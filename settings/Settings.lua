@@ -545,23 +545,8 @@ function LUIE.CreateSettings()
         width = "full",
     }
 
-    -- Post-Processing Overlay
-    optionsData[#optionsData + 1] =
-    {
-        type = "checkbox", 
-        name = "Screen Border Effects",
-        tooltip = "Toggle the screen border post-processing effects (munge overlay)",
-        getFunc = function ()
-            return GetCVar("PPFXOverlaysEnabled") == "1"
-        end,
-        setFunc = function (value)
-            SetCVar("PPFXOverlaysEnabled", value and "1" or "0")
-        end,
-        width = "full",
-        default = true,
-    }
     -- Energy Sustainability
-    optionsData[#optionsData + 1] = 
+    optionsData[#optionsData + 1] =
     {
         type = "checkbox",
         name = "Energy Sustainability",
@@ -579,7 +564,7 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] =
     {
         type = "slider",
-        name = "FPS Limit", 
+        name = "FPS Limit",
         tooltip = "Set the maximum FPS limit (requires game restart)\nDefault game UI only allows up to 100",
         min = 1,
         max = 300,
@@ -587,7 +572,7 @@ function LUIE.CreateSettings()
         getFunc = function ()
             -- Convert MinFrameTime to FPS (1/MinFrameTime)
             local minFrameTime = tonumber(GetCVar("MinFrameTime.2"))
-            return minFrameTime and math.floor(1 / minFrameTime + 0.5) or 100
+            return minFrameTime and zo_floor(1 / minFrameTime + 0.5) or 100
         end,
         setFunc = function (value)
             -- Convert FPS to MinFrameTime (1/FPS)
@@ -595,7 +580,7 @@ function LUIE.CreateSettings()
             SetCVar("MinFrameTime.2", minFrameTime)
         end,
         width = "full",
-        default = 60,
+        default = 100,
     }
 
     -- Skip Pregame Videos
@@ -637,13 +622,17 @@ function LUIE.CreateSettings()
         name = "Screenshot Format",
         tooltip = "Choose the format for saved screenshots",
         choices = { "JPG", "PNG", "BMP" },
-        getFunc = function()
+        getFunc = function ()
             local format = GetCVar("ScreenshotFormat.2")
-            if format == "PNG" then return "PNG"
-            elseif format == "BMP" then return "BMP"
-            else return "JPG" end
+            if format == "PNG" then
+                return "PNG"
+            elseif format == "BMP" then
+                return "BMP"
+            else
+                return "JPG"
+            end
         end,
-        setFunc = function(value)
+        setFunc = function (value)
             SetCVar("ScreenshotFormat.2", value)
         end,
         width = "full",
@@ -665,87 +654,87 @@ function LUIE.CreateSettings()
         width = "full",
         default = true,
     }
+    if LUIE.IsDevDebugEnabled() then
+        -- Developer Options Header
+        optionsData[#optionsData + 1] =
+        {
+            type = "header",
+            name = "Developer Options",
+            width = "full",
+        }
 
-    -- Developer Options Header
-    optionsData[#optionsData + 1] =
-    {
-        type = "header",
-        name = "Developer Options",
-        width = "full",
-    }
+        -- Disable Precompiled Lua
+        optionsData[#optionsData + 1] =
+        {
+            type = "checkbox",
+            name = "Disable Precompiled Lua",
+            tooltip = "Disable use of precompiled Lua files",
+            getFunc = function ()
+                return GetCVar("UsePrecompiledLua.2") == "0"
+            end,
+            setFunc = function (value)
+                SetCVar("UsePrecompiledLua.2", value and "0" or "1")
+            end,
+            width = "full",
+            default = true,
+            requiresReload = true,
+            warning = "This is a developer option that may affect game performance. Changes require a UI reload.",
+        }
 
-    -- Disable Precompiled Lua
-    optionsData[#optionsData + 1] =
-    {
-        type = "checkbox",
-        name = "Disable Precompiled Lua",
-        tooltip = "Disable use of precompiled Lua files",
-        getFunc = function ()
-            return GetCVar("UsePrecompiledLua.2") == "0"
-        end,
-        setFunc = function (value)
-            SetCVar("UsePrecompiledLua.2", value and "0" or "1")
-        end,
-        width = "full",
-        default = true,
-        requiresReload = true,
-        warning = "This is a developer option that may affect game performance. Changes require a UI reload.",
-    }
+        -- Disable Precompiled XML
+        optionsData[#optionsData + 1] =
+        {
+            type = "checkbox",
+            name = "Disable Precompiled XML",
+            tooltip = "Disable use of precompiled XML files",
+            getFunc = function ()
+                return GetCVar("UsePrecompiledXML.2") == "0"
+            end,
+            setFunc = function (value)
+                SetCVar("UsePrecompiledXML.2", value and "0" or "1")
+            end,
+            width = "full",
+            default = true,
+            requiresReload = true,
+            warning = "This is a developer option that may affect game performance. Changes require a UI reload.",
+        }
 
-    -- Disable Precompiled XML
-    optionsData[#optionsData + 1] =
-    {
-        type = "checkbox",
-        name = "Disable Precompiled XML",
-        tooltip = "Disable use of precompiled XML files",
-        getFunc = function ()
-            return GetCVar("UsePrecompiledXML.2") == "0"
-        end,
-        setFunc = function (value)
-            SetCVar("UsePrecompiledXML.2", value and "0" or "1")
-        end,
-        width = "full",
-        default = true,
-        requiresReload = true,
-        warning = "This is a developer option that may affect game performance. Changes require a UI reload.",
-    }
+        -- Profile Control Creation
+        optionsData[#optionsData + 1] =
+        {
+            type = "checkbox",
+            name = "Profile Control Creation",
+            tooltip = "Enable profiling of UI control creation",
+            getFunc = function ()
+                return GetCVar("ProfileControlCreation") == "1"
+            end,
+            setFunc = function (value)
+                SetCVar("ProfileControlCreation", value and "1" or "0")
+            end,
+            width = "full",
+            default = false,
+            requiresReload = true,
+            warning = "This is a developer option that may affect game performance. Changes require a UI reload.",
+        }
 
-    -- Profile Control Creation
-    optionsData[#optionsData + 1] =
-    {
-        type = "checkbox",
-        name = "Profile Control Creation",
-        tooltip = "Enable profiling of UI control creation",
-        getFunc = function ()
-            return GetCVar("ProfileControlCreation") == "1"
-        end,
-        setFunc = function (value)
-            SetCVar("ProfileControlCreation", value and "1" or "0")
-        end,
-        width = "full",
-        default = false,
-        requiresReload = true,
-        warning = "This is a developer option that may affect game performance. Changes require a UI reload.",
-    }
-
-    -- Enable Lua Class Verification
-    optionsData[#optionsData + 1] =
-    {
-        type = "checkbox",
-        name = "Lua Class Verification",
-        tooltip = "Enable Lua class verification",
-        getFunc = function ()
-            return GetCVar("EnableLuaClassVerification") == "1"
-        end,
-        setFunc = function (value)
-            SetCVar("EnableLuaClassVerification", value and "1" or "0")
-        end,
-        width = "full",
-        default = false,
-        requiresReload = true,
-        warning = "This is a developer option that may affect game performance. Changes require a UI reload.",
-    }
-
+        -- Enable Lua Class Verification
+        optionsData[#optionsData + 1] =
+        {
+            type = "checkbox",
+            name = "Lua Class Verification",
+            tooltip = "Enable Lua class verification",
+            getFunc = function ()
+                return GetCVar("EnableLuaClassVerification") == "1"
+            end,
+            setFunc = function (value)
+                SetCVar("EnableLuaClassVerification", value and "1" or "0")
+            end,
+            width = "full",
+            default = false,
+            requiresReload = true,
+            warning = "This is a developer option that may affect game performance. Changes require a UI reload.",
+        }
+    end
     LAM:RegisterAddonPanel(LUIE.name .. "AddonOptions", panelData)
     LAM:RegisterOptionControls(LUIE.name .. "AddonOptions", optionsData)
 end
