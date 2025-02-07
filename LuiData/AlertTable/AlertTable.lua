@@ -11,51 +11,94 @@ local Zonenames = LuiData.Data.ZoneNames
 local Abilities = LuiData.Data.Abilities
 local ZoneTable = LuiData.Data.ZoneTable
 
--- SET A PRIORITY
--- priority = 1-3: (1 = ARENA/DUNGEON/TRIAL, 2 = ELITE NPC/QUEST BOSS, 3 = NORMAL NPC)
+--[[
+    LuiExtended AlertTable Definition
 
--- MITIGATION ALERTS
--- block = true -- Show a Block Alert
--- bs = true -- Add indicator for Block Stagger to effect
--- dodge = true -- Show a Dodge Alert
--- avoid = true -- Show an Avoid Alert
--- interrupt = true -- Show an Interrupt Alert
--- reflect = true -- Show a Reflect Alert (not implemented) TODO: Implement
--- unmit = true -- Show an unmitigable alert
+    This module defines alert configurations for combat events within LuiExtended.
+    It provides options for setting alert priorities, mitigation and miscellaneous alerts,
+    result filtering, source name modifications, crowd control (CC) types, duration settings,
+    and other modifiers to tailor the behavior of alerts.
 
--- MISC ALERTS
--- power = true -- Show a power alert
--- summon = true -- Show a summon alert
--- destroy = true -- Show a destroy alert
+    **Priority Settings:**
+    - priority: number (1-3)
+        * 1 = ARENA/DUNGEON/TRIAL alerts
+        * 2 = ELITE NPC/QUEST BOSS alerts
+        * 3 = NORMAL NPC alerts
 
--- RESULT / FILTERING
--- result = ACTION_RESULT_TYPE -- The action result for combat events to detect
--- eventdetect = true -- Detect combat events without a source or target for abilities not directly targeting the player
--- auradetect = true -- Detect aura application rather than using targeting info - can omit result field if this is true
+    **Mitigation Alerts Options:**
+    - block: boolean         -- Show a Block Alert
+    - bs: boolean            -- Add indicator for Block Stagger effect
+    - dodge: boolean         -- Show a Dodge Alert
+    - avoid: boolean         -- Show an Avoid Alert
+    - interrupt: boolean     -- Show an Interrupt Alert
+    - reflect: boolean       -- Show a Reflect Alert (not implemented, TODO)
+    - unmit: boolean         -- Show an unmitigable alert
 
--- SOURCE NAME MODIFICATION
--- fakeName = string -- Set this name for the source
--- bossName = true -- Use the name of the current BOSS target frame for this ability source if possible
--- bossMatch = NAME -- If there are multiple bosses, look for this name and use it as the source if possible
--- noForcedNameOverride = true -- Only fill in a name here if the name is missing, this gets around a few minor limitations
+    **Miscellaneous Alerts Options:**
+    - power: boolean         -- Show a power alert
+    - summon: boolean        -- Show a summon alert
+    - destroy: boolean       -- Show a destroy alert
 
--- CC TYPE
--- cc = LUIE_CC_TYPE_STUN/LUIE_CC_TYPE_DISORIENT/LUIE_CC_TYPE_FEAR/LUIE_CC_TYPE_STAGGER/LUIE_CC_TYPE_SILENCE/LUIE_CC_TYPE_SNARE/LUIE_CC_TYPE_UNBREAKABLE -- If applicable set the CC type of this effect here
+    **Result / Filtering Options:**
+    - result: ACTION_RESULT_TYPE  -- Determines the combat event action result to detect
+    - eventdetect: boolean   -- Detect combat events without a source or target
+    - auradetect: boolean    -- Detect aura application instead of using targeting info
 
--- DURATION
--- duration = timeMs -- Set the duration in MS here for the cast IF applicable, power/summon/destroy alerts shouldn't use durations, and very long events can omit duration as well (long ground effects are a good case for this)
+    **Source Name Modification Options:**
+    - fakeName: string       -- Set a custom name for the source
+    - bossName: boolean      -- Use the current BOSS target frame name if available
+    - bossMatch: string      -- Specifies a boss name match when multiple bosses exist
+    - noForcedNameOverride: boolean -- Fill in the name only if it is missing
 
--- OTHER MODIFIERS
--- refire = "x" -- refire duration
--- ignoreRefresh = true -- Ignores refresh event here
--- neverShowInterrupt = true -- Never show an interrupt event here
--- effectOnlyInterrupt = true -- Show an interrupt only when this effect fades early off a unit. Used for abilities that a target casts on another target.
--- alwaysShowInterrupt = true -- Show an interrupt even if this effect doesn't display a duration.
--- noSelf = true -- Do not show this alert if you are the target/source of it. This is used for warning party members of attacks they have to help you deal with.
--- durationOnlyIfTarget = true -- Only show a duration timer if the player is the target, this makes some events we can't detect interrupts for less annoying for other players if they get interrupted early.
--- hideIfNoSource = true -- Hide if this event has no source name (this factors in after all name overrides including zone ones).
+    **Crowd Control (CC) Type:**
+    - cc: string             -- Set the type of CC effect (e.g. LUIE_CC_TYPE_STUN, LUIE_CC_TYPE_FEAR, etc.)
+
+    **Duration:**
+    - duration: number       -- Duration in milliseconds (e.g., for cast alerts)
+
+    **Additional Modifiers:**
+    - refire: number|string  -- Refire duration for repeated alerts
+    - ignoreRefresh: boolean -- Ignores refresh events
+    - neverShowInterrupt: boolean -- Disables the display of interrupt events
+    - effectOnlyInterrupt: boolean -- Show interrupt only when an effect ends early
+    - alwaysShowInterrupt: boolean -- Always show interrupt even in absence of a duration
+    - noSelf: boolean        -- Do not show this alert if you are the source/target
+    - durationOnlyIfTarget: boolean -- Only show a duration timer if the player is the target
+    - hideIfNoSource: boolean -- Hide the alert if no source name is provided
+]]
+
+--- @class AlertTableItem
+--- @field priority number             -- Priority of the alert (1: ARENA/DUNGEON/TRIAL, 2: ELITE NPC/QUEST BOSS, 3: NORMAL NPC)
+--- @field block? boolean              -- (Mitigation) Displays block alert
+--- @field bs? boolean                 -- (Mitigation) Displays block stagger indicator
+--- @field dodge? boolean              -- (Mitigation) Displays dodge alert
+--- @field avoid? boolean              -- (Mitigation) Displays avoid alert
+--- @field interrupt? boolean          -- (Mitigation) Displays interrupt alert
+--- @field reflect? boolean            -- (Mitigation) Displays reflect alert (TODO)
+--- @field unmit? boolean              -- (Mitigation) Displays unmitigable alert
+--- @field power? boolean              -- (Misc) Displays power alert
+--- @field summon? boolean             -- (Misc) Displays summon alert
+--- @field destroy? boolean            -- (Misc) Displays destroy alert
+--- @field result? any                 -- (Filtering) Action result type to detect (ACTION_RESULT_TYPE)
+--- @field eventdetect? boolean        -- (Filtering) Detects events with no source or target
+--- @field auradetect? boolean         -- (Filtering) Detects aura applications
+--- @field fakeName? string            -- (Source Name Modification) Custom source name override
+--- @field bossName? boolean           -- (Source Name Modification) Use boss target frame name if possible
+--- @field bossMatch? string           -- (Source Name Modification) Specific boss name for matching
+--- @field noForcedNameOverride? boolean -- (Source Name Modification) Only override if name is missing
+--- @field cc? string                  -- (CC Type) Crowd control type (e.g. LUIE_CC_TYPE_STUN)
+--- @field duration? number            -- (Duration) Duration in milliseconds for alert display
+--- @field refire? number|string       -- (Other Modifiers) Refire duration (delay between alerts)
+--- @field ignoreRefresh? boolean      -- (Other Modifiers) Ignores refresh events
+--- @field neverShowInterrupt? boolean -- (Other Modifiers) Do not display interrupt alerts
+--- @field effectOnlyInterrupt? boolean -- (Other Modifiers) Only display interrupts on early effect fade
+--- @field alwaysShowInterrupt? boolean -- (Other Modifiers) Always display interrupts even without duration
+--- @field noSelf? boolean             -- (Other Modifiers) Suppress alerts for self-generated events
+--- @field durationOnlyIfTarget? boolean -- (Other Modifiers) Show duration timer only if the player is the target
+--- @field hideIfNoSource? boolean     -- (Other Modifiers) Hide alerts when source name is missing
 
 --- @class (partial) AlertTable
+--- @field [integer] table<AlertTableItem>
 local AlertTable =
 {
     --------------------------------------------------
