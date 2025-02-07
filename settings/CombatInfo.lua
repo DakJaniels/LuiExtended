@@ -389,20 +389,20 @@ function CombatInfo.CreateSettings()
                 choices =
                 {
                     "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_NORMAL) .. "|r",
+                    "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
                     "|cEEEEEE" .. GetString(LUIE_FONT_STYLE_OUTLINE) .. "|r",
                     "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_THICK_OUTLINE) .. "|r",
-                    "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
-                    "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
                     "|c777777" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THIN) .. "|r",
+                    "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
                 },
                 choicesValues =
                 {
                     GetString(LUIE_FONT_STYLE_VALUE_NORMAL),
+                    GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
                     GetString(LUIE_FONT_STYLE_VALUE_OUTLINE),
                     GetString(LUIE_FONT_STYLE_VALUE_THICK_OUTLINE),
-                    GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
-                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
                     GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THIN),
+                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
                 },
                 sort = "name-up",
                 getFunc = function ()
@@ -639,20 +639,20 @@ function CombatInfo.CreateSettings()
                 choices =
                 {
                     "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_NORMAL) .. "|r",
+                    "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
                     "|cEEEEEE" .. GetString(LUIE_FONT_STYLE_OUTLINE) .. "|r",
                     "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_THICK_OUTLINE) .. "|r",
-                    "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
-                    "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
                     "|c777777" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THIN) .. "|r",
+                    "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
                 },
                 choicesValues =
                 {
                     GetString(LUIE_FONT_STYLE_VALUE_NORMAL),
+                    GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
                     GetString(LUIE_FONT_STYLE_VALUE_OUTLINE),
                     GetString(LUIE_FONT_STYLE_VALUE_THICK_OUTLINE),
-                    GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
-                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
                     GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THIN),
+                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
                 },
                 sort = "name-up",
                 getFunc = function ()
@@ -902,20 +902,20 @@ function CombatInfo.CreateSettings()
                 choices =
                 {
                     "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_NORMAL) .. "|r",
+                    "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
                     "|cEEEEEE" .. GetString(LUIE_FONT_STYLE_OUTLINE) .. "|r",
                     "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_THICK_OUTLINE) .. "|r",
-                    "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
-                    "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
                     "|c777777" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THIN) .. "|r",
+                    "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
                 },
                 choicesValues =
                 {
                     GetString(LUIE_FONT_STYLE_VALUE_NORMAL),
+                    GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
                     GetString(LUIE_FONT_STYLE_VALUE_OUTLINE),
                     GetString(LUIE_FONT_STYLE_VALUE_THICK_OUTLINE),
-                    GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
-                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
                     GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THIN),
+                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
                 },
                 sort = "name-up",
                 getFunc = function ()
@@ -1202,20 +1202,20 @@ function CombatInfo.CreateSettings()
                 choices =
                 {
                     "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_NORMAL) .. "|r",
+                    "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
                     "|cEEEEEE" .. GetString(LUIE_FONT_STYLE_OUTLINE) .. "|r",
                     "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_THICK_OUTLINE) .. "|r",
-                    "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
-                    "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
                     "|c777777" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THIN) .. "|r",
+                    "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
                 },
                 choicesValues =
                 {
                     GetString(LUIE_FONT_STYLE_VALUE_NORMAL),
+                    GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
                     GetString(LUIE_FONT_STYLE_VALUE_OUTLINE),
                     GetString(LUIE_FONT_STYLE_VALUE_THICK_OUTLINE),
-                    GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
-                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
                     GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THIN),
+                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
                 },
                 sort = "name-up",
                 getFunc = function ()
@@ -1481,20 +1481,20 @@ function CombatInfo.CreateSettings()
                 choices =
                 {
                     "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_NORMAL) .. "|r",
+                    "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
                     "|cEEEEEE" .. GetString(LUIE_FONT_STYLE_OUTLINE) .. "|r",
                     "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_THICK_OUTLINE) .. "|r",
-                    "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
-                    "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
                     "|c777777" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THIN) .. "|r",
+                    "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
                 },
                 choicesValues =
                 {
                     GetString(LUIE_FONT_STYLE_VALUE_NORMAL),
+                    GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
                     GetString(LUIE_FONT_STYLE_VALUE_OUTLINE),
                     GetString(LUIE_FONT_STYLE_VALUE_THICK_OUTLINE),
-                    GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
-                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
                     GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THIN),
+                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
                 },
                 sort = "name-up",
                 getFunc = function ()
