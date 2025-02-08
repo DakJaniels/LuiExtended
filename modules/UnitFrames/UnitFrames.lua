@@ -3331,7 +3331,9 @@ function UnitFrames.ResurrectionMonitor(unitTag)
 end
 
 -- Runs on the EVENT_LEADER_UPDATE listener.
-function UnitFrames.OnLeaderUpdate(_, _)
+--- @param eventId integer
+--- @param leaderTag string
+function UnitFrames.OnLeaderUpdate(eventId, leaderTag)
     UnitFrames.CustomFramesApplyLayoutGroup(false)
     UnitFrames.CustomFramesApplyLayoutRaid(false)
 end
