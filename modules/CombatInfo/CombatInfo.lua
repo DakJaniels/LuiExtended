@@ -736,9 +736,8 @@ local function SetBarRemainLabel(remain, abilityId)
     end
 end
 
--- Updates all floating labels. Called every 100ms
-function CombatInfo.OnUpdate(currentTime)
-    -- Procs
+-- Procs
+local doProcs = function (currentTime)
     for k, v in pairs(g_triggeredSlotsRemain) do
         local remain = v - currentTime
         local front = g_triggeredSlotsFront[k]
@@ -765,7 +764,10 @@ function CombatInfo.OnUpdate(currentTime)
             end
         end
     end
-    -- Ability Highlight
+end
+
+-- Ability Highlight
+local doHighlights = function (currentTime)
     for k, v in pairs(g_toggledSlotsRemain) do
         local remain = v - currentTime
         local front = g_toggledSlotsFront[k]
@@ -793,8 +795,10 @@ function CombatInfo.OnUpdate(currentTime)
             end
         end
     end
+end
 
-    -- Quickslot cooldown
+-- Quickslot cooldown
+local doQuickslot = function ()
     if CombatInfo.SV.PotionTimerShow then
         local slotIndex = GetCurrentQuickslot()
         local remain, duration, _ = GetSlotCooldownInfo(slotIndex, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
@@ -833,6 +837,40 @@ function CombatInfo.OnUpdate(currentTime)
             label:SetHidden(true)
         end
     end
+end
+
+-- Break castbar when movement interrupt is detected for certain effects.
+local doBreakCast = function ()
+    savedPlayerX = playerX
+    savedPlayerZ = playerZ
+    playerX, playerZ = GetMapPlayerPosition("player")
+    if savedPlayerX == playerX and savedPlayerZ == playerZ then
+        return
+    else
+        -- Fix if the player clicks on a Wayshrine in the World Map
+        if g_castbarWorldMapFix == false then
+            if Castbar.BreakCastOnMove[castbar.id] then
+                CombatInfo.StopCastBar()
+                -- TODO: Note probably should make StopCastBar event clear the id on it too. Not doing this right now due to not wanting to troubleshoot possible issues before update release.
+            end
+        end
+        -- Only have this enabled for 1 tick max (the players coordinates only update 1 time after the World Map is closed so if the player moves before 500 ms we want to cancel the cast bar still)
+        if g_castbarWorldMapFix == true then
+            g_castbarWorldMapFix = false
+        end
+    end
+end
+
+-- Updates all floating labels. Called every 100ms
+function CombatInfo.OnUpdate(currentTime)
+    -- Procs
+    doProcs(currentTime)
+
+    -- Ability Highlight
+    doHighlights(currentTime)
+
+    -- Quickslot cooldown
+    doQuickslot()
 
     -- Hide Ultimate generation texture if it is time to do so
     if CombatInfo.SV.UltimateGeneration then
@@ -852,24 +890,7 @@ function CombatInfo.OnUpdate(currentTime)
     end
 
     -- Break castbar when movement interrupt is detected for certain effects.
-    savedPlayerX = playerX
-    savedPlayerZ = playerZ
-    playerX, playerZ = GetMapPlayerPosition("player")
-    if savedPlayerX == playerX and savedPlayerZ == playerZ then
-        return
-    else
-        -- Fix if the player clicks on a Wayshrine in the World Map
-        if g_castbarWorldMapFix == false then
-            if Castbar.BreakCastOnMove[castbar.id] then
-                CombatInfo.StopCastBar()
-                -- TODO: Note probably should make StopCastBar event clear the id on it too. Not doing this right now due to not wanting to troubleshoot possible issues before update release.
-            end
-        end
-        -- Only have this enabled for 1 tick max (the players coordinates only update 1 time after the World Map is closed so if the player moves before 500 ms we want to cancel the cast bar still)
-        if g_castbarWorldMapFix == true then
-            g_castbarWorldMapFix = false
-        end
-    end
+    doBreakCast()
 end
 
 local function CastBarWorldMapFix()
