@@ -1534,7 +1534,7 @@ function ChatAnnouncements.PointRespecDisplay(respecType)
     end
 
     if ChatAnnouncements.SV.DisplayAnnouncements.Respec.CSA then
-        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.NONE)
         messageParams:SetText(messageCSA)
         messageParams:SetSound(SOUNDS.DISPLAY_ANNOUNCEMENT)
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
@@ -3399,7 +3399,7 @@ function ChatAnnouncements.ResolveQuestItemChange()
 
                         if g_isLooted and not g_itemReceivedIsQuestReward and not g_isPickpocketed and not g_isStolen then
                             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
-                            -- reset variables that control looted, or at least ZO_CallLater them
+                            -- reset variables that control looted, or at least zo_callLater them
                         elseif g_isPickpocketed then
                             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePickpocket
                         elseif g_isStolen and not g_isPickpocketed then
@@ -5800,7 +5800,7 @@ function ChatAnnouncements.DisguiseState(eventCode, unitTag, disguiseState)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
         end
         if ChatAnnouncements.SV.Notify.DisguiseCSA then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.NONE)
             messageParams:SetText(message)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -5819,7 +5819,7 @@ function ChatAnnouncements.DisguiseState(eventCode, unitTag, disguiseState)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
         end
         if ChatAnnouncements.SV.Notify.DisguiseCSA then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.NONE)
             messageParams:SetText(message)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -5869,7 +5869,7 @@ function ChatAnnouncements.OnPlayerActivated(eventCode)
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
                 end
                 if ChatAnnouncements.SV.Notify.DisguiseCSA then
-                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.NONE)
                     messageParams:SetText(message)
                     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
                     CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -5889,7 +5889,7 @@ function ChatAnnouncements.OnPlayerActivated(eventCode)
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
                 end
                 if ChatAnnouncements.SV.Notify.DisguiseCSA then
-                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.NONE)
                     messageParams:SetText(message)
                     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
                     CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -5952,19 +5952,19 @@ end
 -- LINK_HANDLER.LINK_CLICKED_EVENT
 -- Custom Link Handlers to deal with when a book link in chat is clicked, this will open the book rather than the default link that only shows whether a lore entry has been read or not.
 function LUIE.HandleClickEvent(rawLink, mouseButton, linkText, linkStyle, linkType, categoryIndex, collectionIndex, bookIndex)
-    if LUIE.IsDevDebugEnabled() then
-        local Debug = LUIE.Debug
-        local traceback = "Handle Click Event:\n" ..
-            "--> rawLink: " .. tostring(rawLink) .. "\n" ..
-            "--> mouseButton: " .. tostring(mouseButton) .. "\n" ..
-            "--> linkText: " .. tostring(linkText) .. "\n" ..
-            "--> linkStyle: " .. tostring(linkStyle) .. "\n" ..
-            "--> linkType: " .. tostring(linkType) .. "\n" ..
-            "--> categoryIndex: " .. tostring(categoryIndex) .. "\n" ..
-            "--> collectionIndex: " .. tostring(collectionIndex) .. "\n" ..
-            "--> bookIndex: " .. tostring(bookIndex)
-        Debug(traceback)
-    end
+    -- if LUIE.IsDevDebugEnabled() then
+    --     local Debug = LUIE.Debug
+    --     local traceback = "Handle Click Event:\n" ..
+    --         "--> rawLink: " .. tostring(rawLink) .. "\n" ..
+    --         "--> mouseButton: " .. tostring(mouseButton) .. "\n" ..
+    --         "--> linkText: " .. tostring(linkText) .. "\n" ..
+    --         "--> linkStyle: " .. tostring(linkStyle) .. "\n" ..
+    --         "--> linkType: " .. tostring(linkType) .. "\n" ..
+    --         "--> categoryIndex: " .. tostring(categoryIndex) .. "\n" ..
+    --         "--> collectionIndex: " .. tostring(collectionIndex) .. "\n" ..
+    --         "--> bookIndex: " .. tostring(bookIndex)
+    --     Debug(traceback)
+    -- end
 
     if linkType == "LINK_TYPE_LUIBOOK" then
         -- Read the book
@@ -6168,7 +6168,7 @@ function ChatAnnouncements.HookFunction()
             end
 
             if ChatAnnouncements.SV.Notify.StorageRidingCSA then
-                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.NONE)
                 messageParams:SetText(GetString(SI_RIDING_SKILL_ANNOUCEMENT_BANNER), zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RIDING_SKILL_IMPROVEMENT)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -7424,7 +7424,7 @@ function ChatAnnouncements.HookFunction()
 
     -- EVENT_SKILL_POINTS_CHANGED (CSA Handler)
     local function SkillPointsChangedHook(oldPoints, newPoints, oldPartialPoints, newPartialPoints, changeReason)
-        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.NONE)
         local numSkillPointsGained = newPoints - oldPoints
         local stringPrefix = ChatAnnouncements.SV.Skills.SkillPointSkyshard
         local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_SKYSHARD_GAINED)
@@ -7641,7 +7641,7 @@ function ChatAnnouncements.HookFunction()
     local function SkillXPUpdateHook(skillType, skillLineIndex, reason, rank, previousXP, currentXP)
         if (skillType == SKILL_TYPE_GUILD and GUILD_SKILL_SHOW_REASONS[reason]) or reason == PROGRESS_REASON_JUSTICE_SKILL_EVENT then
             if not LUIE.SV.HideXPBar then
-                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_NO_TEXT)
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_NO_TEXT, SOUNDS.NONE)
                 local barType = PLAYER_PROGRESS_BAR:GetBarType(PPB_CLASS_SKILL, skillType, skillLineIndex)
                 local rankStartXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillLineIndex, rank)
                 local sound = GUILD_SKILL_SHOW_SOUNDS[reason]
@@ -8025,7 +8025,7 @@ function ChatAnnouncements.HookFunction()
         local alertMessage     -- Variable for alert message
         local formattedMessage -- Variable for CA Message
         local sound            -- Set correct sound based off context
-        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.NONE)
 
         if newConditionVal ~= currConditionVal and not isFailCondition then
             sound = isConditionComplete and SOUNDS.QUEST_OBJECTIVE_COMPLETE or SOUNDS.QUEST_OBJECTIVE_INCREMENT
@@ -8442,7 +8442,7 @@ function ChatAnnouncements.HookFunction()
         if XP_GAIN_SHOW_REASONS[reason] and not LUIE.SV.HideXPBar then
             local barParams = GetRelevantBarParams(level, previousExperience, currentExperience, championPoints)
             if barParams then
-                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_NO_TEXT)
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_NO_TEXT, SOUNDS.NONE)
                 barParams:SetSound(sound)
                 ValidateProgressBarParams(barParams)
                 messageParams:SetBarParams(barParams)
@@ -8453,7 +8453,7 @@ function ChatAnnouncements.HookFunction()
 
         -- We want to play a sound still even if the bar popup is hidden, but the delay needs to remain intact so we add a blank CSA with sound.
         if XP_GAIN_SHOW_REASONS[reason] and LUIE.SV.HideXPBar and sound ~= nil then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.NONE)
             messageParams:SetSound(sound)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_EXPERIENCE_GAIN)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -8674,7 +8674,7 @@ function ChatAnnouncements.HookFunction()
             end
 
             if ChatAnnouncements.SV.Notify.StorageRidingCSA then
-                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.NONE)
                 messageParams:SetText(GetString(SI_RIDING_SKILL_ANNOUCEMENT_BANNER), zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RIDING_SKILL_IMPROVEMENT)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -8687,7 +8687,7 @@ function ChatAnnouncements.HookFunction()
     local function InventoryBagCapacityHook(previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
         if previousCapacity > 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
             if ChatAnnouncements.SV.Notify.StorageBagCSA then
-                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.NONE)
                 messageParams:SetText(GetString(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_TITLE), zo_strformat(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BAG_CAPACITY_CHANGED)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -8700,7 +8700,7 @@ function ChatAnnouncements.HookFunction()
     local function InventoryBankCapacityHook(previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
         if previousCapacity > 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
             if ChatAnnouncements.SV.Notify.StorageBagCSA then
-                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.NONE)
                 messageParams:SetText(GetString(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_TITLE), zo_strformat(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BANK_CAPACITY_CHANGED)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -9285,7 +9285,7 @@ function ChatAnnouncements.HookFunction()
             previousStage, previousCycle, previousArc = 0, 0, 0
         end
 
-        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_ROLLING_METER_PROGRESS_TEXT)
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_ROLLING_METER_PROGRESS_TEXT, SOUNDS.NONE)
         local stageIcon, cycleIcon, arcIcon = ZO_EndlessDungeonManager.GetProgressionIcons()
         local stageNarration, cycleNarration, arcNarration = ZO_EndlessDungeonManager.GetProgressionNarrationDescriptions(stage, cycle, arc)
         local progressData =
@@ -9338,6 +9338,7 @@ function ChatAnnouncements.HookFunction()
 
     local ZoneIds =
     {
+        [1413] = "Endless Archive", -- Dungeon - Endless Archive
         [1436] = "Endless Archive", -- Dungeon - Endless Archive
         [888] = "Craglorn",         -- Zone - Craglorn
         [584] = "Imperial City",    -- Imperial City (Overland)
@@ -9349,6 +9350,7 @@ function ChatAnnouncements.HookFunction()
     {
         [988] = "Maelstrom Arena", -- Vale of the Surreal (Maelstrom Arena - Stage 1)
         [963] = "Maelstrom Arena", -- Seht's Balcony (Maelstrom Arena - Stage 2)
+        [2567] = "Endless Archive",
         -- TODO - Need MapIds for Stage 3-9
     }
 
@@ -9632,7 +9634,7 @@ function ChatAnnouncements.HookFunction()
             -- Display CSA (Success Only)
             if ChatAnnouncements.SV.Social.PledgeOfMaraCSA then
                 if result == PLEDGE_OF_MARA_RESULT_PLEDGED then
-                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.NONE)
                     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_PLEDGE_OF_MARA_RESULT)
                     messageParams:SetText(GetString(SI_RITUAL_OF_MARA_COMPLETION_ANNOUNCE_LARGE), zo_strformat(LUIE_STRING_CA_MARA_PLEDGEOFMARARESULT3, finalAlertName))
                     CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -9697,7 +9699,7 @@ function ChatAnnouncements.HookFunction()
         end
 
         if ChatAnnouncements.SV.Antiquities.AntiquityCSA then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.NONE)
             local secondaryText = zo_strformat(SI_ANTIQUITY_LEAD_ACQUIRED_TEXT, antiquityData:GetColorizedName())
             messageParams:SetText(GetString(SI_ANTIQUITY_LEAD_ACQUIRED_TITLE), secondaryText)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_LEAD_ACQUIRED)
