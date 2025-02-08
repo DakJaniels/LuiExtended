@@ -375,9 +375,7 @@ function LUIE.InitializeHooks()
         end
     end
 
-    --[[
-    Hook STATS Screen Buffs & Debuffs to hide buffs not needed, update icons, names, durations, and tooltips
-]]
+    -- Hook STATS Screen Buffs & Debuffs to hide buffs not needed, update icons, names, durations, and tooltips
     local function EffectsRowComparator(left, right)
         local leftIsArtificial, rightIsArtificial = left.isArtificial, right.isArtificial
         if leftIsArtificial ~= rightIsArtificial then
