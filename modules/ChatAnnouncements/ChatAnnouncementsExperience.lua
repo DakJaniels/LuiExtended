@@ -77,7 +77,7 @@ end
 function ChatAnnouncements.PrintExperienceGain(change)
     local icon = ChatAnnouncements.SV.XP.ExperienceIcon and "|t16:16:/esoui/art/icons/icon_experience.dds|t " or ""
     local xpName = zo_strformat(ChatAnnouncements.SV.XP.ExperienceName, change)
-    local messageP1 = ("|r|c" .. ColorizeColors.ExperienceNameColorize .. icon .. ZO_LocalizeDecimalNumber(change) .. " " .. xpName .. "|r|c" .. ColorizeColors.ExperienceMessageColorize)
+    local messageP1 = ("|r|c" .. ColorizeColors.ExperienceNameColorize .. icon .. ZO_CommaDelimitDecimalNumber(change) .. " " .. xpName .. "|r|c" .. ColorizeColors.ExperienceMessageColorize)
     local formattedMessageP1 = (string_format(ChatAnnouncements.SV.XP.ExperienceMessage, messageP1))
     local finalMessage = string_format("|c%s%s|r", ColorizeColors.ExperienceMessageColorize, formattedMessageP1)
 
@@ -99,7 +99,8 @@ end
 -- EVENT_SKILL_XP_UPDATE HANDLER
 function ChatAnnouncements.SkillXPUpdate(eventCode, skillType, skillIndex, reason, rank, previousXP, currentXP)
     if skillType == SKILL_TYPE_GUILD then
-        local lineName, _, _, lineId = GetSkillLineInfo(skillType, skillIndex)
+        local skillLineData = SKILLS_DATA_MANAGER:GetSkillLineDataByIndices(skillType, skillIndex)
+        local lineName, lineId = skillLineData:GetName(), skillLineData:GetId()
         local formattedName = zo_strformat("<<C:1>>", lineName)
 
         -- Bail out early if a certain type is not set to be displayed

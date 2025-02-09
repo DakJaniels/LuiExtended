@@ -224,7 +224,7 @@ function LUIE.AbbreviateNumber(number, shorten, comma)
         -- If we could not convert even to "G", return full number
         if value >= 1000 then
             if comma then
-                value = ZO_LocalizeDecimalNumber(number)
+                value = ZO_CommaDelimitDecimalNumber(number)
                 return value
             else
                 return number
@@ -241,7 +241,7 @@ function LUIE.AbbreviateNumber(number, shorten, comma)
     end
     -- Add commas if needed
     if comma then
-        local value = ZO_LocalizeDecimalNumber(number)
+        local value = ZO_CommaDelimitDecimalNumber(number)
         return value
     end
     return number

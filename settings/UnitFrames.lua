@@ -850,6 +850,23 @@ function UnitFrames.CreateSettings()
                     return not LUIE.SV.UnitFrames_Enabled
                 end,
             },
+            {
+                -- Custom Unit Frames Target Marker
+                type = "checkbox",
+                name = "Format unitframe names with target marker",
+                tooltip = "Format unitframe names with target marker",
+                getFunc = function ()
+                    return Settings.CustomTargetMarker
+                end,
+                setFunc = function (value)
+                    Settings.CustomTargetMarker = value
+                end,
+                width = "full",
+                default = Defaults.CustomTargetMarker,
+                disabled = function ()
+                    return not LUIE.SV.UnitFrames_Enabled
+                end,
+            },
         },
     }
     -- Unit Frames - Custom Unit Frame Color Options Submenu

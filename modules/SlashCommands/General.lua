@@ -192,7 +192,7 @@ function SlashCommands.SlashCampaignQ(option)
         local campaignId = CampaignNames[optionLower]
         local campaignName = GetCampaignName(campaignId)
 
-        if GetAssignedCampaignId() == campaignId or GetGuestCampaignId() == campaignId then
+        if GetAssignedCampaignId() == campaignId then
             local queueAsGroup
             QueueForCampaign(campaignId, queueAsGroup)
             printToChat(zo_strformat(GetString(LUIE_STRING_SLASHCMDS_CAMPAIGN_QUEUE), campaignName), true)

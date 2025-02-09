@@ -1177,7 +1177,7 @@ function LUIE.InitializeHooks()
 
         local abilityId = LUIE.GetSlotTrueBoundId(slotnum, hotbarCategory) -- Check AbilityId for if this should be a fake activation highlight
 
-        local showHighlight = not slotIsEmpty and (HasActivationHighlight(slotnum, hotbarCategory) or LUIE.Data.Effects.IsAbilityActiveGlow[abilityId] == true) and not self.useFailure and not self.showingCooldown
+        local showHighlight = not slotIsEmpty and (ActionSlotHasActivationHighlight(slotnum, hotbarCategory) or LUIE.Data.Effects.IsAbilityActiveGlow[abilityId] == true) and not self.useFailure and not self.showingCooldown
         local isShowingHighlight = self.activationHighlight:IsHidden() == false
 
         if showHighlight ~= isShowingHighlight then

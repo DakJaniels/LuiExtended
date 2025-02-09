@@ -1689,6 +1689,10 @@ function UnitFrames.Initialize(enabled)
         eventManager:RegisterForEvent(moduleName, EVENT_GUILD_SELF_JOINED_GUILD, UnitFrames.SocialUpdateFrames)
         eventManager:RegisterForEvent(moduleName, EVENT_GUILD_MEMBER_ADDED, UnitFrames.SocialUpdateFrames)
         eventManager:RegisterForEvent(moduleName, EVENT_GUILD_MEMBER_REMOVED, UnitFrames.SocialUpdateFrames)
+
+        if UnitFrames.SV.CustomTargetMarker then
+            eventManager:RegisterForEvent(moduleName, EVENT_TARGET_MARKER_UPDATE, UnitFrames.OnTargetMarkerUpdate)
+        end
     end
 
     -- New AvA frames
@@ -2617,13 +2621,31 @@ function UnitFrames.UpdateStaticControls(unitFrame)
             end
             unitFrame.name:SetWidth(width)
         end
+
+        -- Handle name text formatting
+        local nameText
         if unitFrame.isPlayer and DisplayOption == 3 then
-            unitFrame.name:SetText(GetUnitName(unitFrame.unitTag) .. " " .. GetUnitDisplayName(unitFrame.unitTag))
+            nameText = GetUnitName(unitFrame.unitTag) .. " " .. GetUnitDisplayName(unitFrame.unitTag)
         elseif unitFrame.isPlayer and DisplayOption == 1 then
-            unitFrame.name:SetText(GetUnitDisplayName(unitFrame.unitTag))
+            nameText = GetUnitDisplayName(unitFrame.unitTag)
         else
-            unitFrame.name:SetText(GetUnitName(unitFrame.unitTag))
+            nameText = GetUnitName(unitFrame.unitTag)
         end
+
+        -- Add target marker if present
+        if UnitFrames.SV.CustomTargetMarker then
+            local targetMarkerType = GetUnitTargetMarkerType(unitFrame.unitTag)
+            if targetMarkerType ~= TARGET_MARKER_TYPE_NONE then
+                local iconPath = ZO_GetPlatformTargetMarkerIcon(targetMarkerType)
+                if unitFrame.isTarget then
+                    nameText = zo_iconTextFormatNoSpaceAlignedRight(iconPath, 20, 20, nameText)
+                else
+                    nameText = zo_iconTextFormat(iconPath, 20, 20, nameText)
+                end
+            end
+        end
+
+        unitFrame.name:SetText(nameText)
     end
     -- If unitFrame has level label control
     if unitFrame.level ~= nil then
@@ -3338,9 +3360,52 @@ function UnitFrames.OnLeaderUpdate(eventId, leaderTag)
     UnitFrames.CustomFramesApplyLayoutRaid(false)
 end
 
+-- Runs on the EVENT_TARGET_MARKER_UPDATE listener.
+--- @param eventId integer
+function UnitFrames.OnTargetMarkerUpdate(eventId)
+    -- Only process for target marker updates
+    if eventId ~= EVENT_TARGET_MARKER_UPDATE then return end
+
+    -- Define unit frame types to check
+    local unitTypes =
+    {
+        "player",
+        "reticleover",
+        "companion",
+        "SmallGroup",
+        "RaidGroup",
+        "boss",
+        "AvaPlayerTarget",
+        "PetGroup"
+    }
+
+    -- Update each unit frame type
+    for _, baseType in ipairs(unitTypes) do
+        -- Handle base unit frame (no index)
+        local baseFrame = UnitFrames.CustomFrames[baseType]
+        if baseFrame then
+            UnitFrames.UpdateStaticControls(baseFrame)
+        end
+
+        -- Handle indexed unit frames (1-12)
+        for i = 0, 12 do
+            local unitTag = baseType .. i
+            local unitFrame = UnitFrames.CustomFrames[unitTag]
+            if unitFrame then
+                UnitFrames.UpdateStaticControls(unitFrame)
+            end
+        end
+    end
+end
+
 -- This function is used to setup alternative bar for player
 -- Priority order: Werewolf -> Siege -> Mount -> ChampionXP / Experience
 local XP_BAR_COLORS = ZO_XP_BAR_GRADIENT_COLORS[2]
+
+---
+--- @param isWerewolf boolean|nil
+--- @param isSiege boolean|nil
+--- @param isMounted boolean|nil
 function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
     if not UnitFrames.CustomFrames.player then
         return
