@@ -62,6 +62,19 @@ local playerDisplayName = GetUnitDisplayName("player")
 -- local playerTlw
 local CP_BAR_COLORS = ZO_CP_BAR_GRADIENT_COLORS
 
+-- Define marker colors at module level
+local TARGET_MARKER_COLORS =
+{
+    [TARGET_MARKER_TYPE_ONE] = ZO_ColorDef:New("0080FF"),   -- Blue Square
+    [TARGET_MARKER_TYPE_TWO] = ZO_ColorDef:New("FFD700"),   -- Gold Star
+    [TARGET_MARKER_TYPE_THREE] = ZO_ColorDef:New("00CC00"), -- Green Circle
+    [TARGET_MARKER_TYPE_FOUR] = ZO_ColorDef:New("FF8000"),  -- Orange Triangle
+    [TARGET_MARKER_TYPE_FIVE] = ZO_ColorDef:New("FF66B2"),  -- Pink Moons
+    [TARGET_MARKER_TYPE_SIX] = ZO_ColorDef:New("9900CC"),   -- Purple Oblivion
+    [TARGET_MARKER_TYPE_SEVEN] = ZO_ColorDef:New("E60000"), -- Red Weapons
+    [TARGET_MARKER_TYPE_EIGHT] = ZO_ColorDef:New("E6E6E6"), -- White Skull
+}
+
 local g_PendingUpdate =
 {
     Group = { flag = false, delay = 200, name = moduleName .. "PendingGroupUpdate" },
@@ -2603,8 +2616,6 @@ function UnitFrames.UpdateStaticControls(unitFrame)
     end
     -- If unitFrame has unit name label control
     if unitFrame.name ~= nil then
-        -- Update max width of label
-        local playerName = LUIE.PlayerNameFormatted
         -- Only apply this formatting to non-group frames
         if unitFrame.name:GetParent() == unitFrame.topInfo and unitFrame.unitTag == "reticleover" then
             local width = unitFrame.topInfo:GetWidth()
@@ -2632,16 +2643,14 @@ function UnitFrames.UpdateStaticControls(unitFrame)
             nameText = GetUnitName(unitFrame.unitTag)
         end
 
-        -- Add target marker if present
+        local defaultMarkerColor = ZO_ColorDef:New(1, 1, 1)
+
+        -- Add target marker color if present
         if UnitFrames.SV.CustomTargetMarker then
             local targetMarkerType = GetUnitTargetMarkerType(unitFrame.unitTag)
             if targetMarkerType ~= TARGET_MARKER_TYPE_NONE then
-                local iconPath = ZO_GetPlatformTargetMarkerIcon(targetMarkerType)
-                if unitFrame.isTarget then
-                    nameText = zo_iconTextFormatNoSpaceAlignedRight(iconPath, 20, 20, nameText)
-                else
-                    nameText = zo_iconTextFormat(iconPath, 20, 20, nameText)
-                end
+                local color = TARGET_MARKER_COLORS[targetMarkerType] or defaultMarkerColor
+                unitFrame.name:SetColor(color:UnpackRGB())
             end
         end
 
@@ -3384,14 +3393,36 @@ function UnitFrames.OnTargetMarkerUpdate(eventId)
         -- Handle base unit frame (no index)
         local baseFrame = UnitFrames.CustomFrames[baseType]
         if baseFrame then
+            -- Update marker color before updating static controls
+            if UnitFrames.SV.CustomTargetMarker then
+                local markerType = GetUnitTargetMarkerType(baseType)
+                local color = TARGET_MARKER_COLORS[markerType]
+                if color and markerType ~= TARGET_MARKER_TYPE_NONE then
+                    baseFrame.name:SetColor(color:UnpackRGB())
+                else
+                    -- Reset to default color when no marker is present
+                    baseFrame.name:SetColor(1, 1, 1)
+                end
+            end
             UnitFrames.UpdateStaticControls(baseFrame)
         end
 
         -- Handle indexed unit frames (1-12)
-        for i = 0, 12 do
+        for i = 1, MAX_GROUP_SIZE_THRESHOLD do
             local unitTag = baseType .. i
             local unitFrame = UnitFrames.CustomFrames[unitTag]
             if unitFrame then
+                -- Update marker color before updating static controls
+                if UnitFrames.SV.CustomTargetMarker then
+                    local markerType = GetUnitTargetMarkerType(unitTag)
+                    local color = TARGET_MARKER_COLORS[markerType]
+                    if color and markerType ~= TARGET_MARKER_TYPE_NONE then
+                        unitFrame.name:SetColor(color:UnpackRGB())
+                    else
+                        -- Reset to default color when no marker is present
+                        unitFrame.name:SetColor(1, 1, 1)
+                    end
+                end
                 UnitFrames.UpdateStaticControls(unitFrame)
             end
         end
