@@ -3257,14 +3257,30 @@ function ChatAnnouncements.GetItemLinkFromItemId(itemId)
     end
 end
 
+--- @class questItem
+--- @field questItemId integer
+--- @field stackCount integer
+--- @field iconFile string
+
+--- @alias questItem_itemTable { [integer] : questItem }
+
+--- @alias luiequestItemIndex {
+--- stack : integer,
+--- counter : integer,
+--- icon : string,
+--- }
+
+--- @type table<integer, luiequestItemIndex>
 local questItemIndex = {}
 
 function ChatAnnouncements.AddQuestItemsToIndex()
     questItemIndex = {}
-
+    ---
+    --- @param questIndex integer
     local function AddQuests(questIndex)
         local inventory = PLAYER_INVENTORY.inventories[INVENTORY_QUEST_ITEM]
         local itemTable = inventory.slots[questIndex]
+        --- @cast itemTable questItem_itemTable
         if itemTable then
             -- remove all quest items from search
             for i = 1, #itemTable do
@@ -3482,7 +3498,21 @@ function ChatAnnouncements.ResolveQuestItemChange()
     eventManager:UnregisterForUpdate(moduleName .. "QuestItemUpdater")
 end
 
+---
+--- @param itemId integer
+--- @param stackCount integer
+--- @param icon string
+--- @param reset boolean
 local function DisplayQuestItem(itemId, stackCount, icon, reset)
+    -- if LUIE.IsDevDebugEnabled() then
+    --     local Debug = LUIE.Debug
+    --     local traceback = "Quest Item Details:\n" ..
+    --         "--> itemId: " .. tostring(itemId) .. "\n" ..
+    --         "--> stackCount: " .. tostring(stackCount) .. "\n" ..
+    --         "--> questItemIcon: " .. tostring(icon) .. "\n" ..
+    --         "--> reset: " .. tostring(reset)
+    --     Debug(traceback)
+    -- end
     if not questItemIndex[itemId] then
         questItemIndex[itemId] = { stack = 0, counter = 0, icon = icon }
         -- d("New item created with 0 stack")
@@ -10358,8 +10388,11 @@ function ChatAnnouncements.HookFunction()
             g_mailTarget = ZO_SELECTED_TEXT:Colorize(nameLink)
         end
     end
-
-    PLAYER_INVENTORY.AddQuestItem = function (self, questItem, searchType)
+    ---
+    --- @param self ZO_InventoryManager
+    --- @param questItem questItem
+    --- @param searchType any
+    ZO_InventoryManager.AddQuestItem = function (self, questItem, searchType)
         local inventory = self.inventories[INVENTORY_QUEST_ITEM]
 
         questItem.inventory = inventory
@@ -10376,10 +10409,13 @@ function ChatAnnouncements.HookFunction()
             DisplayQuestItem(questItem.questItemId, questItem.stackCount, questItem.iconFile, false)
         end
     end
-
-    PLAYER_INVENTORY.ResetQuest = function (self, questIndex)
+    ---
+    --- @param self ZO_InventoryManager
+    --- @param questIndex integer
+    ZO_InventoryManager.ResetQuest = function (self, questIndex)
         local inventory = self.inventories[INVENTORY_QUEST_ITEM]
         local itemTable = inventory.slots[questIndex]
+        --- @cast itemTable questItem_itemTable
         if itemTable then
             -- remove all quest items from search
             for i = 1, #itemTable do
