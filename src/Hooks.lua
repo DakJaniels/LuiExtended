@@ -38,7 +38,6 @@ function LUIE.InitializeHooks()
     -- Check if custom icons are enabled in settings
     -- if LUIE.SV.CustomIcons_Enabled then
     LUIE.InitializeHooksSkillAdvisor()
-    LUIE.InitializeHooksKeepTooltip()
 
     local zos_GetSkillAbilityInfo = GetSkillAbilityInfo
     --- Hook for Icon/Name changes.
