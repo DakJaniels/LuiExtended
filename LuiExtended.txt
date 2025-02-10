@@ -24,7 +24,6 @@ src/LuiExtended.lua
 src/LuiExtended_Log.lua
 src/Functions.lua
 src/Hooks-SkillsAdvisor.lua
-src/Hooks-KeepTooltip.lua
 src/Hooks.lua
 src/Initialize.lua
 src/UI.lua
