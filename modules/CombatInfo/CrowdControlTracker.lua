@@ -744,9 +744,6 @@ function CrowdControlTracker:OnCombat(eventCode, result, isError, abilityName, a
     -- end
 end
 
--- Refactored version of CrowdControlTracker:RemoveCC
--- Extracts repetitive code into reusable helper functions.
-
 -- Helper function to create a reset CC priority table.
 local function resetPriority()
     return { endTime = 0, abilityId = 0, abilityIcon = "", hitValue = 0, result = 0, abilityName = "" }
