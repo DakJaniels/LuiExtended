@@ -744,89 +744,106 @@ function CrowdControlTracker:OnCombat(eventCode, result, isError, abilityName, a
     -- end
 end
 
+-- Refactored version of CrowdControlTracker:RemoveCC
+-- Extracts repetitive code into reusable helper functions.
+
+-- Helper function to create a reset CC priority table.
+local function resetPriority()
+    return { endTime = 0, abilityId = 0, abilityIcon = "", hitValue = 0, result = 0, abilityName = "" }
+end
+
+-- Helper that schedules the next CC removal and triggers a redraw.
+local function removeCCAndCallLater(tracker, nextCCType, nextCCInterval, nextCCPriority)
+    tracker.currentCC = nextCCType
+    zo_callLater(function ()
+        tracker:RemoveCC(nextCCType, nextCCPriority.endTime)
+    end, nextCCInterval)
+    tracker:OnDraw(nextCCPriority.abilityId, nextCCPriority.abilityIcon, nextCCPriority.hitValue, nextCCPriority.result, nextCCPriority.abilityName, nextCCInterval)
+end
+
+-- Helper that checks CC conditions and decides whether to advance to the next CC.
+local function checkAndRemoveCC(tracker, ccType, ccPriority, nextCCType, nextCCInterval, nextCCPriority, currentEndTime)
+    if ccType == tracker.currentCC and ccPriority.endTime ~= currentEndTime then
+        return
+    end
+
+    ccPriority = resetPriority()
+
+    if nextCCInterval > 0 then
+        removeCCAndCallLater(tracker, nextCCType, nextCCInterval, nextCCPriority)
+        return
+    end
+end
+
 function CrowdControlTracker:RemoveCC(ccType, currentEndTime)
     local stagger
 
-    if (self.currentCC == 0 and (ccType ~= 5)) or self.breakFreePlaying then
+    if (self.currentCC == 0 and ccType ~= 5) or self.breakFreePlaying then
         return
     end
 
     local currentTime = GetFrameTimeMilliseconds()
-    local secondInterval, thirdInterval, fourthInterval, sixthInterval, seventhInterval, eighthInterval = PriorityTwo.endTime - currentTime, PriorityThree.endTime - currentTime, PriorityFour.endTime - currentTime, PrioritySix.endTime - currentTime, PrioritySeven.endTime - currentTime, PriorityEight.endTime - currentTime
-
-    local function removeCCAndCallLater(nextCCType, nextCCInterval, nextCCPriority)
-        self.currentCC = nextCCType
-        zo_callLater(function ()
-            self:RemoveCC(nextCCType, nextCCPriority.endTime)
-        end, nextCCInterval)
-        self:OnDraw(nextCCPriority.abilityId, nextCCPriority.abilityIcon, nextCCPriority.hitValue, nextCCPriority.result, nextCCPriority.abilityName, nextCCInterval)
-    end
-
-    local function checkAndRemoveCC(ccType, ccPriority, nextCCType, nextCCInterval, nextCCPriority)
-        if ccType == self.currentCC and ccPriority.endTime ~= currentEndTime then
-            return
-        end
-
-        ccPriority = { endTime = 0, abilityId = 0, abilityIcon = "", hitValue = 0, result = 0, abilityName = "" }
-
-        if nextCCInterval > 0 then
-            removeCCAndCallLater(nextCCType, nextCCInterval, nextCCPriority)
-            return
-        end
-    end
+    local secondInterval = PriorityTwo.endTime - currentTime
+    local thirdInterval = PriorityThree.endTime - currentTime
+    local fourthInterval = PriorityFour.endTime - currentTime
+    local sixthInterval = PrioritySix.endTime - currentTime
+    local seventhInterval = PrioritySeven.endTime - currentTime
+    local eighthInterval = PriorityEight.endTime - currentTime
 
     if ccType == 1 then -- STUN
-        checkAndRemoveCC(1, PriorityOne, 2, secondInterval, PriorityTwo)
-        checkAndRemoveCC(2, PriorityTwo, 3, thirdInterval, PriorityThree)
-        checkAndRemoveCC(3, PriorityThree, 4, fourthInterval, PriorityFour)
-        checkAndRemoveCC(4, PriorityFour, 6, sixthInterval, PrioritySix)
-        checkAndRemoveCC(6, PrioritySix, 7, seventhInterval, PrioritySeven)
-        checkAndRemoveCC(7, PrioritySeven, 8, eighthInterval, PriorityEight)
+        checkAndRemoveCC(self, 1, PriorityOne, 2, secondInterval, PriorityTwo, currentEndTime)
+        checkAndRemoveCC(self, 2, PriorityTwo, 3, thirdInterval, PriorityThree, currentEndTime)
+        checkAndRemoveCC(self, 3, PriorityThree, 4, fourthInterval, PriorityFour, currentEndTime)
+        checkAndRemoveCC(self, 4, PriorityFour, 6, sixthInterval, PrioritySix, currentEndTime)
+        checkAndRemoveCC(self, 6, PrioritySix, 7, seventhInterval, PrioritySeven, currentEndTime)
+        checkAndRemoveCC(self, 7, PrioritySeven, 8, eighthInterval, PriorityEight, currentEndTime)
     elseif ccType == 2 then -- FEAR
         if (self.currentCC == 1 or self.currentCC == 2) and PriorityTwo.endTime ~= currentEndTime then
             return
         end
 
-        PriorityTwo = { endTime = 0, abilityId = 0, abilityIcon = "", hitValue = 0, result = 0, abilityName = "" }
+        PriorityTwo = resetPriority()
 
         if PriorityOne.endTime > 0 and self.currentCC == 1 then
             return
         end
 
-        checkAndRemoveCC(3, PriorityThree, 3, thirdInterval, PriorityThree)
-        checkAndRemoveCC(4, PriorityFour, 4, fourthInterval, PriorityFour)
-        checkAndRemoveCC(6, PrioritySix, 6, sixthInterval, PrioritySix)
-        checkAndRemoveCC(7, PrioritySeven, 7, seventhInterval, PrioritySeven)
-        checkAndRemoveCC(8, PriorityEight, 8, eighthInterval, PriorityEight)
+        checkAndRemoveCC(self, 3, PriorityThree, 3, thirdInterval, PriorityThree, currentEndTime)
+        checkAndRemoveCC(self, 4, PriorityFour, 4, fourthInterval, PriorityFour, currentEndTime)
+        checkAndRemoveCC(self, 6, PrioritySix, 6, sixthInterval, PrioritySix, currentEndTime)
+        checkAndRemoveCC(self, 7, PrioritySeven, 7, seventhInterval, PrioritySeven, currentEndTime)
+        checkAndRemoveCC(self, 8, PriorityEight, 8, eighthInterval, PriorityEight, currentEndTime)
     elseif ccType == 3 then -- DISORIENT
         if (self.currentCC > 0 and self.currentCC < 4) and PriorityThree.endTime ~= currentEndTime then
             return
         end
 
-        PriorityThree = { endTime = 0, abilityId = 0, abilityIcon = "", hitValue = 0, result = 0, abilityName = "" }
+        PriorityThree = resetPriority()
 
         if (PriorityOne.endTime > 0 and self.currentCC == 1) or (PriorityTwo.endTime > 0 and self.currentCC == 2) then
             return
         end
 
-        checkAndRemoveCC(4, PriorityFour, 4, fourthInterval, PriorityFour)
-        checkAndRemoveCC(6, PrioritySix, 6, sixthInterval, PrioritySix)
-        checkAndRemoveCC(7, PrioritySeven, 7, seventhInterval, PrioritySeven)
-        checkAndRemoveCC(8, PriorityEight, 8, eighthInterval, PriorityEight)
+        checkAndRemoveCC(self, 4, PriorityFour, 4, fourthInterval, PriorityFour, currentEndTime)
+        checkAndRemoveCC(self, 6, PrioritySix, 6, sixthInterval, PrioritySix, currentEndTime)
+        checkAndRemoveCC(self, 7, PrioritySeven, 7, seventhInterval, PrioritySeven, currentEndTime)
+        checkAndRemoveCC(self, 8, PriorityEight, 8, eighthInterval, PriorityEight, currentEndTime)
     elseif ccType == 4 then -- SILENCE
         if self.currentCC ~= 0 and PriorityFour.endTime ~= currentEndTime then
             return
         end
 
-        PriorityFour = { endTime = 0, abilityId = 0, abilityIcon = "", hitValue = 0, result = 0, abilityName = "" }
+        PriorityFour = resetPriority()
 
-        if (PriorityOne.endTime > 0 and self.currentCC == 1) or (PriorityTwo.endTime > 0 and self.currentCC == 2) or (PriorityThree.endTime > 0 and self.currentCC == 3) then
+        if (PriorityOne.endTime > 0 and self.currentCC == 1) or
+        (PriorityTwo.endTime > 0 and self.currentCC == 2) or
+        (PriorityThree.endTime > 0 and self.currentCC == 3) then
             return
         end
 
-        checkAndRemoveCC(6, PrioritySix, 6, sixthInterval, PrioritySix)
-        checkAndRemoveCC(7, PrioritySeven, 7, seventhInterval, PrioritySeven)
-        checkAndRemoveCC(8, PriorityEight, 8, eighthInterval, PriorityEight)
+        checkAndRemoveCC(self, 6, PrioritySix, 6, sixthInterval, PrioritySix, currentEndTime)
+        checkAndRemoveCC(self, 7, PrioritySeven, 7, seventhInterval, PrioritySeven, currentEndTime)
+        checkAndRemoveCC(self, 8, PriorityEight, 8, eighthInterval, PriorityEight, currentEndTime)
     elseif ccType == 5 then -- STAGGER
         if self.currentCC ~= 0 then
             return
@@ -838,34 +855,46 @@ function CrowdControlTracker:RemoveCC(ccType, currentEndTime)
             return
         end
 
-        PrioritySix = { endTime = 0, abilityId = 0, abilityIcon = "", hitValue = 0, result = 0, abilityName = "" }
+        PrioritySix = resetPriority()
 
-        if (PriorityOne.endTime > 0 and self.currentCC == 1) or (PriorityTwo.endTime > 0 and self.currentCC == 2) or (PriorityThree.endTime > 0 and self.currentCC == 3) or (PriorityFour.endTime > 0 and self.currentCC == 4) then
+        if (PriorityOne.endTime > 0 and self.currentCC == 1) or
+        (PriorityTwo.endTime > 0 and self.currentCC == 2) or
+        (PriorityThree.endTime > 0 and self.currentCC == 3) or
+        (PriorityFour.endTime > 0 and self.currentCC == 4) then
             return
         end
 
-        checkAndRemoveCC(7, PrioritySeven, 7, seventhInterval, PrioritySeven)
-        checkAndRemoveCC(8, PriorityEight, 8, eighthInterval, PriorityEight)
+        checkAndRemoveCC(self, 7, PrioritySeven, 7, seventhInterval, PrioritySeven, currentEndTime)
+        checkAndRemoveCC(self, 8, PriorityEight, 8, eighthInterval, PriorityEight, currentEndTime)
     elseif ccType == 7 then -- AOE
         if self.currentCC ~= 0 and PrioritySeven.endTime ~= currentEndTime then
             return
         end
 
-        PrioritySeven = { endTime = 0, abilityId = 0, abilityIcon = "", hitValue = 0, result = 0, abilityName = "" }
+        PrioritySeven = resetPriority()
 
-        if (PriorityOne.endTime > 0 and self.currentCC == 1) or (PriorityTwo.endTime > 0 and self.currentCC == 2) or (PriorityThree.endTime > 0 and self.currentCC == 3) or (PriorityFour.endTime > 0 and self.currentCC == 4) or (PrioritySix.endTime > 0 and self.currentCC == 6) then
+        if (PriorityOne.endTime > 0 and self.currentCC == 1) or
+        (PriorityTwo.endTime > 0 and self.currentCC == 2) or
+        (PriorityThree.endTime > 0 and self.currentCC == 3) or
+        (PriorityFour.endTime > 0 and self.currentCC == 4) or
+        (PrioritySix.endTime > 0 and self.currentCC == 6) then
             return
         end
 
-        checkAndRemoveCC(8, PriorityEight, 8, eighthInterval, PriorityEight)
+        checkAndRemoveCC(self, 8, PriorityEight, 8, eighthInterval, PriorityEight, currentEndTime)
     elseif ccType == 8 then -- SNARE
         if self.currentCC ~= 0 and PriorityEight.endTime ~= currentEndTime then
             return
         end
 
-        PriorityEight = { endTime = 0, abilityId = 0, abilityIcon = "", hitValue = 0, result = 0, abilityName = "" }
+        PriorityEight = resetPriority()
 
-        if (PriorityOne.endTime > 0 and self.currentCC == 1) or (PriorityTwo.endTime > 0 and self.currentCC == 2) or (PriorityThree.endTime > 0 and self.currentCC == 3) or (PriorityFour.endTime > 0 and self.currentCC == 4) or (PrioritySix.endTime > 0 and self.currentCC == 6) or (PrioritySeven.endTime > 0 and self.currentCC == 7) then
+        if (PriorityOne.endTime > 0 and self.currentCC == 1) or
+        (PriorityTwo.endTime > 0 and self.currentCC == 2) or
+        (PriorityThree.endTime > 0 and self.currentCC == 3) or
+        (PriorityFour.endTime > 0 and self.currentCC == 4) or
+        (PrioritySix.endTime > 0 and self.currentCC == 6) or
+        (PrioritySeven.endTime > 0 and self.currentCC == 7) then
             return
         end
     end
