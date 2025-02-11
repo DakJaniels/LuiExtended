@@ -1605,8 +1605,6 @@ function LUIE.InitializeHooks()
 
     -- Generates extra lines for the Tooltips to show if the criteria for activating the passive is met (matches base functionality)
     local function KeepTooltipExtra(bonusType, tooltip)
-        -- Get Campaign ID
-        local campaignId = GetCurrentCampaignId()
         -- Local fields
         local r1, b1, g1
         local r2, b2, g2
@@ -1623,16 +1621,19 @@ function LUIE.InitializeHooks()
 
         -- Check Defensive Scroll Bonuses
         local function DefensiveScrolls(campaignId)
+            campaignId = campaignId or GetCurrentCampaignId()
             local allHomeScrollsHeld, enemyScrollsHeld = GetAvAArtifactScore(campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_DEFENSIVE)
             return allHomeScrollsHeld, enemyScrollsHeld
         end
 
         -- Check Offensive Scroll Bonuses
         local function OffensiveScrolls(campaignId)
+            campaignId = campaignId or GetCurrentCampaignId()
             local allHomeScrollsHeld, enemyScrollsHeld = GetAvAArtifactScore(campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_OFFENSIVE)
             return allHomeScrollsHeld, enemyScrollsHeld
         end
 
+        local campaignId = GetCurrentCampaignId()
         -- Conditional handling
         if bonusType == ZO_CAMPAIGN_BONUS_TYPE_DEFENSIVE_SCROLLS then
             tooltipLine2 = GetString(SI_CAMPAIGN_BONUSES_TOOLTIP_REQUIRES_DEFENSIVE_SCROLL)
