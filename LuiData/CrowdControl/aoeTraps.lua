@@ -88,6 +88,9 @@ local aoeTraps =
 
     -- City of Ash II
     [56068] = 0, -- Slag Geyser (Lava Pool)
+
+    -- Infinite Archive
+    [224947] = 0, -- Frigid Waters (Infinite Archive)
 }
 
 --- @class (partial) aoeTraps
