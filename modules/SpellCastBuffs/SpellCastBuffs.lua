@@ -2508,8 +2508,9 @@ function SpellCastBuffs.ArtificialEffectUpdate(eventCode, effectId)
             duration, endTime, effectType = handleBGDeserterEffect(startTime)
         end
 
+        local tooltip, artificial
         -- Process effects and get tooltips
-        local effectId, tooltip, artificial = handleBattleSpiritEffectId(activeEffectId)
+        effectId, tooltip, artificial = handleBattleSpiritEffectId(activeEffectId)
 
         -- Create and store effect
         local context = SpellCastBuffs.DetermineContextSimple("player1", effectId, displayName)
