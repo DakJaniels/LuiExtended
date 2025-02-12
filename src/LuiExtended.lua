@@ -22,12 +22,12 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "6.8.6"
+LUIE.version = "6.8.7"
 LUIE.author = "ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
-LUIE.github = "https://github.com/ArtOfShred/LuiExtended"
-LUIE.feedback = "https://github.com/ArtOfShred/LuiExtended/issues"
-LUIE.translation = "https://github.com/ArtOfShred/LuiExtended/tree/translations"
+LUIE.github = "https://github.com/DakJaniels/LuiExtended"
+LUIE.feedback = "https://github.com/DakJaniels/LuiExtended/issues"
+LUIE.translation = "https://github.com/DakJaniels/LuiExtended/tree/translations"
 LUIE.donation = "https://paypal.me/dakjaniels"
 -- -----------------------------------------------------------------------------
 -- Saved variables options

@@ -12,13 +12,12 @@ local table_concat = table.concat
 local changelogMessages =
 {
     -- Version Header
-    "|cFFA500LuiExtended Version 6.8.6|r",
+    "|cFFA500LuiExtended Version 6.8.7|r",
     "",
     -- General Changes
     "|cFFFF00General:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Added chat announcements for Grimoires and Scripts, off by Default. Can be toggled on under the Miscellaneous Announcements section of the Chat Announce settings menu.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Added a new font. Montserrat",
-    "",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Added a new grid snapping system. Currently only for default game frames, custom unit frames, and the buffs & debuffs module.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Code cleanup and optimizations.",
 }
 -- -----------------------------------------------------------------------------
 -- Hide toggle called by the menu or xml button

@@ -91,9 +91,9 @@ end
 -- -----------------------------------------------------------------------------
 
 --- Snaps a position to the nearest grid point
---- @param position number The position to snap
---- @param gridSize number The size of the grid
---- @return number @The snapped position
+--- @param position integer The position to snap
+--- @param gridSize integer The size of the grid
+--- @return integer @The snapped position
 local function SnapToGrid(position, gridSize)
     -- Round down
     position = zo_floor(position)
@@ -109,11 +109,11 @@ end
 LUIE.SnapToGrid = SnapToGrid
 
 --- Applies grid snapping to a pair of coordinates based on the specified grid type
---- @param left number The x coordinate
---- @param top number The y coordinate
+--- @param left integer The x coordinate
+--- @param top integer The y coordinate
 --- @param gridType string The type of grid to use ("default", "unitFrames", "buffs")
---- @return number x
---- @return number y
+--- @return integer x
+--- @return integer y
 local function ApplyGridSnap(left, top, gridType)
     local gridSetting = "snapToGrid" .. (gridType and ("_" .. gridType) or "")
     local sizeSetting = "snapToGridSize" .. (gridType and ("_" .. gridType) or "")
@@ -132,8 +132,8 @@ LUIE.ApplyGridSnap = ApplyGridSnap
 --- @param k Control The element to set the anchor for
 --- @param frameName string The name of the frame associated with the element
 local function setAnchor(k, frameName)
-    local x = LUIE.SV[frameName][1]
-    local y = LUIE.SV[frameName][2]
+    local x = LUIE.SV[frameName][1] --- @type integer
+    local y = LUIE.SV[frameName][2] --- @type integer
 
     -- Apply grid snapping if enabled
     if x ~= nil and y ~= nil then
@@ -193,29 +193,39 @@ end
 local function createTopLevelWindow(k, v, point, relativePoint, offsetX, offsetY, relativeTo)
     local tlw = UI:TopLevel({ point, relativePoint, offsetX, offsetY, relativeTo }, { k:GetWidth(), k:GetHeight() })
     tlw.customPositionAttr = k:GetName()
-
+    
     -- Create preview backdrop
     tlw.preview = UI:Backdrop(tlw, "fill", nil, nil, nil, false)
-
-    -- Create coordinate label
-    tlw.preview.coordLabel = UI:Label(tlw.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "ZoFontGameSmall", "xxx, yyy", false)
+    
+    -- Get initial position from saved variables if it exists
+    local positionText = "Default"
+    if LUIE.SV[tlw.customPositionAttr] then
+        local x = LUIE.SV[tlw.customPositionAttr][1] or 0
+        local y = LUIE.SV[tlw.customPositionAttr][2] or 0
+        positionText = string.format("%d, %d | %s", x, y, v[1])
+    else
+        positionText = string.format("Default | %s", v[1])
+    end
+    
+    -- Create coordinate label with initial position
+    tlw.preview.coordLabel = UI:Label(tlw.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "ZoFontGameSmall", positionText, false)
     tlw.preview.coordLabel:SetColor(1, 1, 0, 1)
     tlw.preview.coordLabel:SetDrawLayer(DL_OVERLAY)
     tlw.preview.coordLabel:SetDrawTier(DT_MEDIUM)
-
+    
     -- Create label background
     tlw.preview.coordLabelBg = UI:Backdrop(tlw.preview.coordLabel, "fill", nil, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, false)
     tlw.preview.coordLabelBg:SetDrawLayer(DL_OVERLAY)
     tlw.preview.coordLabelBg:SetDrawTier(DT_LOW)
 
     -- Add movement handlers
-
     tlw:SetHandler("OnMoveStart",
         --- @param self TopLevelWindow
         function (self)
             eventManager:RegisterForUpdate("LUIE_UnlockMoveUpdate", 200, function ()
                 if self.preview and self.preview.coordLabel then
-                    self.preview.coordLabel:SetText(string.format("%d, %d", self:GetLeft(), self:GetTop()))
+                    local frameName = v[1] -- Get the frame name from the defaultPanels table
+                    self.preview.coordLabel:SetText(string.format("%d, %d | %s", self:GetLeft(), self:GetTop(), frameName))
                 end
             end)
         end)
@@ -225,7 +235,8 @@ local function createTopLevelWindow(k, v, point, relativePoint, offsetX, offsetY
         function (self)
             eventManager:UnregisterForUpdate("LUIE_UnlockMoveUpdate")
             if self.preview and self.preview.coordLabel then
-                self.preview.coordLabel:SetText(string.format("%d, %d", self:GetLeft(), self:GetTop()))
+                local frameName = v[1] -- Get the frame name from the defaultPanels table
+                self.preview.coordLabel:SetText(string.format("%d, %d | %s", self:GetLeft(), self:GetTop(), frameName))
             end
         end)
 
@@ -263,19 +274,22 @@ function LUIE.SetupElementMover(state)
             --- @type TopLevelWindow
             local tlw = createTopLevelWindow(k, v, point, relativePoint, offsetX, offsetY, relativeTo)
             -- Setup handlers to set the custom position SV and call LUIE.SetElementPosition() to apply this positioning
-            tlw:SetHandler("OnMoveStop", function (self)
-                local left, top = self:GetLeft(), self:GetTop()
+            tlw:SetHandler("OnMoveStop",
 
-                -- Apply grid snapping if enabled
-                if LUIE.SV.snapToGrid then
-                    left, top = ApplyGridSnap(left, top, "default")
-                    self:ClearAnchors()
-                    self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-                end
+                --- @param self TopLevelWindow
+                function (self)
+                    local left, top = self:GetLeft(), self:GetTop()
 
-                LUIE.SV[self.customPositionAttr] = { left, top }
-                LUIE.SetElementPosition()
-            end)
+                    -- Apply grid snapping if enabled
+                    if LUIE.SV.snapToGrid then
+                        left, top = ApplyGridSnap(left, top, "default")
+                        self:ClearAnchors()
+                        self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+                    end
+
+                    LUIE.SV[self.customPositionAttr] = { left, top }
+                    LUIE.SetElementPosition()
+                end)
             --- @diagnostic disable-next-line: undefined-field
             g_LUIE_Movers[tlw.customPositionAttr] = tlw
         end
