@@ -78,8 +78,8 @@ LUIE.Defaults =
     snapToGridSize_unitFrames = 15,
     snapToGrid_buffs          = false,
     snapToGridSize_buffs      = 15,
-    snapToGrid_combatText     = false,
-    snapToGridSize_combatText = 15,
+    -- snapToGrid_combatText     = false,
+    -- snapToGridSize_combatText = 15,
 }
 
 -- -----------------------------------------------------------------------------

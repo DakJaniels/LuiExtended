@@ -27,7 +27,7 @@ local defaultPanels =
     [ZO_HUDEquipmentStatus] = { GetString(LUIE_STRING_DEFAULT_FRAME_EQUIPMENT_STATUS), 64, 64 },
     [ZO_FocusedQuestTrackerPanel] = { GetString(LUIE_STRING_DEFAULT_FRAME_QUEST_LOG), nil, 200 },
     [ZO_LootHistoryControl_Keyboard] = { GetString(LUIE_STRING_DEFAULT_FRAME_LOOT_HISTORY), 280, 400 },
-    [ZO_BattlegroundHUDFragmentTopLevel] = { GetString(LUIE_STRING_DEFAULT_FRAME_BATTLEGROUND_SCORE) },
+    [ZO_BattlegroundHUDFragmentTopLevel] = { GetString(LUIE_STRING_DEFAULT_FRAME_BATTLEGROUND_SCORE), nil, 200  },
     [ZO_ActionBar1] = { GetString(LUIE_STRING_DEFAULT_FRAME_ACTION_BAR) },
     [ZO_Subtitles] = { GetString(LUIE_STRING_DEFAULT_FRAME_SUBTITLES), 256, 80 },
     [ZO_TutorialHudInfoTipKeyboard] = { GetString(LUIE_STRING_DEFAULT_FRAME_TUTORIALS) },
@@ -38,9 +38,7 @@ local defaultPanels =
     [ZO_CompassFrame] = { GetString(LUIE_STRING_DEFAULT_FRAME_COMPASS) },                                        -- Needs custom template applied
     [ZO_ActiveCombatTipsTip] = { GetString(LUIE_STRING_DEFAULT_FRAME_ACTIVE_COMBAT_TIPS), 250, 20 },             -- Needs custom template applied
     [ZO_PlayerProgress] = { GetString(LUIE_STRING_DEFAULT_FRAME_PLAYER_PROGRESS) },                              -- Needs custom template applied
-    -- [ZO_CenterScreenAnnounce] = { GetString(LUIE_STRING_DEFAULT_FRAME_CSA), nil, 100 }, -- Needs custom template applied
     [ZO_EndDunHUDTrackerContainer] = { GetString(LUIE_STRING_DEFAULT_FRAME_ENDLESS_DUNGEON_TRACKER), 230, 100 }, -- Needs custom template applied
-    -- [ZO_EndDunBuffTracker_Gamepad] = { GetString(LUIE_STRING_DEFAULT_FRAME_ENDLESS_DUNGEON_TRACKER), 400, 400 }, -- Needs custom template applied
     [ZO_ReticleContainerInteract] = { GetString(LUIE_STRING_DEFAULT_FRAME_RETICLE_CONTAINER_INTERACT) }
 }
 -- -----------------------------------------------------------------------------
@@ -55,6 +53,7 @@ local function ReplaceDefaultTemplate(object, functionName, frameName)
         local frameData = LUIE.SV[frameName]
         if frameData then
             local frame = _G[frameName]
+            ---@cast frame userdata
             frame:ClearAnchors()
             frame:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, frameData[1], frameData[2])
         end
@@ -93,10 +92,10 @@ end
 --- Snaps a position to the nearest grid point
 --- @param position number The position to snap
 --- @param gridSize number The size of the grid
---- @return number The snapped position
+--- @return number @The snapped position
 local function SnapToGrid(position, gridSize)
     -- Round down
-    position = math.floor(position)
+    position = zo_floor(position)
 
     -- Return value to closest grid point
     if (position % gridSize >= gridSize / 2) then
@@ -112,11 +111,12 @@ LUIE.SnapToGrid = SnapToGrid
 --- @param left number The x coordinate
 --- @param top number The y coordinate
 --- @param gridType string The type of grid to use ("default", "unitFrames", "buffs")
---- @return number, number The snapped x and y coordinates
+--- @return number x
+--- @return number y
 local function ApplyGridSnap(left, top, gridType)
     local gridSetting = "snapToGrid" .. (gridType and ("_" .. gridType) or "")
     local sizeSetting = "snapToGridSize" .. (gridType and ("_" .. gridType) or "")
-    
+
     if LUIE.SV[gridSetting] then
         local gridSize = LUIE.SV[sizeSetting] or 10
         left = SnapToGrid(left, gridSize)
