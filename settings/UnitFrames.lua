@@ -282,6 +282,43 @@ function UnitFrames.CreateSettings()
         end,
     }
 
+    -- Grid Snap Settings for Unit Frames
+    optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
+    {
+        type = "checkbox",
+        name = "Enable Grid Snap (Unit Frames)",
+        tooltip = "Enable snapping unit frames to a grid when moving them",
+        getFunc = function ()
+            return LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid
+        end,
+        setFunc = function (value)
+            LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid = value
+        end,
+        width = "half",
+        default = false,
+    }
+
+    optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
+    {
+        type = "slider",
+        name = "Grid Size (Unit Frames)",
+        tooltip = "Set the size of the grid for snapping unit frames",
+        min = 5,
+        max = 100,
+        step = 5,
+        getFunc = function ()
+            return LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridSize or 10
+        end,
+        setFunc = function (value)
+            LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridSize = value
+        end,
+        width = "half",
+        default = 10,
+        disabled = function ()
+            return not LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid
+        end,
+    }
+
     -- Custom Unit Frames Reset position
     optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
     {

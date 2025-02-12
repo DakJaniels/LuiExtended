@@ -51,25 +51,28 @@ LUIE.Data = LuiData.Data
 -- Default Settings
 LUIE.Defaults =
 {
-    CharacterSpecificSV = false,
-    StartupInfo = false,
-    HideAlertFrame = false,
-    AlertFrameAlignment = 3,
+    CharacterSpecificSV      = false,
+    StartupInfo              = false,
+    HideAlertFrame           = false,
+    AlertFrameAlignment      = 3,
     -- CustomIcons_Enabled = true,
-    HideXPBar = false,
-    TempAlertHome = false,
-    TempAlertCampaign = false,
-    TempAlertOutfit = false,
-    WelcomeVersion = 0,
+    HideXPBar                = false,
+    TempAlertHome            = false,
+    TempAlertCampaign        = false,
+    TempAlertOutfit          = false,
+    WelcomeVersion           = 0,
 
     -- Modules
-    UnitFrames_Enabled = true,
-    InfoPanel_Enabled = true,
-    CombatInfo_Enabled = true,
-    CombatText_Enabled = true,
-    SpellCastBuff_Enable = true,
+    UnitFrames_Enabled       = true,
+    InfoPanel_Enabled        = true,
+    CombatInfo_Enabled       = true,
+    CombatText_Enabled       = true,
+    SpellCastBuff_Enable     = true,
     ChatAnnouncements_Enable = true,
-    SlashCommands_Enable = true,
+    SlashCommands_Enable     = true,
+
+    snapToGrid               = false,
+    snapToGridSize           = 1,
 }
 
 -- -----------------------------------------------------------------------------

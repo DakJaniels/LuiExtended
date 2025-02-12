@@ -95,7 +95,7 @@ do
         local formattedMsg = msg or ""
         if doTimestamp then
             local timestring = GetTimeString()
-            local timestamp = LUIE.CreateTimestamp(timestring, nil)
+            local timestamp = LUIE.CreateTimestamp(timestring, nil, nil)
 
             -- Make timestamp clickable if lineNumber and chanCode are provided
             local timestampText

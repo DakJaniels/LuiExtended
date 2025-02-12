@@ -1082,76 +1082,68 @@ end
 -- Runs on the EVENT_RETICLE_TARGET_CHANGED listener.
 -- This handler fires every time the player's reticle target changes
 function CombatInfo.OnReticleTargetChanged(eventCode)
-    -- Define all possible reticle unit tags
-    local reticleUnitTags =
-    {
-        "reticleover",
-        "reticleoverplayer",
-        "reticleovercompanion"
-    }
-
+    if not eventCode then return end
     -- Clear existing toggles that should be removed on target change
-    for k, v in pairs(g_toggledSlotsRemain) do
-        if ((g_toggledSlotsFront[k] and g_uiCustomToggle[g_toggledSlotsFront[k]]) or
-            (g_toggledSlotsBack[k] and g_uiCustomToggle[g_toggledSlotsBack[k]])) and
-        not (g_toggledSlotsPlayer[k] or g_barNoRemove[k]) then
-            -- Hide front slot if it exists
-            if g_toggledSlotsFront[k] and g_uiCustomToggle[g_toggledSlotsFront[k]] then
-                CombatInfo.HideSlot(g_toggledSlotsFront[k], k)
+    for k, _ in pairs(g_toggledSlotsRemain) do
+        local frontSlot = g_toggledSlotsFront[k]
+        local backSlot = g_toggledSlotsBack[k]
+
+        if  ((frontSlot and g_uiCustomToggle[frontSlot]) or (backSlot and g_uiCustomToggle[backSlot]))
+        and not (g_toggledSlotsPlayer[k] or g_barNoRemove[k]) then
+            if frontSlot and g_uiCustomToggle[frontSlot] then
+                CombatInfo.HideSlot(frontSlot, k)
             end
 
-            -- Hide back slot if it exists
-            if g_toggledSlotsBack[k] and g_uiCustomToggle[g_toggledSlotsBack[k]] then
-                CombatInfo.HideSlot(g_toggledSlotsBack[k], k)
+            if backSlot and g_uiCustomToggle[backSlot] then
+                CombatInfo.HideSlot(backSlot, k)
             end
 
-            -- Clear related data
             g_toggledSlotsRemain[k] = nil
             g_toggledSlotsStack[k] = nil
 
-            -- Check for bar highlight effects
             if Effects.BarHighlightCheckOnFade[k] then
                 CombatInfo.BarHighlightSwap(k)
             end
         end
     end
 
-    -- Process buffs for each reticle unit tag
-    for _, unitTag in ipairs(reticleUnitTags) do
-        if DoesUnitExist(unitTag) then
-            for i = 1, GetNumBuffs(unitTag) do
-                -- Get unit and buff information
-                local unitName = GetRawUnitName(unitTag)
-                local buffName, timeStarted, timeEnding, buffSlot, stackCount,
-                iconFilename, buffType, effectType, abilityType,
-                statusEffectType, abilityId, canClickOff, castByPlayer = GetUnitBuffInfo(unitTag, i)
+    -- Process buffs for reticle unit tag
+    local unitTag = "reticleover"
+    if DoesUnitExist(unitTag) then
+        -- -- Debug: Print the actual unit tag when processing buffs for "reticleover"
+        -- if unitTag == "reticleover" then
+        --     printToChat(string.format("[DEBUG] Processing buffs for %s", zo_strformat("<<1>>", GetRawUnitName(unitTag)), true))
+        -- end
 
-                -- Convert boolean castByPlayer to numeric value
-                local castByPlayerNumeric = castByPlayer and 1 or 5
+        local numBuffs = GetNumBuffs(unitTag)
+        for i = 1, numBuffs do
+            local unitName = GetRawUnitName(unitTag)
+            local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer = GetUnitBuffInfo(unitTag, i)
 
-                -- Process effect if unit is alive
-                if not IsUnitDead(unitTag) then
-                    CombatInfo.OnEffectChanged(
-                        0, -- eventCode
-                        EFFECT_RESULT_UPDATED,
-                        buffSlot,
-                        buffName,
-                        unitTag,
-                        timeStarted,
-                        timeEnding,
-                        stackCount,
-                        iconFilename,
-                        buffType,
-                        effectType,
-                        abilityType,
-                        statusEffectType,
-                        unitName,
-                        0, -- unitId
-                        abilityId,
-                        castByPlayerNumeric,
-                        false -- passThrough
-                    )
-                end
+            local castByPlayerNumeric = castByPlayer and 1 or 5
+
+            if not IsUnitDead(unitTag) then
+                CombatInfo.OnEffectChanged(
+                    0, -- eventCode
+                    EFFECT_RESULT_UPDATED,
+                    buffSlot,
+                    buffName,
+                    unitTag,
+                    timeStarted,
+                    timeEnding,
+                    stackCount,
+                    iconFilename,
+                    buffType,
+                    effectType,
+                    abilityType,
+                    statusEffectType,
+                    unitName,
+                    0, -- unitId
+                    abilityId,
+                    castByPlayerNumeric,
+                    false, -- passThrough
+                    0      -- savedId
+                )
             end
         end
     end

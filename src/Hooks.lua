@@ -297,7 +297,8 @@ function LUIE.InitializeHooks()
     --- @param casterUnitTag? string
     --- @return string abilityName
     GetAbilityName = function (abilityId, casterUnitTag)
-        local abilityName = zos_GetAbilityName(abilityId)
+        casterUnitTag = casterUnitTag or "player"
+        local abilityName = zos_GetAbilityName(abilityId, casterUnitTag)
         if LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].name then
             abilityName = LUIE.Data.Effects.EffectOverride[abilityId].name
         end
@@ -405,8 +406,14 @@ function LUIE.InitializeHooks()
     end
 
     -- Helper function to generate tooltip text
+    ---@param abilityId integer
+    ---@param buffSlot integer
+    ---@param timer integer
+    ---@param value2 integer
+    ---@param value3 integer
+    ---@return string tooltipText
     local function GetTooltipText(abilityId, buffSlot, timer, value2, value3)
-        local tooltipText
+        local tooltipText = ""
         local override = LUIE.Data.Effects.EffectOverride[abilityId]
 
         -- Handle veteran difficulty tooltip

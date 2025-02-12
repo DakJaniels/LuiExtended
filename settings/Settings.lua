@@ -161,6 +161,43 @@ function LUIE.CreateSettings()
         resetFunc = LUIE.ResetElementPosition,
     }
 
+    -- Grid Snap Settings
+    optionsData[#optionsData + 1] =
+    {
+        type = "checkbox",
+        name = "Enable Grid Snap",
+        tooltip = "Enable snapping UI elements to a grid when moving them",
+        getFunc = function ()
+            return LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid
+        end,
+        setFunc = function (value)
+            LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid = value
+        end,
+        width = "half",
+        default = false,
+    }
+
+    optionsData[#optionsData + 1] =
+    {
+        type = "slider",
+        name = "Grid Size",
+        tooltip = "Set the size of the grid for snapping UI elements",
+        min = 5,
+        max = 100,
+        step = 5,
+        getFunc = function ()
+            return LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridSize or 10
+        end,
+        setFunc = function (value)
+            LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridSize = value
+        end,
+        width = "half",
+        default = 10,
+        disabled = function ()
+            return not LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid
+        end,
+    }
+
     -- Default UI Elements Position Reset
     optionsData[#optionsData + 1] =
     {

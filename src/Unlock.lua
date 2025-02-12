@@ -87,13 +87,42 @@ local function adjustElement(k, v)
     end
 end
 -- -----------------------------------------------------------------------------
+--- Grid Snap Functions
+-- -----------------------------------------------------------------------------
+local function SnapToGrid(position, gridSize)
+    -- Round down
+    position = math.floor(position)
+
+    -- Return value to closest grid point
+    if (position % gridSize >= gridSize / 2) then
+        return position + (gridSize - (position % gridSize))
+    else
+        return position - (position % gridSize)
+    end
+end
+
+LUIE.SnapToGrid = SnapToGrid
+
+local function ApplyGridSnap(left, top)
+    if LUIE.SV.snapToGrid then
+        local gridSize = LUIE.SV.snapToGridSize or 10
+        left = SnapToGrid(left, gridSize)
+        top = SnapToGrid(top, gridSize)
+    end
+    return left, top
+end
+
+-- -----------------------------------------------------------------------------
 --- Helper function to set the anchor of an element
 --- @param k Control The element to set the anchor for
 --- @param frameName string The name of the frame associated with the element
 local function setAnchor(k, frameName)
     local x = LUIE.SV[frameName][1]
     local y = LUIE.SV[frameName][2]
+    
+    -- Apply grid snapping if enabled
     if x ~= nil and y ~= nil then
+        x, y = ApplyGridSnap(x, y)
         k:ClearAnchors()
         k:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
     end
@@ -187,7 +216,16 @@ function LUIE.SetupElementMover(state)
             local tlw = createTopLevelWindow(k, v, point, relativePoint, offsetX, offsetY, relativeTo)
             -- Setup handlers to set the custom position SV and call LUIE.SetElementPosition() to apply this positioning
             tlw:SetHandler("OnMoveStop", function (self)
-                LUIE.SV[self.customPositionAttr] = { self:GetLeft(), self:GetTop() }
+                local left, top = self:GetLeft(), self:GetTop()
+                
+                -- Apply grid snapping if enabled
+                if LUIE.SV.snapToGrid then
+                    left, top = ApplyGridSnap(left, top)
+                    self:ClearAnchors()
+                    self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+                end
+                
+                LUIE.SV[self.customPositionAttr] = { left, top }
                 LUIE.SetElementPosition()
             end)
             --- @diagnostic disable-next-line: undefined-field
