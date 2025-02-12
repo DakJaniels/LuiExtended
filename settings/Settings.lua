@@ -186,13 +186,13 @@ function LUIE.CreateSettings()
         max = 100,
         step = 5,
         getFunc = function ()
-            return LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridSize or 10
+            return LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridSize or 15
         end,
         setFunc = function (value)
             LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridSize = value
         end,
         width = "half",
-        default = 10,
+        default = 15,
         disabled = function ()
             return not LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid
         end,

@@ -72,7 +72,11 @@ LUIE.Defaults =
     SlashCommands_Enable     = true,
 
     snapToGrid               = false,
-    snapToGridSize           = 1,
+    snapToGridSize           = 15,
+    snapToGridUnitFrames     = false,
+    snapToGridUnitFramesSize = 15,
+    snapToGridBuffs          = false,
+    snapToGridBuffsSize      = 15,
 }
 
 -- -----------------------------------------------------------------------------

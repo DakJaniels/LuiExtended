@@ -4104,8 +4104,8 @@ end
 
 -- Apply grid snapping to unit frame positions
 local function ApplyUnitFrameGridSnap(left, top)
-    if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid then
-        local gridSize = LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridSize or 10
+    if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridUnitFrames then
+        local gridSize = LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridUnitFramesSize or 15
         left = LUIE.SnapToGrid(left, gridSize)
         top = LUIE.SnapToGrid(top, gridSize)
     end

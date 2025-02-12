@@ -222,6 +222,43 @@ function SpellCastBuffs.CreateSettings()
         resetFunc = SpellCastBuffs.ResetTlwPosition,
     }
 
+    -- Grid Snap Settings for Buffs
+    optionsDataBuffsDebuffs[#optionsDataBuffsDebuffs + 1] =
+    {
+        type = "checkbox",
+        name = "Enable Grid Snap (Buffs)",
+        tooltip = "Enable snapping buff frames to a grid when moving them",
+        getFunc = function ()
+            return LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffs
+        end,
+        setFunc = function (value)
+            LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffs = value
+        end,
+        width = "half",
+        default = false,
+    }
+
+    optionsDataBuffsDebuffs[#optionsDataBuffsDebuffs + 1] =
+    {
+        type = "slider",
+        name = "Grid Size (Buffs)",
+        tooltip = "Set the size of the grid for snapping buff frames",
+        min = 5,
+        max = 100,
+        step = 5,
+        getFunc = function ()
+            return LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffsSize or 15
+        end,
+        setFunc = function (value)
+            LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffsSize = value
+        end,
+        width = "half",
+        default = 15,
+        disabled = function ()
+            return not LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffs
+        end,
+    }
+
     -- Buffs Window Reset position
     optionsDataBuffsDebuffs[#optionsDataBuffsDebuffs + 1] =
     {
