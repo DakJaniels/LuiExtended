@@ -103,3 +103,16 @@ LUIE_QUEST_MESSAGE_OPEN = 11
 LUIE_QUEST_MESSAGE_ADMINISTER = 12
 LUIE_QUEST_MESSAGE_PLACE = 13
 LUIE_QUEST_MESSAGE_STEAL = 14
+
+-- -----------------------------------------------------------------------------
+do
+    if not GetItemLinkOnUseAbilityDescription then
+        --- @param itemLink string
+        --- @return string abilityDescription
+        GetItemLinkOnUseAbilityDescription = function (itemLink)
+            local hasAbility, abilityHeader, abilityDescription, cooldown, hasScaling, minLevel, maxLevel, isChampionPoints, remainingCooldown = GetItemLinkOnUseAbilityInfo(itemLink)
+            return abilityDescription
+        end
+    end
+end
+-- -----------------------------------------------------------------------------
