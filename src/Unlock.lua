@@ -10,6 +10,7 @@
 local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 local UI = LUIE.UI
+local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
 -- -----------------------------------------------------------------------------
 local firstRun = true
@@ -173,7 +174,6 @@ function LUIE.SetElementPosition()
             setAnchor(k, frameName)
         end
         ReplaceDefaultTemplate(ACTIVE_COMBAT_TIP_SYSTEM, "ApplyStyle", "ZO_ActiveCombatTips")
-        -- ReplaceDefaultTemplate(CENTER_SCREEN_ANNOUNCE, 'ApplyStyle', 'ZO_CenterScreenAnnounce')
         ReplaceDefaultTemplate(COMPASS_FRAME, "ApplyStyle", "ZO_CompassFrame")
         ReplaceDefaultTemplate(PLAYER_PROGRESS_BAR, "RefreshTemplate", "ZO_PlayerProgress")
         ReplaceDefaultTemplate(ZO_HUDTracker_Base, "RefreshAnchors", "ZO_EndDunHUDTrackerContainer")
@@ -193,8 +193,42 @@ end
 local function createTopLevelWindow(k, v, point, relativePoint, offsetX, offsetY, relativeTo)
     local tlw = UI:TopLevel({ point, relativePoint, offsetX, offsetY, relativeTo }, { k:GetWidth(), k:GetHeight() })
     tlw.customPositionAttr = k:GetName()
+
+    -- Create preview backdrop
     tlw.preview = UI:Backdrop(tlw, "fill", nil, nil, nil, false)
-    tlw.previewLabel = UI:Label(tlw.preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", v[1], false)
+
+    -- Create coordinate label
+    tlw.preview.coordLabel = UI:Label(tlw.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "ZoFontGameSmall", "xxx, yyy", false)
+    tlw.preview.coordLabel:SetColor(1, 1, 0, 1)
+    tlw.preview.coordLabel:SetDrawLayer(DL_OVERLAY)
+    tlw.preview.coordLabel:SetDrawTier(DT_MEDIUM)
+
+    -- Create label background
+    tlw.preview.coordLabelBg = UI:Backdrop(tlw.preview.coordLabel, "fill", nil, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, false)
+    tlw.preview.coordLabelBg:SetDrawLayer(DL_OVERLAY)
+    tlw.preview.coordLabelBg:SetDrawTier(DT_LOW)
+
+    -- Add movement handlers
+
+    tlw:SetHandler("OnMoveStart",
+        --- @param self TopLevelWindow
+        function (self)
+            eventManager:RegisterForUpdate("LUIE_UnlockMoveUpdate", 200, function ()
+                if self.preview and self.preview.coordLabel then
+                    self.preview.coordLabel:SetText(string.format("%d, %d", self:GetLeft(), self:GetTop()))
+                end
+            end)
+        end)
+
+    tlw:SetHandler("OnMoveStop",
+        --- @param self TopLevelWindow
+        function (self)
+            eventManager:UnregisterForUpdate("LUIE_UnlockMoveUpdate")
+            if self.preview and self.preview.coordLabel then
+                self.preview.coordLabel:SetText(string.format("%d, %d", self:GetLeft(), self:GetTop()))
+            end
+        end)
+
     return tlw
 end
 -- -----------------------------------------------------------------------------
