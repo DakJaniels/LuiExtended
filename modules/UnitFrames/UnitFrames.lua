@@ -4102,15 +4102,15 @@ function UnitFrames.CustomFramesResetPosition(playerOnly)
     UnitFrames.CustomFramesSetPositions()
 end
 
--- Apply grid snapping to unit frame positions
-local function ApplyUnitFrameGridSnap(left, top)
-    if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridUnitFrames then
-        local gridSize = LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridUnitFramesSize or 15
-        left = LUIE.SnapToGrid(left, gridSize)
-        top = LUIE.SnapToGrid(top, gridSize)
-    end
-    return left, top
-end
+-- -- Apply grid snapping to unit frame positions
+-- local function ApplyUnitFrameGridSnap(left, top)
+--     if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridUnitFrames then
+--         local gridSize = LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridUnitFramesSize or 15
+--         left = LUIE.SnapToGrid(left, gridSize)
+--         top = LUIE.SnapToGrid(top, gridSize)
+--     end
+--     return left, top
+-- end
 
 -- Unlock CustomFrames for moving. Called from Settings Menu.
 function UnitFrames.CustomFramesSetMovingState(state)
@@ -4140,7 +4140,7 @@ function UnitFrames.CustomFramesSetMovingState(state)
             -- Add grid snapping handler
             tlw:SetHandler("OnMoveStop", function (self)
                 local left, top = self:GetLeft(), self:GetTop()
-                left, top = ApplyUnitFrameGridSnap(left, top)
+                left, top = LUIE.ApplyGridSnap(left, top, "unitFrames")
                 self:ClearAnchors()
                 self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
                 UnitFrames.SV[self.customPositionAttr] = { left, top }

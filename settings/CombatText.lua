@@ -170,14 +170,46 @@ function CombatText.CreateSettings()
         getFunc = function ()
             return Settings.unlocked
         end,
-        setFunc = function ()
-            Settings.unlocked = not Settings.unlocked
-            for k, _ in pairs(Settings.panels) do
-                _G[k]:SetMouseEnabled(Settings.unlocked)
-                _G[k]:SetMovable(Settings.unlocked)
-                _G[k .. "_Backdrop"]:SetHidden(not Settings.unlocked)
-                _G[k .. "_Label"]:SetHidden(not Settings.unlocked)
-            end
+        setFunc = function (value)
+            Settings.unlocked = value
+            CombatText.SetMovingState(value)
+        end,
+    }
+
+    -- Grid Snap Settings for Combat Text
+    optionsDataCombatText[#optionsDataCombatText + 1] =
+    {
+        type = "checkbox",
+        name = "Enable Grid Snap (Combat Text)",
+        tooltip = "Enable snapping combat text panels to a grid when moving them",
+        getFunc = function ()
+            return LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_combatText
+        end,
+        setFunc = function (value)
+            LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_combatText = value
+        end,
+        width = "half",
+        default = false,
+    }
+
+    optionsDataCombatText[#optionsDataCombatText + 1] =
+    {
+        type = "slider",
+        name = "Grid Size (Combat Text)",
+        tooltip = "Set the size of the grid for snapping combat text panels",
+        min = 5,
+        max = 100,
+        step = 5,
+        getFunc = function ()
+            return LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridSize_combatText or 15
+        end,
+        setFunc = function (value)
+            LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridSize_combatText = value
+        end,
+        width = "half",
+        default = 15,
+        disabled = function ()
+            return not LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_combatText
         end,
     }
 

@@ -412,6 +412,67 @@ function SpellCastBuffs.ClearPlayerBuff(abilityId)
     end
 end
 
+-- Callback to update coordinates while moving
+local function OnMoveStart(self)
+    eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
+        if self.preview and self.preview.anchorLabel then
+            self.preview.anchorLabel:SetText(string.format("%d, %d", self:GetLeft(), self:GetTop()))
+        end
+    end)
+end
+
+-- Callback to stop updating coordinates when movement ends
+local function OnMoveStop(self)
+    eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
+end
+
+
+-- Initialize preview labels for all frames
+local function InitializePreviewLabels()
+    local frames =
+    {
+        { frame = uiTlw.playerb,          name = "playerb" },
+        { frame = uiTlw.playerd,          name = "playerd" },
+        { frame = uiTlw.targetb,          name = "targetb" },
+        { frame = uiTlw.targetd,          name = "targetd" },
+        { frame = uiTlw.player_long,      name = "player_long" },
+        { frame = uiTlw.prominentbuffs,   name = "prominentbuffs" },
+        { frame = uiTlw.prominentdebuffs, name = "prominentdebuffs" }
+    }
+
+    for _, f in ipairs(frames) do
+        if f.frame then
+            -- Create preview container if it doesn't exist
+            if not f.frame.preview then
+                f.frame.preview = UI:Control(f.frame, "fill", nil, false)
+            end
+
+            -- Create texture and label for anchor preview
+            if not f.frame.preview.anchorTexture then
+                f.frame.preview.anchorTexture = UI:Texture(f.frame.preview, { TOPLEFT, TOPLEFT }, { 16, 16 }, "/esoui/art/reticle/border_topleft.dds", DL_OVERLAY, false)
+                f.frame.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
+            end
+
+            if not f.frame.preview.anchorLabel then
+                f.frame.preview.anchorLabel = UI:Label(f.frame.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "ZoFontGameSmall", "xxx, yyy", false)
+                f.frame.preview.anchorLabel:SetColor(1, 1, 0, 1)
+                f.frame.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
+                f.frame.preview.anchorLabel:SetDrawTier(DT_MEDIUM)
+            end
+
+            if not f.frame.preview.anchorLabelBg then
+                f.frame.preview.anchorLabelBg = UI:Backdrop(f.frame.preview.anchorLabel, "fill", nil, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, false)
+                f.frame.preview.anchorLabelBg:SetDrawLayer(DL_OVERLAY)
+                f.frame.preview.anchorLabelBg:SetDrawTier(DT_LOW)
+            end
+
+            -- Add movement handlers
+            f.frame:SetHandler("OnMoveStart", OnMoveStart)
+            f.frame:SetHandler("OnMoveStop", OnMoveStop)
+        end
+    end
+end
+
 -- Initialization
 function SpellCastBuffs.Initialize(enabled)
     -- Load settings
@@ -716,6 +777,9 @@ function SpellCastBuffs.Initialize(enabled)
     end
     -- Increment so this doesn't occur again.
     LUIESV.Default[GetDisplayName()]["$AccountWide"].AdjustVarsSCB = 2
+
+    -- Initialize preview labels for all frames
+    InitializePreviewLabels()
 end
 
 function SpellCastBuffs.RegisterWerewolfEvents()
@@ -1025,8 +1089,8 @@ function SpellCastBuffs.SetTlwPosition()
         uiTlw.playerb:ClearAnchors()
         if not SpellCastBuffs.SV.lockPositionToUnitFrames and SpellCastBuffs.SV.playerbOffsetX ~= nil and SpellCastBuffs.SV.playerbOffsetY ~= nil then
             local x, y = SpellCastBuffs.SV.playerbOffsetX, SpellCastBuffs.SV.playerbOffsetY
-            if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffs then
-                x, y = LUIE.ApplyGridSnap(x, y)
+            if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+                x, y = LUIE.ApplyGridSnap(x, y, "buffs")
             end
             uiTlw.playerb:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
         else
@@ -1038,8 +1102,8 @@ function SpellCastBuffs.SetTlwPosition()
         uiTlw.playerd:ClearAnchors()
         if not SpellCastBuffs.SV.lockPositionToUnitFrames and SpellCastBuffs.SV.playerdOffsetX ~= nil and SpellCastBuffs.SV.playerdOffsetY ~= nil then
             local x, y = SpellCastBuffs.SV.playerdOffsetX, SpellCastBuffs.SV.playerdOffsetY
-            if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffs then
-                x, y = LUIE.ApplyGridSnap(x, y)
+            if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+                x, y = LUIE.ApplyGridSnap(x, y, "buffs")
             end
             uiTlw.playerd:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
         else
@@ -1051,8 +1115,8 @@ function SpellCastBuffs.SetTlwPosition()
         uiTlw.targetb:ClearAnchors()
         if not SpellCastBuffs.SV.lockPositionToUnitFrames and SpellCastBuffs.SV.targetbOffsetX ~= nil and SpellCastBuffs.SV.targetbOffsetY ~= nil then
             local x, y = SpellCastBuffs.SV.targetbOffsetX, SpellCastBuffs.SV.targetbOffsetY
-            if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffs then
-                x, y = LUIE.ApplyGridSnap(x, y)
+            if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+                x, y = LUIE.ApplyGridSnap(x, y, "buffs")
             end
             uiTlw.targetb:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
         else
@@ -1064,8 +1128,8 @@ function SpellCastBuffs.SetTlwPosition()
         uiTlw.targetd:ClearAnchors()
         if not SpellCastBuffs.SV.lockPositionToUnitFrames and SpellCastBuffs.SV.targetdOffsetX ~= nil and SpellCastBuffs.SV.targetdOffsetY ~= nil then
             local x, y = SpellCastBuffs.SV.targetdOffsetX, SpellCastBuffs.SV.targetdOffsetY
-            if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffs then
-                x, y = LUIE.ApplyGridSnap(x, y)
+            if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+                x, y = LUIE.ApplyGridSnap(x, y, "buffs")
             end
             uiTlw.targetd:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
         else
@@ -1078,8 +1142,8 @@ function SpellCastBuffs.SetTlwPosition()
         if uiTlw.player_long.alignVertical then
             if SpellCastBuffs.SV.playerVOffsetX ~= nil and SpellCastBuffs.SV.playerVOffsetY ~= nil then
                 local x, y = SpellCastBuffs.SV.playerVOffsetX, SpellCastBuffs.SV.playerVOffsetY
-                if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffs then
-                    x, y = LUIE.ApplyGridSnap(x, y)
+                if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+                    x, y = LUIE.ApplyGridSnap(x, y, "buffs")
                 end
                 uiTlw.player_long:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
             else
@@ -1088,8 +1152,8 @@ function SpellCastBuffs.SetTlwPosition()
         else
             if SpellCastBuffs.SV.playerHOffsetX ~= nil and SpellCastBuffs.SV.playerHOffsetY ~= nil then
                 local x, y = SpellCastBuffs.SV.playerHOffsetX, SpellCastBuffs.SV.playerHOffsetY
-                if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffs then
-                    x, y = LUIE.ApplyGridSnap(x, y)
+                if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+                    x, y = LUIE.ApplyGridSnap(x, y, "buffs")
                 end
                 uiTlw.player_long:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
             else
@@ -1104,8 +1168,8 @@ function SpellCastBuffs.SetTlwPosition()
         if uiTlw.prominentbuffs.alignVertical then
             if SpellCastBuffs.SV.prominentbVOffsetX ~= nil and SpellCastBuffs.SV.prominentbVOffsetY ~= nil then
                 local x, y = SpellCastBuffs.SV.prominentbVOffsetX, SpellCastBuffs.SV.prominentbVOffsetY
-                if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffs then
-                    x, y = LUIE.ApplyGridSnap(x, y)
+                if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+                    x, y = LUIE.ApplyGridSnap(x, y, "buffs")
                 end
                 uiTlw.prominentbuffs:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
             else
@@ -1114,8 +1178,8 @@ function SpellCastBuffs.SetTlwPosition()
         else
             if SpellCastBuffs.SV.prominentbHOffsetX ~= nil and SpellCastBuffs.SV.prominentbHOffsetY ~= nil then
                 local x, y = SpellCastBuffs.SV.prominentbHOffsetX, SpellCastBuffs.SV.prominentbHOffsetY
-                if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffs then
-                    x, y = LUIE.ApplyGridSnap(x, y)
+                if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+                    x, y = LUIE.ApplyGridSnap(x, y, "buffs")
                 end
                 uiTlw.prominentbuffs:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
             else
@@ -1129,8 +1193,8 @@ function SpellCastBuffs.SetTlwPosition()
         if uiTlw.prominentdebuffs.alignVertical then
             if SpellCastBuffs.SV.prominentdVOffsetX ~= nil and SpellCastBuffs.SV.prominentdVOffsetY ~= nil then
                 local x, y = SpellCastBuffs.SV.prominentdVOffsetX, SpellCastBuffs.SV.prominentdVOffsetY
-                if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffs then
-                    x, y = LUIE.ApplyGridSnap(x, y)
+                if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+                    x, y = LUIE.ApplyGridSnap(x, y, "buffs")
                 end
                 uiTlw.prominentdebuffs:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
             else
@@ -1139,8 +1203,8 @@ function SpellCastBuffs.SetTlwPosition()
         else
             if SpellCastBuffs.SV.prominentdHOffsetX ~= nil and SpellCastBuffs.SV.prominentdHOffsetY ~= nil then
                 local x, y = SpellCastBuffs.SV.prominentdHOffsetX, SpellCastBuffs.SV.prominentdHOffsetY
-                if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffs then
-                    x, y = LUIE.ApplyGridSnap(x, y)
+                if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+                    x, y = LUIE.ApplyGridSnap(x, y, "buffs")
                 end
                 uiTlw.prominentdebuffs:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
             else
@@ -1156,16 +1220,28 @@ function SpellCastBuffs.SetMovingState(state)
         return
     end
 
+    -- Helper function to update position label
+    local function UpdatePositionLabel(control, label)
+        if state and label then -- Add check for label existence
+            local left, top = control:GetLeft(), control:GetTop()
+            label:SetText(string.format("%d, %d", left, top))
+            label:SetHidden(false)
+        elseif label then
+            label:SetHidden(true)
+        end
+    end
+
     -- Set moving state
     if uiTlw.playerb and uiTlw.playerb:GetType() == CT_TOPLEVELCONTROL and not SpellCastBuffs.SV.lockPositionToUnitFrames then
         uiTlw.playerb:SetMouseEnabled(state)
         uiTlw.playerb:SetMovable(state)
-        
+        UpdatePositionLabel(uiTlw.playerb, uiTlw.playerb.preview.anchorLabel)
+
         -- Add grid snapping handler
-        uiTlw.playerb:SetHandler("OnMoveStop", function(self)
+        uiTlw.playerb:SetHandler("OnMoveStop", function (self)
             local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridBuffs then
-                left, top = LUIE.ApplyGridSnap(left, top)
+            if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
                 self:ClearAnchors()
                 self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
             end
@@ -1176,26 +1252,49 @@ function SpellCastBuffs.SetMovingState(state)
     if uiTlw.playerd and uiTlw.playerd:GetType() == CT_TOPLEVELCONTROL and not SpellCastBuffs.SV.lockPositionToUnitFrames then
         uiTlw.playerd:SetMouseEnabled(state)
         uiTlw.playerd:SetMovable(state)
+        UpdatePositionLabel(uiTlw.playerd, uiTlw.playerd.preview.anchorLabel)
     end
     if uiTlw.targetb and uiTlw.targetb:GetType() == CT_TOPLEVELCONTROL and not SpellCastBuffs.SV.lockPositionToUnitFrames then
         uiTlw.targetb:SetMouseEnabled(state)
         uiTlw.targetb:SetMovable(state)
+        UpdatePositionLabel(uiTlw.targetb, uiTlw.targetb.preview.anchorLabel)
     end
     if uiTlw.targetd and uiTlw.targetd:GetType() == CT_TOPLEVELCONTROL and not SpellCastBuffs.SV.lockPositionToUnitFrames then
         uiTlw.targetd:SetMouseEnabled(state)
         uiTlw.targetd:SetMovable(state)
+        UpdatePositionLabel(uiTlw.targetd, uiTlw.targetd.preview.anchorLabel)
     end
     if uiTlw.player_long then
         uiTlw.player_long:SetMouseEnabled(state)
         uiTlw.player_long:SetMovable(state)
+        UpdatePositionLabel(uiTlw.player_long, uiTlw.player_long.preview.anchorLabel)
+
+        -- Add grid snapping handler
+        uiTlw.player_long:SetHandler("OnMoveStop", function (self)
+            local left, top = self:GetLeft(), self:GetTop()
+            if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
+                self:ClearAnchors()
+                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+            end
+            if self.alignVertical then
+                SpellCastBuffs.SV.playerVOffsetX = left
+                SpellCastBuffs.SV.playerVOffsetY = top
+            else
+                SpellCastBuffs.SV.playerHOffsetX = left
+                SpellCastBuffs.SV.playerHOffsetY = top
+            end
+        end)
     end
     if uiTlw.prominentbuffs then
         uiTlw.prominentbuffs:SetMouseEnabled(state)
         uiTlw.prominentbuffs:SetMovable(state)
+        UpdatePositionLabel(uiTlw.prominentbuffs, uiTlw.prominentbuffs.preview.anchorLabel)
     end
     if uiTlw.prominentdebuffs then
         uiTlw.prominentdebuffs:SetMouseEnabled(state)
         uiTlw.prominentdebuffs:SetMovable(state)
+        UpdatePositionLabel(uiTlw.prominentdebuffs, uiTlw.prominentdebuffs.preview.anchorLabel)
     end
 
     -- Show/hide preview
@@ -1208,6 +1307,49 @@ function SpellCastBuffs.SetMovingState(state)
         SpellCastBuffs.MenuPreview()
     else
         SpellCastBuffs.Reset()
+    end
+
+    -- Always allow prominent buffs/debuffs to move and snap, regardless of lockPositionToUnitFrames
+    if uiTlw.prominentbuffs then
+        uiTlw.prominentbuffs:SetMouseEnabled(state)
+        uiTlw.prominentbuffs:SetMovable(state)
+
+        uiTlw.prominentbuffs:SetHandler("OnMoveStop", function (self)
+            local left, top = self:GetLeft(), self:GetTop()
+            if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
+                self:ClearAnchors()
+                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+            end
+            if self.alignVertical then
+                SpellCastBuffs.SV.prominentbVOffsetX = left
+                SpellCastBuffs.SV.prominentbVOffsetY = top
+            else
+                SpellCastBuffs.SV.prominentbHOffsetX = left
+                SpellCastBuffs.SV.prominentbHOffsetY = top
+            end
+        end)
+    end
+
+    if uiTlw.prominentdebuffs then
+        uiTlw.prominentdebuffs:SetMouseEnabled(state)
+        uiTlw.prominentdebuffs:SetMovable(state)
+
+        uiTlw.prominentdebuffs:SetHandler("OnMoveStop", function (self)
+            local left, top = self:GetLeft(), self:GetTop()
+            if LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
+                self:ClearAnchors()
+                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+            end
+            if self.alignVertical then
+                SpellCastBuffs.SV.prominentdVOffsetX = left
+                SpellCastBuffs.SV.prominentdVOffsetY = top
+            else
+                SpellCastBuffs.SV.prominentdHOffsetX = left
+                SpellCastBuffs.SV.prominentdHOffsetY = top
+            end
+        end)
     end
 end
 

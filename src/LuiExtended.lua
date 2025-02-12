@@ -71,12 +71,15 @@ LUIE.Defaults =
     ChatAnnouncements_Enable = true,
     SlashCommands_Enable     = true,
 
+    -- Grid settings
     snapToGrid               = false,
     snapToGridSize           = 15,
-    snapToGridUnitFrames     = false,
-    snapToGridUnitFramesSize = 15,
-    snapToGridBuffs          = false,
-    snapToGridBuffsSize      = 15,
+    snapToGrid_unitFrames     = false,
+    snapToGridSize_unitFrames = 15,
+    snapToGrid_buffs          = false,
+    snapToGridSize_buffs      = 15,
+    snapToGrid_combatText     = false,
+    snapToGridSize_combatText = 15,
 }
 
 -- -----------------------------------------------------------------------------

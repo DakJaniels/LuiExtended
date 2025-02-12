@@ -289,10 +289,10 @@ function UnitFrames.CreateSettings()
         name = "Enable Grid Snap (Unit Frames)",
         tooltip = "Enable snapping unit frames to a grid when moving them",
         getFunc = function ()
-            return LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridUnitFrames
+            return LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_unitFrames
         end,
         setFunc = function (value)
-            LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridUnitFrames = value
+            LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_unitFrames = value
         end,
         width = "half",
         default = false,
@@ -307,15 +307,15 @@ function UnitFrames.CreateSettings()
         max = 100,
         step = 5,
         getFunc = function ()
-            return LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridUnitFramesSize or 15
+            return LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridSize_unitFrames or 15
         end,
         setFunc = function (value)
-            LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridUnitFramesSize = value
+            LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridSize_unitFrames = value
         end,
         width = "half",
         default = 15,
         disabled = function ()
-            return not LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGridUnitFrames
+            return not LUIESV.Default[GetDisplayName()]["$AccountWide"].snapToGrid_unitFrames
         end,
     }
 

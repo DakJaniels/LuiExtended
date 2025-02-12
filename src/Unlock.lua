@@ -89,6 +89,11 @@ end
 -- -----------------------------------------------------------------------------
 --- Grid Snap Functions
 -- -----------------------------------------------------------------------------
+
+--- Snaps a position to the nearest grid point
+--- @param position number The position to snap
+--- @param gridSize number The size of the grid
+--- @return number The snapped position
 local function SnapToGrid(position, gridSize)
     -- Round down
     position = math.floor(position)
@@ -103,15 +108,24 @@ end
 
 LUIE.SnapToGrid = SnapToGrid
 
-local function ApplyGridSnap(left, top)
-    if LUIE.SV.snapToGrid then
-        local gridSize = LUIE.SV.snapToGridSize or 10
+--- Applies grid snapping to a pair of coordinates based on the specified grid type
+--- @param left number The x coordinate
+--- @param top number The y coordinate
+--- @param gridType string The type of grid to use ("default", "unitFrames", "buffs")
+--- @return number, number The snapped x and y coordinates
+local function ApplyGridSnap(left, top, gridType)
+    local gridSetting = "snapToGrid" .. (gridType and ("_" .. gridType) or "")
+    local sizeSetting = "snapToGridSize" .. (gridType and ("_" .. gridType) or "")
+    
+    if LUIE.SV[gridSetting] then
+        local gridSize = LUIE.SV[sizeSetting] or 10
         left = SnapToGrid(left, gridSize)
         top = SnapToGrid(top, gridSize)
     end
     return left, top
 end
 
+LUIE.ApplyGridSnap = ApplyGridSnap
 -- -----------------------------------------------------------------------------
 --- Helper function to set the anchor of an element
 --- @param k Control The element to set the anchor for
@@ -119,10 +133,10 @@ end
 local function setAnchor(k, frameName)
     local x = LUIE.SV[frameName][1]
     local y = LUIE.SV[frameName][2]
-    
+
     -- Apply grid snapping if enabled
     if x ~= nil and y ~= nil then
-        x, y = ApplyGridSnap(x, y)
+        x, y = ApplyGridSnap(x, y, "default")
         k:ClearAnchors()
         k:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
     end
@@ -217,14 +231,14 @@ function LUIE.SetupElementMover(state)
             -- Setup handlers to set the custom position SV and call LUIE.SetElementPosition() to apply this positioning
             tlw:SetHandler("OnMoveStop", function (self)
                 local left, top = self:GetLeft(), self:GetTop()
-                
+
                 -- Apply grid snapping if enabled
                 if LUIE.SV.snapToGrid then
-                    left, top = ApplyGridSnap(left, top)
+                    left, top = ApplyGridSnap(left, top, "default")
                     self:ClearAnchors()
                     self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
                 end
-                
+
                 LUIE.SV[self.customPositionAttr] = { left, top }
                 LUIE.SetElementPosition()
             end)
