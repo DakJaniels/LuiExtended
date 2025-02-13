@@ -193,10 +193,13 @@ end
 local function createTopLevelWindow(k, v, point, relativePoint, offsetX, offsetY, relativeTo)
     local tlw = UI:TopLevel({ point, relativePoint, offsetX, offsetY, relativeTo }, { k:GetWidth(), k:GetHeight() })
     tlw.customPositionAttr = k:GetName()
-    
+
     -- Create preview backdrop
     tlw.preview = UI:Backdrop(tlw, "fill", nil, nil, nil, false)
-    
+    tlw.preview:SetDrawLayer(DL_OVERLAY)
+    tlw.preview:SetDrawLevel(5)
+    tlw.preview:SetDrawTier(DT_MEDIUM)
+
     -- Get initial position from saved variables if it exists
     local positionText = "Default"
     if LUIE.SV[tlw.customPositionAttr] then
@@ -206,16 +209,18 @@ local function createTopLevelWindow(k, v, point, relativePoint, offsetX, offsetY
     else
         positionText = string.format("Default | %s", v[1])
     end
-    
+
     -- Create coordinate label with initial position
     tlw.preview.coordLabel = UI:Label(tlw.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "ZoFontGameSmall", positionText, false)
     tlw.preview.coordLabel:SetColor(1, 1, 0, 1)
     tlw.preview.coordLabel:SetDrawLayer(DL_OVERLAY)
+    tlw.preview.coordLabel:SetDrawLevel(5)
     tlw.preview.coordLabel:SetDrawTier(DT_MEDIUM)
-    
+
     -- Create label background
     tlw.preview.coordLabelBg = UI:Backdrop(tlw.preview.coordLabel, "fill", nil, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, false)
     tlw.preview.coordLabelBg:SetDrawLayer(DL_OVERLAY)
+    tlw.preview.coordLabelBg:SetDrawLevel(5)
     tlw.preview.coordLabelBg:SetDrawTier(DT_LOW)
 
     -- Add movement handlers
@@ -226,6 +231,9 @@ local function createTopLevelWindow(k, v, point, relativePoint, offsetX, offsetY
                 if self.preview and self.preview.coordLabel then
                     local frameName = v[1] -- Get the frame name from the defaultPanels table
                     self.preview.coordLabel:SetText(string.format("%d, %d | %s", self:GetLeft(), self:GetTop(), frameName))
+                    -- Anchor label to inside top-left of the frame
+                    self.preview.coordLabel:ClearAnchors()
+                    self.preview.coordLabel:SetAnchor(TOPLEFT, self.preview, TOPLEFT, 2, 2)
                 end
             end)
         end)
@@ -237,6 +245,9 @@ local function createTopLevelWindow(k, v, point, relativePoint, offsetX, offsetY
             if self.preview and self.preview.coordLabel then
                 local frameName = v[1] -- Get the frame name from the defaultPanels table
                 self.preview.coordLabel:SetText(string.format("%d, %d | %s", self:GetLeft(), self:GetTop(), frameName))
+                -- Anchor label to inside top-left of the frame
+                self.preview.coordLabel:ClearAnchors()
+                self.preview.coordLabel:SetAnchor(TOPLEFT, self.preview, TOPLEFT, 2, 2)
             end
         end)
 
@@ -281,7 +292,7 @@ function LUIE.SetupElementMover(state)
                     local left, top = self:GetLeft(), self:GetTop()
 
                     -- Apply grid snapping if enabled
-                    if LUIE.SV.snapToGrid then
+                    if LUIE.SV.snapToGrid_default then
                         left, top = ApplyGridSnap(left, top, "default")
                         self:ClearAnchors()
                         self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
