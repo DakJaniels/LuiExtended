@@ -21,6 +21,7 @@ lang/settings/Settings_$(language).lua
 
 # Addon Base
 src/LuiExtended.lua
+src/LuaFunctions.lua
 src/LuiExtended_Log.lua
 src/Functions.lua
 src/HooksSkillsAdvisor.lua

@@ -642,9 +642,12 @@ local Effects = Data.Effects
 local Quests = Data.Quests
 
 local printToChat = LUIE.PrintToChat
-local string_format = string.format
-local table_insert = table.insert
-local table_concat = table.concat
+local lstring = LUIE.string
+local ltable = LUIE.table
+local string_format = lstring.format
+local table_concat = ltable.concat
+local table_insert = ltable.insert
+local unpack = ltable.unpack
 
 local eventManager = GetEventManager()
 local windowManager = GetWindowManager()
@@ -3290,33 +3293,22 @@ function ChatAnnouncements.OnAchievementUpdated(eventCode, id)
         local name = zo_strformat(GetAchievementNameFromLink(link))
 
         if ChatAnnouncements.SV.Achievement.AchievementUpdateCA then
-            local catName = GetAchievementCategoryInfo(topLevelIndex)
+            local catName, _, _, _, _, _ = GetAchievementCategoryInfo(topLevelIndex)
             local subcatName = categoryIndex ~= nil and GetAchievementSubCategoryInfo(topLevelIndex, categoryIndex) or "General"
-            local _, _, _, icon = GetAchievementInfo(id)
+            local _, _, _, icon, _, _, _ = GetAchievementInfo(id)
             icon = ChatAnnouncements.SV.Achievement.AchievementIcon and ("|t16:16:" .. icon .. "|t ") or ""
 
-            -- Build string parts without using string_format on pre-formatted strings
-            local stringpart1 = ColorizeColors.AchievementColorize1:Colorize(
-                bracket1[ChatAnnouncements.SV.Achievement.AchievementBracketOptions] ..
-                ChatAnnouncements.SV.Achievement.AchievementProgressMsg ..
-                bracket2[ChatAnnouncements.SV.Achievement.AchievementBracketOptions] .. " " ..
-                icon .. link
-            )
+            local stringpart1 = ColorizeColors.AchievementColorize1:Colorize(string_format("%s%s%s %s%s", bracket1[ChatAnnouncements.SV.Achievement.AchievementBracketOptions], ChatAnnouncements.SV.Achievement.AchievementProgressMsg, bracket2[ChatAnnouncements.SV.Achievement.AchievementBracketOptions], icon, link))
 
-            local stringpart2 = ChatAnnouncements.SV.Achievement.AchievementColorProgress and
-                ColorizeColors.AchievementColorize2:Colorize(" (") ..
-                "|c" .. AchievementPctToColor(totalCmp / totalReq) .. zo_floor(100 * totalCmp / totalReq) .. "%|r" ..
-                ColorizeColors.AchievementColorize2:Colorize(")") or
-                ColorizeColors.AchievementColorize2:Colorize(" (" .. zo_floor(100 * totalCmp / totalReq) .. "%)")
+            local stringpart2 = ChatAnnouncements.SV.Achievement.AchievementColorProgress and string_format(" %s|c%s%d%%|r", ColorizeColors.AchievementColorize2:Colorize("("), AchievementPctToColor(totalCmp / totalReq), zo_floor(100 * totalCmp / totalReq)) or ColorizeColors.AchievementColorize2:Colorize(string_format("%d%%", zo_floor(100 * totalCmp / totalReq)))
 
-            local stringpart3 = ""
-            if ChatAnnouncements.SV.Achievement.AchievementCategory then
-                stringpart3 = ColorizeColors.AchievementColorize2:Colorize(
-                    " " .. bracket3[ChatAnnouncements.SV.Achievement.AchievementCatBracketOptions] ..
-                    catName ..
-                    (ChatAnnouncements.SV.Achievement.AchievementSubcategory and (" - " .. subcatName) or "") ..
-                    bracket4[ChatAnnouncements.SV.Achievement.AchievementCatBracketOptions]
-                )
+            local stringpart3
+            if ChatAnnouncements.SV.Achievement.AchievementCategory and ChatAnnouncements.SV.Achievement.AchievementSubcategory then
+                stringpart3 = ColorizeColors.AchievementColorize2:Colorize(string_format(") %s%s - %s%s", bracket3[ChatAnnouncements.SV.Achievement.AchievementCatBracketOptions], catName, subcatName, bracket4[ChatAnnouncements.SV.Achievement.AchievementCatBracketOptions]))
+            elseif ChatAnnouncements.SV.Achievement.AchievementCategory and not ChatAnnouncements.SV.Achievement.AchievementSubcategory then
+                stringpart3 = ColorizeColors.AchievementColorize2:Colorize(string_format(") %s%s%s", bracket3[ChatAnnouncements.SV.Achievement.AchievementCatBracketOptions], catName, bracket4[ChatAnnouncements.SV.Achievement.AchievementCatBracketOptions]))
+            else
+                stringpart3 = ColorizeColors.AchievementColorize2:Colorize(")")
             end
 
             -- Prepare details information
@@ -3325,32 +3317,22 @@ function ChatAnnouncements.OnAchievementUpdated(eventCode, id)
                 -- Skyshards needs separate treatment otherwise text become too long
                 -- We also put this short information for achievements that has too many subitems
                 if topLevelIndex == 9 or #cmpInfo > 12 then
-                    stringpart4 = ChatAnnouncements.SV.Achievement.AchievementColorProgress and
-                        ColorizeColors.AchievementColorize2:Colorize(" (") ..
-                        "|c" .. AchievementPctToColor(totalCmp / totalReq) .. totalCmp .. "|r" ..
-                        ColorizeColors.AchievementColorize2:Colorize("/") ..
-                        "|c71DE73" .. totalReq .. "|r" ..
-                        ColorizeColors.AchievementColorize2:Colorize(")") or
-                        ColorizeColors.AchievementColorize2:Colorize(" (" .. totalCmp .. "/" .. totalReq .. ")")
+                    stringpart4 = ChatAnnouncements.SV.Achievement.AchievementColorProgress and string_format(" %s|c%s%d|r%s|c71DE73%d|c87B7CC|r%s", ColorizeColors.AchievementColorize2:Colorize("("), AchievementPctToColor(totalCmp / totalReq), totalCmp, ColorizeColors.AchievementColorize2:Colorize("/"), totalReq, ColorizeColors.AchievementColorize2:Colorize(")")) or ColorizeColors.AchievementColorize2:Colorize(string_format(" (%d/%d)", totalCmp, totalReq))
                 else
                     for i = 1, #cmpInfo do
+                        -- Boolean achievement stage
                         if cmpInfo[i][3] == 1 then
-                            cmpInfo[i] = "|c" .. AchievementPctToColor(cmpInfo[i][2]) .. cmpInfo[i][1] .. "|r"
+                            cmpInfo[i] = ChatAnnouncements.SV.Achievement.AchievementColorProgress and string_format("|c%s%s", AchievementPctToColor(cmpInfo[i][2]), cmpInfo[i][1]) or ColorizeColors.AchievementColorize2:Colorize(string_format("%s%s", cmpInfo[i][2], cmpInfo[i][1]))
+                            -- Others
                         else
                             local pct = cmpInfo[i][2] / cmpInfo[i][3]
-                            cmpInfo[i] = ColorizeColors.AchievementColorize2:Colorize(cmpInfo[i][1] .. " (") ..
-                                "|c" .. AchievementPctToColor(pct) .. cmpInfo[i][2] .. "|r" ..
-                                ColorizeColors.AchievementColorize2:Colorize("/") ..
-                                "|c71DE73" .. cmpInfo[i][3] .. "|r" ..
-                                ColorizeColors.AchievementColorize2:Colorize(")")
+                            cmpInfo[i] = ChatAnnouncements.SV.Achievement.AchievementColorProgress and string_format("%s %s|c%s%d|r%s|c71DE73%d|r%s", ColorizeColors.AchievementColorize2:Colorize(cmpInfo[i][1]), ColorizeColors.AchievementColorize2:Colorize("("), AchievementPctToColor(pct), cmpInfo[i][2], ColorizeColors.AchievementColorize2:Colorize("/"), cmpInfo[i][3], ColorizeColors.AchievementColorize2:Colorize(")")) or ColorizeColors.AchievementColorize2:Colorize(string_format("%s (%d/%d)", cmpInfo[i][1], cmpInfo[i][2], cmpInfo[i][3]))
                         end
                     end
-                    stringpart4 = table_concat(cmpInfo, ColorizeColors.AchievementColorize2:Colorize(", "))
+                    stringpart4 = " " .. table_concat(cmpInfo, ColorizeColors.AchievementColorize2:Colorize(", ")) .. ""
                 end
             end
-
-            -- Concatenate final string without using string_format
-            local finalString = stringpart1 .. stringpart2 .. stringpart3 .. stringpart4
+            local finalString = string_format("%s%s%s%s", stringpart1, stringpart2, stringpart3, stringpart4)
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalString, type = "ACHIEVEMENT" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
@@ -4081,12 +4063,12 @@ function ChatAnnouncements.OnLootReceived(eventCode, receivedBy, itemLink, quant
     if LUIE.IsDevDebugEnabled() then
         local Debug = LUIE.Debug
         local traceback = "Loot Received:\n" ..
-            "--> eventCode: " .. LUIE.GetEventName(eventCode) .. "\n" ..
+            "--> eventCode: " .. tostring(eventCode) .. "\n" ..
             "--> receivedBy: " .. zo_strformat("<<C:1>>", receivedBy) .. "\n" ..
             "--> itemLink: " .. tostring(itemLink) .. "\n" ..
             "--> quantity: " .. tostring(quantity) .. "\n" ..
-            "--> itemSound: " .. LUIE.GetItemSoundCategoryName(itemSound) .. "\n" ..
-            "--> lootType: " .. LUIE.GetLootTypeName(lootType) .. "\n" ..
+            "--> itemSound: " .. tostring(itemSound) .. "\n" ..
+            "--> lootType: " .. tostring(lootType) .. "\n" ..
             "--> lootedBySelf: " .. tostring(lootedBySelf) .. "\n" ..
             "--> isPickpocketLoot: " .. tostring(isPickpocketLoot) .. "\n" ..
             "--> questItemIcon: " .. tostring(questItemIcon) .. "\n" ..
@@ -4377,100 +4359,66 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
     end
 end
 
+-- Simple function combines our strings or modifies the prefix if RECEIEVED instead of looted
 function ChatAnnouncements.ResolveItemMessage(message, formattedRecipient, color, logPrefix, totalString, groupLoot)
-    -- Ensure all parameters have valid values
-    message = message or ""
-    formattedRecipient = formattedRecipient or ""
-    color = color and (type(color) == "table" and color:IsColorDef() and color or ZO_ColorDef:New(color)) or ZO_ColorDef:New("FFFFFF")
-    logPrefix = logPrefix or ""
-    totalString = totalString or ""
-
-    -- Determine the appropriate message prefix based on item acquisition context
+    -- Conditions for looted/quest item rewards to adjust string prefix.
     if logPrefix == "" then
-        logPrefix = ChatAnnouncements.GetContextMessagePrefix() or ""
+        if g_isLooted and not g_itemReceivedIsQuestReward and not g_isPickpocketed and not g_isStolen then
+            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
+            -- reset variables that control looted, or at least ZO_CallLater them
+        elseif g_isPickpocketed then
+            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePickpocket
+        elseif g_isStolen and not g_isPickpocketed then
+            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSteal
+        else
+            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+        end
     end
 
-    -- Format the message parts with nil checks
-    local formattedMessageP1 = string_format("|r%s|c%s", message, color:ToHex()) or ""
-    local formattedMessageP2 = ChatAnnouncements.FormatContextMessage(
-        logPrefix,
-        formattedMessageP1,
-        formattedRecipient,
-        color:ToHex(),
-        groupLoot
-    ) or ""
+    local formattedMessageP1
+    local formattedMessageP2
 
-    -- Construct and output the final message with additional safety checks
-    local finalMessage = string_format("|c%s%s|r%s", color:ToHex(), formattedMessageP2 or "", totalString or "")
-    if finalMessage and finalMessage ~= "" then
-        printToChat(finalMessage)
+    -- Handle non group loot messages
+    if not groupLoot then
+        -- Adds additional string for previous variant of an item when an item is upgraded.
+        if logPrefix == ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgrade and g_oldItem ~= nil and (g_oldItem.itemLink ~= "" and g_oldItem.itemLink ~= nil) and g_oldItem.icon ~= nil then
+            local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and g_oldItem.icon ~= "") and zo_strformat("<<1>> ", zo_iconFormat(g_oldItem.icon, 16, 16)) or ""
+            local formattedMessageUpgrade = ("|r" .. formattedIcon .. g_oldItem.itemLink .. "|c" .. color)
+            formattedMessageP1 = ("|r" .. message .. "|c" .. color)
+            formattedMessageP2 = string_format(logPrefix, formattedMessageUpgrade, formattedMessageP1)
+            g_oldItem = {}
+        else
+            formattedMessageP1 = ("|r" .. message .. "|c" .. color)
+            if formattedRecipient == "" then
+                formattedMessageP2 = string_format(logPrefix, formattedMessageP1, "")
+            else
+                local recipient = ("|r" .. formattedRecipient .. "|c" .. color)
+                formattedMessageP2 = string_format(logPrefix, formattedMessageP1, recipient)
+            end
+        end
+        -- Handle group loot messages
+    else
+        formattedMessageP1 = ("|r" .. message .. "|c" .. color)
+        local recipient = ("|r" .. formattedRecipient .. "|c" .. color)
+        formattedMessageP2 = string_format(logPrefix, recipient, formattedMessageP1)
     end
 
-    -- Reset all tracking variables
-    ChatAnnouncements.ResetTrackingVariables()
-end
+    local finalMessage = string_format("|c%s%s|r%s", color, formattedMessageP2, totalString)
 
--- Helper function to determine message prefix based on context
-function ChatAnnouncements.GetContextMessagePrefix()
-    if g_isLooted and not g_itemReceivedIsQuestReward and not g_isPickpocketed and not g_isStolen then
-        return ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
-    elseif g_isPickpocketed then
-        return ChatAnnouncements.SV.ContextMessages.CurrencyMessagePickpocket
-    elseif g_isStolen and not g_isPickpocketed then
-        return ChatAnnouncements.SV.ContextMessages.CurrencyMessageSteal
-    end
-    return ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
-end
+    -- LUIE.SV.DummyDumpString = finalMessage
 
--- Helper function to format the context message
-function ChatAnnouncements.FormatContextMessage(logPrefix, formattedMessageP1, formattedRecipient, color, groupLoot)
-    -- Handle upgrade messages
-    if logPrefix == ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgrade and ChatAnnouncements.IsValidOldItem() then
-        local formattedIcon = ChatAnnouncements.GetFormattedIcon(g_oldItem.icon)
-        local formattedMessageUpgrade = string_format("|r%s%s|c%s", formattedIcon, g_oldItem.itemLink, color)
-        g_oldItem = {}
-        return string_format(logPrefix, formattedMessageUpgrade, formattedMessageP1)
-    end
+    printToChat(finalMessage)
 
-    -- Handle regular messages
-    if groupLoot then
-        local recipient = string_format("|r%s|c%s", formattedRecipient, color)
-        return string_format(logPrefix, recipient, formattedMessageP1)
-    end
-
-    -- Handle messages without recipient
-    if formattedRecipient == "" then
-        return string_format(logPrefix, formattedMessageP1, "")
-    end
-
-    -- Handle messages with recipient
-    local recipient = string_format("|r%s|c%s", formattedRecipient, color)
-    return string_format(logPrefix, formattedMessageP1, recipient)
-end
-
--- Helper function to check if old item data is valid
-function ChatAnnouncements.IsValidOldItem()
-    return g_oldItem ~= nil and g_oldItem.itemLink ~= "" and g_oldItem.itemLink ~= nil and g_oldItem.icon ~= nil
-end
-
--- Helper function to format icon
-function ChatAnnouncements.GetFormattedIcon(icon)
-    if not ChatAnnouncements.SV.Inventory.LootIcons or icon == "" then
-        return ""
-    end
-    -- Use zo_iconTextFormat with just the icon (no text)
-    -- 16x16 dimensions maintained, empty text string
-    return zo_iconTextFormat(icon, 16, 16, "", nil)
-end
-
--- Reset all tracking variables
-function ChatAnnouncements.ResetTrackingVariables()
+    -- Reset variables for crafted item counter
     g_itemCounterGain = 0
     g_itemCounterGainTracker = 0
     g_itemCounterLoss = 0
     g_itemCounterLossTracker = 0
     g_itemStringGain = ""
     g_itemStringLoss = ""
+
+    -- "You loot %s."
+    -- "You receive %s."
 end
 
 -- Simple posthook into ZOS crafting mode functions, based off MultiCraft, thanks Ayantir!
@@ -4618,11 +4566,11 @@ function ChatAnnouncements.InventoryUpdate(eventCode, bagId, slotId, isNewItem, 
     if LUIE.IsDevDebugEnabled() then
         local Debug = LUIE.Debug
         local traceback = "Inventory Update:\n" ..
-            "--> bagId: " .. LUIE.GetBagName(bagId) .. "\n" ..
+            "--> bagId: " .. tostring(bagId) .. "\n" ..
             "--> slotId: " .. tostring(slotId) .. "\n" ..
             "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-            "--> itemSoundCategory: " .. LUIE.GetItemSoundCategoryName(itemSoundCategory) .. "\n" ..
-            "--> inventoryUpdateReason: " .. LUIE.GetInventoryUpdateReasonName(inventoryUpdateReason) .. "\n" ..
+            "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
+            "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
             "--> stackCountChange: " .. tostring(stackCountChange)
         Debug(traceback)
     end
@@ -5049,12 +4997,12 @@ function ChatAnnouncements.InventoryUpdateCraft(eventCode, bagId, slotId, isNewI
     if LUIE.IsDevDebugEnabled() then
         local Debug = LUIE.Debug
         local traceback = "Inventory Update:\n" ..
-            "--> eventCode: " .. LUIE.GetEventName(eventCode) .. "\n" ..
-            "--> bagId: " .. LUIE.GetBagName(bagId) .. "\n" ..
+            "--> eventCode: " .. tostring(eventCode) .. "\n" ..
+            "--> bagId: " .. tostring(bagId) .. "\n" ..
             "--> slotId: " .. tostring(slotId) .. "\n" ..
             "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-            "--> itemSoundCategory: " .. LUIE.GetItemSoundCategoryName(itemSoundCategory) .. "\n" ..
-            "--> inventoryUpdateReason: " .. LUIE.GetInventoryUpdateReasonName(inventoryUpdateReason) .. "\n" ..
+            "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
+            "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
             "--> stackCountChange: " .. tostring(stackCountChange)
         Debug(traceback)
     end
@@ -5448,12 +5396,12 @@ function ChatAnnouncements.InventoryUpdateBank(eventCode, bagId, slotId, isNewIt
     if LUIE.IsDevDebugEnabled() then
         local Debug = LUIE.Debug
         local traceback = "Inventory Update:\n" ..
-            "--> eventCode: " .. LUIE.GetEventName(eventCode) .. "\n" ..
-            "--> bagId: " .. LUIE.GetBagName(bagId) .. "\n" ..
+            "--> eventCode: " .. tostring(eventCode) .. "\n" ..
+            "--> bagId: " .. tostring(bagId) .. "\n" ..
             "--> slotId: " .. tostring(slotId) .. "\n" ..
             "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-            "--> itemSoundCategory: " .. LUIE.GetItemSoundCategoryName(itemSoundCategory) .. "\n" ..
-            "--> inventoryUpdateReason: " .. LUIE.GetInventoryUpdateReasonName(inventoryUpdateReason) .. "\n" ..
+            "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
+            "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
             "--> stackCountChange: " .. tostring(stackCountChange)
         Debug(traceback)
     end
@@ -5823,12 +5771,12 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventCode, bagId, slotId, is
     if LUIE.IsDevDebugEnabled() then
         local Debug = LUIE.Debug
         local traceback = "Inventory Update:\n" ..
-            "--> eventCode: " .. LUIE.GetEventName(eventCode) .. "\n" ..
-            "--> bagId: " .. LUIE.GetBagName(bagId) .. "\n" ..
+            "--> eventCode: " .. tostring(eventCode) .. "\n" ..
+            "--> bagId: " .. tostring(bagId) .. "\n" ..
             "--> slotId: " .. tostring(slotId) .. "\n" ..
             "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-            "--> itemSoundCategory: " .. LUIE.GetItemSoundCategoryName(itemSoundCategory) .. "\n" ..
-            "--> inventoryUpdateReason: " .. LUIE.GetInventoryUpdateReasonName(inventoryUpdateReason) .. "\n" ..
+            "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
+            "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
             "--> stackCountChange: " .. tostring(stackCountChange)
         Debug(traceback)
     end
@@ -5965,12 +5913,12 @@ function ChatAnnouncements.InventoryUpdateFence(eventCode, bagId, slotId, isNewI
     if LUIE.IsDevDebugEnabled() then
         local Debug = LUIE.Debug
         local traceback = "Inventory Update:\n" ..
-            "--> eventCode: " .. LUIE.GetEventName(eventCode) .. "\n" ..
-            "--> bagId: " .. LUIE.GetBagName(bagId) .. "\n" ..
+            "--> eventCode: " .. tostring(eventCode) .. "\n" ..
+            "--> bagId: " .. tostring(bagId) .. "\n" ..
             "--> slotId: " .. tostring(slotId) .. "\n" ..
             "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-            "--> itemSoundCategory: " .. LUIE.GetItemSoundCategoryName(itemSoundCategory) .. "\n" ..
-            "--> inventoryUpdateReason: " .. LUIE.GetInventoryUpdateReasonName(inventoryUpdateReason) .. "\n" ..
+            "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
+            "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
             "--> stackCountChange: " .. tostring(stackCountChange)
         Debug(traceback)
     end
@@ -6334,7 +6282,7 @@ function ChatAnnouncements.DisguiseState(eventCode, unitTag, disguiseState)
     if LUIE.IsDevDebugEnabled() then
         local Debug = LUIE.Debug
         local traceback = "Disguise State:\n" ..
-            "--> eventCode: " .. LUIE.GetEventName(eventCode) .. "\n" ..
+            "--> eventCode: " .. tostring(eventCode) .. "\n" ..
             "--> unitTag: " .. tostring(unitTag) .. "\n" ..
             "--> disguiseState: " .. tostring(disguiseState)
         Debug(traceback)
@@ -8565,7 +8513,7 @@ function ChatAnnouncements.HookFunction()
 --> Condition: %s
 --> Progress: %d/%d (Previous: %d)
 --> State: %s]],
-                LUIE.GetQuestConditionTypeName(conditionType),
+                tostring(conditionType),
                 conditionType,
                 questName,
                 conditionText,

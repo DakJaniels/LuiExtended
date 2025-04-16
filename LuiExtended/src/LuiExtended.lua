@@ -53,6 +53,8 @@ if not LuiData then
 end
 --- @class (partial) LuiData
 LUIE.Data = LuiData.Data
+LUIE.table = {}
+LUIE.string = {}
 -- -----------------------------------------------------------------------------
 -- Default Settings
 LUIE.Defaults =

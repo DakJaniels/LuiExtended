@@ -8,8 +8,18 @@ local LUIE = LUIE
 local type, pairs, ipairs = type, pairs, ipairs
 local zo_strformat = zo_strformat
 local printToChat = LUIE.PrintToChat
-local table_insert = table.insert
-local table_sort = table.sort
+local string_find = LUIE.string and LUIE.string.find
+local string_gmatch = LUIE.string and LUIE.string.gmatch
+local string_gsub = LUIE.string and LUIE.string.gsub
+local string_match = LUIE.string and LUIE.string.match
+local string_rep = LUIE.string and LUIE.string.rep
+local string_format = LUIE.string and LUIE.string.format
+local table_concat = LUIE.table and LUIE.table.concat
+local table_insert = LUIE.table and LUIE.table.insert
+local table_move = LUIE.table and LUIE.table.move
+local table_remove = LUIE.table and LUIE.table.remove
+local table_sort = LUIE.table and LUIE.table.sort
+local unpack = LUIE.table and LUIE.table.unpack
 local ANIMATION_MANAGER = GetAnimationManager()
 
 local FORCE_SUPPRESS_COOLDOWN_SOUND = true
@@ -482,13 +492,13 @@ function LUIE.InitializeHooks()
 
             -- Clean up tooltip text
             if tooltipText ~= "" then
-                tooltipText = zo_strmatch(tooltipText, ".*%S")
+                tooltipText = string_match(tooltipText, ".*%S")
             end
 
             -- Use default tooltip if custom tooltips are disabled
             if not LUIE.SpellCastBuffs.SV.TooltipCustom then
                 tooltipText = GetAbilityEffectDescription(buffSlot)
-                tooltipText = zo_strgsub(tooltipText, "\n$", "")
+                tooltipText = string_gsub(tooltipText, "\n$", "")
             end
             return tooltipText
         end
@@ -978,7 +988,7 @@ function LUIE.InitializeHooks()
                     end
 
                     if tooltipText ~= "" then
-                        tooltipText = zo_strmatch(tooltipText, ".*%S")
+                        tooltipText = string_match(tooltipText, ".*%S")
                     end
                     local thirdLine
                     local timer2 = (contentEndTime - contentStartTime)
@@ -1203,8 +1213,8 @@ function LUIE.InitializeHooks()
         else
             detailedName = skillProgressionData:GetFormattedName()
         end
-        detailedName = zo_strgsub(detailedName, "With", "with")               -- Easiest way to fix the capitalization of the skill "Bond With Nature"
-        detailedName = zo_strgsub(detailedName, "Blessing Of", "Blessing of") -- Easiest way to fix the capitalization of the skill "Blessing of Restoration"
+        detailedName = string_gsub(detailedName, "With", "with")               -- Easiest way to fix the capitalization of the skill "Bond With Nature"
+        detailedName = string_gsub(detailedName, "Blessing Of", "Blessing of") -- Easiest way to fix the capitalization of the skill "Blessing of Restoration"
         control.nameLabel:SetText(detailedName)
         control.nameLabel:SetColor(PURCHASED_COLOR:UnpackRGBA())
     end
@@ -1989,8 +1999,8 @@ function LUIE.InitializeHooks()
 
             -- name
             local detailedName = skillProgressionData:GetDetailedName()
-            detailedName = zo_strgsub(detailedName, "With", "with")               -- Easiest way to fix the capitalization of the skill "Bond With Nature"
-            detailedName = zo_strgsub(detailedName, "Blessing Of", "Blessing of") -- Easiest way to fix the capitalization of the skill "Blessing of Restoration"
+            detailedName = string_gsub(detailedName, "With", "with")               -- Easiest way to fix the capitalization of the skill "Bond With Nature"
+            detailedName = string_gsub(detailedName, "Blessing Of", "Blessing of") -- Easiest way to fix the capitalization of the skill "Blessing of Restoration"
             control.nameLabel:SetText(detailedName)
             local offsetY = showXPBar and -10 or 0
             control.nameLabel:SetAnchor(LEFT, control.slot, RIGHT, 10, offsetY)

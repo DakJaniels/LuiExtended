@@ -5,9 +5,28 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
+
 -- -----------------------------------------------------------------------------
-local string_format = string.format
 local eventManager = GetEventManager()
+local pairs = pairs
+local ipairs = ipairs
+local select = select
+local tonumber = tonumber
+local type = type
+local string_find = LUIE.string and LUIE.string.find
+local string_gmatch = LUIE.string and LUIE.string.gmatch
+local string_gsub = LUIE.string and LUIE.string.gsub
+local string_match = LUIE.string and LUIE.string.match
+local string_rep = LUIE.string and LUIE.string.rep
+local string_format = LUIE.string and LUIE.string.format
+local locale_string_format = LUIE.string and LUIE.string.localestrformat
+local table_concat = LUIE.table and LUIE.table.concat
+local table_insert = LUIE.table and LUIE.table.insert
+local table_move = LUIE.table and LUIE.table.move
+local table_remove = LUIE.table and LUIE.table.remove
+local table_sort = LUIE.table and LUIE.table.sort
+local unpack = LUIE.table and LUIE.table.unpack
+local GetString = GetString
 
 do
     --- @param addonName string
@@ -78,7 +97,8 @@ do
     local function getCurrentMillisecondsFormatted()
         local currentTimeMs = GetGameTimeMilliseconds()
         if currentTimeMs == nil then return end
-        return string_format("%03d", currentTimeMs % 1000)
+        local formattedTime = string_format("%03d", currentTimeMs % 1000)
+        return formattedTime
     end
 
     --- Returns a formatted timestamp based on the provided time string and format string.
@@ -95,7 +115,7 @@ do
         formatStr = formatStr or LUIE.ChatAnnouncements.SV.TimeStampFormat
 
         -- split up default timestamp
-        local hours, minutes, seconds = zo_strmatch(timeStr, "([^%:]+):([^%:]+):([^%:]+)")
+        local hours, minutes, seconds = string_match(timeStr, "([^%:]+):([^%:]+):([^%:]+)")
         local hoursNoLead = tonumber(hours) -- hours without leading zero
         local hours12NoLead = (hoursNoLead - 1) % 12 + 1
         local hours12
@@ -114,15 +134,15 @@ do
         -- create new one
         -- >If you add new formats make sure to update the tooltip at LUIE_STRING_LAM_CA_TIMESTAMPFORMAT_TP too
         local timestamp = formatStr
-        timestamp = zo_strgsub(timestamp, "HH", hours)
-        timestamp = zo_strgsub(timestamp, "H", hoursNoLead)
-        timestamp = zo_strgsub(timestamp, "hh", hours12)
-        timestamp = zo_strgsub(timestamp, "h", hours12NoLead)
-        timestamp = zo_strgsub(timestamp, "m", minutes)
-        timestamp = zo_strgsub(timestamp, "s", seconds)
-        timestamp = zo_strgsub(timestamp, "A", pUp)
-        timestamp = zo_strgsub(timestamp, "a", pLow)
-        timestamp = zo_strgsub(timestamp, "xy", milliseconds)
+        timestamp = string_gsub(timestamp, "HH", hours)
+        timestamp = string_gsub(timestamp, "H", hoursNoLead)
+        timestamp = string_gsub(timestamp, "hh", hours12)
+        timestamp = string_gsub(timestamp, "h", hours12NoLead)
+        timestamp = string_gsub(timestamp, "m", minutes)
+        timestamp = string_gsub(timestamp, "s", seconds)
+        timestamp = string_gsub(timestamp, "A", pUp)
+        timestamp = string_gsub(timestamp, "a", pLow)
+        timestamp = string_gsub(timestamp, "xy", milliseconds)
         return timestamp
     end
 
@@ -181,7 +201,7 @@ do
         local formattedMessage
         if select("#", ...) > 0 then
             -- Escape '%' characters to prevent illegal format specifiers
-            local safeFormat = zo_strgsub(messageOrFormatter, "%%", "%%%%")
+            local safeFormat = string_gsub(messageOrFormatter, "%%", "%%%%")
             formattedMessage = string_format(safeFormat, ...)
         else
             formattedMessage = messageOrFormatter
@@ -441,12 +461,12 @@ end
 function LUIE.UpdateMundusTooltipSyntax(abilityId, tooltipText)
     -- Update syntax for The Lady, The Lover, and the Thief Mundus stones since they aren't consistent with other buffs.
     if abilityId == 13976 or abilityId == 13981 then -- The Lady / The Lover
-        tooltipText = zo_strgsub(tooltipText, GetString(LUIE_STRING_SKILL_MUNDUS_SUB_RES_PEN), GetString(LUIE_STRING_SKILL_MUNDUS_SUB_RES_PEN_REPLACE))
+        tooltipText = string_gsub(tooltipText, GetString(LUIE_STRING_SKILL_MUNDUS_SUB_RES_PEN), GetString(LUIE_STRING_SKILL_MUNDUS_SUB_RES_PEN_REPLACE))
     elseif abilityId == 13975 then                   -- The Thief
-        tooltipText = zo_strgsub(tooltipText, GetString(LUIE_STRING_SKILL_MUNDUS_SUB_THIEF), GetString(LUIE_STRING_SKILL_MUNDUS_SUB_THIEF_REPLACE))
+        tooltipText = string_gsub(tooltipText, GetString(LUIE_STRING_SKILL_MUNDUS_SUB_THIEF), GetString(LUIE_STRING_SKILL_MUNDUS_SUB_THIEF_REPLACE))
     end
     -- Replace "Increases your" with "Increase"
-    tooltipText = zo_strgsub(tooltipText, GetString(LUIE_STRING_SKILL_MUNDUS_STRING), GetString(LUIE_STRING_SKILL_DRINK_INCREASE))
+    tooltipText = string_gsub(tooltipText, GetString(LUIE_STRING_SKILL_MUNDUS_STRING), GetString(LUIE_STRING_SKILL_DRINK_INCREASE))
     return tooltipText
 end
 
@@ -470,7 +490,7 @@ end
 
 -- Add this if not already.
 if not SLASH_COMMANDS["/rl"] then
-    SLASH_COMMANDS["/rl"] = ReloadUI
+    SLASH_COMMANDS["/rl"] = ReloadUI("ingame")
 end
 
 -- -----------------------------------------------------------------------------
@@ -822,7 +842,7 @@ local TooltipHandlers =
 
         local finalSpeed = 100 - speed
         local roundedMitigation = zo_floor(mitigation * 100 + 0.5) / 100
-        return zo_strformat(GetString(LUIE_STRING_SKILL_BRACE_TP), roundedMitigation, finalSpeed, cost, getResourceType())
+        return locale_string_format(GetString(LUIE_STRING_SKILL_BRACE_TP), roundedMitigation, finalSpeed, cost, getResourceType())
     end,
 
     -- Crouch
@@ -831,9 +851,9 @@ local TooltipHandlers =
         local _, cost = GetAdvancedStatValue(ADVANCED_STAT_DISPLAY_TYPE_SNEAK_COST)
 
         if speed <= 0 or speed >= 100 then
-            return zo_strformat(GetString(LUIE_STRING_SKILL_HIDDEN_NO_SPEED_TP), cost)
+            return locale_string_format(GetString(LUIE_STRING_SKILL_HIDDEN_NO_SPEED_TP), cost)
         end
-        return zo_strformat(GetString(LUIE_STRING_SKILL_HIDDEN_TP), 100 - speed, cost)
+        return locale_string_format(GetString(LUIE_STRING_SKILL_HIDDEN_TP), 100 - speed, cost)
     end,
 
     -- Unchained
@@ -841,27 +861,27 @@ local TooltipHandlers =
         local duration = (GetAbilityDuration(98316) or 0) / 1000
         local pointsSpent = GetNumPointsSpentOnChampionSkill(64) * 1.1
         local adjustPoints = pointsSpent == 0 and 55 or zo_floor(pointsSpent * 100 + 0.5) / 100
-        return zo_strformat(GetString(LUIE_STRING_SKILL_UNCHAINED_TP), duration, adjustPoints)
+        return locale_string_format(GetString(LUIE_STRING_SKILL_UNCHAINED_TP), duration, adjustPoints)
     end,
 
     -- Medium Armor Evasion
     [150057] = function ()
         local counter = GetEquippedArmorPieces(ARMORTYPE_MEDIUM) * 2
-        return zo_strformat(GetString(LUIE_STRING_SKILL_MEDIUM_ARMOR_EVASION), counter)
+        return locale_string_format(GetString(LUIE_STRING_SKILL_MEDIUM_ARMOR_EVASION), counter)
     end,
 
     -- Unstoppable Brute
     [126582] = function ()
         local counter = GetEquippedArmorPieces(ARMORTYPE_HEAVY) * 5
         local duration = (GetAbilityDuration(126582) or 0) / 1000
-        return zo_strformat(GetString(LUIE_STRING_SKILL_UNSTOPPABLE_BRUTE), duration, counter)
+        return locale_string_format(GetString(LUIE_STRING_SKILL_UNSTOPPABLE_BRUTE), duration, counter)
     end,
 
     -- Immovable
     [126583] = function ()
         local counter = GetEquippedArmorPieces(ARMORTYPE_HEAVY) * 5
         local duration = (GetAbilityDuration(126583) or 0) / 1000
-        return zo_strformat(GetString(LUIE_STRING_SKILL_IMMOVABLE), duration, counter, 65 + counter)
+        return locale_string_format(GetString(LUIE_STRING_SKILL_IMMOVABLE), duration, counter, 65 + counter)
     end,
 }
 
