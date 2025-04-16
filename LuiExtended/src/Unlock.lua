@@ -260,45 +260,45 @@ function Unlock.InitializeElementMover(element, config)
     end
 
     -- Retrieve the anchor information for the element
-    local isValidAnchor, point, relativeTo, relativePoint, offsetX, offsetY, anchorConstraints = element:GetAnchor()
-    if not isValidAnchor then
-        return nil
-    end
+    for i = 0, MAX_ANCHORS - 1 do
+        local isValidAnchor, point, relativeTo, relativePoint, offsetX, offsetY, anchorConstraints = element:GetAnchor(i)
+        if isValidAnchor then
+            -- Special handling for the Alert Text Notification element
+            if element == ZO_AlertTextNotification then
+                local frameName = element:GetName()
+                if not LUIE.SV[frameName] then
+                    point = TOPRIGHT
+                    relativeTo = GuiRoot
+                    relativePoint = TOPRIGHT
+                    offsetX = 0
+                    offsetY = 0
+                    anchorConstraints = anchorConstraints or ANCHOR_CONSTRAINS_XY
+                end
+            end
 
-    -- Special handling for the Alert Text Notification element
-    if element == ZO_AlertTextNotification then
-        local frameName = element:GetName()
-        if not LUIE.SV[frameName] then
-            point = TOPRIGHT
-            relativeTo = GuiRoot
-            relativePoint = TOPRIGHT
-            offsetX = 0
-            offsetY = 0
-            anchorConstraints = anchorConstraints or ANCHOR_CONSTRAINS_XY
+            --- @param self TopLevelWindow
+            local function OnMoveStop(self)
+                local left, top = self:GetLeft(), self:GetTop()
+
+                -- Apply grid snapping if enabled
+                if LUIE.SV.snapToGrid_default then
+                    left, top = Unlock.ApplyGridSnap(left, top, "default")
+                    self:ClearAnchors()
+                    self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+                end
+
+                -- Save the new position and update the element positions
+                LUIE.SV[self.customPositionAttr] = { left, top }
+                Unlock.SetElementPosition()
+            end
+
+            -- Create and configure the top-level window (mover) for the element
+            local mover = Unlock.CreateTopLevelWindow(element, config, point, relativePoint, offsetX, offsetY, relativeTo)
+            mover:SetHandler("OnMoveStop", OnMoveStop)
+
+            return mover
         end
     end
-
-    --- @param self TopLevelWindow
-    local function OnMoveStop(self)
-        local left, top = self:GetLeft(), self:GetTop()
-
-        -- Apply grid snapping if enabled
-        if LUIE.SV.snapToGrid_default then
-            left, top = Unlock.ApplyGridSnap(left, top, "default")
-            self:ClearAnchors()
-            self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-        end
-
-        -- Save the new position and update the element positions
-        LUIE.SV[self.customPositionAttr] = { left, top }
-        Unlock.SetElementPosition()
-    end
-
-    -- Create and configure the top-level window (mover) for the element
-    local mover = Unlock.CreateTopLevelWindow(element, config, point, relativePoint, offsetX, offsetY, relativeTo)
-    mover:SetHandler("OnMoveStop", OnMoveStop)
-
-    return mover
 end
 
 --- Run when the UI scene changes to hide the unlocked elements if we're in the Addon Settings Menu

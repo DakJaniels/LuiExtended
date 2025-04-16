@@ -1343,53 +1343,57 @@ function CrowdControlTracker:StartAnimation(control, animType, test)
         self.immunePlaying:Stop()
     end
 
-    local _, point, relativeTo, relativePoint, offsetX, offsetY = control:GetAnchor()
-    control:ClearAnchors()
-    control:SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY)
+    for i = 0, MAX_ANCHORS - 1 do
+        local isValidAnchor, point, relativeTo, relativePoint, offsetX, offsetY, anchorConstrains = control:GetAnchor(i)
+        if isValidAnchor then
+            control:ClearAnchors()
+            control:SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY, anchorConstrains)
 
-    local timeline = animationManager:CreateTimeline()
+            local timeline = animationManager:CreateTimeline()
 
-    if animType == "proc" then
-        if control:GetAlpha() == 0 then
-            self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 100, 0, ZO_EaseInQuadratic, 0, 1)
-        else
-            control:SetAlpha(1)
+            if animType == "proc" then
+                if control:GetAlpha() == 0 then
+                    self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 100, 0, ZO_EaseInQuadratic, 0, 1)
+                else
+                    control:SetAlpha(1)
+                end
+                self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 100, 0, ZO_EaseInQuadratic, 1, 2.2, SET_SCALE_FROM_SV)
+                self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 200, 200, ZO_EaseOutQuadratic, 2.2, 1, SET_SCALE_FROM_SV)
+            elseif animType == "end" or animType == "endstagger" then
+                local currentAlpha = control:GetAlpha()
+                self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 150, 0, ZO_EaseOutQuadratic, currentAlpha, 0)
+            elseif animType == "silence" then
+                if LUIE_CCTracker:GetAlpha() < 1 then
+                    self:InsertAnimationType(timeline, ANIMATION_ALPHA, LUIE_CCTracker, 100, 0, ZO_EaseInQuadratic, 0, 1)
+                    self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 100, 0, ZO_EaseInQuadratic, 1, 2.5, SET_SCALE_FROM_SV)
+                    self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 200, 200, ZO_EaseOutQuadratic, 2.5, 1, SET_SCALE_FROM_SV)
+                else
+                    LUIE_CCTracker:SetAlpha(1)
+                    self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 250, 0, ZO_EaseInQuadratic, 1, 1.5, SET_SCALE_FROM_SV)
+                    self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 250, 250, ZO_EaseOutQuadratic, 1.5, 1, SET_SCALE_FROM_SV)
+                end
+            elseif animType == "stagger" then
+                self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 50, 0, ZO_EaseInQuadratic, 0, 1)
+                self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 50, 0, ZO_EaseInQuadratic, 1, 1.5, SET_SCALE_FROM_SV)
+                self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 50, 100, ZO_EaseOutQuadratic, 1.5, 1, SET_SCALE_FROM_SV)
+            elseif animType == "immune" then
+                control:SetScale(CombatInfo.SV.cct.controlScale * 1)
+                self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 10, 0, ZO_EaseInQuadratic, 0, 0.6)
+                self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, CombatInfo.SV.cct.immuneDisplayTime, 100, ZO_EaseInOutQuadratic, 0.6, 0)
+            end
+
+            timeline:SetHandler("OnStop", function ()
+                control:SetScale(CombatInfo.SV.cct.controlScale)
+                control:ClearAnchors()
+                control:SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY)
+                self.currentlyPlaying = nil
+                self.immunePlaying = nil
+            end)
+
+            timeline:PlayFromStart()
+            return timeline
         end
-        self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 100, 0, ZO_EaseInQuadratic, 1, 2.2, SET_SCALE_FROM_SV)
-        self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 200, 200, ZO_EaseOutQuadratic, 2.2, 1, SET_SCALE_FROM_SV)
-    elseif animType == "end" or animType == "endstagger" then
-        local currentAlpha = control:GetAlpha()
-        self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 150, 0, ZO_EaseOutQuadratic, currentAlpha, 0)
-    elseif animType == "silence" then
-        if LUIE_CCTracker:GetAlpha() < 1 then
-            self:InsertAnimationType(timeline, ANIMATION_ALPHA, LUIE_CCTracker, 100, 0, ZO_EaseInQuadratic, 0, 1)
-            self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 100, 0, ZO_EaseInQuadratic, 1, 2.5, SET_SCALE_FROM_SV)
-            self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 200, 200, ZO_EaseOutQuadratic, 2.5, 1, SET_SCALE_FROM_SV)
-        else
-            LUIE_CCTracker:SetAlpha(1)
-            self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 250, 0, ZO_EaseInQuadratic, 1, 1.5, SET_SCALE_FROM_SV)
-            self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 250, 250, ZO_EaseOutQuadratic, 1.5, 1, SET_SCALE_FROM_SV)
-        end
-    elseif animType == "stagger" then
-        self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 50, 0, ZO_EaseInQuadratic, 0, 1)
-        self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 50, 0, ZO_EaseInQuadratic, 1, 1.5, SET_SCALE_FROM_SV)
-        self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 50, 100, ZO_EaseOutQuadratic, 1.5, 1, SET_SCALE_FROM_SV)
-    elseif animType == "immune" then
-        control:SetScale(CombatInfo.SV.cct.controlScale * 1)
-        self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 10, 0, ZO_EaseInQuadratic, 0, 0.6)
-        self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, CombatInfo.SV.cct.immuneDisplayTime, 100, ZO_EaseInOutQuadratic, 0.6, 0)
     end
-
-    timeline:SetHandler("OnStop", function ()
-        control:SetScale(CombatInfo.SV.cct.controlScale)
-        control:ClearAnchors()
-        control:SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY)
-        self.currentlyPlaying = nil
-        self.immunePlaying = nil
-    end)
-
-    timeline:PlayFromStart()
-    return timeline
 end
 
 function CrowdControlTracker:InsertAnimationType(animHandler, animType, control, animDuration, animDelay, animEasing, ...)

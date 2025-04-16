@@ -664,7 +664,7 @@ function CombatInfo.RegisterCombatInfo()
 
     -- Display default UI ultimate text if the LUIE option is enabled.
     if CombatInfo.SV.UltimateLabelEnabled or CombatInfo.SV.UltimatePctEnabled then
-        SetSetting(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER, 0)
+        SetSetting(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER, 0, SETTINGS_SET_OPTION_SAVE_TO_PERSISTED_DATA)
     end
 end
 
@@ -928,7 +928,7 @@ end
 
 local function CastBarWorldMapFix()
     g_castbarWorldMapFix = false
-    eventManager:UnregisterForEvent(moduleName .. "CastBarFix")
+    eventManager:UnregisterForPostEffectsUpdate(moduleName .. "CastBarFix")
 end
 
 -- Runs on the `EVENT_GAME_CAMERA_UI_MODE_CHANGED` handler.
@@ -937,7 +937,7 @@ function CombatInfo.OnGameCameraUIModeChanged(eventCode)
     -- Changing zones in the World Map for some reason changes the player coordinates so when the player clicks on a Wayshrine to teleport the cast gets interrupted
     -- This buffer fixes this issue
     g_castbarWorldMapFix = true
-    eventManager:RegisterForUpdate(moduleName .. "CastBarFix", 500, CastBarWorldMapFix)
+    eventManager:RegisterForPostEffectsUpdate(moduleName .. "CastBarFix", 500, CastBarWorldMapFix)
     -- Break Siege Deployment casts when opening UI windows
     if Castbar.BreakSiegeOnWindowOpen[castbar.id] then
         CombatInfo.StopCastBar()

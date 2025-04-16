@@ -130,30 +130,33 @@ local function CreateRegenAnimation(parent, anchors, dims, alpha, number)
     control:SetAlpha(0)
     control:SetDrawLayer(1)
 
-    local offsetY = select(6, control:GetAnchor())
+    for i = 0, MAX_ANCHORS - 1 do
+        local isValid, _, _, _, _, offsetY = control:GetAnchor(i)
+        if isValid then
+            -- Create an horizontal sliding animation
+            local animation, timeline = CreateSimpleAnimation(ANIMATION_TRANSLATE, control, 0)
+            animation:SetTranslateOffsets(offsetX, offsetY, offsetX + distance, offsetY)
+            animation:SetDuration(1000)
 
-    -- Create an horizontal sliding animation
-    local animation, timeline = CreateSimpleAnimation(ANIMATION_TRANSLATE, control, 0)
-    animation:SetTranslateOffsets(offsetX, offsetY, offsetX + distance, offsetY)
-    animation:SetDuration(1000)
+            -- Fade alpha coming in
+            local fadeIn = timeline:InsertAnimation(ANIMATION_ALPHA, control, 0)
+            fadeIn:SetAlphaValues(0, 0.75)
+            fadeIn:SetDuration(250)
+            fadeIn:SetEasingFunction(ZO_EaseOutQuadratic)
 
-    -- Fade alpha coming in
-    local fadeIn = timeline:InsertAnimation(ANIMATION_ALPHA, control, 0)
-    fadeIn:SetAlphaValues(0, 0.75)
-    fadeIn:SetDuration(250)
-    fadeIn:SetEasingFunction(ZO_EaseOutQuadratic)
+            -- Fade alpha going out
+            local fadeOut = timeline:InsertAnimation(ANIMATION_ALPHA, control, 750)
+            fadeOut:SetAlphaValues(0.75, 0)
+            fadeOut:SetDuration(250)
+            fadeIn:SetEasingFunction(ZO_EaseOutQuadratic)
 
-    -- Fade alpha going out
-    local fadeOut = timeline:InsertAnimation(ANIMATION_ALPHA, control, 750)
-    fadeOut:SetAlphaValues(0.75, 0)
-    fadeOut:SetDuration(250)
-    fadeIn:SetEasingFunction(ZO_EaseOutQuadratic)
+            timeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
+            control.animation = animation
+            control.timeline = timeline
 
-    timeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
-    control.animation = animation
-    control.timeline = timeline
-
-    return control
+            return control
+        end
+    end
 end
 
 -- Decreased armour overlay visuals
@@ -240,7 +243,7 @@ end
 function UnitFrames.SetDefaultFramesSetting(frame, value)
     local key = "DefaultFramesNew" .. tostring(frame)
     if value == g_DefaultFramesOptions[3] then
-        SetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS, 0)
+        SetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS, 0, SETTINGS_SET_OPTION_SAVE_TO_PERSISTED_DATA)
         UnitFrames.SV[key] = 3
     elseif value == g_DefaultFramesOptions[2] then
         UnitFrames.SV[key] = 2
