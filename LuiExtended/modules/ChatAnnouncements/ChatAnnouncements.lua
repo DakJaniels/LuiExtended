@@ -4072,11 +4072,11 @@ end
 --- @param quantity integer
 --- @param itemSound ItemUISoundCategory
 --- @param lootType LootItemType
---- @param lootedBySelf bool
---- @param isPickpocketLoot bool
+--- @param lootedBySelf boolean
+--- @param isPickpocketLoot boolean
 --- @param questItemIcon string
 --- @param itemId integer
---- @param isStolen bool
+--- @param isStolen boolean
 function ChatAnnouncements.OnLootReceived(eventCode, receivedBy, itemLink, quantity, itemSound, lootType, lootedBySelf, isPickpocketLoot, questItemIcon, itemId, isStolen)
     if LUIE.IsDevDebugEnabled() then
         local Debug = LUIE.Debug

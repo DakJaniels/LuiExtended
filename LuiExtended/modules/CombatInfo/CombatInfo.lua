@@ -2160,7 +2160,7 @@ end
 ---
 --- @param eventCode integer
 --- @param result ActionResult
---- @param isError bool
+--- @param isError boolean
 --- @param abilityName string
 --- @param abilityGraphic integer
 --- @param abilityActionSlotType ActionSlotType
@@ -2171,7 +2171,7 @@ end
 --- @param hitValue integer
 --- @param powerType CombatMechanicFlags
 --- @param damageType DamageType
---- @param log bool
+--- @param log boolean
 --- @param sourceUnitId integer
 --- @param targetUnitId integer
 --- @param abilityId integer
@@ -2212,7 +2212,7 @@ end
 -- Listens to EVENT_COMBAT_EVENT
 --- @param eventCode integer
 --- @param result ActionResult
---- @param isError bool
+--- @param isError boolean
 --- @param abilityName string
 --- @param abilityGraphic integer
 --- @param abilityActionSlotType ActionSlotType
@@ -2223,7 +2223,7 @@ end
 --- @param hitValue integer
 --- @param powerType CombatMechanicFlags
 --- @param damageType DamageType
---- @param log bool
+--- @param log boolean
 --- @param sourceUnitId integer
 --- @param targetUnitId integer
 --- @param abilityId integer
@@ -2553,7 +2553,7 @@ end
 --- Handles combat event for ability bar UI updates.
 --- @param eventCode integer
 --- @param result ActionResult
---- @param isError bool
+--- @param isError boolean
 --- @param abilityName string
 --- @param abilityGraphic integer
 --- @param abilityActionSlotType ActionSlotType
@@ -2564,7 +2564,7 @@ end
 --- @param hitValue integer
 --- @param powerType CombatMechanicFlags
 --- @param damageType DamageType
---- @param log bool
+--- @param log boolean
 --- @param sourceUnitId integer
 --- @param targetUnitId integer
 --- @param abilityId integer
@@ -3026,13 +3026,13 @@ end
 --- @param eventCode integer
 --- @param bagId Bag
 --- @param slotIndex integer
---- @param isNewItem bool
+--- @param isNewItem boolean
 --- @param itemSoundCategory ItemUISoundCategory
 --- @param inventoryUpdateReason integer
 --- @param stackCountChange integer
 --- @param triggeredByCharacterName string?
 --- @param triggeredByDisplayName string?
---- @param isLastUpdateForMessage bool
+--- @param isLastUpdateForMessage boolean
 --- @param bonusDropSource BonusDropSource
 function CombatInfo.OnInventorySlotUpdate(eventCode, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
     if stackCountChange >= 0 then

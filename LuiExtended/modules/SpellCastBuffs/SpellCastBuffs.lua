@@ -2710,7 +2710,7 @@ end
 -- Combat Event (Target = Player)
 --- @param eventCode integer
 --- @param result ActionResult
---- @param isError bool
+--- @param isError boolean
 --- @param abilityName string
 --- @param abilityGraphic integer
 --- @param abilityActionSlotType ActionSlotType
@@ -2721,7 +2721,7 @@ end
 --- @param hitValue integer
 --- @param powerType CombatMechanicFlags
 --- @param damageType DamageType
---- @param log bool
+--- @param log boolean
 --- @param sourceUnitId integer
 --- @param targetUnitId integer
 --- @param abilityId integer
@@ -3257,7 +3257,7 @@ end
 -- Combat Event (Source = Player)
 --- @param eventCode integer
 --- @param result ActionResult
---- @param isError bool
+--- @param isError boolean
 --- @param abilityName string
 --- @param abilityGraphic integer
 --- @param abilityActionSlotType ActionSlotType
@@ -3268,7 +3268,7 @@ end
 --- @param hitValue integer
 --- @param powerType CombatMechanicFlags
 --- @param damageType DamageType
---- @param log bool
+--- @param log boolean
 --- @param sourceUnitId integer
 --- @param targetUnitId integer
 --- @param abilityId integer

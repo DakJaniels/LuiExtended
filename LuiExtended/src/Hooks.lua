@@ -77,9 +77,9 @@ function LUIE.InitializeHooks()
     --- @return string name
     --- @return textureName texture
     --- @return luaindex earnedRank
-    --- @return bool passive
-    --- @return bool ultimate
-    --- @return bool purchased
+    --- @return boolean passive
+    --- @return boolean ultimate
+    --- @return boolean purchased
     --- @return luaindex|nil progressionIndex
     --- @return integer rank
     GetSkillAbilityInfo = function (skillType, skillIndex, abilityIndex)
@@ -129,8 +129,8 @@ function LUIE.InitializeHooks()
     --- @return AbilityType abilityType
     --- @return StatusEffectType statusEffectType
     --- @return integer abilityId
-    --- @return bool canClickOff
-    --- @return bool castByPlayer
+    --- @return boolean canClickOff
+    --- @return boolean castByPlayer
     GetUnitBuffInfo = function (unitTag, buffIndex)
         local buffName, startTime, endTime, buffSlot, stackCount, iconFile, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer = zos_GetUnitBuffInfo(unitTag, buffIndex)
         if LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].name then
@@ -148,7 +148,7 @@ function LUIE.InitializeHooks()
 
     --- Override function for DoesKillingAttackHaveAttacker.
     --- @param index luaindex
-    --- @return bool hasAttacker
+    --- @return boolean hasAttacker
     DoesKillingAttackHaveAttacker = function (index)
         local hasAttacker = zos_DoesKillingAttackHaveAttacker(index)
         local attackName, attackDamage, attackIcon, wasKillingBlow, castTimeAgoMS, durationMS, numAttackHits, abilityId = zos_GetKillingAttackInfo(index)
@@ -166,8 +166,8 @@ function LUIE.InitializeHooks()
     --- @return integer attackerChampionPoints
     --- @return integer attackerLevel
     --- @return integer attackerAvARank
-    --- @return bool isPlayer
-    --- @return bool isBoss
+    --- @return boolean isPlayer
+    --- @return boolean isBoss
     --- @return Alliance alliance
     --- @return string minionName
     --- @return string attackerDisplayName
@@ -207,7 +207,7 @@ function LUIE.InitializeHooks()
     --- @return string|nil attackName
     --- @return integer|nil attackDamage
     --- @return textureName|nil attackIcon
-    --- @return bool|nil wasKillingBlow
+    --- @return boolean|nil wasKillingBlow
     --- @return integer|nil castTimeAgoMS
     --- @return integer|nil durationMS
     --- @return integer|nil numAttackHits
