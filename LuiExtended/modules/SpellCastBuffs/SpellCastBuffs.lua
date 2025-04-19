@@ -2821,8 +2821,8 @@ function SpellCastBuffs.OnCombatEventIn(eventCode, result, isError, abilityName,
                         local zones = Effects.EffectOverrideByName[abilityId][unitName].zone
                         local index = GetZoneId(GetCurrentMapZoneIndex())
                         for k, v in pairs(zones) do
-                            d(k)
-                            d(index)
+                            -- d(k)
+                            -- d(index)
                             if k == index then
                                 return
                             end
