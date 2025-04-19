@@ -122,7 +122,7 @@ local FakePlayerBuffs =
 
     -- Nightblade
     [90587] = { duration = "GET", shiftId = 33375, onlyExtended = true }, -- Blur
-    --[90593] = { duration = "GET", shiftId = 35414, onlyExtra = true },    -- Mirage
+    [90593] = { duration = "GET", shiftId = 35414, onlyExtra = true },    -- Mirage
     [90620] = { duration = "GET", shiftId = 35419, onlyExtended = true }, -- Phantasmal Escape
 
     [33317] = { duration = "GET", shiftId = 33316, onlyExtra = true },    -- Drain Power
