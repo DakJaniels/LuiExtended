@@ -2902,6 +2902,12 @@ function CombatInfo.ShowCustomToggle(slotNum)
         else
             actionButton = g_backbarButtons[slotNum]
         end
+        
+        -- Check if actionButton is nil or doesn't have a slot property
+        if not actionButton or not actionButton.slot then
+            return
+        end
+        
         local name = "ActionButton" .. slotNum
         local window = windowManager:GetControlByName(name, "Toggle_LUIE") -- Check to see if this frame already exists, don't create it if it does.
         if window == nil then
