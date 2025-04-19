@@ -233,7 +233,7 @@ local DebugAuras =
     -- [16593] = true, -- Melee Snare
     -- [48532] = true, -- Charge Snare
     -- [41952] = true, -- Cower
-    --[20299] = true, -- Pet Hidden
+    -- [20299] = true, -- Pet Hidden
     [16566] = true, -- CC Immunity
     [28301] = true, -- Crowd Control Immunity
     [38117] = true, -- Crowd Control Immunity
@@ -1038,7 +1038,7 @@ local DebugAuras =
     [89953] = true,  -- Jesters Food: Max H, Reg MS
     [89972] = true,  -- Increase Magicka Recovery
     [88973] = true,  -- Increase Health
-    --[89956] = true,  -- Princess' Delight (Green)
+    -- [89956] = true,  -- Princess' Delight (Green)
     [89921] = true,  -- Jesters Food: Butterflies
     [89919] = true,  -- Jesters Food: Max M
     [127596] = true, -- Bewitched Sugar Skulls
@@ -1766,7 +1766,7 @@ local DebugAuras =
     -------------------------------------
     -- ITEM SETS ------------------------
     -------------------------------------
-
+    [187839] = true, -- Runecarver's Blaze
     -------------------------------------
     -- Ability Altering Weapons
     -------------------------------------
@@ -6756,7 +6756,7 @@ local DebugAuras =
     [32624] = true,  -- Blood Scion (Blood Scion)
     [135978] = true, -- Blood Scion (Blood Scion)
     [138565] = true, -- Blood Scion (Blood Scion)
-    --[138607] = true, -- Blood Scion (Blood Scion)
+    -- [138607] = true, -- Blood Scion (Blood Scion)
     [138564] = true, -- Blood Scion (Blood Scion)
     [140368] = true, -- Blood Scion (Blood Scion)
     [135945] = true, -- Blood Scion (Blood Scion)
@@ -9405,7 +9405,7 @@ local DebugAuras =
     [7271] = true,   -- Ambush -- Nix-Hound
     [18190] = true,  -- Shadowstep -- Nix-Hound
 
-    --[5362] = true,   -- Slam -- Skeever
+    -- [5362] = true,   -- Slam -- Skeever
     [21904] = true,  -- Rend -- Skeever
 
     [21947] = true,  -- Bite -- Wamasu
@@ -9802,7 +9802,7 @@ local DebugAuras =
     [88976] = true,  -- Summon Daedra -- Xivilai
     [25726] = true,  -- Summon Daedra -- Xivilai
     [88974] = true,  -- Summon Daedra -- Xivilai
-    --[88973] = true,  -- Summon Daedra -- Xivilai
+    -- [88973] = true,  -- Summon Daedra -- Xivilai
     [89232] = true,  -- Summon Daedra -- Xivilai
 
     [4652] = true,   -- Gaze -- Watcher
@@ -10464,43 +10464,43 @@ local DebugAuras =
     [48257] = true,  -- Boulder Toss -- Troll (Ranged)
     [50387] = true,  -- Boulder Toss -- Troll (Ranged)
     [48282] = true,  -- Consuming Omen -- Troll (Ranged)
-    --[48288] = true,  -- Consuming Omen -- Troll (Ranged)
-    --[48286] = true,  -- Consuming Omen -- Troll (Ranged)
-    [48287] = true,  -- Consuming Omen -- Troll (Ranged)
-    [48294] = true,  -- Consuming Omen -- Troll (Ranged)
-    [48297] = true,  -- Consuming Omen -- Troll (Ranged)
-    [48286] = true,  -- Consuming Omen -- Troll (Ranged)
-    [48288] = true,  -- Consuming Omen -- Troll (Ranged)
+    -- [48288] = true,  -- Consuming Omen -- Troll (Ranged)
+    -- [48286] = true,  -- Consuming Omen -- Troll (Ranged)
+    [48287] = true, -- Consuming Omen -- Troll (Ranged)
+    [48294] = true, -- Consuming Omen -- Troll (Ranged)
+    [48297] = true, -- Consuming Omen -- Troll (Ranged)
+    [48286] = true, -- Consuming Omen -- Troll (Ranged)
+    [48288] = true, -- Consuming Omen -- Troll (Ranged)
 
-    [76266] = true,  -- Rip -- River Troll (DB DLC)
-    [76268] = true,  -- Lope -- River Troll (DB DLC)
-    [76271] = true,  -- Lope -- River Troll (DB DLC)
-    [78834] = true,  -- Lope -- River Troll (DB DLC)
-    [76274] = true,  -- Lope -- River Troll (DB DLC)
-    [76295] = true,  -- Crab Toss -- River Troll (DB DLC)
-    [80506] = true,  -- Crab Toss -- River Troll (DB DLC)
-    [81046] = true,  -- Crab Toss -- River Troll (DB DLC)
-    [76297] = true,  -- Crab Toss -- River Troll (DB DLC)
-    [76302] = true,  -- SW Spawn Stun -- River Troll (DB DLC)
-    [76298] = true,  -- Crab Toss -- River Troll (DB DLC)
-    [81045] = true,  -- Crab Toss -- River Troll (DB DLC)
-    [76300] = true,  -- Scuttle -- River Troll (DB DLC)
-    [76277] = true,  -- Close Wounds -- River Troll (DB DLC)
-    [76278] = true,  -- Close Wounds -- River Troll (DB DLC)
-    [78314] = true,  -- Close Wounds -- River Troll (DB DLC)
+    [76266] = true, -- Rip -- River Troll (DB DLC)
+    [76268] = true, -- Lope -- River Troll (DB DLC)
+    [76271] = true, -- Lope -- River Troll (DB DLC)
+    [78834] = true, -- Lope -- River Troll (DB DLC)
+    [76274] = true, -- Lope -- River Troll (DB DLC)
+    [76295] = true, -- Crab Toss -- River Troll (DB DLC)
+    [80506] = true, -- Crab Toss -- River Troll (DB DLC)
+    [81046] = true, -- Crab Toss -- River Troll (DB DLC)
+    [76297] = true, -- Crab Toss -- River Troll (DB DLC)
+    [76302] = true, -- SW Spawn Stun -- River Troll (DB DLC)
+    [76298] = true, -- Crab Toss -- River Troll (DB DLC)
+    [81045] = true, -- Crab Toss -- River Troll (DB DLC)
+    [76300] = true, -- Scuttle -- River Troll (DB DLC)
+    [76277] = true, -- Close Wounds -- River Troll (DB DLC)
+    [76278] = true, -- Close Wounds -- River Troll (DB DLC)
+    [78314] = true, -- Close Wounds -- River Troll (DB DLC)
 
-    [4304] = true,   -- Assault -- Wisp
-    [18634] = true,  -- Assault -- Wisp
-    [4309] = true,   -- Dying Blast -- Wisp
-    [64221] = true,  -- Dying Blast -- Wisp
+    [4304] = true,  -- Assault -- Wisp
+    [18634] = true, -- Assault -- Wisp
+    [4309] = true,  -- Dying Blast -- Wisp
+    [64221] = true, -- Dying Blast -- Wisp
 
-    [6596] = true,   -- Summon Wisp -- Wispmother
-    [64211] = true,  -- Summon Wisp -- Wispmother
-    --[19052] = true,  -- Rain of Wisps -- Wispmother
-    --[19058] = true,  -- Rain of Wisps -- Wispmother
+    [6596] = true,  -- Summon Wisp -- Wispmother
+    [64211] = true, -- Summon Wisp -- Wispmother
+    -- [19052] = true,  -- Rain of Wisps -- Wispmother
+    -- [19058] = true,  -- Rain of Wisps -- Wispmother
     [8003] = true,   -- Rain of Wisps -- Wispmother
     [19062] = true,  -- Rain of Wisps -- Wispmother
-    --[19049] = true,  -- Rain of Wisps -- Wispmother
+    -- [19049] = true,  -- Rain of Wisps -- Wispmother
     [19045] = true,  -- Rain of Wisps -- Wispmother
     [19047] = true,  -- Rain of Wisps -- Wispmother
     [19055] = true,  -- Rain of Wisps -- Wispmother
@@ -13738,7 +13738,7 @@ local DebugAuras =
     [55081] = true, -- Drain Essence (Vampire Lord Thisa)
     [55084] = true, -- Drain Essence (Vampire Lord Thisa)
     [55082] = true, -- Drain Essence (Vampire Lord Thisa)
-    --[55081] = true, -- Drain Essence (Vampire Lord Thisa)
+    -- [55081] = true, -- Drain Essence (Vampire Lord Thisa)
     [21911] = true, -- Stun (Vampire Lord Thisa)
 
     [55090] = true, -- Devouring Swarm (Vampire Lord Thisa)
@@ -16086,7 +16086,7 @@ local DebugAuras =
     [52478] = true,  -- Find the Enemy (Ilambris Amalgam)
     [52488] = true,  -- Find the Enemy (Ilambris Amalgam)
     [52337] = true,  -- Rain Fire (Ilambris Amalgam)
-    --[52341] = true,  -- Call Lightning (Ilambris Amalgam)
+    -- [52341] = true,  -- Call Lightning (Ilambris Amalgam)
     [52343] = true,  -- Call Lightning (Ilambris Amalgam)
     [52344] = true,  -- Call Lightning (Ilambris Amalgam)
     [52487] = true,  -- Call Lightning (Ilambris Amalgam)
@@ -16968,7 +16968,7 @@ local DebugAuras =
     [212754] = true, -- Deposit Ink : Spammed event
     [203124] = true, -- Event - Verse Select. GAIN/GAINDUR/STUN
     [203125] = true, -- Event - Verse Select. GAIN/GAINDUR/STUN
-    
+
     -- West Weald
     [210068] = true, -- Trigger Central VO 1
     [209292] = true, -- Rift Projectile B
