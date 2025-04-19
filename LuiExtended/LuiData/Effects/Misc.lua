@@ -218,6 +218,7 @@ Effects.IsExperienceBuff =
     [85501] = true,  -- Crown Crate Experience Scroll
     [85502] = true,  -- Major Crown Crate Experience Scroll
     [85503] = true,  -- Grand Crown Crate Experience Scroll
+    [241125] = true,  -- Hero's Return Experience Scroll
     -- Event
     [91369] = true,  -- The Pie of Misrule (Jester's Experience Boost Pie)
     [77123] = true,  -- Anniversary EXP Buff

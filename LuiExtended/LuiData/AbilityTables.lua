@@ -265,13 +265,14 @@ local AbilityTables =
     Drink_Crown_Vigorous_Tincture = GetItemLinkName("|H0:item:124678:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
 
     -- Experience Consumables
-    Experience_Psijic_Ambrosia = GetItemLinkName("|H0:item:64221:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),       -- Psijic Ambrosia
-    Experience_Aetherial_Ambrosia = GetItemLinkName("|H0:item:120076:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),   -- Aetherial Ambrosia
-    Experience_Mythic_Ambrosia = GetItemLinkName("|H0:item:115027:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),      -- Mythic Aetherial Ambrosia
-    Experience_Crown_Scroll = GetItemLinkName("|H0:item:64537:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"),         -- Crown Experience Scroll
-    Experience_Crown_Crate_Scroll_1 = GetItemLinkName("|H0:item:94439:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"), -- Gold Coast Experience Scroll
-    Experience_Crown_Crate_Scroll_2 = GetItemLinkName("|H0:item:94440:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"), -- Major Gold Coast Experience Scroll
-    Experience_Crown_Crate_Scroll_3 = GetItemLinkName("|H0:item:94441:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"), -- Grand Gold Coast Experience Scroll
+    Experience_Psijic_Ambrosia = GetItemLinkName("|H0:item:64221:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),         -- Psijic Ambrosia
+    Experience_Aetherial_Ambrosia = GetItemLinkName("|H0:item:120076:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),     -- Aetherial Ambrosia
+    Experience_Mythic_Ambrosia = GetItemLinkName("|H0:item:115027:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),        -- Mythic Aetherial Ambrosia
+    Experience_Crown_Scroll = GetItemLinkName("|H0:item:64537:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"),           -- Crown Experience Scroll
+    Experience_Crown_Crate_Scroll_1 = GetItemLinkName("|H0:item:94439:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"),   -- Gold Coast Experience Scroll
+    Experience_Crown_Crate_Scroll_2 = GetItemLinkName("|H0:item:94440:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"),   -- Major Gold Coast Experience Scroll
+    Experience_Crown_Crate_Scroll_3 = GetItemLinkName("|H0:item:94441:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"),   -- Grand Gold Coast Experience Scroll
+    Experience_Crown_Crate_Scroll_4 = GetItemLinkName("|H0:item:214517:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"), -- Hero's Return Experience Scroll
 
     -- Alliance War Skill Consumables
     Experience_Alliance_War_Skill_1 = GetItemLinkName("|H0:item:171262:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"), -- Alliance War Skill Line Scroll
