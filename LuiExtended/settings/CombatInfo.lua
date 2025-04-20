@@ -77,6 +77,12 @@ local Blacklist, BlacklistValues = {}, {}
 
 local ACTION_RESULT_AREA_EFFECT = 669966
 
+local function SetAbilityBarTimersEnabled()
+    if tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS)) == 0 then
+        SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS, "true", SETTINGS_SET_OPTION_SAVE_TO_PERSISTED_DATA)
+    end
+end
+
 -- Create a list of abilityId's / abilityName's to use for Blacklist
 local function GenerateCustomList(input)
     local options, values = {}, {}
@@ -564,6 +570,7 @@ function CombatInfo.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.BarShowLabel = value
+                    SetAbilityBarTimersEnabled()
                     CombatInfo.ResetBarLabel()
                 end,
                 width = "full",
