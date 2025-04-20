@@ -1102,6 +1102,7 @@ function CombatInfo.StopCastBar()
     castbar.remain = nil
     castbar.starts = nil
     castbar.ends = nil
+    castbar.currentIcon = nil -- >>> Clear cached icon <<<
     g_casting = false
     eventManager:UnregisterForUpdate(moduleName .. "CastBar")
 
@@ -2471,7 +2472,11 @@ function CombatInfo.OnCombatEvent(eventCode, result, isError, abilityName, abili
             castbar.remain = endTime
             castbar.starts = currentTime
             castbar.ends = endTime
-            castbar.icon:SetTexture(icon)
+            -- >>> Check if icon needs updating before setting <<<
+            if castbar.currentIcon ~= icon then
+                castbar.icon:SetTexture(icon)
+                castbar.currentIcon = icon -- Store the new icon path
+            end
             castbar.id = abilityId
 
             if channeled then

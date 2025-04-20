@@ -4173,7 +4173,11 @@ function SpellCastBuffs.updateIcons(currentTime, sortedList, container)
             else
                 buff.drop:SetHidden(true)
             end
-            buff.icon:SetTexture(effect.icon)
+            -- >>> Check if the texture path is actually different before setting <<<
+            if buff.icon.currentIconPath ~= effect.icon then
+                buff.icon:SetTexture(effect.icon)
+                buff.icon.currentIconPath = effect.icon -- Store the currently set icon path
+            end
             buff:SetAlpha(1)
             buff:SetHidden(false)
             if not remain or effect.fakeDuration then
@@ -4243,7 +4247,12 @@ function SpellCastBuffs.updateIcons(currentTime, sortedList, container)
 
     -- Hide rest of icons
     for i = iconsNum + 1, #uiTlw[container].icons do
-        uiTlw[container].icons[i]:SetHidden(true)
+        local buffToHide = uiTlw[container].icons[i]
+        buffToHide:SetHidden(true)
+        -- >>> Clear the cached path when hiding <<<
+        if buffToHide.icon then
+            buffToHide.icon.currentIconPath = nil
+        end
     end
 
     -- Save icon number processed to compare in next update iteration
