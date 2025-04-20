@@ -251,7 +251,7 @@ end
 local function OnSwapAnimationDone(animation, button)
     button.noUpdates = false
     if button:GetSlot() == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
-        g_activeWeaponSwapInProgress = false
+        g_weaponSwapInProgress = false
     end
     slotsUpdated = {}
 end
@@ -2896,7 +2896,7 @@ function CombatInfo.OnActiveHotbarUpdate(eventCode, didActiveHotbarChange, shoul
             end
         end
     else
-        g_activeWeaponSwapInProgress = false
+        g_weaponSwapInProgress = false
     end
 end
 
@@ -3170,10 +3170,10 @@ end
 function CombatInfo.OnActionSlotEffectUpdate(eventCode, hotbarCategory, actionSlotIndex)
     local timeRemainingMS = GetActionSlotEffectTimeRemaining(actionSlotIndex, hotbarCategory)
 
-    -- Skip updates for very short duration effects
-    if timeRemainingMS <= 1000 and timeRemainingMS ~= 0 then
-        return
-    end
+    -- -- Skip updates for very short duration effects
+    -- if timeRemainingMS <= 1000 and timeRemainingMS ~= 0 then
+    --     return
+    -- end
 
     -- Important: We want to apply the effect to the ACTIVE bar that used the ability
     -- not to the slot on the backbar
@@ -3347,7 +3347,7 @@ function CombatInfo:InitializeActionBarEffects()
     CombatInfo.EnsureBackbarTimerVisibility()
 
     -- Also update tracked abilities when active bar changes or slots are updated
-    eventManager:RegisterForEvent(moduleName .. "SlotUpdate", EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, function ()
+    eventManager:RegisterForEvent(moduleName .. "SlotUpdate", EVENT_ACTION_SLOT_UPDATED, function (eventId, actionSlotIndex)
         -- Skip updates during weapon swap to prevent flickering
         if g_weaponSwapInProgress then return end
 
@@ -3382,10 +3382,9 @@ function CombatInfo:InitializeActionBarEffects()
     end)
 
     -- Register for animation completion to ensure timers are visible after animation
-    eventManager:RegisterForEvent(moduleName .. "Animations", EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, function ()
+    eventManager:RegisterForEvent(moduleName .. "Animations", EVENT_ACTION_SLOT_UPDATED, function (eventId, actionSlotIndex)
         -- Skip updates during weapon swap to prevent flickering
         if g_weaponSwapInProgress then return end
-
         CombatInfo.EnsureBackbarTimerVisibility()
     end)
 end
@@ -3394,6 +3393,7 @@ end
 --- @param slotNum integer
 --- @param hotbarCategory number
 function CombatInfo.UpdateTrackedActionSlotEffects(slotNum, hotbarCategory)
+    LUIE.Debug("UpdateTrackedActionSlotEffects", slotNum, hotbarCategory)
     local abilityId = GetSlotTrueBoundId(slotNum, hotbarCategory)
     if not abilityId or abilityId == 0 then return end
 
