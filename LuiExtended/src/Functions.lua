@@ -19,7 +19,6 @@ local string_gsub = LUIE.string and LUIE.string.gsub
 local string_match = LUIE.string and LUIE.string.match
 local string_rep = LUIE.string and LUIE.string.rep
 local string_format = LUIE.string and LUIE.string.format
-local locale_string_format = LUIE.string and LUIE.string.localestrformat
 local table_concat = LUIE.table and LUIE.table.concat
 local table_insert = LUIE.table and LUIE.table.insert
 local table_move = LUIE.table and LUIE.table.move
@@ -27,6 +26,7 @@ local table_remove = LUIE.table and LUIE.table.remove
 local table_sort = LUIE.table and LUIE.table.sort
 local unpack = LUIE.table and LUIE.table.unpack
 local GetString = GetString
+local zo_strformat = zo_strformat
 
 do
     --- @param addonName string
@@ -842,7 +842,7 @@ local TooltipHandlers =
 
         local finalSpeed = 100 - speed
         local roundedMitigation = zo_floor(mitigation * 100 + 0.5) / 100
-        return locale_string_format(GetString(LUIE_STRING_SKILL_BRACE_TP), roundedMitigation, finalSpeed, cost, getResourceType())
+        return zo_strformat(GetString(LUIE_STRING_SKILL_BRACE_TP), roundedMitigation, finalSpeed, cost, getResourceType())
     end,
 
     -- Crouch
@@ -851,9 +851,9 @@ local TooltipHandlers =
         local _, cost = GetAdvancedStatValue(ADVANCED_STAT_DISPLAY_TYPE_SNEAK_COST)
 
         if speed <= 0 or speed >= 100 then
-            return locale_string_format(GetString(LUIE_STRING_SKILL_HIDDEN_NO_SPEED_TP), cost)
+            return zo_strformat(GetString(LUIE_STRING_SKILL_HIDDEN_NO_SPEED_TP), cost)
         end
-        return locale_string_format(GetString(LUIE_STRING_SKILL_HIDDEN_TP), 100 - speed, cost)
+        return zo_strformat(GetString(LUIE_STRING_SKILL_HIDDEN_TP), 100 - speed, cost)
     end,
 
     -- Unchained
@@ -861,27 +861,27 @@ local TooltipHandlers =
         local duration = (GetAbilityDuration(98316) or 0) / 1000
         local pointsSpent = GetNumPointsSpentOnChampionSkill(64) * 1.1
         local adjustPoints = pointsSpent == 0 and 55 or zo_floor(pointsSpent * 100 + 0.5) / 100
-        return locale_string_format(GetString(LUIE_STRING_SKILL_UNCHAINED_TP), duration, adjustPoints)
+        return zo_strformat(GetString(LUIE_STRING_SKILL_UNCHAINED_TP), duration, adjustPoints)
     end,
 
     -- Medium Armor Evasion
     [150057] = function ()
         local counter = GetEquippedArmorPieces(ARMORTYPE_MEDIUM) * 2
-        return locale_string_format(GetString(LUIE_STRING_SKILL_MEDIUM_ARMOR_EVASION), counter)
+        return zo_strformat(GetString(LUIE_STRING_SKILL_MEDIUM_ARMOR_EVASION), counter)
     end,
 
     -- Unstoppable Brute
     [126582] = function ()
         local counter = GetEquippedArmorPieces(ARMORTYPE_HEAVY) * 5
         local duration = (GetAbilityDuration(126582) or 0) / 1000
-        return locale_string_format(GetString(LUIE_STRING_SKILL_UNSTOPPABLE_BRUTE), duration, counter)
+        return zo_strformat(GetString(LUIE_STRING_SKILL_UNSTOPPABLE_BRUTE), duration, counter)
     end,
 
     -- Immovable
     [126583] = function ()
         local counter = GetEquippedArmorPieces(ARMORTYPE_HEAVY) * 5
         local duration = (GetAbilityDuration(126583) or 0) / 1000
-        return locale_string_format(GetString(LUIE_STRING_SKILL_IMMOVABLE), duration, counter, 65 + counter)
+        return zo_strformat(GetString(LUIE_STRING_SKILL_IMMOVABLE), duration, counter, 65 + counter)
     end,
 }
 
