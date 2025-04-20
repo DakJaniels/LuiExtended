@@ -2863,7 +2863,7 @@ function ChatAnnouncements.OnBuybackItem(eventCode, itemName, quantity, money, i
     if ChatAnnouncements.SV.Inventory.LootVendorTotalItems then
         local total1, total2, total3 = GetItemLinkStacks(itemName)
         local total = total1 + total2 + total3
-        if total > 1 then
+        if total >= 1 then
             carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
@@ -2916,7 +2916,7 @@ function ChatAnnouncements.OnBuyItem(eventCode, itemName, entryType, quantity, m
     if ChatAnnouncements.SV.Inventory.LootVendorTotalItems then
         local total1, total2, total3 = GetItemLinkStacks(itemName)
         local total = total1 + total2 + total3
-        if total > 1 then
+        if total >= 1 then
             carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
@@ -2965,7 +2965,7 @@ function ChatAnnouncements.OnSellItem(eventCode, itemName, quantity, money)
     if ChatAnnouncements.SV.Inventory.LootVendorTotalItems then
         local total1, total2, total3 = GetItemLinkStacks(itemName)
         local total = total1 + total2 + total3
-        if total > 1 then
+        if total >= 1 then
             carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
@@ -3022,7 +3022,7 @@ function ChatAnnouncements.TradingHouseResponseReceived(eventCode, TradingHouseR
     if ChatAnnouncements.SV.Inventory.LootVendorTotalItems then
         local total1, total2, total3 = GetItemLinkStacks(itemName)
         local total = total1 + total2 + total3
-        if total > 1 then
+        if total >= 1 then
             carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
@@ -4262,7 +4262,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
     if ChatAnnouncements.SV.Inventory.LootTotal and receivedBy ~= "LUIE_INVENTORY_UPDATE_DISGUISE" and receivedBy ~= "LUIE_RECEIVE_CRAFT" and not groupLoot and (logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnRecipe and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnMotif and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnStyle) then
         local total1, total2, total3 = GetItemLinkStacks(itemLink)
         local total = total1 + total2 + total3
-        if total > 1 then
+        if total >= 1 then
             formattedTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", color, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
@@ -5986,7 +5986,7 @@ function ChatAnnouncements.InventoryUpdateFence(eventCode, bagId, slotId, isNewI
                     if ChatAnnouncements.SV.Inventory.LootVendorTotalItems then
                         local total1, total2, total3 = GetItemLinkStacks(itemLink)
                         local total = total1 + total2 + total3
-                        if total > 1 then
+                        if total >= 1 then
                             carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
                         end
                     end
@@ -6045,7 +6045,7 @@ function ChatAnnouncements.InventoryUpdateFence(eventCode, bagId, slotId, isNewI
                     if ChatAnnouncements.SV.Inventory.LootVendorTotalItems then
                         local total1, total2, total3 = GetItemLinkStacks(itemLink)
                         local total = total1 + total2 + total3
-                        if total > 1 then
+                        if total >= 1 then
                             carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
                         end
                     end
@@ -6110,7 +6110,7 @@ function ChatAnnouncements.InventoryUpdateFence(eventCode, bagId, slotId, isNewI
             if ChatAnnouncements.SV.Inventory.LootVendorTotalItems then
                 local total1, total2, total3 = GetItemLinkStacks(itemLink)
                 local total = total1 + total2 + total3
-                if total > 1 then
+                if total >= 1 then
                     carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
                 end
             end
