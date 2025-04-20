@@ -5141,12 +5141,22 @@ function UnitFrames.CustomFramesApplyTexture()
     local texture = LUIE.StatusbarTextures[UnitFrames.SV.CustomTexture]
     local isRoundTexture = UnitFrames.SV.CustomTexture == "Tube" or UnitFrames.SV.CustomTexture == "Steel"
 
-    -- Helper function to set texture and handle Round texture edge color
+    -- Helper function to set texture and handle Round texture edge color (Now with placeholder EdgeTexture)
     local function applyTextureToBackdrop(backdrop)
-        backdrop:SetCenterTexture(texture)
-        -- For Round texture, set the edge color to transparent to avoid black border
+        -- Set the main texture
+        backdrop:SetCenterTexture(texture) -- TODO: Add optional tilingInterval, addressMode args here if needed?
+
+        -- Set Blend Mode
+        backdrop:SetBlendMode(TEX_BLEND_MODE_ALPHA)
+
+        -- Set Pixel Rounding
+        backdrop:SetPixelRoundingEnabled(true) -- Keep true for now, toggle to false to test sharpness.
+
         if isRoundTexture then
+            -- Still setting edge color to transparent for round textures
             backdrop:SetEdgeColor(0, 0, 0, 0)
+        else
+            backdrop:SetEdgeColor(0, 0, 0, 0.5)
         end
     end
 
