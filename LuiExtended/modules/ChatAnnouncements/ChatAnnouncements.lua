@@ -4024,15 +4024,15 @@ end
 --- @param icon string
 --- @param reset boolean
 local function DisplayQuestItem(itemId, stackCount, icon, reset)
-    if LUIE.IsDevDebugEnabled() then
-        local Debug = LUIE.Debug
-        local traceback = "Quest Item Details:\n" ..
-            "--> itemId: " .. tostring(itemId) .. "\n" ..
-            "--> stackCount: " .. tostring(stackCount) .. "\n" ..
-            "--> questItemIcon: " .. tostring(icon) .. "\n" ..
-            "--> reset: " .. tostring(reset)
-        Debug(traceback)
-    end
+    -- if LUIE.IsDevDebugEnabled() then
+    --     local Debug = LUIE.Debug
+    --     local traceback = "Quest Item Details:\n" ..
+    --         "--> itemId: " .. tostring(itemId) .. "\n" ..
+    --         "--> stackCount: " .. tostring(stackCount) .. "\n" ..
+    --         "--> questItemIcon: " .. tostring(icon) .. "\n" ..
+    --         "--> reset: " .. tostring(reset)
+    --     Debug(traceback)
+    -- end
     if not questItemIndex[itemId] then
         questItemIndex[itemId] = { stack = 0, counter = 0, icon = icon }
         -- d("New item created with 0 stack")
@@ -4060,22 +4060,22 @@ end
 --- @param itemId integer
 --- @param isStolen boolean
 function ChatAnnouncements.OnLootReceived(eventCode, receivedBy, itemLink, quantity, itemSound, lootType, lootedBySelf, isPickpocketLoot, questItemIcon, itemId, isStolen)
-    if LUIE.IsDevDebugEnabled() then
-        local Debug = LUIE.Debug
-        local traceback = "Loot Received:\n" ..
-            "--> eventCode: " .. tostring(eventCode) .. "\n" ..
-            "--> receivedBy: " .. zo_strformat("<<C:1>>", receivedBy) .. "\n" ..
-            "--> itemLink: " .. tostring(itemLink) .. "\n" ..
-            "--> quantity: " .. tostring(quantity) .. "\n" ..
-            "--> itemSound: " .. tostring(itemSound) .. "\n" ..
-            "--> lootType: " .. tostring(lootType) .. "\n" ..
-            "--> lootedBySelf: " .. tostring(lootedBySelf) .. "\n" ..
-            "--> isPickpocketLoot: " .. tostring(isPickpocketLoot) .. "\n" ..
-            "--> questItemIcon: " .. tostring(questItemIcon) .. "\n" ..
-            "--> itemId: " .. tostring(itemId) .. "\n" ..
-            "--> isStolen: " .. tostring(isStolen)
-        Debug(traceback)
-    end
+    -- if LUIE.IsDevDebugEnabled() then
+    --     local Debug = LUIE.Debug
+    --     local traceback = "Loot Received:\n" ..
+    --         "--> eventCode: " .. tostring(eventCode) .. "\n" ..
+    --         "--> receivedBy: " .. zo_strformat("<<C:1>>", receivedBy) .. "\n" ..
+    --         "--> itemLink: " .. tostring(itemLink) .. "\n" ..
+    --         "--> quantity: " .. tostring(quantity) .. "\n" ..
+    --         "--> itemSound: " .. tostring(itemSound) .. "\n" ..
+    --         "--> lootType: " .. tostring(lootType) .. "\n" ..
+    --         "--> lootedBySelf: " .. tostring(lootedBySelf) .. "\n" ..
+    --         "--> isPickpocketLoot: " .. tostring(isPickpocketLoot) .. "\n" ..
+    --         "--> questItemIcon: " .. tostring(questItemIcon) .. "\n" ..
+    --         "--> itemId: " .. tostring(itemId) .. "\n" ..
+    --         "--> isStolen: " .. tostring(isStolen)
+    --     Debug(traceback)
+    -- end
     -- If the player loots an item
     if not isPickpocketLoot and lootedBySelf then
         g_isLooted = true
@@ -4476,9 +4476,9 @@ local delayedItemPoolOut = {} -- Stacks for outbound delayed item pool
 function ChatAnnouncements.ItemCounterDelay(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, filter, groupLoot, alwaysFirst, delay)
     -- Return if we have an invalid itemId or stack
     if itemId == 0 or not stack then
-        if LUIE.IsDevDebugEnabled() then
-            LUIE.Debug("Item counter returned invalid items")
-        end
+        -- if LUIE.IsDevDebugEnabled() then
+        --     LUIE.Debug("Item counter returned invalid items")
+        -- end
         return
     end
 
@@ -4563,17 +4563,17 @@ local crownRidingIds =
 }
 
 function ChatAnnouncements.InventoryUpdate(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
-    if LUIE.IsDevDebugEnabled() then
-        local Debug = LUIE.Debug
-        local traceback = "Inventory Update:\n" ..
-            "--> bagId: " .. tostring(bagId) .. "\n" ..
-            "--> slotId: " .. tostring(slotId) .. "\n" ..
-            "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-            "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
-            "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
-            "--> stackCountChange: " .. tostring(stackCountChange)
-        Debug(traceback)
-    end
+    -- if LUIE.IsDevDebugEnabled() then
+    --     local Debug = LUIE.Debug
+    --     local traceback = "Inventory Update:\n" ..
+    --         "--> bagId: " .. tostring(bagId) .. "\n" ..
+    --         "--> slotId: " .. tostring(slotId) .. "\n" ..
+    --         "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
+    --         "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
+    --         "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
+    --         "--> stackCountChange: " .. tostring(stackCountChange)
+    --     Debug(traceback)
+    -- end
 
     -- End right now if this is any other reason (durability loss, etc)
     if inventoryUpdateReason ~= INVENTORY_UPDATE_REASON_DEFAULT then
@@ -4994,18 +4994,18 @@ function ChatAnnouncements.Dummy()
 end
 
 function ChatAnnouncements.InventoryUpdateCraft(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
-    if LUIE.IsDevDebugEnabled() then
-        local Debug = LUIE.Debug
-        local traceback = "Inventory Update:\n" ..
-            "--> eventCode: " .. tostring(eventCode) .. "\n" ..
-            "--> bagId: " .. tostring(bagId) .. "\n" ..
-            "--> slotId: " .. tostring(slotId) .. "\n" ..
-            "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-            "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
-            "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
-            "--> stackCountChange: " .. tostring(stackCountChange)
-        Debug(traceback)
-    end
+    -- if LUIE.IsDevDebugEnabled() then
+    --     local Debug = LUIE.Debug
+    --     local traceback = "Inventory Update:\n" ..
+    --         "--> eventCode: " .. tostring(eventCode) .. "\n" ..
+    --         "--> bagId: " .. tostring(bagId) .. "\n" ..
+    --         "--> slotId: " .. tostring(slotId) .. "\n" ..
+    --         "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
+    --         "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
+    --         "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
+    --         "--> stackCountChange: " .. tostring(stackCountChange)
+    --     Debug(traceback)
+    -- end
 
     -- End right now if this is any other reason (durability loss, etc)
     if inventoryUpdateReason ~= INVENTORY_UPDATE_REASON_DEFAULT then
@@ -5393,18 +5393,18 @@ function ChatAnnouncements.InventoryUpdateCraft(eventCode, bagId, slotId, isNewI
 end
 
 function ChatAnnouncements.InventoryUpdateBank(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
-    if LUIE.IsDevDebugEnabled() then
-        local Debug = LUIE.Debug
-        local traceback = "Inventory Update:\n" ..
-            "--> eventCode: " .. tostring(eventCode) .. "\n" ..
-            "--> bagId: " .. tostring(bagId) .. "\n" ..
-            "--> slotId: " .. tostring(slotId) .. "\n" ..
-            "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-            "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
-            "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
-            "--> stackCountChange: " .. tostring(stackCountChange)
-        Debug(traceback)
-    end
+    -- if LUIE.IsDevDebugEnabled() then
+    --     local Debug = LUIE.Debug
+    --     local traceback = "Inventory Update:\n" ..
+    --         "--> eventCode: " .. tostring(eventCode) .. "\n" ..
+    --         "--> bagId: " .. tostring(bagId) .. "\n" ..
+    --         "--> slotId: " .. tostring(slotId) .. "\n" ..
+    --         "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
+    --         "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
+    --         "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
+    --         "--> stackCountChange: " .. tostring(stackCountChange)
+    --     Debug(traceback)
+    -- end
 
     -- End right now if this is any other reason (durability loss, etc)
     if inventoryUpdateReason ~= INVENTORY_UPDATE_REASON_DEFAULT then
@@ -5768,18 +5768,18 @@ function ChatAnnouncements.InventoryUpdateBank(eventCode, bagId, slotId, isNewIt
 end
 
 function ChatAnnouncements.InventoryUpdateGuildBank(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
-    if LUIE.IsDevDebugEnabled() then
-        local Debug = LUIE.Debug
-        local traceback = "Inventory Update:\n" ..
-            "--> eventCode: " .. tostring(eventCode) .. "\n" ..
-            "--> bagId: " .. tostring(bagId) .. "\n" ..
-            "--> slotId: " .. tostring(slotId) .. "\n" ..
-            "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-            "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
-            "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
-            "--> stackCountChange: " .. tostring(stackCountChange)
-        Debug(traceback)
-    end
+    -- if LUIE.IsDevDebugEnabled() then
+    --     local Debug = LUIE.Debug
+    --     local traceback = "Inventory Update:\n" ..
+    --         "--> eventCode: " .. tostring(eventCode) .. "\n" ..
+    --         "--> bagId: " .. tostring(bagId) .. "\n" ..
+    --         "--> slotId: " .. tostring(slotId) .. "\n" ..
+    --         "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
+    --         "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
+    --         "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
+    --         "--> stackCountChange: " .. tostring(stackCountChange)
+    --     Debug(traceback)
+    -- end
 
     local receivedBy = ""
     ---------------------------------- INVENTORY ----------------------------------
@@ -5910,18 +5910,18 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventCode, bagId, slotId, is
 end
 
 function ChatAnnouncements.InventoryUpdateFence(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
-    if LUIE.IsDevDebugEnabled() then
-        local Debug = LUIE.Debug
-        local traceback = "Inventory Update:\n" ..
-            "--> eventCode: " .. tostring(eventCode) .. "\n" ..
-            "--> bagId: " .. tostring(bagId) .. "\n" ..
-            "--> slotId: " .. tostring(slotId) .. "\n" ..
-            "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-            "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
-            "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
-            "--> stackCountChange: " .. tostring(stackCountChange)
-        Debug(traceback)
-    end
+    -- if LUIE.IsDevDebugEnabled() then
+    --     local Debug = LUIE.Debug
+    --     local traceback = "Inventory Update:\n" ..
+    --         "--> eventCode: " .. tostring(eventCode) .. "\n" ..
+    --         "--> bagId: " .. tostring(bagId) .. "\n" ..
+    --         "--> slotId: " .. tostring(slotId) .. "\n" ..
+    --         "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
+    --         "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
+    --         "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
+    --         "--> stackCountChange: " .. tostring(stackCountChange)
+    --     Debug(traceback)
+    -- end
 
     -- End right now if this is any other reason (durability loss, etc)
     if inventoryUpdateReason ~= INVENTORY_UPDATE_REASON_DEFAULT then
@@ -6279,14 +6279,14 @@ function ChatAnnouncements.JusticeRemovePrint()
 end
 
 function ChatAnnouncements.DisguiseState(eventCode, unitTag, disguiseState)
-    if LUIE.IsDevDebugEnabled() then
-        local Debug = LUIE.Debug
-        local traceback = "Disguise State:\n" ..
-            "--> eventCode: " .. tostring(eventCode) .. "\n" ..
-            "--> unitTag: " .. tostring(unitTag) .. "\n" ..
-            "--> disguiseState: " .. tostring(disguiseState)
-        Debug(traceback)
-    end
+    -- if LUIE.IsDevDebugEnabled() then
+    --     local Debug = LUIE.Debug
+    --     local traceback = "Disguise State:\n" ..
+    --         "--> eventCode: " .. tostring(eventCode) .. "\n" ..
+    --         "--> unitTag: " .. tostring(unitTag) .. "\n" ..
+    --         "--> disguiseState: " .. tostring(disguiseState)
+    --     Debug(traceback)
+    -- end
 
     if disguiseState == DISGUISE_STATE_DANGER then
         if ChatAnnouncements.SV.Notify.DisguiseWarnCA then
@@ -8506,36 +8506,36 @@ function ChatAnnouncements.HookFunction()
         end
 
         -- Debug for DEVS
-        if LUIE.IsDevDebugEnabled() then
-            LUIE.Debug([[Quest Condition Update:
---> Type: %s (%d)
---> Quest: %s
---> Condition: %s
---> Progress: %d/%d (Previous: %d)
---> State: %s]],
-                tostring(conditionType),
-                conditionType,
-                questName,
-                conditionText,
-                newConditionVal,
-                conditionMax,
-                currConditionVal,
-                isConditionComplete and "Complete" or "In Progress"
-            )
-        end
+        --         if LUIE.IsDevDebugEnabled() then
+        --             LUIE.Debug([[Quest Condition Update:
+        -- --> Type: %s (%d)
+        -- --> Quest: %s
+        -- --> Condition: %s
+        -- --> Progress: %d/%d (Previous: %d)
+        -- --> State: %s]],
+        --                 tostring(conditionType),
+        --                 conditionType,
+        --                 questName,
+        --                 conditionText,
+        --                 newConditionVal,
+        --                 conditionMax,
+        --                 currConditionVal,
+        --                 isConditionComplete and "Complete" or "In Progress"
+        --             )
+        --         end
 
         -- Check WritCreater settings first
         if isWritCreaterEnabled and WritCreater and WritCreater:GetSettings().suppressQuestAnnouncements and isQuestWritQuest(journalIndex) then
-            if LUIE.IsDevDebugEnabled() then
-                LUIE.Debug([[Writ Quest Condition Suppressed:
---> Quest: %s
---> Index: %d
---> Condition: %s]],
-                    questName,
-                    journalIndex,
-                    conditionText
-                )
-            end
+            --             if LUIE.IsDevDebugEnabled() then
+            --                 LUIE.Debug([[Writ Quest Condition Suppressed:
+            -- --> Quest: %s
+            -- --> Index: %d
+            -- --> Condition: %s]],
+            --                     questName,
+            --                     journalIndex,
+            --                     conditionText
+            --                 )
+            --             end
             return true
         end
 
@@ -8762,16 +8762,16 @@ function ChatAnnouncements.HookFunction()
     local function OnQuestAdvanced(eventId, questIndex, questName, isPushed, isComplete, mainStepChanged, soundOverride)
         -- Check if WritCreater is enabled & then call a copy of a local function from WritCreater to check if this is a Writ Quest
         if isWritCreaterEnabled and WritCreater and WritCreater:GetSettings().suppressQuestAnnouncements and isQuestWritQuest(questIndex) then
-            if LUIE.IsDevDebugEnabled() then
-                LUIE.Debug([[Writ Quest Condition Suppressed:
---> Quest: %s
---> Index: %d
---> Condition: %s]],
-                    questName,
-                    questIndex,
-                    isComplete and "Complete" or "Not Complete"
-                )
-            end
+            --             if LUIE.IsDevDebugEnabled() then
+            --                 LUIE.Debug([[Writ Quest Condition Suppressed:
+            -- --> Quest: %s
+            -- --> Index: %d
+            -- --> Condition: %s]],
+            --                     questName,
+            --                     questIndex,
+            --                     isComplete and "Complete" or "Not Complete"
+            --                 )
+            --             end
             return true
         end
 
@@ -10718,9 +10718,9 @@ function ChatAnnouncements.HookFunction()
     do
         local originalSend = MAIL_SEND.Send
         function MAIL_SEND:Send(...)
-            if LUIE.IsDevDebugEnabled() then
-                LUIE.Debug("MAIL_SEND:Send has been hooked!")
-            end
+            -- if LUIE.IsDevDebugEnabled() then
+            --     LUIE.Debug("MAIL_SEND:Send has been hooked!")
+            -- end
             windowManager:SetFocusByName("")
 
             if not self.sendMoneyMode and GetQueuedCOD() == 0 then
@@ -10817,9 +10817,9 @@ function ChatAnnouncements.HookFunction()
             if isMenu then
                 local link
                 if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                    link = ZO_LinkHandler_CreateLinkWithoutBrackets(characterOrDisplayName, nil, DISPLAY_NAME_LINK_TYPE, characterOrDisplayName)
+                    link = ZO_LinkHandler_CreateLinkWithoutBrackets(characterOrDisplayName, nil, CHARACTER_LINK_TYPE, characterOrDisplayName)
                 else
-                    link = ZO_LinkHandler_CreateLink(characterOrDisplayName, nil, DISPLAY_NAME_LINK_TYPE, characterOrDisplayName)
+                    link = ZO_LinkHandler_CreateLink(characterOrDisplayName, nil, CHARACTER_LINK_TYPE, characterOrDisplayName)
                 end
                 printToChat(zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MENU), link), true)
                 if ChatAnnouncements.SV.Group.GroupAlert then
