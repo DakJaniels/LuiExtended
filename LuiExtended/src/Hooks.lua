@@ -550,7 +550,7 @@ function LUIE.InitializeHooks()
                             effectsRow.time.endTime = endTime
                             effectsRow.isArtificial = false -- Sort with normal buffs
                         end
-                        table.insert(effectsRows, effectsRow)
+                        table_insert(effectsRows, effectsRow)
                     end
                 end
 
