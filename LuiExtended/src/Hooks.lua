@@ -685,6 +685,7 @@ function LUIE.InitializeHooks()
         container:SetHandler("OnEffectivelyHidden", HideMundusTooltips)
     end
 
+    -- Hook GAMEPAD Stats List
     do
         local GAMEPAD_STATS_DISPLAY_MODE =
         {
@@ -702,7 +703,7 @@ function LUIE.InitializeHooks()
         local function ArtificialEffectsRowComparator(left, right)
             return left.sortOrder < right.sortOrder
         end
-        -- Hook GAMEPAD Stats List
+
         function ZO_GamepadStats:RefreshMainList()
             if self.currentTitleDropdown and self.currentTitleDropdown:IsDropdownVisible() then
                 self.refreshMainListOnDropdownClose = true
@@ -733,7 +734,7 @@ function LUIE.InitializeHooks()
             -- Mundus Entries
             for key, attribute in pairs(self.attributeItems) do
                 local NO_MUNDUS_EFFECT = false
-                attribute:SetMundusEffect(nil)
+                attribute:SetMundusEffect(NO_MUNDUS_EFFECT)
             end
             self.mundusEntries = {}
             self.mundusAdvancedStats = {}
@@ -751,7 +752,7 @@ function LUIE.InitializeHooks()
                     {
                         name = buffName,
                         description = GetAbilityEffectDescription(buffSlot),
-                        buffIndex = activeMundusStoneBuffIndices[slotIndex],
+                        mundusBuffIndex = activeMundusStoneBuffIndices[slotIndex],
                         slotIndex = slotIndex,
                         statEffects = {},
                     }
@@ -761,7 +762,7 @@ function LUIE.InitializeHooks()
                         local attributeItem = self:GetAttributeItem(statType)
                         if attributeItem then
                             local HAS_MUNDUS_EFFECT = true
-                            attributeItem:SetMundusEffect(HAS_MUNDUS_EFFECT, buffName, effectValue, mundusEntry.data.buffIndex)
+                            attributeItem:SetMundusEffect(HAS_MUNDUS_EFFECT, buffName, effectValue, mundusEntry.data.mundusBuffIndex)
                         end
                         local statEffect =
                         {
@@ -910,6 +911,16 @@ function LUIE.InitializeHooks()
             self.mainList:Commit()
 
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+
+        function ZO_GamepadStats:AddActiveEffectData(data)
+            if self.numActiveEffects == 0 then
+                data:SetHeader(GetString(SI_STATS_ACTIVE_EFFECTS))
+                self.mainList:AddEntryWithHeader("ZO_GamepadEffectAttributeRow", data)
+            else
+                self.mainList:AddEntry("ZO_GamepadEffectAttributeRow", data)
+            end
+            self.numActiveEffects = self.numActiveEffects + 1
         end
 
         -- Hook GAMEPAD Stats Refresh
