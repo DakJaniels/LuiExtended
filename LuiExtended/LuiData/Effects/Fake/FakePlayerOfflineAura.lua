@@ -6,12 +6,9 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR FAKE EFFECTS
@@ -39,7 +36,7 @@ local zo_strformat = zo_strformat
 -- ground == true - Set the target to ground instead of player.
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) FakePlayerOfflineAura
-local FakePlayerOfflineAura =
+local fakePlayerOfflineAura =
 {
     -- Sets
     [75814] = { duration = "GET" }, -- Lunar Bastion (Lunar Bastion)
@@ -57,4 +54,4 @@ local FakePlayerOfflineAura =
 
 
 --- @class (partial) FakePlayerOfflineAura
-LuiData.Data.Effects.FakePlayerOfflineAura = FakePlayerOfflineAura
+Effects.FakePlayerOfflineAura = fakePlayerOfflineAura

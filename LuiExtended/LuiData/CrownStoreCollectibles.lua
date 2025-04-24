@@ -5,13 +5,26 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
+local Data = LuiData.Data
 
---- @class (partial) CrownStoreCollectiables
-local CrownStoreCollectiables =
+local GetCollectibleName = GetCollectibleName
+
+--- @class (partial) CrownStoreCollectibles
+local crownStoreCollectibles =
 {
-    [GetCollectibleName(3)] = 3, -- Brown Paint Horse
-    [GetCollectibleName(4)] = 4, -- Bay Dun Horse
-    [GetCollectibleName(5)] = 5, -- Midnight Steed
+    [GetCollectibleName(3)] = 3,       -- Brown Paint Horse
+    [GetCollectibleName(4)] = 4,       -- Bay Dun Horse
+    [GetCollectibleName(5)] = 5,       -- Midnight Steed
+    [GetCollectibleName(265)] = 265,   -- Pride-King Lion
+    [GetCollectibleName(235)] = 235,   -- Black Camel of Ill Omen
+    [GetCollectibleName(233)] = 233,   -- Hammerfell Camel
+    [GetCollectibleName(4723)] = 4723, -- Tattooed Shorn Camel
+    [GetCollectibleName(21)] = 21,     -- Tessellated Guar
+    [GetCollectibleName(5066)] = 5066, -- Auroran Warhorse
+    [GetCollectibleName(59)] = 59,     -- Nightmare Courser
+    [GetCollectibleName(4722)] = 4722, -- Snow-Blanket Sorrel Horse
+    [GetCollectibleName(290)] = 290,   -- Highland Wolf
+    [GetCollectibleName(5075)] = 5075, -- Painted Wolf
 
     -- [GetCollectibleName(4673)] = 4673, -- Storage Coffer, Fortified (from level up rewards)
     [GetCollectibleName(4674)] = 4674, -- Storage Chest, Fortified (Tel Var / Writ Vouchers)
@@ -83,5 +96,5 @@ local CrownStoreCollectiables =
     [GetCollectibleName(9162)] = 9162, -- Smoke-Wreathed Griffon Feather (Dagonic Quasigriff)
 }
 
---- @class (partial) CrownStoreCollectiables
-LuiData.Data.CrownStoreCollectiables = CrownStoreCollectiables
+--- @class (partial) CrownStoreCollectibles
+Data.CrownStoreCollectibles = crownStoreCollectibles

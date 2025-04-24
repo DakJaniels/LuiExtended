@@ -5,6 +5,9 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
+local Data = LuiData.Data
+
+local zo_callLater = zo_callLater
 
 --- @class (partial) Quests
 --- @field ItemIgnoreTurnIn table :TODO
@@ -19,7 +22,9 @@ local LuiData = LuiData
 --- @field QuestItemModifyOnAdd table<number, function>
 --- @field QuestItemModifyOnRemove table<number, function>
 --- @field QuestObjectiveCompleteOverride table<string, string>
-local Quests =
+local quests = {}
+
+quests =
 {
     -- List of Quest Items to ignore when Looted (Alot of quest items swap out for different id's mid quest and it looks silly having a ton of messages print)
     QuestItemHideLoot =
@@ -318,70 +323,71 @@ local Quests =
 }
 
 -- Call specific functions to add/remove table entries for funky quest items. This will trigger when a certain quest item is added.
-Quests.QuestItemModifyOnAdd =
+quests.QuestItemModifyOnAdd =
 {
     [3278] = function ()
-        Quests.QuestItemHideLoot[3280] = true
+        quests.QuestItemHideLoot[3280] = true
     end, -- Rune of Xarxes (The Mallari-Mora)
     [3279] = function ()
-        Quests.QuestItemHideLoot[3281] = true
+        quests.QuestItemHideLoot[3281] = true
     end, -- Rune of Magnus (The Mallari-Mora)
     [3532] = function ()
-        Quests.QuestItemHideLoot[3491] = true
+        quests.QuestItemHideLoot[3491] = true
     end, -- Crystal (Preventative Measure)
     [3769] = function ()
-        Quests.QuestItemHideLoot[3415] = true
+        quests.QuestItemHideLoot[3415] = true
     end, -- Teleport Scroll (Depths of Madness)
     [4485] = function ()
-        Quests.QuestItemHideRemove[4485] = true
+        quests.QuestItemHideRemove[4485] = true
     end, -- Rajhin's Mantle (A Lasting Winter)
     [4492] = function ()
-        Quests.QuestItemHideLoot[4485] = true
+        quests.QuestItemHideLoot[4485] = true
     end, -- Rajhin's Mantle (A Lasting Winter)
     [3597] = function ()
-        Quests.QuestItemHideLoot[3596] = true
+        quests.QuestItemHideLoot[3596] = true
     end, -- Rahkaz's Blade (The Enemy Within)
 
     -- Daggerfall Covenant
     [3818] = function ()
-        Quests.QuestItemHideLoot[3818] = true
+        quests.QuestItemHideLoot[3818] = true
     end, -- Dwemer Device (Tip of the Spearhead)
 }
 
 -- Call specific functions to add/remove table entries for funky quest items. This will trigger when a certain quest item is removed.
-Quests.QuestItemModifyOnRemove =
+quests.QuestItemModifyOnRemove =
 {
     [3532] = function ()
-        Quests.QuestItemHideRemove[3491] = nil
+        quests.QuestItemHideRemove[3491] = nil
     end, -- Crystal (Preventative Measure)
     [4492] = function ()
         zo_callLater(function ()
-            Quests.QuestItemHideRemove[4485] = nil
+            quests.QuestItemHideRemove[4485] = nil
         end, 2000)
     end, -- Rajhin's Mantle (A Lasting Winter)
     [4645] = function ()
         zo_callLater(function ()
-            Quests.QuestItemHideRemove[4596] = nil
+            quests.QuestItemHideRemove[4596] = nil
         end, 2000)
     end, -- Rahjin's Mantle (The Orrery of Elden Root)
     [4411] = function ()
-        Quests.QuestItemHideRemove[4411] = nil
+        quests.QuestItemHideRemove[4411] = nil
     end, -- Bone Scepter (The Unquiet Dead)
     [4479] = function ()
-        Quests.QuestItemHideLoot[4479] = true
-        Quests.QuestItemHideRemove[4479] = false
+        quests.QuestItemHideLoot[4479] = true
+        quests.QuestItemHideRemove[4479] = false
     end, -- Loriasel Tablet Notes (Eyes of Azura)
     [4442] = function ()
-        Quests.QuestItemHideRemove[4433] = nil
+        quests.QuestItemHideRemove[4433] = nil
     end, -- Sigil Geode (Eyes of Azura)
     [3597] = function ()
-        Quests.QuestItemHideRemove[3596] = nil
+        quests.QuestItemHideRemove[3596] = nil
     end, -- Rahkaz's Blade (The Enemy Within)
 
     -- Daggerfall Covenant
     [3818] = function ()
-        Quests.QuestItemHideRemove[3818] = true
+        quests.QuestItemHideRemove[3818] = true
     end, -- Dwemer Device (Tip of the Spearhead)
 }
+
 --- @class (partial) Quests
-LuiData.Data.Quests = Quests
+Data.Quests = quests

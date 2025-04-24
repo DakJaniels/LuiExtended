@@ -6,18 +6,15 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR BAR HIGHLIGHT RELATED OVERRIDES
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) IsAbilityActiveGlow
-local IsAbilityActiveGlow =
+local isAbilityActiveGlow =
 {
 
     [20824] = true,  -- Power Lash (Flame Lash)
@@ -30,4 +27,4 @@ local IsAbilityActiveGlow =
 }
 
 --- @class (partial) IsAbilityActiveGlow
-LuiData.Data.Effects.IsAbilityActiveGlow = IsAbilityActiveGlow
+Effects.IsAbilityActiveGlow = isAbilityActiveGlow

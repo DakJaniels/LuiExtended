@@ -1,10 +1,10 @@
 ## Title: |c00C000Lui Extended|r
 ## Author: ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101045 101046
-## Version: 6.8.9
-## AddOnVersion: 6809
+## Version: 6.9.0
+## AddOnVersion: 690
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
-## DependsOn: LuiData>=6809 LibAddonMenu-2.0>=38 LibMediaProvider-1.0>=33
+## DependsOn: LuiData>=690 LibAddonMenu-2.0>=38 LibMediaProvider-1.0>=33
 ## OptionalDependsOn: LibChatMessage>=113 pChat>=10006040 CombatMetrics>=10602
 ## OptionalDependsOn: LibDebugLogger>=263 DolgubonsLazyWritCreator LibLazyCrafting>=4014 LootLog>=407032
 ## SavedVariables: LUIESV
@@ -22,11 +22,10 @@ lang/settings/Settings_$(language).lua
 # Addon Base
 src/LuiExtended.lua
 src/LuiExtended_Log.lua
+src/UI.lua
 src/Functions.lua
 src/HooksSkillsAdvisor.lua
 src/Hooks.lua
-src/Initialize.lua
-src/UI.lua
 src/Changelog.lua
 bindings/Bindings.xml
 
@@ -107,6 +106,9 @@ settings/InfoPanel.lua
 settings/SlashCommands.lua
 settings/SpellCastBuffs.lua
 settings/UnitFrames.lua
+
+# Do the stuff.
+src/Initialize.lua
 
 # This Add-on is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates.
 # The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States and/or other countries.

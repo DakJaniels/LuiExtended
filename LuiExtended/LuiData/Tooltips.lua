@@ -5,8 +5,18 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
+local Data = LuiData.Data
 
+local GetAbilityDescription = GetAbilityDescription
+local GetAbilityDuration = GetAbilityDuration
+local GetAbilityName = GetAbilityName
+local GetCollectibleDescription = GetCollectibleDescription
+local GetItemLinkOnUseAbilityDescription = GetItemLinkOnUseAbilityDescription
+local GetNumPassiveSkillRanks = GetNumPassiveSkillRanks
+local GetSkillLineIndicesFromSkillLineId = GetSkillLineIndicesFromSkillLineId
+local GetString = GetString
 local zo_strformat = zo_strformat
+local zo_strgsub = zo_strgsub
 
 -- From /esoui/lang/en_client.lua
 -- SI_DAMAGETYPE0 = "None"
@@ -35,7 +45,7 @@ local BleedDamage = GetString(SI_DAMAGETYPE12) .. " Damage"   -- TODO: Localize
 local OblivionDamage = "Oblivion Damage"                      -- TODO: Localize
 
 --- @class (partial) Tooltips
-local Tooltips =
+local tooltips =
 {
     ----------------------------------------------------------------
     -- MAJOR / MINOR BUFFS & DEBUFFS -------------------------------
@@ -1528,4 +1538,4 @@ local Tooltips =
 }
 
 --- @class (partial) Tooltips
-LuiData.Data.Tooltips = Tooltips
+Data.Tooltips = tooltips

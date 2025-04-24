@@ -29,7 +29,7 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "6.8.9"
+LUIE.version = "6.9.0"
 LUIE.author = "ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
 LUIE.github = "https://github.com/DakJaniels/LuiExtended"
@@ -51,10 +51,7 @@ local LuiData = LuiData
 if not LuiData then
     error("LuiData is not enabled", 2)
 end
---- @class (partial) LuiData
-LUIE.Data = LuiData.Data
-LUIE.table = {}
-LUIE.string = {}
+
 -- -----------------------------------------------------------------------------
 -- Default Settings
 LUIE.Defaults =
@@ -124,19 +121,29 @@ LUIE.Fonts =
     ["Montserrat SemiBold"] = "LuiExtended/media/fonts/Montserrat/Montserrat-SemiBold.slug",
     ["Porky"] = "LuiExtended/media/fonts/Porky/porky.slug",
     ["ProFontWindows"] = "LuiExtended/media/fonts/ProFontWindows/ProFontWindows.slug",
-    ["ProseAntique"] = ZoFontBookPaper:GetFontInfo(),
     ["Roboto Bold Italic"] = "LuiExtended/media/fonts/Roboto/Roboto-BoldItalic.slug",
     ["Roboto Bold"] = "LuiExtended/media/fonts/Roboto/Roboto-Bold.slug",
-    ["Skyrim Handwritten"] = ZoFontBookLetter:GetFontInfo(),
     ["Talisman"] = "LuiExtended/media/fonts/Talisman/talisman.slug",
     ["Trajan Pro Bold"] = "LuiExtended/media/fonts/TrajanPro/TrajanProBold.slug",
-    ["Trajan Pro"] = ZoFontBookTablet:GetFontInfo(),
     ["Transformers"] = "LuiExtended/media/fonts/Transformers/transformers.slug",
     ["Univers 55"] = "/EsoUI/Common/Fonts/univers55.slug",
-    ["Univers 57"] = ZoFontGame:GetFontInfo(),
-    ["Univers 67"] = ZoFontWinH1:GetFontInfo(),
     ["Yellowjacket"] = "LuiExtended/media/fonts/Yellowjacket/yellowjacket.slug",
 }
+
+local keyboardFonts =
+{
+    ["ProseAntique"] = ZoFontBookPaper:GetFontInfo(),
+    ["Skyrim Handwritten"] = ZoFontBookLetter:GetFontInfo(),
+    ["Trajan Pro"] = ZoFontBookTablet:GetFontInfo(),
+    ["Univers 57"] = ZoFontGame:GetFontInfo(),
+    ["Univers 67"] = ZoFontWinH1:GetFontInfo(),
+}
+
+if IsKeyboardUISupported() then
+    for fontName, fontPath in pairs(keyboardFonts) do
+        LUIE.Fonts[fontName] = fontPath
+    end
+end
 -- -----------------------------------------------------------------------------
 LUIE.Sounds =
 {

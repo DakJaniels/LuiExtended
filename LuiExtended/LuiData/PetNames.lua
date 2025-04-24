@@ -5,6 +5,9 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
+local Data = LuiData.Data
+
+local GetString = GetString
 
 --- @class (partial) PetNames
 --- @field Assistants table<string, boolean>
@@ -12,7 +15,7 @@ local LuiData = LuiData
 --- @field Sets table<string, boolean>
 --- @field Sorcerer table<string, boolean>
 --- @field Warden table<string, boolean>
-local PetNames =
+local petNames =
 {
     -- Pet Names (Sorcerer)
     Sorcerer =
@@ -73,4 +76,4 @@ local PetNames =
     },
 }
 --- @class (partial) PetNames
-LuiData.Data.PetNames = PetNames
+Data.PetNames = petNames

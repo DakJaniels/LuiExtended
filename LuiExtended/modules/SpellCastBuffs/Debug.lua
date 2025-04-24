@@ -7,7 +7,7 @@
 local LUIE = LUIE
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
-local Effects = LUIE.Data.Effects
+local Effects = LuiData.Data.Effects
 
 -- -----------------------------------------------------------------------------
 -- Core Lua function localizations
@@ -121,7 +121,7 @@ end
 --- @param name string Raw name
 --- @return string Formatted name
 local function FormatActorName(name)
-    local formattedName = zo_strformat("<<C:1>>", name)
+    local formattedName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, name)
 
     if formattedName == LUIE.PlayerNameFormatted then
         return "Player"
@@ -139,7 +139,7 @@ end
 local function FormatAbilityInfo(abilityId, size)
     size = size or 16
     local iconFormatted = zo_iconFormat(GetAbilityIcon(abilityId), size, size)
-    local nameFormatted = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
+    local nameFormatted = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(abilityId))
 
     return iconFormatted, nameFormatted
 end
@@ -178,7 +178,7 @@ end
 --- @return string Formatted debug message
 local function GenerateCombatDebugMessage(abilityId, source, target, duration, castInfo, result)
     local iconFormatted, nameFormatted = FormatAbilityInfo(abilityId)
-    local formattedResult = LUIE.Data.DebugResults[result]
+    local formattedResult = LuiData.Data.DebugResults[result]
     local castTimeText = ""
     local channelTimeText = ""
 
@@ -285,7 +285,7 @@ end
 --- @param casterUnitTag string Caster unit tag
 function SpellCastBuffs.EventCombatDebug(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overrideRank, casterUnitTag)
     -- Skip if this aura is filtered
-    if LUIE.Data.DebugAuras[abilityId] and SpellCastBuffs.SV.ShowDebugFilter then
+    if LuiData.Data.DebugAuras[abilityId] and SpellCastBuffs.SV.ShowDebugFilter then
         return
     end
 
@@ -327,7 +327,7 @@ end
 --- @param castByPlayer boolean Whether cast by player
 function SpellCastBuffs.EventEffectDebug(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, castByPlayer)
     -- Skip if this aura is filtered
-    if LUIE.Data.DebugAuras[abilityId] and SpellCastBuffs.SV.ShowDebugFilter then
+    if LuiData.Data.DebugAuras[abilityId] and SpellCastBuffs.SV.ShowDebugFilter then
         return
     end
 
@@ -376,7 +376,7 @@ function SpellCastBuffs.AuthorCombatDebug(eventCode, result, isError, abilityNam
     -- Format ability information
     local iconFormatted, nameFormatted = FormatAbilityInfo(abilityId)
     local cmxHiddenStatus = GetCMXHiddenStatus(abilityId)
-    local formattedResult = LUIE.Data.DebugResults[result]
+    local formattedResult = LuiData.Data.DebugResults[result]
 
     -- Generate debug message
     local message = string_format("%s[%d] %s: HIDDEN LUI%s: [S] %s --> [T] %s [R] %s",
@@ -539,9 +539,9 @@ function SpellCastBuffs.TempSlashZoneCheck()
         { "Map Index:",          info.mapindex or "nil" },
         { "--------------------" },
         { "GPS Coordinates:" },
-        { "Map:",                string_format("%s: %s×%s", info.mapName, FormatCoords(info.mapX), FormatCoords(info.mapY)) },
-        { "Zone:",               string_format("%s: %s×%s", info.zoneName, FormatCoords(info.zoneX), FormatCoords(info.zoneY)) },
-        { "World:",              string_format("Tamriel: %s×%s", FormatCoords(info.worldX), FormatCoords(info.worldY)) },
+        { "Map:",                string_format("%s: %s\195\151%s", info.mapName, FormatCoords(info.mapX), FormatCoords(info.mapY)) },
+        { "Zone:",               string_format("%s: %s\195\151%s", info.zoneName, FormatCoords(info.zoneX), FormatCoords(info.zoneY)) },
+        { "World:",              string_format("Tamriel: %s\195\151%s", FormatCoords(info.worldX), FormatCoords(info.worldY)) },
         { "--------------------" },
         { "Map Name:",           info.name },
         { "Map Type:",           info.mapType },
@@ -556,11 +556,11 @@ function SpellCastBuffs.TempSlashZoneCheck()
     end
 end
 
---- Checks for removed abilities by iterating through LUIE.Data.DebugAuras and checking if each ability still exists.
+--- Checks for removed abilities by iterating through LuiData.Data.DebugAuras and checking if each ability still exists.
 --- Outputs a list of ability IDs that no longer exist in the game to chat.
 function SpellCastBuffs.TempSlashCheckRemovedAbilities()
     AddSystemMessage("Removed AbilityIds:")
-    for abilityId in pairs(LUIE.Data.DebugAuras) do
+    for abilityId in pairs(LuiData.Data.DebugAuras) do
         if not DoesAbilityExist(abilityId) then
             AddSystemMessage(tostring(abilityId))
         end

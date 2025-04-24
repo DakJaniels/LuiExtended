@@ -6,12 +6,14 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
+local Data = LuiData.Data
+
 --- @class (partial) BlacklistPresets
 --- @field public MinorBuffs table<number, boolean>
 --- @field public MajorBuffs table<number, boolean>
 --- @field public MinorDebuffs table<number, boolean>
 --- @field public MajorDebuffs table<number, boolean>
-local BlacklistPresets =
+local blacklistPresets =
 {
     -- Minor Buffs
     MinorBuffs =
@@ -89,4 +91,4 @@ local BlacklistPresets =
 }
 
 --- @class (partial) BlacklistPresets
-LuiData.Data.AbilityBlacklistPresets = BlacklistPresets
+Data.AbilityBlacklistPresets = blacklistPresets

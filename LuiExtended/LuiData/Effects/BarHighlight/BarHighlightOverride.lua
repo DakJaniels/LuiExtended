@@ -6,12 +6,9 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR BAR HIGHLIGHT RELATED OVERRIDES
@@ -25,12 +22,12 @@ local zo_strformat = zo_strformat
 --- @field hide boolean | nil Whether to hide this bar highlight entirely
 
 --- @type table<integer, BarHighlightOverrideOptions>
-local BarHighlightOverride =
+local barHighlightOverride =
 {
     -- Optional
     -- newId = # -- Replace ID
     -- showFakeAura = true -- USE EVENT_COMBAT_EVENT instead - allows auras to display even if they weren't applied. Should be used with major/minor effects.
-    -- noRemove = ture -- don't remove effect on fading or target change -- Doesn't apply to hostile effects. Should be used with major/minor effects.
+    -- noRemove = true -- don't remove effect on fading or target change -- Doesn't apply to hostile effects. Should be used with major/minor effects.
     -- duration = # -- override duration
     -- hide = true -- Hide this bar highlight
 
@@ -591,4 +588,4 @@ local BarHighlightOverride =
     [116095] = { newId = 116366 }, -- Pariah's Resolve
 }
 
-LuiData.Data.Effects.BarHighlightOverride = BarHighlightOverride
+Effects.BarHighlightOverride = barHighlightOverride

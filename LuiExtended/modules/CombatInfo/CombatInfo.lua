@@ -11,9 +11,10 @@ local LUIE = LUIE
 local CombatInfo = LUIE.CombatInfo
 
 local UI = LUIE.UI
-local Effects = LUIE.Data.Effects
-local Abilities = LUIE.Data.Abilities
-local Castbar = LUIE.Data.CastBarTable
+local Data = LuiData.Data
+local Effects = Data.Effects
+local Abilities = Data.Abilities
+local Castbar = Data.CastBarTable
 
 local pairs = pairs
 local ipairs = ipairs
@@ -49,8 +50,8 @@ local g_toggledSlotsStack = {}                                -- Table of stacks
 local g_toggledSlotsPlayer = {}                               -- Table of abilities that target the player (bar highlight doesn't fade on reticleover change)
 local g_potionUsed = false                                    -- Toggled on when a potion is used to prevent OnSlotsFullUpdate from updating timers.
 local g_barOverrideCI = {}                                    -- Table for storing abilityId's from Effects.BarHighlightOverride that should show as an aura
-local g_barFakeAura = {}                                      -- Table for storing abilityId's that only display a fakeaura
-local g_barDurationOverride = {}                              -- Table for storing abilitiyId's that ignore ending event
+local g_barFakeAura = {}                                      -- Table for storing abilityId's that only display a fake aura
+local g_barDurationOverride = {}                              -- Table for storing abilityId's that ignore ending event
 local g_barNoRemove = {}                                      -- Table of abilities we don't remove from bar highlight
 local g_protectAbilityRemoval = {}                            -- AbilityId's set to a timestamp here to prevent removal of bar highlight when refreshing ground auras from causing the highlight to fade.
 local g_mineStacks = {}                                       -- Individual AbilityId ground mine stack information
@@ -162,7 +163,7 @@ local function SetBarRemainLabel(remain, abilityId)
     end
 end
 
--- Quickslot
+-- QuickSlot
 local uiQuickSlot =
 {
     color = { 0.941, 0.565, 0.251 },
@@ -190,7 +191,7 @@ local uiUltimate =
 -- Cooldown Animation Types for GCD Tracking
 local CooldownMethod =
 {
-    [1] = CD_TYPE_VERTICAL,
+    [1] = CD_TYPE_VERTICAL, -- Animation only works in GamePad/Console UI...
     [2] = CD_TYPE_RADIAL,
     [3] = CD_TYPE_VERTICAL_REVEAL,
 }
@@ -830,7 +831,7 @@ function CombatInfo.AddToCustomList(list, input)
     local listRef = list == CombatInfo.SV.blacklist and GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST) or ""
     if id and id > 0 then
         local cachedName = ZO_CachedStrFormat(SI_ABILITY_NAME, GetAbilityName(id))
-        local name = cachedName -- zo_strformat("<<C:1>>", GetAbilityName(id))
+        local name = cachedName -- zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
         if name ~= nil and name ~= "" then
             local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
             list[id] = true
@@ -858,7 +859,7 @@ function CombatInfo.RemoveFromCustomList(list, input)
     local listRef = list == CombatInfo.SV.blacklist and GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST) or ""
     if id and id > 0 then
         local cachedName = ZO_CachedStrFormat(SI_ABILITY_NAME, GetAbilityName(id))
-        local name = cachedName -- zo_strformat("<<C:1>>", GetAbilityName(id))
+        local name = cachedName -- zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
         local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
         list[id] = nil
         ZO_GetChatSystem():Maximize()
@@ -2216,7 +2217,7 @@ function CombatInfo.ClientInteractResult(eventCode, result, interactTargetName)
         eventManager:RegisterForUpdate(moduleName .. "CastBar", 20, CombatInfo.OnUpdateCastbar)
     end
 
-    -- If we succesfully interact then...
+    -- If we successfully interact then...
     if result == CLIENT_INTERACT_RESULT_SUCCESS then
         -- Check if the interact object name is in our table
         if Castbar.InteractCast[interactTargetName] then
@@ -2397,7 +2398,7 @@ function CombatInfo.OnCombatEvent(eventCode, result, isError, abilityName, abili
 
     local icon = GetAbilityIcon(abilityId)
     local cachedName = ZO_CachedStrFormat(SI_ABILITY_NAME, GetAbilityName(abilityId))
-    local name = cachedName -- zo_strformat("<<C:1>>", GetAbilityName(abilityId))
+    local name = cachedName -- zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(abilityId))
 
     -- Return if ability not marked as cast or ability is blacklisted
     if not Castbar.IsCast[abilityId] or CombatInfo.SV.blacklist[abilityId] or CombatInfo.SV.blacklist[name] then
@@ -2443,7 +2444,7 @@ function CombatInfo.OnCombatEvent(eventCode, result, isError, abilityName, abili
     end
 
     -- Some abilities cast into a channeled stun effect - we want these abilities to display the cast and channel if flagged.
-    -- Only flags on ACTION_RESULT_BEGIN so this won't interfere with the stun result that is converted to dissplay a channeled cast.
+    -- Only flags on ACTION_RESULT_BEGIN so this won't interfere with the stun result that is converted to display a channeled cast.
     if Castbar.MultiCast[abilityId] then
         if result == 2200 then
             channeled = false

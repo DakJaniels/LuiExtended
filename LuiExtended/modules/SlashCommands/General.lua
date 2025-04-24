@@ -15,7 +15,7 @@ local zo_strformat = zo_strformat
 local pairs = pairs
 
 local companionKeys = {}
-for id, name in pairs(LUIE.Data.CollectibleTables.Companions) do
+for id, name in pairs(LuiData.Data.CollectibleTables.Companions) do
     companionKeys[name] = id
 end
 
@@ -254,7 +254,7 @@ function SlashCommands.SlashCollectible(id)
 
     -- If this is a Banker/Merchant/Fence/Armory/Deconstruction/Companion and we are
     -- in a player home then display a message that the collectible can't be used here.
-    if LUIE.Data.CollectibleTables.All[id] ~= nil then
+    if LuiData.Data.CollectibleTables.All[id] ~= nil then
         local currentHouse = GetCurrentZoneHouseId()
         if currentHouse ~= nil and currentHouse > 0 then
             printToChat(zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_FAILED_HOME), GetCollectibleName(id)), true)
@@ -269,7 +269,7 @@ function SlashCommands.SlashCollectible(id)
     if IsCollectibleUnlocked(id) then
         UseCollectible(id, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
         LUIE.SlashCollectibleOverride = true
-        if LUIE.Data.CollectibleTables.All[id] == nil then
+        if LuiData.Data.CollectibleTables.All[id] == nil then
             LUIE.LastMementoUsed = id
         end
     else

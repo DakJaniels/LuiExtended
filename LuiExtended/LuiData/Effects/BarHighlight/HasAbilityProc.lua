@@ -6,12 +6,10 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
+local Abilities = Data.Abilities
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR BAR HIGHLIGHT RELATED OVERRIDES
@@ -21,10 +19,10 @@ local zo_strformat = zo_strformat
 -- List of abilities flagged to display a Proc highlight / sound notification when an ability with a matching name appears as a buff.
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) HasAbilityProc
-local HasAbilityProc =
+local hasAbilityProc =
 {
     [Abilities.Skill_Crystal_Fragments] = 46327,
 }
 
 --- @class (partial) HasAbilityProc
-LuiData.Data.Effects.HasAbilityProc = HasAbilityProc
+Effects.HasAbilityProc = hasAbilityProc

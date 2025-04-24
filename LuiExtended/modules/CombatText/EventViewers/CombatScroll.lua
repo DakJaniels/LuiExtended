@@ -9,7 +9,7 @@ local LUIE = LUIE
 LUIE.CombatTextCombatScrollEventViewer = LUIE.CombatTextEventViewer:Subclass()
 local CombatTextCombatScrollEventViewer = LUIE.CombatTextCombatScrollEventViewer
 
-local CombatTextConstants = LUIE.Data.CombatTextConstants
+local CombatTextConstants = LuiData.Data.CombatTextConstants
 local AbbreviateNumber = LUIE.AbbreviateNumber
 --- @diagnostic disable-next-line: duplicate-set-field
 function CombatTextCombatScrollEventViewer:New(...)

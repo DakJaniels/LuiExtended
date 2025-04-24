@@ -169,12 +169,12 @@ function LUIE.InitializeHooksSkillAdvisor()
     end
 
     function SkillsAdvisorSuggestions_Gamepad:BuildMasterList()
-        -- intended to be overriden
+        -- intended to be overridden
         -- should build the master list of data that is later filtered by FilterScrollList
     end
 
     function SkillsAdvisorSuggestions_Gamepad:FilterScrollList()
-        -- intended to be overriden
+        -- intended to be overridden
         -- should take the master list data and filter it
     end
 

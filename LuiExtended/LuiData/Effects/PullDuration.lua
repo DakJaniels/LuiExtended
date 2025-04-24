@@ -6,20 +6,17 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- If this abilityId is up, then pull the duration from another active ability Id to set its duration (Unused - Might be useful in the future - Note this is supported in code)
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) EffectPullDuration
-local EffectPullDuration =
+local effectPullDuration =
 {
 }
 
 --- @class (partial) EffectPullDuration
-LuiData.Data.Effects.EffectPullDuration = EffectPullDuration
+Effects.EffectPullDuration = effectPullDuration

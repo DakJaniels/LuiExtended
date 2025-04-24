@@ -211,8 +211,9 @@ local function CreateUIControls()
 
     -- Gold display
     uiGold.control = UI:Control(uiBotRow, nil, { 85, 20 }, false)
-    uiGold.icon = UI:Texture(uiGold.control, { LEFT, LEFT }, { 12, 12 }, "/esoui/art/currency/currency_gold.dds", nil, false)
-    uiGold.label = UI:Label(uiGold.control, { LEFT, RIGHT, 2, 0, uiGold.icon }, { 65, 20 }, { 0, 1 }, g_infoPanelFont, "999,999", false)
+    uiGold.icon = UI:Texture(uiGold.control, { LEFT, LEFT }, { 12, 12 }, ZO_Currency_GetKeyboardCurrencyIcon(CURT_MONEY), nil, false)
+    uiGold.label = UI:Label(uiGold.control, { LEFT, RIGHT, 2, 0, uiGold.icon }, { 65, 20 }, { 0, 1 }, g_infoPanelFont, ZO_CommaDelimitNumber(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)), false)
+    uiGold.label:SetColor(colors.GOLD.r, colors.GOLD.g, colors.GOLD.b, 1)
 
     uiFeedTimer.control = UI:Control(uiBotRow, nil, { 96, 20 }, false)
     uiFeedTimer.icon = UI:Texture(uiFeedTimer.control, { LEFT, LEFT }, { 28, 28 }, "/esoui/art/mounts/tabicon_mounts_up.dds", nil, false)
@@ -241,8 +242,8 @@ function InfoPanel.RearrangePanel()
     -- Reset scale of panel
     uiPanel:SetScale(1)
     -- Top row
-    local anchorTop = nil -- Rename the variable to anchorTop
-    local sizeTop = 0     -- Rename the variable to sizeTop
+    local anchorTop = nil
+    local sizeTop = 0
     -- Latency
     if InfoPanel.SV.HideLatency then
         uiLatency.control:SetHidden(true)
@@ -393,8 +394,9 @@ function InfoPanel.Initialize(enabled)
     -- Set event handlers
     eventManager:RegisterForEvent(moduleName, EVENT_LOOT_RECEIVED, InfoPanel.OnBagUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, InfoPanel.OnBagUpdate)
-    eventManager:RegisterForEvent(moduleName, EVENT_MONEY_UPDATE, InfoPanel.UpdateGold)
-    eventManager:RegisterForEvent(moduleName, EVENT_RIDING_SKILL_IMPROVEMENT, InfoPanel.TrainMountTimer)
+    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_BAG_CAPACITY_CHANGED, InfoPanel.OnBagCapacityChanged)
+    eventManager:RegisterForEvent(moduleName, EVENT_CARRIED_CURRENCY_UPDATE, InfoPanel.OnCurrencyUpdate)
+    eventManager:RegisterForEvent(moduleName, EVENT_RIDING_SKILL_IMPROVEMENT, InfoPanel.UpdateMountFeedTimer)
     eventManager:RegisterForUpdate(moduleName .. "01", ZO_ONE_SECOND_IN_MILLISECONDS, InfoPanel.OnUpdate01)
     eventManager:RegisterForUpdate(moduleName .. "10", ZO_ONE_SECOND_IN_MILLISECONDS * 10, InfoPanel.OnUpdate10)
     eventManager:RegisterForUpdate(moduleName .. "60", ZO_ONE_MINUTE_IN_MILLISECONDS, InfoPanel.OnUpdate60)
@@ -428,25 +430,28 @@ function InfoPanel.SetScale()
     uiPanel:SetScale(InfoPanel.SV.panelScale and InfoPanel.SV.panelScale / 100 or 1)
 end
 
--- Format number with commas
-local function FormatGold(gold)
-    return ZO_CommaDelimitNumber(gold)
-end
-
--- Update player's gold display
--- Listens on the `EVENT_MONEY_UPDATE`
-function InfoPanel.UpdateGold()
-    if not InfoPanel.Enabled or InfoPanel.SV.HideGold then
-        return
-    end
-
-    local gold = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
-    uiGold.label:SetText(FormatGold(gold))
-    uiGold.label:SetColor(colors.GOLD.r, colors.GOLD.g, colors.GOLD.b, 1)
-end
+-- EVENT HANDLING PATTERN:
+-- We use a consistent pattern for event handling in InfoPanel:
+-- 1. For simple events, the event handler is a direct function like OnCurrencyUpdate
+-- 2. For events that need debouncing (like bag updates), we use a two-function pattern:
+--    - OnBagUpdate: registers a delayed update
+--    - DoBagUpdate: does the actual work after the delay
+-- 3. Event handlers accept all event parameters and utilize them for rich functionality:
+--    - UpdateMountFeedTimer: Different display based on riding skill improvement
+--    - OnBagCapacityChanged: Shows capacity upgrades with special formatting
+--    - OnCurrencyUpdate: Shows temporary notifications for significant gold changes
+--
+-- This approach reduces redundancy, makes the code easier to maintain, and creates
+-- a better user experience by leveraging the event data for more contextual updates.
 
 -- Listens to EVENT_INVENTORY_SINGLE_SLOT_UPDATE and EVENT_LOOT_RECEIVED
-function InfoPanel.OnBagUpdate()
+--- @param eventId integer|nil
+--- @param bagId number|nil
+--- @param slotIndex number|nil
+--- @param isNewItem boolean|nil
+--- @param itemSoundCategory number|nil
+--- @param updateReason number|nil
+function InfoPanel.OnBagUpdate(eventId, bagId, slotIndex, isNewItem, itemSoundCategory, updateReason)
     -- We shall not execute bags size calculation immediately, but rather set a flag with delay function
     -- This is needed to avoid lockups when the game start flooding us with same event for every bag slot used
     -- While we do not need any good latency, we can afford to update info-panel label with 250ms delay
@@ -612,17 +617,47 @@ end
 function InfoPanel.OnUpdate10()
     -- Update latency
     UpdateLatency()
-
-    -- Update gold.
-    InfoPanel.UpdateGold()
 end
 
 -- Update mount feed timer information
-function InfoPanel.UpdateMountFeedTimer()
+--- @param eventId integer|nil Optional - event ID if called from event
+--- @param ridingSkillType RidingTrainType|nil Optional - riding skill type
+--- @param previous integer|nil Optional - previous skill value
+--- @param current integer|nil Optional - current skill value
+--- @param source RidingTrainSource|nil Optional - source of the training
+function InfoPanel.UpdateMountFeedTimer(eventId, ridingSkillType, previous, current, source)
     if InfoPanel.SV.HideMountFeed or not InfoPanel.Enabled then
         return
     end
 
+    -- If this was triggered by the EVENT_RIDING_SKILL_IMPROVEMENT event
+    if eventId == EVENT_RIDING_SKILL_IMPROVEMENT and ridingSkillType ~= nil and current ~= nil then
+        -- Get current stats to check if fully trained
+        local inventoryBonus, maxInventoryBonus, staminaBonus, maxStaminaBonus, speedBonus, maxSpeedBonus = GetRidingStats()
+        local isFullyTrained = (inventoryBonus == maxInventoryBonus and staminaBonus == maxStaminaBonus and speedBonus == maxSpeedBonus)
+
+        -- Skill was just improved - show appropriate message
+        if isFullyTrained then
+            -- All mount skills are now maxed
+            uiFeedTimer.label:SetText(GetString(LUIE_STRING_PNL_MAXED))
+            uiFeedTimer.hideLocally = true
+            InfoPanel.RearrangePanel()
+            return
+        else
+            -- Still has skills to train, show training cooldown
+            local mountFeedTimer = GetTimeUntilCanBeTrained()
+            if mountFeedTimer and mountFeedTimer > 0 then
+                local hours = zo_floor(mountFeedTimer / ZO_ONE_HOUR_IN_MILLISECONDS)
+                local minutes = zo_floor((mountFeedTimer - (hours * ZO_ONE_HOUR_IN_MILLISECONDS)) / ZO_ONE_MINUTE_IN_MILLISECONDS)
+                uiFeedTimer.label:SetText(string_format("%dh %dm", hours, minutes))
+            else
+                uiFeedTimer.label:SetText(GetString(LUIE_STRING_PNL_TRAINNOW))
+            end
+            return
+        end
+    end
+
+    -- Standard update without event - check training state
     local mountFeedTimer, mountFeedTotalTime = GetTimeUntilCanBeTrained()
     local mountFeedMessage = GetString(LUIE_STRING_PNL_MAXED)
 
@@ -646,17 +681,6 @@ function InfoPanel.UpdateMountFeedTimer()
     uiFeedTimer.label:SetText(mountFeedMessage)
 end
 
--- EVENT_RIDING_SKILL_IMPROVEMENT
---
---- @param eventId integer
---- @param ridingSkillType RidingTrainType
---- @param previous integer
---- @param current integer
---- @param source RidingTrainSource
-function InfoPanel.TrainMountTimer(eventId, ridingSkillType, previous, current, source)
-    InfoPanel.UpdateMountFeedTimer()
-end
-
 function InfoPanel.OnUpdate60()
     -- Update item durability
     UpdateArmourDurability()
@@ -670,4 +694,54 @@ function InfoPanel.OnUpdate60()
     -- Update mount feed timer periodically in case it needs to be hidden
     -- This ensures the display updates even if no training events occur
     InfoPanel.UpdateMountFeedTimer()
+end
+
+-- Update bag capacity when it changes
+--- @param eventId integer
+--- @param previousCapacity integer
+--- @param currentCapacity integer
+--- @param previousUpgrade integer
+--- @param currentUpgrade integer
+function InfoPanel.OnBagCapacityChanged(eventId, previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
+    -- Use event parameters to update bag display
+    if InfoPanel.SV.HideBags then return end
+
+    -- Use the currentCapacity parameter directly instead of calling GetBagSize
+    local bagSize = currentCapacity
+    local bagUsed = GetNumBagUsedSlots(BAG_BACKPACK)
+
+    local filledSlotPercentage = (bagUsed / bagSize) * 100
+    local color = uiBags.color[#uiBags.color].color
+    if bagSize - bagUsed > 10 then
+        for i = 1, #uiBags.color - 1 do
+            if filledSlotPercentage < uiBags.color[i].fill then
+                color = uiBags.color[i].color
+                break
+            end
+        end
+    end
+    uiBags.label:SetText(ZO_FormatFraction(bagUsed, bagSize))
+    uiBags.label:SetColor(color.r, color.g, color.b, 1)
+end
+
+-- Update player's gold display
+--- @param eventId integer
+--- @param currency CurrencyType
+--- @param newValue integer
+--- @param oldValue integer
+--- @param reason CurrencyChangeReason
+--- @param reasonSupplementaryInfo integer
+function InfoPanel.OnCurrencyUpdate(eventId, currency, newValue, oldValue, reason, reasonSupplementaryInfo)
+    if not InfoPanel.Enabled or InfoPanel.SV.HideGold then
+        return
+    end
+
+    -- Only update for gold currency
+    if currency ~= CURT_MONEY then
+        return
+    end
+
+    -- Display the current amount
+    uiGold.label:SetText(ZO_CommaDelimitNumber(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)))
+    uiGold.label:SetColor(colors.GOLD.r, colors.GOLD.g, colors.GOLD.b, 1)
 end

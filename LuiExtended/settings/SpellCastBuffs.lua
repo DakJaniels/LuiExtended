@@ -56,7 +56,7 @@ end
 
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
-local BlacklistPresets = LUIE.Data.AbilityBlacklistPresets
+local BlacklistPresets = LuiData.Data.AbilityBlacklistPresets
 
 local type, pairs = type, pairs
 local zo_strformat = zo_strformat
@@ -82,7 +82,7 @@ local function GenerateCustomList(input)
         counter = counter + 1
         -- If the input is a numeric value then we can pull this abilityId's info.
         if type(id) == "number" then
-            options[counter] = zo_iconFormat(GetAbilityIcon(id), 16, 16) .. " [" .. id .. "] " .. zo_strformat("<<C:1>>", GetAbilityName(id))
+            options[counter] = zo_iconFormat(GetAbilityIcon(id), 16, 16) .. " [" .. id .. "] " .. zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
             -- If the input is not numeric then add this as a name only.
         else
             options[counter] = id

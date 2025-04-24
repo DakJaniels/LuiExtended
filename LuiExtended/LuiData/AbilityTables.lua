@@ -5,6 +5,17 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
+local Data = LuiData.Data
+
+local GetAbilityName = GetAbilityName
+local GetCollectibleName = GetCollectibleName
+local GetItemLinkName = GetItemLinkName
+local GetQuestItemName = GetQuestItemName
+local GetQuestItemNameFromLink = GetQuestItemNameFromLink
+local GetString = GetString
+local GetUnitRaceId = GetUnitRaceId
+local zo_strformat = zo_strformat
+local ZO_CachedStrFormat = ZO_CachedStrFormat
 
 --- @param summonShade integer
 --- @return integer
@@ -56,81 +67,81 @@ local darkShade
 
 -- AbilityTables namespace
 --- @class (partial) AbilityTables
-local AbilityTables =
+local abilityTables =
 {
 
     -- Dragonknight Cyrodiil Templates
-    Skill_Vengeance_Standard = 237627,         -- Vengeance Dragonknight Standard
-    Skill_Vengeance_Lava_Whip = 237606,        -- Vengeance Lava Whip
-    Skill_Vengeance_Searing_Strike = 237607,   -- Vengeance Searing Strike
-    Skill_Vengeance_Fiery_Breath = 237615,     -- Vengeance Fiery Breath
-    Skill_Vengeance_Fiery_Grip = 237620,       -- Vengeance Fiery Grip
-    Skill_Vengeance_Inferno = 237624,          -- Vengeance Inferno
-    Skill_Vengeance_Dragon_Leap = 237648,      -- Vengeance Dragon Leap
-    Skill_Vengeance_Spiked_Armor = 237630,     -- Vengeance Spiked Armor
-    Skill_Vengeance_Dark_Talons = 237636,      -- Vengeance Dark Talons
-    Skill_Vengeance_Dragon_Blood = 237638,     -- Vengeance Dragon Blood
-    Skill_Vengeance_Protective_Scale = 237639, -- Vengeance Protective Scale
-    Skill_Vengeance_Inhale = 237641,           -- Vengeance Inhale
-    Skill_Vengeance_Magma_Armor = 237790,      -- Vengeance Magma Armor
-    Skill_Vengeance_Stonefist = 237781,        -- Vengeance Stonefist
-    Skill_Vengeance_Molten_Weapons = 237782,   -- Vengeance Molten Weapons
-    Skill_Vengeance_Obsidian_Shield = 237785,  -- Vengeance Obsidian Shield
-    Skill_Vengeance_Petrify = 237787,          -- Vengeance Petrify
-    Skill_Vengeance_Ash_Cloud = 237788,        -- Vengeance Ash Cloud
+    Skill_Vengeance_Standard = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237627)),         -- Vengeance Dragonknight Standard
+    Skill_Vengeance_Lava_Whip = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237606)),        -- Vengeance Lava Whip
+    Skill_Vengeance_Searing_Strike = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237607)),   -- Vengeance Searing Strike
+    Skill_Vengeance_Fiery_Breath = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237615)),     -- Vengeance Fiery Breath
+    Skill_Vengeance_Fiery_Grip = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237620)),       -- Vengeance Fiery Grip
+    Skill_Vengeance_Inferno = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237624)),          -- Vengeance Inferno
+    Skill_Vengeance_Dragon_Leap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237648)),      -- Vengeance Dragon Leap
+    Skill_Vengeance_Spiked_Armor = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237630)),     -- Vengeance Spiked Armor
+    Skill_Vengeance_Dark_Talons = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237636)),      -- Vengeance Dark Talons
+    Skill_Vengeance_Dragon_Blood = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237638)),     -- Vengeance Dragon Blood
+    Skill_Vengeance_Protective_Scale = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237639)), -- Vengeance Protective Scale
+    Skill_Vengeance_Inhale = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237641)),           -- Vengeance Inhale
+    Skill_Vengeance_Magma_Armor = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237790)),      -- Vengeance Magma Armor
+    Skill_Vengeance_Stonefist = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237781)),        -- Vengeance Stonefist
+    Skill_Vengeance_Molten_Weapons = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237782)),   -- Vengeance Molten Weapons
+    Skill_Vengeance_Obsidian_Shield = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237785)),  -- Vengeance Obsidian Shield
+    Skill_Vengeance_Petrify = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237787)),          -- Vengeance Petrify
+    Skill_Vengeance_Ash_Cloud = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(237788)),        -- Vengeance Ash Cloud
 
     -- ---------------------------------------------------
     -- GENERIC BUFFS & DEBUFFS ---------------------------
     -- ---------------------------------------------------
 
     -- Major/Minor
-    Skill_Minor_Mangle = 61733,
+    Skill_Minor_Mangle = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61733)),
 
     -- Generic
-    Skill_Off_Balance = 14062,
-    Skill_Off_Balance_Immunity = 134599,
+    Skill_Off_Balance = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(14062)),
+    Skill_Off_Balance_Immunity = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(134599)),
     Skill_Major_Vulnerability_Immunity = GetString(LUIE_STRING_SKILL_GENERIC_MAJOR_VULNERABILITY_IMMUNITY),
-    Skill_Hindrance = 46210,
+    Skill_Hindrance = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46210)),
 
     -- ---------------------------------------------------
     -- INNATE ABILITIES ----------------------------------
     -- ---------------------------------------------------
 
     -- Simulated Auras
-    Innate_Recall = 6811,
+    Innate_Recall = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(6811)),
     Innate_Recall_Penalty = GetString(LUIE_STRING_SKILL_RECALL_PENALTY),               -- Recall Penalty
     Innate_Resurrection_Immunity = GetString(LUIE_STRING_SKILL_RESURRECTION_IMMUNITY), -- Resurrection Immunity
     Innate_Soul_Gem_Resurrection = GetString(LUIE_STRING_SKILL_SOUL_GEM_RESURRECTION), -- Soul Gem Resurrection
 
     -- Player Basic
-    Innate_Immobilize_Immunity = 29721,
-    Innate_Stun = 14756,      -- Stun
-    Innate_Disguise = 31287,  -- Disguise
-    Innate_Disguised = 23553, -- Disguised
-    Innate_Sneak = 20299,     -- Sneak
-    Innate_Hidden = 20309,    -- Hidden
+    Innate_Immobilize_Immunity = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29721)),
+    Innate_Stun = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(14756)),      -- Stun
+    Innate_Disguise = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(31287)),  -- Disguise
+    Innate_Disguised = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(23553)), -- Disguised
+    Innate_Sneak = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20299)),     -- Sneak
+    Innate_Hidden = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20309)),    -- Hidden
     Innate_Mounted = GetString(LUIE_STRING_SKILL_MOUNTED),
     Innate_Mounted_Passenger = GetString(LUIE_STRING_SKILL_MOUNTED_PASSENGER),
     Innate_Vanity_Pet = GetString(SI_COLLECTIBLECATEGORYTYPE3),
     Innate_Assistant = GetString(SI_COLLECTIBLECATEGORYTYPE8),
-    -- Innate_Sprint                     = 15614, -- Sprint
+    -- Innate_Sprint                     = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(15614)), -- Sprint
     -- Innate_Gallop                     = GetString(LUIE_STRING_SKILL_MOUNT_SPRINT), -- Gallop
-    Innate_Brace = 29761,                                                              -- Brace
-    Innate_Block = 2890,                                                               -- Block
-    Innate_Bash = 21970,                                                               -- Bash
-    Innate_Bash_Stun = 21971,                                                          -- Bash Stun
-    Innate_Fall_Damage = GetString(LUIE_STRING_SKILL_FALL_DAMAGE),                     -- Fall Damage
-    Innate_Absorbing_Skyshard = GetString(LUIE_STRING_SKILL_ABSORBING_SKYSHARD),       -- Absorbing Skyshard
-    Innate_Receiving_Boon = GetString(LUIE_STRING_SKILL_RECEIVING_BOON),               -- Receiving Boon
-    Innate_Ayleid_Well = GetString(LUIE_STRING_SKILL_AYLEID_WELL),                     -- Ayleid Well
-    Innate_Ayleid_Well_Fortified = GetString(LUIE_STRING_SKILL_AYLEID_WELL_FORTIFIED), -- Ayleid Well
-    Innate_Aetherial_Well = 151928,
-    Innate_CC_Immunity = 38117,                                                        -- CC Immunity
-    Innate_Stagger = 1834,                                                             -- Stagger
-    Innate_Revive = 5823,                                                              -- Revive
+    Innate_Brace = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29761)),       -- Brace
+    Innate_Block = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(2890)),        -- Block
+    Innate_Bash = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(21970)),        -- Bash
+    Innate_Bash_Stun = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(21971)),   -- Bash Stun
+    Innate_Fall_Damage = GetString(LUIE_STRING_SKILL_FALL_DAMAGE),                                  -- Fall Damage
+    Innate_Absorbing_Skyshard = GetString(LUIE_STRING_SKILL_ABSORBING_SKYSHARD),                    -- Absorbing Skyshard
+    Innate_Receiving_Boon = GetString(LUIE_STRING_SKILL_RECEIVING_BOON),                            -- Receiving Boon
+    Innate_Ayleid_Well = GetString(LUIE_STRING_SKILL_AYLEID_WELL),                                  -- Ayleid Well
+    Innate_Ayleid_Well_Fortified = GetString(LUIE_STRING_SKILL_AYLEID_WELL_FORTIFIED),              -- Ayleid Well
+    Innate_Aetherial_Well = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(151928)),
+    Innate_CC_Immunity = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38117)), -- CC Immunity
+    Innate_Stagger = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(1834)),      -- Stagger
+    Innate_Revive = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(5823)),       -- Revive
 
     Innate_Create_Station = GetString(LUIE_STRING_SKILL_CRAFTING_STATION),
-    Innate_Summon = 29585,
+    Innate_Summon = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29585)),
     Innate_Indrik_Nascent = GetCollectibleName(5710),
     Innate_Indrik_Spectral = zo_strformat("<<1>>", GetCollectibleName(6942)),
     Innate_Sovereign_Sow = GetCollectibleName(7270),
@@ -143,7 +154,7 @@ local AbilityTables =
 
     Innate_Merethic_Restorative_Resin = GetItemLinkName("|H0:item:69434:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
     Innate_Aetheric_Cipher = GetItemLinkName("|H0:item:115028:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
-    Innate_Create_Psijic_Ambrosia_Recipe = 68258,
+    Innate_Create_Psijic_Ambrosia_Recipe = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(68258)),
 
     Innate_Chef_Arquitius_Torte_Dissertation = GetItemLinkName("|H0:item:171430:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
     Innate_Chef_Arquitius_Lost_Thesis = GetItemLinkName("|H0:item:171434:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
@@ -173,65 +184,65 @@ local AbilityTables =
     Innate_Siege_of_Cyrodiil_Distinction = GetItemLinkName("|H0:item:167303:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
 
     -- World
-    Innate_Drop_Anchor = 86717,                                    -- Drop Anchor
-    Innate_Anchor_Drop = GetString(LUIE_STRING_SKILL_ANCHOR_DROP), -- Anchor Drop
-    Innate_Power_of_the_Daedra = 46690,                            -- Power of the Daedra
+    Innate_Drop_Anchor = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(86717)),         -- Drop Anchor
+    Innate_Anchor_Drop = GetString(LUIE_STRING_SKILL_ANCHOR_DROP),                                          -- Anchor Drop
+    Innate_Power_of_the_Daedra = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46690)), -- Power of the Daedra
 
     -- Weapon Attacks
-    Skill_Light_Attack = 39088,             -- Light Attack
-    Skill_Medium_Attack = 39097,            -- Medium Attack
-    Skill_Heavy_Attack = 39101,             -- Heavy Attack
+    Skill_Light_Attack = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(39088)),             -- Light Attack
+    Skill_Medium_Attack = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(39097)),            -- Medium Attack
+    Skill_Heavy_Attack = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(39101)),             -- Heavy Attack
 
-    Skill_Light_Attack_Unarmed = 23604,     -- Light Attack (Unarmed)
-    Skill_Heavy_Attack_Unarmed = 18429,     -- Heavy Attack (Unarmed)
+    Skill_Light_Attack_Unarmed = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(23604)),     -- Light Attack (Unarmed)
+    Skill_Heavy_Attack_Unarmed = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(18429)),     -- Heavy Attack (Unarmed)
 
-    Skill_Light_Attack_Two_Handed = 16037,  -- Light Attack (Two Handed)
-    Skill_Heavy_Attack_Two_Handed = 16041,  -- Heavy Attack (Two Handed)
-    Skill_Light_Attack_One_Handed = 15435,  -- Light Attack (One Handed)
-    Skill_Heavy_Attack_One_Handed = 15279,  -- Heavy Attack (One Handed)
-    Skill_Light_Attack_Dual_Wield = 16499,  -- Light Attack (Dual Wield)
-    Skill_Heavy_Attack_Dual_Wield = 16420,  -- Heavy Attack (Dual Wield)
-    Skill_Light_Attack_Bow = 16688,         -- Light Attack (Bow)
-    Skill_Heavy_Attack_Bow = 16691,         -- Heavy Attack (Bow)
+    Skill_Light_Attack_Two_Handed = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(16037)),  -- Light Attack (Two Handed)
+    Skill_Heavy_Attack_Two_Handed = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(16041)),  -- Heavy Attack (Two Handed)
+    Skill_Light_Attack_One_Handed = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(15435)),  -- Light Attack (One Handed)
+    Skill_Heavy_Attack_One_Handed = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(15279)),  -- Heavy Attack (One Handed)
+    Skill_Light_Attack_Dual_Wield = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(16499)),  -- Light Attack (Dual Wield)
+    Skill_Heavy_Attack_Dual_Wield = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(16420)),  -- Heavy Attack (Dual Wield)
+    Skill_Light_Attack_Bow = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(16688)),         -- Light Attack (Bow)
+    Skill_Heavy_Attack_Bow = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(16691)),         -- Heavy Attack (Bow)
 
-    Skill_Light_Attack_Ice = 16277,         -- Light Attack (Ice)
-    Skill_Heavy_Attack_Ice = 16261,         -- Heavy Attack (Ice)
-    Skill_Light_Attack_Inferno = 16165,     -- Light Attack (Inferno)
-    Skill_Heavy_Attack_Inferno = 15383,     -- Heavy Attack (Inferno)
-    Skill_Light_Attack_Lightning = 18350,   -- Light Attack (Lightning)
-    Skill_Heavy_Attack_Lightning = 18396,   -- Heavy Attack (Lightning)
+    Skill_Light_Attack_Ice = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(16277)),         -- Light Attack (Ice)
+    Skill_Heavy_Attack_Ice = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(16261)),         -- Heavy Attack (Ice)
+    Skill_Light_Attack_Inferno = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(16165)),     -- Light Attack (Inferno)
+    Skill_Heavy_Attack_Inferno = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(15383)),     -- Heavy Attack (Inferno)
+    Skill_Light_Attack_Lightning = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(18350)),   -- Light Attack (Lightning)
+    Skill_Heavy_Attack_Lightning = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(18396)),   -- Heavy Attack (Lightning)
 
-    Skill_Light_Attack_Restoration = 16145, -- Light Attack (Restoration)
-    Skill_Heavy_Attack_Restoration = 16212, -- Heavy Attack (Restoration)
+    Skill_Light_Attack_Restoration = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(16145)), -- Light Attack (Restoration)
+    Skill_Heavy_Attack_Restoration = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(16212)), -- Heavy Attack (Restoration)
 
-    Skill_Light_Attack_Volendrung = 116762, -- Light Attack (Volendrung)
-    Skill_Heavy_Attack_Volendrung = 116763, -- Heavy Attack (Volendrung)
+    Skill_Light_Attack_Volendrung = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(116762)), -- Light Attack (Volendrung)
+    Skill_Heavy_Attack_Volendrung = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(116763)), -- Heavy Attack (Volendrung)
 
-    Skill_Light_Attack_Werewolf = 32464,    -- Light Attack (Werewolf)
-    Skill_Heavy_Attack_Werewolf = 32477,    -- Heavy Attack (Werewolf)
+    Skill_Light_Attack_Werewolf = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(32464)),    -- Light Attack (Werewolf)
+    Skill_Heavy_Attack_Werewolf = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(32477)),    -- Heavy Attack (Werewolf)
 
     -- ---------------------------------------------------
-    -- COMSUMABLES & ITEMS -------------------------------
+    -- CONSUMABLES & ITEMS -------------------------------
     -- ---------------------------------------------------
 
     -- Glyphs
-    Item_Glyph_of_Weapon_Damage = 17910,
+    Item_Glyph_of_Weapon_Damage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(17910)),
 
     -- Potions/Poisons
-    Potion_Invisiblity = 3668,
-    Potion_Ravage_Health = 46111,
-    Potion_Restore_Health = 45221,
-    Potion_Restore_Magicka = 45223,
-    Potion_Restore_Stamina = 45225,
-    Poison_Creeping_Drain_Health = 79701,
-    Poison_Lingering_Restore_Health = 79702,
+    Potion_Invisiblity = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(3668)),
+    Potion_Ravage_Health = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46111)),
+    Potion_Restore_Health = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(45221)),
+    Potion_Restore_Magicka = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(45223)),
+    Potion_Restore_Stamina = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(45225)),
+    Poison_Creeping_Drain_Health = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(79701)),
+    Poison_Lingering_Restore_Health = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(79702)),
     Poison_Stealth_Draining_Poison = GetString(LUIE_STRING_SKILL_POISON_STEALTH_DRAIN),
     Poison_Conspicuous_Poison = GetString(LUIE_STRING_SKILL_POISON_CONSPICUOUS),
 
     -- Food/Drink
-    Food_Magicka_Stamina_Increase = 61294,
-    Food_Health_Stamina_Increase = 61255,
-    Food_Health_Magicka_Increase = 61257,
+    Food_Magicka_Stamina_Increase = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61294)),
+    Food_Health_Stamina_Increase = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61255)),
+    Food_Health_Magicka_Increase = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61257)),
     Food_Orzorgas_Tripe_Trifle_Pocket = GetItemLinkName("|H0:item:71057:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
     Food_Orzorgas_Blood_Price_Pie = GetItemLinkName("|H0:item:71058:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
     Food_Orzorgas_Smoked_Bear_Haunch = GetItemLinkName("|H0:item:71059:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
@@ -244,13 +255,13 @@ local AbilityTables =
     Food_Crown_Meal = GetItemLinkName("|H0:item:64711:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
     Food_Crown_Combat_Mystics_Stew = GetItemLinkName("|H0:item:124675:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
     Food_Crown_Vigorous_Ragout = GetItemLinkName("|H0:item:124676:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
-    Drink_Health_Recovery = 61322,
-    Drink_Magicka_Recovery = 61325,
-    Drink_Stamina_Recovery = 61328,
-    Drink_Magicka_Stamina_Recovery = 61345,
-    Drink_Health_Stamina_Recovery = 61340,
-    Drink_Health_Magicka_Recovery = 61335,
-    Drink_Primary_Stat_Recovery = 61350,
+    Drink_Health_Recovery = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61322)),
+    Drink_Magicka_Recovery = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61325)),
+    Drink_Stamina_Recovery = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61328)),
+    Drink_Magicka_Stamina_Recovery = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61345)),
+    Drink_Health_Stamina_Recovery = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61340)),
+    Drink_Health_Magicka_Recovery = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61335)),
+    Drink_Primary_Stat_Recovery = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61350)),
     Drink_Increase = GetString(LUIE_STRING_SKILL_DRINK_INCREASE),
     Drink_Orzorgas_Red_Frothgar = GetItemLinkName("|H0:item:71056:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
     Drink_Bowl_of_Peeled_Eyeballs = GetItemLinkName("|H0:item:87687:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
@@ -265,13 +276,13 @@ local AbilityTables =
     Drink_Crown_Vigorous_Tincture = GetItemLinkName("|H0:item:124678:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
 
     -- Experience Consumables
-    Experience_Psijic_Ambrosia = GetItemLinkName("|H0:item:64221:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),         -- Psijic Ambrosia
-    Experience_Aetherial_Ambrosia = GetItemLinkName("|H0:item:120076:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),     -- Aetherial Ambrosia
-    Experience_Mythic_Ambrosia = GetItemLinkName("|H0:item:115027:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),        -- Mythic Aetherial Ambrosia
-    Experience_Crown_Scroll = GetItemLinkName("|H0:item:64537:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"),           -- Crown Experience Scroll
-    Experience_Crown_Crate_Scroll_1 = GetItemLinkName("|H0:item:94439:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"),   -- Gold Coast Experience Scroll
-    Experience_Crown_Crate_Scroll_2 = GetItemLinkName("|H0:item:94440:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"),   -- Major Gold Coast Experience Scroll
-    Experience_Crown_Crate_Scroll_3 = GetItemLinkName("|H0:item:94441:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"),   -- Grand Gold Coast Experience Scroll
+    Experience_Psijic_Ambrosia = GetItemLinkName("|H0:item:64221:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),       -- Psijic Ambrosia
+    Experience_Aetherial_Ambrosia = GetItemLinkName("|H0:item:120076:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),   -- Aetherial Ambrosia
+    Experience_Mythic_Ambrosia = GetItemLinkName("|H0:item:115027:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),      -- Mythic Aetherial Ambrosia
+    Experience_Crown_Scroll = GetItemLinkName("|H0:item:64537:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"),         -- Crown Experience Scroll
+    Experience_Crown_Crate_Scroll_1 = GetItemLinkName("|H0:item:94439:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"), -- Gold Coast Experience Scroll
+    Experience_Crown_Crate_Scroll_2 = GetItemLinkName("|H0:item:94440:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"), -- Major Gold Coast Experience Scroll
+    Experience_Crown_Crate_Scroll_3 = GetItemLinkName("|H0:item:94441:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"), -- Grand Gold Coast Experience Scroll
     Experience_Crown_Crate_Scroll_4 = GetItemLinkName("|H0:item:214517:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"), -- Hero's Return Experience Scroll
 
     -- Alliance War Skill Consumables
@@ -317,8 +328,8 @@ local AbilityTables =
     Memento_Hidden_Pressure_Vent = GetCollectibleName(354),
     Memento_Coin_of_Illusory_Riches = GetCollectibleName(361),
     Memento_Malacaths_Wrathful_Flame = GetCollectibleName(353),
-    Memento_Jubliee_Cake = 87998,
-    Memento_Mud_Ball = 86749,
+    Memento_Jubliee_Cake = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(87998)),
+    Memento_Mud_Ball = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(86749)),
     Memento_Cherry_Blossom_Branch = GetCollectibleName(1108),
 
     Memento_Festive_Noise_Maker = GetCollectibleName(5885),
@@ -362,62 +373,66 @@ local AbilityTables =
 
     Set_Bogdan_the_Nightflame = GetString(LUIE_STRING_SKILL_SET_BOGDAN_THE_NIGHTFLAME),
     Set_Lord_Warden_Dusk = GetString(LUIE_STRING_SKILL_SET_LORD_WARDEN_DUSK),
-    Set_Scourge_Harvester = 59564,
-    Set_Maw_of_the_Infernal = 59507,
-    Set_Nerieneth = 59592,
-    Set_Shadowrend = 80989,
-    Set_Spawn_of_Mephala = 59497,
-    Set_Swarm_Mother = 80592,
+    Set_Scourge_Harvester = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(59564)),
+    Set_Maw_of_the_Infernal = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(59507)),
+    Set_Nerieneth = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(59592)),
+    Set_Shadowrend = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(80989)),
+    Set_Spawn_of_Mephala = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(59497)),
+    Set_Swarm_Mother = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(80592)),
     Set_The_Troll_King = GetString(LUIE_STRING_SKILL_SET_TROLL_KING),
     Set_Energy_Charge = GetString(LUIE_STRING_SKILL_SET_ENERGY_CHARGE),
-    Set_Scavenging_Demise = 116947,
-    Set_Varens_Legacy = 79029,
-    Set_Syvarras_Scales = 75717,
-    Set_Twin_Sisters = 32828,
-    Set_Wilderqueens_Arch = 34870,
-    Set_Plague_Slinger = 102113,
+    Set_Scavenging_Demise = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(116947)),
+    Set_Varens_Legacy = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(79029)),
+    Set_Syvarras_Scales = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(75717)),
+    Set_Twin_Sisters = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(32828)),
+    Set_Wilderqueens_Arch = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(34870)),
+    Set_Plague_Slinger = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(102113)),
     Set_Ice_Furnace = GetString(LUIE_STRING_SKILL_SET_ICE_FURNACE),
-    Set_Hand_of_Mephala = { 84353, 84355 },
-    Set_Tormentor = 67280,
-    Set_Destructive_Mage = 51315,
-    Set_Healing_Mage = 51442,
-    Set_Vicious_Serpent = 61440,
-    Set_Vicecannon_of_Venom = 79464,
+    Set_Hand_of_Mephala =
+    {
+        ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(84353)),
+        ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(84355))
+    },
+    Set_Tormentor = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(67280)),
+    Set_Destructive_Mage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(51315)),
+    Set_Healing_Mage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(51442)),
+    Set_Vicious_Serpent = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61440)),
+    Set_Vicecannon_of_Venom = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(79464)),
     Set_Cooldown = GetString(LUIE_STRING_SKILL_SET_COOLDOWN),
-    Set_Eternal_Hunt = 75927,
-    Set_Glorious_Defender = 71180,
-    Set_Para_Bellum = 71191,
-    Set_Winterborn = 71644,
-    Set_Nocturnals_Favor = 106803,
-    Set_Vestment_of_Olorime = 107117,
-    Set_Mantle_of_Siroria = 107093,
+    Set_Eternal_Hunt = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(75927)),
+    Set_Glorious_Defender = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(71180)),
+    Set_Para_Bellum = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(71191)),
+    Set_Winterborn = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(71644)),
+    Set_Nocturnals_Favor = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(106803)),
+    Set_Vestment_of_Olorime = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(107117)),
+    Set_Mantle_of_Siroria = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(107093)),
     Set_Harmful_Winds = GetString(LUIE_STRING_SKILL_SET_HARMFUL_WINDS),
-    Set_Sloads_Semblance = 106797,
-    Set_Shield_of_Ursus = 111437,
-    Set_Ursus_Blessing = 112414,
-    Set_Grace_of_Gloom = 106865,
+    Set_Sloads_Semblance = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(106797)),
+    Set_Shield_of_Ursus = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(111437)),
+    Set_Ursus_Blessing = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(112414)),
+    Set_Grace_of_Gloom = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(106865)),
     Set_Noble_Duelist = GetString(LUIE_STRING_SKILL_SET_NOBLE_DUELIST),
-    Set_Soldier_of_Anguish = 113460,
-    Set_Affliction = 34787,
-    Set_Sentry = 32807,
-    Set_Line_Breaker = 75753,
-    Set_False_Gods_Devotion = 121823,
-    Set_Morkuldin = 71670,
-    Set_Senchals_Duty = 129442,
-    Set_Phoenix = 68933,
-    Set_Immortal_Warrior = 51300,
-    Set_Eternal_Warrior = 61436,
-    Set_Juggernaut = 34512,
-    Set_Honors_Scorn = 121917,
-    Set_Honors_Love = 121913,
-    Set_Warming_Aura = 133210,
-    Set_Aegis_Caller = 133490,
-    Set_Reactive_Armor = 68947,
-    Set_Kynes_Blessing = 136098,
-    Set_Blood_Curse = 139903,
-    Set_Sanguine_Burst = 142305,
-    Set_Heed_the_Call = 142780,
-    Set_Legacy_of_Karth = 147388,
+    Set_Soldier_of_Anguish = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(113460)),
+    Set_Affliction = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(34787)),
+    Set_Sentry = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(32807)),
+    Set_Line_Breaker = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(75753)),
+    Set_False_Gods_Devotion = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(121823)),
+    Set_Morkuldin = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(71670)),
+    Set_Senchals_Duty = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(129442)),
+    Set_Phoenix = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(68933)),
+    Set_Immortal_Warrior = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(51300)),
+    Set_Eternal_Warrior = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61436)),
+    Set_Juggernaut = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(34512)),
+    Set_Honors_Scorn = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(121917)),
+    Set_Honors_Love = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(121913)),
+    Set_Warming_Aura = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(133210)),
+    Set_Aegis_Caller = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(133490)),
+    Set_Reactive_Armor = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(68947)),
+    Set_Kynes_Blessing = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(136098)),
+    Set_Blood_Curse = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(139903)),
+    Set_Sanguine_Burst = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(142305)),
+    Set_Heed_the_Call = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(142780)),
+    Set_Legacy_of_Karth = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(147388)),
 
     Disguise_Monks_Disguise = GetString(LUIE_STRING_SKILL_DISGUISE_MONKS_DISGUISE),
 
@@ -425,123 +440,123 @@ local AbilityTables =
     -- CHAMPION ABILITIES --------------------------------
     -- ---------------------------------------------------
 
-    Champion_Riposte = 60230,
-    Champion_Expert_Evasion = 151113,
+    Champion_Riposte = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(60230)),
+    Champion_Expert_Evasion = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(151113)),
 
     -- ---------------------------------------------------
     -- SKILL LINE PASSIVES -------------------------------
     -- ---------------------------------------------------
 
     -- Sorcerer
-    Passive_Persistence = 31378,
+    Passive_Persistence = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(31378)),
 
     -- Templar
-    Passive_Light_Weaver = 31760,
+    Passive_Light_Weaver = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(31760)),
 
     -- Warden
     Passive_Bond_with_Nature = GetString(LUIE_STRING_SKILL_BOND_WITH_NATURE),
-    Passive_Savage_Beast = 86062,
-    Passive_Natures_Gift = 93054,
+    Passive_Savage_Beast = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(86062)),
+    Passive_Natures_Gift = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(93054)),
 
     -- Weapon
-    Passive_Follow_Up = 29389,
-    Passive_Destruction_Expert = 30965,
+    Passive_Follow_Up = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29389)),
+    Passive_Destruction_Expert = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(30965)),
 
     -- Soul Magic
-    Passive_Soul_Summons = 39269,
+    Passive_Soul_Summons = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(39269)),
 
     -- Vampire
-    Passive_Blood_Ritual = 33091,
+    Passive_Blood_Ritual = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(33091)),
 
     -- Werewolf
-    Passive_Bloodmoon = 32639,
+    Passive_Bloodmoon = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(32639)),
 
     -- Undaunted
-    Passive_Undaunted_Command = 55584,
+    Passive_Undaunted_Command = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(55584)),
 
     -- Racial
-    Passive_Red_Diamond = 36155,
+    Passive_Red_Diamond = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(36155)),
 
     -- ---------------------------------------------------
     -- CLASS SKILLS --------------------------------------
     -- ---------------------------------------------------
 
     -- Dragonknight
-    Skill_Fiery_Breath = 20917,
-    Skill_Fiery_Grip = 20492,
-    Skill_Empowering_Chains = 20499,
-    Skill_Inferno = 28967,
-    Skill_Shackle = 32905,
-    Skill_Dragon_Blood = 29004,
-    Skill_Inhale = 31837,
-    Skill_Dragon_Leap = 29016,
-    Skill_Take_Flight = 32719,
-    Skill_Ferocious_Leap = 32715,
-    Skill_Stonefist = 29032,
-    Skill_Molten_Weapons = 29043,
+    Skill_Fiery_Breath = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20917)),
+    Skill_Fiery_Grip = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20492)),
+    Skill_Empowering_Chains = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20499)),
+    Skill_Inferno = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(28967)),
+    Skill_Shackle = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(32905)),
+    Skill_Dragon_Blood = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29004)),
+    Skill_Inhale = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(31837)),
+    Skill_Dragon_Leap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29016)),
+    Skill_Take_Flight = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(32719)),
+    Skill_Ferocious_Leap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(32715)),
+    Skill_Stonefist = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29032)),
+    Skill_Molten_Weapons = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29043)),
 
     -- Nightblade
-    Skill_Death_Stroke = 33398,
-    Skill_Incapacitating_Strike = 36508,
-    Skill_Soul_Harvest = 36514,
-    Skill_Corrosive_Strike = 33219,
+    Skill_Death_Stroke = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(33398)),
+    Skill_Incapacitating_Strike = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(36508)),
+    Skill_Soul_Harvest = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(36514)),
+    Skill_Corrosive_Strike = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(33219)),
     Skill_Corrosive_Spin = GetString(LUIE_STRING_SKILL_CORROSIVE_SPIN_TP),
-    Skill_Summon_Shade = GetSummonShade(summonShade),
+    Skill_Summon_Shade = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(GetSummonShade(summonShade))),
     Skill_Shade = "Shade",
-    Skill_Dark_Shade = GetDarkShade(darkShade),
-    Skill_Shadow_Image = GetShadowImage(shadowImage),
-    Skill_Crippling_Grasp = 36957,
-    Skill_Sap_Essence = 36891,
+    Skill_Dark_Shade = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(GetDarkShade(darkShade))),
+    Skill_Shadow_Image = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(GetShadowImage(shadowImage))),
+    Skill_Crippling_Grasp = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(36957)),
+    Skill_Sap_Essence = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(36891)),
 
     -- Sorcerer
-    Skill_Crystal_Shard = 43714,
-    Skill_Crystal_Blast = 46704,
-    Skill_Crystal_Fragments = 46324,
-    Skill_Daedric_Tomb = 24842,
-    Skill_Daedric_Minefield = 24834,
+    Skill_Crystal_Shard = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(43714)),
+    Skill_Crystal_Blast = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46704)),
+    Skill_Crystal_Fragments = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46324)),
+    Skill_Daedric_Tomb = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(24842)),
+    Skill_Daedric_Minefield = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(24834)),
     Skill_Unstable_Pulse = GetString(LUIE_STRING_SKILL_UNSTABLE_PULSE),
     Skill_Volatile_Pulse = GetString(LUIE_STRING_SKILL_VOLATILE_PULSE),
-    Skill_Summon_Storm_Atronach = 23634,
-    Skill_Greater_Storm_Atronach = 23492,
-    Skill_Summon_Charged_Atronach = 23495,
-    Skill_Atronach_Zap = 23428,
-    Skill_Bound_Aegis = 24163,
-    Skill_Lightning_Form = 23210,
-    Skill_Kick = 4125,
-    Skill_Entropic_Touch = 9743,
-    Skill_Intercept = 23284,
+    Skill_Summon_Storm_Atronach = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(23634)),
+    Skill_Greater_Storm_Atronach = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(23492)),
+    Skill_Summon_Charged_Atronach = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(23495)),
+    Skill_Atronach_Zap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(23428)),
+    Skill_Bound_Aegis = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(24163)),
+    Skill_Lightning_Form = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(23210)),
+    Skill_Kick = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(4125)),
+    Skill_Entropic_Touch = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(9743)),
+    Skill_Intercept = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(23284)),
 
     -- Templar
-    Skill_Puncturing_Sweep = 26797,
-    Skill_Aurora_Javelin = 26800,
-    Skill_Crescent_Sweep = 22139,
-    Skill_Sun_Fire = 21726,
-    Skill_Dark_Flare = 22110,
-    Skill_Unstable_Core = 22004,
-    Skill_Radiant_Glory = 63044,
-    Skill_Nova = 21752,
-    Skill_Solar_Disturbance = 21758,
-    Skill_Cleansing_Ritual = 22265,
-    Skill_Restoring_Focus = 22237,
+    Skill_Puncturing_Sweep = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(26797)),
+    Skill_Aurora_Javelin = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(26800)),
+    Skill_Crescent_Sweep = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(22139)),
+    Skill_Sun_Fire = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(21726)),
+    Skill_Dark_Flare = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(22110)),
+    Skill_Unstable_Core = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(22004)),
+    Skill_Radiant_Glory = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(63044)),
+    Skill_Nova = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(21752)),
+    Skill_Solar_Disturbance = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(21758)),
+    Skill_Cleansing_Ritual = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(22265)),
+    Skill_Restoring_Focus = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(22237)),
 
     -- Warden
-    Skill_Feral_Guardian = 85982,
-    Skill_Eternal_Guardian = 85986,
-    Skill_Lotus_Blossom = 85855,
-    Skill_Natures_Grasp = 85564,
-    Skill_Bursting_Vines = 85859,
-    Skill_Natures_Embrace = 85858,
-    Skill_Shimmering_Shield = 86143,
-    Skill_Frozen_Device = 86179,
+    Skill_Feral_Guardian = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(85982)),
+    Skill_Eternal_Guardian = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(85986)),
+    Skill_Lotus_Blossom = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(85855)),
+    Skill_Natures_Grasp = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(85564)),
+    Skill_Bursting_Vines = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(85859)),
+    Skill_Natures_Embrace = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(85858)),
+    Skill_Shimmering_Shield = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(86143)),
+    Skill_Frozen_Device = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(86179)),
 
     -- Necromancer
-    Skill_Skeletal_Mage = 114317,
-    Skill_Skeletal_Arcanist = 118726,
-    Skill_Bitter_Harvest = 115238,
-    Skill_Deaden_Pain = 118623,
-    Skill_Bone_Goliath_Transformation = 115001,
-    Skill_Pummeling_Goliath = 118664,
-    Skill_Ravenous_Goliath = 118279,
+    Skill_Skeletal_Mage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(114317)),
+    Skill_Skeletal_Arcanist = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(118726)),
+    Skill_Bitter_Harvest = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(115238)),
+    Skill_Deaden_Pain = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(118623)),
+    Skill_Bone_Goliath_Transformation = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(115001)),
+    Skill_Pummeling_Goliath = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(118664)),
+    Skill_Ravenous_Goliath = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(118279)),
 
     -- ---------------------------------------------------
     -- WEAPON SKILLS -------------------------------------
@@ -551,115 +566,115 @@ local AbilityTables =
     Skill_Blessing_of_Restoration = GetString(LUIE_STRING_SKILL_BLESSING_OF_RESTORATION),
 
     -- Destruction Staff
-    Skill_Crushing_Shock = 46348,
-    Skill_Frozen = 68719,
-    Skill_Flame_Touch = 29073,
-    Skill_Flame_Clench = 38985,
-    Skill_Shock_Clench = 38993,
-    Skill_Frost_Clench = 38989,
-    Skill_Weakness_to_Elements = 29173,
-    Skill_Frost_Pulsar = 39163,
+    Skill_Crushing_Shock = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46348)),
+    Skill_Frozen = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(68719)),
+    Skill_Flame_Touch = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29073)),
+    Skill_Flame_Clench = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38985)),
+    Skill_Shock_Clench = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38993)),
+    Skill_Frost_Clench = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38989)),
+    Skill_Weakness_to_Elements = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29173)),
+    Skill_Frost_Pulsar = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(39163)),
 
     -- Two-Handed
-    Skill_Uppercut = 28279,
-    Skill_Stampede = 38788,
-    Skill_Cleave = 20919,
+    Skill_Uppercut = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(28279)),
+    Skill_Stampede = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38788)),
+    Skill_Cleave = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20919)),
 
     -- One Hand & Shield
-    Skill_Puncture = 28306,
-    Skill_Deep_Slash = 38268,
-    Skill_Shield_Charge = 28719,
-    Skill_Invasion = 38405,
-    Skill_Power_Bash = 28365,
+    Skill_Puncture = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(28306)),
+    Skill_Deep_Slash = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38268)),
+    Skill_Shield_Charge = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(28719)),
+    Skill_Invasion = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38405)),
+    Skill_Power_Bash = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(28365)),
 
     -- Dual Wield
-    Skill_Twin_Slashes = 28379,
-    Skill_Hidden_Blade = 21157,
-    Skill_Shrouded_Daggers = 38914,
-    Skill_Flying_Blade = 38910,
+    Skill_Twin_Slashes = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(28379)),
+    Skill_Hidden_Blade = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(21157)),
+    Skill_Shrouded_Daggers = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38914)),
+    Skill_Flying_Blade = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38910)),
 
     -- Bow
-    Skill_Draining_Shot = 38669,
-    Skill_Bombard = 38705,
-    Skill_Venom_Arrow = 38645,
-    Skill_Rapid_Fire = 83465,
+    Skill_Draining_Shot = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38669)),
+    Skill_Bombard = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38705)),
+    Skill_Venom_Arrow = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38645)),
+    Skill_Rapid_Fire = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(83465)),
 
     -- ---------------------------------------------------
     -- ARMOR SKILLS --------------------------------------
     -- ---------------------------------------------------
 
     -- Heavy Armor
-    Skill_Unstoppable_Brute = 39205,
+    Skill_Unstoppable_Brute = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(39205)),
 
     -- ---------------------------------------------------
     -- SOUL MAGIC SKILLS ---------------------------------
     -- ---------------------------------------------------
 
-    Skill_Consuming_Trap = 40317,
+    Skill_Consuming_Trap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(40317)),
 
     -- ---------------------------------------------------
     -- VAMPIRE SKILLS ------------------------------------
     -- ---------------------------------------------------
 
-    Skill_Feed = 33152,
+    Skill_Feed = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(33152)),
     Skill_Vampirism = GetString(LUIE_STRING_SKILL_VAMPIRISM),
     Skill_Profane_Symbol = GetString(LUIE_STRING_SKILL_PROFANE_SYMBOL),
-    Skill_Blood_Scion = 32624,
-    Skill_Swarming_Scion = 38932,
-    Skill_Perfect_Scion = 38931,
+    Skill_Blood_Scion = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(32624)),
+    Skill_Swarming_Scion = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38932)),
+    Skill_Perfect_Scion = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38931)),
 
     -- ---------------------------------------------------
     -- WEREWOLF SKILLS -----------------------------------
     -- ---------------------------------------------------
 
-    Skill_Werewolf_Transformation = 32455,
-    Skill_Devour = 32634,
-    Skill_Carnage = 137157,
-    Skill_Brutal_Carnage = 137186,
-    Skill_Feral_Carnage = 137165,
-    Skill_Hircines_Rage = 58317,
-    Skill_Remove = 31262,
+    Skill_Werewolf_Transformation = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(32455)),
+    Skill_Devour = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(32634)),
+    Skill_Carnage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(137157)),
+    Skill_Brutal_Carnage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(137186)),
+    Skill_Feral_Carnage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(137165)),
+    Skill_Hircines_Rage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(58317)),
+    Skill_Remove = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(31262)),
 
     -- ---------------------------------------------------
     -- GUILD SKILLS --------------------------------------
     -- ---------------------------------------------------
 
     -- Dark Brotherhood
-    Skill_Blade_of_Woe = 78219,
+    Skill_Blade_of_Woe = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(78219)),
 
     -- Fighters Guild
-    Skill_Revealed = 11717,
-    Skill_Marked = 103943,
-    Skill_Lightweight_Beast_Trap = 40372,
-    Skill_Flawless_Dawnbreaker = 40161,
+    Skill_Revealed = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(11717)),
+    Skill_Marked = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(103943)),
+    Skill_Lightweight_Beast_Trap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(40372)),
+    Skill_Flawless_Dawnbreaker = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(40161)),
 
     -- Mages Guild
-    Skill_Magelight = 30920,
-    Skill_Entropy = 28567,
-    Skill_Meteor = 16536,
-    Skill_Ice_Comet = 40489,
-    Skill_Shooting_Star = 40493,
+    Skill_Magelight = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(30920)),
+    Skill_Entropy = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(28567)),
+    Skill_Meteor = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(16536)),
+    Skill_Ice_Comet = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(40489)),
+    Skill_Shooting_Star = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(40493)),
 
     -- Psijic Order
-    Skill_Imbue_Weapon = 103483,
-    Skill_Elemental_Weapon = 103571,
-    Skill_Crushing_Weapon = 103623,
+    Skill_Imbue_Weapon = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(103483)),
+    Skill_Elemental_Weapon = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(103571)),
+    Skill_Crushing_Weapon = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(103623)),
 
     -- Undaunted
-    Skill_Black_Widow = 41994,
-    Skill_Arachnophobia = 42016,
+    Skill_Black_Widow = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(41994)),
+    Skill_Arachnophobia = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(42016)),
 
     -- ---------------------------------------------------
     -- ALLIANCE WAR --------------------------------------
     -- ---------------------------------------------------
 
     -- Assault
-    Skill_Caltrops = 33376,
-    Skill_Razor_Caltrops = 40242,
+    Skill_Caltrops = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(33376)),
+    Skill_Razor_Caltrops = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(40242)),
 
     -- Support
-    Skill_Lingering_Flare = 61519,
-    Skill_Reviving_Barrier = 40237,
+    Skill_Lingering_Flare = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61519)),
+    Skill_Reviving_Barrier = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(40237)),
 
     -- ---------------------------------------------------
     -- CYRODIIL ------------------------------------------
@@ -676,27 +691,27 @@ local AbilityTables =
     Skill_Pact = GetString(LUIE_STRING_SKILL_PACT),
     Skill_Covenant = GetString(LUIE_STRING_SKILL_COVENANT),
     Skill_Dominion = GetString(LUIE_STRING_SKILL_DOMINION),
-    Skill_Ballista = 68205,
-    Skill_Fire_Ballista = 35049,
+    Skill_Ballista = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(68205)),
+    Skill_Fire_Ballista = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(35049)),
     Skill_Lightning_Ballista = GetString(LUIE_STRING_SKILL_LIGHTNING_BALLISTA),
 
-    Skill_Stone_Trebuchet = 14159,
-    Skill_Iceball_Trebuchet = 13551,
-    Skill_Firepot_Trebuchet = 7010,
-    Skill_Meatbag_Catapult = 14774,
-    Skill_Oil_Catapult = 16789,
-    Skill_Scattershot_Catapult = 14611,
+    Skill_Stone_Trebuchet = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(14159)),
+    Skill_Iceball_Trebuchet = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(13551)),
+    Skill_Firepot_Trebuchet = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(7010)),
+    Skill_Meatbag_Catapult = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(14774)),
+    Skill_Oil_Catapult = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(16789)),
+    Skill_Scattershot_Catapult = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(14611)),
 
-    Skill_Shock_Lancer = 138555,
-    Skill_Fire_Lancer = 138426,
-    Skill_Frost_Lancer = 138551,
+    Skill_Shock_Lancer = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(138555)),
+    Skill_Fire_Lancer = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(138426)),
+    Skill_Frost_Lancer = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(138551)),
 
     Skill_Cold_Stone_Trebuchet = GetString(LUIE_STRING_SKILL_COLD_STONE_TREBUCHET),
     Skill_Cold_Fire_Trebuchet = GetString(LUIE_STRING_SKILL_COLD_FIRE_TREBUCHET),
     Skill_Cold_Fire_Ballista = GetString(LUIE_STRING_SKILL_COLD_FIRE_BALLISTA),
 
-    Skill_Flaming_Oil = 15774,
-    Skill_Battering_Ram = 15197,
+    Skill_Flaming_Oil = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(15774)),
+    Skill_Battering_Ram = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(15197)),
 
     Skill_Siege_Repair_Kit = GetItemLinkName("|H0:item:27112:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"),          -- Siege Repair Kit
     Skill_Keep_Wall_Repair_Kit = GetItemLinkName("|H0:item:27138:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"),      -- Keep Wall Masonry Repair Kit
@@ -708,158 +723,158 @@ local AbilityTables =
     Skill_Dominion_Forward_Camp = GetItemLinkName("|H0:item:29533:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),      -- Dominion Forward Camp
     Skill_Covenant_Forward_Camp = GetItemLinkName("|H0:item:29535:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),      -- Covenant Forward Camp
 
-    Skill_Razor_Armor = 36304,
+    Skill_Razor_Armor = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(36304)),
 
     Skill_Consume_Lifeforce = GetString(LUIE_STRING_SKILL_CONSUME_LIFEFORCE),
-    Skill_Wall_of_Souls = 21677,
+    Skill_Wall_of_Souls = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(21677)),
 
     -- ---------------------------------------------------
     -- BATTLEGROUNDS -------------------------------------
     -- ---------------------------------------------------
 
-    Skill_Mark_of_the_Worm = 95830,
+    Skill_Mark_of_the_Worm = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(95830)),
 
     -- ---------------------------------------------------
     -- NPC ABILITIES -------------------------------------
     -- ---------------------------------------------------
 
     -- Shared/Basic
-    Skill_Hamstring = 70068,
+    Skill_Hamstring = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(70068)),
     Skill_Boss_CC_Immunity = GetString(LUIE_STRING_SKILL_BOSS_CC_IMMUNITY),
-    Skill_Backstabber = 13739,
+    Skill_Backstabber = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(13739)),
 
     -- Human
-    Skill_Ignite = 14070,
+    Skill_Ignite = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(14070)),
     Skill_Shield_Rush = GetString(LUIE_STRING_SKILL_SHIELD_RUSH),
-    Skill_Shock_Aura = 17867,
-    Skill_Shock_Blast = 85255,
+    Skill_Shock_Aura = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(17867)),
+    Skill_Shock_Blast = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(85255)),
     Skill_Improved = GetString(LUIE_STRING_SKILL_IMPROVED),
-    Skill_Knockback = 77905,
-    Skill_Weakness = 8705,
-    Skill_Staff_Strike = 2901,
-    Skill_Ice_Barrier = 14178,
-    Skill_Vanish = 24687,
-    Skill_Bone_Cage = 35387,
+    Skill_Knockback = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(77905)),
+    Skill_Weakness = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(8705)),
+    Skill_Staff_Strike = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(2901)),
+    Skill_Ice_Barrier = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(14178)),
+    Skill_Vanish = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(24687)),
+    Skill_Bone_Cage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(35387)),
     Skill_Defensive_Ward = GetString(LUIE_STRING_SKILL_DEFENSIVE_WARD),
-    Skill_Divine_Leap = 54027,
+    Skill_Divine_Leap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(54027)),
     Skill_Inspire = GetString(LUIE_STRING_SKILL_INSPIRE),
     Skill_Hide_in_Shadows = GetString(LUIE_STRING_SKILL_HIDE_IN_SHADOWS),
-    Skill_Recover = 42905,
-    Skill_Clobber = 24671,
+    Skill_Recover = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(42905)),
+    Skill_Clobber = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(24671)),
     Skill_Shadowy_Barrier = GetString(LUIE_STRING_SKILL_SHADOWY_BARRIER),
-    Skill_Flare_Trap = 74628,
-    Skill_Bear_Trap = 39058,
-    Skill_Void_Burst = 36987,
+    Skill_Flare_Trap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(74628)),
+    Skill_Bear_Trap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(39058)),
+    Skill_Void_Burst = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(36987)),
 
     -- Justice
-    Skill_Heavy_Blow = 63157,
+    Skill_Heavy_Blow = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(63157)),
     Skill_Mighty_Charge = GetString(LUIE_STRING_SKILL_MIGHTY_CHARGE),
-    Skill_Throw_Dagger = 28499,
+    Skill_Throw_Dagger = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(28499)),
     Skill_Detection = GetString(LUIE_STRING_SKILL_DETECTION),
 
     -- Cyrodiil
-    Skill_Shock_Torrent = 46726,
+    Skill_Shock_Torrent = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46726)),
     Skill_Improved_Shock_Torrent = GetString(LUIE_STRING_SKILL_IMPROVED_SHOCK_TORRENT),
-    Skill_Lasting_Storm = 46818,
-    Skill_Bleeding_Strike = 46830,
-    Skill_Telekinetic_Prison = 21636,
-    Skill_Shattering_Prison = 46905,
+    Skill_Lasting_Storm = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46818)),
+    Skill_Bleeding_Strike = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46830)),
+    Skill_Telekinetic_Prison = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(21636)),
+    Skill_Shattering_Prison = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46905)),
     Skill_Siege_Barrier = GetString(LUIE_STRING_SKILL_SIEGE_BARRIER),
     Skill_Fire_Torrent = GetString(LUIE_STRING_SKILL_FIRE_TORRENT),
-    Skill_Improved_Fire_Torrent = 46990,
+    Skill_Improved_Fire_Torrent = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46990)),
     Skill_Puncturing_Chains = GetString(LUIE_STRING_SKILL_PUNCTURING_CHAINS),
     Skill_Improved_Volley = GetString(LUIE_STRING_SKILL_IMPROVED_VOLLEY),
 
     -- Animals
-    Skill_Lacerate = 5452,
-    Skill_Bite = 17957,
-    Skill_Savage_Blow = 139956,
-    Skill_Slam = 70366,
+    Skill_Lacerate = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(5452)),
+    Skill_Bite = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(17957)),
+    Skill_Savage_Blow = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(139956)),
+    Skill_Slam = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(70366)),
     Skill_Rip_and_Tear = GetString(LUIE_STRING_SKILL_RIP_AND_TEAR),
-    Skill_Rush = 14380,
-    Skill_Vigorus_Swipes = 75634,
+    Skill_Rush = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(14380)),
+    Skill_Vigorus_Swipes = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(75634)),
     Skill_Barreling_Charge = GetString(LUIE_STRING_SKILL_BARRELING_CHARGE),
-    Skill_Storm_Bound = 55864,
-    Skill_Swipe = 2850,
+    Skill_Storm_Bound = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(55864)),
+    Skill_Swipe = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(2850)),
     Skill_Blitz = GetString(LUIE_STRING_SKILL_BLITZ),
-    Skill_Toxic_Mucus = 72793,
-    Skill_Gore = 85202,
-    Skill_Bile_Spit = 64559,
+    Skill_Toxic_Mucus = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(72793)),
+    Skill_Gore = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(85202)),
+    Skill_Bile_Spit = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(64559)),
 
     -- Insects
-    Skill_Paralyze = 6756,
-    Skill_Web = 58521,
-    Skill_Inject_Larva = 9229,
+    Skill_Paralyze = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(6756)),
+    Skill_Web = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(58521)),
+    Skill_Inject_Larva = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(9229)),
     Skill_Zoom = GetString(LUIE_STRING_SKILL_ZOOM),
-    Skill_Vile_Bite = 61243,
-    Skill_Infectious_Swarm = 61360,
-    Skill_Necrotic_Explosion = 61427,
-    Skill_Contagion = 47838,
+    Skill_Vile_Bite = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61243)),
+    Skill_Infectious_Swarm = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61360)),
+    Skill_Necrotic_Explosion = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61427)),
+    Skill_Contagion = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(47838)),
     Skill_Plow = GetString(LUIE_STRING_SKILL_PLOW),
-    Skill_Zap = 8429,
+    Skill_Zap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(8429)),
     Skill_Leeching_Bite = GetString(LUIE_STRING_SKILL_LEECHING_BITE),
     Skill_Fetcherfly_Colony = GetString(LUIE_STRING_SKILL_FETCHERFLY_COLONY),
     Skill_Fetcherfly_Swarm = GetString(LUIE_STRING_SKILL_FETCHERFLY_SWARM),
-    Skill_Call_Scribs = 38545,
+    Skill_Call_Scribs = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38545)),
 
     -- Daedra
-    Skill_Summon_Daedric_Arch = 65404,
+    Skill_Summon_Daedric_Arch = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(65404)),
     Skill_Empower_Atronach_Flame = GetString(LUIE_STRING_SKILL_EMPOWER_ATRONACH_FLAME),
     Skill_Empower_Atronach_Frost = GetString(LUIE_STRING_SKILL_EMPOWER_ATRONACH_FROST),
     Skill_Empower_Atronach_Storm = GetString(LUIE_STRING_SKILL_EMPOWER_ATRONACH_STORM),
-    Skill_Headbutt = 54380,
-    Skill_Tail_Spike = 4799,
-    Skill_Rending_Leap = 93745,
-    Skill_Radiance = 4891,
-    Skill_Unyielding_Mace = 4817,
-    Skill_Pin = 65709,
-    Skill_Sweep = 67872,
-    Skill_Enrage = 71696,
-    Skill_Stomp = 91848,
-    Skill_Boulder_Toss = 91855,
-    Skill_Shockwave = 4653,
-    Skill_Doom_Truths_Gaze = 9219,
-    Skill_The_Feast = 11083,
-    Skill_Flame_Geyser = 34376,
+    Skill_Headbutt = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(54380)),
+    Skill_Tail_Spike = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(4799)),
+    Skill_Rending_Leap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(93745)),
+    Skill_Radiance = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(4891)),
+    Skill_Unyielding_Mace = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(4817)),
+    Skill_Pin = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(65709)),
+    Skill_Sweep = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(67872)),
+    Skill_Enrage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(71696)),
+    Skill_Stomp = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(91848)),
+    Skill_Boulder_Toss = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(91855)),
+    Skill_Shockwave = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(4653)),
+    Skill_Doom_Truths_Gaze = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(9219)),
+    Skill_The_Feast = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(11083)),
+    Skill_Flame_Geyser = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(34376)),
 
     -- Undead
-    Skill_Desecrated_Ground = 38828,
+    Skill_Desecrated_Ground = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38828)),
     Skill_Colossal_Stomp = GetString(LUIE_STRING_SKILL_COLOSSAL_STOMP),
-    Skill_Defiled_Ground = 22521,
-    Skill_Soul_Rupture = 73931,
+    Skill_Defiled_Ground = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(22521)),
+    Skill_Soul_Rupture = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(73931)),
 
     -- Monsters
-    Skill_Luring_Snare = 2821,
-    Skill_Assault = 4304,
-    Skill_Crushing_Limbs = 3855,
-    Skill_Pillars_of_Nirn = 75955,
-    Skill_Claw = 27922,
-    Skill_Obliterate = 127908,
-    Skill_Fiery_Surge = 75949,
+    Skill_Luring_Snare = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(2821)),
+    Skill_Assault = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(4304)),
+    Skill_Crushing_Limbs = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(3855)),
+    Skill_Pillars_of_Nirn = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(75955)),
+    Skill_Claw = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(27922)),
+    Skill_Obliterate = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(127908)),
+    Skill_Fiery_Surge = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(75949)),
 
     -- Dwemer
-    Skill_Static_Shield = 64463,
-    Skill_Dart = 7485,
-    Skill_Split_Bolt = 91093,
-    Skill_Turret_Mode = 71045,
-    Skill_Overcharge = 27333,
+    Skill_Static_Shield = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(64463)),
+    Skill_Dart = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(7485)),
+    Skill_Split_Bolt = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(91093)),
+    Skill_Turret_Mode = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(71045)),
+    Skill_Overcharge = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(27333)),
 
     -- ---------------------------------------------------
     -- TRAPS ---------------------------------------------
     -- ---------------------------------------------------
 
     Trap_Cold_Fire_Trap = GetString(LUIE_STRING_SKILL_COLD_FIRE_TRAP),
-    Trap_Falling_Rocks = 20886,
-    Trap_Fire_Trap = 17198,
-    Trap_Spike_Trap = 21940,
-    Trap_Sigil_of_Frost = 20258,
+    Trap_Falling_Rocks = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20886)),
+    Trap_Fire_Trap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(17198)),
+    Trap_Spike_Trap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(21940)),
+    Trap_Sigil_of_Frost = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20258)),
 
     Trap_Lava_Trap = GetString(LUIE_STRING_SKILL_LAVA_TRAP),
     Trap_Lightning_Trap = GetString(LUIE_STRING_SKILL_LIGHTNING_TRAP),
-    Trap_Blade_Trap = 66793,
+    Trap_Blade_Trap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(66793)),
 
-    Trap_Slaughterfish = zo_strformat("<<C:1>>", GetItemLinkName("|H0:item:42861:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),
-    Trap_Lava = 5139,
+    Trap_Slaughterfish = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetItemLinkName("|H0:item:42861:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")),
+    Trap_Lava = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(5139)),
 
     Trap_Charge_Wire = GetString(LUIE_STRING_SKILL_CHARGE_WIRE),
     Trap_Steam_Vent = GetString(LUIE_STRING_SKILL_STEAM_VENT),
@@ -868,19 +883,19 @@ local AbilityTables =
     Trap_Gas_Blossom = GetItemLinkName("|H0:item:145492:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
     Trap_Lantern_Mantis = GetItemLinkName("|H0:item:145493:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
 
-    Trap_Hiding_Spot = 72712,
+    Trap_Hiding_Spot = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(72712)),
 
     -- ---------------------------------------------------
     -- WORLD BOSSES --------------------------------------
     -- ---------------------------------------------------
 
-    Skill_Ferocious_Charge = 83033,
-    Skill_Molten_Impact = 83203,
+    Skill_Ferocious_Charge = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(83033)),
+    Skill_Molten_Impact = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(83203)),
     Skill_Molten_Pillar_Incalescence = GetString(LUIE_STRING_SKILL_MOLTEN_PILLAR_INCALESCENCE),
-    Skill_Trapping_Bolt = 83925,
-    Skill_Remove_Bolt = 25763,
-    Skill_Poison_Spit = 21708,
-    Skill_Graven_Slash = 84292,
+    Skill_Trapping_Bolt = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(83925)),
+    Skill_Remove_Bolt = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(25763)),
+    Skill_Poison_Spit = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(21708)),
+    Skill_Graven_Slash = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(84292)),
 
     -- ---------------------------------------------------
     -- QUEST ABILITIES -----------------------------------
@@ -890,8 +905,8 @@ local AbilityTables =
     Skill_Lava_Foot_Stomp = GetString(LUIE_STRING_SKILL_LAVA_FOOT_STOMP),
     Skill_Knife_Juggling = GetString(LUIE_STRING_SKILL_KNIFE_JUGGLING),
     Skill_Torch_Juggling = GetString(LUIE_STRING_SKILL_TORCH_JUGGLING),
-    Skill_Sword_Swallowing = 84533,
-    Skill_Celebratory_Belch = 84847,
+    Skill_Sword_Swallowing = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(84533)),
+    Skill_Celebratory_Belch = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(84847)),
     Event_Petal_Pelters = GetQuestItemNameFromLink("|H0:quest_item:6145|h|h"),
     Event_Crow_Caller = GetItemLinkName("|H0:item:81189:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
 
@@ -899,103 +914,103 @@ local AbilityTables =
     Event_Burst_Dazzler = GetQuestItemNameFromLink("|H0:quest_item:6192|h|h"),
     Event_Flash_Dazzler = GetQuestItemNameFromLink("|H0:quest_item:6193|h|h"),
 
-    Skill_Grease_Slip = 143695,
-    Skill_Thrash = 144340,
+    Skill_Grease_Slip = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(143695)),
+    Skill_Thrash = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(144340)),
 
     -- MSQ
     Skill_Wall_of_Flames = GetString(LUIE_STRING_SKILL_WALL_OF_FLAMES),
-    Skill_Necrotic = 41852,
-    Skill_Barrier = 38573,
-    Skill_Swordstorm = 36858,
-    Skill_Flame_Shield = 37173,
-    Skill_Royal_Strike = 38729,
+    Skill_Necrotic = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(41852)),
+    Skill_Barrier = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38573)),
+    Skill_Swordstorm = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(36858)),
+    Skill_Flame_Shield = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(37173)),
+    Skill_Royal_Strike = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(38729)),
     Skill_Consecrate_Shrine = GetString(LUIE_STRING_SKILL_CONSECRATE_SHRINE),
     Skill_Remove_Ward = "Remove Ward",
-    Skill_Shock = 27598,
-    Skill_Drink_Mead = 13941,
+    Skill_Shock = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(27598)),
+    Skill_Drink_Mead = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(13941)),
     Skill_Unstable_Portal = GetString(LUIE_STRING_SKILL_UNSTABLE_PORTAL),
     Skill_Stabilize_Portal = GetString(LUIE_STRING_SKILL_STABILIZE_PORTAL),
     Skill_Close_Unstable_Rift = GetString(LUIE_STRING_SKILL_CLOSE_UNSTABLE_RIFT),
 
     -- Fighters Guild
-    Skill_Palolels_Rage = 39577,
-    Skill_Prismatic_Light = 25981,
-    Skill_Quick_Strike = 10618,
-    Skill_Quick_Shot = 12437,
+    Skill_Palolels_Rage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(39577)),
+    Skill_Prismatic_Light = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(25981)),
+    Skill_Quick_Strike = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(10618)),
+    Skill_Quick_Shot = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(12437)),
     Skill_Flame_Blossom = GetString(LUIE_STRING_SKILL_FLAME_BLOSSOM),
 
     -- Mages Guild
-    Skill_Rock = 26775,
-    Skill_Essence = 25337,
+    Skill_Rock = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(26775)),
+    Skill_Essence = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(25337)),
     Skill_Sahdinas_Essence = GetString(LUIE_STRING_SKILL_SAHDINAS_ESSENCE),
     Skill_Rashomtas_Essence = GetString(LUIE_STRING_SKILL_RASHOMTAS_ESSENCE),
     Skill_Polymorph_Skeleton = GetString(LUIE_STRING_SKILL_POLYMORPH_SKELETON),
-    Skill_Drain_Vitality = 8787,
-    Skill_Ungulate_Ordnance = 39393,
+    Skill_Drain_Vitality = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(8787)),
+    Skill_Ungulate_Ordnance = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(39393)),
 
     -- Aldmeri Dominion
     Skill_Drain_Energy = GetString(LUIE_STRING_SKILL_DRAIN_ENERGY),
-    Skill_Blessing = 33029,
+    Skill_Blessing = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(33029)),
     Skill_Beckon_Gathwen = GetString(LUIE_STRING_SKILL_BECKON_GATHWEN),
-    Skill_Summon = 29585,
-    Skill_Ancestral_Spirit = 48921,
-    Skill_Drinking = 23527,
-    Skill_Disruption = 31321,
-    Skill_Voice_to_Wake_the_Dead = 5030,
+    Skill_Summon = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29585)),
+    Skill_Ancestral_Spirit = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(48921)),
+    Skill_Drinking = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(23527)),
+    Skill_Disruption = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(31321)),
+    Skill_Voice_to_Wake_the_Dead = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(5030)),
     Skill_Barrier_Rebuke = GetString(LUIE_STRING_SKILL_BARRIER_REBUKE),
-    Skill_Dispel = 8490,
+    Skill_Dispel = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(8490)),
     Skill_Teleport_Scroll = GetString(LUIE_STRING_SKILL_TELEPORT_SCROLL),
-    Skill_Purify = 22260,
+    Skill_Purify = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(22260)),
     Skill_Bind_Hands = GetString(LUIE_STRING_SKILL_BIND_HANDS),
     Skill_Bind_Bear = GetString(LUIE_STRING_SKILL_BIND_BEAR),
     Skill_Aetherial_Shift = GetString(LUIE_STRING_SKILL_AETHERIAL_SHIFT),
     Skill_Free_Spirit = GetString(LUIE_STRING_SKILL_FREE_SPIRIT),
     Skill_Unbind = GetString(LUIE_STRING_SKILL_UNBIND),
-    Skill_Crystal = 67121,
+    Skill_Crystal = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(67121)),
     Skill_Backfire = GetString(LUIE_STRING_SKILL_BACKFIRE),
-    Skill_Close_Portal = 23370,
-    Skill_Lightning_Strike = 27596,
-    Skill_Push = 8692,
-    Skill_Absorb = 30869,
+    Skill_Close_Portal = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(23370)),
+    Skill_Lightning_Strike = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(27596)),
+    Skill_Push = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(8692)),
+    Skill_Absorb = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(30869)),
     Skill_Mantles_Shadow = GetString(LUIE_STRING_SKILL_MANTLES_SHADOW),
-    Skill_Quaking_Stomp = 43820,
-    Skill_Projectile_Vomit = 43827,
-    Skill_Call_for_Help = 53430,
+    Skill_Quaking_Stomp = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(43820)),
+    Skill_Projectile_Vomit = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(43827)),
+    Skill_Call_for_Help = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(53430)),
     Skill_Throw_Water = GetString(LUIE_STRING_SKILL_THROW_WATER),
-    Skill_Snake_Scales = 36713,
-    Skill_Wolfs_Pelt = 36843,
-    Skill_Tigers_Fur = 36828,
-    Skill_Feedback = 32063,
-    Skill_Soul_Binding = 21171,
+    Skill_Snake_Scales = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(36713)),
+    Skill_Wolfs_Pelt = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(36843)),
+    Skill_Tigers_Fur = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(36828)),
+    Skill_Feedback = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(32063)),
+    Skill_Soul_Binding = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(21171)),
     Skill_Empower_Heart = GetString(LUIE_STRING_SKILL_EMPOWER_TWILIT_HEART),
     Skill_Restricting_Vines = GetString(LUIE_STRING_SKILL_RESTRICTING_VINES),
     Skill_Change_Clothes = GetString(LUIE_STRING_SKILL_CHANGE_CLOTHES),
     Skill_Fancy_Clothing = GetString(LUIE_STRING_SKILL_FANCY_CLOTHING),
-    Skill_Flames = 64704,
-    Skill_Burrow = 8974,
-    Skill_Emerge = 20746,
+    Skill_Flames = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(64704)),
+    Skill_Burrow = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(8974)),
+    Skill_Emerge = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20746)),
     Skill_Serpent_Spit = GetString(LUIE_STRING_SKILL_SERPENT_SPIT),
     Skill_Shadow_Wood = GetString(LUIE_STRING_SKILL_SHADOW_WOOD),
     Skill_Disperse_Corruption = GetString(LUIE_STRING_SKILL_DISPERSE_CORRUPTION),
-    Skill_Undead_Legion = 35809,
+    Skill_Undead_Legion = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(35809)),
     Skill_Call_Corrupt_Lurchers = GetString(LUIE_STRING_SKILL_CALL_CORRUPT_LURCHERS),
 
     -- Daggerfall Covenant
     Skill_Neramos_Control_Rod = GetQuestItemName(3703),
-    Skill_Vision_of_the_Past = 36834,
+    Skill_Vision_of_the_Past = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(36834)),
 
     -- Summerset Quests
-    Skill_Pustulant_Eruption = 105867,
+    Skill_Pustulant_Eruption = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(105867)),
 
     -- Elsweyr Quests
-    Skill_Flame_Aura = 124352,
+    Skill_Flame_Aura = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(124352)),
     Skill_Star_Haven_Dragonhorn = GetString(LUIE_STRING_SKILL_STAR_HAVEN_DRAGONHORN),
-    Skill_Steadfast_Ward = 37232,
-    Skill_Wing_Thrash = 125242,
+    Skill_Steadfast_Ward = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(37232)),
+    Skill_Wing_Thrash = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(125242)),
 
     -- Greymoor Quests
     Skill_Piercing_Dagger = GetString(LUIE_STRING_SKILL_PIERCING_DAGGER),
-    Skill_Frostbolt = 119222,
+    Skill_Frostbolt = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(119222)),
     Skill_Freezing_Vines = GetString(LUIE_STRING_SKILL_FREEZING_VINES),
     Skill_Freezing_Vineburst = GetString(LUIE_STRING_SKILL_FREEZING_VINEBURST),
 
@@ -1004,111 +1019,111 @@ local AbilityTables =
     -- ---------------------------------------------------
 
     -- Dragonstar Area
-    Skill_Dawnbreaker = 35713,
-    Skill_Flame_Volley = 53314,
-    Skill_Daedric_Curse = 24326,
-    Skill_Poison_Cloud = 21411,
-    Skill_Flurry = 28607,
-    Skill_Mages_Wrath = 19123,
+    Skill_Dawnbreaker = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(35713)),
+    Skill_Flame_Volley = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(53314)),
+    Skill_Daedric_Curse = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(24326)),
+    Skill_Poison_Cloud = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(21411)),
+    Skill_Flurry = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(28607)),
+    Skill_Mages_Wrath = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(19123)),
     Skill_Caustic_Armor = GetString(LUIE_STRING_SKILL_CAUSTIC_ARMOR),
-    Skill_Enslavement = 83774,
-    Skill_Cinder_Storm = 20779,
-    Skill_Petrify = 29037,
-    Skill_Celestial_Ward = 54315,
-    Skill_Draining_Poison = 60442,
+    Skill_Enslavement = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(83774)),
+    Skill_Cinder_Storm = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20779)),
+    Skill_Petrify = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29037)),
+    Skill_Celestial_Ward = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(54315)),
+    Skill_Draining_Poison = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(60442)),
     Skill_Natures_Blessing = GetString(LUIE_STRING_SKILL_NATURES_BLESSING),
     Skill_Reflective_Scale = GetString(LUIE_STRING_SKILL_REFLECTIVE_SCALE),
-    Skill_Summon_Scamp = 39555,
-    Skill_Summon_Harvester = 58054,
+    Skill_Summon_Scamp = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(39555)),
+    Skill_Summon_Harvester = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(58054)),
     Skill_Summon_Daedric_Titan = GetString(LUIE_STRING_SKILL_SUMMON_DAEDRIC_TITAN),
-    Skill_Suppression_Field = 28341,
-    Skill_Sucked_Under = 55221,
-    Skill_Spirit_Shield = 56985,
-    Skill_Blazing_Fire = 34959,
+    Skill_Suppression_Field = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(28341)),
+    Skill_Sucked_Under = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(55221)),
+    Skill_Spirit_Shield = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(56985)),
+    Skill_Blazing_Fire = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(34959)),
     Skill_Empowered_by_the_Light = GetString(LUIE_STRING_SKILL_EMPOWERED_BY_THE_LIGHT),
-    Skill_Warmth = 29430,
+    Skill_Warmth = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29430)),
     Skill_Arena_Torch = GetString(LUIE_STRING_SKILL_ARENA_TORCH),
-    Skill_Biting_Cold = 53341,
-    Skill_Circle_of_Protection_NPC = 35737,
+    Skill_Biting_Cold = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(53341)),
+    Skill_Circle_of_Protection_NPC = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(35737)),
 
     -- Maelstrom Arena
-    Skill_Sigil_of_Healing = 66920,
-    Skill_Defiled_Grave = 70893,
-    Skill_Overload = 72690,
+    Skill_Sigil_of_Healing = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(66920)),
+    Skill_Defiled_Grave = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(70893)),
+    Skill_Overload = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(72690)),
     Skill_Energize = GetString(LUIE_STRING_SKILL_ENERGIZE),
     Skill_Defensive_Protocol = GetString(LUIE_STRING_SKILL_DEFENSIVE_PROTOCOL),
 
-    Skill_Electrified_Water = 69913,
-    Skill_Call_Lightning = 73881,
-    Skill_Spit = 76094,
+    Skill_Electrified_Water = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(69913)),
+    Skill_Call_Lightning = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(73881)),
+    Skill_Spit = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(76094)),
     Skill_Venting_Flames = GetString(LUIE_STRING_SKILL_VENTING_FLAMES),
-    Skill_Voltaic_Overload = 109059,
-    Skill_Cold_Snap = 72705,
+    Skill_Voltaic_Overload = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(109059)),
+    Skill_Cold_Snap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(72705)),
     Skill_Summon_Deathless_Wolf = GetString(LUIE_STRING_SKILL_SUMMON_DEATHLESS_WOLF),
-    Skill_Iceberg_Calving = 71702,
-    Skill_Frigid_Waters = 67805,
+    Skill_Iceberg_Calving = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(71702)),
+    Skill_Frigid_Waters = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(67805)),
 
     -- ---------------------------------------------------
     -- DUNGEON EFFECTS -----------------------------------
     -- ---------------------------------------------------
 
     -- Banished Cells I
-    Skill_Tail_Smite = 47587,
-    Skill_Shadow_Proxy = 114655,
-    Skill_Overpower = 52997,
+    Skill_Tail_Smite = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(47587)),
+    Skill_Shadow_Proxy = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(114655)),
+    Skill_Overpower = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(52997)),
 
     -- Banished Cells II
     Skill_Pool_of_Fire = GetString(LUIE_STRING_SKILL_POOL_OF_FIRE),
     Skill_Sisters_Bond = GetString(LUIE_STRING_SKILL_SISTERS_BOND),
-    Skill_Levitate = 28570,
-    Skill_Essence_Siphon = 28750,
+    Skill_Levitate = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(28570)),
+    Skill_Essence_Siphon = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(28750)),
     Skill_Daedric_Chaos = GetString(LUIE_STRING_SKILL_DAEDRIC_CHAOS),
     Skill_Chaotic_Dispersion = GetString(LUIE_STRING_SKILL_CHAOTIC_DISPERSION),
     Skill_Chaotic_Return = GetString(LUIE_STRING_SKILL_CHAOTIC_RETURN),
-    Skill_Summon_Daedroth = 69356,
+    Skill_Summon_Daedroth = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(69356)),
     Skill_Resilience = GetString(LUIE_STRING_SKILL_RESILIENCE),
 
     -- Elden Hollow I
-    Skill_Executioners_Strike = 16834,
+    Skill_Executioners_Strike = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(16834)),
     Skill_Whirling_Axe = GetString(LUIE_STRING_SKILL_WHIRLING_AXE),
-    Skill_Crushing_Blow = 33189, -- TODO: Move to the first instance of this rename being neccesary
-    Skill_Measured_Uppercut = 34607,
+    Skill_Crushing_Blow = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(33189)), -- TODO: Move to the first instance of this rename being necessary
+    Skill_Measured_Uppercut = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(34607)),
     Skill_Heal_Spores = GetString(LUIE_STRING_SKILL_HEAL_SPORES),
     Skill_Summon_Saplings = GetString(LUIE_STRING_SKILL_SUMMON_STRANGLER_SAPLINGS),
     Skill_Reanimate_Skeletons = GetString(LUIE_STRING_SKILL_REANIMATE_SKELETONS),
 
     -- Elden Hollow II
-    Skill_Fortified_Ground = 32648,
-    Skill_Empowered_Ground = 32647,
+    Skill_Fortified_Ground = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(32648)),
+    Skill_Empowered_Ground = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(32647)),
     Skill_Siphon_Magicka = GetString(LUIE_STRING_SKILL_SIPHON_MAGICKA),
     Skill_Siphon_Stamina = GetString(LUIE_STRING_SKILL_SIPHON_STAMINA),
     Skill_Shadow_Tendril = GetString(LUIE_STRING_SKILL_SHADOW_TENDRIL),
     Skill_Nova_Tendril = GetString(LUIE_STRING_SKILL_NOVA_TENDRIL),
 
     -- City of Ash I
-    Skill_Steel_Cyclone = 5843,
-    Skill_Fan_of_Flames = 34654,
-    Skill_Thorny_Backhand = 34190,
-    Skill_Fiery_Deception = 52224,
-    Skill_Blazing_Arrow = 34901,
-    Skill_Blazing_Embers = 34953,
-    Skill_Summon_Flame_Atronach = 34623,
+    Skill_Steel_Cyclone = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(5843)),
+    Skill_Fan_of_Flames = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(34654)),
+    Skill_Thorny_Backhand = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(34190)),
+    Skill_Fiery_Deception = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(52224)),
+    Skill_Blazing_Arrow = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(34901)),
+    Skill_Blazing_Embers = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(34953)),
+    Skill_Summon_Flame_Atronach = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(34623)),
     Skill_Summon_Flame_Atronachs = GetString(LUIE_STRING_SKILL_SUMMON_FLAME_ATRONACHS),
     Skill_Oblivion_Gate = GetString(LUIE_STRING_SKILL_OBLIVION_GATE),
 
     -- City of Ash II
     Skill_Trail_of_Flames = GetString(LUIE_STRING_SKILL_TRAIL_OF_FLAMES),
-    Skill_Pyroclasm = 92269,
-    Skill_Fire_Rune = 47102,
-    Skill_Seismic_Tremor = 55203,
+    Skill_Pyroclasm = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(92269)),
+    Skill_Fire_Rune = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(47102)),
+    Skill_Seismic_Tremor = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(55203)),
     Skill_Enraged_Fortitude = GetString(LUIE_STRING_SKILL_ENRAGED_FORTITUDE),
-    Skill_Wing_Gust = 26554,
+    Skill_Wing_Gust = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(26554)),
     Skill_Flame_Tsunami = GetString(LUIE_STRING_SKILL_FLAME_TSUNAMI),
     Skill_Ignore_Pain = GetString(LUIE_STRING_SKILL_IGNORE_PAIN),
-    Skill_Flame_Bolt = 55513,
-    Skill_Call_the_Flames = 55514,
-    Skill_Slag_Geyser = 56068,
-    Skill_Platform_Detonation = 56548,
+    Skill_Flame_Bolt = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(55513)),
+    Skill_Call_the_Flames = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(55514)),
+    Skill_Slag_Geyser = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(56068)),
+    Skill_Platform_Detonation = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(56548)),
     Skill_Volcanic_Shield = GetString(LUIE_STRING_SKILL_VOLCANIC_SHIELD),
     Skill_Meteoric_Strike = GetString(LUIE_STRING_SKILL_METEORIC_STRIKE),
     Skill_Flame_Barrier = GetString(LUIE_STRING_SKILL_FLAME_BARRIER),
@@ -1116,103 +1131,103 @@ local AbilityTables =
     Skill_Call_Storm_Atronachs = GetString(LUIE_STRING_SKILL_CALL_STORM_ATRONACHS),
 
     -- Tempest Island
-    Skill_Sonic_Scream = 46732,
+    Skill_Sonic_Scream = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46732)),
     Skill_Sudden_Storm = GetString(LUIE_STRING_SKILL_SUDDEN_STORM),
-    Skill_Shadowstep = 18190,
-    Skill_Poisoned_Blade = 29063,
-    Skill_Stormfist = 80520,
-    Skill_Wind_Charge = 26746,
-    Skill_Twister = 26514,
-    Skill_Heavy_Slash = 51993,
+    Skill_Shadowstep = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(18190)),
+    Skill_Poisoned_Blade = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29063)),
+    Skill_Stormfist = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(80520)),
+    Skill_Wind_Charge = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(26746)),
+    Skill_Twister = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(26514)),
+    Skill_Heavy_Slash = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(51993)),
     Skill_Precision_Strike = GetString(LUIE_STRING_SKILL_PRECISION_STRIKE),
 
     -- Selene's Web
     Skill_Primal_Swarm = GetString(LUIE_STRING_SKILL_PRIMAL_SWARM),
-    Skill_Volley = 28876,
+    Skill_Volley = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(28876)),
     Skill_Senche_Spirit = GetString(LUIE_STRING_SKILL_SENCHE_SPIRIT),
-    Skill_Lash = 5240,
-    Skill_Vicious_Maul = 30996,
-    Skill_Trampling_Charge = 30987,
+    Skill_Lash = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(5240)),
+    Skill_Vicious_Maul = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(30996)),
+    Skill_Trampling_Charge = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(30987)),
     Skill_Selenes_Rose = GetString(LUIE_STRING_SKILL_SELENES_ROSE),
-    Skill_Free_Ally = 31180,
+    Skill_Free_Ally = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(31180)),
     Skill_Primal_Maul = GetString(LUIE_STRING_SKILL_PRIMAL_MAUL),
-    Skill_Primal_Leap = 30901,
+    Skill_Primal_Leap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(30901)),
     Skill_Root_Guard = GetString(LUIE_STRING_SKILL_ROOT_GUARD),
     Skill_Earth_Mender = GetString(LUIE_STRING_SKILL_EARTH_MENDER),
     Skill_True_Shot = GetString(LUIE_STRING_SKILL_TRUE_SHOT),
 
     -- Spindleclutch I
-    Skill_Summon_Swarm = 51408,
-    Skill_Arachnid_Leap = 17960,
+    Skill_Summon_Swarm = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(51408)),
+    Skill_Arachnid_Leap = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(17960)),
     Skill_Spawn_Hatchlings = GetString(LUIE_STRING_SKILL_SPAWN_HATCHLINGS),
-    Skill_Web_Blast = 18078,
-    Skill_Grappling_Web = 35572,
-    Skill_Daedric_Explosion = 18058,
+    Skill_Web_Blast = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(18078)),
+    Skill_Grappling_Web = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(35572)),
+    Skill_Daedric_Explosion = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(18058)),
 
     -- Spindleclutch II
-    Skill_Vicious_Smash = 28093,
-    Skill_Quake = 10270,
-    Skill_Cave_In = 27995,
-    Skill_Praxins_Nightmare = 47122,
-    Skill_Harrowing_Ring = 27703,
+    Skill_Vicious_Smash = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(28093)),
+    Skill_Quake = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(10270)),
+    Skill_Cave_In = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(27995)),
+    Skill_Praxins_Nightmare = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(47122)),
+    Skill_Harrowing_Ring = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(27703)),
     Skill_Wracking_Pain = GetString(LUIE_STRING_SKILL_WRACKING_PAIN),
 
     -- Wayrest Sewers I
-    Skill_Dark_Lance = 9441,
-    Skill_Summon_Restless_Souls = 9463,
-    Skill_Hallucinogenic_Fumes = 35006,
+    Skill_Dark_Lance = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(9441)),
+    Skill_Summon_Restless_Souls = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(9463)),
+    Skill_Hallucinogenic_Fumes = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(35006)),
 
     -- Wayrest Sewers II
-    Skill_Scourging_Spark = 36613,
-    Skill_Necromantic_Implosion = 17207,
+    Skill_Scourging_Spark = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(36613)),
+    Skill_Necromantic_Implosion = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(17207)),
     Skill_Escaped_Souls = GetString(LUIE_STRING_SKILL_ESCAPED_SOULS),
-    Skill_Overhead_Smash = 20915,
+    Skill_Overhead_Smash = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20915)),
 
     -- Crypt of Hearts I
-    Skill_Trample = 46947,
-    Skill_Immolate = 46679,
-    Skill_Electric_Prison = 22432,
+    Skill_Trample = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46947)),
+    Skill_Immolate = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46679)),
+    Skill_Electric_Prison = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(22432)),
     Skill_Overwhelming_Blow = GetString(LUIE_STRING_SKILL_OVERWHELMING_BLOW),
 
     -- Crypt of Hearts II
     Skill_Summon_Spiderkith = GetString(LUIE_STRING_SKILL_SUMMON_SPIDERKITH),
     Skill_Summon_Death_Spider = GetString(LUIE_STRING_SKILL_SUMMON_DEATH_SPIDER),
-    Skill_Summon_Atronach = 52040,
-    Skill_Chattering_Web = 51381,
-    Skill_Spider_Swarm = 51410,
-    Skill_Shock_Stomp = 53599,
-    Skill_Fire_Stomp = 61611,
-    Skill_Shock_Form = 52167,
-    Skill_Fire_Form = 52166,
+    Skill_Summon_Atronach = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(52040)),
+    Skill_Chattering_Web = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(51381)),
+    Skill_Spider_Swarm = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(51410)),
+    Skill_Shock_Stomp = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(53599)),
+    Skill_Fire_Stomp = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(61611)),
+    Skill_Shock_Form = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(52167)),
+    Skill_Fire_Form = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(52166)),
     Skill_Split_Flare = GetString(LUIE_STRING_SKILL_SPLIT_FLARE),
     Skill_Void_Grip = GetString(LUIE_STRING_SKILL_VOID_GRIP),
-    Skill_Fulminating_Void = 51799,
+    Skill_Fulminating_Void = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(51799)),
     Skill_Skull_Volley = GetString(LUIE_STRING_SKILL_SKULL_VOLLEY),
-    Skill_Daedric_Step = 46581,
-    Skill_Soul_Pulse = 51853,
-    Skill_Cold_Strike = 53123,
+    Skill_Daedric_Step = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(46581)),
+    Skill_Soul_Pulse = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(51853)),
+    Skill_Cold_Strike = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(53123)),
     Skill_Chilling_Bolt = GetString(LUIE_STRING_SKILL_CHILLING_BOLT),
-    Skill_Soul_Sacrifice = 51969,
+    Skill_Soul_Sacrifice = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(51969)),
     Skill_Draw_the_Ebony_Blade = GetString(LUIE_STRING_SKILL_DRAW_THE_EBONY_BLADE),
     Skill_Ebony_Shield = GetString(LUIE_STRING_SKILL_EBONY_SHIELD),
-    Skill_Resist_Necrosis = 53185,
-    Skill_Lethal_Stab = 51988,
+    Skill_Resist_Necrosis = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(53185)),
+    Skill_Lethal_Stab = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(51988)),
 
     -- Volenfell
     Skill_Mighty_Swing = GetString(LUIE_STRING_SKILL_MIGHTY_SWING),
     Skill_Flame_Wraith = GetString(LUIE_STRING_SKILL_FLAME_WRAITH),
-    Skill_Burning_Ground = 25143,
+    Skill_Burning_Ground = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(25143)),
     Skill_Gargoyle_Leap = GetString(LUIE_STRING_SKILL_GARGOYLE_LEAP),
-    Skill_Explosive_Bolt = 25655,
-    Skill_Tail_Swipe = 24777,
-    Skill_Rupture = 29164,
+    Skill_Explosive_Bolt = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(25655)),
+    Skill_Tail_Swipe = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(24777)),
+    Skill_Rupture = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(29164)),
 
     -- Frostvault
-    Skill_Rending_Bleed = 117286,
-    Skill_Leaping_Crush = 109801,
-    Skill_Lifting_Strike = 109834,
-    Skill_Frenzied_Pummeling = 118489,
-    Skill_Frozen_Aura = 109806,
+    Skill_Rending_Bleed = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(117286)),
+    Skill_Leaping_Crush = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(109801)),
+    Skill_Lifting_Strike = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(109834)),
+    Skill_Frenzied_Pummeling = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(118489)),
+    Skill_Frozen_Aura = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(109806)),
 
     -- ---------------------------------------------------
     -- KEEP UPGRADE --------------------------------------
@@ -1238,23 +1253,7 @@ local AbilityTables =
     Keep_Upgrade_Food_Guard_Abilities = GetString(LUIE_STRING_KEEP_UPGRADE_FOOD_GUARD_ABILITIES),
 }
 
---- @type AbilityTables[]
-local AbilityTablesStrings = setmetatable({},
-    {
-        __index = function (t, k)
-            local v = AbilityTables[k]
-            if type(v) == "number" then
-                local name = zo_strformat("<<C:1>>", GetAbilityName(v))
-                t[k] = name
-                return name
-            elseif type(v) == "string" then
-                t[k] = v
-                return v
-            end
-            return v
-        end
-    })
-
 -- Export string data to global namespace
 --- @class (partial) AbilityTables
-LuiData.Data.Abilities = AbilityTablesStrings
+--- Converted to strings with a __index metamethod.
+Data.Abilities = abilityTables

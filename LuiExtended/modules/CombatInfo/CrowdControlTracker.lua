@@ -10,8 +10,8 @@ local CombatInfo = LUIE.CombatInfo
 --- @class (partial) CrowdControlTracker
 local CrowdControlTracker = CombatInfo.CrowdControlTracker
 
-local Effects = LUIE.Data.Effects
-local CrowdControl = LUIE.Data.CrowdControl
+local Effects = LuiData.Data.Effects
+local CrowdControl = LuiData.Data.CrowdControl
 local eventManager = GetEventManager()
 local animationManager = GetAnimationManager()
 local table_insert = table.insert
@@ -285,7 +285,7 @@ local function ResolveAbilityName(abilityId, sourceName)
     local abilityName = GetAbilityName(abilityId)
 
     if Effects.EffectOverrideByName[abilityId] then
-        sourceName = zo_strformat("<<C:1>>", sourceName)
+        sourceName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
         if Effects.EffectOverrideByName[abilityId][sourceName] then
             abilityName = Effects.EffectOverrideByName[abilityId][sourceName].name or abilityName
         end
@@ -319,7 +319,7 @@ local function ResolveAbilityIcon(abilityId, sourceName)
     local abilityIcon = GetAbilityIcon(abilityId)
 
     if Effects.EffectOverrideByName[abilityId] then
-        sourceName = zo_strformat("<<C:1>>", sourceName)
+        sourceName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
         if Effects.EffectOverrideByName[abilityId][sourceName] then
             abilityIcon = Effects.EffectOverrideByName[abilityId][sourceName].icon or abilityIcon
         end
@@ -490,7 +490,7 @@ function CrowdControlTracker:OnCombat(eventCode, result, isError, abilityName, a
 
     -- if result~=ACTION_RESULT_EFFECT_GAINED_DURATION and result~=ACTION_RESULT_STUNNED and result~=ACTION_RESULT_FEARED and result~=ACTION_RESULT_STAGGERED and result~=ACTION_RESULT_IMMUNE and result~=ACTION_RESULT_DISORIENTED then return end
 
-    if abilityName == LUIE.Data.Abilities.Trap_Hiding_Spot then -- TODO: Put IDs here instead or add to blacklist instead
+    if abilityName == LuiData.Data.Abilities.Trap_Hiding_Spot then -- TODO: Put IDs here instead or add to blacklist instead
         return
     end
 

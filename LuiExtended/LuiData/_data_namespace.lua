@@ -86,143 +86,183 @@
 --- @field ZoneNames ZoneNames
 --- @field ZoneTable ZoneTable
 
+-- Define all the tables individually first
+local Abilities = {}
+
+local AbilityBlacklistPresets =
+{
+    MajorBuffs = {},
+    MajorDebuffs = {},
+    MinorBuffs = {},
+    MinorDebuffs = {},
+}
+
+local AlertBossNameConvert = {}
+local AlertMapOverride = {}
+local AlertTable = {}
+local AlertZoneOverride = {}
+local CastBarTable = {}
+local CollectibleTables = {}
+
+local CombatTextBlacklistPresets =
+{
+    Necromancer = {},
+    Sets = {},
+    Sorcerer = {},
+    Templar = {},
+    Warden = {},
+}
+
+local CombatTextConstants = {}
+
+local CrowdControl =
+{
+    IgnoreList = {},
+    LavaAlerts = {},
+    ReversedLogic = {},
+    SpecialCC = {},
+    aoeNPCBoss = {},
+    aoeNPCElite = {},
+    aoeNPCNormal = {},
+    aoePlayerNormal = {},
+    aoePlayerSet = {},
+    aoePlayerUltimate = {},
+    aoeTraps = {},
+}
+
+local DebugResults = {}
+local DebugAuras = {}
+
+local Effects =
+{
+    AddGroundDamageAura = {},
+    AddNameAura = {},
+    AddNameOnBossEngaged = {},
+    AddNameOnEvent = {},
+    AddNoDurationBarHighlight = {},
+    AddStackOnEvent = {},
+    ArtificialEffectOverride = {},
+    AssistantIcons = {},
+    BarHighlightCheckOnFade = {},
+    BarHighlightDestroFix = {},
+    BarHighlightExtraId = {},
+    BarHighlightOverride = {},
+    BarHighlightStack = {},
+    BarIdOverride = {},
+    BlockAndBashCC = {},
+    DebuffDisplayOverrideId = {},
+    DebuffDisplayOverrideIdAlways = {},
+    DebuffDisplayOverrideMajorMinor = {},
+    DebuffDisplayOverrideName = {},
+    DisguiseIcons = {},
+    EffectCreateSkillAura = {},
+    EffectGroundDisplay = {},
+    EffectHideSCT = {},
+    EffectMergeId = {},
+    EffectMergeName = {},
+    EffectOverride = {},
+    EffectOverrideByName = {},
+    EffectPullDuration = {},
+    EffectSourceOverride = {},
+    FakeExternalBuffs = {},
+    FakeExternalDebuffs = {},
+    FakePlayerBuffs = {},
+    FakePlayerDebuffs = {},
+    FakePlayerOfflineAura = {},
+    FakeStagger = {},
+    HasAbilityProc = {},
+    HideGroundMineStacks = {},
+    IsAbilityActiveGlow = {},
+    IsAbilityActiveHighlight = {},
+    IsAbilityICD = {},
+    IsAllianceXPBuff = {},
+    IsBlock = {},
+    IsBloodFrenzy = {},
+    IsBoon = {},
+    IsCyrodiil = {},
+    IsExperienceBuff = {},
+    IsFoodBuff = {},
+    IsGrimFocus = {},
+    IsGroundMineAura = {},
+    IsGroundMineDamage = {},
+    IsGroundMineStack = {},
+    IsLycan = {},
+    IsSetICD = {},
+    IsSoulSummons = {},
+    IsVamp = {},
+    IsVampLycanBite = {},
+    IsVampLycanDisease = {},
+    IsWeaponAttack = {},
+    KeepUpgradeAlliance = {},
+    KeepUpgradeNameFix = {},
+    KeepUpgradeOverride = {},
+    KeepUpgradeTooltip = {},
+    LinkedGroundMine = {},
+    MajorMinor = {},
+    MapDataOverride = {},
+    RemoveAbilityActiveHighlight = {},
+    SynergyNameOverride = {},
+    TooltipUseDefault = {},
+    ZoneBuffs = {},
+    ZoneDataOverride = {},
+}
+
+--- @class (partial) CrownStoreCollectibles
+--- @field [string] integer
+local CrownStoreCollectibles = {}
+
+local PetNames =
+{
+    Assistants = {},
+    Necromancer = {},
+    Sets = {},
+    Sorcerer = {},
+    Warden = {},
+}
+
+--- @class (partial) Quests
+local Quests = {}
+
+--- @class (partial) Tooltips
+local Tooltips = {}
+
+--- @class (partial) UnitNames
+local UnitNames = {}
+
+--- @class (partial) ZoneNames
+local ZoneNames = {}
+
+--- @class (partial) ZoneTable
+local ZoneTable = {}
 
 --- @class (partial) LuiData
-LuiData =
+LuiData = {}
+LuiData.name = "LuiData"
+LuiData.version = 690
+LuiData.addonVersion = "6.9.0"
+
+--- @class (partial) Data
+LuiData.Data =
 {
-    __name = "LuiData",
-    version = "6.8.9",
-    Data = --- @class (partial) Data
-    {
-        Abilities = {},
-        AbilityBlacklistPresets =
-        {
-            MajorBuffs = {},
-            MajorDebuffs = {},
-            MinorBuffs = {},
-            MinorDebuffs = {},
-        },
-        AlertBossNameConvert = {},
-        AlertMapOverride = {},
-        AlertTable = {},
-        AlertZoneOverride = {},
-        CastBarTable = {},
-        CollectibleTables = {},
-        CombatTextBlacklistPresets =
-        {
-            Necromancer = {},
-            Sets = {},
-            Sorcerer = {},
-            Templar = {},
-            Warden = {},
-        },
-        CombatTextConstants = {},
-        CrowdControl =
-        {
-            IgnoreList = {},
-            LavaAlerts = {},
-            ReversedLogic = {},
-            SpecialCC = {},
-            aoeNPCBoss = {},
-            aoeNPCElite = {},
-            aoeNPCNormal = {},
-            aoePlayerNormal = {},
-            aoePlayerSet = {},
-            aoePlayerUltimate = {},
-            aoeTraps = {},
-        },
-        DebugResults = {},
-        DebugAuras = {},
-        Effects =
-        {
-            AddNameAura = {},
-            AddNameOnBossEngaged = {},
-            AddNameOnEvent = {},
-            AddNoDurationBarHighlight = {},
-            AddStackOnEvent = {},
-            ArtificialEffectOverride = {},
-            AssistantIcons = {},
-            BarHighlightCheckOnFade = {},
-            BarHighlightDestroFix = {},
-            BarHighlightExtraId = {},
-            BarHighlightOverride = {},
-            BarHighlightStack = {},
-            BarIdOverride = {},
-            BlockAndBashCC = {},
-            DebuffDisplayOverrideId = {},
-            DebuffDisplayOverrideIdAlways = {},
-            DebuffDisplayOverrideMajorMinor = {},
-            DebuffDisplayOverrideName = {},
-            DisguiseIcons = {},
-            EffectHideSCT = {},
-            EffectMergeId = {},
-            EffectMergeName = {},
-            EffectOverride = {},
-            EffectOverrideByName = {},
-            EffectPullDuration = {},
-            EffectSourceOverride = {},
-            FakeExternalBuffs = {},
-            FakeExternalDebuffs = {},
-            FakePlayerBuffs = {},
-            FakePlayerDebuffs = {},
-            FakePlayerOfflineAura = {},
-            FakeStagger = {},
-            HasAbilityProc = {},
-            HideGroundMineStacks = {},
-            IsAbilityActiveGlow = {},
-            IsAbilityActiveHighlight = {},
-            IsAbilityICD = {},
-            IsAllianceXPBuff = {},
-            IsBlock = {},
-            IsBloodFrenzy = {},
-            IsBoon = {},
-            IsCyrodiil = {},
-            IsExperienceBuff = {},
-            IsFoodBuff = {},
-            IsGrimFocus = {},
-            IsGroundMineAura = {},
-            IsGroundMineDamage = {},
-            IsGroundMineStack = {},
-            IsLycan = {},
-            IsSetICD = {},
-            IsSoulSummons = {},
-            IsVamp = {},
-            IsVampLycanBite = {},
-            IsVampLycanDisease = {},
-            IsWeaponAttack = {},
-            KeepUpgradeAlliance = {},
-            KeepUpgradeNameFix = {},
-            KeepUpgradeOverride = {},
-            KeepUpgradeTooltip = {},
-            LinkedGroundMine = {},
-            MajorMinor = {},
-            MapDataOverride = {},
-            RemoveAbilityActiveHighlight = {},
-            SynergyNameOverride = {},
-            TooltipUseDefault = {},
-            ZoneBuffs = {},
-            ZoneDataOverride = {},
-        },
-        --- @class (partial) CrownStoreCollectiables
-        --- @field [string] integer
-        CrownStoreCollectiables = {},
-        PetNames =
-        {
-            Assistants = {},
-            Necromancer = {},
-            Sets = {},
-            Sorcerer = {},
-            Warden = {},
-        },
-        --- @class (partial) Quests
-        Quests = {},
-        --- @class (partial) Tooltips
-        Tooltips = {},
-        --- @class (partial) UnitNames
-        UnitNames = {},
-        --- @class (partial) ZoneNames
-        ZoneNames = {},
-        --- @class (partial) ZoneTable
-        ZoneTable = {},
-    }
+    Abilities = Abilities,
+    AbilityBlacklistPresets = AbilityBlacklistPresets,
+    AlertBossNameConvert = AlertBossNameConvert,
+    AlertMapOverride = AlertMapOverride,
+    AlertTable = AlertTable,
+    AlertZoneOverride = AlertZoneOverride,
+    CastBarTable = CastBarTable,
+    CollectibleTables = CollectibleTables,
+    CombatTextBlacklistPresets = CombatTextBlacklistPresets,
+    CombatTextConstants = CombatTextConstants,
+    CrownStoreCollectibles = CrownStoreCollectibles,
+    CrowdControl = CrowdControl,
+    DebugResults = DebugResults,
+    DebugAuras = DebugAuras,
+    Effects = Effects,
+    PetNames = PetNames,
+    Quests = Quests,
+    Tooltips = Tooltips,
+    UnitNames = UnitNames,
+    ZoneNames = ZoneNames,
+    ZoneTable = ZoneTable,
 }

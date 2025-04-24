@@ -5,19 +5,35 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
+--- @class (partial) UnitFrames
+local UnitFrames = LUIE.UnitFrames
 
+local LibAddonMenu2 = LibAddonMenu2
+local LibMediaProvider = LibMediaProvider
+local GetDisplayName = GetDisplayName
+local zo_strformat = zo_strformat
+local GetString = GetString
+local ReloadUI = ReloadUI
+local ZO_Dialogs_ShowDialog = ZO_Dialogs_ShowDialog
+
+local PetNames = LuiData.Data.PetNames
+
+local pairs = pairs
+local table = table
+local table_insert = table.insert
+local g_FramesMovingEnabled = false -- Helper local flag
 local FontsList = {}
 local LMP = LibMediaProvider
 if LMP then
     -- Add LUIE fonts first
     for f, _ in pairs(LUIE.Fonts) do
-        table.insert(FontsList, f)
+        table_insert(FontsList, f)
     end
     -- Add LMP fonts
     for _, font in ipairs(LMP:List(LMP.MediaType.FONT)) do
         -- Only add if not already in list
         if not LUIE.Fonts[font] then
-            table.insert(FontsList, font)
+            table_insert(FontsList, font)
         end
     end
 end
@@ -27,13 +43,13 @@ local SoundsList = {}
 if LMP then
     -- Add LUIE sounds first
     for sound, _ in pairs(LUIE.Sounds) do
-        table.insert(SoundsList, sound)
+        table_insert(SoundsList, sound)
     end
     -- Add LMP sounds
     for _, sound in ipairs(LMP:List(LMP.MediaType.SOUND)) do
         -- Only add if not already in list
         if not LUIE.Sounds[sound] then
-            table.insert(SoundsList, sound)
+            table_insert(SoundsList, sound)
         end
     end
 end
@@ -43,24 +59,18 @@ local StatusbarTexturesList = {}
 if LMP then
     -- Add LUIE textures first
     for key, _ in pairs(LUIE.StatusbarTextures) do
-        table.insert(StatusbarTexturesList, key)
+        table_insert(StatusbarTexturesList, key)
     end
     -- Add LMP statusbar textures
     for _, texture in ipairs(LMP:List(LMP.MediaType.STATUSBAR)) do
         -- Only add if not already in list
         if not LUIE.StatusbarTextures[texture] then
-            table.insert(StatusbarTexturesList, texture)
+            table_insert(StatusbarTexturesList, texture)
         end
     end
 end
 
---- @class (partial) UnitFrames
-local UnitFrames = LUIE.UnitFrames
-local PetNames = LUIE.Data.PetNames
-local pairs = pairs
-local zo_strformat = zo_strformat
-local table_insert = table.insert
-local g_FramesMovingEnabled = false -- Helper local flag
+
 
 local nameDisplayOptions =
 {
@@ -890,8 +900,8 @@ function UnitFrames.CreateSettings()
             {
                 -- Custom Unit Frames Target Marker
                 type = "checkbox",
-                name = "Format unitframe names with target marker",
-                tooltip = "Format unitframe names with target marker",
+                name = "Format unitFrame names with target marker",
+                tooltip = "Format unitFrame names with target marker",
                 getFunc = function ()
                     return Settings.CustomTargetMarker
                 end,

@@ -1,8 +1,8 @@
 ## Title: LuiData
 ## Author: ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder
-## Version: 6.8.9
+## Version: 6.9.0
 ## APIVersion: 101045 101046
-## AddOnVersion: 6809
+## AddOnVersion: 690
 ## Description: Provides data for LuiExtended.
 ## IsLibrary: true
 ## DisableSavedVariablesAutoSaving: 0
@@ -11,13 +11,14 @@ lang/Skills_en.lua
 lang/Skills_$(language).lua
 
 # Core Data Files
-_data_namespace.lua
 Globals.lua
+_data_namespace.lua
+
 AbilityTables.lua
 Tooltips.lua
 UnitNamesTable.lua
 ZoneNamesTable.lua
-CrownStoreCollectibles.lua
+
 
 # Effects - Core
 Effects/KeepUpgradeOverride.lua
@@ -106,6 +107,7 @@ Quests.lua
 PetNames.lua
 AbilityBlacklistPresets.lua
 CombatTextBlacklistPresets.lua
+CrownStoreCollectibles.lua
 
 # Debug
 Debug/DebugAuras.lua

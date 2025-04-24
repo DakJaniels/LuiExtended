@@ -8,10 +8,10 @@ local LUIE = LUIE
 LUIE.CombatTextCrowdControlEventViewer = LUIE.CombatTextEventViewer:Subclass()
 local CombatTextCrowdControlEventViewer = LUIE.CombatTextCrowdControlEventViewer
 
-local poolTypes = LUIE.Data.CombatTextConstants.poolType
-local eventType = LUIE.Data.CombatTextConstants.eventType
-local combatType = LUIE.Data.CombatTextConstants.combatType
-local crowdControlTypes = LUIE.Data.CombatTextConstants.crowdControlType
+local poolTypes = LuiData.Data.CombatTextConstants.poolType
+local eventType = LuiData.Data.CombatTextConstants.eventType
+local combatType = LuiData.Data.CombatTextConstants.combatType
+local crowdControlTypes = LuiData.Data.CombatTextConstants.crowdControlType
 --- @diagnostic disable-next-line: duplicate-set-field
 function CombatTextCrowdControlEventViewer:New(...)
     local obj = LUIE.CombatTextEventViewer:New(...)
@@ -24,7 +24,7 @@ function CombatTextCrowdControlEventViewer:New(...)
 end
 
 function CombatTextCrowdControlEventViewer:OnEvent(crowdControlType, eventCombatType)
-    local combatTypeConstant = LUIE.Data.CombatTextConstants.combatType
+    local combatTypeConstant = LuiData.Data.CombatTextConstants.combatType
     local Settings = LUIE.CombatText.SV
     -- Label setup
     local control, controlPoolKey = self.poolManager:GetPoolObject(poolTypes.CONTROL)

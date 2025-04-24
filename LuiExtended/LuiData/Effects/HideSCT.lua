@@ -6,18 +6,15 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- Hide this ID from appearing in any way on Combat Cloud Text - Useful for spammy ids.
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) EffectHideSCT
-local EffectHideSCT =
+local effectHideSCT =
 {
     -- Player - Basic
     [45982] = true, -- Bash Stun
@@ -303,4 +300,4 @@ local EffectHideSCT =
 }
 
 --- @class (partial) EffectHideSCT
-LuiData.Data.Effects.EffectHideSCT = EffectHideSCT
+Effects.EffectHideSCT = effectHideSCT

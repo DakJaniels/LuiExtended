@@ -6,12 +6,14 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
+local Data = LuiData.Data
+
+local ACTION_RESULT_BEGIN = ACTION_RESULT_BEGIN
+local LUIE_CC_TYPE_STUN = LUIE_CC_TYPE_STUN
+local LUIE_ALERT_SOUND_TYPE_ST_CC = LUIE_ALERT_SOUND_TYPE_ST_CC
 
 --- @class (partial) ZoneTable
-local ZoneTable =
+local zoneTable =
 {
 
     [63157] = { block = true, dodge = true, priority = 2, bs = true, result = ACTION_RESULT_BEGIN, duration = 1500, cc = LUIE_CC_TYPE_STUN, sound = LUIE_ALERT_SOUND_TYPE_ST_CC },                        -- Heavy Blow (Justice Guard 1H)
@@ -20,4 +22,4 @@ local ZoneTable =
 }
 
 --- @class (partial) ZoneTable
-LuiData.Data.ZoneTable = ZoneTable
+Data.ZoneTable = zoneTable

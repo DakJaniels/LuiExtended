@@ -8,9 +8,9 @@ local LUIE = LUIE
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
 
-local Abilities = LUIE.Data.Abilities
-local Tooltips = LUIE.Data.Tooltips
-local AssistantIcons = LUIE.Data.Effects.AssistantIcons
+local Abilities = LuiData.Data.Abilities
+local Tooltips = LuiData.Data.Tooltips
+local AssistantIcons = LuiData.Data.Effects.AssistantIcons
 
 local pairs = pairs
 local zo_strformat = zo_strformat

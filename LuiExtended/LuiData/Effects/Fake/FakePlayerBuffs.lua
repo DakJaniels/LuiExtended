@@ -6,12 +6,10 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
+local Abilities = Data.Abilities
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR FAKE EFFECTS
@@ -40,7 +38,7 @@ local zo_strformat = zo_strformat
 -- onlyExtended -- Only display this if the Show Extra Buffs menu option with "Extend Settings to Single Aura Effects" is enabled.
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) FakePlayerBuffs
-local FakePlayerBuffs =
+local fakePlayerBuffs =
 {
     -- Misc Consumables
     -- [85355] = {icon = 'LuiExtended/media/icons/mementos/memento_fire-breathers_torches.dds', name = Abilities.Memento_Fire_Breathers_Torches, duration = 12000}, -- Flame Juggling (Consumable Version)
@@ -212,4 +210,4 @@ local FakePlayerBuffs =
 }
 
 --- @class (partial) FakePlayerBuffs
-LuiData.Data.Effects.FakePlayerBuffs = FakePlayerBuffs
+Effects.FakePlayerBuffs = fakePlayerBuffs

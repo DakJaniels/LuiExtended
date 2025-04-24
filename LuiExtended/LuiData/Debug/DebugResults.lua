@@ -6,10 +6,10 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
-
+local Data = LuiData.Data
 -- For debug function - convert result reason codes to string value
 --- @class DebugResults
-local DebugResults =
+local debugResults =
 {
     [-1] = "INVALID",
     [1] = "DMG",
@@ -138,4 +138,4 @@ local DebugResults =
 }
 
 --- @type DebugResults
-LuiData.Data.DebugResults = DebugResults
+Data.DebugResults = debugResults

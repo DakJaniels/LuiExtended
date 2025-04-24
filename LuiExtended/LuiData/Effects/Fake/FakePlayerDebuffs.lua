@@ -6,12 +6,9 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR FAKE EFFECTS
@@ -39,10 +36,10 @@ local zo_strformat = zo_strformat
 -- Fake debuffs applied onto a target by the player
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) FakePlayerDebuffs
-local FakePlayerDebuffs =
+local fakePlayerDebuffs =
 {
     -- JUSTICE NPCS
-    -- Disabled: Duration is too long and Guard always CC breaks. Maybe setup a calllater removal function?
+    -- Disabled: Duration is too long and Guard always CC breaks. Maybe setup a callLater removal function?
     -- [63194] = { icon = 'esoui/art/icons/ability_dragonknight_013.dds', name = Abilities.Skill_Stonefist, duration = 6000 }, -- Flame Shard (Justice Guard 2H) -- If the player reflects
 
     ----------------------------------------------------------------
@@ -69,4 +66,4 @@ local FakePlayerDebuffs =
 }
 
 --- @class (partial) FakePlayerDebuffs
-LuiData.Data.Effects.FakePlayerDebuffs = FakePlayerDebuffs
+Effects.FakePlayerDebuffs = fakePlayerDebuffs

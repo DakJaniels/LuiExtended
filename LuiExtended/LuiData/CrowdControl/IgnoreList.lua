@@ -5,9 +5,10 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
-
+local Data = LuiData.Data
+local CrowdControl = Data.CrowdControl
 --- @class (partial) IgnoreList
-local IgnoreList =
+local ignoreList =
 {
     -- PVP
     [178127] = true, -- Diseased
@@ -111,4 +112,4 @@ local IgnoreList =
 }
 
 --- @class (partial) IgnoreList
-LuiData.Data.CrowdControl.IgnoreList = IgnoreList
+CrowdControl.IgnoreList = ignoreList

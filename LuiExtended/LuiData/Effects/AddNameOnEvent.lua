@@ -6,18 +6,17 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
+local Unitnames = Data.UnitNames
 
-local zo_strformat = zo_strformat
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- When a gain event or faded event fires for this id in the world, we add a buff aura to a specific unit name. Only usable for unique boss effects.
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) AddNameOnEvent
-local AddNameOnEvent =
+local addNameOnEvent =
 {
 
     [46680] = { name = Unitnames.Boss_Deaths_Leviathan, id = 46680 }, -- Immolate Colossus -- Death's Leviathan (Crypt of Hearts I)
@@ -27,4 +26,4 @@ local AddNameOnEvent =
 }
 
 --- @class (partial) AddNameOnEvent
-LuiData.Data.Effects.AddNameOnEvent = AddNameOnEvent
+Effects.AddNameOnEvent = addNameOnEvent

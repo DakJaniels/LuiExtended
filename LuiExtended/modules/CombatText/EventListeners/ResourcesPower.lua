@@ -8,8 +8,8 @@ local LUIE = LUIE
 LUIE.CombatTextResourcesPowerEventListener = LUIE.CombatTextEventListener:Subclass()
 local CombatTextResourcesPowerEventListener = LUIE.CombatTextResourcesPowerEventListener
 
-local eventType = LUIE.Data.CombatTextConstants.eventType
-local resourceType = LUIE.Data.CombatTextConstants.resourceType
+local eventType = LuiData.Data.CombatTextConstants.eventType
+local resourceType = LuiData.Data.CombatTextConstants.resourceType
 --- @diagnostic disable-next-line: duplicate-set-field
 function CombatTextResourcesPowerEventListener:New()
     local obj = LUIE.CombatTextEventListener:New()

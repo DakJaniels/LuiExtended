@@ -6,12 +6,12 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
+local Tooltips = Data.Tooltips
+local Abilities = Data.Abilities
 
-local zo_strformat = zo_strformat
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR FAKE EFFECTS
@@ -21,7 +21,7 @@ local zo_strformat = zo_strformat
 -- Adds this aura to a list of fake Ground auras to display when the player casts them
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) EffectGroundDisplay
-local EffectGroundDisplay =
+local effectGroundDisplay =
 {
     -- Required:
     -- buff, debuff, ground = true/false -- Choose whether this effect shows up in any of these containers
@@ -282,4 +282,4 @@ local EffectGroundDisplay =
 }
 
 --- @class (partial) EffectGroundDisplay
-LuiData.Data.Effects.EffectGroundDisplay = EffectGroundDisplay
+Effects.EffectGroundDisplay = effectGroundDisplay

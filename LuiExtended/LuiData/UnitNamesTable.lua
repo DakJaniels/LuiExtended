@@ -5,9 +5,13 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
+local Data = LuiData.Data
+
+local zo_strformat = zo_strformat
+local GetItemLinkName = GetItemLinkName
 
 --- @class (partial) UnitNames
-local UnitNames =
+local unitNames =
 {
 
     ----------------------------------------------------------------
@@ -629,4 +633,4 @@ local UnitNames =
 }
 
 --- @class (partial) UnitNames
-LuiData.Data.UnitNames = UnitNames
+Data.UnitNames = unitNames

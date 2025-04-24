@@ -6,12 +6,9 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR FAKE EFFECTS
@@ -37,7 +34,7 @@ local zo_strformat = zo_strformat
 -- Fake Buffs applied onto the player by NPCs or Events (Friendly)
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) FakeExternalBuffs
-local FakeExternalBuffs =
+local fakeExternalBuffs =
 {
 
     -- Quests
@@ -56,4 +53,4 @@ local FakeExternalBuffs =
 }
 
 --- @class (partial) FakeExternalBuffs
-LuiData.Data.Effects.FakeExternalBuffs = FakeExternalBuffs
+Effects.FakeExternalBuffs = fakeExternalBuffs

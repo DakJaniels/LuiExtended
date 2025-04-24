@@ -10,8 +10,8 @@ LUIE.CombatTextCombatEventListener = LUIE.CombatTextEventListener:Subclass()
 --- @class (partial) CombatTextCombatEventListener
 local CombatTextCombatEventListener = LUIE.CombatTextCombatEventListener
 
-local Effects = LUIE.Data.Effects
-local CombatTextConstants = LUIE.Data.CombatTextConstants
+local Effects = LuiData.Data.Effects
+local CombatTextConstants = LuiData.Data.CombatTextConstants
 
 -- Local state for CC rate limiting (keeps track of recent warnings)
 local isWarned =
@@ -76,7 +76,7 @@ local function GetOverriddenAbilityName(abilityId, originalAbilityName, sourceNa
 
     -- Check for UnitName override
     if Effects.EffectOverrideByName and Effects.EffectOverrideByName[abilityId] then
-        local sourceNameCheck = zo_strformat("<<C:1>>", sourceName)
+        local sourceNameCheck = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
         if Effects.EffectOverrideByName[abilityId][sourceNameCheck] and Effects.EffectOverrideByName[abilityId][sourceNameCheck].name then
             name = Effects.EffectOverrideByName[abilityId][sourceNameCheck].name
         end

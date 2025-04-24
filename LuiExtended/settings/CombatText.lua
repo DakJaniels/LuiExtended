@@ -56,8 +56,8 @@ end
 
 --- @class (partial) LUIE.CombatText
 local CombatText = LUIE.CombatText
-local CombatTextConstants = LUIE.Data.CombatTextConstants
-local BlacklistPresets = LUIE.Data.CombatTextBlacklistPresets
+local CombatTextConstants = LuiData.Data.CombatTextConstants
+local BlacklistPresets = LuiData.Data.CombatTextBlacklistPresets
 
 local type, pairs = type, pairs
 local table_insert = table.insert
@@ -78,7 +78,7 @@ local function GenerateCustomList(input)
         counter = counter + 1
         -- If the input is a numeric value then we can pull this abilityId's info.
         if type(id) == "number" then
-            options[counter] = zo_iconFormat(GetAbilityIcon(id), 16, 16) .. " [" .. id .. "] " .. zo_strformat("<<C:1>>", GetAbilityName(id))
+            options[counter] = zo_iconFormat(GetAbilityIcon(id), 16, 16) .. " [" .. id .. "] " .. zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
             -- If the input is not numeric then add this as a name only.
         else
             options[counter] = id

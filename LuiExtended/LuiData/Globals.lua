@@ -5,6 +5,8 @@
 
 -- Global Variables
 
+LUIE_UPPER_CASE_NAME_FORMATTER = "<<C:1>>"
+
 -- LUIE_CC_ICON
 LUIE_CC_ICON_STUN = "/esoui/art/icons/ability_debuff_stun.dds"
 -- LUIE_CC_ICON_KNOCKDOWN = "/esoui/art/icons/ability_debuff_stun.dds" -- Knockdown's are considered stuns

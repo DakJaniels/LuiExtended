@@ -6,19 +6,16 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- LuiData for the most part overwrites default ability tooltips due to the fact they are only exposed for buffs/debuffs that are on the player. In some cases there is no description with scaling or we need to still use the default where possible.
 -- The most noteworthy case of this is Mundus Boons, where there is a tooltip but no description. We want to display a generic tooltip describing the effect if mousing over another player - but display the default value with accurate number for self.
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) TooltipUseDefault
-local TooltipUseDefault =
+local tooltipUseDefault =
 {
     [13940] = true, -- Boon: The Warrior
     [13943] = true, -- Boon: The Mage
@@ -36,4 +33,4 @@ local TooltipUseDefault =
 }
 
 --- @class (partial) TooltipUseDefault
-LuiData.Data.Effects.TooltipUseDefault = TooltipUseDefault
+Effects.TooltipUseDefault = tooltipUseDefault

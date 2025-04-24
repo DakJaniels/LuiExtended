@@ -6,15 +6,10 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
+local Data = LuiData.Data
 --- @class (partial) Effects
-local Effects = LuiData.Data.Effects
-
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Effects = Data.Effects
+local Abilities = Data.Abilities
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR MISC OVERRIDES
@@ -218,7 +213,7 @@ Effects.IsExperienceBuff =
     [85501] = true,  -- Crown Crate Experience Scroll
     [85502] = true,  -- Major Crown Crate Experience Scroll
     [85503] = true,  -- Grand Crown Crate Experience Scroll
-    [241125] = true,  -- Hero's Return Experience Scroll
+    [241125] = true, -- Hero's Return Experience Scroll
     -- Event
     [91369] = true,  -- The Pie of Misrule (Jester's Experience Boost Pie)
     [77123] = true,  -- Anniversary EXP Buff

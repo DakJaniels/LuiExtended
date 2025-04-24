@@ -13,7 +13,7 @@ LUIE.CombatTextPool = ZO_ObjectPool:Subclass()
 local CombatTextPool = LUIE.CombatTextPool
 
 -- Import constants and utilities
-local poolTypes = LUIE.Data.CombatTextConstants.poolType
+local poolTypes = LuiData.Data.CombatTextConstants.poolType
 
 --- @see easeInOutCirc(https://easings.net/#easeInOutCirc)
 ---

@@ -8,8 +8,8 @@ local LUIE = LUIE
 LUIE.CombatTextResourcesPotionEventListener = LUIE.CombatTextEventListener:Subclass()
 local CombatTextResourcesPotionEventListener = LUIE.CombatTextResourcesPotionEventListener
 
-local eventType = LUIE.Data.CombatTextConstants.eventType
-local resourceType = LUIE.Data.CombatTextConstants.resourceType
+local eventType = LuiData.Data.CombatTextConstants.eventType
+local resourceType = LuiData.Data.CombatTextConstants.resourceType
 
 local inCooldown = false
 --- @diagnostic disable-next-line: duplicate-set-field

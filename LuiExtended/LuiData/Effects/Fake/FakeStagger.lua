@@ -6,12 +6,10 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
+local Abilities = Data.Abilities
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR FAKE EFFECTS
@@ -38,7 +36,7 @@ local zo_strformat = zo_strformat
 -- Fake Stagger Effects - For debuffs applied on the player or on a target that don't need to check for a removal condition (Useful for effects like staggers where this is no way to break out of them for the short duration they are applied.
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) FakeStagger
-local FakeStagger =
+local fakeStagger =
 {
     -- Player Basic
     [115607] = { duration = 2000 }, -- Hard Dismount (Mount)
@@ -149,4 +147,4 @@ local FakeStagger =
 }
 
 --- @class (partial) FakeStagger
-LuiData.Data.Effects.FakeStagger = FakeStagger
+Effects.FakeStagger = fakeStagger

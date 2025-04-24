@@ -5,11 +5,18 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
+local Data = LuiData.Data
 
--- local Abilities = LuiData.Data.Abilities --unused local
+local ACTION_RESULT_STAGGERED = ACTION_RESULT_STAGGERED
+local ACTION_RESULT_STUNNED = ACTION_RESULT_STUNNED
+local ACTION_RESULT_KNOCKBACK = ACTION_RESULT_KNOCKBACK
+local ACTION_RESULT_LEVITATED = ACTION_RESULT_LEVITATED
+local ACTION_RESULT_FEARED = ACTION_RESULT_FEARED
+local ACTION_RESULT_DISORIENTED = ACTION_RESULT_DISORIENTED
+local ACTION_RESULT_CHARMED = ACTION_RESULT_CHARMED
 
 --- @class (partial) CastBarTable
-local CastBarTable =
+local castBarTable =
 {
     --------------------------------------------------------------------------------------------------------------------------------
     -- Id's for Heavy Attacks to ignore if the menu setting is off
@@ -1230,4 +1237,4 @@ CastBarTable.InteractCast = {
 }
 
 --- @class (partial) CastBarTable
-LuiData.Data.CastBarTable = CastBarTable
+Data.CastBarTable = castBarTable

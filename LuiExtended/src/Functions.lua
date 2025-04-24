@@ -5,28 +5,46 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
+local printToChat = LUIE.PrintToChat
+
 
 -- -----------------------------------------------------------------------------
+-- ESO API Locals.
+-- -----------------------------------------------------------------------------
+
+local animationManager = GetAnimationManager()
 local eventManager = GetEventManager()
+local windowManager = GetWindowManager()
+
+local GetString = GetString
+local zo_strformat = zo_strformat
+
+-- -----------------------------------------------------------------------------
+-- Lua Locals.
+-- -----------------------------------------------------------------------------
+
 local pairs = pairs
 local ipairs = ipairs
 local select = select
 local tonumber = tonumber
+local unpack = unpack
 local type = type
-local string_find = LUIE.string and LUIE.string.find
-local string_gmatch = LUIE.string and LUIE.string.gmatch
-local string_gsub = LUIE.string and LUIE.string.gsub
-local string_match = LUIE.string and LUIE.string.match
-local string_rep = LUIE.string and LUIE.string.rep
-local string_format = LUIE.string and LUIE.string.format
-local table_concat = LUIE.table and LUIE.table.concat
-local table_insert = LUIE.table and LUIE.table.insert
-local table_move = LUIE.table and LUIE.table.move
-local table_remove = LUIE.table and LUIE.table.remove
-local table_sort = LUIE.table and LUIE.table.sort
-local unpack = LUIE.table and LUIE.table.unpack
-local GetString = GetString
-local zo_strformat = zo_strformat
+local string = string
+local string_find = string.find
+local string_gmatch = string.gmatch
+local string_gsub = string.gsub
+local string_match = string.match
+local string_rep = string.rep
+local string_format = string.format
+local table = table
+local table_concat = table.concat
+local table_insert = table.insert
+local table_move = table.move
+local table_remove = table.remove
+local table_sort = table.sort
+
+-- -----------------------------------------------------------------------------
+
 
 do
     --- @param addonName string
@@ -70,7 +88,11 @@ do
         return id
     end
 
-    LUIE_CallLater = callLater
+    if LibDebugLogger and LUIE.IsDevDebugEnabled() then
+        LUIE_CallLater = callLater
+    else
+        LUIE_CallLater = zo_callLater
+    end
 end
 
 -- -----------------------------------------------------------------------------
@@ -667,7 +689,7 @@ local DECONSTRUCTIBLE_CRAFTING_TYPES =
 --- | `SMITHING_MODE_RECIPES` # 6
 --- | `SMITHING_MODE_CONSOLIDATED_SET_SELECTION` # 7
 
---- @alias EnchanthingMode integer
+--- @alias EnchantingMode integer
 --- | `ENCHANTING_MODE_NONE` # 0
 --- | `ENCHANTING_MODE_CREATION` # 1
 --- | `ENCHANTING_MODE_EXTRACTION` # 2
@@ -701,14 +723,14 @@ function LUIE.GetSmithingMode()
 end
 
 function LUIE.GetEnchantingMode()
-    local enchantingmode
+    local enchantingMode
     if IsInGamepadPreferredMode() == true then
-        enchantingmode = GAMEPAD_ENCHANTING
+        enchantingMode = GAMEPAD_ENCHANTING
     else
-        enchantingmode = ENCHANTING
+        enchantingMode = ENCHANTING
     end
-    local mode = enchantingmode:GetEnchantingMode()
-    --- @cast mode EnchanthingMode
+    local mode = enchantingMode:GetEnchantingMode()
+    --- @cast mode EnchantingMode
     return mode or ENCHANTING_MODE_NONE
 end
 

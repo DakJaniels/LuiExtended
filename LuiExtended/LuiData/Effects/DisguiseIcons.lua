@@ -6,12 +6,9 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- Data for icon & description to show for the fake Disguise buff applied to the player.
@@ -72,4 +69,4 @@ local DisguiseIcons =
 }
 
 --- @class (partial) DisguiseIcons
-LuiData.Data.Effects.DisguiseIcons = DisguiseIcons
+Effects.DisguiseIcons = DisguiseIcons

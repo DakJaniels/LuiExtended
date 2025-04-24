@@ -5,9 +5,10 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
+local Data = LuiData.Data
 
 --- @class (partial) ZoneNames
-local ZoneNames =
+local zoneNames =
 {
 
     ----------------------------------------------------------------
@@ -62,4 +63,4 @@ local ZoneNames =
 }
 
 --- @class (partial) ZoneNames
-LuiData.Data.ZoneNames = ZoneNames
+Data.ZoneNames = zoneNames

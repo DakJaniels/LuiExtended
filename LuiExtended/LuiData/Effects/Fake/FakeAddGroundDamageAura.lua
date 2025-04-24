@@ -6,12 +6,12 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
-local zo_strformat = zo_strformat
+local BUFF_EFFECT_TYPE_BUFF = BUFF_EFFECT_TYPE_BUFF
+local BUFF_EFFECT_TYPE_DEBUFF = BUFF_EFFECT_TYPE_DEBUFF
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR FAKE EFFECTS
@@ -40,7 +40,7 @@ local zo_strformat = zo_strformat
 -- merge = Simple merge functionality for id's - these will be considered the same ID so as not to display multiple auras (for effects that have consecutive hits with different id's like Pestilent Colossus)
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) AddGroundDamageAura
-local AddGroundDamageAura =
+local addGroundDamageAura =
 {
 
     --------------------
@@ -435,4 +435,4 @@ local AddGroundDamageAura =
 
 
 --- @class (partial) AddGroundDamageAura
-LuiData.Data.Effects.AddGroundDamageAura = AddGroundDamageAura
+Effects.AddGroundDamageAura = addGroundDamageAura

@@ -6,12 +6,11 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
+local Unitnames = Data.UnitNames
+local Abilities = Data.Abilities
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- Override source name = when one of these abilities hits change the source to match this name. Used for death recap to rename odd trap or source names for damage.
@@ -20,7 +19,7 @@ local zo_strformat = zo_strformat
 -- removePlayer = true -- If for some reason a damage effect is sourced from the player, set it to not be flagged as isPlayer == true in order to stop AVA rank, etc from showing.
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) EffectSourceOverride
-local EffectSourceOverride =
+local effectSourceOverride =
 {
 
     -- PLAYER SETS
@@ -150,4 +149,4 @@ local EffectSourceOverride =
 
 --- @class (partial) EffectSourceOverride
 --- @field [integer] EffectSourceOverrideData
-LuiData.Data.Effects.EffectSourceOverride = EffectSourceOverride
+Effects.EffectSourceOverride = effectSourceOverride

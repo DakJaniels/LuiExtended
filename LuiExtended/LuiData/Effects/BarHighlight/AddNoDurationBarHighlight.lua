@@ -6,15 +6,9 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
+local Data = LuiData.Data
 --- @class (partial) Effects
-local Effects = LuiData.Data.Effects
-
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR BAR HIGHLIGHT RELATED OVERRIDES
@@ -24,7 +18,7 @@ local zo_strformat = zo_strformat
 -- We don't add bar highlights for 0 duration abilities, a few abilities with dynamic durations show as 0 duration so we need this override table.
 --------------------------------------------------------------------------------------------------------------------------------
 --- @type table<integer, boolean>
-local AddNoDurationBarHighlight =
+local addNoDurationBarHighlight =
 {
 
     -- Necromancer
@@ -34,4 +28,4 @@ local AddNoDurationBarHighlight =
     [118814] = true, -- Enduring Undeath
 }
 
-LuiData.Data.Effects.AddNoDurationBarHighlight = AddNoDurationBarHighlight
+Effects.AddNoDurationBarHighlight = addNoDurationBarHighlight

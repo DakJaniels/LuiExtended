@@ -13,7 +13,7 @@ CombatText.__index = CombatText
 --- @class (partial) LUIE.CombatText
 LUIE.CombatText = CombatText
 
-local CombatTextConstants = LUIE.Data.CombatTextConstants
+local CombatTextConstants = LuiData.Data.CombatTextConstants
 
 local pairs = pairs
 local printToChat = LUIE.PrintToChat
@@ -427,7 +427,7 @@ function CombatText.AddToCustomList(list, input)
     local listRef = list == CombatText.SV.blacklist and GetString(LUIE_STRING_CUSTOM_LIST_CT_BLACKLIST) or ""
     if id and id > 0 then
         local cachedName = ZO_CachedStrFormat(SI_ABILITY_NAME, GetAbilityName(id))
-        local name = cachedName -- zo_strformat("<<C:1>>", GetAbilityName(id))
+        local name = cachedName -- zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
         if name ~= nil and name ~= "" then
             local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
             list[id] = true
@@ -455,7 +455,7 @@ function CombatText.RemoveFromCustomList(list, input)
     local listRef = list == CombatText.SV.blacklist and GetString(LUIE_STRING_CUSTOM_LIST_CT_BLACKLIST) or ""
     if id and id > 0 then
         local cachedName = ZO_CachedStrFormat(SI_ABILITY_NAME, GetAbilityName(id))
-        local name = cachedName -- zo_strformat("<<C:1>>", GetAbilityName(id))
+        local name = cachedName -- zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
         local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
         list[id] = nil
         ZO_GetChatSystem():Maximize()

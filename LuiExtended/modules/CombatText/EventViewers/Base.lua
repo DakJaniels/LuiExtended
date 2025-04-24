@@ -10,8 +10,8 @@ local LUIE = LUIE
 local CombatTextEventViewer = ZO_InitializingObject:Subclass()
 local CombatText = LUIE.CombatText
 local string_format = string.format
-local Effects = LUIE.Data.Effects
-local CombatTextConstants = LUIE.Data.CombatTextConstants
+local Effects = LuiData.Data.Effects
+local CombatTextConstants = LuiData.Data.CombatTextConstants
 
 local callbackManager = LUIE.callbackObject
 
@@ -218,7 +218,7 @@ function CombatTextEventViewer:ControlLayout(control, abilityId, combatType, sou
         local iconPath = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].icon or GetAbilityIcon(abilityId)
 
         if Effects.EffectOverrideByName[abilityId] then
-            sourceName = zo_strformat("<<C:1>>", sourceName)
+            sourceName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
             if Effects.EffectOverrideByName[abilityId][sourceName] and Effects.EffectOverrideByName[abilityId][sourceName].icon then
                 iconPath = Effects.EffectOverrideByName[abilityId][sourceName].icon
             end

@@ -8,8 +8,8 @@ local LUIE = LUIE
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
 
-local Abilities = LUIE.Data.Abilities
-local Tooltips = LUIE.Data.Tooltips
+local Abilities = LuiData.Data.Abilities
+local Tooltips = LuiData.Data.Tooltips
 
 local zo_strformat = zo_strformat
 
@@ -19,7 +19,7 @@ local g_currentDuelTarget = nil -- Saved Duel Target for generating Battle Spiri
 function SpellCastBuffs.DuelStart()
     local duelState, characterName = GetDuelInfo()
     if duelState == 3 and not SpellCastBuffs.SV.HideTargetBuffs and not SpellCastBuffs.SV.IgnoreBattleSpiritTarget then
-        g_currentDuelTarget = zo_strformat("<<C:1>>", characterName)
+        g_currentDuelTarget = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, characterName)
         SpellCastBuffs.ReloadEffects("reticleover")
     end
 end

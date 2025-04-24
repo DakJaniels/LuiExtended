@@ -6,18 +6,17 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
+local ZoneNames = Data.ZoneNames
+local Abilities = Data.Abilities
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- When GetZoneId(GetCurrentMapZoneIndex()) matches this filter, customize the ability based off this criteria.
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) ZoneDataOverride
-local ZoneDataOverride =
+local zoneDataOverride =
 {
 
     -- TUTORIAL AREAS
@@ -171,52 +170,52 @@ local ZoneDataOverride =
 
     [21582] =
     {                                                                                                                                       -- Nature's Swarm (Spriggan)
-        [Zonenames.Zone_Hectahame] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", },                -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", },         -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", },      -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", }, -- Hectahame Ritual Chamber
+        [ZoneNames.Zone_Hectahame] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", },                -- Hectahame
+        [ZoneNames.Zone_Hectahame_Armory] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", },         -- Hectahame Armory
+        [ZoneNames.Zone_Hectahame_Arboretum] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", },      -- Hectahame Arboretum
+        [ZoneNames.Zone_Hectahame_Ritual_Chamber] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", }, -- Hectahame Ritual Chamber
     },
     [31699] =
     {                                                                                                                                       -- Nature's Swarm (Spriggan)
-        [Zonenames.Zone_Hectahame] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", },                -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", },         -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", },      -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", }, -- Hectahame Ritual Chamber
+        [ZoneNames.Zone_Hectahame] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", },                -- Hectahame
+        [ZoneNames.Zone_Hectahame_Armory] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", },         -- Hectahame Armory
+        [ZoneNames.Zone_Hectahame_Arboretum] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", },      -- Hectahame Arboretum
+        [ZoneNames.Zone_Hectahame_Ritual_Chamber] = { icon = "LuiExtended/media/icons/abilities/ability_spriggan_natures_swarm_red.dds", }, -- Hectahame Ritual Chamber
     },
     [13475] =
     { -- Healing Salve (Spriggan)
-        [Zonenames.Zone_Hectahame] =
+        [ZoneNames.Zone_Hectahame] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_spriggan_healing_salve_red.dds",
         }, -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] =
+        [ZoneNames.Zone_Hectahame_Armory] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_spriggan_healing_salve_red.dds",
         }, -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] =
+        [ZoneNames.Zone_Hectahame_Arboretum] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_spriggan_healing_salve_red.dds",
         }, -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] =
+        [ZoneNames.Zone_Hectahame_Ritual_Chamber] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_spriggan_healing_salve_red.dds",
         }, -- Hectahame Ritual Chamber
     },
     [13477] =
     { -- Control Beast (Spriggan)
-        [Zonenames.Zone_Hectahame] =
+        [ZoneNames.Zone_Hectahame] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_spriggan_control_beast_red.dds",
         }, -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] =
+        [ZoneNames.Zone_Hectahame_Armory] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_spriggan_control_beast_red.dds",
         }, -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] =
+        [ZoneNames.Zone_Hectahame_Arboretum] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_spriggan_control_beast_red.dds",
         }, -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] =
+        [ZoneNames.Zone_Hectahame_Ritual_Chamber] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_spriggan_control_beast_red.dds",
         }, -- Hectahame Ritual Chamber
@@ -225,14 +224,14 @@ local ZoneDataOverride =
     [3757] =
     {                                                                                                                    -- Claw (Lurcher)
         [931] = { icon = "LuiExtended/media/icons/abilities/ability_lurcher_claw_red.dds" },                             -- Elden Hollow II
-        [Zonenames.Zone_Hectahame] = { icon = "LuiExtended/media/icons/abilities/ability_lurcher_claw_red.dds" },        -- Hectahame
-        [Zonenames.Zone_Hectahame] = { icon = "LuiExtended/media/icons/abilities/ability_lurcher_claw_red.dds" },        -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] = { icon = "LuiExtended/media/icons/abilities/ability_lurcher_claw_red.dds" }, -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] =
+        [ZoneNames.Zone_Hectahame] = { icon = "LuiExtended/media/icons/abilities/ability_lurcher_claw_red.dds" },        -- Hectahame
+        [ZoneNames.Zone_Hectahame] = { icon = "LuiExtended/media/icons/abilities/ability_lurcher_claw_red.dds" },        -- Hectahame
+        [ZoneNames.Zone_Hectahame_Armory] = { icon = "LuiExtended/media/icons/abilities/ability_lurcher_claw_red.dds" }, -- Hectahame Armory
+        [ZoneNames.Zone_Hectahame_Arboretum] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_claw_red.dds",
         }, -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] =
+        [ZoneNames.Zone_Hectahame_Ritual_Chamber] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_claw_red.dds",
         },                                                                                     -- Valenheart
@@ -242,16 +241,16 @@ local ZoneDataOverride =
     [3860] =
     {                                                                                                                  -- Pulverize (Lurcher)
         [931] = { icon = "LuiExtended/media/icons/abilities/ability_lurcher_pulverize_red.dds" },                      -- Elden Hollow II
-        [Zonenames.Zone_Hectahame] = { icon = "LuiExtended/media/icons/abilities/ability_lurcher_pulverize_red.dds" }, -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] =
+        [ZoneNames.Zone_Hectahame] = { icon = "LuiExtended/media/icons/abilities/ability_lurcher_pulverize_red.dds" }, -- Hectahame
+        [ZoneNames.Zone_Hectahame_Armory] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_pulverize_red.dds",
         }, -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] =
+        [ZoneNames.Zone_Hectahame_Arboretum] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_pulverize_red.dds",
         }, -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] =
+        [ZoneNames.Zone_Hectahame_Ritual_Chamber] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_pulverize_red.dds",
         },                                                                                          -- Hectahame Ritual Chamber
@@ -261,19 +260,19 @@ local ZoneDataOverride =
     [3855] =
     {                                                                                                  -- Crushing Limbs (Lurcher)
         [931] = { icon = "LuiExtended/media/icons/abilities/ability_lurcher_crushing_limbs_red.dds" }, -- Elden Hollow II
-        [Zonenames.Zone_Hectahame] =
+        [ZoneNames.Zone_Hectahame] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_crushing_limbs_red.dds",
         }, -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] =
+        [ZoneNames.Zone_Hectahame_Armory] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_crushing_limbs_red.dds",
         }, -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] =
+        [ZoneNames.Zone_Hectahame_Arboretum] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_crushing_limbs_red.dds",
         }, -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] =
+        [ZoneNames.Zone_Hectahame_Ritual_Chamber] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_crushing_limbs_red.dds",
         },                                                                                               -- Hectahame Ritual Chamber
@@ -283,19 +282,19 @@ local ZoneDataOverride =
     [38554] =
     {                                                                                                  -- Crushing Limbs (Lurcher)
         [931] = { icon = "LuiExtended/media/icons/abilities/ability_lurcher_crushing_limbs_red.dds" }, -- Elden Hollow II
-        [Zonenames.Zone_Hectahame] =
+        [ZoneNames.Zone_Hectahame] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_crushing_limbs_red.dds",
         }, -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] =
+        [ZoneNames.Zone_Hectahame_Armory] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_crushing_limbs_red.dds",
         }, -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] =
+        [ZoneNames.Zone_Hectahame_Arboretum] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_crushing_limbs_red.dds",
         }, -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] =
+        [ZoneNames.Zone_Hectahame_Ritual_Chamber] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_crushing_limbs_red.dds",
         },                                                                                               -- Hectahame Ritual Chamber
@@ -305,19 +304,19 @@ local ZoneDataOverride =
     [3767] =
     {                                                                                                  -- Choking Pollen (Lurcher)
         [931] = { icon = "LuiExtended/media/icons/abilities/ability_lurcher_choking_pollen_red.dds" }, -- Elden Hollow II
-        [Zonenames.Zone_Hectahame] =
+        [ZoneNames.Zone_Hectahame] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_choking_pollen_red.dds",
         }, -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] =
+        [ZoneNames.Zone_Hectahame_Armory] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_choking_pollen_red.dds",
         }, -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] =
+        [ZoneNames.Zone_Hectahame_Arboretum] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_choking_pollen_red.dds",
         }, -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] =
+        [ZoneNames.Zone_Hectahame_Ritual_Chamber] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_choking_pollen_red.dds",
         },                                                                                               -- Hectahame Ritual Chamber
@@ -327,19 +326,19 @@ local ZoneDataOverride =
     [4769] =
     {                                                                                                  -- Choking Pollen (Lurcher)
         [931] = { icon = "LuiExtended/media/icons/abilities/ability_lurcher_choking_pollen_red.dds" }, -- Elden Hollow II
-        [Zonenames.Zone_Hectahame] =
+        [ZoneNames.Zone_Hectahame] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_choking_pollen_red.dds",
         }, -- Hectahame
-        [Zonenames.Zone_Hectahame_Armory] =
+        [ZoneNames.Zone_Hectahame_Armory] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_choking_pollen_red.dds",
         }, -- Hectahame Armory
-        [Zonenames.Zone_Hectahame_Arboretum] =
+        [ZoneNames.Zone_Hectahame_Arboretum] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_choking_pollen_red.dds",
         }, -- Hectahame Arboretum
-        [Zonenames.Zone_Hectahame_Ritual_Chamber] =
+        [ZoneNames.Zone_Hectahame_Ritual_Chamber] =
         {
             icon = "LuiExtended/media/icons/abilities/ability_lurcher_choking_pollen_red.dds",
         },                                                                                               -- Hectahame Ritual Chamber
@@ -445,4 +444,4 @@ local ZoneDataOverride =
 }
 
 --- @class (partial) ZoneDataOverride
-LuiData.Data.Effects.ZoneDataOverride = ZoneDataOverride
+Effects.ZoneDataOverride = zoneDataOverride

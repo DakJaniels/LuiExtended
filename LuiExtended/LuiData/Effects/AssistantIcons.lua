@@ -6,19 +6,18 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
-local zo_strformat = zo_strformat
+local GetCollectibleName = GetCollectibleName
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- Icon to display for Assistant Collectibles
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) AssistantIcons
 --- @field [string] string Table mapping collectible names to their icon paths
-local AssistantIcons =
+local assistantIcons =
 {
     -- Original Assistants
     [GetCollectibleName(267)] = "LuiExtended/media/icons/assistants/assistant_tythis.dds",                 -- Tythis Andromo
@@ -54,4 +53,4 @@ local AssistantIcons =
 }
 
 --- @class (partial) AssistantIcons
-LuiData.Data.Effects.AssistantIcons = AssistantIcons
+Effects.AssistantIcons = assistantIcons

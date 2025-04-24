@@ -6,18 +6,16 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
+local Abilities = Data.Abilities
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- Synergy Icon Overrides - When a synergy with a matching ability name appears, change the icon or name.
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) SynergyNameOverride
-local SynergyNameOverride =
+local synergyNameOverride =
 {
     ["Tonal Inverter"] = { icon = "LuiExtended/media/icons/abilities/ability_quest_tonal_inverter.dds" },                                                 -- Tonal Inverter (Divine Intervention)
     [Abilities.Skill_Blade_of_Woe] = { icon = "LuiExtended/media/icons/abilities/ability_darkbrotherhood_blade_of_woe.dds" },                             -- Blade of Woe (Dark Brotherhood)
@@ -35,4 +33,4 @@ local SynergyNameOverride =
 }
 
 --- @class (partial) SynergyNameOverride
-LuiData.Data.Effects.SynergyNameOverride = SynergyNameOverride
+Effects.SynergyNameOverride = synergyNameOverride

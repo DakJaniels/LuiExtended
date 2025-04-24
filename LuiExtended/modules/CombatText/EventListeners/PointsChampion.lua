@@ -8,8 +8,8 @@ local LUIE = LUIE
 LUIE.CombatTextPointsChampionEventListener = LUIE.CombatTextEventListener:Subclass()
 local CombatTextPointsChampionEventListener = LUIE.CombatTextPointsChampionEventListener
 
-local eventType = LUIE.Data.CombatTextConstants.eventType
-local pointType = LUIE.Data.CombatTextConstants.pointType
+local eventType = LuiData.Data.CombatTextConstants.eventType
+local pointType = LuiData.Data.CombatTextConstants.pointType
 --- @diagnostic disable-next-line: duplicate-set-field
 function CombatTextPointsChampionEventListener:New()
     local obj = LUIE.CombatTextEventListener:New()

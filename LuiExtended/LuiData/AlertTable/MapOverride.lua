@@ -6,22 +6,21 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-local ZoneTable = LuiData.Data.ZoneTable
+local Data = LuiData.Data
+local UnitNames = Data.UnitNames
+local Zonenames = Data.ZoneNames
 
 -- Map Name override - Sometimes we need to use GetMapName() instead of Location Name or ZoneId
 --- @class (partial) AlertMapOverride
-local AlertMapOverride =
+local alertMapOverride =
 {
     -- Slam (Great Bear)
     [70366] =
     {
         -- QUESTS
-        [Zonenames.Zone_Deepwood_Barrow] = Unitnames.NPC_Great_Bear, -- Deepwood Vale (Greymoor Tutorial)
+        [Zonenames.Zone_Deepwood_Barrow] = UnitNames.NPC_Great_Bear, -- Deepwood Vale (Greymoor Tutorial)
     },
 }
 
 --- @class (partial) AlertMapOverride
-LuiData.Data.AlertMapOverride = AlertMapOverride
+Data.AlertMapOverride = alertMapOverride

@@ -5,18 +5,18 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
+local Data = LuiData.Data
 
---- @class (partial) CombatTextBlacklistPresets
-local BlacklistPresets = LuiData.Data.CombatTextBlacklistPresets
+local blacklistPresets = {}
 
 -- Sets
-BlacklistPresets.Sets =
+blacklistPresets.Sets =
 {
     [135919] = true, -- Spell Parasite (Spell Parasite's)
 }
 
 -- Sorcerer
-BlacklistPresets.Sorcerer =
+blacklistPresets.Sorcerer =
 {
     [114903] = true, -- Dark Exchange
     [114908] = true, -- Dark Deal
@@ -24,21 +24,24 @@ BlacklistPresets.Sorcerer =
 }
 
 -- Templar
-BlacklistPresets.Templar =
+blacklistPresets.Templar =
 {
     [37009] = true,  -- Channeled Focus (Channeled Focus)
     [114842] = true, -- Restoring Focus (Restoring Focus)
 }
 
 -- Warden
-BlacklistPresets.Warden =
+blacklistPresets.Warden =
 {
     [114854] = true, -- Betty Netch (Blue Betty)
     [114853] = true, -- Bull Netch (Bull Netch)
 }
 
 -- Necromancer
-BlacklistPresets.Necromancer =
+blacklistPresets.Necromancer =
 {
     [123233] = true, -- Mortal Coil (Mortal Coil)
 }
+
+--- @class (partial) CombatTextBlacklistPresets
+Data.CombatTextBlacklistPresets = blacklistPresets

@@ -5,10 +5,11 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
-
+local Data = LuiData.Data
+local CrowdControl = Data.CrowdControl
 -- List of effects sourced by the player that damage self that should be shown
 --- @class (partial) LavaAlerts
-local LavaAlerts =
+local lavaAlerts =
 {
     -- Player
     [115607] = true, -- Dismount Stun (Mount)
@@ -77,4 +78,4 @@ local LavaAlerts =
 }
 
 --- @class (partial) LavaAlerts
-LuiData.Data.CrowdControl.LavaAlerts = LavaAlerts
+CrowdControl.LavaAlerts = lavaAlerts

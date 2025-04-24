@@ -5,10 +5,11 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
+local Data = LuiData.Data
 
 -- Define ID lists for collectibles by category
 --- @class (partial) CollectibleTables
-local CollectibleIds =
+local collectibleIds =
 {
     -- Banker
     Banker =
@@ -94,11 +95,11 @@ local function GetFormattedCollectibleShortName(id)
 end
 
 --- @class (partial) CollectibleTables
-local CollectibleTables = {}
+local collectibleTables = {}
 
 -- Convert the ID lists to tables with ID-to-name mappings
-for category, ids in pairs(CollectibleIds) do
-    CollectibleTables[category] = setmetatable({},
+for category, ids in pairs(collectibleIds) do
+    collectibleTables[category] = setmetatable({},
         {
             __index = function (t, k)
                 -- Only process numeric keys (collectible IDs)
@@ -127,19 +128,19 @@ for category, ids in pairs(CollectibleIds) do
 
     -- Pre-populate with known values to avoid initial delay
     for _, id in ipairs(ids) do
-        CollectibleTables[category][id] = GetFormattedCollectibleShortName(id)
+        collectibleTables[category][id] = GetFormattedCollectibleShortName(id)
     end
 end
 
 -- Create the All table as a combination of all other tables
-CollectibleTables.All = setmetatable({},
+collectibleTables.All = setmetatable({},
     {
         __index = function (t, k)
             if type(k) == "number" then
                 -- Check all categories
-                for category, _ in pairs(CollectibleIds) do
-                    if CollectibleTables[category][k] then
-                        local name = CollectibleTables[category][k]
+                for category, _ in pairs(collectibleIds) do
+                    if collectibleTables[category][k] then
+                        local name = collectibleTables[category][k]
                         t[k] = name -- Cache result
                         return name
                     end
@@ -157,11 +158,11 @@ CollectibleTables.All = setmetatable({},
     })
 
 -- Pre-populate All table with known values
-for category, ids in pairs(CollectibleIds) do
+for category, ids in pairs(collectibleIds) do
     for _, id in ipairs(ids) do
-        CollectibleTables.All[id] = CollectibleTables[category][id]
+        collectibleTables.All[id] = collectibleTables[category][id]
     end
 end
 
 --- @class (partial) CollectibleTables
-LuiData.Data.CollectibleTables = CollectibleTables
+Data.CollectibleTables = collectibleTables

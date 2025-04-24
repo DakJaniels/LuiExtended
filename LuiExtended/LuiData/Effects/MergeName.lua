@@ -6,18 +6,16 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
+local Abilities = Data.Abilities
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- If one of these ability Names is applied then we set the buffSlot for ON_EFFECT_CHANGED to be a single name identifier to prevent more than one aura from appearing. Only works with unlimited duration or equal duration effects.
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) EffectMergeName
-local EffectMergeName =
+local effectMergeName =
 {
     [Abilities.Skill_Overcharge] = "MERGED_EFFECT_OVERCHARGE",
     [Abilities.Skill_Boulder_Toss] = "MERGED_EFFECT_BOULDER_TOSS",
@@ -25,4 +23,4 @@ local EffectMergeName =
 }
 
 --- @class (partial) EffectMergeName
-LuiData.Data.Effects.EffectMergeName = EffectMergeName
+Effects.EffectMergeName = effectMergeName

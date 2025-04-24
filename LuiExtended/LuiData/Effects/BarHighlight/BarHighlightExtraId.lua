@@ -6,12 +6,9 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR BAR HIGHLIGHT RELATED OVERRIDES
@@ -24,7 +21,7 @@ local zo_strformat = zo_strformat
 -- Also track this id on bar highlight
 -- SECONDARY ID = ORIGINAL BAR HIGHLIGHT ID
 --- @class (partial) BarHighlightExtraId
-local BarHighlightExtraId =
+local barHighlightExtraId =
 {
 
     -- Dragonknight
@@ -71,4 +68,4 @@ local BarHighlightExtraId =
 }
 
 --- @class (partial) BarHighlightExtraId
-LuiData.Data.Effects.BarHighlightExtraId = BarHighlightExtraId
+Effects.BarHighlightExtraId = barHighlightExtraId

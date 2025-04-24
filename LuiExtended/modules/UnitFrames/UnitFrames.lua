@@ -266,7 +266,7 @@ function UnitFrames.GroupFrames_OnMouseUp(self, button, upInside)
         ClearMenu()
         local isPlayer = AreUnitsEqual(unitTag, "player") -- Flag Player
         local isLFG = DoesGroupModificationRequireVote()  -- Flag if we're in an LFG Group
-        local accountName = zo_strformat("<<C:1>>", GetUnitDisplayName(unitTag))
+        local accountName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitDisplayName(unitTag))
         local isOnline = IsUnitOnline(unitTag)
 
         if isPlayer then
@@ -413,7 +413,7 @@ function UnitFrames.AltBar_OnMouseEnterSiege(control)
         local siegeName = GetUnitName("controlledsiege")
         InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
 
-        SetTooltipText(InformationTooltip, zo_strformat("<<C:1>>", siegeName))
+        SetTooltipText(InformationTooltip, zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, siegeName))
         InformationTooltip:AddLine(zo_strformat(LUIE_STRING_UF_SIEGE_POWER, ZO_CommaDelimitNumber(currentPower), ZO_CommaDelimitNumber(maxPower), percentagePower))
     end
     UpdateSiegePower()

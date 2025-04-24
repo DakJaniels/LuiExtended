@@ -164,7 +164,7 @@ function SlashCommands.RegisterSlashCommands()
         SLASH_COMMANDS["/removeignore"] = SlashCommands.SlashRemoveIgnore
     end
     if SlashCommands.SV.SlashCompanion then
-        for id, name in pairs(LUIE.Data.CollectibleTables.Companions) do
+        for id, name in pairs(LuiData.Data.CollectibleTables.Companions) do
             local command = "/" .. zo_strlower(name)
             SLASH_COMMANDS[command] = function (...)
                 SlashCommands.SlashCollectible(id)

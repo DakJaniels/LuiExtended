@@ -6,10 +6,32 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-local ZoneTable = LuiData.Data.ZoneTable
+local Data = LuiData.Data
+local UnitNames = Data.UnitNames
+
+local ACTION_RESULT_BEGIN = ACTION_RESULT_BEGIN
+local ACTION_RESULT_EFFECT_GAINED = ACTION_RESULT_EFFECT_GAINED
+
+local LUIE_ALERT_SOUND_TYPE_AOE = LUIE_ALERT_SOUND_TYPE_AOE
+local LUIE_ALERT_SOUND_TYPE_AOE_CC = LUIE_ALERT_SOUND_TYPE_AOE_CC
+local LUIE_ALERT_SOUND_TYPE_DESTROY = LUIE_ALERT_SOUND_TYPE_DESTROY
+local LUIE_ALERT_SOUND_TYPE_GROUND = LUIE_ALERT_SOUND_TYPE_GROUND
+local LUIE_ALERT_SOUND_TYPE_HEAL = LUIE_ALERT_SOUND_TYPE_HEAL
+local LUIE_ALERT_SOUND_TYPE_POWER_ATTACK = LUIE_ALERT_SOUND_TYPE_POWER_ATTACK
+local LUIE_ALERT_SOUND_TYPE_POWER_DAMAGE = LUIE_ALERT_SOUND_TYPE_POWER_DAMAGE
+local LUIE_ALERT_SOUND_TYPE_POWER_DEFENSE = LUIE_ALERT_SOUND_TYPE_POWER_DEFENSE
+local LUIE_ALERT_SOUND_TYPE_ST = LUIE_ALERT_SOUND_TYPE_ST
+local LUIE_ALERT_SOUND_TYPE_ST_CC = LUIE_ALERT_SOUND_TYPE_ST_CC
+local LUIE_ALERT_SOUND_TYPE_SUMMON = LUIE_ALERT_SOUND_TYPE_SUMMON
+local LUIE_ALERT_SOUND_TYPE_TRAVELER = LUIE_ALERT_SOUND_TYPE_TRAVELER
+local LUIE_ALERT_SOUND_TYPE_TRAVELER_CC = LUIE_ALERT_SOUND_TYPE_TRAVELER_CC
+local LUIE_CC_TYPE_FEAR = LUIE_CC_TYPE_FEAR
+local LUIE_CC_TYPE_KNOCKBACK = LUIE_CC_TYPE_KNOCKBACK
+local LUIE_CC_TYPE_SILENCE = LUIE_CC_TYPE_SILENCE
+local LUIE_CC_TYPE_SNARE = LUIE_CC_TYPE_SNARE
+local LUIE_CC_TYPE_STAGGER = LUIE_CC_TYPE_STAGGER
+local LUIE_CC_TYPE_STUN = LUIE_CC_TYPE_STUN
+local LUIE_CC_TYPE_UNBREAKABLE = LUIE_CC_TYPE_UNBREAKABLE
 
 --[[
     LuiExtended AlertTable Definition
@@ -99,7 +121,7 @@ local ZoneTable = LuiData.Data.ZoneTable
 
 --- @class (partial) AlertTable
 --- @field [integer] table<AlertTableItem>
-local AlertTable =
+local alertTable =
 {
     --------------------------------------------------
     -- JUSTICE NPC'S ---------------------------------
@@ -212,7 +234,7 @@ local AlertTable =
         duration = 1500,
         postCast = 4000,
         refire = 2500,
-        bossMatch = { Unitnames.Boss_Calixte_Darkblood, Unitnames.Boss_Angata_the_Clannfear_Handler },
+        bossMatch = { UnitNames.Boss_Calixte_Darkblood, UnitNames.Boss_Angata_the_Clannfear_Handler },
         sound = LUIE_ALERT_SOUND_TYPE_GROUND,
     }, -- Ignite (Synergy)
 
@@ -237,7 +259,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         duration = 1533,
-        bossMatch = { Unitnames.Boss_Smiles_With_Knife },
+        bossMatch = { UnitNames.Boss_Smiles_With_Knife },
         sound = LUIE_ALERT_SOUND_TYPE_AOE,
     }, -- Whirlwind (Skirmisher)
 
@@ -354,10 +376,10 @@ local AlertTable =
         duration = 1500,
         bossMatch =
         {
-            Unitnames.Boss_Anarume,
-            Unitnames.Boss_Fangoz,
-            Unitnames.Boss_Nenesh_gro_Mal,
-            Unitnames.NPC_Xivilai_Boltaic,
+            UnitNames.Boss_Anarume,
+            UnitNames.Boss_Fangoz,
+            UnitNames.Boss_Nenesh_gro_Mal,
+            UnitNames.NPC_Xivilai_Boltaic,
         },
         sound = LUIE_ALERT_SOUND_TYPE_AOE,
     }, -- Thunder Hammer (Thundermaul)
@@ -371,10 +393,10 @@ local AlertTable =
         duration = 2000,
         bossMatch =
         {
-            Unitnames.Boss_Anarume,
-            Unitnames.Boss_Fangoz,
-            Unitnames.Boss_Nenesh_gro_Mal,
-            Unitnames.NPC_Xivilai_Boltaic,
+            UnitNames.Boss_Anarume,
+            UnitNames.Boss_Fangoz,
+            UnitNames.Boss_Nenesh_gro_Mal,
+            UnitNames.NPC_Xivilai_Boltaic,
         },
         sound = LUIE_ALERT_SOUND_TYPE_AOE,
     },                                                                                                       -- Shock Aura (Thundermaul)
@@ -388,7 +410,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         duration = 1000,
         cc = LUIE_CC_TYPE_STUN,
-        bossMatch = { Unitnames.Boss_Captain_Blanchete },
+        bossMatch = { UnitNames.Boss_Captain_Blanchete },
         sound = LUIE_ALERT_SOUND_TYPE_AOE_CC,
     }, -- Shock Aura (Thundermaul - Boss)
     [81195] =
@@ -397,7 +419,7 @@ local AlertTable =
         priority = 2,
         auradetect = true,
         cc = LUIE_CC_TYPE_SNARE,
-        bossMatch = { Unitnames.Boss_Captain_Blanchete },
+        bossMatch = { UnitNames.Boss_Captain_Blanchete },
         sound = LUIE_ALERT_SOUND_TYPE_TRAVELER,
     }, -- Agonizing Fury (Thundermaul - Boss)
     [81217] =
@@ -408,7 +430,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
         duration = 1533,
-        bossMatch = { Unitnames.Boss_Captain_Blanchete },
+        bossMatch = { UnitNames.Boss_Captain_Blanchete },
         sound = LUIE_ALERT_SOUND_TYPE_AOE,
     }, -- Thunder Hammer (Thundermaul - Boss)
 
@@ -443,7 +465,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         cc = LUIE_CC_TYPE_STUN,
         duration = 600,
-        bossMatch = { Unitnames.Boss_Dogas_the_Berserker },
+        bossMatch = { UnitNames.Boss_Dogas_the_Berserker },
         sound = LUIE_ALERT_SOUND_TYPE_AOE_CC,
     }, -- Soul Tether (Nightblade)
 
@@ -472,7 +494,7 @@ local AlertTable =
         priority = 2,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        bossMatch = { Unitnames.Boss_Jahlasri, Unitnames.Boss_Dugan_the_Red },
+        bossMatch = { UnitNames.Boss_Jahlasri, UnitNames.Boss_Dugan_the_Red },
         sound = LUIE_ALERT_SOUND_TYPE_GROUND,
     }, -- Dragonknight Standard (Dragonknight - Elite)
     [52041] =
@@ -485,7 +507,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         duration = 1667,
         cc = LUIE_CC_TYPE_STUN,
-        bossMatch = { Unitnames.Boss_Jahlasri },
+        bossMatch = { UnitNames.Boss_Jahlasri },
         sound = LUIE_ALERT_SOUND_TYPE_AOE_CC,
     },                                                                                                                 -- Blink Strike (Dragonknight - Elite)
 
@@ -510,7 +532,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
         duration = 1500,
-        bossMatch = { Unitnames.Boss_Akezel, Unitnames.Boss_Calixte_Darkblood },
+        bossMatch = { UnitNames.Boss_Akezel, UnitNames.Boss_Calixte_Darkblood },
         sound = LUIE_ALERT_SOUND_TYPE_TRAVELER,
         noForcedNameOverride = true,
     }, -- Heat Wave (Fire Mage)
@@ -522,7 +544,7 @@ local AlertTable =
         eventdetect = true,
         duration = 2000,
         postCast = 4000,
-        bossMatch = { Unitnames.Boss_Calixte_Darkblood, Unitnames.Boss_Keeper_Areldur },
+        bossMatch = { UnitNames.Boss_Calixte_Darkblood, UnitNames.Boss_Keeper_Areldur },
         sound = LUIE_ALERT_SOUND_TYPE_GROUND,
     }, -- Fire Rune (Fire Mage)
 
@@ -534,7 +556,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         duration = 1800,
-        bossMatch = { Unitnames.NPC_Xivilai_Fulminator, Unitnames.NPC_Xivilai_Boltaic },
+        bossMatch = { UnitNames.NPC_Xivilai_Fulminator, UnitNames.NPC_Xivilai_Boltaic },
         sound = LUIE_ALERT_SOUND_TYPE_AOE,
     }, -- Thunder Thrall (Storm Mage)
 
@@ -569,7 +591,7 @@ local AlertTable =
         duration = 8000,
         effectOnlyInterrupt = true,
         fakeName = "",
-        bossMatch = { Unitnames.Boss_Shagura },
+        bossMatch = { UnitNames.Boss_Shagura },
         sound = LUIE_ALERT_SOUND_TYPE_HEAL,
     }, -- Spell Absorption (Spirit Mage)
     [14472] =
@@ -578,7 +600,7 @@ local AlertTable =
         priority = 2,
         auradetect = true,
         fakeName = "",
-        bossMatch = { Unitnames.Boss_Shagura },
+        bossMatch = { UnitNames.Boss_Shagura },
         sound = LUIE_ALERT_SOUND_TYPE_SUMMON,
     }, -- Burdening Eye (Spirit Mage)
 
@@ -604,10 +626,10 @@ local AlertTable =
         postCast = 1250,
         bossMatch =
         {
-            Unitnames.Boss_Thjormar_the_Drowned,
-            Unitnames.Boss_Stroda_gra_Drom,
-            Unitnames.NPC_Xivilai_Fulminator,
-            Unitnames.NPC_Xivilai_Boltaic,
+            UnitNames.Boss_Thjormar_the_Drowned,
+            UnitNames.Boss_Stroda_gra_Drom,
+            UnitNames.NPC_Xivilai_Fulminator,
+            UnitNames.NPC_Xivilai_Boltaic,
         },
         sound = LUIE_ALERT_SOUND_TYPE_TRAVELER,
     }, -- Lightning Onslaught (Battlemage)
@@ -618,7 +640,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         cc = LUIE_CC_TYPE_SNARE,
         eventdetect = true,
-        bossMatch = { Unitnames.Boss_Thjormar_the_Drowned, Unitnames.Boss_Stroda_gra_Drom },
+        bossMatch = { UnitNames.Boss_Thjormar_the_Drowned, UnitNames.Boss_Stroda_gra_Drom },
         sound = LUIE_ALERT_SOUND_TYPE_GROUND,
     }, -- Ice Cage (Battlemage)
     [44216] =
@@ -628,7 +650,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         cc = LUIE_CC_TYPE_SILENCE,
         eventdetect = true,
-        bossMatch = { Unitnames.Boss_Thjormar_the_Drowned, Unitnames.Boss_Stroda_gra_Drom },
+        bossMatch = { UnitNames.Boss_Thjormar_the_Drowned, UnitNames.Boss_Stroda_gra_Drom },
         sound = LUIE_ALERT_SOUND_TYPE_GROUND,
     },                                                                                                                 -- Negate Magic (Battlemage - Elite)
 
@@ -641,9 +663,9 @@ local AlertTable =
         fakeName = "",
         bossMatch =
         {
-            Unitnames.Boss_Gravecaller_Niramo,
-            Unitnames.Boss_Grivier_Bloodcaller,
-            Unitnames.Boss_Louna_Darkblood,
+            UnitNames.Boss_Gravecaller_Niramo,
+            UnitNames.Boss_Grivier_Bloodcaller,
+            UnitNames.Boss_Louna_Darkblood,
         },
         sound = LUIE_ALERT_SOUND_TYPE_SUMMON,
     },                                                                                                                 -- Summon the Dead (Necromancer)
@@ -657,9 +679,9 @@ local AlertTable =
         duration = 5000,
         bossMatch =
         {
-            Unitnames.Boss_Gravecaller_Niramo,
-            Unitnames.Boss_Grivier_Bloodcaller,
-            Unitnames.Boss_Louna_Darkblood,
+            UnitNames.Boss_Gravecaller_Niramo,
+            UnitNames.Boss_Grivier_Bloodcaller,
+            UnitNames.Boss_Louna_Darkblood,
         },
         hideIfNoSource = true,
         sound = LUIE_ALERT_SOUND_TYPE_HEAL,
@@ -699,7 +721,7 @@ local AlertTable =
         cc = LUIE_CC_TYPE_SNARE,
         duration = 1000,
         postCast = 4000,
-        bossMatch = { Unitnames.Boss_Overlord_Nur_dro },
+        bossMatch = { UnitNames.Boss_Overlord_Nur_dro },
         sound = LUIE_ALERT_SOUND_TYPE_GROUND,
     }, -- Defiled Grave (Bonelord)
     [88506] =
@@ -718,7 +740,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_EFFECT_GAINED,
         fakeName = "",
-        bossMatch = { Unitnames.Boss_Overlord_Nur_dro },
+        bossMatch = { UnitNames.Boss_Overlord_Nur_dro },
         sound = LUIE_ALERT_SOUND_TYPE_SUMMON,
     }, -- Summon Abomination (Bonelord)
 
@@ -751,7 +773,7 @@ local AlertTable =
         auradetect = true,
         priority = 2,
         fakeName = "",
-        bossMatch = { Unitnames.Boss_Bagul },
+        bossMatch = { UnitNames.Boss_Bagul },
         sound = LUIE_ALERT_SOUND_TYPE_DESTROY,
     }, -- Aura of Protection (Shaman)
 
@@ -1147,7 +1169,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         duration = 2167,
         cc = LUIE_CC_TYPE_STUN,
-        bossMatch = { Unitnames.Boss_Gurgozu, Unitnames.Boss_Graufang },
+        bossMatch = { UnitNames.Boss_Gurgozu, UnitNames.Boss_Graufang },
         sound = LUIE_ALERT_SOUND_TYPE_AOE_CC,
     },                                                                                                        -- Slam (Great Bear)
     [70374] = { power = true, auradetect = true, priority = 2, sound = LUIE_ALERT_SOUND_TYPE_POWER_DEFENSE }, -- Ferocity (Great Bear)
@@ -2188,7 +2210,7 @@ local AlertTable =
         refire = 1250,
         result = ACTION_RESULT_BEGIN,
         duration = 3100,
-        bossMatch = { Unitnames.Boss_Ysolmarr_the_Roving_Pyre, Unitnames.Boss_Gar_Xuu_Gar },
+        bossMatch = { UnitNames.Boss_Ysolmarr_the_Roving_Pyre, UnitNames.Boss_Gar_Xuu_Gar },
         sound = LUIE_ALERT_SOUND_TYPE_AOE,
     }, -- Fiery Breath (Daedroth)
     [91946] =
@@ -2201,7 +2223,7 @@ local AlertTable =
         duration = 1000,
         cc = LUIE_CC_TYPE_STAGGER,
         postCast = 750,
-        bossMatch = { Unitnames.Boss_Ysolmarr_the_Roving_Pyre, Unitnames.Boss_Gar_Xuu_Gar },
+        bossMatch = { UnitNames.Boss_Ysolmarr_the_Roving_Pyre, UnitNames.Boss_Gar_Xuu_Gar },
         sound = LUIE_ALERT_SOUND_TYPE_TRAVELER_CC,
     }, -- Ground Tremor (Daedroth)
     [91937] =
@@ -2214,7 +2236,7 @@ local AlertTable =
         duration = 1767,
         cc = LUIE_CC_TYPE_STUN,
         postCast = 500,
-        bossMatch = { Unitnames.Boss_Ysolmarr_the_Roving_Pyre, Unitnames.Boss_Gar_Xuu_Gar },
+        bossMatch = { UnitNames.Boss_Ysolmarr_the_Roving_Pyre, UnitNames.Boss_Gar_Xuu_Gar },
         sound = LUIE_ALERT_SOUND_TYPE_AOE_CC,
     }, -- Burst of Embers (Daedroth)
 
@@ -2373,7 +2395,7 @@ local AlertTable =
         auradetect = true,
         fakeName = "",
         refire = 5000,
-        bossMatch = { Unitnames.Boss_High_Kinlord_Rilis },
+        bossMatch = { UnitNames.Boss_High_Kinlord_Rilis },
         sound = LUIE_ALERT_SOUND_TYPE_DESTROY,
     },                                                                                                                   -- Creeping Doom (Harvester)
 
@@ -2443,7 +2465,7 @@ local AlertTable =
         postCast = 1750,
         sound = LUIE_ALERT_SOUND_TYPE_TRAVELER,
     }, -- Lightning Onslaught (Spider Daedra)
-    -- [89306] = { avoid = true, priority = 3, result = ACTION_RESULT_BEGIN, eventdetect = true, fakeName = Unitnames.NPC_Spiderling, cc = LUIE_CC_TYPE_SNARE, duration = 1000, postCast = 4000, sound = LUIE_ALERT_SOUND_TYPE_GROUND }, -- Web (Spiderling)
+    -- [89306] = { avoid = true, priority = 3, result = ACTION_RESULT_BEGIN, eventdetect = true, fakeName = UnitNames.NPC_Spiderling, cc = LUIE_CC_TYPE_SNARE, duration = 1000, postCast = 4000, sound = LUIE_ALERT_SOUND_TYPE_GROUND }, -- Web (Spiderling)
     [8782] =
     {
         block = true,
@@ -2466,7 +2488,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         duration = 1200,
         postCast = 4000,
-        bossMatch = { Unitnames.Boss_Zymel_Etitan, Unitnames.Boss_Zymel_Kruz },
+        bossMatch = { UnitNames.Boss_Zymel_Etitan, UnitNames.Boss_Zymel_Kruz },
         sound = LUIE_ALERT_SOUND_TYPE_AOE,
     }, -- Impending Storm (Storm Atronach)
     [4864] =
@@ -2497,7 +2519,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         hiddenDuration = 3000,
-        bossMatch = { Unitnames.NPC_Xivilai_Fulminator, Unitnames.NPC_Xivilai_Boltaic },
+        bossMatch = { UnitNames.NPC_Xivilai_Fulminator, UnitNames.NPC_Xivilai_Boltaic },
         sound = LUIE_ALERT_SOUND_TYPE_GROUND,
         noDirect = true,
     }, -- Lightning Grasp (Xivilai)
@@ -2695,7 +2717,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         duration = 1500,
         cc = LUIE_CC_TYPE_STAGGER,
-        bossMatch = { Unitnames.Boss_Griviers_Monstrosity, Unitnames.Boss_Skeletal_Destroyer },
+        bossMatch = { UnitNames.Boss_Griviers_Monstrosity, UnitNames.Boss_Skeletal_Destroyer },
         sound = LUIE_ALERT_SOUND_TYPE_AOE_CC,
     }, -- Bone Saw (Bone Colossus)
     [5030] =
@@ -2705,7 +2727,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         fakeName = "",
-        bossMatch = { Unitnames.Boss_Griviers_Monstrosity, Unitnames.Boss_Oskana, Unitnames.Boss_Skeletal_Destroyer },
+        bossMatch = { UnitNames.Boss_Griviers_Monstrosity, UnitNames.Boss_Oskana, UnitNames.Boss_Skeletal_Destroyer },
         sound = LUIE_ALERT_SOUND_TYPE_SUMMON,
     }, -- Voice to Wake the Dead (Bone Colossus)
     [17207] =
@@ -2750,7 +2772,7 @@ local AlertTable =
         auradetect = true,
         cc = LUIE_CC_TYPE_SNARE,
         neverShowInterrupt = true,
-        bossMatch = { Unitnames.Boss_Valanir_the_Restless },
+        bossMatch = { UnitNames.Boss_Valanir_the_Restless },
         sound = LUIE_ALERT_SOUND_TYPE_GROUND,
     }, -- Defiled Ground (Lich)
     [73925] =
@@ -2763,7 +2785,7 @@ local AlertTable =
         duration = 7450,
         refire = 2000,
         neverShowInterrupt = true,
-        bossMatch = { Unitnames.Boss_Valanir_the_Restless },
+        bossMatch = { UnitNames.Boss_Valanir_the_Restless },
         sound = LUIE_ALERT_SOUND_TYPE_AOE_CC,
     }, -- Soul Cage (Lich)
 
@@ -3139,7 +3161,7 @@ local AlertTable =
         refire = 1100,
         result = ACTION_RESULT_BEGIN,
         duration = 5600,
-        bossMatch = { Unitnames.Boss_Limbscather, Unitnames.Boss_Heart_of_Rootwater, Unitnames.Boss_Ravenous_Loam },
+        bossMatch = { UnitNames.Boss_Limbscather, UnitNames.Boss_Heart_of_Rootwater, UnitNames.Boss_Ravenous_Loam },
         sound = LUIE_ALERT_SOUND_TYPE_AOE,
     }, -- Choking Pollen (Lurcher)
 
@@ -3236,7 +3258,7 @@ local AlertTable =
         priority = 3,
         auradetect = true,
         duration = 2000,
-        bossMatch = { Unitnames.Boss_Bone_Grappler, Unitnames.Boss_Dirge_of_Thorns },
+        bossMatch = { UnitNames.Boss_Bone_Grappler, UnitNames.Boss_Dirge_of_Thorns },
         sound = LUIE_ALERT_SOUND_TYPE_AOE,
     }, -- Poisoned Ground (Strangler)
     [9321] =
@@ -3482,7 +3504,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         duration = 1000,
-        bossMatch = { Unitnames.Boss_Unstable_Construct },
+        bossMatch = { UnitNames.Boss_Unstable_Construct },
         sound = LUIE_ALERT_SOUND_TYPE_TRAVELER,
     }, -- Ricochet Wave (Dwemer Sphere)
     [7520] =
@@ -3503,7 +3525,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         duration = 1000,
-        bossMatch = { Unitnames.Boss_Unstable_Construct },
+        bossMatch = { UnitNames.Boss_Unstable_Construct },
         sound = LUIE_ALERT_SOUND_TYPE_AOE,
     }, -- Quake (Dwemer Sphere)
 
@@ -3621,7 +3643,7 @@ local AlertTable =
         priority = 1,
         auradetect = true,
         cc = LUIE_CC_TYPE_SNARE,
-        fakeName = Unitnames.Boss_Quenyas,
+        fakeName = UnitNames.Boss_Quenyas,
         sound = LUIE_ALERT_SOUND_TYPE_AOE,
     }, -- Defiled Ground (Quenyas)
     [83776] =
@@ -3630,7 +3652,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_EFFECT_GAINED,
-        fakeName = Unitnames.Boss_Quenyas,
+        fakeName = UnitNames.Boss_Quenyas,
         refire = 1000,
         sound = LUIE_ALERT_SOUND_TYPE_SUMMON,
     }, -- Dark Summons (Quenyas)
@@ -3640,7 +3662,7 @@ local AlertTable =
         dodge = true,
         priority = 1,
         eventdetect = true,
-        fakeName = Unitnames.Boss_Oskana,
+        fakeName = UnitNames.Boss_Oskana,
         cc = LUIE_CC_TYPE_STAGGER,
         duration = 1500,
         sound = LUIE_ALERT_SOUND_TYPE_AOE_CC,
@@ -3651,7 +3673,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Oskana,
+        fakeName = UnitNames.Boss_Oskana,
         sound = LUIE_ALERT_SOUND_TYPE_SUMMON,
     }, -- -- Wake the Dead (Oskana)
 
@@ -3682,11 +3704,11 @@ local AlertTable =
         priority = 2,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.NPC_Clannfear,
+        fakeName = UnitNames.NPC_Clannfear,
         refire = 500,
         sound = LUIE_ALERT_SOUND_TYPE_AOE_CC,
     }, -- Focused Charge (Clannfear - Snapjaw)
-    -- [83016] = { block = true, avoid = true, priority = 2, eventdetect = true, result = ACTION_RESULT_EFFECT_GAINED, refire = 250, duration = 1000, effectOnlyInterrupt = true, fakeName = Unitnames.NPC_Clannfear }, -- Necrotic Explosion (Clannfear - Snapjaw)
+    -- [83016] = { block = true, avoid = true, priority = 2, eventdetect = true, result = ACTION_RESULT_EFFECT_GAINED, refire = 250, duration = 1000, effectOnlyInterrupt = true, fakeName = UnitNames.NPC_Clannfear }, -- Necrotic Explosion (Clannfear - Snapjaw)
 
     -- World Boss - Nindaeril's Perch
     [83515] =
@@ -3707,7 +3729,7 @@ local AlertTable =
         eventdetect = true,
         cc = LUIE_CC_TYPE_STUN,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Nindaeril_the_Monsoon,
+        fakeName = UnitNames.Boss_Nindaeril_the_Monsoon,
     }, -- Frenzied Charge (Nindaeril the Monsoon)
     [83548] =
     {
@@ -3717,7 +3739,7 @@ local AlertTable =
         cc = LUIE_CC_TYPE_FEAR,
         duration = 1000,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Nindaeril_the_Monsoon,
+        fakeName = UnitNames.Boss_Nindaeril_the_Monsoon,
     }, -- Mighty Roar (Nindaeril the Monsoon)
 
     -- World Boss - Gathongor's Mine
@@ -4059,7 +4081,7 @@ local AlertTable =
         priority = 2,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Norion,
+        fakeName = UnitNames.Boss_Norion,
     }, -- Ancestral Spirit
     [48924] =
     {
@@ -4067,7 +4089,7 @@ local AlertTable =
         priority = 2,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Norion,
+        fakeName = UnitNames.Boss_Norion,
     }, -- Ancestral Spirit
     [48927] =
     {
@@ -4075,7 +4097,7 @@ local AlertTable =
         priority = 2,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Norion,
+        fakeName = UnitNames.Boss_Norion,
     }, -- Ancestral Spirit
 
     -- Sever All Ties
@@ -4087,7 +4109,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         duration = 2000,
-        fakeName = Unitnames.Boss_High_Kinlady_Estre,
+        fakeName = UnitNames.Boss_High_Kinlady_Estre,
         cc = LUIE_CC_TYPE_UNBREAKABLE,
     }, -- Q4261 Estre Knockback (High Kinlady Estre)
 
@@ -4109,7 +4131,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         duration = 2000,
         cc = LUIE_CC_TYPE_UNBREAKABLE,
-        fakeName = Unitnames.Boss_Mayor_Aulus,
+        fakeName = UnitNames.Boss_Mayor_Aulus,
     }, -- Q4868 Aulus Knockback (Mayor Aulus)
 
     -- A Lasting Winter
@@ -4119,7 +4141,7 @@ local AlertTable =
         priority = 2,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Elite_General_Endare,
+        fakeName = UnitNames.Elite_General_Endare,
     }, -- Spawn Clone (General Endare)
 
     -- The Orrery of Elden Root
@@ -4132,7 +4154,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         duration = 1970,
         cc = LUIE_CC_TYPE_UNBREAKABLE,
-        fakeName = Unitnames.Boss_Prince_Naemon,
+        fakeName = UnitNames.Boss_Prince_Naemon,
     },                                                                                                -- Quaking Stomp (Prince Naemon)
     [43827] = { avoid = true, priority = 2, auradetect = true, duration = 2916, eventdetect = true }, -- Projectile Vomit (Prince Naemon)
 
@@ -4143,7 +4165,7 @@ local AlertTable =
         priority = 2,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Prince_Naemon,
+        fakeName = UnitNames.Boss_Prince_Naemon,
         refire = 120000,
     }, -- Q4960 Naemon Shield Shade (Shade of Naemon)
     [48498] =
@@ -4152,7 +4174,7 @@ local AlertTable =
         priority = 2,
         eventdetect = true,
         result = ACTION_RESULT_EFFECT_GAINED,
-        fakeName = Unitnames.Boss_Prince_Naemon,
+        fakeName = UnitNames.Boss_Prince_Naemon,
         refire = 120000,
     }, -- Q4960 Necor Skele Rise (Shade of Naemon)
 
@@ -4171,7 +4193,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         duration = 2533,
-        fakeName = Unitnames.NPC_Slaver_Cutthroat,
+        fakeName = UnitNames.NPC_Slaver_Cutthroat,
         sound = LUIE_ALERT_SOUND_TYPE_AOE,
     }, -- Whirlwind (Slaver Cutthroat)
 
@@ -4281,7 +4303,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         duration = 4400,
-        fakeName = Unitnames.Boss_Bahlokdaan,
+        fakeName = UnitNames.Boss_Bahlokdaan,
         refire = 2000,
         sound = LUIE_ALERT_SOUND_TYPE_AOE,
     }, -- Sweeping Breath (Bahlokdaan)
@@ -4293,7 +4315,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         duration = 1567,
-        fakeName = Unitnames.Boss_Bahlokdaan,
+        fakeName = UnitNames.Boss_Bahlokdaan,
         cc = LUIE_CC_TYPE_STUN,
         sound = LUIE_ALERT_SOUND_TYPE_AOE_CC,
     }, -- Head Strike (Bahlokdaan)
@@ -4335,7 +4357,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         duration = 1567,
-        fakeName = Unitnames.Boss_Bahlokdaan,
+        fakeName = UnitNames.Boss_Bahlokdaan,
         cc = LUIE_CC_TYPE_STUN,
         sound = LUIE_ALERT_SOUND_TYPE_AOE_CC,
     }, -- Tail Whip (Bahlokdaan)
@@ -4347,7 +4369,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         duration = 1533,
-        fakeName = Unitnames.Boss_Bahlokdaan,
+        fakeName = UnitNames.Boss_Bahlokdaan,
         cc = LUIE_CC_TYPE_STUN,
         sound = LUIE_ALERT_SOUND_TYPE_AOE_CC,
     }, -- Wing Thrash (Bahlokdaan)
@@ -4359,7 +4381,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         duration = 1533,
-        fakeName = Unitnames.Boss_Bahlokdaan,
+        fakeName = UnitNames.Boss_Bahlokdaan,
         cc = LUIE_CC_TYPE_STUN,
         sound = LUIE_ALERT_SOUND_TYPE_AOE_CC,
     }, -- Wing Thrash (Bahlokdaan)
@@ -4411,7 +4433,7 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
-        fakeName = Unitnames.Boss_Champion_Marcauld,
+        fakeName = UnitNames.Boss_Champion_Marcauld,
     }, -- Flawless Dawnbreaker (Champion Marcauld)
 
     -- Stage 2 - The Frozen Ring
@@ -4435,7 +4457,7 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_BEGIN,
     },                                                                                                            -- Crushing Shock (Sovngarde Icemage)
-    [53274] = { avoid = true, priority = 1, auradetect = true, bossMatch = { Unitnames.Boss_Katti_Ice_Turner } }, -- Unstable Wall of Frost (Sovngarde Icemage)
+    [53274] = { avoid = true, priority = 1, auradetect = true, bossMatch = { UnitNames.Boss_Katti_Ice_Turner } }, -- Unstable Wall of Frost (Sovngarde Icemage)
 
     [53250] = { block = true, dodge = true, priority = 1, result = ACTION_RESULT_BEGIN },                         -- Wrecking Blow (Yavni Frost-Skin)
     [53301] =
@@ -4444,7 +4466,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        bossMatch = { Unitnames.Boss_Katti_Ice_Turner },
+        bossMatch = { UnitNames.Boss_Katti_Ice_Turner },
     }, -- Icy Pulsar (Katti Ice-Turner)
 
     -- Stage 3 - The Marsh
@@ -4457,7 +4479,7 @@ local AlertTable =
     [56796] = { power = true, priority = 1, auradetect = true },                                               -- Bound Aegis (Dragonclaw Hedge Wizard)
 
     [53613] = { power = true, priority = 1, auradetect = true },                                               -- Thundering Presence (Nak'tah)
-    [53624] = { avoid = true, priority = 1, auradetect = true, bossMatch = { Unitnames.Boss_Nak_tah } },       -- Lightning Flood (Nak'tah)
+    [53624] = { avoid = true, priority = 1, auradetect = true, bossMatch = { UnitNames.Boss_Nak_tah } },       -- Lightning Flood (Nak'tah)
     [53659] = { block = true, avoid = true, interrupt = true, priority = 1, auradetect = true },               -- Power Overload Heavy Attack (Nak'tah)
 
     -- Stage 4 - The Slave Pit
@@ -4468,13 +4490,13 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         refire = 750,
         eventdetect = true,
-        fakeName = Unitnames.NPC_House_Dres_Slaver,
+        fakeName = UnitNames.NPC_House_Dres_Slaver,
     },                                                                                                                -- Berserker Frenzy (House Dres Slaver)
     [83774] = { unmit = true, priority = 1, result = ACTION_RESULT_BEGIN, refire = 750 },                             -- Enslavement (House Dres Slaver)
 
     [54056] = { power = true, priority = 1, auradetect = true, refire = 500 },                                        -- Molten Armaments (Earthen Heart Knight)
     [54065] = { power = true, priority = 1, auradetect = true, ignoreRefresh = true },                                -- Igneous Shield (Earthen Heart Knight)
-    [54077] = { avoid = true, priority = 1, auradetect = true, bossMatch = { Unitnames.Boss_Earthen_Heart_Knight } }, -- Cinder Storm (Earthen Heart Knight)
+    [54077] = { avoid = true, priority = 1, auradetect = true, bossMatch = { UnitNames.Boss_Earthen_Heart_Knight } }, -- Cinder Storm (Earthen Heart Knight)
     [54053] = { block = true, dodge = true, reflect = true, priority = 1, result = ACTION_RESULT_BEGIN },             -- Stone Giant (Earthen Heart Knight)
     [54083] = { power = true, priority = 1, auradetect = true },                                                      -- Corrosive Armor (Earthen Heart Knight)
     [54067] = { block = true, interrupt = true, priority = 1, result = ACTION_RESULT_BEGIN },                         -- Fossilize (Earth Heart Knight)
@@ -4486,14 +4508,14 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
-        fakeName = Unitnames.NPC_Anka_Ra_Shadowcaster,
+        fakeName = UnitNames.NPC_Anka_Ra_Shadowcaster,
     }, -- Celestial Blast (Anka-Ra Shadowcaster)
     [54404] =
     {
         unmit = true,
         priority = 1,
         result = ACTION_RESULT_EFFECT_GAINED,
-        fakeName = Unitnames.NPC_Anka_Ra_Shadowcaster,
+        fakeName = UnitNames.NPC_Anka_Ra_Shadowcaster,
     },                                                                            -- Celestial Blast (Anka-Ra Shadowcaster)
     [52897] = { avoid = true, priority = 1, auradetect = true, bossName = true }, -- Standard of Might (Anal'a Tu'wha)
     [52891] =
@@ -4502,7 +4524,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_EFFECT_GAINED,
-        bossMatch = { Unitnames.Boss_Anala_tuwha },
+        bossMatch = { UnitNames.Boss_Anala_tuwha },
     }, -- Flames of Oblivion (Anal'a Tu'wha)
 
     -- Stage 6 - The Grove
@@ -4533,8 +4555,8 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_EFFECT_GAINED,
-        fakeName = Unitnames.Boss_Shadow_Knight,
-        bossMatch = { Unitnames.Boss_Hiath_the_Battlemaster },
+        fakeName = UnitNames.Boss_Shadow_Knight,
+        bossMatch = { UnitNames.Boss_Hiath_the_Battlemaster },
     }, -- Solar Disturbance (Shadow Knight)
 
     [54792] =
@@ -4552,7 +4574,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_EFFECT_GAINED,
-        bossMatch = { Unitnames.Boss_Dark_Mage },
+        bossMatch = { UnitNames.Boss_Dark_Mage },
     }, -- Daedric Minefield (Dark Mage)
     [54829] =
     {
@@ -4560,8 +4582,8 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_EFFECT_GAINED,
-        fakeName = Unitnames.Boss_Dark_Mage,
-        bossMatch = { Unitnames.Boss_Hiath_the_Battlemaster },
+        fakeName = UnitNames.Boss_Dark_Mage,
+        bossMatch = { UnitNames.Boss_Hiath_the_Battlemaster },
     },                                                               -- Suppression Field (Dark Mage)
     [54809] = { interrupt = true, priority = 1, auradetect = true }, -- Dark Deal (Dark Mage)
 
@@ -4575,7 +4597,7 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
-        fakeName = Unitnames.NPC_Dwarven_Sphere,
+        fakeName = UnitNames.NPC_Dwarven_Sphere,
     },                                                                              -- Electric Wave (Dwarven Sphere)
 
     [52773] = { block = true, priority = 1, result = ACTION_RESULT_EFFECT_GAINED }, -- Ice Comet (Mavus Talnarith)
@@ -4585,7 +4607,7 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_EFFECT_GAINED,
         eventdetect = true,
-        fakeName = Unitnames.Boss_Mavus_Talnarith,
+        fakeName = UnitNames.Boss_Mavus_Talnarith,
     }, -- Volcanic Rune (Mavus Talnarith)
 
     -- Stage 9 - Crypts of the Lost
@@ -4599,7 +4621,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         noSelf = true,
-        fakeName = Unitnames.Boss_Vampire_Lord_Thisa,
+        fakeName = UnitNames.Boss_Vampire_Lord_Thisa,
     },                                                                                        -- Vampire Lord Thisa
 
     [55479] = { block = true, interrupt = true, priority = 1, result = ACTION_RESULT_BEGIN }, -- Malefic Wreath (Hiath the Battlemaster)
@@ -4649,7 +4671,7 @@ local AlertTable =
         priority = 2,
         eventdetect = true,
         result = ACTION_RESULT_EFFECT_GAINED,
-        fakeName = Unitnames.NPC_Dwarven_Spider,
+        fakeName = UnitNames.NPC_Dwarven_Spider,
     }, -- Static Field (Dwarven Spider)
     [72166] =
     {
@@ -4684,7 +4706,7 @@ local AlertTable =
         priority = 2,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.NPC_Scavenger_Thunder_Smith,
+        fakeName = UnitNames.NPC_Scavenger_Thunder_Smith,
     }, -- Overcharge (Scavenger Thunder-Smith)
 
     -- Stage 5 - Rink of Frozen Blood
@@ -4864,7 +4886,7 @@ local AlertTable =
         auradetect = true,
         fakeName = "",
         refire = 5000,
-        bossMatch = { Unitnames.Boss_High_Kinlord_Rilis },
+        bossMatch = { UnitNames.Boss_High_Kinlord_Rilis },
         hideIfNoSource = true,
     }, -- Creeping Doom (Harvester)
 
@@ -4896,7 +4918,7 @@ local AlertTable =
         interrupt = true,
         priority = 1,
         auradetect = true,
-        fakeName = Unitnames.NPC_Strangler_Saplings,
+        fakeName = UnitNames.NPC_Strangler_Saplings,
         effectOnlyInterrupt = true,
         alwaysShowInterrupt = true,
     }, -- Heal Spores (Chokethorn)
@@ -4919,7 +4941,7 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
-        fakeName = Unitnames.Boss_Leafseether,
+        fakeName = UnitNames.Boss_Leafseether,
         cc = LUIE_CC_TYPE_STAGGER,
         duration = 1750,
     },                                                                                                                 -- Inhale (Leafseether)
@@ -4976,7 +4998,7 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
-        fakeName = Unitnames.NPC_Frenzied_Guardian,
+        fakeName = UnitNames.NPC_Frenzied_Guardian,
         hiddenDuration = 1800,
         alwaysShowInterrupt = true,
     }, -- Latch On Stamina (Frenzied Guardian)
@@ -4986,7 +5008,7 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
-        fakeName = Unitnames.NPC_Mystic_Guardian,
+        fakeName = UnitNames.NPC_Mystic_Guardian,
         hiddenDuration = 1800,
         alwaysShowInterrupt = true,
     },                                                                                                                   -- Latch On Magicka (Mystic Guardian)
@@ -5181,7 +5203,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_EFFECT_GAINED,
-        fakeName = Unitnames.Boss_Rukhan,
+        fakeName = UnitNames.Boss_Rukhan,
     }, -- Summon (Flame Atronach)
     [54021] =
     {
@@ -5189,7 +5211,7 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
-        bossMatch = { Unitnames.Boss_Marruz },
+        bossMatch = { UnitNames.Boss_Marruz },
     },                                                                                       -- Release Flame (Marruz)
     [53976] = { dodge = true, priority = 1, result = ACTION_RESULT_BEGIN, duration = 1500 }, -- Blazing Arrow (Marruz)
     [54025] =
@@ -5197,7 +5219,7 @@ local AlertTable =
         interrupt = true,
         priority = 1,
         auradetect = true,
-        fakeName = Unitnames.Boss_Akezel,
+        fakeName = UnitNames.Boss_Akezel,
         duration = 7000,
         effectOnlyInterrupt = true,
     }, -- Spell Absorption (Akezel)
@@ -5206,7 +5228,7 @@ local AlertTable =
         interrupt = true,
         priority = 1,
         eventdetect = true,
-        fakeName = Unitnames.Boss_Akezel,
+        fakeName = UnitNames.Boss_Akezel,
         result = ACTION_RESULT_BEGIN,
         duration = 3000,
     }, -- Focused Healing (Akezel)
@@ -5216,7 +5238,7 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
-        fakeName = Unitnames.Boss_Rukhan,
+        fakeName = UnitNames.Boss_Rukhan,
         duration = 2500,
         cc = LUIE_CC_TYPE_STUN,
     }, -- Pyrocasm (Rukhan)
@@ -5261,7 +5283,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.NPC_Flame_Colossus,
+        fakeName = UnitNames.NPC_Flame_Colossus,
     }, -- Voice to Wake the Dead (Bone Colossus)
 
     [55203] =
@@ -5777,7 +5799,7 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
-        fakeName = Unitnames.NPC_The_Whisperer_Nightmare,
+        fakeName = UnitNames.NPC_The_Whisperer_Nightmare,
         refire = 2500,
         duration = 2000,
         cc = LUIE_CC_TYPE_UNBREAKABLE,
@@ -5923,7 +5945,7 @@ local AlertTable =
         duration = 3000,
         postCast = 4000,
         cc = LUIE_CC_TYPE_SNARE,
-        fakeName = Unitnames.Boss_Malubeth_the_Scourger,
+        fakeName = UnitNames.Boss_Malubeth_the_Scourger,
     },                                                                                                                 -- Scourging Spark (Malubeth the Scourger)
     [36431] = { power = true, priority = 1, result = ACTION_RESULT_EFFECT_GAINED, eventdetect = true, noSelf = true }, -- Rend Soul (Malubeth the Scourger)
 
@@ -5933,7 +5955,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Skull_Reaper,
+        fakeName = UnitNames.Boss_Skull_Reaper,
     }, -- Voice to Wake the Dead (Bone Colossus)
     [48773] =
     {
@@ -5942,7 +5964,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.NPC_Risen_Dead,
+        fakeName = UnitNames.NPC_Risen_Dead,
         refire = 1000,
         duration = 1500,
     }, -- Necromantic Burst (Risen Dead)
@@ -5954,7 +5976,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Garron_the_Returned,
+        fakeName = UnitNames.Boss_Garron_the_Returned,
         duration = 5300,
     }, -- Necrotic Barrage (Garron the Returned)
     [36761] =
@@ -5964,7 +5986,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Garron_the_Returned,
+        fakeName = UnitNames.Boss_Garron_the_Returned,
         cc = LUIE_CC_TYPE_STAGGER,
         duration = 2700,
     }, -- Necrotic Barrage (Garron the Returned)
@@ -5973,7 +5995,7 @@ local AlertTable =
         summon = true,
         priority = 1,
         auradetect = true,
-        fakeName = Unitnames.Boss_Garron_the_Returned,
+        fakeName = UnitNames.Boss_Garron_the_Returned,
         refire = 2000,
     }, -- Summon Minion (Garron the Returned)
     [36838] =
@@ -5982,7 +6004,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Garron_the_Returned,
+        fakeName = UnitNames.Boss_Garron_the_Returned,
         hiddenDuration = 2500,
     }, -- Deceptive Teleport (Garron the Returned)
     [36873] =
@@ -5991,7 +6013,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Garron_the_Returned,
+        fakeName = UnitNames.Boss_Garron_the_Returned,
         duration = 9000,
         refire = 10000,
     }, -- Consume Life (Garron the Returned)
@@ -6002,7 +6024,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_The_Forgotten_One,
+        fakeName = UnitNames.Boss_The_Forgotten_One,
         duration = 1000,
         postCast = 3500,
     }, -- Haunting Spectre (The Forgotten One)
@@ -6016,7 +6038,7 @@ local AlertTable =
         duration = 100,
         postCast = 900,
         eventdetect = true,
-        bossMatch = { Unitnames.Boss_Varaine_Pellingare },
+        bossMatch = { UnitNames.Boss_Varaine_Pellingare },
     }, -- Cone of Rot (Varaine Pellingare)
     [36534] =
     {
@@ -6093,7 +6115,7 @@ local AlertTable =
         avoid = true,
         priority = 1,
         auradetect = true,
-        fakeName = Unitnames.Boss_Ilambris_Athor,
+        fakeName = UnitNames.Boss_Ilambris_Athor,
         neverShowInterrupt = true,
     }, -- Summon Lightning Rod (Ilambris-Athor)
     [22338] =
@@ -6117,7 +6139,7 @@ local AlertTable =
         eventdetect = true,
         duration = 1000,
         postCast = 1500,
-        fakeName = Unitnames.Boss_Ilambris_Zaven,
+        fakeName = UnitNames.Boss_Ilambris_Zaven,
     },                                                           -- Rolling Fire (Ilambris-Zaven)
     [32424] = { power = true, priority = 1, auradetect = true }, -- Incensed (Ilambris-Zaven)
     [22390] =
@@ -6127,15 +6149,15 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
         duration = 2500,
-        fakeName = Unitnames.Boss_Ilambris_Zaven,
+        fakeName = UnitNames.Boss_Ilambris_Zaven,
         cc = LUIE_CC_TYPE_STUN,
     },                                                                                                       -- Pyrocasm (Ilambris-Zaven)
     [22457] = { power = true, priority = 1, auradetect = true },                                             -- Emit Flames (Ilambris-Zaven)
     [22383] = { avoid = true, priority = 1, auradetect = true, duration = 6100, neverShowInterrupt = true }, -- Rain Fire (Ilambris-Zaven)
 
     -- Crypt of Hearts II
-    [51746] = { summon = true, priority = 2, auradetect = true, fakeName = Unitnames.NPC_Spiderkith_Broodnurse }, -- Summon the Dead (Spiderkith Broodnurse)
-    [51753] = { summon = true, priority = 2, auradetect = true, fakeName = Unitnames.NPC_Spiderkith_Broodnurse }, -- Reanimate Skeleton (Spiderkith Broodnurse)
+    [51746] = { summon = true, priority = 2, auradetect = true, fakeName = UnitNames.NPC_Spiderkith_Broodnurse }, -- Summon the Dead (Spiderkith Broodnurse)
+    [51753] = { summon = true, priority = 2, auradetect = true, fakeName = UnitNames.NPC_Spiderkith_Broodnurse }, -- Reanimate Skeleton (Spiderkith Broodnurse)
     [52040] =
     {
         shouldusecc = true,
@@ -6143,7 +6165,7 @@ local AlertTable =
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
         refire = 1000,
-        fakeName = Unitnames.NPC_Spiderkith_Broodnurse,
+        fakeName = UnitNames.NPC_Spiderkith_Broodnurse,
         stack = 2,
     }, -- Summon Atronach (Ibelgast's Broodnurse)
     [52160] =
@@ -6152,7 +6174,7 @@ local AlertTable =
         priority = 2,
         eventdetect = true,
         result = ACTION_RESULT_EFFECT_GAINED,
-        fakeName = Unitnames.NPC_Spiderkith_Broodnurse,
+        fakeName = UnitNames.NPC_Spiderkith_Broodnurse,
     }, -- Flesh Atronach Rises (Ibelgast's Broodnurse)
     [53285] =
     {
@@ -6160,7 +6182,7 @@ local AlertTable =
         priority = 2,
         eventdetect = true,
         result = ACTION_RESULT_EFFECT_GAINED,
-        fakeName = Unitnames.NPC_Ogrim,
+        fakeName = UnitNames.NPC_Ogrim,
     }, -- Summon (Ogrim)
     [51882] =
     {
@@ -6220,7 +6242,7 @@ local AlertTable =
         duration = 1000,
         postCast = 2100,
         cc = LUIE_CC_TYPE_FEAR,
-        fakeName = Unitnames.Boss_Chamber_Guardian,
+        fakeName = UnitNames.Boss_Chamber_Guardian,
     }, -- Consuming Horror (Chamber Guardian)
     [51728] =
     {
@@ -6229,7 +6251,7 @@ local AlertTable =
         auradetect = true,
         result = ACTION_RESULT_EFFECT_GAINED,
         refire = 5000,
-        fakeName = Unitnames.Boss_Chamber_Guardian,
+        fakeName = UnitNames.Boss_Chamber_Guardian,
     }, -- Consuming Horror (Chamber Guardian)
 
     [52167] =
@@ -6295,7 +6317,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Nerieneth,
+        fakeName = UnitNames.Boss_Nerieneth,
         hiddenDuration = 1000,
     }, -- Soul Pulse (Nerien'eth)
     [51864] =
@@ -6306,7 +6328,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         duration = 2000,
         cc = LUIE_CC_TYPE_STAGGER,
-        fakeName = Unitnames.Boss_Nerieneth,
+        fakeName = UnitNames.Boss_Nerieneth,
     }, -- Force Pulse (Nerien'eth)
     [51943] =
     {
@@ -6314,7 +6336,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Nerieneth,
+        fakeName = UnitNames.Boss_Nerieneth,
         hiddenDuration = 1000,
     },                                                                                                        -- Soul Summon (Nerien'eth)
     [60632] = { summon = true, priority = 1, auradetect = true, duration = 8000, neverShowInterrupt = true }, -- Shadow Cloak (Nerien'eth)
@@ -6324,7 +6346,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Nerieneth,
+        fakeName = UnitNames.Boss_Nerieneth,
         hiddenDuration = 1000,
     },                                                                                                        -- Teleport (Nerien'eth)
     [60631] = { power = true, priority = 1, auradetect = true, duration = 12000, neverShowInterrupt = true }, -- Shadow Cloak (Nerien'eth)
@@ -6337,7 +6359,7 @@ local AlertTable =
         duration = 3000,
         cc = LUIE_CC_TYPE_UNBREAKABLE,
         refire = 1000,
-        fakeName = Unitnames.Boss_Nerieneth,
+        fakeName = UnitNames.Boss_Nerieneth,
     }, -- Enervating Sheen (Nerien'eth)
     [52126] =
     {
@@ -6345,7 +6367,7 @@ local AlertTable =
         priority = 1,
         eventdetect = true,
         result = ACTION_RESULT_BEGIN,
-        fakeName = Unitnames.Boss_Nerieneth,
+        fakeName = UnitNames.Boss_Nerieneth,
         hiddenDuration = 1000,
     }, -- Teleport (Nerien'eth)
     [52143] =
@@ -6377,7 +6399,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         duration = 1000,
         cc = LUIE_CC_TYPE_STAGGER,
-        fakeName = Unitnames.Boss_Nerieneth,
+        fakeName = UnitNames.Boss_Nerieneth,
         postCast = 500,
     }, -- Ebony Whirlwind (Nerien'eth)
 
@@ -6390,7 +6412,7 @@ local AlertTable =
         result = ACTION_RESULT_BEGIN,
         duration = 2000,
         cc = LUIE_CC_TYPE_FEAR,
-        fakeName = Unitnames.Boss_Desert_Lion,
+        fakeName = UnitNames.Boss_Desert_Lion,
     }, -- Debilitating Roar (Desert Lion)
 
     [25029] =
@@ -6420,7 +6442,7 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
-        fakeName = Unitnames.Boss_Monstrous_Gargoyle,
+        fakeName = UnitNames.Boss_Monstrous_Gargoyle,
         duration = 2100,
         cc = LUIE_CC_TYPE_STUN,
     }, -- Petrifying Bellow (Monstrous Gargoyle)
@@ -6431,7 +6453,7 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
-        fakeName = Unitnames.Boss_Monstrous_Gargoyle,
+        fakeName = UnitNames.Boss_Monstrous_Gargoyle,
         duration = 6100,
         refire = 5000,
     }, -- Heaving Quake (Monstrous Gargoyle)
@@ -6464,7 +6486,7 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_BEGIN,
         eventdetect = true,
-        fakeName = Unitnames.Boss_Tremorscale,
+        fakeName = UnitNames.Boss_Tremorscale,
         duration = 1500,
         cc = LUIE_CC_TYPE_UNBREAKABLE,
     }, -- Tail Swipe (Tremorscale)
@@ -6474,7 +6496,7 @@ local AlertTable =
         priority = 1,
         result = ACTION_RESULT_EFFECT_GAINED,
         eventdetect = true,
-        fakeName = Unitnames.Boss_Tremorscale,
+        fakeName = UnitNames.Boss_Tremorscale,
         duration = 1800,
         cc = LUIE_CC_TYPE_UNBREAKABLE,
     },                                                                                          -- Dummy (Tremorscale)
@@ -6506,4 +6528,4 @@ local AlertTable =
 }
 
 --- @class (partial) AlertTable
-LuiData.Data.AlertTable = AlertTable
+Data.AlertTable = alertTable

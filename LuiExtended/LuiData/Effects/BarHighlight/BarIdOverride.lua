@@ -6,12 +6,9 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR BAR HIGHLIGHT RELATED OVERRIDES
@@ -21,7 +18,7 @@ local zo_strformat = zo_strformat
 -- When a bar ability proc with a matching id appears, change the icon.
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) BarIdOverride
-local BarIdOverride =
+local barIdOverride =
 {
     -- Dragonknight
     [20824] = "LuiExtended/media/icons/abilities/ability_dragonknight_power_lash.dds", -- Power Lash (Flame Lash)
@@ -43,4 +40,4 @@ local BarIdOverride =
 }
 
 --- @class (partial) BarIdOverride
-LuiData.Data.Effects.BarIdOverride = BarIdOverride
+Effects.BarIdOverride = barIdOverride

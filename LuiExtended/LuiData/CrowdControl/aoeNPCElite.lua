@@ -5,7 +5,8 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
-
+local Data = LuiData.Data
+local CrowdControl = Data.CrowdControl
 -- CrowdControl.aoePlayerUltimate
 -- CrowdControl.aoePlayerNormal
 -- CrowdControl.aoePlayerSet
@@ -64,4 +65,4 @@ local aoeNPCElite =
 }
 
 --- @class (partial) aoeNPCElite
-LuiData.Data.CrowdControl.aoeNPCElite = aoeNPCElite
+CrowdControl.aoeNPCElite = aoeNPCElite

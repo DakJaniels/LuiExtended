@@ -11,11 +11,11 @@ local SpellCastBuffs = LUIE.SpellCastBuffs
 
 local UI = LUIE.UI
 --- @type Data
-local Data = LUIE.Data
+local Data = LuiData.Data
 --- @type Effects
 local Effects = Data.Effects
-local Abilities = LUIE.Data.Abilities
-local Tooltips = LUIE.Data.Tooltips
+local Abilities = Data.Abilities
+local Tooltips = Data.Tooltips
 local string_format = string.format
 local printToChat = LUIE.PrintToChat
 local zo_strformat = zo_strformat
@@ -665,7 +665,7 @@ function SpellCastBuffs.AddToCustomList(list, input)
     local id = tonumber(input)
     local listRef = list == SpellCastBuffs.SV.PromBuffTable and GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS) or list == SpellCastBuffs.SV.PromDebuffTable and GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS) or list == SpellCastBuffs.SV.PriorityBuffTable and GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_BUFFS) or list == SpellCastBuffs.SV.PriorityDebuffTable and GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_DEBUFFS) or list == SpellCastBuffs.SV.BlacklistTable and GetString(LUIE_STRING_CUSTOM_LIST_AURA_BLACKLIST) or ""
     if id and id > 0 then
-        local name = zo_strformat("<<C:1>>", GetAbilityName(id))
+        local name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
         if name ~= nil and name ~= "" then
             local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
             list[id] = true
@@ -693,7 +693,7 @@ function SpellCastBuffs.RemoveFromCustomList(list, input)
     local id = tonumber(input)
     local listRef = list == SpellCastBuffs.SV.PromBuffTable and GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS) or list == SpellCastBuffs.SV.PromDebuffTable and GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS) or list == SpellCastBuffs.SV.PriorityBuffTable and GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_BUFFS) or list == SpellCastBuffs.SV.PriorityDebuffTable and GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_DEBUFFS) or list == SpellCastBuffs.SV.BlacklistTable and GetString(LUIE_STRING_CUSTOM_LIST_AURA_BLACKLIST) or ""
     if id and id > 0 then
-        local name = zo_strformat("<<C:1>>", GetAbilityName(id))
+        local name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
         local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
         list[id] = nil
         ZO_GetChatSystem():Maximize()
@@ -2284,7 +2284,7 @@ function SpellCastBuffs.OnEffectChanged(eventId, changeType, effectSlot, effectN
 
     -- Override name or icon based off unitName
     if Effects.EffectOverrideByName[abilityId] then
-        unitName = zo_strformat("<<C:1>>", unitName)
+        unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, unitName)
         if Effects.EffectOverrideByName[abilityId][unitName] then
             if Effects.EffectOverrideByName[abilityId][unitName].hide then
                 return
@@ -2332,7 +2332,7 @@ function SpellCastBuffs.OnEffectChanged(eventId, changeType, effectSlot, effectN
         if Effects.EffectCreateSkillAura[abilityId] and Effects.EffectCreateSkillAura[abilityId].removeOnEnd then
             local id = Effects.EffectCreateSkillAura[abilityId].abilityId
 
-            local name = zo_strformat("<<C:1>>", GetAbilityName(id))
+            local name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
             local fakeEffectType = Effects.EffectOverride[id] and Effects.EffectOverride[id].type or effectType
             if not (SpellCastBuffs.SV.BlacklistTable[name] or SpellCastBuffs.SV.BlacklistTable[id]) then
                 local simulatedContext = unitTag .. fakeEffectType
@@ -2377,7 +2377,7 @@ function SpellCastBuffs.OnEffectChanged(eventId, changeType, effectSlot, effectN
         if Effects.EffectCreateSkillAura[abilityId] then
             if not Effects.EffectCreateSkillAura[abilityId].requiredStack or (Effects.EffectCreateSkillAura[abilityId].requiredStack and stackCount == Effects.EffectCreateSkillAura[abilityId].requiredStack) then
                 local id = Effects.EffectCreateSkillAura[abilityId].abilityId
-                local name = zo_strformat("<<C:1>>", GetAbilityName(id))
+                local name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
                 local fakeEffectType = Effects.EffectOverride[id] and Effects.EffectOverride[id].type or effectType
                 local fakeUnbreakable = Effects.EffectOverride[id] and Effects.EffectOverride[id].unbreakable or 0
                 if not (SpellCastBuffs.SV.BlacklistTable[name] or SpellCastBuffs.SV.BlacklistTable[id]) then
@@ -2618,10 +2618,10 @@ function SpellCastBuffs.OnCombatAddNameEvent(eventCode, result, isError, ability
             end
             -- Specific to Crypt of Hearts I (Ignite Colossus)
             if id == 46680 then
-                LUIE.Data.AlertTable[22527].cc = LUIE_CC_TYPE_UNBREAKABLE
-                LUIE.Data.AlertTable[22527].block = nil
-                LUIE.Data.AlertTable[22527].dodge = nil
-                LUIE.Data.AlertTable[22527].avoid = true
+                LuiData.Data.AlertTable[22527].cc = LUIE_CC_TYPE_UNBREAKABLE
+                LuiData.Data.AlertTable[22527].block = nil
+                LuiData.Data.AlertTable[22527].dodge = nil
+                LuiData.Data.AlertTable[22527].avoid = true
             end
         elseif result == ACTION_RESULT_EFFECT_FADED then
             -- Check to make sure the current added aura here is the same id. If something else overrides the previous one we don't need to worry about removing the previous one.
@@ -2629,10 +2629,10 @@ function SpellCastBuffs.OnCombatAddNameEvent(eventCode, result, isError, ability
                 Effects.AddNameAura[name][2] = nil
                 -- Specific to Crypt of Hearts I (Ignite Colossus)
                 if id == 46680 then
-                    LUIE.Data.AlertTable[22527].cc = nil
-                    LUIE.Data.AlertTable[22527].block = true
-                    LUIE.Data.AlertTable[22527].dodge = true
-                    LUIE.Data.AlertTable[22527].avoid = false
+                    LuiData.Data.AlertTable[22527].cc = nil
+                    LuiData.Data.AlertTable[22527].block = true
+                    LuiData.Data.AlertTable[22527].dodge = true
+                    LuiData.Data.AlertTable[22527].avoid = false
                 end
             end
         end
@@ -2657,7 +2657,7 @@ function SpellCastBuffs.AddNameOnBossEngaged(eventCode)
 
     -- Check for bosses and add name auras when engaged.
     for i = 1, 4 do
-        local bossName = DoesUnitExist("boss" .. i) and zo_strformat("<<C:1>>", GetUnitName("boss" .. i)) or ""
+        local bossName = DoesUnitExist("boss" .. i) and zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("boss" .. i)) or ""
         if Effects.AddNameOnBossEngaged[bossName] then
             for k, v in pairs(Effects.AddNameOnBossEngaged[bossName]) do
                 Effects.AddNameAura[k] = {}
@@ -2814,7 +2814,7 @@ function SpellCastBuffs.OnCombatEventIn(eventCode, result, isError, abilityName,
 
         -- Override name or icon based off unitName
         if Effects.EffectOverrideByName[abilityId] then
-            local unitName = zo_strformat("<<C:1>>", sourceName)
+            local unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
             if Effects.EffectOverrideByName[abilityId][unitName] then
                 if Effects.EffectOverrideByName[abilityId][unitName].hide then
                     if Effects.EffectOverrideByName[abilityId][unitName].zone then
@@ -2953,8 +2953,8 @@ function SpellCastBuffs.OnCombatEventIn(eventCode, result, isError, abilityName,
         duration = Effects.FakeExternalBuffs[abilityId].duration
         local beginTime = GetGameTimeMilliseconds()
         local endTime = beginTime + duration
-        local source = zo_strformat("<<C:1>>", sourceName)
-        local target = zo_strformat("<<C:1>>", targetName)
+        local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
+        local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
         if source ~= "" and target == LUIE.PlayerNameFormatted then
             SpellCastBuffs.EffectsList[context][abilityId] =
             {
@@ -3036,8 +3036,8 @@ function SpellCastBuffs.OnCombatEventIn(eventCode, result, isError, abilityName,
         duration = Effects.FakeExternalDebuffs[abilityId].duration
         local beginTime = GetGameTimeMilliseconds()
         local endTime = beginTime + duration
-        local source = zo_strformat("<<C:1>>", sourceName)
-        local target = zo_strformat("<<C:1>>", targetName)
+        local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
+        local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
 
         if Effects.ZoneDataOverride[abilityId] then
             local index = GetZoneId(GetCurrentMapZoneIndex())
@@ -3177,8 +3177,8 @@ function SpellCastBuffs.OnCombatEventIn(eventCode, result, isError, abilityName,
         local forcedType = Effects.FakePlayerBuffs[abilityId].long and "long" or "short"
         local beginTime = GetGameTimeMilliseconds()
         local endTime = beginTime + duration
-        local source = zo_strformat("<<C:1>>", sourceName)
-        local target = zo_strformat("<<C:1>>", targetName)
+        local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
+        local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
         -- Pull unbreakable info from Shift Id if present
         unbreakable = (Effects.EffectOverride[finalId] and Effects.EffectOverride[finalId].unbreakable) or unbreakable
         if source == LUIE.PlayerNameFormatted and target == LUIE.PlayerNameFormatted then
@@ -3223,9 +3223,9 @@ function SpellCastBuffs.OnCombatEventIn(eventCode, result, isError, abilityName,
         duration = Effects.FakeStagger[abilityId].duration
         local beginTime = GetGameTimeMilliseconds()
         local endTime = beginTime + duration
-        local source = zo_strformat("<<C:1>>", sourceName)
-        local target = zo_strformat("<<C:1>>", targetName)
-        local unitName = zo_strformat("<<C:1>>", GetUnitName("reticleover"))
+        local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
+        local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
+        local unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("reticleover"))
         local context = "player2"
         if source ~= "" and target == LUIE.PlayerNameFormatted then
             SpellCastBuffs.EffectsList[context][abilityId] =
@@ -3396,8 +3396,8 @@ function SpellCastBuffs.OnCombatEventOut(eventCode, result, isError, abilityName
         local forcedType = Effects.FakePlayerOfflineAura[abilityId].long and "long" or "short"
         local beginTime = GetGameTimeMilliseconds()
         local endTime = beginTime + duration
-        local source = zo_strformat("<<C:1>>", sourceName)
-        local target = zo_strformat("<<C:1>>", targetName)
+        local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
+        local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
         -- Pull unbreakable info from Shift Id if present
         unbreakable = Effects.EffectOverride[finalId].unbreakable or unbreakable
         if source == LUIE.PlayerNameFormatted then
@@ -3483,9 +3483,9 @@ function SpellCastBuffs.OnCombatEventOut(eventCode, result, isError, abilityName
         effectType = BUFF_EFFECT_TYPE_DEBUFF
         local beginTime = GetGameTimeMilliseconds()
         local endTime = beginTime + duration
-        local source = zo_strformat("<<C:1>>", sourceName)
-        local target = zo_strformat("<<C:1>>", targetName)
-        local unitName = zo_strformat("<<C:1>>", GetUnitName("reticleover"))
+        local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
+        local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
+        local unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("reticleover"))
         -- if unitName ~= target then return end
         if source == LUIE.PlayerNameFormatted and target ~= nil then
             if SpellCastBuffs.SV.HideTargetDebuffs then
@@ -3506,7 +3506,7 @@ function SpellCastBuffs.OnCombatEventOut(eventCode, result, isError, abilityName
                     restart = true,
                     iconNum = 0,
                     unbreakable = unbreakable,
-                    savedName = zo_strformat("<<C:1>>", targetName),
+                    savedName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName),
                     fakeDuration = overrideDuration,
                     groundLabel = groundLabel,
                 }
@@ -3525,7 +3525,7 @@ function SpellCastBuffs.OnCombatEventOut(eventCode, result, isError, abilityName
                     restart = true,
                     iconNum = 0,
                     unbreakable = unbreakable,
-                    savedName = zo_strformat("<<C:1>>", targetName),
+                    savedName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName),
                     fakeDuration = overrideDuration,
                     groundLabel = groundLabel,
                 }
@@ -3554,9 +3554,9 @@ function SpellCastBuffs.OnCombatEventOut(eventCode, result, isError, abilityName
         duration = Effects.FakeStagger[abilityId].duration
         local beginTime = GetGameTimeMilliseconds()
         local endTime = beginTime + duration
-        local source = zo_strformat("<<C:1>>", sourceName)
-        local target = zo_strformat("<<C:1>>", targetName)
-        local unitName = zo_strformat("<<C:1>>", GetUnitName("reticleover"))
+        local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
+        local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
+        local unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("reticleover"))
         if source == LUIE.PlayerNameFormatted and target ~= nil then
             if SpellCastBuffs.SV.HideTargetDebuffs then
                 return
@@ -3576,7 +3576,7 @@ function SpellCastBuffs.OnCombatEventOut(eventCode, result, isError, abilityName
                     restart = true,
                     iconNum = 0,
                     unbreakable = unbreakable,
-                    savedName = zo_strformat("<<C:1>>", targetName),
+                    savedName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName),
                     groundLabel = groundLabel,
                 }
             else
@@ -3594,7 +3594,7 @@ function SpellCastBuffs.OnCombatEventOut(eventCode, result, isError, abilityName
                     restart = true,
                     iconNum = 0,
                     unbreakable = unbreakable,
-                    savedName = zo_strformat("<<C:1>>", targetName),
+                    savedName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName),
                     groundLabel = groundLabel,
                 }
             end
@@ -3768,7 +3768,7 @@ function SpellCastBuffs.RestoreSavedFakeEffects()
         -- local container = containerRouting[context]
         for k, v in pairs(effectsList) do
             if v.savedName ~= nil then
-                local unitName = zo_strformat("<<C:1>>", GetUnitName("reticleover"))
+                local unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("reticleover"))
                 if unitName == v.savedName then
                     if SpellCastBuffs.EffectsList.saved[k] then
                         SpellCastBuffs.EffectsList.ground[k] = SpellCastBuffs.EffectsList.saved[k]
@@ -4195,7 +4195,7 @@ function SpellCastBuffs.updateIcons(currentTime, sortedList, container)
             end
 
             if buff.name then
-                buff.name:SetText(zo_strformat("<<C:1>>", effect.name))
+                buff.name:SetText(zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, effect.name))
             end
         end
 

@@ -5,22 +5,45 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-local type, pairs, ipairs = type, pairs, ipairs
-local zo_strformat = zo_strformat
 local printToChat = LUIE.PrintToChat
-local string_find = LUIE.string and LUIE.string.find
-local string_gmatch = LUIE.string and LUIE.string.gmatch
-local string_gsub = LUIE.string and LUIE.string.gsub
-local string_match = LUIE.string and LUIE.string.match
-local string_rep = LUIE.string and LUIE.string.rep
-local string_format = LUIE.string and LUIE.string.format
-local table_concat = LUIE.table and LUIE.table.concat
-local table_insert = LUIE.table and LUIE.table.insert
-local table_move = LUIE.table and LUIE.table.move
-local table_remove = LUIE.table and LUIE.table.remove
-local table_sort = LUIE.table and LUIE.table.sort
-local unpack = LUIE.table and LUIE.table.unpack
-local ANIMATION_MANAGER = GetAnimationManager()
+
+
+-- -----------------------------------------------------------------------------
+-- ESO API Locals.
+-- -----------------------------------------------------------------------------
+
+local animationManager = GetAnimationManager()
+local eventManager = GetEventManager()
+local windowManager = GetWindowManager()
+
+local GetString = GetString
+local zo_strformat = zo_strformat
+
+-- -----------------------------------------------------------------------------
+-- Lua Locals.
+-- -----------------------------------------------------------------------------
+
+local pairs = pairs
+local ipairs = ipairs
+local select = select
+local tonumber = tonumber
+local unpack = unpack
+local type = type
+local string = string
+local string_find = string.find
+local string_gmatch = string.gmatch
+local string_gsub = string.gsub
+local string_match = string.match
+local string_rep = string.rep
+local string_format = string.format
+local table = table
+local table_concat = table.concat
+local table_insert = table.insert
+local table_move = table.move
+local table_remove = table.remove
+local table_sort = table.sort
+
+-- -----------------------------------------------------------------------------
 
 local FORCE_SUPPRESS_COOLDOWN_SOUND = true
 local HIDE_COUNT = 0
@@ -95,11 +118,11 @@ function LUIE.InitializeHooks()
     GetSkillAbilityInfo = function (skillType, skillIndex, abilityIndex)
         local name, texture, earnedRank, passive, ultimate, purchased, progressionIndex, rankIndex = zos_GetSkillAbilityInfo(skillType, skillIndex, abilityIndex)
         local abilityId = GetSkillAbilityId(skillType, skillIndex, abilityIndex, true)
-        if LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].icon then
-            texture = LUIE.Data.Effects.EffectOverride[abilityId].icon
+        if LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].icon then
+            texture = LuiData.Data.Effects.EffectOverride[abilityId].icon
         end
-        if LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].name then
-            name = LUIE.Data.Effects.EffectOverride[abilityId].name
+        if LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].name then
+            name = LuiData.Data.Effects.EffectOverride[abilityId].name
         end
         return name, texture, earnedRank, passive, ultimate, purchased, progressionIndex, rankIndex
     end
@@ -115,11 +138,11 @@ function LUIE.InitializeHooks()
     GetSkillAbilityNextUpgradeInfo = function (skillType, skillIndex, abilityIndex)
         local name, texture, earnedRank = zos_GetSkillAbilityNextUpgradeInfo(skillType, skillIndex, abilityIndex)
         local abilityId = GetSkillAbilityId(skillType, skillIndex, abilityIndex, true)
-        if LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].icon then
-            texture = LUIE.Data.Effects.EffectOverride[abilityId].icon
+        if LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].icon then
+            texture = LuiData.Data.Effects.EffectOverride[abilityId].icon
         end
-        if LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].name then
-            name = LUIE.Data.Effects.EffectOverride[abilityId].name
+        if LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].name then
+            name = LuiData.Data.Effects.EffectOverride[abilityId].name
         end
         return name, texture, earnedRank
     end
@@ -143,11 +166,11 @@ function LUIE.InitializeHooks()
     --- @return boolean castByPlayer
     GetUnitBuffInfo = function (unitTag, buffIndex)
         local buffName, startTime, endTime, buffSlot, stackCount, iconFile, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer = zos_GetUnitBuffInfo(unitTag, buffIndex)
-        if LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].name then
-            buffName = LUIE.Data.Effects.EffectOverride[abilityId].name
+        if LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].name then
+            buffName = LuiData.Data.Effects.EffectOverride[abilityId].name
         end
-        if LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].icon then
-            iconFile = LUIE.Data.Effects.EffectOverride[abilityId].icon
+        if LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].icon then
+            iconFile = LuiData.Data.Effects.EffectOverride[abilityId].icon
         end
         return buffName, startTime, endTime, buffSlot, stackCount, iconFile, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer
     end
@@ -162,8 +185,8 @@ function LUIE.InitializeHooks()
     DoesKillingAttackHaveAttacker = function (index)
         local hasAttacker = zos_DoesKillingAttackHaveAttacker(index)
         local attackName, attackDamage, attackIcon, wasKillingBlow, castTimeAgoMS, durationMS, numAttackHits, abilityId = zos_GetKillingAttackInfo(index)
-        if LUIE.Data.Effects.EffectSourceOverride[abilityId] then
-            if LUIE.Data.Effects.EffectSourceOverride[abilityId].addSource then
+        if LuiData.Data.Effects.EffectSourceOverride[abilityId] then
+            if LuiData.Data.Effects.EffectSourceOverride[abilityId].addSource then
                 hasAttacker = true
             end
         end
@@ -184,27 +207,27 @@ function LUIE.InitializeHooks()
     GetKillingAttackerInfo = function (index)
         local attackerRawName, attackerChampionPoints, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerDisplayName = zos_GetKillingAttackerInfo(index)
         local attackName, attackDamage, attackIcon, wasKillingBlow, castTimeAgoMS, durationMS, numAttackHits, abilityId = zos_GetKillingAttackInfo(index)
-        if LUIE.Data.Effects.EffectSourceOverride[abilityId] then
-            if LUIE.Data.Effects.EffectSourceOverride[abilityId].source then
-                attackerRawName = LUIE.Data.Effects.EffectSourceOverride[abilityId].source
+        if LuiData.Data.Effects.EffectSourceOverride[abilityId] then
+            if LuiData.Data.Effects.EffectSourceOverride[abilityId].source then
+                attackerRawName = LuiData.Data.Effects.EffectSourceOverride[abilityId].source
             end
-            if LUIE.Data.Effects.EffectSourceOverride[abilityId].pet then
-                minionName = LUIE.Data.Effects.EffectSourceOverride[abilityId].pet
+            if LuiData.Data.Effects.EffectSourceOverride[abilityId].pet then
+                minionName = LuiData.Data.Effects.EffectSourceOverride[abilityId].pet
             end
-            if LUIE.Data.Effects.EffectSourceOverride[abilityId].removePlayer then
+            if LuiData.Data.Effects.EffectSourceOverride[abilityId].removePlayer then
                 isPlayer = false
             end
-            if LUIE.Data.Effects.ZoneDataOverride[abilityId] then
+            if LuiData.Data.Effects.ZoneDataOverride[abilityId] then
                 local index1 = GetZoneId(GetCurrentMapZoneIndex())
                 local zoneName = GetPlayerLocationName()
-                if LUIE.Data.Effects.ZoneDataOverride[abilityId][index1] then
-                    if LUIE.Data.Effects.ZoneDataOverride[abilityId][index1].source then
-                        attackerRawName = LUIE.Data.Effects.ZoneDataOverride[abilityId][index1].source
+                if LuiData.Data.Effects.ZoneDataOverride[abilityId][index1] then
+                    if LuiData.Data.Effects.ZoneDataOverride[abilityId][index1].source then
+                        attackerRawName = LuiData.Data.Effects.ZoneDataOverride[abilityId][index1].source
                     end
                 end
-                if LUIE.Data.Effects.ZoneDataOverride[abilityId][zoneName] then
-                    if LUIE.Data.Effects.ZoneDataOverride[abilityId][zoneName].source then
-                        attackerRawName = LUIE.Data.Effects.ZoneDataOverride[abilityId][zoneName].source
+                if LuiData.Data.Effects.ZoneDataOverride[abilityId][zoneName] then
+                    if LuiData.Data.Effects.ZoneDataOverride[abilityId][zoneName].source then
+                        attackerRawName = LuiData.Data.Effects.ZoneDataOverride[abilityId][zoneName].source
                     end
                 end
             end
@@ -225,96 +248,96 @@ function LUIE.InitializeHooks()
     --- @return textureName|nil abilityFxIcon
     GetKillingAttackInfo = function (index)
         local attackerRawName, attackerChampionPoints, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerDisplayName = zos_GetKillingAttackerInfo(index)
-        local attackName, attackDamage, attackIcon, wasKillingBlow, castTimeAgoMS, durationMS, numAttackHits, abilityId = zos_GetKillingAttackInfo(index)
+        local attackName, attackDamage, attackIcon, wasKillingBlow, castTimeAgoMS, durationMS, numAttackHits, abilityId, abilityFxIcon = zos_GetKillingAttackInfo(index)
 
         -- Check if there is an effect override for the abilityId
-        if LUIE.Data.Effects.EffectOverride[abilityId] then
-            attackName = LUIE.Data.Effects.EffectOverride[abilityId].name or attackName
-            attackIcon = LUIE.Data.Effects.EffectOverride[abilityId].icon or attackIcon
+        if LuiData.Data.Effects.EffectOverride[abilityId] then
+            attackName = LuiData.Data.Effects.EffectOverride[abilityId].name or attackName
+            attackIcon = LuiData.Data.Effects.EffectOverride[abilityId].icon or attackIcon
         end
 
         -- Check if there is a zone data override for the abilityId
-        if LUIE.Data.Effects.ZoneDataOverride[abilityId] then
+        if LuiData.Data.Effects.ZoneDataOverride[abilityId] then
             local index2 = GetZoneId(GetCurrentMapZoneIndex())
             local zoneName = GetPlayerLocationName()
 
             -- Check if there is a zone data override for the current zone index
-            if LUIE.Data.Effects.ZoneDataOverride[abilityId][index2] then
-                if LUIE.Data.Effects.ZoneDataOverride[abilityId][index2].icon then
-                    attackIcon = LUIE.Data.Effects.ZoneDataOverride[abilityId][index2].icon
+            if LuiData.Data.Effects.ZoneDataOverride[abilityId][index2] then
+                if LuiData.Data.Effects.ZoneDataOverride[abilityId][index2].icon then
+                    attackIcon = LuiData.Data.Effects.ZoneDataOverride[abilityId][index2].icon
                 end
-                if LUIE.Data.Effects.ZoneDataOverride[abilityId][index2].name then
-                    attackName = LUIE.Data.Effects.ZoneDataOverride[abilityId][index2].name
+                if LuiData.Data.Effects.ZoneDataOverride[abilityId][index2].name then
+                    attackName = LuiData.Data.Effects.ZoneDataOverride[abilityId][index2].name
                 end
-                if LUIE.Data.Effects.ZoneDataOverride[abilityId][index2].hide then
-                    return
+                if LuiData.Data.Effects.ZoneDataOverride[abilityId][index2].hide then
+                    return nil, nil, nil, nil, nil, nil, nil, nil, nil
                 end
             end
 
             -- Check if there is a zone data override for the current zone name
-            if LUIE.Data.Effects.ZoneDataOverride[abilityId][zoneName] then
-                if LUIE.Data.Effects.ZoneDataOverride[abilityId][zoneName].icon then
-                    attackIcon = LUIE.Data.Effects.ZoneDataOverride[abilityId][zoneName].icon
+            if LuiData.Data.Effects.ZoneDataOverride[abilityId][zoneName] then
+                if LuiData.Data.Effects.ZoneDataOverride[abilityId][zoneName].icon then
+                    attackIcon = LuiData.Data.Effects.ZoneDataOverride[abilityId][zoneName].icon
                 end
-                if LUIE.Data.Effects.ZoneDataOverride[abilityId][zoneName].name then
-                    attackName = LUIE.Data.Effects.ZoneDataOverride[abilityId][zoneName].name
+                if LuiData.Data.Effects.ZoneDataOverride[abilityId][zoneName].name then
+                    attackName = LuiData.Data.Effects.ZoneDataOverride[abilityId][zoneName].name
                 end
-                if LUIE.Data.Effects.ZoneDataOverride[abilityId][zoneName].hide then
-                    return
+                if LuiData.Data.Effects.ZoneDataOverride[abilityId][zoneName].hide then
+                    return nil, nil, nil, nil, nil, nil, nil, nil, nil
                 end
             end
         end
 
         -- Check if there is a map data override for the abilityId
-        if LUIE.Data.Effects.MapDataOverride[abilityId] then
+        if LuiData.Data.Effects.MapDataOverride[abilityId] then
             local mapName = GetMapName()
 
             -- Check if there is a map data override for the current map name
-            if LUIE.Data.Effects.MapDataOverride[abilityId][mapName] then
-                if LUIE.Data.Effects.MapDataOverride[abilityId][mapName].icon then
-                    attackIcon = LUIE.Data.Effects.MapDataOverride[abilityId][mapName].icon
+            if LuiData.Data.Effects.MapDataOverride[abilityId][mapName] then
+                if LuiData.Data.Effects.MapDataOverride[abilityId][mapName].icon then
+                    attackIcon = LuiData.Data.Effects.MapDataOverride[abilityId][mapName].icon
                 end
-                if LUIE.Data.Effects.MapDataOverride[abilityId][mapName].name then
-                    attackName = LUIE.Data.Effects.MapDataOverride[abilityId][mapName].name
+                if LuiData.Data.Effects.MapDataOverride[abilityId][mapName].name then
+                    attackName = LuiData.Data.Effects.MapDataOverride[abilityId][mapName].name
                 end
-                if LUIE.Data.Effects.MapDataOverride[abilityId][mapName].hide then
-                    return
+                if LuiData.Data.Effects.MapDataOverride[abilityId][mapName].hide then
+                    return nil, nil, nil, nil, nil, nil, nil, nil, nil
                 end
             end
         end
 
         -- Check if there is an effect override by name for the abilityId
-        if LUIE.Data.Effects.EffectOverrideByName[abilityId] then
-            local unitName = zo_strformat("<<C:1>>", attackerRawName)
-            local petName = zo_strformat("<<C:1>>", minionName)
+        if LuiData.Data.Effects.EffectOverrideByName[abilityId] then
+            local unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, attackerRawName)
+            local petName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, minionName)
 
             -- Check if there is an effect override by name for the attacker unit name
-            if LUIE.Data.Effects.EffectOverrideByName[abilityId][unitName] then
-                if LUIE.Data.Effects.EffectOverrideByName[abilityId][unitName].hide then
-                    return
+            if LuiData.Data.Effects.EffectOverrideByName[abilityId][unitName] then
+                if LuiData.Data.Effects.EffectOverrideByName[abilityId][unitName].hide then
+                    return nil, nil, nil, nil, nil, nil, nil, nil, nil
                 end
-                attackName = LUIE.Data.Effects.EffectOverrideByName[abilityId][unitName].name or attackName
-                attackIcon = LUIE.Data.Effects.EffectOverrideByName[abilityId][unitName].icon or attackIcon
+                attackName = LuiData.Data.Effects.EffectOverrideByName[abilityId][unitName].name or attackName
+                attackIcon = LuiData.Data.Effects.EffectOverrideByName[abilityId][unitName].icon or attackIcon
             end
 
             -- Check if there is an effect override by name for the minion name
-            if LUIE.Data.Effects.EffectOverrideByName[abilityId][petName] then
-                if LUIE.Data.Effects.EffectOverrideByName[abilityId][petName].hide then
-                    return
+            if LuiData.Data.Effects.EffectOverrideByName[abilityId][petName] then
+                if LuiData.Data.Effects.EffectOverrideByName[abilityId][petName].hide then
+                    return nil, nil, nil, nil, nil, nil, nil, nil, nil
                 end
-                attackName = LUIE.Data.Effects.EffectOverrideByName[abilityId][petName].name or attackName
-                attackIcon = LUIE.Data.Effects.EffectOverrideByName[abilityId][petName].icon or attackIcon
+                attackName = LuiData.Data.Effects.EffectOverrideByName[abilityId][petName].name or attackName
+                attackIcon = LuiData.Data.Effects.EffectOverrideByName[abilityId][petName].icon or attackIcon
             end
         end
 
         -- Check if the attack name is "Fall Damage" and there is an effect override for abilityId 10950
         if attackName == GetString(LUIE_STRING_SKILL_FALL_DAMAGE) then
-            if LUIE.Data.Effects.EffectOverride[10950] then
-                attackIcon = LUIE.Data.Effects.EffectOverride[10950].icon
+            if LuiData.Data.Effects.EffectOverride[10950] then
+                attackIcon = LuiData.Data.Effects.EffectOverride[10950].icon
             end
         end
 
-        return attackName, attackDamage, attackIcon, wasKillingBlow, castTimeAgoMS, durationMS, numAttackHits
+        return attackName, attackDamage, attackIcon, wasKillingBlow, castTimeAgoMS, durationMS, numAttackHits, abilityId, abilityFxIcon
     end
 
     LUIE.GetAbilityIcon = GetAbilityIcon -- Used only for PTS testing
@@ -324,8 +347,8 @@ function LUIE.InitializeHooks()
     --- @return textureName icon
     GetAbilityIcon = function (abilityId)
         local icon = zos_GetAbilityIcon(abilityId)
-        if LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].icon then
-            icon = LUIE.Data.Effects.EffectOverride[abilityId].icon
+        if LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].icon then
+            icon = LuiData.Data.Effects.EffectOverride[abilityId].icon
         end
         return icon
     end
@@ -338,15 +361,15 @@ function LUIE.InitializeHooks()
     --- @return string abilityName
     GetAbilityName = function (abilityId, casterUnitTag)
         local abilityName = zos_GetAbilityName(abilityId, casterUnitTag)
-        if LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].name then
-            abilityName = LUIE.Data.Effects.EffectOverride[abilityId].name
+        if LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].name then
+            abilityName = LuiData.Data.Effects.EffectOverride[abilityId].name
         end
         return abilityName
     end
 
     LUIE.GetArtificialEffectInfo = GetArtificialEffectInfo -- Used only for PTS testing
     local zos_GetArtificialEffectInfo = GetArtificialEffectInfo
-    --- Hook support for ArtificialffectId's
+    --- Hook support for ArtificialEffectId's
     --- @param artificialEffectId integer
     --- @return string displayName
     --- @return textureName icon
@@ -356,11 +379,11 @@ function LUIE.InitializeHooks()
     --- @return number timeEndingS
     GetArtificialEffectInfo = function (artificialEffectId)
         local displayName, iconFile, effectType, sortOrder, timeStarted, timeEnding = zos_GetArtificialEffectInfo(artificialEffectId)
-        if LUIE.Data.Effects.ArtificialEffectOverride[artificialEffectId] and LUIE.Data.Effects.ArtificialEffectOverride[artificialEffectId].icon then
-            iconFile = LUIE.Data.Effects.ArtificialEffectOverride[artificialEffectId].icon
+        if LuiData.Data.Effects.ArtificialEffectOverride[artificialEffectId] and LuiData.Data.Effects.ArtificialEffectOverride[artificialEffectId].icon then
+            iconFile = LuiData.Data.Effects.ArtificialEffectOverride[artificialEffectId].icon
         end
-        if LUIE.Data.Effects.ArtificialEffectOverride[artificialEffectId] and LUIE.Data.Effects.ArtificialEffectOverride[artificialEffectId].name then
-            displayName = LUIE.Data.Effects.ArtificialEffectOverride[artificialEffectId].name
+        if LuiData.Data.Effects.ArtificialEffectOverride[artificialEffectId] and LuiData.Data.Effects.ArtificialEffectOverride[artificialEffectId].name then
+            displayName = LuiData.Data.Effects.ArtificialEffectOverride[artificialEffectId].name
         end
         return displayName, iconFile, effectType, sortOrder, timeStarted, timeEnding
     end
@@ -371,8 +394,8 @@ function LUIE.InitializeHooks()
     --- @return string tooltipText
     GetArtificialEffectTooltipText = function (artificialEffectId)
         local function GenArtificialEffectTooltipText(tooltip)
-            if LUIE.Data.Effects.ArtificialEffectOverride[artificialEffectId] and LUIE.Data.Effects.ArtificialEffectOverride[artificialEffectId].tooltip then
-                tooltip = LUIE.Data.Effects.ArtificialEffectOverride[artificialEffectId].tooltip
+            if LuiData.Data.Effects.ArtificialEffectOverride[artificialEffectId] and LuiData.Data.Effects.ArtificialEffectOverride[artificialEffectId].tooltip then
+                tooltip = LuiData.Data.Effects.ArtificialEffectOverride[artificialEffectId].tooltip
                 return tooltip
             else
                 tooltip = zos_GetArtificialEffectTooltipText(artificialEffectId)
@@ -389,12 +412,12 @@ function LUIE.InitializeHooks()
 
         if hasSynergy then
             -- Apply LUIE custom overrides if they exist
-            if LUIE.Data.Effects.SynergyNameOverride[synergyName] then
-                if LUIE.Data.Effects.SynergyNameOverride[synergyName].icon then
-                    iconFilename = LUIE.Data.Effects.SynergyNameOverride[synergyName].icon
+            if LuiData.Data.Effects.SynergyNameOverride[synergyName] then
+                if LuiData.Data.Effects.SynergyNameOverride[synergyName].icon then
+                    iconFilename = LuiData.Data.Effects.SynergyNameOverride[synergyName].icon
                 end
-                if LUIE.Data.Effects.SynergyNameOverride[synergyName].name then
-                    synergyName = LUIE.Data.Effects.SynergyNameOverride[synergyName].name
+                if LuiData.Data.Effects.SynergyNameOverride[synergyName].name then
+                    synergyName = LuiData.Data.Effects.SynergyNameOverride[synergyName].name
                 end
             end
 
@@ -438,7 +461,7 @@ function LUIE.InitializeHooks()
     --- @param abilityId integer
     --- @return boolean
     local function ShouldShowEffect(abilityId)
-        local override = LUIE.Data.Effects.EffectOverride[abilityId]
+        local override = LuiData.Data.Effects.EffectOverride[abilityId]
         if not override then
             return true
         end
@@ -458,7 +481,7 @@ function LUIE.InitializeHooks()
     --- @return string tooltipText
     local function GetTooltipText(abilityId, buffSlot, timer, value2, value3)
         local function GenTooltipText(tooltipText)
-            local override = LUIE.Data.Effects.EffectOverride[abilityId]
+            local override = LuiData.Data.Effects.EffectOverride[abilityId]
 
             -- Handle veteran difficulty tooltip
             if LUIE.ResolveVeteranDifficulty() and override and override.tooltipVeteran then
@@ -478,7 +501,7 @@ function LUIE.InitializeHooks()
             end
 
             -- Handle default tooltip override
-            if LUIE.Data.Effects.TooltipUseDefault[abilityId] then
+            if LuiData.Data.Effects.TooltipUseDefault[abilityId] then
                 local effectDesc = GetAbilityEffectDescription(buffSlot)
                 if effectDesc ~= "" then
                     tooltipText = LUIE.UpdateMundusTooltipSyntax(abilityId, effectDesc)
@@ -508,8 +531,8 @@ function LUIE.InitializeHooks()
 
     -- Helper function to get third line text
     local function GetThirdLine(abilityId, timer)
-        if LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].duration then
-            timer = timer + LUIE.Data.Effects.EffectOverride[abilityId].duration
+        if LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].duration then
+            timer = timer + LuiData.Data.Effects.EffectOverride[abilityId].duration
         end
         -- Additional third line logic can be added here if needed
         return nil
@@ -578,7 +601,7 @@ function LUIE.InitializeHooks()
                 for i = 1, #trackBuffs do
                     local compareId = trackBuffs[i].abilityId
                     local compareTime = trackBuffs[i].endTime
-                    if LUIE.Data.Effects.EffectOverride[compareId] and LUIE.Data.Effects.EffectOverride[compareId].noDuplicate then
+                    if LuiData.Data.Effects.EffectOverride[compareId] and LuiData.Data.Effects.EffectOverride[compareId].noDuplicate then
                         for k, v in pairs(trackBuffs) do
                             if v.abilityId == compareId and v.endTime < compareTime then
                                 v.markForRemove = true
@@ -591,12 +614,12 @@ function LUIE.InitializeHooks()
                 for i = 1, #trackBuffs do
                     local buff = trackBuffs[i]
                     if buff.buffSlot > 0 and buff.buffName ~= "" and
-                    not (LUIE.Data.Effects.EffectOverride[buff.abilityId] and LUIE.Data.Effects.EffectOverride[buff.abilityId].hide) and
+                    not (LuiData.Data.Effects.EffectOverride[buff.abilityId] and LuiData.Data.Effects.EffectOverride[buff.abilityId].hide) and
                     not buff.markForRemove then
                         -- Process tooltip values
                         local timer = buff.endTime - buff.startTime
                         local value2, value3 = 0, 0
-                        local effectOverride = LUIE.Data.Effects.EffectOverride[buff.abilityId]
+                        local effectOverride = LuiData.Data.Effects.EffectOverride[buff.abilityId]
 
                         if effectOverride then
                             -- Handle value2
@@ -893,7 +916,7 @@ function LUIE.InitializeHooks()
                         data.narrationText = GetActiveEffectNarration
 
                         -- Hide effects if they are set to hide on the override.
-                        if not LUIE.Data.Effects.EffectOverride[abilityId] or (LUIE.Data.Effects.EffectOverride[abilityId] and not LUIE.Data.Effects.EffectOverride[abilityId].hide) then
+                        if not LuiData.Data.Effects.EffectOverride[abilityId] or (LuiData.Data.Effects.EffectOverride[abilityId] and not LuiData.Data.Effects.EffectOverride[abilityId].hide) then
                             self:AddActiveEffectData(data)
                         end
                     end
@@ -944,31 +967,31 @@ function LUIE.InitializeHooks()
                     local timer = contentEndTime - contentStartTime
                     local value2
                     local value3
-                    if LUIE.Data.Effects.EffectOverride[abilityId] then
-                        if LUIE.Data.Effects.EffectOverride[abilityId].tooltipValue2 then
-                            value2 = LUIE.Data.Effects.EffectOverride[abilityId].tooltipValue2
-                        elseif LUIE.Data.Effects.EffectOverride[abilityId].tooltipValue2Mod then
-                            value2 = zo_floor(timer + LUIE.Data.Effects.EffectOverride[abilityId].tooltipValue2Mod + 0.5)
-                        elseif LUIE.Data.Effects.EffectOverride[abilityId].tooltipValue2Id then
-                            value2 = zo_floor((GetAbilityDuration(LUIE.Data.Effects.EffectOverride[abilityId].tooltipValue2Id) or 0) + 0.5) / 1000
+                    if LuiData.Data.Effects.EffectOverride[abilityId] then
+                        if LuiData.Data.Effects.EffectOverride[abilityId].tooltipValue2 then
+                            value2 = LuiData.Data.Effects.EffectOverride[abilityId].tooltipValue2
+                        elseif LuiData.Data.Effects.EffectOverride[abilityId].tooltipValue2Mod then
+                            value2 = zo_floor(timer + LuiData.Data.Effects.EffectOverride[abilityId].tooltipValue2Mod + 0.5)
+                        elseif LuiData.Data.Effects.EffectOverride[abilityId].tooltipValue2Id then
+                            value2 = zo_floor((GetAbilityDuration(LuiData.Data.Effects.EffectOverride[abilityId].tooltipValue2Id) or 0) + 0.5) / 1000
                         else
                             value2 = 0
                         end
                     else
                         value2 = 0
                     end
-                    if LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].tooltipValue3 then
-                        value3 = LUIE.Data.Effects.EffectOverride[abilityId].tooltipValue3
+                    if LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].tooltipValue3 then
+                        value3 = LuiData.Data.Effects.EffectOverride[abilityId].tooltipValue3
                     else
                         value3 = 0
                     end
                     timer = zo_floor((timer * 10) + 0.5) / 10
 
                     local tooltipText
-                    if LUIE.ResolveVeteranDifficulty() == true and LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].tooltipVeteran then
-                        tooltipText = zo_strformat(LUIE.Data.Effects.EffectOverride[abilityId].tooltipVeteran, timer, value2, value3)
+                    if LUIE.ResolveVeteranDifficulty() == true and LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].tooltipVeteran then
+                        tooltipText = zo_strformat(LuiData.Data.Effects.EffectOverride[abilityId].tooltipVeteran, timer, value2, value3)
                     else
-                        tooltipText = (LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].tooltip) and zo_strformat(LUIE.Data.Effects.EffectOverride[abilityId].tooltip, timer, value2, value3) or ""
+                        tooltipText = (LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].tooltip) and zo_strformat(LuiData.Data.Effects.EffectOverride[abilityId].tooltip, timer, value2, value3) or ""
                     end
 
                     -- Display Default Tooltip Description if no custom tooltip is present
@@ -986,7 +1009,7 @@ function LUIE.InitializeHooks()
                     end
 
                     -- Override custom tooltip with default tooltip if this ability is flagged to do so (scaling buffs like Mundus Stones)
-                    if LUIE.Data.Effects.TooltipUseDefault[abilityId] then
+                    if LuiData.Data.Effects.TooltipUseDefault[abilityId] then
                         if GetAbilityEffectDescription(buffSlot) ~= "" then
                             tooltipText = GetAbilityEffectDescription(buffSlot)
                             tooltipText = LUIE.UpdateMundusTooltipSyntax(abilityId, tooltipText)
@@ -1003,8 +1026,8 @@ function LUIE.InitializeHooks()
                     end
                     local thirdLine
                     local timer2 = (contentEndTime - contentStartTime)
-                    if LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].duration then
-                        timer2 = timer2 + LUIE.Data.Effects.EffectOverride[abilityId].duration
+                    if LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].duration then
+                        timer2 = timer2 + LuiData.Data.Effects.EffectOverride[abilityId].duration
                     end
 
                     contentDescription = tooltipText
@@ -1038,23 +1061,23 @@ function LUIE.InitializeHooks()
                 -- Add Buff Type Line
                 if LUIE.SpellCastBuffs.SV.TooltipBuffType then
                     buffType = buffType or LUIE_BUFF_TYPE_NONE
-                    if abilityId and LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].unbreakable then
+                    if abilityId and LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].unbreakable then
                         buffType = buffType + 2
                     end
 
                     -- Setup tooltips for player aoe trackers
-                    if abilityId and LUIE.Data.Effects.EffectGroundDisplay[abilityId] then
+                    if abilityId and LuiData.Data.Effects.EffectGroundDisplay[abilityId] then
                         buffType = buffType + 4
                     end
 
                     -- Setup tooltips for ground buff/debuff effects
-                    if abilityId and (LUIE.Data.Effects.AddGroundDamageAura[abilityId] or (LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].groundLabel)) then
+                    if abilityId and (LuiData.Data.Effects.AddGroundDamageAura[abilityId] or (LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].groundLabel)) then
                         buffType = buffType + 6
                     end
 
                     -- Setup tooltips for Fake Player Offline Auras
-                    if abilityId and LUIE.Data.Effects.FakePlayerOfflineAura[abilityId] then
-                        if LUIE.Data.Effects.FakePlayerOfflineAura[abilityId].ground then
+                    if abilityId and LuiData.Data.Effects.FakePlayerOfflineAura[abilityId] then
+                        if LuiData.Data.Effects.FakePlayerOfflineAura[abilityId].ground then
                             buffType = 6
                         else
                             buffType = 5
@@ -1133,17 +1156,17 @@ function LUIE.InitializeHooks()
             if LUIE.SpellCastBuffs.SV.TooltipBuffType then
                 local buffType = control.effectType or LUIE_BUFF_TYPE_NONE
                 local effectId = control.effectId
-                if effectId and LUIE.Data.Effects.EffectOverride[effectId] and LUIE.Data.Effects.EffectOverride[effectId].unbreakable then
+                if effectId and LuiData.Data.Effects.EffectOverride[effectId] and LuiData.Data.Effects.EffectOverride[effectId].unbreakable then
                     buffType = buffType + 2
                 end
 
                 -- Setup tooltips for player aoe trackers
-                if effectId and LUIE.Data.Effects.EffectGroundDisplay[effectId] then
+                if effectId and LuiData.Data.Effects.EffectGroundDisplay[effectId] then
                     buffType = buffType + 4
                 end
 
                 -- Setup tooltips for ground buff/debuff effects
-                if effectId and (LUIE.Data.Effects.AddGroundDamageAura[effectId] or (LUIE.Data.Effects.EffectOverride[effectId] and LUIE.Data.Effects.EffectOverride[effectId].groundLabel)) then
+                if effectId and (LuiData.Data.Effects.AddGroundDamageAura[effectId] or (LuiData.Data.Effects.EffectOverride[effectId] and LuiData.Data.Effects.EffectOverride[effectId].groundLabel)) then
                     buffType = buffType + 6
                 end
 
@@ -1196,7 +1219,7 @@ function LUIE.InitializeHooks()
         TooltipBottomLine(control, detailsLine)
 
         if not control.animation then
-            control.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ShowOnMouseOverLabelAnimation", control:GetNamedChild("Highlight"))
+            control.animation = animationManager:CreateTimelineFromVirtual("ShowOnMouseOverLabelAnimation", control:GetNamedChild("Highlight"))
         end
         control.animation:PlayForward()
     end
@@ -1238,8 +1261,8 @@ function LUIE.InitializeHooks()
         local function SetupActionSlot(slotObject, slotId)
             local slotIcon = GetSlotTexture(slotId, slotObject:GetHotbarCategory())
             local abilityId = LUIE.GetSlotTrueBoundId(slotId, slotObject:GetHotbarCategory())
-            if LUIE.Data.Effects.BarIdOverride[abilityId] then
-                slotIcon = LUIE.Data.Effects.BarIdOverride[abilityId]
+            if LuiData.Data.Effects.BarIdOverride[abilityId] then
+                slotIcon = LuiData.Data.Effects.BarIdOverride[abilityId]
             end
             slotObject:SetEnabled(true)
             local isGamepad = IsInGamepadPreferredMode()
@@ -1312,7 +1335,7 @@ function LUIE.InitializeHooks()
 
             local abilityId = LUIE.GetSlotTrueBoundId(slotnum, hotbarCategory) -- Check AbilityId for if this should be a fake activation highlight
 
-            local showHighlight = not slotIsEmpty and (ActionSlotHasActivationHighlight(slotnum, hotbarCategory) or LUIE.Data.Effects.IsAbilityActiveGlow[abilityId] == true) and not self.useFailure and not self.showingCooldown
+            local showHighlight = not slotIsEmpty and (ActionSlotHasActivationHighlight(slotnum, hotbarCategory) or LuiData.Data.Effects.IsAbilityActiveGlow[abilityId] == true) and not self.useFailure and not self.showingCooldown
             local isShowingHighlight = self.activationHighlight:IsHidden() == false
 
             if showHighlight ~= isShowingHighlight then
@@ -1356,13 +1379,13 @@ function LUIE.InitializeHooks()
 
             local hidden = true
 
-            -- Add toggle highlight for abilites that need it (Guard + morphs)
-            if IsSlotToggled(slotnum, hotbarCategory) == true or LUIE.Data.Effects.IsAbilityActiveHighlight[abilityId] then
+            -- Add toggle highlight for abilities that need it (Guard + morphs)
+            if IsSlotToggled(slotnum, hotbarCategory) == true or LuiData.Data.Effects.IsAbilityActiveHighlight[abilityId] then
                 hidden = false
             end
 
             -- If LUIE Bar Highlight is enabled, hide certain "Toggle effects" (aka Blood Frenzy + morphs)
-            if IsSlotToggled(slotnum, hotbarCategory) == true and LUIE.Data.Effects.RemoveAbilityActiveHighlight[abilityId] and LUIE.CombatInfo.SV.ShowToggled then
+            if IsSlotToggled(slotnum, hotbarCategory) == true and LuiData.Data.Effects.RemoveAbilityActiveHighlight[abilityId] and LUIE.CombatInfo.SV.ShowToggled then
                 hidden = true
             end
 
@@ -1675,8 +1698,8 @@ function LUIE.InitializeHooks()
                 --- @diagnostic disable-next-line: redundant-parameter
                 local abilityId = info.abilityFunction(index, self.campaignId)
                 local name = GetAbilityName(abilityId)
-                local icon = (LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].passiveIcon) and LUIE.Data.Effects.EffectOverride[abilityId].passiveIcon or GetAbilityIcon(abilityId)       -- Get Updated LUIE AbilityIcon here
-                local description = (LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].tooltip) and LUIE.Data.Effects.EffectOverride[abilityId].tooltip or GetAbilityDescription(abilityId) -- Get Updated LUIE Tooltip here
+                local icon = (LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].passiveIcon) and LuiData.Data.Effects.EffectOverride[abilityId].passiveIcon or GetAbilityIcon(abilityId)       -- Get Updated LUIE AbilityIcon here
+                local description = (LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].tooltip) and LuiData.Data.Effects.EffectOverride[abilityId].tooltip or GetAbilityDescription(abilityId) -- Get Updated LUIE Tooltip here
 
                 if info.countText then
                     if info.countText == HIDE_COUNT then
@@ -1717,8 +1740,8 @@ function LUIE.InitializeHooks()
                     -- Replace description
                     if targetData.abilityId then
                         local abilityId = targetData.abilityId
-                        if LUIE.Data.Effects.EffectOverride[abilityId] and LUIE.Data.Effects.EffectOverride[abilityId].tooltip then
-                            targetData.description = LUIE.Data.Effects.EffectOverride[abilityId].tooltip
+                        if LuiData.Data.Effects.EffectOverride[abilityId] and LuiData.Data.Effects.EffectOverride[abilityId].tooltip then
+                            targetData.description = LuiData.Data.Effects.EffectOverride[abilityId].tooltip
                         end
                     end
                     GAMEPAD_TOOLTIPS:LayoutAvABonus(GAMEPAD_RIGHT_TOOLTIP, targetData)
@@ -1856,24 +1879,24 @@ function LUIE.InitializeHooks()
                         local name, description, icon, atPercent, isActive = self.keepUpgradeObject:GetLevelUpgradeInfo(currentLevel, i)
 
                         -- Override with custom icons here.
-                        if LUIE.Data.Effects.KeepUpgradeOverride[name] then
-                            icon = LUIE.Data.Effects.KeepUpgradeOverride[name]
+                        if LuiData.Data.Effects.KeepUpgradeOverride[name] then
+                            icon = LuiData.Data.Effects.KeepUpgradeOverride[name]
                         end
                         -- Override with custom faction icons here.
-                        if LUIE.Data.Effects.KeepUpgradeAlliance[name] then
-                            icon = LUIE.Data.Effects.KeepUpgradeAlliance[name][LUIE.PlayerFaction]
+                        if LuiData.Data.Effects.KeepUpgradeAlliance[name] then
+                            icon = LuiData.Data.Effects.KeepUpgradeAlliance[name][LUIE.PlayerFaction]
                         end
                         -- Special condition to display a unique icon for rank 2 of siege cap upgrade.
-                        if name == LUIE.Data.Abilities.Keep_Upgrade_Wood_Siege_Cap and currentLevel == 2 then
+                        if name == LuiData.Data.Abilities.Keep_Upgrade_Wood_Siege_Cap and currentLevel == 2 then
                             icon = "LuiExtended/media/icons/keepupgrade/upgrade_wood_siege_cap_2.dds"
                         end
                         -- Update the tooltips.
-                        if LUIE.Data.Effects.KeepUpgradeTooltip[name] then
-                            description = LUIE.Data.Effects.KeepUpgradeTooltip[name]
+                        if LuiData.Data.Effects.KeepUpgradeTooltip[name] then
+                            description = LuiData.Data.Effects.KeepUpgradeTooltip[name]
                         end
                         -- Update the name (Note: We do this last since our other conditionals check by name).
-                        if LUIE.Data.Effects.KeepUpgradeNameFix[name] then
-                            name = LUIE.Data.Effects.KeepUpgradeNameFix[name]
+                        if LuiData.Data.Effects.KeepUpgradeNameFix[name] then
+                            name = LuiData.Data.Effects.KeepUpgradeNameFix[name]
                         end
 
                         local data =
@@ -2128,7 +2151,7 @@ function LUIE.InitializeHooks()
                 if skillProgressionData:GetSkillData():GetPointAllocator():CanPurchase() then
                     local dialogAbility = dialog.ability
                     local id = skillProgressionData:GetAbilityId()
-                    dialog.abilityName:SetText(zo_strformat("<<C:1>>", GetAbilityName(id)))
+                    dialog.abilityName:SetText(zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id)))
 
                     dialogAbility.skillProgressionData = skillProgressionData
                     dialogAbility.icon:SetTexture(GetAbilityIcon(id))

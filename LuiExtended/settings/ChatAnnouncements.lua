@@ -9,8 +9,16 @@ local LUIE = LUIE
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
+local GetAchievementCategoryInfo = GetAchievementCategoryInfo
+local GetCollectibleCategoryInfo = GetCollectibleCategoryInfo
+local GetNumAchievementCategories = GetNumAchievementCategories
+local GetString = GetString
+local LibAddonMenu2 = LibAddonMenu2
+local ReloadUI = ReloadUI
 local zo_strformat = zo_strformat
+local table = table
 local table_insert = table.insert
+local unpack = unpack
 
 local chatNameDisplayOptions = { "@UserID", "Character Name", "Character Name @UserID" }
 local chatNameDisplayOptionsKeys = { ["@UserID"] = 1, ["Character Name"] = 2, ["Character Name @UserID"] = 3 }

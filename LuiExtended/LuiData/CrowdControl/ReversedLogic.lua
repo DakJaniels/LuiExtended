@@ -5,10 +5,11 @@
 
 --- @class (partial) LuiData
 local LuiData = LuiData
-
+local Data = LuiData.Data
+local CrowdControl = Data.CrowdControl
 -- Not implemented - list of abilities that ACTION_RESULT_GAINED_DURATION fires in the opposite order of normal
 --- @class (partial) ReversedLogic
-local ReversedLogic =
+local reversedLogic =
 {
     -- Quests
     [21876] = true, -- Q4260 West Barrier Teleport
@@ -24,4 +25,4 @@ local ReversedLogic =
 }
 
 --- @class (partial) ReversedLogic
-LuiData.Data.CrowdControl.ReversedLogic = ReversedLogic
+CrowdControl.ReversedLogic = reversedLogic

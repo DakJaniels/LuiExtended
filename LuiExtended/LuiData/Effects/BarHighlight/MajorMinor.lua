@@ -6,12 +6,9 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR BAR HIGHLIGHT RELATED OVERRIDES
@@ -19,7 +16,7 @@ local zo_strformat = zo_strformat
 
 -- Table of all Major / Minor Effects (Used by CombatInfo Bar Highlight to override the 0 duration on these abilities)
 --- @class (partial) MajorMinor
-local MajorMinor =
+local majorMinor =
 {
     -- Major / Minor Buffs
     [61693] = true,  -- Minor Resolve
@@ -90,4 +87,4 @@ local MajorMinor =
 }
 
 --- @class (partial) MajorMinor
-LuiData.Data.Effects.MajorMinor = MajorMinor
+Effects.MajorMinor = majorMinor

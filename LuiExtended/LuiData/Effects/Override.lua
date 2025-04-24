@@ -6,12 +6,25 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
+local Tooltips = Data.Tooltips
+local Abilities = Data.Abilities
 
+local LUIE_CC_TYPE_KNOCKDOWN = LUIE_CC_TYPE_KNOCKDOWN
+local LUIE_CC_TYPE_STAGGER = LUIE_CC_TYPE_STAGGER
+local LUIE_CC_TYPE_STUN = LUIE_CC_TYPE_STUN
+local LUIE_CC_TYPE_SNARE = LUIE_CC_TYPE_SNARE
+local LUIE_CC_TYPE_KNOCKBACK = LUIE_CC_TYPE_KNOCKBACK
+local LUIE_CC_TYPE_FEAR = LUIE_CC_TYPE_FEAR
+local LUIE_CC_TYPE_ROOT = LUIE_CC_TYPE_ROOT
+
+local GetAbilityName = GetAbilityName
+local zo_strgsub = zo_strgsub
 local zo_strformat = zo_strformat
+local BUFF_EFFECT_TYPE_BUFF = BUFF_EFFECT_TYPE_BUFF
+local BUFF_EFFECT_TYPE_DEBUFF = BUFF_EFFECT_TYPE_DEBUFF
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- Override various information displayed for Effect auras
@@ -56,7 +69,7 @@ local zo_strformat = zo_strformat
     - isPlayerAbility = true -- Set this ability to be a "Player Ability" for the purpose of determining if a generic CC icon should be used for the ability
 --]]
 --- @class (partial) EffectOverride
-local EffectOverride =
+local effectOverride =
 {
 
     -- Companion Buffs
@@ -112,7 +125,7 @@ local EffectOverride =
     [61716] = { tooltip = Tooltips.Skill_Major_Evasion },    -- Major Evasion
     [61735] = { tooltip = Tooltips.Skill_Minor_Expedition }, -- Minor Expedition
     [61736] = { tooltip = Tooltips.Skill_Major_Expedition }, -- Major Expedition
-    [63569] = { tooltip = Tooltips.Skill_Gallop },     -- Major Gallop
+    [63569] = { tooltip = Tooltips.Skill_Gallop },           -- Major Gallop
     [61708] = { tooltip = Tooltips.Skill_Minor_Heroism },    -- Minor Heroism
     [61709] = { tooltip = Tooltips.Skill_Major_Heroism },    -- Major Heroism
     [88490] = { tooltip = Tooltips.Skill_Minor_Toughness },  -- Minor Toughness
@@ -8945,4 +8958,4 @@ local EffectOverride =
 
 --- @class (partial) EffectOverride
 --- @field [integer] EffectOverrideData
-LuiData.Data.Effects.EffectOverride = EffectOverride
+Effects.EffectOverride = effectOverride

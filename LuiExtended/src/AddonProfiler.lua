@@ -179,8 +179,8 @@ function AddonProfiler:OutputDetailedProfilingResults(results)
     end
     d("\n")
 
-    -- Function Hotspots
-    d("|cFFFF00Function Hotspots:|r")
+    -- Function HotSpots
+    d("|cFFFF00Function HotSpots:|r")
     local sorted = {}
     for name, time in pairs(results.functions) do
         table.insert(sorted, { name = name, time = time })

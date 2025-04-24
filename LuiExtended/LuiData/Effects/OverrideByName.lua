@@ -6,18 +6,17 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
+local Unitnames = Data.UnitNames
+local Abilities = Data.Abilities
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- Table of effects to adjust only based off a specific target - this allows us to override the name/icon or hide an effect only when the source is a specific NPC. Used to change icons for attacks with the same id coming from different types of animals, etc...
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) EffectOverrideByName
-local EffectOverrideByName =
+local effectOverrideByName =
 {
     [10618] =
     {                                                                                                                 -- Quick Strike (Shared)
@@ -458,4 +457,4 @@ local EffectOverrideByName =
 }
 
 --- @class (partial) EffectOverrideByName
-LuiData.Data.Effects.EffectOverrideByName = EffectOverrideByName
+Effects.EffectOverrideByName = effectOverrideByName

@@ -6,12 +6,14 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
+local Tooltips = Data.Tooltips
+local Abilities = Data.Abilities
 
-local zo_strformat = zo_strformat
+local zo_strgsub = zo_strgsub
+local GetArtificialEffectInfo = GetArtificialEffectInfo
 
 local ESO_Plus_Member = function ()
     local displayName, _, _, _, _, _ = GetArtificialEffectInfo(0)
@@ -22,7 +24,7 @@ end
 --------------------------------------------------------------------------------------------------------------------------------
 
 --- @class (partial) ArtificialEffectOverride
-local ArtificialEffectOverride =
+local artificialEffectOverride =
 {
     -- ESO Plus Subscription Status
     -- Index 0: Displays active ESO Plus membership status in the Active Effects window
@@ -75,5 +77,5 @@ local ArtificialEffectOverride =
 
 
 --- @class (partial) ArtificialEffectOverride
---- @field [integer] {overide:boolean,name:string,tooltip:string}
-LuiData.Data.Effects.ArtificialEffectOverride = ArtificialEffectOverride
+--- @field [integer] {override:boolean,name:string,tooltip:string}
+Effects.ArtificialEffectOverride = artificialEffectOverride

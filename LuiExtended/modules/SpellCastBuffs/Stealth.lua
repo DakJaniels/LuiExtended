@@ -9,9 +9,9 @@ local LUIE = LUIE
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
 
-local Effects = LUIE.Data.Effects
-local Abilities = LUIE.Data.Abilities
-local Tooltips = LUIE.Data.Tooltips
+local Effects = LuiData.Data.Effects
+local Abilities = LuiData.Data.Abilities
+local Tooltips = LuiData.Data.Tooltips
 
 -- Handles long term Disguise Item Icon (appears when wearing a disguise even if not in a disguised state)
 local g_currentDisguise = 0

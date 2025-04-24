@@ -8,9 +8,9 @@ local LUIE = LUIE
 LUIE.CombatTextPointEventViewer = LUIE.CombatTextEventViewer:Subclass()
 local CombatTextPointEventViewer = LUIE.CombatTextPointEventViewer
 
-local poolTypes = LUIE.Data.CombatTextConstants.poolType
-local eventType = LUIE.Data.CombatTextConstants.eventType
-local pointTypes = LUIE.Data.CombatTextConstants.pointType
+local poolTypes = LuiData.Data.CombatTextConstants.poolType
+local eventType = LuiData.Data.CombatTextConstants.eventType
+local pointTypes = LuiData.Data.CombatTextConstants.pointType
 --- @diagnostic disable-next-line: duplicate-set-field
 function CombatTextPointEventViewer:New(...)
     local obj = LUIE.CombatTextEventViewer:New(...)

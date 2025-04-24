@@ -11,11 +11,11 @@ local CombatInfo = LUIE.CombatInfo
 local AbilityAlerts = CombatInfo.AbilityAlerts
 
 local UI = LUIE.UI
-local Effects = LUIE.Data.Effects
-local Alerts = LUIE.Data.AlertTable
-local AlertsZone = LUIE.Data.AlertZoneOverride
-local AlertsMap = LUIE.Data.AlertMapOverride
-local AlertsConvert = LUIE.Data.AlertBossNameConvert
+local Effects = LuiData.Data.Effects
+local Alerts = LuiData.Data.AlertTable
+local AlertsZone = LuiData.Data.AlertZoneOverride
+local AlertsMap = LuiData.Data.AlertMapOverride
+local AlertsConvert = LuiData.Data.AlertBossNameConvert
 
 local pairs = pairs
 local printToChat = LUIE.PrintToChat
@@ -336,7 +336,7 @@ function AbilityAlerts.GenerateAlertFramePreview(state)
         alert.icon.icon:SetTexture("/esoui/art/icons/icon_missing.dds")
         alert.icon.cd:SetFillColor(0, 0, 0, 0)
         alert.icon.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
-        alert.mitigation:SetText("MITGATION TEST")
+        alert.mitigation:SetText("MITIGATION TEST")
         alert.timer:SetText(CombatInfo.SV.alerts.toggles.alertTimer and " 1.0" or "")
         alert:SetHidden(not state)
     end
@@ -421,7 +421,7 @@ function AbilityAlerts.AlertInterrupt(eventCode, result, isError, abilityName, a
     for i = 1, 3 do
         local alert = _G["LUIE_Alert" .. i]
         if alert.data.sourceUnitId then
-            targetName = zo_strformat("<<C:1>>", targetName)
+            targetName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
 
             -- DEBUG
             -- d("NORMAL INTERRUPT DETECTED")
@@ -725,9 +725,9 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
     end
 
     -- Get Ability Name & Icon
-    local abilityName = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
+    local abilityName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(abilityId))
     local abilityIcon = GetAbilityIcon(abilityId)
-    unitName = zo_strformat("<<C:1>>", unitName)
+    unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, unitName)
     local savedName = unitName
 
     -- Override unitName here if we utilize a fakeName / bossName
@@ -737,7 +737,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
         end
     end
     if Alerts[abilityId].bossName and DoesUnitExist("boss1") then
-        unitName = zo_strformat("<<C:1>>", GetUnitName("boss1"))
+        unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("boss1"))
     end
 
     -- Handle effects that override by UnitName
@@ -798,7 +798,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
             unitName = Alerts[abilityId].fakeName
         end
         if Alerts[abilityId].bossName and DoesUnitExist("boss1") then
-            unitName = zo_strformat("<<C:1>>", GetUnitName("boss1"))
+            unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("boss1"))
         end
     end
 
@@ -843,7 +843,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
     if Alerts[abilityId].bossMatch then
         for x = 1, #Alerts[abilityId].bossMatch do
             for i = 1, 4 do
-                local bossName = DoesUnitExist("boss" .. i) and zo_strformat("<<C:1>>", GetUnitName("boss" .. i)) or ""
+                local bossName = DoesUnitExist("boss" .. i) and zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("boss" .. i)) or ""
                 if bossName == Alerts[abilityId].bossMatch[x] then
                     unitName = Alerts[abilityId].bossMatch[x]
                     if LUIE.IsDevDebugEnabled() then
@@ -860,7 +860,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
 
     if AlertsConvert[abilityId] then
         for i = 1, 4 do
-            local bossName = DoesUnitExist("boss" .. i) and zo_strformat("<<C:1>>", GetUnitName("boss" .. i)) or ""
+            local bossName = DoesUnitExist("boss" .. i) and zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("boss" .. i)) or ""
             if AlertsConvert[abilityId][bossName] then
                 unitName = AlertsConvert[abilityId][bossName]
                 if LUIE.IsDevDebugEnabled() then
@@ -1084,10 +1084,10 @@ function AbilityAlerts.OnCombatIn(eventCode, result, isError, abilityName, abili
     end
 
     local Settings = CombatInfo.SV.alerts
-    abilityName = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
+    abilityName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(abilityId))
     local abilityIcon = GetAbilityIcon(abilityId)
 
-    local sourceNameCheck = zo_strformat("<<C:1>>", sourceName)
+    local sourceNameCheck = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
 
     -- Handle effects that override by UnitName
     if Effects.EffectOverrideByName[abilityId] then

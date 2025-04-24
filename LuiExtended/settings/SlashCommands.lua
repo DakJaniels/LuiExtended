@@ -8,7 +8,7 @@ local LUIE = LUIE
 --- @class (partial) LUIE.SlashCommands
 local SlashCommands = LUIE.SlashCommands
 --- @type CollectibleTables
-local CollectibleTables = LUIE.Data.CollectibleTables
+local CollectibleTables = LuiData.Data.CollectibleTables
 
 local pairs = pairs
 local table_insert = table.insert

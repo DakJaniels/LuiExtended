@@ -6,12 +6,17 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
 
-local zo_strformat = zo_strformat
+--------------------------------------------------------------------------------------------------------------------------------
+-- Local Constants.
+--------------------------------------------------------------------------------------------------------------------------------
+
+local WEAPONTYPE_FIRE_STAFF = WEAPONTYPE_FIRE_STAFF
+local WEAPONTYPE_LIGHTNING_STAFF = WEAPONTYPE_LIGHTNING_STAFF
+local WEAPONTYPE_FROST_STAFF = WEAPONTYPE_FROST_STAFF
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- EFFECTS TABLE FOR BAR HIGHLIGHT RELATED OVERRIDES
@@ -24,7 +29,7 @@ local zo_strformat = zo_strformat
 -- Switch backbar slotId's when we have a certain type of staff equipped
 -- Back Bar ID will unfortunately return either the base ability or the element type of the Staff we are using in our current weapon pair, so have to check for ALL of these conditions
 --- @class (partial) BarHighlightDestroFix
-local BarHighlightDestroFix =
+local barHighlightDestroFix =
 {
     -- Base Ability
     [28858] = { [WEAPONTYPE_FIRE_STAFF] = 28807, [WEAPONTYPE_LIGHTNING_STAFF] = 28854, [WEAPONTYPE_FROST_STAFF] = 28849 }, -- Wall of Elements
@@ -72,4 +77,4 @@ local BarHighlightDestroFix =
 }
 
 --- @class (partial) BarHighlightDestroFix
-LuiData.Data.Effects.BarHighlightDestroFix = BarHighlightDestroFix
+Effects.BarHighlightDestroFix = barHighlightDestroFix

@@ -6,15 +6,13 @@
 --- @class (partial) LuiData
 local LuiData = LuiData
 
-local Tooltips = LuiData.Data.Tooltips
-local Unitnames = LuiData.Data.UnitNames
-local Zonenames = LuiData.Data.ZoneNames
-local Abilities = LuiData.Data.Abilities
-
-local zo_strformat = zo_strformat
+local Data = LuiData.Data
+--- @class (partial) Effects
+local Effects = Data.Effects
+local Abilities = Data.Abilities
 
 --- @class (partial) KeepUpgradeAlliance
-local KeepUpgradeAlliance =
+local keepUpgradeAlliance =
 {
     [Abilities.Keep_Upgrade_Food_Honor_Guard_Abilities] =
     {
@@ -26,4 +24,4 @@ local KeepUpgradeAlliance =
 
 
 --- @class (partial) KeepUpgradeAlliance
-LuiData.Data.Effects.KeepUpgradeAlliance = KeepUpgradeAlliance
+Effects.KeepUpgradeAlliance = keepUpgradeAlliance
