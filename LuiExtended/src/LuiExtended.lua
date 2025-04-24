@@ -51,7 +51,6 @@ local LuiData = LuiData
 if not LuiData then
     error("LuiData is not enabled", 2)
 end
-
 -- -----------------------------------------------------------------------------
 -- Default Settings
 LUIE.Defaults =

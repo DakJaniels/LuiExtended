@@ -679,8 +679,6 @@ local ChatAnnouncements =
     },
 }
 
-
-
 ------------------------------------------------
 
 local ColorizeColors = {}

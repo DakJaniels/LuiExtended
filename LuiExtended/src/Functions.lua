@@ -45,7 +45,6 @@ local table_sort = table.sort
 
 -- -----------------------------------------------------------------------------
 
-
 do
     --- @param addonName string
     --- @return boolean

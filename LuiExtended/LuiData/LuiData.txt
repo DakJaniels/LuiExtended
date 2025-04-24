@@ -13,12 +13,10 @@ lang/Skills_$(language).lua
 # Core Data Files
 Globals.lua
 _data_namespace.lua
-
 AbilityTables.lua
 Tooltips.lua
 UnitNamesTable.lua
 ZoneNamesTable.lua
-
 
 # Effects - Core
 Effects/KeepUpgradeOverride.lua
@@ -108,6 +106,7 @@ PetNames.lua
 AbilityBlacklistPresets.lua
 CombatTextBlacklistPresets.lua
 CrownStoreCollectibles.lua
+
 
 # Debug
 Debug/DebugAuras.lua
