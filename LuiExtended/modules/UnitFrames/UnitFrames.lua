@@ -1545,10 +1545,13 @@ end
 
 -- A function to extract the anchor information
 --- @param frame Control
+--- @return {point:AnchorPosition,relativeTo:object,relativePoint:AnchorPosition,offsetX:number,offsetY:number }|nil
 local function GetAnchorInfo(frame)
     local anchorIndex = 1
     local isValidAnchor, point, relativeTo, relativePoint, offsetX, offsetY = frame:GetAnchor(anchorIndex)
-    if not isValidAnchor then return end
+    if not isValidAnchor then
+        return
+    end
     return { point, relativeTo, relativePoint, offsetX, offsetY }
 end
 
