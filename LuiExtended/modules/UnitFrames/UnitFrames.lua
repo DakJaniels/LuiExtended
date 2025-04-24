@@ -1520,6 +1520,27 @@ function UnitFrames.CustomFramesApplyBarAlignment()
             end
         end
     end
+
+    for i = 1, 7 do
+        local unitTag = "boss" .. i
+        if DoesUnitExist(unitTag) then
+            if UnitFrames.CustomFrames[unitTag] then
+                local hpBar = UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH]
+                if hpBar then
+                    hpBar.bar:SetBarAlignment(UnitFrames.SV.BarAlignTarget - 1)
+                    if hpBar.trauma then
+                        hpBar.trauma:SetBarAlignment(UnitFrames.SV.BarAlignTarget - 1)
+                    end
+                    if hpBar.invulnerable then
+                        hpBar.invulnerable:SetBarAlignment(UnitFrames.SV.BarAlignTarget - 1)
+                    end
+                    if hpBar.invulnerableInlay then
+                        hpBar.invulnerableInlay:SetBarAlignment(UnitFrames.SV.BarAlignTarget - 1)
+                    end
+                end
+            end
+        end
+    end
 end
 
 -- A function to extract the anchor information
