@@ -160,6 +160,7 @@ function AbilityAlerts.CreateAlertFrame()
             ["alwaysShowInterrupt"] = nil,
             ["neverShowInterrupt"] = nil,
             ["effectOnlyInterrupt"] = nil,
+            ["mitigationParts"] = nil,
         }
 
         alert.prefix = UI:Label(alert, nil, nil, nil, g_alertFont, alert.data.textPrefix, false)
@@ -417,6 +418,12 @@ function AbilityAlerts.AlertUpdate(currentTime)
                     alert:SetAlpha(ZO_EaseOutQuadratic(progress))
                 end
                 alert.timer:SetText("")
+                -- Rebuild mitigation text without trailing dash
+                if alert.data.textMitigation and alert.data.mitigationParts then
+                    local spacer = "-"
+                    local mitigationText = table.concat(alert.data.mitigationParts, " " .. spacer .. " ")
+                    alert.mitigation:SetText(" " .. spacer .. " " .. mitigationText)
+                end
             end
         end
     end
@@ -583,7 +590,7 @@ function AbilityAlerts.PlayAlertSound(abilityId, ...)
 end
 
 local drawLocation = 1
-function AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier, textName, textMitigation, abilityIcon, currentTime, endTime, showDuration, crowdControl, sourceUnitId, postCast, alwaysShowInterrupt, neverShowInterrupt, effectOnlyInterrupt)
+function AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier, textName, textMitigation, abilityIcon, currentTime, endTime, showDuration, crowdControl, sourceUnitId, postCast, alwaysShowInterrupt, neverShowInterrupt, effectOnlyInterrupt, mitigationParts)
     local labelColor
     local borderColor
 
@@ -603,6 +610,7 @@ function AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier
         if alert.data.available then
             alert.data.id = abilityId
             alert.data.textMitigation = textMitigation
+            alert.data.mitigationParts = mitigationParts
             alert.data.textPrefix = textPrefix or ""
             alert.data.textName = textName
             alert.data.textModifier = textModifier or ""
@@ -622,7 +630,6 @@ function AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier
             alert.modifier:SetText(alert.data.textModifier)
             alert.modifier:SetColor(unpack(CombatInfo.SV.alerts.colors.alertShared))
             alert.mitigation:SetText(textMitigation)
-            alert.mitigation:SetColor(unpack(CombatInfo.SV.alerts.colors.alertShared))
             alert.timer:SetText(alert.data.showDuration and string_format(" %.1f", remain / 1000) or "")
             alert.timer:SetColor(unpack(CombatInfo.SV.alerts.colors.alertTimer))
             alert.icon:SetHidden(false)
@@ -640,6 +647,7 @@ function AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier
     local alert = _G["LUIE_Alert" .. drawLocation]
     alert.data.id = abilityId
     alert.data.textMitigation = textMitigation
+    alert.data.mitigationParts = mitigationParts
     alert.data.textPrefix = textPrefix or ""
     alert.data.textName = textName
     alert.data.textModifier = textModifier or ""
@@ -659,7 +667,6 @@ function AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier
     alert.modifier:SetText(alert.data.textModifier)
     alert.modifier:SetColor(unpack(CombatInfo.SV.alerts.colors.alertShared))
     alert.mitigation:SetText(textMitigation)
-    alert.mitigation:SetColor(unpack(CombatInfo.SV.alerts.colors.alertShared))
     alert.timer:SetText(alert.data.showDuration and string_format(" %.1f", remain / 1000) or "")
     alert.timer:SetColor(unpack(CombatInfo.SV.alerts.colors.alertTimer))
     alert.icon:SetHidden(false)
@@ -1258,34 +1265,34 @@ local function generateMitigationString(Settings, avoid, block, dodge, blockstag
 
     if avoid then
         local color = AbilityAlerts.AlertColors.alertColorAvoid
-        stringAvoid = zo_strformat("|c<<1>><<2>>|r <<3>> ", color, Settings.formats.alertAvoid, spacer)
+        stringAvoid = zo_strformat("|c<<1>><<2>>|r", color, Settings.formats.alertAvoid)
     else
         stringAvoid = ""
     end
 
     if block then
         local color = AbilityAlerts.AlertColors.alertColorBlock
-        stringBlock = zo_strformat("|c<<1>><<2>>|r <<3>> ", color, Settings.formats.alertBlock, spacer)
+        stringBlock = zo_strformat("|c<<1>><<2>>|r", color, Settings.formats.alertBlock)
     end
 
     if dodge then
         local color = AbilityAlerts.AlertColors.alertColorDodge
-        stringDodge = zo_strformat("|c<<1>><<2>>|r <<3>> ", color, Settings.formats.alertDodge, spacer)
+        stringDodge = zo_strformat("|c<<1>><<2>>|r", color, Settings.formats.alertDodge)
     else
         stringDodge = ""
     end
 
     if blockstagger then
         local color = AbilityAlerts.AlertColors.alertColorBlock
-        stringBlock = zo_strformat("|c<<1>><<2>>|r <<3>> ", color, Settings.formats.alertBlockStagger, spacer)
+        stringBlock = zo_strformat("|c<<1>><<2>>|r", color, Settings.formats.alertBlockStagger)
     end
 
     if interrupt then
         local color = AbilityAlerts.AlertColors.alertColorInterrupt
-        stringInterrupt = zo_strformat("|c<<1>><<2>>|r <<3>> ", color, Settings.formats.alertInterrupt, spacer)
+        stringInterrupt = zo_strformat("|c<<1>><<2>>|r", color, Settings.formats.alertInterrupt)
     elseif shouldusecc then
         local color = AbilityAlerts.AlertColors.alertColorInterrupt
-        stringInterrupt = zo_strformat("|c<<1>><<2>>|r <<3>> ", color, Settings.formats.alertShouldUseCC, spacer)
+        stringInterrupt = zo_strformat("|c<<1>><<2>>|r", color, Settings.formats.alertShouldUseCC)
     else
         stringInterrupt = ""
     end
@@ -1306,6 +1313,7 @@ function AbilityAlerts.OnEvent(alertType, abilityId, abilityName, abilityIcon, s
     local textName
     local textModifier
     local textMitigation
+    local mitigationParts = nil
 
     if alertType == alertTypes.SHARED then
         local spacer = "-"
@@ -1340,7 +1348,29 @@ function AbilityAlerts.OnEvent(alertType, abilityId, abilityName, abilityIcon, s
         textPrefix = AbilityAlerts.FormatAlertString(prefix, { source = sourceName, ability = abilityName })
         textName = AbilityAlerts.FormatAlertString(name, { source = sourceName, ability = abilityName })
         textModifier = modifier
-        textMitigation = Settings.toggles.showMitigation and zo_strformat(" <<1>> <<2>><<3>><<4>><<5>>", spacer, stringBlock, stringDodge, stringAvoid, stringInterrupt) or ""
+
+        -- Build mitigation string with proper spacing
+        if Settings.toggles.showMitigation then
+            local mitigationPartsTable = {}
+            if stringBlock ~= "" then table.insert(mitigationPartsTable, stringBlock) end
+            if stringDodge ~= "" then table.insert(mitigationPartsTable, stringDodge) end
+            if stringAvoid ~= "" then table.insert(mitigationPartsTable, stringAvoid) end
+            if stringInterrupt ~= "" then table.insert(mitigationPartsTable, stringInterrupt) end
+
+            if #mitigationPartsTable > 0 then
+                local mitigationText = table.concat(mitigationPartsTable, " " .. spacer .. " ")
+                -- Store the base mitigation text without trailing dash for later use
+                local baseMitigationText = " " .. spacer .. " " .. mitigationText
+                -- Only add the trailing dash if there will be a timer shown
+                textMitigation = baseMitigationText .. (duration and " " .. spacer or "")
+                -- Store the mitigation parts for later use
+                mitigationParts = mitigationPartsTable
+            else
+                textMitigation = ""
+            end
+        else
+            textMitigation = ""
+        end
         -- UNMIT
     elseif alertType == alertTypes.UNMIT then
         local name = Settings.toggles.mitigationAbilityName
@@ -1393,7 +1423,7 @@ function AbilityAlerts.OnEvent(alertType, abilityId, abilityName, abilityIcon, s
     local currentTime = GetFrameTimeMilliseconds()
     local endTime = currentTime + duration
 
-    AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier, textName, textMitigation, abilityIcon, currentTime, endTime, showDuration, crowdControl, sourceUnitId, postCast, alwaysShowInterrupt, neverShowInterrupt, effectOnlyInterrupt)
+    AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier, textName, textMitigation, abilityIcon, currentTime, endTime, showDuration, crowdControl, sourceUnitId, postCast, alwaysShowInterrupt, neverShowInterrupt, effectOnlyInterrupt, mitigationParts)
     AbilityAlerts.PlayAlertSound(abilityId, alertType)
 end
 
