@@ -53,6 +53,7 @@ src/Unlock.lua
 modules/ChatAnnouncements/_Namespace.lua
 modules/ChatAnnouncements/_PrintQueuedMessages.lua
 modules/ChatAnnouncements/_HookFunction.lua
+modules/ChatAnnouncements/_PlayerToPlayerHook.lua
 modules/ChatAnnouncements/_Mail.lua
 modules/ChatAnnouncements/_Experience.lua
 modules/ChatAnnouncements/ChatAnnouncements.lua
