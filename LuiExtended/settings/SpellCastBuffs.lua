@@ -172,11 +172,7 @@ local function loadDialogButtons()
 end
 
 -- Load LibAddonMenu
-local LAM = LibAddonMenu2
-if LAM == nil then
-    return
-end
-
+local LAM = LUIE.LAM
 function SpellCastBuffs.CreateSettings()
     local Defaults = SpellCastBuffs.Defaults
     local Settings = SpellCastBuffs.SV
@@ -523,8 +519,18 @@ function SpellCastBuffs.CreateSettings()
                         tooltip = "Enter an Ability ID to add to the group buffs tracking list.",
                         getFunc = function () return "" end,
                         setFunc = function (value)
-                            if SpellCastBuffs.AddGroupBuff(value) then
-                                LUIE_Group_Custom_Buffs_List:UpdateChoices(GenerateCustomList(SpellCastBuffs.SV.GroupTrackedBuffs))
+                            local id = tonumber(value)
+                            if id and id > 0 then
+                                local name = GetAbilityName(id)
+                                if name and name ~= "" then
+                                    if SpellCastBuffs.AddGroupBuff(id, name) then
+                                        LUIE_Group_Custom_Buffs_List:UpdateChoices(GenerateCustomList(SpellCastBuffs.SV.GroupTrackedBuffs))
+                                    end
+                                else
+                                    LUIE.PrintToChat("Invalid Ability ID: " .. tostring(id), true)
+                                end
+                            else
+                                LUIE.PrintToChat("Please enter a valid numeric Ability ID.", true)
                             end
                         end,
                         width = "full",
@@ -539,7 +545,7 @@ function SpellCastBuffs.CreateSettings()
                         tooltip = "Select a buff to remove from tracking.",
                         choices = {},       -- Will be populated by UpdateChoices
                         choicesValues = {}, -- Will be populated by UpdateChoices
-                        scrollable = true,
+                        scrollable = 7,
                         sort = "name-up",
                         getFunc = function ()
                             -- Filter out default buffs so we only see custom ones
@@ -553,16 +559,24 @@ function SpellCastBuffs.CreateSettings()
                             return nil
                         end,
                         setFunc = function (value)
-                            if value then
-                                SpellCastBuffs.RemoveGroupBuff(value)
-                                -- Refresh the dropdown
-                                local customBuffs = {}
-                                for buffId, _ in pairs(SpellCastBuffs.SV.GroupTrackedBuffs) do
-                                    if not SpellCastBuffs.DefaultGroupBuffs[buffId] then
-                                        customBuffs[buffId] = true
+                            local id = tonumber(value)
+                            if id and id > 0 then
+                                local name = GetAbilityName(id)
+                                if name and name ~= "" then
+                                    SpellCastBuffs.RemoveGroupBuff(id, name)
+                                    -- Refresh the dropdown
+                                    local customBuffs = {}
+                                    for buffId, _ in pairs(SpellCastBuffs.SV.GroupTrackedBuffs) do
+                                        if not SpellCastBuffs.DefaultGroupBuffs[buffId] then
+                                            customBuffs[buffId] = true
+                                        end
                                     end
+                                    LUIE_Group_Custom_Buffs_List:UpdateChoices(GenerateCustomList(customBuffs))
+                                else
+                                    LUIE.PrintToChat("Invalid Ability ID: " .. tostring(id), true)
                                 end
-                                LUIE_Group_Custom_Buffs_List:UpdateChoices(GenerateCustomList(customBuffs))
+                            else
+                                LUIE.PrintToChat("Please select a valid Ability ID to remove.", true)
                             end
                         end,
                         width = "full",
@@ -1803,7 +1817,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 -- Buff Label Font
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT)),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_FONT_TP),
                 choices = FontsList,
@@ -3259,7 +3273,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_BUFF_REMLIST_TP),
                 choices = PromBuffs,
                 choicesValues = PromBuffsValues,
-                scrollable = true,
+                scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_Priority_Buffs_List:UpdateChoices(GenerateCustomList(Settings.PriorityBuffTable))
@@ -3304,7 +3318,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_DEBUFF_REMLIST_TP),
                 choices = PromDebuffs,
                 choicesValues = PromDebuffsValues,
-                scrollable = true,
+                scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_Priority_Debuffs_List:UpdateChoices(GenerateCustomList(Settings.PriorityDebuffTable))
@@ -3364,7 +3378,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 -- Prominent Buffs Label Font Face
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE)),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE_TP),
                 choices = FontsList,
@@ -3461,7 +3475,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 -- Prominent Buffs Progress Bar Texture
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE)),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE_TP),
                 choices = StatusbarTexturesList,
@@ -3743,7 +3757,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFF_REMLIST_TP),
                 choices = PromBuffs,
                 choicesValues = PromBuffsValues,
-                scrollable = true,
+                scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_Prominent_Buffs_List:UpdateChoices(GenerateCustomList(Settings.PromBuffTable))
@@ -3788,7 +3802,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFF_REMLIST_TP),
                 choices = PromDebuffs,
                 choicesValues = PromDebuffsValues,
-                scrollable = true,
+                scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_Prominent_Debuffs_List:UpdateChoices(GenerateCustomList(Settings.PromDebuffTable))
@@ -3913,7 +3927,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_REMLIST_TP),
                 choices = Blacklist,
                 choicesValues = BlacklistValues,
-                scrollable = true,
+                scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_Blacklist:UpdateChoices(GenerateCustomList(Settings.BlacklistTable))

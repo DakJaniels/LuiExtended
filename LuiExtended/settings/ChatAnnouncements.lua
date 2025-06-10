@@ -52,10 +52,7 @@ local function GetAchievementCategoryInfoName(topLevelIndex)
 end
 
 -- Load LibAddonMenu
-local LAM = LibAddonMenu2
-if LAM == nil then
-    return
-end
+local LAM = LUIE.LAM
 
 function ChatAnnouncements.CreateSettings()
     local Defaults = ChatAnnouncements.Defaults

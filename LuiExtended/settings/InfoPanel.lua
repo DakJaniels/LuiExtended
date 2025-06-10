@@ -28,10 +28,7 @@ if LMP then
 end
 
 -- Load LibAddonMenu
-local LAM = LibAddonMenu2
-if LAM == nil then
-    return
-end
+local LAM = LUIE.LAM
 
 -- Create Settings Menu
 function InfoPanel.CreateSettings()
@@ -135,7 +132,7 @@ function InfoPanel.CreateSettings()
         {
             {
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 name = GetString(LUIE_STRING_LAM_FONT),
                 tooltip = GetString(LUIE_STRING_LAM_FONT),
                 choices = FontsList,

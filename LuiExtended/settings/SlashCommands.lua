@@ -91,10 +91,7 @@ function SlashCommands.MigrateSettings()
 end
 
 -- Load LibAddonMenu
-local LAM = LibAddonMenu2
-if LAM == nil then
-    return
-end
+local LAM = LUIE.LAM
 
 -- Create Slash Commands Settings Menu
 function SlashCommands.CreateSettings()

@@ -201,10 +201,7 @@ local function loadDialogButtons()
 end
 
 -- Load LibAddonMenu
-local LAM = LibAddonMenu2
-if LAM == nil then
-    return
-end
+local LAM = LUIE.LAM
 
 function UnitFrames.CreateSettings()
     local Defaults = UnitFrames.Defaults
@@ -521,7 +518,7 @@ function UnitFrames.CreateSettings()
             {
                 -- DefaultFrames Font
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 name = GetString(LUIE_STRING_LAM_FONT),
                 tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_FONT_TP),
                 choices = FontsList,
@@ -682,7 +679,7 @@ function UnitFrames.CreateSettings()
             {
                 -- Custom Unit Frames Font
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 name = GetString(LUIE_STRING_LAM_FONT),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_TP),
                 choices = FontsList,
@@ -782,7 +779,7 @@ function UnitFrames.CreateSettings()
             {
                 -- Custom Unit Frames Texture
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE_TP),
                 choices = StatusbarTexturesList,
@@ -3718,7 +3715,7 @@ function UnitFrames.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_UF_BLACKLIST_REMLIST_TP),
                 choices = Whitelist,
                 choicesValues = WhitelistValues,
-                scrollable = true,
+                scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_WhitelistUF:UpdateChoices(GenerateCustomList(Settings.whitelist))

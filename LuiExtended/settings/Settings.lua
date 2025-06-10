@@ -11,10 +11,7 @@ local pairs = pairs
 local table_concat = table.concat
 
 -- Load LibAddonMenu
-local LAM = LibAddonMenu2
-if LAM == nil then
-    return
-end
+local LAM = LUIE.LAM
 
 -- Create Settings Menu
 function LUIE.CreateSettings()
@@ -243,7 +240,7 @@ function LUIE.CreateSettings()
             {
                 -- Copy Profile Dropdown
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 name = GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPY),
                 tooltip = GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPY_TP),
                 choices = profileCharacters,

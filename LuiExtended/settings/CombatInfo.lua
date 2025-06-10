@@ -123,10 +123,7 @@ local function loadDialogButtons()
 end
 
 -- Load LibAddonMenu
-local LAM = LibAddonMenu2
-if LAM == nil then
-    return
-end
+local LAM = LUIE.LAM
 
 function CombatInfo.CreateSettings()
     local Defaults = CombatInfo.Defaults
@@ -350,7 +347,7 @@ function CombatInfo.CreateSettings()
             },
             {
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT)),
                 tooltip = GetString(LUIE_STRING_LAM_CI_SHARED_FONT_TP),
                 choices = FontsList,
@@ -506,7 +503,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Bar Proc Sound Choice
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -601,7 +598,7 @@ function CombatInfo.CreateSettings()
             },
             {
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT)),
                 tooltip = GetString(LUIE_STRING_LAM_CI_SHARED_FONT_TP),
                 choices = FontsList,
@@ -864,7 +861,7 @@ function CombatInfo.CreateSettings()
             },
             {
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT)),
                 tooltip = GetString(LUIE_STRING_LAM_CI_SHARED_FONT_TP),
                 choices = FontsList,
@@ -1160,7 +1157,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Cast Bar Font Face
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CI_CASTBAR_FONTFACE)),
                 tooltip = GetString(LUIE_STRING_LAM_CI_CASTBAR_FONTFACE_TP),
                 choices = FontsList,
@@ -1242,7 +1239,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Cast Bar Texture
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CI_CASTBAR_TEXTURE)),
                 tooltip = GetString(LUIE_STRING_LAM_CI_CASTBAR_TEXTURE_TP),
                 choices = StatusbarTexturesList,
@@ -1371,7 +1368,7 @@ function CombatInfo.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_REMLIST_TP),
                 choices = Blacklist,
                 choicesValues = BlacklistValues,
-                scrollable = true,
+                scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_BlacklistCastbar:UpdateChoices(GenerateCustomList(Settings.blacklist))
@@ -1439,7 +1436,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Alert Font Face
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT)),
                 tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_FONTFACE_TP),
                 choices = FontsList,
@@ -2693,7 +2690,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (Single Target)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -2729,7 +2726,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (Single Target CC)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -2765,7 +2762,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (AOE)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -2801,7 +2798,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (AOE CC)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -2837,7 +2834,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (POWER ATTACK)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -2873,7 +2870,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (RADIAL AVOID)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -2909,7 +2906,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (GROUND TRAVEL)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -2945,7 +2942,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (GROUND TRAVEL CC)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -2981,7 +2978,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (GROUND)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -3017,7 +3014,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (METEOR)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -3053,7 +3050,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (UNMIT ST)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -3089,7 +3086,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (UNMIT AOE)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -3125,7 +3122,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (POWER - DAMAGE)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -3161,7 +3158,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (POWER - DEFENSE)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -3197,7 +3194,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (SUMMON)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -3233,7 +3230,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (DESTROY)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -3269,7 +3266,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound Selection (HEAL)
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -3494,7 +3491,7 @@ function CombatInfo.CreateSettings()
             {
                 -- Sound CC
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -3937,7 +3934,7 @@ function CombatInfo.CreateSettings()
             {
                 -- SOUND - aoePlayerUltimate
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -3995,7 +3992,7 @@ function CombatInfo.CreateSettings()
             {
                 -- SOUND - aoePlayerNormal
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -4053,7 +4050,7 @@ function CombatInfo.CreateSettings()
             {
                 -- SOUND - aoePlayerSet
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -4111,7 +4108,7 @@ function CombatInfo.CreateSettings()
             {
                 -- SOUND - aoeTraps
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -4169,7 +4166,7 @@ function CombatInfo.CreateSettings()
             {
                 -- SOUND - aoeNPCBoss
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -4227,7 +4224,7 @@ function CombatInfo.CreateSettings()
             {
                 -- SOUND - aoeNPCElite
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()
@@ -4285,7 +4282,7 @@ function CombatInfo.CreateSettings()
             {
                 -- SOUND - aoeNPCNormal
                 type = "dropdown",
-                scrollable = true,
+                scrollable = 7,
                 choices = SoundsList,
                 sort = "name-up",
                 getFunc = function ()

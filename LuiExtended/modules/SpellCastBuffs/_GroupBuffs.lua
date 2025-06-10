@@ -305,8 +305,6 @@ function SpellCastBuffs.InitializeGroupBuffs(enabled)
     if not enabled then
         return
     end
-    -- Initialize tracked buffs and debuffs from saved vars
-    SpellCastBuffs.SV.GroupTrackedBuffs = SpellCastBuffs.SV.GroupTrackedBuffs or {}
 
     -- Initialize position settings from defaults
     local defaults = SpellCastBuffs.DefaultGroupSettings
