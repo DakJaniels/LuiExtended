@@ -16,17 +16,6 @@ local GetNumPassiveSkillRanks = GetNumPassiveSkillRanks
 local GetSkillLineIndicesFromSkillLineId = GetSkillLineIndicesFromSkillLineId
 local GetString = GetString
 local zo_strformat = zo_strformat
-local zo_strgsub = zo_strgsub
-
----@param s       string|number
----@param pattern string|number
----@param repl    string|number|table|function
----@param n?      integer
----@return string
-local function safe_gsub(s, pattern, repl, n)
-    n = n or 0
-    return (zo_strgsub(s, pattern, repl, n))
-end
 
 -- From /esoui/lang/en_client.lua
 -- SI_DAMAGETYPE0 = "None"
@@ -213,42 +202,42 @@ local tooltips =
 
     Generic_Increase_Healing_Received_No_Dur = GetString(LUIE_STRING_SKILL_GENERIC_INCREASE_HEALING_RECEIVED_NO_DUR_TP),
 
-    Generic_Bleed = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", BleedDamage),
-    Generic_Physical = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", PhysicalDamage),
-    Generic_Disease = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", DiseaseDamage),
-    Generic_Poison = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", PoisonDamage),
-    Generic_Burn = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", FlameDamage),
-    Generic_Freeze = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", FrostDamage),
-    Generic_Shock = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", ShockDamage),
-    Generic_Oblivion = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", OblivionDamage),
-    Generic_Magic_No_Tick = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_DOT_NO_TICK_TP), "SUBSTRING", MagicDamage),
-    Generic_Magic = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", MagicDamage),
+    Generic_Bleed = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", BleedDamage),
+    Generic_Physical = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", PhysicalDamage),
+    Generic_Disease = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", DiseaseDamage),
+    Generic_Poison = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", PoisonDamage),
+    Generic_Burn = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", FlameDamage),
+    Generic_Freeze = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", FrostDamage),
+    Generic_Shock = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", ShockDamage),
+    Generic_Oblivion = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", OblivionDamage),
+    Generic_Magic_No_Tick = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_NO_TICK_TP), "SUBSTRING", MagicDamage),
+    Generic_Magic = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", MagicDamage),
     Generic_HoT = GetString(LUIE_STRING_SKILL_GENERIC_HOT_TP),
     Generic_HoT_Channel = GetString(LUIE_STRING_SKILL_GENERIC_HOT_CHANNEL_TP),
 
-    Generic_Shock_Snare = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_DOT_SNARE_TP), "SUBSTRING", ShockDamage),
-    Generic_Oblivion_Snare = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_DOT_SNARE_TP), "SUBSTRING", OblivionDamage),
+    Generic_Shock_Snare = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_SNARE_TP), "SUBSTRING", ShockDamage),
+    Generic_Oblivion_Snare = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_SNARE_TP), "SUBSTRING", OblivionDamage),
 
-    Generic_AOE_Physical = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", PhysicalDamage),
-    Generic_AOE_Bleed = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", BleedDamage),
-    Generic_AOE_Poison = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", PoisonDamage),
-    Generic_AOE_Disease = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", DiseaseDamage),
-    Generic_AOE_Fire = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", FlameDamage),
-    Generic_AOE_Frost = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", FrostDamage),
-    Generic_AOE_Shock = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", ShockDamage),
-    Generic_AOE_Magic = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", MagicDamage),
-    Generic_AOE_Oblivion = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", OblivionDamage),
+    Generic_AOE_Physical = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", PhysicalDamage),
+    Generic_AOE_Bleed = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", BleedDamage),
+    Generic_AOE_Poison = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", PoisonDamage),
+    Generic_AOE_Disease = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", DiseaseDamage),
+    Generic_AOE_Fire = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", FlameDamage),
+    Generic_AOE_Frost = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", FrostDamage),
+    Generic_AOE_Shock = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", ShockDamage),
+    Generic_AOE_Magic = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", MagicDamage),
+    Generic_AOE_Oblivion = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", OblivionDamage),
 
-    Generic_AOE_Fire_Stacking = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_STACK_TP), "SUBSTRING", FlameDamage),
-    Generic_AOE_Shock_Stacking = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_STACK_TP), "SUBSTRING", ShockDamage),
+    Generic_AOE_Fire_Stacking = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_STACK_TP), "SUBSTRING", FlameDamage),
+    Generic_AOE_Shock_Stacking = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_STACK_TP), "SUBSTRING", ShockDamage),
 
-    Generic_AOE_Snare_Physical = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", PhysicalDamage),
-    Generic_AOE_Snare_Poison = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", PoisonDamage),
-    Generic_AOE_Snare_Disease = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", DiseaseDamage),
-    Generic_AOE_Snare_Fire = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", FlameDamage),
-    Generic_AOE_Snare_Frost = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", FrostDamage),
-    Generic_AOE_Snare_Shock = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", ShockDamage),
-    Generic_AOE_Snare_Magic = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", MagicDamage),
+    Generic_AOE_Snare_Physical = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", PhysicalDamage),
+    Generic_AOE_Snare_Poison = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", PoisonDamage),
+    Generic_AOE_Snare_Disease = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", DiseaseDamage),
+    Generic_AOE_Snare_Fire = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", FlameDamage),
+    Generic_AOE_Snare_Frost = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", FrostDamage),
+    Generic_AOE_Snare_Shock = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", ShockDamage),
+    Generic_AOE_Snare_Magic = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", MagicDamage),
 
     Generic_AOE_Heal = GetString(LUIE_STRING_SKILL_GENERIC_GROUND_HEAL_TP),
 
@@ -280,8 +269,8 @@ local tooltips =
     Generic_Detection = GetString(LUIE_STRING_SKILL_GENERIC_DETECTION_TP),
     Generic_Detection_NPC = GetString(LUIE_STRING_SKILL_GENERIC_DETECTION_NPC_TP),
 
-    Generic_Ravage_Health_Potion = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_RAVAGE_HEALTH_POTION_TP), "SUBSTRING", PoisonDamage),
-    Generic_Gradual_Ravage_Health_Potion = safe_gsub(GetString(LUIE_STRING_SKILL_GENERIC_RAVAGE_HEALTH_POTION_TP), "SUBSTRING", BleedDamage),
+    Generic_Ravage_Health_Potion = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_RAVAGE_HEALTH_POTION_TP), "SUBSTRING", PoisonDamage),
+    Generic_Gradual_Ravage_Health_Potion = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_RAVAGE_HEALTH_POTION_TP), "SUBSTRING", BleedDamage),
     -- Generic_Ravage_Magicka_Potion                   = GetString(LUIE_STRING_SKILL_GENERIC_RAVAGE_MAGICKA_POTION_TP),
     -- Generic_Ravage_Stamina_Potion                   = GetString(LUIE_STRING_SKILL_GENERIC_RAVAGE_STAMINA_POTION_TP),
     Generic_Ravage_Magicka_Poison = GetString(LUIE_STRING_SKILL_GENERIC_RAVAGE_MAGICKA_POISON_TP),
@@ -392,18 +381,18 @@ local tooltips =
     Food_Crafted_Deregulated_Mushroom_Stew = GetItemLinkOnUseAbilityDescription("|H1:item:133554:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
     Food_Crafted_Clockwork_Citrus_Filet = GetItemLinkOnUseAbilityDescription("|H1:item:133556:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
     Food_Crafted_Artaeum_Takeaway_Broth = GetItemLinkOnUseAbilityDescription("|H1:item:139018:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
-    Food_Crafted_Artaeum_Pickled_Fish_Bowl = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:139016:6:1:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_ARTAEUM_BOWL), GetString(LUIE_STRING_SKILL_ADD_TOOLTIP_ARTAEUM_BOWL)),
-    Food_Crafted_Candied_Jesters_Coins = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:120762:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Lava_Foot_Soup = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:112425:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Alcaire_Festival_Sword_Pie = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:112439:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Pumpkin_Snack_Skewer = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:87686:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Crunchy_Spider_Skewer = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:87691:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Frosted_Brains = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:87696:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Jagga_Drenched_Mud_Ball = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:112434:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Jewels_of_Misrule = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:120764:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Rajhins_Sugar_Claws = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:112438:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Sweet_Sanguine_Apples = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:87685:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Bewitched_Sugar_Skulls = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:153629:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crafted_Artaeum_Pickled_Fish_Bowl = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:139016:6:1:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_ARTAEUM_BOWL), GetString(LUIE_STRING_SKILL_ADD_TOOLTIP_ARTAEUM_BOWL)),
+    Food_Crafted_Candied_Jesters_Coins = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:120762:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crafted_Lava_Foot_Soup = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112425:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crafted_Alcaire_Festival_Sword_Pie = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112439:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crafted_Pumpkin_Snack_Skewer = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87686:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crafted_Crunchy_Spider_Skewer = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87691:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crafted_Frosted_Brains = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87696:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crafted_Jagga_Drenched_Mud_Ball = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112434:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crafted_Jewels_of_Misrule = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:120764:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crafted_Rajhins_Sugar_Claws = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112438:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crafted_Sweet_Sanguine_Apples = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87685:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crafted_Bewitched_Sugar_Skulls = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:153629:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
 
     -- Vendor / Cyrodiil Food
     Food_Vendor_Health = GetItemLinkOnUseAbilityDescription("|H1:item:57637:308:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
@@ -414,10 +403,10 @@ local tooltips =
     Food_Cyrodilic_Field_Treat = GetItemLinkOnUseAbilityDescription("|H1:item:71075:368:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
 
     -- Crown Food
-    Food_Crown_Crate_Meal = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:94437:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crown_Meal = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:64711:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crown_Vigorous_Ragout = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:124676:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crown_Combat_Mystics_Stew = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:124675:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crown_Crate_Meal = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:94437:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crown_Meal = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:64711:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crown_Vigorous_Ragout = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:124676:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crown_Combat_Mystics_Stew = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:124675:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
 
     -- Crafted Drink
     Drink_Crafted_Health = GetItemLinkOnUseAbilityDescription("|H1:item:68257:309:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
@@ -429,18 +418,18 @@ local tooltips =
     Drink_Crafted_Triple = GetItemLinkOnUseAbilityDescription("|H1:item:68276:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
     Drink_Crafted_Orzorgas_Red_Frothgar = GetItemLinkOnUseAbilityDescription("|H1:item:71056:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
     Drink_Crafted_Spring_Loaded_Infusion = GetItemLinkOnUseAbilityDescription("|H1:item:133555:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
-    Drink_Crafted_Dubious_Camoran_Throne = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:120763:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crafted_Witchmothers_Potent_Brew = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:87697:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crafted_Bowl_of_Peeled_Eyeballs = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:87687:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crafted_Witchmothers_Party_Punch = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:87690:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crafted_Ghastly_Eye_Bowl = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:87695:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crafted_Bergama_Warning_Fire = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:112426:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crafted_Betnikh_Twice_Spiked_Ale = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:112433:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_TWICE_SPIKED_ALE), ""),
-    Drink_Crafted_Snow_Bear_Glow_Wine = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:112440:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Double_Bloody_Mara = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:87699:6:1:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_DOUBLE_BLOODY_MARA), ""),
-    Drink_Hissmir = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:101879:6:1:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_HISSMIR), GetString(LUIE_STRING_SKILL_ADD_TOOLTIP_HISSMIR)),
-    Drink_Crafted_Disastrously_Bloody_Mara = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:153625:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_DISASTROUSLY_BLOODY), ""),
-    Drink_Crafted_Pack_Leaders_Bone_Broth = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:153627:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_PACK_LEADERS_BROTH), GetString(LUIE_STRING_SKILL_ADD_TOOLTIP_PACK_LEADERS_BROTH)),
+    Drink_Crafted_Dubious_Camoran_Throne = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:120763:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Drink_Crafted_Witchmothers_Potent_Brew = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87697:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Drink_Crafted_Bowl_of_Peeled_Eyeballs = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87687:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Drink_Crafted_Witchmothers_Party_Punch = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87690:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Drink_Crafted_Ghastly_Eye_Bowl = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87695:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Drink_Crafted_Bergama_Warning_Fire = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112426:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Drink_Crafted_Betnikh_Twice_Spiked_Ale = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112433:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_TWICE_SPIKED_ALE), ""),
+    Drink_Crafted_Snow_Bear_Glow_Wine = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112440:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Drink_Double_Bloody_Mara = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87699:6:1:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_DOUBLE_BLOODY_MARA), ""),
+    Drink_Hissmir = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:101879:6:1:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_HISSMIR), GetString(LUIE_STRING_SKILL_ADD_TOOLTIP_HISSMIR)),
+    Drink_Crafted_Disastrously_Bloody_Mara = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:153625:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_DISASTROUSLY_BLOODY), ""),
+    Drink_Crafted_Pack_Leaders_Bone_Broth = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:153627:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_PACK_LEADERS_BROTH), GetString(LUIE_STRING_SKILL_ADD_TOOLTIP_PACK_LEADERS_BROTH)),
 
     -- Vendor / Cyrodiil Drink
     Drink_Vendor_Health = GetItemLinkOnUseAbilityDescription("|H1:item:71249:134:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
@@ -451,10 +440,10 @@ local tooltips =
     Drink_Cyrodilic_Field_Tea = GetItemLinkOnUseAbilityDescription("|H1:item:71078:368:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
 
     -- Crown Drink
-    Drink_Crown_Crate_Drink = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:94438:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crown_Drink = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:64712:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crown_Stout_Magic_Liqueur = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:124677:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crown_Vigorous_Tincture = safe_gsub(GetItemLinkOnUseAbilityDescription("|H1:item:124678:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Drink_Crown_Crate_Drink = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:94438:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Drink_Crown_Drink = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:64712:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Drink_Crown_Stout_Magic_Liqueur = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:124677:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Drink_Crown_Vigorous_Tincture = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:124678:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
 
     -- Experience
     Experience_Psijic_Ambrosia = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HALF_HOUR_TP), "50"),
@@ -510,7 +499,7 @@ local tooltips =
     Set_Aslyum_Restoration_Staff = GetString(LUIE_STRING_SKILL_SET_ASYLUM_RESTORATION_STAFF),
     Set_Maelstrom_DW = GetString(LUIE_STRING_SKILL_SET_MAELSTROM_DW),
     Set_Maelstrom_1H = GetString(LUIE_STRING_SKILL_SET_MAELSTROM_1H),
-    Set_Maelstrom_2H = safe_gsub(zo_strformat(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), 6, 1), "SUBSTRING", BleedDamage),
+    Set_Maelstrom_2H = StringOnlyGSUB(zo_strformat(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), 6, 1), "SUBSTRING", BleedDamage),
     Set_Master_1H = GetString(LUIE_STRING_SKILL_SET_MASTER_1H),
     Set_Master_Resto = GetString(LUIE_STRING_SKILL_SET_MASTER_RESTO),
     Set_Blackrose_Dual_Wield = GetString(LUIE_STRING_SKILL_SET_BLACKROSE_DUAL_WIELD),

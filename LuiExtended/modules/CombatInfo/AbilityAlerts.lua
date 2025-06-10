@@ -1246,7 +1246,7 @@ function AbilityAlerts.OnCombatAlert(eventCode, resultType, isError, abilityName
 end
 
 function AbilityAlerts.FormatAlertString(inputFormat, params)
-    return (zo_strgsub(inputFormat, "%%.", function (x)
+    return StringOnlyGSUB(inputFormat, "%%.", function (x)
         if x == "%n" then
             return params.source or ""
         elseif x == "%t" then
@@ -1254,7 +1254,7 @@ function AbilityAlerts.FormatAlertString(inputFormat, params)
         else
             return x
         end
-    end))
+    end)
 end
 
 local function generateMitigationString(Settings, avoid, block, dodge, blockstagger, interrupt, shouldusecc, spacer)

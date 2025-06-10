@@ -75,7 +75,7 @@ function CombatTextEventViewer:GetDefaultIcon(ccType)
 end
 
 function CombatTextEventViewer:FormatString(inputFormat, params)
-    return (zo_strgsub(inputFormat, "%%.", function (x)
+    return StringOnlyGSUB(inputFormat, "%%.", function (x)
         if x == "%t" then
             return params.text or ""
         elseif x == "%a" then
@@ -87,11 +87,11 @@ function CombatTextEventViewer:FormatString(inputFormat, params)
         else
             return x
         end
-    end))
+    end)
 end
 
 function CombatTextEventViewer:FormatAlertString(inputFormat, params)
-    return (zo_strgsub(inputFormat, "%%.", function (x)
+    return StringOnlyGSUB(inputFormat, "%%.", function (x)
         if x == "%n" then
             return params.source or ""
         elseif x == "%t" then
@@ -101,7 +101,7 @@ function CombatTextEventViewer:FormatAlertString(inputFormat, params)
         else
             return x
         end
-    end))
+    end)
 end
 
 function CombatTextEventViewer:GetTextAttributes(powerType, damageType, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)

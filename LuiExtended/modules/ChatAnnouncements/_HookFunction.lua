@@ -3688,7 +3688,7 @@ local function DisplayAnnouncementHook(primaryText, secondaryText, icon, soundId
         -- Custom formatting for IC messages
         if settings == LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ZoneIC and language == "en" then
             local prefix = GetString(LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_IC_TITLE_PREFIX)
-            caPrimary = (zo_strgsub(primaryText, prefix, ""))
+            caPrimary = StringOnlyGSUB(primaryText, prefix, "")
             caPrimary = settings.Description and string.format("%s|c%s%s: |r", prefix, ChatAnnouncements.Colors.QuestColorLocNameColorize, caPrimary) or string.format("%s|c%s%s|r", prefix, ChatAnnouncements.Colors.QuestColorLocNameColorize, caPrimary)
             caSecondary = settings.Description and string.format("|c%s%s|r", ChatAnnouncements.Colors.QuestColorLocDescriptionColorize, caSecondary) or ""
             printToChat(caPrimary .. caSecondary)

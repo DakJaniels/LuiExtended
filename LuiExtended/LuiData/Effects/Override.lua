@@ -21,7 +21,6 @@ local LUIE_CC_TYPE_FEAR = LUIE_CC_TYPE_FEAR
 local LUIE_CC_TYPE_ROOT = LUIE_CC_TYPE_ROOT
 
 local GetAbilityName = GetAbilityName
-local zo_strgsub = zo_strgsub
 local zo_strformat = zo_strformat
 local BUFF_EFFECT_TYPE_BUFF = BUFF_EFFECT_TYPE_BUFF
 local BUFF_EFFECT_TYPE_DEBUFF = BUFF_EFFECT_TYPE_DEBUFF
@@ -2806,28 +2805,28 @@ local effectOverride =
     -- Unarmed
     [23604] = { icon = "LuiExtended/media/icons/abilities/ability_attack_unarmed_light.dds" },                                                                                                                          -- Light Attack (Unarmed)
     [18429] = { icon = "LuiExtended/media/icons/abilities/ability_attack_unarmed_heavy.dds" },                                                                                                                          -- Heavy Attack (Unarmed)
-    [18430] = { icon = "LuiExtended/media/icons/abilities/ability_attack_unarmed_medium.dds", name = (zo_strgsub(Abilities.Skill_Heavy_Attack_Unarmed, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack)) }, -- Heavy Attack (Unarmed)
+    [18430] = { icon = "LuiExtended/media/icons/abilities/ability_attack_unarmed_medium.dds", name = StringOnlyGSUB(Abilities.Skill_Heavy_Attack_Unarmed, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack) }, -- Heavy Attack (Unarmed)
     [18431] = { icon = "LuiExtended/media/icons/abilities/ability_attack_unarmed_heavy.dds" },                                                                                                                          -- Heavy Attack (Unarmed)
     [60772] = { icon = "LuiExtended/media/icons/abilities/ability_attack_unarmed_restore.dds" },                                                                                                                        -- Heavy Attack (Unarmed)
 
     -- Two Handed
     [16037] = { icon = "LuiExtended/media/icons/abilities/ability_attack_two_handed_light.dds" },                                                                                                                             -- Light Attack (Two Handed)
     [16041] = { icon = "LuiExtended/media/icons/abilities/ability_attack_two_handed_heavy.dds" },                                                                                                                             -- Heavy Attack (Two Handed)
-    [17162] = { icon = "LuiExtended/media/icons/abilities/ability_attack_two_handed_medium.dds", name = (zo_strgsub(Abilities.Skill_Heavy_Attack_Two_Handed, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack)) }, -- Heavy Attack (Two Handed)
+    [17162] = { icon = "LuiExtended/media/icons/abilities/ability_attack_two_handed_medium.dds", name = StringOnlyGSUB(Abilities.Skill_Heavy_Attack_Two_Handed, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack) }, -- Heavy Attack (Two Handed)
     [17163] = { icon = "LuiExtended/media/icons/abilities/ability_attack_two_handed_heavy.dds" },                                                                                                                             -- Heavy Attack (Two Handed)
     [60757] = { icon = "LuiExtended/media/icons/abilities/ability_attack_two_handed_restore.dds" },                                                                                                                           -- Heavy Attack (Two Handed)
 
     -- One Hand and Shield
     [15435] = { icon = "LuiExtended/media/icons/abilities/ability_attack_melee_light.dds" },                                                                                                                             -- Light Attack (One Handed)
     [15279] = { icon = "LuiExtended/media/icons/abilities/ability_attack_melee_heavy.dds" },                                                                                                                             -- Heavy Attack (One Handed)
-    [15282] = { icon = "LuiExtended/media/icons/abilities/ability_attack_melee_medium.dds", name = (zo_strgsub(Abilities.Skill_Heavy_Attack_One_Handed, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack)) }, -- Heavy Attack (One Handed)
+    [15282] = { icon = "LuiExtended/media/icons/abilities/ability_attack_melee_medium.dds", name = StringOnlyGSUB(Abilities.Skill_Heavy_Attack_One_Handed, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack) }, -- Heavy Attack (One Handed)
     [15829] = { icon = "LuiExtended/media/icons/abilities/ability_attack_melee_heavy.dds" },                                                                                                                             -- Heavy Attack (One Handed)
     [60759] = { icon = "LuiExtended/media/icons/abilities/ability_attack_melee_restore.dds" },                                                                                                                           -- Heavy Attack (One Handed)
 
     -- Dual Wield
     [16499] = { icon = "LuiExtended/media/icons/abilities/ability_attack_melee_light.dds" },                                                                                                                             -- Light Attack (Dual Wield)
     [16420] = { icon = "LuiExtended/media/icons/abilities/ability_attack_dual_wield_heavy.dds" },                                                                                                                        -- Heavy Attack (Dual Wield)
-    [17170] = { icon = "LuiExtended/media/icons/abilities/ability_attack_melee_medium.dds", name = (zo_strgsub(Abilities.Skill_Heavy_Attack_Dual_Wield, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack)) }, -- Heavy Attack (Dual Wield)
+    [17170] = { icon = "LuiExtended/media/icons/abilities/ability_attack_melee_medium.dds", name = StringOnlyGSUB(Abilities.Skill_Heavy_Attack_Dual_Wield, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack) }, -- Heavy Attack (Dual Wield)
     [17169] = { icon = "LuiExtended/media/icons/abilities/ability_attack_dual_wield_heavy.dds" },                                                                                                                        -- Heavy Attack (Dual Wield)
     [18622] = { icon = "LuiExtended/media/icons/abilities/ability_attack_dual_wield_heavy.dds" },                                                                                                                        -- Heavy Attack (Dual Wield)
     [60758] = { icon = "LuiExtended/media/icons/abilities/ability_attack_dual_wield_restore.dds" },                                                                                                                      -- Heavy Attack (Dual Wield)
@@ -2835,21 +2834,21 @@ local effectOverride =
     -- Bow
     [16688] = { icon = "LuiExtended/media/icons/abilities/ability_attack_bow_light.dds" },                                                                                                                      -- Light Attack (Bow)
     [16691] = { icon = "LuiExtended/media/icons/abilities/ability_attack_bow_heavy.dds" },                                                                                                                      -- Heavy Attack (Bow)
-    [17174] = { icon = "LuiExtended/media/icons/abilities/ability_attack_bow_medium.dds", name = (zo_strgsub(Abilities.Skill_Heavy_Attack_Bow, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack)) }, -- Heavy Attack (Bow)
+    [17174] = { icon = "LuiExtended/media/icons/abilities/ability_attack_bow_medium.dds", name = StringOnlyGSUB(Abilities.Skill_Heavy_Attack_Bow, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack) }, -- Heavy Attack (Bow)
     [17173] = { icon = "LuiExtended/media/icons/abilities/ability_attack_bow_heavy.dds" },                                                                                                                      -- Heavy Attack (Bow)
     [60761] = { icon = "LuiExtended/media/icons/abilities/ability_attack_bow_restore.dds" },                                                                                                                    -- Heavy Attack (Bow)
 
     -- Destruction Staff (Frost)
     [16277] = { icon = "LuiExtended/media/icons/abilities/ability_attack_staff_frost_light.dds" },                                                                                                                      -- Light Attack (Ice)
     [16261] = { icon = "LuiExtended/media/icons/abilities/ability_attack_staff_frost_heavy.dds" },                                                                                                                      -- Heavy Attack (Ice)
-    [18405] = { icon = "LuiExtended/media/icons/abilities/ability_attack_staff_frost_medium.dds", name = (zo_strgsub(Abilities.Skill_Heavy_Attack_Ice, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack)) }, -- Heavy Attack (Ice)
+    [18405] = { icon = "LuiExtended/media/icons/abilities/ability_attack_staff_frost_medium.dds", name = StringOnlyGSUB(Abilities.Skill_Heavy_Attack_Ice, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack) }, -- Heavy Attack (Ice)
     [18406] = { icon = "LuiExtended/media/icons/abilities/ability_attack_staff_frost_heavy.dds" },                                                                                                                      -- Heavy Attack (Ice)
     [60762] = { icon = "LuiExtended/media/icons/abilities/ability_attack_staff_restore.dds" },                                                                                                                          -- Heavy Attack Heavy Attack (Ice)
 
     -- Destruction Staff (Flame)
     [16165] = { icon = "LuiExtended/media/icons/abilities/ability_attack_staff_flame_light.dds" },                                                                                                                          -- Light Attack (Inferno)
     [15383] = { icon = "LuiExtended/media/icons/abilities/ability_attack_staff_flame_heavy.dds" },                                                                                                                          -- Heavy Attack (Inferno)
-    [15385] = { icon = "LuiExtended/media/icons/abilities/ability_attack_staff_flame_medium.dds", name = (zo_strgsub(Abilities.Skill_Heavy_Attack_Inferno, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack)) }, -- Heavy Attack (Inferno)
+    [15385] = { icon = "LuiExtended/media/icons/abilities/ability_attack_staff_flame_medium.dds", name = StringOnlyGSUB(Abilities.Skill_Heavy_Attack_Inferno, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack) }, -- Heavy Attack (Inferno)
     [16321] = { icon = "LuiExtended/media/icons/abilities/ability_attack_staff_flame_heavy.dds" },                                                                                                                          -- Heavy Attack (Inferno)
     [60763] = { icon = "LuiExtended/media/icons/abilities/ability_attack_staff_restore.dds" },                                                                                                                              -- Heavy Attack (Inferno)
 
@@ -3359,7 +3358,7 @@ local effectOverride =
 
     [32464] = { icon = "LuiExtended/media/icons/abilities/ability_werewolf_attacklight.dds" },                                                                                                                                                           -- Light Attack (Werewolf)
     [32477] = { icon = "LuiExtended/media/icons/abilities/ability_werewolf_attackheavy.dds" },                                                                                                                                                           -- Heavy Attack (Werewolf)
-    [32479] = { icon = "LuiExtended/media/icons/abilities/ability_werewolf_attackmedium.dds", name = (zo_strgsub(Abilities.Skill_Heavy_Attack_Werewolf, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack)) },                                 -- Heavy Attack (Werewolf)
+    [32479] = { icon = "LuiExtended/media/icons/abilities/ability_werewolf_attackmedium.dds", name = StringOnlyGSUB(Abilities.Skill_Heavy_Attack_Werewolf, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack) },                                 -- Heavy Attack (Werewolf)
     [32480] = { icon = "LuiExtended/media/icons/abilities/ability_werewolf_attackheavy.dds" },                                                                                                                                                           -- Heavy Attack (Werewolf)
     [32494] = { icon = "LuiExtended/media/icons/abilities/ability_werewolf_attackheavy.dds" },                                                                                                                                                           -- Heavy Attack (Werewolf)
     [60773] = { icon = "LuiExtended/media/icons/abilities/ability_werewolf_attackrestore.dds" },                                                                                                                                                         -- Heavy Attack (Werewolf)
@@ -3435,7 +3434,7 @@ local effectOverride =
 
     [55885] = { icon = "LuiExtended/media/icons/abilities/ability_werewolf_attacklight.dds", name = Abilities.Skill_Light_Attack_Werewolf },                                                                             -- Light Attack
     [55886] = { icon = "LuiExtended/media/icons/abilities/ability_werewolf_attackheavy.dds", name = Abilities.Skill_Heavy_Attack_Werewolf },                                                                             -- Heavy Attack (Were)
-    [55888] = { icon = "LuiExtended/media/icons/abilities/ability_werewolf_attackmedium.dds", name = (zo_strgsub(Abilities.Skill_Heavy_Attack_Werewolf, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack)) }, -- Heavy Attack
+    [55888] = { icon = "LuiExtended/media/icons/abilities/ability_werewolf_attackmedium.dds", name = StringOnlyGSUB(Abilities.Skill_Heavy_Attack_Werewolf, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack) }, -- Heavy Attack
     [55891] = { icon = "LuiExtended/media/icons/abilities/ability_werewolf_attackheavy.dds", name = Abilities.Skill_Heavy_Attack_Werewolf },                                                                             -- Heavy Attack Werewolf
     [55890] = { icon = "LuiExtended/media/icons/abilities/ability_werewolf_attackheavy.dds", name = Abilities.Skill_Heavy_Attack_Werewolf },                                                                             -- Heavy Attack
     [40124] = { hide = true },                                                                                                                                                                                           -- Devour
@@ -6038,7 +6037,7 @@ local effectOverride =
     [118500] = { icon = "LuiExtended/media/icons/abilities/ability_volendrung_passive.dds" },                                                                                                                                         -- Volendrung (Volendrung)
     [116762] = { icon = "LuiExtended/media/icons/abilities/ability_weapon_volendrung_attack_light.dds" },                                                                                                                             -- Light Attack (Volendrung)
     [116763] = { icon = "LuiExtended/media/icons/abilities/ability_weapon_volendrung_attack_heavy.dds" },                                                                                                                             -- Heavy Attack (Volendrung)
-    [116765] = { icon = "LuiExtended/media/icons/abilities/ability_weapon_volendrung_attack_medium.dds", name = (zo_strgsub(Abilities.Skill_Heavy_Attack_Volendrung, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack)) }, -- Heavy Attack (Volendrung)
+    [116765] = { icon = "LuiExtended/media/icons/abilities/ability_weapon_volendrung_attack_medium.dds", name = StringOnlyGSUB(Abilities.Skill_Heavy_Attack_Volendrung, Abilities.Skill_Heavy_Attack, Abilities.Skill_Medium_Attack) }, -- Heavy Attack (Volendrung)
     [116767] = { icon = "LuiExtended/media/icons/abilities/ability_weapon_volendrung_attack_heavy.dds" },                                                                                                                             -- Heavy Attack (Volendrung)
     [116766] = { icon = "LuiExtended/media/icons/abilities/ability_weapon_volendrung_attack_restore.dds" },                                                                                                                           -- Heavy Attack (Volendrung)
     [118501] = { icon = "LuiExtended/media/icons/abilities/ability_volendrung_damage_shield.dds", name = Abilities.Skill_Consume_Lifeforce },                                                                                         -- Damage Shield (Volendrung)

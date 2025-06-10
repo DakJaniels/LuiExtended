@@ -179,7 +179,7 @@ function SlashCommands.SlashGuildKick(option)
         local compareDisplay = zo_strlower(displayName)
         local compareCharacter = zo_strlower(characterName)
 
-        compareCharacter = (zo_strgsub(compareCharacter, "%^%a+", ""))
+        compareCharacter = StringOnlyGSUB(compareCharacter, "%^%a+", "")
 
         g_guildNamesTable[i] =
         {

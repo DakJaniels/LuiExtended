@@ -884,7 +884,7 @@ function UnitFrames.UpdateStaticControls(unitFrame)
         local className = zo_strformat(GetString(SI_CLASS_NAME), GetClassName(GENDER_MALE, classId))
         local showClass = unitFrame.isPlayer and className ~= nil and UnitFrames.SV.TargetEnableClass
         if showClass then
-            local classNameText = (zo_strgsub(className, "%^%a+", ""))
+            local classNameText = StringOnlyGSUB(className, "%^%a+", "")
             unitFrame.className:SetText(classNameText)
         end
         -- this condition is somehow extra, but let keep it to be in consistency with all others
@@ -990,7 +990,7 @@ function UnitFrames.UpdateStaticControls(unitFrame)
             end
         end
         title = title or ""
-        local titletext = (zo_strgsub(title, "%^%a+", ""))
+        local titletext = StringOnlyGSUB(title, "%^%a+", "")
         unitFrame.title:SetText(titletext)
         if unitFrame.unitTag == "reticleover" then
             unitFrame.title:SetHidden(not UnitFrames.SV.TargetEnableRank and not UnitFrames.SV.TargetEnableTitle)

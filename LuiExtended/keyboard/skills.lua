@@ -79,7 +79,7 @@ LUIE.HookKeyboardStats = function ()
             -- Use default tooltip if custom tooltips are disabled
             if not LUIE.SpellCastBuffs.SV.TooltipCustom then
                 tooltipText = GetAbilityEffectDescription(buffSlot)
-                tooltipText = string.gsub(tooltipText, "\n$", "")
+                tooltipText = StringOnlyGSUB(tooltipText, "\n$", "")
             end
             return tooltipText
         end
@@ -447,8 +447,8 @@ LUIE.HookKeyboardStats = function ()
         else
             detailedName = skillProgressionData:GetFormattedName()
         end
-        detailedName = (string.gsub(detailedName, "With", "with"))               -- Easiest way to fix the capitalization of the skill "Bond With Nature"
-        detailedName = (string.gsub(detailedName, "Blessing Of", "Blessing of")) -- Easiest way to fix the capitalization of the skill "Blessing of Restoration"
+        detailedName = StringOnlyGSUB(detailedName, "With", "with")               -- Easiest way to fix the capitalization of the skill "Bond With Nature"
+        detailedName = StringOnlyGSUB(detailedName, "Blessing Of", "Blessing of") -- Easiest way to fix the capitalization of the skill "Blessing of Restoration"
         control.nameLabel:SetText(detailedName)
         control.nameLabel:SetColor(PURCHASED_COLOR:UnpackRGBA())
     end

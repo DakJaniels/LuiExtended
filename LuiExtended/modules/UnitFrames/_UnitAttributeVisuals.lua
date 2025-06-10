@@ -129,13 +129,13 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
             -- Format specific to selected label
             local format = tostring(attributeFrame[label].format or UnitFrames.SV.Format)
             local str
-            str = (zo_strgsub(format, "Percentage", tostring(pct)))
-            str = (zo_strgsub(str, "Max", FormatNumber(powerEffectiveMax)))
-            str = (zo_strgsub(str, "Current", FormatNumber(powerValue)))
-            str = (zo_strgsub(str, "+ Shield", shield and ("+ " .. FormatNumber(shield)) or ""))
-            str = (zo_strgsub(str, "- Trauma", trauma and ("- (" .. FormatNumber(trauma) .. ")") or ""))
-            str = (zo_strgsub(str, "Nothing", ""))
-            str = (zo_strgsub(str, "  ", " "))
+            str = StringOnlyGSUB(format, "Percentage", tostring(pct))
+            str = StringOnlyGSUB(str, "Max", FormatNumber(powerEffectiveMax))
+            str = StringOnlyGSUB(str, "Current", FormatNumber(powerValue))
+            str = StringOnlyGSUB(str, "+ Shield", shield and ("+ " .. FormatNumber(shield)) or "")
+            str = StringOnlyGSUB(str, "- Trauma", trauma and ("- (" .. FormatNumber(trauma) .. ")") or "")
+            str = StringOnlyGSUB(str, "Nothing", "")
+            str = StringOnlyGSUB(str, "  ", " ")
 
             -- Change text
             if isGuard and label == "labelOne" then

@@ -1285,23 +1285,12 @@ function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
 
         -- Group Buffs
         local groupBuffs = SpellCastBuffs.SV.GroupTrackedBuffs
-        local isGroupBuff = groupBuffs[id]
+        local isGroupBuff = groupBuffs[id] or groupBuffs[name]
         AddMenuItem(isGroupBuff and "Remove from Group Buffs" or "Add to Group Buffs", function ()
             if isGroupBuff then
-                SpellCastBuffs.RemoveGroupBuff(id)
+                SpellCastBuffs.RemoveGroupBuff(id, name)
             else
-                SpellCastBuffs.AddGroupBuff(id)
-            end
-        end)
-
-        -- Group Debuffs
-        local groupDebuffs = SpellCastBuffs.SV.GroupTrackedDebuffs
-        local isGroupDebuff = groupDebuffs[id]
-        AddMenuItem(isGroupDebuff and "Remove from Group Debuffs" or "Add to Group Debuffs", function ()
-            if isGroupDebuff then
-                SpellCastBuffs.RemoveGroupDebuff(id)
-            else
-                SpellCastBuffs.AddGroupDebuff(id)
+                SpellCastBuffs.AddGroupBuff(id, name)
             end
         end)
 
@@ -1523,7 +1512,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
         -- Set the Tooltip to be default if custom tooltips aren't enabled
         if not LUIE.SpellCastBuffs.SV.TooltipCustom then
             tooltipText = GetAbilityEffectDescription(control.buffSlot)
-            tooltipText = (zo_strgsub(tooltipText, "\n$", "")) -- Remove blank end line
+            tooltipText = StringOnlyGSUB(tooltipText, "\n$", "") -- Remove blank end line
         end
 
         local thirdLine

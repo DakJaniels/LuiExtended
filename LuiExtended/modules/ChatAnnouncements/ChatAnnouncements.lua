@@ -37,23 +37,14 @@ local zo_strformat = zo_strformat
 -- -----------------------------------------------------------------------------
 
 local pairs = pairs
-local ipairs = ipairs
 local select = select
 local tonumber = tonumber
 local unpack = unpack
-local type = type
 local string = string
-local string_find = string.find
-local string_gmatch = string.gmatch
-local string_gsub = string.gsub
-local string_match = string.match
-local string_rep = string.rep
 local string_format = string.format
 local table = table
 local table_concat = table.concat
 local table_insert = table.insert
-local table_remove = table.remove
-local table_sort = table.sort
 
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
@@ -2178,7 +2169,7 @@ function ChatAnnouncements.OnBuybackItem(eventId, itemLink, itemQuantity, money,
     if ChatAnnouncements.SV.BracketOptionItem == 1 then
         carriedItem = (formattedIcon .. itemName .. itemCount)
     else
-        carriedItem = (formattedIcon .. (zo_strgsub(itemName, "^|H0", "|H1", 1)) .. itemCount)
+        carriedItem = (formattedIcon .. StringOnlyGSUB(itemName, "^|H0", "|H1", 1) .. itemCount)
     end
 
     local carriedItemTotal = ""
@@ -2267,7 +2258,7 @@ function ChatAnnouncements.OnBuyItem(eventId, entryName, entryType, entryQuantit
     if ChatAnnouncements.SV.BracketOptionItem == 1 then
         carriedItem = (formattedIcon .. entryName .. itemCount)
     else
-        carriedItem = (formattedIcon .. (zo_strgsub(entryName, "^|H0", "|H1", 1)) .. itemCount)
+        carriedItem = (formattedIcon .. StringOnlyGSUB(entryName, "^|H0", "|H1", 1) .. itemCount)
     end
 
     local carriedItemTotal = ""
@@ -2340,7 +2331,7 @@ function ChatAnnouncements.OnSellItem(eventId, itemName, itemQuantity, money)
     if ChatAnnouncements.SV.BracketOptionItem == 1 then
         carriedItem = (formattedIcon .. itemName .. itemCount)
     else
-        carriedItem = (formattedIcon .. (zo_strgsub(itemName, "^|H0", "|H1", 1)) .. itemCount)
+        carriedItem = (formattedIcon .. StringOnlyGSUB(itemName, "^|H0", "|H1", 1) .. itemCount)
     end
 
     local carriedItemTotal = ""
@@ -2420,7 +2411,7 @@ function ChatAnnouncements.TradingHouseResponseReceived(eventId, responseType, r
     if ChatAnnouncements.SV.BracketOptionItem == 1 then
         carriedItem = (formattedIcon .. itemName .. itemCount)
     else
-        carriedItem = (formattedIcon .. (zo_strgsub(itemName, "^|H0", "|H1", 1)) .. itemCount)
+        carriedItem = (formattedIcon .. StringOnlyGSUB(itemName, "^|H0", "|H1", 1) .. itemCount)
     end
 
     local carriedItemTotal = ""
@@ -3493,7 +3484,7 @@ function ChatAnnouncements.OnLootReceived(eventId, receivedBy, itemName, quantit
         if ChatAnnouncements.SV.BracketOptionItem == 1 then
             formattedItemLink = itemLink
         else
-            formattedItemLink = (zo_strgsub(itemLink, "^|H0", "|H1", 1))
+            formattedItemLink = StringOnlyGSUB(itemLink, "^|H0", "|H1", 1)
         end
 
         local formatName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, receivedBy)

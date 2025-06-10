@@ -56,7 +56,7 @@ function SlashCommands.SlashRemoveFriend(option)
         local _, characterName = GetFriendCharacterInfo(i)
         local compareDisplay = zo_strlower(displayName)
         local compareCharacter = zo_strlower(characterName)
-        compareCharacter = (zo_strgsub(compareCharacter, "%^%a+", ""))
+        compareCharacter = StringOnlyGSUB(compareCharacter, "%^%a+", "")
         g_friendIndex[i] =
         {
             displayName = displayName,

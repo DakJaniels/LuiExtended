@@ -119,3 +119,19 @@ do
     end
 end
 -- -----------------------------------------------------------------------------
+do
+    --- @param s       string|number
+    --- @param pattern string|number
+    --- @param repl    string|number|table|function
+    --- @param n?      integer
+    --- @return string
+    StringOnlyGSUB = function (s, pattern, repl, n)
+        -- Only use n if explicitly provided, otherwise replace all matches
+        if n then
+            return (zo_strgsub(s, pattern, repl, n))
+        else
+            return (zo_strgsub(s, pattern, repl))
+        end
+    end
+end
+-- -----------------------------------------------------------------------------

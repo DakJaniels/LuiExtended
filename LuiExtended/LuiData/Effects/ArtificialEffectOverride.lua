@@ -12,7 +12,6 @@ local Effects = Data.Effects
 local Tooltips = Data.Tooltips
 local Abilities = Data.Abilities
 
-local zo_strgsub = zo_strgsub
 local GetArtificialEffectInfo = GetArtificialEffectInfo
 
 local ESO_Plus_Member = function ()
@@ -47,11 +46,11 @@ local artificialEffectOverride =
 
     -- Looking For Group Status
     -- Index 2: Shows Dungeon Finder queue status
-    -- Uses zo_strgsub to modify the default text, replacing "For" with "for"
+    -- Uses StringOnlyGSUB to modify the default text, replacing "For" with "for"
     [2] =
     {
         override = true,
-        name = (zo_strgsub(GetArtificialEffectInfo(1), "For", "for")), -- Adjusts capitalization in LFG text
+        name = StringOnlyGSUB(GetArtificialEffectInfo(1), "For", "for"), -- Adjusts capitalization in LFG text
         tooltip = Tooltips.Innate_Looking_for_Group                  -- Custom tooltip for LFG status
     },
 

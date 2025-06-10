@@ -162,23 +162,6 @@ local dialogs =
             LUIE_Group_Custom_Buffs_List:UpdateChoices(GenerateCustomList(customBuffs))
         end,
     },
-    [7] =
-    { -- Clear Custom Group Debuffs
-        identifier = "LUIE_CLEAR_GROUP_CUSTOM_DEBUFFS",
-        title = "Reset Group Debuffs",
-        text = "Are you sure you want to reset all group debuffs to defaults? This will remove any custom debuffs you've added.",
-        callback = function (_)
-            SpellCastBuffs.ClearGroupDebuffs()
-            -- Update the dropdown
-            local customDebuffs = {}
-            for debuffId, _ in pairs(SpellCastBuffs.SV.GroupTrackedDebuffs) do
-                if not SpellCastBuffs.DefaultGroupDebuffs[debuffId] then
-                    customDebuffs[debuffId] = true
-                end
-            end
-            LUIE_Group_Custom_Debuffs_List:UpdateChoices(GenerateCustomList(customDebuffs))
-        end,
-    },
 }
 
 local function loadDialogButtons()
@@ -525,41 +508,6 @@ function SpellCastBuffs.CreateSettings()
             },
             {
                 type = "submenu",
-                name = GetString(LUIE_STRING_LAM_SCB_GROUP_DEBUFFS_TRACKED_SUBMENU),
-                controls = (function ()
-                    local controls =
-                    {
-                        {
-                            type = "description",
-                            text = GetString(LUIE_STRING_LAM_SCB_GROUP_DEBUFFS_TRACKED_DESC),
-                            width = "full",
-                        },
-                    }
-                    for debuffId, _ in pairs(SpellCastBuffs.DefaultGroupDebuffs) do
-                        local icon = GetAbilityIcon(debuffId) or "/esoui/art/icons/default.dds"
-                        local debuffName = GetAbilityName(debuffId) or ("Debuff " .. tostring(debuffId))
-                        local debuffNameWithIcon = ("|t24:24:%s|t %s"):format(icon, debuffName)
-                        table_insert(controls,
-                                     {
-                                         type = "checkbox",
-                                         name = debuffNameWithIcon,
-                                         getFunc = function ()
-                                             return SpellCastBuffs.SV.GroupTrackedDebuffs[debuffId]
-                                         end,
-                                         setFunc = function (value)
-                                             SpellCastBuffs.SV.GroupTrackedDebuffs[debuffId] = value
-                                         end,
-                                         width = "full",
-                                         disabled = function ()
-                                             return not SpellCastBuffs.SV.EnableGroupBuffTracking
-                                         end,
-                                     })
-                    end
-                    return controls
-                end)(),
-            },
-            {
-                type = "submenu",
                 name = "Custom Group Buffs",
                 controls =
                 {
@@ -630,86 +578,6 @@ function SpellCastBuffs.CreateSettings()
                         tooltip = "Remove all custom buffs and reset to defaults.",
                         func = function ()
                             ZO_Dialogs_ShowDialog("LUIE_CLEAR_GROUP_CUSTOM_BUFFS")
-                        end,
-                        width = "full",
-                        disabled = function ()
-                            return not SpellCastBuffs.SV.EnableGroupBuffTracking
-                        end,
-                    },
-                },
-            },
-            {
-                type = "submenu",
-                name = "Custom Group Debuffs",
-                controls =
-                {
-                    {
-                        type = "description",
-                        text = "Add custom debuffs to track on group members by entering the Ability ID below.",
-                        width = "full",
-                    },
-                    {
-                        -- Custom Group Debuffs List (Add)
-                        type = "editbox",
-                        name = "Add Custom Group Debuff",
-                        tooltip = "Enter an Ability ID to add to the group debuffs tracking list.",
-                        getFunc = function () return "" end,
-                        setFunc = function (value)
-                            if SpellCastBuffs.AddGroupDebuff(value) then
-                                LUIE_Group_Custom_Debuffs_List:UpdateChoices(GenerateCustomList(SpellCastBuffs.SV.GroupTrackedDebuffs))
-                            end
-                        end,
-                        width = "full",
-                        disabled = function ()
-                            return not SpellCastBuffs.SV.EnableGroupBuffTracking
-                        end,
-                    },
-                    {
-                        -- Custom Group Debuffs List (Remove)
-                        type = "dropdown",
-                        name = "Remove Custom Group Debuff",
-                        tooltip = "Select a debuff to remove from tracking.",
-                        choices = {},       -- Will be populated by UpdateChoices
-                        choicesValues = {}, -- Will be populated by UpdateChoices
-                        scrollable = true,
-                        sort = "name-up",
-                        getFunc = function ()
-                            -- Filter out default debuffs so we only see custom ones
-                            local customDebuffs = {}
-                            for debuffId, _ in pairs(SpellCastBuffs.SV.GroupTrackedDebuffs) do
-                                if not SpellCastBuffs.DefaultGroupDebuffs[debuffId] then
-                                    customDebuffs[debuffId] = true
-                                end
-                            end
-                            LUIE_Group_Custom_Debuffs_List:UpdateChoices(GenerateCustomList(customDebuffs))
-                            return nil
-                        end,
-                        setFunc = function (value)
-                            if value then
-                                SpellCastBuffs.RemoveGroupDebuff(value)
-                                -- Refresh the dropdown
-                                local customDebuffs = {}
-                                for debuffId, _ in pairs(SpellCastBuffs.SV.GroupTrackedDebuffs) do
-                                    if not SpellCastBuffs.DefaultGroupDebuffs[debuffId] then
-                                        customDebuffs[debuffId] = true
-                                    end
-                                end
-                                LUIE_Group_Custom_Debuffs_List:UpdateChoices(GenerateCustomList(customDebuffs))
-                            end
-                        end,
-                        width = "full",
-                        reference = "LUIE_Group_Custom_Debuffs_List",
-                        disabled = function ()
-                            return not SpellCastBuffs.SV.EnableGroupBuffTracking
-                        end,
-                    },
-                    {
-                        -- Clear Custom Group Debuffs
-                        type = "button",
-                        name = "Reset to Default Group Debuffs",
-                        tooltip = "Remove all custom debuffs and reset to defaults.",
-                        func = function ()
-                            ZO_Dialogs_ShowDialog("LUIE_CLEAR_GROUP_CUSTOM_DEBUFFS")
                         end,
                         width = "full",
                         disabled = function ()

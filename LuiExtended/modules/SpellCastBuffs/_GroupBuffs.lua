@@ -55,25 +55,11 @@ SpellCastBuffs.DefaultGroupBuffs =
     [217608] = true, -- Spell Power
     [61693] = true,  -- Power of the Light
     [61747] = true,  -- Force Move
-}
 
--- Default tracked debuffs
-SpellCastBuffs.DefaultGroupDebuffs =
-{
-    -- Major Debuffs
-    [178118] = true, -- Status Effect Magic (Overcharged)
-    [95136] = true,  -- Status Effect Frost (Chill)
-    [95134] = true,  -- Status Effect Lightning (Concussion)
-    [178123] = true, -- Status Effect Physical (Sundered)
-    [178127] = true, -- Status Effect Foulness (Diseased)
-    [148801] = true, -- Status Effect Bleeding (Hemorrhaging)
-
-    -- Minor Debuffs
-    [120007] = true, -- Crusher
-    [120011] = true, -- Engulfing Flames
-    [120018] = true, -- Roar of Alkosh
-    [17906] = true,  -- Crusher (Glyph of Crushing)
-    [17945] = true,  -- Weakening (Glyph of Weakening)
+    -- Arena Sigils
+    [112893] = true,
+    [112903] = true,
+    [112874] = true,
 }
 
 -- Bugged long duration buffs that need special handling
@@ -321,7 +307,6 @@ function SpellCastBuffs.InitializeGroupBuffs(enabled)
     end
     -- Initialize tracked buffs and debuffs from saved vars
     SpellCastBuffs.SV.GroupTrackedBuffs = SpellCastBuffs.SV.GroupTrackedBuffs or {}
-    SpellCastBuffs.SV.GroupTrackedDebuffs = SpellCastBuffs.SV.GroupTrackedDebuffs or {}
 
     -- Initialize position settings from defaults
     local defaults = SpellCastBuffs.DefaultGroupSettings
@@ -348,13 +333,6 @@ function SpellCastBuffs.InitializeGroupBuffs(enabled)
     for buffId, _ in pairs(SpellCastBuffs.DefaultGroupBuffs) do
         if SpellCastBuffs.SV.GroupTrackedBuffs[buffId] == nil then
             SpellCastBuffs.SV.GroupTrackedBuffs[buffId] = true
-        end
-    end
-
-    -- Set defaults for any new debuffs
-    for debuffId, _ in pairs(SpellCastBuffs.DefaultGroupDebuffs) do
-        if SpellCastBuffs.SV.GroupTrackedDebuffs[debuffId] == nil then
-            SpellCastBuffs.SV.GroupTrackedDebuffs[debuffId] = true
         end
     end
 
@@ -401,46 +379,26 @@ function SpellCastBuffs.ShutdownGroupBuffs()
 end
 
 -- Add a custom buff to track for group members
-function SpellCastBuffs.AddGroupBuff(buffId)
+function SpellCastBuffs.AddGroupBuff(buffId, name)
     if not buffId or type(buffId) ~= "number" then
         return false
     end
 
     -- Add to tracked list
     SpellCastBuffs.SV.GroupTrackedBuffs[buffId] = true
-    return true
-end
-
--- Add a custom debuff to track for group members
-function SpellCastBuffs.AddGroupDebuff(debuffId)
-    if not debuffId or type(debuffId) ~= "number" then
-        return false
-    end
-
-    -- Add to tracked list
-    SpellCastBuffs.SV.GroupTrackedDebuffs[debuffId] = true
+    SpellCastBuffs.SV.GroupTrackedBuffs[name] = true
     return true
 end
 
 -- Remove a buff from tracking
-function SpellCastBuffs.RemoveGroupBuff(buffId)
+function SpellCastBuffs.RemoveGroupBuff(buffId, name)
     if not buffId or type(buffId) ~= "number" then
         return false
     end
 
     -- Remove from tracked list
     SpellCastBuffs.SV.GroupTrackedBuffs[buffId] = nil
-    return true
-end
-
--- Remove a debuff from tracking
-function SpellCastBuffs.RemoveGroupDebuff(debuffId)
-    if not debuffId or type(debuffId) ~= "number" then
-        return false
-    end
-
-    -- Remove from tracked list
-    SpellCastBuffs.SV.GroupTrackedDebuffs[debuffId] = nil
+    SpellCastBuffs.SV.GroupTrackedBuffs[name] = nil
     return true
 end
 
@@ -453,15 +411,4 @@ function SpellCastBuffs.ClearGroupBuffs()
     end
     -- Reset to only default buffs
     SpellCastBuffs.SV.GroupTrackedBuffs = defaultBuffs
-end
-
--- Clear all custom debuffs
-function SpellCastBuffs.ClearGroupDebuffs()
-    local defaultDebuffs = {}
-    -- Keep default debuffs
-    for debuffId in pairs(SpellCastBuffs.DefaultGroupDebuffs) do
-        defaultDebuffs[debuffId] = true
-    end
-    -- Reset to only default debuffs
-    SpellCastBuffs.SV.GroupTrackedDebuffs = defaultDebuffs
 end
