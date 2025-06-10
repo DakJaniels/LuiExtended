@@ -5,8 +5,8 @@
 ## AddOnVersion: 7000
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
 ## DependsOn: LuiData>=7000 LibAddonMenu-2.0>=40 LibMediaProvider-1.0>=33
-## OptionalDependsOn: LibChatMessage>=118 pChat>=10006040 CombatMetrics>=10704
-## OptionalDependsOn: LibDebugLogger>=268 DolgubonsLazyWritCreator LibLazyCrafting>=4014 LootLog>=407032
+## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705
+## OptionalDependsOn: LibDebugLogger>=268 DolgubonsLazyWritCreator>=4005 LibLazyCrafting>=4018 LootLog>=408010
 ## SavedVariables: LUIESV
 
 # Addon Profiler
