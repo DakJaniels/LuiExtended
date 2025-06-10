@@ -7,7 +7,6 @@
 ---
 --- @class (partial) LuiExtended
 --- @field __index LuiExtended
---- @field ActionBar LUIE_ActionBar
 --- @field Combat LUIE.CombatInfo
 --- @field SpellCastBuffs LUIE.SpellCastBuffs
 --- @field name string The addon name
@@ -94,7 +93,6 @@ LUIE.Defaults =
     ShowChangeLog             = false,
 
     -- Modules
-    ActionBar_Enabled         = false,
     UnitFrames_Enabled        = true,
     InfoPanel_Enabled         = true,
     CombatInfo_Enabled        = true,

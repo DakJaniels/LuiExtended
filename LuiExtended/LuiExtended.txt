@@ -49,11 +49,6 @@ frontend/CrowdControlTracker.xml
 # Unlock
 src/Unlock.lua
 
-# Modules - ActionBar
-modules/ActionBar/ActionBar.lua
-modules/ActionBar/ActionBarConfig.lua
-modules/ActionBar/ActionBar.xml
-
 # Modules - Chat Announcements
 modules/ChatAnnouncements/_Namespace.lua
 modules/ChatAnnouncements/_PrintQueuedMessages.lua
@@ -143,7 +138,6 @@ modules/UnitFrames/UnitFrames.lua
 
 # Settings
 settings/Settings.lua
-modules/ActionBar/ActionBarSettings.lua
 settings/ChatAnnouncements.lua
 settings/CombatInfo.lua
 settings/CombatText.lua
