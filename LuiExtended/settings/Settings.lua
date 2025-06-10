@@ -301,6 +301,29 @@ function LUIE.CreateSettings()
         name = GetString(LUIE_STRING_LAM_MODULEHEADER),
         width = "full",
     }
+    -- Action Bar Module
+    optionsData[#optionsData + 1] =
+    {
+        type = "checkbox",
+        name = "Action Bar Module" --[[GetString(LUIE_STRING_LAM_CI_SHOWCOMBATINFO)]],
+        getFunc = function ()
+            return Settings.ActionBar_Enabled
+        end,
+        setFunc = function (value)
+            Settings.ActionBar_Enabled = value
+        end,
+        width = "half",
+        warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+        default = Defaults.ActionBar_Enabled,
+    }
+
+    -- Action Bar Description
+    optionsData[#optionsData + 1] =
+    {
+        type = "description",
+        width = "half",
+        text = "Action Bar" --[[GetString(LUIE_STRING_LAM_CI_DESCRIPTION)]],
+    }
 
     -- Unit Frames Module
     optionsData[#optionsData + 1] =
