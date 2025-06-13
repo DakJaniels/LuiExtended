@@ -433,7 +433,7 @@ local uiQuickSlot =
 -- Ultimate slot
 local uiUltimate =
 {
-    color = { 0.941, 0.973, 0.957 },
+    color = { 0.941, 0.973, 0.957, 1 },
     pctColors =
     {
         [1] = { pct = 100, color = { 0.878, 0.941, 0.251, 1 } },
