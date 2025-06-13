@@ -342,6 +342,7 @@ local g_boundArmamentsPlayed = false                      -- Specific variable t
 local g_disableProcSound = {}                             -- When we play a proc sound from a bar ability changing (like power lash) we put a 3 sec ICD on it so it doesn't spam when mousing on/off a target, etc
 local g_hotbarCategory = GetActiveHotbarCategory()        -- Set on initialization and when we swap weapons to determine the current hotbar category
 local g_actionBarActiveWeaponPair = GetHeldWeaponPair()   -- Toggled on when weapon swapping, TODO: maybe not needed
+--- @type {[integer]:ActionButton}
 local g_backbarButtons = {}                               -- Table to hold backbar buttons
 local g_activeWeaponSwapInProgress = false                -- Toggled on when weapon swapping, TODO: maybe not needed
 local g_castbarWorldMapFix = false                        -- Fix for viewing the World Map changing the player coordinates for some reason
@@ -354,6 +355,16 @@ local BACKBAR_INDEX_OFFSET = 50
 
 -- ===== HELPER FUNCTIONS TO REDUCE CODE DUPLICATION =====
 
+-- Update actionId for backbar buttons
+local function UpdateBackbarButtonActionIds()
+    for i = BAR_INDEX_START + BACKBAR_INDEX_OFFSET, BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET do
+        local button = g_backbarButtons[i]
+        if button and button.button then
+            -- Update actionId properly using original slot number without offset
+            button.button.actionId = GetSlotTrueBoundId(i - BACKBAR_INDEX_OFFSET, HOTBAR_CATEGORY_BACKUP)
+        end
+    end
+end
 
 ---
 --- @param result ActionResult
@@ -583,6 +594,7 @@ function CombatInfo.OnActiveWeaponPairChanged(eventCode, activeWeaponPair)
         g_activeWeaponSwapInProgress = true
         g_hotbarCategory = GetActiveHotbarCategory()
         g_actionBarActiveWeaponPair = GetHeldWeaponPair()
+        UpdateBackbarButtonActionIds()
     end
 end
 
