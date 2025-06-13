@@ -35,7 +35,7 @@ LUIE.feedback = "https://github.com/DakJaniels/LuiExtended/issues"
 LUIE.translation = "https://github.com/DakJaniels/LuiExtended/tree/translations"
 LUIE.donation = "https://paypal.me/dakjaniels"
 -- -----------------------------------------------------------------------------
-LUIE.LAM = LibAddonMenu2 or error("LibAddonMenu2 was not enabled!")
+LUIE.LAM = LibAddonMenu2 or error("LibAddonMenu2 is not initialized", 2)
 -- Saved variables options
 --- @diagnostic disable-next-line: missing-fields
 LUIE.SV = {}

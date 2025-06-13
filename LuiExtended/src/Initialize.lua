@@ -95,17 +95,15 @@ local function RegisterEvents()
     eventManager:RegisterForEvent(LUIE.name, EVENT_PLAYER_ACTIVATED, LoadScreen)
 
     -- Register for LibMediaProvider media registration callbacks
-    if LMP then
-        LUIE:RegisterCallback("LibMediaProvider_Registered", function (mediatype, key)
-            if mediatype == LMP.MediaType.FONT then
-                LUIE.Fonts[key] = LMP:Fetch(mediatype, key)
-            elseif mediatype == LMP.MediaType.STATUSBAR then
-                LUIE.StatusbarTextures[key] = LMP:Fetch(mediatype, key)
-            elseif mediatype == LMP.MediaType.SOUND then
-                LUIE.Sounds[key] = LMP:Fetch(mediatype, key)
-            end
-        end)
-    end
+    LUIE:RegisterCallback("LibMediaProvider_Registered", function (mediatype, key)
+        if mediatype == LMP.MediaType.FONT then
+            LUIE.Fonts[key] = LMP:Fetch(mediatype, key)
+        elseif mediatype == LMP.MediaType.STATUSBAR then
+            LUIE.StatusbarTextures[key] = LMP:Fetch(mediatype, key)
+        elseif mediatype == LMP.MediaType.SOUND then
+            LUIE.Sounds[key] = LMP:Fetch(mediatype, key)
+        end
+    end)
 
     -- Existing event registrations
     if LUIE.SV.SlashCommands_Enable or LUIE.SV.ChatAnnouncements_Enable then
