@@ -595,6 +595,13 @@ function CombatInfo.OnActiveWeaponPairChanged(eventCode, activeWeaponPair)
         g_hotbarCategory = GetActiveHotbarCategory()
         g_actionBarActiveWeaponPair = GetHeldWeaponPair()
         UpdateBackbarButtonActionIds()
+
+        -- Safety net: Reset the flag after a reasonable timeout in case animations fail
+        zo_callLater(function ()
+                         if g_activeWeaponSwapInProgress then
+                             g_activeWeaponSwapInProgress = false
+                         end
+                     end, 2000) -- 2 second timeout
     end
 end
 
@@ -2752,6 +2759,8 @@ function CombatInfo.UpdateAllSlotsForActiveHotbar(didActiveHotbarChange)
     g_hotbarCategory = GetActiveHotbarCategory()
     -- update bar slots
     if didActiveHotbarChange then
+        -- Weapon swap is happening, start animations
+        -- Keep g_activeWeaponSwapInProgress = true (already set by OnActiveWeaponPairChanged)
         for _, physicalSlot in pairs(g_backbarButtons) do
             if physicalSlot.hotbarSwapAnimation then
                 physicalSlot.noUpdates = true
@@ -2759,7 +2768,9 @@ function CombatInfo.UpdateAllSlotsForActiveHotbar(didActiveHotbarChange)
             end
         end
     else
-        g_activeWeaponSwapInProgress = false
+        -- No hotbar change occurred, but event fired - likely a false trigger or completion
+        -- Don't automatically set to false here since animations might still be running
+        -- Let the animation completion handler manage the flag
     end
 end
 
@@ -3087,9 +3098,13 @@ function CombatInfo.Initialize(enabled)
 
         local function OnSwapAnimationDone(animation, button)
             button.noUpdates = false
+
+            -- Check if this is the last animation to complete
+            -- We'll use the ultimate slot as the final indicator since it's the last slot
             if button:GetSlot() == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
                 g_activeWeaponSwapInProgress = false
             end
+
             slotsUpdated = {}
         end
 
@@ -3104,6 +3119,9 @@ function CombatInfo.Initialize(enabled)
             local button = ActionButton:New(i, ACTION_BUTTON_TYPE_VISIBLE, LUIE_Backbar, "ZO_ActionButton", HOTBAR_CATEGORY_BACKUP)
             SetupSwapAnimation(button)
             button:SetupBounceAnimation()
+            button:UpdateState()
+            -- Force update the actionId properly
+            button.button.actionId = GetSlotTrueBoundId(i - 50, HOTBAR_CATEGORY_BACKUP)
             g_backbarButtons[i] = button
         end
     end
