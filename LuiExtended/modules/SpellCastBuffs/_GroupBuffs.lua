@@ -189,8 +189,6 @@ function SpellCastBuffs.OnGroupEffectChanged(eventId, changeType, effectSlot, ef
     local shouldTrack = false
     if effectType == BUFF_EFFECT_TYPE_BUFF and SpellCastBuffs.SV.GroupTrackedBuffs[abilityId] then
         shouldTrack = true
-    elseif effectType == BUFF_EFFECT_TYPE_DEBUFF and SpellCastBuffs.SV.GroupTrackedDebuffs[abilityId] then
-        shouldTrack = true
     end
     if not shouldTrack then return end
 
