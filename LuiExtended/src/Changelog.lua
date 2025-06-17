@@ -19,10 +19,11 @@ local changelogMessages =
     "|cFFFF00Fixes:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Grim Focus and Bound Armorments count now go to the new 10/8 respectively.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Merged dannystewart PR # 338 to \"Fix trailing dash persisting after countdown timer expires in AbilityAlerts.\"",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Fix for crystal frag and grim focus stack counts.",
     "",
     -- New Features
     "|cFFFF00New:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Group buffs/debuffs found in the SpellcastBuff module, this is in beta and can be turned off.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Group buffs found in the SpellcastBuff module, this is in beta and can be turned off.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Added right click support for buffs so you can easily add/remove them to the prominent buff/debuff and group buff/debuff trackers. work in progress.",
     "",
     -- Miscellaneous
