@@ -13,6 +13,14 @@ local GetDisplayName = GetDisplayName
 local changelogMessages =
 {
     -- Version Header
+    "|cFFA500LuiExtended Version 7.0.0.2|r",
+    "",
+    -- Fixes
+    "|cFFFF00Fixes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Attempt fix for gamepad ui when leaving group, dialog now shows.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Grave Lord's Sacrifice timers.",
+    "",
+    -- Version Header
     "|cFFA500LuiExtended Version 7.0.0.0|r",
     "",
     -- Fixes
