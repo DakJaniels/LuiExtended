@@ -243,41 +243,41 @@ local barHighlightOverride =
     -- Necromancer ------------
     ---------------------------
 
-    [114860] = { newId = 114863 },                      -- Blastbones
-    [117330] = { newId = 114863 },                      -- Blastbones
-    [117690] = { newId = 117691 },                      -- Blighted Blastbones
-    [117693] = { newId = 117691 },                      -- Blighted Blastbones
-    [117749] = { newId = 117750 },                      -- Stalking Blastbones
-    [117773] = { newId = 117750 },                      -- Relentless Blastbones --> Stalking Blastbones
+    [114860] = { newId = 114863 },                                                         -- Blastbones
+    [117330] = { newId = 114863 },                                                         -- Blastbones
+    [117690] = { newId = 117691 },                                                         -- Blighted Blastbones
+    [117693] = { newId = 117691 },                                                         -- Blighted Blastbones
+    [117749] = { newId = 117750, showFakeAura = true, noRemove = true, duration = 20500 }, -- Grave Lord's Sacrifice
+    [117773] = { newId = 117750 },                                                         -- Relentless Blastbones --> Stalking Blastbones
 
-    [115924] = { newId = 116445 },                      -- Shocking Siphon
-    [118763] = { newId = 118764 },                      -- Detonating Siphon
-    [118008] = { newId = 118009 },                      -- Mystic Siphon
+    [115924] = { newId = 116445 },                                                         -- Shocking Siphon
+    [118763] = { newId = 118764 },                                                         -- Detonating Siphon
+    [118008] = { newId = 118009 },                                                         -- Mystic Siphon
 
-    [118226] = { newId = 125750 },                      -- Ruinous Scythe --> Off Balance
-    [118223] = { newId = 122625 },                      -- Hungry Scythe
+    [118226] = { newId = 125750 },                                                         -- Ruinous Scythe --> Off Balance
+    [118223] = { newId = 122625 },                                                         -- Hungry Scythe
 
-    [115238] = { newId = 115240 },                      -- Bitter Harvest
-    [118623] = { newId = 124165 },                      -- Deaden Pain
-    [118639] = { newId = 124193 },                      -- Necrotic Potency
+    [115238] = { newId = 115240 },                                                         -- Bitter Harvest
+    [118623] = { newId = 124165 },                                                         -- Deaden Pain
+    [118639] = { newId = 124193 },                                                         -- Necrotic Potency
 
-    [115177] = { newId = 121513 },                      -- Grave Grasp
-    [118308] = { newId = 118309 },                      -- Ghostly Embrace
-    [118352] = { newId = 118354 },                      -- Empowering Grasp
+    [115177] = { newId = 121513 },                                                         -- Grave Grasp
+    [118308] = { newId = 118309 },                                                         -- Ghostly Embrace
+    [118352] = { newId = 118354 },                                                         -- Empowering Grasp
 
-    [114196] = { newId = 114206, showFakeAura = true }, -- Render Flesh --> Minor Defile
-    [117883] = { newId = 117885, showFakeAura = true }, -- Resistant Flesh --> Minor Defile
-    [117888] = { newId = 117890, showFakeAura = true }, -- Blood Sacrifice --> Minor Defile
+    [114196] = { newId = 114206, showFakeAura = true },                                    -- Render Flesh --> Minor Defile
+    [117883] = { newId = 117885, showFakeAura = true },                                    -- Resistant Flesh --> Minor Defile
+    [117888] = { newId = 117890, showFakeAura = true },                                    -- Blood Sacrifice --> Minor Defile
 
-    [115315] = { newId = 115326 },                      -- Life amid Death
-    [118017] = { newId = 118022 },                      -- Renewing Undeath
-    [118809] = { newId = 118814 },                      -- Enduring Undeath
+    [115315] = { newId = 115326 },                                                         -- Life amid Death
+    [118017] = { newId = 118022 },                                                         -- Renewing Undeath
+    [118809] = { newId = 118814 },                                                         -- Enduring Undeath
 
-    [115926] = { newId = 116450 },                      -- Restoring Tether
-    [118070] = { newId = 118071 },                      -- Braided Tether
-    [118122] = { newId = 118123 },                      -- Mortal Coil
+    [115926] = { newId = 116450 },                                                         -- Restoring Tether
+    [118070] = { newId = 118071 },                                                         -- Braided Tether
+    [118122] = { newId = 118123 },                                                         -- Mortal Coil
 
-    [118379] = { newId = 124999, showFakeAura = true }, -- Animate Blastbones
+    [118379] = { newId = 124999, showFakeAura = true },                                    -- Animate Blastbones
 
     ---------------------------
     -- Arcanist ---------------
