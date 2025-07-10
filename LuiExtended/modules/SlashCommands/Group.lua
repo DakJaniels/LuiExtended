@@ -177,8 +177,13 @@ end
 
 -- Slash Command to leave a group
 function SlashCommands.SlashGroupLeave()
-    -- EVENT_GROUP_NOTIFICATION_MESSAGE hook handles response to this.
-    GroupLeave()
+    if IsInGamepadPreferredMode() then
+        -- Show confirmation dialog like the normal party menu does
+        ZO_Dialogs_ShowDialog("GROUP_LEAVE_DIALOG")
+    else
+        -- EVENT_GROUP_NOTIFICATION_MESSAGE hook handles response to this.
+        GroupLeave()
+    end
 end
 
 function SlashCommands.SlashGroupRole(option)
