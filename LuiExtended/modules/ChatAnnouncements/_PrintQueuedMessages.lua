@@ -172,6 +172,13 @@ local MessageProcessors =
     }
 }
 
+-- Build a direct lookup table for messageType to processor function
+local MessageTypeProcessors = {}
+for i = 1, #MessageProcessors do
+    local entry = MessageProcessors[i]
+    MessageTypeProcessors[entry.messageType] = entry.processor
+end
+
 -- Validate a message.
 local function IsValidMessage(message)
     return message and message.message ~= ""
@@ -180,15 +187,12 @@ end
 -- Process messages of a specific type.
 local function ProcessMessages(messageType)
     local QueuedMessages = ChatAnnouncements.QueuedMessages
-    for i = 1, #QueuedMessages do
-        local message = QueuedMessages[i]
-        if IsValidMessage(message) and message.messageType == messageType then
-            -- Find the processor for this message type
-            for order, processor in pairs(MessageProcessors) do
-                if processor.messageType == messageType then
-                    processor.processor(message)
-                    break
-                end
+    local processor = MessageTypeProcessors[messageType]
+    if processor then
+        for i = 1, #QueuedMessages do
+            local message = QueuedMessages[i]
+            if IsValidMessage(message) and message.messageType == messageType then
+                processor(message)
             end
         end
     end
