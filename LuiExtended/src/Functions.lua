@@ -537,7 +537,9 @@ end
 do
     -- Add this if not already.
     if not SLASH_COMMANDS["/rl"] then
-        SLASH_COMMANDS["/rl"] = ReloadUI("ingame")
+        SLASH_COMMANDS["/rl"] = function()
+		    ReloadUI("ingame")
+		end
     end
 end
 

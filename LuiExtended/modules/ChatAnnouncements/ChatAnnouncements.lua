@@ -1731,6 +1731,8 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
         messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWayshrine
     elseif reason == CURRENCY_CHANGE_REASON_CRAFT or reason == CURRENCY_CHANGE_REASON_RECONSTRUCTION then
         messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse
+    elseif reason == CURRENCY_CHANGE_REASON_ENDLESS_DUNGEON_VISION_REROLL then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse
     elseif reason == CURRENCY_CHANGE_REASON_VENDOR_REPAIR then
         messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageRepair
     elseif reason == CURRENCY_CHANGE_REASON_TRADINGHOUSE_LISTING then
