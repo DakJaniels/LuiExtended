@@ -364,8 +364,8 @@ function SlashCommands.SlashReport(player)
     HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:SelectSubcategory(4)
 
     -- Populate the reporting window name and description
-    ZO_Help_Ask_For_Help_Keyboard_ControlDetailsTextLineField:SetText(player)
-    ZO_Help_Ask_For_Help_Keyboard_ControlDescriptionBodyField:SetText(zo_strformat(text, player, location, currentdate, currenttime, server))
+    ZO_Help_Ask_For_Help_Keyboard_Control:GetNamedChild("DetailsTextLineField"):SetText(player)
+    ZO_Help_Ask_For_Help_Keyboard_Control:GetNamedChild("DescriptionBodyField"):SetText(zo_strformat(text, player, location, currentdate, currenttime, server))
 
     -- Open the reporting window
     HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT)
