@@ -6,6 +6,9 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
+-- Load Settings API
+local SettingsAPI = LUIE.SettingsAPI
+
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 

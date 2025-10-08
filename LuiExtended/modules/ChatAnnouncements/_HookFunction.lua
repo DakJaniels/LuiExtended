@@ -4092,44 +4092,46 @@ function ChatAnnouncements.HookFunction()
     end
 
     -- Hook MAIL_SEND.Send to get name of player we send to.
-    do
-        local originalSend = MAIL_SEND.Send
-        function MAIL_SEND:Send(...)
-            -- if LUIE.IsDevDebugEnabled() then
-            --     LUIE.Debug("MAIL_SEND:Send has been hooked!")
-            -- end
-            windowManager:SetFocusByName("")
+    if MAIL_SEND then
+        do
+            local originalSend = MAIL_SEND.Send
+            function MAIL_SEND:Send(...)
+                -- if LUIE.IsDevDebugEnabled() then
+                --     LUIE.Debug("MAIL_SEND:Send has been hooked!")
+                -- end
+                windowManager:SetFocusByName("")
 
-            if not self.sendMoneyMode and GetQueuedCOD() == 0 then
-                if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
-                    printToChat(GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE), true)
-                end
-                if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
-                    ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE))
-                end
-                PlaySound(SOUNDS.NEGATIVE_CLICK)
-            else
-                SendMail(self.to:GetText(), self.subject:GetText(), self.body:GetText())
-
-                local mailTarget = self.to:GetText()
-                local nameLink
-                -- Here we look for @ character in the sent mail, if the player send to an account then we want the link to be an account name link, otherwise, it's a character name link.
-                if zo_strmatch(mailTarget, "@") == "@" then
-                    if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                        nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(mailTarget, nil, DISPLAY_NAME_LINK_TYPE, mailTarget)
-                    else
-                        nameLink = ZO_LinkHandler_CreateLink(mailTarget, nil, DISPLAY_NAME_LINK_TYPE, mailTarget)
+                if not self.sendMoneyMode and GetQueuedCOD() == 0 then
+                    if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
+                        printToChat(GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE), true)
                     end
+                    if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+                        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE))
+                    end
+                    PlaySound(SOUNDS.NEGATIVE_CLICK)
                 else
-                    if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                        nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(mailTarget, nil, CHARACTER_LINK_TYPE, mailTarget)
+                    SendMail(self.to:GetText(), self.subject:GetText(), self.body:GetText())
+
+                    local mailTarget = self.to:GetText()
+                    local nameLink
+                    -- Here we look for @ character in the sent mail, if the player send to an account then we want the link to be an account name link, otherwise, it's a character name link.
+                    if zo_strmatch(mailTarget, "@") == "@" then
+                        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                            nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(mailTarget, nil, DISPLAY_NAME_LINK_TYPE, mailTarget)
+                        else
+                            nameLink = ZO_LinkHandler_CreateLink(mailTarget, nil, DISPLAY_NAME_LINK_TYPE, mailTarget)
+                        end
                     else
-                        nameLink = ZO_LinkHandler_CreateLink(mailTarget, nil, CHARACTER_LINK_TYPE, mailTarget)
+                        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                            nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(mailTarget, nil, CHARACTER_LINK_TYPE, mailTarget)
+                        else
+                            nameLink = ZO_LinkHandler_CreateLink(mailTarget, nil, CHARACTER_LINK_TYPE, mailTarget)
+                        end
                     end
+                    ChatAnnouncements.mailTarget = ZO_SELECTED_TEXT:Colorize(nameLink)
                 end
-                ChatAnnouncements.mailTarget = ZO_SELECTED_TEXT:Colorize(nameLink)
+                originalSend(self, ...)
             end
-            originalSend(self, ...)
         end
     end
     ---

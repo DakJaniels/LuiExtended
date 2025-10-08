@@ -25,56 +25,9 @@ local function LoadSavedVars()
     end
 end
 
--- Load additional fonts from LMP.
-local function UpdateFonts()
-    -- First register our own fonts
-    for fontName, fontPath in pairs(LUIE.Fonts) do
-        LMP:Register(LMP.MediaType.FONT, fontName, fontPath)
-    end
-
-    -- Then fetch fonts from other addons
-    for _, fontName in pairs(LMP:List(LMP.MediaType.FONT)) do
-        if not LUIE.Fonts[fontName] then
-            LUIE.Fonts[fontName] = LMP:Fetch(LMP.MediaType.FONT, fontName)
-        end
-    end
-end
-
--- Load additional status bar textures from LMP.
-local function UpdateStatusbarTextures()
-    -- First register our own textures
-    for textureName, texturePath in pairs(LUIE.StatusbarTextures) do
-        LMP:Register(LMP.MediaType.STATUSBAR, textureName, texturePath)
-    end
-
-    -- Then fetch textures from other addons
-    for _, textureName in pairs(LMP:List(LMP.MediaType.STATUSBAR)) do
-        if not LUIE.StatusbarTextures[textureName] then
-            LUIE.StatusbarTextures[textureName] = LMP:Fetch(LMP.MediaType.STATUSBAR, textureName)
-        end
-    end
-end
-
--- Load additional sounds from LMP.
-local function UpdateSounds()
-    -- First register our own sounds
-    for soundName, soundId in pairs(LUIE.Sounds) do
-        LMP:Register(LMP.MediaType.SOUND, soundName, soundId)
-    end
-
-    -- Then fetch sounds from other addons
-    for _, soundName in pairs(LMP:List(LMP.MediaType.SOUND)) do
-        if not LUIE.Sounds[soundName] then
-            LUIE.Sounds[soundName] = LMP:Fetch(LMP.MediaType.SOUND, soundName)
-        end
-    end
-end
-
--- Load additional media from LMP.
+-- Load additional media from LMP using centralized SettingsAPI
 local function LoadMedia()
-    UpdateFonts()
-    UpdateStatusbarTextures()
-    UpdateSounds()
+    LUIE.SettingsAPI.LoadAllMedia()
 end
 
 --- - **EVENT_PLAYER_ACTIVATED **
@@ -96,13 +49,7 @@ local function RegisterEvents()
 
     -- Register for LibMediaProvider media registration callbacks
     LUIE:RegisterCallback("LibMediaProvider_Registered", function (mediatype, key)
-        if mediatype == LMP.MediaType.FONT then
-            LUIE.Fonts[key] = LMP:Fetch(mediatype, key)
-        elseif mediatype == LMP.MediaType.STATUSBAR then
-            LUIE.StatusbarTextures[key] = LMP:Fetch(mediatype, key)
-        elseif mediatype == LMP.MediaType.SOUND then
-            LUIE.Sounds[key] = LMP:Fetch(mediatype, key)
-        end
+        LUIE.SettingsAPI.HandleMediaRegistration(mediatype, key)
     end)
 
     -- Existing event registrations
@@ -123,9 +70,12 @@ function LUIE:InitializeHooks()
     self.HookGamePadIcons()
     self.HookGamePadStats()
     self.HookGamePadMap()
-    self.HookKeyboardIcons()
-    self.HookKeyboardStats()
-    self.HookKeyboardMap()
+    
+    if not IsConsoleUI() then
+        self.HookKeyboardIcons()
+        self.HookKeyboardStats()
+        self.HookKeyboardMap()
+    end
 end
 
 --- - **EVENT_ADD_ON_LOADED **

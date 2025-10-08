@@ -5,6 +5,10 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
+
+-- Load Settings API
+local SettingsAPI = LUIE.SettingsAPI
+
 --- @class (partial) LUIE.SlashCommands
 local SlashCommands = LUIE.SlashCommands
 --- @type CollectibleTables
@@ -117,759 +121,660 @@ function SlashCommands.CreateSettings()
     local optionsDataSlashCommands = {}
 
     -- Slash Commands description
-    optionsDataSlashCommands[#optionsDataSlashCommands + 1] =
-    {
-        type = "description",
-        text = GetString(LUIE_STRING_LAM_SLASHCMDS_DESCRIPTION),
-    }
+    optionsDataSlashCommands[#optionsDataSlashCommands + 1] = SettingsAPI.CreateDescriptionOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_DESCRIPTION)
+    )
 
     -- ReloadUI Button
-    optionsDataSlashCommands[#optionsDataSlashCommands + 1] =
-    {
-        type = "button",
-        name = GetString(LUIE_STRING_LAM_RELOADUI),
-        tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
-        func = function ()
-            ReloadUI("ingame")
-        end,
-        width = "full",
-    }
+    optionsDataSlashCommands[#optionsDataSlashCommands + 1] = SettingsAPI.CreateButtonOption(
+        GetString(LUIE_STRING_LAM_RELOADUI),
+        GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
+        function() ReloadUI("ingame") end
+    )
 
     -- Slash Commands - General Commands Submenu
-    optionsDataSlashCommands[#optionsDataSlashCommands + 1] =
-    {
-        type = "submenu",
-        name = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GENERAL),
-        controls =
-        {
-            {
-                -- SlashTrade
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_TRADE),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_TRADE_TP),
-                getFunc = function ()
-                    return Settings.SlashTrade
-                end,
-                setFunc = function (value)
-                    Settings.SlashTrade = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashTrade,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashHome
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_HOME),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_TP),
-                getFunc = function ()
-                    return Settings.SlashHome
-                end,
-                setFunc = function (value)
-                    Settings.SlashHome = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashHome,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- Choose Home Option
-                type = "dropdown",
-                name = "\t\t\t\t\tChoose Inside or Outside for /home",
-                choices = homeOptions,
-                getFunc = function ()
-                    return homeOptions[Settings.SlashHomeChoice]
-                end,
-                setFunc = function (value)
-                    Settings.SlashHomeChoice = homeOptionsKeys[value]
-                end,
-                width = "full",
-                default = Defaults.SlashHomeChoice,
-                disabled = function ()
-                    return not Settings.SlashHome
-                end,
-            },
-            {
-                -- SlashSetPrimaryHome
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_SET_PRIMARY),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_SET_PRIMARY_TP),
-                getFunc = function ()
-                    return Settings.SlashSetPrimaryHome
-                end,
-                setFunc = function (value)
-                    Settings.SlashSetPrimaryHome = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashSetPrimaryHome,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashCampaignQ
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_CAMPAIGN),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_CAMPAIGN_TP),
-                getFunc = function ()
-                    return Settings.SlashCampaignQ
-                end,
-                setFunc = function (value)
-                    Settings.SlashCampaignQ = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashCampaignQ,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashCompanion
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_COMPANION),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_COMPANION_TP),
-                getFunc = function ()
-                    return Settings.SlashCompanion
-                end,
-                setFunc = function (value)
-                    Settings.SlashCompanion = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashCompanion,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-                disabled = function ()
-                    return #companionOptions == 0
-                end,
-            },
-            {
-                -- Choose Companion
-                type = "dropdown",
-                name = "\t\t\t\t\tChoose Companion to Summon",
-                choices = companionOptions,
-                getFunc = function ()
-                    return GetFormattedCollectibleName(Settings.SlashCompanionChoice)
-                end,
-                setFunc = function (value)
-                    Settings.SlashCompanionChoice = companionOptionsKeys[value]
-                end,
-                width = "full",
-                default = Defaults.SlashCompanionChoice,
-                disabled = function ()
-                    return not Settings.SlashCompanion
-                end,
-            },
-            {
-                -- SlashBanker
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_BANKER),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_BANKER_TP),
-                getFunc = function ()
-                    return Settings.SlashBanker
-                end,
-                setFunc = function (value)
-                    Settings.SlashBanker = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashBanker,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-                disabled = function ()
-                    return #bankerOptions == 0
-                end,
-            },
-            {
-                -- Choose Banker
-                type = "dropdown",
-                name = "\t\t\t\t\tChoose Banker to Summon",
-                choices = bankerOptions,
-                getFunc = function ()
-                    return GetFormattedCollectibleName(Settings.SlashBankerChoice)
-                end,
-                setFunc = function (value)
-                    Settings.SlashBankerChoice = bankerOptionsKeys[value]
-                end,
-                width = "full",
-                default = Defaults.SlashBankerChoice,
-                disabled = function ()
-                    return not Settings.SlashBanker
-                end,
-            },
-            {
-                -- SlashMerchant
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_MERCHANT),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_MERCHANT_TP),
-                getFunc = function ()
-                    return Settings.SlashMerchant
-                end,
-                setFunc = function (value)
-                    Settings.SlashMerchant = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashMerchant,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-                disabled = function ()
-                    return #merchantOptions == 0
-                end,
-            },
-            {
-                -- Choose Merchant
-                type = "dropdown",
-                name = "\t\t\t\t\tChoose Merchant to Summon",
-                choices = merchantOptions,
-                getFunc = function ()
-                    return GetFormattedCollectibleName(Settings.SlashMerchantChoice)
-                end,
-                setFunc = function (value)
-                    Settings.SlashMerchantChoice = merchantOptionsKeys[value]
-                end,
-                width = "full",
-                default = Defaults.SlashMerchantChoice,
-                disabled = function ()
-                    return not Settings.SlashMerchant
-                end,
-            },
-            {
-                -- SlashArmory
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_ARMORY),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_ARMORY_TP),
-                getFunc = function ()
-                    return Settings.SlashArmory
-                end,
-                setFunc = function (value)
-                    Settings.SlashArmory = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashArmory,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-                disabled = function ()
-                    return #armoryOptions == 0
-                end,
-            },
-            {
-                -- Choose Armory
-                type = "dropdown",
-                name = "\t\t\t\t\tChoose Armory Assistant to Summon",
-                choices = armoryOptions,
-                getFunc = function ()
-                    return GetFormattedCollectibleName(Settings.SlashArmoryChoice)
-                end,
-                setFunc = function (value)
-                    Settings.SlashArmoryChoice = armoryOptionsKeys[value]
-                end,
-                width = "full",
-                default = Defaults.SlashArmoryChoice,
-                disabled = function ()
-                    return not Settings.SlashArmory
-                end,
-            },
-            {
-                -- SlashDecon
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_DECON),
-                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_SLASHCMDS_DECON_TP), GetCollectibleName(10184)),
-                getFunc = function ()
-                    return Settings.SlashDecon
-                end,
-                setFunc = function (value)
-                    Settings.SlashDecon = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashDecon,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-                disabled = function ()
-                    return #deconOptions == 0
-                end,
-            },
-            {
-                -- Choose Decon
-                type = "dropdown",
-                name = "\t\t\t\t\tChoose Deconstruction Assistant to Summon",
-                choices = deconOptions,
-                getFunc = function ()
-                    return GetFormattedCollectibleName(Settings.SlashDeconChoice)
-                end,
-                setFunc = function (value)
-                    Settings.SlashDeconChoice = deconOptionsKeys[value]
-                end,
-                width = "full",
-                default = Defaults.SlashDeconChoice,
-                disabled = function ()
-                    return not Settings.SlashDecon
-                end,
-            },
-            {
-                -- SlashFence
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE),
-                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE_TP), GetCollectibleName(300)),
-                getFunc = function ()
-                    return Settings.SlashFence
-                end,
-                setFunc = function (value)
-                    Settings.SlashFence = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashFence,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashEye
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_EYE),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_EYE_TP),
-                getFunc = function ()
-                    return Settings.SlashEye
-                end,
-                setFunc = function (value)
-                    Settings.SlashEye = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashEye,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashPet
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_PET),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_PET_TP),
-                getFunc = function ()
-                    return Settings.SlashPet
-                end,
-                setFunc = function (value)
-                    Settings.SlashPet = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashPet,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashPet Message
-                type = "checkbox",
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_SLASHCMDS_PET_MESSAGE)),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_PET_MESSAGE_TP),
-                getFunc = function ()
-                    return Settings.SlashPetMessage
-                end,
-                setFunc = function (value)
-                    Settings.SlashPetMessage = value
-                end,
-                width = "full",
-                default = LUIE.Defaults.SlashPetMessage,
-            },
-            {
-                -- SlashOutfit
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_OUTFIT),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_OUTFIT_TP),
-                getFunc = function ()
-                    return Settings.SlashOutfit
-                end,
-                setFunc = function (value)
-                    Settings.SlashOutfit = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashOutfit,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashReport
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_REPORT),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_REPORT_TP),
-                getFunc = function ()
-                    return Settings.SlashReport
-                end,
-                setFunc = function (value)
-                    Settings.SlashReport = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashReport,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- /home Alert -- TODO
-                type = "checkbox",
-                name = "/home Results - Show Alert (Temp Setting)",
-                tooltip = "Display an alert when the /home command is used.\nNote: This setting will be deprecated in the future when Social Errors Events are implemented in Chat Announcements.",
-                getFunc = function ()
-                    return LUIE.SV.TempAlertHome
-                end,
-                setFunc = function (value)
-                    LUIE.SV.TempAlertHome = value
-                end,
-                width = "full",
-                default = LUIE.Defaults.TempAlertHome,
-            },
-            {
-                -- /Campaign Results Alert -- TODO
-                type = "checkbox",
-                name = "/Campaign Results - Show Alert (Temp Setting)",
-                tooltip = "Display an alert when the /campaign command is used.\nNote: This setting will be deprecated in the future when Campaign Queue Events are implemented in Chat Announcements.",
-                getFunc = function ()
-                    return LUIE.SV.TempAlertCampaign
-                end,
-                setFunc = function (value)
-                    LUIE.SV.TempAlertCampaign = value
-                end,
-                width = "full",
-                default = LUIE.Defaults.TempAlertCampaign,
-            },
-            {
-                -- /Outfit Alert -- TODO
-                type = "checkbox",
-                name = "/Outfit - Show Alert (Temp Setting)",
-                tooltip = "Display an alert when the /outfit command is used.\nNote: This setting will be deprecated in the future when Outfit Alerts are implemented in Chat Announcements.",
-                getFunc = function ()
-                    return LUIE.SV.TempAlertOutfit
-                end,
-                setFunc = function (value)
-                    LUIE.SV.TempAlertOutfit = value
-                end,
-                width = "full",
-                default = LUIE.Defaults.TempAlertOutfit,
-            },
-        },
-    }
+    local generalCommandsControls = {}
+
+    -- SlashTrade
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_TRADE),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_TRADE_TP),
+        function() return Settings.SlashTrade end,
+        function(value)
+            Settings.SlashTrade = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashTrade,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashHome
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_HOME),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_TP),
+        function() return Settings.SlashHome end,
+        function(value)
+            Settings.SlashHome = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashHome,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- Choose Home Option
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedDropdown(
+        "Choose Inside or Outside for /home",
+        nil,
+        homeOptions,
+        function() return homeOptions[Settings.SlashHomeChoice] end,
+        function(value) Settings.SlashHomeChoice = homeOptionsKeys[value] end,
+        1,
+        "full",
+        function() return not Settings.SlashHome end,
+        Defaults.SlashHomeChoice
+    )
+
+    -- SlashSetPrimaryHome
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_SET_PRIMARY),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_SET_PRIMARY_TP),
+        function() return Settings.SlashSetPrimaryHome end,
+        function(value)
+            Settings.SlashSetPrimaryHome = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashSetPrimaryHome,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashCampaignQ
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_CAMPAIGN),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_CAMPAIGN_TP),
+        function() return Settings.SlashCampaignQ end,
+        function(value)
+            Settings.SlashCampaignQ = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashCampaignQ,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashCompanion
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_COMPANION),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_COMPANION_TP),
+        function() return Settings.SlashCompanion end,
+        function(value)
+            Settings.SlashCompanion = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        function() return #companionOptions == 0 end,
+        Defaults.SlashCompanion,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- Choose Companion
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedDropdown(
+        "Choose Companion to Summon",
+        nil,
+        companionOptions,
+        function() return GetFormattedCollectibleName(Settings.SlashCompanionChoice) end,
+        function(value) Settings.SlashCompanionChoice = companionOptionsKeys[value] end,
+        1,
+        "full",
+        function() return not Settings.SlashCompanion end,
+        Defaults.SlashCompanionChoice
+    )
+
+    -- SlashBanker
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_BANKER),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_BANKER_TP),
+        function() return Settings.SlashBanker end,
+        function(value)
+            Settings.SlashBanker = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        function() return #bankerOptions == 0 end,
+        Defaults.SlashBanker,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- Choose Banker
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedDropdown(
+        "Choose Banker to Summon",
+        nil,
+        bankerOptions,
+        function() return GetFormattedCollectibleName(Settings.SlashBankerChoice) end,
+        function(value) Settings.SlashBankerChoice = bankerOptionsKeys[value] end,
+        1,
+        "full",
+        function() return not Settings.SlashBanker end,
+        Defaults.SlashBankerChoice
+    )
+
+    -- SlashMerchant
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_MERCHANT),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_MERCHANT_TP),
+        function() return Settings.SlashMerchant end,
+        function(value)
+            Settings.SlashMerchant = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        function() return #merchantOptions == 0 end,
+        Defaults.SlashMerchant,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- Choose Merchant
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedDropdown(
+        "Choose Merchant to Summon",
+        nil,
+        merchantOptions,
+        function() return GetFormattedCollectibleName(Settings.SlashMerchantChoice) end,
+        function(value) Settings.SlashMerchantChoice = merchantOptionsKeys[value] end,
+        1,
+        "full",
+        function() return not Settings.SlashMerchant end,
+        Defaults.SlashMerchantChoice
+    )
+
+    -- SlashArmory
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_ARMORY),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_ARMORY_TP),
+        function() return Settings.SlashArmory end,
+        function(value)
+            Settings.SlashArmory = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        function() return #armoryOptions == 0 end,
+        Defaults.SlashArmory,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- Choose Armory
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedDropdown(
+        "Choose Armory Assistant to Summon",
+        nil,
+        armoryOptions,
+        function() return GetFormattedCollectibleName(Settings.SlashArmoryChoice) end,
+        function(value) Settings.SlashArmoryChoice = armoryOptionsKeys[value] end,
+        1,
+        "full",
+        function() return not Settings.SlashArmory end,
+        Defaults.SlashArmoryChoice
+    )
+
+    -- SlashDecon
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_DECON),
+        zo_strformat(GetString(LUIE_STRING_LAM_SLASHCMDS_DECON_TP), GetCollectibleName(10184)),
+        function() return Settings.SlashDecon end,
+        function(value)
+            Settings.SlashDecon = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        function() return #deconOptions == 0 end,
+        Defaults.SlashDecon,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- Choose Decon
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedDropdown(
+        "Choose Deconstruction Assistant to Summon",
+        nil,
+        deconOptions,
+        function() return GetFormattedCollectibleName(Settings.SlashDeconChoice) end,
+        function(value) Settings.SlashDeconChoice = deconOptionsKeys[value] end,
+        1,
+        "full",
+        function() return not Settings.SlashDecon end,
+        Defaults.SlashDeconChoice
+    )
+
+    -- SlashFence
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE),
+        zo_strformat(GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE_TP), GetCollectibleName(300)),
+        function() return Settings.SlashFence end,
+        function(value)
+            Settings.SlashFence = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashFence,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashEye
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_EYE),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_EYE_TP),
+        function() return Settings.SlashEye end,
+        function(value)
+            Settings.SlashEye = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashEye,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashPet
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_PET),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_PET_TP),
+        function() return Settings.SlashPet end,
+        function(value)
+            Settings.SlashPet = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashPet,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashPet Message (indented)
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedCheckbox(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_PET_MESSAGE),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_PET_MESSAGE_TP),
+        function() return Settings.SlashPetMessage end,
+        function(value) Settings.SlashPetMessage = value end,
+        1,
+        "full",
+        nil,
+        LUIE.Defaults.SlashPetMessage
+    )
+
+    -- SlashOutfit
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_OUTFIT),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_OUTFIT_TP),
+        function() return Settings.SlashOutfit end,
+        function(value)
+            Settings.SlashOutfit = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashOutfit,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashReport
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_REPORT),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_REPORT_TP),
+        function() return Settings.SlashReport end,
+        function(value)
+            Settings.SlashReport = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashReport,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- /home Alert (Temp Setting)
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        "/home Results - Show Alert (Temp Setting)",
+        "Display an alert when the /home command is used.\nNote: This setting will be deprecated in the future when Social Errors Events are implemented in Chat Announcements.",
+        function() return LUIE.SV.TempAlertHome end,
+        function(value) LUIE.SV.TempAlertHome = value end,
+        "full",
+        nil,
+        LUIE.Defaults.TempAlertHome
+    )
+
+    -- /Campaign Results Alert (Temp Setting)
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        "/Campaign Results - Show Alert (Temp Setting)",
+        "Display an alert when the /campaign command is used.\nNote: This setting will be deprecated in the future when Campaign Queue Events are implemented in Chat Announcements.",
+        function() return LUIE.SV.TempAlertCampaign end,
+        function(value) LUIE.SV.TempAlertCampaign = value end,
+        "full",
+        nil,
+        LUIE.Defaults.TempAlertCampaign
+    )
+
+    -- /Outfit Alert (Temp Setting)
+    generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        "/Outfit - Show Alert (Temp Setting)",
+        "Display an alert when the /outfit command is used.\nNote: This setting will be deprecated in the future when Outfit Alerts are implemented in Chat Announcements.",
+        function() return LUIE.SV.TempAlertOutfit end,
+        function(value) LUIE.SV.TempAlertOutfit = value end,
+        "full",
+        nil,
+        LUIE.Defaults.TempAlertOutfit
+    )
+
+    optionsDataSlashCommands[#optionsDataSlashCommands + 1] = SettingsAPI.CreateSubmenuOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GENERAL),
+        generalCommandsControls
+    )
 
     -- Slash Commands - Group Commands Options Submenu
-    optionsDataSlashCommands[#optionsDataSlashCommands + 1] =
-    {
-        type = "submenu",
-        name = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GROUP),
-        controls =
-        {
-            {
-                -- SlashReadyCheck
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_READYCHECK),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_READYCHECK_TP),
-                getFunc = function ()
-                    return Settings.SlashReadyCheck
-                end,
-                setFunc = function (value)
-                    Settings.SlashReadyCheck = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashReadyCheck,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashRegroup
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_REGROUP),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_REGROUP_TP),
-                getFunc = function ()
-                    return Settings.SlashRegroup
-                end,
-                setFunc = function (value)
-                    Settings.SlashRegroup = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashRegroup,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashDisband
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_DISBAND),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_DISBAND_TP),
-                getFunc = function ()
-                    return Settings.SlashDisband
-                end,
-                setFunc = function (value)
-                    Settings.SlashDisband = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashDisband,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashGroupLeave
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_LEAVE),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_LEAVE_TP),
-                getFunc = function ()
-                    return Settings.SlashGroupLeave
-                end,
-                setFunc = function (value)
-                    Settings.SlashGroupLeave = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashGroupLeave,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashGroupKick
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_KICK),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_KICK_TP),
-                getFunc = function ()
-                    return Settings.SlashGroupKick
-                end,
-                setFunc = function (value)
-                    Settings.SlashGroupKick = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashGroupKick,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashGroupRole
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_ROLE),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_ROLE_TP),
-                getFunc = function ()
-                    return Settings.SlashGroupRole
-                end,
-                setFunc = function (value)
-                    Settings.SlashGroupRole = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashGroupRole,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashVoteKick
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_VOTEKICK),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_VOTEKICK_TP),
-                getFunc = function ()
-                    return Settings.SlashVoteKick
-                end,
-                setFunc = function (value)
-                    Settings.SlashVoteKick = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashVoteKick,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-        },
-    }
+    local groupCommandsControls = {}
+
+    -- SlashReadyCheck
+    groupCommandsControls[#groupCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_READYCHECK),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_READYCHECK_TP),
+        function() return Settings.SlashReadyCheck end,
+        function(value)
+            Settings.SlashReadyCheck = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashReadyCheck,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashRegroup
+    groupCommandsControls[#groupCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_REGROUP),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_REGROUP_TP),
+        function() return Settings.SlashRegroup end,
+        function(value)
+            Settings.SlashRegroup = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashRegroup,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashDisband
+    groupCommandsControls[#groupCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_DISBAND),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_DISBAND_TP),
+        function() return Settings.SlashDisband end,
+        function(value)
+            Settings.SlashDisband = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashDisband,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashGroupLeave
+    groupCommandsControls[#groupCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_LEAVE),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_LEAVE_TP),
+        function() return Settings.SlashGroupLeave end,
+        function(value)
+            Settings.SlashGroupLeave = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashGroupLeave,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashGroupKick
+    groupCommandsControls[#groupCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_KICK),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_KICK_TP),
+        function() return Settings.SlashGroupKick end,
+        function(value)
+            Settings.SlashGroupKick = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashGroupKick,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashGroupRole
+    groupCommandsControls[#groupCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_ROLE),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_ROLE_TP),
+        function() return Settings.SlashGroupRole end,
+        function(value)
+            Settings.SlashGroupRole = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashGroupRole,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashVoteKick
+    groupCommandsControls[#groupCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_VOTEKICK),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_VOTEKICK_TP),
+        function() return Settings.SlashVoteKick end,
+        function(value)
+            Settings.SlashVoteKick = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashVoteKick,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    optionsDataSlashCommands[#optionsDataSlashCommands + 1] = SettingsAPI.CreateSubmenuOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GROUP),
+        groupCommandsControls
+    )
 
     -- Slash Commands - Guild Commands Options Submenu
-    optionsDataSlashCommands[#optionsDataSlashCommands + 1] =
-    {
-        type = "submenu",
-        name = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GUILD),
-        controls =
-        {
-            {
-                -- SlashGuildInvite
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDINVITE),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDINVITE_TP),
-                getFunc = function ()
-                    return Settings.SlashGuildInvite
-                end,
-                setFunc = function (value)
-                    Settings.SlashGuildInvite = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashGuildInvite,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashGuildQuit
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDQUIT),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDQUIT_TP),
-                getFunc = function ()
-                    return Settings.SlashGuildQuit
-                end,
-                setFunc = function (value)
-                    Settings.SlashGuildQuit = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashGuildQuit,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashGuildKick
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDKICK),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDKICK_TP),
-                getFunc = function ()
-                    return Settings.SlashGuildKick
-                end,
-                setFunc = function (value)
-                    Settings.SlashGuildKick = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashGuildKick,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-        },
-    }
+    local guildCommandsControls = {}
+
+    -- SlashGuildInvite
+    guildCommandsControls[#guildCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDINVITE),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDINVITE_TP),
+        function() return Settings.SlashGuildInvite end,
+        function(value)
+            Settings.SlashGuildInvite = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashGuildInvite,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashGuildQuit
+    guildCommandsControls[#guildCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDQUIT),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDQUIT_TP),
+        function() return Settings.SlashGuildQuit end,
+        function(value)
+            Settings.SlashGuildQuit = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashGuildQuit,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashGuildKick
+    guildCommandsControls[#guildCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDKICK),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDKICK_TP),
+        function() return Settings.SlashGuildKick end,
+        function(value)
+            Settings.SlashGuildKick = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashGuildKick,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    optionsDataSlashCommands[#optionsDataSlashCommands + 1] = SettingsAPI.CreateSubmenuOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GUILD),
+        guildCommandsControls
+    )
 
     -- Slash Commands - Social Commands Options Submenu
-    optionsDataSlashCommands[#optionsDataSlashCommands + 1] =
-    {
-        type = "submenu",
-        name = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_SOCIAL),
-        controls =
-        {
-            {
-                -- SlashFriend
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_FRIEND),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_FRIEND_TP),
-                getFunc = function ()
-                    return Settings.SlashFriend
-                end,
-                setFunc = function (value)
-                    Settings.SlashFriend = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashFriend,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashIgnore
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_IGNORE),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_IGNORE_TP),
-                getFunc = function ()
-                    return Settings.SlashIgnore
-                end,
-                setFunc = function (value)
-                    Settings.SlashIgnore = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashIgnore,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashRemoveFriend
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEFRIEND),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEFRIEND_TP),
-                getFunc = function ()
-                    return Settings.SlashRemoveFriend
-                end,
-                setFunc = function (value)
-                    Settings.SlashRemoveFriend = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashRemoveFriend,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashRemoveIgnore
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEIGNORE),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEIGNORE_TP),
-                getFunc = function ()
-                    return Settings.SlashRemoveIgnore
-                end,
-                setFunc = function (value)
-                    Settings.SlashRemoveIgnore = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashRemoveIgnore,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-        },
-    }
+    local socialCommandsControls = {}
+
+    -- SlashFriend
+    socialCommandsControls[#socialCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_FRIEND),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_FRIEND_TP),
+        function() return Settings.SlashFriend end,
+        function(value)
+            Settings.SlashFriend = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashFriend,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashIgnore
+    socialCommandsControls[#socialCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_IGNORE),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_IGNORE_TP),
+        function() return Settings.SlashIgnore end,
+        function(value)
+            Settings.SlashIgnore = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashIgnore,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashRemoveFriend
+    socialCommandsControls[#socialCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEFRIEND),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEFRIEND_TP),
+        function() return Settings.SlashRemoveFriend end,
+        function(value)
+            Settings.SlashRemoveFriend = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashRemoveFriend,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashRemoveIgnore
+    socialCommandsControls[#socialCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEIGNORE),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEIGNORE_TP),
+        function() return Settings.SlashRemoveIgnore end,
+        function(value)
+            Settings.SlashRemoveIgnore = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashRemoveIgnore,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    optionsDataSlashCommands[#optionsDataSlashCommands + 1] = SettingsAPI.CreateSubmenuOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_SOCIAL),
+        socialCommandsControls
+    )
 
     -- Holiday XP Buffs are applied by the event now and not an item. No need to have these settings. Commented, maybe we can repurpose the code.
     -- Slash Commands - Holiday XP Events Commands Options Submenu
-    optionsDataSlashCommands[#optionsDataSlashCommands + 1] =
-    {
-        type = "submenu",
-        name = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_HOLIDAY),
-        controls =
-        {
-            {
-                -- SlashCake
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_CAKE),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_CAKE_TP),
-                getFunc = function ()
-                    return Settings.SlashCake
-                end,
-                setFunc = function (value)
-                    Settings.SlashCake = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashCake,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashPie
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_PIE),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_PIE_TP),
-                getFunc = function ()
-                    return Settings.SlashPie
-                end,
-                setFunc = function (value)
-                    Settings.SlashPie = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashPie,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashMead
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_MEAD),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_MEAD_TP),
-                getFunc = function ()
-                    return Settings.SlashMead
-                end,
-                setFunc = function (value)
-                    Settings.SlashMead = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashMead,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-            {
-                -- SlashWitch
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_SLASHCMDS_WITCH),
-                tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_WITCH_TP),
-                getFunc = function ()
-                    return Settings.SlashWitch
-                end,
-                setFunc = function (value)
-                    Settings.SlashWitch = value
-                    SlashCommands.RegisterSlashCommands()
-                end,
-                width = "full",
-                default = Defaults.SlashWitch,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING),
-            },
-        },
-    }
+    local holidayCommandsControls = {}
+
+    -- SlashCake
+    holidayCommandsControls[#holidayCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_CAKE),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_CAKE_TP),
+        function() return Settings.SlashCake end,
+        function(value)
+            Settings.SlashCake = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashCake,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashPie
+    holidayCommandsControls[#holidayCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_PIE),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_PIE_TP),
+        function() return Settings.SlashPie end,
+        function(value)
+            Settings.SlashPie = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashPie,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashMead
+    holidayCommandsControls[#holidayCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_MEAD),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_MEAD_TP),
+        function() return Settings.SlashMead end,
+        function(value)
+            Settings.SlashMead = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashMead,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    -- SlashWitch
+    holidayCommandsControls[#holidayCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDS_WITCH),
+        GetString(LUIE_STRING_LAM_SLASHCMDS_WITCH_TP),
+        function() return Settings.SlashWitch end,
+        function(value)
+            Settings.SlashWitch = value
+            SlashCommands.RegisterSlashCommands()
+        end,
+        "full",
+        nil,
+        Defaults.SlashWitch,
+        GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
+    )
+
+    optionsDataSlashCommands[#optionsDataSlashCommands + 1] = SettingsAPI.CreateSubmenuOption(
+        GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_HOLIDAY),
+        holidayCommandsControls
+    )
 
     -- Register the settings panel
     if LUIE.SV.SlashCommands_Enable then

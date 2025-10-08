@@ -154,12 +154,15 @@ LUIE.Fonts =
     ["Transformers"] = "LuiExtended/media/fonts/Transformers/transformers.slug",
     ["Univers 55"] = "/EsoUI/Common/Fonts/univers55.slug",
     ["Yellowjacket"] = "LuiExtended/media/fonts/Yellowjacket/yellowjacket.slug",
-    ["ProseAntique"] = ZoFontBookPaper:GetFontInfo(),
-    ["Skyrim Handwritten"] = ZoFontBookLetter:GetFontInfo(),
-    ["Trajan Pro"] = ZoFontBookTablet:GetFontInfo(),
-    ["Univers 57"] = ZoFontGame:GetFontInfo(),
-    ["Univers 67"] = ZoFontWinH1:GetFontInfo(),
 }
+
+if not IsConsoleUI() then
+    LUIE.Fonts["ProseAntique"] = ZoFontBookPaper:GetFontInfo()
+    LUIE.Fonts["Skyrim Handwritten"] = ZoFontBookLetter:GetFontInfo()
+    LUIE.Fonts["Trajan Pro"] = ZoFontBookTablet:GetFontInfo()
+    LUIE.Fonts["Univers 57"] = ZoFontGame:GetFontInfo()
+    LUIE.Fonts["Univers 67"] = ZoFontWinH1:GetFontInfo()
+end
 
 -- -----------------------------------------------------------------------------
 LUIE.Sounds =

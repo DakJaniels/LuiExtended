@@ -877,7 +877,7 @@ function CombatInfo.RegisterCombatInfo()
         eventManager:AddFilterForEvent(moduleName .. "Pet", EVENT_EFFECT_CHANGED, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER_PET)
     end
     -- Display default UI ultimate text if the LUIE option is enabled.
-    if CombatInfo.SV.UltimateLabelEnabled or CombatInfo.SV.UltimatePctEnabled then
+    if not IsConsoleUI() and (CombatInfo.SV.UltimateLabelEnabled or CombatInfo.SV.UltimatePctEnabled) then
         SetSetting(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER, 0, SETTINGS_SET_OPTION_SAVE_TO_PERSISTED_DATA)
     end
 end

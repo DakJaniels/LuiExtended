@@ -137,6 +137,7 @@ modules/UnitFrames/_Debug.lua
 modules/UnitFrames/UnitFrames.lua
 
 # Settings
+settings/Settings_API.lua
 settings/Settings.lua
 settings/ChatAnnouncements.lua
 settings/CombatInfo.lua

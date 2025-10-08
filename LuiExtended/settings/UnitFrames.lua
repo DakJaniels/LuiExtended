@@ -5,6 +5,8 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
+local SettingsAPI = LUIE.SettingsAPI
+
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
 
@@ -22,55 +24,6 @@ local pairs = pairs
 local table = table
 local table_insert = table.insert
 local g_FramesMovingEnabled = false -- Helper local flag
-local FontsList = {}
-local LMP = LibMediaProvider
-if LMP then
-    -- Add LUIE fonts first
-    for f, _ in pairs(LUIE.Fonts) do
-        table_insert(FontsList, f)
-    end
-    -- Add LMP fonts
-    for _, font in ipairs(LMP:List(LMP.MediaType.FONT)) do
-        -- Only add if not already in list
-        if not LUIE.Fonts[font] then
-            table_insert(FontsList, font)
-        end
-    end
-end
-
--- Get sounds from LibMediaProvider
-local SoundsList = {}
-if LMP then
-    -- Add LUIE sounds first
-    for sound, _ in pairs(LUIE.Sounds) do
-        table_insert(SoundsList, sound)
-    end
-    -- Add LMP sounds
-    for _, sound in ipairs(LMP:List(LMP.MediaType.SOUND)) do
-        -- Only add if not already in list
-        if not LUIE.Sounds[sound] then
-            table_insert(SoundsList, sound)
-        end
-    end
-end
-
--- Get statusbar textures from LibMediaProvider
-local StatusbarTexturesList = {}
-if LMP then
-    -- Add LUIE textures first
-    for key, _ in pairs(LUIE.StatusbarTextures) do
-        table_insert(StatusbarTexturesList, key)
-    end
-    -- Add LMP statusbar textures
-    for _, texture in ipairs(LMP:List(LMP.MediaType.STATUSBAR)) do
-        -- Only add if not already in list
-        if not LUIE.StatusbarTextures[texture] then
-            table_insert(StatusbarTexturesList, texture)
-        end
-    end
-end
-
-
 
 local nameDisplayOptions =
 {
@@ -518,10 +471,10 @@ function UnitFrames.CreateSettings()
             {
                 -- DefaultFrames Font
                 type = "dropdown",
-                scrollable = 7,
+                scrollable = true and 7,
                 name = GetString(LUIE_STRING_LAM_FONT),
                 tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_FONT_TP),
-                choices = FontsList,
+                choices = SettingsAPI.GetFontsList(),
                 sort = "name-up",
                 getFunc = function ()
                     return Settings.DefaultFontFace
@@ -679,10 +632,10 @@ function UnitFrames.CreateSettings()
             {
                 -- Custom Unit Frames Font
                 type = "dropdown",
-                scrollable = 7,
+                scrollable = true and 7,
                 name = GetString(LUIE_STRING_LAM_FONT),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_TP),
-                choices = FontsList,
+                choices = SettingsAPI.GetFontsList(),
                 sort = "name-up",
                 getFunc = function ()
                     return Settings.CustomFontFace
@@ -779,10 +732,10 @@ function UnitFrames.CreateSettings()
             {
                 -- Custom Unit Frames Texture
                 type = "dropdown",
-                scrollable = 7,
+                scrollable = true and 7,
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE_TP),
-                choices = StatusbarTexturesList,
+                choices = SettingsAPI.GetStatusbarTexturesList(),
                 sort = "name-up",
                 getFunc = function ()
                     return Settings.CustomTexture
@@ -3715,7 +3668,7 @@ function UnitFrames.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_UF_BLACKLIST_REMLIST_TP),
                 choices = Whitelist,
                 choicesValues = WhitelistValues,
-                scrollable = 7,
+                scrollable = true and 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_WhitelistUF:UpdateChoices(GenerateCustomList(Settings.whitelist))

@@ -10,22 +10,8 @@ local InfoPanel = LUIE.InfoPanel
 
 local zo_strformat = zo_strformat
 
--- Setup font list
-local FontsList = {}
-local LMP = LibMediaProvider
-if LMP then
-    -- Add LUIE fonts first
-    for f, _ in pairs(LUIE.Fonts) do
-        table.insert(FontsList, f)
-    end
-    -- Add LMP fonts
-    for _, font in ipairs(LMP:List(LMP.MediaType.FONT)) do
-        -- Only add if not already in list
-        if not LUIE.Fonts[font] then
-            table.insert(FontsList, font)
-        end
-    end
-end
+-- Load Settings API
+local SettingsAPI = LUIE.SettingsAPI
 
 -- Load LibAddonMenu
 local LAM = LUIE.LAM
@@ -54,376 +40,320 @@ function InfoPanel.CreateSettings()
     local optionsDataInfoPanel = {}
 
     -- Info Panel description
-    optionsDataInfoPanel[#optionsDataInfoPanel + 1] =
-    {
-        type = "description",
-        text = GetString(LUIE_STRING_LAM_PNL_DESCRIPTION),
-    }
+    optionsDataInfoPanel[#optionsDataInfoPanel + 1] = SettingsAPI.CreateDescriptionOption(
+        GetString(LUIE_STRING_LAM_PNL_DESCRIPTION)
+    )
 
     -- ReloadUI Button
-    optionsDataInfoPanel[#optionsDataInfoPanel + 1] =
-    {
-        type = "button",
-        name = GetString(LUIE_STRING_LAM_RELOADUI),
-        tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
-        func = function ()
-            ReloadUI("ingame")
-        end,
-        width = "full",
-    }
+    optionsDataInfoPanel[#optionsDataInfoPanel + 1] = SettingsAPI.CreateButtonOption(
+        GetString(LUIE_STRING_LAM_RELOADUI),
+        GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
+        function() ReloadUI("ingame") end
+    )
 
     -- Unlock InfoPanel
-    optionsDataInfoPanel[#optionsDataInfoPanel + 1] =
-    {
-        type = "checkbox",
-        name = GetString(LUIE_STRING_LAM_PNL_UNLOCKPANEL),
-        tooltip = GetString(LUIE_STRING_LAM_PNL_UNLOCKPANEL_TP),
-        getFunc = function ()
-            return InfoPanel.panelUnlocked
-        end,
-        setFunc = InfoPanel.SetMovingState,
-        width = "half",
-        default = false,
-        disabled = function ()
-            return not LUIE.SV.InfoPanel_Enabled
-        end,
-        resetFunc = InfoPanel.ResetPosition,
-    }
+    optionsDataInfoPanel[#optionsDataInfoPanel + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_UNLOCKPANEL),
+        GetString(LUIE_STRING_LAM_PNL_UNLOCKPANEL_TP),
+        function() return InfoPanel.panelUnlocked end,
+        InfoPanel.SetMovingState,
+        "half",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        false,
+        nil,
+        nil,
+        InfoPanel.ResetPosition
+    )
 
     -- InfoPanel scale
-    optionsDataInfoPanel[#optionsDataInfoPanel + 1] =
-    {
-        type = "slider",
-        name = GetString(LUIE_STRING_LAM_PNL_PANELSCALE),
-        tooltip = GetString(LUIE_STRING_LAM_PNL_PANELSCALE_TP),
-        min = 100,
-        max = 300,
-        step = 10,
-        getFunc = function ()
-            return Settings.panelScale
-        end,
-        setFunc = function (value)
+    optionsDataInfoPanel[#optionsDataInfoPanel + 1] = SettingsAPI.CreateSliderOption(
+        GetString(LUIE_STRING_LAM_PNL_PANELSCALE),
+        GetString(LUIE_STRING_LAM_PNL_PANELSCALE_TP),
+        100,
+        300,
+        10,
+        function() return Settings.panelScale end,
+        function(value)
             Settings.panelScale = value
             InfoPanel.SetScale()
         end,
-        width = "full",
-        default = 100,
-        disabled = function ()
-            return not LUIE.SV.InfoPanel_Enabled
-        end,
-    }
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        100
+    )
 
     -- Reset InfoPanel position
-    optionsDataInfoPanel[#optionsDataInfoPanel + 1] =
-    {
-        type = "button",
-        name = GetString(LUIE_STRING_LAM_RESETPOSITION),
-        tooltip = GetString(LUIE_STRING_LAM_PNL_RESETPOSITION_TP),
-        func = InfoPanel.ResetPosition,
-        width = "half",
-    }
+    optionsDataInfoPanel[#optionsDataInfoPanel + 1] = SettingsAPI.CreateButtonOption(
+        GetString(LUIE_STRING_LAM_RESETPOSITION),
+        GetString(LUIE_STRING_LAM_PNL_RESETPOSITION_TP),
+        InfoPanel.ResetPosition,
+        "half"
+    )
 
     -- Font Options Submenu
-    optionsDataInfoPanel[#optionsDataInfoPanel + 1] =
+    local fontSubmenuControls = {}
+
+    -- Font Face Dropdown
+    local fontDropdown = SettingsAPI.CreateFontDropdown(
+        GetString(LUIE_STRING_LAM_FONT),
+        GetString(LUIE_STRING_LAM_FONT),
+        function() return Settings.FontFace end,
+        function(var)
+            Settings.FontFace = var
+            InfoPanel.ApplyFont()
+        end,
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        Defaults.FontFace,
+        nil,
+        "name-up"
+    )
+    fontDropdown.scrollable = true and 7
+    fontSubmenuControls[#fontSubmenuControls + 1] = fontDropdown
+
+    -- Font Size Slider
+    fontSubmenuControls[#fontSubmenuControls + 1] = SettingsAPI.CreateSliderOption(
+        GetString(LUIE_STRING_LAM_FONT_SIZE),
+        GetString(LUIE_STRING_LAM_FONT_SIZE),
+        10,
+        30,
+        1,
+        function() return Settings.FontSize end,
+        function(value)
+            Settings.FontSize = value
+            InfoPanel.ApplyFont()
+        end,
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        Defaults.FontSize
+    )
+
+    -- Font Style Dropdown
+    local fontStyleChoices =
     {
-        type = "submenu",
-        name = GetString(LUIE_STRING_LAM_FONT),
-        controls =
-        {
-            {
-                type = "dropdown",
-                scrollable = 7,
-                name = GetString(LUIE_STRING_LAM_FONT),
-                tooltip = GetString(LUIE_STRING_LAM_FONT),
-                choices = FontsList,
-                sort = "name-up",
-                getFunc = function ()
-                    return Settings.FontFace
-                end,
-                setFunc = function (var)
-                    Settings.FontFace = var
-                    InfoPanel.ApplyFont()
-                end,
-                width = "full",
-                default = Defaults.FontFace,
-                disabled = function ()
-                    return not LUIE.SV.InfoPanel_Enabled
-                end,
-            },
-            {
-                type = "slider",
-                name = GetString(LUIE_STRING_LAM_FONT_SIZE),
-                tooltip = GetString(LUIE_STRING_LAM_FONT_SIZE),
-                min = 10,
-                max = 30,
-                step = 1,
-                getFunc = function ()
-                    return Settings.FontSize
-                end,
-                setFunc = function (value)
-                    Settings.FontSize = value
-                    InfoPanel.ApplyFont()
-                end,
-                width = "full",
-                default = Defaults.FontSize,
-                disabled = function ()
-                    return not LUIE.SV.InfoPanel_Enabled
-                end,
-            },
-            {
-                type = "dropdown",
-                name = GetString(LUIE_STRING_LAM_FONT_STYLE),
-                tooltip = GetString(LUIE_STRING_LAM_CT_FONT_STYLE_TP),
-                choices =
-                {
-                    "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_NORMAL) .. "|r",
-                    "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
-                    "|cEEEEEE" .. GetString(LUIE_FONT_STYLE_OUTLINE) .. "|r",
-                    "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_THICK_OUTLINE) .. "|r",
-                    "|c777777" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THIN) .. "|r",
-                    "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
-                },
-                choicesValues =
-                {
-                    GetString(LUIE_FONT_STYLE_VALUE_NORMAL),
-                    GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
-                    GetString(LUIE_FONT_STYLE_VALUE_OUTLINE),
-                    GetString(LUIE_FONT_STYLE_VALUE_THICK_OUTLINE),
-                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THIN),
-                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
-                },
-                sort = "name-up",
-                getFunc = function ()
-                    return Settings.FontStyle
-                end,
-                setFunc = function (var)
-                    Settings.FontStyle = var
-                    InfoPanel.ApplyFont()
-                end,
-                width = "full",
-                default = Defaults.FontStyle,
-                disabled = function ()
-                    return not LUIE.SV.InfoPanel_Enabled
-                end,
-            },
-        },
+        "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_NORMAL) .. "|r",
+        "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
+        "|cEEEEEE" .. GetString(LUIE_FONT_STYLE_OUTLINE) .. "|r",
+        "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_THICK_OUTLINE) .. "|r",
+        "|c777777" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THIN) .. "|r",
+        "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
+    }
+    local fontStyleChoicesValues =
+    {
+        GetString(LUIE_FONT_STYLE_VALUE_NORMAL),
+        GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
+        GetString(LUIE_FONT_STYLE_VALUE_OUTLINE),
+        GetString(LUIE_FONT_STYLE_VALUE_THICK_OUTLINE),
+        GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THIN),
+        GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
     }
 
+    fontSubmenuControls[#fontSubmenuControls + 1] = SettingsAPI.CreateDropdownOption(
+        GetString(LUIE_STRING_LAM_FONT_STYLE),
+        GetString(LUIE_STRING_LAM_CT_FONT_STYLE_TP),
+        fontStyleChoices,
+        function() return Settings.FontStyle end,
+        function(var)
+            Settings.FontStyle = var
+            InfoPanel.ApplyFont()
+        end,
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        Defaults.FontStyle,
+        nil,
+        "name-up",
+        nil,
+        fontStyleChoicesValues
+    )
+
+    optionsDataInfoPanel[#optionsDataInfoPanel + 1] = SettingsAPI.CreateSubmenuOption(
+        GetString(LUIE_STRING_LAM_FONT),
+        fontSubmenuControls
+    )
+
     -- Info Panel Options Submenu
-    optionsDataInfoPanel[#optionsDataInfoPanel + 1] =
-    {
-        type = "submenu",
-        name = GetString(LUIE_STRING_LAM_PNL_HEADER),
-        controls =
-        {
-            {
-                type = "header",
-                name = GetString(LUIE_STRING_LAM_PNL_ELEMENTS_HEADER),
-                width = "full",
-            },
-            {
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_PNL_SHOWLATENCY),
-                getFunc = function ()
-                    return not Settings.HideLatency
-                end,
-                setFunc = function (value)
-                    Settings.HideLatency = not value
-                    InfoPanel.RearrangePanel()
-                end,
-                width = "full",
-                default = true,
-                disabled = function ()
-                    return not LUIE.SV.InfoPanel_Enabled
-                end,
-            },
-            {
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_PNL_SHOWCLOCK),
-                getFunc = function ()
-                    return not Settings.HideClock
-                end,
-                setFunc = function (value)
-                    Settings.HideClock = not value
-                    InfoPanel.RearrangePanel()
-                end,
-                width = "full",
-                default = true,
-                disabled = function ()
-                    return not LUIE.SV.InfoPanel_Enabled
-                end,
-            },
-            {
-                -- Timestamp Format
-                type = "editbox",
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_PNL_CLOCKFORMAT)),
-                tooltip = GetString(LUIE_STRING_LAM_CA_TIMESTAMPFORMAT_TP),
-                getFunc = function ()
-                    return Settings.ClockFormat
-                end,
-                setFunc = function (value)
-                    Settings.ClockFormat = value
-                    InfoPanel.RearrangePanel()
-                end,
-                width = "full",
-                default = Defaults.ClockFormat,
-                disabled = function ()
-                    return not (LUIE.SV.InfoPanel_Enabled and not Settings.HideClock)
-                end,
-            },
-            {
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_PNL_SHOWFPS),
-                getFunc = function ()
-                    return not Settings.HideFPS
-                end,
-                setFunc = function (value)
-                    Settings.HideFPS = not value
-                    InfoPanel.RearrangePanel()
-                end,
-                width = "full",
-                default = true,
-                disabled = function ()
-                    return not LUIE.SV.InfoPanel_Enabled
-                end,
-            },
-            {
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_PNL_SHOWMOUNTTIMER),
-                tooltip = GetString(LUIE_STRING_LAM_PNL_SHOWMOUNTTIMER_TP),
-                getFunc = function ()
-                    return not Settings.HideMountFeed
-                end,
-                setFunc = function (value)
-                    Settings.HideMountFeed = not value
-                    InfoPanel.RearrangePanel()
-                end,
-                width = "full",
-                default = true,
-                disabled = function ()
-                    return not LUIE.SV.InfoPanel_Enabled
-                end,
-            },
-            {
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_PNL_SHOWARMORDURABILITY),
-                getFunc = function ()
-                    return not Settings.HideArmour
-                end,
-                setFunc = function (value)
-                    Settings.HideArmour = not value
-                    InfoPanel.RearrangePanel()
-                end,
-                width = "full",
-                default = true,
-                disabled = function ()
-                    return not LUIE.SV.InfoPanel_Enabled
-                end,
-            },
-            {
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_PNL_SHOWEAPONCHARGES),
-                getFunc = function ()
-                    return not Settings.HideWeapons
-                end,
-                setFunc = function (value)
-                    Settings.HideWeapons = not value
-                    InfoPanel.RearrangePanel()
-                end,
-                width = "full",
-                default = true,
-                disabled = function ()
-                    return not LUIE.SV.InfoPanel_Enabled
-                end,
-            },
-            {
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_PNL_SHOWBAGSPACE),
-                getFunc = function ()
-                    return not Settings.HideBags
-                end,
-                setFunc = function (value)
-                    Settings.HideBags = not value
-                    InfoPanel.RearrangePanel()
-                end,
-                width = "full",
-                default = true,
-                disabled = function ()
-                    return not LUIE.SV.InfoPanel_Enabled
-                end,
-            },
-            {
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_PNL_SHOWSOULGEMS),
-                getFunc = function ()
-                    return not Settings.HideGems
-                end,
-                setFunc = function (value)
-                    Settings.HideGems = not value
-                    InfoPanel.RearrangePanel()
-                end,
-                width = "full",
-                default = true,
-                disabled = function ()
-                    return not LUIE.SV.InfoPanel_Enabled
-                end,
-            },
-            {
-                type = "checkbox",
-                name = GetString(LUIE_STRING_PNL_SHOWGOLD),
-                getFunc = function ()
-                    return not Settings.HideGold
-                end,
-                setFunc = function (value)
-                    Settings.HideGold = not value
-                    InfoPanel.RearrangePanel()
-                end,
-                width = "full",
-                default = true,
-                disabled = function ()
-                    return not LUIE.SV.InfoPanel_Enabled
-                end,
-            },
-            {
-                type = "header",
-                name = GetString(SI_PLAYER_MENU_MISC),
-                width = "full",
-            },
-            {
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP),
-                tooltip = GetString(LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP_TP),
-                getFunc = function ()
-                    return Settings.DisplayOnWorldMap
-                end,
-                setFunc = function (value)
-                    Settings.DisplayOnWorldMap = value
-                    InfoPanel.SetDisplayOnMap()
-                end,
-                width = "full",
-                default = false,
-                disabled = function ()
-                    return not LUIE.SV.InfoPanel_Enabled
-                end,
-            },
-            {
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_PNL_DISABLECOLORSRO),
-                tooltip = GetString(LUIE_STRING_LAM_PNL_DISABLECOLORSRO_TP),
-                getFunc = function ()
-                    return Settings.DisableInfoColours
-                end,
-                setFunc = function (value)
-                    Settings.DisableInfoColours = value
-                end,
-                width = "full",
-                default = false,
-                disabled = function ()
-                    return not LUIE.SV.InfoPanel_Enabled
-                end,
-            },
-        },
-    }
+    local panelSubmenuControls = {}
+
+    -- Elements Header
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateHeaderOption(
+        GetString(LUIE_STRING_LAM_PNL_ELEMENTS_HEADER)
+    )
+
+    -- Show Latency
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_SHOWLATENCY),
+        nil,
+        function() return not Settings.HideLatency end,
+        function(value)
+            Settings.HideLatency = not value
+            InfoPanel.RearrangePanel()
+        end,
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        true
+    )
+
+    -- Show Clock
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_SHOWCLOCK),
+        nil,
+        function() return not Settings.HideClock end,
+        function(value)
+            Settings.HideClock = not value
+            InfoPanel.RearrangePanel()
+        end,
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        true
+    )
+
+    -- Clock Format (indented)
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateIndentedEditbox(
+        GetString(LUIE_STRING_LAM_PNL_CLOCKFORMAT),
+        GetString(LUIE_STRING_LAM_CA_TIMESTAMPFORMAT_TP),
+        function() return Settings.ClockFormat end,
+        function(value)
+            Settings.ClockFormat = value
+            InfoPanel.RearrangePanel()
+        end,
+        1,
+        "full",
+        function() return not (LUIE.SV.InfoPanel_Enabled and not Settings.HideClock) end,
+        Defaults.ClockFormat
+    )
+
+    -- Show FPS
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_SHOWFPS),
+        nil,
+        function() return not Settings.HideFPS end,
+        function(value)
+            Settings.HideFPS = not value
+            InfoPanel.RearrangePanel()
+        end,
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        true
+    )
+
+    -- Show Mount Timer
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_SHOWMOUNTTIMER),
+        GetString(LUIE_STRING_LAM_PNL_SHOWMOUNTTIMER_TP),
+        function() return not Settings.HideMountFeed end,
+        function(value)
+            Settings.HideMountFeed = not value
+            InfoPanel.RearrangePanel()
+        end,
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        true
+    )
+
+    -- Show Armor Durability
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_SHOWARMORDURABILITY),
+        nil,
+        function() return not Settings.HideArmour end,
+        function(value)
+            Settings.HideArmour = not value
+            InfoPanel.RearrangePanel()
+        end,
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        true
+    )
+
+    -- Show Weapon Charges
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_SHOWEAPONCHARGES),
+        nil,
+        function() return not Settings.HideWeapons end,
+        function(value)
+            Settings.HideWeapons = not value
+            InfoPanel.RearrangePanel()
+        end,
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        true
+    )
+
+    -- Show Bag Space
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_SHOWBAGSPACE),
+        nil,
+        function() return not Settings.HideBags end,
+        function(value)
+            Settings.HideBags = not value
+            InfoPanel.RearrangePanel()
+        end,
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        true
+    )
+
+    -- Show Soul Gems
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_SHOWSOULGEMS),
+        nil,
+        function() return not Settings.HideGems end,
+        function(value)
+            Settings.HideGems = not value
+            InfoPanel.RearrangePanel()
+        end,
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        true
+    )
+
+    -- Show Gold
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_PNL_SHOWGOLD),
+        nil,
+        function() return not Settings.HideGold end,
+        function(value)
+            Settings.HideGold = not value
+            InfoPanel.RearrangePanel()
+        end,
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        true
+    )
+
+    -- Misc Header
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateHeaderOption(
+        GetString(SI_PLAYER_MENU_MISC)
+    )
+
+    -- Display on World Map
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP),
+        GetString(LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP_TP),
+        function() return Settings.DisplayOnWorldMap end,
+        function(value)
+            Settings.DisplayOnWorldMap = value
+            InfoPanel.SetDisplayOnMap()
+        end,
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        false
+    )
+
+    -- Disable Info Colors
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_DISABLECOLORSRO),
+        GetString(LUIE_STRING_LAM_PNL_DISABLECOLORSRO_TP),
+        function() return Settings.DisableInfoColours end,
+        function(value) Settings.DisableInfoColours = value end,
+        "full",
+        function() return not LUIE.SV.InfoPanel_Enabled end,
+        false
+    )
+
+    optionsDataInfoPanel[#optionsDataInfoPanel + 1] = SettingsAPI.CreateSubmenuOption(
+        GetString(LUIE_STRING_LAM_PNL_HEADER),
+        panelSubmenuControls
+    )
 
     -- Register the settings panel
     if LUIE.SV.InfoPanel_Enabled then

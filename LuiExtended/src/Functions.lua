@@ -115,7 +115,9 @@ end
 --- Toggle the display of the Alert Frame.
 --- Sets the visibility of the ZO_AlertTextNotification based on the value of LUIE.SV.HideAlertFrame.
 function LUIE.SetupAlertFrameVisibility()
-    ZO_AlertTextNotification:SetHidden(LUIE.SV.HideAlertFrame)
+    if ZO_AlertTextNotification then
+        ZO_AlertTextNotification:SetHidden(LUIE.SV.HideAlertFrame)
+    end
 end
 
 -- -----------------------------------------------------------------------------

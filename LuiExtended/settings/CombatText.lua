@@ -6,53 +6,8 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
-local FontsList = {}
-local LMP = LibMediaProvider
-if LMP then
-    -- Add LUIE fonts first
-    for f, _ in pairs(LUIE.Fonts) do
-        table.insert(FontsList, f)
-    end
-    -- Add LMP fonts
-    for _, font in ipairs(LMP:List(LMP.MediaType.FONT)) do
-        -- Only add if not already in list
-        if not LUIE.Fonts[font] then
-            table.insert(FontsList, font)
-        end
-    end
-end
-
--- Get sounds from LibMediaProvider
-local SoundsList = {}
-if LMP then
-    -- Add LUIE sounds first
-    for sound, _ in pairs(LUIE.Sounds) do
-        table.insert(SoundsList, sound)
-    end
-    -- Add LMP sounds
-    for _, sound in ipairs(LMP:List(LMP.MediaType.SOUND)) do
-        -- Only add if not already in list
-        if not LUIE.Sounds[sound] then
-            table.insert(SoundsList, sound)
-        end
-    end
-end
-
--- Get statusbar textures from LibMediaProvider
-local StatusbarTexturesList = {}
-if LMP then
-    -- Add LUIE textures first
-    for key, _ in pairs(LUIE.StatusbarTextures) do
-        table.insert(StatusbarTexturesList, key)
-    end
-    -- Add LMP statusbar textures
-    for _, texture in ipairs(LMP:List(LMP.MediaType.STATUSBAR)) do
-        -- Only add if not already in list
-        if not LUIE.StatusbarTextures[texture] then
-            table.insert(StatusbarTexturesList, texture)
-        end
-    end
-end
+-- Load Settings API
+local SettingsAPI = LUIE.SettingsAPI
 
 --- @class (partial) LUIE.CombatText
 local CombatText = LUIE.CombatText
@@ -430,7 +385,7 @@ function CombatText.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_REMLIST_TP),
                 choices = Blacklist,
                 choicesValues = BlacklistValues,
-                scrollable = 7,
+                scrollable = true and 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_BlacklistCT:UpdateChoices(GenerateCustomList(Settings.blacklist))
@@ -3196,10 +3151,10 @@ function CombatText.CreateSettings()
             {
                 -- Font Face Dropdown
                 type = "dropdown",
-                scrollable = 7,
+                scrollable = true and 7,
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT)),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FONT_FACE_TP),
-                choices = FontsList,
+                choices = SettingsAPI.GetFontsList(),
                 sort = "name-up",
                 getFunc = function ()
                     return Settings.fontFace
