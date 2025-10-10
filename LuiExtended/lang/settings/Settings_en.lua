@@ -2282,7 +2282,7 @@ local strings =
     LUIE_STRING_UF_FORMAT_CENTER_LABEL = "Current + Shield - Trauma / Max (Percentage%)",
 
     -- Unit Frames Font Settings
-    LUIE_STRING_UF_FONT_DEFAULT = "Univers 67",
+    LUIE_STRING_UF_FONT_DEFAULT = "LUIE Default Font",
     LUIE_STRING_UF_FONT_STYLE_DEFAULT = "soft-shadow-thick",
     LUIE_STRING_UF_FONT_STYLE_CUSTOM = "soft-shadow-thin",
 

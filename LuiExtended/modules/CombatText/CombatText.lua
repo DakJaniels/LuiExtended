@@ -193,7 +193,7 @@ CombatText.Defaults =
     staminaThreshold = 35,
 
     -- Font defaults
-    fontFace = "Univers 67",
+    fontFace = "LUIE Default Font",
     fontStyle = "soft-shadow-thick",
     fontSize = 26,
     fontSizes =
@@ -478,7 +478,7 @@ function CombatText.ApplyFont()
     if not fontName or fontName == "" then
         LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
         -- Set the font face to a default bold font
-        fontName = "Univers 67"
+        fontName = "LUIE Default Font"
     end
 
     -- Set the applied font face to the fetched or default font name

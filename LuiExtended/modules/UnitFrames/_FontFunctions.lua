@@ -18,7 +18,7 @@ local function __applyFont(unitTag)
         -- if LUIE.IsDevDebugEnabled() then
         --     LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
         -- end
-        fontName = "$(BOLD_FONT)|16|soft-shadow-thick"
+        fontName = "LUIE Default Font"
     end
 
     local fontStyle = (UnitFrames.SV.DefaultFontStyle and UnitFrames.SV.DefaultFontStyle ~= "") and UnitFrames.SV.DefaultFontStyle or "soft-shadow-thick"
@@ -87,7 +87,7 @@ function UnitFrames.CustomFramesApplyFont()
         -- if LUIE.IsDevDebugEnabled() then
         --     LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
         -- end
-        fontName = "Univers 67"
+        fontName = "LUIE Default Font"
     end
 
     local fontStyle = (UnitFrames.SV.CustomFontStyle and UnitFrames.SV.CustomFontStyle ~= "") and UnitFrames.SV.CustomFontStyle or "soft-shadow-thin"

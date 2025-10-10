@@ -539,9 +539,9 @@ end
 do
     -- Add this if not already.
     if not SLASH_COMMANDS["/rl"] then
-        SLASH_COMMANDS["/rl"] = function()
-		    ReloadUI("ingame")
-		end
+        SLASH_COMMANDS["/rl"] = function ()
+            ReloadUI("ingame")
+        end
     end
 end
 
@@ -795,3 +795,16 @@ do
     LUIE.DynamicTooltip = DynamicTooltip
 end
 -- -----------------------------------------------------------------------------
+
+---
+--- @param font? string
+--- @return string
+function LUIE.GetUsableFont()
+    local font = ""
+    if IsInGamepadPreferredMode() or IsConsoleUI() then
+        font = "$(GAMEPAD_MEDIUM_FONT)|$(GP_18)|soft-shadow-thick"
+    else
+        font = "$(MEDIUM_FONT)|$(KB_18)|soft-shadow-thin"
+    end
+    return font
+end

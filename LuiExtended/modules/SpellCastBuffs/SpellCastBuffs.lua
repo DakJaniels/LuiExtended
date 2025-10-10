@@ -201,9 +201,6 @@ function SpellCastBuffs.Initialize(enabled)
         table_insert(fragments, fragment2)
     end
 
-    -- Initialize group buff tracking
-    SpellCastBuffs.InitializeGroupBuffs(SpellCastBuffs.SV.EnableGroupBuffTracking)
-
     -- Create TopLevelWindows for buff frames when NOT locked to Custom Unit Frames
     if SpellCastBuffs.SV.lockPositionToUnitFrames and LUIE.UnitFrames.CustomFrames.reticleover and LUIE.UnitFrames.CustomFrames.reticleover.buffs and LUIE.UnitFrames.CustomFrames.reticleover.debuffs then
         SpellCastBuffs.BuffContainers.target1 = LUIE.UnitFrames.CustomFrames.reticleover.buffs
@@ -1283,17 +1280,6 @@ function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
             end
         end)
 
-        -- Group Buffs
-        local groupBuffs = SpellCastBuffs.SV.GroupTrackedBuffs
-        local isGroupBuff = groupBuffs[id] or groupBuffs[name]
-        AddMenuItem(isGroupBuff and "Remove from Group Buffs" or "Add to Group Buffs", function ()
-            if isGroupBuff then
-                SpellCastBuffs.RemoveGroupBuff(id, name)
-            else
-                SpellCastBuffs.AddGroupBuff(id, name)
-            end
-        end)
-
         -- Prominent Buffs
         local promBuffs = SpellCastBuffs.SV.PromBuffTable
         local isPromBuff = promBuffs[id] or promBuffs[name]
@@ -1600,7 +1586,7 @@ function SpellCastBuffs.ApplyFont()
     local fontName = LUIE.Fonts[SpellCastBuffs.SV.BuffFontFace]
     if not fontName or fontName == "" then
         LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
-        fontName = "Univers 67"
+        fontName = "LUIE Default Font"
     end
     local fontStyle = (SpellCastBuffs.SV.BuffFontStyle and SpellCastBuffs.SV.BuffFontStyle ~= "") and SpellCastBuffs.SV.BuffFontStyle or "outline"
     local fontSize = (SpellCastBuffs.SV.BuffFontSize and SpellCastBuffs.SV.BuffFontSize > 0) and SpellCastBuffs.SV.BuffFontSize or 17
@@ -1610,7 +1596,7 @@ function SpellCastBuffs.ApplyFont()
     local prominentName = LUIE.Fonts[SpellCastBuffs.SV.ProminentLabelFontFace]
     if not prominentName or prominentName == "" then
         LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
-        prominentName = "Univers 67"
+        prominentName = "LUIE Default Font"
     end
     local prominentStyle = (SpellCastBuffs.SV.ProminentLabelFontStyle and SpellCastBuffs.SV.ProminentLabelFontStyle ~= "") and SpellCastBuffs.SV.ProminentLabelFontStyle or "outline"
     local prominentSize = (SpellCastBuffs.SV.ProminentLabelFontSize and SpellCastBuffs.SV.ProminentLabelFontSize > 0) and SpellCastBuffs.SV.ProminentLabelFontSize or 17

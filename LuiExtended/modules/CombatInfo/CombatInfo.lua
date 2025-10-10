@@ -61,7 +61,7 @@ CombatInfo.Defaults =
     UltimateHideFull = true,
     UltimateGeneration = true,
     UltimateLabelPosition = -20,
-    UltimateFontFace = "Univers 67",
+    UltimateFontFace = "LUIE Default Font",
     UltimateFontStyle = "outline",
     UltimateFontSize = 18,
     ShowTriggered = true,
@@ -73,7 +73,7 @@ CombatInfo.Defaults =
     ShowToggledUltimate = true,
     BarShowLabel = true,
     BarLabelPosition = -20,
-    BarFontFace = "Univers 67",
+    BarFontFace = "LUIE Default Font",
     BarFontStyle = "outline",
     BarFontSize = 18,
     BarMillis = true,
@@ -85,7 +85,7 @@ CombatInfo.Defaults =
     BarHideUnused = false,
     PotionTimerShow = true,
     PotionTimerLabelPosition = 0,
-    PotionTimerFontFace = "Univers 67",
+    PotionTimerFontFace = "LUIE Default Font",
     PotionTimerFontStyle = "outline",
     PotionTimerFontSize = 18,
     PotionTimerColor = true,
@@ -97,7 +97,7 @@ CombatInfo.Defaults =
     CastBarTexture = "Plain",
     CastBarLabel = true,
     CastBarTimer = true,
-    CastBarFontFace = "Univers 67",
+    CastBarFontFace = "LUIE Default Font",
     CastBarFontStyle = "soft-shadow-thick",
     CastBarFontSize = 16,
     CastBarGradientC1 = { 0, 47 / 255, 130 / 255 },
@@ -108,7 +108,7 @@ CombatInfo.Defaults =
         toggles =
         {
             alertEnable = true,
-            alertFontFace = "Univers 67",
+            alertFontFace = "LUIE Default Font",
             alertFontStyle = "soft-shadow-thick",
             alertFontSize = 32,
             alertTimer = true,
@@ -1192,7 +1192,7 @@ function CombatInfo.ApplyFont()
         local fontName = LUIE.Fonts[CombatInfo.SV[fontNameKey]]
         if not fontName or fontName == "" then
             LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
-            fontName = "Univers 67"
+            fontName = "LUIE Default Font"
         end
         local fontStyle = (CombatInfo.SV[fontStyleKey] and CombatInfo.SV[fontStyleKey] ~= "") and CombatInfo.SV[fontStyleKey] or defaultFontStyle
         local fontSize = (CombatInfo.SV[fontSizeKey] and CombatInfo.SV[fontSizeKey] > 0) and CombatInfo.SV[fontSizeKey] or defaultFontSize

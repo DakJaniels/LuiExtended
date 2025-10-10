@@ -44,7 +44,7 @@ SpellCastBuffs.Defaults =
     },
     IconSize = 40,
     LabelPosition = 0,
-    BuffFontFace = "Univers 67",
+    BuffFontFace = "LUIE Default Font",
     BuffFontStyle = "outline",
     BuffFontSize = 16,
     BuffShowLabel = true,
@@ -152,7 +152,7 @@ SpellCastBuffs.Defaults =
     HideReduce = true,
     GroundDamageAura = true,
     ProminentLabel = true,
-    ProminentLabelFontFace = "Univers 67",
+    ProminentLabelFontFace = "LUIE Default Font",
     ProminentLabelFontStyle = "outline",
     ProminentLabelFontSize = 16,
     ProminentProgress = true,
@@ -185,15 +185,6 @@ SpellCastBuffs.Defaults =
     DefaultIconOptions = 1,
     ShowSharedEffects = true,
     ShowSharedMajorMinor = true,
-    -- Group Buff Tracking
-    GroupBuffIconSize = 24,
-    GroupBuffIconOffset = 5,
-    GroupBuffStartX = 75,
-    GroupBuffStartY = 0,
-    GroupBuffTimerSize = 16,
-    GroupBuffTimerColor = { 1, 1, 1, 1 },
-    GroupTrackedBuffs = {},
-    EnableGroupBuffTracking = false,
 }
 SpellCastBuffs.SV = {}
 

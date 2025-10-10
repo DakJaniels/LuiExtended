@@ -70,7 +70,7 @@ function LUIE:InitializeHooks()
     self.HookGamePadIcons()
     self.HookGamePadStats()
     self.HookGamePadMap()
-    
+
     if not IsConsoleUI() then
         self.HookKeyboardIcons()
         self.HookKeyboardStats()

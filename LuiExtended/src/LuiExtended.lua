@@ -35,7 +35,8 @@ LUIE.feedback = "https://github.com/DakJaniels/LuiExtended/issues"
 LUIE.translation = "https://github.com/DakJaniels/LuiExtended/tree/translations"
 LUIE.donation = "https://paypal.me/dakjaniels"
 -- -----------------------------------------------------------------------------
-LUIE.LAM = LibAddonMenu2 or error("LibAddonMenu2 is not initialized", 2)
+LUIE.LAM = LibAddonMenu2
+-- -----------------------------------------------------------------------------
 -- Saved variables options
 --- @diagnostic disable-next-line: missing-fields
 LUIE.SV = {}
@@ -315,8 +316,8 @@ local DEVS = readonlytable
         },
         ["@dack_janiels"] =
         {
-            enabled = true,
-            debug = true,
+            enabled = false,
+            debug = false,
         },
     }
 

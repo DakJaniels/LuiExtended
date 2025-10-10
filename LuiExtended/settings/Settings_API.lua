@@ -69,8 +69,22 @@ function SettingsAPI.FetchExternalMedia()
     FetchExternalMedia(LMP.MediaType.STATUSBAR, LUIE.StatusbarTextures)
 end
 
+-- Create platform-appropriate system font (only created once at load time)
+function SettingsAPI.CreateSystemFont()
+    if not LUIE.Fonts["LUIE Default Font"] then
+        local systemFont = CreateFont("LUIE_SystemFont")
+        if IsInGamepadPreferredMode() or IsConsoleUI() then
+            systemFont:SetFont("$(GAMEPAD_BOLD_FONT)|$(GP_18)|soft-shadow-thick")
+        else
+            systemFont:SetFont("$(BOLD_FONT)|$(KB_18)|soft-shadow-thick")
+        end
+        LUIE.Fonts["LUIE Default Font"] = systemFont:GetFontInfo()
+    end
+end
+
 --- Load all media (register LUIE + fetch external)
 function SettingsAPI.LoadAllMedia()
+    SettingsAPI.CreateSystemFont()
     SettingsAPI.RegisterLUIEMedia()
     SettingsAPI.FetchExternalMedia()
     SettingsAPI.ClearMediaCache() -- Clear cache after loading new media

@@ -1437,7 +1437,7 @@ function AbilityAlerts.ApplyFontAlert()
     local alertFontName = LUIE.Fonts[CombatInfo.SV.alerts.toggles.alertFontFace]
     if not alertFontName or alertFontName == "" then
         LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
-        alertFontName = "Univers 67"
+        alertFontName = "LUIE Default Font"
     end
 
     local alertFontStyle = (CombatInfo.SV.alerts.toggles.alertFontStyle and CombatInfo.SV.alerts.toggles.alertFontStyle ~= "") and CombatInfo.SV.alerts.toggles.alertFontStyle or "soft-shadow-thin"

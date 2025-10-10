@@ -310,7 +310,7 @@ function UI:Label(parent, anchors, dims, align, font, text, hidden, name)
     local alignment = (align ~= nil and #align == 2) and align or { TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER }
     --- @type LabelControl
     local label = windowManager:CreateControl(labelName, parent, CT_LABEL)
-    label:SetFont(font or "ZoFontGame")
+    label:SetFont(font or "LUIE Default Font")
     label:SetHorizontalAlignment(alignment[1])
     label:SetVerticalAlignment(alignment[2])
     label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)

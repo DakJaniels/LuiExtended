@@ -42,7 +42,7 @@ InfoPanel.Defaults =
     ClockFormat = "HH:m:s",
     panelScale = 100,
     HideGold = true,
-    FontFace = "Univers 67",
+    FontFace = "LUIE Default Font",
     FontSize = 16,
     FontStyle = "soft-shadow-thin",
 }
@@ -131,7 +131,7 @@ function InfoPanel.ApplyFont()
     -- Get font settings
     local fontName = LUIE.Fonts[InfoPanel.SV.FontFace]
     if not fontName or fontName == "" then
-        fontName = "Univers 67"
+        fontName = "LUIE Default Font"
         -- if LUIE.IsDevDebugEnabled() then
         --     LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
         -- end
@@ -317,7 +317,7 @@ function InfoPanel.Initialize(enabled)
     -- Create font string from settings
     local fontName = LUIE.Fonts[InfoPanel.SV.FontFace]
     if not fontName or fontName == "" then
-        fontName = "Univers 67"
+        fontName = "LUIE Default Font"
     end
     local fontStyle = (InfoPanel.SV.FontStyle and InfoPanel.SV.FontStyle ~= "") and InfoPanel.SV.FontStyle or "soft-shadow-thin"
     local fontSize = (InfoPanel.SV.FontSize and InfoPanel.SV.FontSize > 0) and InfoPanel.SV.FontSize or 16
