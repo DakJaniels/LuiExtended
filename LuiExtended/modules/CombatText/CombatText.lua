@@ -167,6 +167,7 @@ CombatText.Defaults =
         showInCombat = true,
         showOutCombat = true,
         showDeath = true,
+        useAccountNameForDeath = true,
 
         -- Points
         showPointsAlliance = false,

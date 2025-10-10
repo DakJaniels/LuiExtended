@@ -45,6 +45,7 @@ InfoPanel.Defaults =
     FontFace = "LUIE Default Font",
     FontSize = 16,
     FontStyle = "soft-shadow-thin",
+    transparency = 100,
 }
 InfoPanel.SV = {}
 InfoPanel.panelUnlocked = false
@@ -121,6 +122,16 @@ local uiBags =
 }
 
 local panelFragment
+
+-- Apply transparency to the info panel
+function InfoPanel.ApplyTransparency()
+    if not InfoPanel.Enabled or not uiPanel then
+        return
+    end
+
+    local alpha = InfoPanel.SV.transparency / 100
+    uiPanel:SetAlpha(alpha)
+end
 
 -- Apply font changes to the info panel elements
 function InfoPanel.ApplyFont()
@@ -274,6 +285,8 @@ function InfoPanel.RearrangePanel()
     uiPanel:SetWidth(zo_max(uiTopRow:GetWidth(), uiBotRow:GetWidth(), 39 * 6))
     -- Set scale of panel again
     InfoPanel.SetScale()
+    -- Apply transparency
+    InfoPanel.ApplyTransparency()
 end
 
 function InfoPanel.Initialize(enabled)

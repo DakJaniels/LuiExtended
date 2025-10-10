@@ -2550,6 +2550,22 @@ function CombatText.CreateSettings()
                 default = Defaults.toggles.showDeath,
             },
             {
+                -- Use Account Name for Death Notifications
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_CT_DEATH_USE_ACCOUNT_NAME),
+                tooltip = GetString(LUIE_STRING_LAM_CT_DEATH_USE_ACCOUNT_NAME_TP),
+                getFunc = function ()
+                    return Settings.toggles.useAccountNameForDeath
+                end,
+                setFunc = function (v)
+                    Settings.toggles.useAccountNameForDeath = v
+                end,
+                default = Defaults.toggles.useAccountNameForDeath,
+                disabled = function ()
+                    return not Settings.toggles.showDeath
+                end,
+            },
+            {
                 -- Death Format
                 type = "editbox",
                 name = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),

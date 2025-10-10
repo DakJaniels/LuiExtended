@@ -26,7 +26,12 @@ end
 function CombatTextDeathViewer:OnEvent(unitTag)
     local Settings = LUIE.CombatText.SV
 
-    local name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName(unitTag))
+    local name
+    if Settings.toggles.useAccountNameForDeath then
+        name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitDisplayName(unitTag))
+    else
+        name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName(unitTag))
+    end
 
     -- Label setup
     local control, controlPoolKey = self.poolManager:GetPoolObject(poolTypes.CONTROL)

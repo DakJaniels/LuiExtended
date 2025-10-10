@@ -48,17 +48,17 @@ function InfoPanel.CreateSettings()
     optionsDataInfoPanel[#optionsDataInfoPanel + 1] = SettingsAPI.CreateButtonOption(
         GetString(LUIE_STRING_LAM_RELOADUI),
         GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
-        function() ReloadUI("ingame") end
+        function () ReloadUI("ingame") end
     )
 
     -- Unlock InfoPanel
     optionsDataInfoPanel[#optionsDataInfoPanel + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_UNLOCKPANEL),
         GetString(LUIE_STRING_LAM_PNL_UNLOCKPANEL_TP),
-        function() return InfoPanel.panelUnlocked end,
+        function () return InfoPanel.panelUnlocked end,
         InfoPanel.SetMovingState,
         "half",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         false,
         nil,
         nil,
@@ -72,13 +72,30 @@ function InfoPanel.CreateSettings()
         100,
         300,
         10,
-        function() return Settings.panelScale end,
-        function(value)
+        function () return Settings.panelScale end,
+        function (value)
             Settings.panelScale = value
             InfoPanel.SetScale()
         end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
+        100
+    )
+
+    -- InfoPanel transparency
+    optionsDataInfoPanel[#optionsDataInfoPanel + 1] = SettingsAPI.CreateSliderOption(
+        GetString(LUIE_STRING_LAM_PNL_TRANSPARENCY),
+        GetString(LUIE_STRING_LAM_PNL_TRANSPARENCY_TP),
+        0,
+        100,
+        5,
+        function () return Settings.transparency end,
+        function (value)
+            Settings.transparency = value
+            InfoPanel.ApplyTransparency()
+        end,
+        "full",
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         100
     )
 
@@ -97,13 +114,13 @@ function InfoPanel.CreateSettings()
     local fontDropdown = SettingsAPI.CreateFontDropdown(
         GetString(LUIE_STRING_LAM_FONT),
         GetString(LUIE_STRING_LAM_FONT),
-        function() return Settings.FontFace end,
-        function(var)
+        function () return Settings.FontFace end,
+        function (var)
             Settings.FontFace = var
             InfoPanel.ApplyFont()
         end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         Defaults.FontFace,
         nil,
         "name-up"
@@ -118,13 +135,13 @@ function InfoPanel.CreateSettings()
         10,
         30,
         1,
-        function() return Settings.FontSize end,
-        function(value)
+        function () return Settings.FontSize end,
+        function (value)
             Settings.FontSize = value
             InfoPanel.ApplyFont()
         end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         Defaults.FontSize
     )
 
@@ -152,13 +169,13 @@ function InfoPanel.CreateSettings()
         GetString(LUIE_STRING_LAM_FONT_STYLE),
         GetString(LUIE_STRING_LAM_CT_FONT_STYLE_TP),
         fontStyleChoices,
-        function() return Settings.FontStyle end,
-        function(var)
+        function () return Settings.FontStyle end,
+        function (var)
             Settings.FontStyle = var
             InfoPanel.ApplyFont()
         end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         Defaults.FontStyle,
         nil,
         "name-up",
@@ -183,13 +200,13 @@ function InfoPanel.CreateSettings()
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_SHOWLATENCY),
         nil,
-        function() return not Settings.HideLatency end,
-        function(value)
+        function () return not Settings.HideLatency end,
+        function (value)
             Settings.HideLatency = not value
             InfoPanel.RearrangePanel()
         end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         true
     )
 
@@ -197,13 +214,13 @@ function InfoPanel.CreateSettings()
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_SHOWCLOCK),
         nil,
-        function() return not Settings.HideClock end,
-        function(value)
+        function () return not Settings.HideClock end,
+        function (value)
             Settings.HideClock = not value
             InfoPanel.RearrangePanel()
         end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         true
     )
 
@@ -211,14 +228,14 @@ function InfoPanel.CreateSettings()
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateIndentedEditbox(
         GetString(LUIE_STRING_LAM_PNL_CLOCKFORMAT),
         GetString(LUIE_STRING_LAM_CA_TIMESTAMPFORMAT_TP),
-        function() return Settings.ClockFormat end,
-        function(value)
+        function () return Settings.ClockFormat end,
+        function (value)
             Settings.ClockFormat = value
             InfoPanel.RearrangePanel()
         end,
         1,
         "full",
-        function() return not (LUIE.SV.InfoPanel_Enabled and not Settings.HideClock) end,
+        function () return not (LUIE.SV.InfoPanel_Enabled and not Settings.HideClock) end,
         Defaults.ClockFormat
     )
 
@@ -226,13 +243,13 @@ function InfoPanel.CreateSettings()
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_SHOWFPS),
         nil,
-        function() return not Settings.HideFPS end,
-        function(value)
+        function () return not Settings.HideFPS end,
+        function (value)
             Settings.HideFPS = not value
             InfoPanel.RearrangePanel()
         end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         true
     )
 
@@ -240,13 +257,13 @@ function InfoPanel.CreateSettings()
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_SHOWMOUNTTIMER),
         GetString(LUIE_STRING_LAM_PNL_SHOWMOUNTTIMER_TP),
-        function() return not Settings.HideMountFeed end,
-        function(value)
+        function () return not Settings.HideMountFeed end,
+        function (value)
             Settings.HideMountFeed = not value
             InfoPanel.RearrangePanel()
         end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         true
     )
 
@@ -254,13 +271,13 @@ function InfoPanel.CreateSettings()
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_SHOWARMORDURABILITY),
         nil,
-        function() return not Settings.HideArmour end,
-        function(value)
+        function () return not Settings.HideArmour end,
+        function (value)
             Settings.HideArmour = not value
             InfoPanel.RearrangePanel()
         end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         true
     )
 
@@ -268,13 +285,13 @@ function InfoPanel.CreateSettings()
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_SHOWEAPONCHARGES),
         nil,
-        function() return not Settings.HideWeapons end,
-        function(value)
+        function () return not Settings.HideWeapons end,
+        function (value)
             Settings.HideWeapons = not value
             InfoPanel.RearrangePanel()
         end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         true
     )
 
@@ -282,13 +299,13 @@ function InfoPanel.CreateSettings()
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_SHOWBAGSPACE),
         nil,
-        function() return not Settings.HideBags end,
-        function(value)
+        function () return not Settings.HideBags end,
+        function (value)
             Settings.HideBags = not value
             InfoPanel.RearrangePanel()
         end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         true
     )
 
@@ -296,13 +313,13 @@ function InfoPanel.CreateSettings()
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_SHOWSOULGEMS),
         nil,
-        function() return not Settings.HideGems end,
-        function(value)
+        function () return not Settings.HideGems end,
+        function (value)
             Settings.HideGems = not value
             InfoPanel.RearrangePanel()
         end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         true
     )
 
@@ -310,13 +327,13 @@ function InfoPanel.CreateSettings()
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_PNL_SHOWGOLD),
         nil,
-        function() return not Settings.HideGold end,
-        function(value)
+        function () return not Settings.HideGold end,
+        function (value)
             Settings.HideGold = not value
             InfoPanel.RearrangePanel()
         end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         true
     )
 
@@ -329,13 +346,13 @@ function InfoPanel.CreateSettings()
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP),
         GetString(LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP_TP),
-        function() return Settings.DisplayOnWorldMap end,
-        function(value)
+        function () return Settings.DisplayOnWorldMap end,
+        function (value)
             Settings.DisplayOnWorldMap = value
             InfoPanel.SetDisplayOnMap()
         end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         false
     )
 
@@ -343,10 +360,10 @@ function InfoPanel.CreateSettings()
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_DISABLECOLORSRO),
         GetString(LUIE_STRING_LAM_PNL_DISABLECOLORSRO_TP),
-        function() return Settings.DisableInfoColours end,
-        function(value) Settings.DisableInfoColours = value end,
+        function () return Settings.DisableInfoColours end,
+        function (value) Settings.DisableInfoColours = value end,
         "full",
-        function() return not LUIE.SV.InfoPanel_Enabled end,
+        function () return not LUIE.SV.InfoPanel_Enabled end,
         false
     )
 

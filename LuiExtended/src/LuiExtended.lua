@@ -165,6 +165,18 @@ if not IsConsoleUI() then
     LUIE.Fonts["Univers 67"] = ZoFontWinH1:GetFontInfo()
 end
 
+if not LUIE.Fonts["LUIE Default Font"] then
+    local font = ""
+
+    if IsInGamepadPreferredMode() or IsConsoleUI() then
+        font = "$(GAMEPAD_BOLD_FONT)|$(GP_18)|soft-shadow-thick"
+    else
+        font = "$(BOLD_FONT)|$(KB_18)|soft-shadow-thick"
+    end
+    LUIE_SystemFont = CreateFont("LUIE_SystemFont", font)
+    LUIE.Fonts["LUIE Default Font"] = LUIE_SystemFont:GetFontInfo()
+end
+
 -- -----------------------------------------------------------------------------
 LUIE.Sounds =
 {
