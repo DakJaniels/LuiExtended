@@ -233,7 +233,7 @@ function AbilityAlerts.CreateAlertFrame()
     uiTlw.alertFrame.preview.anchorTexture = UI:Texture(uiTlw.alertFrame.preview, { TOPLEFT, TOPLEFT }, { 16, 16 }, "/esoui/art/reticle/border_topleft.dds", DL_OVERLAY, false)
     uiTlw.alertFrame.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
 
-    uiTlw.alertFrame.preview.anchorLabel = UI:Label(uiTlw.alertFrame.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "ZoFontGameSmall", "xxx, yyy", false)
+    uiTlw.alertFrame.preview.anchorLabel = UI:Label(uiTlw.alertFrame.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "LUIE Default Font", "xxx, yyy", false)
     uiTlw.alertFrame.preview.anchorLabel:SetColor(1, 1, 0, 1)
     uiTlw.alertFrame.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
     uiTlw.alertFrame.preview.anchorLabel:SetDrawTier(DT_MEDIUM)

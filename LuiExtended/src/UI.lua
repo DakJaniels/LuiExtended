@@ -297,7 +297,7 @@ end
 --- @param anchors? table|"fill" Array of anchor points [point, relativeTo, relativePoint, offsetX, offsetY] or "fill" to fill parent
 --- @param dims? table|"inherit" Array of dimensions [width, height] or "inherit" to match parent
 --- @param align? table Array of alignment values [horizontal, vertical] using TEXT_ALIGN_* constants. Defaults to [CENTER, CENTER]
---- @param font? string Font to use for the text. Defaults to "ZoFontGame"
+--- @param font? string Font to use for the text. Defaults to "LUIE Default Font"
 --- @param text? string Initial text content for the label
 --- @param hidden? boolean Whether the label starts hidden
 --- @param name? string Optional custom name for the label control

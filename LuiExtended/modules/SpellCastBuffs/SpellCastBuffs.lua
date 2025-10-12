@@ -126,7 +126,7 @@ local function InitializePreviewLabels()
             end
 
             if not f.frame.preview.anchorLabel then
-                f.frame.preview.anchorLabel = UI:Label(f.frame.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "ZoFontGameSmall", "xxx, yyy", false)
+                f.frame.preview.anchorLabel = UI:Label(f.frame.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "LUIE Default Font", "xxx, yyy", false)
                 f.frame.preview.anchorLabel:SetColor(1, 1, 0, 1)
                 f.frame.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
                 f.frame.preview.anchorLabel:SetDrawTier(DT_MEDIUM)
@@ -323,7 +323,7 @@ function SpellCastBuffs.Initialize(enabled)
             -- Create background areas for preview position purposes
             -- SpellCastBuffs.BuffContainers[v].preview = UI:Backdrop( SpellCastBuffs.BuffContainers[v], "fill", nil, nil, nil, true )
             SpellCastBuffs.BuffContainers[v].preview = UI:Texture(SpellCastBuffs.BuffContainers[v], "fill", nil, "/esoui/art/miscellaneous/inset_bg.dds", DL_BACKGROUND, true)
-            SpellCastBuffs.BuffContainers[v].previewLabel = UI:Label(SpellCastBuffs.BuffContainers[v].preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", SpellCastBuffs.windowTitles[v] .. (SpellCastBuffs.SV.lockPositionToUnitFrames and (v ~= "player_long" and v ~= "prominentbuffs" and v ~= "prominentdebuffs") and " (locked)" or ""), false)
+            SpellCastBuffs.BuffContainers[v].previewLabel = UI:Label(SpellCastBuffs.BuffContainers[v].preview, { CENTER, CENTER }, nil, nil, "LUIE Default Font", SpellCastBuffs.windowTitles[v] .. (SpellCastBuffs.SV.lockPositionToUnitFrames and (v ~= "player_long" and v ~= "prominentbuffs" and v ~= "prominentdebuffs") and " (locked)" or ""), false)
 
             -- Create control that will hold the icons
             SpellCastBuffs.BuffContainers[v].prevIconsCount = 0
@@ -1349,8 +1349,8 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
             if isArtificial then
                 labelAbilityId = "Artificial"
             end
-            GameTooltip:AddHeaderLine("Ability ID", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
-            GameTooltip:AddHeaderLine(labelAbilityId, "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
+            GameTooltip:AddHeaderLine("Ability ID", "LUIE Default Font", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
+            GameTooltip:AddHeaderLine(labelAbilityId, "LUIE Default Font", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
             detailsLine = detailsLine + 1
         end
 
@@ -1381,8 +1381,8 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
                 end
             end
 
-            GameTooltip:AddHeaderLine("Type", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
-            GameTooltip:AddHeaderLine(buffTypes[buffType], "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
+            GameTooltip:AddHeaderLine("Type", "LUIE Default Font", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
+            GameTooltip:AddHeaderLine(buffTypes[buffType], "LUIE Default Font", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
             detailsLine = detailsLine + 1
         end
     end
@@ -1400,7 +1400,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
     local tooltipTitle = zo_strformat(SI_ABILITY_TOOLTIP_NAME, control.effectName)
     if control.isArtificial then
         tooltipText = GetArtificialEffectTooltipText(control.effectId)
-        GameTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
+        GameTooltip:AddLine(tooltipTitle, "LUIE Default Font", 1, 1, 1, nil)
         detailsLine = 3
         if SpellCastBuffs.SV.TooltipEnable then
             GameTooltip:SetVerticalPadding(1)
@@ -1412,7 +1412,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
         SpellCastBuffs.TooltipBottomLine(control, detailsLine, true)
     else
         if not SpellCastBuffs.SV.TooltipEnable then
-            GameTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
+            GameTooltip:AddLine(tooltipTitle, "LUIE Default Font", 1, 1, 1, nil)
             detailsLine = 3
             SpellCastBuffs.TooltipBottomLine(control, detailsLine)
             return
@@ -1525,7 +1525,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
 
         detailsLine = 5
 
-        GameTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
+        GameTooltip:AddLine(tooltipTitle, "LUIE Default Font", 1, 1, 1, nil)
         if tooltipText ~= "" and tooltipText ~= nil then
             GameTooltip:SetVerticalPadding(1)
             ZO_Tooltip_AddDivider(GameTooltip)

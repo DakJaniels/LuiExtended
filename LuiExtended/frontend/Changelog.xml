@@ -23,7 +23,7 @@
 					<AnchorFill/>
 				</Backdrop>
 				<Label name="$(parent)_Title"
-				       font="ZoFontWindowTitle"
+				       font="LUIE Default Font"
 				       wrapMode="ELLIPSIS"
 				       verticalAlignment="TOP">
 					<Anchor relativeTo="$(parent)"
@@ -33,7 +33,7 @@
 					        offsetY="5"/>
 				</Label>
 				<Label name="$(parent)_About"
-				       font="ZoFontGame"
+				       font="LUIE Default Font"
 				       wrapMode="ELLIPSIS">
 					<Anchor relativeTo="$(parent)"
 					        relativePoint="TOPLEFT"
@@ -64,7 +64,7 @@
 					        offsetY="690"/>
 				</Control>
 				<Label name="$(parent)_Text"
-				       font="ZoFontGame"
+				       font="LUIE Default Font"
 				       wrapMode="ELLIPSIS">
 					<Dimensions x="870"/>
 					<OnInitialized>

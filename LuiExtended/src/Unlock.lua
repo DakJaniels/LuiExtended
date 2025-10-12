@@ -183,7 +183,7 @@ end
 --- @param positionText string The text to display in the label
 --- @return LabelControl label The created label
 function Unlock.CreateCoordinateLabel(parent, positionText)
-    local label = UI:Label(parent, { TOPLEFT, TOPLEFT, 2, 2 }, nil, { 0, 2 }, "ZoFontGameSmall", positionText, false)
+    local label = UI:Label(parent, { TOPLEFT, TOPLEFT, 2, 2 }, nil, { 0, 2 }, "LUIE Default Font", positionText, false)
     label:SetColor(1, 1, 0, 1)
     label:SetDrawLayer(DL_OVERLAY)
     label:SetDrawLevel(5)

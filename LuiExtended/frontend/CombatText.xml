@@ -41,7 +41,7 @@
 						          alpha="0.3"
 						          hidden="true"/>
 						<Label name="$(parent)_Label"
-						       font="ZoFontWinH4"
+						       font="LUIE Default Font"
 						       color="FFFFFF"
 						       inheritAlpha="true"
 						       verticalAlignment="CENTER"
@@ -72,7 +72,7 @@
 						          alpha="0.3"
 						          hidden="true"/>
 						<Label name="$(parent)_Label"
-						       font="ZoFontWinH4"
+						       font="LUIE Default Font"
 						       color="FFFFFF"
 						       inheritAlpha="true"
 						       verticalAlignment="CENTER"
@@ -99,7 +99,7 @@
 						          alpha="0.3"
 						          hidden="true"/>
 						<Label name="$(parent)_Label"
-						       font="ZoFontWinH4"
+						       font="LUIE Default Font"
 						       color="FFFFFF"
 						       inheritAlpha="true"
 						       verticalAlignment="CENTER"
@@ -126,7 +126,7 @@
 						          alpha="0.3"
 						          hidden="true"/>
 						<Label name="$(parent)_Label"
-						       font="ZoFontWinH4"
+						       font="LUIE Default Font"
 						       color="FFFFFF"
 						       inheritAlpha="true"
 						       verticalAlignment="CENTER"
@@ -153,7 +153,7 @@
 						          alpha="0.3"
 						          hidden="true"/>
 						<Label name="$(parent)_Label"
-						       font="ZoFontWinH4"
+						       font="LUIE Default Font"
 						       color="FFFFFF"
 						       inheritAlpha="true"
 						       verticalAlignment="CENTER"
