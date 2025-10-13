@@ -797,7 +797,6 @@ end
 -- -----------------------------------------------------------------------------
 
 ---
---- @param font? string
 --- @return string
 function LUIE.GetUsableFont()
     local font = ""
