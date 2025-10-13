@@ -260,7 +260,7 @@ local function CreateTargetFrame()
         targetTlw:SetDrawLevel(DL_CONTROLS)
         targetTlw.customPositionAttr = "CustomFramesTargetFramePos"
         targetTlw.preview = UI:Backdrop(targetTlw, "fill", nil, nil, nil, true)
-        targetTlw.previewLabel = UI:Label(targetTlw.preview, { CENTER, CENTER }, nil, nil, "LUIE Default Font", "Target Frame", false)
+        targetTlw.previewLabel = UI:Label(targetTlw.preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", "Target Frame", false)
         local target = UI:Control(targetTlw, { TOPLEFT, TOPLEFT }, nil, false)
         local topInfo = UI:Control(target, { BOTTOM, TOP, 0, -3 }, nil, false)
         local botInfo = UI:Control(target, { TOP, BOTTOM, 0, 2 }, nil, false)
@@ -341,7 +341,7 @@ local function CreateAvaPlayerTargetFrame()
         targetTlw:SetDrawLevel(DL_CONTROLS)
         targetTlw.customPositionAttr = "AvaCustFramesTargetFramePos"
         targetTlw.preview = UI:Backdrop(targetTlw, "fill", nil, nil, nil, true)
-        targetTlw.previewLabel = UI:Label(targetTlw.preview, { CENTER, CENTER }, nil, nil, "LUIE Default Font", "PvP Player Target Frame", false)
+        targetTlw.previewLabel = UI:Label(targetTlw.preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", "PvP Player Target Frame", false)
         local target = UI:Control(targetTlw, { TOPLEFT, TOPLEFT }, nil, false)
         local topInfo = UI:Control(target, { BOTTOM, TOP, 0, -3 }, nil, false)
         local botInfo = UI:Control(target, { TOP, BOTTOM, 0, 2 }, nil, false)
@@ -413,7 +413,7 @@ local function CreateSmallGroupFrames()
         group:SetDrawLevel(DL_CONTROLS)
         group.customPositionAttr = "CustomFramesGroupFramePos"
         group.preview = UI:Backdrop(group, "fill", nil, nil, nil, true)
-        group.previewLabel = UI:Label(group.preview, { BOTTOM, TOP, 0, -1, group }, nil, nil, "LUIE Default Font", "Small Group", false)
+        group.previewLabel = UI:Label(group.preview, { BOTTOM, TOP, 0, -1, group }, nil, nil, "ZoFontGameMedium", "Small Group", false)
 
         local fragment = ZO_HUDFadeSceneFragment:New(group, 0, 0)
 
@@ -482,7 +482,7 @@ local function CreateRaidGroupFrames()
         raid:SetDrawLevel(DL_CONTROLS)
         raid.customPositionAttr = "CustomFramesRaidFramePos"
         raid.preview = UI:Backdrop(raid, { TOPLEFT, TOPLEFT }, nil, nil, nil, true)
-        raid.previewLabel = UI:Label(raid.preview, { BOTTOM, TOP, 0, -1, raid }, nil, nil, "LUIE Default Font", "Raid Group", false)
+        raid.previewLabel = UI:Label(raid.preview, { BOTTOM, TOP, 0, -1, raid }, nil, nil, "ZoFontGameMedium", "Raid Group", false)
 
         local fragment = ZO_HUDFadeSceneFragment:New(raid, 0, 0)
 
@@ -544,7 +544,7 @@ local function CreatePetFrames()
         pet:SetDrawLevel(DL_CONTROLS)
         pet.customPositionAttr = "CustomFramesPetFramePos"
         pet.preview = UI:Backdrop(pet, "fill", nil, nil, nil, true)
-        pet.previewLabel = UI:Label(pet.preview, { BOTTOM, TOP, 0, -1, nil }, nil, nil, "LUIE Default Font", "Player Pets", false)
+        pet.previewLabel = UI:Label(pet.preview, { BOTTOM, TOP, 0, -1, nil }, nil, nil, "ZoFontGameMedium", "Player Pets", false)
 
         local fragment = ZO_HUDFadeSceneFragment:New(pet, 0, 0)
 
@@ -593,7 +593,7 @@ local function CreateCompanionFrame()
         companionTlw:SetDrawLevel(DL_CONTROLS)
         companionTlw.customPositionAttr = "CustomFramesCompanionFramePos"
         companionTlw.preview = UI:Backdrop(companionTlw, "fill", nil, nil, nil, true)
-        companionTlw.previewLabel = UI:Label(companionTlw.preview, { BOTTOM, TOP, 0, -1, nil }, nil, nil, "LUIE Default Font", "Player Companion", false)
+        companionTlw.previewLabel = UI:Label(companionTlw.preview, { BOTTOM, TOP, 0, -1, nil }, nil, nil, "ZoFontGameMedium", "Player Companion", false)
 
         local fragment = ZO_HUDFadeSceneFragment:New(companionTlw, 0, 0)
 
@@ -640,7 +640,7 @@ local function CreateBossFrames()
         bosses:SetDrawLevel(DL_CONTROLS)
         bosses.customPositionAttr = "CustomFramesBossesFramePos"
         bosses.preview = UI:Backdrop(bosses, "fill", nil, nil, nil, true)
-        bosses.previewLabel = UI:Label(bosses.preview, { BOTTOM, TOP, 0, -1, bosses }, nil, nil, "LUIE Default Font", "Bosses Group", false)
+        bosses.previewLabel = UI:Label(bosses.preview, { BOTTOM, TOP, 0, -1, bosses }, nil, nil, "ZoFontGameMedium", "Bosses Group", false)
 
         local fragment = ZO_HUDFadeSceneFragment:New(bosses, 0, 0)
 
@@ -720,7 +720,7 @@ local function SetupCommonFrameActions()
             unitFrame.tlw.preview.anchorTexture = UI:Texture(unitFrame.tlw.preview, { TOPLEFT, TOPLEFT }, { 16, 16 }, "/esoui/art/reticle/border_topleft.dds", DL_OVERLAY, false)
             unitFrame.tlw.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
 
-            unitFrame.tlw.preview.anchorLabel = UI:Label(unitFrame.tlw.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "LUIE Default Font", "xxx, yyy", false)
+            unitFrame.tlw.preview.anchorLabel = UI:Label(unitFrame.tlw.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "ZoFontGameSmall", "xxx, yyy", false)
             unitFrame.tlw.preview.anchorLabel:SetColor(1, 1, 0, 1)
             unitFrame.tlw.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
             unitFrame.tlw.preview.anchorLabel:SetDrawTier(DT_MEDIUM)

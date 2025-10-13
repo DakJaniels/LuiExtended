@@ -111,6 +111,7 @@ modules/SpellCastBuffs/_OnUpdate.lua
 modules/SpellCastBuffs/_ReloadEffects.lua
 modules/SpellCastBuffs/_Stealth.lua
 modules/SpellCastBuffs/_Werewolf.lua
+modules/SpellCastBuffs/_GroupBuffs.lua
 modules/SpellCastBuffs/SpellCastBuffs.lua
 
 # Modules - Slash Commands
