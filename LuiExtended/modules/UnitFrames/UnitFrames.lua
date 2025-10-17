@@ -1952,13 +1952,6 @@ local function GetAspectRatioScaleFactor()
     -- Apply manual override if set in saved variables
     if UnitFrames.SV.AspectRatioOverride and UnitFrames.SV.AspectRatioOverride ~= 0 then
         scaleFactor = UnitFrames.SV.AspectRatioOverride
-        if LUIE.IsDevDebugEnabled() then
-            LUIE.Debug("Unit Frames: Using manual aspect ratio scaling: " .. string_format("%.2f", scaleFactor))
-        end
-    else
-        if LUIE.IsDevDebugEnabled() then
-            LUIE.Debug("Unit Frames: Detected aspect ratio: " .. string_format("%.2f", aspectRatio) .. " (" .. screenWidth .. "x" .. screenHeight .. "), scaling factor: " .. string_format("%.2f", scaleFactor))
-        end
     end
 
     return scaleFactor

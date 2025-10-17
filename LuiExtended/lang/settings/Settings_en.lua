@@ -1767,6 +1767,13 @@ local strings =
     LUIE_STRING_LAM_UF_RESOLUTION_1080P = "1080p",
     LUIE_STRING_LAM_UF_RESOLUTION_1440P = "1440p",
     LUIE_STRING_LAM_UF_RESOLUTION_4K = "4K",
+    LUIE_STRING_LAM_UF_RESOLUTION_1080P_16_10 = "1080p (16:10)",
+    LUIE_STRING_LAM_UF_RESOLUTION_1440P_16_10 = "1440p (16:10)",
+    LUIE_STRING_LAM_UF_RESOLUTION_STEAMDECK = "Steam Deck (1280x800)",
+
+    -- Aspect Ratio Scaling
+    LUIE_STRING_LAM_UF_ASPECTRATIO = "Aspect Ratio Scaling",
+    LUIE_STRING_LAM_UF_ASPECTRATIO_TP = "Override automatic aspect ratio detection for frame positioning. Set to 0 for auto-detection (recommended for 16:9 and 16:10 displays). Adjust manually if frames are mispositioned on non-standard aspect ratios. Lower values (0.85-0.95) work better for taller screens like 16:10 or Steam Deck. Higher values (1.05-1.15) for ultra-wide displays.",
 
     -- Alignment Options
     LUIE_STRING_LAM_UF_ALIGNMENT_LEFT_RIGHT = "Left to Right (Default)",
