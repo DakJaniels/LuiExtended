@@ -186,8 +186,6 @@ UnitFrames.Defaults =
     LowResourceStamina = 25,
     LowResourceMagicka = 25,
     ShieldAlpha = 50,
-    ResolutionOptions = 1,
-    AspectRatioOverride = 0, -- 0 = auto-detect, otherwise manual override (0.85-1.15 range)
     ReverseResourceBars = false,
     CustomFramesPet = true,
     CustomFormatPet = GetString(LUIE_STRING_UF_FORMAT_PET),

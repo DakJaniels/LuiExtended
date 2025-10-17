@@ -10,8 +10,6 @@ local SettingsAPI = LUIE.SettingsAPI
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
 
-local LibAddonMenu2 = LibAddonMenu2
-local LibMediaProvider = LibMediaProvider
 local GetDisplayName = GetDisplayName
 local zo_strformat = zo_strformat
 local GetString = GetString
@@ -66,25 +64,6 @@ local playerFrameOptionsKeys =
     [GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_VERTICAL)] = 1,
     [GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_HORIZONTAL)] = 2,
     [GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_PYRAMID)] = 3
-}
-
-local resolutionOptions =
-{
-    GetString(LUIE_STRING_LAM_UF_RESOLUTION_1080P),
-    GetString(LUIE_STRING_LAM_UF_RESOLUTION_1440P),
-    GetString(LUIE_STRING_LAM_UF_RESOLUTION_4K),
-    GetString(LUIE_STRING_LAM_UF_RESOLUTION_1080P_16_10),
-    GetString(LUIE_STRING_LAM_UF_RESOLUTION_1440P_16_10),
-    GetString(LUIE_STRING_LAM_UF_RESOLUTION_STEAMDECK)
-}
-local resolutionOptionsKeys =
-{
-    [GetString(LUIE_STRING_LAM_UF_RESOLUTION_1080P)] = 1,
-    [GetString(LUIE_STRING_LAM_UF_RESOLUTION_1440P)] = 2,
-    [GetString(LUIE_STRING_LAM_UF_RESOLUTION_4K)] = 3,
-    [GetString(LUIE_STRING_LAM_UF_RESOLUTION_1080P_16_10)] = 4,
-    [GetString(LUIE_STRING_LAM_UF_RESOLUTION_1440P_16_10)] = 5,
-    [GetString(LUIE_STRING_LAM_UF_RESOLUTION_STEAMDECK)] = 6
 }
 
 local alignmentOptions =
@@ -204,50 +183,6 @@ function UnitFrames.CreateSettings()
             ReloadUI("ingame")
         end,
         width = "full",
-    }
-
-    -- Resolution Options
-    optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
-    {
-        type = "dropdown",
-        name = GetString(LUIE_STRING_LAM_UF_RESOLUTION),
-        tooltip = GetString(LUIE_STRING_LAM_UF_RESOLUTION_TP),
-        choices = resolutionOptions,
-        getFunc = function ()
-            return resolutionOptions[Settings.ResolutionOptions]
-        end,
-        setFunc = function (value)
-            Settings.ResolutionOptions = resolutionOptionsKeys[value]
-            UnitFrames.CustomFramesSetPositions()
-        end,
-        width = "full",
-        default = Defaults.ResolutionOptions,
-        disabled = function ()
-            return not LUIE.SV.UnitFrames_Enabled
-        end,
-    }
-
-    -- Aspect Ratio Scaling Override
-    optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
-    {
-        type = "slider",
-        name = GetString(LUIE_STRING_LAM_UF_ASPECTRATIO),
-        tooltip = GetString(LUIE_STRING_LAM_UF_ASPECTRATIO_TP),
-        min = 0,
-        max = 115,
-        step = 1,
-        getFunc = function ()
-            return (Settings.AspectRatioOverride or 0) * 100
-        end,
-        setFunc = function (value)
-            Settings.AspectRatioOverride = value / 100
-            UnitFrames.CustomFramesSetPositions()
-        end,
-        width = "full",
-        default = Defaults.AspectRatioOverride * 100,
-        disabled = function ()
-            return not LUIE.SV.UnitFrames_Enabled
-        end,
     }
 
     -- Custom Unit Frames Unlock
