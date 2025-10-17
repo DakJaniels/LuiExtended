@@ -12,6 +12,14 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    "|cFFA500LuiExtended Version 7.0.2.0|r",
+    "",
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Added support for 16:10 displays and Steam Deck.",
+    "",
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Updated aspect ratio detection and scaling for unit frames.",
+    "",
     -- Version Header
     "|cFFA500LuiExtended Version 7.0.1.0|r",
     "",
