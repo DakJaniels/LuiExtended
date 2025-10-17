@@ -72,13 +72,19 @@ local resolutionOptions =
 {
     GetString(LUIE_STRING_LAM_UF_RESOLUTION_1080P),
     GetString(LUIE_STRING_LAM_UF_RESOLUTION_1440P),
-    GetString(LUIE_STRING_LAM_UF_RESOLUTION_4K)
+    GetString(LUIE_STRING_LAM_UF_RESOLUTION_4K),
+    "1080p (16:10)",
+    "1440p (16:10)",
+    "Steam Deck (1280x800)"
 }
 local resolutionOptionsKeys =
 {
     [GetString(LUIE_STRING_LAM_UF_RESOLUTION_1080P)] = 1,
     [GetString(LUIE_STRING_LAM_UF_RESOLUTION_1440P)] = 2,
-    [GetString(LUIE_STRING_LAM_UF_RESOLUTION_4K)] = 3
+    [GetString(LUIE_STRING_LAM_UF_RESOLUTION_4K)] = 3,
+    ["1080p (16:10)"] = 4,
+    ["1440p (16:10)"] = 5,
+    ["Steam Deck (1280x800)"] = 6
 }
 
 local alignmentOptions =
@@ -216,6 +222,29 @@ function UnitFrames.CreateSettings()
         end,
         width = "full",
         default = Defaults.ResolutionOptions,
+        disabled = function ()
+            return not LUIE.SV.UnitFrames_Enabled
+        end,
+    }
+
+    -- Aspect Ratio Scaling Override
+    optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
+    {
+        type = "slider",
+        name = "Aspect Ratio Scaling",
+        tooltip = "Override automatic aspect ratio detection for frame positioning. Set to 0 for auto-detection (recommended for 16:9 and 16:10 displays). Adjust manually if frames are mispositioned on non-standard aspect ratios. Lower values (0.85-0.95) work better for taller screens like 16:10 or Steam Deck. Higher values (1.05-1.15) for ultra-wide displays.",
+        min = 0,
+        max = 115,
+        step = 1,
+        getFunc = function ()
+            return (Settings.AspectRatioOverride or 0) * 100
+        end,
+        setFunc = function (value)
+            Settings.AspectRatioOverride = value / 100
+            UnitFrames.CustomFramesSetPositions()
+        end,
+        width = "full",
+        default = Defaults.AspectRatioOverride * 100,
         disabled = function ()
             return not LUIE.SV.UnitFrames_Enabled
         end,
@@ -471,7 +500,7 @@ function UnitFrames.CreateSettings()
             {
                 -- DefaultFrames Font
                 type = "dropdown",
-                scrollable = true and 7,
+                scrollable = 7,
                 name = GetString(LUIE_STRING_LAM_FONT),
                 tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_FONT_TP),
                 choices = SettingsAPI.GetFontsList(),
@@ -632,7 +661,7 @@ function UnitFrames.CreateSettings()
             {
                 -- Custom Unit Frames Font
                 type = "dropdown",
-                scrollable = true and 7,
+                scrollable = 7,
                 name = GetString(LUIE_STRING_LAM_FONT),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_TP),
                 choices = SettingsAPI.GetFontsList(),
@@ -732,7 +761,7 @@ function UnitFrames.CreateSettings()
             {
                 -- Custom Unit Frames Texture
                 type = "dropdown",
-                scrollable = true and 7,
+                scrollable = 7,
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE_TP),
                 choices = SettingsAPI.GetStatusbarTexturesList(),
@@ -3668,7 +3697,7 @@ function UnitFrames.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_UF_BLACKLIST_REMLIST_TP),
                 choices = Whitelist,
                 choicesValues = WhitelistValues,
-                scrollable = true and 7,
+                scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_WhitelistUF:UpdateChoices(GenerateCustomList(Settings.whitelist))

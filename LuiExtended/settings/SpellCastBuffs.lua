@@ -1454,7 +1454,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 -- Buff Label Font
                 type = "dropdown",
-                scrollable = true and 7,
+                scrollable = 7,
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT)),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_FONT_TP),
                 choices = SettingsAPI.GetFontsList(),
@@ -2910,7 +2910,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_BUFF_REMLIST_TP),
                 choices = PromBuffs,
                 choicesValues = PromBuffsValues,
-                scrollable = true and 7,
+                scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_Priority_Buffs_List:UpdateChoices(GenerateCustomList(Settings.PriorityBuffTable))
@@ -2955,7 +2955,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_DEBUFF_REMLIST_TP),
                 choices = PromDebuffs,
                 choicesValues = PromDebuffsValues,
-                scrollable = true and 7,
+                scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_Priority_Debuffs_List:UpdateChoices(GenerateCustomList(Settings.PriorityDebuffTable))
@@ -3015,7 +3015,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 -- Prominent Buffs Label Font Face
                 type = "dropdown",
-                scrollable = true and 7,
+                scrollable = 7,
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE)),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE_TP),
                 choices = SettingsAPI.GetFontsList(),
@@ -3112,7 +3112,7 @@ function SpellCastBuffs.CreateSettings()
             {
                 -- Prominent Buffs Progress Bar Texture
                 type = "dropdown",
-                scrollable = true and 7,
+                scrollable = 7,
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE)),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE_TP),
                 choices = SettingsAPI.GetStatusbarTexturesList(),
@@ -3394,7 +3394,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFF_REMLIST_TP),
                 choices = PromBuffs,
                 choicesValues = PromBuffsValues,
-                scrollable = true and 7,
+                scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_Prominent_Buffs_List:UpdateChoices(GenerateCustomList(Settings.PromBuffTable))
@@ -3439,7 +3439,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFF_REMLIST_TP),
                 choices = PromDebuffs,
                 choicesValues = PromDebuffsValues,
-                scrollable = true and 7,
+                scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_Prominent_Debuffs_List:UpdateChoices(GenerateCustomList(Settings.PromDebuffTable))
@@ -3564,7 +3564,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_REMLIST_TP),
                 choices = Blacklist,
                 choicesValues = BlacklistValues,
-                scrollable = true and 7,
+                scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_Blacklist:UpdateChoices(GenerateCustomList(Settings.BlacklistTable))

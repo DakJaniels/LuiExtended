@@ -122,19 +122,19 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateButtonOption(
         GetString(LUIE_STRING_LAM_CHANGELOG),
         GetString(LUIE_STRING_LAM_CHANGELOG_TP),
-        function()
+        function ()
             LUIE.ToggleChangelog(false)
             SCENE_MANAGER:ShowBaseScene()
         end,
         "half",
-        function() return not Settings.ShowChangeLog end
+        function () return not Settings.ShowChangeLog end
     )
 
     -- ReloadUI Button
     optionsData[#optionsData + 1] = SettingsAPI.CreateButtonOption(
         GetString(LUIE_STRING_LAM_RELOADUI),
         GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
-        function() ReloadUI("ingame") end,
+        function () ReloadUI("ingame") end,
         "half"
     )
 
@@ -142,8 +142,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_UNLOCK_DEFAULT_UI),
         GetString(LUIE_STRING_LAM_UNLOCK_DEFAULT_UI_TP),
-        function() return g_ElementMovingEnabled end,
-        function(value)
+        function () return g_ElementMovingEnabled end,
+        function (value)
             g_ElementMovingEnabled = value
             LUIE.SetupElementMover(value)
         end,
@@ -159,8 +159,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         "Enable Grid Snap",
         "Enable snapping UI elements to a grid when moving them",
-        function() return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
-        function(value) LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default = value end,
+        function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
+        function (value) LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default = value end,
         "half",
         nil,
         false
@@ -173,10 +173,10 @@ function LUIE.CreateSettings()
         5,
         100,
         5,
-        function() return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_default or 15 end,
-        function(value) LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_default = value end,
+        function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_default or 15 end,
+        function (value) LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_default = value end,
         "half",
-        function() return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
+        function () return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
         15
     )
 
@@ -202,8 +202,8 @@ function LUIE.CreateSettings()
     profileControls[#profileControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SVPROFILE_SETTINGSTOGGLE),
         GetString(LUIE_STRING_LAM_SVPROFILE_SETTINGSTOGGLE_TP),
-        function() return LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV end,
-        function(value)
+        function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV end,
+        function (value)
             LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV = value
             ReloadUI("ingame")
         end,
@@ -218,8 +218,8 @@ function LUIE.CreateSettings()
         GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPY),
         GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPY_TP),
         profileCharacters,
-        function() return profileCharacters end,
-        function(value) profileQueuedCopy = value end,
+        function () return profileCharacters end,
+        function (value) profileQueuedCopy = value end,
         "full",
         nil,
         nil,
@@ -243,12 +243,12 @@ function LUIE.CreateSettings()
     profileControls[#profileControls + 1] = SettingsAPI.CreateButtonOption(
         GetString(LUIE_STRING_LAM_SVPROFILE_RESETCHAR),
         GetString(LUIE_STRING_LAM_SVPROFILE_RESETCHAR_TP),
-        function()
+        function ()
             DeleteCurrentProfile(false)
             ReloadUI("ingame")
         end,
         "half",
-        function() return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV end,
+        function () return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV end,
         GetString(LUIE_STRING_LAM_RELOADUI_BUTTON)
     )
 
@@ -256,7 +256,7 @@ function LUIE.CreateSettings()
     profileControls[#profileControls + 1] = SettingsAPI.CreateButtonOption(
         GetString(LUIE_STRING_LAM_SVPROFILE_RESETACCOUNT),
         GetString(LUIE_STRING_LAM_SVPROFILE_RESETACCOUNT_TP),
-        function()
+        function ()
             DeleteCurrentProfile(true)
             ReloadUI("ingame")
         end,
@@ -279,8 +279,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_UF_ENABLE),
         nil,
-        function() return Settings.UnitFrames_Enabled end,
-        function(value) Settings.UnitFrames_Enabled = value end,
+        function () return Settings.UnitFrames_Enabled end,
+        function (value) Settings.UnitFrames_Enabled = value end,
         "half",
         nil,
         Defaults.UnitFrames_Enabled,
@@ -297,8 +297,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_CI_SHOWCOMBATINFO),
         nil,
-        function() return Settings.CombatInfo_Enabled end,
-        function(value) Settings.CombatInfo_Enabled = value end,
+        function () return Settings.CombatInfo_Enabled end,
+        function (value) Settings.CombatInfo_Enabled = value end,
         "half",
         nil,
         Defaults.CombatInfo_Enabled,
@@ -315,8 +315,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_CT_SHOWCOMBATTEXT),
         nil,
-        function() return Settings.CombatText_Enabled end,
-        function(value) Settings.CombatText_Enabled = value end,
+        function () return Settings.CombatText_Enabled end,
+        function (value) Settings.CombatText_Enabled = value end,
         "half",
         nil,
         Defaults.CombatText_Enabled,
@@ -333,8 +333,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_BUFF_ENABLEEFFECTSTRACK),
         nil,
-        function() return Settings.SpellCastBuff_Enable end,
-        function(value) Settings.SpellCastBuff_Enable = value end,
+        function () return Settings.SpellCastBuff_Enable end,
+        function (value) Settings.SpellCastBuff_Enable = value end,
         "half",
         nil,
         Defaults.SpellCastBuff_Enable,
@@ -351,8 +351,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_CA_ENABLE),
         nil,
-        function() return Settings.ChatAnnouncements_Enable end,
-        function(value) Settings.ChatAnnouncements_Enable = value end,
+        function () return Settings.ChatAnnouncements_Enable end,
+        function (value) Settings.ChatAnnouncements_Enable = value end,
         "half",
         nil,
         Defaults.ChatAnnouncements_Enable,
@@ -369,8 +369,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_ENABLE),
         nil,
-        function() return Settings.SlashCommands_Enable end,
-        function(value) Settings.SlashCommands_Enable = value end,
+        function () return Settings.SlashCommands_Enable end,
+        function (value) Settings.SlashCommands_Enable = value end,
         "half",
         nil,
         Defaults.SlashCommands_Enable,
@@ -387,8 +387,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_ENABLE),
         nil,
-        function() return Settings.InfoPanel_Enabled end,
-        function(value) Settings.InfoPanel_Enabled = value end,
+        function () return Settings.InfoPanel_Enabled end,
+        function (value) Settings.InfoPanel_Enabled = value end,
         "half",
         nil,
         Defaults.InfoPanel_Enabled,
@@ -410,8 +410,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         "Show Changelog when there is a update to LUIE.",
         "Show Changelog when there is a update to LUIE.",
-        function() return Settings.ShowChangeLog end,
-        function(value) Settings.ShowChangeLog = value end,
+        function () return Settings.ShowChangeLog end,
+        function (value) Settings.ShowChangeLog = value end,
         "full",
         nil,
         Defaults.ShowChangeLog,
@@ -423,8 +423,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_ALERT_HIDE_ALL),
         GetString(LUIE_STRING_LAM_ALERT_HIDE_ALL_TP),
-        function() return Settings.HideAlertFrame end,
-        function(value)
+        function () return Settings.HideAlertFrame end,
+        function (value)
             Settings.HideAlertFrame = value
             LUIE.SetupAlertFrameVisibility()
         end,
@@ -437,8 +437,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_HIDE_EXPERIENCE_BAR),
         GetString(LUIE_STRING_LAM_HIDE_EXPERIENCE_BAR_TP),
-        function() return Settings.HideXPBar end,
-        function(value) Settings.HideXPBar = value end,
+        function () return Settings.HideXPBar end,
+        function (value) Settings.HideXPBar = value end,
         "full",
         nil,
         Defaults.HideXPBar
@@ -448,8 +448,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_STARTUPMSG),
         GetString(LUIE_STRING_LAM_STARTUPMSG_TP),
-        function() return Settings.StartupInfo end,
-        function(value) Settings.StartupInfo = value end,
+        function () return Settings.StartupInfo end,
+        function (value) Settings.StartupInfo = value end,
         "full",
         nil,
         Defaults.StartupInfo
@@ -459,8 +459,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         "Use Custom Icons",
         "Use Custom Icons",
-        function() return Settings.CustomIcons end,
-        function(value) Settings.CustomIcons = value end,
+        function () return Settings.CustomIcons end,
+        function (value) Settings.CustomIcons = value end,
         "full",
         nil,
         Defaults.CustomIcons
@@ -475,8 +475,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         "Energy Sustainability",
         "Toggle energy sustainability measures",
-        function() return GetCVar("EnergySustainabilityMeasuresEnabled") == "1" end,
-        function(value) SetCVar("EnergySustainabilityMeasuresEnabled", value and "1" or "0") end,
+        function () return GetCVar("EnergySustainabilityMeasuresEnabled") == "1" end,
+        function (value) SetCVar("EnergySustainabilityMeasuresEnabled", value and "1" or "0") end,
         "full",
         nil,
         false
@@ -489,11 +489,11 @@ function LUIE.CreateSettings()
         1,
         300,
         1,
-        function()
+        function ()
             local minFrameTime = tonumber(GetCVar("MinFrameTime.2"))
             return minFrameTime and zo_floor(1 / minFrameTime + 0.5) or 100
         end,
-        function(value)
+        function (value)
             local minFrameTime = string.format("%.8f", 1 / value)
             SetCVar("MinFrameTime.2", minFrameTime)
         end,
@@ -506,8 +506,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         "Skip Pregame Videos",
         "Skip intro videos when launching the game",
-        function() return GetCVar("SkipPregameVideos") == "1" end,
-        function(value) SetCVar("SkipPregameVideos", value and "1" or "0") end,
+        function () return GetCVar("SkipPregameVideos") == "1" end,
+        function (value) SetCVar("SkipPregameVideos", value and "1" or "0") end,
         "full",
         nil,
         true
@@ -517,8 +517,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         "Raw Mouse Input",
         "Enable raw mouse input for more precise control",
-        function() return GetCVar("MouseRawInput") == "1" end,
-        function(value) SetCVar("MouseRawInput", value and "1" or "0") end,
+        function () return GetCVar("MouseRawInput") == "1" end,
+        function (value) SetCVar("MouseRawInput", value and "1" or "0") end,
         "full",
         nil,
         true
@@ -529,7 +529,7 @@ function LUIE.CreateSettings()
         "Screenshot Format",
         "Choose the format for saved screenshots",
         { "JPG", "PNG", "BMP" },
-        function()
+        function ()
             local format = GetCVar("ScreenshotFormat.2")
             if format == "PNG" then
                 return "PNG"
@@ -539,7 +539,7 @@ function LUIE.CreateSettings()
                 return "JPG"
             end
         end,
-        function(value) SetCVar("ScreenshotFormat.2", value) end,
+        function (value) SetCVar("ScreenshotFormat.2", value) end,
         "full",
         nil,
         "PNG"
@@ -549,8 +549,8 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         "Disable Razer Chroma",
         "Disable Razer Chroma integration",
-        function() return GetCVar("UseChromaIfAvailable") == "0" end,
-        function(value) SetCVar("UseChromaIfAvailable", value and "0" or "1") end,
+        function () return GetCVar("UseChromaIfAvailable") == "0" end,
+        function (value) SetCVar("UseChromaIfAvailable", value and "0" or "1") end,
         "full",
         nil,
         true
@@ -565,8 +565,8 @@ function LUIE.CreateSettings()
         optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
             "Disable Precompiled Lua",
             "Disable use of precompiled Lua files",
-            function() return GetCVar("UsePrecompiledLua.2") == "0" end,
-            function(value) SetCVar("UsePrecompiledLua.2", value and "0" or "1") end,
+            function () return GetCVar("UsePrecompiledLua.2") == "0" end,
+            function (value) SetCVar("UsePrecompiledLua.2", value and "0" or "1") end,
             "full",
             nil,
             true,
@@ -578,8 +578,8 @@ function LUIE.CreateSettings()
         optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
             "Disable Precompiled XML",
             "Disable use of precompiled XML files",
-            function() return GetCVar("UsePrecompiledXML.2") == "0" end,
-            function(value) SetCVar("UsePrecompiledXML.2", value and "0" or "1") end,
+            function () return GetCVar("UsePrecompiledXML.2") == "0" end,
+            function (value) SetCVar("UsePrecompiledXML.2", value and "0" or "1") end,
             "full",
             nil,
             true,
@@ -591,8 +591,8 @@ function LUIE.CreateSettings()
         optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
             "Profile Control Creation",
             "Enable profiling of UI control creation",
-            function() return GetCVar("ProfileControlCreation") == "1" end,
-            function(value) SetCVar("ProfileControlCreation", value and "1" or "0") end,
+            function () return GetCVar("ProfileControlCreation") == "1" end,
+            function (value) SetCVar("ProfileControlCreation", value and "1" or "0") end,
             "full",
             nil,
             false,
@@ -604,8 +604,8 @@ function LUIE.CreateSettings()
         optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
             "Lua Class Verification",
             "Enable Lua class verification",
-            function() return GetCVar("EnableLuaClassVerification") == "1" end,
-            function(value) SetCVar("EnableLuaClassVerification", value and "1" or "0") end,
+            function () return GetCVar("EnableLuaClassVerification") == "1" end,
+            function (value) SetCVar("EnableLuaClassVerification", value and "1" or "0") end,
             "full",
             nil,
             false,

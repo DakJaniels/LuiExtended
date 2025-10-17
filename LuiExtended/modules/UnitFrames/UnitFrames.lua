@@ -1932,55 +1932,129 @@ function UnitFrames.OnBossesChanged(eventCode)
     end
 end
 
+-- Helper function to calculate aspect ratio scaling factor
+local function GetAspectRatioScaleFactor()
+    local screenWidth, screenHeight = GuiRoot:GetDimensions()
+
+    if screenWidth == 0 or screenHeight == 0 then
+        return 1.0 -- Fallback to no scaling if dimensions are invalid
+    end
+
+    local aspectRatio = screenWidth / screenHeight
+
+    -- Define baseline aspect ratio (16:9)
+    local baseline169 = 16 / 9 -- 1.7778
+
+    -- Calculate scaling factor for Y-axis coordinates
+    -- For 16:10 displays (1.6), we need to reduce Y-offsets since screens are proportionally taller
+    local scaleFactor = aspectRatio / baseline169
+
+    -- Apply manual override if set in saved variables
+    if UnitFrames.SV.AspectRatioOverride and UnitFrames.SV.AspectRatioOverride ~= 0 then
+        scaleFactor = UnitFrames.SV.AspectRatioOverride
+        if LUIE.IsDevDebugEnabled() then
+            LUIE.Debug("Unit Frames: Using manual aspect ratio scaling: " .. string_format("%.2f", scaleFactor))
+        end
+    else
+        if LUIE.IsDevDebugEnabled() then
+            LUIE.Debug("Unit Frames: Detected aspect ratio: " .. string_format("%.2f", aspectRatio) .. " (" .. screenWidth .. "x" .. screenHeight .. "), scaling factor: " .. string_format("%.2f", scaleFactor))
+        end
+    end
+
+    return scaleFactor
+end
+
+-- Helper function to apply aspect ratio scaling to coordinate table
+local function ApplyAspectRatioScaling(coords, scaleFactor)
+    return { coords[1], coords[2] * scaleFactor }
+end
+
 -- Set anchors for all top level windows of CustomFrames
 function UnitFrames.CustomFramesSetPositions()
     local default_anchors = {}
 
-    local player
-    local playerCenter
-    local reticleover
-    local reticleoverCenter
-    local companion
-    local SmallGroup1
-    local RaidGroup1
-    local PetGroup1
-    local boss1
-    local AvaPlayerTarget
-    -- 1 = 1080, 2 = 1440, 3 = 4k
-    if UnitFrames.SV.ResolutionOptions == 1 then -- 1080p Resolution
-        player = { -492, 205 }
-        playerCenter = { 0, 334 }
-        reticleover = { 192, 205 }
-        reticleoverCenter = { 0, -334 }
-        companion = { -954, 180 }
-        SmallGroup1 = { -954, -332 }
-        PetGroup1 = { -954, 250 }
-        RaidGroup1 = { -954, -210 }
-        boss1 = { 306, -312 }
-        AvaPlayerTarget = { 0, -200 }
-    elseif UnitFrames.SV.ResolutionOptions == 2 then -- 1440p Resolution
-        player = { -570, 272 }
-        playerCenter = { 0, 445 }
-        reticleover = { 270, 272 }
-        reticleoverCenter = { 0, -445 }
-        companion = { -1271, 280 }
-        SmallGroup1 = { -1271, -385 }
-        PetGroup1 = { -1271, 350 }
-        RaidGroup1 = { -1271, -243 }
-        boss1 = { 354, -365 }
-        AvaPlayerTarget = { 0, -266 }
-    else -- 4k Resolution
-        player = { -738, 410 }
-        playerCenter = { 0, 668 }
-        reticleover = { 438, 410 }
-        reticleoverCenter = { 0, -668 }
-        companion = { -2036, 380 }
-        SmallGroup1 = { -2036, -498 }
-        PetGroup1 = { -2036, 450 }
-        RaidGroup1 = { -2036, -315 }
-        boss1 = { 459, -478 }
-        AvaPlayerTarget = { 0, -400 }
+    -- Get aspect ratio scaling factor
+    local aspectRatioScale = GetAspectRatioScaleFactor()
+
+    -- Base coordinate tables for 16:9 resolutions (source of truth)
+    local baseCoordinates =
+    {
+        [1] =
+        { -- 1080p (16:9)
+            player = { -492, 205 },
+            playerCenter = { 0, 334 },
+            reticleover = { 192, 205 },
+            reticleoverCenter = { 0, -334 },
+            companion = { -954, 180 },
+            SmallGroup1 = { -954, -332 },
+            PetGroup1 = { -954, 250 },
+            RaidGroup1 = { -954, -210 },
+            boss1 = { 306, -312 },
+            AvaPlayerTarget = { 0, -200 },
+        },
+        [2] =
+        { -- 1440p (16:9)
+            player = { -570, 272 },
+            playerCenter = { 0, 445 },
+            reticleover = { 270, 272 },
+            reticleoverCenter = { 0, -445 },
+            companion = { -1271, 280 },
+            SmallGroup1 = { -1271, -385 },
+            PetGroup1 = { -1271, 350 },
+            RaidGroup1 = { -1271, -243 },
+            boss1 = { 354, -365 },
+            AvaPlayerTarget = { 0, -266 },
+        },
+        [3] =
+        { -- 4K (16:9)
+            player = { -738, 410 },
+            playerCenter = { 0, 668 },
+            reticleover = { 438, 410 },
+            reticleoverCenter = { 0, -668 },
+            companion = { -2036, 380 },
+            SmallGroup1 = { -2036, -498 },
+            PetGroup1 = { -2036, 450 },
+            RaidGroup1 = { -2036, -315 },
+            boss1 = { 459, -478 },
+            AvaPlayerTarget = { 0, -400 },
+        },
+    }
+
+    -- Resolution scaling configuration
+    -- Maps resolution option to: { baseResolutionIndex, resolutionScale, aspectRatioScale }
+    local resolutionConfig =
+    {
+        [1] = { base = 1, resScale = 1.0, arScale = 1.0 },  -- 1080p (16:9)
+        [2] = { base = 2, resScale = 1.0, arScale = 1.0 },  -- 1440p (16:9)
+        [3] = { base = 3, resScale = 1.0, arScale = 1.0 },  -- 4K (16:9)
+        [4] = { base = 1, resScale = 1.0, arScale = 0.9 },  -- 1080p (16:10)
+        [5] = { base = 2, resScale = 1.0, arScale = 0.9 },  -- 1440p (16:10)
+        [6] = { base = 1, resScale = 0.64, arScale = 0.9 }, -- Steam Deck (1280x800)
+    }
+
+    -- Get configuration for selected resolution
+    local config = resolutionConfig[UnitFrames.SV.ResolutionOptions] or resolutionConfig[1]
+    local coords = baseCoordinates[config.base]
+
+    -- Apply scaling to all coordinates
+    local function scaleCoords(baseCoords)
+        return ApplyAspectRatioScaling(
+            { baseCoords[1] * config.resScale, baseCoords[2] * config.arScale * config.resScale },
+            aspectRatioScale
+        )
     end
+
+    -- Apply scaling to all frame positions
+    local player = scaleCoords(coords.player)
+    local playerCenter = scaleCoords(coords.playerCenter)
+    local reticleover = scaleCoords(coords.reticleover)
+    local reticleoverCenter = scaleCoords(coords.reticleoverCenter)
+    local companion = scaleCoords(coords.companion)
+    local SmallGroup1 = scaleCoords(coords.SmallGroup1)
+    local RaidGroup1 = scaleCoords(coords.RaidGroup1)
+    local PetGroup1 = scaleCoords(coords.PetGroup1)
+    local boss1 = scaleCoords(coords.boss1)
+    local AvaPlayerTarget = scaleCoords(coords.AvaPlayerTarget)
 
     if UnitFrames.SV.PlayerFrameOptions == 1 then
         default_anchors["player"] = { TOPLEFT, CENTER, player[1], player[2] }

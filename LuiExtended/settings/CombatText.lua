@@ -385,7 +385,7 @@ function CombatText.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_REMLIST_TP),
                 choices = Blacklist,
                 choicesValues = BlacklistValues,
-                scrollable = true and 7,
+                scrollable = 7,
                 sort = "name-up",
                 getFunc = function ()
                     LUIE_BlacklistCT:UpdateChoices(GenerateCustomList(Settings.blacklist))
@@ -3167,7 +3167,7 @@ function CombatText.CreateSettings()
             {
                 -- Font Face Dropdown
                 type = "dropdown",
-                scrollable = true and 7,
+                scrollable = 7,
                 name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT)),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FONT_FACE_TP),
                 choices = SettingsAPI.GetFontsList(),

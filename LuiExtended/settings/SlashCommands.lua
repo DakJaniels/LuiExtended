@@ -129,7 +129,7 @@ function SlashCommands.CreateSettings()
     optionsDataSlashCommands[#optionsDataSlashCommands + 1] = SettingsAPI.CreateButtonOption(
         GetString(LUIE_STRING_LAM_RELOADUI),
         GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
-        function() ReloadUI("ingame") end
+        function () ReloadUI("ingame") end
     )
 
     -- Slash Commands - General Commands Submenu
@@ -139,8 +139,8 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_TRADE),
         GetString(LUIE_STRING_LAM_SLASHCMDS_TRADE_TP),
-        function() return Settings.SlashTrade end,
-        function(value)
+        function () return Settings.SlashTrade end,
+        function (value)
             Settings.SlashTrade = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -154,8 +154,8 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_HOME),
         GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_TP),
-        function() return Settings.SlashHome end,
-        function(value)
+        function () return Settings.SlashHome end,
+        function (value)
             Settings.SlashHome = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -170,11 +170,11 @@ function SlashCommands.CreateSettings()
         "Choose Inside or Outside for /home",
         nil,
         homeOptions,
-        function() return homeOptions[Settings.SlashHomeChoice] end,
-        function(value) Settings.SlashHomeChoice = homeOptionsKeys[value] end,
+        function () return homeOptions[Settings.SlashHomeChoice] end,
+        function (value) Settings.SlashHomeChoice = homeOptionsKeys[value] end,
         1,
         "full",
-        function() return not Settings.SlashHome end,
+        function () return not Settings.SlashHome end,
         Defaults.SlashHomeChoice
     )
 
@@ -182,8 +182,8 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_SET_PRIMARY),
         GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_SET_PRIMARY_TP),
-        function() return Settings.SlashSetPrimaryHome end,
-        function(value)
+        function () return Settings.SlashSetPrimaryHome end,
+        function (value)
             Settings.SlashSetPrimaryHome = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -197,8 +197,8 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_CAMPAIGN),
         GetString(LUIE_STRING_LAM_SLASHCMDS_CAMPAIGN_TP),
-        function() return Settings.SlashCampaignQ end,
-        function(value)
+        function () return Settings.SlashCampaignQ end,
+        function (value)
             Settings.SlashCampaignQ = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -212,13 +212,13 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_COMPANION),
         GetString(LUIE_STRING_LAM_SLASHCMDS_COMPANION_TP),
-        function() return Settings.SlashCompanion end,
-        function(value)
+        function () return Settings.SlashCompanion end,
+        function (value)
             Settings.SlashCompanion = value
             SlashCommands.RegisterSlashCommands()
         end,
         "full",
-        function() return #companionOptions == 0 end,
+        function () return #companionOptions == 0 end,
         Defaults.SlashCompanion,
         GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
     )
@@ -228,11 +228,11 @@ function SlashCommands.CreateSettings()
         "Choose Companion to Summon",
         nil,
         companionOptions,
-        function() return GetFormattedCollectibleName(Settings.SlashCompanionChoice) end,
-        function(value) Settings.SlashCompanionChoice = companionOptionsKeys[value] end,
+        function () return GetFormattedCollectibleName(Settings.SlashCompanionChoice) end,
+        function (value) Settings.SlashCompanionChoice = companionOptionsKeys[value] end,
         1,
         "full",
-        function() return not Settings.SlashCompanion end,
+        function () return not Settings.SlashCompanion end,
         Defaults.SlashCompanionChoice
     )
 
@@ -240,13 +240,13 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_BANKER),
         GetString(LUIE_STRING_LAM_SLASHCMDS_BANKER_TP),
-        function() return Settings.SlashBanker end,
-        function(value)
+        function () return Settings.SlashBanker end,
+        function (value)
             Settings.SlashBanker = value
             SlashCommands.RegisterSlashCommands()
         end,
         "full",
-        function() return #bankerOptions == 0 end,
+        function () return #bankerOptions == 0 end,
         Defaults.SlashBanker,
         GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
     )
@@ -256,11 +256,11 @@ function SlashCommands.CreateSettings()
         "Choose Banker to Summon",
         nil,
         bankerOptions,
-        function() return GetFormattedCollectibleName(Settings.SlashBankerChoice) end,
-        function(value) Settings.SlashBankerChoice = bankerOptionsKeys[value] end,
+        function () return GetFormattedCollectibleName(Settings.SlashBankerChoice) end,
+        function (value) Settings.SlashBankerChoice = bankerOptionsKeys[value] end,
         1,
         "full",
-        function() return not Settings.SlashBanker end,
+        function () return not Settings.SlashBanker end,
         Defaults.SlashBankerChoice
     )
 
@@ -268,13 +268,13 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_MERCHANT),
         GetString(LUIE_STRING_LAM_SLASHCMDS_MERCHANT_TP),
-        function() return Settings.SlashMerchant end,
-        function(value)
+        function () return Settings.SlashMerchant end,
+        function (value)
             Settings.SlashMerchant = value
             SlashCommands.RegisterSlashCommands()
         end,
         "full",
-        function() return #merchantOptions == 0 end,
+        function () return #merchantOptions == 0 end,
         Defaults.SlashMerchant,
         GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
     )
@@ -284,11 +284,11 @@ function SlashCommands.CreateSettings()
         "Choose Merchant to Summon",
         nil,
         merchantOptions,
-        function() return GetFormattedCollectibleName(Settings.SlashMerchantChoice) end,
-        function(value) Settings.SlashMerchantChoice = merchantOptionsKeys[value] end,
+        function () return GetFormattedCollectibleName(Settings.SlashMerchantChoice) end,
+        function (value) Settings.SlashMerchantChoice = merchantOptionsKeys[value] end,
         1,
         "full",
-        function() return not Settings.SlashMerchant end,
+        function () return not Settings.SlashMerchant end,
         Defaults.SlashMerchantChoice
     )
 
@@ -296,13 +296,13 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_ARMORY),
         GetString(LUIE_STRING_LAM_SLASHCMDS_ARMORY_TP),
-        function() return Settings.SlashArmory end,
-        function(value)
+        function () return Settings.SlashArmory end,
+        function (value)
             Settings.SlashArmory = value
             SlashCommands.RegisterSlashCommands()
         end,
         "full",
-        function() return #armoryOptions == 0 end,
+        function () return #armoryOptions == 0 end,
         Defaults.SlashArmory,
         GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
     )
@@ -312,11 +312,11 @@ function SlashCommands.CreateSettings()
         "Choose Armory Assistant to Summon",
         nil,
         armoryOptions,
-        function() return GetFormattedCollectibleName(Settings.SlashArmoryChoice) end,
-        function(value) Settings.SlashArmoryChoice = armoryOptionsKeys[value] end,
+        function () return GetFormattedCollectibleName(Settings.SlashArmoryChoice) end,
+        function (value) Settings.SlashArmoryChoice = armoryOptionsKeys[value] end,
         1,
         "full",
-        function() return not Settings.SlashArmory end,
+        function () return not Settings.SlashArmory end,
         Defaults.SlashArmoryChoice
     )
 
@@ -324,13 +324,13 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_DECON),
         zo_strformat(GetString(LUIE_STRING_LAM_SLASHCMDS_DECON_TP), GetCollectibleName(10184)),
-        function() return Settings.SlashDecon end,
-        function(value)
+        function () return Settings.SlashDecon end,
+        function (value)
             Settings.SlashDecon = value
             SlashCommands.RegisterSlashCommands()
         end,
         "full",
-        function() return #deconOptions == 0 end,
+        function () return #deconOptions == 0 end,
         Defaults.SlashDecon,
         GetString(LUIE_STRING_LAM_RELOADUI_SLASH_WARNING)
     )
@@ -340,11 +340,11 @@ function SlashCommands.CreateSettings()
         "Choose Deconstruction Assistant to Summon",
         nil,
         deconOptions,
-        function() return GetFormattedCollectibleName(Settings.SlashDeconChoice) end,
-        function(value) Settings.SlashDeconChoice = deconOptionsKeys[value] end,
+        function () return GetFormattedCollectibleName(Settings.SlashDeconChoice) end,
+        function (value) Settings.SlashDeconChoice = deconOptionsKeys[value] end,
         1,
         "full",
-        function() return not Settings.SlashDecon end,
+        function () return not Settings.SlashDecon end,
         Defaults.SlashDeconChoice
     )
 
@@ -352,8 +352,8 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE),
         zo_strformat(GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE_TP), GetCollectibleName(300)),
-        function() return Settings.SlashFence end,
-        function(value)
+        function () return Settings.SlashFence end,
+        function (value)
             Settings.SlashFence = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -367,8 +367,8 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_EYE),
         GetString(LUIE_STRING_LAM_SLASHCMDS_EYE_TP),
-        function() return Settings.SlashEye end,
-        function(value)
+        function () return Settings.SlashEye end,
+        function (value)
             Settings.SlashEye = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -382,8 +382,8 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_PET),
         GetString(LUIE_STRING_LAM_SLASHCMDS_PET_TP),
-        function() return Settings.SlashPet end,
-        function(value)
+        function () return Settings.SlashPet end,
+        function (value)
             Settings.SlashPet = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -397,8 +397,8 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateIndentedCheckbox(
         GetString(LUIE_STRING_LAM_SLASHCMDS_PET_MESSAGE),
         GetString(LUIE_STRING_LAM_SLASHCMDS_PET_MESSAGE_TP),
-        function() return Settings.SlashPetMessage end,
-        function(value) Settings.SlashPetMessage = value end,
+        function () return Settings.SlashPetMessage end,
+        function (value) Settings.SlashPetMessage = value end,
         1,
         "full",
         nil,
@@ -409,8 +409,8 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_OUTFIT),
         GetString(LUIE_STRING_LAM_SLASHCMDS_OUTFIT_TP),
-        function() return Settings.SlashOutfit end,
-        function(value)
+        function () return Settings.SlashOutfit end,
+        function (value)
             Settings.SlashOutfit = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -424,8 +424,8 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_REPORT),
         GetString(LUIE_STRING_LAM_SLASHCMDS_REPORT_TP),
-        function() return Settings.SlashReport end,
-        function(value)
+        function () return Settings.SlashReport end,
+        function (value)
             Settings.SlashReport = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -439,8 +439,8 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         "/home Results - Show Alert (Temp Setting)",
         "Display an alert when the /home command is used.\nNote: This setting will be deprecated in the future when Social Errors Events are implemented in Chat Announcements.",
-        function() return LUIE.SV.TempAlertHome end,
-        function(value) LUIE.SV.TempAlertHome = value end,
+        function () return LUIE.SV.TempAlertHome end,
+        function (value) LUIE.SV.TempAlertHome = value end,
         "full",
         nil,
         LUIE.Defaults.TempAlertHome
@@ -450,8 +450,8 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         "/Campaign Results - Show Alert (Temp Setting)",
         "Display an alert when the /campaign command is used.\nNote: This setting will be deprecated in the future when Campaign Queue Events are implemented in Chat Announcements.",
-        function() return LUIE.SV.TempAlertCampaign end,
-        function(value) LUIE.SV.TempAlertCampaign = value end,
+        function () return LUIE.SV.TempAlertCampaign end,
+        function (value) LUIE.SV.TempAlertCampaign = value end,
         "full",
         nil,
         LUIE.Defaults.TempAlertCampaign
@@ -461,8 +461,8 @@ function SlashCommands.CreateSettings()
     generalCommandsControls[#generalCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         "/Outfit - Show Alert (Temp Setting)",
         "Display an alert when the /outfit command is used.\nNote: This setting will be deprecated in the future when Outfit Alerts are implemented in Chat Announcements.",
-        function() return LUIE.SV.TempAlertOutfit end,
-        function(value) LUIE.SV.TempAlertOutfit = value end,
+        function () return LUIE.SV.TempAlertOutfit end,
+        function (value) LUIE.SV.TempAlertOutfit = value end,
         "full",
         nil,
         LUIE.Defaults.TempAlertOutfit
@@ -480,8 +480,8 @@ function SlashCommands.CreateSettings()
     groupCommandsControls[#groupCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_READYCHECK),
         GetString(LUIE_STRING_LAM_SLASHCMDS_READYCHECK_TP),
-        function() return Settings.SlashReadyCheck end,
-        function(value)
+        function () return Settings.SlashReadyCheck end,
+        function (value)
             Settings.SlashReadyCheck = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -495,8 +495,8 @@ function SlashCommands.CreateSettings()
     groupCommandsControls[#groupCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_REGROUP),
         GetString(LUIE_STRING_LAM_SLASHCMDS_REGROUP_TP),
-        function() return Settings.SlashRegroup end,
-        function(value)
+        function () return Settings.SlashRegroup end,
+        function (value)
             Settings.SlashRegroup = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -510,8 +510,8 @@ function SlashCommands.CreateSettings()
     groupCommandsControls[#groupCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_DISBAND),
         GetString(LUIE_STRING_LAM_SLASHCMDS_DISBAND_TP),
-        function() return Settings.SlashDisband end,
-        function(value)
+        function () return Settings.SlashDisband end,
+        function (value)
             Settings.SlashDisband = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -525,8 +525,8 @@ function SlashCommands.CreateSettings()
     groupCommandsControls[#groupCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_LEAVE),
         GetString(LUIE_STRING_LAM_SLASHCMDS_LEAVE_TP),
-        function() return Settings.SlashGroupLeave end,
-        function(value)
+        function () return Settings.SlashGroupLeave end,
+        function (value)
             Settings.SlashGroupLeave = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -540,8 +540,8 @@ function SlashCommands.CreateSettings()
     groupCommandsControls[#groupCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_KICK),
         GetString(LUIE_STRING_LAM_SLASHCMDS_KICK_TP),
-        function() return Settings.SlashGroupKick end,
-        function(value)
+        function () return Settings.SlashGroupKick end,
+        function (value)
             Settings.SlashGroupKick = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -555,8 +555,8 @@ function SlashCommands.CreateSettings()
     groupCommandsControls[#groupCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_ROLE),
         GetString(LUIE_STRING_LAM_SLASHCMDS_ROLE_TP),
-        function() return Settings.SlashGroupRole end,
-        function(value)
+        function () return Settings.SlashGroupRole end,
+        function (value)
             Settings.SlashGroupRole = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -570,8 +570,8 @@ function SlashCommands.CreateSettings()
     groupCommandsControls[#groupCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_VOTEKICK),
         GetString(LUIE_STRING_LAM_SLASHCMDS_VOTEKICK_TP),
-        function() return Settings.SlashVoteKick end,
-        function(value)
+        function () return Settings.SlashVoteKick end,
+        function (value)
             Settings.SlashVoteKick = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -593,8 +593,8 @@ function SlashCommands.CreateSettings()
     guildCommandsControls[#guildCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDINVITE),
         GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDINVITE_TP),
-        function() return Settings.SlashGuildInvite end,
-        function(value)
+        function () return Settings.SlashGuildInvite end,
+        function (value)
             Settings.SlashGuildInvite = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -608,8 +608,8 @@ function SlashCommands.CreateSettings()
     guildCommandsControls[#guildCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDQUIT),
         GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDQUIT_TP),
-        function() return Settings.SlashGuildQuit end,
-        function(value)
+        function () return Settings.SlashGuildQuit end,
+        function (value)
             Settings.SlashGuildQuit = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -623,8 +623,8 @@ function SlashCommands.CreateSettings()
     guildCommandsControls[#guildCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDKICK),
         GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDKICK_TP),
-        function() return Settings.SlashGuildKick end,
-        function(value)
+        function () return Settings.SlashGuildKick end,
+        function (value)
             Settings.SlashGuildKick = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -646,8 +646,8 @@ function SlashCommands.CreateSettings()
     socialCommandsControls[#socialCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_FRIEND),
         GetString(LUIE_STRING_LAM_SLASHCMDS_FRIEND_TP),
-        function() return Settings.SlashFriend end,
-        function(value)
+        function () return Settings.SlashFriend end,
+        function (value)
             Settings.SlashFriend = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -661,8 +661,8 @@ function SlashCommands.CreateSettings()
     socialCommandsControls[#socialCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_IGNORE),
         GetString(LUIE_STRING_LAM_SLASHCMDS_IGNORE_TP),
-        function() return Settings.SlashIgnore end,
-        function(value)
+        function () return Settings.SlashIgnore end,
+        function (value)
             Settings.SlashIgnore = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -676,8 +676,8 @@ function SlashCommands.CreateSettings()
     socialCommandsControls[#socialCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEFRIEND),
         GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEFRIEND_TP),
-        function() return Settings.SlashRemoveFriend end,
-        function(value)
+        function () return Settings.SlashRemoveFriend end,
+        function (value)
             Settings.SlashRemoveFriend = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -691,8 +691,8 @@ function SlashCommands.CreateSettings()
     socialCommandsControls[#socialCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEIGNORE),
         GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEIGNORE_TP),
-        function() return Settings.SlashRemoveIgnore end,
-        function(value)
+        function () return Settings.SlashRemoveIgnore end,
+        function (value)
             Settings.SlashRemoveIgnore = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -715,8 +715,8 @@ function SlashCommands.CreateSettings()
     holidayCommandsControls[#holidayCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_CAKE),
         GetString(LUIE_STRING_LAM_SLASHCMDS_CAKE_TP),
-        function() return Settings.SlashCake end,
-        function(value)
+        function () return Settings.SlashCake end,
+        function (value)
             Settings.SlashCake = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -730,8 +730,8 @@ function SlashCommands.CreateSettings()
     holidayCommandsControls[#holidayCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_PIE),
         GetString(LUIE_STRING_LAM_SLASHCMDS_PIE_TP),
-        function() return Settings.SlashPie end,
-        function(value)
+        function () return Settings.SlashPie end,
+        function (value)
             Settings.SlashPie = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -745,8 +745,8 @@ function SlashCommands.CreateSettings()
     holidayCommandsControls[#holidayCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_MEAD),
         GetString(LUIE_STRING_LAM_SLASHCMDS_MEAD_TP),
-        function() return Settings.SlashMead end,
-        function(value)
+        function () return Settings.SlashMead end,
+        function (value)
             Settings.SlashMead = value
             SlashCommands.RegisterSlashCommands()
         end,
@@ -760,8 +760,8 @@ function SlashCommands.CreateSettings()
     holidayCommandsControls[#holidayCommandsControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SLASHCMDS_WITCH),
         GetString(LUIE_STRING_LAM_SLASHCMDS_WITCH_TP),
-        function() return Settings.SlashWitch end,
-        function(value)
+        function () return Settings.SlashWitch end,
+        function (value)
             Settings.SlashWitch = value
             SlashCommands.RegisterSlashCommands()
         end,
