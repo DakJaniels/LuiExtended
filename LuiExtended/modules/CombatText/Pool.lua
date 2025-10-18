@@ -17,19 +17,8 @@ local poolTypes = LuiData.Data.CombatTextConstants.poolType
 
 local wm = GetWindowManager()
 
---- @see easeInOutCirc(https://easings.net/#easeInOutCirc)
----
---- @param x number
---- @return number
-local function easeInOutCirc(x)
-    if x < 0.5 then
-        return (1 - zo_sqrt(1 - (2 * x) * (2 * x))) / 2
-    else
-        return (zo_sqrt(1 - (-2 * x + 2) * (-2 * x + 2)) + 1) / 2
-    end
-end
-
 -- Animation easing functions
+local easeInOutCirc = ZO_EaseInOutQuadratic
 local fastSlow = ZO_GenerateCubicBezierEase(0.3, 0.9, 0.7, 1)
 local slowFast = ZO_GenerateCubicBezierEase(0.63, 0.1, 0.83, 0.69)
 local even = ZO_GenerateCubicBezierEase(0.63, 1.2, 0.83, 1)
