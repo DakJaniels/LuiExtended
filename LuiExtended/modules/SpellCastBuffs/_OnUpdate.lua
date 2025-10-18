@@ -17,6 +17,15 @@ local Data = LuiData.Data
 local Abilities = Data.Abilities
 local Effects = Data.Effects
 
+local zo_floor = zo_floor
+local zo_min = zo_min
+local string_format = string.format
+local zo_strformat = zo_strformat
+local table_sort = table.sort
+local GetAbilityName = GetAbilityName
+local IsBlockActive = IsBlockActive
+local IsPlayerStunned = IsPlayerStunned
+
 
 -- Helper function to get CC color
 --- @param ccType integer
@@ -103,15 +112,15 @@ local SetSingleIconBuffType = function (buff, buffType, unbreakable, id)
 
     -- Set visual properties
     buff.frame:SetTexture("/esoui/art/actionbar/" .. contextType .. "_frame.dds")
-    buff.label:SetColor(unpack(textColor))
-    buff.stack:SetColor(unpack(textColor))
+    buff.label:SetColor(textColor[1], textColor[2], textColor[3], textColor[4])
+    buff.stack:SetColor(textColor[1], textColor[2], textColor[3], textColor[4])
 
     buff.back:SetHidden(true)
     buff.drop:SetHidden(false)
 
     -- Set cooldown color if it exists
     if buff.cd then
-        buff.cd:SetFillColor(unpack(fillColor))
+        buff.cd:SetFillColor(fillColor[1], fillColor[2], fillColor[3], fillColor[4])
     end
 
     -- Set progress bar colors if they exist
@@ -127,7 +136,7 @@ local function GetOrCreateBuffIconPool(container)
     if not buffIconPools[container] then
         local function BuffIconFactory(objectPool)
             local effectType = nil -- Will be set when acquired
-            
+
             -- Create main buff container
             local buff = UI:Backdrop(SpellCastBuffs.BuffContainers[container], nil, nil, { 0, 0, 0, 0.5 }, { 0, 0, 0, 1 }, false)
             -- Setup mouse interaction
@@ -220,20 +229,20 @@ local function GetOrCreateBuffIconPool(container)
         -- Create the pool
         buffIconPools[container] = ZO_ObjectPool:New(BuffIconFactory, BuffIconReset)
     end
-    
+
     return buffIconPools[container]
 end
 
 local CreateSingleIcon = function (container, AnchorItem, effectType)
     local pool = GetOrCreateBuffIconPool(container)
     local buff = pool:AcquireObject()
-    
+
     -- Reset icon properties for first use
     SpellCastBuffs.ResetSingleIcon(container, buff, AnchorItem)
-    
+
     -- Show the buff
     buff:SetHidden(false)
-    
+
     return buff
 end
 
@@ -461,7 +470,7 @@ local updateIcons = function (currentTimeMs, sortedList, container)
         end
 
         if effect.stack and effect.stack > 0 then
-            buff.stack:SetText(string.format("%s", effect.stack))
+            buff.stack:SetText(string_format("%s", effect.stack))
             buff.stack:SetHidden(false)
         else
             buff.stack:SetHidden(true)
@@ -471,19 +480,19 @@ local updateIcons = function (currentTimeMs, sortedList, container)
         if remain and not effect.fakeDuration then
             if remain > 86400000 then
                 -- more then 1 day
-                buff.label:SetText(string.format("%d d", zo_floor(remain / 86400000)))
+                buff.label:SetText(string_format("%d d", zo_floor(remain / 86400000)))
             elseif remain > 6000000 then
                 -- over 100 minutes - display XXh
-                buff.label:SetText(string.format("%dh", zo_floor(remain / 3600000)))
+                buff.label:SetText(string_format("%dh", zo_floor(remain / 3600000)))
             elseif remain > 600000 then
                 -- over 10 minutes - display XXm
-                buff.label:SetText(string.format("%dm", zo_floor(remain / 60000)))
+                buff.label:SetText(string_format("%dm", zo_floor(remain / 60000)))
             elseif remain > 60000 or container == "player_long" then
                 local m = zo_floor(remain / 60000)
                 local s = remain / 1000 - 60 * m
-                buff.label:SetText(string.format("%d:%.2d", m, s))
+                buff.label:SetText(string_format("%d:%.2d", m, s))
             else
-                buff.label:SetText(string.format(SpellCastBuffs.SV.RemainingTextMillis and "%.1f" or "%.1d", remain / 1000))
+                buff.label:SetText(string_format(SpellCastBuffs.SV.RemainingTextMillis and "%.1f" or "%.1d", remain / 1000))
             end
         end
         if effect.restart and buff.cd ~= nil then
@@ -565,6 +574,7 @@ end
 --- @param currentTimeMs number
 function SpellCastBuffs.OnUpdate(currentTimeMs)
     local buffsSorted = {}
+    local sortedCounts = {}
     local needs_update = {}
     local isProminent = {}
 
@@ -575,6 +585,7 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
         if buffsSorted[container] == nil then
             buffsSorted[container] = {}
         end
+        sortedCounts[container] = 0
         -- Refresh prominent buff labels on each update tick
         if container == "prominentbuffs" or container == "prominentdebuffs" then
             isProminent[container] = true
@@ -594,24 +605,30 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
                     -- Filter Effects
                     -- Always show prominent effects
                     if v.target == "prominent" then
-                        table.insert(buffsSorted[container], v)
+                        sortedCounts[container] = sortedCounts[container] + 1
+                        buffsSorted[container][sortedCounts[container]] = v
                         -- If the effect is not flagged as long or 0 duration and flagged to display in short container, then display normally.
                     elseif v.type == BUFF_EFFECT_TYPE_DEBUFF or v.forced == "short" or not (v.forced == "long" or v.ends == nil or v.dur == 0) then
                         if v.target == "reticleover" and SpellCastBuffs.SV.ShortTermEffects_Target then
-                            table.insert(buffsSorted[container], v)
+                            sortedCounts[container] = sortedCounts[container] + 1
+                            buffsSorted[container][sortedCounts[container]] = v
                         elseif v.target == "player" and SpellCastBuffs.SV.ShortTermEffects_Player then
-                            table.insert(buffsSorted[container], v)
+                            sortedCounts[container] = sortedCounts[container] + 1
+                            buffsSorted[container][sortedCounts[container]] = v
                         end
                         -- If the effect is a long term effect on the target then use Long Term Target settings.
                     elseif v.target == "reticleover" and SpellCastBuffs.SV.LongTermEffects_Target then
-                        table.insert(buffsSorted[container], v)
+                        sortedCounts[container] = sortedCounts[container] + 1
+                        buffsSorted[container][sortedCounts[container]] = v
                         -- If the effect is a long term effect on the player then use Long Term Player settings.
                     elseif v.target == "player" and SpellCastBuffs.SV.LongTermEffects_Player then
                         -- Choose container for long-term player buffs
                         if SpellCastBuffs.SV.LongTermEffectsSeparate and not (container == "prominentbuffs" or container == "prominentdebuffs") then
-                            table.insert(buffsSorted.player_long, v)
+                            sortedCounts.player_long = sortedCounts.player_long + 1
+                            buffsSorted.player_long[sortedCounts.player_long] = v
                         else
-                            table.insert(buffsSorted[container], v)
+                            sortedCounts[container] = sortedCounts[container] + 1
+                            buffsSorted[container][sortedCounts[container]] = v
                         end
                     end
                 end
@@ -622,7 +639,7 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
     -- Sort effects in container and draw them on screen
     for _, container in pairs(SpellCastBuffs.containerRouting) do
         if needs_update[container] then
-            table.sort(buffsSorted[container], buffSort)
+            table_sort(buffsSorted[container], buffSort)
             updateIcons(currentTimeMs, buffsSorted[container], container)
         end
         needs_update[container] = false
