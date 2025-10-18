@@ -120,79 +120,120 @@ local SetSingleIconBuffType = function (buff, buffType, unbreakable, id)
     end
 end
 
+-- Initialize buff icon pools per container (called once on module init)
+local buffIconPools = {}
+
+local function GetOrCreateBuffIconPool(container)
+    if not buffIconPools[container] then
+        local function BuffIconFactory(objectPool)
+            local effectType = nil -- Will be set when acquired
+            
+            -- Create main buff container
+            local buff = UI:Backdrop(SpellCastBuffs.BuffContainers[container], nil, nil, { 0, 0, 0, 0.5 }, { 0, 0, 0, 1 }, false)
+            -- Setup mouse interaction
+            buff:SetMouseEnabled(true)
+            buff:SetHandler("OnMouseEnter", SpellCastBuffs.Buff_OnMouseEnter)
+            buff:SetHandler("OnMouseExit", SpellCastBuffs.Buff_OnMouseExit)
+            buff:SetHandler("OnMouseUp", SpellCastBuffs.Buff_OnMouseUp)
+
+            -- Border layer - hidden by default, shown only for non-collectible buffs
+            buff.back = UI:Texture(buff, "fill", nil, "EsoUI/Art/ActionBar/abilityFrame_buff.dds", DL_BACKGROUND, true)
+
+            -- Glow border layer
+            buff.frame = UI:Texture(buff, { CENTER, CENTER }, nil, nil, DL_OVERLAY, false)
+
+            -- Background layer (except for player_long container)
+            if container ~= "player_long" then
+                -- Create background texture
+                buff.iconbg = UI:Texture(buff, "fill", nil, "EsoUI/Art/ActionBar/abilityInset.dds", DL_CONTROLS, false)
+                -- Create dark backdrop behind the texture
+                local bgBackdrop = UI:Backdrop(buff.iconbg, "fill", nil, { 0, 0, 0, 0.9 }, { 0, 0, 0, 0.9 }, false)
+                bgBackdrop:SetDrawLevel(DL_CONTROLS)
+            end
+
+            -- Collectible/mount background
+            buff.drop = UI:Texture(buff, nil, nil, "LuiExtended/media/icons/abilities/ability_innate_background.dds", DL_BACKGROUND, true)
+
+            -- Main ability icon
+            buff.icon = UI:Texture(buff, nil, nil, "/esoui/art/icons/icon_missing.dds", DL_CONTROLS, false)
+
+            -- Duration label
+            buff.label = UI:Label(buff, nil, nil, nil, SpellCastBuffs.buffsFont, nil, false)
+            buff.label:SetAnchor(TOPLEFT, buff, LEFT, -SpellCastBuffs.padding, -SpellCastBuffs.SV.LabelPosition)
+            buff.label:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, SpellCastBuffs.padding, -2)
+
+            -- Debug ability ID label
+            buff.abilityId = UI:Label(buff, { CENTER, CENTER }, nil, nil, SpellCastBuffs.buffsFont, nil, false)
+            buff.abilityId:SetDrawLayer(DL_OVERLAY)
+            buff.abilityId:SetDrawTier(DT_MEDIUM)
+
+            -- Stack count label
+            buff.stack = UI:Label(buff, nil, nil, nil, SpellCastBuffs.buffsFont, nil, false)
+            buff.stack:SetAnchor(CENTER, buff, BOTTOMLEFT, 0, 0)
+            buff.stack:SetAnchor(CENTER, buff, TOPRIGHT, -SpellCastBuffs.padding * 3, SpellCastBuffs.padding * 3)
+
+            if buff.iconbg then
+                buff.cd = UI:ControlWithType(buff, "fill", nil, false, nil, CT_COOLDOWN)
+                buff.cd:SetAnchor(TOPLEFT, buff, TOPLEFT, 1, 1)
+                buff.cd:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -1, -1)
+                buff.cd:SetDrawLayer(DL_BACKGROUND)
+            end
+
+            if container == "prominentbuffs" or container == "prominentdebuffs" then
+                buff.effectType = effectType
+                buff.name = UI:Label(buff, nil, nil, nil, SpellCastBuffs.prominentFont, nil, false)
+
+                -- Create progress bar
+                buff.bar =
+                {
+                    backdrop = UI:Backdrop(buff, nil, { 154, 16 }, nil, nil, false),
+                    bar = UI:StatusBar(buff, nil, { 150, 12 }, nil, false),
+                }
+
+                -- Setup bar properties
+                buff.bar.backdrop:SetEdgeTexture("", 8, 2, 2, 2)
+                buff.bar.backdrop:SetDrawLayer(DL_BACKGROUND)
+                buff.bar.backdrop:SetDrawLevel(DL_CONTROLS)
+                buff.bar.bar:SetMinMax(0, 1)
+            end
+
+            return buff
+        end
+
+        local function BuffIconReset(buff)
+            buff:SetHidden(true)
+            buff:ClearAnchors()
+            buff:SetAlpha(1)
+            if buff.cd then
+                buff.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
+            end
+            buff.label:SetText("")
+            buff.stack:SetHidden(true)
+            if buff.name then
+                buff.name:SetText("")
+            end
+            if buff.bar then
+                buff.bar.bar:SetValue(0)
+            end
+        end
+
+        -- Create the pool
+        buffIconPools[container] = ZO_ObjectPool:New(BuffIconFactory, BuffIconReset)
+    end
+    
+    return buffIconPools[container]
+end
+
 local CreateSingleIcon = function (container, AnchorItem, effectType)
-    -- Create main buff container
-    local buff = UI:Backdrop(SpellCastBuffs.BuffContainers[container], nil, nil, { 0, 0, 0, 0.5 }, { 0, 0, 0, 1 }, false)
-    -- Setup mouse interaction
-    buff:SetMouseEnabled(true)
-    buff:SetHandler("OnMouseEnter", SpellCastBuffs.Buff_OnMouseEnter)
-    buff:SetHandler("OnMouseExit", SpellCastBuffs.Buff_OnMouseExit)
-    buff:SetHandler("OnMouseUp", SpellCastBuffs.Buff_OnMouseUp)
-
-    -- Border layer - hidden by default, shown only for non-collectible buffs
-    buff.back = UI:Texture(buff, "fill", nil, "EsoUI/Art/ActionBar/abilityFrame_buff.dds", DL_BACKGROUND, true)
-
-    -- Glow border layer
-    buff.frame = UI:Texture(buff, { CENTER, CENTER }, nil, nil, DL_OVERLAY, false)
-
-    -- Background layer (except for player_long container)
-    if container ~= "player_long" then
-        -- Create background texture
-        buff.iconbg = UI:Texture(buff, "fill", nil, "EsoUI/Art/ActionBar/abilityInset.dds", DL_CONTROLS, false)
-        -- Create dark backdrop behind the texture
-        local bgBackdrop = UI:Backdrop(buff.iconbg, "fill", nil, { 0, 0, 0, 0.9 }, { 0, 0, 0, 0.9 }, false)
-        bgBackdrop:SetDrawLevel(DL_CONTROLS)
-    end
-
-    -- Collectible/mount background
-    buff.drop = UI:Texture(buff, nil, nil, "LuiExtended/media/icons/abilities/ability_innate_background.dds", DL_BACKGROUND, true)
-
-    -- Main ability icon
-    buff.icon = UI:Texture(buff, nil, nil, "/esoui/art/icons/icon_missing.dds", DL_CONTROLS, false)
-
-    -- Duration label
-    buff.label = UI:Label(buff, nil, nil, nil, SpellCastBuffs.buffsFont, nil, false)
-    buff.label:SetAnchor(TOPLEFT, buff, LEFT, -SpellCastBuffs.padding, -SpellCastBuffs.SV.LabelPosition)
-    buff.label:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, SpellCastBuffs.padding, -2)
-
-    -- Debug ability ID label
-    buff.abilityId = UI:Label(buff, { CENTER, CENTER }, nil, nil, SpellCastBuffs.buffsFont, nil, false)
-    buff.abilityId:SetDrawLayer(DL_OVERLAY)
-    buff.abilityId:SetDrawTier(DT_MEDIUM)
-
-    -- Stack count label
-    buff.stack = UI:Label(buff, nil, nil, nil, SpellCastBuffs.buffsFont, nil, false)
-    buff.stack:SetAnchor(CENTER, buff, BOTTOMLEFT, 0, 0)
-    buff.stack:SetAnchor(CENTER, buff, TOPRIGHT, -SpellCastBuffs.padding * 3, SpellCastBuffs.padding * 3)
-
-    if buff.iconbg then
-        buff.cd = UI:ControlWithType(buff, "fill", nil, false, nil, CT_COOLDOWN)
-        buff.cd:SetAnchor(TOPLEFT, buff, TOPLEFT, 1, 1)
-        buff.cd:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -1, -1)
-        buff.cd:SetDrawLayer(DL_BACKGROUND)
-    end
-
-    if container == "prominentbuffs" or container == "prominentdebuffs" then
-        buff.effectType = effectType
-        buff.name = UI:Label(buff, nil, nil, nil, SpellCastBuffs.prominentFont, nil, false)
-
-        -- Create progress bar
-        buff.bar =
-        {
-            backdrop = UI:Backdrop(buff, nil, { 154, 16 }, nil, nil, false),
-            bar = UI:StatusBar(buff, nil, { 150, 12 }, nil, false),
-        }
-
-        -- Setup bar properties
-        buff.bar.backdrop:SetEdgeTexture("", 8, 2, 2, 2)
-        buff.bar.backdrop:SetDrawLayer(DL_BACKGROUND)
-        buff.bar.backdrop:SetDrawLevel(DL_CONTROLS)
-        buff.bar.bar:SetMinMax(0, 1)
-    end
-
-    -- Reset icon properties
+    local pool = GetOrCreateBuffIconPool(container)
+    local buff = pool:AcquireObject()
+    
+    -- Reset icon properties for first use
     SpellCastBuffs.ResetSingleIcon(container, buff, AnchorItem)
-
+    
+    -- Show the buff
+    buff:SetHidden(false)
+    
     return buff
 end
 
@@ -315,7 +356,7 @@ local updateIcons = function (currentTimeMs, sortedList, container)
         -- Get current buff definition
         local effect = sortedList[i]
         index = index + 1
-        -- Check if the icon for buff #index exists otherwise create new icon
+        -- Get or create icon from pool
         if SpellCastBuffs.BuffContainers[container].icons[index] == nil then
             SpellCastBuffs.BuffContainers[container].icons[index] = CreateSingleIcon(container, SpellCastBuffs.BuffContainers[container].icons[index - 1], effect.type)
         end
@@ -325,6 +366,8 @@ local updateIcons = function (currentTimeMs, sortedList, container)
         local name = (effect.name ~= nil) and effect.name or nil
 
         local buff = SpellCastBuffs.BuffContainers[container].icons[index]
+        -- Ensure buff is shown (may have been hidden by pool reset)
+        buff:SetHidden(false)
 
         -- Perform manual alignment
         if not SpellCastBuffs.BuffContainers[container].iconHolder then
