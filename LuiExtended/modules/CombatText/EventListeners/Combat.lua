@@ -60,7 +60,7 @@ function CombatTextCombatEventListener:OnCombatIn(...)
     local cachedName = ZO_CachedStrFormat(SI_ABILITY_NAME, GetAbilityName(abilityId))
     abilityName = cachedName -- zo_strformat("<<C:1>>", GetAbilityName(abilityId))
 
-    local sourceNameCheck = zo_strformat("<<C:1>>", sourceName)
+    local sourceNameCheck = ZO_CachedStrFormat("<<C:1>>", sourceName)
 
     -- Handle effects that override by UnitName
     if Effects.EffectOverrideByName[abilityId] then
