@@ -132,6 +132,27 @@ function UnitFrames.CustomFramesApplyBarAlignment()
     end
 end
 
+local function RefreshBossHealthBar(self, smoothAnimate)
+    local totalHealth = 0
+    local totalMaxHealth = 0
+
+    for unitTag, bossEntry in pairs(self.bossHealthValues) do
+        totalHealth = totalHealth + bossEntry.health
+        totalMaxHealth = totalMaxHealth + bossEntry.maxHealth
+    end
+
+    local halfHealth = zo_floor(totalHealth / 2)
+    local halfMax = zo_floor(totalMaxHealth / 2)
+    for i = 1, #self.bars do
+        ZO_StatusBar_SmoothTransition(self.bars[i], halfHealth, halfMax, not smoothAnimate)
+    end
+    self.healthText:SetText(ZO_FormatResourceBarCurrentAndMax(totalHealth, totalMaxHealth))
+
+    if UnitFrames.SV.DefaultFramesNewBoss == 2 then
+        COMPASS_FRAME:SetBossBarActive(totalHealth > 0)
+    end
+end
+
 -- Main entry point to this module
 function UnitFrames.Initialize(enabled)
     -- Load settings
@@ -192,26 +213,7 @@ function UnitFrames.Initialize(enabled)
     UnitFrames.CreateDefaultFrames()
     UnitFrames.CreateCustomFrames()
 
-    function BOSS_BAR:RefreshBossHealthBar(smoothAnimate)
-        local totalHealth = 0
-        local totalMaxHealth = 0
-
-        for unitTag, bossEntry in pairs(self.bossHealthValues) do
-            totalHealth = totalHealth + bossEntry.health
-            totalMaxHealth = totalMaxHealth + bossEntry.maxHealth
-        end
-
-        local halfHealth = zo_floor(totalHealth / 2)
-        local halfMax = zo_floor(totalMaxHealth / 2)
-        for i = 1, #self.bars do
-            ZO_StatusBar_SmoothTransition(self.bars[i], halfHealth, halfMax, not smoothAnimate)
-        end
-        self.healthText:SetText(ZO_FormatResourceBarCurrentAndMax(totalHealth, totalMaxHealth))
-
-        if UnitFrames.SV.DefaultFramesNewBoss == 2 then
-            COMPASS_FRAME:SetBossBarActive(totalHealth > 0)
-        end
-    end
+    ZO_PreHook(BOSS_BAR, "RefreshBossHealthBar", RefreshBossHealthBar)
 
     UnitFrames.SaveDefaultFramePositions()
     UnitFrames.RepositionDefaultFrames()
@@ -276,9 +278,9 @@ function UnitFrames.Initialize(enabled)
         UnitFrames.RegisterForGroupElectionEvents()
 
         -- Register for screen resolution changes to recalculate positioning
-        eventManager:RegisterForEvent(moduleName, EVENT_SCREEN_RESIZED, function ()
+        eventManager:RegisterForEvent(moduleName, EVENT_SCREEN_RESIZED, function (eventId, pixelWidth, pixelHeight)
             if LUIE.IsDevDebugEnabled() then
-                LUIE.Debug("Unit Frames: Screen resolution changed, recalculating positions")
+                LUIE.Debug("Unit Frames: Screen resolution changed to " .. pixelWidth .. LUIE_TINY_X_FORMATTER .. pixelHeight .. " pixels, recalculating positions")
             end
             UnitFrames.CustomFramesSetPositions()
         end)
@@ -1940,60 +1942,102 @@ function UnitFrames.OnBossesChanged(eventCode)
     end
 end
 
--- Helper function to dynamically calculate positioning based on resolution
--- Uses the same scaling pattern as the original hardcoded presets
-local function CalculateDynamicPositioning(screenWidth, screenHeight, baseCoords)
+--- Dynamically calculate frame positioning based on resolution with dimension compensation
+--- Supports ultrawide (21:9), 16:10, and multi-monitor setups
+--- @param screenWidth number UI canvas width in UI units
+--- @param screenHeight number UI canvas height in UI units
+--- @param baseCoords table<string, number[]> Base coordinate tables for 1080p reference
+--- @param frameDimensions table<string, {width: number, height: number}> Current frame dimensions from saved variables
+--- @return table<string, number[]> coords Calculated position coordinates for each frame type
+--- @return {widthResolutionScale: number, heightResolutionScale: number, aspectRatioScale: number, isMultiMonitorLikely: boolean, actualAspectRatio: number} scaleFactors Debug scale factors
+local function CalculateDynamicPositioning(screenWidth, screenHeight, baseCoords, frameDimensions)
     local aspectRatio = screenWidth / screenHeight
-    local baseline169 = 16 / 9 -- 1.7778
+    local baseline169 = 16 / 9
+    local maxAspectRatio = 2.45 -- Cap at ~21:9 (catches 32:9 and multi-monitor setups)
 
-    -- Calculate scaling factors based on original preset patterns
-    local resolutionScale = screenHeight / 1080 -- Scale relative to 1080p baseline
+    local widthResolutionScale = screenWidth / 1920
+    local heightResolutionScale = screenHeight / 1080
     local aspectRatioScale = aspectRatio / baseline169
 
-    -- Apply manual override if set
     if UnitFrames.SV.AspectRatioOverride and UnitFrames.SV.AspectRatioOverride ~= 0 then
         aspectRatioScale = UnitFrames.SV.AspectRatioOverride
     end
 
-    -- Scale coordinates using original preset scaling patterns
-    local function scaleCoords(coords)
-        -- X scales linearly with resolution (like original: -492 → -570 → -738)
-        local scaledX = coords[1] * resolutionScale
+    -- Multi-monitor protection: cap extreme aspect ratios to prevent UI spreading across screens
+    local isMultiMonitorLikely = aspectRatio > maxAspectRatio
+    if isMultiMonitorLikely and (not UnitFrames.SV.AspectRatioOverride or UnitFrames.SV.AspectRatioOverride == 0) then
+        local cappedAspectRatio = maxAspectRatio
+        local cappedAspectRatioScale = cappedAspectRatio / baseline169
 
-        -- Y scales more aggressively (like original: 205 → 272 → 410)
-        -- Use a power curve to match the original scaling pattern
-        local scaledY = coords[2] * math.pow(resolutionScale, 1.2) * aspectRatioScale
+        aspectRatioScale = cappedAspectRatioScale
+        widthResolutionScale = heightResolutionScale * (cappedAspectRatio / baseline169)
+    end
+
+    -- Baseline dimensions at 1080p (reference point for scaling)
+    local baselineDimensions =
+    {
+        player = { width = 300, height = 30 },
+        reticleover = { width = 300, height = 36 },
+        companion = { width = 220, height = 30 },
+        SmallGroup1 = { width = 220, height = 30 },
+        RaidGroup1 = { width = 220, height = 30 },
+        PetGroup1 = { width = 220, height = 30 },
+        boss1 = { width = 300, height = 36 },
+        AvaPlayerTarget = { width = 300, height = 36 },
+    }
+
+    --- @param coords number[]
+    --- @param frameType string
+    --- @return number[]
+    local function scaleCoords(coords, frameType)
+        local baseline = baselineDimensions[frameType] or baselineDimensions.player
+        local current = frameDimensions[frameType] or baseline
+
+        local widthRatio = current.width / baseline.width
+        local heightRatio = current.height / baseline.height
+
+        local scaledX = coords[1] * widthResolutionScale * widthRatio
+        local scaledY = coords[2] * math.pow(heightResolutionScale, 1.2) * aspectRatioScale * heightRatio
 
         return { scaledX, scaledY }
     end
 
-    return
+    local scaleFactors =
     {
-        player = scaleCoords(baseCoords.player),
-        playerCenter = scaleCoords(baseCoords.playerCenter),
-        reticleover = scaleCoords(baseCoords.reticleover),
-        reticleoverCenter = scaleCoords(baseCoords.reticleoverCenter),
-        companion = scaleCoords(baseCoords.companion),
-        SmallGroup1 = scaleCoords(baseCoords.SmallGroup1),
-        RaidGroup1 = scaleCoords(baseCoords.RaidGroup1),
-        PetGroup1 = scaleCoords(baseCoords.PetGroup1),
-        boss1 = scaleCoords(baseCoords.boss1),
-        AvaPlayerTarget = scaleCoords(baseCoords.AvaPlayerTarget),
+        widthResolutionScale = widthResolutionScale,
+        heightResolutionScale = heightResolutionScale,
+        aspectRatioScale = aspectRatioScale,
+        isMultiMonitorLikely = isMultiMonitorLikely,
+        actualAspectRatio = aspectRatio,
     }
+
+    return
+        {
+            player = scaleCoords(baseCoords.player, "player"),
+            playerCenter = scaleCoords(baseCoords.playerCenter, "player"),
+            reticleover = scaleCoords(baseCoords.reticleover, "reticleover"),
+            reticleoverCenter = scaleCoords(baseCoords.reticleoverCenter, "reticleover"),
+            companion = scaleCoords(baseCoords.companion, "companion"),
+            SmallGroup1 = scaleCoords(baseCoords.SmallGroup1, "SmallGroup1"),
+            RaidGroup1 = scaleCoords(baseCoords.RaidGroup1, "RaidGroup1"),
+            PetGroup1 = scaleCoords(baseCoords.PetGroup1, "PetGroup1"),
+            boss1 = scaleCoords(baseCoords.boss1, "boss1"),
+            AvaPlayerTarget = scaleCoords(baseCoords.AvaPlayerTarget, "AvaPlayerTarget"),
+        }, scaleFactors
 end
 
--- Set anchors for all top level windows of CustomFrames
+--- Set anchors for all top level windows of CustomFrames
 function UnitFrames.CustomFramesSetPositions()
+    --- @type table<string, table>
     local default_anchors = {}
 
-    -- Get UI canvas dimensions (what ZOS uses for positioning)
     local screenWidth, screenHeight = GuiRoot:GetDimensions()
 
     if screenWidth == 0 or screenHeight == 0 then
-        screenWidth, screenHeight = 1920, 1080 -- Fallback to 1080p
+        screenWidth, screenHeight = 1920, 1080
     end
 
-    -- Base coordinate tables for 1080p (16:9) - our reference point
+    -- Base coordinates for 1080p reference (UI units)
     local baseCoordinates =
     {
         player = { -492, 205 },
@@ -2008,15 +2052,31 @@ function UnitFrames.CustomFramesSetPositions()
         AvaPlayerTarget = { 0, -200 },
     }
 
-    -- Calculate positioning dynamically based on actual screen resolution
-    local coords = CalculateDynamicPositioning(screenWidth, screenHeight, baseCoordinates)
+    -- Current frame dimensions from saved variables
+    local frameDimensions =
+    {
+        player = { width = UnitFrames.SV.PlayerBarWidth, height = UnitFrames.SV.PlayerBarHeightHealth },
+        reticleover = { width = UnitFrames.SV.TargetBarWidth, height = UnitFrames.SV.TargetBarHeight },
+        companion = { width = UnitFrames.SV.CompanionWidth, height = UnitFrames.SV.CompanionHeight },
+        SmallGroup1 = { width = UnitFrames.SV.GroupBarWidth, height = UnitFrames.SV.GroupBarHeight },
+        RaidGroup1 = { width = UnitFrames.SV.RaidBarWidth, height = UnitFrames.SV.RaidBarHeight },
+        PetGroup1 = { width = UnitFrames.SV.PetWidth, height = UnitFrames.SV.PetHeight },
+        boss1 = { width = UnitFrames.SV.BossBarWidth, height = UnitFrames.SV.BossBarHeight },
+        AvaPlayerTarget = { width = UnitFrames.SV.AvaTargetBarWidth, height = UnitFrames.SV.AvaTargetBarHeight },
+    }
+
+    local coords, scaleFactors = CalculateDynamicPositioning(screenWidth, screenHeight, baseCoordinates, frameDimensions)
 
     if LUIE.IsDevDebugEnabled() then
         local aspectRatio = screenWidth / screenHeight
-        local resolutionScale = screenHeight / 1080
-        local aspectRatioScale = aspectRatio / (16 / 9)
-        LUIE.Debug("Unit Frames: UI Canvas " .. screenWidth .. LUIE_TINY_X_FORMATTER .. screenHeight)
-        LUIE.Debug("Unit Frames: Aspect ratio: " .. string_format("%.4f", aspectRatio) .. ", Resolution scale: " .. string_format("%.3f", resolutionScale) .. ", Aspect ratio scale: " .. string_format("%.3f", aspectRatioScale))
+        local uiGlobalScale = GetUIGlobalScale()
+        local pixelWidth = screenWidth * uiGlobalScale
+        local pixelHeight = screenHeight * uiGlobalScale
+        LUIE.Debug("Unit Frames: UI Canvas " .. screenWidth .. LUIE_TINY_X_FORMATTER .. screenHeight .. " UI units (" .. string_format("%.0f", pixelWidth) .. LUIE_TINY_X_FORMATTER .. string_format("%.0f", pixelHeight) .. " pixels, scale: " .. string_format("%.2f", uiGlobalScale) .. ")")
+        LUIE.Debug("Unit Frames: Aspect ratio: " .. string_format("%.4f", aspectRatio) .. (scaleFactors.isMultiMonitorLikely and " [EXTREME ASPECT RATIO - Capped to prevent multi-monitor spread]" or ""))
+        LUIE.Debug("Unit Frames: Width scale: " .. string_format("%.3f", scaleFactors.widthResolutionScale) .. ", Height scale: " .. string_format("%.3f", scaleFactors.heightResolutionScale) .. ", Aspect ratio scale: " .. string_format("%.3f", scaleFactors.aspectRatioScale))
+        LUIE.Debug("Unit Frames: Player frame dimensions: " .. frameDimensions.player.width .. "x" .. frameDimensions.player.height .. " UI units (base: 300x30)")
+        LUIE.Debug("Unit Frames: Player calculated position: " .. string_format("%.1f", coords.player[1]) .. ", " .. string_format("%.1f", coords.player[2]) .. " UI units")
     end
 
     if UnitFrames.SV.PlayerFrameOptions == 1 then
