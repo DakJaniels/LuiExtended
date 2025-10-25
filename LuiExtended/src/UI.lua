@@ -152,7 +152,6 @@ function UI:Texture(parent, anchors, dims, texture, drawlayer, hidden)
     local name = GetUniqueControlName("Texture")
     --- @type TextureControl
     local t = windowManager:CreateControl(name, parent, CT_TEXTURE)
-    t:SetTextureReleaseOption(RELEASE_TEXTURE_AT_ZERO_REFERENCES)
     if anchors == "fill" then
         t:SetAnchorFill()
     elseif anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
@@ -193,7 +192,6 @@ function UI:Backdrop(parent, anchors, dims, center, edge, hidden)
     local edgeColor = (edge ~= nil and #edge == 4) and edge or { 0, 0, 0, 0.6 }
     --- @type BackdropControl
     local bg = windowManager:CreateControl(name, parent, CT_BACKDROP)
-    bg:SetTextureReleaseOption(RELEASE_TEXTURE_AT_ZERO_REFERENCES)
     bg:SetCenterColor(centerColor[1], centerColor[2], centerColor[3], centerColor[4])
     bg:SetEdgeColor(edgeColor[1], edgeColor[2], edgeColor[3], edgeColor[4])
     bg:SetEdgeTexture("", 8, 1, 1, 1)
@@ -232,7 +230,6 @@ function UI:ChatBackdrop(parent, anchors, dims, color, edge_size, hidden)
     local edgeSize = (edge_size ~= nil and edge_size > 0) and edge_size or 16
     --- @type BackdropControl
     local bg = windowManager:CreateControl(name, parent, CT_BACKDROP)
-    bg:SetTextureReleaseOption(RELEASE_TEXTURE_AT_ZERO_REFERENCES)
     bg:SetCenterColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
     bg:SetEdgeColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
     bg:SetCenterTexture("/esoui/art/chatwindow/chat_bg_center.dds", nil, nil)
