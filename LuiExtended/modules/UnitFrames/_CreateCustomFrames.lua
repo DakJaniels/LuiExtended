@@ -16,42 +16,19 @@ local sceneManager = SCENE_MANAGER
 
 -- -----------------------------------------------------------------------------
 
-
 -- Default Regen/degen animation used on default group frames and custom frames
 local function CreateRegenAnimation(parent, anchors, dims, alpha, number)
-    -- Table of animation configs (because hardcoding is for masochists)
     local animConfigs =
     {
-        degen1 =
-        {
-            texture = "LuiExtended/media/unitframes/regenleft.dds",
-            distanceMult = -0.35,
-            offsetXMult = 0.425,
-        },
-        degen2 =
-        {
-            texture = "LuiExtended/media/unitframes/regenright.dds",
-            distanceMult = 0.35,
-            offsetXMult = -0.425,
-        },
-        regen1 =
-        {
-            texture = "LuiExtended/media/unitframes/regenright.dds",
-            distanceMult = 0.35,
-            offsetXMult = 0.075,
-        },
-        regen2 =
-        {
-            texture = "LuiExtended/media/unitframes/regenleft.dds",
-            distanceMult = -0.35,
-            offsetXMult = -0.075,
-        },
+        degen1 = { texture = "LuiExtended/media/unitframes/regenleft.dds", distanceMult = -0.35, offsetXMult = 0.425 },
+        degen2 = { texture = "LuiExtended/media/unitframes/regenright.dds", distanceMult = 0.35, offsetXMult = -0.425 },
+        regen1 = { texture = "LuiExtended/media/unitframes/regenright.dds", distanceMult = 0.35, offsetXMult = 0.075 },
+        regen2 = { texture = "LuiExtended/media/unitframes/regenleft.dds", distanceMult = -0.35, offsetXMult = -0.075 },
     }
 
     local config = animConfigs[number]
     if not config then
         if LUIE.IsDevDebugEnabled() then
-            -- If you pass in a bad number, you get nothing. (And you deserve it.)
             LUIE.Error("[LUIE] CreateRegenAnimation: Invalid animation number '" .. tostring(number) .. "'.")
         end
         return nil
@@ -70,22 +47,19 @@ local function CreateRegenAnimation(parent, anchors, dims, alpha, number)
     control:SetAlpha(alpha or 0)
     control:SetDrawLayer(DL_CONTROLS)
 
-    -- Find the first valid anchor and set up the animation (because why would you want more than one?)
+    -- Find the first valid anchor and set up the animation
     for i = 0, MAX_ANCHORS - 1 do
         local isValid, _, _, _, _, offsetY = control:GetAnchor(i)
         if isValid then
-            -- Horizontal sliding animation
             local animation, timeline = CreateSimpleAnimation(ANIMATION_TRANSLATE, control, 0)
             animation:SetTranslateOffsets(offsetX, offsetY, offsetX + distance, offsetY)
             animation:SetDuration(1000)
 
-            -- Fade in
             local fadeIn = timeline:InsertAnimation(ANIMATION_ALPHA, control, 0)
             fadeIn:SetAlphaValues(0, 0.75)
             fadeIn:SetDuration(250)
             fadeIn:SetEasingFunction(ZO_EaseOutQuadratic)
 
-            -- Fade out
             local fadeOut = timeline:InsertAnimation(ANIMATION_ALPHA, control, 750)
             fadeOut:SetAlphaValues(0.75, 0)
             fadeOut:SetDuration(250)
@@ -98,16 +72,77 @@ local function CreateRegenAnimation(parent, anchors, dims, alpha, number)
             return control
         end
     end
+
     if LUIE.IsDevDebugEnabled() then
-        -- If you get here, you have no valid anchors. Sucks to be you.
         LUIE.Error("[LUIE] CreateRegenAnimation: No valid anchors found for animation.")
     end
     return nil
 end
 
+-- Possession halo animated texture (32-frame sprite sheet: 4 columns x 8 rows)
+local function CreatePossessionHaloAnimation(backdrop)
+    local halo = UI:Texture(backdrop, nil, nil, "EsoUI/Art/UnitAttributeVisualizer/possession_animatedHalo_32fr.dds", DL_BACKGROUND, false)
+    halo:SetAnchor(LEFT, backdrop, LEFT, -80, 0)
+    halo:SetAnchor(RIGHT, backdrop, RIGHT, 80, 0)
+    halo:SetHeight(128)
+    halo:SetDrawTier(DT_LOW)
+    halo:SetHidden(true)
+
+    -- Create texture animation for 32-frame sprite sheet (4 wide x 8 high)
+    local animation, timeline = CreateSimpleAnimation(ANIMATION_TEXTURE, halo)
+    animation:SetImageData(4, 8) -- 4 columns, 8 rows = 32 frames
+    animation:SetFramerate(32)
+    animation:SetDuration(1000)
+    timeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
+
+    halo.animation = animation
+    halo.timeline = timeline
+
+    return halo
+end
+
+-- No-healing fade animation (controls inner ring, outer ring, and stripe overlay)
+local function CreateNoHealingFadeAnimation(innerRing, outerRing, stripeOverlay)
+    if not innerRing or not outerRing then
+        return nil
+    end
+
+    -- Create fade timeline for both rings
+    local fadeAnim, fadeTimeline = CreateSimpleAnimation(ANIMATION_ALPHA, innerRing)
+    fadeAnim:SetAlphaValues(0, 1)
+    fadeAnim:SetDuration(200)
+    fadeAnim:SetEasingFunction(ZO_EaseInQuadratic)
+
+    -- Add outer ring to same timeline
+    local outerFade = fadeTimeline:InsertAnimation(ANIMATION_ALPHA, outerRing)
+    outerFade:SetAlphaValues(0, 1)
+    outerFade:SetDuration(200)
+    outerFade:SetEasingFunction(ZO_EaseInQuadratic)
+
+    -- Add stripe overlay to same timeline
+    if stripeOverlay then
+        local stripeFade = fadeTimeline:InsertAnimation(ANIMATION_ALPHA, stripeOverlay)
+        stripeFade:SetAlphaValues(0, 0.8)
+        stripeFade:SetDuration(200)
+        stripeFade:SetEasingFunction(ZO_EaseInQuadratic)
+    end
+
+    -- When animation stops, hide controls if faded out
+    fadeTimeline:SetHandler("OnStop", function ()
+        if innerRing:GetAlpha() == 0 then
+            innerRing:SetHidden(true)
+            outerRing:SetHidden(true)
+            if stripeOverlay then
+                stripeOverlay:SetHidden(true)
+            end
+        end
+    end)
+
+    return fadeTimeline
+end
+
 -- Decreased armour overlay visuals
 local function CreateDecreasedArmorOverlay(parent, small)
-    -- Config for overlay textures (because hardcoding is for people who hate themselves)
     local textureConfig =
     {
         small =
@@ -124,14 +159,10 @@ local function CreateDecreasedArmorOverlay(parent, small)
         },
     }
 
-    -- Create the base control (centered, because why not?)
     local control = UI:Control(parent, { CENTER, CENTER }, textureConfig.small.size, false)
-
-    -- Always add the small texture (because apparently everyone gets to be small)
     control.smallTex = UI:Texture(control, { CENTER, CENTER }, textureConfig.small.size, textureConfig.small.file, 2, false)
     control.smallTex:SetDrawTier(textureConfig.small.tier)
 
-    -- Only add the normal texture if 'small' is NOT true (logic, right?)
     if not small then
         control.normalTex = UI:Texture(control, { CENTER, CENTER }, textureConfig.normal.size, textureConfig.normal.file, 2, false)
         control.normalTex:SetDrawTier(textureConfig.normal.tier)
@@ -143,7 +174,6 @@ end
 -- Helper to create the Player Frame
 local function CreatePlayerFrame()
     if UnitFrames.SV.CustomFramesPlayer then
-        -- Player Frame
         local playerTlw = UI:TopLevel(nil, nil)
         playerTlw:SetDrawLayer(DL_BACKGROUND)
         playerTlw:SetDrawTier(DT_LOW)
@@ -173,7 +203,6 @@ local function CreatePlayerFrame()
         sceneManager:GetScene("siegeBar"):AddFragment(fragment)
         sceneManager:GetScene("siegeBarUI"):AddFragment(fragment)
 
-        -- Collect all together
         UnitFrames.CustomFrames["player"] =
         {
             ["unitTag"] = "player",
@@ -187,6 +216,10 @@ local function CreatePlayerFrame()
                 ["trauma"] = UI:StatusBar(phb, nil, nil, nil, true),
                 ["bar"] = UI:StatusBar(phb, nil, nil, nil, false),
                 ["shield"] = UI:StatusBar(phb, nil, nil, nil, true),
+                ["noHealingInner"] = UI:StatusBar(phb, nil, nil, nil, true),
+                ["noHealingOuter"] = UI:StatusBar(phb, nil, nil, nil, true),
+                ["noHealingStripe"] = UI:Texture(phb, nil, nil, nil, nil, true),
+                ["possessionOverlay"] = UI:Control(phb, nil, nil, true),
                 ["threshold"] = UnitFrames.healthThreshold,
             },
             [COMBAT_MECHANIC_FLAGS_MAGICKA] =
@@ -225,27 +258,24 @@ local function CreatePlayerFrame()
 
         UnitFrames.CustomFrames["player"].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
 
-        -- If Health Label is hidden in menu optins, hide the health bar labels
-        if UnitFrames.SV.HideLabelHealth then
-            UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_HEALTH].labelOne:SetHidden(true)
-            UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_HEALTH].labelTwo:SetHidden(true)
-        end
+        -- Hide labels based on settings
+        local labelSettings =
+        {
+            { flag = UnitFrames.SV.HideLabelHealth,  mechanic = COMBAT_MECHANIC_FLAGS_HEALTH  },
+            { flag = UnitFrames.SV.HideLabelStamina, mechanic = COMBAT_MECHANIC_FLAGS_STAMINA },
+            { flag = UnitFrames.SV.HideLabelMagicka, mechanic = COMBAT_MECHANIC_FLAGS_MAGICKA },
+        }
 
-        -- If Stamina Label is hidden in menu options, hide the stamina bar labels
-        if UnitFrames.SV.HideLabelStamina then
-            UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_STAMINA].labelOne:SetHidden(true)
-            UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_STAMINA].labelTwo:SetHidden(true)
-        end
-
-        -- If Magicka Label is hidden in menu options, hide the magicka bar labels
-        if UnitFrames.SV.HideLabelMagicka then
-            UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_MAGICKA].labelOne:SetHidden(true)
-            UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_MAGICKA].labelTwo:SetHidden(true)
+        for _, setting in ipairs(labelSettings) do
+            if setting.flag then
+                UnitFrames.CustomFrames["player"][setting.mechanic].labelOne:SetHidden(true)
+                UnitFrames.CustomFrames["player"][setting.mechanic].labelTwo:SetHidden(true)
+            end
         end
 
         UnitFrames.CustomFrames["controlledsiege"] =
         {
-            ["unitTag"] = "controlledsiege", -- placeholder for alternative bar when using siege weapon
+            ["unitTag"] = "controlledsiege",
         }
     end
 end
@@ -253,7 +283,6 @@ end
 -- Helper to create the Target Frame
 local function CreateTargetFrame()
     if UnitFrames.SV.CustomFramesTarget then
-        -- Target Frame
         local targetTlw = UI:TopLevel(nil, nil)
         targetTlw:SetDrawLayer(DL_BACKGROUND)
         targetTlw:SetDrawTier(DT_LOW)
@@ -270,8 +299,8 @@ local function CreateTargetFrame()
         thb:SetDrawLevel(DL_CONTROLS)
         local tli = UI:Texture(topInfo, nil, { 20, 20 }, nil, nil, false)
         local ari = UI:Texture(botInfo, { RIGHT, RIGHT, -1, 0 }, { 20, 20 }, nil, nil, false)
-        local buffs
-        local debuffs
+
+        local buffs, debuffs
         if UnitFrames.SV.PlayerFrameOptions == 1 then
             buffs = UI:Control(targetTlw, { TOP, BOTTOM, 0, 2, buffAnchor }, nil, false)
             debuffs = UI:Control(targetTlw, { BOTTOM, TOP, 0, -2, topInfo }, nil, false)
@@ -287,7 +316,6 @@ local function CreateTargetFrame()
         sceneManager:GetScene("siegeBar"):AddFragment(fragment)
         sceneManager:GetScene("siegeBarUI"):AddFragment(fragment)
 
-        -- Collect all together
         UnitFrames.CustomFrames["reticleover"] =
         {
             ["unitTag"] = "reticleover",
@@ -304,6 +332,10 @@ local function CreateTargetFrame()
                 ["invulnerable"] = UI:StatusBar(thb, nil, nil, nil, false),
                 ["invulnerableInlay"] = UI:StatusBar(thb, nil, nil, nil, false),
                 ["shield"] = UI:StatusBar(thb, nil, nil, nil, true),
+                ["noHealingInner"] = UI:StatusBar(thb, nil, nil, nil, true),
+                ["noHealingOuter"] = UI:StatusBar(thb, nil, nil, nil, true),
+                ["noHealingStripe"] = UI:Texture(thb, nil, nil, nil, nil, true),
+                ["possessionOverlay"] = UI:Control(thb, nil, nil, true),
                 ["threshold"] = UnitFrames.targetThreshold,
             },
             ["topInfo"] = topInfo,
@@ -334,7 +366,6 @@ end
 -- Helper to create the Ava Player Target Frame
 local function CreateAvaPlayerTargetFrame()
     if UnitFrames.SV.AvaCustFramesTarget then
-        -- Target Frame
         local targetTlw = UI:TopLevel(nil, nil)
         targetTlw:SetDrawLayer(DL_BACKGROUND)
         targetTlw:SetDrawTier(DT_LOW)
@@ -358,10 +389,6 @@ local function CreateAvaPlayerTargetFrame()
         sceneManager:GetScene("siegeBar"):AddFragment(fragment)
         sceneManager:GetScene("siegeBarUI"):AddFragment(fragment)
 
-        -- Collect all together
-        -- Notice, that we put this table into same UnitFrames.CustomFrames table.
-        -- This is done to apply formating more easier
-        -- Later this table will be referenced from UnitFrames.AvaCustFrames
         UnitFrames.CustomFrames["AvaPlayerTarget"] =
         {
             ["unitTag"] = "reticleover",
@@ -379,6 +406,10 @@ local function CreateAvaPlayerTargetFrame()
                 ["invulnerable"] = UI:StatusBar(thb, nil, nil, nil, false),
                 ["invulnerableInlay"] = UI:StatusBar(thb, nil, nil, nil, false),
                 ["shield"] = UI:StatusBar(thb, nil, nil, nil, true),
+                ["noHealingInner"] = UI:StatusBar(thb, nil, nil, nil, true),
+                ["noHealingOuter"] = UI:StatusBar(thb, nil, nil, nil, true),
+                ["noHealingStripe"] = UI:Texture(thb, nil, nil, nil, nil, true),
+                ["possessionOverlay"] = UI:Control(thb, nil, nil, true),
                 ["threshold"] = UnitFrames.targetThreshold,
             },
             ["topInfo"] = topInfo,
@@ -398,7 +429,6 @@ local function CreateAvaPlayerTargetFrame()
         UnitFrames.CustomFrames["AvaPlayerTarget"][COMBAT_MECHANIC_FLAGS_HEALTH].labelOne.format = "Current + Shield"
         UnitFrames.CustomFrames["AvaPlayerTarget"][COMBAT_MECHANIC_FLAGS_HEALTH].labelTwo.format = "Max"
 
-        -- Put in into table with secondary frames so it can be accessed by other functions in this module
         UnitFrames.AvaCustFrames["reticleover"] = UnitFrames.CustomFrames["AvaPlayerTarget"]
     end
 end
@@ -406,7 +436,6 @@ end
 -- Helper to create the Small Group Frames
 local function CreateSmallGroupFrames()
     if UnitFrames.SV.CustomFramesGroup then
-        -- Group Frame
         local group = UI:TopLevel(nil, nil)
         group:SetDrawLayer(DL_BACKGROUND)
         group:SetDrawTier(DT_LOW)
@@ -417,11 +446,9 @@ local function CreateSmallGroupFrames()
 
         local fragment = ZO_HUDFadeSceneFragment:New(group, 0, 0)
 
-        sceneManager:GetScene("hud"):AddFragment(fragment)
-        sceneManager:GetScene("hudui"):AddFragment(fragment)
-        sceneManager:GetScene("siegeBar"):AddFragment(fragment)
-        sceneManager:GetScene("siegeBarUI"):AddFragment(fragment)
-        sceneManager:GetScene("loot"):AddFragment(fragment)
+        for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
+            sceneManager:GetScene(scene):AddFragment(fragment)
+        end
 
         for i = 1, 4 do
             local unitTag = "SmallGroup" .. i
@@ -444,6 +471,10 @@ local function CreateSmallGroupFrames()
                     ["trauma"] = UI:StatusBar(ghb, nil, nil, nil, true),
                     ["bar"] = UI:StatusBar(ghb, nil, nil, nil, false),
                     ["shield"] = UI:StatusBar(ghb, nil, nil, nil, true),
+                    ["noHealingInner"] = UI:StatusBar(ghb, nil, nil, nil, true),
+                    ["noHealingOuter"] = UI:StatusBar(ghb, nil, nil, nil, true),
+                    ["noHealingStripe"] = UI:Texture(ghb, nil, nil, nil, nil, true),
+                    ["possessionOverlay"] = UI:Control(ghb, nil, nil, true),
                 },
                 ["topInfo"] = topInfo,
                 ["name"] = UI:Label(topInfo, { BOTTOMLEFT, BOTTOMLEFT }, nil, { 0, 4 }, nil, unitTag, false),
@@ -463,7 +494,7 @@ local function CreateSmallGroupFrames()
             topInfo.defaultUnitTag = GetGroupUnitTagByIndex(i)
             topInfo:SetMouseEnabled(true)
             topInfo:SetHandler("OnMouseUp", UnitFrames.GroupFrames_OnMouseUp)
-            -- Map by real unitTag as well
+
             local realUnitTag = GetGroupUnitTagByIndex(i)
             if realUnitTag then
                 UnitFrames.CustomFrames[realUnitTag] = UnitFrames.CustomFrames[unitTag]
@@ -475,7 +506,6 @@ end
 -- Helper to create the Raid Group Frames
 local function CreateRaidGroupFrames()
     if UnitFrames.SV.CustomFramesRaid then
-        -- Raid Frame
         local raid = UI:TopLevel(nil, nil)
         raid:SetDrawLayer(DL_BACKGROUND)
         raid:SetDrawTier(DT_LOW)
@@ -486,11 +516,9 @@ local function CreateRaidGroupFrames()
 
         local fragment = ZO_HUDFadeSceneFragment:New(raid, 0, 0)
 
-        sceneManager:GetScene("hud"):AddFragment(fragment)
-        sceneManager:GetScene("hudui"):AddFragment(fragment)
-        sceneManager:GetScene("siegeBar"):AddFragment(fragment)
-        sceneManager:GetScene("siegeBarUI"):AddFragment(fragment)
-        sceneManager:GetScene("loot"):AddFragment(fragment)
+        for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
+            sceneManager:GetScene(scene):AddFragment(fragment)
+        end
 
         for i = 1, 12 do
             local unitTag = "RaidGroup" .. i
@@ -510,6 +538,10 @@ local function CreateRaidGroupFrames()
                     ["trauma"] = UI:StatusBar(rhb, nil, nil, nil, true),
                     ["bar"] = UI:StatusBar(rhb, nil, nil, nil, false),
                     ["shield"] = UI:StatusBar(rhb, nil, nil, nil, true),
+                    ["noHealingInner"] = UI:StatusBar(rhb, nil, nil, nil, true),
+                    ["noHealingOuter"] = UI:StatusBar(rhb, nil, nil, nil, true),
+                    ["noHealingStripe"] = UI:Texture(rhb, nil, nil, nil, nil, true),
+                    ["possessionOverlay"] = UI:Control(rhb, nil, nil, true),
                 },
                 ["name"] = UI:Label(rhb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, unitTag, false),
                 ["roleIcon"] = UI:Texture(rhb, { LEFT, LEFT, 4, 0 }, { 16, 16 }, nil, 2, false),
@@ -525,7 +557,6 @@ local function CreateRaidGroupFrames()
 
             UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label.format = "Current (Percentage%)"
 
-            -- Map by real unitTag as well
             local realUnitTag = GetGroupUnitTagByIndex(i)
             if realUnitTag then
                 UnitFrames.CustomFrames[realUnitTag] = UnitFrames.CustomFrames[unitTag]
@@ -537,7 +568,6 @@ end
 -- Helper to create the Pet Frames
 local function CreatePetFrames()
     if UnitFrames.SV.CustomFramesPet then
-        -- Pet Frame
         local pet = UI:TopLevel(nil, nil)
         pet:SetDrawLayer(DL_BACKGROUND)
         pet:SetDrawTier(DT_LOW)
@@ -548,11 +578,9 @@ local function CreatePetFrames()
 
         local fragment = ZO_HUDFadeSceneFragment:New(pet, 0, 0)
 
-        sceneManager:GetScene("hud"):AddFragment(fragment)
-        sceneManager:GetScene("hudui"):AddFragment(fragment)
-        sceneManager:GetScene("siegeBar"):AddFragment(fragment)
-        sceneManager:GetScene("siegeBarUI"):AddFragment(fragment)
-        sceneManager:GetScene("loot"):AddFragment(fragment)
+        for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
+            sceneManager:GetScene(scene):AddFragment(fragment)
+        end
 
         for i = 1, 7 do
             local unitTag = "PetGroup" .. i
@@ -573,6 +601,10 @@ local function CreatePetFrames()
                     ["trauma"] = UI:StatusBar(shb, nil, nil, nil, true),
                     ["bar"] = UI:StatusBar(shb, nil, nil, nil, false),
                     ["shield"] = UI:StatusBar(shb, nil, nil, nil, true),
+                    ["noHealingInner"] = UI:StatusBar(shb, nil, nil, nil, true),
+                    ["noHealingOuter"] = UI:StatusBar(shb, nil, nil, nil, true),
+                    ["noHealingStripe"] = UI:Texture(shb, nil, nil, nil, nil, true),
+                    ["possessionOverlay"] = UI:Control(shb, nil, nil, true),
                 },
                 ["dead"] = UI:Label(shb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "Status", true),
                 ["name"] = UI:Label(shb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, unitTag, false),
@@ -586,7 +618,6 @@ end
 -- Helper to create the Companion Frame
 local function CreateCompanionFrame()
     if UnitFrames.SV.CustomFramesCompanion then
-        -- Companion Frame
         local companionTlw = UI:TopLevel(nil, nil)
         companionTlw:SetDrawLayer(DL_BACKGROUND)
         companionTlw:SetDrawTier(DT_LOW)
@@ -597,11 +628,9 @@ local function CreateCompanionFrame()
 
         local fragment = ZO_HUDFadeSceneFragment:New(companionTlw, 0, 0)
 
-        sceneManager:GetScene("hud"):AddFragment(fragment)
-        sceneManager:GetScene("hudui"):AddFragment(fragment)
-        sceneManager:GetScene("siegeBar"):AddFragment(fragment)
-        sceneManager:GetScene("siegeBarUI"):AddFragment(fragment)
-        sceneManager:GetScene("loot"):AddFragment(fragment)
+        for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
+            sceneManager:GetScene(scene):AddFragment(fragment)
+        end
 
         local companion = UI:Control(companionTlw, nil, nil, false)
         local shb = UI:Backdrop(companion, "fill", nil, nil, nil, false)
@@ -621,6 +650,10 @@ local function CreateCompanionFrame()
                 ["trauma"] = UI:StatusBar(shb, nil, nil, nil, true),
                 ["bar"] = UI:StatusBar(shb, nil, nil, nil, false),
                 ["shield"] = UI:StatusBar(shb, nil, nil, nil, true),
+                ["noHealingInner"] = UI:StatusBar(shb, nil, nil, nil, true),
+                ["noHealingOuter"] = UI:StatusBar(shb, nil, nil, nil, true),
+                ["noHealingStripe"] = UI:Texture(shb, nil, nil, nil, nil, true),
+                ["possessionOverlay"] = UI:Control(shb, nil, nil, true),
             },
             ["dead"] = UI:Label(shb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "Status", true),
             ["name"] = UI:Label(shb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, nil, false),
@@ -633,7 +666,6 @@ end
 -- Helper to create the Bosses Frames
 local function CreateBossFrames()
     if UnitFrames.SV.CustomFramesBosses then
-        -- Bosses Frame
         local bosses = UI:TopLevel(nil, nil)
         bosses:SetDrawLayer(DL_BACKGROUND)
         bosses:SetDrawTier(DT_LOW)
@@ -644,11 +676,9 @@ local function CreateBossFrames()
 
         local fragment = ZO_HUDFadeSceneFragment:New(bosses, 0, 0)
 
-        sceneManager:GetScene("hud"):AddFragment(fragment)
-        sceneManager:GetScene("hudui"):AddFragment(fragment)
-        sceneManager:GetScene("siegeBar"):AddFragment(fragment)
-        sceneManager:GetScene("siegeBarUI"):AddFragment(fragment)
-        sceneManager:GetScene("loot"):AddFragment(fragment)
+        for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
+            sceneManager:GetScene(scene):AddFragment(fragment)
+        end
 
         for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
             local unitTag = "boss" .. i
@@ -672,6 +702,10 @@ local function CreateBossFrames()
                     ["invulnerable"] = UI:StatusBar(bhb, nil, nil, nil, false),
                     ["invulnerableInlay"] = UI:StatusBar(bhb, nil, nil, nil, false),
                     ["shield"] = UI:StatusBar(bhb, nil, nil, nil, true),
+                    ["noHealingInner"] = UI:StatusBar(bhb, nil, nil, nil, true),
+                    ["noHealingOuter"] = UI:StatusBar(bhb, nil, nil, nil, true),
+                    ["noHealingStripe"] = UI:Texture(bhb, nil, nil, nil, nil, true),
+                    ["possessionOverlay"] = UI:Control(bhb, nil, nil, true),
                     ["threshold"] = UnitFrames.targetThreshold,
                 },
                 ["dead"] = UI:Label(bhb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "Status", true),
@@ -685,38 +719,27 @@ end
 
 -- Helper to set up common actions for all created frames
 local function SetupCommonFrameActions()
-    -- Callback used to hide anchor coords preview label on movement start
     local tlwOnMoveStart = function (self)
         eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
             self.preview.anchorLabel:SetText(zo_strformat("<<1>>, <<2>>", self:GetLeft(), self:GetTop()))
         end)
     end
-    -- Callback used to save new position of frames
+
     local tlwOnMoveStop = function (self)
         eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
         UnitFrames.SV[self.customPositionAttr] = { self:GetLeft(), self:GetTop() }
     end
 
-    -- Common actions for all created frames:
-    for _, baseName in pairs(
-        {
-            "player",
-            "reticleover",
-            "companion",
-            "SmallGroup",
-            "RaidGroup",
-            "boss",
-            "AvaPlayerTarget",
-            "PetGroup",
-        }) do
-        -- set mouse handlers for all created tlws and create anchor coords preview labels
-        local unitFrame = UnitFrames.CustomFrames[baseName] or UnitFrames.CustomFrames[baseName .. "1"] or nil
-        if unitFrame ~= nil and unitFrame.tlw ~= nil then
+    local frameBaseNames = { "player", "reticleover", "companion", "SmallGroup", "RaidGroup", "boss", "AvaPlayerTarget", "PetGroup" }
+
+    for _, baseName in ipairs(frameBaseNames) do
+        local unitFrame = UnitFrames.CustomFrames[baseName] or UnitFrames.CustomFrames[baseName .. "1"]
+        if unitFrame and unitFrame.tlw then
             -- Movement handlers
             unitFrame.tlw:SetHandler("OnMoveStart", tlwOnMoveStart)
             unitFrame.tlw:SetHandler("OnMoveStop", tlwOnMoveStop)
 
-            -- Create Texture and a label for Anchor Preview
+            -- Create anchor preview
             unitFrame.tlw.preview.anchorTexture = UI:Texture(unitFrame.tlw.preview, { TOPLEFT, TOPLEFT }, { 16, 16 }, "/esoui/art/reticle/border_topleft.dds", DL_OVERLAY, false)
             unitFrame.tlw.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
 
@@ -729,24 +752,21 @@ local function SetupCommonFrameActions()
             unitFrame.tlw.preview.anchorLabelBg:SetDrawTier(DT_LOW)
         end
 
-        -- Now we have to anchor all bars to their backdrops
+        -- Anchor bars to their backdrops
         local shieldOverlay = (baseName == "RaidGroup" or baseName == "boss") or not UnitFrames.SV.CustomShieldBarSeparate
+
         for i = 0, 12 do
             local unitTag = (i == 0) and baseName or (baseName .. i)
-            if UnitFrames.CustomFrames[unitTag] then
-                for _, powerType in pairs(
-                    {
-                        COMBAT_MECHANIC_FLAGS_HEALTH,
-                        COMBAT_MECHANIC_FLAGS_MAGICKA,
-                        COMBAT_MECHANIC_FLAGS_STAMINA,
-                        "alternative",
-                    }) do
-                    local powerBar = UnitFrames.CustomFrames[unitTag][powerType]
+            local frame = UnitFrames.CustomFrames[unitTag]
+
+            if frame then
+                for _, powerType in ipairs({ COMBAT_MECHANIC_FLAGS_HEALTH, COMBAT_MECHANIC_FLAGS_MAGICKA, COMBAT_MECHANIC_FLAGS_STAMINA, "alternative" }) do
+                    local powerBar = frame[powerType]
+
                     if powerBar then
                         powerBar.bar:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
                         powerBar.bar:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
 
-                        -- Also set anchors for enlightenment bar
                         if powerBar.enlightenment then
                             powerBar.enlightenment:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
                             powerBar.enlightenment:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
@@ -764,6 +784,75 @@ local function SetupCommonFrameActions()
                             powerBar.invulnerableInlay:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -3, -3)
                         end
 
+                        if powerBar.noHealingInner and powerBar.noHealingOuter then
+                            -- Inner ring: Dark fill that covers health portion
+                            powerBar.noHealingInner:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
+                            powerBar.noHealingInner:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
+                            powerBar.noHealingInner:SetTexture("EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_noHealing_inner_fill.dds")
+                            powerBar.noHealingInner:SetDrawLevel(2)
+                            powerBar.noHealingInner:SetHidden(true)
+                            powerBar.noHealingInner:SetAlpha(0)
+                            -- Dark red tint for inner
+                            powerBar.noHealingInner:SetColor(0.1, 0.05, 0.05, 1)
+
+                            -- Outer ring: Red border that shows danger
+                            powerBar.noHealingOuter:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
+                            powerBar.noHealingOuter:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
+                            powerBar.noHealingOuter:SetTexture("EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_noHealing_outer_fill.dds")
+                            powerBar.noHealingOuter:SetDrawLevel(1)
+                            powerBar.noHealingOuter:SetHidden(true)
+                            powerBar.noHealingOuter:SetAlpha(0)
+                            -- Bright red for outer border
+                            powerBar.noHealingOuter:SetColor(0.85, 0.19, 0.19, 1)
+                        end
+
+                        if powerBar.noHealingStripe then
+                            -- Full-bar diagonal stripe overlay (always covers entire bar regardless of health)
+                            powerBar.noHealingStripe:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 0, 0)
+                            powerBar.noHealingStripe:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, 0, 0)
+                            powerBar.noHealingStripe:SetTexture("LuiExtended/media/unitframes/textures/Diagonal.dds")
+                            powerBar.noHealingStripe:SetTextureCoords(0, 1, 0, 1) -- Full texture, no tiling
+                            powerBar.noHealingStripe:SetDrawLayer(DL_OVERLAY)
+                            powerBar.noHealingStripe:SetDrawTier(DT_HIGH)
+                            powerBar.noHealingStripe:SetDrawLevel(10)           -- Way above everything else
+                            powerBar.noHealingStripe:SetBlendMode(TEX_BLEND_MODE_ALPHA)
+                            powerBar.noHealingStripe:SetColor(1, 0.3, 0.3, 0.8) -- Bright red with some transparency
+                            powerBar.noHealingStripe:SetHidden(true)
+
+                            -- Create fade animation for inner, outer, and stripe
+                            powerBar.noHealingFadeAnimation = CreateNoHealingFadeAnimation(powerBar.noHealingInner, powerBar.noHealingOuter, powerBar.noHealingStripe)
+                        end
+
+                        if powerBar.possessionOverlay then
+                            powerBar.possessionOverlay:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 0, -2)
+                            powerBar.possessionOverlay:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, 0, 2)
+                            powerBar.possessionOverlay:SetDrawTier(DT_HIGH)
+                            powerBar.possessionOverlay:SetDrawLayer(DL_CONTROLS)
+
+                            -- Create three-part possession overlay container (uses TextureCoords from single file)
+                            if not powerBar.possessionGlowLeft then
+                                -- Left arrow (width 10px from texture coords)
+                                powerBar.possessionGlowLeft = UI:Texture(powerBar.possessionOverlay, { TOPLEFT, TOPLEFT }, { 10, nil }, "EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possession.dds", DL_CONTROLS, false)
+                                powerBar.possessionGlowLeft:SetTextureCoords(0.390625, 0.46875, 0.359375, 0.65625)
+                                powerBar.possessionGlowLeft:SetHidden(true)
+
+                                -- Right arrow (width 10px, mirrored texture coords)
+                                powerBar.possessionGlowRight = UI:Texture(powerBar.possessionOverlay, { TOPRIGHT, TOPRIGHT }, { 10, nil }, "EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possession.dds", DL_CONTROLS, false)
+                                powerBar.possessionGlowRight:SetTextureCoords(0.46875, 0.390625, 0.359375, 0.65625)
+                                powerBar.possessionGlowRight:SetHidden(true)
+
+                                -- Center section (stretches between left and right)
+                                powerBar.possessionGlowCenter = UI:Texture(powerBar.possessionOverlay, nil, nil, "EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possession.dds", DL_CONTROLS, false)
+                                powerBar.possessionGlowCenter:SetAnchor(TOPLEFT, powerBar.possessionGlowLeft, TOPRIGHT, 0, 0)
+                                powerBar.possessionGlowCenter:SetAnchor(BOTTOMRIGHT, powerBar.possessionGlowRight, TOPLEFT, 0, 0)
+                                powerBar.possessionGlowCenter:SetTextureCoords(0.46875, 0.5234375, 0.359375, 0.65625)
+                                powerBar.possessionGlowCenter:SetHidden(true)
+
+                                -- Create animated halo texture using helper function
+                                powerBar.possessionHalo = CreatePossessionHaloAnimation(powerBar.backdrop)
+                            end
+                        end
+
                         if powerBar.shield then
                             if shieldOverlay then
                                 if UnitFrames.SV.CustomShieldBarFull then
@@ -775,8 +864,7 @@ local function SetupCommonFrameActions()
                                     powerBar.shield:SetHeight(UnitFrames.SV.CustomShieldBarHeight)
                                 end
                             else
-                                -- In non-overlay mode we need to create separate backdrop for shield
-                                powerBar.shieldbackdrop = UI:Backdrop(UnitFrames.CustomFrames[unitTag].control, nil, nil, nil, nil, true)
+                                powerBar.shieldbackdrop = UI:Backdrop(frame.control, nil, nil, nil, nil, true)
                                 powerBar.shield:SetAnchor(TOPLEFT, powerBar.shieldbackdrop, TOPLEFT, 1, 1)
                                 powerBar.shield:SetAnchor(BOTTOMRIGHT, powerBar.shieldbackdrop, BOTTOMRIGHT, -1, -1)
                             end
@@ -788,33 +876,31 @@ local function SetupCommonFrameActions()
     end
 end
 
--- Helper to set up Player regen/degen animations
-local function SetupPlayerRegenAnimations()
-    if UnitFrames.SV.PlayerEnableRegen then
-        for _, baseName in pairs({ "player", "reticleover", "AvaPlayerTarget" }) do
-            local unitTag = baseName
-            if UnitFrames.CustomFrames[unitTag] then
-                for _, powerType in pairs({ COMBAT_MECHANIC_FLAGS_HEALTH }) do
-                    if UnitFrames.CustomFrames[unitTag][powerType] then
-                        local backdrop = UnitFrames.CustomFrames[unitTag][powerType].backdrop
-                        local size1
-                        local size2
-                        if baseName == "player" then
-                            size1 = UnitFrames.SV.PlayerBarWidth
-                            size2 = UnitFrames.SV.PlayerBarHeightHealth
-                        elseif baseName == "reticleover" then
-                            size1 = UnitFrames.SV.TargetBarWidth
-                            size2 = UnitFrames.SV.TargetBarHeight
-                        elseif baseName == "AvaPlayerTarget" then
-                            size1 = UnitFrames.SV.AvaTargetBarWidth
-                            size2 = UnitFrames.SV.AvaTargetBarHeight
-                        end
-                        if size1 ~= nil and size2 ~= nil then
-                            UnitFrames.CustomFrames[unitTag][powerType].regen1 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.3) }, 0.55, "regen1")
-                            UnitFrames.CustomFrames[unitTag][powerType].regen2 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.3) }, 0.55, "regen2")
-                            UnitFrames.CustomFrames[unitTag][powerType].degen1 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.3) }, 0.55, "degen1")
-                            UnitFrames.CustomFrames[unitTag][powerType].degen2 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.3) }, 0.55, "degen2")
-                        end
+-- Generic function to setup regen/degen animations
+local function SetupRegenAnimations(frameConfig)
+    if not UnitFrames.SV[frameConfig.enableFlag] then
+        return
+    end
+
+    for i = frameConfig.startIndex, frameConfig.endIndex do
+        local unitTag = frameConfig.prefix .. (frameConfig.prefix == "" and "" or i)
+        local frame = UnitFrames.CustomFrames[unitTag]
+
+        if frame then
+            for _, powerType in ipairs({ COMBAT_MECHANIC_FLAGS_HEALTH, COMBAT_MECHANIC_FLAGS_MAGICKA, COMBAT_MECHANIC_FLAGS_STAMINA }) do
+                if frame[powerType] then
+                    local backdrop = frame[powerType].backdrop
+                    local size1 = UnitFrames.SV[frameConfig.widthSV]
+                    local size2 = UnitFrames.SV[frameConfig.heightSV]
+
+                    if size1 and size2 then
+                        local heightReduction = size2 * frameConfig.heightMultiplier
+                        local dims = { size1 - 4, size2 - heightReduction }
+
+                        frame[powerType].regen1 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, dims, 0.55, "regen1")
+                        frame[powerType].regen2 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, dims, 0.55, "regen2")
+                        frame[powerType].degen1 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, dims, 0.55, "degen1")
+                        frame[powerType].degen2 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, dims, 0.55, "degen2")
                     end
                 end
             end
@@ -822,221 +908,61 @@ local function SetupPlayerRegenAnimations()
     end
 end
 
--- Helper to set up Group regen/degen animations
-local function SetupGroupRegenAnimations()
-    if UnitFrames.SV.GroupEnableRegen then
-        for i = 1, 4 do
-            local unitTag = "SmallGroup" .. i
-            if UnitFrames.CustomFrames[unitTag] then
-                for _, powerType in pairs(
-                    {
-                        COMBAT_MECHANIC_FLAGS_HEALTH,
-                        COMBAT_MECHANIC_FLAGS_MAGICKA,
-                        COMBAT_MECHANIC_FLAGS_STAMINA,
-                    }) do
-                    if UnitFrames.CustomFrames[unitTag][powerType] then
-                        local backdrop = UnitFrames.CustomFrames[unitTag][powerType].backdrop
-                        local size1 = UnitFrames.SV.GroupBarWidth
-                        local size2 = UnitFrames.SV.GroupBarHeight
-                        if size1 ~= nil and size2 ~= nil then
-                            UnitFrames.CustomFrames[unitTag][powerType].regen1 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.4) }, 0.55, "regen1")
-                            UnitFrames.CustomFrames[unitTag][powerType].regen2 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.4) }, 0.55, "regen2")
-                            UnitFrames.CustomFrames[unitTag][powerType].degen1 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.4) }, 0.55, "degen1")
-                            UnitFrames.CustomFrames[unitTag][powerType].degen2 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.4) }, 0.55, "degen2")
-                        end
-                    end
-                end
-            end
-        end
+-- Generic function to setup armor overlays
+local function SetupArmorOverlays(frameConfig)
+    if not UnitFrames.SV[frameConfig.enableFlag] then
+        return
     end
-end
 
--- Helper to set up Raid regen/degen animations
-local function SetupRaidRegenAnimations()
-    if UnitFrames.SV.RaidEnableRegen then
-        for i = 1, 12 do
-            local unitTag = "RaidGroup" .. i
-            if UnitFrames.CustomFrames[unitTag] then
-                for _, powerType in pairs(
-                    {
-                        COMBAT_MECHANIC_FLAGS_HEALTH,
-                        COMBAT_MECHANIC_FLAGS_MAGICKA,
-                        COMBAT_MECHANIC_FLAGS_STAMINA,
-                    }) do
-                    if UnitFrames.CustomFrames[unitTag][powerType] then
-                        local backdrop = UnitFrames.CustomFrames[unitTag][powerType].backdrop
-                        local size1 = UnitFrames.SV.RaidBarWidth
-                        local size2 = UnitFrames.SV.RaidBarHeight
-                        if size1 ~= nil and size2 ~= nil then
-                            UnitFrames.CustomFrames[unitTag][powerType].regen1 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.3) }, 0.55, "regen1")
-                            UnitFrames.CustomFrames[unitTag][powerType].regen2 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.3) }, 0.55, "regen2")
-                            UnitFrames.CustomFrames[unitTag][powerType].degen1 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.3) }, 0.55, "degen1")
-                            UnitFrames.CustomFrames[unitTag][powerType].degen2 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.3) }, 0.55, "degen2")
-                        end
-                    end
-                end
-            end
-        end
-    end
-end
+    for i = frameConfig.startIndex, frameConfig.endIndex do
+        local unitTag = frameConfig.prefix .. (frameConfig.prefix == "" and "" or i)
+        local frame = UnitFrames.CustomFrames[unitTag]
 
--- Helper to set up Boss regen/degen animations
-local function SetupBossRegenAnimations()
-    if UnitFrames.SV.BossEnableRegen then
-        for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
-            local unitTag = "boss" .. i
-            if UnitFrames.CustomFrames[unitTag] then
-                for _, powerType in pairs(
-                    {
-                        COMBAT_MECHANIC_FLAGS_HEALTH,
-                        COMBAT_MECHANIC_FLAGS_MAGICKA,
-                        COMBAT_MECHANIC_FLAGS_STAMINA,
-                    }) do
-                    if UnitFrames.CustomFrames[unitTag][powerType] then
-                        local backdrop = UnitFrames.CustomFrames[unitTag][powerType].backdrop
-                        local size1 = UnitFrames.SV.BossBarWidth
-                        local size2 = UnitFrames.SV.BossBarHeight
-                        if size1 ~= nil and size2 ~= nil then
-                            UnitFrames.CustomFrames[unitTag][powerType].regen1 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.3) }, 0.55, "regen1")
-                            UnitFrames.CustomFrames[unitTag][powerType].regen2 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.3) }, 0.55, "regen2")
-                            UnitFrames.CustomFrames[unitTag][powerType].degen1 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.3) }, 0.55, "degen1")
-                            UnitFrames.CustomFrames[unitTag][powerType].degen2 = CreateRegenAnimation(backdrop, { CENTER, CENTER, 0, 0 }, { size1 - 4, size2 - (size2 * 0.3) }, 0.55, "degen2")
-                        end
-                    end
-                end
+        if frame and frame[COMBAT_MECHANIC_FLAGS_HEALTH] then
+            if not frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat then
+                frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat = {}
             end
-        end
-    end
-end
 
--- Helper to set up Player armor overlays
-local function SetupPlayerArmorOverlays()
-    if UnitFrames.SV.PlayerEnableArmor then
-        for _, baseName in pairs({ "player", "reticleover", "AvaPlayerTarget" }) do
-            local unitTag = baseName
-            if UnitFrames.CustomFrames[unitTag] then
-                -- Assume that unitTag DO have [COMBAT_MECHANIC_FLAGS_HEALTH] field
-                if UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat == nil then
-                    UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat = {}
-                end
-                local backdrop = UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
-                UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_ARMOR_RATING] =
-                {
-                    ["dec"] = CreateDecreasedArmorOverlay(backdrop, false),
-                    ["inc"] = UI:Texture(backdrop, { CENTER, CENTER, 13, 0 }, { 24, 24 }, "/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds", 2, true),
-                }
-            end
-        end
-    end
-end
-
--- Helper to set up Group armor overlays
-local function SetupGroupArmorOverlays()
-    if UnitFrames.SV.GroupEnableArmor then
-        for i = 1, 4 do
-            local unitTag = "SmallGroup" .. i
-            if UnitFrames.CustomFrames[unitTag] then
-                -- Assume that unitTag DO have [COMBAT_MECHANIC_FLAGS_HEALTH] field
-                if UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat == nil then
-                    UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat = {}
-                end
-                local backdrop = UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
-                UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_ARMOR_RATING] =
-                {
-                    ["dec"] = CreateDecreasedArmorOverlay(backdrop, false),
-                    ["inc"] = UI:Texture(backdrop, { CENTER, CENTER, 13, 0 }, { 24, 24 }, "/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds", 2, true),
-                }
-            end
-        end
-    end
-end
-
--- Helper to set up Raid armor overlays
-local function SetupRaidArmorOverlays()
-    if UnitFrames.SV.RaidEnableArmor then
-        for i = 1, 12 do
-            local unitTag = "RaidGroup" .. i
-            if UnitFrames.CustomFrames[unitTag] then
-                -- Assume that unitTag DO have [COMBAT_MECHANIC_FLAGS_HEALTH] field
-                if UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat == nil then
-                    UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat = {}
-                end
-                local backdrop = UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
-                UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_ARMOR_RATING] =
-                {
-                    ["dec"] = CreateDecreasedArmorOverlay(backdrop, false),
-                    ["inc"] = UI:Texture(backdrop, { CENTER, CENTER, 13, 0 }, { 24, 24 }, "/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds", 2, true),
-                }
-            end
-        end
-    end
-end
-
--- Helper to set up Boss armor overlays
-local function SetupBossArmorOverlays()
-    if UnitFrames.SV.BossEnableArmor then
-        for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
-            local unitTag = "boss" .. i
-            if UnitFrames.CustomFrames[unitTag] then
-                -- Assume that unitTag DO have [COMBAT_MECHANIC_FLAGS_HEALTH] field
-                if UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat == nil then
-                    UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat = {}
-                end
-                local backdrop = UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
-                UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_ARMOR_RATING] =
-                {
-                    ["dec"] = CreateDecreasedArmorOverlay(backdrop, false),
-                    ["inc"] = UI:Texture(backdrop, { CENTER, CENTER, 13, 0 }, { 24, 24 }, "/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds", 2, true),
-                }
-            end
+            local backdrop = frame[COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
+            frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_ARMOR_RATING] =
+            {
+                ["dec"] = CreateDecreasedArmorOverlay(backdrop, false),
+                ["inc"] = UI:Texture(backdrop, { CENTER, CENTER, 13, 0 }, { 24, 24 }, "/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds", 2, true),
+            }
         end
     end
 end
 
 -- Helper to set up Power Glow animations for all frames that have it displayed
 local function SetupPowerGlowAnimations()
-    for _, baseName in pairs({ "player", "reticleover", "AvaPlayerTarget", "boss", "SmallGroup", "RaidGroup" }) do
+    for _, baseName in ipairs({ "player", "reticleover", "AvaPlayerTarget", "boss", "SmallGroup", "RaidGroup" }) do
         for i = 0, 12 do
             local unitTag = (i == 0) and baseName or (baseName .. i)
-            if UnitFrames.CustomFrames[unitTag] then
-                if UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH] then
-                    if UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat then
-                        if UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_POWER] then
-                            if UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_POWER].inc then
-                                -- Create glow animation
-                                local control = UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_POWER].inc
-                                local animation, timeline = CreateSimpleAnimation(ANIMATION_TEXTURE, control)
-                                animation:SetImageData(4, 8)
-                                animation:SetFramerate(GetFramerate())
-                                animation:SetDuration(1000)
-                                timeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
+            local frame = UnitFrames.CustomFrames[unitTag]
 
-                                control.animation = animation
-                                control.timeline = timeline
+            if  frame and frame[COMBAT_MECHANIC_FLAGS_HEALTH] and frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat
+            and frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_POWER]
+            and frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_POWER].inc then
+                local control = frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_POWER].inc
+                local animation, timeline = CreateSimpleAnimation(ANIMATION_TEXTURE, control)
+                animation:SetImageData(4, 8)
+                animation:SetFramerate(GetFramerate())
+                animation:SetDuration(1000)
+                timeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
 
-                                control.timeline:PlayFromStart()
-                            end
-                        end
-                    end
-                end
+                control.animation = animation
+                control.timeline = timeline
+                control.timeline:PlayFromStart()
             end
         end
     end
 end
 
--- Add the top level windows to global controls list, so they can be hidden.
+-- Add the top level windows to global controls list
 local function AddTopLevelWindows()
-    for _, unitTag in pairs(
-        {
-            "player",
-            "reticleover",
-            "companion",
-            "SmallGroup1",
-            "RaidGroup1",
-            "boss1",
-            "AvaPlayerTarget",
-            "PetGroup1",
-        }) do
+    local frameTags = { "player", "reticleover", "companion", "SmallGroup1", "RaidGroup1", "boss1", "AvaPlayerTarget", "PetGroup1" }
+
+    for _, unitTag in ipairs(frameTags) do
         if UnitFrames.CustomFrames[unitTag] then
             LUIE.Components[moduleName .. "_CustomFrame_" .. unitTag] = UnitFrames.CustomFrames[unitTag].tlw
         end
@@ -1056,14 +982,37 @@ function UnitFrames.CreateCustomFrames()
     CreateCompanionFrame()
     CreateBossFrames()
     SetupCommonFrameActions()
-    SetupPlayerRegenAnimations()
-    SetupGroupRegenAnimations()
-    SetupRaidRegenAnimations()
-    SetupBossRegenAnimations()
-    SetupPlayerArmorOverlays()
-    SetupGroupArmorOverlays()
-    SetupRaidArmorOverlays()
-    SetupBossArmorOverlays()
+
+    -- Setup regen animations using config table
+    local regenConfigs =
+    {
+        { prefix = "player",          startIndex = 0,                         endIndex = 0,                       enableFlag = "PlayerEnableRegen", widthSV = "PlayerBarWidth",    heightSV = "PlayerBarHeightHealth", heightMultiplier = 0.3 },
+        { prefix = "reticleover",     startIndex = 0,                         endIndex = 0,                       enableFlag = "PlayerEnableRegen", widthSV = "TargetBarWidth",    heightSV = "TargetBarHeight",       heightMultiplier = 0.3 },
+        { prefix = "AvaPlayerTarget", startIndex = 0,                         endIndex = 0,                       enableFlag = "PlayerEnableRegen", widthSV = "AvaTargetBarWidth", heightSV = "AvaTargetBarHeight",    heightMultiplier = 0.3 },
+        { prefix = "SmallGroup",      startIndex = 1,                         endIndex = 4,                       enableFlag = "GroupEnableRegen",  widthSV = "GroupBarWidth",     heightSV = "GroupBarHeight",        heightMultiplier = 0.4 },
+        { prefix = "RaidGroup",       startIndex = 1,                         endIndex = 12,                      enableFlag = "RaidEnableRegen",   widthSV = "RaidBarWidth",      heightSV = "RaidBarHeight",         heightMultiplier = 0.3 },
+        { prefix = "boss",            startIndex = BOSS_RANK_ITERATION_BEGIN, endIndex = BOSS_RANK_ITERATION_END, enableFlag = "BossEnableRegen",   widthSV = "BossBarWidth",      heightSV = "BossBarHeight",         heightMultiplier = 0.3 },
+    }
+
+    for _, config in ipairs(regenConfigs) do
+        SetupRegenAnimations(config)
+    end
+
+    -- Setup armor overlays using config table
+    local armorConfigs =
+    {
+        { prefix = "player",          startIndex = 0,                         endIndex = 0,                       enableFlag = "PlayerEnableArmor" },
+        { prefix = "reticleover",     startIndex = 0,                         endIndex = 0,                       enableFlag = "PlayerEnableArmor" },
+        { prefix = "AvaPlayerTarget", startIndex = 0,                         endIndex = 0,                       enableFlag = "PlayerEnableArmor" },
+        { prefix = "SmallGroup",      startIndex = 1,                         endIndex = 4,                       enableFlag = "GroupEnableArmor"  },
+        { prefix = "RaidGroup",       startIndex = 1,                         endIndex = 12,                      enableFlag = "RaidEnableArmor"   },
+        { prefix = "boss",            startIndex = BOSS_RANK_ITERATION_BEGIN, endIndex = BOSS_RANK_ITERATION_END, enableFlag = "BossEnableArmor"   },
+    }
+
+    for _, config in ipairs(armorConfigs) do
+        SetupArmorOverlays(config)
+    end
+
     SetupPowerGlowAnimations()
 
     -- Set proper anchors according to user preferences
@@ -1075,13 +1024,9 @@ function UnitFrames.CreateCustomFrames()
     UnitFrames.CustomPetUpdate()
     UnitFrames.CompanionUpdate()
     UnitFrames.CustomFramesApplyLayoutBosses()
-    -- Set positions of tlws using saved values or default ones
     UnitFrames.CustomFramesSetPositions()
-    -- Apply formatting for labels
     UnitFrames.CustomFramesFormatLabels(true)
-    -- Apply bar textures
     UnitFrames.CustomFramesApplyTexture()
-    -- Apply fonts
     UnitFrames.CustomFramesApplyFont()
     UnitFrames.CustomFramesApplyBarAlignment()
 

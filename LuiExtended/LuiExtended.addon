@@ -1,8 +1,8 @@
 ## Title: |c00C000Lui Extended|r
 ## Author: ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101047 101048
-## Version: 7.0.2.0
-## AddOnVersion: 7020
+## Version: 7.1.0.0
+## AddOnVersion: 7100
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
 ## DependsOn: LuiData>=7010 LibAddonMenu-2.0>=40 LibMediaProvider>=36
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705
@@ -128,7 +128,17 @@ modules/UnitFrames/_CustomFrames.lua
 modules/UnitFrames/_DefaultFrames.lua
 modules/UnitFrames/_Handlers.lua
 modules/UnitFrames/_GroupElectionInfo.lua
+
+# Unit Attribute Visuals Modules
+modules/UnitFrames/UnitAttributeVisuals/_ModuleBase.lua
+modules/UnitFrames/UnitAttributeVisuals/PowerShield.lua
+modules/UnitFrames/UnitAttributeVisuals/Regeneration.lua
+modules/UnitFrames/UnitAttributeVisuals/Unwavering.lua
+modules/UnitFrames/UnitAttributeVisuals/StatChange.lua
+modules/UnitFrames/UnitAttributeVisuals/Possession.lua
+modules/UnitFrames/_UnitAttributeVisualizerCoordinator.lua
 modules/UnitFrames/_UnitAttributeVisuals.lua
+
 modules/UnitFrames/_ListFunctions.lua
 modules/UnitFrames/_MenuFunctions.lua
 modules/UnitFrames/_FontFunctions.lua

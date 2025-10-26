@@ -16,6 +16,8 @@ local UnitFrames = ZO_Object:Subclass()
 LUIE.UnitFrames = UnitFrames
 
 UnitFrames.moduleName = LUIE.name .. "UnitFrames"
+UnitFrames.VisualizerModules = {}
+UnitFrames.Visualizers = {} -- Per-unitTag coordinator instances
 UnitFrames.AvaCustFrames = {}
 UnitFrames.DefaultFrames = {}
 UnitFrames.MaxChampionPoint = 3600

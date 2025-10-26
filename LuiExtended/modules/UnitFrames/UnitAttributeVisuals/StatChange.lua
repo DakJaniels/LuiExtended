@@ -1,0 +1,75 @@
+-- -----------------------------------------------------------------------------
+--  LuiExtended                                                               --
+--  Distributed under The MIT License (MIT) (see LICENSE file)                --
+-- -----------------------------------------------------------------------------
+
+--- @class (partial) LuiExtended
+local LUIE = LUIE
+-- -----------------------------------------------------------------------------
+
+--- @class (partial) UnitFrames
+local UnitFrames = LUIE.UnitFrames
+-- -----------------------------------------------------------------------------
+
+--- Module for handling increased/decreased stat visuals (armor debuffs, etc.)
+--- @class LUIE_StatChangeModule : LUIE_UnitAttributeVisualizerModuleBase
+local StatChangeModule = LUIE_UnitAttributeVisualizerModuleBase:New()
+
+UnitFrames.VisualizerModules.StatChangeModule = StatChangeModule
+
+function StatChangeModule:IsRelevant(unitAttributeVisual, statType, attributeType, powerType)
+    return unitAttributeVisual == ATTRIBUTE_VISUAL_INCREASED_STAT or unitAttributeVisual == ATTRIBUTE_VISUAL_DECREASED_STAT
+end
+
+-- -----------------------------------------------------------------------------
+-- Internal Implementation
+-- -----------------------------------------------------------------------------
+
+--- Updates stat change visuals (armor debuffs, etc.) for given unit
+--- @param unitTag string
+--- @param statType DerivedStats
+--- @param attributeType Attributes
+--- @param powerType CombatMechanicFlags
+function StatChangeModule:UpdateStat(unitTag, statType, attributeType, powerType)
+    -- Build a list of UI controls to hold this statType on different UnitFrames lists
+    local statControls = {}
+
+    if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag][powerType] and UnitFrames.CustomFrames[unitTag][powerType].stat and UnitFrames.CustomFrames[unitTag][powerType].stat[statType] then
+        table.insert(statControls, UnitFrames.CustomFrames[unitTag][powerType].stat[statType])
+    end
+    if UnitFrames.AvaCustFrames[unitTag] and UnitFrames.AvaCustFrames[unitTag][powerType] and UnitFrames.AvaCustFrames[unitTag][powerType].stat and UnitFrames.AvaCustFrames[unitTag][powerType].stat[statType] then
+        table.insert(statControls, UnitFrames.AvaCustFrames[unitTag][powerType].stat[statType])
+    end
+
+    -- If we have a control, proceed next
+    if #statControls > 0 then
+        -- Calculate actual value, and fallback to 0 if we call this function with nil parameters
+        local value = (GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_INCREASED_STAT, statType, attributeType, powerType) or 0) + (GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_DECREASED_STAT, statType, attributeType, powerType) or 0)
+
+        for _, control in pairs(statControls) do
+            -- Hide proper controls if they exist
+            if control.dec then
+                control.dec:SetHidden(value >= 0)
+            end
+            if control.inc then
+                control.inc:SetHidden(value <= 0)
+            end
+        end
+    end
+end
+
+-- -----------------------------------------------------------------------------
+-- Event Handlers
+-- -----------------------------------------------------------------------------
+
+function StatChangeModule:OnVisualizationAdded(unitTag, unitAttributeVisual, statType, attributeType, powerType, value, maxValue, sequenceId)
+    self:UpdateStat(unitTag, statType, attributeType, powerType)
+end
+
+function StatChangeModule:OnVisualizationRemoved(unitTag, unitAttributeVisual, statType, attributeType, powerType, value, maxValue, sequenceId)
+    self:UpdateStat(unitTag, statType, attributeType, powerType)
+end
+
+function StatChangeModule:OnVisualizationUpdated(unitTag, unitAttributeVisual, statType, attributeType, powerType, oldValue, newValue, oldMaxValue, newMaxValue, sequenceId)
+    self:UpdateStat(unitTag, statType, attributeType, powerType)
+end
