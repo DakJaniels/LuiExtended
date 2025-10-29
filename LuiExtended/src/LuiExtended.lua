@@ -331,6 +331,11 @@ local DEVS = readonlytable
             enabled = true,
             debug = true,
         },
+        ["@dack_janiels.luie"] =
+        {
+            enabled = true,
+            debug = true,
+        },
     }
 
 -- @type table<string, DevEntry>
