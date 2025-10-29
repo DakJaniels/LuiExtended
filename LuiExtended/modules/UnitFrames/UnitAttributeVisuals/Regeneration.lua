@@ -15,10 +15,30 @@ local UnitFrames = LUIE.UnitFrames
 --- @class LUIE_RegenerationModule : LUIE_UnitAttributeVisualizerModuleBase
 local RegenerationModule = LUIE_UnitAttributeVisualizerModuleBase:New()
 
-UnitFrames.VisualizerModules.RegenerationModule = RegenerationModule
-
 function RegenerationModule:IsRelevant(unitAttributeVisual, statType, attributeType, powerType)
     return unitAttributeVisual == ATTRIBUTE_VISUAL_INCREASED_REGEN_POWER or unitAttributeVisual == ATTRIBUTE_VISUAL_DECREASED_REGEN_POWER
+end
+
+function RegenerationModule:OnUnitChanged(unitTag)
+    if not DoesUnitExist(unitTag) then
+        return
+    end
+
+    -- Reinitialize regen visuals for all power types
+    -- Health
+    self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_INCREASED_REGEN_POWER, STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, unitTag)
+    self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_DECREASED_REGEN_POWER, STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, unitTag)
+    self:UpdateRegen(unitTag, STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+
+    -- Magicka
+    self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_INCREASED_REGEN_POWER, STAT_MAGICKA_REGEN_COMBAT, ATTRIBUTE_MAGICKA, COMBAT_MECHANIC_FLAGS_MAGICKA, unitTag)
+    self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_DECREASED_REGEN_POWER, STAT_MAGICKA_REGEN_COMBAT, ATTRIBUTE_MAGICKA, COMBAT_MECHANIC_FLAGS_MAGICKA, unitTag)
+    self:UpdateRegen(unitTag, STAT_MAGICKA_REGEN_COMBAT, ATTRIBUTE_MAGICKA, COMBAT_MECHANIC_FLAGS_MAGICKA)
+
+    -- Stamina
+    self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_INCREASED_REGEN_POWER, STAT_STAMINA_REGEN_COMBAT, ATTRIBUTE_STAMINA, COMBAT_MECHANIC_FLAGS_STAMINA, unitTag)
+    self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_DECREASED_REGEN_POWER, STAT_STAMINA_REGEN_COMBAT, ATTRIBUTE_STAMINA, COMBAT_MECHANIC_FLAGS_STAMINA, unitTag)
+    self:UpdateRegen(unitTag, STAT_STAMINA_REGEN_COMBAT, ATTRIBUTE_STAMINA, COMBAT_MECHANIC_FLAGS_STAMINA)
 end
 
 -- -----------------------------------------------------------------------------
@@ -52,7 +72,10 @@ end
 --- @param attributeType Attributes
 --- @param powerType CombatMechanicFlags
 function RegenerationModule:UpdateRegen(unitTag, statType, attributeType, powerType)
-    if powerType ~= COMBAT_MECHANIC_FLAGS_HEALTH then
+    -- Support all power types (health, magicka, stamina)
+    if  powerType ~= COMBAT_MECHANIC_FLAGS_HEALTH
+    and powerType ~= COMBAT_MECHANIC_FLAGS_MAGICKA
+    and powerType ~= COMBAT_MECHANIC_FLAGS_STAMINA then
         return
     end
 
@@ -67,24 +90,24 @@ function RegenerationModule:UpdateRegen(unitTag, statType, attributeType, powerT
     end
     local value = value1 + value2
 
-    -- Here we assume, that every unitTag entry in tables has COMBAT_MECHANIC_FLAGS_HEALTH key
-    if UnitFrames.DefaultFrames[unitTag] and UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH] then
-        self:DisplayRegen(UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].regen1, value > 0)
-        self:DisplayRegen(UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].regen2, value > 0)
-        self:DisplayRegen(UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].degen1, value < 0)
-        self:DisplayRegen(UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].degen2, value < 0)
+    -- Update regen/degen animations for all frame types
+    if UnitFrames.DefaultFrames[unitTag] and UnitFrames.DefaultFrames[unitTag][powerType] then
+        self:DisplayRegen(UnitFrames.DefaultFrames[unitTag][powerType].regen1, value > 0)
+        self:DisplayRegen(UnitFrames.DefaultFrames[unitTag][powerType].regen2, value > 0)
+        self:DisplayRegen(UnitFrames.DefaultFrames[unitTag][powerType].degen1, value < 0)
+        self:DisplayRegen(UnitFrames.DefaultFrames[unitTag][powerType].degen2, value < 0)
     end
-    if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH] then
-        self:DisplayRegen(UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].regen1, value > 0)
-        self:DisplayRegen(UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].regen2, value > 0)
-        self:DisplayRegen(UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].degen1, value < 0)
-        self:DisplayRegen(UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].degen2, value < 0)
+    if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag][powerType] then
+        self:DisplayRegen(UnitFrames.CustomFrames[unitTag][powerType].regen1, value > 0)
+        self:DisplayRegen(UnitFrames.CustomFrames[unitTag][powerType].regen2, value > 0)
+        self:DisplayRegen(UnitFrames.CustomFrames[unitTag][powerType].degen1, value < 0)
+        self:DisplayRegen(UnitFrames.CustomFrames[unitTag][powerType].degen2, value < 0)
     end
-    if UnitFrames.AvaCustFrames[unitTag] and UnitFrames.AvaCustFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH] then
-        self:DisplayRegen(UnitFrames.AvaCustFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].regen1, value > 0)
-        self:DisplayRegen(UnitFrames.AvaCustFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].regen2, value > 0)
-        self:DisplayRegen(UnitFrames.AvaCustFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].degen1, value < 0)
-        self:DisplayRegen(UnitFrames.AvaCustFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].degen2, value < 0)
+    if UnitFrames.AvaCustFrames[unitTag] and UnitFrames.AvaCustFrames[unitTag][powerType] then
+        self:DisplayRegen(UnitFrames.AvaCustFrames[unitTag][powerType].regen1, value > 0)
+        self:DisplayRegen(UnitFrames.AvaCustFrames[unitTag][powerType].regen2, value > 0)
+        self:DisplayRegen(UnitFrames.AvaCustFrames[unitTag][powerType].degen1, value < 0)
+        self:DisplayRegen(UnitFrames.AvaCustFrames[unitTag][powerType].degen2, value < 0)
     end
 end
 
@@ -103,3 +126,7 @@ end
 function RegenerationModule:OnVisualizationUpdated(unitTag, unitAttributeVisual, statType, attributeType, powerType, oldValue, newValue, oldMaxValue, newMaxValue, sequenceId)
     self:UpdateRegen(unitTag, statType, attributeType, powerType)
 end
+
+UnitFrames.VisualizerModules.RegenerationModule = RegenerationModule
+
+return RegenerationModule

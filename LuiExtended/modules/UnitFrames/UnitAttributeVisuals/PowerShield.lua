@@ -15,12 +15,27 @@ local UnitFrames = LUIE.UnitFrames
 --- @class LUIE_PowerShieldModule : LUIE_UnitAttributeVisualizerModuleBase
 local PowerShieldModule = LUIE_UnitAttributeVisualizerModuleBase:New()
 
-UnitFrames.VisualizerModules.PowerShieldModule = PowerShieldModule
-
 function PowerShieldModule:IsRelevant(unitAttributeVisual, statType, attributeType, powerType)
     return unitAttributeVisual == ATTRIBUTE_VISUAL_POWER_SHIELDING
         or unitAttributeVisual == ATTRIBUTE_VISUAL_TRAUMA
         or unitAttributeVisual == ATTRIBUTE_VISUAL_NO_HEALING
+end
+
+function PowerShieldModule:OnUnitChanged(unitTag)
+    if not DoesUnitExist(unitTag) then
+        return
+    end
+
+    -- Reinitialize all relevant visuals for the new unit using GetInitialValueAndMarkMostRecent
+    -- This properly marks sequence IDs to prevent stale events
+    local shieldValue, shieldMaxValue = self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_POWER_SHIELDING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, unitTag)
+    self:UpdateShield(unitTag, shieldValue, shieldMaxValue)
+
+    local traumaValue, traumaMaxValue = self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_TRAUMA, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, unitTag)
+    self:UpdateTrauma(unitTag, traumaValue, traumaMaxValue)
+
+    local noHealingValue = self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_NO_HEALING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, unitTag)
+    self:UpdateNoHealing(unitTag, noHealingValue)
 end
 
 -- -----------------------------------------------------------------------------
@@ -68,18 +83,23 @@ function PowerShieldModule:UpdateShieldBar(attributeFrame, shieldValue, healthEf
 
     if hideShield then
         attributeFrame.shield:SetValue(0)
+        attributeFrame.shield:SetHidden(true)
+        if attributeFrame.shieldbackdrop then
+            attributeFrame.shieldbackdrop:SetHidden(true)
+        end
     else
+        -- Set min/max and value BEFORE unhiding to prevent animation delay
+        attributeFrame.shield:SetMinMax(0, healthEffectiveMax)
+        attributeFrame.shield:SetValue(shieldValue)
+        attributeFrame.shield:SetHidden(false)
+        if attributeFrame.shieldbackdrop then
+            attributeFrame.shieldbackdrop:SetHidden(false)
+        end
+
+        -- Apply smooth transition if enabled (will animate from current value)
         if UnitFrames.SV.CustomSmoothBar then
             ZO_StatusBar_SmoothTransition(attributeFrame.shield, shieldValue, healthEffectiveMax, false, nil, 250)
-        else
-            attributeFrame.shield:SetMinMax(0, healthEffectiveMax)
-            attributeFrame.shield:SetValue(shieldValue)
         end
-    end
-
-    attributeFrame.shield:SetHidden(hideShield)
-    if attributeFrame.shieldbackdrop then
-        attributeFrame.shieldbackdrop:SetHidden(hideShield)
     end
 end
 
@@ -246,3 +266,7 @@ function PowerShieldModule:OnVisualizationUpdated(unitTag, unitAttributeVisual, 
         self:UpdateNoHealing(unitTag, newValue)
     end
 end
+
+UnitFrames.VisualizerModules.PowerShieldModule = PowerShieldModule
+
+return PowerShieldModule

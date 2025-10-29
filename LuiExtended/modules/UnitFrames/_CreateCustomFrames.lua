@@ -159,12 +159,13 @@ local function CreateDecreasedArmorOverlay(parent, small)
         },
     }
 
-    local control = UI:Control(parent, { CENTER, CENTER }, textureConfig.small.size, false)
-    control.smallTex = UI:Texture(control, { CENTER, CENTER }, textureConfig.small.size, textureConfig.small.file, 2, false)
+    -- Create overlay as hidden by default (will be shown when effect is active)
+    local control = UI:Control(parent, { CENTER, CENTER }, textureConfig.small.size, true)
+    control.smallTex = UI:Texture(control, { CENTER, CENTER }, textureConfig.small.size, textureConfig.small.file, 2, true)
     control.smallTex:SetDrawTier(textureConfig.small.tier)
 
     if not small then
-        control.normalTex = UI:Texture(control, { CENTER, CENTER }, textureConfig.normal.size, textureConfig.normal.file, 2, false)
+        control.normalTex = UI:Texture(control, { CENTER, CENTER }, textureConfig.normal.size, textureConfig.normal.file, 2, true)
         control.normalTex:SetDrawTier(textureConfig.normal.tier)
     end
 
@@ -883,7 +884,7 @@ local function SetupRegenAnimations(frameConfig)
     end
 
     for i = frameConfig.startIndex, frameConfig.endIndex do
-        local unitTag = frameConfig.prefix .. (frameConfig.prefix == "" and "" or i)
+        local unitTag = frameConfig.prefix .. (i == 0 and "" or i)
         local frame = UnitFrames.CustomFrames[unitTag]
 
         if frame then
@@ -915,7 +916,7 @@ local function SetupArmorOverlays(frameConfig)
     end
 
     for i = frameConfig.startIndex, frameConfig.endIndex do
-        local unitTag = frameConfig.prefix .. (frameConfig.prefix == "" and "" or i)
+        local unitTag = frameConfig.prefix .. (i == 0 and "" or i)
         local frame = UnitFrames.CustomFrames[unitTag]
 
         if frame and frame[COMBAT_MECHANIC_FLAGS_HEALTH] then
@@ -927,7 +928,7 @@ local function SetupArmorOverlays(frameConfig)
             frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_ARMOR_RATING] =
             {
                 ["dec"] = CreateDecreasedArmorOverlay(backdrop, false),
-                ["inc"] = UI:Texture(backdrop, { CENTER, CENTER, 13, 0 }, { 24, 24 }, "/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds", 2, true),
+                ["inc"] = UI:Texture(backdrop, { CENTER, CENTER, 13, 0 }, { 24, 24 }, "/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds", 2, true), -- Already hidden by default
             }
         end
     end

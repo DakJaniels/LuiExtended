@@ -11,13 +11,33 @@ local LUIE = LUIE
 
 -- Unit Frames namespace
 --- @class (partial) UnitFrames
+--- @field VisualizerModules UnitFrames.VisualizerModules
+--- @field Visualizers table<string, LUIE_UnitAttributeVisualizer>
 local UnitFrames = ZO_Object:Subclass()
 --- @class (partial) UnitFrames
 LUIE.UnitFrames = UnitFrames
 
 UnitFrames.moduleName = LUIE.name .. "UnitFrames"
-UnitFrames.VisualizerModules = {}
-UnitFrames.Visualizers = {} -- Per-unitTag coordinator instances
+
+--- Table holding singleton module instances shared across all unit frames
+--- @class UnitFrames.VisualizerModules
+--- @field PowerShieldModule LUIE_PowerShieldModule
+--- @field RegenerationModule LUIE_RegenerationModule
+--- @field StatChangeModule LUIE_StatChangeModule
+--- @field UnwaveringModule LUIE_UnwaveringModule
+--- @field PossessionModule LUIE_PossessionModule
+UnitFrames.VisualizerModules =
+{
+    PossessionModule = {},
+    PowerShieldModule = {},
+    RegenerationModule = {},
+    StatChangeModule = {},
+    UnwaveringModule = {},
+}
+
+--- Table holding per-unitTag visualizer coordinator instances
+--- @type table<string, LUIE_UnitAttributeVisualizer>
+UnitFrames.Visualizers = {}
 UnitFrames.AvaCustFrames = {}
 UnitFrames.DefaultFrames = {}
 UnitFrames.MaxChampionPoint = 3600

@@ -13,6 +13,13 @@ local GetDisplayName = GetDisplayName
 local changelogMessages =
 {
     -- Version Header
+    "|cFFA500LuiExtended Version 7.1.0.1|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t \nUnitframes should now show visuals correctly; somehow in testing I didn't catch a 0-index issue, sorry all.\nLet me know in the ESOUI comments/Github if any issues remain.",
+    "",
+    -- Version Header
     "|cFFA500LuiExtended Version 7.1.0.0|r",
     "",
     -- New Features

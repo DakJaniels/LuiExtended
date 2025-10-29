@@ -15,10 +15,18 @@ local UnitFrames = LUIE.UnitFrames
 --- @class LUIE_PossessionModule : LUIE_UnitAttributeVisualizerModuleBase
 local PossessionModule = LUIE_UnitAttributeVisualizerModuleBase:New()
 
-UnitFrames.VisualizerModules.PossessionModule = PossessionModule
-
 function PossessionModule:IsRelevant(unitAttributeVisual, statType, attributeType, powerType)
     return unitAttributeVisual == ATTRIBUTE_VISUAL_POSSESSION
+end
+
+function PossessionModule:OnUnitChanged(unitTag)
+    if not DoesUnitExist(unitTag) then
+        return
+    end
+
+    -- Reinitialize possession visual for the new unit
+    local value = self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_POSSESSION, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, unitTag)
+    self:UpdatePossession(unitTag, value)
 end
 
 -- -----------------------------------------------------------------------------
@@ -122,3 +130,7 @@ end
 function PossessionModule:OnVisualizationUpdated(unitTag, unitAttributeVisual, statType, attributeType, powerType, oldValue, newValue, oldMaxValue, newMaxValue, sequenceId)
     self:UpdatePossession(unitTag, newValue)
 end
+
+UnitFrames.VisualizerModules.PossessionModule = PossessionModule
+
+return PossessionModule

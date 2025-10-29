@@ -1,4 +1,4 @@
---- @diagnostic disable: missing-global-doc
+--- @diagnostic disable: missing-global-doc, duplicate-set-field
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --

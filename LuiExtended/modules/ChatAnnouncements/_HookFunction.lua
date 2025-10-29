@@ -4095,6 +4095,7 @@ function ChatAnnouncements.HookFunction()
     if MAIL_SEND then
         do
             local originalSend = MAIL_SEND.Send
+            --- @diagnostic disable-next-line: duplicate-set-field
             function MAIL_SEND:Send(...)
                 -- if LUIE.IsDevDebugEnabled() then
                 --     LUIE.Debug("MAIL_SEND:Send has been hooked!")
@@ -4401,6 +4402,7 @@ function ChatAnnouncements.GuildHooks()
 
     -- Called when changing guilds in the Guild tab
     local originalSetGuildId = GUILD_SHARED_INFO.SetGuildId
+    --- @diagnostic disable-next-line: duplicate-set-field
     function GUILD_SHARED_INFO:SetGuildId(guildId)
         self.guildId = guildId
         self:Refresh(guildId)
@@ -4410,6 +4412,7 @@ function ChatAnnouncements.GuildHooks()
 
     -- Called when changing guilds in the Guild tab or leaving/joining a guild
     local originalRefresh = GUILD_SHARED_INFO.Refresh
+    --- @diagnostic disable-next-line: duplicate-set-field
     function GUILD_SHARED_INFO:Refresh(guildId)
         if self.guildId and self.guildId == guildId then
             local count = GetControl(self.control, "Count")

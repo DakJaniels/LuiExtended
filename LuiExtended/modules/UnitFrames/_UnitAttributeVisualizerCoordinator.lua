@@ -33,7 +33,14 @@ end
 --- @param unitTag string
 function LUIE_UnitAttributeVisualizer:Initialize(unitTag)
     self.unitTag = unitTag
+    --- Registry of module references for this unit (mirrors UnitFrames.VisualizerModules)
+    --- @type UnitFrames.VisualizerModules
     self.modules = {}
+
+    -- Copy all registered modules to this visualizer
+    -- NOTE: Modules are singletons shared across all visualizers, so don't call SetOwner!
+    -- Each module method receives unitTag explicitly to identify which unit it's operating on
+    zo_mixin(self.modules, UnitFrames.VisualizerModules)
 
     -- Create unique event namespace for this visualizer instance
     local eventNamespace = "LUIE_UnitAttributeVisualizer" .. unitTag .. NEXT_VISUALIZER_NAMESPACE_INDEX
@@ -56,7 +63,8 @@ function LUIE_UnitAttributeVisualizer:Initialize(unitTag)
     end)
     eventManager:AddFilterForEvent(eventNamespace, EVENT_UNIT_ATTRIBUTE_VISUAL_REMOVED, REGISTER_FILTER_UNIT_TAG, unitTag)
 
-    -- Special handling for target changes
+    -- Special handling for reticleover (unit pointer changes constantly but unitTag stays same)
+    -- Note: ZOS also handles "target" with EVENT_TARGET_CHANGED, but LUIE doesn't use that unitTag
     if unitTag == "reticleover" then
         eventManager:RegisterForEvent(eventNamespace, EVENT_RETICLE_TARGET_CHANGED, function ()
             self:OnUnitChanged()
@@ -70,32 +78,30 @@ function LUIE_UnitAttributeVisualizer:GetUnitTag()
     return self.unitTag
 end
 
---- Adds a module to this visualizer instance
---- @param module LUIE_UnitAttributeVisualizerModuleBase
-function LUIE_UnitAttributeVisualizer:AddModule(module)
-    if not self.modules[module] then
-        module:SetOwner(self)
-        self.modules[module] = module
-    end
-end
-
 --- Called when the unit this visualizer tracks has changed
 function LUIE_UnitAttributeVisualizer:OnUnitChanged()
     if DoesUnitExist(self.unitTag) then
-        for module in pairs(self.modules) do
-            module:OnUnitChanged()
+        --- @type string, LUIE_PowerShieldModule|LUIE_RegenerationModule|LUIE_StatChangeModule|LUIE_UnwaveringModule|LUIE_PossessionModule
+        for moduleName, module in pairs(self.modules) do
+            local success, err = pcall(function ()
+                module:OnUnitChanged(self.unitTag)
+            end)
+            if not success then
+                d(string.format("[LUIE] Error in %s:OnUnitChanged for %s: %s", moduleName, self.unitTag, tostring(err)))
+            end
         end
     end
 end
 
 --- Dispatches EVENT_UNIT_ATTRIBUTE_VISUAL_ADDED to registered modules
 function LUIE_UnitAttributeVisualizer:OnUnitAttributeVisualAdded(unitTag, visualType, stat, attribute, powerType, value, maxValue, sequenceId)
-    for module in pairs(self.modules) do
+    --- @type string, LUIE_PowerShieldModule|LUIE_RegenerationModule|LUIE_StatChangeModule|LUIE_UnwaveringModule|LUIE_PossessionModule
+    for _, module in pairs(self.modules) do
         if module:IsRelevant(visualType, stat, attribute, powerType) then
-            local mostRecentUpdate = module:GetMostRecentUpdate(visualType, stat, attribute, powerType)
+            local mostRecentUpdate = module:GetMostRecentUpdate(visualType, stat, attribute, powerType, unitTag)
             if not mostRecentUpdate then
                 module:OnVisualizationAdded(unitTag, visualType, stat, attribute, powerType, value, maxValue, sequenceId)
-                module:SetMostRecentUpdate(visualType, stat, attribute, powerType, sequenceId)
+                module:SetMostRecentUpdate(visualType, stat, attribute, powerType, sequenceId, unitTag)
             end
         end
     end
@@ -103,12 +109,13 @@ end
 
 --- Dispatches EVENT_UNIT_ATTRIBUTE_VISUAL_UPDATED to registered modules
 function LUIE_UnitAttributeVisualizer:OnUnitAttributeVisualUpdated(unitTag, visualType, stat, attribute, powerType, oldValue, newValue, oldMaxValue, newMaxValue, sequenceId)
-    for module in pairs(self.modules) do
+    --- @type string, LUIE_PowerShieldModule|LUIE_RegenerationModule|LUIE_StatChangeModule|LUIE_UnwaveringModule|LUIE_PossessionModule
+    for _, module in pairs(self.modules) do
         if module:IsRelevant(visualType, stat, attribute, powerType) then
-            local mostRecentUpdate = module:GetMostRecentUpdate(visualType, stat, attribute, powerType)
+            local mostRecentUpdate = module:GetMostRecentUpdate(visualType, stat, attribute, powerType, unitTag)
             if mostRecentUpdate and sequenceId > mostRecentUpdate then
                 module:OnVisualizationUpdated(unitTag, visualType, stat, attribute, powerType, oldValue, newValue, oldMaxValue, newMaxValue, sequenceId)
-                module:SetMostRecentUpdate(visualType, stat, attribute, powerType, sequenceId)
+                module:SetMostRecentUpdate(visualType, stat, attribute, powerType, sequenceId, unitTag)
             end
         end
     end
@@ -116,12 +123,13 @@ end
 
 --- Dispatches EVENT_UNIT_ATTRIBUTE_VISUAL_REMOVED to registered modules
 function LUIE_UnitAttributeVisualizer:OnUnitAttributeVisualRemoved(unitTag, visualType, stat, attribute, powerType, value, maxValue, sequenceId)
-    for module in pairs(self.modules) do
+    --- @type string, LUIE_PowerShieldModule|LUIE_RegenerationModule|LUIE_StatChangeModule|LUIE_UnwaveringModule|LUIE_PossessionModule
+    for _, module in pairs(self.modules) do
         if module:IsRelevant(visualType, stat, attribute, powerType) then
-            local mostRecentUpdate = module:GetMostRecentUpdate(visualType, stat, attribute, powerType)
-            if mostRecentUpdate and sequenceId > mostRecentUpdate then
+            local mostRecentUpdate = module:GetMostRecentUpdate(visualType, stat, attribute, powerType, unitTag)
+            if mostRecentUpdate and sequenceId >= mostRecentUpdate then
                 module:OnVisualizationRemoved(unitTag, visualType, stat, attribute, powerType, value, maxValue, sequenceId)
-                module:SetMostRecentUpdate(visualType, stat, attribute, powerType, nil)
+                module:SetMostRecentUpdate(visualType, stat, attribute, powerType, nil, unitTag)
             end
         end
     end
@@ -129,7 +137,8 @@ end
 
 --- Triggers platform style updates for all modules
 function LUIE_UnitAttributeVisualizer:ApplyPlatformStyle()
-    for module in pairs(self.modules) do
+    --- @type string, LUIE_PowerShieldModule|LUIE_RegenerationModule|LUIE_StatChangeModule|LUIE_UnwaveringModule|LUIE_PossessionModule
+    for _, module in pairs(self.modules) do
         module:ApplyPlatformStyle()
     end
 end
@@ -137,7 +146,8 @@ end
 --- Triggers alpha updates for all modules
 --- @param isNearby boolean
 function LUIE_UnitAttributeVisualizer:DoAlphaUpdate(isNearby)
-    for module in pairs(self.modules) do
+    --- @type string, LUIE_PowerShieldModule|LUIE_RegenerationModule|LUIE_StatChangeModule|LUIE_UnwaveringModule|LUIE_PossessionModule
+    for _, module in pairs(self.modules) do
         module:DoAlphaUpdate(isNearby)
     end
 end

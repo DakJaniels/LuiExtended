@@ -11,6 +11,7 @@ local Effects = Data.Effects
 
 LUIE.HookGamePadMap = function ()
     -- Hook Gamepad Campaign Bonuses Tooltip
+    --- @diagnostic disable-next-line: duplicate-set-field
     function CAMPAIGN_BONUSES_GAMEPAD:UpdateToolTip()
         GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
         if self.abilityList:IsActive() then

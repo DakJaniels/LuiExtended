@@ -15,10 +15,18 @@ local UnitFrames = LUIE.UnitFrames
 --- @class LUIE_UnwaveringModule : LUIE_UnitAttributeVisualizerModuleBase
 local UnwaveringModule = LUIE_UnitAttributeVisualizerModuleBase:New()
 
-UnitFrames.VisualizerModules.UnwaveringModule = UnwaveringModule
-
 function UnwaveringModule:IsRelevant(unitAttributeVisual, statType, attributeType, powerType)
     return unitAttributeVisual == ATTRIBUTE_VISUAL_UNWAVERING_POWER
+end
+
+function UnwaveringModule:OnUnitChanged(unitTag)
+    if not DoesUnitExist(unitTag) then
+        return
+    end
+
+    -- Reinitialize unwavering power visual for the new unit
+    self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_UNWAVERING_POWER, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, unitTag)
+    self:UpdateInvulnerable(unitTag)
 end
 
 -- -----------------------------------------------------------------------------
@@ -61,3 +69,7 @@ end
 function UnwaveringModule:OnVisualizationUpdated(unitTag, unitAttributeVisual, statType, attributeType, powerType, oldValue, newValue, oldMaxValue, newMaxValue, sequenceId)
     self:UpdateInvulnerable(unitTag)
 end
+
+UnitFrames.VisualizerModules.UnwaveringModule = UnwaveringModule
+
+return UnwaveringModule

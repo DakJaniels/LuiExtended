@@ -20,13 +20,8 @@ function UnitFrames.CreateVisualizer(unitTag)
         return -- Already exists
     end
 
+    -- Create visualizer (modules are automatically added via mixin in Initialize)
     local visualizer = LUIE_UnitAttributeVisualizer:New(unitTag)
-
-    -- Add all registered modules to this visualizer
-    for _, module in pairs(UnitFrames.VisualizerModules) do
-        visualizer:AddModule(module)
-    end
-
     UnitFrames.Visualizers[unitTag] = visualizer
 end
 
@@ -52,6 +47,13 @@ function UnitFrames.InitializeVisualizers()
     for i = 1, 7 do
         UnitFrames.CreateVisualizer("playerpet" .. i)
     end
+end
+
+--- Gets the visualizer coordinator for a specific unit
+--- @param unitTag string
+--- @return LUIE_UnitAttributeVisualizer|nil
+function UnitFrames.GetVisualizerForUnit(unitTag)
+    return UnitFrames.Visualizers[unitTag]
 end
 
 -- -----------------------------------------------------------------------------

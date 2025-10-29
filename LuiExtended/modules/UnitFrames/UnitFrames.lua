@@ -362,10 +362,8 @@ end
 --- @param eventId integer
 --- @param initial boolean
 function UnitFrames.OnPlayerActivated(eventId, initial)
-    -- Reload values for player frames
+    -- Reload values for player frames (this triggers visualizer OnUnitChanged which initializes all power types)
     UnitFrames.ReloadValues("player")
-    UnitFrames.VisualizerModules.RegenerationModule:UpdateRegen("player", STAT_MAGICKA_REGEN_COMBAT, ATTRIBUTE_MAGICKA, COMBAT_MECHANIC_FLAGS_MAGICKA)
-    UnitFrames.VisualizerModules.RegenerationModule:UpdateRegen("player", STAT_STAMINA_REGEN_COMBAT, ATTRIBUTE_STAMINA, COMBAT_MECHANIC_FLAGS_STAMINA)
 
     -- Create UI elements for default group members frames
     if UnitFrames.DefaultFrames.SmallGroup then
@@ -780,39 +778,17 @@ function UnitFrames.ReloadValues(unitTag)
         UnitFrames.OnPowerUpdate(unitTag, nil, powerType, powerValue, powerMax, powerEffectiveMax)
     end
 
-    -- Update shield value on controls; this will also update health attribute value, again.
-    local shield, _ = GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_POWER_SHIELDING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-    UnitFrames.VisualizerModules.PowerShieldModule:UpdateShield(unitTag, shield or 0, nil)
-
-    -- Update trauma value on controls
-    local trauma, _ = GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_TRAUMA, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-    UnitFrames.VisualizerModules.PowerShieldModule:UpdateTrauma(unitTag, trauma or 0, nil)
-
-    -- Update no-healing overlay
-    local noHealing, _ = GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_NO_HEALING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-    UnitFrames.VisualizerModules.PowerShieldModule:UpdateNoHealing(unitTag, noHealing or 0)
-
-    -- Update possession overlay
-    local possession, _ = GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_POSSESSION, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-    UnitFrames.VisualizerModules.PossessionModule:UpdatePossession(unitTag, possession or 0)
-
-    -- Update unwavering power (invulnerability) state
-    local unwavering, _ = GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_UNWAVERING_POWER, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-    if unwavering and unwavering > 0 then
-        UnitFrames.VisualizerModules.UnwaveringModule:UpdateInvulnerable(unitTag)
+    -- Trigger visualizer reinitialization (handles all visual states with proper sequence IDs)
+    -- This replaces the manual module Update calls to ensure proper sequence ID tracking
+    local coordinator = UnitFrames.GetVisualizerForUnit(unitTag)
+    if coordinator then
+        coordinator:OnUnitChanged()
     end
 
     -- Now we need to update Name labels, classIcon
     UnitFrames.UpdateStaticControls(UnitFrames.DefaultFrames[unitTag])
     UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames[unitTag])
     UnitFrames.UpdateStaticControls(UnitFrames.AvaCustFrames[unitTag])
-
-    -- Get regen/degen values
-    UnitFrames.VisualizerModules.RegenerationModule:UpdateRegen(unitTag, STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-
-    -- Get initial stats
-    UnitFrames.VisualizerModules.StatChangeModule:UpdateStat(unitTag, STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
-    UnitFrames.VisualizerModules.StatChangeModule:UpdateStat(unitTag, STAT_POWER, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
 
     if unitTag == "player" then
         UnitFrames.statFull[COMBAT_MECHANIC_FLAGS_HEALTH] = (UnitFrames.savedHealth.player[1] == UnitFrames.savedHealth.player[3])
@@ -2024,17 +2000,17 @@ function UnitFrames.CustomFramesSetPositions()
 
     local coords, scaleFactors = CalculateDynamicPositioning(screenWidth, screenHeight, baseCoordinates, frameDimensions)
 
-    if LUIE.IsDevDebugEnabled() then
-        local aspectRatio = screenWidth / screenHeight
-        local uiGlobalScale = GetUIGlobalScale()
-        local pixelWidth = screenWidth * uiGlobalScale
-        local pixelHeight = screenHeight * uiGlobalScale
-        LUIE.Debug("Unit Frames: UI Canvas " .. screenWidth .. LUIE_TINY_X_FORMATTER .. screenHeight .. " UI units (" .. string_format("%.0f", pixelWidth) .. LUIE_TINY_X_FORMATTER .. string_format("%.0f", pixelHeight) .. " pixels, scale: " .. string_format("%.2f", uiGlobalScale) .. ")")
-        LUIE.Debug("Unit Frames: Aspect ratio: " .. string_format("%.4f", aspectRatio) .. (scaleFactors.isMultiMonitorLikely and " [EXTREME ASPECT RATIO - Capped to prevent multi-monitor spread]" or ""))
-        LUIE.Debug("Unit Frames: Width scale: " .. string_format("%.3f", scaleFactors.widthResolutionScale) .. ", Height scale: " .. string_format("%.3f", scaleFactors.heightResolutionScale) .. ", Aspect ratio scale: " .. string_format("%.3f", scaleFactors.aspectRatioScale))
-        LUIE.Debug("Unit Frames: Player frame dimensions: " .. frameDimensions.player.width .. "x" .. frameDimensions.player.height .. " UI units (base: 300x30)")
-        LUIE.Debug("Unit Frames: Player calculated position: " .. string_format("%.1f", coords.player[1]) .. ", " .. string_format("%.1f", coords.player[2]) .. " UI units")
-    end
+    -- if LUIE.IsDevDebugEnabled() then
+    --     local aspectRatio = screenWidth / screenHeight
+    --     local uiGlobalScale = GetUIGlobalScale()
+    --     local pixelWidth = screenWidth * uiGlobalScale
+    --     local pixelHeight = screenHeight * uiGlobalScale
+    --     LUIE.Debug("Unit Frames: UI Canvas " .. screenWidth .. LUIE_TINY_X_FORMATTER .. screenHeight .. " UI units (" .. string_format("%.0f", pixelWidth) .. LUIE_TINY_X_FORMATTER .. string_format("%.0f", pixelHeight) .. " pixels, scale: " .. string_format("%.2f", uiGlobalScale) .. ")")
+    --     LUIE.Debug("Unit Frames: Aspect ratio: " .. string_format("%.4f", aspectRatio) .. (scaleFactors.isMultiMonitorLikely and " [EXTREME ASPECT RATIO - Capped to prevent multi-monitor spread]" or ""))
+    --     LUIE.Debug("Unit Frames: Width scale: " .. string_format("%.3f", scaleFactors.widthResolutionScale) .. ", Height scale: " .. string_format("%.3f", scaleFactors.heightResolutionScale) .. ", Aspect ratio scale: " .. string_format("%.3f", scaleFactors.aspectRatioScale))
+    --     LUIE.Debug("Unit Frames: Player frame dimensions: " .. frameDimensions.player.width .. "x" .. frameDimensions.player.height .. " UI units (base: 300x30)")
+    --     LUIE.Debug("Unit Frames: Player calculated position: " .. string_format("%.1f", coords.player[1]) .. ", " .. string_format("%.1f", coords.player[2]) .. " UI units")
+    -- end
 
     if UnitFrames.SV.PlayerFrameOptions == 1 then
         default_anchors["player"] = { TOPLEFT, CENTER, coords.player[1], coords.player[2] }
