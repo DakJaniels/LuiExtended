@@ -2637,50 +2637,54 @@ function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
     for i = 1, 4 do
         local index = UnitFrames.SV.SortRoleGroup and playerList[i] or i
         local unitFrame = UnitFrames.CustomFrames["SmallGroup" .. index]
-        local unitTag = GetGroupUnitTagByIndex(index)
-        local ghb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH]
 
-        -- Position and size frame
-        unitFrame.control:ClearAnchors()
-        unitFrame.control:SetAnchor(TOPLEFT, group, TOPLEFT, 0, 0.5 * UnitFrames.SV.GroupBarSpacing + (totalFrameHeight + UnitFrames.SV.GroupBarSpacing) * (i - 1))
-        unitFrame.control:SetDimensions(UnitFrames.SV.GroupBarWidth, totalFrameHeight)
-        unitFrame.topInfo:SetWidth(UnitFrames.SV.GroupBarWidth - 5)
+        -- Only process if frame exists (skip invalid indices from role sorting)
+        if unitFrame then
+            local unitTag = GetGroupUnitTagByIndex(index)
+            local ghb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH]
 
-        -- Setup leader icon and name positioning
-        unitFrame.levelIcon:ClearAnchors()
-        local isLeader = IsUnitGroupLeader(unitTag)
+            -- Position and size frame
+            unitFrame.control:ClearAnchors()
+            unitFrame.control:SetAnchor(TOPLEFT, group, TOPLEFT, 0, 0.5 * UnitFrames.SV.GroupBarSpacing + (totalFrameHeight + UnitFrames.SV.GroupBarSpacing) * (i - 1))
+            unitFrame.control:SetDimensions(UnitFrames.SV.GroupBarWidth, totalFrameHeight)
+            unitFrame.topInfo:SetWidth(UnitFrames.SV.GroupBarWidth - 5)
 
-        if isLeader then
-            unitFrame.name:SetWidth(UnitFrames.SV.GroupBarWidth - 137)
-            unitFrame.name:ClearAnchors()
-            unitFrame.name:SetAnchor(LEFT, unitFrame.topInfo, LEFT, 22, -8)
-            unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 23, 0)
-            unitFrame.leader:SetTexture(leaderIcons[1])
-        else
-            unitFrame.name:SetWidth(UnitFrames.SV.GroupBarWidth - 115)
-            unitFrame.name:ClearAnchors()
-            unitFrame.name:SetAnchor(LEFT, unitFrame.topInfo, LEFT, 0, -8)
-            unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 1, 0)
-            unitFrame.leader:SetTexture(leaderIcons[0])
+            -- Setup leader icon and name positioning
+            unitFrame.levelIcon:ClearAnchors()
+            local isLeader = IsUnitGroupLeader(unitTag)
+
+            if isLeader then
+                unitFrame.name:SetWidth(UnitFrames.SV.GroupBarWidth - 137)
+                unitFrame.name:ClearAnchors()
+                unitFrame.name:SetAnchor(LEFT, unitFrame.topInfo, LEFT, 22, -8)
+                unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 23, 0)
+                unitFrame.leader:SetTexture(leaderIcons[1])
+            else
+                unitFrame.name:SetWidth(UnitFrames.SV.GroupBarWidth - 115)
+                unitFrame.name:ClearAnchors()
+                unitFrame.name:SetAnchor(LEFT, unitFrame.topInfo, LEFT, 0, -8)
+                unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 1, 0)
+                unitFrame.leader:SetTexture(leaderIcons[0])
+            end
+
+            -- Health bar dimensions
+            ghb.backdrop:SetDimensions(UnitFrames.SV.GroupBarWidth, UnitFrames.SV.GroupBarHeight)
+            setupShieldBackdrop(ghb.shieldbackdrop, ghb.backdrop, UnitFrames.SV.GroupBarWidth)
+
+            -- Role icon and label positioning
+            local role = GetGroupMemberSelectedRole(unitTag)
+            local showRoleIcon = UnitFrames.SV.RoleIconSmallGroup and role
+            local labelWidth = showRoleIcon and (UnitFrames.SV.GroupBarWidth - 52) or (UnitFrames.SV.GroupBarWidth - 72)
+            local labelAnchorX = showRoleIcon and 25 or 5
+
+            ghb.labelOne:SetDimensions(labelWidth, UnitFrames.SV.GroupBarHeight - 2)
+            ghb.labelOne:SetAnchor(LEFT, ghb.backdrop, LEFT, labelAnchorX, 0)
+            ghb.labelTwo:SetDimensions(UnitFrames.SV.GroupBarWidth - 50, UnitFrames.SV.GroupBarHeight - 2)
+
+            unitFrame.dead:ClearAnchors()
+            unitFrame.dead:SetAnchor(LEFT, ghb.backdrop, LEFT, labelAnchorX, 0)
+            unitFrame.roleIcon:SetHidden(not showRoleIcon)
         end
-
-        -- Health bar dimensions
-        ghb.backdrop:SetDimensions(UnitFrames.SV.GroupBarWidth, UnitFrames.SV.GroupBarHeight)
-        setupShieldBackdrop(ghb.shieldbackdrop, ghb.backdrop, UnitFrames.SV.GroupBarWidth)
-
-        -- Role icon and label positioning
-        local role = GetGroupMemberSelectedRole(unitTag)
-        local showRoleIcon = UnitFrames.SV.RoleIconSmallGroup and role
-        local labelWidth = showRoleIcon and (UnitFrames.SV.GroupBarWidth - 52) or (UnitFrames.SV.GroupBarWidth - 72)
-        local labelAnchorX = showRoleIcon and 25 or 5
-
-        ghb.labelOne:SetDimensions(labelWidth, UnitFrames.SV.GroupBarHeight - 2)
-        ghb.labelOne:SetAnchor(LEFT, ghb.backdrop, LEFT, labelAnchorX, 0)
-        ghb.labelTwo:SetDimensions(UnitFrames.SV.GroupBarWidth - 50, UnitFrames.SV.GroupBarHeight - 2)
-
-        unitFrame.dead:ClearAnchors()
-        unitFrame.dead:SetAnchor(LEFT, ghb.backdrop, LEFT, labelAnchorX, 0)
-        unitFrame.roleIcon:SetHidden(not showRoleIcon)
     end
 
     if unhide then
