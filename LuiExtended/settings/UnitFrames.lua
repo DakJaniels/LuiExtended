@@ -3179,6 +3179,678 @@ function UnitFrames.CreateSettings()
         },
     }
 
+    -- Unit Frames - Group Resources (LibGroupBroadcast) Options Submenu
+    optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
+    {
+        type = "submenu",
+        name = "Group Resources",
+        controls =
+        {
+            {
+                -- Enable Group Resources
+                type = "checkbox",
+                name = "Enable Group Resources",
+                tooltip = "Display magicka and stamina bars for group members using LibGroupBroadcast.",
+                getFunc = function ()
+                    return Settings.GroupResources.enabled
+                end,
+                setFunc = function (value)
+                    Settings.GroupResources.enabled = value
+                end,
+                width = "full",
+                default = Defaults.GroupResources.enabled,
+                warning = "Requires LibGroupBroadcast library. " .. GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and LibGroupBroadcast)
+                end,
+            },
+            {
+                -- Stamina First
+                type = "checkbox",
+                name = "Stamina First",
+                tooltip = "Show stamina bar above magicka bar instead of below.",
+                getFunc = function ()
+                    return Settings.GroupResources.staminaFirst
+                end,
+                setFunc = function (value)
+                    Settings.GroupResources.staminaFirst = value
+                    if UnitFrames.GroupResources then
+                        UnitFrames.GroupResources.UpdateAllLayouts()
+                    end
+                end,
+                width = "full",
+                default = Defaults.GroupResources.staminaFirst,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled)
+                end,
+            },
+            {
+                -- Enable Fade Effect
+                type = "checkbox",
+                name = "Fade Effect on Resource Loss",
+                tooltip = "Show a fade-out ghost effect when resources decrease for better visibility.",
+                getFunc = function ()
+                    return Settings.GroupResources.enableFadeEffect
+                end,
+                setFunc = function (value)
+                    Settings.GroupResources.enableFadeEffect = value
+                end,
+                width = "full",
+                default = Defaults.GroupResources.enableFadeEffect,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled)
+                end,
+            },
+            {
+                -- Hide Resource Bars Toggle
+                type = "checkbox",
+                name = "Hide Resource Bars (Timeout)",
+                tooltip = "Hide resource bars after no updates received for set timeout period.",
+                getFunc = function ()
+                    return Settings.GroupResources.hideResourceBarsToggle
+                end,
+                setFunc = function (value)
+                    Settings.GroupResources.hideResourceBarsToggle = value
+                end,
+                width = "full",
+                default = Defaults.GroupResources.hideResourceBarsToggle,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled)
+                end,
+            },
+            {
+                -- Hide Timeout
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Hide Timeout (seconds)"),
+                tooltip = "Seconds after last resource update before hiding bars.",
+                min = 5,
+                max = 600,
+                step = 5,
+                getFunc = function ()
+                    return Settings.GroupResources.hideResourceBarsTimeout
+                end,
+                setFunc = function (value)
+                    Settings.GroupResources.hideResourceBarsTimeout = value
+                end,
+                width = "full",
+                default = Defaults.GroupResources.hideResourceBarsTimeout,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled and Settings.GroupResources.hideResourceBarsToggle)
+                end,
+            },
+            {
+                -- Group Bar Width
+                type = "slider",
+                name = "Group Frame Bar Width",
+                min = 50,
+                max = 300,
+                step = 5,
+                getFunc = function ()
+                    return Settings.GroupResources.groupBarWidth
+                end,
+                setFunc = function (value)
+                    Settings.GroupResources.groupBarWidth = value
+                    if UnitFrames.GroupResources then
+                        UnitFrames.GroupResources.UpdateAllLayouts()
+                    end
+                end,
+                width = "half",
+                default = Defaults.GroupResources.groupBarWidth,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled)
+                end,
+            },
+            {
+                -- Group Bar Height
+                type = "slider",
+                name = "Group Frame Bar Height",
+                min = 3,
+                max = 15,
+                step = 1,
+                getFunc = function ()
+                    return Settings.GroupResources.groupBarHeight
+                end,
+                setFunc = function (value)
+                    Settings.GroupResources.groupBarHeight = value
+                    if UnitFrames.GroupResources then
+                        UnitFrames.GroupResources.UpdateAllLayouts()
+                    end
+                end,
+                width = "half",
+                default = Defaults.GroupResources.groupBarHeight,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled)
+                end,
+            },
+            {
+                -- Raid Bar Width
+                type = "slider",
+                name = "Raid Frame Bar Width",
+                min = 50,
+                max = 250,
+                step = 5,
+                getFunc = function ()
+                    return Settings.GroupResources.raidBarWidth
+                end,
+                setFunc = function (value)
+                    Settings.GroupResources.raidBarWidth = value
+                    if UnitFrames.GroupResources then
+                        UnitFrames.GroupResources.UpdateAllLayouts()
+                    end
+                end,
+                width = "half",
+                default = Defaults.GroupResources.raidBarWidth,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled)
+                end,
+            },
+            {
+                -- Raid Bar Height
+                type = "slider",
+                name = "Raid Frame Bar Height",
+                min = 3,
+                max = 15,
+                step = 1,
+                getFunc = function ()
+                    return Settings.GroupResources.raidBarHeight
+                end,
+                setFunc = function (value)
+                    Settings.GroupResources.raidBarHeight = value
+                    if UnitFrames.GroupResources then
+                        UnitFrames.GroupResources.UpdateAllLayouts()
+                    end
+                end,
+                width = "half",
+                default = Defaults.GroupResources.raidBarHeight,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled)
+                end,
+            },
+            {
+                -- Magicka Color Start
+                type = "colorpicker",
+                name = "Magicka Gradient Start",
+                getFunc = function ()
+                    return unpack(Settings.GroupResources.colors[COMBAT_MECHANIC_FLAGS_MAGICKA].gradientStart)
+                end,
+                setFunc = function (r, g, b, a)
+                    Settings.GroupResources.colors[COMBAT_MECHANIC_FLAGS_MAGICKA].gradientStart = { r, g, b, a }
+                    if UnitFrames.GroupResources then
+                        UnitFrames.GroupResources.RefreshColors()
+                    end
+                end,
+                width = "half",
+                default = ZO_ColorDef:New(unpack(Defaults.GroupResources.colors[COMBAT_MECHANIC_FLAGS_MAGICKA].gradientStart)),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled)
+                end,
+            },
+            {
+                -- Magicka Color End
+                type = "colorpicker",
+                name = "Magicka Gradient End",
+                getFunc = function ()
+                    return unpack(Settings.GroupResources.colors[COMBAT_MECHANIC_FLAGS_MAGICKA].gradientEnd)
+                end,
+                setFunc = function (r, g, b, a)
+                    Settings.GroupResources.colors[COMBAT_MECHANIC_FLAGS_MAGICKA].gradientEnd = { r, g, b, a }
+                    if UnitFrames.GroupResources then
+                        UnitFrames.GroupResources.RefreshColors()
+                    end
+                end,
+                width = "half",
+                default = ZO_ColorDef:New(unpack(Defaults.GroupResources.colors[COMBAT_MECHANIC_FLAGS_MAGICKA].gradientEnd)),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled)
+                end,
+            },
+            {
+                -- Stamina Color Start
+                type = "colorpicker",
+                name = "Stamina Gradient Start",
+                getFunc = function ()
+                    return unpack(Settings.GroupResources.colors[COMBAT_MECHANIC_FLAGS_STAMINA].gradientStart)
+                end,
+                setFunc = function (r, g, b, a)
+                    Settings.GroupResources.colors[COMBAT_MECHANIC_FLAGS_STAMINA].gradientStart = { r, g, b, a }
+                    if UnitFrames.GroupResources then
+                        UnitFrames.GroupResources.RefreshColors()
+                    end
+                end,
+                width = "half",
+                default = ZO_ColorDef:New(unpack(Defaults.GroupResources.colors[COMBAT_MECHANIC_FLAGS_STAMINA].gradientStart)),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled)
+                end,
+            },
+            {
+                -- Stamina Color End
+                type = "colorpicker",
+                name = "Stamina Gradient End",
+                getFunc = function ()
+                    return unpack(Settings.GroupResources.colors[COMBAT_MECHANIC_FLAGS_STAMINA].gradientEnd)
+                end,
+                setFunc = function (r, g, b, a)
+                    Settings.GroupResources.colors[COMBAT_MECHANIC_FLAGS_STAMINA].gradientEnd = { r, g, b, a }
+                    if UnitFrames.GroupResources then
+                        UnitFrames.GroupResources.RefreshColors()
+                    end
+                end,
+                width = "half",
+                default = ZO_ColorDef:New(unpack(Defaults.GroupResources.colors[COMBAT_MECHANIC_FLAGS_STAMINA].gradientEnd)),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupResources.enabled)
+                end,
+            },
+        },
+    }
+
+    -- Unit Frames - Group Combat Stats (LibGroupCombatStats) Options Submenu
+    optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
+    {
+        type = "submenu",
+        name = "Group Combat Stats",
+        controls =
+        {
+            {
+                -- Enable Group Combat Stats
+                type = "checkbox",
+                name = "Enable Combat Stats Display",
+                tooltip = "Display ultimate status, DPS, and HPS for group members using LibGroupCombatStats.",
+                getFunc = function ()
+                    return Settings.GroupCombatStats.enabled
+                end,
+                setFunc = function (value)
+                    Settings.GroupCombatStats.enabled = value
+                end,
+                width = "full",
+                default = Defaults.GroupCombatStats.enabled,
+                warning = "Requires LibGroupCombatStats library. " .. GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and LibGroupCombatStats)
+                end,
+            },
+            {
+                -- Show Ultimate Icon
+                type = "checkbox",
+                name = "Show Ultimate Icons",
+                tooltip = "Display ultimate ability icon with charge indicator on group frames.",
+                getFunc = function ()
+                    return Settings.GroupCombatStats.showUltimate
+                end,
+                setFunc = function (value)
+                    Settings.GroupCombatStats.showUltimate = value
+                end,
+                width = "full",
+                default = Defaults.GroupCombatStats.showUltimate,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupCombatStats.enabled)
+                end,
+            },
+            {
+                -- Show DPS
+                type = "checkbox",
+                name = "Show DPS",
+                tooltip = "Display damage per second values on group frames.",
+                getFunc = function ()
+                    return Settings.GroupCombatStats.showDPS
+                end,
+                setFunc = function (value)
+                    Settings.GroupCombatStats.showDPS = value
+                    if UnitFrames.GroupCombatStats then
+                        UnitFrames.GroupCombatStats.RefreshAll()
+                    end
+                end,
+                width = "half",
+                default = Defaults.GroupCombatStats.showDPS,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupCombatStats.enabled)
+                end,
+            },
+            {
+                -- Show HPS
+                type = "checkbox",
+                name = "Show HPS",
+                tooltip = "Display healing per second values on group frames.",
+                getFunc = function ()
+                    return Settings.GroupCombatStats.showHPS
+                end,
+                setFunc = function (value)
+                    Settings.GroupCombatStats.showHPS = value
+                    if UnitFrames.GroupCombatStats then
+                        UnitFrames.GroupCombatStats.RefreshAll()
+                    end
+                end,
+                width = "half",
+                default = Defaults.GroupCombatStats.showHPS,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupCombatStats.enabled)
+                end,
+            },
+            {
+                -- Header for Group (4 player) settings
+                type = "header",
+                name = "Group Frames (4 player)",
+            },
+            {
+                -- Ultimate Icon Size (Group)
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Ultimate Icon Size"),
+                tooltip = "Set the size of ultimate icons displayed on group frames (4 player).",
+                min = 16,
+                max = 36,
+                step = 2,
+                getFunc = function ()
+                    return Settings.GroupCombatStats.ultIconGroupSize
+                end,
+                setFunc = function (value)
+                    Settings.GroupCombatStats.ultIconGroupSize = value
+                end,
+                width = "full",
+                default = Defaults.GroupCombatStats.ultIconGroupSize,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupCombatStats.enabled and Settings.GroupCombatStats.showUltimate)
+                end,
+            },
+            {
+                -- Ultimate Icon Horizontal Offset (Group)
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Horizontal Offset"),
+                tooltip = "Adjust horizontal position of ultimate icons on group frames.",
+                min = -20,
+                max = 20,
+                step = 1,
+                getFunc = function ()
+                    return Settings.GroupCombatStats.ultIconGroupOffsetX
+                end,
+                setFunc = function (value)
+                    Settings.GroupCombatStats.ultIconGroupOffsetX = value
+                end,
+                width = "half",
+                default = Defaults.GroupCombatStats.ultIconGroupOffsetX,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupCombatStats.enabled and Settings.GroupCombatStats.showUltimate)
+                end,
+            },
+            {
+                -- Ultimate Icon Vertical Offset (Group)
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Vertical Offset"),
+                tooltip = "Adjust vertical position of ultimate icons on group frames.",
+                min = -20,
+                max = 20,
+                step = 1,
+                getFunc = function ()
+                    return Settings.GroupCombatStats.ultIconGroupOffsetY
+                end,
+                setFunc = function (value)
+                    Settings.GroupCombatStats.ultIconGroupOffsetY = value
+                end,
+                width = "half",
+                default = Defaults.GroupCombatStats.ultIconGroupOffsetY,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupCombatStats.enabled and Settings.GroupCombatStats.showUltimate)
+                end,
+            },
+            {
+                -- Header for Raid (12 player) settings
+                type = "header",
+                name = "Raid Frames (12 player)",
+            },
+            {
+                -- Ultimate Icon Size (Raid)
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Ultimate Icon Size"),
+                tooltip = "Set the size of ultimate icons displayed on raid frames (12 player).",
+                min = 14,
+                max = 32,
+                step = 2,
+                getFunc = function ()
+                    return Settings.GroupCombatStats.ultIconRaidSize
+                end,
+                setFunc = function (value)
+                    Settings.GroupCombatStats.ultIconRaidSize = value
+                end,
+                width = "full",
+                default = Defaults.GroupCombatStats.ultIconRaidSize,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupCombatStats.enabled and Settings.GroupCombatStats.showUltimate)
+                end,
+            },
+            {
+                -- Ultimate Icon Horizontal Offset (Raid)
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Horizontal Offset"),
+                tooltip = "Adjust horizontal position of ultimate icons on raid frames.",
+                min = -20,
+                max = 20,
+                step = 1,
+                getFunc = function ()
+                    return Settings.GroupCombatStats.ultIconRaidOffsetX
+                end,
+                setFunc = function (value)
+                    Settings.GroupCombatStats.ultIconRaidOffsetX = value
+                end,
+                width = "half",
+                default = Defaults.GroupCombatStats.ultIconRaidOffsetX,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupCombatStats.enabled and Settings.GroupCombatStats.showUltimate)
+                end,
+            },
+            {
+                -- Ultimate Icon Vertical Offset (Raid)
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Vertical Offset"),
+                tooltip = "Adjust vertical position of ultimate icons on raid frames.",
+                min = -20,
+                max = 20,
+                step = 1,
+                getFunc = function ()
+                    return Settings.GroupCombatStats.ultIconRaidOffsetY
+                end,
+                setFunc = function (value)
+                    Settings.GroupCombatStats.ultIconRaidOffsetY = value
+                end,
+                width = "half",
+                default = Defaults.GroupCombatStats.ultIconRaidOffsetY,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupCombatStats.enabled and Settings.GroupCombatStats.showUltimate)
+                end,
+            },
+        },
+    }
+
+    -- Unit Frames - Group Potion Cooldowns Options Submenu
+    optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
+    {
+        type = "submenu",
+        name = "Group Potion Cooldowns",
+        controls =
+        {
+            {
+                -- Enable Group Potion Cooldowns
+                type = "checkbox",
+                name = "Enable Group Potion Cooldowns",
+                tooltip = "Display potion cooldown status for group members on custom unit frames (requires LibGroupPotionCooldowns).",
+                getFunc = function ()
+                    return Settings.GroupPotionCooldowns.enabled
+                end,
+                setFunc = function (value)
+                    Settings.GroupPotionCooldowns.enabled = value
+                end,
+                width = "full",
+                default = Defaults.GroupPotionCooldowns.enabled,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not LUIE.SV.UnitFrames_Enabled
+                end,
+            },
+            {
+                -- Show Remaining Time
+                type = "checkbox",
+                name = "Show Remaining Time",
+                tooltip = "Display countdown timer on potion icon when on cooldown.",
+                getFunc = function ()
+                    return Settings.GroupPotionCooldowns.showRemainingTime
+                end,
+                setFunc = function (value)
+                    Settings.GroupPotionCooldowns.showRemainingTime = value
+                end,
+                width = "full",
+                default = Defaults.GroupPotionCooldowns.showRemainingTime,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled)
+                end,
+            },
+            {
+                -- Header for Group (4 player) settings
+                type = "header",
+                name = "Group Frames (4 player)",
+            },
+            {
+                -- Potion Icon Size (Group)
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Potion Icon Size"),
+                tooltip = "Set the size of potion cooldown icons on group frames (4 player).",
+                min = 14,
+                max = 32,
+                step = 2,
+                getFunc = function ()
+                    return Settings.GroupPotionCooldowns.potionIconGroupSize
+                end,
+                setFunc = function (value)
+                    Settings.GroupPotionCooldowns.potionIconGroupSize = value
+                end,
+                width = "full",
+                default = Defaults.GroupPotionCooldowns.potionIconGroupSize,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled)
+                end,
+            },
+            {
+                -- Potion Icon Horizontal Offset (Group)
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Horizontal Offset"),
+                tooltip = "Adjust horizontal position of potion icon on group frames.",
+                min = -20,
+                max = 20,
+                step = 1,
+                getFunc = function ()
+                    return Settings.GroupPotionCooldowns.potionIconGroupOffsetX
+                end,
+                setFunc = function (value)
+                    Settings.GroupPotionCooldowns.potionIconGroupOffsetX = value
+                end,
+                width = "half",
+                default = Defaults.GroupPotionCooldowns.potionIconGroupOffsetX,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled)
+                end,
+            },
+            {
+                -- Potion Icon Vertical Offset (Group)
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Vertical Offset"),
+                tooltip = "Adjust vertical position of potion icon on group frames.",
+                min = -20,
+                max = 20,
+                step = 1,
+                getFunc = function ()
+                    return Settings.GroupPotionCooldowns.potionIconGroupOffsetY
+                end,
+                setFunc = function (value)
+                    Settings.GroupPotionCooldowns.potionIconGroupOffsetY = value
+                end,
+                width = "half",
+                default = Defaults.GroupPotionCooldowns.potionIconGroupOffsetY,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled)
+                end,
+            },
+            {
+                -- Header for Raid (12 player) settings
+                type = "header",
+                name = "Raid Frames (12 player)",
+            },
+            {
+                -- Potion Icon Size (Raid)
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Potion Icon Size"),
+                tooltip = "Set the size of potion cooldown icons on raid frames (12 player).",
+                min = 12,
+                max = 28,
+                step = 2,
+                getFunc = function ()
+                    return Settings.GroupPotionCooldowns.potionIconRaidSize
+                end,
+                setFunc = function (value)
+                    Settings.GroupPotionCooldowns.potionIconRaidSize = value
+                end,
+                width = "full",
+                default = Defaults.GroupPotionCooldowns.potionIconRaidSize,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled)
+                end,
+            },
+            {
+                -- Potion Icon Horizontal Offset (Raid)
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Horizontal Offset"),
+                tooltip = "Adjust horizontal position of potion icon on raid frames.",
+                min = -20,
+                max = 20,
+                step = 1,
+                getFunc = function ()
+                    return Settings.GroupPotionCooldowns.potionIconRaidOffsetX
+                end,
+                setFunc = function (value)
+                    Settings.GroupPotionCooldowns.potionIconRaidOffsetX = value
+                end,
+                width = "half",
+                default = Defaults.GroupPotionCooldowns.potionIconRaidOffsetX,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled)
+                end,
+            },
+            {
+                -- Potion Icon Vertical Offset (Raid)
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Vertical Offset"),
+                tooltip = "Adjust vertical position of potion icon on raid frames.",
+                min = -20,
+                max = 20,
+                step = 1,
+                getFunc = function ()
+                    return Settings.GroupPotionCooldowns.potionIconRaidOffsetY
+                end,
+                setFunc = function (value)
+                    Settings.GroupPotionCooldowns.potionIconRaidOffsetY = value
+                end,
+                width = "half",
+                default = Defaults.GroupPotionCooldowns.potionIconRaidOffsetY,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled)
+                end,
+            },
+        },
+    }
+
     -- Unit Frames - Custom Unit Frames (Companion) Options Submenu
     optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
     {

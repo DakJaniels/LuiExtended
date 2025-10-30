@@ -12,6 +12,13 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+        -- Version Header
+    "|cFFA500LuiExtended Version 7.1.0.2|r",
+    "",
+    -- New Features
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Integration with LibGroupResources, LibGroupCombatStats, LibGroupPotionCooldowns.\nTweaks will be made, need people to test and let me know.",
+    "",
     -- Version Header
     "|cFFA500LuiExtended Version 7.1.0.1|r",
     "",

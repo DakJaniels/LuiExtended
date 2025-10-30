@@ -154,10 +154,31 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
 
     local pct = zo_floor(100 * powerValue / powerEffectiveMax)
 
+    -- Cache all attribute visualizer effects for this unit in one batch call
+    local attributeVisualCache = {}
+    local results = { GetAllUnitAttributeVisualizerEffectInfo(unitTag) }
+    for i = 1, #results, 6 do
+        local visualType = results[i]
+        local statType = results[i + 1]
+        local attributeType = results[i + 2]
+        local powerTypeResult = results[i + 3]
+        local value = results[i + 4]
+
+        -- Build cache key: visualType_statType_attributeType_powerType
+        local cacheKey = string.format("%d_%d_%d_%d", visualType, statType, attributeType, powerTypeResult)
+        attributeVisualCache[cacheKey] = value
+    end
+
+    -- Helper to query cache
+    local function getAttributeVisual(visualType, statType, attributeType, powerTypeQuery)
+        local cacheKey = string.format("%d_%d_%d_%d", visualType, statType, attributeType, powerTypeQuery)
+        return attributeVisualCache[cacheKey] or 0
+    end
+
     -- Update Shield / Trauma values IF this is the health bar
     local shield = (powerType == COMBAT_MECHANIC_FLAGS_HEALTH and UnitFrames.savedHealth[unitTag][4] > 0) and UnitFrames.savedHealth[unitTag][4] or nil
     local trauma = (powerType == COMBAT_MECHANIC_FLAGS_HEALTH and UnitFrames.savedHealth[unitTag][5] > 0) and UnitFrames.savedHealth[unitTag][5] or nil
-    local isUnwaveringPower = (GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_UNWAVERING_POWER, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH) or 0)
+    local isUnwaveringPower = getAttributeVisual(ATTRIBUTE_VISUAL_UNWAVERING_POWER, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
     local isGuard = (UnitFrames.CustomFrames and UnitFrames.CustomFrames["reticleover"] and attributeFrame == UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH] and IsUnitInvulnerableGuard("reticleover"))
 
     -- Adjust health bar value to subtract the trauma bar value
@@ -236,14 +257,35 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
             end
         end
 
-        -- Update no-healing overlay
+        -- Update no-healing overlay (default frames)
         if powerType == COMBAT_MECHANIC_FLAGS_HEALTH and attributeFrame.noHealingInner and attributeFrame.noHealingOuter then
-            local noHealingValue = GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_NO_HEALING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH) or 0
+            local noHealingValue = getAttributeVisual(ATTRIBUTE_VISUAL_NO_HEALING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
             if noHealingValue > 0 and not attributeFrame.noHealingInner:IsHidden() then
                 attributeFrame.noHealingOuter:SetMinMax(0, powerEffectiveMax)
                 attributeFrame.noHealingOuter:SetValue(powerValue)
                 attributeFrame.noHealingInner:SetMinMax(0, powerEffectiveMax)
                 attributeFrame.noHealingInner:SetValue(adjustedBarValue)
+            end
+        end
+
+        -- Update no-healing overlay and stripe (custom frames)
+        if powerType == COMBAT_MECHANIC_FLAGS_HEALTH and attributeFrame.noHealingOverlay then
+            local noHealingValue = getAttributeVisual(ATTRIBUTE_VISUAL_NO_HEALING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+            if noHealingValue > 0 and not attributeFrame.noHealingOverlay:IsHidden() then
+                -- Update overlay value to match current health
+                if UnitFrames.SV.CustomSmoothBar then
+                    ZO_StatusBar_SmoothTransition(attributeFrame.noHealingOverlay, powerValue, powerEffectiveMax, forceInit, nil, 250)
+                    if attributeFrame.noHealingStripe then
+                        ZO_StatusBar_SmoothTransition(attributeFrame.noHealingStripe, powerValue, powerEffectiveMax, forceInit, nil, 250)
+                    end
+                else
+                    attributeFrame.noHealingOverlay:SetMinMax(0, powerEffectiveMax)
+                    attributeFrame.noHealingOverlay:SetValue(powerValue)
+                    if attributeFrame.noHealingStripe then
+                        attributeFrame.noHealingStripe:SetMinMax(0, powerEffectiveMax)
+                        attributeFrame.noHealingStripe:SetValue(powerValue)
+                    end
+                end
             end
         end
     end

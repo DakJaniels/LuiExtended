@@ -192,6 +192,24 @@ function UnitFrames.Initialize(enabled)
     UnitFrames.CreateDefaultFrames()
     UnitFrames.CreateCustomFrames()
 
+    -- Initialize LibGroupBroadcast integrations if available
+    if UnitFrames.GroupResources then
+        UnitFrames.GroupResources.Initialize()
+        UnitFrames.GroupResources.SetupFrames()
+    end
+
+    -- Initialize GroupCombatStats
+    if UnitFrames.GroupCombatStats then
+        UnitFrames.GroupCombatStats.Initialize()
+        UnitFrames.GroupCombatStats.SetupFrames()
+    end
+
+    -- Initialize GroupPotionCooldowns
+    if UnitFrames.GroupPotionCooldowns then
+        UnitFrames.GroupPotionCooldowns.Initialize()
+        UnitFrames.GroupPotionCooldowns.SetupFrames()
+    end
+
     local RefreshBossHealthBar = function (self, smoothAnimate)
         local totalHealth = 0
         local totalMaxHealth = 0
@@ -1685,7 +1703,18 @@ function UnitFrames.CustomFramesSetDeadLabel(unitFrame, newValue)
     end
     if unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH] then
         if unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].bar ~= nil then
-            local isUnwaveringPower = (GetUnitAttributeVisualizerEffectInfo(unitFrame.unitTag, ATTRIBUTE_VISUAL_UNWAVERING_POWER, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH) or 0)
+            local isUnwaveringPower = 0
+            local results = { GetAllUnitAttributeVisualizerEffectInfo(unitFrame.unitTag) }
+            for i = 1, #results, 6 do
+                if  results[i] == ATTRIBUTE_VISUAL_UNWAVERING_POWER
+                and results[i + 1] == STAT_MITIGATION
+                and results[i + 2] == ATTRIBUTE_HEALTH
+                and results[i + 3] == COMBAT_MECHANIC_FLAGS_HEALTH then
+                    isUnwaveringPower = results[i + 4]
+                    break
+                end
+            end
+
             -- Don't unhide the HP bar if this unit is invulnerable
             if isUnwaveringPower == 0 then
                 unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].bar:SetHidden(newValue ~= nil)
@@ -2286,6 +2315,11 @@ function UnitFrames.CustomFramesApplyTexture()
         end
         UnitFrames.CustomFrames["boss1"].tlw:SetHidden(false)
     end
+
+    -- Update GroupResources textures if enabled
+    if UnitFrames.GroupResources then
+        UnitFrames.GroupResources.UpdateAllLayouts()
+    end
 end
 
 -- Set dimensions of custom group frame and anchors or raid group members
@@ -2565,8 +2599,15 @@ function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
         groupBarHeight = groupBarHeight + UnitFrames.SV.CustomShieldBarHeight
     end
 
+    -- Add extra height for resource bars if enabled
+    local resourceBarsHeight = 0
+    if UnitFrames.GroupResources then
+        resourceBarsHeight = UnitFrames.GroupResources.GetResourceBarsHeight(false)
+    end
+
     local group = UnitFrames.CustomFrames["SmallGroup1"].tlw
-    group:SetDimensions(UnitFrames.SV.GroupBarWidth, groupBarHeight * 4 + UnitFrames.SV.GroupBarSpacing * 3.5)
+    local totalFrameHeight = groupBarHeight + resourceBarsHeight
+    group:SetDimensions(UnitFrames.SV.GroupBarWidth, totalFrameHeight * 4 + UnitFrames.SV.GroupBarSpacing * 3.5)
 
     for i = 1, 4 do
         local unitFrame = UnitFrames.CustomFrames["SmallGroup" .. i]
@@ -2575,8 +2616,8 @@ function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
 
         -- Position and size frame
         unitFrame.control:ClearAnchors()
-        unitFrame.control:SetAnchor(TOPLEFT, group, TOPLEFT, 0, 0.5 * UnitFrames.SV.GroupBarSpacing + (groupBarHeight + UnitFrames.SV.GroupBarSpacing) * (i - 1))
-        unitFrame.control:SetDimensions(UnitFrames.SV.GroupBarWidth, groupBarHeight)
+        unitFrame.control:SetAnchor(TOPLEFT, group, TOPLEFT, 0, 0.5 * UnitFrames.SV.GroupBarSpacing + (totalFrameHeight + UnitFrames.SV.GroupBarSpacing) * (i - 1))
+        unitFrame.control:SetDimensions(UnitFrames.SV.GroupBarWidth, totalFrameHeight)
         unitFrame.topInfo:SetWidth(UnitFrames.SV.GroupBarWidth - 5)
 
         -- Setup leader icon and name positioning
@@ -2633,13 +2674,15 @@ end
 --- @param index number
 --- @param itemsPerColumn number
 --- @param spacerHeight number
+--- @param resourceBarsHeight number
 --- @return number xOffset
 --- @return number yOffset
-local function calculateFramePosition(index, itemsPerColumn, spacerHeight)
+local function calculateFramePosition(index, itemsPerColumn, spacerHeight, resourceBarsHeight)
     local column = zo_floor((index - 1) / itemsPerColumn)
     local row = (index - 1) % itemsPerColumn + 1
     local xOffset = UnitFrames.SV.RaidBarWidth * column
-    local yOffset = UnitFrames.SV.RaidBarHeight * (row - 1)
+    local totalFrameHeight = UnitFrames.SV.RaidBarHeight + resourceBarsHeight
+    local yOffset = totalFrameHeight * (row - 1)
 
     -- Add spacers if enabled (every 4 members)
     if UnitFrames.SV.RaidSpacers then
@@ -2704,6 +2747,12 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide)
 
     local spacerHeight = 3
 
+    -- Add extra height for resource bars if enabled
+    local resourceBarsHeight = 0
+    if UnitFrames.GroupResources then
+        resourceBarsHeight = UnitFrames.GroupResources.GetResourceBarsHeight(true)
+    end
+
     -- Determine layout dimensions
     local columns, rows
     if UnitFrames.SV.RaidLayout == "6 x 2" then
@@ -2718,6 +2767,7 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide)
 
     local itemsPerColumn = rows
     local raid = UnitFrames.CustomFrames["RaidGroup1"].tlw
+    local totalFrameHeight = UnitFrames.SV.RaidBarHeight + resourceBarsHeight
 
     -- Calculate dimensions
     local totalWidth = UnitFrames.SV.RaidBarWidth * columns
@@ -2725,8 +2775,8 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide)
         totalWidth = totalWidth + (spacerHeight * (rows / 4))
     end
 
-    raid:SetDimensions(totalWidth, UnitFrames.SV.RaidBarHeight * rows)
-    raid.preview:SetDimensions(UnitFrames.SV.RaidBarWidth * columns, UnitFrames.SV.RaidBarHeight * rows)
+    raid:SetDimensions(totalWidth, totalFrameHeight * rows)
+    raid.preview:SetDimensions(UnitFrames.SV.RaidBarWidth * columns, totalFrameHeight * rows)
 
     -- Build player list (sorted by role if enabled)
     local playerList = {}
@@ -2745,10 +2795,10 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide)
         local rhb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
 
         -- Calculate position and set frame dimensions
-        local xOffset, yOffset = calculateFramePosition(i, itemsPerColumn, spacerHeight)
+        local xOffset, yOffset = calculateFramePosition(i, itemsPerColumn, spacerHeight, resourceBarsHeight)
         unitFrame.control:ClearAnchors()
         unitFrame.control:SetAnchor(TOPLEFT, raid, TOPLEFT, xOffset, yOffset)
-        unitFrame.control:SetDimensions(UnitFrames.SV.RaidBarWidth, UnitFrames.SV.RaidBarHeight)
+        unitFrame.control:SetDimensions(UnitFrames.SV.RaidBarWidth, totalFrameHeight)
 
         -- Apply icon settings
         local role = GetGroupMemberSelectedRole(unitTag)

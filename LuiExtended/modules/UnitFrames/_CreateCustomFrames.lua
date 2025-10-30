@@ -101,37 +101,30 @@ local function CreatePossessionHaloAnimation(backdrop)
     return halo
 end
 
--- No-healing fade animation (controls inner ring, outer ring, and stripe overlay)
-local function CreateNoHealingFadeAnimation(innerRing, outerRing, stripeOverlay)
-    if not innerRing or not outerRing then
+-- No-healing fade animation (controls overlay and stripe)
+local function CreateNoHealingFadeAnimation(overlay, stripeOverlay)
+    if not overlay then
         return nil
     end
 
-    -- Create fade timeline for both rings
-    local fadeAnim, fadeTimeline = CreateSimpleAnimation(ANIMATION_ALPHA, innerRing)
+    -- Create fade timeline for overlay
+    local fadeAnim, fadeTimeline = CreateSimpleAnimation(ANIMATION_ALPHA, overlay)
     fadeAnim:SetAlphaValues(0, 1)
     fadeAnim:SetDuration(200)
     fadeAnim:SetEasingFunction(ZO_EaseInQuadratic)
 
-    -- Add outer ring to same timeline
-    local outerFade = fadeTimeline:InsertAnimation(ANIMATION_ALPHA, outerRing)
-    outerFade:SetAlphaValues(0, 1)
-    outerFade:SetDuration(200)
-    outerFade:SetEasingFunction(ZO_EaseInQuadratic)
-
-    -- Add stripe overlay to same timeline
+    -- Add stripe overlay to same timeline (custom LUIE feature)
     if stripeOverlay then
         local stripeFade = fadeTimeline:InsertAnimation(ANIMATION_ALPHA, stripeOverlay)
-        stripeFade:SetAlphaValues(0, 0.8)
+        stripeFade:SetAlphaValues(0, 1)
         stripeFade:SetDuration(200)
         stripeFade:SetEasingFunction(ZO_EaseInQuadratic)
     end
 
     -- When animation stops, hide controls if faded out
     fadeTimeline:SetHandler("OnStop", function ()
-        if innerRing:GetAlpha() == 0 then
-            innerRing:SetHidden(true)
-            outerRing:SetHidden(true)
+        if overlay:GetAlpha() == 0 then
+            overlay:SetHidden(true)
             if stripeOverlay then
                 stripeOverlay:SetHidden(true)
             end
@@ -217,9 +210,8 @@ local function CreatePlayerFrame()
                 ["trauma"] = UI:StatusBar(phb, nil, nil, nil, true),
                 ["bar"] = UI:StatusBar(phb, nil, nil, nil, false),
                 ["shield"] = UI:StatusBar(phb, nil, nil, nil, true),
-                ["noHealingInner"] = UI:StatusBar(phb, nil, nil, nil, true),
-                ["noHealingOuter"] = UI:StatusBar(phb, nil, nil, nil, true),
-                ["noHealingStripe"] = UI:Texture(phb, nil, nil, nil, nil, true),
+                ["noHealingOverlay"] = UI:StatusBar(phb, nil, nil, nil, true),
+                ["noHealingStripe"] = UI:StatusBar(phb, nil, nil, nil, true),
                 ["possessionOverlay"] = UI:Control(phb, nil, nil, true),
                 ["threshold"] = UnitFrames.healthThreshold,
             },
@@ -333,9 +325,8 @@ local function CreateTargetFrame()
                 ["invulnerable"] = UI:StatusBar(thb, nil, nil, nil, false),
                 ["invulnerableInlay"] = UI:StatusBar(thb, nil, nil, nil, false),
                 ["shield"] = UI:StatusBar(thb, nil, nil, nil, true),
-                ["noHealingInner"] = UI:StatusBar(thb, nil, nil, nil, true),
-                ["noHealingOuter"] = UI:StatusBar(thb, nil, nil, nil, true),
-                ["noHealingStripe"] = UI:Texture(thb, nil, nil, nil, nil, true),
+                ["noHealingOverlay"] = UI:StatusBar(thb, nil, nil, nil, true),
+                ["noHealingStripe"] = UI:StatusBar(thb, nil, nil, nil, true),
                 ["possessionOverlay"] = UI:Control(thb, nil, nil, true),
                 ["threshold"] = UnitFrames.targetThreshold,
             },
@@ -407,9 +398,8 @@ local function CreateAvaPlayerTargetFrame()
                 ["invulnerable"] = UI:StatusBar(thb, nil, nil, nil, false),
                 ["invulnerableInlay"] = UI:StatusBar(thb, nil, nil, nil, false),
                 ["shield"] = UI:StatusBar(thb, nil, nil, nil, true),
-                ["noHealingInner"] = UI:StatusBar(thb, nil, nil, nil, true),
-                ["noHealingOuter"] = UI:StatusBar(thb, nil, nil, nil, true),
-                ["noHealingStripe"] = UI:Texture(thb, nil, nil, nil, nil, true),
+                ["noHealingOverlay"] = UI:StatusBar(thb, nil, nil, nil, true),
+                ["noHealingStripe"] = UI:StatusBar(thb, nil, nil, nil, true),
                 ["possessionOverlay"] = UI:Control(thb, nil, nil, true),
                 ["threshold"] = UnitFrames.targetThreshold,
             },
@@ -472,9 +462,8 @@ local function CreateSmallGroupFrames()
                     ["trauma"] = UI:StatusBar(ghb, nil, nil, nil, true),
                     ["bar"] = UI:StatusBar(ghb, nil, nil, nil, false),
                     ["shield"] = UI:StatusBar(ghb, nil, nil, nil, true),
-                    ["noHealingInner"] = UI:StatusBar(ghb, nil, nil, nil, true),
-                    ["noHealingOuter"] = UI:StatusBar(ghb, nil, nil, nil, true),
-                    ["noHealingStripe"] = UI:Texture(ghb, nil, nil, nil, nil, true),
+                    ["noHealingOverlay"] = UI:StatusBar(ghb, nil, nil, nil, true),
+                    ["noHealingStripe"] = UI:StatusBar(ghb, nil, nil, nil, true),
                     ["possessionOverlay"] = UI:Control(ghb, nil, nil, true),
                 },
                 ["topInfo"] = topInfo,
@@ -539,9 +528,8 @@ local function CreateRaidGroupFrames()
                     ["trauma"] = UI:StatusBar(rhb, nil, nil, nil, true),
                     ["bar"] = UI:StatusBar(rhb, nil, nil, nil, false),
                     ["shield"] = UI:StatusBar(rhb, nil, nil, nil, true),
-                    ["noHealingInner"] = UI:StatusBar(rhb, nil, nil, nil, true),
-                    ["noHealingOuter"] = UI:StatusBar(rhb, nil, nil, nil, true),
-                    ["noHealingStripe"] = UI:Texture(rhb, nil, nil, nil, nil, true),
+                    ["noHealingOverlay"] = UI:StatusBar(rhb, nil, nil, nil, true),
+                    ["noHealingStripe"] = UI:StatusBar(rhb, nil, nil, nil, true),
                     ["possessionOverlay"] = UI:Control(rhb, nil, nil, true),
                 },
                 ["name"] = UI:Label(rhb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, unitTag, false),
@@ -602,9 +590,8 @@ local function CreatePetFrames()
                     ["trauma"] = UI:StatusBar(shb, nil, nil, nil, true),
                     ["bar"] = UI:StatusBar(shb, nil, nil, nil, false),
                     ["shield"] = UI:StatusBar(shb, nil, nil, nil, true),
-                    ["noHealingInner"] = UI:StatusBar(shb, nil, nil, nil, true),
-                    ["noHealingOuter"] = UI:StatusBar(shb, nil, nil, nil, true),
-                    ["noHealingStripe"] = UI:Texture(shb, nil, nil, nil, nil, true),
+                    ["noHealingOverlay"] = UI:StatusBar(shb, nil, nil, nil, true),
+                    ["noHealingStripe"] = UI:StatusBar(shb, nil, nil, nil, true),
                     ["possessionOverlay"] = UI:Control(shb, nil, nil, true),
                 },
                 ["dead"] = UI:Label(shb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "Status", true),
@@ -651,9 +638,8 @@ local function CreateCompanionFrame()
                 ["trauma"] = UI:StatusBar(shb, nil, nil, nil, true),
                 ["bar"] = UI:StatusBar(shb, nil, nil, nil, false),
                 ["shield"] = UI:StatusBar(shb, nil, nil, nil, true),
-                ["noHealingInner"] = UI:StatusBar(shb, nil, nil, nil, true),
-                ["noHealingOuter"] = UI:StatusBar(shb, nil, nil, nil, true),
-                ["noHealingStripe"] = UI:Texture(shb, nil, nil, nil, nil, true),
+                ["noHealingOverlay"] = UI:StatusBar(shb, nil, nil, nil, true),
+                ["noHealingStripe"] = UI:StatusBar(shb, nil, nil, nil, true),
                 ["possessionOverlay"] = UI:Control(shb, nil, nil, true),
             },
             ["dead"] = UI:Label(shb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "Status", true),
@@ -703,9 +689,8 @@ local function CreateBossFrames()
                     ["invulnerable"] = UI:StatusBar(bhb, nil, nil, nil, false),
                     ["invulnerableInlay"] = UI:StatusBar(bhb, nil, nil, nil, false),
                     ["shield"] = UI:StatusBar(bhb, nil, nil, nil, true),
-                    ["noHealingInner"] = UI:StatusBar(bhb, nil, nil, nil, true),
-                    ["noHealingOuter"] = UI:StatusBar(bhb, nil, nil, nil, true),
-                    ["noHealingStripe"] = UI:Texture(bhb, nil, nil, nil, nil, true),
+                    ["noHealingOverlay"] = UI:StatusBar(bhb, nil, nil, nil, true),
+                    ["noHealingStripe"] = UI:StatusBar(bhb, nil, nil, nil, true),
                     ["possessionOverlay"] = UI:Control(bhb, nil, nil, true),
                     ["threshold"] = UnitFrames.targetThreshold,
                 },
@@ -785,43 +770,59 @@ local function SetupCommonFrameActions()
                             powerBar.invulnerableInlay:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -3, -3)
                         end
 
-                        if powerBar.noHealingInner and powerBar.noHealingOuter then
-                            -- Inner ring: Dark fill that covers health portion
-                            powerBar.noHealingInner:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
-                            powerBar.noHealingInner:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
-                            powerBar.noHealingInner:SetTexture("EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_noHealing_inner_fill.dds")
-                            powerBar.noHealingInner:SetDrawLevel(2)
-                            powerBar.noHealingInner:SetHidden(true)
-                            powerBar.noHealingInner:SetAlpha(0)
-                            -- Dark red tint for inner
-                            powerBar.noHealingInner:SetColor(0.1, 0.05, 0.05, 1)
+                        if powerBar.noHealingOverlay then
+                            -- No-healing overlay: works like shield overlay with SetValue() calls
+                            -- Anchors to backdrop, fills are controlled by status bar value
+                            powerBar.noHealingOverlay:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
+                            powerBar.noHealingOverlay:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
+                            powerBar.noHealingOverlay:SetTexture("LuiExtended/media/unitframes/textures/Diagonal.dds")
+                            powerBar.noHealingOverlay:SetDrawLevel(5)
+                            powerBar.noHealingOverlay:SetHidden(true)
+                            powerBar.noHealingOverlay:SetAlpha(0)
+                            -- Dark red tint with transparency so health color shows through
+                            powerBar.noHealingOverlay:SetColor(0.8, 0.1, 0.1, 0.5)
+                        end
 
-                            -- Outer ring: Red border that shows danger
-                            powerBar.noHealingOuter:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
-                            powerBar.noHealingOuter:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
-                            powerBar.noHealingOuter:SetTexture("EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_noHealing_outer_fill.dds")
-                            powerBar.noHealingOuter:SetDrawLevel(1)
-                            powerBar.noHealingOuter:SetHidden(true)
-                            powerBar.noHealingOuter:SetAlpha(0)
-                            -- Bright red for outer border
-                            powerBar.noHealingOuter:SetColor(0.85, 0.19, 0.19, 1)
+                        -- Ensure labels render above overlays (draw level 10 is above overlay at 5)
+                        if powerBar.labelOne then
+                            powerBar.labelOne:SetDrawTier(DT_HIGH)
+                            powerBar.labelOne:SetDrawLayer(DL_OVERLAY)
+                            powerBar.labelOne:SetDrawLevel(10)
+                        end
+                        if powerBar.labelTwo then
+                            powerBar.labelTwo:SetDrawTier(DT_HIGH)
+                            powerBar.labelTwo:SetDrawLayer(DL_OVERLAY)
+                            powerBar.labelTwo:SetDrawLevel(10)
+                        end
+                        if powerBar.label then
+                            powerBar.label:SetDrawTier(DT_HIGH)
+                            powerBar.label:SetDrawLayer(DL_OVERLAY)
+                            powerBar.label:SetDrawLevel(10)
+                        end
+                        if frame.roleIcon then
+                            frame.roleIcon:SetDrawTier(DT_HIGH)
+                            frame.roleIcon:SetDrawLayer(DL_OVERLAY)
+                            frame.roleIcon:SetDrawLevel(10)
                         end
 
                         if powerBar.noHealingStripe then
-                            -- Full-bar diagonal stripe overlay (always covers entire bar regardless of health)
-                            powerBar.noHealingStripe:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 0, 0)
-                            powerBar.noHealingStripe:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, 0, 0)
+                            -- Diagonal stripe: status bar that syncs value with noHealingOverlay
+                            powerBar.noHealingStripe:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
+                            powerBar.noHealingStripe:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
                             powerBar.noHealingStripe:SetTexture("LuiExtended/media/unitframes/textures/Diagonal.dds")
-                            powerBar.noHealingStripe:SetTextureCoords(0, 1, 0, 1) -- Full texture, no tiling
-                            powerBar.noHealingStripe:SetDrawLayer(DL_OVERLAY)
-                            powerBar.noHealingStripe:SetDrawTier(DT_HIGH)
-                            powerBar.noHealingStripe:SetDrawLevel(10)           -- Way above everything else
-                            powerBar.noHealingStripe:SetBlendMode(TEX_BLEND_MODE_ALPHA)
-                            powerBar.noHealingStripe:SetColor(1, 0.3, 0.3, 0.8) -- Bright red with some transparency
+                            powerBar.noHealingStripe:SetDrawLayer(DL_CONTROLS)
+                            powerBar.noHealingStripe:SetDrawTier(DT_MEDIUM)
+                            powerBar.noHealingStripe:SetDrawLevel(10)
+                            powerBar.noHealingStripe:SetColor(1, 0.3, 0.3, 0.8)
                             powerBar.noHealingStripe:SetHidden(true)
+                        end
 
-                            -- Create fade animation for inner, outer, and stripe
-                            powerBar.noHealingFadeAnimation = CreateNoHealingFadeAnimation(powerBar.noHealingInner, powerBar.noHealingOuter, powerBar.noHealingStripe)
+                        -- Create fade animation for overlay and stripe
+                        if powerBar.noHealingOverlay then
+                            powerBar.noHealingFadeAnimation = CreateNoHealingFadeAnimation(
+                                powerBar.noHealingOverlay,
+                                powerBar.noHealingStripe
+                            )
                         end
 
                         if powerBar.possessionOverlay then

@@ -236,6 +236,65 @@ UnitFrames.Defaults =
     BarAlignCenterLabelTarget = false,
     CustomFormatCenterLabel = GetString(LUIE_STRING_UF_FORMAT_CENTER_LABEL),
     CustomTargetMarker = false,
+
+    -- Group Resources (LibGroupBroadcast Integration)
+    GroupResources =
+    {
+        enabled = false,
+        staminaFirst = false,
+        hideResourceBarsToggle = true,
+        hideResourceBarsTimeout = 120,
+        enableFadeEffect = true,
+        groupBarWidth = 150,
+        groupBarHeight = 6,
+        raidBarWidth = 90,
+        raidBarHeight = 6,
+        colors =
+        {
+            [COMBAT_MECHANIC_FLAGS_MAGICKA] =
+            {
+                gradientStart = { GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_START, COMBAT_MECHANIC_FLAGS_MAGICKA) },
+                gradientEnd = { GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_END, COMBAT_MECHANIC_FLAGS_MAGICKA) },
+            },
+            [COMBAT_MECHANIC_FLAGS_STAMINA] =
+            {
+                gradientStart = { GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_START, COMBAT_MECHANIC_FLAGS_STAMINA) },
+                gradientEnd = { GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_END, COMBAT_MECHANIC_FLAGS_STAMINA) },
+            },
+        },
+    },
+
+    -- Group Combat Stats (LibGroupCombatStats Integration)
+    GroupCombatStats =
+    {
+        enabled = false,
+        showUltimate = true,
+        showDPS = true,
+        showHPS = true,
+        -- Group (4 player) settings
+        ultIconGroupSize = 28,
+        ultIconGroupOffsetX = 4,
+        ultIconGroupOffsetY = 0,
+        -- Raid (12 player) settings
+        ultIconRaidSize = 22,
+        ultIconRaidOffsetX = 3,
+        ultIconRaidOffsetY = 0,
+    },
+
+    -- Group Potion Cooldowns (LibGroupPotionCooldowns Integration)
+    GroupPotionCooldowns =
+    {
+        enabled = false,
+        showRemainingTime = true,
+        -- Group (4 player) settings
+        potionIconGroupSize = 24,
+        potionIconGroupOffsetX = 4,
+        potionIconGroupOffsetY = 0,
+        -- Raid (12 player) settings
+        potionIconRaidSize = 20,
+        potionIconRaidOffsetX = 3,
+        potionIconRaidOffsetY = 0,
+    },
 }
 
 UnitFrames.SV = {}

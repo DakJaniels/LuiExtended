@@ -131,7 +131,18 @@ function PowerShieldModule:UpdateTrauma(unitTag, value, maxValue)
     end
 
     -- Update no-healing overlay inner ring when trauma changes
-    local noHealingValue = GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_NO_HEALING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH) or 0
+    local noHealingValue = 0
+    local results = { GetAllUnitAttributeVisualizerEffectInfo(unitTag) }
+    for i = 1, #results, 6 do
+        if  results[i] == ATTRIBUTE_VISUAL_NO_HEALING
+        and results[i + 1] == STAT_MITIGATION
+        and results[i + 2] == ATTRIBUTE_HEALTH
+        and results[i + 3] == COMBAT_MECHANIC_FLAGS_HEALTH then
+            noHealingValue = results[i + 4]
+            break
+        end
+    end
+
     if noHealingValue > 0 then
         self:UpdateNoHealing(unitTag, noHealingValue)
     end
@@ -177,26 +188,29 @@ function PowerShieldModule:UpdateNoHealing(unitTag, value)
         fakeHealthValue = 0
     end
 
-    -- Helper to update no-healing overlays (inner/outer rings + stripe) with fade animation
+    -- Helper to update no-healing overlays with fade animation
+    -- Works like shield overlay: actively sets value to match health
     local function updateNoHealingOverlays(frame)
         if not frame then return end
 
-        local inner = frame.noHealingInner
-        local outer = frame.noHealingOuter
+        local overlay = frame.noHealingOverlay
         local stripe = frame.noHealingStripe
         local fadeAnim = frame.noHealingFadeAnimation
 
-        if inner and outer then
+        if overlay then
             if isActive then
-                -- Set values first (before showing)
-                outer:SetMinMax(0, healthEffectiveMax)
-                outer:SetValue(healthValue)
-                inner:SetMinMax(0, healthEffectiveMax)
-                inner:SetValue(fakeHealthValue)
+                -- Set overlay min/max and value to match current health (like shield does)
+                overlay:SetMinMax(0, healthEffectiveMax)
+                overlay:SetValue(healthValue)
 
-                -- Show controls and fade in
-                inner:SetHidden(false)
-                outer:SetHidden(false)
+                -- Stripe is also a status bar, sync its value with overlay
+                if stripe then
+                    stripe:SetMinMax(0, healthEffectiveMax)
+                    stripe:SetValue(healthValue)
+                end
+
+                -- Show overlay and stripe, fade in
+                overlay:SetHidden(false)
                 if stripe then
                     stripe:SetHidden(false)
                 end
@@ -204,14 +218,23 @@ function PowerShieldModule:UpdateNoHealing(unitTag, value)
                 if fadeAnim and not fadeAnim:IsPlaying() then
                     fadeAnim:PlayForward()
                 end
+
+                -- Apply smooth transition if enabled (matches shield behavior)
+                if UnitFrames.SV.CustomSmoothBar then
+                    ZO_StatusBar_SmoothTransition(overlay, healthValue, healthEffectiveMax, false, nil, 250)
+                    if stripe then
+                        ZO_StatusBar_SmoothTransition(stripe, healthValue, healthEffectiveMax, false, nil, 250)
+                    end
+                end
             else
                 -- Fade out, then hide
                 if fadeAnim then
                     fadeAnim:PlayBackward()
                 else
-                    inner:SetHidden(true)
-                    outer:SetHidden(true)
+                    overlay:SetValue(0)
+                    overlay:SetHidden(true)
                     if stripe then
+                        stripe:SetValue(0)
                         stripe:SetHidden(true)
                     end
                 end
