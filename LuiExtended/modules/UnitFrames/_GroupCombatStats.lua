@@ -77,7 +77,7 @@ local function AddCombatStatsToFrame(frameData, isRaid)
             -- Apply font
             local fontFace = LUIE.Fonts[Settings.CustomFontFace]
             local fontStyle = Settings.CustomFontStyle
-            frameData.combatStats.statsLabel:SetFont(string.format("%s|%d|%s", fontFace, fontSize, fontStyle))
+            frameData.combatStats.statsLabel:SetFont(ZO_CreateFontString(fontFace, fontSize, fontStyle))
         end
     end
 end
@@ -262,7 +262,7 @@ function GroupCombatStatsManager.Initialize()
         if not IsUnitGrouped("player") then return end
         if not lgcs then return end
 
-        -- Iterate over all group members by index (like TDAddon does)
+        -- Iterate over all group members by index
         for i = 1, GetGroupSize() do
             local unitTag = GetGroupUnitTagByIndex(i)
             if unitTag then

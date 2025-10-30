@@ -27,7 +27,7 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.1.0.2"
+LUIE.version = "7.1.0.3"
 LUIE.author = "ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
 LUIE.github = "https://github.com/DakJaniels/LuiExtended"
@@ -40,6 +40,7 @@ LUIE.LAM = LibAddonMenu2
 -- Saved variables options
 --- @diagnostic disable-next-line: missing-fields
 LUIE.SV = {}
+LUIE.SV.Migrations = {}
 LUIE.SVVer = 2
 LUIE.SVName = "LUIESV"
 -- -----------------------------------------------------------------------------

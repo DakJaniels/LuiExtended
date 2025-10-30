@@ -21,15 +21,16 @@ local function __applyFont(unitTag)
         fontName = "LUIE Default Font"
     end
 
-    local fontStyle = (UnitFrames.SV.DefaultFontStyle and UnitFrames.SV.DefaultFontStyle ~= "") and UnitFrames.SV.DefaultFontStyle or "soft-shadow-thick"
+    local fontStyle = UnitFrames.SV.DefaultFontStyle
     local fontSize = (UnitFrames.SV.DefaultFontSize and UnitFrames.SV.DefaultFontSize > 0) and UnitFrames.SV.DefaultFontSize or 16
 
 
     if UnitFrames.DefaultFrames[unitTag] then
         local unitFrame = UnitFrames.DefaultFrames[unitTag]
+        local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
         for _, powerType in pairs({ COMBAT_MECHANIC_FLAGS_HEALTH, COMBAT_MECHANIC_FLAGS_MAGICKA, COMBAT_MECHANIC_FLAGS_STAMINA }) do
             if unitFrame[powerType] then
-                unitFrame[powerType].label:SetFont(zo_strformat("<<1>>|<<2>>|<<3>>", fontName, fontSize, fontStyle))
+                unitFrame[powerType].label:SetFont(fontString)
             end
         end
     end
@@ -90,11 +91,11 @@ function UnitFrames.CustomFramesApplyFont()
         fontName = "LUIE Default Font"
     end
 
-    local fontStyle = (UnitFrames.SV.CustomFontStyle and UnitFrames.SV.CustomFontStyle ~= "") and UnitFrames.SV.CustomFontStyle or "soft-shadow-thin"
+    local fontStyle = UnitFrames.SV.CustomFontStyle
     local sizeCaption = (UnitFrames.SV.CustomFontOther and UnitFrames.SV.CustomFontOther > 0) and UnitFrames.SV.CustomFontOther or 16
     local sizeBars = (UnitFrames.SV.CustomFontBars and UnitFrames.SV.CustomFontBars > 0) and UnitFrames.SV.CustomFontBars or 14
 
-    local __mkFont = function (size) return zo_strformat("<<1>>|<<2>>|<<3>>", fontName, size, fontStyle) end
+    local __mkFont = function (size) return ZO_CreateFontString(fontName, size, fontStyle) end
 
     -- After fonts is applied unhide frames, so player can see changes even from menu
     for _, baseName in pairs({ "player", "reticleover", "companion", "SmallGroup", "RaidGroup", "boss", "AvaPlayerTarget", "PetGroup" }) do

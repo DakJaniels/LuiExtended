@@ -75,6 +75,104 @@ do
 end
 
 -- -----------------------------------------------------------------------------
+-- Font String Creation & Migration
+do
+    -- Mapping from LUIE string-based font styles to ZOS numeric constants
+    local LUIE_FONT_STYLE_TO_CONSTANT =
+    {
+        ["normal"] = nil,
+        ["|normal"] = nil,
+        [""] = nil,
+        ["shadow"] = FONT_STYLE_SHADOW,
+        ["|shadow"] = FONT_STYLE_SHADOW,
+        ["outline"] = FONT_STYLE_OUTLINE,
+        ["|outline"] = FONT_STYLE_OUTLINE,
+        ["thick-outline"] = FONT_STYLE_OUTLINE_THICK,
+        ["|thick-outline"] = FONT_STYLE_OUTLINE_THICK,
+        ["soft-shadow-thin"] = FONT_STYLE_SOFT_SHADOW_THIN,
+        ["|soft-shadow-thin"] = FONT_STYLE_SOFT_SHADOW_THIN,
+        ["soft-shadow-thick"] = FONT_STYLE_SOFT_SHADOW_THICK,
+        ["|soft-shadow-thick"] = FONT_STYLE_SOFT_SHADOW_THICK,
+    }
+
+    --- Creates a font string using ZOS's ZO_CreateFontString function
+    --- Supports both string-based and numeric font styles for backwards compatibility
+    --- @param faceName string Font face name
+    --- @param size number Font size
+    --- @param style string|number|nil Font style (string will be converted to constant)
+    --- @return string Font string
+    local function CreateFontString(faceName, size, style)
+        local styleConstant = style
+        -- Convert string styles to numeric constants if needed
+        if type(style) == "string" then
+            styleConstant = LUIE_FONT_STYLE_TO_CONSTANT[style]
+        end
+        return ZO_CreateFontString(faceName, size, styleConstant)
+    end
+
+    --- Migrates old string-based font style to numeric constant
+    --- @param styleValue string|number Font style value
+    --- @return number|nil Numeric font style constant
+    local function MigrateFontStyle(styleValue)
+        if type(styleValue) == "string" then
+            return LUIE_FONT_STYLE_TO_CONSTANT[styleValue]
+        end
+        return styleValue
+    end
+
+    -- Font style choices for settings menus
+    local FONT_STYLE_CHOICES =
+    {
+        "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_NORMAL) .. "|r",
+        "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
+        "|cEEEEEE" .. GetString(LUIE_FONT_STYLE_OUTLINE) .. "|r",
+        "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_THICK_OUTLINE) .. "|r",
+        "|c777777" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THIN) .. "|r",
+        "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
+    }
+
+    local FONT_STYLE_CHOICES_VALUES =
+    {
+        nil, -- normal = no style
+        FONT_STYLE_SHADOW,
+        FONT_STYLE_OUTLINE,
+        FONT_STYLE_OUTLINE_THICK,
+        FONT_STYLE_SOFT_SHADOW_THIN,
+        FONT_STYLE_SOFT_SHADOW_THICK,
+    }
+
+    LUIE.CreateFontString = CreateFontString
+    LUIE.MigrateFontStyle = MigrateFontStyle
+    LUIE.FONT_STYLE_CHOICES = FONT_STYLE_CHOICES
+    LUIE.FONT_STYLE_CHOICES_VALUES = FONT_STYLE_CHOICES_VALUES
+end
+
+-- -----------------------------------------------------------------------------
+-- Migrations helpers
+do
+    --- Returns true if a migration with the given key has been completed
+    --- @param key string
+    --- @return boolean
+    local function IsMigrationDone(key)
+        if not LUIE.SV or not LUIE.SV.Migrations then
+            return false
+        end
+        return LUIE.SV.Migrations[key] == true
+    end
+
+    --- Marks a migration as completed using the given key
+    --- @param key string
+    local function MarkMigrationDone(key)
+        if not LUIE.SV then return end
+        LUIE.SV.Migrations = LUIE.SV.Migrations or {}
+        LUIE.SV.Migrations[key] = true
+    end
+
+    LUIE.IsMigrationDone = IsMigrationDone
+    LUIE.MarkMigrationDone = MarkMigrationDone
+end
+
+-- -----------------------------------------------------------------------------
 
 do
     local addonManager = GetAddOnManager()

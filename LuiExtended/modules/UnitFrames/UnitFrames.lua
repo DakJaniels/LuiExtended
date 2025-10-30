@@ -142,6 +142,13 @@ function UnitFrames.Initialize(enabled)
         UnitFrames.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "UnitFrames", UnitFrames.Defaults)
     end
 
+    -- Migrate old string-based font styles to numeric constants (run once)
+    if not LUIE.IsMigrationDone("unitframes_fontstyles") then
+        UnitFrames.SV.DefaultFontStyle = LUIE.MigrateFontStyle(UnitFrames.SV.DefaultFontStyle)
+        UnitFrames.SV.CustomFontStyle = LUIE.MigrateFontStyle(UnitFrames.SV.CustomFontStyle)
+        LUIE.MarkMigrationDone("unitframes_fontstyles")
+    end
+
     if UnitFrames.SV.DefaultOocTransparency < 0 or UnitFrames.SV.DefaultOocTransparency > 100 then
         UnitFrames.SV.DefaultOocTransparency = UnitFrames.Defaults.DefaultOocTransparency
     end

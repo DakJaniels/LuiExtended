@@ -1440,8 +1440,8 @@ function AbilityAlerts.ApplyFontAlert()
         alertFontName = "LUIE Default Font"
     end
 
-    local alertFontStyle = (CombatInfo.SV.alerts.toggles.alertFontStyle and CombatInfo.SV.alerts.toggles.alertFontStyle ~= "") and CombatInfo.SV.alerts.toggles.alertFontStyle or "soft-shadow-thin"
+    local alertFontStyle = CombatInfo.SV.alerts.toggles.alertFontStyle
     local alertFontSize = (CombatInfo.SV.alerts.toggles.alertFontSize and CombatInfo.SV.alerts.toggles.alertFontSize > 0) and CombatInfo.SV.alerts.toggles.alertFontSize or 16
 
-    g_alertFont = alertFontName .. "|" .. alertFontSize .. "|" .. alertFontStyle
+    g_alertFont = ZO_CreateFontString(alertFontName, alertFontSize, alertFontStyle)
 end

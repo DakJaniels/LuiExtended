@@ -479,24 +479,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_FONT_STYLE),
                 tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_FONT_STYLE_TP),
-                choices =
-                {
-                    "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_NORMAL) .. "|r",
-                    "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
-                    "|cEEEEEE" .. GetString(LUIE_FONT_STYLE_OUTLINE) .. "|r",
-                    "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_THICK_OUTLINE) .. "|r",
-                    "|c777777" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THIN) .. "|r",
-                    "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
-                },
-                choicesValues =
-                {
-                    GetString(LUIE_FONT_STYLE_VALUE_NORMAL),
-                    GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
-                    GetString(LUIE_FONT_STYLE_VALUE_OUTLINE),
-                    GetString(LUIE_FONT_STYLE_VALUE_THICK_OUTLINE),
-                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THIN),
-                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
-                },
+                choices = LUIE.FONT_STYLE_CHOICES,
+                choicesValues = LUIE.FONT_STYLE_CHOICES_VALUES,
                 sort = "name-up",
                 getFunc = function ()
                     return Settings.DefaultFontStyle
@@ -661,24 +645,8 @@ function UnitFrames.CreateSettings()
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_FONT_STYLE),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_STYLE_TP),
-                choices =
-                {
-                    "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_NORMAL) .. "|r",
-                    "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
-                    "|cEEEEEE" .. GetString(LUIE_FONT_STYLE_OUTLINE) .. "|r",
-                    "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_THICK_OUTLINE) .. "|r",
-                    "|c777777" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THIN) .. "|r",
-                    "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
-                },
-                choicesValues =
-                {
-                    GetString(LUIE_FONT_STYLE_VALUE_NORMAL),
-                    GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
-                    GetString(LUIE_FONT_STYLE_VALUE_OUTLINE),
-                    GetString(LUIE_FONT_STYLE_VALUE_THICK_OUTLINE),
-                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THIN),
-                    GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
-                },
+                choices = LUIE.FONT_STYLE_CHOICES,
+                choicesValues = LUIE.FONT_STYLE_CHOICES_VALUES,
                 sort = "name-up",
                 getFunc = function ()
                     return Settings.CustomFontStyle

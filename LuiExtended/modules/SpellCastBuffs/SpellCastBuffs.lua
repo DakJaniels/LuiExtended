@@ -155,6 +155,13 @@ function SpellCastBuffs.Initialize(enabled)
         SpellCastBuffs.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "SpellCastBuffs", SpellCastBuffs.Defaults)
     end
 
+    -- Migrate old string-based font styles to numeric constants (run once)
+    if not LUIE.IsMigrationDone("spellcastbuffs_fontstyles") then
+        SpellCastBuffs.SV.BuffFontStyle = LUIE.MigrateFontStyle(SpellCastBuffs.SV.BuffFontStyle)
+        SpellCastBuffs.SV.ProminentLabelFontStyle = LUIE.MigrateFontStyle(SpellCastBuffs.SV.ProminentLabelFontStyle)
+        LUIE.MarkMigrationDone("spellcastbuffs_fontstyles")
+    end
+
     -- Correct read values
     if SpellCastBuffs.SV.IconSize < 30 or SpellCastBuffs.SV.IconSize > 60 then
         SpellCastBuffs.SV.IconSize = SpellCastBuffs.Defaults.IconSize
@@ -1588,9 +1595,9 @@ function SpellCastBuffs.ApplyFont()
         LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
         fontName = "LUIE Default Font"
     end
-    local fontStyle = (SpellCastBuffs.SV.BuffFontStyle and SpellCastBuffs.SV.BuffFontStyle ~= "") and SpellCastBuffs.SV.BuffFontStyle or "outline"
+    local fontStyle = SpellCastBuffs.SV.BuffFontStyle
     local fontSize = (SpellCastBuffs.SV.BuffFontSize and SpellCastBuffs.SV.BuffFontSize > 0) and SpellCastBuffs.SV.BuffFontSize or 17
-    SpellCastBuffs.buffsFont = fontName .. "|" .. fontSize .. "|" .. fontStyle
+    SpellCastBuffs.buffsFont = ZO_CreateFontString(fontName, fontSize, fontStyle)
 
     -- Font Setup for Prominent Buffs & Debuffs
     local prominentName = LUIE.Fonts[SpellCastBuffs.SV.ProminentLabelFontFace]
@@ -1598,9 +1605,9 @@ function SpellCastBuffs.ApplyFont()
         LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
         prominentName = "LUIE Default Font"
     end
-    local prominentStyle = (SpellCastBuffs.SV.ProminentLabelFontStyle and SpellCastBuffs.SV.ProminentLabelFontStyle ~= "") and SpellCastBuffs.SV.ProminentLabelFontStyle or "outline"
+    local prominentStyle = SpellCastBuffs.SV.ProminentLabelFontStyle
     local prominentSize = (SpellCastBuffs.SV.ProminentLabelFontSize and SpellCastBuffs.SV.ProminentLabelFontSize > 0) and SpellCastBuffs.SV.ProminentLabelFontSize or 17
-    SpellCastBuffs.prominentFont = prominentName .. "|" .. prominentSize .. "|" .. prominentStyle
+    SpellCastBuffs.prominentFont = ZO_CreateFontString(prominentName, prominentSize, prominentStyle)
 
     local needs_reset = {}
     -- And reset sizes of already existing icons

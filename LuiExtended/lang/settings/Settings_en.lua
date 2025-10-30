@@ -24,14 +24,6 @@ local strings =
     LUIE_FONT_STYLE_SOFT_SHADOW_THICK = "Soft Shadow Thick",
     LUIE_FONT_STYLE_SOFT_SHADOW_THIN = "Soft Shadow Thin",
 
-    -- Font Style Values (these don't need translation but good to keep with related strings)
-    LUIE_FONT_STYLE_VALUE_NORMAL = "|normal",
-    LUIE_FONT_STYLE_VALUE_OUTLINE = "|outline",
-    LUIE_FONT_STYLE_VALUE_THICK_OUTLINE = "|thick-outline",
-    LUIE_FONT_STYLE_VALUE_SHADOW = "|shadow",
-    LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK = "|soft-shadow-thick",
-    LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THIN = "|soft-shadow-thin",
-
     -- Settings
     LUIE_STRING_LAM_COMPATIBILITY_WARNING = "Disable this option if you are having compatibility issues with other addons.",
     LUIE_STRING_LAM_RELOADUI = "Reload UI",
@@ -2286,9 +2278,6 @@ local strings =
 
     -- Unit Frames Font Settings
     LUIE_STRING_UF_FONT_DEFAULT = "LUIE Default Font",
-    LUIE_STRING_UF_FONT_STYLE_DEFAULT = "|soft-shadow-thick",
-    LUIE_STRING_UF_FONT_STYLE_CUSTOM = "|soft-shadow-thin",
-
     -- Unit Frames Texture Settings
     LUIE_STRING_UF_TEXTURE_DEFAULT = "Minimalistic",
 

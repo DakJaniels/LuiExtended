@@ -44,7 +44,7 @@ InfoPanel.Defaults =
     HideGold = true,
     FontFace = "LUIE Default Font",
     FontSize = 16,
-    FontStyle = "soft-shadow-thin",
+    FontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
     transparency = 100,
 }
 InfoPanel.SV = {}
@@ -148,11 +148,11 @@ function InfoPanel.ApplyFont()
         -- end
     end
 
-    local fontStyle = (InfoPanel.SV.FontStyle and InfoPanel.SV.FontStyle ~= "") and InfoPanel.SV.FontStyle or "soft-shadow-thin"
+    local fontStyle = InfoPanel.SV.FontStyle
     local fontSize = (InfoPanel.SV.FontSize and InfoPanel.SV.FontSize > 0) and InfoPanel.SV.FontSize or 16
 
     -- Create font string
-    g_infoPanelFont = string_format("%s|%d|%s", fontName, fontSize, fontStyle)
+    g_infoPanelFont = ZO_CreateFontString(fontName, fontSize, fontStyle)
 
     -- Apply font to all elements
     if uiLatency.label then uiLatency.label:SetFont(g_infoPanelFont) end
@@ -298,6 +298,12 @@ function InfoPanel.Initialize(enabled)
         InfoPanel.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "InfoPanel", InfoPanel.Defaults)
     end
 
+    -- Migrate old string-based font styles to numeric constants (run once)
+    if not LUIE.IsMigrationDone("infopanel_fontstyles") then
+        InfoPanel.SV.FontStyle = LUIE.MigrateFontStyle(InfoPanel.SV.FontStyle)
+        LUIE.MarkMigrationDone("infopanel_fontstyles")
+    end
+
     -- Disable module if setting not toggled on
     if not enabled then
         return
@@ -332,9 +338,9 @@ function InfoPanel.Initialize(enabled)
     if not fontName or fontName == "" then
         fontName = "LUIE Default Font"
     end
-    local fontStyle = (InfoPanel.SV.FontStyle and InfoPanel.SV.FontStyle ~= "") and InfoPanel.SV.FontStyle or "soft-shadow-thin"
+    local fontStyle = InfoPanel.SV.FontStyle
     local fontSize = (InfoPanel.SV.FontSize and InfoPanel.SV.FontSize > 0) and InfoPanel.SV.FontSize or 16
-    g_infoPanelFont = string_format("%s|%d|%s", fontName, fontSize, fontStyle)
+    g_infoPanelFont = ZO_CreateFontString(fontName, fontSize, fontStyle)
 
     uiLatency.control = UI:Control(uiTopRow, nil, { 75, 20 }, false)
     uiLatency.icon = UI:Texture(uiLatency.control, { LEFT, LEFT }, { 24, 24 }, "/esoui/art/campaign/campaignbrowser_hipop.dds", nil, false)

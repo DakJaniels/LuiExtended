@@ -12,7 +12,20 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
-        -- Version Header
+    -- Version Header
+    "|cFFA500LuiExtended Version 7.1.0.3|r",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Migrated font system to use ZOS's native ZO_CreateFontString function.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Implemented migration system with SV flags to automatically convert legacy font style values (runs once per module).",
+    "",
+    -- Miscellaneous
+    "|cFFFF00Miscellaneous:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Cleaned up obsolete font style string constants from localization files.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Consolidated settings menu font style dropdowns to use shared arrays for consistency.",
+    "",
+    -- Version Header
     "|cFFA500LuiExtended Version 7.1.0.2|r",
     "",
     -- New Features

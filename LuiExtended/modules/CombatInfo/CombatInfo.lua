@@ -62,7 +62,7 @@ CombatInfo.Defaults =
     UltimateGeneration = true,
     UltimateLabelPosition = -20,
     UltimateFontFace = "LUIE Default Font",
-    UltimateFontStyle = "outline",
+    UltimateFontStyle = FONT_STYLE_OUTLINE,
     UltimateFontSize = 18,
     ShowTriggered = true,
     ProcEnableSound = true,
@@ -74,7 +74,7 @@ CombatInfo.Defaults =
     BarShowLabel = true,
     BarLabelPosition = -20,
     BarFontFace = "LUIE Default Font",
-    BarFontStyle = "outline",
+    BarFontStyle = FONT_STYLE_OUTLINE,
     BarFontSize = 18,
     BarMillis = true,
     BarMillisAboveTen = true,
@@ -86,7 +86,7 @@ CombatInfo.Defaults =
     PotionTimerShow = true,
     PotionTimerLabelPosition = 0,
     PotionTimerFontFace = "LUIE Default Font",
-    PotionTimerFontStyle = "outline",
+    PotionTimerFontStyle = FONT_STYLE_OUTLINE,
     PotionTimerFontSize = 18,
     PotionTimerColor = true,
     PotionTimerMillis = true,
@@ -98,7 +98,7 @@ CombatInfo.Defaults =
     CastBarLabel = true,
     CastBarTimer = true,
     CastBarFontFace = "LUIE Default Font",
-    CastBarFontStyle = "soft-shadow-thick",
+    CastBarFontStyle = FONT_STYLE_SOFT_SHADOW_THICK,
     CastBarFontSize = 16,
     CastBarGradientC1 = { 0, 47 / 255, 130 / 255 },
     CastBarGradientC2 = { 82 / 255, 215 / 255, 1 },
@@ -109,7 +109,7 @@ CombatInfo.Defaults =
         {
             alertEnable = true,
             alertFontFace = "LUIE Default Font",
-            alertFontStyle = "soft-shadow-thick",
+            alertFontStyle = FONT_STYLE_SOFT_SHADOW_THICK,
             alertFontSize = 32,
             alertTimer = true,
             showMitigation = true,
@@ -1194,12 +1194,12 @@ function CombatInfo.ApplyFont()
             LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
             fontName = "LUIE Default Font"
         end
-        local fontStyle = (CombatInfo.SV[fontStyleKey] and CombatInfo.SV[fontStyleKey] ~= "") and CombatInfo.SV[fontStyleKey] or defaultFontStyle
+        local fontStyle = CombatInfo.SV[fontStyleKey] or defaultFontStyle
         local fontSize = (CombatInfo.SV[fontSizeKey] and CombatInfo.SV[fontSizeKey] > 0) and CombatInfo.SV[fontSizeKey] or defaultFontSize
-        return fontName .. "|" .. fontSize .. "|" .. fontStyle
+        return ZO_CreateFontString(fontName, fontSize, fontStyle)
     end
 
-    g_barFont = setupFont("BarFontFace", "BarFontStyle", "BarFontSize", "outline", 17)
+    g_barFont = setupFont("BarFontFace", "BarFontStyle", "BarFontSize", FONT_STYLE_OUTLINE, 17)
     for k, _ in pairs(g_uiProcAnimation) do
         g_uiProcAnimation[k].procLoopTexture.label:SetFont(g_barFont)
     end
@@ -1208,17 +1208,17 @@ function CombatInfo.ApplyFont()
         g_uiCustomToggle[k].stack:SetFont(g_barFont)
     end
 
-    g_potionFont = setupFont("PotionTimerFontFace", "PotionTimerFontStyle", "PotionTimerFontSize", "outline", 17)
+    g_potionFont = setupFont("PotionTimerFontFace", "PotionTimerFontStyle", "PotionTimerFontSize", FONT_STYLE_OUTLINE, 17)
     if uiQuickSlot.label then
         uiQuickSlot.label:SetFont(g_potionFont)
     end
 
-    g_ultimateFont = setupFont("UltimateFontFace", "UltimateFontStyle", "UltimateFontSize", "outline", 17)
+    g_ultimateFont = setupFont("UltimateFontFace", "UltimateFontStyle", "UltimateFontSize", FONT_STYLE_OUTLINE, 17)
     if uiUltimate.LabelPct then
         uiUltimate.LabelPct:SetFont(g_ultimateFont)
     end
 
-    g_castbarFont = setupFont("CastBarFontFace", "CastBarFontStyle", "CastBarFontSize", "soft-shadow-thin", 16)
+    g_castbarFont = setupFont("CastBarFontFace", "CastBarFontStyle", "CastBarFontSize", FONT_STYLE_SOFT_SHADOW_THIN, 16)
 end
 
 -- Updates Proc Sound - called on initialization and menu changes.
@@ -3029,6 +3029,18 @@ function CombatInfo.Initialize(enabled)
         CombatInfo.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "CombatInfo", CombatInfo.Defaults)
     end
 
+    -- Migrate old string-based font styles to numeric constants (run once)
+    if not LUIE.IsMigrationDone("combatinfo_fontstyles") then
+        CombatInfo.SV.UltimateFontStyle = LUIE.MigrateFontStyle(CombatInfo.SV.UltimateFontStyle)
+        CombatInfo.SV.BarFontStyle = LUIE.MigrateFontStyle(CombatInfo.SV.BarFontStyle)
+        CombatInfo.SV.PotionTimerFontStyle = LUIE.MigrateFontStyle(CombatInfo.SV.PotionTimerFontStyle)
+        CombatInfo.SV.CastBarFontStyle = LUIE.MigrateFontStyle(CombatInfo.SV.CastBarFontStyle)
+        if CombatInfo.SV.alerts and CombatInfo.SV.alerts.toggles then
+            CombatInfo.SV.alerts.toggles.alertFontStyle = LUIE.MigrateFontStyle(CombatInfo.SV.alerts.toggles.alertFontStyle)
+        end
+        LUIE.MarkMigrationDone("combatinfo_fontstyles")
+    end
+
     -- Disable module if setting not toggled on
     if not enabled then
         return
@@ -3057,7 +3069,7 @@ function CombatInfo.Initialize(enabled)
 
     -- Create Ultimate overlay labels
     local AB8 = _G["ActionButton8"]
-    uiUltimate.LabelVal = UI:Label(AB8, { BOTTOM, TOP, 0, -3 }, nil, { 1, 2 }, "$(BOLD_FONT)|16|soft-shadow-thick", nil, true)
+    uiUltimate.LabelVal = UI:Label(AB8, { BOTTOM, TOP, 0, -3 }, nil, { 1, 2 }, ZO_CreateFontString("$(BOLD_FONT)", 16, FONT_STYLE_SOFT_SHADOW_THICK), nil, true)
     uiUltimate.LabelPct = UI:Label(AB8, nil, nil, nil, g_ultimateFont, nil, true)
     uiUltimate.LabelPct:SetAnchor(TOPLEFT, actionButton.slot, nil, 0, 0)
     uiUltimate.LabelPct:SetAnchor(BOTTOMRIGHT, actionButton.slot, nil, 0, -CombatInfo.SV.UltimateLabelPosition)

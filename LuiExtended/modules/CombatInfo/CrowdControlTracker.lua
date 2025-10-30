@@ -29,8 +29,8 @@ local graceTime = 5
 local isRooted = false
 local rootEndTime = 0
 
-local iconFont = "$(GAMEPAD_BOLD_FONT)|25|thick-outline"
-local staggerFont = "$(GAMEPAD_BOLD_FONT)|36|thick-outline"
+local iconFont = ZO_CreateFontString("$(GAMEPAD_BOLD_FONT)", 25, FONT_STYLE_OUTLINE_THICK)
+local staggerFont = ZO_CreateFontString("$(GAMEPAD_BOLD_FONT)", 36, FONT_STYLE_OUTLINE_THICK)
 
 local iconBorder = "LuiExtended/media/combatinfo/crowdcontroltracker/border.dds"
 

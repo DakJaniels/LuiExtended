@@ -195,7 +195,7 @@ CombatText.Defaults =
 
     -- Font defaults
     fontFace = "LUIE Default Font",
-    fontStyle = "soft-shadow-thick",
+    fontStyle = FONT_STYLE_SOFT_SHADOW_THICK,
     fontSize = 26,
     fontSizes =
     {
@@ -496,6 +496,12 @@ function CombatText.Initialize(enabled)
         CombatText.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "CombatText", CombatText.Defaults)
     end
 
+    -- Migrate old string-based font styles to numeric constants (run once)
+    if not LUIE.IsMigrationDone("combattext_fontstyles") then
+        CombatText.SV.fontStyle = LUIE.MigrateFontStyle(CombatText.SV.fontStyle)
+        LUIE.MarkMigrationDone("combattext_fontstyles")
+    end
+
     -- Disable module if setting not toggled on
     if not enabled then
         return
@@ -513,7 +519,7 @@ function CombatText.Initialize(enabled)
             _G[k]:SetAnchor(s.point, Combattext, s.relativePoint, s.offsetX, s.offsetY)
             _G[k]:SetDimensions(unpack(s.dimensions))
             _G[k]:SetHandler("OnMouseUp", SavePosition)
-            _G[k .. "_Label"]:SetFont(LUIE.CombatText.SV.fontFaceApplied .. "|26|" .. LUIE.CombatText.SV.fontStyle)
+            _G[k .. "_Label"]:SetFont(ZO_CreateFontString(LUIE.CombatText.SV.fontFaceApplied, 26, LUIE.CombatText.SV.fontStyle))
             _G[k .. "_Label"]:SetText(panelTitles[k])
         else
             LUIE.CombatText.SV.panels[k] = nil

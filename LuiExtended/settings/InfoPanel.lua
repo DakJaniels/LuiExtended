@@ -146,29 +146,10 @@ function InfoPanel.CreateSettings()
     )
 
     -- Font Style Dropdown
-    local fontStyleChoices =
-    {
-        "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_NORMAL) .. "|r",
-        "|c888888" .. GetString(LUIE_FONT_STYLE_SHADOW) .. "|r",
-        "|cEEEEEE" .. GetString(LUIE_FONT_STYLE_OUTLINE) .. "|r",
-        "|cFFFFFF" .. GetString(LUIE_FONT_STYLE_THICK_OUTLINE) .. "|r",
-        "|c777777" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THIN) .. "|r",
-        "|c666666" .. GetString(LUIE_FONT_STYLE_SOFT_SHADOW_THICK) .. "|r",
-    }
-    local fontStyleChoicesValues =
-    {
-        GetString(LUIE_FONT_STYLE_VALUE_NORMAL),
-        GetString(LUIE_FONT_STYLE_VALUE_SHADOW),
-        GetString(LUIE_FONT_STYLE_VALUE_OUTLINE),
-        GetString(LUIE_FONT_STYLE_VALUE_THICK_OUTLINE),
-        GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THIN),
-        GetString(LUIE_FONT_STYLE_VALUE_SOFT_SHADOW_THICK),
-    }
-
     fontSubmenuControls[#fontSubmenuControls + 1] = SettingsAPI.CreateDropdownOption(
         GetString(LUIE_STRING_LAM_FONT_STYLE),
         GetString(LUIE_STRING_LAM_CT_FONT_STYLE_TP),
-        fontStyleChoices,
+        LUIE.FONT_STYLE_CHOICES,
         function () return Settings.FontStyle end,
         function (var)
             Settings.FontStyle = var
@@ -180,7 +161,7 @@ function InfoPanel.CreateSettings()
         nil,
         "name-up",
         nil,
-        fontStyleChoicesValues
+        LUIE.FONT_STYLE_CHOICES_VALUES
     )
 
     optionsDataInfoPanel[#optionsDataInfoPanel + 1] = SettingsAPI.CreateSubmenuOption(
