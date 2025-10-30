@@ -242,7 +242,7 @@ end
 
 -- Hide all DPS/HPS stat labels (called after 6s out of combat)
 local function HideAllCombatStatsText()
-    Shared.ForEachGroupFrame(function(unitTag, frameData)
+    Shared.ForEachGroupFrame(function (unitTag, frameData)
         if frameData.combatStats and frameData.combatStats.statsLabel then
             frameData.combatStats.statsLabel:SetHidden(true)
         end
@@ -364,7 +364,7 @@ function GroupCombatStatsManager.SetupFrames()
     local Settings = Shared.GetCombatStatsSettings()
     if not Settings or not Settings.enabled then return end
 
-    Shared.ForEachGroupFrame(function(unitTag, frameData, isRaid)
+    Shared.ForEachGroupFrame(function (unitTag, frameData, isRaid)
         if not frameData.combatStats then
             AddCombatStatsToFrame(frameData, isRaid)
         end

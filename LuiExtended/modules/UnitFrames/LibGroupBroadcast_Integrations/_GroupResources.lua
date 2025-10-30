@@ -121,11 +121,11 @@ local function UpdateResourceBarLayout(frameData, isRaid)
     else
         -- Small group: stacked bars below health (original layout)
         local healthBackdrop = Shared.GetHealthBackdrop(frameData)
-        
+
         -- Position backdrops
         magBackdrop:ClearAnchors()
         stamBackdrop:ClearAnchors()
-        
+
         if staminaFirst then
             -- Stamina first (top), then magicka (bottom)
             stamBackdrop:SetAnchor(TOPLEFT, healthBackdrop, BOTTOMLEFT, 0, 2)
@@ -332,7 +332,7 @@ function GroupResourcesManager.SetupFrames()
     local Settings = Shared.GetResourceSettings()
     if not Settings or not Settings.enabled then return end
 
-    Shared.ForEachGroupFrame(function(unitTag, frameData, isRaid)
+    Shared.ForEachGroupFrame(function (unitTag, frameData, isRaid)
         AddResourceBarsToFrame(frameData)
         UpdateResourceBarLayout(frameData, isRaid)
     end)
@@ -340,7 +340,7 @@ end
 
 -- Update all resource bar layouts (called from menu)
 function GroupResourcesManager.UpdateAllLayouts()
-    Shared.ForEachGroupFrame(function(unitTag, frameData, isRaid)
+    Shared.ForEachGroupFrame(function (unitTag, frameData, isRaid)
         UpdateResourceBarLayout(frameData, isRaid)
     end)
 end

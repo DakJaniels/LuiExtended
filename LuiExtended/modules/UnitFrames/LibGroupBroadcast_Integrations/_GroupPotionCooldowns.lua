@@ -233,7 +233,7 @@ function GroupPotionCooldownsManager.SetupFrames()
     local Settings = Shared.GetPotionCooldownSettings()
     if not Settings or not Settings.enabled then return end
 
-    Shared.ForEachGroupFrame(function(unitTag, frameData, isRaid)
+    Shared.ForEachGroupFrame(function (unitTag, frameData, isRaid)
         if not frameData.potionCooldown then
             AddPotionCooldownToFrame(frameData, isRaid)
         end

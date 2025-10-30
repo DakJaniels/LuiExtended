@@ -111,10 +111,10 @@ end
 --- @param callback function Function called with (unitTag, frameData, isRaid) for each frame
 function Shared.ForEachGroupFrame(callback)
     if not callback then return end
-    Shared.ForEachSmallGroupFrame(function(unitTag, frameData)
+    Shared.ForEachSmallGroupFrame(function (unitTag, frameData)
         callback(unitTag, frameData, false)
     end)
-    Shared.ForEachRaidGroupFrame(function(unitTag, frameData)
+    Shared.ForEachRaidGroupFrame(function (unitTag, frameData)
         callback(unitTag, frameData, true)
     end)
 end
@@ -144,4 +144,3 @@ function Shared.ValidateFrameComponents(frameData, requiredComponents)
     end
     return true
 end
-

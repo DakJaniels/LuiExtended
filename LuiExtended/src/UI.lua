@@ -330,7 +330,7 @@ function UI:Label(parent, anchors, dims, align, font, text, hidden, name)
     return label
 end
 
---: Configure as flex container (parent)
+-- : Configure as flex container (parent)
 --- @alias flexConfig_container {
 --- direction: FlexDirection, -- (ROW, COLUMN, ROW_REVERSE, COLUMN_REVERSE)
 --- justification: FlexJustification, --(FLEX_START, CENTER, FLEX_END, SPACE_BETWEEN, SPACE_AROUND, SPACE_EVENLY)
@@ -340,7 +340,7 @@ end
 --- padding: table|number, --(internal padding: table with edges or single number for all)
 --- }
 
---:Configure as flex item (child)
+-- :Configure as flex item (child)
 --- @alias flexConfig_item {
 --- grow: number, --(flex grow factor, default 0)
 --- shrink: number, --(flex shrink factor, default 1)
@@ -348,11 +348,11 @@ end
 --- alignSelf: FlexAlignment, --(override parent's item alignment)
 --- margin: table|number, --(external margins: table with edges or single number for all - use margins for gaps between children)
 --- exclude: boolean, --(exclude from flex layout)
----}
+--- }
 
----@class flexConfig
----@field container flexConfig_container
----@field item flexConfig_item
+--- @class flexConfig
+--- @field container flexConfig_container
+--- @field item flexConfig_item
 
 -- -----------------------------------------------------------------------------
 --- Creates a flex-enabled control element with optional container and/or item properties
