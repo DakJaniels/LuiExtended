@@ -330,6 +330,176 @@ function UI:Label(parent, anchors, dims, align, font, text, hidden, name)
     return label
 end
 
+--: Configure as flex container (parent)
+--- @alias flexConfig_container {
+--- direction: FlexDirection, -- (ROW, COLUMN, ROW_REVERSE, COLUMN_REVERSE)
+--- justification: FlexJustification, --(FLEX_START, CENTER, FLEX_END, SPACE_BETWEEN, SPACE_AROUND, SPACE_EVENLY)
+--- itemAlignment: FlexAlignment, --(FLEX_START, CENTER, FLEX_END, STRETCH, BASELINE)
+--- contentAlignment: FlexAlignment, --(alignment of multiple lines)
+--- wrap: FlexWrap, --(NO_WRAP, WRAP, WRAP_REVERSE)
+--- padding: table|number, --(internal padding: table with edges or single number for all)
+--- }
+
+--:Configure as flex item (child)
+--- @alias flexConfig_item {
+--- grow: number, --(flex grow factor, default 0)
+--- shrink: number, --(flex shrink factor, default 1)
+--- basis: number, --(base size before growing/shrinking)
+--- alignSelf: FlexAlignment, --(override parent's item alignment)
+--- margin: table|number, --(external margins: table with edges or single number for all - use margins for gaps between children)
+--- exclude: boolean, --(exclude from flex layout)
+---}
+
+---@class flexConfig
+---@field container flexConfig_container
+---@field item flexConfig_item
+
+-- -----------------------------------------------------------------------------
+--- Creates a flex-enabled control element with optional container and/or item properties
+--- @param parent userdata The parent control
+--- @param anchors? table|"fill" Array of anchor points or "fill" to fill parent
+--- @param dims? table|"inherit" Array of dimensions or "inherit" to match parent
+--- @param hidden? boolean Whether the control starts hidden
+--- @param flexConfig? flexConfig Configuration table with optional 'container' and 'item' subtables
+--- @return Control|nil control The created flex control, or nil if parent is invalid
+function UI:FlexControl(parent, anchors, dims, hidden, flexConfig)
+    if not parent then
+        return nil
+    end
+
+    local name = GetUniqueControlName("Control")
+    local control = windowManager:CreateControl(name, parent, CT_CONTROL)
+
+    -- Apply anchors
+    if anchors == "fill" then
+        control:SetAnchorFill()
+    elseif anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
+        control:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
+    end
+
+    -- Apply dimensions
+    if dims == "inherit" then
+        control:SetDimensions(parent:GetWidth(), parent:GetHeight())
+    elseif dims ~= nil and #dims == 2 then
+        control:SetDimensions(dims[1], dims[2])
+    end
+
+    -- Apply visibility
+    if hidden then
+        control:SetHidden(hidden)
+    end
+
+    -- Apply flex configuration
+    if flexConfig then
+        -- Container properties (this control will have flex children)
+        if flexConfig.container then
+            local container = flexConfig.container
+
+            -- Enable flex layout
+            control:SetChildLayout(CHILD_LAYOUT_TYPE_FLEX)
+
+            -- Direction (default: ROW)
+            if container.direction then
+                control:SetChildFlexDirection(container.direction)
+            end
+
+            -- Justification (default: FLEX_START)
+            if container.justification then
+                control:SetChildFlexJustification(container.justification)
+            end
+
+            -- Item alignment on cross axis (default: STRETCH)
+            if container.itemAlignment then
+                control:SetChildFlexItemAlignment(container.itemAlignment)
+            end
+
+            -- Content alignment for multiple lines (default: FLEX_START)
+            if container.contentAlignment then
+                control:SetChildFlexContentAlignment(container.contentAlignment)
+            end
+
+            -- Wrap behavior (default: NO_WRAP)
+            if container.wrap then
+                control:SetChildFlexWrap(container.wrap)
+            end
+
+            -- Internal padding
+            if container.padding then
+                if type(container.padding) == "number" then
+                    -- Single number applies to all edges
+                    control:SetFlexPaddings(container.padding, container.padding, container.padding, container.padding)
+                elseif type(container.padding) == "table" then
+                    -- Table of specific edges or LTRB array
+                    if #container.padding == 4 then
+                        -- Array format: {left, top, right, bottom}
+                        control:SetFlexPaddings(container.padding[1], container.padding[2], container.padding[3], container.padding[4])
+                    else
+                        -- Edge table format: { [FLEX_EDGE_LEFT] = 4, [FLEX_EDGE_RIGHT] = 4, ... }
+                        local left = container.padding[FLEX_EDGE_LEFT] or 0
+                        local top = container.padding[FLEX_EDGE_TOP] or 0
+                        local right = container.padding[FLEX_EDGE_RIGHT] or 0
+                        local bottom = container.padding[FLEX_EDGE_BOTTOM] or 0
+                        control:SetFlexPaddings(left, top, right, bottom)
+                    end
+                end
+            end
+        end
+
+        -- Item properties (this control is a flex child)
+        if flexConfig.item then
+            local item = flexConfig.item
+
+            -- Grow factor (default: 0)
+            if item.grow then
+                control:SetFlexGrow(item.grow)
+            end
+
+            -- Shrink factor (default: 1)
+            if item.shrink then
+                control:SetFlexShrink(item.shrink)
+            end
+
+            -- Base size before growing/shrinking
+            if item.basis then
+                control:SetFlexBasis(item.basis)
+            end
+
+            -- Override parent's item alignment
+            if item.alignSelf then
+                control:SetFlexAlignSelf(item.alignSelf)
+            end
+
+            -- Margins
+            if item.margin then
+                if type(item.margin) == "number" then
+                    -- Single number applies to all edges
+                    control:SetFlexMargins(item.margin, item.margin, item.margin, item.margin)
+                elseif type(item.margin) == "table" then
+                    -- Table of specific edges or LTRB array
+                    if #item.margin == 4 then
+                        -- Array format: {left, top, right, bottom}
+                        control:SetFlexMargins(item.margin[1], item.margin[2], item.margin[3], item.margin[4])
+                    else
+                        -- Edge table format: { [FLEX_EDGE_LEFT] = 4, [FLEX_EDGE_RIGHT] = 4, ... }
+                        local left = item.margin[FLEX_EDGE_LEFT] or 0
+                        local top = item.margin[FLEX_EDGE_TOP] or 0
+                        local right = item.margin[FLEX_EDGE_RIGHT] or 0
+                        local bottom = item.margin[FLEX_EDGE_BOTTOM] or 0
+                        control:SetFlexMargins(left, top, right, bottom)
+                    end
+                end
+            end
+
+            -- Exclude from flex layout
+            if item.exclude then
+                control:SetExcludeFromFlexbox(item.exclude)
+            end
+        end
+    end
+
+    return control
+end
+
 -- -----------------------------------------------------------------------------
 --- @type LUIE.UI
 LUIE.UI = UI
