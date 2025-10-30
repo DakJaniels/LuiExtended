@@ -141,9 +141,10 @@ modules/UnitFrames/_UnitAttributeVisualizerCoordinator.lua
 modules/UnitFrames/_UnitAttributeVisuals.lua
 
 # LibGroupBroadcast Integration
-modules/UnitFrames/_GroupResources.lua
-modules/UnitFrames/_GroupCombatStats.lua
-modules/UnitFrames/_GroupPotionCooldowns.lua
+modules/UnitFrames/LibGroupBroadcast_Integrations/Shared.lua
+modules/UnitFrames/LibGroupBroadcast_Integrations/_GroupCombatStats.lua
+modules/UnitFrames/LibGroupBroadcast_Integrations/_GroupPotionCooldowns.lua
+modules/UnitFrames/LibGroupBroadcast_Integrations/_GroupResources.lua
 
 modules/UnitFrames/_ListFunctions.lua
 modules/UnitFrames/_MenuFunctions.lua
