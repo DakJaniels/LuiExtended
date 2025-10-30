@@ -3614,9 +3614,9 @@ function UnitFrames.CreateSettings()
                 -- Ultimate Icon Horizontal Offset (Raid)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Horizontal Offset"),
-                tooltip = "Adjust horizontal position of ultimate icons on raid frames.",
-                min = -20,
-                max = 20,
+                tooltip = "Adjust horizontal spacing between resource bars and ultimate icons (bottom row positioning).",
+                min = 0,
+                max = 100,
                 step = 1,
                 getFunc = function ()
                     return Settings.GroupCombatStats.ultIconRaidOffsetX
@@ -3635,9 +3635,9 @@ function UnitFrames.CreateSettings()
                 -- Ultimate Icon Vertical Offset (Raid)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Vertical Offset"),
-                tooltip = "Adjust vertical position of ultimate icons on raid frames.",
-                min = -20,
-                max = 20,
+                tooltip = "Adjust vertical alignment of icons in the bottom row (relative to resource bars).",
+                min = -50,
+                max = 50,
                 step = 1,
                 getFunc = function ()
                     return Settings.GroupCombatStats.ultIconRaidOffsetY
@@ -3796,9 +3796,9 @@ function UnitFrames.CreateSettings()
                 -- Potion Icon Horizontal Offset (Raid)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Horizontal Offset"),
-                tooltip = "Adjust horizontal position of potion icon on raid frames.",
-                min = -20,
-                max = 20,
+                tooltip = "Adjust horizontal spacing from resource bars or ultimate icons (if combat stats disabled). Bottom row positioning.",
+                min = 0,
+                max = 100,
                 step = 1,
                 getFunc = function ()
                     return Settings.GroupPotionCooldowns.potionIconRaidOffsetX
@@ -3817,9 +3817,9 @@ function UnitFrames.CreateSettings()
                 -- Potion Icon Vertical Offset (Raid)
                 type = "slider",
                 name = zo_strformat("\t\t\t\t\t<<1>>", "Vertical Offset"),
-                tooltip = "Adjust vertical position of potion icon on raid frames.",
-                min = -20,
-                max = 20,
+                tooltip = "Adjust vertical alignment of potion icon in the bottom row (relative to resource bars).",
+                min = -50,
+                max = 50,
                 step = 1,
                 getFunc = function ()
                     return Settings.GroupPotionCooldowns.potionIconRaidOffsetY

@@ -2692,16 +2692,18 @@ end
 --- @param itemsPerColumn number
 --- @param spacerHeight number
 --- @param resourceBarsHeight number
+--- @param frameWidth number Total width of frame (including integration icons)
+--- @param frameSpacing number Vertical spacing between each frame
 --- @return number xOffset
 --- @return number yOffset
-local function calculateFramePosition(index, itemsPerColumn, spacerHeight, resourceBarsHeight)
+local function calculateFramePosition(index, itemsPerColumn, spacerHeight, resourceBarsHeight, frameWidth, frameSpacing)
     local column = zo_floor((index - 1) / itemsPerColumn)
     local row = (index - 1) % itemsPerColumn + 1
-    local xOffset = UnitFrames.SV.RaidBarWidth * column
+    local xOffset = frameWidth * column
     local totalFrameHeight = UnitFrames.SV.RaidBarHeight + resourceBarsHeight
-    local yOffset = totalFrameHeight * (row - 1)
+    local yOffset = (totalFrameHeight + frameSpacing) * (row - 1)
 
-    -- Add spacers if enabled (every 4 members)
+    -- Add extra spacers if enabled (every 4 members)
     if UnitFrames.SV.RaidSpacers then
         local spacersInCurrentColumn = zo_floor((row - 1) / 4)
         yOffset = yOffset + (spacerHeight * spacersInCurrentColumn)
@@ -2757,18 +2759,59 @@ local function applyIconSettings(unitFrame, unitTag, role, healthBackdrop)
     end
 end
 
+-- Calculate additional width needed for LibGroupBroadcast integration icons (raid frames)
+local function GetRaidIntegrationWidth()
+    local totalWidth = 0
+    local iconCount = 0
+
+    -- Check for combat stats (ultimate icons)
+    local combatStatsSettings = UnitFrames.SV.GroupCombatStats
+    if combatStatsSettings and combatStatsSettings.enabled and combatStatsSettings.showUltimate then
+        local iconSize = combatStatsSettings.ultIconRaidSize or 22
+        local offsetX = combatStatsSettings.ultIconRaidOffsetX or 3
+        -- 2 ultimate icons (frontbar + backbar) with 3px spacing between them
+        totalWidth = offsetX + (iconSize * 2) + 3
+        iconCount = 2
+    end
+
+    -- Check for potion cooldowns
+    local potionSettings = UnitFrames.SV.GroupPotionCooldowns
+    if potionSettings and potionSettings.enabled then
+        local iconSize = potionSettings.potionIconRaidSize or 20
+        -- If combat stats are enabled, match their icon size for consistency
+        if combatStatsSettings and combatStatsSettings.enabled and combatStatsSettings.showUltimate then
+            iconSize = combatStatsSettings.ultIconRaidSize or 22
+        end
+
+        if iconCount > 0 then
+            -- Add spacing + potion icon width
+            totalWidth = totalWidth + 3 + iconSize
+        else
+            -- First icon, add offset + icon width
+            local offsetX = potionSettings.potionIconRaidOffsetX or 3
+            totalWidth = offsetX + iconSize
+        end
+    end
+
+    return totalWidth
+end
+
 function UnitFrames.CustomFramesApplyLayoutRaid(unhide)
     if not UnitFrames.CustomFrames["RaidGroup1"] or not UnitFrames.CustomFrames["RaidGroup1"].tlw then
         return
     end
 
     local spacerHeight = 3
+    local frameSpacing = 8 -- Vertical spacing between each frame for integration elements
 
     -- Add extra height for resource bars if enabled
     local resourceBarsHeight = 0
     if UnitFrames.GroupResources then
         resourceBarsHeight = UnitFrames.GroupResources.GetResourceBarsHeight(true)
     end
+
+    -- Add extra width for integration icons if enabled
+    local integrationWidth = GetRaidIntegrationWidth()
 
     -- Determine layout dimensions
     local columns, rows
@@ -2785,15 +2828,19 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide)
     local itemsPerColumn = rows
     local raid = UnitFrames.CustomFrames["RaidGroup1"].tlw
     local totalFrameHeight = UnitFrames.SV.RaidBarHeight + resourceBarsHeight
+    local totalFrameWidth = UnitFrames.SV.RaidBarWidth + integrationWidth
 
-    -- Calculate dimensions
-    local totalWidth = UnitFrames.SV.RaidBarWidth * columns
+    -- Calculate dimensions (add spacing between frames)
+    local totalWidth = totalFrameWidth * columns
+    local totalHeight = (totalFrameHeight + frameSpacing) * rows - frameSpacing -- Subtract last spacing
+
     if UnitFrames.SV.RaidSpacers then
         totalWidth = totalWidth + (spacerHeight * (rows / 4))
+        totalHeight = totalHeight + (spacerHeight * zo_floor((rows - 1) / 4))
     end
 
-    raid:SetDimensions(totalWidth, totalFrameHeight * rows)
-    raid.preview:SetDimensions(UnitFrames.SV.RaidBarWidth * columns, totalFrameHeight * rows)
+    raid:SetDimensions(totalWidth, totalHeight)
+    raid.preview:SetDimensions(totalFrameWidth * columns, totalHeight)
 
     -- Build player list (sorted by role if enabled)
     local playerList = {}
@@ -2812,10 +2859,10 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide)
         local rhb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
 
         -- Calculate position and set frame dimensions
-        local xOffset, yOffset = calculateFramePosition(i, itemsPerColumn, spacerHeight, resourceBarsHeight)
+        local xOffset, yOffset = calculateFramePosition(i, itemsPerColumn, spacerHeight, resourceBarsHeight, totalFrameWidth, frameSpacing)
         unitFrame.control:ClearAnchors()
         unitFrame.control:SetAnchor(TOPLEFT, raid, TOPLEFT, xOffset, yOffset)
-        unitFrame.control:SetDimensions(UnitFrames.SV.RaidBarWidth, totalFrameHeight)
+        unitFrame.control:SetDimensions(totalFrameWidth, totalFrameHeight)
 
         -- Apply icon settings
         local role = GetGroupMemberSelectedRole(unitTag)

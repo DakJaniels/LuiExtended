@@ -450,6 +450,9 @@ local function CreateSmallGroupFrames()
             ghb:SetDrawLevel(DL_CONTROLS)
             local gli = UI:Texture(topInfo, nil, { 20, 20 }, nil, nil, false)
 
+            -- Create container for LibGroupBroadcast integrations (positioned to right of health bar)
+            local libGroupContainer = UI:Control(control, nil, nil, false)
+
             UnitFrames.CustomFrames[unitTag] =
             {
                 ["tlw"] = group,
@@ -475,6 +478,7 @@ local function CreateSmallGroupFrames()
                 ["roleIcon"] = UI:Texture(ghb, { LEFT, LEFT, 5, 0 }, { 18, 18 }, nil, 2, false),
                 ["dead"] = UI:Label(ghb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, "Status", false),
                 ["leader"] = UI:Texture(topInfo, { LEFT, LEFT, -7, 0 }, { 32, 32 }, nil, 2, false),
+                ["libGroupContainer"] = libGroupContainer,
             }
 
             UnitFrames.CustomFrames[unitTag].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
@@ -517,6 +521,26 @@ local function CreateRaidGroupFrames()
             rhb:SetDrawLayer(DL_BACKGROUND)
             rhb:SetDrawLevel(DL_CONTROLS)
 
+            -- Create container for LibGroupBroadcast integrations (positioned to right of health bar)
+            local libGroupContainer = UI:Control(control, nil, nil, false)
+
+            -- Create DPS/HPS stats label (will be repositioned to bottom row by GroupCombatStats)
+            local statsLabel = UI:Label(control, nil, nil, { 0, 4 }, nil, "", false)
+            statsLabel:SetDrawLayer(DL_OVERLAY)
+            statsLabel:SetDrawLevel(15)
+            statsLabel:SetHidden(true)
+
+            -- Create resource bars (magicka and stamina) for LibGroupBroadcast integration
+            local magBackdrop = UI:Backdrop(control, nil, nil, nil, nil, false)
+            magBackdrop:SetDrawLayer(DL_BACKGROUND)
+            magBackdrop:SetDrawLevel(DL_CONTROLS)
+            magBackdrop:SetHidden(true)
+
+            local stamBackdrop = UI:Backdrop(control, nil, nil, nil, nil, false)
+            stamBackdrop:SetDrawLayer(DL_BACKGROUND)
+            stamBackdrop:SetDrawLevel(DL_CONTROLS)
+            stamBackdrop:SetHidden(true)
+
             UnitFrames.CustomFrames[unitTag] =
             {
                 ["tlw"] = raid,
@@ -537,6 +561,18 @@ local function CreateRaidGroupFrames()
                 ["classIcon"] = UI:Texture(rhb, { LEFT, LEFT, 1, 0 }, { 20, 20 }, nil, 2, false),
                 ["dead"] = UI:Label(rhb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "Status", false),
                 ["leader"] = UI:Texture(rhb, { LEFT, LEFT, -2, 0 }, { 28, 28 }, nil, 2, false),
+                ["libGroupContainer"] = libGroupContainer,
+                ["statsLabel"] = statsLabel,
+                ["resourceMagicka"] =
+                {
+                    ["backdrop"] = magBackdrop,
+                    ["bar"] = UI:StatusBar(magBackdrop, nil, nil, nil, false),
+                },
+                ["resourceStamina"] =
+                {
+                    ["backdrop"] = stamBackdrop,
+                    ["bar"] = UI:StatusBar(stamBackdrop, nil, nil, nil, false),
+                },
             }
             UnitFrames.CustomFrames[unitTag].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
 
@@ -872,6 +908,16 @@ local function SetupCommonFrameActions()
                             end
                         end
                     end
+                end
+
+                -- Anchor resource bars if they exist (for LibGroupBroadcast integration)
+                if frame.resourceMagicka and frame.resourceMagicka.bar then
+                    frame.resourceMagicka.bar:SetAnchor(TOPLEFT, frame.resourceMagicka.backdrop, TOPLEFT, 1, 1)
+                    frame.resourceMagicka.bar:SetAnchor(BOTTOMRIGHT, frame.resourceMagicka.backdrop, BOTTOMRIGHT, -1, -1)
+                end
+                if frame.resourceStamina and frame.resourceStamina.bar then
+                    frame.resourceStamina.bar:SetAnchor(TOPLEFT, frame.resourceStamina.backdrop, TOPLEFT, 1, 1)
+                    frame.resourceStamina.bar:SetAnchor(BOTTOMRIGHT, frame.resourceStamina.backdrop, BOTTOMRIGHT, -1, -1)
                 end
             end
         end

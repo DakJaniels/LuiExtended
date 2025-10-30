@@ -47,77 +47,76 @@ local function AddCombatStatsToFrame(frameData, isRaid)
             local offsetX = isRaid and Settings.ultIconRaidOffsetX or Settings.ultIconGroupOffsetX
             local offsetY = isRaid and Settings.ultIconRaidOffsetY or Settings.ultIconGroupOffsetY
 
-            if isRaid then
-                -- Raid: Use pre-created ultContainer with flex layout
-                -- FRONTBAR ULT (ult1) - flex child with right margin for spacing
-                frameData.combatStats.ult1Backdrop = UI:Backdrop(frameData.ultContainer, nil, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
-                frameData.combatStats.ult1Backdrop:SetDrawLayer(DL_BACKGROUND)
-                frameData.combatStats.ult1Backdrop:SetDrawLevel(13)
-                frameData.combatStats.ult1Backdrop:SetFlexGrow(0)
-                frameData.combatStats.ult1Backdrop:SetFlexShrink(0)
-                frameData.combatStats.ult1Backdrop:SetFlexMargin(FLEX_EDGE_RIGHT, 3)
-
-                frameData.combatStats.ult1Icon = UI:Texture(frameData.combatStats.ult1Backdrop, { CENTER, CENTER }, { iconSize - 2, iconSize - 2 }, nil, DL_OVERLAY, false)
-                frameData.combatStats.ult1Icon:SetDrawLevel(15)
-                frameData.combatStats.ult1Icon:SetHidden(true)
-
-                -- BACKBAR ULT (ult2) - flex child with right margin for spacing
-                frameData.combatStats.ult2Backdrop = UI:Backdrop(frameData.ultContainer, nil, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
-                frameData.combatStats.ult2Backdrop:SetDrawLayer(DL_BACKGROUND)
-                frameData.combatStats.ult2Backdrop:SetDrawLevel(13)
-                frameData.combatStats.ult2Backdrop:SetFlexGrow(0)
-                frameData.combatStats.ult2Backdrop:SetFlexShrink(0)
-                frameData.combatStats.ult2Backdrop:SetFlexMargin(FLEX_EDGE_RIGHT, 3)
-
-                frameData.combatStats.ult2Icon = UI:Texture(frameData.combatStats.ult2Backdrop, { CENTER, CENTER }, { iconSize - 2, iconSize - 2 }, nil, DL_OVERLAY, false)
-                frameData.combatStats.ult2Icon:SetDrawLevel(15)
-                frameData.combatStats.ult2Icon:SetHidden(true)
-            else
-                -- Small group: traditional external positioning
-                frameData.combatStats.ult1Backdrop = UI:Backdrop(frameData.control, nil, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
-                frameData.combatStats.ult1Backdrop:SetAnchor(LEFT, backdrop, RIGHT, offsetX, offsetY)
-                frameData.combatStats.ult1Backdrop:SetDrawLayer(DL_BACKGROUND)
-                frameData.combatStats.ult1Backdrop:SetDrawLevel(13)
-
-                frameData.combatStats.ult1Icon = UI:Texture(frameData.combatStats.ult1Backdrop, { CENTER, CENTER }, { iconSize - 2, iconSize - 2 }, nil, DL_OVERLAY, false)
-                frameData.combatStats.ult1Icon:SetDrawLevel(15)
-                frameData.combatStats.ult1Icon:SetHidden(true)
-
-                frameData.combatStats.ult2Backdrop = UI:Backdrop(frameData.control, nil, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
-                frameData.combatStats.ult2Backdrop:SetAnchor(LEFT, frameData.combatStats.ult1Backdrop, RIGHT, 1, 0)
-                frameData.combatStats.ult2Backdrop:SetDrawLayer(DL_BACKGROUND)
-                frameData.combatStats.ult2Backdrop:SetDrawLevel(13)
-
-                frameData.combatStats.ult2Icon = UI:Texture(frameData.combatStats.ult2Backdrop, { CENTER, CENTER }, { iconSize - 2, iconSize - 2 }, nil, DL_OVERLAY, false)
-                frameData.combatStats.ult2Icon:SetDrawLevel(15)
-                frameData.combatStats.ult2Icon:SetHidden(true)
+            -- Get or create the container
+            local container = frameData.libGroupContainer
+            if not container then
+                container = UI:Control(frameData.control, nil, nil, false)
+                frameData.libGroupContainer = container
             end
+
+            -- Position container in the spacing gap below health bar
+            if isRaid then
+                -- Raid: position container in the gap below health bar (to the right of resource bars)
+                local anchorTarget = Shared.GetRightmostResourceBar(frameData)
+                if anchorTarget then
+                    -- Anchor to right of resource bars in the bottom row
+                    container:SetAnchor(LEFT, anchorTarget, RIGHT, offsetX, 0)
+                else
+                    -- No resource bars - anchor to left edge below health bar
+                    container:SetAnchor(TOP, backdrop, BOTTOM, offsetX, offsetY)
+                end
+            else
+                -- Small group: anchor to right of health bar (external)
+                container:SetAnchor(LEFT, backdrop, RIGHT, offsetX, offsetY)
+            end
+
+            -- FRONTBAR ULT (ult1)
+            frameData.combatStats.ult1Backdrop = UI:Backdrop(container, { LEFT, LEFT }, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
+            frameData.combatStats.ult1Backdrop:SetDrawLayer(DL_BACKGROUND)
+            frameData.combatStats.ult1Backdrop:SetDrawLevel(13)
+
+            frameData.combatStats.ult1Icon = UI:Texture(frameData.combatStats.ult1Backdrop, { CENTER, CENTER }, { iconSize - 2, iconSize - 2 }, nil, DL_OVERLAY, false)
+            frameData.combatStats.ult1Icon:SetDrawLevel(15)
+            frameData.combatStats.ult1Icon:SetHidden(true)
+
+            -- BACKBAR ULT (ult2)
+            frameData.combatStats.ult2Backdrop = UI:Backdrop(container, { LEFT, RIGHT, 3, 0, frameData.combatStats.ult1Backdrop }, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
+            frameData.combatStats.ult2Backdrop:SetDrawLayer(DL_BACKGROUND)
+            frameData.combatStats.ult2Backdrop:SetDrawLevel(13)
+
+            frameData.combatStats.ult2Icon = UI:Texture(frameData.combatStats.ult2Backdrop, { CENTER, CENTER }, { iconSize - 2, iconSize - 2 }, nil, DL_OVERLAY, false)
+            frameData.combatStats.ult2Icon:SetDrawLevel(15)
+            frameData.combatStats.ult2Icon:SetHidden(true)
         end
 
         -- DPS/HPS text label
         if Settings.showDPS or Settings.showHPS then
             local fontSize = isRaid and 11 or 14
 
-            if isRaid and frameData.flexBottomRow then
-                -- Raid: Add to pre-existing flex container
-                frameData.combatStats.statsLabel = UI:Label(frameData.flexBottomRow, nil, nil, { 0, 4 }, nil, "", false)
-                frameData.combatStats.statsLabel:SetFlexGrow(0)
-                frameData.combatStats.statsLabel:SetFlexShrink(0)
-                frameData.combatStats.statsLabel:SetFlexMargin(FLEX_EDGE_LEFT, 4)
+            if isRaid then
+                -- Raid: use pre-created statsLabel and reposition to bottom row, right of icons
+                frameData.combatStats.statsLabel = frameData.statsLabel
+                if frameData.combatStats.statsLabel then
+                    frameData.combatStats.statsLabel:ClearAnchors()
+                    -- Anchor to right of the icon container (container is already bottom-aligned)
+                    local anchorTarget = frameData.libGroupContainer or backdrop
+                    frameData.combatStats.statsLabel:SetAnchor(LEFT, anchorTarget, RIGHT, 4, 0)
+                end
             else
-                -- Small group: anchor below health bar on right (original positioning)
+                -- Small group: anchor below health bar on right
                 frameData.combatStats.statsLabel = UI:Label(backdrop, { TOPRIGHT, BOTTOMRIGHT, -2, 2 }, nil, { 0, 4 }, nil, "", false)
+                frameData.combatStats.statsLabel:SetDrawLayer(DL_OVERLAY)
+                frameData.combatStats.statsLabel:SetDrawLevel(15)
+                frameData.combatStats.statsLabel:SetHidden(true)
             end
-
-            frameData.combatStats.statsLabel:SetDrawLayer(DL_OVERLAY)
-            frameData.combatStats.statsLabel:SetDrawLevel(15)
-            frameData.combatStats.statsLabel:SetHidden(true)
 
             -- Apply font
             local rootSettings = Shared.GetSettings()
             local fontFace = LUIE.Fonts[rootSettings.CustomFontFace]
             local fontStyle = rootSettings.CustomFontStyle
-            frameData.combatStats.statsLabel:SetFont(ZO_CreateFontString(fontFace, fontSize, fontStyle))
+            if frameData.combatStats.statsLabel then
+                frameData.combatStats.statsLabel:SetFont(ZO_CreateFontString(fontFace, fontSize, fontStyle))
+            end
         end
     end
 end

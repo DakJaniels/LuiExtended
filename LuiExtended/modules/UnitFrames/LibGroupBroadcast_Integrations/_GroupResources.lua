@@ -38,8 +38,8 @@ local Shared = UnitFrames.LibGroupBroadcastShared
 
 local isInitialized = false
 
--- Add resource bars to a custom frame
-local function AddResourceBarsToFrame(frameData)
+-- Add resource bars to a custom frame (only needed for SmallGroup frames - RaidGroup frames have them pre-created)
+local function AddResourceBarsToFrame(frameData, isRaid)
     if not frameData or not frameData.control then return end
 
     local Settings = Shared.GetResourceSettings()
@@ -48,7 +48,12 @@ local function AddResourceBarsToFrame(frameData)
     local healthBackdrop = Shared.GetHealthBackdrop(frameData)
     if not healthBackdrop then return end
 
-    -- Create magicka bar if it doesn't exist
+    -- For raid frames, bars are pre-created in _CreateCustomFrames.lua
+    if isRaid then
+        return
+    end
+
+    -- Create magicka bar if it doesn't exist (SmallGroup only)
     if not frameData.resourceMagicka then
         local magBackdrop = UI:Backdrop(frameData.control, nil, nil, nil, nil, false)
         magBackdrop:SetDrawLayer(DL_BACKGROUND)
@@ -60,13 +65,13 @@ local function AddResourceBarsToFrame(frameData)
             ["bar"] = UI:StatusBar(magBackdrop, nil, nil, nil, false),
         }
 
-        -- Anchor bar to backdrop with 1px inset
+        -- Anchor bar to backdrop with 1px inset (done in _CreateCustomFrames for raid)
         frameData.resourceMagicka.bar:SetAnchor(TOPLEFT, magBackdrop, TOPLEFT, 1, 1)
         frameData.resourceMagicka.bar:SetAnchor(BOTTOMRIGHT, magBackdrop, BOTTOMRIGHT, -1, -1)
         frameData.resourceMagicka.bar:SetHidden(true)
     end
 
-    -- Create stamina bar if it doesn't exist
+    -- Create stamina bar if it doesn't exist (SmallGroup only)
     if not frameData.resourceStamina then
         local stamBackdrop = UI:Backdrop(frameData.control, nil, nil, nil, nil, false)
         stamBackdrop:SetDrawLayer(DL_BACKGROUND)
@@ -78,7 +83,7 @@ local function AddResourceBarsToFrame(frameData)
             ["bar"] = UI:StatusBar(stamBackdrop, nil, nil, nil, false),
         }
 
-        -- Anchor bar to backdrop with 1px inset
+        -- Anchor bar to backdrop with 1px inset (done in _CreateCustomFrames for raid)
         frameData.resourceStamina.bar:SetAnchor(TOPLEFT, stamBackdrop, TOPLEFT, 1, 1)
         frameData.resourceStamina.bar:SetAnchor(BOTTOMRIGHT, stamBackdrop, BOTTOMRIGHT, -1, -1)
         frameData.resourceStamina.bar:SetHidden(true)
@@ -101,31 +106,31 @@ local function UpdateResourceBarLayout(frameData, isRaid)
     local magBar = frameData.resourceMagicka.bar
     local stamBar = frameData.resourceStamina.bar
 
+    local healthBackdrop = Shared.GetHealthBackdrop(frameData)
+
+    -- Position backdrops
+    magBackdrop:ClearAnchors()
+    stamBackdrop:ClearAnchors()
+
     if isRaid then
-        -- Raid: Bars are flex children of resourceContainer, just adjust order with flex
-        -- The bars are already created as flex children in _CreateCustomFrames.lua
-        -- Flex order is determined by creation order, so we swap margins if needed
+        -- Raid: side-by-side bars in the gap below health bar
         if staminaFirst then
-            -- Stamina left, magicka right (swap the margins)
-            stamBackdrop:SetFlexMargin(FLEX_EDGE_RIGHT, 1)
-            stamBackdrop:SetFlexMargin(FLEX_EDGE_LEFT, 0)
-            magBackdrop:SetFlexMargin(FLEX_EDGE_LEFT, 1)
-            magBackdrop:SetFlexMargin(FLEX_EDGE_RIGHT, 0)
+            -- Stamina left, magicka right
+            stamBackdrop:SetAnchor(TOPLEFT, healthBackdrop, BOTTOMLEFT, 0, 0)
+            stamBackdrop:SetDimensions(barWidth, barHeight)
+
+            magBackdrop:SetAnchor(LEFT, stamBackdrop, RIGHT, 1, 0)
+            magBackdrop:SetDimensions(barWidth, barHeight)
         else
-            -- Magicka left, stamina right (default - as created)
-            magBackdrop:SetFlexMargin(FLEX_EDGE_RIGHT, 1)
-            magBackdrop:SetFlexMargin(FLEX_EDGE_LEFT, 0)
-            stamBackdrop:SetFlexMargin(FLEX_EDGE_LEFT, 1)
-            stamBackdrop:SetFlexMargin(FLEX_EDGE_RIGHT, 0)
+            -- Magicka left, stamina right (default)
+            magBackdrop:SetAnchor(TOPLEFT, healthBackdrop, BOTTOMLEFT, 0, 0)
+            magBackdrop:SetDimensions(barWidth, barHeight)
+
+            stamBackdrop:SetAnchor(LEFT, magBackdrop, RIGHT, 1, 0)
+            stamBackdrop:SetDimensions(barWidth, barHeight)
         end
     else
-        -- Small group: stacked bars below health (original layout)
-        local healthBackdrop = Shared.GetHealthBackdrop(frameData)
-
-        -- Position backdrops
-        magBackdrop:ClearAnchors()
-        stamBackdrop:ClearAnchors()
-
+        -- Small group: stacked bars below health
         if staminaFirst then
             -- Stamina first (top), then magicka (bottom)
             stamBackdrop:SetAnchor(TOPLEFT, healthBackdrop, BOTTOMLEFT, 0, 2)
@@ -333,7 +338,7 @@ function GroupResourcesManager.SetupFrames()
     if not Settings or not Settings.enabled then return end
 
     Shared.ForEachGroupFrame(function (unitTag, frameData, isRaid)
-        AddResourceBarsToFrame(frameData)
+        AddResourceBarsToFrame(frameData, isRaid)
         UpdateResourceBarLayout(frameData, isRaid)
     end)
 end

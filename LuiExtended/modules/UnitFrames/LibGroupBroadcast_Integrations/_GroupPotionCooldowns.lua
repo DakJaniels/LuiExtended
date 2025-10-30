@@ -59,32 +59,47 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
         local offsetX = isRaid and Settings.potionIconRaidOffsetX or Settings.potionIconGroupOffsetX
         local offsetY = isRaid and Settings.potionIconRaidOffsetY or Settings.potionIconGroupOffsetY
 
-        -- Potion icon backdrop
-        if isRaid then
-            -- Raid: Use pre-created ultContainer with flex layout
-            if frameData.ultContainer then
-                frameData.potionCooldown.backdrop = UI:Backdrop(frameData.ultContainer, nil, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
-                frameData.potionCooldown.backdrop:SetFlexGrow(0)
-                frameData.potionCooldown.backdrop:SetFlexShrink(0)
-                frameData.potionCooldown.backdrop:SetFlexMargin(FLEX_EDGE_RIGHT, 3)
-            end
-        else
-            -- Small group: anchor to right of health bar (external, original positioning)
-            local anchorTarget = backdrop
-            local anchorPoint = RIGHT
+        -- Get or create the container (already positioned by GroupCombatStats if enabled)
+        local container = frameData.libGroupContainer
+        if not container then
+            container = UI:Control(frameData.control, nil, nil, false)
+            frameData.libGroupContainer = container
 
-            if frameData.combatStats and frameData.combatStats.ult2Backdrop then
-                anchorTarget = frameData.combatStats.ult2Backdrop
-                anchorPoint = RIGHT
-            elseif frameData.combatStats and frameData.combatStats.ult1Backdrop then
-                anchorTarget = frameData.combatStats.ult1Backdrop
-                anchorPoint = RIGHT
+            -- If combat stats didn't create/position container, we need to do it
+            local healthBackdrop = Shared.GetHealthBackdrop(frameData)
+            if isRaid then
+                -- Raid: position container in the gap below health bar (to the right of resource bars)
+                local anchorTarget = Shared.GetRightmostResourceBar(frameData)
+                if anchorTarget then
+                    -- Anchor to right of resource bars in the bottom row
+                    container:SetAnchor(LEFT, anchorTarget, RIGHT, offsetX, 0)
+                else
+                    -- No resource bars - anchor to left edge below health bar
+                    container:SetAnchor(TOP, healthBackdrop, BOTTOM, offsetX, offsetY)
+                end
+            else
+                -- Small group: anchor to right of health bar (external)
+                container:SetAnchor(LEFT, healthBackdrop, RIGHT, offsetX, offsetY)
             end
-
-            frameData.potionCooldown.backdrop = UI:Backdrop(frameData.control, nil, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
-            frameData.potionCooldown.backdrop:SetAnchor(LEFT, anchorTarget, anchorPoint, offsetX, offsetY)
         end
 
+        -- Determine anchor target within container for horizontal flow
+        local anchorTarget = container
+        local anchorPoint = LEFT
+        local anchorOffsetX = 0
+
+        if frameData.combatStats and frameData.combatStats.ult2Backdrop then
+            anchorTarget = frameData.combatStats.ult2Backdrop
+            anchorPoint = RIGHT
+            anchorOffsetX = 3
+        elseif frameData.combatStats and frameData.combatStats.ult1Backdrop then
+            anchorTarget = frameData.combatStats.ult1Backdrop
+            anchorPoint = RIGHT
+            anchorOffsetX = 3
+        end
+
+        -- Potion icon backdrop (container is already bottom-aligned, just flow horizontally)
+        frameData.potionCooldown.backdrop = UI:Backdrop(container, { LEFT, anchorPoint, anchorOffsetX, 0, anchorTarget }, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
         frameData.potionCooldown.backdrop:SetDrawLayer(DL_BACKGROUND)
         frameData.potionCooldown.backdrop:SetDrawLevel(13)
 

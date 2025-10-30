@@ -77,6 +77,23 @@ function Shared.GetHealthBackdrop(frameData)
     return healthData and healthData.backdrop
 end
 
+--- Get the right-most resource bar backdrop (handles staminaFirst setting)
+--- @param frameData table The frame data table
+--- @return table|nil backdrop The right-most resource bar backdrop or nil if none exist
+function Shared.GetRightmostResourceBar(frameData)
+    if not frameData then return nil end
+
+    local resourceSettings = Shared.GetResourceSettings()
+    local staminaFirst = resourceSettings and resourceSettings.staminaFirst
+
+    -- If staminaFirst, magicka is on the right; otherwise stamina is on the right
+    if staminaFirst then
+        return frameData.resourceMagicka and frameData.resourceMagicka.backdrop
+    else
+        return frameData.resourceStamina and frameData.resourceStamina.backdrop
+    end
+end
+
 -- ============================================================================
 -- ITERATION HELPERS
 -- ============================================================================
