@@ -154,17 +154,6 @@ local function UpdateResourceBarLayout(frameData, isRaid)
         stamBackdrop:SetBlendMode(TEX_BLEND_MODE_ALPHA)
         stamBackdrop:SetPixelRoundingEnabled(true)
 
-        -- leading edge
-        local leadingEdgeTexture = "LuiExtended/media/unitframes/textures/gradients/dark.dds"
-
-        magBar:EnableLeadingEdge(true)
-        magBar:SetLeadingEdge(leadingEdgeTexture, 8, barHeight)
-        magBar:SetLeadingEdgeTextureCoords(1, 0, 0, 1)
-
-        stamBar:EnableLeadingEdge(true)
-        stamBar:SetLeadingEdge(leadingEdgeTexture, 8, barHeight)
-        stamBar:SetLeadingEdgeTextureCoords(1, 0, 0, 1)
-
         -- Set edge colors based on texture type
         if isRoundTexture then
             magBackdrop:SetEdgeColor(0, 0, 0, 0)
