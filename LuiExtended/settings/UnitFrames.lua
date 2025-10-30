@@ -2776,6 +2776,24 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                -- Custom Unit Frames Group Sort by role
+                type = "checkbox",
+                name = "Sort Group Frames by Role",
+                tooltip = "Sort group members by role (Tank -> Healer -> DPS).",
+                getFunc = function ()
+                    return Settings.SortRoleGroup
+                end,
+                setFunc = function (value)
+                    Settings.SortRoleGroup = value
+                    UnitFrames.CustomFramesApplyLayoutGroup(true)
+                end,
+                width = "full",
+                default = Defaults.SortRoleGroup,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
+                end,
+            },
+            {
                 -- Display Armor stat change
                 type = "checkbox",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_ARMOR), GetString(LUIE_STRING_LAM_UF_SHARED_GROUP)),

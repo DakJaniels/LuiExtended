@@ -2586,6 +2586,15 @@ function UnitFrames.CustomFramesApplyLayoutPlayer(unhide)
     end
 end
 
+local insertRole = function (list, currentRole)
+    for index = 1, GetGroupSize() do
+        local playerRole = GetGroupMemberSelectedRole(GetGroupUnitTagByIndex(index))
+        if playerRole == currentRole then
+            table.insert(list, index)
+        end
+    end
+end
+
 -- Set dimensions of custom group frame and anchors or raid group members
 function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
     if not UnitFrames.CustomFrames["SmallGroup1"] or not UnitFrames.CustomFrames["SmallGroup1"].tlw then
@@ -2616,9 +2625,19 @@ function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
     local totalFrameHeight = groupBarHeight + resourceBarsHeight
     group:SetDimensions(UnitFrames.SV.GroupBarWidth, totalFrameHeight * 4 + UnitFrames.SV.GroupBarSpacing * 3.5)
 
+    -- Build player list (sorted by role if enabled)
+    local playerList = {}
+    if UnitFrames.SV.SortRoleGroup then
+        local roles = { LFG_ROLE_TANK, LFG_ROLE_HEAL, LFG_ROLE_DPS, LFG_ROLE_INVALID }
+        for _, value in ipairs(roles) do
+            insertRole(playerList, value)
+        end
+    end
+
     for i = 1, 4 do
-        local unitFrame = UnitFrames.CustomFrames["SmallGroup" .. i]
-        local unitTag = GetGroupUnitTagByIndex(i)
+        local index = UnitFrames.SV.SortRoleGroup and playerList[i] or i
+        local unitFrame = UnitFrames.CustomFrames["SmallGroup" .. index]
+        local unitTag = GetGroupUnitTagByIndex(index)
         local ghb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH]
 
         -- Position and size frame
@@ -2666,15 +2685,6 @@ function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
 
     if unhide then
         group:SetHidden(false)
-    end
-end
-
-local function insertRole(list, currentRole)
-    for index = 1, GetGroupSize() do
-        local playerRole = GetGroupMemberSelectedRole(GetGroupUnitTagByIndex(index))
-        if playerRole == currentRole then
-            table.insert(list, index)
-        end
     end
 end
 

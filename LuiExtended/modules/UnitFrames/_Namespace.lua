@@ -169,6 +169,7 @@ UnitFrames.Defaults =
     RoleIconSmallGroup = true,
     ColorRoleGroup = true,
     ColorRoleRaid = true,
+    SortRoleGroup = false,
     SortRoleRaid = true,
     ColorClassGroup = false,
     ColorClassRaid = false,
