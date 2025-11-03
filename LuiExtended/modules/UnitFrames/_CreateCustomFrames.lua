@@ -150,12 +150,12 @@ local function CreateCombatGlowAnimation(backdrop)
     glow:SetEdgeTexture("", 16, 16, 2, 0) -- Thicker edge for visible glow
     glow:SetBlendMode(TEX_BLEND_MODE_ADD)
 
-    -- Create pulse animation on the edge alpha
+    -- Create one-shot fade-in animation.
     local alphaAnim, alphaTimeline = CreateSimpleAnimation(ANIMATION_ALPHA, glow)
-    alphaAnim:SetAlphaValues(0.5, 1.0)
-    alphaAnim:SetDuration(800)
-    alphaAnim:SetEasingFunction(ZO_EaseInOutQuadratic)
-    alphaTimeline:SetPlaybackType(ANIMATION_PLAYBACK_PING_PONG, LOOP_INDEFINITELY)
+    alphaAnim:SetAlphaValues(0, 1)
+    alphaAnim:SetDuration(300)
+    alphaAnim:SetEasingFunction(ZO_EaseInQuadratic)
+    alphaTimeline:SetPlaybackType(ANIMATION_PLAYBACK_ONE_SHOT, 1)
 
     glow.animation = alphaAnim
     glow.timeline = alphaTimeline

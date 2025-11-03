@@ -1141,6 +1141,7 @@ function UnitFrames.UpdateGroupCombatGlow()
                 timeline:Stop()
             end
             glow:SetHidden(true)
+            glow:SetAlpha(0)
             return
         end
 
@@ -1148,15 +1149,18 @@ function UnitFrames.UpdateGroupCombatGlow()
         local isInCombat = IsUnitActivelyEngaged(unitTag) or IsUnitInCombat(unitTag)
 
         if isInCombat then
-            if not timeline:IsPlaying() then
+            -- One-shot fade in when entering combat
+            if not timeline:IsPlaying() and glow:GetAlpha() < 1 then
                 glow:SetHidden(false)
                 timeline:PlayFromStart()
             end
         else
+            -- Reset when leaving combat
             if timeline:IsPlaying() then
                 timeline:Stop()
             end
             glow:SetHidden(true)
+            glow:SetAlpha(0)
         end
     end
 
