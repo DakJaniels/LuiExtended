@@ -13,6 +13,13 @@ local GetDisplayName = GetDisplayName
 local changelogMessages =
 {
     -- Version Header
+    "|cFFA500LuiExtended Version 7.1.0.4|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Shield animations are smooth again. oops.",
+    "",
+    -- Version Header
     "|cFFA500LuiExtended Version 7.1.0.3|r",
     "",
     -- New

@@ -88,17 +88,23 @@ function PowerShieldModule:UpdateShieldBar(attributeFrame, shieldValue, healthEf
             attributeFrame.shieldbackdrop:SetHidden(true)
         end
     else
-        -- Set min/max and value BEFORE unhiding to prevent animation delay
+        -- Set min/max before unhiding
         attributeFrame.shield:SetMinMax(0, healthEffectiveMax)
-        attributeFrame.shield:SetValue(shieldValue)
-        attributeFrame.shield:SetHidden(false)
-        if attributeFrame.shieldbackdrop then
-            attributeFrame.shieldbackdrop:SetHidden(false)
-        end
 
-        -- Apply smooth transition if enabled (will animate from current value)
+        -- If smooth bar enabled, let ZO_StatusBar_SmoothTransition handle value setting with animation
+        -- Otherwise set value directly for instant update
         if UnitFrames.SV.CustomSmoothBar then
+            attributeFrame.shield:SetHidden(false)
+            if attributeFrame.shieldbackdrop then
+                attributeFrame.shieldbackdrop:SetHidden(false)
+            end
             ZO_StatusBar_SmoothTransition(attributeFrame.shield, shieldValue, healthEffectiveMax, false, nil, 250)
+        else
+            attributeFrame.shield:SetValue(shieldValue)
+            attributeFrame.shield:SetHidden(false)
+            if attributeFrame.shieldbackdrop then
+                attributeFrame.shieldbackdrop:SetHidden(false)
+            end
         end
     end
 end
@@ -199,14 +205,10 @@ function PowerShieldModule:UpdateNoHealing(unitTag, value)
 
         if overlay then
             if isActive then
-                -- Set overlay min/max and value to match current health (like shield does)
+                -- Set overlay min/max
                 overlay:SetMinMax(0, healthEffectiveMax)
-                overlay:SetValue(healthValue)
-
-                -- Stripe is also a status bar, sync its value with overlay
                 if stripe then
                     stripe:SetMinMax(0, healthEffectiveMax)
-                    stripe:SetValue(healthValue)
                 end
 
                 -- Show overlay and stripe, fade in
@@ -219,11 +221,16 @@ function PowerShieldModule:UpdateNoHealing(unitTag, value)
                     fadeAnim:PlayForward()
                 end
 
-                -- Apply smooth transition if enabled (matches shield behavior)
+                -- Apply smooth transition if enabled, otherwise set value directly
                 if UnitFrames.SV.CustomSmoothBar then
                     ZO_StatusBar_SmoothTransition(overlay, healthValue, healthEffectiveMax, false, nil, 250)
                     if stripe then
                         ZO_StatusBar_SmoothTransition(stripe, healthValue, healthEffectiveMax, false, nil, 250)
+                    end
+                else
+                    overlay:SetValue(healthValue)
+                    if stripe then
+                        stripe:SetValue(healthValue)
                     end
                 end
             else
