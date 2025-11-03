@@ -311,6 +311,11 @@ function UnitFrames.Initialize(enabled)
             end
             UnitFrames.CustomFramesSetPositions()
         end)
+
+        -- Register periodic update for group combat glow (checks every 500ms)
+        if UnitFrames.CustomFrames["SmallGroup1"] or UnitFrames.CustomFrames["RaidGroup1"] then
+            eventManager:RegisterForUpdate(moduleName .. "_CombatGlow", 500, UnitFrames.UpdateGroupCombatGlow)
+        end
     end
 
     UnitFrames.defaultTargetNameLabel = ZO_TargetUnitFramereticleoverName
@@ -1114,6 +1119,68 @@ end
 function UnitFrames.OnPlayerCombatState(eventCode, inCombat)
     UnitFrames.statFull.combat = not inCombat
     UnitFrames.CustomFramesApplyInCombat()
+end
+
+-- Updates combat glow on group frames based on combat state
+function UnitFrames.UpdateGroupCombatGlow()
+    if not IsUnitGrouped("player") then
+        return
+    end
+
+    -- Helper to update combat glow for a single frame
+    local function updateFrameCombatGlow(frame, unitTag)
+        if not frame or not frame[COMBAT_MECHANIC_FLAGS_HEALTH] or not frame[COMBAT_MECHANIC_FLAGS_HEALTH].combatGlow then
+            return
+        end
+
+        local glow = frame[COMBAT_MECHANIC_FLAGS_HEALTH].combatGlow
+        local timeline = glow.timeline
+
+        if not unitTag or not DoesUnitExist(unitTag) then
+            if timeline and timeline:IsPlaying() then
+                timeline:Stop()
+            end
+            glow:SetHidden(true)
+            return
+        end
+
+        -- Use IsUnitActivelyEngaged for more accurate combat detection
+        local isInCombat = IsUnitActivelyEngaged(unitTag) or IsUnitInCombat(unitTag)
+
+        if isInCombat then
+            if not timeline:IsPlaying() then
+                glow:SetHidden(false)
+                timeline:PlayFromStart()
+            end
+        else
+            if timeline:IsPlaying() then
+                timeline:Stop()
+            end
+            glow:SetHidden(true)
+        end
+    end
+
+    -- Update SmallGroup frames (if enabled)
+    if UnitFrames.SV.GroupCombatGlow and UnitFrames.CustomFrames["SmallGroup1"] and UnitFrames.CustomFrames["SmallGroup1"].tlw then
+        for i = 1, 4 do
+            local frameTag = "SmallGroup" .. i
+            local frame = UnitFrames.CustomFrames[frameTag]
+            if frame then
+                updateFrameCombatGlow(frame, frame.unitTag)
+            end
+        end
+    end
+
+    -- Update RaidGroup frames (if enabled)
+    if UnitFrames.SV.RaidCombatGlow and UnitFrames.CustomFrames["RaidGroup1"] and UnitFrames.CustomFrames["RaidGroup1"].tlw then
+        for i = 1, 12 do
+            local frameTag = "RaidGroup" .. i
+            local frame = UnitFrames.CustomFrames[frameTag]
+            if frame then
+                updateFrameCombatGlow(frame, frame.unitTag)
+            end
+        end
+    end
 end
 
 -- Runs on the EVENT_WEREWOLF_STATE_CHANGED listener.

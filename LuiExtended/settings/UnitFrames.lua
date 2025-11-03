@@ -2847,6 +2847,23 @@ function UnitFrames.CreateSettings()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
                 end,
             },
+            {
+                -- Group Combat Glow
+                type = "checkbox",
+                name = "Show Combat Glow",
+                tooltip = "Display a red pulsing glow around group member health bars when they are in combat.",
+                getFunc = function ()
+                    return Settings.GroupCombatGlow
+                end,
+                setFunc = function (value)
+                    Settings.GroupCombatGlow = value
+                end,
+                width = "full",
+                default = Defaults.GroupCombatGlow,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
+                end,
+            },
         },
     }
 
@@ -3158,6 +3175,23 @@ function UnitFrames.CreateSettings()
                 width = "full",
                 default = Defaults.RaidEnableRegen,
                 warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
+                end,
+            },
+            {
+                -- Raid Combat Glow
+                type = "checkbox",
+                name = "Show Combat Glow",
+                tooltip = "Display a red pulsing glow around raid member health bars when they are in combat.",
+                getFunc = function ()
+                    return Settings.RaidCombatGlow
+                end,
+                setFunc = function (value)
+                    Settings.RaidCombatGlow = value
+                end,
+                width = "full",
+                default = Defaults.RaidCombatGlow,
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
                 end,

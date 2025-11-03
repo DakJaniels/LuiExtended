@@ -134,6 +134,35 @@ local function CreateNoHealingFadeAnimation(overlay, stripeOverlay)
     return fadeTimeline
 end
 
+-- Combat glow animation (red pixel glow for group frames)
+local function CreateCombatGlowAnimation(backdrop)
+    -- Create a backdrop for the glow effect matching health bar size exactly
+    local glow = UI:Backdrop(backdrop, nil, nil, nil, nil, false)
+    glow:SetAnchor(TOPLEFT, backdrop, TOPLEFT, 0, 0)
+    glow:SetAnchor(BOTTOMRIGHT, backdrop, BOTTOMRIGHT, 0, 0)
+    glow:SetDrawTier(DT_HIGH)
+    glow:SetDrawLevel(3)
+    glow:SetHidden(true)
+
+    -- Set red glow color with thicker edges for visibility
+    glow:SetCenterColor(0, 0, 0, 0)       -- Transparent center
+    glow:SetEdgeColor(1, 0, 0, 1)         -- Red edges
+    glow:SetEdgeTexture("", 16, 16, 2, 0) -- Thicker edge for visible glow
+    glow:SetBlendMode(TEX_BLEND_MODE_ADD)
+
+    -- Create pulse animation on the edge alpha
+    local alphaAnim, alphaTimeline = CreateSimpleAnimation(ANIMATION_ALPHA, glow)
+    alphaAnim:SetAlphaValues(0.5, 1.0)
+    alphaAnim:SetDuration(800)
+    alphaAnim:SetEasingFunction(ZO_EaseInOutQuadratic)
+    alphaTimeline:SetPlaybackType(ANIMATION_PLAYBACK_PING_PONG, LOOP_INDEFINITELY)
+
+    glow.animation = alphaAnim
+    glow.timeline = alphaTimeline
+
+    return glow
+end
+
 -- Decreased armour overlay visuals
 local function CreateDecreasedArmorOverlay(parent, small)
     local textureConfig =
@@ -453,6 +482,9 @@ local function CreateSmallGroupFrames()
             -- Create container for LibGroupBroadcast integrations (positioned to right of health bar)
             local libGroupContainer = UI:Control(control, nil, nil, false)
 
+            -- Create combat glow animation
+            local combatGlow = CreateCombatGlowAnimation(ghb)
+
             UnitFrames.CustomFrames[unitTag] =
             {
                 ["tlw"] = group,
@@ -468,6 +500,7 @@ local function CreateSmallGroupFrames()
                     ["noHealingOverlay"] = UI:StatusBar(ghb, nil, nil, nil, true),
                     ["noHealingStripe"] = UI:StatusBar(ghb, nil, nil, nil, true),
                     ["possessionOverlay"] = UI:Control(ghb, nil, nil, true),
+                    ["combatGlow"] = combatGlow,
                 },
                 ["topInfo"] = topInfo,
                 ["name"] = UI:Label(topInfo, { BOTTOMLEFT, BOTTOMLEFT }, nil, { 0, 4 }, nil, unitTag, false),
@@ -545,6 +578,9 @@ local function CreateRaidGroupFrames()
             stamBackdrop:SetDrawLevel(DL_CONTROLS)
             stamBackdrop:SetHidden(true)
 
+            -- Create combat glow animation
+            local combatGlow = CreateCombatGlowAnimation(rhb)
+
             UnitFrames.CustomFrames[unitTag] =
             {
                 ["tlw"] = raid,
@@ -559,6 +595,7 @@ local function CreateRaidGroupFrames()
                     ["noHealingOverlay"] = UI:StatusBar(rhb, nil, nil, nil, true),
                     ["noHealingStripe"] = UI:StatusBar(rhb, nil, nil, nil, true),
                     ["possessionOverlay"] = UI:Control(rhb, nil, nil, true),
+                    ["combatGlow"] = combatGlow,
                 },
                 ["name"] = UI:Label(rhb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, unitTag, false),
                 ["roleIcon"] = UI:Texture(rhb, { LEFT, LEFT, 4, 0 }, { 16, 16 }, nil, 2, false),
