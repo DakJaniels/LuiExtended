@@ -3584,11 +3584,12 @@ function UnitFrames.CreateSettings()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupCombatStats.enabled and Settings.GroupCombatStats.showUltimate)
                 end,
             },
-            {
-                -- Header for Raid (12 player) settings
-                type = "header",
-                name = "Raid Frames (12 player)",
-            },
+            -- {
+            --     -- Header for Raid (12 player) settings
+            --     type = "header",
+            --     name = "Raid Frames (12 player)",
+            -- },
+            --[[ Raid ultimate icons commented out - no longer shown on raid frames
             {
                 -- Ultimate Icon Size (Raid)
                 type = "slider",
@@ -3610,6 +3611,8 @@ function UnitFrames.CreateSettings()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupCombatStats.enabled and Settings.GroupCombatStats.showUltimate)
                 end,
             },
+            ]] --
+            --[[
             {
                 -- Ultimate Icon Horizontal Offset (Raid)
                 type = "slider",
@@ -3652,6 +3655,7 @@ function UnitFrames.CreateSettings()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupCombatStats.enabled and Settings.GroupCombatStats.showUltimate)
                 end,
             },
+            ]] --
         },
     }
 
@@ -3766,6 +3770,7 @@ function UnitFrames.CreateSettings()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled)
                 end,
             },
+            --[[ Raid potion cooldown settings commented out - no longer shown on raid frames
             {
                 -- Header for Raid (12 player) settings
                 type = "header",
@@ -3834,6 +3839,7 @@ function UnitFrames.CreateSettings()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupPotionCooldowns.enabled)
                 end,
             },
+            ]] --
         },
     }
 

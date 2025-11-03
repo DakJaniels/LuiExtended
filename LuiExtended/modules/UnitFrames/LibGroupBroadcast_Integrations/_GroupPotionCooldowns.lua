@@ -37,6 +37,9 @@ local potionDataCache = {}
 local function AddPotionCooldownToFrame(frameData, isRaid)
     if not frameData or not frameData.control then return end
 
+    -- Only create for SmallGroup frames, not RaidGroup
+    if isRaid then return end
+
     local Settings = Shared.GetPotionCooldownSettings()
     if not Settings or not Settings.enabled then return end
 
@@ -65,22 +68,9 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
             container = UI:Control(frameData.control, nil, nil, false)
             frameData.libGroupContainer = container
 
-            -- If combat stats didn't create/position container, we need to do it
+            -- If combat stats didn't create/position container, position it (SmallGroup only)
             local healthBackdrop = Shared.GetHealthBackdrop(frameData)
-            if isRaid then
-                -- Raid: position container in the gap below health bar (to the right of resource bars)
-                local anchorTarget = Shared.GetRightmostResourceBar(frameData)
-                if anchorTarget then
-                    -- Anchor to right of resource bars in the bottom row
-                    container:SetAnchor(LEFT, anchorTarget, RIGHT, offsetX, 0)
-                else
-                    -- No resource bars - anchor to left edge below health bar
-                    container:SetAnchor(TOP, healthBackdrop, BOTTOM, offsetX, offsetY)
-                end
-            else
-                -- Small group: anchor to right of health bar (external)
-                container:SetAnchor(LEFT, healthBackdrop, RIGHT, offsetX, offsetY)
-            end
+            container:SetAnchor(LEFT, healthBackdrop, RIGHT, offsetX, offsetY)
         end
 
         -- Determine anchor target within container for horizontal flow
@@ -248,11 +238,27 @@ function GroupPotionCooldownsManager.SetupFrames()
     local Settings = Shared.GetPotionCooldownSettings()
     if not Settings or not Settings.enabled then return end
 
-    Shared.ForEachGroupFrame(function (unitTag, frameData, isRaid)
-        if not frameData.potionCooldown then
-            AddPotionCooldownToFrame(frameData, isRaid)
+    -- Determine which frame type is in use (matches logic from CustomFramesGroupUpdate)
+    local groupSize = GetGroupSize()
+    local useRaidFrames = false
+
+    if groupSize > 4 then
+        useRaidFrames = true
+    elseif not UnitFrames.CustomFrames["SmallGroup1"] or not UnitFrames.CustomFrames["SmallGroup1"].tlw then
+        -- No SmallGroup frames available, must use raid frames
+        useRaidFrames = true
+    end
+
+    -- Iterate over actual group members
+    for i = 1, groupSize do
+        local unitTag = GetGroupUnitTagByIndex(i)
+        if unitTag then
+            local frameData = Shared.GetFrameData(unitTag)
+            if frameData and not frameData.potionCooldown then
+                AddPotionCooldownToFrame(frameData, useRaidFrames)
+            end
         end
-    end)
+    end
 end
 
 -- Refresh all potion cooldown displays (called from settings)

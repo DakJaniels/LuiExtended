@@ -524,11 +524,15 @@ local function CreateRaidGroupFrames()
             -- Create container for LibGroupBroadcast integrations (positioned to right of health bar)
             local libGroupContainer = UI:Control(control, nil, nil, false)
 
+            -- Raid DPS/HPS and potion cooldowns commented out - only resource bars remain
+            --[[
             -- Create DPS/HPS stats label (will be repositioned to bottom row by GroupCombatStats)
             local statsLabel = UI:Label(control, nil, nil, { 0, 4 }, nil, "", false)
             statsLabel:SetDrawLayer(DL_OVERLAY)
             statsLabel:SetDrawLevel(15)
             statsLabel:SetHidden(true)
+            ]]
+            --
 
             -- Create resource bars (magicka and stamina) for LibGroupBroadcast integration
             local magBackdrop = UI:Backdrop(control, nil, nil, nil, nil, false)
@@ -562,7 +566,10 @@ local function CreateRaidGroupFrames()
                 ["dead"] = UI:Label(rhb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "Status", false),
                 ["leader"] = UI:Texture(rhb, { LEFT, LEFT, -2, 0 }, { 28, 28 }, nil, 2, false),
                 ["libGroupContainer"] = libGroupContainer,
+                -- Raid DPS/HPS commented out - only resource bars remain
+                --[[
                 ["statsLabel"] = statsLabel,
+                ]] --
                 ["resourceMagicka"] =
                 {
                     ["backdrop"] = magBackdrop,

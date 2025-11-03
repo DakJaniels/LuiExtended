@@ -337,17 +337,52 @@ function GroupResourcesManager.SetupFrames()
     local Settings = Shared.GetResourceSettings()
     if not Settings or not Settings.enabled then return end
 
-    Shared.ForEachGroupFrame(function (unitTag, frameData, isRaid)
-        AddResourceBarsToFrame(frameData, isRaid)
-        UpdateResourceBarLayout(frameData, isRaid)
-    end)
+    -- Determine which frame type is in use (matches logic from CustomFramesGroupUpdate)
+    local groupSize = GetGroupSize()
+    local useRaidFrames = false
+
+    if groupSize > 4 then
+        useRaidFrames = true
+    elseif not UnitFrames.CustomFrames["SmallGroup1"] or not UnitFrames.CustomFrames["SmallGroup1"].tlw then
+        -- No SmallGroup frames available, must use raid frames
+        useRaidFrames = true
+    end
+
+    -- Iterate over actual group members
+    for i = 1, groupSize do
+        local unitTag = GetGroupUnitTagByIndex(i)
+        if unitTag then
+            local frameData = Shared.GetFrameData(unitTag)
+            if frameData then
+                AddResourceBarsToFrame(frameData, useRaidFrames)
+                UpdateResourceBarLayout(frameData, useRaidFrames)
+            end
+        end
+    end
 end
 
 -- Update all resource bar layouts (called from menu)
 function GroupResourcesManager.UpdateAllLayouts()
-    Shared.ForEachGroupFrame(function (unitTag, frameData, isRaid)
-        UpdateResourceBarLayout(frameData, isRaid)
-    end)
+    -- Determine which frame type is in use
+    local groupSize = GetGroupSize()
+    local useRaidFrames = false
+
+    if groupSize > 4 then
+        useRaidFrames = true
+    elseif not UnitFrames.CustomFrames["SmallGroup1"] or not UnitFrames.CustomFrames["SmallGroup1"].tlw then
+        useRaidFrames = true
+    end
+
+    -- Iterate over actual group members
+    for i = 1, groupSize do
+        local unitTag = GetGroupUnitTagByIndex(i)
+        if unitTag then
+            local frameData = Shared.GetFrameData(unitTag)
+            if frameData then
+                UpdateResourceBarLayout(frameData, useRaidFrames)
+            end
+        end
+    end
 end
 
 -- Refresh colors on all bars

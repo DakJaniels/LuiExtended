@@ -1869,6 +1869,17 @@ function UnitFrames.CustomFramesGroupUpdate()
         end
     end
 
+    -- Setup LibGroupBroadcast integrations on active frames
+    if UnitFrames.GroupCombatStats then
+        UnitFrames.GroupCombatStats.SetupFrames()
+    end
+    if UnitFrames.GroupPotionCooldowns then
+        UnitFrames.GroupPotionCooldowns.SetupFrames()
+    end
+    if UnitFrames.GroupResources then
+        UnitFrames.GroupResources.SetupFrames()
+    end
+
     UnitFrames.OnLeaderUpdate(nil, nil)
 end
 
@@ -1884,6 +1895,36 @@ function UnitFrames.CustomFramesUnreferenceGroupControl(groupType, first)
         local unitTag = groupType .. i
         local frame = UnitFrames.CustomFrames[unitTag]
         if frame then
+            -- Hide LibGroupBroadcast integration elements when unreferencing SmallGroup frames
+            if groupType == "SmallGroup" then
+                -- Hide combat stats (ultimates, DPS/HPS)
+                if UnitFrames.GroupCombatStats then
+                    UnitFrames.GroupCombatStats.HideStats(unitTag)
+                end
+
+                -- Hide resource bars
+                if frame.resourceMagicka then
+                    if frame.resourceMagicka.backdrop then frame.resourceMagicka.backdrop:SetHidden(true) end
+                    if frame.resourceMagicka.bar then frame.resourceMagicka.bar:SetHidden(true) end
+                end
+                if frame.resourceStamina then
+                    if frame.resourceStamina.backdrop then frame.resourceStamina.backdrop:SetHidden(true) end
+                    if frame.resourceStamina.bar then frame.resourceStamina.bar:SetHidden(true) end
+                end
+
+                -- Hide potion cooldown
+                if frame.potionCooldown then
+                    if frame.potionCooldown.backdrop then frame.potionCooldown.backdrop:SetHidden(true) end
+                    if frame.potionCooldown.icon then frame.potionCooldown.icon:SetHidden(true) end
+                    if frame.potionCooldown.label then frame.potionCooldown.label:SetHidden(true) end
+                end
+
+                -- Hide container
+                if frame.libGroupContainer then
+                    frame.libGroupContainer:SetHidden(true)
+                end
+            end
+
             frame.unitTag = nil
             frame.control:SetHidden(true)
         end
@@ -2764,40 +2805,10 @@ local function applyIconSettings(unitFrame, unitTag, role, healthBackdrop)
 end
 
 -- Calculate additional width needed for LibGroupBroadcast integration icons (raid frames)
+-- Raid frames only show resource bars now, no integration icons
 local function GetRaidIntegrationWidth()
-    local totalWidth = 0
-    local iconCount = 0
-
-    -- Check for combat stats (ultimate icons)
-    local combatStatsSettings = UnitFrames.SV.GroupCombatStats
-    if combatStatsSettings and combatStatsSettings.enabled and combatStatsSettings.showUltimate then
-        local iconSize = combatStatsSettings.ultIconRaidSize or 22
-        local offsetX = combatStatsSettings.ultIconRaidOffsetX or 3
-        -- 2 ultimate icons (frontbar + backbar) with 3px spacing between them
-        totalWidth = offsetX + (iconSize * 2) + 3
-        iconCount = 2
-    end
-
-    -- Check for potion cooldowns
-    local potionSettings = UnitFrames.SV.GroupPotionCooldowns
-    if potionSettings and potionSettings.enabled then
-        local iconSize = potionSettings.potionIconRaidSize or 20
-        -- If combat stats are enabled, match their icon size for consistency
-        if combatStatsSettings and combatStatsSettings.enabled and combatStatsSettings.showUltimate then
-            iconSize = combatStatsSettings.ultIconRaidSize or 22
-        end
-
-        if iconCount > 0 then
-            -- Add spacing + potion icon width
-            totalWidth = totalWidth + 3 + iconSize
-        else
-            -- First icon, add offset + icon width
-            local offsetX = potionSettings.potionIconRaidOffsetX or 3
-            totalWidth = offsetX + iconSize
-        end
-    end
-
-    return totalWidth
+    -- No integration icons on raid frames anymore (only resource bars)
+    return 0
 end
 
 function UnitFrames.CustomFramesApplyLayoutRaid(unhide)
@@ -2806,7 +2817,7 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide)
     end
 
     local spacerHeight = 3
-    local frameSpacing = 8 -- Vertical spacing between each frame for integration elements
+    local frameSpacing = 2 -- Vertical spacing between each frame (reduced from 8 since no integration icons)
 
     -- Add extra height for resource bars if enabled
     local resourceBarsHeight = 0

@@ -31,6 +31,9 @@ local isPlayerInCombat = false
 local function AddCombatStatsToFrame(frameData, isRaid)
     if not frameData or not frameData.control then return end
 
+    -- Only create for SmallGroup frames, not RaidGroup
+    if isRaid then return end
+
     local Settings = Shared.GetCombatStatsSettings()
     if not Settings or not Settings.enabled then return end
 
@@ -54,21 +57,8 @@ local function AddCombatStatsToFrame(frameData, isRaid)
                 frameData.libGroupContainer = container
             end
 
-            -- Position container in the spacing gap below health bar
-            if isRaid then
-                -- Raid: position container in the gap below health bar (to the right of resource bars)
-                local anchorTarget = Shared.GetRightmostResourceBar(frameData)
-                if anchorTarget then
-                    -- Anchor to right of resource bars in the bottom row
-                    container:SetAnchor(LEFT, anchorTarget, RIGHT, offsetX, 0)
-                else
-                    -- No resource bars - anchor to left edge below health bar
-                    container:SetAnchor(TOP, backdrop, BOTTOM, offsetX, offsetY)
-                end
-            else
-                -- Small group: anchor to right of health bar (external)
-                container:SetAnchor(LEFT, backdrop, RIGHT, offsetX, offsetY)
-            end
+            -- Position container to right of health bar (SmallGroup only)
+            container:SetAnchor(LEFT, backdrop, RIGHT, offsetX, offsetY)
 
             -- FRONTBAR ULT (ult1)
             frameData.combatStats.ult1Backdrop = UI:Backdrop(container, { LEFT, LEFT }, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
@@ -89,26 +79,15 @@ local function AddCombatStatsToFrame(frameData, isRaid)
             frameData.combatStats.ult2Icon:SetHidden(true)
         end
 
-        -- DPS/HPS text label
+        -- DPS/HPS text label (SmallGroup only)
         if Settings.showDPS or Settings.showHPS then
-            local fontSize = isRaid and 11 or 14
+            local fontSize = 14
 
-            if isRaid then
-                -- Raid: use pre-created statsLabel and reposition to bottom row, right of icons
-                frameData.combatStats.statsLabel = frameData.statsLabel
-                if frameData.combatStats.statsLabel then
-                    frameData.combatStats.statsLabel:ClearAnchors()
-                    -- Anchor to right of the icon container (container is already bottom-aligned)
-                    local anchorTarget = frameData.libGroupContainer or backdrop
-                    frameData.combatStats.statsLabel:SetAnchor(LEFT, anchorTarget, RIGHT, 4, 0)
-                end
-            else
-                -- Small group: anchor below health bar on right
-                frameData.combatStats.statsLabel = UI:Label(backdrop, { TOPRIGHT, BOTTOMRIGHT, -2, 2 }, nil, { 0, 4 }, nil, "", false)
-                frameData.combatStats.statsLabel:SetDrawLayer(DL_OVERLAY)
-                frameData.combatStats.statsLabel:SetDrawLevel(15)
-                frameData.combatStats.statsLabel:SetHidden(true)
-            end
+            -- Small group: anchor below health bar on right
+            frameData.combatStats.statsLabel = UI:Label(backdrop, { TOPRIGHT, BOTTOMRIGHT, -2, 2 }, nil, { 0, 4 }, nil, "", false)
+            frameData.combatStats.statsLabel:SetDrawLayer(DL_OVERLAY)
+            frameData.combatStats.statsLabel:SetDrawLevel(15)
+            frameData.combatStats.statsLabel:SetHidden(true)
 
             -- Apply font
             local rootSettings = Shared.GetSettings()
@@ -363,11 +342,27 @@ function GroupCombatStatsManager.SetupFrames()
     local Settings = Shared.GetCombatStatsSettings()
     if not Settings or not Settings.enabled then return end
 
-    Shared.ForEachGroupFrame(function (unitTag, frameData, isRaid)
-        if not frameData.combatStats then
-            AddCombatStatsToFrame(frameData, isRaid)
+    -- Determine which frame type is in use (matches logic from CustomFramesGroupUpdate)
+    local groupSize = GetGroupSize()
+    local useRaidFrames = false
+
+    if groupSize > 4 then
+        useRaidFrames = true
+    elseif not UnitFrames.CustomFrames["SmallGroup1"] or not UnitFrames.CustomFrames["SmallGroup1"].tlw then
+        -- No SmallGroup frames available, must use raid frames
+        useRaidFrames = true
+    end
+
+    -- Iterate over actual group members
+    for i = 1, groupSize do
+        local unitTag = GetGroupUnitTagByIndex(i)
+        if unitTag then
+            local frameData = Shared.GetFrameData(unitTag)
+            if frameData and not frameData.combatStats then
+                AddCombatStatsToFrame(frameData, useRaidFrames)
+            end
         end
-    end)
+    end
 end
 
 -- Refresh all combat stat displays (called from settings)
