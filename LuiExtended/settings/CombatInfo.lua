@@ -30,6 +30,7 @@ local globalIconOptions = { "All Crowd Control", "NPC CC Only", "Player CC Only"
 local globalIconOptionsKeys = { ["All Crowd Control"] = 1, ["NPC CC Only"] = 2, ["Player CC Only"] = 3 }
 
 local Blacklist, BlacklistValues = {}, {}
+local DurationOverridesList, DurationOverridesListValues = {}, {}
 
 local ACTION_RESULT_AREA_EFFECT = 669966
 
@@ -1270,6 +1271,127 @@ function CombatInfo.CreateSettings()
                     LUIE_BlacklistCastbar:UpdateChoices(GenerateCustomList(Settings.blacklist))
                 end,
                 reference = "LUIE_BlacklistCastbar",
+            },
+        },
+    }
+
+    -- Combat Info - Duration Override Options Submenu
+    optionsDataCombatInfo[#optionsDataCombatInfo + 1] =
+    {
+        type = "submenu",
+        name = "Ability Duration Overrides",
+        controls =
+        {
+            {
+                type = "description",
+                text = "Override ability durations. Useful when the game API reports the wrong duration for abilities with multiple effects.",
+            },
+            {
+                -- Select Ability to Override
+                type = "dropdown",
+                name = "Select Ability",
+                tooltip = "Select an ability from your currently tracked abilities to override its duration",
+                choices = DurationOverridesList,
+                choicesValues = DurationOverridesListValues,
+                scrollable = 10,
+                sort = "name-up",
+                getFunc = function ()
+                    LUIE_DurationOverrideSelect:UpdateChoices(CombatInfo.GetTrackedAbilitiesForOverride())
+                    return Settings.selectedAbilityForDurationOverride or 0
+                end,
+                setFunc = function (value)
+                    Settings.selectedAbilityForDurationOverride = value
+                    -- Update the duration field to show current duration
+                    if Settings.durationOverrides[value] then
+                        Settings.tempDurationOverrideValue = tostring(Settings.durationOverrides[value])
+                    else
+                        local duration = GetAbilityDuration(value)
+                        Settings.tempDurationOverrideValue = duration > 0 and tostring(duration) or ""
+                    end
+                    LUIE_DurationOverrideEditbox:UpdateValue()
+                end,
+                reference = "LUIE_DurationOverrideSelect",
+            },
+            {
+                -- Duration Override Value
+                type = "editbox",
+                name = "Duration (milliseconds)",
+                tooltip = "Set the duration for the selected ability in milliseconds\nExample: 15000 for 15 seconds",
+                getFunc = function ()
+                    return Settings.tempDurationOverrideValue or ""
+                end,
+                setFunc = function (value)
+                    Settings.tempDurationOverrideValue = value
+                end,
+                isMultiline = false,
+                width = "half",
+                reference = "LUIE_DurationOverrideEditbox",
+                disabled = function ()
+                    return not Settings.selectedAbilityForDurationOverride or Settings.selectedAbilityForDurationOverride == 0
+                end,
+            },
+            {
+                -- Apply Duration Override
+                type = "button",
+                name = "Apply Override",
+                tooltip = "Apply the duration override for the selected ability",
+                func = function ()
+                    local abilityId = Settings.selectedAbilityForDurationOverride
+                    local durationStr = Settings.tempDurationOverrideValue
+
+                    if not abilityId or abilityId == 0 then
+                        LUIE.PrintToChat("CombatInfo: Please select an ability first", true)
+                        return
+                    end
+
+                    local duration = tonumber(durationStr)
+                    if not duration or duration <= 0 then
+                        LUIE.PrintToChat("CombatInfo: Invalid duration. Must be a positive number", true)
+                        return
+                    end
+
+                    -- Use the module function to add the override
+                    CombatInfo.AddDurationOverride(string.format("%d %d", abilityId, duration))
+
+                    -- Update the remove dropdown
+                    LUIE_DurationOverrideRemove:UpdateChoices(GenerateCustomList(Settings.durationOverrides))
+                end,
+                width = "half",
+                disabled = function ()
+                    return not Settings.selectedAbilityForDurationOverride or Settings.selectedAbilityForDurationOverride == 0
+                end,
+            },
+            {
+                -- Duration Override List (Remove)
+                type = "dropdown",
+                name = "Remove Override",
+                tooltip = "Select an override to remove",
+                choices = {},
+                choicesValues = {},
+                scrollable = 7,
+                sort = "name-up",
+                getFunc = function ()
+                    LUIE_DurationOverrideRemove:UpdateChoices(GenerateCustomList(Settings.durationOverrides))
+                end,
+                setFunc = function (value)
+                    CombatInfo.RemoveDurationOverride(value)
+                    LUIE_DurationOverrideRemove:UpdateChoices(GenerateCustomList(Settings.durationOverrides))
+                    LUIE_DurationOverrideSelect:UpdateChoices(CombatInfo.GetTrackedAbilitiesForOverride())
+                end,
+                reference = "LUIE_DurationOverrideRemove",
+            },
+            {
+                -- Clear All Duration Overrides
+                type = "button",
+                name = "Clear All Overrides",
+                tooltip = "Remove all custom duration overrides",
+                func = function ()
+                    CombatInfo.ClearDurationOverrides()
+                    LUIE_DurationOverrideRemove:UpdateChoices(GenerateCustomList(Settings.durationOverrides))
+                    LUIE_DurationOverrideSelect:UpdateChoices(CombatInfo.GetTrackedAbilitiesForOverride())
+                end,
+                width = "half",
+                warning = "This will remove ALL duration overrides!",
             },
         },
     }

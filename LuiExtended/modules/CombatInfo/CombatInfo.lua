@@ -25,6 +25,8 @@ local sceneManager = SCENE_MANAGER
 local windowManager = GetWindowManager()
 local animationManager = GetAnimationManager()
 local ACTION_RESULT_AREA_EFFECT = 669966
+local GetActionSlotEffectDuration = GetActionSlotEffectDuration
+local GetActionSlotEffectTimeRemaining = GetActionSlotEffectTimeRemaining
 
 local moduleName = LUIE.name .. "CombatInfo"
 
@@ -55,6 +57,7 @@ CombatInfo.Enabled = false
 CombatInfo.Defaults =
 {
     blacklist = {},
+    durationOverrides = {},
     GlobalShowGCD = false,
     GlobalPotion = false,
     GlobalFlash = true,
@@ -487,6 +490,256 @@ local KEYBOARD_CONSTANTS =
 }
 
 
+-- Force enable default action bar timers to get EVENT_ACTION_SLOT_EFFECT_UPDATE data
+function CombatInfo.SetActionBarTimersEnabled()
+    if tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS)) == 0 then
+        SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS, "true")
+    end
+end
+
+-- Disable default timer display on all action buttons to prevent double timers
+function CombatInfo.DisableZOSTimerDisplay()
+    for slotNum = BAR_INDEX_START, BAR_INDEX_END do
+        local actionButton = ZO_ActionBar_GetButton(slotNum)
+        if actionButton then
+            actionButton.showTimer = false
+            actionButton.timerText:SetHidden(true)
+            actionButton.timerOverlay:SetHidden(true)
+        end
+    end
+
+    -- Also disable on backbar buttons
+    for i = BAR_INDEX_START + BACKBAR_INDEX_OFFSET, BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET do
+        local button = g_backbarButtons[i]
+        if button then
+            button.showTimer = false
+            button.timerText:SetHidden(true)
+            button.timerOverlay:SetHidden(true)
+        end
+    end
+end
+
+-- Handle default action slot effect updates to get duration data for abilities without custom data
+function CombatInfo.OnActionSlotEffectUpdated(eventCode, hotbarCategory, actionSlotIndex)
+    -- -- Debug: Log that the event fired
+    -- if LUIE.IsDevDebugEnabled() then
+    --     LUIE.Debug(string.format("CombatInfo: EVENT_ACTION_SLOT_EFFECT_UPDATE fired - slot %d, hotbar %s", actionSlotIndex, hotbarCategory == HOTBAR_CATEGORY_PRIMARY and "PRIMARY" or "BACKUP"))
+    -- end
+
+    -- Only process if this is a primary or backup hotbar (ignore special bars)
+    if hotbarCategory ~= HOTBAR_CATEGORY_PRIMARY and hotbarCategory ~= HOTBAR_CATEGORY_BACKUP then
+        -- if LUIE.IsDevDebugEnabled() then
+        --     LUIE.Debug("CombatInfo: Ignoring event for special hotbar")
+        -- end
+        return
+    end
+
+    local abilityId = GetSlotTrueBoundId(actionSlotIndex, hotbarCategory)
+    if not abilityId or abilityId == 0 then
+        -- if LUIE.IsDevDebugEnabled() then
+        --     LUIE.Debug("CombatInfo: No ability ID found for slot")
+        -- end
+        return
+    end
+
+    -- Get duration data from game API
+    local duration = GetActionSlotEffectDuration(actionSlotIndex, hotbarCategory)
+    -- if LUIE.IsDevDebugEnabled() then
+    --     LUIE.Debug(string.format("CombatInfo: Got duration %d ms for ability %d", duration, abilityId))
+    -- end
+
+    if duration > 1 and duration < 1000000 then -- Reasonable duration bounds
+        -- If an override already exists for this ability, skip default updates entirely
+        -- User-set overrides take absolute priority
+        if g_barDurationOverride[abilityId] then
+            -- if LUIE.IsDevDebugEnabled() then
+            --     LUIE.Debug(string.format("CombatInfo: Skipping default update for ability %d - using override duration %d ms", abilityId, g_barDurationOverride[abilityId]))
+            -- end
+            return
+        end
+
+        local remain = GetActionSlotEffectTimeRemaining(actionSlotIndex, hotbarCategory) / 1000
+
+        -- Determine the internal slot number for this hotbar/slot combination
+        local internalSlotNum = actionSlotIndex
+        if hotbarCategory == HOTBAR_CATEGORY_BACKUP then
+            internalSlotNum = internalSlotNum + BACKBAR_INDEX_OFFSET
+        end
+
+        -- If we have an active effect for this ability, update its duration
+        if g_toggledSlotsRemain[abilityId] then
+            -- Update the remaining time for our custom effect tracking
+            g_toggledSlotsRemain[abilityId] = timeMs() + (remain * 1000)
+
+            -- Update any active UI elements
+            local frontSlot = g_toggledSlotsFront[abilityId]
+            local backSlot = g_toggledSlotsBack[abilityId]
+
+            if frontSlot and g_uiCustomToggle[frontSlot] then
+                CombatInfo.ShowSlot(frontSlot, abilityId, timeMs(), false)
+            end
+            if backSlot and g_uiCustomToggle[backSlot] then
+                CombatInfo.ShowSlot(backSlot, abilityId, timeMs(), false)
+            end
+
+            -- if LUIE.IsDevDebugEnabled() then
+            --     LUIE.Debug(string.format("CombatInfo: Updated active effect for ability %d, remaining: %.1f", abilityId, remain))
+            -- end
+        else
+            -- This ability is showing an effect but not tracked by CombatInfo
+            -- Register it for tracking if it should show a toggle effect
+            if CombatInfo.SV.ShowToggled then
+                local duration_ms = GetUpdatedAbilityDuration(abilityId)
+                if duration_ms > 0 then
+                    -- Register the ability for tracking
+                    if hotbarCategory == HOTBAR_CATEGORY_BACKUP then
+                        g_toggledSlotsBack[abilityId] = internalSlotNum
+                    else
+                        g_toggledSlotsFront[abilityId] = internalSlotNum
+                    end
+
+                    -- Set the remaining time
+                    g_toggledSlotsRemain[abilityId] = timeMs() + (remain * 1000)
+
+                    -- Show the slot
+                    CombatInfo.ShowSlot(internalSlotNum, abilityId, timeMs(), false)
+
+                    -- if LUIE.IsDevDebugEnabled() then
+                    --     LUIE.Debug(string.format("CombatInfo: Registered new active effect for ability %d on %s slot %d", abilityId, hotbarCategory == HOTBAR_CATEGORY_BACKUP and "BACKUP" or "PRIMARY", internalSlotNum))
+                    -- end
+                end
+            end
+
+            -- Store the duration for future use in our override table
+            if not g_barDurationOverride[abilityId] then
+                g_barDurationOverride[abilityId] = duration
+
+                -- Debug output
+                local abilityName = getAbilityName(abilityId) or "Unknown"
+                LUIE.Debug(string.format("CombatInfo: Learned duration %d ms for ability %d (%s)", duration, abilityId, abilityName))
+                -- else
+                --     if LUIE.IsDevDebugEnabled() then
+                --         LUIE.Debug(string.format("CombatInfo: Already have custom duration for ability %d", abilityId))
+                --     end
+            end
+        end
+        -- else
+        --     if LUIE.IsDevDebugEnabled() then
+        --         LUIE.Debug(string.format("CombatInfo: Duration %d out of bounds for ability %d", duration, abilityId))
+        --     end
+    end
+end
+
+-- Duration Override Management Functions
+
+-- Get list of all currently tracked abilities for the dropdown
+function CombatInfo.GetTrackedAbilitiesForOverride()
+    local abilities = {}
+    local choices = {}
+    local choicesValues = {}
+
+    -- Collect all unique ability IDs from learned overrides
+    for abilityId, duration in pairs(CombatInfo.SV.durationOverrides) do
+        if not abilities[abilityId] then
+            abilities[abilityId] = true
+        end
+    end
+
+    -- Build the choices/values arrays
+    local counter = 0
+    for abilityId, _ in pairs(abilities) do
+        counter = counter + 1
+        local abilityName = getAbilityName(abilityId) or "Unknown Ability"
+        local icon = GetAbilityIcon(abilityId)
+        local currentDuration = CombatInfo.SV.durationOverrides[abilityId] or GetAbilityDuration(abilityId) or 0
+
+        choices[counter] = zo_iconFormat(icon, 16, 16) .. " [" .. abilityId .. "] " .. abilityName .. string.format(" (%d ms)", currentDuration)
+        choicesValues[counter] = abilityId
+    end
+
+    return choices, choicesValues
+end
+
+function CombatInfo.ClearDurationOverrides()
+    for k, v in pairs(CombatInfo.SV.durationOverrides) do
+        CombatInfo.SV.durationOverrides[k] = nil
+    end
+    ZO_GetChatSystem():Maximize()
+    ZO_GetChatSystem().primaryContainer:FadeIn()
+    printToChat("CombatInfo: Cleared all custom duration overrides", true)
+end
+
+function CombatInfo.AddDurationOverride(input)
+    local parts = {}
+    for part in string.gmatch(input, "%S+") do
+        table.insert(parts, part)
+    end
+
+    if #parts ~= 2 then
+        ZO_GetChatSystem():Maximize()
+        ZO_GetChatSystem().primaryContainer:FadeIn()
+        printToChat("CombatInfo: Invalid format. Use: <abilityId> <durationMs>", true)
+        return
+    end
+
+    local abilityId = tonumber(parts[1])
+    local duration = tonumber(parts[2])
+
+    if not abilityId or not duration or abilityId <= 0 or duration <= 0 then
+        ZO_GetChatSystem():Maximize()
+        ZO_GetChatSystem().primaryContainer:FadeIn()
+        printToChat("CombatInfo: Invalid ability ID or duration. Both must be positive numbers.", true)
+        return
+    end
+
+    local abilityName = getAbilityName(abilityId) or "Unknown Ability"
+    CombatInfo.SV.durationOverrides[abilityId] = duration
+
+    ZO_GetChatSystem():Maximize()
+    ZO_GetChatSystem().primaryContainer:FadeIn()
+    printToChat(string.format("CombatInfo: Added duration override for %s (%d): %d ms", abilityName, abilityId, duration), true)
+end
+
+function CombatInfo.RemoveDurationOverride(input)
+    local abilityId = tonumber(input)
+    if not abilityId or abilityId <= 0 then
+        ZO_GetChatSystem():Maximize()
+        ZO_GetChatSystem().primaryContainer:FadeIn()
+        printToChat("CombatInfo: Invalid ability ID. Must be a positive number.", true)
+        return
+    end
+
+    if not CombatInfo.SV.durationOverrides[abilityId] then
+        ZO_GetChatSystem():Maximize()
+        ZO_GetChatSystem().primaryContainer:FadeIn()
+        printToChat(string.format("CombatInfo: No duration override found for ability ID %d", abilityId), true)
+        return
+    end
+
+    local abilityName = getAbilityName(abilityId) or "Unknown Ability"
+    local duration = CombatInfo.SV.durationOverrides[abilityId]
+    CombatInfo.SV.durationOverrides[abilityId] = nil
+
+    ZO_GetChatSystem():Maximize()
+    ZO_GetChatSystem().primaryContainer:FadeIn()
+    printToChat(string.format("CombatInfo: Removed duration override for %s (%d): %d ms", abilityName, abilityId, duration), true)
+end
+
+function CombatInfo.ListDurationOverrides()
+    local count = 0
+    for abilityId, duration in pairs(CombatInfo.SV.durationOverrides) do
+        count = count + 1
+        local abilityName = getAbilityName(abilityId) or "Unknown Ability"
+        printToChat(string.format("CombatInfo: %s (%d): %d ms", abilityName, abilityId, duration), true)
+    end
+
+    if count == 0 then
+        printToChat("CombatInfo: No duration overrides configured", true)
+    else
+        printToChat(string.format("CombatInfo: Total duration overrides: %d", count), true)
+    end
+end
+
 -- Set Marker - Called by the menu & EVENT_PLAYER_ACTIVATED (needs to be reset on the player changing zones)
 --- @param removeMarker boolean? Remove the marker by making an empty dummy marker (only called from the menu toggle)
 function CombatInfo.SetMarker(removeMarker)
@@ -772,8 +1025,12 @@ function CombatInfo.UpdateBarHighlightTables()
     g_toggledSlotsPlayer = {}
     g_barOverrideCI = {}
     g_barFakeAura = {}
-    g_barDurationOverride = {}
     g_barNoRemove = {}
+
+    -- Set up g_barDurationOverride to reference the SV table FIRST
+    -- This ensures user-set overrides are never lost or overwritten
+    g_barDurationOverride = CombatInfo.SV.durationOverrides or {}
+    CombatInfo.SV.durationOverrides = g_barDurationOverride
 
     if CombatInfo.SV.ShowTriggered or CombatInfo.SV.ShowToggled then
         -- Grab any aura's from the list that have on EVENT_COMBAT_EVENT AURA support
@@ -781,7 +1038,8 @@ function CombatInfo.UpdateBarHighlightTables()
             if value.showFakeAura == true then
                 if value.newId then
                     g_barOverrideCI[value.newId] = true
-                    if value.duration then
+                    -- Only add static duration if no override exists (don't overwrite user values)
+                    if value.duration and not g_barDurationOverride[value.newId] then
                         g_barDurationOverride[value.newId] = value.duration
                     end
                     if value.noRemove then
@@ -790,7 +1048,8 @@ function CombatInfo.UpdateBarHighlightTables()
                     g_barFakeAura[value.newId] = true
                 else
                     g_barOverrideCI[abilityId] = true
-                    if value.duration then
+                    -- Only add static duration if no override exists (don't overwrite user values)
+                    if value.duration and not g_barDurationOverride[abilityId] then
                         g_barDurationOverride[abilityId] = value.duration
                     end
                     if value.noRemove then
@@ -878,6 +1137,9 @@ function CombatInfo.RegisterCombatInfo()
         eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_UPDATED, CombatInfo.OnSlotUpdated)
         eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_WEAPON_PAIR_CHANGED, CombatInfo.OnActiveWeaponPairChanged)
         eventManager:RegisterForEvent(moduleName, EVENT_WEAPON_PAIR_LOCK_CHANGED, CombatInfo.OnActiveWeaponPairChanged)
+
+        -- Register for default action slot effect updates to get duration data for abilities without custom data
+        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_EFFECT_UPDATE, CombatInfo.OnActionSlotEffectUpdated)
     end
     if CombatInfo.SV.ShowTriggered or CombatInfo.SV.ShowToggled then
         eventManager:RegisterForEvent(moduleName, EVENT_UNIT_DEATH_STATE_CHANGED, CombatInfo.OnDeath)
@@ -972,6 +1234,17 @@ end
 function CombatInfo.OnPlayerActivated(eventCode)
     -- do not call this function for the second time
     eventManager:UnregisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED)
+
+    -- Enable default action bar timers to get EVENT_ACTION_SLOT_EFFECT_UPDATE data
+    -- Must be done after player activation like FancyActionBar does
+    if CombatInfo.SV.ShowTriggered or CombatInfo.SV.ShowToggled then
+        if not IsConsoleUI() then
+            CombatInfo.SetActionBarTimersEnabled()
+            -- if LUIE.IsDevDebugEnabled() then
+            --     LUIE.Debug("CombatInfo: Enabled default action bar timers for duration data collection")
+            -- end
+        end
+    end
 
     -- Manually trigger event to update stats
     g_hotbarCategory = GetActiveHotbarCategory()
@@ -1593,7 +1866,12 @@ function CombatInfo.OnEffectChanged(eventCode, changeType, effectSlot, effectNam
                 g_toggledSlotsPlayer[abilityId] = true
                 local currentTimeST = timeMs()
                 if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
-                    g_toggledSlotsRemain[abilityId] = 1000 * endTime
+                    -- Use override duration if it exists, otherwise use default api endTime
+                    if g_barDurationOverride[abilityId] then
+                        g_toggledSlotsRemain[abilityId] = currentTimeST + g_barDurationOverride[abilityId]
+                    else
+                        g_toggledSlotsRemain[abilityId] = 1000 * endTime
+                    end
                     g_toggledSlotsStack[abilityId] = stackCount
                     if g_toggledSlotsFront[abilityId] then
                         local slotNum = g_toggledSlotsFront[abilityId]
@@ -1774,7 +2052,12 @@ function CombatInfo.OnEffectChanged(eventCode, changeType, effectSlot, effectNam
                 if Effects.IsGrimFocus[abilityId] or Effects.IsBloodFrenzy[abilityId] then
                     g_toggledSlotsRemain[abilityId] = currentTimeMs + 90000000
                 else
-                    g_toggledSlotsRemain[abilityId] = 1000 * endTime
+                    -- Use override duration if it exists, otherwise use default api endTime
+                    if g_barDurationOverride[abilityId] then
+                        g_toggledSlotsRemain[abilityId] = currentTimeMs + g_barDurationOverride[abilityId]
+                    else
+                        g_toggledSlotsRemain[abilityId] = 1000 * endTime
+                    end
                 end
                 g_toggledSlotsStack[abilityId] = stackCount
                 if g_toggledSlotsFront[abilityId] then
@@ -3152,6 +3435,11 @@ function CombatInfo.Initialize(enabled)
 
     CombatInfo.BackbarSetupTemplate()
     CombatInfo.BackbarToggleSettings()
+
+    -- Disable default timers on backbar buttons too
+    if CombatInfo.SV.ShowTriggered or CombatInfo.SV.ShowToggled then
+        CombatInfo.DisableZOSTimerDisplay()
+    end
     -------------------------------------------------------------------------------------
 
     CombatInfo.RegisterCombatInfo()
