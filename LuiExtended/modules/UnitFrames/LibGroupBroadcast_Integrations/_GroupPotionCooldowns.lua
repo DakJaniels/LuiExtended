@@ -220,13 +220,13 @@ function GroupPotionCooldownsManager.Initialize()
         EVENT_MANAGER:RegisterForUpdate("LUIE_GroupPotionCooldowns_Update", 1000, function ()
             if not IsUnitGrouped("player") then return end
 
-            -- Use our cached data instead of querying the buggy library method
-            for unitTag, potionData in pairs(potionDataCache) do
-                local frameData = Shared.GetFrameData(unitTag)
-                if potionData and frameData and frameData.potionCooldown then
+            -- Iterate over active group members and update from cache
+            Shared.ForEachActiveGroupMember(function (unitTag, frameData)
+                local potionData = potionDataCache[unitTag]
+                if potionData and frameData.potionCooldown then
                     UpdatePotionCooldownDisplay(unitTag, potionData)
                 end
-            end
+            end)
         end)
     end
 
@@ -238,27 +238,21 @@ function GroupPotionCooldownsManager.SetupFrames()
     local Settings = Shared.GetPotionCooldownSettings()
     if not Settings or not Settings.enabled then return end
 
-    -- Determine which frame type is in use (matches logic from CustomFramesGroupUpdate)
-    local groupSize = GetGroupSize()
-    local useRaidFrames = false
-
-    if groupSize > 4 then
-        useRaidFrames = true
-    elseif not UnitFrames.CustomFrames["SmallGroup1"] or not UnitFrames.CustomFrames["SmallGroup1"].tlw then
-        -- No SmallGroup frames available, must use raid frames
-        useRaidFrames = true
-    end
-
-    -- Iterate over actual group members
-    for i = 1, groupSize do
-        local unitTag = GetGroupUnitTagByIndex(i)
+    -- Use shared frame setup helper with unhide callback
+    Shared.SetupIntegrationFrames("potionCooldown", AddPotionCooldownToFrame, function (frameData)
+        -- Unhide container when reusing SmallGroup frames
+        if frameData.libGroupContainer then
+            frameData.libGroupContainer:SetHidden(false)
+        end
+        -- Request fresh data from cache
+        local unitTag = frameData.unitTag
         if unitTag then
-            local frameData = Shared.GetFrameData(unitTag)
-            if frameData and not frameData.potionCooldown then
-                AddPotionCooldownToFrame(frameData, useRaidFrames)
+            local potionData = potionDataCache[unitTag]
+            if potionData then
+                UpdatePotionCooldownDisplay(unitTag, potionData)
             end
         end
-    end
+    end)
 end
 
 -- Refresh all potion cooldown displays (called from settings)
@@ -266,11 +260,11 @@ function GroupPotionCooldownsManager.RefreshAll()
     if not lgpc then return end
     if not IsUnitGrouped("player") then return end
 
-    -- Use our cached data instead of querying the buggy library method
-    for unitTag, potionData in pairs(potionDataCache) do
-        local frameData = Shared.GetFrameData(unitTag)
-        if potionData and frameData and frameData.potionCooldown then
+    -- Iterate over active group members and update from cache
+    Shared.ForEachActiveGroupMember(function (unitTag, frameData)
+        local potionData = potionDataCache[unitTag]
+        if potionData and frameData.potionCooldown then
             UpdatePotionCooldownDisplay(unitTag, potionData)
         end
-    end
+    end)
 end

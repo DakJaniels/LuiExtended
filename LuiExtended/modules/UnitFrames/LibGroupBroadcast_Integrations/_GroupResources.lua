@@ -315,18 +315,15 @@ function GroupResourcesManager.Initialize()
         local now = GetGameTimeMilliseconds()
         local timeout = currentSettings.hideResourceBarsTimeout * 1000
 
-        for i = 1, GetGroupSize() do
-            local unitTag = GetGroupUnitTagByIndex(i)
-            local frameData = Shared.GetFrameData(unitTag)
-            if unitTag and frameData then
-                local magLast = GroupResources:GetLastMagickaUpdateTime(unitTag)
-                local stamLast = GroupResources:GetLastStaminaUpdateTime(unitTag)
+        -- Iterate over active group members
+        Shared.ForEachActiveGroupMember(function (unitTag, frameData)
+            local magLast = GroupResources:GetLastMagickaUpdateTime(unitTag)
+            local stamLast = GroupResources:GetLastStaminaUpdateTime(unitTag)
 
-                if (now - magLast > timeout) and (now - stamLast > timeout) then
-                    HideResourceBars(unitTag)
-                end
+            if (now - magLast > timeout) and (now - stamLast > timeout) then
+                HideResourceBars(unitTag)
             end
-        end
+        end)
     end)
 
     isInitialized = true
@@ -337,52 +334,26 @@ function GroupResourcesManager.SetupFrames()
     local Settings = Shared.GetResourceSettings()
     if not Settings or not Settings.enabled then return end
 
-    -- Determine which frame type is in use (matches logic from CustomFramesGroupUpdate)
-    local groupSize = GetGroupSize()
-    local useRaidFrames = false
+    local useRaidFrames = Shared.DetermineFrameType()
 
-    if groupSize > 4 then
-        useRaidFrames = true
-    elseif not UnitFrames.CustomFrames["SmallGroup1"] or not UnitFrames.CustomFrames["SmallGroup1"].tlw then
-        -- No SmallGroup frames available, must use raid frames
-        useRaidFrames = true
-    end
+    -- Iterate over active group members
+    Shared.ForEachActiveGroupMember(function (unitTag, frameData)
+        AddResourceBarsToFrame(frameData, useRaidFrames)
+        UpdateResourceBarLayout(frameData, useRaidFrames)
 
-    -- Iterate over actual group members
-    for i = 1, groupSize do
-        local unitTag = GetGroupUnitTagByIndex(i)
-        if unitTag then
-            local frameData = Shared.GetFrameData(unitTag)
-            if frameData then
-                AddResourceBarsToFrame(frameData, useRaidFrames)
-                UpdateResourceBarLayout(frameData, useRaidFrames)
-            end
-        end
-    end
+        -- Bars will be shown/hidden by update callbacks based on actual resource data
+        -- This ensures they're ready to be displayed when data arrives
+    end)
 end
 
 -- Update all resource bar layouts (called from menu)
 function GroupResourcesManager.UpdateAllLayouts()
-    -- Determine which frame type is in use
-    local groupSize = GetGroupSize()
-    local useRaidFrames = false
+    local useRaidFrames = Shared.DetermineFrameType()
 
-    if groupSize > 4 then
-        useRaidFrames = true
-    elseif not UnitFrames.CustomFrames["SmallGroup1"] or not UnitFrames.CustomFrames["SmallGroup1"].tlw then
-        useRaidFrames = true
-    end
-
-    -- Iterate over actual group members
-    for i = 1, groupSize do
-        local unitTag = GetGroupUnitTagByIndex(i)
-        if unitTag then
-            local frameData = Shared.GetFrameData(unitTag)
-            if frameData then
-                UpdateResourceBarLayout(frameData, useRaidFrames)
-            end
-        end
-    end
+    -- Iterate over active group members
+    Shared.ForEachActiveGroupMember(function (unitTag, frameData)
+        UpdateResourceBarLayout(frameData, useRaidFrames)
+    end)
 end
 
 -- Refresh colors on all bars
@@ -399,7 +370,7 @@ function GroupResourcesManager.GetResourceBarsHeight(isRaid)
 
     if isRaid then
         -- Raid: inset bars don't add extra height (they're inside the health frame)
-        return 0
+        return 2
     else
         -- Small group: stacked bars add height
         local barHeight = Settings.groupBarHeight

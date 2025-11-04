@@ -1128,7 +1128,7 @@ function UnitFrames.UpdateGroupCombatGlow()
     end
 
     -- Helper to update combat glow for a single frame
-    local function updateFrameCombatGlow(frame, unitTag)
+    local function updateFrameCombatGlow(frame, unitTag, isGroupFrame)
         if not frame or not frame[COMBAT_MECHANIC_FLAGS_HEALTH] or not frame[COMBAT_MECHANIC_FLAGS_HEALTH].combatGlow then
             return
         end
@@ -1140,6 +1140,10 @@ function UnitFrames.UpdateGroupCombatGlow()
             if timeline and timeline:IsPlaying() then
                 timeline:Stop()
             end
+            if glow.fadeOutTimerName then
+                eventManager:UnregisterForUpdate(glow.fadeOutTimerName)
+                glow.fadeOutTimerName = nil
+            end
             glow:SetHidden(true)
             glow:SetAlpha(0)
             return
@@ -1149,18 +1153,42 @@ function UnitFrames.UpdateGroupCombatGlow()
         local isInCombat = IsUnitActivelyEngaged(unitTag) or IsUnitInCombat(unitTag)
 
         if isInCombat then
-            -- One-shot fade in when entering combat
+            -- Cancel any pending fade-out timer
+            if glow.fadeOutTimerName then
+                eventManager:UnregisterForUpdate(glow.fadeOutTimerName)
+                glow.fadeOutTimerName = nil
+            end
+            if timeline and timeline:IsPlaying() and timeline:IsPlayingBackward() then
+                timeline:Stop()
+            end
+
+            -- Play forward to fade in when entering combat
             if not timeline:IsPlaying() and glow:GetAlpha() < 1 then
                 glow:SetHidden(false)
                 timeline:PlayFromStart()
             end
         else
-            -- Reset when leaving combat
-            if timeline:IsPlaying() then
-                timeline:Stop()
+            -- Unit is out of combat - check if we need to start fade-out timer
+            if not glow.fadeOutTimerName and glow:GetAlpha() > 0 then
+                -- Get delay and duration based on frame type
+                local delay = isGroupFrame and UnitFrames.SV.GroupCombatGlowFadeOutDelay or UnitFrames.SV.RaidCombatGlowFadeOutDelay
+                local fadeDuration = isGroupFrame and UnitFrames.SV.GroupCombatGlowFadeOutDuration or UnitFrames.SV.RaidCombatGlowFadeOutDuration
+
+                -- Update fade duration if needed
+                if fadeDuration ~= 300 then
+                    glow.animation:SetDuration(fadeDuration)
+                end
+
+                -- Register timer to fade out after delay
+                glow.fadeOutTimerName = UnitFrames.moduleName .. "_CombatGlow_FadeOut_" .. unitTag
+                eventManager:RegisterForUpdate(glow.fadeOutTimerName, delay, function ()
+                    if timeline and glow:GetAlpha() > 0 then
+                        timeline:PlayBackward()
+                    end
+                    eventManager:UnregisterForUpdate(glow.fadeOutTimerName)
+                    glow.fadeOutTimerName = nil
+                end)
             end
-            glow:SetHidden(true)
-            glow:SetAlpha(0)
         end
     end
 
@@ -1170,7 +1198,7 @@ function UnitFrames.UpdateGroupCombatGlow()
             local frameTag = "SmallGroup" .. i
             local frame = UnitFrames.CustomFrames[frameTag]
             if frame then
-                updateFrameCombatGlow(frame, frame.unitTag)
+                updateFrameCombatGlow(frame, frame.unitTag, true)
             end
         end
     end
@@ -1181,7 +1209,7 @@ function UnitFrames.UpdateGroupCombatGlow()
             local frameTag = "RaidGroup" .. i
             local frame = UnitFrames.CustomFrames[frameTag]
             if frame then
-                updateFrameCombatGlow(frame, frame.unitTag)
+                updateFrameCombatGlow(frame, frame.unitTag, false)
             end
         end
     end
@@ -1943,12 +1971,17 @@ function UnitFrames.CustomFramesGroupUpdate()
     -- Setup LibGroupBroadcast integrations on active frames
     if UnitFrames.GroupCombatStats then
         UnitFrames.GroupCombatStats.SetupFrames()
+        -- Immediately refresh to show current data after frame transition
+        UnitFrames.GroupCombatStats.RefreshAll()
     end
     if UnitFrames.GroupPotionCooldowns then
         UnitFrames.GroupPotionCooldowns.SetupFrames()
+        -- Immediately refresh to show current data after frame transition
+        UnitFrames.GroupPotionCooldowns.RefreshAll()
     end
     if UnitFrames.GroupResources then
         UnitFrames.GroupResources.SetupFrames()
+        -- Resource bars will be updated by LibGroupBroadcast callbacks
     end
 
     UnitFrames.OnLeaderUpdate(nil, nil)

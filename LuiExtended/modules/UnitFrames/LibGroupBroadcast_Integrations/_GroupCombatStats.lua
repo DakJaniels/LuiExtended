@@ -313,25 +313,21 @@ function GroupCombatStatsManager.Initialize()
         local currentSettings = Shared.GetCombatStatsSettings()
         if not currentSettings then return end
 
-        -- Iterate over all group members by index
-        for i = 1, GetGroupSize() do
-            local unitTag = GetGroupUnitTagByIndex(i)
-            if unitTag then
-                local stats = lgcs:GetUnitStats(unitTag)
-                local frameData = Shared.GetFrameData(unitTag)
-                if stats and frameData and frameData.combatStats then
-                    -- Update ultimate display
-                    if currentSettings.showUltimate and stats.ult then
-                        UpdateUltimateDisplay(unitTag, stats.ult)
-                    end
+        -- Iterate over active group members
+        Shared.ForEachActiveGroupMember(function (unitTag, frameData)
+            local stats = lgcs:GetUnitStats(unitTag)
+            if stats and frameData.combatStats then
+                -- Update ultimate display
+                if currentSettings.showUltimate and stats.ult then
+                    UpdateUltimateDisplay(unitTag, stats.ult)
+                end
 
-                    -- Update DPS/HPS text
-                    if currentSettings.showDPS or currentSettings.showHPS then
-                        UpdateCombatStatsText(unitTag, stats.dps, stats.hps)
-                    end
+                -- Update DPS/HPS text
+                if currentSettings.showDPS or currentSettings.showHPS then
+                    UpdateCombatStatsText(unitTag, stats.dps, stats.hps)
                 end
             end
-        end
+        end)
     end)
 
     isInitialized = true
@@ -342,27 +338,14 @@ function GroupCombatStatsManager.SetupFrames()
     local Settings = Shared.GetCombatStatsSettings()
     if not Settings or not Settings.enabled then return end
 
-    -- Determine which frame type is in use (matches logic from CustomFramesGroupUpdate)
-    local groupSize = GetGroupSize()
-    local useRaidFrames = false
-
-    if groupSize > 4 then
-        useRaidFrames = true
-    elseif not UnitFrames.CustomFrames["SmallGroup1"] or not UnitFrames.CustomFrames["SmallGroup1"].tlw then
-        -- No SmallGroup frames available, must use raid frames
-        useRaidFrames = true
-    end
-
-    -- Iterate over actual group members
-    for i = 1, groupSize do
-        local unitTag = GetGroupUnitTagByIndex(i)
-        if unitTag then
-            local frameData = Shared.GetFrameData(unitTag)
-            if frameData and not frameData.combatStats then
-                AddCombatStatsToFrame(frameData, useRaidFrames)
-            end
+    -- Use shared frame setup helper with unhide callback
+    Shared.SetupIntegrationFrames("combatStats", AddCombatStatsToFrame, function (frameData)
+        -- Unhide container when reusing SmallGroup frames
+        if frameData.libGroupContainer then
+            frameData.libGroupContainer:SetHidden(false)
         end
-    end
+        -- Components will be updated by the periodic update loop and event callbacks
+    end)
 end
 
 -- Refresh all combat stat displays (called from settings)
@@ -370,22 +353,18 @@ function GroupCombatStatsManager.RefreshAll()
     if not lgcs then return end
     if not IsUnitGrouped("player") then return end
 
-    -- Iterate over all group members by index
-    for i = 1, GetGroupSize() do
-        local unitTag = GetGroupUnitTagByIndex(i)
-        if unitTag then
-            local stats = lgcs:GetUnitStats(unitTag)
-            local frameData = Shared.GetFrameData(unitTag)
-            if stats and frameData and frameData.combatStats then
-                if stats.ult then
-                    UpdateUltimateDisplay(unitTag, stats.ult)
-                end
-                if stats.dps or stats.hps then
-                    UpdateCombatStatsText(unitTag, stats.dps, stats.hps)
-                end
+    -- Iterate over active group members
+    Shared.ForEachActiveGroupMember(function (unitTag, frameData)
+        local stats = lgcs:GetUnitStats(unitTag)
+        if stats and frameData.combatStats then
+            if stats.ult then
+                UpdateUltimateDisplay(unitTag, stats.ult)
+            end
+            if stats.dps or stats.hps then
+                UpdateCombatStatsText(unitTag, stats.dps, stats.hps)
             end
         end
-    end
+    end)
 end
 
 -- Hide combat stats for a unit

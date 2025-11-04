@@ -150,15 +150,23 @@ local function CreateCombatGlowAnimation(backdrop)
     glow:SetEdgeTexture("", 16, 16, 2, 0) -- Thicker edge for visible glow
     glow:SetBlendMode(TEX_BLEND_MODE_ADD)
 
-    -- Create one-shot fade-in animation.
+    -- Create reversible fade animation (plays forward for fade-in, backward for fade-out)
     local alphaAnim, alphaTimeline = CreateSimpleAnimation(ANIMATION_ALPHA, glow)
     alphaAnim:SetAlphaValues(0, 1)
     alphaAnim:SetDuration(300)
     alphaAnim:SetEasingFunction(ZO_EaseInQuadratic)
     alphaTimeline:SetPlaybackType(ANIMATION_PLAYBACK_ONE_SHOT, 1)
 
+    -- Hide glow when fade-out completes (backward playback)
+    alphaTimeline:SetHandler("OnStop", function (timeline, completedPlaying)
+        if completedPlaying and timeline:IsPlayingBackward() and glow:GetAlpha() == 0 then
+            glow:SetHidden(true)
+        end
+    end)
+
     glow.animation = alphaAnim
     glow.timeline = alphaTimeline
+    glow.fadeOutTimerName = nil -- Will be set per unitTag
 
     return glow
 end

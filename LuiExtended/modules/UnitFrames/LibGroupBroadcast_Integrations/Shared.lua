@@ -137,6 +137,72 @@ function Shared.ForEachGroupFrame(callback)
 end
 
 -- ============================================================================
+-- FRAME TYPE DETERMINATION
+-- ============================================================================
+
+--- Determine if raid frames or small group frames should be used
+--- @return boolean useRaidFrames True if raid frames should be used
+--- @return number groupSize Current group size
+function Shared.DetermineFrameType()
+    local groupSize = GetGroupSize()
+    local useRaidFrames = false
+
+    if groupSize > 4 then
+        useRaidFrames = true
+    elseif not UnitFrames.CustomFrames["SmallGroup1"] or not UnitFrames.CustomFrames["SmallGroup1"].tlw then
+        -- No SmallGroup frames available, must use raid frames
+        useRaidFrames = true
+    end
+
+    return useRaidFrames, groupSize
+end
+
+-- ============================================================================
+-- GROUP MEMBER ITERATION
+-- ============================================================================
+
+--- Iterate over all current group members and call callback for each valid frame
+--- @param callback function Function(unitTag, frameData, index) called for each group member with valid frame
+function Shared.ForEachActiveGroupMember(callback)
+    if not callback then return end
+
+    local groupSize = GetGroupSize()
+    for i = 1, groupSize do
+        local unitTag = GetGroupUnitTagByIndex(i)
+        if unitTag then
+            local frameData = Shared.GetFrameData(unitTag)
+            if frameData then
+                callback(unitTag, frameData, i)
+            end
+        end
+    end
+end
+
+--- Setup frames for an integration with create/unhide logic
+--- @param componentName string Name of the component (e.g., "combatStats", "potionCooldown")
+--- @param createCallback function Function(frameData, useRaidFrames) to create components
+--- @param unhideCallback function|nil Optional function(frameData) to unhide existing components
+function Shared.SetupIntegrationFrames(componentName, createCallback, unhideCallback)
+    local useRaidFrames, groupSize = Shared.DetermineFrameType()
+
+    for i = 1, groupSize do
+        local unitTag = GetGroupUnitTagByIndex(i)
+        if unitTag then
+            local frameData = Shared.GetFrameData(unitTag)
+            if frameData then
+                if not frameData[componentName] then
+                    -- Create components if they don't exist
+                    createCallback(frameData, useRaidFrames)
+                elseif not useRaidFrames and frameData[componentName] and unhideCallback then
+                    -- Unhide existing SmallGroup components that may have been hidden during frame transitions
+                    unhideCallback(frameData)
+                end
+            end
+        end
+    end
+end
+
+-- ============================================================================
 -- VALIDATION HELPERS
 -- ============================================================================
 

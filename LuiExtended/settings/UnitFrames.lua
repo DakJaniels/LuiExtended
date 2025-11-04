@@ -2851,7 +2851,7 @@ function UnitFrames.CreateSettings()
                 -- Group Combat Glow
                 type = "checkbox",
                 name = "Show Combat Glow",
-                tooltip = "Display a red pulsing glow around group member health bars when they are in combat.",
+                tooltip = "Display a red glow around group member health bars when they are in combat (fades in/out smoothly).",
                 getFunc = function ()
                     return Settings.GroupCombatGlow
                 end,
@@ -2862,6 +2862,46 @@ function UnitFrames.CreateSettings()
                 default = Defaults.GroupCombatGlow,
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
+                end,
+            },
+            {
+                -- Group Combat Glow Fade-Out Delay
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Fade-Out Delay (ms)"),
+                tooltip = "Time to wait after leaving combat before starting fade-out animation.",
+                min = 0,
+                max = 10000,
+                step = 100,
+                getFunc = function ()
+                    return Settings.GroupCombatGlowFadeOutDelay
+                end,
+                setFunc = function (value)
+                    Settings.GroupCombatGlowFadeOutDelay = value
+                end,
+                width = "half",
+                default = Defaults.GroupCombatGlowFadeOutDelay,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup and Settings.GroupCombatGlow)
+                end,
+            },
+            {
+                -- Group Combat Glow Fade-Out Duration
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Fade-Out Duration (ms)"),
+                tooltip = "Duration of the fade-out animation.",
+                min = 100,
+                max = 2000,
+                step = 50,
+                getFunc = function ()
+                    return Settings.GroupCombatGlowFadeOutDuration
+                end,
+                setFunc = function (value)
+                    Settings.GroupCombatGlowFadeOutDuration = value
+                end,
+                width = "half",
+                default = Defaults.GroupCombatGlowFadeOutDuration,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup and Settings.GroupCombatGlow)
                 end,
             },
         },
@@ -3183,7 +3223,7 @@ function UnitFrames.CreateSettings()
                 -- Raid Combat Glow
                 type = "checkbox",
                 name = "Show Combat Glow",
-                tooltip = "Display a red pulsing glow around raid member health bars when they are in combat.",
+                tooltip = "Display a red glow around raid member health bars when they are in combat (fades in/out smoothly).",
                 getFunc = function ()
                     return Settings.RaidCombatGlow
                 end,
@@ -3194,6 +3234,46 @@ function UnitFrames.CreateSettings()
                 default = Defaults.RaidCombatGlow,
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
+                end,
+            },
+            {
+                -- Raid Combat Glow Fade-Out Delay
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Fade-Out Delay (ms)"),
+                tooltip = "Time to wait after leaving combat before starting fade-out animation.",
+                min = 0,
+                max = 10000,
+                step = 100,
+                getFunc = function ()
+                    return Settings.RaidCombatGlowFadeOutDelay
+                end,
+                setFunc = function (value)
+                    Settings.RaidCombatGlowFadeOutDelay = value
+                end,
+                width = "half",
+                default = Defaults.RaidCombatGlowFadeOutDelay,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid and Settings.RaidCombatGlow)
+                end,
+            },
+            {
+                -- Raid Combat Glow Fade-Out Duration
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Fade-Out Duration (ms)"),
+                tooltip = "Duration of the fade-out animation.",
+                min = 100,
+                max = 2000,
+                step = 50,
+                getFunc = function ()
+                    return Settings.RaidCombatGlowFadeOutDuration
+                end,
+                setFunc = function (value)
+                    Settings.RaidCombatGlowFadeOutDuration = value
+                end,
+                width = "half",
+                default = Defaults.RaidCombatGlowFadeOutDuration,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid and Settings.RaidCombatGlow)
                 end,
             },
         },
