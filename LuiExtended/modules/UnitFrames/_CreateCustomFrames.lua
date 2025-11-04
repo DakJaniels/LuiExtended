@@ -134,8 +134,8 @@ local function CreateNoHealingFadeAnimation(overlay, stripeOverlay)
     return fadeTimeline
 end
 
--- Combat glow animation (red pixel glow for group frames)
-local function CreateCombatGlowAnimation(backdrop)
+-- Combat glow border (static red glow for group frames in combat)
+local function CreateCombatGlowBorder(backdrop)
     -- Create a backdrop for the glow effect matching health bar size exactly
     local glow = UI:Backdrop(backdrop, nil, nil, nil, nil, false)
     glow:SetAnchor(TOPLEFT, backdrop, TOPLEFT, 0, 0)
@@ -144,29 +144,11 @@ local function CreateCombatGlowAnimation(backdrop)
     glow:SetDrawLevel(3)
     glow:SetHidden(true)
 
-    -- Set red glow color with thicker edges for visibility
+    -- Set glow color with thicker edges for visibility (default red, configurable via settings)
     glow:SetCenterColor(0, 0, 0, 0)       -- Transparent center
-    glow:SetEdgeColor(1, 0, 0, 1)         -- Red edges
+    glow:SetEdgeColor(1, 0, 0, 1)         -- Default red edges (will be updated from settings)
     glow:SetEdgeTexture("", 16, 16, 2, 0) -- Thicker edge for visible glow
     glow:SetBlendMode(TEX_BLEND_MODE_ADD)
-
-    -- Create reversible fade animation (plays forward for fade-in, backward for fade-out)
-    local alphaAnim, alphaTimeline = CreateSimpleAnimation(ANIMATION_ALPHA, glow)
-    alphaAnim:SetAlphaValues(0, 1)
-    alphaAnim:SetDuration(300)
-    alphaAnim:SetEasingFunction(ZO_EaseInQuadratic)
-    alphaTimeline:SetPlaybackType(ANIMATION_PLAYBACK_ONE_SHOT, 1)
-
-    -- Hide glow when fade-out completes (backward playback)
-    alphaTimeline:SetHandler("OnStop", function (timeline, completedPlaying)
-        if completedPlaying and timeline:IsPlayingBackward() and glow:GetAlpha() == 0 then
-            glow:SetHidden(true)
-        end
-    end)
-
-    glow.animation = alphaAnim
-    glow.timeline = alphaTimeline
-    glow.fadeOutTimerName = nil -- Will be set per unitTag
 
     return glow
 end
@@ -491,7 +473,7 @@ local function CreateSmallGroupFrames()
             local libGroupContainer = UI:Control(control, nil, nil, false)
 
             -- Create combat glow animation
-            local combatGlow = CreateCombatGlowAnimation(ghb)
+            local combatGlow = CreateCombatGlowBorder(ghb)
 
             UnitFrames.CustomFrames[unitTag] =
             {
@@ -587,7 +569,7 @@ local function CreateRaidGroupFrames()
             stamBackdrop:SetHidden(true)
 
             -- Create combat glow animation
-            local combatGlow = CreateCombatGlowAnimation(rhb)
+            local combatGlow = CreateCombatGlowBorder(rhb)
 
             UnitFrames.CustomFrames[unitTag] =
             {

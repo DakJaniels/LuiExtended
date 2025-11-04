@@ -2865,41 +2865,27 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
-                -- Group Combat Glow Fade-Out Delay
-                type = "slider",
-                name = zo_strformat("\t\t\t\t\t<<1>>", "Fade-Out Delay (ms)"),
-                tooltip = "Time to wait after leaving combat before starting fade-out animation.",
-                min = 0,
-                max = 10000,
-                step = 100,
+                -- Group Combat Glow Color
+                type = "colorpicker",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Combat Glow Color"),
+                tooltip = "Set the color of the combat glow border displayed around group frames.",
                 getFunc = function ()
-                    return Settings.GroupCombatGlowFadeOutDelay
+                    return unpack(Settings.GroupCombatGlowColor)
                 end,
-                setFunc = function (value)
-                    Settings.GroupCombatGlowFadeOutDelay = value
+                setFunc = function (r, g, b, a)
+                    Settings.GroupCombatGlowColor = { r, g, b, a }
+                    if UnitFrames.CustomFramesApplyColors then
+                        UnitFrames.CustomFramesApplyColors(true)
+                    end
                 end,
-                width = "half",
-                default = Defaults.GroupCombatGlowFadeOutDelay,
-                disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup and Settings.GroupCombatGlow)
-                end,
-            },
-            {
-                -- Group Combat Glow Fade-Out Duration
-                type = "slider",
-                name = zo_strformat("\t\t\t\t\t<<1>>", "Fade-Out Duration (ms)"),
-                tooltip = "Duration of the fade-out animation.",
-                min = 100,
-                max = 2000,
-                step = 50,
-                getFunc = function ()
-                    return Settings.GroupCombatGlowFadeOutDuration
-                end,
-                setFunc = function (value)
-                    Settings.GroupCombatGlowFadeOutDuration = value
-                end,
-                width = "half",
-                default = Defaults.GroupCombatGlowFadeOutDuration,
+                width = "full",
+                default =
+                {
+                    r = Defaults.GroupCombatGlowColor[1],
+                    g = Defaults.GroupCombatGlowColor[2],
+                    b = Defaults.GroupCombatGlowColor[3],
+                    a = Defaults.GroupCombatGlowColor[4]
+                },
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup and Settings.GroupCombatGlow)
                 end,
@@ -3237,41 +3223,27 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
-                -- Raid Combat Glow Fade-Out Delay
-                type = "slider",
-                name = zo_strformat("\t\t\t\t\t<<1>>", "Fade-Out Delay (ms)"),
-                tooltip = "Time to wait after leaving combat before starting fade-out animation.",
-                min = 0,
-                max = 10000,
-                step = 100,
+                -- Raid Combat Glow Color
+                type = "colorpicker",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Combat Glow Color"),
+                tooltip = "Set the color of the combat glow border displayed around raid frames.",
                 getFunc = function ()
-                    return Settings.RaidCombatGlowFadeOutDelay
+                    return unpack(Settings.RaidCombatGlowColor)
                 end,
-                setFunc = function (value)
-                    Settings.RaidCombatGlowFadeOutDelay = value
+                setFunc = function (r, g, b, a)
+                    Settings.RaidCombatGlowColor = { r, g, b, a }
+                    if UnitFrames.CustomFramesApplyColors then
+                        UnitFrames.CustomFramesApplyColors(true)
+                    end
                 end,
-                width = "half",
-                default = Defaults.RaidCombatGlowFadeOutDelay,
-                disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid and Settings.RaidCombatGlow)
-                end,
-            },
-            {
-                -- Raid Combat Glow Fade-Out Duration
-                type = "slider",
-                name = zo_strformat("\t\t\t\t\t<<1>>", "Fade-Out Duration (ms)"),
-                tooltip = "Duration of the fade-out animation.",
-                min = 100,
-                max = 2000,
-                step = 50,
-                getFunc = function ()
-                    return Settings.RaidCombatGlowFadeOutDuration
-                end,
-                setFunc = function (value)
-                    Settings.RaidCombatGlowFadeOutDuration = value
-                end,
-                width = "half",
-                default = Defaults.RaidCombatGlowFadeOutDuration,
+                width = "full",
+                default =
+                {
+                    r = Defaults.RaidCombatGlowColor[1],
+                    g = Defaults.RaidCombatGlowColor[2],
+                    b = Defaults.RaidCombatGlowColor[3],
+                    a = Defaults.RaidCombatGlowColor[4]
+                },
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid and Settings.RaidCombatGlow)
                 end,

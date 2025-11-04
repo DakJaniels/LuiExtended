@@ -1134,62 +1134,23 @@ function UnitFrames.UpdateGroupCombatGlow()
         end
 
         local glow = frame[COMBAT_MECHANIC_FLAGS_HEALTH].combatGlow
-        local timeline = glow.timeline
 
         if not unitTag or not DoesUnitExist(unitTag) then
-            if timeline and timeline:IsPlaying() then
-                timeline:Stop()
-            end
-            if glow.fadeOutTimerName then
-                eventManager:UnregisterForUpdate(glow.fadeOutTimerName)
-                glow.fadeOutTimerName = nil
-            end
             glow:SetHidden(true)
-            glow:SetAlpha(0)
             return
         end
 
         -- Use IsUnitActivelyEngaged for more accurate combat detection
         local isInCombat = IsUnitActivelyEngaged(unitTag) or IsUnitInCombat(unitTag)
 
-        if isInCombat then
-            -- Cancel any pending fade-out timer
-            if glow.fadeOutTimerName then
-                eventManager:UnregisterForUpdate(glow.fadeOutTimerName)
-                glow.fadeOutTimerName = nil
-            end
-            if timeline and timeline:IsPlaying() and timeline:IsPlayingBackward() then
-                timeline:Stop()
-            end
-
-            -- Play forward to fade in when entering combat
-            if not timeline:IsPlaying() and glow:GetAlpha() < 1 then
-                glow:SetHidden(false)
-                timeline:PlayFromStart()
-            end
-        else
-            -- Unit is out of combat - check if we need to start fade-out timer
-            if not glow.fadeOutTimerName and glow:GetAlpha() > 0 then
-                -- Get delay and duration based on frame type
-                local delay = isGroupFrame and UnitFrames.SV.GroupCombatGlowFadeOutDelay or UnitFrames.SV.RaidCombatGlowFadeOutDelay
-                local fadeDuration = isGroupFrame and UnitFrames.SV.GroupCombatGlowFadeOutDuration or UnitFrames.SV.RaidCombatGlowFadeOutDuration
-
-                -- Update fade duration if needed
-                if fadeDuration ~= 300 then
-                    glow.animation:SetDuration(fadeDuration)
-                end
-
-                -- Register timer to fade out after delay
-                glow.fadeOutTimerName = UnitFrames.moduleName .. "_CombatGlow_FadeOut_" .. unitTag
-                eventManager:RegisterForUpdate(glow.fadeOutTimerName, delay, function ()
-                    if timeline and glow:GetAlpha() > 0 then
-                        timeline:PlayBackward()
-                    end
-                    eventManager:UnregisterForUpdate(glow.fadeOutTimerName)
-                    glow.fadeOutTimerName = nil
-                end)
-            end
+        -- Update glow color from settings
+        local glowColor = isGroupFrame and UnitFrames.SV.GroupCombatGlowColor or UnitFrames.SV.RaidCombatGlowColor
+        if glowColor then
+            glow:SetEdgeColor(glowColor[1], glowColor[2], glowColor[3], glowColor[4] or 1)
         end
+
+        -- Show/hide glow based on combat state (no animation)
+        glow:SetHidden(not isInCombat)
     end
 
     -- Update SmallGroup frames (if enabled)
