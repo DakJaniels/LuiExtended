@@ -63,7 +63,7 @@ LUIE.HookKeyboardIcons = function ()
         if customIcon then
             control.slotIcon:SetTexture(customIcon)
         else
-            control.slotIcon:SetTexture(skillProgressionData.GetIcon and skillProgressionData:GetIcon())
+            control.slotIcon:SetTexture(skillProgressionData:GetIcon())
         end
         ZO_Skills_SetKeyboardAbilityButtonTextures(control.slot)
         ZO_ActionSlot_SetUnusable(control.slotIcon, not isPurchased)
@@ -73,15 +73,15 @@ LUIE.HookKeyboardIcons = function ()
         local hasSlotStatusUpdated = skillData:HasUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.MORPHABLE) or skillData:HasUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.CRAFTED_ABILITY)
         control.slot.statusIcon:SetHidden(not hasSlotStatusUpdated)
 
-        if skillProgressionData:IsActive() and skillProgressionData.HasAnyNonHiddenSkillStyles and skillProgressionData:HasAnyNonHiddenSkillStyles() then
-            local collectibleData = skillProgressionData.GetSelectedSkillStyleCollectibleData and skillProgressionData:GetSelectedSkillStyleCollectibleData()
+        if skillProgressionData:IsActive() and skillProgressionData:HasAnyNonHiddenSkillStyles() then
+            local collectibleData = skillProgressionData:GetSelectedSkillStyleCollectibleData()
             if collectibleData then
                 control.skillStyleControl.selectedStyleButton.icon:SetTexture(collectibleData:GetIcon())
             end
         end
 
         -- xp bar
-        local showXPBar = skillProgressionData:HasRankData()
+        local showXPBar = skillProgressionData:HasRankData() and not IsCurrentCampaignVengeanceRuleset()
         if showXPBar then
             local currentRank = skillProgressionData:GetCurrentRank()
             local startXP, endXP = skillProgressionData:GetRankXPExtents(currentRank)
@@ -146,7 +146,7 @@ LUIE.HookKeyboardIcons = function ()
                 hideIncreaseButton = false
             end
         else
-            if skillData.CanPointAllocationsBeAltered and skillData:CanPointAllocationsBeAltered(skillPointAllocationMode) then
+            if skillData:CanPointAllocationsBeAltered(skillPointAllocationMode) then
                 hideIncreaseButton = false
                 hideDecreaseButton = false
 
@@ -187,9 +187,9 @@ LUIE.HookKeyboardIcons = function ()
                 skillStyleControl:SetAnchor(RIGHT, increaseButton, LEFT)
             end
 
-            if isActive and skillProgressionData.HasAnyNonHiddenSkillStyles and skillProgressionData:HasAnyNonHiddenSkillStyles() then
+            if isActive and skillProgressionData:HasAnyNonHiddenSkillStyles() then
                 skillStyleControl:SetHidden(false)
-                if skillProgressionData.IsSkillStyleSelected and skillProgressionData:IsSkillStyleSelected() then
+                if skillProgressionData:IsSkillStyleSelected() then
                     skillStyleControl.defaultStyleButton:SetHidden(true)
                     skillStyleControl.selectedStyleButton:SetHidden(false)
                 else
@@ -211,22 +211,26 @@ LUIE.HookKeyboardIcons = function ()
         confirmDialogControl.abilityName = confirmDialogControl:GetNamedChild("AbilityName")
         confirmDialogControl.ability = confirmDialogControl:GetNamedChild("Ability")
         confirmDialogControl.ability.icon = confirmDialogControl.ability:GetNamedChild("Icon")
+        confirmDialogControl.warning = confirmDialogControl:GetNamedChild("Warning")
         local advisementLabel = confirmDialogControl:GetNamedChild("Advisement")
         advisementLabel:SetText(GetString(SI_SKILLS_ADVISOR_PURCHASE_ADVISED))
         advisementLabel:SetColor(ZO_SKILLS_ADVISOR_ADVISED_COLOR:UnpackRGBA())
         confirmDialogControl.advisementLabel = advisementLabel
 
         local function SetupPurchaseAbilityConfirmDialog(dialog, skillProgressionData)
-            if skillProgressionData:GetSkillData():GetPointAllocator():CanPurchase() then
+            local skillData = skillProgressionData:GetSkillData()
+            if skillData:GetPointAllocator():CanPurchase() then
                 local dialogAbility = dialog.ability
                 local id = skillProgressionData:GetAbilityId()
-                dialog.abilityName:SetText(zo_strformat("<<C:1>>", GetAbilityName(id)))
+                dialog.abilityName:SetText(skillProgressionData:GetFormattedName())
 
                 dialogAbility.skillProgressionData = skillProgressionData
                 dialogAbility.icon:SetTexture(GetAbilityIcon(id))
                 ZO_Skills_SetKeyboardAbilityButtonTextures(dialogAbility)
 
-                local hideAdvisement = ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or not skillProgressionData:IsAdvised()
+                dialog.warning:SetText(zo_strformat(SI_SKILLS_IMPROVEMENT_COST, skillData:GetSkillPointCostMultiplier()))
+
+                local hideAdvisement = (not ZO_SKILLS_ADVISOR_SINGLETON:CanUseSkillsAdvisor()) or ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or (not skillProgressionData:IsAdvised())
                 dialog.advisementLabel:SetHidden(hideAdvisement)
             end
         end
@@ -272,6 +276,8 @@ LUIE.HookKeyboardIcons = function ()
         upgradeDialogControl.upgradeAbility = upgradeDialogControl:GetNamedChild("UpgradeAbility")
         upgradeDialogControl.upgradeAbility.icon = upgradeDialogControl.upgradeAbility:GetNamedChild("Icon")
 
+        upgradeDialogControl.warning = upgradeDialogControl:GetNamedChild("Warning")
+
         local advisementLabel = upgradeDialogControl:GetNamedChild("Advisement")
         advisementLabel:SetText(GetString(SI_SKILLS_ADVISOR_PURCHASE_ADVISED))
         advisementLabel:SetColor(ZO_SKILLS_ADVISOR_ADVISED_COLOR:UnpackRGBA())
@@ -286,10 +292,10 @@ LUIE.HookKeyboardIcons = function ()
                 local skillProgressionData = skillData:GetRankData(rank)
                 local nextSkillProgressionData = skillData:GetRankData(rank + 1)
 
-                local id = skillProgressionData:GetAbilityId()
-                dialog.desc:SetText(zo_strformat(SI_SKILLS_UPGRADE_DESCRIPTION, GetAbilityName(id)))
+                dialog.desc:SetText(zo_strformat(SI_SKILLS_UPGRADE_DESCRIPTION, skillProgressionData:GetName()))
 
                 local baseAbility = dialog.baseAbility
+                local id = skillProgressionData:GetAbilityId()
                 baseAbility.skillProgressionData = skillProgressionData
                 baseAbility.icon:SetTexture(GetAbilityIcon(id))
                 ZO_Skills_SetKeyboardAbilityButtonTextures(baseAbility)
@@ -300,7 +306,9 @@ LUIE.HookKeyboardIcons = function ()
                 upgradeAbility.icon:SetTexture(GetAbilityIcon(idUpgrade))
                 ZO_Skills_SetKeyboardAbilityButtonTextures(upgradeAbility)
 
-                local hideAdvisement = ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or not skillData:IsAdvised()
+                dialog.warning:SetText(zo_strformat(SI_SKILLS_IMPROVEMENT_COST, skillData:GetSkillPointCostMultiplier()))
+
+                local hideAdvisement = (not ZO_SKILLS_ADVISOR_SINGLETON:CanUseSkillsAdvisor()) or ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or (not skillProgressionData:IsAdvised())
                 advisementLabel:SetHidden(hideAdvisement)
             end
         end

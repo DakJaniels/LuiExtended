@@ -180,7 +180,9 @@ LUIE.InitializeHooksSkillAdvisor = function ()
     do
         local function AddEntry(scrollData, skillProgressionData)
             local name = skillProgressionData:IsPassive() and skillProgressionData:GetFormattedNameWithRank() or skillProgressionData:GetFormattedName()
-            local entryData = ZO_GamepadEntryData:New(name, skillProgressionData:GetIcon())
+            local abilityId = skillProgressionData:GetAbilityId()
+            local icon = GetAbilityIcon(abilityId) or skillProgressionData:GetIcon()
+            local entryData = ZO_GamepadEntryData:New(name, icon)
             entryData.skillProgressionData = skillProgressionData
             entryData.narrationText = function ()
                 local narrations = {}

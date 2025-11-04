@@ -69,7 +69,11 @@ LUIE.API_Hooks = function ()
     end
 
     -- If true then override -
-    if LUIE.SV.CustomIcons == true then
+    if LUIE.SV.CustomIcons then
+        --
+        -- Apply protected function hooks (see ProtectedHooks.lua)
+        LUIE.ApplyProtectedHooks()
+
         local zos_GetSkillAbilityInfo = GetSkillAbilityInfo
         --- Hook for Icon/Name changes.
         --- @param skillType SkillType

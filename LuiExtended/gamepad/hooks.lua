@@ -93,11 +93,11 @@ LUIE.HookGamePadIcons = function ()
             return indicatorRightWidth
         end
         local skillPointAllocator = skillData:GetPointAllocator()
-        local skillProgressionData = skillPointAllocator.GetProgressionData and skillPointAllocator:GetProgressionData() or skillData:GetPointAllocatorProgressionData()
+        local skillProgressionData = skillPointAllocator:GetProgressionData()
         local isActive = skillData:IsActive()
-        local isNonCraftedActive = isActive and not (skillData.IsCraftedAbility and skillData:IsCraftedAbility())
-        local isMorph = isNonCraftedActive and skillProgressionData and skillProgressionData.IsMorph and skillProgressionData:IsMorph()
-        local showSkillStyle = not showDecrease and isActive and skillProgressionData and skillProgressionData.HasAnyNonHiddenSkillStyles and skillProgressionData:HasAnyNonHiddenSkillStyles()
+        local isNonCraftedActive = isActive and not skillData:IsCraftedAbility()
+        local isMorph = isNonCraftedActive and skillProgressionData.IsMorph and skillProgressionData:IsMorph()
+        local showSkillStyle = not showDecrease and isActive and skillProgressionData.HasAnyNonHiddenSkillStyles and skillProgressionData:HasAnyNonHiddenSkillStyles()
 
         local increaseMultiIcon
         local decreaseMultiIcon
@@ -139,7 +139,7 @@ LUIE.HookGamePadIcons = function ()
             -- Always carve out space for the decrease icon even if it isn't active so the name doesn't dance around as it appears and disappears
             indicatorRightWidth = 40
         elseif showSkillStyle then
-            local collectibleData = skillProgressionData and skillProgressionData.GetSelectedSkillStyleCollectibleData and skillProgressionData:GetSelectedSkillStyleCollectibleData()
+            local collectibleData = skillProgressionData:GetSelectedSkillStyleCollectibleData()
             if collectibleData then
                 leftIndicator:AddIcon(collectibleData:GetIcon())
             else
@@ -180,7 +180,7 @@ LUIE.HookGamePadIcons = function ()
 
         -- Icon
         local iconTexture = control.icon
-        iconTexture:SetTexture(GetAbilityIcon and GetAbilityIcon(abilityId) or (skillProgressionData.GetIcon and skillProgressionData:GetIcon()))
+        iconTexture:SetTexture(GetAbilityIcon(abilityId) or skillProgressionData:GetIcon())
         if displayView == ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE then
             if isPurchased then
                 iconTexture:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
@@ -243,12 +243,12 @@ LUIE.HookGamePadIcons = function ()
         local isUnlocked = skillProgressionData:IsUnlocked()
         local isPurchased = overrideHotbar ~= nil or skillPointAllocator:IsPurchased()
         local isActive = skillData:IsActive()
-        local isNonCraftedActive = isActive and not (skillData.IsCraftedAbility and skillData:IsCraftedAbility())
-        local isMorph = skillData.IsPlayerSkill and skillData:IsPlayerSkill() and isNonCraftedActive and skillProgressionData:IsMorph()
+        local isNonCraftedActive = isActive and not skillData:IsCraftedAbility()
+        local isMorph = skillData:IsPlayerSkill() and isNonCraftedActive and skillProgressionData:IsMorph()
 
         -- Icon
         local iconTexture = control.icon
-        iconTexture:SetTexture(GetAbilityIcon and GetAbilityIcon(skillProgressionData.abilityId) or (skillProgressionData.GetIcon and skillProgressionData:GetIcon()))
+        iconTexture:SetTexture(GetAbilityIcon(skillProgressionData.abilityId) or skillProgressionData:GetIcon())
         if isPurchased then
             iconTexture:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
         else
@@ -258,7 +258,7 @@ LUIE.HookGamePadIcons = function ()
         SetupAbilityIconFrame(control, skillData:IsPassive(), isActive, skillProgressionData:IsAdvised())
 
         -- Label
-        control.label:SetText(skillProgressionData.GetDetailedGamepadName and skillProgressionData:GetDetailedGamepadName() or "")
+        control.label:SetText(skillProgressionData:GetDetailedGamepadName())
         local color = isPurchased and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
         control.label:SetColor(color:UnpackRGBA())
 

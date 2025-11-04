@@ -25,6 +25,7 @@ src/LuiExtended.lua
 src/LuiExtended_Log.lua
 src/UI.lua
 src/Functions.lua
+src/ProtectedHooks.lua
 src/Hooks.lua
 
 shared/actionbutton.lua
