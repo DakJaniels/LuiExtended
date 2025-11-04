@@ -28,6 +28,7 @@ local LUIE = LUIE
 --- PickupAbilityById is used at two callsites. Last check 2025-11-03
 LUIE.ApplyProtectedHooks = function ()
     -- Hook for regular active skills
+    --- @diagnostic disable-next-line: duplicate-set-field
     function ZO_ActiveSkillProgressionData:TryPickup()
         local isPurchased = self.skillData:IsPurchased()
 
@@ -48,6 +49,7 @@ LUIE.ApplyProtectedHooks = function ()
     end
 
     -- Hook for crafted active skills (Scribing system)
+    --- @diagnostic disable-next-line: duplicate-set-field
     function ZO_CraftedActiveSkillProgressionData:TryPickup()
         if self.skillData:IsPurchased() then
             local success, result = CallSecureProtected("PickupAbilityById", self:GetEffectiveAbilityId())
