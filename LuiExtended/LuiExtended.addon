@@ -92,6 +92,7 @@ modules/CombatText/EventViewers/Resources.lua
 modules/CombatInfo/CombatInfo.lua
 modules/CombatInfo/AbilityAlerts.lua
 modules/CombatInfo/CrowdControlTracker.lua
+modules/CombatInfo/SynergyTracker.lua
 
 # Modules - Info Panel
 modules/InfoPanel/InfoPanel.lua

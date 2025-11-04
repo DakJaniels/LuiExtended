@@ -13,6 +13,7 @@ local SettingsAPI = LUIE.SettingsAPI
 local CombatInfo = LUIE.CombatInfo
 local CrowdControlTracker = CombatInfo.CrowdControlTracker
 local AbilityAlerts = CombatInfo.AbilityAlerts
+local SynergyTracker = CombatInfo.SynergyTracker
 
 local type, pairs = type, pairs
 local table_insert = table.insert
@@ -4175,6 +4176,352 @@ function CombatInfo.CreateSettings()
             },
         },
     }
+
+    -- Synergy Tracker
+    optionsDataCombatInfo[#optionsDataCombatInfo + 1] =
+    {
+        type = "submenu",
+        name = "Synergy Tracker",
+        controls =
+        {
+            {
+                -- Description
+                type = "description",
+                text = "Track and display multiple available synergies simultaneously. Set custom priorities and manage synergy preferences.",
+            },
+            {
+                -- Unlock UI
+                type = "checkbox",
+                name = "Unlock Synergy Display",
+                tooltip = "Unlock the synergy display to reposition it. Preview synergies will be shown while unlocked.",
+                getFunc = function ()
+                    return Settings.synergy.unlocked
+                end,
+                setFunc = function (value)
+                    local tracker = CombatInfo.SynergyTrackerInstance
+                    if tracker then
+                        tracker:SetUnlocked(value)
+                    end
+                end,
+                width = "half",
+                default = false,
+                disabled = function ()
+                    return not Settings.synergy.enabled
+                end,
+            },
+            {
+                -- Reset Position
+                type = "button",
+                name = "Reset Position",
+                tooltip = "Reset the synergy display to default position.",
+                func = function ()
+                    local tracker = CombatInfo.SynergyTrackerInstance
+                    if tracker then
+                        tracker:ResetPosition()
+                    end
+                end,
+                width = "half",
+                disabled = function ()
+                    return not Settings.synergy.enabled
+                end,
+            },
+            {
+                -- Enable Synergy Tracker
+                type = "checkbox",
+                name = "Enable Synergy Tracker",
+                tooltip = "Enable the synergy tracking system. This will monitor available synergies and allow you to set priority overrides. Changes require a UI reload (/reloadui).",
+                default = Defaults.synergy.enabled,
+                getFunc = function ()
+                    return Settings.synergy.enabled
+                end,
+                setFunc = function (value)
+                    Settings.synergy.enabled = value
+                end,
+                width = "full",
+                warning = "Requires UI reload (/reloadui) to take effect.",
+                requiresReload = true,
+            },
+            {
+                type = "header",
+                name = "Display Options",
+            },
+            {
+                -- Display Mode
+                type = "dropdown",
+                name = "Display Mode",
+                tooltip = "Single: Show only highest priority synergy (like default UI)\nMulti: Show all available synergies\nCompact: Show all synergies with short names",
+                choices = { "Single Synergy", "Multi-Synergy", "Compact Multi-Synergy" },
+                getFunc = function ()
+                    if Settings.synergy.displayMode == "single" then
+                        return "Single Synergy"
+                    elseif Settings.synergy.displayMode == "compact" then
+                        return "Compact Multi-Synergy"
+                    else
+                        return "Multi-Synergy"
+                    end
+                end,
+                setFunc = function (value)
+                    if value == "Single Synergy" then
+                        Settings.synergy.displayMode = "single"
+                    elseif value == "Compact Multi-Synergy" then
+                        Settings.synergy.displayMode = "compact"
+                    else
+                        Settings.synergy.displayMode = "multi"
+                    end
+                    local tracker = CombatInfo.SynergyTrackerInstance
+                    if tracker then
+                        tracker:UpdateDisplay()
+                    end
+                end,
+                width = "full",
+                default = "Multi-Synergy",
+                disabled = function ()
+                    return not Settings.synergy.enabled
+                end,
+            },
+            {
+                -- Max Display
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Maximum Synergies to Display"),
+                tooltip = "Maximum number of synergies to show simultaneously (1-10). Includes both active and cooldown synergies.",
+                min = 1,
+                max = 10,
+                step = 1,
+                getFunc = function ()
+                    return Settings.synergy.maxDisplay
+                end,
+                setFunc = function (value)
+                    Settings.synergy.maxDisplay = value
+                    local tracker = CombatInfo.SynergyTrackerInstance
+                    if tracker then
+                        tracker:UpdateDisplay()
+                    end
+                end,
+                width = "full",
+                default = Defaults.synergy.maxDisplay,
+                disabled = function ()
+                    return not Settings.synergy.enabled or Settings.synergy.displayMode == "single"
+                end,
+            },
+            {
+                -- Show Priority Numbers
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Show Priority Numbers"),
+                tooltip = "Display priority numbers next to each synergy.",
+                getFunc = function ()
+                    return Settings.synergy.showPriority
+                end,
+                setFunc = function (value)
+                    Settings.synergy.showPriority = value
+                    local tracker = CombatInfo.SynergyTrackerInstance
+                    if tracker then
+                        tracker:UpdateDisplayOptions()
+                    end
+                end,
+                width = "full",
+                default = Defaults.synergy.showPriority,
+                disabled = function ()
+                    return not Settings.synergy.enabled
+                end,
+            },
+            {
+                -- Show Keybind Numbers
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Show Position Numbers"),
+                tooltip = "Display position numbers (1-5) next to each synergy to show its order in the list.",
+                getFunc = function ()
+                    return Settings.synergy.showKeybinds
+                end,
+                setFunc = function (value)
+                    Settings.synergy.showKeybinds = value
+                    local tracker = CombatInfo.SynergyTrackerInstance
+                    if tracker then
+                        tracker:UpdateDisplayOptions()
+                    end
+                end,
+                width = "full",
+                default = Defaults.synergy.showKeybinds,
+                disabled = function ()
+                    return not Settings.synergy.enabled
+                end,
+            },
+            {
+                -- Play Sound
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Play Sound on New Synergy"),
+                tooltip = "Play a sound notification when a new synergy becomes available.",
+                getFunc = function ()
+                    return Settings.synergy.playSound
+                end,
+                setFunc = function (value)
+                    Settings.synergy.playSound = value
+                end,
+                width = "full",
+                default = Defaults.synergy.playSound,
+                disabled = function ()
+                    return not Settings.synergy.enabled
+                end,
+            },
+            {
+                -- Show Cooldowns
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Show Synergies on Cooldown"),
+                tooltip = "Display synergies that are currently on cooldown. The tracker automatically learns which synergies share cooldowns by detecting when multiple synergies go on cooldown together.",
+                getFunc = function ()
+                    return Settings.synergy.showCooldowns
+                end,
+                setFunc = function (value)
+                    Settings.synergy.showCooldowns = value
+                    local tracker = CombatInfo.SynergyTrackerInstance
+                    if tracker then
+                        if not value then
+                            tracker.synergyCooldowns = {}
+                        end
+                        tracker:UpdateDisplay()
+                    end
+                end,
+                width = "full",
+                default = Defaults.synergy.showCooldowns,
+                disabled = function ()
+                    return not Settings.synergy.enabled or Settings.synergy.displayMode == "single"
+                end,
+            },
+            {
+                type = "header",
+                name = "Detected Synergies & Priority Overrides",
+            },
+            {
+                type = "description",
+                text = "Synergies detected during gameplay will appear below. Each synergy has a checkbox to blacklist (hide) it and a slider to set custom priority (0 = game default, 1-10 = higher priority).",
+            },
+            {
+                -- Clear All Overrides Button
+                type = "button",
+                name = "Clear All Priority Overrides",
+                tooltip = "Remove all custom priority overrides and reset to game defaults.",
+                func = function ()
+                    local tracker = CombatInfo.SynergyTrackerInstance
+                    if tracker then
+                        tracker:ClearAllPriorityOverrides()
+                    end
+                end,
+                width = "half",
+                disabled = function ()
+                    return not Settings.synergy.enabled
+                end,
+            },
+            {
+                -- Clear Blacklist Button
+                type = "button",
+                name = "Clear Blacklist",
+                tooltip = "Remove all synergies from the blacklist.",
+                func = function ()
+                    Settings.synergy.blacklist = {}
+                    local tracker = CombatInfo.SynergyTrackerInstance
+                    if tracker then
+                        tracker:RefreshActiveSynergies()
+                    end
+                    LUIE.PrintToChat("Blacklist cleared. Refresh settings to see changes.", true)
+                end,
+                width = "half",
+                disabled = function ()
+                    return not Settings.synergy.enabled
+                end,
+            },
+            {
+                -- Refresh Detected List Button
+                type = "button",
+                name = "Refresh List",
+                tooltip = "Refresh the list of detected synergies. Close and reopen settings to see updated list.",
+                func = function ()
+                    LUIE.PrintToChat("Refresh settings menu to see updated synergy list.", true)
+                end,
+                width = "half",
+                disabled = function ()
+                    return not Settings.synergy.enabled
+                end,
+            },
+        },
+    }
+
+    -- Dynamically add detected synergies to the settings menu
+    local tracker = CombatInfo.SynergyTrackerInstance
+    local detectedList = tracker and tracker:GetDetectedSynergiesSorted() or {}
+    if #detectedList > 0 then
+        local synergySubmenu = optionsDataCombatInfo[#optionsDataCombatInfo]
+
+        for _, synergyData in ipairs(detectedList) do
+            local abilityId = synergyData.abilityId
+            local name = synergyData.name
+            local icon = synergyData.icon
+            local timesSeen = synergyData.timesSeen
+
+            -- Synergy header with icon and name
+            table_insert(synergySubmenu.controls,
+                         {
+                             type = "description",
+                             text = zo_iconFormat(icon, 32, 32) .. " " .. zo_strformat("<<C:1>>", name) .. string_format(" |cAAAAAA(Seen: %d times)|r", timesSeen),
+                             width = "full",
+                         })
+
+            -- Blacklist toggle
+            table_insert(synergySubmenu.controls,
+                         {
+                             type = "checkbox",
+                             name = zo_strformat("\t\t\t\t\t<<1>>", "Blacklist (Hide)"),
+                             tooltip = string_format("Hide this synergy from the tracker. Ability ID: [%d]", abilityId),
+                             getFunc = function ()
+                                 return Settings.synergy.blacklist[abilityId] or false
+                             end,
+                             setFunc = function (value)
+                                 Settings.synergy.blacklist[abilityId] = value or nil
+                                 if tracker then
+                                     tracker:RefreshActiveSynergies()
+                                 end
+                             end,
+                             width = "full",
+                             default = false,
+                             disabled = function ()
+                                 return not Settings.synergy.enabled
+                             end,
+                         })
+
+            -- Priority slider
+            table_insert(synergySubmenu.controls,
+                         {
+                             type = "slider",
+                             name = zo_strformat("\t\t\t\t\t<<1>>", "Priority Override"),
+                             tooltip = string_format("Set priority for %s. Higher values = higher priority. 0 = game default.", name),
+                             min = 0,
+                             max = 10,
+                             step = 1,
+                             default = 0,
+                             getFunc = function ()
+                                 return Settings.synergy.priorityOverrides[abilityId] or 0
+                             end,
+                             setFunc = function (value)
+                                 if value > 0 then
+                                     Settings.synergy.priorityOverrides[abilityId] = value
+                                     SetSynergyPriorityOverride(abilityId, value)
+                                 else
+                                     Settings.synergy.priorityOverrides[abilityId] = nil
+                                     ClearSynergyPriorityOverride(abilityId)
+                                 end
+                             end,
+                             width = "full",
+                             disabled = function ()
+                                 return not Settings.synergy.enabled or (Settings.synergy.blacklist[abilityId] == true)
+                             end,
+                         })
+
+            -- Divider
+            table_insert(synergySubmenu.controls,
+                         {
+                             type = "divider",
+                             width = "full",
+                         })
+        end
+    end
 
     -- Register the settings panel
     if LUIE.SV.CombatInfo_Enabled then
