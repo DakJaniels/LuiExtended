@@ -89,10 +89,14 @@ modules/CombatText/EventViewers/Points.lua
 modules/CombatText/EventViewers/Resources.lua
 
 # Modules - Combat Info
-modules/CombatInfo/CombatInfo.lua
+modules/CombatInfo/Namespace.lua
+modules/CombatInfo/ActionBar.lua
+modules/CombatInfo/CastBar.lua
 modules/CombatInfo/AbilityAlerts.lua
 modules/CombatInfo/CrowdControlTracker.lua
 modules/CombatInfo/SynergyTracker.lua
+modules/CombatInfo/EventHandlers.lua
+modules/CombatInfo/CombatInfo.lua
 
 # Modules - Info Panel
 modules/InfoPanel/InfoPanel.lua
