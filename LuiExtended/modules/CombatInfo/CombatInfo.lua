@@ -44,6 +44,11 @@ CombatInfo.CrowdControlTracker =
 {
     name = LUIE.name .. "CombatInfo" .. "CrowdControlTracker",
 }
+--- @class (partial) SynergyTracker
+CombatInfo.SynergyTracker =
+{
+    name = LUIE.name .. "CombatInfo" .. "SynergyTracker",
+}
 
 
 CombatInfo.Enabled = false
@@ -300,6 +305,23 @@ CombatInfo.Defaults =
             unbreakable = { 224 / 255, 224 / 255, 1, 1 },
         },
         RemainingTextColoured = { 1, 1, 1, 1 }
+    },
+    synergy =
+    {
+        enabled = false,
+        unlocked = false,
+        displayMode = "multi",  -- "single", "multi", "compact"
+        maxDisplay = 10,        -- Max synergies to show (can be increased)
+        showPriority = true,    -- Show priority numbers
+        showKeybinds = true,    -- Show numbered keybinds
+        playSound = true,       -- Play ABILITY_SYNERGY_READY
+        showCooldowns = true,   -- Show synergies on cooldown
+        offsetX = 0,            -- UI position X
+        offsetY = 200,          -- UI position Y
+        detectedSynergies = {}, -- Persistent synergy database
+        priorityOverrides = {}, -- User priority overrides
+        cooldownGroups = {},    -- Learned cooldown group relationships
+        blacklist = {},         -- Blacklisted synergy ability IDs
     },
 }
 
@@ -3154,6 +3176,9 @@ function CombatInfo.Initialize(enabled)
     -- Setup CCT
     CombatInfo.CrowdControlTracker.UpdateAOEList()
     CombatInfo.CrowdControlTracker.Initialize()
+
+    -- Setup Synergy Tracker
+    CombatInfo.InitializeSynergyTracker()
 
     -- Variable adjustment if needed
     if not LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsCI then
