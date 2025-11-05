@@ -561,21 +561,26 @@ local function GroupInviteResponseAlert(characterName, response, displayName)
         local finalName
         local finalAlertName
 
-        local nameCheck1 = ZO_GetPrimaryPlayerName(displayName, characterName, false)
-        local nameCheck2 = ZO_GetSecondaryPlayerName(displayName, characterName, false)
-
-        if nameCheck1 == "" then
-            finalName = displayName
-            finalAlertName = displayName
-        elseif nameCheck2 == "" then
+        if response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED_CANT_JOIN then
             finalName = characterName
             finalAlertName = characterName
-        elseif nameCheck1 ~= "" and nameCheck2 ~= "" then
-            finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
-            finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
         else
-            finalName = ""
-            finalAlertName = ""
+            local nameCheck1 = ZO_GetPrimaryPlayerName(displayName, characterName, false)
+            local nameCheck2 = ZO_GetSecondaryPlayerName(displayName, characterName, false)
+
+            if nameCheck1 == "" then
+                finalName = displayName
+                finalAlertName = displayName
+            elseif nameCheck2 == "" then
+                finalName = characterName
+                finalAlertName = characterName
+            elseif nameCheck1 ~= "" and nameCheck2 ~= "" then
+                finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
+                finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
+            else
+                finalName = ""
+                finalAlertName = ""
+            end
         end
 
         if response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED and (LUIE.PlayerNameFormatted == characterName or LUIE.PlayerDisplayName == displayName) then
@@ -592,7 +597,7 @@ local function GroupInviteResponseAlert(characterName, response, displayName)
             alertMessage = finalAlertName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), finalAlertName) or characterName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), characterName) or GetString(SI_PLAYER_BUSY)
         end
 
-        if ChatAnnouncements.SV.Group.GroupCA or response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED or response == GROUP_INVITE_RESPONSE_IGNORED or response == GROUP_INVITE_RESPONSE_PLAYER_NOT_FOUND then
+        if ChatAnnouncements.SV.Group.GroupCA or response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED or response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED_CANT_JOIN or response == GROUP_INVITE_RESPONSE_IGNORED or response == GROUP_INVITE_RESPONSE_PLAYER_NOT_FOUND then
             printToChat(message, true)
         end
         if ChatAnnouncements.SV.Group.GroupAlert then
