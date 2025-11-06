@@ -25,6 +25,34 @@ local timeMs = GetFrameTimeMilliseconds
 --- @class (partial) ActionBar
 local ActionBar = CombatInfo.ActionBar
 
+-- Cache ActionBar table references at module level to avoid repeated getter calls
+local g_barFakeAura = ActionBar.GetBarFakeAura()
+local g_toggledSlotsPlayer = ActionBar.GetToggledSlotsPlayer()
+local g_toggledSlotsRemain = ActionBar.GetToggledSlotsRemain()
+local g_toggledSlotsFront = ActionBar.GetToggledSlotsFront()
+local g_toggledSlotsBack = ActionBar.GetToggledSlotsBack()
+local g_toggledSlotsStack = ActionBar.GetToggledSlotsStack()
+local g_uiCustomToggle = ActionBar.GetUiCustomToggle()
+local g_barNoRemove = ActionBar.GetBarNoRemove()
+local g_protectAbilityRemoval = ActionBar.GetProtectAbilityRemoval()
+local g_mineStacks = ActionBar.GetMineStacks()
+local g_mineNoTurnOff = ActionBar.GetMineNoTurnOff()
+local g_ProcSound = ActionBar.GetProcSound()
+local g_boundArmamentsPlayed = ActionBar.GetBoundArmamentsPlayed()
+local g_triggeredSlotsRemain = ActionBar.GetTriggeredSlotsRemain()
+local g_triggeredSlotsFront = ActionBar.GetTriggeredSlotsFront()
+local g_triggeredSlotsBack = ActionBar.GetTriggeredSlotsBack()
+local g_barDurationOverride = ActionBar.GetBarDurationOverride()
+local uiUltimate = ActionBar.GetUltimateState()
+
+-- Cache addon compatibility check (checked once at load, never changes)
+local isFancyActionBarEnabled = OtherAddonCompatability.isFancyActionBarPlusEnabled or LUIE.IsItEnabled("FancyActionBar\43") or LUIE.IsItEnabled("FancyActionBar")
+
+-- Function to refresh cached references (called when ActionBar reinitializes tables)
+function EventHandlers.RefreshCachedReferences()
+    g_barDurationOverride = ActionBar.GetBarDurationOverride()
+end
+
 -- ===== EVENT HANDLERS =====
 
 -- Runs on the `EVENT_TARGET_CHANGE` listener
@@ -37,13 +65,6 @@ end
 -- Runs on the `EVENT_RETICLE_TARGET_CHANGED` listener
 --- @param eventCode integer
 function EventHandlers.OnReticleTargetChanged(eventCode)
-    local g_toggledSlotsRemain = ActionBar.GetToggledSlotsRemain()
-    local g_toggledSlotsFront = ActionBar.GetToggledSlotsFront()
-    local g_toggledSlotsBack = ActionBar.GetToggledSlotsBack()
-    local g_toggledSlotsPlayer = ActionBar.GetToggledSlotsPlayer()
-    local g_barNoRemove = ActionBar.GetBarNoRemove()
-    local g_uiCustomToggle = ActionBar.GetUiCustomToggle()
-
     for k, _ in pairs(g_toggledSlotsRemain) do
         local frontSlot = g_toggledSlotsFront[k]
         local backSlot = g_toggledSlotsBack[k]
@@ -104,8 +125,7 @@ end
 
 -- Helper to get override ability duration
 local function GetUpdatedAbilityDuration(abilityId)
-    local barDurationOverride = ActionBar.GetBarDurationOverride()
-    local dur = barDurationOverride[abilityId] or GetAbilityDuration(abilityId) or 0
+    local dur = g_barDurationOverride[abilityId] or GetAbilityDuration(abilityId) or 0
     return dur
 end
 
@@ -168,20 +188,6 @@ end
 --- @param passThrough boolean
 --- @param savedId integer
 function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, castByPlayer, passThrough, savedId)
-    local g_barFakeAura = ActionBar.GetBarFakeAura()
-    local g_toggledSlotsPlayer = ActionBar.GetToggledSlotsPlayer()
-    local g_toggledSlotsRemain = ActionBar.GetToggledSlotsRemain()
-    local g_toggledSlotsFront = ActionBar.GetToggledSlotsFront()
-    local g_toggledSlotsBack = ActionBar.GetToggledSlotsBack()
-    local g_toggledSlotsStack = ActionBar.GetToggledSlotsStack()
-    local g_uiCustomToggle = ActionBar.GetUiCustomToggle()
-    local g_barNoRemove = ActionBar.GetBarNoRemove()
-    local g_protectAbilityRemoval = ActionBar.GetProtectAbilityRemoval()
-    local g_mineStacks = ActionBar.GetMineStacks()
-    local g_mineNoTurnOff = ActionBar.GetMineNoTurnOff()
-    local g_ProcSound = ActionBar.GetProcSound()
-    local g_boundArmamentsPlayed = ActionBar.GetBoundArmamentsPlayed()
-
     if g_barFakeAura[abilityId] and not passThrough then
         return
     end
@@ -311,9 +317,8 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
                 g_toggledSlotsPlayer[abilityId] = true
                 local currentTimeST = timeMs()
                 if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
-                    local barDurationOverride = ActionBar.GetBarDurationOverride()
-                    if barDurationOverride[abilityId] then
-                        g_toggledSlotsRemain[abilityId] = currentTimeST + barDurationOverride[abilityId]
+                    if g_barDurationOverride[abilityId] then
+                        g_toggledSlotsRemain[abilityId] = currentTimeST + g_barDurationOverride[abilityId]
                     else
                         g_toggledSlotsRemain[abilityId] = 1000 * endTime
                     end
@@ -337,7 +342,6 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
         stackCount = Effects.BarHighlightStack[abilityId]
     end
 
-    local isFancyActionBarEnabled = OtherAddonCompatability.isFancyActionBarPlusEnabled or LUIE.IsItEnabled("FancyActionBar\43") or LUIE.IsItEnabled("FancyActionBar")
     if not isFancyActionBarEnabled then
         if Effects.BarHighlightExtraId[abilityId] then
             for k, v in pairs(Effects.BarHighlightExtraId) do
@@ -367,7 +371,6 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
             return
         end
 
-        local g_triggeredSlotsRemain = ActionBar.GetTriggeredSlotsRemain()
         if g_triggeredSlotsRemain[abilityId] then
             if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
                 local slotNum = g_toggledSlotsFront[abilityId]
@@ -387,53 +390,43 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
     else
         if Effects.IsGrimFocus[abilityId] then
             if CombatInfo.SV.ShowTriggered and CombatInfo.SV.ProcEnableSound then
-                local boundArmamentsPlayed = ActionBar.GetBoundArmamentsPlayed()
-                if not boundArmamentsPlayed[abilityId] then
-                    boundArmamentsPlayed[abilityId] = {}
+                if not g_boundArmamentsPlayed[abilityId] then
+                    g_boundArmamentsPlayed[abilityId] = {}
                 end
 
-                if (stackCount == 5 or stackCount == 10) and not boundArmamentsPlayed[abilityId][stackCount] then
+                if (stackCount == 5 or stackCount == 10) and not g_boundArmamentsPlayed[abilityId][stackCount] then
                     PlaySound(g_ProcSound)
                     PlaySound(g_ProcSound)
-                    boundArmamentsPlayed[abilityId][stackCount] = true
+                    g_boundArmamentsPlayed[abilityId][stackCount] = true
                 end
 
                 if stackCount < 5 then
-                    boundArmamentsPlayed[abilityId][5] = false
-                    boundArmamentsPlayed[abilityId][10] = false
+                    g_boundArmamentsPlayed[abilityId][5] = false
+                    g_boundArmamentsPlayed[abilityId][10] = false
                 elseif stackCount < 10 and stackCount > 5 then
-                    boundArmamentsPlayed[abilityId][10] = false
+                    g_boundArmamentsPlayed[abilityId][10] = false
                 end
-
-                ActionBar.SetBoundArmamentsPlayed(boundArmamentsPlayed)
             end
         elseif Effects.IsBoundArmaments[abilityId] then
             if CombatInfo.SV.ShowTriggered and CombatInfo.SV.ProcEnableSound then
-                local boundArmamentsPlayed = ActionBar.GetBoundArmamentsPlayed()
-                if not boundArmamentsPlayed[abilityId] then
-                    boundArmamentsPlayed[abilityId] = {}
+                if not g_boundArmamentsPlayed[abilityId] then
+                    g_boundArmamentsPlayed[abilityId] = {}
                 end
 
-                if (stackCount == 4 or stackCount == 8) and not boundArmamentsPlayed[abilityId][stackCount] then
+                if (stackCount == 4 or stackCount == 8) and not g_boundArmamentsPlayed[abilityId][stackCount] then
                     PlaySound(g_ProcSound)
                     PlaySound(g_ProcSound)
-                    boundArmamentsPlayed[abilityId][stackCount] = true
+                    g_boundArmamentsPlayed[abilityId][stackCount] = true
                 end
 
                 if stackCount < 4 then
-                    boundArmamentsPlayed[abilityId][4] = false
-                    boundArmamentsPlayed[abilityId][8] = false
+                    g_boundArmamentsPlayed[abilityId][4] = false
+                    g_boundArmamentsPlayed[abilityId][8] = false
                 elseif stackCount < 8 and stackCount > 4 then
-                    boundArmamentsPlayed[abilityId][8] = false
+                    g_boundArmamentsPlayed[abilityId][8] = false
                 end
-
-                ActionBar.SetBoundArmamentsPlayed(boundArmamentsPlayed)
             end
         end
-
-        local g_triggeredSlotsFront = ActionBar.GetTriggeredSlotsFront()
-        local g_triggeredSlotsBack = ActionBar.GetTriggeredSlotsBack()
-        local g_triggeredSlotsRemain = ActionBar.GetTriggeredSlotsRemain()
 
         if g_triggeredSlotsFront[abilityId] or g_triggeredSlotsBack[abilityId] then
             local currentTimeMs = timeMs()
@@ -467,9 +460,8 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
                 if Effects.IsGrimFocus[abilityId] or Effects.IsBloodFrenzy[abilityId] then
                     g_toggledSlotsRemain[abilityId] = currentTimeMs + 90000000
                 else
-                    local barDurationOverride = ActionBar.GetBarDurationOverride()
-                    if barDurationOverride[abilityId] then
-                        g_toggledSlotsRemain[abilityId] = currentTimeMs + barDurationOverride[abilityId]
+                    if g_barDurationOverride[abilityId] then
+                        g_toggledSlotsRemain[abilityId] = currentTimeMs + g_barDurationOverride[abilityId]
                     else
                         g_toggledSlotsRemain[abilityId] = 1000 * endTime
                     end
@@ -508,8 +500,6 @@ end
 --- @param abilityId integer
 --- @param overflow integer
 function EventHandlers.OnCombatEvent(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
-    local uiUltimate = ActionBar.GetUltimateState()
-
     if CombatInfo.SV.UltimateGeneration and uiUltimate.NotFull and ((result == ACTION_RESULT_BLOCKED_DAMAGE and targetType == COMBAT_UNIT_TYPE_PLAYER) or (Effects.IsWeaponAttack[abilityName] and sourceType == COMBAT_UNIT_TYPE_PLAYER and targetName ~= "")) then
         uiUltimate.Texture:SetHidden(false)
         uiUltimate.FadeTime = timeMs() + 8000
@@ -531,7 +521,6 @@ function EventHandlers.OnCombatEvent(eventCode, result, isError, abilityName, ab
                 compareId = 40372
             end
             if compareId then
-                local g_barNoRemove = ActionBar.GetBarNoRemove()
                 if g_barNoRemove[compareId] then
                     if Effects.BarHighlightCheckOnFade[compareId] then
                         EventHandlers.BarHighlightSwap(compareId)
@@ -572,14 +561,6 @@ function EventHandlers.OnCombatEventBar(eventCode, result, isError, abilityName,
     if sourceType ~= COMBAT_UNIT_TYPE_PLAYER and targetType ~= COMBAT_UNIT_TYPE_PLAYER then
         return
     end
-
-    local g_toggledSlotsPlayer = ActionBar.GetToggledSlotsPlayer()
-    local g_toggledSlotsFront = ActionBar.GetToggledSlotsFront()
-    local g_toggledSlotsBack = ActionBar.GetToggledSlotsBack()
-    local g_toggledSlotsRemain = ActionBar.GetToggledSlotsRemain()
-    local g_toggledSlotsStack = ActionBar.GetToggledSlotsStack()
-    local g_uiCustomToggle = ActionBar.GetUiCustomToggle()
-    local g_barNoRemove = ActionBar.GetBarNoRemove()
 
     if sourceType == COMBAT_UNIT_TYPE_PLAYER and targetType == COMBAT_UNIT_TYPE_PLAYER then
         g_toggledSlotsPlayer[abilityId] = true

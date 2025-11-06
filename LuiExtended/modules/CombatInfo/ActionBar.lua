@@ -574,24 +574,36 @@ do
     end
 end
 
+-- Helper to clear a table while maintaining the reference
+local function ClearTable(tbl)
+    for k in pairs(tbl) do
+        tbl[k] = nil
+    end
+end
+
 -- Called on initialization and menu changes
 function ActionBar.UpdateBarHighlightTables()
-    g_uiProcAnimation = {}
-    g_uiCustomToggle = {}
-    g_triggeredSlotsFront = {}
-    g_triggeredSlotsBack = {}
-    g_triggeredSlotsRemain = {}
-    g_toggledSlotsFront = {}
-    g_toggledSlotsBack = {}
-    g_toggledSlotsRemain = {}
-    g_toggledSlotsStack = {}
-    g_toggledSlotsPlayer = {}
-    g_barOverrideCI = {}
-    g_barFakeAura = {}
-    g_barNoRemove = {}
+    ClearTable(g_uiProcAnimation)
+    ClearTable(g_uiCustomToggle)
+    ClearTable(g_triggeredSlotsFront)
+    ClearTable(g_triggeredSlotsBack)
+    ClearTable(g_triggeredSlotsRemain)
+    ClearTable(g_toggledSlotsFront)
+    ClearTable(g_toggledSlotsBack)
+    ClearTable(g_toggledSlotsRemain)
+    ClearTable(g_toggledSlotsStack)
+    ClearTable(g_toggledSlotsPlayer)
+    ClearTable(g_barOverrideCI)
+    ClearTable(g_barFakeAura)
+    ClearTable(g_barNoRemove)
 
     g_barDurationOverride = CombatInfo.SV.durationOverrides or {}
     CombatInfo.SV.durationOverrides = g_barDurationOverride
+
+    -- Notify EventHandlers to refresh their cached reference to g_barDurationOverride
+    if CombatInfo.EventHandlers and CombatInfo.EventHandlers.RefreshCachedReferences then
+        CombatInfo.EventHandlers.RefreshCachedReferences()
+    end
 
     if CombatInfo.SV.ShowTriggered or CombatInfo.SV.ShowToggled then
         for abilityId, value in pairs(Effects.BarHighlightOverride) do
