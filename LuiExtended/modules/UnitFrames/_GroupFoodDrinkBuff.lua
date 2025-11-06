@@ -84,9 +84,8 @@ local function IsModuleEnabled()
 end
 
 local function ShouldShowOnFrame(isRaid)
-    local settings = GetSettings()
-    if not settings then return false end
-    return isRaid and settings.showOnRaid or settings.showOnGroup
+    if isRaid then return false end
+    return true
 end
 
 local function CountBuffTypeStats(buffType)
@@ -153,22 +152,20 @@ local function GetIconForBuffType(buffType, isDrink)
     return iconMap[quality]
 end
 
-local function GetIconSize(isRaid)
+local function GetIconSize()
     local settings = GetSettings()
     local combatStatsSettings = Shared.GetCombatStatsSettings()
 
     if combatStatsSettings and combatStatsSettings.enabled and combatStatsSettings.showUltimate then
-        return isRaid and combatStatsSettings.ultIconRaidSize or combatStatsSettings.ultIconGroupSize
+        return combatStatsSettings.ultIconGroupSize
     else
-        return isRaid and settings.iconSizeRaid or settings.iconSizeGroup
+        return settings.iconSizeGroup
     end
 end
 
-local function GetIconOffset(isRaid)
+local function GetIconOffset()
     local settings = GetSettings()
-    local offsetX = isRaid and settings.iconOffsetXRaid or settings.iconOffsetXGroup
-    local offsetY = isRaid and settings.iconOffsetYRaid or settings.iconOffsetYGroup
-    return offsetX, offsetY
+    return settings.iconOffsetXGroup, settings.iconOffsetYGroup
 end
 
 local function DetermineAnchorPoint(frameData)
@@ -227,11 +224,11 @@ end
 -- UI CREATION
 -- =====================================================================================================================
 
-local function CreateFoodDrinkBuffUI(frameData, isRaid)
+local function CreateFoodDrinkBuffUI(frameData)
     if frameData.foodDrinkBuff then return end
 
-    local iconSize = GetIconSize(isRaid)
-    local offsetX, offsetY = GetIconOffset(isRaid)
+    local iconSize = GetIconSize()
+    local offsetX, offsetY = GetIconOffset()
     local anchorControl, anchorPoint, anchorRelPoint, customOffsetX = DetermineAnchorPoint(frameData)
 
     if not anchorControl then return end
@@ -303,7 +300,7 @@ local function CreateFoodDrinkBuffUI(frameData, isRaid)
 
     local settings = GetSettings()
     if settings and settings.showRemainingTime then
-        local fontSize = isRaid and 10 or 12
+        local fontSize = 12
         local label = UI:Label(backdrop, { CENTER, BOTTOM, 0, 0 }, nil, { 1, 1 }, nil, "", false)
         label:SetDrawLayer(DL_OVERLAY)
         label:SetDrawLevel(16)
@@ -447,7 +444,7 @@ local function AddFoodDrinkIconToFrame(frameData, isRaid)
     if not IsModuleEnabled() then return end
     if not ShouldShowOnFrame(isRaid) then return end
 
-    CreateFoodDrinkBuffUI(frameData, isRaid)
+    CreateFoodDrinkBuffUI(frameData)
 end
 
 local function ShowFoodDrinkFrame(frameData)
@@ -561,6 +558,7 @@ function GroupFoodDrinkBuffManager.Initialize()
     EVENT_MANAGER:RegisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
     EVENT_MANAGER:RegisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_INVENTORY_ITEM_USED, OnInventoryItemUsed)
     EVENT_MANAGER:RegisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventorySingleSlotUpdate)
+    EVENT_MANAGER:AddFilterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK, REGISTER_FILTER_IS_NEW_ITEM, false)
 
     SLASH_COMMANDS[SLASH_COMMAND] = OnSlashCommand
 

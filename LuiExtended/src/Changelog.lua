@@ -13,6 +13,17 @@ local GetDisplayName = GetDisplayName
 local changelogMessages =
 {
     -- Version Header
+    "|cFFA500LuiExtended Version 7.1.0.5|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Significant CombatInfo performance optimization: eliminated redundant function calls and addon state checks that were causing frame freezes on high-buff-count scenarios (especially noticeable on Arcanist).",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Integration with LibFoodDrinkBuff: small group unit frames now display food/drink buff status icons and time remaining. Can be turned on and configured in the Unit Frames settings.",
+    "",
+    -- Version Header
     "|cFFA500LuiExtended Version 7.1.0.4|r",
     "",
     -- Fix

@@ -305,17 +305,12 @@ UnitFrames.Defaults =
     GroupFoodDrinkBuff =
     {
         enabled = false,
-        showOnGroup = true,
-        showOnRaid = true,
         showNoBuff = false,
         showRemainingTime = true,
         useCustomIcons = false,
         iconSizeGroup = 24,
         iconOffsetXGroup = 4,
         iconOffsetYGroup = 0,
-        iconSizeRaid = 20,
-        iconOffsetXRaid = 3,
-        iconOffsetYRaid = 0,
     },
 }
 
