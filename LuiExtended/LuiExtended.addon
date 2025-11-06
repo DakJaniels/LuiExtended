@@ -18,7 +18,7 @@ lang/default.lua
 lang/settings/default.lua
 
 lang/$(language).lua
-lang/settings/(language).lua
+lang/settings/$(language).lua
 
 # Addon Base
 src/LuiExtended.lua
