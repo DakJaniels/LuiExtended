@@ -85,7 +85,7 @@ function CombatText.CreateSettings()
         donation = LUIE.donation,
         slashCommand = "/luict",
         registerForRefresh = true,
-        registerForDefaults = false,
+        registerForDefaults = true,
     }
 
     local optionsDataCombatText = {}
@@ -130,8 +130,8 @@ function CombatText.CreateSettings()
         getFunc = function ()
             return Settings.unlocked
         end,
-        setFunc = function ()
-            Settings.unlocked = not Settings.unlocked
+        setFunc = function (value)
+            Settings.unlocked = value
             for k, _ in pairs(Settings.panels) do
                 _G[k]:SetMouseEnabled(Settings.unlocked)
                 _G[k]:SetMovable(Settings.unlocked)
@@ -285,7 +285,7 @@ function CombatText.CreateSettings()
                 disabled = function ()
                     return not Settings.common.useDefaultIcon
                 end,
-                default = Defaults.common.defaultIconOptions,
+                default = globalIconOptions[Defaults.common.defaultIconOptions],
             },
         },
     }

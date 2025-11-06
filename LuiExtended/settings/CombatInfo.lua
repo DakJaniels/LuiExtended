@@ -231,7 +231,7 @@ function CombatInfo.CreateSettings()
                     Settings.GlobalMethod = globalMethodOptionsKeys[value]
                 end,
                 width = "full",
-                default = Defaults.GlobalMethod,
+                default = globalMethodOptions[Defaults.GlobalMethod],
                 disabled = function ()
                     return not (LUIE.SV.CombatInfo_Enabled and Settings.GlobalShowGCD)
                 end,
@@ -1700,7 +1700,7 @@ function CombatInfo.CreateSettings()
                 disabled = function ()
                     return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
                 end,
-                default = Defaults.alerts.toggles.alertOptions,
+                default = globalAlertOptions[Defaults.alerts.toggles.alertOptions],
             },
             {
                 -- Show Mitigation Suffix
@@ -3438,7 +3438,7 @@ function CombatInfo.CreateSettings()
                     CrowdControlTracker:InitControls()
                 end,
                 width = "full",
-                default = Defaults.cct.defaultIconOptions,
+                default = globalIconOptions[Defaults.cct.defaultIconOptions],
                 disabled = function ()
                     return not Settings.cct.useDefaultIcon
                 end,

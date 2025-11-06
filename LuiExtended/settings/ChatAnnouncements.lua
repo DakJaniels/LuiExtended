@@ -141,7 +141,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not LUIE.SV.ChatAnnouncements_Enable
                 end,
-                default = Defaults.BracketOptionCharacter,
+                default = linkBracketDisplayOptions[Defaults.BracketOptionCharacter],
             },
             {
                 -- TODO: Temporary
@@ -1623,7 +1623,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not LUIE.SV.ChatAnnouncements_Enable
                 end,
-                default = Defaults.BracketOptionItem,
+                default = linkBracketDisplayOptions[Defaults.BracketOptionItem],
             },
             {
                 -- Show looted item icons
@@ -5214,7 +5214,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Collectibles.CollectibleCA or Settings.Collectibles.CollectibleCSA or Settings.Collectibles.CollectibleAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.BracketOptionCollectible,
+                default = linkBracketDisplayOptions[Defaults.BracketOptionCollectible],
             },
             {
                 -- Collectible Color 1
@@ -5419,7 +5419,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Collectibles.CollectibleUseCA or Settings.Collectibles.CollectibleUseAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.BracketOptionCollectibleUse,
+                default = linkBracketDisplayOptions[Defaults.BracketOptionCollectibleUse],
             },
             {
                 -- Collectible Color
@@ -5550,7 +5550,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not LUIE.SV.ChatAnnouncements_Enable
                 end,
-                default = Defaults.BracketOptionLorebook,
+                default = linkBracketDisplayOptions[Defaults.BracketOptionLorebook],
             },
             {
                 -- Show Lorebooks (ChatAnnouncements)
@@ -5920,7 +5920,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Antiquities.AntiquityCA or Settings.Antiquities.AntiquityCSA or Settings.Antiquities.AntiquityAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.Antiquities.AntiquityBracket,
+                default = linkBracketDisplayOptions[Defaults.Antiquities.AntiquityBracket],
             },
             {
                 -- Antiquities Icon
@@ -7232,7 +7232,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Social.GuildRankCA or Settings.Social.GuildRankAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.Social.GuildRankDisplayOptions,
+                default = guildRankDisplayOptions[Defaults.Social.GuildRankDisplayOptions],
             },
             {
                 -- Show Guild Management ChatAnnouncements

@@ -1641,7 +1641,7 @@ function SpellCastBuffs.CreateSettings()
                 disabled = function ()
                     return not Settings.UseDefaultIcon
                 end,
-                default = Defaults.DefaultIconOptions,
+                default = globalIconOptions[Defaults.DefaultIconOptions],
             },
         },
     }

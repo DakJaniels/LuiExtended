@@ -162,6 +162,10 @@ function UnitFrames.CreateSettings()
         slashCommand = "/luiuf",
         registerForRefresh = true,
         registerForDefaults = true,
+        resetFunc = function ()
+            -- Reset all frame positions when LAM "Reset to Default" is clicked
+            UnitFrames.CustomFramesResetPosition(false)
+        end,
     }
 
     local optionsDataUnitFrames = {}
@@ -2147,7 +2151,7 @@ function UnitFrames.CreateSettings()
                     UnitFrames.CustomFramesApplyBarAlignment()
                 end,
                 width = "full",
-                default = Defaults.BarAlignPlayerHealth,
+                default = alignmentOptions[Defaults.BarAlignPlayerHealth],
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
                 end,
@@ -2166,7 +2170,7 @@ function UnitFrames.CreateSettings()
                     UnitFrames.CustomFramesApplyBarAlignment()
                 end,
                 width = "full",
-                default = Defaults.BarAlignPlayerMagicka,
+                default = alignmentOptions[Defaults.BarAlignPlayerMagicka],
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
                 end,
@@ -2185,7 +2189,7 @@ function UnitFrames.CreateSettings()
                     UnitFrames.CustomFramesApplyBarAlignment()
                 end,
                 width = "full",
-                default = Defaults.BarAlignPlayerStamina,
+                default = alignmentOptions[Defaults.BarAlignPlayerStamina],
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
                 end,
@@ -2204,7 +2208,7 @@ function UnitFrames.CreateSettings()
                     UnitFrames.CustomFramesApplyBarAlignment()
                 end,
                 width = "full",
-                default = Defaults.BarAlignTarget,
+                default = alignmentOptions[Defaults.BarAlignTarget],
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
                 end,
@@ -2293,7 +2297,7 @@ function UnitFrames.CreateSettings()
                 end,
                 width = "full",
                 warning = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_PLAYER_METHOD_WARN),
-                default = Defaults.PlayerFrameOptions,
+                default = playerFrameOptions[Defaults.PlayerFrameOptions],
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
                 end,
@@ -3092,7 +3096,7 @@ function UnitFrames.CreateSettings()
                     UnitFrames.CustomFramesApplyLayoutRaid(true)
                 end,
                 width = "full",
-                default = Defaults.RaidIconOptions,
+                default = raidIconOptions[Defaults.RaidIconOptions],
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
                 end,
