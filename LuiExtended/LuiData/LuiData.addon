@@ -6,8 +6,8 @@
 ## Description: Provides data for LuiExtended.
 ## IsLibrary: true
 
-lang/Skills_en.lua
-lang/Skills_$(language).lua
+lang/default.lua
+lang/$(language).lua
 
 # Core Data Files
 Globals.lua

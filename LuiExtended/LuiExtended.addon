@@ -14,11 +14,11 @@
 ;src/AddonProfiler.lua
 
 # Language Files
-lang/en.lua
-lang/settings/Settings_en.lua
+lang/default.lua
+lang/settings/default.lua
 
 lang/$(language).lua
-lang/settings/Settings_$(language).lua
+lang/settings/(language).lua
 
 # Addon Base
 src/LuiExtended.lua
