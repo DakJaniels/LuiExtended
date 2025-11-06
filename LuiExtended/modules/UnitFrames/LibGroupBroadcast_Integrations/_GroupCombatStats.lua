@@ -57,11 +57,23 @@ local function AddCombatStatsToFrame(frameData, isRaid)
                 frameData.libGroupContainer = container
             end
 
-            -- Position container to right of health bar (SmallGroup only)
-            container:SetAnchor(LEFT, backdrop, RIGHT, offsetX, offsetY)
+            local numAnchors = container:GetNumAnchors()
+            if numAnchors == 0 then
+                container:SetAnchor(LEFT, backdrop, RIGHT, offsetX, offsetY)
+            end
+
+            -- Determine anchor within container (after food/drink if it exists)
+            local anchorTarget = container
+            local anchorPoint = LEFT
+            local anchorOffsetX = 0
+            if frameData.foodDrinkBuff and frameData.foodDrinkBuff.backdrop then
+                anchorTarget = frameData.foodDrinkBuff.backdrop
+                anchorPoint = RIGHT
+                anchorOffsetX = 3
+            end
 
             -- FRONTBAR ULT (ult1)
-            frameData.combatStats.ult1Backdrop = UI:Backdrop(container, { LEFT, LEFT }, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
+            frameData.combatStats.ult1Backdrop = UI:Backdrop(container, { LEFT, anchorPoint, anchorOffsetX, 0, anchorTarget }, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
             frameData.combatStats.ult1Backdrop:SetDrawLayer(DL_BACKGROUND)
             frameData.combatStats.ult1Backdrop:SetDrawLevel(13)
 

@@ -3929,6 +3929,261 @@ function UnitFrames.CreateSettings()
         },
     }
 
+    -- Unit Frames - Group Food & Drink Buffs Options Submenu
+    optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
+    {
+        type = "submenu",
+        name = "Group Food & Drink Buffs",
+        controls =
+        {
+            {
+                type = "checkbox",
+                name = "Enable Group Food & Drink Buffs",
+                tooltip = "Display food and drink buff icons for group members using LibFoodDrinkBuff.",
+                getFunc = function ()
+                    return Settings.GroupFoodDrinkBuff.enabled
+                end,
+                setFunc = function (value)
+                    Settings.GroupFoodDrinkBuff.enabled = value
+                    if UnitFrames.GroupFoodDrinkBuff then
+                        UnitFrames.GroupFoodDrinkBuff.OnSettingsChanged()
+                    end
+                end,
+                width = "full",
+                default = Defaults.GroupFoodDrinkBuff.enabled,
+                warning = "Requires LibFoodDrinkBuff library. " .. GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and LibFoodDrinkBuff)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = "Show on Group Frames",
+                tooltip = "Display food/drink buff icons on small group frames (4-player groups).",
+                getFunc = function ()
+                    return Settings.GroupFoodDrinkBuff.showOnGroup
+                end,
+                setFunc = function (value)
+                    Settings.GroupFoodDrinkBuff.showOnGroup = value
+                    if UnitFrames.GroupFoodDrinkBuff then
+                        UnitFrames.GroupFoodDrinkBuff.RefreshFrames()
+                    end
+                end,
+                width = "half",
+                default = Defaults.GroupFoodDrinkBuff.showOnGroup,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupFoodDrinkBuff.enabled)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = "Show on Raid Frames",
+                tooltip = "Display food/drink buff icons on raid frames (5+ player groups).",
+                getFunc = function ()
+                    return Settings.GroupFoodDrinkBuff.showOnRaid
+                end,
+                setFunc = function (value)
+                    Settings.GroupFoodDrinkBuff.showOnRaid = value
+                    if UnitFrames.GroupFoodDrinkBuff then
+                        UnitFrames.GroupFoodDrinkBuff.RefreshFrames()
+                    end
+                end,
+                width = "half",
+                default = Defaults.GroupFoodDrinkBuff.showOnRaid,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupFoodDrinkBuff.enabled)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = "Show \"No Buff\" Icon",
+                tooltip = "Display an icon when a group member has no food or drink buff active.",
+                getFunc = function ()
+                    return Settings.GroupFoodDrinkBuff.showNoBuff
+                end,
+                setFunc = function (value)
+                    Settings.GroupFoodDrinkBuff.showNoBuff = value
+                    if UnitFrames.GroupFoodDrinkBuff then
+                        UnitFrames.GroupFoodDrinkBuff.RefreshFrames()
+                    end
+                end,
+                width = "full",
+                default = Defaults.GroupFoodDrinkBuff.showNoBuff,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupFoodDrinkBuff.enabled)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = "Show Remaining Time",
+                tooltip = "Display countdown timer on food/drink buff icons showing time remaining (hours/minutes/seconds).",
+                getFunc = function ()
+                    return Settings.GroupFoodDrinkBuff.showRemainingTime
+                end,
+                setFunc = function (value)
+                    Settings.GroupFoodDrinkBuff.showRemainingTime = value
+                end,
+                width = "full",
+                default = Defaults.GroupFoodDrinkBuff.showRemainingTime,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupFoodDrinkBuff.enabled)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = "Use Custom Quality Icons",
+                tooltip = "Use custom quality-based icons (green/blue/purple) instead of actual buff icons. Green = single stat, Blue = dual stat, Purple = triple stat.",
+                getFunc = function ()
+                    return Settings.GroupFoodDrinkBuff.useCustomIcons
+                end,
+                setFunc = function (value)
+                    Settings.GroupFoodDrinkBuff.useCustomIcons = value
+                    if UnitFrames.GroupFoodDrinkBuff then
+                        UnitFrames.GroupFoodDrinkBuff.RefreshFrames()
+                    end
+                end,
+                width = "full",
+                default = Defaults.GroupFoodDrinkBuff.useCustomIcons,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupFoodDrinkBuff.enabled)
+                end,
+            },
+            {
+                type = "slider",
+                name = "Group Frame Icon Size",
+                min = 16,
+                max = 32,
+                step = 2,
+                getFunc = function ()
+                    return Settings.GroupFoodDrinkBuff.iconSizeGroup
+                end,
+                setFunc = function (value)
+                    Settings.GroupFoodDrinkBuff.iconSizeGroup = value
+                    if UnitFrames.GroupFoodDrinkBuff then
+                        UnitFrames.GroupFoodDrinkBuff.RefreshFrames()
+                    end
+                end,
+                width = "full",
+                default = Defaults.GroupFoodDrinkBuff.iconSizeGroup,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupFoodDrinkBuff.enabled)
+                end,
+            },
+            {
+                type = "slider",
+                name = "Group Frame Icon Offset X",
+                min = -20,
+                max = 20,
+                step = 1,
+                getFunc = function ()
+                    return Settings.GroupFoodDrinkBuff.iconOffsetXGroup
+                end,
+                setFunc = function (value)
+                    Settings.GroupFoodDrinkBuff.iconOffsetXGroup = value
+                    if UnitFrames.GroupFoodDrinkBuff then
+                        UnitFrames.GroupFoodDrinkBuff.RefreshFrames()
+                    end
+                end,
+                width = "half",
+                default = Defaults.GroupFoodDrinkBuff.iconOffsetXGroup,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupFoodDrinkBuff.enabled)
+                end,
+            },
+            {
+                type = "slider",
+                name = "Group Frame Icon Offset Y",
+                min = -20,
+                max = 20,
+                step = 1,
+                getFunc = function ()
+                    return Settings.GroupFoodDrinkBuff.iconOffsetYGroup
+                end,
+                setFunc = function (value)
+                    Settings.GroupFoodDrinkBuff.iconOffsetYGroup = value
+                    if UnitFrames.GroupFoodDrinkBuff then
+                        UnitFrames.GroupFoodDrinkBuff.RefreshFrames()
+                    end
+                end,
+                width = "half",
+                default = Defaults.GroupFoodDrinkBuff.iconOffsetYGroup,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupFoodDrinkBuff.enabled)
+                end,
+            },
+            {
+                type = "slider",
+                name = "Raid Frame Icon Size",
+                min = 14,
+                max = 28,
+                step = 2,
+                getFunc = function ()
+                    return Settings.GroupFoodDrinkBuff.iconSizeRaid
+                end,
+                setFunc = function (value)
+                    Settings.GroupFoodDrinkBuff.iconSizeRaid = value
+                    if UnitFrames.GroupFoodDrinkBuff then
+                        UnitFrames.GroupFoodDrinkBuff.RefreshFrames()
+                    end
+                end,
+                width = "full",
+                default = Defaults.GroupFoodDrinkBuff.iconSizeRaid,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupFoodDrinkBuff.enabled)
+                end,
+            },
+            {
+                type = "slider",
+                name = "Raid Frame Icon Offset X",
+                min = -100,
+                max = 100,
+                step = 1,
+                getFunc = function ()
+                    return Settings.GroupFoodDrinkBuff.iconOffsetXRaid
+                end,
+                setFunc = function (value)
+                    Settings.GroupFoodDrinkBuff.iconOffsetXRaid = value
+                    if UnitFrames.GroupFoodDrinkBuff then
+                        UnitFrames.GroupFoodDrinkBuff.RefreshFrames()
+                    end
+                end,
+                width = "half",
+                default = Defaults.GroupFoodDrinkBuff.iconOffsetXRaid,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupFoodDrinkBuff.enabled)
+                end,
+            },
+            {
+                type = "slider",
+                name = "Raid Frame Icon Offset Y",
+                min = -50,
+                max = 50,
+                step = 1,
+                getFunc = function ()
+                    return Settings.GroupFoodDrinkBuff.iconOffsetYRaid
+                end,
+                setFunc = function (value)
+                    Settings.GroupFoodDrinkBuff.iconOffsetYRaid = value
+                    if UnitFrames.GroupFoodDrinkBuff then
+                        UnitFrames.GroupFoodDrinkBuff.RefreshFrames()
+                    end
+                end,
+                width = "half",
+                default = Defaults.GroupFoodDrinkBuff.iconOffsetYRaid,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.GroupFoodDrinkBuff.enabled)
+                end,
+            },
+        },
+    }
+
     -- Unit Frames - Custom Unit Frames (Companion) Options Submenu
     optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
     {

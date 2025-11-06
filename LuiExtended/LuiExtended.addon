@@ -152,6 +152,7 @@ modules/UnitFrames/LibGroupBroadcast_Integrations/_GroupCombatStats.lua
 modules/UnitFrames/LibGroupBroadcast_Integrations/_GroupPotionCooldowns.lua
 modules/UnitFrames/LibGroupBroadcast_Integrations/_GroupResources.lua
 
+modules/UnitFrames/_GroupFoodDrinkBuff.lua
 modules/UnitFrames/_ListFunctions.lua
 modules/UnitFrames/_MenuFunctions.lua
 modules/UnitFrames/_FontFunctions.lua

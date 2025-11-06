@@ -62,18 +62,21 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
         local offsetX = isRaid and Settings.potionIconRaidOffsetX or Settings.potionIconGroupOffsetX
         local offsetY = isRaid and Settings.potionIconRaidOffsetY or Settings.potionIconGroupOffsetY
 
-        -- Get or create the container (already positioned by GroupCombatStats if enabled)
+        -- Get or create the container (already positioned by other modules if enabled)
         local container = frameData.libGroupContainer
         if not container then
             container = UI:Control(frameData.control, nil, nil, false)
             frameData.libGroupContainer = container
+        end
 
-            -- If combat stats didn't create/position container, position it (SmallGroup only)
+        local numAnchors = container:GetNumAnchors()
+        if numAnchors == 0 then
             local healthBackdrop = Shared.GetHealthBackdrop(frameData)
             container:SetAnchor(LEFT, healthBackdrop, RIGHT, offsetX, offsetY)
         end
 
         -- Determine anchor target within container for horizontal flow
+        -- Order: Food/Drink -> Ultimate -> Potion
         local anchorTarget = container
         local anchorPoint = LEFT
         local anchorOffsetX = 0
@@ -84,6 +87,10 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
             anchorOffsetX = 3
         elseif frameData.combatStats and frameData.combatStats.ult1Backdrop then
             anchorTarget = frameData.combatStats.ult1Backdrop
+            anchorPoint = RIGHT
+            anchorOffsetX = 3
+        elseif frameData.foodDrinkBuff and frameData.foodDrinkBuff.backdrop then
+            anchorTarget = frameData.foodDrinkBuff.backdrop
             anchorPoint = RIGHT
             anchorOffsetX = 3
         end

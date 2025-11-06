@@ -300,6 +300,23 @@ UnitFrames.Defaults =
         potionIconRaidOffsetX = 3,
         potionIconRaidOffsetY = 0,
     },
+
+    -- Group Food & Drink Buffs (LibFoodDrinkBuff Integration)
+    GroupFoodDrinkBuff =
+    {
+        enabled = false,
+        showOnGroup = true,
+        showOnRaid = true,
+        showNoBuff = false,
+        showRemainingTime = true,
+        useCustomIcons = false,
+        iconSizeGroup = 24,
+        iconOffsetXGroup = 4,
+        iconOffsetYGroup = 0,
+        iconSizeRaid = 20,
+        iconOffsetXRaid = 3,
+        iconOffsetYRaid = 0,
+    },
 }
 
 UnitFrames.SV = {}

@@ -217,6 +217,11 @@ function UnitFrames.Initialize(enabled)
         UnitFrames.GroupPotionCooldowns.SetupFrames()
     end
 
+    -- Initialize GroupFoodDrinkBuff
+    if UnitFrames.GroupFoodDrinkBuff then
+        UnitFrames.GroupFoodDrinkBuff.Initialize()
+    end
+
     local RefreshBossHealthBar = function (self, smoothAnimate)
         local totalHealth = 0
         local totalMaxHealth = 0
