@@ -23,6 +23,7 @@ local table_insert = table.insert
 local table_sort = table.sort
 local table_remove = table.remove
 local string_format = string.format
+local string_sub = string.sub
 local zo_strformat = zo_strformat
 
 local eventManager = GetEventManager()
@@ -57,6 +58,12 @@ local g_PendingUpdate =
     Group = { flag = false, delay = 200, name = moduleName .. "PendingGroupUpdate" },
     VeteranXP = { flag = false, delay = 5000, name = moduleName .. "PendingVeteranXP" },
 }
+
+local BOSS_THRESHOLD_MARKER_WIDTH = 2
+local BOSS_THRESHOLD_MARKER_COLOR = { 1, 0.85, 0.1, 0.8 }
+local BOSS_THRESHOLD_LABEL_COLOR = { 1, 0.95, 0.7, 1 }
+local BOSS_THRESHOLD_LABEL_DIMENSIONS = { 56, 16 }
+local DEFAULT_BOSS_THRESHOLD_PERCENTS = { 25, 50, 75 }
 
 -- Labels for Offline/Dead/Resurrection Status
 local strDead = GetString(SI_UNIT_FRAME_STATUS_DEAD)
@@ -389,6 +396,202 @@ end
 --- @param format string
 function UnitFrames.FormatSimpleLabel(label, format)
     label.format = format
+end
+
+local function FetchCrutchBossThresholds()
+    local crutch = rawget(_G, "CrutchAlerts")
+    if not crutch then
+        return nil
+    end
+
+    local bossBar = crutch.BossHealthBar
+    if not bossBar or type(bossBar.GetBossThresholds) ~= "function" then
+        return nil
+    end
+
+    local ok, thresholdData = pcall(bossBar.GetBossThresholds)
+    if not ok or type(thresholdData) ~= "table" then
+        return nil
+    end
+
+    local percents = {}
+    for percent in pairs(thresholdData) do
+        if type(percent) == "number" then
+            table_insert(percents, percent)
+        end
+    end
+
+    if #percents == 0 then
+        return nil
+    end
+
+    table_sort(percents)
+
+    return
+    {
+        percents = percents,
+        map = thresholdData,
+    }
+end
+
+local function HideBossThresholdMarkers(healthFrame)
+    if not healthFrame or not healthFrame.thresholdMarkers then
+        return
+    end
+
+    for _, marker in ipairs(healthFrame.thresholdMarkers) do
+        if marker.line then
+            marker.line:SetHidden(true)
+        end
+        if marker.label then
+            marker.label:SetHidden(true)
+        end
+    end
+end
+
+local function ApplyBossThresholdMarkersToHealthFrame(healthFrame, thresholdInfo)
+    if not healthFrame or not thresholdInfo then
+        return
+    end
+
+    local container = healthFrame.thresholdContainer
+    if not container then
+        return
+    end
+
+    local markers = healthFrame.thresholdMarkers
+    if not markers then
+        markers = {}
+        healthFrame.thresholdMarkers = markers
+    end
+
+    local width = container:GetWidth()
+    if width <= 0 and UnitFrames.SV then
+        width = UnitFrames.SV.BossBarWidth or width
+    end
+
+    local height = container:GetHeight()
+    if height <= 0 and UnitFrames.SV then
+        height = UnitFrames.SV.BossBarHeight or height
+    end
+
+    if width <= 0 or height <= 0 then
+        HideBossThresholdMarkers(healthFrame)
+        return
+    end
+
+    for idx, percent in ipairs(thresholdInfo.percents) do
+        local marker = markers[idx]
+        if not marker then
+            local line = UI:Backdrop(container, nil, { BOSS_THRESHOLD_MARKER_WIDTH, height }, BOSS_THRESHOLD_MARKER_COLOR, BOSS_THRESHOLD_MARKER_COLOR, true)
+            line:SetEdgeTexture("", 1, 1, 0, 0)
+            line:SetDrawTier(DT_HIGH)
+            line:SetDrawLayer(DL_OVERLAY)
+            line:SetDrawLevel(6)
+            line:SetMouseEnabled(false)
+
+            local label = UI:Label(
+                container,
+                nil,
+                { BOSS_THRESHOLD_LABEL_DIMENSIONS[1], BOSS_THRESHOLD_LABEL_DIMENSIONS[2] },
+                { TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM },
+                "ZoFontGameSmall",
+                "",
+                true
+            )
+            label:SetDrawTier(DT_HIGH)
+            label:SetDrawLayer(DL_OVERLAY)
+            label:SetDrawLevel(7)
+            label:SetMouseEnabled(false)
+            label:SetColor(unpack(BOSS_THRESHOLD_LABEL_COLOR))
+
+            marker = { line = line, label = label }
+            markers[idx] = marker
+        end
+
+        local line = marker.line
+        local label = marker.label
+
+        line:SetDimensions(BOSS_THRESHOLD_MARKER_WIDTH, height)
+        local normalized = zo_clamp(percent / 100, 0, 1)
+        local offset = normalized * width - (BOSS_THRESHOLD_MARKER_WIDTH / 2)
+        local maxAnchor = width - BOSS_THRESHOLD_MARKER_WIDTH
+        if maxAnchor < 0 then
+            maxAnchor = 0
+        end
+        offset = zo_clamp(offset, 0, maxAnchor)
+        line:ClearAnchors()
+        line:SetAnchor(TOPLEFT, container, TOPLEFT, offset, 0)
+        line:SetAnchor(BOTTOMLEFT, container, BOTTOMLEFT, offset, 0)
+        line:SetHidden(false)
+
+        label:ClearAnchors()
+        label:SetDimensions(BOSS_THRESHOLD_LABEL_DIMENSIONS[1], BOSS_THRESHOLD_LABEL_DIMENSIONS[2])
+        label:SetAnchor(BOTTOM, line, TOP, 0, -2)
+        label:SetText(zo_strformat("<<1>>%", percent))
+        label:SetHidden(false)
+    end
+
+    for idx = #thresholdInfo.percents + 1, #markers do
+        local marker = markers[idx]
+        if marker then
+            if marker.line then
+                marker.line:SetHidden(true)
+            end
+            if marker.label then
+                marker.label:SetHidden(true)
+            end
+        end
+    end
+end
+
+local function ApplyBossThresholdMarkers(thresholdInfo)
+    if not UnitFrames.CustomFrames then
+        return
+    end
+
+    for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
+        local frame = UnitFrames.CustomFrames["boss" .. i]
+        if frame and frame[COMBAT_MECHANIC_FLAGS_HEALTH] then
+            if thresholdInfo then
+                ApplyBossThresholdMarkersToHealthFrame(frame[COMBAT_MECHANIC_FLAGS_HEALTH], thresholdInfo)
+            else
+                HideBossThresholdMarkers(frame[COMBAT_MECHANIC_FLAGS_HEALTH])
+            end
+        end
+    end
+end
+
+function UnitFrames.UpdateBossThresholds()
+    if not UnitFrames.CustomFrames or not UnitFrames.CustomFrames["boss1"] then
+        UnitFrames.activeBossThresholds = nil
+        return
+    end
+
+    if not UnitFrames.SV.BossShowThresholdMarkers then
+        UnitFrames.activeBossThresholds = nil
+        ApplyBossThresholdMarkers(nil)
+        return
+    end
+
+    local thresholdInfo = FetchCrutchBossThresholds()
+    if not thresholdInfo then
+        local fallbackPercents = {}
+        local fallbackMap = {}
+        for _, pct in ipairs(DEFAULT_BOSS_THRESHOLD_PERCENTS) do
+            table_insert(fallbackPercents, pct)
+            fallbackMap[pct] = ""
+        end
+
+        thresholdInfo =
+        {
+            percents = fallbackPercents,
+            map = fallbackMap,
+        }
+    end
+
+    UnitFrames.activeBossThresholds = thresholdInfo
+    ApplyBossThresholdMarkers(thresholdInfo)
 end
 
 -- Runs on the EVENT_PLAYER_ACTIVATED listener.
@@ -2020,6 +2223,8 @@ function UnitFrames.OnBossesChanged(eventCode)
             end
         end
     end
+
+    UnitFrames.UpdateBossThresholds()
 end
 
 --- Dynamically calculate frame positioning based on resolution with dimension compensation
@@ -3042,6 +3247,8 @@ function UnitFrames.CustomFramesApplyLayoutBosses()
         unitFrame.name:SetDimensions(UnitFrames.SV.BossBarWidth - 50, UnitFrames.SV.BossBarHeight - 2)
         unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.BossBarWidth - 50, UnitFrames.SV.BossBarHeight - 2)
     end
+
+    ApplyBossThresholdMarkers(UnitFrames.activeBossThresholds)
 
     bosses:SetHidden(false)
 end

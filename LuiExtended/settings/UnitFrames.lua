@@ -3943,7 +3943,7 @@ function UnitFrames.CreateSettings()
             {
                 type = "checkbox",
                 name = "Enable Group Food & Drink Buffs",
-                tooltip = "Display food and drink buff icons for group members using LibFoodDrinkBuff.",
+                tooltip = "Display food and drink buff icons for group members.",
                 getFunc = function ()
                     return Settings.GroupFoodDrinkBuff.enabled
                 end,
@@ -3955,9 +3955,9 @@ function UnitFrames.CreateSettings()
                 end,
                 width = "full",
                 default = Defaults.GroupFoodDrinkBuff.enabled,
-                warning = "Requires LibFoodDrinkBuff library. " .. GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and LibFoodDrinkBuff)
+                    return not LUIE.SV.UnitFrames_Enabled
                 end,
             },
             {
@@ -4732,6 +4732,24 @@ function UnitFrames.CreateSettings()
                 width = "full",
                 default = Defaults.BossEnableRegen,
                 warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses)
+                end,
+            },
+            {
+                -- Display Threshold Markers
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_THRESHOLDS), GetString(LUIE_STRING_LAM_UF_SHARED_BOSS)),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_THRESHOLDS_TP),
+                getFunc = function ()
+                    return Settings.BossShowThresholdMarkers
+                end,
+                setFunc = function (value)
+                    Settings.BossShowThresholdMarkers = value
+                    UnitFrames.UpdateBossThresholds()
+                end,
+                width = "full",
+                default = Defaults.BossShowThresholdMarkers,
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses)
                 end,

@@ -745,6 +745,12 @@ local function CreateBossFrames()
             bhb:SetDrawLayer(DL_BACKGROUND)
             bhb:SetDrawLevel(DL_CONTROLS)
 
+            local thresholdContainer = UI:Control(bhb, "fill", nil, false)
+            thresholdContainer:SetMouseEnabled(false)
+            thresholdContainer:SetDrawTier(DT_HIGH)
+            thresholdContainer:SetDrawLayer(DL_OVERLAY)
+            thresholdContainer:SetDrawLevel(6)
+
             UnitFrames.CustomFrames[unitTag] =
             {
                 ["unitTag"] = unitTag,
@@ -762,6 +768,8 @@ local function CreateBossFrames()
                     ["noHealingOverlay"] = UI:StatusBar(bhb, nil, nil, nil, true),
                     ["noHealingStripe"] = UI:StatusBar(bhb, nil, nil, nil, true),
                     ["possessionOverlay"] = UI:Control(bhb, nil, nil, true),
+                    ["thresholdContainer"] = thresholdContainer,
+                    ["thresholdMarkers"] = {},
                     ["threshold"] = UnitFrames.targetThreshold,
                 },
                 ["dead"] = UI:Label(bhb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "Status", true),

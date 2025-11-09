@@ -9,6 +9,8 @@ local LUIE = LUIE
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
 
+local string_sub = string.sub
+
 -- -----------------------------------------------------------------------------
 -- Coordinator Setup
 -- -----------------------------------------------------------------------------
@@ -83,14 +85,27 @@ end
 function UnitFrames.OnPowerUpdate(unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
     -- Save Health value for future reference
     if powerType == COMBAT_MECHANIC_FLAGS_HEALTH and UnitFrames.savedHealth[unitTag] then
+        local previousHealth = UnitFrames.savedHealth[unitTag]
+        local bossMaxChanged = false
+
+        if previousHealth and string_sub(unitTag, 1, 4) == "boss" then
+            local previousMax = previousHealth[2]
+            local previousEffectiveMax = previousHealth[3]
+            bossMaxChanged = (previousMax and previousMax ~= powerMax) or (previousEffectiveMax and previousEffectiveMax ~= powerEffectiveMax)
+        end
+
         UnitFrames.savedHealth[unitTag] =
         {
             powerValue,
             powerMax,
             powerEffectiveMax,
-            UnitFrames.savedHealth[unitTag][4] or 0, -- shield
-            UnitFrames.savedHealth[unitTag][5] or 0  -- trauma
+            previousHealth[4] or 0, -- shield
+            previousHealth[5] or 0  -- trauma
         }
+
+        if bossMaxChanged then
+            UnitFrames.UpdateBossThresholds()
+        end
     end
 
     -- Update frames

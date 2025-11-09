@@ -410,6 +410,12 @@ local function UpdateRemainingTimeDisplay(frameData, timeEnds)
     local settings = GetSettings()
     if not settings or not settings.showRemainingTime then return end
 
+    if not timeEnds then
+        frameData.foodDrinkBuff.label:SetHidden(true)
+        frameData.foodDrinkBuff.label:SetText("")
+        return
+    end
+
     local currentTime = GetGameTimeMilliseconds()
     local remainingMS = (timeEnds * 1000) - currentTime
 
