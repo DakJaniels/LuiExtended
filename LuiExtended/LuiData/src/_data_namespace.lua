@@ -184,6 +184,7 @@ local Effects =
     IsCyrodiil = {},
     IsExperienceBuff = {},
     IsFoodBuff = {},
+    IsDrinkBuff = {},
     IsGrimFocus = {},
     IsBoundArmaments = {},
     IsGroundMineAura = {},
@@ -242,8 +243,8 @@ local ZoneTable = {}
 --- @class (partial) LuiData
 LuiData = {}
 LuiData.name = "LuiData"
-LuiData.version = 7010
-LuiData.addonVersion = "7.0.1.0"
+LuiData.version = 7106
+LuiData.addonVersion = "7.1.0.6"
 
 --- @class (partial) Data
 LuiData.Data =

@@ -11,8 +11,6 @@ local LUIE = LUIE
 local UnitFrames = LUIE.UnitFrames
 if not UnitFrames then return end
 
-if not LibFoodDrinkBuff then return end
-
 local LuiData = LuiData
 local Data = LuiData.Data
 local Effects = Data.Effects
@@ -20,7 +18,6 @@ local Tooltips = Data.Tooltips
 local Abilities = Data.Abilities
 
 local UI = LUIE.UI
-local libFDB = LibFoodDrinkBuff
 
 --- @class GroupFoodDrinkBuffManager
 local GroupFoodDrinkBuffManager = {}
@@ -54,15 +51,29 @@ local QUALITY_BLUE_STAT_COUNT = 2
 
 local SLASH_COMMAND = "/luiefoodbuff"
 
+-- Buff type constants (simplified from LibFoodDrinkBuff). Thank you (Scootworks & Baertram)
+local BUFF_TYPE_NONE = 0
+local BUFF_TYPE_MAX_HEALTH = 1
+local BUFF_TYPE_MAX_MAGICKA = 2
+local BUFF_TYPE_MAX_STAMINA = 4
+local BUFF_TYPE_REGEN_HEALTH = 8
+local BUFF_TYPE_REGEN_MAGICKA = 16
+local BUFF_TYPE_REGEN_STAMINA = 32
+
 -- Local API references
 local GetNumBuffs = GetNumBuffs
 local GetUnitBuffInfo = GetUnitBuffInfo
+local GetGameTimeMilliseconds = GetGameTimeMilliseconds
 local DoesUnitExist = DoesUnitExist
 local IsUnitDead = IsUnitDead
 local IsUnitOnline = IsUnitOnline
 local IsUnitGrouped = IsUnitGrouped
 local ITEM_SOUND_CATEGORY_FOOD = ITEM_SOUND_CATEGORY_FOOD
 local ITEM_SOUND_CATEGORY_DRINK = ITEM_SOUND_CATEGORY_DRINK
+
+-- Combined food & drink buff lookup table
+local AllFoodDrinkBuffs = {}
+ZO_CombineNonContiguousTables(AllFoodDrinkBuffs, Effects.IsFoodBuff, Effects.IsDrinkBuff)
 
 -- =====================================================================================================================
 -- STATE
@@ -95,16 +106,16 @@ local function CountBuffTypeStats(buffType)
 
     local regenTypes =
     {
-        LFDB_BUFF_TYPE_REGEN_HEALTH,
-        LFDB_BUFF_TYPE_REGEN_MAGICKA,
-        LFDB_BUFF_TYPE_REGEN_STAMINA
+        BUFF_TYPE_REGEN_HEALTH,
+        BUFF_TYPE_REGEN_MAGICKA,
+        BUFF_TYPE_REGEN_STAMINA
     }
 
     local maxTypes =
     {
-        LFDB_BUFF_TYPE_MAX_HEALTH,
-        LFDB_BUFF_TYPE_MAX_MAGICKA,
-        LFDB_BUFF_TYPE_MAX_STAMINA
+        BUFF_TYPE_MAX_HEALTH,
+        BUFF_TYPE_MAX_MAGICKA,
+        BUFF_TYPE_MAX_STAMINA
     }
 
     for _, regenType in ipairs(regenTypes) do
@@ -135,7 +146,7 @@ local function DetermineIconQuality(statCount, hasRegen, hasMax)
 end
 
 local function GetIconForBuffType(buffType, isDrink)
-    if buffType == LFDB_BUFF_TYPE_NONE then
+    if buffType == BUFF_TYPE_NONE then
         return ICON_NO_BUFF
     end
 
@@ -185,6 +196,65 @@ local function FindBuffSlotAndIconByAbilityId(unitTag, abilityId)
     end
 
     return nil, nil
+end
+
+local function CalculateBuffType(abilityId, buffName)
+    if not abilityId or not AllFoodDrinkBuffs[abilityId] then
+        return BUFF_TYPE_NONE
+    end
+
+    local buffType = BUFF_TYPE_NONE
+    local lowerName = buffName and string.lower(buffName) or ""
+
+    if zo_plainstrfind(lowerName, "max health") or zo_plainstrfind(lowerName, "increase health") then
+        buffType = buffType + BUFF_TYPE_MAX_HEALTH
+    end
+    if zo_plainstrfind(lowerName, "max magicka") or zo_plainstrfind(lowerName, "increase magicka") then
+        buffType = buffType + BUFF_TYPE_MAX_MAGICKA
+    end
+    if zo_plainstrfind(lowerName, "max stamina") or zo_plainstrfind(lowerName, "increase stamina") then
+        buffType = buffType + BUFF_TYPE_MAX_STAMINA
+    end
+    if zo_plainstrfind(lowerName, "health recovery") or zo_plainstrfind(lowerName, "regen health") then
+        buffType = buffType + BUFF_TYPE_REGEN_HEALTH
+    end
+    if zo_plainstrfind(lowerName, "magicka recovery") or zo_plainstrfind(lowerName, "regen magicka") then
+        buffType = buffType + BUFF_TYPE_REGEN_MAGICKA
+    end
+    if zo_plainstrfind(lowerName, "stamina recovery") or zo_plainstrfind(lowerName, "regen stamina") then
+        buffType = buffType + BUFF_TYPE_REGEN_STAMINA
+    end
+
+    if buffType == BUFF_TYPE_NONE then
+        buffType = BUFF_TYPE_MAX_HEALTH
+    end
+
+    return buffType
+end
+
+local function GetFoodBuffInfos(unitTag)
+    local numBuffs = GetNumBuffs(unitTag)
+    if numBuffs == 0 then
+        return BUFF_TYPE_NONE, nil, nil, nil, nil, nil, nil, 0
+    end
+
+    for i = 1, numBuffs do
+        local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconTexture, buffType, effectType, abilityType, statusEffectType, abilityId = GetUnitBuffInfo(unitTag, i)
+
+        if abilityId and AllFoodDrinkBuffs[abilityId] then
+            local calculatedBuffType = CalculateBuffType(abilityId, buffName)
+            local isDrink = Effects.IsDrinkBuff[abilityId] == true
+            local timeLeft = 0
+            if timeEnding then
+                local currentTime = GetGameTimeMilliseconds()
+                timeLeft = math.max(0, math.floor((timeEnding * 1000 - currentTime) / 1000))
+            end
+
+            return calculatedBuffType, isDrink, abilityId, buffName, timeStarted, timeEnding, iconTexture, timeLeft
+        end
+    end
+
+    return BUFF_TYPE_NONE, nil, nil, nil, nil, nil, nil, 0
 end
 
 -- =====================================================================================================================
@@ -389,9 +459,9 @@ local function UpdateFoodDrinkIcon(unitTag, frameData)
         return
     end
 
-    local buffType, isDrink, abilityId, buffName, timeStarted, timeEnds, iconTexture, timeLeft = libFDB:GetFoodBuffInfos(actualUnitTag)
+    local buffType, isDrink, abilityId, buffName, timeStarted, timeEnds, iconTexture, timeLeft = GetFoodBuffInfos(actualUnitTag)
 
-    if buffType == LFDB_BUFF_TYPE_NONE then
+    if buffType == BUFF_TYPE_NONE then
         local settings = GetSettings()
         if settings.showNoBuff then
             ShowFoodDrinkBuffIcon(frameData, ICON_NO_BUFF, nil, nil, nil, nil)
@@ -499,6 +569,7 @@ end
 
 local function OnEffectChanged(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
     if not isInitialized then return end
+    if not abilityId or not AllFoodDrinkBuffs[abilityId] then return end
 
     local frameData = Shared.GetFrameData(unitTag)
     if frameData then
@@ -550,8 +621,7 @@ function GroupFoodDrinkBuffManager.Initialize()
     if isInitialized then return end
     if not IsModuleEnabled() then return end
 
-    libFDB:RegisterAbilityIdsFilterOnEventEffectChanged("LUIE_GroupFoodDrinkBuff", OnEffectChanged)
-
+    EVENT_MANAGER:RegisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_EFFECT_CHANGED, OnEffectChanged)
     EVENT_MANAGER:RegisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)
     EVENT_MANAGER:RegisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_GROUP_MEMBER_LEFT, OnGroupMemberLeft)
     EVENT_MANAGER:RegisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_GROUP_UPDATE, OnGroupUpdate)
@@ -585,8 +655,7 @@ end
 function GroupFoodDrinkBuffManager.Uninitialize()
     if not isInitialized then return end
 
-    libFDB:UnRegisterAbilityIdsFilterOnEventEffectChanged("LUIE_GroupFoodDrinkBuff")
-
+    EVENT_MANAGER:UnregisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_EFFECT_CHANGED)
     EVENT_MANAGER:UnregisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_GROUP_MEMBER_JOINED)
     EVENT_MANAGER:UnregisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_GROUP_MEMBER_LEFT)
     EVENT_MANAGER:UnregisterForEvent("LUIE_GroupFoodDrinkBuff", EVENT_GROUP_UPDATE)

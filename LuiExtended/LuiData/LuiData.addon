@@ -1,8 +1,8 @@
 ## Title: LuiData
 ## Author: ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder
-## Version: 7.0.1.0
+## Version: 7.1.0.6
 ## APIVersion: 101048 101049
-## AddOnVersion: 7010
+## AddOnVersion: 7106
 ## Description: Provides data for LuiExtended.
 ## IsLibrary: true
 
@@ -10,15 +10,16 @@ lang/default.lua
 lang/$(language).lua
 
 # Core Data Files
-Globals.lua
-_data_namespace.lua
-AbilityTables.lua
-Tooltips.lua
-UnitNamesTable.lua
-ZoneNamesTable.lua
+src/Globals.lua
+src/_data_namespace.lua
+src/AbilityTables.lua
+src/Tooltips.lua
+src/UnitNamesTable.lua
+src/ZoneNamesTable.lua
 
 # Effects - Core
 Effects/IsFoodBuff.lua
+Effects/IsDrinkBuff.lua
 Effects/KeepUpgradeOverride.lua
 Effects/KeepUpgradeTooltip.lua
 Effects/MapDataOverride.lua
@@ -77,9 +78,9 @@ Effects/KeepUpgradeAlliance.lua
 Effects/KeepUpgradeNameFix.lua
 
 # Combat and Collectibles
-CastBarTable.lua
-CollectibleTables.lua
-CombatTextConstants.lua
+src/CastBarTable.lua
+src/CollectibleTables.lua
+src/CombatTextConstants.lua
 
 # Alert System
 AlertTable/AlertTable.lua
@@ -102,11 +103,11 @@ CrowdControl/ReversedLogic.lua
 CrowdControl/SpecialCC.lua
 
 # Misc Data
-Quests.lua
-PetNames.lua
-AbilityBlacklistPresets.lua
-CombatTextBlacklistPresets.lua
-CrownStoreCollectibles.lua
+src/Quests.lua
+src/PetNames.lua
+src/AbilityBlacklistPresets.lua
+src/CombatTextBlacklistPresets.lua
+src/CrownStoreCollectibles.lua
 
 
 # Debug

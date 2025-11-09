@@ -222,9 +222,15 @@ function SpellCastBuffs.UpdateContextHideList()
         for k, v in pairs(Effects.IsFoodBuff) do
             SpellCastBuffs.hidePlayerEffects[k] = v
         end
+        for k, v in pairs(Effects.IsDrinkBuff) do
+            SpellCastBuffs.hidePlayerEffects[k] = v
+        end
     end
     if SpellCastBuffs.SV.IgnoreFoodTarget then
         for k, v in pairs(Effects.IsFoodBuff) do
+            SpellCastBuffs.hideTargetEffects[k] = v
+        end
+        for k, v in pairs(Effects.IsDrinkBuff) do
             SpellCastBuffs.hideTargetEffects[k] = v
         end
     end
