@@ -11,6 +11,7 @@ local LUIE = LUIE
 local SpellCastBuffs = LUIE.SpellCastBuffs
 
 local UI = LUIE.UI
+local GridOverlay = LUIE.GridOverlay
 local LuiData = LuiData
 --- @type Data
 local Data = LuiData.Data
@@ -859,6 +860,11 @@ function SpellCastBuffs.SetMovingState(state)
     if not SpellCastBuffs.Enabled then
         return
     end
+
+    local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+    local gridEnabled = accountWideSettings and accountWideSettings.snapToGrid_buffs
+    local gridSize = (accountWideSettings and accountWideSettings.snapToGridSize_buffs) or 15
+    GridOverlay.Refresh("buffs", state and gridEnabled, gridSize)
 
     -- Helper function to update position label
     local function UpdatePositionLabel(control, label)

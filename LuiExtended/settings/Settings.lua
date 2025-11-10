@@ -7,6 +7,8 @@
 local LUIE = LUIE
 local g_ElementMovingEnabled
 
+local GridOverlay = LUIE.GridOverlay
+
 local pairs = pairs
 local table_concat = table.concat
 
@@ -160,7 +162,12 @@ function LUIE.CreateSettings()
         "Enable Grid Snap",
         "Enable snapping UI elements to a grid when moving them",
         function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
-        function (value) LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default = value end,
+        function (value)
+            local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+            accountWideSettings.snapToGrid_default = value
+            local gridSize = accountWideSettings.snapToGridSize_default or 15
+            GridOverlay.Refresh("default", g_ElementMovingEnabled and value, gridSize)
+        end,
         "half",
         nil,
         false
@@ -174,7 +181,11 @@ function LUIE.CreateSettings()
         100,
         5,
         function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_default or 15 end,
-        function (value) LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_default = value end,
+        function (value)
+            local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+            accountWideSettings.snapToGridSize_default = value
+            GridOverlay.Refresh("default", g_ElementMovingEnabled and accountWideSettings.snapToGrid_default, value)
+        end,
         "half",
         function () return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
         15

@@ -8,6 +8,7 @@
 local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 local UI = LUIE.UI
+local GridOverlay = LUIE.GridOverlay
 local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
 -- -----------------------------------------------------------------------------
@@ -322,6 +323,9 @@ function Unlock.OnSceneChange(oldState, newState)
     for _, mover in pairs(Unlock.movers) do
         mover:SetHidden(isHidden)
     end
+    if LUIE.SV.snapToGrid_default then
+        GridOverlay.SetHidden("default", isHidden)
+    end
 end
 
 --- Register scene callback for the game menu
@@ -377,6 +381,9 @@ function Unlock.SetupElementMover(state)
     if isFirstRun then
         Unlock.RegisterSceneCallback()
     end
+
+    local gridSize = LUIE.SV.snapToGridSize_default or 15
+    GridOverlay.Refresh("default", state and LUIE.SV.snapToGrid_default, gridSize)
 end
 
 --- Reset the position of windows. Called from the Settings Menu

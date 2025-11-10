@@ -11,6 +11,7 @@ local SettingsAPI = LUIE.SettingsAPI
 
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
+local GridOverlay = LUIE.GridOverlay
 local BlacklistPresets = LuiData.Data.AbilityBlacklistPresets
 
 local type, pairs = type, pairs
@@ -187,7 +188,10 @@ function SpellCastBuffs.CreateSettings()
             return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs
         end,
         setFunc = function (value)
-            LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs = value
+            local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+            accountWideSettings.snapToGrid_buffs = value
+            local gridSize = accountWideSettings.snapToGridSize_buffs or 15
+            GridOverlay.Refresh("buffs", g_BuffsMovingEnabled and value, gridSize)
         end,
         width = "half",
         default = false,
@@ -205,7 +209,9 @@ function SpellCastBuffs.CreateSettings()
             return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_buffs or 15
         end,
         setFunc = function (value)
-            LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_buffs = value
+            local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+            accountWideSettings.snapToGridSize_buffs = value
+            GridOverlay.Refresh("buffs", g_BuffsMovingEnabled and accountWideSettings.snapToGrid_buffs, value)
         end,
         width = "half",
         default = 15,

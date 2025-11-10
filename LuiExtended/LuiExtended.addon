@@ -49,6 +49,7 @@ frontend/CombatText.xml
 frontend/CrowdControlTracker.xml
 
 # Unlock
+src/GridOverlay.lua
 src/Unlock.lua
 
 # Modules - Chat Announcements

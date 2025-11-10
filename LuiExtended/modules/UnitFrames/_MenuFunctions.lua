@@ -9,6 +9,7 @@ local LUIE = LUIE
 -- Unit Frames namespace
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
+local GridOverlay = LUIE.GridOverlay
 
 function UnitFrames.MenuUpdatePlayerFrameOptions(option)
     if UnitFrames.CustomFrames["reticleover"] then
@@ -46,6 +47,11 @@ end
 -- Unlock CustomFrames for moving. Called from Settings Menu.
 function UnitFrames.CustomFramesSetMovingState(state)
     UnitFrames.CustomFramesMovingState = state
+
+    local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+    local gridEnabled = accountWideSettings and accountWideSettings.snapToGrid_unitFrames
+    local gridSize = (accountWideSettings and accountWideSettings.snapToGridSize_unitFrames) or 15
+    GridOverlay.Refresh("unitFrames", state and gridEnabled, gridSize)
 
     -- Unlock individual frames
     for _, unitTag in pairs(

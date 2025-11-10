@@ -9,6 +9,7 @@ local SettingsAPI = LUIE.SettingsAPI
 
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
+local GridOverlay = LUIE.GridOverlay
 
 local GetDisplayName = GetDisplayName
 local zo_strformat = zo_strformat
@@ -219,7 +220,10 @@ function UnitFrames.CreateSettings()
             return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_unitFrames
         end,
         setFunc = function (value)
-            LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_unitFrames = value
+            local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+            accountWideSettings.snapToGrid_unitFrames = value
+            local gridSize = accountWideSettings.snapToGridSize_unitFrames or 15
+            GridOverlay.Refresh("unitFrames", g_FramesMovingEnabled and value, gridSize)
         end,
         width = "half",
         default = false,
@@ -237,7 +241,9 @@ function UnitFrames.CreateSettings()
             return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_unitFrames or 15
         end,
         setFunc = function (value)
-            LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_unitFrames = value
+            local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+            accountWideSettings.snapToGridSize_unitFrames = value
+            GridOverlay.Refresh("unitFrames", g_FramesMovingEnabled and accountWideSettings.snapToGrid_unitFrames, value)
         end,
         width = "half",
         default = 15,
