@@ -15,14 +15,19 @@ local changelogMessages =
     -- Version Header
     "|cFFA500LuiExtended Version 7.1.0.7|r",
     "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Crowd Control Tracker preview window with pooled controls so players can test stun/immobilize visuals and encounter the updated charm handling in a safe space.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock mode grid overlay rebuilt as a pooled control system, wired into SpellCastBuffs and UnitFrames settings for lighter footprint and easier snapping.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Custom boss frames now read CrutchAlerts boss phase thresholds, expose a toggle in settings, and ship localized strings for supported languages.",
+    "",
     -- Changes
     "|cFFFF00Changes:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Refactored Group Food & Drink Buffs module: cleaner architecture, localized API references, and unified data sources for food/drink tracking.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat action bar overhaul: hotbar category validation, pooled cooldown widgets, and smarter throttling to keep cooldown displays in sync.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Group resource bars reformats their layout/spacing based on LibGroupBroadcast data so raid and small-group frames stay aligned with the new integrations.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Refactored Group Food & Drink Buffs module: localized API usage, unified data helpers, and migrated drink tracking into `LuiData/Effects` for maintenance.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Integrated LUIE icon/tooltip overrides, slash command refresh, countdown timer display, and smart anchoring with other LibGroupBroadcast widgets.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Removed LibFoodDrinkBuff dependency and migrated drink data into `LuiData/Effects` for centralized maintenance.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Applied inventory event filters and update throttling to cut redundant refreshes and improve performance.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Custom boss frames: CrutchAlerts boss phase thresholds now display on LUIE boss health bars (with 25/50/75 fallback) plus a settings toggle to disable the markers if desired.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Added boss threshold overlay offset/texture fixes and player-facing localization strings for the new toggle across supported languages.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Applied inventory event filters, update throttling, and LuiData version checks to eliminate redundant refreshes and stale-data warnings.",
     "",
     -- Version Header
     "|cFFA500LuiExtended Version 7.1.0.6|r",
