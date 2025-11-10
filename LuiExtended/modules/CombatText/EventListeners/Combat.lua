@@ -12,6 +12,7 @@ local CombatTextCombatEventListener = LUIE.CombatTextCombatEventListener
 
 local Effects = LuiData.Data.Effects
 local CombatTextConstants = LuiData.Data.CombatTextConstants
+local IsCharmAbility = IsCharmAbility
 
 local isWarned =
 {
@@ -115,6 +116,10 @@ function CombatTextCombatEventListener:OnCombatIn(...)
     local isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted = CombatTextConstants.isMiss[resultType], CombatTextConstants.isImmune[resultType], CombatTextConstants.isParried[resultType], CombatTextConstants.isReflected[resultType], CombatTextConstants.isDamageShield[resultType], CombatTextConstants.isDodged[resultType], CombatTextConstants.isBlocked[resultType], CombatTextConstants.isInterrupted[resultType]
     -- Crowd Control
     local isDisoriented, isFeared, isOffBalanced, isSilenced, isStunned, isCharmed = CombatTextConstants.isDisoriented[resultType], CombatTextConstants.isFeared[resultType], CombatTextConstants.isOffBalanced[resultType], CombatTextConstants.isSilenced[resultType], CombatTextConstants.isStunned[resultType], CombatTextConstants.isCharmed[resultType]
+    if not isCharmed and isFeared and IsCharmAbility(abilityId) then
+        isFeared = false
+        isCharmed = true
+    end
     -- Overflow
     local overkill, overheal = (Settings.common.overkill and overflow > 0 and (isDamage or isDamageCritical or isDot or isDotCritical)), (Settings.common.overheal and overflow > 0 and (isHealing or isHealingCritical or isHot or isHotCritical))
     ---------------------------------------------------------------------------------------------------------------------------------------
@@ -240,6 +245,10 @@ function CombatTextCombatEventListener:OnCombatOut(...)
     local isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted = CombatTextConstants.isMiss[resultType], CombatTextConstants.isImmune[resultType], CombatTextConstants.isParried[resultType], CombatTextConstants.isReflected[resultType], CombatTextConstants.isDamageShield[resultType], CombatTextConstants.isDodged[resultType], CombatTextConstants.isBlocked[resultType], CombatTextConstants.isInterrupted[resultType]
     -- Crowd Control
     local isDisoriented, isFeared, isOffBalanced, isSilenced, isStunned, isCharmed = CombatTextConstants.isDisoriented[resultType], CombatTextConstants.isFeared[resultType], CombatTextConstants.isOffBalanced[resultType], CombatTextConstants.isSilenced[resultType], CombatTextConstants.isStunned[resultType], CombatTextConstants.isCharmed[resultType]
+    if not isCharmed and isFeared and IsCharmAbility(abilityId) then
+        isFeared = false
+        isCharmed = true
+    end
     -- Overflow
     local overkill, overheal = (Settings.common.overkill and overflow > 0 and (isDamage or isDamageCritical or isDot or isDotCritical)), (Settings.common.overheal and overflow > 0 and (isHealing or isHealingCritical or isHot or isHotCritical))
     ---------------------------------------------------------------------------------------------------------------------------------------

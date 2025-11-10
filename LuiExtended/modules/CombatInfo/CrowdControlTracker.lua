@@ -14,6 +14,7 @@ local Effects = LuiData.Data.Effects
 local CrowdControl = LuiData.Data.CrowdControl
 local eventManager = GetEventManager()
 local animationManager = GetAnimationManager()
+local IsCharmAbility = IsCharmAbility
 local table_insert = table.insert
 local table_remove = table.remove
 local pairs = pairs
@@ -36,6 +37,24 @@ local iconBorder = "LuiExtended/media/combatinfo/crowdcontroltracker/border.dds"
 
 local defaultDisorientIcon
 local defaultImmuneIcon
+
+local previewCommand = "/luiecc"
+local previewAbilityBaseId = 900000
+local previewDurationMs = 2000
+local previewSpacingMs = 2600
+local previewSequence =
+{
+    ACTION_RESULT_STUNNED,
+    ACTION_RESULT_FEARED,
+    ACTION_RESULT_CHARMED,
+    ACTION_RESULT_DISORIENTED,
+    ACTION_RESULT_SILENCED,
+    ACTION_RESULT_STAGGERED,
+    ACTION_RESULT_ROOTED,
+    ACTION_RESULT_SNARED,
+    ACTION_RESULT_IMMUNE,
+}
+local previewCalls = {}
 
 local SET_SCALE_FROM_SV = true
 local BREAK_FREE_ID = 16565
@@ -356,6 +375,10 @@ function CrowdControlTracker:OnCombat(eventCode, result, isError, abilityName, a
 
     if CrowdControl.IgnoreList[abilityId] then
         return
+    end
+
+    if result == ACTION_RESULT_FEARED and IsCharmAbility(abilityId) then
+        result = ACTION_RESULT_CHARMED
     end
     local function StringEnd(String, End)
         return End == "" or zo_strsub(String, -zo_strlen(End)) == End
@@ -970,6 +993,7 @@ function CrowdControlTracker:GetDefaultIcon(ccType)
         [ACTION_RESULT_CHARMED] = LUIE_CC_ICON_CHARM,
         [ACTION_RESULT_DISORIENTED] = LUIE_CC_ICON_DISORIENT,
         [ACTION_RESULT_SILENCED] = LUIE_CC_ICON_SILENCE,
+        [ACTION_RESULT_STAGGERED] = LUIE_CC_ICON_STAGGER,
         [ACTION_RESULT_ROOTED] = LUIE_CC_ICON_ROOT,
         [ACTION_RESULT_SNARED] = LUIE_CC_ICON_SNARE,
         -- Group immune-type results
@@ -1019,6 +1043,14 @@ function CrowdControlTracker:OnDraw(abilityId, abilityIcon, ccDuration, result, 
     end
 
     if result == ACTION_RESULT_STAGGERED then
+        abilityIcon = abilityIcon or self:GetDefaultIcon(result) or ICON_MISSING
+        local ccText
+        if CombatInfo.SV.cct.useAbilityName then
+            ccText = zo_strformat(SI_ABILITY_NAME, abilityName)
+        else
+            ccText = self.controlText[result]
+        end
+        self:SetupInfo(ccText, CombatInfo.SV.cct.colors[result], abilityIcon)
         self:OnAnimation(LUIE_CCTracker, "stagger")
         return
     end
@@ -1145,11 +1177,19 @@ function CrowdControlTracker:SetupDisplay(displayType)
         self:BreakFreeHidden(true)
         LUIE_CCTracker:SetHidden(false)
     elseif displayType == "stagger" then
+        LUIE_CCTracker_IconFrame_Cooldown:SetHidden(true)
+        LUIE_CCTracker_IconFrame_GlobalCooldown:SetHidden(true)
+        LUIE_CCTracker_IconFrame_IconBorderHighlight:SetHidden(false)
+        LUIE_CCTracker_IconFrame_Icon:SetTextureCoords(0, 1, 0, 1)
         LUIE_CCTracker_TextFrame_Label:SetText(CrowdControlTracker.controlText[ACTION_RESULT_STAGGERED])
         LUIE_CCTracker_TextFrame_Label:SetColor(unpack(CombatInfo.SV.cct.colors[ACTION_RESULT_STAGGERED]))
         LUIE_CCTracker_TextFrame_Label:SetFont(staggerFont)
-        self:TextHidden(false)
-        self:IconHidden(true)
+        if CombatInfo.SV.cct.showOptions == "icon" then
+            self:TextHidden(true)
+        else
+            self:TextHidden(false)
+        end
+        self:IconHidden(false)
         self:TimerHidden(true)
         self:BreakFreeHidden(true)
         LUIE_CCTracker:SetHidden(false)
@@ -1496,6 +1536,67 @@ function CrowdControlTracker:FullReset()
         self.immunePlaying:Stop()
     end
     self:InitControls()
+end
+
+local function ClearPreviewQueue()
+    for index = 1, #previewCalls do
+        zo_removeCallLater(previewCalls[index])
+    end
+    previewCalls = {}
+end
+
+local function QueueCrowdControlPreview()
+    if not CombatInfo.SV.cct.enabled then
+        CHAT_ROUTER:AddSystemMessage("[LUIE] Crowd Control Tracker is disabled.")
+        return
+    end
+
+    if CombatInfo.SV.cct.enabledOnlyInCyro and not LUIE.ResolvePVPZone() then
+        CHAT_ROUTER:AddSystemMessage("[LUIE] Crowd Control Tracker preview is limited to Cyrodiil.")
+        return
+    end
+
+    if not CrowdControlTracker.addonEnabled then
+        CrowdControlTracker:OnOff()
+    end
+
+    if not CrowdControlTracker.addonEnabled then
+        CHAT_ROUTER:AddSystemMessage("[LUIE] Crowd Control Tracker is unavailable in this location.")
+        return
+    end
+
+    ClearPreviewQueue()
+    CrowdControlTracker:VarReset()
+    CrowdControlTracker:InitControls()
+    CrowdControlTracker.currentCC = 0
+    isRooted = false
+
+    for index, result in ipairs(previewSequence) do
+        local delay = (index - 1) * previewSpacingMs
+        local callId = zo_callLater(function ()
+            local abilityIcon = CrowdControlTracker:GetDefaultIcon(result) or ICON_MISSING
+            local abilityName = CrowdControlTracker.controlText[result] or "Crowd Control"
+            local abilityId = previewAbilityBaseId + index
+
+            if result == ACTION_RESULT_ROOTED then
+                isRooted = true
+            end
+
+            CrowdControlTracker:OnDraw(abilityId, abilityIcon, previewDurationMs, result, abilityName, previewDurationMs)
+
+            if result == ACTION_RESULT_ROOTED then
+                zo_callLater(function ()
+                    isRooted = false
+                end, previewDurationMs)
+            end
+        end, delay)
+
+        previewCalls[#previewCalls + 1] = callId
+    end
+end
+
+SLASH_COMMANDS[previewCommand] = function ()
+    QueueCrowdControlPreview()
 end
 
 function CrowdControlTracker:VarReset()
