@@ -3092,12 +3092,20 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide)
     end
 
     local spacerHeight = 3
-    local frameSpacing = 2 -- Vertical spacing between each frame (reduced from 8 since no integration icons)
-
     -- Add extra height for resource bars if enabled
     local resourceBarsHeight = 0
+    local resourceBarsAreEnabled = false
     if UnitFrames.GroupResources then
         resourceBarsHeight = UnitFrames.GroupResources.GetResourceBarsHeight(true)
+        resourceBarsAreEnabled = resourceBarsHeight > 0
+    end
+
+    -- Vertical spacing between each frame. Only add the larger gap when resource sharing is active.
+    local frameSpacing = 0
+    if resourceBarsAreEnabled then
+        local raidResourceSettings = UnitFrames.SV.GroupResources
+        local raidBarHeight = raidResourceSettings and raidResourceSettings.raidBarHeight or 0
+        frameSpacing = 1 + raidBarHeight
     end
 
     -- Add extra width for integration icons if enabled

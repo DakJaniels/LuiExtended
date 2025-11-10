@@ -99,7 +99,7 @@ local function UpdateResourceBarLayout(frameData, isRaid)
 
     local staminaFirst = Settings.staminaFirst
     local barHeight = Settings[isRaid and "raidBarHeight" or "groupBarHeight"]
-    local barWidth = Settings[isRaid and "raidBarWidth" or "groupBarWidth"]
+    local barWidth
 
     local magBackdrop = frameData.resourceMagicka.backdrop
     local stamBackdrop = frameData.resourceStamina.backdrop
@@ -113,6 +113,12 @@ local function UpdateResourceBarLayout(frameData, isRaid)
     stamBackdrop:ClearAnchors()
 
     if isRaid then
+        local gapBetweenBars = 1
+        local healthWidth = healthBackdrop and healthBackdrop:GetWidth() or UnitFrames.SV.RaidBarWidth
+        if healthWidth <= 0 then
+            healthWidth = UnitFrames.SV.RaidBarWidth
+        end
+        barWidth = zo_max(0, (healthWidth - gapBetweenBars) * 0.5)
         -- Raid: side-by-side bars in the gap below health bar
         if staminaFirst then
             -- Stamina left, magicka right
@@ -131,6 +137,7 @@ local function UpdateResourceBarLayout(frameData, isRaid)
         end
     else
         -- Small group: stacked bars below health
+        barWidth = Settings.groupBarWidth
         if staminaFirst then
             -- Stamina first (top), then magicka (bottom)
             stamBackdrop:SetAnchor(TOPLEFT, healthBackdrop, BOTTOMLEFT, 0, 2)
