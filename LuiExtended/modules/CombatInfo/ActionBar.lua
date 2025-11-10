@@ -45,12 +45,41 @@ local GAMEPAD_CONSTANTS =
 {
     abilitySlotOffsetX = 10,
     ultimateSlotOffsetX = 65,
+    weaponSwapOffsetX = 61,
+    weaponSwapOffsetY = 4,
 }
 local KEYBOARD_CONSTANTS =
 {
     abilitySlotOffsetX = 2,
     ultimateSlotOffsetX = 62,
+    weaponSwapOffsetX = 59,
+    weaponSwapOffsetY = -4,
 }
+
+local PLAYER_HOTBAR_CATEGORIES =
+{
+    [HOTBAR_CATEGORY_PRIMARY] = true,
+    [HOTBAR_CATEGORY_BACKUP] = true,
+    [HOTBAR_CATEGORY_OVERLOAD] = true,
+    [HOTBAR_CATEGORY_DAEDRIC_ARTIFACT] = true,
+    [HOTBAR_CATEGORY_WEREWOLF] = true,
+    [HOTBAR_CATEGORY_TEMPORARY] = true,
+}
+
+local function IsPlayerHotbarCategory(hotbarCategory)
+    return hotbarCategory ~= nil and PLAYER_HOTBAR_CATEGORIES[hotbarCategory] == true
+end
+
+local function IsWeaponSwapHotbarCategory(hotbarCategory)
+    return hotbarCategory == HOTBAR_CATEGORY_PRIMARY or hotbarCategory == HOTBAR_CATEGORY_BACKUP
+end
+
+local function IsUniqueOverrideHotbarCategory(hotbarCategory)
+    return hotbarCategory == HOTBAR_CATEGORY_OVERLOAD
+        or hotbarCategory == HOTBAR_CATEGORY_DAEDRIC_ARTIFACT
+        or hotbarCategory == HOTBAR_CATEGORY_WEREWOLF
+        or hotbarCategory == HOTBAR_CATEGORY_TEMPORARY
+end
 
 -- Module-local state
 local isFancyActionBarEnabled = OtherAddonCompatability.isFancyActionBarPlusEnabled or LUIE.IsItEnabled("FancyActionBar\43") or LUIE.IsItEnabled("FancyActionBar")
@@ -86,6 +115,134 @@ local g_actionBarActiveWeaponPair = GetHeldWeaponPair()
 local g_backbarButtons = {}
 local g_activeWeaponSwapInProgress = false
 local g_potionUsed = false
+local g_backbarUniqueHidden = false
+local g_platformStyle
+local abilityDropValidators = ZO_ABILITY_DROP_CALLOUT_VALIDITY_FUNCTION_BY_ACTION_TYPE
+local MOUSE_CONTENT_ACTION = MOUSE_CONTENT_ACTION
+
+local function HideAbilityDropCallouts()
+    for slotNum = BAR_INDEX_START, BAR_INDEX_END do
+        local actionButton = ZO_ActionBar_GetButton(slotNum)
+        if actionButton and actionButton.slot then
+            local callout = actionButton.slot:GetNamedChild("DropCallout")
+            if callout then
+                callout:SetHidden(true)
+            end
+        end
+    end
+end
+
+local function ShowAbilityDropCallouts(actionType, actionValue)
+    if not abilityDropValidators then
+        return
+    end
+
+    local validator = abilityDropValidators[actionType]
+    if not validator then
+        return
+    end
+
+    HideAbilityDropCallouts()
+
+    for slotNum = BAR_INDEX_START, BAR_INDEX_END do
+        local actionButton = ZO_ActionBar_GetButton(slotNum)
+        if actionButton and actionButton.slot then
+            local callout = actionButton.slot:GetNamedChild("DropCallout")
+            if callout then
+                if validator(actionValue, slotNum) then
+                    callout:SetColor(1, 1, 1, 1)
+                else
+                    callout:SetColor(1, 0, 0, 1)
+                end
+                callout:SetHidden(false)
+            end
+        end
+    end
+end
+
+local function RefreshVisibleCooldowns()
+    for slotNum = BAR_INDEX_START, BAR_INDEX_END do
+        local button = ZO_ActionBar_GetButton(slotNum, g_hotbarCategory)
+        if button and button.UpdateCooldown then
+            button:UpdateCooldown()
+        end
+    end
+
+    for slotNum = BAR_INDEX_START + BACKBAR_INDEX_OFFSET, BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET do
+        local button = g_backbarButtons[slotNum]
+        if button and button.UpdateCooldown then
+            button:UpdateCooldown()
+        end
+    end
+
+    local quickslotButton = ZO_ActionBar_GetButton(GetCurrentQuickslot(), HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
+    if quickslotButton and quickslotButton.UpdateCooldown then
+        quickslotButton:UpdateCooldown()
+    end
+
+    local companionUltimateButton = ZO_ActionBar_GetButton(g_ultimateSlot, HOTBAR_CATEGORY_COMPANION)
+    if companionUltimateButton and companionUltimateButton.UpdateCooldown then
+        companionUltimateButton:UpdateCooldown()
+    end
+end
+
+local function ShouldAnimateWeaponSwap(previousCategory, newCategory)
+    return previousCategory ~= newCategory
+        and IsWeaponSwapHotbarCategory(previousCategory)
+        and IsWeaponSwapHotbarCategory(newCategory)
+end
+
+local function GetInactiveHotbarCategory(activeHotbarCategory)
+    if activeHotbarCategory == HOTBAR_CATEGORY_PRIMARY then
+        return HOTBAR_CATEGORY_BACKUP
+    end
+    if activeHotbarCategory == HOTBAR_CATEGORY_BACKUP then
+        return HOTBAR_CATEGORY_PRIMARY
+    end
+    if g_actionBarActiveWeaponPair == ACTIVE_WEAPON_PAIR_BACKUP then
+        return HOTBAR_CATEGORY_PRIMARY
+    end
+    return HOTBAR_CATEGORY_BACKUP
+end
+
+local function ApplyBackbarUniqueHiddenState(hidden)
+    local weaponSwapControl = ACTION_BAR:GetNamedChild("WeaponSwap")
+    local needsUpdate = hidden ~= g_backbarUniqueHidden
+
+    if weaponSwapControl and weaponSwapControl.permanentlyHidden ~= hidden then
+        needsUpdate = true
+        ZO_WeaponSwap_SetPermanentlyHidden(weaponSwapControl, hidden)
+        -- LUIE.Debug("CombatInfo: WeaponSwap permanent hidden -> " .. tostring(hidden))
+    end
+
+    if not needsUpdate then
+        return
+    end
+
+    g_backbarUniqueHidden = hidden
+    -- LUIE.Debug(string_format("CombatInfo: ApplyBackbarUniqueHiddenState hidden=%s", tostring(hidden)))
+
+    if hidden then
+        for slotNum = BAR_INDEX_START + BACKBAR_INDEX_OFFSET, BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET do
+            local button = g_backbarButtons[slotNum]
+            if button then
+                button.slot:SetHidden(true)
+            end
+        end
+        for slotNum, control in pairs(g_uiCustomToggle) do
+            if slotNum > BACKBAR_INDEX_OFFSET then
+                control:SetHidden(true)
+            end
+        end
+    else
+        ActionBar.BackbarToggleSettings()
+    end
+end
+
+local function UpdateBackbarUniqueState(activeHotbarCategory)
+    -- LUIE.Debug(string_format("CombatInfo: UpdateBackbarUniqueState category=%s unique=%s", tostring(activeHotbarCategory), tostring(IsUniqueOverrideHotbarCategory(activeHotbarCategory))))
+    ApplyBackbarUniqueHiddenState(IsUniqueOverrideHotbarCategory(activeHotbarCategory))
+end
 
 -- QuickSlot
 local uiQuickSlot =
@@ -124,10 +281,11 @@ local CooldownMethod =
 
 -- Update actionId for backbar buttons
 local function UpdateBackbarButtonActionIds()
+    local inactiveHotbarCategory = GetInactiveHotbarCategory(g_hotbarCategory)
     for i = BAR_INDEX_START + BACKBAR_INDEX_OFFSET, BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET do
         local button = g_backbarButtons[i]
         if button and button.button then
-            button.button.actionId = GetSlotTrueBoundId(i - BACKBAR_INDEX_OFFSET, HOTBAR_CATEGORY_BACKUP)
+            button.button.actionId = GetSlotTrueBoundId(i - BACKBAR_INDEX_OFFSET, inactiveHotbarCategory)
         end
     end
 end
@@ -218,7 +376,9 @@ end
 
 -- Handle default action slot effect updates to get duration data
 function ActionBar.OnActionSlotEffectUpdated(eventCode, hotbarCategory, actionSlotIndex)
-    if hotbarCategory ~= HOTBAR_CATEGORY_PRIMARY and hotbarCategory ~= HOTBAR_CATEGORY_BACKUP then
+    if not IsPlayerHotbarCategory(hotbarCategory) then
+        -- LUIE.Debug(string_format("CombatInfo: OnActionSlotEffectUpdated ignored hotbar=%s slot=%s", tostring(hotbarCategory), tostring(actionSlotIndex)))
+        ApplyBackbarUniqueHiddenState(IsUniqueOverrideHotbarCategory(hotbarCategory))
         return
     end
 
@@ -269,8 +429,7 @@ function ActionBar.OnActionSlotEffectUpdated(eventCode, hotbarCategory, actionSl
 
             if not g_barDurationOverride[abilityId] then
                 g_barDurationOverride[abilityId] = duration
-                local abilityName = GetAbilityName(abilityId) or "Unknown"
-                LUIE.Debug(string_format("CombatInfo: Learned duration %d ms for ability %d (%s)", duration, abilityId, abilityName))
+                -- LUIE.Debug(string_format("CombatInfo: Learned duration %d ms for ability %d (%s)", duration, abilityId, abilityName))
             end
         end
     end
@@ -385,7 +544,7 @@ end
 
 -- Called on initialization and on full update to swap icons on backbar
 function ActionBar.SetupBackBarIcons(button, flip)
-    local inactiveHotbarCategory = g_hotbarCategory == HOTBAR_CATEGORY_BACKUP and HOTBAR_CATEGORY_PRIMARY or HOTBAR_CATEGORY_BACKUP
+    local inactiveHotbarCategory = GetInactiveHotbarCategory(g_hotbarCategory)
     local slotNum = button.slot.slotNum
 
     local slotId = GetSlotTrueBoundId(slotNum - BACKBAR_INDEX_OFFSET, inactiveHotbarCategory)
@@ -436,9 +595,65 @@ end
 function ActionBar.OnActiveWeaponPairChanged(eventCode, activeWeaponPair)
     if activeWeaponPair ~= g_actionBarActiveWeaponPair then
         g_activeWeaponSwapInProgress = true
-        g_hotbarCategory = GetActiveHotbarCategory()
+        -- LUIE.Debug(string_format("CombatInfo: OnActiveWeaponPairChanged event=%s pair=%s", tostring(eventCode), tostring(activeWeaponPair)))
+        local currentHotbarCategory = GetActiveHotbarCategory()
+        UpdateBackbarUniqueState(currentHotbarCategory)
         g_actionBarActiveWeaponPair = GetHeldWeaponPair()
         UpdateBackbarButtonActionIds()
+    end
+end
+
+--- @param eventCode integer
+--- @param actionBarLockedReason ActionBarLockedReason
+function ActionBar.OnActionBarLockedReasonChanged(eventCode, actionBarLockedReason)
+    -- LUIE.Debug(string_format("CombatInfo: OnActionBarLockedReasonChanged reason=%s", tostring(actionBarLockedReason)))
+    local currentHotbarCategory = GetActiveHotbarCategory()
+    if IsPlayerHotbarCategory(currentHotbarCategory) then
+        UpdateBackbarUniqueState(currentHotbarCategory)
+        if g_activeWeaponSwapInProgress then
+            return
+        end
+        ActionBar.UpdateAllSlotsForActiveHotbar(false)
+    else
+        ApplyBackbarUniqueHiddenState(IsUniqueOverrideHotbarCategory(currentHotbarCategory))
+    end
+end
+
+--- @param eventCode integer
+--- @param isRepeccableBarState boolean
+function ActionBar.OnActionBarIsRespeccableBarStateChanged(eventCode, isRepeccableBarState)
+    -- LUIE.Debug(string_format("CombatInfo: OnActionBarIsRespeccableBarStateChanged isRepeccable=%s", tostring(isRepeccableBarState)))
+    local currentHotbarCategory = GetActiveHotbarCategory()
+    if IsPlayerHotbarCategory(currentHotbarCategory) then
+        UpdateBackbarUniqueState(currentHotbarCategory)
+        if g_activeWeaponSwapInProgress then
+            return
+        end
+        ActionBar.UpdateAllSlotsForActiveHotbar(false)
+    else
+        ApplyBackbarUniqueHiddenState(IsUniqueOverrideHotbarCategory(currentHotbarCategory))
+    end
+end
+
+--- @param eventCode integer
+--- @param artifactId integer?
+function ActionBar.OnActiveDaedricArtifactChanged(eventCode, artifactId)
+    -- LUIE.Debug(string_format("CombatInfo: OnActiveDaedricArtifactChanged artifactId=%s", tostring(artifactId)))
+    if artifactId ~= nil then
+        ApplyBackbarUniqueHiddenState(true)
+    else
+        ApplyBackbarUniqueHiddenState(false)
+    end
+
+    local currentHotbarCategory = GetActiveHotbarCategory()
+    if IsPlayerHotbarCategory(currentHotbarCategory) then
+        UpdateBackbarUniqueState(currentHotbarCategory)
+        if g_activeWeaponSwapInProgress and not IsUniqueOverrideHotbarCategory(currentHotbarCategory) then
+            return
+        end
+        ActionBar.UpdateAllSlotsForActiveHotbar(true)
+    else
+        ApplyBackbarUniqueHiddenState(IsUniqueOverrideHotbarCategory(currentHotbarCategory))
     end
 end
 
@@ -713,6 +928,9 @@ end
 --- @param wasfullUpdate boolean
 --- @param onlyProc boolean
 function ActionBar.BarSlotUpdate(slotNum, wasfullUpdate, onlyProc)
+    if not IsPlayerHotbarCategory(g_hotbarCategory) then
+        return
+    end
     if not slotNum or not BACKBAR_INDEX_OFFSET then
         return
     end
@@ -767,10 +985,10 @@ function ActionBar.BarSlotUpdate(slotNum, wasfullUpdate, onlyProc)
 
     local ability_id = GetSlotTrueBoundId(slotNum, g_hotbarCategory)
     if slotNum > BACKBAR_INDEX_OFFSET then
-        local hotbarCategory = g_hotbarCategory == HOTBAR_CATEGORY_BACKUP and HOTBAR_CATEGORY_PRIMARY or HOTBAR_CATEGORY_BACKUP
-        ability_id = GetSlotTrueBoundId(slotNum - BACKBAR_INDEX_OFFSET, hotbarCategory)
+        local inactiveHotbarCategory = GetInactiveHotbarCategory(g_hotbarCategory)
+        ability_id = GetSlotTrueBoundId(slotNum - BACKBAR_INDEX_OFFSET, inactiveHotbarCategory)
 
-        local weaponSlot = g_hotbarCategory == HOTBAR_CATEGORY_BACKUP and 4 or 20
+        local weaponSlot = inactiveHotbarCategory == HOTBAR_CATEGORY_BACKUP and EQUIP_SLOT_BACKUP_MAIN or EQUIP_SLOT_MAIN_HAND
         local weaponType = GetItemWeaponType(BAG_WORN, weaponSlot)
 
         if weaponType == WEAPONTYPE_FIRE_STAFF or weaponType == WEAPONTYPE_FROST_STAFF or weaponType == WEAPONTYPE_LIGHTNING_STAFF or weaponType == WEAPONTYPE_NONE then
@@ -855,6 +1073,9 @@ end
 
 ---
 function ActionBar.UpdateUltimateLabel()
+    if not IsPlayerHotbarCategory(g_hotbarCategory) then
+        return
+    end
     local bar = g_hotbarCategory
     g_ultimateCost = GetSlotAbilityCost(g_ultimateSlot, COMBAT_MECHANIC_FLAGS_ULTIMATE, bar) or 0
 
@@ -872,15 +1093,39 @@ end
 ---
 --- @param didActiveHotbarChange boolean
 function ActionBar.UpdateAllSlotsForActiveHotbar(didActiveHotbarChange)
-    g_hotbarCategory = GetActiveHotbarCategory()
-    if didActiveHotbarChange then
+    local previousCategory = g_hotbarCategory
+    local activeHotbarCategory = GetActiveHotbarCategory()
+    -- LUIE.Debug(string_format("CombatInfo: UpdateAllSlotsForActiveHotbar prev=%s current=%s didChange=%s", tostring(previousCategory), tostring(activeHotbarCategory), tostring(didActiveHotbarChange)))
+
+    if not IsPlayerHotbarCategory(activeHotbarCategory) then
+        ApplyBackbarUniqueHiddenState(true)
+        return
+    end
+
+    g_hotbarCategory = activeHotbarCategory
+    UpdateBackbarUniqueState(activeHotbarCategory)
+
+    local shouldAnimate = didActiveHotbarChange and (g_activeWeaponSwapInProgress or ShouldAnimateWeaponSwap(previousCategory, activeHotbarCategory))
+    -- LUIE.Debug(string_format("CombatInfo: UpdateAllSlotsForActiveHotbar shouldAnimate=%s g_activeWeaponSwapInProgress=%s", tostring(shouldAnimate), tostring(g_activeWeaponSwapInProgress)))
+    if shouldAnimate then
         for _, physicalSlot in pairs(g_backbarButtons) do
             if physicalSlot.hotbarSwapAnimation then
                 physicalSlot.noUpdates = true
                 physicalSlot.hotbarSwapAnimation:PlayFromStart()
             end
         end
-    else
+        return
+    end
+
+    if g_activeWeaponSwapInProgress then
+        -- LUIE.Debug("CombatInfo: Swap in progress, skipping redundant full update")
+        return
+    end
+
+    if not shouldAnimate then
+        if g_activeWeaponSwapInProgress then
+            -- LUIE.Debug("CombatInfo: Swap flagged but not animating, forcing full update")
+        end
         ActionBar.OnSlotsFullUpdate()
     end
 end
@@ -888,6 +1133,11 @@ end
 ---
 function ActionBar.OnSlotsFullUpdate()
     g_activeWeaponSwapInProgress = false
+    -- LUIE.Debug("CombatInfo: OnSlotsFullUpdate")
+    UpdateBackbarUniqueState(g_hotbarCategory)
+    if not IsPlayerHotbarCategory(g_hotbarCategory) then
+        return
+    end
     if g_potionUsed == true then
         return
     end
@@ -895,12 +1145,14 @@ function ActionBar.OnSlotsFullUpdate()
     ActionBar.UpdateUltimateLabel()
 
     for i = BAR_INDEX_START, BAR_INDEX_END do
+        -- LUIE.Debug(string_format("CombatInfo: OnSlotsFullUpdate main slot %d", i))
         ActionBar.BarSlotUpdate(i, true, false)
     end
 
     for i = (BAR_INDEX_START + BACKBAR_INDEX_OFFSET), (BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET) do
         local button = g_backbarButtons[i]
         ActionBar.SetupBackBarIcons(button)
+        -- LUIE.Debug(string_format("CombatInfo: OnSlotsFullUpdate back slot %d", i))
         ActionBar.BarSlotUpdate(i, true, false)
     end
 end
@@ -1174,7 +1426,7 @@ end
 --- Handles backbar hide slot event
 --- @param slotNum number
 function ActionBar.BackbarHideSlot(slotNum)
-    if CombatInfo.SV.BarHideUnused then
+    if CombatInfo.SV.BarHideUnused or g_backbarUniqueHidden then
         if g_backbarButtons[slotNum] then
             g_backbarButtons[slotNum].slot:SetHidden(true)
         end
@@ -1184,6 +1436,12 @@ end
 --- Handles backbar show slot event
 --- @param slotNum number
 function ActionBar.BackbarShowSlot(slotNum)
+    if g_backbarUniqueHidden then
+        if g_backbarButtons[slotNum] then
+            g_backbarButtons[slotNum].slot:SetHidden(true)
+        end
+        return
+    end
     if CombatInfo.SV.BarShowBack then
         if g_backbarButtons[slotNum] then
             g_backbarButtons[slotNum].slot:SetHidden(false)
@@ -1205,29 +1463,36 @@ function ActionBar.ToggleBackbarSaturation(slotNum, desaturate)
     end
 end
 
--- Called on initialization and when swapping in and out of Gamepad mode
-function ActionBar.BackbarSetupTemplate()
-    local style = IsInGamepadPreferredMode() and GAMEPAD_CONSTANTS or KEYBOARD_CONSTANTS
+function ActionBar.BackbarSetupTemplate(style)
+    style = style or (IsInGamepadPreferredMode() and GAMEPAD_CONSTANTS or KEYBOARD_CONSTANTS)
     local weaponSwapControl = ACTION_BAR:GetNamedChild("WeaponSwap")
+
+    if weaponSwapControl then
+        weaponSwapControl:ClearAnchors()
+        weaponSwapControl:SetAnchor(TOPLEFT, nil, TOPLEFT, style.weaponSwapOffsetX, style.weaponSwapOffsetY)
+    end
+
+    UpdateBackbarUniqueState(g_hotbarCategory)
 
     local lastButton
     local buttonTemplate = ZO_GetPlatformTemplate("ZO_ActionButton")
     for i = BAR_INDEX_START, BAR_INDEX_END do
         local targetButton = g_backbarButtons[i + BACKBAR_INDEX_OFFSET]
-
-        if i > 2 and i < 8 then
-            local anchorTarget = lastButton and lastButton.slot
-            if not lastButton then
-                anchorTarget = weaponSwapControl
+        if targetButton then
+            if i > 2 and i < 8 then
+                local anchorTarget = lastButton and lastButton.slot
+                if not lastButton then
+                    anchorTarget = weaponSwapControl
+                end
+                targetButton:ApplyAnchor(anchorTarget, style.abilitySlotOffsetX)
+                targetButton:ApplyStyle(buttonTemplate)
             end
-            targetButton:ApplyAnchor(anchorTarget, style.abilitySlotOffsetX)
-            targetButton:ApplyStyle(buttonTemplate)
+            lastButton = targetButton
         end
-
-        lastButton = targetButton
     end
 
-    local offsetY = IsInGamepadPreferredMode() and ACTION_BAR:GetHeight() * 1.6 or ACTION_BAR:GetHeight()
+    local isGamepadStyle = style == GAMEPAD_CONSTANTS
+    local offsetY = isGamepadStyle and (ACTION_BAR:GetHeight() * 1.6) or ACTION_BAR:GetHeight()
     local ActionButton53 = GetControl("ActionButton53")
     local AB3 = _G["ActionButton3"]
     ActionButton53:ClearAnchors()
@@ -1240,16 +1505,28 @@ function ActionBar.BackbarToggleSettings()
         local targetButton = g_backbarButtons[i + BACKBAR_INDEX_OFFSET]
 
         if CombatInfo.SV.BarShowBack and not CombatInfo.SV.BarHideUnused then
-            targetButton.slot:SetHidden(false)
+            targetButton.slot:SetHidden(g_backbarUniqueHidden)
         end
         ZO_ActionSlot_SetUnusable(targetButton.icon, CombatInfo.SV.BarDarkUnused, false)
         local saturation = CombatInfo.SV.BarDesaturateUnused and 1 or 0
         targetButton.icon:SetDesaturation(saturation)
 
-        if CombatInfo.SV.BarHideUnused or not CombatInfo.SV.BarShowBack then
+        if CombatInfo.SV.BarHideUnused or not CombatInfo.SV.BarShowBack or g_backbarUniqueHidden then
             targetButton.slot:SetHidden(true)
         end
     end
+end
+
+local function HandleActionUpdateCooldowns()
+    RefreshVisibleCooldowns()
+end
+
+local function HandleActionSlotEffectsCleared()
+    ActionBar.OnSlotsFullUpdate()
+end
+
+local function HandleInventoryFullUpdate()
+    ActionBar.OnSlotsFullUpdate()
 end
 
 -- Main ticker update for action bar (called from CombatInfo.OnUpdate)
@@ -1380,6 +1657,18 @@ function ActionBar.SetupFonts(barFont, potionFont, ultimateFont, procSound)
     end
 end
 
+local function HandleCursorPickup(_, cursorType, actionType, _, slotIndex)
+    if cursorType == MOUSE_CONTENT_ACTION and abilityDropValidators and abilityDropValidators[actionType] then
+        ShowAbilityDropCallouts(actionType, slotIndex)
+    end
+end
+
+local function HandleCursorDropped(_, cursorType)
+    if cursorType == MOUSE_CONTENT_ACTION then
+        HideAbilityDropCallouts()
+    end
+end
+
 -- Initialize action bar module
 function ActionBar.Initialize()
     local QSB = _G["QuickslotButton"]
@@ -1414,6 +1703,7 @@ function ActionBar.Initialize()
             for i = BAR_INDEX_START, BAR_INDEX_END do
                 if not slotsUpdated[i] then
                     local targetButton = g_backbarButtons[i + BACKBAR_INDEX_OFFSET]
+                    -- LUIE.Debug(string_format("CombatInfo: OnSwapAnimationHalfDone updating slot %d", i))
                     ActionBar.BarSlotUpdate(i, false, false)
                     ActionBar.BarSlotUpdate(i + BACKBAR_INDEX_OFFSET, false, false)
                     if i < 8 then
@@ -1429,9 +1719,11 @@ function ActionBar.Initialize()
 
         local function OnSwapAnimationDone(animation, button)
             button.noUpdates = false
+            -- LUIE.Debug("CombatInfo: OnSwapAnimationDone for slot " .. tostring(button:GetSlot()))
 
             if ZO_ActionBar_IsUltimateSlot(button:GetSlot(), button:GetHotbarCategory()) then
                 g_activeWeaponSwapInProgress = false
+                -- LUIE.Debug("CombatInfo: Swap animation complete, clearing g_activeWeaponSwapInProgress")
             end
 
             slotsUpdated = {}
@@ -1448,6 +1740,12 @@ function ActionBar.Initialize()
             local button = ActionButton:New(i, ACTION_BUTTON_TYPE_VISIBLE, LUIE_Backbar, "ZO_ActionButton", HOTBAR_CATEGORY_BACKUP)
             SetupSwapAnimation(button)
             button:SetupBounceAnimation()
+            if button.SetupTimerSwapAnimation then
+                button:SetupTimerSwapAnimation()
+            end
+            if button.SetupKeySlideAnimation and ZO_ActionBar_IsUltimateSlot(button:GetSlot(), button:GetHotbarCategory()) then
+                button:SetupKeySlideAnimation()
+            end
             button:UpdateState()
             button.button.actionId = GetSlotTrueBoundId(i - 50, HOTBAR_CATEGORY_BACKUP)
             g_backbarButtons[i] = button
@@ -1456,10 +1754,27 @@ function ActionBar.Initialize()
 
     ActionBar.BackbarSetupTemplate()
     ActionBar.BackbarToggleSettings()
+    if not g_platformStyle then
+        g_platformStyle = ZO_PlatformStyle:New(ActionBar.BackbarSetupTemplate, KEYBOARD_CONSTANTS, GAMEPAD_CONSTANTS)
+    else
+        g_platformStyle:Apply()
+    end
+    UpdateBackbarUniqueState(g_hotbarCategory)
+    if g_hotbarCategory == HOTBAR_CATEGORY_DAEDRIC_ARTIFACT then
+        ApplyBackbarUniqueHiddenState(true)
+    end
 
     if CombatInfo.SV.ShowTriggered or CombatInfo.SV.ShowToggled then
         ActionBar.DisableZOSTimerDisplay()
     end
+
+    HideAbilityDropCallouts()
+
+    eventManager:RegisterForEvent(moduleName .. "ActionCooldowns", EVENT_ACTION_UPDATE_COOLDOWNS, HandleActionUpdateCooldowns)
+    eventManager:RegisterForEvent(moduleName .. "ActionEffectsCleared", EVENT_ACTION_SLOT_EFFECTS_CLEARED, HandleActionSlotEffectsCleared)
+    eventManager:RegisterForEvent(moduleName .. "InventoryFullUpdate", EVENT_INVENTORY_FULL_UPDATE, HandleInventoryFullUpdate)
+    eventManager:RegisterForEvent(moduleName .. "CursorPickup", EVENT_CURSOR_PICKUP, HandleCursorPickup)
+    eventManager:RegisterForEvent(moduleName .. "CursorDropped", EVENT_CURSOR_DROPPED, HandleCursorDropped)
 end
 
 -- Export state for CombatInfo main module to access
