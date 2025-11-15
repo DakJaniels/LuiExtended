@@ -83,6 +83,7 @@ end
 LUIE.Defaults =
 {
     CustomIcons               = true,
+    BookFontFace              = "",
     CharacterSpecificSV       = false,
     StartupInfo               = false,
     HideAlertFrame            = false,
