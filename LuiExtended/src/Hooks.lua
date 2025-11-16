@@ -10,7 +10,6 @@ local Data = LuiData.Data
 local Effects = Data.Effects
 
 local printToChat = LUIE.PrintToChat
-local LMP = LibMediaProvider
 
 -- -----------------------------------------------------------------------------
 -- ESO API Locals.
@@ -51,45 +50,6 @@ LUIE.API_Hooks = function ()
                 ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, message)
             end
         end
-    end
-
-    local zos_GetBookMediumFontInfo = GetBookMediumFontInfo
-    --- Hook lorebook medium font retrieval so we can force a custom face.
-    --- @param mediumId integer
-    --- @param isGamepad boolean
-    --- @return string titleFontName
-    --- @return integer titleFontSize
-    --- @return FontStyle titleFontStyle
-    --- @return string bodyFontName
-    --- @return integer bodyFontSize
-    --- @return FontStyle bodyFontStyle
-    --- @return number fontColorR
-    --- @return number fontColorG
-    --- @return number fontColorB
-    --- @return number fontColorA
-    --- @return number fontStyleColorR
-    --- @return number fontStyleColorG
-    --- @return number fontStyleColorB
-    --- @return number fontStyleColorA
-    GetBookMediumFontInfo = function (mediumId, isGamepad)
-        local titleFontName, titleFontSize, titleFontStyle, bodyFontName, bodyFontSize, bodyFontStyle, fontColorR, fontColorG, fontColorB, fontColorA, fontStyleColorR, fontStyleColorG, fontStyleColorB, fontStyleColorA = zos_GetBookMediumFontInfo(mediumId, isGamepad)
-        local fontName = LUIE.SV and LUIE.SV.BookFontFace
-        local customFont
-
-        if fontName and fontName ~= "" then
-            if LUIE.Fonts and LUIE.Fonts[fontName] then
-                customFont = LUIE.Fonts[fontName]
-            elseif LMP then
-                customFont = LMP:Fetch(LMP.MediaType.FONT, fontName)
-            end
-        end
-
-        if customFont then
-            titleFontName = customFont
-            bodyFontName = customFont
-        end
-
-        return titleFontName, titleFontSize, titleFontStyle, bodyFontName, bodyFontSize, bodyFontStyle, fontColorR, fontColorG, fontColorB, fontColorA, fontStyleColorR, fontStyleColorG, fontStyleColorB, fontStyleColorA
     end
 
     local zos_AddIgnore = AddIgnore

@@ -412,12 +412,6 @@ function LUIE.CreateSettings()
         "half"
     )
 
-    local bookFontChoices = ZO_ShallowTableCopy(SettingsAPI.GetFontsList())
-    table.sort(bookFontChoices)
-    local bookFontValues = ZO_ShallowTableCopy(bookFontChoices)
-    table.insert(bookFontChoices, 1, GetString(LUIE_STRING_LAM_BOOK_FONT_DEFAULT))
-    table.insert(bookFontValues, 1, "")
-
     -- Misc Settings
     optionsData[#optionsData + 1] = SettingsAPI.CreateHeaderOption(
         GetString(LUIE_STRING_LAM_MISCHEADER)
@@ -481,30 +475,6 @@ function LUIE.CreateSettings()
         "full",
         nil,
         Defaults.CustomIcons
-    )
-
-    optionsData[#optionsData + 1] = SettingsAPI.CreateDropdownOption(
-        GetString(LUIE_STRING_LAM_BOOK_FONT),
-        GetString(LUIE_STRING_LAM_BOOK_FONT_TP),
-        bookFontChoices,
-        function ()
-            return Settings.BookFontFace or ""
-        end,
-        function (value)
-            if value == "" then
-                Settings.BookFontFace = nil
-            else
-                Settings.BookFontFace = value
-            end
-        end,
-        "full",
-        nil,
-        Defaults.BookFontFace,
-        nil,
-        nil,
-        nil,
-        bookFontValues,
-        7
     )
 
     -- Missing Base Game Settings
