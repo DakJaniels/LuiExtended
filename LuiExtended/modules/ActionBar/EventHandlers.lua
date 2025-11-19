@@ -48,6 +48,97 @@ local uiUltimate = ActionBar.GetUltimateState()
 -- Cache addon compatibility check (checked once at load, never changes)
 local isFancyActionBarEnabled = OtherAddonCompatability.isFancyActionBarPlusEnabled or LUIE.IsItEnabled("FancyActionBar\43") or LUIE.IsItEnabled("FancyActionBar")
 
+-- Helper to get override ability duration
+local function GetUpdatedAbilityDuration(abilityId)
+    local dur = g_barDurationOverride[abilityId] or GetAbilityDuration(abilityId) or 0
+    return dur
+end
+
+-- Helper to hide slots for both front and back positions
+local function HideSlotsForAbility(abilityId)
+    if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
+        local slotNum = g_toggledSlotsFront[abilityId]
+        ActionBar.HideSlot(slotNum, abilityId)
+    end
+    if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
+        local slotNum = g_toggledSlotsBack[abilityId]
+        ActionBar.HideSlot(slotNum, abilityId)
+    end
+end
+
+-- Helper to show slots for both front and back positions
+local function ShowSlotsForAbility(abilityId, currentTimeMs, isBackBar)
+    if g_toggledSlotsFront[abilityId] then
+        local slotNum = g_toggledSlotsFront[abilityId]
+        ActionBar.ShowSlot(slotNum, abilityId, currentTimeMs, isBackBar)
+    end
+    if g_toggledSlotsBack[abilityId] then
+        local slotNum = g_toggledSlotsBack[abilityId]
+        ActionBar.ShowSlot(slotNum, abilityId, currentTimeMs, isBackBar)
+    end
+end
+
+-- Helper to update stack count display on UI elements
+local function UpdateStackDisplay(abilityId, stackCount)
+    if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
+        local slotNum = g_toggledSlotsFront[abilityId]
+        if g_uiCustomToggle[slotNum] then
+            g_uiCustomToggle[slotNum].stack:SetText(stackCount > 0 and stackCount or "")
+        end
+    end
+    if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
+        local slotNum = g_toggledSlotsBack[abilityId]
+        if g_uiCustomToggle[slotNum] then
+            g_uiCustomToggle[slotNum].stack:SetText(stackCount > 0 and stackCount or "")
+        end
+    end
+end
+
+-- Helper to handle BarHighlightSwap calls with null checks
+local function HandleBarHighlightSwap(abilityId)
+    if Effects.BarHighlightCheckOnFade[abilityId] then
+        EventHandlers.BarHighlightSwap(abilityId)
+    end
+end
+
+-- Helper to clear toggled slots data
+local function ClearToggledSlotsData(abilityId)
+    g_toggledSlotsRemain[abilityId] = nil
+    g_toggledSlotsStack[abilityId] = nil
+end
+
+-- Helper to handle ground mine stack changes and slot management
+local function HandleGroundMineStackChange(abilityId, stackChange)
+    if not g_mineStacks[abilityId] then
+        g_mineStacks[abilityId] = 0
+    end
+
+    g_mineStacks[abilityId] = g_mineStacks[abilityId] + stackChange
+
+    -- Clamp stack count to valid range
+    if Effects.EffectGroundDisplay[abilityId] and Effects.EffectGroundDisplay[abilityId].stackReset then
+        local maxStacks = Effects.EffectGroundDisplay[abilityId].stackReset
+        if g_mineStacks[abilityId] > maxStacks then
+            g_mineStacks[abilityId] = maxStacks
+        elseif g_mineStacks[abilityId] < 0 then
+            g_mineStacks[abilityId] = 0
+        end
+    end
+
+    -- Update UI if showing labels
+    if ActionBar.SV.BarShowLabel then
+        UpdateStackDisplay(abilityId, g_mineStacks[abilityId])
+    end
+
+    -- Hide slots if stack reaches 0 and not prevented from turning off
+    if g_mineStacks[abilityId] == 0 and not g_mineNoTurnOff[abilityId] then
+        if g_toggledSlotsRemain[abilityId] then
+            HideSlotsForAbility(abilityId)
+            ClearToggledSlotsData(abilityId)
+            HandleBarHighlightSwap(abilityId)
+        end
+    end
+end
 -- Function to refresh cached references (called when ActionBar reinitializes tables)
 function EventHandlers.RefreshCachedReferences()
     g_barDurationOverride = ActionBar.GetBarDurationOverride()
@@ -71,19 +162,9 @@ function EventHandlers.OnReticleTargetChanged(eventCode)
 
         if  ((frontSlot and g_uiCustomToggle[frontSlot]) or (backSlot and g_uiCustomToggle[backSlot]))
         and not (g_toggledSlotsPlayer[k] or g_barNoRemove[k]) then
-            if frontSlot and g_uiCustomToggle[frontSlot] then
-                ActionBar.HideSlot(frontSlot, k)
-            end
-
-            if backSlot and g_uiCustomToggle[backSlot] then
-                ActionBar.HideSlot(backSlot, k)
-            end
-
-            g_toggledSlotsRemain[k] = nil
-
-            if Effects.BarHighlightCheckOnFade[k] then
-                EventHandlers.BarHighlightSwap(k)
-            end
+            HideSlotsForAbility(k)
+            ClearToggledSlotsData(k)
+            HandleBarHighlightSwap(k)
         end
     end
 
@@ -121,12 +202,6 @@ function EventHandlers.OnReticleTargetChanged(eventCode)
             end
         end
     end
-end
-
--- Helper to get override ability duration
-local function GetUpdatedAbilityDuration(abilityId)
-    local dur = g_barDurationOverride[abilityId] or GetAbilityDuration(abilityId) or 0
-    return dur
 end
 
 -- Handles bar highlight swap event
@@ -230,69 +305,16 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
             if not g_protectAbilityRemoval[abilityId] or g_protectAbilityRemoval[abilityId] < currentTimeMs then
                 if Effects.IsGroundMineAura[abilityId] or Effects.IsGroundMineStack[abilityId] then
                     if g_mineStacks[abilityId] then
-                        g_mineStacks[abilityId] = g_mineStacks[abilityId] - Effects.EffectGroundDisplay[abilityId].stackRemove
-
-                        if ActionBar.SV.BarShowLabel then
-                            if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
-                                if not Effects.HideGroundMineStacks[abilityId] then
-                                    local slotNum = g_toggledSlotsFront[abilityId]
-                                    if g_uiCustomToggle[slotNum] then
-                                        if g_mineStacks[abilityId] > 0 then
-                                            g_uiCustomToggle[slotNum].stack:SetText(g_mineStacks[abilityId])
-                                        else
-                                            g_uiCustomToggle[slotNum].stack:SetText("")
-                                        end
-                                    end
-                                end
-                            end
-                            if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
-                                if not Effects.HideGroundMineStacks[abilityId] then
-                                    local slotNum = g_toggledSlotsBack[abilityId]
-                                    if g_uiCustomToggle[slotNum] then
-                                        if g_mineStacks[abilityId] > 0 then
-                                            g_uiCustomToggle[slotNum].stack:SetText(g_mineStacks[abilityId])
-                                        else
-                                            g_uiCustomToggle[slotNum].stack:SetText("")
-                                        end
-                                    end
-                                end
-                            end
-                        end
-
-                        if g_mineStacks[abilityId] == 0 and not g_mineNoTurnOff[abilityId] then
-                            if g_toggledSlotsRemain[abilityId] then
-                                if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
-                                    local slotNum = g_toggledSlotsFront[abilityId]
-                                    ActionBar.HideSlot(slotNum, abilityId)
-                                end
-                                if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
-                                    local slotNum = g_toggledSlotsBack[abilityId]
-                                    ActionBar.HideSlot(slotNum, abilityId)
-                                end
-                            end
-                            g_toggledSlotsRemain[abilityId] = nil
-                            g_toggledSlotsStack[abilityId] = nil
-                            if Effects.BarHighlightCheckOnFade[abilityId] then
-                                EventHandlers.BarHighlightSwap(abilityId)
-                            end
-                        end
+                        HandleGroundMineStackChange(abilityId, -Effects.EffectGroundDisplay[abilityId].stackRemove)
                     end
                 else
                     if g_barNoRemove[abilityId] then
                         return
                     end
                     if g_toggledSlotsRemain[abilityId] then
-                        if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
-                            local slotNum = g_toggledSlotsFront[abilityId]
-                            ActionBar.HideSlot(slotNum, abilityId)
-                        end
-                        if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
-                            local slotNum = g_toggledSlotsBack[abilityId]
-                            ActionBar.HideSlot(slotNum, abilityId)
-                        end
+                        HideSlotsForAbility(abilityId)
                     end
-                    g_toggledSlotsRemain[abilityId] = nil
-                    g_toggledSlotsStack[abilityId] = nil
+                    ClearToggledSlotsData(abilityId)
                 end
             end
         elseif changeType == EFFECT_RESULT_GAINED then
@@ -375,21 +397,11 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
         end
 
         if g_triggeredSlotsRemain[abilityId] then
-            if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
-                local slotNum = g_toggledSlotsFront[abilityId]
-                ActionBar.HideSlot(slotNum, abilityId)
-            end
-            if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
-                local slotNum = g_toggledSlotsBack[abilityId]
-                ActionBar.HideSlot(slotNum, abilityId)
-            end
-            g_toggledSlotsRemain[abilityId] = nil
-            g_toggledSlotsStack[abilityId] = nil
+            HideSlotsForAbility(abilityId)
+            ClearToggledSlotsData(abilityId)
         end
 
-        if Effects.BarHighlightCheckOnFade[abilityId] then
-            EventHandlers.BarHighlightSwap(abilityId)
-        end
+        HandleBarHighlightSwap(abilityId)
     else
         if Effects.IsGrimFocus[abilityId] then
             if ActionBar.SV.ShowTriggered and ActionBar.SV.ProcEnableSound then
@@ -470,14 +482,7 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
                     end
                 end
                 g_toggledSlotsStack[abilityId] = stackCount
-                if g_toggledSlotsFront[abilityId] then
-                    local slotNum = g_toggledSlotsFront[abilityId]
-                    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMs, false)
-                end
-                if g_toggledSlotsBack[abilityId] then
-                    local slotNum = g_toggledSlotsBack[abilityId]
-                    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMs, false)
-                end
+                ShowSlotsForAbility(abilityId, currentTimeMs, false)
             end
         end
     end
@@ -525,9 +530,7 @@ function EventHandlers.OnCombatEvent(eventCode, result, isError, abilityName, ab
             end
             if compareId then
                 if g_barNoRemove[compareId] then
-                    if Effects.BarHighlightCheckOnFade[compareId] then
-                        EventHandlers.BarHighlightSwap(compareId)
-                    end
+                    HandleBarHighlightSwap(compareId)
                     return
                 end
             end
@@ -575,26 +578,7 @@ function EventHandlers.OnCombatEventBar(eventCode, result, isError, abilityName,
                 if g_toggledSlotsStack[abilityId] then
                     g_toggledSlotsStack[abilityId] = g_toggledSlotsStack[abilityId] - 1
                 end
-                if g_toggledSlotsFront[abilityId] then
-                    local slotNum = g_toggledSlotsFront[abilityId]
-                    if g_uiCustomToggle[slotNum] then
-                        if g_toggledSlotsStack[abilityId] and g_toggledSlotsStack[abilityId] > 0 then
-                            g_uiCustomToggle[slotNum].stack:SetText(g_toggledSlotsStack[abilityId])
-                        else
-                            g_uiCustomToggle[slotNum].stack:SetText("")
-                        end
-                    end
-                end
-                if g_toggledSlotsBack[abilityId] then
-                    local slotNum = g_toggledSlotsBack[abilityId]
-                    if g_uiCustomToggle[slotNum] then
-                        if g_toggledSlotsStack[abilityId] and g_toggledSlotsStack[abilityId] > 0 then
-                            g_uiCustomToggle[slotNum].stack:SetText(g_toggledSlotsStack[abilityId])
-                        else
-                            g_uiCustomToggle[slotNum].stack:SetText("")
-                        end
-                    end
-                end
+                UpdateStackDisplay(abilityId, g_toggledSlotsStack[abilityId] or 0)
             end
         end
     end
@@ -612,35 +596,18 @@ function EventHandlers.OnCombatEventBar(eventCode, result, isError, abilityName,
                 if abilityId == 35750 or abilityId == 40382 or abilityId == 40372 then
                     g_toggledSlotsStack[abilityId] = 1
                 end
-                if g_toggledSlotsFront[abilityId] then
-                    local slotNum = g_toggledSlotsFront[abilityId]
-                    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMs, false)
-                end
-                if g_toggledSlotsBack[abilityId] then
-                    local slotNum = g_toggledSlotsBack[abilityId]
-                    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMs, false)
-                end
+                ShowSlotsForAbility(abilityId, currentTimeMs, false)
             end
         end
     elseif result == ACTION_RESULT_EFFECT_FADED then
         if g_barNoRemove[abilityId] then
-            if Effects.BarHighlightCheckOnFade[abilityId] then
-                EventHandlers.BarHighlightSwap(abilityId)
-            end
+            HandleBarHighlightSwap(abilityId)
             return
         end
 
         if g_toggledSlotsRemain[abilityId] then
-            if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
-                local slotNum = g_toggledSlotsFront[abilityId]
-                ActionBar.HideSlot(slotNum, abilityId)
-            end
-            if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
-                local slotNum = g_toggledSlotsBack[abilityId]
-                ActionBar.HideSlot(slotNum, abilityId)
-            end
-            g_toggledSlotsRemain[abilityId] = nil
-            g_toggledSlotsStack[abilityId] = nil
+            HideSlotsForAbility(abilityId)
+            ClearToggledSlotsData(abilityId)
         end
         if Effects.BarHighlightCheckOnFade[abilityId] and targetType == COMBAT_UNIT_TYPE_PLAYER then
             EventHandlers.BarHighlightSwap(abilityId)
