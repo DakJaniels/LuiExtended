@@ -564,4 +564,3 @@ function CastBar.Initialize()
     CastBar.UpdateCastBar()
     CastBar.SetCastBarPosition()
 end
-

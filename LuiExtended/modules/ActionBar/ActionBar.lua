@@ -1908,16 +1908,21 @@ function ActionBar.BackbarToggleSettings()
     end
 end
 
-local function HandleActionUpdateCooldowns()
+-- Public handlers for event registration
+function ActionBar.HandleActionUpdateCooldowns()
     RefreshVisibleCooldowns()
 end
 
-local function HandleActionSlotEffectsCleared()
-    ActionBar.OnSlotsFullUpdate()
+function ActionBar.HandleCursorPickup(_, cursorType, actionType, _, slotIndex)
+    if cursorType == MOUSE_CONTENT_ACTION and abilityDropValidators and abilityDropValidators[actionType] then
+        ShowAbilityDropCallouts(actionType, slotIndex)
+    end
 end
 
-local function HandleInventoryFullUpdate()
-    ActionBar.OnSlotsFullUpdate()
+function ActionBar.HandleCursorDropped(_, cursorType)
+    if cursorType == MOUSE_CONTENT_ACTION then
+        HideAbilityDropCallouts()
+    end
 end
 
 -- Main ticker update for action bar
@@ -2059,17 +2064,6 @@ function ActionBar.SetupFonts(barFont, potionFont, ultimateFont, procSound)
     end
 end
 
-local function HandleCursorPickup(_, cursorType, actionType, _, slotIndex)
-    if cursorType == MOUSE_CONTENT_ACTION and abilityDropValidators and abilityDropValidators[actionType] then
-        ShowAbilityDropCallouts(actionType, slotIndex)
-    end
-end
-
-local function HandleCursorDropped(_, cursorType)
-    if cursorType == MOUSE_CONTENT_ACTION then
-        HideAbilityDropCallouts()
-    end
-end
 
 -- Initialize action bar module
 function ActionBar.Initialize(enabled)
@@ -2112,11 +2106,7 @@ function ActionBar.Initialize(enabled)
     local g_castbarFont = setupFont("CastBarFontFace", "CastBarFontStyle", "CastBarFontSize", FONT_STYLE_SOFT_SHADOW_THICK, 16)
 
     -- Setup proc sound
-    local barProcSound = LUIE.Sounds[ActionBar.SV.ProcSoundName]
-    if not barProcSound or barProcSound == "" then
-        barProcSound = "DeathRecap_KillingBlowShown"
-    end
-    g_ProcSound = barProcSound
+    ActionBar.ApplyProcSound()
 
     -- Setup CastBar font (CastBar module should be loaded by now)
     if ActionBar.CastBar and ActionBar.CastBar.SetupFont then
@@ -2252,180 +2242,59 @@ function ActionBar.Initialize(enabled)
 
     HideAbilityDropCallouts()
 
-    eventManager:RegisterForEvent(moduleName .. "ActionCooldowns", EVENT_ACTION_UPDATE_COOLDOWNS, HandleActionUpdateCooldowns)
-    eventManager:RegisterForEvent(moduleName .. "ActionEffectsCleared", EVENT_ACTION_SLOT_EFFECTS_CLEARED, HandleActionSlotEffectsCleared)
-    eventManager:RegisterForEvent(moduleName .. "InventoryFullUpdate", EVENT_INVENTORY_FULL_UPDATE, HandleInventoryFullUpdate)
-    eventManager:RegisterForEvent(moduleName .. "CursorPickup", EVENT_CURSOR_PICKUP, HandleCursorPickup)
-    eventManager:RegisterForEvent(moduleName .. "CursorDropped", EVENT_CURSOR_DROPPED, HandleCursorDropped)
-
-    -- Register companion ultimate power updates
-    local function HandleCompanionPowerUpdate(eventCode, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
-        if powerType == COMBAT_MECHANIC_FLAGS_ULTIMATE then
-            ActionBar.OnPowerUpdateCompanion(eventCode, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
-        end
-    end
-    eventManager:RegisterForEvent(moduleName .. "CompanionPower", EVENT_POWER_UPDATE, HandleCompanionPowerUpdate)
-    eventManager:AddFilterForEvent(moduleName .. "CompanionPower", EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, COMBAT_MECHANIC_FLAGS_ULTIMATE, REGISTER_FILTER_UNIT_TAG, "companion")
-
-    -- Register companion state changes
-    local function HandleActiveCompanionStateChanged(eventCode, newState, oldState)
-        ActionBar.UpdateCompanionUltimateLabel()
-        ActionBar.SetCompanionAnchors()
-    end
-    eventManager:RegisterForEvent(moduleName .. "ActiveCompanionState", EVENT_ACTIVE_COMPANION_STATE_CHANGED, HandleActiveCompanionStateChanged)
-
-    -- Register companion activated/deactivated events
-    local function HandleCompanionActivated(eventCode, companionId)
-        ActionBar.UpdateCompanionUltimateLabel()
-        ActionBar.SetCompanionAnchors()
-    end
-    eventManager:RegisterForEvent(moduleName .. "CompanionActivated", EVENT_COMPANION_ACTIVATED, HandleCompanionActivated)
-
-    local function HandleCompanionDeactivated(eventCode)
-        ActionBar.UpdateCompanionUltimateLabel()
-        ActionBar.SetCompanionAnchors()
-    end
-    eventManager:RegisterForEvent(moduleName .. "CompanionDeactivated", EVENT_COMPANION_DEACTIVATED, HandleCompanionDeactivated)
-
-    -- Register ultimate ability cost changes for companion
-    local function HandleUltimateAbilityCostChanged()
-        ActionBar.UpdateCompanionUltimateLabel()
-    end
-    eventManager:RegisterForEvent(moduleName .. "CompanionUltimateCost", EVENT_ULTIMATE_ABILITY_COST_CHANGED, HandleUltimateAbilityCostChanged)
-
-    -- Register all events based on settings
-    eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, ActionBar.OnUpdate)
-    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, ActionBar.OnPlayerActivated)
+    -- Register all events based on settings (handled in ActionBarManager.lua)
     ActionBar.RegisterEvents()
 end
 
--- Register/unregister events based on current settings
-function ActionBar.RegisterEvents()
-    if not ActionBar.Enabled then
-        return
+-- Updates Proc Sound
+function ActionBar.ApplyProcSound(menu)
+    local barProcSound = LUIE.Sounds[ActionBar.SV.ProcSoundName]
+    if not barProcSound or barProcSound == "" then
+        printToChat(GetString(LUIE_STRING_ERROR_SOUND), true)
+        barProcSound = "DeathRecap_KillingBlowShown"
     end
 
-    -- Unregister all ActionBar events first
-    eventManager:UnregisterForEvent(moduleName, EVENT_COMBAT_EVENT)
-    eventManager:UnregisterForEvent(moduleName, EVENT_POWER_UPDATE)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_SLOT_UPDATED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTIVE_WEAPON_PAIR_CHANGED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_ITEM_USED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_SLOT_ABILITY_USED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_BAR_LOCKED_REASON_CHANGED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_BAR_IS_RESPECCABLE_BAR_STATE_CHANGED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTIVE_DAEDRIC_ARTIFACT_CHANGED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_UNIT_DEATH_STATE_CHANGED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_TARGET_CHANGED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_GAMEPAD_PREFERRED_MODE_CHANGED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_EFFECT_CHANGED)
-    eventManager:UnregisterForEvent(moduleName .. "Pet", EVENT_EFFECT_CHANGED)
-    eventManager:UnregisterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT)
-    eventManager:UnregisterForEvent(moduleName .. "CombatEvent2", EVENT_COMBAT_EVENT)
-    eventManager:UnregisterForEvent(moduleName .. "PowerUpdatePlayer", EVENT_POWER_UPDATE)
-    eventManager:UnregisterForEvent(moduleName .. "InventoryUpdate", EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
-    eventManager:UnregisterForEvent(moduleName .. "PowerUpdate2", EVENT_ULTIMATE_ABILITY_COST_CHANGED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_SLOT_EFFECT_UPDATE)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ARMORY_BUILD_RESTORE_RESPONSE)
-    eventManager:UnregisterForEvent(moduleName, EVENT_WEAPON_PAIR_LOCK_CHANGED)
+    g_ProcSound = barProcSound
 
-    -- Unregister CastBar events
-    local Castbar = Data.CastBarTable
-    local counter = 0
-    for result, _ in pairs(Castbar.CastBreakingStatus) do
-        local eventName = moduleName .. "CombatEventCC" .. tostring(counter)
-        eventManager:UnregisterForEvent(eventName, EVENT_COMBAT_EVENT)
-        counter = counter + 1
-    end
-    eventManager:UnregisterForEvent(moduleName .. "CastBarSoulGemStart", EVENT_START_SOUL_GEM_RESURRECTION)
-    eventManager:UnregisterForEvent(moduleName .. "CastBarSoulGemEnd", EVENT_END_SOUL_GEM_RESURRECTION)
-    eventManager:UnregisterForEvent(moduleName .. "CastBarCameraUI", EVENT_GAME_CAMERA_UI_MODE_CHANGED)
-    eventManager:UnregisterForEvent(moduleName .. "CastBarSiegeEnd", EVENT_END_SIEGE_CONTROL)
-    eventManager:UnregisterForEvent(moduleName .. "CastBarAbilityUsed", EVENT_ACTION_SLOT_ABILITY_USED)
-    eventManager:UnregisterForEvent(moduleName .. "CastBarCombatEvent", EVENT_COMBAT_EVENT)
+    ActionBar.SetupFonts(g_barFont, g_potionFont, g_ultimateFont, g_ProcSound)
 
-    -- Register Ultimate tracking events
-    if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
-        eventManager:RegisterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT, ActionBar.EventHandlers.OnCombatEvent)
-        eventManager:AddFilterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_BLOCKED_DAMAGE)
-        eventManager:RegisterForEvent(moduleName .. "PowerUpdatePlayer", EVENT_POWER_UPDATE, ActionBar.OnPowerUpdatePlayer)
-        eventManager:AddFilterForEvent(moduleName .. "PowerUpdatePlayer", EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, COMBAT_MECHANIC_FLAGS_ULTIMATE, REGISTER_FILTER_UNIT_TAG, "player")
-        eventManager:RegisterForEvent(moduleName .. "InventoryUpdate", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ActionBar.OnInventorySlotUpdate)
-        eventManager:AddFilterForEvent(moduleName .. "InventoryUpdate", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT, REGISTER_FILTER_IS_NEW_ITEM, false)
-        eventManager:RegisterForEvent(moduleName .. "PowerUpdate2", EVENT_ULTIMATE_ABILITY_COST_CHANGED, ActionBar.UpdateUltimateLabel)
-    end
-
-    -- Register events for Ultimate or CastBar
-    if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled or ActionBar.SV.CastBarEnable then
-        eventManager:RegisterForEvent(moduleName .. "CombatEvent2", EVENT_COMBAT_EVENT, ActionBar.EventHandlers.OnCombatEvent)
-        eventManager:AddFilterForEvent(moduleName .. "CombatEvent2", EVENT_COMBAT_EVENT, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false)
-    end
-
-    -- Register CastBar events if enabled
-    if ActionBar.SV.CastBarEnable and ActionBar.CastBar then
-        counter = 0
-        for result, _ in pairs(Castbar.CastBreakingStatus) do
-            local eventName = moduleName .. "CombatEventCC" .. tostring(counter)
-            counter = counter + 1
-            eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, ActionBar.CastBar.OnCombatEventBreakCast)
-            eventManager:AddFilterForEvent(eventName, EVENT_COMBAT_EVENT, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_COMBAT_RESULT, result)
-        end
-        eventManager:RegisterForEvent(moduleName .. "CastBarSoulGemStart", EVENT_START_SOUL_GEM_RESURRECTION, ActionBar.CastBar.SoulGemResurrectionStart)
-        eventManager:RegisterForEvent(moduleName .. "CastBarSoulGemEnd", EVENT_END_SOUL_GEM_RESURRECTION, ActionBar.CastBar.SoulGemResurrectionEnd)
-        eventManager:RegisterForEvent(moduleName .. "CastBarCameraUI", EVENT_GAME_CAMERA_UI_MODE_CHANGED, ActionBar.CastBar.OnGameCameraUIModeChanged)
-        eventManager:RegisterForEvent(moduleName .. "CastBarSiegeEnd", EVENT_END_SIEGE_CONTROL, ActionBar.CastBar.OnSiegeEnd)
-        eventManager:RegisterForEvent(moduleName .. "CastBarAbilityUsed", EVENT_ACTION_SLOT_ABILITY_USED, ActionBar.CastBar.OnAbilityUsed)
-        eventManager:RegisterForEvent(moduleName .. "CastBarCombatEvent", EVENT_COMBAT_EVENT, ActionBar.CastBar.OnCombatEvent)
-        eventManager:AddFilterForEvent(moduleName .. "CastBarCombatEvent", EVENT_COMBAT_EVENT, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false)
-    end
-
-    -- Register action bar slot events
-    if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled or ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
-        local function OnActiveHotbarUpdated(event, didActiveHotbarChange)
-            ActionBar.UpdateAllSlotsForActiveHotbar(didActiveHotbarChange)
-        end
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, OnActiveHotbarUpdated)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, ActionBar.OnSlotsFullUpdate)
-        eventManager:RegisterForEvent(moduleName, EVENT_ARMORY_BUILD_RESTORE_RESPONSE, ActionBar.OnSlotsFullUpdate)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_UPDATED, ActionBar.OnSlotUpdated)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_WEAPON_PAIR_CHANGED, ActionBar.OnActiveWeaponPairChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_WEAPON_PAIR_LOCK_CHANGED, ActionBar.OnActiveWeaponPairChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_BAR_LOCKED_REASON_CHANGED, ActionBar.OnActionBarLockedReasonChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_BAR_IS_RESPECCABLE_BAR_STATE_CHANGED, ActionBar.OnActionBarIsRespeccableBarStateChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_DAEDRIC_ARTIFACT_CHANGED, ActionBar.OnActiveDaedricArtifactChanged)
-
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_EFFECT_UPDATE, ActionBar.OnActionSlotEffectUpdated)
-    end
-
-    -- Register triggered/toggled ability events
-    if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled then
-        eventManager:RegisterForEvent(moduleName, EVENT_UNIT_DEATH_STATE_CHANGED, ActionBar.OnDeath)
-        eventManager:AddFilterForEvent(moduleName, EVENT_UNIT_DEATH_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
-        eventManager:RegisterForEvent(moduleName, EVENT_TARGET_CHANGED, ActionBar.EventHandlers.OnTargetChange)
-        eventManager:AddFilterForEvent(moduleName, EVENT_TARGET_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
-        eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED, ActionBar.EventHandlers.OnReticleTargetChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, ActionBar.BackbarSetupTemplate)
-
-        eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEM_USED, ActionBar.InventoryItemUsed)
-
-        ActionBar.UpdateBarHighlightTables()
-    end
-
-    -- Register effect changed events
-    if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled or ActionBar.SV.CastBarEnable or ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
-        eventManager:RegisterForEvent(moduleName, EVENT_EFFECT_CHANGED, ActionBar.EventHandlers.OnEffectChanged)
-        eventManager:RegisterForEvent(moduleName .. "Pet", EVENT_EFFECT_CHANGED, ActionBar.EventHandlers.OnEffectChanged)
-        eventManager:AddFilterForEvent(moduleName .. "Pet", EVENT_EFFECT_CHANGED, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER_PET)
-    end
-
-    -- Hide default ultimate number if our labels are enabled
-    if not IsConsoleUI() and (ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled) then
-        SetSetting(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER, 0, SETTINGS_SET_OPTION_SAVE_TO_PERSISTED_DATA)
+    if menu then
+        PlaySound(g_ProcSound)
     end
 end
+
+-- Applies font changes to all ActionBar elements
+function ActionBar.ApplyFont()
+    local function setupFont(fontNameKey, fontStyleKey, fontSizeKey, defaultFontStyle, defaultFontSize)
+        local fontName = LUIE.Fonts[ActionBar.SV[fontNameKey]]
+        if not fontName or fontName == "" then
+            LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
+            fontName = "LUIE Default Font"
+        end
+        local fontStyle = ActionBar.SV[fontStyleKey] or defaultFontStyle
+        local fontSize = (ActionBar.SV[fontSizeKey] and ActionBar.SV[fontSizeKey] > 0) and ActionBar.SV[fontSizeKey] or defaultFontSize
+        return ZO_CreateFontString(fontName, fontSize, fontStyle)
+    end
+
+    -- Update all fonts
+    g_barFont = setupFont("BarFontFace", "BarFontStyle", "BarFontSize", FONT_STYLE_OUTLINE, 17)
+    g_potionFont = setupFont("PotionTimerFontFace", "PotionTimerFontStyle", "PotionTimerFontSize", FONT_STYLE_OUTLINE, 17)
+    g_ultimateFont = setupFont("UltimateFontFace", "UltimateFontStyle", "UltimateFontSize", FONT_STYLE_OUTLINE, 17)
+    local castbarFont = setupFont("CastBarFontFace", "CastBarFontStyle", "CastBarFontSize", FONT_STYLE_SOFT_SHADOW_THICK, 16)
+
+    -- Update fonts for all ActionBar UI elements
+    ActionBar.SetupFonts(g_barFont, g_potionFont, g_ultimateFont, g_ProcSound)
+
+    -- Update CastBar font if CastBar module is loaded
+    if ActionBar.CastBar and ActionBar.CastBar.SetupFont then
+        ActionBar.CastBar.SetupFont(castbarFont)
+        -- Update the cast bar display with new font
+        if ActionBar.CastBar.UpdateCastBar then
+            ActionBar.CastBar.UpdateCastBar()
+        end
+    end
+end
+
 
 -- Export state for ActionBar main module to access
 ActionBar.GetTriggeredSlotsRemain = function () return g_triggeredSlotsRemain end
