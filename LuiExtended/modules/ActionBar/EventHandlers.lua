@@ -11,19 +11,19 @@ local Effects = Data.Effects
 local Castbar = Data.CastBarTable
 local OtherAddonCompatability = LUIE.OtherAddonCompatability
 
+--- @class (partial) LUIE.ActionBar
+local ActionBar = LUIE.ActionBar
+
 --- @class (partial) LUIE.CombatInfo
 local CombatInfo = LUIE.CombatInfo
 
 --- @class (partial) EventHandlers
 local EventHandlers = {}
 EventHandlers.__index = EventHandlers
-CombatInfo.EventHandlers = EventHandlers
+ActionBar.EventHandlers = EventHandlers
 
 local pairs = pairs
 local timeMs = GetFrameTimeMilliseconds
-
---- @class (partial) ActionBar
-local ActionBar = CombatInfo.ActionBar
 
 -- Cache ActionBar table references at module level to avoid repeated getter calls
 local g_barFakeAura = ActionBar.GetBarFakeAura()
@@ -72,11 +72,11 @@ function EventHandlers.OnReticleTargetChanged(eventCode)
         if  ((frontSlot and g_uiCustomToggle[frontSlot]) or (backSlot and g_uiCustomToggle[backSlot]))
         and not (g_toggledSlotsPlayer[k] or g_barNoRemove[k]) then
             if frontSlot and g_uiCustomToggle[frontSlot] then
-                CombatInfo.HideSlot(frontSlot, k)
+                ActionBar.HideSlot(frontSlot, k)
             end
 
             if backSlot and g_uiCustomToggle[backSlot] then
-                CombatInfo.HideSlot(backSlot, k)
+                ActionBar.HideSlot(backSlot, k)
             end
 
             g_toggledSlotsRemain[k] = nil
@@ -196,11 +196,14 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
     end
 
     if Effects.IsVamp[abilityId] and changeType == EFFECT_RESULT_GAINED then
-        CombatInfo.UpdateUltimateLabel()
+        ActionBar.UpdateUltimateLabel()
     end
 
     if Castbar.CastBreakOnRemoveEffect[abilityId] and changeType == EFFECT_RESULT_FADED then
-        CombatInfo.StopCastBar()
+        local CastBar = CombatInfo.CastBar
+        if CastBar then
+            CastBar.StopCastBar()
+        end
         if abilityId == 33208 then
             return
         end
@@ -229,7 +232,7 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
                     if g_mineStacks[abilityId] then
                         g_mineStacks[abilityId] = g_mineStacks[abilityId] - Effects.EffectGroundDisplay[abilityId].stackRemove
 
-                        if CombatInfo.SV.BarShowLabel then
+                        if ActionBar.SV.BarShowLabel then
                             if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
                                 if not Effects.HideGroundMineStacks[abilityId] then
                                     local slotNum = g_toggledSlotsFront[abilityId]
@@ -260,11 +263,11 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
                             if g_toggledSlotsRemain[abilityId] then
                                 if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
                                     local slotNum = g_toggledSlotsFront[abilityId]
-                                    CombatInfo.HideSlot(slotNum, abilityId)
+                                    ActionBar.HideSlot(slotNum, abilityId)
                                 end
                                 if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
                                     local slotNum = g_toggledSlotsBack[abilityId]
-                                    CombatInfo.HideSlot(slotNum, abilityId)
+                                    ActionBar.HideSlot(slotNum, abilityId)
                                 end
                             end
                             g_toggledSlotsRemain[abilityId] = nil
@@ -281,11 +284,11 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
                     if g_toggledSlotsRemain[abilityId] then
                         if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
                             local slotNum = g_toggledSlotsFront[abilityId]
-                            CombatInfo.HideSlot(slotNum, abilityId)
+                            ActionBar.HideSlot(slotNum, abilityId)
                         end
                         if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
                             local slotNum = g_toggledSlotsBack[abilityId]
-                            CombatInfo.HideSlot(slotNum, abilityId)
+                            ActionBar.HideSlot(slotNum, abilityId)
                         end
                     end
                     g_toggledSlotsRemain[abilityId] = nil
@@ -313,7 +316,7 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
                 end
             end
 
-            if CombatInfo.SV.ShowToggled then
+            if ActionBar.SV.ShowToggled then
                 g_toggledSlotsPlayer[abilityId] = true
                 local currentTimeST = timeMs()
                 if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
@@ -325,11 +328,11 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
                     g_toggledSlotsStack[abilityId] = stackCount
                     if g_toggledSlotsFront[abilityId] then
                         local slotNum = g_toggledSlotsFront[abilityId]
-                        CombatInfo.ShowSlot(slotNum, abilityId, currentTimeST, false)
+                        ActionBar.ShowSlot(slotNum, abilityId, currentTimeST, false)
                     end
                     if g_toggledSlotsBack[abilityId] then
                         local slotNum = g_toggledSlotsBack[abilityId]
-                        CombatInfo.ShowSlot(slotNum, abilityId, currentTimeST, false)
+                        ActionBar.ShowSlot(slotNum, abilityId, currentTimeST, false)
                     end
                 end
             end
@@ -374,11 +377,11 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
         if g_triggeredSlotsRemain[abilityId] then
             if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
                 local slotNum = g_toggledSlotsFront[abilityId]
-                CombatInfo.HideSlot(slotNum, abilityId)
+                ActionBar.HideSlot(slotNum, abilityId)
             end
             if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
                 local slotNum = g_toggledSlotsBack[abilityId]
-                CombatInfo.HideSlot(slotNum, abilityId)
+                ActionBar.HideSlot(slotNum, abilityId)
             end
             g_toggledSlotsRemain[abilityId] = nil
             g_toggledSlotsStack[abilityId] = nil
@@ -389,7 +392,7 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
         end
     else
         if Effects.IsGrimFocus[abilityId] then
-            if CombatInfo.SV.ShowTriggered and CombatInfo.SV.ProcEnableSound then
+            if ActionBar.SV.ShowTriggered and ActionBar.SV.ProcEnableSound then
                 if not g_boundArmamentsPlayed[abilityId] then
                     g_boundArmamentsPlayed[abilityId] = {}
                 end
@@ -408,7 +411,7 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
                 end
             end
         elseif Effects.IsBoundArmaments[abilityId] then
-            if CombatInfo.SV.ShowTriggered and CombatInfo.SV.ProcEnableSound then
+            if ActionBar.SV.ShowTriggered and ActionBar.SV.ProcEnableSound then
                 if not g_boundArmamentsPlayed[abilityId] then
                     g_boundArmamentsPlayed[abilityId] = {}
                 end
@@ -430,8 +433,8 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
 
         if g_triggeredSlotsFront[abilityId] or g_triggeredSlotsBack[abilityId] then
             local currentTimeMs = timeMs()
-            if CombatInfo.SV.ShowTriggered then
-                if CombatInfo.SV.ProcEnableSound and unitTag == "player" and g_triggeredSlotsFront[abilityId] then
+            if ActionBar.SV.ShowTriggered then
+                if ActionBar.SV.ProcEnableSound and unitTag == "player" and g_triggeredSlotsFront[abilityId] then
                     if abilityId == 46327 then
                         if changeType == EFFECT_RESULT_GAINED then
                             PlaySound(g_ProcSound)
@@ -456,7 +459,7 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
 
         if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
             local currentTimeMs = timeMs()
-            if CombatInfo.SV.ShowToggled then
+            if ActionBar.SV.ShowToggled then
                 if Effects.IsGrimFocus[abilityId] or Effects.IsBloodFrenzy[abilityId] then
                     g_toggledSlotsRemain[abilityId] = currentTimeMs + 90000000
                 else
@@ -469,11 +472,11 @@ function EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effect
                 g_toggledSlotsStack[abilityId] = stackCount
                 if g_toggledSlotsFront[abilityId] then
                     local slotNum = g_toggledSlotsFront[abilityId]
-                    CombatInfo.ShowSlot(slotNum, abilityId, currentTimeMs, false)
+                    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMs, false)
                 end
                 if g_toggledSlotsBack[abilityId] then
                     local slotNum = g_toggledSlotsBack[abilityId]
-                    CombatInfo.ShowSlot(slotNum, abilityId, currentTimeMs, false)
+                    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMs, false)
                 end
             end
         end
@@ -500,7 +503,7 @@ end
 --- @param abilityId integer
 --- @param overflow integer
 function EventHandlers.OnCombatEvent(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
-    if CombatInfo.SV.UltimateGeneration and uiUltimate.NotFull and ((result == ACTION_RESULT_BLOCKED_DAMAGE and targetType == COMBAT_UNIT_TYPE_PLAYER) or (Effects.IsWeaponAttack[abilityName] and sourceType == COMBAT_UNIT_TYPE_PLAYER and targetName ~= "")) then
+    if ActionBar.SV.UltimateGeneration and uiUltimate.NotFull and ((result == ACTION_RESULT_BLOCKED_DAMAGE and targetType == COMBAT_UNIT_TYPE_PLAYER) or (Effects.IsWeaponAttack[abilityName] and sourceType == COMBAT_UNIT_TYPE_PLAYER and targetName ~= "")) then
         uiUltimate.Texture:SetHidden(false)
         uiUltimate.FadeTime = timeMs() + 8000
     end
@@ -532,8 +535,8 @@ function EventHandlers.OnCombatEvent(eventCode, result, isError, abilityName, ab
     end
 
     -- Delegate cast bar handling to CastBar module
-    local CastBar = CombatInfo.CastBar
-    if CastBar and CombatInfo.SV.CastBarEnable then
+    local CastBar = ActionBar.CastBar
+    if CastBar and ActionBar.SV.CastBarEnable then
         CastBar.OnCombatEvent(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     end
 end
@@ -599,7 +602,7 @@ function EventHandlers.OnCombatEventBar(eventCode, result, isError, abilityName,
     if result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED or result == ACTION_RESULT_EFFECT_GAINED_DURATION then
         local currentTimeMs = timeMs()
         if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
-            if CombatInfo.SV.ShowToggled then
+            if ActionBar.SV.ShowToggled then
                 local duration = GetUpdatedAbilityDuration(abilityId)
                 local endTime = currentTimeMs + duration
                 g_toggledSlotsRemain[abilityId] = endTime
@@ -611,11 +614,11 @@ function EventHandlers.OnCombatEventBar(eventCode, result, isError, abilityName,
                 end
                 if g_toggledSlotsFront[abilityId] then
                     local slotNum = g_toggledSlotsFront[abilityId]
-                    CombatInfo.ShowSlot(slotNum, abilityId, currentTimeMs, false)
+                    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMs, false)
                 end
                 if g_toggledSlotsBack[abilityId] then
                     local slotNum = g_toggledSlotsBack[abilityId]
-                    CombatInfo.ShowSlot(slotNum, abilityId, currentTimeMs, false)
+                    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMs, false)
                 end
             end
         end
@@ -630,11 +633,11 @@ function EventHandlers.OnCombatEventBar(eventCode, result, isError, abilityName,
         if g_toggledSlotsRemain[abilityId] then
             if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
                 local slotNum = g_toggledSlotsFront[abilityId]
-                CombatInfo.HideSlot(slotNum, abilityId)
+                ActionBar.HideSlot(slotNum, abilityId)
             end
             if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
                 local slotNum = g_toggledSlotsBack[abilityId]
-                CombatInfo.HideSlot(slotNum, abilityId)
+                ActionBar.HideSlot(slotNum, abilityId)
             end
             g_toggledSlotsRemain[abilityId] = nil
             g_toggledSlotsStack[abilityId] = nil

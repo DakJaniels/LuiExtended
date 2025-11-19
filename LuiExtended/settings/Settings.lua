@@ -304,6 +304,24 @@ function LUIE.CreateSettings()
         "half"
     )
 
+    -- Action Bar Module
+    optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
+        "Action Bar",
+        nil,
+        function () return Settings.ActionBar_Enabled end,
+        function (value) Settings.ActionBar_Enabled = value end,
+        "half",
+        nil,
+        Defaults.ActionBar_Enabled,
+        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+    )
+
+    -- Action Bar Description
+    optionsData[#optionsData + 1] = SettingsAPI.CreateDescriptionOption(
+        "Enhanced action bar with cooldown timers, ultimate tracking, and cast bar.",
+        "half"
+    )
+
     -- Combat Info Module
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_CI_SHOWCOMBATINFO),

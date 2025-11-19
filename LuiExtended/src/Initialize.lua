@@ -111,6 +111,7 @@ eventManager:RegisterForEvent(LUIE.name, EVENT_ADD_ON_LOADED, function (eventId,
     -- -----------------------------------------------------------------------------
     -- Initialize this addon modules according to user preferences
     LUIE.ChatAnnouncements.Initialize(LUIE.SV.ChatAnnouncements_Enable)
+    LUIE.ActionBar.Initialize(LUIE.SV.ActionBar_Enabled)
     LUIE.CombatInfo.Initialize(LUIE.SV.CombatInfo_Enabled)
     LUIE.CombatText.Initialize(LUIE.SV.CombatText_Enabled)
     LUIE.InfoPanel.Initialize(LUIE.SV.InfoPanel_Enabled)
@@ -124,6 +125,7 @@ eventManager:RegisterForEvent(LUIE.name, EVENT_ADD_ON_LOADED, function (eventId,
     -- Create settings menus for our addon
     LUIE.CreateSettings()
     LUIE.ChatAnnouncements.CreateSettings()
+    LUIE.ActionBar.CreateSettings()
     LUIE.CombatInfo.CreateSettings()
     LUIE.CombatText.CreateSettings()
     LUIE.InfoPanel.CreateSettings()

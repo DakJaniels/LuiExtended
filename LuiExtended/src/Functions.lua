@@ -205,7 +205,7 @@ LUIE.TimeStampColorize = nil
 -- -----------------------------------------------------------------------------
 --- Updates the timestamp color based on the value in LUIE.ChatAnnouncements.SV.TimeStampColor.
 function LUIE.UpdateTimeStampColor()
-    local color = LUIE.ChatAnnouncements.SV.TimeStampColor or { 0.5607843137, 0.5607843137, 0.5607843137 }
+    local color = { 0.5607843137, 0.5607843137, 0.5607843137 } or LUIE.ChatAnnouncements.SV.TimeStampColor
     LUIE.TimeStampColorize = ZO_ColorDef:New(unpack(color)):ToHex()
 end
 
@@ -331,9 +331,9 @@ do
         end
         CHAT_ROUTER:AddSystemMessage(formattedMessage)
 
-        -- if LibDebugLogger and LUIE.IsDevDebugEnabled() then
-        --     LUIE.Debug(formattedMessage)
-        -- end
+        if LibDebugLogger and LUIE.IsDevDebugEnabled() then
+            LUIE.Debug(formattedMessage)
+        end
     end
 
     LUIE.AddSystemMessage = AddSystemMessage

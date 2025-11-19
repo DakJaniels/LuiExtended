@@ -168,3 +168,17 @@ end
 function CombatTextAnimation:GetProgress()
     return self.timeline:GetProgress()
 end
+
+--- Resets the animation to its default state for pool recycling
+function CombatTextAnimation:Reset()
+    -- Only clear callbacks to prevent memory leaks - this is the main source of leaks.
+    -- The timeline state (progress, playing status) is handled by PlayFromStart()
+    -- when the animation is reused. Don't manipulate timeline state here as it can
+    -- cause issues with reusing animations on different controls.
+    if self.timeline then
+        self.timeline:ClearAllCallbacks()
+    end
+    -- Note: namedSteps table is NOT cleared because it contains persistent
+    -- references to animation steps that are needed for GetStepByName() calls.
+    -- The animation steps themselves remain valid even after the timeline finishes.
+end

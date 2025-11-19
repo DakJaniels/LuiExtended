@@ -15,18 +15,6 @@ CombatInfo.__index = CombatInfo
 LUIE.CombatInfo = CombatInfo
 
 -- Sub-module placeholders (will be populated by their respective files)
---- @class (partial) ActionBar
-CombatInfo.ActionBar =
-{
-    name = LUIE.name .. "CombatInfo" .. "ActionBar",
-}
-
---- @class (partial) CastBar
-CombatInfo.CastBar =
-{
-    name = LUIE.name .. "CombatInfo" .. "CastBar",
-}
-
 --- @class (partial) EventHandlers
 CombatInfo.EventHandlers =
 {
@@ -54,67 +42,13 @@ CombatInfo.SynergyTracker =
 -- Module state
 CombatInfo.Enabled = false
 CombatInfo.SV = {}
-CombatInfo.CastBarUnlocked = false
 CombatInfo.AlertFrameUnlocked = false
 
 -- Module defaults
 CombatInfo.Defaults =
 {
-    blacklist = {},
-    durationOverrides = {},
-    GlobalShowGCD = false,
-    GlobalPotion = false,
-    GlobalFlash = true,
-    GlobalDesat = false,
-    GlobalLabelColor = false,
-    GlobalMethod = 3,
-    UltimateLabelEnabled = true,
-    UltimatePctEnabled = true,
-    UltimateHideFull = true,
-    UltimateGeneration = true,
-    UltimateLabelPosition = -20,
-    UltimateFontFace = "LUIE Default Font",
-    UltimateFontStyle = FONT_STYLE_OUTLINE,
-    UltimateFontSize = 18,
-    ShowTriggered = true,
-    ProcEnableSound = true,
-    ProcSoundName = "Death Recap Killing Blow",
     showMarker = false,
     markerSize = 26,
-    ShowToggled = true,
-    ShowToggledUltimate = true,
-    BarShowLabel = true,
-    BarLabelPosition = -20,
-    BarFontFace = "LUIE Default Font",
-    BarFontStyle = FONT_STYLE_OUTLINE,
-    BarFontSize = 18,
-    BarMillis = true,
-    BarMillisAboveTen = true,
-    BarMillisThreshold = 10,
-    BarShowBack = false,
-    BarDarkUnused = false,
-    BarDesaturateUnused = false,
-    BarHideUnused = false,
-    PotionTimerShow = true,
-    PotionTimerLabelPosition = 0,
-    PotionTimerFontFace = "LUIE Default Font",
-    PotionTimerFontStyle = FONT_STYLE_OUTLINE,
-    PotionTimerFontSize = 18,
-    PotionTimerColor = true,
-    PotionTimerMillis = true,
-    CastBarEnable = false,
-    CastBarSizeW = 300,
-    CastBarSizeH = 22,
-    CastBarIconSize = 32,
-    CastBarTexture = "Plain",
-    CastBarLabel = true,
-    CastBarTimer = true,
-    CastBarFontFace = "LUIE Default Font",
-    CastBarFontStyle = FONT_STYLE_SOFT_SHADOW_THICK,
-    CastBarFontSize = 16,
-    CastBarGradientC1 = { 0, 47 / 255, 130 / 255 },
-    CastBarGradientC2 = { 82 / 255, 215 / 255, 1 },
-    CastBarHeavy = false,
     alerts =
     {
         toggles =

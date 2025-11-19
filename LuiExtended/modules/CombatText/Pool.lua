@@ -112,7 +112,7 @@ function CombatTextPool:New(poolType)
         obj = ZO_ObjectPool:New(self.CreateNewControl, self.ResetControl)
     else
         --- @class (partial) CombatTextPool:ZO_ObjectPool
-        obj = ZO_ObjectPool:New(self.CreateNewAnimation, function () end)
+        obj = ZO_ObjectPool:New(self.CreateNewAnimation, self.ResetAnimation)
     end
 
     obj.poolType = poolType
@@ -142,10 +142,30 @@ end
 --- Resets a control to its default state
 --- @param control CombatTextPool_control The control to reset
 function CombatTextPool.ResetControl(control)
+    -- Stop any animations that might still be playing on the control
+    -- The animation timeline's Reset function will handle stopping timelines,
+    -- but we need to ensure the control is properly cleaned
     control:ClearAnchors()
-    control.label:ClearAnchors()
-    control.icon:ClearAnchors()
-    control.icon:SetHidden(true)
+    if control.label then
+        control.label:ClearAnchors()
+    end
+    if control.icon then
+        control.icon:ClearAnchors()
+        control.icon:SetHidden(true)
+    end
+    -- Hide the control to ensure it's not visible when pooled
+    control:SetHidden(true)
+    -- Reset alpha and scale in case they were animated
+    control:SetAlpha(1)
+    control:SetScale(1)
+end
+
+--- Resets an animation to its default state before returning to pool
+--- @param anim CombatTextAnimation The animation to reset
+function CombatTextPool.ResetAnimation(anim)
+    if anim then
+        anim:Reset()
+    end
 end
 
 --- Creates a new animation for the pool

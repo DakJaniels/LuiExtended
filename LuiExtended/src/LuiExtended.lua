@@ -27,7 +27,7 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.1.0.7"
+LUIE.version = "7.1.2.0"
 LUIE.author = "ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
 LUIE.github = "https://github.com/DakJaniels/LuiExtended"
@@ -97,6 +97,7 @@ LUIE.Defaults =
     -- Modules
     UnitFrames_Enabled        = true,
     InfoPanel_Enabled         = true,
+    ActionBar_Enabled         = true,
     CombatInfo_Enabled        = true,
     CombatText_Enabled        = true,
     SpellCastBuff_Enable      = true,

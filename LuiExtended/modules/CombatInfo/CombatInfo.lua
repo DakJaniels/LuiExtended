@@ -32,230 +32,12 @@ local moduleName = LUIE.name .. "CombatInfo"
 --- @class (partial) LUIE.CombatInfo
 local CombatInfo = LUIE.CombatInfo
 
--- Import sub-modules (loaded before this file)
---- @class (partial) ActionBar
-local ActionBar = CombatInfo.ActionBar
---- @class (partial) CastBar
-local CastBar = CombatInfo.CastBar
---- @class (partial) EventHandlers
-local EventHandlers = CombatInfo.EventHandlers
-
 -- Module-local state
-local g_barFont
-local g_potionFont
-local g_ultimateFont
-local g_castbarFont
-local g_ProcSound
 
 -- ===== HELPER FUNCTIONS =====
 
 local function getAbilityName(abilityId, casterUnitTag)
     return GetAbilityName(abilityId, casterUnitTag)
-end
-
--- ===== WRAPPER FUNCTIONS (delegate to sub-modules) =====
-
--- ActionBar wrappers
-function CombatInfo.OnActionSlotEffectUpdated(eventCode, hotbarCategory, actionSlotIndex)
-    ActionBar.OnActionSlotEffectUpdated(eventCode, hotbarCategory, actionSlotIndex)
-end
-
-function CombatInfo.GetTrackedAbilitiesForOverride()
-    return ActionBar.GetTrackedAbilitiesForOverride()
-end
-
-function CombatInfo.ClearDurationOverrides()
-    ActionBar.ClearDurationOverrides()
-end
-
-function CombatInfo.AddDurationOverride(input)
-    ActionBar.AddDurationOverride(input)
-end
-
-function CombatInfo.RemoveDurationOverride(input)
-    ActionBar.RemoveDurationOverride(input)
-end
-
-function CombatInfo.ListDurationOverrides()
-    ActionBar.ListDurationOverrides()
-end
-
-function CombatInfo.ResetUltimateLabel()
-    ActionBar.ResetUltimateLabel()
-end
-
-function CombatInfo.ResetBarLabel()
-    ActionBar.ResetBarLabel()
-end
-
-function CombatInfo.ResetPotionTimerLabel()
-    ActionBar.ResetPotionTimerLabel()
-end
-
-function CombatInfo.OnSlotUpdated(eventCode, slotNum)
-    ActionBar.OnSlotUpdated(eventCode, slotNum)
-end
-
-function CombatInfo.BarSlotUpdate(slotNum, wasfullUpdate, onlyProc)
-    ActionBar.BarSlotUpdate(slotNum, wasfullUpdate, onlyProc)
-end
-
-function CombatInfo.UpdateUltimateLabel()
-    ActionBar.UpdateUltimateLabel()
-end
-
-function CombatInfo.InventoryItemUsed()
-    ActionBar.InventoryItemUsed()
-end
-
-function CombatInfo.UpdateAllSlotsForActiveHotbar(didActiveHotbarChange)
-    ActionBar.UpdateAllSlotsForActiveHotbar(didActiveHotbarChange)
-end
-
-function CombatInfo.OnSlotsFullUpdate()
-    ActionBar.OnSlotsFullUpdate()
-end
-
-function CombatInfo.OnActiveWeaponPairChanged(eventCode, activeWeaponPair)
-    ActionBar.OnActiveWeaponPairChanged(eventCode, activeWeaponPair)
-end
-
-function CombatInfo.OnActionBarLockedReasonChanged(eventCode, actionBarLockedReason)
-    ActionBar.OnActionBarLockedReasonChanged(eventCode, actionBarLockedReason)
-end
-
-function CombatInfo.OnActionBarIsRespeccableBarStateChanged(eventCode, isRespeccableBarState)
-    ActionBar.OnActionBarIsRespeccableBarStateChanged(eventCode, isRespeccableBarState)
-end
-
-function CombatInfo.OnActiveDaedricArtifactChanged(eventCode, artifactId)
-    ActionBar.OnActiveDaedricArtifactChanged(eventCode, artifactId)
-end
-
-function CombatInfo.OnPowerUpdatePlayer(eventCode, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
-    ActionBar.OnPowerUpdatePlayer(eventCode, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
-end
-
-function CombatInfo.OnInventorySlotUpdate(eventCode, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
-    ActionBar.OnInventorySlotUpdate(eventCode, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
-end
-
-function CombatInfo.OnDeath(eventCode, unitTag, isDead)
-    ActionBar.OnDeath(eventCode, unitTag, isDead)
-end
-
-function CombatInfo.HideSlot(slotNum, abilityId)
-    ActionBar.HideSlot(slotNum, abilityId)
-end
-
-function CombatInfo.ShowSlot(slotNum, abilityId, currentTimeMs, desaturate)
-    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMs, desaturate)
-end
-
-function CombatInfo.BackbarSetupTemplate()
-    ActionBar.BackbarSetupTemplate()
-end
-
-function CombatInfo.BackbarToggleSettings()
-    ActionBar.BackbarToggleSettings()
-end
-
-function CombatInfo.BackbarHideSlot(slotNum)
-    ActionBar.BackbarHideSlot(slotNum)
-end
-
-function CombatInfo.BackbarShowSlot(slotNum)
-    ActionBar.BackbarShowSlot(slotNum)
-end
-
-function CombatInfo.HookGCD()
-    ActionBar.HookGCD()
-end
-
-function CombatInfo.UpdateBarHighlightTables()
-    ActionBar.UpdateBarHighlightTables()
-end
-
--- CastBar wrappers
-function CombatInfo.CreateCastBar()
-    CastBar.Initialize()
-end
-
-function CombatInfo.ResizeCastBar()
-    CastBar.ResizeCastBar()
-end
-
-function CombatInfo.UpdateCastBar()
-    CastBar.UpdateCastBar()
-end
-
-function CombatInfo.ResetCastBarPosition()
-    CastBar.ResetCastBarPosition()
-end
-
-function CombatInfo.SetCastBarPosition()
-    CastBar.SetCastBarPosition()
-end
-
-function CombatInfo.SetMovingState(state)
-    CastBar.SetMovingState(state)
-end
-
-function CombatInfo.GenerateCastbarPreview(state)
-    CastBar.GenerateCastbarPreview(state)
-end
-
-function CombatInfo.StopCastBar()
-    CastBar.StopCastBar()
-end
-
-function CombatInfo.SoulGemResurrectionStart(eventCode, durationMs)
-    CastBar.SoulGemResurrectionStart(eventCode, durationMs)
-end
-
-function CombatInfo.SoulGemResurrectionEnd(eventCode)
-    CastBar.SoulGemResurrectionEnd(eventCode)
-end
-
-function CombatInfo.OnCombatEventBreakCast(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
-    CastBar.OnCombatEventBreakCast(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
-end
-
-function CombatInfo.OnGameCameraUIModeChanged(eventCode)
-    CastBar.OnGameCameraUIModeChanged(eventCode)
-end
-
-function CombatInfo.OnSiegeEnd(eventCode)
-    CastBar.OnSiegeEnd(eventCode)
-end
-
-function CombatInfo.OnAbilityUsed(eventCode, actionSlotIndex)
-    CastBar.OnAbilityUsed(eventCode, actionSlotIndex)
-end
-
--- EventHandlers wrappers
-function CombatInfo.OnTargetChange(eventCode, unitTag)
-    EventHandlers.OnTargetChange(eventCode, unitTag)
-end
-
-function CombatInfo.OnReticleTargetChanged(eventCode)
-    EventHandlers.OnReticleTargetChanged(eventCode)
-end
-
-function CombatInfo.BarHighlightSwap(abilityId)
-    EventHandlers.BarHighlightSwap(abilityId)
-end
-
-function CombatInfo.OnEffectChanged(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, castByPlayer, passThrough, savedId)
-    EventHandlers.OnEffectChanged(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, castByPlayer, passThrough, savedId)
-end
-
-function CombatInfo.OnCombatEvent(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
-    EventHandlers.OnCombatEvent(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
-end
-
-function CombatInfo.OnCombatEventBar(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
-    EventHandlers.OnCombatEventBar(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
 end
 
 -- ===== CORE FUNCTIONS (stay in main module) =====
@@ -279,85 +61,10 @@ end
 function CombatInfo.RegisterCombatInfo()
     eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, CombatInfo.OnUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, CombatInfo.OnPlayerActivated)
-
-    eventManager:UnregisterForEvent(moduleName, EVENT_COMBAT_EVENT)
-    eventManager:UnregisterForEvent(moduleName, EVENT_POWER_UPDATE)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_SLOT_UPDATED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTIVE_WEAPON_PAIR_CHANGED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_ITEM_USED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_SLOT_ABILITY_USED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_BAR_LOCKED_REASON_CHANGED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_BAR_IS_RESPECCABLE_BAR_STATE_CHANGED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_ACTIVE_DAEDRIC_ARTIFACT_CHANGED)
-    if CombatInfo.SV.UltimateLabelEnabled or CombatInfo.SV.UltimatePctEnabled then
-        eventManager:RegisterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT, CombatInfo.OnCombatEvent)
-        eventManager:AddFilterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_BLOCKED_DAMAGE)
-        eventManager:RegisterForEvent(moduleName .. "PowerUpdatePlayer", EVENT_POWER_UPDATE, CombatInfo.OnPowerUpdatePlayer)
-        eventManager:AddFilterForEvent(moduleName .. "PowerUpdatePlayer", EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, COMBAT_MECHANIC_FLAGS_ULTIMATE, REGISTER_FILTER_UNIT_TAG, "player")
-        eventManager:RegisterForEvent(moduleName .. "InventoryUpdate", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, CombatInfo.OnInventorySlotUpdate)
-        eventManager:AddFilterForEvent(moduleName .. "InventoryUpdate", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT, REGISTER_FILTER_IS_NEW_ITEM, false)
-        eventManager:RegisterForEvent(moduleName .. "PowerUpdate2", EVENT_ULTIMATE_ABILITY_COST_CHANGED, CombatInfo.UpdateUltimateLabel)
-    end
-    if CombatInfo.SV.UltimateLabelEnabled or CombatInfo.SV.UltimatePctEnabled or CombatInfo.SV.CastBarEnable then
-        eventManager:RegisterForEvent(moduleName .. "CombatEvent2", EVENT_COMBAT_EVENT, CombatInfo.OnCombatEvent)
-        eventManager:AddFilterForEvent(moduleName .. "CombatEvent2", EVENT_COMBAT_EVENT, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false)
-    end
-    if CombatInfo.SV.CastBarEnable then
-        local counter = 0
-        for result, _ in pairs(Castbar.CastBreakingStatus) do
-            local eventName = moduleName .. "CombatEventCC" .. tostring(counter)
-            counter = counter + 1
-            eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, CombatInfo.OnCombatEventBreakCast)
-            eventManager:AddFilterForEvent(eventName, EVENT_COMBAT_EVENT, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_COMBAT_RESULT, result)
-        end
-        eventManager:RegisterForEvent(moduleName, EVENT_START_SOUL_GEM_RESURRECTION, CombatInfo.SoulGemResurrectionStart)
-        eventManager:RegisterForEvent(moduleName, EVENT_END_SOUL_GEM_RESURRECTION, CombatInfo.SoulGemResurrectionEnd)
-        eventManager:RegisterForEvent(moduleName, EVENT_GAME_CAMERA_UI_MODE_CHANGED, CombatInfo.OnGameCameraUIModeChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_END_SIEGE_CONTROL, CombatInfo.OnSiegeEnd)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_ABILITY_USED, CombatInfo.OnAbilityUsed)
-    end
-    if CombatInfo.SV.ShowTriggered or CombatInfo.SV.ShowToggled or CombatInfo.SV.UltimateLabelEnabled or CombatInfo.SV.UltimatePctEnabled then
-        local function OnActiveHotbarUpdated(event, didActiveHotbarChange)
-            CombatInfo.UpdateAllSlotsForActiveHotbar(didActiveHotbarChange)
-        end
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, OnActiveHotbarUpdated)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, CombatInfo.OnSlotsFullUpdate)
-        eventManager:RegisterForEvent(moduleName, EVENT_ARMORY_BUILD_RESTORE_RESPONSE, CombatInfo.OnSlotsFullUpdate)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_UPDATED, CombatInfo.OnSlotUpdated)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_WEAPON_PAIR_CHANGED, CombatInfo.OnActiveWeaponPairChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_WEAPON_PAIR_LOCK_CHANGED, CombatInfo.OnActiveWeaponPairChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_BAR_LOCKED_REASON_CHANGED, CombatInfo.OnActionBarLockedReasonChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_BAR_IS_RESPECCABLE_BAR_STATE_CHANGED, CombatInfo.OnActionBarIsRespeccableBarStateChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_DAEDRIC_ARTIFACT_CHANGED, CombatInfo.OnActiveDaedricArtifactChanged)
-
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_EFFECT_UPDATE, CombatInfo.OnActionSlotEffectUpdated)
-    end
-    if CombatInfo.SV.ShowTriggered or CombatInfo.SV.ShowToggled then
-        eventManager:RegisterForEvent(moduleName, EVENT_UNIT_DEATH_STATE_CHANGED, CombatInfo.OnDeath)
-        eventManager:AddFilterForEvent(moduleName, EVENT_UNIT_DEATH_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
-        eventManager:RegisterForEvent(moduleName, EVENT_TARGET_CHANGED, CombatInfo.OnTargetChange)
-        eventManager:AddFilterForEvent(moduleName, EVENT_TARGET_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
-        eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED, CombatInfo.OnReticleTargetChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, CombatInfo.BackbarSetupTemplate)
-
-        eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEM_USED, CombatInfo.InventoryItemUsed)
-
-        ActionBar.UpdateBarHighlightTables()
-    end
-    if CombatInfo.SV.ShowTriggered or CombatInfo.SV.ShowToggled or CombatInfo.SV.CastBarEnable or CombatInfo.SV.UltimateLabelEnabled or CombatInfo.SV.UltimatePctEnabled then
-        eventManager:RegisterForEvent(moduleName, EVENT_EFFECT_CHANGED, CombatInfo.OnEffectChanged)
-        eventManager:RegisterForEvent(moduleName .. "Pet", EVENT_EFFECT_CHANGED, CombatInfo.OnEffectChanged)
-        eventManager:AddFilterForEvent(moduleName .. "Pet", EVENT_EFFECT_CHANGED, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER_PET)
-    end
-    if not IsConsoleUI() and (CombatInfo.SV.UltimateLabelEnabled or CombatInfo.SV.UltimatePctEnabled) then
-        SetSetting(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER, 0, SETTINGS_SET_OPTION_SAVE_TO_PERSISTED_DATA)
-    end
 end
 
 function CombatInfo.ClearCustomList(list)
-    local listRef = list == CombatInfo.SV.blacklist and GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST) or ""
+    local listRef = ""
     for k, v in pairs(list) do
         list[k] = nil
     end
@@ -368,7 +75,7 @@ end
 
 function CombatInfo.AddToCustomList(list, input)
     local id = tonumber(input)
-    local listRef = list == CombatInfo.SV.blacklist and GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST) or ""
+    local listRef = ""
     if id and id > 0 then
         local cachedName = ZO_CachedStrFormat(SI_ABILITY_NAME, getAbilityName(id))
         local name = cachedName
@@ -395,7 +102,7 @@ end
 
 function CombatInfo.RemoveFromCustomList(list, input)
     local id = tonumber(input)
-    local listRef = list == CombatInfo.SV.blacklist and GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST) or ""
+    local listRef = ""
     if id and id > 0 then
         local cachedName = ZO_CachedStrFormat(SI_ABILITY_NAME, getAbilityName(id))
         local name = cachedName
@@ -418,70 +125,14 @@ function CombatInfo.OnPlayerActivatedMarker(eventCode)
     CombatInfo.SetMarker()
 end
 
--- Updates local variables with new font
-function CombatInfo.ApplyFont()
-    if not CombatInfo.Enabled then
-        return
-    end
-
-    local function setupFont(fontNameKey, fontStyleKey, fontSizeKey, defaultFontStyle, defaultFontSize)
-        local fontName = LUIE.Fonts[CombatInfo.SV[fontNameKey]]
-        if not fontName or fontName == "" then
-            LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
-            fontName = "LUIE Default Font"
-        end
-        local fontStyle = CombatInfo.SV[fontStyleKey] or defaultFontStyle
-        local fontSize = (CombatInfo.SV[fontSizeKey] and CombatInfo.SV[fontSizeKey] > 0) and CombatInfo.SV[fontSizeKey] or defaultFontSize
-        return ZO_CreateFontString(fontName, fontSize, fontStyle)
-    end
-
-    g_barFont = setupFont("BarFontFace", "BarFontStyle", "BarFontSize", FONT_STYLE_OUTLINE, 17)
-    g_potionFont = setupFont("PotionTimerFontFace", "PotionTimerFontStyle", "PotionTimerFontSize", FONT_STYLE_OUTLINE, 17)
-    g_ultimateFont = setupFont("UltimateFontFace", "UltimateFontStyle", "UltimateFontSize", FONT_STYLE_OUTLINE, 17)
-    g_castbarFont = setupFont("CastBarFontFace", "CastBarFontStyle", "CastBarFontSize", FONT_STYLE_SOFT_SHADOW_THIN, 16)
-
-    ActionBar.SetupFonts(g_barFont, g_potionFont, g_ultimateFont, g_ProcSound)
-    CastBar.SetupFont(g_castbarFont)
-end
-
--- Updates Proc Sound
-function CombatInfo.ApplyProcSound(menu)
-    local barProcSound = LUIE.Sounds[CombatInfo.SV.ProcSoundName]
-    if not barProcSound or barProcSound == "" then
-        printToChat(GetString(LUIE_STRING_ERROR_SOUND), true)
-        barProcSound = "DeathRecap_KillingBlowShown"
-    end
-
-    g_ProcSound = barProcSound
-
-    ActionBar.SetupFonts(g_barFont, g_potionFont, g_ultimateFont, g_ProcSound)
-
-    if menu then
-        PlaySound(g_ProcSound)
-    end
-end
 
 -- Used to populate abilities icons after the user has logged on
 function CombatInfo.OnPlayerActivated(eventCode)
     eventManager:UnregisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED)
-
-    if CombatInfo.SV.ShowTriggered or CombatInfo.SV.ShowToggled then
-        if not IsConsoleUI() then
-            ActionBar.SetActionBarTimersEnabled()
-        end
-    end
-
-    CombatInfo.OnSlotsFullUpdate()
-    for i = 53, 57 do
-        CombatInfo.BarSlotUpdate(i, true, false)
-    end
-    CombatInfo.OnPowerUpdatePlayer(EVENT_POWER_UPDATE, "player", nil, COMBAT_MECHANIC_FLAGS_ULTIMATE, GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE))
 end
 
 -- Main update ticker (coordinates all sub-modules)
 function CombatInfo.OnUpdate(currentTimeMs)
-    ActionBar.OnUpdate(currentTimeMs)
-    CastBar.OnUpdate(currentTimeMs)
 end
 
 -- Module initialization
@@ -494,9 +145,6 @@ function CombatInfo.Initialize(enabled)
     end
 
     if not LUIE.IsMigrationDone("combatinfo_fontstyles") then
-        CombatInfo.SV.UltimateFontStyle = LUIE.MigrateFontStyle(CombatInfo.SV.UltimateFontStyle)
-        CombatInfo.SV.BarFontStyle = LUIE.MigrateFontStyle(CombatInfo.SV.BarFontStyle)
-        CombatInfo.SV.PotionTimerFontStyle = LUIE.MigrateFontStyle(CombatInfo.SV.PotionTimerFontStyle)
         CombatInfo.SV.CastBarFontStyle = LUIE.MigrateFontStyle(CombatInfo.SV.CastBarFontStyle)
         if CombatInfo.SV.alerts and CombatInfo.SV.alerts.toggles then
             CombatInfo.SV.alerts.toggles.alertFontStyle = LUIE.MigrateFontStyle(CombatInfo.SV.alerts.toggles.alertFontStyle)
@@ -509,18 +157,7 @@ function CombatInfo.Initialize(enabled)
     end
     CombatInfo.Enabled = true
 
-    CombatInfo.ApplyFont()
-    CombatInfo.ApplyProcSound()
-
-    -- Initialize sub-modules
-    ActionBar.Initialize()
-    CastBar.Initialize()
-
     CombatInfo.RegisterCombatInfo()
-
-    if CombatInfo.SV.GlobalShowGCD then
-        CombatInfo.HookGCD()
-    end
 
     CombatInfo.SetMarker()
 

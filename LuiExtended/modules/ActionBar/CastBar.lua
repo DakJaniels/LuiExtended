@@ -11,13 +11,13 @@ local Data = LuiData.Data
 local Abilities = Data.Abilities
 local Castbar = Data.CastBarTable
 
---- @class (partial) LUIE.CombatInfo
-local CombatInfo = LUIE.CombatInfo
+--- @class (partial) LUIE.ActionBar
+local ActionBar = LUIE.ActionBar
 
 --- @class (partial) CastBar
 local CastBar = {}
 CastBar.__index = CastBar
-CombatInfo.CastBar = CastBar
+ActionBar.CastBar = CastBar
 
 local zo_strformat = zo_strformat
 local string_format = string.format
@@ -25,7 +25,7 @@ local timeMs = GetFrameTimeMilliseconds
 local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
 
-local moduleName = LUIE.name .. "CombatInfo"
+local moduleName = LUIE.name .. "ActionBar"
 
 -- Module-local state
 local uiTlw = {}
@@ -54,7 +54,7 @@ end
 
 -- Stops cast bar
 function CastBar.StopCastBar()
-    local state = CombatInfo.CastBarUnlocked
+    local state = ActionBar.CastBarUnlocked
     castbar.bar.name:SetHidden(true)
     castbar.bar.timer:SetHidden(true)
     castbar:SetHidden(true)
@@ -80,7 +80,7 @@ function CastBar.OnUpdateCastbar(currentTimeMs)
     if remain <= 0 then
         CastBar.StopCastBar()
     else
-        if CombatInfo.SV.CastBarTimer then
+        if ActionBar.SV.CastBarTimer then
             castbar.bar.timer:SetText(string_format("%.1f", remain / 1000))
         end
         if castbar.type == 1 then
@@ -94,7 +94,7 @@ end
 function CastBar.CreateCastBar()
     uiTlw.castBar = UI:TopLevel(nil, nil)
 
-    uiTlw.castBar:SetDimensions(CombatInfo.SV.CastBarSizeW + CombatInfo.SV.CastBarIconSize + 4, CombatInfo.SV.CastBarSizeH)
+    uiTlw.castBar:SetDimensions(ActionBar.SV.CastBarSizeW + ActionBar.SV.CastBarIconSize + 4, ActionBar.SV.CastBarSizeH)
 
     uiTlw.castBar.preview = UI:Backdrop(uiTlw.castBar, "fill", nil, nil, nil, true)
     uiTlw.castBar.previewLabel = UI:Label(uiTlw.castBar.preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", "Cast Bar", false)
@@ -106,9 +106,9 @@ function CastBar.CreateCastBar()
     end
     local tlwOnMoveStop = function (self)
         eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
-        CombatInfo.SV.CastbarOffsetX = self:GetLeft()
-        CombatInfo.SV.CastbarOffsetY = self:GetTop()
-        CombatInfo.SV.CastBarCustomPosition = { self:GetLeft(), self:GetTop() }
+        ActionBar.SV.CastbarOffsetX = self:GetLeft()
+        ActionBar.SV.CastbarOffsetY = self:GetTop()
+        ActionBar.SV.CastBarCustomPosition = { self:GetLeft(), self:GetTop() }
     end
 
     uiTlw.castBar:SetHandler("OnMoveStart", tlwOnMoveStart)
@@ -139,7 +139,7 @@ function CastBar.CreateCastBar()
     castbar.ends = 0
     castbar.remain = 0
 
-    castbar:SetDimensions(CombatInfo.SV.CastBarIconSize, CombatInfo.SV.CastBarIconSize)
+    castbar:SetDimensions(ActionBar.SV.CastBarIconSize, ActionBar.SV.CastBarIconSize)
 
     castbar.back = UI:Texture(castbar, nil, nil, "LuiExtended/media/icons/icon_border/icon_border.dds", DL_BACKGROUND, false)
     castbar.back:SetAnchor(TOPLEFT, castbar, TOPLEFT, 0, 0)
@@ -157,8 +157,8 @@ function CastBar.CreateCastBar()
 
     castbar.bar =
     {
-        ["backdrop"] = UI:Backdrop(castbar, nil, { CombatInfo.SV.CastBarSizeW, CombatInfo.SV.CastBarSizeH }, nil, nil, false),
-        ["bar"] = UI:StatusBar(castbar, nil, { CombatInfo.SV.CastBarSizeW - 4, CombatInfo.SV.CastBarSizeH - 4 }, nil, false),
+        ["backdrop"] = UI:Backdrop(castbar, nil, { ActionBar.SV.CastBarSizeW, ActionBar.SV.CastBarSizeH }, nil, nil, false),
+        ["bar"] = UI:StatusBar(castbar, nil, { ActionBar.SV.CastBarSizeW - 4, ActionBar.SV.CastBarSizeH - 4 }, nil, false),
         ["name"] = UI:Label(castbar, nil, nil, nil, nil, g_castbarFont, false),
         ["timer"] = UI:Label(castbar, nil, nil, nil, nil, g_castbarFont, false),
     }
@@ -169,8 +169,8 @@ function CastBar.CreateCastBar()
     castbar.bar.backdrop:SetDrawLevel(DL_CONTROLS)
     castbar.bar.bar:SetMinMax(0, 1)
     castbar.bar.bar:SetGradientColors(0, 47 / 255, 130 / 255, 1, 82 / 255, 215 / 255, 1, 1)
-    castbar.bar.backdrop:SetCenterColor((0.1 * CombatInfo.SV.CastBarGradientC1[1]), (0.1 * CombatInfo.SV.CastBarGradientC1[2]), (0.1 * CombatInfo.SV.CastBarGradientC1[3]), 0.75)
-    castbar.bar.bar:SetGradientColors(CombatInfo.SV.CastBarGradientC1[1], CombatInfo.SV.CastBarGradientC1[2], CombatInfo.SV.CastBarGradientC1[3], 1, CombatInfo.SV.CastBarGradientC2[1], CombatInfo.SV.CastBarGradientC2[2], CombatInfo.SV.CastBarGradientC2[3], 1)
+    castbar.bar.backdrop:SetCenterColor((0.1 * ActionBar.SV.CastBarGradientC1[1]), (0.1 * ActionBar.SV.CastBarGradientC1[2]), (0.1 * ActionBar.SV.CastBarGradientC1[3]), 0.75)
+    castbar.bar.bar:SetGradientColors(ActionBar.SV.CastBarGradientC1[1], ActionBar.SV.CastBarGradientC1[2], ActionBar.SV.CastBarGradientC1[3], 1, ActionBar.SV.CastBarGradientC2[1], ActionBar.SV.CastBarGradientC2[2], ActionBar.SV.CastBarGradientC2[3], 1)
 
     castbar.bar.backdrop:ClearAnchors()
     castbar.bar.backdrop:SetAnchor(LEFT, castbar, RIGHT, 4, 0)
@@ -183,7 +183,7 @@ function CastBar.CreateCastBar()
     castbar.bar.name:SetAnchor(LEFT, castbar.bar.backdrop, LEFT, 4, 0)
     castbar.bar.name:SetHidden(true)
 
-    castbar.bar.bar:SetTexture(LUIE.StatusbarTextures[CombatInfo.SV.CastBarTexture])
+    castbar.bar.bar:SetTexture(LUIE.StatusbarTextures[ActionBar.SV.CastBarTexture])
     castbar.bar.bar:ClearAnchors()
     castbar.bar.bar:SetAnchor(CENTER, castbar.bar.backdrop, CENTER, 0, 0)
     castbar.bar.bar:SetAnchor(CENTER, castbar.bar.backdrop, CENTER, 0, 0)
@@ -195,13 +195,13 @@ function CastBar.CreateCastBar()
 end
 
 function CastBar.ResizeCastBar()
-    uiTlw.castBar:SetDimensions(CombatInfo.SV.CastBarSizeW + CombatInfo.SV.CastBarIconSize + 4, CombatInfo.SV.CastBarSizeH)
+    uiTlw.castBar:SetDimensions(ActionBar.SV.CastBarSizeW + ActionBar.SV.CastBarIconSize + 4, ActionBar.SV.CastBarSizeH)
     castbar:ClearAnchors()
     castbar:SetAnchor(LEFT, uiTlw.castBar, LEFT)
 
-    castbar:SetDimensions(CombatInfo.SV.CastBarIconSize, CombatInfo.SV.CastBarIconSize)
-    castbar.bar.backdrop:SetDimensions(CombatInfo.SV.CastBarSizeW, CombatInfo.SV.CastBarSizeH)
-    castbar.bar.bar:SetDimensions(CombatInfo.SV.CastBarSizeW - 4, CombatInfo.SV.CastBarSizeH - 4)
+    castbar:SetDimensions(ActionBar.SV.CastBarIconSize, ActionBar.SV.CastBarIconSize)
+    castbar.bar.backdrop:SetDimensions(ActionBar.SV.CastBarSizeW, ActionBar.SV.CastBarSizeH)
+    castbar.bar.bar:SetDimensions(ActionBar.SV.CastBarSizeW - 4, ActionBar.SV.CastBarSizeH - 4)
 
     castbar.bar.backdrop:ClearAnchors()
     castbar.bar.backdrop:SetAnchor(LEFT, castbar, RIGHT, 4, 0)
@@ -222,18 +222,18 @@ end
 function CastBar.UpdateCastBar()
     castbar.bar.name:SetFont(g_castbarFont)
     castbar.bar.timer:SetFont(g_castbarFont)
-    castbar.bar.bar:SetTexture(LUIE.StatusbarTextures[CombatInfo.SV.CastBarTexture])
-    castbar.bar.backdrop:SetCenterColor((0.1 * CombatInfo.SV.CastBarGradientC1[1]), (0.1 * CombatInfo.SV.CastBarGradientC1[2]), (0.1 * CombatInfo.SV.CastBarGradientC1[3]), 0.75)
-    castbar.bar.bar:SetGradientColors(CombatInfo.SV.CastBarGradientC1[1], CombatInfo.SV.CastBarGradientC1[2], CombatInfo.SV.CastBarGradientC1[3], 1, CombatInfo.SV.CastBarGradientC2[1], CombatInfo.SV.CastBarGradientC2[2], CombatInfo.SV.CastBarGradientC2[3], 1)
+    castbar.bar.bar:SetTexture(LUIE.StatusbarTextures[ActionBar.SV.CastBarTexture])
+    castbar.bar.backdrop:SetCenterColor((0.1 * ActionBar.SV.CastBarGradientC1[1]), (0.1 * ActionBar.SV.CastBarGradientC1[2]), (0.1 * ActionBar.SV.CastBarGradientC1[3]), 0.75)
+    castbar.bar.bar:SetGradientColors(ActionBar.SV.CastBarGradientC1[1], ActionBar.SV.CastBarGradientC1[2], ActionBar.SV.CastBarGradientC1[3], 1, ActionBar.SV.CastBarGradientC2[1], ActionBar.SV.CastBarGradientC2[2], ActionBar.SV.CastBarGradientC2[3], 1)
 end
 
 function CastBar.ResetCastBarPosition()
-    if not CombatInfo.Enabled then
+    if not ActionBar.Enabled then
         return
     end
-    CombatInfo.SV.CastbarOffsetX = nil
-    CombatInfo.SV.CastbarOffsetY = nil
-    CombatInfo.SV.CastBarCustomPosition = nil
+    ActionBar.SV.CastbarOffsetX = nil
+    ActionBar.SV.CastbarOffsetY = nil
+    ActionBar.SV.CastBarCustomPosition = nil
     CastBar.SetCastBarPosition()
     CastBar.SetMovingState(false)
 end
@@ -242,24 +242,24 @@ function CastBar.SetCastBarPosition()
     if uiTlw.castBar and uiTlw.castBar:GetType() == CT_TOPLEVELCONTROL then
         uiTlw.castBar:ClearAnchors()
 
-        if CombatInfo.SV.CastbarOffsetX ~= nil and CombatInfo.SV.CastbarOffsetY ~= nil then
-            uiTlw.castBar:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, CombatInfo.SV.CastbarOffsetX, CombatInfo.SV.CastbarOffsetY)
+        if ActionBar.SV.CastbarOffsetX ~= nil and ActionBar.SV.CastbarOffsetY ~= nil then
+            uiTlw.castBar:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, ActionBar.SV.CastbarOffsetX, ActionBar.SV.CastbarOffsetY)
         else
             uiTlw.castBar:SetAnchor(CENTER, GuiRoot, CENTER, 0, 320)
         end
     end
 
-    local savedPos = CombatInfo.SV.CastBarCustomPosition
+    local savedPos = ActionBar.SV.CastBarCustomPosition
     uiTlw.castBar.preview.anchorLabel:SetText((savedPos ~= nil and #savedPos == 2) and zo_strformat("<<1>>, <<2>>", savedPos[1], savedPos[2]) or "default")
 end
 
 ---
 --- @param state boolean
 function CastBar.SetMovingState(state)
-    if not CombatInfo.Enabled then
+    if not ActionBar.Enabled then
         return
     end
-    CombatInfo.CastBarUnlocked = state
+    ActionBar.CastBarUnlocked = state
     if uiTlw.castBar and uiTlw.castBar:GetType() == CT_TOPLEVELCONTROL then
         CastBar.GenerateCastbarPreview(state)
         uiTlw.castBar:SetMouseEnabled(state)
@@ -273,12 +273,12 @@ end
 function CastBar.GenerateCastbarPreview(state)
     local previewIcon = "/esoui/art/icons/icon_missing.dds"
     castbar.icon:SetTexture(previewIcon)
-    if CombatInfo.SV.CastBarLabel then
+    if ActionBar.SV.CastBarLabel then
         local previewName = "Test"
         castbar.bar.name:SetText(previewName)
         castbar.bar.name:SetHidden(not state)
     end
-    if CombatInfo.SV.CastBarTimer then
+    if ActionBar.SV.CastBarTimer then
         castbar.bar.timer:SetText(string_format("1.0"))
         castbar.bar.timer:SetHidden(not state)
     end
@@ -310,11 +310,11 @@ function CastBar.SoulGemResurrectionStart(eventCode, durationMs)
     castbar.type = 1
     castbar.bar.bar:SetValue(0)
 
-    if CombatInfo.SV.CastBarLabel then
+    if ActionBar.SV.CastBarLabel then
         castbar.bar.name:SetText(name)
         castbar.bar.name:SetHidden(false)
     end
-    if CombatInfo.SV.CastBarTimer then
+    if ActionBar.SV.CastBarTimer then
         castbar.bar.timer:SetText(string_format("%.1f", remain / 1000))
         castbar.bar.timer:SetHidden(false)
     end
@@ -380,7 +380,7 @@ end
 --- @param abilityId integer
 --- @param overflow integer
 function CastBar.OnCombatEvent(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
-    if not CombatInfo.SV.CastBarEnable or ((sourceType ~= COMBAT_UNIT_TYPE_PLAYER and not Castbar.CastOverride[abilityId])
+    if not ActionBar.SV.CastBarEnable or ((sourceType ~= COMBAT_UNIT_TYPE_PLAYER and not Castbar.CastOverride[abilityId])
         and (targetType ~= COMBAT_UNIT_TYPE_PLAYER or result ~= ACTION_RESULT_EFFECT_FADED)) then
         return
     end
@@ -395,11 +395,11 @@ function CastBar.OnCombatEvent(eventCode, result, isError, abilityName, abilityG
     local cachedName = ZO_CachedStrFormat(SI_ABILITY_NAME, getAbilityName(abilityId))
     local name = cachedName
 
-    if not Castbar.IsCast[abilityId] or CombatInfo.SV.blacklist[abilityId] or CombatInfo.SV.blacklist[name] then
+    if not Castbar.IsCast[abilityId] or ActionBar.SV.blacklist[abilityId] or ActionBar.SV.blacklist[name] then
         return
     end
 
-    if Castbar.IsHeavy[abilityId] and not CombatInfo.SV.CastBarHeavy then
+    if Castbar.IsHeavy[abilityId] and not ActionBar.SV.CastBarHeavy then
         return
     end
 
@@ -472,11 +472,11 @@ function CastBar.OnCombatEvent(eventCode, result, isError, abilityName, abilityG
                 castbar.type = 1
                 castbar.bar.bar:SetValue(0)
             end
-            if CombatInfo.SV.CastBarLabel then
+            if ActionBar.SV.CastBarLabel then
                 castbar.bar.name:SetText(name)
                 castbar.bar.name:SetHidden(false)
             end
-            if CombatInfo.SV.CastBarTimer then
+            if ActionBar.SV.CastBarTimer then
                 castbar.bar.timer:SetText(string_format("%.1f", remain / 1000))
                 castbar.bar.timer:SetHidden(false)
             end
@@ -524,7 +524,7 @@ function CastBar.OnAbilityUsed(eventCode, actionSlotIndex)
     end
 end
 
--- Main ticker update for cast bar (called from CombatInfo.OnUpdate)
+-- Main ticker update for cast bar (called from ActionBar.OnUpdate)
 function CastBar.OnUpdate(currentTimeMs)
     -- Break castbar when block is used for certain effects
     if not Castbar.IgnoreCastBreakingActions[castbar.id] then
@@ -564,3 +564,4 @@ function CastBar.Initialize()
     CastBar.UpdateCastBar()
     CastBar.SetCastBarPosition()
 end
+

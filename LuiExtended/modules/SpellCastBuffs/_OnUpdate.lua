@@ -210,20 +210,67 @@ local function GetOrCreateBuffIconPool(container)
         end
 
         local function BuffIconReset(buff)
+            -- Hide the main buff control
             buff:SetHidden(true)
+            -- Clear anchors on main control
             buff:ClearAnchors()
+            -- Reset visual state
             buff:SetAlpha(1)
+            -- Reset all child controls
+            if buff.label then
+                buff.label:ClearAnchors()
+                buff.label:SetText("")
+                buff.label:SetColor(1, 1, 1, 1) -- Reset to default white
+            end
+            if buff.stack then
+                buff.stack:ClearAnchors()
+                buff.stack:SetText("")
+                buff.stack:SetHidden(true)
+            end
+            if buff.name then
+                buff.name:ClearAnchors()
+                buff.name:SetText("")
+            end
+            if buff.abilityId then
+                buff.abilityId:SetText("")
+            end
+            -- Reset icon texture to default
+            if buff.icon then
+                buff.icon:ClearAnchors()
+                buff.icon:SetTexture("/esoui/art/icons/icon_missing.dds")
+            end
+            -- Reset cooldown to stopped state
             if buff.cd then
                 buff.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
             end
-            buff.label:SetText("")
-            buff.stack:SetHidden(true)
-            if buff.name then
-                buff.name:SetText("")
-            end
+            -- Reset progress bar
             if buff.bar then
-                buff.bar.bar:SetValue(0)
+                if buff.bar.bar then
+                    buff.bar.bar:SetValue(0)
+                end
+                if buff.bar.backdrop then
+                    buff.bar.backdrop:ClearAnchors()
+                end
+                if buff.bar.bar then
+                    buff.bar.bar:ClearAnchors()
+                end
             end
+            -- Reset frame and backdrop textures
+            if buff.frame then
+                buff.frame:ClearAnchors()
+            end
+            if buff.back then
+                buff.back:ClearAnchors()
+            end
+            if buff.drop then
+                buff.drop:ClearAnchors()
+                buff.drop:SetHidden(true)
+            end
+            if buff.iconbg then
+                buff.iconbg:ClearAnchors()
+            end
+            -- Clear any cached effect data
+            buff.effectType = nil
         end
 
         -- Create the pool

@@ -1,10 +1,11 @@
 ## Title: |c00C000Lui Extended|r
 ## Author: ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101048 101049
-## Version: 7.1.0.7
-## AddOnVersion: 7107
+## Version: 7.1.2.0
+## AddOnVersion: 7120
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
-## DependsOn: LuiData>=7106 LibAddonMenu-2.0>=41 LibMediaProvider>=36
+## PCDependsOn: LuiData>=7106 LibAddonMenu-2.0>=41 LibMediaProvider>=36
+## ConsoleDependsOn: LuiData>=7106 LibAddonMenu-2.0>=41 LibMediaProvider>=36 LibHarvensAddonSettings>=20004
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705 CrutchAlerts>=20502
 ## OptionalDependsOn: LibGroupResources>=91 LibGroupCombatStats>=20251011 LibGroupPotionCooldowns>=20250727
 ## OptionalDependsOn: LibDebugLogger>=268 DolgubonsLazyWritCreator>=4038 LibLazyCrafting>=4028 LootLog>=408040
@@ -89,14 +90,17 @@ modules/CombatText/EventViewers/Death.lua
 modules/CombatText/EventViewers/Points.lua
 modules/CombatText/EventViewers/Resources.lua
 
+# Modules - Action Bar
+modules/ActionBar/Namespace.lua
+modules/ActionBar/ActionBar.lua
+modules/ActionBar/CastBar.lua
+modules/ActionBar/EventHandlers.lua
+
 # Modules - Combat Info
 modules/CombatInfo/Namespace.lua
-modules/CombatInfo/ActionBar.lua
-modules/CombatInfo/CastBar.lua
 modules/CombatInfo/AbilityAlerts.lua
 modules/CombatInfo/CrowdControlTracker.lua
 modules/CombatInfo/SynergyTracker.lua
-modules/CombatInfo/EventHandlers.lua
 modules/CombatInfo/CombatInfo.lua
 
 # Modules - Info Panel
@@ -165,6 +169,7 @@ settings/Settings_API.lua
 settings/Settings.lua
 settings/ChatAnnouncements.lua
 settings/CombatInfo.lua
+settings/ActionBar.lua
 settings/CombatText.lua
 settings/InfoPanel.lua
 settings/SlashCommands.lua
