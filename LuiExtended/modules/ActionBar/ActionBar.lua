@@ -1698,7 +1698,9 @@ end
 function ActionBar.OnInventorySlotUpdate(eventCode, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
     if stackCountChange >= 0 then
         ActionBar.UpdateUltimateLabel()
-        ActionBar.UpdateCompanionUltimateLabel()
+        if ShouldShowCompanionUltimateButton() then
+            ActionBar.UpdateCompanionUltimateLabel()
+        end
     end
 end
 
@@ -1710,10 +1712,12 @@ local function HandleBackbarSlot(slotNum, showSlot, desaturate)
 
     if showSlot then
         ActionBar.BackbarShowSlot(slotNum)
+        -- desaturate parameter: false = don't desaturate (active toggle), true/nil = use default/base state
         ActionBar.ToggleBackbarSaturation(slotNum, desaturate)
     else
         ActionBar.BackbarHideSlot(slotNum)
-        ActionBar.ToggleBackbarSaturation(slotNum, ActionBar.SV.BarDarkUnused)
+        -- When hiding, use default behavior (nil) which respects BarDesaturateUnused setting
+        ActionBar.ToggleBackbarSaturation(slotNum, nil)
     end
 end
 
@@ -1802,27 +1806,39 @@ end
 
 --- Handles backbar saturation toggle event
 --- @param slotNum number
---- @param desaturate boolean
+--- @param desaturate boolean? Optional: force desaturation state. false = no desaturation (active toggle), true = desaturate, nil = use BarDesaturateUnused setting
 function ActionBar.ToggleBackbarSaturation(slotNum, desaturate)
     local button = g_backbarButtons[slotNum]
     if not button then
         return
     end
-    -- Default to desaturated for backbar buttons (inactive bar)
-    if desaturate == nil then
-        desaturate = true
-    end
+
+    -- Handle darkening (BarDarkUnused) - this uses ZO_ActionSlot_SetUnusable
+    -- The second parameter controls darkening (unusable state), third parameter controls desaturation via this function
     if ActionBar.SV.BarDarkUnused then
-        ZO_ActionSlot_SetUnusable(button.icon, desaturate, false)
+        -- Darken all backbar buttons when BarDarkUnused is enabled
+        -- Don't let ZO_ActionSlot_SetUnusable handle desaturation (third param = false)
+        -- We handle desaturation separately below
+        ZO_ActionSlot_SetUnusable(button.icon, true, false)
+    else
+        -- Clear darkening if BarDarkUnused is disabled
+        ZO_ActionSlot_SetUnusable(button.icon, false, false)
     end
-    if ActionBar.SV.BarDesaturateUnused then
-        -- Always desaturate backbar buttons when the setting is enabled
+
+    -- Handle desaturation
+    -- Explicit desaturate parameter (false) can override BarDesaturateUnused to show active toggles normally
+    if desaturate == false then
+        -- Explicitly don't desaturate (e.g., for active toggle effects)
+        button.icon:SetDesaturation(0)
+    elseif ActionBar.SV.BarDesaturateUnused then
+        -- Always desaturate backbar buttons when the setting is enabled (unless explicitly overridden above)
+        button.icon:SetDesaturation(1)
+    elseif desaturate == true then
+        -- Explicitly desaturate (e.g., for cooldowns)
         button.icon:SetDesaturation(1)
     else
-        -- If setting is disabled, only desaturate if explicitly requested (for cooldowns, etc.)
-        if desaturate then
-            button.icon:SetDesaturation(1)
-        end
+        -- Default (nil): desaturate backbar buttons (inactive bar)
+        button.icon:SetDesaturation(1)
     end
 end
 
@@ -1898,9 +1914,18 @@ function ActionBar.BackbarToggleSettings()
         if ActionBar.SV.BarShowBack and not ActionBar.SV.BarHideUnused then
             targetButton.slot:SetHidden(g_backbarUniqueHidden)
         end
-        ZO_ActionSlot_SetUnusable(targetButton.icon, ActionBar.SV.BarDarkUnused, false)
-        -- Apply desaturation for backbar buttons
-        ActionBar.ToggleBackbarSaturation(slotNum, true)
+
+        -- Check if this slot has an active toggle effect (should not be desaturated)
+        local hasActiveToggle = false
+        if g_uiCustomToggle[slotNum] and not g_uiCustomToggle[slotNum]:IsHidden() then
+            hasActiveToggle = true
+        end
+
+        -- Apply darkening and desaturation for backbar buttons
+        -- ToggleBackbarSaturation handles both BarDarkUnused and BarDesaturateUnused
+        -- If slot has active toggle, preserve its non-desaturated state (desaturate = false)
+        -- Otherwise apply base settings (desaturate = nil)
+        ActionBar.ToggleBackbarSaturation(slotNum, hasActiveToggle and false or nil)
 
         if ActionBar.SV.BarHideUnused or not ActionBar.SV.BarShowBack or g_backbarUniqueHidden then
             targetButton.slot:SetHidden(true)
@@ -2087,6 +2112,9 @@ function ActionBar.Initialize(enabled)
     end
     ActionBar.Enabled = true
 
+    if ActionBar.SV.GlobalShowGCD or ActionBar.SV.BarDesaturateUnused or ActionBar.SV.BarDarkUnused then
+        ActionBar.HookGCD()
+    end
     -- Setup fonts from ActionBar.SV
     local function setupFont(fontNameKey, fontStyleKey, fontSizeKey, defaultFontStyle, defaultFontSize)
         local fontName = LUIE.Fonts[ActionBar.SV[fontNameKey]]
@@ -2156,8 +2184,14 @@ function ActionBar.Initialize(enabled)
     -- Create backbar buttons
     do
         local slotsUpdated = {}
+        local settingsReapplied = false
 
         local function OnSwapAnimationHalfDone(animation, button, isBackBarSlot)
+            -- Reset flag at start of new swap animation
+            if not next(slotsUpdated) then
+                settingsReapplied = false
+            end
+
             for i = BAR_INDEX_START, BAR_INDEX_END do
                 if not slotsUpdated[i] then
                     local targetButton = g_backbarButtons[i + BACKBAR_INDEX_OFFSET]
@@ -2182,6 +2216,13 @@ function ActionBar.Initialize(enabled)
             if ZO_ActionBar_IsUltimateSlot(button:GetSlot(), button:GetHotbarCategory()) then
                 g_activeWeaponSwapInProgress = false
                 -- LUIE.Debug("ActionBar: Swap animation complete, clearing g_activeWeaponSwapInProgress")
+            end
+
+            -- Reapply darken/desaturate settings once after swap animation completes
+            -- Use ultimate slot completion as the trigger since it's typically the last to animate
+            if ZO_ActionBar_IsUltimateSlot(button:GetSlot(), button:GetHotbarCategory()) and not settingsReapplied then
+                settingsReapplied = true
+                ActionBar.BackbarToggleSettings()
             end
 
             slotsUpdated = {}
