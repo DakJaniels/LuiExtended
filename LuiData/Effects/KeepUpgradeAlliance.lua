@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -16,9 +16,9 @@ local keepUpgradeAlliance =
 {
     [Abilities.Keep_Upgrade_Food_Honor_Guard_Abilities] =
     {
-        [1] = "LuiExtended/media/icons/keepupgrade/upgrade_food_honor_guard_ad.dds",
-        [2] = "LuiExtended/media/icons/keepupgrade/upgrade_food_honor_guard_ep.dds",
-        [3] = "LuiExtended/media/icons/keepupgrade/upgrade_food_honor_guard_dc.dds",
+        [1] = LUIE_MEDIA_ICONS_KEEPUPGRADE_UPGRADE_FOOD_HONOR_GUARD_AD_DDS,
+        [2] = LUIE_MEDIA_ICONS_KEEPUPGRADE_UPGRADE_FOOD_HONOR_GUARD_EP_DDS,
+        [3] = LUIE_MEDIA_ICONS_KEEPUPGRADE_UPGRADE_FOOD_HONOR_GUARD_DC_DDS,
     },
 }
 

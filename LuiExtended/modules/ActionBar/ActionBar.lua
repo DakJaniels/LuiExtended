@@ -2064,7 +2064,6 @@ function ActionBar.SetupFonts(barFont, potionFont, ultimateFont, procSound)
     end
 end
 
-
 -- Initialize action bar module
 function ActionBar.Initialize(enabled)
     local isCharacterSpecific = LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV
@@ -2294,7 +2293,6 @@ function ActionBar.ApplyFont()
         end
     end
 end
-
 
 -- Export state for ActionBar main module to access
 ActionBar.GetTriggeredSlotsRemain = function () return g_triggeredSlotsRemain end

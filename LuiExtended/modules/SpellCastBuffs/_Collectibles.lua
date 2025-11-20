@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -56,12 +56,12 @@ function SpellCastBuffs.DisplayMountIcon()
             else
                 name = Abilities.Innate_Mounted
                 description = Tooltips.Innate_Mounted
-                icon = "LuiExtended/media/icons/abilities/ability_innate_mounted.dds"
+                icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_MOUNTED_DDS
             end
         elseif mountedState == MOUNTED_STATE_MOUNT_PASSENGER then
             name = Abilities.Innate_Mounted_Passenger
             description = Tooltips.Innate_Mounted_Passenger
-            icon = "LuiExtended/media/icons/abilities/ability_innate_mounted.dds"
+            icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_MOUNTED_DDS
         end
 
         local abilityId = 999017
@@ -155,7 +155,7 @@ function SpellCastBuffs.CollectibleBuff()
         else
             name = Abilities.Innate_Vanity_Pet
             description = Tooltips.Innate_Vanity_Pet
-            icon = "LuiExtended/media/icons/abilities/ability_innate_pet.dds"
+            icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_PET_DDS
         end
 
         local abilityId = 999018

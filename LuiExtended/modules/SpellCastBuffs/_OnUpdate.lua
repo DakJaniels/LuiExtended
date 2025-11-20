@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -161,7 +161,7 @@ local function GetOrCreateBuffIconPool(container)
             end
 
             -- Collectible/mount background
-            buff.drop = UI:Texture(buff, nil, nil, "LuiExtended/media/icons/abilities/ability_innate_background.dds", DL_BACKGROUND, true)
+            buff.drop = UI:Texture(buff, nil, nil, LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_BACKGROUND_DDS, DL_BACKGROUND, true)
 
             -- Main ability icon
             buff.icon = UI:Texture(buff, nil, nil, "/esoui/art/icons/icon_missing.dds", DL_CONTROLS, false)
@@ -710,7 +710,7 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
                 type = 1,
                 id = abilityId,
                 name = abilityName,
-                icon = "LuiExtended/media/icons/abilities/ability_innate_block.dds",
+                icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_BLOCK_DDS,
                 dur = 0,
                 starts = currentTimeMs,
                 ends = nil,

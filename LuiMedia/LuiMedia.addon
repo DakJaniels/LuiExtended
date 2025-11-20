@@ -1,0 +1,9 @@
+## Title: LuiMedia
+## Author: ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder
+## Version: 7.1.2.0
+## APIVersion: 101048 101049
+## AddOnVersion: 7120
+## Description: Provides custom textures for LuiExtended.
+## IsLibrary: true
+
+MediaPaths.lua

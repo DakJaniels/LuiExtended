@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -413,7 +413,7 @@ function SpellCastBuffs.OnCombatEventIn(eventCode, result, isError, abilityName,
         -- TODO: Temp - converts icon for Helljoint, might be other abilities that need this in the future
         if abilityId == 14523 then
             if source == "Jackal" then
-                iconName = "LuiExtended/media/icons/abilities/ability_jackal_helljoint.dds"
+                iconName = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_JACKAL_HELLJOINT_DDS
             end
         end
 

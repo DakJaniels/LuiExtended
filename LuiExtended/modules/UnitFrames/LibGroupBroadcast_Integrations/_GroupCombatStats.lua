@@ -59,7 +59,7 @@ local function AddCombatStatsToFrame(frameData, isRaid)
 
             local numAnchors = container:GetNumAnchors()
             if numAnchors == 0 then
-            container:SetAnchor(LEFT, backdrop, RIGHT, offsetX, offsetY)
+                container:SetAnchor(LEFT, backdrop, RIGHT, offsetX, offsetY)
             end
 
             -- Determine anchor within container (after food/drink if it exists)

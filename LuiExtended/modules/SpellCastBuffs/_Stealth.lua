@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -116,7 +116,7 @@ function SpellCastBuffs.DisguiseStateChanged(eventId, unitTag, disguiseState)
             type = 1,
             id = abilityId,
             name = abilityName,
-            icon = "LuiExtended/media/icons/abilities/ability_innate_disguised.dds",
+            icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_DISGUISED_DDS,
             dur = 0,
             starts = 1,
             ends = nil, -- ends=nil : last buff in sorting
@@ -177,7 +177,7 @@ function SpellCastBuffs.StealthStateChanged(eventId, unitTag, stealthState)
             type = 1,
             id = abilityId,
             name = abilityName,
-            icon = "LuiExtended/media/icons/abilities/ability_innate_hidden.dds",
+            icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_HIDDEN_DDS,
             dur = 0,
             starts = 1,
             ends = nil, -- ends=nil : last buff in sorting
@@ -196,7 +196,7 @@ function SpellCastBuffs.StealthStateChanged(eventId, unitTag, stealthState)
             type = 1,
             id = abilityId,
             name = abilityName,
-            icon = "LuiExtended/media/icons/abilities/ability_innate_invisible.dds",
+            icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_INVISIBLE_DDS,
             dur = 0,
             starts = 1,
             ends = nil, -- ends=nil : last buff in sorting

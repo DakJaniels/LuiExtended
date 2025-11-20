@@ -1,4 +1,4 @@
---- @diagnostic disable: missing-fields
+﻿--- @diagnostic disable: missing-fields
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
@@ -20,10 +20,10 @@ local sceneManager = SCENE_MANAGER
 local function CreateRegenAnimation(parent, anchors, dims, alpha, number)
     local animConfigs =
     {
-        degen1 = { texture = "LuiExtended/media/unitframes/regenleft.dds", distanceMult = -0.35, offsetXMult = 0.425 },
-        degen2 = { texture = "LuiExtended/media/unitframes/regenright.dds", distanceMult = 0.35, offsetXMult = -0.425 },
-        regen1 = { texture = "LuiExtended/media/unitframes/regenright.dds", distanceMult = 0.35, offsetXMult = 0.075 },
-        regen2 = { texture = "LuiExtended/media/unitframes/regenleft.dds", distanceMult = -0.35, offsetXMult = -0.075 },
+        degen1 = { texture = LUIE_MEDIA_UNITFRAMES_REGENLEFT_DDS, distanceMult = -0.35, offsetXMult = 0.425 },
+        degen2 = { texture = LUIE_MEDIA_UNITFRAMES_REGENRIGHT_DDS, distanceMult = 0.35, offsetXMult = -0.425 },
+        regen1 = { texture = LUIE_MEDIA_UNITFRAMES_REGENRIGHT_DDS, distanceMult = 0.35, offsetXMult = 0.075 },
+        regen2 = { texture = LUIE_MEDIA_UNITFRAMES_REGENLEFT_DDS, distanceMult = -0.35, offsetXMult = -0.075 },
     }
 
     local config = animConfigs[number]
@@ -159,13 +159,13 @@ local function CreateDecreasedArmorOverlay(parent, small)
     {
         small =
         {
-            file = "LuiExtended/media/unitframes/unitattributevisualizer/attributebar_dynamic_decreasedarmor_small.dds",
+            file = LUIE_MEDIA_UNITFRAMES_UNITATTRIBUTEVISUALIZER_ATTRIBUTEBAR_DYNAMIC_DECREASEDARMOR_SMALL_DDS,
             size = { 512, 32 },
             tier = DT_HIGH,
         },
         normal =
         {
-            file = "LuiExtended/media/unitframes/unitattributevisualizer/attributebar_dynamic_decreasedarmor_standard.dds",
+            file = LUIE_MEDIA_UNITFRAMES_UNITATTRIBUTEVISUALIZER_ATTRIBUTEBAR_DYNAMIC_DECREASEDARMOR_STANDARD_DDS,
             size = { 512, 32 },
             tier = DT_HIGH,
         },
@@ -365,7 +365,7 @@ local function CreateTargetFrame()
             ["avaRankIcon"] = ari,
             ["avaRank"] = UI:Label(botInfo, { RIGHT, LEFT, -1, 0, ari }, nil, { 2, 3 }, nil, "ava", false),
             ["dead"] = UI:Label(thb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, "Status", true),
-            ["skull"] = UI:Texture(target, { RIGHT, LEFT, -8, 0 }, nil, "LuiExtended/media/unitframes/unitframes_execute.dds", nil, true),
+            ["skull"] = UI:Texture(target, { RIGHT, LEFT, -8, 0 }, nil, LUIE_MEDIA_UNITFRAMES_UNITFRAMES_EXECUTE_DDS, nil, true),
             ["buffs"] = buffs,
             ["debuffs"] = debuffs,
         }
@@ -853,7 +853,7 @@ local function SetupCommonFrameActions()
                             -- Anchors to backdrop, fills are controlled by status bar value
                             powerBar.noHealingOverlay:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
                             powerBar.noHealingOverlay:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
-                            powerBar.noHealingOverlay:SetTexture("LuiExtended/media/unitframes/textures/Diagonal.dds")
+                            powerBar.noHealingOverlay:SetTexture(LUIE_MEDIA_UNITFRAMES_TEXTURES_DIAGONAL_DDS)
                             powerBar.noHealingOverlay:SetDrawLevel(1) -- Draw below shield (which has no explicit level, defaults higher due to creation order)
                             powerBar.noHealingOverlay:SetHidden(true)
                             powerBar.noHealingOverlay:SetAlpha(0)
@@ -887,7 +887,7 @@ local function SetupCommonFrameActions()
                             -- Diagonal stripe: status bar that syncs value with noHealingOverlay
                             powerBar.noHealingStripe:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
                             powerBar.noHealingStripe:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
-                            powerBar.noHealingStripe:SetTexture("LuiExtended/media/unitframes/textures/Diagonal.dds")
+                            powerBar.noHealingStripe:SetTexture(LUIE_MEDIA_UNITFRAMES_TEXTURES_DIAGONAL_DDS)
                             powerBar.noHealingStripe:SetDrawLevel(1) -- Draw below shield (same level as overlay, relies on creation order)
                             powerBar.noHealingStripe:SetColor(1, 0.3, 0.3, 0.8)
                             powerBar.noHealingStripe:SetHidden(true)

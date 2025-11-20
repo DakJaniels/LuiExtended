@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -33,7 +33,7 @@ local rootEndTime = 0
 local iconFont = ZO_CreateFontString("$(GAMEPAD_BOLD_FONT)", 25, FONT_STYLE_OUTLINE_THICK)
 local staggerFont = ZO_CreateFontString("$(GAMEPAD_BOLD_FONT)", 36, FONT_STYLE_OUTLINE_THICK)
 
-local iconBorder = "LuiExtended/media/combatinfo/crowdcontroltracker/border.dds"
+local iconBorder = LUIE_MEDIA_COMBATINFO_CROWDCONTROLTRACKER_BORDER_DDS
 
 local defaultDisorientIcon
 local defaultImmuneIcon
@@ -1574,22 +1574,22 @@ local function QueueCrowdControlPreview()
     for index, result in ipairs(previewSequence) do
         local delay = (index - 1) * previewSpacingMs
         local callId = zo_callLater(function ()
-            local abilityIcon = CrowdControlTracker:GetDefaultIcon(result) or ICON_MISSING
-            local abilityName = CrowdControlTracker.controlText[result] or "Crowd Control"
-            local abilityId = previewAbilityBaseId + index
+                                        local abilityIcon = CrowdControlTracker:GetDefaultIcon(result) or ICON_MISSING
+                                        local abilityName = CrowdControlTracker.controlText[result] or "Crowd Control"
+                                        local abilityId = previewAbilityBaseId + index
 
-            if result == ACTION_RESULT_ROOTED then
-                isRooted = true
-            end
+                                        if result == ACTION_RESULT_ROOTED then
+                                            isRooted = true
+                                        end
 
-            CrowdControlTracker:OnDraw(abilityId, abilityIcon, previewDurationMs, result, abilityName, previewDurationMs)
+                                        CrowdControlTracker:OnDraw(abilityId, abilityIcon, previewDurationMs, result, abilityName, previewDurationMs)
 
-            if result == ACTION_RESULT_ROOTED then
-                zo_callLater(function ()
-                    isRooted = false
-                end, previewDurationMs)
-            end
-        end, delay)
+                                        if result == ACTION_RESULT_ROOTED then
+                                            zo_callLater(function ()
+                                                             isRooted = false
+                                                         end, previewDurationMs)
+                                        end
+                                    end, delay)
 
         previewCalls[#previewCalls + 1] = callId
     end

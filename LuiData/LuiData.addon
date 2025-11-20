@@ -4,6 +4,7 @@
 ## APIVersion: 101048 101049
 ## AddOnVersion: 7106
 ## Description: Provides data for LuiExtended.
+## DependsOn: LuiMedia>=7120 
 ## IsLibrary: true
 
 lang/default.lua

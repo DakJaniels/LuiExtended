@@ -1,4 +1,4 @@
---- @diagnostic disable: undefined-field, missing-fields
+﻿--- @diagnostic disable: undefined-field, missing-fields
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
@@ -31,7 +31,7 @@ local sceneManager = SCENE_MANAGER
 
 local leaderIcons =
 {
-    [0] = "LuiExtended/media/unitframes/unitframes_class_none.dds",
+    [0] = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_CLASS_NONE_DDS,
     [1] = "/esoui/art/icons/guildranks/guild_rankicon_misc01.dds",
 }
 
@@ -1108,9 +1108,9 @@ function UnitFrames.UpdateStaticControls(unitFrame)
         if unitFrame.isPlayer then
             unitFrame.classIcon:SetTexture(classIcon)
         elseif unitDifficulty == 2 then
-            unitFrame.classIcon:SetTexture("LuiExtended/media/unitframes/unitframes_level_elite.dds")
+            unitFrame.classIcon:SetTexture(LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_ELITE_DDS)
         elseif unitDifficulty >= 3 then
-            unitFrame.classIcon:SetTexture("LuiExtended/media/unitframes/unitframes_level_elite.dds")
+            unitFrame.classIcon:SetTexture(LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_ELITE_DDS)
         end
         if unitFrame.unitTag == "player" then
             unitFrame.classIcon:SetHidden(not UnitFrames.SV.PlayerEnableYourname)
@@ -1140,7 +1140,7 @@ function UnitFrames.UpdateStaticControls(unitFrame)
         local isFriend = unitFrame.isPlayer and IsUnitFriend(unitFrame.unitTag)
         local isGuild = unitFrame.isPlayer and not isFriend and not isIgnored and IsGuildMate(unitFrame.unitTag)
         if isIgnored or isFriend or isGuild then
-            unitFrame.friendIcon:SetTexture(isIgnored and "LuiExtended/media/unitframes/unitframes_social_ignore.dds" or isFriend and "/esoui/art/campaign/campaignbrowser_friends.dds" or "/esoui/art/campaign/campaignbrowser_guild.dds")
+            unitFrame.friendIcon:SetTexture(isIgnored and LUIE_MEDIA_UNITFRAMES_UNITFRAMES_SOCIAL_IGNORE_DDS or isFriend and "/esoui/art/campaign/campaignbrowser_friends.dds" or "/esoui/art/campaign/campaignbrowser_guild.dds")
             unitFrame.friendIcon:SetHidden(false)
         else
             unitFrame.friendIcon:SetHidden(true)
@@ -1197,7 +1197,7 @@ function UnitFrames.UpdateStaticControls(unitFrame)
                 unitFrame.levelIcon:ClearAnchors()
                 unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 1, 0)
             end
-            unitFrame.levelIcon:SetTexture(unitFrame.isChampion and "LuiExtended/media/unitframes/unitframes_level_champion.dds" or "LuiExtended/media/unitframes/unitframes_level_normal.dds")
+            unitFrame.levelIcon:SetTexture(unitFrame.isChampion and LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_CHAMPION_DDS or LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_NORMAL_DDS)
             -- Level label should be already anchored
             unitFrame.level:SetText(tostring(unitFrame.isChampion and GetUnitChampionPoints(unitFrame.unitTag) or GetUnitLevel(unitFrame.unitTag)))
         end
@@ -1700,7 +1700,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
     if UnitFrames.SV.PlayerEnableAltbarMSW and isWerewolf then
         -- Werewolf mode
         mode = "werewolf"
-        icon = "LuiExtended/media/unitframes/unitframes_bar_werewolf.dds"
+        icon = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_BAR_WEREWOLF_DDS
         center = { 0.05, 0, 0, 0.9 }
         color = { 0.8, 0, 0, 0.9 }
         positionMode = getPositioningMode(false)
@@ -1714,7 +1714,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
     elseif UnitFrames.SV.PlayerEnableAltbarMSW and isSiege then
         -- Siege mode
         mode = "siege"
-        icon = "LuiExtended/media/unitframes/unitframes_bar_siege.dds"
+        icon = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_BAR_SIEGE_DDS
         center = { 0.05, 0, 0, 0.9 }
         color = { 0.8, 0, 0, 0.9 }
         positionMode = "recenter"
@@ -1728,7 +1728,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
     elseif UnitFrames.SV.PlayerEnableAltbarMSW and isMounted then
         -- Mount mode
         mode = "mount"
-        icon = "LuiExtended/media/unitframes/unitframes_bar_mount.dds"
+        icon = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_BAR_MOUNT_DDS
         center =
         {
             0.1 * UnitFrames.SV.CustomColourStamina[1],
@@ -1775,7 +1775,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
     elseif UnitFrames.SV.PlayerEnableAltbarXP then
         -- Experience XP mode
         mode = "experience"
-        icon = "LuiExtended/media/unitframes/unitframes_level_normal.dds"
+        icon = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_NORMAL_DDS
         center = { 0, 0.1, 0.1, 0.9 }
         color = { XP_BAR_COLORS.r, XP_BAR_COLORS.g, XP_BAR_COLORS.b, 0.9 }
         positionMode = "recenter"
@@ -2551,7 +2551,7 @@ function UnitFrames.CustomFramesApplyTexture()
             healthFrame.invulnerable:SetTexture(texture)
         end
         if healthFrame.invulnerableInlay then
-            healthFrame.invulnerableInlay:SetTexture("LuiExtended/media/unitframes/invulnerable_munge.dds")
+            healthFrame.invulnerableInlay:SetTexture(LUIE_MEDIA_UNITFRAMES_INVULNERABLE_MUNGE_DDS)
         end
     end
 

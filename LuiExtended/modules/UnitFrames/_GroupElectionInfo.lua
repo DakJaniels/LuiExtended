@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -16,22 +16,22 @@ local GROUP_ELECTION_ICON_INFO =
 {
     [GROUP_VOTE_CHOICE_ABSTAIN] =
     {
-        icon = "LuiExtended/media/unitframes/electionInfo/votedicon_notyet.dds",
+        icon = LUIE_MEDIA_UNITFRAMES_ELECTIONINFO_VOTEDICON_NOTYET_DDS,
         color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED)),
     },
     [GROUP_VOTE_CHOICE_FOR] =
     {
-        icon = "LuiExtended/media/unitframes/electionInfo/votedicon_yes.dds",
+        icon = LUIE_MEDIA_UNITFRAMES_ELECTIONINFO_VOTEDICON_YES_DDS,
         color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SUCCEEDED)),
     },
     [GROUP_VOTE_CHOICE_AGAINST] =
     {
-        icon = "LuiExtended/media/unitframes/electionInfo/votedicon_no.dds",
+        icon = LUIE_MEDIA_UNITFRAMES_ELECTIONINFO_VOTEDICON_NO_DDS,
         color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_FAILED)),
     },
     [GROUP_VOTE_CHOICE_INVALID] =
     {
-        icon = "LuiExtended/media/unitframes/electionInfo/votedicon_notyet.dds",
+        icon = LUIE_MEDIA_UNITFRAMES_ELECTIONINFO_VOTEDICON_NOTYET_DDS,
         color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED)),
     },
 }

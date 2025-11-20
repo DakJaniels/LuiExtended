@@ -202,4 +202,3 @@ function ActionBar.RegisterEvents()
     eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, ActionBar.OnUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, ActionBar.OnPlayerActivated)
 end
-

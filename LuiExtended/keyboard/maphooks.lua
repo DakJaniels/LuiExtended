@@ -1,4 +1,4 @@
---- @diagnostic disable: missing-global-doc, duplicate-set-field
+﻿--- @diagnostic disable: missing-global-doc, duplicate-set-field
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
@@ -462,7 +462,7 @@ LUIE.HookKeyboardMap = function ()
                     end
                     -- Special condition to display a unique icon for rank 2 of siege cap upgrade.
                     if name == LuiData.Data.Abilities.Keep_Upgrade_Wood_Siege_Cap and currentLevel == 2 then
-                        icon = "LuiExtended/media/icons/keepupgrade/upgrade_wood_siege_cap_2.dds"
+                        icon = LUIE_MEDIA_ICONS_KEEPUPGRADE_UPGRADE_WOOD_SIEGE_CAP_2_DDS
                     end
                     -- Update the tooltips.
                     if Effects.KeepUpgradeTooltip[name] then

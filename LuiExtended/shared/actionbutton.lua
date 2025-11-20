@@ -114,10 +114,10 @@ LUIE.HookActionButton = function ()
 
         -- Determine if highlight should be shown
         local showHighlight = not slotIsEmpty and
-                              (ActionSlotHasActivationHighlight(slotnum, hotbarCategory) or
-                               Effects.IsAbilityActiveGlow[abilityId]) and
-                              not self.useFailure and
-                              not self.showingCooldown
+            (ActionSlotHasActivationHighlight(slotnum, hotbarCategory) or
+                Effects.IsAbilityActiveGlow[abilityId]) and
+            not self.useFailure and
+            not self.showingCooldown
 
         local isShowingHighlight = not self.activationHighlight:IsHidden()
 

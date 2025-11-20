@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -21,13 +21,13 @@ local Effects = Data.Effects
 local barIdOverride =
 {
     -- Dragonknight
-    [20824] = "LuiExtended/media/icons/abilities/ability_dragonknight_power_lash.dds", -- Power Lash (Flame Lash)
+    [20824] = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_POWER_LASH_DDS, -- Power Lash (Flame Lash)
 
     -- Nightblade
-    [35445] = "LuiExtended/media/icons/abilities/ability_nightblade_shadow_image_teleport.dds", -- Shadow Image Teleport (Shadow Image)
+    [35445] = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_NIGHTBLADE_SHADOW_IMAGE_TELEPORT_DDS, -- Shadow Image Teleport (Shadow Image)
 
     -- Dual Wield
-    [126659] = "LuiExtended/media/icons/abilities/ability_weapon_flying_blade_jump.dds", -- Flying Blade (Flying Blade)
+    [126659] = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEAPON_FLYING_BLADE_JUMP_DDS, -- Flying Blade (Flying Blade)
 
     -- Sorcerer
     [108840] = "/esoui/art/icons/ability_sorcerer_unstable_fimiliar_summoned.dds", -- Summon Unstable Familiar (Summon Unstable Familiar)

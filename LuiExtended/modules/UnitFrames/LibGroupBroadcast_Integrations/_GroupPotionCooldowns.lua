@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -27,7 +27,7 @@ local lgpc
 local isInitialized = false
 
 -- Potion icon texture path (using existing LUIE potion icon)
-local POTION_ICON = "LuiExtended/media/icons/potions/potion_001.dds"
+local POTION_ICON = LUIE_MEDIA_ICONS_POTIONS_POTION_001_DDS
 
 -- Local cache of potion cooldown data (keyed by unitTag)
 -- We maintain our own cache because the library's GetUnitPotionData() is buggy

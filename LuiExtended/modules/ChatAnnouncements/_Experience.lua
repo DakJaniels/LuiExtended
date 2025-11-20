@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -181,7 +181,7 @@ local GUILD_SKILL_ICONS =
     [55] = "/esoui/art/icons/mapkey/mapkey_undaunted.dds",
     [117] = "/esoui/art/icons/mapkey/mapkey_thievesguild.dds",
     [118] = "/esoui/art/icons/mapkey/mapkey_darkbrotherhood.dds",
-    [130] = "LuiExtended/media/unitframes/mapkey_psijicorder.dds",
+    [130] = LUIE_MEDIA_UNITFRAMES_MAPKEY_PSIJICORDER_DDS,
 }
 
 -- Print Guild Rep Gain

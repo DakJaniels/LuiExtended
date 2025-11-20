@@ -86,4 +86,3 @@ ActionBar.Defaults =
     CastBarHeavy = false,
     blacklist = {},
 }
-

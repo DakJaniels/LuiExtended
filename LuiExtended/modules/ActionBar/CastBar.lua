@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -141,7 +141,7 @@ function CastBar.CreateCastBar()
 
     castbar:SetDimensions(ActionBar.SV.CastBarIconSize, ActionBar.SV.CastBarIconSize)
 
-    castbar.back = UI:Texture(castbar, nil, nil, "LuiExtended/media/icons/icon_border/icon_border.dds", DL_BACKGROUND, false)
+    castbar.back = UI:Texture(castbar, nil, nil, LUIE_MEDIA_ICONS_ICON_BORDER_ICON_BORDER_DDS, DL_BACKGROUND, false)
     castbar.back:SetAnchor(TOPLEFT, castbar, TOPLEFT, 0, 0)
     castbar.back:SetAnchor(BOTTOMRIGHT, castbar, BOTTOMRIGHT, 0, 0)
 

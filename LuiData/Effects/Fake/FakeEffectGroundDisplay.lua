@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -34,53 +34,53 @@ local Abilities = Data.Abilities
 Effects.EffectGroundDisplay =
 {
     -- Cyrodiil
-    [88714] = { icon = "LuiExtended/media/icons/abilities/ability_ava_siege_meatbag_catapult.dds", name = Abilities.Skill_Meatbag_Catapult, buff = false, debuff = false, ground = true },          -- Meatbag (Meatbag Catapult)
-    [104700] = { icon = "LuiExtended/media/icons/abilities/ability_spell_gtaoe_oil_snare.dds", name = Abilities.Skill_Oil_Catapult, buff = false, debuff = false, ground = true },                  -- Twisting Path (Oil Catapult)
-    [104690] = { icon = "LuiExtended/media/icons/abilities/ability_ava_siege_scattershot_catapult.dds", name = Abilities.Skill_Scattershot_Catapult, buff = false, debuff = false, ground = true }, -- Twisting Path (Scattershot Catapult)
+    [88714] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_AVA_SIEGE_MEATBAG_CATAPULT_DDS, name = Abilities.Skill_Meatbag_Catapult, buff = false, debuff = false, ground = true },          -- Meatbag (Meatbag Catapult)
+    [104700] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SPELL_GTAOE_OIL_SNARE_DDS, name = Abilities.Skill_Oil_Catapult, buff = false, debuff = false, ground = true },                  -- Twisting Path (Oil Catapult)
+    [104690] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_AVA_SIEGE_SCATTERSHOT_CATAPULT_DDS, name = Abilities.Skill_Scattershot_Catapult, buff = false, debuff = false, ground = true }, -- Twisting Path (Scattershot Catapult)
 
     -- Monster Sets
-    [59590] = { icon = "LuiExtended/media/icons/abilities/ability_set_bogdan.dds", name = Abilities.Set_Bogdan_the_Nightflame, buff = true, debuff = false, ground = false },                                             -- Imperial Prison Item Set (Bogdan the Nightflame)
-    [97882] = { icon = "LuiExtended/media/icons/abilities/ability_set_domihaus_fire.dds", buff = true, debuff = false, ground = true },                                                                                   -- Domihaus (Domihaus)
-    [97855] = { icon = "LuiExtended/media/icons/abilities/ability_set_monster_earthgore.dds", buff = true, debuff = false, ground = false },                                                                              -- Earthgore (Earthgore)
-    [80527] = { icon = "LuiExtended/media/icons/abilities/ability_set_ilambris.dds", buff = false, debuff = false, ground = true },                                                                                       -- Ilambris (Ilambris)
-    [59587] = { icon = "LuiExtended/media/icons/abilities/ability_set_monster_lord_warden.dds", name = Abilities.Set_Lord_Warden_Dusk, buff = true, debuff = false, ground = false },                                     -- Lord Warden (Lord Warden)
-    [59568] = { icon = "LuiExtended/media/icons/abilities/ability_set_monster_malubeth.dds", name = Abilities.Set_Scourge_Harvester, buff = true, debuff = false, ground = false, tooltip = Tooltips.Set_Malubeth_Heal }, -- Scourge Harvest (Malubeth)
-    [59508] = { icon = "LuiExtended/media/icons/abilities/ability_set_maw_of_the_infernal.dds", name = Abilities.Set_Maw_of_the_Infernal, buff = true, debuff = false, ground = false },                                  -- Banished Cells Item Set (Maw of the Infernal)
-    [81036] = { icon = "LuiExtended/media/icons/abilities/ability_dwarvenspider_heal.dds", buff = true, debuff = false, ground = false },                                                                                 -- Sentinel of Rkugamz
-    [80954] = { icon = "LuiExtended/media/icons/abilities/ability_summon_shadow_proxy.dds", name = Abilities.Set_Shadowrend, buff = true, debuff = false, ground = false },                                               -- Shadowrend Summon (Shadowrend)
-    [59497] = { icon = "LuiExtended/media/icons/abilities/ability_innate_web_white.dds", buff = false, debuff = false, ground = true },                                                                                   -- Spawn of Mephala (Spawn of Mephala)
-    [80523] = { icon = "LuiExtended/media/icons/abilities/ability_stormatronach_enervating_stone.dds", buff = false, debuff = false, ground = true },                                                                     -- Stormfist (Stormfist)
-    [102093] = { icon = "LuiExtended/media/icons/abilities/ability_set_monster_thurvokun.dds", buff = false, debuff = false, ground = true },                                                                             -- Thurvokun
-    [59594] = { icon = "LuiExtended/media/icons/abilities/ability_spell_soul_rupture.dds", name = Abilities.Set_Nerieneth, buff = false, debuff = false, ground = true },                                                 -- Crypt of Hearts Item Set (Nerien'eth)
-    [80545] = { icon = "LuiExtended/media/icons/abilities/ability_set_sellistrix.dds", buff = false, debuff = false, ground = true },                                                                                     -- Sellistrix (Sellistrix)
+    [59590] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_BOGDAN_DDS, name = Abilities.Set_Bogdan_the_Nightflame, buff = true, debuff = false, ground = false },                                             -- Imperial Prison Item Set (Bogdan the Nightflame)
+    [97882] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_DOMIHAUS_FIRE_DDS, buff = true, debuff = false, ground = true },                                                                                   -- Domihaus (Domihaus)
+    [97855] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_MONSTER_EARTHGORE_DDS, buff = true, debuff = false, ground = false },                                                                              -- Earthgore (Earthgore)
+    [80527] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_ILAMBRIS_DDS, buff = false, debuff = false, ground = true },                                                                                       -- Ilambris (Ilambris)
+    [59587] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_MONSTER_LORD_WARDEN_DDS, name = Abilities.Set_Lord_Warden_Dusk, buff = true, debuff = false, ground = false },                                     -- Lord Warden (Lord Warden)
+    [59568] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_MONSTER_MALUBETH_DDS, name = Abilities.Set_Scourge_Harvester, buff = true, debuff = false, ground = false, tooltip = Tooltips.Set_Malubeth_Heal }, -- Scourge Harvest (Malubeth)
+    [59508] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_MAW_OF_THE_INFERNAL_DDS, name = Abilities.Set_Maw_of_the_Infernal, buff = true, debuff = false, ground = false },                                  -- Banished Cells Item Set (Maw of the Infernal)
+    [81036] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DWARVENSPIDER_HEAL_DDS, buff = true, debuff = false, ground = false },                                                                                 -- Sentinel of Rkugamz
+    [80954] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SUMMON_SHADOW_PROXY_DDS, name = Abilities.Set_Shadowrend, buff = true, debuff = false, ground = false },                                               -- Shadowrend Summon (Shadowrend)
+    [59497] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_WEB_WHITE_DDS, buff = false, debuff = false, ground = true },                                                                                   -- Spawn of Mephala (Spawn of Mephala)
+    [80523] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_STORMATRONACH_ENERVATING_STONE_DDS, buff = false, debuff = false, ground = true },                                                                     -- Stormfist (Stormfist)
+    [102093] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_MONSTER_THURVOKUN_DDS, buff = false, debuff = false, ground = true },                                                                             -- Thurvokun
+    [59594] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SPELL_SOUL_RUPTURE_DDS, name = Abilities.Set_Nerieneth, buff = false, debuff = false, ground = true },                                                 -- Crypt of Hearts Item Set (Nerien'eth)
+    [80545] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_SELLISTRIX_DDS, buff = false, debuff = false, ground = true },                                                                                     -- Sellistrix (Sellistrix)
     -- [102136] = { icon = 'LuiExtended/media/icons/abilities/ability_set_monster_zaan.dds', buff = true, debuff = false, ground = false }, -- Zaan -- Buff icon for Zaan, may reimplement if I add a way to override tooltips for these.
 
     -- Crafted Sets
-    [75930] = { icon = "LuiExtended/media/icons/abilities/ability_set_eternal_hunt.dds", name = Abilities.Set_Eternal_Hunt, buff = false, debuff = false, ground = true, stackAdd = 1, stackRemove = 1, stackReset = 7 }, -- Daedric Mines (Eternal Hunt)
-    [71671] = { icon = "LuiExtended/media/icons/abilities/ability_set_morkuldin_summon.dds", buff = true, debuff = false, ground = false },                                                                               -- Morkuldin (Morkuldin)
-    [113181] = { icon = "/esoui/art/icons/mm_teaser.dds", buff = true, debuff = false, ground = false },                                                                                                                  -- Grave-Stake Collector (Grave-Stake Collector)
-    [121915] = { icon = "LuiExtended/media/icons/abilities/ability_set_honors_scorn.dds", name = Abilities.Set_Honors_Scorn, buff = false, debuff = false, ground = true },                                               -- Coldharbour's Favorite (Coldharbour's Favorite)
-    [121912] = { icon = "LuiExtended/media/icons/abilities/ability_set_honors_love.dds", name = Abilities.Set_Honors_Love, buff = true, debuff = false, ground = false },                                                 -- Coldharbour's Favorite (Coldharbour's Favorite)
+    [75930] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_ETERNAL_HUNT_DDS, name = Abilities.Set_Eternal_Hunt, buff = false, debuff = false, ground = true, stackAdd = 1, stackRemove = 1, stackReset = 7 }, -- Daedric Mines (Eternal Hunt)
+    [71671] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_MORKULDIN_SUMMON_DDS, buff = true, debuff = false, ground = false },                                                                               -- Morkuldin (Morkuldin)
+    [113181] = { icon = "/esoui/art/icons/mm_teaser.dds", buff = true, debuff = false, ground = false },                                                                                                         -- Grave-Stake Collector (Grave-Stake Collector)
+    [121915] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_HONORS_SCORN_DDS, name = Abilities.Set_Honors_Scorn, buff = false, debuff = false, ground = true },                                               -- Coldharbour's Favorite (Coldharbour's Favorite)
+    [121912] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_HONORS_LOVE_DDS, name = Abilities.Set_Honors_Love, buff = true, debuff = false, ground = false },                                                 -- Coldharbour's Favorite (Coldharbour's Favorite)
 
     -- Overland Sets
-    [75691] = { icon = "LuiExtended/media/icons/abilities/ability_spell_gtaoe_necrotic_snare.dds", buff = false, debuff = false, ground = true },                                     -- Bahraha's Curse
-    [71664] = { icon = "LuiExtended/media/icons/abilities/ability_set_trinimacs_valor.dds", buff = false, debuff = false, ground = true },                                            -- Trinimac's Valor
-    [135659] = { icon = "LuiExtended/media/icons/abilities/ability_set_winters_respite.dds", buff = true, debuff = false, ground = false },                                           -- Winter's Respite (of Winter's Respite)
+    [75691] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SPELL_GTAOE_NECROTIC_SNARE_DDS, buff = false, debuff = false, ground = true },                                     -- Bahraha's Curse
+    [71664] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_TRINIMACS_VALOR_DDS, buff = false, debuff = false, ground = true },                                            -- Trinimac's Valor
+    [135659] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_WINTERS_RESPITE_DDS, buff = true, debuff = false, ground = false },                                           -- Winter's Respite (of Winter's Respite)
     -- Dungeon Sets
-    [97538] = { icon = "LuiExtended/media/icons/abilities/ability_set_draugrs_rest.dds", buff = true, debuff = false, ground = false },                                               -- Draugr's Rest
-    [102106] = { icon = "/esoui/art/icons/achievement_bossflavoreasy.dds", name = Abilities.Set_Plague_Slinger, buff = false, debuff = false, ground = true },                        -- Skeever Corpse
-    [97908] = { icon = "LuiExtended/media/icons/abilities/ability_set_hagravens_garden.dds", buff = true, debuff = false, ground = false },                                           -- Hagraven's Garden (Hagraven's)
-    [67205] = { icon = "LuiExtended/media/icons/abilities/ability_set_leeching_plate.dds", buff = false, debuff = false, ground = true },                                             -- Leeching Plate (of Leeching)
-    [84354] = { icon = "LuiExtended/media/icons/abilities/ability_innate_web_green.dds", buff = false, debuff = false, ground = true },                                               -- Hand of Mephala (of Mephala's Hand)
-    [126924] = { icon = "LuiExtended/media/icons/abilities/ability_set_hollowfang.dds", buff = true, debuff = false, ground = false },                                                -- Hollowfang Thirst (Hollowfang Thirst)
-    [133493] = { icon = "LuiExtended/media/icons/abilities/ability_set_aegis_caller.dds", name = Abilities.Set_Aegis_Caller, buff = false, debuff = false, ground = true },           -- Aegis Caller (Aegis Caller's)
+    [97538] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_DRAUGRS_REST_DDS, buff = true, debuff = false, ground = false },                                               -- Draugr's Rest
+    [102106] = { icon = "/esoui/art/icons/achievement_bossflavoreasy.dds", name = Abilities.Set_Plague_Slinger, buff = false, debuff = false, ground = true },               -- Skeever Corpse
+    [97908] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_HAGRAVENS_GARDEN_DDS, buff = true, debuff = false, ground = false },                                           -- Hagraven's Garden (Hagraven's)
+    [67205] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_LEECHING_PLATE_DDS, buff = false, debuff = false, ground = true },                                             -- Leeching Plate (of Leeching)
+    [84354] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_WEB_GREEN_DDS, buff = false, debuff = false, ground = true },                                               -- Hand of Mephala (of Mephala's Hand)
+    [126924] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_HOLLOWFANG_DDS, buff = true, debuff = false, ground = false },                                                -- Hollowfang Thirst (Hollowfang Thirst)
+    [133493] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_AEGIS_CALLER_DDS, name = Abilities.Set_Aegis_Caller, buff = false, debuff = false, ground = true },           -- Aegis Caller (Aegis Caller's)
     -- Trial Sets
-    [107141] = { icon = "LuiExtended/media/icons/abilities/ability_set_olorime.dds", name = Abilities.Set_Vestment_of_Olorime, buff = true, debuff = false, ground = false },         -- Vestment of Olirime (Olorime's)
-    [109084] = { icon = "LuiExtended/media/icons/abilities/ability_set_olorime.dds", name = Abilities.Set_Vestment_of_Olorime, buff = true, debuff = false, ground = false },         -- Ideal Vestment of Olirime (Olorime's Perfect)
-    [107095] = { icon = "LuiExtended/media/icons/abilities/ability_set_mantle_of_siroria.dds", buff = true, debuff = false, ground = false },                                         -- Mantle of Siroria (Siroria's)
-    [109081] = { icon = "LuiExtended/media/icons/abilities/ability_set_mantle_of_siroria.dds", name = Abilities.Set_Mantle_of_Siroria, buff = true, debuff = false, ground = false }, -- Ideal Mantle of Siroria (Perfect Siroria's)
-    [136098] = { icon = "LuiExtended/media/icons/abilities/ability_set_kynes_blessing.dds", buff = true, debuff = false, ground = false },                                            -- Kyne's Blessing (of Kyne's Wind)
-    [137995] = { icon = "LuiExtended/media/icons/abilities/ability_set_kynes_blessing.dds", buff = true, debuff = false, ground = false },                                            -- Kyne's Blessing (of Kyne's Wind (Perfect)) }
+    [107141] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_OLORIME_DDS, name = Abilities.Set_Vestment_of_Olorime, buff = true, debuff = false, ground = false },         -- Vestment of Olirime (Olorime's)
+    [109084] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_OLORIME_DDS, name = Abilities.Set_Vestment_of_Olorime, buff = true, debuff = false, ground = false },         -- Ideal Vestment of Olirime (Olorime's Perfect)
+    [107095] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_MANTLE_OF_SIRORIA_DDS, buff = true, debuff = false, ground = false },                                         -- Mantle of Siroria (Siroria's)
+    [109081] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_MANTLE_OF_SIRORIA_DDS, name = Abilities.Set_Mantle_of_Siroria, buff = true, debuff = false, ground = false }, -- Ideal Mantle of Siroria (Perfect Siroria's)
+    [136098] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_KYNES_BLESSING_DDS, buff = true, debuff = false, ground = false },                                            -- Kyne's Blessing (of Kyne's Wind)
+    [137995] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_KYNES_BLESSING_DDS, buff = true, debuff = false, ground = false },                                            -- Kyne's Blessing (of Kyne's Wind (Perfect)) }
 
     -- Used only to flag abilities for Tooltips
     [75814] = { buff = false, debuff = false, ground = false }, -- Lunar Bastion (Lunar Bastion)
@@ -125,7 +125,7 @@ Effects.EffectGroundDisplay =
     [23182] = { buff = false, debuff = false, ground = true },                                                                                                                                                            -- Lightning Splash (Lightning Splash)
     [23200] = { buff = false, debuff = false, ground = true },                                                                                                                                                            -- Liquid Lightning (Liquid Lightning)
     [23205] = { buff = false, debuff = false, ground = true },                                                                                                                                                            -- Lightning Flood (Lightning Flood)
-    [23279] = { icon = "LuiExtended/media/icons/abilities/ability_sorcerer_intercept.dds", name = Abilities.Skill_Intercept, buff = true, debuff = false, ground = false },                                               -- Ball of Lightning (Ball of Lightning)
+    [23279] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SORCERER_INTERCEPT_DDS, name = Abilities.Skill_Intercept, buff = true, debuff = false, ground = false },                                                        -- Ball of Lightning (Ball of Lightning)
 
     -- Templar
     [95933] = { icon = "/esoui/art/icons/ability_templar_sun_strike.dds", buff = false, debuff = false, ground = true },        -- Spear Shards (Spear Shards)

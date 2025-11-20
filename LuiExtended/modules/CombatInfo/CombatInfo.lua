@@ -125,7 +125,6 @@ function CombatInfo.OnPlayerActivatedMarker(eventCode)
     CombatInfo.SetMarker()
 end
 
-
 -- Used to populate abilities icons after the user has logged on
 function CombatInfo.OnPlayerActivated(eventCode)
     eventManager:UnregisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED)

@@ -1,4 +1,4 @@
---- @diagnostic disable: missing-fields
+﻿--- @diagnostic disable: missing-fields
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
@@ -29,12 +29,12 @@ local Shared = UnitFrames.LibGroupBroadcastShared
 -- CONSTANTS
 -- =====================================================================================================================
 
-local ICON_FOOD_GREEN = "LuiExtended/media/icons/consumables/consumable_food_green.dds"
-local ICON_FOOD_BLUE = "LuiExtended/media/icons/consumables/consumable_food_blue.dds"
-local ICON_FOOD_PURPLE = "LuiExtended/media/icons/consumables/consumable_food_purple.dds"
-local ICON_DRINK_GREEN = "LuiExtended/media/icons/consumables/consumable_drink_green.dds"
-local ICON_DRINK_BLUE = "LuiExtended/media/icons/consumables/consumable_drink_blue.dds"
-local ICON_DRINK_PURPLE = "LuiExtended/media/icons/consumables/consumable_drink_purple.dds"
+local ICON_FOOD_GREEN = LUIE_MEDIA_ICONS_CONSUMABLES_CONSUMABLE_FOOD_GREEN_DDS
+local ICON_FOOD_BLUE = LUIE_MEDIA_ICONS_CONSUMABLES_CONSUMABLE_FOOD_BLUE_DDS
+local ICON_FOOD_PURPLE = LUIE_MEDIA_ICONS_CONSUMABLES_CONSUMABLE_FOOD_PURPLE_DDS
+local ICON_DRINK_GREEN = LUIE_MEDIA_ICONS_CONSUMABLES_CONSUMABLE_DRINK_GREEN_DDS
+local ICON_DRINK_BLUE = LUIE_MEDIA_ICONS_CONSUMABLES_CONSUMABLE_DRINK_BLUE_DDS
+local ICON_DRINK_PURPLE = LUIE_MEDIA_ICONS_CONSUMABLES_CONSUMABLE_DRINK_PURPLE_DDS
 local ICON_NO_BUFF = ZO_NO_TEXTURE_FILE
 
 local DELAY_GROUP_JOIN = 100

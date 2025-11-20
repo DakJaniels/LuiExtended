@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -1886,7 +1886,7 @@ function SpellCastBuffs.ShowRecallCooldown()
             type = 1,
             id = abilityId,
             name = abilityName,
-            icon = "LuiExtended/media/icons/abilities/ability_innate_recall_cooldown.dds",
+            icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_RECALL_COOLDOWN_DDS,
             dur = 600000,
             starts = currentTimeMs,
             ends = currentTimeMs + recallRemain,
@@ -2117,7 +2117,7 @@ function SpellCastBuffs.OnVibration(eventCode, duration, coarseMotor, fineMotor,
             type = 1,
             id = abilityId,
             name = abilityName,
-            icon = "LuiExtended/media/icons/abilities/ability_innate_resurrection_immunity.dds",
+            icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_RESURRECTION_IMMUNITY_DDS,
             dur = 10000,
             starts = currentTimeMs,
             ends = currentTimeMs + 10000,

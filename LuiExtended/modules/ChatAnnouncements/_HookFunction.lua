@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -2638,9 +2638,9 @@ local function ExperienceGainHook(reason, level, previousExperience, currentExpe
         if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
             local icon
             if ChatAnnouncements.SV.XP.ExperienceLevelColorByLevel then
-                icon = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and ZO_XP_BAR_GRADIENT_COLORS[2]:Colorize(" " .. zo_iconFormatInheritColor("LuiExtended/media/unitframes/unitframes_level_normal.dds", 16, 16)) or ""
+                icon = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and ZO_XP_BAR_GRADIENT_COLORS[2]:Colorize(" " .. zo_iconFormatInheritColor(LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_NORMAL_DDS, 16, 16)) or ""
             else
-                icon = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and (" " .. zo_iconFormat("LuiExtended/media/unitframes/unitframes_level_normal.dds", 16, 16)) or ""
+                icon = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and (" " .. zo_iconFormat(LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_NORMAL_DDS, 16, 16)) or ""
             end
 
             local CurrentLevelFormatted = ""
@@ -2666,7 +2666,7 @@ local function ExperienceGainHook(reason, level, previousExperience, currentExpe
         end
 
         if ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
-            local iconCSA = (" " .. zo_iconFormat("LuiExtended/media/unitframes/unitframes_level_up.dds", "100%", "100%")) or ""
+            local iconCSA = (" " .. zo_iconFormat(LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_UP_DDS, "100%", "100%")) or ""
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.LEVEL_UP)
             if ChatAnnouncements.SV.XP.ExperienceLevelUpCSAExpand then
                 local levelUpExpanded = zo_strformat("<<1>><<2>> <<3>> <<4>>", GetString(LUIE_STRING_CA_LVL_ANNOUNCE_XP), iconCSA, GetString(SI_GAMEPAD_QUEST_JOURNAL_QUEST_LEVEL), CurrentLevel)
@@ -2686,7 +2686,7 @@ local function ExperienceGainHook(reason, level, previousExperience, currentExpe
         end
 
         if ChatAnnouncements.SV.XP.ExperienceLevelUpAlert then
-            local iconAlert = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and (" " .. zo_iconFormat("LuiExtended/media/unitframes/unitframes_level_up.dds", "75%", "75%")) or ""
+            local iconAlert = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and (" " .. zo_iconFormat(LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_UP_DDS, "75%", "75%")) or ""
             local text = zo_strformat("<<1>><<2>> <<3>> <<4>>!", GetString(LUIE_STRING_CA_LVL_ANNOUNCE_XP), iconAlert, GetString(SI_GAMEPAD_QUEST_JOURNAL_QUEST_LEVEL), CurrentLevel)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, text)
         end

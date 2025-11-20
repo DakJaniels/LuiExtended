@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -197,8 +197,8 @@ local fakePlayerBuffs =
     [26581] = { duration = 0 }, -- MG2 Captured Rashomta Essence
 
     -- Aldmeri Dominion Quests
-    [33066] = { icon = "LuiExtended/media/icons/disguises/disguise_fancy_clothing.dds", name = Abilities.Skill_Fancy_Clothing, duration = 0, long = true, ignoreBegin = true },        -- Q4586_ChangeClothes
-    [34842] = { icon = "LuiExtended/media/icons/disguises/disguise_fancy_clothing_female.dds", name = Abilities.Skill_Fancy_Clothing, duration = 0, long = true, ignoreBegin = true }, -- Q4586_ChangeClothesFEMALE
+    [33066] = { icon = LUIE_MEDIA_ICONS_DISGUISES_DISGUISE_FANCY_CLOTHING_DDS, name = Abilities.Skill_Fancy_Clothing, duration = 0, long = true, ignoreBegin = true },        -- Q4586_ChangeClothes
+    [34842] = { icon = LUIE_MEDIA_ICONS_DISGUISES_DISGUISE_FANCY_CLOTHING_FEMALE_DDS, name = Abilities.Skill_Fancy_Clothing, duration = 0, long = true, ignoreBegin = true }, -- Q4586_ChangeClothesFEMALE
     -- [29504] = { duration = 0, long = true }, -- Q4546 Shade Layer
     -- [34597] = { duration = 0, long = true }, -- Q4690 Forest Spirit Layer
 

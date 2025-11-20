@@ -1850,7 +1850,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
     ChatAnnouncements.CurrencyPrinter(currencyType, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, messageType, "", "")
 end
 
---- @alias LUIE_CURRENCY
+--- @alias LUIE_CURRENCY_TYPE
 --- | "LUIE_CURRENCY_BAG"
 --- | "LUIE_CURRENCY_BANK"
 --- | "LUIE_CURRENCY_HERALDRY"
@@ -1861,7 +1861,6 @@ end
 --- | "LUIE_CURRENCY_RIDING_STAMINA"
 --- | "LUIE_CURRENCY_THROTTLE"
 --- | "LUIE_CURRENCY_TRADE"
---- | "LUIE_CURRENCY_TYPE
 --- | "LUIE_CURRENCY_VENDOR"
 
 local function ResolveStorageType(changeColor, messageType)
@@ -1908,7 +1907,7 @@ end
 --- @param currencyTotal string
 --- @param messageChange string
 --- @param messageTotal string
---- @param messageType LUIE_CURRENCY
+--- @param messageType LUIE_CURRENCY_TYPE
 --- @param carriedItem string
 --- @param carriedItemTotal string
 function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, messageType, carriedItem, carriedItemTotal)

@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -20,7 +20,7 @@ LUIE_CC_ICON_STAGGER = "/esoui/art/icons/ability_debuff_stagger.dds"
 LUIE_CC_ICON_SILENCE = "/esoui/art/icons/ability_debuff_silence.dds"
 LUIE_CC_ICON_SNARE = "/esoui/art/icons/ability_debuff_snare.dds"
 LUIE_CC_ICON_ROOT = "/esoui/art/icons/ability_debuff_root.dds"
-LUIE_CC_ICON_IMMUNE = "LuiExtended/media/icons/abilities/ability_innate_cc_immunity.dds"
+LUIE_CC_ICON_IMMUNE = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_CC_IMMUNITY_DDS
 
 -- LUIE_CC_TYPE
 LUIE_CC_TYPE_STUN = 1           -- Stun

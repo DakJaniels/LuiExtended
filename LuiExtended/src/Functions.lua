@@ -1,4 +1,4 @@
--- -----------------------------------------------------------------------------
+﻿-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -35,7 +35,7 @@ local zo_strformat = zo_strformat
 do
     local KEYBOARD_ROLE_ICONS =
     {
-        [LFG_ROLE_INVALID] = "LuiExtended/media/unitframes/unitframes_class_none.dds",
+        [LFG_ROLE_INVALID] = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_CLASS_NONE_DDS,
         [LFG_ROLE_DPS] = "EsoUI/Art/LFG/LFG_icon_dps.dds",
         [LFG_ROLE_TANK] = "EsoUI/Art/LFG/LFG_icon_tank.dds",
         [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/LFG_icon_healer.dds",
@@ -49,7 +49,7 @@ do
 
     local GAMEPAD_ROLE_ICONS =
     {
-        [LFG_ROLE_INVALID] = "LuiExtended/media/unitframes/unitframes_class_none.dds",
+        [LFG_ROLE_INVALID] = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_CLASS_NONE_DDS,
         [LFG_ROLE_DPS] = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_dps.dds",
         [LFG_ROLE_TANK] = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_tank.dds",
         [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_healer.dds",
