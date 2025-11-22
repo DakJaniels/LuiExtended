@@ -36,6 +36,7 @@ local BAR_INDEX_END = ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
 local BACKBAR_INDEX_END = ACTION_BAR_ULTIMATE_SLOT_INDEX
 local BACKBAR_INDEX_OFFSET = 50
 
+--- @class LUIE_ACTIONBAR_GAMEPAD_CONSTANTS
 local GAMEPAD_CONSTANTS =
 {
     abilitySlotOffsetX = 10,
@@ -45,6 +46,8 @@ local GAMEPAD_CONSTANTS =
     weaponSwapOffsetX = 61,
     weaponSwapOffsetY = 4,
 }
+
+--- @class LUIE_ACTIONBAR_KEYBOARD_CONSTANTS
 local KEYBOARD_CONSTANTS =
 {
     abilitySlotOffsetX = 2,
@@ -55,6 +58,7 @@ local KEYBOARD_CONSTANTS =
     weaponSwapOffsetY = -4,
 }
 
+--- @return LUIE_ACTIONBAR_GAMEPAD_CONSTANTS | LUIE_ACTIONBAR_KEYBOARD_CONSTANTS
 local function GetPlatformConstants()
     return IsInGamepadPreferredMode() and GAMEPAD_CONSTANTS or KEYBOARD_CONSTANTS
 end
