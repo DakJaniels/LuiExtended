@@ -52,7 +52,7 @@ function CombatInfo.SetMarker(removeMarker)
     if CombatInfo.SV.showMarker ~= true then
         return
     end
-    local LUIE_MARKER = "/LuiExtended/media/combatinfo/floatingicon/redarrow.dds"
+    local LUIE_MARKER = LUIE_MEDIA_COMBATINFO_FLOATINGICON_REDARROW_DDS
     SetFloatingMarkerInfo(MAP_PIN_TYPE_AGGRO, CombatInfo.SV.markerSize, LUIE_MARKER, "", true, false)
     eventManager:RegisterForEvent(moduleName .. "Marker", EVENT_PLAYER_ACTIVATED, CombatInfo.OnPlayerActivatedMarker)
 end
