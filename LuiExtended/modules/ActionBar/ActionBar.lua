@@ -474,7 +474,8 @@ function ActionBar.OnActionSlotEffectUpdated(eventCode, hotbarCategory, actionSl
                 end
             end
 
-            if not g_barDurationOverride[abilityId] then
+            -- Only learn duration if not already overridden and not hardcoded in database
+            if not g_barDurationOverride[abilityId] and not (Effects.BarHighlightOverride[abilityId] and Effects.BarHighlightOverride[abilityId].duration) then
                 g_barDurationOverride[abilityId] = duration
                 -- LUIE.Debug(string_format("ActionBar: Learned duration %d ms for ability %d (%s)", duration, abilityId, abilityName))
             end
@@ -1122,7 +1123,8 @@ local function SetupFakeAura(ability_id)
         g_barFakeAura[ability_id] = true
         g_barOverrideCI[ability_id] = true
 
-        if Effects.BarHighlightOverride[ability_id] and Effects.BarHighlightOverride[ability_id].duration then
+        -- Only set hardcoded duration if not already overridden (by user custom override or learned duration)
+        if Effects.BarHighlightOverride[ability_id] and Effects.BarHighlightOverride[ability_id].duration and not g_barDurationOverride[ability_id] then
             g_barDurationOverride[ability_id] = Effects.BarHighlightOverride[ability_id].duration
         end
     end
@@ -1901,7 +1903,10 @@ local function PositionUltimateBackbarButton(style)
 end
 
 function ActionBar.BackbarSetupTemplate(style)
-    style = style or (IsInGamepadPreferredMode() and GAMEPAD_CONSTANTS or KEYBOARD_CONSTANTS)
+    -- Validate that style is a valid constants table, not a number or other invalid type
+    if not style or type(style) ~= "table" or not style.weaponSwapOffsetX then
+        style = GetPlatformConstants()
+    end
 
     SetupWeaponSwapControl(style)
     UpdateBackbarUniqueState(g_hotbarCategory)
