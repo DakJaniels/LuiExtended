@@ -331,6 +331,30 @@ function AbilityAlerts.SetMovingStateAlert(state)
         return
     end
     AbilityAlerts.AlertFrameUnlocked = state
+
+    -- Use console helper if on console
+    if IsConsoleUI() and LUIE.ConsoleMoverHelper and uiTlw.alertFrame and uiTlw.alertFrame:GetType() == CT_TOPLEVELCONTROL then
+        local MoverHelper = LUIE.ConsoleMoverHelper
+        local EditModeController = LUIE.EditModeController
+
+        -- Activate edit mode when unlocking on console
+        if EditModeController and state then
+            if not EditModeController:IsEditModeActive() then
+                EditModeController:SetEditModeActive(true, "AbilityAlerts")
+            end
+        end
+
+        AbilityAlerts.GenerateAlertFramePreview(state)
+        MoverHelper.SetupGamepadHandler(uiTlw.alertFrame, "default", function (control, left, top)
+            CombatInfo.SV.alerts.offsetX = left
+            CombatInfo.SV.alerts.offsetY = top
+        end)
+        MoverHelper.UpdateControlState(uiTlw.alertFrame, "abilityAlerts", state)
+
+        return
+    end
+
+    -- PC/Keyboard version
     if uiTlw.alertFrame and uiTlw.alertFrame:GetType() == CT_TOPLEVELCONTROL then
         AbilityAlerts.GenerateAlertFramePreview(state)
         uiTlw.alertFrame:SetMouseEnabled(state)

@@ -363,7 +363,7 @@ local function GetActionBarGradientColor(remain, duration)
     if not ActionBar.SV.RemainingTextColoured or duration <= 0 then
         return { 1, 1, 1, 1 }
     end
-    
+
     local pct = remain / duration
     if pct <= ActionBar.SV.RemainingTextColorThresholdLow then
         return ActionBar.SV.RemainingTextColorLow
@@ -381,7 +381,7 @@ local function GetQuickslotGradientColor(remain)
     if not ActionBar.SV.PotionTimerColor then
         return { 1, 1, 1, 1 }
     end
-    
+
     -- Check thresholds from low to high (most restrictive first)
     if remain <= ActionBar.SV.PotionTimerTextColorThresholdLow then
         return ActionBar.SV.PotionTimerTextColorLow
@@ -1800,7 +1800,7 @@ local function UpdateSlotLabels(slotNum, abilityId, currentTimeMs)
 
     local remain = g_toggledSlotsRemain[abilityId] - currentTimeMs
     g_uiCustomToggle[slotNum].label:SetText(SetBarRemainLabel(remain, abilityId))
-    
+
     -- Update gradient color based on remaining time
     if ActionBar.SV.RemainingTextColoured then
         local duration = GetUpdatedAbilityDuration(abilityId) or 0
@@ -2190,9 +2190,7 @@ function ActionBar.Initialize(enabled)
     end
     ActionBar.Enabled = true
 
-    if ActionBar.SV.GlobalShowGCD or ActionBar.SV.BarDesaturateUnused or ActionBar.SV.BarDarkUnused then
-        ActionBar.HookGCD()
-    end
+
     -- Setup fonts from ActionBar.SV
     local function setupFont(fontNameKey, fontStyleKey, fontSizeKey, defaultFontStyle, defaultFontSize)
         local fontName = LUIE.Fonts[ActionBar.SV[fontNameKey]]
@@ -2326,17 +2324,7 @@ function ActionBar.Initialize(enabled)
         end
     end
 
-    -- Migrate old GlobalMethod values (1=Vertical, 2=Radial, 3=Vertical Reveal) to new values (1=Radial, 2=Vertical Reveal)
-    if ActionBar.SV.GlobalMethod == 1 then
-        -- Old "Vertical" option -> migrate to "Vertical Reveal" (2)
-        ActionBar.SV.GlobalMethod = 2
-    elseif ActionBar.SV.GlobalMethod == 2 then
-        -- Old "Radial" option -> stays as "Radial" (1)
-        ActionBar.SV.GlobalMethod = 1
-    elseif ActionBar.SV.GlobalMethod == 3 then
-        -- Old "Vertical Reveal" option -> becomes "Vertical Reveal" (2)
-        ActionBar.SV.GlobalMethod = 2
-    end
+
 
     ActionBar.BackbarSetupTemplate()
     ActionBar.BackbarToggleSettings()
@@ -2349,6 +2337,10 @@ function ActionBar.Initialize(enabled)
     UpdateBackbarUniqueState(g_hotbarCategory)
     if g_hotbarCategory == HOTBAR_CATEGORY_DAEDRIC_ARTIFACT then
         ApplyBackbarUniqueHiddenState(true)
+    end
+
+    if ActionBar.SV.GlobalShowGCD or ActionBar.SV.BarDesaturateUnused or ActionBar.SV.BarDarkUnused then
+        ActionBar.HookGCD()
     end
 
     if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled then

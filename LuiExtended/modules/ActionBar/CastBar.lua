@@ -98,6 +98,22 @@ function CastBar.CreateCastBar()
 
     uiTlw.castBar.preview = UI:Backdrop(uiTlw.castBar, "fill", nil, nil, nil, true)
     uiTlw.castBar.previewLabel = UI:Label(uiTlw.castBar.preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", "Cast Bar", false)
+    -- Update font to use better readable font
+    if IsConsoleUI() and LUIE.ConsoleMoverHelper then
+        local fontName = "LUIE Default Font"
+        if LUIE.Fonts and LUIE.Fonts[fontName] then
+            local fontSize = 16
+            local fontStyle = "soft-shadow-thick"
+            local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
+            uiTlw.castBar.previewLabel:SetFont(fontString)
+        else
+            if IsInGamepadPreferredMode() or IsConsoleUI() then
+                uiTlw.castBar.previewLabel:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
+            else
+                uiTlw.castBar.previewLabel:SetFont("$(MEDIUM_FONT)|16|soft-shadow-thick")
+            end
+        end
+    end
 
     local tlwOnMoveStart = function (self)
         eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
@@ -223,16 +239,16 @@ function CastBar.UpdateCastBar()
     if not castbar.bar or not castbar.bar.name then
         return
     end
-    
+
     if g_castbarFont then
         castbar.bar.name:SetFont(g_castbarFont)
         castbar.bar.timer:SetFont(g_castbarFont)
     end
-    
+
     if LUIE.StatusbarTextures and LUIE.StatusbarTextures[ActionBar.SV.CastBarTexture] then
         castbar.bar.bar:SetTexture(LUIE.StatusbarTextures[ActionBar.SV.CastBarTexture])
     end
-    
+
     if ActionBar.SV.CastBarGradientC1 and ActionBar.SV.CastBarGradientC2 then
         castbar.bar.backdrop:SetCenterColor((0.1 * ActionBar.SV.CastBarGradientC1[1]), (0.1 * ActionBar.SV.CastBarGradientC1[2]), (0.1 * ActionBar.SV.CastBarGradientC1[3]), 0.75)
         castbar.bar.bar:SetGradientColors(ActionBar.SV.CastBarGradientC1[1], ActionBar.SV.CastBarGradientC1[2], ActionBar.SV.CastBarGradientC1[3], 1, ActionBar.SV.CastBarGradientC2[1], ActionBar.SV.CastBarGradientC2[2], ActionBar.SV.CastBarGradientC2[3], 1)
@@ -272,6 +288,35 @@ function CastBar.SetMovingState(state)
         return
     end
     ActionBar.CastBarUnlocked = state
+
+    -- Use console helper if on console
+    if IsConsoleUI() and LUIE.ConsoleMoverHelper and uiTlw.castBar and uiTlw.castBar:GetType() == CT_TOPLEVELCONTROL then
+        local MoverHelper = LUIE.ConsoleMoverHelper
+        local EditModeController = LUIE.EditModeController
+
+        -- Activate edit mode when unlocking on console
+        if EditModeController and state then
+            if not EditModeController:IsEditModeActive() then
+                EditModeController:SetEditModeActive(true, "ActionBar")
+            end
+        end
+
+        CastBar.GenerateCastbarPreview(state)
+        MoverHelper.SetupGamepadHandler(uiTlw.castBar, "default", function (control, left, top)
+            ActionBar.SV.CastbarOffsetX = left
+            ActionBar.SV.CastbarOffsetY = top
+            local savedPos = ActionBar.SV.CastBarCustomPosition
+            if savedPos then
+                savedPos[1] = left
+                savedPos[2] = top
+            end
+        end)
+        MoverHelper.UpdateControlState(uiTlw.castBar, "castBar", state)
+
+        return
+    end
+
+    -- PC/Keyboard version
     if uiTlw.castBar and uiTlw.castBar:GetType() == CT_TOPLEVELCONTROL then
         CastBar.GenerateCastbarPreview(state)
         uiTlw.castBar:SetMouseEnabled(state)

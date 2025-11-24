@@ -131,6 +131,22 @@ local function InitializePreviewLabels()
                 f.frame.preview.anchorLabel:SetColor(1, 1, 0, 1)
                 f.frame.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
                 f.frame.preview.anchorLabel:SetDrawTier(DT_MEDIUM)
+                -- Update font to use better readable font
+                if IsConsoleUI() and LUIE.ConsoleMoverHelper then
+                    local fontName = "LUIE Default Font"
+                    if LUIE.Fonts and LUIE.Fonts[fontName] then
+                        local fontSize = 14
+                        local fontStyle = "soft-shadow-thick"
+                        local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
+                        f.frame.preview.anchorLabel:SetFont(fontString)
+                    else
+                        if IsInGamepadPreferredMode() or IsConsoleUI() then
+                            f.frame.preview.anchorLabel:SetFont("$(GAMEPAD_MEDIUM_FONT)|14|soft-shadow-thick")
+                        else
+                            f.frame.preview.anchorLabel:SetFont("$(MEDIUM_FONT)|14|soft-shadow-thick")
+                        end
+                    end
+                end
             end
 
             if not f.frame.preview.anchorLabelBg then
@@ -866,6 +882,90 @@ function SpellCastBuffs.SetMovingState(state)
     local gridSize = (accountWideSettings and accountWideSettings.snapToGridSize_buffs) or 15
     GridOverlay.Refresh("buffs", state and gridEnabled, gridSize)
 
+    -- Use console helper if on console
+    if IsConsoleUI() and LUIE.ConsoleMoverHelper then
+        local MoverHelper = LUIE.ConsoleMoverHelper
+        local EditModeController = LUIE.EditModeController
+
+        -- Activate edit mode when unlocking on console
+        if EditModeController and state then
+            if not EditModeController:IsEditModeActive() then
+                EditModeController:SetEditModeActive(true, "SpellCastBuffs")
+            end
+        end
+
+        -- Helper function to set up a buff container
+        local function SetupBuffContainer(container, identifier, saveCallback)
+            if container and container:GetType() == CT_TOPLEVELCONTROL then
+                MoverHelper.SetupGamepadHandler(container, "buffs", saveCallback)
+                MoverHelper.UpdateControlState(container, identifier, state)
+            end
+        end
+
+        -- Set up each buff container
+        if SpellCastBuffs.SV.lockPositionToUnitFrames == nil or not SpellCastBuffs.SV.lockPositionToUnitFrames then
+            SetupBuffContainer(SpellCastBuffs.BuffContainers.playerb, "buff_playerb", function (control, left, top)
+                SpellCastBuffs.SV.playerbOffsetX = left
+                SpellCastBuffs.SV.playerbOffsetY = top
+            end)
+
+            SetupBuffContainer(SpellCastBuffs.BuffContainers.playerd, "buff_playerd", function (control, left, top)
+                SpellCastBuffs.SV.playerdOffsetX = left
+                SpellCastBuffs.SV.playerdOffsetY = top
+            end)
+
+            SetupBuffContainer(SpellCastBuffs.BuffContainers.targetb, "buff_targetb", function (control, left, top)
+                SpellCastBuffs.SV.targetbOffsetX = left
+                SpellCastBuffs.SV.targetbOffsetY = top
+            end)
+
+            SetupBuffContainer(SpellCastBuffs.BuffContainers.targetd, "buff_targetd", function (control, left, top)
+                SpellCastBuffs.SV.targetdOffsetX = left
+                SpellCastBuffs.SV.targetdOffsetY = top
+            end)
+        end
+
+        SetupBuffContainer(SpellCastBuffs.BuffContainers.player_long, "buff_player_long", function (control, left, top)
+            if control.alignVertical then
+                SpellCastBuffs.SV.playerVOffsetX = left
+                SpellCastBuffs.SV.playerVOffsetY = top
+            else
+                SpellCastBuffs.SV.playerHOffsetX = left
+                SpellCastBuffs.SV.playerHOffsetY = top
+            end
+        end)
+
+        SetupBuffContainer(SpellCastBuffs.BuffContainers.prominentbuffs, "buff_prominentbuffs", function (control, left, top)
+            if control.alignVertical then
+                SpellCastBuffs.SV.prominentbVOffsetX = left
+                SpellCastBuffs.SV.prominentbVOffsetY = top
+            else
+                SpellCastBuffs.SV.prominentbHOffsetX = left
+                SpellCastBuffs.SV.prominentbHOffsetY = top
+            end
+        end)
+
+        SetupBuffContainer(SpellCastBuffs.BuffContainers.prominentdebuffs, "buff_prominentdebuffs", function (control, left, top)
+            if control.alignVertical then
+                SpellCastBuffs.SV.prominentdVOffsetX = left
+                SpellCastBuffs.SV.prominentdVOffsetY = top
+            else
+                SpellCastBuffs.SV.prominentdHOffsetX = left
+                SpellCastBuffs.SV.prominentdHOffsetY = top
+            end
+        end)
+
+        -- Show/hide preview
+        for _, v in pairs(SpellCastBuffs.containerRouting) do
+            if SpellCastBuffs.BuffContainers[v] and SpellCastBuffs.BuffContainers[v].preview then
+                SpellCastBuffs.BuffContainers[v].preview:SetHidden(not state)
+            end
+        end
+
+        return
+    end
+
+    -- PC/Keyboard version
     -- Helper function to update position label
     local function UpdatePositionLabel(control, label)
         if state and label then

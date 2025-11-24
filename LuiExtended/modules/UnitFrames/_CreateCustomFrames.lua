@@ -683,6 +683,22 @@ local function CreateCompanionFrame()
         companionTlw.customPositionAttr = "CustomFramesCompanionFramePos"
         companionTlw.preview = UI:Backdrop(companionTlw, "fill", nil, nil, nil, true)
         companionTlw.previewLabel = UI:Label(companionTlw.preview, { BOTTOM, TOP, 0, -1, nil }, nil, nil, "ZoFontGameMedium", "Player Companion", false)
+        -- Update font to use better readable font
+        if IsConsoleUI() and LUIE.ConsoleMoverHelper then
+            local fontName = "LUIE Default Font"
+            if LUIE.Fonts and LUIE.Fonts[fontName] then
+                local fontSize = 16
+                local fontStyle = "soft-shadow-thick"
+                local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
+                companionTlw.previewLabel:SetFont(fontString)
+            else
+                if IsInGamepadPreferredMode() or IsConsoleUI() then
+                    companionTlw.previewLabel:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
+                else
+                    companionTlw.previewLabel:SetFont("$(MEDIUM_FONT)|16|soft-shadow-thick")
+                end
+            end
+        end
 
         local fragment = ZO_HUDFadeSceneFragment:New(companionTlw, 0, 0)
 
@@ -811,6 +827,22 @@ local function SetupCommonFrameActions()
             unitFrame.tlw.preview.anchorLabel:SetColor(1, 1, 0, 1)
             unitFrame.tlw.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
             unitFrame.tlw.preview.anchorLabel:SetDrawTier(DT_MEDIUM)
+            -- Update font to use better readable font
+            if IsConsoleUI() and LUIE.ConsoleMoverHelper then
+                local fontName = "LUIE Default Font"
+                if LUIE.Fonts and LUIE.Fonts[fontName] then
+                    local fontSize = 14
+                    local fontStyle = "soft-shadow-thick"
+                    local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
+                    unitFrame.tlw.preview.anchorLabel:SetFont(fontString)
+                else
+                    if IsInGamepadPreferredMode() or IsConsoleUI() then
+                        unitFrame.tlw.preview.anchorLabel:SetFont("$(GAMEPAD_MEDIUM_FONT)|14|soft-shadow-thick")
+                    else
+                        unitFrame.tlw.preview.anchorLabel:SetFont("$(MEDIUM_FONT)|14|soft-shadow-thick")
+                    end
+                end
+            end
             unitFrame.tlw.preview.anchorLabelBg = UI:Backdrop(unitFrame.tlw.preview.anchorLabel, "fill", nil, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, false)
             unitFrame.tlw.preview.anchorLabelBg:SetDrawLayer(DL_OVERLAY)
             unitFrame.tlw.preview.anchorLabelBg:SetDrawTier(DT_LOW)

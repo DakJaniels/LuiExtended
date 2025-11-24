@@ -27,7 +27,11 @@ end
 
 -- Load additional media from LMP using centralized SettingsAPI
 local function LoadMedia()
-    LUIE.SettingsAPI.LoadAllMedia()
+    if IsConsoleUI() then
+        LUIE.ConsoleSettingsAPI.LoadAllMedia()
+    else
+        LUIE.SettingsAPI.LoadAllMedia()
+    end
 end
 
 --- - **EVENT_PLAYER_ACTIVATED **
@@ -122,17 +126,43 @@ eventManager:RegisterForEvent(LUIE.name, EVENT_ADD_ON_LOADED, function (eventId,
     -- Load Timestamp Color
     LUIE.UpdateTimeStampColor()
     -- -----------------------------------------------------------------------------
+    -- Initialize EditModeController for console
+    if IsConsoleUI() then
+        local EditModeControllerClass = LUIE.EditModeController
+        if EditModeControllerClass then
+            LUIE.EditModeController = EditModeControllerClass:New()
+            LUIE.EditModeController:InitializeKeybindStrip()
+            eventManager:RegisterForEvent(LUIE.name .. "_EditMode", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function ()
+                if LUIE.EditModeController then
+                    LUIE.EditModeController:OnGamepadPreferredModeChanged()
+                end
+            end)
+        end
+    end
+    -- -----------------------------------------------------------------------------
     -- Create settings menus for our addon
-    LUIE.CreateSettings()
-    LUIE.ChatAnnouncements.CreateSettings()
-    LUIE.ActionBar.CreateSettings()
-    LUIE.CombatInfo.CreateSettings()
-    LUIE.CombatText.CreateSettings()
-    LUIE.InfoPanel.CreateSettings()
-    LUIE.UnitFrames.CreateSettings()
-    LUIE.SpellCastBuffs.CreateSettings()
-    LUIE.SlashCommands.CreateSettings()
-    LUIE.SlashCommands.MigrateSettings()
+    if IsConsoleUI() then
+        LUIE.CreateConsoleSettings()
+        LUIE.ChatAnnouncements.CreateConsoleSettings()
+        LUIE.ActionBar.CreateConsoleSettings()
+        LUIE.CombatInfo.CreateConsoleSettings()
+        LUIE.CombatText.CreateConsoleSettings()
+        LUIE.InfoPanel.CreateConsoleSettings()
+        LUIE.UnitFrames.CreateConsoleSettings()
+        LUIE.SpellCastBuffs.CreateConsoleSettings()
+        LUIE.SlashCommands.CreateConsoleSettings()
+    else
+        LUIE.CreateSettings()
+        LUIE.ChatAnnouncements.CreateSettings()
+        LUIE.ActionBar.CreateSettings()
+        LUIE.CombatInfo.CreateSettings()
+        LUIE.CombatText.CreateSettings()
+        LUIE.InfoPanel.CreateSettings()
+        LUIE.UnitFrames.CreateSettings()
+        LUIE.SpellCastBuffs.CreateSettings()
+        LUIE.SlashCommands.CreateSettings()
+        LUIE.SlashCommands.MigrateSettings()
+    end
     -- -----------------------------------------------------------------------------
     -- Display changelog screen
     if LUIE.SV.ShowChangeLog == true then

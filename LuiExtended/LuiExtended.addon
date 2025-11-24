@@ -1,11 +1,11 @@
 ## Title: |c00C000Lui Extended|r
 ## Author: ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101048 101049
-## Version: 7.1.2.0
-## AddOnVersion: 7120
+## Version: 7.1.3.0
+## AddOnVersion: 7130
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
 ## PCDependsOn: LuiMedia>=7120 LuiData>=7106 LibAddonMenu-2.0>=41 LibMediaProvider>=36
-## ConsoleDependsOn: LuiMedia>=7120 LuiData>=7106 LibAddonMenu-2.0>=41 LibMediaProvider>=36 LibHarvensAddonSettings>=20004
+## ConsoleDependsOn: LuiMedia>=7120 LuiData>=7106 LibMediaProvider>=36 LibHarvensAddonSettings>=20004 LibCombatAlerts
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705 CrutchAlerts>=20502
 ## OptionalDependsOn: LibGroupResources>=91 LibGroupCombatStats>=20251011 LibGroupPotionCooldowns>=20250727
 ## OptionalDependsOn: LibDebugLogger>=268 DolgubonsLazyWritCreator>=4038 LibLazyCrafting>=4028 LootLog>=408040
@@ -51,7 +51,12 @@ frontend/CrowdControlTracker.xml
 
 # Unlock
 src/GridOverlay.lua
-src/Unlock.lua
+pc/Unlock.lua
+
+# Console Edit Mode & Unlock
+console/MoverHelper.lua
+console/EditModeController.lua
+console/Unlock.lua
 
 # Modules - Chat Announcements
 modules/ChatAnnouncements/_Namespace.lua
@@ -165,17 +170,33 @@ modules/UnitFrames/_FontFunctions.lua
 modules/UnitFrames/_Debug.lua
 modules/UnitFrames/UnitFrames.lua
 
-# Settings
-settings/Settings_API.lua
-settings/Settings.lua
-settings/ChatAnnouncements.lua
-settings/CombatInfo.lua
-settings/ActionBar.lua
-settings/CombatText.lua
-settings/InfoPanel.lua
-settings/SlashCommands.lua
-settings/SpellCastBuffs.lua
-settings/UnitFrames.lua
+# Settings - Console
+console/Settings_API.lua
+console/settings/Settings.lua
+console/settings/ChatAnnouncements.lua
+console/settings/CombatInfo.lua
+console/settings/ActionBar.lua
+console/settings/CombatText.lua
+console/settings/InfoPanel.lua
+console/settings/SlashCommands.lua
+console/settings/SpellCastBuffs.lua
+console/settings/UnitFrames.lua
+
+# Dialogs - Console
+console/dialogs/BlacklistDialog.xml
+console/dialogs/BlacklistDialog.lua
+
+# Settings - PC
+pc/Settings_API.lua
+pc/settings/Settings.lua
+pc/settings/ChatAnnouncements.lua
+pc/settings/CombatInfo.lua
+pc/settings/ActionBar.lua
+pc/settings/CombatText.lua
+pc/settings/InfoPanel.lua
+pc/settings/SlashCommands.lua
+pc/settings/SpellCastBuffs.lua
+pc/settings/UnitFrames.lua
 
 # Do the stuff.
 src/Initialize.lua

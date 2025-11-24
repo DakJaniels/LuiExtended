@@ -470,11 +470,14 @@ end
 --- @param callback function: The callback function to be executed when the button is clicked.
 --- @return table identifier: The created dialogue button table.
 function LUIE.RegisterDialogueButton(identifier, title, text, callback)
+    -- Ensure GAMEPAD_DIALOGS is available (it's a global ESO constant)
+    local dialogType = GAMEPAD_DIALOGS and GAMEPAD_DIALOGS.BASIC or 1
+
     ESO_Dialogs[identifier] =
     {
         gamepadInfo =
         {
-            dialogType = GAMEPAD_DIALOGS.BASIC,
+            dialogType = dialogType,
         },
         canQueue = true,
         title =
@@ -497,6 +500,50 @@ function LUIE.RegisterDialogueButton(identifier, title, text, callback)
         },
     }
     return ESO_Dialogs[identifier]
+end
+
+--- Register a custom dialog for managing blacklists/whitelists using custom dialog template
+--- @param identifier string Unique dialog identifier
+--- @param title string Dialog title
+--- @param generateItemsFunc function Function that returns a table of {name, data} items
+--- @param onSelectCallback function Callback when an item is selected: function(itemData)
+--- @param addItemCallback function|nil Optional callback for adding items: function(text)
+--- @param clearCallback function|nil Optional callback for clearing the list: function()
+function LUIE.RegisterBlacklistDialog(identifier, title, generateItemsFunc, onSelectCallback, addItemCallback, clearCallback)
+    -- Store dialog data for later use
+    if not LUIE.BlacklistDialogs then
+        LUIE.BlacklistDialogs = {}
+    end
+
+    LUIE.BlacklistDialogs[identifier] =
+    {
+        title = title,
+        generateItemsFunc = generateItemsFunc,
+        onSelectCallback = onSelectCallback,
+        addItemCallback = addItemCallback,
+        clearCallback = clearCallback,
+    }
+end
+
+--- Show a registered blacklist dialog
+--- @param identifier string Dialog identifier
+function LUIE.ShowBlacklistDialog(identifier)
+    local dialogData = LUIE.BlacklistDialogs and LUIE.BlacklistDialogs[identifier]
+    if not dialogData then
+        return
+    end
+
+    -- Use custom dialog system
+    if LUIE.BlacklistDialog and LUIE.BlacklistDialog.Show then
+        LUIE.BlacklistDialog.Show(identifier, dialogData.title, dialogData.generateItemsFunc, dialogData.onSelectCallback, dialogData.addItemCallback, dialogData.clearCallback)
+    end
+end
+
+--- Refresh a blacklist dialog if it's currently open
+--- @param identifier string Dialog identifier
+function LUIE.RefreshBlacklistDialog(identifier)
+    -- Refresh handled internally by the dialog when items change
+    -- This function kept for compatibility but does nothing
 end
 
 -- -----------------------------------------------------------------------------

@@ -27,7 +27,7 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.1.2.0"
+LUIE.version = "7.1.3.0"
 LUIE.author = "ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
 LUIE.github = "https://github.com/DakJaniels/LuiExtended"
@@ -35,13 +35,20 @@ LUIE.feedback = "https://github.com/DakJaniels/LuiExtended/issues"
 LUIE.translation = "https://github.com/DakJaniels/LuiExtended/tree/translations"
 LUIE.donation = "https://paypal.me/dakjaniels"
 -- -----------------------------------------------------------------------------
-LUIE.LAM = LibAddonMenu2
+if not IsConsoleUI() then
+    LUIE.LAM = LibAddonMenu2
+end
 -- -----------------------------------------------------------------------------
 -- Saved variables options
 --- @diagnostic disable-next-line: missing-fields
 LUIE.SV = {}
 LUIE.SV.Migrations = {}
-LUIE.SVVer = 2
+LUIE.SVVer = nil
+if IsConsoleUI() then
+    LUIE.SVVer = 3
+else
+    LUIE.SVVer = 2
+end
 LUIE.SVName = "LUIESV"
 -- -----------------------------------------------------------------------------
 do
@@ -351,3 +358,22 @@ function LUIE.IsDevDebugEnabled()
 end
 
 -- -----------------------------------------------------------------------------
+
+-- do
+--     local g_loggingEnabled = LUIE.IsDevDebugEnabled()
+--     function ZO_Scene:Log(message)
+--         if g_loggingEnabled then
+--             CHAT_ROUTER:AddSystemMessage(string.format("%s - %s - %s", ZO_Scene_GetOriginColor():Colorize(GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN)), self.name, message))
+--         end
+--     end
+
+--     function ZO_SceneManager_Follower:Log(message, sceneName)
+--         if g_loggingEnabled then
+--             if sceneName then
+--                 CHAT_ROUTER:AddSystemMessage(string.format("%s - %s - %s", ZO_Scene_GetOriginColor():Colorize(GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN)), message, sceneName))
+--             else
+--                 CHAT_ROUTER:AddSystemMessage(string.format("%s - %s", ZO_Scene_GetOriginColor():Colorize(GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN)), message))
+--             end
+--         end
+--     end
+-- end

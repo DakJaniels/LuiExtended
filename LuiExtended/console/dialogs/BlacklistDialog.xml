@@ -1,0 +1,16 @@
+<!--
+      LuiExtended
+      License: The MIT License (MIT)
+-->
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
+    <Controls>
+        <!-- Custom Blacklist Dialog Template -->
+        <TopLevelControl name="LUIE_BlacklistDialog"
+            inherits="ZO_GenericParametricListGamepadDialogTemplate" hidden="true" virtual="true">
+            <OnInitialized>
+                LUIE.BlacklistDialog_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

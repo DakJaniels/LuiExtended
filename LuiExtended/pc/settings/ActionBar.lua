@@ -1147,4 +1147,3 @@ function ActionBar.CreateSettings()
         LAM:RegisterOptionControls(LUIE.name .. "ActionBarOptions", optionsDataActionBar)
     end
 end
-

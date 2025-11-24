@@ -311,6 +311,7 @@ function InfoPanel.Initialize(enabled)
     InfoPanel.Enabled = true
 
     uiPanel = UI:TopLevel(nil, { 240, 48 })
+    InfoPanel.Panel = uiPanel -- Update Panel reference after creation
     uiPanel:SetDrawLayer(DL_BACKGROUND)
     uiPanel:SetDrawTier(DT_LOW)
     uiPanel:SetDrawLevel(DL_CONTROLS)
@@ -433,6 +434,28 @@ function InfoPanel.SetMovingState(state)
         return
     end
     InfoPanel.panelUnlocked = state
+
+    -- Use console helper if on console
+    if IsConsoleUI() and LUIE.ConsoleMoverHelper then
+        local MoverHelper = LUIE.ConsoleMoverHelper
+        local EditModeController = LUIE.EditModeController
+
+        -- Activate edit mode when unlocking on console
+        if EditModeController and state then
+            if not EditModeController:IsEditModeActive() then
+                EditModeController:SetEditModeActive(true, "InfoPanel")
+            end
+        end
+
+        MoverHelper.SetupGamepadHandler(uiPanel, "default", function (control, left, top)
+            InfoPanel.SV.position = { left, top }
+        end)
+        MoverHelper.UpdateControlState(uiPanel, "infoPanel", state)
+
+        return
+    end
+
+    -- PC/Keyboard version
     uiPanel:SetMouseEnabled(state)
     uiPanel:SetMovable(state)
     uiPanel:SetHidden(false)
