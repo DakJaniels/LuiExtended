@@ -734,6 +734,7 @@ ChatAnnouncements.mailCODPresent = false -- Tracks whether the currently opened 
 ChatAnnouncements.inMail = false         -- Toggled on when looting mail to prevent notable item display from hiding items acquired.
 ChatAnnouncements.mailTarget = ""        -- Target of mail being sent.
 ChatAnnouncements.mailStacksOut = {}     -- Table for storing items to be mailed out.
+ChatAnnouncements.currentMailSender = "" -- Current mail sender for currency formatting (updated from queue)
 
 -- Disguise
 ChatAnnouncements.currentDisguise = nil -- Holds current disguise itemId

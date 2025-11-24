@@ -19,15 +19,11 @@ local zo_strformat = zo_strformat
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
 local moduleName = ChatAnnouncements.moduleName
-
-------------------------------------------------
-
-------------------------------------------------
--- LINK BRACKET OPTIONS ------------------------
-------------------------------------------------
-
 local linkBrackets = ChatAnnouncements.linkBrackets
 
+local mailSenderMap = {}
+local mailSenderQueue = {}
+local isTakingMail = false
 
 --- - **EVENT_MAIL_ATTACHED_MONEY_CHANGED **
 ---
@@ -123,14 +119,62 @@ function ChatAnnouncements.OnMailReadable(eventId, mailId)
     end
 end
 
+local function ResolveMailSender(mailId)
+    local senderDisplayName, senderCharacterName, subject, firstItemIcon, unread, fromSystem, fromCS, returned, numAttachments, attachedMoney, codAmount, expiresInDays, secsSinceReceived, category = GetMailItemInfo(mailId)
+
+    local mailTarget = ""
+    if fromSystem or fromCS then
+        mailTarget = ZO_GAME_REPRESENTATIVE_TEXT:Colorize(senderDisplayName)
+    elseif not (fromSystem or fromCS) then
+        if senderDisplayName ~= "" and senderCharacterName ~= "" then
+            local finalName = ChatAnnouncements.ResolveNameLink(senderCharacterName, senderDisplayName)
+            mailTarget = ZO_SELECTED_TEXT:Colorize(finalName)
+        else
+            local finalName
+            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                finalName = ZO_LinkHandler_CreateLinkWithoutBrackets(senderDisplayName, nil, DISPLAY_NAME_LINK_TYPE, senderDisplayName)
+            else
+                finalName = ZO_LinkHandler_CreateLink(senderDisplayName, nil, DISPLAY_NAME_LINK_TYPE, senderDisplayName)
+            end
+            mailTarget = ZO_SELECTED_TEXT:Colorize(finalName)
+        end
+    end
+
+    return mailTarget, codAmount > 0, numAttachments, attachedMoney
+end
+
+function ChatAnnouncements.GetNextMailSender()
+    if #mailSenderQueue > 0 then
+        local sender = table.remove(mailSenderQueue, 1)
+        -- if LUIE.IsDevDebugEnabled() then
+        --     LUIE.Debug(string.format("Mail sender queue: consumed '%s', remaining: %d", sender, #mailSenderQueue))
+        -- end
+        return sender
+    end
+    return ""
+end
+
 --- - **EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS **
 ---
 --- @param eventId integer
 --- @param mailId id64
 function ChatAnnouncements.OnMailTakeAttachedItem(eventId, mailId)
+    isTakingMail = true
+
+    local mailTarget, hasCOD = ResolveMailSender(mailId)
+    mailSenderMap[mailId] = mailTarget
+    ChatAnnouncements.mailTarget = mailTarget
+    ChatAnnouncements.mailCODPresent = hasCOD
+
+    eventManager:UnregisterForUpdate(moduleName .. "_Mail" .. "ClearTakingFlag")
+    eventManager:RegisterForUpdate(moduleName .. "_Mail" .. "ClearTakingFlag", 200, function ()
+        isTakingMail = false
+        eventManager:UnregisterForUpdate(moduleName .. "_Mail" .. "ClearTakingFlag")
+    end)
+
     if ChatAnnouncements.SV.Notify.NotificationMailSendCA or ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
         local mailString
-        if ChatAnnouncements.mailCODPresent then
+        if hasCOD then
             mailString = GetString(LUIE_STRING_CA_MAIL_RECEIVED_COD)
         else
             mailString = GetString(LUIE_STRING_CA_MAIL_RECEIVED)
@@ -151,6 +195,23 @@ function ChatAnnouncements.OnMailTakeAttachedItem(eventId, mailId)
             end
         end
     end
+end
+
+--- - **EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE **
+---
+--- @param eventId integer
+--- @param result MailTakeAttachmentResult
+--- @param category MailCategory
+--- @param headersRemoved bool
+function ChatAnnouncements.OnMailTakeAllResponse(eventId, result, category, headersRemoved)
+    isTakingMail = false
+    eventManager:UnregisterForUpdate(moduleName .. "_Mail" .. "ClearTakingFlag")
+
+    -- if LUIE.IsDevDebugEnabled() then
+    --     local resultStr = result == MAIL_TAKE_ATTACHMENT_RESULT_SUCCESS and "SUCCESS" or "FAIL"
+    --     LUIE.Debug(string.format("Take All completed: result=%s, category=%d, headersRemoved=%s, queue remaining=%d",
+    --         resultStr, category, tostring(headersRemoved), #mailSenderQueue))
+    -- end
 end
 
 --- - **EVENT_MAIL_ATTACHMENT_ADDED **
@@ -175,7 +236,6 @@ function ChatAnnouncements.OnMailAttach(eventId, attachmentSlot)
     }
 end
 
--- Removes items from index if they are removed from the trade
 --- - **EVENT_MAIL_ATTACHMENT_REMOVED **
 ---
 --- @param eventId integer
@@ -185,6 +245,61 @@ function ChatAnnouncements.OnMailAttachRemove(eventId, attachmentSlot)
     ChatAnnouncements.mailAmount = GetQueuedMoneyAttachment()
     local mailIndex = attachmentSlot
     ChatAnnouncements.mailStacksOut[mailIndex] = nil
+end
+
+local function PopulateMailSenderQueue()
+    mailSenderQueue = {}
+    local mailCount = 0
+
+    local mailId = GetNextMailId(nil)
+    while mailId do
+        mailCount = mailCount + 1
+        local mailTarget, hasCOD, numAttachments, attachedMoney = ResolveMailSender(mailId)
+
+        -- if LUIE.IsDevDebugEnabled() then
+        --     local senderDisplayName, senderCharacterName = GetMailSender(mailId)
+        --     LUIE.Debug(string.format("Found mail %d: mailId=%s, displayName='%s', charName='%s', resolved='%s', attachments=%d, money=%d",
+        --         mailCount, Id64ToString(mailId), senderDisplayName or "", senderCharacterName or "", mailTarget or "", numAttachments or 0, attachedMoney or 0))
+        -- end
+
+        if (numAttachments and numAttachments > 0) or (attachedMoney and attachedMoney > 0) then
+            if mailTarget == "" then
+                local senderDisplayName = GetMailSender(mailId)
+                if senderDisplayName ~= "" then
+                    mailTarget = ZO_GAME_REPRESENTATIVE_TEXT:Colorize(senderDisplayName)
+                end
+            end
+
+            -- if LUIE.IsDevDebugEnabled() then
+            --     LUIE.Debug(string.format("Populating queue: mailId=%s, sender='%s', attachments=%d, money=%d",
+            --         Id64ToString(mailId), mailTarget, numAttachments, attachedMoney))
+            -- end
+
+            if attachedMoney > 0 then
+                table.insert(mailSenderQueue, mailTarget)
+            end
+            for i = 1, numAttachments do
+                table.insert(mailSenderQueue, mailTarget)
+            end
+
+            mailSenderMap[mailId] = mailTarget
+        end
+
+        mailId = GetNextMailId(mailId)
+    end
+
+    -- if LUIE.IsDevDebugEnabled() then
+    --     LUIE.Debug(string.format("Mail sender queue populated: %d mails found, %d queue entries", mailCount, #mailSenderQueue))
+    -- end
+end
+
+--- - **EVENT_MAIL_INBOX_UPDATE**
+---
+--- @param eventId integer
+function ChatAnnouncements.OnMailInboxUpdate(eventId)
+    if ChatAnnouncements.inMail and not isTakingMail then
+        PopulateMailSenderQueue()
+    end
 end
 
 --- - **EVENT_MAIL_OPEN_MAILBOX**
@@ -213,9 +328,13 @@ function ChatAnnouncements.OnMailCloseBox(eventId)
     end
     ChatAnnouncements.inMail = false
     ChatAnnouncements.mailStacksOut = {}
+    ChatAnnouncements.currentMailSender = ""
+    mailSenderMap = {}
+    mailSenderQueue = {}
+    isTakingMail = false
+    eventManager:UnregisterForUpdate(moduleName .. "_Mail" .. "ClearTakingFlag")
 end
 
--- Sends results of the trade to the Item Log print function and clears variables so they are reset for next trade interactions
 --- - **EVENT_MAIL_SEND_SUCCESS **
 ---
 --- @param eventId integer
@@ -298,30 +417,35 @@ function ChatAnnouncements.OnMailSuccess(eventId, playerName)
 end
 
 function ChatAnnouncements.RegisterMailEvents()
-    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_READABLE)
-    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS)
-    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_ADDED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_REMOVED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_OPEN_MAILBOX)
-    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_CLOSE_MAILBOX)
-    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_SEND_SUCCESS)
-    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_COD_CHANGED)
-    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_REMOVED)
+    local mailModuleName = moduleName .. "_Mail"
+    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_READABLE)
+    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS)
+    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE)
+    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_ATTACHMENT_ADDED)
+    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_ATTACHMENT_REMOVED)
+    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_OPEN_MAILBOX)
+    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_CLOSE_MAILBOX)
+    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_SEND_SUCCESS)
+    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED)
+    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_COD_CHANGED)
+    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_REMOVED)
+    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_INBOX_UPDATE)
     if ChatAnnouncements.SV.Inventory.LootMail then
-        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_READABLE, ChatAnnouncements.OnMailReadable)
-        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS, ChatAnnouncements.OnMailTakeAttachedItem)
+        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_READABLE, ChatAnnouncements.OnMailReadable)
+        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS, ChatAnnouncements.OnMailTakeAttachedItem)
     end
+    eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE, ChatAnnouncements.OnMailTakeAllResponse)
     if ChatAnnouncements.SV.Inventory.LootMail or ChatAnnouncements.SV.Currency.CurrencyGoldChange then
-        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_ADDED, ChatAnnouncements.OnMailAttach)
-        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_REMOVED, ChatAnnouncements.OnMailAttachRemove)
-        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_SEND_SUCCESS, ChatAnnouncements.OnMailSuccess)
-        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED, ChatAnnouncements.MailMoneyChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_COD_CHANGED, ChatAnnouncements.MailCODChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_REMOVED, ChatAnnouncements.MailRemoved)
+        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_ATTACHMENT_ADDED, ChatAnnouncements.OnMailAttach)
+        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_ATTACHMENT_REMOVED, ChatAnnouncements.OnMailAttachRemove)
+        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_SEND_SUCCESS, ChatAnnouncements.OnMailSuccess)
+        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED, ChatAnnouncements.MailMoneyChanged)
+        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_COD_CHANGED, ChatAnnouncements.MailCODChanged)
+        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_REMOVED, ChatAnnouncements.MailRemoved)
+        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_INBOX_UPDATE, ChatAnnouncements.OnMailInboxUpdate)
     end
     if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootMail or ChatAnnouncements.SV.Currency.CurrencyGoldChange then
-        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_OPEN_MAILBOX, ChatAnnouncements.OnMailOpenBox)
-        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_CLOSE_MAILBOX, ChatAnnouncements.OnMailCloseBox)
+        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_OPEN_MAILBOX, ChatAnnouncements.OnMailOpenBox)
+        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_CLOSE_MAILBOX, ChatAnnouncements.OnMailCloseBox)
     end
 end

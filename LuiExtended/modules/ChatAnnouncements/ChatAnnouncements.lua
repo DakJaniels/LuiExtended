@@ -1664,14 +1664,20 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
             return
         end
     elseif reason == CURRENCY_CHANGE_REASON_MAIL and UpOrDown > 0 then
-        messageChange = ChatAnnouncements.mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
-        if ChatAnnouncements.mailTarget ~= "" then
+        -- Get the correct sender from the queue for this currency change
+        local mailSender = ChatAnnouncements.GetNextMailSender() or ""
+        ChatAnnouncements.currentMailSender = mailSender
+        messageChange = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
+        if mailSender ~= "" then
             messageType = "LUIE_CURRENCY_MAIL"
         end
     elseif reason == CURRENCY_CHANGE_REASON_MAIL and UpOrDown < 0 then
         if ChatAnnouncements.mailCODPresent then
+            -- Get the correct sender from the queue for COD
+            local mailSender = ChatAnnouncements.GetNextMailSender() or ""
+            ChatAnnouncements.currentMailSender = mailSender
             messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailCOD
-            if ChatAnnouncements.mailTarget ~= "" then
+            if mailSender ~= "" then
                 messageType = "LUIE_CURRENCY_MAIL"
             end
         else
@@ -1944,7 +1950,9 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
         name = string_format("|r" .. ChatAnnouncements.tradeTarget .. "|c" .. changeColor)
         formattedMessageP1 = (string_format(messageChange, messageP1, name))
     elseif messageType == "LUIE_CURRENCY_MAIL" then
-        name = string_format("|r" .. ChatAnnouncements.mailTarget .. "|c" .. changeColor)
+        -- Use currentMailSender which was set from the queue when currency change occurred
+        local mailSender = ChatAnnouncements.currentMailSender ~= "" and ChatAnnouncements.currentMailSender or ChatAnnouncements.mailTarget
+        name = string_format("|r" .. mailSender .. "|c" .. changeColor)
         formattedMessageP1 = (string_format(messageChange, messageP1, name))
     else
         formattedMessageP1 = (string_format(messageChange, messageP1))
@@ -4266,8 +4274,11 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                 itemLink = itemLink
             }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
+            local mailSender = ""
             if ChatAnnouncements.inMail then
-                logPrefix = ChatAnnouncements.mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
+                -- Get the correct sender from the queue for this item
+                mailSender = ChatAnnouncements.GetNextMailSender() or ""
+                logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
             else
                 logPrefix = ""
             end
@@ -4300,7 +4311,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                     itemType,
                     itemId,
                     itemLink,
-                    ChatAnnouncements.mailTarget,
+                    mailSender,
                     logPrefix,
                     gainOrLoss,
                     false,
@@ -4342,6 +4353,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                 end
 
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
+                local mailSender = ""
                 if ChatAnnouncements.inMail then
                     logPrefix = ChatAnnouncements.mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
                 else
@@ -4370,13 +4382,16 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                     )
                 end
                 if ChatAnnouncements.inMail and isNewItem then
+                    -- Get the correct sender from the queue for new items
+                    mailSender = ChatAnnouncements.GetNextMailSender() or ""
+                    logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
                     ChatAnnouncements.ItemCounterDelay(
                         icon,
                         stackCountChange,
                         itemType,
                         itemId,
                         itemLink,
-                        ChatAnnouncements.mailTarget,
+                        mailSender,
                         logPrefix,
                         gainOrLoss,
                         false,
@@ -4384,6 +4399,28 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                         nil,
                         nil
                     )
+                end
+                -- Handle stacked items from mail (they still need to consume from queue)
+                if ChatAnnouncements.inMail and not isNewItem and stackCountChange > 0 then
+                    -- Consume from queue for stacked items too
+                    mailSender = ChatAnnouncements.GetNextMailSender() or ""
+                    logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
+                    if mailSender ~= "" then
+                        ChatAnnouncements.ItemCounterDelay(
+                            icon,
+                            stackCountChange,
+                            itemType,
+                            itemId,
+                            itemLink,
+                            mailSender,
+                            logPrefix,
+                            gainOrLoss,
+                            false,
+                            nil,
+                            nil,
+                            nil
+                        )
+                    end
                 end
                 -- STACK COUNT INCREMENTED DOWN
             elseif stackCountChange < 0 then
@@ -4638,8 +4675,11 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
     if bagId == BAG_VIRTUAL then
         local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
         local logPrefix
+        local mailSender = ""
         if ChatAnnouncements.inMail then
-            logPrefix = ChatAnnouncements.mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
+            -- Get the correct sender from the queue for this item
+            mailSender = ChatAnnouncements.GetNextMailSender() or ""
+            logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
         else
             logPrefix = ""
         end
@@ -4675,7 +4715,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                 itemType,
                 itemId,
                 itemLink,
-                ChatAnnouncements.mailTarget,
+                mailSender,
                 logPrefix,
                 gainOrLoss,
                 false,
