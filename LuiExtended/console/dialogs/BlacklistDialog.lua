@@ -260,10 +260,6 @@ function BlacklistDialog.Show(identifier, title, generateItemsFunc, onSelectCall
     -- Register with ESO dialogs system
     local dialogKey = "LUIE_BLACKLIST_" .. identifier
 
-    if not ESO_Dialogs then
-        ESO_Dialogs = {}
-    end
-
     local dialogInfo =
     {
         gamepadInfo =
