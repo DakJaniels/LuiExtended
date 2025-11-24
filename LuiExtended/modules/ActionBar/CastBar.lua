@@ -220,11 +220,23 @@ function CastBar.ResizeCastBar()
 end
 
 function CastBar.UpdateCastBar()
-    castbar.bar.name:SetFont(g_castbarFont)
-    castbar.bar.timer:SetFont(g_castbarFont)
-    castbar.bar.bar:SetTexture(LUIE.StatusbarTextures[ActionBar.SV.CastBarTexture])
-    castbar.bar.backdrop:SetCenterColor((0.1 * ActionBar.SV.CastBarGradientC1[1]), (0.1 * ActionBar.SV.CastBarGradientC1[2]), (0.1 * ActionBar.SV.CastBarGradientC1[3]), 0.75)
-    castbar.bar.bar:SetGradientColors(ActionBar.SV.CastBarGradientC1[1], ActionBar.SV.CastBarGradientC1[2], ActionBar.SV.CastBarGradientC1[3], 1, ActionBar.SV.CastBarGradientC2[1], ActionBar.SV.CastBarGradientC2[2], ActionBar.SV.CastBarGradientC2[3], 1)
+    if not castbar.bar or not castbar.bar.name then
+        return
+    end
+    
+    if g_castbarFont then
+        castbar.bar.name:SetFont(g_castbarFont)
+        castbar.bar.timer:SetFont(g_castbarFont)
+    end
+    
+    if LUIE.StatusbarTextures and LUIE.StatusbarTextures[ActionBar.SV.CastBarTexture] then
+        castbar.bar.bar:SetTexture(LUIE.StatusbarTextures[ActionBar.SV.CastBarTexture])
+    end
+    
+    if ActionBar.SV.CastBarGradientC1 and ActionBar.SV.CastBarGradientC2 then
+        castbar.bar.backdrop:SetCenterColor((0.1 * ActionBar.SV.CastBarGradientC1[1]), (0.1 * ActionBar.SV.CastBarGradientC1[2]), (0.1 * ActionBar.SV.CastBarGradientC1[3]), 0.75)
+        castbar.bar.bar:SetGradientColors(ActionBar.SV.CastBarGradientC1[1], ActionBar.SV.CastBarGradientC1[2], ActionBar.SV.CastBarGradientC1[3], 1, ActionBar.SV.CastBarGradientC2[1], ActionBar.SV.CastBarGradientC2[2], ActionBar.SV.CastBarGradientC2[3], 1)
+    end
 end
 
 function CastBar.ResetCastBarPosition()

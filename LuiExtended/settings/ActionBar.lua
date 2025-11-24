@@ -485,6 +485,81 @@ function ActionBar.CreateSettings()
                 function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.BarMillis and (Settings.ShowTriggered or Settings.ShowToggled)) end,
                 Defaults.BarMillisAboveTen
             ),
+            SettingsAPI.CreateIndentedCheckbox(
+                "Colored Remaining Text",
+                "Enable colored text for remaining duration labels on ability highlights",
+                function () return Settings.RemainingTextColoured end,
+                function (value)
+                    Settings.RemainingTextColoured = value
+                    -- Colors are updated dynamically in OnUpdate
+                end,
+                2,
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end,
+                Defaults.RemainingTextColoured
+            ),
+            SettingsAPI.CreateIndentedColorpickerFromTable(
+                "Remaining Text Color (High)",
+                "Color when duration is above mid threshold (high time remaining)",
+                function () return unpack(Settings.RemainingTextColorHigh) end,
+                function (r, g, b, a)
+                    Settings.RemainingTextColorHigh = { r, g, b, a }
+                end,
+                Defaults.RemainingTextColorHigh,
+                3,
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
+            ),
+            SettingsAPI.CreateIndentedColorpickerFromTable(
+                "Remaining Text Color (Mid)",
+                "Color when duration is between low and mid thresholds",
+                function () return unpack(Settings.RemainingTextColorMid) end,
+                function (r, g, b, a)
+                    Settings.RemainingTextColorMid = { r, g, b, a }
+                end,
+                Defaults.RemainingTextColorMid,
+                3,
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
+            ),
+            SettingsAPI.CreateIndentedColorpickerFromTable(
+                "Remaining Text Color (Low)",
+                "Color when duration is below low threshold (low time remaining)",
+                function () return unpack(Settings.RemainingTextColorLow) end,
+                function (r, g, b, a)
+                    Settings.RemainingTextColorLow = { r, g, b, a }
+                end,
+                Defaults.RemainingTextColorLow,
+                3,
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
+            ),
+            SettingsAPI.CreateIndentedSlider(
+                "Mid Threshold (%)",
+                "Percentage of duration remaining to switch from high to mid color (0.0-1.0)",
+                0, 100, 1,
+                function () return Settings.RemainingTextColorThresholdMid * 100 end,
+                function (value)
+                    Settings.RemainingTextColorThresholdMid = value / 100
+                end,
+                3,
+                "half",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end,
+                Defaults.RemainingTextColorThresholdMid * 100
+            ),
+            SettingsAPI.CreateIndentedSlider(
+                "Low Threshold (%)",
+                "Percentage of duration remaining to switch from mid to low color (0.0-1.0)",
+                0, 100, 1,
+                function () return Settings.RemainingTextColorThresholdLow * 100 end,
+                function (value)
+                    Settings.RemainingTextColorThresholdLow = value / 100
+                end,
+                3,
+                "half",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end,
+                Defaults.RemainingTextColorThresholdLow * 100
+            ),
             SettingsAPI.CreateDividerOption("full"),
             SettingsAPI.CreateHeaderOption(GetString(LUIE_STRING_LAM_AB_BACKBAR_HEADER)),
             SettingsAPI.CreateDescriptionOption(GetString(LUIE_STRING_LAM_AB_BACKBAR_NOTE)),
@@ -628,6 +703,68 @@ function ActionBar.CreateSettings()
                 "full",
                 function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end,
                 Defaults.PotionTimerColor
+            ),
+            SettingsAPI.CreateIndentedColorpickerFromTable(
+                "Quickslot Timer Color (High)",
+                "Color when remaining time is above mid threshold",
+                function () return unpack(Settings.PotionTimerTextColorHigh) end,
+                function (r, g, b, a)
+                    Settings.PotionTimerTextColorHigh = { r, g, b, a }
+                end,
+                Defaults.PotionTimerTextColorHigh,
+                2,
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
+            ),
+            SettingsAPI.CreateIndentedColorpickerFromTable(
+                "Quickslot Timer Color (Mid)",
+                "Color when remaining time is between low and mid thresholds",
+                function () return unpack(Settings.PotionTimerTextColorMid) end,
+                function (r, g, b, a)
+                    Settings.PotionTimerTextColorMid = { r, g, b, a }
+                end,
+                Defaults.PotionTimerTextColorMid,
+                2,
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
+            ),
+            SettingsAPI.CreateIndentedColorpickerFromTable(
+                "Quickslot Timer Color (Low)",
+                "Color when remaining time is below low threshold",
+                function () return unpack(Settings.PotionTimerTextColorLow) end,
+                function (r, g, b, a)
+                    Settings.PotionTimerTextColorLow = { r, g, b, a }
+                end,
+                Defaults.PotionTimerTextColorLow,
+                2,
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
+            ),
+            SettingsAPI.CreateIndentedSlider(
+                "Mid Threshold (ms)",
+                "Remaining time in milliseconds to switch from high to mid color",
+                1000, 60000, 1000,
+                function () return Settings.PotionTimerTextColorThresholdMid end,
+                function (value)
+                    Settings.PotionTimerTextColorThresholdMid = value
+                end,
+                2,
+                "half",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end,
+                Defaults.PotionTimerTextColorThresholdMid
+            ),
+            SettingsAPI.CreateIndentedSlider(
+                "Low Threshold (ms)",
+                "Remaining time in milliseconds to switch from mid to low color",
+                500, 30000, 500,
+                function () return Settings.PotionTimerTextColorThresholdLow end,
+                function (value)
+                    Settings.PotionTimerTextColorThresholdLow = value
+                end,
+                2,
+                "half",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end,
+                Defaults.PotionTimerTextColorThresholdLow
             ),
             SettingsAPI.CreateIndentedCheckbox(
                 GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS),
@@ -1010,3 +1147,4 @@ function ActionBar.CreateSettings()
         LAM:RegisterOptionControls(LUIE.name .. "ActionBarOptions", optionsDataActionBar)
     end
 end
+

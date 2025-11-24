@@ -355,6 +355,43 @@ local function FormatDurationSeconds(remain)
     return string_format((ActionBar.SV.BarMillis and ((remain < ActionBar.SV.BarMillisThreshold * 1000) or ActionBar.SV.BarMillisAboveTen)) and "%.1f" or "%.1d", remain / 1000)
 end
 
+--- Gets gradient color for ActionBar labels based on remaining time percentage
+--- @param remain number Remaining time in milliseconds
+--- @param duration number Total duration in milliseconds
+--- @return table Color table {r, g, b, a}
+local function GetActionBarGradientColor(remain, duration)
+    if not ActionBar.SV.RemainingTextColoured or duration <= 0 then
+        return { 1, 1, 1, 1 }
+    end
+    
+    local pct = remain / duration
+    if pct <= ActionBar.SV.RemainingTextColorThresholdLow then
+        return ActionBar.SV.RemainingTextColorLow
+    elseif pct <= ActionBar.SV.RemainingTextColorThresholdMid then
+        return ActionBar.SV.RemainingTextColorMid
+    else
+        return ActionBar.SV.RemainingTextColorHigh
+    end
+end
+
+--- Gets gradient color for quickslot timer based on remaining time
+--- @param remain number Remaining time in milliseconds
+--- @return table Color table {r, g, b, a}
+local function GetQuickslotGradientColor(remain)
+    if not ActionBar.SV.PotionTimerColor then
+        return { 1, 1, 1, 1 }
+    end
+    
+    -- Check thresholds from low to high (most restrictive first)
+    if remain <= ActionBar.SV.PotionTimerTextColorThresholdLow then
+        return ActionBar.SV.PotionTimerTextColorLow
+    elseif remain <= ActionBar.SV.PotionTimerTextColorThresholdMid then
+        return ActionBar.SV.PotionTimerTextColorMid
+    else
+        return ActionBar.SV.PotionTimerTextColorHigh
+    end
+end
+
 --- Sets bar remain label based on ability type
 --- @param remain number Remaining time in milliseconds
 --- @param abilityId number Ability ID
@@ -987,7 +1024,9 @@ function ActionBar.ResetBarLabel()
     for i = BAR_INDEX_START, BAR_INDEX_END do
         local backIndex = i + BACKBAR_INDEX_OFFSET
         local actionButtonBB = g_backbarButtons[backIndex]
-        ResetButtonLabel(backIndex, actionButtonBB.slot)
+        if actionButtonBB and actionButtonBB.slot then
+            ResetButtonLabel(backIndex, actionButtonBB.slot)
+        end
     end
 end
 
@@ -1364,7 +1403,8 @@ local function CreateProcAnimationLabel(procLoopTexture, actionButton)
     label:SetDrawLayer(DL_CONTROLS)
     label:SetDrawLevel(DL_OVERLAY)
     label:SetDrawTier(DT_HIGH)
-    label:SetColor(unpack(uiQuickSlot.color or { 1, 1, 1, 1 }))
+    -- Default to high color on creation, will be updated in OnUpdate
+    label:SetColor(unpack(ActionBar.SV.RemainingTextColoured and ActionBar.SV.RemainingTextColorHigh or { 1, 1, 1, 1 }))
     label:SetHidden(false)
     procLoopTexture.label = label
 end
@@ -1458,7 +1498,8 @@ local function CreateToggleLabel(toggleFrame, actionButton)
     label:SetDrawLayer(DL_CONTROLS)
     label:SetDrawLevel(DL_CONTROLS)
     label:SetDrawTier(DT_HIGH)
-    label:SetColor(unpack(ActionBar.SV.RemainingTextColoured and uiQuickSlot.color or { 1, 1, 1, 1 }))
+    -- Default to high color on creation, will be updated in OnUpdate
+    label:SetColor(unpack(ActionBar.SV.RemainingTextColoured and ActionBar.SV.RemainingTextColorHigh or { 1, 1, 1, 1 }))
     label:SetHidden(false)
     toggleFrame.label = label
 end
@@ -1471,7 +1512,8 @@ local function CreateToggleStackLabel(toggleFrame, actionButton)
     stack:SetDrawLayer(DL_CONTROLS)
     stack:SetDrawLevel(DL_CONTROLS)
     stack:SetDrawTier(DT_HIGH)
-    stack:SetColor(unpack(ActionBar.SV.RemainingTextColoured and uiQuickSlot.color or { 1, 1, 1, 1 }))
+    -- Default to high color on creation, will be updated in OnUpdate
+    stack:SetColor(unpack(ActionBar.SV.RemainingTextColoured and ActionBar.SV.RemainingTextColorHigh or { 1, 1, 1, 1 }))
     stack:SetHidden(false)
     toggleFrame.stack = stack
 end
@@ -1758,6 +1800,14 @@ local function UpdateSlotLabels(slotNum, abilityId, currentTimeMs)
 
     local remain = g_toggledSlotsRemain[abilityId] - currentTimeMs
     g_uiCustomToggle[slotNum].label:SetText(SetBarRemainLabel(remain, abilityId))
+    
+    -- Update gradient color based on remaining time
+    if ActionBar.SV.RemainingTextColoured then
+        local duration = GetUpdatedAbilityDuration(abilityId) or 0
+        local color = GetActionBarGradientColor(remain, duration)
+        g_uiCustomToggle[slotNum].label:SetColor(unpack(color))
+        g_uiCustomToggle[slotNum].stack:SetColor(unpack(color))
+    end
 
     local stackCount = GetAbilityStackCount(abilityId)
     g_uiCustomToggle[slotNum].stack:SetText(stackCount and stackCount > 0 and stackCount or "")
@@ -1980,9 +2030,23 @@ function ActionBar.OnUpdate(currentTimeMs)
         if ActionBar.SV.BarShowLabel and remain then
             if frontAnim then
                 frontAnim.procLoopTexture.label:SetText(SetBarRemainLabel(remain, k))
+                -- Update gradient color for proc labels (use ability duration if available)
+                if ActionBar.SV.RemainingTextColoured then
+                    local abilityId = ActionBar.GetSlotAbilityId(front)
+                    local duration = abilityId and GetUpdatedAbilityDuration(abilityId) or 0
+                    local color = GetActionBarGradientColor(remain, duration)
+                    frontAnim.procLoopTexture.label:SetColor(unpack(color))
+                end
             end
             if backAnim then
                 backAnim.procLoopTexture.label:SetText(SetBarRemainLabel(remain, k))
+                -- Update gradient color for proc labels (use ability duration if available)
+                if ActionBar.SV.RemainingTextColoured then
+                    local abilityId = ActionBar.GetSlotAbilityId(back)
+                    local duration = abilityId and GetUpdatedAbilityDuration(abilityId) or 0
+                    local color = GetActionBarGradientColor(remain, duration)
+                    backAnim.procLoopTexture.label:SetColor(unpack(color))
+                end
             end
         end
     end
@@ -2007,9 +2071,23 @@ function ActionBar.OnUpdate(currentTimeMs)
         if ActionBar.SV.BarShowLabel and remain then
             if frontToggle then
                 frontToggle.label:SetText(SetBarRemainLabel(remain, k))
+                -- Update gradient color for toggle labels
+                if ActionBar.SV.RemainingTextColoured then
+                    local duration = GetUpdatedAbilityDuration(k) or 0
+                    local color = GetActionBarGradientColor(remain, duration)
+                    frontToggle.label:SetColor(unpack(color))
+                    frontToggle.stack:SetColor(unpack(color))
+                end
             end
             if backToggle then
                 backToggle.label:SetText(SetBarRemainLabel(remain, k))
+                -- Update gradient color for toggle labels
+                if ActionBar.SV.RemainingTextColoured then
+                    local duration = GetUpdatedAbilityDuration(k) or 0
+                    local color = GetActionBarGradientColor(remain, duration)
+                    backToggle.label:SetColor(unpack(color))
+                    backToggle.stack:SetColor(unpack(color))
+                end
             end
         end
     end
@@ -2022,18 +2100,9 @@ function ActionBar.OnUpdate(currentTimeMs)
         local timeColors = uiQuickSlot.timeColors
         if duration > 1000 then
             label:SetHidden(false)
-            if not ActionBar.SV.PotionTimerColor then
-                label:SetColor(1, 1, 1, 1)
-            else
-                local color = uiQuickSlot.color
-                for i = #timeColors, 1, -1 do
-                    if remain < timeColors[i].remain then
-                        color = timeColors[i].color
-                        break
-                    end
-                end
-                label:SetColor(unpack(color))
-            end
+            -- Use gradient colors based on remaining time
+            local color = GetQuickslotGradientColor(remain)
+            label:SetColor(unpack(color))
             local text
             if remain > 86400000 then
                 text = zo_floor(remain / 86400000) .. " d"
@@ -2157,11 +2226,8 @@ function ActionBar.Initialize(enabled)
     g_quickslotButton = ZO_ActionBar_GetButton(QuickslotActionButton:GetSlot(), HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
     uiQuickSlot.label = UI:Label(g_quickslotButton.button, { CENTER, CENTER }, nil, nil, g_potionFont, nil, true)
     uiQuickSlot.label:SetFont(g_potionFont)
-    if ActionBar.SV.PotionTimerColor then
-        uiQuickSlot.label:SetColor(unpack(uiQuickSlot.color))
-    else
-        uiQuickSlot.label:SetColor(1, 1, 1, 1)
-    end
+    -- Default to high color, will be updated in OnUpdate
+    uiQuickSlot.label:SetColor(unpack(ActionBar.SV.PotionTimerColor and ActionBar.SV.PotionTimerTextColorHigh or { 1, 1, 1, 1 }))
     uiQuickSlot.label:SetDrawLayer(DL_OVERLAY)
     uiQuickSlot.label:SetDrawTier(DT_HIGH)
 
@@ -2340,6 +2406,18 @@ function ActionBar.ApplyFont()
         -- Update the cast bar display with new font
         if ActionBar.CastBar.UpdateCastBar then
             ActionBar.CastBar.UpdateCastBar()
+        end
+    end
+end
+
+-- Helper to update proc animation label colors
+function ActionBar.UpdateProcLabelColors()
+    -- Colors are updated dynamically in OnUpdate based on remaining time
+    -- This function is kept for compatibility but colors are handled per-frame
+    for slotNum, procAnim in pairs(g_uiProcAnimation) do
+        if procAnim and procAnim.procLoopTexture and procAnim.procLoopTexture.label then
+            local color = ActionBar.SV.RemainingTextColoured and ActionBar.SV.RemainingTextColorHigh or { 1, 1, 1, 1 }
+            procAnim.procLoopTexture.label:SetColor(unpack(color))
         end
     end
 end
