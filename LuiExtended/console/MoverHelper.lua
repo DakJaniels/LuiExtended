@@ -15,27 +15,43 @@ local LUIE = LUIE
 --- @class LUIE.ConsoleMoverHelper
 local MoverHelper = {}
 
+--- Helper to check if a control has required methods
+--- @param control userdata The control to check
+--- @param ... string Method names to check for
+--- @return boolean
+local function HasMethods(control, ...)
+    if not control then return false end
+    for i = 1, select('#', ...) do
+        local method = select(i, ...)
+        if not control[method] then return false end
+    end
+    return true
+end
+
+--- Creates font string for labels
+--- @param fontName string The font name to use
+--- @param size number The font size
+--- @param style string The font style
+--- @return string
+local function CreateFontString(fontName, size, style)
+    return ZO_CreateFontString(fontName, size, style)
+end
+
 --- Updates preview label font to use a better readable font
 --- @param label userdata The label control to update
 local function UpdatePreviewLabelFont(label)
-    if not label or not label.SetFont then
-        return
-    end
+    if not HasMethods(label, "SetFont") then return end
 
-    -- Use a readable font for preview labels
     local fontName = "LUIE Default Font"
+    local fontSize = 14
+    local fontStyle = "soft-shadow-thick"
+
     if LUIE.Fonts and LUIE.Fonts[fontName] then
-        local fontSize = 14
-        local fontStyle = "soft-shadow-thick"
-        local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
-        label:SetFont(fontString)
+        label:SetFont(CreateFontString(fontName, fontSize, fontStyle))
     else
         -- Fallback to gamepad font if LUIE font not available
-        if IsInGamepadPreferredMode() or IsConsoleUI() then
-            label:SetFont("$(GAMEPAD_MEDIUM_FONT)|14|soft-shadow-thick")
-        else
-            label:SetFont("$(MEDIUM_FONT)|14|soft-shadow-thick")
-        end
+        local fallbackFont = (IsInGamepadPreferredMode() or IsConsoleUI()) and "$(GAMEPAD_MEDIUM_FONT)" or "$(MEDIUM_FONT)"
+        label:SetFont(fallbackFont .. "|" .. fontSize .. "|" .. fontStyle)
     end
 end
 
@@ -105,95 +121,103 @@ end
 --- @param identifier string Unique identifier for this control in edit mode
 --- @param isUnlocked boolean Whether the control should be unlocked
 function MoverHelper.UpdateControlState(control, identifier, isUnlocked)
-    if not control or not control.SetMouseEnabled or not control.SetMovable then
-        return
-    end
+    if not HasMethods(control, "SetMouseEnabled", "SetMovable") then return end
 
     local EditModeController = LUIE.EditModeController
     local isEditModeActive = EditModeController and EditModeController:IsEditModeActive() or false
     local editModeFocusId = EditModeController and EditModeController.editModeFocusId or nil
 
-    -- When edit mode is active, all unlocked panels are visible and unlocked
-    -- When edit mode is NOT active, panels are only visible/unlocked if individually unlocked (for settings menu)
+    -- Determine control states
     local isFocused = editModeFocusId == identifier
-
-    -- Determine visibility - show if edit mode is active (all unlocked) OR if individually unlocked
     local isVisible = isEditModeActive or isUnlocked
-
-    -- Determine unlock state - unlocked if edit mode is active (all unlocked) OR if individually unlocked
     local unlocked = isEditModeActive or isUnlocked
-
-    -- Determine gamepad movement - only enable for focused panel when in edit mode
     local shouldGamepadMove = isEditModeActive and isFocused
 
-    -- Update control state
+    -- Update basic control state
     control:SetMouseEnabled(false)
     control:SetMovable(unlocked)
-    if control.SetHidden then
+    if HasMethods(control, "SetHidden") then
         control:SetHidden(not isVisible)
     end
 
-    -- Update gamepad handler lock state
-    if control.gamepadHandler and control.gamepadHandler.ToggleLock then
-        control.gamepadHandler:ToggleLock(not unlocked)
+    -- Update gamepad handler
+    if control.gamepadHandler then
+        if HasMethods(control.gamepadHandler, "ToggleLock") then
+            control.gamepadHandler:ToggleLock(not unlocked)
+        end
+        if HasMethods(control.gamepadHandler, "ToggleGamepadMove") then
+            control.gamepadHandler:ToggleGamepadMove(shouldGamepadMove, 10000)
+        end
     end
 
-    -- Update gamepad movement state if changed
-    if control.gamepadHandler and control.gamepadHandler.ToggleGamepadMove then
-        control.gamepadHandler:ToggleGamepadMove(shouldGamepadMove, 10000)
-    end
-
-    -- Update preview highlight if it exists and has the required methods
+    -- Update preview elements
     if control.preview then
-        if control.preview.SetCenterColor and control.preview.SetEdgeColor then
-            if isFocused then
-                control.preview:SetCenterColor(0.2, 0.8, 0.2, 0.35)
-                control.preview:SetEdgeColor(0.2, 0.9, 0.2, 1.0)
-            else
-                control.preview:SetCenterColor(0.05, 0.6, 0.9, 0.25)
-                control.preview:SetEdgeColor(0.05, 0.6, 0.9, 0.9)
-            end
-        end
-        if control.preview.SetHidden then
-            control.preview:SetHidden(not isVisible)
-        end
+        MoverHelper.UpdatePreviewState(control.preview, isFocused, isVisible, isEditModeActive, EditModeController)
     end
 
-    -- Update label visibility if it exists
-    if control.preview and control.preview.coordLabel then
-        local showLabel = isVisible and (isEditModeActive and (EditModeController.showAllLabels or isFocused))
-        control.preview.coordLabel:SetHidden(not showLabel)
-        -- Update font when label is shown
-        if showLabel then
-            UpdatePreviewLabelFont(control.preview.coordLabel)
-        end
-    end
+    -- Update preview label fonts
+    MoverHelper.UpdatePreviewFonts(control, isVisible, isEditModeActive, EditModeController, isFocused)
+end
 
-    -- Update anchor label font if it exists
-    if control.preview and control.preview.anchorLabel then
-        UpdatePreviewLabelFont(control.preview.anchorLabel)
-    end
+--- Updates preview visual state
+--- @param preview userdata The preview control
+--- @param isFocused boolean Whether the control is focused
+--- @param isVisible boolean Whether the control is visible
+--- @param isEditModeActive boolean Whether edit mode is active
+--- @param EditModeController table The edit mode controller
+function MoverHelper.UpdatePreviewState(preview, isFocused, isVisible, isEditModeActive, EditModeController)
+    if not preview then return end
 
-    -- Update preview name label font if it exists
-    -- Can be directly on control (SpellCastBuffs) or on control.preview (UnitFrames companion)
-    local previewLabel = control.previewLabel
-    if not previewLabel and control.preview then
-        previewLabel = control.preview.previewLabel
-    end
-
-    if previewLabel and previewLabel.SetFont then
-        local fontName = "LUIE Default Font"
-        if LUIE.Fonts and LUIE.Fonts[fontName] then
-            local fontSize = 16
-            local fontStyle = "soft-shadow-thick"
-            local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
-            previewLabel:SetFont(fontString)
+    -- Update preview colors if methods exist
+    if HasMethods(preview, "SetCenterColor", "SetEdgeColor") then
+        if isFocused then
+            preview:SetCenterColor(0.2, 0.8, 0.2, 0.35)
+            preview:SetEdgeColor(0.2, 0.9, 0.2, 1.0)
         else
-            if IsInGamepadPreferredMode() or IsConsoleUI() then
-                previewLabel:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
-            else
-                previewLabel:SetFont("$(MEDIUM_FONT)|16|soft-shadow-thick")
-            end
+            preview:SetCenterColor(0.05, 0.6, 0.9, 0.25)
+            preview:SetEdgeColor(0.05, 0.6, 0.9, 0.9)
+        end
+    end
+
+    -- Update preview visibility
+    if HasMethods(preview, "SetHidden") then
+        preview:SetHidden(not isVisible)
+    end
+
+    -- Update coordinate label visibility
+    if preview.coordLabel then
+        local showLabel = isVisible and (isEditModeActive and (EditModeController.showAllLabels or isFocused))
+        preview.coordLabel:SetHidden(not showLabel)
+        if showLabel then
+            UpdatePreviewLabelFont(preview.coordLabel)
+        end
+    end
+
+    -- Update anchor label font
+    if preview.anchorLabel then
+        UpdatePreviewLabelFont(preview.anchorLabel)
+    end
+end
+
+--- Updates preview label fonts
+--- @param control userdata The control containing preview labels
+--- @param isVisible boolean Whether the control is visible
+--- @param isEditModeActive boolean Whether edit mode is active
+--- @param EditModeController table The edit mode controller
+--- @param isFocused boolean Whether the control is focused
+function MoverHelper.UpdatePreviewFonts(control, isVisible, isEditModeActive, EditModeController, isFocused)
+    -- Update preview name label font (can be on control or control.preview)
+    local previewLabel = control.previewLabel or (control.preview and control.preview.previewLabel)
+    if previewLabel and HasMethods(previewLabel, "SetFont") then
+        local fontName = "LUIE Default Font"
+        local fontSize = 16
+        local fontStyle = "soft-shadow-thick"
+
+        if LUIE.Fonts and LUIE.Fonts[fontName] then
+            previewLabel:SetFont(CreateFontString(fontName, fontSize, fontStyle))
+        else
+            local fallbackFont = (IsInGamepadPreferredMode() or IsConsoleUI()) and "$(GAMEPAD_MEDIUM_FONT)" or "$(MEDIUM_FONT)"
+            previewLabel:SetFont(fallbackFont .. "|" .. fontSize .. "|" .. fontStyle)
         end
     end
 end

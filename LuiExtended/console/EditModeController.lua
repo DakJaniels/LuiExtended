@@ -25,6 +25,40 @@ EditModeController.__index = EditModeController
 -- Constants
 local REDUCED_KEYBIND_STRIP_HEIGHT = 48
 
+--- Helper functions for module availability
+local function IsModuleAvailable(moduleName)
+    local module = LUIE[moduleName]
+    return module ~= nil
+end
+
+local function IsUnitFramesAvailable()
+    return IsModuleAvailable("UnitFrames") and LUIE.UnitFrames.CustomFramesMovingState ~= nil
+end
+
+local function IsSpellCastBuffsAvailable()
+    return IsModuleAvailable("SpellCastBuffs") and LUIE.SpellCastBuffs.Enabled
+end
+
+local function IsActionBarAvailable()
+    return IsModuleAvailable("ActionBar") and LUIE.ActionBar.CastBarUnlocked ~= nil
+end
+
+local function IsInfoPanelAvailable()
+    return IsModuleAvailable("InfoPanel") and LUIE.InfoPanel.panelUnlocked ~= nil
+end
+
+local function IsAbilityAlertsAvailable()
+    return IsModuleAvailable("CombatInfo") and LUIE.CombatInfo.AbilityAlerts and LUIE.CombatInfo.AbilityAlerts.AlertFrameUnlocked ~= nil
+end
+
+local function IsCombatTextAvailable()
+    return IsModuleAvailable("CombatText") and LUIE.CombatText.Enabled and LUIE.CombatText.SV and LUIE.CombatText.SV.unlocked
+end
+
+local function IsSynergyTrackerAvailable()
+    return IsModuleAvailable("CombatInfo") and LUIE.CombatInfo.SynergyTrackerInstance ~= nil
+end
+
 --- Creates new EditModeController
 --- @return LUIE.EditModeController
 function EditModeController:New()
@@ -198,134 +232,142 @@ end
 --- Refreshes all module movers (UnitFrames, SpellCastBuffs, etc.)
 function EditModeController:RefreshModuleMovers()
     local MoverHelper = LUIE.ConsoleMoverHelper
-    if not MoverHelper then
-        return
-    end
+    if not MoverHelper then return end
 
     -- Refresh UnitFrames movers
-    if LUIE.UnitFrames and LUIE.UnitFrames.CustomFramesMovingState then
-        for _, unitTag in pairs({ "player", "reticleover", "companion", "SmallGroup1", "RaidGroup1", "boss1", "AvaPlayerTarget", "PetGroup1" }) do
-            if LUIE.UnitFrames.CustomFrames[unitTag] and LUIE.UnitFrames.CustomFrames[unitTag].tlw then
-                local tlw = LUIE.UnitFrames.CustomFrames[unitTag].tlw
-                local identifier = "unitFrame_" .. unitTag
-                MoverHelper.UpdateControlState(tlw, identifier, LUIE.UnitFrames.CustomFramesMovingState)
-
-                -- Handle buff/debuff previews when locked to unit frames
-                local lockToUnitFrames = LUIE.SpellCastBuffs and LUIE.SpellCastBuffs.SV and (LUIE.SpellCastBuffs.SV.lockPositionToUnitFrames == nil or LUIE.SpellCastBuffs.SV.lockPositionToUnitFrames)
-                if lockToUnitFrames and (unitTag == "player" or unitTag == "reticleover") then
-                    local frame = LUIE.UnitFrames.CustomFrames[unitTag]
-                    -- Show/hide buff/debuff previews based on edit mode state
-                    local isEditModeActive = self:IsEditModeActive()
-                    local isFocused = self.editModeFocusId == identifier
-                    local shouldShow = isEditModeActive or LUIE.UnitFrames.CustomFramesMovingState
-
-                    if frame.buffs and frame.buffs.preview then
-                        frame.buffs.preview:SetHidden(not shouldShow)
-                    end
-                    if frame.debuffs and frame.debuffs.preview then
-                        frame.debuffs.preview:SetHidden(not shouldShow)
-                    end
-                end
-            end
-        end
+    if IsUnitFramesAvailable() then
+        self:RefreshUnitFramesMovers(MoverHelper)
     end
 
     -- Refresh SpellCastBuffs movers
-    if LUIE.SpellCastBuffs and LUIE.SpellCastBuffs.Enabled then
-        local lockToUnitFrames = LUIE.SpellCastBuffs.SV and (LUIE.SpellCastBuffs.SV.lockPositionToUnitFrames == nil or LUIE.SpellCastBuffs.SV.lockPositionToUnitFrames)
+    if IsSpellCastBuffsAvailable() then
+        self:RefreshSpellCastBuffsMovers(MoverHelper)
+    end
 
-        -- Only refresh independent buff containers if NOT locked to unit frames
-        if not lockToUnitFrames then
-            local containers =
-            {
-                { container = LUIE.SpellCastBuffs.BuffContainers.playerb, id = "buff_playerb" },
-                { container = LUIE.SpellCastBuffs.BuffContainers.playerd, id = "buff_playerd" },
-                { container = LUIE.SpellCastBuffs.BuffContainers.targetb, id = "buff_targetb" },
-                { container = LUIE.SpellCastBuffs.BuffContainers.targetd, id = "buff_targetd" },
-            }
-            for _, item in ipairs(containers) do
-                if item.container and item.container:GetType() == CT_TOPLEVELCONTROL then
-                    MoverHelper.UpdateControlState(item.container, item.id, true)
-                end
-            end
-        else
-            -- When locked to unit frames, hide the independent buff container previews
-            -- (they're handled as part of unit frame previews instead)
-            local containers =
-            {
-                LUIE.SpellCastBuffs.BuffContainers.playerb,
-                LUIE.SpellCastBuffs.BuffContainers.playerd,
-                LUIE.SpellCastBuffs.BuffContainers.targetb,
-                LUIE.SpellCastBuffs.BuffContainers.targetd,
-            }
-            for _, container in ipairs(containers) do
-                if container and container.preview then
-                    container.preview:SetHidden(true)
-                end
+    -- Refresh other module movers
+    self:RefreshOtherModuleMovers(MoverHelper)
+end
+
+--- Refreshes UnitFrames movers
+function EditModeController:RefreshUnitFramesMovers(MoverHelper)
+    local unitTags = { "player", "reticleover", "companion", "SmallGroup1", "RaidGroup1", "boss1", "AvaPlayerTarget", "PetGroup1" }
+
+    for _, unitTag in ipairs(unitTags) do
+        local frame = LUIE.UnitFrames.CustomFrames[unitTag]
+        if frame and frame.tlw then
+            local identifier = "unitFrame_" .. unitTag
+            MoverHelper.UpdateControlState(frame.tlw, identifier, LUIE.UnitFrames.CustomFramesMovingState)
+
+            -- Handle buff/debuff previews when locked to unit frames
+            self:UpdateUnitFrameBuffPreviews(frame, identifier, unitTag)
+        end
+    end
+end
+
+--- Updates buff/debuff previews for unit frames
+function EditModeController:UpdateUnitFrameBuffPreviews(frame, identifier, unitTag)
+    if not IsSpellCastBuffsAvailable() or (unitTag ~= "player" and unitTag ~= "reticleover") then return end
+
+    local lockToUnitFrames = LUIE.SpellCastBuffs.SV.lockPositionToUnitFrames ~= false
+    if not lockToUnitFrames then return end
+
+    local shouldShow = self:IsEditModeActive() or LUIE.UnitFrames.CustomFramesMovingState
+
+    if frame.buffs and frame.buffs.preview then
+        frame.buffs.preview:SetHidden(not shouldShow)
+    end
+    if frame.debuffs and frame.debuffs.preview then
+        frame.debuffs.preview:SetHidden(not shouldShow)
+    end
+end
+
+--- Refreshes SpellCastBuffs movers
+function EditModeController:RefreshSpellCastBuffsMovers(MoverHelper)
+    local lockToUnitFrames = LUIE.SpellCastBuffs.SV.lockPositionToUnitFrames ~= false
+
+    if not lockToUnitFrames then
+        -- Refresh independent buff containers
+        local containers = {
+            { container = LUIE.SpellCastBuffs.BuffContainers.playerb, id = "buff_playerb" },
+            { container = LUIE.SpellCastBuffs.BuffContainers.playerd, id = "buff_playerd" },
+            { container = LUIE.SpellCastBuffs.BuffContainers.targetb, id = "buff_targetb" },
+            { container = LUIE.SpellCastBuffs.BuffContainers.targetd, id = "buff_targetd" },
+        }
+        for _, item in ipairs(containers) do
+            if item.container and item.container:GetType() == CT_TOPLEVELCONTROL then
+                MoverHelper.UpdateControlState(item.container, item.id, true)
             end
         end
-
-        -- Only refresh these containers if SpellCastBuffs is unlocked
-        -- Check if buffs are unlocked by checking if SetMovingState was called (no direct state variable exists)
-        -- We'll check if any of the main containers have gamepad handlers set up as a proxy
-        local buffsUnlocked = false
-        if not lockToUnitFrames and LUIE.SpellCastBuffs.BuffContainers.playerb and LUIE.SpellCastBuffs.BuffContainers.playerb.gamepadHandler then
-            buffsUnlocked = true
-        end
-
-        if buffsUnlocked then
-            local alwaysContainers =
-            {
-                { container = LUIE.SpellCastBuffs.BuffContainers.player_long,      id = "buff_player_long"      },
-                { container = LUIE.SpellCastBuffs.BuffContainers.prominentbuffs,   id = "buff_prominentbuffs"   },
-                { container = LUIE.SpellCastBuffs.BuffContainers.prominentdebuffs, id = "buff_prominentdebuffs" },
-            }
-            for _, item in ipairs(alwaysContainers) do
-                if item.container and item.container:GetType() == CT_TOPLEVELCONTROL then
-                    MoverHelper.UpdateControlState(item.container, item.id, true)
-                end
+    else
+        -- Hide independent buff container previews when locked to unit frames
+        local containers = {
+            LUIE.SpellCastBuffs.BuffContainers.playerb,
+            LUIE.SpellCastBuffs.BuffContainers.playerd,
+            LUIE.SpellCastBuffs.BuffContainers.targetb,
+            LUIE.SpellCastBuffs.BuffContainers.targetd,
+        }
+        for _, container in ipairs(containers) do
+            if container and container.preview then
+                container.preview:SetHidden(true)
             end
         end
     end
 
-    -- Refresh CastBar mover
-    if LUIE.ActionBar and LUIE.ActionBar.CastBarUnlocked then
+    -- Refresh always-available containers if buffs are unlocked
+    local buffsUnlocked = not lockToUnitFrames and LUIE.SpellCastBuffs.BuffContainers.playerb and LUIE.SpellCastBuffs.BuffContainers.playerb.gamepadHandler
+    if buffsUnlocked then
+        local alwaysContainers = {
+            { container = LUIE.SpellCastBuffs.BuffContainers.player_long,      id = "buff_player_long"      },
+            { container = LUIE.SpellCastBuffs.BuffContainers.prominentbuffs,   id = "buff_prominentbuffs"   },
+            { container = LUIE.SpellCastBuffs.BuffContainers.prominentdebuffs, id = "buff_prominentdebuffs" },
+        }
+        for _, item in ipairs(alwaysContainers) do
+            if item.container and item.container:GetType() == CT_TOPLEVELCONTROL then
+                MoverHelper.UpdateControlState(item.container, item.id, true)
+            end
+        end
+    end
+end
+
+--- Refreshes other module movers (CastBar, InfoPanel, etc.)
+function EditModeController:RefreshOtherModuleMovers(MoverHelper)
+    -- CastBar
+    if IsActionBarAvailable() then
         local uiTlw = LUIE.ActionBar.uiTlw
         if uiTlw and uiTlw.castBar and uiTlw.castBar:GetType() == CT_TOPLEVELCONTROL then
             MoverHelper.UpdateControlState(uiTlw.castBar, "castBar", LUIE.ActionBar.CastBarUnlocked)
         end
     end
 
-    -- Refresh InfoPanel mover
-    if LUIE.InfoPanel and LUIE.InfoPanel.panelUnlocked then
+    -- InfoPanel
+    if IsInfoPanelAvailable() then
         local uiPanel = LUIE.InfoPanel.Panel
         if uiPanel and uiPanel:GetType() == CT_TOPLEVELCONTROL then
             MoverHelper.UpdateControlState(uiPanel, "infoPanel", LUIE.InfoPanel.panelUnlocked)
         end
     end
 
-    -- Refresh AbilityAlerts mover
-    if LUIE.CombatInfo and LUIE.CombatInfo.AbilityAlerts and LUIE.CombatInfo.AbilityAlerts.AlertFrameUnlocked then
+    -- AbilityAlerts
+    if IsAbilityAlertsAvailable() then
         local uiTlw = LUIE.CombatInfo.AbilityAlerts.uiTlw
         if uiTlw and uiTlw.alertFrame and uiTlw.alertFrame:GetType() == CT_TOPLEVELCONTROL then
             MoverHelper.UpdateControlState(uiTlw.alertFrame, "abilityAlerts", LUIE.CombatInfo.AbilityAlerts.AlertFrameUnlocked)
         end
     end
 
-    -- Refresh CombatText movers
-    if LUIE.CombatText and LUIE.CombatText.Enabled and LUIE.CombatText.SV and LUIE.CombatText.SV.unlocked then
+    -- CombatText
+    if IsCombatTextAvailable() then
         if LUIE.CombatText.panelWrappers then
             for k, wrapper in pairs(LUIE.CombatText.panelWrappers) do
                 if wrapper and wrapper:GetType() == CT_TOPLEVELCONTROL then
-                    local identifier = "combatText_" .. k
-                    MoverHelper.UpdateControlState(wrapper, identifier, LUIE.CombatText.SV.unlocked)
+                    MoverHelper.UpdateControlState(wrapper, "combatText_" .. k, LUIE.CombatText.SV.unlocked)
                 end
             end
         end
     end
 
-    -- Refresh SynergyTracker mover
-    if LUIE.CombatInfo and LUIE.CombatInfo.SynergyTrackerInstance then
+    -- SynergyTracker
+    if IsSynergyTrackerAvailable() then
         local tracker = LUIE.CombatInfo.SynergyTrackerInstance
         local Settings = LUIE.CombatInfo.SV and LUIE.CombatInfo.SV.synergy
         if tracker.control and tracker.control:GetType() == CT_TOPLEVELCONTROL and Settings and Settings.unlocked then
@@ -359,6 +401,73 @@ function EditModeController:DeactivateActionLayer()
     self.actionLayerActive = false
 end
 
+--- Adds unit frame panel IDs to the list
+local function AddUnitFramePanelIds(ids)
+    if not IsUnitFramesAvailable() then return end
+
+    local unitTags = { "player", "reticleover", "companion", "SmallGroup1", "RaidGroup1", "boss1", "AvaPlayerTarget", "PetGroup1" }
+    for _, unitTag in ipairs(unitTags) do
+        local frame = LUIE.UnitFrames.CustomFrames[unitTag]
+        if frame and frame.tlw then
+            table.insert(ids, "unitFrame_" .. unitTag)
+        end
+    end
+end
+
+--- Adds buff container panel IDs to the list
+local function AddBuffPanelIds(ids, includeLocked)
+    if not IsSpellCastBuffsAvailable() then return end
+
+    local lockToUnitFrames = LUIE.SpellCastBuffs.SV.lockPositionToUnitFrames ~= false
+
+    if not lockToUnitFrames or includeLocked then
+        local containers = {
+            { container = LUIE.SpellCastBuffs.BuffContainers.playerb, id = "buff_playerb" },
+            { container = LUIE.SpellCastBuffs.BuffContainers.playerd, id = "buff_playerd" },
+            { container = LUIE.SpellCastBuffs.BuffContainers.targetb, id = "buff_targetb" },
+            { container = LUIE.SpellCastBuffs.BuffContainers.targetd, id = "buff_targetd" },
+        }
+        for _, item in ipairs(containers) do
+            if item.container and item.container:GetType() == CT_TOPLEVELCONTROL then
+                table.insert(ids, item.id)
+            end
+        end
+    end
+
+    -- Always add these containers (not locked to unit frames)
+    local alwaysContainers = {
+        { container = LUIE.SpellCastBuffs.BuffContainers.player_long,      id = "buff_player_long"      },
+        { container = LUIE.SpellCastBuffs.BuffContainers.prominentbuffs,   id = "buff_prominentbuffs"   },
+        { container = LUIE.SpellCastBuffs.BuffContainers.prominentdebuffs, id = "buff_prominentdebuffs" },
+    }
+    for _, item in ipairs(alwaysContainers) do
+        if item.container and item.container:GetType() == CT_TOPLEVELCONTROL then
+            table.insert(ids, item.id)
+        end
+    end
+end
+
+--- Adds combat text panel IDs to the list
+local function AddCombatTextPanelIds(ids)
+    if not IsCombatTextAvailable() then return end
+
+    if LUIE.CombatText.panelWrappers then
+        for k, wrapper in pairs(LUIE.CombatText.panelWrappers) do
+            if wrapper and wrapper:GetType() == CT_TOPLEVELCONTROL then
+                table.insert(ids, "combatText_" .. k)
+            end
+        end
+    else
+        -- Fallback to panels if wrappers don't exist yet
+        for k, _ in pairs(LUIE.CombatText.SV.panels) do
+            local panel = _G[k]
+            if panel then
+                table.insert(ids, "combatText_" .. k)
+            end
+        end
+    end
+end
+
 --- Enumerates all focusable panel IDs
 --- @param triggeringModule string? Optional module name to filter panels
 --- @return string[]
@@ -367,179 +476,44 @@ local function EnumerateFocusablePanelIds(triggeringModule)
 
     -- If a triggering module is specified, only include panels from that module
     if triggeringModule == "UnitFrames" then
-        -- Add unit frame panels
-        if LUIE.UnitFrames and LUIE.UnitFrames.CustomFramesMovingState then
-            for _, unitTag in pairs({ "player", "reticleover", "companion", "SmallGroup1", "RaidGroup1", "boss1", "AvaPlayerTarget", "PetGroup1" }) do
-                if LUIE.UnitFrames.CustomFrames[unitTag] and LUIE.UnitFrames.CustomFrames[unitTag].tlw then
-                    local identifier = "unitFrame_" .. unitTag
-                    table.insert(ids, identifier)
-                end
-            end
-        end
+        AddUnitFramePanelIds(ids)
     elseif triggeringModule == "SpellCastBuffs" then
-        -- Add buff/debuff panels
-        if LUIE.SpellCastBuffs and LUIE.SpellCastBuffs.Enabled then
-            local lockToUnitFrames = LUIE.SpellCastBuffs.SV and (LUIE.SpellCastBuffs.SV.lockPositionToUnitFrames == nil or LUIE.SpellCastBuffs.SV.lockPositionToUnitFrames)
-            if not lockToUnitFrames then
-                local containers =
-                {
-                    { container = LUIE.SpellCastBuffs.BuffContainers.playerb, id = "buff_playerb" },
-                    { container = LUIE.SpellCastBuffs.BuffContainers.playerd, id = "buff_playerd" },
-                    { container = LUIE.SpellCastBuffs.BuffContainers.targetb, id = "buff_targetb" },
-                    { container = LUIE.SpellCastBuffs.BuffContainers.targetd, id = "buff_targetd" },
-                }
-                for _, item in ipairs(containers) do
-                    if item.container and item.container:GetType() == CT_TOPLEVELCONTROL then
-                        table.insert(ids, item.id)
-                    end
-                end
-            end
-
-            -- Always add these containers (not locked to unit frames)
-            local alwaysContainers =
-            {
-                { container = LUIE.SpellCastBuffs.BuffContainers.player_long,      id = "buff_player_long"      },
-                { container = LUIE.SpellCastBuffs.BuffContainers.prominentbuffs,   id = "buff_prominentbuffs"   },
-                { container = LUIE.SpellCastBuffs.BuffContainers.prominentdebuffs, id = "buff_prominentdebuffs" },
-            }
-            for _, item in ipairs(alwaysContainers) do
-                if item.container and item.container:GetType() == CT_TOPLEVELCONTROL then
-                    table.insert(ids, item.id)
-                end
-            end
-        end
-    elseif triggeringModule == "ActionBar" then
-        -- Add cast bar panel
-        if LUIE.ActionBar and LUIE.ActionBar.CastBarUnlocked then
-            table.insert(ids, "castBar")
-        end
-    elseif triggeringModule == "InfoPanel" then
-        -- Add info panel
-        if LUIE.InfoPanel and LUIE.InfoPanel.panelUnlocked then
-            table.insert(ids, "infoPanel")
-        end
-    elseif triggeringModule == "AbilityAlerts" then
-        -- Add ability alerts panel
-        if LUIE.CombatInfo and LUIE.CombatInfo.AbilityAlerts and LUIE.CombatInfo.AbilityAlerts.AlertFrameUnlocked then
-            table.insert(ids, "abilityAlerts")
-        end
+        AddBuffPanelIds(ids, true)
+    elseif triggeringModule == "ActionBar" and IsActionBarAvailable() then
+        table.insert(ids, "castBar")
+    elseif triggeringModule == "InfoPanel" and IsInfoPanelAvailable() then
+        table.insert(ids, "infoPanel")
+    elseif triggeringModule == "AbilityAlerts" and IsAbilityAlertsAvailable() then
+        table.insert(ids, "abilityAlerts")
     elseif triggeringModule == "CombatText" then
-        -- Add combat text panels (use wrappers if they exist)
-        if LUIE.CombatText and LUIE.CombatText.Enabled and LUIE.CombatText.SV and LUIE.CombatText.SV.unlocked then
-            if LUIE.CombatText.panelWrappers then
-                for k, wrapper in pairs(LUIE.CombatText.panelWrappers) do
-                    if wrapper and wrapper:GetType() == CT_TOPLEVELCONTROL then
-                        table.insert(ids, "combatText_" .. k)
-                    end
-                end
-            else
-                -- Fallback to panels if wrappers don't exist yet
-                for k, _ in pairs(LUIE.CombatText.SV.panels) do
-                    local panel = _G[k]
-                    if panel then
-                        table.insert(ids, "combatText_" .. k)
-                    end
-                end
-            end
-        end
-    elseif triggeringModule == "SynergyTracker" then
-        -- Add synergy tracker panel
-        if LUIE.CombatInfo and LUIE.CombatInfo.SynergyTrackerInstance then
-            local tracker = LUIE.CombatInfo.SynergyTrackerInstance
-            local Settings = LUIE.CombatInfo.SV and LUIE.CombatInfo.SV.synergy
-            if tracker.control and tracker.control:GetType() == CT_TOPLEVELCONTROL and Settings and Settings.unlocked then
-                table.insert(ids, "synergyTracker")
-            end
+        AddCombatTextPanelIds(ids)
+    elseif triggeringModule == "SynergyTracker" and IsSynergyTrackerAvailable() then
+        local tracker = LUIE.CombatInfo.SynergyTrackerInstance
+        local Settings = LUIE.CombatInfo.SV and LUIE.CombatInfo.SV.synergy
+        if tracker.control and tracker.control:GetType() == CT_TOPLEVELCONTROL and Settings and Settings.unlocked then
+            table.insert(ids, "synergyTracker")
         end
     else
-        -- No triggering module specified, include all unlocked panels (for manual edit mode activation)
+        -- No triggering module specified, include all unlocked panels
         -- Add default unlock panels
-        for element, _ in pairs(LUIE.Unlock.defaultPanels) do
-            local frameName = element:GetName()
-            local mover = LUIE.Unlock.movers[frameName]
-            if mover then
-                table.insert(ids, frameName)
-            end
-        end
-
-        -- Add unit frame panels
-        if LUIE.UnitFrames and LUIE.UnitFrames.CustomFramesMovingState then
-            for _, unitTag in pairs({ "player", "reticleover", "companion", "SmallGroup1", "RaidGroup1", "boss1", "AvaPlayerTarget", "PetGroup1" }) do
-                if LUIE.UnitFrames.CustomFrames[unitTag] and LUIE.UnitFrames.CustomFrames[unitTag].tlw then
-                    local identifier = "unitFrame_" .. unitTag
-                    table.insert(ids, identifier)
+        if LUIE.Unlock and LUIE.Unlock.defaultPanels then
+            for element, _ in pairs(LUIE.Unlock.defaultPanels) do
+                local frameName = element:GetName()
+                local mover = LUIE.Unlock.movers[frameName]
+                if mover then
+                    table.insert(ids, frameName)
                 end
             end
         end
 
-        -- Add buff/debuff panels
-        if LUIE.SpellCastBuffs and LUIE.SpellCastBuffs.Enabled then
-            local lockToUnitFrames = LUIE.SpellCastBuffs.SV and (LUIE.SpellCastBuffs.SV.lockPositionToUnitFrames == nil or LUIE.SpellCastBuffs.SV.lockPositionToUnitFrames)
-            if not lockToUnitFrames then
-                local containers =
-                {
-                    { container = LUIE.SpellCastBuffs.BuffContainers.playerb, id = "buff_playerb" },
-                    { container = LUIE.SpellCastBuffs.BuffContainers.playerd, id = "buff_playerd" },
-                    { container = LUIE.SpellCastBuffs.BuffContainers.targetb, id = "buff_targetb" },
-                    { container = LUIE.SpellCastBuffs.BuffContainers.targetd, id = "buff_targetd" },
-                }
-                for _, item in ipairs(containers) do
-                    if item.container and item.container:GetType() == CT_TOPLEVELCONTROL then
-                        table.insert(ids, item.id)
-                    end
-                end
-            end
-
-            -- Always add these containers (not locked to unit frames)
-            local alwaysContainers =
-            {
-                { container = LUIE.SpellCastBuffs.BuffContainers.player_long,      id = "buff_player_long"      },
-                { container = LUIE.SpellCastBuffs.BuffContainers.prominentbuffs,   id = "buff_prominentbuffs"   },
-                { container = LUIE.SpellCastBuffs.BuffContainers.prominentdebuffs, id = "buff_prominentdebuffs" },
-            }
-            for _, item in ipairs(alwaysContainers) do
-                if item.container and item.container:GetType() == CT_TOPLEVELCONTROL then
-                    table.insert(ids, item.id)
-                end
-            end
-        end
-
-        -- Add cast bar panel
-        if LUIE.ActionBar and LUIE.ActionBar.CastBarUnlocked then
-            table.insert(ids, "castBar")
-        end
-
-        -- Add info panel
-        if LUIE.InfoPanel and LUIE.InfoPanel.panelUnlocked then
-            table.insert(ids, "infoPanel")
-        end
-
-        -- Add ability alerts panel
-        if LUIE.CombatInfo and LUIE.CombatInfo.AbilityAlerts and LUIE.CombatInfo.AbilityAlerts.AlertFrameUnlocked then
-            table.insert(ids, "abilityAlerts")
-        end
-
-        -- Add combat text panels (use wrappers if they exist)
-        if LUIE.CombatText and LUIE.CombatText.Enabled and LUIE.CombatText.SV and LUIE.CombatText.SV.unlocked then
-            if LUIE.CombatText.panelWrappers then
-                for k, wrapper in pairs(LUIE.CombatText.panelWrappers) do
-                    if wrapper and wrapper:GetType() == CT_TOPLEVELCONTROL then
-                        table.insert(ids, "combatText_" .. k)
-                    end
-                end
-            else
-                -- Fallback to panels if wrappers don't exist yet
-                for k, _ in pairs(LUIE.CombatText.SV.panels) do
-                    local panel = _G[k]
-                    if panel then
-                        table.insert(ids, "combatText_" .. k)
-                    end
-                end
-            end
-        end
-
-        -- Add synergy tracker panel
-        if LUIE.CombatInfo and LUIE.CombatInfo.SynergyTrackerInstance then
+        -- Add all available panels
+        AddUnitFramePanelIds(ids)
+        AddBuffPanelIds(ids, false)
+        if IsActionBarAvailable() then table.insert(ids, "castBar") end
+        if IsInfoPanelAvailable() then table.insert(ids, "infoPanel") end
+        if IsAbilityAlertsAvailable() then table.insert(ids, "abilityAlerts") end
+        AddCombatTextPanelIds(ids)
+        if IsSynergyTrackerAvailable() then
             local tracker = LUIE.CombatInfo.SynergyTrackerInstance
             local Settings = LUIE.CombatInfo.SV and LUIE.CombatInfo.SV.synergy
             if tracker.control and tracker.control:GetType() == CT_TOPLEVELCONTROL and Settings and Settings.unlocked then
@@ -743,6 +717,32 @@ function EditModeController:ToggleLabels()
     CHAT_ROUTER:AddSystemMessage(string.format("[LUIE] Labels: %s", status))
 end
 
+--- Creates a standardized keybind descriptor
+--- @param config table Configuration for the keybind descriptor
+--- @return table The keybind descriptor
+local function CreateKeybindDescriptor(config)
+    return {
+        -- Core properties
+        name = config.name,
+        keybind = config.keybind,
+        callback = config.callback,
+
+        -- Optional properties
+        alignment = config.alignment,
+        gamepadPreferredKeybind = config.gamepadPreferredKeybind,
+        visible = config.visible,
+        enabled = config.enabled,
+
+        -- Special flags
+        ethereal = config.ethereal or false,
+        handlesKeyUp = config.handlesKeyUp or false,
+        disabledDuringSceneHiding = config.disabledDuringSceneHiding or false,
+
+        -- Ordering (lower numbers appear first)
+        order = config.order or 0,
+    }
+end
+
 --- Ensures keybind descriptor is created
 function EditModeController:EnsureKeybindDescriptor()
     if self.keybindStripDescriptor then
@@ -752,76 +752,84 @@ function EditModeController:EnsureKeybindDescriptor()
     local controller = self
     self.keybindStripDescriptor =
     {
-        {
-            ethereal = true,
-            name = function ()
-                return "Enter Edit Mode"
-            end,
+        -- Enter Edit Mode (ethereal - only shows on keybind press)
+        CreateKeybindDescriptor({
+            name = "Enter Edit Mode",
             keybind = "UI_SHORTCUT_TERTIARY",
-            visible = function ()
+            ethereal = true,
+            visible = function()
                 return IsInGamepadPreferredMode() and not controller:IsEditModeActive()
             end,
-            callback = function ()
+            callback = function()
                 controller:SetEditModeActive(true)
             end,
-        },
-        {
-            name = function ()
-                return "Exit Edit Mode"
-            end,
+            order = 10,
+        }),
+
+        -- Exit Edit Mode
+        CreateKeybindDescriptor({
+            name = "Exit Edit Mode",
             keybind = "UI_SHORTCUT_NEGATIVE",
-            visible = function ()
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
+            visible = function()
                 return IsInGamepadPreferredMode() and controller:IsEditModeActive()
             end,
-            callback = function ()
+            callback = function()
                 controller:SetEditModeActive(false)
             end,
-            -- Make exit keybind always enabled, even in settings scene
-            enabled = function ()
+            -- Always enabled, even during scene transitions
+            enabled = function()
                 return true
             end,
-        },
-        {
-            name = function ()
-                return "Previous Panel"
-            end,
+            disabledDuringSceneHiding = false,
+            order = 20,
+        }),
+
+        -- Previous Panel
+        CreateKeybindDescriptor({
+            name = "Previous Panel",
             keybind = "UI_SHORTCUT_INPUT_LEFT",
             gamepadPreferredKeybind = "UI_SHORTCUT_LEFT_SHOULDER",
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            visible = function ()
+            visible = function()
                 return IsInGamepadPreferredMode() and controller:IsEditModeActive()
             end,
-            callback = function ()
+            callback = function()
                 controller:CycleFocusedPanel(-1)
             end,
-        },
-        {
-            name = function ()
-                return "Next Panel"
-            end,
+            order = 30,
+        }),
+
+        -- Next Panel
+        CreateKeybindDescriptor({
+            name = "Next Panel",
             keybind = "UI_SHORTCUT_INPUT_RIGHT",
             gamepadPreferredKeybind = "UI_SHORTCUT_RIGHT_SHOULDER",
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            visible = function ()
+            visible = function()
                 return IsInGamepadPreferredMode() and controller:IsEditModeActive()
             end,
-            callback = function ()
+            callback = function()
                 controller:CycleFocusedPanel(1)
             end,
-        },
-        {
-            name = function ()
+            order = 40,
+        }),
+
+        -- Toggle Labels
+        CreateKeybindDescriptor({
+            name = function()
                 return controller.showAllLabels and "Hide Labels" or "Show All Labels"
             end,
             keybind = "UI_SHORTCUT_QUATERNARY",
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            visible = function ()
+            visible = function()
                 return IsInGamepadPreferredMode() and controller:IsEditModeActive()
             end,
-            callback = function ()
+            callback = function()
                 controller:ToggleLabels()
             end,
-        },
+            order = 50,
+        }),
     }
 end
 
