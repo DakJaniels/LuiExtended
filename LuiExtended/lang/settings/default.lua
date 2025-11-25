@@ -188,6 +188,8 @@ local strings =
     LUIE_STRING_LAM_BUFF_FONTSIZE_TP = "Choose the font size for the buff countdown label.",
     LUIE_STRING_LAM_BUFF_FONTSTYLE_TP = "Choose the font style for the buff countdown label.",
     LUIE_STRING_LAM_BUFF_LABELCOLOR_TP = "Set the color of text label to be the same as icon border or keep it white.",
+    LUIE_STRING_LAM_CI_POTION_COLOR = "Colored Label",
+    LUIE_STRING_LAM_CI_SHARED_POSITION = "Label Position",
     LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS = "Show Second Fractions",
     LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS_TP = 'Format remaining text labels as "12.3" or keep only seconds "12".',
     LUIE_STRING_LAM_BUFF_SHOWFRACTIONSTHRESHOLDVALUE = "Duration Threshold",    -- Note: This option is actually used in CombatInfo for Bar Highlight
@@ -1333,6 +1335,7 @@ local strings =
     -- Module: Combat Info
     LUIE_STRING_LAM_CI_HEADER = "Combat Info Options",
     LUIE_STRING_LAM_CI_SHOWCOMBATINFO = "Combat Info Module",
+    LUIE_STRING_LAM_CI_DESCRIPTION = "Combat Info displays combat-related alerts, crowd control tracking, and floating markers to help you stay aware of combat situations.",
     LUIE_STRING_LAM_CI_ENEMY_MARKER_HEADER = "Floating Markers",
     LUIE_STRING_LAM_CI_ENEMY_MARKER = "Show Enemy Markers",
     LUIE_STRING_LAM_CI_ENEMY_MARKER_TP = "Display a red arrow over the head of enemies you are currently in combat with.",
