@@ -148,7 +148,7 @@ function SynergyTracker:OnDeferredInitialize()
 
         -- Position number (optional)
         local posNum = windowManager:CreateControl(nil, row, CT_LABEL)
-        posNum:SetFont("ZoFontGamepad27")
+        posNum:SetFont("ZoFontGamepad27") -- Already console-friendly
         posNum:SetAnchor(LEFT, iconBg, RIGHT, 5, 0)
         posNum:SetText(i)
         posNum:SetColor(1, 1, 0.5, 1)
@@ -156,7 +156,19 @@ function SynergyTracker:OnDeferredInitialize()
 
         -- Synergy name/prompt
         local name = windowManager:CreateControl(nil, row, CT_LABEL)
-        name:SetFont("ZoInteractionPrompt")
+        if IsConsoleUI() or IsInGamepadPreferredMode() then
+            local fontName = "LUIE Default Font"
+            if LUIE.Fonts and LUIE.Fonts[fontName] then
+                local fontSize = 18
+                local fontStyle = "soft-shadow-thick"
+                local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
+                name:SetFont(fontString)
+            else
+                name:SetFont("$(GAMEPAD_MEDIUM_FONT)|18|soft-shadow-thick")
+            end
+        else
+            name:SetFont("ZoInteractionPrompt")
+        end
         name:SetAnchor(LEFT, posNum, RIGHT, 8, 0)
         name:SetDimensionConstraints(0, 0, 200, SYNERGY_ROW_HEIGHT)
         name:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
@@ -164,7 +176,19 @@ function SynergyTracker:OnDeferredInitialize()
 
         -- Priority indicator
         local priority = windowManager:CreateControl(nil, row, CT_LABEL)
-        priority:SetFont("ZoFontGame")
+        if IsConsoleUI() or IsInGamepadPreferredMode() then
+            local fontName = "LUIE Default Font"
+            if LUIE.Fonts and LUIE.Fonts[fontName] then
+                local fontSize = 16
+                local fontStyle = "soft-shadow-thick"
+                local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
+                priority:SetFont(fontString)
+            else
+                priority:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
+            end
+        else
+            priority:SetFont("ZoFontGame")
+        end
         priority:SetAnchor(RIGHT, row, RIGHT, -5, 0)
         priority:SetColor(0.7, 0.7, 0.7, 1)
         priority:SetHidden(not Settings.showPriority)
@@ -181,7 +205,19 @@ function SynergyTracker:OnDeferredInitialize()
 
         -- Cooldown text (shows time remaining)
         local cooldownText = windowManager:CreateControl(nil, iconBg, CT_LABEL)
-        cooldownText:SetFont("ZoFontGameBold")
+        if IsConsoleUI() or IsInGamepadPreferredMode() then
+            local fontName = "LUIE Default Font"
+            if LUIE.Fonts and LUIE.Fonts[fontName] then
+                local fontSize = 20
+                local fontStyle = "soft-shadow-thick"
+                local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
+                cooldownText:SetFont(fontString)
+            else
+                cooldownText:SetFont("$(GAMEPAD_MEDIUM_FONT)|20|soft-shadow-thick")
+            end
+        else
+            cooldownText:SetFont("ZoFontGameBold")
+        end
         cooldownText:SetAnchor(CENTER, iconBg, CENTER, 0, 0)
         cooldownText:SetColor(1, 1, 1, 1)
         cooldownText:SetDrawLayer(DL_OVERLAY)
@@ -228,10 +264,68 @@ function SynergyTracker:OnDeferredInitialize()
     end
 
     -- Unlock/lock handlers
-    self.control:SetHandler("OnMoveStop", function ()
-        Settings.offsetX = self.control:GetLeft() - GuiRoot:GetWidth() / 2
-        Settings.offsetY = self.control:GetTop() - GuiRoot:GetHeight() / 2
-    end)
+    if IsConsoleUI() and LUIE.ConsoleMoverHelper then
+        -- Console version: Create preview elements and set up gamepad handler
+        local MoverHelper = LUIE.ConsoleMoverHelper
+        local UI = LUIE.UI
+
+        -- Create preview backdrop
+        local preview = UI:Backdrop(self.control, "fill", nil, nil, nil, true)
+        preview:SetCenterColor(0.05, 0.6, 0.9, 0.25)
+        preview:SetEdgeColor(0.05, 0.6, 0.9, 0.9)
+        preview:SetEdgeTexture("", 1, 1, 0, 0)
+        preview:SetHidden(true)
+        self.control.preview = preview
+
+        -- Create coordinate label
+        local coordLabel = UI:Label(preview, { TOPLEFT, TOPLEFT }, nil, { 4, 4 }, "ZoFontGameSmall", "xxx, yyy", false)
+        coordLabel:SetColor(1, 1, 0, 1)
+        coordLabel:SetDrawLayer(DL_OVERLAY)
+        coordLabel:SetDrawTier(DT_MEDIUM)
+        preview.coordLabel = coordLabel
+
+        -- Create name label
+        local previewLabel = UI:Label(preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", "Synergy Tracker", false)
+        previewLabel:SetColor(1, 1, 1, 1)
+        previewLabel:SetDrawLayer(DL_OVERLAY)
+        previewLabel:SetDrawTier(DT_MEDIUM)
+        self.control.previewLabel = previewLabel
+
+        -- Update coordinate label during movement
+        self.control:SetHandler("OnMoveStart", function ()
+            eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
+                local left, top = self.control:GetLeft(), self.control:GetTop()
+                preview.coordLabel:SetText(zo_strformat("<<1>>, <<2>>", left, top))
+            end)
+        end)
+
+        self.control:SetHandler("OnMoveStop", function ()
+            eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
+            Settings.offsetX = self.control:GetLeft() - GuiRoot:GetWidth() / 2
+            Settings.offsetY = self.control:GetTop() - GuiRoot:GetHeight() / 2
+        end)
+
+        -- Update fonts
+        MoverHelper.UpdateControlState(self.control, "synergyTracker", Settings.unlocked)
+
+        -- Set up gamepad handler if unlocked
+        if Settings.unlocked then
+            MoverHelper.SetupGamepadHandler(
+                self.control,
+                "default",
+                function (control, left, top)
+                    Settings.offsetX = left - GuiRoot:GetWidth() / 2
+                    Settings.offsetY = top - GuiRoot:GetHeight() / 2
+                end
+            )
+        end
+    else
+        -- PC version
+        self.control:SetHandler("OnMoveStop", function ()
+            Settings.offsetX = self.control:GetLeft() - GuiRoot:GetWidth() / 2
+            Settings.offsetY = self.control:GetTop() - GuiRoot:GetHeight() / 2
+        end)
+    end
 
     -- Cooldown timer update loop (updates every second)
     self.lastCooldownUpdate = 0
@@ -752,19 +846,62 @@ function SynergyTracker:SetUnlocked(unlocked)
     local Settings = CombatInfo.SV.synergy
     Settings.unlocked = unlocked
 
-    self.control:SetMovable(unlocked)
-    self.control:SetMouseEnabled(unlocked)
-    self.bg:SetHidden(not unlocked)
+    if IsConsoleUI() and LUIE.ConsoleMoverHelper then
+        local MoverHelper = LUIE.ConsoleMoverHelper
+        local EditModeController = LUIE.EditModeController
 
-    if unlocked then
-        self:ShowPreview()
-    else
-        -- When locking, hide preview and return to normal display
-        if not self.fragment:IsShowing() then
-            -- If we're not in HUD/HUDUI scene, hide the control
-            self.control:SetHidden(true)
+        if unlocked then
+            -- Set up gamepad handler if not already set up
+            if not self.control.gamepadHandler then
+                MoverHelper.SetupGamepadHandler(
+                    self.control,
+                    "default",
+                    function (control, left, top)
+                        Settings.offsetX = left - GuiRoot:GetWidth() / 2
+                        Settings.offsetY = top - GuiRoot:GetHeight() / 2
+                    end
+                )
+            end
+
+            -- Activate edit mode
+            if EditModeController then
+                EditModeController:SetEditModeActive(true, "SynergyTracker")
+            end
+
+            self:ShowPreview()
         else
-            self:UpdateDisplay()
+            -- Clean up gamepad handler
+            if self.control.gamepadHandler then
+                -- Handler cleanup is handled by MoverHelper.UpdateControlState
+            end
+
+            -- When locking, hide preview and return to normal display
+            if not self.fragment:IsShowing() then
+                -- If we're not in HUD/HUDUI scene, hide the control
+                self.control:SetHidden(true)
+            else
+                self:UpdateDisplay()
+            end
+        end
+
+        -- Update control state
+        MoverHelper.UpdateControlState(self.control, "synergyTracker", unlocked)
+    else
+        -- PC version
+        self.control:SetMovable(unlocked)
+        self.control:SetMouseEnabled(unlocked)
+        self.bg:SetHidden(not unlocked)
+
+        if unlocked then
+            self:ShowPreview()
+        else
+            -- When locking, hide preview and return to normal display
+            if not self.fragment:IsShowing() then
+                -- If we're not in HUD/HUDUI scene, hide the control
+                self.control:SetHidden(true)
+            else
+                self:UpdateDisplay()
+            end
         end
     end
 end
