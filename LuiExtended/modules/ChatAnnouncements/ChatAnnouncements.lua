@@ -56,8 +56,25 @@ local moduleName = ChatAnnouncements.moduleName
 
 ------------------------------------------------
 
+--- Gets the total stack count for an item link from backpack, bank, and craft bag.
+--- @param itemlink string The item link to check stack counts for
+--- @return integer count The total stack count (backpack + bank + craft bag)
+--[[[
+* GetItemLinkStacks(*string* _itemLink_)
+** _Returns:_ *integer* _stackCountBackpack_, *integer* _stackCountBank_, *integer* _stackCountCraftBag_, *integer* _stackCountHouseBanks_, *integer* _stackCountFurnitureVault_, *integer* _stackCountVengeanceBag_
+
+**Example:**
+Acai Berry
+Results of function `GetItemLinkStacks("|H1:item:34349:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")`:
+- `0` -- stackCountBackpack
+- `0` -- stackCountBank
+- `9441` -- stackCountCraftBag
+- `0` -- stackCountHouseBanks
+- `0` -- stackCountFurnitureVault
+- `0` -- stackCountVengeanceBag
+]]
 local function getItemLinkStackCount(itemlink)
-    local stackCountBackpack, stackCountBank, stackCountCraftBag, stackCountHouseBanks, stackCountFurnitureVault = GetItemLinkStacks(itemlink)
+    local stackCountBackpack, stackCountBank, stackCountCraftBag, stackCountHouseBanks, stackCountFurnitureVault, stackCountVengeanceBag = GetItemLinkStacks(itemlink)
     local count = (stackCountBackpack + stackCountBank + stackCountCraftBag) or 0
     return count
 end
