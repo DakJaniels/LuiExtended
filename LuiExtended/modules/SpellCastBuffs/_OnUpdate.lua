@@ -322,12 +322,14 @@ local updateBar = function (currentTimeMs, sortedList, container)
     if SpellCastBuffs.sortDirection[container] then
         if SpellCastBuffs.sortDirection[container] == "Left to Right" or SpellCastBuffs.sortDirection[container] == "Bottom to Top" then
             istart, iend, istep = 1, iconsNum, 1
-        end
-        if SpellCastBuffs.sortDirection[container] == "Right to Left" or SpellCastBuffs.sortDirection[container] == "Top to Bottom" then
+        elseif SpellCastBuffs.sortDirection[container] == "Right to Left" or SpellCastBuffs.sortDirection[container] == "Top to Bottom" then
             istart, iend, istep = iconsNum, 1, -1
+        else
+            -- Fall back for unexpected sort direction values
+            istart, iend, istep = 1, iconsNum, 1
         end
-        -- Fall back in case for some strange reason the container doesn't exist
     else
+        -- Fall back in case for some strange reason the container doesn't exist
         istart, iend, istep = 1, iconsNum, 1
     end
 
@@ -381,12 +383,14 @@ local updateIcons = function (currentTimeMs, sortedList, container)
     if SpellCastBuffs.sortDirection[container] then
         if SpellCastBuffs.sortDirection[container] == "Left to Right" or SpellCastBuffs.sortDirection[container] == "Bottom to Top" then
             istart, iend, istep = 1, iconsNum, 1
-        end
-        if SpellCastBuffs.sortDirection[container] == "Right to Left" or SpellCastBuffs.sortDirection[container] == "Top to Bottom" then
+        elseif SpellCastBuffs.sortDirection[container] == "Right to Left" or SpellCastBuffs.sortDirection[container] == "Top to Bottom" then
             istart, iend, istep = iconsNum, 1, -1
+        else
+            -- Fall back for unexpected sort direction values
+            istart, iend, istep = 1, iconsNum, 1
         end
-        -- Fall back in case there is no sort direction for the container somehow
     else
+        -- Fall back in case there is no sort direction for the container somehow
         istart, iend, istep = 1, iconsNum, 1
     end
 
