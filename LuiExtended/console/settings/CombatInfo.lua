@@ -264,6 +264,7 @@ function CombatInfo.CreateConsoleSettings()
         end,
         Defaults.alerts.colors.alertTimer,
         10,
+        nil,
         function ()
             return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.alertTimer)
         end
@@ -281,6 +282,7 @@ function CombatInfo.CreateConsoleSettings()
         end,
         Defaults.alerts.colors.alertShared,
         5,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -414,11 +416,12 @@ function CombatInfo.CreateConsoleSettings()
         function (combobox, value, item)
             Settings.alerts.toggles.alertOptions = globalAlertOptionsKeys[value]
         end,
-        globalAlertOptions[Defaults.alerts.toggles.alertOptions],
         5,
+        nil,
         function ()
             return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
-        end
+        end,
+        globalAlertOptions[Defaults.alerts.toggles.alertOptions]
     )
 
     settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
@@ -622,6 +625,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.alertBlockA,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -659,6 +663,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.alertDodgeA,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -696,6 +701,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.alertAvoidB,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -749,6 +755,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.alertInterruptC,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -804,6 +811,7 @@ function CombatInfo.CreateConsoleSettings()
         end,
         Defaults.alerts.colors.alertUnmit,
         5,
+        nil,
         function ()
             return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertUnmit)
         end
@@ -893,6 +901,7 @@ function CombatInfo.CreateConsoleSettings()
         end,
         Defaults.alerts.colors.alertPower,
         5,
+        nil,
         function ()
             return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertPower)
         end
@@ -982,6 +991,7 @@ function CombatInfo.CreateConsoleSettings()
         end,
         Defaults.alerts.colors.alertDestroy,
         5,
+        nil,
         function ()
             return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertDestroy)
         end
@@ -1071,6 +1081,7 @@ function CombatInfo.CreateConsoleSettings()
         end,
         Defaults.alerts.colors.alertSummon,
         5,
+        nil,
         function ()
             return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertSummon)
         end
@@ -1092,6 +1103,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.stunColor,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -1108,6 +1120,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.knockbackColor,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -1124,6 +1137,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.levitateColor,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -1140,6 +1154,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.disorientColor,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -1156,6 +1171,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.fearColor,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -1172,6 +1188,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.charmColor,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -1188,6 +1205,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.silenceColor,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -1204,6 +1222,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.staggerColor,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -1220,6 +1239,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.unbreakableColor,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -1236,6 +1256,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.snareColor,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -1252,6 +1273,7 @@ function CombatInfo.CreateConsoleSettings()
             AbilityAlerts.SetAlertColors()
         end,
         Defaults.alerts.colors.rootColor,
+        nil,
         function ()
             return not Settings.alerts.toggles.alertEnable
         end
@@ -1313,8 +1335,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_stEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_st
+        end
     )
 
     -- Sound Options - Single Target CC
@@ -1349,8 +1370,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_st_ccEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_st_cc
+        end
     )
 
     -- Sound Options - AOE
@@ -1385,8 +1405,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_aoeEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_aoe
+        end
     )
 
     -- Sound Options - AOE CC
@@ -1421,8 +1440,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_aoe_ccEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_aoe_cc
+        end
     )
 
     -- Sound Options - POWER ATTACK
@@ -1457,8 +1475,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_powerattackEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_powerattack
+        end
     )
 
     -- Sound Options - RADIAL AVOID
@@ -1493,8 +1510,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_radialEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_radial
+        end
     )
 
     -- Sound Options - GROUND TRAVEL
@@ -1529,8 +1545,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_travelEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_travel
+        end
     )
 
     -- Sound Options - GROUND TRAVEL CC
@@ -1565,8 +1580,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_travel_ccEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_travel_cc
+        end
     )
 
     -- Sound Options - GROUND
@@ -1601,8 +1615,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_groundEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_ground
+        end
     )
 
     -- Sound Options - METEOR
@@ -1637,8 +1650,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_meteorEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_meteor
+        end
     )
 
     -- Sound Options - UNMIT ST
@@ -1673,8 +1685,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_unmit_stEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_unmit_st
+        end
     )
 
     -- Sound Options - UNMIT AOE
@@ -1709,8 +1720,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_unmit_aoeEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_unmit_aoe
+        end
     )
 
     -- Sound Options - POWER DAMAGE
@@ -1745,8 +1755,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_power_damageEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_power_damage
+        end
     )
 
     -- Sound Options - POWER DEFENSE
@@ -1781,8 +1790,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_power_buffEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_power_buff
+        end
     )
 
     -- Sound Options - SUMMON
@@ -1817,8 +1825,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_summonEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_summon
+        end
     )
 
     -- Sound Options - DESTROY
@@ -1853,8 +1860,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_destroyEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_destroy
+        end
     )
 
     -- Sound Options - HEAL
@@ -1889,8 +1895,7 @@ function CombatInfo.CreateConsoleSettings()
         "full",
         function ()
             return not (Settings.alerts.toggles.sound_healEnable and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.sounds.sound_heal
+        end
     )
 
     -- Crowd Control Tracker Section
@@ -2054,11 +2059,12 @@ function CombatInfo.CreateConsoleSettings()
             Settings.cct.defaultIconOptions = globalIconOptionsKeys[value]
             CrowdControlTracker:InitControls()
         end,
-        globalIconOptions[Defaults.cct.defaultIconOptions],
         5,
+        nil,
         function ()
             return not Settings.cct.useDefaultIcon
-        end
+        end,
+        globalIconOptions[Defaults.cct.defaultIconOptions]
     )
 
     settingsData[#settingsData + 1] = SettingsAPI.CreateSliderOption(
@@ -2112,8 +2118,8 @@ function CombatInfo.CreateConsoleSettings()
             Settings.cct.playSoundOption = value
             AbilityAlerts.PreviewAlertSound(value)
         end,
-        Settings.cct.playSoundOption,
         5,
+        nil,
         function ()
             return not (Settings.cct.playSound and Settings.cct.enabled)
         end
@@ -2223,6 +2229,7 @@ function CombatInfo.CreateConsoleSettings()
             CrowdControlTracker:InitControls()
         end,
         Defaults.cct.colors[ACTION_RESULT_STUNNED],
+        nil,
         function ()
             return not Settings.cct.enabled
         end
@@ -2239,6 +2246,7 @@ function CombatInfo.CreateConsoleSettings()
             CrowdControlTracker:InitControls()
         end,
         Defaults.cct.colors[ACTION_RESULT_KNOCKBACK],
+        nil,
         function ()
             return not Settings.cct.enabled
         end
@@ -2255,6 +2263,7 @@ function CombatInfo.CreateConsoleSettings()
             CrowdControlTracker:InitControls()
         end,
         Defaults.cct.colors[ACTION_RESULT_LEVITATED],
+        nil,
         function ()
             return not Settings.cct.enabled
         end
@@ -2271,6 +2280,7 @@ function CombatInfo.CreateConsoleSettings()
             CrowdControlTracker:InitControls()
         end,
         Defaults.cct.colors[ACTION_RESULT_DISORIENTED],
+        nil,
         function ()
             return not Settings.cct.enabled
         end
@@ -2287,6 +2297,7 @@ function CombatInfo.CreateConsoleSettings()
             CrowdControlTracker:InitControls()
         end,
         Defaults.cct.colors[ACTION_RESULT_SILENCED],
+        nil,
         function ()
             return not Settings.cct.enabled
         end
@@ -2303,6 +2314,7 @@ function CombatInfo.CreateConsoleSettings()
             CrowdControlTracker:InitControls()
         end,
         Defaults.cct.colors[ACTION_RESULT_FEARED],
+        nil,
         function ()
             return not Settings.cct.enabled
         end
@@ -2319,6 +2331,7 @@ function CombatInfo.CreateConsoleSettings()
             CrowdControlTracker:InitControls()
         end,
         Defaults.cct.colors[ACTION_RESULT_CHARMED],
+        nil,
         function ()
             return not Settings.cct.enabled
         end
@@ -2335,6 +2348,7 @@ function CombatInfo.CreateConsoleSettings()
             CrowdControlTracker:InitControls()
         end,
         Defaults.cct.colors[ACTION_RESULT_STAGGERED],
+        nil,
         function ()
             return not Settings.cct.enabled
         end
@@ -2351,6 +2365,7 @@ function CombatInfo.CreateConsoleSettings()
             CrowdControlTracker:InitControls()
         end,
         Defaults.cct.colors.unbreakable,
+        nil,
         function ()
             return not Settings.cct.enabled
         end
@@ -2370,6 +2385,7 @@ function CombatInfo.CreateConsoleSettings()
             CrowdControlTracker:InitControls()
         end,
         Defaults.cct.colors[ACTION_RESULT_IMMUNE],
+        nil,
         function ()
             return not Settings.cct.enabled
         end
@@ -2409,6 +2425,7 @@ function CombatInfo.CreateConsoleSettings()
         end,
         Defaults.cct.colors[ACTION_RESULT_ROOTED],
         5,
+        nil,
         function ()
             return not (Settings.cct.showRoot and Settings.cct.enabled)
         end
@@ -2448,6 +2465,7 @@ function CombatInfo.CreateConsoleSettings()
         end,
         Defaults.cct.colors[ACTION_RESULT_AREA_EFFECT],
         5,
+        nil,
         function ()
             return not (Settings.cct.showAoe and Settings.cct.enabled)
         end
@@ -2487,6 +2505,7 @@ function CombatInfo.CreateConsoleSettings()
         end,
         Defaults.cct.colors[ACTION_RESULT_SNARED],
         5,
+        nil,
         function ()
             return not (Settings.cct.showSnare and Settings.cct.enabled)
         end
@@ -2542,8 +2561,8 @@ function CombatInfo.CreateConsoleSettings()
             Settings.cct.aoePlayerUltimateSound = value
             AbilityAlerts.PreviewAlertSound(value)
         end,
-        Settings.cct.aoePlayerUltimateSound,
         5,
+        nil,
         function ()
             return not (Settings.cct.showAoe and Settings.cct.aoePlayerUltimate and Settings.cct.aoePlayerUltimateSoundToggle and Settings.cct.enabled)
         end
@@ -2594,8 +2613,8 @@ function CombatInfo.CreateConsoleSettings()
             Settings.cct.aoePlayerNormalSound = value
             AbilityAlerts.PreviewAlertSound(value)
         end,
-        Settings.cct.aoePlayerNormalSound,
         5,
+        nil,
         function ()
             return not (Settings.cct.showAoe and Settings.cct.aoePlayerNormal and Settings.cct.aoePlayerNormalSoundToggle and Settings.cct.enabled)
         end
@@ -2646,8 +2665,8 @@ function CombatInfo.CreateConsoleSettings()
             Settings.cct.aoePlayerSetSound = value
             AbilityAlerts.PreviewAlertSound(value)
         end,
-        Settings.cct.aoePlayerSetSound,
         5,
+        nil,
         function ()
             return not (Settings.cct.showAoe and Settings.cct.aoePlayerSet and Settings.cct.aoePlayerSetSoundToggle and Settings.cct.enabled)
         end
@@ -2698,8 +2717,8 @@ function CombatInfo.CreateConsoleSettings()
             Settings.cct.aoeTrapsSound = value
             AbilityAlerts.PreviewAlertSound(value)
         end,
-        Settings.cct.aoeTrapsSound,
         5,
+        nil,
         function ()
             return not (Settings.cct.showAoe and Settings.cct.aoeTraps and Settings.cct.aoeTrapsSoundToggle and Settings.cct.enabled)
         end
@@ -2750,8 +2769,8 @@ function CombatInfo.CreateConsoleSettings()
             Settings.cct.aoeNPCBossSound = value
             AbilityAlerts.PreviewAlertSound(value)
         end,
-        Settings.cct.aoeNPCBossSound,
         5,
+        nil,
         function ()
             return not (Settings.cct.showAoe and Settings.cct.aoeNPCBoss and Settings.cct.aoeNPCBossSoundToggle and Settings.cct.enabled)
         end
@@ -2802,8 +2821,8 @@ function CombatInfo.CreateConsoleSettings()
             Settings.cct.aoeNPCEliteSound = value
             AbilityAlerts.PreviewAlertSound(value)
         end,
-        Settings.cct.aoeNPCEliteSound,
         5,
+        nil,
         function ()
             return not (Settings.cct.showAoe and Settings.cct.aoeNPCElite and Settings.cct.aoeNPCEliteSoundToggle and Settings.cct.enabled)
         end
@@ -2854,8 +2873,8 @@ function CombatInfo.CreateConsoleSettings()
             Settings.cct.aoeNPCNormalSound = value
             AbilityAlerts.PreviewAlertSound(value)
         end,
-        Settings.cct.aoeNPCNormalSound,
         5,
+        nil,
         function ()
             return not (Settings.cct.showAoe and Settings.cct.aoeNPCNormal and Settings.cct.aoeNPCNormalSoundToggle and Settings.cct.enabled)
         end
