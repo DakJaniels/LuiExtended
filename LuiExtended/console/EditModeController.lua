@@ -119,6 +119,8 @@ function EditModeController:SetEditModeActive(active, triggeringModule)
                 LUIE.CombatInfo.AbilityAlerts.SetMovingState(false)
             elseif self.triggeringModule == "CombatText" and LUIE.CombatText and LUIE.CombatText.SetMovingState then
                 LUIE.CombatText.SetMovingState(false)
+            elseif self.triggeringModule == "SynergyTracker" and LUIE.CombatInfo and LUIE.CombatInfo.SynergyTrackerInstance and LUIE.CombatInfo.SynergyTrackerInstance.SetUnlocked then
+                LUIE.CombatInfo.SynergyTrackerInstance:SetUnlocked(false)
             end
             self.triggeringModule = nil
         end
@@ -321,6 +323,15 @@ function EditModeController:RefreshModuleMovers()
             end
         end
     end
+
+    -- Refresh SynergyTracker mover
+    if LUIE.CombatInfo and LUIE.CombatInfo.SynergyTrackerInstance then
+        local tracker = LUIE.CombatInfo.SynergyTrackerInstance
+        local Settings = LUIE.CombatInfo.SV and LUIE.CombatInfo.SV.synergy
+        if tracker.control and tracker.control:GetType() == CT_TOPLEVELCONTROL and Settings and Settings.unlocked then
+            MoverHelper.UpdateControlState(tracker.control, "synergyTracker", Settings.unlocked)
+        end
+    end
 end
 
 --- Toggles edit mode on/off
@@ -431,6 +442,15 @@ local function EnumerateFocusablePanelIds(triggeringModule)
                 end
             end
         end
+    elseif triggeringModule == "SynergyTracker" then
+        -- Add synergy tracker panel
+        if LUIE.CombatInfo and LUIE.CombatInfo.SynergyTrackerInstance then
+            local tracker = LUIE.CombatInfo.SynergyTrackerInstance
+            local Settings = LUIE.CombatInfo.SV and LUIE.CombatInfo.SV.synergy
+            if tracker.control and tracker.control:GetType() == CT_TOPLEVELCONTROL and Settings and Settings.unlocked then
+                table.insert(ids, "synergyTracker")
+            end
+        end
     else
         -- No triggering module specified, include all unlocked panels (for manual edit mode activation)
         -- Add default unlock panels
@@ -517,6 +537,15 @@ local function EnumerateFocusablePanelIds(triggeringModule)
                 end
             end
         end
+
+        -- Add synergy tracker panel
+        if LUIE.CombatInfo and LUIE.CombatInfo.SynergyTrackerInstance then
+            local tracker = LUIE.CombatInfo.SynergyTrackerInstance
+            local Settings = LUIE.CombatInfo.SV and LUIE.CombatInfo.SV.synergy
+            if tracker.control and tracker.control:GetType() == CT_TOPLEVELCONTROL and Settings and Settings.unlocked then
+                table.insert(ids, "synergyTracker")
+            end
+        end
     end
 
     return ids
@@ -589,6 +618,17 @@ local function IsValidPanelId(panelId)
         if LUIE.CombatText and LUIE.CombatText.Enabled and LUIE.CombatText.SV and LUIE.CombatText.SV.unlocked then
             local panelName = panelId:match("^combatText_(.+)$")
             if panelName and LUIE.CombatText.SV.panels[panelName] and _G[panelName] then
+                return true
+            end
+        end
+    end
+
+    -- Check synergy tracker panel
+    if panelId == "synergyTracker" then
+        if LUIE.CombatInfo and LUIE.CombatInfo.SynergyTrackerInstance then
+            local tracker = LUIE.CombatInfo.SynergyTrackerInstance
+            local Settings = LUIE.CombatInfo.SV and LUIE.CombatInfo.SV.synergy
+            if tracker.control and Settings and Settings.unlocked then
                 return true
             end
         end
