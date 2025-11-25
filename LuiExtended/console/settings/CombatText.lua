@@ -87,6 +87,11 @@ function CombatText.CreateConsoleSettings()
     local Defaults = CombatText.Defaults
     local Settings = CombatText.SV
 
+    -- Register the settings panel
+    if not LUIE.SV.CombatText_Enabled then
+        return
+    end
+
     -- Load Dialog Buttons
     loadDialogButtons()
 

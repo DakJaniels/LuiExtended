@@ -60,6 +60,11 @@ function SlashCommands.CreateConsoleSettings()
     local Defaults = SlashCommands.Defaults
     local Settings = SlashCommands.SV
 
+    -- Register the settings panel
+    if not LUIE.SV.SlashCommands_Enable then
+        return
+    end
+
     -- Create the addon settings panel
     local panel = LHAS:AddAddon(zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_SLASHCMDS)),
                                 {

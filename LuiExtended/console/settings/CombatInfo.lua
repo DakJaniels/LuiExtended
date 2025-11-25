@@ -62,6 +62,11 @@ function CombatInfo.CreateConsoleSettings()
     local Defaults = CombatInfo.Defaults
     local Settings = CombatInfo.SV
 
+    -- Register the settings panel
+    if not LUIE.SV.CombatInfo_Enabled then
+        return
+    end
+
     -- Create the addon settings panel
     local panel = LHAS:AddAddon(zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_CI)),
                                 {

@@ -127,6 +127,11 @@ function SpellCastBuffs.CreateConsoleSettings()
     local Defaults = SpellCastBuffs.Defaults
     local Settings = SpellCastBuffs.SV
 
+    -- Register the settings panel
+    if not LUIE.SV.SpellCastBuff_Enable then
+        return
+    end
+
     -- Load Dialog Buttons
     loadDialogButtons()
 

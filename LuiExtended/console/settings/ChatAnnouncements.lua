@@ -60,6 +60,11 @@ function ChatAnnouncements.CreateConsoleSettings()
     local Defaults = ChatAnnouncements.Defaults
     local Settings = ChatAnnouncements.SV
 
+    -- Register the settings panel
+    if not LUIE.SV.ChatAnnouncements_Enable then
+        return
+    end
+
     -- Create the addon settings panel
     local panel = LHAS:AddAddon(zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_CA)),
                                 {

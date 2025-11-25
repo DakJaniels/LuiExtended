@@ -151,6 +151,11 @@ function UnitFrames.CreateConsoleSettings()
     local Defaults = UnitFrames.Defaults
     local Settings = UnitFrames.SV
 
+    -- Register the settings panel
+    if not LUIE.SV.UnitFrames_Enabled then
+        return
+    end
+
     -- Load Dialog Buttons
     loadDialogButtons()
 

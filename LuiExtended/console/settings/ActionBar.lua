@@ -25,12 +25,6 @@ local LHAS = LibHarvensAddonSettings
 local globalMethodOptions = { "Radial", "Vertical Reveal" }
 local globalMethodOptionsKeys = { ["Radial"] = 1, ["Vertical Reveal"] = 2 }
 
-local function SetAbilityBarTimersEnabled()
-    if tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS)) == 0 then
-        SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS, "true", SETTINGS_SET_OPTION_SAVE_TO_PERSISTED_DATA)
-    end
-end
-
 local castBarMovingEnabled = false -- Helper local flag
 
 -- Convert to LHAS format {name, data}
@@ -77,6 +71,11 @@ end
 function ActionBar.CreateConsoleSettings()
     local Defaults = ActionBar.Defaults
     local Settings = ActionBar.SV
+
+    -- Register the settings panel
+    if not LUIE.SV.ActionBar_Enabled then
+        return
+    end
 
     -- Load Dialog Buttons
     loadDialogButtons()
@@ -133,7 +132,7 @@ function ActionBar.CreateConsoleSettings()
         -- Ability selection dropdown
         dialog:AddSetting(
             {
-                type = LibHarvensAddonSettings.ST_DROPDOWN,
+                type = LHAS.ST_DROPDOWN,
                 label = "Select Ability",
                 tooltip = "Select an ability from your currently tracked abilities to override its duration",
                 items = function ()
@@ -186,7 +185,7 @@ function ActionBar.CreateConsoleSettings()
         -- Duration input field
         dialog:AddSetting(
             {
-                type = LibHarvensAddonSettings.ST_EDIT,
+                type = LHAS.ST_EDIT,
                 label = "Duration (milliseconds)",
                 tooltip = "Set the duration for the selected ability in milliseconds\nExample: 15000 for 15 seconds",
                 default = "",
@@ -204,7 +203,7 @@ function ActionBar.CreateConsoleSettings()
         -- Apply button
         dialog:AddSetting(
             {
-                type = LibHarvensAddonSettings.ST_BUTTON,
+                type = LHAS.ST_BUTTON,
                 label = "Apply Override",
                 tooltip = "Apply the duration override for the selected ability",
                 buttonText = "Apply",
@@ -554,7 +553,6 @@ function ActionBar.CreateConsoleSettings()
         function () return Settings.BarShowLabel end,
         function (value)
             Settings.BarShowLabel = value
-            SetAbilityBarTimersEnabled()
             ActionBar.ResetBarLabel()
         end,
         1,
