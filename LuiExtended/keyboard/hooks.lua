@@ -103,9 +103,14 @@ LUIE.HookKeyboardIcons = function ()
 
         -- name
         local detailedName = skillProgressionData:GetDetailedName()
+        local abilityID = skillProgressionData.abilityId
         detailedName = StringOnlyGSUB(detailedName, "With", "with")               -- Easiest way to fix the capitalization of the skill "Bond With Nature"
         detailedName = StringOnlyGSUB(detailedName, "Blessing Of", "Blessing of") -- Easiest way to fix the capitalization of the skill "Blessing of Restoration"
-        control.nameLabel:SetText(detailedName)
+        if LUIE.IsDevDebugEnabled() then
+            control.nameLabel:SetText(string.format("(%d) %s", abilityID, detailedName))
+        else
+            control.nameLabel:SetText(detailedName)
+        end
         local offsetY = showXPBar and -10 or 0
         control.nameLabel:SetAnchor(LEFT, control.slot, RIGHT, 10, offsetY)
 
