@@ -1,3 +1,4 @@
+---@diagnostic disable: duplicate-set-field
 -- -----------------------------------------------------------------------------
 --  LuiExtended Console Unlock Module                                          --
 --  Handles UI element unlocking and movement for console/gamepad              --

@@ -12,9 +12,6 @@ local GridOverlay = LUIE.GridOverlay
 local pairs = pairs
 local table_concat = table.concat
 
--- Load Console Settings API
-local SettingsAPI = LUIE.ConsoleSettingsAPI
-
 -- Load LibHarvensAddonSettings
 local LHAS = LibHarvensAddonSettings
 
@@ -112,349 +109,377 @@ function LUIE.CreateConsoleSettings()
                                 })
 
     -- Changelog Button
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_CHANGELOG),
-        GetString(LUIE_STRING_LAM_CHANGELOG_TP),
-        function ()
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_BUTTON,
+        label = GetString(LUIE_STRING_LAM_CHANGELOG),
+        tooltip = GetString(LUIE_STRING_LAM_CHANGELOG_TP),
+        buttonText = GetString(LUIE_STRING_LAM_CHANGELOG),
+        clickHandler = function ()
             LUIE.ToggleChangelog(false)
             SCENE_MANAGER:ShowBaseScene()
         end,
-        "half",
-        function () return not Settings.ShowChangeLog end
-    )
+        disable = function () return not Settings.ShowChangeLog end
+    }
 
     -- ReloadUI Button
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_RELOADUI),
-        GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
-        function () ReloadUI("ingame") end,
-        "half"
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_BUTTON,
+        label = GetString(LUIE_STRING_LAM_RELOADUI),
+        tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
+        buttonText = GetString(LUIE_STRING_LAM_RELOADUI),
+        clickHandler = function () ReloadUI("ingame") end
+    }
 
     -- Default UI Elements Position Unlock
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_UNLOCK_DEFAULT_UI),
-        GetString(LUIE_STRING_LAM_UNLOCK_DEFAULT_UI_TP),
-        function () return g_ElementMovingEnabled end,
-        function (value)
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_UNLOCK_DEFAULT_UI),
+        tooltip = GetString(LUIE_STRING_LAM_UNLOCK_DEFAULT_UI_TP),
+        getFunction = function () return g_ElementMovingEnabled end,
+        setFunction = function (value)
             g_ElementMovingEnabled = value
             LUIE.SetupElementMover(value)
         end,
-        "half",
-        nil,
-        false
-    )
+        default = false
+    }
 
     -- Grid Snap Settings
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Enable Grid Snap",
-        "Enable snapping UI elements to a grid when moving them",
-        function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
-        function (value)
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = "Enable Grid Snap",
+        tooltip = "Enable snapping UI elements to a grid when moving them",
+        getFunction = function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
+        setFunction = function (value)
             local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
             accountWideSettings.snapToGrid_default = value
             local gridSize = accountWideSettings.snapToGridSize_default or 15
             GridOverlay.Refresh("default", g_ElementMovingEnabled and value, gridSize)
         end,
-        "half",
-        nil,
-        false
-    )
+        default = false
+    }
 
     -- Grid Size
-    settingsData[#settingsData + 1] = SettingsAPI.CreateSliderOption(
-        "Grid Size",
-        "Set the size of the grid for snapping UI elements",
-        5,
-        100,
-        5,
-        function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_default or 15 end,
-        function (value)
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_SLIDER,
+        label = "Grid Size",
+        tooltip = "Set the size of the grid for snapping UI elements",
+        min = 5,
+        max = 100,
+        step = 5,
+        format = "%.0f",
+        getFunction = function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_default or 15 end,
+        setFunction = function (value)
             local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
             accountWideSettings.snapToGridSize_default = value
             GridOverlay.Refresh("default", g_ElementMovingEnabled and accountWideSettings.snapToGrid_default, value)
         end,
-        "half",
-        function () return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
-        15
-    )
+        default = 15,
+        disable = function () return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end
+    }
 
     -- Default UI Elements Position Reset
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_RESETPOSITION),
-        GetString(LUIE_STRING_LAM_RESET_DEFAULT_UI_TP),
-        LUIE.ResetElementPosition,
-        "half"
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_BUTTON,
+        label = GetString(LUIE_STRING_LAM_RESETPOSITION),
+        tooltip = GetString(LUIE_STRING_LAM_RESET_DEFAULT_UI_TP),
+        buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
+        clickHandler = LUIE.ResetElementPosition
+    }
 
-    -- Character Profile Settings Section (no submenu in LHAS)
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_SVPROFILE_HEADER)
-    )
+    -- Character Profile Settings Section
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_SECTION,
+        label = GetString(LUIE_STRING_LAM_SVPROFILE_HEADER)
+    }
 
     -- Character Profile Description
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_SVPROFILE_DESCRIPTION)
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = GetString(LUIE_STRING_LAM_SVPROFILE_DESCRIPTION)
+    }
 
     -- Use Character Specific Settings Toggle
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SVPROFILE_SETTINGSTOGGLE),
-        GetString(LUIE_STRING_LAM_SVPROFILE_SETTINGSTOGGLE_TP),
-        function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV end,
-        function (value)
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_SVPROFILE_SETTINGSTOGGLE),
+        tooltip = GetString(LUIE_STRING_LAM_SVPROFILE_SETTINGSTOGGLE_TP),
+        getFunction = function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV end,
+        setFunction = function (value)
             LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV = value
             ReloadUI("ingame")
-        end,
-        "full",
-        nil,
-        nil
-    )
+        end
+    }
 
     -- Copy Profile Dropdown - Convert profileCharacters to {name, data} format
     local profileItems = {}
     for i, profile in ipairs(profileCharacters) do
         profileItems[i] = { name = profile, data = profile }
     end
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDropdownOption(
-        GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPY),
-        GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPY_TP),
-        profileItems,
-        function () return profileQueuedCopy or "" end,
-        function (combobox, value, item)
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_DROPDOWN,
+        label = GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPY),
+        tooltip = GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPY_TP),
+        items = profileItems,
+        getFunction = function () return profileQueuedCopy or "" end,
+        setFunction = function (combobox, value, item)
             profileQueuedCopy = item.data
-        end,
-        "full",
-        nil,
-        nil
-    )
+        end
+    }
 
     -- Copy Profile Button
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPYBUTTON),
-        GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPYBUTTON_TP),
-        CopyCharacterProfile,
-        "full"
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_BUTTON,
+        label = GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPYBUTTON),
+        tooltip = GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPYBUTTON_TP),
+        buttonText = GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPYBUTTON),
+        clickHandler = CopyCharacterProfile
+    }
 
     -- Reset Current Character Settings Button
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_SVPROFILE_RESETCHAR),
-        GetString(LUIE_STRING_LAM_SVPROFILE_RESETCHAR_TP),
-        function ()
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_BUTTON,
+        label = GetString(LUIE_STRING_LAM_SVPROFILE_RESETCHAR),
+        tooltip = GetString(LUIE_STRING_LAM_SVPROFILE_RESETCHAR_TP),
+        buttonText = GetString(LUIE_STRING_LAM_SVPROFILE_RESETCHAR),
+        clickHandler = function ()
             DeleteCurrentProfile(false)
             ReloadUI("ingame")
         end,
-        "half",
-        function () return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV end
-    )
+        disable = function () return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV end
+    }
 
     -- Reset Account Wide Settings Button
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_SVPROFILE_RESETACCOUNT),
-        GetString(LUIE_STRING_LAM_SVPROFILE_RESETACCOUNT_TP),
-        function ()
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_BUTTON,
+        label = GetString(LUIE_STRING_LAM_SVPROFILE_RESETACCOUNT),
+        tooltip = GetString(LUIE_STRING_LAM_SVPROFILE_RESETACCOUNT_TP),
+        buttonText = GetString(LUIE_STRING_LAM_SVPROFILE_RESETACCOUNT),
+        clickHandler = function ()
             DeleteCurrentProfile(true)
             ReloadUI("ingame")
-        end,
-        "half"
-    )
+        end
+    }
 
     -- Modules Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_MODULEHEADER)
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_SECTION,
+        label = GetString(LUIE_STRING_LAM_MODULEHEADER)
+    }
 
     -- Unit Frames Module
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_UF_ENABLE),
-        nil,
-        function () return Settings.UnitFrames_Enabled end,
-        function (value) Settings.UnitFrames_Enabled = value end,
-        "half",
-        nil,
-        Defaults.UnitFrames_Enabled
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_UF_ENABLE),
+        getFunction = function () return Settings.UnitFrames_Enabled end,
+        setFunction = function (value) Settings.UnitFrames_Enabled = value end,
+        default = Defaults.UnitFrames_Enabled
+    }
 
     -- Unit Frames module description
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_UF_DESCRIPTION)
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = GetString(LUIE_STRING_LAM_UF_DESCRIPTION)
+    }
 
     -- Action Bar Module
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Action Bar",
-        nil,
-        function () return Settings.ActionBar_Enabled end,
-        function (value) Settings.ActionBar_Enabled = value end,
-        "half",
-        nil,
-        Defaults.ActionBar_Enabled
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = "Action Bar",
+        getFunction = function () return Settings.ActionBar_Enabled end,
+        setFunction = function (value) Settings.ActionBar_Enabled = value end,
+        default = Defaults.ActionBar_Enabled
+    }
 
     -- Action Bar Description
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        "Enhanced action bar with cooldown timers, ultimate tracking, and cast bar."
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = "Enhanced action bar with cooldown timers, ultimate tracking, and cast bar."
+    }
 
     -- Combat Info Module
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_SHOWCOMBATINFO),
-        nil,
-        function () return Settings.CombatInfo_Enabled end,
-        function (value) Settings.CombatInfo_Enabled = value end,
-        "half",
-        nil,
-        Defaults.CombatInfo_Enabled
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_CI_SHOWCOMBATINFO),
+        getFunction = function () return Settings.CombatInfo_Enabled end,
+        setFunction = function (value) Settings.CombatInfo_Enabled = value end,
+        default = Defaults.CombatInfo_Enabled
+    }
 
     -- Combat Info Description
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_CI_DESCRIPTION)
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = GetString(LUIE_STRING_LAM_CI_DESCRIPTION)
+    }
 
     -- Combat Text Module
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CT_SHOWCOMBATTEXT),
-        nil,
-        function () return Settings.CombatText_Enabled end,
-        function (value) Settings.CombatText_Enabled = value end,
-        "half",
-        nil,
-        Defaults.CombatText_Enabled
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_CT_SHOWCOMBATTEXT),
+        getFunction = function () return Settings.CombatText_Enabled end,
+        setFunction = function (value) Settings.CombatText_Enabled = value end,
+        default = Defaults.CombatText_Enabled
+    }
 
     -- Combat Text Description
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_CT_DESCRIPTION)
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = GetString(LUIE_STRING_LAM_CT_DESCRIPTION)
+    }
 
     -- Buffs & Debuffs Module
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_BUFF_ENABLEEFFECTSTRACK),
-        nil,
-        function () return Settings.SpellCastBuff_Enable end,
-        function (value) Settings.SpellCastBuff_Enable = value end,
-        "half",
-        nil,
-        Defaults.SpellCastBuff_Enable
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_BUFF_ENABLEEFFECTSTRACK),
+        getFunction = function () return Settings.SpellCastBuff_Enable end,
+        setFunction = function (value) Settings.SpellCastBuff_Enable = value end,
+        default = Defaults.SpellCastBuff_Enable
+    }
 
     -- Buffs & Debuffs Description
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_BUFFS_DESCRIPTION)
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = GetString(LUIE_STRING_LAM_BUFFS_DESCRIPTION)
+    }
 
     -- Chat Announcements Module
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CA_ENABLE),
-        nil,
-        function () return Settings.ChatAnnouncements_Enable end,
-        function (value) Settings.ChatAnnouncements_Enable = value end,
-        "half",
-        nil,
-        Defaults.ChatAnnouncements_Enable
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_CA_ENABLE),
+        getFunction = function () return Settings.ChatAnnouncements_Enable end,
+        setFunction = function (value) Settings.ChatAnnouncements_Enable = value end,
+        default = Defaults.ChatAnnouncements_Enable
+    }
 
     -- Chat Announcements Module Description
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_CA_DESCRIPTION)
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = GetString(LUIE_STRING_LAM_CA_DESCRIPTION)
+    }
 
     -- Slash Commands Module
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_ENABLE),
-        nil,
-        function () return Settings.SlashCommands_Enable end,
-        function (value) Settings.SlashCommands_Enable = value end,
-        "half",
-        nil,
-        Defaults.SlashCommands_Enable
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_SLASHCMDS_ENABLE),
+        getFunction = function () return Settings.SlashCommands_Enable end,
+        setFunction = function (value) Settings.SlashCommands_Enable = value end,
+        default = Defaults.SlashCommands_Enable
+    }
 
     -- Slash Commands Module Description
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_DESCRIPTION)
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = GetString(LUIE_STRING_LAM_SLASHCMDS_DESCRIPTION)
+    }
 
     -- Show InfoPanel
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_PNL_ENABLE),
-        nil,
-        function () return Settings.InfoPanel_Enabled end,
-        function (value) Settings.InfoPanel_Enabled = value end,
-        "half",
-        nil,
-        Defaults.InfoPanel_Enabled
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_PNL_ENABLE),
+        getFunction = function () return Settings.InfoPanel_Enabled end,
+        setFunction = function (value) Settings.InfoPanel_Enabled = value end,
+        default = Defaults.InfoPanel_Enabled
+    }
 
     -- InfoPanel Module Description
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_PNL_DESCRIPTION)
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = GetString(LUIE_STRING_LAM_PNL_DESCRIPTION)
+    }
 
     -- Misc Settings
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_MISCHEADER)
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_SECTION,
+        label = GetString(LUIE_STRING_LAM_MISCHEADER)
+    }
 
     -- Show Changelog
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Show Changelog when there is a update to LUIE.",
-        "Show Changelog when there is a update to LUIE.",
-        function () return Settings.ShowChangeLog end,
-        function (value) Settings.ShowChangeLog = value end,
-        "full",
-        nil,
-        Defaults.ShowChangeLog
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = "Show Changelog when there is a update to LUIE.",
+        tooltip = "Show Changelog when there is a update to LUIE.",
+        getFunction = function () return Settings.ShowChangeLog end,
+        setFunction = function (value) Settings.ShowChangeLog = value end,
+        default = Defaults.ShowChangeLog
+    }
 
     -- Hide Alerts
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_ALERT_HIDE_ALL),
-        GetString(LUIE_STRING_LAM_ALERT_HIDE_ALL_TP),
-        function () return Settings.HideAlertFrame end,
-        function (value)
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_ALERT_HIDE_ALL),
+        tooltip = GetString(LUIE_STRING_LAM_ALERT_HIDE_ALL_TP),
+        getFunction = function () return Settings.HideAlertFrame end,
+        setFunction = function (value)
             Settings.HideAlertFrame = value
             LUIE.SetupAlertFrameVisibility()
         end,
-        "full",
-        nil,
-        Defaults.HideAlertFrame
-    )
+        default = Defaults.HideAlertFrame
+    }
 
     -- Toggle XP Bar popup
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_HIDE_EXPERIENCE_BAR),
-        GetString(LUIE_STRING_LAM_HIDE_EXPERIENCE_BAR_TP),
-        function () return Settings.HideXPBar end,
-        function (value) Settings.HideXPBar = value end,
-        "full",
-        nil,
-        Defaults.HideXPBar
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_HIDE_EXPERIENCE_BAR),
+        tooltip = GetString(LUIE_STRING_LAM_HIDE_EXPERIENCE_BAR_TP),
+        getFunction = function () return Settings.HideXPBar end,
+        setFunction = function (value) Settings.HideXPBar = value end,
+        default = Defaults.HideXPBar
+    }
 
     -- Startup Message Options
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_STARTUPMSG),
-        GetString(LUIE_STRING_LAM_STARTUPMSG_TP),
-        function () return Settings.StartupInfo end,
-        function (value) Settings.StartupInfo = value end,
-        "full",
-        nil,
-        Defaults.StartupInfo
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_STARTUPMSG),
+        tooltip = GetString(LUIE_STRING_LAM_STARTUPMSG_TP),
+        getFunction = function () return Settings.StartupInfo end,
+        setFunction = function (value) Settings.StartupInfo = value end,
+        default = Defaults.StartupInfo
+    }
 
     -- Custom Icons
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Use Custom Icons",
-        "Use Custom Icons",
-        function () return Settings.CustomIcons end,
-        function (value) Settings.CustomIcons = value end,
-        "full",
-        nil,
-        Defaults.CustomIcons
-    )
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = "Use Custom Icons",
+        tooltip = "Use Custom Icons",
+        getFunction = function () return Settings.CustomIcons end,
+        setFunction = function (value) Settings.CustomIcons = value end,
+        default = Defaults.CustomIcons
+    }
 
     -- Add all settings to the panel
     panel:AddSettings(settingsData)

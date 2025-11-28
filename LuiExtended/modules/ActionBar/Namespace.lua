@@ -10,6 +10,7 @@ local LUIE = LUIE
 --- @class (partial) LUIE.ActionBar
 local ActionBar = {}
 ActionBar.__index = ActionBar
+--- @class (partial) LUIE.ActionBar
 LUIE.ActionBar = ActionBar
 
 -- Sub-module placeholders (will be populated by their respective files)

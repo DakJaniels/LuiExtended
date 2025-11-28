@@ -5,8 +5,7 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-
--- Load Settings API
+-- Load Console Settings API
 local SettingsAPI = LUIE.ConsoleSettingsAPI
 
 -- Load LibHarvensAddonSettings
@@ -240,2517 +239,3005 @@ function SpellCastBuffs.CreateConsoleSettings()
                                     end,
                                 })
 
+    -- Build font style list once for reuse
+    local fontStyleItems = {}
+    for i, styleName in ipairs(LUIE.FONT_STYLE_CHOICES) do
+        fontStyleItems[i] = { name = styleName, data = LUIE.FONT_STYLE_CHOICES_VALUES[i] }
+    end
+
+    -- Get status bar texture list from SettingsAPI
+    local statusbarTextureItems = SettingsAPI:GetStatusbarTexturesList()
+
+    -- Build rotation options list once for reuse
+    local rotationOptionsItems = {}
+    for i, optionName in ipairs(rotationOptions) do
+        rotationOptionsItems[i] = { name = optionName, data = rotationOptionsKeys[optionName] }
+    end
+
+    -- Collect initial settings for main menu
+    local initialSettings = {}
+
     -- Buffs & Debuffs Description
-    panel:AddSetting(SettingsAPI.CreateDescriptionOption(
-        {
-            text = GetString(LUIE_STRING_LAM_BUFFS_DESCRIPTION),
-        }))
+    initialSettings[#initialSettings + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = GetString(LUIE_STRING_LAM_BUFFS_DESCRIPTION),
+    }
 
     -- ReloadUI Button
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
-        {
-            name = GetString(LUIE_STRING_LAM_RELOADUI),
-            tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
-            clickHandler = function ()
-                ReloadUI("ingame")
-            end,
-            buttonText = GetString(LUIE_STRING_LAM_RELOADUI),
-        }))
+    initialSettings[#initialSettings + 1] =
+    {
+        type = LHAS.ST_BUTTON,
+        label = GetString(LUIE_STRING_LAM_RELOADUI),
+        tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
+        buttonText = GetString(LUIE_STRING_LAM_RELOADUI),
+        clickHandler = function ()
+            ReloadUI("ingame")
+        end,
+    }
 
     -- Buffs Window Unlock
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
-        {
-            name = GetString(LUIE_STRING_LAM_BUFF_UNLOCKWINDOW),
-            tooltip = GetString(LUIE_STRING_LAM_BUFF_UNLOCKWINDOW_TP),
-            getFunc = function ()
-                return g_BuffsMovingEnabled
-            end,
-            setFunc = function (value)
-                g_BuffsMovingEnabled = value
-                -- Ensure lockPositionToUnitFrames is properly initialized when unlocking frames
-                if value and SpellCastBuffs.SV.lockPositionToUnitFrames == nil then
-                    SpellCastBuffs.SV.lockPositionToUnitFrames = false
-                end
-                SpellCastBuffs.SetMovingState(value)
-            end,
-            default = false,
-        }))
+    initialSettings[#initialSettings + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_BUFF_UNLOCKWINDOW),
+        tooltip = GetString(LUIE_STRING_LAM_BUFF_UNLOCKWINDOW_TP),
+        getFunction = function ()
+            return g_BuffsMovingEnabled
+        end,
+        setFunction = function (v)
+            g_BuffsMovingEnabled = v
+            -- Ensure lockPositionToUnitFrames is properly initialized when unlocking frames
+            if v and SpellCastBuffs.SV.lockPositionToUnitFrames == nil then
+                SpellCastBuffs.SV.lockPositionToUnitFrames = false
+            end
+            SpellCastBuffs.SetMovingState(v)
+        end,
+        default = false,
+    }
 
     -- Buffs Window Reset position
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
-        {
-            name = GetString(LUIE_STRING_LAM_RESETPOSITION),
-            tooltip = GetString(LUIE_STRING_LAM_BUFF_RESETPOSITION_TP),
-            clickHandler = SpellCastBuffs.ResetTlwPosition,
-            buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
-        }))
+    initialSettings[#initialSettings + 1] =
+    {
+        type = LHAS.ST_BUTTON,
+        label = GetString(LUIE_STRING_LAM_RESETPOSITION),
+        tooltip = GetString(LUIE_STRING_LAM_BUFF_RESETPOSITION_TP),
+        buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
+        clickHandler = SpellCastBuffs.ResetTlwPosition,
+    }
 
     -- Hard-Lock Position to Unit Frames
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
-        {
-            name = GetString(LUIE_STRING_LAM_BUFF_HARDLOCK),
-            tooltip = GetString(LUIE_STRING_LAM_BUFF_HARDLOCK_TP),
-            getFunc = function ()
-                return Settings.lockPositionToUnitFrames
-            end,
-            setFunc = function (value)
-                Settings.lockPositionToUnitFrames = value
-            end,
-            default = Defaults.lockPositionToUnitFrames,
-        }))
+    initialSettings[#initialSettings + 1] =
+    {
+        type = LHAS.ST_CHECKBOX,
+        label = GetString(LUIE_STRING_LAM_BUFF_HARDLOCK),
+        tooltip = GetString(LUIE_STRING_LAM_BUFF_HARDLOCK_TP),
+        getFunction = function ()
+            return Settings.lockPositionToUnitFrames
+        end,
+        setFunction = function (v)
+            Settings.lockPositionToUnitFrames = v
+        end,
+        default = Defaults.lockPositionToUnitFrames,
+    }
 
-    -- Buffs&Debuffs - Position and Display Options Submenu
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
-        {
-            name = GetString(LUIE_STRING_LAM_BUFF_HEADER_POSITION),
-        }))
+    -- Initialize all settings and menu buttons for submenus
+    local backButton = nil
+    local menuButtons = {}
+    local sectionGroups = {}
 
-    -- Hide OakenSoul
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+    -- Helper function to build section settings
+    local function buildSectionSettings(sectionName, settingsBuilder)
+        local sectionSettings = {}
+        settingsBuilder(sectionSettings)
+        sectionGroups[sectionName] = sectionSettings
+    end
+
+    -- Build Position and Display Options Section
+    buildSectionSettings("PositionDisplay", function (settings)
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_MISC_HIDE_OAKENSOUL),
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_HEADER_POSITION),
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Configure position and display options for buffs and debuffs.",
+        }
+
+        -- Hide OakenSoul
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_MISC_HIDE_OAKENSOUL),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_MISC_HIDE_OAKENSOUL_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.HideOakenSoul
             end,
-            setFunc = function (value)
-                Settings.HideOakenSoul = value
+            setFunction = function (v)
+                Settings.HideOakenSoul = v
             end,
             default = Defaults.HideOakenSoul,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SHOWPLAYERBUFF)),
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SHOWPLAYERBUFF)),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOWPLAYERBUFF_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.HidePlayerBuffs
             end,
-            setFunc = function (value)
-                Settings.HidePlayerBuffs = not value
+            setFunction = function (v)
+                Settings.HidePlayerBuffs = not v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.HidePlayerBuffs,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SHOWPLAYERDEBUFF)),
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SHOWPLAYERDEBUFF)),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOWPLAYERDEBUFF_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.HidePlayerDebuffs
             end,
-            setFunc = function (value)
-                Settings.HidePlayerDebuffs = not value
+            setFunction = function (v)
+                Settings.HidePlayerDebuffs = not v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.HidePlayerDebuffs,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SHOWTARGETBUFF)),
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SHOWTARGETBUFF)),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOWTARGETBUFF_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.HideTargetBuffs
             end,
-            setFunc = function (value)
-                Settings.HideTargetBuffs = not value
+            setFunction = function (v)
+                Settings.HideTargetBuffs = not v
             end,
             default = not Defaults.HideTargetBuffs,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SHOWTARGETDEBUFF)),
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SHOWTARGETDEBUFF)),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOWTARGETDEBUFF_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.HideTargetDebuffs
             end,
-            setFunc = function (value)
-                Settings.HideTargetDebuffs = not value
+            setFunction = function (v)
+                Settings.HideTargetDebuffs = not v
             end,
             default = not Defaults.HideTargetDebuffs,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SHOWGROUNDBUFFDEBUFF)),
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SHOWGROUNDBUFFDEBUFF)),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOWGROUNDBUFFDEBUFF_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.HideGroundEffects
             end,
-            setFunc = function (value)
-                Settings.HideGroundEffects = not value
+            setFunction = function (v)
+                Settings.HideGroundEffects = not v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Settings.HideGroundEffects,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Ground Damage Auras
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Ground Damage Auras
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SHOW_GROUND_DAMAGE)),
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SHOW_GROUND_DAMAGE)),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOW_GROUND_DAMAGE_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.GroundDamageAura
             end,
-            setFunc = function (value)
-                Settings.GroundDamageAura = value
+            setFunction = function (v)
+                Settings.GroundDamageAura = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Settings.GroundDamageAura,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Add Extra
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Add Extra
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_ADD_EXTRA_BUFFS)),
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_ADD_EXTRA_BUFFS)),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_ADD_EXTRA_BUFFS_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ExtraBuffs
             end,
-            setFunc = function (value)
-                Settings.ExtraBuffs = value
+            setFunction = function (v)
+                Settings.ExtraBuffs = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Settings.ExtraBuffs,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Extra Expanded
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Extra Expanded
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_EXTEND_EXTRA)),
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_EXTEND_EXTRA),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_EXTEND_EXTRA_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ExtraExpanded
             end,
-            setFunc = function (value)
-                Settings.ExtraExpanded = value
+            setFunction = function (v)
+                Settings.ExtraExpanded = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Settings.ExtraExpanded,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and Settings.ExtraBuffs)
             end,
-        }))
+        }
 
-    -- Reduce
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Reduce
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_REDUCE)),
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_REDUCE)),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_REDUCE_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.HideReduce
             end,
-            setFunc = function (value)
-                Settings.HideReduce = value
+            setFunction = function (v)
+                Settings.HideReduce = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Settings.HideReduce,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Always Show Shared Debuffs
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Always Show Shared Debuffs
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_ALWAYS_SHARED_EFFECTS),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_ALWAYS_SHARED_EFFECTS),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_ALWAYS_SHARED_EFFECTS_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ShowSharedEffects
             end,
-            setFunc = function (value)
-                Settings.ShowSharedEffects = value
+            setFunction = function (v)
+                Settings.ShowSharedEffects = v
                 SpellCastBuffs.UpdateDisplayOverrideIdList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.ShowSharedEffects,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Always Show Major/Minor Debuffs
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Always Show Major/Minor Debuffs
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_ALWAYS_MAJOR_MINOR_EFFECTS),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_ALWAYS_MAJOR_MINOR_EFFECTS),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_ALWAYS_MAJOR_MINOR_EFFECTS_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ShowSharedMajorMinor
             end,
-            setFunc = function (value)
-                Settings.ShowSharedMajorMinor = value
+            setFunction = function (v)
+                Settings.ShowSharedMajorMinor = v
                 SpellCastBuffs.UpdateDisplayOverrideIdList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.ShowSharedMajorMinor,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
+    end)
 
-    -- Buffs&Debuffs - Long & Short Term Effects Filters
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+    -- Build Long & Short Term Effects Filters Section
+    buildSectionSettings("LongShortTerm", function (settings)
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONG_SHORT_HEADER),
-        }))
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONG_SHORT_HEADER),
+        }
 
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Submenu description
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_SHORTTERM_SELF),
+            type = LHAS.ST_LABEL,
+            label = "Configure long and short term effects filters.",
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_SHORTTERM_SELF),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_SHORTTERM_SELF_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ShortTermEffects_Player
             end,
-            setFunc = function (value)
-                Settings.ShortTermEffects_Player = value
+            setFunction = function (v)
+                Settings.ShortTermEffects_Player = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.ShortTermEffects_Player,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_SHORTTERM_TARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_SHORTTERM_TARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_SHORTTERM_TARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ShortTermEffects_Target
             end,
-            setFunc = function (value)
-                Settings.ShortTermEffects_Target = value
+            setFunction = function (v)
+                Settings.ShortTermEffects_Target = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.ShortTermEffects_Target,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SELF),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SELF),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SELF_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.LongTermEffects_Player
             end,
-            setFunc = function (value)
-                Settings.LongTermEffects_Player = value
+            setFunction = function (v)
+                Settings.LongTermEffects_Player = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.LongTermEffects_Player,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Separate control for player effects
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Separate control for player effects
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SEPCTRL)),
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SEPCTRL),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SEPCTRL_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.LongTermEffectsSeparate
             end,
-            setFunc = function (value)
-                Settings.LongTermEffectsSeparate = value
+            setFunction = function (v)
+                Settings.LongTermEffectsSeparate = v
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.LongTermEffectsSeparate,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and Settings.LongTermEffects_Player)
             end,
-        }))
+        }
 
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_TARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_TARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_TARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.LongTermEffects_Target
             end,
-            setFunc = function (value)
-                Settings.LongTermEffects_Target = value
+            setFunction = function (v)
+                Settings.LongTermEffects_Target = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.LongTermEffects_Target,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
+    end)
 
-    -- Misc Header
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+    -- Build Misc Options Section
+    buildSectionSettings("Misc", function (settings)
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_MISC_HEADER),
-        }))
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_MISC_HEADER),
+        }
 
-    -- Show Rezz Immunity Icon
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Submenu description
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWREZZ),
+            type = LHAS.ST_LABEL,
+            label = "Configure miscellaneous buff and debuff display options.",
+        }
+
+        -- Show Rezz Immunity Icon
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWREZZ),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWREZZ_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ShowResurrectionImmunity
             end,
-            setFunc = function (value)
-                Settings.ShowResurrectionImmunity = value
+            setFunction = function (v)
+                Settings.ShowResurrectionImmunity = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.ShowResurrectionImmunity,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Show Recall Cooldown Icon
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Show Recall Cooldown Icon
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWRECALL),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWRECALL),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWRECALL_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ShowRecall
             end,
-            setFunc = function (value)
-                Settings.ShowRecall = value
+            setFunction = function (v)
+                Settings.ShowRecall = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.ShowRecall,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Show Werewolf Timer Icon
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Show Werewolf Timer Icon
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWWEREWOLF),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWWEREWOLF),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWWEREWOLF_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ShowWerewolf
             end,
-            setFunc = function (value)
-                Settings.ShowWerewolf = value
+            setFunction = function (v)
+                Settings.ShowWerewolf = v
                 SpellCastBuffs.RegisterWerewolfEvents()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.ShowWerewolf,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Short Term - Set ICD - Player
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Short Term - Set ICD - Player
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SETICDPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SETICDPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SETICDPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreSetICDPlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreSetICDPlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreSetICDPlayer = not v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreSetICDPlayer,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Short Term - Ability ICD - Player
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Short Term - Ability ICD - Player
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ABILITYICDPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ABILITYICDPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ABILITYICDPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreAbilityICDPlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreAbilityICDPlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreAbilityICDPlayer = not v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreAbilityICDPlayer,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Show Block Player Icon
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Show Block Player Icon
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWBLOCKPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWBLOCKPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWBLOCKPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ShowBlockPlayer
             end,
-            setFunc = function (value)
-                Settings.ShowBlockPlayer = value
+            setFunction = function (v)
+                Settings.ShowBlockPlayer = v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.ShowBlockPlayer,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Show Block Target Icon
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Show Block Target Icon
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWBLOCKTARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWBLOCKTARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWBLOCKTARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ShowBlockTarget
             end,
-            setFunc = function (value)
-                Settings.ShowBlockTarget = value
+            setFunction = function (v)
+                Settings.ShowBlockTarget = v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.ShowBlockTarget,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Show Stealth Player Icon
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Show Stealth Player Icon
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWSTEALTHPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWSTEALTHPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWSTEALTHPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.StealthStatePlayer
             end,
-            setFunc = function (value)
-                Settings.StealthStatePlayer = value
+            setFunction = function (v)
+                Settings.StealthStatePlayer = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.StealthStatePlayer,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Show Stealth Target Icon
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Show Stealth Target Icon
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWSTEALTHTARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWSTEALTHTARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_MISC_SHOWSTEALTHTARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.StealthStateTarget
             end,
-            setFunc = function (value)
-                Settings.StealthStateTarget = value
+            setFunction = function (v)
+                Settings.StealthStateTarget = v
                 SpellCastBuffs.ReloadEffects("reticleover")
             end,
             default = Defaults.StealthStateTarget,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Show Disguise Player Icon
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Show Disguise Player Icon
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_MISC_LOOTSHOWDISGUISEPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_MISC_LOOTSHOWDISGUISEPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_MISC_LOOTSHOWDISGUISEPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.DisguiseStatePlayer
             end,
-            setFunc = function (value)
-                Settings.DisguiseStatePlayer = value
+            setFunction = function (v)
+                Settings.DisguiseStatePlayer = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.DisguiseStatePlayer,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Show Disguise Target Icon
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Show Disguise Target Icon
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_MISC_LOOTSHOWDISGUISETARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_MISC_LOOTSHOWDISGUISETARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_MISC_LOOTSHOWDISGUISETARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.DisguiseStateTarget
             end,
-            setFunc = function (value)
-                Settings.DisguiseStateTarget = value
+            setFunction = function (v)
+                Settings.DisguiseStateTarget = v
                 SpellCastBuffs.ReloadEffects("reticleover")
             end,
             default = Defaults.DisguiseStateTarget,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
+    end)
 
-    -- Long Term Header
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+    -- Build Long Term Effects Section
+    buildSectionSettings("LongTerm", function (settings)
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_HEADER),
-        }))
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_HEADER),
+        }
 
-    -- Long Term - Disguises
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Submenu description
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_DISGUISE),
+            type = LHAS.ST_LABEL,
+            label = "Configure long term effects display options.",
+        }
+
+        -- Long Term - Disguises
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_DISGUISE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_DISGUISE_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreDisguise
             end,
-            setFunc = function (value)
-                Settings.IgnoreDisguise = not value
+            setFunction = function (v)
+                Settings.IgnoreDisguise = not v
                 SpellCastBuffs.OnPlayerActivated()
             end,
             default = not Defaults.IgnoreDisguise,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Assistants
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Assistants
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ASSISTANT),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ASSISTANT),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ASSISTANT_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreAssistant
             end,
-            setFunc = function (value)
-                Settings.IgnoreAssistant = not value
+            setFunction = function (v)
+                Settings.IgnoreAssistant = not v
                 SpellCastBuffs.OnPlayerActivated()
             end,
             default = not Defaults.IgnoreAssistant,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Pets
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Pets
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_PET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_PET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_PET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnorePet
             end,
-            setFunc = function (value)
-                Settings.IgnorePet = not value
+            setFunction = function (v)
+                Settings.IgnorePet = not v
                 SpellCastBuffs.OnPlayerActivated()
             end,
             default = not Defaults.IgnorePet,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Use Generic Pet Icon
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Use Generic Pet Icon
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_LONGTERM_PET_ICON)),
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_LONGTERM_PET_ICON),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_PET_ICON_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.PetDetail
             end,
-            setFunc = function (value)
-                Settings.PetDetail = value
+            setFunction = function (v)
+                Settings.PetDetail = v
                 SpellCastBuffs.OnPlayerActivated()
             end,
             default = not Defaults.PetDetail,
-            disabled = function ()
+            disable = function ()
                 return Settings.IgnorePet
             end,
-        }))
+        }
 
-    -- Long Term - Mounts (Player)
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Mounts (Player)
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MOUNT_PLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MOUNT_PLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MOUNT_PLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreMountPlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreMountPlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreMountPlayer = not v
                 SpellCastBuffs.OnPlayerActivated()
             end,
             default = not Defaults.IgnoreMountPlayer,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Use Generic Mount Icon
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Use Generic Mount Icon
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MOUNT_ICON)),
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MOUNT_ICON),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MOUNT_ICON_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.MountDetail
             end,
-            setFunc = function (value)
-                Settings.MountDetail = value
+            setFunction = function (v)
+                Settings.MountDetail = v
                 SpellCastBuffs.OnPlayerActivated()
             end,
             default = not Defaults.MountDetail,
-            disabled = function ()
+            disable = function ()
                 return Settings.IgnoreMountPlayer
             end,
-        }))
+        }
 
-    -- Long Term - Mundus - Player
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Mundus - Player
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MUNDUSPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MUNDUSPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MUNDUSPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreMundusPlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreMundusPlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreMundusPlayer = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreMundusPlayer,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Mundus - Target
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Mundus - Target
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MUNDUSTARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MUNDUSTARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MUNDUSTARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreMundusTarget
             end,
-            setFunc = function (value)
-                Settings.IgnoreMundusTarget = not value
+            setFunction = function (v)
+                Settings.IgnoreMundusTarget = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreMundusTarget,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Food & Drink - Player
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Food & Drink - Player
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_FOODPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_FOODPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_FOODPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreFoodPlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreFoodPlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreFoodPlayer = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreFoodPlayer,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Food & Drink - Target
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Food & Drink - Target
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_FOODTARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_FOODTARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_FOODTARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreFoodTarget
             end,
-            setFunc = function (value)
-                Settings.IgnoreFoodTarget = not value
+            setFunction = function (v)
+                Settings.IgnoreFoodTarget = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreFoodTarget,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Experience - Player
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Experience - Player
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_EXPERIENCEPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_EXPERIENCEPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_EXPERIENCEPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreExperiencePlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreExperiencePlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreExperiencePlayer = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreExperiencePlayer,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Experience - Target
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Experience - Target
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_EXPERIENCETARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_EXPERIENCETARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_EXPERIENCETARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreExperienceTarget
             end,
-            setFunc = function (value)
-                Settings.IgnoreExperienceTarget = not value
+            setFunction = function (v)
+                Settings.IgnoreExperienceTarget = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreExperienceTarget,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Alliance XP - Player
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Alliance XP - Player
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ALLIANCEXPPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ALLIANCEXPPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ALLIANCEXPPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreAllianceXPPlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreAllianceXPPlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreAllianceXPPlayer = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreAllianceXPPlayer,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Alliance XP - Target
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Alliance XP - Target
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ALLIANCEXPTARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ALLIANCEXPTARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ALLIANCEXPTARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreAllianceXPTarget
             end,
-            setFunc = function (value)
-                Settings.IgnoreAllianceXPTarget = not value
+            setFunction = function (v)
+                Settings.IgnoreAllianceXPTarget = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreAllianceXPTarget,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Vamp Stage - Player
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Vamp Stage - Player
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_VAMPSTAGEPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_VAMPSTAGEPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_VAMPSTAGEPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreVampPlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreVampPlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreVampPlayer = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreVampPlayer,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Vamp Stage - Target
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Vamp Stage - Target
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_VAMPSTAGETARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_VAMPSTAGETARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_VAMPSTAGETARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreVampTarget
             end,
-            setFunc = function (value)
-                Settings.IgnoreVampTarget = not value
+            setFunction = function (v)
+                Settings.IgnoreVampTarget = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreVampTarget,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Lycanthrophy - Player
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Lycanthrophy - Player
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_LYCANPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_LYCANPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_LYCANPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreLycanPlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreLycanPlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreLycanPlayer = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreLycanPlayer,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Lycanthrophy - Target
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Lycanthrophy - Target
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_LYCANTARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_LYCANTARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_LYCANTARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreLycanTarget
             end,
-            setFunc = function (value)
-                Settings.IgnoreLycanTarget = not value
+            setFunction = function (v)
+                Settings.IgnoreLycanTarget = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreLycanTarget,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Bite Disease - Player
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Bite Disease - Player
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_VAMPWWPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_VAMPWWPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_VAMPWWPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreDiseasePlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreDiseasePlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreDiseasePlayer = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreDiseasePlayer,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Bite Disease - Target
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Bite Disease - Target
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_VAMPWWTARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_VAMPWWTARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_VAMPWWTARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreDiseaseTarget
             end,
-            setFunc = function (value)
-                Settings.IgnoreDiseaseTarget = not value
+            setFunction = function (v)
+                Settings.IgnoreDiseaseTarget = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreDiseaseTarget,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Bite Timers - Player
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Bite Timers - Player
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_BITEPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_BITEPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_BITEPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreBitePlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreBitePlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreBitePlayer = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreBitePlayer,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Bite Timers - Target
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Bite Timers - Target
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_BITETARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_BITETARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_BITETARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreBiteTarget
             end,
-            setFunc = function (value)
-                Settings.IgnoreBiteTarget = not value
+            setFunction = function (v)
+                Settings.IgnoreBiteTarget = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreBiteTarget,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Battle Spirit - Player
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Battle Spirit - Player
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_BSPIRITPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_BSPIRITPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_BSPIRITPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreBattleSpiritPlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreBattleSpiritPlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreBattleSpiritPlayer = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
                 SpellCastBuffs.ArtificialEffectUpdate()
             end,
             default = not Defaults.IgnoreBattleSpiritPlayer,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Battle Spirit - Target
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Battle Spirit - Target
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_BSPIRITTARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_BSPIRITTARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_BSPIRITTARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreBattleSpiritTarget
             end,
-            setFunc = function (value)
-                Settings.IgnoreBattleSpiritTarget = not value
+            setFunction = function (v)
+                Settings.IgnoreBattleSpiritTarget = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreBattleSpiritTarget,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Cyrodiil - Player
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Cyrodiil - Player
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_CYROPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_CYROPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_CYROPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreCyrodiilPlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreCyrodiilPlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreCyrodiilPlayer = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreCyrodiilPlayer,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Cyrodiil - Target
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Cyrodiil - Target
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_CYROTARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_CYROTARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_CYROTARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreCyrodiilTarget
             end,
-            setFunc = function (value)
-                Settings.IgnoreCyrodiilTarget = not value
+            setFunction = function (v)
+                Settings.IgnoreCyrodiilTarget = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreCyrodiilTarget,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - ESO Plus - Player
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - ESO Plus - Player
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ESOPLUSPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ESOPLUSPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ESOPLUSPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreEsoPlusPlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreEsoPlusPlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreEsoPlusPlayer = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreEsoPlusPlayer,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - ESO Plus - Target
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - ESO Plus - Target
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ESOPLUSTARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ESOPLUSTARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_ESOPLUSTARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreEsoPlusTarget
             end,
-            setFunc = function (value)
-                Settings.IgnoreEsoPlusTarget = not value
+            setFunction = function (v)
+                Settings.IgnoreEsoPlusTarget = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreEsoPlusTarget,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Soul Summons - Player
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Soul Summons - Player
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SOULSUMMONSPLAYER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SOULSUMMONSPLAYER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SOULSUMMONSPLAYER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreSoulSummonsPlayer
             end,
-            setFunc = function (value)
-                Settings.IgnoreSoulSummonsPlayer = not value
+            setFunction = function (v)
+                Settings.IgnoreSoulSummonsPlayer = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreSoulSummonsPlayer,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
 
-    -- Long Term - Soul Summons - Target
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Long Term - Soul Summons - Target
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SOULSUMMONSTARGET),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SOULSUMMONSTARGET),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SOULSUMMONSTARGET_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return not Settings.IgnoreSoulSummonsTarget
             end,
-            setFunc = function (value)
-                Settings.IgnoreSoulSummonsTarget = not value
+            setFunction = function (v)
+                Settings.IgnoreSoulSummonsTarget = not v
                 SpellCastBuffs.UpdateContextHideList()
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = not Defaults.IgnoreSoulSummonsTarget,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.LongTermEffects_Player or Settings.LongTermEffects_Target))
             end,
-        }))
+        }
+    end)
 
-    -- Buffs&Debuffs - Icon Options Submenu
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+    -- Build Icon Options Section
+    buildSectionSettings("Icon", function (settings)
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_ICON_HEADER),
-        }))
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_ICON_HEADER),
+        }
 
-    -- Buff Icon Size
-    panel:AddSetting(SettingsAPI.CreateSliderOption(
+        -- Submenu description
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_ICONSIZE),
+            type = LHAS.ST_LABEL,
+            label = "Configure icon display options for buffs and debuffs.",
+        }
+
+        -- Buff Icon Size
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            format = "%.0f",
+            label = GetString(LUIE_STRING_LAM_BUFF_ICONSIZE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_ICONSIZE_TP),
             min = 30,
             max = 60,
             step = 2,
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.IconSize
             end,
-            setFunc = function (value)
-                Settings.IconSize = value
+            setFunction = function (v)
+                Settings.IconSize = v
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.IconSize,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Buff Show Remaining Time Label
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Buff Show Remaining Time Label
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_SHOWREMAINTIMELABEL),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_SHOWREMAINTIMELABEL),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOWREMAINTIMELABEL_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.RemainingText
             end,
-            setFunc = function (value)
-                Settings.RemainingText = value
+            setFunction = function (v)
+                Settings.RemainingText = v
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.RemainingText,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Buff Label Position
-    panel:AddSetting(SettingsAPI.CreateSliderOption(
+        -- Buff Label Position
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_CI_SHARED_POSITION)),
+            type = LHAS.ST_SLIDER,
+            format = "%.0f",
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_SHARED_POSITION),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LABEL_POSITION_TP),
             min = -64,
             max = 64,
             step = 2,
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.LabelPosition
             end,
-            setFunc = function (value)
-                Settings.LabelPosition = value
+            setFunction = function (v)
+                Settings.LabelPosition = v
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.LabelPosition,
-            disabled = function ()
+            disable = function ()
                 return not (Settings.RemainingText and LUIE.SV.SpellCastBuff_Enable)
             end,
-        }))
+        }
 
-    -- Buff Label Font
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Buff Label Font
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_FONT)),
+            type = LHAS.ST_DROPDOWN,
+            label = "  " .. GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_FONT_TP),
-            choices = SettingsAPI.GetFontsList(),
-            getFunc = function ()
+            items = SettingsAPI:GetFontsList(),
+            getFunction = function ()
                 return Settings.BuffFontFace
             end,
-            setFunc = function (value)
-                Settings.BuffFontFace = value
+            setFunction = function (v)
+                Settings.BuffFontFace = v
                 SpellCastBuffs.ApplyFont()
             end,
             default = Defaults.BuffFontFace,
-            disabled = function ()
+            disable = function ()
                 return not (Settings.RemainingText and LUIE.SV.SpellCastBuff_Enable)
             end,
-        }))
+        }
 
-    -- Buff Font Size
-    panel:AddSetting(SettingsAPI.CreateSliderOption(
+        -- Buff Font Size
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_FONT_SIZE)),
+            type = LHAS.ST_SLIDER,
+            format = "%.0f",
+            label = "  " .. GetString(LUIE_STRING_LAM_FONT_SIZE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_FONTSIZE_TP),
             min = 10,
             max = 30,
             step = 1,
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.BuffFontSize
             end,
-            setFunc = function (value)
-                Settings.BuffFontSize = value
+            setFunction = function (v)
+                Settings.BuffFontSize = v
                 SpellCastBuffs.ApplyFont()
             end,
             default = Defaults.BuffFontSize,
-            disabled = function ()
+            disable = function ()
                 return not (Settings.RemainingText and LUIE.SV.SpellCastBuff_Enable)
             end,
-        }))
+        }
 
-    -- Buff Font Style
-    panel:AddSetting(SettingsAPI.CreateFontStyleDropdown(
+        -- Buff Font Style
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_FONT_STYLE)),
+            type = LHAS.ST_DROPDOWN,
+            label = "  " .. GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_FONTSTYLE_TP),
-            getFunc = function ()
-                return Settings.BuffFontStyle
+            items = fontStyleItems,
+            getFunction = function ()
+                for i, choiceValue in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
+                    if Settings.BuffFontStyle == choiceValue then
+                        return LUIE.FONT_STYLE_CHOICES[i]
+                    end
+                end
+                return LUIE.FONT_STYLE_CHOICES[1]
             end,
-            setFunc = function (value)
-                Settings.BuffFontStyle = value
-                SpellCastBuffs.ApplyFont()
+            setFunction = function (v)
+                for i, choiceName in ipairs(LUIE.FONT_STYLE_CHOICES) do
+                    if v == choiceName then
+                        Settings.BuffFontStyle = LUIE.FONT_STYLE_CHOICES_VALUES[i]
+                        SpellCastBuffs.ApplyFont()
+                        return
+                    end
+                end
             end,
             default = Defaults.BuffFontStyle,
-            disabled = function ()
+            disable = function ()
                 return not (Settings.RemainingText and LUIE.SV.SpellCastBuff_Enable)
             end,
-        }))
+        }
 
-    -- Buff Colored Label
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Buff Colored Label
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_CI_POTION_COLOR)),
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_POTION_COLOR),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LABELCOLOR_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.RemainingTextColoured
             end,
-            setFunc = function (value)
-                Settings.RemainingTextColoured = value
+            setFunction = function (v)
+                Settings.RemainingTextColoured = v
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.RemainingTextColoured,
-            disabled = function ()
+            disable = function ()
                 return not (Settings.RemainingText and LUIE.SV.SpellCastBuff_Enable)
             end,
-        }))
+        }
 
-    -- Buff Show Seconds Fractions
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Buff Show Seconds Fractions
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS)),
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.RemainingTextMillis
             end,
-            setFunc = function (value)
-                Settings.RemainingTextMillis = value
+            setFunction = function (v)
+                Settings.RemainingTextMillis = v
             end,
             default = Defaults.RemainingTextMillis,
-            disabled = function ()
+            disable = function ()
                 return not (Settings.RemainingText and LUIE.SV.SpellCastBuff_Enable)
             end,
-        }))
+        }
 
-    -- Buff Glow Icon Border
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Buff Glow Icon Border
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_GLOWICONBORDER),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_GLOWICONBORDER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_GLOWICONBORDER_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.GlowIcons
             end,
-            setFunc = function (value)
-                Settings.GlowIcons = value
+            setFunction = function (v)
+                Settings.GlowIcons = v
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.GlowIcons,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Buff Show Border Cooldown
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Buff Show Border Cooldown
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_SHOWBORDERCOOLDOWN),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_SHOWBORDERCOOLDOWN),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOWBORDERCOOLDOWN_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.RemainingCooldown
             end,
-            setFunc = function (value)
-                Settings.RemainingCooldown = value
+            setFunction = function (v)
+                Settings.RemainingCooldown = v
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.RemainingCooldown,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Buff Fade Expiring Icon
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Buff Fade Expiring Icon
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_FADEEXPIREICON),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_FADEEXPIREICON),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_FADEEXPIREICON_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.FadeOutIcons
             end,
-            setFunc = function (value)
-                Settings.FadeOutIcons = value
+            setFunction = function (v)
+                Settings.FadeOutIcons = v
             end,
             default = Defaults.FadeOutIcons,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Icon Normalization Options
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+        -- Icon Normalization Options
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_NORMALIZE_HEADER),
-        }))
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_NORMALIZE_HEADER),
+        }
 
-    -- Use Generic Icon for CC Type
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Use Generic Icon for CC Type
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON),
             tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.UseDefaultIcon
             end,
-            setFunc = function (newValue)
-                Settings.UseDefaultIcon = newValue
+            setFunction = function (v)
+                Settings.UseDefaultIcon = v
             end,
             default = Defaults.UseDefaultIcon,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Generic Icon Options
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Generic Icon Options
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS)),
+            type = LHAS.ST_DROPDOWN,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS),
             tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS_TP),
-            choices = globalIconOptions,
-            getFunc = function ()
-                return globalIconOptions[Settings.DefaultIconOptions]
+            items = SettingsAPI:GetGlobalIconOptionsList(),
+            getFunction = function ()
+                local index = Settings.DefaultIconOptions
+                if type(index) == "string" then
+                    index = globalIconOptionsKeys[index] or 1
+                end
+                return globalIconOptions[index] or globalIconOptions[1]
             end,
-            setFunc = function (combobox, value, item)
-                Settings.DefaultIconOptions = globalIconOptionsKeys[value]
+            setFunction = function (combobox, value, item)
+                Settings.DefaultIconOptions = item.data
             end,
             default = globalIconOptions[Defaults.DefaultIconOptions],
-            disabled = function ()
+            disable = function ()
                 return not Settings.UseDefaultIcon
             end,
-        }))
+        }
+    end)
 
-    -- Buffs&Debuffs - Color Options Submenu
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+    -- Build Color Options Section
+    buildSectionSettings("Color", function (settings)
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER),
-        }))
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER),
+        }
 
-    -- Basic Color Options
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+        -- Submenu description
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER_BASIC),
-        }))
+            type = LHAS.ST_LABEL,
+            label = "Configure color options for buffs and debuffs.",
+        }
 
-    -- buff
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_BUFF),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_BUFF_TP),
-        function ()
-            return unpack(Settings.colors.buff)
-        end,
-        function (r, g, b, a)
-            Settings.colors.buff = { r, g, b, a }
-        end,
-        Defaults.colors.buff
-    ))
-
-    -- debuff
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_DEBUFF),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_DEBUFF_TP),
-        function ()
-            return unpack(Settings.colors.debuff)
-        end,
-        function (r, g, b, a)
-            Settings.colors.debuff = { r, g, b, a }
-        end,
-        Defaults.colors.debuff
-    ))
-
-    -- prioritybuff
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_PRIORITYBUFF),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_PRIORITYBUFF_TP),
-        function ()
-            return unpack(Settings.colors.prioritybuff)
-        end,
-        function (r, g, b, a)
-            Settings.colors.prioritybuff = { r, g, b, a }
-        end,
-        Defaults.colors.prioritybuff
-    ))
-
-    -- prioritydebuff
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_PRIORITYDEBUFF),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_PRIORITYDEBUFF_TP),
-        function ()
-            return unpack(Settings.colors.prioritydebuff)
-        end,
-        function (r, g, b, a)
-            Settings.colors.prioritydebuff = { r, g, b, a }
-        end,
-        Defaults.colors.prioritydebuff
-    ))
-
-    -- Unbreakable & Cosmetic Header
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+        -- Basic Color Options
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER_UNBREAKABLE),
-        }))
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER_BASIC),
+        }
 
-    -- Unbreakable Toggle
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- buff
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_COLOR_UNBREAKABLE_TOGGLE),
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_BUFF),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_BUFF_TP),
+            getFunction = function ()
+                return Settings.colors.buff[1], Settings.colors.buff[2], Settings.colors.buff[3], Settings.colors.buff[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.buff = { r, g, b, a }
+            end,
+            default = Defaults.colors.buff,
+        }
+
+        -- debuff
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_DEBUFF),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_DEBUFF_TP),
+            getFunction = function ()
+                return Settings.colors.debuff[1], Settings.colors.debuff[2], Settings.colors.debuff[3], Settings.colors.debuff[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.debuff = { r, g, b, a }
+            end,
+            default = Defaults.colors.debuff,
+        }
+
+        -- prioritybuff
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_PRIORITYBUFF),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_PRIORITYBUFF_TP),
+            getFunction = function ()
+                return Settings.colors.prioritybuff[1], Settings.colors.prioritybuff[2], Settings.colors.prioritybuff[3], Settings.colors.prioritybuff[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.prioritybuff = { r, g, b, a }
+            end,
+            default = Defaults.colors.prioritybuff,
+        }
+
+        -- prioritydebuff
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_PRIORITYDEBUFF),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_PRIORITYDEBUFF_TP),
+            getFunction = function ()
+                return Settings.colors.prioritydebuff[1], Settings.colors.prioritydebuff[2], Settings.colors.prioritydebuff[3], Settings.colors.prioritydebuff[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.prioritydebuff = { r, g, b, a }
+            end,
+            default = Defaults.colors.prioritydebuff,
+        }
+
+        -- Unbreakable & Cosmetic Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER_UNBREAKABLE),
+        }
+
+        -- Unbreakable Toggle
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_UNBREAKABLE_TOGGLE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_UNBREAKABLE_TOGGLE_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ColorUnbreakable
             end,
-            setFunc = function (value)
-                Settings.ColorUnbreakable = value
+            setFunction = function (v)
+                Settings.ColorUnbreakable = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.ColorUnbreakable,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- unbreakable
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_COLOR_UNBREAKABLE)),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_UNBREAKABLE_TP),
-        function ()
-            return unpack(Settings.colors.unbreakable)
-        end,
-        function (r, g, b, a)
-            Settings.colors.unbreakable = { r, g, b, a }
-        end,
-        Defaults.colors.unbreakable,
-        nil,
-        function ()
-            return not Settings.ColorUnbreakable
-        end
-    ))
-
-    -- Cosmetic Toggle
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- unbreakable
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_COLOR_COSMETIC_TOGGLE),
+            type = LHAS.ST_COLOR,
+            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_COLOR_UNBREAKABLE),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_UNBREAKABLE_TP),
+            getFunction = function ()
+                return Settings.colors.unbreakable[1], Settings.colors.unbreakable[2], Settings.colors.unbreakable[3], Settings.colors.unbreakable[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.unbreakable = { r, g, b, a }
+            end,
+            default = Defaults.colors.unbreakable,
+            disable = function ()
+                return not Settings.ColorUnbreakable
+            end,
+        }
+
+        -- Cosmetic Toggle
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_COSMETIC_TOGGLE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_COSMETIC_TOGGLE_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ColorCosmetic
             end,
-            setFunc = function (value)
-                Settings.ColorCosmetic = value
+            setFunction = function (v)
+                Settings.ColorCosmetic = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.ColorCosmetic,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- cosmetic
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_COLOR_COSMETIC)),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_COSMETIC_TP),
-        function ()
-            return unpack(Settings.colors.cosmetic)
-        end,
-        function (r, g, b, a)
-            Settings.colors.cosmetic = { r, g, b, a }
-        end,
-        Defaults.colors.cosmetic,
-        nil,
-        function ()
-            return not Settings.ColorCosmetic
-        end
-    ))
-
-    -- Crowd Control Header
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+        -- cosmetic
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER_CROWD_CONTROL),
-        }))
+            type = LHAS.ST_COLOR,
+            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_COLOR_COSMETIC),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_COSMETIC_TP),
+            getFunction = function ()
+                return Settings.colors.cosmetic[1], Settings.colors.cosmetic[2], Settings.colors.cosmetic[3], Settings.colors.cosmetic[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.cosmetic = { r, g, b, a }
+            end,
+            default = Defaults.colors.cosmetic,
+            disable = function ()
+                return not Settings.ColorCosmetic
+            end,
+        }
 
-    -- CC Toggle
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Crowd Control Header
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_COLOR_BY_CC),
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER_CROWD_CONTROL),
+        }
+
+        -- CC Toggle
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_BY_CC),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_BY_CC_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ColorCC
             end,
-            setFunc = function (value)
-                Settings.ColorCC = value
+            setFunction = function (v)
+                Settings.ColorCC = v
                 SpellCastBuffs.ReloadEffects("player")
             end,
             default = Defaults.ColorCC,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- nocc
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_NOCC),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_NOCC_TP),
-        function ()
-            return unpack(Settings.colors.nocc)
-        end,
-        function (r, g, b, a)
-            Settings.colors.nocc = { r, g, b, a }
-        end,
-        Defaults.colors.nocc,
-        nil,
-        function ()
-            return not Settings.ColorCC
-        end
-    ))
-
-    -- stun
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_STUN),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_STUN_TP),
-        function ()
-            return unpack(Settings.colors.stun)
-        end,
-        function (r, g, b, a)
-            Settings.colors.stun = { r, g, b, a }
-        end,
-        Defaults.colors.stun,
-        nil,
-        function ()
-            return not Settings.ColorCC
-        end
-    ))
-
-    -- knockback
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_KNOCKBACK),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_KNOCKBACK_TP),
-        function ()
-            return unpack(Settings.colors.knockback)
-        end,
-        function (r, g, b, a)
-            Settings.colors.knockback = { r, g, b, a }
-        end,
-        Defaults.colors.knockback,
-        nil,
-        function ()
-            return not Settings.ColorCC
-        end
-    ))
-
-    -- levitate
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_LEVITATE),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_LEVITATE_TP),
-        function ()
-            return unpack(Settings.colors.levitate)
-        end,
-        function (r, g, b, a)
-            Settings.colors.levitate = { r, g, b, a }
-        end,
-        Defaults.colors.levitate,
-        nil,
-        function ()
-            return not Settings.ColorCC
-        end
-    ))
-
-    -- disorient
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_DISORIENT),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_DISORIENT_TP),
-        function ()
-            return unpack(Settings.colors.disorient)
-        end,
-        function (r, g, b, a)
-            Settings.colors.disorient = { r, g, b, a }
-        end,
-        Defaults.colors.disorient,
-        nil,
-        function ()
-            return not Settings.ColorCC
-        end
-    ))
-
-    -- fear
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_FEAR),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_FEAR_TP),
-        function ()
-            return unpack(Settings.colors.fear)
-        end,
-        function (r, g, b, a)
-            Settings.colors.fear = { r, g, b, a }
-        end,
-        Defaults.colors.fear,
-        nil,
-        function ()
-            return not Settings.ColorCC
-        end
-    ))
-
-    -- charm
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_CHARM),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_CHARM_TP),
-        function ()
-            return unpack(Settings.colors.charm)
-        end,
-        function (r, g, b, a)
-            Settings.colors.charm = { r, g, b, a }
-        end,
-        Defaults.colors.charm,
-        nil,
-        function ()
-            return not Settings.ColorCC
-        end
-    ))
-
-    -- stagger
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_STAGGER),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_STAGGER_TP),
-        function ()
-            return unpack(Settings.colors.stagger)
-        end,
-        function (r, g, b, a)
-            Settings.colors.stagger = { r, g, b, a }
-        end,
-        Defaults.colors.stagger,
-        nil,
-        function ()
-            return not Settings.ColorCC
-        end
-    ))
-
-    -- silence
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_SILENCE),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_SILENCE_TP),
-        function ()
-            return unpack(Settings.colors.silence)
-        end,
-        function (r, g, b, a)
-            Settings.colors.silence = { r, g, b, a }
-        end,
-        Defaults.colors.silence,
-        nil,
-        function ()
-            return not Settings.ColorCC
-        end
-    ))
-
-    -- snare
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_SNARE),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_SNARE_TP),
-        function ()
-            return unpack(Settings.colors.snare)
-        end,
-        function (r, g, b, a)
-            Settings.colors.snare = { r, g, b, a }
-        end,
-        Defaults.colors.snare,
-        nil,
-        function ()
-            return not Settings.ColorCC
-        end
-    ))
-
-    -- root
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_ROOT),
-        GetString(LUIE_STRING_LAM_BUFF_COLOR_ROOT_TP),
-        function ()
-            return unpack(Settings.colors.root)
-        end,
-        function (r, g, b, a)
-            Settings.colors.root = { r, g, b, a }
-        end,
-        Defaults.colors.root,
-        nil,
-        function ()
-            return not Settings.ColorCC
-        end
-    ))
-
-    -- Buffs&Debuffs - Alignment & Sorting Options Submenu
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+        -- nocc
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_SORTING_HEADER),
-        }))
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_NOCC),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_NOCC_TP),
+            getFunction = function ()
+                return Settings.colors.nocc[1], Settings.colors.nocc[2], Settings.colors.nocc[3], Settings.colors.nocc[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.nocc = { r, g, b, a }
+            end,
+            default = Defaults.colors.nocc,
+            disable = function ()
+                return not Settings.ColorCC
+            end,
+        }
 
-    -- Buffs/Debuffs Alignment & Sorting
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+        -- stun
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_SORTING_NORMAL_HEADER),
-        }))
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_STUN),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_STUN_TP),
+            getFunction = function ()
+                return Settings.colors.stun[1], Settings.colors.stun[2], Settings.colors.stun[3], Settings.colors.stun[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.stun = { r, g, b, a }
+            end,
+            default = Defaults.colors.stun,
+            disable = function ()
+                return not Settings.ColorCC
+            end,
+        }
 
-    -- Buff Alignment (BuffsPlayer)
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- knockback
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_KNOCKBACK),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_KNOCKBACK_TP),
+            getFunction = function ()
+                return Settings.colors.knockback[1], Settings.colors.knockback[2], Settings.colors.knockback[3], Settings.colors.knockback[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.knockback = { r, g, b, a }
+            end,
+            default = Defaults.colors.knockback,
+            disable = function ()
+                return not Settings.ColorCC
+            end,
+        }
+
+        -- levitate
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_LEVITATE),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_LEVITATE_TP),
+            getFunction = function ()
+                return Settings.colors.levitate[1], Settings.colors.levitate[2], Settings.colors.levitate[3], Settings.colors.levitate[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.levitate = { r, g, b, a }
+            end,
+            default = Defaults.colors.levitate,
+            disable = function ()
+                return not Settings.ColorCC
+            end,
+        }
+
+        -- disorient
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_DISORIENT),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_DISORIENT_TP),
+            getFunction = function ()
+                return Settings.colors.disorient[1], Settings.colors.disorient[2], Settings.colors.disorient[3], Settings.colors.disorient[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.disorient = { r, g, b, a }
+            end,
+            default = Defaults.colors.disorient,
+            disable = function ()
+                return not Settings.ColorCC
+            end,
+        }
+
+        -- fear
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_FEAR),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_FEAR_TP),
+            getFunction = function ()
+                return Settings.colors.fear[1], Settings.colors.fear[2], Settings.colors.fear[3], Settings.colors.fear[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.fear = { r, g, b, a }
+            end,
+            default = Defaults.colors.fear,
+            disable = function ()
+                return not Settings.ColorCC
+            end,
+        }
+
+        -- charm
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_CHARM),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_CHARM_TP),
+            getFunction = function ()
+                return Settings.colors.charm[1], Settings.colors.charm[2], Settings.colors.charm[3], Settings.colors.charm[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.charm = { r, g, b, a }
+            end,
+            default = Defaults.colors.charm,
+            disable = function ()
+                return not Settings.ColorCC
+            end,
+        }
+
+        -- stagger
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_STAGGER),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_STAGGER_TP),
+            getFunction = function ()
+                return Settings.colors.stagger[1], Settings.colors.stagger[2], Settings.colors.stagger[3], Settings.colors.stagger[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.stagger = { r, g, b, a }
+            end,
+            default = Defaults.colors.stagger,
+            disable = function ()
+                return not Settings.ColorCC
+            end,
+        }
+
+        -- silence
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_SILENCE),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_SILENCE_TP),
+            getFunction = function ()
+                return Settings.colors.silence[1], Settings.colors.silence[2], Settings.colors.silence[3], Settings.colors.silence[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.silence = { r, g, b, a }
+            end,
+            default = Defaults.colors.silence,
+            disable = function ()
+                return not Settings.ColorCC
+            end,
+        }
+
+        -- snare
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_SNARE),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_SNARE_TP),
+            getFunction = function ()
+                return Settings.colors.snare[1], Settings.colors.snare[2], Settings.colors.snare[3], Settings.colors.snare[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.snare = { r, g, b, a }
+            end,
+            default = Defaults.colors.snare,
+            disable = function ()
+                return not Settings.ColorCC
+            end,
+        }
+
+        -- root
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_ROOT),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_ROOT_TP),
+            getFunction = function ()
+                return Settings.colors.root[1], Settings.colors.root[2], Settings.colors.root[3], Settings.colors.root[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.colors.root = { r, g, b, a }
+            end,
+            default = Defaults.colors.root,
+            disable = function ()
+                return not Settings.ColorCC
+            end,
+        }
+    end)
+
+    -- Build Alignment & Sorting Options Section
+    buildSectionSettings("AlignmentSorting", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_SORTING_HEADER),
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Configure alignment and sorting options for buffs and debuffs.",
+        }
+
+        -- Buffs/Debuffs Alignment & Sorting
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_SORTING_NORMAL_HEADER),
+        }
+
+        -- Buff Alignment (BuffsPlayer)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
-            choices = { "Left", "Centered", "Right" },
-            getFunc = function ()
-                return Settings.AlignmentBuffsPlayer
+            items =
+            {
+                { name = "Left",     data = "Left"     },
+                { name = "Centered", data = "Centered" },
+                { name = "Right",    data = "Right"    },
+            },
+            getFunction = function ()
+                local value = Settings.AlignmentBuffsPlayer
+                if value == "Left" or value == "Centered" or value == "Right" then
+                    return value
+                end
+                return Defaults.AlignmentBuffsPlayer or "Left"
             end,
-            setFunc = function (value)
-                Settings.AlignmentBuffsPlayer = value
+            setFunction = function (combobox, value, item)
+                Settings.AlignmentBuffsPlayer = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentBuffsPlayer,
-        }))
+            default = Defaults.AlignmentBuffsPlayer or "Left",
+        }
 
-    -- Buff Sort Direction (BuffsPlayer)
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Buff Sort Direction (BuffsPlayer)
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
-            choices = { "Left to Right", "Right to Left" },
-            getFunc = function ()
-                return Settings.SortBuffsPlayer
+            items =
+            {
+                { name = "Left to Right", data = "Left to Right" },
+                { name = "Right to Left", data = "Right to Left" },
+            },
+            getFunction = function ()
+                local value = Settings.SortBuffsPlayer
+                if value == "Left to Right" or value == "Right to Left" then
+                    return value
+                end
+                return Defaults.SortBuffsPlayer or "Left to Right"
             end,
-            setFunc = function (value)
-                Settings.SortBuffsPlayer = value
+            setFunction = function (combobox, value, item)
+                Settings.SortBuffsPlayer = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortBuffsPlayer,
-        }))
+            default = Defaults.SortBuffsPlayer or "Left to Right",
+        }
 
-    -- Buff Alignment (DebuffsPlayer)
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Buff Alignment (DebuffsPlayer)
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
-            choices = { "Left", "Centered", "Right" },
-            getFunc = function ()
-                return Settings.AlignmentDebuffsPlayer
+            items =
+            {
+                { name = "Left",     data = "Left"     },
+                { name = "Centered", data = "Centered" },
+                { name = "Right",    data = "Right"    },
+            },
+            getFunction = function ()
+                local value = Settings.AlignmentDebuffsPlayer
+                if value == "Left" or value == "Centered" or value == "Right" then
+                    return value
+                end
+                return Defaults.AlignmentDebuffsPlayer or "Left"
             end,
-            setFunc = function (value)
-                Settings.AlignmentDebuffsPlayer = value
+            setFunction = function (combobox, value, item)
+                Settings.AlignmentDebuffsPlayer = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentDebuffsPlayer,
-        }))
+            default = Defaults.AlignmentDebuffsPlayer or "Left",
+        }
 
-    -- Buff Sort Direction (DebuffsPlayer)
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Buff Sort Direction (DebuffsPlayer)
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
-            choices = { "Left to Right", "Right to Left" },
-            getFunc = function ()
-                return Settings.SortDebuffsPlayer
+            items =
+            {
+                { name = "Left to Right", data = "Left to Right" },
+                { name = "Right to Left", data = "Right to Left" },
+            },
+            getFunction = function ()
+                local value = Settings.SortDebuffsPlayer
+                if value == "Left to Right" or value == "Right to Left" then
+                    return value
+                end
+                return Defaults.SortDebuffsPlayer or "Left to Right"
             end,
-            setFunc = function (value)
-                Settings.SortDebuffsPlayer = value
+            setFunction = function (combobox, value, item)
+                Settings.SortDebuffsPlayer = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortDebuffsPlayer,
-        }))
+            default = Defaults.SortDebuffsPlayer or "Left to Right",
+        }
 
-    -- Buff Alignment (BuffsTarget)
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Buff Alignment (BuffsTarget)
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
-            choices = { "Left", "Centered", "Right" },
-            getFunc = function ()
-                return Settings.AlignmentBuffsTarget
+            items =
+            {
+                { name = "Left",     data = "Left"     },
+                { name = "Centered", data = "Centered" },
+                { name = "Right",    data = "Right"    },
+            },
+            getFunction = function ()
+                local value = Settings.AlignmentBuffsTarget
+                if value == "Left" or value == "Centered" or value == "Right" then
+                    return value
+                end
+                return Defaults.AlignmentBuffsTarget or "Left"
             end,
-            setFunc = function (value)
-                Settings.AlignmentBuffsTarget = value
+            setFunction = function (combobox, value, item)
+                Settings.AlignmentBuffsTarget = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentBuffsTarget,
-        }))
+            default = Defaults.AlignmentBuffsTarget or "Left",
+        }
 
-    -- Buff Sort Direction (BuffsTarget)
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Buff Sort Direction (BuffsTarget)
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
-            choices = { "Left to Right", "Right to Left" },
-            getFunc = function ()
-                return Settings.SortBuffsTarget
+            items =
+            {
+                { name = "Left to Right", data = "Left to Right" },
+                { name = "Right to Left", data = "Right to Left" },
+            },
+            getFunction = function ()
+                local value = Settings.SortBuffsTarget
+                if value == "Left to Right" or value == "Right to Left" then
+                    return value
+                end
+                return Defaults.SortBuffsTarget or "Left to Right"
             end,
-            setFunc = function (value)
-                Settings.SortBuffsTarget = value
+            setFunction = function (combobox, value, item)
+                Settings.SortBuffsTarget = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortBuffsTarget,
-        }))
+            default = Defaults.SortBuffsTarget or "Left to Right",
+        }
 
-    -- Buff Alignment (DebuffsTarget)
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Buff Alignment (DebuffsTarget)
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_GENERIC_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
-            choices = { "Left", "Centered", "Right" },
-            getFunc = function ()
-                return Settings.AlignmentDebuffsTarget
+            items =
+            {
+                { name = "Left",     data = "Left"     },
+                { name = "Centered", data = "Centered" },
+                { name = "Right",    data = "Right"    },
+            },
+            getFunction = function ()
+                local value = Settings.AlignmentDebuffsTarget
+                if value == "Left" or value == "Centered" or value == "Right" then
+                    return value
+                end
+                return Defaults.AlignmentDebuffsTarget or "Left"
             end,
-            setFunc = function (value)
-                Settings.AlignmentDebuffsTarget = value
+            setFunction = function (combobox, value, item)
+                Settings.AlignmentDebuffsTarget = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentDebuffsTarget,
-        }))
+            default = Defaults.AlignmentDebuffsTarget or "Left",
+        }
 
-    -- Buff Sort Direction (DebuffsTarget)
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Buff Sort Direction (DebuffsTarget)
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
-            choices = { "Left to Right", "Right to Left" },
-            getFunc = function ()
-                return Settings.SortDebuffsTarget
+            items =
+            {
+                { name = "Left to Right", data = "Left to Right" },
+                { name = "Right to Left", data = "Right to Left" },
+            },
+            getFunction = function ()
+                local value = Settings.SortDebuffsTarget
+                if value == "Left to Right" or value == "Right to Left" then
+                    return value
+                end
+                return Defaults.SortDebuffsTarget or "Left to Right"
             end,
-            setFunc = function (value)
-                Settings.SortDebuffsTarget = value
+            setFunction = function (combobox, value, item)
+                Settings.SortDebuffsTarget = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortDebuffsTarget,
-        }))
+            default = Defaults.SortDebuffsTarget or "Left to Right",
+        }
 
-    -- Unanchored Player / Target Buff Options
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+        -- Unanchored Player / Target Buff Options
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_SORTING_UNANCHORED_HEADER),
-        }))
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_SORTING_UNANCHORED_HEADER),
+        }
 
-    panel:AddSetting(SettingsAPI.CreateDescriptionOption(
+        settings[#settings + 1] =
         {
-            text = GetString(LUIE_STRING_LAM_BUFF_SORTING_UNANCHORED_DESCRIPTION),
-        }))
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_BUFF_SORTING_UNANCHORED_DESCRIPTION),
+        }
 
-    -- Buff Width - Player Buffs
-    panel:AddSetting(SettingsAPI.CreateSliderOption(
+        -- Buff Width - Player Buffs
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_WIDTH_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
+            type = LHAS.ST_SLIDER,
+            format = "%.0f",
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_WIDTH_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_WIDTH_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
             min = 40,
             max = 1920,
             step = 10,
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.WidthPlayerBuffs
             end,
-            setFunc = function (value)
-                Settings.WidthPlayerBuffs = value
+            setFunction = function (v)
+                Settings.WidthPlayerBuffs = v
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.WidthPlayerBuffs,
-            disabled = function ()
+            disable = function ()
                 return Settings.lockPositionToUnitFrames
             end,
-        }))
+        }
 
-    -- Buff Stack Direction - Player Buffs
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Buff Stack Direction - Player Buffs
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS)),
-            choices = { "Down", "Up" },
-            getFunc = function ()
+            items =
+            {
+                { name = "Down", data = "Down" },
+                { name = "Up",   data = "Up"   },
+            },
+            getFunction = function ()
                 return Settings.StackPlayerBuffs
             end,
-            setFunc = function (value)
-                Settings.StackPlayerBuffs = value
+            setFunction = function (v)
+                Settings.StackPlayerBuffs = v
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
             default = Defaults.StackPlayerBuffs,
-            disabled = function ()
+            disable = function ()
                 return Settings.lockPositionToUnitFrames
             end,
-        }))
+        }
 
-    -- Buff Width - Player Debuffs
-    panel:AddSetting(SettingsAPI.CreateSliderOption(
+        -- Buff Width - Player Debuffs
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_WIDTH_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
+            type = LHAS.ST_SLIDER,
+            format = "%.0f",
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_WIDTH_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_WIDTH_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
             min = 40,
             max = 1920,
             step = 10,
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.WidthPlayerDebuffs
             end,
-            setFunc = function (value)
-                Settings.WidthPlayerDebuffs = value
+            setFunction = function (v)
+                Settings.WidthPlayerDebuffs = v
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.WidthPlayerDebuffs,
-            disabled = function ()
+            disable = function ()
                 return Settings.lockPositionToUnitFrames
             end,
-        }))
+        }
 
-    -- Buff Stack Direction - Player Debuffs
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Buff Stack Direction - Player Debuffs
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS)),
-            choices = { "Down", "Up" },
-            getFunc = function ()
+            items =
+            {
+                { name = "Down", data = "Down" },
+                { name = "Up",   data = "Up"   },
+            },
+            getFunction = function ()
                 return Settings.StackPlayerDebuffs
             end,
-            setFunc = function (value)
-                Settings.StackPlayerDebuffs = value
+            setFunction = function (v)
+                Settings.StackPlayerDebuffs = v
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
             default = Defaults.StackPlayerDebuffs,
-            disabled = function ()
+            disable = function ()
                 return Settings.lockPositionToUnitFrames
             end,
-        }))
+        }
 
-    -- Buff Width - Target Buffs
-    panel:AddSetting(SettingsAPI.CreateSliderOption(
+        -- Buff Width - Target Buffs
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_WIDTH_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
+            type = LHAS.ST_SLIDER,
+            format = "%.0f",
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_WIDTH_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_WIDTH_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
             min = 40,
             max = 1920,
             step = 10,
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.WidthTargetBuffs
             end,
-            setFunc = function (value)
-                Settings.WidthTargetBuffs = value
+            setFunction = function (v)
+                Settings.WidthTargetBuffs = v
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.WidthTargetBuffs,
-            disabled = function ()
+            disable = function ()
                 return Settings.lockPositionToUnitFrames
             end,
-        }))
+        }
 
-    -- Buff Stack Direction - Target Buffs
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Buff Stack Direction - Target Buffs
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS)),
-            choices = { "Down", "Up" },
-            getFunc = function ()
+            items =
+            {
+                { name = "Down", data = "Down" },
+                { name = "Up",   data = "Up"   },
+            },
+            getFunction = function ()
                 return Settings.StackTargetBuffs
             end,
-            setFunc = function (value)
-                Settings.StackTargetBuffs = value
+            setFunction = function (v)
+                Settings.StackTargetBuffs = v
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
             default = Defaults.StackTargetBuffs,
-            disabled = function ()
+            disable = function ()
                 return Settings.lockPositionToUnitFrames
             end,
-        }))
+        }
 
-    -- Buff Width - Target Debuffs
-    panel:AddSetting(SettingsAPI.CreateSliderOption(
+        -- Buff Width - Target Debuffs
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_WIDTH_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
+            type = LHAS.ST_SLIDER,
+            format = "%.0f",
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_WIDTH_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_WIDTH_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
             min = 40,
             max = 1920,
             step = 10,
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.WidthTargetDebuffs
             end,
-            setFunc = function (value)
-                Settings.WidthTargetDebuffs = value
+            setFunction = function (v)
+                Settings.WidthTargetDebuffs = v
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.WidthTargetDebuffs,
-            disabled = function ()
+            disable = function ()
                 return Settings.lockPositionToUnitFrames
             end,
-        }))
+        }
 
-    -- Buff Stack Direction - Target Debuffs
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Buff Stack Direction - Target Debuffs
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_STACK_GENERIC_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS)),
-            choices = { "Down", "Up" },
-            getFunc = function ()
+            items =
+            {
+                { name = "Down", data = "Down" },
+                { name = "Up",   data = "Up"   },
+            },
+            getFunction = function ()
                 return Settings.StackTargetDebuffs
             end,
-            setFunc = function (value)
-                Settings.StackTargetDebuffs = value
+            setFunction = function (v)
+                Settings.StackTargetDebuffs = v
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
             default = Defaults.StackTargetDebuffs,
-            disabled = function ()
+            disable = function ()
                 return Settings.lockPositionToUnitFrames
             end,
-        }))
+        }
 
-    -- Long Term Alignment & Sorting
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+        -- Long Term Alignment & Sorting
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_SORTING_LONGTERM_HEADER),
-        }))
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_SORTING_LONGTERM_HEADER),
+        }
 
-    -- Container Orientation (Long Term)
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Container Orientation (Long Term)
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_CONTAINER),
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_CONTAINER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_CONTAINER_TP),
-            choices = rotationOptions,
-            getFunc = function ()
-                return rotationOptions[Settings.LongTermEffectsSeparateAlignment]
+            items = SettingsAPI:GetRotationOptionsList(),
+            getFunction = function ()
+                local index = Settings.LongTermEffectsSeparateAlignment
+                if type(index) == "string" then
+                    index = rotationOptionsKeys[index] or 2
+                end
+                return rotationOptions[index] or rotationOptions[2]
             end,
-            setFunc = function (combobox, value, item)
-                Settings.LongTermEffectsSeparateAlignment = rotationOptionsKeys[value]
+            setFunction = function (combobox, value, item)
+                Settings.LongTermEffectsSeparateAlignment = item.data
                 SpellCastBuffs.ResetContainerOrientation()
                 SpellCastBuffs.Reset()
             end,
             default = rotationOptions[2],
-        }))
+        }
 
-    -- Horizontal Long Term Icons Alignment
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Horizontal Long Term Icons Alignment
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
-            choices = { "Left", "Centered", "Right" },
-            getFunc = function ()
-                return Settings.AlignmentLongHorz
+            items =
+            {
+                { name = "Left",     data = "Left"     },
+                { name = "Centered", data = "Centered" },
+                { name = "Right",    data = "Right"    },
+            },
+            getFunction = function ()
+                local value = Settings.AlignmentLongHorz
+                if value == "Left" or value == "Centered" or value == "Right" then
+                    return value
+                end
+                return Defaults.AlignmentLongHorz or "Left"
             end,
-            setFunc = function (value)
-                Settings.AlignmentLongHorz = value
+            setFunction = function (combobox, value, item)
+                Settings.AlignmentLongHorz = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentLongHorz,
-            disabled = function ()
+            default = Defaults.AlignmentLongHorz or "Left",
+            disable = function ()
                 return Settings.LongTermEffectsSeparateAlignment == 2
             end,
-        }))
+        }
 
-    -- Horizontal Long Term Sort
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Horizontal Long Term Sort
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
-            choices = { "Left to Right", "Right to Left" },
-            getFunc = function ()
-                return Settings.SortLongHorz
+            items =
+            {
+                { name = "Left to Right", data = "Left to Right" },
+                { name = "Right to Left", data = "Right to Left" },
+            },
+            getFunction = function ()
+                local value = Settings.SortLongHorz
+                if value == "Left to Right" or value == "Right to Left" then
+                    return value
+                end
+                return Defaults.SortLongHorz or "Left to Right"
             end,
-            setFunc = function (value)
-                Settings.SortLongHorz = value
+            setFunction = function (combobox, value, item)
+                Settings.SortLongHorz = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortLongHorz,
-            disabled = function ()
+            default = Defaults.SortLongHorz or "Left to Right",
+            disable = function ()
                 return Settings.LongTermEffectsSeparateAlignment == 2
             end,
-        }))
+        }
 
-    -- Vertical Long Term Icons Alignment
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Vertical Long Term Icons Alignment
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
-            choices = { "Top", "Centered", "Bottom" },
-            getFunc = function ()
-                return Settings.AlignmentLongVert
+            items =
+            {
+                { name = "Top",      data = "Top"      },
+                { name = "Centered", data = "Centered" },
+                { name = "Bottom",   data = "Bottom"   },
+            },
+            getFunction = function ()
+                local value = Settings.AlignmentLongVert
+                if value == "Top" or value == "Centered" or value == "Bottom" then
+                    return value
+                end
+                return Defaults.AlignmentLongVert or "Top"
             end,
-            setFunc = function (value)
-                Settings.AlignmentLongVert = value
+            setFunction = function (combobox, value, item)
+                Settings.AlignmentLongVert = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentLongVert,
-            disabled = function ()
+            default = Defaults.AlignmentLongVert or "Top",
+            disable = function ()
                 return Settings.LongTermEffectsSeparateAlignment == 1
             end,
-        }))
+        }
 
-    -- Vertical Long Term Sort
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Vertical Long Term Sort
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS)),
-            choices = { "Bottom to Top", "Top to Bottom" },
-            getFunc = function ()
-                return Settings.SortLongVert
+            items =
+            {
+                { name = "Bottom to Top", data = "Bottom to Top" },
+                { name = "Top to Bottom", data = "Top to Bottom" },
+            },
+            getFunction = function ()
+                local value = Settings.SortLongVert
+                if value == "Bottom to Top" or value == "Top to Bottom" then
+                    return value
+                end
+                return Defaults.SortLongVert or "Bottom to Top"
             end,
-            setFunc = function (value)
-                Settings.SortLongVert = value
+            setFunction = function (combobox, value, item)
+                Settings.SortLongVert = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortLongVert,
-            disabled = function ()
+            default = Defaults.SortLongVert or "Bottom to Top",
+            disable = function ()
                 return Settings.LongTermEffectsSeparateAlignment == 1
             end,
-        }))
+        }
 
-    -- Prominent Alignment & Sorting
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+        -- Prominent Alignment & Sorting
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_SORTING_PROMINET_HEADER),
-        }))
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_SORTING_PROMINET_HEADER),
+        }
 
-    -- Prominent Buff Container Orientation
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Prominent Buff Container Orientation
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFFCONTAINER),
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFFCONTAINER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFFCONTAINER_TP),
-            choices = rotationOptions,
-            getFunc = function ()
-                return rotationOptions[Settings.ProminentBuffContainerAlignment]
+            items = SettingsAPI:GetRotationOptionsList(),
+            getFunction = function ()
+                local index = Settings.ProminentBuffContainerAlignment
+                if type(index) == "string" then
+                    index = rotationOptionsKeys[index] or 2
+                end
+                return rotationOptions[index] or rotationOptions[2]
             end,
-            setFunc = function (combobox, value, item)
-                Settings.ProminentBuffContainerAlignment = rotationOptionsKeys[value]
+            setFunction = function (combobox, value, item)
+                Settings.ProminentBuffContainerAlignment = item.data
                 SpellCastBuffs.ResetContainerOrientation()
                 SpellCastBuffs.Reset()
             end,
             default = rotationOptions[2],
-        }))
+        }
 
-    -- Horizontal Prominent Buffs Icons Alignment
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Horizontal Prominent Buffs Icons Alignment
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
-            choices = { "Left", "Centered", "Right" },
-            getFunc = function ()
-                return Settings.AlignmentPromBuffsHorz
+            items =
+            {
+                { name = "Left",     data = "Left"     },
+                { name = "Centered", data = "Centered" },
+                { name = "Right",    data = "Right"    },
+            },
+            getFunction = function ()
+                local value = Settings.AlignmentPromBuffsHorz
+                if value == "Left" or value == "Centered" or value == "Right" then
+                    return value
+                end
+                return Defaults.AlignmentPromBuffsHorz or "Left"
             end,
-            setFunc = function (value)
-                Settings.AlignmentPromBuffsHorz = value
+            setFunction = function (combobox, value, item)
+                Settings.AlignmentPromBuffsHorz = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentPromBuffsHorz,
-            disabled = function ()
+            default = Defaults.AlignmentPromBuffsHorz or "Left",
+            disable = function ()
                 return Settings.ProminentBuffContainerAlignment == 2
             end,
-        }))
+        }
 
-    -- Horizontal Prominent Buffs Sort
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Horizontal Prominent Buffs Sort
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
-            choices = { "Left to Right", "Right to Left" },
-            getFunc = function ()
-                return Settings.SortPromBuffsHorz
+            items =
+            {
+                { name = "Left to Right", data = "Left to Right" },
+                { name = "Right to Left", data = "Right to Left" },
+            },
+            getFunction = function ()
+                local value = Settings.SortPromBuffsHorz
+                if value == "Left to Right" or value == "Right to Left" then
+                    return value
+                end
+                return Defaults.SortPromBuffsHorz or "Left to Right"
             end,
-            setFunc = function (value)
-                Settings.SortPromBuffsHorz = value
+            setFunction = function (combobox, value, item)
+                Settings.SortPromBuffsHorz = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortPromBuffsHorz,
-            disabled = function ()
+            default = Defaults.SortPromBuffsHorz or "Left to Right",
+            disable = function ()
                 return Settings.ProminentBuffContainerAlignment == 2
             end,
-        }))
+        }
 
-    -- Vertical Prominent Buffs Icons Alignment
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Vertical Prominent Buffs Icons Alignment
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
-            choices = { "Top", "Centered", "Bottom" },
-            getFunc = function ()
-                return Settings.AlignmentPromBuffsVert
+            items =
+            {
+                { name = "Top",      data = "Top"      },
+                { name = "Centered", data = "Centered" },
+                { name = "Bottom",   data = "Bottom"   },
+            },
+            getFunction = function ()
+                local value = Settings.AlignmentPromBuffsVert
+                if value == "Top" or value == "Centered" or value == "Bottom" then
+                    return value
+                end
+                return Defaults.AlignmentPromBuffsVert or "Top"
             end,
-            setFunc = function (value)
-                Settings.AlignmentPromBuffsVert = value
+            setFunction = function (combobox, value, item)
+                Settings.AlignmentPromBuffsVert = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentPromBuffsVert,
-            disabled = function ()
+            default = Defaults.AlignmentPromBuffsVert or "Top",
+            disable = function ()
                 return Settings.ProminentBuffContainerAlignment == 1
             end,
-        }))
+        }
 
-    -- Vertical Prominent Buffs Sort
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Vertical Prominent Buffs Sort
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
-            choices = { "Bottom to Top", "Top to Bottom" },
-            getFunc = function ()
-                return Settings.SortPromBuffsVert
+            items =
+            {
+                { name = "Bottom to Top", data = "Bottom to Top" },
+                { name = "Top to Bottom", data = "Top to Bottom" },
+            },
+            getFunction = function ()
+                local value = Settings.SortPromBuffsVert
+                if value == "Bottom to Top" or value == "Top to Bottom" then
+                    return value
+                end
+                return Defaults.SortPromBuffsVert or "Bottom to Top"
             end,
-            setFunc = function (value)
-                Settings.SortPromBuffsVert = value
+            setFunction = function (combobox, value, item)
+                Settings.SortPromBuffsVert = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortPromBuffsVert,
-            disabled = function ()
+            default = Defaults.SortPromBuffsVert or "Bottom to Top",
+            disable = function ()
                 return Settings.ProminentBuffContainerAlignment == 1
             end,
-        }))
+        }
 
-    -- Prominent Debuff Container Orientation
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Prominent Debuff Container Orientation
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFFCONTAINER),
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFFCONTAINER),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFFCONTAINER_TP),
-            choices = rotationOptions,
-            getFunc = function ()
-                return rotationOptions[Settings.ProminentDebuffContainerAlignment]
+            items = SettingsAPI:GetRotationOptionsList(),
+            getFunction = function ()
+                local index = Settings.ProminentDebuffContainerAlignment
+                if type(index) == "string" then
+                    index = rotationOptionsKeys[index] or 2
+                end
+                return rotationOptions[index] or rotationOptions[2]
             end,
-            setFunc = function (combobox, value, item)
-                Settings.ProminentDebuffContainerAlignment = rotationOptionsKeys[value]
+            setFunction = function (combobox, value, item)
+                Settings.ProminentDebuffContainerAlignment = item.data
                 SpellCastBuffs.ResetContainerOrientation()
                 SpellCastBuffs.Reset()
             end,
             default = rotationOptions[2],
-        }))
+        }
 
-    -- Horizontal Prominent Debuffs Icons Alignment
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Horizontal Prominent Debuffs Icons Alignment
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_HORIZONTAL_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
-            choices = { "Left", "Centered", "Right" },
-            getFunc = function ()
-                return Settings.AlignmentPromDebuffsHorz
+            items =
+            {
+                { name = "Left",     data = "Left"     },
+                { name = "Centered", data = "Centered" },
+                { name = "Right",    data = "Right"    },
+            },
+            getFunction = function ()
+                local value = Settings.AlignmentPromDebuffsHorz
+                if value == "Left" or value == "Centered" or value == "Right" then
+                    return value
+                end
+                return Defaults.AlignmentPromDebuffsHorz or "Left"
             end,
-            setFunc = function (value)
-                Settings.AlignmentPromDebuffsHorz = value
+            setFunction = function (combobox, value, item)
+                Settings.AlignmentPromDebuffsHorz = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentPromDebuffsHorz,
-            disabled = function ()
+            default = Defaults.AlignmentPromDebuffsHorz or "Left",
+            disable = function ()
                 return Settings.ProminentDebuffContainerAlignment == 2
             end,
-        }))
+        }
 
-    -- Horizontal Prominent Debuffs Sort
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Horizontal Prominent Debuffs Sort
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_HORIZONTAL_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
-            choices = { "Left to Right", "Right to Left" },
-            getFunc = function ()
-                return Settings.SortPromDebuffsHorz
+            items =
+            {
+                { name = "Left to Right", data = "Left to Right" },
+                { name = "Right to Left", data = "Right to Left" },
+            },
+            getFunction = function ()
+                local value = Settings.SortPromDebuffsHorz
+                if value == "Left to Right" or value == "Right to Left" then
+                    return value
+                end
+                return Defaults.SortPromDebuffsHorz or "Left to Right"
             end,
-            setFunc = function (value)
-                Settings.SortPromDebuffsHorz = value
+            setFunction = function (combobox, value, item)
+                Settings.SortPromDebuffsHorz = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
             default = Defaults.SortPromDebuffsHorz,
-            disabled = function ()
+            disable = function ()
                 return Settings.ProminentDebuffContainerAlignment == 2
             end,
-        }))
+        }
 
-    -- Vertical Prominent Debuffs Icons Alignment
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Vertical Prominent Debuffs Icons Alignment
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_VERTICAL_ALIGN_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
-            choices = { "Top", "Centered", "Bottom" },
-            getFunc = function ()
-                return Settings.AlignmentPromDebuffsVert
+            items =
+            {
+                { name = "Top",      data = "Top"      },
+                { name = "Centered", data = "Centered" },
+                { name = "Bottom",   data = "Bottom"   },
+            },
+            getFunction = function ()
+                local value = Settings.AlignmentPromDebuffsVert
+                if value == "Top" or value == "Centered" or value == "Bottom" then
+                    return value
+                end
+                return Defaults.AlignmentPromDebuffsVert or "Top"
             end,
-            setFunc = function (value)
-                Settings.AlignmentPromDebuffsVert = value
+            setFunction = function (combobox, value, item)
+                Settings.AlignmentPromDebuffsVert = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.AlignmentPromDebuffsVert,
-            disabled = function ()
+            default = Defaults.AlignmentPromDebuffsVert or "Top",
+            disable = function ()
                 return Settings.ProminentDebuffContainerAlignment == 1
             end,
-        }))
+        }
 
-    -- Vertical Prominent Debuffs Sort
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Vertical Prominent Debuffs Sort
+        settings[#settings + 1] =
         {
-            name = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
+            type = LHAS.ST_DROPDOWN,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_BUFF_SORTING_SORT_VERTICAL_TP), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
-            choices = { "Bottom to Top", "Top to Bottom" },
-            getFunc = function ()
-                return Settings.SortPromDebuffsVert
+            items =
+            {
+                { name = "Bottom to Top", data = "Bottom to Top" },
+                { name = "Top to Bottom", data = "Top to Bottom" },
+            },
+            getFunction = function ()
+                local value = Settings.SortPromDebuffsVert
+                if value == "Bottom to Top" or value == "Top to Bottom" then
+                    return value
+                end
+                return Defaults.SortPromDebuffsVert or "Bottom to Top"
             end,
-            setFunc = function (value)
-                Settings.SortPromDebuffsVert = value
+            setFunction = function (combobox, value, item)
+                Settings.SortPromDebuffsVert = item.data
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
-            default = Defaults.SortPromDebuffsVert,
-            disabled = function ()
+            default = Defaults.SortPromDebuffsVert or "Bottom to Top",
+            disable = function ()
                 return Settings.ProminentDebuffContainerAlignment == 1
             end,
-        }))
+        }
+    end)
 
-    -- Buffs&Debuffs - Tooltip Options Submenu
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+    -- Build Tooltip Options Section
+    buildSectionSettings("Tooltip", function (settings)
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_HEADER),
-        }))
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_HEADER),
+        }
 
-    -- Tooltip Enable
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Submenu description
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_ENABLE),
+            type = LHAS.ST_LABEL,
+            label = "Configure tooltip display options for buffs and debuffs.",
+        }
+
+        -- Tooltip Enable
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_ENABLE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_ENABLE_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.TooltipEnable
             end,
-            setFunc = function (value)
-                Settings.TooltipEnable = value
+            setFunction = function (v)
+                Settings.TooltipEnable = v
             end,
             default = Defaults.TooltipEnable,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Tooltip Custom
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Tooltip Custom
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_CUSTOM),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_CUSTOM),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_CUSTOM_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.TooltipCustom
             end,
-            setFunc = function (value)
-                Settings.TooltipCustom = value
+            setFunction = function (v)
+                Settings.TooltipCustom = v
             end,
             default = Defaults.TooltipCustom,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Tooltip Ability Id
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Tooltip Ability Id
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_ABILITY_ID),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_ABILITY_ID),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_ABILITY_ID_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.TooltipAbilityId
             end,
-            setFunc = function (value)
-                Settings.TooltipAbilityId = value
+            setFunction = function (v)
+                Settings.TooltipAbilityId = v
             end,
             default = Defaults.TooltipAbilityId,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Tooltip Buff Type
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Tooltip Buff Type
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_BUFF_TYPE),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_BUFF_TYPE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_BUFF_TYPE_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.TooltipBuffType
             end,
-            setFunc = function (value)
-                Settings.TooltipBuffType = value
+            setFunction = function (v)
+                Settings.TooltipBuffType = v
             end,
             default = Defaults.TooltipBuffType,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Sticky Tooltip Slider
-    panel:AddSetting(SettingsAPI.CreateSliderOption(
+        -- Sticky Tooltip Slider
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_STICKY),
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_STICKY),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_STICKY_TP),
             min = 0,
             max = 5000,
             step = 100,
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.TooltipSticky
             end,
-            setFunc = function (value)
+            setFunction = function (value)
                 Settings.TooltipSticky = value
             end,
             default = Defaults.TooltipSticky,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
+    end)
 
-    -- Buffs&Debuffs - Priority Buffs & Debuffs Options Submenu
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+    -- Build Priority Buffs & Debuffs Options Section
+    buildSectionSettings("Priority", function (settings)
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_HEADER),
-        }))
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_HEADER),
+        }
 
-    -- Prominent Buffs & Debuffs Description
-    panel:AddSetting(SettingsAPI.CreateDescriptionOption(
+        -- Submenu description
+        settings[#settings + 1] =
         {
-            text = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_DESCRIPTION),
-        }))
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_DESCRIPTION),
+        }
 
-    panel:AddSetting(SettingsAPI.CreateDescriptionOption(
+        -- Prominent Buffs & Debuffs Description
+        settings[#settings + 1] =
         {
-            text = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_DIALOGUE_DESCRIPT),
-        }))
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_DESCRIPTION),
+        }
 
-    -- Store temp text for adding priority buffs
-    if not Settings.tempPriorityBuffsText then
-        Settings.tempPriorityBuffsText = ""
-    end
-
-    -- Add Priority Buff edit box
-    panel:AddSetting(SettingsAPI.CreateEditboxOption(
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_DIALOGUE_DESCRIPT),
+        }
+
+        -- Store temp text for adding priority buffs
+        if not Settings.tempPriorityBuffsText then
+            Settings.tempPriorityBuffsText = ""
+        end
+
+        -- Add Priority Buff edit box
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.tempPriorityBuffsText or ""
             end,
-            setFunc = function (value)
+            setFunction = function (value)
                 Settings.tempPriorityBuffsText = value
             end,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Add Priority Buff button
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Add Priority Buff button
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             clickHandler = function ()
                 local text = Settings.tempPriorityBuffsText or ""
@@ -2768,61 +3255,65 @@ function SpellCastBuffs.CreateConsoleSettings()
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Manage Priority Buffs
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Manage Priority Buffs
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_BUFFS),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_BUFFS),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_BUFF_REMLIST_TP),
             clickHandler = function ()
                 LUIE.ShowBlacklistDialog("LUIE_MANAGE_PRIORITY_BUFFS")
             end,
             buttonText = GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_BUFFS),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Clear Priority Buffs
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Clear Priority Buffs
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_UF_PRIORITY_CLEAR_BUFFS),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_UF_PRIORITY_CLEAR_BUFFS),
             tooltip = GetString(LUIE_STRING_LAM_UF_PRIORITY_CLEAR_BUFFS_TP),
             clickHandler = function ()
                 ZO_Dialogs_ShowGamepadDialog("LUIE_CLEAR_PRIORITY_BUFFS")
             end,
             buttonText = GetString(LUIE_STRING_LAM_UF_PRIORITY_CLEAR_BUFFS),
-        }))
+        }
 
-    -- Store temp text for adding priority debuffs
-    if not Settings.tempPriorityDebuffsText then
-        Settings.tempPriorityDebuffsText = ""
-    end
+        -- Store temp text for adding priority debuffs
+        if not Settings.tempPriorityDebuffsText then
+            Settings.tempPriorityDebuffsText = ""
+        end
 
-    -- Add Priority Debuff edit box
-    panel:AddSetting(SettingsAPI.CreateEditboxOption(
+        -- Add Priority Debuff edit box
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.tempPriorityDebuffsText or ""
             end,
-            setFunc = function (value)
+            setFunction = function (value)
                 Settings.tempPriorityDebuffsText = value
             end,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Add Priority Debuff button
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Add Priority Debuff button
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             clickHandler = function ()
                 local text = Settings.tempPriorityDebuffsText or ""
@@ -2840,373 +3331,399 @@ function SpellCastBuffs.CreateConsoleSettings()
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Manage Priority Debuffs
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Manage Priority Debuffs
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_DEBUFFS),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_DEBUFFS),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_DEBUFF_REMLIST_TP),
             clickHandler = function ()
                 LUIE.ShowBlacklistDialog("LUIE_MANAGE_PRIORITY_DEBUFFS")
             end,
             buttonText = GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_DEBUFFS),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Clear Priority Debuffs
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Clear Priority Debuffs
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_UF_PRIORITY_CLEAR_DEBUFFS),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_UF_PRIORITY_CLEAR_DEBUFFS),
             tooltip = GetString(LUIE_STRING_LAM_UF_PRIORITY_CLEAR_DEBUFFS_TP),
             clickHandler = function ()
                 ZO_Dialogs_ShowGamepadDialog("LUIE_CLEAR_PRIORITY_DEBUFFS")
             end,
             buttonText = GetString(LUIE_STRING_LAM_UF_PRIORITY_CLEAR_DEBUFFS),
-        }))
+        }
+    end)
 
-    -- Buffs&Debuffs - Prominent Buffs & Debuffs Options Submenu
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+    -- Build Prominent Buffs & Debuffs Options Section
+    buildSectionSettings("Prominent", function (settings)
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_PROM_HEADER),
-        }))
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_HEADER),
+        }
 
-    -- Prominent Buffs & Debuffs Description
-    panel:AddSetting(SettingsAPI.CreateDescriptionOption(
+        -- Submenu description
+        settings[#settings + 1] =
         {
-            text = GetString(LUIE_STRING_LAM_BUFF_PROM_DESCRIPTION),
-        }))
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_DESCRIPTION),
+        }
 
-    -- Prominent Buffs Label Toggle
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Prominent Buffs Label Toggle
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_PROM_LABEL),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_LABEL),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_LABEL_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ProminentLabel
             end,
-            setFunc = function (value)
+            setFunction = function (value)
                 Settings.ProminentLabel = value
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.ProminentLabel,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Prominent Buffs Label Font Face
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Prominent Buffs Label Font Face
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE)),
+            type = LHAS.ST_DROPDOWN,
+            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE_TP),
-            choices = SettingsAPI.GetFontsList(),
-            getFunc = function ()
+            items = SettingsAPI:GetFontsList(),
+            getFunction = function ()
                 return Settings.ProminentLabelFontFace
             end,
-            setFunc = function (value)
-                Settings.ProminentLabelFontFace = value
+            setFunction = function (combobox, value, item)
+                Settings.ProminentLabelFontFace = item.data or item.name or value
                 SpellCastBuffs.ApplyFont()
             end,
             default = Defaults.ProminentLabelFontFace,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentLabel)
             end,
-        }))
+        }
 
-    -- Prominent Buffs Label Font Size
-    panel:AddSetting(SettingsAPI.CreateSliderOption(
+        -- Prominent Buffs Label Font Size
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSIZE)),
+            type = LHAS.ST_SLIDER,
+            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSIZE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSIZE_TP),
             min = 10,
             max = 30,
             step = 1,
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ProminentLabelFontSize
             end,
-            setFunc = function (value)
+            setFunction = function (value)
                 Settings.ProminentLabelFontSize = value
                 SpellCastBuffs.ApplyFont()
             end,
             default = Defaults.ProminentLabelFontSize,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentLabel)
             end,
-        }))
+        }
 
-    -- Prominent Buffs Label Font Style
-    panel:AddSetting(SettingsAPI.CreateFontStyleDropdown(
+        -- Prominent Buffs Label Font Style
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSTYLE)),
+            type = LHAS.ST_DROPDOWN,
+            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSTYLE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSTYLE_TP),
-            getFunc = function ()
+            items = fontStyleItems,
+            getFunction = function ()
                 return Settings.ProminentLabelFontStyle
             end,
-            setFunc = function (value)
-                Settings.ProminentLabelFontStyle = value
+            setFunction = function (combobox, value, item)
+                Settings.ProminentLabelFontStyle = item.data or item.name or value
                 SpellCastBuffs.ApplyFont()
             end,
             default = Defaults.ProminentLabelFontStyle,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentLabel)
             end,
-        }))
+        }
 
-    -- Prominent Buffs Progress Bar
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Prominent Buffs Progress Bar
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR),
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ProminentProgress
             end,
-            setFunc = function (value)
+            setFunction = function (value)
                 Settings.ProminentProgress = value
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.ProminentProgress,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Prominent Buffs Progress Bar Texture
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Prominent Buffs Progress Bar Texture
+        settings[#settings + 1] =
         {
-            name = SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE)),
+            type = LHAS.ST_DROPDOWN,
+            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE_TP),
-            choices = SettingsAPI.GetStatusbarTexturesList(),
-            getFunc = function ()
+            items = statusbarTextureItems,
+            getFunction = function ()
                 return Settings.ProminentProgressTexture
             end,
-            setFunc = function (value)
-                Settings.ProminentProgressTexture = value
+            setFunction = function (combobox, value, item)
+                Settings.ProminentProgressTexture = item.data or item.name or value
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.ProminentProgressTexture,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
             end,
-        }))
+        }
 
-    -- Prominent Buffs Gradient Color 1
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFF1)),
-        GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFF1_TP),
-        function ()
-            return unpack(Settings.ProminentProgressBuffC1)
-        end,
-        function (r, g, b, a)
-            Settings.ProminentProgressBuffC1 = { r, g, b, a }
-            SpellCastBuffs.Reset()
-        end,
-        Settings.ProminentProgressBuffC1,
-        nil,
-        function ()
-            return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
-        end
-    ))
-
-    -- Prominent Buffs Gradient Color 2
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFF2)),
-        GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFF2_TP),
-        function ()
-            return unpack(Settings.ProminentProgressBuffC2)
-        end,
-        function (r, g, b, a)
-            Settings.ProminentProgressBuffC2 = { r, g, b, a }
-            SpellCastBuffs.Reset()
-        end,
-        Settings.ProminentProgressBuffC2,
-        nil,
-        function ()
-            return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
-        end
-    ))
-
-    -- Prominent Buffs Gradient Color 1 (Priority)
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFFPRIORITY1)),
-        GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFFPRIORITY1_TP),
-        function ()
-            return unpack(Settings.ProminentProgressBuffPriorityC1)
-        end,
-        function (r, g, b, a)
-            Settings.ProminentProgressBuffPriorityC1 = { r, g, b, a }
-            SpellCastBuffs.Reset()
-        end,
-        Settings.ProminentProgressBuffPriorityC1,
-        nil,
-        function ()
-            return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
-        end
-    ))
-
-    -- Prominent Buffs Gradient Color 2 (Priority)
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFFPRIORITY2)),
-        GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFFPRIORITY2_TP),
-        function ()
-            return unpack(Settings.ProminentProgressBuffPriorityC2)
-        end,
-        function (r, g, b, a)
-            Settings.ProminentProgressBuffPriorityC2 = { r, g, b, a }
-            SpellCastBuffs.Reset()
-        end,
-        Settings.ProminentProgressBuffPriorityC2,
-        nil,
-        function ()
-            return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
-        end
-    ))
-
-    -- Prominent Debuffs Gradient Color 1
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFF1)),
-        GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFF1_TP),
-        function ()
-            return unpack(Settings.ProminentProgressDebuffC1)
-        end,
-        function (r, g, b, a)
-            Settings.ProminentProgressDebuffC1 = { r, g, b, a }
-            SpellCastBuffs.Reset()
-        end,
-        Settings.ProminentProgressDebuffC1,
-        nil,
-        function ()
-            return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
-        end
-    ))
-
-    -- Prominent Debuffs Gradient Color 2
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFF2)),
-        GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFF2_TP),
-        function ()
-            return unpack(Settings.ProminentProgressDebuffC2)
-        end,
-        function (r, g, b, a)
-            Settings.ProminentProgressDebuffC2 = { r, g, b, a }
-            SpellCastBuffs.Reset()
-        end,
-        Settings.ProminentProgressDebuffC2,
-        nil,
-        function ()
-            return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
-        end
-    ))
-
-    -- Prominent Debuffs Gradient Color 1 (Priority)
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFFPRIORITY1)),
-        GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFFPRIORITY1_TP),
-        function ()
-            return unpack(Settings.ProminentProgressDebuffPriorityC1)
-        end,
-        function (r, g, b, a)
-            Settings.ProminentProgressDebuffPriorityC1 = { r, g, b, a }
-            SpellCastBuffs.Reset()
-        end,
-        Settings.ProminentProgressDebuffPriorityC1,
-        nil,
-        function ()
-            return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
-        end
-    ))
-
-    -- Prominent Debuffs Gradient Color 2 (Priority)
-    panel:AddSetting(SettingsAPI.CreateColorpickerFromTable(
-        SettingsAPI.AddIndent(GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFFPRIORITY2)),
-        GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFFPRIORITY2_TP),
-        function ()
-            return unpack(Settings.ProminentProgressDebuffPriorityC2)
-        end,
-        function (r, g, b, a)
-            Settings.ProminentProgressDebuffPriorityC2 = { r, g, b, a }
-            SpellCastBuffs.Reset()
-        end,
-        Settings.ProminentProgressDebuffPriorityC2,
-        nil,
-        function ()
-            return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
-        end
-    ))
-
-    -- Prominent Buffs Label/Progress Bar Direction
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Prominent Buffs Gradient Color 1
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFFLABELDIRECTION),
+            type = LHAS.ST_COLOR,
+            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFF1),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFF1_TP),
+            getFunction = function ()
+                return Settings.ProminentProgressBuffC1[1], Settings.ProminentProgressBuffC1[2], Settings.ProminentProgressBuffC1[3], Settings.ProminentProgressBuffC1[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.ProminentProgressBuffC1 = { r, g, b, a }
+                SpellCastBuffs.Reset()
+            end,
+            default = Settings.ProminentProgressBuffC1,
+            disable = function ()
+                return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
+            end
+        }
+
+        -- Prominent Buffs Gradient Color 2
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFF2),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFF2_TP),
+            getFunction = function ()
+                return Settings.ProminentProgressBuffC2[1], Settings.ProminentProgressBuffC2[2], Settings.ProminentProgressBuffC2[3], Settings.ProminentProgressBuffC2[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.ProminentProgressBuffC2 = { r, g, b, a }
+                SpellCastBuffs.Reset()
+            end,
+            default = Settings.ProminentProgressBuffC2,
+            disable = function ()
+                return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
+            end
+        }
+
+        -- Prominent Buffs Gradient Color 1 (Priority)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFFPRIORITY1),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFFPRIORITY1_TP),
+            getFunction = function ()
+                return Settings.ProminentProgressBuffPriorityC1[1], Settings.ProminentProgressBuffPriorityC1[2], Settings.ProminentProgressBuffPriorityC1[3], Settings.ProminentProgressBuffPriorityC1[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.ProminentProgressBuffPriorityC1 = { r, g, b, a }
+                SpellCastBuffs.Reset()
+            end,
+            default = Settings.ProminentProgressBuffPriorityC1,
+            disable = function ()
+                return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
+            end
+        }
+
+        -- Prominent Buffs Gradient Color 2 (Priority)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFFPRIORITY2),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFFPRIORITY2_TP),
+            getFunction = function ()
+                return Settings.ProminentProgressBuffPriorityC2[1], Settings.ProminentProgressBuffPriorityC2[2], Settings.ProminentProgressBuffPriorityC2[3], Settings.ProminentProgressBuffPriorityC2[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.ProminentProgressBuffPriorityC2 = { r, g, b, a }
+                SpellCastBuffs.Reset()
+            end,
+            default = Settings.ProminentProgressBuffPriorityC2,
+            disable = function ()
+                return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
+            end
+        }
+
+        -- Prominent Debuffs Gradient Color 1
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFF1),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFF1_TP),
+            getFunction = function ()
+                return Settings.ProminentProgressDebuffC1[1], Settings.ProminentProgressDebuffC1[2], Settings.ProminentProgressDebuffC1[3], Settings.ProminentProgressDebuffC1[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.ProminentProgressDebuffC1 = { r, g, b, a }
+                SpellCastBuffs.Reset()
+            end,
+            default = Settings.ProminentProgressDebuffC1,
+            disable = function ()
+                return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
+            end
+        }
+
+        -- Prominent Debuffs Gradient Color 2
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFF2),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFF2_TP),
+            getFunction = function ()
+                return Settings.ProminentProgressDebuffC2[1], Settings.ProminentProgressDebuffC2[2], Settings.ProminentProgressDebuffC2[3], Settings.ProminentProgressDebuffC2[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.ProminentProgressDebuffC2 = { r, g, b, a }
+                SpellCastBuffs.Reset()
+            end,
+            default = Settings.ProminentProgressDebuffC2,
+            disable = function ()
+                return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
+            end
+        }
+
+        -- Prominent Debuffs Gradient Color 1 (Priority)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFFPRIORITY1),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFFPRIORITY1_TP),
+            getFunction = function ()
+                return Settings.ProminentProgressDebuffPriorityC1[1], Settings.ProminentProgressDebuffPriorityC1[2], Settings.ProminentProgressDebuffPriorityC1[3], Settings.ProminentProgressDebuffPriorityC1[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.ProminentProgressDebuffPriorityC1 = { r, g, b, a }
+                SpellCastBuffs.Reset()
+            end,
+            default = Settings.ProminentProgressDebuffPriorityC1,
+            disable = function ()
+                return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
+            end
+        }
+
+        -- Prominent Debuffs Gradient Color 2 (Priority)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFFPRIORITY2),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFFPRIORITY2_TP),
+            getFunction = function ()
+                return Settings.ProminentProgressDebuffPriorityC2[1], Settings.ProminentProgressDebuffPriorityC2[2], Settings.ProminentProgressDebuffPriorityC2[3], Settings.ProminentProgressDebuffPriorityC2[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.ProminentProgressDebuffPriorityC2 = { r, g, b, a }
+                SpellCastBuffs.Reset()
+            end,
+            default = Settings.ProminentProgressDebuffPriorityC2,
+            disable = function ()
+                return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
+            end
+        }
+
+        -- Prominent Buffs Label/Progress Bar Direction
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFFLABELDIRECTION),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFFLABELDIRECTION_TP),
-            choices = { "Right", "Left" },
-            getFunc = function ()
+            items = { "Right", "Left" },
+            getFunction = function ()
                 return Settings.ProminentBuffLabelDirection
             end,
-            setFunc = function (value)
-                Settings.ProminentBuffLabelDirection = value
+            setFunction = function (combobox, value, item)
+                Settings.ProminentBuffLabelDirection = item.data or item.name or value
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.ProminentBuffLabelDirection,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.ProminentLabel or Settings.ProminentProgress))
             end,
-        }))
+        }
 
-    -- Prominent Debuffs Label/Progress Bar Direction
-    panel:AddSetting(SettingsAPI.CreateDropdownOption(
+        -- Prominent Debuffs Label/Progress Bar Direction
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFFLABELDIRECTION),
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFFLABELDIRECTION),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFFLABELDIRECTION_TP),
-            choices = { "Right", "Left" },
-            getFunc = function ()
+            items = { "Right", "Left" },
+            getFunction = function ()
                 return Settings.ProminentDebuffLabelDirection
             end,
-            setFunc = function (value)
-                Settings.ProminentDebuffLabelDirection = value
+            setFunction = function (combobox, value, item)
+                Settings.ProminentDebuffLabelDirection = item.data or item.name or value
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.ProminentDebuffLabelDirection,
-            disabled = function ()
+            disable = function ()
                 return not (LUIE.SV.SpellCastBuff_Enable and (Settings.ProminentLabel or Settings.ProminentProgress))
             end,
-        }))
+        }
 
-    panel:AddSetting(SettingsAPI.CreateDescriptionOption(
+        settings[#settings + 1] =
         {
-            text = GetString(LUIE_STRING_LAM_BUFF_PROM_DIALOGUE_DESCRIPT),
-        }))
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_DIALOGUE_DESCRIPT),
+        }
 
-    -- Store temp text for adding prominent buffs
-    if not Settings.tempProminentBuffsText then
-        Settings.tempProminentBuffsText = ""
-    end
+        -- Store temp text for adding prominent buffs
+        if not Settings.tempProminentBuffsText then
+            Settings.tempProminentBuffsText = ""
+        end
 
-    -- Add Prominent Buff edit box
-    panel:AddSetting(SettingsAPI.CreateEditboxOption(
+        -- Add Prominent Buff edit box
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.tempProminentBuffsText or ""
             end,
-            setFunc = function (value)
+            setFunction = function (value)
                 Settings.tempProminentBuffsText = value
             end,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Add Prominent Buff button
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Add Prominent Buff button
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             clickHandler = function ()
                 local text = Settings.tempProminentBuffsText or ""
@@ -3224,61 +3741,65 @@ function SpellCastBuffs.CreateConsoleSettings()
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Manage Prominent Buffs
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Manage Prominent Buffs
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFF_REMLIST_TP),
             clickHandler = function ()
                 LUIE.ShowBlacklistDialog("LUIE_MANAGE_PROMINENT_BUFFS")
             end,
             buttonText = GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Clear Prominent Buffs
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Clear Prominent Buffs
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_UF_PROMINENT_CLEAR_BUFFS),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_UF_PROMINENT_CLEAR_BUFFS),
             tooltip = GetString(LUIE_STRING_LAM_UF_PROMINENT_CLEAR_BUFFS_TP),
             clickHandler = function ()
                 ZO_Dialogs_ShowGamepadDialog("LUIE_CLEAR_PROMINENT_BUFFS")
             end,
             buttonText = GetString(LUIE_STRING_LAM_UF_PROMINENT_CLEAR_BUFFS),
-        }))
+        }
 
-    -- Store temp text for adding prominent debuffs
-    if not Settings.tempProminentDebuffsText then
-        Settings.tempProminentDebuffsText = ""
-    end
+        -- Store temp text for adding prominent debuffs
+        if not Settings.tempProminentDebuffsText then
+            Settings.tempProminentDebuffsText = ""
+        end
 
-    -- Add Prominent Debuff edit box
-    panel:AddSetting(SettingsAPI.CreateEditboxOption(
+        -- Add Prominent Debuff edit box
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.tempProminentDebuffsText or ""
             end,
-            setFunc = function (value)
+            setFunction = function (value)
                 Settings.tempProminentDebuffsText = value
             end,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Add Prominent Debuff button
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Add Prominent Debuff button
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             clickHandler = function ()
                 local text = Settings.tempProminentDebuffsText or ""
@@ -3296,52 +3817,59 @@ function SpellCastBuffs.CreateConsoleSettings()
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Manage Prominent Debuffs
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Manage Prominent Debuffs
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFF_REMLIST_TP),
             clickHandler = function ()
                 LUIE.ShowBlacklistDialog("LUIE_MANAGE_PROMINENT_DEBUFFS")
             end,
             buttonText = GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Clear Prominent Debuffs
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Clear Prominent Debuffs
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_UF_PROMINENT_CLEAR_DEBUFFS),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_UF_PROMINENT_CLEAR_DEBUFFS),
             tooltip = GetString(LUIE_STRING_LAM_UF_PROMINENT_CLEAR_DEBUFFS_TP),
             clickHandler = function ()
                 ZO_Dialogs_ShowGamepadDialog("LUIE_CLEAR_PROMINENT_DEBUFFS")
             end,
             buttonText = GetString(LUIE_STRING_LAM_UF_PROMINENT_CLEAR_DEBUFFS),
-        }))
+        }
+    end)
 
-    -- Buffs&Debuffs - Blacklist Submenu
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+    -- Build Blacklist Section
+    buildSectionSettings("Blacklist", function (settings)
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_HEADER),
-        }))
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_HEADER),
+        }
 
-    -- Buffs & Debuffs Blacklist Description
-    panel:AddSetting(SettingsAPI.CreateDescriptionOption(
+        -- Submenu description
+        settings[#settings + 1] =
         {
-            text = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_DESCRIPT),
-        }))
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_DESCRIPT),
+        }
 
-    -- Add Minor Buffs
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Add Minor Buffs
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_BUFF),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_BUFF),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_BUFF_TP),
             clickHandler = function ()
                 SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MinorBuffs)
@@ -3352,15 +3880,16 @@ function SpellCastBuffs.CreateConsoleSettings()
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_BUFF),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Add Major Buffs
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Add Major Buffs
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_BUFF),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_BUFF),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_BUFF_TP),
             clickHandler = function ()
                 SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MajorBuffs)
@@ -3371,15 +3900,16 @@ function SpellCastBuffs.CreateConsoleSettings()
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_BUFF),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Add Minor Debuffs
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Add Minor Debuffs
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_DEBUFF),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_DEBUFF),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_DEBUFF_TP),
             clickHandler = function ()
                 SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MinorDebuffs)
@@ -3390,15 +3920,16 @@ function SpellCastBuffs.CreateConsoleSettings()
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_DEBUFF),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Add Major Debuffs
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Add Major Debuffs
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_DEBUFF),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_DEBUFF),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_DEBUFF_TP),
             clickHandler = function ()
                 SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MajorDebuffs)
@@ -3409,36 +3940,38 @@ function SpellCastBuffs.CreateConsoleSettings()
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_DEBUFF),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Store temp text for adding items
-    if not Settings.tempBlacklistText then
-        Settings.tempBlacklistText = ""
-    end
+        -- Store temp text for adding items
+        if not Settings.tempBlacklistText then
+            Settings.tempBlacklistText = ""
+        end
 
-    -- Add Item edit box
-    panel:AddSetting(SettingsAPI.CreateEditboxOption(
+        -- Add Item edit box
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.tempBlacklistText or ""
             end,
-            setFunc = function (value)
+            setFunction = function (value)
                 Settings.tempBlacklistText = value
             end,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Add Item button
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Add Item button
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             clickHandler = function ()
                 local text = Settings.tempBlacklistText or ""
@@ -3456,113 +3989,200 @@ function SpellCastBuffs.CreateConsoleSettings()
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Clear Blacklist
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Clear Blacklist
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR),
             tooltip = GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_TP),
             clickHandler = function ()
                 ZO_Dialogs_ShowGamepadDialog("LUIE_CLEAR_ABILITY_BLACKLIST")
             end,
             buttonText = GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Manage Blacklist
-    panel:AddSetting(SettingsAPI.CreateButtonOption(
+        -- Manage Blacklist
+        settings[#settings + 1] =
         {
-            name = GetString(LUIE_STRING_CUSTOM_LIST_AURA_BLACKLIST),
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_CUSTOM_LIST_AURA_BLACKLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_REMLIST_TP),
             clickHandler = function ()
                 LUIE.ShowBlacklistDialog("LUIE_MANAGE_BLACKLIST")
             end,
             buttonText = GetString(LUIE_STRING_CUSTOM_LIST_AURA_BLACKLIST),
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
+    end)
 
-    -- Debug Options
-    panel:AddSetting(SettingsAPI.CreateHeaderOption(
+    -- Build Debug Options Section
+    buildSectionSettings("Debug", function (settings)
+        settings[#settings + 1] =
         {
-            name = "Debug Options",
-        }))
+            type = LHAS.ST_SECTION,
+            label = "Debug Options",
+        }
 
-    -- Debug - Show AbilityId on Buffs & Debuffs
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Submenu description
+        settings[#settings + 1] =
         {
-            name = "Show AbilityId on Buffs & Debuffs",
+            type = LHAS.ST_LABEL,
+            label = "Configure debug options for development.",
+        }
+
+        -- Debug - Show AbilityId on Buffs & Debuffs
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "Show AbilityId on Buffs & Debuffs",
             tooltip = "Toggle the display of AbilityId on buffs and debuffs - useful for adding auras to Prominent Buffs & Debuffs or the Aura Blacklist.",
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ShowDebugAbilityId
             end,
-            setFunc = function (value)
+            setFunction = function (value)
                 Settings.ShowDebugAbilityId = value
                 SpellCastBuffs.Reset()
             end,
             default = Defaults.ShowDebugAbilityId,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Debug - Show Debug for Combat Events
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Debug - Show Debug for Combat Events
+        settings[#settings + 1] =
         {
-            name = "Show Debug for Combat Events",
+            type = LHAS.ST_CHECKBOX,
+            label = "Show Debug for Combat Events",
             tooltip = "Display debug information for combat events - used for development.",
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ShowDebugCombat
             end,
-            setFunc = function (value)
+            setFunction = function (value)
                 Settings.ShowDebugCombat = value
                 SpellCastBuffs.RegisterDebugEvents()
             end,
             default = Defaults.ShowDebugCombat,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Debug - Show Debug for Effect Change Events
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Debug - Show Debug for Effect Change Events
+        settings[#settings + 1] =
         {
-            name = "Show Debug for Effect Change Events",
+            type = LHAS.ST_CHECKBOX,
+            label = "Show Debug for Effect Change Events",
             tooltip = "Display debug information for effect change events - used for development.",
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ShowDebugEffect
             end,
-            setFunc = function (value)
+            setFunction = function (value)
                 Settings.ShowDebugEffect = value
                 SpellCastBuffs.RegisterDebugEvents()
             end,
             default = Defaults.ShowDebugEffect,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
 
-    -- Debug - Filter Debug Events & Effects
-    panel:AddSetting(SettingsAPI.CreateCheckboxOption(
+        -- Debug - Filter Debug Events & Effects
+        settings[#settings + 1] =
         {
-            name = "Filter Debug Events & Effects",
+            type = LHAS.ST_CHECKBOX,
+            label = "Filter Debug Events & Effects",
             tooltip = "Filter out events and effects that have already been processed - used for development.",
-            getFunc = function ()
+            getFunction = function ()
                 return Settings.ShowDebugFilter
             end,
-            setFunc = function (value)
+            setFunction = function (value)
                 Settings.ShowDebugFilter = value
             end,
             default = Defaults.ShowDebugFilter,
-            disabled = function ()
+            disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
-        }))
+        }
+    end)
+
+    -- Create back button
+    backButton =
+    {
+        type = LHAS.ST_BUTTON,
+        label = "BACK",
+        buttonText = "BACK",
+        tooltip = "",
+        clickHandler = function (control)
+            panel:RemoveAllSettings()
+            local mainMenuSettings = {}
+            for i = 1, #initialSettings do
+                mainMenuSettings[i] = initialSettings[i]
+            end
+            for i = 1, #menuButtons do
+                mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
+            end
+            panel:AddSettings(mainMenuSettings)
+            if IsConsoleUI() then
+                LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(1)
+            end
+        end
+    }
+
+    -- Helper function to create menu buttons
+    local function createMenuButton(sectionName, labelText)
+        return
+        {
+            type = LHAS.ST_BUTTON,
+            label = labelText,
+            buttonText = labelText,
+            tooltip = "",
+            clickHandler = function (control)
+                panel:RemoveAllSettings()
+                local sectionSettings = {}
+                for i = 1, #sectionGroups[sectionName] do
+                    sectionSettings[i] = sectionGroups[sectionName][i]
+                end
+                sectionSettings[#sectionSettings + 1] = backButton
+                panel:AddSettings(sectionSettings)
+                if IsConsoleUI() then
+                    LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(2)
+                end
+            end
+        }
+    end
+
+    -- Create menu buttons for each section
+    menuButtons[#menuButtons + 1] = createMenuButton("PositionDisplay", GetString(LUIE_STRING_LAM_BUFF_HEADER_POSITION))
+    menuButtons[#menuButtons + 1] = createMenuButton("LongShortTerm", GetString(LUIE_STRING_LAM_BUFF_LONG_SHORT_HEADER))
+    menuButtons[#menuButtons + 1] = createMenuButton("Misc", GetString(LUIE_STRING_LAM_BUFF_MISC_HEADER))
+    menuButtons[#menuButtons + 1] = createMenuButton("LongTerm", GetString(LUIE_STRING_LAM_BUFF_LONGTERM_HEADER))
+    menuButtons[#menuButtons + 1] = createMenuButton("Icon", GetString(LUIE_STRING_LAM_BUFF_ICON_HEADER))
+    menuButtons[#menuButtons + 1] = createMenuButton("Color", GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER))
+    menuButtons[#menuButtons + 1] = createMenuButton("AlignmentSorting", GetString(LUIE_STRING_LAM_BUFF_SORTING_HEADER))
+    menuButtons[#menuButtons + 1] = createMenuButton("Tooltip", GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_HEADER))
+    menuButtons[#menuButtons + 1] = createMenuButton("Priority", GetString(LUIE_STRING_LAM_BUFF_PRIORITY_HEADER))
+    menuButtons[#menuButtons + 1] = createMenuButton("Prominent", GetString(LUIE_STRING_LAM_BUFF_PROM_HEADER))
+    menuButtons[#menuButtons + 1] = createMenuButton("Blacklist", GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_HEADER))
+    menuButtons[#menuButtons + 1] = createMenuButton("Debug", "Debug Options")
+
+    -- Initialize main menu
+    local mainMenuSettings = {}
+    for i = 1, #initialSettings do
+        mainMenuSettings[i] = initialSettings[i]
+    end
+    for i = 1, #menuButtons do
+        mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
+    end
+    panel:AddSettings(mainMenuSettings)
 end

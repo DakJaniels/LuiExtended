@@ -5,7 +5,6 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-
 -- Load Console Settings API
 local SettingsAPI = LUIE.ConsoleSettingsAPI
 
@@ -17,7 +16,9 @@ local CastBar = ActionBar.CastBar
 
 local zo_strformat = zo_strformat
 local string_format = string.format
-local type, pairs = type, pairs
+local type, pairs, ipairs = type, pairs, ipairs
+local GetString = GetString
+local unpack = unpack
 
 -- Load LibHarvensAddonSettings
 local LHAS = LibHarvensAddonSettings
@@ -260,1020 +261,1298 @@ function ActionBar.CreateConsoleSettings()
                                     allowRefresh = true
                                 })
 
-    local settingsData = {}
+    -- Get media lists from SettingsAPI
+    local fontItems = SettingsAPI:GetFontsList()
+    local soundItems = SettingsAPI:GetSoundsList()
+    local statusbarItems = SettingsAPI:GetStatusbarTexturesList()
+
+    -- Build font style items once
+    local fontStyleItems = {}
+    for i, choice in ipairs(LUIE.FONT_STYLE_CHOICES) do
+        fontStyleItems[i] = { name = choice, data = LUIE.FONT_STYLE_CHOICES_VALUES[i] }
+    end
+    table.sort(fontStyleItems, function (a, b) return a.name < b.name end)
+
+    -- Collect initial settings for main menu
+    local initialSettings = {}
 
     -- Action Bar Description
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_AB_DESCRIPTION)
-    )
+    initialSettings[#initialSettings + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = GetString(LUIE_STRING_LAM_AB_DESCRIPTION)
+    }
 
     -- ReloadUI Button
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_RELOADUI),
-        GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
-        function ()
+    initialSettings[#initialSettings + 1] =
+    {
+        type = LHAS.ST_BUTTON,
+        label = GetString(LUIE_STRING_LAM_RELOADUI),
+        tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
+        buttonText = GetString(LUIE_STRING_LAM_RELOADUI),
+        clickHandler = function ()
             ReloadUI("ingame")
         end
-    )
-
-    -- Action Bar - Global Cooldown Options Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_AB_HEADER_GCD)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_AB_GCD_SHOW),
-        GetString(LUIE_STRING_LAM_AB_GCD_SHOW_TP),
-        function () return Settings.GlobalShowGCD end,
-        function (value)
-            Settings.GlobalShowGCD = value
-            ActionBar.HookGCD()
-        end,
-        "full",
-        function () return not LUIE.SV.ActionBar_Enabled end,
-        Defaults.GlobalShowGCD
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_GCD_QUICK),
-        GetString(LUIE_STRING_LAM_AB_GCD_QUICK_TP),
-        function () return Settings.GlobalPotion end,
-        function (value) Settings.GlobalPotion = value end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.GlobalShowGCD) end,
-        Defaults.GlobalPotion
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_GCD_FLASH),
-        GetString(LUIE_STRING_LAM_AB_GCD_FLASH_TP),
-        function () return Settings.GlobalFlash end,
-        function (value) Settings.GlobalFlash = value end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.GlobalShowGCD) end,
-        Defaults.GlobalFlash
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_GCD_DESAT),
-        GetString(LUIE_STRING_LAM_AB_GCD_DESAT_TP),
-        function () return Settings.GlobalDesat end,
-        function (value) Settings.GlobalDesat = value end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.GlobalShowGCD) end,
-        Defaults.GlobalDesat
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_GCD_COLOR),
-        GetString(LUIE_STRING_LAM_AB_GCD_COLOR_TP),
-        function () return Settings.GlobalLabelColor end,
-        function (value) Settings.GlobalLabelColor = value end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.GlobalShowGCD) end,
-        Defaults.GlobalLabelColor
-    )
-
-    -- Animation dropdown - convert to use keys mapping
-    local globalMethodItems = {}
-    for i, option in ipairs(globalMethodOptions) do
-        globalMethodItems[i] = { name = option, data = option }
-    end
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        GetString(LUIE_STRING_LAM_AB_GCD_ANIMATION),
-        GetString(LUIE_STRING_LAM_AB_GCD_ANIMATION_TP),
-        globalMethodItems,
-        function () return globalMethodOptions[Settings.GlobalMethod] end,
-        function (combobox, value, item)
-            Settings.GlobalMethod = globalMethodOptionsKeys[value]
-        end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.GlobalShowGCD) end,
-        globalMethodOptions[Defaults.GlobalMethod]
-    )
-
-    -- Action Bar - Ultimate Tracking Options Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_AB_HEADER_ULTIMATE)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_AB_ULTIMATE_SHOW_VAL),
-        GetString(LUIE_STRING_LAM_AB_ULTIMATE_SHOW_VAL_TP),
-        function () return Settings.UltimateLabelEnabled end,
-        function (value)
-            Settings.UltimateLabelEnabled = value
-            ActionBar.RegisterEvents()
-            ActionBar.UpdateUltimateLabel()
-        end,
-        "full",
-        function () return not LUIE.SV.ActionBar_Enabled end,
-        Defaults.UltimateLabelEnabled
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_AB_ULTIMATE_SHOW_PCT),
-        GetString(LUIE_STRING_LAM_AB_ULTIMATE_SHOW_PCT_TP),
-        function () return Settings.UltimatePctEnabled end,
-        function (value)
-            Settings.UltimatePctEnabled = value
-            ActionBar.RegisterEvents()
-            ActionBar.UpdateUltimateLabel()
-        end,
-        "full",
-        function () return not LUIE.SV.ActionBar_Enabled end,
-        Defaults.UltimatePctEnabled
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSlider(
-        GetString(LUIE_STRING_LAM_AB_SHARED_POSITION),
-        GetString(LUIE_STRING_LAM_AB_SHARED_POSITION_TP),
-        -72, 40, 2,
-        function () return Settings.UltimateLabelPosition end,
-        function (value)
-            Settings.UltimateLabelPosition = value
-            ActionBar.ResetUltimateLabel()
-        end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end,
-        Defaults.UltimateLabelPosition
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        GetString(LUIE_STRING_LAM_FONT),
-        GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
-        SettingsAPI.GetFontsList(),
-        function () return Settings.UltimateFontFace end,
-        function (var)
-            Settings.UltimateFontFace = var
-            ActionBar.ApplyFont()
-        end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end,
-        Defaults.UltimateFontFace
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSlider(
-        GetString(LUIE_STRING_LAM_FONT_SIZE),
-        GetString(LUIE_STRING_LAM_AB_SHARED_FONTSIZE_TP),
-        10, 30, 1,
-        function () return Settings.UltimateFontSize end,
-        function (value)
-            Settings.UltimateFontSize = value
-            ActionBar.ApplyFont()
-        end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end,
-        Defaults.UltimateFontSize
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateFontStyleDropdown(
-        GetString(LUIE_STRING_LAM_FONT_STYLE),
-        GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
-        function () return Settings.UltimateFontStyle end,
-        function (var)
-            Settings.UltimateFontStyle = var
-            ActionBar.ApplyFont()
-        end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end,
-        Defaults.UltimateFontStyle
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_ULTIMATE_HIDEFULL),
-        GetString(LUIE_STRING_LAM_AB_ULTIMATE_HIDEFULL_TP),
-        function () return Settings.UltimateHideFull end,
-        function (value)
-            Settings.UltimateHideFull = value
-            ActionBar.UpdateUltimateLabel()
-        end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end,
-        Defaults.UltimateHideFull
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_AB_ULTIMATE_TEXTURE),
-        GetString(LUIE_STRING_LAM_AB_ULTIMATE_TEXTURE_TP),
-        function () return Settings.UltimateGeneration end,
-        function (value) Settings.UltimateGeneration = value end,
-        "full",
-        function () return not LUIE.SV.ActionBar_Enabled end,
-        Defaults.UltimateGeneration
-    )
-
-    -- Action Bar - Bar Ability Highlight Options Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_AB_HEADER_BAR)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_AB_BAR_PROC),
-        GetString(LUIE_STRING_LAM_AB_BAR_PROC_TP),
-        function () return Settings.ShowTriggered end,
-        function (value)
-            Settings.ShowTriggered = value
-            ActionBar.UpdateBarHighlightTables()
-            ActionBar.OnSlotsFullUpdate()
-        end,
-        "full",
-        function () return not LUIE.SV.ActionBar_Enabled end,
-        Defaults.ShowTriggered
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_BAR_PROCSOUND),
-        GetString(LUIE_STRING_LAM_AB_BAR_PROCSOUND_TP),
-        function () return Settings.ProcEnableSound end,
-        function (value) Settings.ProcEnableSound = value end,
-        1,
-        "half",
-        function () return not (Settings.ShowTriggered and LUIE.SV.ActionBar_Enabled) end,
-        Defaults.ProcEnableSound
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        GetString(LUIE_STRING_LAM_AB_BAR_PROCSOUNDCHOICE),
-        GetString(LUIE_STRING_LAM_AB_BAR_PROCSOUNDCHOICE_TP),
-        SettingsAPI.GetSoundsList(),
-        function () return Settings.ProcSoundName end,
-        function (value)
-            Settings.ProcSoundName = value
-            ActionBar.ApplyProcSound(true)
-        end,
-        1,
-        "half",
-        function () return not (Settings.ShowTriggered and Settings.ProcEnableSound and LUIE.SV.ActionBar_Enabled) end,
-        Defaults.ProcSoundName
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_AB_BAR_EFFECT),
-        GetString(LUIE_STRING_LAM_AB_BAR_EFFECT_TP),
-        function () return Settings.ShowToggled end,
-        function (value)
-            Settings.ShowToggled = value
-            ActionBar.UpdateBarHighlightTables()
-            ActionBar.OnSlotsFullUpdate()
-        end,
-        "full",
-        function () return not LUIE.SV.ActionBar_Enabled end,
-        Defaults.ShowToggled
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_BAR_ULTIMATE),
-        GetString(LUIE_STRING_LAM_AB_BAR_ULTIMATE_TP),
-        function () return Settings.ShowToggledUltimate end,
-        function (value)
-            Settings.ShowToggledUltimate = value
-            ActionBar.UpdateBarHighlightTables()
-            ActionBar.OnSlotsFullUpdate()
-        end,
-        1,
-        "full",
-        function () return not (Settings.ShowToggled and LUIE.SV.ActionBar_Enabled) end,
-        Defaults.ShowToggledUltimate
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_BAR_LABEL),
-        GetString(LUIE_STRING_LAM_AB_BAR_LABEL_TP),
-        function () return Settings.BarShowLabel end,
-        function (value)
-            Settings.BarShowLabel = value
-            ActionBar.ResetBarLabel()
-        end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and (Settings.ShowTriggered or Settings.ShowToggled)) end,
-        Defaults.BarShowLabel
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSlider(
-        GetString(LUIE_STRING_LAM_AB_SHARED_POSITION),
-        GetString(LUIE_STRING_LAM_AB_SHARED_POSITION_TP),
-        -72, 40, 2,
-        function () return Settings.BarLabelPosition end,
-        function (value)
-            Settings.BarLabelPosition = value
-            ActionBar.ResetBarLabel()
-        end,
-        2,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end,
-        Defaults.BarLabelPosition
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        GetString(LUIE_STRING_LAM_FONT),
-        GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
-        SettingsAPI.GetFontsList(),
-        function () return Settings.BarFontFace end,
-        function (var)
-            Settings.BarFontFace = var
-            ActionBar.ApplyFont()
-        end,
-        2,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end,
-        Defaults.BarFontFace
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSlider(
-        GetString(LUIE_STRING_LAM_FONT_SIZE),
-        GetString(LUIE_STRING_LAM_AB_SHARED_FONTSIZE_TP),
-        10, 30, 1,
-        function () return Settings.BarFontSize end,
-        function (value)
-            Settings.BarFontSize = value
-            ActionBar.ApplyFont()
-        end,
-        2,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end,
-        Defaults.BarFontSize
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateFontStyleDropdown(
-        GetString(LUIE_STRING_LAM_FONT_STYLE),
-        GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
-        function () return Settings.BarFontStyle end,
-        function (var)
-            Settings.BarFontStyle = var
-            ActionBar.ApplyFont()
-        end,
-        2,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end,
-        Defaults.BarFontStyle
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS),
-        GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS_TP),
-        function () return Settings.BarMillis end,
-        function (value) Settings.BarMillis = value end,
-        2,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end,
-        Defaults.BarMillis
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSlider(
-        GetString(LUIE_STRING_LAM_BUFF_SHOWFRACTIONSTHRESHOLDVALUE),
-        GetString(LUIE_STRING_LAM_BUFF_SHOWFRACTIONSTHRESHOLDVALUE_TP),
-        1, 30, 1,
-        function () return Settings.BarMillisThreshold end,
-        function (value)
-            Settings.BarMillisThreshold = value
-            ActionBar.ApplyFont()
-        end,
-        3,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.BarMillis and (Settings.ShowTriggered or Settings.ShowToggled)) end,
-        Defaults.BarMillisThreshold
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_BUFF_SHOWFRACTIONSABOVETHRESHOLD),
-        GetString(LUIE_STRING_LAM_BUFF_SHOWFRACTIONSABOVETHRESHOLD_TP),
-        function () return Settings.BarMillisAboveTen end,
-        function (value) Settings.BarMillisAboveTen = value end,
-        3,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.BarMillis and (Settings.ShowTriggered or Settings.ShowToggled)) end,
-        Defaults.BarMillisAboveTen
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        "Colored Remaining Text",
-        "Enable colored text for remaining duration labels on ability highlights",
-        function () return Settings.RemainingTextColoured end,
-        function (value)
-            Settings.RemainingTextColoured = value
-            -- Colors are updated dynamically in OnUpdate
-        end,
-        2,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end,
-        Defaults.RemainingTextColoured
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        "Remaining Text Color (High)",
-        "Color when duration is above mid threshold (high time remaining)",
-        function () return unpack(Settings.RemainingTextColorHigh) end,
-        function (r, g, b, a)
-            Settings.RemainingTextColorHigh = { r, g, b, a }
-        end,
-        Defaults.RemainingTextColorHigh,
-        3,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        "Remaining Text Color (Mid)",
-        "Color when duration is between low and mid thresholds",
-        function () return unpack(Settings.RemainingTextColorMid) end,
-        function (r, g, b, a)
-            Settings.RemainingTextColorMid = { r, g, b, a }
-        end,
-        Defaults.RemainingTextColorMid,
-        3,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        "Remaining Text Color (Low)",
-        "Color when duration is below low threshold (low time remaining)",
-        function () return unpack(Settings.RemainingTextColorLow) end,
-        function (r, g, b, a)
-            Settings.RemainingTextColorLow = { r, g, b, a }
-        end,
-        Defaults.RemainingTextColorLow,
-        3,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSlider(
-        "Mid Threshold (%)",
-        "Percentage of duration remaining to switch from high to mid color (0.0-1.0)",
-        0, 100, 1,
-        function () return Settings.RemainingTextColorThresholdMid * 100 end,
-        function (value)
-            Settings.RemainingTextColorThresholdMid = value / 100
-        end,
-        3,
-        "half",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end,
-        Defaults.RemainingTextColorThresholdMid * 100
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSlider(
-        "Low Threshold (%)",
-        "Percentage of duration remaining to switch from mid to low color (0.0-1.0)",
-        0, 100, 1,
-        function () return Settings.RemainingTextColorThresholdLow * 100 end,
-        function (value)
-            Settings.RemainingTextColorThresholdLow = value / 100
-        end,
-        3,
-        "half",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end,
-        Defaults.RemainingTextColorThresholdLow * 100
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDividerOption("full")
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(GetString(LUIE_STRING_LAM_AB_BACKBAR_HEADER))
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(GetString(LUIE_STRING_LAM_AB_BACKBAR_NOTE))
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_AB_BACKBAR_ENABLE),
-        GetString(LUIE_STRING_LAM_AB_BACKBAR_ENABLE_TP),
-        function () return Settings.BarShowBack end,
-        function (value)
-            Settings.BarShowBack = value
-            ActionBar.OnSlotsFullUpdate()
-            ActionBar.BackbarToggleSettings()
-        end,
-        "full",
-        function () return not LUIE.SV.ActionBar_Enabled end,
-        Defaults.BarShowBack
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_BACKBAR_DARK),
-        GetString(LUIE_STRING_LAM_AB_BACKBAR_DARK_TP),
-        function () return Settings.BarDarkUnused end,
-        function (value)
-            Settings.BarDarkUnused = value
-            ActionBar.OnSlotsFullUpdate()
-            ActionBar.BackbarToggleSettings()
-        end,
-        1,
-        "full",
-        function () return not (Settings.BarShowBack and LUIE.SV.ActionBar_Enabled) end,
-        Defaults.BarDarkUnused
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_BACKBAR_DESATURATE),
-        GetString(LUIE_STRING_LAM_AB_BACKBAR_DESATURATE_TP),
-        function () return Settings.BarDesaturateUnused end,
-        function (value)
-            Settings.BarDesaturateUnused = value
-            ActionBar.OnSlotsFullUpdate()
-            ActionBar.BackbarToggleSettings()
-        end,
-        1,
-        "full",
-        function () return not (Settings.BarShowBack and LUIE.SV.ActionBar_Enabled) end,
-        Defaults.BarDesaturateUnused
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_BACKBAR_HIDE_UNUSED),
-        GetString(LUIE_STRING_LAM_AB_BACKBAR_HIDE_UNUSED_TP),
-        function () return Settings.BarHideUnused end,
-        function (value)
-            Settings.BarHideUnused = value
-            ActionBar.OnSlotsFullUpdate()
-            ActionBar.BackbarToggleSettings()
-        end,
-        1,
-        "full",
-        function () return not (Settings.BarShowBack and LUIE.SV.ActionBar_Enabled) end,
-        Defaults.BarHideUnused
-    )
-
-    -- Action Bar - Quickslot Cooldown Timer Option Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_AB_HEADER_POTION)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_AB_POTION),
-        GetString(LUIE_STRING_LAM_AB_POTION_TP),
-        function () return Settings.PotionTimerShow end,
-        function (value) Settings.PotionTimerShow = value end,
-        "full",
-        function () return not LUIE.SV.ActionBar_Enabled end,
-        Defaults.PotionTimerShow
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSlider(
-        GetString(LUIE_STRING_LAM_AB_SHARED_POSITION),
-        GetString(LUIE_STRING_LAM_AB_SHARED_POSITION_TP),
-        -72, 40, 2,
-        function () return Settings.PotionTimerLabelPosition end,
-        function (value)
-            Settings.PotionTimerLabelPosition = value
-            ActionBar.ResetPotionTimerLabel()
-        end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end,
-        Defaults.PotionTimerLabelPosition
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        GetString(LUIE_STRING_LAM_FONT),
-        GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
-        SettingsAPI.GetFontsList(),
-        function () return Settings.PotionTimerFontFace end,
-        function (var)
-            Settings.PotionTimerFontFace = var
-            ActionBar.ApplyFont()
-        end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end,
-        Defaults.PotionTimerFontFace
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSlider(
-        GetString(LUIE_STRING_LAM_FONT_SIZE),
-        GetString(LUIE_STRING_LAM_AB_SHARED_FONTSIZE_TP),
-        10, 30, 1,
-        function () return Settings.PotionTimerFontSize end,
-        function (value)
-            Settings.PotionTimerFontSize = value
-            ActionBar.ApplyFont()
-        end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end,
-        Defaults.PotionTimerFontSize
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateFontStyleDropdown(
-        GetString(LUIE_STRING_LAM_FONT_STYLE),
-        GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
-        function () return Settings.PotionTimerFontStyle end,
-        function (var)
-            Settings.PotionTimerFontStyle = var
-            ActionBar.ApplyFont()
-        end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end,
-        Defaults.PotionTimerFontStyle
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_POTION_COLOR),
-        GetString(LUIE_STRING_LAM_AB_POTION_COLOR_TP),
-        function () return Settings.PotionTimerColor end,
-        function (value) Settings.PotionTimerColor = value end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end,
-        Defaults.PotionTimerColor
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        "Quickslot Timer Color (High)",
-        "Color when remaining time is above mid threshold",
-        function () return unpack(Settings.PotionTimerTextColorHigh) end,
-        function (r, g, b, a)
-            Settings.PotionTimerTextColorHigh = { r, g, b, a }
-        end,
-        Defaults.PotionTimerTextColorHigh,
-        2,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        "Quickslot Timer Color (Mid)",
-        "Color when remaining time is between low and mid thresholds",
-        function () return unpack(Settings.PotionTimerTextColorMid) end,
-        function (r, g, b, a)
-            Settings.PotionTimerTextColorMid = { r, g, b, a }
-        end,
-        Defaults.PotionTimerTextColorMid,
-        2,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        "Quickslot Timer Color (Low)",
-        "Color when remaining time is below low threshold",
-        function () return unpack(Settings.PotionTimerTextColorLow) end,
-        function (r, g, b, a)
-            Settings.PotionTimerTextColorLow = { r, g, b, a }
-        end,
-        Defaults.PotionTimerTextColorLow,
-        2,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSlider(
-        "Mid Threshold (ms)",
-        "Remaining time in milliseconds to switch from high to mid color",
-        1000, 60000, 1000,
-        function () return Settings.PotionTimerTextColorThresholdMid end,
-        function (value)
-            Settings.PotionTimerTextColorThresholdMid = value
-        end,
-        2,
-        "half",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end,
-        Defaults.PotionTimerTextColorThresholdMid
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSlider(
-        "Low Threshold (ms)",
-        "Remaining time in milliseconds to switch from mid to low color",
-        500, 30000, 500,
-        function () return Settings.PotionTimerTextColorThresholdLow end,
-        function (value)
-            Settings.PotionTimerTextColorThresholdLow = value
-        end,
-        2,
-        "half",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end,
-        Defaults.PotionTimerTextColorThresholdLow
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS),
-        GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS_TP),
-        function () return Settings.PotionTimerMillis end,
-        function (value) Settings.PotionTimerMillis = value end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end,
-        Defaults.PotionTimerMillis
-    )
-
-    -- Action Bar -- Cast Bar Option Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_AB_HEADER_CASTBAR)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_MOVE),
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_MOVE_TP),
-        function () return castBarMovingEnabled end,
-        function (value)
-            castBarMovingEnabled = value
-            CastBar.SetMovingState(value)
-        end,
-        "half",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
-        false
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_RESETPOSITION),
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_RESET_TP),
-        CastBar.ResetCastBarPosition,
-        "half",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_ENABLE),
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_ENABLE_TP),
-        function () return Settings.CastBarEnable end,
-        function (value)
-            Settings.CastBarEnable = value
-            ActionBar.RegisterEvents()
-        end,
-        "full",
-        function () return not LUIE.SV.ActionBar_Enabled end,
-        Defaults.CastBarEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateSliderOption(
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_SIZEW),
-        nil,
-        100, 500, 5,
-        function () return Settings.CastBarSizeW end,
-        function (value)
-            Settings.CastBarSizeW = value
-            CastBar.ResizeCastBar()
-        end,
-        "full",
-        function () return not LUIE.SV.ActionBar_Enabled end,
-        Defaults.CastBarSizeW
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateSliderOption(
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_SIZEH),
-        nil,
-        16, 64, 2,
-        function () return Settings.CastBarSizeH end,
-        function (value)
-            Settings.CastBarSizeH = value
-            CastBar.ResizeCastBar()
-        end,
-        "full",
-        function () return not LUIE.SV.ActionBar_Enabled end,
-        Defaults.CastBarSizeH
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateSliderOption(
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_ICONSIZE),
-        nil,
-        16, 64, 2,
-        function () return Settings.CastBarIconSize end,
-        function (value)
-            Settings.CastBarIconSize = value
-            CastBar.ResizeCastBar()
-        end,
-        "full",
-        function () return not LUIE.SV.ActionBar_Enabled end,
-        Defaults.CastBarIconSize
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_LABEL),
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_LABEL_TP),
-        function () return Settings.CastBarLabel end,
-        function (value) Settings.CastBarLabel = value end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
-        Defaults.CastBarLabel
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER),
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_TP),
-        function () return Settings.CastBarTimer end,
-        function (value) Settings.CastBarTimer = value end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
-        Defaults.CastBarTimer
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTFACE),
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTFACE_TP),
-        SettingsAPI.GetFontsList(),
-        function () return Settings.CastBarFontFace end,
-        function (var)
-            Settings.CastBarFontFace = var
-            ActionBar.ApplyFont()
-            CastBar.UpdateCastBar()
-        end,
-        2,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end,
-        Defaults.CastBarFontFace
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSlider(
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSIZE),
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSIZE_TP),
-        10, 30, 1,
-        function () return Settings.CastBarFontSize end,
-        function (value)
-            Settings.CastBarFontSize = value
-            ActionBar.ApplyFont()
-            CastBar.UpdateCastBar()
-        end,
-        2,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end,
-        Defaults.CastBarFontSize
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateFontStyleDropdown(
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSTYLE),
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSTYLE_TP),
-        function () return Settings.CastBarFontStyle end,
-        function (var)
-            Settings.CastBarFontStyle = var
-            ActionBar.ApplyFont()
-            CastBar.UpdateCastBar()
-        end,
-        2,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end,
-        Defaults.CastBarFontStyle
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_TEXTURE),
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_TEXTURE_TP),
-        SettingsAPI.GetStatusbarTexturesList(),
-        function () return Settings.CastBarTexture end,
-        function (value)
-            Settings.CastBarTexture = value
-            CastBar.UpdateCastBar()
-        end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
-        Defaults.CastBarTexture
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_GRADIENTC1),
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_GRADIENTC1_TP),
-        function () return unpack(Settings.CastBarGradientC1) end,
-        function (r, g, b, a)
-            Settings.CastBarGradientC1 = { r, g, b, a }
-            CastBar.UpdateCastBar()
-        end,
-        Defaults.CastBarGradientC1,
-        1,
-        "half",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_GRADIENTC2),
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_GRADIENTC2_TP),
-        function () return unpack(Settings.CastBarGradientC2) end,
-        function (r, g, b, a)
-            Settings.CastBarGradientC2 = { r, g, b, a }
-            CastBar.UpdateCastBar()
-        end,
-        Defaults.CastBarGradientC2,
-        1,
-        "half",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(GetString(LUIE_STRING_LAM_AB_CASTBAR_FILTERS_HEADER))
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS),
-        GetString(LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS_TP),
-        function () return Settings.CastBarHeavy end,
-        function (value) Settings.CastBarHeavy = value end,
-        1,
-        "full",
-        function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
-        Defaults.CastBarHeavy
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST))
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_DESCRIPT))
-
-    -- Store temp text for adding items
-    if not Settings.tempBlacklistText then
-        Settings.tempBlacklistText = ""
+    }
+
+    -- Initialize all settings and menu buttons for submenus
+    local backButton = nil
+    local menuButtons = {}
+    local sectionGroups = {}
+
+    -- Helper function to build section settings
+    local function buildSectionSettings(sectionName, settingsBuilder)
+        local sectionSettings = {}
+        settingsBuilder(sectionSettings)
+        sectionGroups[sectionName] = sectionSettings
     end
 
-    -- Add Item edit box
-    settingsData[#settingsData + 1] = SettingsAPI.CreateEditboxOption(
-        GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
-        GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
-        function ()
-            return Settings.tempBlacklistText or ""
-        end,
-        function (value)
-            Settings.tempBlacklistText = value
-        end,
-        nil,
-        "full",
-        function () return not LUIE.SV.ActionBar_Enabled end
-    )
+    -- Build Global Cooldown Options Section
+    buildSectionSettings("GlobalCooldown", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_AB_HEADER_GCD),
+        }
 
-    -- Add Item button
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
-        GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
-        function ()
-            local text = Settings.tempBlacklistText or ""
-            if text and text ~= "" then
-                ActionBar.AddToCustomList(Settings.blacklist, text)
-                Settings.tempBlacklistText = ""
-                -- Refresh the blacklist dialog if it's open
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Configure global cooldown (GCD) display options including visual effects, animations, and color settings.",
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_GCD_SHOW),
+            tooltip = GetString(LUIE_STRING_LAM_AB_GCD_SHOW_TP),
+            getFunction = function () return Settings.GlobalShowGCD end,
+            setFunction = function (value)
+                Settings.GlobalShowGCD = value
+                ActionBar.HookGCD()
+            end,
+            default = Defaults.GlobalShowGCD,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_GCD_QUICK),
+            tooltip = GetString(LUIE_STRING_LAM_AB_GCD_QUICK_TP),
+            getFunction = function () return Settings.GlobalPotion end,
+            setFunction = function (value) Settings.GlobalPotion = value end,
+            default = Defaults.GlobalPotion,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.GlobalShowGCD) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_GCD_FLASH),
+            tooltip = GetString(LUIE_STRING_LAM_AB_GCD_FLASH_TP),
+            getFunction = function () return Settings.GlobalFlash end,
+            setFunction = function (value) Settings.GlobalFlash = value end,
+            default = Defaults.GlobalFlash,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.GlobalShowGCD) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_GCD_DESAT),
+            tooltip = GetString(LUIE_STRING_LAM_AB_GCD_DESAT_TP),
+            getFunction = function () return Settings.GlobalDesat end,
+            setFunction = function (value) Settings.GlobalDesat = value end,
+            default = Defaults.GlobalDesat,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.GlobalShowGCD) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_GCD_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_AB_GCD_COLOR_TP),
+            getFunction = function () return Settings.GlobalLabelColor end,
+            setFunction = function (value) Settings.GlobalLabelColor = value end,
+            default = Defaults.GlobalLabelColor,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.GlobalShowGCD) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_GCD_ANIMATION),
+            tooltip = GetString(LUIE_STRING_LAM_AB_GCD_ANIMATION_TP),
+            items = SettingsAPI:GetGlobalMethodOptionsList(),
+            getFunction = function ()
+                local index = Settings.GlobalMethod
+                if type(index) == "string" then
+                    index = globalMethodOptionsKeys[index] or 1
+                end
+                return globalMethodOptions[index] or globalMethodOptions[1]
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.GlobalMethod = item.data
+            end,
+            default = globalMethodOptions[Defaults.GlobalMethod],
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.GlobalShowGCD) end
+        }
+    end)
+
+    -- Build Ultimate Tracking Options Section
+    buildSectionSettings("UltimateTracking", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_AB_HEADER_ULTIMATE),
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Configure ultimate ability tracking display including value, percentage, font settings, and visual indicators.",
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_ULTIMATE_SHOW_VAL),
+            tooltip = GetString(LUIE_STRING_LAM_AB_ULTIMATE_SHOW_VAL_TP),
+            getFunction = function () return Settings.UltimateLabelEnabled end,
+            setFunction = function (value)
+                Settings.UltimateLabelEnabled = value
+                ActionBar.RegisterEvents()
+                ActionBar.UpdateUltimateLabel()
+            end,
+            default = Defaults.UltimateLabelEnabled,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_ULTIMATE_SHOW_PCT),
+            tooltip = GetString(LUIE_STRING_LAM_AB_ULTIMATE_SHOW_PCT_TP),
+            getFunction = function () return Settings.UltimatePctEnabled end,
+            setFunction = function (value)
+                Settings.UltimatePctEnabled = value
+                ActionBar.RegisterEvents()
+                ActionBar.UpdateUltimateLabel()
+            end,
+            default = Defaults.UltimatePctEnabled,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_SHARED_POSITION),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_POSITION_TP),
+            min = -72,
+            max = 40,
+            step = 2,
+            format = "%.0f",
+            getFunction = function () return Settings.UltimateLabelPosition end,
+            setFunction = function (value)
+                Settings.UltimateLabelPosition = value
+                ActionBar.ResetUltimateLabel()
+            end,
+            default = Defaults.UltimateLabelPosition,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  " .. GetString(LUIE_STRING_LAM_FONT),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
+            items = fontItems,
+            getFunction = function () return Settings.UltimateFontFace end,
+            setFunction = function (combobox, value, item)
+                Settings.UltimateFontFace = item.data
+                ActionBar.ApplyFont()
+            end,
+            default = Defaults.UltimateFontFace,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "  " .. GetString(LUIE_STRING_LAM_FONT_SIZE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSIZE_TP),
+            min = 10,
+            max = 30,
+            step = 1,
+            format = "%.0f",
+            getFunction = function () return Settings.UltimateFontSize end,
+            setFunction = function (value)
+                Settings.UltimateFontSize = value
+                ActionBar.ApplyFont()
+            end,
+            default = Defaults.UltimateFontSize,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  " .. GetString(LUIE_STRING_LAM_FONT_STYLE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
+            items = fontStyleItems,
+            getFunction = function ()
+                local value = Settings.UltimateFontStyle
+                for i, choiceValue in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
+                    if choiceValue == value then
+                        return LUIE.FONT_STYLE_CHOICES[i]
+                    end
+                end
+                return LUIE.FONT_STYLE_CHOICES[1]
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.UltimateFontStyle = item.data
+                ActionBar.ApplyFont()
+            end,
+            default = Defaults.UltimateFontStyle,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_ULTIMATE_HIDEFULL),
+            tooltip = GetString(LUIE_STRING_LAM_AB_ULTIMATE_HIDEFULL_TP),
+            getFunction = function () return Settings.UltimateHideFull end,
+            setFunction = function (value)
+                Settings.UltimateHideFull = value
+                ActionBar.UpdateUltimateLabel()
+            end,
+            default = Defaults.UltimateHideFull,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_ULTIMATE_TEXTURE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_ULTIMATE_TEXTURE_TP),
+            getFunction = function () return Settings.UltimateGeneration end,
+            setFunction = function (value) Settings.UltimateGeneration = value end,
+            default = Defaults.UltimateGeneration,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+    end)
+
+    -- Build Bar Ability Highlight Options Section
+    buildSectionSettings("BarAbilityHighlight", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_AB_HEADER_BAR),
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Configure ability highlight options including proc effects, toggled abilities, labels, colors, and backbar display settings.",
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_BAR_PROC),
+            tooltip = GetString(LUIE_STRING_LAM_AB_BAR_PROC_TP),
+            getFunction = function () return Settings.ShowTriggered end,
+            setFunction = function (value)
+                Settings.ShowTriggered = value
+                ActionBar.UpdateBarHighlightTables()
+                ActionBar.OnSlotsFullUpdate()
+            end,
+            default = Defaults.ShowTriggered,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_BAR_PROCSOUND),
+            tooltip = GetString(LUIE_STRING_LAM_AB_BAR_PROCSOUND_TP),
+            getFunction = function () return Settings.ProcEnableSound end,
+            setFunction = function (value) Settings.ProcEnableSound = value end,
+            default = Defaults.ProcEnableSound,
+            disable = function () return not (Settings.ShowTriggered and LUIE.SV.ActionBar_Enabled) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_BAR_PROCSOUNDCHOICE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_BAR_PROCSOUNDCHOICE_TP),
+            items = soundItems,
+            getFunction = function () return Settings.ProcSoundName end,
+            setFunction = function (combobox, value, item)
+                Settings.ProcSoundName = item.data
+                ActionBar.ApplyProcSound(true)
+            end,
+            default = Defaults.ProcSoundName,
+            disable = function () return not (Settings.ShowTriggered and Settings.ProcEnableSound and LUIE.SV.ActionBar_Enabled) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_BAR_EFFECT),
+            tooltip = GetString(LUIE_STRING_LAM_AB_BAR_EFFECT_TP),
+            getFunction = function () return Settings.ShowToggled end,
+            setFunction = function (value)
+                Settings.ShowToggled = value
+                ActionBar.UpdateBarHighlightTables()
+                ActionBar.OnSlotsFullUpdate()
+            end,
+            default = Defaults.ShowToggled,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_BAR_ULTIMATE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_BAR_ULTIMATE_TP),
+            getFunction = function () return Settings.ShowToggledUltimate end,
+            setFunction = function (value)
+                Settings.ShowToggledUltimate = value
+                ActionBar.UpdateBarHighlightTables()
+                ActionBar.OnSlotsFullUpdate()
+            end,
+            default = Defaults.ShowToggledUltimate,
+            disable = function () return not (Settings.ShowToggled and LUIE.SV.ActionBar_Enabled) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_BAR_LABEL),
+            tooltip = GetString(LUIE_STRING_LAM_AB_BAR_LABEL_TP),
+            getFunction = function () return Settings.BarShowLabel end,
+            setFunction = function (value)
+                Settings.BarShowLabel = value
+                ActionBar.ResetBarLabel()
+            end,
+            default = Defaults.BarShowLabel,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and (Settings.ShowTriggered or Settings.ShowToggled)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "    " .. GetString(LUIE_STRING_LAM_AB_SHARED_POSITION),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_POSITION_TP),
+            min = -72,
+            max = 40,
+            step = 2,
+            format = "%.0f",
+            getFunction = function () return Settings.BarLabelPosition end,
+            setFunction = function (value)
+                Settings.BarLabelPosition = value
+                ActionBar.ResetBarLabel()
+            end,
+            default = Defaults.BarLabelPosition,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "    " .. GetString(LUIE_STRING_LAM_FONT),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
+            items = fontItems,
+            getFunction = function () return Settings.BarFontFace end,
+            setFunction = function (combobox, value, item)
+                Settings.BarFontFace = item.data
+                ActionBar.ApplyFont()
+            end,
+            default = Defaults.BarFontFace,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "    " .. GetString(LUIE_STRING_LAM_FONT_SIZE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSIZE_TP),
+            min = 10,
+            max = 30,
+            step = 1,
+            format = "%.0f",
+            getFunction = function () return Settings.BarFontSize end,
+            setFunction = function (value)
+                Settings.BarFontSize = value
+                ActionBar.ApplyFont()
+            end,
+            default = Defaults.BarFontSize,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "    " .. GetString(LUIE_STRING_LAM_FONT_STYLE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
+            items = fontStyleItems,
+            getFunction = function ()
+                local value = Settings.BarFontStyle
+                for i, choiceValue in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
+                    if choiceValue == value then
+                        return LUIE.FONT_STYLE_CHOICES[i]
+                    end
+                end
+                return LUIE.FONT_STYLE_CHOICES[1]
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.BarFontStyle = item.data
+                ActionBar.ApplyFont()
+            end,
+            default = Defaults.BarFontStyle,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS_TP),
+            getFunction = function () return Settings.BarMillis end,
+            setFunction = function (value) Settings.BarMillis = value end,
+            default = Defaults.BarMillis,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "      " .. GetString(LUIE_STRING_LAM_BUFF_SHOWFRACTIONSTHRESHOLDVALUE),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOWFRACTIONSTHRESHOLDVALUE_TP),
+            min = 1,
+            max = 30,
+            step = 1,
+            format = "%.0f",
+            getFunction = function () return Settings.BarMillisThreshold end,
+            setFunction = function (value)
+                Settings.BarMillisThreshold = value
+                ActionBar.ApplyFont()
+            end,
+            default = Defaults.BarMillisThreshold,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.BarMillis and (Settings.ShowTriggered or Settings.ShowToggled)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "      " .. GetString(LUIE_STRING_LAM_BUFF_SHOWFRACTIONSABOVETHRESHOLD),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOWFRACTIONSABOVETHRESHOLD_TP),
+            getFunction = function () return Settings.BarMillisAboveTen end,
+            setFunction = function (value) Settings.BarMillisAboveTen = value end,
+            default = Defaults.BarMillisAboveTen,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.BarMillis and (Settings.ShowTriggered or Settings.ShowToggled)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "    Colored Remaining Text",
+            tooltip = "Enable colored text for remaining duration labels on ability highlights",
+            getFunction = function () return Settings.RemainingTextColoured end,
+            setFunction = function (value)
+                Settings.RemainingTextColoured = value
+            end,
+            default = Defaults.RemainingTextColoured,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "      Remaining Text Color (High)",
+            tooltip = "Color when duration is above mid threshold (high time remaining)",
+            getFunction = function () return Settings.RemainingTextColorHigh[1], Settings.RemainingTextColorHigh[2], Settings.RemainingTextColorHigh[3], Settings.RemainingTextColorHigh[4] end,
+            setFunction = function (r, g, b, a)
+                Settings.RemainingTextColorHigh = { r, g, b, a }
+            end,
+            default = Defaults.RemainingTextColorHigh,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "      Remaining Text Color (Mid)",
+            tooltip = "Color when duration is between low and mid thresholds",
+            getFunction = function () return Settings.RemainingTextColorMid[1], Settings.RemainingTextColorMid[2], Settings.RemainingTextColorMid[3], Settings.RemainingTextColorMid[4] end,
+            setFunction = function (r, g, b, a)
+                Settings.RemainingTextColorMid = { r, g, b, a }
+            end,
+            default = Defaults.RemainingTextColorMid,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "      Remaining Text Color (Low)",
+            tooltip = "Color when duration is below low threshold (low time remaining)",
+            getFunction = function () return Settings.RemainingTextColorLow[1], Settings.RemainingTextColorLow[2], Settings.RemainingTextColorLow[3], Settings.RemainingTextColorLow[4] end,
+            setFunction = function (r, g, b, a)
+                Settings.RemainingTextColorLow = { r, g, b, a }
+            end,
+            default = Defaults.RemainingTextColorLow,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "      Mid Threshold (%)",
+            tooltip = "Percentage of duration remaining to switch from high to mid color (0.0-1.0)",
+            min = 0,
+            max = 100,
+            step = 1,
+            format = "%.0f",
+            getFunction = function () return Settings.RemainingTextColorThresholdMid * 100 end,
+            setFunction = function (value)
+                Settings.RemainingTextColorThresholdMid = value / 100
+            end,
+            default = Defaults.RemainingTextColorThresholdMid * 100,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "      Low Threshold (%)",
+            tooltip = "Percentage of duration remaining to switch from mid to low color (0.0-1.0)",
+            min = 0,
+            max = 100,
+            step = 1,
+            format = "%.0f",
+            getFunction = function () return Settings.RemainingTextColorThresholdLow * 100 end,
+            setFunction = function (value)
+                Settings.RemainingTextColorThresholdLow = value / 100
+            end,
+            default = Defaults.RemainingTextColorThresholdLow * 100,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
+        }
+
+        -- Backbar subsection
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_AB_BACKBAR_HEADER)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_AB_BACKBAR_NOTE)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_BACKBAR_ENABLE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_BACKBAR_ENABLE_TP),
+            getFunction = function () return Settings.BarShowBack end,
+            setFunction = function (value)
+                Settings.BarShowBack = value
+                ActionBar.OnSlotsFullUpdate()
+                ActionBar.BackbarToggleSettings()
+            end,
+            default = Defaults.BarShowBack,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_BACKBAR_DARK),
+            tooltip = GetString(LUIE_STRING_LAM_AB_BACKBAR_DARK_TP),
+            getFunction = function () return Settings.BarDarkUnused end,
+            setFunction = function (value)
+                Settings.BarDarkUnused = value
+                ActionBar.OnSlotsFullUpdate()
+                ActionBar.BackbarToggleSettings()
+            end,
+            default = Defaults.BarDarkUnused,
+            disable = function () return not (Settings.BarShowBack and LUIE.SV.ActionBar_Enabled) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_BACKBAR_DESATURATE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_BACKBAR_DESATURATE_TP),
+            getFunction = function () return Settings.BarDesaturateUnused end,
+            setFunction = function (value)
+                Settings.BarDesaturateUnused = value
+                ActionBar.OnSlotsFullUpdate()
+                ActionBar.BackbarToggleSettings()
+            end,
+            default = Defaults.BarDesaturateUnused,
+            disable = function () return not (Settings.BarShowBack and LUIE.SV.ActionBar_Enabled) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_BACKBAR_HIDE_UNUSED),
+            tooltip = GetString(LUIE_STRING_LAM_AB_BACKBAR_HIDE_UNUSED_TP),
+            getFunction = function () return Settings.BarHideUnused end,
+            setFunction = function (value)
+                Settings.BarHideUnused = value
+                ActionBar.OnSlotsFullUpdate()
+                ActionBar.BackbarToggleSettings()
+            end,
+            default = Defaults.BarHideUnused,
+            disable = function () return not (Settings.BarShowBack and LUIE.SV.ActionBar_Enabled) end
+        }
+    end)
+
+    -- Build Quickslot Cooldown Timer Option Section
+    buildSectionSettings("QuickslotCooldown", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_AB_HEADER_POTION),
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Configure quickslot (potion) cooldown timer display including position, font settings, color thresholds, and millisecond display options.",
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_POTION),
+            tooltip = GetString(LUIE_STRING_LAM_AB_POTION_TP),
+            getFunction = function () return Settings.PotionTimerShow end,
+            setFunction = function (value) Settings.PotionTimerShow = value end,
+            default = Defaults.PotionTimerShow,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_SHARED_POSITION),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_POSITION_TP),
+            min = -72,
+            max = 40,
+            step = 2,
+            format = "%.0f",
+            getFunction = function () return Settings.PotionTimerLabelPosition end,
+            setFunction = function (value)
+                Settings.PotionTimerLabelPosition = value
+                ActionBar.ResetPotionTimerLabel()
+            end,
+            default = Defaults.PotionTimerLabelPosition,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  " .. GetString(LUIE_STRING_LAM_FONT),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
+            items = fontItems,
+            getFunction = function () return Settings.PotionTimerFontFace end,
+            setFunction = function (combobox, value, item)
+                Settings.PotionTimerFontFace = item.data
+                ActionBar.ApplyFont()
+            end,
+            default = Defaults.PotionTimerFontFace,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "  " .. GetString(LUIE_STRING_LAM_FONT_SIZE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSIZE_TP),
+            min = 10,
+            max = 30,
+            step = 1,
+            format = "%.0f",
+            getFunction = function () return Settings.PotionTimerFontSize end,
+            setFunction = function (value)
+                Settings.PotionTimerFontSize = value
+                ActionBar.ApplyFont()
+            end,
+            default = Defaults.PotionTimerFontSize,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  " .. GetString(LUIE_STRING_LAM_FONT_STYLE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
+            items = fontStyleItems,
+            getFunction = function ()
+                local value = Settings.PotionTimerFontStyle
+                for i, choiceValue in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
+                    if choiceValue == value then
+                        return LUIE.FONT_STYLE_CHOICES[i]
+                    end
+                end
+                return LUIE.FONT_STYLE_CHOICES[1]
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.PotionTimerFontStyle = item.data
+                ActionBar.ApplyFont()
+            end,
+            default = Defaults.PotionTimerFontStyle,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_POTION_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_AB_POTION_COLOR_TP),
+            getFunction = function () return Settings.PotionTimerColor end,
+            setFunction = function (value) Settings.PotionTimerColor = value end,
+            default = Defaults.PotionTimerColor,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "    Quickslot Timer Color (High)",
+            tooltip = "Color when remaining time is above mid threshold",
+            getFunction = function () return Settings.PotionTimerTextColorHigh[1], Settings.PotionTimerTextColorHigh[2], Settings.PotionTimerTextColorHigh[3], Settings.PotionTimerTextColorHigh[4] end,
+            setFunction = function (r, g, b, a)
+                Settings.PotionTimerTextColorHigh = { r, g, b, a }
+            end,
+            default = Defaults.PotionTimerTextColorHigh,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "    Quickslot Timer Color (Mid)",
+            tooltip = "Color when remaining time is between low and mid thresholds",
+            getFunction = function () return Settings.PotionTimerTextColorMid[1], Settings.PotionTimerTextColorMid[2], Settings.PotionTimerTextColorMid[3], Settings.PotionTimerTextColorMid[4] end,
+            setFunction = function (r, g, b, a)
+                Settings.PotionTimerTextColorMid = { r, g, b, a }
+            end,
+            default = Defaults.PotionTimerTextColorMid,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "    Quickslot Timer Color (Low)",
+            tooltip = "Color when remaining time is below low threshold",
+            getFunction = function () return Settings.PotionTimerTextColorLow[1], Settings.PotionTimerTextColorLow[2], Settings.PotionTimerTextColorLow[3], Settings.PotionTimerTextColorLow[4] end,
+            setFunction = function (r, g, b, a)
+                Settings.PotionTimerTextColorLow = { r, g, b, a }
+            end,
+            default = Defaults.PotionTimerTextColorLow,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "    Mid Threshold (ms)",
+            tooltip = "Remaining time in milliseconds to switch from high to mid color",
+            min = 1000,
+            max = 60000,
+            step = 1000,
+            format = "%.0f",
+            getFunction = function () return Settings.PotionTimerTextColorThresholdMid end,
+            setFunction = function (value)
+                Settings.PotionTimerTextColorThresholdMid = value
+            end,
+            default = Defaults.PotionTimerTextColorThresholdMid,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "    Low Threshold (ms)",
+            tooltip = "Remaining time in milliseconds to switch from mid to low color",
+            min = 500,
+            max = 30000,
+            step = 500,
+            format = "%.0f",
+            getFunction = function () return Settings.PotionTimerTextColorThresholdLow end,
+            setFunction = function (value)
+                Settings.PotionTimerTextColorThresholdLow = value
+            end,
+            default = Defaults.PotionTimerTextColorThresholdLow,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS_TP),
+            getFunction = function () return Settings.PotionTimerMillis end,
+            setFunction = function (value) Settings.PotionTimerMillis = value end,
+            default = Defaults.PotionTimerMillis,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end
+        }
+    end)
+
+    -- Build Cast Bar Option Section
+    buildSectionSettings("CastBar", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_AB_HEADER_CASTBAR),
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Configure cast bar display including size, position, fonts, textures, colors, filters, and blacklist management.",
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_CASTBAR_MOVE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_MOVE_TP),
+            getFunction = function () return castBarMovingEnabled end,
+            setFunction = function (value)
+                castBarMovingEnabled = value
+                CastBar.SetMovingState(value)
+            end,
+            default = false,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_RESETPOSITION),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_RESET_TP),
+            buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
+            clickHandler = CastBar.ResetCastBarPosition,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_CASTBAR_ENABLE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_ENABLE_TP),
+            getFunction = function () return Settings.CastBarEnable end,
+            setFunction = function (value)
+                Settings.CastBarEnable = value
+                ActionBar.RegisterEvents()
+            end,
+            default = Defaults.CastBarEnable,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_AB_CASTBAR_SIZEW),
+            min = 100,
+            max = 500,
+            step = 5,
+            format = "%.0f",
+            getFunction = function () return Settings.CastBarSizeW end,
+            setFunction = function (value)
+                Settings.CastBarSizeW = value
+                CastBar.ResizeCastBar()
+            end,
+            default = Defaults.CastBarSizeW,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_AB_CASTBAR_SIZEH),
+            min = 16,
+            max = 64,
+            step = 2,
+            format = "%.0f",
+            getFunction = function () return Settings.CastBarSizeH end,
+            setFunction = function (value)
+                Settings.CastBarSizeH = value
+                CastBar.ResizeCastBar()
+            end,
+            default = Defaults.CastBarSizeH,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_AB_CASTBAR_ICONSIZE),
+            min = 16,
+            max = 64,
+            step = 2,
+            format = "%.0f",
+            getFunction = function () return Settings.CastBarIconSize end,
+            setFunction = function (value)
+                Settings.CastBarIconSize = value
+                CastBar.ResizeCastBar()
+            end,
+            default = Defaults.CastBarIconSize,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_CASTBAR_LABEL),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_LABEL_TP),
+            getFunction = function () return Settings.CastBarLabel end,
+            setFunction = function (value) Settings.CastBarLabel = value end,
+            default = Defaults.CastBarLabel,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_TP),
+            getFunction = function () return Settings.CastBarTimer end,
+            setFunction = function (value) Settings.CastBarTimer = value end,
+            default = Defaults.CastBarTimer,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "    " .. GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTFACE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTFACE_TP),
+            items = fontItems,
+            getFunction = function () return Settings.CastBarFontFace end,
+            setFunction = function (combobox, value, item)
+                Settings.CastBarFontFace = item.data
+                ActionBar.ApplyFont()
+                CastBar.UpdateCastBar()
+            end,
+            default = Defaults.CastBarFontFace,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "    " .. GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSIZE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSIZE_TP),
+            min = 10,
+            max = 30,
+            step = 1,
+            format = "%.0f",
+            getFunction = function () return Settings.CastBarFontSize end,
+            setFunction = function (value)
+                Settings.CastBarFontSize = value
+                ActionBar.ApplyFont()
+                CastBar.UpdateCastBar()
+            end,
+            default = Defaults.CastBarFontSize,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "    " .. GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSTYLE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSTYLE_TP),
+            items = fontStyleItems,
+            getFunction = function ()
+                local value = Settings.CastBarFontStyle
+                for i, choiceValue in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
+                    if choiceValue == value then
+                        return LUIE.FONT_STYLE_CHOICES[i]
+                    end
+                end
+                return LUIE.FONT_STYLE_CHOICES[1]
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.CastBarFontStyle = item.data
+                ActionBar.ApplyFont()
+                CastBar.UpdateCastBar()
+            end,
+            default = Defaults.CastBarFontStyle,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_CASTBAR_TEXTURE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_TEXTURE_TP),
+            items = statusbarItems,
+            getFunction = function () return Settings.CastBarTexture end,
+            setFunction = function (combobox, value, item)
+                Settings.CastBarTexture = item.data
+                CastBar.UpdateCastBar()
+            end,
+            default = Defaults.CastBarTexture,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_CASTBAR_GRADIENTC1),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_GRADIENTC1_TP),
+            getFunction = function () return Settings.CastBarGradientC1[1], Settings.CastBarGradientC1[2], Settings.CastBarGradientC1[3], Settings.CastBarGradientC1[4] end,
+            setFunction = function (r, g, b, a)
+                Settings.CastBarGradientC1 = { r, g, b, a }
+                CastBar.UpdateCastBar()
+            end,
+            default = Defaults.CastBarGradientC1,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_CASTBAR_GRADIENTC2),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_GRADIENTC2_TP),
+            getFunction = function () return Settings.CastBarGradientC2[1], Settings.CastBarGradientC2[2], Settings.CastBarGradientC2[3], Settings.CastBarGradientC2[4] end,
+            setFunction = function (r, g, b, a)
+                Settings.CastBarGradientC2 = { r, g, b, a }
+                CastBar.UpdateCastBar()
+            end,
+            default = Defaults.CastBarGradientC2,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+        }
+
+        -- Filters subsection
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_AB_CASTBAR_FILTERS_HEADER)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_HEAVY_ATTACKS_TP),
+            getFunction = function () return Settings.CastBarHeavy end,
+            setFunction = function (value) Settings.CastBarHeavy = value end,
+            default = Defaults.CastBarHeavy,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+        }
+
+        -- Blacklist subsection
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_DESCRIPT)
+        }
+
+        -- Store temp text for adding items
+        if not Settings.tempBlacklistText then
+            Settings.tempBlacklistText = ""
+        end
+
+        -- Add Item edit box
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
+            getFunction = function ()
+                return Settings.tempBlacklistText or ""
+            end,
+            setFunction = function (value)
+                Settings.tempBlacklistText = value
+            end,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        -- Add Item button
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
+            buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
+            clickHandler = function ()
+                local text = Settings.tempBlacklistText or ""
+                if text and text ~= "" then
+                    ActionBar.AddToCustomList(Settings.blacklist, text)
+                    Settings.tempBlacklistText = ""
+                    -- Refresh the blacklist dialog if it's open
+                    if LUIE.BlacklistDialogs and LUIE.BlacklistDialogs["LUIE_MANAGE_CASTBAR_BLACKLIST"] then
+                        LUIE.RefreshBlacklistDialog("LUIE_MANAGE_CASTBAR_BLACKLIST")
+                    end
+                    -- Refresh settings to clear the edit box
+                    if LHAS and LHAS.RefreshAddonSettings then
+                        LHAS:RefreshAddonSettings()
+                    end
+                end
+            end,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR),
+            tooltip = GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_TP),
+            buttonText = GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR),
+            clickHandler = function () ZO_Dialogs_ShowGamepadDialog("LUIE_CLEAR_CASTBAR_BLACKLIST") end,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        -- Manage Blacklist
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_REMLIST_TP),
+            buttonText = GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST),
+            clickHandler = function ()
                 if LUIE.BlacklistDialogs and LUIE.BlacklistDialogs["LUIE_MANAGE_CASTBAR_BLACKLIST"] then
-                    LUIE.RefreshBlacklistDialog("LUIE_MANAGE_CASTBAR_BLACKLIST")
+                    LUIE.ShowBlacklistDialog("LUIE_MANAGE_CASTBAR_BLACKLIST")
                 end
-                -- Refresh settings to clear the edit box
-                if LHAS and LHAS.RefreshAddonSettings then
-                    LHAS:RefreshAddonSettings()
+            end,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+    end)
+
+    -- Build Duration Override Options Section
+    buildSectionSettings("DurationOverride", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "Ability Duration Overrides",
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Override ability durations. Useful when the game API reports the wrong duration for abilities with multiple effects.",
+        }
+
+        -- Add Duration Override button
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = "Add Duration Override",
+            tooltip = "Add a new duration override for an ability",
+            buttonText = "Add Duration Override",
+            clickHandler = function ()
+                if LUIE.DurationOverrideDialogs and LUIE.DurationOverrideDialogs["LUIE_ADD_DURATION_OVERRIDE"] then
+                    LUIE.DurationOverrideDialogs["LUIE_ADD_DURATION_OVERRIDE"]:Show()
+                end
+            end,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        -- Manage Duration Overrides button
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = "Manage Duration Overrides",
+            tooltip = "View and remove existing duration overrides",
+            buttonText = "Manage Duration Overrides",
+            clickHandler = function ()
+                if LUIE.BlacklistDialogs and LUIE.BlacklistDialogs["LUIE_MANAGE_DURATION_OVERRIDES"] then
+                    LUIE.ShowBlacklistDialog("LUIE_MANAGE_DURATION_OVERRIDES")
+                end
+            end,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+    end)
+
+    -- Create back button
+    backButton =
+    {
+        type = LHAS.ST_BUTTON,
+        label = "BACK",
+        buttonText = "BACK",
+        tooltip = "",
+        clickHandler = function (control)
+            panel:RemoveAllSettings()
+            local mainMenuSettings = {}
+            for i = 1, #initialSettings do
+                mainMenuSettings[i] = initialSettings[i]
+            end
+            for i = 1, #menuButtons do
+                mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
+            end
+            panel:AddSettings(mainMenuSettings)
+            if IsConsoleUI() then
+                LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(1)
+            end
+        end
+    }
+
+    -- Create menu buttons for each section
+    local function createMenuButton(sectionName, sectionLabel, sectionSettings)
+        return
+        {
+            type = LHAS.ST_BUTTON,
+            label = sectionLabel,
+            buttonText = sectionLabel,
+            tooltip = "",
+            clickHandler = function (control)
+                panel:RemoveAllSettings()
+                local settingsWithBack = {}
+                for i = 1, #sectionSettings do
+                    settingsWithBack[i] = sectionSettings[i]
+                end
+                settingsWithBack[#settingsWithBack + 1] = backButton
+                panel:AddSettings(settingsWithBack)
+                if IsConsoleUI() then
+                    LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(2)
                 end
             end
-        end,
-        "half",
-        function () return not LUIE.SV.ActionBar_Enabled end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR),
-        GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_TP),
-        function () ZO_Dialogs_ShowGamepadDialog("LUIE_CLEAR_CASTBAR_BLACKLIST") end,
-        "half",
-        function () return not LUIE.SV.ActionBar_Enabled end
-    )
-
-    -- Manage Blacklist
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST),
-        GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_REMLIST_TP),
-        function ()
-            if LUIE.BlacklistDialogs and LUIE.BlacklistDialogs["LUIE_MANAGE_CASTBAR_BLACKLIST"] then
-                LUIE.ShowBlacklistDialog("LUIE_MANAGE_CASTBAR_BLACKLIST")
-            end
-        end,
-        "full",
-        function () return not LUIE.SV.ActionBar_Enabled end
-    )
-
-    -- Action Bar - Duration Override Options Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        "Ability Duration Overrides"
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        "Override ability durations. Useful when the game API reports the wrong duration for abilities with multiple effects."
-    )
-
-    -- Add Duration Override button
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        "Add Duration Override",
-        "Add a new duration override for an ability",
-        function ()
-            if LUIE.DurationOverrideDialogs and LUIE.DurationOverrideDialogs["LUIE_ADD_DURATION_OVERRIDE"] then
-                LUIE.DurationOverrideDialogs["LUIE_ADD_DURATION_OVERRIDE"]:Show()
-            end
-        end,
-        "half",
-        function () return not LUIE.SV.ActionBar_Enabled end
-    )
-
-    -- Manage Duration Overrides button
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        "Manage Duration Overrides",
-        "View and remove existing duration overrides",
-        function ()
-            if LUIE.BlacklistDialogs and LUIE.BlacklistDialogs["LUIE_MANAGE_DURATION_OVERRIDES"] then
-                LUIE.ShowBlacklistDialog("LUIE_MANAGE_DURATION_OVERRIDES")
-            end
-        end,
-        "half",
-        function () return not LUIE.SV.ActionBar_Enabled end
-    )
-
-    -- Register the settings panel
-    if LUIE.SV.ActionBar_Enabled then
-        panel:AddSettings(settingsData)
+        }
     end
+
+    -- Add all submenu buttons
+    menuButtons[#menuButtons + 1] = createMenuButton("GlobalCooldown", GetString(LUIE_STRING_LAM_AB_HEADER_GCD), sectionGroups["GlobalCooldown"])
+    menuButtons[#menuButtons + 1] = createMenuButton("UltimateTracking", GetString(LUIE_STRING_LAM_AB_HEADER_ULTIMATE), sectionGroups["UltimateTracking"])
+    menuButtons[#menuButtons + 1] = createMenuButton("BarAbilityHighlight", GetString(LUIE_STRING_LAM_AB_HEADER_BAR), sectionGroups["BarAbilityHighlight"])
+    menuButtons[#menuButtons + 1] = createMenuButton("QuickslotCooldown", GetString(LUIE_STRING_LAM_AB_HEADER_POTION), sectionGroups["QuickslotCooldown"])
+    menuButtons[#menuButtons + 1] = createMenuButton("CastBar", GetString(LUIE_STRING_LAM_AB_HEADER_CASTBAR), sectionGroups["CastBar"])
+    menuButtons[#menuButtons + 1] = createMenuButton("DurationOverride", "Ability Duration Overrides", sectionGroups["DurationOverride"])
+
+    -- Initialize main menu with initial settings and menu buttons
+    local mainMenuSettings = {}
+    for i = 1, #initialSettings do
+        mainMenuSettings[i] = initialSettings[i]
+    end
+    for i = 1, #menuButtons do
+        mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
+    end
+    panel:AddSettings(mainMenuSettings)
 end

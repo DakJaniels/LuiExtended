@@ -12,9 +12,6 @@ local eventManager = GetEventManager()
 
 -- Ensure LibMediaProvider is initialized
 local LMP = LibMediaProvider
-if not LMP then
-    error("LibMediaProvider is not initialized", 2)
-end
 
 -- Load saved settings.
 local function LoadSavedVars()
@@ -28,7 +25,7 @@ end
 -- Load additional media from LMP using centralized SettingsAPI
 local function LoadMedia()
     if IsConsoleUI() then
-        LUIE.ConsoleSettingsAPI.LoadAllMedia()
+        LUIE.ConsoleSettingsAPI:LoadAllMedia()
     else
         LUIE.SettingsAPI.LoadAllMedia()
     end
@@ -53,7 +50,11 @@ local function RegisterEvents()
 
     -- Register for LibMediaProvider media registration callbacks
     LUIE:RegisterCallback("LibMediaProvider_Registered", function (mediatype, key)
-        LUIE.SettingsAPI.HandleMediaRegistration(mediatype, key)
+        if IsConsoleUI() then
+            LUIE.ConsoleSettingsAPI:HandleMediaRegistration(mediatype, key)
+        else
+            LUIE.SettingsAPI.HandleMediaRegistration(mediatype, key)
+        end
     end)
 
     -- Existing event registrations

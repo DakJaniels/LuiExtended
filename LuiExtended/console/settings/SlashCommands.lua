@@ -6,9 +6,6 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
--- Load Console Settings API
-local SettingsAPI = LUIE.ConsoleSettingsAPI
-
 --- @class (partial) LUIE.SlashCommands
 local SlashCommands = LUIE.SlashCommands
 --- @type CollectibleTables
@@ -18,8 +15,12 @@ local CollectibleTables = LuiData.Data.CollectibleTables
 local LHAS = LibHarvensAddonSettings
 
 local pairs = pairs
+local ipairs = ipairs
 local table_insert = table.insert
 local zo_strformat = zo_strformat
+local GetString = GetString
+local GetCollectibleName = GetCollectibleName
+local IsCollectibleUnlocked = IsCollectibleUnlocked
 
 local function GetFormattedCollectibleName(id)
     return zo_strformat("<<1>>", GetCollectibleName(id)) -- Remove ^M and ^F
@@ -27,33 +28,36 @@ end
 
 --- @generic T
 --- @param collectibleTable T | CollectibleTables
---- @return T options
---- @return T optionKeys
-local function CreateOptions(collectibleTable)
-    local options = {}
-    local optionKeys = {}
-
-    if collectibleTable ~= nil then
-        for id, _ in pairs(collectibleTable) do
-            if IsCollectibleUnlocked(id) then
-                local name = GetFormattedCollectibleName(id)
-                table_insert(options, name)
-                optionKeys[name] = id
+--- @return function itemsFunction Function that returns fresh array of LHAS dropdown items
+local function CreateCollectibleItemsFunction(collectibleTable)
+    return function ()
+        local items = {}
+        if collectibleTable ~= nil then
+            for id, _ in pairs(collectibleTable) do
+                if IsCollectibleUnlocked(id) then
+                    local name = GetFormattedCollectibleName(id)
+                    table_insert(items, { name = name, data = id })
+                end
             end
         end
+        return items
     end
-
-    return options, optionKeys
 end
 
-local bankerOptions, bankerOptionsKeys = CreateOptions(CollectibleTables.Banker)
-local merchantOptions, merchantOptionsKeys = CreateOptions(CollectibleTables.Merchants)
-local companionOptions, companionOptionsKeys = CreateOptions(CollectibleTables.Companions)
-local armoryOptions, armoryOptionsKeys = CreateOptions(CollectibleTables.Armory)
-local deconOptions, deconOptionsKeys = CreateOptions(CollectibleTables.Decon)
+local GetBankerItems = CreateCollectibleItemsFunction(CollectibleTables.Banker)
+local GetMerchantItems = CreateCollectibleItemsFunction(CollectibleTables.Merchants)
+local GetCompanionItems = CreateCollectibleItemsFunction(CollectibleTables.Companions)
+local GetArmoryItems = CreateCollectibleItemsFunction(CollectibleTables.Armory)
+local GetDeconItems = CreateCollectibleItemsFunction(CollectibleTables.Decon)
 
-local homeOptions = { "Inside", "Outside" }
-local homeOptionsKeys = { ["Inside"] = 1, ["Outside"] = 2 }
+-- Home options (create fresh each time to avoid reference sharing)
+local function GetHomeItems()
+    return
+    {
+        { name = "Inside",  data = 1 },
+        { name = "Outside", data = 2 }
+    }
+end
 
 -- Create Slash Commands Settings Menu
 function SlashCommands.CreateConsoleSettings()
@@ -75,654 +79,771 @@ function SlashCommands.CreateConsoleSettings()
                                     allowRefresh = true
                                 })
 
-    local settingsData = {}
+    -- Collect initial settings for main menu
+    local initialSettings = {}
 
     -- Slash Commands description
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_DESCRIPTION)
-    )
+    initialSettings[#initialSettings + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = GetString(LUIE_STRING_LAM_SLASHCMDS_DESCRIPTION)
+    }
 
     -- ReloadUI Button
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_RELOADUI),
-        GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
-        function () ReloadUI("ingame") end
-    )
+    initialSettings[#initialSettings + 1] =
+    {
+        type = LHAS.ST_BUTTON,
+        label = GetString(LUIE_STRING_LAM_RELOADUI),
+        tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
+        buttonText = GetString(LUIE_STRING_LAM_RELOADUI),
+        clickHandler = function () ReloadUI("ingame") end
+    }
 
-    -- Slash Commands - General Commands Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GENERAL)
-    )
+    -- Initialize all settings and menu buttons for submenus
+    local backButton = nil
+    local menuButtons = {}
+    local sectionGroups = {}
 
-    -- SlashTrade
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_TRADE),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_TRADE_TP),
-        function () return Settings.SlashTrade end,
-        function (value)
-            Settings.SlashTrade = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashTrade
-    )
-
-    -- SlashHome
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_HOME),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_TP),
-        function () return Settings.SlashHome end,
-        function (value)
-            Settings.SlashHome = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashHome
-    )
-
-    -- Choose Home Option
-    local homeItems = {}
-    for i, option in ipairs(homeOptions) do
-        homeItems[i] = { name = option, data = option }
+    -- Helper function to build section settings
+    local function buildSectionSettings(sectionName, settingsBuilder)
+        local sectionSettings = {}
+        settingsBuilder(sectionSettings)
+        sectionGroups[sectionName] = sectionSettings
     end
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "Choose Inside or Outside for /home",
-        nil,
-        homeItems,
-        function () return homeOptions[Settings.SlashHomeChoice] end,
-        function (combobox, value, item)
-            Settings.SlashHomeChoice = homeOptionsKeys[value]
-        end,
-        1,
-        "full",
-        function () return not Settings.SlashHome end,
-        homeOptions[Defaults.SlashHomeChoice]
-    )
 
-    -- SlashSetPrimaryHome
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_SET_PRIMARY),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_SET_PRIMARY_TP),
-        function () return Settings.SlashSetPrimaryHome end,
-        function (value)
-            Settings.SlashSetPrimaryHome = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashSetPrimaryHome
-    )
+    -- Build General Commands Section
+    buildSectionSettings("GeneralCommands", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GENERAL),
+        }
 
-    -- SlashCampaignQ
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_CAMPAIGN),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_CAMPAIGN_TP),
-        function () return Settings.SlashCampaignQ end,
-        function (value)
-            Settings.SlashCampaignQ = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashCampaignQ
-    )
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Configure general slash commands including trade, home, companions, merchants, bankers, and other utility commands.",
+        }
 
-    -- SlashCompanion
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_COMPANION),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_COMPANION_TP),
-        function () return Settings.SlashCompanion end,
-        function (value)
-            Settings.SlashCompanion = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        function () return #companionOptions == 0 end,
-        Defaults.SlashCompanion
-    )
+        -- SlashTrade
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_TRADE),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_TRADE_TP),
+            getFunction = function () return Settings.SlashTrade end,
+            setFunction = function (value)
+                Settings.SlashTrade = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashTrade
+        }
 
-    -- Choose Companion
-    local companionItems = {}
-    for i, option in ipairs(companionOptions) do
-        companionItems[i] = { name = option, data = option }
+        -- SlashHome
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_HOME),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_TP),
+            getFunction = function () return Settings.SlashHome end,
+            setFunction = function (value)
+                Settings.SlashHome = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashHome
+        }
+
+        -- Choose Home Option
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  Choose Inside or Outside for /home",
+            items = GetHomeItems,
+            getFunction = function ()
+                return { data = Settings.SlashHomeChoice }
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.SlashHomeChoice = item.data
+            end,
+            default = Defaults.SlashHomeChoice,
+            disable = function () return not Settings.SlashHome end
+        }
+
+        -- SlashSetPrimaryHome
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_SET_PRIMARY),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_HOME_SET_PRIMARY_TP),
+            getFunction = function () return Settings.SlashSetPrimaryHome end,
+            setFunction = function (value)
+                Settings.SlashSetPrimaryHome = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashSetPrimaryHome
+        }
+
+        -- SlashCampaignQ
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_CAMPAIGN),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_CAMPAIGN_TP),
+            getFunction = function () return Settings.SlashCampaignQ end,
+            setFunction = function (value)
+                Settings.SlashCampaignQ = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashCampaignQ
+        }
+
+        -- SlashCompanion
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_COMPANION),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_COMPANION_TP),
+            getFunction = function () return Settings.SlashCompanion end,
+            setFunction = function (value)
+                Settings.SlashCompanion = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashCompanion,
+            disable = function () return #GetCompanionItems() == 0 end
+        }
+
+        -- Choose Companion
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  Choose Companion to Summon",
+            items = GetCompanionItems,
+            getFunction = function ()
+                return { data = Settings.SlashCompanionChoice }
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.SlashCompanionChoice = item.data
+            end,
+            default = Defaults.SlashCompanionChoice,
+            disable = function () return not Settings.SlashCompanion end
+        }
+
+        -- SlashBanker
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_BANKER),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_BANKER_TP),
+            getFunction = function () return Settings.SlashBanker end,
+            setFunction = function (value)
+                Settings.SlashBanker = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashBanker,
+            disable = function () return #GetBankerItems() == 0 end
+        }
+
+        -- Choose Banker
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  Choose Banker to Summon",
+            items = GetBankerItems,
+            getFunction = function ()
+                return { data = Settings.SlashBankerChoice }
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.SlashBankerChoice = item.data
+            end,
+            default = Defaults.SlashBankerChoice,
+            disable = function () return not Settings.SlashBanker end
+        }
+
+        -- SlashMerchant
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_MERCHANT),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_MERCHANT_TP),
+            getFunction = function () return Settings.SlashMerchant end,
+            setFunction = function (value)
+                Settings.SlashMerchant = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashMerchant,
+            disable = function () return #GetMerchantItems() == 0 end
+        }
+
+        -- Choose Merchant
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  Choose Merchant to Summon",
+            items = GetMerchantItems,
+            getFunction = function ()
+                return { data = Settings.SlashMerchantChoice }
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.SlashMerchantChoice = item.data
+            end,
+            default = Defaults.SlashMerchantChoice,
+            disable = function () return not Settings.SlashMerchant end
+        }
+
+        -- SlashArmory
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_ARMORY),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_ARMORY_TP),
+            getFunction = function () return Settings.SlashArmory end,
+            setFunction = function (value)
+                Settings.SlashArmory = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashArmory,
+            disable = function () return #GetArmoryItems() == 0 end
+        }
+
+        -- Choose Armory
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  Choose Armory Assistant to Summon",
+            items = GetArmoryItems,
+            getFunction = function ()
+                return { data = Settings.SlashArmoryChoice }
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.SlashArmoryChoice = item.data
+            end,
+            default = Defaults.SlashArmoryChoice,
+            disable = function () return not Settings.SlashArmory end
+        }
+
+        -- SlashDecon
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_DECON),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_SLASHCMDS_DECON_TP), GetCollectibleName(10184)),
+            getFunction = function () return Settings.SlashDecon end,
+            setFunction = function (value)
+                Settings.SlashDecon = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashDecon,
+            disable = function () return #GetDeconItems() == 0 end
+        }
+
+        -- Choose Decon
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  Choose Deconstruction Assistant to Summon",
+            items = GetDeconItems,
+            getFunction = function ()
+                return { data = Settings.SlashDeconChoice }
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.SlashDeconChoice = item.data
+            end,
+            default = Defaults.SlashDeconChoice,
+            disable = function () return not Settings.SlashDecon end
+        }
+
+        -- SlashFence
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE_TP), GetCollectibleName(300)),
+            getFunction = function () return Settings.SlashFence end,
+            setFunction = function (value)
+                Settings.SlashFence = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashFence
+        }
+
+        -- SlashEye
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_EYE),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_EYE_TP),
+            getFunction = function () return Settings.SlashEye end,
+            setFunction = function (value)
+                Settings.SlashEye = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashEye
+        }
+
+        -- SlashPet
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_PET),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_PET_TP),
+            getFunction = function () return Settings.SlashPet end,
+            setFunction = function (value)
+                Settings.SlashPet = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashPet
+        }
+
+        -- SlashPet Message (indented)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_SLASHCMDS_PET_MESSAGE),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_PET_MESSAGE_TP),
+            getFunction = function () return Settings.SlashPetMessage end,
+            setFunction = function (value) Settings.SlashPetMessage = value end,
+            default = LUIE.Defaults.SlashPetMessage
+        }
+
+        -- SlashOutfit
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_OUTFIT),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_OUTFIT_TP),
+            getFunction = function () return Settings.SlashOutfit end,
+            setFunction = function (value)
+                Settings.SlashOutfit = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashOutfit
+        }
+
+        -- SlashReport
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_REPORT),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_REPORT_TP),
+            getFunction = function () return Settings.SlashReport end,
+            setFunction = function (value)
+                Settings.SlashReport = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashReport
+        }
+
+        -- /home Alert (Temp Setting)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "/home Results - Show Alert (Temp Setting)",
+            tooltip = "Display an alert when the /home command is used.\nNote: This setting will be deprecated in the future when Social Errors Events are implemented in Chat Announcements.",
+            getFunction = function () return LUIE.SV.TempAlertHome end,
+            setFunction = function (value) LUIE.SV.TempAlertHome = value end,
+            default = LUIE.Defaults.TempAlertHome
+        }
+
+        -- /Campaign Results Alert (Temp Setting)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "/Campaign Results - Show Alert (Temp Setting)",
+            tooltip = "Display an alert when the /campaign command is used.\nNote: This setting will be deprecated in the future when Campaign Queue Events are implemented in Chat Announcements.",
+            getFunction = function () return LUIE.SV.TempAlertCampaign end,
+            setFunction = function (value) LUIE.SV.TempAlertCampaign = value end,
+            default = LUIE.Defaults.TempAlertCampaign
+        }
+
+        -- /Outfit Alert (Temp Setting)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "/Outfit - Show Alert (Temp Setting)",
+            tooltip = "Display an alert when the /outfit command is used.\nNote: This setting will be deprecated in the future when Outfit Alerts are implemented in Chat Announcements.",
+            getFunction = function () return LUIE.SV.TempAlertOutfit end,
+            setFunction = function (value) LUIE.SV.TempAlertOutfit = value end,
+            default = LUIE.Defaults.TempAlertOutfit
+        }
+    end)
+
+    -- Build Group Commands Options Section
+    buildSectionSettings("GroupCommands", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GROUP),
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Configure group-related slash commands including ready check, regroup, disband, leave, kick, role management, and vote kick.",
+        }
+
+        -- SlashReadyCheck
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_READYCHECK),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_READYCHECK_TP),
+            getFunction = function () return Settings.SlashReadyCheck end,
+            setFunction = function (value)
+                Settings.SlashReadyCheck = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashReadyCheck
+        }
+
+        -- SlashRegroup
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_REGROUP),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_REGROUP_TP),
+            getFunction = function () return Settings.SlashRegroup end,
+            setFunction = function (value)
+                Settings.SlashRegroup = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashRegroup
+        }
+
+        -- SlashDisband
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_DISBAND),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_DISBAND_TP),
+            getFunction = function () return Settings.SlashDisband end,
+            setFunction = function (value)
+                Settings.SlashDisband = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashDisband
+        }
+
+        -- SlashGroupLeave
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_LEAVE),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_LEAVE_TP),
+            getFunction = function () return Settings.SlashGroupLeave end,
+            setFunction = function (value)
+                Settings.SlashGroupLeave = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashGroupLeave
+        }
+
+        -- SlashGroupKick
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_KICK),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_KICK_TP),
+            getFunction = function () return Settings.SlashGroupKick end,
+            setFunction = function (value)
+                Settings.SlashGroupKick = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashGroupKick
+        }
+
+        -- SlashGroupRole
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_ROLE),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_ROLE_TP),
+            getFunction = function () return Settings.SlashGroupRole end,
+            setFunction = function (value)
+                Settings.SlashGroupRole = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashGroupRole
+        }
+
+        -- SlashVoteKick
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_VOTEKICK),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_VOTEKICK_TP),
+            getFunction = function () return Settings.SlashVoteKick end,
+            setFunction = function (value)
+                Settings.SlashVoteKick = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashVoteKick
+        }
+    end)
+
+    -- Build Guild Commands Options Section
+    buildSectionSettings("GuildCommands", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GUILD),
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Configure guild-related slash commands including invite, quit, and kick functionality.",
+        }
+
+        -- SlashGuildInvite
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDINVITE),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDINVITE_TP),
+            getFunction = function () return Settings.SlashGuildInvite end,
+            setFunction = function (value)
+                Settings.SlashGuildInvite = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashGuildInvite
+        }
+
+        -- SlashGuildQuit
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDQUIT),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDQUIT_TP),
+            getFunction = function () return Settings.SlashGuildQuit end,
+            setFunction = function (value)
+                Settings.SlashGuildQuit = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashGuildQuit
+        }
+
+        -- SlashGuildKick
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDKICK),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDKICK_TP),
+            getFunction = function () return Settings.SlashGuildKick end,
+            setFunction = function (value)
+                Settings.SlashGuildKick = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashGuildKick
+        }
+    end)
+
+    -- Build Social Commands Options Section
+    buildSectionSettings("SocialCommands", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_SOCIAL),
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Configure social slash commands for managing friends and ignore lists.",
+        }
+
+        -- SlashFriend
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_FRIEND),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_FRIEND_TP),
+            getFunction = function () return Settings.SlashFriend end,
+            setFunction = function (value)
+                Settings.SlashFriend = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashFriend
+        }
+
+        -- SlashIgnore
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_IGNORE),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_IGNORE_TP),
+            getFunction = function () return Settings.SlashIgnore end,
+            setFunction = function (value)
+                Settings.SlashIgnore = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashIgnore
+        }
+
+        -- SlashRemoveFriend
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEFRIEND),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEFRIEND_TP),
+            getFunction = function () return Settings.SlashRemoveFriend end,
+            setFunction = function (value)
+                Settings.SlashRemoveFriend = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashRemoveFriend
+        }
+
+        -- SlashRemoveIgnore
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEIGNORE),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEIGNORE_TP),
+            getFunction = function () return Settings.SlashRemoveIgnore end,
+            setFunction = function (value)
+                Settings.SlashRemoveIgnore = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashRemoveIgnore
+        }
+    end)
+
+    -- Build Holiday XP Events Commands Options Section
+    buildSectionSettings("HolidayCommands", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_HOLIDAY),
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Configure holiday event slash commands for special XP boost items during seasonal events.",
+        }
+
+        -- SlashCake
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_CAKE),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_CAKE_TP),
+            getFunction = function () return Settings.SlashCake end,
+            setFunction = function (value)
+                Settings.SlashCake = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashCake
+        }
+
+        -- SlashPie
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_PIE),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_PIE_TP),
+            getFunction = function () return Settings.SlashPie end,
+            setFunction = function (value)
+                Settings.SlashPie = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashPie
+        }
+
+        -- SlashMead
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_MEAD),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_MEAD_TP),
+            getFunction = function () return Settings.SlashMead end,
+            setFunction = function (value)
+                Settings.SlashMead = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashMead
+        }
+
+        -- SlashWitch
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_WITCH),
+            tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_WITCH_TP),
+            getFunction = function () return Settings.SlashWitch end,
+            setFunction = function (value)
+                Settings.SlashWitch = value
+                SlashCommands.RegisterSlashCommands()
+            end,
+            default = Defaults.SlashWitch
+        }
+    end)
+
+    -- Create back button
+    backButton =
+    {
+        type = LHAS.ST_BUTTON,
+        label = "BACK",
+        buttonText = "BACK",
+        tooltip = "",
+        clickHandler = function (control)
+            panel:RemoveAllSettings()
+            local mainMenuSettings = {}
+            for i = 1, #initialSettings do
+                mainMenuSettings[i] = initialSettings[i]
+            end
+            for i = 1, #menuButtons do
+                mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
+            end
+            panel:AddSettings(mainMenuSettings)
+            if IsConsoleUI() then
+                LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(1)
+            end
+        end
+    }
+
+    -- Create menu buttons for each section
+    local function createMenuButton(sectionName, sectionLabel, sectionSettings)
+        return
+        {
+            type = LHAS.ST_BUTTON,
+            label = sectionLabel,
+            buttonText = sectionLabel,
+            tooltip = "",
+            clickHandler = function (control)
+                panel:RemoveAllSettings()
+                local settingsWithBack = {}
+                for i = 1, #sectionSettings do
+                    settingsWithBack[i] = sectionSettings[i]
+                end
+                settingsWithBack[#settingsWithBack + 1] = backButton
+                panel:AddSettings(settingsWithBack)
+                if IsConsoleUI() then
+                    LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(2)
+                end
+            end
+        }
     end
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "Choose Companion to Summon",
-        nil,
-        companionItems,
-        function () return GetFormattedCollectibleName(Settings.SlashCompanionChoice) end,
-        function (combobox, value, item)
-            Settings.SlashCompanionChoice = companionOptionsKeys[value]
-        end,
-        1,
-        "full",
-        function () return not Settings.SlashCompanion end,
-        GetFormattedCollectibleName(Defaults.SlashCompanionChoice)
-    )
 
-    -- SlashBanker
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_BANKER),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_BANKER_TP),
-        function () return Settings.SlashBanker end,
-        function (value)
-            Settings.SlashBanker = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        function () return #bankerOptions == 0 end,
-        Defaults.SlashBanker
-    )
+    -- Add all submenu buttons
+    menuButtons[#menuButtons + 1] = createMenuButton("GeneralCommands", GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GENERAL), sectionGroups["GeneralCommands"])
+    menuButtons[#menuButtons + 1] = createMenuButton("GroupCommands", GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GROUP), sectionGroups["GroupCommands"])
+    menuButtons[#menuButtons + 1] = createMenuButton("GuildCommands", GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GUILD), sectionGroups["GuildCommands"])
+    menuButtons[#menuButtons + 1] = createMenuButton("SocialCommands", GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_SOCIAL), sectionGroups["SocialCommands"])
+    menuButtons[#menuButtons + 1] = createMenuButton("HolidayCommands", GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_HOLIDAY), sectionGroups["HolidayCommands"])
 
-    -- Choose Banker
-    local bankerItems = {}
-    for i, option in ipairs(bankerOptions) do
-        bankerItems[i] = { name = option, data = option }
+    -- Initialize main menu with initial settings and menu buttons
+    local mainMenuSettings = {}
+    for i = 1, #initialSettings do
+        mainMenuSettings[i] = initialSettings[i]
     end
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "Choose Banker to Summon",
-        nil,
-        bankerItems,
-        function () return GetFormattedCollectibleName(Settings.SlashBankerChoice) end,
-        function (combobox, value, item)
-            Settings.SlashBankerChoice = bankerOptionsKeys[value]
-        end,
-        1,
-        "full",
-        function () return not Settings.SlashBanker end,
-        GetFormattedCollectibleName(Defaults.SlashBankerChoice)
-    )
-
-    -- SlashMerchant
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_MERCHANT),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_MERCHANT_TP),
-        function () return Settings.SlashMerchant end,
-        function (value)
-            Settings.SlashMerchant = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        function () return #merchantOptions == 0 end,
-        Defaults.SlashMerchant
-    )
-
-    -- Choose Merchant
-    local merchantItems = {}
-    for i, option in ipairs(merchantOptions) do
-        merchantItems[i] = { name = option, data = option }
+    for i = 1, #menuButtons do
+        mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
     end
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "Choose Merchant to Summon",
-        nil,
-        merchantItems,
-        function () return GetFormattedCollectibleName(Settings.SlashMerchantChoice) end,
-        function (combobox, value, item)
-            Settings.SlashMerchantChoice = merchantOptionsKeys[value]
-        end,
-        1,
-        "full",
-        function () return not Settings.SlashMerchant end,
-        GetFormattedCollectibleName(Defaults.SlashMerchantChoice)
-    )
-
-    -- SlashArmory
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_ARMORY),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_ARMORY_TP),
-        function () return Settings.SlashArmory end,
-        function (value)
-            Settings.SlashArmory = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        function () return #armoryOptions == 0 end,
-        Defaults.SlashArmory
-    )
-
-    -- Choose Armory
-    local armoryItems = {}
-    for i, option in ipairs(armoryOptions) do
-        armoryItems[i] = { name = option, data = option }
-    end
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "Choose Armory Assistant to Summon",
-        nil,
-        armoryItems,
-        function () return GetFormattedCollectibleName(Settings.SlashArmoryChoice) end,
-        function (combobox, value, item)
-            Settings.SlashArmoryChoice = armoryOptionsKeys[value]
-        end,
-        1,
-        "full",
-        function () return not Settings.SlashArmory end,
-        GetFormattedCollectibleName(Defaults.SlashArmoryChoice)
-    )
-
-    -- SlashDecon
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_DECON),
-        zo_strformat(GetString(LUIE_STRING_LAM_SLASHCMDS_DECON_TP), GetCollectibleName(10184)),
-        function () return Settings.SlashDecon end,
-        function (value)
-            Settings.SlashDecon = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        function () return #deconOptions == 0 end,
-        Defaults.SlashDecon
-    )
-
-    -- Choose Decon
-    local deconItems = {}
-    for i, option in ipairs(deconOptions) do
-        deconItems[i] = { name = option, data = option }
-    end
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "Choose Deconstruction Assistant to Summon",
-        nil,
-        deconItems,
-        function () return GetFormattedCollectibleName(Settings.SlashDeconChoice) end,
-        function (combobox, value, item)
-            Settings.SlashDeconChoice = deconOptionsKeys[value]
-        end,
-        1,
-        "full",
-        function () return not Settings.SlashDecon end,
-        GetFormattedCollectibleName(Defaults.SlashDeconChoice)
-    )
-
-    -- SlashFence
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE),
-        zo_strformat(GetString(LUIE_STRING_LAM_SLASHCMDS_FENCE_TP), GetCollectibleName(300)),
-        function () return Settings.SlashFence end,
-        function (value)
-            Settings.SlashFence = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashFence
-    )
-
-    -- SlashEye
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_EYE),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_EYE_TP),
-        function () return Settings.SlashEye end,
-        function (value)
-            Settings.SlashEye = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashEye
-    )
-
-    -- SlashPet
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_PET),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_PET_TP),
-        function () return Settings.SlashPet end,
-        function (value)
-            Settings.SlashPet = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashPet
-    )
-
-    -- SlashPet Message (indented)
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckbox(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_PET_MESSAGE),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_PET_MESSAGE_TP),
-        function () return Settings.SlashPetMessage end,
-        function (value) Settings.SlashPetMessage = value end,
-        1,
-        "full",
-        nil,
-        LUIE.Defaults.SlashPetMessage
-    )
-
-    -- SlashOutfit
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_OUTFIT),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_OUTFIT_TP),
-        function () return Settings.SlashOutfit end,
-        function (value)
-            Settings.SlashOutfit = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashOutfit
-    )
-
-    -- SlashReport
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_REPORT),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_REPORT_TP),
-        function () return Settings.SlashReport end,
-        function (value)
-            Settings.SlashReport = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashReport
-    )
-
-    -- /home Alert (Temp Setting)
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "/home Results - Show Alert (Temp Setting)",
-        "Display an alert when the /home command is used.\nNote: This setting will be deprecated in the future when Social Errors Events are implemented in Chat Announcements.",
-        function () return LUIE.SV.TempAlertHome end,
-        function (value) LUIE.SV.TempAlertHome = value end,
-        "full",
-        nil,
-        LUIE.Defaults.TempAlertHome
-    )
-
-    -- /Campaign Results Alert (Temp Setting)
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "/Campaign Results - Show Alert (Temp Setting)",
-        "Display an alert when the /campaign command is used.\nNote: This setting will be deprecated in the future when Campaign Queue Events are implemented in Chat Announcements.",
-        function () return LUIE.SV.TempAlertCampaign end,
-        function (value) LUIE.SV.TempAlertCampaign = value end,
-        "full",
-        nil,
-        LUIE.Defaults.TempAlertCampaign
-    )
-
-    -- /Outfit Alert (Temp Setting)
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "/Outfit - Show Alert (Temp Setting)",
-        "Display an alert when the /outfit command is used.\nNote: This setting will be deprecated in the future when Outfit Alerts are implemented in Chat Announcements.",
-        function () return LUIE.SV.TempAlertOutfit end,
-        function (value) LUIE.SV.TempAlertOutfit = value end,
-        "full",
-        nil,
-        LUIE.Defaults.TempAlertOutfit
-    )
-
-    -- Slash Commands - Group Commands Options Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GROUP)
-    )
-
-    -- SlashReadyCheck
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_READYCHECK),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_READYCHECK_TP),
-        function () return Settings.SlashReadyCheck end,
-        function (value)
-            Settings.SlashReadyCheck = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashReadyCheck
-    )
-
-    -- SlashRegroup
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_REGROUP),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_REGROUP_TP),
-        function () return Settings.SlashRegroup end,
-        function (value)
-            Settings.SlashRegroup = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashRegroup
-    )
-
-    -- SlashDisband
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_DISBAND),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_DISBAND_TP),
-        function () return Settings.SlashDisband end,
-        function (value)
-            Settings.SlashDisband = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashDisband
-    )
-
-    -- SlashGroupLeave
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_LEAVE),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_LEAVE_TP),
-        function () return Settings.SlashGroupLeave end,
-        function (value)
-            Settings.SlashGroupLeave = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashGroupLeave
-    )
-
-    -- SlashGroupKick
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_KICK),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_KICK_TP),
-        function () return Settings.SlashGroupKick end,
-        function (value)
-            Settings.SlashGroupKick = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashGroupKick
-    )
-
-    -- SlashGroupRole
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_ROLE),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_ROLE_TP),
-        function () return Settings.SlashGroupRole end,
-        function (value)
-            Settings.SlashGroupRole = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashGroupRole
-    )
-
-    -- SlashVoteKick
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_VOTEKICK),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_VOTEKICK_TP),
-        function () return Settings.SlashVoteKick end,
-        function (value)
-            Settings.SlashVoteKick = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashVoteKick
-    )
-
-    -- Slash Commands - Guild Commands Options Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GUILD)
-    )
-
-    -- SlashGuildInvite
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDINVITE),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDINVITE_TP),
-        function () return Settings.SlashGuildInvite end,
-        function (value)
-            Settings.SlashGuildInvite = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashGuildInvite
-    )
-
-    -- SlashGuildQuit
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDQUIT),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDQUIT_TP),
-        function () return Settings.SlashGuildQuit end,
-        function (value)
-            Settings.SlashGuildQuit = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashGuildQuit
-    )
-
-    -- SlashGuildKick
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDKICK),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_GUILDKICK_TP),
-        function () return Settings.SlashGuildKick end,
-        function (value)
-            Settings.SlashGuildKick = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashGuildKick
-    )
-
-    -- Slash Commands - Social Commands Options Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_SOCIAL)
-    )
-
-    -- SlashFriend
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_FRIEND),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_FRIEND_TP),
-        function () return Settings.SlashFriend end,
-        function (value)
-            Settings.SlashFriend = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashFriend
-    )
-
-    -- SlashIgnore
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_IGNORE),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_IGNORE_TP),
-        function () return Settings.SlashIgnore end,
-        function (value)
-            Settings.SlashIgnore = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashIgnore
-    )
-
-    -- SlashRemoveFriend
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEFRIEND),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEFRIEND_TP),
-        function () return Settings.SlashRemoveFriend end,
-        function (value)
-            Settings.SlashRemoveFriend = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashRemoveFriend
-    )
-
-    -- SlashRemoveIgnore
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEIGNORE),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_REMOVEIGNORE_TP),
-        function () return Settings.SlashRemoveIgnore end,
-        function (value)
-            Settings.SlashRemoveIgnore = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashRemoveIgnore
-    )
-
-    -- Slash Commands - Holiday XP Events Commands Options Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_HOLIDAY)
-    )
-
-    -- SlashCake
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_CAKE),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_CAKE_TP),
-        function () return Settings.SlashCake end,
-        function (value)
-            Settings.SlashCake = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashCake
-    )
-
-    -- SlashPie
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_PIE),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_PIE_TP),
-        function () return Settings.SlashPie end,
-        function (value)
-            Settings.SlashPie = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashPie
-    )
-
-    -- SlashMead
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_MEAD),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_MEAD_TP),
-        function () return Settings.SlashMead end,
-        function (value)
-            Settings.SlashMead = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashMead
-    )
-
-    -- SlashWitch
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_SLASHCMDS_WITCH),
-        GetString(LUIE_STRING_LAM_SLASHCMDS_WITCH_TP),
-        function () return Settings.SlashWitch end,
-        function (value)
-            Settings.SlashWitch = value
-            SlashCommands.RegisterSlashCommands()
-        end,
-        "full",
-        nil,
-        Defaults.SlashWitch
-    )
-
-    -- Register the settings panel
-    if LUIE.SV.SlashCommands_Enable then
-        panel:AddSettings(settingsData)
-    end
+    panel:AddSettings(mainMenuSettings)
 end

@@ -99,7 +99,6 @@ modules/CombatText/EventViewers/Resources.lua
 modules/ActionBar/Namespace.lua
 modules/ActionBar/ActionBar.lua
 modules/ActionBar/CastBar.lua
-modules/ActionBar/EventHandlers.lua
 modules/ActionBar/ActionBarManager.lua
 
 # Modules - Combat Info

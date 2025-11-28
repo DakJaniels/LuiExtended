@@ -5,6 +5,9 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
+-- Load Console Settings API
+local SettingsAPI = LUIE.ConsoleSettingsAPI
+
 --- @class (partial) LUIE.InfoPanel
 local InfoPanel = LUIE.InfoPanel
 
@@ -14,9 +17,6 @@ local ipairs = ipairs
 
 -- Load LibHarvensAddonSettings
 local LHAS = LibHarvensAddonSettings
-
--- Load LibMediaProvider for fonts
-local LMP = LibMediaProvider
 
 -- Create Settings Menu
 function InfoPanel.CreateConsoleSettings()
@@ -138,20 +138,8 @@ function InfoPanel.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_FONT)
         })
 
-    -- Font Face Dropdown - Build items list from LMP
-    local fontItems = {}
-    local fontCounter = 0
-    for font, _ in pairs(LUIE.Fonts) do
-        fontCounter = fontCounter + 1
-        fontItems[fontCounter] = { name = font, data = font }
-    end
-    for _, font in ipairs(LMP:List(LMP.MediaType.FONT)) do
-        if not LUIE.Fonts[font] then
-            fontCounter = fontCounter + 1
-            fontItems[fontCounter] = { name = font, data = font }
-        end
-    end
-    table.sort(fontItems, function (a, b) return a.name < b.name end)
+    -- Font Face Dropdown - Get items list from SettingsAPI
+    local fontItems = SettingsAPI:GetFontsList()
 
     panel:AddSetting(
         {

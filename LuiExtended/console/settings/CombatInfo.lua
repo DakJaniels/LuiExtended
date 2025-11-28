@@ -5,7 +5,6 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-
 -- Load Console Settings API
 local SettingsAPI = LUIE.ConsoleSettingsAPI
 
@@ -78,3147 +77,3398 @@ function CombatInfo.CreateConsoleSettings()
                                     allowRefresh = true
                                 })
 
-    local settingsData = {}
+    -- Get media lists from SettingsAPI
+    local fontItems = SettingsAPI:GetFontsList()
+    local soundItems = SettingsAPI:GetSoundsList()
+
+    -- Build font style list once for reuse
+    local fontStyleItems = {}
+    for i, styleName in ipairs(LUIE.FONT_STYLE_CHOICES) do
+        fontStyleItems[i] = { name = styleName, data = LUIE.FONT_STYLE_CHOICES_VALUES[i] }
+    end
+
+    -- Collect initial settings for main menu
+    local initialSettings = {}
 
     -- Combat Info Description
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_CI_DESCRIPTION)
-    )
+    initialSettings[#initialSettings + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = GetString(LUIE_STRING_LAM_CI_DESCRIPTION)
+    }
 
     -- ReloadUI Button
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_RELOADUI),
-        GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
-        function ()
+    initialSettings[#initialSettings + 1] =
+    {
+        type = LHAS.ST_BUTTON,
+        label = GetString(LUIE_STRING_LAM_RELOADUI),
+        tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
+        buttonText = GetString(LUIE_STRING_LAM_RELOADUI),
+        clickHandler = function ()
             ReloadUI("ingame")
-        end,
-        "full",
-        nil,
-        GetString(LUIE_STRING_LAM_RELOADUI)
-    )
-
-    -- Combat Info - Floating Markers Option Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CI_ENEMY_MARKER_HEADER)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ENEMY_MARKER),
-        GetString(LUIE_STRING_LAM_CI_ENEMY_MARKER_TP),
-        function ()
-            return Settings.showMarker
-        end,
-        function (value)
-            Settings.showMarker = value
-            CombatInfo.SetMarker(true)
-        end,
-        "half",
-        nil,
-        Settings.showMarker
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateSliderOption(
-        GetString(LUIE_STRING_LAM_CI_ENEMY_MARKER_SIZE),
-        nil,
-        10, 90, 1,
-        function ()
-            return Settings.markerSize or 26
-        end,
-        function (value)
-            Settings.markerSize = value
-            CombatInfo.SetMarker()
-        end,
-        "half",
-        nil,
-        26
-    )
-
-    -- Active Combat Alerts Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CI_HEADER_ACTIVE_COMBAT_ALERT)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_DESCRIPTION)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_UNLOCK),
-        GetString(LUIE_STRING_LAM_CI_ALERT_UNLOCK_TP),
-        function ()
-            return alertFrameMovingEnabled
-        end,
-        AbilityAlerts.SetMovingStateAlert,
-        "half",
-        function ()
-            return not LUIE.SV.CombatInfo_Enabled
-        end,
-        false
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_RESETPOSITION),
-        GetString(LUIE_STRING_LAM_CI_ALERT_RESET_TP),
-        AbilityAlerts.ResetAlertFramePosition,
-        "half",
-        function ()
-            return not LUIE.SV.CombatInfo_Enabled
-        end,
-        GetString(LUIE_STRING_LAM_RESETPOSITION)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_TOGGLE),
-        GetString(LUIE_STRING_LAM_CI_ALERT_TOGGLE_TP),
-        function ()
-            return Settings.alerts.toggles.alertEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.alertEnable = v
-        end,
-        "full",
-        nil,
-        Defaults.alerts.toggles.alertEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        GetString(LUIE_STRING_LAM_FONT),
-        GetString(LUIE_STRING_LAM_CI_ALERT_FONTFACE_TP),
-        SettingsAPI.GetFontsList(),
-        function ()
-            return Settings.alerts.toggles.alertFontFace
-        end,
-        function (var)
-            Settings.alerts.toggles.alertFontFace = var
-            AbilityAlerts.ApplyFontAlert()
-            AbilityAlerts.ResetAlertSize()
-        end,
-        5,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.alertFontFace
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSliderOption(
-        GetString(LUIE_STRING_LAM_FONT_SIZE),
-        GetString(LUIE_STRING_LAM_CI_ALERT_FONTSIZE_TP),
-        16, 64, 1,
-        function ()
-            return Settings.alerts.toggles.alertFontSize
-        end,
-        function (value)
-            Settings.alerts.toggles.alertFontSize = value
-            AbilityAlerts.ApplyFontAlert()
-            AbilityAlerts.ResetAlertSize()
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.alertFontSize,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateFontStyleDropdown(
-        GetString(LUIE_STRING_LAM_FONT_STYLE),
-        GetString(LUIE_STRING_LAM_CI_ALERT_FONTSTYLE_TP),
-        function ()
-            return Settings.alerts.toggles.alertFontStyle
-        end,
-        function (var)
-            Settings.alerts.toggles.alertFontStyle = var
-            AbilityAlerts.ApplyFontAlert()
-            AbilityAlerts.ResetAlertSize()
-        end,
-        5,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.alertFontStyle
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_TIMER_TOGGLE),
-        GetString(LUIE_STRING_LAM_CI_ALERT_TIMER_TOGGLE_TP),
-        function ()
-            return Settings.alerts.toggles.alertTimer
-        end,
-        function (v)
-            Settings.alerts.toggles.alertTimer = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.alertTimer,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_TIMER_COLOR),
-        GetString(LUIE_STRING_LAM_CI_ALERT_TIMER_COLOR_TP),
-        function ()
-            return unpack(Settings.alerts.colors.alertTimer)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.alertTimer = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.alertTimer,
-        10,
-        nil,
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.alertTimer)
         end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_COLOR_BASE),
-        GetString(LUIE_STRING_LAM_CI_ALERT_COLOR_BASE_TP),
-        function ()
-            return unpack(Settings.alerts.colors.alertShared)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.alertShared = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.alertShared,
-        5,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    -- Shared Options Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_HEADER_SHARED)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_RANK3),
-        GetString(LUIE_STRING_LAM_CI_ALERT_RANK3_TP),
-        function ()
-            return Settings.alerts.toggles.mitigationRank3
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationRank3 = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.mitigationRank3
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_RANK2),
-        GetString(LUIE_STRING_LAM_CI_ALERT_RANK2_TP),
-        function ()
-            return Settings.alerts.toggles.mitigationRank2
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationRank2 = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.mitigationRank2
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_RANK1),
-        GetString(LUIE_STRING_LAM_CI_ALERT_RANK1_TP),
-        function ()
-            return Settings.alerts.toggles.mitigationRank1
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationRank1 = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.mitigationRank1
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_AURA),
-        GetString(LUIE_STRING_LAM_CI_ALERT_AURA_TP),
-        function ()
-            return Settings.alerts.toggles.mitigationAura
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationAura = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable or not (Settings.alerts.toggles.mitigationRank1 or Settings.alerts.toggles.mitigationRank2 or Settings.alerts.toggles.mitigationRank3)
-        end,
-        Defaults.alerts.toggles.mitigationAura,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_DUNGEON),
-        GetString(LUIE_STRING_LAM_CI_ALERT_DUNGEON_TP),
-        function ()
-            return Settings.alerts.toggles.mitigationDungeon
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationDungeon = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable or not (Settings.alerts.toggles.mitigationRank1 or Settings.alerts.toggles.mitigationRank2 or Settings.alerts.toggles.mitigationRank3)
-        end,
-        Defaults.alerts.toggles.mitigationDungeon,
-        5
-    )
-
-    -- Mitigation Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_HEADER)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_DESCRIPTION)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_ENABLE),
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_ENABLE_TP),
-        function ()
-            return Settings.alerts.toggles.showAlertMitigate
-        end,
-        function (v)
-            Settings.alerts.toggles.showAlertMitigate = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.showAlertMitigate
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdownOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FILTER),
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FILTER_TP),
-        function ()
-            local items = {}
-            for i, option in ipairs(globalAlertOptions) do
-                items[i] = { name = option, data = option }
-            end
-            return items
-        end,
-        function ()
-            return globalAlertOptions[Settings.alerts.toggles.alertOptions]
-        end,
-        function (combobox, value, item)
-            Settings.alerts.toggles.alertOptions = globalAlertOptionsKeys[value]
-        end,
-        5,
-        nil,
-        function ()
-            return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
-        end,
-        globalAlertOptions[Defaults.alerts.toggles.alertOptions]
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_SUFFIX),
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_SUFFIX_TP),
-        function ()
-            return Settings.alerts.toggles.showMitigation
-        end,
-        function (v)
-            Settings.alerts.toggles.showMitigation = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.toggles.showMitigation,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedEditboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_ABILITY),
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_ABILITY_TP),
-        function ()
-            return Settings.alerts.toggles.mitigationAbilityName
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationAbilityName = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.toggles.mitigationAbilityName,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedEditboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_NAME),
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_NAME_TP),
-        function ()
-            return Settings.alerts.toggles.mitigationEnemyName
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationEnemyName = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.toggles.mitigationEnemyName,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_BORDER),
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_BORDER_TP),
-        function ()
-            return Settings.alerts.toggles.showCrowdControlBorder
-        end,
-        function (v)
-            Settings.alerts.toggles.showCrowdControlBorder = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.toggles.showCrowdControlBorder,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_LABEL_COLOR),
-        GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_LABEL_COLOR_TP),
-        function ()
-            return Settings.alerts.toggles.ccLabelColor
-        end,
-        function (v)
-            Settings.alerts.toggles.ccLabelColor = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.toggles.ccLabelColor,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON),
-        GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_ALERT_TP),
-        function ()
-            return Settings.alerts.toggles.useDefaultIcon
-        end,
-        function (newValue)
-            Settings.alerts.toggles.useDefaultIcon = newValue
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.toggles.useDefaultIcon,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_ALLOW_MODIFIER),
-        GetString(LUIE_STRING_LAM_CI_ALERT_ALLOW_MODIFIER_TP),
-        function ()
-            return Settings.alerts.toggles.modifierEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.modifierEnable = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
-        end,
-        Defaults.alerts.toggles.modifierEnable,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedEditboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_MODIFIER_DIRECT),
-        GetString(LUIE_STRING_LAM_CI_ALERT_MODIFIER_DIRECT_TP),
-        function ()
-            return Settings.alerts.toggles.mitigationModifierOnYou
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationModifierOnYou = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.modifierEnable)
-        end,
-        Defaults.alerts.toggles.mitigationModifierOnYou,
-        10
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedEditboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_MODIFIER_SPREAD),
-        GetString(LUIE_STRING_LAM_CI_ALERT_MODIFIER_SPREAD_TP),
-        function ()
-            return Settings.alerts.toggles.mitigationModifierSpreadOut
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationModifierSpreadOut = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.modifierEnable)
-        end,
-        Defaults.alerts.toggles.mitigationModifierSpreadOut,
-        10
-    )
-
-    -- Block Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_BLOCK)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateEditboxOption(
-        zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_BLOCK)),
-        GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_BLOCK_TP),
-        function ()
-            return Settings.alerts.formats.alertBlock
-        end,
-        function (v)
-            Settings.alerts.formats.alertBlock = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.formats.alertBlock
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateEditboxOption(
-        zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_BLOCK_S)),
-        GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_BLOCK_S_TP),
-        function ()
-            return Settings.alerts.formats.alertBlockStagger
-        end,
-        function (v)
-            Settings.alerts.formats.alertBlockStagger = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.formats.alertBlockStagger
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
-        GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_BLOCK_TP),
-        function ()
-            return unpack(Settings.alerts.colors.alertBlockA)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.alertBlockA = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.alertBlockA,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    -- Dodge Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_DODGE)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateEditboxOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
-        GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_DODGE_TP),
-        function ()
-            return Settings.alerts.formats.alertDodge
-        end,
-        function (v)
-            Settings.alerts.formats.alertDodge = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.formats.alertDodge
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
-        GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_DODGE_TP),
-        function ()
-            return unpack(Settings.alerts.colors.alertDodgeA)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.alertDodgeA = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.alertDodgeA,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    -- Avoid Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_AVOID)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateEditboxOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
-        GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_AVOID_TP),
-        function ()
-            return Settings.alerts.formats.alertAvoid
-        end,
-        function (v)
-            Settings.alerts.formats.alertAvoid = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.formats.alertAvoid
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
-        GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_AVOID_TP),
-        function ()
-            return unpack(Settings.alerts.colors.alertAvoidB)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.alertAvoidB = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.alertAvoidB,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    -- Interrupt Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_INTERRUPT)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateEditboxOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
-        GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_INTERRUPT_TP),
-        function ()
-            return Settings.alerts.formats.alertInterrupt
-        end,
-        function (v)
-            Settings.alerts.formats.alertInterrupt = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.formats.alertInterrupt
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateEditboxOption(
-        GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_SHOULDUSECC),
-        GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_SHOULDUSECC_TP),
-        function ()
-            return Settings.alerts.formats.alertShouldUseCC
-        end,
-        function (v)
-            Settings.alerts.formats.alertShouldUseCC = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.formats.alertShouldUseCC
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
-        GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_INTERRUPT_TP),
-        function ()
-            return unpack(Settings.alerts.colors.alertInterruptC)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.alertInterruptC = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.alertInterruptC,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    -- Unmit Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_UNMIT)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_UNMIT)),
-        GetString(LUIE_STRING_LAM_CT_NOTIFICATION_ALERT_UNMIT_TP),
-        function ()
-            return Settings.alerts.toggles.showAlertUnmit
-        end,
-        function (v)
-            Settings.alerts.toggles.showAlertUnmit = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.showAlertUnmit
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedEditboxOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
-        GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_UNMIT_TP),
-        function ()
-            return Settings.alerts.formats.alertUnmit
-        end,
-        function (v)
-            Settings.alerts.formats.alertUnmit = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertUnmit)
-        end,
-        Defaults.alerts.formats.alertUnmit,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
-        GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_UNMIT_TP),
-        function ()
-            return unpack(Settings.alerts.colors.alertUnmit)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.alertUnmit = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.alertUnmit,
-        5,
-        nil,
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertUnmit)
-        end
-    )
-
-    -- Power Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_POWER)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_POWER)),
-        GetString(LUIE_STRING_LAM_CT_NOTIFICATION_ALERT_POWER_TP),
-        function ()
-            return Settings.alerts.toggles.showAlertPower
-        end,
-        function (v)
-            Settings.alerts.toggles.showAlertPower = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.showAlertPower
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedEditboxOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
-        GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_POWER_TP),
-        function ()
-            return Settings.alerts.formats.alertPower
-        end,
-        function (v)
-            Settings.alerts.formats.alertPower = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertPower)
-        end,
-        Defaults.alerts.formats.alertPower,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedEditboxOption(
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_P), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME)),
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_P_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME_TP)),
-        function ()
-            return Settings.alerts.toggles.mitigationPowerPrefix2
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationPowerPrefix2 = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertPower)
-        end,
-        Defaults.alerts.toggles.mitigationPowerPrefix2,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedEditboxOption(
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_P), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME)),
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_P_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME_TP)),
-        function ()
-            return Settings.alerts.toggles.mitigationPowerPrefixN2
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationPowerPrefixN2 = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertPower)
-        end,
-        Defaults.alerts.toggles.mitigationPowerPrefixN2,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
-        GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_POWER_TP),
-        function ()
-            return unpack(Settings.alerts.colors.alertPower)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.alertPower = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.alertPower,
-        5,
-        nil,
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertPower)
-        end
-    )
-
-    -- Destroy Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_DESTROY)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_DESTROY)),
-        GetString(LUIE_STRING_LAM_CT_NOTIFICATION_ALERT_DESTROY_TP),
-        function ()
-            return Settings.alerts.toggles.showAlertDestroy
-        end,
-        function (v)
-            Settings.alerts.toggles.showAlertDestroy = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.showAlertDestroy
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedEditboxOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
-        GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_DESTROY_TP),
-        function ()
-            return Settings.alerts.formats.alertDestroy
-        end,
-        function (v)
-            Settings.alerts.formats.alertDestroy = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertDestroy)
-        end,
-        Defaults.alerts.formats.alertDestroy,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedEditboxOption(
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_D), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME)),
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_D_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME_TP)),
-        function ()
-            return Settings.alerts.toggles.mitigationDestroyPrefix2
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationDestroyPrefix2 = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertDestroy)
-        end,
-        Defaults.alerts.toggles.mitigationDestroyPrefix2,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedEditboxOption(
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_D), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME)),
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_D_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME_TP)),
-        function ()
-            return Settings.alerts.toggles.mitigationDestroyPrefixN2
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationDestroyPrefixN2 = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertDestroy)
-        end,
-        Defaults.alerts.toggles.mitigationDestroyPrefixN2,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
-        GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_DESTROY_TP),
-        function ()
-            return unpack(Settings.alerts.colors.alertDestroy)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.alertDestroy = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.alertDestroy,
-        5,
-        nil,
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertDestroy)
-        end
-    )
-
-    -- Summon Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_SUMMON)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_SUMMON)),
-        GetString(LUIE_STRING_LAM_CT_NOTIFICATION_ALERT_SUMMON_TP),
-        function ()
-            return Settings.alerts.toggles.showAlertSummon
-        end,
-        function (v)
-            Settings.alerts.toggles.showAlertSummon = v
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.showAlertSummon
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedEditboxOption(
-        GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
-        GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_SUMMON_TP),
-        function ()
-            return Settings.alerts.formats.alertSummon
-        end,
-        function (v)
-            Settings.alerts.formats.alertSummon = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertSummon)
-        end,
-        Defaults.alerts.formats.alertSummon,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedEditboxOption(
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_S), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME)),
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_S_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME_TP)),
-        function ()
-            return Settings.alerts.toggles.mitigationSummonPrefix2
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationSummonPrefix2 = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertSummon)
-        end,
-        Defaults.alerts.toggles.mitigationSummonPrefix2,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedEditboxOption(
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_S), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME)),
-        zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_S_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME_TP)),
-        function ()
-            return Settings.alerts.toggles.mitigationSummonPrefixN2
-        end,
-        function (v)
-            Settings.alerts.toggles.mitigationSummonPrefixN2 = v
-        end,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertSummon)
-        end,
-        Defaults.alerts.toggles.mitigationSummonPrefixN2,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
-        GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_SUMMON_TP),
-        function ()
-            return unpack(Settings.alerts.colors.alertSummon)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.alertSummon = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.alertSummon,
-        5,
-        nil,
-        function ()
-            return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertSummon)
-        end
-    )
-
-    -- CC Colors Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_HEADER_CC_COLOR)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STUN),
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STUN_TP),
-        function ()
-            return unpack(Settings.alerts.colors.stunColor)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.stunColor = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.stunColor,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_KNOCKBACK),
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_KNOCKBACK_TP),
-        function ()
-            return unpack(Settings.alerts.colors.knockbackColor)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.knockbackColor = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.knockbackColor,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_LEVITATE),
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_LEVITATE_TP),
-        function ()
-            return unpack(Settings.alerts.colors.levitateColor)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.levitateColor = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.levitateColor,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_DISORIENT),
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_DISORIENT_TP),
-        function ()
-            return unpack(Settings.alerts.colors.disorientColor)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.disorientColor = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.disorientColor,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_FEAR),
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_FEAR_TP),
-        function ()
-            return unpack(Settings.alerts.colors.fearColor)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.fearColor = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.fearColor,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_CHARM),
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_CHARM_TP),
-        function ()
-            return unpack(Settings.alerts.colors.charmColor)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.charmColor = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.charmColor,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SILENCE),
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SILENCE_TP),
-        function ()
-            return unpack(Settings.alerts.colors.silenceColor)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.silenceColor = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.silenceColor,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STAGGER),
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STAGGER_TP),
-        function ()
-            return unpack(Settings.alerts.colors.staggerColor)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.staggerColor = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.staggerColor,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_UNBREAKABLE),
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_UNBREAKABLE_TP),
-        function ()
-            return unpack(Settings.alerts.colors.unbreakableColor)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.unbreakableColor = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.unbreakableColor,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SNARE),
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SNARE_TP),
-        function ()
-            return unpack(Settings.alerts.colors.snareColor)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.snareColor = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.snareColor,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_ROOT),
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_ROOT_TP),
-        function ()
-            return unpack(Settings.alerts.colors.rootColor)
-        end,
-        function (r, g, b, a)
-            Settings.alerts.colors.rootColor = { r, g, b, a }
-            AbilityAlerts.SetAlertColors()
-        end,
-        Defaults.alerts.colors.rootColor,
-        nil,
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end
-    )
-
-    -- Sounds Header
-    -- NOTE: Sounds section has many options (AOE, POWER ATTACK, RADIAL AVOID, GROUND TRAVEL, etc.)
-    -- Due to file size, adding key sound options. Full conversion can be completed if needed.
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_HEADER)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateSliderOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_VOLUME),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_VOLUME_TP),
-        1, 5, 1,
-        function ()
-            return Settings.alerts.toggles.soundVolume
-        end,
-        function (value)
-            Settings.alerts.toggles.soundVolume = value
-        end,
-        "full",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.soundVolume
-    )
-
-    -- Sound Options - Single Target
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_TP),
-        function ()
-            return Settings.alerts.toggles.sound_stEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_stEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_stEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_st
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_st = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_stEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - Single Target CC
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_CC),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_CC_TP),
-        function ()
-            return Settings.alerts.toggles.sound_st_ccEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_st_ccEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_st_ccEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_st_cc
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_st_cc = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_st_ccEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - AOE
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_AOE),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_AOE_TP),
-        function ()
-            return Settings.alerts.toggles.sound_aoeEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_aoeEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_aoeEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_aoe
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_aoe = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_aoeEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - AOE CC
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_AOE_CC),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_AOE_CC_TP),
-        function ()
-            return Settings.alerts.toggles.sound_aoe_ccEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_aoe_ccEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_aoe_ccEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_aoe_cc
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_aoe_cc = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_aoe_ccEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - POWER ATTACK
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_POWER_ATTACK),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_POWER_ATTACK_TP),
-        function ()
-            return Settings.alerts.toggles.sound_powerattackEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_powerattackEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_powerattackEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_powerattack
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_powerattack = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_powerattackEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - RADIAL AVOID
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_RADIAL_AVOID),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_RADIAL_AVOID_TP),
-        function ()
-            return Settings.alerts.toggles.sound_radialEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_radialEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_radialEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_radial
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_radial = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_radialEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - GROUND TRAVEL
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND_TRAVEL),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND_TRAVEL_TP),
-        function ()
-            return Settings.alerts.toggles.sound_travelEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_travelEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_travelEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_travel
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_travel = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_travelEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - GROUND TRAVEL CC
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND_TRAVEL_CC),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND_TRAVEL_CC_TP),
-        function ()
-            return Settings.alerts.toggles.sound_travel_ccEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_travel_ccEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_travel_ccEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_travel_cc
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_travel_cc = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_travel_ccEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - GROUND
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND_TP),
-        function ()
-            return Settings.alerts.toggles.sound_groundEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_groundEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_groundEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_ground
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_ground = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_groundEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - METEOR
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_METEOR),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_METEOR_TP),
-        function ()
-            return Settings.alerts.toggles.sound_meteorEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_meteorEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_meteorEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_meteor
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_meteor = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_meteorEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - UNMIT ST
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_UNMIT),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_UNMIT_TP),
-        function ()
-            return Settings.alerts.toggles.sound_unmit_stEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_unmit_stEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_unmit_stEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_unmit_st
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_unmit_st = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_unmit_stEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - UNMIT AOE
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_UNMIT_AOE),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_UNMIT_AOE_TP),
-        function ()
-            return Settings.alerts.toggles.sound_unmit_aoeEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_unmit_aoeEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_unmit_aoeEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_unmit_aoe
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_unmit_aoe = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_unmit_aoeEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - POWER DAMAGE
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_POWER_DAMAGE),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_POWER_DAMAGE_TP),
-        function ()
-            return Settings.alerts.toggles.sound_power_damageEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_power_damageEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_power_damageEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_power_damage
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_power_damage = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_power_damageEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - POWER DEFENSE
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_POWER_DEFENSE),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_POWER_DEFENSE_TP),
-        function ()
-            return Settings.alerts.toggles.sound_power_buffEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_power_buffEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_power_buffEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_power_buff
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_power_buff = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_power_buffEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - SUMMON
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_SUMMON),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_SUMMON_TP),
-        function ()
-            return Settings.alerts.toggles.sound_summonEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_summonEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_summonEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_summon
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_summon = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_summonEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - DESTROY
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_DESTROY),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_DESTROY_TP),
-        function ()
-            return Settings.alerts.toggles.sound_destroyEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_destroyEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_destroyEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_destroy
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_destroy = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_destroyEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Sound Options - HEAL
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_HEAL),
-        GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_HEAL_TP),
-        function ()
-            return Settings.alerts.toggles.sound_healEnable
-        end,
-        function (v)
-            Settings.alerts.toggles.sound_healEnable = v
-        end,
-        "half",
-        function ()
-            return not Settings.alerts.toggles.alertEnable
-        end,
-        Defaults.alerts.toggles.sound_healEnable
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.alerts.sounds.sound_heal
-        end,
-        function (value)
-            Settings.alerts.sounds.sound_heal = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        "full",
-        function ()
-            return not (Settings.alerts.toggles.sound_healEnable and Settings.alerts.toggles.alertEnable)
-        end
-    )
-
-    -- Crowd Control Tracker Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_HEADER)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_DESCRIPTION)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_UNLOCK),
-        GetString(LUIE_STRING_LAM_CI_CCT_UNLOCK_TP),
-        function ()
-            return Settings.cct.unlock
-        end,
-        function (newValue)
-            Settings.cct.unlock = newValue
-            if newValue then
-                CrowdControlTracker:SetupDisplay("draw")
-            end
-            CrowdControlTracker:InitControls()
-        end,
-        "half",
-        nil,
-        Defaults.cct.unlock
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_RESETPOSITION),
-        GetString(LUIE_STRING_LAM_CI_CCT_RESET_TP),
-        CrowdControlTracker.ResetPosition,
-        "half",
-        nil,
-        GetString(LUIE_STRING_LAM_RESETPOSITION)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_TOGGLE),
-        GetString(LUIE_STRING_LAM_CI_CCT_TOGGLE_TP),
-        function ()
-            return Settings.cct.enabled
-        end,
-        function (newValue)
-            Settings.cct.enabled = newValue
-            CrowdControlTracker:OnOff()
-        end,
-        "full",
-        nil,
-        Defaults.cct.enabled
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_PVP_ONLY),
-        GetString(LUIE_STRING_LAM_CI_CCT_PVP_ONLY_TP),
-        function ()
-            return Settings.cct.enabledOnlyInCyro
-        end,
-        function (newValue)
-            Settings.cct.enabledOnlyInCyro = newValue
-            CrowdControlTracker:OnOff()
-        end,
-        "full",
-        function ()
-            return not Settings.cct.enabled
-        end,
-        Defaults.cct.enabledOnlyInCyro,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_HEADER)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDropdownOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_STYLE),
-        GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_STYLE_TP),
-        function ()
-            local items =
-            {
-                { name = "Display: Icon & Text", data = "Display: Icon & Text" },
-                { name = "Display: Icon",        data = "Display: Icon"        },
-                { name = "Display: Text",        data = "Display: Text"        }
-            }
-            return items
-        end,
-        function ()
-            if Settings.cct.showOptions == "all" then
-                return "Display: Icon & Text"
-            elseif Settings.cct.showOptions == "icon" then
-                return "Display: Icon"
-            elseif Settings.cct.showOptions == "text" then
-                return "Display: Text"
-            end
-        end,
-        function (combobox, value, item)
-            if value == "Display: Icon & Text" then
-                Settings.cct.showOptions = "all"
-            elseif value == "Display: Icon" then
-                Settings.cct.showOptions = "icon"
-            elseif value == "Display: Text" then
-                Settings.cct.showOptions = "text"
-            end
-            CrowdControlTracker:InitControls()
-        end,
-        "Display: Icon & Text",
-        function ()
-            return not Settings.cct.enabled
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_NAME),
-        GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_NAME_TP),
-        function ()
-            return Settings.cct.useAbilityName
-        end,
-        function (newValue)
-            Settings.cct.useAbilityName = newValue
-            CrowdControlTracker:InitControls()
-        end,
-        "full",
-        function ()
-            return (not Settings.cct.enabled) or (Settings.cct.showOptions == "icon")
-        end,
-        Defaults.cct.useAbilityName
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON),
-        GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_TP),
-        function ()
-            return Settings.cct.useDefaultIcon
-        end,
-        function (newValue)
-            Settings.cct.useDefaultIcon = newValue
-            CrowdControlTracker:InitControls()
-        end,
-        "full",
-        function ()
-            return (not Settings.cct.enabled) or (Settings.cct.showOptions == "icon")
-        end,
-        Defaults.cct.useDefaultIcon
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdownOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS),
-        GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS_TP),
-        function ()
-            local items = {}
-            for i, option in ipairs(globalIconOptions) do
-                items[i] = { name = option, data = option }
-            end
-            return items
-        end,
-        function ()
-            return globalIconOptions[Settings.cct.defaultIconOptions]
-        end,
-        function (combobox, value, item)
-            Settings.cct.defaultIconOptions = globalIconOptionsKeys[value]
-            CrowdControlTracker:InitControls()
-        end,
-        5,
-        nil,
-        function ()
-            return not Settings.cct.useDefaultIcon
-        end,
-        globalIconOptions[Defaults.cct.defaultIconOptions]
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateSliderOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_SCALE),
-        GetString(LUIE_STRING_LAM_CI_CCT_SCALE_TP),
-        20, 200, 1,
-        function ()
-            return tonumber(string_format("%.0f", 100 * Settings.cct.controlScale))
-        end,
-        function (newValue)
-            Settings.cct.controlScale = newValue / 100
-            CrowdControlTracker:InitControls()
-        end,
-        "full",
-        function ()
-            return not Settings.cct.enabled
-        end,
-        tonumber(string_format("%.0f", 100 * Defaults.cct.controlScale))
-    )
-
-    -- CCT Misc Options Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_MISC_OPTIONS_HEADER)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_SOUND),
-        GetString(LUIE_STRING_LAM_CI_CCT_SOUND_TP),
-        function ()
-            return Settings.cct.playSound
-        end,
-        function (newValue)
-            Settings.cct.playSound = newValue
-            CrowdControlTracker:InitControls()
-        end,
-        "half",
-        function ()
-            return not Settings.cct.enabled
-        end,
-        Defaults.cct.playSound
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.cct.playSoundOption
-        end,
-        function (value)
-            Settings.cct.playSoundOption = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        nil,
-        function ()
-            return not (Settings.cct.playSound and Settings.cct.enabled)
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_STAGGER),
-        GetString(LUIE_STRING_LAM_CI_CCT_STAGGER_TP),
-        function ()
-            return Settings.cct.showStaggered
-        end,
-        function (newValue)
-            Settings.cct.showStaggered = newValue
-            CrowdControlTracker:InitControls()
-        end,
-        "full",
-        function ()
-            return not Settings.cct.enabled
-        end,
-        Defaults.cct.showStaggered
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_GCD_TOGGLE),
-        GetString(LUIE_STRING_LAM_CI_CCT_GCD_TOGGLE_TP),
-        function ()
-            return Settings.cct.showGCD
-        end,
-        function (newValue)
-            Settings.cct.showGCD = newValue
-            CrowdControlTracker:InitControls()
-        end,
-        "full",
-        function ()
-            return not Settings.cct.enabled
-        end,
-        Defaults.cct.showGCD
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_TOGGLE),
-        GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_TOGGLE_TP),
-        function ()
-            return Settings.cct.showImmune
-        end,
-        function (newValue)
-            Settings.cct.showImmune = newValue
-            CrowdControlTracker:InitControls()
-        end,
-        "full",
-        function ()
-            return not Settings.cct.enabled
-        end,
-        Defaults.cct.showImmune
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_CYRODIIL),
-        GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_CYRODIIL_TP),
-        function ()
-            return Settings.cct.showImmuneOnlyInCyro
-        end,
-        function (newValue)
-            Settings.cct.showImmuneOnlyInCyro = newValue
-            CrowdControlTracker:InitControls()
-        end,
-        "full",
-        function ()
-            return not (Settings.cct.showImmune and Settings.cct.enabled)
-        end,
-        Defaults.cct.showImmuneOnlyInCyro,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSliderOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_TIME),
-        GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_TIME_TP),
-        100, 1500, 1,
-        function ()
-            return Settings.cct.immuneDisplayTime
-        end,
-        function (newValue)
-            Settings.cct.immuneDisplayTime = newValue
-            CrowdControlTracker:InitControls()
-        end,
-        "full",
-        function ()
-            return not (Settings.cct.showImmune and Settings.cct.enabled)
-        end,
-        Defaults.cct.immuneDisplayTime,
-        5
-    )
-
-    -- CCT CC Colors Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_HEADER_CC_COLOR)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STUN),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STUN)),
-        function ()
-            return unpack(Settings.cct.colors[ACTION_RESULT_STUNNED])
-        end,
-        function (r, g, b, a)
-            Settings.cct.colors[ACTION_RESULT_STUNNED] = { r, g, b, a }
-            CrowdControlTracker:InitControls()
-        end,
-        Defaults.cct.colors[ACTION_RESULT_STUNNED],
-        nil,
-        function ()
-            return not Settings.cct.enabled
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_KNOCKBACK),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_KNOCKBACK)),
-        function ()
-            return unpack(Settings.cct.colors[ACTION_RESULT_KNOCKBACK])
-        end,
-        function (r, g, b, a)
-            Settings.cct.colors[ACTION_RESULT_KNOCKBACK] = { r, g, b, a }
-            CrowdControlTracker:InitControls()
-        end,
-        Defaults.cct.colors[ACTION_RESULT_KNOCKBACK],
-        nil,
-        function ()
-            return not Settings.cct.enabled
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_LEVITATE),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_LEVITATE)),
-        function ()
-            return unpack(Settings.cct.colors[ACTION_RESULT_LEVITATED])
-        end,
-        function (r, g, b, a)
-            Settings.cct.colors[ACTION_RESULT_LEVITATED] = { r, g, b, a }
-            CrowdControlTracker:InitControls()
-        end,
-        Defaults.cct.colors[ACTION_RESULT_LEVITATED],
-        nil,
-        function ()
-            return not Settings.cct.enabled
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_DISORIENT),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_DISORIENT)),
-        function ()
-            return unpack(Settings.cct.colors[ACTION_RESULT_DISORIENTED])
-        end,
-        function (r, g, b, a)
-            Settings.cct.colors[ACTION_RESULT_DISORIENTED] = { r, g, b, a }
-            CrowdControlTracker:InitControls()
-        end,
-        Defaults.cct.colors[ACTION_RESULT_DISORIENTED],
-        nil,
-        function ()
-            return not Settings.cct.enabled
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SILENCE),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SILENCE)),
-        function ()
-            return unpack(Settings.cct.colors[ACTION_RESULT_SILENCED])
-        end,
-        function (r, g, b, a)
-            Settings.cct.colors[ACTION_RESULT_SILENCED] = { r, g, b, a }
-            CrowdControlTracker:InitControls()
-        end,
-        Defaults.cct.colors[ACTION_RESULT_SILENCED],
-        nil,
-        function ()
-            return not Settings.cct.enabled
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_FEAR),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_FEAR)),
-        function ()
-            return unpack(Settings.cct.colors[ACTION_RESULT_FEARED])
-        end,
-        function (r, g, b, a)
-            Settings.cct.colors[ACTION_RESULT_FEARED] = { r, g, b, a }
-            CrowdControlTracker:InitControls()
-        end,
-        Defaults.cct.colors[ACTION_RESULT_FEARED],
-        nil,
-        function ()
-            return not Settings.cct.enabled
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_CHARM),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_CHARM)),
-        function ()
-            return unpack(Settings.cct.colors[ACTION_RESULT_CHARMED])
-        end,
-        function (r, g, b, a)
-            Settings.cct.colors[ACTION_RESULT_CHARMED] = { r, g, b, a }
-            CrowdControlTracker:InitControls()
-        end,
-        Defaults.cct.colors[ACTION_RESULT_CHARMED],
-        nil,
-        function ()
-            return not Settings.cct.enabled
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STAGGER),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STAGGER)),
-        function ()
-            return unpack(Settings.cct.colors[ACTION_RESULT_STAGGERED])
-        end,
-        function (r, g, b, a)
-            Settings.cct.colors[ACTION_RESULT_STAGGERED] = { r, g, b, a }
-            CrowdControlTracker:InitControls()
-        end,
-        Defaults.cct.colors[ACTION_RESULT_STAGGERED],
-        nil,
-        function ()
-            return not Settings.cct.enabled
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_UNBREAKABLE),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_UNBREAKABLE)),
-        function ()
-            return unpack(Settings.cct.colors.unbreakable)
-        end,
-        function (r, g, b, a)
-            Settings.cct.colors.unbreakable = { r, g, b, a }
-            CrowdControlTracker:InitControls()
-        end,
-        Defaults.cct.colors.unbreakable,
-        nil,
-        function ()
-            return not Settings.cct.enabled
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE)),
-        function ()
-            return unpack(Settings.cct.colors[ACTION_RESULT_IMMUNE])
-        end,
-        function (r, g, b, a)
-            Settings.cct.colors[ACTION_RESULT_IMMUNE] = { r, g, b, a }
-            Settings.cct.colors[ACTION_RESULT_DODGED] = { r, g, b, a }
-            Settings.cct.colors[ACTION_RESULT_BLOCKED] = { r, g, b, a }
-            Settings.cct.colors[ACTION_RESULT_BLOCKED_DAMAGE] = { r, g, b, a }
-            CrowdControlTracker:InitControls()
-        end,
-        Defaults.cct.colors[ACTION_RESULT_IMMUNE],
-        nil,
-        function ()
-            return not Settings.cct.enabled
-        end
-    )
-
-    -- CCT Root Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_ROOT_HEADER)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_ROOT_TOGGLE),
-        GetString(LUIE_STRING_LAM_CI_CCT_ROOT_TOGGLE_TP),
-        function ()
-            return Settings.cct.showRoot
-        end,
-        function (newValue)
-            Settings.cct.showRoot = newValue
-            CrowdControlTracker:InitControls()
-        end,
-        "full",
-        function ()
-            return not Settings.cct.enabled
-        end,
-        Defaults.cct.showRoot
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_CCT_ROOT_COLOR),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_ROOT)),
-        function ()
-            return unpack(Settings.cct.colors[ACTION_RESULT_ROOTED])
-        end,
-        function (r, g, b, a)
-            Settings.cct.colors[ACTION_RESULT_ROOTED] = { r, g, b, a }
-            CrowdControlTracker:InitControls()
-        end,
-        Defaults.cct.colors[ACTION_RESULT_ROOTED],
-        5,
-        nil,
-        function ()
-            return not (Settings.cct.showRoot and Settings.cct.enabled)
-        end
-    )
-
-    -- CCT AOE Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_AOE_HEADER)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_AOE_TOGGLE),
-        GetString(LUIE_STRING_LAM_CI_CCT_AOE_TOGGLE_TP),
-        function ()
-            return Settings.cct.showAoe
-        end,
-        function (newValue)
-            Settings.cct.showAoe = newValue
-            CrowdControlTracker:InitControls()
-        end,
-        "full",
-        function ()
-            return not Settings.cct.enabled
-        end,
-        Defaults.cct.showAoe
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CT_CCT_AOE_COLOR),
-        GetString(LUIE_STRING_LAM_CT_CCT_AOE_COLOR_TP),
-        function ()
-            return unpack(Settings.cct.colors[ACTION_RESULT_AREA_EFFECT])
-        end,
-        function (r, g, b, a)
-            Settings.cct.colors[ACTION_RESULT_AREA_EFFECT] = { r, g, b, a }
-            CrowdControlTracker:InitControls()
-        end,
-        Defaults.cct.colors[ACTION_RESULT_AREA_EFFECT],
-        5,
-        nil,
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.enabled)
-        end
-    )
-
-    -- CCT Snare Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_SNARE_HEADER)
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_CI_CCT_SNARE_TOGGLE),
-        GetString(LUIE_STRING_LAM_CI_CCT_SNARE_TOGGLE_TP),
-        function ()
-            return Settings.cct.showSnare
-        end,
-        function (newValue)
-            Settings.cct.showSnare = newValue
-            CrowdControlTracker:InitControls()
-        end,
-        "full",
-        function ()
-            return not Settings.cct.enabled
-        end,
-        Defaults.cct.showSnare
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedColorpickerFromTable(
-        GetString(LUIE_STRING_LAM_CI_CCT_SNARE_COLOR),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SNARE)),
-        function ()
-            return unpack(Settings.cct.colors[ACTION_RESULT_SNARED])
-        end,
-        function (r, g, b, a)
-            Settings.cct.colors[ACTION_RESULT_SNARED] = { r, g, b, a }
-            CrowdControlTracker:InitControls()
-        end,
-        Defaults.cct.colors[ACTION_RESULT_SNARED],
-        5,
-        nil,
-        function ()
-            return not (Settings.cct.showSnare and Settings.cct.enabled)
-        end
-    )
-
-    -- CCT Shared Options Header (AOE Display Options)
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        GetString(LUIE_STRING_LAM_CI_ALERT_HEADER_SHARED)
-    )
-
-    -- AOE Display Options - Player Ultimate
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_ULT)),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_ULT)),
-        function ()
-            return Settings.cct.aoePlayerUltimate
-        end,
-        function (newValue)
-            Settings.cct.aoePlayerUltimate = newValue
-            CrowdControlTracker.UpdateAOEList()
-        end,
-        "full",
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.enabled)
-        end,
-        Defaults.cct.aoePlayerUltimate
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_ULT)),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_ULT)),
-        function ()
-            return Settings.cct.aoePlayerUltimateSoundToggle
-        end,
-        function (newValue)
-            Settings.cct.aoePlayerUltimateSoundToggle = newValue
-        end,
-        "half",
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.aoePlayerUltimate and Settings.cct.enabled)
-        end,
-        Defaults.cct.aoePlayerUltimateSoundToggle
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.cct.aoePlayerUltimateSound
-        end,
-        function (value)
-            Settings.cct.aoePlayerUltimateSound = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        nil,
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.aoePlayerUltimate and Settings.cct.aoePlayerUltimateSoundToggle and Settings.cct.enabled)
-        end
-    )
-
-    -- AOE Display Options - Player Normal
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_NORM)),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_NORM)),
-        function ()
-            return Settings.cct.aoePlayerNormal
-        end,
-        function (newValue)
-            Settings.cct.aoePlayerNormal = newValue
-            CrowdControlTracker.UpdateAOEList()
-        end,
-        "full",
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.enabled)
-        end,
-        Defaults.cct.aoePlayerNormal
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_NORM)),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_NORM)),
-        function ()
-            return Settings.cct.aoePlayerNormalSoundToggle
-        end,
-        function (newValue)
-            Settings.cct.aoePlayerNormalSoundToggle = newValue
-        end,
-        "half",
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.aoePlayerNormal and Settings.cct.enabled)
-        end,
-        Defaults.cct.aoePlayerNormalSoundToggle
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.cct.aoePlayerNormalSound
-        end,
-        function (value)
-            Settings.cct.aoePlayerNormalSound = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        nil,
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.aoePlayerNormal and Settings.cct.aoePlayerNormalSoundToggle and Settings.cct.enabled)
-        end
-    )
-
-    -- AOE Display Options - Player Set
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_SET)),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_SET)),
-        function ()
-            return Settings.cct.aoePlayerSet
-        end,
-        function (newValue)
-            Settings.cct.aoePlayerSet = newValue
-            CrowdControlTracker.UpdateAOEList()
-        end,
-        "full",
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.enabled)
-        end,
-        Defaults.cct.aoePlayerSet
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_SET)),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_SET)),
-        function ()
-            return Settings.cct.aoePlayerSetSoundToggle
-        end,
-        function (newValue)
-            Settings.cct.aoePlayerSetSoundToggle = newValue
-        end,
-        "half",
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.aoePlayerSet and Settings.cct.enabled)
-        end,
-        Defaults.cct.aoePlayerSetSoundToggle
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.cct.aoePlayerSetSound
-        end,
-        function (value)
-            Settings.cct.aoePlayerSetSound = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        nil,
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.aoePlayerSet and Settings.cct.aoePlayerSetSoundToggle and Settings.cct.enabled)
-        end
-    )
-
-    -- AOE Display Options - Trap
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_TRAP)),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_TRAP)),
-        function ()
-            return Settings.cct.aoeTraps
-        end,
-        function (newValue)
-            Settings.cct.aoeTraps = newValue
-            CrowdControlTracker.UpdateAOEList()
-        end,
-        "full",
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.enabled)
-        end,
-        Defaults.cct.aoeTraps
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_TRAP)),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_TRAP)),
-        function ()
-            return Settings.cct.aoeTrapsSoundToggle
-        end,
-        function (newValue)
-            Settings.cct.aoeTrapsSoundToggle = newValue
-        end,
-        "half",
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.aoeTraps and Settings.cct.enabled)
-        end,
-        Defaults.cct.aoeTrapsSoundToggle
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.cct.aoeTrapsSound
-        end,
-        function (value)
-            Settings.cct.aoeTrapsSound = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        nil,
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.aoeTraps and Settings.cct.aoeTrapsSoundToggle and Settings.cct.enabled)
-        end
-    )
-
-    -- AOE Display Options - NPC Boss
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_BOSS)),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_BOSS)),
-        function ()
-            return Settings.cct.aoeNPCBoss
-        end,
-        function (newValue)
-            Settings.cct.aoeNPCBoss = newValue
-            CrowdControlTracker.UpdateAOEList()
-        end,
-        "full",
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.enabled)
-        end,
-        Defaults.cct.aoeNPCBoss
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_BOSS)),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_BOSS)),
-        function ()
-            return Settings.cct.aoeNPCBossSoundToggle
-        end,
-        function (newValue)
-            Settings.cct.aoeNPCBossSoundToggle = newValue
-        end,
-        "half",
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.aoeNPCBoss and Settings.cct.enabled)
-        end,
-        Defaults.cct.aoeNPCBossSoundToggle
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.cct.aoeNPCBossSound
-        end,
-        function (value)
-            Settings.cct.aoeNPCBossSound = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        nil,
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.aoeNPCBoss and Settings.cct.aoeNPCBossSoundToggle and Settings.cct.enabled)
-        end
-    )
-
-    -- AOE Display Options - NPC Elite
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_ELITE)),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_ELITE)),
-        function ()
-            return Settings.cct.aoeNPCElite
-        end,
-        function (newValue)
-            Settings.cct.aoeNPCElite = newValue
-            CrowdControlTracker.UpdateAOEList()
-        end,
-        "full",
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.enabled)
-        end,
-        Defaults.cct.aoeNPCElite
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_ELITE)),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_ELITE)),
-        function ()
-            return Settings.cct.aoeNPCEliteSoundToggle
-        end,
-        function (newValue)
-            Settings.cct.aoeNPCEliteSoundToggle = newValue
-        end,
-        "half",
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.aoeNPCElite and Settings.cct.enabled)
-        end,
-        Defaults.cct.aoeNPCEliteSoundToggle
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.cct.aoeNPCEliteSound
-        end,
-        function (value)
-            Settings.cct.aoeNPCEliteSound = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        nil,
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.aoeNPCElite and Settings.cct.aoeNPCEliteSoundToggle and Settings.cct.enabled)
-        end
-    )
-
-    -- AOE Display Options - NPC Normal
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_NORMAL)),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_NORMAL)),
-        function ()
-            return Settings.cct.aoeNPCNormal
-        end,
-        function (newValue)
-            Settings.cct.aoeNPCNormal = newValue
-            CrowdControlTracker.UpdateAOEList()
-        end,
-        "full",
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.enabled)
-        end,
-        Defaults.cct.aoeNPCNormal
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_NORMAL)),
-        zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_NORMAL)),
-        function ()
-            return Settings.cct.aoeNPCNormalSoundToggle
-        end,
-        function (newValue)
-            Settings.cct.aoeNPCNormalSoundToggle = newValue
-        end,
-        "half",
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.aoeNPCNormal and Settings.cct.enabled)
-        end,
-        Defaults.cct.aoeNPCNormalSoundToggle
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedDropdown(
-        "",
-        nil,
-        SettingsAPI.GetSoundsList(),
-        function ()
-            return Settings.cct.aoeNPCNormalSound
-        end,
-        function (value)
-            Settings.cct.aoeNPCNormalSound = value
-            AbilityAlerts.PreviewAlertSound(value)
-        end,
-        5,
-        nil,
-        function ()
-            return not (Settings.cct.showAoe and Settings.cct.aoeNPCNormal and Settings.cct.aoeNPCNormalSoundToggle and Settings.cct.enabled)
-        end
-    )
-
-    -- Synergy Tracker Section
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        "Synergy Tracker"
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        "Track and display multiple available synergies simultaneously. Set custom priorities and manage synergy preferences."
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Unlock Synergy Display",
-        "Unlock the synergy display to reposition it. Preview synergies will be shown while unlocked.",
-        function ()
-            return Settings.synergy.unlocked
-        end,
-        function (value)
-            local tracker = CombatInfo.SynergyTrackerInstance
-            if tracker then
-                tracker:SetUnlocked(value)
-            end
-        end,
-        "half",
-        function ()
-            return not Settings.synergy.enabled
-        end,
-        false
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        "Reset Position",
-        "Reset the synergy display to default position.",
-        function ()
-            local tracker = CombatInfo.SynergyTrackerInstance
-            if tracker then
-                tracker:ResetPosition()
-            end
-        end,
-        "half",
-        function ()
-            return not Settings.synergy.enabled
-        end,
-        "Reset Position"
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Enable Synergy Tracker",
-        "Enable the synergy tracking system. This will monitor available synergies and allow you to set priority overrides. Changes require a UI reload (/reloadui).",
-        function ()
-            return Settings.synergy.enabled
-        end,
-        function (value)
-            Settings.synergy.enabled = value
-        end,
-        "full",
-        nil,
-        Defaults.synergy.enabled
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        "Display Options"
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDropdownOption(
-        "Display Mode",
-        "Single: Show only highest priority synergy (like default UI)\nMulti: Show all available synergies\nCompact: Show all synergies with short names",
-        function ()
-            return
-            {
-                { name = "Single Synergy",        data = "Single Synergy"        },
-                { name = "Multi-Synergy",         data = "Multi-Synergy"         },
-                { name = "Compact Multi-Synergy", data = "Compact Multi-Synergy" }
-            }
-        end,
-        function ()
-            if Settings.synergy.displayMode == "single" then
-                return "Single Synergy"
-            elseif Settings.synergy.displayMode == "compact" then
-                return "Compact Multi-Synergy"
-            else
-                return "Multi-Synergy"
-            end
-        end,
-        function (combobox, value, item)
-            if value == "Single Synergy" then
-                Settings.synergy.displayMode = "single"
-            elseif value == "Compact Multi-Synergy" then
-                Settings.synergy.displayMode = "compact"
-            else
-                Settings.synergy.displayMode = "multi"
-            end
-            local tracker = CombatInfo.SynergyTrackerInstance
-            if tracker then
-                tracker:UpdateDisplay()
-            end
-        end,
-        "Multi-Synergy",
-        function ()
-            return not Settings.synergy.enabled
-        end
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedSliderOption(
-        "Maximum Synergies to Display",
-        "Maximum number of synergies to show simultaneously (1-10). Includes both active and cooldown synergies.",
-        1, 10, 1,
-        function ()
-            return Settings.synergy.maxDisplay
-        end,
-        function (value)
-            Settings.synergy.maxDisplay = value
-            local tracker = CombatInfo.SynergyTrackerInstance
-            if tracker then
-                tracker:UpdateDisplay()
-            end
-        end,
-        "full",
-        function ()
-            return not Settings.synergy.enabled or Settings.synergy.displayMode == "single"
-        end,
-        Defaults.synergy.maxDisplay,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-        "Show Priority Numbers",
-        "Display priority numbers next to each synergy.",
-        function ()
-            return Settings.synergy.showPriority
-        end,
-        function (value)
-            Settings.synergy.showPriority = value
-            local tracker = CombatInfo.SynergyTrackerInstance
-            if tracker then
-                tracker:UpdateDisplayOptions()
-            end
-        end,
-        "full",
-        function ()
-            return not Settings.synergy.enabled
-        end,
-        Defaults.synergy.showPriority,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-        "Show Position Numbers",
-        "Display position numbers (1-5) next to each synergy to show its order in the list.",
-        function ()
-            return Settings.synergy.showKeybinds
-        end,
-        function (value)
-            Settings.synergy.showKeybinds = value
-            local tracker = CombatInfo.SynergyTrackerInstance
-            if tracker then
-                tracker:UpdateDisplayOptions()
-            end
-        end,
-        "full",
-        function ()
-            return not Settings.synergy.enabled
-        end,
-        Defaults.synergy.showKeybinds,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-        "Play Sound on New Synergy",
-        "Play a sound notification when a new synergy becomes available.",
-        function ()
-            return Settings.synergy.playSound
-        end,
-        function (value)
-            Settings.synergy.playSound = value
-        end,
-        "full",
-        function ()
-            return not Settings.synergy.enabled
-        end,
-        Defaults.synergy.playSound,
-        5
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-        "Show Synergies on Cooldown",
-        "Display synergies that are currently on cooldown. The tracker automatically learns which synergies share cooldowns by detecting when multiple synergies go on cooldown together.",
-        function ()
-            return Settings.synergy.showCooldowns
-        end,
-        function (value)
-            Settings.synergy.showCooldowns = value
-            local tracker = CombatInfo.SynergyTrackerInstance
-            if tracker then
-                if not value then
-                    tracker.synergyCooldowns = {}
-                end
-                tracker:UpdateDisplay()
-            end
-        end,
-        "full",
-        function ()
-            return not Settings.synergy.enabled or Settings.synergy.displayMode == "single"
-        end,
-        Defaults.synergy.showCooldowns,
-        5
-    )
-
-    -- Detected Synergies & Priority Overrides Header
-    settingsData[#settingsData + 1] = SettingsAPI.CreateHeaderOption(
-        "Detected Synergies & Priority Overrides"
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateDescriptionOption(
-        "Synergies detected during gameplay will appear below. Each synergy has a checkbox to blacklist (hide) it and a slider to set custom priority (0 = game default, 1-10 = higher priority)."
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        "Clear All Priority Overrides",
-        "Remove all custom priority overrides and reset to game defaults.",
-        function ()
-            local tracker = CombatInfo.SynergyTrackerInstance
-            if tracker then
-                tracker:ClearAllPriorityOverrides()
-            end
-        end,
-        "half",
-        function ()
-            return not Settings.synergy.enabled
-        end,
-        "Clear All Priority Overrides"
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        "Clear Blacklist",
-        "Remove all synergies from the blacklist.",
-        function ()
-            Settings.synergy.blacklist = {}
-            local tracker = CombatInfo.SynergyTrackerInstance
-            if tracker then
-                tracker:RefreshActiveSynergies()
-            end
-            LUIE.PrintToChat("Blacklist cleared. Refresh settings to see changes.", true)
-        end,
-        "half",
-        function ()
-            return not Settings.synergy.enabled
-        end,
-        "Clear Blacklist"
-    )
-
-    settingsData[#settingsData + 1] = SettingsAPI.CreateButtonOption(
-        "Refresh List",
-        "Refresh the list of detected synergies. Close and reopen settings to see updated list.",
-        function ()
-            LUIE.PrintToChat("Refresh settings menu to see updated synergy list.", true)
-        end,
-        "half",
-        function ()
-            return not Settings.synergy.enabled
-        end,
-        "Refresh List"
-    )
-
-    -- NOTE: Dynamic synergy list generation (detected synergies) is handled after panel registration in PC version
-    -- This would need to be implemented separately if needed, as it dynamically adds options based on detected synergies
-
-    -- Add all settings to the panel
-    panel:AddSettings(settingsData)
-
-    -- Dynamically add detected synergies to the settings menu (if tracker exists)
-    local tracker = CombatInfo.SynergyTrackerInstance
-    local detectedList = tracker and tracker:GetDetectedSynergiesSorted() or {}
-    if #detectedList > 0 then
-        local dynamicSettings = {}
-        for _, synergyData in ipairs(detectedList) do
-            local abilityId = synergyData.abilityId
-            local name = synergyData.name
-            local icon = synergyData.icon
-            local timesSeen = synergyData.timesSeen
-
-            -- Synergy description with icon and name
-            dynamicSettings[#dynamicSettings + 1] = SettingsAPI.CreateDescriptionOption(
-                zo_iconTextFormat(icon, 32, 32, " " .. zo_strformat("<<C:1>>", name) .. string_format(" |cAAAAAA(Seen: %d times)|r", timesSeen), true, true)
-            )
-
-            -- Blacklist toggle
-            dynamicSettings[#dynamicSettings + 1] = SettingsAPI.CreateIndentedCheckboxOption(
-                "Blacklist (Hide)",
-                string_format("Hide this synergy from the tracker. Ability ID: [%d]", abilityId),
-                function ()
-                    return Settings.synergy.blacklist[abilityId] or false
-                end,
-                function (value)
-                    Settings.synergy.blacklist[abilityId] = value or nil
-                    if tracker then
-                        tracker:RefreshActiveSynergies()
-                    end
-                end,
-                "full",
-                function ()
-                    return not Settings.synergy.enabled
-                end,
-                false,
-                5
-            )
-
-            -- Priority slider
-            dynamicSettings[#dynamicSettings + 1] = SettingsAPI.CreateIndentedSliderOption(
-                "Priority Override",
-                string_format("Set priority for %s. Higher values = higher priority. 0 = game default.", name),
-                0, 10, 1,
-                function ()
-                    return Settings.synergy.priorityOverrides[abilityId] or 0
-                end,
-                function (value)
-                    if value > 0 then
-                        Settings.synergy.priorityOverrides[abilityId] = value
-                        SetSynergyPriorityOverride(abilityId, value)
-                    else
-                        Settings.synergy.priorityOverrides[abilityId] = nil
-                        ClearSynergyPriorityOverride(abilityId)
-                    end
-                end,
-                "full",
-                function ()
-                    return not Settings.synergy.enabled or (Settings.synergy.blacklist[abilityId] == true)
-                end,
-                0,
-                5
-            )
-        end
-
-        -- Add dynamic settings to panel
-        if #dynamicSettings > 0 then
-            panel:AddSettings(dynamicSettings)
-        end
+    }
+
+    -- Initialize all settings and menu buttons for submenus
+    local backButton = nil
+    local menuButtons = {}
+    local sectionGroups = {}
+
+    -- Helper function to build section settings
+    local function buildSectionSettings(sectionName, settingsBuilder)
+        local sectionSettings = {}
+        settingsBuilder(sectionSettings)
+        sectionGroups[sectionName] = sectionSettings
     end
+
+    -- Build Floating Markers Section
+    buildSectionSettings("FloatingMarkers", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CI_ENEMY_MARKER_HEADER),
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Configure floating enemy markers display options.",
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ENEMY_MARKER),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ENEMY_MARKER_TP),
+            getFunction = function ()
+                return Settings.showMarker
+            end,
+            setFunction = function (value)
+                Settings.showMarker = value
+                CombatInfo.SetMarker(true)
+            end,
+            default = Settings.showMarker
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_CI_ENEMY_MARKER_SIZE),
+            min = 10,
+            max = 90,
+            step = 1,
+            format = "%.0f",
+            getFunction = function ()
+                return Settings.markerSize or 26
+            end,
+            setFunction = function (value)
+                Settings.markerSize = value
+                CombatInfo.SetMarker()
+            end,
+            default = 26
+        }
+    end)
+
+    -- Build Active Combat Alerts Section
+    buildSectionSettings("ActiveCombatAlerts", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CI_HEADER_ACTIVE_COMBAT_ALERT),
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_DESCRIPTION),
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_DESCRIPTION)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_UNLOCK),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_UNLOCK_TP),
+            getFunction = function ()
+                return alertFrameMovingEnabled
+            end,
+            setFunction = AbilityAlerts.SetMovingStateAlert,
+            disable = function ()
+                return not LUIE.SV.CombatInfo_Enabled
+            end,
+            default = false
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_RESETPOSITION),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_RESET_TP),
+            buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
+            clickHandler = AbilityAlerts.ResetAlertFramePosition,
+            disable = function ()
+                return not LUIE.SV.CombatInfo_Enabled
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_TOGGLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_TOGGLE_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.alertEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.alertEnable = v
+            end,
+            default = Defaults.alerts.toggles.alertEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  " .. GetString(LUIE_STRING_LAM_FONT),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_FONTFACE_TP),
+            items = fontItems,
+            getFunction = function ()
+                return Settings.alerts.toggles.alertFontFace
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.toggles.alertFontFace = item.data
+                AbilityAlerts.ApplyFontAlert()
+                AbilityAlerts.ResetAlertSize()
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.alertFontFace
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "  " .. GetString(LUIE_STRING_LAM_FONT_SIZE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_FONTSIZE_TP),
+            min = 16,
+            max = 64,
+            step = 1,
+            format = "%.0f",
+            getFunction = function ()
+                return Settings.alerts.toggles.alertFontSize
+            end,
+            setFunction = function (value)
+                Settings.alerts.toggles.alertFontSize = value
+                AbilityAlerts.ApplyFontAlert()
+                AbilityAlerts.ResetAlertSize()
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.alertFontSize
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  " .. GetString(LUIE_STRING_LAM_FONT_STYLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_FONTSTYLE_TP),
+            items = fontStyleItems,
+            getFunction = function ()
+                local value = Settings.alerts.toggles.alertFontStyle
+                for i, choiceValue in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
+                    if choiceValue == value then
+                        return LUIE.FONT_STYLE_CHOICES[i]
+                    end
+                end
+                return LUIE.FONT_STYLE_CHOICES[1]
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.toggles.alertFontStyle = item.data
+                AbilityAlerts.ApplyFontAlert()
+                AbilityAlerts.ResetAlertSize()
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.alertFontStyle
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_TIMER_TOGGLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_TIMER_TOGGLE_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.alertTimer
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.alertTimer = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.alertTimer
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "    " .. GetString(LUIE_STRING_LAM_CI_ALERT_TIMER_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_TIMER_COLOR_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.alertTimer[1], Settings.alerts.colors.alertTimer[2], Settings.alerts.colors.alertTimer[3], Settings.alerts.colors.alertTimer[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.alertTimer = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.alertTimer,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.alertTimer)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_COLOR_BASE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_COLOR_BASE_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.alertShared[1], Settings.alerts.colors.alertShared[2], Settings.alerts.colors.alertShared[3], Settings.alerts.colors.alertShared[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.alertShared = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.alertShared,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        -- Shared Options Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_HEADER_SHARED)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_RANK3),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_RANK3_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationRank3
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationRank3 = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.mitigationRank3
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_RANK2),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_RANK2_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationRank2
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationRank2 = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.mitigationRank2
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_RANK1),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_RANK1_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationRank1
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationRank1 = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.mitigationRank1
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_AURA),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_AURA_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationAura
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationAura = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable or not (Settings.alerts.toggles.mitigationRank1 or Settings.alerts.toggles.mitigationRank2 or Settings.alerts.toggles.mitigationRank3)
+            end,
+            default = Defaults.alerts.toggles.mitigationAura
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_DUNGEON),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_DUNGEON_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationDungeon
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationDungeon = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable or not (Settings.alerts.toggles.mitigationRank1 or Settings.alerts.toggles.mitigationRank2 or Settings.alerts.toggles.mitigationRank3)
+            end,
+            default = Defaults.alerts.toggles.mitigationDungeon
+        }
+
+        -- Mitigation Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_HEADER)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_DESCRIPTION)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_ENABLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_ENABLE_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.showAlertMitigate
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.showAlertMitigate = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.showAlertMitigate
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FILTER),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FILTER_TP),
+            items = SettingsAPI:GetGlobalAlertOptionsList(),
+            getFunction = function ()
+                local index = Settings.alerts.toggles.alertOptions
+                if type(index) == "string" then
+                    index = globalAlertOptionsKeys[index] or 1
+                end
+                return globalAlertOptions[index] or globalAlertOptions[1]
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.toggles.alertOptions = item.data
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
+            end,
+            default = globalAlertOptions[Defaults.alerts.toggles.alertOptions]
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_SUFFIX),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_SUFFIX_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.showMitigation
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.showMitigation = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
+            end,
+            default = Defaults.alerts.toggles.showMitigation
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_ABILITY),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_ABILITY_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationAbilityName
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationAbilityName = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
+            end,
+            default = Defaults.alerts.toggles.mitigationAbilityName
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_NAME),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_NAME_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationEnemyName
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationEnemyName = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
+            end,
+            default = Defaults.alerts.toggles.mitigationEnemyName
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_BORDER),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_BORDER_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.showCrowdControlBorder
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.showCrowdControlBorder = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
+            end,
+            default = Defaults.alerts.toggles.showCrowdControlBorder
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_LABEL_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_LABEL_COLOR_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.ccLabelColor
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.ccLabelColor = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
+            end,
+            default = Defaults.alerts.toggles.ccLabelColor
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_ALERT_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.useDefaultIcon
+            end,
+            setFunction = function (newValue)
+                Settings.alerts.toggles.useDefaultIcon = newValue
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
+            end,
+            default = Defaults.alerts.toggles.useDefaultIcon
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_ALLOW_MODIFIER),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_ALLOW_MODIFIER_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.modifierEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.modifierEnable = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable)
+            end,
+            default = Defaults.alerts.toggles.modifierEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = "    " .. GetString(LUIE_STRING_LAM_CI_ALERT_MODIFIER_DIRECT),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MODIFIER_DIRECT_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationModifierOnYou
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationModifierOnYou = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.modifierEnable)
+            end,
+            default = Defaults.alerts.toggles.mitigationModifierOnYou
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = "    " .. GetString(LUIE_STRING_LAM_CI_ALERT_MODIFIER_SPREAD),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MODIFIER_SPREAD_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationModifierSpreadOut
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationModifierSpreadOut = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.showAlertMitigate and Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.modifierEnable)
+            end,
+            default = Defaults.alerts.toggles.mitigationModifierSpreadOut
+        }
+
+        -- Block Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_BLOCK)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_BLOCK)),
+            tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_BLOCK_TP),
+            getFunction = function ()
+                return Settings.alerts.formats.alertBlock
+            end,
+            setFunction = function (v)
+                Settings.alerts.formats.alertBlock = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.formats.alertBlock
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_BLOCK_S)),
+            tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_BLOCK_S_TP),
+            getFunction = function ()
+                return Settings.alerts.formats.alertBlockStagger
+            end,
+            setFunction = function (v)
+                Settings.alerts.formats.alertBlockStagger = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.formats.alertBlockStagger
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_BLOCK_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.alertBlockA[1], Settings.alerts.colors.alertBlockA[2], Settings.alerts.colors.alertBlockA[3], Settings.alerts.colors.alertBlockA[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.alertBlockA = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.alertBlockA,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        -- Dodge Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_DODGE)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
+            tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_DODGE_TP),
+            getFunction = function ()
+                return Settings.alerts.formats.alertDodge
+            end,
+            setFunction = function (v)
+                Settings.alerts.formats.alertDodge = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.formats.alertDodge
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_DODGE_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.alertDodgeA[1], Settings.alerts.colors.alertDodgeA[2], Settings.alerts.colors.alertDodgeA[3], Settings.alerts.colors.alertDodgeA[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.alertDodgeA = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.alertDodgeA,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        -- Avoid Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_AVOID)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
+            tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_AVOID_TP),
+            getFunction = function ()
+                return Settings.alerts.formats.alertAvoid
+            end,
+            setFunction = function (v)
+                Settings.alerts.formats.alertAvoid = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.formats.alertAvoid
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_AVOID_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.alertAvoidB[1], Settings.alerts.colors.alertAvoidB[2], Settings.alerts.colors.alertAvoidB[3], Settings.alerts.colors.alertAvoidB[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.alertAvoidB = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.alertAvoidB,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        -- Interrupt Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_INTERRUPT)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
+            tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_INTERRUPT_TP),
+            getFunction = function ()
+                return Settings.alerts.formats.alertInterrupt
+            end,
+            setFunction = function (v)
+                Settings.alerts.formats.alertInterrupt = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.formats.alertInterrupt
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_SHOULDUSECC),
+            tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_SHOULDUSECC_TP),
+            getFunction = function ()
+                return Settings.alerts.formats.alertShouldUseCC
+            end,
+            setFunction = function (v)
+                Settings.alerts.formats.alertShouldUseCC = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.formats.alertShouldUseCC
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_INTERRUPT_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.alertInterruptC[1], Settings.alerts.colors.alertInterruptC[2], Settings.alerts.colors.alertInterruptC[3], Settings.alerts.colors.alertInterruptC[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.alertInterruptC = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.alertInterruptC,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        -- Unmit Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_UNMIT)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_UNMIT)),
+            tooltip = GetString(LUIE_STRING_LAM_CT_NOTIFICATION_ALERT_UNMIT_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.showAlertUnmit
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.showAlertUnmit = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.showAlertUnmit
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
+            tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_UNMIT_TP),
+            getFunction = function ()
+                return Settings.alerts.formats.alertUnmit
+            end,
+            setFunction = function (v)
+                Settings.alerts.formats.alertUnmit = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertUnmit)
+            end,
+            default = Defaults.alerts.formats.alertUnmit
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_UNMIT_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.alertUnmit[1], Settings.alerts.colors.alertUnmit[2], Settings.alerts.colors.alertUnmit[3], Settings.alerts.colors.alertUnmit[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.alertUnmit = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.alertUnmit,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertUnmit)
+            end
+        }
+
+        -- Power Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_POWER)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_POWER)),
+            tooltip = GetString(LUIE_STRING_LAM_CT_NOTIFICATION_ALERT_POWER_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.showAlertPower
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.showAlertPower = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.showAlertPower
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
+            tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_POWER_TP),
+            getFunction = function ()
+                return Settings.alerts.formats.alertPower
+            end,
+            setFunction = function (v)
+                Settings.alerts.formats.alertPower = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertPower)
+            end,
+            default = Defaults.alerts.formats.alertPower
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = "  " .. zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_P), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME)),
+            tooltip = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_P_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME_TP)),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationPowerPrefix2
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationPowerPrefix2 = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertPower)
+            end,
+            default = Defaults.alerts.toggles.mitigationPowerPrefix2
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = "  " .. zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_P), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME)),
+            tooltip = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_P_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME_TP)),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationPowerPrefixN2
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationPowerPrefixN2 = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertPower)
+            end,
+            default = Defaults.alerts.toggles.mitigationPowerPrefixN2
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_POWER_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.alertPower[1], Settings.alerts.colors.alertPower[2], Settings.alerts.colors.alertPower[3], Settings.alerts.colors.alertPower[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.alertPower = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.alertPower,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertPower)
+            end
+        }
+
+        -- Destroy Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_DESTROY)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_DESTROY)),
+            tooltip = GetString(LUIE_STRING_LAM_CT_NOTIFICATION_ALERT_DESTROY_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.showAlertDestroy
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.showAlertDestroy = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.showAlertDestroy
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
+            tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_DESTROY_TP),
+            getFunction = function ()
+                return Settings.alerts.formats.alertDestroy
+            end,
+            setFunction = function (v)
+                Settings.alerts.formats.alertDestroy = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertDestroy)
+            end,
+            default = Defaults.alerts.formats.alertDestroy
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = "  " .. zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_D), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME)),
+            tooltip = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_D_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME_TP)),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationDestroyPrefix2
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationDestroyPrefix2 = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertDestroy)
+            end,
+            default = Defaults.alerts.toggles.mitigationDestroyPrefix2
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = "  " .. zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_D), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME)),
+            tooltip = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_D_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME_TP)),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationDestroyPrefixN2
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationDestroyPrefixN2 = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertDestroy)
+            end,
+            default = Defaults.alerts.toggles.mitigationDestroyPrefixN2
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_DESTROY_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.alertDestroy[1], Settings.alerts.colors.alertDestroy[2], Settings.alerts.colors.alertDestroy[3], Settings.alerts.colors.alertDestroy[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.alertDestroy = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.alertDestroy,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertDestroy)
+            end
+        }
+
+        -- Summon Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_SUMMON)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_SUMMON)),
+            tooltip = GetString(LUIE_STRING_LAM_CT_NOTIFICATION_ALERT_SUMMON_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.showAlertSummon
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.showAlertSummon = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.showAlertSummon
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
+            tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_SUMMON_TP),
+            getFunction = function ()
+                return Settings.alerts.formats.alertSummon
+            end,
+            setFunction = function (v)
+                Settings.alerts.formats.alertSummon = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertSummon)
+            end,
+            default = Defaults.alerts.formats.alertSummon
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = "  " .. zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_S), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME)),
+            tooltip = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_S_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME_TP)),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationSummonPrefix2
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationSummonPrefix2 = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertSummon)
+            end,
+            default = Defaults.alerts.toggles.mitigationSummonPrefix2
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = "  " .. zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_S), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME)),
+            tooltip = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_S_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME_TP)),
+            getFunction = function ()
+                return Settings.alerts.toggles.mitigationSummonPrefixN2
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.mitigationSummonPrefixN2 = v
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertSummon)
+            end,
+            default = Defaults.alerts.toggles.mitigationSummonPrefixN2
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_SUMMON_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.alertSummon[1], Settings.alerts.colors.alertSummon[2], Settings.alerts.colors.alertSummon[3], Settings.alerts.colors.alertSummon[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.alertSummon = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.alertSummon,
+            disable = function ()
+                return not (Settings.alerts.toggles.alertEnable and Settings.alerts.toggles.showAlertSummon)
+            end
+        }
+
+        -- CC Colors Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_HEADER_CC_COLOR)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STUN),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STUN_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.stunColor[1], Settings.alerts.colors.stunColor[2], Settings.alerts.colors.stunColor[3], Settings.alerts.colors.stunColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.stunColor = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.stunColor,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_KNOCKBACK),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_KNOCKBACK_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.knockbackColor[1], Settings.alerts.colors.knockbackColor[2], Settings.alerts.colors.knockbackColor[3], Settings.alerts.colors.knockbackColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.knockbackColor = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.knockbackColor,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_LEVITATE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_LEVITATE_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.levitateColor[1], Settings.alerts.colors.levitateColor[2], Settings.alerts.colors.levitateColor[3], Settings.alerts.colors.levitateColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.levitateColor = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.levitateColor,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_DISORIENT),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_DISORIENT_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.disorientColor[1], Settings.alerts.colors.disorientColor[2], Settings.alerts.colors.disorientColor[3], Settings.alerts.colors.disorientColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.disorientColor = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.disorientColor,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_FEAR),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_FEAR_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.fearColor[1], Settings.alerts.colors.fearColor[2], Settings.alerts.colors.fearColor[3], Settings.alerts.colors.fearColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.fearColor = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.fearColor,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_CHARM),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_CHARM_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.charmColor[1], Settings.alerts.colors.charmColor[2], Settings.alerts.colors.charmColor[3], Settings.alerts.colors.charmColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.charmColor = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.charmColor,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SILENCE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SILENCE_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.silenceColor[1], Settings.alerts.colors.silenceColor[2], Settings.alerts.colors.silenceColor[3], Settings.alerts.colors.silenceColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.silenceColor = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.silenceColor,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STAGGER),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STAGGER_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.staggerColor[1], Settings.alerts.colors.staggerColor[2], Settings.alerts.colors.staggerColor[3], Settings.alerts.colors.staggerColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.staggerColor = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.staggerColor,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_UNBREAKABLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_UNBREAKABLE_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.unbreakableColor[1], Settings.alerts.colors.unbreakableColor[2], Settings.alerts.colors.unbreakableColor[3], Settings.alerts.colors.unbreakableColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.unbreakableColor = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.unbreakableColor,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SNARE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SNARE_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.snareColor[1], Settings.alerts.colors.snareColor[2], Settings.alerts.colors.snareColor[3], Settings.alerts.colors.snareColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.snareColor = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.snareColor,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_ROOT),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_ROOT_TP),
+            getFunction = function ()
+                return Settings.alerts.colors.rootColor[1], Settings.alerts.colors.rootColor[2], Settings.alerts.colors.rootColor[3], Settings.alerts.colors.rootColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.alerts.colors.rootColor = { r, g, b, a }
+                AbilityAlerts.SetAlertColors()
+            end,
+            default = Defaults.alerts.colors.rootColor,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end
+        }
+
+        -- Sounds Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_HEADER)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_VOLUME),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_VOLUME_TP),
+            min = 1,
+            max = 5,
+            step = 1,
+            format = "%.0f",
+            getFunction = function ()
+                return Settings.alerts.toggles.soundVolume
+            end,
+            setFunction = function (value)
+                Settings.alerts.toggles.soundVolume = value
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.soundVolume
+        }
+
+        -- Sound Options - Single Target
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_stEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_stEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_stEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_st
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_st = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_stEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - Single Target CC
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_CC),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_CC_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_st_ccEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_st_ccEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_st_ccEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_st_cc
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_st_cc = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_st_ccEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - AOE
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_AOE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_AOE_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_aoeEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_aoeEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_aoeEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_aoe
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_aoe = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_aoeEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - AOE CC
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_AOE_CC),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_AOE_CC_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_aoe_ccEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_aoe_ccEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_aoe_ccEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_aoe_cc
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_aoe_cc = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_aoe_ccEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - POWER ATTACK
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_POWER_ATTACK),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_POWER_ATTACK_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_powerattackEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_powerattackEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_powerattackEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_powerattack
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_powerattack = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_powerattackEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - RADIAL AVOID
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_RADIAL_AVOID),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_ST_RADIAL_AVOID_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_radialEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_radialEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_radialEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_radial
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_radial = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_radialEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - GROUND TRAVEL
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND_TRAVEL),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND_TRAVEL_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_travelEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_travelEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_travelEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_travel
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_travel = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_travelEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - GROUND TRAVEL CC
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND_TRAVEL_CC),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND_TRAVEL_CC_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_travel_ccEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_travel_ccEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_travel_ccEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_travel_cc
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_travel_cc = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_travel_ccEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - GROUND
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_GROUND_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_groundEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_groundEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_groundEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_ground
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_ground = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_groundEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - METEOR
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_METEOR),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_METEOR_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_meteorEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_meteorEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_meteorEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_meteor
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_meteor = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_meteorEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - UNMIT ST
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_UNMIT),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_UNMIT_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_unmit_stEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_unmit_stEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_unmit_stEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_unmit_st
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_unmit_st = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_unmit_stEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - UNMIT AOE
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_UNMIT_AOE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_UNMIT_AOE_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_unmit_aoeEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_unmit_aoeEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_unmit_aoeEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_unmit_aoe
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_unmit_aoe = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_unmit_aoeEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - POWER DAMAGE
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_POWER_DAMAGE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_POWER_DAMAGE_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_power_damageEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_power_damageEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_power_damageEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_power_damage
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_power_damage = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_power_damageEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - POWER DEFENSE
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_POWER_DEFENSE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_POWER_DEFENSE_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_power_buffEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_power_buffEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_power_buffEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_power_buff
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_power_buff = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_power_buffEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - SUMMON
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_SUMMON),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_SUMMON_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_summonEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_summonEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_summonEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_summon
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_summon = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_summonEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - DESTROY
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_DESTROY),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_DESTROY_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_destroyEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_destroyEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_destroyEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_destroy
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_destroy = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_destroyEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+
+        -- Sound Options - HEAL
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_HEAL),
+            tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_HEAL_TP),
+            getFunction = function ()
+                return Settings.alerts.toggles.sound_healEnable
+            end,
+            setFunction = function (v)
+                Settings.alerts.toggles.sound_healEnable = v
+            end,
+            disable = function ()
+                return not Settings.alerts.toggles.alertEnable
+            end,
+            default = Defaults.alerts.toggles.sound_healEnable
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.alerts.sounds.sound_heal
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.alerts.sounds.sound_heal = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.alerts.toggles.sound_healEnable and Settings.alerts.toggles.alertEnable)
+            end
+        }
+    end)
+
+    -- Build Crowd Control Tracker Section
+    buildSectionSettings("CrowdControlTracker", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_HEADER),
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_DESCRIPTION),
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_DESCRIPTION)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_UNLOCK),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_UNLOCK_TP),
+            getFunction = function ()
+                return Settings.cct.unlock
+            end,
+            setFunction = function (v)
+                Settings.cct.unlock = v
+                if v then
+                    CrowdControlTracker:SetupDisplay("draw")
+                end
+                CrowdControlTracker:InitControls()
+            end,
+            default = Defaults.cct.unlock
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_RESETPOSITION),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_RESET_TP),
+            buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
+            clickHandler = CrowdControlTracker.ResetPosition
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_TOGGLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_TOGGLE_TP),
+            getFunction = function ()
+                return Settings.cct.enabled
+            end,
+            setFunction = function (v)
+                Settings.cct.enabled = v
+                CrowdControlTracker:OnOff()
+            end,
+            default = Defaults.cct.enabled
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_PVP_ONLY),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_PVP_ONLY_TP),
+            getFunction = function ()
+                return Settings.cct.enabledOnlyInCyro
+            end,
+            setFunction = function (v)
+                Settings.cct.enabledOnlyInCyro = v
+                CrowdControlTracker:OnOff()
+            end,
+            disable = function ()
+                return not Settings.cct.enabled
+            end,
+            default = Defaults.cct.enabledOnlyInCyro
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_HEADER)
+        }
+
+        -- Build display style items
+        local displayStyleItems =
+        {
+            { name = "Display: Icon & Text", data = "all"  },
+            { name = "Display: Icon",        data = "icon" },
+            { name = "Display: Text",        data = "text" }
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_STYLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_STYLE_TP),
+            items = displayStyleItems,
+            getFunction = function ()
+                if Settings.cct.showOptions == "all" then
+                    return "Display: Icon & Text"
+                elseif Settings.cct.showOptions == "icon" then
+                    return "Display: Icon"
+                elseif Settings.cct.showOptions == "text" then
+                    return "Display: Text"
+                end
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.cct.showOptions = item.data
+                CrowdControlTracker:InitControls()
+            end,
+            disable = function ()
+                return not Settings.cct.enabled
+            end,
+            default = "Display: Icon & Text"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_NAME),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_NAME_TP),
+            getFunction = function ()
+                return Settings.cct.useAbilityName
+            end,
+            setFunction = function (v)
+                Settings.cct.useAbilityName = v
+                CrowdControlTracker:InitControls()
+            end,
+            disable = function ()
+                return (not Settings.cct.enabled) or (Settings.cct.showOptions == "icon")
+            end,
+            default = Defaults.cct.useAbilityName
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_TP),
+            getFunction = function ()
+                return Settings.cct.useDefaultIcon
+            end,
+            setFunction = function (v)
+                Settings.cct.useDefaultIcon = v
+                CrowdControlTracker:InitControls()
+            end,
+            disable = function ()
+                return (not Settings.cct.enabled) or (Settings.cct.showOptions == "icon")
+            end,
+            default = Defaults.cct.useDefaultIcon
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS_TP),
+            items = SettingsAPI:GetGlobalIconOptionsList(),
+            getFunction = function ()
+                local index = Settings.cct.defaultIconOptions
+                if type(index) == "string" then
+                    index = globalIconOptionsKeys[index] or 1
+                end
+                return globalIconOptions[index] or globalIconOptions[1]
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.cct.defaultIconOptions = item.data
+                CrowdControlTracker:InitControls()
+            end,
+            disable = function ()
+                return not Settings.cct.useDefaultIcon
+            end,
+            default = globalIconOptions[Defaults.cct.defaultIconOptions]
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_SCALE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_SCALE_TP),
+            min = 20,
+            max = 200,
+            step = 1,
+            format = "%.0f",
+            getFunction = function ()
+                return tonumber(string_format("%.0f", 100 * Settings.cct.controlScale))
+            end,
+            setFunction = function (v)
+                Settings.cct.controlScale = v / 100
+                CrowdControlTracker:InitControls()
+            end,
+            disable = function ()
+                return not Settings.cct.enabled
+            end,
+            default = tonumber(string_format("%.0f", 100 * Defaults.cct.controlScale))
+        }
+
+        -- CCT Misc Options Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_MISC_OPTIONS_HEADER)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_SOUND),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_SOUND_TP),
+            getFunction = function ()
+                return Settings.cct.playSound
+            end,
+            setFunction = function (v)
+                Settings.cct.playSound = v
+                CrowdControlTracker:InitControls()
+            end,
+            disable = function ()
+                return not Settings.cct.enabled
+            end,
+            default = Defaults.cct.playSound
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.cct.playSoundOption
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.cct.playSoundOption = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.cct.playSound and Settings.cct.enabled)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_STAGGER),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_STAGGER_TP),
+            getFunction = function ()
+                return Settings.cct.showStaggered
+            end,
+            setFunction = function (v)
+                Settings.cct.showStaggered = v
+                CrowdControlTracker:InitControls()
+            end,
+            disable = function ()
+                return not Settings.cct.enabled
+            end,
+            default = Defaults.cct.showStaggered
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_GCD_TOGGLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_GCD_TOGGLE_TP),
+            getFunction = function ()
+                return Settings.cct.showGCD
+            end,
+            setFunction = function (v)
+                Settings.cct.showGCD = v
+                CrowdControlTracker:InitControls()
+            end,
+            disable = function ()
+                return not Settings.cct.enabled
+            end,
+            default = Defaults.cct.showGCD
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_TOGGLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_TOGGLE_TP),
+            getFunction = function ()
+                return Settings.cct.showImmune
+            end,
+            setFunction = function (v)
+                Settings.cct.showImmune = v
+                CrowdControlTracker:InitControls()
+            end,
+            disable = function ()
+                return not Settings.cct.enabled
+            end,
+            default = Defaults.cct.showImmune
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_CYRODIIL),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_CYRODIIL_TP),
+            getFunction = function ()
+                return Settings.cct.showImmuneOnlyInCyro
+            end,
+            setFunction = function (v)
+                Settings.cct.showImmuneOnlyInCyro = v
+                CrowdControlTracker:InitControls()
+            end,
+            disable = function ()
+                return not (Settings.cct.showImmune and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.showImmuneOnlyInCyro
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_TIME),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_TIME_TP),
+            min = 100,
+            max = 1500,
+            step = 1,
+            format = "%.0f",
+            getFunction = function ()
+                return Settings.cct.immuneDisplayTime
+            end,
+            setFunction = function (v)
+                Settings.cct.immuneDisplayTime = v
+                CrowdControlTracker:InitControls()
+            end,
+            disable = function ()
+                return not (Settings.cct.showImmune and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.immuneDisplayTime
+        }
+
+        -- CCT CC Colors Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_HEADER_CC_COLOR)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STUN),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STUN)),
+            getFunction = function ()
+                return Settings.cct.colors[ACTION_RESULT_STUNNED][1], Settings.cct.colors[ACTION_RESULT_STUNNED][2], Settings.cct.colors[ACTION_RESULT_STUNNED][3], Settings.cct.colors[ACTION_RESULT_STUNNED][4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.cct.colors[ACTION_RESULT_STUNNED] = { r, g, b, a }
+                CrowdControlTracker:InitControls()
+            end,
+            default = Defaults.cct.colors[ACTION_RESULT_STUNNED],
+            disable = function ()
+                return not Settings.cct.enabled
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_KNOCKBACK),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_KNOCKBACK)),
+            getFunction = function ()
+                return Settings.cct.colors[ACTION_RESULT_KNOCKBACK][1], Settings.cct.colors[ACTION_RESULT_KNOCKBACK][2], Settings.cct.colors[ACTION_RESULT_KNOCKBACK][3], Settings.cct.colors[ACTION_RESULT_KNOCKBACK][4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.cct.colors[ACTION_RESULT_KNOCKBACK] = { r, g, b, a }
+                CrowdControlTracker:InitControls()
+            end,
+            default = Defaults.cct.colors[ACTION_RESULT_KNOCKBACK],
+            disable = function ()
+                return not Settings.cct.enabled
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_LEVITATE),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_LEVITATE)),
+            getFunction = function ()
+                return Settings.cct.colors[ACTION_RESULT_LEVITATED][1], Settings.cct.colors[ACTION_RESULT_LEVITATED][2], Settings.cct.colors[ACTION_RESULT_LEVITATED][3], Settings.cct.colors[ACTION_RESULT_LEVITATED][4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.cct.colors[ACTION_RESULT_LEVITATED] = { r, g, b, a }
+                CrowdControlTracker:InitControls()
+            end,
+            default = Defaults.cct.colors[ACTION_RESULT_LEVITATED],
+            disable = function ()
+                return not Settings.cct.enabled
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_DISORIENT),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_DISORIENT)),
+            getFunction = function ()
+                return Settings.cct.colors[ACTION_RESULT_DISORIENTED][1], Settings.cct.colors[ACTION_RESULT_DISORIENTED][2], Settings.cct.colors[ACTION_RESULT_DISORIENTED][3], Settings.cct.colors[ACTION_RESULT_DISORIENTED][4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.cct.colors[ACTION_RESULT_DISORIENTED] = { r, g, b, a }
+                CrowdControlTracker:InitControls()
+            end,
+            default = Defaults.cct.colors[ACTION_RESULT_DISORIENTED],
+            disable = function ()
+                return not Settings.cct.enabled
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SILENCE),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SILENCE)),
+            getFunction = function ()
+                return Settings.cct.colors[ACTION_RESULT_SILENCED][1], Settings.cct.colors[ACTION_RESULT_SILENCED][2], Settings.cct.colors[ACTION_RESULT_SILENCED][3], Settings.cct.colors[ACTION_RESULT_SILENCED][4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.cct.colors[ACTION_RESULT_SILENCED] = { r, g, b, a }
+                CrowdControlTracker:InitControls()
+            end,
+            default = Defaults.cct.colors[ACTION_RESULT_SILENCED],
+            disable = function ()
+                return not Settings.cct.enabled
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_FEAR),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_FEAR)),
+            getFunction = function ()
+                return Settings.cct.colors[ACTION_RESULT_FEARED][1], Settings.cct.colors[ACTION_RESULT_FEARED][2], Settings.cct.colors[ACTION_RESULT_FEARED][3], Settings.cct.colors[ACTION_RESULT_FEARED][4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.cct.colors[ACTION_RESULT_FEARED] = { r, g, b, a }
+                CrowdControlTracker:InitControls()
+            end,
+            default = Defaults.cct.colors[ACTION_RESULT_FEARED],
+            disable = function ()
+                return not Settings.cct.enabled
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_CHARM),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_CHARM)),
+            getFunction = function ()
+                return Settings.cct.colors[ACTION_RESULT_CHARMED][1], Settings.cct.colors[ACTION_RESULT_CHARMED][2], Settings.cct.colors[ACTION_RESULT_CHARMED][3], Settings.cct.colors[ACTION_RESULT_CHARMED][4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.cct.colors[ACTION_RESULT_CHARMED] = { r, g, b, a }
+                CrowdControlTracker:InitControls()
+            end,
+            default = Defaults.cct.colors[ACTION_RESULT_CHARMED],
+            disable = function ()
+                return not Settings.cct.enabled
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STAGGER),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_STAGGER)),
+            getFunction = function ()
+                return Settings.cct.colors[ACTION_RESULT_STAGGERED][1], Settings.cct.colors[ACTION_RESULT_STAGGERED][2], Settings.cct.colors[ACTION_RESULT_STAGGERED][3], Settings.cct.colors[ACTION_RESULT_STAGGERED][4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.cct.colors[ACTION_RESULT_STAGGERED] = { r, g, b, a }
+                CrowdControlTracker:InitControls()
+            end,
+            default = Defaults.cct.colors[ACTION_RESULT_STAGGERED],
+            disable = function ()
+                return not Settings.cct.enabled
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_UNBREAKABLE),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_UNBREAKABLE)),
+            getFunction = function ()
+                return Settings.cct.colors.unbreakable[1], Settings.cct.colors.unbreakable[2], Settings.cct.colors.unbreakable[3], Settings.cct.colors.unbreakable[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.cct.colors.unbreakable = { r, g, b, a }
+                CrowdControlTracker:InitControls()
+            end,
+            default = Defaults.cct.colors.unbreakable,
+            disable = function ()
+                return not Settings.cct.enabled
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE)),
+            getFunction = function ()
+                return Settings.cct.colors[ACTION_RESULT_IMMUNE][1], Settings.cct.colors[ACTION_RESULT_IMMUNE][2], Settings.cct.colors[ACTION_RESULT_IMMUNE][3], Settings.cct.colors[ACTION_RESULT_IMMUNE][4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.cct.colors[ACTION_RESULT_IMMUNE] = { r, g, b, a }
+                Settings.cct.colors[ACTION_RESULT_DODGED] = { r, g, b, a }
+                Settings.cct.colors[ACTION_RESULT_BLOCKED] = { r, g, b, a }
+                Settings.cct.colors[ACTION_RESULT_BLOCKED_DAMAGE] = { r, g, b, a }
+                CrowdControlTracker:InitControls()
+            end,
+            default = Defaults.cct.colors[ACTION_RESULT_IMMUNE],
+            disable = function ()
+                return not Settings.cct.enabled
+            end
+        }
+
+        -- CCT Root Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_ROOT_HEADER)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_ROOT_TOGGLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_ROOT_TOGGLE_TP),
+            getFunction = function ()
+                return Settings.cct.showRoot
+            end,
+            setFunction = function (v)
+                Settings.cct.showRoot = v
+                CrowdControlTracker:InitControls()
+            end,
+            disable = function ()
+                return not Settings.cct.enabled
+            end,
+            default = Defaults.cct.showRoot
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_ROOT_COLOR),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_ROOT)),
+            getFunction = function ()
+                return Settings.cct.colors[ACTION_RESULT_ROOTED][1], Settings.cct.colors[ACTION_RESULT_ROOTED][2], Settings.cct.colors[ACTION_RESULT_ROOTED][3], Settings.cct.colors[ACTION_RESULT_ROOTED][4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.cct.colors[ACTION_RESULT_ROOTED] = { r, g, b, a }
+                CrowdControlTracker:InitControls()
+            end,
+            default = Defaults.cct.colors[ACTION_RESULT_ROOTED],
+            disable = function ()
+                return not (Settings.cct.showRoot and Settings.cct.enabled)
+            end
+        }
+
+        -- CCT AOE Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_AOE_HEADER)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_AOE_TOGGLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_AOE_TOGGLE_TP),
+            getFunction = function ()
+                return Settings.cct.showAoe
+            end,
+            setFunction = function (v)
+                Settings.cct.showAoe = v
+                CrowdControlTracker:InitControls()
+            end,
+            disable = function ()
+                return not Settings.cct.enabled
+            end,
+            default = Defaults.cct.showAoe
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "  " .. GetString(LUIE_STRING_LAM_CT_CCT_AOE_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_CT_CCT_AOE_COLOR_TP),
+            getFunction = function ()
+                return Settings.cct.colors[ACTION_RESULT_AREA_EFFECT][1], Settings.cct.colors[ACTION_RESULT_AREA_EFFECT][2], Settings.cct.colors[ACTION_RESULT_AREA_EFFECT][3], Settings.cct.colors[ACTION_RESULT_AREA_EFFECT][4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.cct.colors[ACTION_RESULT_AREA_EFFECT] = { r, g, b, a }
+                CrowdControlTracker:InitControls()
+            end,
+            default = Defaults.cct.colors[ACTION_RESULT_AREA_EFFECT],
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.enabled)
+            end
+        }
+
+        -- CCT Snare Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_SNARE_HEADER)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_CCT_SNARE_TOGGLE),
+            tooltip = GetString(LUIE_STRING_LAM_CI_CCT_SNARE_TOGGLE_TP),
+            getFunction = function ()
+                return Settings.cct.showSnare
+            end,
+            setFunction = function (v)
+                Settings.cct.showSnare = v
+                CrowdControlTracker:InitControls()
+            end,
+            disable = function ()
+                return not Settings.cct.enabled
+            end,
+            default = Defaults.cct.showSnare
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_SNARE_COLOR),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SNARE)),
+            getFunction = function ()
+                return Settings.cct.colors[ACTION_RESULT_SNARED][1], Settings.cct.colors[ACTION_RESULT_SNARED][2], Settings.cct.colors[ACTION_RESULT_SNARED][3], Settings.cct.colors[ACTION_RESULT_SNARED][4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.cct.colors[ACTION_RESULT_SNARED] = { r, g, b, a }
+                CrowdControlTracker:InitControls()
+            end,
+            default = Defaults.cct.colors[ACTION_RESULT_SNARED],
+            disable = function ()
+                return not (Settings.cct.showSnare and Settings.cct.enabled)
+            end
+        }
+
+        -- CCT Shared Options Header (AOE Display Options)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_HEADER_SHARED)
+        }
+
+        -- AOE Display Options - Player Ultimate
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_ULT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_ULT)),
+            getFunction = function ()
+                return Settings.cct.aoePlayerUltimate
+            end,
+            setFunction = function (v)
+                Settings.cct.aoePlayerUltimate = v
+                CrowdControlTracker.UpdateAOEList()
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.aoePlayerUltimate
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_ULT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_ULT)),
+            getFunction = function ()
+                return Settings.cct.aoePlayerUltimateSoundToggle
+            end,
+            setFunction = function (v)
+                Settings.cct.aoePlayerUltimateSoundToggle = v
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.aoePlayerUltimate and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.aoePlayerUltimateSoundToggle
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.cct.aoePlayerUltimateSound
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.cct.aoePlayerUltimateSound = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.aoePlayerUltimate and Settings.cct.aoePlayerUltimateSoundToggle and Settings.cct.enabled)
+            end
+        }
+
+        -- AOE Display Options - Player Normal
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_NORM)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_NORM)),
+            getFunction = function ()
+                return Settings.cct.aoePlayerNormal
+            end,
+            setFunction = function (v)
+                Settings.cct.aoePlayerNormal = v
+                CrowdControlTracker.UpdateAOEList()
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.aoePlayerNormal
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_NORM)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_NORM)),
+            getFunction = function ()
+                return Settings.cct.aoePlayerNormalSoundToggle
+            end,
+            setFunction = function (v)
+                Settings.cct.aoePlayerNormalSoundToggle = v
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.aoePlayerNormal and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.aoePlayerNormalSoundToggle
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.cct.aoePlayerNormalSound
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.cct.aoePlayerNormalSound = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.aoePlayerNormal and Settings.cct.aoePlayerNormalSoundToggle and Settings.cct.enabled)
+            end
+        }
+
+        -- AOE Display Options - Player Set
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_SET)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_SET)),
+            getFunction = function ()
+                return Settings.cct.aoePlayerSet
+            end,
+            setFunction = function (v)
+                Settings.cct.aoePlayerSet = v
+                CrowdControlTracker.UpdateAOEList()
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.aoePlayerSet
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_SET)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_PLAYER_SET)),
+            getFunction = function ()
+                return Settings.cct.aoePlayerSetSoundToggle
+            end,
+            setFunction = function (v)
+                Settings.cct.aoePlayerSetSoundToggle = v
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.aoePlayerSet and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.aoePlayerSetSoundToggle
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.cct.aoePlayerSetSound
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.cct.aoePlayerSetSound = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.aoePlayerSet and Settings.cct.aoePlayerSetSoundToggle and Settings.cct.enabled)
+            end
+        }
+
+        -- AOE Display Options - Trap
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_TRAP)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_TRAP)),
+            getFunction = function ()
+                return Settings.cct.aoeTraps
+            end,
+            setFunction = function (v)
+                Settings.cct.aoeTraps = v
+                CrowdControlTracker.UpdateAOEList()
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.aoeTraps
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_TRAP)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_TRAP)),
+            getFunction = function ()
+                return Settings.cct.aoeTrapsSoundToggle
+            end,
+            setFunction = function (v)
+                Settings.cct.aoeTrapsSoundToggle = v
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.aoeTraps and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.aoeTrapsSoundToggle
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.cct.aoeTrapsSound
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.cct.aoeTrapsSound = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.aoeTraps and Settings.cct.aoeTrapsSoundToggle and Settings.cct.enabled)
+            end
+        }
+
+        -- AOE Display Options - NPC Boss
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_BOSS)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_BOSS)),
+            getFunction = function ()
+                return Settings.cct.aoeNPCBoss
+            end,
+            setFunction = function (v)
+                Settings.cct.aoeNPCBoss = v
+                CrowdControlTracker.UpdateAOEList()
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.aoeNPCBoss
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_BOSS)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_BOSS)),
+            getFunction = function ()
+                return Settings.cct.aoeNPCBossSoundToggle
+            end,
+            setFunction = function (v)
+                Settings.cct.aoeNPCBossSoundToggle = v
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.aoeNPCBoss and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.aoeNPCBossSoundToggle
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.cct.aoeNPCBossSound
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.cct.aoeNPCBossSound = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.aoeNPCBoss and Settings.cct.aoeNPCBossSoundToggle and Settings.cct.enabled)
+            end
+        }
+
+        -- AOE Display Options - NPC Elite
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_ELITE)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_ELITE)),
+            getFunction = function ()
+                return Settings.cct.aoeNPCElite
+            end,
+            setFunction = function (v)
+                Settings.cct.aoeNPCElite = v
+                CrowdControlTracker.UpdateAOEList()
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.aoeNPCElite
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_ELITE)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_ELITE)),
+            getFunction = function ()
+                return Settings.cct.aoeNPCEliteSoundToggle
+            end,
+            setFunction = function (v)
+                Settings.cct.aoeNPCEliteSoundToggle = v
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.aoeNPCElite and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.aoeNPCEliteSoundToggle
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.cct.aoeNPCEliteSound
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.cct.aoeNPCEliteSound = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.aoeNPCElite and Settings.cct.aoeNPCEliteSoundToggle and Settings.cct.enabled)
+            end
+        }
+
+        -- AOE Display Options - NPC Normal
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_NORMAL)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SHOW_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_NORMAL)),
+            getFunction = function ()
+                return Settings.cct.aoeNPCNormal
+            end,
+            setFunction = function (v)
+                Settings.cct.aoeNPCNormal = v
+                CrowdControlTracker.UpdateAOEList()
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.aoeNPCNormal
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_NORMAL)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_AOE_SOUND_TP), GetString(LUIE_STRING_LAM_CI_CCT_AOE_TIER_NPC_NORMAL)),
+            getFunction = function ()
+                return Settings.cct.aoeNPCNormalSoundToggle
+            end,
+            setFunction = function (v)
+                Settings.cct.aoeNPCNormalSoundToggle = v
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.aoeNPCNormal and Settings.cct.enabled)
+            end,
+            default = Defaults.cct.aoeNPCNormalSoundToggle
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "  ",
+            items = soundItems,
+            getFunction = function ()
+                return Settings.cct.aoeNPCNormalSound
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.cct.aoeNPCNormalSound = item.data
+                AbilityAlerts.PreviewAlertSound(item.data)
+            end,
+            disable = function ()
+                return not (Settings.cct.showAoe and Settings.cct.aoeNPCNormal and Settings.cct.aoeNPCNormalSoundToggle and Settings.cct.enabled)
+            end
+        }
+    end)
+
+    -- Build Synergy Tracker Section
+    buildSectionSettings("SynergyTracker", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "Synergy Tracker",
+        }
+
+        -- Submenu description
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Track and display multiple available synergies simultaneously. Set custom priorities and manage synergy preferences.",
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Track and display multiple available synergies simultaneously. Set custom priorities and manage synergy preferences."
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "Unlock Synergy Display",
+            tooltip = "Unlock the synergy display to reposition it. Preview synergies will be shown while unlocked.",
+            getFunction = function ()
+                return Settings.synergy.unlocked
+            end,
+            setFunction = function (v)
+                local tracker = CombatInfo.SynergyTrackerInstance
+                if tracker then
+                    tracker:SetUnlocked(v)
+                end
+            end,
+            disable = function ()
+                return not Settings.synergy.enabled
+            end,
+            default = false
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = "Reset Position",
+            tooltip = "Reset the synergy display to default position.",
+            buttonText = "Reset Position",
+            clickHandler = function ()
+                local tracker = CombatInfo.SynergyTrackerInstance
+                if tracker then
+                    tracker:ResetPosition()
+                end
+            end,
+            disable = function ()
+                return not Settings.synergy.enabled
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "Enable Synergy Tracker",
+            tooltip = "Enable the synergy tracking system. This will monitor available synergies and allow you to set priority overrides. Changes require a UI reload (/reloadui).",
+            getFunction = function ()
+                return Settings.synergy.enabled
+            end,
+            setFunction = function (v)
+                Settings.synergy.enabled = v
+            end,
+            default = Defaults.synergy.enabled
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "Display Options"
+        }
+
+        -- Build display mode items
+        local displayModeItems =
+        {
+            { name = "Single Synergy",        data = "single"  },
+            { name = "Multi-Synergy",         data = "multi"   },
+            { name = "Compact Multi-Synergy", data = "compact" }
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "Display Mode",
+            tooltip = "Single: Show only highest priority synergy (like default UI)\nMulti: Show all available synergies\nCompact: Show all synergies with short names",
+            items = displayModeItems,
+            getFunction = function ()
+                if Settings.synergy.displayMode == "single" then
+                    return "Single Synergy"
+                elseif Settings.synergy.displayMode == "compact" then
+                    return "Compact Multi-Synergy"
+                else
+                    return "Multi-Synergy"
+                end
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.synergy.displayMode = item.data
+                local tracker = CombatInfo.SynergyTrackerInstance
+                if tracker then
+                    tracker:UpdateDisplay()
+                end
+            end,
+            disable = function ()
+                return not Settings.synergy.enabled
+            end,
+            default = "Multi-Synergy"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "  " .. "Maximum Synergies to Display",
+            tooltip = "Maximum number of synergies to show simultaneously (1-10). Includes both active and cooldown synergies.",
+            min = 1,
+            max = 10,
+            step = 1,
+            format = "%.0f",
+            getFunction = function ()
+                return Settings.synergy.maxDisplay
+            end,
+            setFunction = function (v)
+                Settings.synergy.maxDisplay = v
+                local tracker = CombatInfo.SynergyTrackerInstance
+                if tracker then
+                    tracker:UpdateDisplay()
+                end
+            end,
+            disable = function ()
+                return not Settings.synergy.enabled or Settings.synergy.displayMode == "single"
+            end,
+            default = Defaults.synergy.maxDisplay
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. "Show Priority Numbers",
+            tooltip = "Display priority numbers next to each synergy.",
+            getFunction = function ()
+                return Settings.synergy.showPriority
+            end,
+            setFunction = function (v)
+                Settings.synergy.showPriority = v
+                local tracker = CombatInfo.SynergyTrackerInstance
+                if tracker then
+                    tracker:UpdateDisplayOptions()
+                end
+            end,
+            disable = function ()
+                return not Settings.synergy.enabled
+            end,
+            default = Defaults.synergy.showPriority
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. "Show Position Numbers",
+            tooltip = "Display position numbers (1-5) next to each synergy to show its order in the list.",
+            getFunction = function ()
+                return Settings.synergy.showKeybinds
+            end,
+            setFunction = function (v)
+                Settings.synergy.showKeybinds = v
+                local tracker = CombatInfo.SynergyTrackerInstance
+                if tracker then
+                    tracker:UpdateDisplayOptions()
+                end
+            end,
+            disable = function ()
+                return not Settings.synergy.enabled
+            end,
+            default = Defaults.synergy.showKeybinds
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. "Play Sound on New Synergy",
+            tooltip = "Play a sound notification when a new synergy becomes available.",
+            getFunction = function ()
+                return Settings.synergy.playSound
+            end,
+            setFunction = function (v)
+                Settings.synergy.playSound = v
+            end,
+            disable = function ()
+                return not Settings.synergy.enabled
+            end,
+            default = Defaults.synergy.playSound
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "  " .. "Show Synergies on Cooldown",
+            tooltip = "Display synergies that are currently on cooldown. The tracker automatically learns which synergies share cooldowns by detecting when multiple synergies go on cooldown together.",
+            getFunction = function ()
+                return Settings.synergy.showCooldowns
+            end,
+            setFunction = function (v)
+                Settings.synergy.showCooldowns = v
+                local tracker = CombatInfo.SynergyTrackerInstance
+                if tracker then
+                    if not v then
+                        tracker.synergyCooldowns = {}
+                    end
+                    tracker:UpdateDisplay()
+                end
+            end,
+            disable = function ()
+                return not Settings.synergy.enabled or Settings.synergy.displayMode == "single"
+            end,
+            default = Defaults.synergy.showCooldowns
+        }
+
+        -- Detected Synergies & Priority Overrides Header
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "Detected Synergies & Priority Overrides"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Synergies detected during gameplay will appear below. Each synergy has a checkbox to blacklist (hide) it and a slider to set custom priority (0 = game default, 1-10 = higher priority)."
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = "Clear All Priority Overrides",
+            tooltip = "Remove all custom priority overrides and reset to game defaults.",
+            buttonText = "Clear All Priority Overrides",
+            clickHandler = function ()
+                local tracker = CombatInfo.SynergyTrackerInstance
+                if tracker then
+                    tracker:ClearAllPriorityOverrides()
+                end
+            end,
+            disable = function ()
+                return not Settings.synergy.enabled
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = "Clear Blacklist",
+            tooltip = "Remove all synergies from the blacklist.",
+            buttonText = "Clear Blacklist",
+            clickHandler = function ()
+                Settings.synergy.blacklist = {}
+                local tracker = CombatInfo.SynergyTrackerInstance
+                if tracker then
+                    tracker:RefreshActiveSynergies()
+                end
+                LUIE.PrintToChat("Blacklist cleared. Refresh settings to see changes.", true)
+            end,
+            disable = function ()
+                return not Settings.synergy.enabled
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = "Refresh List",
+            tooltip = "Refresh the list of detected synergies. Close and reopen settings to see updated list.",
+            buttonText = "Refresh List",
+            clickHandler = function ()
+                LUIE.PrintToChat("Refresh settings menu to see updated synergy list.", true)
+            end,
+            disable = function ()
+                return not Settings.synergy.enabled
+            end
+        }
+
+        -- NOTE: Dynamic synergy list generation (detected synergies)
+        -- Dynamically add detected synergies to the settings menu (if tracker exists)
+        local tracker = CombatInfo.SynergyTrackerInstance
+        local detectedList = tracker and tracker:GetDetectedSynergiesSorted() or {}
+        if #detectedList > 0 then
+            for _, synergyData in ipairs(detectedList) do
+                local abilityId = synergyData.abilityId
+                local name = synergyData.name
+                local icon = synergyData.icon
+                local timesSeen = synergyData.timesSeen
+
+                -- Synergy description with icon and name
+                settings[#settings + 1] =
+                {
+                    type = LHAS.ST_LABEL,
+                    label = zo_iconTextFormat(icon, 32, 32, " " .. zo_strformat("<<C:1>>", name) .. string_format(" |cAAAAAA(Seen: %d times)|r", timesSeen), true, true)
+                }
+
+                -- Blacklist toggle
+                settings[#settings + 1] =
+                {
+                    type = LHAS.ST_CHECKBOX,
+                    label = "  " .. "Blacklist (Hide)",
+                    tooltip = string_format("Hide this synergy from the tracker. Ability ID: [%d]", abilityId),
+                    getFunction = function ()
+                        return Settings.synergy.blacklist[abilityId] or false
+                    end,
+                    setFunction = function (v)
+                        Settings.synergy.blacklist[abilityId] = v or nil
+                        if tracker then
+                            tracker:RefreshActiveSynergies()
+                        end
+                    end,
+                    disable = function ()
+                        return not Settings.synergy.enabled
+                    end,
+                    default = false
+                }
+
+                -- Priority slider
+                settings[#settings + 1] =
+                {
+                    type = LHAS.ST_SLIDER,
+                    label = "  " .. "Priority Override",
+                    tooltip = string_format("Set priority for %s. Higher values = higher priority. 0 = game default.", name),
+                    min = 0,
+                    max = 10,
+                    step = 1,
+                    format = "%.0f",
+                    getFunction = function ()
+                        return Settings.synergy.priorityOverrides[abilityId] or 0
+                    end,
+                    setFunction = function (v)
+                        if v > 0 then
+                            Settings.synergy.priorityOverrides[abilityId] = v
+                            SetSynergyPriorityOverride(abilityId, v)
+                        else
+                            Settings.synergy.priorityOverrides[abilityId] = nil
+                            ClearSynergyPriorityOverride(abilityId)
+                        end
+                    end,
+                    disable = function ()
+                        return not Settings.synergy.enabled or (Settings.synergy.blacklist[abilityId] == true)
+                    end,
+                    default = 0
+                }
+            end
+        end
+    end)
+
+    -- Create back button
+    backButton =
+    {
+        type = LHAS.ST_BUTTON,
+        label = "BACK",
+        buttonText = "BACK",
+        tooltip = "",
+        clickHandler = function (control)
+            panel:RemoveAllSettings()
+            local mainMenuSettings = {}
+            for i = 1, #initialSettings do
+                mainMenuSettings[i] = initialSettings[i]
+            end
+            for i = 1, #menuButtons do
+                mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
+            end
+            panel:AddSettings(mainMenuSettings)
+            if IsConsoleUI() then
+                LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(1)
+            end
+        end
+    }
+
+    -- Create menu buttons for each section
+    local function createMenuButton(sectionName, sectionLabel, sectionSettings)
+        return
+        {
+            type = LHAS.ST_BUTTON,
+            label = sectionLabel,
+            buttonText = sectionLabel,
+            tooltip = "",
+            clickHandler = function (control)
+                panel:RemoveAllSettings()
+                local settingsWithBack = {}
+                for i = 1, #sectionSettings do
+                    settingsWithBack[i] = sectionSettings[i]
+                end
+                settingsWithBack[#settingsWithBack + 1] = backButton
+                panel:AddSettings(settingsWithBack)
+                if IsConsoleUI() then
+                    LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(2)
+                end
+            end
+        }
+    end
+
+    -- Add all submenu buttons
+    menuButtons[#menuButtons + 1] = createMenuButton("FloatingMarkers", GetString(LUIE_STRING_LAM_CI_ENEMY_MARKER_HEADER), sectionGroups["FloatingMarkers"])
+    menuButtons[#menuButtons + 1] = createMenuButton("ActiveCombatAlerts", GetString(LUIE_STRING_LAM_CI_HEADER_ACTIVE_COMBAT_ALERT), sectionGroups["ActiveCombatAlerts"])
+    menuButtons[#menuButtons + 1] = createMenuButton("CrowdControlTracker", GetString(LUIE_STRING_LAM_CI_CCT_HEADER), sectionGroups["CrowdControlTracker"])
+    menuButtons[#menuButtons + 1] = createMenuButton("SynergyTracker", "Synergy Tracker", sectionGroups["SynergyTracker"])
+
+    -- Initialize main menu with initial settings and menu buttons
+    local mainMenuSettings = {}
+    for i = 1, #initialSettings do
+        mainMenuSettings[i] = initialSettings[i]
+    end
+    for i = 1, #menuButtons do
+        mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
+    end
+    panel:AddSettings(mainMenuSettings)
 end

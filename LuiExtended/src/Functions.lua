@@ -200,7 +200,7 @@ end
 
 -- -----------------------------------------------------------------------------
 --- Called from the menu and on initialization to update the timestamp color when changed.
-LUIE.TimeStampColorize = nil
+LUIE.TimeStampColorize = ZO_OFF_WHITE:ToHex()
 
 -- -----------------------------------------------------------------------------
 --- Updates the timestamp color based on the value in LUIE.ChatAnnouncements.SV.TimeStampColor.
