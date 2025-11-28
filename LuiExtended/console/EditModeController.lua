@@ -137,6 +137,8 @@ function EditModeController:SetEditModeActive(active, triggeringModule)
         if self.keybindStripReduced then
             self:ApplyKeybindStripSizing()
         end
+        -- Force cleanup of keybind backdrop to ensure it disappears immediately
+        self:ForceCleanupKeybindBackdrop()
         self:DeactivateActionLayer()
 
         -- Re-lock the module that triggered edit mode
@@ -918,6 +920,33 @@ function EditModeController:ApplyKeybindStripSizing()
 
         self.keybindStripBackgroundWasHidden = nil
         self.keybindStripReduced = false
+    end
+end
+
+--- Forces cleanup of keybind backdrop when exiting edit mode
+function EditModeController:ForceCleanupKeybindBackdrop()
+    -- Force hide backdrop controls to ensure they disappear immediately
+    if ZO_KeybindStripGamepadBackground then
+        ZO_KeybindStripGamepadBackground:SetHidden(true)
+    end
+    if ZO_KeybindStripGamepadBackgroundTexture then
+        ZO_KeybindStripGamepadBackgroundTexture:SetHidden(true)
+    end
+    
+    -- Force a scene refresh to ensure backdrop is properly removed
+    local currentScene = SCENE_MANAGER:GetCurrentScene()
+    if currentScene then
+        -- Trigger a scene state refresh by briefly toggling the fragment
+        if currentScene:HasFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT) then
+            currentScene:RemoveFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
+            -- Small delay to ensure cleanup, then force scene refresh
+            zo_callLater(function()
+                -- Force update the scene to ensure backdrop is gone
+                if currentScene:IsShowing() then
+                    currentScene:Refresh()
+                end
+            end, 50)
+        end
     end
 end
 
