@@ -25,6 +25,7 @@
 --- @field ArtificialEffectOverride ArtificialEffectOverride Table of artificial effect overrides
 --- @field AssistantIcons AssistantIcons Table of assistant icon definitions
 --- @field BarHighlightCheckOnFade table<integer, BarHighlightOverrideEntry> Table of effects to check highlight on fade
+--- @field BarHighlightCruxMap BarHighlightCruxMap Table mapping Crux effect to abilities that show Crux stacks
 --- @field BarHighlightDestroFix BarHighlightDestroFix Table of destruction staff highlight fixes
 --- @field BarHighlightExtraId BarHighlightExtraId Table of additional effect IDs for highlighting
 --- @field BarHighlightOverride table<integer, BarHighlightOverrideOptions> Table of highlight override definitions
@@ -146,6 +147,7 @@ local Effects =
     ArtificialEffectOverride = {},
     AssistantIcons = {},
     BarHighlightCheckOnFade = {},
+    BarHighlightCruxMap = {},
     BarHighlightDestroFix = {},
     BarHighlightExtraId = {},
     BarHighlightOverride = {},
@@ -243,8 +245,8 @@ local ZoneTable = {}
 --- @class (partial) LuiData
 LuiData = {}
 LuiData.name = "LuiData"
-LuiData.version = 7106
-LuiData.addonVersion = "7.1.0.6"
+LuiData.version = 7107
+LuiData.addonVersion = "7.1.0.7"
 
 --- @class (partial) Data
 LuiData.Data =

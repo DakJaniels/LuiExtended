@@ -138,6 +138,7 @@ end
 
 -- Module-local state
 local isFancyActionBarEnabled = OtherAddonCompatability.isFancyActionBarPlusEnabled or LUIE.IsItEnabled("FancyActionBar\43") or LUIE.IsItEnabled("FancyActionBar")
+local g_cruxAbilityLookup = nil
 local g_ultimateCost = 0
 local g_ultimateCurrent = 0
 local g_ultimateSlot = ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
@@ -534,9 +535,26 @@ end
 local function SetBarRemainLabel(remain, abilityId)
     if Effects.IsGrimFocus[abilityId] or Effects.IsBloodFrenzy[abilityId] then
         return ""
-    else
-        return FormatDurationSeconds(remain)
     end
+
+    -- Check if this ability should show Crux stacks (hide timer, show only stack count)
+    -- Create a lookup table for faster checking
+    if not g_cruxAbilityLookup then
+        g_cruxAbilityLookup = {}
+        if Effects.BarHighlightCruxMap then
+            for cruxEffectId, cruxAbilities in pairs(Effects.BarHighlightCruxMap) do
+                for _, cruxAbilityId in ipairs(cruxAbilities) do
+                    g_cruxAbilityLookup[cruxAbilityId] = true
+                end
+            end
+        end
+    end
+
+    if g_cruxAbilityLookup[abilityId] then
+        return ""
+    end
+
+    return FormatDurationSeconds(remain)
 end
 
 --- Gets corrected ability ID based on weapon type and special cases

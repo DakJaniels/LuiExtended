@@ -1,8 +1,8 @@
 ## Title: LuiData
 ## Author: ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder
-## Version: 7.1.0.6
+## Version: 7.1.0.7
 ## APIVersion: 101048 101049
-## AddOnVersion: 7106
+## AddOnVersion: 7107
 ## Description: Provides data for LuiExtended.
 ## DependsOn: LuiMedia>=7120 
 ## IsLibrary: true
@@ -46,6 +46,7 @@ Effects/OakenSoul.lua
 # Effects - Bar Highlight
 Effects/BarHighlight/AddNoDurationBarHighlight.lua
 Effects/BarHighlight/BarHighlightCheckOnFade.lua
+Effects/BarHighlight/BarHighlightCruxMap.lua
 Effects/BarHighlight/BarHighlightDestroFix.lua
 Effects/BarHighlight/BarHighlightExtraId.lua
 Effects/BarHighlight/BarHighlightOverride.lua

@@ -407,6 +407,66 @@ OnEffectChanged = function (eventCode, changeType, effectSlot, effectName, unitT
         stackCount = Effects.BarHighlightStack[abilityId]
     end
 
+    -- Handle Crux stack mapping: when Crux effect (184220) is detected, update stack counts for all Crux-related abilities
+    if Effects.BarHighlightCruxMap[abilityId] then
+        local cruxAbilities = Effects.BarHighlightCruxMap[abilityId]
+        local cruxAbilitySet = {}
+        for _, cruxAbilityId in ipairs(cruxAbilities) do
+            cruxAbilitySet[cruxAbilityId] = true
+        end
+
+        -- Check all action bar slots (front and back) for Crux-related abilities
+        if ActionBar.IsPlayerHotbarCategory(g_hotbarCategory) and ActionBar.SV.ShowToggled then
+            local currentTimeMs = timeMs()
+            
+            -- Check front bar slots
+            for slotNum = ActionBar.GetBarIndexStart(), ActionBar.GetBarIndexEnd() do
+                local slotAbilityId = ActionBar.GetSlotAbilityId(slotNum)
+                if slotAbilityId and cruxAbilitySet[slotAbilityId] then
+                    -- Found a Crux ability on the action bar
+                    if not g_toggledSlotsFront[slotAbilityId] then
+                        g_toggledSlotsFront[slotAbilityId] = slotNum
+                    end
+                    -- Set a long duration so the slot stays visible
+                    if not g_toggledSlotsRemain[slotAbilityId] then
+                        g_toggledSlotsRemain[slotAbilityId] = currentTimeMs + 90000000
+                    end
+                    -- Update stack count
+                    g_toggledSlotsStack[slotAbilityId] = stackCount
+                    -- Show the slot (creates toggle UI if needed)
+                    ActionBar.ShowSlot(slotNum, slotAbilityId, currentTimeMs, false)
+                    -- Clear the label text for Crux abilities (only show stack count, not timer)
+                    if g_uiCustomToggle[slotNum] and g_uiCustomToggle[slotNum].label then
+                        g_uiCustomToggle[slotNum].label:SetText("")
+                    end
+                end
+            end
+
+            -- Check back bar slots
+            for slotNum = ActionBar.GetBarIndexStart() + ActionBar.GetBackbarIndexOffset(), ActionBar.GetBackbarIndexEnd() + ActionBar.GetBackbarIndexOffset() do
+                local slotAbilityId = ActionBar.GetSlotAbilityId(slotNum)
+                if slotAbilityId and cruxAbilitySet[slotAbilityId] then
+                    -- Found a Crux ability on the back bar
+                    if not g_toggledSlotsBack[slotAbilityId] then
+                        g_toggledSlotsBack[slotAbilityId] = slotNum
+                    end
+                    -- Set a long duration so the slot stays visible
+                    if not g_toggledSlotsRemain[slotAbilityId] then
+                        g_toggledSlotsRemain[slotAbilityId] = currentTimeMs + 90000000
+                    end
+                    -- Update stack count
+                    g_toggledSlotsStack[slotAbilityId] = stackCount
+                    -- Show the slot (creates toggle UI if needed)
+                    ActionBar.ShowSlot(slotNum, slotAbilityId, currentTimeMs, false)
+                    -- Clear the label text for Crux abilities (only show stack count, not timer)
+                    if g_uiCustomToggle[slotNum] and g_uiCustomToggle[slotNum].label then
+                        g_uiCustomToggle[slotNum].label:SetText("")
+                    end
+                end
+            end
+        end
+    end
+
     if not isFancyActionBarEnabled then
         if Effects.BarHighlightExtraId[abilityId] then
             for k, v in pairs(Effects.BarHighlightExtraId) do
@@ -656,14 +716,17 @@ local function OnActionSlotEffectUpdated(eventCode, hotbarCategory, actionSlotIn
         if g_toggledSlotsRemain[abilityId] then
             g_toggledSlotsRemain[abilityId] = timeMs() + (remain * 1000)
 
-            local frontSlot = g_toggledSlotsFront[abilityId]
-            local backSlot = g_toggledSlotsBack[abilityId]
-
-            if frontSlot and g_uiCustomToggle[frontSlot] then
-                ActionBar.ShowSlot(frontSlot, abilityId, timeMs(), false)
-            end
-            if backSlot and g_uiCustomToggle[backSlot] then
-                ActionBar.ShowSlot(backSlot, abilityId, timeMs(), false)
+            -- Only show the slot that corresponds to the hotbar category that triggered this event
+            if hotbarCategory == HOTBAR_CATEGORY_BACKUP then
+                local backSlot = g_toggledSlotsBack[abilityId]
+                if backSlot and g_uiCustomToggle[backSlot] then
+                    ActionBar.ShowSlot(backSlot, abilityId, timeMs(), false)
+                end
+            else
+                local frontSlot = g_toggledSlotsFront[abilityId]
+                if frontSlot and g_uiCustomToggle[frontSlot] then
+                    ActionBar.ShowSlot(frontSlot, abilityId, timeMs(), false)
+                end
             end
         else
             if ActionBar.SV.ShowToggled then
@@ -680,9 +743,18 @@ local function OnActionSlotEffectUpdated(eventCode, hotbarCategory, actionSlotIn
                 end
             end
 
-            -- Only learn duration if not already overridden and not hardcoded in database
-            if not g_barDurationOverride[abilityId] and not (Effects.BarHighlightOverride[abilityId] and Effects.BarHighlightOverride[abilityId].duration) then
-                g_barDurationOverride[abilityId] = duration
+            -- Only learn duration from game API if:
+            -- 1. Not already in override table
+            -- 2. Not hardcoded in BarHighlightOverride
+            -- 3. GetUpdatedAbilityDuration() doesn't already have a valid hardcoded duration from ZOS API (prefer ZOS API over game slot API)
+            if not g_barDurationOverride[abilityId] 
+                and not (Effects.BarHighlightOverride[abilityId] and Effects.BarHighlightOverride[abilityId].duration) then
+                local existingDuration = GetUpdatedAbilityDuration(abilityId)
+                -- If existingDuration > 0 and not from override, it came from GetAbilityDuration - don't learn from game API
+                -- Only learn if ZOS API doesn't have a hardcoded duration (existingDuration == 0)
+                if existingDuration == 0 then
+                    g_barDurationOverride[abilityId] = duration
+                end
             end
         end
     end
