@@ -399,7 +399,7 @@ function SlashCommands.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_SLASHCMDS_PET_MESSAGE),
+            label = GetString(LUIE_STRING_LAM_SLASHCMDS_PET_MESSAGE),
             tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_PET_MESSAGE_TP),
             getFunction = function () return Settings.SlashPetMessage end,
             setFunction = function (value) Settings.SlashPetMessage = value end,

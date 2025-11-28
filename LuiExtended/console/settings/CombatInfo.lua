@@ -235,7 +235,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  " .. GetString(LUIE_STRING_LAM_FONT),
+            label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_FONTFACE_TP),
             items = fontItems,
             getFunction = function ()
@@ -255,7 +255,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "  " .. GetString(LUIE_STRING_LAM_FONT_SIZE),
+            label = GetString(LUIE_STRING_LAM_FONT_SIZE),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_FONTSIZE_TP),
             min = 16,
             max = 64,
@@ -278,7 +278,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  " .. GetString(LUIE_STRING_LAM_FONT_STYLE),
+            label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_FONTSTYLE_TP),
             items = fontStyleItems,
             getFunction = function ()
@@ -304,7 +304,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_TIMER_TOGGLE),
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_TIMER_TOGGLE),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_TIMER_TOGGLE_TP),
             getFunction = function ()
                 return Settings.alerts.toggles.alertTimer
@@ -321,7 +321,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CI_ALERT_TIMER_COLOR),
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_TIMER_COLOR),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_TIMER_COLOR_TP),
             getFunction = function ()
                 return Settings.alerts.colors.alertTimer[1], Settings.alerts.colors.alertTimer[2], Settings.alerts.colors.alertTimer[3], Settings.alerts.colors.alertTimer[4]
@@ -339,7 +339,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_COLOR_BASE),
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_COLOR_BASE),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_COLOR_BASE_TP),
             getFunction = function ()
                 return Settings.alerts.colors.alertShared[1], Settings.alerts.colors.alertShared[2], Settings.alerts.colors.alertShared[3], Settings.alerts.colors.alertShared[4]
@@ -415,7 +415,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_AURA),
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_AURA),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_AURA_TP),
             getFunction = function ()
                 return Settings.alerts.toggles.mitigationAura
@@ -432,7 +432,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_DUNGEON),
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_DUNGEON),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_DUNGEON_TP),
             getFunction = function ()
                 return Settings.alerts.toggles.mitigationDungeon
@@ -479,7 +479,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FILTER),
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FILTER),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FILTER_TP),
             items = SettingsAPI:GetGlobalAlertOptionsList(),
             getFunction = function ()
@@ -501,7 +501,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_SUFFIX),
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_SUFFIX),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_SUFFIX_TP),
             getFunction = function ()
                 return Settings.alerts.toggles.showMitigation
@@ -518,7 +518,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_ABILITY),
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_ABILITY),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_ABILITY_TP),
             getFunction = function ()
                 return Settings.alerts.toggles.mitigationAbilityName
@@ -535,7 +535,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_NAME),
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_NAME),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_NAME_TP),
             getFunction = function ()
                 return Settings.alerts.toggles.mitigationEnemyName
@@ -552,7 +552,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_BORDER),
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_BORDER),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_BORDER_TP),
             getFunction = function ()
                 return Settings.alerts.toggles.showCrowdControlBorder
@@ -569,7 +569,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_LABEL_COLOR),
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_LABEL_COLOR),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_LABEL_COLOR_TP),
             getFunction = function ()
                 return Settings.alerts.toggles.ccLabelColor
@@ -586,7 +586,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON),
+            label = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON),
             tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_ALERT_TP),
             getFunction = function ()
                 return Settings.alerts.toggles.useDefaultIcon
@@ -603,7 +603,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_ALERT_ALLOW_MODIFIER),
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_ALLOW_MODIFIER),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_ALLOW_MODIFIER_TP),
             getFunction = function ()
                 return Settings.alerts.toggles.modifierEnable
@@ -620,7 +620,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CI_ALERT_MODIFIER_DIRECT),
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_MODIFIER_DIRECT),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MODIFIER_DIRECT_TP),
             getFunction = function ()
                 return Settings.alerts.toggles.mitigationModifierOnYou
@@ -637,7 +637,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CI_ALERT_MODIFIER_SPREAD),
+            label = GetString(LUIE_STRING_LAM_CI_ALERT_MODIFIER_SPREAD),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_MODIFIER_SPREAD_TP),
             getFunction = function ()
                 return Settings.alerts.toggles.mitigationModifierSpreadOut
@@ -880,7 +880,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_UNMIT_TP),
             getFunction = function ()
                 return Settings.alerts.formats.alertUnmit
@@ -897,7 +897,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
             tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_UNMIT_TP),
             getFunction = function ()
                 return Settings.alerts.colors.alertUnmit[1], Settings.alerts.colors.alertUnmit[2], Settings.alerts.colors.alertUnmit[3], Settings.alerts.colors.alertUnmit[4]
@@ -939,7 +939,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_POWER_TP),
             getFunction = function ()
                 return Settings.alerts.formats.alertPower
@@ -956,7 +956,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "  " .. zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_P), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME)),
+            label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_P), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME)),
             tooltip = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_P_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME_TP)),
             getFunction = function ()
                 return Settings.alerts.toggles.mitigationPowerPrefix2
@@ -973,7 +973,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "  " .. zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_P), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME)),
+            label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_P), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME)),
             tooltip = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_P_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME_TP)),
             getFunction = function ()
                 return Settings.alerts.toggles.mitigationPowerPrefixN2
@@ -990,7 +990,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
             tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_POWER_TP),
             getFunction = function ()
                 return Settings.alerts.colors.alertPower[1], Settings.alerts.colors.alertPower[2], Settings.alerts.colors.alertPower[3], Settings.alerts.colors.alertPower[4]
@@ -1032,7 +1032,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_DESTROY_TP),
             getFunction = function ()
                 return Settings.alerts.formats.alertDestroy
@@ -1049,7 +1049,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "  " .. zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_D), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME)),
+            label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_D), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME)),
             tooltip = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_D_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME_TP)),
             getFunction = function ()
                 return Settings.alerts.toggles.mitigationDestroyPrefix2
@@ -1066,7 +1066,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "  " .. zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_D), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME)),
+            label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_D), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME)),
             tooltip = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_D_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME_TP)),
             getFunction = function ()
                 return Settings.alerts.toggles.mitigationDestroyPrefixN2
@@ -1083,7 +1083,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
             tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_DESTROY_TP),
             getFunction = function ()
                 return Settings.alerts.colors.alertDestroy[1], Settings.alerts.colors.alertDestroy[2], Settings.alerts.colors.alertDestroy[3], Settings.alerts.colors.alertDestroy[4]
@@ -1125,7 +1125,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_SUMMON_TP),
             getFunction = function ()
                 return Settings.alerts.formats.alertSummon
@@ -1142,7 +1142,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "  " .. zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_S), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME)),
+            label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_S), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME)),
             tooltip = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_S_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NO_NAME_TP)),
             getFunction = function ()
                 return Settings.alerts.toggles.mitigationSummonPrefix2
@@ -1159,7 +1159,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "  " .. zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_S), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME)),
+            label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_S), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME)),
             tooltip = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_FORMAT_S_TP), GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_NAME_TP)),
             getFunction = function ()
                 return Settings.alerts.toggles.mitigationSummonPrefixN2
@@ -1176,7 +1176,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "  " .. GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
+            label = GetString(LUIE_STRING_LAM_CT_SHARED_COLOR),
             tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_NOTIFICATION_SUMMON_TP),
             getFunction = function ()
                 return Settings.alerts.colors.alertSummon[1], Settings.alerts.colors.alertSummon[2], Settings.alerts.colors.alertSummon[3], Settings.alerts.colors.alertSummon[4]
@@ -2086,7 +2086,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_PVP_ONLY),
+            label = GetString(LUIE_STRING_LAM_CI_CCT_PVP_ONLY),
             tooltip = GetString(LUIE_STRING_LAM_CI_CCT_PVP_ONLY_TP),
             getFunction = function ()
                 return Settings.cct.enabledOnlyInCyro
@@ -2179,7 +2179,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS),
+            label = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS),
             tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS_TP),
             items = SettingsAPI:GetGlobalIconOptionsList(),
             getFunction = function ()
@@ -2320,7 +2320,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_CYRODIIL),
+            label = GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_CYRODIIL),
             tooltip = GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_CYRODIIL_TP),
             getFunction = function ()
                 return Settings.cct.showImmuneOnlyInCyro
@@ -2338,7 +2338,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_TIME),
+            label = GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_TIME),
             tooltip = GetString(LUIE_STRING_LAM_CI_CCT_IMMUNE_TIME_TP),
             min = 100,
             max = 1500,
@@ -2575,7 +2575,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_ROOT_COLOR),
+            label = GetString(LUIE_STRING_LAM_CI_CCT_ROOT_COLOR),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_ROOT)),
             getFunction = function ()
                 return Settings.cct.colors[ACTION_RESULT_ROOTED][1], Settings.cct.colors[ACTION_RESULT_ROOTED][2], Settings.cct.colors[ACTION_RESULT_ROOTED][3], Settings.cct.colors[ACTION_RESULT_ROOTED][4]
@@ -2618,7 +2618,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "  " .. GetString(LUIE_STRING_LAM_CT_CCT_AOE_COLOR),
+            label = GetString(LUIE_STRING_LAM_CT_CCT_AOE_COLOR),
             tooltip = GetString(LUIE_STRING_LAM_CT_CCT_AOE_COLOR_TP),
             getFunction = function ()
                 return Settings.cct.colors[ACTION_RESULT_AREA_EFFECT][1], Settings.cct.colors[ACTION_RESULT_AREA_EFFECT][2], Settings.cct.colors[ACTION_RESULT_AREA_EFFECT][3], Settings.cct.colors[ACTION_RESULT_AREA_EFFECT][4]
@@ -2661,7 +2661,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_SNARE_COLOR),
+            label = GetString(LUIE_STRING_LAM_CI_CCT_SNARE_COLOR),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CI_CCT_COLOR_TP), GetString(LUIE_STRING_LAM_CI_ALERT_CC_COLOR_SNARE)),
             getFunction = function ()
                 return Settings.cct.colors[ACTION_RESULT_SNARED][1], Settings.cct.colors[ACTION_RESULT_SNARED][2], Settings.cct.colors[ACTION_RESULT_SNARED][3], Settings.cct.colors[ACTION_RESULT_SNARED][4]
@@ -3172,7 +3172,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "  " .. "Maximum Synergies to Display",
+            label = "Maximum Synergies to Display",
             tooltip = "Maximum number of synergies to show simultaneously (1-10). Includes both active and cooldown synergies.",
             min = 1,
             max = 10,
@@ -3197,7 +3197,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. "Show Priority Numbers",
+            label = "Show Priority Numbers",
             tooltip = "Display priority numbers next to each synergy.",
             getFunction = function ()
                 return Settings.synergy.showPriority
@@ -3218,7 +3218,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. "Show Position Numbers",
+            label = "Show Position Numbers",
             tooltip = "Display position numbers (1-5) next to each synergy to show its order in the list.",
             getFunction = function ()
                 return Settings.synergy.showKeybinds
@@ -3239,7 +3239,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. "Play Sound on New Synergy",
+            label = "Play Sound on New Synergy",
             tooltip = "Play a sound notification when a new synergy becomes available.",
             getFunction = function ()
                 return Settings.synergy.playSound
@@ -3256,7 +3256,7 @@ function CombatInfo.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. "Show Synergies on Cooldown",
+            label = "Show Synergies on Cooldown",
             tooltip = "Display synergies that are currently on cooldown. The tracker automatically learns which synergies share cooldowns by detecting when multiple synergies go on cooldown together.",
             getFunction = function ()
                 return Settings.synergy.showCooldowns
@@ -3362,7 +3362,7 @@ function CombatInfo.CreateConsoleSettings()
                 settings[#settings + 1] =
                 {
                     type = LHAS.ST_CHECKBOX,
-                    label = "  " .. "Blacklist (Hide)",
+                    label = "Blacklist (Hide)",
                     tooltip = string_format("Hide this synergy from the tracker. Ability ID: [%d]", abilityId),
                     getFunction = function ()
                         return Settings.synergy.blacklist[abilityId] or false
@@ -3383,7 +3383,7 @@ function CombatInfo.CreateConsoleSettings()
                 settings[#settings + 1] =
                 {
                     type = LHAS.ST_SLIDER,
-                    label = "  " .. "Priority Override",
+                    label = "Priority Override",
                     tooltip = string_format("Set priority for %s. Higher values = higher priority. 0 = game default.", name),
                     min = 0,
                     max = 10,

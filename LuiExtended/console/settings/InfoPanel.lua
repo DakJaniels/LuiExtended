@@ -270,7 +270,7 @@ function InfoPanel.CreateConsoleSettings()
     panel:AddSetting(
         {
             type = LHAS.ST_EDIT,
-            label = "  " .. GetString(LUIE_STRING_LAM_PNL_CLOCKFORMAT), -- Add indent with spaces
+            label = GetString(LUIE_STRING_LAM_PNL_CLOCKFORMAT), -- Add indent with spaces
             tooltip = GetString(LUIE_STRING_LAM_CA_TIMESTAMPFORMAT_TP),
             getFunction = function ()
                 return Settings.ClockFormat

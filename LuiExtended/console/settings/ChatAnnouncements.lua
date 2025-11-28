@@ -300,7 +300,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CHATTABSYSTEMALL),
+            label = GetString(LUIE_STRING_LAM_CA_CHATTABSYSTEMALL),
             tooltip = GetString(LUIE_STRING_LAM_CA_CHATTABSYSTEMALL_TP),
             getFunction = function ()
                 return Settings.ChatSystemAll
@@ -331,7 +331,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_TIMESTAMPFORMAT),
+            label = GetString(LUIE_STRING_LAM_CA_TIMESTAMPFORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CA_TIMESTAMPFORMAT_TP),
             getFunction = function ()
                 return Settings.TimeStampFormat
@@ -348,7 +348,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_TIMESTAMPCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_TIMESTAMPCOLOR),
             tooltip = GetString(LUIE_STRING_LAM_CA_TIMESTAMPCOLOR_TP),
             getFunction = function ()
                 return Settings.TimeStampColor[1], Settings.TimeStampColor[2], Settings.TimeStampColor[3], Settings.TimeStampColor[4]
@@ -418,7 +418,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDCOLOR),
             getFunction = function ()
                 return Settings.Currency.CurrencyGoldColor[1], Settings.Currency.CurrencyGoldColor[2], Settings.Currency.CurrencyGoldColor[3], Settings.Currency.CurrencyGoldColor[4]
             end,
@@ -435,7 +435,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDNAME),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDNAME),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDNAME_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyGoldName
@@ -452,7 +452,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDTOTAL),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDTOTAL),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDTOTAL_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyGoldShowTotal
@@ -469,7 +469,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDTOTAL_MSG),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDTOTAL_MSG),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDTOTAL_MSG_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyMessageTotalGold
@@ -486,7 +486,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDTHRESHOLD),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDTHRESHOLD),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDTHRESHOLD_TP),
             min = 0,
             max = 10000,
@@ -506,7 +506,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDTHROTTLE),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDTHROTTLE),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_GOLDTHROTTLE_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyGoldThrottle
@@ -523,7 +523,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_HIDEGOLDAHLIST),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_HIDEGOLDAHLIST),
             tooltip = zo_strformat("<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_HIDEGOLDAHLIST_TP)),
             getFunction = function ()
                 return Settings.Currency.CurrencyGoldHideListingAH
@@ -540,7 +540,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_HIDEGOLDAHSPENT),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_HIDEGOLDAHSPENT),
             tooltip = zo_strformat("<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_HIDEGOLDAHSPENT_TP)),
             getFunction = function ()
                 return Settings.Currency.CurrencyGoldHideAH
@@ -575,7 +575,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPCOLOR),
             getFunction = function ()
                 return Settings.Currency.CurrencyAPColor[1], Settings.Currency.CurrencyAPColor[2], Settings.Currency.CurrencyAPColor[3], Settings.Currency.CurrencyAPColor[4]
             end,
@@ -592,7 +592,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPNAME),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPNAME),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPNAME_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyAPName
@@ -609,7 +609,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPTOTAL),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPTOTAL),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPTOTAL_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyAPShowTotal
@@ -626,7 +626,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_APTOTAL_MSG),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_APTOTAL_MSG),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_APTOTAL_MSG_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyMessageTotalAP
@@ -643,7 +643,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPTHRESHOLD),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPTHRESHOLD),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPTHRESHOLD_TP),
             min = 0,
             max = 10000,
@@ -663,7 +663,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPTHROTTLE),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPTHROTTLE),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWAPTHROTTLE_TP),
             min = 0,
             max = 5000,
@@ -701,7 +701,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVCOLOR),
             getFunction = function ()
                 return Settings.Currency.CurrencyTVColor[1], Settings.Currency.CurrencyTVColor[2], Settings.Currency.CurrencyTVColor[3], Settings.Currency.CurrencyTVColor[4]
             end,
@@ -718,7 +718,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVNAME),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVNAME),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVNAME_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyTVName
@@ -735,7 +735,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVTOTAL),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVTOTAL),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVTOTAL_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyTVShowTotal
@@ -752,7 +752,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_TVTOTAL_MSG),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_TVTOTAL_MSG),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TVTOTAL_MSG_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyMessageTotalTV
@@ -769,7 +769,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVTHRESHOLD),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVTHRESHOLD),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVTHRESHOLD_TP),
             min = 0,
             max = 10000,
@@ -789,7 +789,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVTHROTTLE),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVTHROTTLE),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTVTHROTTLE_TP),
             min = 0,
             max = 5000,
@@ -827,7 +827,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWVOUCHERCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWVOUCHERCOLOR),
             getFunction = function ()
                 return Settings.Currency.CurrencyWVColor[1], Settings.Currency.CurrencyWVColor[2], Settings.Currency.CurrencyWVColor[3], Settings.Currency.CurrencyWVColor[4]
             end,
@@ -844,7 +844,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWVOUCHERNAME),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWVOUCHERNAME),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWVOUCHERNAME_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyWVName
@@ -861,7 +861,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWVOUCHERTOTAL),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWVOUCHERTOTAL),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWVOUCHERTOTAL_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyWVShowTotal
@@ -878,7 +878,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_WVTOTAL_MSG),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_WVTOTAL_MSG),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_WVTOTAL_MSG_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyMessageTotalWV
@@ -913,7 +913,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDCOLOR),
             getFunction = function ()
                 return Settings.Currency.CurrencyUndauntedColor[1], Settings.Currency.CurrencyUndauntedColor[2], Settings.Currency.CurrencyUndauntedColor[3], Settings.Currency.CurrencyUndauntedColor[4]
             end,
@@ -930,7 +930,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDNAME),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDNAME),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDNAME_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyUndauntedName
@@ -947,7 +947,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDTOTAL),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDTOTAL),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWUNDAUNTEDTOTAL_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyUndauntedShowTotal
@@ -964,7 +964,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_UNDAUNTEDTOTAL_MSG),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_UNDAUNTEDTOTAL_MSG),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_UNDAUNTEDTOTAL_MSG_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyMessageTotalUndaunted
@@ -999,7 +999,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDLESSCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDLESSCOLOR),
             getFunction = function ()
                 return Settings.Currency.CurrencyEndlessColor[1], Settings.Currency.CurrencyEndlessColor[2], Settings.Currency.CurrencyEndlessColor[3], Settings.Currency.CurrencyEndlessColor[4]
             end,
@@ -1016,7 +1016,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDLESSNAME),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDLESSNAME),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDLESSNAME_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyEndlessName
@@ -1033,7 +1033,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDLESSTOTAL),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDLESSTOTAL),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDLESSTOTAL_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyEndlessShowTotal
@@ -1050,7 +1050,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_ENDLESSTOTAL_MSG),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_ENDLESSTOTAL_MSG),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_ENDLESSTOTAL_MSG_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyMessageTotalEndless
@@ -1085,7 +1085,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOKENSCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOKENSCOLOR),
             getFunction = function ()
                 return Settings.Currency.CurrencyOutfitTokenColor[1], Settings.Currency.CurrencyOutfitTokenColor[2], Settings.Currency.CurrencyOutfitTokenColor[3], Settings.Currency.CurrencyOutfitTokenColor[4]
             end,
@@ -1102,7 +1102,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOKENSNAME),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOKENSNAME),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOKENSNAME_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyOutfitTokenName
@@ -1119,7 +1119,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOKENSTOTAL),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOKENSTOTAL),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOKENSTOTAL_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyOutfitTokenShowTotal
@@ -1136,7 +1136,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_TOKENSTOTAL_MSG),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOKENSTOTAL_MSG),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOKENSTOTAL_MSG_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyMessageTotalOutfitToken
@@ -1171,7 +1171,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRANSMUTECOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRANSMUTECOLOR),
             getFunction = function ()
                 return Settings.Currency.CurrencyTransmuteColor[1], Settings.Currency.CurrencyTransmuteColor[2], Settings.Currency.CurrencyTransmuteColor[3], Settings.Currency.CurrencyTransmuteColor[4]
             end,
@@ -1188,7 +1188,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRANSMUTENAME),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRANSMUTENAME),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRANSMUTENAME_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyTransmuteName
@@ -1205,7 +1205,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRANSMUTETOTAL),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRANSMUTETOTAL),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRANSMUTETOTAL_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyTransmuteShowTotal
@@ -1222,7 +1222,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_TRANSMUTETOTAL_MSG),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_TRANSMUTETOTAL_MSG),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TRANSMUTETOTAL_MSG_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyMessageTotalTransmute
@@ -1257,7 +1257,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTCOLOR),
             getFunction = function ()
                 return Settings.Currency.CurrencyEventColor[1], Settings.Currency.CurrencyEventColor[2], Settings.Currency.CurrencyEventColor[3], Settings.Currency.CurrencyEventColor[4]
             end,
@@ -1274,7 +1274,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTNAME),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTNAME),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTNAME_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyEventName
@@ -1291,7 +1291,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTTOTAL),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTTOTAL),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTTOTAL_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyEventShowTotal
@@ -1308,7 +1308,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_EVENTTOTAL_MSG),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_EVENTTOTAL_MSG),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_EVENTTOTAL_MSG_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyMessageTotalEvent
@@ -1343,7 +1343,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNSCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNSCOLOR),
             getFunction = function ()
                 return Settings.Currency.CurrencyCrownsColor[1], Settings.Currency.CurrencyCrownsColor[2], Settings.Currency.CurrencyCrownsColor[3], Settings.Currency.CurrencyCrownsColor[4]
             end,
@@ -1360,7 +1360,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNSNAME),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNSNAME),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNSNAME_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyCrownsName
@@ -1377,7 +1377,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNSTOTAL),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNSTOTAL),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNSTOTAL_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyCrownsShowTotal
@@ -1394,7 +1394,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_CROWNSTOTAL_MSG),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_CROWNSTOTAL_MSG),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_CROWNSTOTAL_MSG_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyMessageTotalCrowns
@@ -1429,7 +1429,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNGEMSCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNGEMSCOLOR),
             getFunction = function ()
                 return Settings.Currency.CurrencyCrownGemsColor[1], Settings.Currency.CurrencyCrownGemsColor[2], Settings.Currency.CurrencyCrownGemsColor[3], Settings.Currency.CurrencyCrownGemsColor[4]
             end,
@@ -1446,7 +1446,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNGEMSNAME),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNGEMSNAME),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNGEMSNAME_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyCrownGemsName
@@ -1463,7 +1463,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNGEMSTOTAL),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNGEMSTOTAL),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWCROWNGEMSTOTAL_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyCrownGemsShowTotal
@@ -1480,7 +1480,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_CROWNGEMSTOTAL_MSG),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_CROWNGEMSTOTAL_MSG),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_CROWNGEMSTOTAL_MSG_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyMessageTotalCrownGems
@@ -1515,7 +1515,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSCOLOR),
             getFunction = function ()
                 return Settings.Currency.CurrencyEndeavorsColor[1], Settings.Currency.CurrencyEndeavorsColor[2], Settings.Currency.CurrencyEndeavorsColor[3], Settings.Currency.CurrencyEndeavorsColor[4]
             end,
@@ -1532,7 +1532,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSNAME),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSNAME),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSNAME_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyEndeavorsName
@@ -1549,7 +1549,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSTOTAL),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSTOTAL),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSTOTAL_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyEndeavorsShowTotal
@@ -1566,7 +1566,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_ENDEAVORSTOTAL_MSG),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_ENDEAVORSTOTAL_MSG),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_ENDEAVORSTOTAL_MSG_TP),
             getFunction = function ()
                 return Settings.Currency.CurrencyMessageTotalEndeavors
@@ -1706,7 +1706,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_TOTALSTRING),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_TOTALSTRING),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_TOTALSTRING_TP),
             getFunction = function ()
                 return Settings.Inventory.LootTotalString
@@ -1741,7 +1741,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTLOGDISABLE),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTLOGDISABLE),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTLOGDISABLE_TP),
             getFunction = function ()
                 return Settings.Inventory.LootLogOverride
@@ -1758,7 +1758,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_SHOWNOTABLE),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWNOTABLE),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWNOTABLE_TP),
             getFunction = function ()
                 return Settings.Inventory.LootOnlyNotable
@@ -1775,7 +1775,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_SHOWGRPLOOT),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWGRPLOOT),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWGRPLOOT_TP),
             getFunction = function ()
                 return Settings.Inventory.LootGroup
@@ -1792,7 +1792,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_HIDEANNOYINGITEMS),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_HIDEANNOYINGITEMS),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_HIDEANNOYINGITEMS_TP),
             getFunction = function ()
                 return Settings.Inventory.LootBlacklist
@@ -1810,7 +1810,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_HIDETRASH),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_HIDETRASH),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_HIDETRASH_TP),
             getFunction = function ()
                 return Settings.Inventory.LootNotTrash
@@ -1827,7 +1827,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTCONFISCATED),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTCONFISCATED),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTCONFISCATED_TP),
             getFunction = function ()
                 return Settings.Inventory.LootConfiscate
@@ -1845,7 +1845,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWCONTAINER),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWCONTAINER),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWCONTAINER_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowContainer
@@ -1863,7 +1863,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWDESTROYED),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWDESTROYED),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWDESTROYED_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowDestroy
@@ -1881,7 +1881,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWREMOVED),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWREMOVED),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWREMOVED_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowRemove
@@ -1899,7 +1899,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWLIST),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWLIST),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWLIST_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowList
@@ -1917,7 +1917,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWTURNIN),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWTURNIN),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWTURNIN_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowTurnIn
@@ -1935,7 +1935,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_POTION),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_POTION),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_POTION_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowUsePotion
@@ -1953,7 +1953,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_FOOD),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_FOOD),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_FOOD_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowUseFood
@@ -1971,7 +1971,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_DRINK),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_DRINK),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_DRINK_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowUseDrink
@@ -1989,7 +1989,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_REPAIR_KIT),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_REPAIR_KIT),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_REPAIR_KIT_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowUseRepairKit
@@ -2007,7 +2007,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_SOUL_GEM),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_SOUL_GEM),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_SOUL_GEM_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowUseSoulGem
@@ -2025,7 +2025,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_SIEGE),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_SIEGE),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_SIEGE_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowUseSiege
@@ -2043,7 +2043,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_FISH),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_FISH),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_FISH_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowUseFish
@@ -2061,7 +2061,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_MISC),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_MISC),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWUSE_MISC_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowUseMisc
@@ -2079,7 +2079,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWLOCKPICK),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWLOCKPICK),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSHOWLOCKPICK_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowLockpick
@@ -2097,7 +2097,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTRECIPE),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTRECIPE),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTRECIPE_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowRecipe
@@ -2115,7 +2115,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTMOTIF),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTMOTIF),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTMOTIF_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowMotif
@@ -2133,7 +2133,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSTYLE),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSTYLE),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_LOOTSTYLE_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowStylePage
@@ -2151,7 +2151,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_HIDE_RECIPE_ALERT),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_HIDE_RECIPE_ALERT),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_HIDE_RECIPE_ALERT_TP),
             getFunction = function ()
                 return Settings.Inventory.LootRecipeHideAlert
@@ -2225,7 +2225,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_VENDOR_MERGE),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_VENDOR_MERGE),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_VENDOR_MERGE_TP),
             getFunction = function ()
                 return Settings.Inventory.LootVendorCurrency
@@ -2242,7 +2242,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "          " .. GetString(LUIE_STRING_LAM_CA_LOOT_VENDOR_TOTALITEMS),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_VENDOR_TOTALITEMS),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_VENDOR_TOTALITEMS_TP),
             getFunction = function ()
                 return Settings.Inventory.LootVendorTotalItems
@@ -2259,7 +2259,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "          " .. GetString(LUIE_STRING_LAM_CA_LOOT_VENDOR_TOTALCURRENCY),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_VENDOR_TOTALCURRENCY),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_VENDOR_TOTALCURRENCY_TP),
             getFunction = function ()
                 return Settings.Inventory.LootVendorTotalCurrency
@@ -2312,7 +2312,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOOT_SHOWCRAFT_MATERIALS),
+            label = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWCRAFT_MATERIALS),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOOT_SHOWCRAFT_MATERIALS_TP),
             getFunction = function ()
                 return Settings.Inventory.LootShowCraftUse
@@ -2433,7 +2433,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_COLORUP),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_COLORUP),
             getFunction = function ()
                 return Settings.Currency.CurrencyColorUp[1], Settings.Currency.CurrencyColorUp[2], Settings.Currency.CurrencyColorUp[3], Settings.Currency.CurrencyColorUp[4]
             end,
@@ -2450,7 +2450,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_CURRENCY_COLORDOWN),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_COLORDOWN),
             getFunction = function ()
                 return Settings.Currency.CurrencyColorDown[1], Settings.Currency.CurrencyColorDown[2], Settings.Currency.CurrencyColorDown[3], Settings.Currency.CurrencyColorDown[4]
             end,
@@ -4080,7 +4080,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_EXP_LEVELUP_CSAEXPAND),
+            label = GetString(LUIE_STRING_LAM_CA_EXP_LEVELUP_CSAEXPAND),
             tooltip = GetString(LUIE_STRING_LAM_CA_EXP_LEVELUP_CSAEXPAND_TP),
             getFunction = function ()
                 return Settings.XP.ExperienceLevelUpCSAExpand
@@ -4116,7 +4116,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_EXP_LVLUPICON),
+            label = GetString(LUIE_STRING_LAM_CA_EXP_LVLUPICON),
             tooltip = GetString(LUIE_STRING_LAM_CA_EXP_LVLUPICON_TP),
             getFunction = function ()
                 return Settings.XP.ExperienceLevelUpIcon
@@ -4133,7 +4133,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_EXPERIENCE_LEVELUP_COLOR),
+            label = GetString(LUIE_STRING_LAM_CA_EXPERIENCE_LEVELUP_COLOR),
             getFunction = function ()
                 return Settings.XP.ExperienceLevelUpColor[1], Settings.XP.ExperienceLevelUpColor[2], Settings.XP.ExperienceLevelUpColor[3], Settings.XP.ExperienceLevelUpColor[4]
             end,
@@ -4150,7 +4150,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_EXP_COLORLVLBYCONTEXT),
+            label = GetString(LUIE_STRING_LAM_CA_EXP_COLORLVLBYCONTEXT),
             tooltip = GetString(LUIE_STRING_LAM_CA_EXP_COLORLVLBYCONTEXT_TP),
             getFunction = function ()
                 return Settings.XP.ExperienceLevelColorByLevel
@@ -4192,7 +4192,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_EXP_SHOWEXPICON),
+            label = GetString(LUIE_STRING_LAM_CA_EXP_SHOWEXPICON),
             tooltip = GetString(LUIE_STRING_LAM_CA_EXP_SHOWEXPICON_TP),
             getFunction = function ()
                 return Settings.XP.ExperienceIcon
@@ -4209,7 +4209,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_EXPERIENCE_COLORMESSAGE),
+            label = GetString(LUIE_STRING_LAM_CA_EXPERIENCE_COLORMESSAGE),
             getFunction = function ()
                 return Settings.XP.ExperienceColorMessage[1], Settings.XP.ExperienceColorMessage[2], Settings.XP.ExperienceColorMessage[3], Settings.XP.ExperienceColorMessage[4]
             end,
@@ -4226,7 +4226,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_EXPERIENCE_COLORNAME),
+            label = GetString(LUIE_STRING_LAM_CA_EXPERIENCE_COLORNAME),
             getFunction = function ()
                 return Settings.XP.ExperienceColorName[1], Settings.XP.ExperienceColorName[2], Settings.XP.ExperienceColorName[3], Settings.XP.ExperienceColorName[4]
             end,
@@ -4243,7 +4243,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_EXP_MESSAGE),
+            label = GetString(LUIE_STRING_LAM_CA_EXP_MESSAGE),
             tooltip = GetString(LUIE_STRING_LAM_CA_EXP_MESSAGE_TP),
             getFunction = function ()
                 return Settings.XP.ExperienceMessage
@@ -4260,7 +4260,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_EXP_NAME),
+            label = GetString(LUIE_STRING_LAM_CA_EXP_NAME),
             tooltip = GetString(LUIE_STRING_LAM_CA_EXP_NAME_TP),
             getFunction = function ()
                 return Settings.XP.ExperienceName
@@ -4277,7 +4277,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_EXP_HIDEEXPKILLS),
+            label = GetString(LUIE_STRING_LAM_CA_EXP_HIDEEXPKILLS),
             tooltip = GetString(LUIE_STRING_LAM_CA_EXP_HIDEEXPKILLS_TP),
             getFunction = function ()
                 return Settings.XP.ExperienceHideCombat
@@ -4295,7 +4295,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_EXP_EXPGAINTHRESHOLD),
+            label = GetString(LUIE_STRING_LAM_CA_EXP_EXPGAINTHRESHOLD),
             tooltip = GetString(LUIE_STRING_LAM_CA_EXP_EXPGAINTHRESHOLD_TP),
             min = 0,
             max = 10000,
@@ -4315,7 +4315,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_EXP_THROTTLEEXPINCOMBAT),
+            label = GetString(LUIE_STRING_LAM_CA_EXP_THROTTLEEXPINCOMBAT),
             tooltip = GetString(LUIE_STRING_LAM_CA_EXP_THROTTLEEXPINCOMBAT_TP),
             min = 0,
             max = 5000,
@@ -4395,7 +4395,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_SKILLPOINT_COLOR1),
+            label = GetString(LUIE_STRING_LAM_CA_SKILLPOINT_COLOR1),
             getFunction = function ()
                 return Settings.Skills.SkillPointColor1[1], Settings.Skills.SkillPointColor1[2], Settings.Skills.SkillPointColor1[3], Settings.Skills.SkillPointColor1[4]
             end,
@@ -4412,7 +4412,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_SKILLPOINT_COLOR2),
+            label = GetString(LUIE_STRING_LAM_CA_SKILLPOINT_COLOR2),
             getFunction = function ()
                 return Settings.Skills.SkillPointColor2[1], Settings.Skills.SkillPointColor2[2], Settings.Skills.SkillPointColor2[3], Settings.Skills.SkillPointColor2[4]
             end,
@@ -4429,7 +4429,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_SKILLPOINT_PARTIALPREFIX),
+            label = GetString(LUIE_STRING_LAM_CA_SKILLPOINT_PARTIALPREFIX),
             tooltip = GetString(LUIE_STRING_LAM_CA_SKILLPOINT_PARTIALPREFIX_TP),
             getFunction = function ()
                 return Settings.Skills.SkillPointSkyshard
@@ -4447,7 +4447,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_SKILLPOINT_PARTIALBRACKET),
+            label = GetString(LUIE_STRING_LAM_CA_SKILLPOINT_PARTIALBRACKET),
             tooltip = GetString(LUIE_STRING_LAM_CA_SKILLPOINT_PARTIALBRACKET_TP),
             items = function ()
                 local items = {}
@@ -4471,7 +4471,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_SKILLPOINT_UPDATEDPARTIAL),
+            label = GetString(LUIE_STRING_LAM_CA_SKILLPOINT_UPDATEDPARTIAL),
             tooltip = GetString(LUIE_STRING_LAM_CA_SKILLPOINT_UPDATEDPARTIAL_TP),
             getFunction = function ()
                 return Settings.Skills.SkillPointsPartial
@@ -4546,7 +4546,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_SKILL_LINE_ICON),
+            label = GetString(LUIE_STRING_LAM_CA_SKILL_LINE_ICON),
             tooltip = GetString(LUIE_STRING_LAM_CA_SKILL_LINE_ICON_TP),
             getFunction = function ()
                 return Settings.Skills.SkillLineIcon
@@ -4665,7 +4665,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_SKILL_LINE_COLOR),
+            label = GetString(LUIE_STRING_LAM_CA_SKILL_LINE_COLOR),
             getFunction = function ()
                 return Settings.Skills.SkillLineColor[1], Settings.Skills.SkillLineColor[2], Settings.Skills.SkillLineColor[3], Settings.Skills.SkillLineColor[4]
             end,
@@ -4775,7 +4775,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_GUILDREP_FG_COLOR),
+            label = GetString(LUIE_STRING_LAM_CA_GUILDREP_FG_COLOR),
             getFunction = function ()
                 return Settings.Skills.SkillGuildColorFG[1], Settings.Skills.SkillGuildColorFG[2], Settings.Skills.SkillGuildColorFG[3], Settings.Skills.SkillGuildColorFG[4]
             end,
@@ -4792,7 +4792,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_GUILDREP_THRESHOLD),
+            label = GetString(LUIE_STRING_LAM_CA_GUILDREP_THRESHOLD),
             tooltip = GetString(LUIE_STRING_LAM_CA_GUILDREP_THRESHOLD_TP),
             min = 0,
             max = 5,
@@ -4812,7 +4812,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_GUILDREP_THROTTLE),
+            label = GetString(LUIE_STRING_LAM_CA_GUILDREP_THROTTLE),
             tooltip = GetString(LUIE_STRING_LAM_CA_GUILDREP_THROTTLE_TP),
             min = 0,
             max = 5000,
@@ -4849,7 +4849,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_GUILDREP_MG_COLOR),
+            label = GetString(LUIE_STRING_LAM_CA_GUILDREP_MG_COLOR),
             getFunction = function ()
                 return Settings.Skills.SkillGuildColorMG[1], Settings.Skills.SkillGuildColorMG[2], Settings.Skills.SkillGuildColorMG[3], Settings.Skills.SkillGuildColorMG[4]
             end,
@@ -4883,7 +4883,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_GUILDREP_UD_COLOR),
+            label = GetString(LUIE_STRING_LAM_CA_GUILDREP_UD_COLOR),
             getFunction = function ()
                 return Settings.Skills.SkillGuildColorUD[1], Settings.Skills.SkillGuildColorUD[2], Settings.Skills.SkillGuildColorUD[3], Settings.Skills.SkillGuildColorUD[4]
             end,
@@ -4917,7 +4917,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_GUILDREP_TG_COLOR),
+            label = GetString(LUIE_STRING_LAM_CA_GUILDREP_TG_COLOR),
             getFunction = function ()
                 return Settings.Skills.SkillGuildColorTG[1], Settings.Skills.SkillGuildColorTG[2], Settings.Skills.SkillGuildColorTG[3], Settings.Skills.SkillGuildColorTG[4]
             end,
@@ -4951,7 +4951,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_GUILDREP_DB_COLOR),
+            label = GetString(LUIE_STRING_LAM_CA_GUILDREP_DB_COLOR),
             getFunction = function ()
                 return Settings.Skills.SkillGuildColorDB[1], Settings.Skills.SkillGuildColorDB[2], Settings.Skills.SkillGuildColorDB[3], Settings.Skills.SkillGuildColorDB[4]
             end,
@@ -4985,7 +4985,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_GUILDREP_PO_COLOR),
+            label = GetString(LUIE_STRING_LAM_CA_GUILDREP_PO_COLOR),
             getFunction = function ()
                 return Settings.Skills.SkillGuildColorPO[1], Settings.Skills.SkillGuildColorPO[2], Settings.Skills.SkillGuildColorPO[3], Settings.Skills.SkillGuildColorPO[4]
             end,
@@ -5092,7 +5092,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_ICON),
+            label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_ICON),
             tooltip = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_ICON_TP),
             getFunction = function ()
                 return Settings.Collectibles.CollectibleIcon
@@ -5109,7 +5109,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_BRACKET_OPTION_COLLECTIBLE),
+            label = GetString(LUIE_STRING_LAM_CA_BRACKET_OPTION_COLLECTIBLE),
             tooltip = GetString(LUIE_STRING_LAM_CA_BRACKET_OPTION_COLLECTIBLE_TP),
             items = SettingsAPI:GetLinkBracketDisplayOptionsList(),
             getFunction = function ()
@@ -5131,7 +5131,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_COLOR_ONE),
+            label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_COLOR_ONE),
             getFunction = function ()
                 return Settings.Collectibles.CollectibleColor1[1], Settings.Collectibles.CollectibleColor1[2], Settings.Collectibles.CollectibleColor1[3], Settings.Collectibles.CollectibleColor1[4]
             end,
@@ -5148,7 +5148,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_COLOR_TWO),
+            label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_COLOR_TWO),
             getFunction = function ()
                 return Settings.Collectibles.CollectibleColor2[1], Settings.Collectibles.CollectibleColor2[2], Settings.Collectibles.CollectibleColor2[3], Settings.Collectibles.CollectibleColor2[4]
             end,
@@ -5165,7 +5165,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_MESSAGEPREFIX),
+            label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_MESSAGEPREFIX),
             tooltip = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_MESSAGEPREFIX_TP),
             getFunction = function ()
                 return Settings.Collectibles.CollectiblePrefix
@@ -5182,7 +5182,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_BRACKET),
+            label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_BRACKET),
             tooltip = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_BRACKET_TP),
             items = function ()
                 local items = {}
@@ -5206,7 +5206,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_CATEGORY),
+            label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_CATEGORY),
             tooltip = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_CATEGORY_TP),
             getFunction = function ()
                 return Settings.Collectibles.CollectibleCategory
@@ -5223,7 +5223,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_SUBCATEGORY),
+            label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_SUBCATEGORY),
             tooltip = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_SUBCATEGORY_TP),
             getFunction = function ()
                 return Settings.Collectibles.CollectibleSubcategory
@@ -5280,7 +5280,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_USE_PET_NICKNAME),
+            label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_USE_PET_NICKNAME),
             tooltip = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_USE_PET_NICKNAME_TP),
             getFunction = function ()
                 return Settings.Collectibles.CollectibleUsePetNickname
@@ -5297,7 +5297,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_ICON),
+            label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_ICON),
             tooltip = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_USE_ICON_TP),
             getFunction = function ()
                 return Settings.Collectibles.CollectibleUseIcon
@@ -5314,7 +5314,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_BRACKET_OPTION_COLLECTIBLE),
+            label = GetString(LUIE_STRING_LAM_CA_BRACKET_OPTION_COLLECTIBLE),
             tooltip = GetString(LUIE_STRING_LAM_CA_BRACKET_OPTION_COLLECTIBLE_TP),
             items = SettingsAPI:GetLinkBracketDisplayOptionsList(),
             getFunction = function ()
@@ -5336,7 +5336,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_COLOR_ONE),
+            label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_COLOR_ONE),
             getFunction = function ()
                 return Settings.Collectibles.CollectibleUseColor[1], Settings.Collectibles.CollectibleUseColor[2], Settings.Collectibles.CollectibleUseColor[3], Settings.Collectibles.CollectibleUseColor[4]
             end,
@@ -5483,7 +5483,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOREBOOK_CSA_LOREONLY),
+            label = GetString(LUIE_STRING_LAM_CA_LOREBOOK_CSA_LOREONLY),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOREBOOK_CSA_LOREONLY_TP),
             getFunction = function ()
                 return Settings.Lorebooks.LorebookCSALoreOnly
@@ -5568,7 +5568,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOREBOOK_ICON),
+            label = GetString(LUIE_STRING_LAM_CA_LOREBOOK_ICON),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOREBOOK_ICON_TP),
             getFunction = function ()
                 return Settings.Lorebooks.LorebookIcon
@@ -5585,7 +5585,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOREBOOK_COLOR1),
+            label = GetString(LUIE_STRING_LAM_CA_LOREBOOK_COLOR1),
             getFunction = function ()
                 return Settings.Lorebooks.LorebookColor1[1], Settings.Lorebooks.LorebookColor1[2], Settings.Lorebooks.LorebookColor1[3], Settings.Lorebooks.LorebookColor1[4]
             end,
@@ -5602,7 +5602,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOREBOOK_COLOR2),
+            label = GetString(LUIE_STRING_LAM_CA_LOREBOOK_COLOR2),
             getFunction = function ()
                 return Settings.Lorebooks.LorebookColor2[1], Settings.Lorebooks.LorebookColor2[2], Settings.Lorebooks.LorebookColor2[3], Settings.Lorebooks.LorebookColor2[4]
             end,
@@ -5619,7 +5619,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX1),
+            label = GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX1),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX1_TP),
             getFunction = function ()
                 return Settings.Lorebooks.LorebookPrefix1
@@ -5636,7 +5636,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX2),
+            label = GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX2),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX2_TP),
             getFunction = function ()
                 return Settings.Lorebooks.LorebookPrefix2
@@ -5653,7 +5653,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX_COLLECTION),
+            label = GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX_COLLECTION),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOREBOOK_PREFIX_COLLECTION_TP),
             getFunction = function ()
                 return Settings.Lorebooks.LorebookCollectionPrefix
@@ -5670,7 +5670,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOREBOOK_CATEGORY_BRACKET),
+            label = GetString(LUIE_STRING_LAM_CA_LOREBOOK_CATEGORY_BRACKET),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOREBOOK_CATEGORY_BRACKET_TP),
             items = function ()
                 local items = {}
@@ -5694,7 +5694,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOREBOOK_CATEGORY),
+            label = GetString(LUIE_STRING_LAM_CA_LOREBOOK_CATEGORY),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOREBOOK_CATEGORY_TP),
             getFunction = function ()
                 return Settings.Lorebooks.LorebookCategory
@@ -5711,7 +5711,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_LOREBOOK_NOSHOWHIDE),
+            label = GetString(LUIE_STRING_LAM_CA_LOREBOOK_NOSHOWHIDE),
             tooltip = GetString(LUIE_STRING_LAM_CA_LOREBOOK_NOSHOWHIDE_TP),
             getFunction = function ()
                 return Settings.Lorebooks.LorebookShowHidden
@@ -5801,7 +5801,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_ANTIQUITY_BRACKET),
+            label = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_BRACKET),
             tooltip = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_BRACKET_TP),
             items = SettingsAPI:GetLinkBracketDisplayOptionsList(),
             getFunction = function ()
@@ -5823,7 +5823,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_ANTIQUITY_ICON),
+            label = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_ICON),
             tooltip = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_ICON_TP),
             getFunction = function ()
                 return Settings.Antiquities.AntiquityIcon
@@ -5840,7 +5840,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_ANTIQUITY_COLOR),
+            label = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_COLOR),
             getFunction = function ()
                 return Settings.Antiquities.AntiquityColor[1], Settings.Antiquities.AntiquityColor[2], Settings.Antiquities.AntiquityColor[3], Settings.Antiquities.AntiquityColor[4]
             end,
@@ -5857,7 +5857,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_ANTIQUITY_PREFIX),
+            label = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_PREFIX),
             tooltip = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_PREFIX_TP),
             getFunction = function ()
                 return Settings.Antiquities.AntiquityPrefix
@@ -5874,7 +5874,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_ANTIQUITY_PREFIX_BRACKET),
+            label = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_PREFIX_BRACKET),
             tooltip = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_PREFIX_BRACKET_TP),
             items = function ()
                 local items = {}
@@ -5898,7 +5898,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_ANTIQUITY_SUFFIX),
+            label = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_SUFFIX),
             tooltip = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_SUFFIX_TP),
             getFunction = function ()
                 return Settings.Antiquities.AntiquitySuffix
@@ -5967,7 +5967,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_ACHIEVE_DETAILINFO),
+            label = GetString(LUIE_STRING_LAM_CA_ACHIEVE_DETAILINFO),
             tooltip = GetString(LUIE_STRING_LAM_CA_ACHIEVE_DETAILINFO_TP),
             getFunction = function ()
                 return Settings.Achievement.AchievementDetails
@@ -5984,7 +5984,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_ACHIEVE_STEPSIZE),
+            label = GetString(LUIE_STRING_LAM_CA_ACHIEVE_STEPSIZE),
             tooltip = GetString(LUIE_STRING_LAM_CA_ACHIEVE_STEPSIZE_TP),
             min = 0,
             max = 50,
@@ -6040,7 +6040,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_ACHIEVE_COMPLETE_CSA_ALWAYS),
+            label = GetString(LUIE_STRING_LAM_CA_ACHIEVE_COMPLETE_CSA_ALWAYS),
             tooltip = GetString(LUIE_STRING_LAM_CA_ACHIEVE_COMPLETE_CSA_ALWAYS_TP),
             getFunction = function ()
                 return Settings.Achievement.AchievementCompleteAlwaysCSA
@@ -6680,7 +6680,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_QUEST_SHOWQUESTICON),
+            label = GetString(LUIE_STRING_LAM_CA_QUEST_SHOWQUESTICON),
             tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_SHOWQUESTICON_TP),
             getFunction = function ()
                 return Settings.Quests.QuestIcon
@@ -6697,7 +6697,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_QUEST_COLOR1),
+            label = GetString(LUIE_STRING_LAM_CA_QUEST_COLOR1),
             getFunction = function ()
                 return Settings.Quests.QuestColorLocName[1], Settings.Quests.QuestColorLocName[2], Settings.Quests.QuestColorLocName[3], Settings.Quests.QuestColorLocName[4]
             end,
@@ -6714,7 +6714,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_QUEST_COLOR2),
+            label = GetString(LUIE_STRING_LAM_CA_QUEST_COLOR2),
             getFunction = function ()
                 return Settings.Quests.QuestColorLocDescription[1], Settings.Quests.QuestColorLocDescription[2], Settings.Quests.QuestColorLocDescription[3], Settings.Quests.QuestColorLocDescription[4]
             end,
@@ -6731,7 +6731,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_QUEST_COLOR3),
+            label = GetString(LUIE_STRING_LAM_CA_QUEST_COLOR3),
             getFunction = function ()
                 return Settings.Quests.QuestColorName[1], Settings.Quests.QuestColorName[2], Settings.Quests.QuestColorName[3], Settings.Quests.QuestColorName[4]
             end,
@@ -6748,7 +6748,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_QUEST_COLOR4),
+            label = GetString(LUIE_STRING_LAM_CA_QUEST_COLOR4),
             getFunction = function ()
                 return Settings.Quests.QuestColorDescription[1], Settings.Quests.QuestColorDescription[2], Settings.Quests.QuestColorDescription[3], Settings.Quests.QuestColorDescription[4]
             end,
@@ -6765,7 +6765,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_QUEST_SHOWQUESTLONG),
+            label = GetString(LUIE_STRING_LAM_CA_QUEST_SHOWQUESTLONG),
             tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_SHOWQUESTLONG_TP),
             getFunction = function ()
                 return Settings.Quests.QuestLong
@@ -6782,7 +6782,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_QUEST_SHOWQUESTOBJECTIVELONG),
+            label = GetString(LUIE_STRING_LAM_CA_QUEST_SHOWQUESTOBJECTIVELONG),
             tooltip = GetString(LUIE_STRING_LAM_CA_QUEST_SHOWQUESTOBJECTIVELONG_TP),
             getFunction = function ()
                 return Settings.Quests.QuestLocLong
@@ -6963,7 +6963,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_SOCIAL_GUILD_RANKOPTIONS),
+            label = GetString(LUIE_STRING_LAM_CA_SOCIAL_GUILD_RANKOPTIONS),
             tooltip = GetString(LUIE_STRING_LAM_CA_SOCIAL_GUILD_RANKOPTIONS_TP),
             items = SettingsAPI:GetGuildRankDisplayOptionsList(),
             getFunction = function ()
@@ -7019,7 +7019,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_SOCIAL_GUILD_ICONS),
+            label = GetString(LUIE_STRING_LAM_CA_SOCIAL_GUILD_ICONS),
             tooltip = GetString(LUIE_STRING_LAM_CA_SOCIAL_GUILD_ICONS_TP),
             getFunction = function ()
                 return Settings.Social.GuildIcon
@@ -7036,7 +7036,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_SOCIAL_GUILD_COLOR),
+            label = GetString(LUIE_STRING_LAM_CA_SOCIAL_GUILD_COLOR),
             getFunction = function ()
                 return Settings.Social.GuildColor[1], Settings.Social.GuildColor[2], Settings.Social.GuildColor[3], Settings.Social.GuildColor[4]
             end,
@@ -7053,7 +7053,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_SOCIAL_GUILD_COLOR_ALLIANCE),
+            label = GetString(LUIE_STRING_LAM_CA_SOCIAL_GUILD_COLOR_ALLIANCE),
             tooltip = GetString(LUIE_STRING_LAM_CA_SOCIAL_GUILD_COLOR_ALLIANCE_TP),
             getFunction = function ()
                 return Settings.Social.GuildAllianceColor
@@ -7201,7 +7201,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_SOCIAL_DUELSTART_OPTION),
+            label = GetString(LUIE_STRING_LAM_CA_SOCIAL_DUELSTART_OPTION),
             tooltip = GetString(LUIE_STRING_LAM_CA_SOCIAL_DUELSTART_OPTION_TP),
             items = SettingsAPI:GetDuelStartOptionsList(),
             getFunction = function ()
@@ -7382,7 +7382,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_MISC_MARA_ALERT),
+            label = GetString(LUIE_STRING_LAM_CA_MISC_MARA_ALERT),
             tooltip = GetString(LUIE_STRING_LAM_CA_MISC_MARA_ALERT_TP),
             getFunction = function ()
                 return Settings.Social.PledgeOfMaraAlertOnlyFail
@@ -8096,7 +8096,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_DISPLAY_ZONE_IC_DESCRIPTION),
+            label = GetString(LUIE_STRING_LAM_CA_DISPLAY_ZONE_IC_DESCRIPTION),
             tooltip = GetString(LUIE_STRING_LAM_CA_DISPLAY_ZONE_IC_DESCRIPTION_TP),
             getFunction = function ()
                 return Settings.DisplayAnnouncements.ZoneIC.Description
@@ -8472,7 +8472,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_MISC_SHOWBANKBAG_COLOR),
+            label = GetString(LUIE_STRING_LAM_CA_MISC_SHOWBANKBAG_COLOR),
             getFunction = function ()
                 return Settings.Notify.StorageBagColor[1], Settings.Notify.StorageBagColor[2], Settings.Notify.StorageBagColor[3], Settings.Notify.StorageBagColor[4]
             end,
@@ -8540,7 +8540,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_MISC_SHOWRIDING_COLOR),
+            label = GetString(LUIE_STRING_LAM_CA_MISC_SHOWRIDING_COLOR),
             getFunction = function ()
                 return Settings.Notify.StorageRidingColor[1], Settings.Notify.StorageRidingColor[2], Settings.Notify.StorageRidingColor[3], Settings.Notify.StorageRidingColor[4]
             end,
@@ -8557,7 +8557,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_MISC_SHOWRIDING_COLOR_BOOK),
+            label = GetString(LUIE_STRING_LAM_CA_MISC_SHOWRIDING_COLOR_BOOK),
             getFunction = function ()
                 return Settings.Notify.StorageRidingBookColor[1], Settings.Notify.StorageRidingBookColor[2], Settings.Notify.StorageRidingBookColor[3], Settings.Notify.StorageRidingBookColor[4]
             end,
@@ -8679,7 +8679,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_CA_MISC_LOOTSHOWDISGUISEALERTCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_MISC_LOOTSHOWDISGUISEALERTCOLOR),
             tooltip = GetString(LUIE_STRING_LAM_CA_MISC_LOOTSHOWDISGUISEALERTCOLOR_TP),
             getFunction = function ()
                 return Settings.Notify.DisguiseAlertColor[1], Settings.Notify.DisguiseAlertColor[2], Settings.Notify.DisguiseAlertColor[3], Settings.Notify.DisguiseAlertColor[4]

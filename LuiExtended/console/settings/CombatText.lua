@@ -252,7 +252,7 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS),
+            label = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS),
             tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS_TP),
             items = SettingsAPI:GetGlobalIconOptionsList(),
             getFunction = function ()
@@ -752,7 +752,7 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "  " .. GetString(LUIE_STRING_LAM_CT_COLOR_COMBAT_CRIT_DAMAGE_COLOR),
+            label = GetString(LUIE_STRING_LAM_CT_COLOR_COMBAT_CRIT_DAMAGE_COLOR),
             tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_COMBAT_CRIT_DAMAGE_COLOR_TP),
             getFunction = function () return Settings.colors.criticalDamageOverride[1], Settings.colors.criticalDamageOverride[2], Settings.colors.criticalDamageOverride[3], Settings.colors.criticalDamageOverride[4] end,
             setFunction = function (r, g, b, a) Settings.colors.criticalDamageOverride = { r, g, b, a } end,
@@ -772,7 +772,7 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "  " .. GetString(LUIE_STRING_LAM_CT_COLOR_COMBAT_INCOMING_COLOR),
+            label = GetString(LUIE_STRING_LAM_CT_COLOR_COMBAT_INCOMING_COLOR),
             tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_COMBAT_INCOMING_COLOR_TP),
             getFunction = function () return Settings.colors.incomingDamageOverride[1], Settings.colors.incomingDamageOverride[2], Settings.colors.incomingDamageOverride[3], Settings.colors.incomingDamageOverride[4] end,
             setFunction = function (r, g, b, a) Settings.colors.incomingDamageOverride = { r, g, b, a } end,
@@ -956,7 +956,7 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "  " .. GetString(LUIE_STRING_LAM_CT_COLOR_COMBAT_CRIT_HEALING_COLOR),
+            label = GetString(LUIE_STRING_LAM_CT_COLOR_COMBAT_CRIT_HEALING_COLOR),
             tooltip = GetString(LUIE_STRING_LAM_CT_COLOR_COMBAT_CRIT_HEALING_COLOR_TP),
             getFunction = function () return Settings.colors.criticalHealingOverride[1], Settings.colors.criticalHealingOverride[2], Settings.colors.criticalHealingOverride[3], Settings.colors.criticalHealingOverride[4] end,
             setFunction = function (r, g, b, a) Settings.colors.criticalHealingOverride = { r, g, b, a } end,
@@ -1700,7 +1700,7 @@ function CombatText.CreateConsoleSettings()
             settings[#settings + 1] =
             {
                 type = LHAS.ST_SLIDER,
-                label = "  " .. GetString("LUIE_STRING_LAM_CT_NOTIFICATION_WARNING_" .. resType.header),
+                label = GetString("LUIE_STRING_LAM_CT_NOTIFICATION_WARNING_" .. resType.header),
                 tooltip = GetString("LUIE_STRING_LAM_CT_NOTIFICATION_WARNING_" .. resType.header .. "_TP"),
                 min = 15,
                 max = 50,
@@ -1752,7 +1752,7 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  " .. GetString(LUIE_STRING_LAM_FONT),
+            label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FONT_FACE_TP),
             items = fontItems,
             getFunction = function () return Settings.fontFace end,
@@ -1766,7 +1766,7 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "  " .. GetString(LUIE_STRING_LAM_FONT_SIZE),
+            label = GetString(LUIE_STRING_LAM_FONT_SIZE),
             tooltip = GetString(LUIE_STRING_LAM_CT_FONT_SIZE_TP),
             min = 8,
             max = 72,
@@ -1795,7 +1795,7 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  " .. GetString(LUIE_STRING_LAM_FONT_STYLE),
+            label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_CT_FONT_STYLE_TP),
             items = fontStyleItems,
             getFunction = function ()
@@ -2057,7 +2057,7 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_CT_THROTTLE_CRITICAL),
+            label = GetString(LUIE_STRING_LAM_CT_THROTTLE_CRITICAL),
             tooltip = GetString(LUIE_STRING_LAM_CT_THROTTLE_CRITICAL_TP),
             getFunction = function () return Settings.toggles.throttleCriticals end,
             setFunction = function (v) Settings.toggles.throttleCriticals = v end,

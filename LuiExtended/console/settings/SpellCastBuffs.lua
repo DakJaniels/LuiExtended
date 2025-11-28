@@ -496,7 +496,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_EXTEND_EXTRA),
+            label = GetString(LUIE_STRING_LAM_BUFF_EXTEND_EXTRA),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_EXTEND_EXTRA_TP),
             getFunction = function ()
                 return Settings.ExtraExpanded
@@ -644,7 +644,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SEPCTRL),
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SEPCTRL),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_SEPCTRL_TP),
             getFunction = function ()
                 return Settings.LongTermEffectsSeparate
@@ -982,7 +982,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_LONGTERM_PET_ICON),
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_PET_ICON),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_PET_ICON_TP),
             getFunction = function ()
                 return Settings.PetDetail
@@ -1020,7 +1020,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MOUNT_ICON),
+            label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MOUNT_ICON),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_MOUNT_ICON_TP),
             getFunction = function ()
                 return Settings.MountDetail
@@ -1579,7 +1579,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         {
             type = LHAS.ST_SLIDER,
             format = "%.0f",
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_SHARED_POSITION),
+            label = GetString(LUIE_STRING_LAM_CI_SHARED_POSITION),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LABEL_POSITION_TP),
             min = -64,
             max = 64,
@@ -1601,7 +1601,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  " .. GetString(LUIE_STRING_LAM_FONT),
+            label = GetString(LUIE_STRING_LAM_FONT),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_FONT_TP),
             items = SettingsAPI:GetFontsList(),
             getFunction = function ()
@@ -1622,7 +1622,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         {
             type = LHAS.ST_SLIDER,
             format = "%.0f",
-            label = "  " .. GetString(LUIE_STRING_LAM_FONT_SIZE),
+            label = GetString(LUIE_STRING_LAM_FONT_SIZE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_FONTSIZE_TP),
             min = 10,
             max = 30,
@@ -1644,7 +1644,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  " .. GetString(LUIE_STRING_LAM_FONT_STYLE),
+            label = GetString(LUIE_STRING_LAM_FONT_STYLE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_FONTSTYLE_TP),
             items = fontStyleItems,
             getFunction = function ()
@@ -1674,7 +1674,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_POTION_COLOR),
+            label = GetString(LUIE_STRING_LAM_CI_POTION_COLOR),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_LABELCOLOR_TP),
             getFunction = function ()
                 return Settings.RemainingTextColoured
@@ -1693,7 +1693,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS),
+            label = GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS_TP),
             getFunction = function ()
                 return Settings.RemainingTextMillis
@@ -1792,7 +1792,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "  " .. GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS),
+            label = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS),
             tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS_TP),
             items = SettingsAPI:GetGlobalIconOptionsList(),
             getFunction = function ()
@@ -1924,7 +1924,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_COLOR_UNBREAKABLE),
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_UNBREAKABLE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_UNBREAKABLE_TP),
             getFunction = function ()
                 return Settings.colors.unbreakable[1], Settings.colors.unbreakable[2], Settings.colors.unbreakable[3], Settings.colors.unbreakable[4]
@@ -1961,7 +1961,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "  " .. GetString(LUIE_STRING_LAM_BUFF_COLOR_COSMETIC),
+            label = GetString(LUIE_STRING_LAM_BUFF_COLOR_COSMETIC),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_COLOR_COSMETIC_TP),
             getFunction = function ()
                 return Settings.colors.cosmetic[1], Settings.colors.cosmetic[2], Settings.colors.cosmetic[3], Settings.colors.cosmetic[4]
@@ -3402,7 +3402,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE),
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE_TP),
             items = SettingsAPI:GetFontsList(),
             getFunction = function ()
@@ -3422,7 +3422,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSIZE),
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSIZE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSIZE_TP),
             min = 10,
             max = 30,
@@ -3444,7 +3444,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSTYLE),
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSTYLE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSTYLE_TP),
             items = fontStyleItems,
             getFunction = function ()
@@ -3483,7 +3483,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_DROPDOWN,
-            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE),
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE_TP),
             items = statusbarTextureItems,
             getFunction = function ()
@@ -3503,7 +3503,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFF1),
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFF1),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFF1_TP),
             getFunction = function ()
                 return Settings.ProminentProgressBuffC1[1], Settings.ProminentProgressBuffC1[2], Settings.ProminentProgressBuffC1[3], Settings.ProminentProgressBuffC1[4]
@@ -3522,7 +3522,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFF2),
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFF2),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFF2_TP),
             getFunction = function ()
                 return Settings.ProminentProgressBuffC2[1], Settings.ProminentProgressBuffC2[2], Settings.ProminentProgressBuffC2[3], Settings.ProminentProgressBuffC2[4]
@@ -3541,7 +3541,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFFPRIORITY1),
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFFPRIORITY1),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFFPRIORITY1_TP),
             getFunction = function ()
                 return Settings.ProminentProgressBuffPriorityC1[1], Settings.ProminentProgressBuffPriorityC1[2], Settings.ProminentProgressBuffPriorityC1[3], Settings.ProminentProgressBuffPriorityC1[4]
@@ -3560,7 +3560,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFFPRIORITY2),
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFFPRIORITY2),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORBUFFPRIORITY2_TP),
             getFunction = function ()
                 return Settings.ProminentProgressBuffPriorityC2[1], Settings.ProminentProgressBuffPriorityC2[2], Settings.ProminentProgressBuffPriorityC2[3], Settings.ProminentProgressBuffPriorityC2[4]
@@ -3579,7 +3579,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFF1),
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFF1),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFF1_TP),
             getFunction = function ()
                 return Settings.ProminentProgressDebuffC1[1], Settings.ProminentProgressDebuffC1[2], Settings.ProminentProgressDebuffC1[3], Settings.ProminentProgressDebuffC1[4]
@@ -3598,7 +3598,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFF2),
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFF2),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFF2_TP),
             getFunction = function ()
                 return Settings.ProminentProgressDebuffC2[1], Settings.ProminentProgressDebuffC2[2], Settings.ProminentProgressDebuffC2[3], Settings.ProminentProgressDebuffC2[4]
@@ -3617,7 +3617,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFFPRIORITY1),
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFFPRIORITY1),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFFPRIORITY1_TP),
             getFunction = function ()
                 return Settings.ProminentProgressDebuffPriorityC1[1], Settings.ProminentProgressDebuffPriorityC1[2], Settings.ProminentProgressDebuffPriorityC1[3], Settings.ProminentProgressDebuffPriorityC1[4]
@@ -3636,7 +3636,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = "    " .. GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFFPRIORITY2),
+            label = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFFPRIORITY2),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_COLORDEBUFFPRIORITY2_TP),
             getFunction = function ()
                 return Settings.ProminentProgressDebuffPriorityC2[1], Settings.ProminentProgressDebuffPriorityC2[2], Settings.ProminentProgressDebuffPriorityC2[3], Settings.ProminentProgressDebuffPriorityC2[4]
