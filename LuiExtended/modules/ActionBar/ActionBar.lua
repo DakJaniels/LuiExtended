@@ -1399,14 +1399,6 @@ function ActionBar.UpdateCompanionUltimateLabel()
     end
 end
 
----
-function ActionBar.InventoryItemUsed()
-    g_potionUsed = true
-    zo_callLater(function ()
-                     g_potionUsed = false
-                 end, 200)
-end
-
 -- Local helper to perform full slot update (inline from deleted ActionBar.OnSlotsFullUpdate)
 local function DoSlotsFullUpdate()
     g_activeWeaponSwapInProgress = false
@@ -1909,6 +1901,34 @@ function ActionBar.BackbarSetupTemplate(style)
     ActionBar.UpdateBackbarUniqueState(g_hotbarCategory)
     ActionBar.SetupBackbarButtons(style)
     ActionBar.PositionUltimateBackbarButton(style)
+end
+
+-- Public function to trigger full slot update (called from settings)
+function ActionBar.OnSlotsFullUpdate()
+    g_activeWeaponSwapInProgress = false
+    ActionBar.UpdateBackbarUniqueState(g_hotbarCategory)
+    if not ActionBar.IsPlayerHotbarCategory(g_hotbarCategory) then
+        return
+    end
+    if g_potionUsed == true then
+        return
+    end
+
+    ActionBar.UpdateUltimateLabel()
+
+    for i = BAR_INDEX_START, BAR_INDEX_END do
+        ActionBar.BarSlotUpdate(i, true, false)
+    end
+
+    for i = (BAR_INDEX_START + BACKBAR_INDEX_OFFSET), (BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET) do
+        local button = g_backbarButtons[i]
+        if button then
+            ActionBar.SetupBackBarIcons(button, true)
+            ActionBar.BarSlotUpdate(i, true, false)
+        end
+    end
+
+    ActionBar.BackbarToggleSettings()
 end
 
 -- Called from the menu and on init
