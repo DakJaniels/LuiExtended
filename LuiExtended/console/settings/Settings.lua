@@ -143,7 +143,8 @@ function LUIE.CreateConsoleSettings()
             g_ElementMovingEnabled = value
             LUIE.SetupElementMover(value)
         end,
-        default = false
+        default = false,
+        disable = function () return true end
     }
 
     -- Grid Snap Settings

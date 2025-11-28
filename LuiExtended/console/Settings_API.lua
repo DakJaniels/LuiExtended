@@ -162,7 +162,8 @@ end
 --- @return table nameDisplayItemsList Array of {name = string, data = number} items for LHAS dropdowns
 function SettingsAPI:GetNameDisplayOptionsList()
     local nameDisplayItemsList = {}
-    local nameDisplayOptions = {
+    local nameDisplayOptions =
+    {
         GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_USERID),
         GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME),
         GetString(LUIE_STRING_LAM_UF_NAMEDISPLAY_CHARNAME_USERID)
@@ -187,7 +188,8 @@ end
 --- Get raid icon options list for UnitFrames
 --- @return table itemsList Array of {name = string, data = number} items for LHAS dropdowns
 function SettingsAPI:GetRaidIconOptionsList()
-    local raidIconOptions = {
+    local raidIconOptions =
+    {
         GetString(LUIE_STRING_LAM_UF_RAIDICON_NONE),
         GetString(LUIE_STRING_LAM_UF_RAIDICON_CLASS_ONLY),
         GetString(LUIE_STRING_LAM_UF_RAIDICON_ROLE_ONLY),
@@ -200,7 +202,8 @@ end
 --- Get player frame options list for UnitFrames
 --- @return table itemsList Array of {name = string, data = number} items for LHAS dropdowns
 function SettingsAPI:GetPlayerFrameOptionsList()
-    local playerFrameOptions = {
+    local playerFrameOptions =
+    {
         GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_VERTICAL),
         GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_HORIZONTAL),
         GetString(LUIE_STRING_LAM_UF_PLAYERFRAME_PYRAMID)
@@ -211,7 +214,8 @@ end
 --- Get alignment options list for UnitFrames
 --- @return table itemsList Array of {name = string, data = number} items for LHAS dropdowns
 function SettingsAPI:GetAlignmentOptionsList()
-    local alignmentOptions = {
+    local alignmentOptions =
+    {
         GetString(LUIE_STRING_LAM_UF_ALIGNMENT_LEFT_RIGHT),
         GetString(LUIE_STRING_LAM_UF_ALIGNMENT_RIGHT_LEFT),
         GetString(LUIE_STRING_LAM_UF_ALIGNMENT_CENTER)

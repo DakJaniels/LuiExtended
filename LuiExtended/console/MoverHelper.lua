@@ -21,7 +21,7 @@ local MoverHelper = {}
 --- @return boolean
 local function HasMethods(control, ...)
     if not control then return false end
-    for i = 1, select('#', ...) do
+    for i = 1, select("#", ...) do
         local method = select(i, ...)
         if not control[method] then return false end
     end

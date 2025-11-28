@@ -307,7 +307,8 @@ function EditModeController:RefreshSpellCastBuffsMovers(MoverHelper)
 
     if not lockToUnitFrames then
         -- Refresh independent buff containers
-        local containers = {
+        local containers =
+        {
             { container = LUIE.SpellCastBuffs.BuffContainers.playerb, id = "buff_playerb" },
             { container = LUIE.SpellCastBuffs.BuffContainers.playerd, id = "buff_playerd" },
             { container = LUIE.SpellCastBuffs.BuffContainers.targetb, id = "buff_targetb" },
@@ -320,7 +321,8 @@ function EditModeController:RefreshSpellCastBuffsMovers(MoverHelper)
         end
     else
         -- Hide independent buff container previews when locked to unit frames
-        local containers = {
+        local containers =
+        {
             LUIE.SpellCastBuffs.BuffContainers.playerb,
             LUIE.SpellCastBuffs.BuffContainers.playerd,
             LUIE.SpellCastBuffs.BuffContainers.targetb,
@@ -336,7 +338,8 @@ function EditModeController:RefreshSpellCastBuffsMovers(MoverHelper)
     -- Refresh always-available containers if buffs are unlocked
     local buffsUnlocked = not lockToUnitFrames and LUIE.SpellCastBuffs.BuffContainers.playerb and LUIE.SpellCastBuffs.BuffContainers.playerb.gamepadHandler
     if buffsUnlocked then
-        local alwaysContainers = {
+        local alwaysContainers =
+        {
             { container = LUIE.SpellCastBuffs.BuffContainers.player_long,      id = "buff_player_long"      },
             { container = LUIE.SpellCastBuffs.BuffContainers.prominentbuffs,   id = "buff_prominentbuffs"   },
             { container = LUIE.SpellCastBuffs.BuffContainers.prominentdebuffs, id = "buff_prominentdebuffs" },
@@ -441,7 +444,8 @@ local function AddBuffPanelIds(ids, includeLocked)
     local lockToUnitFrames = LUIE.SpellCastBuffs.SV.lockPositionToUnitFrames ~= false
 
     if not lockToUnitFrames or includeLocked then
-        local containers = {
+        local containers =
+        {
             { container = LUIE.SpellCastBuffs.BuffContainers.playerb, id = "buff_playerb" },
             { container = LUIE.SpellCastBuffs.BuffContainers.playerd, id = "buff_playerd" },
             { container = LUIE.SpellCastBuffs.BuffContainers.targetb, id = "buff_targetb" },
@@ -455,7 +459,8 @@ local function AddBuffPanelIds(ids, includeLocked)
     end
 
     -- Always add these containers (not locked to unit frames)
-    local alwaysContainers = {
+    local alwaysContainers =
+    {
         { container = LUIE.SpellCastBuffs.BuffContainers.player_long,      id = "buff_player_long"      },
         { container = LUIE.SpellCastBuffs.BuffContainers.prominentbuffs,   id = "buff_prominentbuffs"   },
         { container = LUIE.SpellCastBuffs.BuffContainers.prominentdebuffs, id = "buff_prominentdebuffs" },
@@ -774,10 +779,10 @@ function EditModeController:EnsureKeybindDescriptor()
             name = "Enter Edit Mode",
             keybind = "UI_SHORTCUT_TERTIARY",
             ethereal = true,
-            visible = function()
+            visible = function ()
                 return IsInGamepadPreferredMode() and not controller:IsEditModeActive()
             end,
-            callback = function()
+            callback = function ()
                 controller:SetEditModeActive(true)
             end,
         },
@@ -787,10 +792,10 @@ function EditModeController:EnsureKeybindDescriptor()
             name = "Exit Edit Mode",
             keybind = "UI_SHORTCUT_NEGATIVE",
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            visible = function()
+            visible = function ()
                 return IsInGamepadPreferredMode() and controller:IsEditModeActive()
             end,
-            callback = function()
+            callback = function ()
                 controller:SetEditModeActive(false)
             end,
         },
@@ -800,10 +805,10 @@ function EditModeController:EnsureKeybindDescriptor()
             name = "Previous Panel",
             keybind = "UI_SHORTCUT_LEFT_SHOULDER",
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            visible = function()
+            visible = function ()
                 return IsInGamepadPreferredMode() and controller:IsEditModeActive()
             end,
-            callback = function()
+            callback = function ()
                 controller:CycleFocusedPanel(-1)
             end,
         },
@@ -813,25 +818,25 @@ function EditModeController:EnsureKeybindDescriptor()
             name = "Next Panel",
             keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            visible = function()
+            visible = function ()
                 return IsInGamepadPreferredMode() and controller:IsEditModeActive()
             end,
-            callback = function()
+            callback = function ()
                 controller:CycleFocusedPanel(1)
             end,
         },
 
         -- Toggle Labels
         {
-            name = function()
+            name = function ()
                 return controller.showAllLabels and "Hide Labels" or "Show All Labels"
             end,
             keybind = "UI_SHORTCUT_QUATERNARY",
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            visible = function()
+            visible = function ()
                 return IsInGamepadPreferredMode() and controller:IsEditModeActive()
             end,
-            callback = function()
+            callback = function ()
                 controller:ToggleLabels()
             end,
         },
@@ -932,7 +937,7 @@ function EditModeController:ForceCleanupKeybindBackdrop()
     if ZO_KeybindStripGamepadBackgroundTexture then
         ZO_KeybindStripGamepadBackgroundTexture:SetHidden(true)
     end
-    
+
     -- Force a scene refresh to ensure backdrop is properly removed
     local currentScene = SCENE_MANAGER:GetCurrentScene()
     if currentScene then
@@ -940,12 +945,12 @@ function EditModeController:ForceCleanupKeybindBackdrop()
         if currentScene:HasFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT) then
             currentScene:RemoveFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
             -- Small delay to ensure cleanup, then force scene refresh
-            zo_callLater(function()
-                -- Force update the scene to ensure backdrop is gone
-                if currentScene:IsShowing() then
-                    currentScene:Refresh()
-                end
-            end, 50)
+            zo_callLater(function ()
+                             -- Force update the scene to ensure backdrop is gone
+                             if currentScene:IsShowing() then
+                                 currentScene:Refresh()
+                             end
+                         end, 50)
         end
     end
 end
