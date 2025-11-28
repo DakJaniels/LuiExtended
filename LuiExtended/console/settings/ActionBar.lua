@@ -1136,9 +1136,8 @@ function ActionBar.CreateConsoleSettings()
             type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_AB_CASTBAR_MOVE),
             tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_MOVE_TP),
-            getFunction = function () return castBarMovingEnabled end,
+            getFunction = function () return ActionBar.CastBarUnlocked end,
             setFunction = function (value)
-                castBarMovingEnabled = value
                 CastBar.SetMovingState(value)
             end,
             default = false,

@@ -197,7 +197,7 @@ function CombatInfo.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_CI_ALERT_UNLOCK),
             tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_UNLOCK_TP),
             getFunction = function ()
-                return alertFrameMovingEnabled
+                return CombatInfo.AbilityAlerts.AlertFrameUnlocked
             end,
             setFunction = AbilityAlerts.SetMovingStateAlert,
             disable = function ()

@@ -256,6 +256,24 @@ function EditModeController:RefreshUnitFramesMovers(MoverHelper)
         local frame = LUIE.UnitFrames.CustomFrames[unitTag]
         if frame and frame.tlw then
             local identifier = "unitFrame_" .. unitTag
+
+            -- Create coordinate label if it doesn't exist (check both preview and direct access)
+            if frame.tlw.preview and LUIE.Unlock then
+                -- Check if coordLabel already exists (may have been created in Unlock.CreateTopLevelWindow)
+                if not frame.tlw.preview.coordLabel then
+                    local frameName = unitTag:gsub("^%l", string.upper)
+                    local positionText = "Default"
+                    if LUIE.UnitFrames.SV and LUIE.UnitFrames.SV[frame.tlw.customPositionAttr] then
+                        local x = LUIE.UnitFrames.SV[frame.tlw.customPositionAttr][1] or 0
+                        local y = LUIE.UnitFrames.SV[frame.tlw.customPositionAttr][2] or 0
+                        positionText = string.format("%d, %d | %s", x, y, frameName)
+                    else
+                        positionText = string.format("Default | %s", frameName)
+                    end
+                    frame.tlw.preview.coordLabel = LUIE.Unlock.CreateCoordinateLabel(frame.tlw.preview, positionText)
+                end
+            end
+
             MoverHelper.UpdateControlState(frame.tlw, identifier, LUIE.UnitFrames.CustomFramesMovingState)
 
             -- Handle buff/debuff previews when locked to unit frames
@@ -618,6 +636,29 @@ function EditModeController:SetEditModeFocus(panelId)
         return
     end
 
+    -- Explicitly disable gamepad movement on ALL panels before changing focus
+    -- This ensures any active LCA timers are cancelled
+    if LUIE.UnitFrames and LUIE.UnitFrames.CustomFrames then
+        for _, frame in pairs(LUIE.UnitFrames.CustomFrames) do
+            if frame.tlw and frame.tlw.gamepadHandler then
+                if frame.tlw.gamepadHandler.ToggleGamepadMove then
+                    frame.tlw.gamepadHandler:ToggleGamepadMove(false)
+                end
+                frame.tlw.gamepadMoveFocused = false
+            end
+        end
+    end
+    if LUIE.SpellCastBuffs and LUIE.SpellCastBuffs.BuffContainers then
+        for _, container in pairs(LUIE.SpellCastBuffs.BuffContainers) do
+            if container and container.gamepadHandler then
+                if container.gamepadHandler.ToggleGamepadMove then
+                    container.gamepadHandler:ToggleGamepadMove(false)
+                end
+                container.gamepadMoveFocused = false
+            end
+        end
+    end
+
     if panelId and IsValidPanelId(panelId) then
         self.editModeFocusId = panelId
     else
@@ -627,7 +668,7 @@ function EditModeController:SetEditModeFocus(panelId)
     if LUIE.Unlock then
         LUIE.Unlock:RefreshAllPanels()
     end
-    -- Refresh module movers to update gamepad movement state
+    -- Refresh module movers to enable gamepad movement on newly focused panel
     self:RefreshModuleMovers()
     self:RefreshKeybindStrip()
 end
@@ -717,32 +758,6 @@ function EditModeController:ToggleLabels()
     CHAT_ROUTER:AddSystemMessage(string.format("[LUIE] Labels: %s", status))
 end
 
---- Creates a standardized keybind descriptor
---- @param config table Configuration for the keybind descriptor
---- @return table The keybind descriptor
-local function CreateKeybindDescriptor(config)
-    return {
-        -- Core properties
-        name = config.name,
-        keybind = config.keybind,
-        callback = config.callback,
-
-        -- Optional properties
-        alignment = config.alignment,
-        gamepadPreferredKeybind = config.gamepadPreferredKeybind,
-        visible = config.visible,
-        enabled = config.enabled,
-
-        -- Special flags
-        ethereal = config.ethereal or false,
-        handlesKeyUp = config.handlesKeyUp or false,
-        disabledDuringSceneHiding = config.disabledDuringSceneHiding or false,
-
-        -- Ordering (lower numbers appear first)
-        order = config.order or 0,
-    }
-end
-
 --- Ensures keybind descriptor is created
 function EditModeController:EnsureKeybindDescriptor()
     if self.keybindStripDescriptor then
@@ -753,7 +768,7 @@ function EditModeController:EnsureKeybindDescriptor()
     self.keybindStripDescriptor =
     {
         -- Enter Edit Mode (ethereal - only shows on keybind press)
-        CreateKeybindDescriptor({
+        {
             name = "Enter Edit Mode",
             keybind = "UI_SHORTCUT_TERTIARY",
             ethereal = true,
@@ -763,11 +778,10 @@ function EditModeController:EnsureKeybindDescriptor()
             callback = function()
                 controller:SetEditModeActive(true)
             end,
-            order = 10,
-        }),
+        },
 
         -- Exit Edit Mode
-        CreateKeybindDescriptor({
+        {
             name = "Exit Edit Mode",
             keybind = "UI_SHORTCUT_NEGATIVE",
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -777,19 +791,12 @@ function EditModeController:EnsureKeybindDescriptor()
             callback = function()
                 controller:SetEditModeActive(false)
             end,
-            -- Always enabled, even during scene transitions
-            enabled = function()
-                return true
-            end,
-            disabledDuringSceneHiding = false,
-            order = 20,
-        }),
+        },
 
-        -- Previous Panel
-        CreateKeybindDescriptor({
+        -- Previous Panel (LB only - no left stick)
+        {
             name = "Previous Panel",
-            keybind = "UI_SHORTCUT_INPUT_LEFT",
-            gamepadPreferredKeybind = "UI_SHORTCUT_LEFT_SHOULDER",
+            keybind = "UI_SHORTCUT_LEFT_SHOULDER",
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
             visible = function()
                 return IsInGamepadPreferredMode() and controller:IsEditModeActive()
@@ -797,14 +804,12 @@ function EditModeController:EnsureKeybindDescriptor()
             callback = function()
                 controller:CycleFocusedPanel(-1)
             end,
-            order = 30,
-        }),
+        },
 
-        -- Next Panel
-        CreateKeybindDescriptor({
+        -- Next Panel (RB only - no right stick)
+        {
             name = "Next Panel",
-            keybind = "UI_SHORTCUT_INPUT_RIGHT",
-            gamepadPreferredKeybind = "UI_SHORTCUT_RIGHT_SHOULDER",
+            keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
             visible = function()
                 return IsInGamepadPreferredMode() and controller:IsEditModeActive()
@@ -812,11 +817,10 @@ function EditModeController:EnsureKeybindDescriptor()
             callback = function()
                 controller:CycleFocusedPanel(1)
             end,
-            order = 40,
-        }),
+        },
 
         -- Toggle Labels
-        CreateKeybindDescriptor({
+        {
             name = function()
                 return controller.showAllLabels and "Hide Labels" or "Show All Labels"
             end,
@@ -828,8 +832,7 @@ function EditModeController:EnsureKeybindDescriptor()
             callback = function()
                 controller:ToggleLabels()
             end,
-            order = 50,
-        }),
+        },
     }
 end
 

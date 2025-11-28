@@ -877,6 +877,8 @@ function SpellCastBuffs.SetMovingState(state)
         return
     end
 
+    SpellCastBuffs.BuffsMovingState = state
+
     local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
     local gridEnabled = accountWideSettings and accountWideSettings.snapToGrid_buffs
     local gridSize = (accountWideSettings and accountWideSettings.snapToGridSize_buffs) or 15

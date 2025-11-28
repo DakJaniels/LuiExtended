@@ -219,10 +219,9 @@ function UnitFrames.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_UF_CFRAMES_UNLOCK),
             tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_UNLOCK_TP),
             getFunction = function ()
-                return g_FramesMovingEnabled
+                return UnitFrames.CustomFramesMovingState
             end,
             setFunction = function (value)
-                g_FramesMovingEnabled = value
                 UnitFrames.CustomFramesSetMovingState(value)
             end,
             default = false,

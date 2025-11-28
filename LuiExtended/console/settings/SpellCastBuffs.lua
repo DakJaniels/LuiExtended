@@ -283,10 +283,9 @@ function SpellCastBuffs.CreateConsoleSettings()
         label = GetString(LUIE_STRING_LAM_BUFF_UNLOCKWINDOW),
         tooltip = GetString(LUIE_STRING_LAM_BUFF_UNLOCKWINDOW_TP),
         getFunction = function ()
-            return g_BuffsMovingEnabled
+            return SpellCastBuffs.BuffsMovingState
         end,
         setFunction = function (v)
-            g_BuffsMovingEnabled = v
             -- Ensure lockPositionToUnitFrames is properly initialized when unlocking frames
             if v and SpellCastBuffs.SV.lockPositionToUnitFrames == nil then
                 SpellCastBuffs.SV.lockPositionToUnitFrames = false

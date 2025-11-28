@@ -800,9 +800,12 @@ end
 -- Helper to set up common actions for all created frames
 local function SetupCommonFrameActions()
     local tlwOnMoveStart = function (self)
-        eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
-            self.preview.anchorLabel:SetText(zo_strformat("<<1>>, <<2>>", self:GetLeft(), self:GetTop()))
-        end)
+        -- For console UI, coordLabel is updated by MoverHelper, so skip anchorLabel update
+        if not IsConsoleUI() and self.preview.anchorLabel then
+            eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
+                self.preview.anchorLabel:SetText(zo_strformat("<<1>>, <<2>>", self:GetLeft(), self:GetTop()))
+            end)
+        end
     end
 
     local tlwOnMoveStop = function (self)
@@ -823,29 +826,16 @@ local function SetupCommonFrameActions()
             unitFrame.tlw.preview.anchorTexture = UI:Texture(unitFrame.tlw.preview, { TOPLEFT, TOPLEFT }, { 16, 16 }, "/esoui/art/reticle/border_topleft.dds", DL_OVERLAY, false)
             unitFrame.tlw.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
 
-            unitFrame.tlw.preview.anchorLabel = UI:Label(unitFrame.tlw.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "ZoFontGameSmall", "xxx, yyy", false)
-            unitFrame.tlw.preview.anchorLabel:SetColor(1, 1, 0, 1)
-            unitFrame.tlw.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
-            unitFrame.tlw.preview.anchorLabel:SetDrawTier(DT_MEDIUM)
-            -- Update font to use better readable font
-            if IsConsoleUI() and LUIE.ConsoleMoverHelper then
-                local fontName = "LUIE Default Font"
-                if LUIE.Fonts and LUIE.Fonts[fontName] then
-                    local fontSize = 14
-                    local fontStyle = "soft-shadow-thick"
-                    local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
-                    unitFrame.tlw.preview.anchorLabel:SetFont(fontString)
-                else
-                    if IsInGamepadPreferredMode() or IsConsoleUI() then
-                        unitFrame.tlw.preview.anchorLabel:SetFont("$(GAMEPAD_MEDIUM_FONT)|14|soft-shadow-thick")
-                    else
-                        unitFrame.tlw.preview.anchorLabel:SetFont("$(MEDIUM_FONT)|14|soft-shadow-thick")
-                    end
-                end
+            -- For console UI, don't create anchorLabel - EditModeController will create a better coordLabel instead
+            if not IsConsoleUI() then
+                unitFrame.tlw.preview.anchorLabel = UI:Label(unitFrame.tlw.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "ZoFontGameSmall", "xxx, yyy", false)
+                unitFrame.tlw.preview.anchorLabel:SetColor(1, 1, 0, 1)
+                unitFrame.tlw.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
+                unitFrame.tlw.preview.anchorLabel:SetDrawTier(DT_MEDIUM)
+                unitFrame.tlw.preview.anchorLabelBg = UI:Backdrop(unitFrame.tlw.preview.anchorLabel, "fill", nil, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, false)
+                unitFrame.tlw.preview.anchorLabelBg:SetDrawLayer(DL_OVERLAY)
+                unitFrame.tlw.preview.anchorLabelBg:SetDrawTier(DT_LOW)
             end
-            unitFrame.tlw.preview.anchorLabelBg = UI:Backdrop(unitFrame.tlw.preview.anchorLabel, "fill", nil, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, false)
-            unitFrame.tlw.preview.anchorLabelBg:SetDrawLayer(DL_OVERLAY)
-            unitFrame.tlw.preview.anchorLabelBg:SetDrawTier(DT_LOW)
         end
 
         -- Anchor bars to their backdrops

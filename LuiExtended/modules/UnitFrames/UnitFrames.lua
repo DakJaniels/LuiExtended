@@ -2394,7 +2394,10 @@ function UnitFrames.CustomFramesSetPositions()
             local anchors = (savedPos ~= nil and #savedPos == 2) and { TOPLEFT, TOPLEFT, savedPos[1], savedPos[2] } or default_anchors[unitTag]
             UnitFrames.CustomFrames[unitTag].tlw:ClearAnchors()
             UnitFrames.CustomFrames[unitTag].tlw:SetAnchor(anchors[1], GuiRoot, anchors[2], anchors[3], anchors[4])
-            UnitFrames.CustomFrames[unitTag].tlw.preview.anchorLabel:SetText((savedPos ~= nil and #savedPos == 2) and zo_strformat("<<1>>, <<2>>", savedPos[1], savedPos[2]) or "default")
+            -- For console UI, coordLabel is updated by EditModeController, so skip anchorLabel update
+            if not IsConsoleUI() and UnitFrames.CustomFrames[unitTag].tlw.preview.anchorLabel then
+                UnitFrames.CustomFrames[unitTag].tlw.preview.anchorLabel:SetText((savedPos ~= nil and #savedPos == 2) and zo_strformat("<<1>>, <<2>>", savedPos[1], savedPos[2]) or "default")
+            end
         end
     end
 end

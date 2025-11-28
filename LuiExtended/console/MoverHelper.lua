@@ -88,12 +88,56 @@ function MoverHelper.SetupGamepadHandler(control, gridType, onMoveStopCallback)
         handler:SetSnap(gridSize)
     end
 
-    -- Register move stop callback
+    -- Get control name for callback registration
     local controlName = control:GetName() or "Unknown"
+
+    -- Helper function to get frame name from control
+    local function GetFrameName(ctrl)
+        local frameName = "Frame"
+        if ctrl.customPositionAttr then
+            frameName = ctrl.customPositionAttr:gsub("CustomFrames", ""):gsub("FramePos", ""):gsub("Pos", "")
+            if frameName == "" then frameName = "Frame" end
+        elseif ctrl.config and ctrl.config[1] then
+            frameName = ctrl.config[1]
+        end
+        return frameName
+    end
+
+    -- Helper function to update coordinate label
+    local function UpdateCoordLabel(ctrl, left, top)
+        if ctrl.preview and ctrl.preview.coordLabel then
+            local frameName = GetFrameName(ctrl)
+            ctrl.preview.coordLabel:SetText(string.format("%d, %d | %s", math.floor(left), math.floor(top), frameName))
+        end
+    end
+
+    -- Register move start callback for real-time updates
+    handler:RegisterCallback(
+        string.format("LUIE_MoveStart_%s", controlName),
+        LCA.EVENT_CONTROL_MOVE_START,
+        function ()
+            -- Register for real-time position updates during movement
+            local updateName = string.format("LUIE_MoveUpdate_%s", controlName)
+            EVENT_MANAGER:RegisterForUpdate(updateName, 50, function ()
+                if control and control:IsControlHidden() == false then
+                    local left, top = control:GetLeft(), control:GetTop()
+                    UpdateCoordLabel(control, left, top)
+                else
+                    EVENT_MANAGER:UnregisterForUpdate(updateName)
+                end
+            end)
+        end
+    )
+
+    -- Register move stop callback
     handler:RegisterCallback(
         string.format("LUIE_MoveStop_%s", controlName),
         LCA.EVENT_CONTROL_MOVE_STOP,
         function (newPos)
+            -- Unregister real-time update
+            local updateName = string.format("LUIE_MoveUpdate_%s", controlName)
+            EVENT_MANAGER:UnregisterForUpdate(updateName)
+
             local left, top = control:GetLeft(), control:GetTop()
             if gridEnabled then
                 left, top = LUIE.ApplyGridSnap(left, top, gridType)
@@ -104,10 +148,19 @@ function MoverHelper.SetupGamepadHandler(control, gridType, onMoveStopCallback)
                 onMoveStopCallback(control, left, top)
             end
 
+            -- Update coordinate label with final position
+            UpdateCoordLabel(control, left, top)
+
+            -- Clear the gamepad focus tracking so movement can be re-enabled
+            control.gamepadMoveFocused = false
+
             -- Stop control movement if EditModeController is tracking it
             local EditModeController = LUIE.EditModeController
             if EditModeController and EditModeController.activePanelId then
                 EditModeController:StopControlMove()
+            elseif EditModeController and EditModeController:IsEditModeActive() then
+                -- In edit mode, refresh to re-enable movement if still focused
+                EditModeController:RefreshModuleMovers()
             end
         end
     )
@@ -145,8 +198,14 @@ function MoverHelper.UpdateControlState(control, identifier, isUnlocked)
         if HasMethods(control.gamepadHandler, "ToggleLock") then
             control.gamepadHandler:ToggleLock(not unlocked)
         end
-        if HasMethods(control.gamepadHandler, "ToggleGamepadMove") then
-            control.gamepadHandler:ToggleGamepadMove(shouldGamepadMove, 10000)
+
+        -- Only call ToggleGamepadMove when focus state changes
+        local wasFocused = control.gamepadMoveFocused or false
+        if shouldGamepadMove ~= wasFocused then
+            control.gamepadMoveFocused = shouldGamepadMove
+            if HasMethods(control.gamepadHandler, "ToggleGamepadMove") then
+                control.gamepadHandler:ToggleGamepadMove(shouldGamepadMove, shouldGamepadMove and 30000 or nil)
+            end
         end
     end
 
@@ -249,6 +308,11 @@ function MoverHelper.StopControlMove(control)
     if not control then
         return
     end
+
+    -- Unregister any pending real-time update
+    local controlName = control:GetName() or "Unknown"
+    local updateName = string.format("LUIE_MoveUpdate_%s", controlName)
+    EVENT_MANAGER:UnregisterForUpdate(updateName)
 
     if control.gamepadHandler then
         control.gamepadHandler:ToggleGamepadMove(false)

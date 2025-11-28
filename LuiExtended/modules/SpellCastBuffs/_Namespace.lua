@@ -17,6 +17,7 @@ LUIE.SpellCastBuffs = SpellCastBuffs
 SpellCastBuffs.moduleName = LUIE.name .. "SpellCastBuffs"
 
 SpellCastBuffs.Enabled = false
+SpellCastBuffs.BuffsMovingState = false
 SpellCastBuffs.Defaults =
 {
     ColorCosmetic = true,
