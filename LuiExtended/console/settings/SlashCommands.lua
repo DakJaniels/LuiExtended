@@ -801,9 +801,7 @@ function SlashCommands.CreateConsoleSettings()
                 mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
             end
             panel:AddSettings(mainMenuSettings)
-            if IsConsoleUI() then
-                LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(1)
-            end
+            LHAS.list:SetSelectedIndexWithoutAnimation(1)
         end
     }
 
@@ -823,9 +821,7 @@ function SlashCommands.CreateConsoleSettings()
                 end
                 settingsWithBack[#settingsWithBack + 1] = backButton
                 panel:AddSettings(settingsWithBack)
-                if IsConsoleUI() then
-                    LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(2)
-                end
+                LHAS.list:SetSelectedIndexWithoutAnimation(2)
             end
         }
     end

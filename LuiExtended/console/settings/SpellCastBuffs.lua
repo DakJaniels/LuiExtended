@@ -1606,8 +1606,8 @@ function SpellCastBuffs.CreateConsoleSettings()
             getFunction = function ()
                 return Settings.BuffFontFace
             end,
-            setFunction = function (v)
-                Settings.BuffFontFace = v
+            setFunction = function (combobox, value, item)
+                Settings.BuffFontFace = item.data or item.name or value
                 SpellCastBuffs.ApplyFont()
             end,
             default = Defaults.BuffFontFace,
@@ -1654,14 +1654,9 @@ function SpellCastBuffs.CreateConsoleSettings()
                 end
                 return LUIE.FONT_STYLE_CHOICES[1]
             end,
-            setFunction = function (v)
-                for i, choiceName in ipairs(LUIE.FONT_STYLE_CHOICES) do
-                    if v == choiceName then
-                        Settings.BuffFontStyle = LUIE.FONT_STYLE_CHOICES_VALUES[i]
-                        SpellCastBuffs.ApplyFont()
-                        return
-                    end
-                end
+            setFunction = function (combobox, value, item)
+                Settings.BuffFontStyle = item.data or item.name or value
+                SpellCastBuffs.ApplyFont()
             end,
             default = Defaults.BuffFontStyle,
             disable = function ()
@@ -4132,9 +4127,7 @@ function SpellCastBuffs.CreateConsoleSettings()
                 mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
             end
             panel:AddSettings(mainMenuSettings)
-            if IsConsoleUI() then
-                LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(1)
-            end
+            LHAS.list:SetSelectedIndexWithoutAnimation(1)
         end
     }
 
@@ -4154,9 +4147,7 @@ function SpellCastBuffs.CreateConsoleSettings()
                 end
                 sectionSettings[#sectionSettings + 1] = backButton
                 panel:AddSettings(sectionSettings)
-                if IsConsoleUI() then
-                    LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(2)
-                end
+                LHAS.list:SetSelectedIndexWithoutAnimation(2)
             end
         }
     end

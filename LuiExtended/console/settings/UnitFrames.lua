@@ -317,7 +317,7 @@ function UnitFrames.CreateConsoleSettings()
                 return { data = UnitFrames.GetDefaultFramesSetting("Player") }
             end,
             setFunction = function (combobox, value, item)
-                UnitFrames.SetDefaultFramesSetting("Player", value)
+                UnitFrames.SetDefaultFramesSetting("Player", item.data or item.name or value)
             end,
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
@@ -340,7 +340,7 @@ function UnitFrames.CreateConsoleSettings()
                 return { data = UnitFrames.GetDefaultFramesSetting("Target") }
             end,
             setFunction = function (combobox, value, item)
-                UnitFrames.SetDefaultFramesSetting("Target", value)
+                UnitFrames.SetDefaultFramesSetting("Target", item.data or item.name or value)
             end,
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
@@ -363,7 +363,7 @@ function UnitFrames.CreateConsoleSettings()
                 return { data = UnitFrames.GetDefaultFramesSetting("Group") }
             end,
             setFunction = function (combobox, value, item)
-                UnitFrames.SetDefaultFramesSetting("Group", value)
+                UnitFrames.SetDefaultFramesSetting("Group", item.data or item.name or value)
             end,
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
@@ -2615,8 +2615,8 @@ function UnitFrames.CreateConsoleSettings()
             getFunction = function ()
                 return { data = Settings.CustomFormatOneGroup }
             end,
-            setFunction = function (value)
-                Settings.CustomFormatOneGroup = value
+            setFunction = function (combobox, value, item)
+                Settings.CustomFormatOneGroup = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutGroup(true)
             end,
@@ -5009,9 +5009,7 @@ function UnitFrames.CreateConsoleSettings()
                 mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
             end
             panel:AddSettings(mainMenuSettings)
-            if IsConsoleUI() then
-                LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(1)
-            end
+            LHAS.list:SetSelectedIndexWithoutAnimation(1)
         end
     }
 
@@ -5031,9 +5029,7 @@ function UnitFrames.CreateConsoleSettings()
                 end
                 settingsWithBack[#settingsWithBack + 1] = backButton
                 panel:AddSettings(settingsWithBack)
-                if IsConsoleUI() then
-                    LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(2)
-                end
+                LHAS.list:SetSelectedIndexWithoutAnimation(2)
             end
         }
     end

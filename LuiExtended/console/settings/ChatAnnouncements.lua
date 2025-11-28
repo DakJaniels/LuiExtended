@@ -5,10 +5,8 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
--- Load Console Settings API
-local SettingsAPI = LUIE.ConsoleSettingsAPI
 
--- LibHarvensAddonSettings is loaded globally as LHAS
+local SettingsAPI = LUIE.ConsoleSettingsAPI
 
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
@@ -207,7 +205,7 @@ function ChatAnnouncements.CreateConsoleSettings()
                 return Settings.ChatMethod
             end,
             setFunction = function (combobox, value, item)
-                Settings.ChatMethod = value
+                Settings.ChatMethod = item.data or item.name or value
             end,
             default = Defaults.ChatMethod
         }
@@ -8848,9 +8846,7 @@ function ChatAnnouncements.CreateConsoleSettings()
                 mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
             end
             panel:AddSettings(mainMenuSettings)
-            if IsConsoleUI() then
-                LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(1)
-            end
+            LHAS.list:SetSelectedIndexWithoutAnimation(1)
         end
     }
 
@@ -8870,9 +8866,7 @@ function ChatAnnouncements.CreateConsoleSettings()
                 end
                 settingsWithBack[#settingsWithBack + 1] = backButton
                 panel:AddSettings(settingsWithBack)
-                if IsConsoleUI() then
-                    LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(2)
-                end
+                LHAS.list:SetSelectedIndexWithoutAnimation(2)
             end
         }
     end

@@ -1655,14 +1655,14 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SECTION,
-            label = GetString(LUIE_STRING_LAM_CT_NOTIFICATION_LOW_RESOURCE)
+            label = GetString(LUIE_STRING_LAM_CT_FORMAT_DESCRIPTION)
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
             label = GetString(LUIE_STRING_LAM_CT_HEADER_SHARED_FONT_SIZE),
-            tooltip = GetString(LUIE_STRING_LAM_CT_FONT_NOTIFICATION_LOW_RESOURCE_TP),
+            tooltip = GetString(LUIE_STRING_LAM_CT_FONT_NOTIFICATION_RESOURCE_TP),
             min = 8,
             max = 72,
             step = 1,
@@ -1756,8 +1756,8 @@ function CombatText.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CT_FONT_FACE_TP),
             items = fontItems,
             getFunction = function () return Settings.fontFace end,
-            setFunction = function (var)
-                Settings.fontFace = var
+            setFunction = function (combobox, value, item)
+                Settings.fontFace = item.data or item.name or value
                 CombatText.ApplyFont()
             end,
             default = Defaults.fontFace
@@ -1853,7 +1853,7 @@ function CombatText.CreateConsoleSettings()
                 return Settings.animation.animationType
             end,
             setFunction = function (combobox, value, item)
-                Settings.animation.animationType = value
+                Settings.animation.animationType = item.data or item.name or value
             end,
             default = Defaults.animation.animationType
         }
@@ -1892,7 +1892,7 @@ function CombatText.CreateConsoleSettings()
                 return Settings.animation.incoming.directionType
             end,
             setFunction = function (combobox, value, item)
-                Settings.animation.incoming.directionType = value
+                Settings.animation.incoming.directionType = item.data or item.name or value
             end,
             default = Defaults.animation.incoming.directionType
         }
@@ -1913,7 +1913,7 @@ function CombatText.CreateConsoleSettings()
                 return Settings.animation.incomingIcon
             end,
             setFunction = function (combobox, value, item)
-                Settings.animation.incomingIcon = value
+                Settings.animation.incomingIcon = item.data or item.name or value
             end,
             default = Defaults.animation.incomingIcon
         }
@@ -1934,7 +1934,7 @@ function CombatText.CreateConsoleSettings()
                 return Settings.animation.outgoing.directionType
             end,
             setFunction = function (combobox, value, item)
-                Settings.animation.outgoing.directionType = value
+                Settings.animation.outgoing.directionType = item.data or item.name or value
             end,
             default = Defaults.animation.outgoing.directionType
         }
@@ -1955,7 +1955,7 @@ function CombatText.CreateConsoleSettings()
                 return Settings.animation.outgoingIcon
             end,
             setFunction = function (combobox, value, item)
-                Settings.animation.outgoingIcon = value
+                Settings.animation.outgoingIcon = item.data or item.name or value
             end,
             default = Defaults.animation.outgoingIcon
         }
@@ -2083,9 +2083,7 @@ function CombatText.CreateConsoleSettings()
                 mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
             end
             panel:AddSettings(mainMenuSettings)
-            if IsConsoleUI() then
-                LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(1)
-            end
+            LHAS.list:SetSelectedIndexWithoutAnimation(1)
         end
     }
 
@@ -2105,9 +2103,7 @@ function CombatText.CreateConsoleSettings()
                 end
                 settingsWithBack[#settingsWithBack + 1] = backButton
                 panel:AddSettings(settingsWithBack)
-                if IsConsoleUI() then
-                    LibHarvensAddonSettings.list:SetSelectedIndexWithoutAnimation(2)
-                end
+                LHAS.list:SetSelectedIndexWithoutAnimation(2)
             end
         }
     end

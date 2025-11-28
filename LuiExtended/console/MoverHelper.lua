@@ -4,11 +4,6 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
--- Only load on console
-if not IsConsoleUI() then
-    return
-end
-
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
@@ -48,10 +43,6 @@ local function UpdatePreviewLabelFont(label)
 
     if LUIE.Fonts and LUIE.Fonts[fontName] then
         label:SetFont(CreateFontString(fontName, fontSize, fontStyle))
-    else
-        -- Fallback to gamepad font if LUIE font not available
-        local fallbackFont = (IsInGamepadPreferredMode() or IsConsoleUI()) and "$(GAMEPAD_MEDIUM_FONT)" or "$(MEDIUM_FONT)"
-        label:SetFont(fallbackFont .. "|" .. fontSize .. "|" .. fontStyle)
     end
 end
 
@@ -274,9 +265,6 @@ function MoverHelper.UpdatePreviewFonts(control, isVisible, isEditModeActive, Ed
 
         if LUIE.Fonts and LUIE.Fonts[fontName] then
             previewLabel:SetFont(CreateFontString(fontName, fontSize, fontStyle))
-        else
-            local fallbackFont = (IsInGamepadPreferredMode() or IsConsoleUI()) and "$(GAMEPAD_MEDIUM_FONT)" or "$(MEDIUM_FONT)"
-            previewLabel:SetFont(fallbackFont .. "|" .. fontSize .. "|" .. fontStyle)
         end
     end
 end

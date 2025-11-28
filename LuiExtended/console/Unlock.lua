@@ -5,11 +5,6 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
--- Only load on console
-if not IsConsoleUI() then
-    return
-end
-
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 -- -----------------------------------------------------------------------------
