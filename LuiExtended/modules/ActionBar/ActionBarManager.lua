@@ -948,6 +948,9 @@ local function OnPowerUpdateCompanion(eventCode, unitTag, powerIndex, powerType,
         return
     end
 
+    -- Refresh companion ultimate cost before calculating percentage
+    g_companionUltimateCost = GetSlotAbilityCost(g_ultimateSlot, COMBAT_MECHANIC_FLAGS_ULTIMATE, HOTBAR_CATEGORY_COMPANION) or 0
+
     local pct = (g_companionUltimateCost > 0) and zo_floor((powerValue / g_companionUltimateCost) * 100) or 0
     pct = pct > 100 and 100 or pct
 
