@@ -21,18 +21,34 @@ SpellCastBuffs.ReloadEffects = function (unitTag)
 
     -- Clear existing base containers
     for effectType = BUFF_EFFECT_TYPE_ITERATION_BEGIN, BUFF_EFFECT_TYPE_ITERATION_END do
-        SpellCastBuffs.EffectsList[unitTag .. effectType] = {}
+        local key = unitTag .. effectType
+        local effectsTable = SpellCastBuffs.EffectsList[key]
+        if effectsTable then
+            ZO_ClearTable(effectsTable)
+        else
+            SpellCastBuffs.EffectsList[key] = {}
+        end
     end
     -- Clear prominent containers
     if unitTag == "player" then
         local context = { "promb_player", "promb_ground", "promd_player", "promd_ground" }
         for _, v in pairs(context) do
-            SpellCastBuffs.EffectsList[v] = {}
+            local effectsTable = SpellCastBuffs.EffectsList[v]
+            if effectsTable then
+                ZO_ClearTable(effectsTable)
+            else
+                SpellCastBuffs.EffectsList[v] = {}
+            end
         end
     else
         local context = { "promb_target", "promd_target" }
         for _, v in pairs(context) do
-            SpellCastBuffs.EffectsList[v] = {}
+            local effectsTable = SpellCastBuffs.EffectsList[v]
+            if effectsTable then
+                ZO_ClearTable(effectsTable)
+            else
+                SpellCastBuffs.EffectsList[v] = {}
+            end
         end
     end
 

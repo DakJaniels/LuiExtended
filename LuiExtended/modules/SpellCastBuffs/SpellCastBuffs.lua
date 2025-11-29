@@ -1206,18 +1206,11 @@ function SpellCastBuffs.Reset()
     SpellCastBuffs.SetupContainerAlignment()
     SpellCastBuffs.SetupContainerSort()
 
-    local needs_reset = {}
     -- And reset sizes of already existing icons
     for _, container in pairs(SpellCastBuffs.containerRouting) do
-        needs_reset[container] = true
-    end
-    for _, container in pairs(SpellCastBuffs.containerRouting) do
-        if needs_reset[container] then
-            for i = 1, #SpellCastBuffs.BuffContainers[container].icons do
-                SpellCastBuffs.ResetSingleIcon(container, SpellCastBuffs.BuffContainers[container].icons[i], SpellCastBuffs.BuffContainers[container].icons[i - 1])
-            end
+        for i = 1, #SpellCastBuffs.BuffContainers[container].icons do
+            SpellCastBuffs.ResetSingleIcon(container, SpellCastBuffs.BuffContainers[container].icons[i], SpellCastBuffs.BuffContainers[container].icons[i - 1])
         end
-        needs_reset[container] = false
     end
 
     if SpellCastBuffs.playerActive then
@@ -1717,23 +1710,16 @@ function SpellCastBuffs.ApplyFont()
     local prominentSize = (SpellCastBuffs.SV.ProminentLabelFontSize and SpellCastBuffs.SV.ProminentLabelFontSize > 0) and SpellCastBuffs.SV.ProminentLabelFontSize or 17
     SpellCastBuffs.prominentFont = ZO_CreateFontString(prominentName, prominentSize, prominentStyle)
 
-    local needs_reset = {}
     -- And reset sizes of already existing icons
     for _, container in pairs(SpellCastBuffs.containerRouting) do
-        needs_reset[container] = true
-    end
-    for _, container in pairs(SpellCastBuffs.containerRouting) do
-        if needs_reset[container] then
-            for i = 1, #SpellCastBuffs.BuffContainers[container].icons do
-                -- Set label font
-                SpellCastBuffs.BuffContainers[container].icons[i].label:SetFont(SpellCastBuffs.buffsFont)
-                -- Set prominent buff label font
-                if SpellCastBuffs.BuffContainers[container].icons[i].name then
-                    SpellCastBuffs.BuffContainers[container].icons[i].name:SetFont(SpellCastBuffs.prominentFont)
-                end
+        for i = 1, #SpellCastBuffs.BuffContainers[container].icons do
+            -- Set label font
+            SpellCastBuffs.BuffContainers[container].icons[i].label:SetFont(SpellCastBuffs.buffsFont)
+            -- Set prominent buff label font
+            if SpellCastBuffs.BuffContainers[container].icons[i].name then
+                SpellCastBuffs.BuffContainers[container].icons[i].name:SetFont(SpellCastBuffs.prominentFont)
             end
         end
-        needs_reset[container] = false
     end
 end
 
@@ -1934,7 +1920,10 @@ function SpellCastBuffs.OnDeath(eventCode, unitTag, isDead)
             -- Clear all player/ground/prominent containers
             local context = { "player1", "player2", "ground", "promb_ground", "promd_ground", "promb_player", "promd_player" }
             for _, v in pairs(context) do
-                SpellCastBuffs.EffectsList[v] = {}
+                local effectsTable = SpellCastBuffs.EffectsList[v]
+                if effectsTable then
+                    ZO_ClearTable(effectsTable)
+                end
             end
 
             -- If werewolf is active, reset the icon so it's not removed (otherwise it flashes off for about a second until the trailer function picks up on the fact that no power drain has occurred.
@@ -1944,7 +1933,11 @@ function SpellCastBuffs.OnDeath(eventCode, unitTag, isDead)
         else
             -- TODO: Do we need to clear prominent target containers here? (Don't think so)
             for effectType = BUFF_EFFECT_TYPE_BUFF, BUFF_EFFECT_TYPE_DEBUFF do
-                SpellCastBuffs.EffectsList[unitTag .. effectType] = {}
+                local key = unitTag .. effectType
+                local effectsTable = SpellCastBuffs.EffectsList[key]
+                if effectsTable then
+                    ZO_ClearTable(effectsTable)
+                end
             end
         end
     end

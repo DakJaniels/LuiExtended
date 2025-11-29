@@ -134,8 +134,8 @@ end
 
 -- Called from the menu and on initialize to build the table of hidden effects.
 function SpellCastBuffs.UpdateContextHideList()
-    SpellCastBuffs.hidePlayerEffects = {}
-    SpellCastBuffs.hideTargetEffects = {}
+    ZO_ClearTable(SpellCastBuffs.hidePlayerEffects)
+    ZO_ClearTable(SpellCastBuffs.hideTargetEffects)
 
     -- Hide Warden Crystallized Shield & morphs from effects on the player (we use fake buffs to track this so that the stack count can be displayed)
     SpellCastBuffs.hidePlayerEffects[86135] = true
@@ -269,7 +269,7 @@ end
 -- Called from the menu and on initialize to build the table of effects we should show regardless of source (by id).
 function SpellCastBuffs.UpdateDisplayOverrideIdList()
     -- Clear the list
-    SpellCastBuffs.debuffDisplayOverrideId = {}
+    ZO_ClearTable(SpellCastBuffs.debuffDisplayOverrideId)
 
     -- Add effects from table if enabled
     if SpellCastBuffs.SV.ShowSharedEffects then

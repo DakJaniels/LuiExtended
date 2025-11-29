@@ -445,8 +445,17 @@ local function updateIcons(currentTimeMs, sortedList, container)
             end
 
             if buff.name then
-                buff.name:SetText(zo_strformat("<<C:1>>", effect.name))
+                local formattedName = effect._cachedName or zo_strformat("<<C:1>>", effect.name)
+                if not effect._cachedName then
+                    effect._cachedName = formattedName
+                end
+                buff.name:SetText(formattedName)
             end
+            
+            -- Clear cached values when effect changes
+            effect._sortKey = nil
+            effect._cachedText = nil
+            effect._cachedName = nil
         end
 
         if effect.stack and effect.stack > 0 then
@@ -456,23 +465,33 @@ local function updateIcons(currentTimeMs, sortedList, container)
             buff.stack:SetHidden(true)
         end
 
-        -- For update remaining text. For temporary effects this is not very efficient, but we have not much such effects
+        -- For update remaining text. Cache formatted text to avoid redundant formatting
         if remain and not effect.fakeDuration then
+            local remainSeconds = remain / 1000
+            local cachedText = effect._cachedText
+            local newText
+            
             if remain > 86400000 then
                 -- more then 1 day
-                buff.label:SetText(string_format("%d d", zo_floor(remain / 86400000)))
+                newText = string_format("%d d", zo_floor(remain / 86400000))
             elseif remain > 6000000 then
                 -- over 100 minutes - display XXh
-                buff.label:SetText(string_format("%dh", zo_floor(remain / 3600000)))
+                newText = string_format("%dh", zo_floor(remain / 3600000))
             elseif remain > 600000 then
                 -- over 10 minutes - display XXm
-                buff.label:SetText(string_format("%dm", zo_floor(remain / 60000)))
+                newText = string_format("%dm", zo_floor(remain / 60000))
             elseif remain > 60000 or container == "player_long" then
                 local m = zo_floor(remain / 60000)
-                local s = remain / 1000 - 60 * m
-                buff.label:SetText(string_format("%d:%.2d", m, s))
+                local s = zo_floor(remainSeconds - 60 * m)
+                newText = string_format("%d:%.2d", m, s)
             else
-                buff.label:SetText(string_format(SpellCastBuffs.SV.RemainingTextMillis and "%.1f" or "%.1d", remain / 1000))
+                newText = string_format(SpellCastBuffs.SV.RemainingTextMillis and "%.1f" or "%.1d", remainSeconds)
+            end
+            
+            -- Only update text if it changed
+            if cachedText ~= newText then
+                buff.label:SetText(newText)
+                effect._cachedText = newText
             end
         end
         if effect.restart and buff.cd ~= nil then
@@ -516,49 +535,53 @@ local function updateIcons(currentTimeMs, sortedList, container)
 end
 
 
--- Helper function to sort buffs
---- @param x {
---- dur: number|nil,
---- ends: number|nil,
---- groundLabel: string,
---- name: string,
---- starts: number,
---- toggle: boolean,
---- }
---- @param y {
---- dur: number|nil,
---- ends: number|nil,
---- groundLabel: string,
---- name: string,
---- starts: number,
---- toggle: boolean,
---- }
+-- Helper function to get sort key for an effect (cached on effect for performance)
+local function getSortKey(effect)
+    if effect._sortKey then
+        return effect._sortKey
+    end
+    local duration = (effect.ends == nil or effect.dur == 0 or effect.groundLabel or effect.toggle) and 0 or effect.dur
+    effect._sortKey = duration
+    return duration
+end
+
+-- Helper function to sort buffs (optimized)
+--- @param x table
+--- @param y table
 --- @return boolean?
 local function buffSort(x, y)
-    local xDuration = (x.ends == nil or x.dur == 0 or x.groundLabel or x.toggle) and 0 or x.dur
-    local yDuration = (y.ends == nil or y.dur == 0 or y.groundLabel or y.toggle) and 0 or y.dur
-    -- Sort toggle effects
-    if x.toggle or y.toggle then
-        if xDuration == 0 and yDuration == 0 then
-            if x.toggle and y.toggle then
-                return (x.name < y.name)
-            elseif x.toggle and not y.toggle then
-                return (xDuration == 0)
-            end
+    local xDuration = getSortKey(x)
+    local yDuration = getSortKey(y)
+    
+    -- Both permanent/ground/toggle (duration 0)
+    if xDuration == 0 and yDuration == 0 then
+        if x.toggle and y.toggle then
+            return x.name < y.name
+        elseif x.toggle then
+            return true
+        elseif y.toggle then
+            return false
         else
-            return (xDuration == 0)
+            return x.name < y.name
         end
-        -- Sort permanent/ground effects (might separate these at some point but for now want the sorting function simplified)
-    elseif xDuration == 0 and yDuration == 0 then
-        return (x.name < y.name)
-        -- Both non-permanent
-    elseif xDuration ~= 0 and yDuration ~= 0 then
-        return (x.starts == y.starts) and (x.name < y.name) or (x.ends > y.ends)
-        -- One permanent, one not
-    else
-        return (xDuration == 0)
     end
-    return nil
+    
+    -- One permanent, one not - permanent comes first
+    if xDuration == 0 then
+        return true
+    end
+    if yDuration == 0 then
+        return false
+    end
+    
+    -- Both non-permanent - sort by end time (longer first), then by start time, then by name
+    if x.ends ~= y.ends then
+        return x.ends > y.ends
+    end
+    if x.starts ~= y.starts then
+        return x.starts < y.starts
+    end
+    return x.name < y.name
 end
 
 -- Reusable tables for OnUpdate (cleared each update to avoid allocations)
@@ -634,8 +657,15 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
     -- Sort effects in container and draw them on screen
     for _, container in pairs(containerRouting) do
         if needs_update[container] then
-            table_sort(buffsSorted[container], buffSort)
-            updateIcons(currentTimeMs, buffsSorted[container], container)
+            local sorted = buffsSorted[container]
+            if #sorted > 0 then
+                -- Clear sort keys before sorting (they may be stale)
+                for i = 1, #sorted do
+                    sorted[i]._sortKey = nil
+                end
+                table_sort(sorted, buffSort)
+            end
+            updateIcons(currentTimeMs, sorted, container)
         end
     end
 
@@ -646,8 +676,13 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
 
     -- Update player_long if it has effects
     if sortedCounts.player_long > 0 then
-        table_sort(buffsSorted.player_long, buffSort)
-        updateIcons(currentTimeMs, buffsSorted.player_long, "player_long")
+        local sorted = buffsSorted.player_long
+        -- Clear sort keys before sorting
+        for i = 1, #sorted do
+            sorted[i]._sortKey = nil
+        end
+        table_sort(sorted, buffSort)
+        updateIcons(currentTimeMs, sorted, "player_long")
     end
 
     -- Display Block buff for player if enabled

@@ -337,13 +337,13 @@ local DEVS = readonlytable
         },
         ["@dack_janiels"] =
         {
-            enabled = true,
-            debug = true,
+            enabled = false,
+            debug = false,
         },
         ["@dack_janiels.luie"] =
         {
-            enabled = true,
-            debug = true,
+            enabled = false,
+            debug = false,
         },
     }
 

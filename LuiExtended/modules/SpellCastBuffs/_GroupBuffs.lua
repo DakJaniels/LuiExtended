@@ -128,13 +128,16 @@ local function GetUnitFrame(unitTag)
     return nil
 end
 
+-- Reusable table for RepositionBuffIcons
+local repositionKeys = {}
+
 -- Helper to reposition buff icons in a tight row
 local function RepositionBuffIcons(unitFrame)
-    local keys = {}
+    ZO_ClearTable(repositionKeys)
     for id in pairs(unitFrame.buffIconsById) do
-        table_insert(keys, id)
+        table_insert(repositionKeys, id)
     end
-    table_sort(keys)
+    table_sort(repositionKeys)
 
     -- Check group size to determine which position settings to use
     local defaults = SpellCastBuffs.DefaultGroupSettings
@@ -152,7 +155,7 @@ local function RepositionBuffIcons(unitFrame)
     end
 
     local lastIcon
-    for _, id in ipairs(keys) do
+    for _, id in ipairs(repositionKeys) do
         local bufficon = unitFrame.buffIconsById[id]
         if bufficon and not bufficon:IsHidden() then
             bufficon:ClearAnchors()
