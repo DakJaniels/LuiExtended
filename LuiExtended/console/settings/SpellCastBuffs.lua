@@ -2478,8 +2478,8 @@ function SpellCastBuffs.CreateConsoleSettings()
             getFunction = function ()
                 return Settings.StackPlayerBuffs
             end,
-            setFunction = function (v)
-                Settings.StackPlayerBuffs = v
+            setFunction = function (combobox, value, item)
+                Settings.StackPlayerBuffs = item.data or item.name or value
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
@@ -2526,8 +2526,8 @@ function SpellCastBuffs.CreateConsoleSettings()
             getFunction = function ()
                 return Settings.StackPlayerDebuffs
             end,
-            setFunction = function (v)
-                Settings.StackPlayerDebuffs = v
+            setFunction = function (combobox, value, item)
+                Settings.StackPlayerDebuffs = item.data or item.name or value
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
@@ -2574,8 +2574,8 @@ function SpellCastBuffs.CreateConsoleSettings()
             getFunction = function ()
                 return Settings.StackTargetBuffs
             end,
-            setFunction = function (v)
-                Settings.StackTargetBuffs = v
+            setFunction = function (combobox, value, item)
+                Settings.StackTargetBuffs = item.data or item.name or value
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,
@@ -2622,8 +2622,8 @@ function SpellCastBuffs.CreateConsoleSettings()
             getFunction = function ()
                 return Settings.StackTargetDebuffs
             end,
-            setFunction = function (v)
-                Settings.StackTargetDebuffs = v
+            setFunction = function (combobox, value, item)
+                Settings.StackTargetDebuffs = item.data or item.name or value
                 SpellCastBuffs.SetupContainerAlignment()
                 SpellCastBuffs.SetupContainerSort()
             end,

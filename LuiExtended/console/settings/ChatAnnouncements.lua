@@ -4458,7 +4458,7 @@ function ChatAnnouncements.CreateConsoleSettings()
                 return bracketOptions5[Settings.Skills.SkillPointBracket]
             end,
             setFunction = function (combobox, value, item)
-                Settings.Skills.SkillPointBracket = bracketOptions5Keys[value]
+                Settings.Skills.SkillPointBracket = bracketOptions5Keys[item.data or item.name or value]
             end,
             default = bracketOptions5[Defaults.Skills.SkillPointBracket],
             disable = function ()
@@ -5193,7 +5193,7 @@ function ChatAnnouncements.CreateConsoleSettings()
                 return bracketOptions5[Settings.Collectibles.CollectibleBracket]
             end,
             setFunction = function (combobox, value, item)
-                Settings.Collectibles.CollectibleBracket = bracketOptions5Keys[value]
+                Settings.Collectibles.CollectibleBracket = bracketOptions5Keys[item.data or item.name or value]
             end,
             default = bracketOptions5[Defaults.Collectibles.CollectibleBracket],
             disable = function ()
@@ -5681,7 +5681,7 @@ function ChatAnnouncements.CreateConsoleSettings()
                 return bracketOptions5[Settings.Lorebooks.LorebookBracket]
             end,
             setFunction = function (combobox, value, item)
-                Settings.Lorebooks.LorebookBracket = bracketOptions5Keys[value]
+                Settings.Lorebooks.LorebookBracket = bracketOptions5Keys[item.data or item.name or value]
             end,
             default = bracketOptions5[Defaults.Lorebooks.LorebookBracket],
             disable = function ()
@@ -5885,7 +5885,7 @@ function ChatAnnouncements.CreateConsoleSettings()
                 return bracketOptions5[Settings.Antiquities.AntiquityPrefixBracket]
             end,
             setFunction = function (combobox, value, item)
-                Settings.Antiquities.AntiquityPrefixBracket = bracketOptions5Keys[value]
+                Settings.Antiquities.AntiquityPrefixBracket = bracketOptions5Keys[item.data or item.name or value]
             end,
             default = bracketOptions5[Defaults.Antiquities.AntiquityPrefixBracket],
             disable = function ()
@@ -6245,7 +6245,7 @@ function ChatAnnouncements.CreateConsoleSettings()
                 return bracketOptions5[Settings.Achievement.AchievementBracketOptions]
             end,
             setFunction = function (combobox, value, item)
-                Settings.Achievement.AchievementBracketOptions = bracketOptions5Keys[value]
+                Settings.Achievement.AchievementBracketOptions = bracketOptions5Keys[item.data or item.name or value]
             end,
             default = bracketOptions5[Defaults.Achievement.AchievementBracketOptions],
             disable = function ()
