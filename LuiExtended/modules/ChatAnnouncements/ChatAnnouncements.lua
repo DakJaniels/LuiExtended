@@ -2269,7 +2269,12 @@ function ChatAnnouncements.OnBuyItem(eventId, entryName, entryType, entryQuantit
             entryName = GetCollectibleLink(id, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             itemIcon = GetCollectibleIcon(id) or ZO_NO_TEXTURE_FILE
         else
-            itemIcon = GetItemLinkIcon(entryName) or ZO_NO_TEXTURE_FILE
+            local collectibleId = GetCollectibleIdFromLink(entryName)
+            if collectibleId then
+                itemIcon = GetCollectibleIcon(collectibleId) or ZO_NO_TEXTURE_FILE
+            else
+                itemIcon = ZO_NO_TEXTURE_FILE
+            end
         end
     else
         -- Try to get an icon for non-collectibles, or set a different default
