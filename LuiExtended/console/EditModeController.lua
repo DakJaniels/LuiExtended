@@ -316,7 +316,7 @@ function EditModeController:RefreshSpellCastBuffsMovers(MoverHelper)
         }
         for _, item in ipairs(containers) do
             if item.container and item.container:GetType() == CT_TOPLEVELCONTROL then
-                MoverHelper.UpdateControlState(item.container, item.id, true)
+                MoverHelper.UpdateControlState(item.container, item.id, LUIE.SpellCastBuffs.BuffsMovingState)
             end
         end
     else
@@ -346,7 +346,7 @@ function EditModeController:RefreshSpellCastBuffsMovers(MoverHelper)
         }
         for _, item in ipairs(alwaysContainers) do
             if item.container and item.container:GetType() == CT_TOPLEVELCONTROL then
-                MoverHelper.UpdateControlState(item.container, item.id, true)
+                MoverHelper.UpdateControlState(item.container, item.id, LUIE.SpellCastBuffs.BuffsMovingState)
             end
         end
     end
