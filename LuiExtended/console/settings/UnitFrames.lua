@@ -728,8 +728,8 @@ function UnitFrames.CreateConsoleSettings()
             getFunction = function ()
                 return { data = Settings.CustomTexture }
             end,
-            setFunction = function (var)
-                Settings.CustomTexture = var
+            setFunction = function (combobox, value, item)
+                Settings.CustomTexture = item.data or item.name or value
                 UnitFrames.CustomFramesApplyTexture()
             end,
             default = Defaults.CustomTexture,
@@ -1431,8 +1431,8 @@ function UnitFrames.CreateConsoleSettings()
             getFunction = function ()
                 return { data = Settings.CustomFormatOnePT }
             end,
-            setFunction = function (value)
-                Settings.CustomFormatOnePT = value
+            setFunction = function (combobox, value, item)
+                Settings.CustomFormatOnePT = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutPlayer(true)
             end,
@@ -1457,8 +1457,8 @@ function UnitFrames.CreateConsoleSettings()
             getFunction = function ()
                 return { data = Settings.CustomFormatTwoPT }
             end,
-            setFunction = function (value)
-                Settings.CustomFormatTwoPT = value
+            setFunction = function (combobox, value, item)
+                Settings.CustomFormatTwoPT = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutPlayer(true)
             end,
@@ -1997,8 +1997,8 @@ function UnitFrames.CreateConsoleSettings()
             getFunction = function ()
                 return { data = Settings.TargetTitlePriority }
             end,
-            setFunction = function (value)
-                Settings.TargetTitlePriority = value
+            setFunction = function (combobox, value, item)
+                Settings.TargetTitlePriority = item.data or item.name or value
                 UnitFrames.CustomFramesApplyLayoutPlayer(true)
             end,
             default = Defaults.TargetTitlePriority,
@@ -2258,8 +2258,8 @@ function UnitFrames.CreateConsoleSettings()
             getFunction = function ()
                 return { data = Settings.CustomFormatCenterLabel }
             end,
-            setFunction = function (value)
-                Settings.CustomFormatCenterLabel = value
+            setFunction = function (combobox, value, item)
+                Settings.CustomFormatCenterLabel = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutPlayer(true)
             end,
@@ -2641,8 +2641,8 @@ function UnitFrames.CreateConsoleSettings()
             getFunction = function ()
                 return { data = Settings.CustomFormatTwoGroup }
             end,
-            setFunction = function (value)
-                Settings.CustomFormatTwoGroup = value
+            setFunction = function (combobox, value, item)
+                Settings.CustomFormatTwoGroup = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutGroup(true)
             end,
@@ -2992,8 +2992,8 @@ function UnitFrames.CreateConsoleSettings()
             getFunction = function ()
                 return { data = Settings.CustomFormatRaid }
             end,
-            setFunction = function (value)
-                Settings.CustomFormatRaid = value
+            setFunction = function (combobox, value, item)
+                Settings.CustomFormatRaid = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutRaid(true)
             end,
@@ -3082,8 +3082,8 @@ function UnitFrames.CreateConsoleSettings()
             getFunction = function ()
                 return { data = Settings.RaidLayout }
             end,
-            setFunction = function (value)
-                Settings.RaidLayout = value
+            setFunction = function (combobox, value, item)
+                Settings.RaidLayout = item.data or item.name or value
                 UnitFrames.CustomFramesApplyLayoutRaid(true)
             end,
             default = Defaults.RaidLayout,
@@ -4085,8 +4085,8 @@ function UnitFrames.CreateConsoleSettings()
             getFunction = function ()
                 return { data = Settings.CustomFormatCompanion }
             end,
-            setFunction = function (value)
-                Settings.CustomFormatCompanion = value
+            setFunction = function (combobox, value, item)
+                Settings.CustomFormatCompanion = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutCompanion(true)
             end,
@@ -4270,8 +4270,8 @@ function UnitFrames.CreateConsoleSettings()
             getFunction = function ()
                 return { data = Settings.CustomFormatPet }
             end,
-            setFunction = function (value)
-                Settings.CustomFormatPet = value
+            setFunction = function (combobox, value, item)
+                Settings.CustomFormatPet = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
                 UnitFrames.CustomFramesApplyLayoutPet(true)
             end,
@@ -4577,8 +4577,8 @@ function UnitFrames.CreateConsoleSettings()
             getFunction = function ()
                 return { data = Settings.CustomFormatBoss }
             end,
-            setFunction = function (value)
-                Settings.CustomFormatBoss = value
+            setFunction = function (combobox, value, item)
+                Settings.CustomFormatBoss = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
             end,
             default = Defaults.CustomFormatBoss,
