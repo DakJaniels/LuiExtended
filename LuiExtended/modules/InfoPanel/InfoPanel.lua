@@ -448,7 +448,9 @@ function InfoPanel.SetMovingState(state)
         end
 
         MoverHelper.SetupGamepadHandler(uiPanel, "default", function (control, left, top)
-            InfoPanel.SV.position = { left, top }
+            -- Convert top-left coordinates to center coordinates to match how position is restored
+            local centerX, centerY = control:GetCenter()
+            InfoPanel.SV.position = { centerX, centerY }
         end)
         MoverHelper.UpdateControlState(uiPanel, "infoPanel", state)
 
