@@ -1,4 +1,4 @@
-﻿-- -----------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -47,6 +47,101 @@ local function getCCColor(ccType)
     return ccColors[ccType] or SpellCastBuffs.SV.colors.nocc
 end
 
+-- Helper function to check if effect is priority
+--- @param id integer
+--- @param abilityName string
+--- @param contextType string
+--- @return boolean
+local function isPriorityEffect(id, abilityName, contextType)
+    if contextType == "buff" then
+        return SpellCastBuffs.SV.PriorityBuffTable[id] or SpellCastBuffs.SV.PriorityBuffTable[abilityName]
+    else
+        return SpellCastBuffs.SV.PriorityDebuffTable[id] or SpellCastBuffs.SV.PriorityDebuffTable[abilityName]
+    end
+end
+
+-- Helper function to get sort direction iteration parameters
+--- @param container string
+--- @param iconsNum integer
+--- @return integer, integer, integer
+local function getSortDirectionParams(container, iconsNum)
+    local sortDir = SpellCastBuffs.sortDirection[container]
+    if sortDir == "Left to Right" or sortDir == "Bottom to Top" then
+        return 1, iconsNum, 1
+    elseif sortDir == "Right to Left" or sortDir == "Top to Bottom" then
+        return iconsNum, 1, -1
+    else
+        return 1, iconsNum, 1
+    end
+end
+
+-- Helper function to calculate remaining time
+--- @param effect table
+--- @param currentTimeMs number
+--- @return number|nil
+local function calculateRemainingTime(effect, currentTimeMs)
+    return (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
+end
+
+-- Helper function to format remaining time text
+--- @param remain number
+--- @param container string
+--- @return string
+local function formatRemainingTime(remain, container)
+    if remain > 86400000 then
+        return string_format("%d d", zo_floor(remain / 86400000))
+    elseif remain > 6000000 then
+        return string_format("%dh", zo_floor(remain / 3600000))
+    elseif remain > 600000 then
+        return string_format("%dm", zo_floor(remain / 60000))
+    elseif remain > 60000 or container == "player_long" then
+        local m = zo_floor(remain / 60000)
+        local s = remain / 1000 - 60 * m
+        return string_format("%d:%.2d", m, s)
+    else
+        return string_format(SpellCastBuffs.SV.RemainingTextMillis and "%.1f" or "%.1d", remain / 1000)
+    end
+end
+
+-- Helper function to get row increment for container
+--- @param container string
+--- @return integer
+local function getRowIncrement(container)
+    local rowIncrements =
+    {
+        player1 = 1,
+        target1 = 1,
+        player2 = -1,
+        target2 = -1,
+        playerb = (SpellCastBuffs.SV.StackPlayerBuffs == "Down" and 1 or -1),
+        playerd = (SpellCastBuffs.SV.StackPlayerDebuffs == "Down" and 1 or -1),
+        targetb = (SpellCastBuffs.SV.StackTargetBuffs == "Down" and 1 or -1),
+        targetd = (SpellCastBuffs.SV.StackTargetDebuffs == "Down" and 1 or -1),
+    }
+    return rowIncrements[container] or 0
+end
+
+-- Helper function to check if container is prominent
+--- @param container string
+--- @return boolean
+local function isProminentContainer(container)
+    return container == "prominentbuffs" or container == "prominentdebuffs"
+end
+
+-- Helper function to add effect to sorted list
+--- @param sortedCounts table
+--- @param buffsSorted table
+--- @param container string
+--- @param effect table
+local function addToSortedList(sortedCounts, buffsSorted, container, effect)
+    if not sortedCounts[container] then
+        sortedCounts[container] = 0
+        buffsSorted[container] = {}
+    end
+    sortedCounts[container] = sortedCounts[container] + 1
+    buffsSorted[container][sortedCounts[container]] = effect
+end
+
 --- @param buff table
 --- @param buffType integer
 --- @param unbreakable integer
@@ -55,20 +150,12 @@ local SetSingleIconBuffType = function (buff, buffType, unbreakable, id)
     -- Determine context type and get ability name
     local contextType = (buffType == BUFF_EFFECT_TYPE_BUFF) and "buff" or "debuff"
     local abilityName = GetAbilityName(id)
-
-    -- Helper function to determine if effect is priority
-    local function isPriorityEffect()
-        if contextType == "buff" then
-            return SpellCastBuffs.SV.PriorityBuffTable[id] or SpellCastBuffs.SV.PriorityBuffTable[abilityName]
-        else
-            return SpellCastBuffs.SV.PriorityDebuffTable[id] or SpellCastBuffs.SV.PriorityDebuffTable[abilityName]
-        end
-    end
+    local priority = isPriorityEffect(id, abilityName, contextType)
 
     -- Determine fill color based on buff type and conditions
     local function determineFillColor()
         if contextType == "buff" then
-            if isPriorityEffect() then
+            if priority then
                 return SpellCastBuffs.SV.colors.prioritybuff
             elseif unbreakable == 1 and SpellCastBuffs.SV.ColorCosmetic then
                 return SpellCastBuffs.SV.colors.cosmetic
@@ -76,7 +163,7 @@ local SetSingleIconBuffType = function (buff, buffType, unbreakable, id)
                 return SpellCastBuffs.SV.colors.buff
             end
         else -- debuff
-            if isPriorityEffect() then
+            if priority then
                 return SpellCastBuffs.SV.colors.prioritydebuff
             elseif unbreakable == 1 and SpellCastBuffs.SV.ColorUnbreakable then
                 return SpellCastBuffs.SV.colors.unbreakable
@@ -125,164 +212,84 @@ local SetSingleIconBuffType = function (buff, buffType, unbreakable, id)
 
     -- Set progress bar colors if they exist
     if buff.bar then
-        setProgressBarColors(buffType == BUFF_EFFECT_TYPE_DEBUFF, isPriorityEffect())
+        setProgressBarColors(buffType == BUFF_EFFECT_TYPE_DEBUFF, priority)
     end
 end
 
--- Initialize buff icon pools per container (called once on module init)
-local buffIconPools = {}
+-- Create a single buff icon
+--- @param container string
+--- @param AnchorItem Control|nil
+--- @param effectType integer|nil
+--- @return Control
+local function CreateSingleIcon(container, AnchorItem, effectType)
+    -- Create main buff container
+    local buff = UI:Backdrop(SpellCastBuffs.BuffContainers[container], nil, nil, { 0, 0, 0, 0.5 }, { 0, 0, 0, 1 }, false)
+    -- Setup mouse interaction
+    buff:SetMouseEnabled(true)
+    buff:SetHandler("OnMouseEnter", SpellCastBuffs.Buff_OnMouseEnter)
+    buff:SetHandler("OnMouseExit", SpellCastBuffs.Buff_OnMouseExit)
+    buff:SetHandler("OnMouseUp", SpellCastBuffs.Buff_OnMouseUp)
 
-local function GetOrCreateBuffIconPool(container)
-    if not buffIconPools[container] then
-        local function BuffIconFactory(objectPool)
-            local effectType = nil -- Will be set when acquired
+    -- Border layer - hidden by default, shown only for non-collectible buffs
+    buff.back = UI:Texture(buff, "fill", nil, "EsoUI/Art/ActionBar/abilityFrame_buff.dds", DL_BACKGROUND, true)
 
-            -- Create main buff container
-            local buff = UI:Backdrop(SpellCastBuffs.BuffContainers[container], nil, nil, { 0, 0, 0, 0.5 }, { 0, 0, 0, 1 }, false)
-            -- Setup mouse interaction
-            buff:SetMouseEnabled(true)
-            buff:SetHandler("OnMouseEnter", SpellCastBuffs.Buff_OnMouseEnter)
-            buff:SetHandler("OnMouseExit", SpellCastBuffs.Buff_OnMouseExit)
-            buff:SetHandler("OnMouseUp", SpellCastBuffs.Buff_OnMouseUp)
+    -- Glow border layer
+    buff.frame = UI:Texture(buff, { CENTER, CENTER }, nil, nil, DL_OVERLAY, false)
 
-            -- Border layer - hidden by default, shown only for non-collectible buffs
-            buff.back = UI:Texture(buff, "fill", nil, "EsoUI/Art/ActionBar/abilityFrame_buff.dds", DL_BACKGROUND, true)
-
-            -- Glow border layer
-            buff.frame = UI:Texture(buff, { CENTER, CENTER }, nil, nil, DL_OVERLAY, false)
-
-            -- Background layer (except for player_long container)
-            if container ~= "player_long" then
-                -- Create background texture
-                buff.iconbg = UI:Texture(buff, "fill", nil, "EsoUI/Art/ActionBar/abilityInset.dds", DL_CONTROLS, false)
-                -- Create dark backdrop behind the texture
-                local bgBackdrop = UI:Backdrop(buff.iconbg, "fill", nil, { 0, 0, 0, 0.9 }, { 0, 0, 0, 0.9 }, false)
-                bgBackdrop:SetDrawLevel(DL_CONTROLS)
-            end
-
-            -- Collectible/mount background
-            buff.drop = UI:Texture(buff, nil, nil, LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_BACKGROUND_DDS, DL_BACKGROUND, true)
-
-            -- Main ability icon
-            buff.icon = UI:Texture(buff, nil, nil, "/esoui/art/icons/icon_missing.dds", DL_CONTROLS, false)
-
-            -- Duration label
-            buff.label = UI:Label(buff, nil, nil, nil, SpellCastBuffs.buffsFont, nil, false)
-            buff.label:SetAnchor(TOPLEFT, buff, LEFT, -SpellCastBuffs.padding, -SpellCastBuffs.SV.LabelPosition)
-            buff.label:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, SpellCastBuffs.padding, -2)
-
-            -- Debug ability ID label
-            buff.abilityId = UI:Label(buff, { CENTER, CENTER }, nil, nil, SpellCastBuffs.buffsFont, nil, false)
-            buff.abilityId:SetDrawLayer(DL_OVERLAY)
-            buff.abilityId:SetDrawTier(DT_MEDIUM)
-
-            -- Stack count label
-            buff.stack = UI:Label(buff, nil, nil, nil, SpellCastBuffs.buffsFont, nil, false)
-            buff.stack:SetAnchor(CENTER, buff, BOTTOMLEFT, 0, 0)
-            buff.stack:SetAnchor(CENTER, buff, TOPRIGHT, -SpellCastBuffs.padding * 3, SpellCastBuffs.padding * 3)
-
-            if buff.iconbg then
-                buff.cd = UI:ControlWithType(buff, "fill", nil, false, nil, CT_COOLDOWN)
-                buff.cd:SetAnchor(TOPLEFT, buff, TOPLEFT, 1, 1)
-                buff.cd:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -1, -1)
-                buff.cd:SetDrawLayer(DL_BACKGROUND)
-            end
-
-            if container == "prominentbuffs" or container == "prominentdebuffs" then
-                buff.effectType = effectType
-                buff.name = UI:Label(buff, nil, nil, nil, SpellCastBuffs.prominentFont, nil, false)
-
-                -- Create progress bar
-                buff.bar =
-                {
-                    backdrop = UI:Backdrop(buff, nil, { 154, 16 }, nil, nil, false),
-                    bar = UI:StatusBar(buff, nil, { 150, 12 }, nil, false),
-                }
-
-                -- Setup bar properties
-                buff.bar.backdrop:SetEdgeTexture("", 8, 2, 2, 2)
-                buff.bar.backdrop:SetDrawLayer(DL_BACKGROUND)
-                buff.bar.backdrop:SetDrawLevel(DL_CONTROLS)
-                buff.bar.bar:SetMinMax(0, 1)
-            end
-
-            return buff
-        end
-
-        local function BuffIconReset(buff)
-            -- Hide the main buff control
-            buff:SetHidden(true)
-            -- Clear anchors on main control
-            buff:ClearAnchors()
-            -- Reset visual state
-            buff:SetAlpha(1)
-            -- Reset all child controls
-            if buff.label then
-                buff.label:ClearAnchors()
-                buff.label:SetText("")
-                buff.label:SetColor(1, 1, 1, 1) -- Reset to default white
-            end
-            if buff.stack then
-                buff.stack:ClearAnchors()
-                buff.stack:SetText("")
-                buff.stack:SetHidden(true)
-            end
-            if buff.name then
-                buff.name:ClearAnchors()
-                buff.name:SetText("")
-            end
-            if buff.abilityId then
-                buff.abilityId:SetText("")
-            end
-            -- Reset icon texture to default
-            if buff.icon then
-                buff.icon:ClearAnchors()
-                buff.icon:SetTexture("/esoui/art/icons/icon_missing.dds")
-            end
-            -- Reset cooldown to stopped state
-            if buff.cd then
-                buff.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
-            end
-            -- Reset progress bar
-            if buff.bar then
-                if buff.bar.bar then
-                    buff.bar.bar:SetValue(0)
-                end
-                if buff.bar.backdrop then
-                    buff.bar.backdrop:ClearAnchors()
-                end
-                if buff.bar.bar then
-                    buff.bar.bar:ClearAnchors()
-                end
-            end
-            -- Reset frame and backdrop textures
-            if buff.frame then
-                buff.frame:ClearAnchors()
-            end
-            if buff.back then
-                buff.back:ClearAnchors()
-            end
-            if buff.drop then
-                buff.drop:ClearAnchors()
-                buff.drop:SetHidden(true)
-            end
-            if buff.iconbg then
-                buff.iconbg:ClearAnchors()
-            end
-            -- Clear any cached effect data
-            buff.effectType = nil
-        end
-
-        -- Create the pool
-        buffIconPools[container] = ZO_ObjectPool:New(BuffIconFactory, BuffIconReset)
+    -- Background layer (except for player_long container)
+    if container ~= "player_long" then
+        -- Create background texture
+        buff.iconbg = UI:Texture(buff, "fill", nil, "EsoUI/Art/ActionBar/abilityInset.dds", DL_CONTROLS, false)
+        -- Create dark backdrop behind the texture
+        local bgBackdrop = UI:Backdrop(buff.iconbg, "fill", nil, { 0, 0, 0, 0.9 }, { 0, 0, 0, 0.9 }, false)
+        bgBackdrop:SetDrawLevel(DL_CONTROLS)
     end
 
-    return buffIconPools[container]
-end
+    -- Collectible/mount background
+    buff.drop = UI:Texture(buff, nil, nil, LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_BACKGROUND_DDS, DL_BACKGROUND, true)
 
-local CreateSingleIcon = function (container, AnchorItem, effectType)
-    local pool = GetOrCreateBuffIconPool(container)
-    local buff = pool:AcquireObject()
+    -- Main ability icon
+    buff.icon = UI:Texture(buff, nil, nil, "/esoui/art/icons/icon_missing.dds", DL_CONTROLS, false)
+
+    -- Duration label
+    buff.label = UI:Label(buff, nil, nil, nil, SpellCastBuffs.buffsFont, nil, false)
+    buff.label:SetAnchor(TOPLEFT, buff, LEFT, -SpellCastBuffs.padding, -SpellCastBuffs.SV.LabelPosition)
+    buff.label:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, SpellCastBuffs.padding, -2)
+
+    -- Debug ability ID label
+    buff.abilityId = UI:Label(buff, { CENTER, CENTER }, nil, nil, SpellCastBuffs.buffsFont, nil, false)
+    buff.abilityId:SetDrawLayer(DL_OVERLAY)
+    buff.abilityId:SetDrawTier(DT_MEDIUM)
+
+    -- Stack count label
+    buff.stack = UI:Label(buff, nil, nil, nil, SpellCastBuffs.buffsFont, nil, false)
+    buff.stack:SetAnchor(CENTER, buff, BOTTOMLEFT, 0, 0)
+    buff.stack:SetAnchor(CENTER, buff, TOPRIGHT, -SpellCastBuffs.padding * 3, SpellCastBuffs.padding * 3)
+
+    if buff.iconbg then
+        buff.cd = UI:ControlWithType(buff, "fill", nil, false, nil, CT_COOLDOWN)
+        buff.cd:SetAnchor(TOPLEFT, buff, TOPLEFT, 1, 1)
+        buff.cd:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -1, -1)
+        buff.cd:SetDrawLayer(DL_BACKGROUND)
+    end
+
+    if isProminentContainer(container) then
+        buff.effectType = effectType
+        buff.name = UI:Label(buff, nil, nil, nil, SpellCastBuffs.prominentFont, nil, false)
+
+        -- Create progress bar
+        buff.bar =
+        {
+            backdrop = UI:Backdrop(buff, nil, { 154, 16 }, nil, nil, false),
+            bar = UI:StatusBar(buff, nil, { 150, 12 }, nil, false),
+        }
+
+        -- Setup bar properties
+        buff.bar.backdrop:SetEdgeTexture("", 8, 2, 2, 2)
+        buff.bar.backdrop:SetDrawLayer(DL_BACKGROUND)
+        buff.bar.backdrop:SetDrawLevel(DL_CONTROLS)
+        buff.bar.bar:SetMinMax(0, 1)
+    end
 
     -- Reset icon properties for first use
     SpellCastBuffs.ResetSingleIcon(container, buff, AnchorItem)
@@ -317,28 +324,14 @@ end
 --- @param container string
 local updateBar = function (currentTimeMs, sortedList, container)
     local iconsNum = #sortedList
-    local istart, iend, istep
+    local istart, iend, istep = getSortDirectionParams(container, iconsNum)
 
-    if SpellCastBuffs.sortDirection[container] then
-        if SpellCastBuffs.sortDirection[container] == "Left to Right" or SpellCastBuffs.sortDirection[container] == "Bottom to Top" then
-            istart, iend, istep = 1, iconsNum, 1
-        end
-        if SpellCastBuffs.sortDirection[container] == "Right to Left" or SpellCastBuffs.sortDirection[container] == "Top to Bottom" then
-            istart, iend, istep = iconsNum, 1, -1
-        end
-        -- Fall back in case for some strange reason the container doesn't exist
-    else
-        istart, iend, istep = 1, iconsNum, 1
-    end
-
-    local index = 0 -- Global icon counter
+    local index = 0
     for i = istart, iend, istep do
         index = index + 1
-        -- Get current buff definition
         local effect = sortedList[i]
-
         local ground = effect.groundLabel
-        local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
+        local remain = calculateRemainingTime(effect, currentTimeMs)
         local buff = SpellCastBuffs.BuffContainers[container].icons[index]
         local auraStarts = effect.starts or nil
         local auraEnds = effect.ends or nil
@@ -375,20 +368,7 @@ local updateIcons = function (currentTimeMs, sortedList, container)
     end
 
     local iconsNum = #sortedList
-    local istart, iend, istep
-
-    -- Set Sort Direction
-    if SpellCastBuffs.sortDirection[container] then
-        if SpellCastBuffs.sortDirection[container] == "Left to Right" or SpellCastBuffs.sortDirection[container] == "Bottom to Top" then
-            istart, iend, istep = 1, iconsNum, 1
-        end
-        if SpellCastBuffs.sortDirection[container] == "Right to Left" or SpellCastBuffs.sortDirection[container] == "Top to Bottom" then
-            istart, iend, istep = iconsNum, 1, -1
-        end
-        -- Fall back in case there is no sort direction for the container somehow
-    else
-        istart, iend, istep = 1, iconsNum, 1
-    end
+    local istart, iend, istep = getSortDirectionParams(container, iconsNum)
 
     -- Size of icon+padding
     local iconSize = SpellCastBuffs.SV.IconSize + SpellCastBuffs.padding
@@ -412,17 +392,16 @@ local updateIcons = function (currentTimeMs, sortedList, container)
         -- Get current buff definition
         local effect = sortedList[i]
         index = index + 1
-        -- Get or create icon from pool
+        -- Get or create icon
         if SpellCastBuffs.BuffContainers[container].icons[index] == nil then
             SpellCastBuffs.BuffContainers[container].icons[index] = CreateSingleIcon(container, SpellCastBuffs.BuffContainers[container].icons[index - 1], effect.type)
         end
 
-        -- Calculate remaining time
-        local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
+        local remain = calculateRemainingTime(effect, currentTimeMs)
         local name = (effect.name ~= nil) and effect.name or nil
 
         local buff = SpellCastBuffs.BuffContainers[container].icons[index]
-        -- Ensure buff is shown (may have been hidden by pool reset)
+        -- Ensure buff is shown (may have been hidden previously)
         buff:SetHidden(false)
 
         -- Perform manual alignment
@@ -452,23 +431,8 @@ local updateIcons = function (currentTimeMs, sortedList, container)
 
                 buff:ClearAnchors()
                 buff:SetAnchor(TOPLEFT, SpellCastBuffs.BuffContainers[container], anchor, leftPadding, row * iconSize)
-                -- Determine if we need to make next row
                 if SpellCastBuffs.BuffContainers[container].maxIcons then
-                    -- If buffs then stack down
-                    if container == "player1" or container == "target1" then
-                        row = row + 1
-                        -- If debuffs then stack up
-                    elseif container == "player2" or container == "target2" then
-                        row = row - 1
-                    elseif container == "playerb" then
-                        row = row + (SpellCastBuffs.SV.StackPlayerBuffs == "Down" and 1 or -1)
-                    elseif container == "playerd" then
-                        row = row + (SpellCastBuffs.SV.StackPlayerDebuffs == "Down" and 1 or -1)
-                    elseif container == "targetb" then
-                        row = row + (SpellCastBuffs.SV.StackTargetBuffs == "Down" and 1 or -1)
-                    elseif container == "targetd" then
-                        row = row + (SpellCastBuffs.SV.StackTargetDebuffs == "Down" and 1 or -1)
-                    end
+                    row = row + getRowIncrement(container)
                     next_row_break = next_row_break + SpellCastBuffs.BuffContainers[container].maxIcons
                 end
             end
@@ -523,24 +487,8 @@ local updateIcons = function (currentTimeMs, sortedList, container)
             buff.stack:SetHidden(true)
         end
 
-        -- For update remaining text. For temporary effects this is not very efficient, but we have not much such effects
         if remain and not effect.fakeDuration then
-            if remain > 86400000 then
-                -- more then 1 day
-                buff.label:SetText(string_format("%d d", zo_floor(remain / 86400000)))
-            elseif remain > 6000000 then
-                -- over 100 minutes - display XXh
-                buff.label:SetText(string_format("%dh", zo_floor(remain / 3600000)))
-            elseif remain > 600000 then
-                -- over 10 minutes - display XXm
-                buff.label:SetText(string_format("%dm", zo_floor(remain / 60000)))
-            elseif remain > 60000 or container == "player_long" then
-                local m = zo_floor(remain / 60000)
-                local s = remain / 1000 - 60 * m
-                buff.label:SetText(string_format("%d:%.2d", m, s))
-            else
-                buff.label:SetText(string_format(SpellCastBuffs.SV.RemainingTextMillis and "%.1f" or "%.1d", remain / 1000))
-            end
+            buff.label:SetText(formatRemainingTime(remain, container))
         end
         if effect.restart and buff.cd ~= nil then
             -- Modify recall penalty to show forced max duration
@@ -617,6 +565,31 @@ local buffSort = function (x, y)
     return nil
 end
 
+-- Helper function to determine if effect should be added to sorted list
+--- @param effect table
+--- @param container string
+--- @return boolean, string|nil
+local function shouldAddEffect(effect, container)
+    if effect.target == "prominent" then
+        return true, container
+    elseif effect.type == BUFF_EFFECT_TYPE_DEBUFF or effect.forced == "short" or not (effect.forced == "long" or effect.ends == nil or effect.dur == 0) then
+        if effect.target == "reticleover" and SpellCastBuffs.SV.ShortTermEffects_Target then
+            return true, container
+        elseif effect.target == "player" and SpellCastBuffs.SV.ShortTermEffects_Player then
+            return true, container
+        end
+    elseif effect.target == "reticleover" and SpellCastBuffs.SV.LongTermEffects_Target then
+        return true, container
+    elseif effect.target == "player" and SpellCastBuffs.SV.LongTermEffects_Player then
+        if SpellCastBuffs.SV.LongTermEffectsSeparate and not isProminentContainer(container) then
+            return true, "player_long"
+        else
+            return true, container
+        end
+    end
+    return false, nil
+end
+
 -- Runs OnUpdate - 100 ms buffer
 --- @param currentTimeMs number
 function SpellCastBuffs.OnUpdate(currentTimeMs)
@@ -625,18 +598,17 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
     local needs_update = {}
     local isProminent = {}
 
-    -- And reset sizes of already existing icons
     for _, container in pairs(SpellCastBuffs.containerRouting) do
         needs_update[container] = true
-        -- Prepare sort container
-        if buffsSorted[container] == nil then
-            buffsSorted[container] = {}
-        end
+        buffsSorted[container] = {}
         sortedCounts[container] = 0
-        -- Refresh prominent buff labels on each update tick
-        if container == "prominentbuffs" or container == "prominentdebuffs" then
+        if isProminentContainer(container) then
             isProminent[container] = true
         end
+    end
+    if not buffsSorted.player_long then
+        buffsSorted.player_long = {}
+        sortedCounts.player_long = 0
     end
 
     -- Filter expired events and build array for sorting
@@ -646,53 +618,21 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
             -- Remove effect (that is not permanent and has duration)
             if v.ends ~= nil and v.dur > 0 and v.ends < currentTimeMs then
                 effectsList[k] = nil
-            elseif container then
-                -- Add icons to to-be-sorted list only if effect already started
-                if v.starts < currentTimeMs then
-                    -- Filter Effects
-                    -- Always show prominent effects
-                    if v.target == "prominent" then
-                        sortedCounts[container] = sortedCounts[container] + 1
-                        buffsSorted[container][sortedCounts[container]] = v
-                        -- If the effect is not flagged as long or 0 duration and flagged to display in short container, then display normally.
-                    elseif v.type == BUFF_EFFECT_TYPE_DEBUFF or v.forced == "short" or not (v.forced == "long" or v.ends == nil or v.dur == 0) then
-                        if v.target == "reticleover" and SpellCastBuffs.SV.ShortTermEffects_Target then
-                            sortedCounts[container] = sortedCounts[container] + 1
-                            buffsSorted[container][sortedCounts[container]] = v
-                        elseif v.target == "player" and SpellCastBuffs.SV.ShortTermEffects_Player then
-                            sortedCounts[container] = sortedCounts[container] + 1
-                            buffsSorted[container][sortedCounts[container]] = v
-                        end
-                        -- If the effect is a long term effect on the target then use Long Term Target settings.
-                    elseif v.target == "reticleover" and SpellCastBuffs.SV.LongTermEffects_Target then
-                        sortedCounts[container] = sortedCounts[container] + 1
-                        buffsSorted[container][sortedCounts[container]] = v
-                        -- If the effect is a long term effect on the player then use Long Term Player settings.
-                    elseif v.target == "player" and SpellCastBuffs.SV.LongTermEffects_Player then
-                        -- Choose container for long-term player buffs
-                        if SpellCastBuffs.SV.LongTermEffectsSeparate and not (container == "prominentbuffs" or container == "prominentdebuffs") then
-                            sortedCounts.player_long = sortedCounts.player_long + 1
-                            buffsSorted.player_long[sortedCounts.player_long] = v
-                        else
-                            sortedCounts[container] = sortedCounts[container] + 1
-                            buffsSorted[container][sortedCounts[container]] = v
-                        end
-                    end
+            elseif container and v.starts < currentTimeMs then
+                local shouldAdd, targetContainer = shouldAddEffect(v, container)
+                if shouldAdd then
+                    addToSortedList(sortedCounts, buffsSorted, targetContainer, v)
                 end
             end
         end
     end
 
-    -- Sort effects in container and draw them on screen
     for _, container in pairs(SpellCastBuffs.containerRouting) do
         if needs_update[container] then
             table_sort(buffsSorted[container], buffSort)
             updateIcons(currentTimeMs, buffsSorted[container], container)
+            needs_update[container] = false
         end
-        needs_update[container] = false
-    end
-
-    for _, container in pairs(SpellCastBuffs.containerRouting) do
         if isProminent[container] then
             updateBar(currentTimeMs, buffsSorted[container], container)
         end
