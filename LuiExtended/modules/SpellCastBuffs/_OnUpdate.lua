@@ -51,7 +51,7 @@ end
 --- @param buffType integer
 --- @param unbreakable integer
 --- @param id integer
-local function SetSingleIconBuffType(buff, buffType, unbreakable, id)
+local SetSingleIconBuffType = function (buff, buffType, unbreakable, id)
     -- Determine context type and get ability name
     local contextType = (buffType == BUFF_EFFECT_TYPE_BUFF) and "buff" or "debuff"
     local abilityName = GetAbilityName(id)
@@ -220,7 +220,7 @@ local function GetOrCreateBuffIconPool(container)
             if buff.label then
                 buff.label:ClearAnchors()
                 buff.label:SetText("")
-                buff.label:SetColor(1, 1, 1, 1)
+                buff.label:SetColor(1, 1, 1, 1) -- Reset to default white
             end
             if buff.stack then
                 buff.stack:ClearAnchors()
@@ -234,13 +234,16 @@ local function GetOrCreateBuffIconPool(container)
             if buff.abilityId then
                 buff.abilityId:SetText("")
             end
+            -- Reset icon texture to default
             if buff.icon then
                 buff.icon:ClearAnchors()
                 buff.icon:SetTexture("/esoui/art/icons/icon_missing.dds")
             end
+            -- Reset cooldown to stopped state
             if buff.cd then
                 buff.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
             end
+            -- Reset progress bar
             if buff.bar then
                 if buff.bar.bar then
                     buff.bar.bar:SetValue(0)
@@ -252,6 +255,7 @@ local function GetOrCreateBuffIconPool(container)
                     buff.bar.bar:ClearAnchors()
                 end
             end
+            -- Reset frame and backdrop textures
             if buff.frame then
                 buff.frame:ClearAnchors()
             end
@@ -265,15 +269,8 @@ local function GetOrCreateBuffIconPool(container)
             if buff.iconbg then
                 buff.iconbg:ClearAnchors()
             end
-            -- Clear cached effect data and pool references
+            -- Clear any cached effect data
             buff.effectType = nil
-            buff.effectId = nil
-            buff.effectName = nil
-            buff.buffType = nil
-            buff.buffSlot = nil
-            buff.tooltip = nil
-            buff.duration = nil
-            buff.container = nil
         end
 
         -- Create the pool
@@ -283,13 +280,9 @@ local function GetOrCreateBuffIconPool(container)
     return buffIconPools[container]
 end
 
-local function CreateSingleIcon(container, AnchorItem, effectType)
+local CreateSingleIcon = function (container, AnchorItem, effectType)
     local pool = GetOrCreateBuffIconPool(container)
-    local buff, poolKey = pool:AcquireObject()
-
-    -- Store pool key and pool reference on the buff for later release
-    buff._poolKey = poolKey
-    buff._pool = pool
+    local buff = pool:AcquireObject()
 
     -- Reset icon properties for first use
     SpellCastBuffs.ResetSingleIcon(container, buff, AnchorItem)
@@ -306,7 +299,7 @@ end
 --- @param c number
 --- @param d number
 --- @return number
-local function EaseOutQuad(t, b, c, d)
+local EaseOutQuad = function (t, b, c, d)
     -- protect against 1 / 0
     if t == 0 then
         t = 0.0001
@@ -322,21 +315,19 @@ end
 --- @param currentTimeMs number
 --- @param sortedList table
 --- @param container string
-local function updateBar(currentTimeMs, sortedList, container)
+local updateBar = function (currentTimeMs, sortedList, container)
     local iconsNum = #sortedList
     local istart, iend, istep
 
     if SpellCastBuffs.sortDirection[container] then
         if SpellCastBuffs.sortDirection[container] == "Left to Right" or SpellCastBuffs.sortDirection[container] == "Bottom to Top" then
             istart, iend, istep = 1, iconsNum, 1
-        elseif SpellCastBuffs.sortDirection[container] == "Right to Left" or SpellCastBuffs.sortDirection[container] == "Top to Bottom" then
-            istart, iend, istep = iconsNum, 1, -1
-        else
-            -- Fall back for unexpected sort direction values
-            istart, iend, istep = 1, iconsNum, 1
         end
-    else
+        if SpellCastBuffs.sortDirection[container] == "Right to Left" or SpellCastBuffs.sortDirection[container] == "Top to Bottom" then
+            istart, iend, istep = iconsNum, 1, -1
+        end
         -- Fall back in case for some strange reason the container doesn't exist
+    else
         istart, iend, istep = 1, iconsNum, 1
     end
 
@@ -372,7 +363,7 @@ end
 --- @param currentTimeMs number
 --- @param sortedList table
 --- @param container string
-local function updateIcons(currentTimeMs, sortedList, container)
+local updateIcons = function (currentTimeMs, sortedList, container)
     -- Special workaround for container with player long buffs. We do not need to update it every 100ms, but rather 3 times less often
     if SpellCastBuffs.BuffContainers[container].skipUpdate then
         SpellCastBuffs.BuffContainers[container].skipUpdate = SpellCastBuffs.BuffContainers[container].skipUpdate + 1
@@ -390,14 +381,12 @@ local function updateIcons(currentTimeMs, sortedList, container)
     if SpellCastBuffs.sortDirection[container] then
         if SpellCastBuffs.sortDirection[container] == "Left to Right" or SpellCastBuffs.sortDirection[container] == "Bottom to Top" then
             istart, iend, istep = 1, iconsNum, 1
-        elseif SpellCastBuffs.sortDirection[container] == "Right to Left" or SpellCastBuffs.sortDirection[container] == "Top to Bottom" then
-            istart, iend, istep = iconsNum, 1, -1
-        else
-            -- Fall back for unexpected sort direction values
-            istart, iend, istep = 1, iconsNum, 1
         end
-    else
+        if SpellCastBuffs.sortDirection[container] == "Right to Left" or SpellCastBuffs.sortDirection[container] == "Top to Bottom" then
+            istart, iend, istep = iconsNum, 1, -1
+        end
         -- Fall back in case there is no sort direction for the container somehow
+    else
         istart, iend, istep = 1, iconsNum, 1
     end
 
@@ -573,14 +562,9 @@ local function updateIcons(currentTimeMs, sortedList, container)
         end
     end
 
-    -- Release excess icons back to pool
-    local icons = SpellCastBuffs.BuffContainers[container].icons
-    for i = iconsNum + 1, #icons do
-        local buff = icons[i]
-        if buff and buff._pool and buff._poolKey then
-            buff._pool:ReleaseObject(buff._poolKey)
-        end
-        icons[i] = nil
+    -- Hide rest of icons
+    for i = iconsNum + 1, #SpellCastBuffs.BuffContainers[container].icons do
+        SpellCastBuffs.BuffContainers[container].icons[i]:SetHidden(true)
     end
 
     -- Save icon number processed to compare in next update iteration
@@ -606,7 +590,7 @@ end
 --- toggle: boolean,
 --- }
 --- @return boolean?
-local function buffSort(x, y)
+local buffSort = function (x, y)
     local xDuration = (x.ends == nil or x.dur == 0 or x.groundLabel or x.toggle) and 0 or x.dur
     local yDuration = (y.ends == nil or y.dur == 0 or y.groundLabel or y.toggle) and 0 or y.dur
     -- Sort toggle effects
@@ -633,29 +617,13 @@ local function buffSort(x, y)
     return nil
 end
 
--- Reusable tables to avoid allocations every update
-local buffsSortedCache = {}
-local sortedCountsCache = {}
-
 -- Runs OnUpdate - 100 ms buffer
 --- @param currentTimeMs number
 function SpellCastBuffs.OnUpdate(currentTimeMs)
+    local buffsSorted = {}
+    local sortedCounts = {}
     local needs_update = {}
     local isProminent = {}
-
-    -- Clear and reuse cached tables
-    for k in pairs(buffsSortedCache) do
-        local t = buffsSortedCache[k]
-        for i = #t, 1, -1 do
-            t[i] = nil
-        end
-    end
-    for k in pairs(sortedCountsCache) do
-        sortedCountsCache[k] = 0
-    end
-
-    local buffsSorted = buffsSortedCache
-    local sortedCounts = sortedCountsCache
 
     -- And reset sizes of already existing icons
     for _, container in pairs(SpellCastBuffs.containerRouting) do
@@ -669,15 +637,6 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
         if container == "prominentbuffs" or container == "prominentdebuffs" then
             isProminent[container] = true
         end
-    end
-
-    -- Initialize player_long container if it exists
-    if SpellCastBuffs.BuffContainers.player_long then
-        if buffsSorted.player_long == nil then
-            buffsSorted.player_long = {}
-        end
-        sortedCounts.player_long = 0
-        needs_update.player_long = true
     end
 
     -- Filter expired events and build array for sorting
@@ -731,13 +690,6 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
             updateIcons(currentTimeMs, buffsSorted[container], container)
         end
         needs_update[container] = false
-    end
-
-    -- Handle player_long container separately if it exists
-    if needs_update.player_long then
-        table_sort(buffsSorted.player_long, buffSort)
-        updateIcons(currentTimeMs, buffsSorted.player_long, "player_long")
-        needs_update.player_long = false
     end
 
     for _, container in pairs(SpellCastBuffs.containerRouting) do
