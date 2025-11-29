@@ -555,7 +555,7 @@ function ChatAnnouncements.GuildHeraldrySaved()
         local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyDownColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
         local changeType = ZO_CommaDelimitDecimalNumber(value)
         local currencyTypeColor = ChatAnnouncements.Colors.CurrencyGoldColorize:ToHex()
-        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_MONEY), 16,16) or ""
+        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_MONEY), 16,16) or ""
         local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, value)
         local currencyTotal = nil
         local messageTotal = ""
@@ -1488,7 +1488,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
         end
 
         currencyTypeColor = ChatAnnouncements.Colors.CurrencyGoldColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_MONEY), 16, 16) or ""
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_MONEY), 16, 16) or ""
         currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, UpOrDown)
         currencyTotal = ChatAnnouncements.SV.Currency.CurrencyGoldShowTotal
         messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalGold
@@ -1518,7 +1518,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
         end
 
         currencyTypeColor = ChatAnnouncements.Colors.CurrencyAPColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_ALLIANCE_POINTS), 16, 16) or ""
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_ALLIANCE_POINTS), 16, 16) or ""
         currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyAPName, UpOrDown)
         currencyTotal = ChatAnnouncements.SV.Currency.CurrencyAPShowTotal
         messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalAP
@@ -1549,7 +1549,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
         end
 
         currencyTypeColor = ChatAnnouncements.Colors.CurrencyTVColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_TELVAR_STONES), 16, 16) or ""
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_TELVAR_STONES), 16, 16) or ""
         currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyTVName, UpOrDown)
         currencyTotal = ChatAnnouncements.SV.Currency.CurrencyTVShowTotal
         messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalTV
@@ -1558,7 +1558,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
             return
         end
         currencyTypeColor = ChatAnnouncements.Colors.CurrencyWVColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_WRIT_VOUCHERS), 16, 16) or ""
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_WRIT_VOUCHERS), 16, 16) or ""
         currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyWVName, UpOrDown)
         currencyTotal = ChatAnnouncements.SV.Currency.CurrencyWVShowTotal
         messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalWV
@@ -1567,7 +1567,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
             return
         end
         currencyTypeColor = ChatAnnouncements.Colors.CurrencyOutfitTokenColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_STYLE_STONES), 16, 16) or ""
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_STYLE_STONES), 16, 16) or ""
         currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyOutfitTokenName, UpOrDown)
         currencyTotal = ChatAnnouncements.SV.Currency.CurrencyOutfitTokenShowTotal
         messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalOutfitToken
@@ -1576,7 +1576,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
             return
         end
         currencyTypeColor = ChatAnnouncements.Colors.CurrencyTransmuteColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_CHAOTIC_CREATIA), 16, 16) or ""
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_CHAOTIC_CREATIA), 16, 16) or ""
         currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyTransmuteName, UpOrDown)
         currencyTotal = ChatAnnouncements.SV.Currency.CurrencyTransmuteShowTotal
         messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalTransmute
@@ -1585,7 +1585,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
             return
         end
         currencyTypeColor = ChatAnnouncements.Colors.CurrencyEventColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_EVENT_TICKETS), 16, 16) or ""
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_EVENT_TICKETS), 16, 16) or ""
         currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyEventName, UpOrDown)
         currencyTotal = ChatAnnouncements.SV.Currency.CurrencyEventShowTotal
         messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalEvent
@@ -1594,7 +1594,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
             return
         end
         currencyTypeColor = ChatAnnouncements.Colors.CurrencyUndauntedColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_UNDAUNTED_KEYS), 16, 16) or ""
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_UNDAUNTED_KEYS), 16, 16) or ""
         currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyUndauntedName, UpOrDown)
         currencyTotal = ChatAnnouncements.SV.Currency.CurrencyUndauntedShowTotal
         messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalUndaunted
@@ -1603,7 +1603,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
             return
         end
         currencyTypeColor = ChatAnnouncements.Colors.CurrencyCrownsColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_CROWNS), 16, 16) or ""
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWNS), 16, 16) or ""
         currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyCrownsName, UpOrDown)
         currencyTotal = ChatAnnouncements.SV.Currency.CurrencyCrownsShowTotal
         messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalCrowns
@@ -1612,7 +1612,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
             return
         end
         currencyTypeColor = ChatAnnouncements.Colors.CurrencyCrownGemsColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_CROWN_GEMS), 16, 16) or ""
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS), 16, 16) or ""
         currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyCrownGemsName, UpOrDown)
         currencyTotal = ChatAnnouncements.SV.Currency.CurrencyCrownGemsShowTotal
         messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalCrownGems
@@ -1621,7 +1621,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
             return
         end
         currencyTypeColor = ChatAnnouncements.Colors.CurrencyEndeavorsColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_ENDEAVOR_SEALS), 16, 16) or ""
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_ENDEAVOR_SEALS), 16, 16) or ""
         currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyEndeavorsName, UpOrDown)
         currencyTotal = ChatAnnouncements.SV.Currency.CurrencyEndeavorsShowTotal
         messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalEndeavors
@@ -1630,7 +1630,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
             return
         end
         currencyTypeColor = ChatAnnouncements.Colors.CurrencyEndlessColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_ARCHIVAL_FORTUNES), 16, 16) or ""
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_ARCHIVAL_FORTUNES), 16, 16) or ""
         currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyEndlessName, UpOrDown)
         currencyTotal = ChatAnnouncements.SV.Currency.CurrencyEndlessShowTotal
         messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalEndless
@@ -2012,7 +2012,7 @@ function ChatAnnouncements.CurrencyGoldThrottlePrinter()
         local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyUpColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
         local changeType = ZO_CommaDelimitDecimalNumber(ChatAnnouncements.currencyGoldThrottleValue)
         local currencyTypeColor = ChatAnnouncements.Colors.CurrencyGoldColorize:ToHex()
-        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_MONEY), 16, 16) or ""
+        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_MONEY), 16, 16) or ""
         local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, ChatAnnouncements.currencyGoldThrottleValue)
         local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyGoldShowTotal
         local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalGold
@@ -2030,7 +2030,7 @@ function ChatAnnouncements.CurrencyAPThrottlePrinter()
         local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyUpColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
         local changeType = ZO_CommaDelimitDecimalNumber(ChatAnnouncements.currencyAPThrottleValue)
         local currencyTypeColor = ChatAnnouncements.Colors.CurrencyAPColorize:ToHex()
-        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_ALLIANCE_POINTS), 16, 16) or ""
+        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_ALLIANCE_POINTS), 16, 16) or ""
         local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyAPName, ChatAnnouncements.currencyAPThrottleValue)
         local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyAPShowTotal
         local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalAP
@@ -2063,7 +2063,7 @@ function ChatAnnouncements.CurrencyTVThrottlePrinter()
         local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyUpColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
         local changeType = ZO_CommaDelimitDecimalNumber(ChatAnnouncements.currencyTVThrottleValue)
         local currencyTypeColor = ChatAnnouncements.Colors.CurrencyTVColorize:ToHex()
-        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_TELVAR_STONES), 16, 16) or ""
+        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_TELVAR_STONES), 16, 16) or ""
         local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyTVName, ChatAnnouncements.currencyTVThrottleValue)
         local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyTVShowTotal
         local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalTV
