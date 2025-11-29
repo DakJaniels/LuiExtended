@@ -47,12 +47,12 @@ local function getCCColor(ccType)
     return ccColors[ccType] or SpellCastBuffs.SV.colors.nocc
 end
 
--- Helper function to check if effect is priority
+-- Helper function to determine if effect is priority
+--- @param contextType string
 --- @param id integer
 --- @param abilityName string
---- @param contextType string
 --- @return boolean
-local function isPriorityEffect(id, abilityName, contextType)
+local function isPriorityEffect(contextType, id, abilityName)
     if contextType == "buff" then
         return SpellCastBuffs.SV.PriorityBuffTable[id] or SpellCastBuffs.SV.PriorityBuffTable[abilityName]
     else
@@ -60,140 +60,66 @@ local function isPriorityEffect(id, abilityName, contextType)
     end
 end
 
--- Helper function to get sort direction iteration parameters
---- @param container string
---- @param iconsNum integer
---- @return integer, integer, integer
-local function getSortDirectionParams(container, iconsNum)
-    local sortDir = SpellCastBuffs.sortDirection[container]
-    if sortDir == "Left to Right" or sortDir == "Bottom to Top" then
-        return 1, iconsNum, 1
-    elseif sortDir == "Right to Left" or sortDir == "Top to Bottom" then
-        return iconsNum, 1, -1
+-- Determine fill color based on buff type and conditions
+--- @param contextType string
+--- @param id integer
+--- @param abilityName string
+--- @param unbreakable integer
+--- @return table
+local function determineFillColor(contextType, id, abilityName, unbreakable)
+    local priority = isPriorityEffect(contextType, id, abilityName)
+    if contextType == "buff" then
+        if priority then
+            return SpellCastBuffs.SV.colors.prioritybuff
+        elseif unbreakable == 1 and SpellCastBuffs.SV.ColorCosmetic then
+            return SpellCastBuffs.SV.colors.cosmetic
+        else
+            return SpellCastBuffs.SV.colors.buff
+        end
+    else -- debuff
+        if priority then
+            return SpellCastBuffs.SV.colors.prioritydebuff
+        elseif unbreakable == 1 and SpellCastBuffs.SV.ColorUnbreakable then
+            return SpellCastBuffs.SV.colors.unbreakable
+        elseif SpellCastBuffs.SV.ColorCC and Effects.EffectOverride[id] and Effects.EffectOverride[id].cc then
+            return getCCColor(Effects.EffectOverride[id].cc)
+        else
+            return SpellCastBuffs.SV.colors.debuff
+        end
+    end
+end
+
+-- Helper function to set progress bar colors
+--- @param buff table
+--- @param isDebuff boolean
+--- @param isPriority boolean
+local function setProgressBarColors(buff, isDebuff, isPriority)
+    local colors
+    if isDebuff then
+        colors = isPriority and SpellCastBuffs.SV.ProminentProgressDebuffPriorityC2 or SpellCastBuffs.SV.ProminentProgressDebuffC2
     else
-        return 1, iconsNum, 1
+        colors = isPriority and SpellCastBuffs.SV.ProminentProgressBuffPriorityC2 or SpellCastBuffs.SV.ProminentProgressBuffC2
     end
-end
 
--- Helper function to calculate remaining time
---- @param effect table
---- @param currentTimeMs number
---- @return number|nil
-local function calculateRemainingTime(effect, currentTimeMs)
-    return (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
-end
+    local gradientColors = isDebuff and
+        (isPriority and SpellCastBuffs.SV.ProminentProgressDebuffPriorityC1 or SpellCastBuffs.SV.ProminentProgressDebuffC1) or
+        (isPriority and SpellCastBuffs.SV.ProminentProgressBuffPriorityC1 or SpellCastBuffs.SV.ProminentProgressBuffC1)
 
--- Helper function to format remaining time text
---- @param remain number
---- @param container string
---- @return string
-local function formatRemainingTime(remain, container)
-    if remain > 86400000 then
-        return string_format("%d d", zo_floor(remain / 86400000))
-    elseif remain > 6000000 then
-        return string_format("%dh", zo_floor(remain / 3600000))
-    elseif remain > 600000 then
-        return string_format("%dm", zo_floor(remain / 60000))
-    elseif remain > 60000 or container == "player_long" then
-        local m = zo_floor(remain / 60000)
-        local s = remain / 1000 - 60 * m
-        return string_format("%d:%.2d", m, s)
-    else
-        return string_format(SpellCastBuffs.SV.RemainingTextMillis and "%.1f" or "%.1d", remain / 1000)
-    end
-end
-
--- Helper function to get row increment for container
---- @param container string
---- @return integer
-local function getRowIncrement(container)
-    local rowIncrements =
-    {
-        player1 = 1,
-        target1 = 1,
-        player2 = -1,
-        target2 = -1,
-        playerb = (SpellCastBuffs.SV.StackPlayerBuffs == "Down" and 1 or -1),
-        playerd = (SpellCastBuffs.SV.StackPlayerDebuffs == "Down" and 1 or -1),
-        targetb = (SpellCastBuffs.SV.StackTargetBuffs == "Down" and 1 or -1),
-        targetd = (SpellCastBuffs.SV.StackTargetDebuffs == "Down" and 1 or -1),
-    }
-    return rowIncrements[container] or 0
-end
-
--- Helper function to check if container is prominent
---- @param container string
---- @return boolean
-local function isProminentContainer(container)
-    return container == "prominentbuffs" or container == "prominentdebuffs"
-end
-
--- Helper function to add effect to sorted list
---- @param sortedCounts table
---- @param buffsSorted table
---- @param container string
---- @param effect table
-local function addToSortedList(sortedCounts, buffsSorted, container, effect)
-    if not sortedCounts[container] then
-        sortedCounts[container] = 0
-        buffsSorted[container] = {}
-    end
-    sortedCounts[container] = sortedCounts[container] + 1
-    buffsSorted[container][sortedCounts[container]] = effect
+    buff.bar.backdrop:SetCenterColor(0.1 * colors[1], 0.1 * colors[2], 0.1 * colors[3], 0.75)
+    buff.bar.bar:SetGradientColors(colors[1], colors[2], colors[3], 1, gradientColors[1], gradientColors[2], gradientColors[3], 1)
 end
 
 --- @param buff table
 --- @param buffType integer
 --- @param unbreakable integer
 --- @param id integer
-local SetSingleIconBuffType = function (buff, buffType, unbreakable, id)
+local function SetSingleIconBuffType(buff, buffType, unbreakable, id)
     -- Determine context type and get ability name
     local contextType = (buffType == BUFF_EFFECT_TYPE_BUFF) and "buff" or "debuff"
     local abilityName = GetAbilityName(id)
-    local priority = isPriorityEffect(id, abilityName, contextType)
-
-    -- Determine fill color based on buff type and conditions
-    local function determineFillColor()
-        if contextType == "buff" then
-            if priority then
-                return SpellCastBuffs.SV.colors.prioritybuff
-            elseif unbreakable == 1 and SpellCastBuffs.SV.ColorCosmetic then
-                return SpellCastBuffs.SV.colors.cosmetic
-            else
-                return SpellCastBuffs.SV.colors.buff
-            end
-        else -- debuff
-            if priority then
-                return SpellCastBuffs.SV.colors.prioritydebuff
-            elseif unbreakable == 1 and SpellCastBuffs.SV.ColorUnbreakable then
-                return SpellCastBuffs.SV.colors.unbreakable
-            elseif SpellCastBuffs.SV.ColorCC and Effects.EffectOverride[id] and Effects.EffectOverride[id].cc then
-                return getCCColor(Effects.EffectOverride[id].cc)
-            else
-                return SpellCastBuffs.SV.colors.debuff
-            end
-        end
-    end
-
-    -- Helper function to set progress bar colors
-    local function setProgressBarColors(isDebuff, isPriority)
-        local colors
-        if isDebuff then
-            colors = isPriority and SpellCastBuffs.SV.ProminentProgressDebuffPriorityC2 or SpellCastBuffs.SV.ProminentProgressDebuffC2
-        else
-            colors = isPriority and SpellCastBuffs.SV.ProminentProgressBuffPriorityC2 or SpellCastBuffs.SV.ProminentProgressBuffC2
-        end
-
-        local gradientColors = isDebuff and
-            (isPriority and SpellCastBuffs.SV.ProminentProgressDebuffPriorityC1 or SpellCastBuffs.SV.ProminentProgressDebuffC1) or
-            (isPriority and SpellCastBuffs.SV.ProminentProgressBuffPriorityC1 or SpellCastBuffs.SV.ProminentProgressBuffC1)
-
-        buff.bar.backdrop:SetCenterColor(0.1 * colors[1], 0.1 * colors[2], 0.1 * colors[3], 0.75)
-        buff.bar.bar:SetGradientColors(colors[1], colors[2], colors[3], 1, gradientColors[1], gradientColors[2], gradientColors[3], 1)
-    end
 
     -- Apply visual settings
-    local fillColor = determineFillColor()
+    local fillColor = determineFillColor(contextType, id, abilityName, unbreakable)
     local labelColor = contextType == "buff" and SpellCastBuffs.SV.colors.buff or SpellCastBuffs.SV.colors.debuff
     local textColor = SpellCastBuffs.SV.RemainingTextColoured and labelColor or { 1, 1, 1, 1 }
 
@@ -212,16 +138,13 @@ local SetSingleIconBuffType = function (buff, buffType, unbreakable, id)
 
     -- Set progress bar colors if they exist
     if buff.bar then
-        setProgressBarColors(buffType == BUFF_EFFECT_TYPE_DEBUFF, priority)
+        local priority = isPriorityEffect(contextType, id, abilityName)
+        setProgressBarColors(buff, buffType == BUFF_EFFECT_TYPE_DEBUFF, priority)
     end
 end
 
--- Create a single buff icon
---- @param container string
---- @param AnchorItem Control|nil
---- @param effectType integer|nil
---- @return Control
-local function CreateSingleIcon(container, AnchorItem, effectType)
+-- Create a single buff icon control
+local function CreateSingleIcon(container, effectType)
     -- Create main buff container
     local buff = UI:Backdrop(SpellCastBuffs.BuffContainers[container], nil, nil, { 0, 0, 0, 0.5 }, { 0, 0, 0, 1 }, false)
     -- Setup mouse interaction
@@ -273,7 +196,7 @@ local function CreateSingleIcon(container, AnchorItem, effectType)
         buff.cd:SetDrawLayer(DL_BACKGROUND)
     end
 
-    if isProminentContainer(container) then
+    if container == "prominentbuffs" or container == "prominentdebuffs" then
         buff.effectType = effectType
         buff.name = UI:Label(buff, nil, nil, nil, SpellCastBuffs.prominentFont, nil, false)
 
@@ -291,12 +214,6 @@ local function CreateSingleIcon(container, AnchorItem, effectType)
         buff.bar.bar:SetMinMax(0, 1)
     end
 
-    -- Reset icon properties for first use
-    SpellCastBuffs.ResetSingleIcon(container, buff, AnchorItem)
-
-    -- Show the buff
-    buff:SetHidden(false)
-
     return buff
 end
 
@@ -306,7 +223,7 @@ end
 --- @param c number
 --- @param d number
 --- @return number
-local EaseOutQuad = function (t, b, c, d)
+local function EaseOutQuad(t, b, c, d)
     -- protect against 1 / 0
     if t == 0 then
         t = 0.0001
@@ -319,20 +236,33 @@ local EaseOutQuad = function (t, b, c, d)
     return -c * t * (t - 2) + b
 end
 
+-- Helper to get sort iteration parameters
+local function getSortIteration(container, count)
+    local sortDir = SpellCastBuffs.sortDirection[container]
+    if sortDir == "Right to Left" or sortDir == "Top to Bottom" then
+        return count, 1, -1
+    else
+        return 1, count, 1
+    end
+end
+
 --- @param currentTimeMs number
 --- @param sortedList table
 --- @param container string
-local updateBar = function (currentTimeMs, sortedList, container)
+local function updateBar(currentTimeMs, sortedList, container)
     local iconsNum = #sortedList
-    local istart, iend, istep = getSortDirectionParams(container, iconsNum)
+    local istart, iend, istep = getSortIteration(container, iconsNum)
+    local iconsArray = SpellCastBuffs.BuffContainers[container].icons
 
-    local index = 0
+    local index = 0 -- Global icon counter
     for i = istart, iend, istep do
         index = index + 1
+        -- Get current buff definition
         local effect = sortedList[i]
+
         local ground = effect.groundLabel
-        local remain = calculateRemainingTime(effect, currentTimeMs)
-        local buff = SpellCastBuffs.BuffContainers[container].icons[index]
+        local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
+        local buff = iconsArray[index]
         local auraStarts = effect.starts or nil
         local auraEnds = effect.ends or nil
         -- Modify recall penalty to show forced max duration
@@ -356,35 +286,52 @@ end
 --- @param currentTimeMs number
 --- @param sortedList table
 --- @param container string
-local updateIcons = function (currentTimeMs, sortedList, container)
+local function updateIcons(currentTimeMs, sortedList, container)
+    local containerData = SpellCastBuffs.BuffContainers[container]
+
     -- Special workaround for container with player long buffs. We do not need to update it every 100ms, but rather 3 times less often
-    if SpellCastBuffs.BuffContainers[container].skipUpdate then
-        SpellCastBuffs.BuffContainers[container].skipUpdate = SpellCastBuffs.BuffContainers[container].skipUpdate + 1
-        if SpellCastBuffs.BuffContainers[container].skipUpdate > 1 then
-            SpellCastBuffs.BuffContainers[container].skipUpdate = 0
+    if containerData.skipUpdate then
+        containerData.skipUpdate = containerData.skipUpdate + 1
+        if containerData.skipUpdate > 1 then
+            containerData.skipUpdate = 0
         else
             return
         end
     end
 
     local iconsNum = #sortedList
-    local istart, iend, istep = getSortDirectionParams(container, iconsNum)
+    local istart, iend, istep = getSortIteration(container, iconsNum)
 
     -- Size of icon+padding
     local iconSize = SpellCastBuffs.SV.IconSize + SpellCastBuffs.padding
 
     -- Set width of contol that holds icons. This will make alignment automatic
-    if SpellCastBuffs.BuffContainers[container].iconHolder then
-        if SpellCastBuffs.BuffContainers[container].alignVertical then
-            SpellCastBuffs.BuffContainers[container].iconHolder:SetDimensions(0, iconSize * iconsNum - SpellCastBuffs.padding)
+    if containerData.iconHolder then
+        if containerData.alignVertical then
+            containerData.iconHolder:SetDimensions(0, iconSize * iconsNum - SpellCastBuffs.padding)
         else
-            SpellCastBuffs.BuffContainers[container].iconHolder:SetDimensions(iconSize * iconsNum - SpellCastBuffs.padding, 0)
+            containerData.iconHolder:SetDimensions(iconSize * iconsNum - SpellCastBuffs.padding, 0)
         end
     end
 
     -- Prepare variables for manual alignment of icons
     local row = 0 -- row counter for multi-row placement
     local next_row_break = 1
+    local iconsArray = containerData.icons
+    local maxIcons = containerData.maxIcons
+    local prevIconsCount = containerData.prevIconsCount
+    local alignmentDir = SpellCastBuffs.alignmentDirection[container]
+    local iconHolder = containerData.iconHolder
+    local countChanged = iconsNum ~= prevIconsCount
+
+    -- Re-anchor all icons when count changes and iconHolder exists (to maintain chain)
+    if countChanged and iconHolder then
+        for j = 1, iconsNum do
+            if iconsArray[j] then
+                SpellCastBuffs.ResetSingleIcon(container, iconsArray[j], iconsArray[j - 1])
+            end
+        end
+    end
 
     -- Iterate over list of sorted icons
     local index = 0 -- Global icon counter
@@ -393,47 +340,69 @@ local updateIcons = function (currentTimeMs, sortedList, container)
         local effect = sortedList[i]
         index = index + 1
         -- Get or create icon
-        if SpellCastBuffs.BuffContainers[container].icons[index] == nil then
-            SpellCastBuffs.BuffContainers[container].icons[index] = CreateSingleIcon(container, SpellCastBuffs.BuffContainers[container].icons[index - 1], effect.type)
+        local buff = iconsArray[index]
+        local isNewIcon = false
+        if buff == nil then
+            buff = CreateSingleIcon(container, effect.type)
+            iconsArray[index] = buff
+            isNewIcon = true
         end
 
-        local remain = calculateRemainingTime(effect, currentTimeMs)
+        -- Calculate remaining time
+        local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
         local name = (effect.name ~= nil) and effect.name or nil
 
-        local buff = SpellCastBuffs.BuffContainers[container].icons[index]
-        -- Ensure buff is shown (may have been hidden previously)
+        -- Anchor new icon to previous one (or iconHolder for first icon) and initialize settings
+        if isNewIcon then
+            SpellCastBuffs.ResetSingleIcon(container, buff, iconsArray[index - 1])
+        end
+
+        -- Ensure buff is shown
         buff:SetHidden(false)
 
         -- Perform manual alignment
-        if not SpellCastBuffs.BuffContainers[container].iconHolder then
-            if
-            iconsNum ~= SpellCastBuffs.BuffContainers[container].prevIconsCount and index == next_row_break --[[and horizontal orientation of container]]
-            then
+        if not containerData.iconHolder then
+            if iconsNum ~= prevIconsCount and index == next_row_break then
                 -- Padding of first icon in a row
                 local anchor, leftPadding
 
-                if SpellCastBuffs.alignmentDirection[container] then
-                    if SpellCastBuffs.alignmentDirection[container] == LEFT then
+                if alignmentDir then
+                    if alignmentDir == LEFT then
                         anchor = TOPLEFT
                         leftPadding = SpellCastBuffs.padding
-                    elseif SpellCastBuffs.alignmentDirection[container] == RIGHT then
+                    elseif alignmentDir == RIGHT then
                         anchor = TOPRIGHT
-                        leftPadding = -zo_min(SpellCastBuffs.BuffContainers[container].maxIcons, iconsNum - SpellCastBuffs.BuffContainers[container].maxIcons * row) * iconSize - SpellCastBuffs.padding
+                        leftPadding = -zo_min(maxIcons, iconsNum - maxIcons * row) * iconSize - SpellCastBuffs.padding
                     else
                         anchor = TOP
-                        leftPadding = -0.5 * (zo_min(SpellCastBuffs.BuffContainers[container].maxIcons, iconsNum - SpellCastBuffs.BuffContainers[container].maxIcons * row) * iconSize - SpellCastBuffs.padding)
+                        leftPadding = -0.5 * (zo_min(maxIcons, iconsNum - maxIcons * row) * iconSize - SpellCastBuffs.padding)
                     end
                 else
                     -- Fallback
                     anchor = TOP
-                    leftPadding = -0.5 * (zo_min(SpellCastBuffs.BuffContainers[container].maxIcons, iconsNum - SpellCastBuffs.BuffContainers[container].maxIcons * row) * iconSize - SpellCastBuffs.padding)
+                    leftPadding = -0.5 * (zo_min(maxIcons, iconsNum - maxIcons * row) * iconSize - SpellCastBuffs.padding)
                 end
 
                 buff:ClearAnchors()
-                buff:SetAnchor(TOPLEFT, SpellCastBuffs.BuffContainers[container], anchor, leftPadding, row * iconSize)
-                if SpellCastBuffs.BuffContainers[container].maxIcons then
-                    row = row + getRowIncrement(container)
-                    next_row_break = next_row_break + SpellCastBuffs.BuffContainers[container].maxIcons
+                buff:SetAnchor(TOPLEFT, containerData, anchor, leftPadding, row * iconSize)
+                -- Determine if we need to make next row
+                if maxIcons then
+                    -- If buffs then stack down
+                    if container == "player1" or container == "target1" then
+                        row = row + 1
+                        -- If debuffs then stack up
+                    elseif container == "player2" or container == "target2" then
+                        row = row - 1
+                    elseif container == "playerb" then
+                        row = row + (SpellCastBuffs.SV.StackPlayerBuffs == "Down" and 1 or -1)
+                    elseif container == "playerd" then
+                        row = row + (SpellCastBuffs.SV.StackPlayerDebuffs == "Down" and 1 or -1)
+                    elseif container == "targetb" then
+                        row = row + (SpellCastBuffs.SV.StackTargetBuffs == "Down" and 1 or -1)
+                    elseif container == "targetd" then
+                        row = row + (SpellCastBuffs.SV.StackTargetDebuffs == "Down" and 1 or -1)
+                    end
+                    next_row_break = next_row_break + maxIcons
                 end
             end
         end
@@ -487,8 +456,24 @@ local updateIcons = function (currentTimeMs, sortedList, container)
             buff.stack:SetHidden(true)
         end
 
+        -- For update remaining text. For temporary effects this is not very efficient, but we have not much such effects
         if remain and not effect.fakeDuration then
-            buff.label:SetText(formatRemainingTime(remain, container))
+            if remain > 86400000 then
+                -- more then 1 day
+                buff.label:SetText(string_format("%d d", zo_floor(remain / 86400000)))
+            elseif remain > 6000000 then
+                -- over 100 minutes - display XXh
+                buff.label:SetText(string_format("%dh", zo_floor(remain / 3600000)))
+            elseif remain > 600000 then
+                -- over 10 minutes - display XXm
+                buff.label:SetText(string_format("%dm", zo_floor(remain / 60000)))
+            elseif remain > 60000 or container == "player_long" then
+                local m = zo_floor(remain / 60000)
+                local s = remain / 1000 - 60 * m
+                buff.label:SetText(string_format("%d:%.2d", m, s))
+            else
+                buff.label:SetText(string_format(SpellCastBuffs.SV.RemainingTextMillis and "%.1f" or "%.1d", remain / 1000))
+            end
         end
         if effect.restart and buff.cd ~= nil then
             -- Modify recall penalty to show forced max duration
@@ -510,13 +495,24 @@ local updateIcons = function (currentTimeMs, sortedList, container)
         end
     end
 
-    -- Hide rest of icons
-    for i = iconsNum + 1, #SpellCastBuffs.BuffContainers[container].icons do
-        SpellCastBuffs.BuffContainers[container].icons[i]:SetHidden(true)
+    -- Hide and cleanup excess icons
+    local maxIconsCount = #iconsArray
+    for i = iconsNum + 1, maxIconsCount do
+        if iconsArray[i] then
+            iconsArray[i]:SetHidden(true)
+        end
+    end
+
+    -- Clean up excess icons if we have significantly more than needed (keep a small buffer)
+    -- Only cleanup if we have more than 10 extra icons to avoid frequent create/destroy
+    if maxIconsCount > iconsNum + 10 then
+        for i = iconsNum + 11, maxIconsCount do
+            iconsArray[i] = nil
+        end
     end
 
     -- Save icon number processed to compare in next update iteration
-    SpellCastBuffs.BuffContainers[container].prevIconsCount = iconsNum
+    containerData.prevIconsCount = iconsNum
 end
 
 
@@ -538,7 +534,7 @@ end
 --- toggle: boolean,
 --- }
 --- @return boolean?
-local buffSort = function (x, y)
+local function buffSort(x, y)
     local xDuration = (x.ends == nil or x.dur == 0 or x.groundLabel or x.toggle) and 0 or x.dur
     local yDuration = (y.ends == nil or y.dur == 0 or y.groundLabel or y.toggle) and 0 or y.dur
     -- Sort toggle effects
@@ -565,86 +561,102 @@ local buffSort = function (x, y)
     return nil
 end
 
--- Helper function to determine if effect should be added to sorted list
---- @param effect table
---- @param container string
---- @return boolean, string|nil
-local function shouldAddEffect(effect, container)
-    if effect.target == "prominent" then
-        return true, container
-    elseif effect.type == BUFF_EFFECT_TYPE_DEBUFF or effect.forced == "short" or not (effect.forced == "long" or effect.ends == nil or effect.dur == 0) then
-        if effect.target == "reticleover" and SpellCastBuffs.SV.ShortTermEffects_Target then
-            return true, container
-        elseif effect.target == "player" and SpellCastBuffs.SV.ShortTermEffects_Player then
-            return true, container
-        end
-    elseif effect.target == "reticleover" and SpellCastBuffs.SV.LongTermEffects_Target then
-        return true, container
-    elseif effect.target == "player" and SpellCastBuffs.SV.LongTermEffects_Player then
-        if SpellCastBuffs.SV.LongTermEffectsSeparate and not isProminentContainer(container) then
-            return true, "player_long"
-        else
-            return true, container
-        end
-    end
-    return false, nil
-end
+-- Reusable tables for OnUpdate (cleared each update to avoid allocations)
+local buffsSorted = {}
+local sortedCounts = {}
+local needs_update = {}
+local isProminent = {}
 
 -- Runs OnUpdate - 100 ms buffer
 --- @param currentTimeMs number
 function SpellCastBuffs.OnUpdate(currentTimeMs)
-    local buffsSorted = {}
-    local sortedCounts = {}
-    local needs_update = {}
-    local isProminent = {}
+    local containerRouting = SpellCastBuffs.containerRouting
+    local EffectsList = SpellCastBuffs.EffectsList
 
-    for _, container in pairs(SpellCastBuffs.containerRouting) do
+    -- Clear and initialize containers and prepare sort arrays
+    ZO_ClearTable(buffsSorted)
+    ZO_ClearTable(sortedCounts)
+    ZO_ClearTable(needs_update)
+    ZO_ClearTable(isProminent)
+
+    for _, container in pairs(containerRouting) do
         needs_update[container] = true
         buffsSorted[container] = {}
         sortedCounts[container] = 0
-        if isProminentContainer(container) then
+        if container == "prominentbuffs" or container == "prominentdebuffs" then
             isProminent[container] = true
         end
     end
-    if not buffsSorted.player_long then
-        buffsSorted.player_long = {}
-        sortedCounts.player_long = 0
-    end
+    -- Initialize player_long separately as it may not be in containerRouting
+    buffsSorted.player_long = {}
+    sortedCounts.player_long = 0
 
     -- Filter expired events and build array for sorting
-    for context, effectsList in pairs(SpellCastBuffs.EffectsList) do
-        local container = SpellCastBuffs.containerRouting[context]
-        for k, v in pairs(effectsList) do
-            -- Remove effect (that is not permanent and has duration)
-            if v.ends ~= nil and v.dur > 0 and v.ends < currentTimeMs then
-                effectsList[k] = nil
-            elseif container and v.starts < currentTimeMs then
-                local shouldAdd, targetContainer = shouldAddEffect(v, container)
-                if shouldAdd then
-                    addToSortedList(sortedCounts, buffsSorted, targetContainer, v)
+    for context, effectsList in pairs(EffectsList) do
+        local container = containerRouting[context]
+        if container or context == "player1" then
+            for k, v in pairs(effectsList) do
+                -- Remove expired effect
+                if v.ends ~= nil and v.dur > 0 and v.ends < currentTimeMs then
+                    effectsList[k] = nil
+                elseif v.starts < currentTimeMs then
+                    -- Always show prominent effects
+                    if v.target == "prominent" and container then
+                        sortedCounts[container] = sortedCounts[container] + 1
+                        buffsSorted[container][sortedCounts[container]] = v
+                        -- Short-term effects
+                    elseif v.type == BUFF_EFFECT_TYPE_DEBUFF or v.forced == "short" or not (v.forced == "long" or v.ends == nil or v.dur == 0) then
+                        if v.target == "reticleover" and SpellCastBuffs.SV.ShortTermEffects_Target and container then
+                            sortedCounts[container] = sortedCounts[container] + 1
+                            buffsSorted[container][sortedCounts[container]] = v
+                        elseif v.target == "player" and SpellCastBuffs.SV.ShortTermEffects_Player and container then
+                            sortedCounts[container] = sortedCounts[container] + 1
+                            buffsSorted[container][sortedCounts[container]] = v
+                        end
+                        -- Long-term effects
+                    elseif v.target == "reticleover" and SpellCastBuffs.SV.LongTermEffects_Target and container then
+                        sortedCounts[container] = sortedCounts[container] + 1
+                        buffsSorted[container][sortedCounts[container]] = v
+                    elseif v.target == "player" and SpellCastBuffs.SV.LongTermEffects_Player then
+                        if SpellCastBuffs.SV.LongTermEffectsSeparate and container and container ~= "prominentbuffs" and container ~= "prominentdebuffs" then
+                            sortedCounts.player_long = sortedCounts.player_long + 1
+                            buffsSorted.player_long[sortedCounts.player_long] = v
+                        elseif container then
+                            sortedCounts[container] = sortedCounts[container] + 1
+                            buffsSorted[container][sortedCounts[container]] = v
+                        end
+                    end
                 end
             end
         end
     end
 
-    for _, container in pairs(SpellCastBuffs.containerRouting) do
+    -- Sort effects in container and draw them on screen
+    for _, container in pairs(containerRouting) do
         if needs_update[container] then
             table_sort(buffsSorted[container], buffSort)
             updateIcons(currentTimeMs, buffsSorted[container], container)
-            needs_update[container] = false
         end
-        if isProminent[container] then
-            updateBar(currentTimeMs, buffsSorted[container], container)
-        end
+    end
+
+    -- Update prominent buff bars
+    for container, _ in pairs(isProminent) do
+        updateBar(currentTimeMs, buffsSorted[container], container)
+    end
+
+    -- Update player_long if it has effects
+    if sortedCounts.player_long > 0 then
+        table_sort(buffsSorted.player_long, buffSort)
+        updateIcons(currentTimeMs, buffsSorted.player_long, "player_long")
     end
 
     -- Display Block buff for player if enabled
     if SpellCastBuffs.SV.ShowBlockPlayer and not SpellCastBuffs.SV.HidePlayerBuffs then
-        if IsBlockActive() and not IsPlayerStunned() then -- Is Block Active returns true when the player is stunned currently.
+        if IsBlockActive() and not IsPlayerStunned() then
             local abilityId = 974
             local abilityName = Abilities.Innate_Brace
             local context = SpellCastBuffs.DetermineContextSimple("player1", abilityId, abilityName)
-            SpellCastBuffs.EffectsList[context][abilityId] =
+            EffectsList[context][abilityId] =
             {
                 target = SpellCastBuffs.DetermineTarget(context),
                 type = 1,
