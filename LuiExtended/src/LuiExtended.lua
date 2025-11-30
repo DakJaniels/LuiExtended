@@ -27,7 +27,7 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.1.3.6"
+LUIE.version = "7.1.3.7"
 LUIE.author = "ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
 LUIE.github = "https://github.com/DakJaniels/LuiExtended"
@@ -337,8 +337,8 @@ local DEVS = readonlytable
         },
         ["@dack_janiels"] =
         {
-            enabled = false,
-            debug = false,
+            enabled = true,
+            debug = true,
         },
         ["@dack_janiels.luie"] =
         {
