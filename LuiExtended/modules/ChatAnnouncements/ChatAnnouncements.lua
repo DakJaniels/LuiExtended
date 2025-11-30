@@ -120,7 +120,45 @@ local ChatEventFormattersDelete =
     [EVENT_SOCIAL_ERROR] = true,
 }
 
-local noop = function (...) end
+local pChatEventSettings =
+{
+    [EVENT_FRIEND_PLAYER_STATUS_CHANGED] = "usePlayerStatusChangedChatHandler",
+    [EVENT_IGNORE_ADDED] = "useIgnoreAddedChatHandler",
+    [EVENT_IGNORE_REMOVED] = "useIgnoreRemovedChatHandler",
+    [EVENT_GROUP_MEMBER_LEFT] = "useGroupMemberLeftChatHandler",
+    [EVENT_GROUP_TYPE_CHANGED] = "useGroupTypeChangedChatHandler",
+}
+
+local function WrapFormatterToSuppress(originalFormatter)
+    if not originalFormatter then
+        return nil
+    end
+    -- Wrap the formatter to suppress output while preserving LibChatMessage's wrapping chain
+    -- This allows LibChatMessage to still process (e.g., for history) but prevents chat display
+    return function (...)
+        originalFormatter(...)
+        return nil
+    end
+end
+
+local function IsPChatFormatter(eventType, formatter)
+    if not formatter then
+        return false
+    end
+
+    local pChat = _G["pChat"]
+    if not pChat or not pChat.db then
+        return false
+    end
+
+    local settingName = pChatEventSettings[eventType]
+    if not settingName then
+        return false
+    end
+
+    -- Check if pChat has this handler enabled
+    return pChat.db[settingName] == true
+end
 
 function ChatAnnouncements.SlayChatHandlers()
     -- Unregister ZOS handlers for events we need to modify
@@ -128,10 +166,24 @@ function ChatAnnouncements.SlayChatHandlers()
         eventManager:UnregisterForEvent("ChatRouter", eventCode)
     end
 
-    -- Slay these events in case LibChatMessage is active and hooks them
     local ChatEventFormatters = CHAT_ROUTER:GetRegisteredMessageFormatters()
+    local pChat = _G["pChat"]
+
     for eventType, _ in pairs(ChatEventFormattersDelete) do
-        ChatEventFormatters[eventType] = noop
+        local originalFormatter = ChatEventFormatters[eventType]
+        if originalFormatter then
+            if IsPChatFormatter(eventType, originalFormatter) then
+                -- pChat has registered a formatter - post-hook it per pChat compatibility guidelines
+                -- Call pChat's formatter but suppress output (ChatAnnouncements will show its own messages)
+                CHAT_ROUTER:RegisterMessageFormatter(eventType, function (...)
+                    originalFormatter(...)
+                    return nil
+                end)
+            else
+                -- Not pChat's formatter - wrap to suppress (preserves LibChatMessage chain)
+                ChatEventFormatters[eventType] = WrapFormatterToSuppress(originalFormatter)
+            end
+        end
     end
 end
 
@@ -212,9 +264,10 @@ function ChatAnnouncements.Initialize(enabled)
     -- Index members for Group Loot
     ChatAnnouncements.IndexGroupLoot()
 
-    -- Stop other chat handlers from registering, then stop them again a few more times just in case.
+    -- Stop other chat handlers from registering
+    -- Note: pChat registers formatters in EVENT_PLAYER_ACTIVATED, so we'll also call this there
     ChatAnnouncements.SlayChatHandlers()
-    -- Call this again a few times shortly after load just in case.
+    -- Call this again after delays to catch late-loading addons
     zo_callLater(ChatAnnouncements.SlayChatHandlers, 100)
     zo_callLater(ChatAnnouncements.SlayChatHandlers, 5000)
 end
@@ -6528,7 +6581,10 @@ function ChatAnnouncements.OnPlayerActivated(eventId, initial)
     end
 
     if g_firstLoad then
-        ChatAnnouncements.SlayChatHandlers()
+        -- pChat registers formatters in EVENT_PLAYER_ACTIVATED, so delay to ensure pChat has finished
+        zo_callLater(function ()
+                         ChatAnnouncements.SlayChatHandlers()
+                     end, 50)
         g_firstLoad = false
     end
 
