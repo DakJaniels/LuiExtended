@@ -108,20 +108,6 @@ function LUIE.CreateConsoleSettings()
                                     allowRefresh = true
                                 })
 
-    -- Changelog Button
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_BUTTON,
-        label = GetString(LUIE_STRING_LAM_CHANGELOG),
-        tooltip = GetString(LUIE_STRING_LAM_CHANGELOG_TP),
-        buttonText = GetString(LUIE_STRING_LAM_CHANGELOG),
-        clickHandler = function ()
-            LUIE.ToggleChangelog(false)
-            SCENE_MANAGER:ShowBaseScene()
-        end,
-        disable = function () return not Settings.ShowChangeLog end
-    }
-
     -- ReloadUI Button
     settingsData[#settingsData + 1] =
     {
@@ -422,17 +408,6 @@ function LUIE.CreateConsoleSettings()
     {
         type = LHAS.ST_SECTION,
         label = GetString(LUIE_STRING_LAM_MISCHEADER)
-    }
-
-    -- Show Changelog
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_CHECKBOX,
-        label = "Show Changelog when there is a update to LUIE.",
-        tooltip = "Show Changelog when there is a update to LUIE.",
-        getFunction = function () return Settings.ShowChangeLog end,
-        setFunction = function (value) Settings.ShowChangeLog = value end,
-        default = Defaults.ShowChangeLog
     }
 
     -- Hide Alerts

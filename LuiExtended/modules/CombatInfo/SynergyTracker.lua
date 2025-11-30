@@ -301,8 +301,10 @@ function SynergyTracker:OnDeferredInitialize()
 
         self.control:SetHandler("OnMoveStop", function ()
             eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
-            Settings.offsetX = self.control:GetLeft() - GuiRoot:GetWidth() / 2
-            Settings.offsetY = self.control:GetTop() - GuiRoot:GetHeight() / 2
+            -- Convert center coordinates to offset from GuiRoot center
+            local centerX, centerY = self.control:GetCenter()
+            Settings.offsetX = centerX - GuiRoot:GetWidth() / 2
+            Settings.offsetY = centerY - GuiRoot:GetHeight() / 2
         end)
 
         -- Update fonts
@@ -314,16 +316,20 @@ function SynergyTracker:OnDeferredInitialize()
                 self.control,
                 "default",
                 function (control, left, top)
-                    Settings.offsetX = left - GuiRoot:GetWidth() / 2
-                    Settings.offsetY = top - GuiRoot:GetHeight() / 2
+                    -- Convert center coordinates to offset from GuiRoot center
+                    local centerX, centerY = control:GetCenter()
+                    Settings.offsetX = centerX - GuiRoot:GetWidth() / 2
+                    Settings.offsetY = centerY - GuiRoot:GetHeight() / 2
                 end
             )
         end
     else
         -- PC version
         self.control:SetHandler("OnMoveStop", function ()
-            Settings.offsetX = self.control:GetLeft() - GuiRoot:GetWidth() / 2
-            Settings.offsetY = self.control:GetTop() - GuiRoot:GetHeight() / 2
+            -- Convert center coordinates to offset from GuiRoot center
+            local centerX, centerY = self.control:GetCenter()
+            Settings.offsetX = centerX - GuiRoot:GetWidth() / 2
+            Settings.offsetY = centerY - GuiRoot:GetHeight() / 2
         end)
     end
 
@@ -857,8 +863,10 @@ function SynergyTracker:SetUnlocked(unlocked)
                     self.control,
                     "default",
                     function (control, left, top)
-                        Settings.offsetX = left - GuiRoot:GetWidth() / 2
-                        Settings.offsetY = top - GuiRoot:GetHeight() / 2
+                        -- Convert center coordinates to offset from GuiRoot center
+                        local centerX, centerY = control:GetCenter()
+                        Settings.offsetX = centerX - GuiRoot:GetWidth() / 2
+                        Settings.offsetY = centerY - GuiRoot:GetHeight() / 2
                     end
                 )
             end
