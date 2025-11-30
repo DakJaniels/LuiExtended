@@ -11,35 +11,29 @@ local Effects = Data.Effects
 
 LUIE.HookSynergy = function ()
     -- Hook synergy popup Icon/Name (to fix inconsistencies and add custom icons for some Quest/Encounter based Synergies)
-    function ZO_Synergy:OnSynergyAbilityChanged()
-        local hasSynergy, synergyName, iconFilename, prompt = GetCurrentSynergyInfo()
-
-        if hasSynergy then
-            -- Apply LUIE custom overrides if they exist
-            if Effects.SynergyNameOverride[synergyName] then
-                if Effects.SynergyNameOverride[synergyName].icon then
-                    iconFilename = Effects.SynergyNameOverride[synergyName].icon
-                end
-                if Effects.SynergyNameOverride[synergyName].name then
-                    synergyName = Effects.SynergyNameOverride[synergyName].name
-                end
-            end
-
-            if self.lastSynergyName ~= synergyName then
-                PlaySound(SOUNDS.ABILITY_SYNERGY_READY)
-
-                if prompt == "" then
-                    prompt = zo_strformat(SI_USE_SYNERGY, synergyName)
-                end
-                self.action:SetText(prompt)
-                self.lastSynergyName = synergyName
-            end
-
-            self.icon:SetTexture(iconFilename)
-            SHARED_INFORMATION_AREA:SetHidden(self, false)
-        else
-            SHARED_INFORMATION_AREA:SetHidden(self, true)
-            self.lastSynergyName = nil
+    -- Use ZO_PostHook to modify after original function runs, preserving base game behavior
+    ZO_PostHook(ZO_Synergy, "OnSynergyAbilityChanged", function (self)
+        -- Quick check: only process if synergy override table exists and has entries
+        if not Effects.SynergyNameOverride or not next(Effects.SynergyNameOverride) then
+            return
         end
-    end
+
+        local hasSynergy, synergyName = GetCurrentSynergyInfo()
+
+        -- Only process if synergy is available and we have an override for it
+        if hasSynergy and synergyName and Effects.SynergyNameOverride[synergyName] then
+            local override = Effects.SynergyNameOverride[synergyName]
+
+            -- Apply icon override if present
+            if override.icon then
+                self.icon:SetTexture(override.icon)
+            end
+
+            -- Apply name override if present
+            if override.name then
+                local overridePrompt = zo_strformat(SI_USE_SYNERGY, override.name)
+                self.action:SetText(overridePrompt)
+            end
+        end
+    end)
 end
