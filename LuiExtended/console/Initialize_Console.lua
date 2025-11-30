@@ -27,11 +27,7 @@ end
 
 -- Load additional media from LMP using centralized SettingsAPI
 local function LoadMedia()
-    if IsConsoleUI() then
-        LUIE.ConsoleSettingsAPI:LoadAllMedia()
-    else
-        LUIE.SettingsAPI.LoadAllMedia()
-    end
+    LUIE.ConsoleSettingsAPI:LoadAllMedia()
 end
 
 --- - **EVENT_PLAYER_ACTIVATED **
@@ -40,10 +36,6 @@ end
 --- @param initial boolean
 local function LoadScreen(eventId, initial)
     LUIE_InitControl:UnregisterForEvent(EVENT_PLAYER_ACTIVATED)
-    -- Set Positions for moved Default UI elements
-    if not IsConsoleUI() then
-        LUIE.SetElementPosition()
-    end
     if not LUIE.SV.StartupInfo then
         LUIE.PrintToChat(zo_strformat("|cFFFFFF<<1>> by|r |c00C000<<2>>|r |cFFFFFFv<<3>>|r", LUIE.name, LUIE.author, LUIE.version), true)
     end
@@ -68,12 +60,6 @@ function LUIE:InitializeHooks()
     self.HookGamePadIcons()
     self.HookGamePadStats()
     self.HookGamePadMap()
-
-    if not IsConsoleUI() then
-        self.HookKeyboardIcons()
-        self.HookKeyboardStats()
-        self.HookKeyboardMap()
-    end
 end
 
 -- Heavy initialization function
@@ -100,36 +86,21 @@ local function InitializeAddon()
     LUIE.UpdateTimeStampColor()
     -- -----------------------------------------------------------------------------
     -- Initialize EditModeController for console
-    if IsConsoleUI() then
-        LUIE.EditModeController:InitializeKeybindStrip()
-        eventManager:RegisterForEvent(LUIE.name .. "_EditMode", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function ()
-            LUIE.EditModeController:OnGamepadPreferredModeChanged()
-        end)
-    end
+    LUIE.EditModeController:InitializeKeybindStrip()
+    eventManager:RegisterForEvent(LUIE.name .. "_EditMode", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function ()
+        LUIE.EditModeController:OnGamepadPreferredModeChanged()
+    end)
     -- -----------------------------------------------------------------------------
     -- Create settings menus for our addon
-    if IsConsoleUI() then
-        LUIE.CreateConsoleSettings()
-        LUIE.ChatAnnouncements.CreateConsoleSettings()
-        LUIE.ActionBar.CreateConsoleSettings()
-        LUIE.CombatInfo.CreateConsoleSettings()
-        LUIE.CombatText.CreateConsoleSettings()
-        LUIE.InfoPanel.CreateConsoleSettings()
-        LUIE.UnitFrames.CreateConsoleSettings()
-        LUIE.SpellCastBuffs.CreateConsoleSettings()
-        LUIE.SlashCommands.CreateConsoleSettings()
-    else
-        LUIE.CreateSettings()
-        LUIE.ChatAnnouncements.CreateSettings()
-        LUIE.ActionBar.CreateSettings()
-        LUIE.CombatInfo.CreateSettings()
-        LUIE.CombatText.CreateSettings()
-        LUIE.InfoPanel.CreateSettings()
-        LUIE.UnitFrames.CreateSettings()
-        LUIE.SpellCastBuffs.CreateSettings()
-        LUIE.SlashCommands.CreateSettings()
-        LUIE.SlashCommands.MigrateSettings()
-    end
+    LUIE.CreateConsoleSettings()
+    LUIE.ChatAnnouncements.CreateConsoleSettings()
+    LUIE.ActionBar.CreateConsoleSettings()
+    LUIE.CombatInfo.CreateConsoleSettings()
+    LUIE.CombatText.CreateConsoleSettings()
+    LUIE.InfoPanel.CreateConsoleSettings()
+    LUIE.UnitFrames.CreateConsoleSettings()
+    LUIE.SpellCastBuffs.CreateConsoleSettings()
+    LUIE.SlashCommands.CreateConsoleSettings()
     -- -----------------------------------------------------------------------------
     -- Display changelog screen
     if LUIE.SV.ShowChangeLog == true then
@@ -152,11 +123,7 @@ LUIE_InitControl:RegisterForEvent(EVENT_ADD_ONS_LOADED, function (eventId)
     -- -----------------------------------------------------------------------------
     -- Register for LibMediaProvider media registration callbacks
     LUIE:RegisterCallback("LibMediaProvider_Registered", function (mediatype, key)
-        if IsConsoleUI() then
-            LUIE.ConsoleSettingsAPI:HandleMediaRegistration(mediatype, key)
-        else
-            LUIE.SettingsAPI.HandleMediaRegistration(mediatype, key)
-        end
+        LUIE.ConsoleSettingsAPI:HandleMediaRegistration(mediatype, key)
     end)
     -- -----------------------------------------------------------------------------
     -- Load additional media from LMP
