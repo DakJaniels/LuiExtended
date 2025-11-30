@@ -10,6 +10,7 @@ local Data = LuiData.Data
 local Effects = Data.Effects
 
 LUIE.HookSynergy = function ()
+    if IsConsoleUI() then return end
     -- Hook synergy popup Icon/Name (to fix inconsistencies and add custom icons for some Quest/Encounter based Synergies)
     -- Use ZO_PostHook to modify after original function runs, preserving base game behavior
     ZO_PostHook(ZO_Synergy, "OnSynergyAbilityChanged", function (self)

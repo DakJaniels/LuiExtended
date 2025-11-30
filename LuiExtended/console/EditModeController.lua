@@ -1082,7 +1082,4 @@ function EditModeController:OnGamepadPreferredModeChanged()
                  end, 200)
 end
 
--- Export the class (not instance) to LUIE namespace
-LUIE.EditModeController = EditModeController
-
-return EditModeController
+LUIE.EditModeController = EditModeController:New()

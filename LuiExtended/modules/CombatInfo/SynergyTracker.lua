@@ -127,8 +127,8 @@ function SynergyTracker:OnDeferredInitialize()
     bg:SetHidden(not Settings.unlocked)
     self.bg = bg
 
-    -- Create synergy display rows
-    for i = 1, MAX_SYNERGY_SLOTS do
+    -- Create synergy display rows with delays to avoid CPU budget exceeded errors
+    local function CreateSynergyControl(i)
         local row = windowManager:CreateControl("LUIE_SynergyRow" .. i, self.control, CT_CONTROL)
         row:SetDimensions(SYNERGY_ROW_WIDTH, SYNERGY_ROW_HEIGHT)
         row:SetAnchor(TOP, self.control, TOP, 0, (i - 1) * SYNERGY_ROW_HEIGHT)
@@ -148,7 +148,7 @@ function SynergyTracker:OnDeferredInitialize()
 
         -- Position number (optional)
         local posNum = windowManager:CreateControl(nil, row, CT_LABEL)
-        posNum:SetFont("ZoFontGamepad27") -- Already console-friendly
+        posNum:SetFont("ZoFontGamepad27")
         posNum:SetAnchor(LEFT, iconBg, RIGHT, 5, 0)
         posNum:SetText(i)
         posNum:SetColor(1, 1, 0.5, 1)
@@ -157,15 +157,7 @@ function SynergyTracker:OnDeferredInitialize()
         -- Synergy name/prompt
         local name = windowManager:CreateControl(nil, row, CT_LABEL)
         if IsConsoleUI() or IsInGamepadPreferredMode() then
-            local fontName = "LUIE Default Font"
-            if LUIE.Fonts and LUIE.Fonts[fontName] then
-                local fontSize = 18
-                local fontStyle = "soft-shadow-thick"
-                local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
-                name:SetFont(fontString)
-            else
-                name:SetFont("$(GAMEPAD_MEDIUM_FONT)|18|soft-shadow-thick")
-            end
+            name:SetFont("$(GAMEPAD_MEDIUM_FONT)|18|soft-shadow-thick")
         else
             name:SetFont("ZoInteractionPrompt")
         end
@@ -177,15 +169,7 @@ function SynergyTracker:OnDeferredInitialize()
         -- Priority indicator
         local priority = windowManager:CreateControl(nil, row, CT_LABEL)
         if IsConsoleUI() or IsInGamepadPreferredMode() then
-            local fontName = "LUIE Default Font"
-            if LUIE.Fonts and LUIE.Fonts[fontName] then
-                local fontSize = 16
-                local fontStyle = "soft-shadow-thick"
-                local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
-                priority:SetFont(fontString)
-            else
-                priority:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
-            end
+            priority:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
         else
             priority:SetFont("ZoFontGame")
         end
@@ -206,15 +190,7 @@ function SynergyTracker:OnDeferredInitialize()
         -- Cooldown text (shows time remaining)
         local cooldownText = windowManager:CreateControl(nil, iconBg, CT_LABEL)
         if IsConsoleUI() or IsInGamepadPreferredMode() then
-            local fontName = "LUIE Default Font"
-            if LUIE.Fonts and LUIE.Fonts[fontName] then
-                local fontSize = 20
-                local fontStyle = "soft-shadow-thick"
-                local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
-                cooldownText:SetFont(fontString)
-            else
-                cooldownText:SetFont("$(GAMEPAD_MEDIUM_FONT)|20|soft-shadow-thick")
-            end
+            cooldownText:SetFont("$(GAMEPAD_MEDIUM_FONT)|20|soft-shadow-thick")
         else
             cooldownText:SetFont("ZoFontGameBold")
         end
@@ -261,6 +237,11 @@ function SynergyTracker:OnDeferredInitialize()
             cooldownText = cooldownText,
             abilityId = nil,
         }
+    end
+
+    -- Create synergy controls with delays to avoid CPU budget exceeded errors
+    for i = 1, MAX_SYNERGY_SLOTS do
+        zo_callLater(function () CreateSynergyControl(i) end, (i - 1) * 10)
     end
 
     -- Unlock/lock handlers
@@ -363,8 +344,8 @@ function SynergyTracker:OnDeferredInitialize()
     -- Clean up any corrupted cooldown groups from old logic
     self:CleanupCorruptedCooldownGroups()
 
-    -- Initial synergy check
-    self:RefreshActiveSynergies()
+    -- Initial synergy check (deferred until all controls are created)
+    zo_callLater(function () self:RefreshActiveSynergies() end, 100)
 end
 
 --- Called when HUD scene is showing
@@ -454,6 +435,11 @@ function SynergyTracker:UpdateDisplay()
         return
     end
 
+    -- Don't update if synergy controls haven't been created yet (deferred initialization)
+    if not self.synergyControls or not self.synergyControls[1] then
+        return
+    end
+
     local Settings = CombatInfo.SV.synergy
     local numSynergies = GetNumberOfAvailableSynergies()
     local displayMode = Settings.displayMode
@@ -461,15 +447,17 @@ function SynergyTracker:UpdateDisplay()
 
     for i = 1, MAX_SYNERGY_SLOTS do
         local control = self.synergyControls[i]
-        control.row:SetHidden(true)
-        control.cooldown:SetHidden(true)
-        control.cooldownText:SetHidden(true)
+        if control then
+            control.row:SetHidden(true)
+            control.cooldown:SetHidden(true)
+            control.cooldownText:SetHidden(true)
+        end
     end
 
     if displayMode == "single" then
         local hasSynergy, synergyName, iconFilename, prompt = GetCurrentSynergyInfo()
 
-        if hasSynergy then
+        if hasSynergy and self.synergyControls[1] then
             local control = self.synergyControls[1]
             control.icon:SetTexture(iconFilename)
             control.name:SetText(prompt ~= "" and prompt or synergyName)
@@ -557,6 +545,9 @@ function SynergyTracker:UpdateDisplay()
     for i = 1, displayCount do
         local synergyData = displayList[i]
         local control = self.synergyControls[i]
+        if not control then
+            break
+        end
 
         control.icon:SetTexture(synergyData.icon)
 
@@ -604,6 +595,9 @@ function SynergyTracker:UpdateCooldownDisplay()
 
     for i = 1, MAX_SYNERGY_SLOTS do
         local control = self.synergyControls[i]
+        if not control then
+            break
+        end
         local abilityId = control.abilityId
 
         if not control.row:IsHidden() and abilityId and self.synergyCooldowns[abilityId] then
@@ -918,16 +912,21 @@ end
 function SynergyTracker:ShowPreview()
     for i = 1, MAX_SYNERGY_SLOTS do
         local control = self.synergyControls[i]
-        control.icon:SetTexture("esoui/art/icons/ability_undaunted_001.dds")
-        control.name:SetText(string_format("Preview Synergy %d", i))
-        control.priority:SetText(string_format("P%d", i))
-        control.icon:SetDesaturation(0)
-        control.name:SetColor(1, 1, 1, 1)
-        control.row:SetHidden(false)
+        if control then
+            control.icon:SetTexture("esoui/art/icons/ability_undaunted_001.dds")
+            control.name:SetText(string_format("Preview Synergy %d", i))
+            control.priority:SetText(string_format("P%d", i))
+            control.icon:SetDesaturation(0)
+            control.name:SetColor(1, 1, 1, 1)
+            control.row:SetHidden(false)
+        end
     end
 
     for i = 4, MAX_SYNERGY_SLOTS do
-        self.synergyControls[i].row:SetHidden(true)
+        local control = self.synergyControls[i]
+        if control then
+            control.row:SetHidden(true)
+        end
     end
 
     -- Force show when in unlock mode (even outside HUD scenes for positioning)
@@ -952,8 +951,11 @@ function SynergyTracker:UpdateDisplayOptions()
     local Settings = CombatInfo.SV.synergy
 
     for i = 1, MAX_SYNERGY_SLOTS do
-        self.synergyControls[i].posNum:SetHidden(not Settings.showKeybinds)
-        self.synergyControls[i].priority:SetHidden(not Settings.showPriority)
+        local control = self.synergyControls[i]
+        if control then
+            control.posNum:SetHidden(not Settings.showKeybinds)
+            control.priority:SetHidden(not Settings.showPriority)
+        end
     end
 
     self:UpdateDisplay()
