@@ -2210,6 +2210,7 @@ function UnitFrames.OnBossesChanged(eventCode)
         return
     end
 
+    local hasBosses = false
     for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
         local unitTag = "boss" .. i
         local frame = UnitFrames.CustomFrames[unitTag]
@@ -2218,13 +2219,17 @@ function UnitFrames.OnBossesChanged(eventCode)
             if DoesUnitExist(unitTag) then
                 frame.control:SetHidden(false)
                 UnitFrames.ReloadValues(unitTag)
+                hasBosses = true
             else
                 frame.control:SetHidden(true)
             end
         end
     end
 
-    UnitFrames.UpdateBossThresholds()
+    -- Only update boss thresholds if there are actually bosses present
+    if hasBosses then
+        UnitFrames.UpdateBossThresholds()
+    end
 end
 
 --- Dynamically calculate frame positioning based on resolution with dimension compensation
