@@ -4,25 +4,6 @@
 -->
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
-	<Animations>
-		<!-- Blink animation for expiring buffs (following ZOS pattern) -->
-		<AnimationTimeline name="LUIE_SpellCastBuffIcon_BlinkAnimation"
-		                   playbackType="LOOP"
-		                   loopCount="LOOP_INDEFINITELY">
-			<OnStop>
-				LUIE_SpellCastBuffIcon_BlinkAnimation_OnStop(self)
-			</OnStop>
-			<Animations>
-				<AlphaAnimation duration="500"
-				                startAlpha="1"
-				                endAlpha="0.5"/>
-				<AlphaAnimation delay="500"
-				                duration="500"
-				                startAlpha="0.5"
-				                endAlpha="1"/>
-			</Animations>
-		</AnimationTimeline>
-	</Animations>
 	<Controls>
 		<!-- Container TopLevelWindows for buff/debuff displays -->
 		<TopLevelControl name="LUIE_SpellCastBuffs_PlayerBuffs"
@@ -584,10 +565,10 @@
 				          pixelRoundingEnabled="false"
 				          space="SPACE_INTERFACE">
 					<AnchorFill/>
-					<Edge file="EsoUI/Art/Miscellaneous/Gamepad/gp_frameEdge_8px.dds"
-					      edgeFileWidth="64"
+					<Edge file=""
+					      edgeFileWidth="32"
 					      edgeFileHeight="8"/>
-					<Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds"/>
+					<Center file=""/>
 					<Insets left="8"
 					        top="8"
 					        right="-8"
@@ -596,7 +577,7 @@
 				</Backdrop>
 				<!-- Border layer (back) - hidden by default, shown only for non-collectible buffs -->
 				<Texture name="$(parent)Back"
-				         textureFile="EsoUI/Art/ActionBar/abilityFrame_buff.dds"
+				         textureFile="LuiMedia/media/icons/abilities/ability_innate_background.dds"
 				         layer="BACKGROUND"
 				         hidden="true"
 				         space="SPACE_INTERFACE">
@@ -612,7 +593,7 @@
 				</Texture>
 				<!-- Background layer (iconbg) - conditional, not for player_long -->
 				<Texture name="$(parent)IconBG"
-				         textureFile="EsoUI/Art/ActionBar/abilityInset.dds"
+				         textureFile="LuiMedia/media/icons/abilities/ability_innate_background.dds"
 				         layer="CONTROLS"
 				         hidden="false"
 				         space="SPACE_INTERFACE">

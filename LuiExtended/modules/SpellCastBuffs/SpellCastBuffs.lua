@@ -277,13 +277,12 @@ SpellCastBuffs.werewolfQuest = 0   -- Counter for Werewolf transformation events
 -- Handles buffs that rather than refreshing on reapplication create an individual instance and therefore have GAINED/FADED events every single time the effect ticks.
 SpellCastBuffs.InternalStackCounter = {}
 
-
-local UI = LUIE.UI
 local GridOverlay = LUIE.GridOverlay
 
 local LuiData = LuiData
 local Data = LuiData.Data
 local Abilities = Data.Abilities
+local AlertTable = Data.AlertTable
 local Tooltips = Data.Tooltips
 local DebugAuras = Data.DebugAuras
 local DebugResults = Data.DebugResults
@@ -307,7 +306,6 @@ local table_sort = table.sort
 -- local displayName = GetDisplayName()
 local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
-local windowManager = GetWindowManager()
 
 local moduleName = SpellCastBuffs.moduleName
 
@@ -368,20 +366,6 @@ end
 
 -- Initialize preview labels for all frames
 local function InitializePreviewLabels()
-    -- Callback to update coordinates while moving
-    local function OnMoveStart(self)
-        eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
-            if self.preview and self.preview.anchorLabel then
-                self.preview.anchorLabel:SetText(string.format("%d, %d", self:GetLeft(), self:GetTop()))
-            end
-        end)
-    end
-
-    -- Callback to stop updating coordinates when movement ends
-    local function OnMoveStop(self)
-        eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
-    end
-
     local frames =
     {
         { frame = SpellCastBuffs.BuffContainers.playerb,          name = "playerb"          },
@@ -436,8 +420,6 @@ local function InitializePreviewLabels()
                     f.frame.preview.anchorLabelBg = f.frame.preview:GetNamedChild("AnchorLabelBg")
                 end
             end
-
-            -- Movement handlers are set in XML (OnMoveStart, OnMoveStop)
         end
     end
 end
@@ -1441,6 +1423,13 @@ local function ApplyIconVisuals(container, buff)
 
     local inset = (SpellCastBuffs.SV.RemainingCooldown and buff.cd ~= nil) and 3 or 1
 
+    -- Frame (glow border) - centered and larger than icon (original behavior)
+    if buff.frame then
+        buff.frame:ClearAnchors()
+        buff.frame:SetAnchor(CENTER, buff, CENTER, 0, 0)
+        buff.frame:SetDimensions(frameSize, frameSize)
+    end
+
     if buff.drop then
         buff.drop:ClearAnchors()
         buff.drop:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
@@ -1453,13 +1442,11 @@ local function ApplyIconVisuals(container, buff)
         buff.icon:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -inset, -inset)
     end
 
-    -- Anchor cooldown to fill buff control with small offsets (original behavior)
+    -- Anchor cooldown with small offset (1,1) - slightly smaller than control, larger than icon when inset=3
     if buff.cd then
         buff.cd:ClearAnchors()
         buff.cd:SetAnchor(TOPLEFT, buff, TOPLEFT, 1, 1)
         buff.cd:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -1, -1)
-        -- Ensure it's on BACKGROUND layer to render under icon (which is on CONTROLS)
-        buff.cd:SetDrawLayer(DL_BACKGROUND)
     end
 
     if buff.iconbg ~= nil then
@@ -1522,157 +1509,6 @@ local function ApplyIconVisuals(container, buff)
             buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
             buff.bar.bar:ClearAnchors()
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
-        end
-    end
-end
-
--- Reset only a single icon (legacy helper, still used in some flows)
-function SpellCastBuffs.ResetSingleIcon(container, buff, AnchorItem)
-    local buffSize = SpellCastBuffs.SV.IconSize
-    local frameSize = 2 * buffSize + 4
-
-    buff:SetHidden(true)
-    -- buff:SetAlpha( 1 )
-    buff:SetDimensions(buffSize, buffSize)
-    buff.frame:SetDimensions(frameSize, frameSize)
-    buff.back:SetHidden(SpellCastBuffs.SV.GlowIcons)
-    buff.frame:SetHidden(not SpellCastBuffs.SV.GlowIcons)
-    buff.label:SetAnchor(TOPLEFT, buff, LEFT, -SpellCastBuffs.padding, -SpellCastBuffs.SV.LabelPosition)
-    buff.label:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, SpellCastBuffs.padding, -2)
-    buff.label:SetHidden(not SpellCastBuffs.SV.RemainingText)
-    buff.stack:SetAnchor(CENTER, buff, BOTTOMLEFT, 0, 0)
-    buff.stack:SetAnchor(CENTER, buff, TOPRIGHT, -SpellCastBuffs.padding * 3, SpellCastBuffs.padding * 3)
-    buff.stack:SetHidden(true)
-
-    if buff.name ~= nil then
-        if (container == "prominentbuffs" and SpellCastBuffs.SV.ProminentBuffContainerAlignment == 2) or (container == "prominentdebuffs" and SpellCastBuffs.SV.ProminentDebuffContainerAlignment == 2) then
-            -- Vertical
-            buff.name:SetHidden(not SpellCastBuffs.SV.ProminentLabel)
-        else
-            buff.name:SetHidden(true)
-        end
-    end
-
-    if buff.bar ~= nil then
-        if (container == "prominentbuffs" and SpellCastBuffs.SV.ProminentBuffContainerAlignment == 2) or (container == "prominentdebuffs" and SpellCastBuffs.SV.ProminentDebuffContainerAlignment == 2) then
-            -- Vertical
-            buff.bar.backdrop:SetHidden(not SpellCastBuffs.SV.ProminentProgress)
-            buff.bar.bar:SetHidden(not SpellCastBuffs.SV.ProminentProgress)
-        else
-            buff.bar.backdrop:SetHidden(true)
-            buff.bar.bar:SetHidden(true)
-        end
-    end
-
-    if buff.cd ~= nil then
-        buff.cd:SetHidden(not SpellCastBuffs.SV.RemainingCooldown)
-        -- We do not need black icon background when there is no Cooldown control present
-        buff.iconbg:SetHidden(not SpellCastBuffs.SV.RemainingCooldown)
-    end
-
-    if buff.abilityId ~= nil then
-        buff.abilityId:SetHidden(not SpellCastBuffs.SV.ShowDebugAbilityId)
-    end
-
-    local inset = (SpellCastBuffs.SV.RemainingCooldown and buff.cd ~= nil) and 3 or 1
-
-    buff.drop:ClearAnchors()
-    buff.drop:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
-    buff.drop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -inset, -inset)
-
-    buff.icon:ClearAnchors()
-    buff.icon:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
-    buff.icon:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -inset, -inset)
-    if buff.iconbg ~= nil then
-        buff.iconbg:ClearAnchors()
-        buff.iconbg:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
-        buff.iconbg:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -inset, -inset)
-    end
-
-    if container == "prominentbuffs" then
-        if SpellCastBuffs.SV.ProminentBuffLabelDirection == "Left" then
-            buff.name:ClearAnchors()
-            buff.name:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-            buff.name:SetAnchor(TOPRIGHT, buff, TOPLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-
-            buff.bar.backdrop:ClearAnchors()
-            buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
-            buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
-
-            buff.bar.bar:SetTexture(LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
-            buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
-            buff.bar.bar:ClearAnchors()
-            buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
-            buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
-        else
-            buff.name:ClearAnchors()
-            buff.name:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-            buff.name:SetAnchor(TOPLEFT, buff, TOPRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-
-            buff.bar.backdrop:ClearAnchors()
-            buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
-            buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
-
-            buff.bar.bar:SetTexture(LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
-            buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_NORMAL)
-            buff.bar.bar:ClearAnchors()
-            buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
-            buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
-        end
-    end
-
-    if container == "prominentdebuffs" then
-        if SpellCastBuffs.SV.ProminentDebuffLabelDirection == "Right" then
-            buff.name:ClearAnchors()
-            buff.name:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-            buff.name:SetAnchor(TOPLEFT, buff, TOPRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-
-            buff.bar.backdrop:ClearAnchors()
-            buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
-            buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
-
-            buff.bar.bar:SetTexture(LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
-            buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_NORMAL)
-            buff.bar.bar:ClearAnchors()
-            buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
-            buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
-        else
-            buff.name:ClearAnchors()
-            buff.name:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-            buff.name:SetAnchor(TOPRIGHT, buff, TOPLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-
-            buff.bar.backdrop:ClearAnchors()
-            buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
-            buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
-
-            buff.bar.bar:SetTexture(LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
-            buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
-            buff.bar.bar:ClearAnchors()
-            buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
-            buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
-        end
-    end
-
-    -- Position all items except first one to the right of it's neighbor
-    -- First icon is positioned automatically if the container is present
-    buff:ClearAnchors()
-    if AnchorItem == nil then
-        -- First Icon is positioned only when the container is present,
-        if SpellCastBuffs.BuffContainers[container].iconHolder then
-            if SpellCastBuffs.BuffContainers[container].alignVertical then
-                buff:SetAnchor(BOTTOM, SpellCastBuffs.BuffContainers[container].iconHolder, BOTTOM, 0, 0)
-            else
-                buff:SetAnchor(LEFT, SpellCastBuffs.BuffContainers[container].iconHolder, LEFT, 0, 0)
-            end
-        end
-
-        -- For container without holder we will reanchor first icon all the time
-        -- Rest icons go one after another.
-    else
-        if SpellCastBuffs.BuffContainers[container].alignVertical then
-            buff:SetAnchor(BOTTOM, AnchorItem, TOP, 0, -SpellCastBuffs.padding)
-        else
-            buff:SetAnchor(LEFT, AnchorItem, RIGHT, SpellCastBuffs.padding, 0)
         end
     end
 end
@@ -2707,11 +2543,6 @@ do
         -- Called by ZO_MetaPool:ReleaseAllObjects() or :ReleaseObject() before releasing to source pool
         -- Note: ZO_ControlPool's internal reset already calls SetHidden(true) and ClearAnchors()
         local function OnReset(control)
-            -- Stop any animations (matching ZOS pattern)
-            if control.blinkAnimation then
-                control.blinkAnimation:Stop()
-            end
-
             -- Reset cooldown (matching ZOS pattern)
             if control.cd then
                 control.cd:ResetCooldown()
@@ -2918,13 +2749,6 @@ do
                 buff.label = buff:GetNamedChild("Label")
                 buff.abilityId = buff:GetNamedChild("AbilityId")
                 buff.stack = buff:GetNamedChild("Stack")
-
-                -- Initialize blink animation (following ZOS pattern)
-                local blinkAnimation = GetAnimationManager():CreateTimelineFromVirtual("LUIE_SpellCastBuffIcon_BlinkAnimation")
-                blinkAnimation:GetAnimation(1):SetAnimatedControl(buff)
-                blinkAnimation:GetAnimation(2):SetAnimatedControl(buff)
-                -- OnStop handler is set in XML
-                buff.blinkAnimation = blinkAnimation
             end
 
             -- Store effect data on control
@@ -3165,14 +2989,6 @@ do
 
         if showDuration then
             local remainSeconds = remain / 1000
-
-            -- Handle blink animation for expiring effects (following ZOS pattern)
-            local EFFECT_EXPIRATION_IMMINENCE_THRESHOLD_MS = 2000
-            if buffControl.blinkAnimation and remain <= EFFECT_EXPIRATION_IMMINENCE_THRESHOLD_MS then
-                if not buffControl.blinkAnimation:IsPlaying() then
-                    buffControl.blinkAnimation:PlayFromStart()
-                end
-            end
 
             -- Update cooldown (following ZOS pattern: only start if GetDuration() == 0)
             if buffControl.cd and SpellCastBuffs.SV.RemainingCooldown then
@@ -5278,10 +5094,10 @@ do
                 end
                 -- Specific to Crypt of Hearts I (Ignite Colossus)
                 if id == 46680 then
-                    LuiData.Data.AlertTable[22527].cc = LUIE_CC_TYPE_UNBREAKABLE
-                    LuiData.Data.AlertTable[22527].block = nil
-                    LuiData.Data.AlertTable[22527].dodge = nil
-                    LuiData.Data.AlertTable[22527].avoid = true
+                    AlertTable[22527].cc = LUIE_CC_TYPE_UNBREAKABLE
+                    AlertTable[22527].block = nil
+                    AlertTable[22527].dodge = nil
+                    AlertTable[22527].avoid = true
                 end
             elseif result == ACTION_RESULT_EFFECT_FADED then
                 -- Check to make sure the current added aura here is the same id. If something else overrides the previous one we don't need to worry about removing the previous one.
@@ -5289,10 +5105,10 @@ do
                     Effects.AddNameAura[name][2] = nil
                     -- Specific to Crypt of Hearts I (Ignite Colossus)
                     if id == 46680 then
-                        LuiData.Data.AlertTable[22527].cc = nil
-                        LuiData.Data.AlertTable[22527].block = true
-                        LuiData.Data.AlertTable[22527].dodge = true
-                        LuiData.Data.AlertTable[22527].avoid = false
+                        AlertTable[22527].cc = nil
+                        AlertTable[22527].block = true
+                        AlertTable[22527].dodge = true
+                        AlertTable[22527].avoid = false
                     end
                 end
             end
