@@ -7,21 +7,300 @@
 local LUIE = LUIE
 
 -- SpellCastBuffs namespace
+--- @class (partial) LUIE.SpellCastBuffs : ZO_InitializingObject
+local SpellCastBuffs = ZO_InitializingObject:Subclass()
 --- @class (partial) LUIE.SpellCastBuffs
-local SpellCastBuffs = LUIE.SpellCastBuffs
+LUIE.SpellCastBuffs = SpellCastBuffs
+
+SpellCastBuffs.moduleName = LUIE.name .. "SpellCastBuffs"
+
+SpellCastBuffs.Enabled = false
+SpellCastBuffs.BuffsMovingState = false
+SpellCastBuffs.Defaults =
+{
+    ColorCosmetic = true,
+    ColorUnbreakable = true,
+    ColorCC = false,
+    colors =
+    {
+        buff = { 0, 1, 0, 1 },
+        debuff = { 1, 0, 0, 1 },
+        prioritybuff = { 1, 1, 0, 1 },
+        prioritydebuff = { 1, 1, 0, 1 },
+        unbreakable = { 224 / 255, 224 / 255, 1, 1 },
+        cosmetic = { 0, 100 / 255, 0, 1 },
+        nocc = { 0, 0, 0, 1 },
+        stun = { 1, 0, 0, 1 },
+        knockback = { 1, 0, 0, 1 },
+        levitate = { 1, 0, 0, 1 },
+        disorient = { 0, 127 / 255, 1, 1 },
+        fear = { 143 / 255, 9 / 255, 236 / 255, 1 },
+        charm = { 64 / 255, 255 / 255, 32 / 255, 1 },
+        silence = { 0, 1, 1, 1 },
+        stagger = { 1, 127 / 255, 0, 1 },
+        snare = { 1, 242 / 255, 32 / 255, 1 },
+        root = { 1, 165 / 255, 0, 1 },
+    },
+    IconSize = 40,
+    LabelPosition = 0,
+    BuffFontFace = "LUIE Default Font",
+    BuffFontStyle = FONT_STYLE_OUTLINE,
+    BuffFontSize = 16,
+    BuffShowLabel = true,
+    AlignmentBuffsPlayer = "Centered",
+    SortBuffsPlayer = "Left to Right",
+    AlignmentDebuffsPlayer = "Centered",
+    SortDebuffsPlayer = "Left to Right",
+    AlignmentBuffsTarget = "Centered",
+    SortBuffsTarget = "Left to Right",
+    AlignmentDebuffsTarget = "Centered",
+    SortDebuffsTarget = "Left to Right",
+    AlignmentLongHorz = "Centered",
+    SortLongHorz = "Left to Right",
+    AlignmentLongVert = "Top",
+    SortLongVert = "Top to Bottom",
+    AlignmentPromBuffsHorz = "Centered",
+    SortPromBuffsHorz = "Left to Right",
+    AlignmentPromBuffsVert = "Bottom",
+    SortPromBuffsVert = "Bottom to Top",
+    AlignmentPromDebuffsHorz = "Centered",
+    SortPromDebuffsHorz = "Left to Right",
+    AlignmentPromDebuffsVert = "Bottom",
+    SortPromDebuffsVert = "Bottom to Top",
+    StackPlayerBuffs = "Down",
+    StackPlayerDebuffs = "Up",
+    StackTargetBuffs = "Down",
+    StackTargetDebuffs = "Up",
+    WidthPlayerBuffs = 1920,
+    WidthPlayerDebuffs = 1920,
+    WidthTargetBuffs = 1920,
+    WidthTargetDebuffs = 1920,
+    GlowIcons = false,
+    RemainingText = true,
+    RemainingTextColoured = false,
+    RemainingTextMillis = true,
+    RemainingCooldown = true,
+    FadeOutIcons = false,
+    lockPositionToUnitFrames = true,
+    LongTermEffects_Player = true,
+    LongTermEffects_Target = true,
+    ShortTermEffects_Player = true,
+    ShortTermEffects_Target = true,
+    IgnoreMundusPlayer = false,
+    IgnoreMundusTarget = false,
+    IgnoreVampPlayer = false,
+    IgnoreVampTarget = false,
+    IgnoreLycanPlayer = false,
+    IgnoreLycanTarget = false,
+    IgnoreDiseasePlayer = false,
+    IgnoreDiseaseTarget = false,
+    IgnoreBitePlayer = false,
+    IgnoreBiteTarget = false,
+    IgnoreCyrodiilPlayer = false,
+    IgnoreCyrodiilTarget = false,
+    IgnoreBattleSpiritPlayer = false,
+    IgnoreBattleSpiritTarget = false,
+    IgnoreEsoPlusPlayer = true,
+    IgnoreEsoPlusTarget = true,
+    IgnoreSoulSummonsPlayer = false,
+    IgnoreSoulSummonsTarget = false,
+    IgnoreSetICDPlayer = false,
+    IgnoreAbilityICDPlayer = false,
+    IgnoreFoodPlayer = false,
+    IgnoreFoodTarget = false,
+    IgnoreExperiencePlayer = false,
+    IgnoreExperienceTarget = false,
+    IgnoreAllianceXPPlayer = false,
+    IgnoreAllianceXPTarget = false,
+    IgnoreDisguise = false,
+    IgnoreCostume = true,
+    IgnoreHat = true,
+    IgnoreSkin = true,
+    IgnorePolymorph = true,
+    IgnoreAssistant = true,
+    IgnorePet = true,
+    PetDetail = true,
+    IgnoreMountPlayer = false,
+    IgnoreMountTarget = false,
+    MountDetail = true,
+    LongTermEffectsSeparate = true,
+    LongTermEffectsSeparateAlignment = 2,
+    ShowBlockPlayer = true,
+    ShowBlockTarget = true,
+    StealthStatePlayer = true,
+    StealthStateTarget = true,
+    DisguiseStatePlayer = true,
+    DisguiseStateTarget = true,
+    -- ShowSprint                          = true,
+    -- ShowGallop                          = true,
+    ShowResurrectionImmunity = true,
+    ShowRecall = true,
+    ShowWerewolf = true,
+    HideOakenSoul = false,
+    HidePlayerBuffs = false,
+    HidePlayerDebuffs = false,
+    HideTargetBuffs = false,
+    HideTargetDebuffs = false,
+    HideGroundEffects = false,
+    ExtraBuffs = true,
+    ExtraExpanded = false,
+    ShowDebugCombat = false,
+    ShowDebugEffect = false,
+    ShowDebugFilter = false,
+    ShowDebugAbilityId = false,
+    HideReduce = true,
+    GroundDamageAura = true,
+    ProminentLabel = true,
+    ProminentLabelFontFace = "LUIE Default Font",
+    ProminentLabelFontStyle = FONT_STYLE_OUTLINE,
+    ProminentLabelFontSize = 16,
+    ProminentProgress = true,
+    ProminentProgressTexture = "Plain",
+    ProminentProgressBuffC1 = { 0, 1, 0, 1 },
+    ProminentProgressBuffC2 = { 0, 0.4, 0, 1 },
+    ProminentProgressDebuffC1 = { 1, 0, 0, 1 },
+    ProminentProgressDebuffC2 = { 0.4, 0, 0, 1 },
+    ProminentProgressBuffPriorityC1 = { 1, 1, 0, 1 },
+    ProminentProgressBuffPriorityC2 = { 0.6, 0.6, 0, 1 },
+    ProminentProgressDebuffPriorityC1 = { 1, 1, 0, 1 },
+    ProminentProgressDebuffPriorityC2 = { 0.6, 0.6, 0, 1 },
+    ProminentBuffContainerAlignment = 2,
+    ProminentDebuffContainerAlignment = 2,
+    ProminentBuffLabelDirection = "Left",
+    ProminentDebuffLabelDirection = "Right",
+    PriorityBuffTable = {},
+    PriorityDebuffTable = {},
+    PromBuffTable = {},
+    PromDebuffTable = {},
+    BlacklistTable = {},
+    WhitelistTable = {},
+    ListMode = "blacklist", -- or "whitelist"
+    TooltipEnable = true,
+    TooltipCustom = false,
+    TooltipSticky = 0,
+    TooltipAbilityId = false,
+    TooltipBuffType = false,
+    UseDefaultIcon = false,
+    DefaultIconOptions = 1,
+    ShowSharedEffects = true,
+    ShowSharedMajorMinor = true,
+}
+SpellCastBuffs.SV = {}
+
+--- @alias SpellCastBuffsContext string
+--- | `"player1"`
+--- | `"player2"`
+--- | `"reticleover1"`
+--- | `"reticleover2"`
+--- | `"ground"`
+--- | `"saved"`
+--- | `"promd_player"`
+--- | `"promb_player"`
+--- | `"promd_target"`
+--- | `"promb_target"`
+--- | `"target1"`
+--- | `"target2"`
+--- | `"targetb"`
+--- | `"targetd"`
+
+-- Saved Effects
+SpellCastBuffs.EffectsList =
+{
+    player1 = {},
+    player2 = {},
+    reticleover1 = {},
+    reticleover2 = {},
+    ground = {},
+    saved = {},
+    promb_ground = {},
+    promb_target = {},
+    promb_player = {},
+    promd_ground = {},
+    promd_target = {},
+    promd_player = {}
+}
+
+
+SpellCastBuffs.hidePlayerEffects = {}       -- Table of Effects to hide on Player - generated on load or updated from Menu
+SpellCastBuffs.hideTargetEffects = {}       -- Table of Effects to hide on Target - generated on load or updated from Menu
+SpellCastBuffs.debuffDisplayOverrideId = {} -- Table of Effects (by id) that should show on the target regardless of who applied them.
+
+SpellCastBuffs.windowTitles =
+{
+    playerb = GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS),
+    playerd = GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS),
+    player1 = GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS),
+    player2 = GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERDEBUFFS),
+    player_long = GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERLONGTERMEFFECTS),
+    targetb = GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS),
+    targetd = GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS),
+    target1 = GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETBUFFS),
+    target2 = GetString(LUIE_STRING_SCB_WINDOWTITLE_TARGETDEBUFFS),
+    prominentbuffs = GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS),
+    prominentdebuffs = GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS),
+}
+
+local uiTlw = {} -- GUI
+
+-- Routing for Auras
+SpellCastBuffs.containerRouting = {}
+
+SpellCastBuffs.alignmentDirection = {}    -- Holds alignment direction for all containers
+SpellCastBuffs.sortDirection = {}         -- Holds sorting direction for all containers
+
+SpellCastBuffs.playerActive = false       -- Player Active State
+SpellCastBuffs.playerDead = false         -- Player Dead State
+SpellCastBuffs.playerResurrectStage = nil -- Player resurrection sequence state
+
+SpellCastBuffs.buffsFont = ""             -- Buff font
+SpellCastBuffs.prominentFont = ""         -- Prominent buffs label font
+SpellCastBuffs.padding = 0                -- Padding between icons
+SpellCastBuffs.protectAbilityRemoval = {} -- AbilityId's set to a timestamp here to prevent removal of ground effects when refreshing ground auras from causing the aura to fade.
+SpellCastBuffs.ignoreAbilityId = {}       -- Ignored abilityId's on EVENT_COMBAT_EVENT, some events fire twice and we need to ignore every other one.
+
+-- Add buff containers into LUIE namespace
+SpellCastBuffs.BuffContainers = uiTlw
+
+-- Stealth Varaiables
+-- Handles long term Disguise Item Icon (appears when wearing a disguise even if not in a disguised state)
+SpellCastBuffs.currentDisguise = 0
+
+-- Werewolf Varaiables
+SpellCastBuffs.werewolfName = ""   -- Name for current Werewolf Transformation morph
+SpellCastBuffs.werewolfIcon = ""   -- Icon for current Werewolf Transformation morph
+SpellCastBuffs.werewolfId = 0      -- AbilityId for Werewolf Transformation morph
+SpellCastBuffs.werewolfCounter = 0 -- Counter for Werewolf transformation events
+SpellCastBuffs.werewolfQuest = 0   -- Counter for Werewolf transformation events (Quest)
+
+-- Counter variable for ACTION_RESULT_EFFECT_GAINED / ACTION_RESULT_EFFECT_FADED tracking for some buffs that are broken
+-- Handles buffs that rather than refreshing on reapplication create an individual instance and therefore have GAINED/FADED events every single time the effect ticks.
+SpellCastBuffs.InternalStackCounter = {}
+
 
 local UI = LUIE.UI
 local GridOverlay = LUIE.GridOverlay
+
 local LuiData = LuiData
---- @type Data
 local Data = LuiData.Data
---- @type Effects
-local Effects = Data.Effects
 local Abilities = Data.Abilities
 local Tooltips = Data.Tooltips
-local string_format = string.format
-local printToChat = LUIE.PrintToChat
+local DebugAuras = Data.DebugAuras
+local DebugResults = Data.DebugResults
+local Effects = Data.Effects
+local EffectOverride = Effects.EffectOverride
+
 local zo_strformat = zo_strformat
+local zo_iconFormat = zo_iconFormat
+
+
+-- API function localizations
+local GetAbilityIcon = GetAbilityIcon
+local GetAbilityName = GetAbilityName
+local GetAbilityDuration = GetAbilityDuration
+local GetAbilityCastInfo = GetAbilityCastInfo
+local string_format = string.format
+local PrintToChat = LUIE.PrintToChat
+
 local table_insert = table.insert
 local table_sort = table.sort
 -- local displayName = GetDisplayName()
@@ -4850,7 +5129,7 @@ do
         end
         chatSystem:Maximize()
         chatSystem.primaryContainer:FadeIn()
-        printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_CLEARED), listRef), true)
+        PrintToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_CLEARED), listRef), true)
         SpellCastBuffs.ReloadEffects("player")
     end
 
@@ -4872,18 +5151,18 @@ do
                 list[id] = true
                 chatSystem:Maximize()
                 chatSystem.primaryContainer:FadeIn()
-                printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_ID), icon, id, name, listRef), true)
+                PrintToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_ID), icon, id, name, listRef), true)
             else
                 chatSystem:Maximize()
                 chatSystem.primaryContainer:FadeIn()
-                printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_FAILED), input, listRef), true)
+                PrintToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_FAILED), input, listRef), true)
             end
         else
             if input ~= "" then
                 list[input] = true
                 chatSystem:Maximize()
                 chatSystem.primaryContainer:FadeIn()
-                printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_NAME), input, listRef), true)
+                PrintToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_NAME), input, listRef), true)
             end
         end
         SpellCastBuffs.ReloadEffects("player")
@@ -4905,13 +5184,13 @@ do
             list[id] = nil
             chatSystem:Maximize()
             chatSystem.primaryContainer:FadeIn()
-            printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_ID), icon, id, name, listRef), true)
+            PrintToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_ID), icon, id, name, listRef), true)
         else
             if input ~= "" then
                 list[input] = nil
                 chatSystem:Maximize()
                 chatSystem.primaryContainer:FadeIn()
-                printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), input, listRef), true)
+                PrintToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), input, listRef), true)
             end
         end
         SpellCastBuffs.ReloadEffects("player")
@@ -5343,4 +5622,701 @@ do
             }
         end
     end
+end
+
+
+-- Debug Display for Combat Events
+--- @param eventId integer
+--- @param result ActionResult
+--- @param isError boolean
+--- @param abilityName string
+--- @param abilityGraphic integer
+--- @param abilityActionSlotType ActionSlotType
+--- @param sourceName string
+--- @param sourceType CombatUnitType
+--- @param targetName string
+--- @param targetType CombatUnitType
+--- @param hitValue integer
+--- @param powerType CombatMechanicFlags
+--- @param damageType DamageType
+--- @param log boolean
+--- @param sourceUnitId integer
+--- @param targetUnitId integer
+--- @param abilityId integer
+--- @param overflow integer
+function SpellCastBuffs.EventCombatDebug(eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+    -- Don't display if this aura is already added to the filter
+    if DebugAuras[abilityId] and SpellCastBuffs.SV.ShowDebugFilter then return end
+
+    local iconFormatted = zo_iconFormat(GetAbilityIcon(abilityId), 16, 16)
+    local nameFormatted = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
+
+    local source = zo_strformat("<<C:1>>", sourceName)
+    local target = zo_strformat("<<C:1>>", targetName)
+    local ability = zo_strformat("<<C:1>>", nameFormatted)
+    local duration = GetAbilityDuration(abilityId)
+    if duration == nil then
+        duration = "0"
+    end
+    local channeled, durationValue = GetAbilityCastInfo(abilityId, nil, sourceType)
+    local showacasttime = ""
+    local showachantime = ""
+    if channeled then
+        showachantime = (" [Chan] " .. durationValue)
+    elseif durationValue and durationValue > 0 then
+        showacasttime = (" [Cast] " .. durationValue)
+    end
+    if source == LUIE.PlayerNameFormatted then
+        source = "Player"
+    end
+    if target == LUIE.PlayerNameFormatted then
+        target = "Player"
+    end
+    if sourceName == "" and targetName == "" then
+        source = "NIL"
+        target = "NIL"
+    end
+
+    local formattedResult = DebugResults[result]
+
+    local finalString = (iconFormatted .. " [" .. abilityId .. "] " .. ability .. ": [S] " .. source .. " --> [T] " .. target .. " [D] " .. duration .. showachantime .. showacasttime .. " [R] " .. formattedResult)
+    PrintToChat(finalString, true)
+end
+
+-- Debug Display for Effect Events
+--- @param eventId integer
+--- @param changeType EffectResult
+--- @param effectSlot integer
+--- @param effectName string
+--- @param unitTag string
+--- @param beginTime number
+--- @param endTime number
+--- @param stackCount integer
+--- @param iconName string
+--- @param deprecatedBuffType string
+--- @param effectType BuffEffectType
+--- @param abilityType AbilityType
+--- @param statusEffectType StatusEffectType
+--- @param unitName string
+--- @param unitId integer
+--- @param abilityId integer
+--- @param sourceType CombatUnitType
+function SpellCastBuffs.EventEffectDebug(eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+    if DebugAuras[abilityId] and SpellCastBuffs.SV.ShowDebugFilter then
+        return
+    end
+
+    local iconFormatted = zo_iconFormat(GetAbilityIcon(abilityId), 16, 16)
+    local nameFormatted = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
+
+    if unitName == "Offline" then
+        unitName = "GROUND?"
+    end
+    unitName = zo_strformat("<<C:1>>", unitName)
+    if unitName == LUIE.PlayerNameFormatted then
+        unitName = "Player"
+    end
+    unitName = unitName .. " (" .. unitTag .. ")"
+
+    local finalString
+    if EffectOverride[abilityId] and EffectOverride[abilityId].hide then
+        finalString = (iconFormatted .. "|c00E200 [" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [Tag] " .. unitName .. "|r")
+        -- Use CHAT_ROUTER to bypass some other addons modifying this string
+        CHAT_ROUTER:AddSystemMessage(finalString)
+        return
+    end
+
+    local duration = (endTime - beginTime) * 1000
+
+    local refreshOnly = ""
+    if EffectOverride[abilityId] and EffectOverride[abilityId].refreshOnly then
+        refreshOnly = " |c00E200(Hidden)|r "
+    end
+
+    if changeType == 1 then
+        finalString = ("|c00E200Gained:|r " .. refreshOnly .. iconFormatted .. " [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. " [Dur] " .. duration)
+    elseif changeType == 2 then
+        finalString = ("|c00E200Faded:|r " .. iconFormatted .. " [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName)
+    else
+        finalString = ("|c00E200Refreshed:|r " .. iconFormatted .. " (" .. changeType .. ") [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. " [Dur] " .. duration)
+    end
+    PrintToChat(finalString, true)
+end
+
+do
+    if not LUIE.IsDevDebugEnabled() then
+        return
+    end
+
+    -- LUIE utility functions
+    local AddSystemMessage = LUIE.AddSystemMessage
+    local printToChat = LUIE.PrintToChat
+
+    -- -----------------------------------------------------------------------------
+    -- Core Lua function localizations
+    -- -----------------------------------------------------------------------------
+
+    local pairs = pairs
+    local zo_round = zo_round
+    local tostring = tostring
+
+    local DoesAbilityExist = DoesAbilityExist
+    local GetZoneId = GetZoneId
+    local GetCurrentMapZoneIndex = GetCurrentMapZoneIndex
+    local GetPlayerLocationName = GetPlayerLocationName
+    local GetCurrentMapId = GetCurrentMapId
+    local GetCurrentMapIndex = GetCurrentMapIndex
+    local GetMapInfoById = GetMapInfoById
+    local GetMapPlayerPosition = GetMapPlayerPosition
+    local GetMapName = GetMapName
+    local SetMapToPlayerLocation = SetMapToPlayerLocation
+    local SetMapToMapListIndex = SetMapToMapListIndex
+    local MapZoomOut = MapZoomOut
+    local chatSystem = ZO_GetChatSystem()
+
+
+    --- Formats GPS coordinates for display
+    --- @param number number The raw coordinate value
+    --- @return number Rounded coordinate value
+    local function FormatGPSCoords(number)
+        return zo_round(number * 100000)
+    end
+
+    --- Formats coordinates for display with proper formatting
+    --- @param number number The raw coordinate value
+    --- @return string Formatted coordinate string
+    local function FormatCoords(number)
+        return ("%05.02f"):format(FormatGPSCoords(number) / 100)
+    end
+
+    -- Account specific DEBUG for ArtOfShred (These are only registered to give me some additional debug options)
+    function SpellCastBuffs.AuthorCombatDebug(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId)
+        local iconFormatted = zo_iconFormat(GetAbilityIcon(abilityId), 16, 16)
+        local nameFormatted = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
+
+        local source
+        local target
+        if sourceName == "" and targetName == "" then
+            source = "NIL"
+            target = "NIL"
+        end
+        source = zo_strformat("<<C:1>>", sourceName)
+        target = zo_strformat("<<C:1>>", targetName)
+        if source == LUIE.PlayerNameFormatted then
+            source = "Player"
+        end
+        if target == LUIE.PlayerNameFormatted then
+            target = "Player"
+        end
+
+        local formattedResult = DebugResults[result]
+
+        if EffectOverride[abilityId] and EffectOverride[abilityId].hide then
+            local finalString = (iconFormatted .. "[" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [S] " .. source .. " --> [T] " .. target .. " [R] " .. formattedResult)
+            for k, cc in ipairs(chatSystem.containers) do
+                local chatContainer = cc
+                local chatWindow = cc.windows[2]
+                if chatWindow == nil then chatWindow = cc.windows[1] end
+                chatContainer:AddEventMessageToWindow(chatWindow, finalString, CHAT_CATEGORY_SYSTEM)
+            end
+        end
+    end
+
+    -- Account specific DEBUG for ArtOfShred (These are only registered to give me some additional debug options)
+    function SpellCastBuffs.AuthorEffectDebug(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, castByPlayer)
+        local iconFormatted = zo_iconFormat(GetAbilityIcon(abilityId), 16, 16)
+        local nameFormatted = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
+
+        unitName = zo_strformat("<<C:1>>", unitName)
+        if unitName == LUIE.PlayerNameFormatted then
+            unitName = "Player"
+        end
+        unitName = unitName .. " (" .. unitTag .. ")"
+
+        local refreshOnly = ""
+        if EffectOverride[abilityId] and EffectOverride[abilityId].refreshOnly then
+            refreshOnly = " |c00E200(Refresh Only - Hidden)|r "
+        end
+
+        if EffectOverride[abilityId] and EffectOverride[abilityId].hide then
+            local finalString = (iconFormatted .. refreshOnly .. "|c00E200 [" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [Tag] " .. unitName .. "|r")
+            for k, cc in ipairs(chatSystem.containers) do
+                local chatContainer = cc
+                local chatWindow = cc.windows[2]
+                if chatWindow == nil then chatWindow = cc.windows[1] end
+                chatContainer:AddEventMessageToWindow(chatWindow, finalString, CHAT_CATEGORY_SYSTEM)
+            end
+        end
+    end
+
+    -- -----------------------------------------------------------------------------
+    -- Map and Zone Information
+    -- -----------------------------------------------------------------------------
+
+    --- @class ZoneMapInfo
+    --- @field zoneid integer
+    --- @field locName string
+    --- @field mapid integer
+    --- @field mapindex luaindex|nil
+    --- @field name string
+    --- @field mapType UIMapType
+    --- @field mapContentType MapContentType
+    --- @field zoneIndex luaindex
+    --- @field description string
+    --- @field mapX number
+    --- @field mapY number
+    --- @field zoneX number
+    --- @field zoneY number
+    --- @field worldX number
+    --- @field worldY number
+    --- @field mapName string
+    --- @field zoneName string
+    --- @field floorInfo table Floor information if available
+    --- @field poiInfo table POI information if available
+    --- @field fastTravelInfo table Fast travel information if available
+    --- @field zoneFlags table Various boolean flags about the current zone
+    --- @field keyInfo table Map key information if available
+    --- @field cadwellInfo table Cadwell's Almanac information if available
+
+    --- Collects and returns zone and map information
+    --- @return ZoneMapInfo Information about current zone and map
+    local function CollectZoneMapInfo()
+        -- Set map to player location and handle callback
+        if SetMapToPlayerLocation() == SET_MAP_RESULT_MAP_CHANGED then
+            LUIE:FireCallbacks("OnWorldMapChanged")
+        end
+
+        -- Get basic zone and map info
+        local zoneIdx = GetCurrentMapZoneIndex()
+        local zoneid = GetZoneId(zoneIdx)
+        local locName = GetPlayerLocationName()
+        local mapid = GetCurrentMapId()
+        local mapindex = GetCurrentMapIndex() or GetMapIndexByZoneId(zoneid) or zoneIdx
+        local name, mapType, mapContentType, zoneIndex, description = GetMapInfoById(mapid)
+
+        -- Get coordinates at different map levels
+        local mapX, mapY = GetMapPlayerPosition("player")
+        local zoneX, zoneY = mapX, mapY
+        local worldX, worldY = mapX, mapY
+        local mapName = GetMapName()
+        local zoneName = mapName
+
+        -- Handle dungeon/subzone cases
+        if mapContentType == MAP_CONTENT_DUNGEON or mapType == MAPTYPE_SUBZONE then
+            MapZoomOut()
+            zoneName = GetMapName()
+            zoneX, zoneY = GetMapPlayerPosition("player")
+        end
+
+        -- Get world coordinates (except for Coldharbour)
+        if not (mapindex == 24 or GetCurrentMapIndex() == 24) then
+            SetMapToMapListIndex(1) -- Tamriel
+            worldX, worldY = GetMapPlayerPosition("player")
+        end
+
+        -- Get floor information if available
+        local floorInfo = {}
+        local currentFloor, numFloors = GetMapFloorInfo()
+        if numFloors > 0 then
+            floorInfo =
+            {
+                currentFloor = currentFloor,
+                numFloors = numFloors
+            }
+        end
+
+        -- Get POI info
+        local poiInfo = {}
+        local numPOIs = GetNumPOIs(zoneIndex)
+        if numPOIs > 0 then
+            poiInfo.count = numPOIs
+            poiInfo.items = {}
+
+            for i = 1, numPOIs do
+                local objectiveName, objectiveLevel, startDescription, finishedDescription = GetPOIInfo(zoneIndex, i)
+                local poiType = GetPOIType(zoneIndex, i)
+                local poiX, poiY, poiPinType, icon, isShown, isLocked, isDiscovered, isNearby = GetPOIMapInfo(zoneIndex, i)
+
+                poiInfo.items[i] =
+                {
+                    name = objectiveName,
+                    level = objectiveLevel,
+                    type = poiType,
+                    x = poiX,
+                    y = poiY,
+                    isDiscovered = isDiscovered,
+                    isNearby = isNearby
+                }
+            end
+        end
+
+        -- Get fast travel information
+        local fastTravelInfo = {}
+        local numFastTravel = GetNumFastTravelNodes()
+        if numFastTravel > 0 then
+            fastTravelInfo.count = numFastTravel
+            fastTravelInfo.items = {}
+
+            for i = 1, numFastTravel do
+                local known, nodeName, nodeX, nodeY, icon, glowIcon, poiType, isShown, isLocked = GetFastTravelNodeInfo(i)
+                if isShown then
+                    local cooldownRemain, cooldownDuration = GetRecallCooldown()
+                    local recallCost = GetRecallCost(i)
+                    local recallCurrency = GetRecallCurrency(i)
+
+                    fastTravelInfo.items[#fastTravelInfo.items + 1] =
+                    {
+                        name = nodeName,
+                        known = known,
+                        x = nodeX,
+                        y = nodeY,
+                        cooldown = { remain = cooldownRemain, duration = cooldownDuration },
+                        cost = recallCost,
+                        currency = recallCurrency
+                    }
+                end
+            end
+        end
+
+        -- Zone flags.
+        local zoneFlags =
+        {
+            isInCyrodiil = IsInCyrodiil(),
+            isInImperialCity = IsInImperialCity(),
+            isInAvAZone = IsInAvAZone(),
+            isInOutlawZone = IsInOutlawZone(),
+            isInJusticeZone = IsInJusticeEnabledZone(),
+            allowsTeleport = CanLeaveCurrentLocationViaTeleport(),
+            allowsScaling = DoesCurrentZoneAllowScalingByLevel(),
+            hasTelvarBehavior = DoesCurrentZoneHaveTelvarStoneBehavior(),
+            allowsBattleLevelScaling = DoesCurrentZoneAllowBattleLevelScaling(),
+            isInAvAWorld = IsPlayerInAvAWorld(),
+            isInBattleground = IsActiveWorldBattleground(),
+            isGroupOwnable = IsActiveWorldGroupOwnable(),
+            isStarterWorld = IsActiveWorldStarterWorld()
+        }
+
+        -- Get map key information
+        local keyInfo = {}
+        local numKeySections = GetNumMapKeySections()
+        if numKeySections > 0 then
+            keyInfo.sections = {}
+            for i = 1, numKeySections do
+                local sectionName = GetMapKeySectionName(i)
+                local numSymbols = GetNumMapKeySectionSymbols(i)
+
+                local symbols = {}
+                for j = 1, numSymbols do
+                    local symbolName, symbolIcon, symbolTooltip = GetMapKeySectionSymbolInfo(i, j)
+                    symbols[j] =
+                    {
+                        name = symbolName,
+                        icon = symbolIcon,
+                        tooltip = symbolTooltip
+                    }
+                end
+
+                keyInfo.sections[i] =
+                {
+                    name = sectionName,
+                    symbols = symbols
+                }
+            end
+        end
+
+        -- Get Cadwell's Almanac information if available
+        local cadwellInfo = {}
+        local cadwellLevel = GetCadwellProgressionLevel()
+        if cadwellLevel > 0 then
+            cadwellInfo.level = cadwellLevel
+            cadwellInfo.zones = {}
+
+            local numZones = GetNumZonesForCadwellProgressionLevel(cadwellLevel)
+            for i = 1, numZones do
+                local cadwellZoneName, zoneDesc, zoneOrder = GetCadwellZoneInfo(cadwellLevel, i)
+                cadwellInfo.zones[i] =
+                {
+                    name = cadwellZoneName,
+                    description = zoneDesc,
+                    order = zoneOrder
+                }
+            end
+        end
+
+        -- Get level scaling constraints
+        local scaleLevelType, minScaleLevel, maxScaleLevel = GetCurrentZoneLevelScalingConstraints()
+
+        -- Reset map to player location
+        if SetMapToPlayerLocation() == SET_MAP_RESULT_MAP_CHANGED then
+            LUIE:FireCallbacks("OnWorldMapChanged")
+        end
+
+        -- Return collected information
+        return
+        {
+            zoneid = zoneid,
+            locName = locName,
+            mapid = mapid,
+            mapindex = mapindex,
+            name = name,
+            mapType = mapType,
+            mapContentType = mapContentType,
+            zoneIndex = zoneIndex,
+            description = description,
+            mapX = mapX,
+            mapY = mapY,
+            zoneX = zoneX,
+            zoneY = zoneY,
+            worldX = worldX,
+            worldY = worldY,
+            mapName = mapName,
+            zoneName = zoneName,
+            floorInfo = floorInfo,
+            poiInfo = poiInfo,
+            fastTravelInfo = fastTravelInfo,
+            zoneFlags = zoneFlags,
+            keyInfo = keyInfo,
+            cadwellInfo = cadwellInfo,
+            scaleLevelConstraints =
+            {
+                type = scaleLevelType,
+                min = minScaleLevel,
+                max = maxScaleLevel
+            }
+        }
+    end
+
+    -- -----------------------------------------------------------------------------
+    -- Slash Command Handlers
+    -- -----------------------------------------------------------------------------
+
+    --- Toggles the ability debug filter on/off.
+    --- When enabled, shows additional debug information for abilities.
+    function SpellCastBuffs.TempSlashFilter()
+        SpellCastBuffs.SV.ShowDebugFilter = not SpellCastBuffs.SV.ShowDebugFilter
+        AddSystemMessage(string_format("LUIE --- Ability Debug Filter %s ---",
+                                       SpellCastBuffs.SV.ShowDebugFilter and "Enabled" or "Disabled"))
+    end
+
+    --- Toggles ground damage aura visualization on/off.
+    --- When enabled, shows visual effects for ground-based damage areas.
+    --- Reloads player effects after toggling.
+    function SpellCastBuffs.TempSlashGround()
+        SpellCastBuffs.SV.GroundDamageAura = not SpellCastBuffs.SV.GroundDamageAura
+        AddSystemMessage(string_format("LUIE --- Ground Damage Auras %s ---",
+                                       SpellCastBuffs.SV.GroundDamageAura and "Enabled" or "Disabled"))
+        LUIE.SpellCastBuffs.ReloadEffects("player")
+    end
+
+    --- Outputs current zone and map information to chat.
+    --- Retrieves and displays:
+    --- - Zone ID and location name
+    --- - Map ID and index
+    --- - Map name, type, content type
+    --- - Zone index and description
+    --- - GPS coordinates for player
+    function SpellCastBuffs.TempSlashZoneCheck()
+        local info = CollectZoneMapInfo()
+
+        local displayInfo =
+        {
+            { "--------------------"                                                                                                                             },
+            { "ZONE & MAP INFO:"                                                                                                                                 },
+            { "--------------------"                                                                                                                             },
+            { "Zone Id:",            info.zoneid                                                                                                                 },
+            { "Location Name:",      info.locName                                                                                                                },
+            { "--------------------"                                                                                                                             },
+            { "Map Id:",             info.mapid                                                                                                                  },
+            { "Map Index:",          info.mapindex or "nil"                                                                                                      },
+            { "--------------------"                                                                                                                             },
+            { "GPS Coordinates:"                                                                                                                                 },
+            { "Map:",                string_format("%s: %s" .. LUIE_TINY_X_FORMATTER .. "%s", info.mapName, FormatCoords(info.mapX), FormatCoords(info.mapY))    },
+            { "Zone:",               string_format("%s: %s" .. LUIE_TINY_X_FORMATTER .. "%s", info.zoneName, FormatCoords(info.zoneX), FormatCoords(info.zoneY)) },
+            { "World:",              string_format("Tamriel: %s" .. LUIE_TINY_X_FORMATTER .. "%s", FormatCoords(info.worldX), FormatCoords(info.worldY))         },
+            { "--------------------"                                                                                                                             },
+            { "Map Name:",           info.name                                                                                                                   },
+            { "Map Type:",           info.mapType                                                                                                                },
+            { "Map Content Type:",   info.mapContentType                                                                                                         },
+            { "Zone Index:",         info.zoneIndex                                                                                                              },
+            { "Description:",        info.description                                                                                                            },
+        }
+
+        -- Floor information
+        if info.floorInfo.numFloors and info.floorInfo.numFloors > 0 then
+            table.insert(displayInfo, { "--------------------" })
+            table.insert(displayInfo, { "Floor Information:" })
+            table.insert(displayInfo, { "Current Floor:", info.floorInfo.currentFloor })
+            table.insert(displayInfo, { "Total Floors:", info.floorInfo.numFloors })
+        end
+
+        -- Zone flags
+        table.insert(displayInfo, { "--------------------" })
+        table.insert(displayInfo, { "Zone Flags:" })
+        local flagsStr = ""
+        if info.zoneFlags.isInCyrodiil then flagsStr = flagsStr .. "Cyrodiil, " end
+        if info.zoneFlags.isInImperialCity then flagsStr = flagsStr .. "Imperial City, " end
+        if info.zoneFlags.isInAvAZone then flagsStr = flagsStr .. "AvA Zone, " end
+        if info.zoneFlags.isInOutlawZone then flagsStr = flagsStr .. "Outlaw Zone, " end
+        if info.zoneFlags.isInJusticeZone then flagsStr = flagsStr .. "Justice Zone, " end
+        if info.zoneFlags.hasTelvarBehavior then flagsStr = flagsStr .. "Telvar Stone, " end
+        if info.zoneFlags.isInBattleground then flagsStr = flagsStr .. "Battleground, " end
+        if info.zoneFlags.isStarterWorld then flagsStr = flagsStr .. "Starter World, " end
+        if flagsStr == "" then flagsStr = "None" else flagsStr = string.sub(flagsStr, 1, -3) end
+        table.insert(displayInfo, { "Active Flags:", flagsStr })
+
+        -- Level scaling
+        table.insert(displayInfo, { "--------------------" })
+        table.insert(displayInfo, { "Level Scaling:" })
+        table.insert(displayInfo, { "Scale Type:", info.scaleLevelConstraints.type })
+        table.insert(displayInfo, { "Min Level:", info.scaleLevelConstraints.min })
+        table.insert(displayInfo, { "Max Level:", info.scaleLevelConstraints.max })
+
+        -- POI information
+        if info.poiInfo.count and info.poiInfo.count > 0 then
+            AddSystemMessage("--------------------")
+            AddSystemMessage("DETAILED POI INFORMATION:")
+            AddSystemMessage("--------------------")
+
+            for i, poi in ipairs(info.poiInfo.items) do
+                if i <= 5 then -- Limit to first 5 POIs to avoid spam
+                    AddSystemMessage(string_format("POI %d: %s (Type: %d, Discovered: %s)",
+                                                   i, poi.name, poi.type, poi.isDiscovered and "Yes" or "No"))
+                end
+            end
+
+            if #info.poiInfo.items > 5 then
+                AddSystemMessage(string_format("... and %d more POIs", #info.poiInfo.items - 5))
+            end
+        end
+
+        -- Fast travel information
+        if info.fastTravelInfo.count and info.fastTravelInfo.count > 0 then
+            table.insert(displayInfo, { "--------------------" })
+            table.insert(displayInfo, { "Fast Travel Points:", info.fastTravelInfo.count .. " total nodes" })
+            table.insert(displayInfo, { "Available:", #info.fastTravelInfo.items .. " in current map" })
+
+            if #info.fastTravelInfo.items > 0 then
+                -- Show the nearest wayshrine
+                local nearestName = info.fastTravelInfo.items[1].name
+                local nearestDist = 999999
+
+                for _, node in ipairs(info.fastTravelInfo.items) do
+                    local dist = math.sqrt((node.x - info.mapX) ^ 2 + (node.y - info.mapY) ^ 2)
+                    if dist < nearestDist then
+                        nearestDist = dist
+                        nearestName = node.name
+                    end
+                end
+
+                table.insert(displayInfo, { "Nearest Wayshrine:", nearestName })
+            end
+        end
+
+        -- Cadwell's Almanac information
+        if info.cadwellInfo.level and info.cadwellInfo.level > 0 then
+            table.insert(displayInfo, { "--------------------" })
+            table.insert(displayInfo, { "Cadwell's Almanac:" })
+            table.insert(displayInfo, { "Progress Level:", info.cadwellInfo.level })
+            if info.cadwellInfo.zones and #info.cadwellInfo.zones > 0 then
+                table.insert(displayInfo, { "Zones in Current Level:", #info.cadwellInfo.zones })
+            end
+        end
+
+        table.insert(displayInfo, { "--------------------" })
+
+        for _, v in ipairs(displayInfo) do
+            AddSystemMessage(#v == 1 and v[1] or string_format("%s %s", v[1], v[2]))
+        end
+    end
+
+    --- Checks for removed abilities by iterating through LuiData.Data.DebugAuras and checking if each ability still exists.
+    --- Outputs a list of ability IDs that no longer exist in the game to chat.
+    function SpellCastBuffs.TempSlashCheckRemovedAbilities()
+        AddSystemMessage("Removed AbilityIds:")
+        for abilityId in pairs(DebugAuras) do
+            if not DoesAbilityExist(abilityId) then
+                AddSystemMessage(tostring(abilityId))
+            end
+        end
+    end
+
+    -- Add a new command for full zone info output
+    function SpellCastBuffs.TempSlashZoneCheckFull()
+        local info = CollectZoneMapInfo()
+
+        -- Display basic info first
+        SpellCastBuffs.TempSlashZoneCheck()
+
+        -- Display POI details
+        if info.poiInfo.count and info.poiInfo.count > 0 then
+            AddSystemMessage("--------------------")
+            AddSystemMessage("DETAILED POI INFORMATION:")
+            AddSystemMessage("--------------------")
+
+            for i, poi in ipairs(info.poiInfo.items) do
+                if i <= 5 then -- Limit to first 5 POIs to avoid spam
+                    AddSystemMessage(string_format("POI %d: %s (Type: %d, Discovered: %s)",
+                                                   i, poi.name, poi.type, poi.isDiscovered and "Yes" or "No"))
+                end
+            end
+
+            if #info.poiInfo.items > 5 then
+                AddSystemMessage(string_format("... and %d more POIs", #info.poiInfo.items - 5))
+            end
+        end
+
+        -- Display wayshrine details
+        if info.fastTravelInfo.count and info.fastTravelInfo.count > 0 then
+            AddSystemMessage("--------------------")
+            AddSystemMessage("DETAILED WAYSHRINE INFORMATION:")
+            AddSystemMessage("--------------------")
+
+            for i, node in ipairs(info.fastTravelInfo.items) do
+                if i <= 5 then -- Limit to first 5 wayshrines
+                    AddSystemMessage(string_format("Wayshrine %d: %s (Known: %s, Cost: %d)",
+                                                   i, node.name, node.known and "Yes" or "No", node.cost))
+                end
+            end
+
+            if #info.fastTravelInfo.items > 5 then
+                AddSystemMessage(string_format("... and %d more wayshrines", #info.fastTravelInfo.items - 5))
+            end
+        end
+
+        -- Display key section info
+        if info.keyInfo.sections and #info.keyInfo.sections > 0 then
+            AddSystemMessage("--------------------")
+            AddSystemMessage("MAP KEY INFORMATION:")
+            AddSystemMessage("--------------------")
+
+            for i, section in ipairs(info.keyInfo.sections) do
+                AddSystemMessage(string_format("Section: %s (%d symbols)", section.name, #section.symbols))
+            end
+        end
+
+        AddSystemMessage("--------------------")
+    end
+
+    -- -----------------------------------------------------------------------------
+    -- Slash Commands Registration
+    -- -----------------------------------------------------------------------------
+
+    -- Slash command mapping
+    local DEBUG_COMMANDS =
+    {
+        ["/filter"] = SpellCastBuffs.TempSlashFilter,
+        ["/ground"] = SpellCastBuffs.TempSlashGround,
+        ["/zonecheck"] = SpellCastBuffs.TempSlashZoneCheck,
+        ["/zonecheckfull"] = SpellCastBuffs.TempSlashZoneCheckFull,
+        ["/abilitydump"] = SpellCastBuffs.TempSlashCheckRemovedAbilities,
+    }
+
+    --- Initializes debug slash commands
+    --- These commands are only available when developer debug mode is enabled
+    if LUIE.IsDevDebugEnabled() then
+        for command, handler in pairs(DEBUG_COMMANDS) do
+            SLASH_COMMANDS[command] = handler
+        end
+    end
+    -- -----------------------------------------------------------------------------
 end

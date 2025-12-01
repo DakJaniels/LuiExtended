@@ -112,9 +112,6 @@ modules/CombatInfo/CombatInfo.lua
 modules/InfoPanel/InfoPanel.lua
 
 # Modules - Spell Cast Buffs
-modules/SpellCastBuffs/_Namespace.lua
-modules/SpellCastBuffs/_Debug.lua
-modules/SpellCastBuffs/_DevDebug.lua
 modules/SpellCastBuffs/SpellCastBuffs.lua
 
 # Modules - Slash Commands
