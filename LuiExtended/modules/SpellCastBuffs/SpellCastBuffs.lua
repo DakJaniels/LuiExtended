@@ -1,4 +1,5 @@
-﻿-- -----------------------------------------------------------------------------
+﻿--- @diagnostic disable: inject-field
+-- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
@@ -394,49 +395,49 @@ local function InitializePreviewLabels()
 
     for _, f in ipairs(frames) do
         if f.frame then
-            -- Create preview container if it doesn't exist
+            -- Get preview controls from XML (created in XML for performance)
             if not f.frame.preview then
-                f.frame.preview = UI:Control(f.frame, "fill", nil, false)
+                f.frame.preview = f.frame:GetNamedChild("Preview")
             end
 
-            -- Create texture and label for anchor preview
-            if not f.frame.preview.anchorTexture then
-                f.frame.preview.anchorTexture = UI:Texture(f.frame.preview, { TOPLEFT, TOPLEFT }, { 16, 16 }, "/esoui/art/reticle/border_topleft.dds", DL_OVERLAY, false)
-                f.frame.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
-            end
+            if f.frame.preview then
+                -- Get anchor controls from XML
+                if not f.frame.preview.anchorTexture then
+                    f.frame.preview.anchorTexture = f.frame.preview:GetNamedChild("AnchorTexture")
+                    if f.frame.preview.anchorTexture then
+                        f.frame.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
+                    end
+                end
 
-            if not f.frame.preview.anchorLabel then
-                f.frame.preview.anchorLabel = UI:Label(f.frame.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "ZoFontGameSmall", "xxx, yyy", false)
-                f.frame.preview.anchorLabel:SetColor(1, 1, 0, 1)
-                f.frame.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
-                f.frame.preview.anchorLabel:SetDrawTier(DT_MEDIUM)
-                -- Update font to use better readable font
-                if IsConsoleUI() and LUIE.ConsoleMoverHelper then
-                    local fontName = "LUIE Default Font"
-                    if LUIE.Fonts and LUIE.Fonts[fontName] then
-                        local fontSize = 14
-                        local fontStyle = "soft-shadow-thick"
-                        local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
-                        f.frame.preview.anchorLabel:SetFont(fontString)
-                    else
-                        if IsInGamepadPreferredMode() or IsConsoleUI() then
-                            f.frame.preview.anchorLabel:SetFont("$(GAMEPAD_MEDIUM_FONT)|14|soft-shadow-thick")
-                        else
-                            f.frame.preview.anchorLabel:SetFont("$(MEDIUM_FONT)|14|soft-shadow-thick")
+                if not f.frame.preview.anchorLabel then
+                    f.frame.preview.anchorLabel = f.frame.preview:GetNamedChild("AnchorLabel")
+                    if f.frame.preview.anchorLabel then
+                        f.frame.preview.anchorLabel:SetColor(1, 1, 0, 1)
+                        -- Update font to use better readable font
+                        if IsConsoleUI() and LUIE.ConsoleMoverHelper then
+                            local fontName = "LUIE Default Font"
+                            if LUIE.Fonts and LUIE.Fonts[fontName] then
+                                local fontSize = 14
+                                local fontStyle = "soft-shadow-thick"
+                                local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
+                                f.frame.preview.anchorLabel:SetFont(fontString)
+                            else
+                                if IsInGamepadPreferredMode() or IsConsoleUI() then
+                                    f.frame.preview.anchorLabel:SetFont("$(GAMEPAD_MEDIUM_FONT)|14|soft-shadow-thick")
+                                else
+                                    f.frame.preview.anchorLabel:SetFont("$(MEDIUM_FONT)|14|soft-shadow-thick")
+                                end
+                            end
                         end
                     end
                 end
+
+                if not f.frame.preview.anchorLabelBg then
+                    f.frame.preview.anchorLabelBg = f.frame.preview:GetNamedChild("AnchorLabelBg")
+                end
             end
 
-            if not f.frame.preview.anchorLabelBg then
-                f.frame.preview.anchorLabelBg = UI:Backdrop(f.frame.preview.anchorLabel, "fill", nil, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, false)
-                f.frame.preview.anchorLabelBg:SetDrawLayer(DL_OVERLAY)
-                f.frame.preview.anchorLabelBg:SetDrawTier(DT_LOW)
-            end
-
-            -- Add movement handlers
-            f.frame:SetHandler("OnMoveStart", OnMoveStart)
-            f.frame:SetHandler("OnMoveStop", OnMoveStop)
+            -- Movement handlers are set in XML (OnMoveStart, OnMoveStop)
         end
     end
 end
@@ -487,21 +488,11 @@ function SpellCastBuffs.Initialize(enabled)
         SpellCastBuffs.containerRouting.player1 = "player1"
         SpellCastBuffs.containerRouting.player2 = "player2"
     else
-        -- Use named TopLevelControl from XML for player buffs
+        -- Use named TopLevelControl from XML for player buffs (OnMoveStop handler set in XML)
         SpellCastBuffs.BuffContainers.playerb = LUIE_SpellCastBuffs_PlayerBuffs
-        local playerb_OnMoveStop = function (self)
-            SpellCastBuffs.SV.playerbOffsetX = self:GetLeft()
-            SpellCastBuffs.SV.playerbOffsetY = self:GetTop()
-        end
-        SpellCastBuffs.BuffContainers.playerb:SetHandler("OnMoveStop", playerb_OnMoveStop)
 
-        -- Use named TopLevelControl from XML for player debuffs
+        -- Use named TopLevelControl from XML for player debuffs (OnMoveStop handler set in XML)
         SpellCastBuffs.BuffContainers.playerd = LUIE_SpellCastBuffs_PlayerDebuffs
-        local playerd_OnMoveStop = function (self)
-            SpellCastBuffs.SV.playerdOffsetX = self:GetLeft()
-            SpellCastBuffs.SV.playerdOffsetY = self:GetTop()
-        end
-        SpellCastBuffs.BuffContainers.playerd:SetHandler("OnMoveStop", playerd_OnMoveStop)
         SpellCastBuffs.containerRouting.player1 = "playerb"
         SpellCastBuffs.containerRouting.player2 = "playerd"
 
@@ -519,21 +510,11 @@ function SpellCastBuffs.Initialize(enabled)
         SpellCastBuffs.containerRouting.reticleover2 = "target2"
         SpellCastBuffs.containerRouting.ground = "target2"
     else
-        -- Use named TopLevelControl from XML for target buffs
+        -- Use named TopLevelControl from XML for target buffs (OnMoveStop handler set in XML)
         SpellCastBuffs.BuffContainers.targetb = LUIE_SpellCastBuffs_TargetBuffs
-        local targetb_OnMoveStop = function (self)
-            SpellCastBuffs.SV.targetbOffsetX = self:GetLeft()
-            SpellCastBuffs.SV.targetbOffsetY = self:GetTop()
-        end
-        SpellCastBuffs.BuffContainers.targetb:SetHandler("OnMoveStop", targetb_OnMoveStop)
 
-        -- Use named TopLevelControl from XML for target debuffs
+        -- Use named TopLevelControl from XML for target debuffs (OnMoveStop handler set in XML)
         SpellCastBuffs.BuffContainers.targetd = LUIE_SpellCastBuffs_TargetDebuffs
-        local targetd_OnMoveStop = function (self)
-            SpellCastBuffs.SV.targetdOffsetX = self:GetLeft()
-            SpellCastBuffs.SV.targetdOffsetY = self:GetTop()
-        end
-        SpellCastBuffs.BuffContainers.targetd:SetHandler("OnMoveStop", targetd_OnMoveStop)
         SpellCastBuffs.containerRouting.reticleover1 = "targetb"
         SpellCastBuffs.containerRouting.reticleover2 = "targetd"
         SpellCastBuffs.containerRouting.ground = "targetd"
@@ -544,28 +525,9 @@ function SpellCastBuffs.Initialize(enabled)
         table_insert(fragments, fragment2)
     end
 
-    -- Create TopLevelWindows for Prominent Buffs (from XML)
+    -- Create TopLevelWindows for Prominent Buffs (from XML, OnMoveStop handlers set in XML)
     SpellCastBuffs.BuffContainers.prominentbuffs = LUIE_SpellCastBuffs_ProminentBuffs
-    SpellCastBuffs.BuffContainers.prominentbuffs:SetHandler("OnMoveStop", function (self)
-        if self.alignVertical then
-            SpellCastBuffs.SV.prominentbVOffsetX = self:GetLeft()
-            SpellCastBuffs.SV.prominentbVOffsetY = self:GetTop()
-        else
-            SpellCastBuffs.SV.prominentbHOffsetX = self:GetLeft()
-            SpellCastBuffs.SV.prominentbHOffsetY = self:GetTop()
-        end
-    end)
-
     SpellCastBuffs.BuffContainers.prominentdebuffs = LUIE_SpellCastBuffs_ProminentDebuffs
-    SpellCastBuffs.BuffContainers.prominentdebuffs:SetHandler("OnMoveStop", function (self)
-        if self.alignVertical then
-            SpellCastBuffs.SV.prominentdVOffsetX = self:GetLeft()
-            SpellCastBuffs.SV.prominentdVOffsetY = self:GetTop()
-        else
-            SpellCastBuffs.SV.prominentdHOffsetX = self:GetLeft()
-            SpellCastBuffs.SV.prominentdHOffsetY = self:GetTop()
-        end
-    end)
 
     if SpellCastBuffs.SV.ProminentBuffContainerAlignment == 1 then
         SpellCastBuffs.BuffContainers.prominentbuffs.alignVertical = false
@@ -590,19 +552,8 @@ function SpellCastBuffs.Initialize(enabled)
     table_insert(fragments, fragmentP1)
     table_insert(fragments, fragmentP2)
 
-    -- Separate container for players long term buffs (from XML)
+    -- Separate container for players long term buffs (from XML, OnMoveStop handler set in XML)
     SpellCastBuffs.BuffContainers.player_long = LUIE_SpellCastBuffs_PlayerLong
-    SpellCastBuffs.BuffContainers.player_long:SetHandler("OnMoveStop", function (self)
-        local left = self:GetLeft()
-        local top = self:GetTop()
-        if self.alignVertical then
-            SpellCastBuffs.SV.playerVOffsetX = left
-            SpellCastBuffs.SV.playerVOffsetY = top
-        else
-            SpellCastBuffs.SV.playerHOffsetX = left
-            SpellCastBuffs.SV.playerHOffsetY = top
-        end
-    end)
 
     if SpellCastBuffs.SV.LongTermEffectsSeparateAlignment == 1 then
         SpellCastBuffs.BuffContainers.player_long.alignVertical = false
@@ -629,20 +580,23 @@ function SpellCastBuffs.Initialize(enabled)
 
     -- Loop over created controls to...
     for _, v in pairs(SpellCastBuffs.containerRouting) do
-        -- Set Draw Priority
-        SpellCastBuffs.BuffContainers[v]:SetDrawLayer(DL_BACKGROUND)
-        SpellCastBuffs.BuffContainers[v]:SetDrawTier(DT_LOW)
-        SpellCastBuffs.BuffContainers[v]:SetDrawLevel(DL_CONTROLS)
+        -- Draw Priority is set in XML (layer, tier, level)
+        -- Get preview controls from XML (created in XML for performance)
         if SpellCastBuffs.BuffContainers[v].preview == nil then
-            -- Create background areas for preview position purposes
-            -- SpellCastBuffs.BuffContainers[v].preview = UI:Backdrop( SpellCastBuffs.BuffContainers[v], "fill", nil, nil, nil, true )
-            SpellCastBuffs.BuffContainers[v].preview = UI:Texture(SpellCastBuffs.BuffContainers[v], "fill", nil, "/esoui/art/miscellaneous/inset_bg.dds", DL_BACKGROUND, true)
-            SpellCastBuffs.BuffContainers[v].previewLabel = UI:Label(SpellCastBuffs.BuffContainers[v].preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", SpellCastBuffs.windowTitles[v] .. (SpellCastBuffs.SV.lockPositionToUnitFrames and (v ~= "player_long" and v ~= "prominentbuffs" and v ~= "prominentdebuffs") and " (locked)" or ""), false)
+            SpellCastBuffs.BuffContainers[v].preview = SpellCastBuffs.BuffContainers[v]:GetNamedChild("Preview")
+            if SpellCastBuffs.BuffContainers[v].preview then
+                SpellCastBuffs.BuffContainers[v].previewLabel = SpellCastBuffs.BuffContainers[v].preview:GetNamedChild("PreviewLabel")
+                -- Set initial preview label text
+                if SpellCastBuffs.BuffContainers[v].previewLabel then
+                    SpellCastBuffs.BuffContainers[v].previewLabel:SetText(SpellCastBuffs.windowTitles[v] .. (SpellCastBuffs.SV.lockPositionToUnitFrames and (v ~= "player_long" and v ~= "prominentbuffs" and v ~= "prominentdebuffs") and " (locked)" or ""))
+                end
+            end
 
+            -- Get iconHolder from XML (created in XML for containers that need it)
             -- We need this container only for icons that are aligned in one row/column automatically.
             -- Thus we do not create containers for player and target buffs/debuffs on custom frames
             if v ~= "player1" and v ~= "player2" and v ~= "target1" and v ~= "target2" and v ~= "playerb" and v ~= "playerd" and v ~= "targetb" and v ~= "targetd" then
-                SpellCastBuffs.BuffContainers[v].iconHolder = UI:Control(SpellCastBuffs.BuffContainers[v], nil, nil, false)
+                SpellCastBuffs.BuffContainers[v].iconHolder = SpellCastBuffs.BuffContainers[v]:GetNamedChild("IconHolder")
             end
             -- Create metapool for this container (replaces icons array)
             SpellCastBuffs.BuffContainers[v].metaPool = SpellCastBuffs:CreateMetaPool(v, SpellCastBuffs.BuffContainers[v])
@@ -1276,17 +1230,7 @@ function SpellCastBuffs.SetMovingState(state)
         SpellCastBuffs.BuffContainers.playerb:SetMovable(state)
         UpdatePositionLabel(SpellCastBuffs.BuffContainers.playerb, SpellCastBuffs.BuffContainers.playerb.preview.anchorLabel)
 
-        -- Add grid snapping handler
-        SpellCastBuffs.BuffContainers.playerb:SetHandler("OnMoveStop", function (self)
-            local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
-                self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-            end
-            SpellCastBuffs.SV.playerbOffsetX = left
-            SpellCastBuffs.SV.playerbOffsetY = top
-        end)
+        -- Grid snapping is handled by XML handler
     end
 
     if SpellCastBuffs.BuffContainers.playerd and SpellCastBuffs.BuffContainers.playerd:GetType() == CT_TOPLEVELCONTROL and (SpellCastBuffs.SV.lockPositionToUnitFrames == nil or not SpellCastBuffs.SV.lockPositionToUnitFrames) then
@@ -1294,17 +1238,7 @@ function SpellCastBuffs.SetMovingState(state)
         SpellCastBuffs.BuffContainers.playerd:SetMovable(state)
         UpdatePositionLabel(SpellCastBuffs.BuffContainers.playerd, SpellCastBuffs.BuffContainers.playerd.preview.anchorLabel)
 
-        -- Add grid snapping handler
-        SpellCastBuffs.BuffContainers.playerd:SetHandler("OnMoveStop", function (self)
-            local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
-                self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-            end
-            SpellCastBuffs.SV.playerdOffsetX = left
-            SpellCastBuffs.SV.playerdOffsetY = top
-        end)
+        -- Grid snapping is handled by XML handler
     end
 
     if SpellCastBuffs.BuffContainers.targetb and SpellCastBuffs.BuffContainers.targetb:GetType() == CT_TOPLEVELCONTROL and (SpellCastBuffs.SV.lockPositionToUnitFrames == nil or not SpellCastBuffs.SV.lockPositionToUnitFrames) then
@@ -1312,17 +1246,7 @@ function SpellCastBuffs.SetMovingState(state)
         SpellCastBuffs.BuffContainers.targetb:SetMovable(state)
         UpdatePositionLabel(SpellCastBuffs.BuffContainers.targetb, SpellCastBuffs.BuffContainers.targetb.preview.anchorLabel)
 
-        -- Add grid snapping handler
-        SpellCastBuffs.BuffContainers.targetb:SetHandler("OnMoveStop", function (self)
-            local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
-                self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-            end
-            SpellCastBuffs.SV.targetbOffsetX = left
-            SpellCastBuffs.SV.targetbOffsetY = top
-        end)
+        -- Grid snapping is handled by XML handler
     end
 
     if SpellCastBuffs.BuffContainers.targetd and SpellCastBuffs.BuffContainers.targetd:GetType() == CT_TOPLEVELCONTROL and (SpellCastBuffs.SV.lockPositionToUnitFrames == nil or not SpellCastBuffs.SV.lockPositionToUnitFrames) then
@@ -1330,17 +1254,7 @@ function SpellCastBuffs.SetMovingState(state)
         SpellCastBuffs.BuffContainers.targetd:SetMovable(state)
         UpdatePositionLabel(SpellCastBuffs.BuffContainers.targetd, SpellCastBuffs.BuffContainers.targetd.preview.anchorLabel)
 
-        -- Add grid snapping handler
-        SpellCastBuffs.BuffContainers.targetd:SetHandler("OnMoveStop", function (self)
-            local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
-                self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-            end
-            SpellCastBuffs.SV.targetdOffsetX = left
-            SpellCastBuffs.SV.targetdOffsetY = top
-        end)
+        -- Grid snapping is handled by XML handler
     end
 
     if SpellCastBuffs.BuffContainers.player_long then
@@ -1348,22 +1262,7 @@ function SpellCastBuffs.SetMovingState(state)
         SpellCastBuffs.BuffContainers.player_long:SetMovable(state)
         UpdatePositionLabel(SpellCastBuffs.BuffContainers.player_long, SpellCastBuffs.BuffContainers.player_long.preview.anchorLabel)
 
-        -- Add grid snapping handler
-        SpellCastBuffs.BuffContainers.player_long:SetHandler("OnMoveStop", function (self)
-            local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
-                self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-            end
-            if self.alignVertical then
-                SpellCastBuffs.SV.playerVOffsetX = left
-                SpellCastBuffs.SV.playerVOffsetY = top
-            else
-                SpellCastBuffs.SV.playerHOffsetX = left
-                SpellCastBuffs.SV.playerHOffsetY = top
-            end
-        end)
+        -- Grid snapping is handled by XML handler
     end
 
     if SpellCastBuffs.BuffContainers.prominentbuffs then
@@ -1371,22 +1270,7 @@ function SpellCastBuffs.SetMovingState(state)
         SpellCastBuffs.BuffContainers.prominentbuffs:SetMovable(state)
         UpdatePositionLabel(SpellCastBuffs.BuffContainers.prominentbuffs, SpellCastBuffs.BuffContainers.prominentbuffs.preview.anchorLabel)
 
-        -- Add grid snapping handler
-        SpellCastBuffs.BuffContainers.prominentbuffs:SetHandler("OnMoveStop", function (self)
-            local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
-                self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-            end
-            if self.alignVertical then
-                SpellCastBuffs.SV.prominentbVOffsetX = left
-                SpellCastBuffs.SV.prominentbVOffsetY = top
-            else
-                SpellCastBuffs.SV.prominentbHOffsetX = left
-                SpellCastBuffs.SV.prominentbHOffsetY = top
-            end
-        end)
+        -- Grid snapping is handled by XML handler
     end
 
     if SpellCastBuffs.BuffContainers.prominentdebuffs then
@@ -1394,27 +1278,14 @@ function SpellCastBuffs.SetMovingState(state)
         SpellCastBuffs.BuffContainers.prominentdebuffs:SetMovable(state)
         UpdatePositionLabel(SpellCastBuffs.BuffContainers.prominentdebuffs, SpellCastBuffs.BuffContainers.prominentdebuffs.preview.anchorLabel)
 
-        -- Add grid snapping handler
-        SpellCastBuffs.BuffContainers.prominentdebuffs:SetHandler("OnMoveStop", function (self)
-            local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
-                self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-            end
-            if self.alignVertical then
-                SpellCastBuffs.SV.prominentdVOffsetX = left
-                SpellCastBuffs.SV.prominentdVOffsetY = top
-            else
-                SpellCastBuffs.SV.prominentdHOffsetX = left
-                SpellCastBuffs.SV.prominentdHOffsetY = top
-            end
-        end)
+        -- Grid snapping is handled by XML handler
     end
 
     -- Show/hide preview
     for _, v in pairs(SpellCastBuffs.containerRouting) do
-        SpellCastBuffs.BuffContainers[v].preview:SetHidden(not state)
+        if SpellCastBuffs.BuffContainers[v] and SpellCastBuffs.BuffContainers[v].preview then
+            SpellCastBuffs.BuffContainers[v].preview:SetHidden(not state)
+        end
     end
 
     -- Now create or remove test-effects icons
@@ -1580,6 +1451,15 @@ local function ApplyIconVisuals(container, buff)
         buff.icon:ClearAnchors()
         buff.icon:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
         buff.icon:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -inset, -inset)
+    end
+
+    -- Anchor cooldown to fill buff control with small offsets (original behavior)
+    if buff.cd then
+        buff.cd:ClearAnchors()
+        buff.cd:SetAnchor(TOPLEFT, buff, TOPLEFT, 1, 1)
+        buff.cd:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -1, -1)
+        -- Ensure it's on BACKGROUND layer to render under icon (which is on CONTROLS)
+        buff.cd:SetDrawLayer(DL_BACKGROUND)
     end
 
     if buff.iconbg ~= nil then
@@ -2770,80 +2650,6 @@ do
         end
     end
 
-    -- Create a single buff icon control
-    local function CreateSingleIcon(container, effectType)
-        -- Create main buff container
-        local buff = UI:Backdrop(SpellCastBuffs.BuffContainers[container], nil, nil, { 0, 0, 0, 0.5 }, { 0, 0, 0, 1 }, false)
-        -- Setup mouse interaction
-        buff:SetMouseEnabled(true)
-        buff:SetHandler("OnMouseEnter", SpellCastBuffs.Buff_OnMouseEnter)
-        buff:SetHandler("OnMouseExit", SpellCastBuffs.Buff_OnMouseExit)
-        buff:SetHandler("OnMouseUp", SpellCastBuffs.Buff_OnMouseUp)
-
-        -- Border layer - hidden by default, shown only for non-collectible buffs
-        buff.back = UI:Texture(buff, "fill", nil, "EsoUI/Art/ActionBar/abilityFrame_buff.dds", DL_BACKGROUND, true)
-
-        -- Glow border layer
-        buff.frame = UI:Texture(buff, { CENTER, CENTER }, nil, nil, DL_OVERLAY, false)
-
-        -- Background layer (except for player_long container)
-        if container ~= "player_long" then
-            -- Create background texture
-            buff.iconbg = UI:Texture(buff, "fill", nil, "EsoUI/Art/ActionBar/abilityInset.dds", DL_CONTROLS, false)
-            -- Create dark backdrop behind the texture
-            local bgBackdrop = UI:Backdrop(buff.iconbg, "fill", nil, { 0, 0, 0, 0.9 }, { 0, 0, 0, 0.9 }, false)
-            bgBackdrop:SetDrawLevel(DL_CONTROLS)
-        end
-
-        -- Collectible/mount background
-        buff.drop = UI:Texture(buff, nil, nil, LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_BACKGROUND_DDS, DL_BACKGROUND, true)
-
-        -- Main ability icon
-        buff.icon = UI:Texture(buff, nil, nil, "/esoui/art/icons/icon_missing.dds", DL_CONTROLS, false)
-
-        -- Duration label
-        buff.label = UI:Label(buff, nil, nil, nil, SpellCastBuffs.buffsFont, nil, false)
-        buff.label:SetAnchor(TOPLEFT, buff, LEFT, -SpellCastBuffs.padding, -SpellCastBuffs.SV.LabelPosition)
-        buff.label:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, SpellCastBuffs.padding, -2)
-
-        -- Debug ability ID label
-        buff.abilityId = UI:Label(buff, { CENTER, CENTER }, nil, nil, SpellCastBuffs.buffsFont, nil, false)
-        buff.abilityId:SetDrawLayer(DL_OVERLAY)
-        buff.abilityId:SetDrawTier(DT_MEDIUM)
-
-        -- Stack count label
-        buff.stack = UI:Label(buff, nil, nil, nil, SpellCastBuffs.buffsFont, nil, false)
-        buff.stack:SetAnchor(CENTER, buff, BOTTOMLEFT, 0, 0)
-        buff.stack:SetAnchor(CENTER, buff, TOPRIGHT, -SpellCastBuffs.padding * 3, SpellCastBuffs.padding * 3)
-
-        if buff.iconbg then
-            buff.cd = UI:ControlWithType(buff, "fill", nil, false, nil, CT_COOLDOWN)
-            buff.cd:SetAnchor(TOPLEFT, buff, TOPLEFT, 1, 1)
-            buff.cd:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -1, -1)
-            buff.cd:SetDrawLayer(DL_BACKGROUND)
-        end
-
-        if container == "prominentbuffs" or container == "prominentdebuffs" then
-            buff.effectType = effectType
-            buff.name = UI:Label(buff, nil, nil, nil, SpellCastBuffs.prominentFont, nil, false)
-
-            -- Create progress bar
-            buff.bar =
-            {
-                backdrop = UI:Backdrop(buff, nil, { 154, 16 }, nil, nil, false),
-                bar = UI:StatusBar(buff, nil, { 150, 12 }, nil, false),
-            }
-
-            -- Setup bar properties
-            buff.bar.backdrop:SetEdgeTexture("", 8, 2, 2, 2)
-            buff.bar.backdrop:SetDrawLayer(DL_BACKGROUND)
-            buff.bar.backdrop:SetDrawLevel(DL_CONTROLS)
-            buff.bar.bar:SetMinMax(0, 1)
-        end
-
-        return buff
-    end
-
     -- Create a metapool for a container (similar to ZOS's CreateMetaPool)
     -- @param container string Container name
     -- @param containerControl Control The container control
@@ -2897,47 +2703,20 @@ do
             end
         end
 
-        -- Custom reset behavior
+        -- Custom reset behavior (following ZOS pattern - minimal cleanup)
         -- Called by ZO_MetaPool:ReleaseAllObjects() or :ReleaseObject() before releasing to source pool
         -- Note: ZO_ControlPool's internal reset already calls SetHidden(true) and ClearAnchors()
-        -- This adds additional cleanup specific to our buff icons
         local function OnReset(control)
-            -- Stop any animations
+            -- Stop any animations (matching ZOS pattern)
             if control.blinkAnimation then
                 control.blinkAnimation:Stop()
             end
 
-            -- Reset cooldown
+            -- Reset cooldown (matching ZOS pattern)
             if control.cd then
                 control.cd:ResetCooldown()
                 control.cd:SetHidden(true)
             end
-
-            -- Reset prominent elements if they exist
-            if control.name then
-                control.name:SetText("")
-                control.name:SetHidden(true)
-            end
-            if control.bar then
-                if control.bar.backdrop then
-                    control.bar.backdrop:SetHidden(true)
-                end
-                if control.bar.bar then
-                    control.bar.bar:SetHidden(true)
-                    control.bar.bar:SetValue(1)
-                end
-            end
-
-            -- Clear data reference
-            control.data = nil
-
-            -- Reset visual state (pool's reset already hides, but ensure alpha is reset)
-            control:SetAlpha(1)
-
-            -- Clear event handlers (optional, but good practice)
-            control:SetHandler("OnMouseEnter", nil)
-            control:SetHandler("OnMouseExit", nil)
-            control:SetHandler("OnMouseUp", nil)
         end
 
         metaPool:SetCustomAcquireBehavior(OnAcquired)
@@ -3026,6 +2805,37 @@ do
         end
     end
 
+    -- Setup icon visual properties (following ZOS SetupIcon pattern)
+    --- @param buffControl Control The buff icon control
+    --- @param effect table The effect data
+    --- @param container string Container name
+    local function SetupIcon(buffControl, effect, container)
+        -- Set icon texture
+        if buffControl.icon then
+            buffControl.icon:SetTexture(effect.icon)
+        end
+
+        -- Set stack count
+        if buffControl.stack then
+            if effect.stack and effect.stack > 0 then
+                buffControl.stack:SetText(string_format("%s", effect.stack))
+                buffControl.stack:SetHidden(false)
+            else
+                buffControl.stack:SetHidden(true)
+            end
+        end
+
+        -- Set frame texture (buff vs debuff) - handled by SetSingleIconBuffType
+        -- Set drop background visibility
+        if buffControl.drop then
+            if effect.backdrop then
+                buffControl.drop:SetHidden(false)
+            else
+                buffControl.drop:SetHidden(true)
+            end
+        end
+    end
+
     --- @param currentTimeMs number
     --- @param sortedList table
     --- @param container string
@@ -3090,13 +2900,31 @@ do
             if not buff.back then
                 buff.back = buff:GetNamedChild("Back")
                 buff.frame = buff:GetNamedChild("Frame")
+
+                -- Icon background + nested children (Icon, Cooldown, inner backdrop)
                 buff.iconbg = buff:GetNamedChild("IconBG")
+
+                -- Collectible/mount background
                 buff.drop = buff:GetNamedChild("Drop")
-                buff.icon = buff:GetNamedChild("Icon")
+
+                -- Icon is a child of IconBG (in XML template)
+                local iconParent = buff.iconbg or buff
+                buff.icon = iconParent:GetNamedChild("Icon")
+
+                -- Cooldown is a direct child of root control (renders on BACKGROUND layer under icon)
+                buff.cd = buff:GetNamedChild("Cooldown")
+
+                -- Labels
                 buff.label = buff:GetNamedChild("Label")
                 buff.abilityId = buff:GetNamedChild("AbilityId")
                 buff.stack = buff:GetNamedChild("Stack")
-                buff.cd = buff:GetNamedChild("Cooldown")
+
+                -- Initialize blink animation (following ZOS pattern)
+                local blinkAnimation = GetAnimationManager():CreateTimelineFromVirtual("LUIE_SpellCastBuffIcon_BlinkAnimation")
+                blinkAnimation:GetAnimation(1):SetAnimatedControl(buff)
+                blinkAnimation:GetAnimation(2):SetAnimatedControl(buff)
+                -- OnStop handler is set in XML
+                buff.blinkAnimation = blinkAnimation
             end
 
             -- Store effect data on control
@@ -3115,28 +2943,28 @@ do
 
             ApplyIconVisuals(container, buff)
 
-            -- Set event handlers
-            buff:SetHandler("OnMouseEnter", SpellCastBuffs.Buff_OnMouseEnter)
-            buff:SetHandler("OnMouseExit", SpellCastBuffs.Buff_OnMouseExit)
-            buff:SetHandler("OnMouseUp", SpellCastBuffs.Buff_OnMouseUp)
+            -- Event handlers are set in XML (OnMouseEnter, OnMouseExit, OnMouseUp)
 
-            -- Create prominent buff elements if needed (name label, progress bar)
+            -- Get prominent buff elements from XML (created in XML for performance)
             if (container == "prominentbuffs" or container == "prominentdebuffs") and not buff.name then
                 buff.effectType = effect.type
-                buff.name = UI:Label(buff, nil, nil, nil, SpellCastBuffs.prominentFont, nil, false)
+                buff.name = buff:GetNamedChild("Name")
+                if buff.name then
+                    buff.name:SetFont(SpellCastBuffs.prominentFont)
+                end
 
-                -- Create progress bar
-                buff.bar =
-                {
-                    backdrop = UI:Backdrop(buff, nil, { 154, 16 }, nil, nil, false),
-                    bar = UI:StatusBar(buff, nil, { 150, 12 }, nil, false),
-                }
+                -- Get progress bar from XML
+                local barBackdrop = buff:GetNamedChild("BarBackdrop")
+                local bar = buff:GetNamedChild("Bar")
+                if barBackdrop and bar then
+                    buff.bar = { backdrop = barBackdrop, bar = bar }
 
-                -- Setup bar properties
-                buff.bar.backdrop:SetEdgeTexture("", 8, 2, 2, 2)
-                buff.bar.backdrop:SetDrawLayer(DL_BACKGROUND)
-                buff.bar.backdrop:SetDrawLevel(DL_CONTROLS)
-                buff.bar.bar:SetMinMax(0, 1)
+                    -- Setup bar properties
+                    buff.bar.backdrop:SetEdgeTexture("", 8, 2, 2, 2)
+                    buff.bar.backdrop:SetDimensions(154, 16)
+                    buff.bar.bar:SetDimensions(150, 12)
+                    buff.bar.bar:SetMinMax(0, 1)
+                end
             end
 
             -- Setup prominent buff name and bar anchors/visibility
@@ -3281,23 +3109,11 @@ do
             buff.duration = effect.dur or 0
             buff.container = container
 
-            if effect.backdrop then
-                buff.drop:SetHidden(false)
-            else
-                buff.drop:SetHidden(true)
-            end
-            buff.icon:SetTexture(effect.icon)
+            -- Setup icon visual properties (following ZOS SetupIcon pattern)
+            SetupIcon(buff, effect, container)
+
             buff:SetAlpha(1)
             buff:SetHidden(false)
-            if not remain or effect.fakeDuration then
-                if effect.toggle then
-                    buff.label:SetText("T")
-                elseif effect.groundLabel then
-                    buff.label:SetText("G")
-                else
-                    buff.label:SetText(nil)
-                end
-            end
 
             if buff.abilityId and effect.id then
                 buff.abilityId:SetText(effect.id)
@@ -3311,28 +3127,81 @@ do
                 buff.name:SetText(formattedName)
             end
 
+            -- Duration/cooldown updates are handled in UpdateTime() (following ZOS pattern)
+            -- Set initial label text for non-duration effects
+            if not remain or effect.fakeDuration then
+                if effect.toggle then
+                    buff.label:SetText("T")
+                elseif effect.groundLabel then
+                    buff.label:SetText("G")
+                else
+                    buff.label:SetText(nil)
+                end
+            end
+        end
 
-            if effect.stack and effect.stack > 0 then
-                buff.stack:SetText(string_format("%s", effect.stack))
-                buff.stack:SetHidden(false)
-            else
-                buff.stack:SetHidden(true)
+        -- No need to hide unused icons - metapool handles that via ReleaseAllObjects
+    end
+
+
+
+    -- Update duration for a single buff control (following ZOS UpdateDuration pattern)
+    --- @param buffControl Control The buff icon control
+    --- @param currentTimeMs number Current time in milliseconds
+    --- @param container string Container name
+    local function UpdateDuration(buffControl, currentTimeMs, container)
+        local effect = buffControl.data
+        if not effect then
+            return
+        end
+
+        local remain = (effect.ends ~= nil) and zo_max(effect.ends - currentTimeMs, 0) or nil
+        local showDuration = remain ~= nil and effect.dur ~= nil and effect.dur > 0 and not effect.fakeDuration
+
+        -- Update duration label visibility
+        if buffControl.label then
+            buffControl.label:SetHidden(not showDuration)
+        end
+
+        if showDuration then
+            local remainSeconds = remain / 1000
+
+            -- Handle blink animation for expiring effects (following ZOS pattern)
+            local EFFECT_EXPIRATION_IMMINENCE_THRESHOLD_MS = 2000
+            if buffControl.blinkAnimation and remain <= EFFECT_EXPIRATION_IMMINENCE_THRESHOLD_MS then
+                if not buffControl.blinkAnimation:IsPlaying() then
+                    buffControl.blinkAnimation:PlayFromStart()
+                end
             end
 
-            -- For update remaining text. Cache formatted text to avoid redundant formatting
-            if remain and not effect.fakeDuration then
-                local remainSeconds = remain / 1000
+            -- Update cooldown (following ZOS pattern: only start if GetDuration() == 0)
+            if buffControl.cd and SpellCastBuffs.SV.RemainingCooldown then
+                local cooldownDuration = effect.dur
+                if effect.id == 999016 then
+                    cooldownDuration = 600000
+                end
+
+                -- Only start cooldown if not already running (matching ZOS pattern)
+                if buffControl.cd:GetDuration() == 0 then
+                    if cooldownDuration == nil or cooldownDuration == 0 or effect.fakeDuration then
+                        buffControl.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
+                    else
+                        buffControl.cd:StartCooldown(remain, cooldownDuration, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, false)
+                    end
+                    buffControl.cd:SetHidden(false)
+                end
+            end
+
+            -- Update duration label text
+            if buffControl.label then
                 local cachedText = effect._cachedText
                 local newText
 
                 if remain > 86400000 then
-                    -- more then 1 day
                     newText = string_format("%d d", zo_floor(remain / 86400000))
                 elseif remain > 6000000 then
-                    -- over 100 minutes - display XXh
                     newText = string_format("%dh", zo_floor(remain / 3600000))
                 elseif remain > 600000 then
-                    -- over 10 minutes - display XXm
                     newText = string_format("%dm", zo_floor(remain / 60000))
                 elseif remain > 60000 or container == "player_long" then
                     local m = zo_floor(remain / 60000)
@@ -3344,33 +3213,31 @@ do
 
                 -- Only update text if it changed
                 if cachedText ~= newText then
-                    buff.label:SetText(newText)
+                    buffControl.label:SetText(newText)
                     effect._cachedText = newText
                 end
             end
-            if effect.restart and buff.cd ~= nil then
-                -- Modify recall penalty to show forced max duration
-                if effect.id == 999016 then
-                    effect.dur = 600000
-                end
-                if remain == nil or effect.dur == nil or effect.dur == 0 or effect.fakeDuration then
-                    buff.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
-                else
-                    buff.cd:StartCooldown(remain, effect.dur, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, false)
-                    effect.restart = false
-                end
-            end
 
-            -- Now possibly fade out expiring icon
-            if SpellCastBuffs.SV.FadeOutIcons and remain ~= nil and remain < 2000 then
-                -- buff:SetAlpha( 0.05 + remain/2106 )
-                buff:SetAlpha(EaseOutQuad(remain, 0, 1, 2000))
+            -- Handle fade out for expiring icons
+            if SpellCastBuffs.SV.FadeOutIcons and remain < 2000 then
+                buffControl:SetAlpha(EaseOutQuad(remain, 0, 1, 2000))
             end
         end
-
-        -- No need to hide unused icons - metapool handles that via ReleaseAllObjects
     end
 
+    -- Update durations and cooldowns for active icons (following ZOS UpdateDurations pattern)
+    -- This runs separately from updateIcons to update time-sensitive elements without releasing objects
+    --- @param currentTimeMs number
+    --- @param container string
+    local function UpdateTime(currentTimeMs, container)
+        local containerData = SpellCastBuffs.BuffContainers[container]
+        local metaPool = containerData.metaPool
+        local activeObjects = metaPool:GetActiveObjects()
+
+        for _, buffControl in pairs(activeObjects) do
+            UpdateDuration(buffControl, currentTimeMs, container)
+        end
+    end
 
     -- Helper function to sort buffs
     --- @param x table
@@ -3494,6 +3361,14 @@ do
         if sortedCounts.player_long > 0 then
             table_sort(buffsSorted.player_long, buffSort)
             updateIcons(currentTimeMs, buffsSorted.player_long, "player_long")
+        end
+
+        -- Update durations and cooldowns for all containers (following ZOS UpdateTime pattern)
+        for _, container in pairs(containerRouting) do
+            UpdateTime(currentTimeMs, container)
+        end
+        if sortedCounts.player_long > 0 then
+            UpdateTime(currentTimeMs, "player_long")
         end
 
         -- Display Block buff for player if enabled
@@ -6044,7 +5919,8 @@ function SpellCastBuffs.EventCombatDebug(eventId, result, isError, abilityName, 
     local source = zo_strformat("<<C:1>>", sourceName)
     local target = zo_strformat("<<C:1>>", targetName)
     local ability = zo_strformat("<<C:1>>", nameFormatted)
-    local duration = GetAbilityDuration(abilityId)
+    local duration
+    duration = GetAbilityDuration(abilityId)
     if duration == nil then
         duration = "0"
     end
@@ -6140,7 +6016,6 @@ do
 
     -- LUIE utility functions
     local AddSystemMessage = LUIE.AddSystemMessage
-    local printToChat = LUIE.PrintToChat
 
     -- -----------------------------------------------------------------------------
     -- Core Lua function localizations
@@ -6484,8 +6359,7 @@ do
     --- When enabled, shows additional debug information for abilities.
     function SpellCastBuffs.TempSlashFilter()
         SpellCastBuffs.SV.ShowDebugFilter = not SpellCastBuffs.SV.ShowDebugFilter
-        AddSystemMessage(string_format("LUIE --- Ability Debug Filter %s ---",
-                                       SpellCastBuffs.SV.ShowDebugFilter and "Enabled" or "Disabled"))
+        AddSystemMessage(string_format("LUIE --- Ability Debug Filter %s ---", SpellCastBuffs.SV.ShowDebugFilter and "Enabled" or "Disabled"))
     end
 
     --- Toggles ground damage aura visualization on/off.
@@ -6493,8 +6367,7 @@ do
     --- Reloads player effects after toggling.
     function SpellCastBuffs.TempSlashGround()
         SpellCastBuffs.SV.GroundDamageAura = not SpellCastBuffs.SV.GroundDamageAura
-        AddSystemMessage(string_format("LUIE --- Ground Damage Auras %s ---",
-                                       SpellCastBuffs.SV.GroundDamageAura and "Enabled" or "Disabled"))
+        AddSystemMessage(string_format("LUIE --- Ground Damage Auras %s ---", SpellCastBuffs.SV.GroundDamageAura and "Enabled" or "Disabled"))
         LUIE.SpellCastBuffs.ReloadEffects("player")
     end
 
@@ -6569,8 +6442,7 @@ do
 
             for i, poi in ipairs(info.poiInfo.items) do
                 if i <= 5 then -- Limit to first 5 POIs to avoid spam
-                    AddSystemMessage(string_format("POI %d: %s (Type: %d, Discovered: %s)",
-                                                   i, poi.name, poi.type, poi.isDiscovered and "Yes" or "No"))
+                    AddSystemMessage(string_format("POI %d: %s (Type: %d, Discovered: %s)", i, poi.name, poi.type, poi.isDiscovered and "Yes" or "No"))
                 end
             end
 
@@ -6645,8 +6517,7 @@ do
 
             for i, poi in ipairs(info.poiInfo.items) do
                 if i <= 5 then -- Limit to first 5 POIs to avoid spam
-                    AddSystemMessage(string_format("POI %d: %s (Type: %d, Discovered: %s)",
-                                                   i, poi.name, poi.type, poi.isDiscovered and "Yes" or "No"))
+                    AddSystemMessage(string_format("POI %d: %s (Type: %d, Discovered: %s)", i, poi.name, poi.type, poi.isDiscovered and "Yes" or "No"))
                 end
             end
 
@@ -6663,8 +6534,7 @@ do
 
             for i, node in ipairs(info.fastTravelInfo.items) do
                 if i <= 5 then -- Limit to first 5 wayshrines
-                    AddSystemMessage(string_format("Wayshrine %d: %s (Known: %s, Cost: %d)",
-                                                   i, node.name, node.known and "Yes" or "No", node.cost))
+                    AddSystemMessage(string_format("Wayshrine %d: %s (Known: %s, Cost: %d)", i, node.name, node.known and "Yes" or "No", node.cost))
                 end
             end
 

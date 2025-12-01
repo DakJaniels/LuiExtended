@@ -19,6 +19,7 @@
 --- @field Defaults LUIE_Defaults_SV Default settings
 --- @field SV LUIE_Defaults_SV Current saved variables
 --- @field UI LUIE.UI
+--- @field GridOverlay LUIE.GridOverlay
 LUIE = {}
 LUIE.__index = LUIE
 -- -----------------------------------------------------------------------------
