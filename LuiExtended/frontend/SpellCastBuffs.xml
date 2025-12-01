@@ -1,0 +1,152 @@
+<!--
+    LuiExtended - SpellCastBuffs
+    License: The MIT License (MIT)
+-->
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
+	<Controls>
+		<!-- Container TopLevelWindows for buff/debuff displays -->
+		<TopLevelControl name="LUIE_SpellCastBuffs_PlayerBuffs"
+		                 clampedToScreen="true"
+		                 mouseEnabled="false"
+		                 movable="true"
+		                 hidden="true">
+		</TopLevelControl>
+		<TopLevelControl name="LUIE_SpellCastBuffs_PlayerDebuffs"
+		                 clampedToScreen="true"
+		                 mouseEnabled="false"
+		                 movable="true"
+		                 hidden="true">
+		</TopLevelControl>
+		<TopLevelControl name="LUIE_SpellCastBuffs_TargetBuffs"
+		                 clampedToScreen="true"
+		                 mouseEnabled="false"
+		                 movable="true"
+		                 hidden="true">
+		</TopLevelControl>
+		<TopLevelControl name="LUIE_SpellCastBuffs_TargetDebuffs"
+		                 clampedToScreen="true"
+		                 mouseEnabled="false"
+		                 movable="true"
+		                 hidden="true">
+		</TopLevelControl>
+		<TopLevelControl name="LUIE_SpellCastBuffs_ProminentBuffs"
+		                 clampedToScreen="true"
+		                 mouseEnabled="false"
+		                 movable="true"
+		                 hidden="true">
+		</TopLevelControl>
+		<TopLevelControl name="LUIE_SpellCastBuffs_ProminentDebuffs"
+		                 clampedToScreen="true"
+		                 mouseEnabled="false"
+		                 movable="true"
+		                 hidden="true">
+		</TopLevelControl>
+		<TopLevelControl name="LUIE_SpellCastBuffs_PlayerLong"
+		                 clampedToScreen="true"
+		                 mouseEnabled="false"
+		                 movable="true"
+		                 hidden="true">
+		</TopLevelControl>
+	</Controls>
+	<Controls>
+		<!-- Virtual template for buff icon controls used by ZO_ControlPool -->
+		<!-- Root is a Control - backdrop is added as a child that fills it -->
+		<Control name="LUIE_SpellCastBuffIcon"
+		         virtual="true"
+		         mouseEnabled="true">
+			<Controls>
+				<!-- Main backdrop (fills the control, acts as background) -->
+				<Backdrop name="$(parent)Backdrop"
+				          centerColor="0,0,0,0.5"
+				          edgeColor="0,0,0,1"
+				          layer="BACKGROUND">
+					<AnchorFill/>
+					<Edge file=""
+					      edgeSize="8"/>
+				</Backdrop>
+				<!-- Border layer (back) - hidden by default, shown only for non-collectible buffs -->
+				<Texture name="$(parent)Back"
+				         textureFile="EsoUI/Art/ActionBar/abilityFrame_buff.dds"
+				         layer="BACKGROUND"
+				         hidden="true">
+					<AnchorFill/>
+				</Texture>
+				<!-- Glow border layer (frame) -->
+				<Texture name="$(parent)Frame"
+				         layer="OVERLAY"
+				         hidden="false">
+					<Anchor point="CENTER"
+					        relativePoint="CENTER"/>
+				</Texture>
+				<!-- Background layer (iconbg) - conditional, not for player_long -->
+				<Texture name="$(parent)IconBG"
+				         textureFile="EsoUI/Art/ActionBar/abilityInset.dds"
+				         layer="CONTROLS"
+				         hidden="false">
+					<AnchorFill/>
+					<Controls>
+						<!-- Dark backdrop behind the texture -->
+						<Backdrop name="$(parent)IconBGBackdrop"
+						          centerColor="0,0,0,0.9"
+						          edgeColor="0,0,0,0.9"
+						          layer="CONTROLS"
+						          level="CONTROLS">
+							<AnchorFill/>
+							<Edge file=""
+							      edgeSize="8"/>
+						</Backdrop>
+					</Controls>
+				</Texture>
+				<!-- Collectible/mount background (drop) - hidden by default -->
+				<Texture name="$(parent)Drop"
+				         textureFile="LuiMedia/media/icons/abilities/ability_innate_background.dds"
+				         layer="BACKGROUND"
+				         hidden="true">
+					<!-- Anchors set dynamically in Lua -->
+				</Texture>
+				<!-- Main ability icon -->
+				<Texture name="$(parent)Icon"
+				         textureFile="/esoui/art/icons/icon_missing.dds"
+				         layer="CONTROLS"
+				         hidden="false">
+					<!-- Anchors set dynamically in Lua -->
+				</Texture>
+				<!-- Duration label -->
+				<Label name="$(parent)Label"
+				       font="ZoFontGame"
+				       hidden="false">
+					<!-- Anchors set dynamically in Lua: TOPLEFT to LEFT with padding, BOTTOMRIGHT to BOTTOMRIGHT -->
+				</Label>
+				<!-- Debug ability ID label -->
+				<Label name="$(parent)AbilityId"
+				       font="ZoFontGame"
+				       layer="OVERLAY"
+				       tier="DT_MEDIUM"
+				       hidden="false">
+					<Anchor point="CENTER"
+					        relativePoint="CENTER"/>
+				</Label>
+				<!-- Stack count label -->
+				<Label name="$(parent)Stack"
+				       font="ZoFontGame"
+				       hidden="false">
+					<!-- Anchors set dynamically in Lua: CENTER to BOTTOMLEFT and CENTER to TOPRIGHT -->
+				</Label>
+				<!-- Cooldown control (conditional, only if iconbg exists) -->
+				<Cooldown name="$(parent)Cooldown"
+				          layer="BACKGROUND"
+				          hidden="false">
+					<Anchor point="TOPLEFT"
+					        relativePoint="TOPLEFT"
+					        offsetX="1"
+					        offsetY="1"/>
+					<Anchor point="BOTTOMRIGHT"
+					        relativePoint="BOTTOMRIGHT"
+					        offsetX="-1"
+					        offsetY="-1"/>
+				</Cooldown>
+			</Controls>
+		</Control>
+	</Controls>
+</GuiXml>

@@ -472,6 +472,10 @@ function SpellCastBuffs.Initialize(enabled)
     -- Before we start creating controls, update icons font
     SpellCastBuffs.ApplyFont()
 
+    -- Create the master control pool for buff icons
+    -- ZO_ControlPool uses XML templates (see frontend/SpellCastBuffs.xml)
+    SpellCastBuffs.controlPool = ZO_ControlPool:New("LUIE_SpellCastBuffIcon", nil, "Buff")
+
     -- Create controls
     -- Create temporary table to store references to scenes locally
     local fragments = {}
@@ -483,13 +487,16 @@ function SpellCastBuffs.Initialize(enabled)
         SpellCastBuffs.containerRouting.player1 = "player1"
         SpellCastBuffs.containerRouting.player2 = "player2"
     else
-        SpellCastBuffs.BuffContainers.playerb = UI:TopLevel(nil, nil)
+        -- Use named TopLevelControl from XML for player buffs
+        SpellCastBuffs.BuffContainers.playerb = LUIE_SpellCastBuffs_PlayerBuffs
         local playerb_OnMoveStop = function (self)
             SpellCastBuffs.SV.playerbOffsetX = self:GetLeft()
             SpellCastBuffs.SV.playerbOffsetY = self:GetTop()
         end
         SpellCastBuffs.BuffContainers.playerb:SetHandler("OnMoveStop", playerb_OnMoveStop)
-        SpellCastBuffs.BuffContainers.playerd = UI:TopLevel(nil, nil)
+
+        -- Use named TopLevelControl from XML for player debuffs
+        SpellCastBuffs.BuffContainers.playerd = LUIE_SpellCastBuffs_PlayerDebuffs
         local playerd_OnMoveStop = function (self)
             SpellCastBuffs.SV.playerdOffsetX = self:GetLeft()
             SpellCastBuffs.SV.playerdOffsetY = self:GetTop()
@@ -512,13 +519,16 @@ function SpellCastBuffs.Initialize(enabled)
         SpellCastBuffs.containerRouting.reticleover2 = "target2"
         SpellCastBuffs.containerRouting.ground = "target2"
     else
-        SpellCastBuffs.BuffContainers.targetb = UI:TopLevel(nil, nil)
+        -- Use named TopLevelControl from XML for target buffs
+        SpellCastBuffs.BuffContainers.targetb = LUIE_SpellCastBuffs_TargetBuffs
         local targetb_OnMoveStop = function (self)
             SpellCastBuffs.SV.targetbOffsetX = self:GetLeft()
             SpellCastBuffs.SV.targetbOffsetY = self:GetTop()
         end
         SpellCastBuffs.BuffContainers.targetb:SetHandler("OnMoveStop", targetb_OnMoveStop)
-        SpellCastBuffs.BuffContainers.targetd = UI:TopLevel(nil, nil)
+
+        -- Use named TopLevelControl from XML for target debuffs
+        SpellCastBuffs.BuffContainers.targetd = LUIE_SpellCastBuffs_TargetDebuffs
         local targetd_OnMoveStop = function (self)
             SpellCastBuffs.SV.targetdOffsetX = self:GetLeft()
             SpellCastBuffs.SV.targetdOffsetY = self:GetTop()
@@ -534,8 +544,8 @@ function SpellCastBuffs.Initialize(enabled)
         table_insert(fragments, fragment2)
     end
 
-    -- Create TopLevelWindows for Prominent Buffs
-    SpellCastBuffs.BuffContainers.prominentbuffs = UI:TopLevel(nil, nil)
+    -- Create TopLevelWindows for Prominent Buffs (from XML)
+    SpellCastBuffs.BuffContainers.prominentbuffs = LUIE_SpellCastBuffs_ProminentBuffs
     SpellCastBuffs.BuffContainers.prominentbuffs:SetHandler("OnMoveStop", function (self)
         if self.alignVertical then
             SpellCastBuffs.SV.prominentbVOffsetX = self:GetLeft()
@@ -545,7 +555,8 @@ function SpellCastBuffs.Initialize(enabled)
             SpellCastBuffs.SV.prominentbHOffsetY = self:GetTop()
         end
     end)
-    SpellCastBuffs.BuffContainers.prominentdebuffs = UI:TopLevel(nil, nil)
+
+    SpellCastBuffs.BuffContainers.prominentdebuffs = LUIE_SpellCastBuffs_ProminentDebuffs
     SpellCastBuffs.BuffContainers.prominentdebuffs:SetHandler("OnMoveStop", function (self)
         if self.alignVertical then
             SpellCastBuffs.SV.prominentdVOffsetX = self:GetLeft()
@@ -579,8 +590,8 @@ function SpellCastBuffs.Initialize(enabled)
     table_insert(fragments, fragmentP1)
     table_insert(fragments, fragmentP2)
 
-    -- Separate container for players long term buffs
-    SpellCastBuffs.BuffContainers.player_long = UI:TopLevel(nil, nil)
+    -- Separate container for players long term buffs (from XML)
+    SpellCastBuffs.BuffContainers.player_long = LUIE_SpellCastBuffs_PlayerLong
     SpellCastBuffs.BuffContainers.player_long:SetHandler("OnMoveStop", function (self)
         local left = self:GetLeft()
         local top = self:GetTop()
@@ -628,15 +639,13 @@ function SpellCastBuffs.Initialize(enabled)
             SpellCastBuffs.BuffContainers[v].preview = UI:Texture(SpellCastBuffs.BuffContainers[v], "fill", nil, "/esoui/art/miscellaneous/inset_bg.dds", DL_BACKGROUND, true)
             SpellCastBuffs.BuffContainers[v].previewLabel = UI:Label(SpellCastBuffs.BuffContainers[v].preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", SpellCastBuffs.windowTitles[v] .. (SpellCastBuffs.SV.lockPositionToUnitFrames and (v ~= "player_long" and v ~= "prominentbuffs" and v ~= "prominentdebuffs") and " (locked)" or ""), false)
 
-            -- Create control that will hold the icons
-            SpellCastBuffs.BuffContainers[v].prevIconsCount = 0
             -- We need this container only for icons that are aligned in one row/column automatically.
             -- Thus we do not create containers for player and target buffs/debuffs on custom frames
             if v ~= "player1" and v ~= "player2" and v ~= "target1" and v ~= "target2" and v ~= "playerb" and v ~= "playerd" and v ~= "targetb" and v ~= "targetd" then
                 SpellCastBuffs.BuffContainers[v].iconHolder = UI:Control(SpellCastBuffs.BuffContainers[v], nil, nil, false)
             end
-            -- Create table to store created contols for icons
-            SpellCastBuffs.BuffContainers[v].icons = {}
+            -- Create metapool for this container (replaces icons array)
+            SpellCastBuffs.BuffContainers[v].metaPool = SpellCastBuffs:CreateMetaPool(v, SpellCastBuffs.BuffContainers[v])
 
             -- add this top level window to global controls list, so it can be hidden
             if SpellCastBuffs.BuffContainers[v]:GetType() == CT_TOPLEVELCONTROL then
@@ -1485,19 +1494,159 @@ function SpellCastBuffs.Reset()
     SpellCastBuffs.SetupContainerAlignment()
     SpellCastBuffs.SetupContainerSort()
 
-    -- And reset sizes of already existing icons
-    for _, container in pairs(SpellCastBuffs.containerRouting) do
-        for i = 1, #SpellCastBuffs.BuffContainers[container].icons do
-            SpellCastBuffs.ResetSingleIcon(container, SpellCastBuffs.BuffContainers[container].icons[i], SpellCastBuffs.BuffContainers[container].icons[i - 1])
-        end
-    end
+    -- Icons are now managed by metapools, so no need to reset individual icons here
+    -- The metapool will handle control lifecycle automatically
 
     if SpellCastBuffs.playerActive then
         SpellCastBuffs.ReloadEffects("player")
     end
 end
 
--- Reset only a single icon
+-- Apply original visual layout for a single icon (without anchoring)
+-- This mirrors the non-anchoring part of ResetSingleIcon and is used for pooled controls.
+local function ApplyIconVisuals(container, buff)
+    local buffSize = SpellCastBuffs.SV.IconSize
+    local frameSize = 2 * buffSize + 4
+
+    buff:SetHidden(true)
+    buff:SetDimensions(buffSize, buffSize)
+
+    if buff.frame then
+        buff.frame:SetDimensions(frameSize, frameSize)
+        buff.frame:SetHidden(not SpellCastBuffs.SV.GlowIcons)
+    end
+
+    if buff.back then
+        buff.back:SetHidden(SpellCastBuffs.SV.GlowIcons)
+    end
+
+    if buff.label then
+        buff.label:ClearAnchors()
+        buff.label:SetAnchor(TOPLEFT, buff, LEFT, -SpellCastBuffs.padding, -SpellCastBuffs.SV.LabelPosition)
+        buff.label:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, SpellCastBuffs.padding, -2)
+        buff.label:SetHidden(not SpellCastBuffs.SV.RemainingText)
+    end
+
+    if buff.stack then
+        buff.stack:ClearAnchors()
+        buff.stack:SetAnchor(CENTER, buff, BOTTOMLEFT, 0, 0)
+        buff.stack:SetAnchor(CENTER, buff, TOPRIGHT, -SpellCastBuffs.padding * 3, SpellCastBuffs.padding * 3)
+        buff.stack:SetHidden(true)
+    end
+
+    if buff.name ~= nil then
+        if (container == "prominentbuffs" and SpellCastBuffs.SV.ProminentBuffContainerAlignment == 2)
+        or (container == "prominentdebuffs" and SpellCastBuffs.SV.ProminentDebuffContainerAlignment == 2) then
+            -- Vertical
+            buff.name:SetHidden(not SpellCastBuffs.SV.ProminentLabel)
+        else
+            buff.name:SetHidden(true)
+        end
+    end
+
+    if buff.bar ~= nil then
+        if (container == "prominentbuffs" and SpellCastBuffs.SV.ProminentBuffContainerAlignment == 2)
+        or (container == "prominentdebuffs" and SpellCastBuffs.SV.ProminentDebuffContainerAlignment == 2) then
+            -- Vertical
+            buff.bar.backdrop:SetHidden(not SpellCastBuffs.SV.ProminentProgress)
+            buff.bar.bar:SetHidden(not SpellCastBuffs.SV.ProminentProgress)
+        else
+            buff.bar.backdrop:SetHidden(true)
+            buff.bar.bar:SetHidden(true)
+        end
+    end
+
+    if buff.cd ~= nil then
+        buff.cd:SetHidden(not SpellCastBuffs.SV.RemainingCooldown)
+        if buff.iconbg then
+            -- We do not need black icon background when there is no Cooldown control present
+            buff.iconbg:SetHidden(not SpellCastBuffs.SV.RemainingCooldown)
+        end
+    end
+
+    if buff.abilityId ~= nil then
+        buff.abilityId:SetHidden(not SpellCastBuffs.SV.ShowDebugAbilityId)
+    end
+
+    local inset = (SpellCastBuffs.SV.RemainingCooldown and buff.cd ~= nil) and 3 or 1
+
+    if buff.drop then
+        buff.drop:ClearAnchors()
+        buff.drop:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
+        buff.drop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -inset, -inset)
+    end
+
+    if buff.icon then
+        buff.icon:ClearAnchors()
+        buff.icon:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
+        buff.icon:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -inset, -inset)
+    end
+
+    if buff.iconbg ~= nil then
+        buff.iconbg:ClearAnchors()
+        buff.iconbg:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
+        buff.iconbg:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -inset, -inset)
+    end
+
+    -- Prominent label + bar alignment (no anchoring to other icons here)
+    if container == "prominentbuffs" and buff.name and buff.bar then
+        if SpellCastBuffs.SV.ProminentBuffLabelDirection == "Left" then
+            buff.name:ClearAnchors()
+            buff.name:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+            buff.name:SetAnchor(TOPRIGHT, buff, TOPLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+
+            buff.bar.backdrop:ClearAnchors()
+            buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
+
+            buff.bar.bar:SetTexture(LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
+            buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
+            buff.bar.bar:ClearAnchors()
+            buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
+        else
+            buff.name:ClearAnchors()
+            buff.name:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+            buff.name:SetAnchor(TOPLEFT, buff, TOPRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+
+            buff.bar.backdrop:ClearAnchors()
+            buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
+
+            buff.bar.bar:SetTexture(LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
+            buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_NORMAL)
+            buff.bar.bar:ClearAnchors()
+            buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
+        end
+    end
+
+    if container == "prominentdebuffs" and buff.name and buff.bar then
+        if SpellCastBuffs.SV.ProminentDebuffLabelDirection == "Right" then
+            buff.name:ClearAnchors()
+            buff.name:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+            buff.name:SetAnchor(TOPLEFT, buff, TOPRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+
+            buff.bar.backdrop:ClearAnchors()
+            buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
+
+            buff.bar.bar:SetTexture(LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
+            buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_NORMAL)
+            buff.bar.bar:ClearAnchors()
+            buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
+        else
+            buff.name:ClearAnchors()
+            buff.name:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+            buff.name:SetAnchor(TOPRIGHT, buff, TOPLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+
+            buff.bar.backdrop:ClearAnchors()
+            buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
+
+            buff.bar.bar:SetTexture(LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
+            buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
+            buff.bar.bar:ClearAnchors()
+            buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
+        end
+    end
+end
+
+-- Reset only a single icon (legacy helper, still used in some flows)
 function SpellCastBuffs.ResetSingleIcon(container, buff, AnchorItem)
     local buffSize = SpellCastBuffs.SV.IconSize
     local frameSize = 2 * buffSize + 4
@@ -2695,6 +2844,108 @@ do
         return buff
     end
 
+    -- Create a metapool for a container (similar to ZOS's CreateMetaPool)
+    -- @param container string Container name
+    -- @param containerControl Control The container control
+    -- @return ZO_MetaPool The created metapool
+    function SpellCastBuffs:CreateMetaPool(container, containerControl)
+        local metaPool = ZO_MetaPool:New(SpellCastBuffs.controlPool)
+        metaPool.container = containerControl
+        metaPool.containerName = container
+
+        -- Track first/last controls for anchoring
+        metaPool.firstControl = nil
+        metaPool.lastControl = nil
+
+        -- Custom acquire behavior - handles anchoring
+        -- Called by ZO_MetaPool:AcquireObject() after acquiring from source pool
+        local function OnAcquired(control)
+            control:ClearAnchors()
+
+            -- Check if this container uses manual anchoring (no iconHolder)
+            local usesManualAnchoring = not containerControl.iconHolder
+
+            if usesManualAnchoring then
+                -- For manual anchoring containers, just set parent
+                -- Anchoring will be handled in updateIcons() with full logic
+                control:SetParent(containerControl)
+                -- Don't set anchors here - let updateIcons handle it
+            else
+                -- Automatic anchoring for containers with iconHolder
+                -- Anchor logic based on container type and alignment
+                local isVertical = containerControl.alignVertical
+
+                if not metaPool.firstControl then
+                    metaPool.firstControl = control
+                    -- Anchor first control to iconHolder
+                    if isVertical then
+                        control:SetAnchor(TOP, containerControl.iconHolder)
+                    else
+                        control:SetAnchor(LEFT, containerControl.iconHolder)
+                    end
+                else
+                    -- Anchor to previous control
+                    if isVertical then
+                        control:SetAnchor(TOP, metaPool.lastControl, BOTTOM, 0, SpellCastBuffs.padding)
+                    else
+                        control:SetAnchor(LEFT, metaPool.lastControl, RIGHT, SpellCastBuffs.padding, 0)
+                    end
+                end
+
+                metaPool.lastControl = control
+                control:SetParent(containerControl)
+            end
+        end
+
+        -- Custom reset behavior
+        -- Called by ZO_MetaPool:ReleaseAllObjects() or :ReleaseObject() before releasing to source pool
+        -- Note: ZO_ControlPool's internal reset already calls SetHidden(true) and ClearAnchors()
+        -- This adds additional cleanup specific to our buff icons
+        local function OnReset(control)
+            -- Stop any animations
+            if control.blinkAnimation then
+                control.blinkAnimation:Stop()
+            end
+
+            -- Reset cooldown
+            if control.cd then
+                control.cd:ResetCooldown()
+                control.cd:SetHidden(true)
+            end
+
+            -- Reset prominent elements if they exist
+            if control.name then
+                control.name:SetText("")
+                control.name:SetHidden(true)
+            end
+            if control.bar then
+                if control.bar.backdrop then
+                    control.bar.backdrop:SetHidden(true)
+                end
+                if control.bar.bar then
+                    control.bar.bar:SetHidden(true)
+                    control.bar.bar:SetValue(1)
+                end
+            end
+
+            -- Clear data reference
+            control.data = nil
+
+            -- Reset visual state (pool's reset already hides, but ensure alpha is reset)
+            control:SetAlpha(1)
+
+            -- Clear event handlers (optional, but good practice)
+            control:SetHandler("OnMouseEnter", nil)
+            control:SetHandler("OnMouseExit", nil)
+            control:SetHandler("OnMouseUp", nil)
+        end
+
+        metaPool:SetCustomAcquireBehavior(OnAcquired)
+        metaPool:SetCustomResetBehavior(OnReset)
+
+        return metaPool
+    end
+
     -- Quadratic easing out - decelerating to zero velocity (For buff fade)
     --- @param t number
     --- @param b number
@@ -2728,9 +2979,13 @@ do
     --- @param sortedList table
     --- @param container string
     local function updateBar(currentTimeMs, sortedList, container)
+        local containerData = SpellCastBuffs.BuffContainers[container]
+        local metaPool = containerData.metaPool
         local iconsNum = #sortedList
         local istart, iend, istep = getSortIteration(container, iconsNum)
-        local iconsArray = SpellCastBuffs.BuffContainers[container].icons
+
+        -- Get active objects from metapool
+        local activeObjects = metaPool:GetActiveObjects()
 
         local index = 0 -- Global icon counter
         for i = istart, iend, istep do
@@ -2740,22 +2995,32 @@ do
 
             local ground = effect.groundLabel
             local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
-            local buff = iconsArray[index]
-            local auraStarts = effect.starts or nil
-            local auraEnds = effect.ends or nil
-            -- Modify recall penalty to show forced max duration
-            if effect.id == 999016 then
-                auraStarts = auraEnds - 600000
+            -- Find the control for this effect by matching data
+            local buff = nil
+            for _, control in pairs(activeObjects) do
+                if control.data == effect then
+                    buff = control
+                    break
+                end
             end
 
-            -- If this isn't a permanent duration buff then update the bar on every tick
-            if buff and buff.bar and buff.bar.bar then
-                if auraStarts and auraEnds and remain > 0 and not ground then
-                    buff.bar.bar:SetValue(1 - ((currentTimeMs - auraStarts) / (auraEnds - auraStarts)))
-                elseif effect.werewolf then
-                    buff.bar.bar:SetValue(effect.werewolf)
-                else
-                    buff.bar.bar:SetValue(1)
+            if buff then
+                local auraStarts = effect.starts or nil
+                local auraEnds = effect.ends or nil
+                -- Modify recall penalty to show forced max duration
+                if effect.id == 999016 then
+                    auraStarts = auraEnds - 600000
+                end
+
+                -- If this isn't a permanent duration buff then update the bar on every tick
+                if buff.bar and buff.bar.bar then
+                    if auraStarts and auraEnds and remain > 0 and not ground then
+                        buff.bar.bar:SetValue(1 - ((currentTimeMs - auraStarts) / (auraEnds - auraStarts)))
+                    elseif effect.werewolf then
+                        buff.bar.bar:SetValue(effect.werewolf)
+                    else
+                        buff.bar.bar:SetValue(1)
+                    end
                 end
             end
         end
@@ -2766,6 +3031,7 @@ do
     --- @param container string
     local function updateIcons(currentTimeMs, sortedList, container)
         local containerData = SpellCastBuffs.BuffContainers[container]
+        local metaPool = containerData.metaPool
 
         -- Special workaround for container with player long buffs. We do not need to update it every 100ms, but rather 3 times less often
         if containerData.skipUpdate then
@@ -2777,13 +3043,22 @@ do
             end
         end
 
+        -- Release all objects at start (similar to ZOS ResetPool)
+        metaPool:ReleaseAllObjects()
+        metaPool.firstControl = nil
+        metaPool.lastControl = nil
+
         local iconsNum = #sortedList
+        if iconsNum == 0 then
+            return
+        end
+
         local istart, iend, istep = getSortIteration(container, iconsNum)
 
         -- Size of icon+padding
         local iconSize = SpellCastBuffs.SV.IconSize + SpellCastBuffs.padding
 
-        -- Set width of contol that holds icons. This will make alignment automatic
+        -- Set width of control that holds icons. This will make alignment automatic
         if containerData.iconHolder then
             if containerData.alignVertical then
                 containerData.iconHolder:SetDimensions(0, iconSize * iconsNum - SpellCastBuffs.padding)
@@ -2795,23 +3070,132 @@ do
         -- Prepare variables for manual alignment of icons
         local row = 0 -- row counter for multi-row placement
         local next_row_break = 1
-        local iconsArray = containerData.icons
         local maxIcons = containerData.maxIcons
-        local prevIconsCount = containerData.prevIconsCount
         local alignmentDir = SpellCastBuffs.alignmentDirection[container]
 
         -- Iterate over list of sorted icons
-        local index = 0 -- Global icon counter
+        local index = 0         -- Global icon counter
+        local prevControl = nil -- Track previous control for sequential anchoring
         for i = istart, iend, istep do
             -- Get current buff definition
             local effect = sortedList[i]
             index = index + 1
-            -- Check if the icon for buff #index exists otherwise create new icon
-            local buff = iconsArray[index]
-            if buff == nil then
-                buff = CreateSingleIcon(container, effect.type)
-                iconsArray[index] = buff
-                SpellCastBuffs.ResetSingleIcon(container, buff, iconsArray[index - 1])
+
+            -- Acquire control from metapool
+            local buff, key = metaPool:AcquireObject()
+
+            -- The control from pool is the root Control
+            -- Set up child references for easy access (matching old CreateSingleIcon structure)
+            -- Only set up references once (controls are reused from pool)
+            if not buff.back then
+                buff.back = buff:GetNamedChild("Back")
+                buff.frame = buff:GetNamedChild("Frame")
+                buff.iconbg = buff:GetNamedChild("IconBG")
+                buff.drop = buff:GetNamedChild("Drop")
+                buff.icon = buff:GetNamedChild("Icon")
+                buff.label = buff:GetNamedChild("Label")
+                buff.abilityId = buff:GetNamedChild("AbilityId")
+                buff.stack = buff:GetNamedChild("Stack")
+                buff.cd = buff:GetNamedChild("Cooldown")
+            end
+
+            -- Store effect data on control
+            buff.data = effect
+
+            -- Post-acquisition setup: apply original visual layout (no anchoring)
+            if buff.label then
+                buff.label:SetFont(SpellCastBuffs.buffsFont)
+            end
+            if buff.stack then
+                buff.stack:SetFont(SpellCastBuffs.buffsFont)
+            end
+            if buff.abilityId then
+                buff.abilityId:SetFont(SpellCastBuffs.buffsFont)
+            end
+
+            ApplyIconVisuals(container, buff)
+
+            -- Set event handlers
+            buff:SetHandler("OnMouseEnter", SpellCastBuffs.Buff_OnMouseEnter)
+            buff:SetHandler("OnMouseExit", SpellCastBuffs.Buff_OnMouseExit)
+            buff:SetHandler("OnMouseUp", SpellCastBuffs.Buff_OnMouseUp)
+
+            -- Create prominent buff elements if needed (name label, progress bar)
+            if (container == "prominentbuffs" or container == "prominentdebuffs") and not buff.name then
+                buff.effectType = effect.type
+                buff.name = UI:Label(buff, nil, nil, nil, SpellCastBuffs.prominentFont, nil, false)
+
+                -- Create progress bar
+                buff.bar =
+                {
+                    backdrop = UI:Backdrop(buff, nil, { 154, 16 }, nil, nil, false),
+                    bar = UI:StatusBar(buff, nil, { 150, 12 }, nil, false),
+                }
+
+                -- Setup bar properties
+                buff.bar.backdrop:SetEdgeTexture("", 8, 2, 2, 2)
+                buff.bar.backdrop:SetDrawLayer(DL_BACKGROUND)
+                buff.bar.backdrop:SetDrawLevel(DL_CONTROLS)
+                buff.bar.bar:SetMinMax(0, 1)
+            end
+
+            -- Setup prominent buff name and bar anchors/visibility
+            if buff.name and buff.bar then
+                local isVertical = (container == "prominentbuffs" and SpellCastBuffs.SV.ProminentBuffContainerAlignment == 2) or
+                    (container == "prominentdebuffs" and SpellCastBuffs.SV.ProminentDebuffContainerAlignment == 2)
+
+                if isVertical then
+                    buff.name:SetHidden(not SpellCastBuffs.SV.ProminentLabel)
+                    buff.bar.backdrop:SetHidden(not SpellCastBuffs.SV.ProminentProgress)
+                    buff.bar.bar:SetHidden(not SpellCastBuffs.SV.ProminentProgress)
+
+                    -- Vertical layout - anchors set based on direction
+                    if container == "prominentbuffs" then
+                        if SpellCastBuffs.SV.ProminentBuffLabelDirection == "Left" then
+                            buff.name:ClearAnchors()
+                            buff.name:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+                            buff.name:SetAnchor(TOPRIGHT, buff, TOPLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+                            buff.bar.backdrop:ClearAnchors()
+                            buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
+                            buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
+                        else
+                            buff.name:ClearAnchors()
+                            buff.name:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+                            buff.name:SetAnchor(TOPLEFT, buff, TOPRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+                            buff.bar.backdrop:ClearAnchors()
+                            buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
+                            buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_NORMAL)
+                        end
+                    else -- prominentdebuffs
+                        if SpellCastBuffs.SV.ProminentDebuffLabelDirection == "Right" then
+                            buff.name:ClearAnchors()
+                            buff.name:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+                            buff.name:SetAnchor(TOPLEFT, buff, TOPRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+                            buff.bar.backdrop:ClearAnchors()
+                            buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
+                            buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_NORMAL)
+                        else
+                            buff.name:ClearAnchors()
+                            buff.name:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+                            buff.name:SetAnchor(TOPRIGHT, buff, TOPLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
+                            buff.bar.backdrop:ClearAnchors()
+                            buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
+                            buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
+                        end
+                    end
+
+                    -- Set bar texture and anchor to backdrop
+                    if buff.bar.bar then
+                        buff.bar.bar:SetTexture(LUIE.StatusbarTextures[SpellCastBuffs.SV.ProminentProgressTexture])
+                        buff.bar.bar:ClearAnchors()
+                        buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
+                    end
+                else
+                    -- Horizontal layout - hide name and bar
+                    buff.name:SetHidden(true)
+                    buff.bar.backdrop:SetHidden(true)
+                    buff.bar.bar:SetHidden(true)
+                end
             end
 
             -- Calculate remaining time
@@ -2821,10 +3205,10 @@ do
             -- Ensure buff is shown
             buff:SetHidden(false)
 
-            -- Perform manual alignment
+            -- Perform manual alignment (only for containers without iconHolder)
             if not containerData.iconHolder then
-                if iconsNum ~= prevIconsCount and index == next_row_break then
-                    -- Padding of first icon in a row
+                if index == next_row_break then
+                    -- First icon in a row - anchor to container
                     local anchor, leftPadding
 
                     if alignmentDir then
@@ -2846,6 +3230,7 @@ do
 
                     buff:ClearAnchors()
                     buff:SetAnchor(TOPLEFT, containerData, anchor, leftPadding, row * iconSize)
+
                     -- Determine if we need to make next row
                     if maxIcons then
                         -- If buffs then stack down
@@ -2865,54 +3250,67 @@ do
                         end
                         next_row_break = next_row_break + maxIcons
                     end
+                elseif prevControl then
+                    -- Not first in row - anchor to previous control (sequential)
+                    buff:ClearAnchors()
+                    if containerData.alignVertical then
+                        buff:SetAnchor(BOTTOM, prevControl, TOP, 0, -SpellCastBuffs.padding)
+                    else
+                        buff:SetAnchor(LEFT, prevControl, RIGHT, SpellCastBuffs.padding, 0)
+                    end
                 end
             end
 
-            -- If previously this icon was used for different effect, then setup it again
+            -- Update previous control for next iteration
+            prevControl = buff
+
+            -- Setup icon for this effect (always setup since controls are reused from pool)
             if effect.iconNum ~= index then
                 effect.iconNum = index
                 effect.restart = true
-                SetSingleIconBuffType(buff, effect.type, effect.unbreakable, effect.id)
+            end
+            -- Always call SetSingleIconBuffType since controls come from pool and may have old state
+            SetSingleIconBuffType(buff, effect.type, effect.unbreakable, effect.id)
 
-                -- Setup Info for Tooltip function to pull
-                buff.effectId = effect.id
-                buff.effectName = name
-                buff.buffType = effect.type
-                buff.buffSlot = effect.buffSlot
-                buff.tooltip = effect.tooltip
-                buff.duration = effect.dur or 0
-                buff.container = container
+            -- Setup Info for Tooltip function to pull
+            buff.effectId = effect.id
+            buff.effectName = name
+            buff.buffType = effect.type
+            buff.buffSlot = effect.buffSlot
+            buff.tooltip = effect.tooltip
+            buff.duration = effect.dur or 0
+            buff.container = container
 
-                if effect.backdrop then
-                    buff.drop:SetHidden(false)
+            if effect.backdrop then
+                buff.drop:SetHidden(false)
+            else
+                buff.drop:SetHidden(true)
+            end
+            buff.icon:SetTexture(effect.icon)
+            buff:SetAlpha(1)
+            buff:SetHidden(false)
+            if not remain or effect.fakeDuration then
+                if effect.toggle then
+                    buff.label:SetText("T")
+                elseif effect.groundLabel then
+                    buff.label:SetText("G")
                 else
-                    buff.drop:SetHidden(true)
-                end
-                buff.icon:SetTexture(effect.icon)
-                buff:SetAlpha(1)
-                buff:SetHidden(false)
-                if not remain or effect.fakeDuration then
-                    if effect.toggle then
-                        buff.label:SetText("T")
-                    elseif effect.groundLabel then
-                        buff.label:SetText("G")
-                    else
-                        buff.label:SetText(nil)
-                    end
-                end
-
-                if buff.abilityId and effect.id then
-                    buff.abilityId:SetText(effect.id)
-                end
-
-                if buff.name then
-                    local formattedName = effect._cachedName or zo_strformat("<<C:1>>", effect.name)
-                    if not effect._cachedName then
-                        effect._cachedName = formattedName
-                    end
-                    buff.name:SetText(formattedName)
+                    buff.label:SetText(nil)
                 end
             end
+
+            if buff.abilityId and effect.id then
+                buff.abilityId:SetText(effect.id)
+            end
+
+            if buff.name then
+                local formattedName = effect._cachedName or zo_strformat("<<C:1>>", effect.name)
+                if not effect._cachedName then
+                    effect._cachedName = formattedName
+                end
+                buff.name:SetText(formattedName)
+            end
+
 
             if effect.stack and effect.stack > 0 then
                 buff.stack:SetText(string_format("%s", effect.stack))
@@ -2970,15 +3368,7 @@ do
             end
         end
 
-        -- Hide rest of icons
-        for i = iconsNum + 1, #iconsArray do
-            if iconsArray[i] then
-                iconsArray[i]:SetHidden(true)
-            end
-        end
-
-        -- Save icon number processed to compare in next update iteration
-        containerData.prevIconsCount = iconsNum
+        -- No need to hide unused icons - metapool handles that via ReleaseAllObjects
     end
 
 
