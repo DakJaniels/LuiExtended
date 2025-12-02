@@ -1,4 +1,4 @@
---- @diagnostic disable: duplicate-set-field
+--- @diagnostic disable: duplicate-set-field, duplicate-doc-field
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
