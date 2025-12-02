@@ -48,6 +48,7 @@ bindings/Bindings.xml
 frontend/Changelog.xml
 frontend/CombatText.xml
 frontend/CrowdControlTracker.xml
+frontend/SynergyTracker.xml
 
 # Unlock
 src/GridOverlay.lua
@@ -113,7 +114,6 @@ modules/InfoPanel/InfoPanel.lua
 
 # Modules - Spell Cast Buffs
 modules/SpellCastBuffs/SpellCastBuffs.lua
-modules/SpellCastBuffs/SpellCastBuffsHandlers.lua
 frontend/SpellCastBuffs.xml
 
 # Modules - Slash Commands
