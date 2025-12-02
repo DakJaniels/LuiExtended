@@ -36,7 +36,7 @@ local function IsUnitFramesAvailable()
 end
 
 local function IsSpellCastBuffsAvailable()
-    return IsModuleAvailable("SpellCastBuffs") and LUIE.SpellCastBuffs.Enabled
+    return IsModuleAvailable("SpellCastBuffs") and LUIE.SpellCastBuffs and LUIE.SpellCastBuffs.Enabled
 end
 
 local function IsActionBarAvailable()
@@ -146,13 +146,13 @@ function EditModeController:SetEditModeActive(active, triggeringModule)
             if self.triggeringModule == "UnitFrames" and LUIE.UnitFrames and LUIE.UnitFrames.CustomFramesSetMovingState then
                 LUIE.UnitFrames.CustomFramesSetMovingState(false)
             elseif self.triggeringModule == "SpellCastBuffs" and LUIE.SpellCastBuffs and LUIE.SpellCastBuffs.SetMovingState then
-                LUIE.SpellCastBuffs.SetMovingState(false)
+                LUIE.SpellCastBuffs:SetMovingState(false)
             elseif self.triggeringModule == "ActionBar" and LUIE.ActionBar and LUIE.ActionBar.CastBar and LUIE.ActionBar.CastBar.SetMovingState then
                 LUIE.ActionBar.CastBar.SetMovingState(false)
             elseif self.triggeringModule == "InfoPanel" and LUIE.InfoPanel and LUIE.InfoPanel.SetMovingState then
                 LUIE.InfoPanel.SetMovingState(false)
-            elseif self.triggeringModule == "AbilityAlerts" and LUIE.CombatInfo and LUIE.CombatInfo.AbilityAlerts and LUIE.CombatInfo.AbilityAlerts.SetMovingState then
-                LUIE.CombatInfo.AbilityAlerts.SetMovingState(false)
+            elseif self.triggeringModule == "AbilityAlerts" and LUIE.CombatInfo and LUIE.CombatInfo.AbilityAlerts and LUIE.CombatInfo.AbilityAlerts.SetMovingStateAlert then
+                LUIE.CombatInfo.AbilityAlerts.SetMovingStateAlert(false)
             elseif self.triggeringModule == "CombatText" and LUIE.CombatText and LUIE.CombatText.SetMovingState then
                 LUIE.CombatText.SetMovingState(false)
             elseif self.triggeringModule == "SynergyTracker" and LUIE.CombatInfo and LUIE.CombatInfo.SynergyTrackerInstance and LUIE.CombatInfo.SynergyTrackerInstance.SetUnlocked then
@@ -303,6 +303,8 @@ end
 
 --- Refreshes SpellCastBuffs movers
 function EditModeController:RefreshSpellCastBuffsMovers(MoverHelper)
+    if not LUIE.SpellCastBuffs then return end
+
     local lockToUnitFrames = LUIE.SpellCastBuffs.SV.lockPositionToUnitFrames ~= false
 
     if not lockToUnitFrames then

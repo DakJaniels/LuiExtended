@@ -14,19 +14,6 @@ local CombatInfo = {}
 CombatInfo.__index = CombatInfo
 LUIE.CombatInfo = CombatInfo
 
--- Sub-module placeholders (will be populated by their respective files)
---- @class (partial) EventHandlers
-CombatInfo.EventHandlers =
-{
-    name = LUIE.name .. "CombatInfo" .. "EventHandlers",
-}
-
---- @class (partial) AbilityAlerts
-CombatInfo.AbilityAlerts =
-{
-    name = LUIE.name .. "CombatInfo" .. "AbilityAlerts",
-}
-
 --- @class (partial) CrowdControlTracker
 CombatInfo.CrowdControlTracker =
 {

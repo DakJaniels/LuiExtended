@@ -29,6 +29,8 @@ local moduleName = LUIE.name .. "ActionBar"
 
 -- Module-local state
 local uiTlw = {}
+CastBar.uiTlw = uiTlw
+ActionBar.uiTlw = CastBar.uiTlw
 local castbar = {}
 local g_casting = false
 local g_castbarWorldMapFix = false
