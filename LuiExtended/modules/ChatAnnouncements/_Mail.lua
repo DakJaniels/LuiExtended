@@ -85,6 +85,30 @@ function ChatAnnouncements.OnMailReadable(eventId, mailId)
         for index = 1, numMailItems do
             mailId = GetMailIdByIndex(category, index)
             local dataTable = {}
+            --- @alias MailDataTable {
+            --- GetExpiresText: function,
+            --- GetFormattedReplySubject: function,
+            --- GetFormattedSubject: function,
+            --- GetReceivedText: function,
+            --- IsExpirationImminent: function,
+            --- attachedMoney: integer,
+            --- category: MailCategory,
+            --- codAmount: integer,
+            --- expiresInDays: integer,
+            --- firstItemIcon: textureName,
+            --- fromCS: boolean,
+            --- fromSystem: boolean,
+            --- isFromPlayer: boolean,
+            --- isReadInfoReady: boolean,
+            --- mailId: id64,
+            --- numAttachments: integer,
+            --- returned: boolean,
+            --- secsSinceReceived: integer,
+            --- senderCharacterName: string,
+            --- senderDisplayName: string,
+            --- subject: string,
+            --- unread: boolean,
+            --- }
             --- @cast dataTable MailDataTable
             ZO_MailInboxShared_PopulateMailData(dataTable, mailId)
 
@@ -202,7 +226,7 @@ end
 --- @param eventId integer
 --- @param result MailTakeAttachmentResult
 --- @param category MailCategory
---- @param headersRemoved bool
+--- @param headersRemoved boolean
 function ChatAnnouncements.OnMailTakeAllResponse(eventId, result, category, headersRemoved)
     isTakingMail = false
     eventManager:UnregisterForUpdate(moduleName .. "_Mail" .. "ClearTakingFlag")
