@@ -296,15 +296,15 @@
 					<!-- Anchors set dynamically in Lua with inset -->
 				</Texture>
 				<!-- Duration label -->
-				<Label name="$(parent)Label" font="ZoFontGame" horizontalAlignment="CENTER" hidden="false" space="SPACE_INTERFACE">
+				<Label name="$(parent)Label" font="ZoFontGame" horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="TEXT_WRAP_MODE_ELLIPSIS" hidden="false" space="SPACE_INTERFACE">
 					<!-- Anchors set dynamically in Lua -->
 				</Label>
 				<!-- Debug ability ID label -->
-				<Label name="$(parent)AbilityId" font="ZoFontGame" hidden="false" space="SPACE_INTERFACE">
+				<Label name="$(parent)AbilityId" font="ZoFontGame" horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="TEXT_WRAP_MODE_ELLIPSIS" hidden="false" space="SPACE_INTERFACE">
 					<!-- Anchors set dynamically in Lua -->
 				</Label>
 				<!-- Stack count label -->
-				<Label name="$(parent)Stack" font="ZoFontGame" hidden="false" space="SPACE_INTERFACE">
+				<Label name="$(parent)Stack" font="ZoFontGame" horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="TEXT_WRAP_MODE_ELLIPSIS" hidden="false" space="SPACE_INTERFACE">
 					<!-- Anchors set dynamically in Lua -->
 				</Label>
 				<!-- Cooldown control (radial timer) - created AFTER labels in original, BACKGROUND layer -->
@@ -312,7 +312,7 @@
 					<!-- Anchors set dynamically in Lua -->
 				</Cooldown>
 				<!-- Prominent buff name label (hidden by default, shown only for prominent containers) -->
-				<Label name="$(parent)Name" font="ZoFontGame" hidden="true" space="SPACE_INTERFACE">
+				<Label name="$(parent)Name" font="ZoFontGame" wrapMode="TEXT_WRAP_MODE_ELLIPSIS" verticalAlignment="CENTER" hidden="true" space="SPACE_INTERFACE">
 					<!-- Anchors set dynamically in Lua based on direction settings -->
 				</Label>
 				<!-- Prominent buff progress bar backdrop -->
