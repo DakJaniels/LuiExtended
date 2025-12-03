@@ -2,10 +2,18 @@
     LuiExtended - SpellCastBuffs
     License: The MIT License (MIT)
 -->
-<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
 	<Controls>
-		<!-- Container TopLevelWindows for buff/debuff displays -->
-		<TopLevelControl name="LUIE_SpellCastBuffs_PlayerBuffs" clampedToScreen="true" mouseEnabled="false" movable="true" hidden="true" layer="BACKDROP" tier="DT_LOW" level="1" space="SPACE_INTERFACE">
+		<TopLevelControl name="LUIE_SpellCastBuffs_PlayerBuffs"
+		                 clampedToScreen="true"
+		                 mouseEnabled="false"
+		                 movable="true"
+		                 hidden="true"
+		                 layer="BACKDROP"
+		                 tier="DT_LOW"
+		                 level="1"
+		                 space="SPACE_INTERFACE">
 			<OnMoveStart>
 				LUIE_SpellCastBuffs_OnMoveStart(self)
 			</OnMoveStart>
@@ -13,33 +21,68 @@
 				LUIE_SpellCastBuffs_PlayerBuffs_OnMoveStop(self)
 			</OnMoveStop>
 			<Controls>
-				<!-- Preview texture for position preview -->
-				<Texture name="$(parent)Preview" textureFile="/esoui/art/miscellaneous/inset_bg.dds" layer="BACKGROUND" hidden="true" space="SPACE_INTERFACE">
+				<Texture name="$(parent)Preview"
+				         textureFile="EsoUI/Art/Miscellaneous/inset_bg.dds"
+				         layer="BACKGROUND"
+				         hidden="true"
+				         space="SPACE_INTERFACE">
 					<AnchorFill/>
 					<Controls>
-						<!-- Preview label -->
-						<Label name="$(parent)PreviewLabel" font="ZoFontGameMedium" horizontalAlignment="CENTER" verticalAlignment="CENTER" space="SPACE_INTERFACE">
-							<Anchor point="CENTER" relativePoint="CENTER"/>
+						<Label name="$(parent)PreviewLabel"
+						       font="ZoFontGameMedium"
+						       horizontalAlignment="CENTER"
+						       verticalAlignment="CENTER"
+						       space="SPACE_INTERFACE">
+							<Anchor point="CENTER"
+							        relativePoint="CENTER"/>
 						</Label>
-						<!-- Anchor texture for coordinate display -->
-						<Texture name="$(parent)AnchorTexture" textureFile="/esoui/art/reticle/border_topleft.dds" layer="OVERLAY" hidden="false" space="SPACE_INTERFACE">
-							<Anchor point="TOPLEFT" relativePoint="TOPLEFT"/>
-							<Dimensions x="16" y="16"/>
+						<Texture name="$(parent)AnchorTexture"
+						         textureFile="/esoui/art/reticle/border_topleft.dds"
+						         layer="OVERLAY"
+						         hidden="false"
+						         space="SPACE_INTERFACE">
+							<Anchor point="TOPLEFT"
+							        relativePoint="TOPLEFT"/>
+							<Dimensions x="16"
+							            y="16"/>
 						</Texture>
-						<!-- Anchor label for coordinate display -->
-						<Label name="$(parent)AnchorLabel" font="ZoFontGameSmall" text="xxx, yyy" layer="OVERLAY" tier="DT_MEDIUM" hidden="false" space="SPACE_INTERFACE">
-							<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="-1"/>
-							<Dimensions x="0" y="2"/>
+						<Label name="$(parent)AnchorLabel"
+						       font="ZoFontGameSmall"
+						       text="xxx, yyy"
+						       layer="OVERLAY"
+						       tier="DT_MEDIUM"
+						       hidden="false"
+						       space="SPACE_INTERFACE">
+							<Anchor point="BOTTOMLEFT"
+							        relativePoint="TOPLEFT"
+							        offsetX="0"
+							        offsetY="-1"/>
+							<Dimensions x="0"
+							            y="2"/>
 						</Label>
-						<!-- Anchor label background -->
-						<Backdrop name="$(parent)AnchorLabelBg" centerColor="000000FF" edgeColor="000000FF" layer="OVERLAY" tier="DT_LOW" hidden="false" pixelRoundingEnabled="false" space="SPACE_INTERFACE">
+						<Backdrop name="$(parent)AnchorLabelBg"
+						          centerColor="000000FF"
+						          edgeColor="000000FF"
+						          layer="OVERLAY"
+						          tier="DT_LOW"
+						          hidden="false"
+						          pixelRoundingEnabled="false"
+						          space="SPACE_INTERFACE">
 							<AnchorFill/>
 						</Backdrop>
 					</Controls>
 				</Texture>
 			</Controls>
 		</TopLevelControl>
-		<TopLevelControl name="LUIE_SpellCastBuffs_PlayerDebuffs" clampedToScreen="true" mouseEnabled="false" movable="true" hidden="true" layer="BACKDROP" tier="DT_LOW" level="1" space="SPACE_INTERFACE">
+		<TopLevelControl name="LUIE_SpellCastBuffs_PlayerDebuffs"
+		                 clampedToScreen="true"
+		                 mouseEnabled="false"
+		                 movable="true"
+		                 hidden="true"
+		                 layer="BACKDROP"
+		                 tier="DT_LOW"
+		                 level="1"
+		                 space="SPACE_INTERFACE">
 			<OnMoveStart>
 				LUIE_SpellCastBuffs_OnMoveStart(self)
 			</OnMoveStart>
@@ -47,33 +90,68 @@
 				LUIE_SpellCastBuffs_PlayerDebuffs_OnMoveStop(self)
 			</OnMoveStop>
 			<Controls>
-				<!-- Preview texture for position preview -->
-				<Texture name="$(parent)Preview" textureFile="/esoui/art/miscellaneous/inset_bg.dds" layer="BACKGROUND" hidden="true" space="SPACE_INTERFACE">
+				<Texture name="$(parent)Preview"
+				         textureFile="EsoUI/Art/Miscellaneous/inset_bg.dds"
+				         layer="BACKGROUND"
+				         hidden="true"
+				         space="SPACE_INTERFACE">
 					<AnchorFill/>
 					<Controls>
-						<!-- Preview label -->
-						<Label name="$(parent)PreviewLabel" font="ZoFontGameMedium" horizontalAlignment="CENTER" verticalAlignment="CENTER" space="SPACE_INTERFACE">
-							<Anchor point="CENTER" relativePoint="CENTER"/>
+						<Label name="$(parent)PreviewLabel"
+						       font="ZoFontGameMedium"
+						       horizontalAlignment="CENTER"
+						       verticalAlignment="CENTER"
+						       space="SPACE_INTERFACE">
+							<Anchor point="CENTER"
+							        relativePoint="CENTER"/>
 						</Label>
-						<!-- Anchor texture for coordinate display -->
-						<Texture name="$(parent)AnchorTexture" textureFile="/esoui/art/reticle/border_topleft.dds" layer="OVERLAY" hidden="false" space="SPACE_INTERFACE">
-							<Anchor point="TOPLEFT" relativePoint="TOPLEFT"/>
-							<Dimensions x="16" y="16"/>
+						<Texture name="$(parent)AnchorTexture"
+						         textureFile="/esoui/art/reticle/border_topleft.dds"
+						         layer="OVERLAY"
+						         hidden="false"
+						         space="SPACE_INTERFACE">
+							<Anchor point="TOPLEFT"
+							        relativePoint="TOPLEFT"/>
+							<Dimensions x="16"
+							            y="16"/>
 						</Texture>
-						<!-- Anchor label for coordinate display -->
-						<Label name="$(parent)AnchorLabel" font="ZoFontGameSmall" text="xxx, yyy" layer="OVERLAY" tier="DT_MEDIUM" hidden="false" space="SPACE_INTERFACE">
-							<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="-1"/>
-							<Dimensions x="0" y="2"/>
+						<Label name="$(parent)AnchorLabel"
+						       font="ZoFontGameSmall"
+						       text="xxx, yyy"
+						       layer="OVERLAY"
+						       tier="DT_MEDIUM"
+						       hidden="false"
+						       space="SPACE_INTERFACE">
+							<Anchor point="BOTTOMLEFT"
+							        relativePoint="TOPLEFT"
+							        offsetX="0"
+							        offsetY="-1"/>
+							<Dimensions x="0"
+							            y="2"/>
 						</Label>
-						<!-- Anchor label background -->
-						<Backdrop name="$(parent)AnchorLabelBg" centerColor="000000FF" edgeColor="000000FF" layer="OVERLAY" tier="DT_LOW" hidden="false" pixelRoundingEnabled="false" space="SPACE_INTERFACE">
+						<Backdrop name="$(parent)AnchorLabelBg"
+						          centerColor="000000FF"
+						          edgeColor="000000FF"
+						          layer="OVERLAY"
+						          tier="DT_LOW"
+						          hidden="false"
+						          pixelRoundingEnabled="false"
+						          space="SPACE_INTERFACE">
 							<AnchorFill/>
 						</Backdrop>
 					</Controls>
 				</Texture>
 			</Controls>
 		</TopLevelControl>
-		<TopLevelControl name="LUIE_SpellCastBuffs_TargetBuffs" clampedToScreen="true" mouseEnabled="false" movable="true" hidden="true" layer="BACKDROP" tier="DT_LOW" level="1" space="SPACE_INTERFACE">
+		<TopLevelControl name="LUIE_SpellCastBuffs_TargetBuffs"
+		                 clampedToScreen="true"
+		                 mouseEnabled="false"
+		                 movable="true"
+		                 hidden="true"
+		                 layer="BACKDROP"
+		                 tier="DT_LOW"
+		                 level="1"
+		                 space="SPACE_INTERFACE">
 			<OnMoveStart>
 				LUIE_SpellCastBuffs_OnMoveStart(self)
 			</OnMoveStart>
@@ -81,33 +159,68 @@
 				LUIE_SpellCastBuffs_TargetBuffs_OnMoveStop(self)
 			</OnMoveStop>
 			<Controls>
-				<!-- Preview texture for position preview -->
-				<Texture name="$(parent)Preview" textureFile="/esoui/art/miscellaneous/inset_bg.dds" layer="BACKGROUND" hidden="true" space="SPACE_INTERFACE">
+				<Texture name="$(parent)Preview"
+				         textureFile="EsoUI/Art/Miscellaneous/inset_bg.dds"
+				         layer="BACKGROUND"
+				         hidden="true"
+				         space="SPACE_INTERFACE">
 					<AnchorFill/>
 					<Controls>
-						<!-- Preview label -->
-						<Label name="$(parent)PreviewLabel" font="ZoFontGameMedium" horizontalAlignment="CENTER" verticalAlignment="CENTER" space="SPACE_INTERFACE">
-							<Anchor point="CENTER" relativePoint="CENTER"/>
+						<Label name="$(parent)PreviewLabel"
+						       font="ZoFontGameMedium"
+						       horizontalAlignment="CENTER"
+						       verticalAlignment="CENTER"
+						       space="SPACE_INTERFACE">
+							<Anchor point="CENTER"
+							        relativePoint="CENTER"/>
 						</Label>
-						<!-- Anchor texture for coordinate display -->
-						<Texture name="$(parent)AnchorTexture" textureFile="/esoui/art/reticle/border_topleft.dds" layer="OVERLAY" hidden="false" space="SPACE_INTERFACE">
-							<Anchor point="TOPLEFT" relativePoint="TOPLEFT"/>
-							<Dimensions x="16" y="16"/>
+						<Texture name="$(parent)AnchorTexture"
+						         textureFile="/esoui/art/reticle/border_topleft.dds"
+						         layer="OVERLAY"
+						         hidden="false"
+						         space="SPACE_INTERFACE">
+							<Anchor point="TOPLEFT"
+							        relativePoint="TOPLEFT"/>
+							<Dimensions x="16"
+							            y="16"/>
 						</Texture>
-						<!-- Anchor label for coordinate display -->
-						<Label name="$(parent)AnchorLabel" font="ZoFontGameSmall" text="xxx, yyy" layer="OVERLAY" tier="DT_MEDIUM" hidden="false" space="SPACE_INTERFACE">
-							<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="-1"/>
-							<Dimensions x="0" y="2"/>
+						<Label name="$(parent)AnchorLabel"
+						       font="ZoFontGameSmall"
+						       text="xxx, yyy"
+						       layer="OVERLAY"
+						       tier="DT_MEDIUM"
+						       hidden="false"
+						       space="SPACE_INTERFACE">
+							<Anchor point="BOTTOMLEFT"
+							        relativePoint="TOPLEFT"
+							        offsetX="0"
+							        offsetY="-1"/>
+							<Dimensions x="0"
+							            y="2"/>
 						</Label>
-						<!-- Anchor label background -->
-						<Backdrop name="$(parent)AnchorLabelBg" centerColor="000000FF" edgeColor="000000FF" layer="OVERLAY" tier="DT_LOW" hidden="false" pixelRoundingEnabled="false" space="SPACE_INTERFACE">
+						<Backdrop name="$(parent)AnchorLabelBg"
+						          centerColor="000000FF"
+						          edgeColor="000000FF"
+						          layer="OVERLAY"
+						          tier="DT_LOW"
+						          hidden="false"
+						          pixelRoundingEnabled="false"
+						          space="SPACE_INTERFACE">
 							<AnchorFill/>
 						</Backdrop>
 					</Controls>
 				</Texture>
 			</Controls>
 		</TopLevelControl>
-		<TopLevelControl name="LUIE_SpellCastBuffs_TargetDebuffs" clampedToScreen="true" mouseEnabled="false" movable="true" hidden="true" layer="BACKDROP" tier="DT_LOW" level="1" space="SPACE_INTERFACE">
+		<TopLevelControl name="LUIE_SpellCastBuffs_TargetDebuffs"
+		                 clampedToScreen="true"
+		                 mouseEnabled="false"
+		                 movable="true"
+		                 hidden="true"
+		                 layer="BACKDROP"
+		                 tier="DT_LOW"
+		                 level="1"
+		                 space="SPACE_INTERFACE">
 			<OnMoveStart>
 				LUIE_SpellCastBuffs_OnMoveStart(self)
 			</OnMoveStart>
@@ -115,33 +228,68 @@
 				LUIE_SpellCastBuffs_TargetDebuffs_OnMoveStop(self)
 			</OnMoveStop>
 			<Controls>
-				<!-- Preview texture for position preview -->
-				<Texture name="$(parent)Preview" textureFile="/esoui/art/miscellaneous/inset_bg.dds" layer="BACKGROUND" hidden="true" space="SPACE_INTERFACE">
+				<Texture name="$(parent)Preview"
+				         textureFile="EsoUI/Art/Miscellaneous/inset_bg.dds"
+				         layer="BACKGROUND"
+				         hidden="true"
+				         space="SPACE_INTERFACE">
 					<AnchorFill/>
 					<Controls>
-						<!-- Preview label -->
-						<Label name="$(parent)PreviewLabel" font="ZoFontGameMedium" horizontalAlignment="CENTER" verticalAlignment="CENTER" space="SPACE_INTERFACE">
-							<Anchor point="CENTER" relativePoint="CENTER"/>
+						<Label name="$(parent)PreviewLabel"
+						       font="ZoFontGameMedium"
+						       horizontalAlignment="CENTER"
+						       verticalAlignment="CENTER"
+						       space="SPACE_INTERFACE">
+							<Anchor point="CENTER"
+							        relativePoint="CENTER"/>
 						</Label>
-						<!-- Anchor texture for coordinate display -->
-						<Texture name="$(parent)AnchorTexture" textureFile="/esoui/art/reticle/border_topleft.dds" layer="OVERLAY" hidden="false" space="SPACE_INTERFACE">
-							<Anchor point="TOPLEFT" relativePoint="TOPLEFT"/>
-							<Dimensions x="16" y="16"/>
+						<Texture name="$(parent)AnchorTexture"
+						         textureFile="/esoui/art/reticle/border_topleft.dds"
+						         layer="OVERLAY"
+						         hidden="false"
+						         space="SPACE_INTERFACE">
+							<Anchor point="TOPLEFT"
+							        relativePoint="TOPLEFT"/>
+							<Dimensions x="16"
+							            y="16"/>
 						</Texture>
-						<!-- Anchor label for coordinate display -->
-						<Label name="$(parent)AnchorLabel" font="ZoFontGameSmall" text="xxx, yyy" layer="OVERLAY" tier="DT_MEDIUM" hidden="false" space="SPACE_INTERFACE">
-							<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="-1"/>
-							<Dimensions x="0" y="2"/>
+						<Label name="$(parent)AnchorLabel"
+						       font="ZoFontGameSmall"
+						       text="xxx, yyy"
+						       layer="OVERLAY"
+						       tier="DT_MEDIUM"
+						       hidden="false"
+						       space="SPACE_INTERFACE">
+							<Anchor point="BOTTOMLEFT"
+							        relativePoint="TOPLEFT"
+							        offsetX="0"
+							        offsetY="-1"/>
+							<Dimensions x="0"
+							            y="2"/>
 						</Label>
-						<!-- Anchor label background -->
-						<Backdrop name="$(parent)AnchorLabelBg" centerColor="000000FF" edgeColor="000000FF" layer="OVERLAY" tier="DT_LOW" hidden="false" pixelRoundingEnabled="false" space="SPACE_INTERFACE">
+						<Backdrop name="$(parent)AnchorLabelBg"
+						          centerColor="000000FF"
+						          edgeColor="000000FF"
+						          layer="OVERLAY"
+						          tier="DT_LOW"
+						          hidden="false"
+						          pixelRoundingEnabled="false"
+						          space="SPACE_INTERFACE">
 							<AnchorFill/>
 						</Backdrop>
 					</Controls>
 				</Texture>
 			</Controls>
 		</TopLevelControl>
-		<TopLevelControl name="LUIE_SpellCastBuffs_ProminentBuffs" clampedToScreen="true" mouseEnabled="false" movable="true" hidden="true" layer="BACKDROP" tier="DT_LOW" level="1" space="SPACE_INTERFACE">
+		<TopLevelControl name="LUIE_SpellCastBuffs_ProminentBuffs"
+		                 clampedToScreen="true"
+		                 mouseEnabled="false"
+		                 movable="true"
+		                 hidden="true"
+		                 layer="BACKDROP"
+		                 tier="DT_LOW"
+		                 level="1"
+		                 space="SPACE_INTERFACE">
 			<OnMoveStart>
 				LUIE_SpellCastBuffs_OnMoveStart(self)
 			</OnMoveStart>
@@ -149,37 +297,71 @@
 				LUIE_SpellCastBuffs_ProminentBuffs_OnMoveStop(self)
 			</OnMoveStop>
 			<Controls>
-				<!-- Preview texture for position preview -->
-				<Texture name="$(parent)Preview" textureFile="/esoui/art/miscellaneous/inset_bg.dds" layer="BACKGROUND" hidden="true" space="SPACE_INTERFACE">
+				<Texture name="$(parent)Preview"
+				         textureFile="EsoUI/Art/Miscellaneous/inset_bg.dds"
+				         layer="BACKGROUND"
+				         hidden="true"
+				         space="SPACE_INTERFACE">
 					<AnchorFill/>
 					<Controls>
-						<!-- Preview label -->
-						<Label name="$(parent)PreviewLabel" font="ZoFontGameMedium" horizontalAlignment="CENTER" verticalAlignment="CENTER" space="SPACE_INTERFACE">
-							<Anchor point="CENTER" relativePoint="CENTER"/>
+						<Label name="$(parent)PreviewLabel"
+						       font="ZoFontGameMedium"
+						       horizontalAlignment="CENTER"
+						       verticalAlignment="CENTER"
+						       space="SPACE_INTERFACE">
+							<Anchor point="CENTER"
+							        relativePoint="CENTER"/>
 						</Label>
-						<!-- Anchor texture for coordinate display -->
-						<Texture name="$(parent)AnchorTexture" textureFile="/esoui/art/reticle/border_topleft.dds" layer="OVERLAY" hidden="false" space="SPACE_INTERFACE">
-							<Anchor point="TOPLEFT" relativePoint="TOPLEFT"/>
-							<Dimensions x="16" y="16"/>
+						<Texture name="$(parent)AnchorTexture"
+						         textureFile="/esoui/art/reticle/border_topleft.dds"
+						         layer="OVERLAY"
+						         hidden="false"
+						         space="SPACE_INTERFACE">
+							<Anchor point="TOPLEFT"
+							        relativePoint="TOPLEFT"/>
+							<Dimensions x="16"
+							            y="16"/>
 						</Texture>
-						<!-- Anchor label for coordinate display -->
-						<Label name="$(parent)AnchorLabel" font="ZoFontGameSmall" text="xxx, yyy" layer="OVERLAY" tier="DT_MEDIUM" hidden="false" space="SPACE_INTERFACE">
-							<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="-1"/>
-							<Dimensions x="0" y="2"/>
+						<Label name="$(parent)AnchorLabel"
+						       font="ZoFontGameSmall"
+						       text="xxx, yyy"
+						       layer="OVERLAY"
+						       tier="DT_MEDIUM"
+						       hidden="false"
+						       space="SPACE_INTERFACE">
+							<Anchor point="BOTTOMLEFT"
+							        relativePoint="TOPLEFT"
+							        offsetX="0"
+							        offsetY="-1"/>
+							<Dimensions x="0"
+							            y="2"/>
 						</Label>
-						<!-- Anchor label background -->
-						<Backdrop name="$(parent)AnchorLabelBg" centerColor="000000FF" edgeColor="000000FF" layer="OVERLAY" tier="DT_LOW" hidden="false" pixelRoundingEnabled="false" space="SPACE_INTERFACE">
+						<Backdrop name="$(parent)AnchorLabelBg"
+						          centerColor="000000FF"
+						          edgeColor="000000FF"
+						          layer="OVERLAY"
+						          tier="DT_LOW"
+						          hidden="false"
+						          pixelRoundingEnabled="false"
+						          space="SPACE_INTERFACE">
 							<AnchorFill/>
 						</Backdrop>
 					</Controls>
 				</Texture>
-				<!-- Icon holder for automatic alignment -->
-				<Control name="$(parent)IconHolder" space="SPACE_INTERFACE">
-					<!-- Anchors set dynamically in Lua -->
+				<Control name="$(parent)IconHolder"
+				         space="SPACE_INTERFACE">
 				</Control>
 			</Controls>
 		</TopLevelControl>
-		<TopLevelControl name="LUIE_SpellCastBuffs_ProminentDebuffs" clampedToScreen="true" mouseEnabled="false" movable="true" hidden="true" layer="BACKDROP" tier="DT_LOW" level="1" space="SPACE_INTERFACE">
+		<TopLevelControl name="LUIE_SpellCastBuffs_ProminentDebuffs"
+		                 clampedToScreen="true"
+		                 mouseEnabled="false"
+		                 movable="true"
+		                 hidden="true"
+		                 layer="BACKDROP"
+		                 tier="DT_LOW"
+		                 level="1"
+		                 space="SPACE_INTERFACE">
 			<OnMoveStart>
 				LUIE_SpellCastBuffs_OnMoveStart(self)
 			</OnMoveStart>
@@ -187,37 +369,71 @@
 				LUIE_SpellCastBuffs_ProminentDebuffs_OnMoveStop(self)
 			</OnMoveStop>
 			<Controls>
-				<!-- Preview texture for position preview -->
-				<Texture name="$(parent)Preview" textureFile="/esoui/art/miscellaneous/inset_bg.dds" layer="BACKGROUND" hidden="true" space="SPACE_INTERFACE">
+				<Texture name="$(parent)Preview"
+				         textureFile="EsoUI/Art/Miscellaneous/inset_bg.dds"
+				         layer="BACKGROUND"
+				         hidden="true"
+				         space="SPACE_INTERFACE">
 					<AnchorFill/>
 					<Controls>
-						<!-- Preview label -->
-						<Label name="$(parent)PreviewLabel" font="ZoFontGameMedium" horizontalAlignment="CENTER" verticalAlignment="CENTER" space="SPACE_INTERFACE">
-							<Anchor point="CENTER" relativePoint="CENTER"/>
+						<Label name="$(parent)PreviewLabel"
+						       font="ZoFontGameMedium"
+						       horizontalAlignment="CENTER"
+						       verticalAlignment="CENTER"
+						       space="SPACE_INTERFACE">
+							<Anchor point="CENTER"
+							        relativePoint="CENTER"/>
 						</Label>
-						<!-- Anchor texture for coordinate display -->
-						<Texture name="$(parent)AnchorTexture" textureFile="/esoui/art/reticle/border_topleft.dds" layer="OVERLAY" hidden="false" space="SPACE_INTERFACE">
-							<Anchor point="TOPLEFT" relativePoint="TOPLEFT"/>
-							<Dimensions x="16" y="16"/>
+						<Texture name="$(parent)AnchorTexture"
+						         textureFile="/esoui/art/reticle/border_topleft.dds"
+						         layer="OVERLAY"
+						         hidden="false"
+						         space="SPACE_INTERFACE">
+							<Anchor point="TOPLEFT"
+							        relativePoint="TOPLEFT"/>
+							<Dimensions x="16"
+							            y="16"/>
 						</Texture>
-						<!-- Anchor label for coordinate display -->
-						<Label name="$(parent)AnchorLabel" font="ZoFontGameSmall" text="xxx, yyy" layer="OVERLAY" tier="DT_MEDIUM" hidden="false" space="SPACE_INTERFACE">
-							<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="-1"/>
-							<Dimensions x="0" y="2"/>
+						<Label name="$(parent)AnchorLabel"
+						       font="ZoFontGameSmall"
+						       text="xxx, yyy"
+						       layer="OVERLAY"
+						       tier="DT_MEDIUM"
+						       hidden="false"
+						       space="SPACE_INTERFACE">
+							<Anchor point="BOTTOMLEFT"
+							        relativePoint="TOPLEFT"
+							        offsetX="0"
+							        offsetY="-1"/>
+							<Dimensions x="0"
+							            y="2"/>
 						</Label>
-						<!-- Anchor label background -->
-						<Backdrop name="$(parent)AnchorLabelBg" centerColor="000000FF" edgeColor="000000FF" layer="OVERLAY" tier="DT_LOW" hidden="false" pixelRoundingEnabled="false" space="SPACE_INTERFACE">
+						<Backdrop name="$(parent)AnchorLabelBg"
+						          centerColor="000000FF"
+						          edgeColor="000000FF"
+						          layer="OVERLAY"
+						          tier="DT_LOW"
+						          hidden="false"
+						          pixelRoundingEnabled="false"
+						          space="SPACE_INTERFACE">
 							<AnchorFill/>
 						</Backdrop>
 					</Controls>
 				</Texture>
-				<!-- Icon holder for automatic alignment -->
-				<Control name="$(parent)IconHolder" space="SPACE_INTERFACE">
-					<!-- Anchors set dynamically in Lua -->
+				<Control name="$(parent)IconHolder"
+				         space="SPACE_INTERFACE">
 				</Control>
 			</Controls>
 		</TopLevelControl>
-		<TopLevelControl name="LUIE_SpellCastBuffs_PlayerLong" clampedToScreen="true" mouseEnabled="false" movable="true" hidden="true" layer="BACKDROP" tier="DT_LOW" level="1" space="SPACE_INTERFACE">
+		<TopLevelControl name="LUIE_SpellCastBuffs_PlayerLong"
+		                 clampedToScreen="true"
+		                 mouseEnabled="false"
+		                 movable="true"
+		                 hidden="true"
+		                 layer="BACKDROP"
+		                 tier="DT_LOW"
+		                 level="1"
+		                 space="SPACE_INTERFACE">
 			<OnMoveStart>
 				LUIE_SpellCastBuffs_OnMoveStart(self)
 			</OnMoveStart>
@@ -225,44 +441,70 @@
 				LUIE_SpellCastBuffs_PlayerLong_OnMoveStop(self)
 			</OnMoveStop>
 			<Controls>
-				<!-- Preview texture for position preview -->
-				<Texture name="$(parent)Preview" textureFile="/esoui/art/miscellaneous/inset_bg.dds" layer="BACKGROUND" hidden="true" space="SPACE_INTERFACE">
+				<Texture name="$(parent)Preview"
+				         textureFile="EsoUI/Art/Miscellaneous/inset_bg.dds"
+				         layer="BACKGROUND"
+				         hidden="true"
+				         space="SPACE_INTERFACE">
 					<AnchorFill/>
 					<Controls>
-						<!-- Preview label -->
-						<Label name="$(parent)PreviewLabel" font="ZoFontGameMedium" horizontalAlignment="CENTER" verticalAlignment="CENTER" space="SPACE_INTERFACE">
-							<Anchor point="CENTER" relativePoint="CENTER"/>
+						<Label name="$(parent)PreviewLabel"
+						       font="ZoFontGameMedium"
+						       horizontalAlignment="CENTER"
+						       verticalAlignment="CENTER"
+						       space="SPACE_INTERFACE">
+							<Anchor point="CENTER"
+							        relativePoint="CENTER"/>
 						</Label>
-						<!-- Anchor texture for coordinate display -->
-						<Texture name="$(parent)AnchorTexture" textureFile="/esoui/art/reticle/border_topleft.dds" layer="OVERLAY" hidden="false" space="SPACE_INTERFACE">
-							<Anchor point="TOPLEFT" relativePoint="TOPLEFT"/>
-							<Dimensions x="16" y="16"/>
+						<Texture name="$(parent)AnchorTexture"
+						         textureFile="/esoui/art/reticle/border_topleft.dds"
+						         layer="OVERLAY"
+						         hidden="false"
+						         space="SPACE_INTERFACE">
+							<Anchor point="TOPLEFT"
+							        relativePoint="TOPLEFT"/>
+							<Dimensions x="16"
+							            y="16"/>
 						</Texture>
-						<!-- Anchor label for coordinate display -->
-						<Label name="$(parent)AnchorLabel" font="ZoFontGameSmall" text="xxx, yyy" layer="OVERLAY" tier="DT_MEDIUM" hidden="false" space="SPACE_INTERFACE">
-							<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="-1"/>
-							<Dimensions x="0" y="2"/>
+						<Label name="$(parent)AnchorLabel"
+						       font="ZoFontGameSmall"
+						       text="xxx, yyy"
+						       layer="OVERLAY"
+						       tier="DT_MEDIUM"
+						       hidden="false"
+						       space="SPACE_INTERFACE">
+							<Anchor point="BOTTOMLEFT"
+							        relativePoint="TOPLEFT"
+							        offsetX="0"
+							        offsetY="-1"/>
+							<Dimensions x="0"
+							            y="2"/>
 						</Label>
-						<!-- Anchor label background -->
-						<Backdrop name="$(parent)AnchorLabelBg" centerColor="000000FF" edgeColor="000000FF" layer="OVERLAY" tier="DT_LOW" hidden="false" pixelRoundingEnabled="false" space="SPACE_INTERFACE">
+						<Backdrop name="$(parent)AnchorLabelBg"
+						          centerColor="000000FF"
+						          edgeColor="000000FF"
+						          layer="OVERLAY"
+						          tier="DT_LOW"
+						          hidden="false"
+						          pixelRoundingEnabled="false"
+						          space="SPACE_INTERFACE">
 							<AnchorFill/>
 						</Backdrop>
 					</Controls>
 				</Texture>
-				<!-- Icon holder for automatic alignment -->
-				<Control name="$(parent)IconHolder" space="SPACE_INTERFACE">
-					<!-- Anchors set dynamically in Lua -->
+				<Control name="$(parent)IconHolder"
+				         space="SPACE_INTERFACE">
 				</Control>
 			</Controls>
 		</TopLevelControl>
 	</Controls>
 	<Controls>
-		<!-- Virtual template for buff icon controls used by ZO_ControlPool -->
-		<!-- Root is a Backdrop (acts as main background with border) -->
-		<!-- Control creation order matches original 6.3.2 for proper rendering -->
-		<!-- Original: UI.Backdrop sets SetEdgeTexture("", 8, 1, 0) -->
-		<!-- No Edge element needed - dimensions set in Lua via SetDimensions -->
-		<Backdrop name="LUIE_SpellCastBuffIcon" virtual="true" mouseEnabled="true" centerColor="00000080" edgeColor="000000FF" space="SPACE_INTERFACE">
+		<Backdrop name="LUIE_SpellCastBuffIcon"
+		          virtual="true"
+		          mouseEnabled="true"
+		          centerColor="00000080"
+		          edgeColor="000000FF"
+		          space="SPACE_INTERFACE">
 			<OnMouseEnter>
 				LUIE_SpellCastBuffIcon_OnMouseEnter(self)
 			</OnMouseEnter>
@@ -273,57 +515,86 @@
 				LUIE_SpellCastBuffIcon_OnMouseUp(self, button, upInside, ctrl, alt, shift, command)
 			</OnMouseUp>
 			<Controls>
-				<!-- Border layer (back) - defaults to CONTROLS layer in original -->
-				<Texture name="$(parent)Back" textureFile="/esoui/art/actionbar/abilityframe64_up.dds" hidden="true" space="SPACE_INTERFACE">
-					<!-- Anchors set dynamically in Lua -->
+				<Texture name="$(parent)Back"
+				         textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds"
+				         hidden="true"
+				         space="SPACE_INTERFACE">
 				</Texture>
-				<!-- Glow border layer (frame) - defaults to CONTROLS layer in original -->
-				<Texture name="$(parent)Frame" hidden="false" space="SPACE_INTERFACE">
-					<!-- Anchors set dynamically in Lua -->
+				<Texture name="$(parent)Frame"
+				         hidden="false"
+				         space="SPACE_INTERFACE">
 				</Texture>
-				<!-- Background layer (iconbg) - Backdrop with level=1, not created for player_long -->
-				<!-- Original: UI.Backdrop defaulting to BACKGROUND layer, then SetDrawLevel(DL_CONTROLS=1) -->
-				<!-- Original edge: SetEdgeTexture("", 8, 1, 0) - but empty texture, so no Edge needed -->
-				<Backdrop name="$(parent)IconBG" centerColor="000000E6" edgeColor="000000E6" layer="BACKGROUND" level="1" hidden="false" space="SPACE_INTERFACE">
-					<!-- Anchors set dynamically in Lua with inset -->
+				<Backdrop name="$(parent)IconBG"
+				          centerColor="000000E6"
+				          edgeColor="000000E6"
+				          layer="BACKGROUND"
+				          level="1"
+				          hidden="false"
+				          space="SPACE_INTERFACE">
 				</Backdrop>
-				<!-- Collectible/mount background (drop) - created before icon in original -->
-				<Texture name="$(parent)Drop" textureFile="LuiMedia/media/icons/abilities/ability_innate_background.dds" layer="BACKGROUND" hidden="true" space="SPACE_INTERFACE">
-					<!-- Anchors set dynamically in Lua with inset -->
+				<Texture name="$(parent)Drop"
+				         textureFile="EsoUI/Art/ActionBar/abilityInset.dds"
+				         layer="BACKGROUND"
+				         hidden="true"
+				         space="SPACE_INTERFACE">
 				</Texture>
-				<!-- Main ability icon - CONTROLS layer -->
-				<Texture name="$(parent)Icon" textureFile="/esoui/art/icons/icon_missing.dds" layer="CONTROLS" hidden="false" space="SPACE_INTERFACE">
-					<!-- Anchors set dynamically in Lua with inset -->
+				<Texture name="$(parent)Icon"
+				         textureFile="EsoUI/Art/Icons/icon_missing.dds"
+				         layer="CONTROLS"
+				         hidden="false"
+				         space="SPACE_INTERFACE">
 				</Texture>
-				<!-- Duration label -->
-				<Label name="$(parent)Label" font="ZoFontGame" horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="TEXT_WRAP_MODE_ELLIPSIS" hidden="false" space="SPACE_INTERFACE">
-					<!-- Anchors set dynamically in Lua -->
+				<Label name="$(parent)Label"
+				       font="ZoFontGame"
+				       horizontalAlignment="CENTER"
+				       verticalAlignment="CENTER"
+				       wrapMode="TEXT_WRAP_MODE_ELLIPSIS"
+				       hidden="false"
+				       space="SPACE_INTERFACE">
 				</Label>
-				<!-- Debug ability ID label -->
-				<Label name="$(parent)AbilityId" font="ZoFontGame" horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="TEXT_WRAP_MODE_ELLIPSIS" hidden="false" space="SPACE_INTERFACE">
-					<!-- Anchors set dynamically in Lua -->
+				<Label name="$(parent)AbilityId"
+				       font="ZoFontGame"
+				       horizontalAlignment="CENTER"
+				       verticalAlignment="CENTER"
+				       wrapMode="TEXT_WRAP_MODE_ELLIPSIS"
+				       hidden="false"
+				       space="SPACE_INTERFACE">
 				</Label>
-				<!-- Stack count label -->
-				<Label name="$(parent)Stack" font="ZoFontGame" horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="TEXT_WRAP_MODE_ELLIPSIS" hidden="false" space="SPACE_INTERFACE">
-					<!-- Anchors set dynamically in Lua -->
+				<Label name="$(parent)Stack"
+				       font="ZoFontGame"
+				       horizontalAlignment="CENTER"
+				       verticalAlignment="CENTER"
+				       wrapMode="TEXT_WRAP_MODE_ELLIPSIS"
+				       hidden="false"
+				       space="SPACE_INTERFACE">
 				</Label>
-				<!-- Cooldown control (radial timer) - created AFTER labels in original, BACKGROUND layer -->
-				<Cooldown name="$(parent)Cooldown" layer="BACKGROUND" hidden="false" space="SPACE_INTERFACE">
-					<!-- Anchors set dynamically in Lua -->
+				<Cooldown name="$(parent)Cooldown"
+				          layer="BACKGROUND"
+				          hidden="false"
+				          space="SPACE_INTERFACE">
 				</Cooldown>
-				<!-- Prominent buff name label (hidden by default, shown only for prominent containers) -->
-				<Label name="$(parent)Name" font="ZoFontGame" wrapMode="TEXT_WRAP_MODE_ELLIPSIS" verticalAlignment="CENTER" hidden="true" space="SPACE_INTERFACE">
-					<!-- Anchors set dynamically in Lua based on direction settings -->
+				<Label name="$(parent)Name"
+				       font="ZoFontGame"
+				       wrapMode="TEXT_WRAP_MODE_ELLIPSIS"
+				       verticalAlignment="CENTER"
+				       hidden="true"
+				       space="SPACE_INTERFACE">
 				</Label>
-				<!-- Prominent buff progress bar backdrop -->
-				<!-- Original: SetEdgeTexture("",8,2,2) - but empty texture with asymmetric dimensions may cause stretching -->
-				<Backdrop name="$(parent)BarBackdrop" centerColor="00000000" edgeColor="00000000" layer="BACKDROP" level="1" hidden="true" space="SPACE_INTERFACE">
-					<!-- Anchors and dimensions set dynamically in Lua -->
-					<Edge file="" edgeFileWidth="2" edgeFileHeight="2" edgeFilePadding="2"/>
+				<Backdrop name="$(parent)BarBackdrop"
+				          centerColor="00000000"
+				          edgeColor="00000000"
+				          layer="BACKDROP"
+				          level="1"
+				          hidden="true"
+				          space="SPACE_INTERFACE">
+					<Edge file=""
+					      edgeFileWidth="2"
+					      edgeFileHeight="2"
+					      edgeFilePadding="2"/>
 				</Backdrop>
-				<!-- Prominent buff progress bar -->
-				<StatusBar name="$(parent)Bar" hidden="true" space="SPACE_INTERFACE">
-					<!-- Anchors and dimensions set dynamically in Lua -->
+				<StatusBar name="$(parent)Bar"
+				           hidden="true"
+				           space="SPACE_INTERFACE">
 				</StatusBar>
 			</Controls>
 		</Backdrop>
