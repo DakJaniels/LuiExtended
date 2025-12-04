@@ -574,6 +574,13 @@ function CastBar.OnSiegeEnd(eventCode)
     end
 end
 
+-- Runs on the `EVENT_ACTIVE_WEAPON_PAIR_CHANGED` handler
+--- @param eventCode integer
+--- @param activeWeaponPair integer
+function CastBar.OnActiveWeaponPairChanged(eventCode, activeWeaponPair)
+    CastBar.StopCastBar()
+end
+
 -- Runs on the `EVENT_ACTION_SLOT_ABILITY_USED` handler
 --- @param eventCode integer
 --- @param actionSlotIndex luaindex

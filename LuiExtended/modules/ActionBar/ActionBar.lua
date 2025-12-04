@@ -528,13 +528,13 @@ function ActionBar.SetCompanionAnchors()
     if ActionBar.ShouldShowCompanionUltimateButton() then
         g_companionUltimateButton:SetEnabled(true)
         g_keybindBG:SetDimensions(constants.keybindBGWidth, constants.keybindBGHeight)
-        g_keybindBG:SetAnchor(BOTTOM, nil, nil, constants.keybindBGAnchorOffsetX, 0)
+        g_keybindBG:SetAnchor(BOTTOM, nil, nil, constants.keybindBGAnchorOffsetX, 0, ANCHOR_CONSTRAINS_XY)
         local xOffset = constants.quickslotOffsetXFromCompanionUltimate
         g_quickslotButton:ApplyAnchor(ZO_ActionBar_GetButton(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1, HOTBAR_CATEGORY_COMPANION).slot, xOffset, IS_QUICKSLOT_ANCHORED_LEFT)
     else
         g_companionUltimateButton:SetEnabled(false)
         g_keybindBG:SetDimensions(constants.keybindBGWidthWithoutCompanion, constants.keybindBGHeight)
-        g_keybindBG:SetAnchor(BOTTOM, nil, nil, constants.keybindBGAnchorOffsetXWithoutCompanion, 0)
+        g_keybindBG:SetAnchor(BOTTOM, nil, nil, constants.keybindBGAnchorOffsetXWithoutCompanion, 0, ANCHOR_CONSTRAINS_XY)
         local xOffset = constants.quickslotOffsetXFromFirstSlot
         g_quickslotButton:ApplyAnchor(ZO_ActionBar1WeaponSwap, xOffset, IS_QUICKSLOT_ANCHORED_LEFT)
     end
@@ -1790,15 +1790,15 @@ local function CreateProcAnimationTimeline(procLoopTexture)
     local procLoopTimeline = animationManager:CreateTimelineFromVirtual("UltimateReadyLoop", procLoopTexture)
     procLoopTimeline.procLoopTexture = procLoopTexture
 
-    procLoopTimeline.onPlay = function (self)
+    local onPlay = function (self)
         self.procLoopTexture:SetHidden(false)
     end
-    procLoopTimeline.onStop = function (self)
+    local onStop = function (self)
         self.procLoopTexture:SetHidden(true)
     end
 
-    procLoopTimeline:SetHandler("OnPlay", procLoopTimeline.onPlay)
-    procLoopTimeline:SetHandler("OnStop", procLoopTimeline.onStop)
+    procLoopTimeline:SetHandler("OnPlay", onPlay, "OnPlay")
+    procLoopTimeline:SetHandler("OnStop", onStop, "OnStop")
 
     return procLoopTimeline
 end
@@ -2151,7 +2151,7 @@ function ActionBar.SetupWeaponSwapControl(style)
     end
 
     weaponSwapControl:ClearAnchors()
-    weaponSwapControl:SetAnchor(TOPLEFT, nil, TOPLEFT, style.weaponSwapOffsetX, style.weaponSwapOffsetY)
+    weaponSwapControl:SetAnchor(TOPLEFT, ZO_ActionBar1, TOPLEFT, style.weaponSwapOffsetX, style.weaponSwapOffsetY, ANCHOR_CONSTRAINS_XY)
 end
 
 -- Helper to determine if a button index should be styled
@@ -2194,7 +2194,7 @@ function ActionBar.PositionUltimateBackbarButton(style)
     local AB3 = _G["ActionButton3"]
 
     ActionButton53:ClearAnchors()
-    ActionButton53:SetAnchor(CENTER, AB3, CENTER, 0, finalOffset)
+    ActionButton53:SetAnchor(CENTER, AB3, CENTER, 0, finalOffset, ANCHOR_CONSTRAINS_XY)
 end
 
 function ActionBar.BackbarSetupTemplate(style)
@@ -3230,6 +3230,7 @@ function ActionBar.RegisterEvents()
     eventManager:UnregisterForEvent(moduleName .. "CastBarSiegeEnd", EVENT_END_SIEGE_CONTROL)
     eventManager:UnregisterForEvent(moduleName .. "CastBarAbilityUsed", EVENT_ACTION_SLOT_ABILITY_USED)
     eventManager:UnregisterForEvent(moduleName .. "CastBarCombatEvent", EVENT_COMBAT_EVENT)
+    eventManager:UnregisterForEvent(moduleName .. "CastBarWeaponSwap", EVENT_ACTIVE_WEAPON_PAIR_CHANGED)
 
     -- === REGISTER ULTIMATE TRACKING EVENTS ===
     if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
@@ -3264,6 +3265,7 @@ function ActionBar.RegisterEvents()
         eventManager:RegisterForEvent(moduleName .. "CastBarAbilityUsed", EVENT_ACTION_SLOT_ABILITY_USED, ActionBar.CastBar.OnAbilityUsed)
         eventManager:RegisterForEvent(moduleName .. "CastBarCombatEvent", EVENT_COMBAT_EVENT, ActionBar.CastBar.OnCombatEvent)
         eventManager:AddFilterForEvent(moduleName .. "CastBarCombatEvent", EVENT_COMBAT_EVENT, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false)
+        eventManager:RegisterForEvent(moduleName .. "CastBarWeaponSwap", EVENT_ACTIVE_WEAPON_PAIR_CHANGED, ActionBar.CastBar.OnActiveWeaponPairChanged)
     end
 
     -- === REGISTER ACTION BAR SLOT EVENTS ===
