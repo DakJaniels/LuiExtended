@@ -89,7 +89,7 @@ function UI:Control(parent, anchors, dims, hidden, name)
     --- @type Control
     local c = windowManager:CreateControl(controlName, parent, CT_CONTROL)
     if anchors == "fill" then
-        c:SetAnchorFill()
+        c:SetAnchorFill(parent)
     elseif anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
         c:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
     end
@@ -121,7 +121,7 @@ function UI:ControlWithType(parent, anchors, dims, hidden, name, controlType)
     --- @type Control
     local c = windowManager:CreateControl(controlName, parent, controlType)
     if anchors == "fill" then
-        c:SetAnchorFill()
+        c:SetAnchorFill(parent)
     elseif anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
         c:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
     end
@@ -153,7 +153,7 @@ function UI:Texture(parent, anchors, dims, texture, drawlayer, hidden)
     --- @type TextureControl
     local t = windowManager:CreateControl(name, parent, CT_TEXTURE)
     if anchors == "fill" then
-        t:SetAnchorFill()
+        t:SetAnchorFill(parent)
     elseif anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
         t:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
     end
@@ -197,7 +197,7 @@ function UI:Backdrop(parent, anchors, dims, center, edge, hidden)
     bg:SetEdgeTexture("", 8, 1, 1, 1)
     bg:SetDrawLayer(DL_BACKGROUND)
     if anchors == "fill" then
-        bg:SetAnchorFill()
+        bg:SetAnchorFill(parent)
     elseif anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
         bg:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
     end
@@ -238,7 +238,7 @@ function UI:ChatBackdrop(parent, anchors, dims, color, edge_size, hidden)
     bg:SetDrawLayer(DL_BACKGROUND)
 
     if anchors == "fill" then
-        bg:SetAnchorFill()
+        bg:SetAnchorFill(parent)
     elseif anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
         bg:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
     end
@@ -270,7 +270,7 @@ function UI:StatusBar(parent, anchors, dims, color, hidden)
     local sb = windowManager:CreateControl(name, parent, CT_STATUSBAR)
 
     if anchors == "fill" then
-        sb:SetAnchorFill()
+        sb:SetAnchorFill(parent)
     elseif anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
         sb:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
     end
@@ -312,7 +312,7 @@ function UI:Label(parent, anchors, dims, align, font, text, hidden, name)
     label:SetVerticalAlignment(alignment[2])
     label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
     if anchors == "fill" then
-        label:SetAnchorFill()
+        label:SetAnchorFill(parent)
     elseif anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
         label:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
     end
@@ -372,7 +372,7 @@ function UI:FlexControl(parent, anchors, dims, hidden, flexConfig)
 
     -- Apply anchors
     if anchors == "fill" then
-        control:SetAnchorFill()
+        control:SetAnchorFill(parent)
     elseif anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
         control:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
     end
