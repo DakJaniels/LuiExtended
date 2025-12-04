@@ -25,7 +25,7 @@ local timeMs = GetFrameTimeMilliseconds
 local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
 
-local moduleName = LUIE.name .. "ActionBar"
+local moduleName = LUIE.name .. "ActionBar" .. "CastBar"
 
 -- Module-local state
 local uiTlw = {}
@@ -65,7 +65,7 @@ function CastBar.StopCastBar()
     castbar.ends = nil
     castbar.currentIcon = nil
     g_casting = false
-    eventManager:UnregisterForUpdate(moduleName .. "CastBar")
+    eventManager:UnregisterForUpdate(moduleName)
 
     if state then
         CastBar.GenerateCastbarPreview(state)
@@ -380,7 +380,7 @@ function CastBar.SoulGemResurrectionStart(eventCode, durationMs)
 
     castbar:SetHidden(false)
     g_casting = true
-    eventManager:RegisterForUpdate(moduleName .. "CastBar", 20, CastBar.OnUpdateCastbar)
+    eventManager:RegisterForUpdate(moduleName, 20, CastBar.OnUpdateCastbar)
 end
 
 ---
@@ -542,7 +542,7 @@ function CastBar.OnCombatEvent(eventCode, result, isError, abilityName, abilityG
 
             castbar:SetHidden(false)
             g_casting = true
-            eventManager:RegisterForUpdate(moduleName .. "CastBar", 20, CastBar.OnUpdateCastbar)
+            eventManager:RegisterForUpdate(moduleName, 20, CastBar.OnUpdateCastbar)
         end
     end
 
@@ -557,9 +557,9 @@ end
 --- @param eventCode integer
 function CastBar.OnGameCameraUIModeChanged(eventCode)
     g_castbarWorldMapFix = true
-    eventManager:RegisterForPostEffectsUpdate(moduleName .. "CastBarFix", 500, function ()
+    eventManager:RegisterForPostEffectsUpdate(moduleName .. "Fix", 500, function ()
         g_castbarWorldMapFix = false
-        eventManager:UnregisterForPostEffectsUpdate(moduleName .. "CastBarFix")
+        eventManager:UnregisterForPostEffectsUpdate(moduleName .. "Fix")
     end)
     if Castbar.BreakSiegeOnWindowOpen[castbar.id] then
         CastBar.StopCastBar()

@@ -13,18 +13,6 @@ ActionBar.__index = ActionBar
 --- @class (partial) LUIE.ActionBar
 LUIE.ActionBar = ActionBar
 
--- Sub-module placeholders (will be populated by their respective files)
---- @class (partial) EventHandlers
-ActionBar.EventHandlers =
-{
-    name = LUIE.name .. "ActionBar" .. "EventHandlers",
-}
---- @class (partial) CastBar
-ActionBar.CastBar =
-{
-    name = LUIE.name .. "ActionBar" .. "CastBar",
-}
-
 -- Module state
 ActionBar.Enabled = false
 ActionBar.SV = {}

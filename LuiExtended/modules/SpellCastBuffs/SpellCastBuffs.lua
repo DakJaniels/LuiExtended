@@ -290,8 +290,55 @@ local Tooltips = Data.Tooltips
 local DebugAuras = Data.DebugAuras
 local DebugResults = Data.DebugResults
 local Effects = Data.Effects
-local EffectOverride = Effects.EffectOverride
-
+local Effects_AddGroundDamageAura  = Effects.AddGroundDamageAura
+local Effects_AddNameAura  = Effects.AddNameAura
+local Effects_AddNameOnBossEngaged  = Effects.AddNameOnBossEngaged
+local Effects_AddNameOnEvent  = Effects.AddNameOnEvent
+local Effects_AddStackOnEvent  = Effects.AddStackOnEvent
+local Effects_AssistantIcons  = Effects.AssistantIcons
+local Effects_DebuffDisplayOverrideIdAlways  = Effects.DebuffDisplayOverrideIdAlways
+local Effects_DebuffDisplayOverrideId  = Effects.DebuffDisplayOverrideId
+local Effects_DebuffDisplayOverrideMajorMinor  = Effects.DebuffDisplayOverrideMajorMinor
+local Effects_DebuffDisplayOverrideName  = Effects.DebuffDisplayOverrideName
+local Effects_DisguiseIcons  = Effects.DisguiseIcons
+local Effects_EffectCreateSkillAura  = Effects.EffectCreateSkillAura
+local Effects_EffectGroundDisplay  = Effects.EffectGroundDisplay
+local Effects_EffectMergeId  = Effects.EffectMergeId
+local Effects_EffectMergeName  = Effects.EffectMergeName
+local Effects_EffectOverrideByName  = Effects.EffectOverrideByName
+local Effects_EffectOverride  = Effects.EffectOverride
+local Effects_EffectPullDuration  = Effects.EffectPullDuration
+local Effects_FakeExternalBuffs  = Effects.FakeExternalBuffs
+local Effects_FakeExternalDebuffs  = Effects.FakeExternalDebuffs
+local Effects_FakePlayerBuffs  = Effects.FakePlayerBuffs
+local Effects_FakePlayerDebuffs  = Effects.FakePlayerDebuffs
+local Effects_FakePlayerOfflineAura  = Effects.FakePlayerOfflineAura
+local Effects_FakeStagger  = Effects.FakeStagger
+local Effects_HideGroundMineStacks  = Effects.HideGroundMineStacks
+local Effects_IsAbilityICD  = Effects.IsAbilityICD
+local Effects_IsAllianceXPBuff  = Effects.IsAllianceXPBuff
+local Effects_IsBlock  = Effects.IsBlock
+local Effects_IsBoon  = Effects.IsBoon
+local Effects_IsCyrodiil  = Effects.IsCyrodiil
+local Effects_IsDrinkBuff  = Effects.IsDrinkBuff
+local Effects_IsExperienceBuff  = Effects.IsExperienceBuff
+local Effects_IsFoodBuff  = Effects.IsFoodBuff
+local Effects_IsGroundMineAura  = Effects.IsGroundMineAura
+local Effects_IsGroundMineDamage  = Effects.IsGroundMineDamage
+local Effects_IsGroundMineStack  = Effects.IsGroundMineStack
+local Effects_IsLycan  = Effects.IsLycan
+local Effects_IsOakenSoul  = Effects.IsOakenSoul
+local Effects_IsSetICD  = Effects.IsSetICD
+local Effects_IsSoulSummons  = Effects.IsSoulSummons
+local Effects_IsVampLycanBite  = Effects.IsVampLycanBite
+local Effects_IsVampLycanDisease  = Effects.IsVampLycanDisease
+local Effects_IsVamp  = Effects.IsVamp
+local Effects_LinkedGroundMine  = Effects.LinkedGroundMine
+local Effects_MapDataOverride  = Effects.MapDataOverride
+local Effects_TooltipUseDefault  = Effects.TooltipUseDefault
+local Effects_ZoneBuffs  = Effects.ZoneBuffs
+local Effects_ZoneDataOverride  = Effects.ZoneDataOverride
+ 
 local zo_strformat = zo_strformat
 local zo_iconFormat = zo_iconFormat
 
@@ -317,7 +364,7 @@ local moduleName = SpellCastBuffs.moduleName
 --- @param abilityId integer
 --- @return boolean
 function SpellCastBuffs:ShouldUseDefaultIcon(abilityId)
-    local effect = Effects.EffectOverride[abilityId]
+    local effect = Effects_EffectOverride[abilityId]
 
     -- Check if effect exists and has either cc or ccMergedType (with HideReduce enabled)
     if not effect or (not effect.cc and not (self.SV.HideReduce and effect.ccMergedType)) then
@@ -664,13 +711,13 @@ function SpellCastBuffs:_RegisterEvents()
     eventManager:AddFilterForEvent(moduleName .. "Target", EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     -- GROUND & MINE EFFECTS - add a filtered event for each AbilityId
-    for k, v in pairs(Effects.EffectGroundDisplay) do
+    for k, v in pairs(Effects_EffectGroundDisplay) do
         eventManager:RegisterForEvent(moduleName .. "Ground" .. tostring(k), EVENT_EFFECT_CHANGED, function (...)
             self:OnEffectChangedGround(...)
         end)
         eventManager:AddFilterForEvent(moduleName .. "Ground" .. tostring(k), EVENT_EFFECT_CHANGED, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_ABILITY_ID, k)
     end
-    for k, v in pairs(Effects.LinkedGroundMine) do
+    for k, v in pairs(Effects_LinkedGroundMine) do
         eventManager:RegisterForEvent(moduleName .. "Ground" .. tostring(k), EVENT_EFFECT_CHANGED, function (...)
             self:OnEffectChangedGround(...)
         end)
@@ -690,7 +737,7 @@ function SpellCastBuffs:_RegisterEvents()
     eventManager:AddFilterForEvent(moduleName .. "Event1", EVENT_COMBAT_EVENT, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false)     -- Target -> Player
     eventManager:AddFilterForEvent(moduleName .. "Event2", EVENT_COMBAT_EVENT, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false)     -- Player -> Target
     eventManager:AddFilterForEvent(moduleName .. "Event3", EVENT_COMBAT_EVENT, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER_PET, REGISTER_FILTER_IS_ERROR, false) -- Player Pet -> Target
-    for k, v in pairs(Effects.AddNameOnEvent) do
+    for k, v in pairs(Effects_AddNameOnEvent) do
         eventManager:RegisterForEvent(moduleName .. "Event4" .. tostring(k), EVENT_COMBAT_EVENT, function (...)
             self:OnCombatAddNameEvent(...)
         end)
@@ -741,7 +788,7 @@ function SpellCastBuffs:_RegisterEvents()
     -- Register event to update icons/names/tooltips for some abilities where we pull information from the currently learned morph
     eventManager:RegisterForEvent(moduleName, EVENT_SKILLS_FULL_UPDATE, function (eventId)
         -- Mages Guild
-        Effects.EffectOverride[40465].tooltip = zo_strformat(GetString(LUIE_STRING_SKILL_SCALDING_RUNE_TP), ((GetAbilityDuration(40468) or 0) / 1000) + GetNumPassiveSkillRanks(GetSkillLineIndicesFromSkillLineId(44), select(2, GetSkillLineIndicesFromSkillLineId(44)), 8))
+        Effects_EffectOverride[40465].tooltip = zo_strformat(GetString(LUIE_STRING_SKILL_SCALDING_RUNE_TP), ((GetAbilityDuration(40468) or 0) / 1000) + GetNumPassiveSkillRanks(GetSkillLineIndicesFromSkillLineId(44), select(2, GetSkillLineIndicesFromSkillLineId(44)), 8))
     end)
 
     -- Werewolf
@@ -1674,23 +1721,23 @@ function SpellCastBuffs:TooltipBottomLine(control, detailsLine, artificial)
         if self.SV.TooltipBuffType then
             local buffType = control.buffType or LUIE_BUFF_TYPE_NONE
             local effectId = control.effectId
-            if effectId and Effects.EffectOverride[effectId] and Effects.EffectOverride[effectId].unbreakable then
+            if effectId and Effects_EffectOverride[effectId] and Effects_EffectOverride[effectId].unbreakable then
                 buffType = buffType + 2
             end
 
             -- Setup tooltips for player aoe trackers
-            if effectId and Effects.EffectGroundDisplay[effectId] then
+            if effectId and Effects_EffectGroundDisplay[effectId] then
                 buffType = buffType + 4
             end
 
             -- Setup tooltips for ground buff/debuff effects
-            if effectId and (Effects.AddGroundDamageAura[effectId] or (Effects.EffectOverride[effectId] and Effects.EffectOverride[effectId].groundLabel)) then
+            if effectId and (Effects_AddGroundDamageAura[effectId] or (Effects_EffectOverride[effectId] and Effects_EffectOverride[effectId].groundLabel)) then
                 buffType = buffType + 6
             end
 
             -- Setup tooltips for Fake Player Offline Auras
-            if effectId and Effects.FakePlayerOfflineAura[effectId] then
-                if Effects.FakePlayerOfflineAura[effectId].ground then
+            if effectId and Effects_FakePlayerOfflineAura[effectId] then
+                if Effects_FakePlayerOfflineAura[effectId].ground then
                     buffType = 6
                 else
                     buffType = 5
@@ -1742,43 +1789,43 @@ function SpellCastBuffs:_Buff_OnMouseEnter(control)
                 duration = control.duration / 1000
                 local value2
                 local value3
-                if Effects.EffectOverride[control.effectId] then
-                    if Effects.EffectOverride[control.effectId].tooltipValue2 then
-                        value2 = Effects.EffectOverride[control.effectId].tooltipValue2
-                    elseif Effects.EffectOverride[control.effectId].tooltipValue2Mod then
-                        value2 = zo_floor(duration + Effects.EffectOverride[control.effectId].tooltipValue2Mod + 0.5)
-                    elseif Effects.EffectOverride[control.effectId].tooltipValue2Id then
-                        value2 = zo_floor((GetAbilityDuration(Effects.EffectOverride[control.effectId].tooltipValue2Id, nil, "player" or nil) or 0) + 0.5) / 1000
+                if Effects_EffectOverride[control.effectId] then
+                    if Effects_EffectOverride[control.effectId].tooltipValue2 then
+                        value2 = Effects_EffectOverride[control.effectId].tooltipValue2
+                    elseif Effects_EffectOverride[control.effectId].tooltipValue2Mod then
+                        value2 = zo_floor(duration + Effects_EffectOverride[control.effectId].tooltipValue2Mod + 0.5)
+                    elseif Effects_EffectOverride[control.effectId].tooltipValue2Id then
+                        value2 = zo_floor((GetAbilityDuration(Effects_EffectOverride[control.effectId].tooltipValue2Id, nil, "player" or nil) or 0) + 0.5) / 1000
                     else
                         value2 = 0
                     end
                 else
                     value2 = 0
                 end
-                if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltipValue3 then
-                    value3 = Effects.EffectOverride[control.effectId].tooltipValue3
+                if Effects_EffectOverride[control.effectId] and Effects_EffectOverride[control.effectId].tooltipValue3 then
+                    value3 = Effects_EffectOverride[control.effectId].tooltipValue3
                 else
                     value3 = 0
                 end
                 duration = zo_floor((duration * 10) + 0.5) / 10
 
-                tooltipText = (Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltip) and zo_strformat(Effects.EffectOverride[control.effectId].tooltip, duration, value2, value3) or ""
+                tooltipText = (Effects_EffectOverride[control.effectId] and Effects_EffectOverride[control.effectId].tooltip) and zo_strformat(Effects_EffectOverride[control.effectId].tooltip, duration, value2, value3) or ""
 
                 -- If there is a special tooltip to use for targets only, then set this now
                 local containerContext = control.container
                 if containerContext == "target1" or containerContext == "target2" or containerContext == "targetb" or containerContext == "targetd" or containerContext == "promb_target" or containerContext == "promd_target" then
-                    if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltipOther then
-                        tooltipText = zo_strformat(Effects.EffectOverride[control.effectId].tooltipOther, duration, value2, value3)
+                    if Effects_EffectOverride[control.effectId] and Effects_EffectOverride[control.effectId].tooltipOther then
+                        tooltipText = zo_strformat(Effects_EffectOverride[control.effectId].tooltipOther, duration, value2, value3)
                     end
                 end
 
                 -- Use separate Veteran difficulty tooltip if applicable.
-                if LUIE.ResolveVeteranDifficulty() == true and Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltipVet then
-                    tooltipText = zo_strformat(Effects.EffectOverride[control.effectId].tooltipVet, duration, value2, value3)
+                if LUIE.ResolveVeteranDifficulty() == true and Effects_EffectOverride[control.effectId] and Effects_EffectOverride[control.effectId].tooltipVet then
+                    tooltipText = zo_strformat(Effects_EffectOverride[control.effectId].tooltipVet, duration, value2, value3)
                 end
                 -- Use separate Ground tooltip if applicable (only applies to buffs not debuffs)
-                if Effects.EffectGroundDisplay[control.effectId] and Effects.EffectGroundDisplay[control.effectId].tooltip and control.buffType == BUFF_EFFECT_TYPE_BUFF then
-                    tooltipText = zo_strformat(Effects.EffectGroundDisplay[control.effectId].tooltip, duration, value2, value3)
+                if Effects_EffectGroundDisplay[control.effectId] and Effects_EffectGroundDisplay[control.effectId].tooltip and control.buffType == BUFF_EFFECT_TYPE_BUFF then
+                    tooltipText = zo_strformat(Effects_EffectGroundDisplay[control.effectId].tooltip, duration, value2, value3)
                 end
 
                 -- Display Default Tooltip Description if no custom tooltip is present
@@ -1796,7 +1843,7 @@ function SpellCastBuffs:_Buff_OnMouseEnter(control)
                 end
 
                 -- Dynamic Tooltip if present
-                if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].dynamicTooltip then
+                if Effects_EffectOverride[control.effectId] and Effects_EffectOverride[control.effectId].dynamicTooltip then
                     tooltipText = LUIE.DynamicTooltip(control.effectId) or tooltipText -- Fallback to original tooltipText if nil
                 end
             else
@@ -1804,7 +1851,7 @@ function SpellCastBuffs:_Buff_OnMouseEnter(control)
             end
         end
 
-        if Effects.TooltipUseDefault[control.effectId] then
+        if Effects_TooltipUseDefault[control.effectId] then
             if GetAbilityEffectDescription(control.buffSlot) ~= "" then
                 tooltipText = GetAbilityEffectDescription(control.buffSlot)
                 tooltipText = LUIE.UpdateMundusTooltipSyntax(control.effectId, tooltipText)
@@ -1820,15 +1867,15 @@ function SpellCastBuffs:_Buff_OnMouseEnter(control)
         local thirdLine
         local duration = control.duration / 1000
 
-        if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].duration then
-            duration = duration + Effects.EffectOverride[control.effectId].duration
+        if Effects_EffectOverride[control.effectId] and Effects_EffectOverride[control.effectId].duration then
+            duration = duration + Effects_EffectOverride[control.effectId].duration
         end
 
-        -- if Effects.TooltipNameOverride[control.effectName] then
-        --     thirdLine = zo_strformat(Effects.TooltipNameOverride[control.effectName], duration)
+        -- if Effects_TooltipNameOverride[control.effectName] then
+        --     thirdLine = zo_strformat(Effects_TooltipNameOverride[control.effectName], duration)
         -- end
-        -- if Effects.TooltipNameOverride[control.effectId] then
-        --     thirdLine = zo_strformat(Effects.TooltipNameOverride[control.effectId], duration)
+        -- if Effects_TooltipNameOverride[control.effectId] then
+        --     thirdLine = zo_strformat(Effects_TooltipNameOverride[control.effectId], duration)
         -- end
 
         -- Have to trim trailing spaces on the end of tooltips
@@ -2054,10 +2101,10 @@ end
 -- EVENT_BOSSES_CHANGED handler
 function SpellCastBuffs:AddNameOnBossEngaged(eventCode)
     -- Clear any names we've added this way
-    for k, _ in pairs(Effects.AddNameOnBossEngaged) do
-        for name, _ in pairs(Effects.AddNameOnBossEngaged[k]) do
-            if Effects.AddNameAura[name] then
-                Effects.AddNameAura[name] = nil
+    for k, _ in pairs(Effects_AddNameOnBossEngaged) do
+        for name, _ in pairs(Effects_AddNameOnBossEngaged[k]) do
+            if Effects_AddNameAura[name] then
+                Effects_AddNameAura[name] = nil
             end
         end
     end
@@ -2066,11 +2113,11 @@ function SpellCastBuffs:AddNameOnBossEngaged(eventCode)
     for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
         local unitTag = "boss" .. i
         local bossName = DoesUnitExist(unitTag) and zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName(unitTag)) or ""
-        if Effects.AddNameOnBossEngaged[bossName] then
-            for k, v in pairs(Effects.AddNameOnBossEngaged[bossName]) do
-                Effects.AddNameAura[k] = {}
-                Effects.AddNameAura[k][1] = {}
-                Effects.AddNameAura[k][1].id = v
+        if Effects_AddNameOnBossEngaged[bossName] then
+            for k, v in pairs(Effects_AddNameOnBossEngaged[bossName]) do
+                Effects_AddNameAura[k] = {}
+                Effects_AddNameAura[k][1] = {}
+                Effects_AddNameAura[k][1].id = v
             end
         end
     end
@@ -2084,8 +2131,8 @@ end
 -- Called from EVENT_PLAYER_ACTIVATED
 function SpellCastBuffs:AddZoneBuffs()
     local zoneId = GetZoneId(GetCurrentMapZoneIndex())
-    if Effects.ZoneBuffs[zoneId] then
-        local abilityId = Effects.ZoneBuffs[zoneId]
+    if Effects_ZoneBuffs[zoneId] then
+        local abilityId = Effects_ZoneBuffs[zoneId]
         local abilityName = GetAbilityName(abilityId)
         local abilityIcon = GetAbilityIcon(abilityId)
         local beginTime = GetFrameTimeMilliseconds()
@@ -2226,8 +2273,8 @@ end
 function SpellCastBuffs:AddNameAura()
     local unitName = GetUnitName("reticleover")
     -- We need to check to make sure the mob is not dead, and also check to make sure the unitTag is not the player (just in case someones name exactly matches that of a boss NPC)
-    if Effects.AddNameAura[unitName] and GetUnitReaction("reticleover") == UNIT_REACTION_HOSTILE and not IsUnitPlayer("reticleover") and not IsUnitDead("reticleover") then
-        for k, v in pairs(Effects.AddNameAura[unitName]) do
+    if Effects_AddNameAura[unitName] and GetUnitReaction("reticleover") == UNIT_REACTION_HOSTILE and not IsUnitPlayer("reticleover") and not IsUnitDead("reticleover") then
+        for k, v in pairs(Effects_AddNameAura[unitName]) do
             local abilityName = GetAbilityName(v.id)
             local abilityIcon = GetAbilityIcon(v.id)
 
@@ -2485,8 +2532,8 @@ local function determineFillColor(self, contextType, id, abilityName, unbreakabl
         return self.SV.colors.prioritydebuff
     elseif unbreakable == 1 and self.SV.ColorUnbreakable then
         return self.SV.colors.unbreakable
-    elseif self.SV.ColorCC and Effects.EffectOverride[id] and Effects.EffectOverride[id].cc then
-        return getCCColor(self, Effects.EffectOverride[id].cc)
+    elseif self.SV.ColorCC and Effects_EffectOverride[id] and Effects_EffectOverride[id].cc then
+        return getCCColor(self, Effects_EffectOverride[id].cc)
     end
     return self.SV.colors.debuff
 end
@@ -3329,9 +3376,9 @@ function SpellCastBuffs:SetDisguiseItem()
 
     local name = GetItemName(BAG_WORN, EQUIP_SLOT_COSTUME)
     local abilityName = Abilities.Innate_Disguise
-    local icon = Effects.DisguiseIcons[self.currentDisguise].icon
-    local idTooltip = Effects.DisguiseIcons[self.currentDisguise].id or ""
-    local tooltip = Effects.EffectOverride[idTooltip] and Effects.EffectOverride[idTooltip].tooltip or Tooltips.Disguise_Generic
+    local icon = Effects_DisguiseIcons[self.currentDisguise].icon
+    local idTooltip = Effects_DisguiseIcons[self.currentDisguise].id or ""
+    local tooltip = Effects_EffectOverride[idTooltip] and Effects_EffectOverride[idTooltip].tooltip or Tooltips.Disguise_Generic
     -- Determine Context
     local context = self:DetermineContextSimple("player1", abilityId, abilityName)
     -- Create Buff
@@ -3641,8 +3688,8 @@ function SpellCastBuffs:OnEffectChangedGround(eventId, changeType, effectSlot, e
     end
 
     -- Mines with multiple auras have to be linked into one id for the purpose of tracking stacks
-    if Effects.LinkedGroundMine[abilityId] then
-        abilityId = Effects.LinkedGroundMine[abilityId]
+    if Effects_LinkedGroundMine[abilityId] then
+        abilityId = Effects_LinkedGroundMine[abilityId]
     end
 
     -- Bail out if this ability is blacklisted
@@ -3654,7 +3701,7 @@ function SpellCastBuffs:OnEffectChangedGround(eventId, changeType, effectSlot, e
     local groundType = {}
     groundType[1] =
     {
-        info = Effects.EffectGroundDisplay[abilityId].buff,
+        info = Effects_EffectGroundDisplay[abilityId].buff,
         context = "player1",
         promB = "promb_player",
         promD = "promd_player",
@@ -3662,7 +3709,7 @@ function SpellCastBuffs:OnEffectChangedGround(eventId, changeType, effectSlot, e
     }
     groundType[2] =
     {
-        info = Effects.EffectGroundDisplay[abilityId].debuff,
+        info = Effects_EffectGroundDisplay[abilityId].debuff,
         context = "player2",
         promB = "promb_target",
         promD = "promd_target",
@@ -3670,7 +3717,7 @@ function SpellCastBuffs:OnEffectChangedGround(eventId, changeType, effectSlot, e
     }
     groundType[3] =
     {
-        info = Effects.EffectGroundDisplay[abilityId].ground,
+        info = Effects_EffectGroundDisplay[abilityId].ground,
         context = "ground",
         promB = "promb_ground",
         promD = "promd_ground",
@@ -3678,7 +3725,7 @@ function SpellCastBuffs:OnEffectChangedGround(eventId, changeType, effectSlot, e
     }
 
     if changeType == EFFECT_RESULT_FADED then
-        if Effects.EffectGroundDisplay[abilityId] and Effects.EffectGroundDisplay[abilityId].noRemove then
+        if Effects_EffectGroundDisplay[abilityId] and Effects_EffectGroundDisplay[abilityId].noRemove then
             return
         end -- Ignore some abilities
         local currentTimeMs = GetFrameTimeMilliseconds()
@@ -3694,10 +3741,10 @@ function SpellCastBuffs:OnEffectChangedGround(eventId, changeType, effectSlot, e
                     else
                         context = groundType[i].context
                     end
-                    if Effects.IsGroundMineAura[abilityId] or Effects.IsGroundMineStack[abilityId] then
+                    if Effects_IsGroundMineAura[abilityId] or Effects_IsGroundMineStack[abilityId] then
                         -- Check to make sure aura exists in case of reloadUI
                         if self.EffectsList[context][abilityId] then
-                            self.EffectsList[context][abilityId].stack = self.EffectsList[context][abilityId].stack - Effects.EffectGroundDisplay[abilityId].stackRemove
+                            self.EffectsList[context][abilityId].stack = self.EffectsList[context][abilityId].stack - Effects_EffectGroundDisplay[abilityId].stackRemove
                             if self.EffectsList[context][abilityId].stack == 0 then
                                 self.EffectsList[context][abilityId] = nil
                             end
@@ -3713,10 +3760,10 @@ function SpellCastBuffs:OnEffectChangedGround(eventId, changeType, effectSlot, e
         self.protectAbilityRemoval[abilityId] = currentTimeMs + 150
 
         local duration = endTime - beginTime
-        local groundLabel = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].groundLabel or false
-        local toggle = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].toggle or false
-        iconName = Effects.EffectGroundDisplay[abilityId].icon or iconName
-        effectName = Effects.EffectGroundDisplay[abilityId].name or effectName
+        local groundLabel = Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].groundLabel or false
+        local toggle = Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].toggle or false
+        iconName = Effects_EffectGroundDisplay[abilityId].icon or iconName
+        effectName = Effects_EffectGroundDisplay[abilityId].name or effectName
 
         for i = 1, 3 do
             if groundType[i].info == true then
@@ -3729,19 +3776,19 @@ function SpellCastBuffs:OnEffectChangedGround(eventId, changeType, effectSlot, e
                 else
                     context = groundType[i].context
                 end
-                if Effects.IsGroundMineAura[abilityId] then
-                    stackCount = Effects.EffectGroundDisplay[abilityId].stackReset
-                    if Effects.HideGroundMineStacks[abilityId] then
+                if Effects_IsGroundMineAura[abilityId] then
+                    stackCount = Effects_EffectGroundDisplay[abilityId].stackReset
+                    if Effects_HideGroundMineStacks[abilityId] then
                         stackCount = 0
                     end
-                elseif Effects.IsGroundMineStack[abilityId] then
+                elseif Effects_IsGroundMineStack[abilityId] then
                     if self.EffectsList[context][abilityId] then
-                        stackCount = self.EffectsList[context][abilityId].stack + Effects.EffectGroundDisplay[abilityId].stackRemove
+                        stackCount = self.EffectsList[context][abilityId].stack + Effects_EffectGroundDisplay[abilityId].stackRemove
                     else
                         stackCount = 1
                     end
-                    if stackCount > Effects.EffectGroundDisplay[abilityId].stackReset then
-                        stackCount = Effects.EffectGroundDisplay[abilityId].stackReset
+                    if stackCount > Effects_EffectGroundDisplay[abilityId].stackReset then
+                        stackCount = Effects_EffectGroundDisplay[abilityId].stackReset
                     end
                 end
 
@@ -3770,7 +3817,7 @@ function SpellCastBuffs:OnEffectChangedGround(eventId, changeType, effectSlot, e
 end
 
 --- @type table<number, string>
-local oakensoul = Effects.IsOakenSoul
+local oakensoul = Effects_IsOakenSoul
 
 --- @return boolean
 local function OakensoulEquipped()
@@ -3814,11 +3861,11 @@ end
 --- @param sourceType CombatUnitType
 function SpellCastBuffs:OnEffectChanged(eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
     -- Change the effect type / name before we determine if we want to filter anything else.
-    if Effects.EffectOverride[abilityId] then
-        effectName = Effects.EffectOverride[abilityId].name or effectName
-        effectType = Effects.EffectOverride[abilityId].type or effectType
+    if Effects_EffectOverride[abilityId] then
+        effectName = Effects_EffectOverride[abilityId].name or effectName
+        effectType = Effects_EffectOverride[abilityId].type or effectType
         -- Bail out now if we hide ground snares and other effects because we are showing Damaging Auras (Only do this for the player, we don't want effects on targets to stop showing up).
-        if Effects.EffectOverride[abilityId].hideGround and self.SV.GroundDamageAura and unitTag == "player" then
+        if Effects_EffectOverride[abilityId].hideGround and self.SV.GroundDamageAura and unitTag == "player" then
             return
         end
     end
@@ -3844,7 +3891,7 @@ function SpellCastBuffs:OnEffectChanged(eventId, changeType, effectSlot, effectN
 
     -- If the source of the buff isn't the player or the buff is not on the AbilityId or AbilityName override list then we don't display it
     if unitTag ~= "player" then
-        if effectType == BUFF_EFFECT_TYPE_DEBUFF and not (sourceType == COMBAT_UNIT_TYPE_PLAYER) and not (self.debuffDisplayOverrideId[abilityId] or Effects.DebuffDisplayOverrideName[effectName]) then
+        if effectType == BUFF_EFFECT_TYPE_DEBUFF and not (sourceType == COMBAT_UNIT_TYPE_PLAYER) and not (self.debuffDisplayOverrideId[abilityId] or Effects_DebuffDisplayOverrideName[effectName]) then
             return
         end
     end
@@ -3871,33 +3918,33 @@ function SpellCastBuffs:OnEffectChanged(eventId, changeType, effectSlot, effectN
     end
 
     -- If this is a set ICD then don't display if we have Set ICD's disabled.
-    if Effects.IsSetICD[abilityId] and self.SV.IgnoreSetICDPlayer then
+    if Effects_IsSetICD[abilityId] and self.SV.IgnoreSetICDPlayer then
         return
     end
     -- If this is an ability ICD then don't display if we have Ability ICD's disabled.
-    if Effects.IsAbilityICD[abilityId] and self.SV.IgnoreAbilityICDPlayer then
+    if Effects_IsAbilityICD[abilityId] and self.SV.IgnoreAbilityICDPlayer then
         return
     end
 
     local unbreakable = 0
 
-    -- Set Override data from Effects.lua
-    if Effects.EffectOverride[abilityId] then
-        if Effects.EffectOverride[abilityId].hide == true then
+    -- Set Override data from Effects_lua
+    if Effects_EffectOverride[abilityId] then
+        if Effects_EffectOverride[abilityId].hide == true then
             return
         end
-        if Effects.EffectOverride[abilityId].hideReduce == true and self.SV.HideReduce then
+        if Effects_EffectOverride[abilityId].hideReduce == true and self.SV.HideReduce then
             return
         end
-        if Effects.EffectOverride[abilityId].isDisguise and self.SV.IgnoreDisguise then
+        if Effects_EffectOverride[abilityId].isDisguise and self.SV.IgnoreDisguise then
             -- For Monk's Disguise / other buff based Disguise hiding.
             return
         end
-        iconName = Effects.EffectOverride[abilityId].icon or iconName
-        unbreakable = Effects.EffectOverride[abilityId].unbreakable or 0
-        stackCount = Effects.EffectOverride[abilityId].stack or stackCount
+        iconName = Effects_EffectOverride[abilityId].icon or iconName
+        unbreakable = Effects_EffectOverride[abilityId].unbreakable or 0
+        stackCount = Effects_EffectOverride[abilityId].stack or stackCount
         -- Destroy other effects of the same type if we don't want to show duplicates at all.
-        if Effects.EffectOverride[abilityId].noDuplicate then
+        if Effects_EffectOverride[abilityId].noDuplicate then
             for context, effectsList in pairs(self.EffectsList) do
                 for k, v in pairs(effectsList) do
                     -- Only remove the lower duration effects that were cast previously or simultaneously.
@@ -3908,7 +3955,7 @@ function SpellCastBuffs:OnEffectChanged(eventId, changeType, effectSlot, effectN
             end
         end
         -- Bail out if this effect should only appear on Refresh
-        if Effects.EffectOverride[abilityId].refreshOnly then
+        if Effects_EffectOverride[abilityId].refreshOnly then
             if changeType ~= EFFECT_RESULT_UPDATED and changeType ~= EFFECT_RESULT_FULL_REFRESH and changeType ~= EFFECT_RESULT_FADED then
                 return
             end
@@ -3921,69 +3968,69 @@ function SpellCastBuffs:OnEffectChanged(eventId, changeType, effectSlot, effectN
     end
 
     -- Override name, icon, or hide based on MapZoneIndex
-    if Effects.ZoneDataOverride[abilityId] then
+    if Effects_ZoneDataOverride[abilityId] then
         local index = GetZoneId(GetCurrentMapZoneIndex())
         local zoneName = GetPlayerLocationName()
-        if Effects.ZoneDataOverride[abilityId][index] then
-            if Effects.ZoneDataOverride[abilityId][index].icon then
-                iconName = Effects.ZoneDataOverride[abilityId][index].icon
+        if Effects_ZoneDataOverride[abilityId][index] then
+            if Effects_ZoneDataOverride[abilityId][index].icon then
+                iconName = Effects_ZoneDataOverride[abilityId][index].icon
             end
-            if Effects.ZoneDataOverride[abilityId][index].name then
-                effectName = Effects.ZoneDataOverride[abilityId][index].name
+            if Effects_ZoneDataOverride[abilityId][index].name then
+                effectName = Effects_ZoneDataOverride[abilityId][index].name
             end
-            if Effects.ZoneDataOverride[abilityId][index].hide then
+            if Effects_ZoneDataOverride[abilityId][index].hide then
                 return
             end
         end
-        if Effects.ZoneDataOverride[abilityId][zoneName] then
-            if Effects.ZoneDataOverride[abilityId][zoneName].icon then
-                iconName = Effects.ZoneDataOverride[abilityId][zoneName].icon
+        if Effects_ZoneDataOverride[abilityId][zoneName] then
+            if Effects_ZoneDataOverride[abilityId][zoneName].icon then
+                iconName = Effects_ZoneDataOverride[abilityId][zoneName].icon
             end
-            if Effects.ZoneDataOverride[abilityId][zoneName].name then
-                effectName = Effects.ZoneDataOverride[abilityId][zoneName].name
+            if Effects_ZoneDataOverride[abilityId][zoneName].name then
+                effectName = Effects_ZoneDataOverride[abilityId][zoneName].name
             end
-            if Effects.ZoneDataOverride[abilityId][zoneName].hide then
+            if Effects_ZoneDataOverride[abilityId][zoneName].hide then
                 return
             end
         end
     end
 
     -- Override name, icon, or hide based on Map Name
-    if Effects.MapDataOverride[abilityId] then
+    if Effects_MapDataOverride[abilityId] then
         local mapName = GetMapName()
-        if Effects.MapDataOverride[abilityId][mapName] then
-            if Effects.MapDataOverride[abilityId][mapName].icon then
-                iconName = Effects.MapDataOverride[abilityId][mapName].icon
+        if Effects_MapDataOverride[abilityId][mapName] then
+            if Effects_MapDataOverride[abilityId][mapName].icon then
+                iconName = Effects_MapDataOverride[abilityId][mapName].icon
             end
-            if Effects.MapDataOverride[abilityId][mapName].name then
-                effectName = Effects.MapDataOverride[abilityId][mapName].name
+            if Effects_MapDataOverride[abilityId][mapName].name then
+                effectName = Effects_MapDataOverride[abilityId][mapName].name
             end
-            if Effects.MapDataOverride[abilityId][mapName].hide then
+            if Effects_MapDataOverride[abilityId][mapName].hide then
                 return
             end
         end
     end
 
     -- Override name or icon based off unitName
-    if Effects.EffectOverrideByName[abilityId] then
+    if Effects_EffectOverrideByName[abilityId] then
         unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, unitName)
-        if Effects.EffectOverrideByName[abilityId][unitName] then
-            if Effects.EffectOverrideByName[abilityId][unitName].hide then
+        if Effects_EffectOverrideByName[abilityId][unitName] then
+            if Effects_EffectOverrideByName[abilityId][unitName].hide then
                 return
             end
-            iconName = Effects.EffectOverrideByName[abilityId][unitName].icon or iconName
-            effectName = Effects.EffectOverrideByName[abilityId][unitName].name or effectName
+            iconName = Effects_EffectOverrideByName[abilityId][unitName].icon or iconName
+            effectName = Effects_EffectOverrideByName[abilityId][unitName].name or effectName
         end
     end
 
     -- Override icon with default if enabled
     if self.SV.UseDefaultIcon and self:ShouldUseDefaultIcon(abilityId) == true then
-        iconName = self:GetDefaultIcon(Effects.EffectOverride[abilityId].cc)
+        iconName = self:GetDefaultIcon(Effects_EffectOverride[abilityId].cc)
     end
 
-    local forcedType = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].forcedContainer or nil
+    local forcedType = Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].forcedContainer or nil
     local savedEffectSlot = effectSlot
-    effectSlot = Effects.EffectMergeId[abilityId] or Effects.EffectMergeName[effectName] or effectSlot
+    effectSlot = Effects_EffectMergeId[abilityId] or Effects_EffectMergeName[effectName] or effectSlot
 
     -- Where the new icon will go into
     local context = unitTag .. effectType
@@ -4018,35 +4065,35 @@ function SpellCastBuffs:OnEffectChanged(eventId, changeType, effectSlot, effectN
     if changeType == EFFECT_RESULT_FADED then
         -- delete Effect
         self.EffectsList[context][effectSlot] = nil
-        if Effects.EffectCreateSkillAura[abilityId] and Effects.EffectCreateSkillAura[abilityId].removeOnEnd then
-            local id = Effects.EffectCreateSkillAura[abilityId].abilityId
+        if Effects_EffectCreateSkillAura[abilityId] and Effects_EffectCreateSkillAura[abilityId].removeOnEnd then
+            local id = Effects_EffectCreateSkillAura[abilityId].abilityId
 
             local name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
-            local fakeEffectType = Effects.EffectOverride[id] and Effects.EffectOverride[id].type or effectType
+            local fakeEffectType = Effects_EffectOverride[id] and Effects_EffectOverride[id].type or effectType
             if not (self.SV.BlacklistTable[name] or self.SV.BlacklistTable[id]) then
                 local simulatedContext = unitTag .. fakeEffectType
                 simulatedContext = self:DetermineContext(simulatedContext, id, name, sourceType)
-                self.EffectsList[simulatedContext][Effects.EffectCreateSkillAura[abilityId].abilityId] = nil
+                self.EffectsList[simulatedContext][Effects_EffectCreateSkillAura[abilityId].abilityId] = nil
             end
         end
 
         -- Create Effect
     else
         local duration = endTime - beginTime
-        local groundLabel = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].groundLabel or false
-        local toggle = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].toggle or false
+        local groundLabel = Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].groundLabel or false
+        local toggle = Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].toggle or false
 
-        if Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].duration then
-            if Effects.EffectOverride[abilityId].duration == 0 then
+        if Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].duration then
+            if Effects_EffectOverride[abilityId].duration == 0 then
                 duration = 0
             else
-                duration = duration - Effects.EffectOverride[abilityId].duration
+                duration = duration - Effects_EffectOverride[abilityId].duration
             end
-            endTime = endTime - Effects.EffectOverride[abilityId].duration
+            endTime = endTime - Effects_EffectOverride[abilityId].duration
         end
 
-        if Effects.EffectPullDuration[abilityId] then
-            local matchId = Effects.EffectPullDuration[abilityId]
+        if Effects_EffectPullDuration[abilityId] then
+            local matchId = Effects_EffectPullDuration[abilityId]
             for i = 1, GetNumBuffs(unitTag) do
                 local unitBuffInfo = { GetUnitBuffInfo(unitTag, i) }
                 local timeStarted = unitBuffInfo[2]
@@ -4061,19 +4108,19 @@ function SpellCastBuffs:OnEffectChanged(eventId, changeType, effectSlot, effectN
         end
 
         -- EffectCreateSkillAura
-        if Effects.EffectCreateSkillAura[abilityId] then
-            if not Effects.EffectCreateSkillAura[abilityId].requiredStack or (Effects.EffectCreateSkillAura[abilityId].requiredStack and stackCount == Effects.EffectCreateSkillAura[abilityId].requiredStack) then
-                local id = Effects.EffectCreateSkillAura[abilityId].abilityId
+        if Effects_EffectCreateSkillAura[abilityId] then
+            if not Effects_EffectCreateSkillAura[abilityId].requiredStack or (Effects_EffectCreateSkillAura[abilityId].requiredStack and stackCount == Effects_EffectCreateSkillAura[abilityId].requiredStack) then
+                local id = Effects_EffectCreateSkillAura[abilityId].abilityId
                 local name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
-                local fakeEffectType = Effects.EffectOverride[id] and Effects.EffectOverride[id].type or effectType
-                local fakeUnbreakable = Effects.EffectOverride[id] and Effects.EffectOverride[id].unbreakable or 0
+                local fakeEffectType = Effects_EffectOverride[id] and Effects_EffectOverride[id].type or effectType
+                local fakeUnbreakable = Effects_EffectOverride[id] and Effects_EffectOverride[id].unbreakable or 0
                 if not (self.SV.BlacklistTable[name] or self.SV.BlacklistTable[id]) then
                     local simulatedContext = unitTag .. fakeEffectType
                     simulatedContext = self:DetermineContext(simulatedContext, id, name, sourceType)
 
                     -- Create Buff
-                    local icon = Effects.EffectCreateSkillAura[abilityId].icon or GetAbilityIcon(id)
-                    self.EffectsList[simulatedContext][Effects.EffectCreateSkillAura[abilityId].abilityId] =
+                    local icon = Effects_EffectCreateSkillAura[abilityId].icon or GetAbilityIcon(id)
+                    self.EffectsList[simulatedContext][Effects_EffectCreateSkillAura[abilityId].abilityId] =
                     {
                         target = self:DetermineTarget(simulatedContext),
                         type = fakeEffectType,
@@ -4096,15 +4143,15 @@ function SpellCastBuffs:OnEffectChanged(eventId, changeType, effectSlot, effectN
         end
 
         -- If this effect doesn't properly display stacks - then add them.
-        if Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].displayStacks then
+        if Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].displayStacks then
             for _, effectsList in pairs(self.EffectsList) do
                 for _, v in pairs(effectsList) do
                     -- Add stacks
                     if v.id == abilityId then
                         stackCount = v.stack + 1
                         -- Stop stacks from going over a certain amount.
-                        if stackCount > Effects.EffectOverride[abilityId].maxStacks then
-                            stackCount = Effects.EffectOverride[abilityId].maxStacks
+                        if stackCount > Effects_EffectOverride[abilityId].maxStacks then
+                            stackCount = Effects_EffectOverride[abilityId].maxStacks
                         end
                     end
                 end
@@ -4112,9 +4159,9 @@ function SpellCastBuffs:OnEffectChanged(eventId, changeType, effectSlot, effectN
         end
 
         -- Limit stacks for certain abilities.
-        if Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].stackMax then
-            if stackCount > Effects.EffectOverride[abilityId].stackMax then
-                stackCount = Effects.EffectOverride[abilityId].stackMax
+        if Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].stackMax then
+            if stackCount > Effects_EffectOverride[abilityId].stackMax then
+                stackCount = Effects_EffectOverride[abilityId].stackMax
             end
         end
 
@@ -4170,12 +4217,12 @@ function SpellCastBuffs:OnCombatEventOut(eventCode, result, isError, abilityName
         return
     end
 
-    if not (Effects.FakePlayerOfflineAura[abilityId] or Effects.FakePlayerDebuffs[abilityId] or Effects.FakeStagger[abilityId] or Effects.IsGroundMineDamage[abilityId]) then
+    if not (Effects_FakePlayerOfflineAura[abilityId] or Effects_FakePlayerDebuffs[abilityId] or Effects_FakeStagger[abilityId] or Effects_IsGroundMineDamage[abilityId]) then
         return
     end
 
     -- Handling for Trap Beast
-    if Effects.IsGroundMineDamage[abilityId] and sourceType == COMBAT_UNIT_TYPE_PLAYER then
+    if Effects_IsGroundMineDamage[abilityId] and sourceType == COMBAT_UNIT_TYPE_PLAYER then
         if result == ACTION_RESULT_BLOCKED or result == ACTION_RESULT_BLOCKED_DAMAGE or result == ACTION_RESULT_CRITICAL_DAMAGE or result == ACTION_RESULT_DAMAGE or result == ACTION_RESULT_DAMAGE_SHIELDED or result == ACTION_RESULT_IMMUNE or result == ACTION_RESULT_MISS or result == ACTION_RESULT_PARTIAL_RESIST or result == ACTION_RESULT_REFLECTED or result == ACTION_RESULT_RESIST or result == ACTION_RESULT_WRECKING_DAMAGE or result == ACTION_RESULT_DODGED then
             local compareId
             if abilityId == 35754 then
@@ -4190,7 +4237,7 @@ function SpellCastBuffs:OnCombatEventOut(eventCode, result, isError, abilityName
                 local context = "player1" -- Default context
 
                 -- Check if the compareId exists in FakePlayerOfflineAura before accessing its properties
-                if Effects.FakePlayerOfflineAura[compareId] and Effects.FakePlayerOfflineAura[compareId].ground then
+                if Effects_FakePlayerOfflineAura[compareId] and Effects_FakePlayerOfflineAura[compareId].ground then
                     context = "ground"
                 end
 
@@ -4218,38 +4265,38 @@ function SpellCastBuffs:OnCombatEventOut(eventCode, result, isError, abilityName
     local effectName
     local duration
     local effectType
-    local groundLabel = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].groundLabel or false
+    local groundLabel = Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].groundLabel or false
 
-    if Effects.EffectOverride[abilityId] then
-        if Effects.EffectOverride[abilityId].hideReduce and self.SV.HideReduce then
+    if Effects_EffectOverride[abilityId] then
+        if Effects_EffectOverride[abilityId].hideReduce and self.SV.HideReduce then
             return
         end
-        unbreakable = Effects.EffectOverride[abilityId].unbreakable or 0
-        stack = Effects.EffectOverride[abilityId].stack or 0
+        unbreakable = Effects_EffectOverride[abilityId].unbreakable or 0
+        stack = Effects_EffectOverride[abilityId].stack or 0
     else
         unbreakable = 0
         stack = 0
     end
 
     -- Fake offline auras created by the player
-    if Effects.FakePlayerOfflineAura[abilityId] and sourceType == COMBAT_UNIT_TYPE_PLAYER then
+    if Effects_FakePlayerOfflineAura[abilityId] and sourceType == COMBAT_UNIT_TYPE_PLAYER then
         -- Bail out if we ignore begin events
-        if Effects.FakePlayerOfflineAura[abilityId].ignoreBegin and (result == ACTION_RESULT_BEGIN) then
+        if Effects_FakePlayerOfflineAura[abilityId].ignoreBegin and (result == ACTION_RESULT_BEGIN) then
             return
         end
-        if Effects.FakePlayerOfflineAura[abilityId].refreshOnly and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
+        if Effects_FakePlayerOfflineAura[abilityId].refreshOnly and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
             return
         end
-        if Effects.FakePlayerOfflineAura[abilityId].ignoreFade and (result == ACTION_RESULT_EFFECT_FADED) then
+        if Effects_FakePlayerOfflineAura[abilityId].ignoreFade and (result == ACTION_RESULT_EFFECT_FADED) then
             return
         end
-        if self.SV.HidePlayerBuffs and not (self.SV.PromDebuffTable[abilityId] or self.SV.PromDebuffTable[effectName] or self.SV.PromBuffTable[abilityId] or self.SV.PromBuffTable[effectName] or Effects.FakePlayerOfflineAura[abilityId].ground) then
+        if self.SV.HidePlayerBuffs and not (self.SV.PromDebuffTable[abilityId] or self.SV.PromDebuffTable[effectName] or self.SV.PromBuffTable[abilityId] or self.SV.PromBuffTable[effectName] or Effects_FakePlayerOfflineAura[abilityId].ground) then
             return
         end
 
         -- Prominent Support
         local context
-        if Effects.FakePlayerOfflineAura[abilityId].ground then
+        if Effects_FakePlayerOfflineAura[abilityId].ground then
             context = "ground"
         else
             context = "player1"
@@ -4260,36 +4307,36 @@ function SpellCastBuffs:OnCombatEventOut(eventCode, result, isError, abilityName
             context = "promb_player"
         end
 
-        if self.EffectsList[context][abilityId] and Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].stackAdd then
+        if self.EffectsList[context][abilityId] and Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].stackAdd then
             -- Before removing old effect, if this effect is currently present and stack is set to increment on event, then add to stack counter
-            stack = self.EffectsList[context][abilityId].stack + Effects.EffectOverride[abilityId].stackAdd
+            stack = self.EffectsList[context][abilityId].stack + Effects_EffectOverride[abilityId].stackAdd
         end
 
         self.EffectsList[context][abilityId] = nil
 
-        local toggle = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].toggle or false
+        local toggle = Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].toggle or false
 
-        iconName = Effects.FakePlayerOfflineAura[abilityId].icon or GetAbilityIcon(abilityId)
-        effectName = Effects.FakePlayerOfflineAura[abilityId].name or GetAbilityName(abilityId)
-        duration = Effects.FakePlayerOfflineAura[abilityId].duration
+        iconName = Effects_FakePlayerOfflineAura[abilityId].icon or GetAbilityIcon(abilityId)
+        effectName = Effects_FakePlayerOfflineAura[abilityId].name or GetAbilityName(abilityId)
+        duration = Effects_FakePlayerOfflineAura[abilityId].duration
         if duration == "GET" then
             duration = GetAbilityDuration(abilityId) or 0
         end
-        local finalId = Effects.FakePlayerOfflineAura[abilityId].shiftId or abilityId
-        if Effects.FakePlayerOfflineAura[abilityId].shiftId then
-            iconName = Effects.FakePlayerOfflineAura and Effects.FakePlayerOfflineAura[finalId].icon or GetAbilityIcon(finalId)
-            effectName = Effects.FakePlayerOfflineAura and Effects.FakePlayerOfflineAura[finalId].name or GetAbilityName(finalId)
+        local finalId = Effects_FakePlayerOfflineAura[abilityId].shiftId or abilityId
+        if Effects_FakePlayerOfflineAura[abilityId].shiftId then
+            iconName = Effects_FakePlayerOfflineAura and Effects_FakePlayerOfflineAura[finalId].icon or GetAbilityIcon(finalId)
+            effectName = Effects_FakePlayerOfflineAura and Effects_FakePlayerOfflineAura[finalId].name or GetAbilityName(finalId)
         end
-        local forcedType = Effects.FakePlayerOfflineAura[abilityId].long and "long" or "short"
+        local forcedType = Effects_FakePlayerOfflineAura[abilityId].long and "long" or "short"
         local beginTime = GetFrameTimeMilliseconds()
         local endTime = beginTime + duration
         local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
         local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
         -- Pull unbreakable info from Shift Id if present
-        unbreakable = Effects.EffectOverride[finalId].unbreakable or unbreakable
+        unbreakable = Effects_EffectOverride[finalId].unbreakable or unbreakable
         if source == LUIE.PlayerNameFormatted then
             -- If the "buff" is flagged as a debuff, then display it here instead
-            if Effects.FakePlayerOfflineAura[abilityId].ground == true then
+            if Effects_FakePlayerOfflineAura[abilityId].ground == true then
                 self.EffectsList[context][finalId] =
                 {
                     target = self:DetermineTarget(context),
@@ -4333,15 +4380,15 @@ function SpellCastBuffs:OnCombatEventOut(eventCode, result, isError, abilityName
     end
 
     -- Creates fake debuff icons for debuffs without an aura - These refresh on reapplication/removal (Applied on target by player)
-    if Effects.FakePlayerDebuffs[abilityId] and (sourceType == COMBAT_UNIT_TYPE_PLAYER or targetType == COMBAT_UNIT_TYPE_PLAYER) then
+    if Effects_FakePlayerDebuffs[abilityId] and (sourceType == COMBAT_UNIT_TYPE_PLAYER or targetType == COMBAT_UNIT_TYPE_PLAYER) then
         -- Bail out if we ignore begin events
-        if Effects.FakePlayerDebuffs[abilityId].ignoreBegin and (result == ACTION_RESULT_BEGIN) then
+        if Effects_FakePlayerDebuffs[abilityId].ignoreBegin and (result == ACTION_RESULT_BEGIN) then
             return
         end
-        if Effects.FakePlayerDebuffs[abilityId].refreshOnly and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
+        if Effects_FakePlayerDebuffs[abilityId].refreshOnly and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
             return
         end
-        if Effects.FakePlayerDebuffs[abilityId].ignoreFade and (result == ACTION_RESULT_EFFECT_FADED) then
+        if Effects_FakePlayerDebuffs[abilityId].ignoreFade and (result == ACTION_RESULT_EFFECT_FADED) then
             return
         end
         if self.SV.HideTargetDebuffs then
@@ -4356,17 +4403,17 @@ function SpellCastBuffs:OnCombatEventOut(eventCode, result, isError, abilityName
         if IsUnitDead(unitTag) then
             return
         end
-        iconName = Effects.FakePlayerDebuffs[abilityId].icon or GetAbilityIcon(abilityId)
+        iconName = Effects_FakePlayerDebuffs[abilityId].icon or GetAbilityIcon(abilityId)
 
         -- Override icon with default if enabled
         if self.SV.UseDefaultIcon and self:ShouldUseDefaultIcon(abilityId) == true then
-            iconName = self:GetDefaultIcon(Effects.EffectOverride[abilityId].cc)
+            iconName = self:GetDefaultIcon(Effects_EffectOverride[abilityId].cc)
         end
 
-        effectName = Effects.FakePlayerDebuffs[abilityId].name or GetAbilityName(abilityId)
+        effectName = Effects_FakePlayerDebuffs[abilityId].name or GetAbilityName(abilityId)
         local context = "reticleover2" -- NOTE: TODO - No prominent support here and probably won't add
-        duration = Effects.FakePlayerDebuffs[abilityId].duration
-        local overrideDuration = Effects.FakePlayerDebuffs[abilityId].overrideDuration
+        duration = Effects_FakePlayerDebuffs[abilityId].duration
+        local overrideDuration = Effects_FakePlayerDebuffs[abilityId].overrideDuration
         effectType = BUFF_EFFECT_TYPE_DEBUFF
         local beginTime = GetFrameTimeMilliseconds()
         local endTime = beginTime + duration
@@ -4421,24 +4468,24 @@ function SpellCastBuffs:OnCombatEventOut(eventCode, result, isError, abilityName
     end
 
     -- Simulates fake debuff icons for stagger effects - works for both (target -> player) and (player -> target) - DOES NOT REFRESH - Only expiration condition is the timer
-    if Effects.FakeStagger[abilityId] then
+    if Effects_FakeStagger[abilityId] then
         -- Bail out if we ignore begin events
-        if Effects.FakeStagger[abilityId].ignoreBegin and (result == ACTION_RESULT_BEGIN) then
+        if Effects_FakeStagger[abilityId].ignoreBegin and (result == ACTION_RESULT_BEGIN) then
             return
         end
-        if Effects.FakeStagger[abilityId].refreshOnly and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
+        if Effects_FakeStagger[abilityId].refreshOnly and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
             return
         end
-        if Effects.FakeStagger[abilityId].ignoreFade and (result == ACTION_RESULT_EFFECT_FADED) then
+        if Effects_FakeStagger[abilityId].ignoreFade and (result == ACTION_RESULT_EFFECT_FADED) then
             return
         end
         if self.SV.HideTargetDebuffs then
             return
         end
-        iconName = Effects.FakeStagger[abilityId].icon or GetAbilityIcon(abilityId)
-        effectName = Effects.FakeStagger[abilityId].name or GetAbilityName(abilityId)
+        iconName = Effects_FakeStagger[abilityId].icon or GetAbilityIcon(abilityId)
+        effectName = Effects_FakeStagger[abilityId].name or GetAbilityName(abilityId)
         local context = "reticleover2" -- NOTE: TODO - No prominent support here and probably won't add
-        duration = Effects.FakeStagger[abilityId].duration
+        duration = Effects_FakeStagger[abilityId].duration
         local beginTime = GetFrameTimeMilliseconds()
         local endTime = beginTime + duration
         local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
@@ -4509,7 +4556,7 @@ end
 --- @param abilityId integer
 --- @param overflow integer
 function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
-    if not (Effects.FakeExternalBuffs[abilityId] or Effects.FakeExternalDebuffs[abilityId] or Effects.FakePlayerBuffs[abilityId] or Effects.FakeStagger[abilityId] or Effects.AddGroundDamageAura[abilityId]) then
+    if not (Effects_FakeExternalBuffs[abilityId] or Effects_FakeExternalDebuffs[abilityId] or Effects_FakePlayerBuffs[abilityId] or Effects_FakeStagger[abilityId] or Effects_AddGroundDamageAura[abilityId]) then
         return
     end
 
@@ -4519,14 +4566,14 @@ function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName,
     end
 
     -- Create ground auras for damaging effects if toggled on
-    if self.SV.GroundDamageAura and Effects.AddGroundDamageAura[abilityId] then
+    if self.SV.GroundDamageAura and Effects_AddGroundDamageAura[abilityId] then
         -- Return if this isn't damage or healing, or blocked, dodged, or shielded.
-        if result ~= ACTION_RESULT_DAMAGE and result ~= ACTION_RESULT_DAMAGE_SHIELDED and result ~= ACTION_RESULT_DODGED and result ~= ACTION_RESULT_CRITICAL_DAMAGE and result ~= ACTION_RESULT_CRITICAL_HEAL and result ~= ACTION_RESULT_HEAL and result ~= ACTION_RESULT_BLOCKED and result ~= ACTION_RESULT_BLOCKED_DAMAGE and result ~= ACTION_RESULT_HOT_TICK and result ~= ACTION_RESULT_HOT_TICK_CRITICAL and result ~= ACTION_RESULT_DOT_TICK and result ~= ACTION_RESULT_DOT_TICK_CRITICAL and not Effects.AddGroundDamageAura[abilityId].exception then
+        if result ~= ACTION_RESULT_DAMAGE and result ~= ACTION_RESULT_DAMAGE_SHIELDED and result ~= ACTION_RESULT_DODGED and result ~= ACTION_RESULT_CRITICAL_DAMAGE and result ~= ACTION_RESULT_CRITICAL_HEAL and result ~= ACTION_RESULT_HEAL and result ~= ACTION_RESULT_BLOCKED and result ~= ACTION_RESULT_BLOCKED_DAMAGE and result ~= ACTION_RESULT_HOT_TICK and result ~= ACTION_RESULT_HOT_TICK_CRITICAL and result ~= ACTION_RESULT_DOT_TICK and result ~= ACTION_RESULT_DOT_TICK_CRITICAL and not Effects_AddGroundDamageAura[abilityId].exception then
             return
         end
 
         -- Only allow exceptions through if flagged as such
-        if Effects.AddGroundDamageAura[abilityId].exception and result ~= Effects.AddGroundDamageAura[abilityId].exception then
+        if Effects_AddGroundDamageAura[abilityId].exception and result ~= Effects_AddGroundDamageAura[abilityId].exception then
             return
         end
 
@@ -4534,16 +4581,16 @@ function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName,
         local iconName = GetAbilityIcon(abilityId)
         local effectName
         local unbreakable
-        local duration = Effects.AddGroundDamageAura[abilityId].duration
-        local effectType = Effects.AddGroundDamageAura[abilityId].type
+        local duration = Effects_AddGroundDamageAura[abilityId].duration
+        local effectType = Effects_AddGroundDamageAura[abilityId].type
         local buffSlot
-        local groundLabel = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].groundLabel or false
-        local toggle = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].toggle or false
+        local groundLabel = Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].groundLabel or false
+        local toggle = Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].toggle or false
 
-        if Effects.EffectOverride[abilityId] then
-            effectName = Effects.EffectOverride[abilityId].name or abilityName
-            unbreakable = Effects.EffectOverride[abilityId].unbreakable or 0
-            stack = Effects.EffectOverride[abilityId].stack or 0
+        if Effects_EffectOverride[abilityId] then
+            effectName = Effects_EffectOverride[abilityId].name or abilityName
+            unbreakable = Effects_EffectOverride[abilityId].unbreakable or 0
+            stack = Effects_EffectOverride[abilityId].stack or 0
         else
             effectName = abilityName
             unbreakable = 0
@@ -4551,56 +4598,56 @@ function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName,
         end
 
         -- Override name, icon, or hide based on MapZoneIndex
-        if Effects.ZoneDataOverride[abilityId] then
+        if Effects_ZoneDataOverride[abilityId] then
             local index = GetZoneId(GetCurrentMapZoneIndex())
             local zoneName = GetPlayerLocationName()
-            if Effects.ZoneDataOverride[abilityId][index] then
-                if Effects.ZoneDataOverride[abilityId][index].icon then
-                    iconName = Effects.ZoneDataOverride[abilityId][index].icon
+            if Effects_ZoneDataOverride[abilityId][index] then
+                if Effects_ZoneDataOverride[abilityId][index].icon then
+                    iconName = Effects_ZoneDataOverride[abilityId][index].icon
                 end
-                if Effects.ZoneDataOverride[abilityId][index].name then
-                    effectName = Effects.ZoneDataOverride[abilityId][index].name
+                if Effects_ZoneDataOverride[abilityId][index].name then
+                    effectName = Effects_ZoneDataOverride[abilityId][index].name
                 end
-                if Effects.ZoneDataOverride[abilityId][index].hide then
+                if Effects_ZoneDataOverride[abilityId][index].hide then
                     return
                 end
             end
-            if Effects.ZoneDataOverride[abilityId][zoneName] then
-                if Effects.ZoneDataOverride[abilityId][zoneName].icon then
-                    iconName = Effects.ZoneDataOverride[abilityId][zoneName].icon
+            if Effects_ZoneDataOverride[abilityId][zoneName] then
+                if Effects_ZoneDataOverride[abilityId][zoneName].icon then
+                    iconName = Effects_ZoneDataOverride[abilityId][zoneName].icon
                 end
-                if Effects.ZoneDataOverride[abilityId][zoneName].name then
-                    effectName = Effects.ZoneDataOverride[abilityId][zoneName].name
+                if Effects_ZoneDataOverride[abilityId][zoneName].name then
+                    effectName = Effects_ZoneDataOverride[abilityId][zoneName].name
                 end
-                if Effects.ZoneDataOverride[abilityId][zoneName].hide then
+                if Effects_ZoneDataOverride[abilityId][zoneName].hide then
                     return
                 end
             end
         end
 
         -- Override name, icon, or hide based on Map Name
-        if Effects.MapDataOverride[abilityId] then
+        if Effects_MapDataOverride[abilityId] then
             local mapName = GetMapName()
-            if Effects.MapDataOverride[abilityId][mapName] then
-                if Effects.MapDataOverride[abilityId][mapName].icon then
-                    iconName = Effects.MapDataOverride[abilityId][mapName].icon
+            if Effects_MapDataOverride[abilityId][mapName] then
+                if Effects_MapDataOverride[abilityId][mapName].icon then
+                    iconName = Effects_MapDataOverride[abilityId][mapName].icon
                 end
-                if Effects.MapDataOverride[abilityId][mapName].name then
-                    effectName = Effects.MapDataOverride[abilityId][mapName].name
+                if Effects_MapDataOverride[abilityId][mapName].name then
+                    effectName = Effects_MapDataOverride[abilityId][mapName].name
                 end
-                if Effects.MapDataOverride[abilityId][mapName].hide then
+                if Effects_MapDataOverride[abilityId][mapName].hide then
                     return
                 end
             end
         end
 
         -- Override name or icon based off unitName
-        if Effects.EffectOverrideByName[abilityId] then
+        if Effects_EffectOverrideByName[abilityId] then
             local unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
-            if Effects.EffectOverrideByName[abilityId][unitName] then
-                if Effects.EffectOverrideByName[abilityId][unitName].hide then
-                    if Effects.EffectOverrideByName[abilityId][unitName].zone then
-                        local zones = Effects.EffectOverrideByName[abilityId][unitName].zone
+            if Effects_EffectOverrideByName[abilityId][unitName] then
+                if Effects_EffectOverrideByName[abilityId][unitName].hide then
+                    if Effects_EffectOverrideByName[abilityId][unitName].zone then
+                        local zones = Effects_EffectOverrideByName[abilityId][unitName].zone
                         local index = GetZoneId(GetCurrentMapZoneIndex())
                         for k, v in pairs(zones) do
                             -- d(k)
@@ -4613,13 +4660,13 @@ function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName,
                         return
                     end
                 end
-                iconName = Effects.EffectOverrideByName[abilityId][unitName].icon or iconName
-                effectName = Effects.EffectOverrideByName[abilityId][unitName].name or effectName
+                iconName = Effects_EffectOverrideByName[abilityId][unitName].icon or iconName
+                effectName = Effects_EffectOverrideByName[abilityId][unitName].name or effectName
             end
         end
 
-        if Effects.AddGroundDamageAura[abilityId].merge then
-            buffSlot = "GroundDamageAura" .. tostring(Effects.AddGroundDamageAura[abilityId].merge)
+        if Effects_AddGroundDamageAura[abilityId].merge then
+            buffSlot = "GroundDamageAura" .. tostring(Effects_AddGroundDamageAura[abilityId].merge)
         else
             buffSlot = abilityId
         end
@@ -4629,15 +4676,15 @@ function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName,
         local context = "player" .. effectType
 
         -- Stack Resolution
-        if self.EffectsList[context][buffSlot] and Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].stackAdd then
-            if Effects.EffectOverride[abilityId].stackMax then
-                if not (self.EffectsList[context][buffSlot].stack == Effects.EffectOverride[abilityId].stackMax) then
-                    stack = self.EffectsList[context][buffSlot].stack + Effects.EffectOverride[abilityId].stackAdd
+        if self.EffectsList[context][buffSlot] and Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].stackAdd then
+            if Effects_EffectOverride[abilityId].stackMax then
+                if not (self.EffectsList[context][buffSlot].stack == Effects_EffectOverride[abilityId].stackMax) then
+                    stack = self.EffectsList[context][buffSlot].stack + Effects_EffectOverride[abilityId].stackAdd
                 else
                     stack = self.EffectsList[context][buffSlot].stack
                 end
             else
-                stack = self.EffectsList[context][buffSlot].stack + Effects.EffectOverride[abilityId].stackAdd
+                stack = self.EffectsList[context][buffSlot].stack + Effects_EffectOverride[abilityId].stackAdd
             end
         end
 
@@ -4667,7 +4714,7 @@ function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName,
     if abilityId == 86135 or abilityId == 86139 or abilityId == 86143 then
         if result == ACTION_RESULT_DAMAGE_SHIELDED then
             local context = "player1"
-            local effectName = Effects.EffectOverrideByName[abilityId]
+            local effectName = Effects_EffectOverrideByName[abilityId]
             context = self:DetermineContext(context, abilityId, effectName)
 
             if self.EffectsList[context][abilityId] then
@@ -4696,15 +4743,15 @@ function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName,
     local iconName
     local effectName
     local duration
-    local groundLabel = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].groundLabel or false
+    local groundLabel = Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].groundLabel or false
 
-    if Effects.EffectOverride[abilityId] then
-        if Effects.EffectOverride[abilityId].hideReduce and self.SV.HideReduce then
+    if Effects_EffectOverride[abilityId] then
+        if Effects_EffectOverride[abilityId].hideReduce and self.SV.HideReduce then
             return
         end
-        unbreakable = Effects.EffectOverride[abilityId].unbreakable or 0
-        stack = Effects.EffectOverride[abilityId].stack or 0
-        internalStack = Effects.EffectOverride[abilityId].internalStack or nil
+        unbreakable = Effects_EffectOverride[abilityId].unbreakable or 0
+        stack = Effects_EffectOverride[abilityId].stack or 0
+        internalStack = Effects_EffectOverride[abilityId].internalStack or nil
     else
         unbreakable = 0
         stack = 0
@@ -4712,27 +4759,27 @@ function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName,
     end
 
     -- Creates fake buff icons for buffs without an aura - These refresh on reapplication/removal (Applied on player by target)
-    if Effects.FakeExternalBuffs[abilityId] and (sourceType == COMBAT_UNIT_TYPE_PLAYER or targetType == COMBAT_UNIT_TYPE_PLAYER) then
+    if Effects_FakeExternalBuffs[abilityId] and (sourceType == COMBAT_UNIT_TYPE_PLAYER or targetType == COMBAT_UNIT_TYPE_PLAYER) then
         -- Bail out if we ignore begin events
-        if Effects.FakeExternalBuffs[abilityId].ignoreBegin and (result == ACTION_RESULT_BEGIN) then
+        if Effects_FakeExternalBuffs[abilityId].ignoreBegin and (result == ACTION_RESULT_BEGIN) then
             return
         end
-        if Effects.FakeExternalBuffs[abilityId].refreshOnly and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
+        if Effects_FakeExternalBuffs[abilityId].refreshOnly and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
             return
         end
-        if Effects.FakeExternalBuffs[abilityId].ignoreFade and (result == ACTION_RESULT_EFFECT_FADED) then
+        if Effects_FakeExternalBuffs[abilityId].ignoreFade and (result == ACTION_RESULT_EFFECT_FADED) then
             return
         end
         if self.SV.HidePlayerBuffs then
             return
         end
 
-        iconName = Effects.FakeExternalBuffs[abilityId].icon or GetAbilityIcon(abilityId)
-        effectName = Effects.FakeExternalBuffs[abilityId].name or GetAbilityName(abilityId)
+        iconName = Effects_FakeExternalBuffs[abilityId].icon or GetAbilityIcon(abilityId)
+        effectName = Effects_FakeExternalBuffs[abilityId].name or GetAbilityName(abilityId)
         local context = self:DetermineContextSimple("player1", abilityId, effectName)
         self.EffectsList[context][abilityId] = nil
-        local overrideDuration = Effects.FakeExternalBuffs[abilityId].overrideDuration
-        duration = Effects.FakeExternalBuffs[abilityId].duration
+        local overrideDuration = Effects_FakeExternalBuffs[abilityId].overrideDuration
+        duration = Effects_FakeExternalBuffs[abilityId].duration
         local beginTime = GetFrameTimeMilliseconds()
         local endTime = beginTime + duration
         local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
@@ -4759,38 +4806,38 @@ function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName,
     end
 
     -- Creates fake debuff icons for debuffs without an aura - These refresh on reapplication/removal (Applied on player by target)
-    if Effects.FakeExternalDebuffs[abilityId] and (sourceType == COMBAT_UNIT_TYPE_PLAYER or targetType == COMBAT_UNIT_TYPE_PLAYER) then
+    if Effects_FakeExternalDebuffs[abilityId] and (sourceType == COMBAT_UNIT_TYPE_PLAYER or targetType == COMBAT_UNIT_TYPE_PLAYER) then
         -- Bail out if we ignore begin events
-        if Effects.FakeExternalDebuffs[abilityId].ignoreBegin and (result == ACTION_RESULT_BEGIN) then
+        if Effects_FakeExternalDebuffs[abilityId].ignoreBegin and (result == ACTION_RESULT_BEGIN) then
             return
         end
-        if Effects.FakeExternalDebuffs[abilityId].refreshOnly and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
+        if Effects_FakeExternalDebuffs[abilityId].refreshOnly and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
             return
         end
-        if Effects.FakeExternalDebuffs[abilityId].ignoreFade and (result == ACTION_RESULT_EFFECT_FADED) then
+        if Effects_FakeExternalDebuffs[abilityId].ignoreFade and (result == ACTION_RESULT_EFFECT_FADED) then
             return
         end
         if self.SV.HidePlayerDebuffs then
             return
         end
         -- Bail out if we hide ground snares/etc to replace them with auras for damage
-        if self.SV.GroundDamageAura and Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].hideGround then
+        if self.SV.GroundDamageAura and Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].hideGround then
             return
         end
 
         local context = "player2"
 
         -- Stack handling
-        if self.EffectsList[context][abilityId] and Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].stackAdd then
+        if self.EffectsList[context][abilityId] and Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].stackAdd then
             -- Before removing old effect, if this effect is currently present and stack is set to increment on event, then add to stack counter
-            if Effects.EffectOverride[abilityId].stackMax then
-                if not (self.EffectsList[context][abilityId].stack == Effects.EffectOverride[abilityId].stackMax) then
-                    stack = self.EffectsList[context][abilityId].stack + Effects.EffectOverride[abilityId].stackAdd
+            if Effects_EffectOverride[abilityId].stackMax then
+                if not (self.EffectsList[context][abilityId].stack == Effects_EffectOverride[abilityId].stackMax) then
+                    stack = self.EffectsList[context][abilityId].stack + Effects_EffectOverride[abilityId].stackAdd
                 else
                     stack = self.EffectsList[context][abilityId].stack
                 end
             else
-                stack = self.EffectsList[context][abilityId].stack + Effects.EffectOverride[abilityId].stackAdd
+                stack = self.EffectsList[context][abilityId].stack + Effects_EffectOverride[abilityId].stackAdd
             end
         end
 
@@ -4813,52 +4860,52 @@ function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName,
             self.EffectsList[context][abilityId] = nil
         end
 
-        iconName = Effects.FakeExternalDebuffs[abilityId].icon or GetAbilityIcon(abilityId)
-        effectName = Effects.FakeExternalDebuffs[abilityId].name or GetAbilityName(abilityId)
-        duration = Effects.FakeExternalDebuffs[abilityId].duration
+        iconName = Effects_FakeExternalDebuffs[abilityId].icon or GetAbilityIcon(abilityId)
+        effectName = Effects_FakeExternalDebuffs[abilityId].name or GetAbilityName(abilityId)
+        duration = Effects_FakeExternalDebuffs[abilityId].duration
         local beginTime = GetFrameTimeMilliseconds()
         local endTime = beginTime + duration
         local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
         local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
 
-        if Effects.ZoneDataOverride[abilityId] then
+        if Effects_ZoneDataOverride[abilityId] then
             local index = GetZoneId(GetCurrentMapZoneIndex())
             local zoneName = GetPlayerLocationName()
-            if Effects.ZoneDataOverride[abilityId][index] then
-                if Effects.ZoneDataOverride[abilityId][index].icon then
-                    iconName = Effects.ZoneDataOverride[abilityId][index].icon
+            if Effects_ZoneDataOverride[abilityId][index] then
+                if Effects_ZoneDataOverride[abilityId][index].icon then
+                    iconName = Effects_ZoneDataOverride[abilityId][index].icon
                 end
-                if Effects.ZoneDataOverride[abilityId][index].name then
-                    effectName = Effects.ZoneDataOverride[abilityId][index].name
+                if Effects_ZoneDataOverride[abilityId][index].name then
+                    effectName = Effects_ZoneDataOverride[abilityId][index].name
                 end
-                if Effects.ZoneDataOverride[abilityId][index].hide then
+                if Effects_ZoneDataOverride[abilityId][index].hide then
                     return
                 end
             end
-            if Effects.ZoneDataOverride[abilityId][zoneName] then
-                if Effects.ZoneDataOverride[abilityId][zoneName].icon then
-                    iconName = Effects.ZoneDataOverride[abilityId][zoneName].icon
+            if Effects_ZoneDataOverride[abilityId][zoneName] then
+                if Effects_ZoneDataOverride[abilityId][zoneName].icon then
+                    iconName = Effects_ZoneDataOverride[abilityId][zoneName].icon
                 end
-                if Effects.ZoneDataOverride[abilityId][zoneName].name then
-                    effectName = Effects.ZoneDataOverride[abilityId][zoneName].name
+                if Effects_ZoneDataOverride[abilityId][zoneName].name then
+                    effectName = Effects_ZoneDataOverride[abilityId][zoneName].name
                 end
-                if Effects.ZoneDataOverride[abilityId][zoneName].hide then
+                if Effects_ZoneDataOverride[abilityId][zoneName].hide then
                     return
                 end
             end
         end
 
         -- Override name, icon, or hide based on Map Name
-        if Effects.MapDataOverride[abilityId] then
+        if Effects_MapDataOverride[abilityId] then
             local mapName = GetMapName()
-            if Effects.MapDataOverride[abilityId][mapName] then
-                if Effects.MapDataOverride[abilityId][mapName].icon then
-                    iconName = Effects.MapDataOverride[abilityId][mapName].icon
+            if Effects_MapDataOverride[abilityId][mapName] then
+                if Effects_MapDataOverride[abilityId][mapName].icon then
+                    iconName = Effects_MapDataOverride[abilityId][mapName].icon
                 end
-                if Effects.MapDataOverride[abilityId][mapName].name then
-                    effectName = Effects.MapDataOverride[abilityId][mapName].name
+                if Effects_MapDataOverride[abilityId][mapName].name then
+                    effectName = Effects_MapDataOverride[abilityId][mapName].name
                 end
-                if Effects.MapDataOverride[abilityId][mapName].hide then
+                if Effects_MapDataOverride[abilityId][mapName].hide then
                     return
                 end
             end
@@ -4866,7 +4913,7 @@ function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName,
 
         -- Override icon with default if enabled
         if self.SV.UseDefaultIcon and self:ShouldUseDefaultIcon(abilityId) == true then
-            iconName = self:GetDefaultIcon(Effects.EffectOverride[abilityId].cc)
+            iconName = self:GetDefaultIcon(Effects_EffectOverride[abilityId].cc)
         end
 
         -- TODO: Temp - converts icon for Helljoint, might be other abilities that need this in the future
@@ -4898,71 +4945,71 @@ function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName,
     end
 
     -- Creates fake buff icons for buffs without an aura - These refresh on reapplication/removal (Applied on player by player)
-    if Effects.FakePlayerBuffs[abilityId] and (sourceType == COMBAT_UNIT_TYPE_PLAYER or targetType == COMBAT_UNIT_TYPE_PLAYER) then
+    if Effects_FakePlayerBuffs[abilityId] and (sourceType == COMBAT_UNIT_TYPE_PLAYER or targetType == COMBAT_UNIT_TYPE_PLAYER) then
         -- Bail out if we ignore begin events
-        if Effects.FakePlayerBuffs[abilityId].ignoreBegin and (result == ACTION_RESULT_BEGIN) then
+        if Effects_FakePlayerBuffs[abilityId].ignoreBegin and (result == ACTION_RESULT_BEGIN) then
             return
         end
-        if Effects.FakePlayerBuffs[abilityId].refreshOnly and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
+        if Effects_FakePlayerBuffs[abilityId].refreshOnly and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
             return
         end
-        if Effects.FakePlayerBuffs[abilityId].ignoreFade and (result == ACTION_RESULT_EFFECT_FADED) then
+        if Effects_FakePlayerBuffs[abilityId].ignoreFade and (result == ACTION_RESULT_EFFECT_FADED) then
             return
         end
         if self.SV.HidePlayerBuffs and not (self.SV.PromDebuffTable[abilityId] or self.SV.PromDebuffTable[effectName] or self.SV.PromBuffTable[abilityId] or self.SV.PromBuffTable[effectName]) then
             return
         end
-        if Effects.FakePlayerBuffs[abilityId].onlyExtra and not self.SV.ExtraBuffs then
+        if Effects_FakePlayerBuffs[abilityId].onlyExtra and not self.SV.ExtraBuffs then
             return
         end
-        if Effects.FakePlayerBuffs[abilityId].onlyExtended and not (self.SV.ExtraBuffs and self.SV.ExtraExpanded) then
+        if Effects_FakePlayerBuffs[abilityId].onlyExtended and not (self.SV.ExtraBuffs and self.SV.ExtraExpanded) then
             return
         end
 
         -- If this is a fake set ICD then don't display if we have Set ICD's disabled.
-        if Effects.IsSetICD[abilityId] and self.SV.IgnoreSetICDPlayer then
+        if Effects_IsSetICD[abilityId] and self.SV.IgnoreSetICDPlayer then
             return
         end
         -- If this is an ability ICD then don't display if we have Ability ICD's disabled.
-        if Effects.IsAbilityICD[abilityId] and self.SV.IgnoreAbilityICDPlayer then
+        if Effects_IsAbilityICD[abilityId] and self.SV.IgnoreAbilityICDPlayer then
             return
         end
 
         -- Prominent Support
-        local effectType = Effects.FakePlayerBuffs[abilityId].debuff and BUFF_EFFECT_TYPE_DEBUFF or BUFF_EFFECT_TYPE_BUFF -- TODO: Expand this for below instead of calling again
+        local effectType = Effects_FakePlayerBuffs[abilityId].debuff and BUFF_EFFECT_TYPE_DEBUFF or BUFF_EFFECT_TYPE_BUFF -- TODO: Expand this for below instead of calling again
         local context = "player" .. effectType
 
-        if self.EffectsList[context][abilityId] and Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].stackAdd then
+        if self.EffectsList[context][abilityId] and Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].stackAdd then
             -- Before removing old effect, if this effect is currently present and stack is set to increment on event, then add to stack counter
-            stack = self.EffectsList[context][abilityId].stack + Effects.EffectOverride[abilityId].stackAdd
+            stack = self.EffectsList[context][abilityId].stack + Effects_EffectOverride[abilityId].stackAdd
         end
         if abilityId == 26406 then
             self.ignoreAbilityId[abilityId] = true
         end
 
-        local toggle = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].toggle or false
+        local toggle = Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].toggle or false
 
-        iconName = Effects.FakePlayerBuffs[abilityId].icon or GetAbilityIcon(abilityId)
-        effectName = Effects.FakePlayerBuffs[abilityId].name or GetAbilityName(abilityId)
-        duration = Effects.FakePlayerBuffs[abilityId].duration
+        iconName = Effects_FakePlayerBuffs[abilityId].icon or GetAbilityIcon(abilityId)
+        effectName = Effects_FakePlayerBuffs[abilityId].name or GetAbilityName(abilityId)
+        duration = Effects_FakePlayerBuffs[abilityId].duration
         if duration == "GET" then
             duration = GetAbilityDuration(abilityId) or 0
         end
-        local finalId = Effects.FakePlayerBuffs[abilityId].shiftId or abilityId
-        if Effects.FakePlayerBuffs[abilityId].shiftId then
-            iconName = Effects.FakePlayerBuffs[finalId] and Effects.FakePlayerBuffs[finalId].icon or GetAbilityIcon(finalId)
-            effectName = Effects.FakePlayerBuffs[finalId] and Effects.FakePlayerBuffs[finalId].name or GetAbilityName(finalId)
+        local finalId = Effects_FakePlayerBuffs[abilityId].shiftId or abilityId
+        if Effects_FakePlayerBuffs[abilityId].shiftId then
+            iconName = Effects_FakePlayerBuffs[finalId] and Effects_FakePlayerBuffs[finalId].icon or GetAbilityIcon(finalId)
+            effectName = Effects_FakePlayerBuffs[finalId] and Effects_FakePlayerBuffs[finalId].name or GetAbilityName(finalId)
         end
         -- TODO: Do we want to enable self debuffs from this to show as prominent (ICD for sets for example?)
         context = self:DetermineContextSimple(context, finalId, effectName)
         self.EffectsList[context][finalId] = nil
-        local forcedType = Effects.FakePlayerBuffs[abilityId].long and "long" or "short"
+        local forcedType = Effects_FakePlayerBuffs[abilityId].long and "long" or "short"
         local beginTime = GetFrameTimeMilliseconds()
         local endTime = beginTime + duration
         local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
         local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
         -- Pull unbreakable info from Shift Id if present
-        unbreakable = (Effects.EffectOverride[finalId] and Effects.EffectOverride[finalId].unbreakable) or unbreakable
+        unbreakable = (Effects_EffectOverride[finalId] and Effects_EffectOverride[finalId].unbreakable) or unbreakable
         if source == LUIE.PlayerNameFormatted and target == LUIE.PlayerNameFormatted then
             self.EffectsList[context][finalId] =
             {
@@ -4986,23 +5033,23 @@ function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName,
     end
 
     -- Simulates fake debuff icons for stagger effects - works for both (target -> player) and (player -> target) - DOES NOT REFRESH - Only expiration condition is the timer
-    if Effects.FakeStagger[abilityId] then
+    if Effects_FakeStagger[abilityId] then
         -- Bail out if we ignore begin events
-        if Effects.FakeStagger[abilityId].ignoreBegin and (result == ACTION_RESULT_BEGIN) then
+        if Effects_FakeStagger[abilityId].ignoreBegin and (result == ACTION_RESULT_BEGIN) then
             return
         end
-        if Effects.FakeStagger[abilityId].refreshOnly and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
+        if Effects_FakeStagger[abilityId].refreshOnly and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
             return
         end
-        if Effects.FakeStagger[abilityId].ignoreFade and (result == ACTION_RESULT_EFFECT_FADED) then
+        if Effects_FakeStagger[abilityId].ignoreFade and (result == ACTION_RESULT_EFFECT_FADED) then
             return
         end
         if self.SV.HidePlayerDebuffs then
             return
         end
-        iconName = Effects.FakeStagger[abilityId].icon or GetAbilityIcon(abilityId)
-        effectName = Effects.FakeStagger[abilityId].name or GetAbilityName(abilityId)
-        duration = Effects.FakeStagger[abilityId].duration
+        iconName = Effects_FakeStagger[abilityId].icon or GetAbilityIcon(abilityId)
+        effectName = Effects_FakeStagger[abilityId].name or GetAbilityName(abilityId)
+        duration = Effects_FakeStagger[abilityId].duration
         local beginTime = GetFrameTimeMilliseconds()
         local endTime = beginTime + duration
         local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
@@ -5062,8 +5109,8 @@ end
 --- @param overflow integer
 function SpellCastBuffs:OnCombatAddNameEvent(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     -- Get the name of the target to apply the buff to
-    local name = Effects.AddNameOnEvent[abilityId].name
-    local id = Effects.AddNameOnEvent[abilityId].id
+    local name = Effects_AddNameOnEvent[abilityId].name
+    local id = Effects_AddNameOnEvent[abilityId].id
     -- Bail out if we have no name
     if not name then
         return
@@ -5071,17 +5118,17 @@ function SpellCastBuffs:OnCombatAddNameEvent(eventCode, result, isError, ability
 
     -- NOTE: We may eventually need to iterate here, for the time being though we can just relatively reliably put this in slot 2 since slot 1 should be CC Immunity.
     -- NOTE: We may eventually add a function handler to do other things, like make certain abilities change their CC types etc like the example below.
-    if Effects.AddNameAura[name] then
+    if Effects_AddNameAura[name] then
         if result == ACTION_RESULT_EFFECT_GAINED then
             -- Get stack value if its saved.
-            local stack = Effects.AddNameAura[name][2] and Effects.AddNameAura[name][2].stack
-            Effects.AddNameAura[name][2] = {}
-            Effects.AddNameAura[name][2].id = id
-            if Effects.AddStackOnEvent[abilityId] then
+            local stack = Effects_AddNameAura[name][2] and Effects_AddNameAura[name][2].stack
+            Effects_AddNameAura[name][2] = {}
+            Effects_AddNameAura[name][2].id = id
+            if Effects_AddStackOnEvent[abilityId] then
                 if stack then
-                    Effects.AddNameAura[name][2].stack = stack + 1
+                    Effects_AddNameAura[name][2].stack = stack + 1
                 else
-                    Effects.AddNameAura[name][2].stack = Effects.AddStackOnEvent[abilityId]
+                    Effects_AddNameAura[name][2].stack = Effects_AddStackOnEvent[abilityId]
                 end
             end
             -- Specific to Crypt of Hearts I (Ignite Colossus)
@@ -5093,8 +5140,8 @@ function SpellCastBuffs:OnCombatAddNameEvent(eventCode, result, isError, ability
             end
         elseif result == ACTION_RESULT_EFFECT_FADED then
             -- Check to make sure the current added aura here is the same id. If something else overrides the previous one we don't need to worry about removing the previous one.
-            if Effects.AddNameAura[name] and Effects.AddNameAura[name][2] and Effects.AddNameAura[name][2].id == id then
-                Effects.AddNameAura[name][2] = nil
+            if Effects_AddNameAura[name] and Effects_AddNameAura[name][2] and Effects_AddNameAura[name][2].id == id then
+                Effects_AddNameAura[name][2] = nil
                 -- Specific to Crypt of Hearts I (Ignite Colossus)
                 if id == 46680 then
                     AlertTable[22527].cc = nil
@@ -5294,62 +5341,62 @@ function SpellCastBuffs:UpdateContextHideList()
     self.hidePlayerEffects[86143] = true
 
     if self.SV.IgnoreMundusPlayer then
-        for k, v in pairs(Effects.IsBoon) do
+        for k, v in pairs(Effects_IsBoon) do
             self.hidePlayerEffects[k] = v
         end
     end
     if self.SV.IgnoreMundusTarget then
-        for k, v in pairs(Effects.IsBoon) do
+        for k, v in pairs(Effects_IsBoon) do
             self.hideTargetEffects[k] = v
         end
     end
     if self.SV.IgnoreVampPlayer then
-        for k, v in pairs(Effects.IsVamp) do
+        for k, v in pairs(Effects_IsVamp) do
             self.hidePlayerEffects[k] = v
         end
     end
     if self.SV.IgnoreVampTarget then
-        for k, v in pairs(Effects.IsVamp) do
+        for k, v in pairs(Effects_IsVamp) do
             self.hideTargetEffects[k] = v
         end
     end
     if self.SV.IgnoreLycanPlayer then
-        for k, v in pairs(Effects.IsLycan) do
+        for k, v in pairs(Effects_IsLycan) do
             self.hidePlayerEffects[k] = v
         end
     end
     if self.SV.IgnoreLycanTarget then
-        for k, v in pairs(Effects.IsLycan) do
+        for k, v in pairs(Effects_IsLycan) do
             self.hideTargetEffects[k] = v
         end
     end
     if self.SV.IgnoreDiseasePlayer then
-        for k, v in pairs(Effects.IsVampLycanDisease) do
+        for k, v in pairs(Effects_IsVampLycanDisease) do
             self.hidePlayerEffects[k] = v
         end
     end
     if self.SV.IgnoreDiseaseTarget then
-        for k, v in pairs(Effects.IsVampLycanDisease) do
+        for k, v in pairs(Effects_IsVampLycanDisease) do
             self.hideTargetEffects[k] = v
         end
     end
     if self.SV.IgnoreBitePlayer then
-        for k, v in pairs(Effects.IsVampLycanBite) do
+        for k, v in pairs(Effects_IsVampLycanBite) do
             self.hidePlayerEffects[k] = v
         end
     end
     if self.SV.IgnoreBiteTarget then
-        for k, v in pairs(Effects.IsVampLycanBite) do
+        for k, v in pairs(Effects_IsVampLycanBite) do
             self.hideTargetEffects[k] = v
         end
     end
     if self.SV.IgnoreCyrodiilPlayer then
-        for k, v in pairs(Effects.IsCyrodiil) do
+        for k, v in pairs(Effects_IsCyrodiil) do
             self.hidePlayerEffects[k] = v
         end
     end
     if self.SV.IgnoreCyrodiilTarget then
-        for k, v in pairs(Effects.IsCyrodiil) do
+        for k, v in pairs(Effects_IsCyrodiil) do
             self.hideTargetEffects[k] = v
         end
     end
@@ -5360,58 +5407,58 @@ function SpellCastBuffs:UpdateContextHideList()
         self.hideTargetEffects[63601] = true
     end
     if self.SV.IgnoreSoulSummonsPlayer then
-        for k, v in pairs(Effects.IsSoulSummons) do
+        for k, v in pairs(Effects_IsSoulSummons) do
             self.hidePlayerEffects[k] = v
         end
     end
     if self.SV.IgnoreSoulSummonsTarget then
-        for k, v in pairs(Effects.IsSoulSummons) do
+        for k, v in pairs(Effects_IsSoulSummons) do
             self.hideTargetEffects[k] = v
         end
     end
     if self.SV.IgnoreFoodPlayer then
-        for k, v in pairs(Effects.IsFoodBuff) do
+        for k, v in pairs(Effects_IsFoodBuff) do
             self.hidePlayerEffects[k] = v
         end
-        for k, v in pairs(Effects.IsDrinkBuff) do
+        for k, v in pairs(Effects_IsDrinkBuff) do
             self.hidePlayerEffects[k] = v
         end
     end
     if self.SV.IgnoreFoodTarget then
-        for k, v in pairs(Effects.IsFoodBuff) do
+        for k, v in pairs(Effects_IsFoodBuff) do
             self.hideTargetEffects[k] = v
         end
-        for k, v in pairs(Effects.IsDrinkBuff) do
+        for k, v in pairs(Effects_IsDrinkBuff) do
             self.hideTargetEffects[k] = v
         end
     end
     if self.SV.IgnoreExperiencePlayer then
-        for k, v in pairs(Effects.IsExperienceBuff) do
+        for k, v in pairs(Effects_IsExperienceBuff) do
             self.hidePlayerEffects[k] = v
         end
     end
     if self.SV.IgnoreExperienceTarget then
-        for k, v in pairs(Effects.IsExperienceBuff) do
+        for k, v in pairs(Effects_IsExperienceBuff) do
             self.hideTargetEffects[k] = v
         end
     end
     if self.SV.IgnoreAllianceXPPlayer then
-        for k, v in pairs(Effects.IsAllianceXPBuff) do
+        for k, v in pairs(Effects_IsAllianceXPBuff) do
             self.hidePlayerEffects[k] = v
         end
     end
     if self.SV.IgnoreAllianceXPTarget then
-        for k, v in pairs(Effects.IsAllianceXPBuff) do
+        for k, v in pairs(Effects_IsAllianceXPBuff) do
             self.hideTargetEffects[k] = v
         end
     end
     if not self.SV.ShowBlockPlayer then
-        for k, v in pairs(Effects.IsBlock) do
+        for k, v in pairs(Effects_IsBlock) do
             self.hidePlayerEffects[k] = v
         end
     end
     if not self.SV.ShowBlockTarget then
-        for k, v in pairs(Effects.IsBlock) do
+        for k, v in pairs(Effects_IsBlock) do
             self.hideTargetEffects[k] = v
         end
     end
@@ -5424,19 +5471,19 @@ function SpellCastBuffs:UpdateDisplayOverrideIdList()
 
     -- Add effects from table if enabled
     if self.SV.ShowSharedEffects then
-        for k, v in pairs(Effects.DebuffDisplayOverrideId) do
+        for k, v in pairs(Effects_DebuffDisplayOverrideId) do
             self.debuffDisplayOverrideId[k] = v
         end
     end
 
     -- Always show NPC self applied debuffs
-    for k, v in pairs(Effects.DebuffDisplayOverrideIdAlways) do
+    for k, v in pairs(Effects_DebuffDisplayOverrideIdAlways) do
         self.debuffDisplayOverrideId[k] = v
     end
 
     -- Major/Minor
     if self.SV.ShowSharedMajorMinor then
-        for k, v in pairs(Effects.DebuffDisplayOverrideMajorMinor) do
+        for k, v in pairs(Effects_DebuffDisplayOverrideMajorMinor) do
             self.debuffDisplayOverrideId[k] = v
         end
     end
@@ -5498,7 +5545,7 @@ function SpellCastBuffs:DetermineTarget(context)
     end
 end
 
-local AssistantIcons = Effects.AssistantIcons
+local AssistantIcons = Effects_AssistantIcons
 
 -- Called by SpellCastBuffs.MountStatus to display mount icon
 function SpellCastBuffs:DisplayMountIcon()
@@ -5783,7 +5830,7 @@ function SpellCastBuffs:EventEffectDebug(eventId, changeType, effectSlot, effect
     unitName = unitName .. " (" .. unitTag .. ")"
 
     local finalString
-    if EffectOverride[abilityId] and EffectOverride[abilityId].hide then
+    if Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].hide then
         finalString = (iconFormatted .. "|c00E200 [" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [Tag] " .. unitName .. "|r")
         -- Use CHAT_ROUTER to bypass some other addons modifying this string
         CHAT_ROUTER:AddSystemMessage(finalString)
@@ -5793,7 +5840,7 @@ function SpellCastBuffs:EventEffectDebug(eventId, changeType, effectSlot, effect
     local duration = (endTime - beginTime) * 1000
 
     local refreshOnly = ""
-    if EffectOverride[abilityId] and EffectOverride[abilityId].refreshOnly then
+    if Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].refreshOnly then
         refreshOnly = " |c00E200(Hidden)|r "
     end
 
@@ -5871,7 +5918,7 @@ else
 
         local formattedResult = DebugResults[result]
 
-        if EffectOverride[abilityId] and EffectOverride[abilityId].hide then
+        if Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].hide then
             local finalString = (iconFormatted .. "[" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [S] " .. source .. " --> [T] " .. target .. " [R] " .. formattedResult)
             for k, cc in ipairs(chatSystem.containers) do
                 local chatContainer = cc
@@ -5894,11 +5941,11 @@ else
         unitName = unitName .. " (" .. unitTag .. ")"
 
         local refreshOnly = ""
-        if EffectOverride[abilityId] and EffectOverride[abilityId].refreshOnly then
+        if Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].refreshOnly then
             refreshOnly = " |c00E200(Refresh Only - Hidden)|r "
         end
 
-        if EffectOverride[abilityId] and EffectOverride[abilityId].hide then
+        if Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].hide then
             local finalString = (iconFormatted .. refreshOnly .. "|c00E200 [" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [Tag] " .. unitName .. "|r")
             for k, cc in ipairs(chatSystem.containers) do
                 local chatContainer = cc
