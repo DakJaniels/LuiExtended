@@ -275,7 +275,7 @@ local function ShowBuffTooltip(control, frameData)
     if effectOverride and effectOverride.tooltip then
         tooltipText = effectOverride.tooltip
     else
-        tooltipText = GetAbilityEffectDescription(frameData.foodDrinkBuff.currentBuffSlot, frameData.unitTag)
+        tooltipText = GetAbilityEffectDescription(frameData.foodDrinkBuff.currentBuffSlot)
     end
 
     if tooltipText and tooltipText ~= "" then

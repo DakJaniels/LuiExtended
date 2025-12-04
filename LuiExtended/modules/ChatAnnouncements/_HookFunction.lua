@@ -4203,7 +4203,7 @@ function ChatAnnouncements.HookFunction()
     end
 
     -- Hook TryGroupInviteByName to add custom chat announcements and handle isMenu parameter
-    ZO_PreHook("TryGroupInviteByName", function(characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
+    ZO_PreHook("TryGroupInviteByName", function (characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
         if IsPlayerInGroup(characterOrDisplayName) then
             printToChat(GetString(SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER), true)
             if ChatAnnouncements.SV.Group.GroupAlert then
@@ -4249,17 +4249,17 @@ function ChatAnnouncements.HookFunction()
 
     ChatAnnouncements.GuildHooks()
 
-    -- Hook DeclineLFGReadyCheckNotification to display the message that we are not in queue any longer + LFG activity join event.
     local originalDeclineLFGReadyCheckNotification = DeclineLFGReadyCheckNotification
-    DeclineLFGReadyCheckNotification = function()
+    -- Hook DeclineLFGReadyCheckNotification to display the message that we are not in queue any longer + LFG activity join event.
+    DeclineLFGReadyCheckNotification = function ()
         originalDeclineLFGReadyCheckNotification()
 
         local message = (GetString(SI_LFGREADYCHECKCANCELREASON3))
         ChatAnnouncements.showRCUpdates = true
         ChatAnnouncements.weDeclinedTheQueue = true
-        zo_callLater(function()
-            ChatAnnouncements.weDeclinedTheQueue = false
-        end, 1000)
+        zo_callLater(function ()
+                         ChatAnnouncements.weDeclinedTheQueue = false
+                     end, 1000)
 
         if ChatAnnouncements.SV.Group.GroupLFGQueueCA then
             printToChat(message, true)

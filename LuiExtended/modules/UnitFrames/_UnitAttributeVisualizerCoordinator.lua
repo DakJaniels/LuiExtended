@@ -34,7 +34,6 @@ end
 function LUIE_UnitAttributeVisualizer:Initialize(unitTag)
     self.unitTag = unitTag
     --- Registry of module references for this unit (mirrors UnitFrames.VisualizerModules)
-    --- @type UnitFrames.VisualizerModules
     self.modules = {}
 
     -- Copy all registered modules to this visualizer
@@ -83,12 +82,7 @@ function LUIE_UnitAttributeVisualizer:OnUnitChanged()
     if DoesUnitExist(self.unitTag) then
         --- @type string, LUIE_PowerShieldModule|LUIE_RegenerationModule|LUIE_StatChangeModule|LUIE_UnwaveringModule|LUIE_PossessionModule
         for moduleName, module in pairs(self.modules) do
-            local success, err = pcall(function ()
-                module:OnUnitChanged(self.unitTag)
-            end)
-            if not success then
-                d(string.format("[LUIE] Error in %s:OnUnitChanged for %s: %s", moduleName, self.unitTag, tostring(err)))
-            end
+            module:OnUnitChanged(self.unitTag)
         end
     end
 end

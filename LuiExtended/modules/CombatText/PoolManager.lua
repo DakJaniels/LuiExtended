@@ -8,8 +8,11 @@ local LUIE = LUIE
 
 local pairs = pairs
 
-LUIE.CombatTextPoolManager = ZO_InitializingObject:Subclass()
-local CombatTextPoolManager = LUIE.CombatTextPoolManager
+---@class LUIE.CombatTextPoolManager : ZO_InitializingObject
+local CombatTextPoolManager= ZO_InitializingObject:Subclass()
+
+LUIE.CombatTextPoolManager =CombatTextPoolManager
+
 --- @diagnostic disable-next-line: duplicate-set-field
 function CombatTextPoolManager:New()
     local obj = setmetatable({}, self)

@@ -399,18 +399,13 @@ function UnitFrames.FormatSimpleLabel(label, format)
 end
 
 local function FetchCrutchBossThresholds()
-    local crutch = rawget(_G, "CrutchAlerts")
+    local crutch = CrutchAlerts
     if not crutch then
         return nil
     end
 
-    local bossBar = crutch.BossHealthBar
-    if not bossBar or type(bossBar.GetBossThresholds) ~= "function" then
-        return nil
-    end
-
-    local ok, thresholdData = pcall(bossBar.GetBossThresholds)
-    if not ok or type(thresholdData) ~= "table" then
+    local thresholdData = crutch.BossHealthBar.GetBossThresholds()
+    if not thresholdData then
         return nil
     end
 
