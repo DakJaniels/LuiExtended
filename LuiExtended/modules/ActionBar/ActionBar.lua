@@ -9,35 +9,32 @@ local UI = LUIE.UI
 local LuiData = LuiData
 local Data = LuiData.Data
 local Effects = Data.Effects
-local Effects_AddNoDurationBarHighlight  = Effects.AddNoDurationBarHighlight
-local Effects_BarHighlightCheckOnFade  = Effects.BarHighlightCheckOnFade
-local Effects_BarHighlightCruxMap  = Effects.BarHighlightCruxMap
-local Effects_BarHighlightDestroFix  = Effects.BarHighlightDestroFix
-local Effects_BarHighlightExtraId  = Effects.BarHighlightExtraId
-local Effects_BarHighlightOverride  = Effects.BarHighlightOverride
-local Effects_BarHighlightStack  = Effects.BarHighlightStack
-local Effects_EffectGroundDisplay  = Effects.EffectGroundDisplay
-local Effects_EffectOverride  = Effects.EffectOverride
-local Effects_HasAbilityProc  = Effects.HasAbilityProc
-local Effects_HideGroundMineStacks  = Effects.HideGroundMineStacks
-local Effects_IsBloodFrenzy  = Effects.IsBloodFrenzy
-local Effects_IsBoundArmaments  = Effects.IsBoundArmaments
-local Effects_IsGrimFocus  = Effects.IsGrimFocus
-local Effects_IsGroundMineAura  = Effects.IsGroundMineAura
-local Effects_IsGroundMineDamage  = Effects.IsGroundMineDamage
-local Effects_IsGroundMineStack  = Effects.IsGroundMineStack
-local Effects_IsVamp  = Effects.IsVamp
-local Effects_IsWeaponAttack  = Effects.IsWeaponAttack
-local Effects_LinkedGroundMine  = Effects.LinkedGroundMine
-local Effects_MajorMinor  = Effects.MajorMinor
+local Effects_AddNoDurationBarHighlight = Effects.AddNoDurationBarHighlight
+local Effects_BarHighlightCheckOnFade = Effects.BarHighlightCheckOnFade
+local Effects_BarHighlightCruxMap = Effects.BarHighlightCruxMap
+local Effects_BarHighlightDestroFix = Effects.BarHighlightDestroFix
+local Effects_BarHighlightExtraId = Effects.BarHighlightExtraId
+local Effects_BarHighlightOverride = Effects.BarHighlightOverride
+local Effects_BarHighlightStack = Effects.BarHighlightStack
+local Effects_EffectGroundDisplay = Effects.EffectGroundDisplay
+local Effects_EffectOverride = Effects.EffectOverride
+local Effects_HasAbilityProc = Effects.HasAbilityProc
+local Effects_HideGroundMineStacks = Effects.HideGroundMineStacks
+local Effects_IsBloodFrenzy = Effects.IsBloodFrenzy
+local Effects_IsBoundArmaments = Effects.IsBoundArmaments
+local Effects_IsGrimFocus = Effects.IsGrimFocus
+local Effects_IsGroundMineAura = Effects.IsGroundMineAura
+local Effects_IsGroundMineDamage = Effects.IsGroundMineDamage
+local Effects_IsGroundMineStack = Effects.IsGroundMineStack
+local Effects_IsVamp = Effects.IsVamp
+local Effects_IsWeaponAttack = Effects.IsWeaponAttack
+local Effects_LinkedGroundMine = Effects.LinkedGroundMine
+local Effects_MajorMinor = Effects.MajorMinor
 local Castbar = Data.CastBarTable
 local OtherAddonCompatability = LUIE.OtherAddonCompatability
 
 --- @class (partial) LUIE.ActionBar
 local ActionBar = LUIE.ActionBar
-
---- @class (partial) LUIE.CombatInfo
-local CombatInfo = LUIE.CombatInfo
 
 -- ============================================================================
 -- LOCAL REFERENCES
@@ -1118,11 +1115,14 @@ local function ClearSlotFromTables(slotNum, onlyProc)
 end
 
 -- Helper to get the correct ability ID for a slot
-function ActionBar.GetSlotAbilityId(slotNum, ...)
-    local ability_id = GetSlotTrueBoundId(slotNum, g_hotbarCategory)
+function ActionBar.GetSlotAbilityId(slotNum, hotbarCategory)
+    -- Use provided hotbarCategory or fall back to global
+    local category = hotbarCategory or g_hotbarCategory
+
+    local ability_id = GetSlotTrueBoundId(slotNum, category)
 
     if slotNum > BACKBAR_INDEX_OFFSET then
-        local inactiveHotbarCategory = GetInactiveHotbarCategory(g_hotbarCategory)
+        local inactiveHotbarCategory = GetInactiveHotbarCategory(category)
         ability_id = GetSlotTrueBoundId(slotNum - BACKBAR_INDEX_OFFSET, inactiveHotbarCategory)
 
         local weaponSlot = inactiveHotbarCategory == HOTBAR_CATEGORY_BACKUP and EQUIP_SLOT_BACKUP_MAIN or EQUIP_SLOT_MAIN_HAND
@@ -1762,7 +1762,7 @@ end
 -- Helper to create the proc loop texture
 local function CreateProcLoopTexture(actionButton)
     local procLoopTexture = UI:ControlWithType(actionButton.slot, "fill", nil, false, "$(parent)Loop_LUIE", CT_TEXTURE)
-    ---@cast procLoopTexture TextureControl
+    --- @cast procLoopTexture TextureControl
     procLoopTexture:SetAnchor(TOPLEFT, actionButton.slot:GetNamedChild("FlipCard"))
     procLoopTexture:SetAnchor(BOTTOMRIGHT, actionButton.slot:GetNamedChild("FlipCard"))
     procLoopTexture:SetTexture("/esoui/art/actionbar/abilityhighlight_mage_med.dds")
@@ -1837,7 +1837,7 @@ end
 -- Helper to create the toggle texture frame
 local function CreateToggleTexture(actionButton)
     local toggleFrame = UI:ControlWithType(actionButton.slot, "fill", nil, false, "$(parent)Toggle_LUIE", CT_TEXTURE)
-    ---@cast toggleFrame TextureControl
+    --- @cast toggleFrame TextureControl
     toggleFrame:SetAnchor(TOPLEFT, actionButton.slot:GetNamedChild("FlipCard"))
     toggleFrame:SetAnchor(BOTTOMRIGHT, actionButton.slot:GetNamedChild("FlipCard"))
     toggleFrame:SetTexture("EsoUI/Art/ActionBar/ActionSlot_toggledon.dds")
@@ -2905,6 +2905,14 @@ end
 
 -- Runs on EVENT_PLAYER_ACTIVATED
 local function OnPlayerActivated(eventCode)
+    -- Initialize ultimate power caches from actual current values
+    g_ultimateCurrent = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE)
+    if DoesUnitExist("companion") and HasActiveCompanion() then
+        g_companionUltimateCurrent = GetUnitPower("companion", COMBAT_MECHANIC_FLAGS_ULTIMATE)
+    else
+        g_companionUltimateCurrent = 0
+    end
+
     -- Enable action bar timers if needed
     if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled then
         if not IsConsoleUI() then
