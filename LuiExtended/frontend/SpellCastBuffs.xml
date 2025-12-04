@@ -517,12 +517,19 @@
 			<Controls>
 				<Texture name="$(parent)Back"
 				         textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds"
+				         layer="CONTROLS"
+				         level="1"
 				         hidden="true"
 				         space="SPACE_INTERFACE">
+					<AnchorFill/>
 				</Texture>
 				<Texture name="$(parent)Frame"
-				         hidden="false"
+				         textureFile="EsoUI/Art/ActionBar/abilityFrame_buff.dds"
+				         layer="CONTROLS"
+				         level="2"
+				         hidden="true"
 				         space="SPACE_INTERFACE">
+					<AnchorFill/>
 				</Texture>
 				<Backdrop name="$(parent)IconBG"
 				          centerColor="000000E6"
@@ -541,6 +548,7 @@
 				<Texture name="$(parent)Icon"
 				         textureFile="EsoUI/Art/Icons/icon_missing.dds"
 				         layer="CONTROLS"
+				         level="4"
 				         hidden="false"
 				         space="SPACE_INTERFACE">
 				</Texture>
@@ -569,7 +577,8 @@
 				       space="SPACE_INTERFACE">
 				</Label>
 				<Cooldown name="$(parent)Cooldown"
-				          layer="BACKGROUND"
+				          layer="CONTROLS"
+				          level="3"
 				          hidden="false"
 				          space="SPACE_INTERFACE">
 				</Cooldown>

@@ -460,7 +460,7 @@ function SpellCastBuffs:Initialize(enabled)
 
     -- Create the master control pool for buff icons
     -- ZO_ControlPool uses XML templates (see frontend/SpellCastBuffs.xml)
-    self.controlPool = ZO_ControlPool:New("LUIE_SpellCastBuffIcon", nil, "Buff")
+    self.controlPool = ZO_ControlPool:New("LUIE_SpellCastBuffIcon")
 
     -- Create controls
     -- Create temporary table to store references to scenes locally
@@ -1404,20 +1404,17 @@ local function ApplyIconVisuals(self, container, buff, effect)
 
     buff:SetHidden(true)
     buff:SetDimensions(buffSize, buffSize)
-    -- Original UI.Backdrop: SetEdgeTexture("", 8, 1, 0) but asymmetric causes stretching
-    -- Use symmetric edge to prevent stretching, or no edge at all for empty texture
-    buff:SetEdgeTexture("", 1, 1, 0)
 
     if buff.back then
         buff.back:ClearAnchors()
         buff.back:SetAnchor(TOPLEFT, buff, TOPLEFT)
         buff.back:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT)
-        buff.back:SetHidden(self.SV.GlowIcons)
+        buff.back:SetHidden(false) -- Always show basic border
     end
 
     if buff.frame then
         buff.frame:SetDimensions(frameSize, frameSize)
-        buff.frame:SetHidden(not self.SV.GlowIcons)
+        buff.frame:SetHidden(not self.SV.GlowIcons) -- Show colored glow only when enabled
     end
 
     if buff.label then
@@ -1522,9 +1519,6 @@ local function ApplyIconVisuals(self, container, buff, effect)
         buff.iconbg:ClearAnchors()
         buff.iconbg:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
         buff.iconbg:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -inset, -inset)
-        -- Original UI.Backdrop: SetEdgeTexture("", 8, 1, 0) but asymmetric causes stretching
-        -- Use symmetric edge to prevent stretching
-        buff.iconbg:SetEdgeTexture("", 1, 1, 0)
     end
 
     -- Prominent label + bar alignment (no anchoring to other icons here)
@@ -2463,11 +2457,8 @@ end
 --- @param abilityName string
 --- @return boolean
 local function isPriorityEffect(self, contextType, id, abilityName)
-    if contextType == "buff" then
-        return self.SV.PriorityBuffTable[id] or self.SV.PriorityBuffTable[abilityName]
-    else
-        return self.SV.PriorityDebuffTable[id] or self.SV.PriorityDebuffTable[abilityName]
-    end
+    local priorityTable = (contextType == "buff") and self.SV.PriorityBuffTable or self.SV.PriorityDebuffTable
+    return priorityTable[id] or priorityTable[abilityName]
 end
 
 -- Determine fill color based on buff type and conditions
@@ -2479,25 +2470,25 @@ end
 --- @return table
 local function determineFillColor(self, contextType, id, abilityName, unbreakable)
     local priority = isPriorityEffect(self, contextType, id, abilityName)
+
     if contextType == "buff" then
         if priority then
             return self.SV.colors.prioritybuff
         elseif unbreakable == 1 and self.SV.ColorCosmetic then
             return self.SV.colors.cosmetic
-        else
-            return self.SV.colors.buff
         end
-    else -- debuff
-        if priority then
-            return self.SV.colors.prioritydebuff
-        elseif unbreakable == 1 and self.SV.ColorUnbreakable then
-            return self.SV.colors.unbreakable
-        elseif self.SV.ColorCC and Effects.EffectOverride[id] and Effects.EffectOverride[id].cc then
-            return getCCColor(self, Effects.EffectOverride[id].cc)
-        else
-            return self.SV.colors.debuff
-        end
+        return self.SV.colors.buff
     end
+
+    -- debuff
+    if priority then
+        return self.SV.colors.prioritydebuff
+    elseif unbreakable == 1 and self.SV.ColorUnbreakable then
+        return self.SV.colors.unbreakable
+    elseif self.SV.ColorCC and Effects.EffectOverride[id] and Effects.EffectOverride[id].cc then
+        return getCCColor(self, Effects.EffectOverride[id].cc)
+    end
+    return self.SV.colors.debuff
 end
 
 -- Helper function to set progress bar colors
@@ -2506,16 +2497,15 @@ end
 --- @param isDebuff boolean
 --- @param isPriority boolean
 local function setProgressBarColors(self, buff, isDebuff, isPriority)
-    local colors
+    local colors, gradientColors
+
     if isDebuff then
         colors = isPriority and self.SV.ProminentProgressDebuffPriorityC2 or self.SV.ProminentProgressDebuffC2
+        gradientColors = isPriority and self.SV.ProminentProgressDebuffPriorityC1 or self.SV.ProminentProgressDebuffC1
     else
         colors = isPriority and self.SV.ProminentProgressBuffPriorityC2 or self.SV.ProminentProgressBuffC2
+        gradientColors = isPriority and self.SV.ProminentProgressBuffPriorityC1 or self.SV.ProminentProgressBuffC1
     end
-
-    local gradientColors = isDebuff and
-        (isPriority and self.SV.ProminentProgressDebuffPriorityC1 or self.SV.ProminentProgressDebuffC1) or
-        (isPriority and self.SV.ProminentProgressBuffPriorityC1 or self.SV.ProminentProgressBuffC1)
 
     buff.bar.backdrop:SetCenterColor(0.1 * colors[1], 0.1 * colors[2], 0.1 * colors[3], 0.75)
     buff.bar.bar:SetGradientColors(colors[1], colors[2], colors[3], 1, gradientColors[1], gradientColors[2], gradientColors[3], 1)
@@ -2527,29 +2517,21 @@ end
 --- @param unbreakable integer
 --- @param id integer
 local function SetSingleIconBuffType(self, buff, buffType, unbreakable, id)
-    -- Determine context type and get ability name
     local contextType = (buffType == BUFF_EFFECT_TYPE_BUFF) and "buff" or "debuff"
     local abilityName = GetAbilityName(id)
-
-    -- Apply visual settings
     local fillColor = determineFillColor(self, contextType, id, abilityName, unbreakable)
-    local labelColor = contextType == "buff" and self.SV.colors.buff or self.SV.colors.debuff
+    local labelColor = (contextType == "buff") and self.SV.colors.buff or self.SV.colors.debuff
     local textColor = self.SV.RemainingTextColoured and labelColor or { 1, 1, 1, 1 }
 
-    -- Set visual properties
     buff.frame:SetTexture("/esoui/art/actionbar/" .. contextType .. "_frame.dds")
     buff.label:SetColor(textColor[1], textColor[2], textColor[3], textColor[4])
     buff.stack:SetColor(textColor[1], textColor[2], textColor[3], textColor[4])
-
-    buff.back:SetHidden(true)
     buff.drop:SetHidden(false)
 
-    -- Set cooldown color if it exists
     if buff.cd then
         buff.cd:SetFillColor(fillColor[1], fillColor[2], fillColor[3], fillColor[4])
     end
 
-    -- Set progress bar colors if they exist
     if buff.bar then
         local priority = isPriorityEffect(self, contextType, id, abilityName)
         setProgressBarColors(self, buff, buffType == BUFF_EFFECT_TYPE_DEBUFF, priority)
@@ -2582,6 +2564,19 @@ function SpellCastBuffs:CreateMetaPool(container, containerControl)
             control.cd:ResetCooldown()
             control.cd:SetHidden(true)
         end
+
+        -- Clear all custom data references to prevent memory leaks
+        control.data = nil
+        control.effectSlotId = nil
+        control.effectId = nil
+        control.effectName = nil
+        control.buffType = nil
+        control.buffSlot = nil
+        control.tooltip = nil
+        control.duration = nil
+        control.container = nil
+        control.isArtificial = nil
+        control.effectType = nil
     end
 
     metaPool:SetCustomAcquireBehavior(OnAcquired)
@@ -2614,9 +2609,18 @@ local function getSortIteration(self, container, count)
     local sortDir = self.sortDirection[container]
     if sortDir == "Right to Left" or sortDir == "Top to Bottom" then
         return count, 1, -1
-    else
-        return 1, count, 1
     end
+    return 1, count, 1
+end
+
+-- Find control matching effect data in active objects
+local function findControlForEffect(activeObjects, effect)
+    for _, control in pairs(activeObjects) do
+        if control.data == effect then
+            return control
+        end
+    end
+    return nil
 end
 
 --- @param self table
@@ -2625,47 +2629,29 @@ end
 --- @param container string
 local function updateBar(self, currentTimeMs, sortedList, container)
     local containerData = self.BuffContainers[container]
-    local metaPool = containerData.metaPool
-    local iconsNum = #sortedList
-    local istart, iend, istep = getSortIteration(self, container, iconsNum)
+    local activeObjects = containerData.metaPool:GetActiveObjects()
+    local istart, iend, istep = getSortIteration(self, container, #sortedList)
 
-    -- Get active objects from metapool
-    local activeObjects = metaPool:GetActiveObjects()
-
-    local index = 0 -- Global icon counter
     for i = istart, iend, istep do
-        index = index + 1
-        -- Get current buff definition
         local effect = sortedList[i]
+        local buff = findControlForEffect(activeObjects, effect)
 
-        local ground = effect.groundLabel
-        local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
-        -- Find the control for this effect by matching data
-        local buff = nil
-        for _, control in pairs(activeObjects) do
-            if control.data == effect then
-                buff = control
-                break
-            end
-        end
+        if buff and buff.bar and buff.bar.bar then
+            local remain = effect.ends and (effect.ends - currentTimeMs)
+            local auraStarts = effect.starts
+            local auraEnds = effect.ends
 
-        if buff then
-            local auraStarts = effect.starts or nil
-            local auraEnds = effect.ends or nil
             -- Modify recall penalty to show forced max duration
             if effect.id == 999016 then
                 auraStarts = auraEnds - 600000
             end
 
-            -- If this isn't a permanent duration buff then update the bar on every tick
-            if buff.bar and buff.bar.bar then
-                if auraStarts and auraEnds and remain > 0 and not ground then
-                    buff.bar.bar:SetValue(1 - ((currentTimeMs - auraStarts) / (auraEnds - auraStarts)))
-                elseif effect.werewolf then
-                    buff.bar.bar:SetValue(effect.werewolf)
-                else
-                    buff.bar.bar:SetValue(1)
-                end
+            if auraStarts and auraEnds and remain and remain > 0 and not effect.groundLabel then
+                buff.bar.bar:SetValue(1 - ((currentTimeMs - auraStarts) / (auraEnds - auraStarts)))
+            elseif effect.werewolf then
+                buff.bar.bar:SetValue(effect.werewolf)
+            else
+                buff.bar.bar:SetValue(1)
             end
         end
     end
@@ -2675,14 +2661,11 @@ end
 --- @param self table
 --- @param buffControl Control The buff icon control
 --- @param effect table The effect data
---- @param container string Container name
-local function SetupIcon(self, buffControl, effect, container)
-    -- Set icon texture
+local function SetupIcon(self, buffControl, effect)
     if buffControl.icon then
         buffControl.icon:SetTexture(effect.icon)
     end
 
-    -- Set stack count
     if buffControl.stack then
         if effect.stack and effect.stack > 0 then
             buffControl.stack:SetText(string_format("%s", effect.stack))
@@ -2692,15 +2675,175 @@ local function SetupIcon(self, buffControl, effect, container)
         end
     end
 
-    -- Set frame texture (buff vs debuff) - handled by SetSingleIconBuffType
-    -- Set drop background visibility
     if buffControl.drop then
-        if effect.backdrop then
-            buffControl.drop:SetHidden(false)
+        buffControl.drop:SetHidden(not effect.backdrop)
+    end
+end
+
+-- Initialize buff control child references
+local function setupBuffChildReferences(buff)
+    if not buff.back then
+        buff.back = buff:GetNamedChild("Back")
+        buff.frame = buff:GetNamedChild("Frame")
+        buff.iconbg = buff:GetNamedChild("IconBG")
+        buff.drop = buff:GetNamedChild("Drop")
+        buff.icon = buff:GetNamedChild("Icon")
+        buff.cd = buff:GetNamedChild("Cooldown")
+        buff.label = buff:GetNamedChild("Label")
+        buff.abilityId = buff:GetNamedChild("AbilityId")
+        buff.stack = buff:GetNamedChild("Stack")
+    end
+end
+
+-- Setup prominent buff elements and anchoring
+local function setupProminentBuff(self, buff, container, effect)
+    if (container ~= "prominentbuffs" and container ~= "prominentdebuffs") or buff.name then
+        return
+    end
+
+    buff.effectType = effect.type
+    buff.name = buff:GetNamedChild("Name")
+    if buff.name then
+        buff.name:SetFont(self.prominentFont)
+    end
+
+    local barBackdrop = buff:GetNamedChild("BarBackdrop")
+    local bar = buff:GetNamedChild("Bar")
+    if barBackdrop and bar then
+        buff.bar = { backdrop = barBackdrop, bar = bar }
+        buff.bar.backdrop:SetEdgeTexture("", 2, 2, 2, 2)
+        buff.bar.backdrop:SetDimensions(154, 16)
+        buff.bar.bar:SetDimensions(150, 12)
+        buff.bar.bar:SetMinMax(0, 1)
+    end
+end
+
+-- Configure prominent buff bar visibility and anchors
+local function configureProminentBuffBar(self, buff, container)
+    if not buff.name or not buff.bar then
+        return
+    end
+
+    local isVertical = (container == "prominentbuffs" and self.SV.ProminentBuffContainerAlignment == 2) or
+        (container == "prominentdebuffs" and self.SV.ProminentDebuffContainerAlignment == 2)
+
+    if not isVertical then
+        buff.name:SetHidden(true)
+        buff.bar.backdrop:SetHidden(true)
+        buff.bar.bar:SetHidden(true)
+        return
+    end
+
+    buff.name:SetHidden(not self.SV.ProminentLabel)
+    buff.bar.backdrop:SetHidden(not self.SV.ProminentProgress)
+    buff.bar.bar:SetHidden(not self.SV.ProminentProgress)
+
+    -- Determine label direction
+    local labelLeft = (container == "prominentbuffs" and self.SV.ProminentBuffLabelDirection == "Left") or
+        (container == "prominentdebuffs" and self.SV.ProminentDebuffLabelDirection ~= "Right")
+
+    buff.name:ClearAnchors()
+    buff.bar.backdrop:ClearAnchors()
+
+    if labelLeft then
+        buff.name:SetAnchor(RIGHT, buff.bar.backdrop, TOPRIGHT, -2, -4)
+        buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
+        buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
+    else
+        buff.name:SetAnchor(LEFT, buff.bar.backdrop, TOPLEFT, 2, -4)
+        buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
+        buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_NORMAL)
+    end
+
+    if buff.bar.bar then
+        buff.bar.bar:SetTexture(LUIE.StatusbarTextures[self.SV.ProminentProgressTexture])
+        buff.bar.bar:ClearAnchors()
+        buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
+    end
+end
+
+-- Get row increment direction for manual anchoring
+local function getRowIncrement(self, container)
+    if container == "player1" or container == "target1" then
+        return 1
+    elseif container == "player2" or container == "target2" then
+        return -1
+    elseif container == "playerb" then
+        return self.SV.StackPlayerBuffs == "Down" and 1 or -1
+    elseif container == "playerd" then
+        return self.SV.StackPlayerDebuffs == "Down" and 1 or -1
+    elseif container == "targetb" then
+        return self.SV.StackTargetBuffs == "Down" and 1 or -1
+    elseif container == "targetd" then
+        return self.SV.StackTargetDebuffs == "Down" and 1 or -1
+    end
+    return 0
+end
+
+-- Anchor buff icon based on container settings
+local function anchorBuffIcon(self, buff, index, prevControl, containerData, container, row, iconSize, iconsNum)
+    buff:ClearAnchors()
+
+    if containerData.iconHolder then
+        -- Automatic anchoring for containers with iconHolder
+        if index == 1 then
+            if containerData.alignVertical then
+                buff:SetAnchor(BOTTOM, containerData.iconHolder, BOTTOM, 0, 0)
+            else
+                buff:SetAnchor(LEFT, containerData.iconHolder, LEFT, 0, 0)
+            end
+        elseif prevControl then
+            if containerData.alignVertical then
+                buff:SetAnchor(BOTTOM, prevControl, TOP, 0, -self.padding)
+            else
+                buff:SetAnchor(LEFT, prevControl, RIGHT, self.padding, 0)
+            end
+        end
+    elseif prevControl then
+        -- Manual alignment - anchor to previous control
+        if containerData.alignVertical then
+            buff:SetAnchor(BOTTOM, prevControl, TOP, 0, -self.padding)
         else
-            buffControl.drop:SetHidden(true)
+            buff:SetAnchor(LEFT, prevControl, RIGHT, self.padding, 0)
         end
     end
+end
+
+-- Anchor first icon in row for manual alignment
+local function anchorFirstIconInRow(self, buff, containerData, alignmentDir, iconSize, iconsNum, row, maxIcons)
+    buff:ClearAnchors()
+
+    local anchor, leftPadding
+
+    if alignmentDir == LEFT then
+        anchor = TOPLEFT
+        leftPadding = self.padding
+    elseif alignmentDir == RIGHT then
+        anchor = TOPRIGHT
+        leftPadding = -zo_min(maxIcons, iconsNum - maxIcons * row) * iconSize - self.padding
+    else
+        anchor = TOP
+        leftPadding = -0.5 * (zo_min(maxIcons, iconsNum - maxIcons * row) * iconSize - self.padding)
+    end
+
+    buff:SetAnchor(TOPLEFT, containerData, anchor, leftPadding, row * iconSize)
+end
+
+-- Setup buff cooldown animation
+local function setupBuffCooldown(buff, effect, remain)
+    if not effect.restart or not buff.cd or buff.cd:GetDuration() ~= 0 then
+        return
+    end
+
+    local cooldownDuration = (effect.id == 999016) and 600000 or effect.dur
+
+    if not remain or not cooldownDuration or cooldownDuration == 0 or effect.fakeDuration then
+        buff.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
+    else
+        buff.cd:StartCooldown(remain, cooldownDuration, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, false)
+    end
+
+    effect.restart = false
 end
 
 --- @param self table
@@ -2711,7 +2854,7 @@ local function updateIcons(self, currentTimeMs, sortedList, container)
     local containerData = self.BuffContainers[container]
     local metaPool = containerData.metaPool
 
-    -- Special workaround for container with player long buffs. We do not need to update it every 100ms, but rather 3 times less often
+    -- Skip update for player long buffs container (throttled to 1/3 frequency)
     if containerData.skipUpdate then
         containerData.skipUpdate = containerData.skipUpdate + 1
         if containerData.skipUpdate > 1 then
@@ -2723,7 +2866,6 @@ local function updateIcons(self, currentTimeMs, sortedList, container)
 
     local iconsNum = #sortedList
     if iconsNum == 0 then
-        -- Release all if no icons to show
         metaPool:ReleaseAllObjects()
         return
     end
@@ -2732,13 +2874,11 @@ local function updateIcons(self, currentTimeMs, sortedList, container)
     local currentEffectSlots = {}
     for i = 1, iconsNum do
         local effect = sortedList[i]
-        -- Use buffSlot as stable identifier (unique per active buff)
         local effectSlotId = effect.buffSlot or ("slot_" .. effect.id)
         currentEffectSlots[effectSlotId] = effect
     end
 
     -- Release controls for effects that are no longer active
-    -- Must build list first to avoid modifying table while iterating
     local toRelease = {}
     for key, control in pairs(metaPool:GetActiveObjects()) do
         if control.effectSlotId and not currentEffectSlots[control.effectSlotId] then
@@ -2750,11 +2890,9 @@ local function updateIcons(self, currentTimeMs, sortedList, container)
     end
 
     local istart, iend, istep = getSortIteration(self, container, iconsNum)
-
-    -- Size of icon+padding
     local iconSize = self.SV.IconSize + self.padding
 
-    -- Set width of control that holds icons. This will make alignment automatic
+    -- Set iconHolder dimensions for automatic alignment
     if containerData.iconHolder then
         if containerData.alignVertical then
             containerData.iconHolder:SetDimensions(0, iconSize * iconsNum - self.padding)
@@ -2763,270 +2901,82 @@ local function updateIcons(self, currentTimeMs, sortedList, container)
         end
     end
 
-    -- Prepare variables for manual alignment of icons
-    local row = 0 -- row counter for multi-row placement
+    -- Variables for manual alignment
+    local row = 0
     local next_row_break = 1
     local maxIcons = containerData.maxIcons
     local alignmentDir = self.alignmentDirection[container]
-    local prevIconsCount = containerData.prevIconsCount or 0
 
-    -- Iterate over list of sorted icons
-    local index = 0         -- Global icon counter
-    local prevControl = nil -- Track previous control for sequential anchoring
-    local usedControls = {} -- Track controls used in this iteration to prevent anchor cycles
+    local index = 0
+    local prevControl = nil
+    local usedControls = {}
+
     for i = istart, iend, istep do
-        -- Get current buff definition
         local effect = sortedList[i]
         index = index + 1
 
-        -- Check if we already have a control for this effect
+        -- Find or acquire control for this effect
         local effectSlotId = effect.buffSlot or ("slot_" .. effect.id)
         local buff = nil
-        local existingKey = nil
 
-        -- Search for existing control with this effect
-        -- Skip controls that have already been placed in this iteration
         for key, control in pairs(metaPool:GetActiveObjects()) do
             if control.effectSlotId == effectSlotId and not usedControls[control] then
                 buff = control
-                existingKey = key
                 break
             end
         end
 
-        -- Acquire new control only if we don't have one for this effect
-        local isNewControl = (buff == nil)
         if not buff then
-            buff, existingKey = metaPool:AcquireObject()
+            buff = metaPool:AcquireObject()
             buff.effectSlotId = effectSlotId
-            effect.restart = true -- Only restart cooldown for new controls
+            effect.restart = true
         end
 
-        -- Mark this control as used in this iteration to prevent reuse/anchor cycles
         usedControls[buff] = true
-
-        -- The control from pool is the root Control
-        -- Set up child references for easy access (matching old CreateSingleIcon structure)
-        -- Only set up references once (controls are reused from pool)
-        if not buff.back then
-            buff.back = buff:GetNamedChild("Back")
-            buff.frame = buff:GetNamedChild("Frame")
-
-            -- Icon background + nested child (IconBGBackdrop inside it)
-            buff.iconbg = buff:GetNamedChild("IconBG")
-
-            -- Collectible/mount background
-            buff.drop = buff:GetNamedChild("Drop")
-
-            -- Icon is a direct child of root control (not child of IconBG)
-            buff.icon = buff:GetNamedChild("Icon")
-
-            -- Cooldown is a direct child of root control (renders on BACKGROUND layer under icon)
-            buff.cd = buff:GetNamedChild("Cooldown")
-
-            -- Labels
-            buff.label = buff:GetNamedChild("Label")
-            buff.abilityId = buff:GetNamedChild("AbilityId")
-            buff.stack = buff:GetNamedChild("Stack")
-        end
-
-        -- Store effect data on control
         buff.data = effect
 
-        -- Post-acquisition setup: apply original visual layout (no anchoring)
-        if buff.label then
-            buff.label:SetFont(self.buffsFont)
-        end
-        if buff.stack then
-            buff.stack:SetFont(self.buffsFont)
-        end
-        if buff.abilityId then
-            buff.abilityId:SetFont(self.buffsFont)
-        end
+        -- Setup child references and fonts
+        setupBuffChildReferences(buff)
+
+        if buff.label then buff.label:SetFont(self.buffsFont) end
+        if buff.stack then buff.stack:SetFont(self.buffsFont) end
+        if buff.abilityId then buff.abilityId:SetFont(self.buffsFont) end
 
         ApplyIconVisuals(self, container, buff, effect)
 
-        -- Event handlers are set in XML (OnMouseEnter, OnMouseExit, OnMouseUp)
+        -- Setup prominent buff elements
+        setupProminentBuff(self, buff, container, effect)
+        configureProminentBuffBar(self, buff, container)
 
-        -- Get prominent buff elements from XML (created in XML for performance)
-        if (container == "prominentbuffs" or container == "prominentdebuffs") and not buff.name then
-            buff.effectType = effect.type
-            buff.name = buff:GetNamedChild("Name")
-            if buff.name then
-                buff.name:SetFont(self.prominentFont)
-            end
+        local remain = effect.ends and (effect.ends - currentTimeMs)
 
-            -- Get progress bar from XML
-            local barBackdrop = buff:GetNamedChild("BarBackdrop")
-            local bar = buff:GetNamedChild("Bar")
-            if barBackdrop and bar then
-                buff.bar = { backdrop = barBackdrop, bar = bar }
-
-                -- Setup bar properties with symmetric edge dimensions
-                buff.bar.backdrop:SetEdgeTexture("", 2, 2, 2, 2)
-                buff.bar.backdrop:SetDimensions(154, 16)
-                buff.bar.bar:SetDimensions(150, 12)
-                buff.bar.bar:SetMinMax(0, 1)
-            end
-        end
-
-        -- Setup prominent buff name and bar anchors/visibility
-        if buff.name and buff.bar then
-            local isVertical = (container == "prominentbuffs" and self.SV.ProminentBuffContainerAlignment == 2) or
-                (container == "prominentdebuffs" and self.SV.ProminentDebuffContainerAlignment == 2)
-
-            if isVertical then
-                buff.name:SetHidden(not self.SV.ProminentLabel)
-                buff.bar.backdrop:SetHidden(not self.SV.ProminentProgress)
-                buff.bar.bar:SetHidden(not self.SV.ProminentProgress)
-
-                -- Vertical layout - anchors set based on direction
-                if container == "prominentbuffs" then
-                    if self.SV.ProminentBuffLabelDirection == "Left" then
-                        buff.name:ClearAnchors()
-                        buff.name:SetAnchor(RIGHT, buff.bar.backdrop, TOPRIGHT, -2, -4)
-                        buff.bar.backdrop:ClearAnchors()
-                        buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
-                        buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
-                    else
-                        buff.name:ClearAnchors()
-                        buff.name:SetAnchor(LEFT, buff.bar.backdrop, TOPLEFT, 2, -4)
-                        buff.bar.backdrop:ClearAnchors()
-                        buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
-                        buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_NORMAL)
-                    end
-                else -- prominentdebuffs
-                    if self.SV.ProminentDebuffLabelDirection == "Right" then
-                        buff.name:ClearAnchors()
-                        buff.name:SetAnchor(LEFT, buff.bar.backdrop, TOPLEFT, 2, -4)
-                        buff.bar.backdrop:ClearAnchors()
-                        buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
-                        buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_NORMAL)
-                    else
-                        buff.name:ClearAnchors()
-                        buff.name:SetAnchor(RIGHT, buff.bar.backdrop, TOPRIGHT, -2, -4)
-                        buff.bar.backdrop:ClearAnchors()
-                        buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
-                        buff.bar.bar:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
-                    end
-                end
-
-                -- Set bar texture and anchor to backdrop
-                if buff.bar.bar then
-                    buff.bar.bar:SetTexture(LUIE.StatusbarTextures[self.SV.ProminentProgressTexture])
-                    buff.bar.bar:ClearAnchors()
-                    buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
-                end
-            else
-                -- Horizontal layout - hide name and bar
-                buff.name:SetHidden(true)
-                buff.bar.backdrop:SetHidden(true)
-                buff.bar.bar:SetHidden(true)
-            end
-        end
-
-        -- Calculate remaining time
-        local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
-        local name = (effect.name ~= nil) and effect.name or nil
-
-        -- Ensure buff is shown
-        buff:SetHidden(false)
-
-        -- Perform anchoring based on container type
-        -- CRITICAL: Always reanchor pooled icons since they may have moved positions
-        buff:ClearAnchors()
-        if containerData.iconHolder then
-            -- Automatic anchoring for containers with iconHolder
-            if index == 1 then
-                -- First control - anchor to iconHolder
-                if containerData.alignVertical then
-                    buff:SetAnchor(BOTTOM, containerData.iconHolder, BOTTOM, 0, 0)
-                else
-                    buff:SetAnchor(LEFT, containerData.iconHolder, LEFT, 0, 0)
-                end
-            else
-                -- Subsequent controls - anchor to previous in sorted order
-                if containerData.alignVertical then
-                    buff:SetAnchor(BOTTOM, prevControl, TOP, 0, -self.padding)
-                else
-                    buff:SetAnchor(LEFT, prevControl, RIGHT, self.padding, 0)
-                end
+        -- Anchoring
+        if not containerData.iconHolder and index == next_row_break then
+            anchorFirstIconInRow(self, buff, containerData, alignmentDir, iconSize, iconsNum, row, maxIcons)
+            if maxIcons then
+                row = row + getRowIncrement(self, container)
+                next_row_break = next_row_break + maxIcons
             end
         else
-            -- Manual alignment for containers without iconHolder (player/target on UnitFrames)
-            if index == next_row_break then
-                -- First icon in a row - anchor to container
-                local anchor, leftPadding
-
-                if alignmentDir then
-                    if alignmentDir == LEFT then
-                        anchor = TOPLEFT
-                        leftPadding = self.padding
-                    elseif alignmentDir == RIGHT then
-                        anchor = TOPRIGHT
-                        leftPadding = -zo_min(maxIcons, iconsNum - maxIcons * row) * iconSize - self.padding
-                    else
-                        anchor = TOP
-                        leftPadding = -0.5 * (zo_min(maxIcons, iconsNum - maxIcons * row) * iconSize - self.padding)
-                    end
-                else
-                    -- Fallback
-                    anchor = TOP
-                    leftPadding = -0.5 * (zo_min(maxIcons, iconsNum - maxIcons * row) * iconSize - self.padding)
-                end
-
-                buff:SetAnchor(TOPLEFT, containerData, anchor, leftPadding, row * iconSize)
-
-                -- Determine if we need to make next row
-                if maxIcons then
-                    -- If buffs then stack down
-                    if container == "player1" or container == "target1" then
-                        row = row + 1
-                        -- If debuffs then stack up
-                    elseif container == "player2" or container == "target2" then
-                        row = row - 1
-                    elseif container == "playerb" then
-                        row = row + (self.SV.StackPlayerBuffs == "Down" and 1 or -1)
-                    elseif container == "playerd" then
-                        row = row + (self.SV.StackPlayerDebuffs == "Down" and 1 or -1)
-                    elseif container == "targetb" then
-                        row = row + (self.SV.StackTargetBuffs == "Down" and 1 or -1)
-                    elseif container == "targetd" then
-                        row = row + (self.SV.StackTargetDebuffs == "Down" and 1 or -1)
-                    end
-                    next_row_break = next_row_break + maxIcons
-                end
-            elseif prevControl then
-                -- Not first in row - anchor to previous control (sequential)
-                -- No ClearAnchors needed here as it was done above
-                if containerData.alignVertical then
-                    buff:SetAnchor(BOTTOM, prevControl, TOP, 0, -self.padding)
-                else
-                    buff:SetAnchor(LEFT, prevControl, RIGHT, self.padding, 0)
-                end
-            end
+            anchorBuffIcon(self, buff, index, prevControl, containerData, container, row, iconSize, iconsNum)
         end
 
-        -- Update previous control for next iteration
         prevControl = buff
-
-        -- Track icon position (for reference, restart was already set above if needed)
         effect.iconNum = index
 
-        -- Always call SetSingleIconBuffType since visual state may have changed
+        -- Apply visual state
         SetSingleIconBuffType(self, buff, effect.type, effect.unbreakable, effect.id)
 
-        -- Setup Info for Tooltip function to pull
+        -- Setup tooltip data
         buff.effectId = effect.id
-        buff.effectName = name
+        buff.effectName = effect.name
         buff.buffType = effect.type
         buff.buffSlot = effect.buffSlot
         buff.tooltip = effect.tooltip
         buff.duration = effect.dur or 0
         buff.container = container
 
-        -- Setup icon visual properties
-        SetupIcon(self, buff, effect, container)
+        SetupIcon(self, buff, effect)
 
         buff:SetAlpha(1)
         buff:SetHidden(false)
@@ -3036,31 +2986,14 @@ local function updateIcons(self, currentTimeMs, sortedList, container)
         end
 
         if buff.name then
-            local formattedName = effect._cachedName or zo_strformat("<<C:1>>", effect.name)
             if not effect._cachedName then
-                effect._cachedName = formattedName
+                effect._cachedName = zo_strformat("<<C:1>>", effect.name)
             end
-            buff.name:SetText(formattedName)
+            buff.name:SetText(effect._cachedName)
         end
 
-        -- Start cooldown when icon is first set up (matching original backup behavior)
-        if effect.restart and buff.cd then
-            -- Only start if not already running to prevent restarting animations
-            if buff.cd:GetDuration() == 0 then
-                local cooldownDuration = effect.dur
-                if effect.id == 999016 then
-                    cooldownDuration = 600000
-                end
-
-                if remain == nil or cooldownDuration == nil or cooldownDuration == 0 or effect.fakeDuration then
-                    buff.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
-                else
-                    buff.cd:StartCooldown(remain, cooldownDuration, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, false)
-                end
-            end
-            -- Always clear restart flag to prevent checking again next frame
-            effect.restart = false
-        end
+        -- Setup cooldown
+        setupBuffCooldown(buff, effect, remain)
 
         -- Set initial label text for non-duration effects
         if not remain or effect.fakeDuration then
@@ -3073,11 +3006,6 @@ local function updateIcons(self, currentTimeMs, sortedList, container)
             end
         end
     end
-
-    -- No need to hide unused icons - metapool handles that via ReleaseAllObjects
-
-    -- Save icon count for next update to determine if re-anchoring is needed
-    containerData.prevIconsCount = iconsNum
 end
 
 
@@ -3156,27 +3084,58 @@ end
 local function buffSort(x, y)
     local xDuration = (x.ends == nil or x.dur == 0 or x.groundLabel or x.toggle) and 0 or x.dur
     local yDuration = (y.ends == nil or y.dur == 0 or y.groundLabel or y.toggle) and 0 or y.dur
-    -- Sort toggle effects
+
     if x.toggle or y.toggle then
         if xDuration == 0 and yDuration == 0 then
             if x.toggle and y.toggle then
-                return (x.name < y.name)
-            elseif x.toggle and not y.toggle then
-                return (xDuration == 0)
+                return x.name < y.name
+            elseif x.toggle then
+                return xDuration == 0
             end
         else
-            return (xDuration == 0)
+            return xDuration == 0
         end
-        -- Sort permanent/ground effects (might separate these at some point but for now want the sorting function simplified)
     elseif xDuration == 0 and yDuration == 0 then
-        return (x.name < y.name)
-        -- Both non-permanent
+        return x.name < y.name
     elseif xDuration ~= 0 and yDuration ~= 0 then
         return (x.starts == y.starts) and (x.name < y.name) or (x.ends > y.ends)
-        -- One permanent, one not
-    else
-        return (xDuration == 0)
     end
+    return xDuration == 0
+end
+
+-- Add effect to sorted buffer list
+local function addToSortedList(buffsSorted, sortedCounts, container, effect)
+    sortedCounts[container] = sortedCounts[container] + 1
+    buffsSorted[container][sortedCounts[container]] = effect
+end
+
+-- Determine if effect should be shown based on settings and type
+local function shouldShowEffect(self, effect, container)
+    if effect.target == "prominent" then
+        return true, container
+    end
+
+    local isShortTerm = effect.type == BUFF_EFFECT_TYPE_DEBUFF or effect.forced == "short" or
+        not (effect.forced == "long" or effect.ends == nil or effect.dur == 0)
+
+    if isShortTerm then
+        if effect.target == "reticleover" then
+            return self.SV.ShortTermEffects_Target, container
+        elseif effect.target == "player" then
+            return self.SV.ShortTermEffects_Player, container
+        end
+    else
+        -- Long-term effects
+        if effect.target == "reticleover" then
+            return self.SV.LongTermEffects_Target, container
+        elseif effect.target == "player" and self.SV.LongTermEffects_Player then
+            local usePlayerLong = self.SV.LongTermEffectsSeparate and
+                container ~= "prominentbuffs" and container ~= "prominentdebuffs"
+            return true, usePlayerLong and "player_long" or container
+        end
+    end
+
+    return false, nil
 end
 
 -- Runs OnUpdate - 100 ms buffer
@@ -3187,14 +3146,12 @@ function SpellCastBuffs:OnUpdate(currentTimeMs)
 
     local buffsSorted = {}
     local sortedCounts = {}
-    local needs_update = {}
     local isProminent = {}
 
+    -- Initialize containers
     for _, container in pairs(containerRouting) do
-        needs_update[container] = true
         buffsSorted[container] = {}
         sortedCounts[container] = 0
-
         if container == "prominentbuffs" or container == "prominentdebuffs" then
             isProminent[container] = true
         end
@@ -3206,53 +3163,25 @@ function SpellCastBuffs:OnUpdate(currentTimeMs)
     for context, effectsList in pairs(EffectsList) do
         local container = containerRouting[context]
         for k, v in pairs(effectsList) do
-            -- Remove expired effect
-            if v.ends ~= nil and v.dur > 0 and v.ends < currentTimeMs then
+            if v.ends and v.dur > 0 and v.ends < currentTimeMs then
                 effectsList[k] = nil
-            elseif container then
-                -- Add icons to to-be-sorted list only if effect already started
-                if v.starts < currentTimeMs then
-                    -- Always show prominent effects
-                    if v.target == "prominent" then
-                        sortedCounts[container] = sortedCounts[container] + 1
-                        buffsSorted[container][sortedCounts[container]] = v
-                        -- Short-term effects
-                    elseif v.type == BUFF_EFFECT_TYPE_DEBUFF or v.forced == "short" or not (v.forced == "long" or v.ends == nil or v.dur == 0) then
-                        if v.target == "reticleover" and self.SV.ShortTermEffects_Target then
-                            sortedCounts[container] = sortedCounts[container] + 1
-                            buffsSorted[container][sortedCounts[container]] = v
-                        elseif v.target == "player" and self.SV.ShortTermEffects_Player then
-                            sortedCounts[container] = sortedCounts[container] + 1
-                            buffsSorted[container][sortedCounts[container]] = v
-                        end
-                        -- Long-term effects
-                    elseif v.target == "reticleover" and self.SV.LongTermEffects_Target then
-                        sortedCounts[container] = sortedCounts[container] + 1
-                        buffsSorted[container][sortedCounts[container]] = v
-                    elseif v.target == "player" and self.SV.LongTermEffects_Player then
-                        if self.SV.LongTermEffectsSeparate and container ~= "prominentbuffs" and container ~= "prominentdebuffs" then
-                            sortedCounts.player_long = sortedCounts.player_long + 1
-                            buffsSorted.player_long[sortedCounts.player_long] = v
-                        else
-                            sortedCounts[container] = sortedCounts[container] + 1
-                            buffsSorted[container][sortedCounts[container]] = v
-                        end
-                    end
+            elseif container and v.starts < currentTimeMs then
+                local show, targetContainer = shouldShowEffect(self, v, container)
+                if show then
+                    addToSortedList(buffsSorted, sortedCounts, targetContainer, v)
                 end
             end
         end
     end
 
-    -- Sort effects in container and draw them on screen
+    -- Sort and update all containers
     for _, container in pairs(containerRouting) do
-        if needs_update[container] then
-            table_sort(buffsSorted[container], buffSort)
-            updateIcons(self, currentTimeMs, buffsSorted[container], container)
-        end
+        table_sort(buffsSorted[container], buffSort)
+        updateIcons(self, currentTimeMs, buffsSorted[container], container)
     end
 
     -- Update prominent buff bars
-    for container, _ in pairs(isProminent) do
+    for container in pairs(isProminent) do
         updateBar(self, currentTimeMs, buffsSorted[container], container)
     end
 
@@ -3260,9 +3189,9 @@ function SpellCastBuffs:OnUpdate(currentTimeMs)
     if sortedCounts.player_long > 0 then
         table_sort(buffsSorted.player_long, buffSort)
         updateIcons(self, currentTimeMs, buffsSorted.player_long, "player_long")
-        UpdateTime(self, currentTimeMs, "player_long")
     end
 
+    -- Update time displays for all containers (includes player_long)
     for _, container in pairs(containerRouting) do
         UpdateTime(self, currentTimeMs, container)
     end
@@ -3271,14 +3200,13 @@ function SpellCastBuffs:OnUpdate(currentTimeMs)
     if self.SV.ShowBlockPlayer and not self.SV.HidePlayerBuffs then
         if IsBlockActive() and not IsPlayerStunned() then
             local abilityId = 974
-            local abilityName = Abilities.Innate_Brace
-            local context = self:DetermineContextSimple("player1", abilityId, abilityName)
+            local context = self:DetermineContextSimple("player1", abilityId, Abilities.Innate_Brace)
             EffectsList[context][abilityId] =
             {
                 target = self:DetermineTarget(context),
                 type = 1,
                 id = abilityId,
-                name = abilityName,
+                name = Abilities.Innate_Brace,
                 icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_BLOCK_DDS,
                 dur = 0,
                 starts = currentTimeMs,

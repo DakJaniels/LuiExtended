@@ -361,7 +361,7 @@ end
 --- @param dims? table|"inherit" Array of dimensions or "inherit" to match parent
 --- @param hidden? boolean Whether the control starts hidden
 --- @param flexConfig? flexConfig Configuration table with optional 'container' and 'item' subtables
---- @return Control|nil control The created flex control, or nil if parent is invalid
+--- @return Control|object|nil control The created flex control, or nil if parent is invalid
 function UI:FlexControl(parent, anchors, dims, hidden, flexConfig)
     if not parent then
         return nil
