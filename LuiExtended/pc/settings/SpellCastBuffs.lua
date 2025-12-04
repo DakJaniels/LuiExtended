@@ -56,7 +56,7 @@ local dialogs =
         title = GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR),
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG), GetString(LUIE_STRING_CUSTOM_LIST_AURA_BLACKLIST)),
         callback = function (_)
-            SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.BlacklistTable)
+            SpellCastBuffs:ClearCustomList(SpellCastBuffs.SV.BlacklistTable)
             LUIE_Blacklist:UpdateChoices(GenerateCustomList(SpellCastBuffs.SV.BlacklistTable))
         end,
     },
@@ -66,7 +66,7 @@ local dialogs =
         title = GetString(LUIE_STRING_LAM_UF_PROMINENT_CLEAR_BUFFS),
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG_LIST), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
         callback = function (_)
-            SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.PromBuffTable)
+            SpellCastBuffs:ClearCustomList(SpellCastBuffs.SV.PromBuffTable)
             LUIE_Prominent_Buffs_List:UpdateChoices(GenerateCustomList(SpellCastBuffs.SV.PromBuffTable))
         end,
     },
@@ -76,7 +76,7 @@ local dialogs =
         title = GetString(LUIE_STRING_LAM_UF_PROMINENT_CLEAR_DEBUFFS),
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG_LIST), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
         callback = function (_)
-            SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.PromDebuffTable)
+            SpellCastBuffs:ClearCustomList(SpellCastBuffs.SV.PromDebuffTable)
             LUIE_Prominent_Debuffs_List:UpdateChoices(GenerateCustomList(SpellCastBuffs.SV.PromDebuffTable))
         end,
     },
@@ -87,7 +87,7 @@ local dialogs =
         title = GetString(LUIE_STRING_LAM_UF_PRIORITY_CLEAR_BUFFS),
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG_LIST), GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_BUFFS)),
         callback = function (_)
-            SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.PriorityBuffTable)
+            SpellCastBuffs:ClearCustomList(SpellCastBuffs.SV.PriorityBuffTable)
             LUIE_Priority_Buffs_List:UpdateChoices(GenerateCustomList(SpellCastBuffs.SV.PriorityBuffTable))
         end,
     },
@@ -97,7 +97,7 @@ local dialogs =
         title = GetString(LUIE_STRING_LAM_UF_PRIORITY_CLEAR_DEBUFFS),
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG_LIST), GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_DEBUFFS)),
         callback = function (_)
-            SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.PriorityDebuffTable)
+            SpellCastBuffs:ClearCustomList(SpellCastBuffs.SV.PriorityDebuffTable)
             LUIE_Priority_Debuffs_List:UpdateChoices(GenerateCustomList(SpellCastBuffs.SV.PriorityDebuffTable))
         end,
     },
@@ -112,7 +112,7 @@ end
 
 -- Load LibAddonMenu
 local LAM = LUIE.LAM
-function SpellCastBuffs.CreateSettings()
+function SpellCastBuffs:CreateSettings()
     local Defaults = SpellCastBuffs.Defaults
     local Settings = SpellCastBuffs.SV
 
@@ -171,7 +171,7 @@ function SpellCastBuffs.CreateSettings()
             if value and SpellCastBuffs.SV.lockPositionToUnitFrames == nil then
                 SpellCastBuffs.SV.lockPositionToUnitFrames = false
             end
-            SpellCastBuffs.SetMovingState(value)
+            self:SetMovingState(value)
         end,
         width = "half",
         default = false,
@@ -281,7 +281,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.HidePlayerBuffs = not value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "half",
                 default = not Defaults.HidePlayerBuffs,
@@ -298,7 +298,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.HidePlayerDebuffs = not value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "half",
                 default = not Defaults.HidePlayerDebuffs,
@@ -347,7 +347,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.HideGroundEffects = not value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "half",
                 default = not Settings.HideGroundEffects,
@@ -365,7 +365,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.GroundDamageAura = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "half",
                 default = Settings.GroundDamageAura,
@@ -386,7 +386,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ExtraBuffs = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Settings.ExtraBuffs,
@@ -404,7 +404,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ExtraExpanded = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Settings.ExtraExpanded,
@@ -425,7 +425,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.HideReduce = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Settings.HideReduce,
@@ -444,8 +444,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ShowSharedEffects = value
-                    SpellCastBuffs.UpdateDisplayOverrideIdList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateDisplayOverrideIdList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.ShowSharedEffects,
@@ -464,8 +464,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ShowSharedMajorMinor = value
-                    SpellCastBuffs.UpdateDisplayOverrideIdList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateDisplayOverrideIdList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.ShowSharedMajorMinor,
@@ -492,7 +492,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ShortTermEffects_Player = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.ShortTermEffects_Player,
@@ -509,7 +509,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ShortTermEffects_Target = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.ShortTermEffects_Target,
@@ -526,7 +526,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.LongTermEffects_Player = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.LongTermEffects_Player,
@@ -544,7 +544,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.LongTermEffectsSeparate = value
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "full",
                 default = Defaults.LongTermEffectsSeparate,
@@ -561,7 +561,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.LongTermEffects_Target = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.LongTermEffects_Target,
@@ -611,7 +611,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ShowResurrectionImmunity = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.ShowResurrectionImmunity,
@@ -629,7 +629,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ShowRecall = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.ShowRecall,
@@ -647,8 +647,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ShowWerewolf = value
-                    SpellCastBuffs.RegisterWerewolfEvents()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:RegisterWerewolfEvents()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.ShowWerewolf,
@@ -666,7 +666,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreSetICDPlayer = not value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreSetICDPlayer,
@@ -684,7 +684,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreAbilityICDPlayer = not value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreAbilityICDPlayer,
@@ -700,8 +700,8 @@ function SpellCastBuffs.CreateSettings()
                 getFunc = function () return Settings.ShowBlockPlayer end,
                 setFunc = function (value)
                     Settings.ShowBlockPlayer = value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.ShowBlockPlayer,
@@ -718,8 +718,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ShowBlockTarget = value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.ShowBlockTarget,
@@ -737,7 +737,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.StealthStatePlayer = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.StealthStatePlayer,
@@ -755,7 +755,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.StealthStateTarget = value
-                    SpellCastBuffs.ReloadEffects("reticleover")
+                    self:ReloadEffects("reticleover")
                 end,
                 width = "full",
                 default = Defaults.StealthStateTarget,
@@ -773,7 +773,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.DisguiseStatePlayer = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.DisguiseStatePlayer,
@@ -791,7 +791,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.DisguiseStateTarget = value
-                    SpellCastBuffs.ReloadEffects("reticleover")
+                    self:ReloadEffects("reticleover")
                 end,
                 width = "full",
                 default = Defaults.DisguiseStateTarget,
@@ -816,7 +816,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreDisguise = not value
-                    SpellCastBuffs.OnPlayerActivated()
+                    self:OnPlayerActivated()
                 end,
                 width = "full",
                 default = not Defaults.IgnoreDisguise,
@@ -834,7 +834,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreAssistant = not value
-                    SpellCastBuffs.OnPlayerActivated()
+                    self:OnPlayerActivated()
                 end,
                 width = "full",
                 default = not Defaults.IgnoreAssistant,
@@ -852,7 +852,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnorePet = not value
-                    SpellCastBuffs.OnPlayerActivated()
+                    self:OnPlayerActivated()
                 end,
                 width = "full",
                 default = not Defaults.IgnorePet,
@@ -870,7 +870,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.PetDetail = value
-                    SpellCastBuffs.OnPlayerActivated()
+                    self:OnPlayerActivated()
                 end,
                 width = "full",
                 default = not Defaults.PetDetail,
@@ -888,7 +888,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreMountPlayer = not value
-                    SpellCastBuffs.OnPlayerActivated()
+                    self:OnPlayerActivated()
                 end,
                 width = "full",
                 default = not Defaults.IgnoreMountPlayer,
@@ -906,7 +906,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.MountDetail = value
-                    SpellCastBuffs.OnPlayerActivated()
+                    self:OnPlayerActivated()
                 end,
                 width = "full",
                 default = not Defaults.MountDetail,
@@ -938,8 +938,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreMundusPlayer = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreMundusPlayer,
@@ -957,8 +957,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreMundusTarget = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreMundusTarget,
@@ -976,8 +976,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreFoodPlayer = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreFoodPlayer,
@@ -995,8 +995,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreFoodTarget = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreFoodTarget,
@@ -1014,8 +1014,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreExperiencePlayer = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreExperiencePlayer,
@@ -1033,8 +1033,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreExperienceTarget = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreExperienceTarget,
@@ -1053,8 +1053,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreAllianceXPPlayer = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreAllianceXPPlayer,
@@ -1072,8 +1072,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreAllianceXPTarget = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreAllianceXPTarget,
@@ -1092,8 +1092,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreVampPlayer = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreVampPlayer,
@@ -1111,8 +1111,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreVampTarget = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreVampTarget,
@@ -1130,8 +1130,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreLycanPlayer = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreLycanPlayer,
@@ -1149,8 +1149,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreLycanTarget = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreLycanTarget,
@@ -1168,8 +1168,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreDiseasePlayer = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreDiseasePlayer,
@@ -1187,8 +1187,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreDiseaseTarget = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreDiseaseTarget,
@@ -1206,8 +1206,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreBitePlayer = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreBitePlayer,
@@ -1225,8 +1225,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreBiteTarget = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreBiteTarget,
@@ -1244,9 +1244,9 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreBattleSpiritPlayer = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
-                    SpellCastBuffs.ArtificialEffectUpdate()
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
+                    self:ArtificialEffectUpdate()
                 end,
                 width = "full",
                 default = not Defaults.IgnoreBattleSpiritPlayer,
@@ -1264,8 +1264,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreBattleSpiritTarget = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreBattleSpiritTarget,
@@ -1283,8 +1283,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreCyrodiilPlayer = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreCyrodiilPlayer,
@@ -1302,8 +1302,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreCyrodiilTarget = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreCyrodiilTarget,
@@ -1321,8 +1321,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreEsoPlusPlayer = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreEsoPlusPlayer,
@@ -1340,8 +1340,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreEsoPlusTarget = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreEsoPlusTarget,
@@ -1359,8 +1359,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreSoulSummonsPlayer = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreSoulSummonsPlayer,
@@ -1378,8 +1378,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IgnoreSoulSummonsTarget = not value
-                    SpellCastBuffs.UpdateContextHideList()
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:UpdateContextHideList()
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = not Defaults.IgnoreSoulSummonsTarget,
@@ -1410,7 +1410,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.IconSize = value
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "full",
                 default = Defaults.IconSize,
@@ -1428,7 +1428,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.RemainingText = value
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "full",
                 default = Defaults.RemainingText,
@@ -1449,7 +1449,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.LabelPosition = value
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "full",
                 default = Defaults.LabelPosition,
@@ -1470,7 +1470,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (var)
                     Settings.BuffFontFace = var
-                    SpellCastBuffs.ApplyFont()
+                    self:ApplyFont()
                 end,
                 width = "full",
                 default = Defaults.BuffFontFace,
@@ -1491,7 +1491,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.BuffFontSize = value
-                    SpellCastBuffs.ApplyFont()
+                    self:ApplyFont()
                 end,
                 width = "full",
                 default = Defaults.BuffFontSize,
@@ -1512,7 +1512,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (var)
                     Settings.BuffFontStyle = var
-                    SpellCastBuffs.ApplyFont()
+                    self:ApplyFont()
                 end,
                 width = "full",
                 default = Defaults.BuffFontStyle,
@@ -1530,7 +1530,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.RemainingTextColoured = value
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "full",
                 default = Defaults.RemainingTextColoured,
@@ -1565,7 +1565,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.GlowIcons = value
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "full",
                 default = Defaults.GlowIcons,
@@ -1583,7 +1583,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.RemainingCooldown = value
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "full",
                 default = Defaults.RemainingCooldown,
@@ -1767,7 +1767,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ColorUnbreakable = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.ColorUnbreakable,
@@ -1808,7 +1808,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ColorCosmetic = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.ColorCosmetic,
@@ -1854,7 +1854,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ColorCC = value
-                    SpellCastBuffs.ReloadEffects("player")
+                    self:ReloadEffects("player")
                 end,
                 width = "full",
                 default = Defaults.ColorCC,
@@ -2142,8 +2142,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AlignmentBuffsPlayer = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.AlignmentBuffsPlayer,
@@ -2159,8 +2159,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.SortBuffsPlayer = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.SortBuffsPlayer,
@@ -2176,8 +2176,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AlignmentDebuffsPlayer = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.AlignmentDebuffsPlayer,
@@ -2193,8 +2193,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.SortDebuffsPlayer = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.SortDebuffsPlayer,
@@ -2210,8 +2210,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AlignmentBuffsTarget = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.AlignmentBuffsTarget,
@@ -2227,8 +2227,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.SortBuffsTarget = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.SortBuffsTarget,
@@ -2244,8 +2244,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AlignmentDebuffsTarget = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.AlignmentDebuffsTarget,
@@ -2261,8 +2261,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.SortDebuffsTarget = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.SortDebuffsTarget,
@@ -2292,7 +2292,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.WidthPlayerBuffs = value
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "half",
                 default = Defaults.WidthPlayerBuffs,
@@ -2312,8 +2312,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.StackPlayerBuffs = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.StackPlayerBuffs,
@@ -2335,7 +2335,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.WidthPlayerDebuffs = value
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "half",
                 default = Defaults.WidthPlayerDebuffs,
@@ -2355,8 +2355,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.StackPlayerDebuffs = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.StackPlayerDebuffs,
@@ -2378,7 +2378,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.WidthTargetBuffs = value
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "half",
                 default = Defaults.WidthTargetBuffs,
@@ -2398,8 +2398,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.StackTargetBuffs = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.StackTargetBuffs,
@@ -2421,7 +2421,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.WidthTargetDebuffs = value
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "half",
                 default = Defaults.WidthTargetDebuffs,
@@ -2441,8 +2441,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.StackTargetDebuffs = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.StackTargetDebuffs,
@@ -2468,8 +2468,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.LongTermEffectsSeparateAlignment = rotationOptionsKeys[value]
-                    SpellCastBuffs.ResetContainerOrientation()
-                    SpellCastBuffs.Reset()
+                    self:ResetContainerOrientation()
+                    self:Reset()
                 end,
                 width = "full",
                 default = rotationOptions[2],
@@ -2485,8 +2485,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AlignmentLongHorz = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.AlignmentLongHorz,
@@ -2505,8 +2505,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.SortLongHorz = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.SortLongHorz,
@@ -2525,8 +2525,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AlignmentLongVert = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.AlignmentLongVert,
@@ -2545,8 +2545,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.SortLongVert = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.SortLongVert,
@@ -2573,8 +2573,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ProminentBuffContainerAlignment = rotationOptionsKeys[value]
-                    SpellCastBuffs.ResetContainerOrientation()
-                    SpellCastBuffs.Reset()
+                    self:ResetContainerOrientation()
+                    self:Reset()
                 end,
                 width = "full",
                 default = rotationOptions[2],
@@ -2590,8 +2590,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AlignmentPromBuffsHorz = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.AlignmentPromBuffsHorz,
@@ -2610,8 +2610,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.SortPromBuffsHorz = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.SortPromBuffsHorz,
@@ -2630,8 +2630,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AlignmentPromBuffsVert = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.AlignmentPromBuffsVert,
@@ -2650,8 +2650,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.SortPromBuffsVert = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.SortPromBuffsVert,
@@ -2673,8 +2673,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ProminentDebuffContainerAlignment = rotationOptionsKeys[value]
-                    SpellCastBuffs.ResetContainerOrientation()
-                    SpellCastBuffs.Reset()
+                    self:ResetContainerOrientation()
+                    self:Reset()
                 end,
                 width = "full",
                 default = rotationOptions[2],
@@ -2690,8 +2690,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AlignmentPromDebuffsHorz = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.AlignmentPromDebuffsHorz,
@@ -2710,8 +2710,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.SortPromDebuffsHorz = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.SortPromDebuffsHorz,
@@ -2730,8 +2730,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AlignmentPromDebuffsVert = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.AlignmentPromDebuffsVert,
@@ -2750,8 +2750,8 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.SortPromDebuffsVert = value
-                    SpellCastBuffs.SetupContainerAlignment()
-                    SpellCastBuffs.SetupContainerSort()
+                    self:SetupContainerAlignment()
+                    self:SetupContainerSort()
                 end,
                 width = "half",
                 default = Defaults.SortPromDebuffsVert,
@@ -2886,7 +2886,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_BUFF_ADDLIST_TP),
                 getFunc = function () end,
                 setFunc = function (value)
-                    SpellCastBuffs.AddToCustomList(Settings.PriorityBuffTable, value)
+                    self:AddToCustomList(Settings.PriorityBuffTable, value)
                     LUIE_Priority_Buffs_List:UpdateChoices(GenerateCustomList(Settings.PriorityBuffTable))
                 end,
                 disabled = function ()
@@ -2906,7 +2906,7 @@ function SpellCastBuffs.CreateSettings()
                     LUIE_Priority_Buffs_List:UpdateChoices(GenerateCustomList(Settings.PriorityBuffTable))
                 end,
                 setFunc = function (value)
-                    SpellCastBuffs.RemoveFromCustomList(Settings.PriorityBuffTable, value)
+                    self:RemoveFromCustomList(Settings.PriorityBuffTable, value)
                     LUIE_Priority_Buffs_List:UpdateChoices(GenerateCustomList(Settings.PriorityBuffTable))
                 end,
                 disabled = function ()
@@ -2931,7 +2931,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_DEBUFF_ADDLIST_TP),
                 getFunc = function () end,
                 setFunc = function (value)
-                    SpellCastBuffs.AddToCustomList(Settings.PriorityDebuffTable, value)
+                    self:AddToCustomList(Settings.PriorityDebuffTable, value)
                     LUIE_Priority_Debuffs_List:UpdateChoices(GenerateCustomList(Settings.PriorityDebuffTable))
                 end,
                 disabled = function ()
@@ -2951,7 +2951,7 @@ function SpellCastBuffs.CreateSettings()
                     LUIE_Priority_Debuffs_List:UpdateChoices(GenerateCustomList(Settings.PriorityDebuffTable))
                 end,
                 setFunc = function (value)
-                    SpellCastBuffs.RemoveFromCustomList(Settings.PriorityDebuffTable, value)
+                    self:RemoveFromCustomList(Settings.PriorityDebuffTable, value)
                     LUIE_Priority_Debuffs_List:UpdateChoices(GenerateCustomList(Settings.PriorityDebuffTable))
                 end,
                 disabled = function ()
@@ -2994,7 +2994,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ProminentLabel = value
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "full",
                 default = Defaults.ProminentLabel,
@@ -3015,7 +3015,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (var)
                     Settings.ProminentLabelFontFace = var
-                    SpellCastBuffs.ApplyFont()
+                    self:ApplyFont()
                 end,
                 width = "full",
                 default = Defaults.ProminentLabelFontFace,
@@ -3036,7 +3036,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ProminentLabelFontSize = value
-                    SpellCastBuffs.ApplyFont()
+                    self:ApplyFont()
                 end,
                 width = "full",
                 default = Defaults.ProminentLabelFontSize,
@@ -3057,7 +3057,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (var)
                     Settings.ProminentLabelFontStyle = var
-                    SpellCastBuffs.ApplyFont()
+                    self:ApplyFont()
                 end,
                 width = "full",
                 default = Defaults.ProminentLabelFontStyle,
@@ -3075,7 +3075,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ProminentProgress = value
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "full",
                 default = Defaults.ProminentProgress,
@@ -3096,7 +3096,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.ProminentProgressTexture = value
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "full",
                 default = Defaults.ProminentProgressTexture,
@@ -3114,7 +3114,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (r, g, b, a)
                     Settings.ProminentProgressBuffC1 = { r, g, b, a }
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "half",
                 default =
@@ -3138,7 +3138,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (r, g, b, a)
                     Settings.ProminentProgressBuffC2 = { r, g, b, a }
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "half",
                 default =
@@ -3163,7 +3163,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (r, g, b, a)
                     Settings.ProminentProgressBuffPriorityC1 = { r, g, b, a }
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "half",
                 default =
@@ -3187,7 +3187,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (r, g, b, a)
                     Settings.ProminentProgressBuffPriorityC2 = { r, g, b, a }
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "half",
                 default =
@@ -3212,7 +3212,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (r, g, b, a)
                     Settings.ProminentProgressDebuffC1 = { r, g, b, a }
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "half",
                 default =
@@ -3236,7 +3236,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (r, g, b, a)
                     Settings.ProminentProgressDebuffC2 = { r, g, b, a }
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "half",
                 default =
@@ -3261,7 +3261,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (r, g, b, a)
                     Settings.ProminentProgressDebuffPriorityC1 = { r, g, b, a }
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "half",
                 default =
@@ -3285,7 +3285,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (r, g, b, a)
                     Settings.ProminentProgressDebuffPriorityC2 = { r, g, b, a }
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "half",
                 default =
@@ -3312,7 +3312,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (var)
                     Settings.ProminentBuffLabelDirection = var
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "full",
                 default = Defaults.ProminentBuffLabelDirection,
@@ -3332,7 +3332,7 @@ function SpellCastBuffs.CreateSettings()
                 end,
                 setFunc = function (var)
                     Settings.ProminentDebuffLabelDirection = var
-                    SpellCastBuffs.Reset()
+                    self:Reset()
                 end,
                 width = "full",
                 default = Defaults.ProminentDebuffLabelDirection,
@@ -3354,7 +3354,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFF_ADDLIST_TP),
                 getFunc = function () end,
                 setFunc = function (value)
-                    SpellCastBuffs.AddToCustomList(Settings.PromBuffTable, value)
+                    self:AddToCustomList(Settings.PromBuffTable, value)
                     LUIE_Prominent_Buffs_List:UpdateChoices(GenerateCustomList(Settings.PromBuffTable))
                 end,
                 disabled = function ()
@@ -3374,7 +3374,7 @@ function SpellCastBuffs.CreateSettings()
                     LUIE_Prominent_Buffs_List:UpdateChoices(GenerateCustomList(Settings.PromBuffTable))
                 end,
                 setFunc = function (value)
-                    SpellCastBuffs.RemoveFromCustomList(Settings.PromBuffTable, value)
+                    self:RemoveFromCustomList(Settings.PromBuffTable, value)
                     LUIE_Prominent_Buffs_List:UpdateChoices(GenerateCustomList(Settings.PromBuffTable))
                 end,
                 disabled = function ()
@@ -3399,7 +3399,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFF_ADDLIST_TP),
                 getFunc = function () end,
                 setFunc = function (value)
-                    SpellCastBuffs.AddToCustomList(Settings.PromDebuffTable, value)
+                    self:AddToCustomList(Settings.PromDebuffTable, value)
                     LUIE_Prominent_Debuffs_List:UpdateChoices(GenerateCustomList(Settings.PromDebuffTable))
                 end,
                 disabled = function ()
@@ -3419,7 +3419,7 @@ function SpellCastBuffs.CreateSettings()
                     LUIE_Prominent_Debuffs_List:UpdateChoices(GenerateCustomList(Settings.PromDebuffTable))
                 end,
                 setFunc = function (value)
-                    SpellCastBuffs.RemoveFromCustomList(Settings.PromDebuffTable, value)
+                    self:RemoveFromCustomList(Settings.PromDebuffTable, value)
                     LUIE_Prominent_Debuffs_List:UpdateChoices(GenerateCustomList(Settings.PromDebuffTable))
                 end,
                 disabled = function ()
@@ -3457,7 +3457,7 @@ function SpellCastBuffs.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_BUFF),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_BUFF_TP),
                 func = function ()
-                    SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MinorBuffs)
+                    self:AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MinorBuffs)
                     LUIE_Blacklist:UpdateChoices(GenerateCustomList(Settings.BlacklistTable))
                 end,
                 width = "half",
@@ -3471,7 +3471,7 @@ function SpellCastBuffs.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_BUFF),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_BUFF_TP),
                 func = function ()
-                    SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MajorBuffs)
+                    self:AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MajorBuffs)
                     LUIE_Blacklist:UpdateChoices(GenerateCustomList(Settings.BlacklistTable))
                 end,
                 width = "half",
@@ -3485,7 +3485,7 @@ function SpellCastBuffs.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_DEBUFF),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_DEBUFF_TP),
                 func = function ()
-                    SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MinorDebuffs)
+                    self:AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MinorDebuffs)
                     LUIE_Blacklist:UpdateChoices(GenerateCustomList(Settings.BlacklistTable))
                 end,
                 width = "half",
@@ -3499,7 +3499,7 @@ function SpellCastBuffs.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_DEBUFF),
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_DEBUFF_TP),
                 func = function ()
-                    SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MajorDebuffs)
+                    self:AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MajorDebuffs)
                     LUIE_Blacklist:UpdateChoices(GenerateCustomList(Settings.BlacklistTable))
                 end,
                 width = "half",
@@ -3524,7 +3524,7 @@ function SpellCastBuffs.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
                 getFunc = function () end,
                 setFunc = function (value)
-                    SpellCastBuffs.AddToCustomList(Settings.BlacklistTable, value)
+                    self:AddToCustomList(Settings.BlacklistTable, value)
                     LUIE_Blacklist:UpdateChoices(GenerateCustomList(Settings.BlacklistTable))
                 end,
                 disabled = function ()
@@ -3544,7 +3544,7 @@ function SpellCastBuffs.CreateSettings()
                     LUIE_Blacklist:UpdateChoices(GenerateCustomList(Settings.BlacklistTable))
                 end,
                 setFunc = function (value)
-                    SpellCastBuffs.RemoveFromCustomList(Settings.BlacklistTable, value)
+                    self:RemoveFromCustomList(Settings.BlacklistTable, value)
                     LUIE_Blacklist:UpdateChoices(GenerateCustomList(Settings.BlacklistTable))
                 end,
                 disabled = function ()
@@ -3574,7 +3574,7 @@ function SpellCastBuffs.CreateSettings()
         end,
         setFunc = function (value)
             Settings.ShowDebugAbilityId = value
-            SpellCastBuffs.Reset()
+            self:Reset()
         end,
         width = "full",
         default = Defaults.ShowDebugAbilityId,
@@ -3594,7 +3594,7 @@ function SpellCastBuffs.CreateSettings()
         end,
         setFunc = function (value)
             Settings.ShowDebugCombat = value
-            SpellCastBuffs.RegisterDebugEvents()
+            self:RegisterDebugEvents()
         end,
         width = "full",
         default = Defaults.ShowDebugCombat,
@@ -3614,7 +3614,7 @@ function SpellCastBuffs.CreateSettings()
         end,
         setFunc = function (value)
             Settings.ShowDebugEffect = value
-            SpellCastBuffs.RegisterDebugEvents()
+            self:RegisterDebugEvents()
         end,
         width = "full",
         default = Defaults.ShowDebugEffect,

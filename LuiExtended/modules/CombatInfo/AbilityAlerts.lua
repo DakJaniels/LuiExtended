@@ -8,7 +8,11 @@ local LUIE = LUIE
 --- @class (partial) LUIE.CombatInfo
 local CombatInfo = LUIE.CombatInfo
 --- @class (partial) AbilityAlerts
-local AbilityAlerts = CombatInfo.AbilityAlerts
+local AbilityAlerts = {}
+--- @class (partial) AbilityAlerts
+CombatInfo.AbilityAlerts = AbilityAlerts
+local moduleName = LUIE.name .. "CombatInfo" .. "AbilityAlerts"
+AbilityAlerts.name = moduleName
 
 local UI = LUIE.UI
 local Effects = LuiData.Data.Effects
@@ -25,9 +29,8 @@ local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
 local windowManager = GetWindowManager()
 
-local moduleName = LUIE.name .. "CombatInfo"
-
 local uiTlw = {}  -- GUI
+AbilityAlerts.uiTlw = uiTlw
 local refireDelay = {}
 local g_alertFont -- Font for Alerts
 local g_inDuel    -- Tracker for whether the player is in a duel or not

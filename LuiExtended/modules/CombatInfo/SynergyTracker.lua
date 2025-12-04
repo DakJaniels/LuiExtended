@@ -19,7 +19,6 @@ local zo_strformat = zo_strformat
 local string_format = string.format
 
 local eventManager = GetEventManager()
-local windowManager = GetWindowManager()
 local sceneManager = SCENE_MANAGER
 local HUD_SCENE = "hud"
 local HUDUI_SCENE = "hudui"
@@ -43,28 +42,27 @@ local HARDCODED_SHARED_COOLDOWNS =
     [88758] = { 26832, 95922, 39301, 88758 }, -- Healing Combustion (Energy Orb)
 }
 
---- @class SynergyTracker : ZO_DeferredInitializingObject
+--- @class SynergyTracker : ZO_Object
 --- @field control TopLevelWindow Main UI control
---- @field fragment ZO_FadeSceneFragment Scene fragment for HUD integration
---- @field bg Control Background control for unlock mode
+--- @field bg LUIE_SynergyTracker_UI_Background Background control for unlock mode
 --- @field activeSynergies table<integer, table> Currently active synergies
 --- @field synergyControls table[] UI controls for each synergy slot
 --- @field synergyCooldowns table<integer, table> Synergies currently on cooldown
 --- @field lastSynergyCount integer Last known synergy count
 --- @field lastCooldownUpdate integer Last cooldown UI update time
 --- @field lastLoggedCooldownCount integer Last logged cooldown count (for debug)
-local SynergyTracker = ZO_DeferredInitializingObject:Subclass()
+local SynergyTracker = ZO_Object:Subclass()
 CombatInfo.SynergyTracker = SynergyTracker
 
 --- Create new SynergyTracker instance
 --- @return SynergyTracker
 function SynergyTracker:New()
-    local obj = ZO_DeferredInitializingObject.New(self)
+    local obj = ZO_Object.New(self)
     obj:Initialize()
     return obj
 end
 
---- Initialize the SynergyTracker (creates control and fragment)
+--- Initialize the SynergyTracker (loads controls from XML, creates fragment, registers events)
 function SynergyTracker:Initialize()
     self.activeSynergies = {}
     self.synergyControls = {}
@@ -72,45 +70,141 @@ function SynergyTracker:Initialize()
     self.synergyCooldowns = {}
     self.lastLoggedCooldownCount = 0
 
-    -- Get or create control (check for existing control first)
-    local controlName = "LUIE_SynergyTracker_UI"
-    local control = windowManager:GetControlByName(controlName)
-
-    if not control then
-        control = windowManager:CreateTopLevelWindow(controlName)
-        control:SetParent(GuiRoot)
-        control:SetDimensions(SYNERGY_ROW_WIDTH, MAX_SYNERGY_SLOTS * SYNERGY_ROW_HEIGHT)
-        control:SetDrawLayer(DL_OVERLAY)
-        control:SetDrawTier(DT_MEDIUM)
-        control:SetDrawLevel(1)
-        control:SetMouseEnabled(false)
-        control:SetClampedToScreen(true)
-        control:SetHidden(true)
+    -- Get control from XML
+    local mainControl = LUIE_SynergyTracker_UI
+    if not mainControl then
+        return
     end
 
-    self.control = control
+    self.control = mainControl
 
-    -- Create scene fragment
-    self.fragment = ZO_FadeSceneFragment:New(control)
+    -- Get background control
+    self.bg = LUIE_SynergyTracker_UI_Background
+    if self.bg then
+        -- Set backdrop colors (XML sets defaults, but we may need to adjust)
+        self.bg:SetCenterColor(0, 0, 0, 0.5)
+        self.bg:SetEdgeColor(0.3, 0.3, 0.3, 0.8)
+        self.bg:SetEdgeTexture("", 1, 1, 0, 0)
+    end
 
-    -- Add fragment to HUD and HUDUI scenes
-    sceneManager:GetScene(HUD_SCENE):AddFragment(self.fragment)
-    sceneManager:GetScene(HUDUI_SCENE):AddFragment(self.fragment)
+    -- Load synergy row controls from XML
+    for i = 1, MAX_SYNERGY_SLOTS do
+        local row = GetControl("LUIE_SynergyTracker_UI_Row" .. i)
+        if row then
+            local iconBg = GetControl("LUIE_SynergyTracker_UI_Row" .. i .. "_IconBg")             --- @type TextureControl
+            local icon = GetControl("LUIE_SynergyTracker_UI_Row" .. i .. "_Icon")                 --- @type TextureControl
+            local posNum = GetControl("LUIE_SynergyTracker_UI_Row" .. i .. "_PosNum")             --- @type LabelControl
+            local name = GetControl("LUIE_SynergyTracker_UI_Row" .. i .. "_Name")                 --- @type LabelControl
+            local priority = GetControl("LUIE_SynergyTracker_UI_Row" .. i .. "_Priority")         --- @type LabelControl
+            local cooldown = GetControl("LUIE_SynergyTracker_UI_Row" .. i .. "_Cooldown")         --- @type CooldownControl
+            local cooldownText = GetControl("LUIE_SynergyTracker_UI_Row" .. i .. "_CooldownText") --- @type LabelControl
 
-    -- Initialize with fragment
-    ZO_DeferredInitializingObject.Initialize(self, self.fragment)
-end
+            -- Set fonts based on platform
+            if name then
+                if IsConsoleUI() or IsInGamepadPreferredMode() then
+                    name:SetFont("$(GAMEPAD_MEDIUM_FONT)|18|soft-shadow-thick")
+                else
+                    name:SetFont("ZoInteractionPrompt")
+                end
+            end
 
---- Deferred initialization (creates UI controls, registers events)
---- Called automatically when HUD scene first shows
-function SynergyTracker:OnDeferredInitialize()
+            if priority then
+                if IsConsoleUI() or IsInGamepadPreferredMode() then
+                    priority:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
+                else
+                    priority:SetFont("ZoFontGame")
+                end
+            end
+
+            if cooldownText then
+                if IsConsoleUI() or IsInGamepadPreferredMode() then
+                    cooldownText:SetFont("$(GAMEPAD_MEDIUM_FONT)|20|soft-shadow-thick")
+                else
+                    cooldownText:SetFont("ZoFontGameBold")
+                end
+            end
+
+            -- Set up tooltip handlers
+            if row then
+                row:SetHandler("OnMouseEnter", function (control)
+                    local abilityId = self.synergyControls[i].abilityId
+                    if abilityId and abilityId > 0 then
+                        InitializeTooltip(GameTooltip, control, BOTTOM, 0, -5, TOP)
+
+                        local abilityName = zo_strformat(SI_ABILITY_NAME, GetAbilityName(abilityId))
+                        GameTooltip:AddLine(abilityName, "ZoFontHeader2", 1, 1, 1, nil)
+
+                        if not IsAbilityPassive(abilityId) then
+                            local description = GetAbilityDescription(abilityId, nil, "player")
+                            if description and description ~= "" then
+                                GameTooltip:SetVerticalPadding(1)
+                                ZO_Tooltip_AddDivider(GameTooltip)
+                                GameTooltip:SetVerticalPadding(5)
+                                GameTooltip:AddLine(description, "", ZO_NORMAL_TEXT:UnpackRGBA())
+                            end
+                        end
+                    end
+                end)
+
+                row:SetHandler("OnMouseExit", function ()
+                    ClearTooltip(GameTooltip)
+                end)
+            end
+
+            self.synergyControls[i] =
+            {
+                row = row,
+                iconBg = iconBg,
+                icon = icon,
+                posNum = posNum,
+                name = name,
+                priority = priority,
+                cooldown = cooldown,
+                cooldownText = cooldownText,
+                abilityId = nil,
+            }
+        end
+    end
+
+    -- Initialize position and settings
     local Settings = CombatInfo.SV.synergy
+
+    -- Register for HUD and HUDUI scene state changes to show/hide control
+    local hudScene = sceneManager:GetScene(HUD_SCENE)
+    local hudUIScene = sceneManager:GetScene(HUDUI_SCENE)
+
+    local function OnSceneStateChange(oldState, newState)
+        local isShown = newState == SCENE_SHOWN
+        if isShown then
+            zo_callLater(function () self:OnShowing() end, 0)
+        else
+            zo_callLater(function () self:OnHidden() end, 0)
+        end
+        -- Show/hide control based on scene state (unless unlocked for positioning)
+        if not Settings.unlocked then
+            self.control:SetHidden(not isShown)
+        end
+    end
+
+    hudScene:RegisterCallback("StateChange", OnSceneStateChange)
+    hudUIScene:RegisterCallback("StateChange", OnSceneStateChange)
+
+    -- Initial state check
+    local currentScene = sceneManager:GetCurrentScene()
+    if currentScene == hudScene or currentScene == hudUIScene then
+        if currentScene:GetState() == SCENE_SHOWN then
+            self:OnShowing()
+        end
+    else
+        self.control:SetHidden(true)
+    end
 
     -- Restore saved position or use default
     if Settings.offsetX and Settings.offsetY then
         self.control:ClearAnchors()
         self.control:SetAnchor(CENTER, GuiRoot, CENTER, Settings.offsetX, Settings.offsetY)
     else
+        self.control:ClearAnchors()
         self.control:SetAnchor(CENTER, GuiRoot, CENTER, 0, 200)
     end
 
@@ -118,167 +212,38 @@ function SynergyTracker:OnDeferredInitialize()
     self.control:SetMovable(Settings.unlocked)
     self.control:SetMouseEnabled(Settings.unlocked)
 
-    -- Background (for visibility when unlocked)
-    local bg = windowManager:CreateControl(nil, self.control, CT_BACKDROP)
-    bg:SetAnchorFill()
-    bg:SetCenterColor(0, 0, 0, 0.5)
-    bg:SetEdgeColor(0.3, 0.3, 0.3, 0.8)
-    bg:SetEdgeTexture("", 1, 1, 0, 0)
-    bg:SetHidden(not Settings.unlocked)
-    self.bg = bg
-
-    -- Create synergy display rows with delays to avoid CPU budget exceeded errors
-    local function CreateSynergyControl(i)
-        local row = windowManager:CreateControl("LUIE_SynergyRow" .. i, self.control, CT_CONTROL)
-        row:SetDimensions(SYNERGY_ROW_WIDTH, SYNERGY_ROW_HEIGHT)
-        row:SetAnchor(TOP, self.control, TOP, 0, (i - 1) * SYNERGY_ROW_HEIGHT)
-        row:SetMouseEnabled(true)
-        row:SetHidden(true)
-
-        -- Icon background
-        local iconBg = windowManager:CreateControl(nil, row, CT_TEXTURE)
-        iconBg:SetDimensions(SYNERGY_ICON_SIZE, SYNERGY_ICON_SIZE)
-        iconBg:SetAnchor(LEFT, row, LEFT, 2, 0)
-        iconBg:SetTexture("EsoUI/Art/ActionBar/abilityFrame64_up.dds")
-
-        -- Icon
-        local icon = windowManager:CreateControl(nil, iconBg, CT_TEXTURE)
-        icon:SetDimensions(SYNERGY_ICON_SIZE - 4, SYNERGY_ICON_SIZE - 4)
-        icon:SetAnchor(CENTER, iconBg, CENTER, 0, 0)
-
-        -- Position number (optional)
-        local posNum = windowManager:CreateControl(nil, row, CT_LABEL)
-        posNum:SetFont("ZoFontGamepad27")
-        posNum:SetAnchor(LEFT, iconBg, RIGHT, 5, 0)
-        posNum:SetText(i)
-        posNum:SetColor(1, 1, 0.5, 1)
-        posNum:SetHidden(not Settings.showKeybinds)
-
-        -- Synergy name/prompt
-        local name = windowManager:CreateControl(nil, row, CT_LABEL)
-        if IsConsoleUI() or IsInGamepadPreferredMode() then
-            name:SetFont("$(GAMEPAD_MEDIUM_FONT)|18|soft-shadow-thick")
-        else
-            name:SetFont("ZoInteractionPrompt")
-        end
-        name:SetAnchor(LEFT, posNum, RIGHT, 8, 0)
-        name:SetDimensionConstraints(0, 0, 200, SYNERGY_ROW_HEIGHT)
-        name:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
-        name:SetVerticalAlignment(TEXT_ALIGN_CENTER)
-
-        -- Priority indicator
-        local priority = windowManager:CreateControl(nil, row, CT_LABEL)
-        if IsConsoleUI() or IsInGamepadPreferredMode() then
-            priority:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
-        else
-            priority:SetFont("ZoFontGame")
-        end
-        priority:SetAnchor(RIGHT, row, RIGHT, -5, 0)
-        priority:SetColor(0.7, 0.7, 0.7, 1)
-        priority:SetHidden(not Settings.showPriority)
-
-        -- Cooldown overlay (vertical reveal on icon)
-        local cooldown = windowManager:CreateControl(nil, icon, CT_COOLDOWN)
-        cooldown:SetDrawLayer(DL_OVERLAY)
-        cooldown:SetDrawTier(DT_MEDIUM)
-        cooldown:SetAnchorFill(icon)
-        cooldown:SetTexture("EsoUI/Art/ActionBar/abilityHighlight.dds")
-        cooldown:SetFillColor(0, 0, 0, 0.7)
-        cooldown:SetDesaturation(1)
-        cooldown:SetHidden(true)
-
-        -- Cooldown text (shows time remaining)
-        local cooldownText = windowManager:CreateControl(nil, iconBg, CT_LABEL)
-        if IsConsoleUI() or IsInGamepadPreferredMode() then
-            cooldownText:SetFont("$(GAMEPAD_MEDIUM_FONT)|20|soft-shadow-thick")
-        else
-            cooldownText:SetFont("ZoFontGameBold")
-        end
-        cooldownText:SetAnchor(CENTER, iconBg, CENTER, 0, 0)
-        cooldownText:SetColor(1, 1, 1, 1)
-        cooldownText:SetDrawLayer(DL_OVERLAY)
-        cooldownText:SetDrawTier(DT_MEDIUM)
-        cooldownText:SetHidden(true)
-
-        -- Tooltip handlers
-        row:SetHandler("OnMouseEnter", function (control)
-            local abilityId = self.synergyControls[i].abilityId
-            if abilityId and abilityId > 0 then
-                InitializeTooltip(GameTooltip, control, BOTTOM, 0, -5, TOP)
-
-                local abilityName = zo_strformat(SI_ABILITY_NAME, GetAbilityName(abilityId))
-                GameTooltip:AddLine(abilityName, "ZoFontHeader2", 1, 1, 1, nil)
-
-                if not IsAbilityPassive(abilityId) then
-                    local description = GetAbilityDescription(abilityId, nil, "player")
-                    if description and description ~= "" then
-                        GameTooltip:SetVerticalPadding(1)
-                        ZO_Tooltip_AddDivider(GameTooltip)
-                        GameTooltip:SetVerticalPadding(5)
-                        GameTooltip:AddLine(description, "", ZO_NORMAL_TEXT:UnpackRGBA())
-                    end
-                end
-            end
-        end)
-
-        row:SetHandler("OnMouseExit", function (control)
-            ClearTooltip(GameTooltip)
-        end)
-
-        self.synergyControls[i] =
-        {
-            row = row,
-            iconBg = iconBg,
-            icon = icon,
-            posNum = posNum,
-            name = name,
-            priority = priority,
-            cooldown = cooldown,
-            cooldownText = cooldownText,
-            abilityId = nil,
-        }
-    end
-
-    -- Create synergy controls with delays to avoid CPU budget exceeded errors
-    for i = 1, MAX_SYNERGY_SLOTS do
-        zo_callLater(function () CreateSynergyControl(i) end, (i - 1) * 10)
+    -- Set background visibility
+    if self.bg then
+        self.bg:SetHidden(not Settings.unlocked)
     end
 
     -- Unlock/lock handlers
     if IsConsoleUI() and LUIE.ConsoleMoverHelper then
-        -- Console version: Create preview elements and set up gamepad handler
+        -- Console version: Get preview elements from XML
         local MoverHelper = LUIE.ConsoleMoverHelper
-        local UI = LUIE.UI
+        local preview = LUIE_SynergyTracker_UI_Preview
+        local coordLabel = LUIE_SynergyTracker_UI_Preview_CoordLabel
+        local previewLabel = LUIE_SynergyTracker_UI_Preview_Label
 
-        -- Create preview backdrop
-        local preview = UI:Backdrop(self.control, "fill", nil, nil, nil, true)
-        preview:SetCenterColor(0.05, 0.6, 0.9, 0.25)
-        preview:SetEdgeColor(0.05, 0.6, 0.9, 0.9)
-        preview:SetEdgeTexture("", 1, 1, 0, 0)
-        preview:SetHidden(true)
-        self.control.preview = preview
+        if preview then
+            self.control.preview = preview
+            if coordLabel then
+                preview.coordLabel = coordLabel
+            end
+            if previewLabel then
+                self.control.previewLabel = previewLabel
+            end
 
-        -- Create coordinate label
-        local coordLabel = UI:Label(preview, { TOPLEFT, TOPLEFT }, nil, { 4, 4 }, "ZoFontGameSmall", "xxx, yyy", false)
-        coordLabel:SetColor(1, 1, 0, 1)
-        coordLabel:SetDrawLayer(DL_OVERLAY)
-        coordLabel:SetDrawTier(DT_MEDIUM)
-        preview.coordLabel = coordLabel
-
-        -- Create name label
-        local previewLabel = UI:Label(preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", "Synergy Tracker", false)
-        previewLabel:SetColor(1, 1, 1, 1)
-        previewLabel:SetDrawLayer(DL_OVERLAY)
-        previewLabel:SetDrawTier(DT_MEDIUM)
-        self.control.previewLabel = previewLabel
-
-        -- Update coordinate label during movement
-        self.control:SetHandler("OnMoveStart", function ()
-            eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
-                local left, top = self.control:GetLeft(), self.control:GetTop()
-                preview.coordLabel:SetText(zo_strformat("<<1>>, <<2>>", left, top))
+            -- Update coordinate label during movement
+            self.control:SetHandler("OnMoveStart", function ()
+                eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
+                    local left, top = self.control:GetLeft(), self.control:GetTop()
+                    if coordLabel then
+                        coordLabel:SetText(zo_strformat("<<1>>, <<2>>", left, top))
+                    end
+                end)
             end)
-        end)
+        end
 
         self.control:SetHandler("OnMoveStop", function ()
             eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
@@ -316,6 +281,7 @@ function SynergyTracker:OnDeferredInitialize()
 
     -- Cooldown timer update loop (updates every second)
     self.lastCooldownUpdate = 0
+    -- Note: OnUpdate is handled in XML, but we'll also set it here for safety
     self.control:SetHandler("OnUpdate", function ()
         local currentTime = GetGameTimeMilliseconds()
         if currentTime - self.lastCooldownUpdate >= 1000 then
@@ -344,8 +310,29 @@ function SynergyTracker:OnDeferredInitialize()
     -- Clean up any corrupted cooldown groups from old logic
     self:CleanupCorruptedCooldownGroups()
 
-    -- Initial synergy check (deferred until all controls are created)
+    -- Initial synergy check
     zo_callLater(function () self:RefreshActiveSynergies() end, 100)
+end
+
+--- Static handler for OnMoveStop from XML
+function SynergyTracker.OnMoveStop()
+    if CombatInfo.SynergyTrackerInstance then
+        local Settings = CombatInfo.SV.synergy
+        local centerX, centerY = CombatInfo.SynergyTrackerInstance.control:GetCenter()
+        Settings.offsetX = centerX - GuiRoot:GetWidth() / 2
+        Settings.offsetY = centerY - GuiRoot:GetHeight() / 2
+    end
+end
+
+--- Static handler for OnUpdate from XML
+function SynergyTracker.OnUpdate(control)
+    if CombatInfo.SynergyTrackerInstance then
+        local currentTime = GetGameTimeMilliseconds()
+        if currentTime - CombatInfo.SynergyTrackerInstance.lastCooldownUpdate >= 1000 then
+            CombatInfo.SynergyTrackerInstance.lastCooldownUpdate = currentTime
+            CombatInfo.SynergyTrackerInstance:UpdateCooldownDisplay()
+        end
+    end
 end
 
 --- Called when HUD scene is showing
@@ -430,12 +417,16 @@ end
 
 --- Update the multi-synergy display
 function SynergyTracker:UpdateDisplay()
-    -- Don't update display if fragment isn't showing (not in HUD/HUDUI scene)
-    if not self.fragment:IsShowing() then
+    -- Don't update display if not in HUD/HUDUI scene
+    local currentScene = sceneManager:GetCurrentScene()
+    if currentScene ~= sceneManager:GetScene(HUD_SCENE) and currentScene ~= sceneManager:GetScene(HUDUI_SCENE) then
+        return
+    end
+    if currentScene:GetState() ~= SCENE_SHOWN then
         return
     end
 
-    -- Don't update if synergy controls haven't been created yet (deferred initialization)
+    -- Don't update if synergy controls haven't been loaded yet
     if not self.synergyControls or not self.synergyControls[1] then
         return
     end
@@ -449,8 +440,12 @@ function SynergyTracker:UpdateDisplay()
         local control = self.synergyControls[i]
         if control then
             control.row:SetHidden(true)
-            control.cooldown:SetHidden(true)
-            control.cooldownText:SetHidden(true)
+            if control.cooldown then
+                control.cooldown:SetHidden(true)
+            end
+            if control.cooldownText then
+                control.cooldownText:SetHidden(true)
+            end
         end
     end
 
@@ -459,11 +454,21 @@ function SynergyTracker:UpdateDisplay()
 
         if hasSynergy and self.synergyControls[1] then
             local control = self.synergyControls[1]
-            control.icon:SetTexture(iconFilename)
-            control.name:SetText(prompt ~= "" and prompt or synergyName)
-            control.priority:SetHidden(true)
-            control.cooldown:SetHidden(true)
-            control.cooldownText:SetHidden(true)
+            if control.icon then
+                control.icon:SetTexture(iconFilename)
+            end
+            if control.name then
+                control.name:SetText(prompt ~= "" and prompt or synergyName)
+            end
+            if control.priority then
+                control.priority:SetHidden(true)
+            end
+            if control.cooldown then
+                control.cooldown:SetHidden(true)
+            end
+            if control.cooldownText then
+                control.cooldownText:SetHidden(true)
+            end
             control.row:SetHidden(false)
         end
 
@@ -549,32 +554,40 @@ function SynergyTracker:UpdateDisplay()
             break
         end
 
-        control.icon:SetTexture(synergyData.icon)
+        if control.icon then
+            control.icon:SetTexture(synergyData.icon)
+        end
 
         local displayText = synergyData.prompt
         if displayText == "" or displayMode == "compact" then
             displayText = synergyData.name
         end
 
-        control.name:SetText(displayText)
+        if control.name then
+            control.name:SetText(displayText)
+        end
 
-        if Settings.showPriority then
+        if Settings.showPriority and control.priority then
             control.priority:SetText(string_format("P%d", synergyData.priority))
             control.priority:SetHidden(false)
-        else
+        elseif control.priority then
             control.priority:SetHidden(true)
         end
 
-        control.posNum:SetHidden(not Settings.showKeybinds)
+        if control.posNum then
+            control.posNum:SetHidden(not Settings.showKeybinds)
+        end
 
-        if synergyData.isActive and synergyData.canBeUsed then
-            control.icon:SetDesaturation(0)
-        elseif synergyData.isOnCooldown then
-            control.icon:SetDesaturation(1)
-        elseif self.synergyCooldowns[synergyData.abilityId] then
-            control.icon:SetDesaturation(0.3)
-        else
-            control.icon:SetDesaturation(0.6)
+        if control.icon then
+            if synergyData.isActive and synergyData.canBeUsed then
+                control.icon:SetDesaturation(0)
+            elseif synergyData.isOnCooldown then
+                control.icon:SetDesaturation(1)
+            elseif self.synergyCooldowns[synergyData.abilityId] then
+                control.icon:SetDesaturation(0.3)
+            else
+                control.icon:SetDesaturation(0.6)
+            end
         end
 
         control.abilityId = synergyData.abilityId
@@ -606,25 +619,37 @@ function SynergyTracker:UpdateCooldownDisplay()
             local remaining = cooldownData.duration - elapsed
 
             if remaining > 0 and Settings.showCooldowns then
-                control.cooldown:StartCooldown(
-                    remaining,
-                    cooldownData.duration,
-                    CD_TYPE_VERTICAL_REVEAL,
-                    CD_TIME_TYPE_TIME_REMAINING,
-                    false
-                )
-                control.cooldown:SetHidden(false)
+                if control.cooldown then
+                    control.cooldown:StartCooldown(
+                        remaining,
+                        cooldownData.duration,
+                        CD_TYPE_VERTICAL_REVEAL,
+                        CD_TIME_TYPE_TIME_REMAINING,
+                        false
+                    )
+                    control.cooldown:SetHidden(false)
+                end
 
-                local seconds = math_ceil(remaining / 1000)
-                control.cooldownText:SetText(string_format("%d", seconds))
-                control.cooldownText:SetHidden(false)
+                if control.cooldownText then
+                    local seconds = math_ceil(remaining / 1000)
+                    control.cooldownText:SetText(string_format("%d", seconds))
+                    control.cooldownText:SetHidden(false)
+                end
             else
-                control.cooldown:SetHidden(true)
-                control.cooldownText:SetHidden(true)
+                if control.cooldown then
+                    control.cooldown:SetHidden(true)
+                end
+                if control.cooldownText then
+                    control.cooldownText:SetHidden(true)
+                end
             end
         else
-            control.cooldown:SetHidden(true)
-            control.cooldownText:SetHidden(true)
+            if control.cooldown then
+                control.cooldown:SetHidden(true)
+            end
+            if control.cooldownText then
+                control.cooldownText:SetHidden(true)
+            end
         end
     end
 end
@@ -878,7 +903,9 @@ function SynergyTracker:SetUnlocked(unlocked)
             end
 
             -- When locking, hide preview and return to normal display
-            if not self.fragment:IsShowing() then
+            local currentScene = sceneManager:GetCurrentScene()
+            local isInHUDScene = currentScene == sceneManager:GetScene(HUD_SCENE) or currentScene == sceneManager:GetScene(HUDUI_SCENE)
+            if not isInHUDScene or currentScene:GetState() ~= SCENE_SHOWN then
                 -- If we're not in HUD/HUDUI scene, hide the control
                 self.control:SetHidden(true)
             else
@@ -892,13 +919,17 @@ function SynergyTracker:SetUnlocked(unlocked)
         -- PC version
         self.control:SetMovable(unlocked)
         self.control:SetMouseEnabled(unlocked)
-        self.bg:SetHidden(not unlocked)
+        if self.bg then
+            self.bg:SetHidden(not unlocked)
+        end
 
         if unlocked then
             self:ShowPreview()
         else
             -- When locking, hide preview and return to normal display
-            if not self.fragment:IsShowing() then
+            local currentScene = sceneManager:GetCurrentScene()
+            local isInHUDScene = currentScene == sceneManager:GetScene(HUD_SCENE) or currentScene == sceneManager:GetScene(HUDUI_SCENE)
+            if not isInHUDScene or currentScene:GetState() ~= SCENE_SHOWN then
                 -- If we're not in HUD/HUDUI scene, hide the control
                 self.control:SetHidden(true)
             else
@@ -913,11 +944,19 @@ function SynergyTracker:ShowPreview()
     for i = 1, MAX_SYNERGY_SLOTS do
         local control = self.synergyControls[i]
         if control then
-            control.icon:SetTexture("esoui/art/icons/ability_undaunted_001.dds")
-            control.name:SetText(string_format("Preview Synergy %d", i))
-            control.priority:SetText(string_format("P%d", i))
-            control.icon:SetDesaturation(0)
-            control.name:SetColor(1, 1, 1, 1)
+            if control.icon then
+                control.icon:SetTexture("esoui/art/icons/ability_undaunted_001.dds")
+            end
+            if control.name then
+                control.name:SetText(string_format("Preview Synergy %d", i))
+                control.name:SetColor(1, 1, 1, 1)
+            end
+            if control.priority then
+                control.priority:SetText(string_format("P%d", i))
+            end
+            if control.icon then
+                control.icon:SetDesaturation(0)
+            end
             control.row:SetHidden(false)
         end
     end
@@ -930,9 +969,6 @@ function SynergyTracker:ShowPreview()
     end
 
     -- Force show when in unlock mode (even outside HUD scenes for positioning)
-    if not self.fragment:IsShowing() then
-        self.fragment:Show()
-    end
     self.control:SetHidden(false)
 end
 
@@ -953,8 +989,12 @@ function SynergyTracker:UpdateDisplayOptions()
     for i = 1, MAX_SYNERGY_SLOTS do
         local control = self.synergyControls[i]
         if control then
-            control.posNum:SetHidden(not Settings.showKeybinds)
-            control.priority:SetHidden(not Settings.showPriority)
+            if control.posNum then
+                control.posNum:SetHidden(not Settings.showKeybinds)
+            end
+            if control.priority then
+                control.priority:SetHidden(not Settings.showPriority)
+            end
         end
     end
 

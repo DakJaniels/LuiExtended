@@ -19,6 +19,7 @@
 --- @field Defaults LUIE_Defaults_SV Default settings
 --- @field SV LUIE_Defaults_SV Current saved variables
 --- @field UI LUIE.UI
+--- @field GridOverlay LUIE.GridOverlay
 LUIE = {}
 LUIE.__index = LUIE
 -- -----------------------------------------------------------------------------
@@ -27,7 +28,7 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.1.3.7"
+LUIE.version = "7.1.3.8"
 LUIE.author = "ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
 LUIE.github = "https://github.com/DakJaniels/LuiExtended"

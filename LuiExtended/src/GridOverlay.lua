@@ -1,5 +1,12 @@
+-- -----------------------------------------------------------------------------
+--  LuiExtended                                                               --
+--  Distributed under The MIT License (MIT) (see LICENSE file)                --
+-- -----------------------------------------------------------------------------
+
+--- @class (partial) LuiExtended
 local LUIE = LUIE
 
+---@class LUIE.GridOverlay
 local GridOverlay = {}
 GridOverlay.__index = GridOverlay
 
@@ -171,6 +178,7 @@ function GridOverlay:Refresh(visible, size)
     self:UpdateLines(effectiveSize)
 end
 
+---@class LUIE.GridOverlayManager
 local GridOverlayManager =
 {
     overlays = {},
@@ -210,6 +218,7 @@ function GridOverlayManager.HideAll()
     end
 end
 
+---@class LUIE.GridOverlayManager
 LUIE.GridOverlay = GridOverlayManager
 
 return GridOverlayManager

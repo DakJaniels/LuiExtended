@@ -4048,43 +4048,46 @@ function ChatAnnouncements.HookFunction()
     ChatAnnouncements.PlayerToPlayerHook()
 
 
-    -- Required when hooking ZO_MailSend_Gamepad:IsValid()
-    -- Returns whether there is any item attached.
-    local function IsAnyItemAttached(bagId, slotIndex)
+    -- Helper to create formatted name link for mail target
+    local function CreateMailTargetLink(targetName)
+        local nameLink
+        if zo_strmatch(targetName, "@") == "@" then
+            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(targetName, nil, DISPLAY_NAME_LINK_TYPE, targetName)
+            else
+                nameLink = ZO_LinkHandler_CreateLink(targetName, nil, DISPLAY_NAME_LINK_TYPE, targetName)
+            end
+        else
+            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(targetName, nil, CHARACTER_LINK_TYPE, targetName)
+            else
+                nameLink = ZO_LinkHandler_CreateLink(targetName, nil, CHARACTER_LINK_TYPE, targetName)
+            end
+        end
+        return ZO_SELECTED_TEXT:Colorize(nameLink)
+    end
+
+    -- Returns whether there is any item attached
+    local function IsAnyItemAttached()
         for i = 1, MAIL_MAX_ATTACHED_ITEMS do
             local queuedFromBag = GetQueuedItemAttachmentInfo(i)
-            if queuedFromBag ~= 0 then -- Slot is filled.
+            if queuedFromBag ~= 0 then
                 return true
             end
         end
         return false
     end
 
-    -- Hook Gamepad mail name function
+    -- Hook Gamepad mail validation
     local orgIsMailValid = ZO_MailSend_Gamepad.IsMailValid
     --- @diagnostic disable-next-line: duplicate-set-field
     function ZO_MailSend_Gamepad:IsMailValid(...)
-        orgIsMailValid(self, ...)
         local to = self.mailView:GetAddress()
         if (not to) or (to == "") then
             return false
         end
 
-        local nameLink
-        if zo_strmatch(to, "@") == "@" then
-            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(to, nil, DISPLAY_NAME_LINK_TYPE, to)
-            else
-                nameLink = ZO_LinkHandler_CreateLink(to, nil, DISPLAY_NAME_LINK_TYPE, to)
-            end
-        else
-            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(to, nil, CHARACTER_LINK_TYPE, to)
-            else
-                nameLink = ZO_LinkHandler_CreateLink(to, nil, CHARACTER_LINK_TYPE, to)
-            end
-        end
-        ChatAnnouncements.mailTarget = ZO_SELECTED_TEXT:Colorize(nameLink)
+        ChatAnnouncements.mailTarget = CreateMailTargetLink(to)
 
         local subject = self.mailView:GetSubject()
         local hasSubject = subject and (subject ~= "")
@@ -4093,48 +4096,32 @@ function ChatAnnouncements.HookFunction()
         return hasSubject or hasBody or (GetQueuedMoneyAttachment() > 0) or IsAnyItemAttached()
     end
 
-    -- Hook MAIL_SEND.Send to get name of player we send to.
+    -- Hook MAIL_SEND.Send to capture mail target and validate COD
     if MAIL_SEND then
-        do
-            local originalSend = MAIL_SEND.Send
-            --- @diagnostic disable-next-line: duplicate-set-field
-            function MAIL_SEND:Send(...)
-                -- if LUIE.IsDevDebugEnabled() then
-                --     LUIE.Debug("MAIL_SEND:Send has been hooked!")
-                -- end
-                windowManager:SetFocusByName("")
+        local originalSend = MAIL_SEND.Send
+        --- @diagnostic disable-next-line: duplicate-set-field
+        function MAIL_SEND:Send(...)
+            windowManager:SetFocusByName("")
 
-                if not self.sendMoneyMode and GetQueuedCOD() == 0 then
-                    if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
-                        printToChat(GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE), true)
-                    end
-                    if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
-                        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE))
-                    end
-                    PlaySound(SOUNDS.NEGATIVE_CLICK)
-                else
-                    SendMail(self.to:GetText(), self.subject:GetText(), self.body:GetText())
-
-                    local mailTarget = self.to:GetText()
-                    local nameLink
-                    -- Here we look for @ character in the sent mail, if the player send to an account then we want the link to be an account name link, otherwise, it's a character name link.
-                    if zo_strmatch(mailTarget, "@") == "@" then
-                        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                            nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(mailTarget, nil, DISPLAY_NAME_LINK_TYPE, mailTarget)
-                        else
-                            nameLink = ZO_LinkHandler_CreateLink(mailTarget, nil, DISPLAY_NAME_LINK_TYPE, mailTarget)
-                        end
-                    else
-                        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                            nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(mailTarget, nil, CHARACTER_LINK_TYPE, mailTarget)
-                        else
-                            nameLink = ZO_LinkHandler_CreateLink(mailTarget, nil, CHARACTER_LINK_TYPE, mailTarget)
-                        end
-                    end
-                    ChatAnnouncements.mailTarget = ZO_SELECTED_TEXT:Colorize(nameLink)
+            -- Validate COD mode
+            if not self.sendMoneyMode and GetQueuedCOD() == 0 then
+                if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
+                    printToChat(GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE), true)
                 end
-                originalSend(self, ...)
+                if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+                    ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE))
+                end
+                PlaySound(SOUNDS.NEGATIVE_CLICK)
+                return
             end
+
+            -- Capture mail target
+            local mailTarget = self.to:GetText()
+            ChatAnnouncements.mailTarget = CreateMailTargetLink(mailTarget)
+
+            -- Send the mail
+            SendMail(self.to:GetText(), self.subject:GetText(), self.body:GetText())
+            originalSend(self, ...)
         end
     end
     ---
@@ -4183,7 +4170,7 @@ function ChatAnnouncements.HookFunction()
         inventory.slots[questIndex] = nil
     end
 
-    -- Called by hooked TryGroupInviteByName function
+    -- Custom CompleteGroupInvite with enhanced chat announcements
     -- TODO: Maybe see about links for names here for non-menu
     local function CompleteGroupInvite(characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
         local isLeader = IsUnitGroupLeader("player")
@@ -4215,20 +4202,15 @@ function ChatAnnouncements.HookFunction()
         end
     end
 
-    -- HOOK Group Invite function so we can modify CA/Alert here
-    ---
-    --- @param characterOrDisplayName string
-    --- @param sentFromChat boolean
-    --- @param displayInvitedMessage boolean
-    --- @param isMenu boolean
-    TryGroupInviteByName = function (characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
+    -- Hook TryGroupInviteByName to add custom chat announcements and handle isMenu parameter
+    ZO_PreHook("TryGroupInviteByName", function(characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
         if IsPlayerInGroup(characterOrDisplayName) then
             printToChat(GetString(SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER), true)
             if ChatAnnouncements.SV.Group.GroupAlert then
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER)
             end
             PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
-            return
+            return true -- Prevent original from running
         end
 
         local isLeader = IsUnitGroupLeader("player")
@@ -4236,7 +4218,7 @@ function ChatAnnouncements.HookFunction()
 
         if not isLeader and groupSize > 0 then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE))
-            return
+            return true -- Prevent original from running
         end
 
         if IsConsoleUI() then
@@ -4249,6 +4231,7 @@ function ChatAnnouncements.HookFunction()
             end
 
             ZO_ConsoleAttemptInteractOrError(GroupInviteCallback, displayName, ZO_PLAYER_CONSOLE_INFO_REQUEST_DONT_BLOCK, ZO_CONSOLE_CAN_COMMUNICATE_ERROR_ALERT, ZO_ID_REQUEST_TYPE_DISPLAY_NAME, displayName)
+            return true -- Prevent original from running
         else
             if IsIgnored(characterOrDisplayName) then
                 printToChat(GetString(LUIE_STRING_IGNORE_ERROR_GROUP), true)
@@ -4256,26 +4239,27 @@ function ChatAnnouncements.HookFunction()
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, LUIE_STRING_IGNORE_ERROR_GROUP)
                 end
                 PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
-                return
+                return true -- Prevent original from running
             end
 
             CompleteGroupInvite(characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
+            return true -- Prevent original from running
         end
-    end
+    end)
 
     ChatAnnouncements.GuildHooks()
 
-    -- Replace the default DeclineLFGReadyCheckNotification function to display the message that we are not in queue any longer + LFG activity join event.
-    local zos_DeclineLFGReadyCheckNotification = DeclineLFGReadyCheckNotification
-    DeclineLFGReadyCheckNotification = function (self)
-        zos_DeclineLFGReadyCheckNotification()
+    -- Hook DeclineLFGReadyCheckNotification to display the message that we are not in queue any longer + LFG activity join event.
+    local originalDeclineLFGReadyCheckNotification = DeclineLFGReadyCheckNotification
+    DeclineLFGReadyCheckNotification = function()
+        originalDeclineLFGReadyCheckNotification()
 
         local message = (GetString(SI_LFGREADYCHECKCANCELREASON3))
         ChatAnnouncements.showRCUpdates = true
         ChatAnnouncements.weDeclinedTheQueue = true
-        zo_callLater(function ()
-                         ChatAnnouncements.weDeclinedTheQueue = false
-                     end, 1000)
+        zo_callLater(function()
+            ChatAnnouncements.weDeclinedTheQueue = false
+        end, 1000)
 
         if ChatAnnouncements.SV.Group.GroupLFGQueueCA then
             printToChat(message, true)
