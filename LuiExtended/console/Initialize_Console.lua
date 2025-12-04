@@ -116,7 +116,6 @@ end
 --- - **EVENT_ADD_ON_LOADED **
 -- LuiExtended Initialization.
 LUIE_InitControl:RegisterForEvent(EVENT_ADD_ONS_LOADED, function (eventId)
-    d("EVENT_ADD_ONS_LOADED")
     -- -----------------------------------------------------------------------------
     -- Load saved variables
     LoadSavedVars()
