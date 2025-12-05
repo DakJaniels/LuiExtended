@@ -307,12 +307,10 @@ local function CreateFoodDrinkBuffUI(frameData)
         offsetX = customOffsetX
     end
 
+    -- Get the container (already exists in XML)
     local container = frameData.libGroupContainer
-    if not container then
-        container = UI:Control(frameData.control, nil, nil, false)
-        frameData.libGroupContainer = container
-    end
 
+    -- Anchor container to health bar if not already anchored
     local numAnchors = container:GetNumAnchors()
     if numAnchors == 0 then
         container:SetAnchor(anchorPoint, anchorControl, anchorRelPoint, offsetX, offsetY)
@@ -320,14 +318,20 @@ local function CreateFoodDrinkBuffUI(frameData)
 
     frameData.foodDrinkBuff = {}
 
-    local backdrop = UI:Backdrop(
-        container,
-        { LEFT, LEFT },
-        { iconSize, iconSize },
-        nil,
-        { 0, 0, 0, 0.8 },
-        true
-    )
+    -- Get food/drink controls from XML
+    local backdrop = container:GetNamedChild("_FoodDrinkBackdrop")
+    local icon = backdrop:GetNamedChild("_Icon")
+    local label = backdrop:GetNamedChild("_Label")
+
+    -- Set dimensions based on settings
+    backdrop:SetDimensions(iconSize, iconSize)
+    icon:SetDimensions(iconSize - ICON_BORDER_SIZE, iconSize - ICON_BORDER_SIZE)
+
+    -- Anchor food/drink first in container
+    backdrop:ClearAnchors()
+    backdrop:SetAnchor(LEFT, container, LEFT, 0, 0)
+
+    -- Set draw properties
     backdrop:SetDrawLayer(DL_BACKGROUND)
     backdrop:SetDrawLevel(13)
     backdrop:SetMouseEnabled(true)
@@ -336,6 +340,7 @@ local function CreateFoodDrinkBuffUI(frameData)
     end)
     backdrop:SetHandler("OnMouseExit", HideBuffTooltip)
 
+    -- Reposition ult/potion icons to come after food/drink
     if frameData.combatStats and frameData.combatStats.ult1Backdrop then
         frameData.combatStats.ult1Backdrop:ClearAnchors()
         frameData.combatStats.ult1Backdrop:SetAnchor(LEFT, backdrop, RIGHT, 3, 0)
@@ -357,28 +362,18 @@ local function CreateFoodDrinkBuffUI(frameData)
         end
     end
 
-    local icon = UI:Texture(
-        backdrop,
-        { CENTER, CENTER },
-        { iconSize - ICON_BORDER_SIZE, iconSize - ICON_BORDER_SIZE },
-        nil,
-        DL_OVERLAY,
-        false
-    )
     icon:SetDrawLevel(15)
-    icon:SetHidden(true)
 
+    -- Apply font to label if showRemainingTime is enabled
     local settings = GetSettings()
     if settings and settings.showRemainingTime then
         local fontSize = 12
-        local label = UI:Label(backdrop, { CENTER, BOTTOM, 0, 0 }, nil, { 1, 1 }, nil, "", false)
         label:SetDrawLayer(DL_OVERLAY)
         label:SetDrawLevel(16)
         local rootSettings = Shared.GetSettings()
         local fontFace = LUIE.Fonts[rootSettings.CustomFontFace]
         local fontStyle = rootSettings.CustomFontStyle
         label:SetFont(ZO_CreateFontString(fontFace, fontSize, fontStyle))
-        label:SetHidden(true)
         frameData.foodDrinkBuff.label = label
     end
 

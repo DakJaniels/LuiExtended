@@ -48,46 +48,8 @@ local function AddResourceBarsToFrame(frameData, isRaid)
     local healthBackdrop = Shared.GetHealthBackdrop(frameData)
     if not healthBackdrop then return end
 
-    -- For raid frames, bars are pre-created in _CreateCustomFrames.lua
-    if isRaid then
-        return
-    end
-
-    -- Create magicka bar if it doesn't exist (SmallGroup only)
-    if not frameData.resourceMagicka then
-        local magBackdrop = UI:Backdrop(frameData.control, nil, nil, nil, nil, false)
-        magBackdrop:SetDrawLayer(DL_BACKGROUND)
-        magBackdrop:SetDrawLevel(DL_CONTROLS)
-
-        frameData.resourceMagicka =
-        {
-            ["backdrop"] = magBackdrop,
-            ["bar"] = UI:StatusBar(magBackdrop, nil, nil, nil, false),
-        }
-
-        -- Anchor bar to backdrop with 1px inset (done in _CreateCustomFrames for raid)
-        frameData.resourceMagicka.bar:SetAnchor(TOPLEFT, magBackdrop, TOPLEFT, 1, 1)
-        frameData.resourceMagicka.bar:SetAnchor(BOTTOMRIGHT, magBackdrop, BOTTOMRIGHT, -1, -1)
-        frameData.resourceMagicka.bar:SetHidden(true)
-    end
-
-    -- Create stamina bar if it doesn't exist (SmallGroup only)
-    if not frameData.resourceStamina then
-        local stamBackdrop = UI:Backdrop(frameData.control, nil, nil, nil, nil, false)
-        stamBackdrop:SetDrawLayer(DL_BACKGROUND)
-        stamBackdrop:SetDrawLevel(DL_CONTROLS)
-
-        frameData.resourceStamina =
-        {
-            ["backdrop"] = stamBackdrop,
-            ["bar"] = UI:StatusBar(stamBackdrop, nil, nil, nil, false),
-        }
-
-        -- Anchor bar to backdrop with 1px inset (done in _CreateCustomFrames for raid)
-        frameData.resourceStamina.bar:SetAnchor(TOPLEFT, stamBackdrop, TOPLEFT, 1, 1)
-        frameData.resourceStamina.bar:SetAnchor(BOTTOMRIGHT, stamBackdrop, BOTTOMRIGHT, -1, -1)
-        frameData.resourceStamina.bar:SetHidden(true)
-    end
+    -- Resource bars are now pre-created in XML for both SmallGroup and RaidGroup frames
+    -- No need to create them dynamically anymore
 end
 
 -- Update resource bar appearance and position

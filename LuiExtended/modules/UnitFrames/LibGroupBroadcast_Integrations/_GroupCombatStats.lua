@@ -44,70 +44,88 @@ local function AddCombatStatsToFrame(frameData, isRaid)
     if not frameData.combatStats then
         frameData.combatStats = {}
 
-        -- Ultimate icons (frontbar and backbar)
+        -- Get ultimate icons from XML
         if Settings.showUltimate then
             local iconSize = isRaid and Settings.ultIconRaidSize or Settings.ultIconGroupSize
             local offsetX = isRaid and Settings.ultIconRaidOffsetX or Settings.ultIconGroupOffsetX
             local offsetY = isRaid and Settings.ultIconRaidOffsetY or Settings.ultIconGroupOffsetY
 
-            -- Get or create the container
+            -- Get the container (already exists in XML)
             local container = frameData.libGroupContainer
             if not container then
-                container = UI:Control(frameData.control, nil, nil, false)
-                frameData.libGroupContainer = container
+                -- Fallback: get from control if not set in frameData
+                container = frameData.control and frameData.control:GetNamedChild("_LibGroupContainer") or nil
+                if container then
+                    frameData.libGroupContainer = container
+                else
+                    return -- Can't proceed without container
+                end
             end
 
+            -- Anchor container to health bar if not already anchored
             local numAnchors = container:GetNumAnchors()
             if numAnchors == 0 then
                 container:SetAnchor(LEFT, backdrop, RIGHT, offsetX, offsetY)
             end
 
-            -- Determine anchor within container (after food/drink if it exists)
-            local anchorTarget = container
-            local anchorPoint = LEFT
-            local anchorOffsetX = 0
+            -- Get ult controls from XML
+            frameData.combatStats.ult1Backdrop = container:GetNamedChild("_Ult1Backdrop")
+            if not frameData.combatStats.ult1Backdrop then
+                return -- Can't proceed without ult controls
+            end
+            frameData.combatStats.ult1Icon = frameData.combatStats.ult1Backdrop:GetNamedChild("_Icon")
+            frameData.combatStats.ult2Backdrop = container:GetNamedChild("_Ult2Backdrop")
+            if not frameData.combatStats.ult2Backdrop then
+                return -- Can't proceed without ult controls
+            end
+            frameData.combatStats.ult2Icon = frameData.combatStats.ult2Backdrop:GetNamedChild("_Icon")
+
+            -- Set dimensions and anchors based on settings
+            frameData.combatStats.ult1Backdrop:SetDimensions(iconSize, iconSize)
+            frameData.combatStats.ult1Icon:SetDimensions(iconSize - 2, iconSize - 2)
+            frameData.combatStats.ult2Backdrop:SetDimensions(iconSize, iconSize)
+            frameData.combatStats.ult2Icon:SetDimensions(iconSize - 2, iconSize - 2)
+
+            -- Anchor within container (order: food/drink -> ult1 -> ult2)
+            frameData.combatStats.ult1Backdrop:ClearAnchors()
             if frameData.foodDrinkBuff and frameData.foodDrinkBuff.backdrop then
-                anchorTarget = frameData.foodDrinkBuff.backdrop
-                anchorPoint = RIGHT
-                anchorOffsetX = 3
+                frameData.combatStats.ult1Backdrop:SetAnchor(LEFT, frameData.foodDrinkBuff.backdrop, RIGHT, 3, 0)
+            else
+                frameData.combatStats.ult1Backdrop:SetAnchor(LEFT, container, LEFT, 0, 0)
             end
 
-            -- FRONTBAR ULT (ult1)
-            frameData.combatStats.ult1Backdrop = UI:Backdrop(container, { LEFT, anchorPoint, anchorOffsetX, 0, anchorTarget }, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
+            frameData.combatStats.ult2Backdrop:ClearAnchors()
+            frameData.combatStats.ult2Backdrop:SetAnchor(LEFT, frameData.combatStats.ult1Backdrop, RIGHT, 3, 0)
+
+            -- Set draw properties
             frameData.combatStats.ult1Backdrop:SetDrawLayer(DL_BACKGROUND)
             frameData.combatStats.ult1Backdrop:SetDrawLevel(13)
-
-            frameData.combatStats.ult1Icon = UI:Texture(frameData.combatStats.ult1Backdrop, { CENTER, CENTER }, { iconSize - 2, iconSize - 2 }, nil, DL_OVERLAY, false)
             frameData.combatStats.ult1Icon:SetDrawLevel(15)
-            frameData.combatStats.ult1Icon:SetHidden(true)
 
-            -- BACKBAR ULT (ult2)
-            frameData.combatStats.ult2Backdrop = UI:Backdrop(container, { LEFT, RIGHT, 3, 0, frameData.combatStats.ult1Backdrop }, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
             frameData.combatStats.ult2Backdrop:SetDrawLayer(DL_BACKGROUND)
             frameData.combatStats.ult2Backdrop:SetDrawLevel(13)
-
-            frameData.combatStats.ult2Icon = UI:Texture(frameData.combatStats.ult2Backdrop, { CENTER, CENTER }, { iconSize - 2, iconSize - 2 }, nil, DL_OVERLAY, false)
             frameData.combatStats.ult2Icon:SetDrawLevel(15)
-            frameData.combatStats.ult2Icon:SetHidden(true)
         end
 
-        -- DPS/HPS text label (SmallGroup only)
+        -- Get DPS/HPS text label from XML (SmallGroup only)
         if Settings.showDPS or Settings.showHPS then
             local fontSize = 14
 
-            -- Small group: anchor below health bar on right
-            frameData.combatStats.statsLabel = UI:Label(backdrop, { TOPRIGHT, BOTTOMRIGHT, -2, 2 }, nil, { 0, 4 }, nil, "", false)
+            -- Get from health backdrop
+            frameData.combatStats.statsLabel = backdrop:GetNamedChild("_StatsLabel")
+            if not frameData.combatStats.statsLabel then
+                return -- Can't proceed without stats label
+            end
+
+            -- Set draw properties
             frameData.combatStats.statsLabel:SetDrawLayer(DL_OVERLAY)
             frameData.combatStats.statsLabel:SetDrawLevel(15)
-            frameData.combatStats.statsLabel:SetHidden(true)
 
             -- Apply font
             local rootSettings = Shared.GetSettings()
             local fontFace = LUIE.Fonts[rootSettings.CustomFontFace]
             local fontStyle = rootSettings.CustomFontStyle
-            if frameData.combatStats.statsLabel then
-                frameData.combatStats.statsLabel:SetFont(ZO_CreateFontString(fontFace, fontSize, fontStyle))
-            end
+            frameData.combatStats.statsLabel:SetFont(ZO_CreateFontString(fontFace, fontSize, fontStyle))
         end
     end
 end

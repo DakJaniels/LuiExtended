@@ -14,7 +14,6 @@ CombatInfo.AbilityAlerts = AbilityAlerts
 local moduleName = LUIE.name .. "CombatInfo" .. "AbilityAlerts"
 AbilityAlerts.name = moduleName
 
-local UI = LUIE.UI
 local Effects = LuiData.Data.Effects
 local Alerts = LuiData.Data.AlertTable
 local AlertsZone = LuiData.Data.AlertZoneOverride
@@ -22,7 +21,6 @@ local AlertsMap = LuiData.Data.AlertMapOverride
 local AlertsConvert = LuiData.Data.AlertBossNameConvert
 
 local pairs = pairs
-local printToChat = LUIE.PrintToChat
 local zo_strformat = zo_strformat
 local string_format = string.format
 local eventManager = GetEventManager()
@@ -31,6 +29,7 @@ local windowManager = GetWindowManager()
 
 local uiTlw = {}  -- GUI
 AbilityAlerts.uiTlw = uiTlw
+local alertPool -- Control pool for alert controls
 local refireDelay = {}
 local g_alertFont -- Font for Alerts
 local g_inDuel    -- Tracker for whether the player is in a duel or not
@@ -64,9 +63,12 @@ end
 
 -- Called from menu when font size/face, etc is changed
 function AbilityAlerts.ResetAlertSize()
-    for i = 1, 3 do
-        local height = (CombatInfo.SV.alerts.toggles.alertFontSize * 2)
-        local alert = _G["LUIE_Alert" .. i]
+    local activeCount = alertPool:GetActiveObjectCount()
+    local alertHeight = CombatInfo.SV.alerts.toggles.alertFontSize * 2
+    local alertSpacing = 4
+
+    for key, alert in pairs(alertPool:GetActiveObjects()) do
+        local height = alertHeight
         alert.prefix:SetFont(g_alertFont)
         alert.name:SetFont(g_alertFont)
         alert.modifier:SetFont(g_alertFont)
@@ -83,9 +85,23 @@ function AbilityAlerts.ResetAlertSize()
         alert.icon.icon:SetAnchor(TOPLEFT, alert.icon, TOPLEFT, 3, 3)
         alert.icon.icon:SetAnchor(BOTTOMRIGHT, alert.icon, BOTTOMRIGHT, -3, -3)
         alert:SetDimensions(alert.prefix:GetTextWidth() + alert.name:GetTextWidth() + alert.modifier:GetTextWidth() + 6 + alert.icon:GetWidth() + 6 + alert.mitigation:GetTextWidth() + alert.timer:GetTextWidth(), height)
+
+        -- Reposition alerts with new spacing
+        local alertIndex = 0
+        for k, a in pairs(alertPool:GetActiveObjects()) do
+            if a == alert then
+                alertIndex = alertIndex
+                break
+            end
+            alertIndex = alertIndex + 1
+        end
+        alert:ClearAnchors()
+        alert:SetAnchor(TOP, uiTlw.alertFrame, TOP, 0, alertIndex * (alertHeight + alertSpacing))
     end
 
-    uiTlw.alertFrame:SetDimensions(500, (CombatInfo.SV.alerts.toggles.alertFontSize * 2) + 4)
+    -- Resize the alert frame
+    local totalHeight = activeCount * (alertHeight + alertSpacing) - (activeCount > 0 and alertSpacing or 0)
+    uiTlw.alertFrame:SetDimensions(500, totalHeight > 0 and totalHeight or alertHeight)
 end
 
 local ccResults =
@@ -135,20 +151,66 @@ function AbilityAlerts.GetDefaultIcon(ccType)
     return CC_ICON_MAP[ccType]
 end
 
--- Create Alert Frame - basic setup for now
+-- Event handler for OnMoveStart
+function AbilityAlerts.OnMoveStart(control)
+    eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
+        control.preview.anchorLabel:SetText(zo_strformat("<<1>>, <<2>>", control:GetLeft(), control:GetTop()))
+    end)
+end
+
+-- Event handler for OnMoveStop
+function AbilityAlerts.OnMoveStop(control)
+    eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
+    CombatInfo.SV.AlertFrameOffsetX = control:GetLeft()
+    CombatInfo.SV.AlertFrameOffsetY = control:GetTop()
+    CombatInfo.SV.AlertFrameCustomPosition = { control:GetLeft(), control:GetTop() }
+end
+
+-- Create Alert Frame - setup XML-created controls and control pool
 function AbilityAlerts.CreateAlertFrame()
     -- Apply font for alerts
     AbilityAlerts.ApplyFontAlert()
 
-    -- Create Top Level Controls
-    uiTlw.alertFrame = UI:TopLevel(nil, nil)
+    -- Reference the XML-created top level control
+    uiTlw.alertFrame = windowManager:GetControlByName("LUIE_AlertFrame")
 
-    -- Create 3 alert labels
-    local anchor = { CENTER, CENTER, 0, 0, uiTlw.alertFrame }
-    local height = (CombatInfo.SV.alerts.toggles.alertFontSize * 2)
-    for i = 1, 3 do
-        local alert = UI:Control(uiTlw.alertFrame, anchor, { nil, height }, false, "LUIE_Alert" .. i)
+    -- Setup references to preview elements
+    uiTlw.alertFrame.preview = uiTlw.alertFrame:GetNamedChild("_Preview")
+    uiTlw.alertFrame.preview.anchorLabel = uiTlw.alertFrame.preview:GetNamedChild("_AnchorLabel")
+    uiTlw.alertFrame.preview.anchorLabelBg = uiTlw.alertFrame.preview:GetNamedChild("_AnchorLabelBg")
+    uiTlw.alertFrame.preview.anchorTexture = uiTlw.alertFrame.preview:GetNamedChild("_AnchorTexture")
 
+    -- Create control pool for alert controls
+    alertPool = ZO_ControlPool:New("LUIE_AlertTemplate", uiTlw.alertFrame)
+
+    -- Set custom factory behavior to initialize fonts and other properties
+    alertPool:SetCustomFactoryBehavior(function(alert)
+        -- Reference XML-created child controls
+        alert.prefix = alert:GetNamedChild("_Prefix")
+        alert.name = alert:GetNamedChild("_Name")
+        alert.modifier = alert:GetNamedChild("_Modifier")
+        alert.icon = alert:GetNamedChild("_Icon")
+        alert.icon.back = alert.icon:GetNamedChild("_Back")
+        alert.icon.iconbg = alert.icon:GetNamedChild("_IconBg")
+        alert.icon.cd = alert.icon:GetNamedChild("_Cd")
+        alert.icon.icon = alert.icon:GetNamedChild("_Icon")
+        alert.mitigation = alert:GetNamedChild("_Mitigation")
+        alert.timer = alert:GetNamedChild("_Timer")
+
+        -- Apply fonts
+        alert.prefix:SetFont(g_alertFont)
+        alert.name:SetFont(g_alertFont)
+        alert.modifier:SetFont(g_alertFont)
+        alert.mitigation:SetFont(g_alertFont)
+        alert.timer:SetFont(g_alertFont)
+
+        -- Set initial dimensions for icon
+        alert.icon:SetDimensions(CombatInfo.SV.alerts.toggles.alertFontSize + 8, CombatInfo.SV.alerts.toggles.alertFontSize + 8)
+
+        -- Initialize cooldown control (start it with empty state)
+        alert.icon.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
+
+        -- Initialize data structure
         alert.data =
         {
             ["available"] = true,
@@ -165,84 +227,9 @@ function AbilityAlerts.CreateAlertFrame()
             ["effectOnlyInterrupt"] = nil,
             ["mitigationParts"] = nil,
         }
+    end)
 
-        alert.prefix = UI:Label(alert, nil, nil, nil, g_alertFont, alert.data.textPrefix, false)
-        alert.name = UI:Label(alert, nil, nil, nil, g_alertFont, alert.data.textName, false)
-        alert.modifier = UI:Label(alert, nil, nil, nil, g_alertFont, alert.data.textModifier, false)
-        alert.prefix:SetAnchor(LEFT, alert, LEFT, 0, 0)
-        alert.name:SetAnchor(LEFT, alert.prefix, RIGHT, 0, 0)
-        alert.modifier:SetAnchor(LEFT, alert.name, RIGHT, 0, 0)
-
-        alert.icon = UI:Backdrop(alert.name, nil, nil, { 0, 0, 0, 0.5 }, { 0, 0, 0, 1 }, false)
-        alert.icon:SetDimensions(CombatInfo.SV.alerts.toggles.alertFontSize + 8, CombatInfo.SV.alerts.toggles.alertFontSize + 8)
-        alert.icon:SetAnchor(LEFT, alert.modifier, RIGHT, 6, 0)
-
-        alert.icon.back = UI:Texture(alert.icon, nil, nil, LUIE_MEDIA_ICONS_ICON_BORDER_ICON_BORDER_DDS, DL_BACKGROUND, false)
-        alert.icon.back:SetAnchor(TOPLEFT, alert.icon, TOPLEFT, 0, 0)
-        alert.icon.back:SetAnchor(BOTTOMRIGHT, alert.icon, BOTTOMRIGHT, 0, 0)
-
-        alert.icon.iconbg = UI:Texture(alert.icon, nil, nil, "EsoUI/Art/ActionBar/abilityInset.dds", DL_CONTROLS, false)
-        alert.icon.iconbg = UI:Backdrop(alert.icon, nil, nil, { 0, 0, 0, 0.9 }, { 0, 0, 0, 0.9 }, false)
-        alert.icon.iconbg:SetDrawLevel(DL_CONTROLS)
-        alert.icon.iconbg:SetAnchor(TOPLEFT, alert.icon, TOPLEFT, 3, 3)
-        alert.icon.iconbg:SetAnchor(BOTTOMRIGHT, alert.icon, BOTTOMRIGHT, -3, -3)
-
-        alert.icon.cd = windowManager:CreateControl(nil, alert.icon, CT_COOLDOWN)
-        alert.icon.cd:SetAnchor(TOPLEFT, alert.icon, TOPLEFT, 1, 1)
-        alert.icon.cd:SetAnchor(BOTTOMRIGHT, alert.icon, BOTTOMRIGHT, -1, -1)
-        alert.icon.cd:SetFillColor(0, 0, 0, 0)
-        alert.icon.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
-        alert.icon.cd:SetDrawLayer(DL_BACKGROUND)
-
-        alert.icon.icon = UI:Texture(alert.icon, nil, nil, "/esoui/art/icons/icon_missing.dds", DL_CONTROLS, false)
-        alert.icon.icon:SetAnchor(TOPLEFT, alert.icon, TOPLEFT, 3, 3)
-        alert.icon.icon:SetAnchor(BOTTOMRIGHT, alert.icon, BOTTOMRIGHT, -3, -3)
-
-        alert.mitigation = UI:Label(alert.icon, nil, nil, nil, g_alertFont, alert.data.textMitigation, false)
-        alert.mitigation:SetAnchor(LEFT, alert.icon, RIGHT, 6, 0)
-
-        alert.timer = UI:Label(alert.icon, nil, nil, nil, g_alertFont, alert.data.duration, false)
-        alert.timer:SetAnchor(LEFT, alert.mitigation, RIGHT, 0, 0)
-
-        alert:SetDimensions(alert.prefix:GetTextWidth() + alert.name:GetTextWidth() + alert.modifier:GetTextWidth() + 6 + alert.icon:GetWidth() + 6 + alert.mitigation:GetTextWidth() + alert.timer:GetTextWidth(), height)
-        alert:SetHidden(true)
-
-        anchor = { TOP, BOTTOM, 0, 0, alert }
-    end
-
-    uiTlw.alertFrame:SetDimensions(500, height + 4)
-
-    -- Setup Preview
-    uiTlw.alertFrame.preview = LUIE.UI:Backdrop(uiTlw.alertFrame, "fill", nil, nil, nil, true)
-
-    -- Callback used to hide anchor coords preview label on movement start
-    local tlwOnMoveStart = function (self)
-        eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
-            self.preview.anchorLabel:SetText(zo_strformat("<<1>>, <<2>>", self:GetLeft(), self:GetTop()))
-        end)
-    end
-
-    -- Callback used to save new position of frames
-    local tlwOnMoveStop = function (self)
-        eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
-        CombatInfo.SV.AlertFrameOffsetX = self:GetLeft()
-        CombatInfo.SV.AlertFrameOffsetY = self:GetTop()
-        CombatInfo.SV.AlertFrameCustomPosition = { self:GetLeft(), self:GetTop() }
-    end
-
-    uiTlw.alertFrame:SetHandler("OnMoveStart", tlwOnMoveStart)
-    uiTlw.alertFrame:SetHandler("OnMoveStop", tlwOnMoveStop)
-
-    uiTlw.alertFrame.preview.anchorTexture = UI:Texture(uiTlw.alertFrame.preview, { TOPLEFT, TOPLEFT }, { 16, 16 }, "/esoui/art/reticle/border_topleft.dds", DL_OVERLAY, false)
-    uiTlw.alertFrame.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
-
-    uiTlw.alertFrame.preview.anchorLabel = UI:Label(uiTlw.alertFrame.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "ZoFontGameSmall", "xxx, yyy", false)
-    uiTlw.alertFrame.preview.anchorLabel:SetColor(1, 1, 0, 1)
-    uiTlw.alertFrame.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
-    uiTlw.alertFrame.preview.anchorLabel:SetDrawTier(DT_MEDIUM)
-    uiTlw.alertFrame.preview.anchorLabelBg = UI:Backdrop(uiTlw.alertFrame.preview.anchorLabel, "fill", nil, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, false)
-    uiTlw.alertFrame.preview.anchorLabelBg:SetDrawLayer(DL_OVERLAY)
-    uiTlw.alertFrame.preview.anchorLabelBg:SetDrawTier(DT_LOW)
+    uiTlw.alertFrame:SetDimensions(500, (CombatInfo.SV.alerts.toggles.alertFontSize * 2) + 4)
 
     local fragment = ZO_HUDFadeSceneFragment:New(uiTlw.alertFrame, 0, 0)
 
@@ -367,22 +354,38 @@ end
 
 -- Called by AbilityAlerts.SetMovingState from the menu as well as by AbilityAlerts.OnUpdateCastbar when preview is enabled
 function AbilityAlerts.GenerateAlertFramePreview(state)
-    for i = 1, 3 do
-        local alert = _G["LUIE_Alert" .. i]
-        alert.prefix:SetText("")
-        alert.name:SetText("NAME TEST")
-        alert.name:SetColor(unpack(CombatInfo.SV.alerts.colors.alertShared))
-        alert.modifier:SetText("")
-        alert.icon.icon:SetTexture("/esoui/art/icons/icon_missing.dds")
-        alert.icon.cd:SetFillColor(0, 0, 0, 0)
-        alert.icon.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
-        alert.mitigation:SetText("MITIGATION TEST")
-        alert.timer:SetText(CombatInfo.SV.alerts.toggles.alertTimer and " 1.0" or "")
-        alert:SetHidden(not state)
-    end
+    if state then
+        -- Acquire 3 controls from the pool for preview and position them
+        local alertHeight = CombatInfo.SV.alerts.toggles.alertFontSize * 2
+        local alertSpacing = 4
 
-    for i = 1, 3 do
-        AbilityAlerts.RealignAlerts(i)
+        for i = 1, 3 do
+            local alert, alertKey = alertPool:AcquireObject()
+            alert.prefix:SetText("")
+            alert.name:SetText("NAME TEST")
+            alert.name:SetColor(unpack(CombatInfo.SV.alerts.colors.alertShared))
+            alert.modifier:SetText("")
+            alert.icon.icon:SetTexture("/esoui/art/icons/icon_missing.dds")
+            alert.icon.cd:SetFillColor(0, 0, 0, 0)
+            alert.icon.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
+            alert.mitigation:SetText("MITIGATION TEST")
+            alert.timer:SetText(CombatInfo.SV.alerts.toggles.alertTimer and " 1.0" or "")
+            alert:SetHidden(false)
+
+            -- Position the preview controls
+            alert:ClearAnchors()
+            alert:SetAnchor(TOP, uiTlw.alertFrame, TOP, 0, (i - 1) * (alertHeight + alertSpacing))
+
+            AbilityAlerts.RealignAlerts(alertKey)
+        end
+
+        -- Resize frame for preview
+        local totalHeight = 3 * (alertHeight + alertSpacing) - alertSpacing
+        uiTlw.alertFrame:SetDimensions(500, totalHeight)
+    else
+        -- Release all active controls when exiting preview mode
+        alertPool:ReleaseAllObjects()
+        uiTlw.alertFrame:SetDimensions(500, CombatInfo.SV.alerts.toggles.alertFontSize * 2)
     end
 
     uiTlw.alertFrame.preview:SetHidden(not state)
@@ -391,26 +394,8 @@ end
 
 -- Update ticker for Alerts
 function AbilityAlerts.AlertUpdate(currentTime)
-    for i = 1, 3 do
-        local alert = _G["LUIE_Alert" .. i]
+    for key, alert in pairs(alertPool:GetActiveObjects()) do
         if alert.data.duration then
-            --[[
-            if i > 1 and _G["LUIE_Alert" .. i - 1].data.available == true then
-                _G["LUIE_Alert" .. i - 1].data.duration = alert.data.duration
-                _G["LUIE_Alert" .. i - 1].data.showDuration = alert.data.showDuration
-                _G["LUIE_Alert" .. i - 1].data.textMitigation = alert.data.textMitigation
-                _G["LUIE_Alert" .. i - 1].data.available = false
-                _G["LUIE_Alert" .. i - 1]:SetHidden(false)
-                alert.data.available = true
-                alert:SetHidden(true)
-                alert.data.textMitigation = nil
-                alert.data.duration = nil
-                alert.data.showDuration = nil
-                i = i - 1
-            end
-            ]]
-            --
-
             local remain = alert.data.duration - currentTime
             local postCast = alert.data.postCast + remain
 
@@ -436,6 +421,10 @@ function AbilityAlerts.AlertUpdate(currentTime)
                 alert.data.duration = nil
                 alert.data.postCast = nil
                 alert.data.available = true
+                alertPool:ReleaseObject(key)
+
+                -- Reposition remaining alerts after releasing this one
+                AbilityAlerts.RepositionAlerts()
             elseif remain <= 0 then
                 -- alert:SetHidden(true)
                 -- alert.data = { }
@@ -464,8 +453,7 @@ function AbilityAlerts.AlertInterrupt(eventCode, result, isError, abilityName, a
         return
     end
 
-    for i = 1, 3 do
-        local alert = _G["LUIE_Alert" .. i]
+    for key, alert in pairs(alertPool:GetActiveObjects()) do
         if alert.data.sourceUnitId then
             targetName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
 
@@ -505,7 +493,7 @@ function AbilityAlerts.AlertInterrupt(eventCode, result, isError, abilityName, a
                 alert.timer:SetText("")
                 alert:SetHidden(false)
 
-                AbilityAlerts.RealignAlerts(i)
+                AbilityAlerts.RealignAlerts(key)
             end
         end
     end
@@ -616,7 +604,6 @@ function AbilityAlerts.PlayAlertSound(abilityId, ...)
     end
 end
 
-local drawLocation = 1
 function AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier, textName, textMitigation, abilityIcon, currentTime, endTime, showDuration, crowdControl, sourceUnitId, postCast, alwaysShowInterrupt, neverShowInterrupt, effectOnlyInterrupt, mitigationParts)
     local labelColor
     local borderColor
@@ -632,46 +619,9 @@ function AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier
         labelColor = CombatInfo.SV.alerts.colors.alertShared
     end
 
-    for i = 1, 3 do
-        local alert = _G["LUIE_Alert" .. i]
-        if alert.data.available then
-            alert.data.id = abilityId
-            alert.data.textMitigation = textMitigation
-            alert.data.mitigationParts = mitigationParts
-            alert.data.textPrefix = textPrefix or ""
-            alert.data.textName = textName
-            alert.data.textModifier = textModifier or ""
-            alert.data.sourceUnitId = sourceUnitId
-            alert.icon.icon:SetTexture(abilityIcon)
-            alert.data.duration = endTime
-            alert.data.postCast = postCast
-            local remain = endTime - currentTime
-            alert.data.showDuration = CombatInfo.SV.alerts.toggles.alertTimer and showDuration or false
-            alert.data.alwaysShowInterrupt = alwaysShowInterrupt
-            alert.data.neverShowInterrupt = neverShowInterrupt
-            alert.data.effectOnlyInterrupt = effectOnlyInterrupt
-            alert.prefix:SetText(alert.data.textPrefix)
-            alert.prefix:SetColor(unpack(CombatInfo.SV.alerts.colors.alertShared))
-            alert.name:SetText(alert.data.textName)
-            alert.name:SetColor(unpack(labelColor))
-            alert.modifier:SetText(alert.data.textModifier)
-            alert.modifier:SetColor(unpack(CombatInfo.SV.alerts.colors.alertShared))
-            alert.mitigation:SetText(textMitigation)
-            alert.timer:SetText(alert.data.showDuration and string_format(" %.1f", remain / 1000) or "")
-            alert.timer:SetColor(unpack(CombatInfo.SV.alerts.colors.alertTimer))
-            alert.icon:SetHidden(false)
-            alert:SetHidden(false)
-            alert:SetAlpha(1)
-            alert.data.available = false
-            alert.icon.cd:SetFillColor(unpack(borderColor))
-            -- alert.icon.cd:SetHidden(not crowdControl)
-            drawLocation = 1 -- As long as this text is filling an available spot, we reset the draw over location to slot 1. If all slots are filled then the draw over code below will cycle and handle abilities.
-            AbilityAlerts.RealignAlerts(i)
-            return
-        end
-    end
-    -- If no alert frame is available, then draw over in the first spot
-    local alert = _G["LUIE_Alert" .. drawLocation]
+    -- Acquire an alert control from the pool
+    local alert, alertKey = alertPool:AcquireObject()
+
     alert.data.id = abilityId
     alert.data.textMitigation = textMitigation
     alert.data.mitigationParts = mitigationParts
@@ -701,18 +651,44 @@ function AbilityAlerts.SetupSingleAlertFrame(abilityId, textPrefix, textModifier
     alert:SetAlpha(1)
     alert.data.available = false
     alert.icon.cd:SetFillColor(unpack(borderColor))
-    -- alert.icon.cd:SetHidden(not crowdControl)
-    drawLocation = drawLocation + 1
-    if drawLocation > 3 then
-        drawLocation = 1
-    end
-    AbilityAlerts.RealignAlerts(drawLocation)
+
+    -- Position the alert control (stack them vertically from the top)
+    alert:ClearAnchors()
+    local alertHeight = CombatInfo.SV.alerts.toggles.alertFontSize * 2
+    local alertSpacing = 4
+    local verticalOffset = (alertPool:GetActiveObjectCount() - 1) * (alertHeight + alertSpacing)
+    alert:SetAnchor(TOP, uiTlw.alertFrame, TOP, 0, verticalOffset)
+
+    -- Resize the alert frame to accommodate all alerts
+    local totalHeight = alertPool:GetActiveObjectCount() * (alertHeight + alertSpacing) - alertSpacing
+    uiTlw.alertFrame:SetDimensions(500, totalHeight)
+
+    AbilityAlerts.RealignAlerts(alertKey)
 end
 
-function AbilityAlerts.RealignAlerts(alertNumber)
+function AbilityAlerts.RealignAlerts(alertKey)
     local height = (CombatInfo.SV.alerts.toggles.alertFontSize * 2)
-    local alert = _G["LUIE_Alert" .. alertNumber]
-    alert:SetDimensions(alert.prefix:GetTextWidth() + alert.name:GetTextWidth() + alert.modifier:GetTextWidth() + 6 + alert.icon:GetWidth() + 6 + alert.mitigation:GetTextWidth() + alert.timer:GetTextWidth(), height)
+    local alert = alertPool:GetActiveObject(alertKey)
+    if alert then
+        alert:SetDimensions(alert.prefix:GetTextWidth() + alert.name:GetTextWidth() + alert.modifier:GetTextWidth() + 6 + alert.icon:GetWidth() + 6 + alert.mitigation:GetTextWidth() + alert.timer:GetTextWidth(), height)
+    end
+end
+
+function AbilityAlerts.RepositionAlerts()
+    local alertHeight = CombatInfo.SV.alerts.toggles.alertFontSize * 2
+    local alertSpacing = 4
+    local index = 0
+
+    for key, alert in pairs(alertPool:GetActiveObjects()) do
+        alert:ClearAnchors()
+        alert:SetAnchor(TOP, uiTlw.alertFrame, TOP, 0, index * (alertHeight + alertSpacing))
+        index = index + 1
+    end
+
+    -- Resize the alert frame
+    local activeCount = alertPool:GetActiveObjectCount()
+    local totalHeight = activeCount * (alertHeight + alertSpacing) - (activeCount > 0 and alertSpacing or 0)
+    uiTlw.alertFrame:SetDimensions(500, totalHeight > 0 and totalHeight or alertHeight)
 end
 
 function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
@@ -1050,8 +1026,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
 end
 
 local function CheckInterruptEvent(unitId, abilityId, resultType)
-    for i = 1, 3 do
-        local alert = _G["LUIE_Alert" .. i]
+    for key, alert in pairs(alertPool:GetActiveObjects()) do
         if alert.data.sourceUnitId then
             if alert.data.id == abilityId then
                 local currentTime = GetFrameTimeMilliseconds()
@@ -1083,7 +1058,7 @@ local function CheckInterruptEvent(unitId, abilityId, resultType)
                     alert.timer:SetText("")
                     alert:SetHidden(false)
 
-                    AbilityAlerts.RealignAlerts(i)
+                    AbilityAlerts.RealignAlerts(key)
                 end
             end
         end

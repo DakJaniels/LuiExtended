@@ -3744,7 +3744,7 @@ local function DisplayAnnouncementHook(primaryText, secondaryText, icon, soundId
 end
 
 -- EVENT_ACHIEVEMENT_AWARDED (CSA Handler)
-local function AchievementAwardedHook(name, points, id)
+local function AchievementAwardedHook(name, points, id, link)
     local topLevelIndex, categoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(id)
 
     -- Bail out if this achievement comes from unwanted category & we don't always show CSA
@@ -3768,7 +3768,8 @@ local function AchievementAwardedHook(name, points, id)
     end
 
     if ChatAnnouncements.SV.Achievement.AchievementCompleteCA then
-        local link = zo_strformat(GetAchievementLink(id, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionAchievement]))
+        -- Use the link provided by the event if available, otherwise generate our own
+        local achievementLink = link or zo_strformat(GetAchievementLink(id, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionAchievement]))
         local catName = GetAchievementCategoryInfoName(topLevelIndex)
         local subcatName = categoryIndex ~= nil and GetAchievementSubCategoryInfoName(topLevelIndex, categoryIndex) or "General"
         local icon = GetAchievementInfoIcon(id)
@@ -3779,7 +3780,7 @@ local function AchievementAwardedHook(name, points, id)
             ChatAnnouncements.bracket1[ChatAnnouncements.SV.Achievement.AchievementBracketOptions] ..
             ChatAnnouncements.SV.Achievement.AchievementCompleteMsg ..
             ChatAnnouncements.bracket2[ChatAnnouncements.SV.Achievement.AchievementBracketOptions] .. " " ..
-            icon .. link
+            icon .. achievementLink
         )
 
         local stringpart2 = ""

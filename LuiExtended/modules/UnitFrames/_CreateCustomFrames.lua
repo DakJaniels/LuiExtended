@@ -51,23 +51,12 @@ local function CreateRegenAnimation(parent, anchors, dims, alpha, number)
     for i = 0, MAX_ANCHORS - 1 do
         local isValid, _, _, _, _, offsetY = control:GetAnchor(i)
         if isValid then
-            local animation, timeline = CreateSimpleAnimation(ANIMATION_TRANSLATE, control, 0)
-            animation:SetTranslateOffsets(offsetX, offsetY, offsetX + distance, offsetY)
-            animation:SetDuration(1000)
+            -- Use XML-defined animation timeline template
+            control.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("LUIE_RegenAnimationTemplate", control)
 
-            local fadeIn = timeline:InsertAnimation(ANIMATION_ALPHA, control, 0)
-            fadeIn:SetAlphaValues(0, 0.75)
-            fadeIn:SetDuration(250)
-            fadeIn:SetEasingFunction(ZO_EaseOutQuadratic)
-
-            local fadeOut = timeline:InsertAnimation(ANIMATION_ALPHA, control, 750)
-            fadeOut:SetAlphaValues(0.75, 0)
-            fadeOut:SetDuration(250)
-            fadeOut:SetEasingFunction(ZO_EaseOutQuadratic)
-
-            timeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
-            control.animation = animation
-            control.timeline = timeline
+            -- Configure translate animation with dynamic offsets based on bar size
+            control.animation = control.timeline:GetAnimation(1)
+            control.animation:SetTranslateOffsets(offsetX, offsetY, offsetX + distance, offsetY)
 
             return control
         end
@@ -88,15 +77,9 @@ local function CreatePossessionHaloAnimation(backdrop)
     halo:SetDrawTier(DT_LOW)
     halo:SetHidden(true)
 
-    -- Create texture animation for 32-frame sprite sheet (4 wide x 8 high)
-    local animation, timeline = CreateSimpleAnimation(ANIMATION_TEXTURE, halo)
-    animation:SetImageData(4, 8) -- 4 columns, 8 rows = 32 frames
-    animation:SetFramerate(32)
-    animation:SetDuration(1000)
-    timeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
-
-    halo.animation = animation
-    halo.timeline = timeline
+    -- Use XML-defined animation timeline
+    halo.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("LUIE_PossessionHaloAnimation", halo)
+    halo.animation = halo.timeline:GetAnimation(1)
 
     return halo
 end
@@ -107,13 +90,10 @@ local function CreateNoHealingFadeAnimation(overlay, stripeOverlay)
         return nil
     end
 
-    -- Create fade timeline for overlay
-    local fadeAnim, fadeTimeline = CreateSimpleAnimation(ANIMATION_ALPHA, overlay)
-    fadeAnim:SetAlphaValues(0, 1)
-    fadeAnim:SetDuration(200)
-    fadeAnim:SetEasingFunction(ZO_EaseInQuadratic)
+    -- Use XML-defined animation timeline
+    local fadeTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("LUIE_NoHealingFadeAnimation", overlay)
 
-    -- Add stripe overlay to same timeline (custom LUIE feature)
+    -- Add stripe overlay to same timeline if provided (custom LUIE feature)
     if stripeOverlay then
         local stripeFade = fadeTimeline:InsertAnimation(ANIMATION_ALPHA, stripeOverlay)
         stripeFade:SetAlphaValues(0, 1)
@@ -121,33 +101,22 @@ local function CreateNoHealingFadeAnimation(overlay, stripeOverlay)
         stripeFade:SetEasingFunction(ZO_EaseInQuadratic)
     end
 
-    -- When animation stops, hide controls if faded out
-    fadeTimeline:SetHandler("OnStop", function ()
-        if overlay:GetAlpha() == 0 then
-            overlay:SetHidden(true)
-            if stripeOverlay then
-                stripeOverlay:SetHidden(true)
-            end
-        end
-    end)
+    -- Store references for OnStop handler
+    fadeTimeline.overlay = overlay
+    fadeTimeline.stripe = stripeOverlay
 
     return fadeTimeline
 end
 
 -- Combat glow border (static red glow for group frames in combat)
 local function CreateCombatGlowBorder(backdrop)
-    -- Create a backdrop for the glow effect matching health bar size exactly
-    local glow = UI:Backdrop(backdrop, nil, nil, nil, nil, false)
-    glow:SetAnchor(TOPLEFT, backdrop, TOPLEFT, 0, 0)
-    glow:SetAnchor(BOTTOMRIGHT, backdrop, BOTTOMRIGHT, 0, 0)
-    glow:SetDrawTier(DT_HIGH)
-    glow:SetDrawLevel(3)
-    glow:SetHidden(true)
+    -- Create from XML virtual template with parent-based unique name
+    local parentName = backdrop:GetName() or ("LUIE_UF_Backdrop_" .. tostring(backdrop))
+    local uniqueName = parentName .. "_CombatGlow"
 
-    -- Set glow color with thicker edges for visibility (default red, configurable via settings)
-    glow:SetCenterColor(0, 0, 0, 0)       -- Transparent center
-    glow:SetEdgeColor(1, 0, 0, 1)         -- Default red edges (will be updated from settings)
-    glow:SetEdgeTexture("", 16, 16, 2, 0) -- Thicker edge for visible glow
+    local glow = windowManager:CreateControlFromVirtual(uniqueName, backdrop, "LUIE_CombatGlowBorder")
+
+    -- Configure blend mode (can't be set in XML)
     glow:SetBlendMode(TEX_BLEND_MODE_ADD)
 
     return glow
@@ -155,30 +124,23 @@ end
 
 -- Decreased armour overlay visuals
 local function CreateDecreasedArmorOverlay(parent, small)
-    local textureConfig =
-    {
-        small =
-        {
-            file = LUIE_MEDIA_UNITFRAMES_UNITATTRIBUTEVISUALIZER_ATTRIBUTEBAR_DYNAMIC_DECREASEDARMOR_SMALL_DDS,
-            size = { 512, 32 },
-            tier = DT_HIGH,
-        },
-        normal =
-        {
-            file = LUIE_MEDIA_UNITFRAMES_UNITATTRIBUTEVISUALIZER_ATTRIBUTEBAR_DYNAMIC_DECREASEDARMOR_STANDARD_DDS,
-            size = { 512, 32 },
-            tier = DT_HIGH,
-        },
-    }
+    -- Create from XML virtual template with parent-based unique name
+    local parentName = parent:GetName() or ("LUIE_UF_Parent_" .. tostring(parent))
+    local uniqueName = parentName .. "_DecreasedArmorOverlay"
 
-    -- Create overlay as hidden by default (will be shown when effect is active)
-    local control = UI:Control(parent, { CENTER, CENTER }, textureConfig.small.size, true)
-    control.smallTex = UI:Texture(control, { CENTER, CENTER }, textureConfig.small.size, textureConfig.small.file, 2, true)
-    control.smallTex:SetDrawTier(textureConfig.small.tier)
+    local templateName = small and "LUIE_DecreasedArmorOverlay_Small" or "LUIE_DecreasedArmorOverlay"
+    local control = windowManager:CreateControlFromVirtual(uniqueName, parent, templateName)
 
+    -- Get texture references
+    control.smallTex = control:GetNamedChild("_SmallTex")
     if not small then
-        control.normalTex = UI:Texture(control, { CENTER, CENTER }, textureConfig.normal.size, textureConfig.normal.file, 2, true)
-        control.normalTex:SetDrawTier(textureConfig.normal.tier)
+        control.normalTex = control:GetNamedChild("_NormalTex")
+    end
+
+    -- Set texture files (can't use defines in XML)
+    control.smallTex:SetTexture(LUIE_MEDIA_UNITFRAMES_UNITATTRIBUTEVISUALIZER_ATTRIBUTEBAR_DYNAMIC_DECREASEDARMOR_SMALL_DDS)
+    if control.normalTex then
+        control.normalTex:SetTexture(LUIE_MEDIA_UNITFRAMES_UNITATTRIBUTEVISUALIZER_ATTRIBUTEBAR_DYNAMIC_DECREASEDARMOR_STANDARD_DDS)
     end
 
     return control
@@ -187,28 +149,21 @@ end
 -- Helper to create the Player Frame
 local function CreatePlayerFrame()
     if UnitFrames.SV.CustomFramesPlayer then
-        local playerTlw = UI:TopLevel(nil, nil)
-        playerTlw:SetDrawLayer(DL_BACKGROUND)
-        playerTlw:SetDrawTier(DT_LOW)
-        playerTlw:SetDrawLevel(DL_CONTROLS)
+        -- Get references to XML-created controls
+        local playerTlw = LUIE_CustomPlayerFrame
         playerTlw.customPositionAttr = "CustomFramesPlayerFramePos"
-        playerTlw.preview = UI:Backdrop(playerTlw, "fill", nil, nil, nil, true)
-        local player = UI:Control(playerTlw, { TOPLEFT, TOPLEFT }, nil, false)
-        local topInfo = UI:Control(player, { BOTTOM, TOP, 0, -3 }, nil, false)
-        local botInfo = UI:Control(player, { TOP, BOTTOM, 0, 2 }, nil, false)
-        local buffAnchor = UI:Control(player, { TOP, BOTTOM, 0, 2 }, nil, false)
-        local phb = UI:Backdrop(player, { TOP, TOP, 0, 0 }, nil, nil, nil, false)
-        phb:SetDrawLayer(DL_BACKGROUND)
-        phb:SetDrawLevel(DL_CONTROLS)
-        local pmb = UI:Backdrop(player, nil, nil, nil, nil, false)
-        pmb:SetDrawLayer(DL_BACKGROUND)
-        pmb:SetDrawLevel(DL_CONTROLS)
-        local psb = UI:Backdrop(player, nil, nil, nil, nil, false)
-        psb:SetDrawLayer(DL_BACKGROUND)
-        psb:SetDrawLevel(DL_CONTROLS)
-        local alt = UI:Backdrop(botInfo, { RIGHT, RIGHT }, nil, nil, { 0, 0, 0, 1 }, false)
-        local pli = UI:Texture(topInfo, nil, { 20, 20 }, nil, nil, false)
+        playerTlw.preview = playerTlw:GetNamedChild("_Preview")
+        local player = playerTlw:GetNamedChild("_Player")
+        local topInfo = player:GetNamedChild("_TopInfo")
+        local botInfo = player:GetNamedChild("_BotInfo")
+        local buffAnchor = player:GetNamedChild("_BuffAnchor")
+        local phb = player:GetNamedChild("_Health")
+        local pmb = player:GetNamedChild("_Magicka")
+        local psb = player:GetNamedChild("_Stamina")
+        local alt = botInfo:GetNamedChild("_Alternative")
+        local pli = topInfo:GetNamedChild("_LevelIcon")
 
+        -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(playerTlw, 0, 0)
 
         sceneManager:GetScene("hud"):AddFragment(fragment)
@@ -224,48 +179,48 @@ local function CreatePlayerFrame()
             [COMBAT_MECHANIC_FLAGS_HEALTH] =
             {
                 ["backdrop"] = phb,
-                ["labelOne"] = UI:Label(phb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, "xx / yy", false),
-                ["labelTwo"] = UI:Label(phb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "zz%", false),
-                ["trauma"] = UI:StatusBar(phb, nil, nil, nil, true),
-                ["bar"] = UI:StatusBar(phb, nil, nil, nil, false),
-                ["shield"] = UI:StatusBar(phb, nil, nil, nil, true),
-                ["noHealingOverlay"] = UI:StatusBar(phb, nil, nil, nil, true),
-                ["noHealingStripe"] = UI:StatusBar(phb, nil, nil, nil, true),
-                ["possessionOverlay"] = UI:Control(phb, nil, nil, true),
+                ["labelOne"] = phb:GetNamedChild("_LabelOne"),
+                ["labelTwo"] = phb:GetNamedChild("_LabelTwo"),
+                ["trauma"] = phb:GetNamedChild("_Trauma"),
+                ["bar"] = phb:GetNamedChild("_Bar"),
+                ["shield"] = phb:GetNamedChild("_Shield"),
+                ["noHealingOverlay"] = phb:GetNamedChild("_NoHealingOverlay"),
+                ["noHealingStripe"] = phb:GetNamedChild("_NoHealingStripe"),
+                ["possessionOverlay"] = phb:GetNamedChild("_PossessionOverlay"),
                 ["threshold"] = UnitFrames.healthThreshold,
             },
             [COMBAT_MECHANIC_FLAGS_MAGICKA] =
             {
                 ["backdrop"] = pmb,
-                ["labelOne"] = UI:Label(pmb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, "xx / yy", false),
-                ["labelTwo"] = UI:Label(pmb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "zz%", false),
-                ["bar"] = UI:StatusBar(pmb, nil, nil, nil, false),
+                ["labelOne"] = pmb:GetNamedChild("_LabelOne"),
+                ["labelTwo"] = pmb:GetNamedChild("_LabelTwo"),
+                ["bar"] = pmb:GetNamedChild("_Bar"),
                 ["threshold"] = UnitFrames.magickaThreshold,
             },
             [COMBAT_MECHANIC_FLAGS_STAMINA] =
             {
                 ["backdrop"] = psb,
-                ["labelOne"] = UI:Label(psb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, "xx / yy", false),
-                ["labelTwo"] = UI:Label(psb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "zz%", false),
-                ["bar"] = UI:StatusBar(psb, nil, nil, nil, false),
+                ["labelOne"] = psb:GetNamedChild("_LabelOne"),
+                ["labelTwo"] = psb:GetNamedChild("_LabelTwo"),
+                ["bar"] = psb:GetNamedChild("_Bar"),
                 ["threshold"] = UnitFrames.staminaThreshold,
             },
             ["alternative"] =
             {
                 ["backdrop"] = alt,
-                ["enlightenment"] = UI:StatusBar(alt, nil, nil, nil, false),
-                ["bar"] = UI:StatusBar(alt, nil, nil, nil, false),
-                ["icon"] = UI:Texture(alt, { RIGHT, LEFT, -2, 0 }, { 20, 20 }, nil, nil, false),
+                ["enlightenment"] = alt:GetNamedChild("_Enlightenment"),
+                ["bar"] = alt:GetNamedChild("_Bar"),
+                ["icon"] = alt:GetNamedChild("_Icon"),
             },
             ["topInfo"] = topInfo,
-            ["name"] = UI:Label(topInfo, { BOTTOMLEFT, BOTTOMLEFT }, nil, { 0, 4 }, nil, "Player Name", false),
+            ["name"] = topInfo:GetNamedChild("_Name"),
             ["levelIcon"] = pli,
-            ["level"] = UI:Label(topInfo, { LEFT, RIGHT, 1, 0, pli }, nil, { 0, 1 }, nil, "level", false),
-            ["classIcon"] = UI:Texture(topInfo, { RIGHT, RIGHT, -1, 0 }, { 22, 22 }, nil, nil, false),
+            ["level"] = topInfo:GetNamedChild("_Level"),
+            ["classIcon"] = topInfo:GetNamedChild("_ClassIcon"),
             ["botInfo"] = botInfo,
             ["buffAnchor"] = buffAnchor,
-            ["buffs"] = UI:Control(playerTlw, nil, nil, false),
-            ["debuffs"] = UI:Control(playerTlw, { BOTTOM, TOP, 0, -2, topInfo }, nil, false),
+            ["buffs"] = playerTlw:GetNamedChild("_Buffs"),
+            ["debuffs"] = playerTlw:GetNamedChild("_Debuffs"),
         }
 
         UnitFrames.CustomFrames["player"].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
@@ -295,30 +250,26 @@ end
 -- Helper to create the Target Frame
 local function CreateTargetFrame()
     if UnitFrames.SV.CustomFramesTarget then
-        local targetTlw = UI:TopLevel(nil, nil)
-        targetTlw:SetDrawLayer(DL_BACKGROUND)
-        targetTlw:SetDrawTier(DT_LOW)
-        targetTlw:SetDrawLevel(DL_CONTROLS)
+        -- Get references to XML-created controls
+        local targetTlw = LUIE_CustomTargetFrame
         targetTlw.customPositionAttr = "CustomFramesTargetFramePos"
-        targetTlw.preview = UI:Backdrop(targetTlw, "fill", nil, nil, nil, true)
-        targetTlw.previewLabel = UI:Label(targetTlw.preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", "Target Frame", false)
-        local target = UI:Control(targetTlw, { TOPLEFT, TOPLEFT }, nil, false)
-        local topInfo = UI:Control(target, { BOTTOM, TOP, 0, -3 }, nil, false)
-        local botInfo = UI:Control(target, { TOP, BOTTOM, 0, 2 }, nil, false)
-        local buffAnchor = UI:Control(target, { TOP, BOTTOM, 0, 2 }, nil, false)
-        local thb = UI:Backdrop(target, { TOP, TOP, 0, 0 }, nil, nil, nil, false)
-        thb:SetDrawLayer(DL_BACKGROUND)
-        thb:SetDrawLevel(DL_CONTROLS)
-        local tli = UI:Texture(topInfo, nil, { 20, 20 }, nil, nil, false)
-        local ari = UI:Texture(botInfo, { RIGHT, RIGHT, -1, 0 }, { 20, 20 }, nil, nil, false)
+        targetTlw.preview = targetTlw:GetNamedChild("_Preview")
+        targetTlw.previewLabel = targetTlw.preview:GetNamedChild("_Label")
+        local target = targetTlw:GetNamedChild("_Target")
+        local topInfo = target:GetNamedChild("_TopInfo")
+        local botInfo = target:GetNamedChild("_BotInfo")
+        local buffAnchor = target:GetNamedChild("_BuffAnchor")
+        local thb = target:GetNamedChild("_Health")
+        local tli = topInfo:GetNamedChild("_LevelIcon")
+        local ari = botInfo:GetNamedChild("_AvaRankIcon")
 
         local buffs, debuffs
         if UnitFrames.SV.PlayerFrameOptions == 1 then
-            buffs = UI:Control(targetTlw, { TOP, BOTTOM, 0, 2, buffAnchor }, nil, false)
-            debuffs = UI:Control(targetTlw, { BOTTOM, TOP, 0, -2, topInfo }, nil, false)
+            buffs = targetTlw:GetNamedChild("_Buffs")
+            debuffs = targetTlw:GetNamedChild("_Debuffs")
         else
-            buffs = UI:Control(targetTlw, { BOTTOM, TOP, 0, -2, topInfo }, nil, false)
-            debuffs = UI:Control(targetTlw, { TOP, BOTTOM, 0, 2, buffAnchor }, nil, false)
+            buffs = targetTlw:GetNamedChild("_Debuffs")
+            debuffs = targetTlw:GetNamedChild("_Buffs")
         end
 
         local fragment = ZO_HUDFadeSceneFragment:New(targetTlw, 0, 0)
@@ -337,35 +288,35 @@ local function CreateTargetFrame()
             [COMBAT_MECHANIC_FLAGS_HEALTH] =
             {
                 ["backdrop"] = thb,
-                ["labelOne"] = UI:Label(thb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, "xx / yy", false),
-                ["labelTwo"] = UI:Label(thb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "zz%", false),
-                ["trauma"] = UI:StatusBar(thb, nil, nil, nil, true),
-                ["bar"] = UI:StatusBar(thb, nil, nil, nil, false),
-                ["invulnerable"] = UI:StatusBar(thb, nil, nil, nil, false),
-                ["invulnerableInlay"] = UI:StatusBar(thb, nil, nil, nil, false),
-                ["shield"] = UI:StatusBar(thb, nil, nil, nil, true),
-                ["noHealingOverlay"] = UI:StatusBar(thb, nil, nil, nil, true),
-                ["noHealingStripe"] = UI:StatusBar(thb, nil, nil, nil, true),
-                ["possessionOverlay"] = UI:Control(thb, nil, nil, true),
+                ["labelOne"] = thb:GetNamedChild("_LabelOne"),
+                ["labelTwo"] = thb:GetNamedChild("_LabelTwo"),
+                ["trauma"] = thb:GetNamedChild("_Trauma"),
+                ["bar"] = thb:GetNamedChild("_Bar"),
+                ["invulnerable"] = thb:GetNamedChild("_Invulnerable"),
+                ["invulnerableInlay"] = thb:GetNamedChild("_InvulnerableInlay"),
+                ["shield"] = thb:GetNamedChild("_Shield"),
+                ["noHealingOverlay"] = thb:GetNamedChild("_NoHealingOverlay"),
+                ["noHealingStripe"] = thb:GetNamedChild("_NoHealingStripe"),
+                ["possessionOverlay"] = thb:GetNamedChild("_PossessionOverlay"),
                 ["threshold"] = UnitFrames.targetThreshold,
             },
             ["topInfo"] = topInfo,
-            ["name"] = UI:Label(topInfo, { BOTTOMLEFT, BOTTOMLEFT }, nil, { 0, 4 }, nil, "Target Name", false),
+            ["name"] = topInfo:GetNamedChild("_Name"),
             ["levelIcon"] = tli,
-            ["level"] = UI:Label(topInfo, { LEFT, RIGHT, 1, 0, tli }, nil, { 0, 1 }, nil, "level", false),
-            ["classIcon"] = UI:Texture(topInfo, { RIGHT, RIGHT, -1, 0 }, { 22, 22 }, nil, nil, false),
-            ["className"] = UI:Label(topInfo, { BOTTOMRIGHT, TOPRIGHT, -1, -1 }, nil, { 2, 4 }, nil, "Class", false),
-            ["friendIcon"] = UI:Texture(topInfo, { RIGHT, RIGHT, -20, 0 }, { 22, 22 }, nil, nil, false),
-            ["star1"] = UI:Texture(topInfo, { RIGHT, RIGHT, -28, -1 }, { 16, 16 }, "/esoui/art/ava/ava_bgwindow_capturepointicon.dds", nil, true),
-            ["star2"] = UI:Texture(topInfo, { RIGHT, RIGHT, -45, -1 }, { 16, 16 }, "/esoui/art/ava/ava_bgwindow_capturepointicon.dds", nil, true),
-            ["star3"] = UI:Texture(topInfo, { RIGHT, RIGHT, -62, -1 }, { 16, 16 }, "/esoui/art/ava/ava_bgwindow_capturepointicon.dds", nil, true),
+            ["level"] = topInfo:GetNamedChild("_Level"),
+            ["classIcon"] = topInfo:GetNamedChild("_ClassIcon"),
+            ["className"] = topInfo:GetNamedChild("_ClassName"),
+            ["friendIcon"] = topInfo:GetNamedChild("_FriendIcon"),
+            ["star1"] = topInfo:GetNamedChild("_Star1"),
+            ["star2"] = topInfo:GetNamedChild("_Star2"),
+            ["star3"] = topInfo:GetNamedChild("_Star3"),
             ["botInfo"] = botInfo,
             ["buffAnchor"] = buffAnchor,
-            ["title"] = UI:Label(botInfo, { TOPLEFT, TOPLEFT }, nil, { 0, 3 }, nil, "<Title>", false),
+            ["title"] = botInfo:GetNamedChild("_Title"),
             ["avaRankIcon"] = ari,
-            ["avaRank"] = UI:Label(botInfo, { RIGHT, LEFT, -1, 0, ari }, nil, { 2, 3 }, nil, "ava", false),
-            ["dead"] = UI:Label(thb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, "Status", true),
-            ["skull"] = UI:Texture(target, { RIGHT, LEFT, -8, 0 }, nil, LUIE_MEDIA_UNITFRAMES_UNITFRAMES_EXECUTE_DDS, nil, true),
+            ["avaRank"] = botInfo:GetNamedChild("_AvaRank"),
+            ["dead"] = thb:GetNamedChild("_Dead"),
+            ["skull"] = target:GetNamedChild("_Skull"),
             ["buffs"] = buffs,
             ["debuffs"] = debuffs,
         }
@@ -377,21 +328,17 @@ end
 -- Helper to create the Ava Player Target Frame
 local function CreateAvaPlayerTargetFrame()
     if UnitFrames.SV.AvaCustFramesTarget then
-        local targetTlw = UI:TopLevel(nil, nil)
-        targetTlw:SetDrawLayer(DL_BACKGROUND)
-        targetTlw:SetDrawTier(DT_LOW)
-        targetTlw:SetDrawLevel(DL_CONTROLS)
+        -- Get references to XML-created controls
+        local targetTlw = LUIE_CustomAvaPlayerTargetFrame
         targetTlw.customPositionAttr = "AvaCustFramesTargetFramePos"
-        targetTlw.preview = UI:Backdrop(targetTlw, "fill", nil, nil, nil, true)
-        targetTlw.previewLabel = UI:Label(targetTlw.preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", "PvP Player Target Frame", false)
-        local target = UI:Control(targetTlw, { TOPLEFT, TOPLEFT }, nil, false)
-        local topInfo = UI:Control(target, { BOTTOM, TOP, 0, -3 }, nil, false)
-        local botInfo = UI:Control(target, { TOP, BOTTOM, 0, 2 }, nil, false)
-        local buffAnchor = UI:Control(target, { TOP, BOTTOM, 0, 2 }, nil, false)
-        local thb = UI:Backdrop(target, { TOP, TOP, 0, 0 }, nil, nil, nil, false)
-        thb:SetDrawLayer(DL_BACKGROUND)
-        thb:SetDrawLevel(DL_CONTROLS)
-        local cn = UI:Label(botInfo, { TOP, TOP }, nil, { 1, 3 }, nil, "Class", false)
+        targetTlw.preview = targetTlw:GetNamedChild("_Preview")
+        targetTlw.previewLabel = targetTlw.preview:GetNamedChild("_Label")
+        local target = targetTlw:GetNamedChild("_Target")
+        local topInfo = target:GetNamedChild("_TopInfo")
+        local botInfo = target:GetNamedChild("_BotInfo")
+        local buffAnchor = target:GetNamedChild("_BuffAnchor")
+        local thb = target:GetNamedChild("_Health")
+        local cn = botInfo:GetNamedChild("_ClassName")
 
         local fragment = ZO_HUDFadeSceneFragment:New(targetTlw, 0, 0)
 
@@ -409,29 +356,29 @@ local function CreateAvaPlayerTargetFrame()
             [COMBAT_MECHANIC_FLAGS_HEALTH] =
             {
                 ["backdrop"] = thb,
-                ["label"] = UI:Label(thb, { CENTER, CENTER }, nil, { 1, 1 }, nil, "zz%", false),
-                ["labelOne"] = UI:Label(thb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, "xx + ss", false),
-                ["labelTwo"] = UI:Label(thb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "yy", false),
-                ["trauma"] = UI:StatusBar(thb, nil, nil, nil, true),
-                ["bar"] = UI:StatusBar(thb, nil, nil, nil, false),
-                ["invulnerable"] = UI:StatusBar(thb, nil, nil, nil, false),
-                ["invulnerableInlay"] = UI:StatusBar(thb, nil, nil, nil, false),
-                ["shield"] = UI:StatusBar(thb, nil, nil, nil, true),
-                ["noHealingOverlay"] = UI:StatusBar(thb, nil, nil, nil, true),
-                ["noHealingStripe"] = UI:StatusBar(thb, nil, nil, nil, true),
-                ["possessionOverlay"] = UI:Control(thb, nil, nil, true),
+                ["label"] = thb:GetNamedChild("_Label"),
+                ["labelOne"] = thb:GetNamedChild("_LabelOne"),
+                ["labelTwo"] = thb:GetNamedChild("_LabelTwo"),
+                ["trauma"] = thb:GetNamedChild("_Trauma"),
+                ["bar"] = thb:GetNamedChild("_Bar"),
+                ["invulnerable"] = thb:GetNamedChild("_Invulnerable"),
+                ["invulnerableInlay"] = thb:GetNamedChild("_InvulnerableInlay"),
+                ["shield"] = thb:GetNamedChild("_Shield"),
+                ["noHealingOverlay"] = thb:GetNamedChild("_NoHealingOverlay"),
+                ["noHealingStripe"] = thb:GetNamedChild("_NoHealingStripe"),
+                ["possessionOverlay"] = thb:GetNamedChild("_PossessionOverlay"),
                 ["threshold"] = UnitFrames.targetThreshold,
             },
             ["topInfo"] = topInfo,
-            ["name"] = UI:Label(topInfo, { BOTTOM, BOTTOM }, nil, { 1, 4 }, nil, "Target Name", false),
-            ["classIcon"] = UI:Texture(topInfo, { LEFT, LEFT }, { 20, 20 }, nil, nil, false),
-            ["avaRankIcon"] = UI:Texture(topInfo, { RIGHT, RIGHT }, { 20, 20 }, nil, nil, false),
+            ["name"] = topInfo:GetNamedChild("_Name"),
+            ["classIcon"] = topInfo:GetNamedChild("_ClassIcon"),
+            ["avaRankIcon"] = topInfo:GetNamedChild("_AvaRankIcon"),
             ["botInfo"] = botInfo,
             ["buffAnchor"] = buffAnchor,
             ["className"] = cn,
-            ["title"] = UI:Label(botInfo, { TOP, BOTTOM, 0, 0, cn }, nil, { 1, 3 }, nil, "<Title>", false),
-            ["avaRank"] = UI:Label(botInfo, { TOPRIGHT, TOPRIGHT }, nil, { 2, 3 }, nil, "ava", false),
-            ["dead"] = UI:Label(thb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, "Status", true),
+            ["title"] = botInfo:GetNamedChild("_Title"),
+            ["avaRank"] = botInfo:GetNamedChild("_AvaRank"),
+            ["dead"] = thb:GetNamedChild("_Dead"),
         }
 
         UnitFrames.CustomFrames["AvaPlayerTarget"].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
@@ -446,14 +393,13 @@ end
 -- Helper to create the Small Group Frames
 local function CreateSmallGroupFrames()
     if UnitFrames.SV.CustomFramesGroup then
-        local group = UI:TopLevel(nil, nil)
-        group:SetDrawLayer(DL_BACKGROUND)
-        group:SetDrawTier(DT_LOW)
-        group:SetDrawLevel(DL_CONTROLS)
+        -- Get references to XML-created controls
+        local group = LUIE_CustomSmallGroupFrame
         group.customPositionAttr = "CustomFramesGroupFramePos"
-        group.preview = UI:Backdrop(group, "fill", nil, nil, nil, true)
-        group.previewLabel = UI:Label(group.preview, { BOTTOM, TOP, 0, -1, group }, nil, nil, "ZoFontGameMedium", "Small Group", false)
+        group.preview = group:GetNamedChild("_Preview")
+        group.previewLabel = group.preview:GetNamedChild("_Label")
 
+        -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(group, 0, 0)
 
         for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
@@ -462,15 +408,18 @@ local function CreateSmallGroupFrames()
 
         for i = 1, 4 do
             local unitTag = "SmallGroup" .. i
-            local control = UI:Control(group, nil, nil, false)
-            local topInfo = UI:Control(control, { BOTTOMRIGHT, TOPRIGHT, 0, -3 }, nil, false)
-            local ghb = UI:Backdrop(control, { TOPLEFT, TOPLEFT }, nil, nil, nil, false)
-            ghb:SetDrawLayer(DL_BACKGROUND)
-            ghb:SetDrawLevel(DL_CONTROLS)
-            local gli = UI:Texture(topInfo, nil, { 20, 20 }, nil, nil, false)
+            local control = group:GetNamedChild("_" .. unitTag)
+            local topInfo = control:GetNamedChild("_TopInfo")
+            local ghb = control:GetNamedChild("_Health")
+            local gli = topInfo:GetNamedChild("_LevelIcon")
 
-            -- Create container for LibGroupBroadcast integrations (positioned to right of health bar)
-            local libGroupContainer = UI:Control(control, nil, nil, false)
+            -- Get container for LibGroupBroadcast integrations (positioned to right of health bar)
+            local libGroupContainer = control:GetNamedChild("_LibGroupContainer")
+            if not libGroupContainer then
+                if LUIE.IsDevDebugEnabled() then
+                    LUIE.Error("[LUIE] CreateSmallGroupFrames: Failed to get _LibGroupContainer for " .. unitTag)
+                end
+            end
 
             -- Create combat glow animation
             local combatGlow = CreateCombatGlowBorder(ghb)
@@ -482,26 +431,36 @@ local function CreateSmallGroupFrames()
                 [COMBAT_MECHANIC_FLAGS_HEALTH] =
                 {
                     ["backdrop"] = ghb,
-                    ["labelOne"] = UI:Label(ghb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, "xx / yy", false),
-                    ["labelTwo"] = UI:Label(ghb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "zz%", false),
-                    ["trauma"] = UI:StatusBar(ghb, nil, nil, nil, true),
-                    ["bar"] = UI:StatusBar(ghb, nil, nil, nil, false),
-                    ["shield"] = UI:StatusBar(ghb, nil, nil, nil, true),
-                    ["noHealingOverlay"] = UI:StatusBar(ghb, nil, nil, nil, true),
-                    ["noHealingStripe"] = UI:StatusBar(ghb, nil, nil, nil, true),
-                    ["possessionOverlay"] = UI:Control(ghb, nil, nil, true),
+                    ["labelOne"] = ghb:GetNamedChild("_LabelOne"),
+                    ["labelTwo"] = ghb:GetNamedChild("_LabelTwo"),
+                    ["trauma"] = ghb:GetNamedChild("_Trauma"),
+                    ["bar"] = ghb:GetNamedChild("_Bar"),
+                    ["shield"] = ghb:GetNamedChild("_Shield"),
+                    ["noHealingOverlay"] = ghb:GetNamedChild("_NoHealingOverlay"),
+                    ["noHealingStripe"] = ghb:GetNamedChild("_NoHealingStripe"),
+                    ["possessionOverlay"] = ghb:GetNamedChild("_PossessionOverlay"),
                     ["combatGlow"] = combatGlow,
                 },
                 ["topInfo"] = topInfo,
-                ["name"] = UI:Label(topInfo, { BOTTOMLEFT, BOTTOMLEFT }, nil, { 0, 4 }, nil, unitTag, false),
+                ["name"] = topInfo:GetNamedChild("_Name"),
                 ["levelIcon"] = gli,
-                ["level"] = UI:Label(topInfo, { LEFT, RIGHT, 1, 0, gli }, nil, { 0, 1 }, nil, "level", false),
-                ["classIcon"] = UI:Texture(topInfo, { RIGHT, RIGHT, -1, 0 }, { 22, 22 }, nil, nil, false),
-                ["friendIcon"] = UI:Texture(topInfo, { RIGHT, RIGHT, -20, 0 }, { 22, 22 }, nil, nil, false),
-                ["roleIcon"] = UI:Texture(ghb, { LEFT, LEFT, 5, 0 }, { 18, 18 }, nil, 2, false),
-                ["dead"] = UI:Label(ghb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, "Status", false),
-                ["leader"] = UI:Texture(topInfo, { LEFT, LEFT, -7, 0 }, { 32, 32 }, nil, 2, false),
+                ["level"] = topInfo:GetNamedChild("_Level"),
+                ["classIcon"] = topInfo:GetNamedChild("_ClassIcon"),
+                ["friendIcon"] = topInfo:GetNamedChild("_FriendIcon"),
+                ["roleIcon"] = ghb:GetNamedChild("_RoleIcon"),
+                ["dead"] = ghb:GetNamedChild("_Dead"),
+                ["leader"] = topInfo:GetNamedChild("_Leader"),
                 ["libGroupContainer"] = libGroupContainer,
+                ["resourceMagicka"] =
+                {
+                    ["backdrop"] = control:GetNamedChild("_ResourceMagicka"),
+                    ["bar"] = control:GetNamedChild("_ResourceMagicka"):GetNamedChild("_Bar"),
+                },
+                ["resourceStamina"] =
+                {
+                    ["backdrop"] = control:GetNamedChild("_ResourceStamina"),
+                    ["bar"] = control:GetNamedChild("_ResourceStamina"):GetNamedChild("_Bar"),
+                },
             }
 
             UnitFrames.CustomFrames[unitTag].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
@@ -523,14 +482,13 @@ end
 -- Helper to create the Raid Group Frames
 local function CreateRaidGroupFrames()
     if UnitFrames.SV.CustomFramesRaid then
-        local raid = UI:TopLevel(nil, nil)
-        raid:SetDrawLayer(DL_BACKGROUND)
-        raid:SetDrawTier(DT_LOW)
-        raid:SetDrawLevel(DL_CONTROLS)
+        -- Get references to XML-created controls
+        local raid = LUIE_CustomRaidGroupFrame
         raid.customPositionAttr = "CustomFramesRaidFramePos"
-        raid.preview = UI:Backdrop(raid, { TOPLEFT, TOPLEFT }, nil, nil, nil, true)
-        raid.previewLabel = UI:Label(raid.preview, { BOTTOM, TOP, 0, -1, raid }, nil, nil, "ZoFontGameMedium", "Raid Group", false)
+        raid.preview = raid:GetNamedChild("_Preview")
+        raid.previewLabel = raid.preview:GetNamedChild("_Label")
 
+        -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(raid, 0, 0)
 
         for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
@@ -539,34 +497,15 @@ local function CreateRaidGroupFrames()
 
         for i = 1, 12 do
             local unitTag = "RaidGroup" .. i
-            local control = UI:Control(raid, nil, nil, false)
-            local rhb = UI:Backdrop(control, "fill", nil, nil, nil, false)
-            rhb:SetDrawLayer(DL_BACKGROUND)
-            rhb:SetDrawLevel(DL_CONTROLS)
+            local control = raid:GetNamedChild("_" .. unitTag)
+            local rhb = control:GetNamedChild("_Health")
 
             -- Create container for LibGroupBroadcast integrations (positioned to right of health bar)
-            local libGroupContainer = UI:Control(control, nil, nil, false)
+            local libGroupContainer = control:GetNamedChild("_LibGroupContainer")
 
-            -- Raid DPS/HPS and potion cooldowns commented out - only resource bars remain
-            --[[
-            -- Create DPS/HPS stats label (will be repositioned to bottom row by GroupCombatStats)
-            local statsLabel = UI:Label(control, nil, nil, { 0, 4 }, nil, "", false)
-            statsLabel:SetDrawLayer(DL_OVERLAY)
-            statsLabel:SetDrawLevel(15)
-            statsLabel:SetHidden(true)
-            ]]
-            --
-
-            -- Create resource bars (magicka and stamina) for LibGroupBroadcast integration
-            local magBackdrop = UI:Backdrop(control, nil, nil, nil, nil, false)
-            magBackdrop:SetDrawLayer(DL_BACKGROUND)
-            magBackdrop:SetDrawLevel(DL_CONTROLS)
-            magBackdrop:SetHidden(true)
-
-            local stamBackdrop = UI:Backdrop(control, nil, nil, nil, nil, false)
-            stamBackdrop:SetDrawLayer(DL_BACKGROUND)
-            stamBackdrop:SetDrawLevel(DL_CONTROLS)
-            stamBackdrop:SetHidden(true)
+            -- Get resource bars from XML for LibGroupBroadcast integration
+            local magBackdrop = control:GetNamedChild("_ResourceMagicka")
+            local stamBackdrop = control:GetNamedChild("_ResourceStamina")
 
             -- Create combat glow animation
             local combatGlow = CreateCombatGlowBorder(rhb)
@@ -578,20 +517,20 @@ local function CreateRaidGroupFrames()
                 [COMBAT_MECHANIC_FLAGS_HEALTH] =
                 {
                     ["backdrop"] = rhb,
-                    ["label"] = UI:Label(rhb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "zz%", false),
-                    ["trauma"] = UI:StatusBar(rhb, nil, nil, nil, true),
-                    ["bar"] = UI:StatusBar(rhb, nil, nil, nil, false),
-                    ["shield"] = UI:StatusBar(rhb, nil, nil, nil, true),
-                    ["noHealingOverlay"] = UI:StatusBar(rhb, nil, nil, nil, true),
-                    ["noHealingStripe"] = UI:StatusBar(rhb, nil, nil, nil, true),
-                    ["possessionOverlay"] = UI:Control(rhb, nil, nil, true),
+                    ["label"] = rhb:GetNamedChild("_Label"),
+                    ["trauma"] = rhb:GetNamedChild("_Trauma"),
+                    ["bar"] = rhb:GetNamedChild("_Bar"),
+                    ["shield"] = rhb:GetNamedChild("_Shield"),
+                    ["noHealingOverlay"] = rhb:GetNamedChild("_NoHealingOverlay"),
+                    ["noHealingStripe"] = rhb:GetNamedChild("_NoHealingStripe"),
+                    ["possessionOverlay"] = rhb:GetNamedChild("_PossessionOverlay"),
                     ["combatGlow"] = combatGlow,
                 },
-                ["name"] = UI:Label(rhb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, unitTag, false),
-                ["roleIcon"] = UI:Texture(rhb, { LEFT, LEFT, 4, 0 }, { 16, 16 }, nil, 2, false),
-                ["classIcon"] = UI:Texture(rhb, { LEFT, LEFT, 1, 0 }, { 20, 20 }, nil, 2, false),
-                ["dead"] = UI:Label(rhb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "Status", false),
-                ["leader"] = UI:Texture(rhb, { LEFT, LEFT, -2, 0 }, { 28, 28 }, nil, 2, false),
+                ["name"] = rhb:GetNamedChild("_Name"),
+                ["roleIcon"] = rhb:GetNamedChild("_RoleIcon"),
+                ["classIcon"] = rhb:GetNamedChild("_ClassIcon"),
+                ["dead"] = rhb:GetNamedChild("_Dead"),
+                ["leader"] = rhb:GetNamedChild("_Leader"),
                 ["libGroupContainer"] = libGroupContainer,
                 -- Raid DPS/HPS commented out - only resource bars remain
                 --[[
@@ -599,13 +538,13 @@ local function CreateRaidGroupFrames()
                 ]] --
                 ["resourceMagicka"] =
                 {
-                    ["backdrop"] = magBackdrop,
-                    ["bar"] = UI:StatusBar(magBackdrop, nil, nil, nil, false),
+                    ["backdrop"] = control:GetNamedChild("_ResourceMagicka"),
+                    ["bar"] = control:GetNamedChild("_ResourceMagicka"):GetNamedChild("_Bar"),
                 },
                 ["resourceStamina"] =
                 {
-                    ["backdrop"] = stamBackdrop,
-                    ["bar"] = UI:StatusBar(stamBackdrop, nil, nil, nil, false),
+                    ["backdrop"] = control:GetNamedChild("_ResourceStamina"),
+                    ["bar"] = control:GetNamedChild("_ResourceStamina"):GetNamedChild("_Bar"),
                 },
             }
             UnitFrames.CustomFrames[unitTag].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
@@ -627,14 +566,13 @@ end
 -- Helper to create the Pet Frames
 local function CreatePetFrames()
     if UnitFrames.SV.CustomFramesPet then
-        local pet = UI:TopLevel(nil, nil)
-        pet:SetDrawLayer(DL_BACKGROUND)
-        pet:SetDrawTier(DT_LOW)
-        pet:SetDrawLevel(DL_CONTROLS)
+        -- Get references to XML-created controls
+        local pet = LUIE_CustomPetFrame
         pet.customPositionAttr = "CustomFramesPetFramePos"
-        pet.preview = UI:Backdrop(pet, "fill", nil, nil, nil, true)
-        pet.previewLabel = UI:Label(pet.preview, { BOTTOM, TOP, 0, -1, nil }, nil, nil, "ZoFontGameMedium", "Player Pets", false)
+        pet.preview = pet:GetNamedChild("_Preview")
+        pet.previewLabel = pet.preview:GetNamedChild("_Label")
 
+        -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(pet, 0, 0)
 
         for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
@@ -643,11 +581,8 @@ local function CreatePetFrames()
 
         for i = 1, 7 do
             local unitTag = "PetGroup" .. i
-            local control = UI:Control(pet, nil, nil, false)
-            local shb = UI:Backdrop(control, "fill", nil, nil, nil, false)
-
-            shb:SetDrawLayer(DL_BACKGROUND)
-            shb:SetDrawLevel(DL_CONTROLS)
+            local control = pet:GetNamedChild("_" .. unitTag)
+            local shb = control:GetNamedChild("_Health")
 
             UnitFrames.CustomFrames[unitTag] =
             {
@@ -656,16 +591,16 @@ local function CreatePetFrames()
                 [COMBAT_MECHANIC_FLAGS_HEALTH] =
                 {
                     ["backdrop"] = shb,
-                    ["label"] = UI:Label(shb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "zz%", false),
-                    ["trauma"] = UI:StatusBar(shb, nil, nil, nil, true),
-                    ["bar"] = UI:StatusBar(shb, nil, nil, nil, false),
-                    ["shield"] = UI:StatusBar(shb, nil, nil, nil, true),
-                    ["noHealingOverlay"] = UI:StatusBar(shb, nil, nil, nil, true),
-                    ["noHealingStripe"] = UI:StatusBar(shb, nil, nil, nil, true),
-                    ["possessionOverlay"] = UI:Control(shb, nil, nil, true),
+                    ["label"] = shb:GetNamedChild("_Label"),
+                    ["trauma"] = shb:GetNamedChild("_Trauma"),
+                    ["bar"] = shb:GetNamedChild("_Bar"),
+                    ["shield"] = shb:GetNamedChild("_Shield"),
+                    ["noHealingOverlay"] = shb:GetNamedChild("_NoHealingOverlay"),
+                    ["noHealingStripe"] = shb:GetNamedChild("_NoHealingStripe"),
+                    ["possessionOverlay"] = shb:GetNamedChild("_PossessionOverlay"),
                 },
-                ["dead"] = UI:Label(shb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "Status", true),
-                ["name"] = UI:Label(shb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, unitTag, false),
+                ["dead"] = shb:GetNamedChild("_Dead"),
+                ["name"] = shb:GetNamedChild("_Name"),
             }
             UnitFrames.CustomFrames[unitTag].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
             UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label.format = "Current (Percentage%)"
@@ -676,13 +611,11 @@ end
 -- Helper to create the Companion Frame
 local function CreateCompanionFrame()
     if UnitFrames.SV.CustomFramesCompanion then
-        local companionTlw = UI:TopLevel(nil, nil)
-        companionTlw:SetDrawLayer(DL_BACKGROUND)
-        companionTlw:SetDrawTier(DT_LOW)
-        companionTlw:SetDrawLevel(DL_CONTROLS)
+        -- Get references to XML-created controls
+        local companionTlw = LUIE_CustomCompanionFrame
         companionTlw.customPositionAttr = "CustomFramesCompanionFramePos"
-        companionTlw.preview = UI:Backdrop(companionTlw, "fill", nil, nil, nil, true)
-        companionTlw.previewLabel = UI:Label(companionTlw.preview, { BOTTOM, TOP, 0, -1, nil }, nil, nil, "ZoFontGameMedium", "Player Companion", false)
+        companionTlw.preview = companionTlw:GetNamedChild("_Preview")
+        companionTlw.previewLabel = companionTlw.preview:GetNamedChild("_Label")
         -- Update font to use better readable font
         if IsConsoleUI() and LUIE.ConsoleMoverHelper then
             local fontName = "LUIE Default Font"
@@ -700,17 +633,15 @@ local function CreateCompanionFrame()
             end
         end
 
+        -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(companionTlw, 0, 0)
 
         for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
             sceneManager:GetScene(scene):AddFragment(fragment)
         end
 
-        local companion = UI:Control(companionTlw, nil, nil, false)
-        local shb = UI:Backdrop(companion, "fill", nil, nil, nil, false)
-
-        shb:SetDrawLayer(DL_BACKGROUND)
-        shb:SetDrawLevel(DL_CONTROLS)
+        local companion = companionTlw:GetNamedChild("_Companion")
+        local shb = companion:GetNamedChild("_Health")
 
         UnitFrames.CustomFrames["companion"] =
         {
@@ -720,16 +651,16 @@ local function CreateCompanionFrame()
             [COMBAT_MECHANIC_FLAGS_HEALTH] =
             {
                 ["backdrop"] = shb,
-                ["label"] = UI:Label(shb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "zz%", false),
-                ["trauma"] = UI:StatusBar(shb, nil, nil, nil, true),
-                ["bar"] = UI:StatusBar(shb, nil, nil, nil, false),
-                ["shield"] = UI:StatusBar(shb, nil, nil, nil, true),
-                ["noHealingOverlay"] = UI:StatusBar(shb, nil, nil, nil, true),
-                ["noHealingStripe"] = UI:StatusBar(shb, nil, nil, nil, true),
-                ["possessionOverlay"] = UI:Control(shb, nil, nil, true),
+                ["label"] = shb:GetNamedChild("_Label"),
+                ["trauma"] = shb:GetNamedChild("_Trauma"),
+                ["bar"] = shb:GetNamedChild("_Bar"),
+                ["shield"] = shb:GetNamedChild("_Shield"),
+                ["noHealingOverlay"] = shb:GetNamedChild("_NoHealingOverlay"),
+                ["noHealingStripe"] = shb:GetNamedChild("_NoHealingStripe"),
+                ["possessionOverlay"] = shb:GetNamedChild("_PossessionOverlay"),
             },
-            ["dead"] = UI:Label(shb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "Status", true),
-            ["name"] = UI:Label(shb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, nil, false),
+            ["dead"] = shb:GetNamedChild("_Dead"),
+            ["name"] = shb:GetNamedChild("_Name"),
         }
         UnitFrames.CustomFrames["companion"].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
         UnitFrames.CustomFrames["companion"][COMBAT_MECHANIC_FLAGS_HEALTH].label.format = "Current (Percentage%)"
@@ -739,14 +670,13 @@ end
 -- Helper to create the Bosses Frames
 local function CreateBossFrames()
     if UnitFrames.SV.CustomFramesBosses then
-        local bosses = UI:TopLevel(nil, nil)
-        bosses:SetDrawLayer(DL_BACKGROUND)
-        bosses:SetDrawTier(DT_LOW)
-        bosses:SetDrawLevel(DL_CONTROLS)
+        -- Get references to XML-created controls
+        local bosses = LUIE_CustomBossFrame
         bosses.customPositionAttr = "CustomFramesBossesFramePos"
-        bosses.preview = UI:Backdrop(bosses, "fill", nil, nil, nil, true)
-        bosses.previewLabel = UI:Label(bosses.preview, { BOTTOM, TOP, 0, -1, bosses }, nil, nil, "ZoFontGameMedium", "Bosses Group", false)
+        bosses.preview = bosses:GetNamedChild("_Preview")
+        bosses.previewLabel = bosses.preview:GetNamedChild("_Label")
 
+        -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(bosses, 0, 0)
 
         for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
@@ -755,17 +685,10 @@ local function CreateBossFrames()
 
         for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
             local unitTag = "boss" .. i
-            local control = UI:Control(bosses, nil, nil, false)
-            local bhb = UI:Backdrop(control, "fill", nil, nil, nil, false)
+            local control = bosses:GetNamedChild("_" .. unitTag)
+            local bhb = control:GetNamedChild("_Health")
 
-            bhb:SetDrawLayer(DL_BACKGROUND)
-            bhb:SetDrawLevel(DL_CONTROLS)
-
-            local thresholdContainer = UI:Control(bhb, "fill", nil, false)
-            thresholdContainer:SetMouseEnabled(false)
-            thresholdContainer:SetDrawTier(DT_HIGH)
-            thresholdContainer:SetDrawLayer(DL_OVERLAY)
-            thresholdContainer:SetDrawLevel(6)
+            local thresholdContainer = bhb:GetNamedChild("_ThresholdContainer")
 
             UnitFrames.CustomFrames[unitTag] =
             {
@@ -775,21 +698,21 @@ local function CreateBossFrames()
                 [COMBAT_MECHANIC_FLAGS_HEALTH] =
                 {
                     ["backdrop"] = bhb,
-                    ["label"] = UI:Label(bhb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "zz%", false),
-                    ["trauma"] = UI:StatusBar(bhb, nil, nil, nil, true),
-                    ["bar"] = UI:StatusBar(bhb, nil, nil, nil, false),
-                    ["invulnerable"] = UI:StatusBar(bhb, nil, nil, nil, false),
-                    ["invulnerableInlay"] = UI:StatusBar(bhb, nil, nil, nil, false),
-                    ["shield"] = UI:StatusBar(bhb, nil, nil, nil, true),
-                    ["noHealingOverlay"] = UI:StatusBar(bhb, nil, nil, nil, true),
-                    ["noHealingStripe"] = UI:StatusBar(bhb, nil, nil, nil, true),
-                    ["possessionOverlay"] = UI:Control(bhb, nil, nil, true),
+                    ["label"] = bhb:GetNamedChild("_Label"),
+                    ["trauma"] = bhb:GetNamedChild("_Trauma"),
+                    ["bar"] = bhb:GetNamedChild("_Bar"),
+                    ["invulnerable"] = bhb:GetNamedChild("_Invulnerable"),
+                    ["invulnerableInlay"] = bhb:GetNamedChild("_InvulnerableInlay"),
+                    ["shield"] = bhb:GetNamedChild("_Shield"),
+                    ["noHealingOverlay"] = bhb:GetNamedChild("_NoHealingOverlay"),
+                    ["noHealingStripe"] = bhb:GetNamedChild("_NoHealingStripe"),
+                    ["possessionOverlay"] = bhb:GetNamedChild("_PossessionOverlay"),
                     ["thresholdContainer"] = thresholdContainer,
                     ["thresholdMarkers"] = {},
                     ["threshold"] = UnitFrames.targetThreshold,
                 },
-                ["dead"] = UI:Label(bhb, { RIGHT, RIGHT, -5, 0 }, nil, { 2, 1 }, nil, "Status", true),
-                ["name"] = UI:Label(bhb, { LEFT, LEFT, 5, 0 }, nil, { 0, 1 }, nil, unitTag, false),
+                ["dead"] = bhb:GetNamedChild("_Dead"),
+                ["name"] = bhb:GetNamedChild("_Name"),
             }
             UnitFrames.CustomFrames[unitTag].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
             UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label.format = "Percentage%"
@@ -929,24 +852,11 @@ local function SetupCommonFrameActions()
                             powerBar.possessionOverlay:SetDrawTier(DT_HIGH)
                             powerBar.possessionOverlay:SetDrawLayer(DL_CONTROLS)
 
-                            -- Create three-part possession overlay container (uses TextureCoords from single file)
+                            -- Get three-part possession glow textures from XML
                             if not powerBar.possessionGlowLeft then
-                                -- Left arrow (width 10px from texture coords)
-                                powerBar.possessionGlowLeft = UI:Texture(powerBar.possessionOverlay, { TOPLEFT, TOPLEFT }, { 10, nil }, "EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possession.dds", DL_CONTROLS, false)
-                                powerBar.possessionGlowLeft:SetTextureCoords(0.390625, 0.46875, 0.359375, 0.65625)
-                                powerBar.possessionGlowLeft:SetHidden(true)
-
-                                -- Right arrow (width 10px, mirrored texture coords)
-                                powerBar.possessionGlowRight = UI:Texture(powerBar.possessionOverlay, { TOPRIGHT, TOPRIGHT }, { 10, nil }, "EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possession.dds", DL_CONTROLS, false)
-                                powerBar.possessionGlowRight:SetTextureCoords(0.46875, 0.390625, 0.359375, 0.65625)
-                                powerBar.possessionGlowRight:SetHidden(true)
-
-                                -- Center section (stretches between left and right)
-                                powerBar.possessionGlowCenter = UI:Texture(powerBar.possessionOverlay, nil, nil, "EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possession.dds", DL_CONTROLS, false)
-                                powerBar.possessionGlowCenter:SetAnchor(TOPLEFT, powerBar.possessionGlowLeft, TOPRIGHT, 0, 0)
-                                powerBar.possessionGlowCenter:SetAnchor(BOTTOMRIGHT, powerBar.possessionGlowRight, TOPLEFT, 0, 0)
-                                powerBar.possessionGlowCenter:SetTextureCoords(0.46875, 0.5234375, 0.359375, 0.65625)
-                                powerBar.possessionGlowCenter:SetHidden(true)
+                                powerBar.possessionGlowLeft = powerBar.possessionOverlay:GetNamedChild("_GlowLeft")
+                                powerBar.possessionGlowRight = powerBar.possessionOverlay:GetNamedChild("_GlowRight")
+                                powerBar.possessionGlowCenter = powerBar.possessionOverlay:GetNamedChild("_GlowCenter")
 
                                 -- Create animated halo texture using helper function
                                 powerBar.possessionHalo = CreatePossessionHaloAnimation(powerBar.backdrop)
@@ -954,6 +864,7 @@ local function SetupCommonFrameActions()
                         end
 
                         if powerBar.shield then
+                            powerBar.shield:ClearAnchors()
                             if shieldOverlay then
                                 if UnitFrames.SV.CustomShieldBarFull then
                                     powerBar.shield:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
@@ -1039,7 +950,7 @@ local function SetupArmorOverlays(frameConfig)
             frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_ARMOR_RATING] =
             {
                 ["dec"] = CreateDecreasedArmorOverlay(backdrop, false),
-                ["inc"] = UI:Texture(backdrop, { CENTER, CENTER, 13, 0 }, { 24, 24 }, "/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds", 2, true), -- Already hidden by default
+                ["inc"] = backdrop:GetNamedChild("_ArmorInc"), -- Get from XML (already hidden by default)
             }
         end
     end
@@ -1056,14 +967,14 @@ local function SetupPowerGlowAnimations()
             and frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_POWER]
             and frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_POWER].inc then
                 local control = frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_POWER].inc
-                local animation, timeline = CreateSimpleAnimation(ANIMATION_TEXTURE, control)
-                animation:SetImageData(4, 8)
-                animation:SetFramerate(GetFramerate())
-                animation:SetDuration(1000)
-                timeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
 
-                control.animation = animation
-                control.timeline = timeline
+                -- Use XML-defined animation timeline
+                control.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("LUIE_PowerGlowAnimation", control)
+                control.animation = control.timeline:GetAnimation(1)
+
+                -- Configure framerate dynamically based on current game framerate
+                control.animation:SetFramerate(GetFramerate())
+
                 control.timeline:PlayFromStart()
             end
         end
@@ -1074,7 +985,7 @@ end
 local function AddTopLevelWindows()
     local frameTags = { "player", "reticleover", "companion", "SmallGroup1", "RaidGroup1", "boss1", "AvaPlayerTarget", "PetGroup1" }
 
-    for _, unitTag in ipairs(frameTags) do
+    for _, unitTag in pairs(frameTags) do
         if UnitFrames.CustomFrames[unitTag] then
             LUIE.Components[moduleName .. "_CustomFrame_" .. unitTag] = UnitFrames.CustomFrames[unitTag].tlw
         end

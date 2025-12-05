@@ -62,61 +62,62 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
         local offsetX = isRaid and Settings.potionIconRaidOffsetX or Settings.potionIconGroupOffsetX
         local offsetY = isRaid and Settings.potionIconRaidOffsetY or Settings.potionIconGroupOffsetY
 
-        -- Get or create the container (already positioned by other modules if enabled)
+        -- Get the container (already exists in XML)
         local container = frameData.libGroupContainer
         if not container then
-            container = UI:Control(frameData.control, nil, nil, false)
-            frameData.libGroupContainer = container
+            -- Fallback: get from control if not set in frameData
+            container = frameData.control and frameData.control:GetNamedChild("_LibGroupContainer") or nil
+            if container then
+                frameData.libGroupContainer = container
+            else
+                return -- Can't proceed without container
+            end
         end
 
+        -- Anchor container to health bar if not already anchored
         local numAnchors = container:GetNumAnchors()
         if numAnchors == 0 then
             local healthBackdrop = Shared.GetHealthBackdrop(frameData)
             container:SetAnchor(LEFT, healthBackdrop, RIGHT, offsetX, offsetY)
         end
 
-        -- Determine anchor target within container for horizontal flow
-        -- Order: Food/Drink -> Ultimate -> Potion
-        local anchorTarget = container
-        local anchorPoint = LEFT
-        local anchorOffsetX = 0
+        -- Get potion controls from XML
+        frameData.potionCooldown.backdrop = container:GetNamedChild("_PotionBackdrop")
+        if not frameData.potionCooldown.backdrop then
+            return -- Can't proceed without potion controls
+        end
+        frameData.potionCooldown.icon = frameData.potionCooldown.backdrop:GetNamedChild("_Icon")
+        frameData.potionCooldown.label = frameData.potionCooldown.backdrop:GetNamedChild("_Label")
 
+        -- Set dimensions based on settings
+        frameData.potionCooldown.backdrop:SetDimensions(iconSize, iconSize)
+        frameData.potionCooldown.icon:SetDimensions(iconSize - 2, iconSize - 2)
+
+        -- Anchor within container (order: food/drink -> ult1 -> ult2 -> potion)
+        frameData.potionCooldown.backdrop:ClearAnchors()
         if frameData.combatStats and frameData.combatStats.ult2Backdrop then
-            anchorTarget = frameData.combatStats.ult2Backdrop
-            anchorPoint = RIGHT
-            anchorOffsetX = 3
+            frameData.potionCooldown.backdrop:SetAnchor(LEFT, frameData.combatStats.ult2Backdrop, RIGHT, 3, 0)
         elseif frameData.combatStats and frameData.combatStats.ult1Backdrop then
-            anchorTarget = frameData.combatStats.ult1Backdrop
-            anchorPoint = RIGHT
-            anchorOffsetX = 3
+            frameData.potionCooldown.backdrop:SetAnchor(LEFT, frameData.combatStats.ult1Backdrop, RIGHT, 3, 0)
         elseif frameData.foodDrinkBuff and frameData.foodDrinkBuff.backdrop then
-            anchorTarget = frameData.foodDrinkBuff.backdrop
-            anchorPoint = RIGHT
-            anchorOffsetX = 3
+            frameData.potionCooldown.backdrop:SetAnchor(LEFT, frameData.foodDrinkBuff.backdrop, RIGHT, 3, 0)
+        else
+            frameData.potionCooldown.backdrop:SetAnchor(LEFT, container, LEFT, 0, 0)
         end
 
-        -- Potion icon backdrop (container is already bottom-aligned, just flow horizontally)
-        frameData.potionCooldown.backdrop = UI:Backdrop(container, { LEFT, anchorPoint, anchorOffsetX, 0, anchorTarget }, { iconSize, iconSize }, nil, { 0, 0, 0, 0.8 }, true)
+        -- Set draw properties
         frameData.potionCooldown.backdrop:SetDrawLayer(DL_BACKGROUND)
         frameData.potionCooldown.backdrop:SetDrawLevel(13)
-
-        -- Potion icon
-        frameData.potionCooldown.icon = UI:Texture(frameData.potionCooldown.backdrop, { CENTER, CENTER }, { iconSize - 2, iconSize - 2 }, nil, DL_OVERLAY, false)
         frameData.potionCooldown.icon:SetTexture(POTION_ICON)
         frameData.potionCooldown.icon:SetDrawLevel(15)
-        frameData.potionCooldown.icon:SetHidden(false)
 
-        -- Cooldown time label (optional, shows remaining time)
+        -- Apply font to label if showRemainingTime is enabled
         if Settings.showRemainingTime then
             local fontSize = isRaid and 10 or 12
-            frameData.potionCooldown.label = UI:Label(frameData.potionCooldown.backdrop, { CENTER, BOTTOM, 0, 0 }, nil, { 1, 1 }, nil, "", false)
-            frameData.potionCooldown.label:SetDrawLayer(DL_OVERLAY)
-            frameData.potionCooldown.label:SetDrawLevel(16)
             local rootSettings = Shared.GetSettings()
             local fontFace = LUIE.Fonts[rootSettings.CustomFontFace]
             local fontStyle = rootSettings.CustomFontStyle
             frameData.potionCooldown.label:SetFont(ZO_CreateFontString(fontFace, fontSize, fontStyle))
-            frameData.potionCooldown.label:SetHidden(true)
         end
     end
 end
