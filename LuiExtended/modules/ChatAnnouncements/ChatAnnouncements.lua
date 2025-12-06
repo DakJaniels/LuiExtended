@@ -268,8 +268,8 @@ function ChatAnnouncements.Initialize(enabled)
     -- Note: pChat registers formatters in EVENT_PLAYER_ACTIVATED, so we'll also call this there
     ChatAnnouncements.SlayChatHandlers()
     -- Call this again after delays to catch late-loading addons
-    zo_callLater(ChatAnnouncements.SlayChatHandlers, 100)
-    zo_callLater(ChatAnnouncements.SlayChatHandlers, 5000)
+    LUIE_callLater(ChatAnnouncements.SlayChatHandlers, 100)
+    LUIE_callLater(ChatAnnouncements.SlayChatHandlers, 5000)
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -593,7 +593,7 @@ end
 --- @param eventId integer
 --- @param gameOverFlags DiggingGameOverFlags
 function ChatAnnouncements.OnDigEnd(eventId, gameOverFlags)
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      ChatAnnouncements.weAreInADig = false
                  end, 1000)
 end
@@ -1137,7 +1137,7 @@ function ChatAnnouncements.GroupingToolsLFGJoined(eventId, locationName)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(LUIE_STRING_CA_GROUPFINDER_ALERT_LFG_JOINED, locationName))
         end
         ChatAnnouncements.lfgDisableGroupEvents = true
-        zo_callLater(function ()
+        LUIE_callLater(function ()
                          ChatAnnouncements.lfgDisableGroupEvents = false
                      end, 3000)
     end
@@ -1282,19 +1282,19 @@ function ChatAnnouncements.ReadyCheckUpdate(eventId)
             ChatAnnouncements.rcSpamPrevention = true
 
             -- Reset spam prevention after 1 second
-            zo_callLater(function ()
+            LUIE_callLater(function ()
                              ChatAnnouncements.rcSpamPrevention = false
                          end, 1000)
 
             -- Reset activity status after 1 second
             ChatAnnouncements.showActivityStatus = false
-            zo_callLater(function ()
+            LUIE_callLater(function ()
                              ChatAnnouncements.showActivityStatus = true
                          end, 1000)
 
             -- Reset group leave queue after 1 second
             ChatAnnouncements.stopGroupLeaveQueue = true
-            zo_callLater(function ()
+            LUIE_callLater(function ()
                              ChatAnnouncements.stopGroupLeaveQueue = false
                          end, 1000)
 
@@ -1525,9 +1525,9 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
             return
         end
         if ChatAnnouncements.SV.Currency.CurrencyGoldThrottle and (reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_KILL) then
-            -- NOTE: Unlike other throttle events, we used zo_callLater here because we have to make the call immediately
-            -- (if some of the gold is looted after items, the message will appear after the loot if we don't use zo_callLater instead of a RegisterForUpdate)
-            zo_callLater(ChatAnnouncements.CurrencyGoldThrottlePrinter, 50)
+            -- NOTE: Unlike other throttle events, we used LUIE_callLater here because we have to make the call immediately
+            -- (if some of the gold is looted after items, the message will appear after the loot if we don't use LUIE_callLater instead of a RegisterForUpdate)
+            LUIE_callLater(ChatAnnouncements.CurrencyGoldThrottlePrinter, 50)
             ChatAnnouncements.currencyGoldThrottleValue = ChatAnnouncements.currencyGoldThrottleValue + UpOrDown
             ChatAnnouncements.currencyGoldThrottleTotal = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
             return
@@ -1879,7 +1879,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
         messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawGuild
     elseif reason == CURRENCY_CHANGE_REASON_BOUNTY_PAID_GUARD or reason == CURRENCY_CHANGE_REASON_BOUNTY_CONFISCATED then
         messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageConfiscate
-        zo_callLater(ChatAnnouncements.JusticeDisplayConfiscate, 50)
+        LUIE_callLater(ChatAnnouncements.JusticeDisplayConfiscate, 50)
     elseif reason == CURRENCY_CHANGE_REASON_PICKPOCKET then
         messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePickpocket
     elseif reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER or reason == CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER then
@@ -2149,7 +2149,7 @@ end
 --- @param inactivityLengthMs integer
 function ChatAnnouncements.MiscAlertLockBroke(eventId, inactivityLengthMs)
     ChatAnnouncements.lockpickBroken = true
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      ChatAnnouncements.lockpickBroken = false
                  end, 200)
 end
@@ -2172,7 +2172,7 @@ function ChatAnnouncements.MiscAlertLockSuccess(eventId)
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString(LUIE_STRING_CA_LOCKPICK_SUCCESS))
     end
     ChatAnnouncements.lockpickBroken = true
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      ChatAnnouncements.lockpickBroken = false
                  end, 200)
 end
@@ -2857,7 +2857,7 @@ end
 --- @param isLastUpdateForMessage boolean
 function ChatAnnouncements.GuildBankItemAdded(eventId, slotId, addedByLocalPlayer, itemSoundCategory, isLastUpdateForMessage)
     if addedByLocalPlayer then
-        zo_callLater(ChatAnnouncements.LogGuildBankChange, 50)
+        LUIE_callLater(ChatAnnouncements.LogGuildBankChange, 50)
     end
 end
 
@@ -2871,7 +2871,7 @@ end
 --- @param isLastUpdateForMessage boolean
 function ChatAnnouncements.GuildBankItemRemoved(eventId, slotId, addedByLocalPlayer, itemSoundCategory, isLastUpdateForMessage)
     if addedByLocalPlayer then
-        zo_callLater(ChatAnnouncements.LogGuildBankChange, 50)
+        LUIE_callLater(ChatAnnouncements.LogGuildBankChange, 50)
     end
 end
 
@@ -3149,7 +3149,7 @@ function ChatAnnouncements.StoreClose(eventId)
     if not (ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise) then
         ChatAnnouncements.inventoryStacks = {}
     end
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      ChatAnnouncements.weAreInAStore = false
                      ChatAnnouncements.weAreInAFence = false
                  end, 1000)
@@ -3174,7 +3174,7 @@ function ChatAnnouncements.GuildStoreClose(eventId)
     if not (ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise) then
         ChatAnnouncements.inventoryStacks = {}
     end
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      ChatAnnouncements.weAreInAStore = false
                      ChatAnnouncements.weAreInAGuildStore = false
                  end, 1000)
@@ -3317,7 +3317,7 @@ function ChatAnnouncements.ResolveQuestItemChange()
 
                 countChange = newValue + ChatAnnouncements.questItemIndex[itemId].counter
                 ChatAnnouncements.questItemRemoved[itemId] = true
-                zo_callLater(function ()
+                LUIE_callLater(function ()
                                  ChatAnnouncements.questItemRemoved[itemId] = false
                              end, 100)
 
@@ -3390,7 +3390,7 @@ function ChatAnnouncements.ResolveQuestItemChange()
                 --
                 countChange = newValue - ChatAnnouncements.questItemIndex[itemId].stack
                 ChatAnnouncements.questItemAdded[itemId] = true
-                zo_callLater(function ()
+                LUIE_callLater(function ()
                                  ChatAnnouncements.questItemAdded[itemId] = false
                              end, 100)
 
@@ -3404,7 +3404,7 @@ function ChatAnnouncements.ResolveQuestItemChange()
 
                         if ChatAnnouncements.isLooted and not ChatAnnouncements.itemReceivedIsQuestReward and not ChatAnnouncements.isPickpocketed and not ChatAnnouncements.isStolen then
                             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
-                            -- reset variables that control looted, or at least zo_callLater them
+                            -- reset variables that control looted, or at least LUIE_callLater them
                         elseif ChatAnnouncements.isPickpocketed then
                             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePickpocket
                         elseif ChatAnnouncements.isStolen and not ChatAnnouncements.isPickpocketed then
@@ -4562,7 +4562,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                 elseif ChatAnnouncements.talkingToNPC and not ChatAnnouncements.weAreInAStore and ChatAnnouncements.SV.Inventory.LootShowTurnIn then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestTurnIn
-                    zo_callLater(function ()
+                    LUIE_callLater(function ()
                                      if ChatAnnouncements.stackSplit == false then
                                          ChatAnnouncements.ItemCounterDelay(
                                              removedIcon,
@@ -4588,7 +4588,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                     ChatAnnouncements.savedItem = { icon = removedIcon, stack = change, itemLink = removedItemLink }
                     -- Check to see if the item was used
                 elseif not ChatAnnouncements.itemWasDestroyed and not ChatAnnouncements.talkingToNPC and not ChatAnnouncements.inTrade and not ChatAnnouncements.inMail then
-                    local flag -- When set to true we deliver a message on a zo_callLater
+                    local flag -- When set to true we deliver a message on a LUIE_callLater
                     if ChatAnnouncements.SV.Inventory.LootShowUsePotion and removedItemType == ITEMTYPE_POTION then
                         gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                         logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePotion
@@ -4626,13 +4626,13 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                     end
                     -- If this is a Skill respec scroll, manually call an announcement for it if enabled (for some reason doesn't display an EVENT_DISPLAY_ANNOUNCEMENT on use anymore)
                     if removedItemType == ITEMTYPE_CROWN_ITEM and (itemId == 64524 or itemId == 135128) then
-                        zo_callLater(function ()
+                        LUIE_callLater(function ()
                                          ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILLS)
                                      end, 25)
                     end
                     -- If this is an Attribute respec scroll, manually call an announcement for it if enabled (we disable EVENT_DISPLAY_ANNOUNCEMENT for this to sync it better)
                     if removedItemType == ITEMTYPE_CROWN_ITEM and (itemId == 64523 or itemId == 135130) then
-                        zo_callLater(function ()
+                        LUIE_callLater(function ()
                                          ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_ATTRIBUTES)
                                      end, 25)
                     end
@@ -4688,7 +4688,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                     end
                     -- If any of these options were flagged, run a callLater on a 50ms delay to make sure we didn't just split stacks.
                     if flag then
-                        zo_callLater(function ()
+                        LUIE_callLater(function ()
                                          if ChatAnnouncements.stackSplit == false then
                                              ChatAnnouncements.ItemCounterDelay(
                                                  removedIcon,
@@ -5617,7 +5617,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotIndex, isNewI
                 ChatAnnouncements.InventoryOn = false
             end
             if not ChatAnnouncements.itemWasDestroyed then
-                zo_callLater(ChatAnnouncements.BankFixer, 50)
+                LUIE_callLater(ChatAnnouncements.BankFixer, 50)
             end
         end
     end
@@ -5699,7 +5699,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotIndex, isNewI
                 ChatAnnouncements.bankOn = false
             end
             if not ChatAnnouncements.itemWasDestroyed then
-                zo_callLater(ChatAnnouncements.BankFixer, 50)
+                LUIE_callLater(ChatAnnouncements.BankFixer, 50)
             end
         end
     end
@@ -5781,7 +5781,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotIndex, isNewI
                 ChatAnnouncements.bankOn = false
             end
             if not ChatAnnouncements.itemWasDestroyed then
-                zo_callLater(ChatAnnouncements.BankFixer, 50)
+                LUIE_callLater(ChatAnnouncements.BankFixer, 50)
             end
         end
     end
@@ -5863,7 +5863,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotIndex, isNewI
                 ChatAnnouncements.bankOn = false
             end
             if not ChatAnnouncements.itemWasDestroyed then
-                zo_callLater(ChatAnnouncements.BankFixer, 50)
+                LUIE_callLater(ChatAnnouncements.BankFixer, 50)
             end
         end
     end
@@ -6308,7 +6308,7 @@ function ChatAnnouncements.BankFixer()
 end
 
 function ChatAnnouncements.JusticeStealRemove(eventCode)
-    zo_callLater(ChatAnnouncements.JusticeRemovePrint, 50)
+    LUIE_callLater(ChatAnnouncements.JusticeRemovePrint, 50)
 end
 
 function ChatAnnouncements.JusticeDisplayConfiscate()
@@ -6582,13 +6582,13 @@ function ChatAnnouncements.OnPlayerActivated(eventId, initial)
 
     if g_firstLoad then
         -- pChat registers formatters in EVENT_PLAYER_ACTIVATED, so delay to ensure pChat has finished
-        zo_callLater(function ()
+        LUIE_callLater(function ()
                          ChatAnnouncements.SlayChatHandlers()
                      end, 50)
         g_firstLoad = false
     end
 
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      ChatAnnouncements.loginHideQuestLoot = false
                  end, 3000)
 
@@ -6682,7 +6682,7 @@ function ChatAnnouncements.InventoryFull(eventId, numSlotsRequested, numSlotsFre
         end
     end
 
-    zo_callLater(DisplayItemFailed, 100)
+    LUIE_callLater(DisplayItemFailed, 100)
 end
 
 --- - **EVENT_LOOT_ITEM_FAILED **
@@ -6699,7 +6699,7 @@ function ChatAnnouncements.LootItemFailed(eventId, reason, itemLink)
         eventManager:RegisterForEvent(moduleName, EVENT_LOOT_ITEM_FAILED, ChatAnnouncements.LootItemFailed)
     end
 
-    zo_callLater(ReactivateLootItemFailed, 100)
+    LUIE_callLater(ReactivateLootItemFailed, 100)
 end
 
 -------------------------------------------------------------------------
@@ -7092,7 +7092,7 @@ function ChatAnnouncements.CollectibleUsed(eventCode, result, isAttemptingActiva
     end
     local latency = GetLatency()
     latency = latency + 100
-    zo_callLater(ChatAnnouncements.CollectibleResult, latency)
+    LUIE_callLater(ChatAnnouncements.CollectibleResult, latency)
 end
 
 --- Processes the result of a collectible usage.

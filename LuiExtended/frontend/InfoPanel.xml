@@ -4,306 +4,306 @@
 -->
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
-	<Controls>
-		<TopLevelControl name="LUIE_InfoPanel"
-		                 mouseEnabled="false"
-		                 clampedToScreen="true"
-		                 movable="false"
-		                 hidden="true"
-		                 layer="BACKGROUND"
-		                 tier="DT_LOW"
-		                 level="0">
-			<Anchor point="TOPRIGHT"
-			        relativeTo="GuiRoot"
-			        relativePoint="TOPRIGHT"
-			        offsetX="-24"
-			        offsetY="20"/>
-			<Dimensions x="240"
-			            y="48"/>
-			<OnMoveStop>
-                LUIE.InfoPanel.OnPanelMoveStop(self)
-            </OnMoveStop>
-			<Controls>
-				<!-- Horizontal Divider -->
-				<Texture name="$(parent)_Divider"
-				         textureFile="/esoui/art/miscellaneous/horizontaldivider.dds"
-				         layer="BACKGROUND">
-					<Anchor point="LEFT"
-					        relativeTo="$(parent)"
-					        relativePoint="LEFT"
-					        offsetX="-60"
-					        offsetY="0"/>
-					<Anchor point="RIGHT"
-					        relativeTo="$(parent)"
-					        relativePoint="RIGHT"
-					        offsetX="60"
-					        offsetY="0"/>
-					<Dimensions y="4"/>
-				</Texture>
-				<!-- Top Row Container -->
-				<Control name="$(parent)_TopRow">
-					<Anchor point="TOP"
-					        relativeTo="$(parent)"
-					        relativePoint="TOP"
-					        offsetX="0"
-					        offsetY="2"/>
-					<Dimensions x="300"
-					            y="20"/>
-					<Controls>
-						<!-- Latency -->
-						<Control name="$(parent)_Latency">
-							<Dimensions x="75"
-							            y="20"/>
-							<Controls>
-								<Texture name="$(parent)_Icon"
-								         textureFile="/esoui/art/campaign/campaignbrowser_hipop.dds">
-									<Anchor point="LEFT"
-									        relativeTo="$(parent)"
-									        relativePoint="LEFT"
-									        offsetX="0"
-									        offsetY="0"/>
-									<Dimensions x="24"
-									            y="24"/>
-								</Texture>
-								<Label name="$(parent)_Label"
-								       font="ZoFontGame"
-								       color="FFFFFF"
-								       verticalAlignment="CENTER"
-								       horizontalAlignment="LEFT"
-								       text="11999 ms"
-								       wrapMode="ELLIPSIS">
-									<Anchor point="LEFT"
-									        relativeTo="$(parent)_Icon"
-									        relativePoint="RIGHT"
-									        offsetX="0"
-									        offsetY="0"/>
-									<Dimensions x="56"
-									            y="20"/>
-								</Label>
-							</Controls>
-						</Control>
-						<!-- FPS -->
-						<Label name="$(parent)_Fps"
-						       font="ZoFontGame"
-						       color="FFFFFF"
-						       verticalAlignment="CENTER"
-						       horizontalAlignment="CENTER"
-						       text="999 fps"
-						       wrapMode="ELLIPSIS">
-							<Dimensions x="50"
-							            y="20"/>
-						</Label>
-						<!-- Clock -->
-						<Label name="$(parent)_Clock"
-						       font="ZoFontGame"
-						       color="FFFFFF"
-						       verticalAlignment="CENTER"
-						       horizontalAlignment="CENTER"
-						       text="88:88:88"
-						       wrapMode="ELLIPSIS">
-							<Dimensions x="60"
-							            y="20"/>
-						</Label>
-						<!-- Soul Gems -->
-						<Control name="$(parent)_Gems">
-							<Dimensions x="48"
-							            y="20"/>
-							<Controls>
-								<Texture name="$(parent)_Icon">
-									<Anchor point="LEFT"
-									        relativeTo="$(parent)"
-									        relativePoint="LEFT"
-									        offsetX="0"
-									        offsetY="0"/>
-									<Dimensions x="16"
-									            y="16"/>
-								</Texture>
-								<Label name="$(parent)_Label"
-								       font="ZoFontGame"
-								       color="FFFFFF"
-								       verticalAlignment="CENTER"
-								       horizontalAlignment="LEFT"
-								       text="8/88"
-								       wrapMode="ELLIPSIS">
-									<Anchor point="LEFT"
-									        relativeTo="$(parent)_Icon"
-									        relativePoint="RIGHT"
-									        offsetX="2"
-									        offsetY="0"/>
-									<Dimensions x="32"
-									            y="20"/>
-								</Label>
-							</Controls>
-						</Control>
-					</Controls>
-				</Control>
-				<!-- Bottom Row Container -->
-				<Control name="$(parent)_BotRow">
-					<Anchor point="BOTTOM"
-					        relativeTo="$(parent)"
-					        relativePoint="BOTTOM"
-					        offsetX="0"
-					        offsetY="-2"/>
-					<Dimensions x="300"
-					            y="20"/>
-					<Controls>
-						<!-- Feed Timer -->
-						<Control name="$(parent)_FeedTimer">
-							<Dimensions x="96"
-							            y="20"/>
-							<Controls>
-								<Texture name="$(parent)_Icon"
-								         textureFile="EsoUI/Art/Mounts/tabIcon_mounts_up.dds">
-									<Anchor point="LEFT"
-									        relativeTo="$(parent)"
-									        relativePoint="LEFT"
-									        offsetX="0"
-									        offsetY="0"/>
-									<Dimensions x="28"
-									            y="28"/>
-								</Texture>
-								<Label name="$(parent)_Label"
-								       font="ZoFontGame"
-								       color="FFFFFF"
-								       verticalAlignment="CENTER"
-								       horizontalAlignment="LEFT"
-								       text="Train Now"
-								       wrapMode="ELLIPSIS">
-									<Anchor point="LEFT"
-									        relativeTo="$(parent)_Icon"
-									        relativePoint="RIGHT"
-									        offsetX="0"
-									        offsetY="0"/>
-									<Dimensions x="68"
-									            y="20"/>
-								</Label>
-							</Controls>
-						</Control>
-						<!-- Armour Durability -->
-						<Control name="$(parent)_Armour">
-							<Dimensions x="55"
-							            y="20"/>
-							<Controls>
-								<Texture name="$(parent)_Icon"
-								         textureFile="/esoui/art/progression/progression_indexicon_armor_up.dds">
-									<Anchor point="LEFT"
-									        relativeTo="$(parent)"
-									        relativePoint="LEFT"
-									        offsetX="0"
-									        offsetY="0"/>
-									<Dimensions x="24"
-									            y="24"/>
-								</Texture>
-								<Label name="$(parent)_Label"
-								       font="ZoFontGame"
-								       color="FFFFFF"
-								       verticalAlignment="CENTER"
-								       horizontalAlignment="LEFT"
-								       text="100%"
-								       wrapMode="ELLIPSIS">
-									<Anchor point="LEFT"
-									        relativeTo="$(parent)_Icon"
-									        relativePoint="RIGHT"
-									        offsetX="0"
-									        offsetY="0"/>
-									<Dimensions x="41"
-									            y="20"/>
-								</Label>
-							</Controls>
-						</Control>
-						<!-- Weapon Charges -->
-						<Control name="$(parent)_Weapons">
-							<Dimensions x="46"
-							            y="20"/>
-							<Controls>
-								<Texture name="$(parent)_Main"
-								         textureFile="/esoui/art/progression/icon_1handplusrune.dds">
-									<Anchor point="LEFT"
-									        relativeTo="$(parent)"
-									        relativePoint="LEFT"
-									        offsetX="0"
-									        offsetY="0"/>
-									<Dimensions x="30"
-									            y="30"/>
-								</Texture>
-								<Texture name="$(parent)_Swap"
-								         textureFile="/esoui/art/progression/icon_1handplusrune.dds">
-									<Anchor point="RIGHT"
-									        relativeTo="$(parent)"
-									        relativePoint="RIGHT"
-									        offsetX="5"
-									        offsetY="0"/>
-									<Dimensions x="30"
-									            y="30"/>
-								</Texture>
-							</Controls>
-						</Control>
-						<!-- Bags -->
-						<Control name="$(parent)_Bags">
-							<Dimensions x="78"
-							            y="20"/>
-							<Controls>
-								<Texture name="$(parent)_Icon"
-								         textureFile="EsoUI/Art/Inventory/inventory_tabIcon_misc_up.dds">
-									<Anchor point="LEFT"
-									        relativeTo="$(parent)"
-									        relativePoint="LEFT"
-									        offsetX="0"
-									        offsetY="0"/>
-									<Dimensions x="28"
-									            y="28"/>
-								</Texture>
-								<Label name="$(parent)_Label"
-								       font="ZoFontGame"
-								       color="FFFFFF"
-								       verticalAlignment="CENTER"
-								       horizontalAlignment="LEFT"
-								       text="888/888"
-								       wrapMode="ELLIPSIS">
-									<Anchor point="LEFT"
-									        relativeTo="$(parent)_Icon"
-									        relativePoint="RIGHT"
-									        offsetX="0"
-									        offsetY="0"/>
-									<Dimensions x="50"
-									            y="20"/>
-								</Label>
-							</Controls>
-						</Control>
-						<!-- Gold -->
-						<Control name="$(parent)_Gold">
-							<Dimensions x="85"
-							            y="20"/>
-							<Controls>
-								<Texture name="$(parent)_Icon">
-									<Anchor point="LEFT"
-									        relativeTo="$(parent)"
-									        relativePoint="LEFT"
-									        offsetX="0"
-									        offsetY="0"/>
-									<Dimensions x="12"
-									            y="12"/>
-								</Texture>
-								<Label name="$(parent)_Label"
-								       font="ZoFontGame"
-								       color="FFFFFF"
-								       verticalAlignment="CENTER"
-								       horizontalAlignment="LEFT"
-								       text="0"
-								       wrapMode="ELLIPSIS">
-									<Anchor point="LEFT"
-									        relativeTo="$(parent)_Icon"
-									        relativePoint="RIGHT"
-									        offsetX="2"
-									        offsetY="0"/>
-									<Dimensions x="65"
-									            y="20"/>
-								</Label>
-							</Controls>
-						</Control>
-					</Controls>
-				</Control>
-			</Controls>
-		</TopLevelControl>
-	</Controls>
+  <Controls>
+    <TopLevelControl name="LUIE_InfoPanel"
+                     mouseEnabled="false"
+                     clampedToScreen="true"
+                     movable="false"
+                     hidden="true"
+                     layer="BACKGROUND"
+                     tier="DT_LOW"
+                     level="0">
+      <Anchor point="TOPRIGHT"
+              relativeTo="GuiRoot"
+              relativePoint="TOPRIGHT"
+              offsetX="-24"
+              offsetY="20" />
+      <Dimensions x="240"
+                  y="48" />
+      <OnMoveStop>
+        LUIE.InfoPanel.OnPanelMoveStop(self)
+      </OnMoveStop>
+      <Controls>
+        <!-- Horizontal Divider -->
+        <Texture name="$(parent)_Divider"
+                 textureFile="/esoui/art/miscellaneous/horizontaldivider.dds"
+                 layer="BACKGROUND">
+          <Anchor point="LEFT"
+                  relativeTo="$(parent)"
+                  relativePoint="LEFT"
+                  offsetX="-60"
+                  offsetY="0" />
+          <Anchor point="RIGHT"
+                  relativeTo="$(parent)"
+                  relativePoint="RIGHT"
+                  offsetX="60"
+                  offsetY="0" />
+          <Dimensions y="4" />
+        </Texture>
+        <!-- Top Row Container -->
+        <Control name="$(parent)_TopRow">
+          <Anchor point="TOP"
+                  relativeTo="$(parent)"
+                  relativePoint="TOP"
+                  offsetX="0"
+                  offsetY="2" />
+          <Dimensions x="300"
+                      y="20" />
+          <Controls>
+            <!-- Latency -->
+            <Control name="$(parent)_Latency">
+              <Dimensions x="75"
+                          y="20" />
+              <Controls>
+                <Texture name="$(parent)_Icon"
+                         textureFile="/esoui/art/campaign/campaignbrowser_hipop.dds">
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)"
+                          relativePoint="LEFT"
+                          offsetX="0"
+                          offsetY="0" />
+                  <Dimensions x="24"
+                              y="24" />
+                </Texture>
+                <Label name="$(parent)_Label"
+                       font="ZoFontGame"
+                       color="FFFFFF"
+                       verticalAlignment="CENTER"
+                       horizontalAlignment="LEFT"
+                       text="11999 ms"
+                       wrapMode="ELLIPSIS">
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)_Icon"
+                          relativePoint="RIGHT"
+                          offsetX="0"
+                          offsetY="0" />
+                  <Dimensions x="56"
+                              y="20" />
+                </Label>
+              </Controls>
+            </Control>
+            <!-- FPS -->
+            <Label name="$(parent)_Fps"
+                   font="ZoFontGame"
+                   color="FFFFFF"
+                   verticalAlignment="CENTER"
+                   horizontalAlignment="CENTER"
+                   text="999 fps"
+                   wrapMode="ELLIPSIS">
+              <Dimensions x="50"
+                          y="20" />
+            </Label>
+            <!-- Clock -->
+            <Label name="$(parent)_Clock"
+                   font="ZoFontGame"
+                   color="FFFFFF"
+                   verticalAlignment="CENTER"
+                   horizontalAlignment="CENTER"
+                   text="88:88:88"
+                   wrapMode="ELLIPSIS">
+              <Dimensions x="60"
+                          y="20" />
+            </Label>
+            <!-- Soul Gems -->
+            <Control name="$(parent)_Gems">
+              <Dimensions x="48"
+                          y="20" />
+              <Controls>
+                <Texture name="$(parent)_Icon">
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)"
+                          relativePoint="LEFT"
+                          offsetX="0"
+                          offsetY="0" />
+                  <Dimensions x="16"
+                              y="16" />
+                </Texture>
+                <Label name="$(parent)_Label"
+                       font="ZoFontGame"
+                       color="FFFFFF"
+                       verticalAlignment="CENTER"
+                       horizontalAlignment="LEFT"
+                       text="8/88"
+                       wrapMode="ELLIPSIS">
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)_Icon"
+                          relativePoint="RIGHT"
+                          offsetX="2"
+                          offsetY="0" />
+                  <Dimensions x="32"
+                              y="20" />
+                </Label>
+              </Controls>
+            </Control>
+          </Controls>
+        </Control>
+        <!-- Bottom Row Container -->
+        <Control name="$(parent)_BotRow">
+          <Anchor point="BOTTOM"
+                  relativeTo="$(parent)"
+                  relativePoint="BOTTOM"
+                  offsetX="0"
+                  offsetY="-2" />
+          <Dimensions x="300"
+                      y="20" />
+          <Controls>
+            <!-- Feed Timer -->
+            <Control name="$(parent)_FeedTimer">
+              <Dimensions x="96"
+                          y="20" />
+              <Controls>
+                <Texture name="$(parent)_Icon"
+                         textureFile="EsoUI/Art/Mounts/tabIcon_mounts_up.dds">
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)"
+                          relativePoint="LEFT"
+                          offsetX="0"
+                          offsetY="0" />
+                  <Dimensions x="28"
+                              y="28" />
+                </Texture>
+                <Label name="$(parent)_Label"
+                       font="ZoFontGame"
+                       color="FFFFFF"
+                       verticalAlignment="CENTER"
+                       horizontalAlignment="LEFT"
+                       text="Train Now"
+                       wrapMode="ELLIPSIS">
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)_Icon"
+                          relativePoint="RIGHT"
+                          offsetX="0"
+                          offsetY="0" />
+                  <Dimensions x="68"
+                              y="20" />
+                </Label>
+              </Controls>
+            </Control>
+            <!-- Armour Durability -->
+            <Control name="$(parent)_Armour">
+              <Dimensions x="55"
+                          y="20" />
+              <Controls>
+                <Texture name="$(parent)_Icon"
+                         textureFile="/esoui/art/progression/progression_indexicon_armor_up.dds">
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)"
+                          relativePoint="LEFT"
+                          offsetX="0"
+                          offsetY="0" />
+                  <Dimensions x="24"
+                              y="24" />
+                </Texture>
+                <Label name="$(parent)_Label"
+                       font="ZoFontGame"
+                       color="FFFFFF"
+                       verticalAlignment="CENTER"
+                       horizontalAlignment="LEFT"
+                       text="100%"
+                       wrapMode="ELLIPSIS">
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)_Icon"
+                          relativePoint="RIGHT"
+                          offsetX="0"
+                          offsetY="0" />
+                  <Dimensions x="41"
+                              y="20" />
+                </Label>
+              </Controls>
+            </Control>
+            <!-- Weapon Charges -->
+            <Control name="$(parent)_Weapons">
+              <Dimensions x="46"
+                          y="20" />
+              <Controls>
+                <Texture name="$(parent)_Main"
+                         textureFile="/esoui/art/progression/icon_1handplusrune.dds">
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)"
+                          relativePoint="LEFT"
+                          offsetX="0"
+                          offsetY="0" />
+                  <Dimensions x="30"
+                              y="30" />
+                </Texture>
+                <Texture name="$(parent)_Swap"
+                         textureFile="/esoui/art/progression/icon_1handplusrune.dds">
+                  <Anchor point="RIGHT"
+                          relativeTo="$(parent)"
+                          relativePoint="RIGHT"
+                          offsetX="5"
+                          offsetY="0" />
+                  <Dimensions x="30"
+                              y="30" />
+                </Texture>
+              </Controls>
+            </Control>
+            <!-- Bags -->
+            <Control name="$(parent)_Bags">
+              <Dimensions x="78"
+                          y="20" />
+              <Controls>
+                <Texture name="$(parent)_Icon"
+                         textureFile="EsoUI/Art/Inventory/inventory_tabIcon_misc_up.dds">
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)"
+                          relativePoint="LEFT"
+                          offsetX="0"
+                          offsetY="0" />
+                  <Dimensions x="28"
+                              y="28" />
+                </Texture>
+                <Label name="$(parent)_Label"
+                       font="ZoFontGame"
+                       color="FFFFFF"
+                       verticalAlignment="CENTER"
+                       horizontalAlignment="LEFT"
+                       text="888/888"
+                       wrapMode="ELLIPSIS">
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)_Icon"
+                          relativePoint="RIGHT"
+                          offsetX="0"
+                          offsetY="0" />
+                  <Dimensions x="50"
+                              y="20" />
+                </Label>
+              </Controls>
+            </Control>
+            <!-- Gold -->
+            <Control name="$(parent)_Gold">
+              <Dimensions x="85"
+                          y="20" />
+              <Controls>
+                <Texture name="$(parent)_Icon">
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)"
+                          relativePoint="LEFT"
+                          offsetX="0"
+                          offsetY="0" />
+                  <Dimensions x="12"
+                              y="12" />
+                </Texture>
+                <Label name="$(parent)_Label"
+                       font="ZoFontGame"
+                       color="FFFFFF"
+                       verticalAlignment="CENTER"
+                       horizontalAlignment="LEFT"
+                       text="0"
+                       wrapMode="ELLIPSIS">
+                  <Anchor point="LEFT"
+                          relativeTo="$(parent)_Icon"
+                          relativePoint="RIGHT"
+                          offsetX="2"
+                          offsetY="0" />
+                  <Dimensions x="65"
+                              y="20" />
+                </Label>
+              </Controls>
+            </Control>
+          </Controls>
+        </Control>
+      </Controls>
+    </TopLevelControl>
+  </Controls>
 </GuiXml>

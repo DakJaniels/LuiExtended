@@ -120,7 +120,7 @@ function EditModeController:SetEditModeActive(active, triggeringModule)
                 settingsScene:SetState("hiding")
             end
             -- Navigate back to hud scene
-            zo_callLater(function ()
+            LUIE_callLater(function ()
                              SCENE_MANAGER:Show("hud")
                          end, 50)
         end
@@ -176,7 +176,7 @@ function EditModeController:SetEditModeActive(active, triggeringModule)
 
     -- If we're in an allowed scene but keybind strip isn't active, ensure fragment is added
     if shouldEnable then
-        zo_callLater(function ()
+        LUIE_callLater(function ()
                          currentScene = SCENE_MANAGER:GetCurrentScene()
                          currentName = currentScene and currentScene:GetName()
                          if currentName then
@@ -947,7 +947,7 @@ function EditModeController:ForceCleanupKeybindBackdrop()
         if currentScene:HasFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT) then
             currentScene:RemoveFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
             -- Small delay to ensure cleanup, then force scene refresh
-            zo_callLater(function ()
+            LUIE_callLater(function ()
                              -- Force update the scene to ensure backdrop is gone
                              if currentScene:IsShowing() then
                                  currentScene:Refresh()
@@ -1079,7 +1079,7 @@ end
 
 --- Handles preferred mode changes to refresh keybinds
 function EditModeController:OnGamepadPreferredModeChanged()
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      self:RefreshKeybindStrip()
                  end, 200)
 end

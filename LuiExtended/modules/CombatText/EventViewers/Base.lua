@@ -3,15 +3,21 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
---- @class (partial) LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
 
---- @class CombatTextEventViewer : ZO_InitializingObject
-local CombatTextEventViewer = ZO_InitializingObject:Subclass()
+--- @class (partial) LuiExtended.CombatTextEventViewer : ZO_InitializingObject
+LUIE.CombatTextEventViewer = ZO_InitializingObject:Subclass()
+
+--- @class (partial) LuiExtended.CombatTextEventViewer
+local CombatTextEventViewer = LUIE.CombatTextEventViewer
+
 local CombatText = LUIE.CombatText
 local string_format = string.format
 local Effects = LuiData.Data.Effects
 local CombatTextConstants = LuiData.Data.CombatTextConstants
+
+local callbackManager = CALLBACK_MANAGER
 
 CombatTextEventViewer.resourceNames = setmetatable({},
                                                    {
@@ -28,54 +34,52 @@ CombatTextEventViewer.damageTypes = setmetatable({},
                                                      end,
                                                  })
 
-function CombatTextEventViewer:New(poolManager, LMP)
+function CombatTextEventViewer:New(poolManager)
     local obj = setmetatable({}, self)
     self.poolManager = poolManager
-    self.LMP = LMP
     return obj
 end
 
 function CombatTextEventViewer:ShouldUseDefaultIcon(abilityId)
     if Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].cc then
         if CombatText.SV.common.defaultIconOptions == 1 then
-            -- All Crowd Control
             return true
         elseif CombatText.SV.common.defaultIconOptions == 2 then
-            -- NPC CC Only - return true if NOT a player ability
-            return not Effects.EffectOverride[abilityId].isPlayerAbility
+            return Effects.EffectOverride[abilityId].isPlayerAbility and true or false
         elseif CombatText.SV.common.defaultIconOptions == 3 then
-            -- Player CC Only
-            return Effects.EffectOverride[abilityId].isPlayerAbility
+            return Effects.EffectOverride[abilityId].isPlayerAbility and true or false
         end
     end
-    return false
 end
 
--- Icon lookup table for crowd control types
-CombatTextEventViewer.ccIconTable =
-{
-    [LUIE_CC_TYPE_STUN] = LUIE_CC_ICON_STUN,
-    [LUIE_CC_TYPE_KNOCKDOWN] = LUIE_CC_ICON_STUN,
-    [LUIE_CC_TYPE_KNOCKBACK] = LUIE_CC_ICON_KNOCKBACK,
-    [LUIE_CC_TYPE_PULL] = LUIE_CC_ICON_PULL,
-    [LUIE_CC_TYPE_DISORIENT] = LUIE_CC_ICON_DISORIENT,
-    [LUIE_CC_TYPE_FEAR] = LUIE_CC_ICON_FEAR,
-    [LUIE_CC_TYPE_CHARM] = LUIE_CC_ICON_CHARM,
-    [LUIE_CC_TYPE_STAGGER] = LUIE_CC_ICON_SILENCE,
-    [LUIE_CC_TYPE_SILENCE] = LUIE_CC_ICON_SILENCE,
-    [LUIE_CC_TYPE_SNARE] = LUIE_CC_ICON_SNARE,
-    [LUIE_CC_TYPE_ROOT] = LUIE_CC_ICON_ROOT,
-}
-
---- Gets the default icon for a specific crowd control type
---- @param ccType number The crowd control type constant
---- @return string|nil @The icon path for the CC type or nil if not found
 function CombatTextEventViewer:GetDefaultIcon(ccType)
-    return self.ccIconTable[ccType]
+    if ccType == LUIE_CC_TYPE_STUN then
+        return LUIE_CC_ICON_STUN
+    elseif ccType == LUIE_CC_TYPE_KNOCKDOWN then
+        return LUIE_CC_ICON_STUN
+    elseif ccType == LUIE_CC_TYPE_KNOCKBACK then
+        return LUIE_CC_ICON_KNOCKBACK
+    elseif ccType == LUIE_CC_TYPE_PULL then
+        return LUIE_CC_ICON_PULL
+    elseif ccType == LUIE_CC_TYPE_DISORIENT then
+        return LUIE_CC_ICON_DISORIENT
+    elseif ccType == LUIE_CC_TYPE_FEAR then
+        return LUIE_CC_ICON_FEAR
+    elseif ccType == LUIE_CC_TYPE_CHARM then
+        return LUIE_CC_ICON_CHARM
+    elseif ccType == LUIE_CC_TYPE_STAGGER then
+        return LUIE_CC_ICON_SILENCE
+    elseif ccType == LUIE_CC_TYPE_SILENCE then
+        return LUIE_CC_ICON_SILENCE
+    elseif ccType == LUIE_CC_TYPE_SNARE then
+        return LUIE_CC_ICON_SNARE
+    elseif ccType == LUIE_CC_TYPE_ROOT then
+        return LUIE_CC_ICON_ROOT
+    end
 end
 
 function CombatTextEventViewer:FormatString(inputFormat, params)
-    return StringOnlyGSUB(inputFormat, "%%.", function (x)
+    return (zo_strgsub(inputFormat, "%%.", function (x)
         if x == "%t" then
             return params.text or ""
         elseif x == "%a" then
@@ -87,11 +91,11 @@ function CombatTextEventViewer:FormatString(inputFormat, params)
         else
             return x
         end
-    end)
+    end))
 end
 
 function CombatTextEventViewer:FormatAlertString(inputFormat, params)
-    return StringOnlyGSUB(inputFormat, "%%.", function (x)
+    return (zo_strgsub(inputFormat, "%%.", function (x)
         if x == "%n" then
             return params.source or ""
         elseif x == "%t" then
@@ -101,10 +105,10 @@ function CombatTextEventViewer:FormatAlertString(inputFormat, params)
         else
             return x
         end
-    end)
+    end))
 end
 
-function CombatTextEventViewer:GetTextAttributes(powerType, damageType, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
+function CombatTextEventViewer:GetTextAtributes(powerType, damageType, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
     local Settings = LUIE.CombatText.SV
 
     local textFormat = Settings.formats.damage
@@ -216,7 +220,7 @@ function CombatTextEventViewer:ControlLayout(control, abilityId, combatType, sou
         local iconPath = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].icon or GetAbilityIcon(abilityId)
 
         if Effects.EffectOverrideByName[abilityId] then
-            sourceName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
+            sourceName = zo_strformat("<<C:1>>", sourceName)
             if Effects.EffectOverrideByName[abilityId][sourceName] and Effects.EffectOverrideByName[abilityId][sourceName].icon then
                 iconPath = Effects.EffectOverrideByName[abilityId][sourceName].icon
             end
@@ -294,49 +298,38 @@ function CombatTextEventViewer:ControlLayout(control, abilityId, combatType, sou
 end
 
 function CombatTextEventViewer:RegisterCallback(eventType, func)
-    LUIE:RegisterCallback(eventType, function (...)
+    callbackManager:RegisterCallback(eventType, function (...)
         func(...)
     end)
 end
 
+---
+--- @param label LabelControl
+--- @param fontSize integer
+--- @param color {r: number, g: number, b: number, a?: number}
+--- @param text string
 function CombatTextEventViewer:PrepareLabel(label, fontSize, color, text)
     local Settings = LUIE.CombatText.SV
     label:SetText(text)
     label:SetColor(unpack(color))
-    label:SetFont(string_format("%s|%d|%s", Settings.fontFaceApplied, fontSize, Settings.fontStyle))
+    local fontString = ZO_CreateFontString(Settings.fontFaceApplied, fontSize, Settings.fontOutline)
+    label:SetFont(fontString)
     label:SetAlpha(Settings.common.transparencyValue / 100)
 end
 
+---
 --- @param control Control
 --- @param activeControls {[integer]:Control}
---- @return boolean isOverlapping
+--- @return boolean
 function CombatTextEventViewer:IsOverlapping(control, activeControls)
     local p = 5 -- Substract some padding
 
     local left, top, right, bottom = control:GetScreenRect()
-    local p1 =
-    {
-        x = left + p,
-        y = top + p
-    }
-    local p2 =
-    {
-        x = right - p,
-        y = bottom - p
-    }
+    local p1, p2 = { x = left + p, y = top + p }, { x = right - p, y = bottom - p }
 
     for _, c in pairs(activeControls) do
-        local activeleft, activetop, activeright, activebottom = c:GetScreenRect()
-        local p3 =
-        {
-            x = activeleft + p,
-            y = activetop + p
-        }
-        local p4 =
-        {
-            x = activeright - p,
-            y = activebottom - p
-        }
+        left, top, right, bottom = c:GetScreenRect()
+        local p3, p4 = { x = left + p, y = top + p }, { x = right - p, y = bottom - p }
 
         if p2.y >= p3.y and p1.y <= p4.y and p2.x >= p3.x and p1.x <= p4.x then
             return true
@@ -345,5 +338,3 @@ function CombatTextEventViewer:IsOverlapping(control, activeControls)
 
     return false
 end
-
-LUIE.CombatTextEventViewer = CombatTextEventViewer

@@ -3,16 +3,18 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
---- @class (partial) LuiExtended
+---@class LuiExtended
 local LUIE = LUIE
+--- @class (partial) LuiExtended.CombatTextDeathViewer : LuiExtended.CombatTextEventViewer
 LUIE.CombatTextDeathViewer = LUIE.CombatTextEventViewer:Subclass()
+--- @class (partial) LuiExtended.CombatTextDeathViewer
 local CombatTextDeathViewer = LUIE.CombatTextDeathViewer
 
 local poolTypes = LuiData.Data.CombatTextConstants.poolType
 local eventType = LuiData.Data.CombatTextConstants.eventType
 
 local zo_strformat = zo_strformat
---- @diagnostic disable-next-line: duplicate-set-field
+
 function CombatTextDeathViewer:New(...)
     local obj = LUIE.CombatTextEventViewer:New(...)
     obj:RegisterCallback(eventType.DEATH, function (...)
@@ -26,12 +28,7 @@ end
 function CombatTextDeathViewer:OnEvent(unitTag)
     local Settings = LUIE.CombatText.SV
 
-    local name
-    if Settings.toggles.useAccountNameForDeath then
-        name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitDisplayName(unitTag))
-    else
-        name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName(unitTag))
-    end
+    local name = zo_strformat("<<C:1>>", GetUnitName(unitTag))
 
     -- Label setup
     local control, controlPoolKey = self.poolManager:GetPoolObject(poolTypes.CONTROL)
@@ -65,7 +62,7 @@ function CombatTextDeathViewer:OnEvent(unitTag)
     animation:Play()
 
     -- Add items back into pool after animation
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
                      self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
                      self.activePoints = self.activePoints - 1

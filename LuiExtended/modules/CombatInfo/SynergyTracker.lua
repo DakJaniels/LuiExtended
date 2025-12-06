@@ -176,9 +176,9 @@ function SynergyTracker:Initialize()
     local function OnSceneStateChange(oldState, newState)
         local isShown = newState == SCENE_SHOWN
         if isShown then
-            zo_callLater(function () self:OnShowing() end, 0)
+            LUIE_callLater(function () self:OnShowing() end, 0)
         else
-            zo_callLater(function () self:OnHidden() end, 0)
+            LUIE_callLater(function () self:OnHidden() end, 0)
         end
         -- Show/hide control based on scene state (unless unlocked for positioning)
         if not Settings.unlocked then
@@ -311,7 +311,7 @@ function SynergyTracker:Initialize()
     self:CleanupCorruptedCooldownGroups()
 
     -- Initial synergy check
-    zo_callLater(function () self:RefreshActiveSynergies() end, 100)
+    LUIE_callLater(function () self:RefreshActiveSynergies() end, 100)
 end
 
 --- Static handler for OnMoveStop from XML

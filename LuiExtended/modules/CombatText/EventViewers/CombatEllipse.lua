@@ -3,15 +3,16 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
---- @class (partial) LuiExtended
+---@class LuiExtended
 local LUIE = LUIE
+--- @class (partial) LuiExtended.CombatTextCombatEllipseEventViewer : LuiExtended.CombatTextEventViewer
 LUIE.CombatTextCombatEllipseEventViewer = LUIE.CombatTextEventViewer:Subclass()
+--- @class (partial) LuiExtended.CombatTextCombatEllipseEventViewer
 local CombatTextCombatEllipseEventViewer = LUIE.CombatTextCombatEllipseEventViewer
 
 local CombatTextConstants = LuiData.Data.CombatTextConstants
 local AbbreviateNumber = LUIE.AbbreviateNumber
 local string_format = string.format
---- @diagnostic disable-next-line: duplicate-set-field
 function CombatTextCombatEllipseEventViewer:New(...)
     local obj = LUIE.CombatTextEventViewer:New(...)
     obj:RegisterCallback(CombatTextConstants.eventType.COMBAT, function (...)
@@ -53,7 +54,7 @@ function CombatTextCombatEllipseEventViewer:OnEvent(combatType, powerType, value
             elseif isHotCritical then
                 throttleTime = Settings.throttles.hotcritical
             end
-            zo_callLater(function ()
+            LUIE_callLater(function ()
                              self:ViewFromEventBuffer(combatType, powerType, eventKey, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
                          end, throttleTime)
         else
@@ -79,7 +80,7 @@ function CombatTextCombatEllipseEventViewer:View(combatType, powerType, value, a
 
     local control, controlPoolKey = self.poolManager:GetPoolObject(CombatTextConstants.poolType.CONTROL)
 
-    local textFormat, fontSize, textColor = self:GetTextAttributes(powerType, damageType, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
+    local textFormat, fontSize, textColor = self:GetTextAtributes(powerType, damageType, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
     if hits > 1 and Settings.toggles.showThrottleTrailer then
         value = string_format("%s (%d)", value, hits)
     end
@@ -91,17 +92,13 @@ function CombatTextCombatEllipseEventViewer:View(combatType, powerType, value, a
     self:ControlLayout(control, abilityId, combatType, sourceName)
 
     -- Control setup
-    local panel
-    local point = TOP
-    local relativePoint = BOTTOM
-
+    local panel, point, relativePoint = LUIE_CombatText_Outgoing, BOTTOMRIGHT, TOPRIGHT
     if combatType == CombatTextConstants.combatType.INCOMING then
         panel = LUIE_CombatText_Incoming
         if Settings.animation.incoming.directionType == "up" then
             point, relativePoint = TOPRIGHT, BOTTOMRIGHT
         end
     else
-        panel = LUIE_CombatText_Outgoing
         if Settings.animation.outgoing.directionType == "up" then
             point, relativePoint = TOPRIGHT, BOTTOMRIGHT
         end
@@ -195,7 +192,7 @@ function CombatTextCombatEllipseEventViewer:View(combatType, powerType, value, a
     animationY:Play()
 
     -- Add items back into pool after use
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      self.poolManager:ReleasePoolObject(CombatTextConstants.poolType.CONTROL, controlPoolKey)
                      self.poolManager:ReleasePoolObject(animationXPoolType, animationXPoolKey)
                      self.poolManager:ReleasePoolObject(animationYPoolType, animationYPoolKey)

@@ -3,19 +3,21 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
---- @class (partial) LuiExtended
+---@class LuiExtended
 local LUIE = LUIE
 
---- @class CombatTextCombatCloudEventViewer : CombatTextEventViewer, ZO_InitializingObject
-local CombatTextCombatCloudEventViewer = LUIE.CombatTextEventViewer:Subclass()
-LUIE.CombatTextCombatCloudEventViewer = CombatTextCombatCloudEventViewer
+--- @class (partial) LuiExtended.CombatTextCombatCloudEventViewer : LuiExtended.CombatTextEventViewer
+LUIE.CombatTextCombatCloudEventViewer = LUIE.CombatTextEventViewer:Subclass()
+
+--- @class (partial) LuiExtended.CombatTextCombatCloudEventViewer
+local CombatTextCombatCloudEventViewer = LUIE.CombatTextCombatCloudEventViewer
 
 local CombatTextConstants = LuiData.Data.CombatTextConstants
 local AbbreviateNumber = LUIE.AbbreviateNumber
 local string_format = string.format
 
 function CombatTextCombatCloudEventViewer:New(...)
-    local obj = LUIE.CombatTextEventViewer:New(...) --[[@as CombatTextEventViewer]]
+    local obj = LUIE.CombatTextEventViewer:New(...)
     obj:RegisterCallback(CombatTextConstants.eventType.COMBAT, function (...)
         self:OnEvent(...)
     end)
@@ -53,7 +55,7 @@ function CombatTextCombatCloudEventViewer:OnEvent(combatType, powerType, value, 
             elseif isHotCritical then
                 throttleTime = Settings.throttles.hotcritical
             end
-            zo_callLater(function ()
+            LUIE_callLater(function ()
                              self:ViewFromEventBuffer(combatType, powerType, eventKey, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
                          end, throttleTime)
         else
@@ -78,11 +80,9 @@ function CombatTextCombatCloudEventViewer:View(combatType, powerType, value, abi
     value = AbbreviateNumber(value, Settings.common.abbreviateNumbers)
 
     -- Control setup
-    local panel
+    local panel = LUIE_CombatText_Outgoing
     if combatType == CombatTextConstants.combatType.INCOMING then
         panel = LUIE_CombatText_Incoming
-    else
-        panel = LUIE_CombatText_Outgoing
     end
     local w, h = panel:GetDimensions()
     local radiusW, radiusH = w / 2, h * 2
@@ -109,7 +109,7 @@ function CombatTextCombatCloudEventViewer:View(combatType, powerType, value, abi
     end
 
     -- Label setup in the correct order that the game handles damage
-    local textFormat, fontSize, textColor = self:GetTextAttributes(powerType, damageType, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
+    local textFormat, fontSize, textColor = self:GetTextAtributes(powerType, damageType, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
     if hits > 1 and Settings.toggles.showThrottleTrailer then
         value = string_format("%s (%d)", value, hits)
     end
@@ -139,7 +139,7 @@ function CombatTextCombatCloudEventViewer:View(combatType, powerType, value, abi
     animation:Play()
 
     -- Add items back into pool after use
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      self.poolManager:ReleasePoolObject(CombatTextConstants.poolType.CONTROL, controlPoolKey)
                      self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
                  end, animation:GetDuration())

@@ -3,14 +3,16 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
---- @class (partial) LuiExtended
+---@class LuiExtended
 local LUIE = LUIE
+--- @class (partial) LuiExtended.CombatTextPointsChampionEventListener : LuiExtended.CombatTextEventListener
 LUIE.CombatTextPointsChampionEventListener = LUIE.CombatTextEventListener:Subclass()
+--- @class (partial) LuiExtended.CombatTextPointsChampionEventListener
 local CombatTextPointsChampionEventListener = LUIE.CombatTextPointsChampionEventListener
 
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local pointType = LuiData.Data.CombatTextConstants.pointType
---- @diagnostic disable-next-line: duplicate-set-field
+
 function CombatTextPointsChampionEventListener:New()
     local obj = LUIE.CombatTextEventListener:New()
     obj:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, function (...)
@@ -46,7 +48,7 @@ function CombatTextPointsChampionEventListener:OnEvent(unit, currentPoints, maxP
         -- Trigger custom event (500ms buffer)
         if self.gain > 0 and not self.timeoutActive then
             self.timeoutActive = true
-            zo_callLater(function ()
+            LUIE_callLater(function ()
                              self:TriggerEvent(eventType.POINT, pointType.CHAMPION_POINTS, self.gain)
                              self.gain = 0
                              self.timeoutActive = false

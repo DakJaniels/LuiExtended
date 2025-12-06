@@ -168,3 +168,13 @@ ignore_space_after_colon = false
 remove_call_expression_list_finish_comma = false
 # keep / always / same_line / replace_with_newline / never
 end_statement_with_semicolon = replace_with_newline
+
+
+[*.xml]
+indent_style = space
+indent_size = 2
+end_of_line = auto
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = false
+max_line_length = unset

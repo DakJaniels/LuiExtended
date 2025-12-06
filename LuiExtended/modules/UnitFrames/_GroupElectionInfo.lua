@@ -183,7 +183,7 @@ function UnitFrames.EndGroupElection(resultType)
             UnitFrames.HideElectionIcons()
             UnitFrames.endElectionCallback = nil
         end
-        UnitFrames.endElectionCallback = zo_callLater(OnEndElection, postElectionDelayMS)
+        UnitFrames.endElectionCallback = LUIE_callLater(OnEndElection, postElectionDelayMS)
     end
     UnitFrames.UpdateElectionIcons()
 end

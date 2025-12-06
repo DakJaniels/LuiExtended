@@ -4,946 +4,946 @@
 -->
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
-	<Controls>
-		<TopLevelControl name="LUIE_SynergyTracker_UI"
-		                 mouseEnabled="false"
-		                 movable="false"
-		                 clampedToScreen="true"
-		                 hidden="true"
-		                 layer="0"
-		                 level="1"
-		                 tier="1">
-			<Dimensions x="320"
-			            y="440"/>
-			<Anchor point="CENTER"
-			        relativeTo="GuiRoot"
-			        relativePoint="CENTER"
-			        offsetX="0"
-			        offsetY="200"/>
-			<OnMoveStop>
-                LUIE.CombatInfo.SynergyTracker.OnMoveStop()
-            </OnMoveStop>
-			<OnUpdate>
-                LUIE.CombatInfo.SynergyTracker.OnUpdate(self)
-            </OnUpdate>
-			<Controls>
-				<!-- Background for unlock mode -->
-				<Backdrop name="$(parent)_Background"
-				          hidden="true"
-				          centerColor="00000080"
-				          edgeColor="4D4D4DCC">
-					<AnchorFill/>
-				</Backdrop>
-				<!-- Synergy Rows (10 slots) -->
-				<Control name="$(parent)_Row1"
-				         mouseEnabled="true"
-				         hidden="true">
-					<Dimensions x="320"
-					            y="44"/>
-					<Anchor point="TOP"
-					        relativeTo="$(parent)"
-					        relativePoint="TOP"
-					        offsetX="0"
-					        offsetY="0"/>
-					<Controls>
-						<!-- Icon Background -->
-						<Texture name="$(parent)_IconBg"
-						         textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
-							<Dimensions x="40"
-							            y="40"/>
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)"
-							        relativePoint="LEFT"
-							        offsetX="2"
-							        offsetY="0"/>
-						</Texture>
-						<!-- Icon -->
-						<Texture name="$(parent)_Icon">
-							<Dimensions x="36"
-							            y="36"/>
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Texture>
-						<!-- Position Number -->
-						<Label name="$(parent)_PosNum"
-						       font="ZoFontGamepad27"
-						       color="FFFF80"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       text="1"
-						       hidden="true">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="RIGHT"
-							        offsetX="5"
-							        offsetY="0"/>
-						</Label>
-						<!-- Synergy Name -->
-						<Label name="$(parent)_Name"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       wrapMode="ELLIPSIS">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_PosNum"
-							        relativePoint="RIGHT"
-							        offsetX="8"
-							        offsetY="0"/>
-							<DimensionConstraints minX="0"
-							                      minY="0"
-							                      maxX="200"
-							                      maxY="44"/>
-						</Label>
-						<!-- Priority Indicator -->
-						<Label name="$(parent)_Priority"
-						       horizontalAlignment="RIGHT"
-						       verticalAlignment="CENTER"
-						       color="B3B3B3"
-						       hidden="true">
-							<Anchor point="RIGHT"
-							        relativeTo="$(parent)"
-							        relativePoint="RIGHT"
-							        offsetX="-5"
-							        offsetY="0"/>
-						</Label>
-						<!-- Cooldown Overlay -->
-						<Cooldown name="$(parent)_Cooldown"
-						          hidden="true"
-						          textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
-						          fillColor="000000B3"
-						          desaturation="1">
-							<Anchor point="TOPLEFT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="TOPLEFT"/>
-							<Anchor point="BOTTOMRIGHT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="BOTTOMRIGHT"/>
-						</Cooldown>
-						<!-- Cooldown Text -->
-						<Label name="$(parent)_CooldownText"
-						       horizontalAlignment="CENTER"
-						       verticalAlignment="CENTER"
-						       color="FFFFFF"
-						       hidden="true">
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Label>
-					</Controls>
-				</Control>
-				<Control name="$(parent)_Row2"
-				         mouseEnabled="true"
-				         hidden="true">
-					<Dimensions x="320"
-					            y="44"/>
-					<Anchor point="TOP"
-					        relativeTo="$(parent)_Row1"
-					        relativePoint="BOTTOM"/>
-					<Controls>
-						<Texture name="$(parent)_IconBg"
-						         textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
-							<Dimensions x="40"
-							            y="40"/>
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)"
-							        relativePoint="LEFT"
-							        offsetX="2"
-							        offsetY="0"/>
-						</Texture>
-						<Texture name="$(parent)_Icon">
-							<Dimensions x="36"
-							            y="36"/>
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Texture>
-						<Label name="$(parent)_PosNum"
-						       font="ZoFontGamepad27"
-						       color="FFFF80"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       text="2"
-						       hidden="true">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="RIGHT"
-							        offsetX="5"
-							        offsetY="0"/>
-						</Label>
-						<Label name="$(parent)_Name"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       wrapMode="ELLIPSIS">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_PosNum"
-							        relativePoint="RIGHT"
-							        offsetX="8"
-							        offsetY="0"/>
-							<DimensionConstraints minX="0"
-							                      minY="0"
-							                      maxX="200"
-							                      maxY="44"/>
-						</Label>
-						<Label name="$(parent)_Priority"
-						       horizontalAlignment="RIGHT"
-						       verticalAlignment="CENTER"
-						       color="B3B3B3"
-						       hidden="true">
-							<Anchor point="RIGHT"
-							        relativeTo="$(parent)"
-							        relativePoint="RIGHT"
-							        offsetX="-5"
-							        offsetY="0"/>
-						</Label>
-						<Cooldown name="$(parent)_Cooldown"
-						          hidden="true"
-						          textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
-						          fillColor="000000B3"
-						          desaturation="1">
-							<Anchor point="TOPLEFT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="TOPLEFT"/>
-							<Anchor point="BOTTOMRIGHT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="BOTTOMRIGHT"/>
-						</Cooldown>
-						<Label name="$(parent)_CooldownText"
-						       horizontalAlignment="CENTER"
-						       verticalAlignment="CENTER"
-						       color="FFFFFF"
-						       hidden="true">
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Label>
-					</Controls>
-				</Control>
-				<Control name="$(parent)_Row3"
-				         mouseEnabled="true"
-				         hidden="true">
-					<Dimensions x="320"
-					            y="44"/>
-					<Anchor point="TOP"
-					        relativeTo="$(parent)_Row2"
-					        relativePoint="BOTTOM"/>
-					<Controls>
-						<Texture name="$(parent)_IconBg"
-						         textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
-							<Dimensions x="40"
-							            y="40"/>
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)"
-							        relativePoint="LEFT"
-							        offsetX="2"
-							        offsetY="0"/>
-						</Texture>
-						<Texture name="$(parent)_Icon">
-							<Dimensions x="36"
-							            y="36"/>
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Texture>
-						<Label name="$(parent)_PosNum"
-						       font="ZoFontGamepad27"
-						       color="FFFF80"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       text="3"
-						       hidden="true">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="RIGHT"
-							        offsetX="5"
-							        offsetY="0"/>
-						</Label>
-						<Label name="$(parent)_Name"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       wrapMode="ELLIPSIS">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_PosNum"
-							        relativePoint="RIGHT"
-							        offsetX="8"
-							        offsetY="0"/>
-							<DimensionConstraints minX="0"
-							                      minY="0"
-							                      maxX="200"
-							                      maxY="44"/>
-						</Label>
-						<Label name="$(parent)_Priority"
-						       horizontalAlignment="RIGHT"
-						       verticalAlignment="CENTER"
-						       color="B3B3B3"
-						       hidden="true">
-							<Anchor point="RIGHT"
-							        relativeTo="$(parent)"
-							        relativePoint="RIGHT"
-							        offsetX="-5"
-							        offsetY="0"/>
-						</Label>
-						<Cooldown name="$(parent)_Cooldown"
-						          hidden="true"
-						          textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
-						          fillColor="000000B3"
-						          desaturation="1">
-							<Anchor point="TOPLEFT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="TOPLEFT"/>
-							<Anchor point="BOTTOMRIGHT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="BOTTOMRIGHT"/>
-						</Cooldown>
-						<Label name="$(parent)_CooldownText"
-						       horizontalAlignment="CENTER"
-						       verticalAlignment="CENTER"
-						       color="FFFFFF"
-						       hidden="true">
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Label>
-					</Controls>
-				</Control>
-				<Control name="$(parent)_Row4"
-				         mouseEnabled="true"
-				         hidden="true">
-					<Dimensions x="320"
-					            y="44"/>
-					<Anchor point="TOP"
-					        relativeTo="$(parent)_Row3"
-					        relativePoint="BOTTOM"/>
-					<Controls>
-						<Texture name="$(parent)_IconBg"
-						         textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
-							<Dimensions x="40"
-							            y="40"/>
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)"
-							        relativePoint="LEFT"
-							        offsetX="2"
-							        offsetY="0"/>
-						</Texture>
-						<Texture name="$(parent)_Icon">
-							<Dimensions x="36"
-							            y="36"/>
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Texture>
-						<Label name="$(parent)_PosNum"
-						       font="ZoFontGamepad27"
-						       color="FFFF80"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       text="4"
-						       hidden="true">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="RIGHT"
-							        offsetX="5"
-							        offsetY="0"/>
-						</Label>
-						<Label name="$(parent)_Name"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       wrapMode="ELLIPSIS">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_PosNum"
-							        relativePoint="RIGHT"
-							        offsetX="8"
-							        offsetY="0"/>
-							<DimensionConstraints minX="0"
-							                      minY="0"
-							                      maxX="200"
-							                      maxY="44"/>
-						</Label>
-						<Label name="$(parent)_Priority"
-						       horizontalAlignment="RIGHT"
-						       verticalAlignment="CENTER"
-						       color="B3B3B3"
-						       hidden="true">
-							<Anchor point="RIGHT"
-							        relativeTo="$(parent)"
-							        relativePoint="RIGHT"
-							        offsetX="-5"
-							        offsetY="0"/>
-						</Label>
-						<Cooldown name="$(parent)_Cooldown"
-						          hidden="true"
-						          textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
-						          fillColor="000000B3"
-						          desaturation="1">
-							<Anchor point="TOPLEFT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="TOPLEFT"/>
-							<Anchor point="BOTTOMRIGHT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="BOTTOMRIGHT"/>
-						</Cooldown>
-						<Label name="$(parent)_CooldownText"
-						       horizontalAlignment="CENTER"
-						       verticalAlignment="CENTER"
-						       color="FFFFFF"
-						       hidden="true">
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Label>
-					</Controls>
-				</Control>
-				<Control name="$(parent)_Row5"
-				         mouseEnabled="true"
-				         hidden="true">
-					<Dimensions x="320"
-					            y="44"/>
-					<Anchor point="TOP"
-					        relativeTo="$(parent)_Row4"
-					        relativePoint="BOTTOM"/>
-					<Controls>
-						<Texture name="$(parent)_IconBg"
-						         textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
-							<Dimensions x="40"
-							            y="40"/>
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)"
-							        relativePoint="LEFT"
-							        offsetX="2"
-							        offsetY="0"/>
-						</Texture>
-						<Texture name="$(parent)_Icon">
-							<Dimensions x="36"
-							            y="36"/>
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Texture>
-						<Label name="$(parent)_PosNum"
-						       font="ZoFontGamepad27"
-						       color="FFFF80"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       text="5"
-						       hidden="true">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="RIGHT"
-							        offsetX="5"
-							        offsetY="0"/>
-						</Label>
-						<Label name="$(parent)_Name"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       wrapMode="ELLIPSIS">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_PosNum"
-							        relativePoint="RIGHT"
-							        offsetX="8"
-							        offsetY="0"/>
-							<DimensionConstraints minX="0"
-							                      minY="0"
-							                      maxX="200"
-							                      maxY="44"/>
-						</Label>
-						<Label name="$(parent)_Priority"
-						       horizontalAlignment="RIGHT"
-						       verticalAlignment="CENTER"
-						       color="B3B3B3"
-						       hidden="true">
-							<Anchor point="RIGHT"
-							        relativeTo="$(parent)"
-							        relativePoint="RIGHT"
-							        offsetX="-5"
-							        offsetY="0"/>
-						</Label>
-						<Cooldown name="$(parent)_Cooldown"
-						          hidden="true"
-						          textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
-						          fillColor="000000B3"
-						          desaturation="1">
-							<Anchor point="TOPLEFT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="TOPLEFT"/>
-							<Anchor point="BOTTOMRIGHT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="BOTTOMRIGHT"/>
-						</Cooldown>
-						<Label name="$(parent)_CooldownText"
-						       horizontalAlignment="CENTER"
-						       verticalAlignment="CENTER"
-						       color="FFFFFF"
-						       hidden="true">
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Label>
-					</Controls>
-				</Control>
-				<Control name="$(parent)_Row6"
-				         mouseEnabled="true"
-				         hidden="true">
-					<Dimensions x="320"
-					            y="44"/>
-					<Anchor point="TOP"
-					        relativeTo="$(parent)_Row5"
-					        relativePoint="BOTTOM"/>
-					<Controls>
-						<Texture name="$(parent)_IconBg"
-						         textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
-							<Dimensions x="40"
-							            y="40"/>
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)"
-							        relativePoint="LEFT"
-							        offsetX="2"
-							        offsetY="0"/>
-						</Texture>
-						<Texture name="$(parent)_Icon">
-							<Dimensions x="36"
-							            y="36"/>
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Texture>
-						<Label name="$(parent)_PosNum"
-						       font="ZoFontGamepad27"
-						       color="FFFF80"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       text="6"
-						       hidden="true">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="RIGHT"
-							        offsetX="5"
-							        offsetY="0"/>
-						</Label>
-						<Label name="$(parent)_Name"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       wrapMode="ELLIPSIS">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_PosNum"
-							        relativePoint="RIGHT"
-							        offsetX="8"
-							        offsetY="0"/>
-							<DimensionConstraints minX="0"
-							                      minY="0"
-							                      maxX="200"
-							                      maxY="44"/>
-						</Label>
-						<Label name="$(parent)_Priority"
-						       horizontalAlignment="RIGHT"
-						       verticalAlignment="CENTER"
-						       color="B3B3B3"
-						       hidden="true">
-							<Anchor point="RIGHT"
-							        relativeTo="$(parent)"
-							        relativePoint="RIGHT"
-							        offsetX="-5"
-							        offsetY="0"/>
-						</Label>
-						<Cooldown name="$(parent)_Cooldown"
-						          hidden="true"
-						          textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
-						          fillColor="000000B3"
-						          desaturation="1">
-							<Anchor point="TOPLEFT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="TOPLEFT"/>
-							<Anchor point="BOTTOMRIGHT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="BOTTOMRIGHT"/>
-						</Cooldown>
-						<Label name="$(parent)_CooldownText"
-						       horizontalAlignment="CENTER"
-						       verticalAlignment="CENTER"
-						       color="FFFFFF"
-						       hidden="true">
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Label>
-					</Controls>
-				</Control>
-				<Control name="$(parent)_Row7"
-				         mouseEnabled="true"
-				         hidden="true">
-					<Dimensions x="320"
-					            y="44"/>
-					<Anchor point="TOP"
-					        relativeTo="$(parent)_Row6"
-					        relativePoint="BOTTOM"/>
-					<Controls>
-						<Texture name="$(parent)_IconBg"
-						         textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
-							<Dimensions x="40"
-							            y="40"/>
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)"
-							        relativePoint="LEFT"
-							        offsetX="2"
-							        offsetY="0"/>
-						</Texture>
-						<Texture name="$(parent)_Icon">
-							<Dimensions x="36"
-							            y="36"/>
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Texture>
-						<Label name="$(parent)_PosNum"
-						       font="ZoFontGamepad27"
-						       color="FFFF80"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       text="7"
-						       hidden="true">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="RIGHT"
-							        offsetX="5"
-							        offsetY="0"/>
-						</Label>
-						<Label name="$(parent)_Name"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       wrapMode="ELLIPSIS">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_PosNum"
-							        relativePoint="RIGHT"
-							        offsetX="8"
-							        offsetY="0"/>
-							<DimensionConstraints minX="0"
-							                      minY="0"
-							                      maxX="200"
-							                      maxY="44"/>
-						</Label>
-						<Label name="$(parent)_Priority"
-						       horizontalAlignment="RIGHT"
-						       verticalAlignment="CENTER"
-						       color="B3B3B3"
-						       hidden="true">
-							<Anchor point="RIGHT"
-							        relativeTo="$(parent)"
-							        relativePoint="RIGHT"
-							        offsetX="-5"
-							        offsetY="0"/>
-						</Label>
-						<Cooldown name="$(parent)_Cooldown"
-						          hidden="true"
-						          textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
-						          fillColor="000000B3"
-						          desaturation="1">
-							<Anchor point="TOPLEFT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="TOPLEFT"/>
-							<Anchor point="BOTTOMRIGHT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="BOTTOMRIGHT"/>
-						</Cooldown>
-						<Label name="$(parent)_CooldownText"
-						       horizontalAlignment="CENTER"
-						       verticalAlignment="CENTER"
-						       color="FFFFFF"
-						       hidden="true">
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Label>
-					</Controls>
-				</Control>
-				<Control name="$(parent)_Row8"
-				         mouseEnabled="true"
-				         hidden="true">
-					<Dimensions x="320"
-					            y="44"/>
-					<Anchor point="TOP"
-					        relativeTo="$(parent)_Row7"
-					        relativePoint="BOTTOM"/>
-					<Controls>
-						<Texture name="$(parent)_IconBg"
-						         textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
-							<Dimensions x="40"
-							            y="40"/>
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)"
-							        relativePoint="LEFT"
-							        offsetX="2"
-							        offsetY="0"/>
-						</Texture>
-						<Texture name="$(parent)_Icon">
-							<Dimensions x="36"
-							            y="36"/>
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Texture>
-						<Label name="$(parent)_PosNum"
-						       font="ZoFontGamepad27"
-						       color="FFFF80"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       text="8"
-						       hidden="true">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="RIGHT"
-							        offsetX="5"
-							        offsetY="0"/>
-						</Label>
-						<Label name="$(parent)_Name"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       wrapMode="ELLIPSIS">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_PosNum"
-							        relativePoint="RIGHT"
-							        offsetX="8"
-							        offsetY="0"/>
-							<DimensionConstraints minX="0"
-							                      minY="0"
-							                      maxX="200"
-							                      maxY="44"/>
-						</Label>
-						<Label name="$(parent)_Priority"
-						       horizontalAlignment="RIGHT"
-						       verticalAlignment="CENTER"
-						       color="B3B3B3"
-						       hidden="true">
-							<Anchor point="RIGHT"
-							        relativeTo="$(parent)"
-							        relativePoint="RIGHT"
-							        offsetX="-5"
-							        offsetY="0"/>
-						</Label>
-						<Cooldown name="$(parent)_Cooldown"
-						          hidden="true"
-						          textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
-						          fillColor="000000B3"
-						          desaturation="1">
-							<Anchor point="TOPLEFT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="TOPLEFT"/>
-							<Anchor point="BOTTOMRIGHT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="BOTTOMRIGHT"/>
-						</Cooldown>
-						<Label name="$(parent)_CooldownText"
-						       horizontalAlignment="CENTER"
-						       verticalAlignment="CENTER"
-						       color="FFFFFF"
-						       hidden="true">
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Label>
-					</Controls>
-				</Control>
-				<Control name="$(parent)_Row9"
-				         mouseEnabled="true"
-				         hidden="true">
-					<Dimensions x="320"
-					            y="44"/>
-					<Anchor point="TOP"
-					        relativeTo="$(parent)_Row8"
-					        relativePoint="BOTTOM"/>
-					<Controls>
-						<Texture name="$(parent)_IconBg"
-						         textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
-							<Dimensions x="40"
-							            y="40"/>
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)"
-							        relativePoint="LEFT"
-							        offsetX="2"
-							        offsetY="0"/>
-						</Texture>
-						<Texture name="$(parent)_Icon">
-							<Dimensions x="36"
-							            y="36"/>
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Texture>
-						<Label name="$(parent)_PosNum"
-						       font="ZoFontGamepad27"
-						       color="FFFF80"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       text="9"
-						       hidden="true">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="RIGHT"
-							        offsetX="5"
-							        offsetY="0"/>
-						</Label>
-						<Label name="$(parent)_Name"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       wrapMode="ELLIPSIS">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_PosNum"
-							        relativePoint="RIGHT"
-							        offsetX="8"
-							        offsetY="0"/>
-							<DimensionConstraints minX="0"
-							                      minY="0"
-							                      maxX="200"
-							                      maxY="44"/>
-						</Label>
-						<Label name="$(parent)_Priority"
-						       horizontalAlignment="RIGHT"
-						       verticalAlignment="CENTER"
-						       color="B3B3B3"
-						       hidden="true">
-							<Anchor point="RIGHT"
-							        relativeTo="$(parent)"
-							        relativePoint="RIGHT"
-							        offsetX="-5"
-							        offsetY="0"/>
-						</Label>
-						<Cooldown name="$(parent)_Cooldown"
-						          hidden="true"
-						          textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
-						          fillColor="000000B3"
-						          desaturation="1">
-							<Anchor point="TOPLEFT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="TOPLEFT"/>
-							<Anchor point="BOTTOMRIGHT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="BOTTOMRIGHT"/>
-						</Cooldown>
-						<Label name="$(parent)_CooldownText"
-						       horizontalAlignment="CENTER"
-						       verticalAlignment="CENTER"
-						       color="FFFFFF"
-						       hidden="true">
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Label>
-					</Controls>
-				</Control>
-				<Control name="$(parent)_Row10"
-				         mouseEnabled="true"
-				         hidden="true">
-					<Dimensions x="320"
-					            y="44"/>
-					<Anchor point="TOP"
-					        relativeTo="$(parent)_Row9"
-					        relativePoint="BOTTOM"/>
-					<Controls>
-						<Texture name="$(parent)_IconBg"
-						         textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
-							<Dimensions x="40"
-							            y="40"/>
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)"
-							        relativePoint="LEFT"
-							        offsetX="2"
-							        offsetY="0"/>
-						</Texture>
-						<Texture name="$(parent)_Icon">
-							<Dimensions x="36"
-							            y="36"/>
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Texture>
-						<Label name="$(parent)_PosNum"
-						       font="ZoFontGamepad27"
-						       color="FFFF80"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       text="10"
-						       hidden="true">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="RIGHT"
-							        offsetX="5"
-							        offsetY="0"/>
-						</Label>
-						<Label name="$(parent)_Name"
-						       horizontalAlignment="LEFT"
-						       verticalAlignment="CENTER"
-						       wrapMode="ELLIPSIS">
-							<Anchor point="LEFT"
-							        relativeTo="$(parent)_PosNum"
-							        relativePoint="RIGHT"
-							        offsetX="8"
-							        offsetY="0"/>
-							<DimensionConstraints minX="0"
-							                      minY="0"
-							                      maxX="200"
-							                      maxY="44"/>
-						</Label>
-						<Label name="$(parent)_Priority"
-						       horizontalAlignment="RIGHT"
-						       verticalAlignment="CENTER"
-						       color="B3B3B3"
-						       hidden="true">
-							<Anchor point="RIGHT"
-							        relativeTo="$(parent)"
-							        relativePoint="RIGHT"
-							        offsetX="-5"
-							        offsetY="0"/>
-						</Label>
-						<Cooldown name="$(parent)_Cooldown"
-						          hidden="true"
-						          textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
-						          fillColor="000000B3"
-						          desaturation="1">
-							<Anchor point="TOPLEFT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="TOPLEFT"/>
-							<Anchor point="BOTTOMRIGHT"
-							        relativeTo="$(parent)_Icon"
-							        relativePoint="BOTTOMRIGHT"/>
-						</Cooldown>
-						<Label name="$(parent)_CooldownText"
-						       horizontalAlignment="CENTER"
-						       verticalAlignment="CENTER"
-						       color="FFFFFF"
-						       hidden="true">
-							<Anchor point="CENTER"
-							        relativeTo="$(parent)_IconBg"
-							        relativePoint="CENTER"/>
-						</Label>
-					</Controls>
-				</Control>
-				<!-- Console Preview Elements -->
-				<Backdrop name="$(parent)_Preview"
-				          hidden="true"
-				          centerColor="0D99E640"
-				          edgeColor="0D99E6E6">
-					<AnchorFill/>
-				</Backdrop>
-				<Label name="$(parent)_Preview_CoordLabel"
-				       font="ZoFontGameSmall"
-				       color="FFFF00"
-				       text="xxx, yyy"
-				       hidden="true">
-					<Anchor point="TOPLEFT"
-					        relativeTo="$(parent)_Preview"
-					        relativePoint="TOPLEFT"
-					        offsetX="4"
-					        offsetY="4"/>
-				</Label>
-				<Label name="$(parent)_Preview_Label"
-				       font="ZoFontGameMedium"
-				       color="FFFFFF"
-				       horizontalAlignment="CENTER"
-				       verticalAlignment="CENTER"
-				       text="Synergy Tracker"
-				       hidden="true">
-					<Anchor point="CENTER"
-					        relativeTo="$(parent)_Preview"
-					        relativePoint="CENTER"/>
-				</Label>
-			</Controls>
-		</TopLevelControl>
-	</Controls>
+  <Controls>
+    <TopLevelControl name="LUIE_SynergyTracker_UI"
+                     mouseEnabled="false"
+                     movable="false"
+                     clampedToScreen="true"
+                     hidden="true"
+                     layer="0"
+                     level="1"
+                     tier="1">
+      <Dimensions x="320"
+                  y="440" />
+      <Anchor point="CENTER"
+              relativeTo="GuiRoot"
+              relativePoint="CENTER"
+              offsetX="0"
+              offsetY="200" />
+      <OnMoveStop>
+        LUIE.CombatInfo.SynergyTracker.OnMoveStop()
+      </OnMoveStop>
+      <OnUpdate>
+        LUIE.CombatInfo.SynergyTracker.OnUpdate(self)
+      </OnUpdate>
+      <Controls>
+        <!-- Background for unlock mode -->
+        <Backdrop name="$(parent)_Background"
+                  hidden="true"
+                  centerColor="00000080"
+                  edgeColor="4D4D4DCC">
+          <AnchorFill />
+        </Backdrop>
+        <!-- Synergy Rows (10 slots) -->
+        <Control name="$(parent)_Row1"
+                 mouseEnabled="true"
+                 hidden="true">
+          <Dimensions x="320"
+                      y="44" />
+          <Anchor point="TOP"
+                  relativeTo="$(parent)"
+                  relativePoint="TOP"
+                  offsetX="0"
+                  offsetY="0" />
+          <Controls>
+            <!-- Icon Background -->
+            <Texture name="$(parent)_IconBg"
+                     textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
+              <Dimensions x="40"
+                          y="40" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="LEFT"
+                      offsetX="2"
+                      offsetY="0" />
+            </Texture>
+            <!-- Icon -->
+            <Texture name="$(parent)_Icon">
+              <Dimensions x="36"
+                          y="36" />
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Texture>
+            <!-- Position Number -->
+            <Label name="$(parent)_PosNum"
+                   font="ZoFontGamepad27"
+                   color="FFFF80"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   text="1"
+                   hidden="true">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="RIGHT"
+                      offsetX="5"
+                      offsetY="0" />
+            </Label>
+            <!-- Synergy Name -->
+            <Label name="$(parent)_Name"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   wrapMode="ELLIPSIS">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_PosNum"
+                      relativePoint="RIGHT"
+                      offsetX="8"
+                      offsetY="0" />
+              <DimensionConstraints minX="0"
+                                    minY="0"
+                                    maxX="200"
+                                    maxY="44" />
+            </Label>
+            <!-- Priority Indicator -->
+            <Label name="$(parent)_Priority"
+                   horizontalAlignment="RIGHT"
+                   verticalAlignment="CENTER"
+                   color="B3B3B3"
+                   hidden="true">
+              <Anchor point="RIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="RIGHT"
+                      offsetX="-5"
+                      offsetY="0" />
+            </Label>
+            <!-- Cooldown Overlay -->
+            <Cooldown name="$(parent)_Cooldown"
+                      hidden="true"
+                      textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
+                      fillColor="000000B3"
+                      desaturation="1">
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="TOPLEFT" />
+              <Anchor point="BOTTOMRIGHT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="BOTTOMRIGHT" />
+            </Cooldown>
+            <!-- Cooldown Text -->
+            <Label name="$(parent)_CooldownText"
+                   horizontalAlignment="CENTER"
+                   verticalAlignment="CENTER"
+                   color="FFFFFF"
+                   hidden="true">
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Label>
+          </Controls>
+        </Control>
+        <Control name="$(parent)_Row2"
+                 mouseEnabled="true"
+                 hidden="true">
+          <Dimensions x="320"
+                      y="44" />
+          <Anchor point="TOP"
+                  relativeTo="$(parent)_Row1"
+                  relativePoint="BOTTOM" />
+          <Controls>
+            <Texture name="$(parent)_IconBg"
+                     textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
+              <Dimensions x="40"
+                          y="40" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="LEFT"
+                      offsetX="2"
+                      offsetY="0" />
+            </Texture>
+            <Texture name="$(parent)_Icon">
+              <Dimensions x="36"
+                          y="36" />
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Texture>
+            <Label name="$(parent)_PosNum"
+                   font="ZoFontGamepad27"
+                   color="FFFF80"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   text="2"
+                   hidden="true">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="RIGHT"
+                      offsetX="5"
+                      offsetY="0" />
+            </Label>
+            <Label name="$(parent)_Name"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   wrapMode="ELLIPSIS">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_PosNum"
+                      relativePoint="RIGHT"
+                      offsetX="8"
+                      offsetY="0" />
+              <DimensionConstraints minX="0"
+                                    minY="0"
+                                    maxX="200"
+                                    maxY="44" />
+            </Label>
+            <Label name="$(parent)_Priority"
+                   horizontalAlignment="RIGHT"
+                   verticalAlignment="CENTER"
+                   color="B3B3B3"
+                   hidden="true">
+              <Anchor point="RIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="RIGHT"
+                      offsetX="-5"
+                      offsetY="0" />
+            </Label>
+            <Cooldown name="$(parent)_Cooldown"
+                      hidden="true"
+                      textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
+                      fillColor="000000B3"
+                      desaturation="1">
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="TOPLEFT" />
+              <Anchor point="BOTTOMRIGHT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="BOTTOMRIGHT" />
+            </Cooldown>
+            <Label name="$(parent)_CooldownText"
+                   horizontalAlignment="CENTER"
+                   verticalAlignment="CENTER"
+                   color="FFFFFF"
+                   hidden="true">
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Label>
+          </Controls>
+        </Control>
+        <Control name="$(parent)_Row3"
+                 mouseEnabled="true"
+                 hidden="true">
+          <Dimensions x="320"
+                      y="44" />
+          <Anchor point="TOP"
+                  relativeTo="$(parent)_Row2"
+                  relativePoint="BOTTOM" />
+          <Controls>
+            <Texture name="$(parent)_IconBg"
+                     textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
+              <Dimensions x="40"
+                          y="40" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="LEFT"
+                      offsetX="2"
+                      offsetY="0" />
+            </Texture>
+            <Texture name="$(parent)_Icon">
+              <Dimensions x="36"
+                          y="36" />
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Texture>
+            <Label name="$(parent)_PosNum"
+                   font="ZoFontGamepad27"
+                   color="FFFF80"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   text="3"
+                   hidden="true">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="RIGHT"
+                      offsetX="5"
+                      offsetY="0" />
+            </Label>
+            <Label name="$(parent)_Name"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   wrapMode="ELLIPSIS">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_PosNum"
+                      relativePoint="RIGHT"
+                      offsetX="8"
+                      offsetY="0" />
+              <DimensionConstraints minX="0"
+                                    minY="0"
+                                    maxX="200"
+                                    maxY="44" />
+            </Label>
+            <Label name="$(parent)_Priority"
+                   horizontalAlignment="RIGHT"
+                   verticalAlignment="CENTER"
+                   color="B3B3B3"
+                   hidden="true">
+              <Anchor point="RIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="RIGHT"
+                      offsetX="-5"
+                      offsetY="0" />
+            </Label>
+            <Cooldown name="$(parent)_Cooldown"
+                      hidden="true"
+                      textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
+                      fillColor="000000B3"
+                      desaturation="1">
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="TOPLEFT" />
+              <Anchor point="BOTTOMRIGHT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="BOTTOMRIGHT" />
+            </Cooldown>
+            <Label name="$(parent)_CooldownText"
+                   horizontalAlignment="CENTER"
+                   verticalAlignment="CENTER"
+                   color="FFFFFF"
+                   hidden="true">
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Label>
+          </Controls>
+        </Control>
+        <Control name="$(parent)_Row4"
+                 mouseEnabled="true"
+                 hidden="true">
+          <Dimensions x="320"
+                      y="44" />
+          <Anchor point="TOP"
+                  relativeTo="$(parent)_Row3"
+                  relativePoint="BOTTOM" />
+          <Controls>
+            <Texture name="$(parent)_IconBg"
+                     textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
+              <Dimensions x="40"
+                          y="40" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="LEFT"
+                      offsetX="2"
+                      offsetY="0" />
+            </Texture>
+            <Texture name="$(parent)_Icon">
+              <Dimensions x="36"
+                          y="36" />
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Texture>
+            <Label name="$(parent)_PosNum"
+                   font="ZoFontGamepad27"
+                   color="FFFF80"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   text="4"
+                   hidden="true">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="RIGHT"
+                      offsetX="5"
+                      offsetY="0" />
+            </Label>
+            <Label name="$(parent)_Name"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   wrapMode="ELLIPSIS">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_PosNum"
+                      relativePoint="RIGHT"
+                      offsetX="8"
+                      offsetY="0" />
+              <DimensionConstraints minX="0"
+                                    minY="0"
+                                    maxX="200"
+                                    maxY="44" />
+            </Label>
+            <Label name="$(parent)_Priority"
+                   horizontalAlignment="RIGHT"
+                   verticalAlignment="CENTER"
+                   color="B3B3B3"
+                   hidden="true">
+              <Anchor point="RIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="RIGHT"
+                      offsetX="-5"
+                      offsetY="0" />
+            </Label>
+            <Cooldown name="$(parent)_Cooldown"
+                      hidden="true"
+                      textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
+                      fillColor="000000B3"
+                      desaturation="1">
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="TOPLEFT" />
+              <Anchor point="BOTTOMRIGHT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="BOTTOMRIGHT" />
+            </Cooldown>
+            <Label name="$(parent)_CooldownText"
+                   horizontalAlignment="CENTER"
+                   verticalAlignment="CENTER"
+                   color="FFFFFF"
+                   hidden="true">
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Label>
+          </Controls>
+        </Control>
+        <Control name="$(parent)_Row5"
+                 mouseEnabled="true"
+                 hidden="true">
+          <Dimensions x="320"
+                      y="44" />
+          <Anchor point="TOP"
+                  relativeTo="$(parent)_Row4"
+                  relativePoint="BOTTOM" />
+          <Controls>
+            <Texture name="$(parent)_IconBg"
+                     textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
+              <Dimensions x="40"
+                          y="40" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="LEFT"
+                      offsetX="2"
+                      offsetY="0" />
+            </Texture>
+            <Texture name="$(parent)_Icon">
+              <Dimensions x="36"
+                          y="36" />
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Texture>
+            <Label name="$(parent)_PosNum"
+                   font="ZoFontGamepad27"
+                   color="FFFF80"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   text="5"
+                   hidden="true">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="RIGHT"
+                      offsetX="5"
+                      offsetY="0" />
+            </Label>
+            <Label name="$(parent)_Name"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   wrapMode="ELLIPSIS">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_PosNum"
+                      relativePoint="RIGHT"
+                      offsetX="8"
+                      offsetY="0" />
+              <DimensionConstraints minX="0"
+                                    minY="0"
+                                    maxX="200"
+                                    maxY="44" />
+            </Label>
+            <Label name="$(parent)_Priority"
+                   horizontalAlignment="RIGHT"
+                   verticalAlignment="CENTER"
+                   color="B3B3B3"
+                   hidden="true">
+              <Anchor point="RIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="RIGHT"
+                      offsetX="-5"
+                      offsetY="0" />
+            </Label>
+            <Cooldown name="$(parent)_Cooldown"
+                      hidden="true"
+                      textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
+                      fillColor="000000B3"
+                      desaturation="1">
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="TOPLEFT" />
+              <Anchor point="BOTTOMRIGHT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="BOTTOMRIGHT" />
+            </Cooldown>
+            <Label name="$(parent)_CooldownText"
+                   horizontalAlignment="CENTER"
+                   verticalAlignment="CENTER"
+                   color="FFFFFF"
+                   hidden="true">
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Label>
+          </Controls>
+        </Control>
+        <Control name="$(parent)_Row6"
+                 mouseEnabled="true"
+                 hidden="true">
+          <Dimensions x="320"
+                      y="44" />
+          <Anchor point="TOP"
+                  relativeTo="$(parent)_Row5"
+                  relativePoint="BOTTOM" />
+          <Controls>
+            <Texture name="$(parent)_IconBg"
+                     textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
+              <Dimensions x="40"
+                          y="40" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="LEFT"
+                      offsetX="2"
+                      offsetY="0" />
+            </Texture>
+            <Texture name="$(parent)_Icon">
+              <Dimensions x="36"
+                          y="36" />
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Texture>
+            <Label name="$(parent)_PosNum"
+                   font="ZoFontGamepad27"
+                   color="FFFF80"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   text="6"
+                   hidden="true">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="RIGHT"
+                      offsetX="5"
+                      offsetY="0" />
+            </Label>
+            <Label name="$(parent)_Name"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   wrapMode="ELLIPSIS">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_PosNum"
+                      relativePoint="RIGHT"
+                      offsetX="8"
+                      offsetY="0" />
+              <DimensionConstraints minX="0"
+                                    minY="0"
+                                    maxX="200"
+                                    maxY="44" />
+            </Label>
+            <Label name="$(parent)_Priority"
+                   horizontalAlignment="RIGHT"
+                   verticalAlignment="CENTER"
+                   color="B3B3B3"
+                   hidden="true">
+              <Anchor point="RIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="RIGHT"
+                      offsetX="-5"
+                      offsetY="0" />
+            </Label>
+            <Cooldown name="$(parent)_Cooldown"
+                      hidden="true"
+                      textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
+                      fillColor="000000B3"
+                      desaturation="1">
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="TOPLEFT" />
+              <Anchor point="BOTTOMRIGHT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="BOTTOMRIGHT" />
+            </Cooldown>
+            <Label name="$(parent)_CooldownText"
+                   horizontalAlignment="CENTER"
+                   verticalAlignment="CENTER"
+                   color="FFFFFF"
+                   hidden="true">
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Label>
+          </Controls>
+        </Control>
+        <Control name="$(parent)_Row7"
+                 mouseEnabled="true"
+                 hidden="true">
+          <Dimensions x="320"
+                      y="44" />
+          <Anchor point="TOP"
+                  relativeTo="$(parent)_Row6"
+                  relativePoint="BOTTOM" />
+          <Controls>
+            <Texture name="$(parent)_IconBg"
+                     textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
+              <Dimensions x="40"
+                          y="40" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="LEFT"
+                      offsetX="2"
+                      offsetY="0" />
+            </Texture>
+            <Texture name="$(parent)_Icon">
+              <Dimensions x="36"
+                          y="36" />
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Texture>
+            <Label name="$(parent)_PosNum"
+                   font="ZoFontGamepad27"
+                   color="FFFF80"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   text="7"
+                   hidden="true">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="RIGHT"
+                      offsetX="5"
+                      offsetY="0" />
+            </Label>
+            <Label name="$(parent)_Name"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   wrapMode="ELLIPSIS">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_PosNum"
+                      relativePoint="RIGHT"
+                      offsetX="8"
+                      offsetY="0" />
+              <DimensionConstraints minX="0"
+                                    minY="0"
+                                    maxX="200"
+                                    maxY="44" />
+            </Label>
+            <Label name="$(parent)_Priority"
+                   horizontalAlignment="RIGHT"
+                   verticalAlignment="CENTER"
+                   color="B3B3B3"
+                   hidden="true">
+              <Anchor point="RIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="RIGHT"
+                      offsetX="-5"
+                      offsetY="0" />
+            </Label>
+            <Cooldown name="$(parent)_Cooldown"
+                      hidden="true"
+                      textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
+                      fillColor="000000B3"
+                      desaturation="1">
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="TOPLEFT" />
+              <Anchor point="BOTTOMRIGHT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="BOTTOMRIGHT" />
+            </Cooldown>
+            <Label name="$(parent)_CooldownText"
+                   horizontalAlignment="CENTER"
+                   verticalAlignment="CENTER"
+                   color="FFFFFF"
+                   hidden="true">
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Label>
+          </Controls>
+        </Control>
+        <Control name="$(parent)_Row8"
+                 mouseEnabled="true"
+                 hidden="true">
+          <Dimensions x="320"
+                      y="44" />
+          <Anchor point="TOP"
+                  relativeTo="$(parent)_Row7"
+                  relativePoint="BOTTOM" />
+          <Controls>
+            <Texture name="$(parent)_IconBg"
+                     textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
+              <Dimensions x="40"
+                          y="40" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="LEFT"
+                      offsetX="2"
+                      offsetY="0" />
+            </Texture>
+            <Texture name="$(parent)_Icon">
+              <Dimensions x="36"
+                          y="36" />
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Texture>
+            <Label name="$(parent)_PosNum"
+                   font="ZoFontGamepad27"
+                   color="FFFF80"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   text="8"
+                   hidden="true">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="RIGHT"
+                      offsetX="5"
+                      offsetY="0" />
+            </Label>
+            <Label name="$(parent)_Name"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   wrapMode="ELLIPSIS">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_PosNum"
+                      relativePoint="RIGHT"
+                      offsetX="8"
+                      offsetY="0" />
+              <DimensionConstraints minX="0"
+                                    minY="0"
+                                    maxX="200"
+                                    maxY="44" />
+            </Label>
+            <Label name="$(parent)_Priority"
+                   horizontalAlignment="RIGHT"
+                   verticalAlignment="CENTER"
+                   color="B3B3B3"
+                   hidden="true">
+              <Anchor point="RIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="RIGHT"
+                      offsetX="-5"
+                      offsetY="0" />
+            </Label>
+            <Cooldown name="$(parent)_Cooldown"
+                      hidden="true"
+                      textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
+                      fillColor="000000B3"
+                      desaturation="1">
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="TOPLEFT" />
+              <Anchor point="BOTTOMRIGHT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="BOTTOMRIGHT" />
+            </Cooldown>
+            <Label name="$(parent)_CooldownText"
+                   horizontalAlignment="CENTER"
+                   verticalAlignment="CENTER"
+                   color="FFFFFF"
+                   hidden="true">
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Label>
+          </Controls>
+        </Control>
+        <Control name="$(parent)_Row9"
+                 mouseEnabled="true"
+                 hidden="true">
+          <Dimensions x="320"
+                      y="44" />
+          <Anchor point="TOP"
+                  relativeTo="$(parent)_Row8"
+                  relativePoint="BOTTOM" />
+          <Controls>
+            <Texture name="$(parent)_IconBg"
+                     textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
+              <Dimensions x="40"
+                          y="40" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="LEFT"
+                      offsetX="2"
+                      offsetY="0" />
+            </Texture>
+            <Texture name="$(parent)_Icon">
+              <Dimensions x="36"
+                          y="36" />
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Texture>
+            <Label name="$(parent)_PosNum"
+                   font="ZoFontGamepad27"
+                   color="FFFF80"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   text="9"
+                   hidden="true">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="RIGHT"
+                      offsetX="5"
+                      offsetY="0" />
+            </Label>
+            <Label name="$(parent)_Name"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   wrapMode="ELLIPSIS">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_PosNum"
+                      relativePoint="RIGHT"
+                      offsetX="8"
+                      offsetY="0" />
+              <DimensionConstraints minX="0"
+                                    minY="0"
+                                    maxX="200"
+                                    maxY="44" />
+            </Label>
+            <Label name="$(parent)_Priority"
+                   horizontalAlignment="RIGHT"
+                   verticalAlignment="CENTER"
+                   color="B3B3B3"
+                   hidden="true">
+              <Anchor point="RIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="RIGHT"
+                      offsetX="-5"
+                      offsetY="0" />
+            </Label>
+            <Cooldown name="$(parent)_Cooldown"
+                      hidden="true"
+                      textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
+                      fillColor="000000B3"
+                      desaturation="1">
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="TOPLEFT" />
+              <Anchor point="BOTTOMRIGHT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="BOTTOMRIGHT" />
+            </Cooldown>
+            <Label name="$(parent)_CooldownText"
+                   horizontalAlignment="CENTER"
+                   verticalAlignment="CENTER"
+                   color="FFFFFF"
+                   hidden="true">
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Label>
+          </Controls>
+        </Control>
+        <Control name="$(parent)_Row10"
+                 mouseEnabled="true"
+                 hidden="true">
+          <Dimensions x="320"
+                      y="44" />
+          <Anchor point="TOP"
+                  relativeTo="$(parent)_Row9"
+                  relativePoint="BOTTOM" />
+          <Controls>
+            <Texture name="$(parent)_IconBg"
+                     textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds">
+              <Dimensions x="40"
+                          y="40" />
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="LEFT"
+                      offsetX="2"
+                      offsetY="0" />
+            </Texture>
+            <Texture name="$(parent)_Icon">
+              <Dimensions x="36"
+                          y="36" />
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Texture>
+            <Label name="$(parent)_PosNum"
+                   font="ZoFontGamepad27"
+                   color="FFFF80"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   text="10"
+                   hidden="true">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="RIGHT"
+                      offsetX="5"
+                      offsetY="0" />
+            </Label>
+            <Label name="$(parent)_Name"
+                   horizontalAlignment="LEFT"
+                   verticalAlignment="CENTER"
+                   wrapMode="ELLIPSIS">
+              <Anchor point="LEFT"
+                      relativeTo="$(parent)_PosNum"
+                      relativePoint="RIGHT"
+                      offsetX="8"
+                      offsetY="0" />
+              <DimensionConstraints minX="0"
+                                    minY="0"
+                                    maxX="200"
+                                    maxY="44" />
+            </Label>
+            <Label name="$(parent)_Priority"
+                   horizontalAlignment="RIGHT"
+                   verticalAlignment="CENTER"
+                   color="B3B3B3"
+                   hidden="true">
+              <Anchor point="RIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="RIGHT"
+                      offsetX="-5"
+                      offsetY="0" />
+            </Label>
+            <Cooldown name="$(parent)_Cooldown"
+                      hidden="true"
+                      textureFile="EsoUI/Art/ActionBar/abilityHighlight.dds"
+                      fillColor="000000B3"
+                      desaturation="1">
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="TOPLEFT" />
+              <Anchor point="BOTTOMRIGHT"
+                      relativeTo="$(parent)_Icon"
+                      relativePoint="BOTTOMRIGHT" />
+            </Cooldown>
+            <Label name="$(parent)_CooldownText"
+                   horizontalAlignment="CENTER"
+                   verticalAlignment="CENTER"
+                   color="FFFFFF"
+                   hidden="true">
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)_IconBg"
+                      relativePoint="CENTER" />
+            </Label>
+          </Controls>
+        </Control>
+        <!-- Console Preview Elements -->
+        <Backdrop name="$(parent)_Preview"
+                  hidden="true"
+                  centerColor="0D99E640"
+                  edgeColor="0D99E6E6">
+          <AnchorFill />
+        </Backdrop>
+        <Label name="$(parent)_Preview_CoordLabel"
+               font="ZoFontGameSmall"
+               color="FFFF00"
+               text="xxx, yyy"
+               hidden="true">
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)_Preview"
+                  relativePoint="TOPLEFT"
+                  offsetX="4"
+                  offsetY="4" />
+        </Label>
+        <Label name="$(parent)_Preview_Label"
+               font="ZoFontGameMedium"
+               color="FFFFFF"
+               horizontalAlignment="CENTER"
+               verticalAlignment="CENTER"
+               text="Synergy Tracker"
+               hidden="true">
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)_Preview"
+                  relativePoint="CENTER" />
+        </Label>
+      </Controls>
+    </TopLevelControl>
+  </Controls>
 </GuiXml>

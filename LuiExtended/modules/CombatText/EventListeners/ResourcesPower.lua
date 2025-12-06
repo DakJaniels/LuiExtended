@@ -3,14 +3,16 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
---- @class (partial) LuiExtended
+---@class LuiExtended
 local LUIE = LUIE
+--- @class (partial) LuiExtended.CombatTextResourcesPowerEventListener : LuiExtended.CombatTextEventListener
 LUIE.CombatTextResourcesPowerEventListener = LUIE.CombatTextEventListener:Subclass()
+--- @class (partial) LuiExtended.CombatTextResourcesPowerEventListener
 local CombatTextResourcesPowerEventListener = LUIE.CombatTextResourcesPowerEventListener
 
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local resourceType = LuiData.Data.CombatTextConstants.resourceType
---- @diagnostic disable-next-line: duplicate-set-field
+
 function CombatTextResourcesPowerEventListener:New()
     local obj = LUIE.CombatTextEventListener:New()
     obj:RegisterForEvent(EVENT_POWER_UPDATE, function (...)

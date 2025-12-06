@@ -4,12 +4,15 @@
 ## Version: 7.1.3.11
 ## AddOnVersion: 71311
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
-## PCDependsOn: LuiMedia>=7130 LuiData>=7107 LibAddonMenu-2.0>=41 LibMediaProvider>=36
-## ConsoleDependsOn: LuiMedia>=7130 LuiData>=7107 LibMediaProvider>=36 LibHarvensAddonSettings LibCombatAlerts LibConsoleDialogs
+## PCDependsOn: LuiMedia>=7130 LuiData>=7107 LibAddonMenu-2.0>=41
+## ConsoleDependsOn: LuiMedia>=7130 LuiData>=7107 LibHarvensAddonSettings LibCombatAlerts LibConsoleDialogs
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705 CrutchAlerts>=20502
 ## OptionalDependsOn: LibGroupResources>=91 LibGroupCombatStats>=20251011 LibGroupPotionCooldowns>=20250727
 ## OptionalDependsOn: LibDebugLogger>=268 DolgubonsLazyWritCreator>=4038 LibLazyCrafting>=4028 LootLog>=408040
 ## SavedVariables: LUIESV
+
+# callLater
+src/LUIE_callLater.lua
 
 # Addon Profiler
 ;src/AddonProfiler.lua
@@ -52,6 +55,7 @@ frontend/Changelog.xml
 frontend/CombatText.xml
 frontend/CrowdControlTracker.xml
 frontend/InfoPanel.xml
+frontend/SpellCastBuffs.xml
 frontend/SynergyTracker.xml
 frontend/UnitFrames.xml
 
@@ -74,6 +78,7 @@ modules/ChatAnnouncements/_Experience.lua
 modules/ChatAnnouncements/ChatAnnouncements.lua
 
 # Modules - Combat Text
+modules/CombatText/Namespace.lua
 modules/CombatText/CombatText.lua
 modules/CombatText/Animation.lua
 modules/CombatText/PoolManager.lua
@@ -117,8 +122,8 @@ modules/CombatInfo/CombatInfo.lua
 modules/InfoPanel/InfoPanel.lua
 
 # Modules - Spell Cast Buffs
+modules/SpellCastBuffs/Namespace.lua
 modules/SpellCastBuffs/SpellCastBuffs.lua
-frontend/SpellCastBuffs.xml
 
 # Modules - Slash Commands
 modules/SlashCommands/SlashCommands.lua

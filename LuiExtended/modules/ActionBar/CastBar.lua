@@ -547,7 +547,7 @@ function CastBar.OnCombatEvent(eventCode, result, isError, abilityName, abilityG
     end
 
     if abilityId == 39507 then
-        zo_callLater(function ()
+        LUIE_callLater(function ()
                          Castbar.CastDurationFix[39507] = 19500
                      end, 5000)
     end

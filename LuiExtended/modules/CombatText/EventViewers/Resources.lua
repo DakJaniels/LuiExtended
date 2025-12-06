@@ -3,19 +3,19 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
---- @class (partial) LuiExtended
+---@class LuiExtended
 local LUIE = LUIE
+--- @class (partial) LuiExtended.CombatTextResourceEventViewer : LuiExtended.CombatTextEventViewer
 LUIE.CombatTextResourceEventViewer = LUIE.CombatTextEventViewer:Subclass()
+--- @class (partial) LuiExtended.CombatTextResourceEventViewer
 local CombatTextResourceEventViewer = LUIE.CombatTextResourceEventViewer
 local poolTypes = LuiData.Data.CombatTextConstants.poolType
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local resourceTypes = LuiData.Data.CombatTextConstants.resourceType
---- @diagnostic disable-next-line: duplicate-set-field
+
 function CombatTextResourceEventViewer:New(...)
     local obj = LUIE.CombatTextEventViewer:New(...)
-    obj:RegisterCallback(eventType.RESOURCE, function (...)
-        self:OnEvent(...)
-    end)
+    obj:RegisterCallback(eventType.RESOURCE, function (...) self:OnEvent(...) end)
     self.locationOffset = 0 -- Simple way to avoid overlapping. When the number of active notes is back to 0, the offset is also reset
     self.activeResources = 0
     return obj
@@ -68,7 +68,7 @@ function CombatTextResourceEventViewer:OnEvent(resourceType, value)
         PlaySound("Quest_StepFailed")
     end
 
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
                      self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
                      self.activeResources = self.activeResources - 1

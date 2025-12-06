@@ -3068,7 +3068,7 @@ end
 -- Runs on EVENT_INVENTORY_ITEM_USED
 local function InventoryItemUsed()
     g_potionUsed = true
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      g_potionUsed = false
                  end, 200)
 end

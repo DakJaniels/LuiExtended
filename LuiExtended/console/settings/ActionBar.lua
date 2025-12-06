@@ -170,7 +170,7 @@ function ActionBar.CreateConsoleSettings()
                         end
                         -- Refresh the dialog to update the duration field
                         LibConsoleDialogs:Close()
-                        zo_callLater(function ()
+                        LUIE_callLater(function ()
                                          -- Recreate and show dialog with updated values
                                          local newDialog = CreateAddOverrideDialog()
                                          if not LUIE.DurationOverrideDialogs then

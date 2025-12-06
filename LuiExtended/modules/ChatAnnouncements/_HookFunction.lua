@@ -662,11 +662,11 @@ local function GroupMemberLeftAlert(characterName, reason, isLocalPlayer, isLead
         elseif isLeader and isLocalPlayer then
             message = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
             alert = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
-            zo_callLater(function ()
+            LUIE_callLater(function ()
                              ChatAnnouncements.CheckLFGStatusLeave(false)
                          end, 100)
         elseif isLocalPlayer then
-            zo_callLater(function ()
+            LUIE_callLater(function ()
                              ChatAnnouncements.CheckLFGStatusLeave(false)
                          end, 100)
         end
@@ -674,13 +674,13 @@ local function GroupMemberLeftAlert(characterName, reason, isLocalPlayer, isLead
     elseif reason == GROUP_LEAVE_REASON_KICKED then
         if actionRequiredVote then
             if isLocalPlayer then
-                zo_callLater(function ()
+                LUIE_callLater(function ()
                                  ChatAnnouncements.CheckLFGStatusLeave(true)
                              end, 100)
                 message = zo_strformat(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
                 alert = zo_strformat(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
             elseif hasValidNames then
-                zo_callLater(function ()
+                LUIE_callLater(function ()
                                  ChatAnnouncements.CheckLFGStatusLeave(false)
                              end, 100)
                 message = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_PASSED, finalName)
@@ -693,19 +693,19 @@ local function GroupMemberLeftAlert(characterName, reason, isLocalPlayer, isLead
             if isLeader and isLocalPlayer then
                 message = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
                 alert = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
-                zo_callLater(function ()
+                LUIE_callLater(function ()
                                  ChatAnnouncements.CheckLFGStatusLeave(false)
                              end, 100)
                 sound = SOUNDS.GROUP_DISBAND
             elseif isLocalPlayer then
-                zo_callLater(function ()
+                LUIE_callLater(function ()
                                  ChatAnnouncements.CheckLFGStatusLeave(true)
                              end, 100)
                 message = zo_strformat(SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED)
                 alert = zo_strformat(SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED)
                 sound = SOUNDS.GROUP_KICK
             else
-                zo_callLater(function ()
+                LUIE_callLater(function ()
                                  ChatAnnouncements.CheckLFGStatusLeave(false)
                              end, 100)
                 useDefaultReasonText = true
@@ -715,13 +715,13 @@ local function GroupMemberLeftAlert(characterName, reason, isLocalPlayer, isLead
     elseif reason == GROUP_LEAVE_REASON_VOLUNTARY or reason == GROUP_LEAVE_REASON_LEFT_BATTLEGROUND then
         if not isLocalPlayer then
             useDefaultReasonText = true
-            zo_callLater(function ()
+            LUIE_callLater(function ()
                              ChatAnnouncements.CheckLFGStatusLeave(false)
                          end, 100)
         else
             message = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_LEAVE_SELF), finalName))
             alert = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_LEAVE_SELF), finalAlertName))
-            zo_callLater(function ()
+            LUIE_callLater(function ()
                              ChatAnnouncements.CheckLFGStatusLeave(false)
                          end, 100)
         end
@@ -779,7 +779,7 @@ local function OnGroupMemberJoined(characterName, displayName, isLocalPlayer)
 
     -- Determine if the member that joined a group is the player or another member.
     if isLocalPlayer then
-        zo_callLater(ChatAnnouncements.CheckLFGStatusJoin, 100)
+        LUIE_callLater(ChatAnnouncements.CheckLFGStatusJoin, 100)
     else
         -- Resolve name links (pass characterName and displayName directly) : Should solve https://github.com/DakJaniels/LuiExtended/issues/324
         local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
@@ -787,7 +787,7 @@ local function OnGroupMemberJoined(characterName, displayName, isLocalPlayer)
         -- Set final messages to send
         local SendMessage = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalName))
         local SendAlert = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalAlertName))
-        zo_callLater(function ()
+        LUIE_callLater(function ()
                          ChatAnnouncements.PrintJoinStatusNotSelf(SendMessage, SendAlert)
                      end, 100)
     end
@@ -977,14 +977,14 @@ local function GroupReadyCheckCancelAlert(reason)
 
     -- Stop the cancel message from status update from triggering when any other result here happens.
     ChatAnnouncements.lfgHideStatusCancel = true
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      ChatAnnouncements.lfgHideStatusCancel = false
                  end, 1000)
 
     -- Sometimes if another player cancels slightly before a player in your group cancels, the "you have been placed in the front of the queue message displays. If this is the case, we want to show queue left for that event."
     if reason ~= LFG_READY_CHECK_CANCEL_REASON_GROUP_REPLACED_IN_QUEUE then
         ChatAnnouncements.showActivityStatus = false
-        zo_callLater(function ()
+        LUIE_callLater(function ()
                          ChatAnnouncements.showActivityStatus = true
                      end, 1000)
     end
@@ -1069,7 +1069,7 @@ local function LockpickFailedAlert(result)
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString(LUIE_STRING_CA_LOCKPICK_FAILED))
     end
     ChatAnnouncements.lockpickBroken = true
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      ChatAnnouncements.lockpickBroken = false
                  end, 200)
     return true
@@ -1313,7 +1313,7 @@ local function MailSendFailedAlert(reason)
                 end
             end
             eventManager:UnregisterForEvent(moduleName, EVENT_CURRENCY_UPDATE)
-            zo_callLater(function ()
+            LUIE_callLater(function ()
                              eventManager:RegisterForEvent(moduleName, EVENT_CURRENCY_UPDATE, ChatAnnouncements.OnCurrencyUpdate)
                          end, 500)
         end
@@ -1326,7 +1326,7 @@ local function MailSendFailedAlert(reason)
         end
         PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
 
-        zo_callLater(RestoreMailBackupValues, 50) -- Prevents values from being cleared by failed message (when inbox is full, the currency change fires first regardless and then is refunded)
+        LUIE_callLater(RestoreMailBackupValues, 50) -- Prevents values from being cleared by failed message (when inbox is full, the currency change fires first regardless and then is refunded)
     end
     return true
 end
@@ -2095,7 +2095,7 @@ local function QuestCompleteHook(questName, level, previousExperience, currentEx
     -- We set this variable to true in order to override the [Looted] message syntax that would be applied to a quest reward normally.
     if ChatAnnouncements.SV.Inventory.Loot then
         ChatAnnouncements.itemReceivedIsQuestReward = true
-        zo_callLater(ResetQuestRewardStatus, 500)
+        LUIE_callLater(ResetQuestRewardStatus, 500)
     end
 
     return true
@@ -2175,7 +2175,7 @@ local function ConditionCounterHook(journalIndex, questName, conditionText, cond
         -- We set this variable to true in order to override the [Looted] message syntax that would be applied to a quest reward normally.
         if ChatAnnouncements.SV.Inventory.Loot then
             ChatAnnouncements.itemReceivedIsQuestReward = true
-            zo_callLater(ResetQuestRewardStatus, 500)
+            LUIE_callLater(ResetQuestRewardStatus, 500)
         end
     end
 
@@ -2388,7 +2388,7 @@ local function OnQuestRemoved(eventId, isCompleted, journalIndex, questName, zon
     -- We set this variable to true in order to override the message syntax that would be applied to a quest reward normally with [Removed] instead.
     if ChatAnnouncements.SV.Inventory.Loot then
         ChatAnnouncements.itemReceivedIsQuestAbandon = true
-        zo_callLater(ResetQuestAbandonStatus, 500)
+        LUIE_callLater(ResetQuestAbandonStatus, 500)
     end
 
     ChatAnnouncements.questIndex[questName] = nil
@@ -2505,7 +2505,7 @@ local function OnQuestAdded(eventId, questIndex)
         if rejectedMat then
             local questName = GetJournalQuestName(questIndex)
             printToChat(zo_strformat("Writ Crafter abandoned the <<1>> because it requires <<2>> which was disallowed in settings", questName, rejectedMat), true)
-            zo_callLater(function ()
+            LUIE_callLater(function ()
                              AbandonQuest(questIndex)
                          end, 500)
             return
@@ -4258,7 +4258,7 @@ function ChatAnnouncements.HookFunction()
         local message = (GetString(SI_LFGREADYCHECKCANCELREASON3))
         ChatAnnouncements.showRCUpdates = true
         ChatAnnouncements.weDeclinedTheQueue = true
-        zo_callLater(function ()
+        LUIE_callLater(function ()
                          ChatAnnouncements.weDeclinedTheQueue = false
                      end, 1000)
 

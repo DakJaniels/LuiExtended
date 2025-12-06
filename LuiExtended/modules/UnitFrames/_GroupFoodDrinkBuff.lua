@@ -555,12 +555,12 @@ end
 
 local function OnGroupMemberJoined()
     if not isInitialized then return end
-    zo_callLater(SetupFoodDrinkFrames, DELAY_GROUP_JOIN)
+    LUIE_callLater(SetupFoodDrinkFrames, DELAY_GROUP_JOIN)
 end
 
 local function OnGroupMemberLeft()
     if not isInitialized then return end
-    zo_callLater(UpdateAllFoodDrinkIcons, DELAY_GROUP_LEFT)
+    LUIE_callLater(UpdateAllFoodDrinkIcons, DELAY_GROUP_LEFT)
 end
 
 local function OnGroupUpdate()
@@ -580,20 +580,20 @@ end
 
 local function OnPlayerActivated()
     if not isInitialized then return end
-    zo_callLater(SetupFoodDrinkFrames, DELAY_PLAYER_ACTIVATED)
+    LUIE_callLater(SetupFoodDrinkFrames, DELAY_PLAYER_ACTIVATED)
 end
 
 local function OnInventoryItemUsed(eventCode, itemSoundCategory)
     if not isInitialized then return end
     if itemSoundCategory == ITEM_SOUND_CATEGORY_FOOD or itemSoundCategory == ITEM_SOUND_CATEGORY_DRINK then
-        zo_callLater(UpdateAllFoodDrinkIcons, DELAY_INVENTORY_UPDATE)
+        LUIE_callLater(UpdateAllFoodDrinkIcons, DELAY_INVENTORY_UPDATE)
     end
 end
 
 local function OnInventorySingleSlotUpdate(eventCode, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
     if not isInitialized then return end
     if itemSoundCategory == ITEM_SOUND_CATEGORY_FOOD or itemSoundCategory == ITEM_SOUND_CATEGORY_DRINK then
-        zo_callLater(UpdateAllFoodDrinkIcons, DELAY_INVENTORY_UPDATE)
+        LUIE_callLater(UpdateAllFoodDrinkIcons, DELAY_INVENTORY_UPDATE)
     end
 end
 
@@ -609,7 +609,7 @@ local function OnSlashCommand()
 
     LUIE.PrintToChat("Refreshing food/drink buff icons...")
     GroupFoodDrinkBuffManager.RefreshFrames()
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      LUIE.PrintToChat("Food/drink buff icons refreshed.", true)
                  end, 200)
 end
@@ -649,7 +649,7 @@ function GroupFoodDrinkBuffManager.Initialize()
     isInitialized = true
 
     if IsUnitGrouped("player") then
-        zo_callLater(SetupFoodDrinkFrames, DELAY_INITIAL_SETUP)
+        LUIE_callLater(SetupFoodDrinkFrames, DELAY_INITIAL_SETUP)
     end
 end
 

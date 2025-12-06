@@ -3,184 +3,183 @@
       License: The MIT License (MIT)
 -->
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
-    <Controls>
-        <TopLevelControl name="LUIE_CombatText"
-            mouseEnabled="false"
-            clampedToScreen="true"
-            movable="false"
-            layer="0"
-            level="0"
-            tier="0">
-            <Anchor point="TOPLEFT"
-                relativeTo="GuiRoot"
-                relativePoint="TOPLEFT"
-                offsetX="0"
-                offsetY="0" />
-            <Anchor point="BOTTOMRIGHT"
-                relativeTo="GuiRoot"
-                relativePoint="BOTTOMRIGHT"
-                offsetX="0"
-                offsetY="0" />
-            <Controls>
-                <Control name="$(parent)_Outgoing"
-                    clampedToScreen="true">
-                    <Anchor point="CENTER"
-                        relativeTo="$(parent)"
-                        relativePoint="CENTER"
-                        offsetX="0"
-                        offsetY="- GuiRoot:GetHeight() / 4" />
-                    <Dimensions x="400"
-                        y="200" />
-                    <DimensionConstraints minX="200"
-                        minY="100"
-                        maxX="800"
-                        maxY="600" />
-                    <Controls>
-                        <Backdrop name="$(parent)_Backdrop"
-                            inherits="ZO_DefaultBackdrop"
-                            alpha="0.3"
-                            hidden="true" />
-                        <Label name="$(parent)_Label"
-                            font="ZoFontWinH4"
-                            color="FFFFFF"
-                            inheritAlpha="true"
-                            verticalAlignment="CENTER"
-                            horizontalAlignment="CENTER"
-                            text="Outgoing"
-                            hidden="true"
-                            wrapMode="ELLIPSIS">
-                            <AnchorFill />
-                        </Label>
-                    </Controls>
-                </Control>
-                <Control name="$(parent)_Incoming"
-                    clampedToScreen="true">
-                    <Anchor point="CENTER"
-                        relativeTo="$(parent)"
-                        relativePoint="CENTER"
-                        offsetX="0"
-                        offsetY="GuiRoot:GetHeight() / 4" />
-                    <Dimensions x="400"
-                        y="100" />
-                    <DimensionConstraints minX="200"
-                        minY="100"
-                        maxX="800"
-                        maxY="600" />
-                    <Controls>
-                        <Backdrop name="$(parent)_Backdrop"
-                            inherits="ZO_DefaultBackdrop"
-                            alpha="0.3"
-                            hidden="true" />
-                        <Label name="$(parent)_Label"
-                            font="ZoFontWinH4"
-                            color="FFFFFF"
-                            inheritAlpha="true"
-                            verticalAlignment="CENTER"
-                            horizontalAlignment="CENTER"
-                            text="Incoming"
-                            hidden="true"
-                            wrapMode="ELLIPSIS">
-                            <AnchorFill />
-                        </Label>
-                    </Controls>
-                </Control>
-                <Control name="$(parent)_Alert"
-                    clampedToScreen="true">
-                    <Anchor point="CENTER"
-                        relativeTo="$(parent)"
-                        relativePoint="CENTER"
-                        offsetX="GuiRoot:GetWidth() / 5"
-                        offsetY="0" />
-                    <Dimensions x="400"
-                        y="100" />
-                    <Controls>
-                        <Backdrop name="$(parent)_Backdrop"
-                            inherits="ZO_DefaultBackdrop"
-                            alpha="0.3"
-                            hidden="true" />
-                        <Label name="$(parent)_Label"
-                            font="ZoFontWinH4"
-                            color="FFFFFF"
-                            inheritAlpha="true"
-                            verticalAlignment="CENTER"
-                            horizontalAlignment="CENTER"
-                            text="Notifications"
-                            hidden="true"
-                            wrapMode="ELLIPSIS">
-                            <AnchorFill />
-                        </Label>
-                    </Controls>
-                </Control>
-                <Control name="$(parent)_Point"
-                    clampedToScreen="true">
-                    <Anchor point="CENTER"
-                        relativeTo="$(parent)"
-                        relativePoint="CENTER"
-                        offsetX="GuiRoot:GetWidth() / 3.2"
-                        offsetY="- GuiRoot:GetHeight() / 2.65" />
-                    <Dimensions x="400"
-                        y="100" />
-                    <Controls>
-                        <Backdrop name="$(parent)_Backdrop"
-                            inherits="ZO_DefaultBackdrop"
-                            alpha="0.3"
-                            hidden="true" />
-                        <Label name="$(parent)_Label"
-                            font="ZoFontWinH4"
-                            color="FFFFFF"
-                            inheritAlpha="true"
-                            verticalAlignment="CENTER"
-                            horizontalAlignment="CENTER"
-                            text="Points"
-                            hidden="true"
-                            wrapMode="ELLIPSIS">
-                            <AnchorFill />
-                        </Label>
-                    </Controls>
-                </Control>
-                <Control name="$(parent)_Resource"
-                    clampedToScreen="true">
-                    <Anchor point="CENTER"
-                        relativeTo="$(parent)"
-                        relativePoint="CENTER"
-                        offsetX="GuiRoot:GetWidth() / 5"
-                        offsetY="0" />
-                    <Dimensions x="400"
-                        y="100" />
-                    <Controls>
-                        <Backdrop name="$(parent)_Backdrop"
-                            inherits="ZO_DefaultBackdrop"
-                            alpha="0.3"
-                            hidden="true" />
-                        <Label name="$(parent)_Label"
-                            font="ZoFontWinH4"
-                            color="FFFFFF"
-                            inheritAlpha="true"
-                            verticalAlignment="CENTER"
-                            horizontalAlignment="CENTER"
-                            text="Warnings"
-                            hidden="true"
-                            wrapMode="ELLIPSIS">
-                            <AnchorFill />
-                        </Label>
-                    </Controls>
-                </Control>
-            </Controls>
-        </TopLevelControl>
-        <!-- Virtual / Template -->
-        <Control name="LUIE_CombatText_Virtual"
-            virtual="true">
-            <Controls>
-                <Label name="$(parent)_Amount" />
-                <Texture name="$(parent)_Icon"
-                    hidden="true" />
-                <!--Backdrop
-                for debugging purposes-->
-                <!--Backdrop
-                name="$(parent)_Backdrop" inherits="ZO_DefaultBackdrop" alpha="0.3" hidden="false"
-                /-->
-            </Controls>
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
+  <Controls>
+    <TopLevelControl name="LUIE_CombatText"
+                     mouseEnabled="false"
+                     clampedToScreen="true"
+                     movable="false"
+                     layer="0"
+                     level="0"
+                     tier="0">
+      <Anchor point="TOPLEFT"
+              relativeTo="GuiRoot"
+              relativePoint="TOPLEFT"
+              offsetX="0"
+              offsetY="0" />
+      <Anchor point="BOTTOMRIGHT"
+              relativeTo="GuiRoot"
+              relativePoint="BOTTOMRIGHT"
+              offsetX="0"
+              offsetY="0" />
+      <Controls>
+        <Control name="$(parent)_Outgoing"
+                 clampedToScreen="true">
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)"
+                  relativePoint="CENTER"
+                  offsetX="0"
+                  offsetY="- GuiRoot:GetHeight() / 4" />
+          <Dimensions x="400"
+                      y="200" />
+          <DimensionConstraints minX="200"
+                                minY="100"
+                                maxX="800"
+                                maxY="600" />
+          <Controls>
+            <Backdrop name="$(parent)_Backdrop"
+                      inherits="ZO_DefaultBackdrop"
+                      alpha="0.3"
+                      hidden="true" />
+            <Label name="$(parent)_Label"
+                   font="ZoFontWinH4"
+                   color="FFFFFF"
+                   inheritAlpha="true"
+                   verticalAlignment="CENTER"
+                   horizontalAlignment="CENTER"
+                   text="Outgoing"
+                   hidden="true"
+                   wrapMode="ELLIPSIS">
+              <AnchorFill />
+            </Label>
+          </Controls>
         </Control>
-    </Controls>
+        <Control name="$(parent)_Incoming"
+                 clampedToScreen="true">
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)"
+                  relativePoint="CENTER"
+                  offsetX="0"
+                  offsetY="GuiRoot:GetHeight() / 4" />
+          <Dimensions x="400"
+                      y="100" />
+          <DimensionConstraints minX="200"
+                                minY="100"
+                                maxX="800"
+                                maxY="600" />
+          <Controls>
+            <Backdrop name="$(parent)_Backdrop"
+                      inherits="ZO_DefaultBackdrop"
+                      alpha="0.3"
+                      hidden="true" />
+            <Label name="$(parent)_Label"
+                   font="ZoFontWinH4"
+                   color="FFFFFF"
+                   inheritAlpha="true"
+                   verticalAlignment="CENTER"
+                   horizontalAlignment="CENTER"
+                   text="Incoming"
+                   hidden="true"
+                   wrapMode="ELLIPSIS">
+              <AnchorFill />
+            </Label>
+          </Controls>
+        </Control>
+        <Control name="$(parent)_Alert"
+                 clampedToScreen="true">
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)"
+                  relativePoint="CENTER"
+                  offsetX="GuiRoot:GetWidth() / 5"
+                  offsetY="0" />
+          <Dimensions x="400"
+                      y="100" />
+          <Controls>
+            <Backdrop name="$(parent)_Backdrop"
+                      inherits="ZO_DefaultBackdrop"
+                      alpha="0.3"
+                      hidden="true" />
+            <Label name="$(parent)_Label"
+                   font="ZoFontWinH4"
+                   color="FFFFFF"
+                   inheritAlpha="true"
+                   verticalAlignment="CENTER"
+                   horizontalAlignment="CENTER"
+                   text="Notifications"
+                   hidden="true"
+                   wrapMode="ELLIPSIS">
+              <AnchorFill />
+            </Label>
+          </Controls>
+        </Control>
+        <Control name="$(parent)_Point"
+                 clampedToScreen="true">
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)"
+                  relativePoint="CENTER"
+                  offsetX="GuiRoot:GetWidth() / 3.2"
+                  offsetY="- GuiRoot:GetHeight() / 2.65" />
+          <Dimensions x="400"
+                      y="100" />
+          <Controls>
+            <Backdrop name="$(parent)_Backdrop"
+                      inherits="ZO_DefaultBackdrop"
+                      alpha="0.3"
+                      hidden="true" />
+            <Label name="$(parent)_Label"
+                   font="ZoFontWinH4"
+                   color="FFFFFF"
+                   inheritAlpha="true"
+                   verticalAlignment="CENTER"
+                   horizontalAlignment="CENTER"
+                   text="Points"
+                   hidden="true"
+                   wrapMode="ELLIPSIS">
+              <AnchorFill />
+            </Label>
+          </Controls>
+        </Control>
+        <Control name="$(parent)_Resource"
+                 clampedToScreen="true">
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)"
+                  relativePoint="CENTER"
+                  offsetX="GuiRoot:GetWidth() / 5"
+                  offsetY="0" />
+          <Dimensions x="400"
+                      y="100" />
+          <Controls>
+            <Backdrop name="$(parent)_Backdrop"
+                      inherits="ZO_DefaultBackdrop"
+                      alpha="0.3"
+                      hidden="true" />
+            <Label name="$(parent)_Label"
+                   font="ZoFontWinH4"
+                   color="FFFFFF"
+                   inheritAlpha="true"
+                   verticalAlignment="CENTER"
+                   horizontalAlignment="CENTER"
+                   text="Warnings"
+                   hidden="true"
+                   wrapMode="ELLIPSIS">
+              <AnchorFill />
+            </Label>
+          </Controls>
+        </Control>
+      </Controls>
+    </TopLevelControl>
+    <!-- Virtual / Template -->
+    <Control name="LUIE_CombatText_Virtual"
+             virtual="true">
+      <Controls>
+        <Label name="$(parent)_Amount" />
+        <Texture name="$(parent)_Icon"
+                 hidden="true" />
+        <!--Backdrop
+        for debugging purposes-->
+        <!--Backdrop
+        name="$(parent)_Backdrop" inherits="ZO_DefaultBackdrop" alpha="0.3" hidden="false" /-->
+      </Controls>
+    </Control>
+  </Controls>
 </GuiXml>

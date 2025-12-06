@@ -3,15 +3,17 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
---- @class (partial) LuiExtended
+---@class LuiExtended
 local LUIE = LUIE
+--- @class (partial) LuiExtended.CombatTextPointEventViewer : LuiExtended.CombatTextEventViewer
 LUIE.CombatTextPointEventViewer = LUIE.CombatTextEventViewer:Subclass()
+--- @class (partial) LuiExtended.CombatTextPointEventViewer
 local CombatTextPointEventViewer = LUIE.CombatTextPointEventViewer
 
 local poolTypes = LuiData.Data.CombatTextConstants.poolType
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local pointTypes = LuiData.Data.CombatTextConstants.pointType
---- @diagnostic disable-next-line: duplicate-set-field
+
 function CombatTextPointEventViewer:New(...)
     local obj = LUIE.CombatTextEventViewer:New(...)
     obj:RegisterCallback(eventType.POINT, function (...)
@@ -77,7 +79,7 @@ function CombatTextPointEventViewer:OnEvent(pointType, value)
     animation:Play()
 
     -- Add items back into pool after animation
-    zo_callLater(function ()
+    LUIE_callLater(function ()
                      self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
                      self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
                      self.activePoints = self.activePoints - 1

@@ -3,14 +3,16 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
---- @class (partial) LuiExtended
+---@class LuiExtended
 local LUIE = LUIE
+--- @class (partial) LuiExtended.CombatTextResourcesUltimateEventListener : LuiExtended.CombatTextEventListener
 LUIE.CombatTextResourcesUltimateEventListener = LUIE.CombatTextEventListener:Subclass()
+--- @class (partial) LuiExtended.CombatTextResourcesUltimateEventListener
 local CombatTextResourcesUltimateEventListener = LUIE.CombatTextResourcesUltimateEventListener
 
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local resourceType = LuiData.Data.CombatTextConstants.resourceType
---- @diagnostic disable-next-line: duplicate-set-field
+
 function CombatTextResourcesUltimateEventListener:New()
     local obj = LUIE.CombatTextEventListener:New()
     obj:RegisterForEvent(EVENT_POWER_UPDATE, function (...)
@@ -19,7 +21,7 @@ function CombatTextResourcesUltimateEventListener:New()
     obj:RegisterForEvent(EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, function ()
         self:UpdateMaximum()
     end)
-    obj:RegisterForEvent(EVENT_HOTBAR_SLOT_STATE_UPDATED, function ()
+    obj:RegisterForEvent(EVENT_ACTION_SLOT_STATE_UPDATED, function ()
         self:UpdateMaximum()
     end)
     self.powerInfo = { maximum = 0, wasNotified = false }

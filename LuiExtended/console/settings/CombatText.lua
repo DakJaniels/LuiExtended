@@ -8,16 +8,16 @@ local LUIE = LUIE
 -- Load Console Settings API
 local SettingsAPI = LUIE.ConsoleSettingsAPI
 
---- @class (partial) LUIE.CombatText
+--- @class (partial) LuiExtended.CombatText
 local CombatText = LUIE.CombatText
 local CombatTextConstants = LuiData.Data.CombatTextConstants
 local BlacklistPresets = LuiData.Data.CombatTextBlacklistPresets
 
--- Load LibHarvensAddonSettings
+local callbackManager = CALLBACK_MANAGER
+
 local LHAS = LibHarvensAddonSettings
 
 local type, pairs = type, pairs
-local table_insert = table.insert
 local zo_strformat = zo_strformat
 
 local globalIconOptions = { "All Crowd Control", "NPC CC Only", "Player CC Only" }
@@ -380,7 +380,7 @@ function CombatText.CreateConsoleSettings()
         -- Add Item edit box
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             getFunction = function ()
@@ -482,7 +482,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DAMAGE_TP),
             getFunction = function () return Settings.formats.damage end,
@@ -492,7 +492,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_CRITICAL)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DAMAGE_CRITICAL_TP),
             getFunction = function () return Settings.formats.damagecritical end,
@@ -556,7 +556,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DOT_TP),
             getFunction = function () return Settings.formats.dot end,
@@ -566,7 +566,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_CRITICAL)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DOT_CRITICAL_TP),
             getFunction = function () return Settings.formats.dotcritical end,
@@ -807,7 +807,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_HEALING_TP),
             getFunction = function () return Settings.formats.healing end,
@@ -817,7 +817,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_CRITICAL)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_HEALING_CRITICAL_TP),
             getFunction = function () return Settings.formats.healingcritical end,
@@ -881,7 +881,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_HOT_TP),
             getFunction = function () return Settings.formats.hot end,
@@ -891,7 +891,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_CRITICAL)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_HOT_CRITICAL_TP),
             getFunction = function () return Settings.formats.hotcritical end,
@@ -1027,7 +1027,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_ENERGIZE_TP),
             getFunction = function () return Settings.formats.energize end,
@@ -1083,7 +1083,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_ENERGIZE_ULTIMATE_TP),
             getFunction = function () return Settings.formats.ultimateEnergize end,
@@ -1129,7 +1129,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_COMBAT_DRAIN_TP),
             getFunction = function () return Settings.formats.drain end,
@@ -1235,7 +1235,7 @@ function CombatText.CreateConsoleSettings()
 
             settings[#settings + 1] =
             {
-                type = LHAS.ST_EDITBOX,
+                type = LHAS.ST_EDIT,
                 label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString("LUIE_STRING_LAM_CT_FORMAT_COMBAT_" .. mitType.format:upper() .. "_TP"),
                 getFunction = function () return Settings.formats[mitType.format] end,
@@ -1330,7 +1330,7 @@ function CombatText.CreateConsoleSettings()
 
             settings[#settings + 1] =
             {
-                type = LHAS.ST_EDITBOX,
+                type = LHAS.ST_EDIT,
                 label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString("LUIE_STRING_LAM_CT_FORMAT_COMBAT_" .. ccType.format:upper() .. "_TP"),
                 getFunction = function () return Settings.formats[ccType.format] end,
@@ -1393,7 +1393,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_COMBAT_IN)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_COMBAT_IN_TP),
             getFunction = function () return Settings.formats.inCombat end,
@@ -1403,7 +1403,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_COMBAT_OUT)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_COMBAT_OUT_TP),
             getFunction = function () return Settings.formats.outCombat end,
@@ -1474,7 +1474,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
             tooltip = GetString(LUIE_STRING_LAM_CT_DEATH_FORMAT_TP),
             getFunction = function () return Settings.formats.death end,
@@ -1553,7 +1553,7 @@ function CombatText.CreateConsoleSettings()
 
             settings[#settings + 1] =
             {
-                type = LHAS.ST_EDITBOX,
+                type = LHAS.ST_EDIT,
                 label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString("LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_" .. pointType.format:upper() .. "_TP"),
                 getFunction = function () return Settings.formats[pointType.format] end,
@@ -1614,7 +1614,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_ULTIMATE_READY)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_ULTIMATE_TP),
             getFunction = function () return Settings.formats.ultimateReady end,
@@ -1624,7 +1624,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_EDITBOX,
+            type = LHAS.ST_EDIT,
             label = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT), GetString(LUIE_STRING_LAM_CT_SHARED_POTION_READY)),
             tooltip = GetString(LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_POTION_TP),
             getFunction = function () return Settings.formats.potionReady end,
@@ -1714,7 +1714,7 @@ function CombatText.CreateConsoleSettings()
 
             settings[#settings + 1] =
             {
-                type = LHAS.ST_EDITBOX,
+                type = LHAS.ST_EDIT,
                 label = GetString(LUIE_STRING_LAM_CT_SHARED_FORMAT),
                 tooltip = GetString("LUIE_STRING_LAM_CT_FORMAT_NOTIFICATION_LOW_" .. resType.format:upper() .. "_TP"),
                 getFunction = function () return Settings.formats[resType.format] end,
@@ -1967,8 +1967,8 @@ function CombatText.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST_TP),
             buttonText = GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST),
             clickHandler = function ()
-                LUIE:FireCallbacks(CombatTextConstants.eventType.COMBAT, CombatTextConstants.combatType.INCOMING, COMBAT_MECHANIC_FLAGS_STAMINA, zo_random(7, 777), GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST), 41567, DAMAGE_TYPE_PHYSICAL, "Test", true, false, false, false, false, false, false, false, false, false, false, false, false, false)
-                LUIE:FireCallbacks(CombatTextConstants.eventType.COMBAT, CombatTextConstants.combatType.OUTGOING, COMBAT_MECHANIC_FLAGS_STAMINA, zo_random(7, 777), GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST), 41567, DAMAGE_TYPE_PHYSICAL, "Test", true, false, false, false, false, false, false, false, false, false, false, false, false, false)
+                callbackManager:FireCallbacks(CombatTextConstants.eventType.COMBAT, CombatTextConstants.combatType.INCOMING, COMBAT_MECHANIC_FLAGS_STAMINA, zo_random(7, 777), GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST), 41567, DAMAGE_TYPE_PHYSICAL, "Test", true, false, false, false, false, false, false, false, false, false, false, false, false, false)
+                callbackManager:FireCallbacks(CombatTextConstants.eventType.COMBAT, CombatTextConstants.combatType.OUTGOING, COMBAT_MECHANIC_FLAGS_STAMINA, zo_random(7, 777), GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST), 41567, DAMAGE_TYPE_PHYSICAL, "Test", true, false, false, false, false, false, false, false, false, false, false, false, false, false)
             end
         }
     end)

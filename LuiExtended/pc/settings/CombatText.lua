@@ -9,13 +9,14 @@ local LUIE = LUIE
 -- Load Settings API
 local SettingsAPI = LUIE.SettingsAPI
 
---- @class (partial) LUIE.CombatText
+--- @class (partial) LuiExtended.CombatText
 local CombatText = LUIE.CombatText
 local CombatTextConstants = LuiData.Data.CombatTextConstants
 local BlacklistPresets = LuiData.Data.CombatTextBlacklistPresets
 
+local callbackManager = CALLBACK_MANAGER
+
 local type, pairs = type, pairs
-local table_insert = table.insert
 local zo_strformat = zo_strformat
 
 local globalIconOptions = { "All Crowd Control", "NPC CC Only", "Player CC Only" }
@@ -3241,7 +3242,7 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_FONT_TEST),
                 tooltip = GetString(LUIE_STRING_LAM_CT_FONT_TEST_TP),
                 func = function ()
-                    LUIE:FireCallbacks(CombatTextConstants.eventType.COMBAT, CombatTextConstants.combatType.INCOMING, COMBAT_MECHANIC_FLAGS_STAMINA, zo_random(7, 777), GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST), 41567, DAMAGE_TYPE_PHYSICAL, "Test", true, false, false, false, false, false, false, false, false, false, false, false, false, false)
+                    callbackManager:FireCallbacks(CombatTextConstants.eventType.COMBAT, CombatTextConstants.combatType.INCOMING, COMBAT_MECHANIC_FLAGS_STAMINA, zo_random(7, 777), GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST), 41567, DAMAGE_TYPE_PHYSICAL, "Test", true, false, false, false, false, false, false, false, false, false, false, false, false, false)
                 end,
             },
         },
@@ -3347,8 +3348,8 @@ function CombatText.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST),
                 tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST_TP),
                 func = function ()
-                    LUIE:FireCallbacks(CombatTextConstants.eventType.COMBAT, CombatTextConstants.combatType.INCOMING, COMBAT_MECHANIC_FLAGS_STAMINA, zo_random(7, 777), GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST), 41567, DAMAGE_TYPE_PHYSICAL, "Test", true, false, false, false, false, false, false, false, false, false, false, false, false, false)
-                    LUIE:FireCallbacks(CombatTextConstants.eventType.COMBAT, CombatTextConstants.combatType.OUTGOING, COMBAT_MECHANIC_FLAGS_STAMINA, zo_random(7, 777), GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST), 41567, DAMAGE_TYPE_PHYSICAL, "Test", true, false, false, false, false, false, false, false, false, false, false, false, false, false)
+                    callbackManager:FireCallbacks(CombatTextConstants.eventType.COMBAT, CombatTextConstants.combatType.INCOMING, COMBAT_MECHANIC_FLAGS_STAMINA, zo_random(7, 777), GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST), 41567, DAMAGE_TYPE_PHYSICAL, "Test", true, false, false, false, false, false, false, false, false, false, false, false, false, false)
+                    callbackManager:FireCallbacks(CombatTextConstants.eventType.COMBAT, CombatTextConstants.combatType.OUTGOING, COMBAT_MECHANIC_FLAGS_STAMINA, zo_random(7, 777), GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST), 41567, DAMAGE_TYPE_PHYSICAL, "Test", true, false, false, false, false, false, false, false, false, false, false, false, false, false)
                 end,
             },
         },

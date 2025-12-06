@@ -3,13 +3,15 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
---- @class (partial) LuiExtended
+---@class LuiExtended
 local LUIE = LUIE
+--- @class (partial) LuiExtended.CombatTextDeathListener : LuiExtended.CombatTextEventListener
 LUIE.CombatTextDeathListener = LUIE.CombatTextEventListener:Subclass()
+--- @class (partial) LuiExtended.CombatTextDeathListener
 local CombatTextDeathListener = LUIE.CombatTextDeathListener
 
 local eventType = LuiData.Data.CombatTextConstants.eventType
---- @diagnostic disable-next-line: duplicate-set-field
+
 function CombatTextDeathListener:New()
     local obj = LUIE.CombatTextEventListener:New()
     obj:RegisterForEvent(EVENT_UNIT_DEATH_STATE_CHANGED, function (...)

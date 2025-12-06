@@ -113,7 +113,7 @@ function SlashCommands.SlashRegroup()
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(LUIE_STRING_SLASHCMDS_REGROUP_SAVED_SOME_OFF_MSG), flagOffline, flagOffline, flagOffline))
             end
             GroupDisband()
-            zo_callLater(RegroupInvite, 5000)
+            LUIE_callLater(RegroupInvite, 5000)
         else
             printToChat(GetString(LUIE_STRING_SLASHCMDS_REGROUP_SAVED_ALL_OFF_MSG), true)
             if LUIE.ChatAnnouncements.SV.Group.GroupAlert then
@@ -128,7 +128,7 @@ function SlashCommands.SlashRegroup()
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString(LUIE_STRING_SLASHCMDS_REGROUP_SAVED_MSG))
         end
         GroupDisband()
-        zo_callLater(RegroupInvite, 5000)
+        LUIE_callLater(RegroupInvite, 5000)
     end
 end
 

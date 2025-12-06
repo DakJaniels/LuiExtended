@@ -3,56 +3,56 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
---- @class (partial) LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
 
---- @class (partial) CombatTextEventListener : ZO_CallbackObject
-local CombatTextEventListener = ZO_CallbackObject:Subclass()
+--- @class (partial) LuiExtended.CombatTextEventListener : ZO_InitializingObject
+LUIE.CombatTextEventListener = ZO_InitializingObject:Subclass()
 
-local eventManager = GetEventManager()
+--- @class (partial) LuiExtended.CombatTextEventListener
+local CombatTextEventListener = LUIE.CombatTextEventListener
+
+local callbackManager = CALLBACK_MANAGER
+local eventManager = EVENT_MANAGER
 
 local moduleName = LUIE.name .. "CombatText"
 
 --- @type integer
 local eventPostfix = 1 -- Used to create unique name when registering multiple times to the same game event
 
---- @return CombatTextEventListener
+--- @return LuiExtended.CombatTextEventListener
 function CombatTextEventListener:New()
-    --- @class CombatTextEventListener
     local obj = setmetatable({}, self)
     return obj
 end
 
---- @param event integer
---- @param callback function
---- @param ... any a list of event filters in format filterType1, filterArg1, filterType2, filterArg2, etc.
-function CombatTextEventListener:RegisterForEvent(event, callback, ...)
-    eventManager:RegisterForEvent("LUIE_CombatText_EVENT_" .. tostring(event) .. "_" .. tostring(eventPostfix), event, function (eventCode, ...)
-        callback(...)
-    end)
+--- @param event any
+--- @param func fun(...)
+--- @param ... any
+function CombatTextEventListener:RegisterForEvent(event, func, ...)
+    eventManager:RegisterForEvent(moduleName .. "Event" .. tostring(event) .. "_" .. eventPostfix, event, function (eventCode, ...) func(...) end)
 
-    -- vararg ... is a list of event filters in format filterType1, filterArg1, filterType2, filterArg2, etc.
-    -- example: obj:RegisterForEvent(EVENT_POWER_UPDATE, func, REGISTER_FILTER_UNIT_TAG, 'player', REGISTER_FILTER_POWER_TYPE, POWERTYPE_ULTIMATE)
+    --- @type any[]
+    local filters = { ... }
     local filtersCount = select("#", ...)
-    local filters = filtersCount > 0 and { ... }
-    for i = 1, filtersCount, 2 do
-        eventManager:AddFilterForEvent("LUIE_CombatText_EVENT_" .. tostring(event) .. "_" .. tostring(eventPostfix), event, filters[i], filters[i + 1])
+    if filtersCount > 0 then
+        for i = 1, filtersCount, 2 do
+            eventManager:AddFilterForEvent(moduleName .. "Event" .. tostring(event) .. "_" .. eventPostfix, event, filters[i], filters[i + 1])
+        end
     end
 
     eventPostfix = eventPostfix + 1
 end
 
---- @param name string
---- @param minInterval integer
---- @param callback function
-function CombatTextEventListener:RegisterForUpdate(name, minInterval, callback)
-    eventManager:RegisterForUpdate("LUIE_CombatText_EVENT_" .. name .. "_" .. tostring(eventPostfix), minInterval, callback)
+--- @param name any
+--- @param timer any
+--- @param func fun(...)
+--- @param ... any
+function CombatTextEventListener:RegisterForUpdate(name, timer, func, ...)
+    eventManager:RegisterForUpdate(moduleName .. "Event" .. tostring(name) .. "_" .. eventPostfix, timer, func)
 end
 
 --- @param ... any
 function CombatTextEventListener:TriggerEvent(...)
-    LUIE:FireCallbacks(...)
+    callbackManager:FireCallbacks(...)
 end
-
---- @class (partial) CombatTextEventListener
-LUIE.CombatTextEventListener = CombatTextEventListener
