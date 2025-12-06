@@ -313,7 +313,9 @@ function UnitFrames.Initialize(enabled)
 
     -- Next events make sense only for CustomFrames
     if UnitFrames.CustomFrames["player"] or UnitFrames.CustomFrames["reticleover"] or UnitFrames.CustomFrames["companion"] or UnitFrames.CustomFrames["SmallGroup1"] or UnitFrames.CustomFrames["RaidGroup1"] or UnitFrames.CustomFrames["boss1"] or UnitFrames.CustomFrames["PetGroup1"] then
-        LUIE_UnregisterDefaultUnitFrames()
+        if LUIE.IsDevDebugEnabled() then
+            LUIE_UnregisterDefaultUnitFrames()
+        end
         eventManager:RegisterForEvent(moduleName, EVENT_COMBAT_EVENT, UnitFrames.OnCombatEvent)
         eventManager:AddFilterForEvent(moduleName, EVENT_COMBAT_EVENT, REGISTER_FILTER_IS_ERROR, true)
 

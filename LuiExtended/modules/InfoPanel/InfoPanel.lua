@@ -12,8 +12,6 @@ InfoPanel.__index = InfoPanel
 --- @class (partial) LUIE.InfoPanel
 LUIE.InfoPanel = InfoPanel
 
-local UI = LUIE.UI
-
 local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
 
@@ -310,11 +308,9 @@ function InfoPanel.Initialize(enabled)
     end
     InfoPanel.Enabled = true
 
-    uiPanel = UI:TopLevel(nil, { 240, 48 })
-    InfoPanel.Panel = uiPanel -- Update Panel reference after creation
-    uiPanel:SetDrawLayer(DL_BACKGROUND)
-    uiPanel:SetDrawTier(DT_LOW)
-    uiPanel:SetDrawLevel(DL_CONTROLS)
+    -- Reference XML-created controls
+    uiPanel = LUIE_InfoPanel
+    InfoPanel.Panel = uiPanel
 
     panelFragment = ZO_HUDFadeSceneFragment:New(uiPanel, 0, 0)
 
@@ -325,14 +321,10 @@ function InfoPanel.Initialize(enabled)
 
     InfoPanel.SetDisplayOnMap() -- Add to map scene if the option is enabled.
 
-    uiPanel.div = UI:Texture(uiPanel, nil, nil, "/esoui/art/miscellaneous/horizontaldivider.dds", DL_BACKGROUND, false)
-    uiPanel.div:SetAnchor(LEFT, uiPanel, LEFT, -60, 0)
-    uiPanel.div:SetAnchor(RIGHT, uiPanel, RIGHT, 60, 0)
-    uiPanel.div:SetHeight(4)
+    uiPanel.div = LUIE_InfoPanel_Divider
 
-    uiTopRow = UI:Control(uiPanel, { TOP, TOP, 0, 2 }, { 300, 20 }, false)
-
-    uiBotRow = UI:Control(uiPanel, { BOTTOM, BOTTOM, 0, -2 }, { 300, 20 }, false)
+    uiTopRow = LUIE_InfoPanel_TopRow
+    uiBotRow = LUIE_InfoPanel_BotRow
 
     -- Create font string from settings
     local fontName = LUIE.Fonts[InfoPanel.SV.FontFace]
@@ -343,61 +335,58 @@ function InfoPanel.Initialize(enabled)
     local fontSize = (InfoPanel.SV.FontSize and InfoPanel.SV.FontSize > 0) and InfoPanel.SV.FontSize or 16
     g_infoPanelFont = ZO_CreateFontString(fontName, fontSize, fontStyle)
 
-    uiLatency.control = UI:Control(uiTopRow, nil, { 75, 20 }, false)
-    uiLatency.icon = UI:Texture(uiLatency.control, { LEFT, LEFT }, { 24, 24 }, "/esoui/art/campaign/campaignbrowser_hipop.dds", nil, false)
-    uiLatency.label = UI:Label(uiLatency.control, { LEFT, RIGHT, 0, 0, uiLatency.icon }, { 56, 20 }, { 0, 1 }, g_infoPanelFont, "11999 ms", false)
+    -- Top Row Controls
+    uiLatency.control = LUIE_InfoPanel_TopRow_Latency
+    uiLatency.icon = LUIE_InfoPanel_TopRow_Latency_Icon
+    uiLatency.label = LUIE_InfoPanel_TopRow_Latency_Label
 
-    uiFps.label = UI:Label(uiTopRow, nil, { 50, 20 }, { 1, 1 }, g_infoPanelFont, "999 fps", false)
+    uiFps.label = LUIE_InfoPanel_TopRow_Fps
     uiFps.control = uiFps.label
 
-    uiClock.label = UI:Label(uiTopRow, nil, { 60, 20 }, { 1, 1 }, g_infoPanelFont, "88:88:88", false)
+    uiClock.label = LUIE_InfoPanel_TopRow_Clock
     uiClock.control = uiClock.label
 
-    uiGems.control = UI:Control(uiTopRow, nil, { 48, 20 }, false)
-    uiGems.icon = UI:Texture(uiGems.control, { LEFT, LEFT }, { 16, 16 }, nil, nil, false)
-    uiGems.label = UI:Label(uiGems.control, { LEFT, RIGHT, 2, 0, uiGems.icon }, { 32, 20 }, { 0, 1 }, g_infoPanelFont, "8/88", false)
+    uiGems.control = LUIE_InfoPanel_TopRow_Gems
+    uiGems.icon = LUIE_InfoPanel_TopRow_Gems_Icon
+    uiGems.label = LUIE_InfoPanel_TopRow_Gems_Label
 
-    -- Gold display
-    uiGold.control = UI:Control(uiBotRow, nil, { 85, 20 }, false)
-    uiGold.icon = UI:Texture(uiGold.control, { LEFT, LEFT }, { 12, 12 }, ZO_Currency_GetKeyboardCurrencyIcon(CURT_MONEY), nil, false)
-    uiGold.label = UI:Label(uiGold.control, { LEFT, RIGHT, 2, 0, uiGold.icon }, { 65, 20 }, { 0, 1 }, g_infoPanelFont, ZO_CommaDelimitNumber(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)), false)
-    uiGold.label:SetColor(colors.GOLD.r, colors.GOLD.g, colors.GOLD.b, 1)
+    -- Bottom Row Controls
+    uiFeedTimer.control = LUIE_InfoPanel_BotRow_FeedTimer
+    uiFeedTimer.icon = LUIE_InfoPanel_BotRow_FeedTimer_Icon
+    uiFeedTimer.label = LUIE_InfoPanel_BotRow_FeedTimer_Label
 
-    uiFeedTimer.control = UI:Control(uiBotRow, nil, { 96, 20 }, false)
-    uiFeedTimer.icon = UI:Texture(uiFeedTimer.control, { LEFT, LEFT }, { 28, 28 }, "/esoui/art/mounts/tabicon_mounts_up.dds", nil, false)
-    uiFeedTimer.label = UI:Label(uiFeedTimer.control, { LEFT, RIGHT, 0, 0, uiFeedTimer.icon }, { 68, 20 }, { 0, 1 }, g_infoPanelFont, GetString(LUIE_STRING_PNL_TRAINNOW), false)
+    uiArmour.control = LUIE_InfoPanel_BotRow_Armour
+    uiArmour.icon = LUIE_InfoPanel_BotRow_Armour_Icon
+    uiArmour.label = LUIE_InfoPanel_BotRow_Armour_Label
 
-    uiArmour.control = UI:Control(uiBotRow, nil, { 55, 20 }, false)
-    uiArmour.icon = UI:Texture(uiArmour.control, { LEFT, LEFT }, { 24, 24 }, "/esoui/art/progression/progression_indexicon_armor_up.dds", nil, false)
-    uiArmour.label = UI:Label(uiArmour.control, { LEFT, RIGHT, 0, 0, uiArmour.icon }, { 41, 20 }, { 0, 1 }, g_infoPanelFont, "100%", false)
-
-    uiWeapons.control = UI:Control(uiBotRow, nil, { 46, 20 }, false)
-    uiWeapons.main = UI:Texture(uiWeapons.control, { LEFT, LEFT }, { 30, 30 }, "/esoui/art/progression/icon_1handplusrune.dds", nil, false)
-    uiWeapons.swap = UI:Texture(uiWeapons.control, { RIGHT, RIGHT, 5 }, { 30, 30 }, "/esoui/art/progression/icon_1handplusrune.dds", nil, false)
+    uiWeapons.control = LUIE_InfoPanel_BotRow_Weapons
+    uiWeapons.main = LUIE_InfoPanel_BotRow_Weapons_Main
+    uiWeapons.swap = LUIE_InfoPanel_BotRow_Weapons_Swap
     uiWeapons.main.slotIndex = EQUIP_SLOT_MAIN_HAND
     uiWeapons.swap.slotIndex = EQUIP_SLOT_BACKUP_MAIN
 
-    uiBags.control = UI:Control(uiBotRow, nil, { 78, 20 }, false)
-    uiBags.icon = UI:Texture(uiBags.control, { LEFT, LEFT }, { 28, 28 }, "/esoui/art/inventory/inventory_tabicon_misc_up.dds", nil, false)
-    uiBags.label = UI:Label(uiBags.control, { LEFT, RIGHT, 0, 0, uiBags.icon }, { 50, 20 }, { 0, 1 }, g_infoPanelFont, "888/888", false)
+    uiBags.control = LUIE_InfoPanel_BotRow_Bags
+    uiBags.icon = LUIE_InfoPanel_BotRow_Bags_Icon
+    uiBags.label = LUIE_InfoPanel_BotRow_Bags_Label
+
+    -- Gold display
+    uiGold.control = LUIE_InfoPanel_BotRow_Gold
+    uiGold.icon = LUIE_InfoPanel_BotRow_Gold_Icon
+    uiGold.icon:SetTexture(ZO_Currency_GetKeyboardCurrencyIcon(CURT_MONEY))
+    uiGold.label = LUIE_InfoPanel_BotRow_Gold_Label
+    uiGold.label:SetText(ZO_CommaDelimitNumber(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)))
+    uiGold.label:SetColor(colors.GOLD.r, colors.GOLD.g, colors.GOLD.b, 1)
 
     InfoPanel.RearrangePanel()
 
     -- add control to global list so it can be hidden
     LUIE.Components[moduleName] = uiPanel
 
-    -- Panel position
+    -- Panel position - only set if user has saved a custom position
     if InfoPanel.SV.position ~= nil and #InfoPanel.SV.position == 2 then
+        uiPanel:ClearAnchors()
         uiPanel:SetAnchor(CENTER, GuiRoot, TOPLEFT, InfoPanel.SV.position[1], InfoPanel.SV.position[2])
-    else
-        uiPanel:SetAnchor(TOPRIGHT, GuiRoot, TOPRIGHT, -24, 20)
     end
-
-    -- Dragging
-    local OnMoveStop = function (self)
-        InfoPanel.SV.position = { self:GetCenter() }
-    end
-    uiPanel:SetHandler("OnMoveStop", OnMoveStop)
 
     -- Set init values
     InfoPanel.OnUpdate01()
@@ -424,8 +413,17 @@ function InfoPanel.ResetPosition()
     if not InfoPanel.Enabled then
         return
     end
+    -- Clear anchors and let XML default anchor take over
     uiPanel:ClearAnchors()
     uiPanel:SetAnchor(TOPRIGHT, GuiRoot, TOPRIGHT, -24, 20)
+end
+
+-- Handler for OnMoveStop event (called from XML)
+--- @param control Control
+function InfoPanel.OnPanelMoveStop(control)
+    if InfoPanel.SV then
+        InfoPanel.SV.position = { control:GetCenter() }
+    end
 end
 
 -- Unlock panel for moving. Called from Settings Menu.
