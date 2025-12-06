@@ -1,4 +1,4 @@
-﻿--- @diagnostic disable: inject-field
+--- @diagnostic disable: inject-field
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --

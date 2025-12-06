@@ -1,4 +1,4 @@
-﻿--- @diagnostic disable: undefined-field, missing-fields
+--- @diagnostic disable: undefined-field, missing-fields
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
