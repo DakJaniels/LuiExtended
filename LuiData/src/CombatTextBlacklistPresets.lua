@@ -7,6 +7,7 @@
 local LuiData = LuiData
 local Data = LuiData.Data
 
+--- @class (partial) CombatTextBlacklistPresets
 local blacklistPresets = {}
 
 -- Sets

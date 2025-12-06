@@ -43,12 +43,12 @@ keyboard/hooks.lua
 keyboard/maphooks.lua
 keyboard/skills.lua
 
-#src/Changelog.lua
+src/Changelog.lua
 
 
 # Frontend
 frontend/AbilityAlerts.xml
-#frontend/Changelog.xml
+frontend/Changelog.xml
 frontend/CombatText.xml
 frontend/CrowdControlTracker.xml
 frontend/InfoPanel.xml
