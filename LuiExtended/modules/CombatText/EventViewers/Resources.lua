@@ -3,22 +3,22 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
----@class LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
+
 --- @class (partial) LuiExtended.CombatTextResourceEventViewer : LuiExtended.CombatTextEventViewer
-LUIE.CombatTextResourceEventViewer = LUIE.CombatTextEventViewer:Subclass()
+local CombatTextResourceEventViewer = LUIE.CombatTextEventViewer:Subclass()
 --- @class (partial) LuiExtended.CombatTextResourceEventViewer
-local CombatTextResourceEventViewer = LUIE.CombatTextResourceEventViewer
+LUIE.CombatTextResourceEventViewer = CombatTextResourceEventViewer
 local poolTypes = LuiData.Data.CombatTextConstants.poolType
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local resourceTypes = LuiData.Data.CombatTextConstants.resourceType
 
-function CombatTextResourceEventViewer:New(...)
-    local obj = LUIE.CombatTextEventViewer:New(...)
-    obj:RegisterCallback(eventType.RESOURCE, function (...) self:OnEvent(...) end)
+function CombatTextResourceEventViewer:Initialize(poolManager)
+    LUIE.CombatTextEventViewer.Initialize(self, poolManager)
+    self:RegisterCallback(eventType.RESOURCE, function (...) self:OnEvent(...) end)
     self.locationOffset = 0 -- Simple way to avoid overlapping. When the number of active notes is back to 0, the offset is also reset
     self.activeResources = 0
-    return obj
 end
 
 function CombatTextResourceEventViewer:OnEvent(resourceType, value)
@@ -69,11 +69,11 @@ function CombatTextResourceEventViewer:OnEvent(resourceType, value)
     end
 
     LUIE_callLater(function ()
-                     self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
-                     self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
-                     self.activeResources = self.activeResources - 1
-                     if self.activeResources == 0 then
-                         self.locationOffset = 0
-                     end
-                 end, animation:GetDuration())
+                       self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
+                       self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
+                       self.activeResources = self.activeResources - 1
+                       if self.activeResources == 0 then
+                           self.locationOffset = 0
+                       end
+                   end, animation:GetDuration())
 end

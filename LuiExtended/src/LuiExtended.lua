@@ -52,23 +52,6 @@ else
 end
 LUIE.SVName = "LUIESV"
 -- -----------------------------------------------------------------------------
-do
-    --- @type ZO_CallbackObject
-    local callbackObject = ZO_CallbackObject:New()
-
-    function LUIE:FireCallbacks(...)
-        return callbackObject:FireCallbacks(...)
-    end
-
-    function LUIE:RegisterCallback(...)
-        return callbackObject:RegisterCallback(...)
-    end
-
-    function LUIE:UnregisterCallback(...)
-        return callbackObject:UnregisterCallback(...)
-    end
-end
--- -----------------------------------------------------------------------------
 -- Components
 LUIE.Components = {}
 -- -----------------------------------------------------------------------------
@@ -80,11 +63,6 @@ LUIE.OtherAddonCompatability =
     isFancyActionBarPlusEnabled = false,
     isWritCreatorEnabled = false
 }
--- -----------------------------------------------------------------------------
-local LuiData = LuiData
-if not LuiData then
-    error("LuiData is not enabled", 2)
-end
 -- -----------------------------------------------------------------------------
 -- Default Settings
 --- @class LUIE_Defaults_SV

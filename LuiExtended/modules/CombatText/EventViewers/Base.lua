@@ -7,13 +7,12 @@
 local LUIE = LUIE
 
 --- @class (partial) LuiExtended.CombatTextEventViewer : ZO_InitializingObject
-LUIE.CombatTextEventViewer = ZO_InitializingObject:Subclass()
+local CombatTextEventViewer = ZO_InitializingObject:Subclass()
 
 --- @class (partial) LuiExtended.CombatTextEventViewer
-local CombatTextEventViewer = LUIE.CombatTextEventViewer
+LUIE.CombatTextEventViewer = CombatTextEventViewer
 
 local CombatText = LUIE.CombatText
-local string_format = string.format
 local Effects = LuiData.Data.Effects
 local CombatTextConstants = LuiData.Data.CombatTextConstants
 
@@ -34,10 +33,8 @@ CombatTextEventViewer.damageTypes = setmetatable({},
                                                      end,
                                                  })
 
-function CombatTextEventViewer:New(poolManager)
-    local obj = setmetatable({}, self)
+function CombatTextEventViewer:Initialize(poolManager)
     self.poolManager = poolManager
-    return obj
 end
 
 function CombatTextEventViewer:ShouldUseDefaultIcon(abilityId)

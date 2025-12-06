@@ -8,16 +8,15 @@ local LUIE = LUIE
 
 local pairs = pairs
 
+
 ---@class (partial) LuiExtended.CombatTextPoolManager : ZO_InitializingObject
-LUIE.CombatTextPoolManager = ZO_InitializingObject:Subclass()
+local CombatTextPoolManager = ZO_InitializingObject:Subclass()
 
 ---@class (partial) LuiExtended.CombatTextPoolManager
-local CombatTextPoolManager = LUIE.CombatTextPoolManager
+LUIE.CombatTextPoolManager = CombatTextPoolManager
 
-function CombatTextPoolManager:New()
-    local obj = setmetatable({}, self)
+function CombatTextPoolManager:Initialize()
     self.pools = {}
-    return obj
 end
 
 function CombatTextPoolManager:RegisterPool(poolType, pool)

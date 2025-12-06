@@ -3,12 +3,14 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
----@class LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
+
 --- @class (partial) LuiExtended.CombatTextCombatEventListener : LuiExtended.CombatTextEventListener
-LUIE.CombatTextCombatEventListener = LUIE.CombatTextEventListener:Subclass()
+local CombatTextCombatEventListener = LUIE.CombatTextEventListener:Subclass()
+
 --- @class (partial) LuiExtended.CombatTextCombatEventListener
-local CombatTextCombatEventListener = LUIE.CombatTextCombatEventListener
+LUIE.CombatTextCombatEventListener = CombatTextCombatEventListener
 
 local Effects = LuiData.Data.Effects
 local CombatTextConstants = LuiData.Data.CombatTextConstants
@@ -24,25 +26,23 @@ local isWarned =
     charmed = false,
 }
 
-function CombatTextCombatEventListener:New()
-    local obj = LUIE.CombatTextEventListener:New()
-    obj:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function ()
+function CombatTextCombatEventListener:Initialize()
+    LUIE.CombatTextEventListener.Initialize(self)
+    self:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function ()
         self:OnPlayerActivated()
     end)
-    obj:RegisterForEvent(EVENT_COMBAT_EVENT, function (...)
-                             self:OnCombatIn(...)
-                         end, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER) -- Target -> Player
-    obj:RegisterForEvent(EVENT_COMBAT_EVENT, function (...)
-                             self:OnCombatOut(...)
-                         end, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER) -- Player -> Target
-    obj:RegisterForEvent(EVENT_COMBAT_EVENT, function (...)
-                             self:OnCombatOut(...)
-                         end, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER_PET) -- Player Pet -> Target
-    obj:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, function ()
+    self:RegisterForEvent(EVENT_COMBAT_EVENT, function (...)
+                              self:OnCombatIn(...)
+                          end, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER) -- Target -> Player
+    self:RegisterForEvent(EVENT_COMBAT_EVENT, function (...)
+                              self:OnCombatOut(...)
+                          end, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER) -- Player -> Target
+    self:RegisterForEvent(EVENT_COMBAT_EVENT, function (...)
+                              self:OnCombatOut(...)
+                          end, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER_PET) -- Player Pet -> Target
+    self:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, function ()
         self:CombatState()
     end)
-
-    return obj
 end
 
 function CombatTextCombatEventListener:OnPlayerActivated()
@@ -160,8 +160,8 @@ function CombatTextCombatEventListener:OnCombatIn(...)
                 self:TriggerEvent(CombatTextConstants.eventType.CROWDCONTROL, CombatTextConstants.crowdControlType.DISORIENTED, combatType)
                 isWarned.disoriented = true
                 LUIE_callLater(function ()
-                                 isWarned.disoriented = false
-                             end, 1000)
+                                   isWarned.disoriented = false
+                               end, 1000)
             end -- 1 second buffer
         end
         -- Feared
@@ -172,8 +172,8 @@ function CombatTextCombatEventListener:OnCombatIn(...)
                 self:TriggerEvent(CombatTextConstants.eventType.CROWDCONTROL, CombatTextConstants.crowdControlType.FEARED, combatType)
                 isWarned.feared = true
                 LUIE_callLater(function ()
-                                 isWarned.feared = false
-                             end, 1000)
+                                   isWarned.feared = false
+                               end, 1000)
             end -- 1 second buffer
         end
         -- OffBalanced
@@ -184,8 +184,8 @@ function CombatTextCombatEventListener:OnCombatIn(...)
                 self:TriggerEvent(CombatTextConstants.eventType.CROWDCONTROL, CombatTextConstants.crowdControlType.OFFBALANCED, combatType)
                 isWarned.offBalanced = true
                 LUIE_callLater(function ()
-                                 isWarned.offBalanced = false
-                             end, 1000)
+                                   isWarned.offBalanced = false
+                               end, 1000)
             end -- 1 second buffer
         end
         -- Silenced
@@ -196,8 +196,8 @@ function CombatTextCombatEventListener:OnCombatIn(...)
                 self:TriggerEvent(CombatTextConstants.eventType.CROWDCONTROL, CombatTextConstants.crowdControlType.SILENCED, combatType)
                 isWarned.silenced = true
                 LUIE_callLater(function ()
-                                 isWarned.silenced = false
-                             end, 1000)
+                                   isWarned.silenced = false
+                               end, 1000)
             end -- 1 second buffer
         end
         -- Stunned
@@ -208,8 +208,8 @@ function CombatTextCombatEventListener:OnCombatIn(...)
                 self:TriggerEvent(CombatTextConstants.eventType.CROWDCONTROL, CombatTextConstants.crowdControlType.STUNNED, combatType)
                 isWarned.stunned = true
                 LUIE_callLater(function ()
-                                 isWarned.stunned = false
-                             end, 1000)
+                                   isWarned.stunned = false
+                               end, 1000)
             end -- 1 second buffer
         end
         -- Charmed
@@ -220,8 +220,8 @@ function CombatTextCombatEventListener:OnCombatIn(...)
                 self:TriggerEvent(CombatTextConstants.eventType.CROWDCONTROL, CombatTextConstants.crowdControlType.CHARMED, combatType)
                 isWarned.charmed = true
                 LUIE_callLater(function ()
-                                 isWarned.charmed = false
-                             end, 1000)
+                                   isWarned.charmed = false
+                               end, 1000)
             end -- 1 second buffer
         end
     end
@@ -305,8 +305,8 @@ function CombatTextCombatEventListener:OnCombatOut(...)
                 self:TriggerEvent(CombatTextConstants.eventType.CROWDCONTROL, CombatTextConstants.crowdControlType.DISORIENTED, combatType)
                 isWarned.disoriented = true
                 LUIE_callLater(function ()
-                                 isWarned.disoriented = false
-                             end, 1000)
+                                   isWarned.disoriented = false
+                               end, 1000)
             end -- 1 second buffer
         end
         -- Feared
@@ -317,8 +317,8 @@ function CombatTextCombatEventListener:OnCombatOut(...)
                 self:TriggerEvent(CombatTextConstants.eventType.CROWDCONTROL, CombatTextConstants.crowdControlType.FEARED, combatType)
                 isWarned.feared = true
                 LUIE_callLater(function ()
-                                 isWarned.feared = false
-                             end, 1000)
+                                   isWarned.feared = false
+                               end, 1000)
             end -- 1 second buffer
         end
         -- OffBalanced
@@ -329,8 +329,8 @@ function CombatTextCombatEventListener:OnCombatOut(...)
                 self:TriggerEvent(CombatTextConstants.eventType.CROWDCONTROL, CombatTextConstants.crowdControlType.OFFBALANCED, combatType)
                 isWarned.offBalanced = true
                 LUIE_callLater(function ()
-                                 isWarned.offBalanced = false
-                             end, 1000)
+                                   isWarned.offBalanced = false
+                               end, 1000)
             end -- 1 second buffer
         end
         -- Silenced
@@ -341,8 +341,8 @@ function CombatTextCombatEventListener:OnCombatOut(...)
                 self:TriggerEvent(CombatTextConstants.eventType.CROWDCONTROL, CombatTextConstants.crowdControlType.SILENCED, combatType)
                 isWarned.silenced = true
                 LUIE_callLater(function ()
-                                 isWarned.silenced = false
-                             end, 1000)
+                                   isWarned.silenced = false
+                               end, 1000)
             end -- 1 second buffer
         end
         -- Stunned
@@ -353,8 +353,8 @@ function CombatTextCombatEventListener:OnCombatOut(...)
                 self:TriggerEvent(CombatTextConstants.eventType.CROWDCONTROL, CombatTextConstants.crowdControlType.STUNNED, combatType)
                 isWarned.stunned = true
                 LUIE_callLater(function ()
-                                 isWarned.stunned = false
-                             end, 1000)
+                                   isWarned.stunned = false
+                               end, 1000)
             end -- 1 second buffer
         end
         -- Charmed
@@ -365,8 +365,8 @@ function CombatTextCombatEventListener:OnCombatOut(...)
                 self:TriggerEvent(CombatTextConstants.eventType.CROWDCONTROL, CombatTextConstants.crowdControlType.CHARMED, combatType)
                 isWarned.charmed = true
                 LUIE_callLater(function ()
-                                 isWarned.charmed = false
-                             end, 1000)
+                                   isWarned.charmed = false
+                               end, 1000)
             end -- 1 second buffer
         end
     end

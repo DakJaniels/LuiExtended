@@ -28,26 +28,29 @@
           <Anchor point="CENTER"
                   relativeTo="$(parent)"
                   relativePoint="CENTER"
-                  offsetX="0"
-                  offsetY="- GuiRoot:GetHeight() / 4" />
+                  offsetX="450"
+                  offsetY="-220" />
           <Dimensions x="400"
-                      y="200" />
+                      y="100" />
           <DimensionConstraints minX="200"
                                 minY="100"
                                 maxX="800"
                                 maxY="600" />
+          <OnMouseUp>
+            LUIE.CombatText.SavePosition(self)
+          </OnMouseUp>
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
                       inherits="ZO_DefaultBackdrop"
                       alpha="0.3"
                       hidden="true" />
             <Label name="$(parent)_Label"
-                   font="ZoFontWinH4"
+                   font="$(MEDIUM_FONT)|26|soft-shadow-thick"
                    color="FFFFFF"
                    inheritAlpha="true"
                    verticalAlignment="CENTER"
                    horizontalAlignment="CENTER"
-                   text="Outgoing"
+                   text=""
                    hidden="true"
                    wrapMode="ELLIPSIS">
               <AnchorFill />
@@ -59,26 +62,29 @@
           <Anchor point="CENTER"
                   relativeTo="$(parent)"
                   relativePoint="CENTER"
-                  offsetX="0"
-                  offsetY="GuiRoot:GetHeight() / 4" />
+                  offsetX="-450"
+                  offsetY="-220" />
           <Dimensions x="400"
                       y="100" />
           <DimensionConstraints minX="200"
                                 minY="100"
                                 maxX="800"
                                 maxY="600" />
+          <OnMouseUp>
+            LUIE.CombatText.SavePosition(self)
+          </OnMouseUp>
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
                       inherits="ZO_DefaultBackdrop"
                       alpha="0.3"
                       hidden="true" />
             <Label name="$(parent)_Label"
-                   font="ZoFontWinH4"
+                   font="$(MEDIUM_FONT)|26|soft-shadow-thick"
                    color="FFFFFF"
                    inheritAlpha="true"
                    verticalAlignment="CENTER"
                    horizontalAlignment="CENTER"
-                   text="Incoming"
+                   text=""
                    hidden="true"
                    wrapMode="ELLIPSIS">
               <AnchorFill />
@@ -90,22 +96,25 @@
           <Anchor point="CENTER"
                   relativeTo="$(parent)"
                   relativePoint="CENTER"
-                  offsetX="GuiRoot:GetWidth() / 5"
-                  offsetY="0" />
+                  offsetX="0"
+                  offsetY="250" />
           <Dimensions x="400"
                       y="100" />
+          <OnMouseUp>
+            LUIE.CombatText.SavePosition(self)
+          </OnMouseUp>
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
                       inherits="ZO_DefaultBackdrop"
                       alpha="0.3"
                       hidden="true" />
             <Label name="$(parent)_Label"
-                   font="ZoFontWinH4"
+                   font="$(MEDIUM_FONT)|26|soft-shadow-thick"
                    color="FFFFFF"
                    inheritAlpha="true"
                    verticalAlignment="CENTER"
                    horizontalAlignment="CENTER"
-                   text="Notifications"
+                   text=""
                    hidden="true"
                    wrapMode="ELLIPSIS">
               <AnchorFill />
@@ -117,22 +126,25 @@
           <Anchor point="CENTER"
                   relativeTo="$(parent)"
                   relativePoint="CENTER"
-                  offsetX="GuiRoot:GetWidth() / 3.2"
-                  offsetY="- GuiRoot:GetHeight() / 2.65" />
+                  offsetX="0"
+                  offsetY="-300" />
           <Dimensions x="400"
                       y="100" />
+          <OnMouseUp>
+            LUIE.CombatText.SavePosition(self)
+          </OnMouseUp>
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
                       inherits="ZO_DefaultBackdrop"
                       alpha="0.3"
                       hidden="true" />
             <Label name="$(parent)_Label"
-                   font="ZoFontWinH4"
+                   font="$(MEDIUM_FONT)|26|soft-shadow-thick"
                    color="FFFFFF"
                    inheritAlpha="true"
                    verticalAlignment="CENTER"
                    horizontalAlignment="CENTER"
-                   text="Points"
+                   text=""
                    hidden="true"
                    wrapMode="ELLIPSIS">
               <AnchorFill />
@@ -144,22 +156,25 @@
           <Anchor point="CENTER"
                   relativeTo="$(parent)"
                   relativePoint="CENTER"
-                  offsetX="GuiRoot:GetWidth() / 5"
-                  offsetY="0" />
+                  offsetX="0"
+                  offsetY="375" />
           <Dimensions x="400"
                       y="100" />
+          <OnMouseUp>
+            LUIE.CombatText.SavePosition(self)
+          </OnMouseUp>
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
                       inherits="ZO_DefaultBackdrop"
                       alpha="0.3"
                       hidden="true" />
             <Label name="$(parent)_Label"
-                   font="ZoFontWinH4"
+                   font="$(MEDIUM_FONT)|26|soft-shadow-thick"
                    color="FFFFFF"
                    inheritAlpha="true"
                    verticalAlignment="CENTER"
                    horizontalAlignment="CENTER"
-                   text="Warnings"
+                   text=""
                    hidden="true"
                    wrapMode="ELLIPSIS">
               <AnchorFill />

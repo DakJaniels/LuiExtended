@@ -108,7 +108,8 @@ function CombatText.CreateConsoleSettings()
                                 {
                                     allowDefaults = true,
                                     defaultsFunction = function ()
-                                        -- Reset to defaults if needed
+                                        -- Reset all panel positions to defaults
+                                        CombatText.ResetPanelPositions()
                                     end,
                                     allowRefresh = true
                                 })

@@ -3,22 +3,21 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
----@class LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
+
 --- @class (partial) LuiExtended.CombatTextPointsAllianceEventListener : LuiExtended.CombatTextEventListener
-LUIE.CombatTextPointsAllianceEventListener = LUIE.CombatTextEventListener:Subclass()
+local CombatTextPointsAllianceEventListener = LUIE.CombatTextEventListener:Subclass()
+
 --- @class (partial) LuiExtended.CombatTextPointsAllianceEventListener
-local CombatTextPointsAllianceEventListener = LUIE.CombatTextPointsAllianceEventListener
+LUIE.CombatTextPointsAllianceEventListener = CombatTextPointsAllianceEventListener
 
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local pointType = LuiData.Data.CombatTextConstants.pointType
 
-function CombatTextPointsAllianceEventListener:New()
-    local obj = LUIE.CombatTextEventListener:New()
-    obj:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, function (...)
-        self:OnEvent(...)
-    end)
-    return obj
+function CombatTextPointsAllianceEventListener:Initialize()
+    LUIE.CombatTextEventListener.Initialize(self)
+    self:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, function (...) self:OnEvent(...) end)
 end
 
 function CombatTextPointsAllianceEventListener:OnEvent(alliancePoints, playSound, difference)

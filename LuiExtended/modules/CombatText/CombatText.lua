@@ -28,7 +28,7 @@ local panelTitles =
 
 ---
 --- @param panel Control
-local function SavePosition(panel)
+function CombatText.SavePosition(panel)
     local anchor = { panel:GetAnchor(0) }
     local dimensions = { panel:GetDimensions() }
     local panelSettings = LUIE.CombatText.SV.panels[panel:GetName()]
@@ -37,6 +37,53 @@ local function SavePosition(panel)
     panelSettings.offsetX = anchor[5]
     panelSettings.offsetY = anchor[6]
     panelSettings.dimensions = dimensions
+end
+
+--- Reset all panel positions to defaults
+function CombatText.ResetPanelPositions()
+    if not CombatText.Enabled then
+        return
+    end
+
+    local Defaults = CombatText.Defaults
+    local Settings = CombatText.SV
+
+    -- Reset unlocked state
+    Settings.unlocked = Defaults.unlocked
+
+    -- Reset all panel settings to defaults
+    for k, defaultPanel in pairs(Defaults.panels) do
+        if Settings.panels[k] then
+            -- Copy default values
+            Settings.panels[k].point = defaultPanel.point
+            Settings.panels[k].relativePoint = defaultPanel.relativePoint
+            Settings.panels[k].offsetX = defaultPanel.offsetX
+            Settings.panels[k].offsetY = defaultPanel.offsetY
+            Settings.panels[k].dimensions = {}
+            for i, dim in ipairs(defaultPanel.dimensions) do
+                Settings.panels[k].dimensions[i] = dim
+            end
+            -- Remove x/y coordinates if they exist
+            Settings.panels[k].x = nil
+            Settings.panels[k].y = nil
+        end
+    end
+
+    -- Lock all panels
+    CombatText.SetMovingState(false)
+
+    -- Re-apply panel positions
+    local Combattext = GetControl("Combattext")
+    if Combattext then
+        for k, s in pairs(Settings.panels) do
+            local panel = _G[k]
+            if panel then
+                panel:ClearAnchors()
+                panel:SetAnchor(s.point, Combattext, s.relativePoint, s.offsetX, s.offsetY)
+                panel:SetDimensions(unpack(s.dimensions))
+            end
+        end
+    end
 end
 
 -- Bulk list add from menu buttons
@@ -58,8 +105,8 @@ function CombatText.ClearCustomList(list)
     for k, v in pairs(list) do
         list[k] = nil
     end
-    ZO_GetChatSystem():Maximize()
-    ZO_GetChatSystem().primaryContainer:FadeIn()
+    chatSystem:Maximize()
+    chatSystem.primaryContainer:FadeIn()
     printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_CLEARED), listRef), true)
 end
 
@@ -342,6 +389,12 @@ function CombatText.Initialize(enabled)
         CombatText.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "CombatText", CombatText.Defaults)
     end
 
+    -- Migrate old string-based font styles to numeric constants (run once)
+    if not LUIE.IsMigrationDone("combattext_fontstyles") then
+        CombatText.SV.fontStyle = LUIE.MigrateFontStyle(CombatText.SV.fontStyle)
+        LUIE.MarkMigrationDone("combattext_fontstyles")
+    end
+
     -- Disable module if setting not toggled on
     if not enabled then
         return
@@ -358,8 +411,8 @@ function CombatText.Initialize(enabled)
             _G[k]:ClearAnchors()
             _G[k]:SetAnchor(s.point, Combattext, s.relativePoint, s.offsetX, s.offsetY)
             _G[k]:SetDimensions(unpack(s.dimensions))
-            _G[k]:SetHandler("OnMouseUp", SavePosition)
-            _G[k .. "_Label"]:SetFont(LUIE.CombatText.SV.fontFaceApplied .. "|26|" .. LUIE.CombatText.SV.fontOutline)
+            _G[k]:SetHandler("OnMouseUp", CombatText.SavePosition)
+            _G[k .. "_Label"]:SetFont(ZO_CreateFontString(LUIE.CombatText.SV.fontFaceApplied, 26, LUIE.CombatText.SV.fontStyle))
             _G[k .. "_Label"]:SetText(panelTitles[k])
         else
             LUIE.CombatText.SV.panels[k] = nil

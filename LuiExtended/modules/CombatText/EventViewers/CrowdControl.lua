@@ -3,26 +3,24 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
----@class LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
+
 --- @class (partial) LuiExtended.CombatTextCrowdControlEventViewer : LuiExtended.CombatTextEventViewer
-LUIE.CombatTextCrowdControlEventViewer = LUIE.CombatTextEventViewer:Subclass()
+local CombatTextCrowdControlEventViewer = LUIE.CombatTextEventViewer:Subclass()
 --- @class (partial) LuiExtended.CombatTextCrowdControlEventViewer
-local CombatTextCrowdControlEventViewer = LUIE.CombatTextCrowdControlEventViewer
+LUIE.CombatTextCrowdControlEventViewer = CombatTextCrowdControlEventViewer
 
 local poolTypes = LuiData.Data.CombatTextConstants.poolType
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local combatType = LuiData.Data.CombatTextConstants.combatType
 local crowdControlTypes = LuiData.Data.CombatTextConstants.crowdControlType
 
-function CombatTextCrowdControlEventViewer:New(...)
-    local obj = LUIE.CombatTextEventViewer:New(...)
-    obj:RegisterCallback(eventType.CROWDCONTROL, function (...)
-        self:OnEvent(...)
-    end)
+function CombatTextCrowdControlEventViewer:Initialize(poolManager)
+    LUIE.CombatTextEventViewer.Initialize(self, poolManager)
+    self:RegisterCallback(eventType.CROWDCONTROL, function (...) self:OnEvent(...) end)
     self.locationOffset = { [combatType.OUTGOING] = 0, [combatType.INCOMING] = 0 }
     self.activeCrowdControls = { [combatType.OUTGOING] = 0, [combatType.INCOMING] = 0 }
-    return obj
 end
 
 function CombatTextCrowdControlEventViewer:OnEvent(crowdControlType, eventCombatType)
@@ -73,15 +71,17 @@ function CombatTextCrowdControlEventViewer:OnEvent(crowdControlType, eventCombat
     self:ControlLayout(control)
 
     -- Control setup
-    local panel, point, relativePoint = LUIE_CombatText_Outgoing, TOP, BOTTOM
+    local panel
+    local point = TOP
+    local relativePoint = BOTTOM
 
     if eventCombatType == combatTypeConstant.INCOMING then
         panel = LUIE_CombatText_Incoming
-
         if Settings.animation.incoming.directionType == "down" then
             point, relativePoint = BOTTOM, TOP
         end
     else
+        panel = LUIE_CombatText_Outgoing
         if Settings.animation.outgoing.directionType == "down" then
             point, relativePoint = BOTTOM, TOP
         end
@@ -104,12 +104,12 @@ function CombatTextCrowdControlEventViewer:OnEvent(crowdControlType, eventCombat
 
     -- Add items back into pool after animation
     LUIE_callLater(function ()
-                     self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
-                     self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
-                     self.activeCrowdControls[eventCombatType] = self.activeCrowdControls[eventCombatType] - 1
+                       self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
+                       self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
+                       self.activeCrowdControls[eventCombatType] = self.activeCrowdControls[eventCombatType] - 1
 
-                     if self.activeCrowdControls[eventCombatType] == 0 then
-                         self.locationOffset[eventCombatType] = 0
-                     end
-                 end, animation:GetDuration())
+                       if self.activeCrowdControls[eventCombatType] == 0 then
+                           self.locationOffset[eventCombatType] = 0
+                       end
+                   end, animation:GetDuration())
 end

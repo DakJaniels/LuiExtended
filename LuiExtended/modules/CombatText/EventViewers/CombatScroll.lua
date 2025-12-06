@@ -3,24 +3,23 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
----@class LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
 
 --- @class (partial) LuiExtended.CombatTextCombatScrollEventViewer : LuiExtended.CombatTextEventViewer
-LUIE.CombatTextCombatScrollEventViewer = LUIE.CombatTextEventViewer:Subclass()
+local CombatTextCombatScrollEventViewer = LUIE.CombatTextEventViewer:Subclass()
 --- @class (partial) LuiExtended.CombatTextCombatScrollEventViewer
-local CombatTextCombatScrollEventViewer = LUIE.CombatTextCombatScrollEventViewer
+LUIE.CombatTextCombatScrollEventViewer = CombatTextCombatScrollEventViewer
 
 local CombatTextConstants = LuiData.Data.CombatTextConstants
 local AbbreviateNumber = LUIE.AbbreviateNumber
 
-function CombatTextCombatScrollEventViewer:New(...)
-    local obj = LUIE.CombatTextEventViewer:New(...)
-    obj:RegisterCallback(CombatTextConstants.eventType.COMBAT, function (...) self:OnEvent(...) end)
+function CombatTextCombatScrollEventViewer:Initialize(poolManager)
+    LUIE.CombatTextEventViewer.Initialize(self, poolManager)
+    self:RegisterCallback(CombatTextConstants.eventType.COMBAT, function (...) self:OnEvent(...) end)
     self.eventBuffer = {}
     self.activeControls = { [CombatTextConstants.combatType.OUTGOING] = {}, [CombatTextConstants.combatType.INCOMING] = {} }
     self.lastControl = {}
-    return obj
 end
 
 function CombatTextCombatScrollEventViewer:OnEvent(combatType, powerType, value, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
@@ -89,14 +88,17 @@ function CombatTextCombatScrollEventViewer:View(combatType, powerType, value, ab
     self:ControlLayout(control, abilityId, combatType, sourceName)
 
     -- Control setup
-    local panel, point, relativePoint = LUIE_CombatText_Outgoing, TOP, BOTTOM
-    if (combatType == CombatTextConstants.combatType.INCOMING) then
+    local panel
+    local point = TOP
+    local relativePoint = BOTTOM
+    if combatType == CombatTextConstants.combatType.INCOMING then
         panel = LUIE_CombatText_Incoming
-        if (Settings.animation.incoming.directionType == "down") then
+        if Settings.animation.incoming.directionType == "down" then
             point, relativePoint = BOTTOM, TOP
         end
     else
-        if (Settings.animation.outgoing.directionType == "down") then
+        panel = LUIE_CombatText_Outgoing
+        if Settings.animation.outgoing.directionType == "down" then
             point, relativePoint = BOTTOM, TOP
         end
     end
@@ -155,11 +157,11 @@ function CombatTextCombatScrollEventViewer:View(combatType, powerType, value, ab
 
     -- Add items back into pool after use
     LUIE_callLater(function ()
-                     self.poolManager:ReleasePoolObject(CombatTextConstants.poolType.CONTROL, controlPoolKey)
-                     self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
-                     self.activeControls[combatType][control:GetName()] = nil
-                     if (self.lastControl[combatType] == control) then
-                         self.lastControl[combatType] = nil
-                     end
-                 end, animation:GetDuration())
+                       self.poolManager:ReleasePoolObject(CombatTextConstants.poolType.CONTROL, controlPoolKey)
+                       self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
+                       self.activeControls[combatType][control:GetName()] = nil
+                       if (self.lastControl[combatType] == control) then
+                           self.lastControl[combatType] = nil
+                       end
+                   end, animation:GetDuration())
 end

@@ -3,28 +3,27 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
----@class LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
+
 --- @class (partial) LuiExtended.CombatTextResourcesPowerEventListener : LuiExtended.CombatTextEventListener
-LUIE.CombatTextResourcesPowerEventListener = LUIE.CombatTextEventListener:Subclass()
+local CombatTextResourcesPowerEventListener = LUIE.CombatTextEventListener:Subclass()
+
 --- @class (partial) LuiExtended.CombatTextResourcesPowerEventListener
-local CombatTextResourcesPowerEventListener = LUIE.CombatTextResourcesPowerEventListener
+LUIE.CombatTextResourcesPowerEventListener = CombatTextResourcesPowerEventListener
 
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local resourceType = LuiData.Data.CombatTextConstants.resourceType
 
-function CombatTextResourcesPowerEventListener:New()
-    local obj = LUIE.CombatTextEventListener:New()
-    obj:RegisterForEvent(EVENT_POWER_UPDATE, function (...)
-        self:OnEvent(...)
-    end)
+function CombatTextResourcesPowerEventListener:Initialize()
+    LUIE.CombatTextEventListener.Initialize(self)
+    self:RegisterForEvent(EVENT_POWER_UPDATE, function (...) self:OnEvent(...) end)
     self.powerInfo =
     {
         [COMBAT_MECHANIC_FLAGS_HEALTH] = { wasWarned = false, resourceType = resourceType.LOW_HEALTH },
         [COMBAT_MECHANIC_FLAGS_STAMINA] = { wasWarned = false, resourceType = resourceType.LOW_STAMINA },
         [COMBAT_MECHANIC_FLAGS_MAGICKA] = { wasWarned = false, resourceType = resourceType.LOW_MAGICKA },
     }
-    return obj
 end
 
 function CombatTextResourcesPowerEventListener:OnEvent(unit, powerPoolIndex, powerType, power, powerMax)

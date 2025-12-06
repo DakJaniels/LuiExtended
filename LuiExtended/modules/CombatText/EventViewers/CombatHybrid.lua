@@ -3,25 +3,23 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
----@class LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
+
 --- @class (partial) LuiExtended.CombatTextCombatHybridEventViewer : LuiExtended.CombatTextEventViewer
-LUIE.CombatTextCombatHybridEventViewer = LUIE.CombatTextEventViewer:Subclass()
+local CombatTextCombatHybridEventViewer = LUIE.CombatTextEventViewer:Subclass()
 --- @class (partial) LuiExtended.CombatTextCombatHybridEventViewer
-local CombatTextCombatHybridEventViewer = LUIE.CombatTextCombatHybridEventViewer
+LUIE.CombatTextCombatHybridEventViewer = CombatTextCombatHybridEventViewer
 
 local CombatTextConstants = LuiData.Data.CombatTextConstants
 local AbbreviateNumber = LUIE.AbbreviateNumber
 local string_format = string.format
-function CombatTextCombatHybridEventViewer:New(...)
-    local obj = LUIE.CombatTextEventViewer:New(...)
-    obj:RegisterCallback(CombatTextConstants.eventType.COMBAT, function (...)
-        self:OnEvent(...)
-    end)
+function CombatTextCombatHybridEventViewer:Initialize(poolManager)
+    LUIE.CombatTextEventViewer.Initialize(self, poolManager)
+    self:RegisterCallback(CombatTextConstants.eventType.COMBAT, function (...) self:OnEvent(...) end)
     self.eventBuffer = {}
     self.activeControls = { [CombatTextConstants.combatType.OUTGOING] = {}, [CombatTextConstants.combatType.INCOMING] = {} }
     self.lastControl = {}
-    return obj
 end
 
 function CombatTextCombatHybridEventViewer:OnEvent(combatType, powerType, value, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
@@ -55,8 +53,8 @@ function CombatTextCombatHybridEventViewer:OnEvent(combatType, powerType, value,
                 throttleTime = Settings.throttles.hotcritical
             end
             LUIE_callLater(function ()
-                             self:ViewFromEventBuffer(combatType, powerType, eventKey, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
-                         end, throttleTime)
+                               self:ViewFromEventBuffer(combatType, powerType, eventKey, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
+                           end, throttleTime)
         else
             self.eventBuffer[eventKey].value = self.eventBuffer[eventKey].value + value
             self.eventBuffer[eventKey].hits = self.eventBuffer[eventKey].hits + 1
@@ -92,13 +90,16 @@ function CombatTextCombatHybridEventViewer:View(combatType, powerType, value, ab
     self:ControlLayout(control, abilityId, combatType, sourceName)
 
     -- Control setup
-    local panel, point, relativePoint = LUIE_CombatText_Outgoing, TOP, BOTTOM
+    local panel
+    local point = TOP
+    local relativePoint = BOTTOM
     if combatType == CombatTextConstants.combatType.INCOMING then
         panel = LUIE_CombatText_Incoming
         if Settings.animation.incoming.directionType == "down" then
             point, relativePoint = BOTTOM, TOP
         end
     else
+        panel = LUIE_CombatText_Outgoing
         if Settings.animation.outgoing.directionType == "down" then
             point, relativePoint = BOTTOM, TOP
         end
@@ -166,11 +167,11 @@ function CombatTextCombatHybridEventViewer:View(combatType, powerType, value, ab
 
     -- Add items back into pool after use
     LUIE_callLater(function ()
-                     self.poolManager:ReleasePoolObject(CombatTextConstants.poolType.CONTROL, controlPoolKey)
-                     self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
-                     self.activeControls[combatType][control:GetName()] = nil
-                     if self.lastControl[combatType] == control then
-                         self.lastControl[combatType] = nil
-                     end
-                 end, animation:GetDuration())
+                       self.poolManager:ReleasePoolObject(CombatTextConstants.poolType.CONTROL, controlPoolKey)
+                       self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
+                       self.activeControls[combatType][control:GetName()] = nil
+                       if self.lastControl[combatType] == control then
+                           self.lastControl[combatType] = nil
+                       end
+                   end, animation:GetDuration())
 end

@@ -3,30 +3,25 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
----@class LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
+
 --- @class (partial) LuiExtended.CombatTextResourcesUltimateEventListener : LuiExtended.CombatTextEventListener
-LUIE.CombatTextResourcesUltimateEventListener = LUIE.CombatTextEventListener:Subclass()
+local CombatTextResourcesUltimateEventListener = LUIE.CombatTextEventListener:Subclass()
+
 --- @class (partial) LuiExtended.CombatTextResourcesUltimateEventListener
-local CombatTextResourcesUltimateEventListener = LUIE.CombatTextResourcesUltimateEventListener
+LUIE.CombatTextResourcesUltimateEventListener = CombatTextResourcesUltimateEventListener
 
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local resourceType = LuiData.Data.CombatTextConstants.resourceType
 
-function CombatTextResourcesUltimateEventListener:New()
-    local obj = LUIE.CombatTextEventListener:New()
-    obj:RegisterForEvent(EVENT_POWER_UPDATE, function (...)
-                             self:OnEvent(...)
-                         end, REGISTER_FILTER_UNIT_TAG, "player", REGISTER_FILTER_POWER_TYPE, COMBAT_MECHANIC_FLAGS_ULTIMATE)
-    obj:RegisterForEvent(EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, function ()
-        self:UpdateMaximum()
-    end)
-    obj:RegisterForEvent(EVENT_ACTION_SLOT_STATE_UPDATED, function ()
-        self:UpdateMaximum()
-    end)
+function CombatTextResourcesUltimateEventListener:Initialize()
+    LUIE.CombatTextEventListener.Initialize(self)
+    self:RegisterForEvent(EVENT_POWER_UPDATE, function (...) self:OnEvent(...) end, REGISTER_FILTER_UNIT_TAG, "player", REGISTER_FILTER_POWER_TYPE, COMBAT_MECHANIC_FLAGS_ULTIMATE)
+    self:RegisterForEvent(EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, function () self:UpdateMaximum() end)
+    self:RegisterForEvent(EVENT_ACTION_SLOT_STATE_UPDATED, function () self:UpdateMaximum() end)
     self.powerInfo = { maximum = 0, wasNotified = false }
     self:UpdateMaximum()
-    return obj
 end
 
 function CombatTextResourcesUltimateEventListener:OnEvent(unit, powerPoolIndex, powerType, power, powerMax)

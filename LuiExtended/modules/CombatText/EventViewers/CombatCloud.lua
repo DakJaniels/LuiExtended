@@ -3,26 +3,23 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
----@class LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
 
 --- @class (partial) LuiExtended.CombatTextCombatCloudEventViewer : LuiExtended.CombatTextEventViewer
-LUIE.CombatTextCombatCloudEventViewer = LUIE.CombatTextEventViewer:Subclass()
+local CombatTextCombatCloudEventViewer = LUIE.CombatTextEventViewer:Subclass()
 
 --- @class (partial) LuiExtended.CombatTextCombatCloudEventViewer
-local CombatTextCombatCloudEventViewer = LUIE.CombatTextCombatCloudEventViewer
+LUIE.CombatTextCombatCloudEventViewer = CombatTextCombatCloudEventViewer
 
 local CombatTextConstants = LuiData.Data.CombatTextConstants
 local AbbreviateNumber = LUIE.AbbreviateNumber
 local string_format = string.format
 
-function CombatTextCombatCloudEventViewer:New(...)
-    local obj = LUIE.CombatTextEventViewer:New(...)
-    obj:RegisterCallback(CombatTextConstants.eventType.COMBAT, function (...)
-        self:OnEvent(...)
-    end)
+function CombatTextCombatCloudEventViewer:Initialize(poolManager)
+    LUIE.CombatTextEventViewer.Initialize(self, poolManager)
+    self:RegisterCallback(CombatTextConstants.eventType.COMBAT, function (...) self:OnEvent(...) end)
     self.eventBuffer = {}
-    return obj
 end
 
 function CombatTextCombatCloudEventViewer:OnEvent(combatType, powerType, value, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
@@ -56,8 +53,8 @@ function CombatTextCombatCloudEventViewer:OnEvent(combatType, powerType, value, 
                 throttleTime = Settings.throttles.hotcritical
             end
             LUIE_callLater(function ()
-                             self:ViewFromEventBuffer(combatType, powerType, eventKey, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
-                         end, throttleTime)
+                               self:ViewFromEventBuffer(combatType, powerType, eventKey, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
+                           end, throttleTime)
         else
             self.eventBuffer[eventKey].value = self.eventBuffer[eventKey].value + value
             self.eventBuffer[eventKey].hits = self.eventBuffer[eventKey].hits + 1
@@ -80,9 +77,11 @@ function CombatTextCombatCloudEventViewer:View(combatType, powerType, value, abi
     value = AbbreviateNumber(value, Settings.common.abbreviateNumbers)
 
     -- Control setup
-    local panel = LUIE_CombatText_Outgoing
+    local panel
     if combatType == CombatTextConstants.combatType.INCOMING then
         panel = LUIE_CombatText_Incoming
+    else
+        panel = LUIE_CombatText_Outgoing
     end
     local w, h = panel:GetDimensions()
     local radiusW, radiusH = w / 2, h * 2
@@ -140,7 +139,7 @@ function CombatTextCombatCloudEventViewer:View(combatType, powerType, value, abi
 
     -- Add items back into pool after use
     LUIE_callLater(function ()
-                     self.poolManager:ReleasePoolObject(CombatTextConstants.poolType.CONTROL, controlPoolKey)
-                     self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
-                 end, animation:GetDuration())
+                       self.poolManager:ReleasePoolObject(CombatTextConstants.poolType.CONTROL, controlPoolKey)
+                       self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
+                   end, animation:GetDuration())
 end

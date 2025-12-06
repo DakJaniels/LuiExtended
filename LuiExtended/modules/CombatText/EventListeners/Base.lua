@@ -7,10 +7,10 @@
 local LUIE = LUIE
 
 --- @class (partial) LuiExtended.CombatTextEventListener : ZO_InitializingObject
-LUIE.CombatTextEventListener = ZO_InitializingObject:Subclass()
+local CombatTextEventListener = ZO_InitializingObject:Subclass()
 
 --- @class (partial) LuiExtended.CombatTextEventListener
-local CombatTextEventListener = LUIE.CombatTextEventListener
+LUIE.CombatTextEventListener = CombatTextEventListener
 
 local callbackManager = CALLBACK_MANAGER
 local eventManager = EVENT_MANAGER
@@ -20,10 +20,8 @@ local moduleName = LUIE.name .. "CombatText"
 --- @type integer
 local eventPostfix = 1 -- Used to create unique name when registering multiple times to the same game event
 
---- @return LuiExtended.CombatTextEventListener
-function CombatTextEventListener:New()
-    local obj = setmetatable({}, self)
-    return obj
+function CombatTextEventListener:Initialize()
+    -- Base initialization - can be overridden by subclasses
 end
 
 --- @param event any

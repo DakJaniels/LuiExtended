@@ -3,21 +3,21 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
----@class LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
+
 --- @class (partial) LuiExtended.CombatTextPointsChampionEventListener : LuiExtended.CombatTextEventListener
-LUIE.CombatTextPointsChampionEventListener = LUIE.CombatTextEventListener:Subclass()
+local CombatTextPointsChampionEventListener = LUIE.CombatTextEventListener:Subclass()
+
 --- @class (partial) LuiExtended.CombatTextPointsChampionEventListener
-local CombatTextPointsChampionEventListener = LUIE.CombatTextPointsChampionEventListener
+LUIE.CombatTextPointsChampionEventListener = CombatTextPointsChampionEventListener
 
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local pointType = LuiData.Data.CombatTextConstants.pointType
 
-function CombatTextPointsChampionEventListener:New()
-    local obj = LUIE.CombatTextEventListener:New()
-    obj:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, function (...)
-                             self:OnEvent(...)
-                         end, REGISTER_FILTER_UNIT_TAG, "player")
+function CombatTextPointsChampionEventListener:Initialize()
+    LUIE.CombatTextEventListener.Initialize(self)
+    self:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, function (...) self:OnEvent(...) end, REGISTER_FILTER_UNIT_TAG, "player")
     self.gain = 0
     self.timeoutActive = false
     self.previousPoints = GetUnitChampionPoints("player")
@@ -25,7 +25,6 @@ function CombatTextPointsChampionEventListener:New()
     self.previousCP = GetUnitChampionPoints("player")
     self.maxCP = 3600
     self.hasMaxCP = self.previousCP == self.maxCP and self.previousPoints >= self.previousMaxPoints
-    return obj
 end
 
 function CombatTextPointsChampionEventListener:OnEvent(unit, currentPoints, maxPoints, reason)
@@ -49,10 +48,10 @@ function CombatTextPointsChampionEventListener:OnEvent(unit, currentPoints, maxP
         if self.gain > 0 and not self.timeoutActive then
             self.timeoutActive = true
             LUIE_callLater(function ()
-                             self:TriggerEvent(eventType.POINT, pointType.CHAMPION_POINTS, self.gain)
-                             self.gain = 0
-                             self.timeoutActive = false
-                         end, 500)
+                               self:TriggerEvent(eventType.POINT, pointType.CHAMPION_POINTS, self.gain)
+                               self.gain = 0
+                               self.timeoutActive = false
+                           end, 500)
         end
     end
 end

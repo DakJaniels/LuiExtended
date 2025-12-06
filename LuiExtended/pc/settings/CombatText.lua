@@ -87,6 +87,10 @@ function CombatText.CreateSettings()
         slashCommand = "/luict",
         registerForRefresh = true,
         registerForDefaults = true,
+        resetFunc = function ()
+            -- Reset all panel positions to defaults
+            CombatText.ResetPanelPositions()
+        end,
     }
 
     local optionsDataCombatText = {}
@@ -141,43 +145,6 @@ function CombatText.CreateSettings()
             end
         end,
     }
-
-    -- -- Grid Snap Settings for Combat Text
-    -- optionsDataCombatText[#optionsDataCombatText + 1] =
-    -- {
-    --     type = "checkbox",
-    --     name = "Enable Grid Snap (Combat Text)",
-    --     tooltip = "Enable snapping combat text panels to a grid when moving them",
-    --     getFunc = function ()
-    --         return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_combatText
-    --     end,
-    --     setFunc = function (value)
-    --         LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_combatText = value
-    --     end,
-    --     width = "half",
-    --     default = false,
-    -- }
-
-    -- optionsDataCombatText[#optionsDataCombatText + 1] =
-    -- {
-    --     type = "slider",
-    --     name = "Grid Size (Combat Text)",
-    --     tooltip = "Set the size of the grid for snapping combat text panels",
-    --     min = 5,
-    --     max = 100,
-    --     step = 5,
-    --     getFunc = function ()
-    --         return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_combatText or 15
-    --     end,
-    --     setFunc = function (value)
-    --         LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_combatText = value
-    --     end,
-    --     width = "half",
-    --     default = 15,
-    --     disabled = function ()
-    --         return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_combatText
-    --     end,
-    -- }
 
     -- Combat Text - Common Options
     optionsDataCombatText[#optionsDataCombatText + 1] =

@@ -3,21 +3,21 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
----@class LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
+
 --- @class (partial) LuiExtended.CombatTextPointsExperienceEventListener : LuiExtended.CombatTextEventListener
-LUIE.CombatTextPointsExperienceEventListener = LUIE.CombatTextEventListener:Subclass()
+local CombatTextPointsExperienceEventListener = LUIE.CombatTextEventListener:Subclass()
+
 --- @class (partial) LuiExtended.CombatTextPointsExperienceEventListener
-local CombatTextPointsExperienceEventListener = LUIE.CombatTextPointsExperienceEventListener
+LUIE.CombatTextPointsExperienceEventListener = CombatTextPointsExperienceEventListener
 
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local pointType = LuiData.Data.CombatTextConstants.pointType
 
-function CombatTextPointsExperienceEventListener:New()
-    local obj = LUIE.CombatTextEventListener:New()
-    obj:RegisterForEvent(EVENT_EXPERIENCE_UPDATE, function (...)
-                             self:OnEvent(...)
-                         end, REGISTER_FILTER_UNIT_TAG, "player")
+function CombatTextPointsExperienceEventListener:Initialize()
+    LUIE.CombatTextEventListener.Initialize(self)
+    self:RegisterForEvent(EVENT_EXPERIENCE_UPDATE, function (...) self:OnEvent(...) end, REGISTER_FILTER_UNIT_TAG, "player")
     self.gain = 0
     self.timeoutActive = false
     self.isChampion = IsUnitChampion("player")
@@ -30,7 +30,6 @@ function CombatTextPointsExperienceEventListener:New()
     end
     self.previousXp = self.previousXp or GetUnitXP("player")
     self.previousMaxXp = self.previousMaxXp or GetUnitXPMax("player")
-    return obj
 end
 
 function CombatTextPointsExperienceEventListener:OnEvent(unit, currentXp, maxXp)
@@ -61,10 +60,10 @@ function CombatTextPointsExperienceEventListener:OnEvent(unit, currentXp, maxXp)
         if self.gain > 0 and not self.timeoutActive then
             self.timeoutActive = true
             LUIE_callLater(function ()
-                             self:TriggerEvent(eventType.POINT, pointType.EXPERIENCE_POINTS, self.gain)
-                             self.gain = 0
-                             self.timeoutActive = false
-                         end, 500)
+                               self:TriggerEvent(eventType.POINT, pointType.EXPERIENCE_POINTS, self.gain)
+                               self.gain = 0
+                               self.timeoutActive = false
+                           end, 500)
         end
     end
 end

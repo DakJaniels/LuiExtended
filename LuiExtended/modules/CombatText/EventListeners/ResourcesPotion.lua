@@ -3,24 +3,25 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
----@class LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
+
 --- @class (partial) LuiExtended.CombatTextResourcesPotionEventListener : LuiExtended.CombatTextEventListener
-LUIE.CombatTextResourcesPotionEventListener = LUIE.CombatTextEventListener:Subclass()
+local CombatTextResourcesPotionEventListener = LUIE.CombatTextEventListener:Subclass()
+
 --- @class (partial) LuiExtended.CombatTextResourcesPotionEventListener
-local CombatTextResourcesPotionEventListener = LUIE.CombatTextResourcesPotionEventListener
+LUIE.CombatTextResourcesPotionEventListener = CombatTextResourcesPotionEventListener
 
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local resourceType = LuiData.Data.CombatTextConstants.resourceType
 
 local inCooldown = false
 
-function CombatTextResourcesPotionEventListener:New()
-    local obj = LUIE.CombatTextEventListener:New()
-    obj:RegisterForUpdate("PotionCooldown", 100, function ()
+function CombatTextResourcesPotionEventListener:Initialize()
+    LUIE.CombatTextEventListener.Initialize(self)
+    self:RegisterForUpdate("PotionCooldown", 100, function ()
         self:PotionCooldown()
     end)
-    return obj
 end
 
 function CombatTextResourcesPotionEventListener:PotionCooldown(slotNum)

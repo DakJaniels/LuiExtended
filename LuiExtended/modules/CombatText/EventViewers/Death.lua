@@ -3,26 +3,24 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
----@class LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
+
 --- @class (partial) LuiExtended.CombatTextDeathViewer : LuiExtended.CombatTextEventViewer
-LUIE.CombatTextDeathViewer = LUIE.CombatTextEventViewer:Subclass()
+local CombatTextDeathViewer = LUIE.CombatTextEventViewer:Subclass()
 --- @class (partial) LuiExtended.CombatTextDeathViewer
-local CombatTextDeathViewer = LUIE.CombatTextDeathViewer
+LUIE.CombatTextDeathViewer = CombatTextDeathViewer
 
 local poolTypes = LuiData.Data.CombatTextConstants.poolType
 local eventType = LuiData.Data.CombatTextConstants.eventType
 
 local zo_strformat = zo_strformat
 
-function CombatTextDeathViewer:New(...)
-    local obj = LUIE.CombatTextEventViewer:New(...)
-    obj:RegisterCallback(eventType.DEATH, function (...)
-        self:OnEvent(...)
-    end)
+function CombatTextDeathViewer:Initialize(poolManager)
+    LUIE.CombatTextEventViewer.Initialize(self, poolManager)
+    self:RegisterCallback(eventType.DEATH, function (...) self:OnEvent(...) end)
     self.locationOffset = 0 -- Simple way to avoid overlapping. When number of active notes is back to 0, the offset is also reset
     self.activePoints = 0
-    return obj
 end
 
 function CombatTextDeathViewer:OnEvent(unitTag)
@@ -63,11 +61,11 @@ function CombatTextDeathViewer:OnEvent(unitTag)
 
     -- Add items back into pool after animation
     LUIE_callLater(function ()
-                     self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
-                     self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
-                     self.activePoints = self.activePoints - 1
-                     if self.activePoints == 0 or self.activePoints >= 5 then
-                         self.locationOffset = 0
-                     end
-                 end, animation:GetDuration())
+                       self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
+                       self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
+                       self.activePoints = self.activePoints - 1
+                       if self.activePoints == 0 or self.activePoints >= 5 then
+                           self.locationOffset = 0
+                       end
+                   end, animation:GetDuration())
 end
