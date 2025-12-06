@@ -5,70 +5,150 @@
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertFrame : TopLevelWindow
-LUIE_AlertFrame = ...
+---@field public mouseEnabled boolean
+---@field public movable boolean
+---@field public clampedToScreen boolean
+---@field public hidden boolean
+---@field public layer DrawLayer
+---@field public level integer
+---@field public tier DrawTier
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field public OnMoveStart fun(self: Control)
+---@field public OnMoveStop fun(self: Control)
+LUIE_AlertFrame = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate : Control
-LUIE_AlertTemplate = ...
+---@field public hidden boolean
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+LUIE_AlertTemplate = {}
 ---------- LVL: 03 ----------
 ---------- LVL: 04 ----------
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertFrame_Preview : BackdropControl
-LUIE_AlertFrame_Preview = ...
+---@field public hidden boolean
+---@field public centerColor string
+---@field public edgeColor string
+---@field AnchorFill boolean
+---@field Edge {edgeFileWidth: integer, edgeFileHeight: integer, edgeFilePadding: integer}
+LUIE_AlertFrame_Preview = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Prefix : LabelControl
-LUIE_AlertTemplate_Prefix = ...
+---@field public wrapMode TextWrapMode
+---@field public horizontalAlignment TextAlignment
+---@field public verticalAlignment TextAlignment
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+LUIE_AlertTemplate_Prefix = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Name : LabelControl
-LUIE_AlertTemplate_Name = ...
+---@field public wrapMode TextWrapMode
+---@field public horizontalAlignment TextAlignment
+---@field public verticalAlignment TextAlignment
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+LUIE_AlertTemplate_Name = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Modifier : LabelControl
-LUIE_AlertTemplate_Modifier = ...
+---@field public wrapMode TextWrapMode
+---@field public horizontalAlignment TextAlignment
+---@field public verticalAlignment TextAlignment
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+LUIE_AlertTemplate_Modifier = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Icon : BackdropControl
-LUIE_AlertTemplate_Icon = ...
+---@field public centerColor string
+---@field public edgeColor string
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Edge {edgeFileWidth: integer, edgeFileHeight: integer, edgeFilePadding: integer}
+LUIE_AlertTemplate_Icon = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Mitigation : LabelControl
-LUIE_AlertTemplate_Mitigation = ...
+---@field public wrapMode TextWrapMode
+---@field public horizontalAlignment TextAlignment
+---@field public verticalAlignment TextAlignment
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+LUIE_AlertTemplate_Mitigation = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Timer : LabelControl
-LUIE_AlertTemplate_Timer = ...
+---@field public wrapMode TextWrapMode
+---@field public horizontalAlignment TextAlignment
+---@field public verticalAlignment TextAlignment
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+LUIE_AlertTemplate_Timer = {}
 ---------- LVL: 05 ----------
 ---------- LVL: 06 ----------
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertFrame_Preview_AnchorTexture : TextureControl
-LUIE_AlertFrame_Preview_AnchorTexture = ...
+---@field public textureFile string
+---@field public color string
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
+LUIE_AlertFrame_Preview_AnchorTexture = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertFrame_Preview_AnchorLabelBg : BackdropControl
-LUIE_AlertFrame_Preview_AnchorLabelBg = ...
+---@field public centerColor string
+---@field public edgeColor string
+---@field public layer DrawLayer
+---@field public level integer
+---@field public tier DrawTier
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Edge {edgeFileWidth: integer, edgeFileHeight: integer, edgeFilePadding: integer}
+LUIE_AlertFrame_Preview_AnchorLabelBg = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertFrame_Preview_AnchorLabel : LabelControl
-LUIE_AlertFrame_Preview_AnchorLabel = ...
+---@field public font string
+---@field public color string
+---@field public text string
+---@field public wrapMode TextWrapMode
+---@field public horizontalAlignment TextAlignment
+---@field public verticalAlignment TextAlignment
+---@field public layer DrawLayer
+---@field public level integer
+---@field public tier DrawTier
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+LUIE_AlertFrame_Preview_AnchorLabel = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Icon_Back : TextureControl
-LUIE_AlertTemplate_Icon_Back = ...
+---@field public textureFile string
+---@field public layer DrawLayer
+---@field AnchorFill boolean
+LUIE_AlertTemplate_Icon_Back = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Icon_IconBg : BackdropControl
-LUIE_AlertTemplate_Icon_IconBg = ...
+---@field public centerColor string
+---@field public edgeColor string
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Anchor2 {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Edge {edgeFileWidth: integer, edgeFileHeight: integer, edgeFilePadding: integer}
+LUIE_AlertTemplate_Icon_IconBg = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Icon_Cd : CooldownControl
-LUIE_AlertTemplate_Icon_Cd = ...
+---@field public fillColor string
+---@field public layer DrawLayer
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Anchor2 {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+LUIE_AlertTemplate_Icon_Cd = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_AlertTemplate_Icon_Icon : TextureControl
-LUIE_AlertTemplate_Icon_Icon = ...
+---@field public textureFile string
+---@field public layer DrawLayer
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Anchor2 {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+LUIE_AlertTemplate_Icon_Icon = {}
 ---------- LVL: 07 ----------
 -- ////// END   : GENERATED FROM C:/Users/dack_janiels/source/repos/LUIE/LuiExtended/LuiExtended/frontend\AbilityAlerts.xml

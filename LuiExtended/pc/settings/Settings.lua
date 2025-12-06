@@ -436,17 +436,17 @@ function LUIE.CreateSettings()
     )
 
     -- Show Changelog
-    optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
-        "Show Changelog when there is a update to LUIE.",
-        "Show Changelog when there is a update to LUIE.",
-        function () return Settings.ShowChangeLog end,
-        function (value) Settings.ShowChangeLog = value end,
-        "full",
-        nil,
-        Defaults.ShowChangeLog,
-        nil,
-        true
-    )
+    -- optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
+    --     "Show Changelog when there is a update to LUIE.",
+    --     "Show Changelog when there is a update to LUIE.",
+    --     function () return Settings.ShowChangeLog end,
+    --     function (value) Settings.ShowChangeLog = value end,
+    --     "full",
+    --     nil,
+    --     Defaults.ShowChangeLog,
+    --     nil,
+    --     true
+    -- )
 
     -- Hide Alerts
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(

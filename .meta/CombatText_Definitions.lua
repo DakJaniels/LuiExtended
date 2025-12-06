@@ -5,82 +5,163 @@
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText : TopLevelWindow
-LUIE_CombatText = ...
+---@field public mouseEnabled boolean
+---@field public clampedToScreen boolean
+---@field public movable boolean
+---@field public layer DrawLayer
+---@field public level integer
+---@field public tier DrawTier
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Anchor2 {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+LUIE_CombatText = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Virtual : Control
-LUIE_CombatText_Virtual = ...
+LUIE_CombatText_Virtual = {}
 ---------- LVL: 03 ----------
 ---------- LVL: 04 ----------
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Outgoing : Control
-LUIE_CombatText_Outgoing = ...
+---@field public clampedToScreen boolean
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field DimensionConstraints {minX: layout_measurement, minY: layout_measurement, maxX: layout_measurement, maxY: layout_measurement}
+LUIE_CombatText_Outgoing = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Incoming : Control
-LUIE_CombatText_Incoming = ...
+---@field public clampedToScreen boolean
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field DimensionConstraints {minX: layout_measurement, minY: layout_measurement, maxX: layout_measurement, maxY: layout_measurement}
+LUIE_CombatText_Incoming = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Alert : Control
-LUIE_CombatText_Alert = ...
+---@field public clampedToScreen boolean
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+LUIE_CombatText_Alert = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Point : Control
-LUIE_CombatText_Point = ...
+---@field public clampedToScreen boolean
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+LUIE_CombatText_Point = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Resource : Control
-LUIE_CombatText_Resource = ...
+---@field public clampedToScreen boolean
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+LUIE_CombatText_Resource = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Virtual_Amount : LabelControl
-LUIE_CombatText_Virtual_Amount = ...
+LUIE_CombatText_Virtual_Amount = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Virtual_Icon : TextureControl
-LUIE_CombatText_Virtual_Icon = ...
+---@field public hidden boolean
+LUIE_CombatText_Virtual_Icon = {}
 ---------- LVL: 05 ----------
 ---------- LVL: 06 ----------
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Outgoing_Backdrop : BackdropControl
-LUIE_CombatText_Outgoing_Backdrop = ...
+---@field public alpha number
+---@field public hidden boolean
+LUIE_CombatText_Outgoing_Backdrop = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Outgoing_Label : LabelControl
-LUIE_CombatText_Outgoing_Label = ...
+---@field public font string
+---@field public color string
+---@field public inheritAlpha boolean
+---@field public verticalAlignment TextAlignment
+---@field public horizontalAlignment TextAlignment
+---@field public text string
+---@field public hidden boolean
+---@field public wrapMode TextWrapMode
+---@field AnchorFill boolean
+LUIE_CombatText_Outgoing_Label = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Incoming_Backdrop : BackdropControl
-LUIE_CombatText_Incoming_Backdrop = ...
+---@field public alpha number
+---@field public hidden boolean
+LUIE_CombatText_Incoming_Backdrop = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Incoming_Label : LabelControl
-LUIE_CombatText_Incoming_Label = ...
+---@field public font string
+---@field public color string
+---@field public inheritAlpha boolean
+---@field public verticalAlignment TextAlignment
+---@field public horizontalAlignment TextAlignment
+---@field public text string
+---@field public hidden boolean
+---@field public wrapMode TextWrapMode
+---@field AnchorFill boolean
+LUIE_CombatText_Incoming_Label = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Alert_Backdrop : BackdropControl
-LUIE_CombatText_Alert_Backdrop = ...
+---@field public alpha number
+---@field public hidden boolean
+LUIE_CombatText_Alert_Backdrop = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Alert_Label : LabelControl
-LUIE_CombatText_Alert_Label = ...
+---@field public font string
+---@field public color string
+---@field public inheritAlpha boolean
+---@field public verticalAlignment TextAlignment
+---@field public horizontalAlignment TextAlignment
+---@field public text string
+---@field public hidden boolean
+---@field public wrapMode TextWrapMode
+---@field AnchorFill boolean
+LUIE_CombatText_Alert_Label = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Point_Backdrop : BackdropControl
-LUIE_CombatText_Point_Backdrop = ...
+---@field public alpha number
+---@field public hidden boolean
+LUIE_CombatText_Point_Backdrop = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Point_Label : LabelControl
-LUIE_CombatText_Point_Label = ...
+---@field public font string
+---@field public color string
+---@field public inheritAlpha boolean
+---@field public verticalAlignment TextAlignment
+---@field public horizontalAlignment TextAlignment
+---@field public text string
+---@field public hidden boolean
+---@field public wrapMode TextWrapMode
+---@field AnchorFill boolean
+LUIE_CombatText_Point_Label = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Resource_Backdrop : BackdropControl
-LUIE_CombatText_Resource_Backdrop = ...
+---@field public alpha number
+---@field public hidden boolean
+LUIE_CombatText_Resource_Backdrop = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_CombatText_Resource_Label : LabelControl
-LUIE_CombatText_Resource_Label = ...
+---@field public font string
+---@field public color string
+---@field public inheritAlpha boolean
+---@field public verticalAlignment TextAlignment
+---@field public horizontalAlignment TextAlignment
+---@field public text string
+---@field public hidden boolean
+---@field public wrapMode TextWrapMode
+---@field AnchorFill boolean
+LUIE_CombatText_Resource_Label = {}
 ---------- LVL: 07 ----------
 -- ////// END   : GENERATED FROM C:/Users/dack_janiels/source/repos/LUIE/LuiExtended/LuiExtended/frontend\CombatText.xml

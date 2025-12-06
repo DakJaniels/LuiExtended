@@ -5,32 +5,57 @@
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_Changelog : TopLevelWindow
-LUIE_Changelog = ...
+---@field public mouseEnabled boolean
+---@field public movable boolean
+---@field public clampedToScreen boolean
+---@field public hidden boolean
+---@field public tier DrawTier
+---@field public layer DrawLayer
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetY: layout_measurement}
+LUIE_Changelog = {}
 ---------- LVL: 03 ----------
 ---------- LVL: 04 ----------
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_Changelog_Background : BackdropControl
-LUIE_Changelog_Background = ...
+---@field AnchorFill boolean
+LUIE_Changelog_Background = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_Changelog_Title : LabelControl
-LUIE_Changelog_Title = ...
+---@field public font string
+---@field public wrapMode TextWrapMode
+---@field public verticalAlignment TextAlignment
+---@field Anchor {relativeTo: string, relativePoint: AnchorPosition, point: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+LUIE_Changelog_Title = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_Changelog_About : LabelControl
-LUIE_Changelog_About = ...
+---@field public font string
+---@field public wrapMode TextWrapMode
+---@field Anchor {relativeTo: string, relativePoint: AnchorPosition, point: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+LUIE_Changelog_About = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_Changelog_Close : ButtonControl
-LUIE_Changelog_Close = ...
+---@field Anchor {point: AnchorPosition, offsetY: layout_measurement, offsetX: layout_measurement}
+---@field public OnClicked fun(self: Control, button: integer, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
+LUIE_Changelog_Close = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_Changelog_Container : Control
-LUIE_Changelog_Container = ...
+---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field public OnInitialized fun(self: Control)
+LUIE_Changelog_Container = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
 ---@class LUIE_Changelog_Text : LabelControl
-LUIE_Changelog_Text = ...
+---@field public font string
+---@field public wrapMode TextWrapMode
+---@field Dimensions {x: layout_measurement}
+---@field public OnInitialized fun(self: Control)
+LUIE_Changelog_Text = {}
 ---------- LVL: 05 ----------
 -- ////// END   : GENERATED FROM C:/Users/dack_janiels/source/repos/LUIE/LuiExtended/LuiExtended/frontend\Changelog.xml
