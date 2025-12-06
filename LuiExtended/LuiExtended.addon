@@ -4,8 +4,8 @@
 ## Version: 7.1.3.11
 ## AddOnVersion: 71311
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
-## PCDependsOn: LuiMedia>=7120 LuiData>=7107 LibAddonMenu-2.0>=41 LibMediaProvider>=36
-## ConsoleDependsOn: LuiMedia>=7120 LuiData>=7107 LibMediaProvider>=36 LibHarvensAddonSettings LibCombatAlerts LibConsoleDialogs
+## PCDependsOn: LuiMedia>=7130 LuiData>=7107 LibAddonMenu-2.0>=41 LibMediaProvider>=36
+## ConsoleDependsOn: LuiMedia>=7130 LuiData>=7107 LibMediaProvider>=36 LibHarvensAddonSettings LibCombatAlerts LibConsoleDialogs
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705 CrutchAlerts>=20502
 ## OptionalDependsOn: LibGroupResources>=91 LibGroupCombatStats>=20251011 LibGroupPotionCooldowns>=20250727
 ## OptionalDependsOn: LibDebugLogger>=268 DolgubonsLazyWritCreator>=4038 LibLazyCrafting>=4028 LootLog>=408040
@@ -20,6 +20,8 @@ lang/settings/default.lua
 
 lang/$(language).lua
 lang/settings/$(language).lua
+
+bindings/Bindings.xml
 
 # Addon Base
 src/LuiExtended.lua
@@ -41,12 +43,12 @@ keyboard/hooks.lua
 keyboard/maphooks.lua
 keyboard/skills.lua
 
-src/Changelog.lua
-bindings/Bindings.xml
+#src/Changelog.lua
+
 
 # Frontend
 frontend/AbilityAlerts.xml
-frontend/Changelog.xml
+#frontend/Changelog.xml
 frontend/CombatText.xml
 frontend/CrowdControlTracker.xml
 frontend/InfoPanel.xml

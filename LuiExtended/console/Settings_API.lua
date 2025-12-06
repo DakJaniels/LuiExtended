@@ -8,11 +8,9 @@
 local LUIE = LUIE
 
 -- Local references
-local LMP = LibMediaProvider --- @type LibMediaProvider
 local table_insert = table.insert
 local table_sort = table.sort
 local pairs = pairs
-local ipairs = ipairs
 
 -- ---------------------------------------------------------------------------------------
 -- SettingsAPI Class
@@ -20,7 +18,6 @@ local ipairs = ipairs
 
 --- @class (partial) SettingsAPI : ZO_InitializingObject
 --- @field mediaCache table Cache for media lists to avoid regenerating them
---- @field LMP table LibMediaProvider instance
 --- @field LUIE table LuiExtended namespace
 local SettingsAPI = ZO_InitializingObject:Subclass()
 
@@ -28,7 +25,6 @@ local SettingsAPI = ZO_InitializingObject:Subclass()
 function SettingsAPI:Initialize()
     self.name = "SettingsAPI"
     self.initialized = false
-    self.LMP = LMP
     self.LUIE = LUIE
     self.mediaCache =
     {
@@ -39,57 +35,12 @@ function SettingsAPI:Initialize()
 end
 
 -- ---------------------------------------------------------------------------------------
--- Media Registration Functions
--- ---------------------------------------------------------------------------------------
-
---- Register all LUIE media with LibMediaProvider
-function SettingsAPI:RegisterLUIEMedia()
-    for mediaName, mediaPath in pairs(self.LUIE.Fonts) do
-        self.LMP:Register(self.LMP.MediaType.FONT, mediaName, mediaPath)
-    end
-    for mediaName, mediaPath in pairs(self.LUIE.Sounds) do
-        self.LMP:Register(self.LMP.MediaType.SOUND, mediaName, mediaPath)
-    end
-    for mediaName, mediaPath in pairs(self.LUIE.StatusbarTextures) do
-        self.LMP:Register(self.LMP.MediaType.STATUSBAR, mediaName, mediaPath)
-    end
-end
-
---- Fetch additional media from other addons
-function SettingsAPI:FetchExternalMedia()
-    for _, mediaName in ipairs(self.LMP:List(self.LMP.MediaType.FONT)) do
-        if not self.LUIE.Fonts[mediaName] then
-            self.LUIE.Fonts[mediaName] = self.LMP:Fetch(self.LMP.MediaType.FONT, mediaName)
-        end
-    end
-    for _, mediaName in ipairs(self.LMP:List(self.LMP.MediaType.SOUND)) do
-        if not self.LUIE.Sounds[mediaName] then
-            self.LUIE.Sounds[mediaName] = self.LMP:Fetch(self.LMP.MediaType.SOUND, mediaName)
-        end
-    end
-    for _, mediaName in ipairs(self.LMP:List(self.LMP.MediaType.STATUSBAR)) do
-        if not self.LUIE.StatusbarTextures[mediaName] then
-            self.LUIE.StatusbarTextures[mediaName] = self.LMP:Fetch(self.LMP.MediaType.STATUSBAR, mediaName)
-        end
-    end
-end
-
---- Load all media (register LUIE + fetch external)
-function SettingsAPI:LoadAllMedia()
-    if not self.initialized then
-        self:Initialize()
-        self.initialized = true
-    end
-    self:RegisterLUIEMedia()
-    self:FetchExternalMedia()
-    self:ClearMediaCache()
-end
-
--- ---------------------------------------------------------------------------------------
 -- Media List Generation Functions
 -- ---------------------------------------------------------------------------------------
+-- Note: LuiMedia addon handles all LibMediaProvider registration
+-- We just fetch the combined lists here for settings UI
 
---- Get combined list of LUIE and LibMediaProvider fonts
+--- Get list of all fonts (LuiMedia already has everything including external media)
 --- @return table fontsList Array of {name = string, data = string} items for LHAS dropdowns
 function SettingsAPI:GetFontsList()
     if self.mediaCache.fonts then
@@ -97,14 +48,8 @@ function SettingsAPI:GetFontsList()
     end
 
     local fontsList = {}
-
     for font, _ in pairs(self.LUIE.Fonts) do
         table_insert(fontsList, { name = font, data = font })
-    end
-    for _, font in ipairs(self.LMP:List(self.LMP.MediaType.FONT)) do
-        if not self.LUIE.Fonts[font] then
-            table_insert(fontsList, { name = font, data = font })
-        end
     end
 
     table_sort(fontsList, function (a, b) return a.name < b.name end)
@@ -112,7 +57,7 @@ function SettingsAPI:GetFontsList()
     return fontsList
 end
 
---- Get combined list of LUIE and LibMediaProvider sounds
+--- Get list of all sounds (LuiMedia already has everything including external media)
 --- @return table soundsList Array of {name = string, data = string} items for LHAS dropdowns
 function SettingsAPI:GetSoundsList()
     if self.mediaCache.sounds then
@@ -120,14 +65,8 @@ function SettingsAPI:GetSoundsList()
     end
 
     local soundsList = {}
-
     for sound, _ in pairs(self.LUIE.Sounds) do
         table_insert(soundsList, { name = sound, data = sound })
-    end
-    for _, sound in ipairs(self.LMP:List(self.LMP.MediaType.SOUND)) do
-        if not self.LUIE.Sounds[sound] then
-            table_insert(soundsList, { name = sound, data = sound })
-        end
     end
 
     table_sort(soundsList, function (a, b) return a.name < b.name end)
@@ -135,7 +74,7 @@ function SettingsAPI:GetSoundsList()
     return soundsList
 end
 
---- Get combined list of LUIE and LibMediaProvider statusbar textures
+--- Get list of all statusbar textures (LuiMedia already has everything including external media)
 --- @return table statusbarTexturesList Array of {name = string, data = string} items for LHAS dropdowns
 function SettingsAPI:GetStatusbarTexturesList()
     if self.mediaCache.statusbarTextures then
@@ -143,14 +82,8 @@ function SettingsAPI:GetStatusbarTexturesList()
     end
 
     local statusbarTexturesList = {}
-
-    for key, _ in pairs(self.LUIE.StatusbarTextures) do
-        table_insert(statusbarTexturesList, { name = key, data = key })
-    end
-    for _, texture in ipairs(self.LMP:List(self.LMP.MediaType.STATUSBAR)) do
-        if not self.LUIE.StatusbarTextures[texture] then
-            table_insert(statusbarTexturesList, { name = texture, data = texture })
-        end
+    for texture, _ in pairs(self.LUIE.StatusbarTextures) do
+        table_insert(statusbarTexturesList, { name = texture, data = texture })
     end
 
     table_sort(statusbarTexturesList, function (a, b) return a.name < b.name end)
@@ -277,68 +210,6 @@ end
 function SettingsAPI:GetRotationOptionsList()
     local rotationOptions = { "Horizontal", "Vertical" }
     return self:ConvertOptionsToItems(rotationOptions)
-end
-
--- ---------------------------------------------------------------------------------------
--- Cache Management
--- ---------------------------------------------------------------------------------------
-
---- Clear media cache (useful for when LMP is loaded after initial load)
-function SettingsAPI:ClearMediaCache()
-    self.mediaCache.fonts = nil
-    self.mediaCache.sounds = nil
-    self.mediaCache.statusbarTextures = nil
-end
-
---- Force refresh of all media lists
-function SettingsAPI:RefreshMediaLists()
-    self:ClearMediaCache()
-    self:GetFontsList()
-    self:GetSoundsList()
-    self:GetStatusbarTexturesList()
-end
-
---- Handle dynamic media registration from other addons
---- @param mediaType string The media type that was registered
---- @param mediaName string The name of the media that was registered
-function SettingsAPI:HandleMediaRegistration(mediaType, mediaName)
-    if mediaType == self.LMP.MediaType.FONT then
-        self.LUIE.Fonts[mediaName] = self.LMP:Fetch(mediaType, mediaName)
-    elseif mediaType == self.LMP.MediaType.SOUND then
-        self.LUIE.Sounds[mediaName] = self.LMP:Fetch(mediaType, mediaName)
-    elseif mediaType == self.LMP.MediaType.STATUSBAR then
-        self.LUIE.StatusbarTextures[mediaName] = self.LMP:Fetch(mediaType, mediaName)
-    end
-
-    self:ClearMediaCache()
-end
-
---- Get media path for a specific media name and type
---- @param mediaType string The media type
---- @param mediaName string The media name
---- @return string|nil The media path or nil if not found
-function SettingsAPI:GetMediaPath(mediaType, mediaName)
-    return self.LMP:Fetch(mediaType, mediaName)
-end
-
---- Check if a media item exists
---- @param mediaType string The media type
---- @param mediaName string The media name
---- @return boolean True if the media exists
-function SettingsAPI:IsMediaValid(mediaType, mediaName)
-    return self.LMP:IsValid(mediaType, mediaName)
-end
-
---- Get the LibMediaProvider instance
---- @return table The LibMediaProvider instance
-function SettingsAPI:GetLibMediaProvider()
-    return self.LMP
-end
-
---- Get the LibMediaProvider MediaType constants
---- @return table The MediaType constants
-function SettingsAPI:GetMediaTypes()
-    return self.LMP.MediaType
 end
 
 -- ---------------------------------------------------------------------------------------

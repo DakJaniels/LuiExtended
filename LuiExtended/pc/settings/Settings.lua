@@ -120,17 +120,17 @@ function LUIE.CreateSettings()
         registerForDefaults = false,
     }
 
-    -- Changelog Button
-    optionsData[#optionsData + 1] = SettingsAPI.CreateButtonOption(
-        GetString(LUIE_STRING_LAM_CHANGELOG),
-        GetString(LUIE_STRING_LAM_CHANGELOG_TP),
-        function ()
-            LUIE.ToggleChangelog(false)
-            SCENE_MANAGER:ShowBaseScene()
-        end,
-        "half",
-        function () return not Settings.ShowChangeLog end
-    )
+    -- -- Changelog Button
+    -- optionsData[#optionsData + 1] = SettingsAPI.CreateButtonOption(
+    --     GetString(LUIE_STRING_LAM_CHANGELOG),
+    --     GetString(LUIE_STRING_LAM_CHANGELOG_TP),
+    --     function ()
+    --         LUIE.ToggleChangelog(false)
+    --         SCENE_MANAGER:ShowBaseScene()
+    --     end,
+    --     "half",
+    --     function () return not Settings.ShowChangeLog end
+    -- )
 
     -- ReloadUI Button
     optionsData[#optionsData + 1] = SettingsAPI.CreateButtonOption(

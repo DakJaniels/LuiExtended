@@ -12,14 +12,10 @@ local SettingsAPI = {}
 LUIE.SettingsAPI = SettingsAPI
 
 -- Local references.
-local LMP = LibMediaProvider
 local table_insert = table.insert
 local pairs = pairs
-local ipairs = ipairs
 local zo_strformat = zo_strformat
 local string = string
-local string_rep = string.rep
-local unpack = unpack
 
 -- Cache for media lists to avoid regenerating them
 local mediaCache =
@@ -30,57 +26,12 @@ local mediaCache =
 }
 
 -- -----------------------------------------------------------------------------
--- Media Registration Functions
--- -----------------------------------------------------------------------------
-
---- Register LUIE's own media with LibMediaProvider
---- @param mediaType string The media type to register
---- @param mediaTable table The media table to register
-local function RegisterLUIEMedia(mediaType, mediaTable)
-    for mediaName, mediaPath in pairs(mediaTable) do
-        LMP:Register(mediaType, mediaName, mediaPath)
-    end
-end
-
---- Fetch additional media from other addons via LibMediaProvider
---- @param mediaType string The media type to fetch
---- @param mediaTable table The media table to update
-local function FetchExternalMedia(mediaType, mediaTable)
-    for _, mediaName in ipairs(LMP:List(mediaType)) do
-        if not mediaTable[mediaName] then
-            mediaTable[mediaName] = LMP:Fetch(mediaType, mediaName)
-        end
-    end
-end
-
---- Register all LUIE media with LibMediaProvider
-function SettingsAPI.RegisterLUIEMedia()
-    -- Register LUIE's own media
-    RegisterLUIEMedia(LMP.MediaType.FONT, LUIE.Fonts)
-    RegisterLUIEMedia(LMP.MediaType.SOUND, LUIE.Sounds)
-    RegisterLUIEMedia(LMP.MediaType.STATUSBAR, LUIE.StatusbarTextures)
-end
-
---- Fetch additional media from other addons
-function SettingsAPI.FetchExternalMedia()
-    -- Fetch additional media from other addons
-    FetchExternalMedia(LMP.MediaType.FONT, LUIE.Fonts)
-    FetchExternalMedia(LMP.MediaType.SOUND, LUIE.Sounds)
-    FetchExternalMedia(LMP.MediaType.STATUSBAR, LUIE.StatusbarTextures)
-end
-
---- Load all media (register LUIE + fetch external)
-function SettingsAPI.LoadAllMedia()
-    SettingsAPI.RegisterLUIEMedia()
-    SettingsAPI.FetchExternalMedia()
-    SettingsAPI.ClearMediaCache() -- Clear cache after loading new media
-end
-
--- -----------------------------------------------------------------------------
 -- Media List Generation Functions
 -- -----------------------------------------------------------------------------
+-- Note: LuiMedia addon handles all LibMediaProvider registration
+-- We just fetch the combined lists here for settings UI
 
---- Get combined list of LUIE and LibMediaProvider fonts
+--- Get list of all fonts (LuiMedia already has everything including external media)
 --- @return table fontsList
 function SettingsAPI.GetFontsList()
     if mediaCache.fonts then
@@ -88,24 +39,15 @@ function SettingsAPI.GetFontsList()
     end
 
     local fontsList = {}
-
-    -- Add LUIE fonts first
     for font, _ in pairs(LUIE.Fonts) do
         table_insert(fontsList, font)
-    end
-    -- Add LMP fonts
-    for _, font in ipairs(LMP:List(LMP.MediaType.FONT)) do
-        -- Only add if not already in list
-        if not LUIE.Fonts[font] then
-            table_insert(fontsList, font)
-        end
     end
 
     mediaCache.fonts = fontsList
     return fontsList
 end
 
---- Get combined list of LUIE and LibMediaProvider sounds
+--- Get list of all sounds (LuiMedia already has everything including external media)
 --- @return table soundsList
 function SettingsAPI.GetSoundsList()
     if mediaCache.sounds then
@@ -113,24 +55,15 @@ function SettingsAPI.GetSoundsList()
     end
 
     local soundsList = {}
-
-    -- Add LUIE sounds first
     for sound, _ in pairs(LUIE.Sounds) do
         table_insert(soundsList, sound)
-    end
-    -- Add LMP sounds
-    for _, sound in ipairs(LMP:List(LMP.MediaType.SOUND)) do
-        -- Only add if not already in list
-        if not LUIE.Sounds[sound] then
-            table_insert(soundsList, sound)
-        end
     end
 
     mediaCache.sounds = soundsList
     return soundsList
 end
 
---- Get combined list of LUIE and LibMediaProvider statusbar textures
+--- Get list of all statusbar textures (LuiMedia already has everything including external media)
 --- @return table statusbarTexturesList
 function SettingsAPI.GetStatusbarTexturesList()
     if mediaCache.statusbarTextures then
@@ -138,17 +71,8 @@ function SettingsAPI.GetStatusbarTexturesList()
     end
 
     local statusbarTexturesList = {}
-
-    -- Add LUIE textures first
-    for key, _ in pairs(LUIE.StatusbarTextures) do
-        table_insert(statusbarTexturesList, key)
-    end
-    -- Add LMP statusbar textures
-    for _, texture in ipairs(LMP:List(LMP.MediaType.STATUSBAR)) do
-        -- Only add if not already in list
-        if not LUIE.StatusbarTextures[texture] then
-            table_insert(statusbarTexturesList, texture)
-        end
+    for texture, _ in pairs(LUIE.StatusbarTextures) do
+        table_insert(statusbarTexturesList, texture)
     end
 
     mediaCache.statusbarTextures = statusbarTexturesList
@@ -801,9 +725,9 @@ end
 
 --- Extract colorpicker default values from a settings table
 --- @param colorTable table Table containing color values [1]=r, [2]=g, [3]=b, [4]=a
---- @return number r
---- @return number g
---- @return number b
+--- @return number|nil r
+--- @return number|nil g
+--- @return number|nil b
 --- @return number|nil a
 function SettingsAPI.UnpackColorDefaults(colorTable)
     if colorTable then
@@ -864,70 +788,6 @@ function SettingsAPI.CreateIndentedColorpickerFromTable(name, tooltip, getFunc, 
         warning,
         requiresReload
     )
-end
-
--- -----------------------------------------------------------------------------
--- Cache Management
--- -----------------------------------------------------------------------------
-
---- Clear media cache (useful for when LMP is loaded after initial load)
-function SettingsAPI.ClearMediaCache()
-    mediaCache.fonts = nil
-    mediaCache.sounds = nil
-    mediaCache.statusbarTextures = nil
-end
-
---- Force refresh of all media lists
-function SettingsAPI.RefreshMediaLists()
-    SettingsAPI.ClearMediaCache()
-    SettingsAPI.GetFontsList()
-    SettingsAPI.GetSoundsList()
-    SettingsAPI.GetStatusbarTexturesList()
-end
-
---- Handle dynamic media registration from other addons
---- @param mediaType string The media type that was registered
---- @param mediaName string The name of the media that was registered
-function SettingsAPI.HandleMediaRegistration(mediaType, mediaName)
-    -- Update the appropriate LUIE media table
-    if mediaType == LMP.MediaType.FONT then
-        LUIE.Fonts[mediaName] = LMP:Fetch(mediaType, mediaName)
-    elseif mediaType == LMP.MediaType.SOUND then
-        LUIE.Sounds[mediaName] = LMP:Fetch(mediaType, mediaName)
-    elseif mediaType == LMP.MediaType.STATUSBAR then
-        LUIE.StatusbarTextures[mediaName] = LMP:Fetch(mediaType, mediaName)
-    end
-
-    -- Clear cache to force regeneration with new media
-    SettingsAPI.ClearMediaCache()
-end
-
---- Get media path for a specific media name and type
---- @param mediaType string The media type
---- @param mediaName string The media name
---- @return string|nil The media path or nil if not found
-function SettingsAPI.GetMediaPath(mediaType, mediaName)
-    return LMP:Fetch(mediaType, mediaName)
-end
-
---- Check if a media item exists
---- @param mediaType string The media type
---- @param mediaName string The media name
---- @return boolean True if the media exists
-function SettingsAPI.IsMediaValid(mediaType, mediaName)
-    return LMP:IsValid(mediaType, mediaName)
-end
-
---- Get the LibMediaProvider instance
---- @return table The LibMediaProvider instance
-function SettingsAPI.GetLibMediaProvider()
-    return LMP
-end
-
---- Get the LibMediaProvider MediaType constants
---- @return table The MediaType constants
-function SettingsAPI.GetMediaTypes()
-    return LMP.MediaType
 end
 
 return SettingsAPI

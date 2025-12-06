@@ -11,9 +11,6 @@ local LUIE = LUIE
 local zo_strformat = zo_strformat
 local eventManager = GetEventManager()
 
--- Ensure LibMediaProvider is initialized
-local LMP = LibMediaProvider
-
 -- Load saved settings.
 local function LoadSavedVars()
     -- Addon options
@@ -21,11 +18,6 @@ local function LoadSavedVars()
     if LUIE.SV.CharacterSpecificSV then
         LUIE.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults)
     end
-end
-
--- Load additional media from LMP using centralized SettingsAPI
-local function LoadMedia()
-    LUIE.SettingsAPI.LoadAllMedia()
 end
 
 --- - **EVENT_PLAYER_ACTIVATED **
@@ -45,19 +37,11 @@ end
 local function RegisterEvents()
     eventManager:RegisterForEvent(LUIE.name, EVENT_PLAYER_ACTIVATED, LoadScreen)
 
-    -- Register for LibMediaProvider media registration callbacks
-    LUIE:RegisterCallback("LibMediaProvider_Registered", function (mediatype, key)
-        LUIE.SettingsAPI.HandleMediaRegistration(mediatype, key)
-    end)
-
-    -- Existing event registrations
+    -- Event registrations
     if LUIE.SV.SlashCommands_Enable or LUIE.SV.ChatAnnouncements_Enable then
         eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_JOINED_GUILD, LUIE.UpdateGuildData)
         eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_LEFT_GUILD, LUIE.UpdateGuildData)
     end
-
-    -- Load additional media from LMP and other addons
-    LoadMedia()
 end
 
 function LUIE:InitializeHooks()
@@ -131,9 +115,9 @@ eventManager:RegisterForEvent(LUIE.name, EVENT_ADD_ON_LOADED, function (eventId,
     LUIE.SlashCommands.MigrateSettings()
     -- -----------------------------------------------------------------------------
     -- Display changelog screen
-    if LUIE.SV.ShowChangeLog == true then
-        LUIE.ChangelogScreen()
-    end
+    -- if LUIE.SV.ShowChangeLog == true then
+    --     LUIE.ChangelogScreen()
+    -- end
     -- -----------------------------------------------------------------------------
     -- Register global event listeners
     RegisterEvents()

@@ -12,9 +12,6 @@ local zo_strformat = zo_strformat
 local eventManager = GetEventManager()
 local windowManager = GetWindowManager()
 
--- Ensure LibMediaProvider is initialized
-local LMP = LibMediaProvider
-
 local LUIE_InitControl = windowManager:CreateControl("LUIE_TempInitControl", GuiRoot, CT_CONTROL)
 
 -- Load saved settings.
@@ -24,11 +21,6 @@ local function LoadSavedVars()
     if LUIE.SV.CharacterSpecificSV then
         LUIE.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults)
     end
-end
-
--- Load additional media from LMP using centralized SettingsAPI
-local function LoadMedia()
-    LUIE.ConsoleSettingsAPI:LoadAllMedia()
 end
 
 --- - **EVENT_PLAYER_ACTIVATED **
@@ -44,9 +36,9 @@ end
 
 -- Register events.
 local function RegisterEvents()
-    LUIE_InitControl:RegisterForEvent(EVENT_PLAYER_ACTIVATED, LoadScreen)
+    LUIE_InitControl:RegisterForEvent(EVENT_PLAYER_ACTIVATED, LoadScreen, false)
 
-    -- Existing event registrations
+    -- Event registrations
     if LUIE.SV.SlashCommands_Enable or LUIE.SV.ChatAnnouncements_Enable then
         eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_JOINED_GUILD, LUIE.UpdateGuildData)
         eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_LEFT_GUILD, LUIE.UpdateGuildData)
@@ -103,11 +95,6 @@ local function InitializeAddon()
     LUIE.SpellCastBuffs:CreateConsoleSettings()
     LUIE.SlashCommands.CreateConsoleSettings()
     -- -----------------------------------------------------------------------------
-    -- Display changelog screen
-    if LUIE.SV.ShowChangeLog == true then
-        LUIE.ChangelogScreen()
-    end
-    -- -----------------------------------------------------------------------------
     -- Register global event listeners
     RegisterEvents()
 end
@@ -116,36 +103,28 @@ end
 --- - **EVENT_ADD_ON_LOADED **
 -- LuiExtended Initialization.
 LUIE_InitControl:RegisterForEvent(EVENT_ADD_ONS_LOADED, function (eventId)
-    -- -----------------------------------------------------------------------------
-    -- Load saved variables
-    LoadSavedVars()
-    LUIE.UpdateGuildData(nil, nil, nil, nil)
-    -- -----------------------------------------------------------------------------
-    -- Register for LibMediaProvider media registration callbacks
-    LUIE:RegisterCallback("LibMediaProvider_Registered", function (mediatype, key)
-        LUIE.ConsoleSettingsAPI:HandleMediaRegistration(mediatype, key)
-    end)
-    -- -----------------------------------------------------------------------------
-    -- Load additional media from LMP
-    LoadMedia()
-    -- -----------------------------------------------------------------------------
-    -- Initialize Hooks
-    LUIE:InitializeHooks()
-    --
-    LUIE.OtherAddonCompatability.isActionDurationReminderEnabled = LUIE.IsItEnabled("ActionDurationReminder")
-    LUIE.OtherAddonCompatability.isFancyActionBarEnabled = LUIE.IsItEnabled("FancyActionBar")
-    LUIE.OtherAddonCompatability.isFancyActionBarPlusEnabled = LUIE.IsItEnabled("FancyActionBar\43")
-    LUIE.OtherAddonCompatability.isWritCreatorEnabled = LUIE.IsItEnabled("DolgubonsLazyWritCreator")
+                                      -- -----------------------------------------------------------------------------
+                                      -- Load saved variables
+                                      LoadSavedVars()
+                                      LUIE.UpdateGuildData(nil, nil, nil, nil)
+                                      -- -----------------------------------------------------------------------------
+                                      -- Initialize Hooks
+                                      LUIE:InitializeHooks()
+                                      --
+                                      LUIE.OtherAddonCompatability.isActionDurationReminderEnabled = LUIE.IsItEnabled("ActionDurationReminder")
+                                      LUIE.OtherAddonCompatability.isFancyActionBarEnabled = LUIE.IsItEnabled("FancyActionBar")
+                                      LUIE.OtherAddonCompatability.isFancyActionBarPlusEnabled = LUIE.IsItEnabled("FancyActionBar\43")
+                                      LUIE.OtherAddonCompatability.isWritCreatorEnabled = LUIE.IsItEnabled("DolgubonsLazyWritCreator")
 
-    -- Check if game has focus, if not wait for focus before doing heavy initialization
-    if DoesGameHaveFocus() then
-        InitializeAddon()
-    else
-        LUIE_InitControl:RegisterForEvent(EVENT_GAME_FOCUS_CHANGED, function (_, hasFocus)
-            if hasFocus then
-                LUIE_InitControl:UnregisterForEvent(EVENT_GAME_FOCUS_CHANGED)
-                InitializeAddon()
-            end
-        end, true)
-    end
-end, true)
+                                      -- Check if game has focus, if not wait for focus before doing heavy initialization
+                                      if DoesGameHaveFocus() then
+                                          InitializeAddon()
+                                      else
+                                          LUIE_InitControl:RegisterForEvent(EVENT_GAME_FOCUS_CHANGED, function (_, hasFocus)
+                                                                                if hasFocus then
+                                                                                    LUIE_InitControl:UnregisterForEvent(EVENT_GAME_FOCUS_CHANGED)
+                                                                                    InitializeAddon()
+                                                                                end
+                                                                            end, true)
+                                      end
+                                  end, true)
