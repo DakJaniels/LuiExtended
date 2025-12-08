@@ -403,7 +403,7 @@ function SlashCommands.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_SLASHCMDS_PET_MESSAGE_TP),
             getFunction = function () return Settings.SlashPetMessage end,
             setFunction = function (value) Settings.SlashPetMessage = value end,
-            default = LUIE.Defaults.SlashPetMessage
+            default = Defaults.SlashPetMessage
         }
 
         -- SlashOutfit
