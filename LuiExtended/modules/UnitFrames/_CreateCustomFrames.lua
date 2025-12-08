@@ -95,7 +95,7 @@ local function CreateNoHealingFadeAnimation(overlay, stripeOverlay)
 
     -- Add stripe overlay to same timeline if provided (custom LUIE feature)
     if stripeOverlay then
-        local stripeFade = fadeTimeline:InsertAnimation(ANIMATION_ALPHA, stripeOverlay)
+        local stripeFade = fadeTimeline:InsertAnimation(ANIMATION_ALPHA, stripeOverlay, 0)
         stripeFade:SetAlphaValues(0, 1)
         stripeFade:SetDuration(200)
         stripeFade:SetEasingFunction(ZO_EaseInQuadratic)

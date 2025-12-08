@@ -4019,97 +4019,6 @@ function SpellCastBuffs:CreateConsoleSettings()
         }
     end)
 
-    -- Build Debug Options Section
-    buildSectionSettings("Debug", function (settings)
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_SECTION,
-            label = "Debug Options",
-        }
-
-        -- Submenu description
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_LABEL,
-            label = "Configure debug options for development.",
-        }
-
-        -- Debug - Show AbilityId on Buffs & Debuffs
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = "Show AbilityId on Buffs & Debuffs",
-            tooltip = "Toggle the display of AbilityId on buffs and debuffs - useful for adding auras to Prominent Buffs & Debuffs or the Aura Blacklist.",
-            getFunction = function ()
-                return Settings.ShowDebugAbilityId
-            end,
-            setFunction = function (value)
-                Settings.ShowDebugAbilityId = value
-                self:Reset()
-            end,
-            default = Defaults.ShowDebugAbilityId,
-            disable = function ()
-                return not LUIE.SV.SpellCastBuff_Enable
-            end,
-        }
-
-        -- Debug - Show Debug for Combat Events
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = "Show Debug for Combat Events",
-            tooltip = "Display debug information for combat events - used for development.",
-            getFunction = function ()
-                return Settings.ShowDebugCombat
-            end,
-            setFunction = function (value)
-                Settings.ShowDebugCombat = value
-                self:RegisterDebugEvents()
-            end,
-            default = Defaults.ShowDebugCombat,
-            disable = function ()
-                return not LUIE.SV.SpellCastBuff_Enable
-            end,
-        }
-
-        -- Debug - Show Debug for Effect Change Events
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = "Show Debug for Effect Change Events",
-            tooltip = "Display debug information for effect change events - used for development.",
-            getFunction = function ()
-                return Settings.ShowDebugEffect
-            end,
-            setFunction = function (value)
-                Settings.ShowDebugEffect = value
-                self:RegisterDebugEvents()
-            end,
-            default = Defaults.ShowDebugEffect,
-            disable = function ()
-                return not LUIE.SV.SpellCastBuff_Enable
-            end,
-        }
-
-        -- Debug - Filter Debug Events & Effects
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = "Filter Debug Events & Effects",
-            tooltip = "Filter out events and effects that have already been processed - used for development.",
-            getFunction = function ()
-                return Settings.ShowDebugFilter
-            end,
-            setFunction = function (value)
-                Settings.ShowDebugFilter = value
-            end,
-            default = Defaults.ShowDebugFilter,
-            disable = function ()
-                return not LUIE.SV.SpellCastBuff_Enable
-            end,
-        }
-    end)
-
     -- Create back button
     backButton =
     {
@@ -4164,7 +4073,6 @@ function SpellCastBuffs:CreateConsoleSettings()
     menuButtons[#menuButtons + 1] = createMenuButton("Priority", GetString(LUIE_STRING_LAM_BUFF_PRIORITY_HEADER))
     menuButtons[#menuButtons + 1] = createMenuButton("Prominent", GetString(LUIE_STRING_LAM_BUFF_PROM_HEADER))
     menuButtons[#menuButtons + 1] = createMenuButton("Blacklist", GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_HEADER))
-    menuButtons[#menuButtons + 1] = createMenuButton("Debug", "Debug Options")
 
     -- Initialize main menu
     local mainMenuSettings = {}

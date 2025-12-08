@@ -526,7 +526,12 @@ function SpellCastBuffs:_RegisterEvents()
     self:RegisterWerewolfEvents()
 
     -- Debug
-    self:RegisterDebugEvents()
+    if IsConsoleUI() then
+         return
+    else
+        self:RegisterDebugEvents()
+     end
+
 end
 
 function SpellCastBuffs:RegisterWerewolfEvents()

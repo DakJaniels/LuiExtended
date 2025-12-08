@@ -1232,13 +1232,19 @@ function UnitFrames.UpdateStaticControls(unitFrame)
                 unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 1, 0)
             end
             -- Use game API for both champion and normal level icons
+            local iconPath
             if unitFrame.isChampion then
-                local championIcon = IsInGamepadPreferredMode() and ZO_GetGamepadChampionPointsIcon() or ZO_GetChampionPointsIconSmall()
-                unitFrame.levelIcon:SetTexture(championIcon)
+                iconPath = IsInGamepadPreferredMode() and ZO_GetGamepadChampionPointsIcon() or ZO_GetChampionPointsIconSmall()
             else
-                local normalIcon = IsInGamepadPreferredMode() and ZO_GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL) or ZO_GetKeyboardDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
-                unitFrame.levelIcon:SetTexture(normalIcon)
+                iconPath = IsInGamepadPreferredMode() and ZO_GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL) or ZO_GetKeyboardDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
             end
+            unitFrame.levelIcon:SetTexture(iconPath)
+            -- Prevent auto-resize and set color to white
+            unitFrame.levelIcon:SetResizeToFitFile(false)
+            unitFrame.levelIcon:SetColor(1, 1, 1, 1)
+            -- Set fixed size
+            unitFrame.levelIcon:SetWidth(18)
+            unitFrame.levelIcon:SetHeight(18)
             -- Level label should be already anchored
             unitFrame.level:SetText(tostring(unitFrame.isChampion and GetUnitChampionPoints(unitFrame.unitTag) or GetUnitLevel(unitFrame.unitTag)))
         end

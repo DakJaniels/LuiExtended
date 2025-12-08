@@ -4,6 +4,8 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
+if IsConsoleUI() then return end
+
 --- @class (partial) LuiData
 local LuiData = LuiData
 local Data = LuiData.Data

@@ -27,6 +27,7 @@ LUIE_CombatText_Virtual = {}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
 ---@field DimensionConstraints {minX: layout_measurement, minY: layout_measurement, maxX: layout_measurement, maxY: layout_measurement}
+---@field public OnMouseUp fun(self: Control, button: integer, upInside: boolean, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
 LUIE_CombatText_Outgoing = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
@@ -35,6 +36,7 @@ LUIE_CombatText_Outgoing = {}
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
 ---@field DimensionConstraints {minX: layout_measurement, minY: layout_measurement, maxX: layout_measurement, maxY: layout_measurement}
+---@field public OnMouseUp fun(self: Control, button: integer, upInside: boolean, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
 LUIE_CombatText_Incoming = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
@@ -42,6 +44,7 @@ LUIE_CombatText_Incoming = {}
 ---@field public clampedToScreen boolean
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field public OnMouseUp fun(self: Control, button: integer, upInside: boolean, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
 LUIE_CombatText_Alert = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
@@ -49,6 +52,7 @@ LUIE_CombatText_Alert = {}
 ---@field public clampedToScreen boolean
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field public OnMouseUp fun(self: Control, button: integer, upInside: boolean, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
 LUIE_CombatText_Point = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
@@ -56,6 +60,7 @@ LUIE_CombatText_Point = {}
 ---@field public clampedToScreen boolean
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 ---@field Dimensions {x: layout_measurement, y: layout_measurement}
+---@field public OnMouseUp fun(self: Control, button: integer, upInside: boolean, ctrl: boolean, alt: boolean, shift: boolean, command: boolean)
 LUIE_CombatText_Resource = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
