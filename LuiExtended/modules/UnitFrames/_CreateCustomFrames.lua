@@ -419,7 +419,7 @@ local function CreateSmallGroupFrames()
             sceneManager:GetScene(scene):AddFragment(fragment)
         end
 
-        for i = 1, SMALL_GROUP_SIZE_THRESHOLD do
+        for i = 1, 4 do
             local unitTag = "SmallGroup" .. i
             local control = group:GetNamedChild("_" .. unitTag)
             local topInfo = control:GetNamedChild("_TopInfo")
@@ -797,7 +797,7 @@ local function SetupCommonFrameActions()
         -- Anchor bars to their backdrops
         local shieldOverlay = (baseName == "RaidGroup" or baseName == "boss") or not UnitFrames.SV.CustomShieldBarSeparate
 
-        for i = 0, MAX_GROUP_SIZE_THRESHOLD do
+        for i = 0, 12 do
             local unitTag = (i == 0) and baseName or (baseName .. i)
             local frame = UnitFrames.CustomFrames[unitTag]
 
@@ -1096,7 +1096,7 @@ function UnitFrames.CreateCustomFrames()
         {
             prefix = "SmallGroup",
             startIndex = 1,
-            endIndex = SMALL_GROUP_SIZE_THRESHOLD,
+            endIndex = 4,
             enableFlag = "GroupEnableRegen",
             widthSV = "GroupBarWidth",
             heightSV = "GroupBarHeight",
@@ -1105,7 +1105,7 @@ function UnitFrames.CreateCustomFrames()
         {
             prefix = "RaidGroup",
             startIndex = 1,
-            endIndex = MAX_GROUP_SIZE_THRESHOLD,
+            endIndex = 12,
             enableFlag = "RaidEnableRegen",
             widthSV = "RaidBarWidth",
             heightSV = "RaidBarHeight",
@@ -1154,13 +1154,13 @@ function UnitFrames.CreateCustomFrames()
         {
             prefix = "SmallGroup",
             startIndex = 1,
-            endIndex = SMALL_GROUP_SIZE_THRESHOLD,
+            endIndex = 4,
             enableFlag = "GroupEnableArmor"
         },
         {
             prefix = "RaidGroup",
             startIndex = 1,
-            endIndex = MAX_GROUP_SIZE_THRESHOLD,
+            endIndex = 12,
             enableFlag = "RaidEnableArmor"
         },
         {
