@@ -123,6 +123,10 @@ local function CreateCombatGlowBorder(backdrop)
 end
 
 -- Decreased armour overlay visuals
+---
+---@param parent Control
+---@param small boolean
+---@return Control
 local function CreateDecreasedArmorOverlay(parent, small)
     -- Create from XML virtual template with parent-based unique name
     local parentName = parent:GetName() or ("LUIE_UF_Parent_" .. tostring(parent))
@@ -132,12 +136,12 @@ local function CreateDecreasedArmorOverlay(parent, small)
     local control = windowManager:CreateControlFromVirtual(uniqueName, parent, templateName)
 
     -- Get texture references
-    control.smallTex = control:GetNamedChild("_SmallTex")
+    control.smallTex = control:GetNamedChild("_SmallTex") ---@type TextureControl
     if not small then
-        control.normalTex = control:GetNamedChild("_NormalTex")
+        control.normalTex = control:GetNamedChild("_NormalTex") ---@type TextureControl
     end
 
-    -- Set texture files (can't use defines in XML)
+    -- Set texture files
     control.smallTex:SetTexture(LUIE_MEDIA_UNITFRAMES_UNITATTRIBUTEVISUALIZER_ATTRIBUTEBAR_DYNAMIC_DECREASEDARMOR_SMALL_DDS)
     if control.normalTex then
         control.normalTex:SetTexture(LUIE_MEDIA_UNITFRAMES_UNITATTRIBUTEVISUALIZER_ATTRIBUTEBAR_DYNAMIC_DECREASEDARMOR_STANDARD_DDS)
@@ -233,7 +237,11 @@ local function CreatePlayerFrame()
             { flag = UnitFrames.SV.HideLabelMagicka, mechanic = COMBAT_MECHANIC_FLAGS_MAGICKA },
         }
 
-        for _, setting in ipairs(labelSettings) do
+        local settingKey = nil
+        local setting
+        while true do
+            settingKey, setting = next(labelSettings, settingKey)
+            if settingKey == nil then break end
             if setting.flag then
                 UnitFrames.CustomFrames["player"][setting.mechanic].labelOne:SetHidden(true)
                 UnitFrames.CustomFrames["player"][setting.mechanic].labelTwo:SetHidden(true)
@@ -402,11 +410,16 @@ local function CreateSmallGroupFrames()
         -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(group, 0, 0)
 
-        for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
+        local sceneList = { "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }
+        local sceneKey = nil
+        local scene
+        while true do
+            sceneKey, scene = next(sceneList, sceneKey)
+            if sceneKey == nil then break end
             sceneManager:GetScene(scene):AddFragment(fragment)
         end
 
-        for i = 1, 4 do
+        for i = 1, SMALL_GROUP_SIZE_THRESHOLD do
             local unitTag = "SmallGroup" .. i
             local control = group:GetNamedChild("_" .. unitTag)
             local topInfo = control:GetNamedChild("_TopInfo")
@@ -491,7 +504,12 @@ local function CreateRaidGroupFrames()
         -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(raid, 0, 0)
 
-        for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
+        local sceneList = { "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }
+        local sceneKey = nil
+        local scene
+        while true do
+            sceneKey, scene = next(sceneList, sceneKey)
+            if sceneKey == nil then break end
             sceneManager:GetScene(scene):AddFragment(fragment)
         end
 
@@ -532,19 +550,15 @@ local function CreateRaidGroupFrames()
                 ["dead"] = rhb:GetNamedChild("_Dead"),
                 ["leader"] = rhb:GetNamedChild("_Leader"),
                 ["libGroupContainer"] = libGroupContainer,
-                -- Raid DPS/HPS commented out - only resource bars remain
-                --[[
-                ["statsLabel"] = statsLabel,
-                ]] --
                 ["resourceMagicka"] =
                 {
-                    ["backdrop"] = control:GetNamedChild("_ResourceMagicka"),
-                    ["bar"] = control:GetNamedChild("_ResourceMagicka"):GetNamedChild("_Bar"),
+                    ["backdrop"] = magBackdrop,
+                    ["bar"] = magBackdrop:GetNamedChild("_Bar"),
                 },
                 ["resourceStamina"] =
                 {
-                    ["backdrop"] = control:GetNamedChild("_ResourceStamina"),
-                    ["bar"] = control:GetNamedChild("_ResourceStamina"):GetNamedChild("_Bar"),
+                    ["backdrop"] = stamBackdrop,
+                    ["bar"] = stamBackdrop:GetNamedChild("_Bar"),
                 },
             }
             UnitFrames.CustomFrames[unitTag].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
@@ -575,7 +589,12 @@ local function CreatePetFrames()
         -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(pet, 0, 0)
 
-        for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
+        local sceneList = { "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }
+        local sceneKey = nil
+        local scene
+        while true do
+            sceneKey, scene = next(sceneList, sceneKey)
+            if sceneKey == nil then break end
             sceneManager:GetScene(scene):AddFragment(fragment)
         end
 
@@ -615,7 +634,7 @@ local function CreateCompanionFrame()
         local companionTlw = LUIE_CustomCompanionFrame
         companionTlw.customPositionAttr = "CustomFramesCompanionFramePos"
         companionTlw.preview = companionTlw:GetNamedChild("_Preview")
-        companionTlw.previewLabel = companionTlw.preview:GetNamedChild("_Label")
+        companionTlw.previewLabel = companionTlw.preview:GetNamedChild("_Label") ---@type LabelControl
         -- Update font to use better readable font
         if IsConsoleUI() and LUIE.ConsoleMoverHelper then
             local fontName = "LUIE Default Font"
@@ -625,7 +644,7 @@ local function CreateCompanionFrame()
                 local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
                 companionTlw.previewLabel:SetFont(fontString)
             else
-                if IsInGamepadPreferredMode() or IsConsoleUI() then
+                if IsInGamepadPreferredMode() then
                     companionTlw.previewLabel:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
                 else
                     companionTlw.previewLabel:SetFont("$(MEDIUM_FONT)|16|soft-shadow-thick")
@@ -636,7 +655,12 @@ local function CreateCompanionFrame()
         -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(companionTlw, 0, 0)
 
-        for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
+        local sceneList = { "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }
+        local sceneKey = nil
+        local scene
+        while true do
+            sceneKey, scene = next(sceneList, sceneKey)
+            if sceneKey == nil then break end
             sceneManager:GetScene(scene):AddFragment(fragment)
         end
 
@@ -679,7 +703,12 @@ local function CreateBossFrames()
         -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(bosses, 0, 0)
 
-        for _, scene in ipairs({ "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }) do
+        local sceneList = { "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }
+        local sceneKey = nil
+        local scene
+        while true do
+            sceneKey, scene = next(sceneList, sceneKey)
+            if sceneKey == nil then break end
             sceneManager:GetScene(scene):AddFragment(fragment)
         end
 
@@ -738,7 +767,11 @@ local function SetupCommonFrameActions()
 
     local frameBaseNames = { "player", "reticleover", "companion", "SmallGroup", "RaidGroup", "boss", "AvaPlayerTarget", "PetGroup" }
 
-    for _, baseName in ipairs(frameBaseNames) do
+    local baseNameKey = nil
+    local baseName
+    while true do
+        baseNameKey, baseName = next(frameBaseNames, baseNameKey)
+        if baseNameKey == nil then break end
         local unitFrame = UnitFrames.CustomFrames[baseName] or UnitFrames.CustomFrames[baseName .. "1"]
         if unitFrame and unitFrame.tlw then
             -- Movement handlers
@@ -764,12 +797,17 @@ local function SetupCommonFrameActions()
         -- Anchor bars to their backdrops
         local shieldOverlay = (baseName == "RaidGroup" or baseName == "boss") or not UnitFrames.SV.CustomShieldBarSeparate
 
-        for i = 0, 12 do
+        for i = 0, MAX_GROUP_SIZE_THRESHOLD do
             local unitTag = (i == 0) and baseName or (baseName .. i)
             local frame = UnitFrames.CustomFrames[unitTag]
 
             if frame then
-                for _, powerType in ipairs({ COMBAT_MECHANIC_FLAGS_HEALTH, COMBAT_MECHANIC_FLAGS_MAGICKA, COMBAT_MECHANIC_FLAGS_STAMINA, "alternative" }) do
+                local powerTypeList = { COMBAT_MECHANIC_FLAGS_HEALTH, COMBAT_MECHANIC_FLAGS_MAGICKA, COMBAT_MECHANIC_FLAGS_STAMINA, "alternative" }
+                local powerTypeKey = nil
+                local powerType
+                while true do
+                    powerTypeKey, powerType = next(powerTypeList, powerTypeKey)
+                    if powerTypeKey == nil then break end
                     local powerBar = frame[powerType]
 
                     if powerBar then
@@ -910,7 +948,17 @@ local function SetupRegenAnimations(frameConfig)
         local frame = UnitFrames.CustomFrames[unitTag]
 
         if frame then
-            for _, powerType in ipairs({ COMBAT_MECHANIC_FLAGS_HEALTH, COMBAT_MECHANIC_FLAGS_MAGICKA, COMBAT_MECHANIC_FLAGS_STAMINA }) do
+            local powerTypeList =
+            {
+                COMBAT_MECHANIC_FLAGS_HEALTH,
+                COMBAT_MECHANIC_FLAGS_MAGICKA,
+                COMBAT_MECHANIC_FLAGS_STAMINA
+            }
+            local powerTypeKey = nil
+            local powerType
+            while true do
+                powerTypeKey, powerType = next(powerTypeList, powerTypeKey)
+                if powerTypeKey == nil then break end
                 if frame[powerType] then
                     local backdrop = frame[powerType].backdrop
                     local size1 = UnitFrames.SV[frameConfig.widthSV]
@@ -958,7 +1006,12 @@ end
 
 -- Helper to set up Power Glow animations for all frames that have it displayed
 local function SetupPowerGlowAnimations()
-    for _, baseName in ipairs({ "player", "reticleover", "AvaPlayerTarget", "boss", "SmallGroup", "RaidGroup" }) do
+    local baseNameList = { "player", "reticleover", "AvaPlayerTarget", "boss", "SmallGroup", "RaidGroup" }
+    local baseNameKey = nil
+    local baseName
+    while true do
+        baseNameKey, baseName = next(baseNameList, baseNameKey)
+        if baseNameKey == nil then break end
         for i = 0, 12 do
             local unitTag = (i == 0) and baseName or (baseName .. i)
             local frame = UnitFrames.CustomFrames[unitTag]
@@ -985,7 +1038,11 @@ end
 local function AddTopLevelWindows()
     local frameTags = { "player", "reticleover", "companion", "SmallGroup1", "RaidGroup1", "boss1", "AvaPlayerTarget", "PetGroup1" }
 
-    for _, unitTag in pairs(frameTags) do
+    local unitTagKey = nil
+    local unitTag
+    while true do
+        unitTagKey, unitTag = next(frameTags, unitTagKey)
+        if unitTagKey == nil then break end
         if UnitFrames.CustomFrames[unitTag] then
             LUIE.Components[moduleName .. "_CustomFrame_" .. unitTag] = UnitFrames.CustomFrames[unitTag].tlw
         end
@@ -1009,31 +1066,117 @@ function UnitFrames.CreateCustomFrames()
     -- Setup regen animations using config table
     local regenConfigs =
     {
-        { prefix = "player",          startIndex = 0,                         endIndex = 0,                       enableFlag = "PlayerEnableRegen", widthSV = "PlayerBarWidth",    heightSV = "PlayerBarHeightHealth", heightMultiplier = 0.3 },
-        { prefix = "reticleover",     startIndex = 0,                         endIndex = 0,                       enableFlag = "PlayerEnableRegen", widthSV = "TargetBarWidth",    heightSV = "TargetBarHeight",       heightMultiplier = 0.3 },
-        { prefix = "AvaPlayerTarget", startIndex = 0,                         endIndex = 0,                       enableFlag = "PlayerEnableRegen", widthSV = "AvaTargetBarWidth", heightSV = "AvaTargetBarHeight",    heightMultiplier = 0.3 },
-        { prefix = "SmallGroup",      startIndex = 1,                         endIndex = 4,                       enableFlag = "GroupEnableRegen",  widthSV = "GroupBarWidth",     heightSV = "GroupBarHeight",        heightMultiplier = 0.4 },
-        { prefix = "RaidGroup",       startIndex = 1,                         endIndex = 12,                      enableFlag = "RaidEnableRegen",   widthSV = "RaidBarWidth",      heightSV = "RaidBarHeight",         heightMultiplier = 0.3 },
-        { prefix = "boss",            startIndex = BOSS_RANK_ITERATION_BEGIN, endIndex = BOSS_RANK_ITERATION_END, enableFlag = "BossEnableRegen",   widthSV = "BossBarWidth",      heightSV = "BossBarHeight",         heightMultiplier = 0.3 },
+        {
+            prefix = "player",
+            startIndex = 0,
+            endIndex = 0,
+            enableFlag = "PlayerEnableRegen",
+            widthSV = "PlayerBarWidth",
+            heightSV = "PlayerBarHeightHealth",
+            heightMultiplier = 0.3
+        },
+        {
+            prefix = "reticleover",
+            startIndex = 0,
+            endIndex = 0,
+            enableFlag = "PlayerEnableRegen",
+            widthSV = "TargetBarWidth",
+            heightSV = "TargetBarHeight",
+            heightMultiplier = 0.3
+        },
+        {
+            prefix = "AvaPlayerTarget",
+            startIndex = 0,
+            endIndex = 0,
+            enableFlag = "PlayerEnableRegen",
+            widthSV = "AvaTargetBarWidth",
+            heightSV = "AvaTargetBarHeight",
+            heightMultiplier = 0.3
+        },
+        {
+            prefix = "SmallGroup",
+            startIndex = 1,
+            endIndex = SMALL_GROUP_SIZE_THRESHOLD,
+            enableFlag = "GroupEnableRegen",
+            widthSV = "GroupBarWidth",
+            heightSV = "GroupBarHeight",
+            heightMultiplier = 0.4
+        },
+        {
+            prefix = "RaidGroup",
+            startIndex = 1,
+            endIndex = MAX_GROUP_SIZE_THRESHOLD,
+            enableFlag = "RaidEnableRegen",
+            widthSV = "RaidBarWidth",
+            heightSV = "RaidBarHeight",
+            heightMultiplier = 0.3
+        },
+        {
+            prefix = "boss",
+            startIndex = BOSS_RANK_ITERATION_BEGIN,
+            endIndex = BOSS_RANK_ITERATION_END,
+            enableFlag = "BossEnableRegen",
+            widthSV = "BossBarWidth",
+            heightSV = "BossBarHeight",
+            heightMultiplier = 0.3
+        },
     }
 
-    for _, config in ipairs(regenConfigs) do
+    local configKey = nil
+    local config
+    while true do
+        configKey, config = next(regenConfigs, configKey)
+        if configKey == nil then break end
         SetupRegenAnimations(config)
     end
 
     -- Setup armor overlays using config table
     local armorConfigs =
     {
-        { prefix = "player",          startIndex = 0,                         endIndex = 0,                       enableFlag = "PlayerEnableArmor" },
-        { prefix = "reticleover",     startIndex = 0,                         endIndex = 0,                       enableFlag = "PlayerEnableArmor" },
-        { prefix = "AvaPlayerTarget", startIndex = 0,                         endIndex = 0,                       enableFlag = "PlayerEnableArmor" },
-        { prefix = "SmallGroup",      startIndex = 1,                         endIndex = 4,                       enableFlag = "GroupEnableArmor"  },
-        { prefix = "RaidGroup",       startIndex = 1,                         endIndex = 12,                      enableFlag = "RaidEnableArmor"   },
-        { prefix = "boss",            startIndex = BOSS_RANK_ITERATION_BEGIN, endIndex = BOSS_RANK_ITERATION_END, enableFlag = "BossEnableArmor"   },
+        {
+            prefix = "player",
+            startIndex = 0,
+            endIndex = 0,
+            enableFlag = "PlayerEnableArmor"
+        },
+        {
+            prefix = "reticleover",
+            startIndex = 0,
+            endIndex = 0,
+            enableFlag = "PlayerEnableArmor"
+        },
+        {
+            prefix = "AvaPlayerTarget",
+            startIndex = 0,
+            endIndex = 0,
+            enableFlag = "PlayerEnableArmor"
+        },
+        {
+            prefix = "SmallGroup",
+            startIndex = 1,
+            endIndex = SMALL_GROUP_SIZE_THRESHOLD,
+            enableFlag = "GroupEnableArmor"
+        },
+        {
+            prefix = "RaidGroup",
+            startIndex = 1,
+            endIndex = MAX_GROUP_SIZE_THRESHOLD,
+            enableFlag = "RaidEnableArmor"
+        },
+        {
+            prefix = "boss",
+            startIndex = BOSS_RANK_ITERATION_BEGIN,
+            endIndex = BOSS_RANK_ITERATION_END,
+            enableFlag = "BossEnableArmor"
+        },
     }
 
-    for _, config in ipairs(armorConfigs) do
-        SetupArmorOverlays(config)
+    local armorConfigKey = nil
+    local armorConfig
+    while true do
+        armorConfigKey, armorConfig = next(armorConfigs, armorConfigKey)
+        if armorConfigKey == nil then break end
+        SetupArmorOverlays(armorConfig)
     end
 
     SetupPowerGlowAnimations()
