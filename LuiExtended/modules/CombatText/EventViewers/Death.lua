@@ -26,14 +26,19 @@ end
 function CombatTextDeathViewer:OnEvent(unitTag)
     local Settings = LUIE.CombatText.SV
 
-    local name = zo_strformat("<<C:1>>", GetUnitName(unitTag))
+    local name
+    if Settings.toggles.useAccountNameForDeath then
+        name = zo_strformat("<<1>>", GetUnitDisplayName(unitTag)) or ""
+    else
+        name = zo_strformat("<<1>>", GetUnitName(unitTag))
+    end
 
     -- Label setup
     local control, controlPoolKey = self.poolManager:GetPoolObject(poolTypes.CONTROL)
 
     local size, color, text
     ---------------------------------------------------------------------------------------------------------------------------------------
-    -- //POINTS//--
+    --- - POINTS
     ---------------------------------------------------------------------------------------------------------------------------------------
     color = Settings.colors.death
     size = Settings.fontSizes.death
@@ -59,13 +64,14 @@ function CombatTextDeathViewer:OnEvent(unitTag)
     animation:Apply(control)
     animation:Play()
 
+    local function animationCallback()
+        self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
+        self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
+        self.activePoints = self.activePoints - 1
+        if self.activePoints == 0 or self.activePoints >= 5 then
+            self.locationOffset = 0
+        end
+    end
     -- Add items back into pool after animation
-    LUIE_callLater(function ()
-                       self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
-                       self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
-                       self.activePoints = self.activePoints - 1
-                       if self.activePoints == 0 or self.activePoints >= 5 then
-                           self.locationOffset = 0
-                       end
-                   end, animation:GetDuration())
+    LUIE_callLater(animationCallback, animation:GetDuration())
 end

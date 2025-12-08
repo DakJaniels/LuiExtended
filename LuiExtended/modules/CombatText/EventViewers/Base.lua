@@ -32,9 +32,48 @@ CombatTextEventViewer.damageTypes = setmetatable({},
                                                          return t[k]
                                                      end,
                                                  })
+-- Memory optimization: Cache ability icons to avoid repeated API calls
+CombatTextEventViewer.abilityIconCache = setmetatable({},
+                                                      {
+                                                          __index = function (t, abilityId)
+                                                              t[abilityId] = GetAbilityIcon(abilityId)
+                                                              return t[abilityId]
+                                                          end,
+                                                      })
+-- Memory optimization: Cache formatted source names
+CombatTextEventViewer.sourceNameCache = setmetatable({},
+                                                     {
+                                                         __index = function (t, sourceName)
+                                                             t[sourceName] = zo_strformat("<<C:1>>", sourceName)
+                                                             return t[sourceName]
+                                                         end,
+                                                     })
 
 function CombatTextEventViewer:Initialize(poolManager)
     self.poolManager = poolManager
+end
+
+-- Memory optimization: Lookup table for throttle times instead of if-elseif chains
+function CombatTextEventViewer:GetThrottleTime(Settings, isDamage, isDamageCritical, isDot, isDotCritical, isHealing, isHealingCritical, isHot, isHotCritical)
+    if isDamage then
+        return Settings.throttles.damage
+    elseif isDamageCritical then
+        return Settings.throttles.damagecritical
+    elseif isDot then
+        return Settings.throttles.dot
+    elseif isDotCritical then
+        return Settings.throttles.dotcritical
+    elseif isHealing then
+        return Settings.throttles.healing
+    elseif isHealingCritical then
+        return Settings.throttles.healingcritical
+    elseif isHot then
+        return Settings.throttles.hot
+    elseif isHotCritical then
+        return Settings.throttles.hotcritical
+    else
+        return 0
+    end
 end
 
 function CombatTextEventViewer:ShouldUseDefaultIcon(abilityId)
@@ -214,10 +253,10 @@ function CombatTextEventViewer:ControlLayout(control, abilityId, combatType, sou
     local width, height = control.label:GetTextDimensions()
 
     if abilityId then
-        local iconPath = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].icon or GetAbilityIcon(abilityId)
+        local iconPath = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].icon or self.abilityIconCache[abilityId]
 
         if Effects.EffectOverrideByName[abilityId] then
-            sourceName = zo_strformat("<<C:1>>", sourceName)
+            sourceName = self.sourceNameCache[sourceName]
             if Effects.EffectOverrideByName[abilityId][sourceName] and Effects.EffectOverrideByName[abilityId][sourceName].icon then
                 iconPath = Effects.EffectOverrideByName[abilityId][sourceName].icon
             end
@@ -295,9 +334,18 @@ function CombatTextEventViewer:ControlLayout(control, abilityId, combatType, sou
 end
 
 function CombatTextEventViewer:RegisterCallback(eventType, func)
-    callbackManager:RegisterCallback(eventType, function (...)
+    local callbackWrapper = function (...)
         func(...)
-    end)
+    end
+    callbackManager:RegisterCallback(eventType, callbackWrapper)
+    -- Store callback reference for unregistration
+    if not self.callbackRefs then
+        self.callbackRefs = {}
+    end
+    if not self.callbackRefs[eventType] then
+        self.callbackRefs[eventType] = {}
+    end
+    table.insert(self.callbackRefs[eventType], callbackWrapper)
 end
 
 ---
@@ -309,7 +357,7 @@ function CombatTextEventViewer:PrepareLabel(label, fontSize, color, text)
     local Settings = LUIE.CombatText.SV
     label:SetText(text)
     label:SetColor(unpack(color))
-    local fontString = ZO_CreateFontString(Settings.fontFaceApplied, fontSize, Settings.fontOutline)
+    local fontString = ZO_CreateFontString(Settings.fontFaceApplied, fontSize, Settings.fontStyle)
     label:SetFont(fontString)
     label:SetAlpha(Settings.common.transparencyValue / 100)
 end

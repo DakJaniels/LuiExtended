@@ -261,10 +261,13 @@ function CombatText.CreateConsoleSettings()
                 if type(index) == "string" then
                     index = globalIconOptionsKeys[index] or 1
                 end
+                if type(index) ~= "number" or index < 1 or index > #globalIconOptions then
+                    index = 1
+                end
                 return globalIconOptions[index] or globalIconOptions[1]
             end,
             setFunction = function (combobox, value, item)
-                Settings.common.defaultIconOptions = item.data
+                Settings.common.defaultIconOptions = item.data or 1
             end,
             disable = function () return not Settings.common.useDefaultIcon end,
             default = globalIconOptions[Defaults.common.defaultIconOptions]
@@ -1855,6 +1858,10 @@ function CombatText.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.animation.animationType = item.data or item.name or value
+                -- Recreate the combat event viewer with new animation type
+                if CombatText.Enabled then
+                    CombatText.CreateCombatEventViewer()
+                end
             end,
             default = Defaults.animation.animationType
         }

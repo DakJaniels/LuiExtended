@@ -244,10 +244,17 @@ function CombatText.CreateSettings()
                 tooltip = GetString(LUIE_STRING_LAM_CI_CCT_DEFAULT_ICON_OPTIONS_TP),
                 choices = globalIconOptions,
                 getFunc = function ()
-                    return globalIconOptions[Settings.common.defaultIconOptions]
+                    local index = Settings.common.defaultIconOptions
+                    if type(index) == "string" then
+                        index = globalIconOptionsKeys[index] or 1
+                    end
+                    if type(index) ~= "number" or index < 1 or index > #globalIconOptions then
+                        index = 1
+                    end
+                    return globalIconOptions[index]
                 end,
                 setFunc = function (value)
-                    Settings.common.defaultIconOptions = globalIconOptionsKeys[value]
+                    Settings.common.defaultIconOptions = globalIconOptionsKeys[value] or 1
                 end,
                 width = "full",
                 disabled = function ()
@@ -3233,6 +3240,10 @@ function CombatText.CreateSettings()
                 end,
                 setFunc = function (v)
                     Settings.animation.animationType = v
+                    -- Recreate the combat event viewer with new animation type
+                    if CombatText.Enabled then
+                        CombatText.CreateCombatEventViewer()
+                    end
                 end,
                 default = Defaults.animation.animationType,
             },

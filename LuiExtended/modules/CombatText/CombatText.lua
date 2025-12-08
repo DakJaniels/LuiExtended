@@ -173,6 +173,38 @@ function CombatText.ApplyFont()
     end
 end
 
+function CombatText.CreateCombatEventViewer()
+    if not CombatText.Enabled or not CombatText.poolManager then
+        return
+    end
+
+    -- Remove old combat event viewer if it exists
+    if CombatText.combatEventViewer then
+        -- Unregister callbacks
+        local callbackManager = CALLBACK_MANAGER
+        if CombatText.combatEventViewer.callbackRefs and CombatText.combatEventViewer.callbackRefs[CombatTextConstants.eventType.COMBAT] then
+            for _, callbackRef in ipairs(CombatText.combatEventViewer.callbackRefs[CombatTextConstants.eventType.COMBAT]) do
+                callbackManager:UnregisterCallback(CombatTextConstants.eventType.COMBAT, callbackRef)
+            end
+        end
+        CombatText.combatEventViewer = nil
+    end
+
+    -- Create new combat event viewer based on animation type
+    local animationType = CombatText.SV.animation.animationType
+    local newViewer
+    if animationType == "cloud" then
+        newViewer = LUIE.CombatTextCombatCloudEventViewer:New(CombatText.poolManager)
+    elseif animationType == "hybrid" then
+        newViewer = LUIE.CombatTextCombatHybridEventViewer:New(CombatText.poolManager)
+    elseif animationType == "scroll" then
+        newViewer = LUIE.CombatTextCombatScrollEventViewer:New(CombatText.poolManager)
+    elseif animationType == "ellipse" then
+        newViewer = LUIE.CombatTextCombatEllipseEventViewer:New(CombatText.poolManager)
+    end
+    CombatText.combatEventViewer = newViewer
+end
+
 -- Unlock panels for moving
 --- @param state boolean
 function CombatText.SetMovingState(state)
@@ -424,10 +456,10 @@ function CombatText.Initialize(enabled)
     LUIE_CombatText_Outgoing:SetResizeHandleSize(MOUSE_CURSOR_RESIZE_NS)
 
     -- Pool Manager
-    local poolManager = LUIE.CombatTextPoolManager:New()
+    CombatText.poolManager = LUIE.CombatTextPoolManager:New()
     -- Create a pool for each type
     for _, v in pairs(CombatTextConstants.poolType) do
-        poolManager:RegisterPool(v, LUIE.CombatTextPool:New(v))
+        CombatText.poolManager:RegisterPool(v, LUIE.CombatTextPool:New(v))
     end
 
     -- Event Listeners
@@ -441,14 +473,12 @@ function CombatText.Initialize(enabled)
     LUIE.CombatTextDeathListener:New()
 
     -- Event Viewers
-    LUIE.CombatTextCombatCloudEventViewer:New(poolManager)
-    LUIE.CombatTextCombatHybridEventViewer:New(poolManager)
-    LUIE.CombatTextCombatScrollEventViewer:New(poolManager)
-    LUIE.CombatTextCombatEllipseEventViewer:New(poolManager)
-    LUIE.CombatTextCrowdControlEventViewer:New(poolManager)
-    LUIE.CombatTextPointEventViewer:New(poolManager)
-    LUIE.CombatTextResourceEventViewer:New(poolManager)
-    LUIE.CombatTextDeathViewer:New(poolManager)
+    -- Memory optimization: Only instantiate the active animation viewer
+    CombatText:CreateCombatEventViewer()
+    CombatText.crowdControlEventViewer = LUIE.CombatTextCrowdControlEventViewer:New(CombatText.poolManager)
+    CombatText.pointEventViewer = LUIE.CombatTextPointEventViewer:New(CombatText.poolManager)
+    CombatText.resourceEventViewer = LUIE.CombatTextResourceEventViewer:New(CombatText.poolManager)
+    CombatText.deathEventViewer = LUIE.CombatTextDeathViewer:New(CombatText.poolManager)
 
     -- Variable adjustment if needed
     if not LUIESV.Default[GetDisplayName()]["$AccountWide"].AdjustVarsCT then

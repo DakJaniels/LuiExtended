@@ -72,7 +72,7 @@ CombatText.Defaults =
         overheal = true,
         abbreviateNumbers = false,
         useDefaultIcon = false,
-        defaultIconOptions = false,
+        defaultIconOptions = 1,
     },
     -- Toggle Defaults
     toggles =
@@ -175,7 +175,7 @@ CombatText.Defaults =
 
     -- Font defaults
     fontFace = [[LUIE Default Font]],
-    fontOutline = FONT_STYLE_SOFT_SHADOW_THICK,
+    fontStyle = FONT_STYLE_SOFT_SHADOW_THICK,
     fontSizes =
     {
         -- Combat

@@ -32,27 +32,11 @@ function CombatTextCombatEllipseEventViewer:OnEvent(combatType, powerType, value
     if (isDamageCritical or isHealingCritical or isDotCritical or isHotCritical) and not Settings.toggles.throttleCriticals then
         self:View(combatType, powerType, value, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted, 1)
     else
-        local eventKey = string_format("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s", combatType, powerType, abilityName, abilityId, damageType, sourceName, tostring(isDamage), tostring(isDamageCritical), tostring(isHealing), tostring(isHealingCritical), tostring(isEnergize), tostring(isDrain), tostring(isDot), tostring(isDotCritical), tostring(isHot), tostring(isHotCritical), tostring(isMiss), tostring(isImmune), tostring(isParried), tostring(isReflected), tostring(isDamageShield), tostring(isDodged), tostring(isBlocked), tostring(isInterrupted))
+        -- Memory optimization: lightweight key instead of 24-part concatenation
+        local eventKey = abilityId .. "_" .. combatType .. "_" .. damageType .. "_" .. (isDamage and "1" or isDamageCritical and "2" or isHealing and "3" or isHealingCritical and "4" or isDot and "5" or isDotCritical and "6" or isHot and "7" or isHotCritical and "8" or isMiss and "9" or isImmune and "10" or isParried and "11" or isReflected and "12" or isDamageShield and "13" or isDodged and "14" or isBlocked and "15" or isInterrupted and "16" or isEnergize and "17" or isDrain and "18" or "0")
         if self.eventBuffer[eventKey] == nil then
             self.eventBuffer[eventKey] = { value = value, hits = 1 }
-            local throttleTime = 0
-            if isDamage then
-                throttleTime = Settings.throttles.damage
-            elseif isDamageCritical then
-                throttleTime = Settings.throttles.damagecritical
-            elseif isDot then
-                throttleTime = Settings.throttles.dot
-            elseif isDotCritical then
-                throttleTime = Settings.throttles.dotcritical
-            elseif isHealing then
-                throttleTime = Settings.throttles.healing
-            elseif isHealingCritical then
-                throttleTime = Settings.throttles.healingcritical
-            elseif isHot then
-                throttleTime = Settings.throttles.hot
-            elseif isHotCritical then
-                throttleTime = Settings.throttles.hotcritical
-            end
+            local throttleTime = self:GetThrottleTime(Settings, isDamage, isDamageCritical, isDot, isDotCritical, isHealing, isHealingCritical, isHot, isHotCritical)
             LUIE_callLater(function ()
                                self:ViewFromEventBuffer(combatType, powerType, eventKey, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
                            end, throttleTime)
