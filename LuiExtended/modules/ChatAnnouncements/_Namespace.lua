@@ -18,6 +18,9 @@ local GetString = GetString
 -- -----------------------------------------------------------------------------
 --- @class (partial) ChatAnnouncements : ZO_Object
 --- @field ColorizeColors ChatAnnouncements_ColorizeColors
+--- @field Mail ChatAnnouncements.Mail
+--- @field inMail boolean Toggled on when looting mail to prevent notable item display from hiding items acquired.
+--- @field currentMailSender string Current mail sender for currency formatting (updated from queue)
 local ChatAnnouncements = ZO_Object:Subclass()
 
 --- @class (partial) ChatAnnouncements
@@ -726,14 +729,8 @@ ChatAnnouncements.itemCounterLossTracker = 0 -- Tracker for how many items have 
 ChatAnnouncements.itemStringLoss = ""        -- Combined string variable for items removed via crafting
 ChatAnnouncements.oldItem = {}               -- Saved old item for crafting upgrades
 
--- Mail
-ChatAnnouncements.mailCOD = 0            -- Tracks COD amount
-ChatAnnouncements.postageAmount = 0      -- Tracks Postage amount
-ChatAnnouncements.mailAmount = 0         -- Tracks sent money amount
-ChatAnnouncements.mailCODPresent = false -- Tracks whether the currently opened mail has a COD value present. On receiving items from the mail this will modify the message displayed.
+-- Mail (state moved to ChatAnnouncements.Mail module)
 ChatAnnouncements.inMail = false         -- Toggled on when looting mail to prevent notable item display from hiding items acquired.
-ChatAnnouncements.mailTarget = ""        -- Target of mail being sent.
-ChatAnnouncements.mailStacksOut = {}     -- Table for storing items to be mailed out.
 ChatAnnouncements.currentMailSender = "" -- Current mail sender for currency formatting (updated from queue)
 
 -- Disguise

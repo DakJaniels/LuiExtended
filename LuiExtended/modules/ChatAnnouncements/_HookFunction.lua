@@ -663,26 +663,26 @@ local function GroupMemberLeftAlert(characterName, reason, isLocalPlayer, isLead
             message = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
             alert = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
             LUIE_callLater(function ()
-                             ChatAnnouncements.CheckLFGStatusLeave(false)
-                         end, 100)
+                               ChatAnnouncements.CheckLFGStatusLeave(false)
+                           end, 100)
         elseif isLocalPlayer then
             LUIE_callLater(function ()
-                             ChatAnnouncements.CheckLFGStatusLeave(false)
-                         end, 100)
+                               ChatAnnouncements.CheckLFGStatusLeave(false)
+                           end, 100)
         end
         sound = SOUNDS.GROUP_DISBAND
     elseif reason == GROUP_LEAVE_REASON_KICKED then
         if actionRequiredVote then
             if isLocalPlayer then
                 LUIE_callLater(function ()
-                                 ChatAnnouncements.CheckLFGStatusLeave(true)
-                             end, 100)
+                                   ChatAnnouncements.CheckLFGStatusLeave(true)
+                               end, 100)
                 message = zo_strformat(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
                 alert = zo_strformat(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
             elseif hasValidNames then
                 LUIE_callLater(function ()
-                                 ChatAnnouncements.CheckLFGStatusLeave(false)
-                             end, 100)
+                                   ChatAnnouncements.CheckLFGStatusLeave(false)
+                               end, 100)
                 message = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_PASSED, finalName)
                 alert = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_PASSED, finalAlertName)
                 message2 = zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_KICKED), finalName)
@@ -694,20 +694,20 @@ local function GroupMemberLeftAlert(characterName, reason, isLocalPlayer, isLead
                 message = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
                 alert = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
                 LUIE_callLater(function ()
-                                 ChatAnnouncements.CheckLFGStatusLeave(false)
-                             end, 100)
+                                   ChatAnnouncements.CheckLFGStatusLeave(false)
+                               end, 100)
                 sound = SOUNDS.GROUP_DISBAND
             elseif isLocalPlayer then
                 LUIE_callLater(function ()
-                                 ChatAnnouncements.CheckLFGStatusLeave(true)
-                             end, 100)
+                                   ChatAnnouncements.CheckLFGStatusLeave(true)
+                               end, 100)
                 message = zo_strformat(SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED)
                 alert = zo_strformat(SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED)
                 sound = SOUNDS.GROUP_KICK
             else
                 LUIE_callLater(function ()
-                                 ChatAnnouncements.CheckLFGStatusLeave(false)
-                             end, 100)
+                                   ChatAnnouncements.CheckLFGStatusLeave(false)
+                               end, 100)
                 useDefaultReasonText = true
                 sound = SOUNDS.GROUP_KICK
             end
@@ -716,14 +716,14 @@ local function GroupMemberLeftAlert(characterName, reason, isLocalPlayer, isLead
         if not isLocalPlayer then
             useDefaultReasonText = true
             LUIE_callLater(function ()
-                             ChatAnnouncements.CheckLFGStatusLeave(false)
-                         end, 100)
+                               ChatAnnouncements.CheckLFGStatusLeave(false)
+                           end, 100)
         else
             message = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_LEAVE_SELF), finalName))
             alert = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_LEAVE_SELF), finalAlertName))
             LUIE_callLater(function ()
-                             ChatAnnouncements.CheckLFGStatusLeave(false)
-                         end, 100)
+                               ChatAnnouncements.CheckLFGStatusLeave(false)
+                           end, 100)
         end
 
         sound = SOUNDS.GROUP_LEAVE
@@ -788,8 +788,8 @@ local function OnGroupMemberJoined(characterName, displayName, isLocalPlayer)
         local SendMessage = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalName))
         local SendAlert = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalAlertName))
         LUIE_callLater(function ()
-                         ChatAnnouncements.PrintJoinStatusNotSelf(SendMessage, SendAlert)
-                     end, 100)
+                           ChatAnnouncements.PrintJoinStatusNotSelf(SendMessage, SendAlert)
+                       end, 100)
     end
 
     return true
@@ -978,15 +978,15 @@ local function GroupReadyCheckCancelAlert(reason)
     -- Stop the cancel message from status update from triggering when any other result here happens.
     ChatAnnouncements.lfgHideStatusCancel = true
     LUIE_callLater(function ()
-                     ChatAnnouncements.lfgHideStatusCancel = false
-                 end, 1000)
+                       ChatAnnouncements.lfgHideStatusCancel = false
+                   end, 1000)
 
     -- Sometimes if another player cancels slightly before a player in your group cancels, the "you have been placed in the front of the queue message displays. If this is the case, we want to show queue left for that event."
     if reason ~= LFG_READY_CHECK_CANCEL_REASON_GROUP_REPLACED_IN_QUEUE then
         ChatAnnouncements.showActivityStatus = false
         LUIE_callLater(function ()
-                         ChatAnnouncements.showActivityStatus = true
-                     end, 1000)
+                           ChatAnnouncements.showActivityStatus = true
+                       end, 1000)
     end
 
     ChatAnnouncements.showRCUpdates = true
@@ -1070,8 +1070,8 @@ local function LockpickFailedAlert(result)
     end
     ChatAnnouncements.lockpickBroken = true
     LUIE_callLater(function ()
-                     ChatAnnouncements.lockpickBroken = false
-                 end, 200)
+                       ChatAnnouncements.lockpickBroken = false
+                   end, 200)
     return true
 end
 
@@ -1300,9 +1300,9 @@ end
 local function MailSendFailedAlert(reason)
     if reason ~= MAIL_SEND_RESULT_CANCELED then
         local function RestoreMailBackupValues()
-            ChatAnnouncements.postageAmount = GetQueuedMailPostage()
-            ChatAnnouncements.mailAmount = GetQueuedMoneyAttachment()
-            ChatAnnouncements.mailCOD = GetQueuedCOD()
+            ChatAnnouncements.Mail.postageAmount = GetQueuedMailPostage()
+            ChatAnnouncements.Mail.amount = GetQueuedMoneyAttachment()
+            ChatAnnouncements.Mail.cod = GetQueuedCOD()
         end
 
         -- Stop currency messages from printing here
@@ -1314,8 +1314,8 @@ local function MailSendFailedAlert(reason)
             end
             eventManager:UnregisterForEvent(moduleName, EVENT_CURRENCY_UPDATE)
             LUIE_callLater(function ()
-                             eventManager:RegisterForEvent(moduleName, EVENT_CURRENCY_UPDATE, ChatAnnouncements.OnCurrencyUpdate)
-                         end, 500)
+                               eventManager:RegisterForEvent(moduleName, EVENT_CURRENCY_UPDATE, ChatAnnouncements.OnCurrencyUpdate)
+                           end, 500)
         end
 
         if ChatAnnouncements.SV.Notify.NotificationMailErrorCA then
@@ -2506,8 +2506,8 @@ local function OnQuestAdded(eventId, questIndex)
             local questName = GetJournalQuestName(questIndex)
             printToChat(zo_strformat("Writ Crafter abandoned the <<1>> because it requires <<2>> which was disallowed in settings", questName, rejectedMat), true)
             LUIE_callLater(function ()
-                             AbandonQuest(questIndex)
-                         end, 500)
+                               AbandonQuest(questIndex)
+                           end, 500)
             return
         end
 
@@ -4088,7 +4088,7 @@ function ChatAnnouncements.HookFunction()
             return false
         end
 
-        ChatAnnouncements.mailTarget = CreateMailTargetLink(to)
+        ChatAnnouncements.Mail.target = CreateMailTargetLink(to)
 
         local subject = self.mailView:GetSubject()
         local hasSubject = subject and (subject ~= "")
@@ -4118,7 +4118,7 @@ function ChatAnnouncements.HookFunction()
 
             -- Capture mail target
             local mailTarget = self.to:GetText()
-            ChatAnnouncements.mailTarget = CreateMailTargetLink(mailTarget)
+            ChatAnnouncements.Mail.target = CreateMailTargetLink(mailTarget)
 
             -- Send the mail
             SendMail(self.to:GetText(), self.subject:GetText(), self.body:GetText())
@@ -4259,8 +4259,8 @@ function ChatAnnouncements.HookFunction()
         ChatAnnouncements.showRCUpdates = true
         ChatAnnouncements.weDeclinedTheQueue = true
         LUIE_callLater(function ()
-                         ChatAnnouncements.weDeclinedTheQueue = false
-                     end, 1000)
+                           ChatAnnouncements.weDeclinedTheQueue = false
+                       end, 1000)
 
         if ChatAnnouncements.SV.Group.GroupLFGQueueCA then
             printToChat(message, true)

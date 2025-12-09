@@ -14,31 +14,60 @@ local eventManager = GetEventManager()
 local GetString = GetString
 local zo_strformat = zo_strformat
 
-
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
-local moduleName = ChatAnnouncements.moduleName
-local linkBrackets = ChatAnnouncements.linkBrackets
+-- -----------------------------------------------------------------------------
+-- Mail Module
+-- -----------------------------------------------------------------------------
 
-local mailSenderMap = {}
-local mailSenderQueue = {}
-local isTakingMail = false
+--- @class ChatAnnouncements.Mail
+--- @field parent ChatAnnouncements
+--- @field moduleName string
+--- @field cod integer
+--- @field postageAmount integer
+--- @field amount integer
+--- @field codPresent boolean
+--- @field target string
+--- @field stacksOut table
+--- @field senderMap table
+--- @field senderQueue table
+--- @field isTakingMail boolean
+--- @field Initialize fun()
+--- @field RegisterEvents fun()
+--- @field GetNextSender fun(): string
+ChatAnnouncements.Mail = ChatAnnouncements.Mail or {}
+local Mail = ChatAnnouncements.Mail
+
+-- Store reference to parent for accessing shared services
+Mail.parent = ChatAnnouncements
+Mail.moduleName = ChatAnnouncements.moduleName .. "_Mail"
+
+-- Module state
+Mail.cod = 0
+Mail.postageAmount = 0
+Mail.amount = 0
+Mail.codPresent = false
+Mail.target = ""
+Mail.stacksOut = {}
+Mail.senderMap = {}
+Mail.senderQueue = {}
+Mail.isTakingMail = false
 
 --- - **EVENT_MAIL_ATTACHED_MONEY_CHANGED **
 ---
 --- @param eventId integer
 --- @param moneyAmount integer
-function ChatAnnouncements.MailMoneyChanged(eventId, moneyAmount)
-    ChatAnnouncements.mailCOD = 0
-    ChatAnnouncements.postageAmount = GetQueuedMailPostage()
-    local previousMailAmount = ChatAnnouncements.mailAmount
+function Mail.OnMoneyChanged(eventId, moneyAmount)
+    Mail.cod = 0
+    Mail.postageAmount = GetQueuedMailPostage()
+    local previousMailAmount = Mail.amount
     local getMailAmount = moneyAmount or GetQueuedMoneyAttachment()
     -- If we send more then half of the gold in our bags for some reason this event fires again so this is a workaround
     if getMailAmount == GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) and getMailAmount ~= previousMailAmount then
         return
     else
-        ChatAnnouncements.mailAmount = getMailAmount
+        Mail.amount = getMailAmount
     end
 end
 
@@ -46,30 +75,30 @@ end
 ---
 --- @param eventId integer
 --- @param codAmount integer
-function ChatAnnouncements.MailCODChanged(eventId, codAmount)
-    ChatAnnouncements.mailCOD = codAmount or GetQueuedCOD()
-    ChatAnnouncements.postageAmount = GetQueuedMailPostage()
-    ChatAnnouncements.mailAmount = GetQueuedMoneyAttachment()
+function Mail.OnCODChanged(eventId, codAmount)
+    Mail.cod = codAmount or GetQueuedCOD()
+    Mail.postageAmount = GetQueuedMailPostage()
+    Mail.amount = GetQueuedMoneyAttachment()
 end
 
 --- - **EVENT_MAIL_REMOVED **
 ---
 --- @param eventId integer
 --- @param mailId id64
-function ChatAnnouncements.MailRemoved(eventId, mailId)
-    if ChatAnnouncements.SV.Notify.NotificationMailSendCA or ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
-        if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
+function Mail.OnRemoved(eventId, mailId)
+    if Mail.parent.SV.Notify.NotificationMailSendCA or Mail.parent.SV.Notify.NotificationMailSendAlert then
+        if Mail.parent.SV.Notify.NotificationMailSendCA then
             local message = GetString(LUIE_STRING_CA_MAIL_DELETED_MSG)
-            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
+            Mail.parent.QueuedMessages[Mail.parent.QueuedMessagesCounter] =
             {
                 message = message,
                 messageType = "NOTIFICATION",
                 isSystem = true
             }
-            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            Mail.parent.QueuedMessagesCounter = Mail.parent.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(Mail.parent.moduleName .. "Printer", 50, Mail.parent.PrintQueuedMessages)
         end
-        if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+        if Mail.parent.SV.Notify.NotificationMailSendAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString(LUIE_STRING_CA_MAIL_DELETED_MSG))
         end
     end
@@ -79,7 +108,7 @@ end
 ---
 --- @param eventId integer
 --- @param mailId id64
-function ChatAnnouncements.OnMailReadable(eventId, mailId)
+function Mail.OnReadable(eventId, mailId)
     for category = MAIL_CATEGORY_ITERATION_BEGIN, MAIL_CATEGORY_ITERATION_END do
         local numMailItems = GetNumMailItemsByCategory(category)
         for index = 1, numMailItems do
@@ -120,25 +149,25 @@ function ChatAnnouncements.OnMailReadable(eventId, mailId)
 
             -- Resolve the sender's name based on mail category and sender type
             if dataTable.fromSystem or dataTable.fromCS then
-                ChatAnnouncements.mailTarget = ZO_GAME_REPRESENTATIVE_TEXT:Colorize(dataTable.senderDisplayName)
+                Mail.target = ZO_GAME_REPRESENTATIVE_TEXT:Colorize(dataTable.senderDisplayName)
             end
             if dataTable.isFromPlayer then
                 if dataTable.senderDisplayName ~= "" and dataTable.senderCharacterName ~= "" then
-                    local finalName = ChatAnnouncements.ResolveNameLink(dataTable.senderCharacterName, dataTable.senderDisplayName)
-                    ChatAnnouncements.mailTarget = ZO_SELECTED_TEXT:Colorize(finalName)
+                    local finalName = Mail.parent.ResolveNameLink(dataTable.senderCharacterName, dataTable.senderDisplayName)
+                    Mail.target = ZO_SELECTED_TEXT:Colorize(finalName)
                 else
                     local finalName
-                    if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                    if Mail.parent.SV.BracketOptionCharacter == 1 then
                         finalName = ZO_LinkHandler_CreateLinkWithoutBrackets(dataTable.senderDisplayName, nil, DISPLAY_NAME_LINK_TYPE, dataTable.senderDisplayName)
                     else
                         finalName = ZO_LinkHandler_CreateLink(dataTable.senderDisplayName, nil, DISPLAY_NAME_LINK_TYPE, dataTable.senderDisplayName)
                     end
-                    ChatAnnouncements.mailTarget = ZO_SELECTED_TEXT:Colorize(finalName)
+                    Mail.target = ZO_SELECTED_TEXT:Colorize(finalName)
                 end
             end
 
             -- Handle COD
-            ChatAnnouncements.mailCODPresent = (dataTable.codAmount > 0)
+            Mail.codPresent = (dataTable.codAmount > 0)
         end
     end
 end
@@ -151,11 +180,11 @@ local function ResolveMailSender(mailId)
         mailTarget = ZO_GAME_REPRESENTATIVE_TEXT:Colorize(senderDisplayName)
     elseif not (fromSystem or fromCS) then
         if senderDisplayName ~= "" and senderCharacterName ~= "" then
-            local finalName = ChatAnnouncements.ResolveNameLink(senderCharacterName, senderDisplayName)
+            local finalName = Mail.parent.ResolveNameLink(senderCharacterName, senderDisplayName)
             mailTarget = ZO_SELECTED_TEXT:Colorize(finalName)
         else
             local finalName
-            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+            if Mail.parent.SV.BracketOptionCharacter == 1 then
                 finalName = ZO_LinkHandler_CreateLinkWithoutBrackets(senderDisplayName, nil, DISPLAY_NAME_LINK_TYPE, senderDisplayName)
             else
                 finalName = ZO_LinkHandler_CreateLink(senderDisplayName, nil, DISPLAY_NAME_LINK_TYPE, senderDisplayName)
@@ -167,11 +196,11 @@ local function ResolveMailSender(mailId)
     return mailTarget, codAmount > 0, numAttachments, attachedMoney
 end
 
-function ChatAnnouncements.GetNextMailSender()
-    if #mailSenderQueue > 0 then
-        local sender = table.remove(mailSenderQueue, 1)
+function Mail.GetNextSender()
+    if #Mail.senderQueue > 0 then
+        local sender = table.remove(Mail.senderQueue, 1)
         -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE.Debug(string.format("Mail sender queue: consumed '%s', remaining: %d", sender, #mailSenderQueue))
+        --     LUIE.Debug(string.format("Mail sender queue: consumed '%s', remaining: %d", sender, #Mail.senderQueue))
         -- end
         return sender
     end
@@ -182,21 +211,21 @@ end
 ---
 --- @param eventId integer
 --- @param mailId id64
-function ChatAnnouncements.OnMailTakeAttachedItem(eventId, mailId)
-    isTakingMail = true
+function Mail.OnTakeAttachedItem(eventId, mailId)
+    Mail.isTakingMail = true
 
     local mailTarget, hasCOD = ResolveMailSender(mailId)
-    mailSenderMap[mailId] = mailTarget
-    ChatAnnouncements.mailTarget = mailTarget
-    ChatAnnouncements.mailCODPresent = hasCOD
+    Mail.senderMap[mailId] = mailTarget
+    Mail.target = mailTarget
+    Mail.codPresent = hasCOD
 
-    eventManager:UnregisterForUpdate(moduleName .. "_Mail" .. "ClearTakingFlag")
-    eventManager:RegisterForUpdate(moduleName .. "_Mail" .. "ClearTakingFlag", 200, function ()
-        isTakingMail = false
-        eventManager:UnregisterForUpdate(moduleName .. "_Mail" .. "ClearTakingFlag")
+    eventManager:UnregisterForUpdate(Mail.moduleName .. "ClearTakingFlag")
+    eventManager:RegisterForUpdate(Mail.moduleName .. "ClearTakingFlag", 200, function ()
+        Mail.isTakingMail = false
+        eventManager:UnregisterForUpdate(Mail.moduleName .. "ClearTakingFlag")
     end)
 
-    if ChatAnnouncements.SV.Notify.NotificationMailSendCA or ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+    if Mail.parent.SV.Notify.NotificationMailSendCA or Mail.parent.SV.Notify.NotificationMailSendAlert then
         local mailString
         if hasCOD then
             mailString = GetString(LUIE_STRING_CA_MAIL_RECEIVED_COD)
@@ -204,17 +233,17 @@ function ChatAnnouncements.OnMailTakeAttachedItem(eventId, mailId)
             mailString = GetString(LUIE_STRING_CA_MAIL_RECEIVED)
         end
         if mailString then
-            if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
-                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
+            if Mail.parent.SV.Notify.NotificationMailSendCA then
+                Mail.parent.QueuedMessages[Mail.parent.QueuedMessagesCounter] =
                 {
                     message = mailString,
                     messageType = "NOTIFICATION",
                     isSystem = true
                 }
-                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                Mail.parent.QueuedMessagesCounter = Mail.parent.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(Mail.parent.moduleName .. "Printer", 50, Mail.parent.PrintQueuedMessages)
             end
-            if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+            if Mail.parent.SV.Notify.NotificationMailSendAlert then
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, mailString)
             end
         end
@@ -227,14 +256,14 @@ end
 --- @param result MailTakeAttachmentResult
 --- @param category MailCategory
 --- @param headersRemoved boolean
-function ChatAnnouncements.OnMailTakeAllResponse(eventId, result, category, headersRemoved)
-    isTakingMail = false
-    eventManager:UnregisterForUpdate(moduleName .. "_Mail" .. "ClearTakingFlag")
+function Mail.OnTakeAllResponse(eventId, result, category, headersRemoved)
+    Mail.isTakingMail = false
+    eventManager:UnregisterForUpdate(Mail.moduleName .. "ClearTakingFlag")
 
     -- if LUIE.IsDevDebugEnabled() then
     --     local resultStr = result == MAIL_TAKE_ATTACHMENT_RESULT_SUCCESS and "SUCCESS" or "FAIL"
     --     LUIE.Debug(string.format("Take All completed: result=%s, category=%d, headersRemoved=%s, queue remaining=%d",
-    --         resultStr, category, tostring(headersRemoved), #mailSenderQueue))
+    --         resultStr, category, tostring(headersRemoved), #Mail.senderQueue))
     -- end
 end
 
@@ -242,15 +271,15 @@ end
 ---
 --- @param eventId integer
 --- @param attachmentSlot luaindex
-function ChatAnnouncements.OnMailAttach(eventId, attachmentSlot)
-    ChatAnnouncements.postageAmount = GetQueuedMailPostage()
-    ChatAnnouncements.mailAmount = GetQueuedMoneyAttachment()
+function Mail.OnAttach(eventId, attachmentSlot)
+    Mail.postageAmount = GetQueuedMailPostage()
+    Mail.amount = GetQueuedMoneyAttachment()
     local mailIndex = attachmentSlot
     local bagId, slotIndex, icon, stack = GetQueuedItemAttachmentInfo(attachmentSlot)
     local itemId = GetItemId(bagId, slotIndex)
-    local itemLink = GetMailQueuedAttachmentLink(attachmentSlot, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+    local itemLink = GetMailQueuedAttachmentLink(attachmentSlot, Mail.parent.linkBrackets[Mail.parent.SV.BracketOptionItem])
     local itemType = GetItemLinkItemType(itemLink)
-    ChatAnnouncements.mailStacksOut[mailIndex] =
+    Mail.stacksOut[mailIndex] =
     {
         icon = icon,
         stack = stack,
@@ -264,15 +293,15 @@ end
 ---
 --- @param eventId integer
 --- @param attachmentSlot luaindex
-function ChatAnnouncements.OnMailAttachRemove(eventId, attachmentSlot)
-    ChatAnnouncements.postageAmount = GetQueuedMailPostage()
-    ChatAnnouncements.mailAmount = GetQueuedMoneyAttachment()
+function Mail.OnAttachRemove(eventId, attachmentSlot)
+    Mail.postageAmount = GetQueuedMailPostage()
+    Mail.amount = GetQueuedMoneyAttachment()
     local mailIndex = attachmentSlot
-    ChatAnnouncements.mailStacksOut[mailIndex] = nil
+    Mail.stacksOut[mailIndex] = nil
 end
 
 local function PopulateMailSenderQueue()
-    mailSenderQueue = {}
+    Mail.senderQueue = {}
     local mailCount = 0
 
     local mailId = GetNextMailId(nil)
@@ -300,28 +329,28 @@ local function PopulateMailSenderQueue()
             -- end
 
             if attachedMoney > 0 then
-                table.insert(mailSenderQueue, mailTarget)
+                table.insert(Mail.senderQueue, mailTarget)
             end
             for i = 1, numAttachments do
-                table.insert(mailSenderQueue, mailTarget)
+                table.insert(Mail.senderQueue, mailTarget)
             end
 
-            mailSenderMap[mailId] = mailTarget
+            Mail.senderMap[mailId] = mailTarget
         end
 
         mailId = GetNextMailId(mailId)
     end
 
     -- if LUIE.IsDevDebugEnabled() then
-    --     LUIE.Debug(string.format("Mail sender queue populated: %d mails found, %d queue entries", mailCount, #mailSenderQueue))
+    --     LUIE.Debug(string.format("Mail sender queue populated: %d mails found, %d queue entries", mailCount, #Mail.senderQueue))
     -- end
 end
 
 --- - **EVENT_MAIL_INBOX_UPDATE**
 ---
 --- @param eventId integer
-function ChatAnnouncements.OnMailInboxUpdate(eventId)
-    if ChatAnnouncements.inMail and not isTakingMail then
+function Mail.OnInboxUpdate(eventId)
+    if Mail.parent.inMail and not Mail.isTakingMail then
         PopulateMailSenderQueue()
     end
 end
@@ -329,99 +358,99 @@ end
 --- - **EVENT_MAIL_OPEN_MAILBOX**
 ---
 --- @param eventId integer
-function ChatAnnouncements.OnMailOpenBox(eventId)
-    eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
-    if ChatAnnouncements.SV.Inventory.LootMail then
-        eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
-        ChatAnnouncements.inventoryStacks = {}
-        ChatAnnouncements.IndexInventory() -- Index Inventory
+function Mail.OnOpenBox(eventId)
+    eventManager:UnregisterForEvent(Mail.parent.moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+    if Mail.parent.SV.Inventory.LootMail then
+        eventManager:RegisterForEvent(Mail.parent.moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, Mail.parent.InventoryUpdate)
+        Mail.parent.inventoryStacks = {}
+        Mail.parent.IndexInventory() -- Index Inventory
     end
-    ChatAnnouncements.inMail = true
+    Mail.parent.inMail = true
 end
 
 --- - **EVENT_MAIL_CLOSE_MAILBOX**
 ---
 --- @param eventId integer
-function ChatAnnouncements.OnMailCloseBox(eventId)
-    eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
-    if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise then
-        eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
+function Mail.OnCloseBox(eventId)
+    eventManager:UnregisterForEvent(Mail.parent.moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+    if Mail.parent.SV.Inventory.Loot or Mail.parent.SV.Inventory.LootShowDisguise then
+        eventManager:RegisterForEvent(Mail.parent.moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, Mail.parent.InventoryUpdate)
     end
-    if not (ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise) then
-        ChatAnnouncements.inventoryStacks = {}
+    if not (Mail.parent.SV.Inventory.Loot or Mail.parent.SV.Inventory.LootShowDisguise) then
+        Mail.parent.inventoryStacks = {}
     end
-    ChatAnnouncements.inMail = false
-    ChatAnnouncements.mailStacksOut = {}
-    ChatAnnouncements.currentMailSender = ""
-    mailSenderMap = {}
-    mailSenderQueue = {}
-    isTakingMail = false
-    eventManager:UnregisterForUpdate(moduleName .. "_Mail" .. "ClearTakingFlag")
+    Mail.parent.inMail = false
+    Mail.stacksOut = {}
+    Mail.parent.currentMailSender = ""
+    Mail.senderMap = {}
+    Mail.senderQueue = {}
+    Mail.isTakingMail = false
+    eventManager:UnregisterForUpdate(Mail.moduleName .. "ClearTakingFlag")
 end
 
 --- - **EVENT_MAIL_SEND_SUCCESS **
 ---
 --- @param eventId integer
 --- @param playerName string
-function ChatAnnouncements.OnMailSuccess(eventId, playerName)
+function Mail.OnSendSuccess(eventId, playerName)
     local formattedValue = ZO_CommaDelimitDecimalNumber(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
-    local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyDownColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
-    local currencyTypeColor = ChatAnnouncements.Colors.CurrencyGoldColorize:ToHex()
-    local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_MONEY), 16, 16) or ""
-    local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyGoldShowTotal
-    local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalGold
+    local changeColor = Mail.parent.SV.Currency.CurrencyContextColor and Mail.parent.Colors.CurrencyDownColorize:ToHex() or Mail.parent.Colors.CurrencyColorize:ToHex()
+    local currencyTypeColor = Mail.parent.Colors.CurrencyGoldColorize:ToHex()
+    local currencyIcon = Mail.parent.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetKeyboardCurrencyIcon(CURT_MONEY), 16, 16) or ""
+    local currencyTotal = Mail.parent.SV.Currency.CurrencyGoldShowTotal
+    local messageTotal = Mail.parent.SV.Currency.CurrencyMessageTotalGold
 
-    if ChatAnnouncements.postageAmount > 0 then
+    if Mail.postageAmount > 0 then
         local messageType = "LUIE_CURRENCY_POSTAGE"
-        local changeType = ZO_CommaDelimitDecimalNumber(ChatAnnouncements.postageAmount)
-        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, ChatAnnouncements.postageAmount)
-        local messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePostage
-        ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, messageType, nil, nil)
+        local changeType = ZO_CommaDelimitDecimalNumber(Mail.postageAmount)
+        local currencyName = zo_strformat(Mail.parent.SV.Currency.CurrencyGoldName, Mail.postageAmount)
+        local messageChange = Mail.parent.SV.ContextMessages.CurrencyMessagePostage
+        Mail.parent.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, messageType, nil, nil)
     end
 
-    if not ChatAnnouncements.mailCODPresent and ChatAnnouncements.mailAmount > 0 then
+    if not Mail.codPresent and Mail.amount > 0 then
         local messageType = "LUIE_CURRENCY_MAIL"
-        local changeType = ZO_CommaDelimitDecimalNumber(ChatAnnouncements.mailAmount)
-        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, ChatAnnouncements.mailAmount)
-        local messageChange = ChatAnnouncements.mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailOut or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailOutNoName
-        ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, messageType, nil, nil)
+        local changeType = ZO_CommaDelimitDecimalNumber(Mail.amount)
+        local currencyName = zo_strformat(Mail.parent.SV.Currency.CurrencyGoldName, Mail.amount)
+        local messageChange = Mail.target ~= "" and Mail.parent.SV.ContextMessages.CurrencyMessageMailOut or Mail.parent.SV.ContextMessages.CurrencyMessageMailOutNoName
+        Mail.parent.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, messageType, nil, nil)
     end
 
-    if ChatAnnouncements.SV.Notify.NotificationMailSendCA or ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+    if Mail.parent.SV.Notify.NotificationMailSendCA or Mail.parent.SV.Notify.NotificationMailSendAlert then
         local mailString
-        if not ChatAnnouncements.mailCODPresent then
-            mailString = ChatAnnouncements.mailCOD > 1 and GetString(LUIE_STRING_CA_MAIL_SENT_COD) or GetString(LUIE_STRING_CA_MAIL_SENT)
+        if not Mail.codPresent then
+            mailString = Mail.cod > 1 and GetString(LUIE_STRING_CA_MAIL_SENT_COD) or GetString(LUIE_STRING_CA_MAIL_SENT)
         end
         if mailString then
-            if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
-                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
+            if Mail.parent.SV.Notify.NotificationMailSendCA then
+                Mail.parent.QueuedMessages[Mail.parent.QueuedMessagesCounter] =
                 {
                     message = mailString,
                     messageType = "NOTIFICATION",
                     isSystem = true
                 }
-                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                Mail.parent.QueuedMessagesCounter = Mail.parent.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(Mail.parent.moduleName .. "Printer", 50, Mail.parent.PrintQueuedMessages)
             end
-            if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+            if Mail.parent.SV.Notify.NotificationMailSendAlert then
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, mailString)
             end
         end
     end
 
-    if ChatAnnouncements.SV.Inventory.LootMail then
+    if Mail.parent.SV.Inventory.LootMail then
         for mailIndex = 1, 6 do
-            local item = ChatAnnouncements.mailStacksOut[mailIndex]
+            local item = Mail.stacksOut[mailIndex]
             if item ~= nil then
-                local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                local logPrefix = ChatAnnouncements.mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailOut or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailOutNoName
-                ChatAnnouncements.ItemCounterDelayOut(
+                local gainOrLoss = Mail.parent.SV.Currency.CurrencyContextColor and 2 or 4
+                local logPrefix = Mail.target ~= "" and Mail.parent.SV.ContextMessages.CurrencyMessageMailOut or Mail.parent.SV.ContextMessages.CurrencyMessageMailOutNoName
+                Mail.parent.ItemCounterDelayOut(
                     item.icon,
                     item.stack,
                     item.itemType,
                     item.itemId,
                     item.itemLink,
-                    ChatAnnouncements.mailTarget,
+                    Mail.target,
                     logPrefix,
                     gainOrLoss,
                     false,
@@ -433,43 +462,58 @@ function ChatAnnouncements.OnMailSuccess(eventId, playerName)
         end
     end
 
-    ChatAnnouncements.mailCODPresent = false
-    ChatAnnouncements.mailCOD = 0
-    ChatAnnouncements.postageAmount = 0
-    ChatAnnouncements.mailAmount = 0
-    ChatAnnouncements.mailStacksOut = {}
+    Mail.codPresent = false
+    Mail.cod = 0
+    Mail.postageAmount = 0
+    Mail.amount = 0
+    Mail.stacksOut = {}
 end
 
-function ChatAnnouncements.RegisterMailEvents()
-    local mailModuleName = moduleName .. "_Mail"
-    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_READABLE)
-    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS)
-    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE)
-    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_ATTACHMENT_ADDED)
-    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_ATTACHMENT_REMOVED)
-    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_OPEN_MAILBOX)
-    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_CLOSE_MAILBOX)
-    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_SEND_SUCCESS)
-    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED)
-    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_COD_CHANGED)
-    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_REMOVED)
-    eventManager:UnregisterForEvent(mailModuleName, EVENT_MAIL_INBOX_UPDATE)
-    if ChatAnnouncements.SV.Inventory.LootMail then
-        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_READABLE, ChatAnnouncements.OnMailReadable)
-        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS, ChatAnnouncements.OnMailTakeAttachedItem)
+function Mail.Initialize()
+    -- Initialize state
+    Mail.cod = 0
+    Mail.postageAmount = 0
+    Mail.amount = 0
+    Mail.codPresent = false
+    Mail.target = ""
+    Mail.stacksOut = {}
+    Mail.senderMap = {}
+    Mail.senderQueue = {}
+    Mail.isTakingMail = false
+
+    -- Register events
+    Mail.RegisterEvents()
+end
+
+function Mail.RegisterEvents()
+    eventManager:UnregisterForEvent(Mail.moduleName, EVENT_MAIL_READABLE)
+    eventManager:UnregisterForEvent(Mail.moduleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS)
+    eventManager:UnregisterForEvent(Mail.moduleName, EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE)
+    eventManager:UnregisterForEvent(Mail.moduleName, EVENT_MAIL_ATTACHMENT_ADDED)
+    eventManager:UnregisterForEvent(Mail.moduleName, EVENT_MAIL_ATTACHMENT_REMOVED)
+    eventManager:UnregisterForEvent(Mail.moduleName, EVENT_MAIL_OPEN_MAILBOX)
+    eventManager:UnregisterForEvent(Mail.moduleName, EVENT_MAIL_CLOSE_MAILBOX)
+    eventManager:UnregisterForEvent(Mail.moduleName, EVENT_MAIL_SEND_SUCCESS)
+    eventManager:UnregisterForEvent(Mail.moduleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED)
+    eventManager:UnregisterForEvent(Mail.moduleName, EVENT_MAIL_COD_CHANGED)
+    eventManager:UnregisterForEvent(Mail.moduleName, EVENT_MAIL_REMOVED)
+    eventManager:UnregisterForEvent(Mail.moduleName, EVENT_MAIL_INBOX_UPDATE)
+    if Mail.parent.SV.Inventory.LootMail then
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_READABLE, Mail.OnReadable)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS, Mail.OnTakeAttachedItem)
     end
-    eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE, ChatAnnouncements.OnMailTakeAllResponse)
-    if ChatAnnouncements.SV.Inventory.LootMail or ChatAnnouncements.SV.Currency.CurrencyGoldChange then
-        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_ATTACHMENT_ADDED, ChatAnnouncements.OnMailAttach)
-        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_ATTACHMENT_REMOVED, ChatAnnouncements.OnMailAttachRemove)
-        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_SEND_SUCCESS, ChatAnnouncements.OnMailSuccess)
-        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED, ChatAnnouncements.MailMoneyChanged)
-        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_COD_CHANGED, ChatAnnouncements.MailCODChanged)
-        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_REMOVED, ChatAnnouncements.MailRemoved)
-        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_INBOX_UPDATE, ChatAnnouncements.OnMailInboxUpdate)
+    eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE, Mail.OnTakeAllResponse)
+    if Mail.parent.SV.Inventory.LootMail or Mail.parent.SV.Currency.CurrencyGoldChange then
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_ATTACHMENT_ADDED, Mail.OnAttach)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_ATTACHMENT_REMOVED, Mail.OnAttachRemove)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_SEND_SUCCESS, Mail.OnSendSuccess)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED, Mail.OnMoneyChanged)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_COD_CHANGED, Mail.OnCODChanged)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_REMOVED, Mail.OnRemoved)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_INBOX_UPDATE, Mail.OnInboxUpdate)
     end
-    if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootMail or ChatAnnouncements.SV.Currency.CurrencyGoldChange then
-        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_OPEN_MAILBOX, ChatAnnouncements.OnMailOpenBox)
-        eventManager:RegisterForEvent(mailModuleName, EVENT_MAIL_CLOSE_MAILBOX, ChatAnnouncements.OnMailCloseBox)
+    if Mail.parent.SV.Inventory.Loot or Mail.parent.SV.Inventory.LootMail or Mail.parent.SV.Currency.CurrencyGoldChange then
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_OPEN_MAILBOX, Mail.OnOpenBox)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_CLOSE_MAILBOX, Mail.OnCloseBox)
     end
 end

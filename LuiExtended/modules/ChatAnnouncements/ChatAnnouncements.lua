@@ -111,6 +111,8 @@ local g_firstLoad = true
 
 local ChatEventFormattersDelete =
 {
+    [EVENT_BATTLEGROUND_INACTIVITY_WARNING] = true,
+    [EVENT_BROADCAST] = true,
     [EVENT_FRIEND_PLAYER_STATUS_CHANGED] = true,
     [EVENT_GROUP_INVITE_RESPONSE] = true,
     [EVENT_GROUP_MEMBER_LEFT] = true,
@@ -118,47 +120,8 @@ local ChatEventFormattersDelete =
     [EVENT_IGNORE_ADDED] = true,
     [EVENT_IGNORE_REMOVED] = true,
     [EVENT_SOCIAL_ERROR] = true,
+    [EVENT_TRIAL_FEATURE_RESTRICTED] = true,
 }
-
-local pChatEventSettings =
-{
-    [EVENT_FRIEND_PLAYER_STATUS_CHANGED] = "usePlayerStatusChangedChatHandler",
-    [EVENT_IGNORE_ADDED] = "useIgnoreAddedChatHandler",
-    [EVENT_IGNORE_REMOVED] = "useIgnoreRemovedChatHandler",
-    [EVENT_GROUP_MEMBER_LEFT] = "useGroupMemberLeftChatHandler",
-    [EVENT_GROUP_TYPE_CHANGED] = "useGroupTypeChangedChatHandler",
-}
-
-local function WrapFormatterToSuppress(originalFormatter)
-    if not originalFormatter then
-        return nil
-    end
-    -- Wrap the formatter to suppress output while preserving LibChatMessage's wrapping chain
-    -- This allows LibChatMessage to still process (e.g., for history) but prevents chat display
-    return function (...)
-        originalFormatter(...)
-        return nil
-    end
-end
-
-local function IsPChatFormatter(eventType, formatter)
-    if not formatter then
-        return false
-    end
-
-    local pChat = _G["pChat"]
-    if not pChat or not pChat.db then
-        return false
-    end
-
-    local settingName = pChatEventSettings[eventType]
-    if not settingName then
-        return false
-    end
-
-    -- Check if pChat has this handler enabled
-    return pChat.db[settingName] == true
-end
 
 function ChatAnnouncements.SlayChatHandlers()
     -- Unregister ZOS handlers for events we need to modify
@@ -166,24 +129,10 @@ function ChatAnnouncements.SlayChatHandlers()
         eventManager:UnregisterForEvent("ChatRouter", eventCode)
     end
 
+    -- Slay these events in case LibChatMessage is active and hooks them
     local ChatEventFormatters = CHAT_ROUTER:GetRegisteredMessageFormatters()
-    local pChat = _G["pChat"]
-
     for eventType, _ in pairs(ChatEventFormattersDelete) do
-        local originalFormatter = ChatEventFormatters[eventType]
-        if originalFormatter then
-            if IsPChatFormatter(eventType, originalFormatter) then
-                -- pChat has registered a formatter - post-hook it per pChat compatibility guidelines
-                -- Call pChat's formatter but suppress output (ChatAnnouncements will show its own messages)
-                CHAT_ROUTER:RegisterMessageFormatter(eventType, function (...)
-                    originalFormatter(...)
-                    return nil
-                end)
-            else
-                -- Not pChat's formatter - wrap to suppress (preserves LibChatMessage chain)
-                ChatEventFormatters[eventType] = WrapFormatterToSuppress(originalFormatter)
-            end
-        end
+        ChatEventFormatters[eventType] = nil
     end
 end
 
@@ -220,7 +169,7 @@ function ChatAnnouncements.Initialize(enabled)
     -- Register events
     ChatAnnouncements.RegisterGoldEvents()
     ChatAnnouncements.RegisterLootEvents()
-    ChatAnnouncements.RegisterMailEvents()
+    ChatAnnouncements.Mail.Initialize()
     ChatAnnouncements.RegisterXPEvents()
     ChatAnnouncements.RegisterAchievementsEvent()
     -- TODO: Possibly don't register these unless enabled, I'm not sure -- at least move to better sorted order
@@ -264,11 +213,10 @@ function ChatAnnouncements.Initialize(enabled)
     -- Index members for Group Loot
     ChatAnnouncements.IndexGroupLoot()
 
-    -- Stop other chat handlers from registering
-    -- Note: pChat registers formatters in EVENT_PLAYER_ACTIVATED, so we'll also call this there
+    -- Stop other chat handlers from registering, then stop them again a few more times just in case.
     ChatAnnouncements.SlayChatHandlers()
-    -- Call this again after delays to catch late-loading addons
-    LUIE_callLater(ChatAnnouncements.SlayChatHandlers, 100)
+    -- Call this again a few times shortly after load just in case.
+    LUIE_callLater(ChatAnnouncements.SlayChatHandlers, 1000)
     LUIE_callLater(ChatAnnouncements.SlayChatHandlers, 5000)
 end
 
@@ -391,13 +339,6 @@ function ChatAnnouncements.RegisterGoldEvents()
 
     eventManager:RegisterForEvent(moduleName, EVENT_CURRENCY_UPDATE, ChatAnnouncements.OnCurrencyUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_LOOT_UPDATED, ChatAnnouncements.OnLootUpdated)
-    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_ADDED, ChatAnnouncements.OnMailAttach)
-    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_REMOVED, ChatAnnouncements.OnMailAttachRemove)
-    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_CLOSE_MAILBOX, ChatAnnouncements.OnMailCloseBox)
-    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_SEND_SUCCESS, ChatAnnouncements.OnMailSuccess)
-    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED, ChatAnnouncements.MailMoneyChanged)
-    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_COD_CHANGED, ChatAnnouncements.MailCODChanged)
-    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_REMOVED, ChatAnnouncements.MailRemoved)
 end
 
 function ChatAnnouncements.RegisterLootEvents()
@@ -431,8 +372,8 @@ function ChatAnnouncements.RegisterLootEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_GUILD_BANK_ITEM_ADDED)
     eventManager:UnregisterForEvent(moduleName, EVENT_GUILD_BANK_ITEM_REMOVED)
     -- CRAFT
-    eventManager:UnregisterForEvent(moduleName, EVENT_CRAFTING_STATION_INTERACT, ChatAnnouncements.CraftingOpen)
-    eventManager:UnregisterForEvent(moduleName, EVENT_END_CRAFTING_STATION_INTERACT, ChatAnnouncements.CraftingClose)
+    eventManager:UnregisterForEvent(moduleName, EVENT_CRAFTING_STATION_INTERACT)
+    eventManager:UnregisterForEvent(moduleName, EVENT_END_CRAFTING_STATION_INTERACT)
     -- TRADE
     eventManager:UnregisterForEvent(moduleName, EVENT_TRADE_ITEM_ADDED)
     eventManager:UnregisterForEvent(moduleName, EVENT_TRADE_ITEM_REMOVED)
@@ -594,8 +535,8 @@ end
 --- @param gameOverFlags DiggingGameOverFlags
 function ChatAnnouncements.OnDigEnd(eventId, gameOverFlags)
     LUIE_callLater(function ()
-                     ChatAnnouncements.weAreInADig = false
-                 end, 1000)
+                       ChatAnnouncements.weAreInADig = false
+                   end, 1000)
 end
 
 -- TODO: Fix later
@@ -1138,8 +1079,8 @@ function ChatAnnouncements.GroupingToolsLFGJoined(eventId, locationName)
         end
         ChatAnnouncements.lfgDisableGroupEvents = true
         LUIE_callLater(function ()
-                         ChatAnnouncements.lfgDisableGroupEvents = false
-                     end, 3000)
+                           ChatAnnouncements.lfgDisableGroupEvents = false
+                       end, 3000)
     end
     ChatAnnouncements.joinLFGOverride = true
 end
@@ -1283,20 +1224,20 @@ function ChatAnnouncements.ReadyCheckUpdate(eventId)
 
             -- Reset spam prevention after 1 second
             LUIE_callLater(function ()
-                             ChatAnnouncements.rcSpamPrevention = false
-                         end, 1000)
+                               ChatAnnouncements.rcSpamPrevention = false
+                           end, 1000)
 
             -- Reset activity status after 1 second
             ChatAnnouncements.showActivityStatus = false
             LUIE_callLater(function ()
-                             ChatAnnouncements.showActivityStatus = true
-                         end, 1000)
+                               ChatAnnouncements.showActivityStatus = true
+                           end, 1000)
 
             -- Reset group leave queue after 1 second
             ChatAnnouncements.stopGroupLeaveQueue = true
             LUIE_callLater(function ()
-                             ChatAnnouncements.stopGroupLeaveQueue = false
-                         end, 1000)
+                               ChatAnnouncements.stopGroupLeaveQueue = false
+                           end, 1000)
 
             ChatAnnouncements.showRCUpdates = true
         end
@@ -1735,16 +1676,16 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocat
         end
     elseif reason == CURRENCY_CHANGE_REASON_MAIL and UpOrDown > 0 then
         -- Get the correct sender from the queue for this currency change
-        local mailSender = ChatAnnouncements.GetNextMailSender() or ""
+        local mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
         ChatAnnouncements.currentMailSender = mailSender
         messageChange = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
         if mailSender ~= "" then
             messageType = "LUIE_CURRENCY_MAIL"
         end
     elseif reason == CURRENCY_CHANGE_REASON_MAIL and UpOrDown < 0 then
-        if ChatAnnouncements.mailCODPresent then
+        if ChatAnnouncements.Mail.codPresent then
             -- Get the correct sender from the queue for COD
-            local mailSender = ChatAnnouncements.GetNextMailSender() or ""
+            local mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
             ChatAnnouncements.currentMailSender = mailSender
             messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailCOD
             if mailSender ~= "" then
@@ -2021,7 +1962,7 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
         formattedMessageP1 = (string_format(messageChange, messageP1, name))
     elseif messageType == "LUIE_CURRENCY_MAIL" then
         -- Use currentMailSender which was set from the queue when currency change occurred
-        local mailSender = ChatAnnouncements.currentMailSender ~= "" and ChatAnnouncements.currentMailSender or ChatAnnouncements.mailTarget
+        local mailSender = ChatAnnouncements.currentMailSender ~= "" and ChatAnnouncements.currentMailSender or ChatAnnouncements.Mail.target
         name = string_format("|r" .. mailSender .. "|c" .. changeColor)
         formattedMessageP1 = (string_format(messageChange, messageP1, name))
     else
@@ -2150,8 +2091,8 @@ end
 function ChatAnnouncements.MiscAlertLockBroke(eventId, inactivityLengthMs)
     ChatAnnouncements.lockpickBroken = true
     LUIE_callLater(function ()
-                     ChatAnnouncements.lockpickBroken = false
-                 end, 200)
+                       ChatAnnouncements.lockpickBroken = false
+                   end, 200)
 end
 
 --- - **EVENT_LOCKPICK_SUCCESS**
@@ -2173,8 +2114,8 @@ function ChatAnnouncements.MiscAlertLockSuccess(eventId)
     end
     ChatAnnouncements.lockpickBroken = true
     LUIE_callLater(function ()
-                     ChatAnnouncements.lockpickBroken = false
-                 end, 200)
+                       ChatAnnouncements.lockpickBroken = false
+                   end, 200)
 end
 
 --- - **EVENT_INVENTORY_BAG_CAPACITY_CHANGED **
@@ -3150,9 +3091,9 @@ function ChatAnnouncements.StoreClose(eventId)
         ChatAnnouncements.inventoryStacks = {}
     end
     LUIE_callLater(function ()
-                     ChatAnnouncements.weAreInAStore = false
-                     ChatAnnouncements.weAreInAFence = false
-                 end, 1000)
+                       ChatAnnouncements.weAreInAStore = false
+                       ChatAnnouncements.weAreInAFence = false
+                   end, 1000)
 end
 
 --- - **EVENT_OPEN_TRADING_HOUSE**
@@ -3175,9 +3116,9 @@ function ChatAnnouncements.GuildStoreClose(eventId)
         ChatAnnouncements.inventoryStacks = {}
     end
     LUIE_callLater(function ()
-                     ChatAnnouncements.weAreInAStore = false
-                     ChatAnnouncements.weAreInAGuildStore = false
-                 end, 1000)
+                       ChatAnnouncements.weAreInAStore = false
+                       ChatAnnouncements.weAreInAGuildStore = false
+                   end, 1000)
 end
 
 --- - **EVENT_ITEM_LAUNDER_RESULT **
@@ -3318,8 +3259,8 @@ function ChatAnnouncements.ResolveQuestItemChange()
                 countChange = newValue + ChatAnnouncements.questItemIndex[itemId].counter
                 ChatAnnouncements.questItemRemoved[itemId] = true
                 LUIE_callLater(function ()
-                                 ChatAnnouncements.questItemRemoved[itemId] = false
-                             end, 100)
+                                   ChatAnnouncements.questItemRemoved[itemId] = false
+                               end, 100)
 
                 if not Quests.QuestItemHideRemove[itemId] and not ChatAnnouncements.loginHideQuestLoot then
                     if ChatAnnouncements.SV.Inventory.LootQuestRemove then
@@ -3391,8 +3332,8 @@ function ChatAnnouncements.ResolveQuestItemChange()
                 countChange = newValue - ChatAnnouncements.questItemIndex[itemId].stack
                 ChatAnnouncements.questItemAdded[itemId] = true
                 LUIE_callLater(function ()
-                                 ChatAnnouncements.questItemAdded[itemId] = false
-                             end, 100)
+                                   ChatAnnouncements.questItemAdded[itemId] = false
+                               end, 100)
 
                 if not Quests.QuestItemHideLoot[itemId] and not ChatAnnouncements.loginHideQuestLoot then
                     if ChatAnnouncements.SV.Inventory.LootQuestAdd then
@@ -4352,7 +4293,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
             local mailSender = ""
             if ChatAnnouncements.inMail then
                 -- Get the correct sender from the queue for this item
-                mailSender = ChatAnnouncements.GetNextMailSender() or ""
+                mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
                 logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
             else
                 logPrefix = ""
@@ -4430,7 +4371,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
                 local mailSender = ""
                 if ChatAnnouncements.inMail then
-                    logPrefix = ChatAnnouncements.mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
+                    logPrefix = ChatAnnouncements.Mail.target ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
                 else
                     logPrefix = ""
                 end
@@ -4458,7 +4399,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                 end
                 if ChatAnnouncements.inMail and isNewItem then
                     -- Get the correct sender from the queue for new items
-                    mailSender = ChatAnnouncements.GetNextMailSender() or ""
+                    mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
                     logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
                     ChatAnnouncements.ItemCounterDelay(
                         icon,
@@ -4478,7 +4419,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                 -- Handle stacked items from mail (they still need to consume from queue)
                 if ChatAnnouncements.inMail and not isNewItem and stackCountChange > 0 then
                     -- Consume from queue for stacked items too
-                    mailSender = ChatAnnouncements.GetNextMailSender() or ""
+                    mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
                     logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
                     if mailSender ~= "" then
                         ChatAnnouncements.ItemCounterDelay(
@@ -4563,25 +4504,25 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestTurnIn
                     LUIE_callLater(function ()
-                                     if ChatAnnouncements.stackSplit == false then
-                                         ChatAnnouncements.ItemCounterDelay(
-                                             removedIcon,
-                                             change,
-                                             removedItemType,
-                                             removedItemId,
-                                             removedItemLink,
-                                             receivedBy,
-                                             logPrefix,
-                                             gainOrLoss,
-                                             false,
-                                             false,
-                                             true,
-                                             false
-                                         )
-                                         eventManager:UnregisterForUpdate(moduleName .. "Printer")
-                                         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
-                                     end
-                                 end, 25)
+                                       if ChatAnnouncements.stackSplit == false then
+                                           ChatAnnouncements.ItemCounterDelay(
+                                               removedIcon,
+                                               change,
+                                               removedItemType,
+                                               removedItemId,
+                                               removedItemLink,
+                                               receivedBy,
+                                               logPrefix,
+                                               gainOrLoss,
+                                               false,
+                                               false,
+                                               true,
+                                               false
+                                           )
+                                           eventManager:UnregisterForUpdate(moduleName .. "Printer")
+                                           eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                                       end
+                                   end, 25)
                 elseif ChatAnnouncements.weAreInAGuildStore and ChatAnnouncements.SV.Inventory.LootShowList then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageList
@@ -4627,14 +4568,14 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                     -- If this is a Skill respec scroll, manually call an announcement for it if enabled (for some reason doesn't display an EVENT_DISPLAY_ANNOUNCEMENT on use anymore)
                     if removedItemType == ITEMTYPE_CROWN_ITEM and (itemId == 64524 or itemId == 135128) then
                         LUIE_callLater(function ()
-                                         ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILLS)
-                                     end, 25)
+                                           ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILLS)
+                                       end, 25)
                     end
                     -- If this is an Attribute respec scroll, manually call an announcement for it if enabled (we disable EVENT_DISPLAY_ANNOUNCEMENT for this to sync it better)
                     if removedItemType == ITEMTYPE_CROWN_ITEM and (itemId == 64523 or itemId == 135130) then
                         LUIE_callLater(function ()
-                                         ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_ATTRIBUTES)
-                                     end, 25)
+                                           ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_ATTRIBUTES)
+                                       end, 25)
                     end
                     if ChatAnnouncements.SV.Inventory.LootShowUseMisc and (removedItemType == ITEMTYPE_RECALL_STONE or removedItemType == ITEMTYPE_TROPHY or removedItemType == ITEMTYPE_MASTER_WRIT or removedItemType == ITEMTYPE_CROWN_ITEM) then
                         -- Check to make sure the items aren't riding lesson books.
@@ -4689,25 +4630,25 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                     -- If any of these options were flagged, run a callLater on a 50ms delay to make sure we didn't just split stacks.
                     if flag then
                         LUIE_callLater(function ()
-                                         if ChatAnnouncements.stackSplit == false then
-                                             ChatAnnouncements.ItemCounterDelay(
-                                                 removedIcon,
-                                                 change,
-                                                 removedItemType,
-                                                 removedItemId,
-                                                 removedItemLink,
-                                                 receivedBy,
-                                                 logPrefix,
-                                                 gainOrLoss,
-                                                 false,
-                                                 false,
-                                                 true,
-                                                 false
-                                             )
-                                             eventManager:UnregisterForUpdate(moduleName .. "Printer")
-                                             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
-                                         end
-                                     end, 25)
+                                           if ChatAnnouncements.stackSplit == false then
+                                               ChatAnnouncements.ItemCounterDelay(
+                                                   removedIcon,
+                                                   change,
+                                                   removedItemType,
+                                                   removedItemId,
+                                                   removedItemLink,
+                                                   receivedBy,
+                                                   logPrefix,
+                                                   gainOrLoss,
+                                                   false,
+                                                   false,
+                                                   true,
+                                                   false
+                                               )
+                                               eventManager:UnregisterForUpdate(moduleName .. "Printer")
+                                               eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                                           end
+                                       end, 25)
                     end
                     -- For any leftover cases for items removed.
                 elseif not ChatAnnouncements.itemWasDestroyed and ChatAnnouncements.removableIDs[itemId] and ChatAnnouncements.SV.Inventory.LootShowRemove then
@@ -4753,7 +4694,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
         local mailSender = ""
         if ChatAnnouncements.inMail then
             -- Get the correct sender from the queue for this item
-            mailSender = ChatAnnouncements.GetNextMailSender() or ""
+            mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
             logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
         else
             logPrefix = ""
@@ -6583,14 +6524,14 @@ function ChatAnnouncements.OnPlayerActivated(eventId, initial)
     if g_firstLoad then
         -- pChat registers formatters in EVENT_PLAYER_ACTIVATED, so delay to ensure pChat has finished
         LUIE_callLater(function ()
-                         ChatAnnouncements.SlayChatHandlers()
-                     end, 50)
+                           ChatAnnouncements.SlayChatHandlers()
+                       end, 50)
         g_firstLoad = false
     end
 
     LUIE_callLater(function ()
-                     ChatAnnouncements.loginHideQuestLoot = false
-                 end, 3000)
+                       ChatAnnouncements.loginHideQuestLoot = false
+                   end, 3000)
 
     if ChatAnnouncements.SV.Notify.DisguiseCA or ChatAnnouncements.SV.Notify.DisguiseCSA or ChatAnnouncements.SV.Notify.DisguiseAlert or ChatAnnouncements.SV.Notify.DisguiseWarnCA or ChatAnnouncements.SV.Notify.DisguiseWarnCSA or ChatAnnouncements.SV.Notify.DisguiseWarnAlert then
         if ChatAnnouncements.disguiseState == 0 then
