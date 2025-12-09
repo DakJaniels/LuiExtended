@@ -48,7 +48,8 @@ CombatTextEventViewer.sourceNameCache = setmetatable({},
                                                              return t[sourceName]
                                                          end,
                                                      })
-
+---
+--- @param poolManager LuiExtended.CombatTextPoolManager
 function CombatTextEventViewer:Initialize(poolManager)
     self.poolManager = poolManager
 end

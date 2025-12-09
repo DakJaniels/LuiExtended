@@ -137,15 +137,13 @@ function CombatTextCombatScrollEventViewer:View(combatType, powerType, value, ab
     animation:GetStepByName("scroll"):SetDeltaOffsetY(targetY)
 
     animation:Apply(control)
+    animation:SetStopHandler(function ()
+        self.poolManager:ReleasePoolObject(CombatTextConstants.poolType.CONTROL, controlPoolKey)
+        self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
+        self.activeControls[combatType][control:GetName()] = nil
+        if (self.lastControl[combatType] == control) then
+            self.lastControl[combatType] = nil
+        end
+    end)
     animation:Play()
-
-    -- Add items back into pool after use
-    LUIE_callLater(function ()
-                       self.poolManager:ReleasePoolObject(CombatTextConstants.poolType.CONTROL, controlPoolKey)
-                       self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
-                       self.activeControls[combatType][control:GetName()] = nil
-                       if (self.lastControl[combatType] == control) then
-                           self.lastControl[combatType] = nil
-                       end
-                   end, animation:GetDuration())
 end

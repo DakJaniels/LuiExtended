@@ -41,91 +41,98 @@ function CombatTextPool:New(poolType)
 
         local function ResetControl(control)
             control:ClearAnchors()
+            control:SetHidden(true)
             control.label:ClearAnchors()
+            control.label:SetText("")
             control.icon:ClearAnchors()
             control.icon:SetHidden(true)
         end
 
         ZO_ObjectPool.Initialize(obj, CreateControl, ResetControl)
+        obj:SetCustomAcquireBehavior(function (control)
+            control:SetHidden(false)
+        end)
     else
         -- Capture poolType in closure for animation factory
         local capturedPoolType = poolType
-
-        local function CreateAnimation(pool)
-            local anim = LUIE.CombatTextAnimation:New()
+        ---
+        --- @param animPool LuiExtended.CombatTextAnimation
+        --- @return LuiExtended.CombatTextAnimation
+        local function CreateAnimation(animPool)
+            animPool = LUIE.CombatTextAnimation:New()
             local Settings = LUIE.CombatText.SV
             local animationSpeed = 1 / (Settings.animation.animationDuration / 100)
 
             local animationTypes =
             {
                 [poolTypes.ANIMATION_CLOUD] = function ()
-                    anim:Alpha(nil, 0, 1, animationSpeed * 50)
-                    anim:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 1500, slowFast)
+                    animPool:Alpha(nil, 0, 1, animationSpeed * 50)
+                    animPool:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 1500, slowFast)
                 end,
                 [poolTypes.ANIMATION_CLOUD_CRITICAL] = function ()
-                    anim:Alpha(nil, 0, 1, animationSpeed * 50)
-                    anim:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
-                    anim:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 1500, slowFast)
+                    animPool:Alpha(nil, 0, 1, animationSpeed * 50)
+                    animPool:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
+                    animPool:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 1500, slowFast)
                 end,
                 [poolTypes.ANIMATION_CLOUD_FIREWORKS] = function ()
-                    anim:Alpha(nil, 0, 1, animationSpeed * 50)
-                    anim:Move("move", 0, 0, animationSpeed * 250, 0, fastSlow) -- x and y is set before the animation is played
-                    anim:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1500, slowFast)
+                    animPool:Alpha(nil, 0, 1, animationSpeed * 50)
+                    animPool:Move("move", 0, 0, animationSpeed * 250, 0, fastSlow) -- x and y is set before the animation is played
+                    animPool:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1500, slowFast)
                 end,
                 [poolTypes.ANIMATION_SCROLL] = function ()
-                    anim:Alpha(nil, 0, 1, animationSpeed * 50)
-                    anim:Move("scroll", 0, 0, animationSpeed * 2500, 0, even)
-                    anim:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1400, slowFast)
+                    animPool:Alpha(nil, 0, 1, animationSpeed * 50)
+                    animPool:Move("scroll", 0, 0, animationSpeed * 2500, 0, even)
+                    animPool:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1400, slowFast)
                 end,
                 [poolTypes.ANIMATION_SCROLL_CRITICAL] = function ()
-                    anim:Alpha(nil, 0, 1, animationSpeed * 50)
-                    anim:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
-                    anim:Move("scroll", 0, 0, animationSpeed * 2500, 0, even)
-                    anim:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1400, slowFast)
+                    animPool:Alpha(nil, 0, 1, animationSpeed * 50)
+                    animPool:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
+                    animPool:Move("scroll", 0, 0, animationSpeed * 2500, 0, even)
+                    animPool:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1400, slowFast)
                 end,
                 [poolTypes.ANIMATION_DEATH] = function ()
-                    anim:Alpha(nil, 0, 1, animationSpeed * 50)
-                    anim:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
-                    anim:Move("scroll", 0, 0, animationSpeed * 5000, 0, even)
-                    anim:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 2000, slowFast)
+                    animPool:Alpha(nil, 0, 1, animationSpeed * 50)
+                    animPool:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
+                    animPool:Move("scroll", 0, 0, animationSpeed * 5000, 0, even)
+                    animPool:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 2000, slowFast)
                 end,
                 [poolTypes.ANIMATION_ALERT] = function ()
-                    anim:Alpha(nil, 0, 1, animationSpeed * 50)
-                    anim:Scale(nil, 0.5, 1.5, animationSpeed * 100, 0, fastSlow)
-                    anim:Scale(nil, 1.5, 1, animationSpeed * 200, animationSpeed * 250, slowFast)
-                    anim:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 3000, slowFast)
+                    animPool:Alpha(nil, 0, 1, animationSpeed * 50)
+                    animPool:Scale(nil, 0.5, 1.5, animationSpeed * 100, 0, fastSlow)
+                    animPool:Scale(nil, 1.5, 1, animationSpeed * 200, animationSpeed * 250, slowFast)
+                    animPool:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 3000, slowFast)
                 end,
                 [poolTypes.ANIMATION_COMBATSTATE] = function ()
-                    anim:Alpha(nil, 0, 1, animationSpeed * 1000, 0, slowFast)
-                    anim:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 3000, slowFast)
+                    animPool:Alpha(nil, 0, 1, animationSpeed * 1000, 0, slowFast)
+                    animPool:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 3000, slowFast)
                 end,
                 [poolTypes.ANIMATION_POINT] = function ()
-                    anim:Alpha(nil, 0, 1, animationSpeed * 50)
-                    anim:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 3000, slowFast)
+                    animPool:Alpha(nil, 0, 1, animationSpeed * 50)
+                    animPool:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 3000, slowFast)
                 end,
                 [poolTypes.ANIMATION_RESOURCE] = function ()
-                    anim:Alpha(nil, 0, 1, animationSpeed * 50)
-                    anim:Scale(nil, 0.5, 1.5, animationSpeed * 100, 0, fastSlow)
-                    anim:Scale(nil, 1.5, 1, animationSpeed * 200, animationSpeed * 250, slowFast)
-                    anim:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 3000, slowFast)
+                    animPool:Alpha(nil, 0, 1, animationSpeed * 50)
+                    animPool:Scale(nil, 0.5, 1.5, animationSpeed * 100, 0, fastSlow)
+                    animPool:Scale(nil, 1.5, 1, animationSpeed * 200, animationSpeed * 250, slowFast)
+                    animPool:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 3000, slowFast)
                 end,
                 [poolTypes.ANIMATION_ELLIPSE_X] = function ()
-                    anim:Move("scrollX", 0, 0, animationSpeed * 2500, 0, easeOutIn)
+                    animPool:Move("scrollX", 0, 0, animationSpeed * 2500, 0, easeOutIn)
                 end,
                 [poolTypes.ANIMATION_ELLIPSE_Y] = function ()
-                    anim:Alpha(nil, 0, 1, animationSpeed * 50)
-                    anim:Move("scrollY", 0, 0, animationSpeed * 2500) -- for delay and easying function will be used defaults (0, ZO_LinearEase)
-                    anim:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1800, slowFast)
+                    animPool:Alpha(nil, 0, 1, animationSpeed * 50)
+                    animPool:Move("scrollY", 0, 0, animationSpeed * 2500) -- for delay and easying function will be used defaults (0, ZO_LinearEase)
+                    animPool:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1800, slowFast)
                 end,
                 [poolTypes.ANIMATION_ELLIPSE_X_CRIT] = function ()
-                    anim:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
-                    anim:Move("scrollX", 0, 0, animationSpeed * 2500, 0, easeOutIn)
+                    animPool:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
+                    animPool:Move("scrollX", 0, 0, animationSpeed * 2500, 0, easeOutIn)
                 end,
                 [poolTypes.ANIMATION_ELLIPSE_Y_CRIT] = function ()
-                    anim:Alpha(nil, 0, 1, animationSpeed * 50)
-                    anim:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
-                    anim:Move("scrollY", 0, 0, animationSpeed * 2500)
-                    anim:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1800, slowFast)
+                    animPool:Alpha(nil, 0, 1, animationSpeed * 50)
+                    animPool:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
+                    animPool:Move("scrollY", 0, 0, animationSpeed * 2500)
+                    animPool:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1800, slowFast)
                 end,
             }
 
@@ -134,11 +141,12 @@ function CombatTextPool:New(poolType)
                 animationType()
             end
 
-            return anim
+            return animPool
         end
-
-        local function ResetAnimation(anim)
-            anim:Stop()
+        ---
+        --- @param animPool LuiExtended.CombatTextAnimation
+        local function ResetAnimation(animPool)
+            animPool:Reset()
         end
 
         ZO_ObjectPool.Initialize(obj, CreateAnimation, ResetAnimation)

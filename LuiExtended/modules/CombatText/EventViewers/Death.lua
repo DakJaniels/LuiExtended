@@ -62,16 +62,13 @@ function CombatTextDeathViewer:OnEvent(unitTag)
     animation:GetStepByName("scroll"):SetDeltaOffsetY(targetY)
 
     animation:Apply(control)
-    animation:Play()
-
-    local function animationCallback()
+    animation:SetStopHandler(function ()
         self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
         self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
         self.activePoints = self.activePoints - 1
         if self.activePoints == 0 or self.activePoints >= 5 then
             self.locationOffset = 0
         end
-    end
-    -- Add items back into pool after animation
-    LUIE_callLater(animationCallback, animation:GetDuration())
+    end)
+    animation:Play()
 end

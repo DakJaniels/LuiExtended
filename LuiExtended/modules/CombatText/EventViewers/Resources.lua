@@ -68,12 +68,12 @@ function CombatTextResourceEventViewer:OnEvent(resourceType, value)
         PlaySound("Quest_StepFailed")
     end
 
-    LUIE_callLater(function ()
-                       self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
-                       self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
-                       self.activeResources = self.activeResources - 1
-                       if self.activeResources == 0 then
-                           self.locationOffset = 0
-                       end
-                   end, animation:GetDuration())
+    animation:SetStopHandler(function ()
+        self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
+        self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
+        self.activeResources = self.activeResources - 1
+        if self.activeResources == 0 then
+            self.locationOffset = 0
+        end
+    end)
 end

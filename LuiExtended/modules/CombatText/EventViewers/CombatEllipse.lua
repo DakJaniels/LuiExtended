@@ -175,16 +175,14 @@ function CombatTextCombatEllipseEventViewer:View(combatType, powerType, value, a
     end
     animationY:GetStepByName("scrollY"):SetDeltaOffsetY(verticalOffset)
     animationY:Apply(control)
+    animationY:SetStopHandler(function ()
+        self.poolManager:ReleasePoolObject(CombatTextConstants.poolType.CONTROL, controlPoolKey)
+        self.poolManager:ReleasePoolObject(animationXPoolType, animationXPoolKey)
+        self.poolManager:ReleasePoolObject(animationYPoolType, animationYPoolKey)
+        self.activeControls[combatType][control:GetName()] = nil
+        if self.lastControl[combatType] == control then
+            self.lastControl[combatType] = nil
+        end
+    end)
     animationY:Play()
-
-    -- Add items back into pool after use
-    LUIE_callLater(function ()
-                       self.poolManager:ReleasePoolObject(CombatTextConstants.poolType.CONTROL, controlPoolKey)
-                       self.poolManager:ReleasePoolObject(animationXPoolType, animationXPoolKey)
-                       self.poolManager:ReleasePoolObject(animationYPoolType, animationYPoolKey)
-                       self.activeControls[combatType][control:GetName()] = nil
-                       if self.lastControl[combatType] == control then
-                           self.lastControl[combatType] = nil
-                       end
-                   end, animationY:GetDuration())
 end

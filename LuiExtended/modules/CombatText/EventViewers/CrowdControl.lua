@@ -100,16 +100,14 @@ function CombatTextCrowdControlEventViewer:OnEvent(crowdControlType, eventCombat
     local animationPoolType = poolTypes.ANIMATION_SCROLL_CRITICAL
     local animation, animationPoolKey = self.poolManager:GetPoolObject(animationPoolType)
     animation:Apply(control)
+    animation:SetStopHandler(function ()
+        self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
+        self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
+        self.activeCrowdControls[eventCombatType] = self.activeCrowdControls[eventCombatType] - 1
+
+        if self.activeCrowdControls[eventCombatType] == 0 then
+            self.locationOffset[eventCombatType] = 0
+        end
+    end)
     animation:Play()
-
-    -- Add items back into pool after animation
-    LUIE_callLater(function ()
-                       self.poolManager:ReleasePoolObject(poolTypes.CONTROL, controlPoolKey)
-                       self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
-                       self.activeCrowdControls[eventCombatType] = self.activeCrowdControls[eventCombatType] - 1
-
-                       if self.activeCrowdControls[eventCombatType] == 0 then
-                           self.locationOffset[eventCombatType] = 0
-                       end
-                   end, animation:GetDuration())
 end

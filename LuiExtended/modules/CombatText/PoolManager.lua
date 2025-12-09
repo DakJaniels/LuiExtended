@@ -3,20 +3,24 @@
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
 -- -----------------------------------------------------------------------------
 
----@class LuiExtended
+--- @class LuiExtended
 local LUIE = LUIE
 
 local pairs = pairs
 
 
----@class (partial) LuiExtended.CombatTextPoolManager : ZO_InitializingObject
+--- @class (partial) LuiExtended.CombatTextPoolManager : ZO_InitializingObject
 local CombatTextPoolManager = ZO_InitializingObject:Subclass()
 
----@class (partial) LuiExtended.CombatTextPoolManager
+--- @class (partial) LuiExtended.CombatTextPoolManager
 LUIE.CombatTextPoolManager = CombatTextPoolManager
 
-function CombatTextPoolManager:Initialize()
+function CombatTextPoolManager:Initialize(poolTypes)
     self.pools = {}
+    -- Create a pool for each type
+    for _, poolType in pairs(poolTypes) do
+        self:RegisterPool(poolType, LUIE.CombatTextPool:New(poolType))
+    end
 end
 
 function CombatTextPoolManager:RegisterPool(poolType, pool)

@@ -119,11 +119,9 @@ function CombatTextCombatCloudEventViewer:View(combatType, powerType, value, abi
     end
 
     animation:Apply(control)
+    animation:SetStopHandler(function ()
+        self.poolManager:ReleasePoolObject(CombatTextConstants.poolType.CONTROL, controlPoolKey)
+        self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
+    end)
     animation:Play()
-
-    -- Add items back into pool after use
-    LUIE_callLater(function ()
-                       self.poolManager:ReleasePoolObject(CombatTextConstants.poolType.CONTROL, controlPoolKey)
-                       self.poolManager:ReleasePoolObject(animationPoolType, animationPoolKey)
-                   end, animation:GetDuration())
 end

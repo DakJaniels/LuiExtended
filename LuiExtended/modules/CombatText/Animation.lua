@@ -33,6 +33,26 @@ function CombatTextAnimation:Stop()
     self.timeline:Stop()
 end
 
+--- Sets a one-shot OnStop handler and clears it after firing.
+--- @param callback function|nil
+function CombatTextAnimation:SetStopHandler(callback)
+    if callback == nil then
+        self.timeline:SetHandler("OnStop", nil)
+        return
+    end
+
+    self.timeline:SetHandler("OnStop", function(timeline, completedPlaying)
+        callback(timeline, completedPlaying)
+        self.timeline:SetHandler("OnStop", nil)
+    end)
+end
+
+--- Resets the animation timeline for reuse.
+function CombatTextAnimation:Reset()
+    self.timeline:Stop()
+    self.timeline:SetProgress(0)
+end
+
 --- Sets the progress of the animation timeline.
 --- @param progress number The progress value (0.0 to 1.0)
 function CombatTextAnimation:SetProgress(progress)
