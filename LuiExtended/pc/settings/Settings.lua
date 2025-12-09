@@ -584,6 +584,54 @@ function LUIE.CreateSettings()
         nil,
         true
     )
+
+    -- Speaker Setup
+    optionsData[#optionsData + 1] = SettingsAPI.CreateDropdownOption(
+        "Speaker Setup",
+        "Configure audio speaker configuration",
+        { "Use Windows Setting", "Mono", "Stereo", "2.1", "4.0", "4.1", "5.0", "5.1", "7.1" },
+        function ()
+            local config = tonumber(GetCVar("SPEAKER_SETUP")) or 0
+            local names = { "Use Windows Setting", "Mono", "Stereo", "2.1", "4.0", "4.1", "5.0", "5.1", "7.1" }
+            return names[config + 1] or "Use Windows Setting"
+        end,
+        function (value)
+            local configs = { ["Use Windows Setting"] = 0, ["Mono"] = 1, ["Stereo"] = 2, ["2.1"] = 3, ["4.0"] = 4, ["4.1"] = 5, ["5.0"] = 6, ["5.1"] = 7, ["7.1"] = 8 }
+            SetCVar("SPEAKER_SETUP", tostring(configs[value] or 0))
+        end,
+        "full",
+        nil,
+        "Use Windows Setting"
+    )
+
+    -- Spatial Sound
+    optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
+        "Spatial Sound",
+        "Enable spatial sound processing",
+        function () return GetCVar("SPATIAL_SOUND") == "1" end,
+        function (value) SetCVar("SPATIAL_SOUND", value and "1" or "0") end,
+        "full",
+        nil,
+        false
+    )
+
+    -- Spatial Sound Quality
+    optionsData[#optionsData + 1] = SettingsAPI.CreateDropdownOption(
+        "Spatial Sound Quality",
+        "Set the quality level for spatial sound processing",
+        { "Low", "High" },
+        function ()
+            local quality = tonumber(GetCVar("SPATIAL_SOUND_QUALITY")) or 0
+            return quality == 1 and "High" or "Low"
+        end,
+        function (value)
+            SetCVar("SPATIAL_SOUND_QUALITY", value == "High" and "1" or "0")
+        end,
+        "full",
+        nil,
+        "Low"
+    )
+
     if LUIE.IsDevDebugEnabled() then
         -- Developer Options Header
         optionsData[#optionsData + 1] = SettingsAPI.CreateHeaderOption(
