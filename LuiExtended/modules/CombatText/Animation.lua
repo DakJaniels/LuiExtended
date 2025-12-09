@@ -114,9 +114,8 @@ end
 --- Inserts a callback into the animation timeline.
 --- @param func function The callback function to execute
 --- @param delay integer Delay in milliseconds before executing the callback
---- @return function callbackRef The inserted callback function reference
 function CombatTextAnimation:InsertCallback(func, delay)
-    return self.timeline:InsertCallback(func, delay)
+    self.timeline:InsertCallback(func, delay)
 end
 
 --- Clears all callbacks from the animation timeline.
@@ -156,11 +155,13 @@ end
 --- Gets the total duration of the animation timeline.
 --- @return integer duration The duration in milliseconds
 function CombatTextAnimation:GetDuration()
-    return self.timeline:GetDuration()
+    local duration = self.timeline:GetDuration()
+    return duration or 0
 end
 
 --- Gets the current progress of the animation timeline.
 --- @return number progress The progress value (0.0 to 1.0)
 function CombatTextAnimation:GetProgress()
-    return self.timeline:GetProgress()
+    local progress = self.timeline:GetProgress()
+    return progress or 0
 end
