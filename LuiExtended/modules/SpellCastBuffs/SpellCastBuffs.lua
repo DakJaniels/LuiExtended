@@ -20,55 +20,55 @@ local Tooltips = Data.Tooltips
 local DebugAuras = Data.DebugAuras
 local DebugResults = Data.DebugResults
 local Effects = Data.Effects
-local Effects_AddGroundDamageAura  = Effects.AddGroundDamageAura
-local Effects_AddNameAura  = Effects.AddNameAura
-local Effects_AddNameOnBossEngaged  = Effects.AddNameOnBossEngaged
-local Effects_AddNameOnEvent  = Effects.AddNameOnEvent
-local Effects_AddStackOnEvent  = Effects.AddStackOnEvent
-local Effects_AssistantIcons  = Effects.AssistantIcons
-local Effects_DebuffDisplayOverrideIdAlways  = Effects.DebuffDisplayOverrideIdAlways
-local Effects_DebuffDisplayOverrideId  = Effects.DebuffDisplayOverrideId
-local Effects_DebuffDisplayOverrideMajorMinor  = Effects.DebuffDisplayOverrideMajorMinor
-local Effects_DebuffDisplayOverrideName  = Effects.DebuffDisplayOverrideName
-local Effects_DisguiseIcons  = Effects.DisguiseIcons
-local Effects_EffectCreateSkillAura  = Effects.EffectCreateSkillAura
-local Effects_EffectGroundDisplay  = Effects.EffectGroundDisplay
-local Effects_EffectMergeId  = Effects.EffectMergeId
-local Effects_EffectMergeName  = Effects.EffectMergeName
-local Effects_EffectOverrideByName  = Effects.EffectOverrideByName
-local Effects_EffectOverride  = Effects.EffectOverride
-local Effects_EffectPullDuration  = Effects.EffectPullDuration
-local Effects_FakeExternalBuffs  = Effects.FakeExternalBuffs
-local Effects_FakeExternalDebuffs  = Effects.FakeExternalDebuffs
-local Effects_FakePlayerBuffs  = Effects.FakePlayerBuffs
-local Effects_FakePlayerDebuffs  = Effects.FakePlayerDebuffs
-local Effects_FakePlayerOfflineAura  = Effects.FakePlayerOfflineAura
-local Effects_FakeStagger  = Effects.FakeStagger
-local Effects_HideGroundMineStacks  = Effects.HideGroundMineStacks
-local Effects_IsAbilityICD  = Effects.IsAbilityICD
-local Effects_IsAllianceXPBuff  = Effects.IsAllianceXPBuff
-local Effects_IsBlock  = Effects.IsBlock
-local Effects_IsBoon  = Effects.IsBoon
-local Effects_IsCyrodiil  = Effects.IsCyrodiil
-local Effects_IsDrinkBuff  = Effects.IsDrinkBuff
-local Effects_IsExperienceBuff  = Effects.IsExperienceBuff
-local Effects_IsFoodBuff  = Effects.IsFoodBuff
-local Effects_IsGroundMineAura  = Effects.IsGroundMineAura
-local Effects_IsGroundMineDamage  = Effects.IsGroundMineDamage
-local Effects_IsGroundMineStack  = Effects.IsGroundMineStack
-local Effects_IsLycan  = Effects.IsLycan
-local Effects_IsOakenSoul  = Effects.IsOakenSoul
-local Effects_IsSetICD  = Effects.IsSetICD
-local Effects_IsSoulSummons  = Effects.IsSoulSummons
-local Effects_IsVampLycanBite  = Effects.IsVampLycanBite
-local Effects_IsVampLycanDisease  = Effects.IsVampLycanDisease
-local Effects_IsVamp  = Effects.IsVamp
-local Effects_LinkedGroundMine  = Effects.LinkedGroundMine
-local Effects_MapDataOverride  = Effects.MapDataOverride
-local Effects_TooltipUseDefault  = Effects.TooltipUseDefault
-local Effects_ZoneBuffs  = Effects.ZoneBuffs
-local Effects_ZoneDataOverride  = Effects.ZoneDataOverride
- 
+local Effects_AddGroundDamageAura = Effects.AddGroundDamageAura
+local Effects_AddNameAura = Effects.AddNameAura
+local Effects_AddNameOnBossEngaged = Effects.AddNameOnBossEngaged
+local Effects_AddNameOnEvent = Effects.AddNameOnEvent
+local Effects_AddStackOnEvent = Effects.AddStackOnEvent
+local Effects_AssistantIcons = Effects.AssistantIcons
+local Effects_DebuffDisplayOverrideIdAlways = Effects.DebuffDisplayOverrideIdAlways
+local Effects_DebuffDisplayOverrideId = Effects.DebuffDisplayOverrideId
+local Effects_DebuffDisplayOverrideMajorMinor = Effects.DebuffDisplayOverrideMajorMinor
+local Effects_DebuffDisplayOverrideName = Effects.DebuffDisplayOverrideName
+local Effects_DisguiseIcons = Effects.DisguiseIcons
+local Effects_EffectCreateSkillAura = Effects.EffectCreateSkillAura
+local Effects_EffectGroundDisplay = Effects.EffectGroundDisplay
+local Effects_EffectMergeId = Effects.EffectMergeId
+local Effects_EffectMergeName = Effects.EffectMergeName
+local Effects_EffectOverrideByName = Effects.EffectOverrideByName
+local Effects_EffectOverride = Effects.EffectOverride
+local Effects_EffectPullDuration = Effects.EffectPullDuration
+local Effects_FakeExternalBuffs = Effects.FakeExternalBuffs
+local Effects_FakeExternalDebuffs = Effects.FakeExternalDebuffs
+local Effects_FakePlayerBuffs = Effects.FakePlayerBuffs
+local Effects_FakePlayerDebuffs = Effects.FakePlayerDebuffs
+local Effects_FakePlayerOfflineAura = Effects.FakePlayerOfflineAura
+local Effects_FakeStagger = Effects.FakeStagger
+local Effects_HideGroundMineStacks = Effects.HideGroundMineStacks
+local Effects_IsAbilityICD = Effects.IsAbilityICD
+local Effects_IsAllianceXPBuff = Effects.IsAllianceXPBuff
+local Effects_IsBlock = Effects.IsBlock
+local Effects_IsBoon = Effects.IsBoon
+local Effects_IsCyrodiil = Effects.IsCyrodiil
+local Effects_IsDrinkBuff = Effects.IsDrinkBuff
+local Effects_IsExperienceBuff = Effects.IsExperienceBuff
+local Effects_IsFoodBuff = Effects.IsFoodBuff
+local Effects_IsGroundMineAura = Effects.IsGroundMineAura
+local Effects_IsGroundMineDamage = Effects.IsGroundMineDamage
+local Effects_IsGroundMineStack = Effects.IsGroundMineStack
+local Effects_IsLycan = Effects.IsLycan
+local Effects_IsOakenSoul = Effects.IsOakenSoul
+local Effects_IsSetICD = Effects.IsSetICD
+local Effects_IsSoulSummons = Effects.IsSoulSummons
+local Effects_IsVampLycanBite = Effects.IsVampLycanBite
+local Effects_IsVampLycanDisease = Effects.IsVampLycanDisease
+local Effects_IsVamp = Effects.IsVamp
+local Effects_LinkedGroundMine = Effects.LinkedGroundMine
+local Effects_MapDataOverride = Effects.MapDataOverride
+local Effects_TooltipUseDefault = Effects.TooltipUseDefault
+local Effects_ZoneBuffs = Effects.ZoneBuffs
+local Effects_ZoneDataOverride = Effects.ZoneDataOverride
+
 local zo_strformat = zo_strformat
 local zo_iconFormat = zo_iconFormat
 
@@ -432,45 +432,45 @@ function SpellCastBuffs:_RegisterEvents()
     eventManager:AddFilterForEvent(moduleName .. "Disposition", EVENT_DISPOSITION_UPDATE, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     -- Buff Events
-    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_EFFECT_CHANGED, function (...)
-        self:OnEffectChanged(...)
+    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_EFFECT_CHANGED, function (_, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+        self:OnEffectChanged(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
     end)
-    eventManager:RegisterForEvent(moduleName .. "Target", EVENT_EFFECT_CHANGED, function (...)
-        self:OnEffectChanged(...)
+    eventManager:RegisterForEvent(moduleName .. "Target", EVENT_EFFECT_CHANGED, function (_, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+        self:OnEffectChanged(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
     end)
     eventManager:AddFilterForEvent(moduleName .. "Player", EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
     eventManager:AddFilterForEvent(moduleName .. "Target", EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     -- GROUND & MINE EFFECTS - add a filtered event for each AbilityId
     for k, v in pairs(Effects_EffectGroundDisplay) do
-        eventManager:RegisterForEvent(moduleName .. "Ground" .. tostring(k), EVENT_EFFECT_CHANGED, function (...)
-            self:OnEffectChangedGround(...)
+        eventManager:RegisterForEvent(moduleName .. "Ground" .. tostring(k), EVENT_EFFECT_CHANGED, function (_, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+            self:OnEffectChangedGround(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
         end)
         eventManager:AddFilterForEvent(moduleName .. "Ground" .. tostring(k), EVENT_EFFECT_CHANGED, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_ABILITY_ID, k)
     end
     for k, v in pairs(Effects_LinkedGroundMine) do
-        eventManager:RegisterForEvent(moduleName .. "Ground" .. tostring(k), EVENT_EFFECT_CHANGED, function (...)
-            self:OnEffectChangedGround(...)
+        eventManager:RegisterForEvent(moduleName .. "Ground" .. tostring(k), EVENT_EFFECT_CHANGED, function (_, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+            self:OnEffectChangedGround(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
         end)
         eventManager:AddFilterForEvent(moduleName .. "Ground" .. tostring(k), EVENT_EFFECT_CHANGED, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_ABILITY_ID, k)
     end
 
     -- Combat Events
-    eventManager:RegisterForEvent(moduleName .. "Event1", EVENT_COMBAT_EVENT, function (...)
-        self:OnCombatEventIn(...)
+    eventManager:RegisterForEvent(moduleName .. "Event1", EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+        self:OnCombatEventIn(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     end)
-    eventManager:RegisterForEvent(moduleName .. "Event2", EVENT_COMBAT_EVENT, function (...)
-        self:OnCombatEventOut(...)
+    eventManager:RegisterForEvent(moduleName .. "Event2", EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+        self:OnCombatEventOut(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     end)
-    eventManager:RegisterForEvent(moduleName .. "Event3", EVENT_COMBAT_EVENT, function (...)
-        self:OnCombatEventOut(...)
+    eventManager:RegisterForEvent(moduleName .. "Event3", EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+        self:OnCombatEventOut(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     end)
     eventManager:AddFilterForEvent(moduleName .. "Event1", EVENT_COMBAT_EVENT, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false)     -- Target -> Player
     eventManager:AddFilterForEvent(moduleName .. "Event2", EVENT_COMBAT_EVENT, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false)     -- Player -> Target
     eventManager:AddFilterForEvent(moduleName .. "Event3", EVENT_COMBAT_EVENT, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER_PET, REGISTER_FILTER_IS_ERROR, false) -- Player Pet -> Target
     for k, v in pairs(Effects_AddNameOnEvent) do
-        eventManager:RegisterForEvent(moduleName .. "Event4" .. tostring(k), EVENT_COMBAT_EVENT, function (...)
-            self:OnCombatAddNameEvent(...)
+        eventManager:RegisterForEvent(moduleName .. "Event4" .. tostring(k), EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+            self:OnCombatAddNameEvent(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
         end)
         eventManager:AddFilterForEvent(moduleName .. "Event4" .. tostring(k), EVENT_COMBAT_EVENT, REGISTER_FILTER_ABILITY_ID, k)
     end
@@ -519,7 +519,7 @@ function SpellCastBuffs:_RegisterEvents()
     -- Register event to update icons/names/tooltips for some abilities where we pull information from the currently learned morph
     eventManager:RegisterForEvent(moduleName, EVENT_SKILLS_FULL_UPDATE, function (eventId)
         -- Mages Guild
-        Effects_EffectOverride[40465].tooltip = zo_strformat(GetString(LUIE_STRING_SKILL_SCALDING_RUNE_TP), ((GetAbilityDuration(40468) or 0) / 1000) + GetNumPassiveSkillRanks(GetSkillLineIndicesFromSkillLineId(44), select(2, GetSkillLineIndicesFromSkillLineId(44)), 8))
+        Effects_EffectOverride[40465].tooltip = zo_strformat(GetString(LUIE_STRING_SKILL_SCALDING_RUNE_TP), ((GetAbilityDuration(40468, nil, "player") or 0) / 1000) + GetNumPassiveSkillRanks(GetSkillLineIndicesFromSkillLineId(44), select(2, GetSkillLineIndicesFromSkillLineId(44)), 8))
     end)
 
     -- Werewolf
@@ -527,11 +527,10 @@ function SpellCastBuffs:_RegisterEvents()
 
     -- Debug
     if IsConsoleUI() then
-         return
+        return
     else
         self:RegisterDebugEvents()
-     end
-
+    end
 end
 
 function SpellCastBuffs:RegisterWerewolfEvents()
@@ -551,14 +550,14 @@ function SpellCastBuffs:RegisterDebugEvents()
     eventManager:UnregisterForEvent(moduleName .. "DebugCombat", EVENT_COMBAT_EVENT)
     -- Register standard debug events if enabled
     if self.SV.ShowDebugCombat then
-        eventManager:RegisterForEvent(moduleName .. "DebugCombat", EVENT_COMBAT_EVENT, function (eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
-            self:EventCombatDebug(eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+        eventManager:RegisterForEvent(moduleName .. "DebugCombat", EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+            self:EventCombatDebug(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
         end)
     end
     eventManager:UnregisterForEvent(moduleName .. "DebugEffect", EVENT_EFFECT_CHANGED)
     if self.SV.ShowDebugEffect then
-        eventManager:RegisterForEvent(moduleName .. "DebugEffect", EVENT_EFFECT_CHANGED, function (eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
-            self:EventEffectDebug(eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+        eventManager:RegisterForEvent(moduleName .. "DebugEffect", EVENT_EFFECT_CHANGED, function (_, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+            self:EventEffectDebug(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
         end)
     end
 
@@ -566,14 +565,14 @@ function SpellCastBuffs:RegisterDebugEvents()
     if LUIE.IsDevDebugEnabled() then
         eventManager:UnregisterForEvent(moduleName .. "AuthorDebugCombat", EVENT_COMBAT_EVENT)
         if self.SV.ShowDebugCombat then
-            eventManager:RegisterForEvent(moduleName .. "AuthorDebugCombat", EVENT_COMBAT_EVENT, function (eventId, ...)
-                self:AuthorCombatDebug(eventId, ...)
+            eventManager:RegisterForEvent(moduleName .. "AuthorDebugCombat", EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId)
+                self:AuthorCombatDebug(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId)
             end)
         end
         eventManager:UnregisterForEvent(moduleName .. "AuthorDebugEffect", EVENT_EFFECT_CHANGED)
         if self.SV.ShowDebugEffect then
-            eventManager:RegisterForEvent(moduleName .. "AuthorDebugEffect", EVENT_EFFECT_CHANGED, function (eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
-                self:AuthorEffectDebug(eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+            eventManager:RegisterForEvent(moduleName .. "AuthorDebugEffect", EVENT_EFFECT_CHANGED, function (_, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, castByPlayer)
+                self:AuthorEffectDebug(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, castByPlayer)
             end)
         end
     end
@@ -2110,22 +2109,22 @@ function SpellCastBuffs:OnPlayerActivated(eventCode)
     -- Resolve Mounted icon
     if not self.SV.IgnoreMountPlayer and IsMounted() then
         LUIE_callLater(function ()
-                         self:MountStatus(nil, true)
-                     end, 50)
+                           self:MountStatus(nil, true)
+                       end, 50)
     end
 
     -- Resolve Disguise Icon
     if not self.SV.IgnoreDisguise then
         LUIE_callLater(function ()
-                         self:DisguiseItem(nil, BAG_WORN, 10, nil, nil, nil, nil, nil, nil, nil, nil)
-                     end, 50)
+                           self:DisguiseItem(nil, BAG_WORN, 10, nil, nil, nil, nil, nil, nil, nil, nil)
+                       end, 50)
     end
 
     -- Resolve Assistant Icon
     if not self.SV.IgnorePet or not self.SV.IgnoreAssistant then
         LUIE_callLater(function ()
-                         self:CollectibleBuff()
-                     end, 50)
+                           self:CollectibleBuff()
+                       end, 50)
     end
 
     -- Resolve Werewolf
@@ -3071,8 +3070,8 @@ function SpellCastBuffs:WerewolfState(eventCode, werewolf, onActivation)
         self.werewolfCounter = 0
         -- Delay resetting this value - as the quest werewolf transform event causes werewolf true, false, true in succession.
         LUIE_callLater(function ()
-                         self.werewolfQuest = 0
-                     end, 5000)
+                           self.werewolfQuest = 0
+                       end, 5000)
     end
 end
 
@@ -3092,8 +3091,8 @@ function SpellCastBuffs:OnPowerUpdate(eventCode, unitTag, powerIndex, powerType,
         self.werewolfCounter = 0
         -- Delay resetting this value - as the quest werewolf transform event causes werewolf true, false, true in succession.
         LUIE_callLater(function ()
-                         self.werewolfQuest = 0
-                     end, 5000)
+                           self.werewolfQuest = 0
+                       end, 5000)
     end
 end
 
@@ -3354,7 +3353,7 @@ function SpellCastBuffs:ReloadEffects(unitTag)
             --- @diagnostic disable-next-line: cast-local-type
             castByPlayer = COMBAT_UNIT_TYPE_OTHER
         end
-        self:OnEffectChanged(0, EFFECT_RESULT_UPDATED, buffSlot, buffName, unitTag, timeStarted, timeEnding, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, unitName, 0, --[[unitId]] abilityId, castByPlayer)
+        self:OnEffectChanged(EFFECT_RESULT_UPDATED, buffSlot, buffName, unitTag, timeStarted, timeEnding, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, unitName, 0, --[[unitId]] abilityId, castByPlayer)
     end
     -- Display Disguise State (note that this function handles filtering player/target buffs if hidden)
     self:DisguiseStateChanged(nil, unitTag, GetUnitDisguiseState(unitTag))
@@ -3394,7 +3393,6 @@ function SpellCastBuffs:ReloadEffects(unitTag)
 end
 
 -- Runs on the EVENT_EFFECT_CHANGED listener.
---- @param eventId integer
 --- @param changeType EffectResult
 --- @param effectSlot integer
 --- @param effectName string
@@ -3411,7 +3409,7 @@ end
 --- @param unitId integer
 --- @param abilityId integer
 --- @param sourceType CombatUnitType
-function SpellCastBuffs:OnEffectChangedGround(eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+function SpellCastBuffs:OnEffectChangedGround(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
     if self.SV.HideGroundEffects then
         return
     end
@@ -3578,7 +3576,6 @@ end
 
 -- Runs on the EVENT_EFFECT_CHANGED listener.
 -- This handler fires every long-term effect added or removed
---- @param eventId integer
 --- @param changeType EffectResult
 --- @param effectSlot integer
 --- @param effectName string
@@ -3595,7 +3592,7 @@ end
 --- @param unitId integer
 --- @param abilityId integer
 --- @param sourceType CombatUnitType
-function SpellCastBuffs:OnEffectChanged(eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+function SpellCastBuffs:OnEffectChanged(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
     -- Change the effect type / name before we determine if we want to filter anything else.
     if Effects_EffectOverride[abilityId] then
         effectName = Effects_EffectOverride[abilityId].name or effectName
@@ -3925,7 +3922,6 @@ function SpellCastBuffs:OnEffectChanged(eventId, changeType, effectSlot, effectN
 end
 
 -- Combat Event (Source = Player)
---- @param eventCode integer
 --- @param result ActionResult
 --- @param isError boolean
 --- @param abilityName string
@@ -3943,7 +3939,7 @@ end
 --- @param targetUnitId integer
 --- @param abilityId integer
 --- @param overflow integer
-function SpellCastBuffs:OnCombatEventOut(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+function SpellCastBuffs:OnCombatEventOut(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     if targetType == COMBAT_UNIT_TYPE_PLAYER or targetType == COMBAT_UNIT_TYPE_PLAYER_PET then
         return
     end
@@ -4056,7 +4052,7 @@ function SpellCastBuffs:OnCombatEventOut(eventCode, result, isError, abilityName
         effectName = Effects_FakePlayerOfflineAura[abilityId].name or GetAbilityName(abilityId)
         duration = Effects_FakePlayerOfflineAura[abilityId].duration
         if duration == "GET" then
-            duration = GetAbilityDuration(abilityId) or 0
+            duration = GetAbilityDuration(abilityId, nil, "player") or 0
         end
         local finalId = Effects_FakePlayerOfflineAura[abilityId].shiftId or abilityId
         if Effects_FakePlayerOfflineAura[abilityId].shiftId then
@@ -4273,7 +4269,6 @@ function SpellCastBuffs:OnCombatEventOut(eventCode, result, isError, abilityName
 end
 
 -- Combat Event (Target = Player)
---- @param eventCode integer
 --- @param result ActionResult
 --- @param isError boolean
 --- @param abilityName string
@@ -4291,7 +4286,7 @@ end
 --- @param targetUnitId integer
 --- @param abilityId integer
 --- @param overflow integer
-function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+function SpellCastBuffs:OnCombatEventIn(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     if not (Effects_FakeExternalBuffs[abilityId] or Effects_FakeExternalDebuffs[abilityId] or Effects_FakePlayerBuffs[abilityId] or Effects_FakeStagger[abilityId] or Effects_AddGroundDamageAura[abilityId]) then
         return
     end
@@ -4729,7 +4724,7 @@ function SpellCastBuffs:OnCombatEventIn(eventCode, result, isError, abilityName,
         effectName = Effects_FakePlayerBuffs[abilityId].name or GetAbilityName(abilityId)
         duration = Effects_FakePlayerBuffs[abilityId].duration
         if duration == "GET" then
-            duration = GetAbilityDuration(abilityId) or 0
+            duration = GetAbilityDuration(abilityId, nil, "player") or 0
         end
         local finalId = Effects_FakePlayerBuffs[abilityId].shiftId or abilityId
         if Effects_FakePlayerBuffs[abilityId].shiftId then
@@ -4825,7 +4820,6 @@ end
 -- Combat Event - Add Name Aura to Target
 --- - **EVENT_COMBAT_EVENT **
 ---
---- @param eventCode integer
 --- @param result ActionResult
 --- @param isError boolean
 --- @param abilityName string
@@ -4843,7 +4837,7 @@ end
 --- @param targetUnitId integer
 --- @param abilityId integer
 --- @param overflow integer
-function SpellCastBuffs:OnCombatAddNameEvent(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+function SpellCastBuffs:OnCombatAddNameEvent(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     -- Get the name of the target to apply the buff to
     local name = Effects_AddNameOnEvent[abilityId].name
     local id = Effects_AddNameOnEvent[abilityId].id
@@ -5472,7 +5466,6 @@ function SpellCastBuffs:CollectibleBuff()
 end
 
 -- Debug Display for Combat Events
---- @param eventId integer
 --- @param result ActionResult
 --- @param isError boolean
 --- @param abilityName string
@@ -5490,7 +5483,7 @@ end
 --- @param targetUnitId integer
 --- @param abilityId integer
 --- @param overflow integer
-function SpellCastBuffs:EventCombatDebug(eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+function SpellCastBuffs:EventCombatDebug(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     -- Don't display if this aura is already added to the filter
     if DebugAuras[abilityId] and self.SV.ShowDebugFilter then return end
 
@@ -5501,7 +5494,7 @@ function SpellCastBuffs:EventCombatDebug(eventId, result, isError, abilityName, 
     local target = zo_strformat("<<C:1>>", targetName)
     local ability = zo_strformat("<<C:1>>", nameFormatted)
     local duration
-    duration = GetAbilityDuration(abilityId)
+    duration = GetAbilityDuration(abilityId, nil, "player")
     if duration == nil then
         duration = "0"
     end
@@ -5531,7 +5524,6 @@ function SpellCastBuffs:EventCombatDebug(eventId, result, isError, abilityName, 
 end
 
 -- Debug Display for Effect Events
---- @param eventId integer
 --- @param changeType EffectResult
 --- @param effectSlot integer
 --- @param effectName string
@@ -5548,7 +5540,7 @@ end
 --- @param unitId integer
 --- @param abilityId integer
 --- @param sourceType CombatUnitType
-function SpellCastBuffs:EventEffectDebug(eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+function SpellCastBuffs:EventEffectDebug(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
     if DebugAuras[abilityId] and self.SV.ShowDebugFilter then
         return
     end
@@ -5633,7 +5625,7 @@ else
     end
 
     -- Account specific DEBUG for ArtOfShred (These are only registered to give me some additional debug options)
-    function SpellCastBuffs:AuthorCombatDebug(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId)
+    function SpellCastBuffs:AuthorCombatDebug(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId)
         local iconFormatted = zo_iconFormat(GetAbilityIcon(abilityId), 16, 16)
         local nameFormatted = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
 
@@ -5666,7 +5658,7 @@ else
     end
 
     -- Account specific DEBUG for ArtOfShred (These are only registered to give me some additional debug options)
-    function SpellCastBuffs:AuthorEffectDebug(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, castByPlayer)
+    function SpellCastBuffs:AuthorEffectDebug(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, castByPlayer)
         local iconFormatted = zo_iconFormat(GetAbilityIcon(abilityId), 16, 16)
         local nameFormatted = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
 
