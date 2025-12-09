@@ -878,7 +878,7 @@ function SynergyTracker:SetUnlocked(unlocked)
         if unlocked then
             -- Set up gamepad handler if not already set up
             if not self.control.gamepadHandler then
-                MoverHelper.SetupGamepadHandler(
+                self.control.gamepadHandler = MoverHelper.SetupGamepadHandler(
                     self.control,
                     "default",
                     function (control, left, top)
@@ -897,11 +897,6 @@ function SynergyTracker:SetUnlocked(unlocked)
 
             self:ShowPreview()
         else
-            -- Clean up gamepad handler
-            if self.control.gamepadHandler then
-                -- Handler cleanup is handled by MoverHelper.UpdateControlState
-            end
-
             -- When locking, hide preview and return to normal display
             local currentScene = sceneManager:GetCurrentScene()
             local isInHUDScene = currentScene == sceneManager:GetScene(HUD_SCENE) or currentScene == sceneManager:GetScene(HUDUI_SCENE)
