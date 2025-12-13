@@ -3069,8 +3069,8 @@ end
 local function InventoryItemUsed()
     g_potionUsed = true
     LUIE_callLater(function ()
-                     g_potionUsed = false
-                 end, 200)
+                       g_potionUsed = false
+                   end, 200)
 end
 
 -- Runs on EVENT_GAMEPAD_PREFERRED_MODE_CHANGED
@@ -3349,6 +3349,45 @@ function ActionBar.Initialize(enabled)
         ActionBar.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "ActionBar", ActionBar.Defaults)
     end
 
+    -- Migrate from CombatInfo module (one-time migration)
+    if not LUIE.IsMigrationDone("actionbar_from_combatinfo") then
+        -- Access raw SV table directly
+        local rawSV = isCharacterSpecific
+            and LUIESV["Default"][GetDisplayName()][GetUnitName("player")]
+            or LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+
+        if rawSV and rawSV.CombatInfo then
+            local combatInfoTable = rawSV.CombatInfo
+
+            -- List of fields that moved from CombatInfo to ActionBar
+            local migrateFields =
+            {
+                "blacklist", "durationOverrides", "GlobalShowGCD", "GlobalPotion", "GlobalFlash",
+                "GlobalDesat", "GlobalLabelColor", "GlobalMethod", "UltimateLabelEnabled",
+                "UltimatePctEnabled", "UltimateHideFull", "UltimateGeneration", "UltimateLabelPosition",
+                "UltimateFontFace", "UltimateFontStyle", "UltimateFontSize", "ShowTriggered",
+                "ProcEnableSound", "ProcSoundName", "showMarker", "markerSize", "ShowToggled",
+                "ShowToggledUltimate", "BarShowLabel", "BarLabelPosition", "BarFontFace",
+                "BarFontStyle", "BarFontSize", "BarMillis", "BarMillisAboveTen", "BarMillisThreshold",
+                "BarShowBack", "BarDarkUnused", "BarDesaturateUnused", "BarHideUnused",
+                "PotionTimerShow", "PotionTimerLabelPosition", "PotionTimerFontFace",
+                "PotionTimerFontStyle", "PotionTimerFontSize", "PotionTimerColor", "PotionTimerMillis",
+                "CastBarEnable", "CastBarSizeW", "CastBarSizeH", "CastBarIconSize", "CastBarTexture",
+                "CastBarLabel", "CastBarTimer", "CastBarFontFace", "CastBarFontStyle", "CastBarFontSize",
+                "CastBarGradientC1", "CastBarGradientC2", "CastBarHeavy"
+            }
+
+            for _, field in ipairs(migrateFields) do
+                if combatInfoTable[field] ~= nil then
+                    ActionBar.SV[field] = combatInfoTable[field]
+                    combatInfoTable[field] = nil
+                end
+            end
+        end
+
+        LUIE.MarkMigrationDone("actionbar_from_combatinfo")
+    end
+
     -- Migrate font styles if needed
     if not LUIE.IsMigrationDone("actionbar_fontstyles") then
         ActionBar.SV.UltimateFontStyle = LUIE.MigrateFontStyle(ActionBar.SV.UltimateFontStyle)
@@ -3356,6 +3395,14 @@ function ActionBar.Initialize(enabled)
         ActionBar.SV.PotionTimerFontStyle = LUIE.MigrateFontStyle(ActionBar.SV.PotionTimerFontStyle)
         ActionBar.SV.CastBarFontStyle = LUIE.MigrateFontStyle(ActionBar.SV.CastBarFontStyle)
         LUIE.MarkMigrationDone("actionbar_fontstyles")
+    end
+
+    -- Migrate GlobalMethod if it's set to invalid value 3 (removed "Vertical" option)
+    if not LUIE.IsMigrationDone("actionbar_globalmethod") then
+        if ActionBar.SV.GlobalMethod == 3 then
+            ActionBar.SV.GlobalMethod = 2 -- "Vertical Reveal"
+        end
+        LUIE.MarkMigrationDone("actionbar_globalmethod")
     end
 
     if not enabled then
