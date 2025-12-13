@@ -2334,7 +2334,7 @@ function ChatAnnouncements.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.Inventory.LootMail = value
-                ChatAnnouncements.RegisterMailEvents()
+                ChatAnnouncements.Mail.RegisterEvents()
             end,
             default = Defaults.Inventory.LootMail,
             disable = function ()
@@ -2373,6 +2373,63 @@ function ChatAnnouncements.CreateConsoleSettings()
                 ChatAnnouncements.RegisterLootEvents()
             end,
             default = Defaults.Inventory.LootShowDisguise,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "Attunable Crafting Station Announcements"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Attunable Station Set Unlocks in", GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = "Display announcements in chat when new sets are unlocked on attunable crafting stations in your home.",
+            getFunction = function ()
+                return Settings.Inventory.LootCraftedSetCA
+            end,
+            setFunction = function (value)
+                Settings.Inventory.LootCraftedSetCA = value
+            end,
+            default = Defaults.Inventory.LootCraftedSetCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Attunable Station Set Unlocks in", GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = "Display announcements on screen when new sets are unlocked on attunable crafting stations in your home.",
+            getFunction = function ()
+                return Settings.Inventory.LootCraftedSetCSA
+            end,
+            setFunction = function (value)
+                Settings.Inventory.LootCraftedSetCSA = value
+            end,
+            default = Defaults.Inventory.LootCraftedSetCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Attunable Station Set Unlocks in", GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = "Display announcements as an alert when new sets are unlocked on attunable crafting stations in your home.",
+            getFunction = function ()
+                return Settings.Inventory.LootCraftedSetAlert
+            end,
+            setFunction = function (value)
+                Settings.Inventory.LootCraftedSetAlert = value
+            end,
+            default = Defaults.Inventory.LootCraftedSetAlert,
             disable = function ()
                 return not LUIE.SV.ChatAnnouncements_Enable
             end
@@ -5013,6 +5070,137 @@ function ChatAnnouncements.CreateConsoleSettings()
                 return not LUIE.SV.ChatAnnouncements_Enable
             end
         }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "Companion Level Up Announcements"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Companion Level Up in", GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = "Display announcements in chat when your companion levels up.",
+            getFunction = function ()
+                return Settings.Skills.SkillLevelCA
+            end,
+            setFunction = function (value)
+                Settings.Skills.SkillLevelCA = value
+            end,
+            default = Defaults.Skills.SkillLevelCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Companion Level Up in", GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = "Display announcements on screen when your companion levels up.",
+            getFunction = function ()
+                return Settings.Skills.SkillLevelCSA
+            end,
+            setFunction = function (value)
+                Settings.Skills.SkillLevelCSA = value
+            end,
+            default = Defaults.Skills.SkillLevelCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Companion Level Up in", GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = "Display announcements as an alert when your companion levels up.",
+            getFunction = function ()
+                return Settings.Skills.SkillLevelAlert
+            end,
+            setFunction = function (value)
+                Settings.Skills.SkillLevelAlert = value
+            end,
+            default = Defaults.Skills.SkillLevelAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "Show Icon",
+            tooltip = "Display companion/scribing ability icons in announcements.",
+            getFunction = function ()
+                return Settings.Skills.SkillIcon
+            end,
+            setFunction = function (value)
+                Settings.Skills.SkillIcon = value
+            end,
+            default = Defaults.Skills.SkillIcon,
+            disable = function ()
+                return not (Settings.Skills.SkillLevelCA and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "Forced Respec Announcements"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Forced Respecs in", GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = "Display announcements in chat when your skills/attributes are force reset.",
+            getFunction = function ()
+                return Settings.Skills.SkillPointsCA
+            end,
+            setFunction = function (value)
+                Settings.Skills.SkillPointsCA = value
+            end,
+            default = Defaults.Skills.SkillPointsCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Forced Respecs in", GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = "Display announcements on screen when your skills/attributes are force reset.",
+            getFunction = function ()
+                return Settings.Skills.SkillPointsCSA
+            end,
+            setFunction = function (value)
+                Settings.Skills.SkillPointsCSA = value
+            end,
+            default = Defaults.Skills.SkillPointsCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Forced Respecs in", GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = "Display announcements as an alert when your skills/attributes are force reset.",
+            getFunction = function ()
+                return Settings.Skills.SkillPointsAlert
+            end,
+            setFunction = function (value)
+                Settings.Skills.SkillPointsAlert = value
+            end,
+            default = Defaults.Skills.SkillPointsAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
     end)
 
     -- Build Collectible/Lorebooks Announcements Section
@@ -5907,6 +6095,120 @@ function ChatAnnouncements.CreateConsoleSettings()
             default = Defaults.Antiquities.AntiquitySuffix,
             disable = function ()
                 return not (Settings.Antiquities.AntiquityCA or Settings.Antiquities.AntiquityCSA or Settings.Antiquities.AntiquityAlert and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "Excavation Announcements"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Excavation Messages in", GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = "Display announcements in chat when excavation events occur (game start, antiquity unearthed, bonus loot).",
+            getFunction = function ()
+                return Settings.Antiquities.AntiquityDiggingCA
+            end,
+            setFunction = function (value)
+                Settings.Antiquities.AntiquityDiggingCA = value
+            end,
+            default = Defaults.Antiquities.AntiquityDiggingCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Excavation Messages in", GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = "Display announcements on screen when excavation events occur (game start, antiquity unearthed, bonus loot).",
+            getFunction = function ()
+                return Settings.Antiquities.AntiquityDiggingCSA
+            end,
+            setFunction = function (value)
+                Settings.Antiquities.AntiquityDiggingCSA = value
+            end,
+            default = Defaults.Antiquities.AntiquityDiggingCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Excavation Messages in", GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = "Display announcements as an alert when excavation events occur (game start, antiquity unearthed, bonus loot).",
+            getFunction = function ()
+                return Settings.Antiquities.AntiquityDiggingAlert
+            end,
+            setFunction = function (value)
+                Settings.Antiquities.AntiquityDiggingAlert = value
+            end,
+            default = Defaults.Antiquities.AntiquityDiggingAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "Scrying Announcements"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Scrying Results in", GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = "Display announcements in chat when scrying produces no progress result.",
+            getFunction = function ()
+                return Settings.Antiquities.AntiquityScryingCA
+            end,
+            setFunction = function (value)
+                Settings.Antiquities.AntiquityScryingCA = value
+            end,
+            default = Defaults.Antiquities.AntiquityScryingCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Scrying Results in", GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = "Display announcements on screen when scrying produces no progress result.",
+            getFunction = function ()
+                return Settings.Antiquities.AntiquityScryingCSA
+            end,
+            setFunction = function (value)
+                Settings.Antiquities.AntiquityScryingCSA = value
+            end,
+            default = Defaults.Antiquities.AntiquityScryingCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Scrying Results in", GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = "Display announcements as an alert when scrying produces no progress result.",
+            getFunction = function ()
+                return Settings.Antiquities.AntiquityScryingAlert
+            end,
+            setFunction = function (value)
+                Settings.Antiquities.AntiquityScryingAlert = value
+            end,
+            default = Defaults.Antiquities.AntiquityScryingAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
             end
         }
     end)
@@ -8300,7 +8602,7 @@ function ChatAnnouncements.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.Notify.NotificationMailSendAlert = value
-                ChatAnnouncements.RegisterMailEvents()
+                ChatAnnouncements.Mail.RegisterEvents()
             end,
             default = Defaults.Notify.NotificationMailSendAlert,
             disable = function ()
@@ -8318,7 +8620,7 @@ function ChatAnnouncements.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.Notify.NotificationMailErrorCA = value
-                ChatAnnouncements.RegisterMailEvents()
+                ChatAnnouncements.Mail.RegisterEvents()
             end,
             default = Defaults.Notify.NotificationMailErrorCA,
             disable = function ()
@@ -8336,7 +8638,7 @@ function ChatAnnouncements.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.Notify.NotificationMailErrorAlert = value
-                ChatAnnouncements.RegisterMailEvents()
+                ChatAnnouncements.Mail.RegisterEvents()
             end,
             default = Defaults.Notify.NotificationMailErrorAlert,
             disable = function ()
@@ -8823,6 +9125,524 @@ function ChatAnnouncements.CreateConsoleSettings()
                 Settings.Notify.CraftedAbilityScriptAlert = value
             end,
             default = Defaults.Notify.CraftedAbilityScriptAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "System Broadcasts"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show System Broadcasts in", GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = "Display system broadcast messages in chat.",
+            getFunction = function ()
+                return Settings.Notify.NotificationBroadcastCA
+            end,
+            setFunction = function (value)
+                Settings.Notify.NotificationBroadcastCA = value
+            end,
+            default = Defaults.Notify.NotificationBroadcastCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show System Broadcasts in", GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = "Display system broadcast messages on screen.",
+            getFunction = function ()
+                return Settings.Notify.NotificationBroadcastCSA
+            end,
+            setFunction = function (value)
+                Settings.Notify.NotificationBroadcastCSA = value
+            end,
+            default = Defaults.Notify.NotificationBroadcastCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show System Broadcasts in", GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = "Display system broadcast messages as an alert.",
+            getFunction = function ()
+                return Settings.Notify.NotificationBroadcastAlert
+            end,
+            setFunction = function (value)
+                Settings.Notify.NotificationBroadcastAlert = value
+            end,
+            default = Defaults.Notify.NotificationBroadcastAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "ESO Plus Announcements"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show ESO Plus Trial Status in", GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = "Display announcements in chat when ESO Plus free trial starts or ends.",
+            getFunction = function ()
+                return Settings.Notify.NotificationESOPlusCA
+            end,
+            setFunction = function (value)
+                Settings.Notify.NotificationESOPlusCA = value
+            end,
+            default = Defaults.Notify.NotificationESOPlusCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show ESO Plus Trial Status in", GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = "Display announcements on screen when ESO Plus free trial starts or ends.",
+            getFunction = function ()
+                return Settings.Notify.NotificationESOPlusCSA
+            end,
+            setFunction = function (value)
+                Settings.Notify.NotificationESOPlusCSA = value
+            end,
+            default = Defaults.Notify.NotificationESOPlusCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show ESO Plus Trial Status in", GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = "Display announcements as an alert when ESO Plus free trial starts or ends.",
+            getFunction = function ()
+                return Settings.Notify.NotificationESOPlusAlert
+            end,
+            setFunction = function (value)
+                Settings.Notify.NotificationESOPlusAlert = value
+            end,
+            default = Defaults.Notify.NotificationESOPlusAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "Outfit Change Announcements"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Outfit Changes in", GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = "Display announcements in chat when you successfully apply outfit changes.",
+            getFunction = function ()
+                return Settings.Notify.NotificationOutfitCA
+            end,
+            setFunction = function (value)
+                Settings.Notify.NotificationOutfitCA = value
+            end,
+            default = Defaults.Notify.NotificationOutfitCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Outfit Changes in", GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = "Display announcements on screen when you successfully apply outfit changes.",
+            getFunction = function ()
+                return Settings.Notify.NotificationOutfitCSA
+            end,
+            setFunction = function (value)
+                Settings.Notify.NotificationOutfitCSA = value
+            end,
+            default = Defaults.Notify.NotificationOutfitCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Outfit Changes in", GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = "Display announcements as an alert when you successfully apply outfit changes.",
+            getFunction = function ()
+                return Settings.Notify.NotificationOutfitAlert
+            end,
+            setFunction = function (value)
+                Settings.Notify.NotificationOutfitAlert = value
+            end,
+            default = Defaults.Notify.NotificationOutfitAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "Daily Login Reward Announcements"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Daily Login Rewards in", GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = "Display announcements in chat when claiming daily login rewards.",
+            getFunction = function ()
+                return Settings.Notify.NotificationDailyRewardCA
+            end,
+            setFunction = function (value)
+                Settings.Notify.NotificationDailyRewardCA = value
+            end,
+            default = Defaults.Notify.NotificationDailyRewardCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Daily Login Rewards in", GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = "Display announcements on screen when claiming daily login rewards.",
+            getFunction = function ()
+                return Settings.Notify.NotificationDailyRewardCSA
+            end,
+            setFunction = function (value)
+                Settings.Notify.NotificationDailyRewardCSA = value
+            end,
+            default = Defaults.Notify.NotificationDailyRewardCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Daily Login Rewards in", GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = "Display announcements as an alert when claiming daily login rewards.",
+            getFunction = function ()
+                return Settings.Notify.NotificationDailyRewardAlert
+            end,
+            setFunction = function (value)
+                Settings.Notify.NotificationDailyRewardAlert = value
+            end,
+            default = Defaults.Notify.NotificationDailyRewardAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "Show Item Icon",
+            tooltip = "Display the item icon in daily login reward announcements.",
+            getFunction = function ()
+                return Settings.Notify.NotificationDailyRewardIcon
+            end,
+            setFunction = function (value)
+                Settings.Notify.NotificationDailyRewardIcon = value
+            end,
+            default = Defaults.Notify.NotificationDailyRewardIcon,
+            disable = function ()
+                return not (Settings.Notify.NotificationDailyRewardCA and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "Tales of Tribute Announcements"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Tales of Tribute Events in", GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = "Display announcements in chat for Tales of Tribute game events (rank changes, game phases, turn start).",
+            getFunction = function ()
+                return Settings.Misc.MiscTributeCA
+            end,
+            setFunction = function (value)
+                Settings.Misc.MiscTributeCA = value
+            end,
+            default = Defaults.Misc.MiscTributeCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Tales of Tribute Events in", GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = "Display announcements on screen for Tales of Tribute game events (rank changes, game phases, turn start).",
+            getFunction = function ()
+                return Settings.Misc.MiscTributeCSA
+            end,
+            setFunction = function (value)
+                Settings.Misc.MiscTributeCSA = value
+            end,
+            default = Defaults.Misc.MiscTributeCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Tales of Tribute Events in", GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = "Display announcements as an alert for Tales of Tribute game events (rank changes, game phases, turn start).",
+            getFunction = function ()
+                return Settings.Misc.MiscTributeAlert
+            end,
+            setFunction = function (value)
+                Settings.Misc.MiscTributeAlert = value
+            end,
+            default = Defaults.Misc.MiscTributeAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "Endeavor Completion Announcements"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Endeavor Completion in", GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = "Display announcements in chat when you complete endeavors.",
+            getFunction = function ()
+                return Settings.Quests.QuestEndeavorCA
+            end,
+            setFunction = function (value)
+                Settings.Quests.QuestEndeavorCA = value
+            end,
+            default = Defaults.Quests.QuestEndeavorCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Endeavor Completion in", GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = "Display announcements on screen when you complete endeavors.",
+            getFunction = function ()
+                return Settings.Quests.QuestEndeavorCSA
+            end,
+            setFunction = function (value)
+                Settings.Quests.QuestEndeavorCSA = value
+            end,
+            default = Defaults.Quests.QuestEndeavorCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Endeavor Completion in", GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = "Display announcements as an alert when you complete endeavors.",
+            getFunction = function ()
+                return Settings.Quests.QuestEndeavorAlert
+            end,
+            setFunction = function (value)
+                Settings.Quests.QuestEndeavorAlert = value
+            end,
+            default = Defaults.Quests.QuestEndeavorAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "PvP & AvA Announcements"
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Alliance War Events in", GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = "Display announcements in chat for Alliance War events (scrolls, Volendrung, keep gates, emperor).",
+            getFunction = function ()
+                return Settings.PVP.PVPAvACA
+            end,
+            setFunction = function (value)
+                Settings.PVP.PVPAvACA = value
+            end,
+            default = Defaults.PVP.PVPAvACA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Alliance War Events in", GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = "Display announcements on screen for Alliance War events (scrolls, Volendrung, keep gates, emperor).",
+            getFunction = function ()
+                return Settings.PVP.PVPAvACSA
+            end,
+            setFunction = function (value)
+                Settings.PVP.PVPAvACSA = value
+            end,
+            default = Defaults.PVP.PVPAvACSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Alliance War Events in", GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = "Display announcements as an alert for Alliance War events (scrolls, Volendrung, keep gates, emperor).",
+            getFunction = function ()
+                return Settings.PVP.PVPAvAAlert
+            end,
+            setFunction = function (value)
+                Settings.PVP.PVPAvAAlert = value
+            end,
+            default = Defaults.PVP.PVPAvAAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show PvP Kills in", GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = "Display announcements in chat for PvP kills (revenge, avenge kills in Cyrodiil).",
+            getFunction = function ()
+                return Settings.PVP.PVPKillCA
+            end,
+            setFunction = function (value)
+                Settings.PVP.PVPKillCA = value
+            end,
+            default = Defaults.PVP.PVPKillCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show PvP Kills in", GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = "Display announcements on screen for PvP kills (revenge, avenge kills in Cyrodiil).",
+            getFunction = function ()
+                return Settings.PVP.PVPKillCSA
+            end,
+            setFunction = function (value)
+                Settings.PVP.PVPKillCSA = value
+            end,
+            default = Defaults.PVP.PVPKillCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show PvP Kills in", GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = "Display announcements as an alert for PvP kills (revenge, avenge kills in Cyrodiil).",
+            getFunction = function ()
+                return Settings.PVP.PVPKillAlert
+            end,
+            setFunction = function (value)
+                Settings.PVP.PVPKillAlert = value
+            end,
+            default = Defaults.PVP.PVPKillAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Battleground Events in", GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = "Display announcements in chat for Battleground events (capture points, flags, chaosball, kills).",
+            getFunction = function ()
+                return Settings.PVP.PVPBattlegroundCA
+            end,
+            setFunction = function (value)
+                Settings.PVP.PVPBattlegroundCA = value
+            end,
+            default = Defaults.PVP.PVPBattlegroundCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Battleground Events in", GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = "Display announcements on screen for Battleground events (capture points, flags, chaosball, kills).",
+            getFunction = function ()
+                return Settings.PVP.PVPBattlegroundCSA
+            end,
+            setFunction = function (value)
+                Settings.PVP.PVPBattlegroundCSA = value
+            end,
+            default = Defaults.PVP.PVPBattlegroundCSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat("<<1>> <<2>>", "Show Battleground Events in", GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = "Display announcements as an alert for Battleground events (capture points, flags, chaosball, kills).",
+            getFunction = function ()
+                return Settings.PVP.PVPBattlegroundAlert
+            end,
+            setFunction = function (value)
+                Settings.PVP.PVPBattlegroundAlert = value
+            end,
+            default = Defaults.PVP.PVPBattlegroundAlert,
             disable = function ()
                 return not LUIE.SV.ChatAnnouncements_Enable
             end

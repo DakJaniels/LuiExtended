@@ -115,8 +115,9 @@ local function DisplayQuestItem(itemId, stackCount, icon, reset)
     eventManager:RegisterForUpdate(moduleName .. "QuestItemUpdater", 25, ChatAnnouncements.ResolveQuestItemChange)
 end
 
+
+
 -- Used by functions calling bar updates
---- @param barParams CenterScreenPlayerProgressBarParams
 local function ValidateProgressBarParams(barParams)
     local barType = barParams:GetParams()
     if not (barType and PLAYER_PROGRESS_BAR:GetBarTypeInfoByBarType(barType)) then
@@ -131,13 +132,13 @@ local function GetRelevantBarParams(level, previousExperience, currentExperience
     if CanUnitGainChampionPoints("player") then
         championXpToNextPoint = GetNumChampionXPInChampionPoint(championPoints)
     end
-    if championXpToNextPoint ~= nil and currentExperience > previousExperience then
+    if (championXpToNextPoint ~= nil and currentExperience > previousExperience) then
         local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, championPoints, previousExperience, currentExperience)
         barParams:SetTriggeringEvent(triggeringEvent)
         return barParams
     else
         local levelSize = GetNumExperiencePointsInLevel(level)
-        if levelSize ~= nil and currentExperience > previousExperience then
+        if (levelSize ~= nil and currentExperience > previousExperience) then
             local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_XP, level, previousExperience, currentExperience)
             barParams:SetTriggeringEvent(triggeringEvent)
             return barParams
@@ -3920,6 +3921,1171 @@ local function AntiquityLeadAcquired(antiquityId)
     return true
 end
 
+-- EVENT_BROADCAST (CSA Handler)
+local function BroadcastHook(message)
+    if ChatAnnouncements.SV.Notify.NotificationBroadcastCA then
+        printToChat(string.format("|cffff00%s|r", message), true)
+    end
+
+    if ChatAnnouncements.SV.Notify.NotificationBroadcastAlert then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+    end
+
+    if ChatAnnouncements.SV.Notify.NotificationBroadcastCSA then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.MESSAGE_BROADCAST)
+        messageParams:SetText(string.format("|cffff00%s|r", message))
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST)
+        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+    end
+
+    if not ChatAnnouncements.SV.Notify.NotificationBroadcastCSA then
+        PlaySound(SOUNDS.MESSAGE_BROADCAST)
+    end
+
+    return true
+end
+
+-- EVENT_FIXED_BROADCAST (CSA Handler)
+local function FixedBroadcastHook(broadcastType, arg1)
+    local message = zo_strformat(GetString("SI_BROADCASTTYPE", broadcastType), arg1)
+
+    if ChatAnnouncements.SV.Notify.NotificationBroadcastCA then
+        printToChat(string.format("|cffff00%s|r", message), true)
+    end
+
+    if ChatAnnouncements.SV.Notify.NotificationBroadcastAlert then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+    end
+
+    if ChatAnnouncements.SV.Notify.NotificationBroadcastCSA then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.MESSAGE_BROADCAST)
+        messageParams:SetText(string.format("|cffff00%s|r", message))
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST)
+        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+    end
+
+    if not ChatAnnouncements.SV.Notify.NotificationBroadcastCSA then
+        PlaySound(SOUNDS.MESSAGE_BROADCAST)
+    end
+
+    return true
+end
+
+-- EVENT_COMPANION_EXPERIENCE_GAIN (CSA Handler)
+local function CompanionExperienceGainHook(companionId, previousLevel, previousExperience, currentExperience)
+    local currentLevel = GetActiveCompanionLevelForExperiencePoints(currentExperience, previousLevel)
+    if currentLevel > previousLevel then
+        local companionName = GetCompanionName(companionId)
+        local collectibleIcon = GetCollectibleIcon(GetCompanionCollectibleId(companionId))
+
+        if ChatAnnouncements.SV.Skill.SkillLevelCA then
+            local iconFormatted = ChatAnnouncements.SV.Skill.SkillIcon and ("|t16:16:" .. collectibleIcon .. "|t ") or ""
+            printToChat(zo_strformat("<<1>><<2>> <<3>>", iconFormatted, GetString(SI_COMPANION_LEVEL_UP_NOTIFICATION), companionName), true)
+        end
+
+        if ChatAnnouncements.SV.Skill.SkillLevelAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>> <<2>>", GetString(SI_COMPANION_LEVEL_UP_NOTIFICATION), companionName))
+        end
+
+        if ChatAnnouncements.SV.Skill.SkillLevelCSA then
+            local secondaryTextLines = {}
+            local COMPANION_NAME_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_UNIT_REACTION_COLOR, UNIT_REACTION_COLOR_COMPANION))
+            table.insert(secondaryTextLines, zo_strformat(SI_COMPANION_LEVEL_UP_NAME_CSA, zo_iconFormat(collectibleIcon, "100%", "100%"), COMPANION_NAME_COLOR:Colorize(companionName)))
+            local previousNumSlots = GetCompanionNumSlotsUnlockedForLevel(previousLevel)
+            local currentNumSlots = GetCompanionNumSlotsUnlockedForLevel(currentLevel)
+            if currentNumSlots > previousNumSlots then
+                table.insert(secondaryTextLines, GetString(SI_COMPANION_ACTION_SLOT_UNLOCKED_NOTIFICATION))
+            end
+
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.LEVEL_UP)
+            messageParams:SetText(GetString(SI_COMPANION_LEVEL_UP_NOTIFICATION), table.concat(secondaryTextLines, "\n"))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LEVEL_GAIN)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if not ChatAnnouncements.SV.Skill.SkillLevelCSA then
+            PlaySound(SOUNDS.LEVEL_UP)
+        end
+
+        return true
+    end
+end
+
+-- EVENT_FORCE_RESPEC (CSA Handler)
+local function ForceRespecHook(respecType)
+    local title = GetString("SI_RESPECTYPE_POINTSRESETTITLE", respecType)
+    local description = GetString("SI_RESPECTYPE", respecType)
+
+    if ChatAnnouncements.SV.Skill.SkillPointsCA then
+        printToChat(zo_strformat("<<1>>: <<2>>", title, description), true)
+    end
+
+    if ChatAnnouncements.SV.Skill.SkillPointsAlert then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", title, description))
+    end
+
+    if ChatAnnouncements.SV.Skill.SkillPointsCSA then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        messageParams:SetText(title, description)
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
+        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+    end
+
+    return true
+end
+
+-- EVENT_CRAFTED_ABILITY_RESET (CSA Handler)
+local function CraftedAbilityResetHook(craftedAbilityId, totalNumReset, isLastReset)
+    local RESET_GROUPING_THRESHOLD = 5
+    if totalNumReset < RESET_GROUPING_THRESHOLD then
+        local craftedAbilityData = SCRIBING_DATA_MANAGER:GetCraftedAbilityData(craftedAbilityId)
+        local abilityName = craftedAbilityData:GetFormattedNameWithSkillLine()
+        local icon = craftedAbilityData:GetIcon()
+
+        if ChatAnnouncements.SV.Skill.SkillPointsCA then
+            local iconFormatted = ChatAnnouncements.SV.Skill.SkillIcon and ("|t16:16:" .. icon .. "|t ") or ""
+            printToChat(zo_strformat("<<1>><<2>>: <<3>>", iconFormatted, GetString(SI_CRAFTED_ABILITY_RESET_ANNOUNCE_TITLE), abilityName), true)
+        end
+
+        if ChatAnnouncements.SV.Skill.SkillPointsAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", GetString(SI_CRAFTED_ABILITY_RESET_ANNOUNCE_TITLE), abilityName))
+        end
+
+        if ChatAnnouncements.SV.Skill.SkillPointsCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            messageParams:SetText(GetString(SI_CRAFTED_ABILITY_RESET_ANNOUNCE_TITLE), abilityName)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
+            messageParams:SetIconData(icon)
+            messageParams:MarkSuppressIconFrame()
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        return true
+    elseif isLastReset then
+        if ChatAnnouncements.SV.Skill.SkillPointsCA then
+            printToChat(zo_strformat("<<1>>: <<2>>", GetString(SI_CRAFTED_ABILITIES_RESET_ANNOUNCE_TITLE), zo_strformat(SI_CRAFTED_ABILITIES_RESET_ANNOUNCE_BODY, totalNumReset)), true)
+        end
+
+        if ChatAnnouncements.SV.Skill.SkillPointsAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", GetString(SI_CRAFTED_ABILITIES_RESET_ANNOUNCE_TITLE), zo_strformat(SI_CRAFTED_ABILITIES_RESET_ANNOUNCE_BODY, totalNumReset)))
+        end
+
+        if ChatAnnouncements.SV.Skill.SkillPointsCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            messageParams:SetText(GetString(SI_CRAFTED_ABILITIES_RESET_ANNOUNCE_TITLE), zo_strformat(SI_CRAFTED_ABILITIES_RESET_ANNOUNCE_BODY, totalNumReset))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        return true
+    end
+end
+
+-- EVENT_TRIBUTE_CLUB_RANK_CHANGED (CSA Handler)
+local function TributeClubRankChangedHook(newClubRank)
+    local title = GetString(SI_TRIBUTE_CLUB_RANK_CHANGE_ANNOUNCEMENT_TITLE)
+    local content = zo_strformat(SI_TRIBUTE_CLUB_RANK_CHANGE_ANNOUNCEMENT_CONTENT, newClubRank + 1)
+
+    if ChatAnnouncements.SV.Misc.MiscTributeCA then
+        printToChat(zo_strformat("<<1>>: <<2>>", title, content), true)
+    end
+
+    if ChatAnnouncements.SV.Misc.MiscTributeAlert then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", title, content))
+    end
+
+    if ChatAnnouncements.SV.Misc.MiscTributeCSA then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.TRIBUTE_RANK_CHANGE)
+        messageParams:SetText(title, content)
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_CLUB_RANK_CHANGED)
+        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+    end
+
+    if not ChatAnnouncements.SV.Misc.MiscTributeCSA then
+        PlaySound(SOUNDS.TRIBUTE_RANK_CHANGE)
+    end
+
+    return true
+end
+
+-- EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE (CSA Handler)
+local function TributeGameFlowStateChangeHook(gameFlowState)
+    local TRIBUTE_GAME_FLOW_STATE_CHANGE_MESSAGE_LIFESPAN_MS = 3000
+
+    if gameFlowState == TRIBUTE_GAME_FLOW_STATE_PATRON_DRAFT then
+        if not DoesTributeSkipPatronDrafting() then
+            local firstPick, playerType = GetTributePlayerInfo(GetActiveTributePlayerPerspective())
+            firstPick = playerType ~= TRIBUTE_PLAYER_TYPE_NPC and ZO_FormatUserFacingDisplayName(firstPick) or firstPick
+            local title = GetString(SI_TRIBUTE_DRAFTING_PHASE_ANNOUNCEMENT_TITLE)
+            local body = zo_strformat(SI_TRIBUTE_DRAFTING_PHASE_ANNOUNCEMENT_BODY, firstPick)
+
+            if ChatAnnouncements.SV.Misc.MiscTributeCA then
+                printToChat(zo_strformat("<<1>>: <<2>>", title, body), true)
+            end
+
+            if ChatAnnouncements.SV.Misc.MiscTributeAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", title, body))
+            end
+
+            if ChatAnnouncements.SV.Misc.MiscTributeCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                messageParams:SetText(title, ZO_NORMAL_TEXT:Colorize(body))
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED)
+                messageParams:SetLifespanMS(TRIBUTE_GAME_FLOW_STATE_CHANGE_MESSAGE_LIFESPAN_MS)
+                messageParams:MarkShowBackground()
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            return true
+        end
+    elseif gameFlowState == TRIBUTE_GAME_FLOW_STATE_PLAYING then
+        local firstPlay, playerType = GetTributePlayerInfo(GetActiveTributePlayerPerspective())
+        firstPlay = playerType ~= TRIBUTE_PLAYER_TYPE_NPC and ZO_FormatUserFacingDisplayName(firstPlay) or firstPlay
+        local title = GetString(SI_TRIBUTE_PLAYING_PHASE_ANNOUNCEMENT_TITLE)
+        local body = zo_strformat(SI_TRIBUTE_PLAYING_PHASE_ANNOUNCEMENT_BODY, firstPlay)
+
+        if ChatAnnouncements.SV.Misc.MiscTributeCA then
+            printToChat(zo_strformat("<<1>>: <<2>>", title, body), true)
+        end
+
+        if ChatAnnouncements.SV.Misc.MiscTributeAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", title, body))
+        end
+
+        if ChatAnnouncements.SV.Misc.MiscTributeCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            messageParams:SetText(title, ZO_NORMAL_TEXT:Colorize(body))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED)
+            messageParams:SetLifespanMS(TRIBUTE_GAME_FLOW_STATE_CHANGE_MESSAGE_LIFESPAN_MS)
+            messageParams:MarkShowBackground()
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        return true
+    end
+end
+
+-- EVENT_TRIBUTE_PLAYER_TURN_STARTED (CSA Handler)
+local function TributePlayerTurnStartedHook(isLocalPlayer)
+    if isLocalPlayer then
+        local TRIBUTE_OPPONENT_PRESTIGE_MESSAGE_LIFESPAN_MS = 2000
+        local TRIBUTE_TURN_STARTED_MESSAGE_LIFESPAN_MS = 1600
+
+        local showBeginTurn = true
+        local opponentPrestige = GetTributePlayerPerspectiveResource(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT, TRIBUTE_RESOURCE_PRESTIGE)
+
+        -- If the opponent has at least the amount of prestige required to win then they are close to a prestige victory
+        if opponentPrestige >= GetTributePrestigeRequiredToWin() then
+            local opponentName, playerType = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
+            opponentName = playerType ~= TRIBUTE_PLAYER_TYPE_NPC and ZO_FormatUserFacingDisplayName(opponentName) or opponentName
+            local messageTitle = zo_strformat(SI_TRIBUTE_OPPONENT_PRESTIGE_ANNOUNCEMENT_TITLE, opponentName, opponentPrestige)
+            local messageBody = GetString(SI_TRIBUTE_OPPONENT_PRESTIGE_ANNOUNCEMENT_BODY)
+
+            if ChatAnnouncements.SV.Misc.MiscTributeCA then
+                printToChat(zo_strformat("<<1>>: <<2>>", messageTitle, messageBody), true)
+            end
+
+            if ChatAnnouncements.SV.Misc.MiscTributeAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", messageTitle, messageBody))
+            end
+
+            if ChatAnnouncements.SV.Misc.MiscTributeCSA then
+                local prestigeMessageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.TRIBUTE_TURN_START_OPPONENT_PRESTIGE_VICTORY_NEAR)
+                prestigeMessageParams:SetText(messageTitle, ZO_NORMAL_TEXT:Colorize(messageBody))
+                prestigeMessageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED)
+                prestigeMessageParams:MarkShowBackground()
+                prestigeMessageParams:SetLifespanMS(TRIBUTE_OPPONENT_PRESTIGE_MESSAGE_LIFESPAN_MS)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(prestigeMessageParams)
+            end
+
+            showBeginTurn = false
+        end
+
+        local messageSubheading = nil
+        local sound = SOUNDS.TRIBUTE_TURN_START
+        local opponentFavorCount = GetNumPatronsFavoringPlayerPerspective(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
+
+        -- Is the opponent 1 favor away from victory (ignoring neutral Patron)?
+        if opponentFavorCount == (TRIBUTE_PATRON_DRAFT_ID_MAX_VALUE - 1) then
+            local localPlayerFavorCount = GetNumPatronsFavoringPlayerPerspective(TRIBUTE_PLAYER_PERSPECTIVE_SELF)
+            -- If the local player doesn't have favor with the last Patron, the opponent is 1 action away from victory
+            if localPlayerFavorCount == 0 then
+                local opponentName, playerType = GetTributePlayerInfo(TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT)
+                opponentName = playerType ~= TRIBUTE_PLAYER_TYPE_NPC and ZO_FormatUserFacingDisplayName(opponentName) or opponentName
+                messageSubheading = zo_strformat(SI_TRIBUTE_OPPONENT_FAVOR_ANNOUNCEMENT_BODY, opponentName)
+                sound = SOUNDS.TRIBUTE_TURN_START_OPPONENT_PENULTIMATE_FAVOR
+                -- When the opponent is close to both a prestige and patron victory, we want to show both CSAs, so set this back to true
+                showBeginTurn = true
+            end
+        end
+
+        -- If we are showing the prestige CSA, only show the begin turn CSA if we also need to display the patron victory message
+        if showBeginTurn then
+            local title = GetString(SI_TRIBUTE_TURN_START_ANNOUNCEMENT_TITLE)
+
+            if ChatAnnouncements.SV.Misc.MiscTributeCA then
+                if messageSubheading then
+                    printToChat(zo_strformat("<<1>>: <<2>>", title, messageSubheading), true)
+                else
+                    printToChat(title, true)
+                end
+            end
+
+            if ChatAnnouncements.SV.Misc.MiscTributeAlert then
+                if messageSubheading then
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", title, messageSubheading))
+                else
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, title)
+                end
+            end
+
+            if ChatAnnouncements.SV.Misc.MiscTributeCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, sound)
+                if messageSubheading then
+                    messageParams:SetText(title, ZO_NORMAL_TEXT:Colorize(messageSubheading))
+                else
+                    messageParams:SetText(title)
+                end
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED)
+                messageParams:SetLifespanMS(TRIBUTE_TURN_STARTED_MESSAGE_LIFESPAN_MS)
+                messageParams:MarkShowBackground()
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            if not ChatAnnouncements.SV.Misc.MiscTributeCSA then
+                PlaySound(sound)
+            end
+
+            return true
+        end
+
+        return true
+    end
+end
+
+-- EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED (CSA Handler)
+local function ESOPlusFreeTrialStatusChangedHook(hasFreeTrial)
+    local text
+    local soundId
+    if hasFreeTrial then
+        text = GetString(SI_ESO_PLUS_FREE_TRIAL_STARTED)
+        soundId = SOUNDS.ESO_PLUS_TRIAL_STARTED
+    else
+        text = GetString(SI_ESO_PLUS_FREE_TRIAL_ENDED)
+        soundId = SOUNDS.ESO_PLUS_TRIAL_ENDED
+    end
+
+    if ChatAnnouncements.SV.Notify.NotificationESOPlusCA then
+        printToChat(text, true)
+    end
+
+    if ChatAnnouncements.SV.Notify.NotificationESOPlusAlert then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, text)
+    end
+
+    if ChatAnnouncements.SV.Notify.NotificationESOPlusCSA then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ESO_PLUS_SUBSCRIPTION_CHANGED)
+        messageParams:SetText(text)
+        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+    end
+
+    if not ChatAnnouncements.SV.Notify.NotificationESOPlusCSA then
+        PlaySound(soundId)
+    end
+
+    return true
+end
+
+-- EVENT_OUTFIT_CHANGE_RESPONSE (CSA Handler)
+local function OutfitChangeResponseHook(result, actorCategory, outfitIndex)
+    if result == APPLY_OUTFIT_CHANGES_RESULT_SUCCESS then
+        local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(actorCategory, outfitIndex)
+        if outfitManipulator then
+            local outfitName = outfitManipulator:GetOutfitName()
+            local message = zo_strformat(GetString("SI_APPLYOUTFITCHANGESRESULT", result), outfitName)
+
+            if ChatAnnouncements.SV.Notify.NotificationOutfitCA then
+                printToChat(message, true)
+            end
+
+            if ChatAnnouncements.SV.Notify.NotificationOutfitAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+            end
+
+            if ChatAnnouncements.SV.Notify.NotificationOutfitCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.OUTFIT_CHANGES_APPLIED)
+                messageParams:SetText(message)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_OUTFIT_CHANGES_APPLIED)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            if not ChatAnnouncements.SV.Notify.NotificationOutfitCSA then
+                PlaySound(SOUNDS.OUTFIT_CHANGES_APPLIED)
+            end
+
+            return true
+        end
+    end
+end
+
+-- EVENT_DAILY_LOGIN_REWARDS_CLAIMED (CSA Handler)
+local function DailyLoginRewardsClaimedHook()
+    local rewardId, quantity = GetDailyLoginRewardInfoForCurrentMonth(GetDailyLoginNumRewardsClaimedInMonth())
+    local claimedDailyLoginReward = REWARDS_MANAGER:GetInfoForDailyLoginReward(rewardId, quantity)
+    if ZO_DAILY_LOGIN_REWARD_CLAIMING_FALLBACK then
+        claimedDailyLoginReward = claimedDailyLoginReward:GetFallbackRewardData()
+        ZO_DAILY_LOGIN_REWARD_CLAIMING_FALLBACK = nil
+    end
+
+    local secondaryText = claimedDailyLoginReward:GetQuantity() > 1 and claimedDailyLoginReward:GetFormattedNameWithStack() or claimedDailyLoginReward:GetFormattedName()
+    local icon = claimedDailyLoginReward:GetPlatformLootIcon()
+
+    if ChatAnnouncements.SV.Notify.NotificationDailyRewardCA then
+        local iconFormatted = ChatAnnouncements.SV.Notify.NotificationDailyRewardIcon and ("|t16:16:" .. icon .. "|t ") or ""
+        printToChat(zo_strformat("<<1>><<2>>: <<3>>", iconFormatted, GetString(SI_DAILY_LOGIN_REWARDS_CLAIMED_ANNOUNCEMENT), secondaryText), true)
+    end
+
+    if ChatAnnouncements.SV.Notify.NotificationDailyRewardAlert then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", GetString(SI_DAILY_LOGIN_REWARDS_CLAIMED_ANNOUNCEMENT), secondaryText))
+    end
+
+    if ChatAnnouncements.SV.Notify.NotificationDailyRewardCSA then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.DAILY_LOGIN_REWARDS_CLAIM_ANNOUNCEMENT)
+        messageParams:SetText(GetString(SI_DAILY_LOGIN_REWARDS_CLAIMED_ANNOUNCEMENT), secondaryText)
+        messageParams:SetIconData(icon, "EsoUI/Art/Guild/guildRanks_iconFrame_selected.dds")
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DAILY_LOGIN_REWARD_CLAIMED)
+        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+    end
+
+    if not ChatAnnouncements.SV.Notify.NotificationDailyRewardCSA then
+        PlaySound(SOUNDS.DAILY_LOGIN_REWARDS_CLAIM_ANNOUNCEMENT)
+    end
+
+    return true
+end
+
+-- EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY (CSA Handler)
+local function AntiquityDiggingReadyToPlayHook()
+    local title = GetString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_BEGIN_TITLE)
+    local text = GetString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_BEGIN_TEXT)
+
+    if ChatAnnouncements.SV.Antiquities.AntiquityDiggingCA then
+        printToChat(zo_strformat("<<1>>: <<2>>", title, text), true)
+    end
+
+    if ChatAnnouncements.SV.Antiquities.AntiquityDiggingAlert then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", title, text))
+    end
+
+    if ChatAnnouncements.SV.Antiquities.AntiquityDiggingCSA then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        messageParams:SetText(title, text)
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE)
+        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+    end
+
+    return true
+end
+
+-- EVENT_ANTIQUITY_DIGGING_ANTIQUITY_UNEARTHED (CSA Handler)
+local function AntiquityDiggingAntiquityUnearthedHook()
+    local antiquityId = GetDigSpotAntiquityId()
+    if not IsDiggingGameOver() then
+        local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
+        if antiquityData then
+            local title = zo_strformat(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_ANTIQUITY_UNEARTHED_TITLE, antiquityData:GetColorizedName())
+            local text = GetString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_ANTIQUITY_UNEARTHED_TEXT)
+
+            if ChatAnnouncements.SV.Antiquities.AntiquityDiggingCA then
+                printToChat(zo_strformat("<<1>>: <<2>>", title, text), true)
+            end
+
+            if ChatAnnouncements.SV.Antiquities.AntiquityDiggingAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", title, text))
+            end
+
+            if ChatAnnouncements.SV.Antiquities.AntiquityDiggingCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                messageParams:SetText(title, text)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            return true
+        end
+    end
+end
+
+-- EVENT_ANTIQUITY_DIGGING_BONUS_LOOT_UNEARTHED (CSA Handler)
+local function AntiquityDiggingBonusLootUnearthedHook()
+    if not IsDiggingGameOver() then
+        local title = GetString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_BONUS_LOOT_TITLE)
+
+        if ChatAnnouncements.SV.Antiquities.AntiquityDiggingCA then
+            printToChat(title, true)
+        end
+
+        if ChatAnnouncements.SV.Antiquities.AntiquityDiggingAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, title)
+        end
+
+        if ChatAnnouncements.SV.Antiquities.AntiquityDiggingCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            messageParams:SetText(title)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        return true
+    end
+end
+
+-- EVENT_ANTIQUITY_SCRYING_RESULT (CSA Handler)
+local function AntiquityScryingResultHook(result)
+    if result == ANTIQUITY_SCRYING_RESULT_NO_PROGRESS or result == ANTIQUITY_SCRYING_RESULT_NO_ADDITIONAL_PROGRESS then
+        local antiquityId = GetScryingCurrentAntiquityId()
+        local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
+        if antiquityData then
+            local numGoalsAchieved = antiquityData:GetNumGoalsAchieved()
+            local text = GetString("SI_ANTIQUITYSCRYINGRESULT", result)
+
+            if ChatAnnouncements.SV.Antiquities.AntiquityScryingCA then
+                printToChat(text, true)
+            end
+
+            if ChatAnnouncements.SV.Antiquities.AntiquityScryingAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, text)
+            end
+
+            if ChatAnnouncements.SV.Antiquities.AntiquityScryingCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SCRYING_PROGRESS_TEXT)
+                messageParams:SetText(text)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_SCRYING_RESULT)
+                messageParams:SetScryingProgressData(numGoalsAchieved, numGoalsAchieved, antiquityData:GetTotalNumGoals())
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            return true
+        end
+    end
+end
+
+-- EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED (CSA Handler)
+local function TimedActivityProgressUpdatedHook(timedActivityIndex, previousProgress, currentProgress, complete)
+    if complete then
+        local activityData = ZO_TimedActivityData:New(timedActivityIndex)
+        if activityData then
+            local activityName = activityData:GetName()
+            if activityName ~= "" then
+                local activityType = activityData:GetType()
+                local activityTypeName = GetString("SI_TIMEDACTIVITYTYPE", activityType)
+                local activityCompletionType = zo_strformat(SI_TIMED_ACTIVITY_COMPLETED_CSA, activityTypeName)
+
+                if ChatAnnouncements.SV.Quest.QuestEndeavorCA then
+                    printToChat(zo_strformat("<<1>>: <<2>>", activityCompletionType, activityName), true)
+                end
+
+                if ChatAnnouncements.SV.Quest.QuestEndeavorAlert then
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", activityCompletionType, activityName))
+                end
+
+                if ChatAnnouncements.SV.Quest.QuestEndeavorCSA then
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ENDEAVOR_COMPLETED)
+                    messageParams:SetText(activityCompletionType, activityName)
+                    CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+                end
+
+                if not ChatAnnouncements.SV.Quest.QuestEndeavorCSA then
+                    PlaySound(SOUNDS.ENDEAVOR_COMPLETED)
+                end
+
+                return true
+            end
+        end
+    end
+end
+
+-- EVENT_TIMED_ACTIVITY_TYPE_PROGRESS_UPDATED (CSA Handler)
+local function TimedActivityTypeProgressUpdatedHook(activityType, previousNumComplete, currentNumComplete, complete)
+    if complete then
+        local activityTypeName = GetString("SI_TIMEDACTIVITYTYPE", activityType)
+        local _, maxNumActivities = TIMED_ACTIVITIES_MANAGER:GetTimedActivityTypeLimitInfo(activityType)
+        local messageTitle = zo_strformat(SI_TIMED_ACTIVITY_TYPE_COMPLETED_CSA, currentNumComplete, maxNumActivities, activityTypeName)
+        local messageSubheading = GetString("SI_TIMEDACTIVITYTYPE_FOLLOWUPHINT", activityType)
+
+        if ChatAnnouncements.SV.Quest.QuestEndeavorCA then
+            printToChat(zo_strformat("<<1>>: <<2>>", messageTitle, messageSubheading), true)
+        end
+
+        if ChatAnnouncements.SV.Quest.QuestEndeavorAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", messageTitle, messageSubheading))
+        end
+
+        if ChatAnnouncements.SV.Quest.QuestEndeavorCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            messageParams:SetText(messageTitle, messageSubheading)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        return true
+    end
+end
+
+-- EVENT_ACHIEVEMENTS_COMPLETED_ON_UPGRADE_TO_ACCOUNT_WIDE (CSA Handler)
+local function AchievementsCompletedOnUpgradeToAccountWideHook(numCompletedAchievement)
+    local messageTitle = zo_strformat(SI_ACHIEVEMENT_ON_UPGRADE_TITLE, numCompletedAchievement)
+    local messageSubheading = GetString(SI_ACHIEVEMENT_ON_UPGRADE_TEXT)
+
+    if ChatAnnouncements.SV.Achievement.AchievementCompleteCA then
+        printToChat(zo_strformat("<<1>>: <<2>>", messageTitle, messageSubheading), true)
+    end
+
+    if ChatAnnouncements.SV.Achievement.AchievementCompleteAlert then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", messageTitle, messageSubheading))
+    end
+
+    if ChatAnnouncements.SV.Achievement.AchievementCompleteCSA then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        messageParams:SetText(messageTitle, messageSubheading)
+        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+    end
+
+    return true
+end
+
+-- EVENT_CONSOLIDATED_STATION_SETS_UPDATED (CSA Handler)
+local function ConsolidatedStationSetsUpdatedHook(craftingStationFurnitureId)
+    if HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() then
+        local function GetNextDirtyUnlockedSetIdIter(_, previousSetId)
+            return GetNextDirtyUnlockedConsolidatedSmithingItemSetId(previousSetId)
+        end
+
+        local unlockedSetIds = {}
+        for setId in GetNextDirtyUnlockedSetIdIter do
+            table.insert(unlockedSetIds, setId)
+        end
+
+        local numUnlockedSetIds = #unlockedSetIds
+        if numUnlockedSetIds > 0 then
+            local messageTitle = GetString(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_ANNOUNCEMENT_TITLE)
+            local messageSubheading
+
+            if numUnlockedSetIds == 1 then
+                local setName = GetItemSetName(unlockedSetIds[1])
+                messageSubheading = zo_strformat(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_SINGLE_SET_MESSAGE, setName)
+            else
+                messageSubheading = zo_strformat(SI_SMITHING_CONSOLIDATED_STATION_SETS_UPDATED_MULTI_SET_MESSAGE, numUnlockedSetIds)
+            end
+
+            local message = zo_strformat("<<1>> <<2>>", messageTitle, messageSubheading)
+
+            if ChatAnnouncements.SV.Inventory.LootCraftedSetCA then
+                printToChat(message, true)
+            end
+
+            if ChatAnnouncements.SV.Inventory.LootCraftedSetAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+            end
+
+            if ChatAnnouncements.SV.Inventory.LootCraftedSetCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.CONSOLIDATED_SMITHING_SET_ADDED)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_CONSOLIDATED_STATION_SETS_UPDATED)
+                local stationIcon = select(2, GetPlacedHousingFurnitureInfo(craftingStationFurnitureId))
+                messageParams:SetIconData(stationIcon)
+                messageParams:SetText(messageTitle, messageSubheading)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            else
+                PlaySound(SOUNDS.CONSOLIDATED_SMITHING_SET_ADDED)
+            end
+
+            return true
+        end
+    end
+end
+
+-- PvP/AvA/Battleground Handlers
+
+-- EVENT_ARTIFACT_CONTROL_STATE (CSA Handler)
+local function ArtifactControlStateHook(artifactName, keepId, characterName, playerAlliance, controlEvent, controlState, campaignId, displayName)
+    local nameToShow = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(displayName) or characterName
+    local description, soundId = GetAvAArtifactEventDescription(artifactName, keepId, nameToShow, playerAlliance, controlEvent, campaignId)
+
+    if description then
+        if ChatAnnouncements.SV.PVP.PVPAvACA then
+            printToChat(description, true)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPAvAAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, description)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPAvACSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+            messageParams:SetText(description)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ARTIFACT_CONTROL_STATE)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if soundId and not ChatAnnouncements.SV.PVP.PVPAvACSA then
+            PlaySound(soundId)
+        end
+
+        return true
+    end
+end
+
+-- EVENT_DAEDRIC_ARTIFACT_OBJECTIVE_SPAWNED_BUT_NOT_REVEALED (CSA Handler)
+local function DaedricArtifactObjectiveSpawnedButNotRevealedHook(daedricArtifactId)
+    local daedricArtifactName = GetDaedricArtifactDisplayName(daedricArtifactId)
+    local description = zo_strformat(SI_DAEDRIC_ARTIFACT_SPAWNED, daedricArtifactName)
+
+    if ChatAnnouncements.SV.PVP.PVPAvACA then
+        printToChat(description, true)
+    end
+
+    if ChatAnnouncements.SV.PVP.PVPAvAAlert then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, description)
+    end
+
+    if ChatAnnouncements.SV.PVP.PVPAvACSA then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.DAEDRIC_ARTIFACT_SPAWNED)
+        messageParams:SetText(description)
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED)
+        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+    end
+
+    if not ChatAnnouncements.SV.PVP.PVPAvACSA then
+        PlaySound(SOUNDS.DAEDRIC_ARTIFACT_SPAWNED)
+    end
+
+    return true
+end
+
+-- EVENT_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED (CSA Handler)
+local function DaedricArtifactObjectiveStateChangedHook(objectiveKeepId, objectiveObjectiveId, battlegroundContext, objectiveControlEvent, objectiveControlState, holderAlliance, lastHolderAlliance, pinType, daedricArtifactId, lastObjectiveControlState)
+    local description
+    local soundId
+
+    if lastObjectiveControlState == OBJECTIVE_CONTROL_STATE_UNKNOWN and objectiveControlState ~= OBJECTIVE_CONTROL_STATE_UNKNOWN then
+        -- Revealed (UNKNOWN -> !UNKNOWN)
+        local daedricArtifactName = GetDaedricArtifactDisplayName(daedricArtifactId)
+        description = zo_strformat(SI_DAEDRIC_ARTIFACT_REVEALED, daedricArtifactName)
+        soundId = SOUNDS.DAEDRIC_ARTIFACT_REVEALED
+    elseif lastObjectiveControlState ~= OBJECTIVE_CONTROL_STATE_UNKNOWN and objectiveControlState == OBJECTIVE_CONTROL_STATE_UNKNOWN then
+        -- Despawned (!UNKNOWN -> UNKNOWN)
+        local daedricArtifactName = GetDaedricArtifactDisplayName(daedricArtifactId)
+        description = zo_strformat(SI_DAEDRIC_ARTIFACT_DESPAWNED, daedricArtifactName)
+        soundId = SOUNDS.DAEDRIC_ARTIFACT_DESPAWNED
+    end
+
+    if description then
+        if ChatAnnouncements.SV.PVP.PVPAvACA then
+            printToChat(description, true)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPAvAAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, description)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPAvACSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+            messageParams:SetText(description)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if soundId and not ChatAnnouncements.SV.PVP.PVPAvACSA then
+            PlaySound(soundId)
+        end
+
+        return true
+    end
+end
+
+-- EVENT_KEEP_GATE_STATE_CHANGED (CSA Handler)
+local function KeepGateStateChangedHook(keepId, open)
+    local description, soundId = GetGateStateChangedDescription(keepId, open)
+
+    if description then
+        if ChatAnnouncements.SV.PVP.PVPAvACA then
+            printToChat(description, true)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPAvAAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, description)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPAvACSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+            messageParams:SetText(description)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_KEEP_GATE_CHANGED)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if soundId and not ChatAnnouncements.SV.PVP.PVPAvACSA then
+            PlaySound(soundId)
+        end
+
+        return true
+    end
+end
+
+-- EVENT_CORONATE_EMPEROR_NOTIFICATION (CSA Handler)
+local function CoronateEmperorNotificationHook(campaignId, playerCharacterName, playerAlliance, playerDisplayName)
+    local description, soundId = GetCoronateEmperorEventDescription(campaignId, playerCharacterName, playerAlliance, playerDisplayName)
+
+    if description then
+        if ChatAnnouncements.SV.PVP.PVPAvACA then
+            printToChat(description, true)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPAvAAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, description)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPAvACSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+            messageParams:SetText(description)
+            messageParams:SetLifespanMS(5000)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_CORONATE_EMPEROR)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if soundId and not ChatAnnouncements.SV.PVP.PVPAvACSA then
+            PlaySound(soundId)
+        end
+
+        return true
+    end
+end
+
+-- EVENT_DEPOSE_EMPEROR_NOTIFICATION (CSA Handler)
+local function DeposeEmperorNotificationHook(campaignId, playerCharacterName, playerAlliance, abdication, playerDisplayName)
+    local description, soundId = GetDeposeEmperorEventDescription(campaignId, playerCharacterName, playerAlliance, abdication, playerDisplayName)
+
+    if description then
+        if ChatAnnouncements.SV.PVP.PVPAvACA then
+            printToChat(description, true)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPAvAAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, description)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPAvACSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+            messageParams:SetText(description)
+            messageParams:SetLifespanMS(5000)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DEPOSE_EMPEROR)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if soundId and not ChatAnnouncements.SV.PVP.PVPAvACSA then
+            PlaySound(soundId)
+        end
+
+        return true
+    end
+end
+
+-- EVENT_REVENGE_KILL (CSA Handler)
+local function RevengeKillHook(killedCharacterName, killedDisplayName)
+    if IsPlayerInAvAWorld() then
+        local killedName = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(killedDisplayName) or killedCharacterName
+        local description = zo_strformat(SI_REVENGE_KILL, killedName)
+
+        if ChatAnnouncements.SV.PVP.PVPKillCA then
+            printToChat(description, true)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPKillAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, description)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPKillCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            messageParams:SetText(description)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_REVENGE_KILL)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        return true
+    end
+end
+
+-- EVENT_AVENGE_KILL (CSA Handler)
+local function AvengeKillHook(avengedCharacterName, killedCharacterName, avengedDisplayName, killedDisplayName)
+    if IsPlayerInAvAWorld() then
+        local avengedName = avengedCharacterName
+        local killedName = killedCharacterName
+        if IsInGamepadPreferredMode() then
+            avengedName = ZO_FormatUserFacingDisplayName(avengedDisplayName)
+            killedName = ZO_FormatUserFacingDisplayName(killedDisplayName)
+        end
+        local description = zo_strformat(SI_AVENGE_KILL, avengedName, killedName)
+
+        if ChatAnnouncements.SV.PVP.PVPKillCA then
+            printToChat(description, true)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPKillAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, description)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPKillCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            messageParams:SetText(description)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_AVENGE_KILL)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        return true
+    end
+end
+
+-- Battleground Event Handlers
+
+local function ShouldShowBattlegroundObjectiveCSA(objectiveKeepId, objectiveId, battlegroundContext)
+    return IsBattlegroundObjective(objectiveKeepId, objectiveId, battlegroundContext) and GetCurrentBattlegroundState() == BATTLEGROUND_STATE_RUNNING
+end
+
+-- EVENT_CAPTURE_AREA_STATE_CHANGED (CSA Handler)
+local function CaptureAreaStateChangedHook(objectiveKeepId, objectiveId, battlegroundContext, objectiveName, objectiveControlEvent, objectiveControlState, owningAlliance, pinType)
+    if ShouldShowBattlegroundObjectiveCSA(objectiveKeepId, objectiveId, BGQUERY_LOCAL) then
+        if objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_CAPTURED then
+            local text, soundId
+            local captureAreaIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), "150%", "150%")
+            if owningAlliance == GetUnitBattlegroundTeam("player") then
+                text = zo_strformat(SI_BATTLEGROUND_CAPTURE_AREA_CAPTURED, GetColoredBattlegroundYourTeamText(owningAlliance), captureAreaIcon)
+                soundId = SOUNDS.BATTLEGROUND_CAPTURE_AREA_CAPTURED_OWN_TEAM
+            else
+                text = zo_strformat(SI_BATTLEGROUND_CAPTURE_AREA_CAPTURED, GetColoredBattlegroundEnemyTeamText(owningAlliance), captureAreaIcon)
+                soundId = SOUNDS.BATTLEGROUND_CAPTURE_AREA_CAPTURED_OTHER_TEAM
+            end
+
+            if ChatAnnouncements.SV.PVP.PVPBattlegroundCA then
+                printToChat(text, true)
+            end
+
+            if ChatAnnouncements.SV.PVP.PVPBattlegroundAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, text)
+            end
+
+            if ChatAnnouncements.SV.PVP.PVPBattlegroundCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+                messageParams:SetText(text)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            if soundId and not ChatAnnouncements.SV.PVP.PVPBattlegroundCSA then
+                PlaySound(soundId)
+            end
+
+            return true
+        end
+    end
+end
+
+-- EVENT_CAPTURE_AREA_SPAWNED (CSA Handler)
+local function CaptureAreaSpawnedHook(objectiveKeepId, objectiveId, battlegroundContext, pinType, hasMoved)
+    if ShouldShowBattlegroundObjectiveCSA(objectiveKeepId, objectiveId, BGQUERY_LOCAL) then
+        local text, soundId
+        local captureAreaIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), "150%", "150%")
+        if hasMoved then
+            text = zo_strformat(SI_BATTLEGROUND_CAPTURE_AREA_MOVED, captureAreaIcon)
+            soundId = SOUNDS.BATTLEGROUND_CAPTURE_AREA_MOVED
+        else
+            text = zo_strformat(SI_BATTLEGROUND_CAPTURE_AREA_SPAWNED, captureAreaIcon)
+            soundId = SOUNDS.BATTLEGROUND_CAPTURE_AREA_SPAWNED
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPBattlegroundCA then
+            printToChat(text, true)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPBattlegroundAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, text)
+        end
+
+        if ChatAnnouncements.SV.PVP.PVPBattlegroundCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+            messageParams:SetText(text)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if soundId and not ChatAnnouncements.SV.PVP.PVPBattlegroundCSA then
+            PlaySound(soundId)
+        end
+
+        return true
+    end
+end
+
+-- EVENT_CAPTURE_FLAG_STATE_CHANGED (CSA Handler)
+local function CaptureFlagStateChangedHook(objectiveKeepId, objectiveId, battlegroundContext, objectiveName, objectiveControlEvent, objectiveControlState, originalOwnerAlliance, holderAlliance, lastHolderAlliance, pinType)
+    if ShouldShowBattlegroundObjectiveCSA(objectiveKeepId, objectiveId, BGQUERY_LOCAL) then
+        local flagIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), "150%", "150%")
+        local text, soundId
+
+        if objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_TAKEN then
+            if holderAlliance == GetUnitBattlegroundTeam("player") then
+                text = zo_strformat(SI_BATTLEGROUND_FLAG_PICKED_UP, GetColoredBattlegroundYourTeamText(holderAlliance), flagIcon)
+                soundId = SOUNDS.BATTLEGROUND_CAPTURE_FLAG_TAKEN_OWN_TEAM
+            else
+                text = zo_strformat(SI_BATTLEGROUND_FLAG_PICKED_UP, GetColoredBattlegroundEnemyTeamText(holderAlliance), flagIcon)
+                soundId = SOUNDS.BATTLEGROUND_CAPTURE_FLAG_TAKEN_OTHER_TEAM
+            end
+        elseif objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_DROPPED then
+            if lastHolderAlliance == GetUnitBattlegroundTeam("player") then
+                text = zo_strformat(SI_BATTLEGROUND_FLAG_DROPPED, GetColoredBattlegroundYourTeamText(lastHolderAlliance), flagIcon)
+                soundId = SOUNDS.BATTLEGROUND_CAPTURE_FLAG_DROPPED_OWN_TEAM
+            else
+                text = zo_strformat(SI_BATTLEGROUND_FLAG_DROPPED, GetColoredBattlegroundEnemyTeamText(lastHolderAlliance), flagIcon)
+                soundId = SOUNDS.BATTLEGROUND_CAPTURE_FLAG_DROPPED_OTHER_TEAM
+            end
+        elseif objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_RETURNED or objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_RETURNED_BY_TIMER then
+            text = zo_strformat(SI_BATTLEGROUND_FLAG_RETURNED, flagIcon)
+            soundId = SOUNDS.BATTLEGROUND_CAPTURE_FLAG_RETURNED
+        elseif objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_CAPTURED then
+            if lastHolderAlliance == GetUnitBattlegroundTeam("player") then
+                text = zo_strformat(SI_BATTLEGROUND_FLAG_CAPTURED, GetColoredBattlegroundYourTeamText(lastHolderAlliance), flagIcon)
+                soundId = SOUNDS.BATTLEGROUND_CAPTURE_FLAG_CAPTURED_BY_OWN_TEAM
+            else
+                text = zo_strformat(SI_BATTLEGROUND_FLAG_CAPTURED, GetColoredBattlegroundEnemyTeamText(lastHolderAlliance), flagIcon)
+                soundId = SOUNDS.BATTLEGROUND_CAPTURE_FLAG_CAPTURED_BY_OTHER_TEAM
+            end
+        end
+
+        if text then
+            if ChatAnnouncements.SV.PVP.PVPBattlegroundCA then
+                printToChat(text, true)
+            end
+
+            if ChatAnnouncements.SV.PVP.PVPBattlegroundAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, text)
+            end
+
+            if ChatAnnouncements.SV.PVP.PVPBattlegroundCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+                messageParams:SetText(text)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            if soundId and not ChatAnnouncements.SV.PVP.PVPBattlegroundCSA then
+                PlaySound(soundId)
+            end
+
+            return true
+        end
+    end
+end
+
+-- EVENT_MURDERBALL_STATE_CHANGED (CSA Handler)
+local function MurderballStateChangedHook(objectiveKeepId, objectiveId, battlegroundContext, objectiveName, objectiveControlEvent, objectiveControlState, holderAlliance, lastHolderAlliance, holderRawCharacterName, holderDisplayName, lastHolderRawCharacterName, lastHolderDisplayName, pinType)
+    if ShouldShowBattlegroundObjectiveCSA(objectiveKeepId, objectiveId, BGQUERY_LOCAL) then
+        local murderballIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), "150%", "150%")
+        local text, soundId
+
+        if objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_TAKEN then
+            if holderAlliance == GetUnitBattlegroundTeam("player") then
+                text = zo_strformat(SI_BATTLEGROUND_MURDERBALL_PICKED_UP, GetColoredBattlegroundYourTeamText(holderAlliance), murderballIcon)
+                soundId = SOUNDS.BATTLEGROUND_MURDERBALL_TAKEN_OWN_TEAM
+            else
+                text = zo_strformat(SI_BATTLEGROUND_MURDERBALL_PICKED_UP, GetColoredBattlegroundEnemyTeamText(holderAlliance), murderballIcon)
+                soundId = SOUNDS.BATTLEGROUND_MURDERBALL_TAKEN_OTHER_TEAM
+            end
+        elseif objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_DROPPED then
+            if lastHolderAlliance == GetUnitBattlegroundTeam("player") then
+                text = zo_strformat(SI_BATTLEGROUND_MURDERBALL_DROPPED, GetColoredBattlegroundYourTeamText(lastHolderAlliance), murderballIcon)
+                soundId = SOUNDS.BATTLEGROUND_MURDERBALL_DROPPED_OWN_TEAM
+            else
+                text = zo_strformat(SI_BATTLEGROUND_MURDERBALL_DROPPED, GetColoredBattlegroundEnemyTeamText(lastHolderAlliance), murderballIcon)
+                soundId = SOUNDS.BATTLEGROUND_MURDERBALL_DROPPED_OTHER_TEAM
+            end
+        elseif objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_RETURNED or objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_RETURNED_BY_TIMER then
+            text = zo_strformat(SI_BATTLEGROUND_FLAG_RETURNED, murderballIcon)
+            soundId = SOUNDS.BATTLEGROUND_MURDERBALL_RETURNED
+        end
+
+        if text then
+            if ChatAnnouncements.SV.PVP.PVPBattlegroundCA then
+                printToChat(text, true)
+            end
+
+            if ChatAnnouncements.SV.PVP.PVPBattlegroundAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, text)
+            end
+
+            if ChatAnnouncements.SV.PVP.PVPBattlegroundCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+                messageParams:SetText(text)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            if soundId and not ChatAnnouncements.SV.PVP.PVPBattlegroundCSA then
+                PlaySound(soundId)
+            end
+
+            return true
+        end
+    end
+end
+
+-- EVENT_BATTLEGROUND_KILL (CSA Handler)
+local function BattlegroundKillHook(killedPlayerCharacterName, killedPlayerDisplayName, killedPlayerBattlegroundAlliance, killingPlayerCharacterName, killingPlayerDisplayName, killingPlayerBattlegroundAlliance, battlegroundKillType)
+    local gameType = GetCurrentBattlegroundGameType()
+    if gameType == BATTLEGROUND_GAME_TYPE_DEATHMATCH then
+        local format = GetString("SI_BATTLEGROUNDKILLTYPE", battlegroundKillType)
+        local killedPlayerName = ZO_GetPrimaryPlayerName(killedPlayerDisplayName, killedPlayerCharacterName)
+        local coloredKilledPlayerName = GetBattlegroundTeamColor(killedPlayerBattlegroundAlliance):Colorize(killedPlayerName)
+        local text, soundId
+
+        if battlegroundKillType == BATTLEGROUND_KILL_TYPE_KILLING_BLOW or battlegroundKillType == BATTLEGROUND_KILL_TYPE_ASSIST then
+            local you = GetBattlegroundTeamColor(killingPlayerBattlegroundAlliance):Colorize(GetString(SI_BATTLEGROUND_YOU))
+            if battlegroundKillType == BATTLEGROUND_KILL_TYPE_KILLING_BLOW then
+                soundId = SOUNDS.BATTLEGROUND_KILL_KILLING_BLOW
+            else
+                soundId = SOUNDS.BATTLEGROUND_KILL_ASSIST
+            end
+            text = zo_strformat(format, you, coloredKilledPlayerName)
+        elseif battlegroundKillType == BATTLEGROUND_KILL_TYPE_KILLED_BY_MY_TEAM then
+            soundId = SOUNDS.BATTLEGROUND_KILL_KILLED_BY_MY_TEAM
+            text = zo_strformat(format, GetColoredBattlegroundYourTeamText(killingPlayerBattlegroundAlliance), coloredKilledPlayerName)
+        elseif battlegroundKillType == BATTLEGROUND_KILL_TYPE_STOLEN_BY_ENEMY_TEAM then
+            soundId = SOUNDS.BATTLEGROUND_KILL_STOLEN_BY_ENEMY_TEAM
+            text = zo_strformat(format, GetColoredBattlegroundEnemyTeamText(killingPlayerBattlegroundAlliance), coloredKilledPlayerName)
+        end
+
+        if text then
+            if ChatAnnouncements.SV.PVP.PVPKillCA then
+                printToChat(text, true)
+            end
+
+            if ChatAnnouncements.SV.PVP.PVPKillAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, text)
+            end
+
+            if ChatAnnouncements.SV.PVP.PVPKillCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+                messageParams:SetText(text)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            if soundId and not ChatAnnouncements.SV.PVP.PVPKillCSA then
+                PlaySound(soundId)
+            end
+
+            return true
+        end
+    end
+end
+
 local function Hook1()
     local alertHandlers = ZO_AlertText_GetHandlers()
     ZO_PreHook(alertHandlers, EVENT_LORE_BOOK_ALREADY_KNOWN, AlreadyKnowBookHook)
@@ -4045,6 +5211,42 @@ function ChatAnnouncements.HookFunction()
     eventManager:RegisterForEvent(moduleName, EVENT_PLEDGE_OF_MARA_OFFER, ChatAnnouncements.MaraOffer)
 
     ZO_PreHook(csaHandlers, EVENT_ANTIQUITY_LEAD_ACQUIRED, AntiquityLeadAcquired)
+
+    -- NEW CSA Hooks
+    ZO_PreHook(csaHandlers, EVENT_BROADCAST, BroadcastHook)
+    ZO_PreHook(csaHandlers, EVENT_FIXED_BROADCAST, FixedBroadcastHook)
+    ZO_PreHook(csaHandlers, EVENT_COMPANION_EXPERIENCE_GAIN, CompanionExperienceGainHook)
+    ZO_PreHook(csaHandlers, EVENT_FORCE_RESPEC, ForceRespecHook)
+    ZO_PreHook(csaHandlers, EVENT_CRAFTED_ABILITY_RESET, CraftedAbilityResetHook)
+    ZO_PreHook(csaHandlers, EVENT_TRIBUTE_CLUB_RANK_CHANGED, TributeClubRankChangedHook)
+    ZO_PreHook(csaHandlers, EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE, TributeGameFlowStateChangeHook)
+    ZO_PreHook(csaHandlers, EVENT_TRIBUTE_PLAYER_TURN_STARTED, TributePlayerTurnStartedHook)
+    ZO_PreHook(csaHandlers, EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED, ESOPlusFreeTrialStatusChangedHook)
+    ZO_PreHook(csaHandlers, EVENT_OUTFIT_CHANGE_RESPONSE, OutfitChangeResponseHook)
+    ZO_PreHook(csaHandlers, EVENT_DAILY_LOGIN_REWARDS_CLAIMED, DailyLoginRewardsClaimedHook)
+    ZO_PreHook(csaHandlers, EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY, AntiquityDiggingReadyToPlayHook)
+    ZO_PreHook(csaHandlers, EVENT_ANTIQUITY_DIGGING_ANTIQUITY_UNEARTHED, AntiquityDiggingAntiquityUnearthedHook)
+    ZO_PreHook(csaHandlers, EVENT_ANTIQUITY_DIGGING_BONUS_LOOT_UNEARTHED, AntiquityDiggingBonusLootUnearthedHook)
+    ZO_PreHook(csaHandlers, EVENT_ANTIQUITY_SCRYING_RESULT, AntiquityScryingResultHook)
+    ZO_PreHook(csaHandlers, EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED, TimedActivityProgressUpdatedHook)
+    ZO_PreHook(csaHandlers, EVENT_TIMED_ACTIVITY_TYPE_PROGRESS_UPDATED, TimedActivityTypeProgressUpdatedHook)
+    ZO_PreHook(csaHandlers, EVENT_ACHIEVEMENTS_COMPLETED_ON_UPGRADE_TO_ACCOUNT_WIDE, AchievementsCompletedOnUpgradeToAccountWideHook)
+    ZO_PreHook(csaHandlers, EVENT_CONSOLIDATED_STATION_SETS_UPDATED, ConsolidatedStationSetsUpdatedHook)
+
+    -- PvP/AvA/Battleground Hooks
+    ZO_PreHook(csaHandlers, EVENT_ARTIFACT_CONTROL_STATE, ArtifactControlStateHook)
+    ZO_PreHook(csaHandlers, EVENT_DAEDRIC_ARTIFACT_OBJECTIVE_SPAWNED_BUT_NOT_REVEALED, DaedricArtifactObjectiveSpawnedButNotRevealedHook)
+    ZO_PreHook(csaHandlers, EVENT_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED, DaedricArtifactObjectiveStateChangedHook)
+    ZO_PreHook(csaHandlers, EVENT_KEEP_GATE_STATE_CHANGED, KeepGateStateChangedHook)
+    ZO_PreHook(csaHandlers, EVENT_CORONATE_EMPEROR_NOTIFICATION, CoronateEmperorNotificationHook)
+    ZO_PreHook(csaHandlers, EVENT_DEPOSE_EMPEROR_NOTIFICATION, DeposeEmperorNotificationHook)
+    ZO_PreHook(csaHandlers, EVENT_REVENGE_KILL, RevengeKillHook)
+    ZO_PreHook(csaHandlers, EVENT_AVENGE_KILL, AvengeKillHook)
+    ZO_PreHook(csaHandlers, EVENT_CAPTURE_AREA_STATE_CHANGED, CaptureAreaStateChangedHook)
+    ZO_PreHook(csaHandlers, EVENT_CAPTURE_AREA_SPAWNED, CaptureAreaSpawnedHook)
+    ZO_PreHook(csaHandlers, EVENT_CAPTURE_FLAG_STATE_CHANGED, CaptureFlagStateChangedHook)
+    ZO_PreHook(csaHandlers, EVENT_MURDERBALL_STATE_CHANGED, MurderballStateChangedHook)
+    ZO_PreHook(csaHandlers, EVENT_BATTLEGROUND_KILL, BattlegroundKillHook)
 
     ChatAnnouncements.PlayerToPlayerHook()
 

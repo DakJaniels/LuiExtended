@@ -216,7 +216,8 @@ function Mail.OnTakeAttachedItem(eventId, mailId)
 
     local mailTarget, hasCOD = ResolveMailSender(mailId)
     Mail.senderMap[mailId] = mailTarget
-    Mail.target = mailTarget
+    -- Don't set Mail.target during take all to prevent contamination
+    -- Mail.target is only used as fallback, and queue system handles take all correctly
     Mail.codPresent = hasCOD
 
     eventManager:UnregisterForUpdate(Mail.moduleName .. "ClearTakingFlag")

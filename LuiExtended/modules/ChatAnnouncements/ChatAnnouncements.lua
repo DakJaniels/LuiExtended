@@ -1962,7 +1962,8 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
         formattedMessageP1 = (string_format(messageChange, messageP1, name))
     elseif messageType == "LUIE_CURRENCY_MAIL" then
         -- Use currentMailSender which was set from the queue when currency change occurred
-        local mailSender = ChatAnnouncements.currentMailSender ~= "" and ChatAnnouncements.currentMailSender or ChatAnnouncements.Mail.target
+        -- Don't use Mail.target as fallback during take all, as it gets contaminated
+        local mailSender = ChatAnnouncements.currentMailSender
         name = string_format("|r" .. mailSender .. "|c" .. changeColor)
         formattedMessageP1 = (string_format(messageChange, messageP1, name))
     else
