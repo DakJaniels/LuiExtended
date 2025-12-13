@@ -228,6 +228,27 @@ ChatAnnouncements.Defaults =
         CraftedAbilityAlert = false,
         CraftedAbilityScriptCA = true,
         CraftedAbilityScriptAlert = false,
+
+        -- Broadcasts
+        NotificationBroadcastCA = true,
+        NotificationBroadcastCSA = true,
+        NotificationBroadcastAlert = false,
+
+        -- ESO Plus
+        NotificationESOPlusCA = true,
+        NotificationESOPlusCSA = true,
+        NotificationESOPlusAlert = false,
+
+        -- Outfit
+        NotificationOutfitCA = true,
+        NotificationOutfitCSA = true,
+        NotificationOutfitAlert = false,
+
+        -- Daily Rewards
+        NotificationDailyRewardCA = true,
+        NotificationDailyRewardCSA = true,
+        NotificationDailyRewardAlert = false,
+        NotificationDailyRewardIcon = true,
     },
 
     -- Collectibles
@@ -288,6 +309,13 @@ ChatAnnouncements.Defaults =
         AntiquitySuffix = "",
         AntiquityColor = { 0.75, 0.75, 0.75, 1 },
         AntiquityIcon = true,
+
+        AntiquityDiggingCA = true,
+        AntiquityDiggingCSA = true,
+        AntiquityDiggingAlert = false,
+        AntiquityScryingCA = true,
+        AntiquityScryingCSA = true,
+        AntiquityScryingAlert = false,
     },
 
     -- Quest
@@ -329,6 +357,10 @@ ChatAnnouncements.Defaults =
         QuestObjUpdateCA = false,
         QuestObjUpdateCSA = true,
         QuestObjUpdateAlert = false,
+
+        QuestEndeavorCA = true,
+        QuestEndeavorCSA = true,
+        QuestEndeavorAlert = false,
     },
 
     -- Experience
@@ -378,6 +410,14 @@ ChatAnnouncements.Defaults =
         SkillAbilityAlert = false,
         SkillLineIcon = true,
         SkillLineColor = { 0.75, 0.75, 0.75, 1 },
+
+        SkillLevelCA = true,
+        SkillLevelCSA = true,
+        SkillLevelAlert = false,
+        SkillIcon = true,
+        SkillPointsCA = true,
+        SkillPointsCSA = true,
+        SkillPointsAlert = false,
 
         SkillGuildFighters = true,
         SkillGuildMages = true,
@@ -527,6 +567,10 @@ ChatAnnouncements.Defaults =
         LootRecipeHideAlert = true,
         LootQuestAdd = true,
         LootQuestRemove = false,
+
+        LootCraftedSetCA = true,
+        LootCraftedSetCSA = true,
+        LootCraftedSetAlert = false,
     },
 
     ContextMessages =
@@ -620,6 +664,34 @@ ChatAnnouncements.Defaults =
         CurrencyMessageDisguiseEquip = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_DISGUISE_EQUIP),
         CurrencyMessageDisguiseRemove = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_DISGUISE_REMOVE),
         CurrencyMessageDisguiseDestroy = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_DISGUISE_DESTROY),
+    },
+
+    -- Miscellaneous
+    Misc =
+    {
+        -- Tales of Tribute
+        MiscTributeCA = true,
+        MiscTributeCSA = true,
+        MiscTributeAlert = false,
+    },
+
+    -- PvP
+    PVP =
+    {
+        -- AvA
+        PVPAvACA = true,
+        PVPAvACSA = true,
+        PVPAvAAlert = false,
+
+        -- Kills
+        PVPKillCA = true,
+        PVPKillCSA = true,
+        PVPKillAlert = false,
+
+        -- Battlegrounds
+        PVPBattlegroundCA = true,
+        PVPBattlegroundCSA = true,
+        PVPBattlegroundAlert = false,
     },
 
     DisplayAnnouncements =

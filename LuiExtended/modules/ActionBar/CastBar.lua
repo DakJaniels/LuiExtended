@@ -56,6 +56,10 @@ end
 
 -- Stops cast bar
 function CastBar.StopCastBar()
+    if not castbar.bar or not castbar.bar.name then
+        return
+    end
+    
     local state = ActionBar.CastBarUnlocked
     castbar.bar.name:SetHidden(true)
     castbar.bar.timer:SetHidden(true)
