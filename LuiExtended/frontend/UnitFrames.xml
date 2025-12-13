@@ -622,6 +622,14 @@
                            hidden="true">
                   <AnchorFill />
                 </StatusBar>
+                <StatusBar name="$(parent)_Invulnerable"
+                           hidden="false">
+                  <AnchorFill />
+                </StatusBar>
+                <StatusBar name="$(parent)_InvulnerableInlay"
+                           hidden="false">
+                  <AnchorFill />
+                </StatusBar>
                 <StatusBar name="$(parent)_Shield"
                            hidden="false">
                   <AnchorFill />
