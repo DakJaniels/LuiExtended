@@ -3419,13 +3419,9 @@ function ActionBar.Initialize(enabled)
     -- Setup proc sound
     ActionBar.ApplyProcSound()
 
-    -- Setup CastBar font (CastBar module should be loaded by now)
-    if ActionBar.CastBar and ActionBar.CastBar.SetupFont then
-        ActionBar.CastBar.SetupFont(g_castbarFont)
-    end
-
     -- Initialize CastBar module
-    if ActionBar.SV.CastBarEnable and ActionBar.CastBar and ActionBar.CastBar.Initialize then
+    if ActionBar.SV.CastBarEnable then
+        ActionBar.CastBar.SetupFont(g_castbarFont)
         ActionBar.CastBar.Initialize()
     end
 
