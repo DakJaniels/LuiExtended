@@ -136,8 +136,9 @@ local g_actionBarActiveWeaponPair = GetHeldWeaponPair()
 local ACTION_BAR = _G["ZO_ActionBar1"]
 local BAR_INDEX_START = 3
 local BAR_INDEX_END = 8
-local BACKBAR_INDEX_END = 7 -- Separate index for backbar as long as we're not using an ultimate button.
+local BACKBAR_INDEX_END = 7                             -- Separate index for backbar as long as we're not using an ultimate button.
 local BACKBAR_INDEX_OFFSET = 50
+local MINIMUM_ACTION_BAR_TIMER_DISPLAYED_TIME_MS = 1000 -- Minimum time to display timers (performance optimization)
 
 -- Quickslot
 local uiQuickSlot =
@@ -578,9 +579,28 @@ function ActionBar.HookGCD()
 end
 
 -- Helper function to get override ability duration.
-local function GetUpdatedAbilityDuration(abilityId, overrideRank, casterUnitTag)
-    local duration = g_barDurationOverride[abilityId] or GetAbilityDuration(abilityId, overrideRank, casterUnitTag) or 0
-    return duration
+-- Can optionally use slotNum and hotbarCategory to fill gaps with new API
+local function GetUpdatedAbilityDuration(abilityId, overrideRank, casterUnitTag, slotNum, hotbarCategory)
+    -- First check our override table
+    if g_barDurationOverride[abilityId] then
+        return g_barDurationOverride[abilityId]
+    end
+
+    -- Try standard API
+    local duration = GetAbilityDuration(abilityId, overrideRank, casterUnitTag)
+    if duration and duration > 0 then
+        return duration
+    end
+
+    -- Fill gap: Try slot effect API if we know the slot (for missing data entries)
+    if slotNum and hotbarCategory then
+        local durationMS = GetActionSlotEffectDuration(slotNum, hotbarCategory)
+        if durationMS and durationMS > 0 then
+            return durationMS
+        end
+    end
+
+    return 0
 end
 
 -- Called on initialization and menu changes
@@ -708,8 +728,21 @@ function ActionBar.RegisterEvents()
 
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEM_USED, ActionBar.InventoryItemUsed)
 
+        -- New events to supplement custom tracking and fill missing data gaps
+        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_EFFECT_UPDATE, ActionBar.OnActionSlotEffectUpdate)
+        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_EFFECTS_CLEARED, ActionBar.OnActionSlotEffectsCleared)
+
         -- Setup bar highlight
         ActionBar.UpdateBarHighlightTables()
+
+        -- Unregister some default stuff from action buttons.
+        -- Unregister ZOS's default handler so our custom handler takes over
+        eventManager:UnregisterForEvent("ZO_ActionBar", EVENT_ACTION_SLOT_EFFECT_UPDATE)
+        -- Unregister interface setting changed events from individual buttons to prevent conflicts
+        for i = BAR_INDEX_START, BAR_INDEX_END do
+            eventManager:UnregisterForEvent("ActionButton" .. i, EVENT_INTERFACE_SETTING_CHANGED)
+            eventManager:UnregisterForEvent("ActionBarTimer" .. i, EVENT_INTERFACE_SETTING_CHANGED)
+        end
     end
     -- Have to register EVENT_EFFECT_CHANGED for werewolf as well - Stop devour cast bar when devour fades / also handles updating Vampire Ultimate cost on stage change
     if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled or ActionBar.SV.CastBarEnable or ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
@@ -721,6 +754,8 @@ function ActionBar.RegisterEvents()
     -- Display default UI ultimate text if the LUIE option is enabled.
     if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
         SetSetting(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER, 0)
+        -- Register for ultimate cost changes (e.g., vampire stage changes)
+        eventManager:RegisterForEvent(moduleName, EVENT_ULTIMATE_ABILITY_COST_CHANGED, ActionBar.UpdateUltimateLabel)
     end
 end
 
@@ -1202,6 +1237,110 @@ function ActionBar.OnReticleTargetChanged(eventCode)
             end
         end
     end
+end
+
+-- Runs on the EVENT_ACTION_SLOT_EFFECT_UPDATE listener.
+-- Uses new APIs to supplement custom tracking and fill gaps in missing data entries
+function ActionBar.OnActionSlotEffectUpdate(eventCode, hotbarCategory, actionSlotIndex)
+    -- Skip if not tracking triggered/toggled abilities
+    if not ActionBar.SV.ShowTriggered and not ActionBar.SV.ShowToggled then
+        return
+    end
+
+    -- Get the ability ID for this slot
+    local abilityId = GetSlotTrueBoundId(actionSlotIndex, hotbarCategory)
+    if not abilityId or abilityId == 0 then
+        return
+    end
+
+    -- Check if this ability is in our custom tracking
+    local isTracked = (g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId])
+
+    if isTracked then
+        -- Use API to fill gaps in our custom tracking
+        local timeRemainingMS = GetActionSlotEffectTimeRemaining(actionSlotIndex, hotbarCategory)
+        local stackCount = GetActionSlotEffectStackCount(actionSlotIndex, hotbarCategory)
+
+        -- Only update if we have valid data from API
+        if timeRemainingMS and timeRemainingMS > 0 then
+            local currentTime = GetGameTimeMilliseconds()
+            local endTime = currentTime + timeRemainingMS
+
+            -- Fill gap: If we don't have duration data or it's expired, use API data
+            if not g_toggledSlotsRemain[abilityId] or g_toggledSlotsRemain[abilityId] < currentTime then
+                g_toggledSlotsRemain[abilityId] = endTime
+            end
+
+            -- Fill gap: Update stack count if available from API
+            if stackCount and stackCount > 0 then
+                -- Only update if we don't have stack data or API has different value
+                if not g_toggledSlotsStack[abilityId] or g_toggledSlotsStack[abilityId] ~= stackCount then
+                    g_toggledSlotsStack[abilityId] = stackCount
+
+                    -- Update UI if slot is showing
+                    if g_toggledSlotsFront[abilityId] then
+                        local frontSlot = g_toggledSlotsFront[abilityId]
+                        if g_uiCustomToggle[frontSlot] and not g_uiCustomToggle[frontSlot]:IsHidden() then
+                            g_uiCustomToggle[frontSlot].stack:SetText(stackCount > 1 and tostring(stackCount) or "")
+                        end
+                    end
+                    if g_toggledSlotsBack[abilityId] then
+                        local backSlot = g_toggledSlotsBack[abilityId]
+                        if g_uiCustomToggle[backSlot] and not g_uiCustomToggle[backSlot]:IsHidden() then
+                            g_uiCustomToggle[backSlot].stack:SetText(stackCount > 1 and tostring(stackCount) or "")
+                        end
+                    end
+                end
+            end
+
+            -- Only process if above minimum threshold (performance optimization)
+            if timeRemainingMS > MINIMUM_ACTION_BAR_TIMER_DISPLAYED_TIME_MS then
+                -- Our OnUpdate will handle the label update, but we've now ensured
+                -- g_toggledSlotsRemain has accurate data from the API
+            end
+        elseif timeRemainingMS == 0 then
+            -- Effect expired - clear if we're tracking it
+            if g_toggledSlotsRemain[abilityId] then
+                if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
+                    ActionBar.HideSlot(g_toggledSlotsFront[abilityId], abilityId)
+                end
+                if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
+                    ActionBar.HideSlot(g_toggledSlotsBack[abilityId], abilityId)
+                end
+                g_toggledSlotsRemain[abilityId] = nil
+                g_toggledSlotsStack[abilityId] = nil
+            end
+        end
+    end
+end
+
+-- Runs on the EVENT_ACTION_SLOT_EFFECTS_CLEARED listener.
+-- Clears all custom tracking to stay in sync with game state
+function ActionBar.OnActionSlotEffectsCleared(eventCode)
+    -- Clear all custom tracking UI
+    for i = BAR_INDEX_START, BAR_INDEX_END do
+        if g_uiCustomToggle[i] then
+            g_uiCustomToggle[i]:SetHidden(true)
+        end
+        if g_uiProcAnimation[i] and g_uiProcAnimation[i]:IsPlaying() then
+            g_uiProcAnimation[i]:Stop()
+        end
+    end
+
+    for i = BAR_INDEX_START + BACKBAR_INDEX_OFFSET, BAR_INDEX_END + BACKBAR_INDEX_OFFSET do
+        if g_uiCustomToggle[i] then
+            g_uiCustomToggle[i]:SetHidden(true)
+        end
+        if g_uiProcAnimation[i] and g_uiProcAnimation[i]:IsPlaying() then
+            g_uiProcAnimation[i]:Stop()
+        end
+    end
+
+    -- Clear all custom tracking tables to stay in sync with game state
+    ZO_ClearTable(g_toggledSlotsRemain)
+    ZO_ClearTable(g_toggledSlotsStack)
+    -- Note: Don't clear g_toggledSlotsFront/Back as those map abilityId -> slotNum
+    -- They'll be repopulated on next slot update
 end
 
 function ActionBar.BarHighlightSwap(abilityId, overrideRank, casterUnitTag)
@@ -2510,6 +2649,45 @@ function ActionBar.OnSlotsFullUpdate(eventCode)
         return
     end
 
+    -- Update bar category
+    g_hotbarCategory = GetActiveHotbarCategory()
+
+    -- Disable default timers
+    for i = BAR_INDEX_START, BAR_INDEX_END do
+        local button = ZO_ActionBar_GetButton(i)
+        if button then
+            -- Disable default timer display
+            button.showTimer = false
+            -- Hide default timer and stack count text
+            if button.stackCountText then
+                button.stackCountText:SetHidden(true)
+            end
+            if button.timerText then
+                button.timerText:SetHidden(true)
+            end
+            -- For non-ult buttons, disable default animation updates but keep the animation
+            if i < BAR_INDEX_END then
+                button.noUpdates = true    -- Disable animation updates
+                button:HandleSlotChanged() -- Update slot manually
+            end
+        end
+    end
+
+    -- Hide default backbar buttons and disable their timers
+    if g_hotbarCategory == HOTBAR_CATEGORY_PRIMARY or g_hotbarCategory == HOTBAR_CATEGORY_BACKUP then
+        local inactiveHotbarCategory = g_hotbarCategory == HOTBAR_CATEGORY_PRIMARY and HOTBAR_CATEGORY_BACKUP or HOTBAR_CATEGORY_PRIMARY
+        for i = BAR_INDEX_START, BAR_INDEX_END do
+            local targetButton = ZO_ActionBar_GetButton(i, inactiveHotbarCategory)
+            if targetButton then
+                targetButton.showTimer = false
+                targetButton.showBackRowSlot = false
+                if i < BAR_INDEX_END then -- non-ult only
+                    targetButton.noUpdates = true
+                end
+            end
+        end
+    end
+
     -- Handle ultimate label first
     ActionBar.UpdateUltimateLabel()
 
@@ -2520,8 +2698,10 @@ function ActionBar.OnSlotsFullUpdate(eventCode)
 
     for i = (BAR_INDEX_START + BACKBAR_INDEX_OFFSET), (BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET) do
         local button = g_backbarButtons[i]
-        ActionBar.SetupBackBarIcons(button)
-        ActionBar.BarSlotUpdate(i, true, false)
+        if button then
+            ActionBar.SetupBackBarIcons(button)
+            ActionBar.BarSlotUpdate(i, true, false)
+        end
     end
 end
 

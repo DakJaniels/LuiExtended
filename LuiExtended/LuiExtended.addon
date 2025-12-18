@@ -107,9 +107,7 @@ modules/CombatText/EventViewers/Points.lua
 modules/CombatText/EventViewers/Resources.lua
 
 # Modules - Action Bar
-modules/ActionBar/Namespace.lua
 modules/ActionBar/ActionBar.lua
-modules/ActionBar/CastBar.lua
 
 # Modules - Combat Info
 modules/CombatInfo/Namespace.lua
