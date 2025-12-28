@@ -12,6 +12,7 @@ local UI = LUIE.UI
 local GridOverlay = LUIE.GridOverlay
 local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
+local windowManager = GetWindowManager()
 -- -----------------------------------------------------------------------------
 
 --- @class LUIE.Unlock : table
@@ -185,14 +186,25 @@ end
 --- @param positionText string The text to display in the label
 --- @return LabelControl label The created label
 function Unlock.CreateCoordinateLabel(parent, positionText)
-    local label = UI:Label(parent, { TOPLEFT, TOPLEFT, 2, 2 }, nil, { 0, 2 }, "ZoFontGameSmall", positionText, false)
+    local label = windowManager:CreateControl(nil, parent, CT_LABEL)
+    label:SetFont("ZoFontGameSmall")
+    label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+    label:SetVerticalAlignment(TEXT_ALIGN_TOP)
+    label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+    label:SetAnchor(TOPLEFT, parent, TOPLEFT, 2, 2)
+    label:SetText(positionText)
     label:SetColor(1, 1, 0, 1)
     label:SetDrawLayer(DL_OVERLAY)
     label:SetDrawLevel(5)
     label:SetDrawTier(DT_MEDIUM)
 
     -- Create label background
-    local bg = UI:Backdrop(label, "fill", nil, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, false)
+    local bg = windowManager:CreateControl(nil, label, CT_BACKDROP)
+    bg:SetCenterColor(0, 0, 0, 1)
+    bg:SetEdgeColor(0, 0, 0, 1)
+    bg:SetEdgeTexture("", 8, 1, 1, 1)
+    bg:SetDrawLayer(DL_BACKGROUND)
+    bg:SetAnchorFill(label)
     bg:SetDrawLayer(DL_OVERLAY)
     bg:SetDrawLevel(5)
     bg:SetDrawTier(DT_LOW)
@@ -210,11 +222,22 @@ end
 --- @param relativeTo Control The element to which the top-level window is relative
 --- @return TopLevelWindow tlw The created top-level window
 function Unlock.CreateTopLevelWindow(element, config, point, relativePoint, offsetX, offsetY, relativeTo)
-    local tlw = UI:TopLevel({ point, relativePoint, offsetX, offsetY, relativeTo }, { element:GetWidth(), element:GetHeight() })
+    local tlw = windowManager:CreateTopLevelWindow(nil)
+    tlw:SetClampedToScreen(true)
+    tlw:SetMouseEnabled(false)
+    tlw:SetMovable(false)
+    tlw:SetHidden(true)
+    tlw:SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY)
+    tlw:SetDimensions(element:GetWidth(), element:GetHeight())
     tlw.customPositionAttr = element:GetName()
 
     -- Create preview backdrop
-    tlw.preview = UI:Backdrop(tlw, "fill", nil, nil, nil, false)
+    tlw.preview = windowManager:CreateControl(nil, tlw, CT_BACKDROP)
+    tlw.preview:SetCenterColor(0, 0, 0, 0.4)
+    tlw.preview:SetEdgeColor(0, 0, 0, 0.6)
+    tlw.preview:SetEdgeTexture("", 8, 1, 1, 1)
+    tlw.preview:SetDrawLayer(DL_BACKGROUND)
+    tlw.preview:SetAnchorFill(tlw)
     tlw.preview:SetDrawLayer(DL_OVERLAY)
     tlw.preview:SetDrawLevel(5)
     tlw.preview:SetDrawTier(DT_MEDIUM)

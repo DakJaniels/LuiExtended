@@ -120,17 +120,17 @@ function LUIE.CreateSettings()
         registerForDefaults = false,
     }
 
-    -- -- Changelog Button
-    -- optionsData[#optionsData + 1] = SettingsAPI.CreateButtonOption(
-    --     GetString(LUIE_STRING_LAM_CHANGELOG),
-    --     GetString(LUIE_STRING_LAM_CHANGELOG_TP),
-    --     function ()
-    --         LUIE.ToggleChangelog(false)
-    --         SCENE_MANAGER:ShowBaseScene()
-    --     end,
-    --     "half",
-    --     function () return not Settings.ShowChangeLog end
-    -- )
+    -- Changelog Button
+    optionsData[#optionsData + 1] = SettingsAPI.CreateButtonOption(
+        GetString(LUIE_STRING_LAM_CHANGELOG),
+        GetString(LUIE_STRING_LAM_CHANGELOG_TP),
+        function ()
+            LUIE.ToggleChangelog(false)
+            SCENE_MANAGER:ShowBaseScene()
+        end,
+        "half",
+        function () return not Settings.ShowChangeLog end
+    )
 
     -- ReloadUI Button
     optionsData[#optionsData + 1] = SettingsAPI.CreateButtonOption(
@@ -286,24 +286,6 @@ function LUIE.CreateSettings()
         GetString(LUIE_STRING_LAM_MODULEHEADER)
     )
 
-    -- Unit Frames Module
-    optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
-        GetString(LUIE_STRING_LAM_UF_ENABLE),
-        nil,
-        function () return Settings.UnitFrames_Enabled end,
-        function (value) Settings.UnitFrames_Enabled = value end,
-        "half",
-        nil,
-        Defaults.UnitFrames_Enabled,
-        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
-    )
-
-    -- Unit Frames module description
-    optionsData[#optionsData + 1] = SettingsAPI.CreateDescriptionOption(
-        GetString(LUIE_STRING_LAM_UF_DESCRIPTION),
-        "half"
-    )
-
     -- Action Bar Module
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         "Action Bar",
@@ -430,23 +412,41 @@ function LUIE.CreateSettings()
         "half"
     )
 
+    -- Unit Frames Module
+    optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_UF_ENABLE),
+        nil,
+        function () return Settings.UnitFrames_Enabled end,
+        function (value) Settings.UnitFrames_Enabled = value end,
+        "half",
+        nil,
+        Defaults.UnitFrames_Enabled,
+        GetString(LUIE_STRING_LAM_RELOADUI_WARNING)
+    )
+
+    -- Unit Frames module description
+    optionsData[#optionsData + 1] = SettingsAPI.CreateDescriptionOption(
+        GetString(LUIE_STRING_LAM_UF_DESCRIPTION),
+        "half"
+    )
+
     -- Misc Settings
     optionsData[#optionsData + 1] = SettingsAPI.CreateHeaderOption(
         GetString(LUIE_STRING_LAM_MISCHEADER)
     )
 
     -- Show Changelog
-    -- optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
-    --     "Show Changelog when there is a update to LUIE.",
-    --     "Show Changelog when there is a update to LUIE.",
-    --     function () return Settings.ShowChangeLog end,
-    --     function (value) Settings.ShowChangeLog = value end,
-    --     "full",
-    --     nil,
-    --     Defaults.ShowChangeLog,
-    --     nil,
-    --     true
-    -- )
+    optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
+        "Show Changelog when there is a update to LUIE.",
+        "Show Changelog when there is a update to LUIE.",
+        function () return Settings.ShowChangeLog end,
+        function (value) Settings.ShowChangeLog = value end,
+        "full",
+        nil,
+        Defaults.ShowChangeLog,
+        nil,
+        true
+    )
 
     -- Hide Alerts
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(

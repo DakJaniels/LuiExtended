@@ -5,7 +5,8 @@
 
 --- @class LuiExtended
 local LUIE = LUIE
-
+local LuiData = LuiData
+local LuiData_Data = LuiData.Data
 --- @class (partial) LuiExtended.CombatTextEventViewer : ZO_InitializingObject
 local CombatTextEventViewer = ZO_InitializingObject:Subclass()
 
@@ -13,8 +14,12 @@ local CombatTextEventViewer = ZO_InitializingObject:Subclass()
 LUIE.CombatTextEventViewer = CombatTextEventViewer
 
 local CombatText = LUIE.CombatText
-local Effects = LuiData.Data.Effects
-local CombatTextConstants = LuiData.Data.CombatTextConstants
+local Effects = LuiData_Data.Effects
+local CombatTextConstants = LuiData_Data.CombatTextConstants
+local Effects_EffectOverride = Effects.EffectOverride
+local Effects_EffectOverrideByName = Effects.EffectOverrideByName
+local Effects_ZoneDataOverride = Effects.ZoneDataOverride
+local Effects_MapDataOverride = Effects.MapDataOverride
 
 local callbackManager = CALLBACK_MANAGER
 
@@ -78,13 +83,13 @@ function CombatTextEventViewer:GetThrottleTime(Settings, isDamage, isDamageCriti
 end
 
 function CombatTextEventViewer:ShouldUseDefaultIcon(abilityId)
-    if Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].cc then
+    if Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].cc then
         if CombatText.SV.common.defaultIconOptions == 1 then
             return true
         elseif CombatText.SV.common.defaultIconOptions == 2 then
-            return Effects.EffectOverride[abilityId].isPlayerAbility and true or false
+            return Effects_EffectOverride[abilityId].isPlayerAbility and true or false
         elseif CombatText.SV.common.defaultIconOptions == 3 then
-            return Effects.EffectOverride[abilityId].isPlayerAbility and true or false
+            return Effects_EffectOverride[abilityId].isPlayerAbility and true or false
         end
     end
 end
@@ -254,82 +259,92 @@ function CombatTextEventViewer:ControlLayout(control, abilityId, combatType, sou
     local width, height = control.label:GetTextDimensions()
 
     if abilityId then
-        local iconPath = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].icon or self.abilityIconCache[abilityId]
+        -- Determine iconSide first to avoid calculating iconPath if not needed
+        local iconSide
+        if combatType == CombatTextConstants.combatType.INCOMING then
+            iconSide = Settings.animation.incomingIcon
+        elseif combatType == CombatTextConstants.combatType.OUTGOING then
+            iconSide = Settings.animation.outgoingIcon
+        else
+            iconSide = "none"
+        end
 
-        if Effects.EffectOverrideByName[abilityId] then
-            sourceName = self.sourceNameCache[sourceName]
-            if Effects.EffectOverrideByName[abilityId][sourceName] and Effects.EffectOverrideByName[abilityId][sourceName].icon then
-                iconPath = Effects.EffectOverrideByName[abilityId][sourceName].icon
+        -- Only calculate iconPath if we're actually going to show the icon
+        local iconPath = nil
+        if iconSide ~= "none" then
+            iconPath = Effects_EffectOverride[abilityId] and Effects_EffectOverride[abilityId].icon or self.abilityIconCache[abilityId]
+
+            if Effects_EffectOverrideByName[abilityId] then
+                sourceName = self.sourceNameCache[sourceName]
+                if Effects_EffectOverrideByName[abilityId][sourceName] and Effects_EffectOverrideByName[abilityId][sourceName].icon then
+                    iconPath = Effects_EffectOverrideByName[abilityId][sourceName].icon
+                end
+            end
+
+            if Effects_ZoneDataOverride[abilityId] then
+                local index = GetZoneId(GetCurrentMapZoneIndex())
+                local zoneName = GetPlayerLocationName()
+                if Effects_ZoneDataOverride[abilityId][index] then
+                    if Effects_ZoneDataOverride[abilityId][index].icon then
+                        iconPath = Effects_ZoneDataOverride[abilityId][index].icon
+                    end
+                end
+                if Effects_ZoneDataOverride[abilityId][zoneName] then
+                    if Effects_ZoneDataOverride[abilityId][zoneName].icon then
+                        iconPath = Effects_ZoneDataOverride[abilityId][zoneName].icon
+                    end
+                end
+            end
+
+            -- Override name, icon, or hide based on Map Name
+            if Effects_MapDataOverride[abilityId] then
+                local mapName = GetMapName()
+                if Effects_MapDataOverride[abilityId][mapName] then
+                    if Effects_MapDataOverride[abilityId][mapName].icon then
+                        iconPath = Effects_MapDataOverride[abilityId][mapName].icon
+                    end
+                end
+            end
+
+            -- Override icon with default if enabled
+            if Settings.common.useDefaultIcon and self:ShouldUseDefaultIcon(abilityId) == true then
+                iconPath = self:GetDefaultIcon(Effects_EffectOverride[abilityId].cc)
             end
         end
 
-        if Effects.ZoneDataOverride[abilityId] then
-            local index = GetZoneId(GetCurrentMapZoneIndex())
-            local zoneName = GetPlayerLocationName()
-            if Effects.ZoneDataOverride[abilityId][index] then
-                if Effects.ZoneDataOverride[abilityId][index].icon then
-                    iconPath = Effects.ZoneDataOverride[abilityId][index].icon
-                end
+        if iconPath and iconPath ~= "" and iconSide ~= "none" then
+            if iconSide == "left" then
+                control.icon:SetAnchor(LEFT, control, LEFT, 0, 0)
+                control.label:SetAnchor(LEFT, control.icon, RIGHT, 8, 0)
+            elseif iconSide == "right" then
+                control.icon:SetAnchor(RIGHT, control, RIGHT, 0, 0)
+                control.label:SetAnchor(RIGHT, control.icon, LEFT, -8, 0)
             end
-            if Effects.ZoneDataOverride[abilityId][zoneName] then
-                if Effects.ZoneDataOverride[abilityId][zoneName].icon then
-                    iconPath = Effects.ZoneDataOverride[abilityId][zoneName].icon
-                end
-            end
-        end
-
-        -- Override name, icon, or hide based on Map Name
-        if Effects.MapDataOverride[abilityId] then
-            local mapName = GetMapName()
-            if Effects.MapDataOverride[abilityId][mapName] then
-                if Effects.MapDataOverride[abilityId][mapName].icon then
-                    iconPath = Effects.MapDataOverride[abilityId][mapName].icon
-                end
-            end
-        end
-
-        -- Override icon with default if enabled
-        if Settings.common.useDefaultIcon and self:ShouldUseDefaultIcon(abilityId) == true then
-            iconPath = self:GetDefaultIcon(Effects.EffectOverride[abilityId].cc)
-        end
-
-        if iconPath and iconPath ~= "" then
-            local S = LUIE.CombatText.SV
-            local iconSide
-            if combatType == CombatTextConstants.combatType.INCOMING then
-                iconSide = Settings.animation.incomingIcon
-            elseif combatType == CombatTextConstants.combatType.OUTGOING then
-                iconSide = Settings.animation.outgoingIcon
-            else
-                iconSide = "none"
-            end
-
-            if iconSide == "none" then
-                control.icon:SetAnchor(CENTER, control, CENTER, 0, 0)
-                control.label:SetAnchor(CENTER, control.icon, CENTER, 0, 0)
-                control:SetDimensions(width, height)
-            else
-                if iconSide == "left" then
-                    control.icon:SetAnchor(LEFT, control, LEFT, 0, 0)
-                    control.label:SetAnchor(LEFT, control.icon, RIGHT, 8, 0)
-                elseif iconSide == "right" then
-                    control.icon:SetAnchor(RIGHT, control, RIGHT, 0, 0)
-                    control.label:SetAnchor(RIGHT, control.icon, LEFT, -8, 0)
-                end
+            -- Only update texture if it changed to avoid redundant SetTexture calls
+            if control.icon._lastTexture ~= iconPath then
                 control.icon:SetTexture(iconPath)
-                control.icon:SetDimensions(height, height)
-                control.icon:SetHidden(false)
-                control:SetDimensions(width + height + 8, height)
+                control.icon._lastTexture = iconPath
             end
+            control.icon:SetDimensions(height, height)
+            control.icon:SetHidden(false)
+            control:SetDimensions(width + height + 8, height)
         else
             control.icon:SetAnchor(CENTER, control, CENTER, 0, 0)
             control.label:SetAnchor(CENTER, control.icon, CENTER, 0, 0)
             control:SetDimensions(width, height)
+            -- Clear texture cache when icon is hidden
+            if control.icon._lastTexture then
+                control.icon._lastTexture = nil
+            end
         end
     else
         control.icon:SetAnchor(CENTER, control, CENTER, 0, 0)
         control.label:SetAnchor(CENTER, control.icon, CENTER, 0, 0)
         control:SetDimensions(width, height)
+        -- Clear texture cache when icon is hidden
+        if control.icon._lastTexture then
+            control.icon._lastTexture = nil
+        end
     end
     control.icon:SetAlpha(Settings.common.transparencyValue / 100)
 end

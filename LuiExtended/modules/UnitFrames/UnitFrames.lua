@@ -28,6 +28,7 @@ local zo_strformat = zo_strformat
 
 local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
+local windowManager = GetWindowManager()
 
 local leaderIcons =
 {
@@ -517,22 +518,27 @@ local function ApplyBossThresholdMarkersToHealthFrame(healthFrame, thresholdInfo
     for idx, percent in ipairs(thresholdInfo.percents) do
         local marker = markers[idx]
         if not marker then
-            local line = UI:Backdrop(container, nil, { BOSS_THRESHOLD_MARKER_WIDTH, height }, BOSS_THRESHOLD_MARKER_COLOR, BOSS_THRESHOLD_MARKER_COLOR, true)
+            local line = windowManager:CreateControl(nil, container, CT_BACKDROP)
+            line:SetCenterColor(BOSS_THRESHOLD_MARKER_COLOR[1], BOSS_THRESHOLD_MARKER_COLOR[2], BOSS_THRESHOLD_MARKER_COLOR[3], BOSS_THRESHOLD_MARKER_COLOR[4])
+            line:SetEdgeColor(BOSS_THRESHOLD_MARKER_COLOR[1], BOSS_THRESHOLD_MARKER_COLOR[2], BOSS_THRESHOLD_MARKER_COLOR[3], BOSS_THRESHOLD_MARKER_COLOR[4])
+            line:SetEdgeTexture("", 8, 1, 1, 1)
+            line:SetDrawLayer(DL_BACKGROUND)
+            line:SetDimensions(BOSS_THRESHOLD_MARKER_WIDTH, height)
+            line:SetHidden(true)
             line:SetEdgeTexture("", 1, 1, 0, 0)
             line:SetDrawTier(DT_HIGH)
             line:SetDrawLayer(DL_OVERLAY)
             line:SetDrawLevel(6)
             line:SetMouseEnabled(false)
 
-            local label = UI:Label(
-                container,
-                nil,
-                { BOSS_THRESHOLD_LABEL_DIMENSIONS[1], BOSS_THRESHOLD_LABEL_DIMENSIONS[2] },
-                { TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM },
-                "ZoFontGameSmall",
-                "",
-                true
-            )
+            local label = windowManager:CreateControl(nil, container, CT_LABEL)
+            label:SetFont("ZoFontGameSmall")
+            label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+            label:SetVerticalAlignment(TEXT_ALIGN_BOTTOM)
+            label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+            label:SetDimensions(BOSS_THRESHOLD_LABEL_DIMENSIONS[1], BOSS_THRESHOLD_LABEL_DIMENSIONS[2])
+            label:SetText("")
+            label:SetHidden(true)
             label:SetDrawTier(DT_HIGH)
             label:SetDrawLayer(DL_OVERLAY)
             label:SetDrawLevel(7)

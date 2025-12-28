@@ -23,6 +23,116 @@ local easeOutIn = function (progress)
     return ZO_EaseInOutQuadratic(progress)
 end
 
+local animationConfigs =
+{
+    [poolTypes.ANIMATION_CLOUD] =
+    {
+        { type = "alpha", from = 0, to = 1, duration = 50                                        },
+        { type = "alpha", from = 1, to = 0, startDelay = 500, endDelay = 1500, easing = slowFast },
+    },
+    [poolTypes.ANIMATION_CLOUD_CRITICAL] =
+    {
+        { type = "alpha", from = 0,   to = 1, duration = 50                                        },
+        { type = "scale", from = 1.5, to = 1, duration = 150,   delay = 0,       easing = slowFast },
+        { type = "alpha", from = 1,   to = 0, startDelay = 500, endDelay = 1500, easing = slowFast },
+    },
+    [poolTypes.ANIMATION_CLOUD_FIREWORKS] =
+    {
+        { type = "alpha", from = 0,          to = 1,         duration = 50                                                      },
+        { type = "move",  label = "move",    duration = 250, delay = 0,    easing = fastSlow                                    },
+        { type = "alpha", label = "fadeOut", from = 1,       to = 0,       startDelay = 500, endDelay = 1500, easing = slowFast },
+    },
+    [poolTypes.ANIMATION_SCROLL] =
+    {
+        { type = "alpha", from = 0,          to = 1,          duration = 50                                                      },
+        { type = "move",  label = "scroll",  duration = 2500, delay = 0,    easing = even                                        },
+        { type = "alpha", label = "fadeOut", from = 1,        to = 0,       startDelay = 500, endDelay = 1400, easing = slowFast },
+    },
+    [poolTypes.ANIMATION_SCROLL_CRITICAL] =
+    {
+        { type = "alpha", from = 0,          to = 1,          duration = 50                                                         },
+        { type = "scale", from = 1.5,        to = 1,          duration = 150, delay = 0,        easing = slowFast                   },
+        { type = "move",  label = "scroll",  duration = 2500, delay = 0,      easing = even                                         },
+        { type = "alpha", label = "fadeOut", from = 1,        to = 0,         startDelay = 500, endDelay = 1400,  easing = slowFast },
+    },
+    [poolTypes.ANIMATION_DEATH] =
+    {
+        { type = "alpha", from = 0,          to = 1,          duration = 50                                                         },
+        { type = "scale", from = 1.5,        to = 1,          duration = 150, delay = 0,        easing = slowFast                   },
+        { type = "move",  label = "scroll",  duration = 5000, delay = 0,      easing = even                                         },
+        { type = "alpha", label = "fadeOut", from = 1,        to = 0,         startDelay = 500, endDelay = 2000,  easing = slowFast },
+    },
+    [poolTypes.ANIMATION_ALERT] =
+    {
+        { type = "alpha", from = 0,   to = 1,   duration = 50                                        },
+        { type = "scale", from = 0.5, to = 1.5, duration = 100,   delay = 0,       easing = fastSlow },
+        { type = "scale", from = 1.5, to = 1,   duration = 200,   delay = 250,     easing = slowFast },
+        { type = "alpha", from = 1,   to = 0,   startDelay = 500, endDelay = 3000, easing = slowFast },
+    },
+    [poolTypes.ANIMATION_COMBATSTATE] =
+    {
+        { type = "alpha", from = 0, to = 1, duration = 1000,  delay = 0,       easing = slowFast },
+        { type = "alpha", from = 1, to = 0, startDelay = 500, endDelay = 3000, easing = slowFast },
+    },
+    [poolTypes.ANIMATION_POINT] =
+    {
+        { type = "alpha", from = 0, to = 1, duration = 50                                        },
+        { type = "alpha", from = 1, to = 0, startDelay = 500, endDelay = 3000, easing = slowFast },
+    },
+    [poolTypes.ANIMATION_RESOURCE] =
+    {
+        { type = "alpha", from = 0,   to = 1,   duration = 50                                        },
+        { type = "scale", from = 0.5, to = 1.5, duration = 100,   delay = 0,       easing = fastSlow },
+        { type = "scale", from = 1.5, to = 1,   duration = 200,   delay = 250,     easing = slowFast },
+        { type = "alpha", from = 1,   to = 0,   startDelay = 500, endDelay = 3000, easing = slowFast },
+    },
+    [poolTypes.ANIMATION_ELLIPSE_X] =
+    {
+        { type = "move", label = "scrollX", duration = 2500, delay = 0, easing = easeOutIn },
+    },
+    [poolTypes.ANIMATION_ELLIPSE_Y] =
+    {
+        { type = "alpha", from = 0,          to = 1,         duration = 50                                                      },
+        { type = "move",  label = "scrollY", duration = 2500                                                                    },
+        { type = "alpha", label = "fadeOut", from = 1,       to = 0,       startDelay = 500, endDelay = 1800, easing = slowFast },
+    },
+    [poolTypes.ANIMATION_ELLIPSE_X_CRIT] =
+    {
+        { type = "scale", from = 1.5,        to = 1,          duration = 150, delay = 0,         easing = slowFast },
+        { type = "move",  label = "scrollX", duration = 2500, delay = 0,      easing = easeOutIn                   },
+    },
+    [poolTypes.ANIMATION_ELLIPSE_Y_CRIT] =
+    {
+        { type = "alpha", from = 0,          to = 1,         duration = 50                                                         },
+        { type = "scale", from = 1.5,        to = 1,         duration = 150, delay = 0,        easing = slowFast                   },
+        { type = "move",  label = "scrollY", duration = 2500                                                                       },
+        { type = "alpha", label = "fadeOut", from = 1,       to = 0,         startDelay = 500, endDelay = 1800,  easing = slowFast },
+    },
+}
+
+local function BuildAnimation(anim, poolType, speed)
+    local config = animationConfigs[poolType]
+    if not config then return end
+
+    for _, step in ipairs(config) do
+        if step.type == "alpha" then
+            local label = step.label or nil
+            if step.startDelay and step.endDelay then
+                -- Fade out with delays: Alpha(label, from, to, startDelay, endDelay, easing)
+                anim:Alpha(label, step.from, step.to, speed * step.startDelay, speed * step.endDelay, step.easing)
+            else
+                -- Simple fade: Alpha(label, from, to, duration, delay, easing)
+                local delay = step.delay and speed * step.delay or nil
+                anim:Alpha(label, step.from, step.to, speed * step.duration, delay, step.easing)
+            end
+        elseif step.type == "scale" then
+            anim:Scale(nil, step.from, step.to, speed * step.duration, step.delay and speed * step.delay or 0, step.easing)
+        elseif step.type == "move" then
+            anim:Move(step.label, 0, 0, speed * step.duration, step.delay and speed * step.delay or 0, step.easing)
+        end
+    end
+end
+
 function CombatTextPool:Initialize(poolType)
     assert(poolType, "poolType is required.")
 
@@ -40,89 +150,15 @@ function CombatTextPool:Initialize(poolType)
         control.label:ClearAnchors()
         control.icon:ClearAnchors()
         control.icon:SetHidden(true)
+        control.icon._lastTexture = nil
     end
 
-    local function DestroyControl(control)
-        control:SetHidden(true)
-        control:SetParent(nil)
-        control:ClearAnchors()
-        if control.label then
-            control.label:ClearAnchors()
-        end
-        if control.icon then
-            control.icon:ClearAnchors()
-        end
-    end
-
-    local function CreateAnimation(pool)
+    local function CreateAnimation()
         local anim = LUIE.CombatTextAnimation:New()
         local Settings = LUIE.CombatText.SV
-        local animationSpeed = 1 / (Settings.animation.animationDuration / 100)
-
-        if (poolType == poolTypes.ANIMATION_CLOUD) then
-            anim:Alpha(nil, 0, 1, animationSpeed * 50)
-            anim:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 1500, slowFast)
-        elseif (poolType == poolTypes.ANIMATION_CLOUD_CRITICAL) then
-            anim:Alpha(nil, 0, 1, animationSpeed * 50)
-            anim:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
-            anim:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 1500, slowFast)
-        elseif (poolType == poolTypes.ANIMATION_CLOUD_FIREWORKS) then
-            anim:Alpha(nil, 0, 1, animationSpeed * 50)
-            anim:Move("move", 0, 0, animationSpeed * 250, 0, fastSlow)
-            anim:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1500, slowFast)
-        elseif (poolType == poolTypes.ANIMATION_SCROLL) then
-            anim:Alpha(nil, 0, 1, animationSpeed * 50)
-            anim:Move("scroll", 0, 0, animationSpeed * 2500, 0, even)
-            anim:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1400, slowFast)
-        elseif (poolType == poolTypes.ANIMATION_SCROLL_CRITICAL) then
-            anim:Alpha(nil, 0, 1, animationSpeed * 50)
-            anim:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
-            anim:Move("scroll", 0, 0, animationSpeed * 2500, 0, even)
-            anim:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1400, slowFast)
-        elseif (poolType == poolTypes.ANIMATION_DEATH) then
-            anim:Alpha(nil, 0, 1, animationSpeed * 50)
-            anim:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
-            anim:Move("scroll", 0, 0, animationSpeed * 5000, 0, even)
-            anim:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 2000, slowFast)
-        elseif (poolType == poolTypes.ANIMATION_ALERT) then
-            anim:Alpha(nil, 0, 1, animationSpeed * 50)
-            anim:Scale(nil, 0.5, 1.5, animationSpeed * 100, 0, fastSlow)
-            anim:Scale(nil, 1.5, 1, animationSpeed * 200, animationSpeed * 250, slowFast)
-            anim:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 3000, slowFast)
-        elseif (poolType == poolTypes.ANIMATION_COMBATSTATE) then
-            anim:Alpha(nil, 0, 1, animationSpeed * 1000, 0, slowFast)
-            anim:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 3000, slowFast)
-        elseif (poolType == poolTypes.ANIMATION_POINT) then
-            anim:Alpha(nil, 0, 1, animationSpeed * 50)
-            anim:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 3000, slowFast)
-        elseif (poolType == poolTypes.ANIMATION_RESOURCE) then
-            anim:Alpha(nil, 0, 1, animationSpeed * 50)
-            anim:Scale(nil, 0.5, 1.5, animationSpeed * 100, 0, fastSlow)
-            anim:Scale(nil, 1.5, 1, animationSpeed * 200, animationSpeed * 250, slowFast)
-            anim:Alpha(nil, 1, 0, animationSpeed * 500, animationSpeed * 3000, slowFast)
-        elseif (poolType == poolTypes.ANIMATION_ELLIPSE_X) then
-            anim:Move("scrollX", 0, 0, animationSpeed * 2500, 0, easeOutIn)
-        elseif (poolType == poolTypes.ANIMATION_ELLIPSE_Y) then
-            anim:Alpha(nil, 0, 1, animationSpeed * 50)
-            anim:Move("scrollY", 0, 0, animationSpeed * 2500)
-            anim:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1800, slowFast)
-        elseif (poolType == poolTypes.ANIMATION_ELLIPSE_X_CRIT) then
-            anim:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
-            anim:Move("scrollX", 0, 0, animationSpeed * 2500, 0, easeOutIn)
-        elseif (poolType == poolTypes.ANIMATION_ELLIPSE_Y_CRIT) then
-            anim:Alpha(nil, 0, 1, animationSpeed * 50)
-            anim:Scale(nil, 1.5, 1, animationSpeed * 150, 0, slowFast)
-            anim:Move("scrollY", 0, 0, animationSpeed * 2500)
-            anim:Alpha("fadeOut", 1, 0, animationSpeed * 500, animationSpeed * 1800, slowFast)
-        end
-
+        local speed = 1 / (Settings.animation.animationDuration / 100)
+        BuildAnimation(anim, poolType, speed)
         return anim
-    end
-
-    local function DestroyAnimation(anim)
-        anim:Stop()
-        anim:SetStopHandler(nil)
-        anim:ClearCallbacks()
     end
 
     if poolType == poolTypes.CONTROL then
@@ -130,18 +166,8 @@ function CombatTextPool:Initialize(poolType)
         self:SetCustomAcquireBehavior(function (control)
             control:SetHidden(false)
         end)
-        self.destroyFunction = DestroyControl
     else
         local USE_POOLED_OBJECT_WRAPPER = true
         ZO_ObjectPool.Initialize(self, CreateAnimation, ZO_ObjectPool_DefaultResetObject, USE_POOLED_OBJECT_WRAPPER)
-        self.destroyFunction = DestroyAnimation
     end
-end
-
-function CombatTextPool:DestroyFreeObject(objectKey)
-    ZO_ObjectPool.DestroyFreeObject(self, objectKey, self.destroyFunction)
-end
-
-function CombatTextPool:DestroyAllFreeObjects()
-    ZO_ObjectPool.DestroyAllFreeObjects(self, self.destroyFunction)
 end

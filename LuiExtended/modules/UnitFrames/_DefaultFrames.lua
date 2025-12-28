@@ -13,6 +13,7 @@ local UnitFrames = LUIE.UnitFrames
 
 local pairs = pairs
 local eventManager = GetEventManager()
+local windowManager = GetWindowManager()
 
 
 local defaultPos = {}
@@ -147,9 +148,14 @@ function UnitFrames.CreateDefaultFrames()
         for powerType, parent in pairs(fields) do
             UnitFrames.DefaultFrames[unitTag][powerType] =
             {
-                ["label"] = UI:Label(parent, { CENTER, CENTER }, nil, nil, nil, nil, false),
+                ["label"] = windowManager:CreateControl(nil, parent, CT_LABEL),
                 ["color"] = UnitFrames.SV.DefaultTextColour,
             }
+            UnitFrames.DefaultFrames[unitTag][powerType].label:SetFont("LUIE Default Font")
+            UnitFrames.DefaultFrames[unitTag][powerType].label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+            UnitFrames.DefaultFrames[unitTag][powerType].label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
+            UnitFrames.DefaultFrames[unitTag][powerType].label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+            UnitFrames.DefaultFrames[unitTag][powerType].label:SetAnchor(CENTER, parent, CENTER)
         end
     end
 
@@ -163,8 +169,12 @@ function UnitFrames.CreateDefaultFrames()
     end
 
     -- Create classIcon and friendIcon: they should work even when default unit frames extender is disabled
-    UnitFrames.DefaultFrames.reticleover.classIcon = UI:Texture(UnitFrames.targetUnitFrame.frame, nil, { 32, 32 }, nil, nil, true)
-    UnitFrames.DefaultFrames.reticleover.friendIcon = UI:Texture(UnitFrames.targetUnitFrame.frame, nil, { 32, 32 }, nil, nil, true)
+    UnitFrames.DefaultFrames.reticleover.classIcon = windowManager:CreateControl(nil, UnitFrames.targetUnitFrame.frame, CT_TEXTURE)
+    UnitFrames.DefaultFrames.reticleover.classIcon:SetDimensions(32, 32)
+    UnitFrames.DefaultFrames.reticleover.classIcon:SetHidden(true)
+    UnitFrames.DefaultFrames.reticleover.friendIcon = windowManager:CreateControl(nil, UnitFrames.targetUnitFrame.frame, CT_TEXTURE)
+    UnitFrames.DefaultFrames.reticleover.friendIcon:SetDimensions(32, 32)
+    UnitFrames.DefaultFrames.reticleover.friendIcon:SetHidden(true)
     UnitFrames.DefaultFrames.reticleover.friendIcon:SetAnchor(TOPLEFT, ZO_TargetUnitFramereticleoverTextArea, TOPRIGHT, 30, -4)
     -- add those 2 icons to automatic fade list, so fading will be done automatically by game
     table.insert(UnitFrames.targetUnitFrame.fadeComponents, UnitFrames.DefaultFrames.reticleover.classIcon)
@@ -236,13 +246,28 @@ function UnitFrames.DefaultFramesCreateUnitGroupControls(unitTag)
                     ["unitTag"] = unitTag,
                     [COMBAT_MECHANIC_FLAGS_HEALTH] =
                     {
-                        label = UI:Label(parentBar, { TOP, BOTTOM }, nil, nil, nil, nil, false),
+                        label = windowManager:CreateControl(nil, parentBar, CT_LABEL),
                         color = UnitFrames.SV.DefaultTextColour,
-                        shield = UI:StatusBar(parentBar, { BOTTOM, BOTTOM, 0, 0 }, { width - height, height }, { 1, 0.75, 0, 0.5 }, true),
+                        shield = windowManager:CreateControl(nil, parentBar, CT_STATUSBAR),
                     },
-                    ["classIcon"] = UI:Texture(parentName, { RIGHT, LEFT, -4, 2 }, { 24, 24 }, nil, nil, true),
-                    ["friendIcon"] = UI:Texture(parentName, { RIGHT, LEFT, -4, 24 }, { 24, 24 }, nil, nil, true),
+                    ["classIcon"] = windowManager:CreateControl(nil, parentName, CT_TEXTURE),
+                    ["friendIcon"] = windowManager:CreateControl(nil, parentName, CT_TEXTURE),
                 }
+                UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetFont("LUIE Default Font")
+                UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+                UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
+                UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+                UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetAnchor(TOP, parentBar, BOTTOM)
+                UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].shield:SetAnchor(BOTTOM, parentBar, BOTTOM, 0, 0)
+                UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].shield:SetDimensions(width - height, height)
+                UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].shield:SetColor(1, 0.75, 0, 0.5)
+                UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].shield:SetHidden(true)
+                UnitFrames.DefaultFrames[unitTag].classIcon:SetAnchor(RIGHT, parentName, LEFT, -4, 2)
+                UnitFrames.DefaultFrames[unitTag].classIcon:SetDimensions(24, 24)
+                UnitFrames.DefaultFrames[unitTag].classIcon:SetHidden(true)
+                UnitFrames.DefaultFrames[unitTag].friendIcon:SetAnchor(RIGHT, parentName, LEFT, -4, 24)
+                UnitFrames.DefaultFrames[unitTag].friendIcon:SetDimensions(24, 24)
+                UnitFrames.DefaultFrames[unitTag].friendIcon:SetHidden(true)
                 -- Apply selected font
                 UnitFrames.DefaultFramesApplyFont(unitTag)
             end

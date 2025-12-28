@@ -303,43 +303,50 @@ end
 
 local function PopulateMailSenderQueue()
     Mail.senderQueue = {}
+    Mail.senderMap = {}
     local mailCount = 0
 
-    local mailId = GetNextMailId(nil)
-    while mailId do
-        mailCount = mailCount + 1
-        local mailTarget, hasCOD, numAttachments, attachedMoney = ResolveMailSender(mailId)
+    -- Iterate through all mail categories to ensure we get mail in the correct processing order
+    -- Take all processes mail by category, so we need to match that order
+    for category = MAIL_CATEGORY_ITERATION_BEGIN, MAIL_CATEGORY_ITERATION_END do
+        local numMailItems = GetNumMailItemsByCategory(category)
+        for index = 1, numMailItems do
+            local mailId = GetMailIdByIndex(category, index)
+            if mailId then
+                mailCount = mailCount + 1
+                local mailTarget, hasCOD, numAttachments, attachedMoney = ResolveMailSender(mailId)
 
-        -- if LUIE.IsDevDebugEnabled() then
-        --     local senderDisplayName, senderCharacterName = GetMailSender(mailId)
-        --     LUIE.Debug(string.format("Found mail %d: mailId=%s, displayName='%s', charName='%s', resolved='%s', attachments=%d, money=%d",
-        --         mailCount, Id64ToString(mailId), senderDisplayName or "", senderCharacterName or "", mailTarget or "", numAttachments or 0, attachedMoney or 0))
-        -- end
+                -- if LUIE.IsDevDebugEnabled() then
+                --     local senderDisplayName, senderCharacterName = GetMailSender(mailId)
+                --     LUIE.Debug(string.format("Found mail %d: mailId=%s, displayName='%s', charName='%s', resolved='%s', attachments=%d, money=%d",
+                --         mailCount, Id64ToString(mailId), senderDisplayName or "", senderCharacterName or "", mailTarget or "", numAttachments or 0, attachedMoney or 0))
+                -- end
 
-        if (numAttachments and numAttachments > 0) or (attachedMoney and attachedMoney > 0) then
-            if mailTarget == "" then
-                local senderDisplayName = GetMailSender(mailId)
-                if senderDisplayName ~= "" then
-                    mailTarget = ZO_GAME_REPRESENTATIVE_TEXT:Colorize(senderDisplayName)
+                if (numAttachments and numAttachments > 0) or (attachedMoney and attachedMoney > 0) then
+                    if mailTarget == "" then
+                        local senderDisplayName = GetMailSender(mailId)
+                        if senderDisplayName ~= "" then
+                            mailTarget = ZO_GAME_REPRESENTATIVE_TEXT:Colorize(senderDisplayName)
+                        end
+                    end
+
+                    -- if LUIE.IsDevDebugEnabled() then
+                    --     LUIE.Debug(string.format("Populating queue: mailId=%s, sender='%s', attachments=%d, money=%d",
+                    --         Id64ToString(mailId), mailTarget, numAttachments, attachedMoney))
+                    -- end
+
+                    -- Add money first, then items, to match the order they're processed
+                    if attachedMoney > 0 then
+                        table.insert(Mail.senderQueue, mailTarget)
+                    end
+                    for i = 1, numAttachments do
+                        table.insert(Mail.senderQueue, mailTarget)
+                    end
+
+                    Mail.senderMap[mailId] = mailTarget
                 end
             end
-
-            -- if LUIE.IsDevDebugEnabled() then
-            --     LUIE.Debug(string.format("Populating queue: mailId=%s, sender='%s', attachments=%d, money=%d",
-            --         Id64ToString(mailId), mailTarget, numAttachments, attachedMoney))
-            -- end
-
-            if attachedMoney > 0 then
-                table.insert(Mail.senderQueue, mailTarget)
-            end
-            for i = 1, numAttachments do
-                table.insert(Mail.senderQueue, mailTarget)
-            end
-
-            Mail.senderMap[mailId] = mailTarget
         end
-
-        mailId = GetNextMailId(mailId)
     end
 
     -- if LUIE.IsDevDebugEnabled() then
@@ -367,6 +374,8 @@ function Mail.OnOpenBox(eventId)
         Mail.parent.IndexInventory() -- Index Inventory
     end
     Mail.parent.inMail = true
+    -- Populate queue when mailbox opens to ensure it's ready for take all
+    PopulateMailSenderQueue()
 end
 
 --- - **EVENT_MAIL_CLOSE_MAILBOX**

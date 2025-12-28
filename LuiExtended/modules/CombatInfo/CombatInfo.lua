@@ -59,7 +59,6 @@ end
 
 -- Clear and then (maybe) re-register event listeners
 function CombatInfo.RegisterCombatInfo()
-    eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, CombatInfo.OnUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, CombatInfo.OnPlayerActivated)
 end
 
@@ -128,10 +127,6 @@ end
 -- Used to populate abilities icons after the user has logged on
 function CombatInfo.OnPlayerActivated(eventCode)
     eventManager:UnregisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED)
-end
-
--- Main update ticker (coordinates all sub-modules)
-function CombatInfo.OnUpdate(currentTimeMs)
 end
 
 -- Module initialization

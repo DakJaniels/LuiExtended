@@ -39,11 +39,17 @@ local function CreateRegenAnimation(parent, anchors, dims, alpha, number)
     end
 
     local updateDims = { dims[2] * 1.9, dims[2] * 0.85 }
-    local control = UI:Texture(parent, anchors, updateDims, config.texture, 2, true)
+    local control = windowManager:CreateControl(nil, parent, CT_TEXTURE)
+    if anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
+        control:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
+    end
+    control:SetDimensions(updateDims[1], updateDims[2])
+    control:SetTexture(config.texture)
+    control:SetDrawLayer(2)
+    control:SetHidden(true)
     local distance = dims[1] * config.distanceMult
     local offsetX = dims[1] * config.offsetXMult
 
-    control:SetHidden(true)
     control:SetAlpha(alpha or 0)
     control:SetDrawLayer(DL_CONTROLS)
 
@@ -70,7 +76,9 @@ end
 
 -- Possession halo animated texture (32-frame sprite sheet: 4 columns x 8 rows)
 local function CreatePossessionHaloAnimation(backdrop)
-    local halo = UI:Texture(backdrop, nil, nil, "EsoUI/Art/UnitAttributeVisualizer/possession_animatedHalo_32fr.dds", DL_BACKGROUND, false)
+    local halo = windowManager:CreateControl(nil, backdrop, CT_TEXTURE)
+    halo:SetTexture("EsoUI/Art/UnitAttributeVisualizer/possession_animatedHalo_32fr.dds")
+    halo:SetDrawLayer(DL_BACKGROUND)
     halo:SetAnchor(LEFT, backdrop, LEFT, -80, 0)
     halo:SetAnchor(RIGHT, backdrop, RIGHT, 80, 0)
     halo:SetHeight(128)
@@ -779,16 +787,31 @@ local function SetupCommonFrameActions()
             unitFrame.tlw:SetHandler("OnMoveStop", tlwOnMoveStop)
 
             -- Create anchor preview
-            unitFrame.tlw.preview.anchorTexture = UI:Texture(unitFrame.tlw.preview, { TOPLEFT, TOPLEFT }, { 16, 16 }, "/esoui/art/reticle/border_topleft.dds", DL_OVERLAY, false)
+            unitFrame.tlw.preview.anchorTexture = windowManager:CreateControl(nil, unitFrame.tlw.preview, CT_TEXTURE)
+            unitFrame.tlw.preview.anchorTexture:SetAnchor(TOPLEFT, unitFrame.tlw.preview, TOPLEFT)
+            unitFrame.tlw.preview.anchorTexture:SetDimensions(16, 16)
+            unitFrame.tlw.preview.anchorTexture:SetTexture("/esoui/art/reticle/border_topleft.dds")
+            unitFrame.tlw.preview.anchorTexture:SetDrawLayer(DL_OVERLAY)
             unitFrame.tlw.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
 
             -- For console UI, don't create anchorLabel - EditModeController will create a better coordLabel instead
             if not IsConsoleUI() then
-                unitFrame.tlw.preview.anchorLabel = UI:Label(unitFrame.tlw.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "ZoFontGameSmall", "xxx, yyy", false)
+                unitFrame.tlw.preview.anchorLabel = windowManager:CreateControl(nil, unitFrame.tlw.preview, CT_LABEL)
+                unitFrame.tlw.preview.anchorLabel:SetFont("ZoFontGameSmall")
+                unitFrame.tlw.preview.anchorLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+                unitFrame.tlw.preview.anchorLabel:SetVerticalAlignment(TEXT_ALIGN_TOP)
+                unitFrame.tlw.preview.anchorLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+                unitFrame.tlw.preview.anchorLabel:SetAnchor(BOTTOMLEFT, unitFrame.tlw.preview, TOPLEFT, 0, -1)
+                unitFrame.tlw.preview.anchorLabel:SetText("xxx, yyy")
                 unitFrame.tlw.preview.anchorLabel:SetColor(1, 1, 0, 1)
                 unitFrame.tlw.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
                 unitFrame.tlw.preview.anchorLabel:SetDrawTier(DT_MEDIUM)
-                unitFrame.tlw.preview.anchorLabelBg = UI:Backdrop(unitFrame.tlw.preview.anchorLabel, "fill", nil, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, false)
+                unitFrame.tlw.preview.anchorLabelBg = windowManager:CreateControl(nil, unitFrame.tlw.preview.anchorLabel, CT_BACKDROP)
+                unitFrame.tlw.preview.anchorLabelBg:SetCenterColor(0, 0, 0, 1)
+                unitFrame.tlw.preview.anchorLabelBg:SetEdgeColor(0, 0, 0, 1)
+                unitFrame.tlw.preview.anchorLabelBg:SetEdgeTexture("", 8, 1, 1, 1)
+                unitFrame.tlw.preview.anchorLabelBg:SetDrawLayer(DL_BACKGROUND)
+                unitFrame.tlw.preview.anchorLabelBg:SetAnchorFill(unitFrame.tlw.preview.anchorLabel)
                 unitFrame.tlw.preview.anchorLabelBg:SetDrawLayer(DL_OVERLAY)
                 unitFrame.tlw.preview.anchorLabelBg:SetDrawTier(DT_LOW)
             end
@@ -913,7 +936,12 @@ local function SetupCommonFrameActions()
                                     powerBar.shield:SetHeight(UnitFrames.SV.CustomShieldBarHeight)
                                 end
                             else
-                                powerBar.shieldbackdrop = UI:Backdrop(frame.control, nil, nil, nil, nil, true)
+                                powerBar.shieldbackdrop = windowManager:CreateControl(nil, frame.control, CT_BACKDROP)
+                                powerBar.shieldbackdrop:SetCenterColor(0, 0, 0, 0.4)
+                                powerBar.shieldbackdrop:SetEdgeColor(0, 0, 0, 0.6)
+                                powerBar.shieldbackdrop:SetEdgeTexture("", 8, 1, 1, 1)
+                                powerBar.shieldbackdrop:SetDrawLayer(DL_BACKGROUND)
+                                powerBar.shieldbackdrop:SetHidden(true)
                                 powerBar.shield:SetAnchor(TOPLEFT, powerBar.shieldbackdrop, TOPLEFT, 1, 1)
                                 powerBar.shield:SetAnchor(BOTTOMRIGHT, powerBar.shieldbackdrop, BOTTOMRIGHT, -1, -1)
                             end

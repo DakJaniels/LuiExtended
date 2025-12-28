@@ -4482,21 +4482,21 @@ local function TimedActivityProgressUpdatedHook(timedActivityIndex, previousProg
                 local activityTypeName = GetString("SI_TIMEDACTIVITYTYPE", activityType)
                 local activityCompletionType = zo_strformat(SI_TIMED_ACTIVITY_COMPLETED_CSA, activityTypeName)
 
-                if ChatAnnouncements.SV.Quest.QuestEndeavorCA then
+                if ChatAnnouncements.SV.Quests.QuestEndeavorCA then
                     printToChat(zo_strformat("<<1>>: <<2>>", activityCompletionType, activityName), true)
                 end
 
-                if ChatAnnouncements.SV.Quest.QuestEndeavorAlert then
+                if ChatAnnouncements.SV.Quests.QuestEndeavorAlert then
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", activityCompletionType, activityName))
                 end
 
-                if ChatAnnouncements.SV.Quest.QuestEndeavorCSA then
+                if ChatAnnouncements.SV.Quests.QuestEndeavorCSA then
                     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ENDEAVOR_COMPLETED)
                     messageParams:SetText(activityCompletionType, activityName)
                     CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
                 end
 
-                if not ChatAnnouncements.SV.Quest.QuestEndeavorCSA then
+                if not ChatAnnouncements.SV.Quests.QuestEndeavorCSA then
                     PlaySound(SOUNDS.ENDEAVOR_COMPLETED)
                 end
 
@@ -4514,15 +4514,15 @@ local function TimedActivityTypeProgressUpdatedHook(activityType, previousNumCom
         local messageTitle = zo_strformat(SI_TIMED_ACTIVITY_TYPE_COMPLETED_CSA, currentNumComplete, maxNumActivities, activityTypeName)
         local messageSubheading = GetString("SI_TIMEDACTIVITYTYPE_FOLLOWUPHINT", activityType)
 
-        if ChatAnnouncements.SV.Quest.QuestEndeavorCA then
+        if ChatAnnouncements.SV.Quests.QuestEndeavorCA then
             printToChat(zo_strformat("<<1>>: <<2>>", messageTitle, messageSubheading), true)
         end
 
-        if ChatAnnouncements.SV.Quest.QuestEndeavorAlert then
+        if ChatAnnouncements.SV.Quests.QuestEndeavorAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", messageTitle, messageSubheading))
         end
 
-        if ChatAnnouncements.SV.Quest.QuestEndeavorCSA then
+        if ChatAnnouncements.SV.Quests.QuestEndeavorCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
             messageParams:SetText(messageTitle, messageSubheading)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)

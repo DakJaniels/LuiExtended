@@ -115,9 +115,9 @@ eventManager:RegisterForEvent(LUIE.name, EVENT_ADD_ON_LOADED, function (eventId,
     LUIE.SlashCommands.MigrateSettings()
     -- -----------------------------------------------------------------------------
     -- Display changelog screen
-    -- if LUIE.SV.ShowChangeLog == true then
-    --     LUIE.ChangelogScreen()
-    -- end
+    if LUIE.SV.ShowChangeLog == true then
+        LUIE.ChangelogScreen()
+    end
     -- -----------------------------------------------------------------------------
     -- Register global event listeners
     RegisterEvents()

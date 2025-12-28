@@ -1,4 +1,4 @@
---- @diagnostic disable: inject-field
+--- @diagnostic disable: inject-field, undefined-field
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
@@ -423,7 +423,7 @@ end
 
 function SpellCastBuffs:_RegisterEvents()
     -- Register events
-    eventManager:RegisterForUpdate(moduleName, 100, function (...) self:OnUpdate(...) end)
+    eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, function () self:OnUpdate() end)
 
     -- Target Events
     eventManager:RegisterForEvent(moduleName, EVENT_TARGET_CHANGED, function (...) self:OnTargetChange(...) end)
@@ -2921,8 +2921,8 @@ local function shouldShowEffect(self, effect, container)
 end
 
 -- Runs OnUpdate - 100 ms buffer
---- @param currentTimeMs number
-function SpellCastBuffs:OnUpdate(currentTimeMs)
+function SpellCastBuffs:OnUpdate()
+    local currentFrameTimeMilliSeconds = GetFrameTimeMilliseconds()
     local containerRouting = self.containerRouting
     local EffectsList = self.EffectsList
 
@@ -2945,9 +2945,9 @@ function SpellCastBuffs:OnUpdate(currentTimeMs)
     for context, effectsList in pairs(EffectsList) do
         local container = containerRouting[context]
         for k, v in pairs(effectsList) do
-            if v.ends and v.dur > 0 and v.ends < currentTimeMs then
+            if v.ends and v.dur > 0 and v.ends < currentFrameTimeMilliSeconds then
                 effectsList[k] = nil
-            elseif container and v.starts < currentTimeMs then
+            elseif container and v.starts < currentFrameTimeMilliSeconds then
                 local show, targetContainer = shouldShowEffect(self, v, container)
                 if show then
                     addToSortedList(buffsSorted, sortedCounts, targetContainer, v)
@@ -2959,23 +2959,23 @@ function SpellCastBuffs:OnUpdate(currentTimeMs)
     -- Sort and update all containers
     for _, container in pairs(containerRouting) do
         table_sort(buffsSorted[container], buffSort)
-        updateIcons(self, currentTimeMs, buffsSorted[container], container)
+        updateIcons(self, currentFrameTimeMilliSeconds, buffsSorted[container], container)
     end
 
     -- Update prominent buff bars
     for container in pairs(isProminent) do
-        updateBar(self, currentTimeMs, buffsSorted[container], container)
+        updateBar(self, currentFrameTimeMilliSeconds, buffsSorted[container], container)
     end
 
     -- Update player_long if it has effects
     if sortedCounts.player_long > 0 then
         table_sort(buffsSorted.player_long, buffSort)
-        updateIcons(self, currentTimeMs, buffsSorted.player_long, "player_long")
+        updateIcons(self, currentFrameTimeMilliSeconds, buffsSorted.player_long, "player_long")
     end
 
     -- Update time displays for all containers (includes player_long)
     for _, container in pairs(containerRouting) do
-        UpdateTime(self, currentTimeMs, container)
+        UpdateTime(self, currentFrameTimeMilliSeconds, container)
     end
 
     -- Display Block buff for player if enabled
@@ -2991,7 +2991,7 @@ function SpellCastBuffs:OnUpdate(currentTimeMs)
                 name = Abilities.Innate_Brace,
                 icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_BLOCK_DDS,
                 dur = 0,
-                starts = currentTimeMs,
+                starts = currentFrameTimeMilliSeconds,
                 ends = nil,
                 restart = true,
                 iconNum = 0,
