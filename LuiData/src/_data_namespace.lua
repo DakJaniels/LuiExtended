@@ -48,6 +48,8 @@
 --- @field FakePlayerOfflineAura FakePlayerOfflineAura Table of fake offline aura definitions
 --- @field FakeStagger FakeStagger Table of fake stagger effect definitions
 --- @field HasAbilityProc HasAbilityProc Table of ability proc definitions
+--- @field IsAbilityProc IsAbilityProc
+--- @field BaseForAbilityProc BaseForAbilityProc
 --- @field IsAbilityActiveGlow IsAbilityActiveGlow Table of ability active glow effects
 --- @field IsAbilityActiveHighlight IsAbilityActiveHighlight Table of ability active highlight effects
 --- @field IsBloodFrenzy IsBloodFrenzy Table of blood frenzy effect definitions
@@ -175,6 +177,8 @@ local Effects =
     FakePlayerOfflineAura = {},
     FakeStagger = {},
     HasAbilityProc = {},
+    BaseForAbilityProc = {},
+    IsAbilityProc = {},
     HideGroundMineStacks = {},
     IsAbilityActiveGlow = {},
     IsAbilityActiveHighlight = {},
@@ -245,8 +249,8 @@ local ZoneTable = {}
 --- @class (partial) LuiData
 LuiData = {}
 LuiData.name = "LuiData"
-LuiData.version = 7107
-LuiData.addonVersion = "7.1.0.7"
+LuiData.version = 7200
+LuiData.addonVersion = "7.2.0.0"
 
 --- @class (partial) Data
 LuiData.Data =

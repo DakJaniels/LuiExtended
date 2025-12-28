@@ -1222,11 +1222,10 @@ local castBarTable =
         [137259] = true, -- Exhilarating Drain (Vampire)
     },
 
-    --[[
--- Possibly use later if any cast removal events need to rely on EVENT_COMBAT_EVENT
-CastBreakOnRemoveEvent = {
-},
-]]
+    -- Possibly use later if any cast removal events need to rely on EVENT_COMBAT_EVENT
+    -- CastBreakOnRemoveEvent =
+    -- {
+    -- },
     --
 
     --------------------------------------------------------------------------------------------------------------------------------
@@ -1242,16 +1241,24 @@ CastBreakOnRemoveEvent = {
         [92862] = true, -- Ringing Bell (Dreamer's Chime)
     },
 
-    --[[
-CastBarTable.InteractCast = {
 
-    ['Aetherial Gateway'] = {
-        [394] = { icon = 'LuiExtended/media/icons/abilities/ability_quest_atherial_shift.dds', name = Abilities.Skill_Aetherial_Shift, duration = 2000, delay = 750 }, -- Ezduiin Undercroft
-    }
+    -- InteractCast =
+    -- {
 
-}
-]]
-    --
+    --     ["Aetherial Gateway"] =
+    --     {
+    --         -- Ezduiin Undercroft
+    --         [394] =
+    --         {
+    --             icon = "LuiExtended/media/icons/abilities/ability_quest_atherial_shift.dds",
+    --             name = Abilities.Skill_Aetherial_Shift,
+    --             duration = 2000,
+    --             delay = 750
+    --         },
+    --     },
+
+    -- }
+
 }
 
 --- @class (partial) CastBarTable

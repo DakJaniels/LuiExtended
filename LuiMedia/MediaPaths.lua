@@ -8,6 +8,7 @@
 LUIE_MEDIA = "LuiMedia/media"
 
 -- Individual file path constants
+LUIE_MEDIA_ACTIONBAR_LARGE_RIGHTARROW_UP_DDS = "LuiMedia/media/actionbar/large_rightArrow_up.dds"
 LUIE_MEDIA_COMBATINFO_CROWDCONTROLTRACKER_BORDER_DDS = "LuiMedia/media/combatinfo/crowdcontroltracker/border.dds"
 LUIE_MEDIA_COMBATINFO_FLOATINGICON_REDARROW_DDS = "LuiMedia/media/combatinfo/floatingicon/redarrow.dds"
 LUIE_MEDIA_COMBATINFO_FLOATINGICON_REDARROW_ORG_DDS = "LuiMedia/media/combatinfo/floatingicon/redarrow_org.dds"
