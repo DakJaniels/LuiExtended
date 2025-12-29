@@ -933,7 +933,7 @@
                   offsetY="4" />
         </Label>
         <Label name="$(parent)_Preview_Label"
-               font="ZoFontGameMedium"
+               font="LUIE Default Font"
                color="FFFFFF"
                horizontalAlignment="CENTER"
                verticalAlignment="CENTER"

@@ -402,7 +402,7 @@ function SlashCommands.CreateSettings()
         1,
         "full",
         nil,
-        LUIE.Defaults.SlashPetMessage
+        Defaults.SlashPetMessage
     )
 
     -- SlashOutfit

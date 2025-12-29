@@ -10,53 +10,50 @@ local LUIE = LUIE
 -- Local references for better performance
 local zo_strformat = zo_strformat
 local eventManager = GetEventManager()
-local windowManager = GetWindowManager()
-
-local LUIE_InitControl = windowManager:CreateControl("LUIE_TempInitControl", GuiRoot, CT_CONTROL)
-
--- Load saved settings.
-local function LoadSavedVars()
-    -- Addon options
-    LUIE.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults)
-    if LUIE.SV.CharacterSpecificSV then
-        LUIE.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults)
-    end
-end
 
 --- - **EVENT_PLAYER_ACTIVATED **
 -- Startup Info string.
 --- @param eventId integer
 --- @param initial boolean
 local function LoadScreen(eventId, initial)
-    LUIE_InitControl:UnregisterForEvent(EVENT_PLAYER_ACTIVATED)
-    if not LUIE.SV.StartupInfo then
+    eventManager:UnregisterForEvent(LUIE.name, eventId)
+    if not LUIE.SV.StartupInfo and initial then
         LUIE.PrintToChat(zo_strformat("|cFFFFFF<<1>> by|r |c00C000<<2>>|r |cFFFFFFv<<3>>|r", LUIE.name, LUIE.author, LUIE.version), true)
     end
 end
 
--- Register events.
-local function RegisterEvents()
-    LUIE_InitControl:RegisterForEvent(EVENT_PLAYER_ACTIVATED, LoadScreen, false)
-
-    -- Event registrations
-    if LUIE.SV.SlashCommands_Enable or LUIE.SV.ChatAnnouncements_Enable then
-        eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_JOINED_GUILD, LUIE.UpdateGuildData)
-        eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_LEFT_GUILD, LUIE.UpdateGuildData)
+--- - **EVENT_ADD_ON_LOADED **
+-- LuiExtended Initialization.
+eventManager:RegisterForEvent(LUIE.name, EVENT_ADD_ON_LOADED, function (eventId, addonName)
+    -- Only initialize our own addon
+    if LUIE.name ~= addonName then
+        return
     end
-end
-
-function LUIE:InitializeHooks()
-    self.API_Hooks()
-    self.HookActionButton()
-    self.HookSynergy()
-    self.InitializeHooksSkillAdvisor()
-    self.HookGamePadIcons()
-    self.HookGamePadStats()
-    self.HookGamePadMap()
-end
-
--- Heavy initialization function
-local function InitializeAddon()
+    -- Once we know it's ours, lets unregister the event listener
+    eventManager:UnregisterForEvent(addonName, eventId)
+    -- -----------------------------------------------------------------------------
+    -- Load saved variables
+    -- Addon options
+    LUIE.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults)
+    if LUIE.SV.CharacterSpecificSV then
+        LUIE.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults)
+    end
+    -- -----------------------------------------------------------------------------
+    LUIE.UpdateGuildData(nil, nil, nil, nil)
+    -- -----------------------------------------------------------------------------
+    -- Initialize Hooks
+    LUIE.API_Hooks()
+    LUIE.HookActionButton()
+    LUIE.HookSynergy()
+    LUIE.InitializeHooksSkillAdvisor()
+    LUIE.HookGamePadIcons()
+    LUIE.HookGamePadStats()
+    LUIE.HookGamePadMap()
+    --
+    LUIE.OtherAddonCompatability.isActionDurationReminderEnabled = LUIE.IsItEnabled("ActionDurationReminder")
+    LUIE.OtherAddonCompatability.isFancyActionBarEnabled = LUIE.IsItEnabled("FancyActionBar")
+    LUIE.OtherAddonCompatability.isFancyActionBarPlusEnabled = LUIE.IsItEnabled("FancyActionBar\43")
+    LUIE.OtherAddonCompatability.isWritCreatorEnabled = LUIE.IsItEnabled("DolgubonsLazyWritCreator")
     -- -----------------------------------------------------------------------------
     -- Toggle Alert Frame Visibility if needed
     LUIE.SetupAlertFrameVisibility()
@@ -96,35 +93,11 @@ local function InitializeAddon()
     LUIE.SlashCommands.CreateConsoleSettings()
     -- -----------------------------------------------------------------------------
     -- Register global event listeners
-    RegisterEvents()
-end
+    eventManager:RegisterForEvent(LUIE.name, EVENT_PLAYER_ACTIVATED, LoadScreen)
 
-
---- - **EVENT_ADD_ON_LOADED **
--- LuiExtended Initialization.
-LUIE_InitControl:RegisterForEvent(EVENT_ADD_ONS_LOADED, function (eventId)
-                                      -- -----------------------------------------------------------------------------
-                                      -- Load saved variables
-                                      LoadSavedVars()
-                                      LUIE.UpdateGuildData(nil, nil, nil, nil)
-                                      -- -----------------------------------------------------------------------------
-                                      -- Initialize Hooks
-                                      LUIE:InitializeHooks()
-                                      --
-                                      LUIE.OtherAddonCompatability.isActionDurationReminderEnabled = LUIE.IsItEnabled("ActionDurationReminder")
-                                      LUIE.OtherAddonCompatability.isFancyActionBarEnabled = LUIE.IsItEnabled("FancyActionBar")
-                                      LUIE.OtherAddonCompatability.isFancyActionBarPlusEnabled = LUIE.IsItEnabled("FancyActionBar\43")
-                                      LUIE.OtherAddonCompatability.isWritCreatorEnabled = LUIE.IsItEnabled("DolgubonsLazyWritCreator")
-
-                                      -- Check if game has focus, if not wait for focus before doing heavy initialization
-                                      if DoesGameHaveFocus() then
-                                          InitializeAddon()
-                                      else
-                                          LUIE_InitControl:RegisterForEvent(EVENT_GAME_FOCUS_CHANGED, function (_, hasFocus)
-                                                                                if hasFocus then
-                                                                                    LUIE_InitControl:UnregisterForEvent(EVENT_GAME_FOCUS_CHANGED)
-                                                                                    InitializeAddon()
-                                                                                end
-                                                                            end, true)
-                                      end
-                                  end, true)
+    -- Event registrations
+    if LUIE.SV.SlashCommands_Enable or LUIE.SV.ChatAnnouncements_Enable then
+        eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_JOINED_GUILD, LUIE.UpdateGuildData)
+        eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_LEFT_GUILD, LUIE.UpdateGuildData)
+    end
+end)

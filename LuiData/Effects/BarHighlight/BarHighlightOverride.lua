@@ -282,6 +282,7 @@ local barHighlightOverride =
     ---------------------------
     -- Arcanist ---------------
     ---------------------------
+    [193398] = { newId = 184220 }, -- Beam --> Crux
     [185817] = { newId = 185818 },                                       -- Abyssal Impact (abyssal ink)
     [183006] = { newId = 183008 },                                       -- Cephaliarch's Flail (abyssal ink)
     [185823] = { newId = 185825 },                                       -- Tentacular Dread (abyssal ink)

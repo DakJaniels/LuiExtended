@@ -189,7 +189,7 @@
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="Player Frame"
-                   font="ZoFontGameMedium"
+                   font="LUIE Default Font"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -584,7 +584,7 @@
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="Target Frame"
-                   font="ZoFontGameMedium"
+                   font="LUIE Default Font"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -970,7 +970,7 @@
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="PvP Player Target Frame"
-                   font="ZoFontGameMedium"
+                   font="LUIE Default Font"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -1255,7 +1255,7 @@
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="Small Group"
-                   font="ZoFontGameMedium"
+                   font="LUIE Default Font"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -2786,7 +2786,7 @@
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="Raid Group"
-                   font="ZoFontGameMedium"
+                   font="LUIE Default Font"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -5120,7 +5120,7 @@
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="Player Pets"
-                   font="ZoFontGameMedium"
+                   font="LUIE Default Font"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -6033,7 +6033,7 @@
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="Player Companion"
-                   font="ZoFontGameMedium"
+                   font="LUIE Default Font"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -6207,7 +6207,7 @@
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="Bosses Group"
-                   font="ZoFontGameMedium"
+                   font="LUIE Default Font"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">

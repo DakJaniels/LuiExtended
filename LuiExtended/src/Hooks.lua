@@ -39,7 +39,7 @@ LUIE.API_Hooks = function ()
     -- Hook for request friend so menu option also displays invite message
     -- Menu is true if this request is sent from the Player to Player interaction menu
     --- @param charOrDisplayName string
-    --- @param message string
+    --- @param message string?
     --- @param menu boolean?
     RequestFriend = function (charOrDisplayName, message, menu)
         zos_RequestFriend(charOrDisplayName, message)

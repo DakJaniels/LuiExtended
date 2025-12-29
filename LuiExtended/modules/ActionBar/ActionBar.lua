@@ -753,7 +753,9 @@ function ActionBar.RegisterEvents()
 
     -- Display default UI ultimate text if the LUIE option is enabled.
     if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
-        SetSetting(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER, 0)
+        if not IsConsoleUI() then
+            SetSetting(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER, 0)
+        end
         -- Register for ultimate cost changes (e.g., vampire stage changes)
         eventManager:RegisterForEvent(moduleName, EVENT_ULTIMATE_ABILITY_COST_CHANGED, ActionBar.UpdateUltimateLabel)
     end
@@ -1859,6 +1861,13 @@ function ActionBar.BackbarToggleSettings()
 end
 
 function ActionBar.CreateCastBar()
+
+    local fontString
+    if IsConsoleUI() then
+        fontString = "ZoFontGamepad18"
+    else
+        fontString = "ZoFontGameMedium"
+    end
     uiTlw.castBar = windowManager:CreateTopLevelWindow(nil)
     uiTlw.castBar:SetClampedToScreen(true)
     uiTlw.castBar:SetMouseEnabled(false)
@@ -1876,7 +1885,7 @@ function ActionBar.CreateCastBar()
     uiTlw.castBar.preview:SetAnchorFill(uiTlw.castBar)
     uiTlw.castBar.preview:SetHidden(true)
     uiTlw.castBar.previewLabel = windowManager:CreateControl(nil, uiTlw.castBar.preview, CT_LABEL)
-    uiTlw.castBar.previewLabel:SetFont("ZoFontGameMedium")
+    uiTlw.castBar.previewLabel:SetFont(fontString)
     uiTlw.castBar.previewLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     uiTlw.castBar.previewLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     uiTlw.castBar.previewLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -1908,7 +1917,7 @@ function ActionBar.CreateCastBar()
     uiTlw.castBar.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
 
     uiTlw.castBar.preview.anchorLabel = windowManager:CreateControl(nil, uiTlw.castBar.preview, CT_LABEL)
-    uiTlw.castBar.preview.anchorLabel:SetFont("ZoFontGameSmall")
+    uiTlw.castBar.preview.anchorLabel:SetFont(fontString)
     uiTlw.castBar.preview.anchorLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     uiTlw.castBar.preview.anchorLabel:SetVerticalAlignment(TEXT_ALIGN_TOP)
     uiTlw.castBar.preview.anchorLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -1979,11 +1988,11 @@ function ActionBar.CreateCastBar()
     castbar.bar.backdrop:SetDrawLayer(DL_BACKGROUND)
     castbar.bar.backdrop:SetDimensions(ActionBar.SV.CastBarSizeW, ActionBar.SV.CastBarSizeH)
     castbar.bar.bar:SetDimensions(ActionBar.SV.CastBarSizeW - 4, ActionBar.SV.CastBarSizeH - 4)
-    castbar.bar.name:SetFont(g_castbarFont or "LUIE Default Font")
+    castbar.bar.name:SetFont(g_castbarFont or fontString)
     castbar.bar.name:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     castbar.bar.name:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     castbar.bar.name:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
-    castbar.bar.timer:SetFont(g_castbarFont or "LUIE Default Font")
+    castbar.bar.timer:SetFont(g_castbarFont or fontString)
     castbar.bar.timer:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     castbar.bar.timer:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     castbar.bar.timer:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)

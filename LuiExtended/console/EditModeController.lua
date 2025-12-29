@@ -146,9 +146,9 @@ function EditModeController:SetEditModeActive(active, triggeringModule)
             if self.triggeringModule == "UnitFrames" and LUIE.UnitFrames and LUIE.UnitFrames.CustomFramesSetMovingState then
                 LUIE.UnitFrames.CustomFramesSetMovingState(false)
             elseif self.triggeringModule == "SpellCastBuffs" and LUIE.SpellCastBuffs and LUIE.SpellCastBuffs.SetMovingState then
-                LUIE.SpellCastBuffs:SetMovingState(false)
-            elseif self.triggeringModule == "ActionBar" and LUIE.ActionBar and LUIE.ActionBar.CastBar and LUIE.ActionBar.CastBar.SetMovingState then
-                LUIE.ActionBar.CastBar.SetMovingState(false)
+                LUIE.SpellCastBuffs.SetMovingState(false)
+            elseif self.triggeringModule == "ActionBar" and LUIE.ActionBar and LUIE.ActionBar.SetMovingState then
+                LUIE.ActionBar.SetMovingState(false)
             elseif self.triggeringModule == "InfoPanel" and LUIE.InfoPanel and LUIE.InfoPanel.SetMovingState then
                 LUIE.InfoPanel.SetMovingState(false)
             elseif self.triggeringModule == "AbilityAlerts" and LUIE.CombatInfo and LUIE.CombatInfo.AbilityAlerts and LUIE.CombatInfo.AbilityAlerts.SetMovingStateAlert then

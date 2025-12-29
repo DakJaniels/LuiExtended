@@ -6,7 +6,6 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-local UI = LUIE.UI
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
 local moduleName = UnitFrames.moduleName

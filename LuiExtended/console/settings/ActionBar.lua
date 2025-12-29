@@ -11,14 +11,13 @@ local SettingsAPI = LUIE.ConsoleSettingsAPI
 --- @class (partial) LUIE.ActionBar
 local ActionBar = LUIE.ActionBar
 
---- @class (partial) CastBar
-local CastBar = ActionBar.CastBar
-
 local zo_strformat = zo_strformat
 local string_format = string.format
+local string_rep = string.rep
 local type, pairs, ipairs = type, pairs, ipairs
 local GetString = GetString
 local unpack = unpack
+local table_insert = table.insert
 
 -- Load LibHarvensAddonSettings
 local LHAS = LibHarvensAddonSettings
@@ -26,7 +25,21 @@ local LHAS = LibHarvensAddonSettings
 local globalMethodOptions = { "Radial", "Vertical Reveal" }
 local globalMethodOptionsKeys = { ["Radial"] = 1, ["Vertical Reveal"] = 2 }
 
+-- Helper function to add indentation to names
+local function AddIndent(name, level)
+    level = level or 1
+    local tabs = string_rep("\t", level)
+    return zo_strformat("<<1>><<2>>", tabs, name)
+end
+
+local function SetAbilityBarTimersEnabled()
+    if tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS)) == 0 then
+        SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS, "true", SETTINGS_SET_OPTION_SAVE_TO_PERSISTED_DATA)
+    end
+end
+
 local castBarMovingEnabled = false -- Helper local flag
+local Blacklist, BlacklistValues = {}, {}
 
 -- Convert to LHAS format {name, data}
 local function GenerateCustomListLHAS(input)
@@ -98,155 +111,6 @@ function ActionBar.CreateConsoleSettings()
             ActionBar.ClearCustomList(Settings.blacklist)
         end
     )
-
-    -- Register duration override management dialog
-    -- Dialog for managing duration overrides (remove/clear)
-    LUIE.RegisterBlacklistDialog(
-        "LUIE_MANAGE_DURATION_OVERRIDES",
-        "Duration Overrides",
-        function ()
-            return GenerateCustomListLHAS(Settings.durationOverrides)
-        end,
-        function (itemData)
-            ActionBar.RemoveDurationOverride(itemData)
-            -- Refresh the dialog
-            LUIE.RefreshBlacklistDialog("LUIE_MANAGE_DURATION_OVERRIDES")
-        end,
-        nil, -- No add callback for this dialog
-        function ()
-            ActionBar.ClearDurationOverrides()
-        end
-    )
-
-    -- Store state for add override dialog in Settings (persists between dialog opens)
-    if not Settings.selectedAbilityForDurationOverride then
-        Settings.selectedAbilityForDurationOverride = 0
-    end
-    if not Settings.tempDurationOverrideValue then
-        Settings.tempDurationOverrideValue = ""
-    end
-
-    -- Dialog for adding duration overrides - create function to rebuild dialog with fresh state
-    local function CreateAddOverrideDialog()
-        local dialog = LibConsoleDialogs:Create("Add Duration Override")
-
-        -- Ability selection dropdown
-        dialog:AddSetting(
-            {
-                type = LHAS.ST_DROPDOWN,
-                label = "Select Ability",
-                tooltip = "Select an ability from your currently tracked abilities to override its duration",
-                items = function ()
-                    local choices, choicesValues = ActionBar.GetTrackedAbilitiesForOverride()
-                    local items = {}
-                    for i, choice in ipairs(choices) do
-                        items[i] = { name = choice, data = choicesValues[i] }
-                    end
-                    return items
-                end,
-                getFunction = function ()
-                    local selectedAbilityId = Settings.selectedAbilityForDurationOverride or 0
-                    if selectedAbilityId == 0 then
-                        return nil
-                    end
-                    -- Find the matching item name for the selected ability ID
-                    local choices, choicesValues = ActionBar.GetTrackedAbilitiesForOverride()
-                    for i, abilityId in ipairs(choicesValues) do
-                        if abilityId == selectedAbilityId then
-                            return choices[i]
-                        end
-                    end
-                    return nil
-                end,
-                setFunction = function (combobox, value, item)
-                    if item and item.data then
-                        Settings.selectedAbilityForDurationOverride = item.data
-                        -- Update duration field to show current duration
-                        if Settings.durationOverrides[item.data] then
-                            Settings.tempDurationOverrideValue = tostring(Settings.durationOverrides[item.data])
-                        else
-                            local duration = GetAbilityDuration(item.data)
-                            Settings.tempDurationOverrideValue = duration > 0 and tostring(duration) or ""
-                        end
-                        -- Refresh the dialog to update the duration field
-                        LibConsoleDialogs:Close()
-                        LUIE_callLater(function ()
-                                         -- Recreate and show dialog with updated values
-                                         local newDialog = CreateAddOverrideDialog()
-                                         if not LUIE.DurationOverrideDialogs then
-                                             LUIE.DurationOverrideDialogs = {}
-                                         end
-                                         LUIE.DurationOverrideDialogs["LUIE_ADD_DURATION_OVERRIDE"] = newDialog
-                                         newDialog:Show()
-                                     end, 100)
-                    end
-                end,
-            })
-
-        -- Duration input field
-        dialog:AddSetting(
-            {
-                type = LHAS.ST_EDIT,
-                label = "Duration (milliseconds)",
-                tooltip = "Set the duration for the selected ability in milliseconds\nExample: 15000 for 15 seconds",
-                default = "",
-                setFunction = function (value)
-                    Settings.tempDurationOverrideValue = value
-                end,
-                getFunction = function ()
-                    return Settings.tempDurationOverrideValue or ""
-                end,
-                disable = function ()
-                    return (Settings.selectedAbilityForDurationOverride or 0) == 0
-                end,
-            })
-
-        -- Apply button
-        dialog:AddSetting(
-            {
-                type = LHAS.ST_BUTTON,
-                label = "Apply Override",
-                tooltip = "Apply the duration override for the selected ability",
-                buttonText = "Apply",
-                clickHandler = function (control, button)
-                    local abilityId = Settings.selectedAbilityForDurationOverride or 0
-                    if abilityId == 0 then
-                        LUIE.PrintToChat("ActionBar: Please select an ability first", true)
-                        return
-                    end
-
-                    local duration = tonumber(Settings.tempDurationOverrideValue or "")
-                    if not duration or duration <= 0 then
-                        LUIE.PrintToChat("ActionBar: Invalid duration. Must be a positive number", true)
-                        return
-                    end
-
-                    -- Add the override
-                    ActionBar.AddDurationOverride(string_format("%d %d", abilityId, duration))
-
-                    -- Reset values
-                    Settings.selectedAbilityForDurationOverride = 0
-                    Settings.tempDurationOverrideValue = ""
-
-                    -- Close dialog
-                    LibConsoleDialogs:Close()
-                end,
-                disable = function ()
-                    return (Settings.selectedAbilityForDurationOverride or 0) == 0
-                end,
-            })
-
-        return dialog
-    end
-
-    -- Create initial dialog
-    local addOverrideDialog = CreateAddOverrideDialog()
-
-    -- Store dialog reference
-    if not LUIE.DurationOverrideDialogs then
-        LUIE.DurationOverrideDialogs = {}
-    end
-    LUIE.DurationOverrideDialogs["LUIE_ADD_DURATION_OVERRIDE"] = addOverrideDialog
 
     -- Sync castBarMovingEnabled with ActionBar.CastBarUnlocked
     castBarMovingEnabled = ActionBar.CastBarUnlocked or false
@@ -640,6 +504,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.BarShowLabel end,
             setFunction = function (value)
                 Settings.BarShowLabel = value
+                SetAbilityBarTimersEnabled()
                 ActionBar.ResetBarLabel()
             end,
             default = Defaults.BarShowLabel,
@@ -758,92 +623,6 @@ function ActionBar.CreateConsoleSettings()
             setFunction = function (value) Settings.BarMillisAboveTen = value end,
             default = Defaults.BarMillisAboveTen,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.BarMillis and (Settings.ShowTriggered or Settings.ShowToggled)) end
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = "Colored Remaining Text",
-            tooltip = "Enable colored text for remaining duration labels on ability highlights",
-            getFunction = function () return Settings.RemainingTextColoured end,
-            setFunction = function (value)
-                Settings.RemainingTextColoured = value
-            end,
-            default = Defaults.RemainingTextColoured,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_COLOR,
-            label = "Remaining Text Color (High)",
-            tooltip = "Color when duration is above mid threshold (high time remaining)",
-            getFunction = function () return Settings.RemainingTextColorHigh[1], Settings.RemainingTextColorHigh[2], Settings.RemainingTextColorHigh[3], Settings.RemainingTextColorHigh[4] end,
-            setFunction = function (r, g, b, a)
-                Settings.RemainingTextColorHigh = { r, g, b, a }
-            end,
-            default = Defaults.RemainingTextColorHigh,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_COLOR,
-            label = "Remaining Text Color (Mid)",
-            tooltip = "Color when duration is between low and mid thresholds",
-            getFunction = function () return Settings.RemainingTextColorMid[1], Settings.RemainingTextColorMid[2], Settings.RemainingTextColorMid[3], Settings.RemainingTextColorMid[4] end,
-            setFunction = function (r, g, b, a)
-                Settings.RemainingTextColorMid = { r, g, b, a }
-            end,
-            default = Defaults.RemainingTextColorMid,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_COLOR,
-            label = "Remaining Text Color (Low)",
-            tooltip = "Color when duration is below low threshold (low time remaining)",
-            getFunction = function () return Settings.RemainingTextColorLow[1], Settings.RemainingTextColorLow[2], Settings.RemainingTextColorLow[3], Settings.RemainingTextColorLow[4] end,
-            setFunction = function (r, g, b, a)
-                Settings.RemainingTextColorLow = { r, g, b, a }
-            end,
-            default = Defaults.RemainingTextColorLow,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_SLIDER,
-            label = "Mid Threshold (%)",
-            tooltip = "Percentage of duration remaining to switch from high to mid color (0.0-1.0)",
-            min = 0,
-            max = 100,
-            step = 1,
-            format = "%.0f",
-            getFunction = function () return Settings.RemainingTextColorThresholdMid * 100 end,
-            setFunction = function (value)
-                Settings.RemainingTextColorThresholdMid = value / 100
-            end,
-            default = Defaults.RemainingTextColorThresholdMid * 100,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_SLIDER,
-            label = "Low Threshold (%)",
-            tooltip = "Percentage of duration remaining to switch from mid to low color (0.0-1.0)",
-            min = 0,
-            max = 100,
-            step = 1,
-            format = "%.0f",
-            getFunction = function () return Settings.RemainingTextColorThresholdLow * 100 end,
-            setFunction = function (value)
-                Settings.RemainingTextColorThresholdLow = value / 100
-            end,
-            default = Defaults.RemainingTextColorThresholdLow * 100,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.RemainingTextColoured and (Settings.ShowTriggered or Settings.ShowToggled)) end
         }
 
         -- Backbar subsection
@@ -1033,79 +812,6 @@ function ActionBar.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_COLOR,
-            label = "Quickslot Timer Color (High)",
-            tooltip = "Color when remaining time is above mid threshold",
-            getFunction = function () return Settings.PotionTimerTextColorHigh[1], Settings.PotionTimerTextColorHigh[2], Settings.PotionTimerTextColorHigh[3], Settings.PotionTimerTextColorHigh[4] end,
-            setFunction = function (r, g, b, a)
-                Settings.PotionTimerTextColorHigh = { r, g, b, a }
-            end,
-            default = Defaults.PotionTimerTextColorHigh,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_COLOR,
-            label = "Quickslot Timer Color (Mid)",
-            tooltip = "Color when remaining time is between low and mid thresholds",
-            getFunction = function () return Settings.PotionTimerTextColorMid[1], Settings.PotionTimerTextColorMid[2], Settings.PotionTimerTextColorMid[3], Settings.PotionTimerTextColorMid[4] end,
-            setFunction = function (r, g, b, a)
-                Settings.PotionTimerTextColorMid = { r, g, b, a }
-            end,
-            default = Defaults.PotionTimerTextColorMid,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_COLOR,
-            label = "Quickslot Timer Color (Low)",
-            tooltip = "Color when remaining time is below low threshold",
-            getFunction = function () return Settings.PotionTimerTextColorLow[1], Settings.PotionTimerTextColorLow[2], Settings.PotionTimerTextColorLow[3], Settings.PotionTimerTextColorLow[4] end,
-            setFunction = function (r, g, b, a)
-                Settings.PotionTimerTextColorLow = { r, g, b, a }
-            end,
-            default = Defaults.PotionTimerTextColorLow,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_SLIDER,
-            label = "Mid Threshold (ms)",
-            tooltip = "Remaining time in milliseconds to switch from high to mid color",
-            min = 1000,
-            max = 60000,
-            step = 1000,
-            format = "%.0f",
-            getFunction = function () return Settings.PotionTimerTextColorThresholdMid end,
-            setFunction = function (value)
-                Settings.PotionTimerTextColorThresholdMid = value
-            end,
-            default = Defaults.PotionTimerTextColorThresholdMid,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_SLIDER,
-            label = "Low Threshold (ms)",
-            tooltip = "Remaining time in milliseconds to switch from mid to low color",
-            min = 500,
-            max = 30000,
-            step = 500,
-            format = "%.0f",
-            getFunction = function () return Settings.PotionTimerTextColorThresholdLow end,
-            setFunction = function (value)
-                Settings.PotionTimerTextColorThresholdLow = value
-            end,
-            default = Defaults.PotionTimerTextColorThresholdLow,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow and Settings.PotionTimerColor) end
-        }
-
-        settings[#settings + 1] =
-        {
             type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS_TP),
@@ -1136,9 +842,10 @@ function ActionBar.CreateConsoleSettings()
             type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_AB_CASTBAR_MOVE),
             tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_MOVE_TP),
-            getFunction = function () return ActionBar.CastBarUnlocked end,
+            getFunction = function () return castBarMovingEnabled end,
             setFunction = function (value)
-                CastBar.SetMovingState(value)
+                castBarMovingEnabled = value
+                ActionBar.SetMovingState(value)
             end,
             default = false,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
@@ -1150,7 +857,7 @@ function ActionBar.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_RESETPOSITION),
             tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_RESET_TP),
             buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
-            clickHandler = CastBar.ResetCastBarPosition,
+            clickHandler = ActionBar.ResetCastBarPosition,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
         }
 
@@ -1179,7 +886,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarSizeW end,
             setFunction = function (value)
                 Settings.CastBarSizeW = value
-                CastBar.ResizeCastBar()
+                ActionBar.ResizeCastBar()
             end,
             default = Defaults.CastBarSizeW,
             disable = function () return not LUIE.SV.ActionBar_Enabled end
@@ -1196,7 +903,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarSizeH end,
             setFunction = function (value)
                 Settings.CastBarSizeH = value
-                CastBar.ResizeCastBar()
+                ActionBar.ResizeCastBar()
             end,
             default = Defaults.CastBarSizeH,
             disable = function () return not LUIE.SV.ActionBar_Enabled end
@@ -1213,7 +920,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarIconSize end,
             setFunction = function (value)
                 Settings.CastBarIconSize = value
-                CastBar.ResizeCastBar()
+                ActionBar.ResizeCastBar()
             end,
             default = Defaults.CastBarIconSize,
             disable = function () return not LUIE.SV.ActionBar_Enabled end
@@ -1251,7 +958,7 @@ function ActionBar.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CastBarFontFace = item.data
                 ActionBar.ApplyFont()
-                CastBar.UpdateCastBar()
+                ActionBar.UpdateCastBar()
             end,
             default = Defaults.CastBarFontFace,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end
@@ -1270,7 +977,7 @@ function ActionBar.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.CastBarFontSize = value
                 ActionBar.ApplyFont()
-                CastBar.UpdateCastBar()
+                ActionBar.UpdateCastBar()
             end,
             default = Defaults.CastBarFontSize,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end
@@ -1294,7 +1001,7 @@ function ActionBar.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CastBarFontStyle = item.data
                 ActionBar.ApplyFont()
-                CastBar.UpdateCastBar()
+                ActionBar.UpdateCastBar()
             end,
             default = Defaults.CastBarFontStyle,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end
@@ -1309,7 +1016,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarTexture end,
             setFunction = function (combobox, value, item)
                 Settings.CastBarTexture = item.data
-                CastBar.UpdateCastBar()
+                ActionBar.UpdateCastBar()
             end,
             default = Defaults.CastBarTexture,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
@@ -1323,7 +1030,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarGradientC1[1], Settings.CastBarGradientC1[2], Settings.CastBarGradientC1[3], Settings.CastBarGradientC1[4] end,
             setFunction = function (r, g, b, a)
                 Settings.CastBarGradientC1 = { r, g, b, a }
-                CastBar.UpdateCastBar()
+                ActionBar.UpdateCastBar()
             end,
             default = Defaults.CastBarGradientC1,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
@@ -1337,7 +1044,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarGradientC2[1], Settings.CastBarGradientC2[2], Settings.CastBarGradientC2[3], Settings.CastBarGradientC2[4] end,
             setFunction = function (r, g, b, a)
                 Settings.CastBarGradientC2 = { r, g, b, a }
-                CastBar.UpdateCastBar()
+                ActionBar.UpdateCastBar()
             end,
             default = Defaults.CastBarGradientC2,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
@@ -1445,52 +1152,6 @@ function ActionBar.CreateConsoleSettings()
         }
     end)
 
-    -- Build Duration Override Options Section
-    buildSectionSettings("DurationOverride", function (settings)
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_SECTION,
-            label = "Ability Duration Overrides",
-        }
-
-        -- Submenu description
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_LABEL,
-            label = "Override ability durations. Useful when the game API reports the wrong duration for abilities with multiple effects.",
-        }
-
-        -- Add Duration Override button
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_BUTTON,
-            label = "Add Duration Override",
-            tooltip = "Add a new duration override for an ability",
-            buttonText = "Add Duration Override",
-            clickHandler = function ()
-                if LUIE.DurationOverrideDialogs and LUIE.DurationOverrideDialogs["LUIE_ADD_DURATION_OVERRIDE"] then
-                    LUIE.DurationOverrideDialogs["LUIE_ADD_DURATION_OVERRIDE"]:Show()
-                end
-            end,
-            disable = function () return not LUIE.SV.ActionBar_Enabled end
-        }
-
-        -- Manage Duration Overrides button
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_BUTTON,
-            label = "Manage Duration Overrides",
-            tooltip = "View and remove existing duration overrides",
-            buttonText = "Manage Duration Overrides",
-            clickHandler = function ()
-                if LUIE.BlacklistDialogs and LUIE.BlacklistDialogs["LUIE_MANAGE_DURATION_OVERRIDES"] then
-                    LUIE.ShowBlacklistDialog("LUIE_MANAGE_DURATION_OVERRIDES")
-                end
-            end,
-            disable = function () return not LUIE.SV.ActionBar_Enabled end
-        }
-    end)
-
     -- Create back button
     backButton =
     {
@@ -1539,7 +1200,6 @@ function ActionBar.CreateConsoleSettings()
     menuButtons[#menuButtons + 1] = createMenuButton("BarAbilityHighlight", GetString(LUIE_STRING_LAM_AB_HEADER_BAR), sectionGroups["BarAbilityHighlight"])
     menuButtons[#menuButtons + 1] = createMenuButton("QuickslotCooldown", GetString(LUIE_STRING_LAM_AB_HEADER_POTION), sectionGroups["QuickslotCooldown"])
     menuButtons[#menuButtons + 1] = createMenuButton("CastBar", GetString(LUIE_STRING_LAM_AB_HEADER_CASTBAR), sectionGroups["CastBar"])
-    menuButtons[#menuButtons + 1] = createMenuButton("DurationOverride", "Ability Duration Overrides", sectionGroups["DurationOverride"])
 
     -- Initialize main menu with initial settings and menu buttons
     local mainMenuSettings = {}
