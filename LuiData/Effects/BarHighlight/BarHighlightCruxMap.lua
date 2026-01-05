@@ -19,7 +19,8 @@ local Effects = Data.Effects
 local barHighlightCruxMap =
 {
     -- Crux effect ID maps to list of ability IDs that should show Crux stacks
-    [184220] = {
+    [184220] =
+    {
         185825, -- Tentacular Dread
         186477, -- Unbreakable Fate
         185805, -- Fatecarver (cost mag)
@@ -39,4 +40,3 @@ local barHighlightCruxMap =
 
 --- @class (partial) BarHighlightCruxMap
 Effects.BarHighlightCruxMap = barHighlightCruxMap
-

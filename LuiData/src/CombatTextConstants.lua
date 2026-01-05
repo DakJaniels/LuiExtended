@@ -213,7 +213,7 @@ local combatTextConstants =
         ULTIMATE = "LUIE_CombatText_Resource_TYPE_ULTIMATE",
         POTION = "LUIE_CombatText_Resource_TYPE_POTION",
     },
-    ---@enum LUIE_CombatText_POOL_TYPE
+    --- @enum LUIE_CombatText_POOL_TYPE
     poolType =
     {
         CONTROL = "LUIE_CombatText_POOL_TYPE_CONTROL",
