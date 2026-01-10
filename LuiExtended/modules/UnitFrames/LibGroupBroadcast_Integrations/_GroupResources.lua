@@ -8,14 +8,11 @@ local LUIE = LUIE
 
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
-if not UnitFrames then return end
 
 -- Early return if LibGroupBroadcast is not available
 if not LibGroupBroadcast then
     return
 end
-
-local UI = LUIE.UI
 
 -- Constants
 local COMBAT_MECHANIC_FLAGS_MAGICKA = COMBAT_MECHANIC_FLAGS_MAGICKA

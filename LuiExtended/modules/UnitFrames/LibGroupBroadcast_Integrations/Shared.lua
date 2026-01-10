@@ -8,7 +8,6 @@ local LUIE = LUIE
 
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
-if not UnitFrames then return end
 
 --- @class LibGroupBroadcastShared
 local Shared = {}

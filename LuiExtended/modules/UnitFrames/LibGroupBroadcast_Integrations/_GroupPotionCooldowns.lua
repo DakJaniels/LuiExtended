@@ -8,14 +8,11 @@ local LUIE = LUIE
 
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
-if not UnitFrames then return end
 
 -- Early return if LibGroupPotionCooldowns is not available
 if not LibGroupPotionCooldowns then
     return
 end
-
-local UI = LUIE.UI
 
 --- @class GroupPotionCooldownsManager
 local GroupPotionCooldownsManager = {}

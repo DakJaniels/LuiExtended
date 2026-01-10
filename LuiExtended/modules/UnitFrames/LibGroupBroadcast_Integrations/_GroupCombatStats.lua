@@ -8,14 +8,11 @@ local LUIE = LUIE
 
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
-if not UnitFrames then return end
 
 -- Early return if LibGroupCombatStats is not available
 if not LibGroupCombatStats then
     return
 end
-
-local UI = LUIE.UI
 
 --- @class GroupCombatStatsManager
 local GroupCombatStatsManager = {}

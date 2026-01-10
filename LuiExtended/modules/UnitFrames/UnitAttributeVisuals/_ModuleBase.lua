@@ -22,6 +22,7 @@ local g_numModulesCreated = 0
 --- @param ... self
 --- @return LUIE_UnitAttributeVisualizerModuleBase
 function LUIE_UnitAttributeVisualizerModuleBase:New(...)
+    ---@class LUIE_UnitAttributeVisualizerModuleBase
     local module = ZO_Object.New(self)
     g_numModulesCreated = g_numModulesCreated + 1
     module.moduleId = g_numModulesCreated
