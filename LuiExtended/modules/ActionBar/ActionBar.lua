@@ -5,6 +5,13 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
+
+-- ActionBar namespace
+--- @class (partial) LUIE.ActionBar
+local ActionBar = {}
+ActionBar.__index = ActionBar
+LUIE.ActionBar = ActionBar
+
 local UI = LUIE.UI
 local LuiData = LuiData
 local Data = LuiData.Data
@@ -24,14 +31,9 @@ local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
 local windowManager = GetWindowManager()
 local animationManager = GetAnimationManager()
+local chatSystem = ZO_GetChatSystem()
 
 local moduleName = LUIE.name .. "ActionBar"
-
--- ActionBar namespace
---- @class (partial) LUIE.ActionBar
-local ActionBar = {}
-ActionBar.__index = ActionBar
-LUIE.ActionBar = ActionBar
 
 ActionBar.Enabled = false
 ActionBar.Defaults =
@@ -50,12 +52,10 @@ ActionBar.Defaults =
     UltimateLabelPosition = -20,
     UltimateFontFace = "LUIE Default Font",
     UltimateFontStyle = FONT_STYLE_OUTLINE,
-    UltimateFontSize = 20,
+    UltimateFontSize = 18,
     ShowTriggered = true,
     ProcEnableSound = true,
     ProcSoundName = "Death Recap Killing Blow",
-    showMarker = false,
-    markerSize = 26,
     ShowToggled = true,
     ShowToggledUltimate = true,
     BarShowLabel = true,
@@ -130,41 +130,43 @@ local g_boundArmamentsPlayed = false                      -- Specific variable t
 local g_disableProcSound = {}                             -- When we play a proc sound from a bar ability changing (like power lash) we put a 3 sec ICD on it so it doesn't spam when mousing on/off a target, etc
 local g_hotbarCategory = GetActiveHotbarCategory()        -- Set on initialization and when we swap weapons to determine the current hotbar category
 local g_backbarButtons = {}                               -- Table to hold backbar buttons
-local g_activeWeaponSwapInProgress = false                -- Toggled on when weapon swapping, TODO: maybe not needed
+g_activeWeaponSwapInProgress = false                      -- Toggled on when weapon swapping, TODO: maybe not needed
 local g_castbarWorldMapFix = false                        -- Fix for viewing the World Map changing the player coordinates for some reason
 local g_actionBarActiveWeaponPair = GetHeldWeaponPair()
-local ACTION_BAR = _G["ZO_ActionBar1"]
+local ACTION_BAR = ZO_ActionBar1
 local BAR_INDEX_START = 3
 local BAR_INDEX_END = 8
-local BACKBAR_INDEX_END = 7                             -- Separate index for backbar as long as we're not using an ultimate button.
+local BACKBAR_INDEX_END = 7 -- Separate index for backbar as long as we're not using an ultimate button.
 local BACKBAR_INDEX_OFFSET = 50
-local MINIMUM_ACTION_BAR_TIMER_DISPLAYED_TIME_MS = 1000 -- Minimum time to display timers (performance optimization)
 
+-- -----------------------------------------------------------------------------
 -- Quickslot
 local uiQuickSlot =
 {
-    color = { 0.941, 0.565, 0.251, 1 },
-    timeColors =
+    colour = { 0.941, 0.565, 0.251, 1 },
+    timeColours =
     {
-        [1] = { remain = 15000, color = { 0.878, 0.941, 0.251, 1 } },
-        [2] = { remain = 5000, color = { 0.251, 0.941, 0.125, 1 } },
+        [1] = { remain = 15000, colour = { 0.878, 0.941, 0.251, 1 } },
+        [2] = { remain = 5000, colour = { 0.251, 0.941, 0.125, 1 } },
     },
 }
 
+-- -----------------------------------------------------------------------------
 -- Ultimate slot
 local uiUltimate =
 {
-    color = { 0.941, 0.973, 0.957, 1 },
-    pctColors =
+    colour = { 0.941, 0.973, 0.957, 1 },
+    pctColours =
     {
-        [1] = { pct = 100, color = { 0.878, 0.941, 0.251, 1 } },
-        [2] = { pct = 80, color = { 0.941, 0.565, 0.251, 1 } },
-        [3] = { pct = 50, color = { 0.941, 0.251, 0.125, 1 } },
+        [1] = { pct = 100, colour = { 0.878, 0.941, 0.251, 1 } },
+        [2] = { pct = 80, colour = { 0.941, 0.565, 0.251, 1 } },
+        [3] = { pct = 50, colour = { 0.941, 0.251, 0.125, 1 } },
     },
     FadeTime = 0,
     NotFull = false,
 }
 
+-- -----------------------------------------------------------------------------
 -- Cooldown Animation Types for GCD Tracking
 local CooldownMethod =
 {
@@ -172,6 +174,7 @@ local CooldownMethod =
     [2] = CD_TYPE_VERTICAL_REVEAL,
 }
 
+-- -----------------------------------------------------------------------------
 -- Constants from actionbar.lua with only the information we need
 local GAMEPAD_CONSTANTS =
 {
@@ -184,8 +187,14 @@ local KEYBOARD_CONSTANTS =
     ultimateSlotOffsetX = 62,
 }
 
+-- -----------------------------------------------------------------------------
+
 local slotsUpdated = {}
 
+---
+--- @param animation AnimationTimeline
+--- @param button ActionButton
+--- @param isBackBarSlot boolean
 local function OnSwapAnimationHalfDone(animation, button, isBackBarSlot)
     for i = BAR_INDEX_START, BAR_INDEX_END do
         if not slotsUpdated[i] then
@@ -204,6 +213,9 @@ local function OnSwapAnimationHalfDone(animation, button, isBackBarSlot)
     end
 end
 
+---
+--- @param animation AnimationTimeline
+--- @param button ActionButton
 local function OnSwapAnimationDone(animation, button)
     button.noUpdates = false
     if button:GetSlot() == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
@@ -212,10 +224,15 @@ local function OnSwapAnimationDone(animation, button)
     slotsUpdated = {}
 end
 
+---
+--- @param button ActionButton
 local function SetupSwapAnimation(button)
     button:SetupSwapAnimation(OnSwapAnimationHalfDone, OnSwapAnimationDone)
 end
 
+---
+--- @param activeHotbarCategory HotBarCategory
+--- @return integer
 local function GetInactiveHotbarCategory(activeHotbarCategory)
     if activeHotbarCategory == HOTBAR_CATEGORY_PRIMARY then
         return HOTBAR_CATEGORY_BACKUP
@@ -241,12 +258,18 @@ local function UpdateBackbarButtonActionIds()
     end
 end
 
+---
+--- @param remain number
+--- @return string
 local function FormatDurationSeconds(remain)
     return string_format((ActionBar.SV.BarMillis and ((remain < ActionBar.SV.BarMillisThreshold * 1000) or ActionBar.SV.BarMillisAboveTen)) and "%.1f" or "%.1d", remain / 1000)
 end
 
 -- Module initialization
+---
+--- @param enabled boolean
 function ActionBar.Initialize(enabled)
+    -- -----------------------------------------------------------------------------
     -- Load settings
     local isCharacterSpecific = LUIESV.Default[GetDisplayName()]["$AccountWide"].CharacterSpecificSV
     if isCharacterSpecific then
@@ -255,6 +278,7 @@ function ActionBar.Initialize(enabled)
         ActionBar.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "ActionBar", ActionBar.Defaults)
     end
 
+    -- -----------------------------------------------------------------------------
     -- Migrate from CombatInfo module (one-time migration)
     if not LUIE.IsMigrationDone("actionbar_from_combatinfo") then
         -- Access raw SV table directly
@@ -294,6 +318,7 @@ function ActionBar.Initialize(enabled)
         LUIE.MarkMigrationDone("actionbar_from_combatinfo")
     end
 
+    -- -----------------------------------------------------------------------------
     -- Migrate font styles if needed
     if not LUIE.IsMigrationDone("actionbar_fontstyles") then
         ActionBar.SV.UltimateFontStyle = LUIE.MigrateFontStyle(ActionBar.SV.UltimateFontStyle)
@@ -303,6 +328,7 @@ function ActionBar.Initialize(enabled)
         LUIE.MarkMigrationDone("actionbar_fontstyles")
     end
 
+    -- -----------------------------------------------------------------------------
     -- Migrate GlobalMethod if it's set to invalid value 3 (removed "Vertical" option)
     if not LUIE.IsMigrationDone("actionbar_globalmethod") then
         if ActionBar.SV.GlobalMethod == 3 then
@@ -311,24 +337,26 @@ function ActionBar.Initialize(enabled)
         LUIE.MarkMigrationDone("actionbar_globalmethod")
     end
 
+    -- -----------------------------------------------------------------------------
     -- Disable module if setting not toggled on
     if not enabled then
         return
     end
     ActionBar.Enabled = true
 
-
+    -- -----------------------------------------------------------------------------
     ActionBar.ApplyFont()
     ActionBar.ApplyProcSound()
-    local QSB = _G["QuickslotButton"]
-    uiQuickSlot.label = windowManager:CreateControl(nil, QSB, CT_LABEL)
+
+    -- -----------------------------------------------------------------------------
+    -- ZO_ActionBar_GetButton always returns the quickslot button when the category is HOTBAR_CATEGORY_QUICKSLOT_WHEEL, so there is no reason to pass in a slot
+    local UNUSED = nil
+    local quickslotButton = ZO_ActionBar_GetButton(UNUSED, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
+    local quickslotButtonButton = quickslotButton and quickslotButton.button
+    uiQuickSlot.label = UI:Label(quickslotButtonButton, { CENTER, CENTER }, nil, nil, g_potionFont, nil, true)
     uiQuickSlot.label:SetFont(g_potionFont)
-    uiQuickSlot.label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
-    uiQuickSlot.label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
-    uiQuickSlot.label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
-    uiQuickSlot.label:SetAnchor(CENTER, QSB, CENTER)
     if ActionBar.SV.PotionTimerColor then
-        uiQuickSlot.label:SetColor(unpack(uiQuickSlot.color))
+        uiQuickSlot.label:SetColor(unpack(uiQuickSlot.colour))
     else
         uiQuickSlot.label:SetColor(1, 1, 1, 1)
     end
@@ -336,40 +364,25 @@ function ActionBar.Initialize(enabled)
     uiQuickSlot.label:SetDrawTier(DT_HIGH)
     ActionBar.ResetPotionTimerLabel() -- Set the label position
 
+    -- -----------------------------------------------------------------------------
     -- Create Ultimate overlay labels
-    local AB8 = _G["ActionButton8"]
-    uiUltimate.LabelVal = windowManager:CreateControl(nil, AB8, CT_LABEL)
-    uiUltimate.LabelVal:SetFont("$(BOLD_FONT)|16|soft-shadow-thick")
-    uiUltimate.LabelVal:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
-    uiUltimate.LabelVal:SetVerticalAlignment(TEXT_ALIGN_TOP)
-    uiUltimate.LabelVal:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
-    uiUltimate.LabelVal:SetAnchor(BOTTOM, AB8, TOP, 0, -3)
-    uiUltimate.LabelVal:SetHidden(true)
-    uiUltimate.LabelPct = windowManager:CreateControl(nil, AB8, CT_LABEL)
-    uiUltimate.LabelPct:SetFont(g_ultimateFont)
-    uiUltimate.LabelPct:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
-    uiUltimate.LabelPct:SetVerticalAlignment(TEXT_ALIGN_CENTER)
-    uiUltimate.LabelPct:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
-    uiUltimate.LabelPct:SetHidden(true)
-    local actionButton = ZO_ActionBar_GetButton(g_ultimateSlot, g_hotbarCategory)
-    uiUltimate.LabelPct:SetAnchor(TOPLEFT, actionButton.slot)
-    uiUltimate.LabelPct:SetAnchor(BOTTOMRIGHT, actionButton.slot, nil, 0, -ActionBar.SV.UltimateLabelPosition)
+    local ActionButton8 = ZO_ActionBar_GetButton(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1)
+    uiUltimate.LabelVal = UI:Label(ActionButton8.button, { BOTTOM, TOP, 0, -3 }, nil, { 1, 2 }, "$(BOLD_FONT)|16|soft-shadow-thick", nil, true)
+    uiUltimate.LabelPct = UI:Label(ActionButton8.button, nil, nil, nil, g_ultimateFont, nil, true)
+    uiUltimate.LabelPct:SetAnchor(TOPLEFT, ActionButton8.slot)
+    uiUltimate.LabelPct:SetAnchor(BOTTOMRIGHT, ActionButton8.slot, nil, 0, -ActionBar.SV.UltimateLabelPosition)
 
-    uiUltimate.LabelPct:SetColor(unpack(uiUltimate.color))
+    uiUltimate.LabelPct:SetColor(unpack(uiUltimate.colour))
     -- And buff texture
-    uiUltimate.Texture = windowManager:CreateControl(nil, AB8, CT_TEXTURE)
-    uiUltimate.Texture:SetAnchor(CENTER, AB8, CENTER)
-    uiUltimate.Texture:SetDimensions(160, 160)
-    uiUltimate.Texture:SetTexture("/esoui/art/crafting/white_burst.dds")
-    uiUltimate.Texture:SetDrawLayer(DL_BACKGROUND)
-    uiUltimate.Texture:SetHidden(true)
+    uiUltimate.Texture = UI:Texture(ActionButton8.button, { CENTER, CENTER }, { 160, 160 }, "/esoui/art/crafting/white_burst.dds", DL_BACKGROUND, true)
 
+    -- -----------------------------------------------------------------------------
     -- Create a top level window for backbar butons
     local tlw = windowManager:CreateControl("LUIE_Backbar", ACTION_BAR, CT_CONTROL)
     tlw:SetParent(ACTION_BAR)
 
     for i = BAR_INDEX_START + BACKBAR_INDEX_OFFSET, BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET do
-        local button = ActionButton:New(i, ACTION_BUTTON_TYPE_VISIBLE, tlw, "ZO_ActionButton")
+        local button = ActionButton:New(i, ACTION_BUTTON_TYPE_VISIBLE, tlw, "ZO_ActionButton", HOTBAR_CATEGORY_BACKUP)
         SetupSwapAnimation(button)
         button:SetupBounceAnimation()
         g_backbarButtons[i] = button
@@ -377,21 +390,27 @@ function ActionBar.Initialize(enabled)
 
     ActionBar.BackbarSetupTemplate()
     ActionBar.BackbarToggleSettings()
-    -------------------------------------------------------------------------------------
 
+    -- -----------------------------------------------------------------------------
     ActionBar.RegisterEvents()
 
+    -- -----------------------------------------------------------------------------
     if ActionBar.SV.GlobalShowGCD then
         ActionBar.HookGCD()
     end
 
+    -- -----------------------------------------------------------------------------
     -- Create and update Cast Bar
     ActionBar.CreateCastBar()
     ActionBar.UpdateCastBar()
     ActionBar.SetCastBarPosition()
 end
 
+-- -----------------------------------------------------------------------------
 -- Called on initialization and on full update to swap icons on backbar
+---
+--- @param button ActionButton
+--- @param flip boolean
 function ActionBar.SetupBackBarIcons(button, flip)
     -- Setup icons for backbar
     local hotbarCategory = g_hotbarCategory == HOTBAR_CATEGORY_BACKUP and HOTBAR_CATEGORY_PRIMARY or HOTBAR_CATEGORY_BACKUP
@@ -431,33 +450,34 @@ function ActionBar.SetupBackBarIcons(button, flip)
     end
 
     if flip then
-        ActionBar.handleFlip(slotNum)
-    end
-end
+        local desaturate = true
 
-function ActionBar.handleFlip(slotNum)
-    local desaturate = true
+        if g_uiCustomToggle and g_uiCustomToggle[slotNum] then
+            desaturate = false
 
-    if g_uiCustomToggle and g_uiCustomToggle[slotNum] then
-        desaturate = false
-
-        if g_uiCustomToggle[slotNum]:IsHidden() then
-            ActionBar.BackbarHideSlot(slotNum)
-            desaturate = true
+            if g_uiCustomToggle[slotNum]:IsHidden() then
+                ActionBar.BackbarHideSlot(slotNum)
+                desaturate = true
+            end
         end
-    end
 
-    ActionBar.ToggleBackbarSaturation(slotNum, desaturate)
+        ActionBar.ToggleBackbarSaturation(slotNum, desaturate)
+    end
 end
 
+-- -----------------------------------------------------------------------------
+---
 function ActionBar.OnActiveWeaponPairChanged()
     g_hotbarCategory = GetActiveHotbarCategory()
     g_activeWeaponSwapInProgress = true
     UpdateBackbarButtonActionIds()
 end
 
+-- -----------------------------------------------------------------------------
+-- Hook to update GCD support
 function ActionBar.HookGCD()
-    -- Hook to update GCD support
+    ---
+    --- @param self ActionButton
     --- @diagnostic disable-next-line: duplicate-set-field
     ActionButton.UpdateUsable = function (self)
         local slotnum = self:GetSlot()
@@ -486,6 +506,9 @@ function ActionBar.HookGCD()
     end
 
     -- Hook to update GCD support
+    ---
+    --- @param self ActionButton
+    --- @param options table
     --- @diagnostic disable-next-line: duplicate-set-field
     ActionButton.UpdateCooldown = function (self, options)
         local slotnum = self:GetSlot()
@@ -578,48 +601,37 @@ function ActionBar.HookGCD()
     end
 end
 
+-- -----------------------------------------------------------------------------
 -- Helper function to get override ability duration.
--- Can optionally use slotNum and hotbarCategory to fill gaps with new API
-local function GetUpdatedAbilityDuration(abilityId, overrideRank, casterUnitTag, slotNum, hotbarCategory)
-    -- First check our override table
-    if g_barDurationOverride[abilityId] then
-        return g_barDurationOverride[abilityId]
+---
+--- @param abilityId integer
+--- @return integer duration
+local function GetUpdatedAbilityDuration(abilityId)
+    local duration = g_barDurationOverride[abilityId] or GetAbilityDuration(abilityId) or select(2, GetAbilityCastInfo(abilityId))
+    if duration == nil then
+        duration = 0
     end
-
-    -- Try standard API
-    local duration = GetAbilityDuration(abilityId, overrideRank, casterUnitTag)
-    if duration and duration > 0 then
-        return duration
-    end
-
-    -- Fill gap: Try slot effect API if we know the slot (for missing data entries)
-    if slotNum and hotbarCategory then
-        local durationMS = GetActionSlotEffectDuration(slotNum, hotbarCategory)
-        if durationMS and durationMS > 0 then
-            return durationMS
-        end
-    end
-
-    return 0
+    return duration
 end
 
+-- -----------------------------------------------------------------------------
 -- Called on initialization and menu changes
 -- Pull data from Effects.BarHighlightOverride Tables to filter the display of Bar Highlight abilities based off menu settings.
 function ActionBar.UpdateBarHighlightTables()
-    ZO_ClearTable(g_uiProcAnimation)
-    ZO_ClearTable(g_uiCustomToggle)
-    ZO_ClearTable(g_triggeredSlotsFront)
-    ZO_ClearTable(g_triggeredSlotsBack)
-    ZO_ClearTable(g_triggeredSlotsRemain)
-    ZO_ClearTable(g_toggledSlotsFront)
-    ZO_ClearTable(g_toggledSlotsBack)
-    ZO_ClearTable(g_toggledSlotsRemain)
-    ZO_ClearTable(g_toggledSlotsStack)
-    ZO_ClearTable(g_toggledSlotsPlayer)
-    ZO_ClearTable(g_barOverrideCI)
-    ZO_ClearTable(g_barFakeAura)
-    ZO_ClearTable(g_barDurationOverride)
-    ZO_ClearTable(g_barNoRemove)
+    g_uiProcAnimation = {}
+    g_uiCustomToggle = {}
+    g_triggeredSlotsFront = {}
+    g_triggeredSlotsBack = {}
+    g_triggeredSlotsRemain = {}
+    g_toggledSlotsFront = {}
+    g_toggledSlotsBack = {}
+    g_toggledSlotsRemain = {}
+    g_toggledSlotsStack = {}
+    g_toggledSlotsPlayer = {}
+    g_barOverrideCI = {}
+    g_barFakeAura = {}
+    g_barDurationOverride = {}
+    g_barNoRemove = {}
 
     if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled then
         -- Grab any aura's from the list that have on EVENT_COMBAT_EVENT AURA support
@@ -665,6 +677,7 @@ function ActionBar.UpdateBarHighlightTables()
     end
 end
 
+-- -----------------------------------------------------------------------------
 -- Clear and then (maybe) re-register event listeners for Combat/Power/Slot Updates
 function ActionBar.RegisterEvents()
     eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, ActionBar.OnUpdate)
@@ -679,7 +692,9 @@ function ActionBar.RegisterEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_ITEM_USED)
     eventManager:UnregisterForEvent(moduleName, EVENT_ACTION_SLOT_ABILITY_USED)
     if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
-        eventManager:RegisterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT, ActionBar.OnCombatEvent)
+        eventManager:RegisterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT, function (eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+            ActionBar.OnCombatEvent(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+        end)
         eventManager:AddFilterForEvent(moduleName .. "CombatEvent1", REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_BLOCKED_DAMAGE)
         eventManager:RegisterForEvent(moduleName .. "PowerUpdate", EVENT_POWER_UPDATE, ActionBar.OnPowerUpdatePlayer)
         eventManager:AddFilterForEvent(moduleName .. "PowerUpdate", EVENT_POWER_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
@@ -687,7 +702,9 @@ function ActionBar.RegisterEvents()
         eventManager:AddFilterForEvent(moduleName .. "InventoryUpdate", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT, REGISTER_FILTER_IS_NEW_ITEM, false)
     end
     if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled or ActionBar.SV.CastBarEnable then
-        eventManager:RegisterForEvent(moduleName .. "CombatEvent2", EVENT_COMBAT_EVENT, ActionBar.OnCombatEvent)
+        eventManager:RegisterForEvent(moduleName .. "CombatEvent2", EVENT_COMBAT_EVENT, function (eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+            ActionBar.OnCombatEvent(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+        end)
         eventManager:AddFilterForEvent(moduleName .. "CombatEvent2", REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false)
     end
     if ActionBar.SV.CastBarEnable then
@@ -695,7 +712,9 @@ function ActionBar.RegisterEvents()
         for result, _ in pairs(Castbar.CastBreakingStatus) do
             counter = counter + 1
             local eventName = (moduleName .. "CombatEventCC" .. counter)
-            eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, ActionBar.OnCombatEventBreakCast)
+            eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, function (eventId, actionResult, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+                ActionBar.OnCombatEventBreakCast(actionResult, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+            end)
             eventManager:AddFilterForEvent(eventName, EVENT_COMBAT_EVENT, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_COMBAT_RESULT, result)
         end
         eventManager:RegisterForEvent(moduleName, EVENT_START_SOUL_GEM_RESURRECTION, ActionBar.SoulGemResurrectionStart)
@@ -704,18 +723,19 @@ function ActionBar.RegisterEvents()
         eventManager:RegisterForEvent(moduleName, EVENT_END_SIEGE_CONTROL, ActionBar.OnSiegeEnd)
         eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_ABILITY_USED, ActionBar.OnAbilityUsed)
         -- eventManager:RegisterForEvent(moduleName, EVENT_CLIENT_INTERACT_RESULT, ActionBar.ClientInteractResult)
-        --[[counter = 0
-        for id, _ in pairs (Effects.CastBreakOnRemoveEvent) do
-            counter = counter + 1
-            local eventName = (moduleName.. "LUIE_CI_CombatEventCastBreak" .. counter)
-            eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, ActionBar.OnCombatEventSpecialFilters )
-            eventManager:AddFilterForEvent(eventName, EVENT_COMBAT_EVENT, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_ABILITY_ID, id, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_FADED)
-        end]]
-        --
+        -- counter = 0
+        -- for id, _ in pairs(Effects.CastBreakOnRemoveEvent) do
+        --     counter = counter + 1
+        --     local eventName = (moduleName .. "LUIE_CI_CombatEventCastBreak" .. counter)
+        --     eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, ActionBar.OnCombatEventSpecialFilters)
+        --     eventManager:AddFilterForEvent(eventName, EVENT_COMBAT_EVENT, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_ABILITY_ID, id, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_FADED)
+        -- end
     end
     if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled or ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
         eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, ActionBar.OnActiveHotbarUpdate)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, ActionBar.OnSlotsFullUpdate)
+        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, function (_)
+            ActionBar.OnSlotsFullUpdate()
+        end)
         eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_UPDATED, ActionBar.OnSlotUpdated)
         eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_WEAPON_PAIR_CHANGED, ActionBar.OnActiveWeaponPairChanged)
     end
@@ -723,26 +743,12 @@ function ActionBar.RegisterEvents()
         eventManager:RegisterForEvent(moduleName, EVENT_UNIT_DEATH_STATE_CHANGED, ActionBar.OnDeath)
         eventManager:RegisterForEvent(moduleName, EVENT_TARGET_CHANGED, ActionBar.OnTargetChange)
         eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED, ActionBar.OnReticleTargetChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_HIDDEN_UPDATE, ActionBar.OnReticleHiddenUpdate)
         eventManager:RegisterForEvent(moduleName, EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, ActionBar.BackbarSetupTemplate)
 
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEM_USED, ActionBar.InventoryItemUsed)
 
-        -- New events to supplement custom tracking and fill missing data gaps
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_EFFECT_UPDATE, ActionBar.OnActionSlotEffectUpdate)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_EFFECTS_CLEARED, ActionBar.OnActionSlotEffectsCleared)
-
         -- Setup bar highlight
         ActionBar.UpdateBarHighlightTables()
-
-        -- Unregister some default stuff from action buttons.
-        -- Unregister ZOS's default handler so our custom handler takes over
-        eventManager:UnregisterForEvent("ZO_ActionBar", EVENT_ACTION_SLOT_EFFECT_UPDATE)
-        -- Unregister interface setting changed events from individual buttons to prevent conflicts
-        for i = BAR_INDEX_START, BAR_INDEX_END do
-            eventManager:UnregisterForEvent("ActionButton" .. i, EVENT_INTERFACE_SETTING_CHANGED)
-            eventManager:UnregisterForEvent("ActionBarTimer" .. i, EVENT_INTERFACE_SETTING_CHANGED)
-        end
     end
     -- Have to register EVENT_EFFECT_CHANGED for werewolf as well - Stop devour cast bar when devour fades / also handles updating Vampire Ultimate cost on stage change
     if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled or ActionBar.SV.CastBarEnable or ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
@@ -756,22 +762,28 @@ function ActionBar.RegisterEvents()
         if not IsConsoleUI() then
             SetSetting(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER, 0)
         end
-        -- Register for ultimate cost changes (e.g., vampire stage changes)
-        eventManager:RegisterForEvent(moduleName, EVENT_ULTIMATE_ABILITY_COST_CHANGED, ActionBar.UpdateUltimateLabel)
     end
+
+    eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_HIDDEN_UPDATE, ActionBar.OnReticleHiddenUpdate)
 end
 
+-- -----------------------------------------------------------------------------
+---
+--- @param list table
 function ActionBar.ClearCustomList(list)
     local listRef = list == ActionBar.SV.blacklist and GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST) or ""
     for k, v in pairs(list) do
         list[k] = nil
     end
-    CHAT_SYSTEM:Maximize()
-    CHAT_SYSTEM.primaryContainer:FadeIn()
+    chatSystem:Maximize()
+    chatSystem.primaryContainer:FadeIn()
     printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_CLEARED), listRef), true)
 end
 
+-- -----------------------------------------------------------------------------
 -- List Handling (Add) for Prominent Auras & Blacklist
+--- @param list table
+--- @param input any
 function ActionBar.AddToCustomList(list, input)
     local id = tonumber(input)
     local listRef = list == ActionBar.SV.blacklist and GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST) or ""
@@ -780,25 +792,28 @@ function ActionBar.AddToCustomList(list, input)
         if name ~= nil and name ~= "" then
             local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
             list[id] = true
-            CHAT_SYSTEM:Maximize()
-            CHAT_SYSTEM.primaryContainer:FadeIn()
+            chatSystem:Maximize()
+            chatSystem.primaryContainer:FadeIn()
             printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_ID), icon, id, name, listRef), true)
         else
-            CHAT_SYSTEM:Maximize()
-            CHAT_SYSTEM.primaryContainer:FadeIn()
+            chatSystem:Maximize()
+            chatSystem.primaryContainer:FadeIn()
             printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_FAILED), input, listRef), true)
         end
     else
         if input ~= "" then
             list[input] = true
-            CHAT_SYSTEM:Maximize()
-            CHAT_SYSTEM.primaryContainer:FadeIn()
+            chatSystem:Maximize()
+            chatSystem.primaryContainer:FadeIn()
             printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_ADDED_NAME), input, listRef), true)
         end
     end
 end
 
+-- -----------------------------------------------------------------------------
 -- List Handling (Remove) for Prominent Auras & Blacklist
+--- @param list any
+--- @param input any
 function ActionBar.RemoveFromCustomList(list, input)
     local id = tonumber(input)
     local listRef = list == ActionBar.SV.blacklist and GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST) or ""
@@ -806,24 +821,22 @@ function ActionBar.RemoveFromCustomList(list, input)
         local name = zo_strformat("<<C:1>>", GetAbilityName(id))
         local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
         list[id] = nil
-        CHAT_SYSTEM:Maximize()
-        CHAT_SYSTEM.primaryContainer:FadeIn()
+        chatSystem:Maximize()
+        chatSystem.primaryContainer:FadeIn()
         printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_ID), icon, id, name, listRef), true)
     else
         if input ~= "" then
             list[input] = nil
-            CHAT_SYSTEM:Maximize()
-            CHAT_SYSTEM.primaryContainer:FadeIn()
+            chatSystem:Maximize()
+            chatSystem.primaryContainer:FadeIn()
             printToChat(zo_strformat(GetString(LUIE_STRING_CUSTOM_LIST_REMOVED_NAME), input, listRef), true)
         end
     end
 end
 
+-- -----------------------------------------------------------------------------
 -- Used to populate abilities icons after the user has logged on
 function ActionBar.OnPlayerActivated(eventCode)
-    -- do not call this function for the second time
-    eventManager:UnregisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED)
-
     -- Manually trigger event to update stats
     g_hotbarCategory = GetActiveHotbarCategory()
     ActionBar.OnSlotsFullUpdate()
@@ -834,12 +847,16 @@ function ActionBar.OnPlayerActivated(eventCode)
     ActionBar.OnPowerUpdatePlayer(EVENT_POWER_UPDATE, "player", nil, COMBAT_MECHANIC_FLAGS_ULTIMATE, GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE))
 end
 
-local savedPlayerX = 0
-local savedPlayerZ = 0
-local playerX
-local playerZ
+local savedPlayerX = 0.000000000000000
+local savedPlayerZ = 0.000000000000000
+local playerX = 0.000000000000000
+local playerZ = 0.000000000000000
 
+-- -----------------------------------------------------------------------------
 -- Hide duration label if the ability is Grim Focus or one of its morphs
+--- @param remain integer
+--- @param abilityId integer
+--- @return string
 local function SetBarRemainLabel(remain, abilityId)
     if Effects.IsGrimFocus[abilityId] or Effects.IsBloodFrenzy[abilityId] then
         return ""
@@ -848,17 +865,20 @@ local function SetBarRemainLabel(remain, abilityId)
     end
 end
 
+-- -----------------------------------------------------------------------------
 -- Updates all floating labels. Called every 100ms
-function ActionBar.OnUpdate(currentFrameTimeSeconds)
+---
+--- @param currentTimeMS integer
+function ActionBar.OnUpdate(currentTimeMS)
     -- Procs
     for k, v in pairs(g_triggeredSlotsRemain) do
-        local remain = v - currentFrameTimeSeconds
+        local remain = v - currentTimeMS
         local front = g_triggeredSlotsFront[k]
         local back = g_triggeredSlotsBack[k]
         local frontAnim = front and g_uiProcAnimation[front]
         local backAnim = back and g_uiProcAnimation[back]
         -- If duration reaches 0 then remove effect
-        if v < currentFrameTimeSeconds then
+        if v < currentTimeMS then
             if frontAnim then
                 frontAnim:Stop()
             end
@@ -879,13 +899,13 @@ function ActionBar.OnUpdate(currentFrameTimeSeconds)
     end
     -- Ability Highlight
     for k, v in pairs(g_toggledSlotsRemain) do
-        local remain = v - currentFrameTimeSeconds
+        local remain = v - currentTimeMS
         local front = g_toggledSlotsFront[k]
         local back = g_toggledSlotsBack[k]
         local frontToggle = front and g_uiCustomToggle[front]
         local backToggle = back and g_uiCustomToggle[back]
         -- Update Label (FRONT)
-        if v < currentFrameTimeSeconds then
+        if v < currentTimeMS then
             if frontToggle then
                 ActionBar.HideSlot(front, k)
             end
@@ -911,16 +931,16 @@ function ActionBar.OnUpdate(currentFrameTimeSeconds)
         local slotIndex = GetCurrentQuickslot()
         local remain, duration, _ = GetSlotCooldownInfo(slotIndex, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
         local label = uiQuickSlot.label
-        local timeColors = uiQuickSlot.timeColors
+        local timeColours = uiQuickSlot.timeColours
         if duration > 5000 then
             label:SetHidden(false)
             if not ActionBar.SV.PotionTimerColor then
                 label:SetColor(1, 1, 1, 1)
             else
-                local color = uiQuickSlot.color
-                for i = #timeColors, 1, -1 do
-                    if remain < timeColors[i].remain then
-                        color = timeColors[i].color
+                local color = uiQuickSlot.colour
+                for i = #timeColours, 1, -1 do
+                    if remain < timeColours[i].remain then
+                        color = timeColours[i].colour
                         break
                     end
                 end
@@ -948,7 +968,7 @@ function ActionBar.OnUpdate(currentFrameTimeSeconds)
 
     -- Hide Ultimate generation texture if it is time to do so
     if ActionBar.SV.UltimateGeneration then
-        if not uiUltimate.Texture:IsHidden() and uiUltimate.FadeTime < currentFrameTimeSeconds then
+        if not uiUltimate.Texture:IsHidden() and uiUltimate.FadeTime < currentTimeMS then
             uiUltimate.Texture:SetHidden(true)
         end
     end
@@ -984,11 +1004,13 @@ function ActionBar.OnUpdate(currentFrameTimeSeconds)
     end
 end
 
+-- -----------------------------------------------------------------------------
 local function CastBarWorldMapFix()
     g_castbarWorldMapFix = false
     eventManager:UnregisterForUpdate(moduleName .. "CastBarFix")
 end
 
+-- -----------------------------------------------------------------------------
 -- Run on the EVENT_GAME_CAMERA_UI_MODE_CHANGED handler
 function ActionBar.OnGameCameraUIModeChanged(eventCode)
     -- Changing zones in the World Map for some reason changes the player coordinates so when the player clicks on a Wayshrine to teleport the cast gets interrupted
@@ -1001,6 +1023,7 @@ function ActionBar.OnGameCameraUIModeChanged(eventCode)
     end
 end
 
+-- -----------------------------------------------------------------------------
 -- Run on the EVENT_END_SIEGE_CONTROL handler
 -- Used to break the cast for Stow Siege Weapon if the player exits siege control.
 function ActionBar.OnSiegeEnd(eventCode)
@@ -1009,6 +1032,7 @@ function ActionBar.OnSiegeEnd(eventCode)
     end
 end
 
+-- -----------------------------------------------------------------------------
 -- Stops Attack Cast when releasing heavy attacks
 function ActionBar.OnAbilityUsed(eventCode, actionSlotIndex)
     if actionSlotIndex == 2 then
@@ -1016,6 +1040,7 @@ function ActionBar.OnAbilityUsed(eventCode, actionSlotIndex)
     end
 end
 
+-- -----------------------------------------------------------------------------
 function ActionBar.StopCastBar()
     local state = ActionBar.CastBarUnlocked
     -- Don't hide the cast bar if we have it unlocked to move.
@@ -1033,12 +1058,13 @@ function ActionBar.StopCastBar()
     end
 end
 
+-- -----------------------------------------------------------------------------
 -- Updates Cast Bar - only enabled when Cast Bar is unhidden
-function ActionBar.OnUpdateCastbar(currentFrameTimeSeconds)
+function ActionBar.OnUpdateCastbar(currentTimeMS)
     -- Update castbar
     local castStarts = castbar.starts
     local castEnds = castbar.ends
-    local remain = castbar.remain - currentFrameTimeSeconds
+    local remain = castbar.remain - currentTimeMS
     if remain <= 0 then
         ActionBar.StopCastBar()
     else
@@ -1046,28 +1072,37 @@ function ActionBar.OnUpdateCastbar(currentFrameTimeSeconds)
             castbar.bar.timer:SetText(string_format("%.1f", remain / 1000))
         end
         if castbar.type == 1 then
-            castbar.bar.bar:SetValue((currentFrameTimeSeconds - castStarts) / (castEnds - castStarts))
+            castbar.bar.bar:SetValue((currentTimeMS - castStarts) / (castEnds - castStarts))
         else
-            castbar.bar.bar:SetValue(1 - ((currentFrameTimeSeconds - castStarts) / (castEnds - castStarts)))
+            castbar.bar.bar:SetValue(1 - ((currentTimeMS - castStarts) / (castEnds - castStarts)))
         end
     end
 end
 
+-- -----------------------------------------------------------------------------
+---
+--- @param fontNameKey string
+--- @param fontStyleKey string
+--- @param fontSizeKey string
+--- @param defaultFontStyle integer
+--- @param defaultFontSize integer
+--- @return string
+local setupFont = function (fontNameKey, fontStyleKey, fontSizeKey, defaultFontStyle, defaultFontSize)
+    local fontName = LUIE.Fonts[ActionBar.SV[fontNameKey]]
+    if not fontName or fontName == "" then
+        LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
+        fontName = "LUIE Default Font"
+    end
+    local fontStyle = ActionBar.SV[fontStyleKey] or defaultFontStyle
+    local fontSize = (ActionBar.SV[fontSizeKey] and ActionBar.SV[fontSizeKey] > 0) and ActionBar.SV[fontSizeKey] or defaultFontSize
+    return ZO_CreateFontString(fontName, fontSize, fontStyle)
+end
+
+-- -----------------------------------------------------------------------------
 -- Updates local variables with new font.
 function ActionBar.ApplyFont()
     if not ActionBar.Enabled then
         return
-    end
-
-    local function setupFont(fontNameKey, fontStyleKey, fontSizeKey, defaultFontStyle, defaultFontSize)
-        local fontName = LUIE.Fonts[ActionBar.SV[fontNameKey]]
-        if not fontName or fontName == "" then
-            LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
-            fontName = "LUIE Default Font"
-        end
-        local fontStyle = ActionBar.SV[fontStyleKey] or defaultFontStyle
-        local fontSize = (ActionBar.SV[fontSizeKey] and ActionBar.SV[fontSizeKey] > 0) and ActionBar.SV[fontSizeKey] or defaultFontSize
-        return ZO_CreateFontString(fontName, fontSize, fontStyle)
     end
 
     g_barFont = setupFont("BarFontFace", "BarFontStyle", "BarFontSize", FONT_STYLE_OUTLINE, 17)
@@ -1092,6 +1127,7 @@ function ActionBar.ApplyFont()
     g_castbarFont = setupFont("CastBarFontFace", "CastBarFontStyle", "CastBarFontSize", FONT_STYLE_SOFT_SHADOW_THIN, 16)
 end
 
+-- -----------------------------------------------------------------------------
 -- Updates Proc Sound - called on initialization and menu changes
 function ActionBar.ApplyProcSound(menu)
     local barProcSound = LUIE.Sounds[ActionBar.SV.ProcSoundName]
@@ -1107,6 +1143,7 @@ function ActionBar.ApplyProcSound(menu)
     end
 end
 
+-- -----------------------------------------------------------------------------
 -- Resets the ultimate labels on menu option change
 function ActionBar.ResetUltimateLabel()
     uiUltimate.LabelPct:ClearAnchors()
@@ -1115,6 +1152,7 @@ function ActionBar.ResetUltimateLabel()
     uiUltimate.LabelPct:SetAnchor(BOTTOMRIGHT, actionButton.slot, nil, 0, -ActionBar.SV.UltimateLabelPosition)
 end
 
+-- -----------------------------------------------------------------------------
 -- Resets bar labels on menu option change
 function ActionBar.ResetBarLabel()
     for k, _ in pairs(g_uiProcAnimation) do
@@ -1152,14 +1190,16 @@ function ActionBar.ResetBarLabel()
     end
 end
 
+-- -----------------------------------------------------------------------------
 -- Resets Potion Timer label - called on initialization and menu changes
 function ActionBar.ResetPotionTimerLabel()
-    local QSB = GetControl("QuickslotButton")
+    local QSB = ACTION_BAR:GetNamedChild("QuickslotButtonButton")
     uiQuickSlot.label:ClearAnchors()
     uiQuickSlot.label:SetAnchor(TOPLEFT, QSB)
     uiQuickSlot.label:SetAnchor(BOTTOMRIGHT, QSB, nil, 0, -ActionBar.SV.PotionTimerLabelPosition)
 end
 
+-- -----------------------------------------------------------------------------
 -- Runs on the EVENT_TARGET_CHANGE listener.
 -- This handler fires every time the someone target changes.
 -- This function is needed in case the player teleports via Way Shrine
@@ -1170,12 +1210,14 @@ function ActionBar.OnTargetChange(eventCode, unitTag)
     ActionBar.OnReticleTargetChanged(eventCode)
 end
 
+-- -----------------------------------------------------------------------------
 -- Runs on the EVENT_RETICLE_HIDDEN_UPDATE listener.
 -- This handler fires when the reticle visibility changes
 function ActionBar.OnReticleHiddenUpdate(eventId, hidden)
     g_reticleHidden = hidden
 end
 
+-- -----------------------------------------------------------------------------
 -- Runs on the EVENT_RETICLE_TARGET_CHANGED listener.
 -- This handler fires every time the player's reticle target changes
 function ActionBar.OnReticleTargetChanged(eventCode)
@@ -1241,111 +1283,10 @@ function ActionBar.OnReticleTargetChanged(eventCode)
     end
 end
 
--- Runs on the EVENT_ACTION_SLOT_EFFECT_UPDATE listener.
--- Uses new APIs to supplement custom tracking and fill gaps in missing data entries
-function ActionBar.OnActionSlotEffectUpdate(eventCode, hotbarCategory, actionSlotIndex)
-    -- Skip if not tracking triggered/toggled abilities
-    if not ActionBar.SV.ShowTriggered and not ActionBar.SV.ShowToggled then
-        return
-    end
-
-    -- Get the ability ID for this slot
-    local abilityId = GetSlotTrueBoundId(actionSlotIndex, hotbarCategory)
-    if not abilityId or abilityId == 0 then
-        return
-    end
-
-    -- Check if this ability is in our custom tracking
-    local isTracked = (g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId])
-
-    if isTracked then
-        -- Use API to fill gaps in our custom tracking
-        local timeRemainingMS = GetActionSlotEffectTimeRemaining(actionSlotIndex, hotbarCategory)
-        local stackCount = GetActionSlotEffectStackCount(actionSlotIndex, hotbarCategory)
-
-        -- Only update if we have valid data from API
-        if timeRemainingMS and timeRemainingMS > 0 then
-            local currentTime = GetGameTimeMilliseconds()
-            local endTime = currentTime + timeRemainingMS
-
-            -- Fill gap: If we don't have duration data or it's expired, use API data
-            if not g_toggledSlotsRemain[abilityId] or g_toggledSlotsRemain[abilityId] < currentTime then
-                g_toggledSlotsRemain[abilityId] = endTime
-            end
-
-            -- Fill gap: Update stack count if available from API
-            if stackCount and stackCount > 0 then
-                -- Only update if we don't have stack data or API has different value
-                if not g_toggledSlotsStack[abilityId] or g_toggledSlotsStack[abilityId] ~= stackCount then
-                    g_toggledSlotsStack[abilityId] = stackCount
-
-                    -- Update UI if slot is showing
-                    if g_toggledSlotsFront[abilityId] then
-                        local frontSlot = g_toggledSlotsFront[abilityId]
-                        if g_uiCustomToggle[frontSlot] and not g_uiCustomToggle[frontSlot]:IsHidden() then
-                            g_uiCustomToggle[frontSlot].stack:SetText(stackCount > 1 and tostring(stackCount) or "")
-                        end
-                    end
-                    if g_toggledSlotsBack[abilityId] then
-                        local backSlot = g_toggledSlotsBack[abilityId]
-                        if g_uiCustomToggle[backSlot] and not g_uiCustomToggle[backSlot]:IsHidden() then
-                            g_uiCustomToggle[backSlot].stack:SetText(stackCount > 1 and tostring(stackCount) or "")
-                        end
-                    end
-                end
-            end
-
-            -- Only process if above minimum threshold (performance optimization)
-            if timeRemainingMS > MINIMUM_ACTION_BAR_TIMER_DISPLAYED_TIME_MS then
-                -- Our OnUpdate will handle the label update, but we've now ensured
-                -- g_toggledSlotsRemain has accurate data from the API
-            end
-        elseif timeRemainingMS == 0 then
-            -- Effect expired - clear if we're tracking it
-            if g_toggledSlotsRemain[abilityId] then
-                if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
-                    ActionBar.HideSlot(g_toggledSlotsFront[abilityId], abilityId)
-                end
-                if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
-                    ActionBar.HideSlot(g_toggledSlotsBack[abilityId], abilityId)
-                end
-                g_toggledSlotsRemain[abilityId] = nil
-                g_toggledSlotsStack[abilityId] = nil
-            end
-        end
-    end
-end
-
--- Runs on the EVENT_ACTION_SLOT_EFFECTS_CLEARED listener.
--- Clears all custom tracking to stay in sync with game state
-function ActionBar.OnActionSlotEffectsCleared(eventCode)
-    -- Clear all custom tracking UI
-    for i = BAR_INDEX_START, BAR_INDEX_END do
-        if g_uiCustomToggle[i] then
-            g_uiCustomToggle[i]:SetHidden(true)
-        end
-        if g_uiProcAnimation[i] and g_uiProcAnimation[i]:IsPlaying() then
-            g_uiProcAnimation[i]:Stop()
-        end
-    end
-
-    for i = BAR_INDEX_START + BACKBAR_INDEX_OFFSET, BAR_INDEX_END + BACKBAR_INDEX_OFFSET do
-        if g_uiCustomToggle[i] then
-            g_uiCustomToggle[i]:SetHidden(true)
-        end
-        if g_uiProcAnimation[i] and g_uiProcAnimation[i]:IsPlaying() then
-            g_uiProcAnimation[i]:Stop()
-        end
-    end
-
-    -- Clear all custom tracking tables to stay in sync with game state
-    ZO_ClearTable(g_toggledSlotsRemain)
-    ZO_ClearTable(g_toggledSlotsStack)
-    -- Note: Don't clear g_toggledSlotsFront/Back as those map abilityId -> slotNum
-    -- They'll be repopulated on next slot update
-end
-
-function ActionBar.BarHighlightSwap(abilityId, overrideRank, casterUnitTag)
+-- -----------------------------------------------------------------------------
+---
+--- @param abilityId integer
+function ActionBar.BarHighlightSwap(abilityId)
     local effect = Effects.BarHighlightCheckOnFade[abilityId]
     local ids = { effect.id1 or 0, effect.id2 or 0, effect.id3 or 0 }
     local tags = { effect.unitTag, effect.id2Tag, effect.id3Tag }
@@ -1359,8 +1300,8 @@ function ActionBar.BarHighlightSwap(abilityId, overrideRank, casterUnitTag)
         end
 
         if duration > 0 then
-            duration = ((GetAbilityDuration(duration, overrideRank, casterUnitTag) or 0) - (GetAbilityDuration(durationMod, overrideRank, casterUnitTag) or 0))
-            local timeStarted = GetGameTimeSeconds()
+            duration = ((GetUpdatedAbilityDuration(duration) or 0) - (GetUpdatedAbilityDuration(durationMod) or 0))
+            local timeStarted = GetFrameTimeSeconds()
             local timeEnding = timeStarted + (duration / 1000)
             ActionBar.OnEffectChanged(
                 EFFECT_RESULT_GAINED,
@@ -1476,8 +1417,8 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
             if abilityId == 32958 then
                 return
             end -- Ignore Shifting Standard
-            local currentTime = GetGameTimeMilliseconds()
-            if not g_protectAbilityRemoval[abilityId] or g_protectAbilityRemoval[abilityId] < currentTime then
+            local currentTimeMS = GetFrameTimeMilliseconds()
+            if not g_protectAbilityRemoval[abilityId] or g_protectAbilityRemoval[abilityId] < currentTimeMS then
                 if Effects.IsGroundMineAura[abilityId] or Effects.IsGroundMineStack[abilityId] then
                     if g_mineStacks[abilityId] then
                         g_mineStacks[abilityId] = g_mineStacks[abilityId] - Effects.EffectGroundDisplay[abilityId].stackRemove
@@ -1554,8 +1495,8 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
                 g_mineNoTurnOff[abilityId] = nil
             end
 
-            local currentTime = GetGameTimeMilliseconds()
-            g_protectAbilityRemoval[abilityId] = currentTime + 150
+            local currentTimeMS = GetFrameTimeMilliseconds()
+            g_protectAbilityRemoval[abilityId] = currentTimeMS + 150
 
             if Effects.IsGroundMineAura[abilityId] then
                 g_mineStacks[abilityId] = Effects.EffectGroundDisplay[abilityId].stackReset
@@ -1681,7 +1622,7 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
         end
         -- start any proc animation associated with this effect
         if g_triggeredSlotsFront[abilityId] or g_triggeredSlotsBack[abilityId] then
-            local currentTime = GetGameTimeMilliseconds()
+            local currentTimeMS = GetFrameTimeMilliseconds()
             if ActionBar.SV.ShowTriggered then
                 -- Play sound twice so its a little louder.
                 if ActionBar.SV.ProcEnableSound and unitTag == "player" and g_triggeredSlotsFront[abilityId] then
@@ -1696,7 +1637,7 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
                     end
                 end
                 g_triggeredSlotsRemain[abilityId] = 1000 * endTime
-                local remain = g_triggeredSlotsRemain[abilityId] - currentTime
+                local remain = g_triggeredSlotsRemain[abilityId] - currentTimeMS
                 -- Front
                 if g_triggeredSlotsFront[abilityId] then
                     ActionBar.PlayProcAnimations(g_triggeredSlotsFront[abilityId])
@@ -1715,28 +1656,32 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
         end
         -- Display active effects
         if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
-            local currentTime = GetGameTimeMilliseconds()
+            local currentTimeMS = GetFrameTimeMilliseconds()
             if ActionBar.SV.ShowToggled then
                 -- Add fake duration to Grim Focus so the highlight stays
                 if Effects.IsGrimFocus[abilityId] or Effects.IsBloodFrenzy[abilityId] then
-                    g_toggledSlotsRemain[abilityId] = currentTime + 90000000
+                    g_toggledSlotsRemain[abilityId] = currentTimeMS + 90000000
                 else
                     g_toggledSlotsRemain[abilityId] = 1000 * endTime
                 end
                 g_toggledSlotsStack[abilityId] = stackCount
                 if g_toggledSlotsFront[abilityId] then
                     local slotNum = g_toggledSlotsFront[abilityId]
-                    ActionBar.ShowSlot(slotNum, abilityId, currentTime, false)
+                    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMS, false)
                 end
                 if g_toggledSlotsBack[abilityId] then
                     local slotNum = g_toggledSlotsBack[abilityId]
-                    ActionBar.ShowSlot(slotNum, abilityId, currentTime, false)
+                    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMS, false)
                 end
             end
         end
     end
 end
 
+-- -----------------------------------------------------------------------------
+---
+--- @param slotNum integer
+--- @param abilityId integer
 function ActionBar.HideSlot(slotNum, abilityId)
     g_uiCustomToggle[slotNum]:SetHidden(true)
     if slotNum > BACKBAR_INDEX_OFFSET then
@@ -1750,7 +1695,13 @@ function ActionBar.HideSlot(slotNum, abilityId)
     end
 end
 
-function ActionBar.ShowSlot(slotNum, abilityId, currentTime, desaturate)
+-- -----------------------------------------------------------------------------
+---
+--- @param slotNum integer
+--- @param abilityId integer
+--- @param currentTimeMS integer
+--- @param desaturate boolean
+function ActionBar.ShowSlot(slotNum, abilityId, currentTimeMS, desaturate)
     ActionBar.ShowCustomToggle(slotNum)
     if slotNum > BACKBAR_INDEX_OFFSET then
         if slotNum ~= BAR_INDEX_END + BACKBAR_INDEX_OFFSET then
@@ -1765,7 +1716,7 @@ function ActionBar.ShowSlot(slotNum, abilityId, currentTime, desaturate)
         if not g_uiCustomToggle[slotNum] then
             return
         end
-        local remain = g_toggledSlotsRemain[abilityId] - currentTime
+        local remain = g_toggledSlotsRemain[abilityId] - currentTimeMS
         g_uiCustomToggle[slotNum].label:SetText(SetBarRemainLabel(remain, abilityId))
         if g_toggledSlotsStack[abilityId] and g_toggledSlotsStack[abilityId] > 0 then
             g_uiCustomToggle[slotNum].stack:SetText(g_toggledSlotsStack[abilityId])
@@ -1780,6 +1731,9 @@ function ActionBar.ShowSlot(slotNum, abilityId, currentTime, desaturate)
     end
 end
 
+-- -----------------------------------------------------------------------------
+---
+--- @param slotNum integer
 function ActionBar.BackbarHideSlot(slotNum)
     if ActionBar.SV.BarHideUnused then
         if g_backbarButtons[slotNum] then
@@ -1788,6 +1742,9 @@ function ActionBar.BackbarHideSlot(slotNum)
     end
 end
 
+-- -----------------------------------------------------------------------------
+---
+--- @param slotNum integer
 function ActionBar.BackbarShowSlot(slotNum)
     -- Unhide the slot
     if ActionBar.SV.BarShowBack then
@@ -1797,6 +1754,10 @@ function ActionBar.BackbarShowSlot(slotNum)
     end
 end
 
+-- -----------------------------------------------------------------------------
+---
+--- @param slotNum integer
+--- @param desaturate boolean
 function ActionBar.ToggleBackbarSaturation(slotNum, desaturate)
     local button = g_backbarButtons[slotNum]
     if ActionBar.SV.BarDarkUnused then
@@ -1808,6 +1769,7 @@ function ActionBar.ToggleBackbarSaturation(slotNum, desaturate)
     end
 end
 
+-- -----------------------------------------------------------------------------
 -- Called on initialization and when swapping in and out of Gamepad mode
 function ActionBar.BackbarSetupTemplate()
     local style = IsInGamepadPreferredMode() and GAMEPAD_CONSTANTS or KEYBOARD_CONSTANTS
@@ -1835,12 +1797,13 @@ function ActionBar.BackbarSetupTemplate()
 
     -- Anchor the backbar to the normal action bar with spacing
     local offsetY = IsInGamepadPreferredMode() and ACTION_BAR:GetHeight() * 1.6 or ACTION_BAR:GetHeight()
+    local ActionButton3 = GetControl("ActionButton3")
     local ActionButton53 = GetControl("ActionButton53")
-    local AB3 = _G["ActionButton3"]
     ActionButton53:ClearAnchors()
-    ActionButton53:SetAnchor(CENTER, AB3, CENTER, 0, -(offsetY * 0.8))
+    ActionButton53:SetAnchor(CENTER, ActionButton3, CENTER, 0, -(offsetY * 0.8))
 end
 
+-- -----------------------------------------------------------------------------
 -- Called from the menu and on init
 function ActionBar.BackbarToggleSettings()
     for i = BAR_INDEX_START, BACKBAR_INDEX_END do
@@ -1860,8 +1823,8 @@ function ActionBar.BackbarToggleSettings()
     end
 end
 
+-- -----------------------------------------------------------------------------
 function ActionBar.CreateCastBar()
-
     local fontString
     if IsConsoleUI() then
         fontString = "ZoFontGamepad18"
@@ -2033,6 +1996,7 @@ function ActionBar.CreateCastBar()
     castbar:SetHidden(true)
 end
 
+-- -----------------------------------------------------------------------------
 function ActionBar.ResizeCastBar()
     uiTlw.castBar:SetDimensions(ActionBar.SV.CastBarSizeW + ActionBar.SV.CastBarIconSize + 4, ActionBar.SV.CastBarSizeH)
     castbar:ClearAnchors()
@@ -2058,16 +2022,18 @@ function ActionBar.ResizeCastBar()
     ActionBar.SetCastBarPosition()
 end
 
+-- -----------------------------------------------------------------------------
 function ActionBar.UpdateCastBar()
     castbar.bar.name:SetFont(g_castbarFont)
     castbar.bar.timer:SetFont(g_castbarFont)
     castbar.bar.bar:SetTexture(LUIE.StatusbarTextures[ActionBar.SV.CastBarTexture])
-    castbar.bar.backdrop:SetCenterColor((0.1 * ActionBar.SV.CastBarGradientC1[1]), (0.1 * ActionBar.SV.CastBarGradientC1[2]), (0.1 * ActionBar.SV.CastBarGradientC1[3]), 0.75)
+    castbar.bar.backdrop:SetCenterColor((0.1 * ActionBar.SV.CastBarGradientC1[1]), (0.1 * ActionBar.SV.CastBarGradientC1[2]), (0.1 * ActionBar.SV.CastBarGradientC1[3]), 0.75 * ActionBar.SV.CastBarGradientC1[4])
     local startR, startG, startB, startA = ActionBar.SV.CastBarGradientC1[1], ActionBar.SV.CastBarGradientC1[2], ActionBar.SV.CastBarGradientC1[3], ActionBar.SV.CastBarGradientC1[4]
     local endR, endG, endB, endA = ActionBar.SV.CastBarGradientC2[1], ActionBar.SV.CastBarGradientC2[2], ActionBar.SV.CastBarGradientC2[3], ActionBar.SV.CastBarGradientC2[4]
     castbar.bar.bar:SetGradientColors(startR, startG, startB, startA, endR, endG, endB, endA)
 end
 
+-- -----------------------------------------------------------------------------
 function ActionBar.ResetCastBarPosition()
     if not ActionBar.Enabled then
         return
@@ -2079,6 +2045,7 @@ function ActionBar.ResetCastBarPosition()
     ActionBar.SetMovingState(false)
 end
 
+-- -----------------------------------------------------------------------------
 function ActionBar.SetCastBarPosition()
     if uiTlw.castBar and uiTlw.castBar:GetType() == CT_TOPLEVELCONTROL then
         uiTlw.castBar:ClearAnchors()
@@ -2094,6 +2061,9 @@ function ActionBar.SetCastBarPosition()
     uiTlw.castBar.preview.anchorLabel:SetText((savedPos ~= nil and #savedPos == 2) and zo_strformat("<<1>>, <<2>>", savedPos[1], savedPos[2]) or "default")
 end
 
+-- -----------------------------------------------------------------------------
+---
+--- @param state boolean
 function ActionBar.SetMovingState(state)
     if not ActionBar.Enabled then
         return
@@ -2106,7 +2076,10 @@ function ActionBar.SetMovingState(state)
     end
 end
 
+-- -----------------------------------------------------------------------------
 -- Called by ActionBar.SetMovingState from the menu as well as by ActionBar.OnUpdateCastbar when preview is enabled
+---
+--- @param state boolean
 function ActionBar.GenerateCastbarPreview(state)
     local previewIcon = "esoui/art/icons/icon_missing.dds"
     castbar.icon:SetTexture(previewIcon)
@@ -2130,12 +2103,12 @@ end
 function ActionBar.ClientInteractResult(eventCode, result, interactTargetName)
 
     local function DisplayInteractCast(icon, name, duration)
-        local currentTime = GetGameTimeMilliseconds()
-        local endTime = currentTime + duration
-        local remain = endTime - currentTime
+        local currentTimeMS = GetGameTimeMilliseconds()
+        local endTime = currentTimeMS + duration
+        local remain = endTime - currentTimeMS
 
         castbar.remain = endTime
-        castbar.starts = currentTime
+        castbar.starts = currentTimeMS
         castbar.ends = endTime
         castbar.icon:SetTexture(icon)
         castbar.type = 1 -- CAST
@@ -2168,7 +2141,7 @@ function ActionBar.ClientInteractResult(eventCode, result, interactTargetName)
                 local name = data.name
                 local duration = data.duration
                 local delay = data.delay
-                zo_callLater(function() DisplayInteractCast(icon, name, duration) end, delay)
+                LUIE_callLater(function() DisplayInteractCast(icon, name, duration) end, delay)
             end
         end
     end
@@ -2177,6 +2150,10 @@ end
 ]]
 --
 
+-- -----------------------------------------------------------------------------
+---
+--- @param eventCode integer
+--- @param durationMs integer
 function ActionBar.SoulGemResurrectionStart(eventCode, durationMs)
     -- Just in case any other casts are present - stop them first
     ActionBar.StopCastBar()
@@ -2186,12 +2163,12 @@ function ActionBar.SoulGemResurrectionStart(eventCode, durationMs)
     local name = Abilities.Innate_Soul_Gem_Resurrection
     local duration = durationMs
 
-    local currentTime = GetGameTimeMilliseconds()
-    local endTime = currentTime + duration
-    local remain = endTime - currentTime
+    local currentTimeMS = GetFrameTimeMilliseconds()
+    local endTime = currentTimeMS + duration
+    local remain = endTime - currentTimeMS
 
     castbar.remain = endTime
-    castbar.starts = currentTime
+    castbar.starts = currentTimeMS
     castbar.ends = endTime
     castbar.icon:SetTexture(icon)
     castbar.type = 1 -- CAST
@@ -2211,12 +2188,34 @@ function ActionBar.SoulGemResurrectionStart(eventCode, durationMs)
     eventManager:RegisterForUpdate(moduleName .. "CastBar", 20, ActionBar.OnUpdateCastbar)
 end
 
+-- -----------------------------------------------------------------------------
+---
+--- @param eventCode integer
 function ActionBar.SoulGemResurrectionEnd(eventCode)
     ActionBar.StopCastBar()
 end
 
 -- Very basic handler registered to only read CC events on the player
-function ActionBar.OnCombatEventBreakCast(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId)
+--- - **EVENT_COMBAT_EVENT **
+---
+--- @param result ActionResult
+--- @param isError boolean
+--- @param abilityName string
+--- @param abilityGraphic integer
+--- @param abilityActionSlotType ActionSlotType
+--- @param sourceName string
+--- @param sourceType CombatUnitType
+--- @param targetName string
+--- @param targetType CombatUnitType
+--- @param hitValue integer
+--- @param powerType CombatMechanicFlags
+--- @param damageType DamageType
+--- @param log boolean
+--- @param sourceUnitId integer
+--- @param targetUnitId integer
+--- @param abilityId integer
+--- @param overflow integer
+function ActionBar.OnCombatEventBreakCast(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     -- Some cast/channel abilities (or effects we use to simulate this) stun the player - ignore the effects of these ids when this happens.
     if Castbar.IgnoreCastBarStun[abilityId] or Castbar.IgnoreCastBreakingActions[castbar.id] then
         return
@@ -2233,8 +2232,26 @@ local function isValidDamageResult(result)
     end
 end
 
--- Listens to EVENT_COMBAT_EVENT
-function ActionBar.OnCombatEvent(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overrideRank, casterUnitTag)
+--- - **EVENT_COMBAT_EVENT **
+---
+--- @param result ActionResult
+--- @param isError boolean
+--- @param abilityName string
+--- @param abilityGraphic integer
+--- @param abilityActionSlotType ActionSlotType
+--- @param sourceName string
+--- @param sourceType CombatUnitType
+--- @param targetName string
+--- @param targetType CombatUnitType
+--- @param hitValue integer
+--- @param powerType CombatMechanicFlags
+--- @param damageType DamageType
+--- @param log boolean
+--- @param sourceUnitId integer
+--- @param targetUnitId integer
+--- @param abilityId integer
+--- @param overflow integer
+function ActionBar.OnCombatEvent(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     -- Track ultimate generation when we block an attack or hit a target with a light/medium/heavy attack.
     if ActionBar.SV.UltimateGeneration and uiUltimate.NotFull and ((result == ACTION_RESULT_BLOCKED_DAMAGE and targetType == COMBAT_UNIT_TYPE_PLAYER) or (Effects.IsWeaponAttack[abilityName] and sourceType == COMBAT_UNIT_TYPE_PLAYER and targetName ~= "")) then
         uiUltimate.Texture:SetHidden(false)
@@ -2294,7 +2311,7 @@ function ActionBar.OnCombatEvent(eventCode, result, isError, abilityName, abilit
     end
 
     local duration
-    local channeled, durationValue = GetAbilityCastInfo(abilityId, overrideRank, casterUnitTag)
+    local channeled, castTime = GetAbilityCastInfo(abilityId)
     local forceChanneled = false
 
     -- Override certain things to display as a channel rather than cast.
@@ -2304,9 +2321,9 @@ function ActionBar.OnCombatEvent(eventCode, result, isError, abilityName, abilit
     end
 
     if channeled then
-        duration = Castbar.CastDurationFix[abilityId] or result == ACTION_RESULT_EFFECT_GAINED_DURATION and hitValue or durationValue
+        duration = Castbar.CastDurationFix[abilityId] or result == ACTION_RESULT_EFFECT_GAINED_DURATION and hitValue or 0
     else
-        duration = Castbar.CastDurationFix[abilityId] or durationValue
+        duration = Castbar.CastDurationFix[abilityId] or castTime
     end
 
     -- End the cast bar and restart if a new begin event is detected and the effect isn't a channel or fake cast
@@ -2323,7 +2340,7 @@ function ActionBar.OnCombatEvent(eventCode, result, isError, abilityName, abilit
     if Castbar.CastChannelConvert[abilityId] then
         channeled = true
         forceChanneled = true
-        duration = Castbar.CastDurationFix[abilityId] or durationValue
+        duration = Castbar.CastDurationFix[abilityId] or castTime
     end
 
     -- Some abilities cast into a channeled stun effect - we want these abilities to display the cast and channel if flagged.
@@ -2331,7 +2348,7 @@ function ActionBar.OnCombatEvent(eventCode, result, isError, abilityName, abilit
     if Castbar.MultiCast[abilityId] then
         if result == 2200 then
             channeled = false
-            duration = durationValue or 0
+            duration = castTime or 0
         elseif result == 2240 then
             ActionBar.StopCastBar() -- Stop the cast bar when the GAINED event happens so that we can display the channel when the cast ends
         end
@@ -2349,12 +2366,12 @@ function ActionBar.OnCombatEvent(eventCode, result, isError, abilityName, abilit
     if duration > 0 and not g_casting then
         -- If action result is BEGIN and not channeled then start, otherwise only use GAINED
         if (not forceChanneled and (((result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_BEGIN_CHANNEL) and not channeled) or (result == ACTION_RESULT_EFFECT_GAINED and (Castbar.CastDurationFix[abilityId] or channeled)) or (result == ACTION_RESULT_EFFECT_GAINED_DURATION and (Castbar.CastDurationFix[abilityId] or channeled)))) or (forceChanneled and result == ACTION_RESULT_BEGIN) then
-            local currentTime = GetGameTimeMilliseconds()
-            local endTime = currentTime + duration
-            local remain = endTime - currentTime
+            local currentTimeMS = GetFrameTimeMilliseconds()
+            local endTime = currentTimeMS + duration
+            local remain = endTime - currentTimeMS
 
             castbar.remain = endTime
-            castbar.starts = currentTime
+            castbar.starts = currentTimeMS
             castbar.ends = endTime
             castbar.icon:SetTexture(icon)
             castbar.id = abilityId
@@ -2383,9 +2400,9 @@ function ActionBar.OnCombatEvent(eventCode, result, isError, abilityName, abilit
 
     -- Fix to lower the duration of the next cast of Profane Symbol quest ability for Scion of the Blood Matron (Vampire)
     if abilityId == 39507 then
-        zo_callLater(function ()
-                         Castbar.CastDurationFix[39507] = 19500
-                     end, 5000)
+        LUIE_callLater(function ()
+                           Castbar.CastDurationFix[39507] = 19500
+                       end, 5000)
     end
 end
 
@@ -2440,11 +2457,11 @@ function ActionBar.OnCombatEventBar(eventCode, result, isError, abilityName, abi
     end
 
     if result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED or result == ACTION_RESULT_EFFECT_GAINED_DURATION then
-        local currentTime = GetGameTimeMilliseconds()
+        local currentTimeMS = GetFrameTimeMilliseconds()
         if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
             if ActionBar.SV.ShowToggled then
                 local duration = GetUpdatedAbilityDuration(abilityId)
-                local endTime = currentTime + duration
+                local endTime = currentTimeMS + duration
                 g_toggledSlotsRemain[abilityId] = endTime
                 -- Handling for Crystallized Shield + Morphs
                 if abilityId == 86135 or abilityId == 86139 or abilityId == 86143 then
@@ -2457,11 +2474,11 @@ function ActionBar.OnCombatEventBar(eventCode, result, isError, abilityName, abi
                 -- Toggle highlight on
                 if g_toggledSlotsFront[abilityId] then
                     local slotNum = g_toggledSlotsFront[abilityId]
-                    ActionBar.ShowSlot(slotNum, abilityId, currentTime, false)
+                    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMS, false)
                 end
                 if g_toggledSlotsBack[abilityId] then
                     local slotNum = g_toggledSlotsBack[abilityId]
-                    ActionBar.ShowSlot(slotNum, abilityId, currentTime, false)
+                    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMS, false)
                 end
             end
         end
@@ -2499,19 +2516,13 @@ function ActionBar.OnSlotUpdated(eventCode, slotNum)
     end
 end
 
-local function removeSlotFromTable(table, slotNum)
-    for abilityId, slot in pairs(table) do
-        if slot == slotNum then
-            table[abilityId] = nil
-        end
-    end
-end
-
+-- Handle slot update for action bars
+---
+--- @param slotNum integer
+--- @param wasfullUpdate boolean
+--- @param onlyProc boolean
 function ActionBar.BarSlotUpdate(slotNum, wasfullUpdate, onlyProc)
-    if not slotNum or not BACKBAR_INDEX_OFFSET then
-        return
-    end
-
+    -- Look only for action bar slots
     if slotNum < BACKBAR_INDEX_OFFSET then
         if ActionBar.SV.ShowToggledUltimate then
             if slotNum < BAR_INDEX_START or slotNum > BAR_INDEX_END then
@@ -2524,45 +2535,55 @@ function ActionBar.BarSlotUpdate(slotNum, wasfullUpdate, onlyProc)
         end
     end
 
-    removeSlotFromTable(g_triggeredSlotsFront, slotNum)
-    removeSlotFromTable(g_triggeredSlotsBack, slotNum)
+    -- Remove saved triggered proc information
+    for abilityId, slot in pairs(g_triggeredSlotsFront) do
+        if (slot == slotNum) then
+            g_triggeredSlotsFront[abilityId] = nil
+        end
+    end
+    for abilityId, slot in pairs(g_triggeredSlotsBack) do
+        if (slot == slotNum) then
+            g_triggeredSlotsBack[abilityId] = nil
+        end
+    end
 
+    -- Stop possible proc animation
     if g_uiProcAnimation[slotNum] and g_uiProcAnimation[slotNum]:IsPlaying() then
+        -- g_uiProcAnimation[slotNum].procLoopTexture.label:SetText("")
         g_uiProcAnimation[slotNum]:Stop()
     end
 
     if onlyProc == false then
-        removeSlotFromTable(g_toggledSlotsFront, slotNum)
-        removeSlotFromTable(g_toggledSlotsBack, slotNum)
+        -- Remove custom toggle information and custom highlight
+        for abilityId, slot in pairs(g_toggledSlotsFront) do
+            if (slot == slotNum) then
+                g_toggledSlotsFront[abilityId] = nil
+            end
+        end
+        for abilityId, slot in pairs(g_toggledSlotsBack) do
+            if (slot == slotNum) then
+                g_toggledSlotsBack[abilityId] = nil
+            end
+        end
 
         if g_uiCustomToggle[slotNum] then
+            -- g_uiCustomToggle[slotNum].label:SetText("")
             g_uiCustomToggle[slotNum]:SetHidden(true)
         end
     end
 
-    if slotNum < BACKBAR_INDEX_OFFSET and not IsSlotUsed(slotNum, g_hotbarCategory) then
+    -- Bail out if slot is not used and we're not referencing a fake backbar slot.
+    if slotNum < BACKBAR_INDEX_OFFSET and not IsSlotUsed(slotNum) then
         return
     end
 
-    local ability_id = GetSlotTrueBoundId(slotNum, g_hotbarCategory)
+    local ability_id
     if slotNum > BACKBAR_INDEX_OFFSET then
         local hotbarCategory = g_hotbarCategory == HOTBAR_CATEGORY_BACKUP and HOTBAR_CATEGORY_PRIMARY or HOTBAR_CATEGORY_BACKUP
         ability_id = GetSlotTrueBoundId(slotNum - BACKBAR_INDEX_OFFSET, hotbarCategory)
-
-        -- Check backbar weapon type
-        local weaponSlot = g_hotbarCategory == HOTBAR_CATEGORY_BACKUP and 4 or 20
-        local weaponType = GetItemWeaponType(BAG_WORN, weaponSlot)
-
-        -- Fix tracking for Staff Backbar
-        if weaponType == WEAPONTYPE_FIRE_STAFF or weaponType == WEAPONTYPE_FROST_STAFF or weaponType == WEAPONTYPE_LIGHTNING_STAFF then
-            if Effects.BarHighlightDestroFix[ability_id] and Effects.BarHighlightDestroFix[ability_id][weaponType] then
-                ability_id = Effects.BarHighlightDestroFix[ability_id][weaponType]
-            end
-        end
+    else
+        ability_id = GetSlotTrueBoundId(slotNum, g_hotbarCategory)
     end
-
-    -- Added this back for now but some abilities might still need updates in the override tables
-    local showFakeAura = (Effects.BarHighlightOverride[ability_id] and Effects.BarHighlightOverride[ability_id].showFakeAura)
 
     if Effects.BarHighlightOverride[ability_id] then
         if Effects.BarHighlightOverride[ability_id].hide then
@@ -2572,57 +2593,81 @@ function ActionBar.BarSlotUpdate(slotNum, wasfullUpdate, onlyProc)
             ability_id = Effects.BarHighlightOverride[ability_id].newId
         end
     end
-
-    local abilityName = Effects.EffectOverride[ability_id] and Effects.EffectOverride[ability_id].name or GetAbilityName(ability_id)
-    local duration = GetUpdatedAbilityDuration(ability_id) or 0
-
+    local abilityName = Effects.EffectOverride[ability_id] and Effects.EffectOverride[ability_id].name or GetAbilityName(ability_id) -- GetSlotName(slotNum)
+    -- local _, _, channel = GetAbilityCastInfo(ability_id)
+    local duration = GetUpdatedAbilityDuration(ability_id)
     local currentTime = GetGameTimeMilliseconds()
 
-    local triggeredSlots = slotNum > BACKBAR_INDEX_OFFSET and g_triggeredSlotsBack or g_triggeredSlotsFront
-    local proc = Effects.HasAbilityProc[abilityName]
+    local triggeredSlots
+    if slotNum > BACKBAR_INDEX_OFFSET then
+        triggeredSlots = g_triggeredSlotsBack
+    else
+        triggeredSlots = g_triggeredSlotsFront
+    end
 
-    if proc then
+    -- Check if currently this ability is in proc state
+    local proc = Effects.HasAbilityProc[abilityName]
+    if Effects.IsAbilityProc[GetSlotTrueBoundId(slotNum, g_hotbarCategory)] then
+        if ActionBar.SV.ShowTriggered then
+            ActionBar.PlayProcAnimations(slotNum)
+            if ActionBar.SV.ProcEnableSound then
+                if not wasfullUpdate and not g_disableProcSound[slotNum] then
+                    PlaySound(g_ProcSound)
+                    PlaySound(g_ProcSound)
+                    -- Only play a proc sound every 3 seconds (matches Power Lash cd)
+                    g_disableProcSound[slotNum] = true
+                    zo_callLater(function () g_disableProcSound[slotNum] = false end, 3000)
+                end
+            end
+        end
+    elseif proc then
         triggeredSlots[proc] = slotNum
         if g_triggeredSlotsRemain[proc] then
             if ActionBar.SV.ShowTriggered then
                 ActionBar.PlayProcAnimations(slotNum)
                 if ActionBar.SV.BarShowLabel then
-                    if not g_uiProcAnimation[slotNum] then
-                        return
-                    end
+                    if not g_uiProcAnimation[slotNum] then return end
                     local remain = g_triggeredSlotsRemain[proc] - currentTime
-                    g_uiProcAnimation[slotNum].procLoopTexture.label:SetText(SetBarRemainLabel(remain, ability_id))
+                    g_uiProcAnimation[slotNum].procLoopTexture.label:SetText(FormatDurationSeconds(remain))
                 end
             end
         end
     end
 
-    local toggledSlots = slotNum > BACKBAR_INDEX_OFFSET and g_toggledSlotsBack or g_toggledSlotsFront
+    local toggledSlots
+    if slotNum > BACKBAR_INDEX_OFFSET then
+        toggledSlots = g_toggledSlotsBack
+    else
+        toggledSlots = g_toggledSlotsFront
+    end
 
+    -- Check for active duration to display highlight for abilities on bar swap
     if onlyProc == false then
-        if duration > 0 or Effects.AddNoDurationBarHighlight[ability_id] or Effects.IsGrimFocus[ability_id] or Effects.IsBloodFrenzy[ability_id] or Effects.MajorMinor[ability_id] then
+        if duration > 0 or Effects.AddNoDurationBarHighlight[ability_id] or Effects.MajorMinor[ability_id] then
             toggledSlots[ability_id] = slotNum
             if g_toggledSlotsRemain[ability_id] then
                 if ActionBar.SV.ShowToggled then
-                    local slotNumST = toggledSlots[ability_id]
+                    slotNum = toggledSlots[ability_id]
+                    -- Check the other slot here to determine if we desaturate (in case effects are running in both slots)
                     local desaturate
-                    local math = slotNumST > BACKBAR_INDEX_OFFSET and slotNumST - BACKBAR_INDEX_OFFSET or nil
-                    if math then
-                        if g_uiCustomToggle[math] then
+                    local slotIndex = slotNum > BACKBAR_INDEX_OFFSET and slotNum - BACKBAR_INDEX_OFFSET or nil
+                    if slotIndex then
+                        if g_uiCustomToggle[slotIndex] then
                             desaturate = false
-                            if g_uiCustomToggle[math]:IsHidden() then
-                                ActionBar.BackbarHideSlot(slotNumST)
+                            if g_uiCustomToggle[slotIndex]:IsHidden() then
+                                ActionBar.BackbarHideSlot(slotNum)
                                 desaturate = true
                             end
                         end
                     end
-                    ActionBar.ShowSlot(slotNumST, ability_id, currentTime, desaturate)
+                    ActionBar.ShowSlot(slotNum, ability_id, currentTime, desaturate)
                 end
             end
         end
     end
 end
 
+---
 function ActionBar.UpdateUltimateLabel()
     -- Get the currently slotted ultimate cost
     local bar = g_hotbarCategory
@@ -2632,14 +2677,21 @@ function ActionBar.UpdateUltimateLabel()
     ActionBar.OnPowerUpdatePlayer(EVENT_POWER_UPDATE, "player", nil, COMBAT_MECHANIC_FLAGS_ULTIMATE, g_ultimateCurrent, 0, 0)
 end
 
+---
 function ActionBar.InventoryItemUsed()
     g_potionUsed = true
-    zo_callLater(function ()
-                     g_potionUsed = false
-                 end, 200)
+    LUIE_callLater(function ()
+                       g_potionUsed = false
+                   end, 200)
 end
 
-function ActionBar.OnActiveHotbarUpdate(eventCode, didActiveHotbarChange, shouldUpdateAbilityAssignments, activeHotbarCategory)
+--- - **EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED **
+---
+--- @param eventId integer
+--- @param didActiveHotbarChange boolean
+--- @param shouldUpdateAbilityAssignments boolean
+--- @param activeHotbarCategory HotBarCategory
+function ActionBar.OnActiveHotbarUpdate(eventId, didActiveHotbarChange, shouldUpdateAbilityAssignments, activeHotbarCategory)
     if didActiveHotbarChange == true or shouldUpdateAbilityAssignments == true then
         for _, physicalSlot in pairs(g_backbarButtons) do
             if physicalSlot.hotbarSwapAnimation then
@@ -2652,49 +2704,12 @@ function ActionBar.OnActiveHotbarUpdate(eventCode, didActiveHotbarChange, should
     end
 end
 
-function ActionBar.OnSlotsFullUpdate(eventCode)
+--- - **EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED**
+---
+function ActionBar.OnSlotsFullUpdate()
     -- Don't update bars if this full update event was from using an inventory item
     if g_potionUsed == true then
         return
-    end
-
-    -- Update bar category
-    g_hotbarCategory = GetActiveHotbarCategory()
-
-    -- Disable default timers
-    for i = BAR_INDEX_START, BAR_INDEX_END do
-        local button = ZO_ActionBar_GetButton(i)
-        if button then
-            -- Disable default timer display
-            button.showTimer = false
-            -- Hide default timer and stack count text
-            if button.stackCountText then
-                button.stackCountText:SetHidden(true)
-            end
-            if button.timerText then
-                button.timerText:SetHidden(true)
-            end
-            -- For non-ult buttons, disable default animation updates but keep the animation
-            if i < BAR_INDEX_END then
-                button.noUpdates = true    -- Disable animation updates
-                button:HandleSlotChanged() -- Update slot manually
-            end
-        end
-    end
-
-    -- Hide default backbar buttons and disable their timers
-    if g_hotbarCategory == HOTBAR_CATEGORY_PRIMARY or g_hotbarCategory == HOTBAR_CATEGORY_BACKUP then
-        local inactiveHotbarCategory = g_hotbarCategory == HOTBAR_CATEGORY_PRIMARY and HOTBAR_CATEGORY_BACKUP or HOTBAR_CATEGORY_PRIMARY
-        for i = BAR_INDEX_START, BAR_INDEX_END do
-            local targetButton = ZO_ActionBar_GetButton(i, inactiveHotbarCategory)
-            if targetButton then
-                targetButton.showTimer = false
-                targetButton.showBackRowSlot = false
-                if i < BAR_INDEX_END then -- non-ult only
-                    targetButton.noUpdates = true
-                end
-            end
-        end
     end
 
     -- Handle ultimate label first
@@ -2707,16 +2722,16 @@ function ActionBar.OnSlotsFullUpdate(eventCode)
 
     for i = (BAR_INDEX_START + BACKBAR_INDEX_OFFSET), (BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET) do
         local button = g_backbarButtons[i]
-        if button then
-            ActionBar.SetupBackBarIcons(button)
-            ActionBar.BarSlotUpdate(i, true, false)
-        end
+        ActionBar.SetupBackBarIcons(button, nil)
+        ActionBar.BarSlotUpdate(i, true, false)
     end
 end
 
+---
+--- @param slotNum integer
 function ActionBar.PlayProcAnimations(slotNum)
     if not g_uiProcAnimation[slotNum] then
-        local color = uiQuickSlot.color -- default color in case none is found
+        local colour = uiQuickSlot.colour -- default color in case none is found
         -- Don't make a highlight frame for the backbar ultimate slot since it is not created
         if slotNum == (BAR_INDEX_END + BACKBAR_INDEX_OFFSET) then
             return
@@ -2736,20 +2751,16 @@ function ActionBar.PlayProcAnimations(slotNum)
         procLoopTexture:SetDrawLayer(DL_TEXT)
         procLoopTexture:SetHidden(true)
 
-        procLoopTexture.label = windowManager:CreateControl(nil, procLoopTexture, CT_LABEL)
-        procLoopTexture.label:SetFont(g_barFont)
-        procLoopTexture.label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
-        procLoopTexture.label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
-        procLoopTexture.label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+        procLoopTexture.label = UI:Label(procLoopTexture, nil, nil, nil, g_barFont, nil, false)
         procLoopTexture.label:SetAnchor(TOPLEFT, actionButton.slot)
         procLoopTexture.label:SetAnchor(BOTTOMRIGHT, actionButton.slot, nil, 0, -ActionBar.SV.BarLabelPosition)
         procLoopTexture.label:SetDrawLayer(DL_CONTROLS)
         procLoopTexture.label:SetDrawLayer(DL_OVERLAY)
         procLoopTexture.label:SetDrawTier(DT_HIGH)
-        procLoopTexture.label:SetColor(unpack(ActionBar.SV.RemainingTextColoured and color or { 1, 1, 1, 1 }))
+        procLoopTexture.label:SetColor(unpack(ActionBar.SV.RemainingTextColoured and colour or { 1, 1, 1, 1 }))
         procLoopTexture.label:SetHidden(false)
 
-        local procLoopTimeline = animationManager:CreateTimelineFromVirtual("UltimateReadyLoop", procLoopTexture)
+        local procLoopTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("UltimateReadyLoop", procLoopTexture)
         procLoopTimeline.procLoopTexture = procLoopTexture
 
         procLoopTimeline.onPlay = function (self)
@@ -2771,7 +2782,12 @@ function ActionBar.PlayProcAnimations(slotNum)
     end
 end
 
-function ActionBar.OnDeath(eventCode, unitTag, isDead)
+--- - **EVENT_UNIT_DEATH_STATE_CHANGED **
+---
+--- @param eventId integer
+--- @param unitTag string
+--- @param isDead boolean
+function ActionBar.OnDeath(eventId, unitTag, isDead)
     -- And toggle buttons
     if unitTag == "player" then
         for slotNum = BAR_INDEX_START, BAR_INDEX_END do
@@ -2792,9 +2808,11 @@ function ActionBar.OnDeath(eventCode, unitTag, isDead)
 end
 
 -- Displays custom toggle texture
+---
+--- @param slotNum integer
 function ActionBar.ShowCustomToggle(slotNum)
     if not g_uiCustomToggle[slotNum] then
-        local color = uiQuickSlot.color -- default color in case none is found
+        local colour = uiQuickSlot.colour -- default color in case none is found
         -- Don't make a highlight frame for the backbar ultimate slot since it is not created
         if slotNum == (BAR_INDEX_END + BACKBAR_INDEX_OFFSET) then
             return
@@ -2821,24 +2839,16 @@ function ActionBar.ShowCustomToggle(slotNum)
             toggleFrame:SetColor(0.5, 1, 0.5, 1)
             toggleFrame:SetHidden(false)
 
-            toggleFrame.label = windowManager:CreateControl(nil, toggleFrame, CT_LABEL)
-            toggleFrame.label:SetFont(g_barFont)
-            toggleFrame.label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
-            toggleFrame.label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
-            toggleFrame.label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+            toggleFrame.label = UI:Label(toggleFrame, nil, nil, nil, g_barFont, nil, false)
             toggleFrame.label:SetAnchor(TOPLEFT, actionButton.slot)
             toggleFrame.label:SetAnchor(BOTTOMRIGHT, actionButton.slot, nil, 0, -ActionBar.SV.BarLabelPosition)
             toggleFrame.label:SetDrawLayer(DL_CONTROLS)
             toggleFrame.label:SetDrawLevel(DL_CONTROLS)
             toggleFrame.label:SetDrawTier(DT_HIGH)
-            toggleFrame.label:SetColor(unpack(ActionBar.SV.RemainingTextColoured and color or { 1, 1, 1, 1 }))
+            toggleFrame.label:SetColor(unpack(ActionBar.SV.RemainingTextColoured and colour or { 1, 1, 1, 1 }))
             toggleFrame.label:SetHidden(false)
 
-            toggleFrame.stack = windowManager:CreateControl(nil, toggleFrame, CT_LABEL)
-            toggleFrame.stack:SetFont(g_barFont)
-            toggleFrame.stack:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
-            toggleFrame.stack:SetVerticalAlignment(TEXT_ALIGN_CENTER)
-            toggleFrame.stack:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+            toggleFrame.stack = UI:Label(toggleFrame, nil, nil, nil, g_barFont, nil, false)
             toggleFrame.stack:SetAnchor(CENTER, actionButton.slot, BOTTOMLEFT)
             toggleFrame.stack:SetAnchor(CENTER, actionButton.slot, TOPRIGHT, -12, 14)
             -- toggleFrame.stack:SetAnchor(TOPLEFT, actionButton.slot)
@@ -2847,7 +2857,7 @@ function ActionBar.ShowCustomToggle(slotNum)
             toggleFrame.stack:SetDrawLayer(DL_CONTROLS)
             toggleFrame.stack:SetDrawLevel(DL_CONTROLS)
             toggleFrame.stack:SetDrawTier(DT_HIGH)
-            toggleFrame.stack:SetColor(unpack(ActionBar.SV.RemainingTextColoured and color or { 1, 1, 1, 1 }))
+            toggleFrame.stack:SetColor(unpack(ActionBar.SV.RemainingTextColoured and colour or { 1, 1, 1, 1 }))
             toggleFrame.stack:SetHidden(false)
 
             g_uiCustomToggle[slotNum] = toggleFrame
@@ -2858,7 +2868,16 @@ function ActionBar.ShowCustomToggle(slotNum)
     end
 end
 
-function ActionBar.OnPowerUpdatePlayer(eventCode, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+--- - **EVENT_POWER_UPDATE **
+---
+--- @param eventId integer
+--- @param unitTag string
+--- @param powerIndex luaindex
+--- @param powerType CombatMechanicFlags
+--- @param powerValue integer
+--- @param powerMax integer
+--- @param powerEffectiveMax integer
+function ActionBar.OnPowerUpdatePlayer(eventId, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
     if unitTag ~= "player" then
         return
     end
@@ -2895,9 +2914,9 @@ function ActionBar.OnPowerUpdatePlayer(eventCode, unitTag, powerIndex, powerType
                 uiUltimate.LabelPct:SetHidden(setHiddenPct)
                 -- Update Label Color
                 if ActionBar.SV.UltimateLabelEnabled then
-                    for i = #uiUltimate.pctColors, 1, -1 do
-                        if pct < uiUltimate.pctColors[i].pct then
-                            uiUltimate.LabelVal:SetColor(unpack(uiUltimate.pctColors[i].color))
+                    for i = #uiUltimate.pctColours, 1, -1 do
+                        if pct < uiUltimate.pctColours[i].pct then
+                            uiUltimate.LabelVal:SetColor(unpack(uiUltimate.pctColours[i].colour))
                             break
                         end
                     end
@@ -2911,7 +2930,7 @@ function ActionBar.OnPowerUpdatePlayer(eventCode, unitTag, powerIndex, powerType
                 uiUltimate.LabelPct:SetHidden(setHiddenPct)
                 -- Update Label Color
                 if ActionBar.SV.UltimateLabelEnabled then
-                    uiUltimate.LabelVal:SetColor(unpack(uiUltimate.color))
+                    uiUltimate.LabelVal:SetColor(unpack(uiUltimate.colour))
                 end
             end
             -- Set label hidden or showing
@@ -2926,7 +2945,21 @@ function ActionBar.OnPowerUpdatePlayer(eventCode, unitTag, powerIndex, powerType
     g_ultimateCurrent = powerValue
 end
 
-function ActionBar.OnInventorySlotUpdate(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
+-- -----------------------------------------------------------------------------
+--- - **EVENT_INVENTORY_SINGLE_SLOT_UPDATE **
+---
+--- @param eventId integer
+--- @param bagId Bag
+--- @param slotIndex integer
+--- @param isNewItem boolean
+--- @param itemSoundCategory ItemUISoundCategory
+--- @param inventoryUpdateReason integer
+--- @param stackCountChange integer
+--- @param triggeredByCharacterName string?
+--- @param triggeredByDisplayName string?
+--- @param isLastUpdateForMessage boolean
+--- @param bonusDropSource BonusDropSource
+function ActionBar.OnInventorySlotUpdate(eventId, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
     if stackCountChange >= 0 then
         ActionBar.UpdateUltimateLabel()
     end
