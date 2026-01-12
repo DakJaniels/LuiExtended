@@ -27,7 +27,7 @@ local function __applyFont(unitTag)
 
     if UnitFrames.DefaultFrames[unitTag] then
         local unitFrame = UnitFrames.DefaultFrames[unitTag]
-        local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
+        local fontString = LUIE.CreateFontString(fontName, fontSize, fontStyle)
         for _, powerType in pairs({ COMBAT_MECHANIC_FLAGS_HEALTH, COMBAT_MECHANIC_FLAGS_MAGICKA, COMBAT_MECHANIC_FLAGS_STAMINA }) do
             if unitFrame[powerType] then
                 unitFrame[powerType].label:SetFont(fontString)
@@ -95,7 +95,7 @@ function UnitFrames.CustomFramesApplyFont()
     local sizeCaption = (UnitFrames.SV.CustomFontOther and UnitFrames.SV.CustomFontOther > 0) and UnitFrames.SV.CustomFontOther or 16
     local sizeBars = (UnitFrames.SV.CustomFontBars and UnitFrames.SV.CustomFontBars > 0) and UnitFrames.SV.CustomFontBars or 14
 
-    local __mkFont = function (size) return ZO_CreateFontString(fontName, size, fontStyle) end
+    local __mkFont = function (size) return LUIE.CreateFontString(fontName, size, fontStyle) end
 
     -- After fonts is applied unhide frames, so player can see changes even from menu
     for _, baseName in pairs({ "player", "reticleover", "companion", "SmallGroup", "RaidGroup", "boss", "AvaPlayerTarget", "PetGroup" }) do

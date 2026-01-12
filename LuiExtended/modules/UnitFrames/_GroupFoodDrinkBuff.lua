@@ -373,7 +373,7 @@ local function CreateFoodDrinkBuffUI(frameData)
         local rootSettings = Shared.GetSettings()
         local fontFace = LUIE.Fonts[rootSettings.CustomFontFace]
         local fontStyle = rootSettings.CustomFontStyle
-        label:SetFont(ZO_CreateFontString(fontFace, fontSize, fontStyle))
+        label:SetFont(LUIE.CreateFontString(fontFace, fontSize, fontStyle))
         frameData.foodDrinkBuff.label = label
     end
 

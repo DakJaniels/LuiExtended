@@ -150,7 +150,7 @@ function InfoPanel.ApplyFont()
     local fontSize = (InfoPanel.SV.FontSize and InfoPanel.SV.FontSize > 0) and InfoPanel.SV.FontSize or 16
 
     -- Create font string
-    g_infoPanelFont = ZO_CreateFontString(fontName, fontSize, fontStyle)
+    g_infoPanelFont = LUIE.CreateFontString(fontName, fontSize, fontStyle)
 
     -- Apply font to all elements
     if uiLatency.label then uiLatency.label:SetFont(g_infoPanelFont) end

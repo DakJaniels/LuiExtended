@@ -122,7 +122,7 @@ local function AddCombatStatsToFrame(frameData, isRaid)
             local rootSettings = Shared.GetSettings()
             local fontFace = LUIE.Fonts[rootSettings.CustomFontFace]
             local fontStyle = rootSettings.CustomFontStyle
-            frameData.combatStats.statsLabel:SetFont(ZO_CreateFontString(fontFace, fontSize, fontStyle))
+            frameData.combatStats.statsLabel:SetFont(LUIE.CreateFontString(fontFace, fontSize, fontStyle))
         end
     end
 end

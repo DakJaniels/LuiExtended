@@ -299,7 +299,7 @@ function CombatText.SetMovingState(state)
                             local fontName = "LUIE Default Font"
                             if LUIE.Fonts and LUIE.Fonts[fontName] then
                                 local fontStyle = "soft-shadow-thick"
-                                local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
+                                local fontString = LUIE.CreateFontString(fontName, fontSize, fontStyle)
                                 label:SetFont(fontString)
                             else
                                 if IsInGamepadPreferredMode() or IsConsoleUI() then
@@ -444,7 +444,7 @@ function CombatText.Initialize(enabled)
             _G[k]:SetAnchor(s.point, Combattext, s.relativePoint, s.offsetX, s.offsetY)
             _G[k]:SetDimensions(unpack(s.dimensions))
             _G[k]:SetHandler("OnMouseUp", CombatText.SavePosition)
-            _G[k .. "_Label"]:SetFont(ZO_CreateFontString(LUIE.CombatText.SV.fontFaceApplied, 26, LUIE.CombatText.SV.fontStyle))
+            _G[k .. "_Label"]:SetFont(LUIE.CreateFontString(LUIE.CombatText.SV.fontFaceApplied, 26, LUIE.CombatText.SV.fontStyle))
             _G[k .. "_Label"]:SetText(panelTitles[k])
         else
             LUIE.CombatText.SV.panels[k] = nil

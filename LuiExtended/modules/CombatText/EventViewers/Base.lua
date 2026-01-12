@@ -373,7 +373,7 @@ function CombatTextEventViewer:PrepareLabel(label, fontSize, color, text)
     local Settings = LUIE.CombatText.SV
     label:SetText(text)
     label:SetColor(unpack(color))
-    local fontString = ZO_CreateFontString(Settings.fontFaceApplied, fontSize, Settings.fontStyle)
+    local fontString = LUIE.CreateFontString(Settings.fontFaceApplied, fontSize, Settings.fontStyle)
     label:SetFont(fontString)
     label:SetAlpha(Settings.common.transparencyValue / 100)
 end

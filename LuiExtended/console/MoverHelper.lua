@@ -29,7 +29,7 @@ end
 --- @param style string The font style
 --- @return string
 local function CreateFontString(fontName, size, style)
-    return ZO_CreateFontString(fontName, size, style)
+    return LUIE.CreateFontString(fontName, size, style)
 end
 
 --- Updates preview label font to use a better readable font

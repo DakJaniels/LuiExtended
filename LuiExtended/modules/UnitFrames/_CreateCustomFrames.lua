@@ -648,7 +648,7 @@ local function CreateCompanionFrame()
             if LUIE.Fonts and LUIE.Fonts[fontName] then
                 local fontSize = 16
                 local fontStyle = "soft-shadow-thick"
-                local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
+                local fontString = LUIE.CreateFontString(fontName, fontSize, fontStyle)
                 companionTlw.previewLabel:SetFont(fontString)
             else
                 if IsInGamepadPreferredMode() then

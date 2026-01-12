@@ -184,7 +184,7 @@ local function InitializePreviewLabels(self)
                             if LUIE.Fonts and LUIE.Fonts[fontName] then
                                 local fontSize = 14
                                 local fontStyle = "soft-shadow-thick"
-                                local fontString = ZO_CreateFontString(fontName, fontSize, fontStyle)
+                                local fontString = LUIE.CreateFontString(fontName, fontSize, fontStyle)
                                 f.frame.preview.anchorLabel:SetFont(fontString)
                             else
                                 if IsInGamepadPreferredMode() or IsConsoleUI() then
@@ -1688,7 +1688,7 @@ function SpellCastBuffs:ApplyFont()
     end
     local fontStyle = self.SV.BuffFontStyle
     local fontSize = (self.SV.BuffFontSize and self.SV.BuffFontSize > 0) and self.SV.BuffFontSize or 17
-    self.buffsFont = ZO_CreateFontString(fontName, fontSize, fontStyle)
+    self.buffsFont = LUIE.CreateFontString(fontName, fontSize, fontStyle)
 
     -- Font Setup for Prominent Buffs & Debuffs
     local prominentName = LUIE.Fonts[self.SV.ProminentLabelFontFace]
@@ -1698,7 +1698,7 @@ function SpellCastBuffs:ApplyFont()
     end
     local prominentStyle = self.SV.ProminentLabelFontStyle
     local prominentSize = (self.SV.ProminentLabelFontSize and self.SV.ProminentLabelFontSize > 0) and self.SV.ProminentLabelFontSize or 17
-    self.prominentFont = ZO_CreateFontString(prominentName, prominentSize, prominentStyle)
+    self.prominentFont = LUIE.CreateFontString(prominentName, prominentSize, prominentStyle)
 
     -- And reset sizes of already existing icons
     for _, container in pairs(self.containerRouting) do

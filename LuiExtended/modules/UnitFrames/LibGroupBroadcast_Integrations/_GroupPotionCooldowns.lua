@@ -114,7 +114,7 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
             local rootSettings = Shared.GetSettings()
             local fontFace = LUIE.Fonts[rootSettings.CustomFontFace]
             local fontStyle = rootSettings.CustomFontStyle
-            frameData.potionCooldown.label:SetFont(ZO_CreateFontString(fontFace, fontSize, fontStyle))
+            frameData.potionCooldown.label:SetFont(LUIE.CreateFontString(fontFace, fontSize, fontStyle))
         end
     end
 end

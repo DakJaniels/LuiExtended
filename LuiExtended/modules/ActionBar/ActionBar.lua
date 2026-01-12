@@ -1095,7 +1095,7 @@ local setupFont = function (fontNameKey, fontStyleKey, fontSizeKey, defaultFontS
     end
     local fontStyle = ActionBar.SV[fontStyleKey] or defaultFontStyle
     local fontSize = (ActionBar.SV[fontSizeKey] and ActionBar.SV[fontSizeKey] > 0) and ActionBar.SV[fontSizeKey] or defaultFontSize
-    return ZO_CreateFontString(fontName, fontSize, fontStyle)
+    return LUIE.CreateFontString(fontName, fontSize, fontStyle)
 end
 
 -- -----------------------------------------------------------------------------

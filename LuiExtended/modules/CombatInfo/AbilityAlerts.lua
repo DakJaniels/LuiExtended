@@ -1445,5 +1445,5 @@ function AbilityAlerts.ApplyFontAlert()
     local alertFontStyle = CombatInfo.SV.alerts.toggles.alertFontStyle
     local alertFontSize = (CombatInfo.SV.alerts.toggles.alertFontSize and CombatInfo.SV.alerts.toggles.alertFontSize > 0) and CombatInfo.SV.alerts.toggles.alertFontSize or 16
 
-    g_alertFont = ZO_CreateFontString(alertFontName, alertFontSize, alertFontStyle)
+    g_alertFont = LUIE.CreateFontString(alertFontName, alertFontSize, alertFontStyle)
 end
