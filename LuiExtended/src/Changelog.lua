@@ -130,8 +130,8 @@ local changelogMessages =
     "",
     -- New Features
     "|cFFFF00New:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Added option to use @account names instead of character names in teammate death notifications (Combat Text → Group Member Death → Use Account Names).",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Added transparency control for Info Panel (Info Panel → Info Panel Transparency, %).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Added option to use @account names instead of character names in teammate death notifications (Combat Text -> Group Member Death -> Use Account Names).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Added transparency control for Info Panel (Info Panel -> Info Panel Transparency, %).",
     "",
     -- Changes
     "|cFFFF00Changes:|r",
