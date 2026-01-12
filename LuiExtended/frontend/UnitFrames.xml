@@ -451,6 +451,8 @@
                 </Label>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="22"
                               y="22" />
@@ -790,6 +792,8 @@
                 </Label>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="22"
                               y="22" />
@@ -1127,6 +1131,8 @@
                 </Label>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -1392,6 +1398,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="18"
                               y="18" />
@@ -1470,6 +1478,8 @@
                 </Label>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="22"
                               y="22" />
@@ -1490,6 +1500,8 @@
                 </Texture>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="32"
                               y="32" />
@@ -1763,6 +1775,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="18"
                               y="18" />
@@ -1840,6 +1854,8 @@
                 </Label>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="22"
                               y="22" />
@@ -1860,6 +1876,8 @@
                 </Texture>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="32"
                               y="32" />
@@ -2132,6 +2150,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="18"
                               y="18" />
@@ -2209,6 +2229,8 @@
                 </Label>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="22"
                               y="22" />
@@ -2229,6 +2251,8 @@
                 </Texture>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="32"
                               y="32" />
@@ -2501,6 +2525,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="18"
                               y="18" />
@@ -2578,6 +2604,8 @@
                 </Label>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="22"
                               y="22" />
@@ -2598,6 +2626,8 @@
                 </Texture>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="32"
                               y="32" />
@@ -2907,6 +2937,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -2917,6 +2949,8 @@
                 </Texture>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -2939,6 +2973,8 @@
                 </Label>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -3098,6 +3134,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -3108,6 +3146,8 @@
                 </Texture>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -3130,6 +3170,8 @@
                 </Label>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -3288,6 +3330,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -3298,6 +3342,8 @@
                 </Texture>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -3320,6 +3366,8 @@
                 </Label>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -3478,6 +3526,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -3488,6 +3538,8 @@
                 </Texture>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -3510,6 +3562,8 @@
                 </Label>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -3668,6 +3722,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -3678,6 +3734,8 @@
                 </Texture>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -3700,6 +3758,8 @@
                 </Label>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -3858,6 +3918,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -3868,6 +3930,8 @@
                 </Texture>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -3890,6 +3954,8 @@
                 </Label>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -4048,6 +4114,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -4058,6 +4126,8 @@
                 </Texture>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -4080,6 +4150,8 @@
                 </Label>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -4238,6 +4310,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -4248,6 +4322,8 @@
                 </Texture>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -4270,6 +4346,8 @@
                 </Label>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -4428,6 +4506,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -4438,6 +4518,8 @@
                 </Texture>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -4460,6 +4542,8 @@
                 </Label>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -4618,6 +4702,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -4628,6 +4714,8 @@
                 </Texture>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -4650,6 +4738,8 @@
                 </Label>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -4808,6 +4898,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -4818,6 +4910,8 @@
                 </Texture>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -4840,6 +4934,8 @@
                 </Label>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -4998,6 +5094,8 @@
                 </Label>
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -5008,6 +5106,8 @@
                 </Texture>
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -5030,6 +5130,8 @@
                 </Label>
                 <Texture name="$(parent)_Leader"
                          textureFile=""
+                         layer="OVERLAY"
+                         tier="DT_MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
