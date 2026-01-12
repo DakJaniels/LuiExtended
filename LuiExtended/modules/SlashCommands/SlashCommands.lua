@@ -81,8 +81,17 @@ function SlashCommands.Initialize(enabled)
 end
 
 function SlashCommands.RegisterSlashCommands()
-    -- ZO_GetChatSystem().textEntry.slashCommandAutoComplete:InvalidateSlashCommandCache()
-    SlashCommandAutoComplete:InvalidateSlashCommandCache()
+    if GetAPIVersion() >= 101049 then
+        local autoComplete = ZO_GetChatSystem().textEntry.slashCommandAutoComplete
+        if autoComplete then
+            autoComplete:ClearPossibleCommandMatches()
+        end
+    else
+        local autoComplete = ZO_GetChatSystem().textEntry.slashCommandAutoComplete
+        if autoComplete then
+            autoComplete:InvalidateSlashCommandCache()
+        end
+    end
 
     -- Register commands that replace default functions
     SLASH_COMMANDS["/kick"] = SlashCommands.SlashKick             -- This command is always registered since it is also a default emote
