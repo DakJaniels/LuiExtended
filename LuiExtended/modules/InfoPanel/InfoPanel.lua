@@ -433,28 +433,6 @@ function InfoPanel.SetMovingState(state)
     end
     InfoPanel.panelUnlocked = state
 
-    -- Use console helper if on console
-    if IsConsoleUI() and LUIE.ConsoleMoverHelper then
-        local MoverHelper = LUIE.ConsoleMoverHelper
-        local EditModeController = LUIE.EditModeController
-
-        -- Activate edit mode when unlocking on console
-        if EditModeController and state then
-            if not EditModeController:IsEditModeActive() then
-                EditModeController:SetEditModeActive(true, "InfoPanel")
-            end
-        end
-
-        MoverHelper.SetupGamepadHandler(uiPanel, "default", function (control, left, top)
-            -- Convert top-left coordinates to center coordinates to match how position is restored
-            local centerX, centerY = control:GetCenter()
-            InfoPanel.SV.position = { centerX, centerY }
-        end)
-        MoverHelper.UpdateControlState(uiPanel, "infoPanel", state)
-
-        return
-    end
-
     -- PC/Keyboard version
     uiPanel:SetMouseEnabled(state)
     uiPanel:SetMovable(state)

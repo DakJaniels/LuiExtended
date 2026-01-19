@@ -64,8 +64,6 @@ src/GridOverlay.lua
 pc/Unlock.lua
 
 # Console Edit Mode & Unlock
-console/MoverHelper.lua
-console/EditModeController.lua
 console/Unlock.lua
 
 # Modules - Chat Announcements

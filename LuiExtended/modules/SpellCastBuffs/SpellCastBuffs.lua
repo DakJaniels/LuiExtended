@@ -179,20 +179,10 @@ local function InitializePreviewLabels(self)
                     if f.frame.preview.anchorLabel then
                         f.frame.preview.anchorLabel:SetColor(1, 1, 0, 1)
                         -- Update font to use better readable font
-                        if IsConsoleUI() and LUIE.ConsoleMoverHelper then
-                            local fontName = "LUIE Default Font"
-                            if LUIE.Fonts and LUIE.Fonts[fontName] then
-                                local fontSize = 14
-                                local fontStyle = "soft-shadow-thick"
-                                local fontString = LUIE.CreateFontString(fontName, fontSize, fontStyle)
-                                f.frame.preview.anchorLabel:SetFont(fontString)
-                            else
-                                if IsInGamepadPreferredMode() or IsConsoleUI() then
-                                    f.frame.preview.anchorLabel:SetFont("$(GAMEPAD_MEDIUM_FONT)|14|soft-shadow-thick")
-                                else
-                                    f.frame.preview.anchorLabel:SetFont("$(MEDIUM_FONT)|14|soft-shadow-thick")
-                                end
-                            end
+                        if IsInGamepadPreferredMode() or IsConsoleUI() then
+                            f.frame.preview.anchorLabel:SetFont("$(GAMEPAD_MEDIUM_FONT)|14|soft-shadow-thick")
+                        else
+                            f.frame.preview.anchorLabel:SetFont("$(MEDIUM_FONT)|14|soft-shadow-thick")
                         end
                     end
                 end
@@ -930,89 +920,6 @@ function SpellCastBuffs:SetMovingState(state)
     local gridEnabled = accountWideSettings and accountWideSettings.snapToGrid_buffs
     local gridSize = (accountWideSettings and accountWideSettings.snapToGridSize_buffs) or 15
     GridOverlay.Refresh("buffs", state and gridEnabled, gridSize)
-
-    -- Use console helper if on console
-    if IsConsoleUI() and LUIE.ConsoleMoverHelper then
-        local MoverHelper = LUIE.ConsoleMoverHelper
-        local EditModeController = LUIE.EditModeController
-
-        -- Activate edit mode when unlocking on console
-        if EditModeController and state then
-            if not EditModeController:IsEditModeActive() then
-                EditModeController:SetEditModeActive(true, "SpellCastBuffs")
-            end
-        end
-
-        -- Helper function to set up a buff container
-        local function SetupBuffContainer(container, identifier, saveCallback)
-            if container and container:GetType() == CT_TOPLEVELCONTROL then
-                MoverHelper.SetupGamepadHandler(container, "buffs", saveCallback)
-                MoverHelper.UpdateControlState(container, identifier, state)
-            end
-        end
-
-        -- Set up each buff container
-        if self.SV.lockPositionToUnitFrames == nil or not self.SV.lockPositionToUnitFrames then
-            SetupBuffContainer(self.BuffContainers.playerb, "buff_playerb", function (control, left, top)
-                self.SV.playerbOffsetX = left
-                self.SV.playerbOffsetY = top
-            end)
-
-            SetupBuffContainer(self.BuffContainers.playerd, "buff_playerd", function (control, left, top)
-                self.SV.playerdOffsetX = left
-                self.SV.playerdOffsetY = top
-            end)
-
-            SetupBuffContainer(self.BuffContainers.targetb, "buff_targetb", function (control, left, top)
-                self.SV.targetbOffsetX = left
-                self.SV.targetbOffsetY = top
-            end)
-
-            SetupBuffContainer(self.BuffContainers.targetd, "buff_targetd", function (control, left, top)
-                self.SV.targetdOffsetX = left
-                self.SV.targetdOffsetY = top
-            end)
-        end
-
-        SetupBuffContainer(self.BuffContainers.player_long, "buff_player_long", function (control, left, top)
-            if control.alignVertical then
-                self.SV.playerVOffsetX = left
-                self.SV.playerVOffsetY = top
-            else
-                self.SV.playerHOffsetX = left
-                self.SV.playerHOffsetY = top
-            end
-        end)
-
-        SetupBuffContainer(self.BuffContainers.prominentbuffs, "buff_prominentbuffs", function (control, left, top)
-            if control.alignVertical then
-                self.SV.prominentbVOffsetX = left
-                self.SV.prominentbVOffsetY = top
-            else
-                self.SV.prominentbHOffsetX = left
-                self.SV.prominentbHOffsetY = top
-            end
-        end)
-
-        SetupBuffContainer(self.BuffContainers.prominentdebuffs, "buff_prominentdebuffs", function (control, left, top)
-            if control.alignVertical then
-                self.SV.prominentdVOffsetX = left
-                self.SV.prominentdVOffsetY = top
-            else
-                self.SV.prominentdHOffsetX = left
-                self.SV.prominentdHOffsetY = top
-            end
-        end)
-
-        -- Show/hide preview
-        for _, v in pairs(self.containerRouting) do
-            if self.BuffContainers[v] and self.BuffContainers[v].preview then
-                self.BuffContainers[v].preview:SetHidden(not state)
-            end
-        end
-
-        return
-    end
 
     -- PC/Keyboard version
     -- Helper function to update position label

@@ -749,7 +749,6 @@ end
 -- Helper to set up common actions for all created frames
 local function SetupCommonFrameActions()
     local tlwOnMoveStart = function (self)
-        -- For console UI, coordLabel is updated by MoverHelper, so skip anchorLabel update
         if not IsConsoleUI() and self.preview.anchorLabel then
             eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
                 self.preview.anchorLabel:SetText(zo_strformat("<<1>>, <<2>>", self:GetLeft(), self:GetTop()))
