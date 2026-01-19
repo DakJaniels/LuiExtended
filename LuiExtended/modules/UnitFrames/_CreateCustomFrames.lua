@@ -131,9 +131,9 @@ end
 
 -- Decreased armour overlay visuals
 ---
----@param parent Control
----@param small boolean
----@return Control
+--- @param parent Control
+--- @param small boolean
+--- @return Control
 local function CreateDecreasedArmorOverlay(parent, small)
     -- Create from XML virtual template with parent-based unique name
     local parentName = parent:GetName() or ("LUIE_UF_Parent_" .. tostring(parent))
@@ -143,9 +143,9 @@ local function CreateDecreasedArmorOverlay(parent, small)
     local control = windowManager:CreateControlFromVirtual(uniqueName, parent, templateName)
 
     -- Get texture references
-    control.smallTex = control:GetNamedChild("_SmallTex") ---@type TextureControl
+    control.smallTex = control:GetNamedChild("_SmallTex") --- @type TextureControl
     if not small then
-        control.normalTex = control:GetNamedChild("_NormalTex") ---@type TextureControl
+        control.normalTex = control:GetNamedChild("_NormalTex") --- @type TextureControl
     end
 
     -- Set texture files
@@ -641,22 +641,12 @@ local function CreateCompanionFrame()
         local companionTlw = LUIE_CustomCompanionFrame
         companionTlw.customPositionAttr = "CustomFramesCompanionFramePos"
         companionTlw.preview = companionTlw:GetNamedChild("_Preview")
-        companionTlw.previewLabel = companionTlw.preview:GetNamedChild("_Label") ---@type LabelControl
+        companionTlw.previewLabel = companionTlw.preview:GetNamedChild("_Label") --- @type LabelControl
         -- Update font to use better readable font
-        if IsConsoleUI() and LUIE.ConsoleMoverHelper then
-            local fontName = "LUIE Default Font"
-            if LUIE.Fonts and LUIE.Fonts[fontName] then
-                local fontSize = 16
-                local fontStyle = "soft-shadow-thick"
-                local fontString = LUIE.CreateFontString(fontName, fontSize, fontStyle)
-                companionTlw.previewLabel:SetFont(fontString)
-            else
-                if IsInGamepadPreferredMode() then
-                    companionTlw.previewLabel:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
-                else
-                    companionTlw.previewLabel:SetFont("$(MEDIUM_FONT)|16|soft-shadow-thick")
-                end
-            end
+        if IsInGamepadPreferredMode() then
+            companionTlw.previewLabel:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
+        else
+            companionTlw.previewLabel:SetFont("$(MEDIUM_FONT)|16|soft-shadow-thick")
         end
 
         -- Add to scene fragments (controls are already created via XML)

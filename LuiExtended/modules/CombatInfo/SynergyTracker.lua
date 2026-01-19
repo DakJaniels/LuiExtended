@@ -218,66 +218,12 @@ function SynergyTracker:Initialize()
     end
 
     -- Unlock/lock handlers
-    if IsConsoleUI() and LUIE.ConsoleMoverHelper then
-        -- Console version: Get preview elements from XML
-        local MoverHelper = LUIE.ConsoleMoverHelper
-        local preview = LUIE_SynergyTracker_UI_Preview
-        local coordLabel = LUIE_SynergyTracker_UI_Preview_CoordLabel
-        local previewLabel = LUIE_SynergyTracker_UI_Preview_Label
-
-        if preview then
-            self.control.preview = preview
-            if coordLabel then
-                preview.coordLabel = coordLabel
-            end
-            if previewLabel then
-                self.control.previewLabel = previewLabel
-            end
-
-            -- Update coordinate label during movement
-            self.control:SetHandler("OnMoveStart", function ()
-                eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
-                    local left, top = self.control:GetLeft(), self.control:GetTop()
-                    if coordLabel then
-                        coordLabel:SetText(zo_strformat("<<1>>, <<2>>", left, top))
-                    end
-                end)
-            end)
-        end
-
-        self.control:SetHandler("OnMoveStop", function ()
-            eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
-            -- Convert center coordinates to offset from GuiRoot center
-            local centerX, centerY = self.control:GetCenter()
-            Settings.offsetX = centerX - GuiRoot:GetWidth() / 2
-            Settings.offsetY = centerY - GuiRoot:GetHeight() / 2
-        end)
-
-        -- Update fonts
-        MoverHelper.UpdateControlState(self.control, "synergyTracker", Settings.unlocked)
-
-        -- Set up gamepad handler if unlocked
-        if Settings.unlocked then
-            MoverHelper.SetupGamepadHandler(
-                self.control,
-                "default",
-                function (control, left, top)
-                    -- Convert center coordinates to offset from GuiRoot center
-                    local centerX, centerY = control:GetCenter()
-                    Settings.offsetX = centerX - GuiRoot:GetWidth() / 2
-                    Settings.offsetY = centerY - GuiRoot:GetHeight() / 2
-                end
-            )
-        end
-    else
-        -- PC version
-        self.control:SetHandler("OnMoveStop", function ()
-            -- Convert center coordinates to offset from GuiRoot center
-            local centerX, centerY = self.control:GetCenter()
-            Settings.offsetX = centerX - GuiRoot:GetWidth() / 2
-            Settings.offsetY = centerY - GuiRoot:GetHeight() / 2
-        end)
-    end
+    self.control:SetHandler("OnMoveStop", function ()
+        -- Convert center coordinates to offset from GuiRoot center
+        local centerX, centerY = self.control:GetCenter()
+        Settings.offsetX = centerX - GuiRoot:GetWidth() / 2
+        Settings.offsetY = centerY - GuiRoot:GetHeight() / 2
+    end)
 
     -- Cooldown timer update loop (updates every second)
     self.lastCooldownUpdate = 0
@@ -871,65 +817,24 @@ function SynergyTracker:SetUnlocked(unlocked)
     local Settings = CombatInfo.SV.synergy
     Settings.unlocked = unlocked
 
-    if IsConsoleUI() and LUIE.ConsoleMoverHelper then
-        local MoverHelper = LUIE.ConsoleMoverHelper
-        local EditModeController = LUIE.EditModeController
+    -- PC version
+    self.control:SetMovable(unlocked)
+    self.control:SetMouseEnabled(unlocked)
+    if self.bg then
+        self.bg:SetHidden(not unlocked)
+    end
 
-        if unlocked then
-            -- Set up gamepad handler if not already set up
-            if not self.control.gamepadHandler then
-                self.control.gamepadHandler = MoverHelper.SetupGamepadHandler(
-                    self.control,
-                    "default",
-                    function (control, left, top)
-                        -- Convert center coordinates to offset from GuiRoot center
-                        local centerX, centerY = control:GetCenter()
-                        Settings.offsetX = centerX - GuiRoot:GetWidth() / 2
-                        Settings.offsetY = centerY - GuiRoot:GetHeight() / 2
-                    end
-                )
-            end
-
-            -- Activate edit mode
-            if EditModeController then
-                EditModeController:SetEditModeActive(true, "SynergyTracker")
-            end
-
-            self:ShowPreview()
-        else
-            -- When locking, hide preview and return to normal display
-            local currentScene = sceneManager:GetCurrentScene()
-            local isInHUDScene = currentScene == sceneManager:GetScene(HUD_SCENE) or currentScene == sceneManager:GetScene(HUDUI_SCENE)
-            if not isInHUDScene or currentScene:GetState() ~= SCENE_SHOWN then
-                -- If we're not in HUD/HUDUI scene, hide the control
-                self.control:SetHidden(true)
-            else
-                self:UpdateDisplay()
-            end
-        end
-
-        -- Update control state
-        MoverHelper.UpdateControlState(self.control, "synergyTracker", unlocked)
+    if unlocked then
+        self:ShowPreview()
     else
-        -- PC version
-        self.control:SetMovable(unlocked)
-        self.control:SetMouseEnabled(unlocked)
-        if self.bg then
-            self.bg:SetHidden(not unlocked)
-        end
-
-        if unlocked then
-            self:ShowPreview()
+        -- When locking, hide preview and return to normal display
+        local currentScene = sceneManager:GetCurrentScene()
+        local isInHUDScene = currentScene == sceneManager:GetScene(HUD_SCENE) or currentScene == sceneManager:GetScene(HUDUI_SCENE)
+        if not isInHUDScene or currentScene:GetState() ~= SCENE_SHOWN then
+            -- If we're not in HUD/HUDUI scene, hide the control
+            self.control:SetHidden(true)
         else
-            -- When locking, hide preview and return to normal display
-            local currentScene = sceneManager:GetCurrentScene()
-            local isInHUDScene = currentScene == sceneManager:GetScene(HUD_SCENE) or currentScene == sceneManager:GetScene(HUDUI_SCENE)
-            if not isInHUDScene or currentScene:GetState() ~= SCENE_SHOWN then
-                -- If we're not in HUD/HUDUI scene, hide the control
-                self.control:SetHidden(true)
-            else
-                self:UpdateDisplay()
-            end
+            self:UpdateDisplay()
         end
     end
 end

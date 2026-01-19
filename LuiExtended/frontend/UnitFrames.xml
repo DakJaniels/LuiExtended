@@ -80,7 +80,7 @@
   <Controls>
     <!-- Combat Glow Border Template (red glow for group frames in combat) -->
     <Backdrop name="LUIE_CombatGlowBorder"
-              centerColor="000000"
+              centerColor="66000000"
               edgeColor="FF0000"
               tier="DT_HIGH"
               level="3"
@@ -174,22 +174,22 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_HIGH"
+                 tier="DT_MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
-                      centerColor="000000"
+                      centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_HIGH"
+                      tier="DT_MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="Player Frame"
-                   font="LUIE Default Font"
+                   font="ZoFontGameSmall"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -209,8 +209,8 @@
           <Controls>
             <!-- Health Bar -->
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <Dimensions x="300"
                           y="40" />
@@ -325,8 +325,8 @@
             </Backdrop>
             <!-- Magicka Bar -->
             <Backdrop name="$(parent)_Magicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <Dimensions x="300"
                           y="20" />
@@ -367,8 +367,8 @@
             </Backdrop>
             <!-- Stamina Bar -->
             <Backdrop name="$(parent)_Stamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <Dimensions x="300"
                           y="20" />
@@ -475,8 +475,8 @@
               <Controls>
                 <!-- Alternative Bar -->
                 <Backdrop name="$(parent)_Alternative"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="false">
                   <Anchor point="RIGHT"
                           relativeTo="$(parent)"
@@ -571,22 +571,22 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_HIGH"
+                 tier="DT_MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
-                      centerColor="000000"
+                      centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_HIGH"
+                      tier="DT_MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="Target Frame"
-                   font="LUIE Default Font"
+                   font="ZoFontGameSmall"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -606,8 +606,8 @@
           <Controls>
             <!-- Health Bar -->
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <Dimensions x="300"
                           y="40" />
@@ -959,22 +959,22 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_HIGH"
+                 tier="DT_MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
-                      centerColor="000000"
+                      centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_HIGH"
+                      tier="DT_MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="PvP Player Target Frame"
-                   font="LUIE Default Font"
+                   font="ZoFontGameSmall"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -994,8 +994,8 @@
           <Controls>
             <!-- Health Bar -->
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <Dimensions x="300"
                           y="40" />
@@ -1246,22 +1246,22 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_HIGH"
+                 tier="DT_MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
-                      centerColor="000000"
+                      centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_HIGH"
+                      tier="DT_MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="Small Group"
-                   font="LUIE Default Font"
+                   font="ZoFontGameSmall"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -1284,8 +1284,8 @@
           <Controls>
             <!-- Health Bar -->
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <Dimensions x="200"
                           y="30" />
@@ -1518,8 +1518,8 @@
               <Controls>
                 <!-- Food/Drink Buff -->
                 <Backdrop name="$(parent)_FoodDrinkBackdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -1549,8 +1549,8 @@
                 </Backdrop>
                 <!-- Ultimate 1 (Frontbar) -->
                 <Backdrop name="$(parent)_Ult1Backdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -1569,8 +1569,8 @@
                 </Backdrop>
                 <!-- Ultimate 2 (Backbar) -->
                 <Backdrop name="$(parent)_Ult2Backdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -1589,8 +1589,8 @@
                 </Backdrop>
                 <!-- Potion Cooldown -->
                 <Backdrop name="$(parent)_PotionBackdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -1621,8 +1621,8 @@
               </Controls>
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="200"
                           y="6" />
@@ -1635,8 +1635,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="200"
                           y="6" />
@@ -1661,8 +1661,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <Dimensions x="200"
                           y="30" />
@@ -1893,8 +1893,8 @@
               <Controls>
                 <!-- Food/Drink Buff -->
                 <Backdrop name="$(parent)_FoodDrinkBackdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -1924,8 +1924,8 @@
                 </Backdrop>
                 <!-- Ultimate 1 (Frontbar) -->
                 <Backdrop name="$(parent)_Ult1Backdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -1944,8 +1944,8 @@
                 </Backdrop>
                 <!-- Ultimate 2 (Backbar) -->
                 <Backdrop name="$(parent)_Ult2Backdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -1964,8 +1964,8 @@
                 </Backdrop>
                 <!-- Potion Cooldown -->
                 <Backdrop name="$(parent)_PotionBackdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -1996,8 +1996,8 @@
               </Controls>
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="200"
                           y="6" />
@@ -2010,8 +2010,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="200"
                           y="6" />
@@ -2036,8 +2036,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <Dimensions x="200"
                           y="30" />
@@ -2268,8 +2268,8 @@
               <Controls>
                 <!-- Food/Drink Buff -->
                 <Backdrop name="$(parent)_FoodDrinkBackdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -2299,8 +2299,8 @@
                 </Backdrop>
                 <!-- Ultimate 1 (Frontbar) -->
                 <Backdrop name="$(parent)_Ult1Backdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -2319,8 +2319,8 @@
                 </Backdrop>
                 <!-- Ultimate 2 (Backbar) -->
                 <Backdrop name="$(parent)_Ult2Backdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -2339,8 +2339,8 @@
                 </Backdrop>
                 <!-- Potion Cooldown -->
                 <Backdrop name="$(parent)_PotionBackdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -2371,8 +2371,8 @@
               </Controls>
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="200"
                           y="6" />
@@ -2385,8 +2385,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="200"
                           y="6" />
@@ -2411,8 +2411,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <Dimensions x="200"
                           y="30" />
@@ -2643,8 +2643,8 @@
               <Controls>
                 <!-- Food/Drink Buff -->
                 <Backdrop name="$(parent)_FoodDrinkBackdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -2674,8 +2674,8 @@
                 </Backdrop>
                 <!-- Ultimate 1 (Frontbar) -->
                 <Backdrop name="$(parent)_Ult1Backdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -2694,8 +2694,8 @@
                 </Backdrop>
                 <!-- Ultimate 2 (Backbar) -->
                 <Backdrop name="$(parent)_Ult2Backdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -2714,8 +2714,8 @@
                 </Backdrop>
                 <!-- Potion Cooldown -->
                 <Backdrop name="$(parent)_PotionBackdrop"
-                          centerColor="000000"
-                          edgeColor="000000"
+                          centerColor="66000000"
+                          edgeColor="99000000"
                           hidden="true">
                   <Dimensions x="24"
                               y="24" />
@@ -2746,8 +2746,8 @@
               </Controls>
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="200"
                           y="6" />
@@ -2760,8 +2760,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="200"
                           y="6" />
@@ -2801,22 +2801,22 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_HIGH"
+                 tier="DT_MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
-                      centerColor="000000"
+                      centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_HIGH"
+                      tier="DT_MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="Raid Group"
-                   font="LUIE Default Font"
+                   font="ZoFontGameSmall"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -2838,8 +2838,8 @@
                   relativePoint="TOPLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -2989,8 +2989,8 @@
                      hidden="false">
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -3006,8 +3006,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -3035,8 +3035,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -3186,8 +3186,8 @@
                      hidden="false">
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -3203,8 +3203,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -3231,8 +3231,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -3382,8 +3382,8 @@
                      hidden="false">
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -3399,8 +3399,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -3427,8 +3427,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -3578,8 +3578,8 @@
                      hidden="false">
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -3595,8 +3595,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -3623,8 +3623,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -3774,8 +3774,8 @@
                      hidden="false">
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -3791,8 +3791,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -3819,8 +3819,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -3970,8 +3970,8 @@
                      hidden="false">
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -3987,8 +3987,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -4015,8 +4015,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -4166,8 +4166,8 @@
                      hidden="false">
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -4183,8 +4183,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -4211,8 +4211,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -4362,8 +4362,8 @@
                      hidden="false">
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -4379,8 +4379,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -4407,8 +4407,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -4558,8 +4558,8 @@
                      hidden="false">
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -4575,8 +4575,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -4603,8 +4603,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -4754,8 +4754,8 @@
                      hidden="false">
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -4771,8 +4771,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -4799,8 +4799,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -4950,8 +4950,8 @@
                      hidden="false">
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -4967,8 +4967,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -4995,8 +4995,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -5146,8 +5146,8 @@
                      hidden="false">
             </Control>
             <Backdrop name="$(parent)_ResourceMagicka"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -5163,8 +5163,8 @@
               </Controls>
             </Backdrop>
             <Backdrop name="$(parent)_ResourceStamina"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="true">
               <Dimensions x="150"
                           y="4" />
@@ -5207,22 +5207,22 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_HIGH"
+                 tier="DT_MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
-                      centerColor="000000"
+                      centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_HIGH"
+                      tier="DT_MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="Player Pets"
-                   font="LUIE Default Font"
+                   font="ZoFontGameSmall"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -5243,8 +5243,8 @@
                   relativePoint="TOPLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -5366,8 +5366,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -5489,8 +5489,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -5612,8 +5612,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -5735,8 +5735,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -5858,8 +5858,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -5981,8 +5981,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -6120,22 +6120,22 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_HIGH"
+                 tier="DT_MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
-                      centerColor="000000"
+                      centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_HIGH"
+                      tier="DT_MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="Player Companion"
-                   font="LUIE Default Font"
+                   font="ZoFontGameSmall"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -6155,8 +6155,8 @@
                   relativePoint="TOPLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -6294,22 +6294,22 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_HIGH"
+                 tier="DT_MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
-                      centerColor="000000"
+                      centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_HIGH"
+                      tier="DT_MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
             </Backdrop>
             <Label name="$(parent)_Label"
                    text="Bosses Group"
-                   font="LUIE Default Font"
+                   font="ZoFontGameSmall"
                    color="FFFFFF"
                    horizontalAlignment="CENTER"
                    verticalAlignment="CENTER">
@@ -6330,8 +6330,8 @@
                   relativePoint="TOPLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -6465,8 +6465,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -6600,8 +6600,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -6735,8 +6735,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -6870,8 +6870,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -7005,8 +7005,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />
@@ -7140,8 +7140,8 @@
                   relativePoint="BOTTOMLEFT" />
           <Controls>
             <Backdrop name="$(parent)_Health"
-                      centerColor="000000"
-                      edgeColor="000000"
+                      centerColor="66000000"
+                      edgeColor="99000000"
                       hidden="false">
               <AnchorFill />
               <Edge edgeSize="1" />

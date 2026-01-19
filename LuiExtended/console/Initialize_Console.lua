@@ -75,12 +75,6 @@ eventManager:RegisterForEvent(LUIE.name, EVENT_ADD_ON_LOADED, function (eventId,
     -- Load Timestamp Color
     LUIE.UpdateTimeStampColor()
     -- -----------------------------------------------------------------------------
-    -- Initialize EditModeController for console
-    LUIE.EditModeController:InitializeKeybindStrip()
-    eventManager:RegisterForEvent(LUIE.name .. "_EditMode", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function ()
-        LUIE.EditModeController:OnGamepadPreferredModeChanged()
-    end)
-    -- -----------------------------------------------------------------------------
     -- Create settings menus for our addon
     LUIE.CreateConsoleSettings()
     LUIE.ChatAnnouncements.CreateConsoleSettings()
