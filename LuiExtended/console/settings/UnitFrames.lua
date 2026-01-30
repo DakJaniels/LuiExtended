@@ -213,65 +213,6 @@ function UnitFrames.CreateConsoleSettings()
             end,
             buttonText = GetString(LUIE_STRING_LAM_RELOADUI),
         },
-        -- Custom Unit Frames Unlock
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_UNLOCK),
-            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_UNLOCK_TP),
-            getFunction = function ()
-                return UnitFrames.CustomFramesMovingState
-            end,
-            setFunction = function (value)
-                UnitFrames.CustomFramesSetMovingState(value)
-            end,
-            default = false,
-        },
-        -- Grid Snap Settings for Unit Frames
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = "Enable Grid Snap (Unit Frames)",
-            tooltip = "Enable snapping unit frames to a grid when moving them",
-            getFunction = function ()
-                return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_unitFrames
-            end,
-            setFunction = function (value)
-                local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
-                accountWideSettings.snapToGrid_unitFrames = value
-                local gridSize = accountWideSettings.snapToGridSize_unitFrames or 15
-                GridOverlay.Refresh("unitFrames", g_FramesMovingEnabled and value, gridSize)
-            end,
-            default = false,
-        },
-        {
-            type = LHAS.ST_SLIDER,
-            label = "Grid Size (Unit Frames)",
-            tooltip = "Set the size of the grid for snapping unit frames",
-            min = 5,
-            max = 100,
-            step = 5,
-            getFunction = function ()
-                return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_unitFrames or 15
-            end,
-            setFunction = function (value)
-                local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
-                accountWideSettings.snapToGridSize_unitFrames = value
-                GridOverlay.Refresh("unitFrames", g_FramesMovingEnabled and accountWideSettings.snapToGrid_unitFrames, value)
-            end,
-            disable = function ()
-                return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_unitFrames
-            end,
-            default = 15,
-        },
-        -- Custom Unit Frames Reset position
-        {
-            type = LHAS.ST_BUTTON,
-            label = GetString(LUIE_STRING_LAM_RESETPOSITION),
-            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_RESETPOSIT_TP),
-            clickHandler = function ()
-                UnitFrames.CustomFramesResetPosition(false)
-            end,
-            buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
-        }
     }
 
     -- Initialize all settings and menu buttons for submenus
@@ -2096,6 +2037,106 @@ function UnitFrames.CreateConsoleSettings()
             end,
             default = Defaults.CustomOocAlphaPower,
         }
+    end)
+
+    -- Build Frame positions section (console X/Y sliders; range covers 1080p + margin)
+    buildSectionSettings("CustomFramesPositions", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POSITIONS_HEADER),
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POSITIONS_TP),
+        }
+
+        -- Unlock for previewing frames;
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_UNLOCK),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_UNLOCK_TP),
+            getFunction = function ()
+                return UnitFrames.CustomFramesMovingState
+            end,
+            setFunction = function (value)
+                UnitFrames.CustomFramesSetMovingState(value)
+            end,
+            default = false,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_RESETPOSITION),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_RESETPOSIT_TP),
+            clickHandler = function ()
+                UnitFrames.CustomFramesResetPosition(false)
+            end,
+            buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
+        }
+
+        local positionFrameConfig =
+        {
+            { unitTag = "player",          label = "Player",     disable = function () return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer) end    },
+            { unitTag = "reticleover",     label = "Target",     disable = function () return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget) end    },
+            { unitTag = "companion",       label = "Companion",  disable = function () return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion) end },
+            { unitTag = "SmallGroup1",     label = "Group",      disable = function () return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup) end     },
+            { unitTag = "RaidGroup1",      label = "Raid",       disable = function () return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid) end      },
+            { unitTag = "boss1",           label = "Boss",       disable = function () return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses) end    },
+            { unitTag = "AvaPlayerTarget", label = "PvP Target", disable = function () return not (LUIE.SV.UnitFrames_Enabled and Settings.AvaCustFramesTarget) end   },
+            { unitTag = "PetGroup1",       label = "Pet",        disable = function () return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet) end       },
+        }
+
+        for _, cfg in ipairs(positionFrameConfig) do
+            local unitTag = cfg.unitTag
+            local attr = UnitFrames.CustomFramePositionAttr[unitTag]
+            if not attr then
+                break
+            end
+            settings[#settings + 1] = { type = LHAS.ST_LABEL, label = cfg.label }
+            settings[#settings + 1] =
+            {
+                type = LHAS.ST_SLIDER,
+                label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
+                min = -1200,
+                max = 1200,
+                step = 10,
+                getFunction = function ()
+                    local left, _ = UnitFrames.CustomFramesGetPosition(unitTag)
+                    return left
+                end,
+                setFunction = function (value)
+                    local pos = Settings[attr] or {}
+                    Settings[attr] = { value, pos[2] or 0 }
+                    UnitFrames.CustomFramesSetPositions()
+                end,
+                disable = cfg.disable,
+                default = 0,
+            }
+            settings[#settings + 1] =
+            {
+                type = LHAS.ST_SLIDER,
+                label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
+                min = -800,
+                max = 800,
+                step = 10,
+                getFunction = function ()
+                    local _, top = UnitFrames.CustomFramesGetPosition(unitTag)
+                    return top
+                end,
+                setFunction = function (value)
+                    local pos = Settings[attr] or {}
+                    Settings[attr] = { pos[1] or 0, value }
+                    UnitFrames.CustomFramesSetPositions()
+                end,
+                disable = cfg.disable,
+                default = 0,
+            }
+        end
     end)
 
     -- Build Custom Unit Frames Bar Alignment Section
@@ -4832,10 +4873,10 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Global settings for Unit Frames including frame positioning, grid snapping, and display options that apply across all unit frame types.",
+            label = "Global settings for Unit Frames and display options that apply across all unit frame types. For frame positioning, use the Frame positions submenu.",
         }
 
-        -- Add common global settings (ReloadUI, Unlock, Grid Snap, Reset Position)
+        -- Add common global settings (ReloadUI, etc.)
         for i = 1, #commonGlobalSettings do
             settings[#settings + 1] = commonGlobalSettings[i]
         end
@@ -5042,6 +5083,7 @@ function UnitFrames.CreateConsoleSettings()
     menuButtons[#menuButtons + 1] = createMenuButton("CustomFrames", GetString(LUIE_STRING_LAM_UF_CFRAMES_HEADER), sectionGroups["CustomFrames"])
     menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesColor", GetString(LUIE_STRING_LAM_UF_CFRAMES_COLOR_HEADER), sectionGroups["CustomFramesColor"])
     menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesPlayerTarget", GetString(LUIE_STRING_LAM_UF_CFRAMESPT_HEADER), sectionGroups["CustomFramesPlayerTarget"])
+    menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesPositions", GetString(LUIE_STRING_LAM_UF_CFRAMES_POSITIONS_HEADER), sectionGroups["CustomFramesPositions"])
     menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesBarAlignment", GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_HEADER), sectionGroups["CustomFramesBarAlignment"])
     menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesPlayerTargetOptions", GetString(LUIE_STRING_LAM_UF_CFRAMESPT_OPTIONS_HEADER), sectionGroups["CustomFramesPlayerTargetOptions"])
     menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesGroup", GetString(LUIE_STRING_LAM_UF_CFRAMESG_HEADER), sectionGroups["CustomFramesGroup"])

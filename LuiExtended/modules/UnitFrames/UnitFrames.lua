@@ -1527,8 +1527,8 @@ end
 
 function UnitFrames.OnGroupMemberChange(eventCode, memberName)
     LUIE_callLater(function ()
-                     UnitFrames.CustomFramesApplyColors(false)
-                 end, 200)
+                       UnitFrames.CustomFramesApplyColors(false)
+                   end, 200)
 end
 
 -- Runs on the EVENT_UNIT_DEATH_STATE_CHANGED listener.
@@ -2458,6 +2458,39 @@ function UnitFrames.CustomFramesSetPositions()
             end
         end
     end
+end
+
+--- Position SV key per unitTag (used by console X/Y sliders and getter).
+UnitFrames.CustomFramePositionAttr =
+{
+    player = "CustomFramesPlayerFramePos",
+    reticleover = "CustomFramesTargetFramePos",
+    companion = "CustomFramesCompanionFramePos",
+    SmallGroup1 = "CustomFramesGroupFramePos",
+    RaidGroup1 = "CustomFramesRaidFramePos",
+    boss1 = "CustomFramesBossesFramePos",
+    AvaPlayerTarget = "AvaCustFramesTargetFramePos",
+    PetGroup1 = "CustomFramesPetFramePos",
+}
+
+--- Get current position for a custom frame (for console X/Y sliders).
+--- @param unitTag string
+--- @return number left
+--- @return number top
+function UnitFrames.CustomFramesGetPosition(unitTag)
+    local attr = UnitFrames.CustomFramePositionAttr[unitTag]
+    if not attr then
+        return 0, 0
+    end
+    local pos = UnitFrames.SV[attr]
+    if pos and #pos == 2 then
+        return pos[1], pos[2]
+    end
+    local frame = UnitFrames.CustomFrames[unitTag]
+    if frame and frame.tlw then
+        return frame.tlw:GetLeft(), frame.tlw:GetTop()
+    end
+    return 0, 0
 end
 
 -- Reset anchors for all top level windows of CustomFrames
