@@ -98,5 +98,52 @@ local barHighlightDestroFix =
     [85130] = { [WEAPONTYPE_NONE] = 84434, [WEAPONTYPE_FIRE_STAFF] = 85126, [WEAPONTYPE_FROST_STAFF] = 85128, [WEAPONTYPE_LIGHTNING_STAFF] = 85130 }, -- shock
 }
 
+--- Extend destruction staff mappings to include all ability ranks
+--- This function finds all ranks (I-IV) of mapped abilities and adds them to the mapping
+local function ExtendDestroMappingWithAllRanks()
+    local extendedMapping = {}
+    local addedCount = 0
+
+    -- Copy existing mappings
+    for abilityId, staffMap in pairs(barHighlightDestroFix) do
+        extendedMapping[abilityId] = staffMap
+    end
+
+    -- For each ability in the existing mapping
+    for abilityId, staffMap in pairs(barHighlightDestroFix) do
+        -- Get the skill keys for this ability
+        local skillType, skillLineIndex, skillIndex, morphChoice = GetSpecificSkillAbilityKeysByAbilityId(abilityId)
+
+        if skillType and skillLineIndex then
+            -- Get progression ID for this ability
+            local progressionId = GetProgressionSkillProgressionId(skillType, skillLineIndex, skillIndex)
+
+            if progressionId then
+                -- Determine morph slot from morph choice
+                local morphSlot = morphChoice == 0 and MORPH_SLOT_BASE or
+                    (morphChoice == 1 and MORPH_SLOT_MORPH_1 or MORPH_SLOT_MORPH_2)
+
+                -- Get all ability IDs in this progression chain (all ranks)
+                local abilityIds = { GetProgressionSkillMorphSlotChainedAbilityIds(progressionId, morphSlot) }
+
+                -- Add each rank to the mapping if not already present
+                for rankIndex, rankAbilityId in ipairs(abilityIds) do
+                    if not extendedMapping[rankAbilityId] then
+                        -- Use the same staff mapping as the max rank version
+                        extendedMapping[rankAbilityId] = staffMap
+                        addedCount = addedCount + 1
+                    end
+                end
+            end
+        end
+    end
+
+    if addedCount > 0 then
+        return extendedMapping
+    else
+        return barHighlightDestroFix
+    end
+end
+
 --- @class (partial) BarHighlightDestroFix
-Effects.BarHighlightDestroFix = barHighlightDestroFix
+Effects.BarHighlightDestroFix = ExtendDestroMappingWithAllRanks()
