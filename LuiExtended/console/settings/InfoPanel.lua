@@ -75,6 +75,67 @@ function InfoPanel.CreateConsoleSettings()
             end
         })
 
+    -- Reset panel position
+    panel:AddSetting(
+        {
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_RESETPOSITION),
+            tooltip = GetString(LUIE_STRING_LAM_PNL_RESETPOSITION_TP),
+            buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
+            clickHandler = InfoPanel.ResetPosition,
+            disable = function ()
+                return not LUIE.SV.InfoPanel_Enabled
+            end
+        })
+
+    -- Position X (center) — bounds from GuiRoot for 4K support
+    local gw = GuiRoot:GetWidth()
+    local gh = GuiRoot:GetHeight()
+    panel:AddSetting(
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
+            min = -gw,
+            max = gw,
+            step = 10,
+            getFunction = function ()
+                local x, _ = InfoPanel.GetPanelPosition()
+                return x
+            end,
+            setFunction = function (value)
+                local pos = InfoPanel.SV.position or { 0, 0 }
+                InfoPanel.SV.position = { value, pos[2] }
+                InfoPanel.ApplyPanelPosition()
+            end,
+            disable = function ()
+                return not LUIE.SV.InfoPanel_Enabled
+            end
+        })
+
+    -- Position Y (center)
+    panel:AddSetting(
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
+            min = -gh,
+            max = gh,
+            step = 10,
+            getFunction = function ()
+                local _, y = InfoPanel.GetPanelPosition()
+                return y
+            end,
+            setFunction = function (value)
+                local pos = InfoPanel.SV.position or { 0, 0 }
+                InfoPanel.SV.position = { pos[1], value }
+                InfoPanel.ApplyPanelPosition()
+            end,
+            disable = function ()
+                return not LUIE.SV.InfoPanel_Enabled
+            end
+        })
+
     -- InfoPanel scale
     panel:AddSetting(
         {

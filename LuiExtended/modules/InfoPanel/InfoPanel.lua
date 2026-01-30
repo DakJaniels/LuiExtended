@@ -383,10 +383,7 @@ function InfoPanel.Initialize(enabled)
     LUIE.Components[moduleName] = uiPanel
 
     -- Panel position - only set if user has saved a custom position
-    if InfoPanel.SV.position ~= nil and #InfoPanel.SV.position == 2 then
-        uiPanel:ClearAnchors()
-        uiPanel:SetAnchor(CENTER, GuiRoot, TOPLEFT, InfoPanel.SV.position[1], InfoPanel.SV.position[2])
-    end
+    InfoPanel.ApplyPanelPosition()
 
     -- Set init values
     InfoPanel.OnUpdate01()
@@ -406,6 +403,28 @@ function InfoPanel.Initialize(enabled)
     eventManager:RegisterForUpdate(moduleName .. "01", ZO_ONE_SECOND_IN_MILLISECONDS, InfoPanel.OnUpdate01)
     eventManager:RegisterForUpdate(moduleName .. "10", ZO_ONE_SECOND_IN_MILLISECONDS * 10, InfoPanel.OnUpdate10)
     eventManager:RegisterForUpdate(moduleName .. "60", ZO_ONE_MINUTE_IN_MILLISECONDS, InfoPanel.OnUpdate60)
+end
+
+-- Get current panel position (center X, Y). For console sliders.
+function InfoPanel.GetPanelPosition()
+    if InfoPanel.SV.position ~= nil and #InfoPanel.SV.position == 2 then
+        return InfoPanel.SV.position[1], InfoPanel.SV.position[2]
+    end
+    if InfoPanel.Enabled and uiPanel and uiPanel.GetCenter then
+        return uiPanel:GetCenter()
+    end
+    return 0, 0
+end
+
+-- Apply panel position from SV (center coords). Used by Initialize and console sliders.
+function InfoPanel.ApplyPanelPosition()
+    if not InfoPanel.Enabled or not uiPanel then
+        return
+    end
+    if InfoPanel.SV.position ~= nil and #InfoPanel.SV.position == 2 then
+        uiPanel:ClearAnchors()
+        uiPanel:SetAnchor(CENTER, GuiRoot, TOPLEFT, InfoPanel.SV.position[1], InfoPanel.SV.position[2])
+    end
 end
 
 function InfoPanel.ResetPosition()

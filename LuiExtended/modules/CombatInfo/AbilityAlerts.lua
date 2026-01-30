@@ -232,6 +232,7 @@ function AbilityAlerts.CreateAlertFrame()
     uiTlw.alertFrame:SetDimensions(500, (CombatInfo.SV.alerts.toggles.alertFontSize * 2) + 4)
 
     local fragment = ZO_HUDFadeSceneFragment:New(uiTlw.alertFrame, 0, 0)
+    AbilityAlerts.alertFragment = fragment
 
     sceneManager:GetScene("hud"):AddFragment(fragment)
     sceneManager:GetScene("hudui"):AddFragment(fragment)
@@ -321,6 +322,16 @@ function AbilityAlerts.SetMovingStateAlert(state)
         return
     end
     AbilityAlerts.AlertFrameUnlocked = state
+
+    -- When unlocked on console, add alert frame to settings scene so preview is visible while addon settings are open
+    if IsConsoleUI() and AbilityAlerts.alertFragment then
+        local settingsScene = sceneManager:GetScene("LibHarvensAddonSettingsScene")
+        if state then
+            settingsScene:AddFragment(AbilityAlerts.alertFragment)
+        else
+            settingsScene:RemoveFragment(AbilityAlerts.alertFragment)
+        end
+    end
 
     -- PC/Keyboard version
     if uiTlw.alertFrame and uiTlw.alertFrame:GetType() == CT_TOPLEVELCONTROL then

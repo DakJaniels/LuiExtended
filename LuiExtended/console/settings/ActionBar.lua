@@ -861,6 +861,50 @@ function ActionBar.CreateConsoleSettings()
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
         }
 
+        local gw = GuiRoot:GetWidth()
+        local gh = GuiRoot:GetHeight()
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
+            min = -gw,
+            max = gw,
+            step = 10,
+            getFunction = function ()
+                return ActionBar.SV.CastbarOffsetX ~= nil and ActionBar.SV.CastbarOffsetX or 0
+            end,
+            setFunction = function (value)
+                ActionBar.SV.CastbarOffsetX = value
+                if ActionBar.SV.CastbarOffsetY == nil then
+                    ActionBar.SV.CastbarOffsetY = 320
+                end
+                ActionBar.SetCastBarPosition()
+            end,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
+            min = -gh,
+            max = gh,
+            step = 10,
+            getFunction = function ()
+                return ActionBar.SV.CastbarOffsetY ~= nil and ActionBar.SV.CastbarOffsetY or 320
+            end,
+            setFunction = function (value)
+                if ActionBar.SV.CastbarOffsetX == nil then
+                    ActionBar.SV.CastbarOffsetX = 0
+                end
+                ActionBar.SV.CastbarOffsetY = value
+                ActionBar.SetCastBarPosition()
+            end,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+        }
+
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,

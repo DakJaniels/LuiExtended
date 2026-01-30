@@ -276,50 +276,6 @@ function SpellCastBuffs:CreateConsoleSettings()
         end,
     }
 
-    -- Buffs Window Unlock
-    initialSettings[#initialSettings + 1] =
-    {
-        type = LHAS.ST_CHECKBOX,
-        label = GetString(LUIE_STRING_LAM_BUFF_UNLOCKWINDOW),
-        tooltip = GetString(LUIE_STRING_LAM_BUFF_UNLOCKWINDOW_TP),
-        getFunction = function ()
-            return SpellCastBuffs.BuffsMovingState
-        end,
-        setFunction = function (v)
-            -- Ensure lockPositionToUnitFrames is properly initialized when unlocking frames
-            if v and SpellCastBuffs.SV.lockPositionToUnitFrames == nil then
-                SpellCastBuffs.SV.lockPositionToUnitFrames = false
-            end
-            self:SetMovingState(v)
-        end,
-        default = false,
-    }
-
-    -- Buffs Window Reset position
-    initialSettings[#initialSettings + 1] =
-    {
-        type = LHAS.ST_BUTTON,
-        label = GetString(LUIE_STRING_LAM_RESETPOSITION),
-        tooltip = GetString(LUIE_STRING_LAM_BUFF_RESETPOSITION_TP),
-        buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
-        clickHandler = SpellCastBuffs.ResetTlwPosition,
-    }
-
-    -- Hard-Lock Position to Unit Frames
-    initialSettings[#initialSettings + 1] =
-    {
-        type = LHAS.ST_CHECKBOX,
-        label = GetString(LUIE_STRING_LAM_BUFF_HARDLOCK),
-        tooltip = GetString(LUIE_STRING_LAM_BUFF_HARDLOCK_TP),
-        getFunction = function ()
-            return Settings.lockPositionToUnitFrames
-        end,
-        setFunction = function (v)
-            Settings.lockPositionToUnitFrames = v
-        end,
-        default = Defaults.lockPositionToUnitFrames,
-    }
-
     -- Initialize all settings and menu buttons for submenus
     local backButton = nil
     local menuButtons = {}
@@ -331,6 +287,298 @@ function SpellCastBuffs:CreateConsoleSettings()
         settingsBuilder(sectionSettings)
         sectionGroups[sectionName] = sectionSettings
     end
+
+    -- Build Frame positions section (Unlock, Reset, Hard-Lock, X/Y sliders per container)
+    local buffPositionConfig = {
+        { key = "playerb",     xKey = "playerbOffsetX",     yKey = "playerbOffsetY",     label = "Player Buffs",      disable = function () return Settings.lockPositionToUnitFrames end },
+        { key = "playerd",     xKey = "playerdOffsetX",     yKey = "playerdOffsetY",     label = "Player Debuffs",     disable = function () return Settings.lockPositionToUnitFrames end },
+        { key = "targetb",     xKey = "targetbOffsetX",     yKey = "targetbOffsetY",     label = "Target Buffs",      disable = function () return Settings.lockPositionToUnitFrames end },
+        { key = "targetd",     xKey = "targetdOffsetX",     yKey = "targetdOffsetY",     label = "Target Debuffs",    disable = function () return Settings.lockPositionToUnitFrames end },
+    }
+    buildSectionSettings("FramePositions", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POSITIONS_HEADER),
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POSITIONS_TP),
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_UNLOCKWINDOW),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_UNLOCKWINDOW_TP),
+            getFunction = function ()
+                return SpellCastBuffs.BuffsMovingState
+            end,
+            setFunction = function (v)
+                if v and SpellCastBuffs.SV.lockPositionToUnitFrames == nil then
+                    SpellCastBuffs.SV.lockPositionToUnitFrames = false
+                end
+                self:SetMovingState(v)
+            end,
+            default = false,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_BUFF_HARDLOCK),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_HARDLOCK_TP),
+            getFunction = function ()
+                return Settings.lockPositionToUnitFrames
+            end,
+            setFunction = function (v)
+                Settings.lockPositionToUnitFrames = v
+            end,
+            default = Defaults.lockPositionToUnitFrames,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_RESETPOSITION),
+            tooltip = GetString(LUIE_STRING_LAM_BUFF_RESETPOSITION_TP),
+            buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
+            clickHandler = SpellCastBuffs.ResetTlwPosition,
+        }
+        local gw = GuiRoot:GetWidth()
+        local gh = GuiRoot:GetHeight()
+        for _, cfg in ipairs(buffPositionConfig) do
+            settings[#settings + 1] = { type = LHAS.ST_LABEL, label = cfg.label }
+            settings[#settings + 1] =
+            {
+                type = LHAS.ST_SLIDER,
+                label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
+                min = -gw,
+                max = gw,
+                step = 10,
+                getFunction = function ()
+                    local v = Settings[cfg.xKey]
+                    if v ~= nil then return v end
+                    local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers[cfg.key]
+                    return (c and c.GetLeft) and c:GetLeft() or 0
+                end,
+                setFunction = function (value)
+                    Settings[cfg.xKey] = value
+                    if Settings[cfg.yKey] == nil then
+                        local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers[cfg.key]
+                        Settings[cfg.yKey] = (c and c.GetTop) and c:GetTop() or 0
+                    end
+                    self:SetTlwPosition()
+                end,
+                disable = cfg.disable,
+                default = 0,
+            }
+            settings[#settings + 1] =
+            {
+                type = LHAS.ST_SLIDER,
+                label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
+                min = -gh,
+                max = gh,
+                step = 10,
+                getFunction = function ()
+                    local v = Settings[cfg.yKey]
+                    if v ~= nil then return v end
+                    local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers[cfg.key]
+                    return (c and c.GetTop) and c:GetTop() or 0
+                end,
+                setFunction = function (value)
+                    if Settings[cfg.xKey] == nil then
+                        local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers[cfg.key]
+                        Settings[cfg.xKey] = (c and c.GetLeft) and c:GetLeft() or 0
+                    end
+                    Settings[cfg.yKey] = value
+                    self:SetTlwPosition()
+                end,
+                disable = cfg.disable,
+                default = 0,
+            }
+        end
+        -- Player Long (V or H based on alignVertical)
+        local function playerLongGetXY()
+            local vert = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.player_long and SpellCastBuffs.BuffContainers.player_long.alignVertical
+            local xKey = vert and "playerVOffsetX" or "playerHOffsetX"
+            local yKey = vert and "playerVOffsetY" or "playerHOffsetY"
+            return xKey, yKey
+        end
+        settings[#settings + 1] = { type = LHAS.ST_LABEL, label = "Player Long" }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
+            min = -gw,
+            max = gw,
+            step = 10,
+            getFunction = function ()
+                local xKey, _ = playerLongGetXY()
+                local v = Settings[xKey]
+                if v ~= nil then return v end
+                local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.player_long
+                return (c and c.GetLeft) and c:GetLeft() or 0
+            end,
+            setFunction = function (value)
+                local xKey, yKey = playerLongGetXY()
+                Settings[xKey] = value
+                if Settings[yKey] == nil then
+                    local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.player_long
+                    Settings[yKey] = (c and c.GetTop) and c:GetTop() or 0
+                end
+                self:SetTlwPosition()
+            end,
+            default = 0,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
+            min = -gh,
+            max = gh,
+            step = 10,
+            getFunction = function ()
+                local _, yKey = playerLongGetXY()
+                local v = Settings[yKey]
+                if v ~= nil then return v end
+                local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.player_long
+                return (c and c.GetTop) and c:GetTop() or 0
+            end,
+            setFunction = function (value)
+                local xKey, yKey = playerLongGetXY()
+                if Settings[xKey] == nil then
+                    local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.player_long
+                    Settings[xKey] = (c and c.GetLeft) and c:GetLeft() or 0
+                end
+                Settings[yKey] = value
+                self:SetTlwPosition()
+            end,
+            default = 0,
+        }
+        -- Prominent Buffs (V or H based on alignVertical)
+        local function prominentBGetXY()
+            local vert = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.prominentbuffs and SpellCastBuffs.BuffContainers.prominentbuffs.alignVertical
+            local xKey = vert and "prominentbVOffsetX" or "prominentbHOffsetX"
+            local yKey = vert and "prominentbVOffsetY" or "prominentbHOffsetY"
+            return xKey, yKey
+        end
+        settings[#settings + 1] = { type = LHAS.ST_LABEL, label = "Prominent Buffs" }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
+            min = -gw,
+            max = gw,
+            step = 10,
+            getFunction = function ()
+                local xKey, _ = prominentBGetXY()
+                local v = Settings[xKey]
+                if v ~= nil then return v end
+                local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.prominentbuffs
+                return (c and c.GetLeft) and c:GetLeft() or 0
+            end,
+            setFunction = function (value)
+                local xKey, yKey = prominentBGetXY()
+                Settings[xKey] = value
+                if Settings[yKey] == nil then
+                    local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.prominentbuffs
+                    Settings[yKey] = (c and c.GetTop) and c:GetTop() or 0
+                end
+                self:SetTlwPosition()
+            end,
+            default = 0,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
+            min = -gh,
+            max = gh,
+            step = 10,
+            getFunction = function ()
+                local _, yKey = prominentBGetXY()
+                local v = Settings[yKey]
+                if v ~= nil then return v end
+                local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.prominentbuffs
+                return (c and c.GetTop) and c:GetTop() or 0
+            end,
+            setFunction = function (value)
+                local xKey, yKey = prominentBGetXY()
+                if Settings[xKey] == nil then
+                    local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.prominentbuffs
+                    Settings[xKey] = (c and c.GetLeft) and c:GetLeft() or 0
+                end
+                Settings[yKey] = value
+                self:SetTlwPosition()
+            end,
+            default = 0,
+        }
+        -- Prominent Debuffs (V or H based on alignVertical)
+        local function prominentDGetXY()
+            local vert = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.prominentdebuffs and SpellCastBuffs.BuffContainers.prominentdebuffs.alignVertical
+            local xKey = vert and "prominentdVOffsetX" or "prominentdHOffsetX"
+            local yKey = vert and "prominentdVOffsetY" or "prominentdHOffsetY"
+            return xKey, yKey
+        end
+        settings[#settings + 1] = { type = LHAS.ST_LABEL, label = "Prominent Debuffs" }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
+            min = -gw,
+            max = gw,
+            step = 10,
+            getFunction = function ()
+                local xKey, _ = prominentDGetXY()
+                local v = Settings[xKey]
+                if v ~= nil then return v end
+                local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.prominentdebuffs
+                return (c and c.GetLeft) and c:GetLeft() or 0
+            end,
+            setFunction = function (value)
+                local xKey, yKey = prominentDGetXY()
+                Settings[xKey] = value
+                if Settings[yKey] == nil then
+                    local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.prominentdebuffs
+                    Settings[yKey] = (c and c.GetTop) and c:GetTop() or 0
+                end
+                self:SetTlwPosition()
+            end,
+            default = 0,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
+            min = -gh,
+            max = gh,
+            step = 10,
+            getFunction = function ()
+                local _, yKey = prominentDGetXY()
+                local v = Settings[yKey]
+                if v ~= nil then return v end
+                local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.prominentdebuffs
+                return (c and c.GetTop) and c:GetTop() or 0
+            end,
+            setFunction = function (value)
+                local xKey, yKey = prominentDGetXY()
+                if Settings[xKey] == nil then
+                    local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.prominentdebuffs
+                    Settings[xKey] = (c and c.GetLeft) and c:GetLeft() or 0
+                end
+                Settings[yKey] = value
+                self:SetTlwPosition()
+            end,
+            default = 0,
+        }
+    end)
 
     -- Build Position and Display Options Section
     buildSectionSettings("PositionDisplay", function (settings)
@@ -4062,6 +4310,7 @@ function SpellCastBuffs:CreateConsoleSettings()
     end
 
     -- Create menu buttons for each section
+    menuButtons[#menuButtons + 1] = createMenuButton("FramePositions", GetString(LUIE_STRING_LAM_UF_CFRAMES_POSITIONS_HEADER))
     menuButtons[#menuButtons + 1] = createMenuButton("PositionDisplay", GetString(LUIE_STRING_LAM_BUFF_HEADER_POSITION))
     menuButtons[#menuButtons + 1] = createMenuButton("LongShortTerm", GetString(LUIE_STRING_LAM_BUFF_LONG_SHORT_HEADER))
     menuButtons[#menuButtons + 1] = createMenuButton("Misc", GetString(LUIE_STRING_LAM_BUFF_MISC_HEADER))

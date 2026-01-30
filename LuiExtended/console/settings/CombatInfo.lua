@@ -15,44 +15,14 @@ local AbilityAlerts = CombatInfo.AbilityAlerts
 local SynergyTracker = CombatInfo.SynergyTracker
 
 local type, pairs = type, pairs
-local table_insert = table.insert
 local zo_strformat = zo_strformat
 local string_format = string.format
-local alertFrameMovingEnabled = false -- Helper local flag
 
 local globalAlertOptions = { "Show All Incoming Abilities", "Only Show Hard CC Effects", "Only Show Unbreakable CC Effects" }
 local globalAlertOptionsKeys = { ["Show All Incoming Abilities"] = 1, ["Only Show Hard CC Effects"] = 2, ["Only Show Unbreakable CC Effects"] = 3 }
 local globalIconOptions = { "All Crowd Control", "NPC CC Only", "Player CC Only" }
 local globalIconOptionsKeys = { ["All Crowd Control"] = 1, ["NPC CC Only"] = 2, ["Player CC Only"] = 3 }
-
-local DurationOverridesList, DurationOverridesListValues = {}, {}
-
 local ACTION_RESULT_AREA_EFFECT = 669966
-
--- Create a list of abilityId's / abilityName's to use for Blacklist (LHAS format)
-local function GenerateCustomListLHAS(input)
-    local items = {}
-    local counter = 0
-    for id in pairs(input) do
-        counter = counter + 1
-        -- If the input is a numeric value then we can pull this abilityId's info.
-        if type(id) == "number" then
-            items[counter] =
-            {
-                name = zo_iconTextFormat(GetAbilityIcon(id), 16, 16, " [" .. id .. "] " .. zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id)), true, true),
-                data = id
-            }
-            -- If the input is not numeric then add this as a name only.
-        else
-            items[counter] =
-            {
-                name = id,
-                data = id
-            }
-        end
-    end
-    return items
-end
 
 -- Load LibHarvensAddonSettings
 local LHAS = LibHarvensAddonSettings
@@ -216,6 +186,59 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not LUIE.SV.CombatInfo_Enabled
             end
+        }
+
+        local gw = GuiRoot:GetWidth()
+        local gh = GuiRoot:GetHeight()
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
+            min = -gw,
+            max = gw,
+            step = 10,
+            getFunction = function ()
+                if CombatInfo.SV.AlertFrameOffsetX ~= nil then
+                    return CombatInfo.SV.AlertFrameOffsetX
+                end
+                local f = CombatInfo.AbilityAlerts and CombatInfo.AbilityAlerts.uiTlw and CombatInfo.AbilityAlerts.uiTlw.alertFrame
+                return (f and f.GetLeft) and f:GetLeft() or 0
+            end,
+            setFunction = function (value)
+                CombatInfo.SV.AlertFrameOffsetX = value
+                if CombatInfo.SV.AlertFrameOffsetY == nil then
+                    local f = CombatInfo.AbilityAlerts and CombatInfo.AbilityAlerts.uiTlw and CombatInfo.AbilityAlerts.uiTlw.alertFrame
+                    CombatInfo.SV.AlertFrameOffsetY = (f and f.GetTop) and f:GetTop() or 0
+                end
+                AbilityAlerts.SetAlertFramePosition()
+            end,
+            disable = function () return not LUIE.SV.CombatInfo_Enabled end,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
+            min = -gh,
+            max = gh,
+            step = 10,
+            getFunction = function ()
+                if CombatInfo.SV.AlertFrameOffsetY ~= nil then
+                    return CombatInfo.SV.AlertFrameOffsetY
+                end
+                local f = CombatInfo.AbilityAlerts and CombatInfo.AbilityAlerts.uiTlw and CombatInfo.AbilityAlerts.uiTlw.alertFrame
+                return (f and f.GetTop) and f:GetTop() or 0
+            end,
+            setFunction = function (value)
+                if CombatInfo.SV.AlertFrameOffsetX == nil then
+                    local f = CombatInfo.AbilityAlerts and CombatInfo.AbilityAlerts.uiTlw and CombatInfo.AbilityAlerts.uiTlw.alertFrame
+                    CombatInfo.SV.AlertFrameOffsetX = (f and f.GetLeft) and f:GetLeft() or 0
+                end
+                CombatInfo.SV.AlertFrameOffsetY = value
+                AbilityAlerts.SetAlertFramePosition()
+            end,
+            disable = function () return not LUIE.SV.CombatInfo_Enabled end,
         }
 
         settings[#settings + 1] =
@@ -2068,6 +2091,49 @@ function CombatInfo.CreateConsoleSettings()
             clickHandler = CrowdControlTracker.ResetPosition
         }
 
+        local gwCct = GuiRoot:GetWidth()
+        local ghCct = GuiRoot:GetHeight()
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
+            min = -gwCct,
+            max = gwCct,
+            step = 10,
+            getFunction = function ()
+                return Settings.cct.offsetX or 0
+            end,
+            setFunction = function (value)
+                Settings.cct.offsetX = value
+                if Settings.cct.offsetY == nil then
+                    Settings.cct.offsetY = 0
+                end
+                CrowdControlTracker.ApplyPosition()
+            end,
+            disable = function () return not Settings.cct.enabled end,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
+            min = -ghCct,
+            max = ghCct,
+            step = 10,
+            getFunction = function ()
+                return Settings.cct.offsetY or 0
+            end,
+            setFunction = function (value)
+                if Settings.cct.offsetX == nil then
+                    Settings.cct.offsetX = 0
+                end
+                Settings.cct.offsetY = value
+                CrowdControlTracker.ApplyPosition()
+            end,
+            disable = function () return not Settings.cct.enabled end,
+        }
+
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
@@ -3111,6 +3177,55 @@ function CombatInfo.CreateConsoleSettings()
             disable = function ()
                 return not Settings.synergy.enabled
             end
+        }
+
+        local gwSyn = GuiRoot:GetWidth()
+        local ghSyn = GuiRoot:GetHeight()
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
+            min = -gwSyn,
+            max = gwSyn,
+            step = 10,
+            getFunction = function ()
+                return Settings.synergy.offsetX or 0
+            end,
+            setFunction = function (value)
+                Settings.synergy.offsetX = value
+                if Settings.synergy.offsetY == nil then
+                    Settings.synergy.offsetY = 200
+                end
+                local tracker = CombatInfo.SynergyTrackerInstance
+                if tracker then
+                    tracker:ApplyPosition()
+                end
+            end,
+            disable = function () return not Settings.synergy.enabled end,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
+            min = -ghSyn,
+            max = ghSyn,
+            step = 10,
+            getFunction = function ()
+                return Settings.synergy.offsetY or 200
+            end,
+            setFunction = function (value)
+                if Settings.synergy.offsetX == nil then
+                    Settings.synergy.offsetX = 0
+                end
+                Settings.synergy.offsetY = value
+                local tracker = CombatInfo.SynergyTrackerInstance
+                if tracker then
+                    tracker:ApplyPosition()
+                end
+            end,
+            disable = function () return not Settings.synergy.enabled end,
         }
 
         settings[#settings + 1] =

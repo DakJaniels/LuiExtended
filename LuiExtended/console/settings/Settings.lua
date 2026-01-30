@@ -5,9 +5,9 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-local g_ElementMovingEnabled
+-- local g_ElementMovingEnabled
 
-local GridOverlay = LUIE.GridOverlay
+-- local GridOverlay = LUIE.GridOverlay
 
 local pairs = pairs
 local table_concat = table.concat
@@ -118,66 +118,66 @@ function LUIE.CreateConsoleSettings()
         clickHandler = function () ReloadUI("ingame") end
     }
 
-    -- Default UI Elements Position Unlock
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_CHECKBOX,
-        label = GetString(LUIE_STRING_LAM_UNLOCK_DEFAULT_UI),
-        tooltip = GetString(LUIE_STRING_LAM_UNLOCK_DEFAULT_UI_TP),
-        getFunction = function () return g_ElementMovingEnabled end,
-        setFunction = function (value)
-            g_ElementMovingEnabled = value
-            LUIE.SetupElementMover(value)
-        end,
-        default = false,
-        disable = function () return true end
-    }
+    -- -- Default UI Elements Position Unlock
+    -- settingsData[#settingsData + 1] =
+    -- {
+    --     type = LHAS.ST_CHECKBOX,
+    --     label = GetString(LUIE_STRING_LAM_UNLOCK_DEFAULT_UI),
+    --     tooltip = GetString(LUIE_STRING_LAM_UNLOCK_DEFAULT_UI_TP),
+    --     getFunction = function () return g_ElementMovingEnabled end,
+    --     setFunction = function (value)
+    --         g_ElementMovingEnabled = value
+    --         LUIE.SetupElementMover(value)
+    --     end,
+    --     default = false,
+    --     disable = function () return true end
+    -- }
 
-    -- Grid Snap Settings
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_CHECKBOX,
-        label = "Enable Grid Snap",
-        tooltip = "Enable snapping UI elements to a grid when moving them",
-        getFunction = function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
-        setFunction = function (value)
-            local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
-            accountWideSettings.snapToGrid_default = value
-            local gridSize = accountWideSettings.snapToGridSize_default or 15
-            GridOverlay.Refresh("default", g_ElementMovingEnabled and value, gridSize)
-        end,
-        default = false
-    }
+    -- -- Grid Snap Settings
+    -- settingsData[#settingsData + 1] =
+    -- {
+    --     type = LHAS.ST_CHECKBOX,
+    --     label = "Enable Grid Snap",
+    --     tooltip = "Enable snapping UI elements to a grid when moving them",
+    --     getFunction = function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
+    --     setFunction = function (value)
+    --         local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+    --         accountWideSettings.snapToGrid_default = value
+    --         local gridSize = accountWideSettings.snapToGridSize_default or 15
+    --         GridOverlay.Refresh("default", g_ElementMovingEnabled and value, gridSize)
+    --     end,
+    --     default = false
+    -- }
 
-    -- Grid Size
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_SLIDER,
-        label = "Grid Size",
-        tooltip = "Set the size of the grid for snapping UI elements",
-        min = 5,
-        max = 100,
-        step = 5,
-        format = "%.0f",
-        getFunction = function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_default or 15 end,
-        setFunction = function (value)
-            local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
-            accountWideSettings.snapToGridSize_default = value
-            GridOverlay.Refresh("default", g_ElementMovingEnabled and accountWideSettings.snapToGrid_default, value)
-        end,
-        default = 15,
-        disable = function () return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end
-    }
+    -- -- Grid Size
+    -- settingsData[#settingsData + 1] =
+    -- {
+    --     type = LHAS.ST_SLIDER,
+    --     label = "Grid Size",
+    --     tooltip = "Set the size of the grid for snapping UI elements",
+    --     min = 5,
+    --     max = 100,
+    --     step = 5,
+    --     format = "%.0f",
+    --     getFunction = function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_default or 15 end,
+    --     setFunction = function (value)
+    --         local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+    --         accountWideSettings.snapToGridSize_default = value
+    --         GridOverlay.Refresh("default", g_ElementMovingEnabled and accountWideSettings.snapToGrid_default, value)
+    --     end,
+    --     default = 15,
+    --     disable = function () return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end
+    -- }
 
-    -- Default UI Elements Position Reset
-    settingsData[#settingsData + 1] =
-    {
-        type = LHAS.ST_BUTTON,
-        label = GetString(LUIE_STRING_LAM_RESETPOSITION),
-        tooltip = GetString(LUIE_STRING_LAM_RESET_DEFAULT_UI_TP),
-        buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
-        clickHandler = LUIE.ResetElementPosition
-    }
+    -- -- Default UI Elements Position Reset
+    -- settingsData[#settingsData + 1] =
+    -- {
+    --     type = LHAS.ST_BUTTON,
+    --     label = GetString(LUIE_STRING_LAM_RESETPOSITION),
+    --     tooltip = GetString(LUIE_STRING_LAM_RESET_DEFAULT_UI_TP),
+    --     buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
+    --     clickHandler = LUIE.ResetElementPosition
+    -- }
 
     -- Character Profile Settings Section
     settingsData[#settingsData + 1] =

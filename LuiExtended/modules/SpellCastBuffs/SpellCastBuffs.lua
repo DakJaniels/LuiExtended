@@ -321,6 +321,7 @@ function SpellCastBuffs:Initialize(enabled)
     fragments[#fragments + 1] = fragment
 
     -- Loop over table of fragments to add them to relevant UI Scenes
+    self.hudFragments = fragments
     for _, v in pairs(fragments) do
         sceneManager:GetScene("hud"):AddFragment(v)
         sceneManager:GetScene("hudui"):AddFragment(v)
@@ -915,6 +916,20 @@ function SpellCastBuffs:SetMovingState(state)
     end
 
     self.BuffsMovingState = state
+
+    -- When unlocked, add buff fragments to LibHarvensAddonSettingsScene so preview is visible while settings menu is open.
+    if IsConsoleUI() then
+        local gameMenuScene = sceneManager:GetScene("LibHarvensAddonSettingsScene")
+        if self.hudFragments then
+            for _, frag in pairs(self.hudFragments) do
+                if state then
+                    gameMenuScene:AddFragment(frag)
+                else
+                    gameMenuScene:RemoveFragment(frag)
+                end
+            end
+        end
+    end
 
     local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
     local gridEnabled = accountWideSettings and accountWideSettings.snapToGrid_buffs

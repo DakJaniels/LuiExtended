@@ -1807,6 +1807,7 @@ local strings =
     LUIE_STRING_LAM_CT_DESCRIPTION = "Display Combat Cloud combat text, with damage/healing values, and various alerts.",
     LUIE_STRING_LAM_CT_UNLOCK = "Unlock",
     LUIE_STRING_LAM_CT_UNLOCK_TP = "Unlock the panels to move them.",
+    LUIE_STRING_LAM_CT_POSITIONS_HEADER = "Panel positions",
     LUIE_STRING_LAM_CT_IC_ONLY = "In Combat Only",
     LUIE_STRING_LAM_CT_IC_ONLY_TP = "Only display incoming and outgoing numbers when in combat.",
     LUIE_STRING_LAM_CT_TRANSPARENCY = "Set Transparency",

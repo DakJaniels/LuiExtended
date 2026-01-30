@@ -14,6 +14,7 @@ local Effects = LuiData.Data.Effects
 local CrowdControl = LuiData.Data.CrowdControl
 local eventManager = GetEventManager()
 local animationManager = GetAnimationManager()
+local sceneManager = SCENE_MANAGER
 local IsCharmAbility = IsCharmAbility
 local table_insert = table.insert
 local table_remove = table.remove
@@ -231,8 +232,15 @@ end
 function CrowdControlTracker.ResetPosition()
     CombatInfo.SV.cct.offsetX = 0
     CombatInfo.SV.cct.offsetY = 0
+    CrowdControlTracker.ApplyPosition()
+end
+
+--- Apply saved position (center offset from GuiRoot). Used by console X/Y sliders.
+function CrowdControlTracker.ApplyPosition()
+    local x = CombatInfo.SV.cct.offsetX or 0
+    local y = CombatInfo.SV.cct.offsetY or 0
     LUIE_CCTracker:ClearAnchors()
-    LUIE_CCTracker:SetAnchor(CENTER, GuiRoot, CENTER, 0, 0)
+    LUIE_CCTracker:SetAnchor(CENTER, GuiRoot, CENTER, x, y)
 end
 
 function CrowdControlTracker:OnUpdate(control)
@@ -1468,8 +1476,7 @@ function CrowdControlTracker:InsertAnimationType(animHandler, animType, control,
 end
 
 function CrowdControlTracker:InitControls()
-    LUIE_CCTracker:ClearAnchors()
-    LUIE_CCTracker:SetAnchor(CENTER, GuiRoot, CENTER, CombatInfo.SV.cct.offsetX, CombatInfo.SV.cct.offsetY)
+    CrowdControlTracker.ApplyPosition()
     LUIE_CCTracker:SetScale(CombatInfo.SV.cct.controlScale)
     LUIE_CCTracker_TextFrame_Label:SetFont(iconFont)
     if CombatInfo.SV.cct.unlock then

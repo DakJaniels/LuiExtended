@@ -199,14 +199,11 @@ function SynergyTracker:Initialize()
         self.control:SetHidden(true)
     end
 
+    -- Fragment for console settings scene so preview is visible while addon settings are open
+    self.settingsSceneFragment = ZO_HUDFadeSceneFragment:New(self.control, 0, 0)
+
     -- Restore saved position or use default
-    if Settings.offsetX and Settings.offsetY then
-        self.control:ClearAnchors()
-        self.control:SetAnchor(CENTER, GuiRoot, CENTER, Settings.offsetX, Settings.offsetY)
-    else
-        self.control:ClearAnchors()
-        self.control:SetAnchor(CENTER, GuiRoot, CENTER, 0, 200)
-    end
+    self:ApplyPosition()
 
     -- Update movable state based on settings
     self.control:SetMovable(Settings.unlocked)
@@ -811,11 +808,32 @@ function SynergyTracker:ApplyImmediateCooldown(abilityId)
     self:UpdateDisplay()
 end
 
+--- Apply saved position (center offset from GuiRoot)
+function SynergyTracker:ApplyPosition()
+    local Settings = CombatInfo.SV.synergy
+    local x = (Settings.offsetX ~= nil) and Settings.offsetX or 0
+    local y = (Settings.offsetY ~= nil) and Settings.offsetY or 200
+    self.control:ClearAnchors()
+    self.control:SetAnchor(CENTER, GuiRoot, CENTER, x, y)
+end
+
 --- Unlock/lock UI for positioning
 --- @param unlocked boolean Whether to unlock the UI
 function SynergyTracker:SetUnlocked(unlocked)
     local Settings = CombatInfo.SV.synergy
     Settings.unlocked = unlocked
+
+    -- When unlocked on console, add control to settings scene so preview is visible while addon settings are open
+    if IsConsoleUI() then
+        local settingsScene = sceneManager:GetScene("LibHarvensAddonSettingsScene")
+        if self.settingsSceneFragment then
+            if unlocked then
+                settingsScene:AddFragment(self.settingsSceneFragment)
+            else
+                settingsScene:RemoveFragment(self.settingsSceneFragment)
+            end
+        end
+    end
 
     -- PC version
     self.control:SetMovable(unlocked)
@@ -877,9 +895,7 @@ function SynergyTracker:ResetPosition()
     local Settings = CombatInfo.SV.synergy
     Settings.offsetX = 0
     Settings.offsetY = 200
-
-    self.control:ClearAnchors()
-    self.control:SetAnchor(CENTER, GuiRoot, CENTER, 0, 200)
+    self:ApplyPosition()
 end
 
 --- Update display options (keybinds, priority visibility)

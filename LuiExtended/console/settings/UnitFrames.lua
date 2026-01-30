@@ -2089,6 +2089,8 @@ function UnitFrames.CreateConsoleSettings()
             { unitTag = "PetGroup1",       label = "Pet",        disable = function () return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet) end       },
         }
 
+        local gw = GuiRoot:GetWidth()
+        local gh = GuiRoot:GetHeight()
         for _, cfg in ipairs(positionFrameConfig) do
             local unitTag = cfg.unitTag
             local attr = UnitFrames.CustomFramePositionAttr[unitTag]
@@ -2101,8 +2103,8 @@ function UnitFrames.CreateConsoleSettings()
                 type = LHAS.ST_SLIDER,
                 label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
-                min = -1200,
-                max = 1200,
+                min = -gw,
+                max = gw,
                 step = 10,
                 getFunction = function ()
                     local left, _ = UnitFrames.CustomFramesGetPosition(unitTag)
@@ -2121,8 +2123,8 @@ function UnitFrames.CreateConsoleSettings()
                 type = LHAS.ST_SLIDER,
                 label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
-                min = -800,
-                max = 800,
+                min = -gh,
+                max = gh,
                 step = 10,
                 getFunction = function ()
                     local _, top = UnitFrames.CustomFramesGetPosition(unitTag)
