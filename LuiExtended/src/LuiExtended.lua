@@ -149,13 +149,13 @@ local DEVS = readonlytable
         },
         ["@dack_janiels"] =
         {
-            enabled = true,
-            debug = true,
+            enabled = false,
+            debug = false,
         },
         ["@dack_janiels.luie"] =
         {
-            enabled = true,
-            debug = true,
+            enabled = false,
+            debug = false,
         },
     }
 
@@ -172,20 +172,20 @@ end
 -- -----------------------------------------------------------------------------
 
 -- do
-    -- local g_loggingEnabled = true
-    -- function ZO_Scene:Log(message)
-        -- if g_loggingEnabled then
-            -- CHAT_ROUTER:AddSystemMessage(string.format("%s - %s - %s", ZO_Scene_GetOriginColor():Colorize(GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN)), self.name, message))
-        -- end
-    -- end
+--     local g_loggingEnabled = true
+--     function ZO_Scene:Log(message)
+--         if g_loggingEnabled then
+--             CHAT_ROUTER:AddSystemMessage(string.format("%s - %s - %s", ZO_Scene_GetOriginColor():Colorize(GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN)), self.name, message))
+--         end
+--     end
 
-    -- function ZO_SceneManager_Follower:Log(message, sceneName)
-        -- if g_loggingEnabled then
-            -- if sceneName then
-                -- CHAT_ROUTER:AddSystemMessage(string.format("%s - %s - %s", ZO_Scene_GetOriginColor():Colorize(GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN)), message, sceneName))
-            -- else
-                -- CHAT_ROUTER:AddSystemMessage(string.format("%s - %s", ZO_Scene_GetOriginColor():Colorize(GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN)), message))
-            -- end
-        -- end
-    -- end
+--     function ZO_SceneManager_Follower:Log(message, sceneName)
+--         if g_loggingEnabled then
+--             if sceneName then
+--                 CHAT_ROUTER:AddSystemMessage(string.format("%s - %s - %s", ZO_Scene_GetOriginColor():Colorize(GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN)), message, sceneName))
+--             else
+--                 CHAT_ROUTER:AddSystemMessage(string.format("%s - %s", ZO_Scene_GetOriginColor():Colorize(GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN)), message))
+--             end
+--         end
+--     end
 -- end
