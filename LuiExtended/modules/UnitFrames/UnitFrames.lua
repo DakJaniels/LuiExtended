@@ -1240,9 +1240,17 @@ function UnitFrames.UpdateStaticControls(unitFrame)
             -- Use game API for both champion and normal level icons
             local iconPath
             if unitFrame.isChampion then
-                iconPath = IsInGamepadPreferredMode() and ZO_GetGamepadChampionPointsIcon() or ZO_GetChampionPointsIconSmall()
+                if IsInGamepadPreferredMode() then
+                    iconPath = ZO_GetGamepadChampionPointsIcon()
+                else
+                    iconPath = ZO_GetChampionPointsIconSmall()
+                end
             else
-                iconPath = IsInGamepadPreferredMode() and ZO_GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL) or ZO_GetKeyboardDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
+                if IsInGamepadPreferredMode() then
+                    iconPath = ZO_GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
+                else
+                    iconPath = ZO_GetKeyboardDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
+                end
             end
             unitFrame.levelIcon:SetTexture(iconPath)
             -- Prevent auto-resize and set color to white
@@ -1828,7 +1836,11 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
     elseif UnitFrames.SV.PlayerEnableAltbarXP then
         -- Experience XP mode
         mode = "experience"
-        icon = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_NORMAL_DDS
+        if IsInGamepadPreferredMode() then
+            icon = ZO_GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
+        else
+            icon = ZO_GetKeyboardDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL)
+        end
         center = { 0, 0.1, 0.1, 0.9 }
         color = { XP_BAR_COLORS.r, XP_BAR_COLORS.g, XP_BAR_COLORS.b, 0.9 }
         positionMode = "recenter"
