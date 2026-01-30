@@ -1753,7 +1753,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
     if UnitFrames.SV.PlayerEnableAltbarMSW and isWerewolf then
         -- Werewolf mode
         mode = "werewolf"
-        icon = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_BAR_WEREWOLF_DDS
+        icon = [[/esoui/art/armory/buildicons/buildicon_45.dds]]
         center = { 0.05, 0, 0, 0.9 }
         color = { 0.8, 0, 0, 0.9 }
         positionMode = getPositioningMode(false)
@@ -1767,7 +1767,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
     elseif UnitFrames.SV.PlayerEnableAltbarMSW and isSiege then
         -- Siege mode
         mode = "siege"
-        icon = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_BAR_SIEGE_DDS
+        icon = [[/esoui/art/armory/buildicons/buildicon_37.dds]]
         center = { 0.05, 0, 0, 0.9 }
         color = { 0.8, 0, 0, 0.9 }
         positionMode = "recenter"
@@ -1781,7 +1781,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
     elseif UnitFrames.SV.PlayerEnableAltbarMSW and isMounted then
         -- Mount mode
         mode = "mount"
-        icon = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_BAR_MOUNT_DDS
+        icon = [[/esoui/art/icons/servicemappins/servicepin_stable.dds]]
         center =
         {
             0.1 * UnitFrames.SV.CustomColourStamina[1],
