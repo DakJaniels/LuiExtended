@@ -113,7 +113,7 @@ function Unlock.ReplaceDefaultTemplate(object, functionName, frameName)
             local frame = _G[frameName]
             --- @cast frame userdata
             frame:ClearAnchors()
-            frame:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, frameData[1], frameData[2])
+            frame:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, frameData[1], frameData[2], ANCHOR_CONSTRAINS_XY)
         end
         return result
     end
@@ -149,12 +149,12 @@ function Unlock.SetAnchor(element, frameName)
     if x ~= nil and y ~= nil then
         x, y = Unlock.ApplyGridSnap(x, y, "default")
         element:ClearAnchors()
-        element:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
+        element:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y, ANCHOR_CONSTRAINS_XY)
     end
 
     -- Fix the Objective Capture Meter fill alignment.
     if element == ZO_ObjectiveCaptureMeter then
-        ZO_ObjectiveCaptureMeterFrame:SetAnchor(BOTTOM, ZO_ObjectiveCaptureMeter, BOTTOM, 0, 0)
+        ZO_ObjectiveCaptureMeterFrame:SetAnchor(BOTTOM, ZO_ObjectiveCaptureMeter, BOTTOM, 0, 0, ANCHOR_CONSTRAINS_XY)
     end
 
     -- Setup Alert Text to anchor properly.
@@ -191,7 +191,7 @@ function Unlock.CreateCoordinateLabel(parent, positionText)
     label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     label:SetVerticalAlignment(TEXT_ALIGN_TOP)
     label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
-    label:SetAnchor(TOPLEFT, parent, TOPLEFT, 2, 2)
+    label:SetAnchor(TOPLEFT, parent, TOPLEFT, 2, 2, ANCHOR_CONSTRAINS_XY)
     label:SetText(positionText)
     label:SetColor(1, 1, 0, 1)
     label:SetDrawLayer(DL_OVERLAY)
@@ -227,7 +227,7 @@ function Unlock.CreateTopLevelWindow(element, config, point, relativePoint, offs
     tlw:SetMouseEnabled(false)
     tlw:SetMovable(false)
     tlw:SetHidden(true)
-    tlw:SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY)
+    tlw:SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY, ANCHOR_CONSTRAINS_XY)
     tlw:SetDimensions(element:GetWidth(), element:GetHeight())
     tlw.customPositionAttr = element:GetName()
 
@@ -320,7 +320,7 @@ function Unlock.InitializeElementMover(element, config)
                 if LUIE.SV.snapToGrid_default then
                     left, top = Unlock.ApplyGridSnap(left, top, "default")
                     self:ClearAnchors()
-                    self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+                    self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top, ANCHOR_CONSTRAINS_XY)
                 end
 
                 -- Save the new position and update the element positions

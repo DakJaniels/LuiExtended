@@ -227,7 +227,7 @@ function Unlock.CreateTopLevelWindow(element, config, point, relativePoint, offs
     tlw:SetMouseEnabled(false)
     tlw:SetMovable(false)
     tlw:SetHidden(true)
-    tlw:SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY)
+    tlw:SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY, ANCHOR_CONSTRAINS_XY)
     tlw:SetDimensions(element:GetWidth(), element:GetHeight())
     tlw.customPositionAttr = element:GetName()
 
@@ -320,7 +320,7 @@ function Unlock.InitializeElementMover(element, config)
                 if LUIE.SV.snapToGrid_default then
                     left, top = Unlock.ApplyGridSnap(left, top, "default")
                     self:ClearAnchors()
-                    self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+                    self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top, ANCHOR_CONSTRAINS_XY)
                 end
 
                 -- Save the new position and update the element positions
