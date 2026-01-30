@@ -172,13 +172,13 @@ function AbilityAlerts.CreateAlertFrame()
     AbilityAlerts.ApplyFontAlert()
 
     -- Reference the XML-created top level control
-    uiTlw.alertFrame = windowManager:GetControlByName("LUIE_AlertFrame")
+    uiTlw.alertFrame = windowManager:GetControlByName("LUIE_AlertFrame") --- @type LUIE_AlertFrame
 
     -- Setup references to preview elements
-    uiTlw.alertFrame.preview = uiTlw.alertFrame:GetNamedChild("_Preview")
-    uiTlw.alertFrame.preview.anchorLabel = uiTlw.alertFrame.preview:GetNamedChild("_AnchorLabel")
-    uiTlw.alertFrame.preview.anchorLabelBg = uiTlw.alertFrame.preview:GetNamedChild("_AnchorLabelBg")
-    uiTlw.alertFrame.preview.anchorTexture = uiTlw.alertFrame.preview:GetNamedChild("_AnchorTexture")
+    uiTlw.alertFrame.preview = uiTlw.alertFrame:GetNamedChild("_Preview")                             --- @type LUIE_AlertFrame_Preview
+    uiTlw.alertFrame.preview.anchorLabel = uiTlw.alertFrame.preview:GetNamedChild("_AnchorLabel")     --- @type LUIE_AlertFrame_Preview_AnchorLabel
+    uiTlw.alertFrame.preview.anchorLabelBg = uiTlw.alertFrame.preview:GetNamedChild("_AnchorLabelBg") --- @type LUIE_AlertFrame_Preview_AnchorLabelBg
+    uiTlw.alertFrame.preview.anchorTexture = uiTlw.alertFrame.preview:GetNamedChild("_AnchorTexture") --- @type LUIE_AlertFrame_Preview_AnchorTexture
 
     -- Create control pool for alert controls
     alertPool = ZO_ControlPool:New("LUIE_AlertTemplate", uiTlw.alertFrame)
