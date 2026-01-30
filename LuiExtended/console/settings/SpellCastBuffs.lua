@@ -289,11 +289,12 @@ function SpellCastBuffs:CreateConsoleSettings()
     end
 
     -- Build Frame positions section (Unlock, Reset, Hard-Lock, X/Y sliders per container)
-    local buffPositionConfig = {
-        { key = "playerb",     xKey = "playerbOffsetX",     yKey = "playerbOffsetY",     label = "Player Buffs",      disable = function () return Settings.lockPositionToUnitFrames end },
-        { key = "playerd",     xKey = "playerdOffsetX",     yKey = "playerdOffsetY",     label = "Player Debuffs",     disable = function () return Settings.lockPositionToUnitFrames end },
-        { key = "targetb",     xKey = "targetbOffsetX",     yKey = "targetbOffsetY",     label = "Target Buffs",      disable = function () return Settings.lockPositionToUnitFrames end },
-        { key = "targetd",     xKey = "targetdOffsetX",     yKey = "targetdOffsetY",     label = "Target Debuffs",    disable = function () return Settings.lockPositionToUnitFrames end },
+    local buffPositionConfig =
+    {
+        { key = "playerb", xKey = "playerbOffsetX", yKey = "playerbOffsetY", label = "Player Buffs",   disable = function () return Settings.lockPositionToUnitFrames end },
+        { key = "playerd", xKey = "playerdOffsetX", yKey = "playerdOffsetY", label = "Player Debuffs", disable = function () return Settings.lockPositionToUnitFrames end },
+        { key = "targetb", xKey = "targetbOffsetX", yKey = "targetbOffsetY", label = "Target Buffs",   disable = function () return Settings.lockPositionToUnitFrames end },
+        { key = "targetd", xKey = "targetdOffsetX", yKey = "targetdOffsetY", label = "Target Debuffs", disable = function () return Settings.lockPositionToUnitFrames end },
     }
     buildSectionSettings("FramePositions", function (settings)
         settings[#settings + 1] =

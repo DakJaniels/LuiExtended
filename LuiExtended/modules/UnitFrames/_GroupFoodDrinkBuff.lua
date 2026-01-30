@@ -610,8 +610,8 @@ local function OnSlashCommand()
     LUIE.PrintToChat("Refreshing food/drink buff icons...")
     GroupFoodDrinkBuffManager.RefreshFrames()
     LUIE_callLater(function ()
-                     LUIE.PrintToChat("Food/drink buff icons refreshed.", true)
-                 end, 200)
+                       LUIE.PrintToChat("Food/drink buff icons refreshed.", true)
+                   end, 200)
 end
 
 -- =====================================================================================================================

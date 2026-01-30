@@ -143,7 +143,7 @@ local function CreateDecreasedArmorOverlay(parent, small)
     local control = windowManager:CreateControlFromVirtual(uniqueName, parent, templateName)
 
     -- Get texture references
-    control.smallTex = control:GetNamedChild("_SmallTex") --- @type TextureControl
+    control.smallTex = control:GetNamedChild("_SmallTex")       --- @type TextureControl
     if not small then
         control.normalTex = control:GetNamedChild("_NormalTex") --- @type TextureControl
     end

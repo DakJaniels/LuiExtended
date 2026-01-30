@@ -6,7 +6,7 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
----@class LUIE.GridOverlay
+--- @class LUIE.GridOverlay
 local GridOverlay = {}
 GridOverlay.__index = GridOverlay
 
@@ -178,7 +178,7 @@ function GridOverlay:Refresh(visible, size)
     self:UpdateLines(effectiveSize)
 end
 
----@class LUIE.GridOverlayManager
+--- @class LUIE.GridOverlayManager
 local GridOverlayManager =
 {
     overlays = {},
@@ -218,7 +218,7 @@ function GridOverlayManager.HideAll()
     end
 end
 
----@class LUIE.GridOverlayManager
+--- @class LUIE.GridOverlayManager
 LUIE.GridOverlay = GridOverlayManager
 
 return GridOverlayManager
