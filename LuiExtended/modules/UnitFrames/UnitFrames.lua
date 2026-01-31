@@ -32,8 +32,8 @@ local windowManager = GetWindowManager()
 
 local leaderIcons =
 {
-    [0] = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_CLASS_NONE_DDS,
-    [1] = "/esoui/art/icons/guildranks/guild_rankicon_misc01.dds",
+    [0] = [[/esoui/art/icons/heraldrycrests_misc_blank_01.dds]],
+    [1] = [[/esoui/art/icons/guildranks/guild_rankicon_misc01.dds]],
 }
 
 local moduleName = UnitFrames.moduleName
@@ -1145,12 +1145,18 @@ function UnitFrames.UpdateStaticControls(unitFrame)
         local unitDifficulty = GetUnitDifficulty(unitFrame.unitTag)
         local classIcon = LUIE.GetClassIcon(GetUnitClassId(unitFrame.unitTag))
         local showClass = (unitFrame.isPlayer and classIcon ~= nil) or (unitDifficulty > 1)
+        local eliteIconPath
+        if IsConsoleUI() then
+            eliteIconPath = [[/esoui/art/icons/poi/poi_groupboss_complete.dds]]
+        else
+            eliteIconPath = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_ELITE_DDS
+        end
         if unitFrame.isPlayer then
             unitFrame.classIcon:SetTexture(classIcon)
         elseif unitDifficulty == 2 then
-            unitFrame.classIcon:SetTexture(LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_ELITE_DDS)
+            unitFrame.classIcon:SetTexture(eliteIconPath)
         elseif unitDifficulty >= 3 then
-            unitFrame.classIcon:SetTexture(LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_ELITE_DDS)
+            unitFrame.classIcon:SetTexture(eliteIconPath)
         end
         if unitFrame.unitTag == "player" then
             unitFrame.classIcon:SetHidden(not UnitFrames.SV.PlayerEnableYourname)
@@ -1179,8 +1185,14 @@ function UnitFrames.UpdateStaticControls(unitFrame)
         local isIgnored = unitFrame.isPlayer and IsUnitIgnored(unitFrame.unitTag)
         local isFriend = unitFrame.isPlayer and IsUnitFriend(unitFrame.unitTag)
         local isGuild = unitFrame.isPlayer and not isFriend and not isIgnored and IsGuildMate(unitFrame.unitTag)
+        local ignoredIconPath
+        if IsConsoleUI() then
+            ignoredIconPath = [[EsoUI/Art/Contacts/tabIcon_ignored_up.dds]]
+        else
+            ignoredIconPath = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_SOCIAL_IGNORE_DDS
+        end
         if isIgnored or isFriend or isGuild then
-            unitFrame.friendIcon:SetTexture(isIgnored and LUIE_MEDIA_UNITFRAMES_UNITFRAMES_SOCIAL_IGNORE_DDS or isFriend and "/esoui/art/campaign/campaignbrowser_friends.dds" or "/esoui/art/campaign/campaignbrowser_guild.dds")
+            unitFrame.friendIcon:SetTexture(isIgnored and ignoredIconPath or isFriend and "/esoui/art/campaign/campaignbrowser_friends.dds" or "/esoui/art/campaign/campaignbrowser_guild.dds")
             unitFrame.friendIcon:SetHidden(false)
         else
             unitFrame.friendIcon:SetHidden(true)
@@ -2657,7 +2669,13 @@ function UnitFrames.CustomFramesApplyTexture()
             healthFrame.invulnerable:SetTexture(texture)
         end
         if healthFrame.invulnerableInlay then
-            healthFrame.invulnerableInlay:SetTexture(LUIE_MEDIA_UNITFRAMES_INVULNERABLE_MUNGE_DDS)
+            local invulnerableInlayPath
+            if IsConsoleUI() then
+                invulnerableInlayPath = [[EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_invulnerable_munge.dds]]
+            else
+                invulnerableInlayPath = LUIE_MEDIA_UNITFRAMES_INVULNERABLE_MUNGE_DDS
+            end
+            healthFrame.invulnerableInlay:SetTexture(invulnerableInlayPath)
         end
     end
 
