@@ -9,10 +9,6 @@ local LUIE = LUIE
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
 
-if not LUIE.IsDevDebugEnabled() then
-    return
-end
-
 -- -----------------------------------------------------------------------------
 -- * DEBUG FUNCTIONS *
 -- -----------------------------------------------------------------------------
