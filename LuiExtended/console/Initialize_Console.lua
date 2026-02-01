@@ -20,6 +20,9 @@ local function LoadScreen(eventId, initial)
     if not LUIE.SV.StartupInfo and initial then
         LUIE.PrintToChat(zo_strformat("|cFFFFFF<<1>> by|r |c00C000<<2>>|r |cFFFFFFv<<3>>|r", LUIE.name, LUIE.author, LUIE.version), true)
     end
+    if LibDebugLogger then
+        LibDebugLogger:ClearLog()
+    end
 end
 
 --- - **EVENT_ADD_ON_LOADED **
