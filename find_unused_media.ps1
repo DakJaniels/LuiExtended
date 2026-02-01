@@ -5,7 +5,7 @@ param(
     [string]$MediaPath = "LuiMedia\media",
     [string]$MediaPathsFile = "LuiMedia\MediaPaths.lua",
     [string]$CodebasePath = ".",
-    [switch]$IncludeXml = $true,
+    [switch]$IncludeXml = $false,
     [string]$OutputFile = "unused_media.txt"
 )
 
@@ -74,13 +74,13 @@ foreach ($file in $mediaFiles) {
 $searchExtensions = if ($IncludeXml) { @('*.lua', '*.xml') } else { @('*.lua') }
 
 $codeFiles = Get-ChildItem -Path $CodebasePath -Recurse -Include $searchExtensions -File | 
-    Where-Object { 
-        $_.FullName -notmatch '\\LuiMedia\\media\\' -and
-        $_.FullName -notmatch '\\MediaPaths\.lua$' -and
-        $_.FullName -notmatch '\\generate_media_paths\.ps1$' -and
-        $_.FullName -notmatch '\\replace_media_paths\.ps1$' -and
-        $_.FullName -notmatch '\\find_unused_media\.ps1$'
-    }
+Where-Object { 
+    $_.FullName -notmatch '\\LuiMedia\\media\\' -and
+    $_.FullName -notmatch '\\MediaPaths\.lua$' -and
+    $_.FullName -notmatch '\\generate_media_paths\.ps1$' -and
+    $_.FullName -notmatch '\\replace_media_paths\.ps1$' -and
+    $_.FullName -notmatch '\\find_unused_media\.ps1$'
+}
 
 $luiExtendedFiles = ($codeFiles | Where-Object { $_.FullName -match '\\LuiExtended\\' }).Count
 $luiDataFiles = ($codeFiles | Where-Object { $_.FullName -match '\\LuiData\\' }).Count
@@ -184,9 +184,11 @@ if ($unusedFiles.Count -gt 0) {
     $unusedTotalSize = ($unusedFiles.Values | Measure-Object -Property Length -Sum).Sum
     $unusedTotalSizeFormatted = if ($unusedTotalSize -ge 1MB) {
         "$([math]::Round($unusedTotalSize / 1MB, 2)) MB"
-    } elseif ($unusedTotalSize -ge 1KB) {
+    }
+    elseif ($unusedTotalSize -ge 1KB) {
         "$([math]::Round($unusedTotalSize / 1KB, 2)) KB"
-    } else {
+    }
+    else {
         "$unusedTotalSize bytes"
     }
     $outputContent += "  Total unused size: $unusedTotalSizeFormatted"
@@ -207,9 +209,11 @@ if ($unusedFiles.Count -gt 0) {
         # Format file size
         $sizeFormatted = if ($fileSize -ge 1MB) {
             "$([math]::Round($fileSize / 1MB, 2)) MB"
-        } elseif ($fileSize -ge 1KB) {
+        }
+        elseif ($fileSize -ge 1KB) {
             "$([math]::Round($fileSize / 1KB, 2)) KB"
-        } else {
+        }
+        else {
             "$fileSize bytes"
         }
         
@@ -225,15 +229,18 @@ if ($unusedFiles.Count -gt 0) {
     # Format total size
     $totalSizeFormatted = if ($totalSize -ge 1MB) {
         "$([math]::Round($totalSize / 1MB, 2)) MB"
-    } elseif ($totalSize -ge 1KB) {
+    }
+    elseif ($totalSize -ge 1KB) {
         "$([math]::Round($totalSize / 1KB, 2)) KB"
-    } else {
+    }
+    else {
         "$totalSize bytes"
     }
     
     $outputContent += "Total unused files: $($unusedFiles.Count)"
     $outputContent += "Total unused size: $totalSizeFormatted"
-} else {
+}
+else {
     $outputContent += "All media files are in use!"
 }
 
@@ -244,7 +251,8 @@ Write-Host "Results written to: $OutputFile" -ForegroundColor Green
 # Also show summary on console
 if ($unusedFiles.Count -gt 0) {
     Write-Host "Found $($unusedFiles.Count) unused media files (see $OutputFile for details)" -ForegroundColor Red
-} else {
+}
+else {
     Write-Host "All media files are in use!" -ForegroundColor Green
 }
 
