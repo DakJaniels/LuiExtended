@@ -4621,7 +4621,7 @@ local function ArtifactControlStateHook(artifactName, keepId, characterName, pla
         end
 
         if ChatAnnouncements.SV.PVP.PVPAvACSA then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, soundId)
             messageParams:SetText(description)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ARTIFACT_CONTROL_STATE)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -4649,7 +4649,7 @@ local function DaedricArtifactObjectiveSpawnedButNotRevealedHook(daedricArtifact
     end
 
     if ChatAnnouncements.SV.PVP.PVPAvACSA then
-        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.DAEDRIC_ARTIFACT_SPAWNED)
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.DAEDRIC_ARTIFACT_SPAWNED)
         messageParams:SetText(description)
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED)
         CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -4689,7 +4689,7 @@ local function DaedricArtifactObjectiveStateChangedHook(objectiveKeepId, objecti
         end
 
         if ChatAnnouncements.SV.PVP.PVPAvACSA then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, soundId)
             messageParams:SetText(description)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -4717,7 +4717,7 @@ local function KeepGateStateChangedHook(keepId, open)
         end
 
         if ChatAnnouncements.SV.PVP.PVPAvACSA then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, soundId)
             messageParams:SetText(description)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_KEEP_GATE_CHANGED)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -4745,7 +4745,7 @@ local function CoronateEmperorNotificationHook(campaignId, playerCharacterName, 
         end
 
         if ChatAnnouncements.SV.PVP.PVPAvACSA then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, soundId)
             messageParams:SetText(description)
             messageParams:SetLifespanMS(5000)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_CORONATE_EMPEROR)
@@ -4774,7 +4774,7 @@ local function DeposeEmperorNotificationHook(campaignId, playerCharacterName, pl
         end
 
         if ChatAnnouncements.SV.PVP.PVPAvACSA then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, soundId)
             messageParams:SetText(description)
             messageParams:SetLifespanMS(5000)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DEPOSE_EMPEROR)
@@ -4804,7 +4804,7 @@ local function RevengeKillHook(killedCharacterName, killedDisplayName)
         end
 
         if ChatAnnouncements.SV.PVP.PVPKillCSA then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
             messageParams:SetText(description)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_REVENGE_KILL)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -4834,7 +4834,7 @@ local function AvengeKillHook(avengedCharacterName, killedCharacterName, avenged
         end
 
         if ChatAnnouncements.SV.PVP.PVPKillCSA then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
             messageParams:SetText(description)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_AVENGE_KILL)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -4873,7 +4873,7 @@ local function CaptureAreaStateChangedHook(objectiveKeepId, objectiveId, battleg
             end
 
             if ChatAnnouncements.SV.PVP.PVPBattlegroundCSA then
-                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, soundId)
                 messageParams:SetText(text)
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -4910,7 +4910,7 @@ local function CaptureAreaSpawnedHook(objectiveKeepId, objectiveId, battleground
         end
 
         if ChatAnnouncements.SV.PVP.PVPBattlegroundCSA then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, soundId)
             messageParams:SetText(text)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -4969,7 +4969,7 @@ local function CaptureFlagStateChangedHook(objectiveKeepId, objectiveId, battleg
             end
 
             if ChatAnnouncements.SV.PVP.PVPBattlegroundCSA then
-                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, soundId)
                 messageParams:SetText(text)
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -5021,7 +5021,7 @@ local function MurderballStateChangedHook(objectiveKeepId, objectiveId, battlegr
             end
 
             if ChatAnnouncements.SV.PVP.PVPBattlegroundCSA then
-                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, soundId)
                 messageParams:SetText(text)
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
@@ -5071,7 +5071,7 @@ local function BattlegroundKillHook(killedPlayerCharacterName, killedPlayerDispl
             end
 
             if ChatAnnouncements.SV.PVP.PVPKillCSA then
-                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, soundId)
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, soundId)
                 messageParams:SetText(text)
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
                 CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
