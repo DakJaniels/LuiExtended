@@ -2024,6 +2024,9 @@ end
 
 -- -----------------------------------------------------------------------------
 function ActionBar.UpdateCastBar()
+    if not ActionBar.SV.CastBarEnable then
+        return
+    end
     castbar.bar.name:SetFont(g_castbarFont)
     castbar.bar.timer:SetFont(g_castbarFont)
     castbar.bar.bar:SetTexture(LUIE.StatusbarTextures[ActionBar.SV.CastBarTexture])
@@ -2035,7 +2038,7 @@ end
 
 -- -----------------------------------------------------------------------------
 function ActionBar.ResetCastBarPosition()
-    if not ActionBar.Enabled then
+    if not ActionBar.SV.CastBarEnable then
         return
     end
     ActionBar.SV.CastbarOffsetX = nil
