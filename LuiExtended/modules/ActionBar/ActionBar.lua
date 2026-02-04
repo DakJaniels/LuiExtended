@@ -467,7 +467,9 @@ end
 
 -- -----------------------------------------------------------------------------
 ---
-function ActionBar.OnActiveWeaponPairChanged()
+--- @param activeWeaponPair ActiveWeaponPair
+--- @param locked boolean
+function ActionBar.OnActiveWeaponPairChanged(activeWeaponPair, locked)
     g_hotbarCategory = GetActiveHotbarCategory()
     g_activeWeaponSwapInProgress = true
     UpdateBackbarButtonActionIds()
@@ -670,7 +672,9 @@ function ActionBar.UpdateBarHighlightTables()
         for abilityId, _ in pairs(g_barOverrideCI) do
             counter = counter + 1
             local eventName = (moduleName .. "CombatEventBar" .. counter)
-            eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, ActionBar.OnCombatEventBar)
+            eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, ability_Id, overflow)
+                ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, ability_Id, overflow)
+            end)
             -- Register filter for specific abilityId's in table only, and filter for source = player, no errors
             eventManager:AddFilterForEvent(eventName, EVENT_COMBAT_EVENT, REGISTER_FILTER_ABILITY_ID, abilityId, REGISTER_FILTER_IS_ERROR, false)
         end
@@ -732,12 +736,18 @@ function ActionBar.RegisterEvents()
         -- end
     end
     if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled or ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, ActionBar.OnActiveHotbarUpdate)
+        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, function (_, didActiveHotbarChange, shouldUpdateAbilityAssignments, activeHotbarCategory)
+            ActionBar.OnActiveHotbarUpdate(didActiveHotbarChange, shouldUpdateAbilityAssignments, activeHotbarCategory)
+        end)
         eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, function (_)
             ActionBar.OnSlotsFullUpdate()
         end)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_UPDATED, ActionBar.OnSlotUpdated)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_WEAPON_PAIR_CHANGED, ActionBar.OnActiveWeaponPairChanged)
+        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_UPDATED, function (_, actionSlotIndex)
+            ActionBar.OnSlotUpdated(actionSlotIndex)
+        end)
+        eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_WEAPON_PAIR_CHANGED, function (_, activeWeaponPair, locked)
+            ActionBar.OnActiveWeaponPairChanged(activeWeaponPair, locked)
+        end)
     end
     if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled then
         eventManager:RegisterForEvent(moduleName, EVENT_UNIT_DEATH_STATE_CHANGED, ActionBar.OnDeath)
@@ -2416,7 +2426,24 @@ end
 ]]
 --
 
-function ActionBar.OnCombatEventBar(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId)
+--- @param result ActionResult
+--- @param isError boolean
+--- @param abilityName string
+--- @param abilityGraphic integer
+--- @param abilityActionSlotType ActionSlotType
+--- @param sourceName string
+--- @param sourceType CombatUnitType
+--- @param targetName string
+--- @param targetType CombatUnitType
+--- @param hitValue integer
+--- @param powerType CombatMechanicFlags
+--- @param damageType DamageType
+--- @param log boolean
+--- @param sourceUnitId integer
+--- @param targetUnitId integer
+--- @param abilityId integer
+--- @param overflow integer
+function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     -- If the source/target isn't the player then bail out now.
     if sourceType ~= COMBAT_UNIT_TYPE_PLAYER and targetType ~= COMBAT_UNIT_TYPE_PLAYER then
         return
@@ -2512,9 +2539,10 @@ function ActionBar.OnCombatEventBar(eventCode, result, isError, abilityName, abi
     end
 end
 
-function ActionBar.OnSlotUpdated(eventCode, slotNum)
+--- @param actionSlotIndex luaindex
+function ActionBar.OnSlotUpdated(actionSlotIndex)
     -- Update ultimate label
-    if slotNum == 8 then
+    if actionSlotIndex == 8 then
         ActionBar.UpdateUltimateLabel()
     end
 end
@@ -2690,11 +2718,10 @@ end
 
 --- - **EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED **
 ---
---- @param eventId integer
 --- @param didActiveHotbarChange boolean
 --- @param shouldUpdateAbilityAssignments boolean
 --- @param activeHotbarCategory HotBarCategory
-function ActionBar.OnActiveHotbarUpdate(eventId, didActiveHotbarChange, shouldUpdateAbilityAssignments, activeHotbarCategory)
+function ActionBar.OnActiveHotbarUpdate(didActiveHotbarChange, shouldUpdateAbilityAssignments, activeHotbarCategory)
     if didActiveHotbarChange == true or shouldUpdateAbilityAssignments == true then
         for _, physicalSlot in pairs(g_backbarButtons) do
             if physicalSlot.hotbarSwapAnimation then
