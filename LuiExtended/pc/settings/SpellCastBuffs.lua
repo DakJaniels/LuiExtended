@@ -1246,7 +1246,9 @@ function SpellCastBuffs:CreateSettings()
                     Settings.IgnoreBattleSpiritPlayer = not value
                     self:UpdateContextHideList()
                     self:ReloadEffects("player")
-                    self:ArtificialEffectUpdate()
+                    for effectId in ZO_GetNextActiveArtificialEffectIdIter do
+                        self:ArtificialEffectUpdate(effectId)
+                    end
                 end,
                 width = "full",
                 default = not Defaults.IgnoreBattleSpiritPlayer,
