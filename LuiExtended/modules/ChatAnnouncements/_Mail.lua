@@ -39,26 +39,10 @@ local ChatAnnouncements = LUIE.ChatAnnouncements
 ChatAnnouncements.Mail = ChatAnnouncements.Mail or {}
 local Mail = ChatAnnouncements.Mail
 
--- Store reference to parent for accessing shared services
-Mail.parent = ChatAnnouncements
-Mail.moduleName = ChatAnnouncements.moduleName .. "_Mail"
-
--- Module state
-Mail.cod = 0
-Mail.postageAmount = 0
-Mail.amount = 0
-Mail.codPresent = false
-Mail.target = ""
-Mail.stacksOut = {}
-Mail.senderMap = {}
-Mail.senderQueue = {}
-Mail.isTakingMail = false
-
 --- - **EVENT_MAIL_ATTACHED_MONEY_CHANGED **
 ---
---- @param eventId integer
 --- @param moneyAmount integer
-function Mail.OnMoneyChanged(eventId, moneyAmount)
+function Mail.OnMoneyChanged(moneyAmount)
     Mail.cod = 0
     Mail.postageAmount = GetQueuedMailPostage()
     local previousMailAmount = Mail.amount
@@ -73,9 +57,8 @@ end
 
 --- - **EVENT_MAIL_COD_CHANGED **
 ---
---- @param eventId integer
 --- @param codAmount integer
-function Mail.OnCODChanged(eventId, codAmount)
+function Mail.OnCODChanged(codAmount)
     Mail.cod = codAmount or GetQueuedCOD()
     Mail.postageAmount = GetQueuedMailPostage()
     Mail.amount = GetQueuedMoneyAttachment()
@@ -83,9 +66,8 @@ end
 
 --- - **EVENT_MAIL_REMOVED **
 ---
---- @param eventId integer
 --- @param mailId id64
-function Mail.OnRemoved(eventId, mailId)
+function Mail.OnRemoved(mailId)
     if Mail.parent.SV.Notify.NotificationMailSendCA or Mail.parent.SV.Notify.NotificationMailSendAlert then
         if Mail.parent.SV.Notify.NotificationMailSendCA then
             local message = GetString(LUIE_STRING_CA_MAIL_DELETED_MSG)
@@ -106,9 +88,8 @@ end
 
 --- - **EVENT_MAIL_READABLE **
 ---
---- @param eventId integer
 --- @param mailId id64
-function Mail.OnReadable(eventId, mailId)
+function Mail.OnReadable(mailId)
     for category = MAIL_CATEGORY_ITERATION_BEGIN, MAIL_CATEGORY_ITERATION_END do
         local numMailItems = GetNumMailItemsByCategory(category)
         for index = 1, numMailItems do
@@ -209,9 +190,8 @@ end
 
 --- - **EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS **
 ---
---- @param eventId integer
 --- @param mailId id64
-function Mail.OnTakeAttachedItem(eventId, mailId)
+function Mail.OnTakeAttachedItem(mailId)
     Mail.isTakingMail = true
 
     local mailTarget, hasCOD = ResolveMailSender(mailId)
@@ -253,11 +233,10 @@ end
 
 --- - **EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE **
 ---
---- @param eventId integer
 --- @param result MailTakeAttachmentResult
 --- @param category MailCategory
 --- @param headersRemoved boolean
-function Mail.OnTakeAllResponse(eventId, result, category, headersRemoved)
+function Mail.OnTakeAllResponse(result, category, headersRemoved)
     Mail.isTakingMail = false
     eventManager:UnregisterForUpdate(Mail.moduleName .. "ClearTakingFlag")
 
@@ -270,9 +249,8 @@ end
 
 --- - **EVENT_MAIL_ATTACHMENT_ADDED **
 ---
---- @param eventId integer
 --- @param attachmentSlot luaindex
-function Mail.OnAttach(eventId, attachmentSlot)
+function Mail.OnAttach(attachmentSlot)
     Mail.postageAmount = GetQueuedMailPostage()
     Mail.amount = GetQueuedMoneyAttachment()
     local mailIndex = attachmentSlot
@@ -292,9 +270,8 @@ end
 
 --- - **EVENT_MAIL_ATTACHMENT_REMOVED **
 ---
---- @param eventId integer
 --- @param attachmentSlot luaindex
-function Mail.OnAttachRemove(eventId, attachmentSlot)
+function Mail.OnAttachRemove(attachmentSlot)
     Mail.postageAmount = GetQueuedMailPostage()
     Mail.amount = GetQueuedMoneyAttachment()
     local mailIndex = attachmentSlot
@@ -356,8 +333,7 @@ end
 
 --- - **EVENT_MAIL_INBOX_UPDATE**
 ---
---- @param eventId integer
-function Mail.OnInboxUpdate(eventId)
+function Mail.OnInboxUpdate()
     if Mail.parent.inMail and not Mail.isTakingMail then
         PopulateMailSenderQueue()
     end
@@ -365,8 +341,7 @@ end
 
 --- - **EVENT_MAIL_OPEN_MAILBOX**
 ---
---- @param eventId integer
-function Mail.OnOpenBox(eventId)
+function Mail.OnOpenBox()
     eventManager:UnregisterForEvent(Mail.parent.moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if Mail.parent.SV.Inventory.LootMail then
         eventManager:RegisterForEvent(Mail.parent.moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, Mail.parent.InventoryUpdate)
@@ -380,8 +355,7 @@ end
 
 --- - **EVENT_MAIL_CLOSE_MAILBOX**
 ---
---- @param eventId integer
-function Mail.OnCloseBox(eventId)
+function Mail.OnCloseBox()
     eventManager:UnregisterForEvent(Mail.parent.moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if Mail.parent.SV.Inventory.Loot or Mail.parent.SV.Inventory.LootShowDisguise then
         eventManager:RegisterForEvent(Mail.parent.moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, Mail.parent.InventoryUpdate)
@@ -400,9 +374,8 @@ end
 
 --- - **EVENT_MAIL_SEND_SUCCESS **
 ---
---- @param eventId integer
 --- @param playerName string
-function Mail.OnSendSuccess(eventId, playerName)
+function Mail.OnSendSuccess(playerName)
     local formattedValue = ZO_CommaDelimitDecimalNumber(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
     local changeColor = Mail.parent.SV.Currency.CurrencyContextColor and Mail.parent.Colors.CurrencyDownColorize:ToHex() or Mail.parent.Colors.CurrencyColorize:ToHex()
     local currencyTypeColor = Mail.parent.Colors.CurrencyGoldColorize:ToHex()
@@ -480,7 +453,10 @@ function Mail.OnSendSuccess(eventId, playerName)
 end
 
 function Mail.Initialize()
-    -- Initialize state
+    -- Store reference to parent for accessing shared services
+    Mail.parent = ChatAnnouncements
+    Mail.moduleName = ChatAnnouncements.moduleName .. "_Mail"
+    -- Module state
     Mail.cod = 0
     Mail.postageAmount = 0
     Mail.amount = 0
@@ -490,7 +466,6 @@ function Mail.Initialize()
     Mail.senderMap = {}
     Mail.senderQueue = {}
     Mail.isTakingMail = false
-
     -- Register events
     Mail.RegisterEvents()
 end
@@ -509,21 +484,45 @@ function Mail.RegisterEvents()
     eventManager:UnregisterForEvent(Mail.moduleName, EVENT_MAIL_REMOVED)
     eventManager:UnregisterForEvent(Mail.moduleName, EVENT_MAIL_INBOX_UPDATE)
     if Mail.parent.SV.Inventory.LootMail then
-        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_READABLE, Mail.OnReadable)
-        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS, Mail.OnTakeAttachedItem)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_READABLE, function (_, mailId)
+            Mail.OnReadable(mailId)
+        end)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS, function (_, mailId)
+            Mail.OnTakeAttachedItem(mailId)
+        end)
     end
-    eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE, Mail.OnTakeAllResponse)
+    eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE, function (_, result, category, headersRemoved)
+        Mail.OnTakeAllResponse(result, category, headersRemoved)
+    end)
     if Mail.parent.SV.Inventory.LootMail or Mail.parent.SV.Currency.CurrencyGoldChange then
-        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_ATTACHMENT_ADDED, Mail.OnAttach)
-        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_ATTACHMENT_REMOVED, Mail.OnAttachRemove)
-        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_SEND_SUCCESS, Mail.OnSendSuccess)
-        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED, Mail.OnMoneyChanged)
-        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_COD_CHANGED, Mail.OnCODChanged)
-        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_REMOVED, Mail.OnRemoved)
-        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_INBOX_UPDATE, Mail.OnInboxUpdate)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_ATTACHMENT_ADDED, function (_, attachmentSlot)
+            Mail.OnAttach(attachmentSlot)
+        end)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_ATTACHMENT_REMOVED, function (_, attachmentSlot)
+            Mail.OnAttachRemove(attachmentSlot)
+        end)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_SEND_SUCCESS, function (_, playerName)
+            Mail.OnSendSuccess(playerName)
+        end)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED, function (_, moneyAmount)
+            Mail.OnMoneyChanged(moneyAmount)
+        end)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_COD_CHANGED, function (_, codAmount)
+            Mail.OnCODChanged(codAmount)
+        end)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_REMOVED, function (_, mailId)
+            Mail.OnRemoved(mailId)
+        end)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_INBOX_UPDATE, function (_)
+            Mail.OnInboxUpdate()
+        end)
     end
     if Mail.parent.SV.Inventory.Loot or Mail.parent.SV.Inventory.LootMail or Mail.parent.SV.Currency.CurrencyGoldChange then
-        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_OPEN_MAILBOX, Mail.OnOpenBox)
-        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_CLOSE_MAILBOX, Mail.OnCloseBox)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_OPEN_MAILBOX, function (_)
+            Mail.OnOpenBox()
+        end)
+        eventManager:RegisterForEvent(Mail.moduleName, EVENT_MAIL_CLOSE_MAILBOX, function (_)
+            Mail.OnCloseBox()
+        end)
     end
 end
