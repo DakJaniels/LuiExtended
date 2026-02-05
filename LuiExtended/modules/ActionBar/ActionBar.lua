@@ -12,7 +12,6 @@ local ActionBar = {}
 ActionBar.__index = ActionBar
 LUIE.ActionBar = ActionBar
 
-local UI = LUIE.UI
 local LuiData = LuiData
 local Data = LuiData.Data
 local Effects = Data.Effects
@@ -353,7 +352,16 @@ function ActionBar.Initialize(enabled)
     local UNUSED = nil
     local quickslotButton = ZO_ActionBar_GetButton(UNUSED, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
     local quickslotButtonButton = quickslotButton and quickslotButton.button
-    uiQuickSlot.label = UI:Label(quickslotButtonButton, { CENTER, CENTER }, nil, nil, g_potionFont, nil, true)
+    do
+        local c = windowManager:CreateControl(nil, quickslotButtonButton, CT_LABEL)
+        c:SetAnchor(CENTER, quickslotButtonButton, CENTER, 0, 0)
+        c:SetFont(g_potionFont or "LUIE Default Font")
+        c:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+        c:SetVerticalAlignment(TEXT_ALIGN_CENTER)
+        c:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+        c:SetHidden(true)
+        uiQuickSlot.label = c
+    end
     uiQuickSlot.label:SetFont(g_potionFont)
     if ActionBar.SV.PotionTimerColor then
         uiQuickSlot.label:SetColor(unpack(uiQuickSlot.colour))
@@ -367,14 +375,39 @@ function ActionBar.Initialize(enabled)
     -- -----------------------------------------------------------------------------
     -- Create Ultimate overlay labels
     local ActionButton8 = ZO_ActionBar_GetButton(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1)
-    uiUltimate.LabelVal = UI:Label(ActionButton8.button, { BOTTOM, TOP, 0, -3 }, nil, { 1, 2 }, "$(BOLD_FONT)|16|soft-shadow-thick", nil, true)
-    uiUltimate.LabelPct = UI:Label(ActionButton8.button, nil, nil, nil, g_ultimateFont, nil, true)
+    do
+        local c = windowManager:CreateControl(nil, ActionButton8.button, CT_LABEL)
+        c:SetAnchor(BOTTOM, ActionButton8.button, TOP, 0, -3)
+        c:SetFont("$(BOLD_FONT)|16|soft-shadow-thick")
+        c:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+        c:SetVerticalAlignment(TEXT_ALIGN_CENTER)
+        c:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+        c:SetHidden(true)
+        uiUltimate.LabelVal = c
+    end
+    do
+        local c = windowManager:CreateControl(nil, ActionButton8.button, CT_LABEL)
+        c:SetFont(g_ultimateFont or "LUIE Default Font")
+        c:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+        c:SetVerticalAlignment(TEXT_ALIGN_CENTER)
+        c:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+        c:SetHidden(true)
+        uiUltimate.LabelPct = c
+    end
     uiUltimate.LabelPct:SetAnchor(TOPLEFT, ActionButton8.slot)
     uiUltimate.LabelPct:SetAnchor(BOTTOMRIGHT, ActionButton8.slot, nil, 0, -ActionBar.SV.UltimateLabelPosition)
 
     uiUltimate.LabelPct:SetColor(unpack(uiUltimate.colour))
     -- And buff texture
-    uiUltimate.Texture = UI:Texture(ActionButton8.button, { CENTER, CENTER }, { 160, 160 }, "/esoui/art/crafting/white_burst.dds", DL_BACKGROUND, true)
+    do
+        local t = windowManager:CreateControl(nil, ActionButton8.button, CT_TEXTURE)
+        t:SetAnchor(CENTER, ActionButton8.button, CENTER, 0, 0)
+        t:SetDimensions(160, 160)
+        t:SetTexture("/esoui/art/crafting/white_burst.dds")
+        t:SetDrawLayer(DL_BACKGROUND)
+        t:SetHidden(true)
+        uiUltimate.Texture = t
+    end
 
     -- -----------------------------------------------------------------------------
     -- Create a top level window for backbar butons
@@ -2781,7 +2814,15 @@ function ActionBar.PlayProcAnimations(slotNum)
         procLoopTexture:SetDrawLayer(DL_TEXT)
         procLoopTexture:SetHidden(true)
 
-        procLoopTexture.label = UI:Label(procLoopTexture, nil, nil, nil, g_barFont, nil, false)
+        do
+            local c = windowManager:CreateControl(nil, procLoopTexture, CT_LABEL)
+            c:SetFont(g_barFont or "LUIE Default Font")
+            c:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+            c:SetVerticalAlignment(TEXT_ALIGN_CENTER)
+            c:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+            c:SetHidden(false)
+            procLoopTexture.label = c
+        end
         procLoopTexture.label:SetAnchor(TOPLEFT, actionButton.slot)
         procLoopTexture.label:SetAnchor(BOTTOMRIGHT, actionButton.slot, nil, 0, -ActionBar.SV.BarLabelPosition)
         procLoopTexture.label:SetDrawLayer(DL_CONTROLS)
@@ -2790,7 +2831,7 @@ function ActionBar.PlayProcAnimations(slotNum)
         procLoopTexture.label:SetColor(unpack(ActionBar.SV.RemainingTextColoured and colour or { 1, 1, 1, 1 }))
         procLoopTexture.label:SetHidden(false)
 
-        local procLoopTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("UltimateReadyLoop", procLoopTexture)
+        local procLoopTimeline = animationManager:CreateTimelineFromVirtual("UltimateReadyLoop", procLoopTexture)
         procLoopTimeline.procLoopTexture = procLoopTexture
 
         procLoopTimeline.onPlay = function (self)
@@ -2858,7 +2899,7 @@ function ActionBar.ShowCustomToggle(slotNum)
         local window = windowManager:GetControlByName(name, "") -- Check to see if this frame already exists, don't create it if it does.
         if window == nil then
             local toggleFrame = windowManager:CreateControl("$(parent)Toggle_LUIE", actionButton.slot, CT_TEXTURE)
-            -- toggleFrame.back = UI:Texture(toggleFrame, nil, nil, "/esoui/art/actionbar/actionslot_toggledon.dds")
+            -- toggleFrame.back = windowManager:CreateControl(nil, toggleFrame, CT_TEXTURE); then SetTexture("..."), etc.
             toggleFrame:SetAnchor(TOPLEFT, actionButton.slot:GetNamedChild("FlipCard"))
             toggleFrame:SetAnchor(BOTTOMRIGHT, actionButton.slot:GetNamedChild("FlipCard"))
             toggleFrame:SetTexture("/esoui/art/actionbar/actionslot_toggledon.dds")
@@ -2869,7 +2910,15 @@ function ActionBar.ShowCustomToggle(slotNum)
             toggleFrame:SetColor(0.5, 1, 0.5, 1)
             toggleFrame:SetHidden(false)
 
-            toggleFrame.label = UI:Label(toggleFrame, nil, nil, nil, g_barFont, nil, false)
+            do
+                local c = windowManager:CreateControl(nil, toggleFrame, CT_LABEL)
+                c:SetFont(g_barFont or "LUIE Default Font")
+                c:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+                c:SetVerticalAlignment(TEXT_ALIGN_CENTER)
+                c:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+                c:SetHidden(false)
+                toggleFrame.label = c
+            end
             toggleFrame.label:SetAnchor(TOPLEFT, actionButton.slot)
             toggleFrame.label:SetAnchor(BOTTOMRIGHT, actionButton.slot, nil, 0, -ActionBar.SV.BarLabelPosition)
             toggleFrame.label:SetDrawLayer(DL_CONTROLS)
@@ -2878,7 +2927,15 @@ function ActionBar.ShowCustomToggle(slotNum)
             toggleFrame.label:SetColor(unpack(ActionBar.SV.RemainingTextColoured and colour or { 1, 1, 1, 1 }))
             toggleFrame.label:SetHidden(false)
 
-            toggleFrame.stack = UI:Label(toggleFrame, nil, nil, nil, g_barFont, nil, false)
+            do
+                local c = windowManager:CreateControl(nil, toggleFrame, CT_LABEL)
+                c:SetFont(g_barFont or "LUIE Default Font")
+                c:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+                c:SetVerticalAlignment(TEXT_ALIGN_CENTER)
+                c:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+                c:SetHidden(false)
+                toggleFrame.stack = c
+            end
             toggleFrame.stack:SetAnchor(CENTER, actionButton.slot, BOTTOMLEFT)
             toggleFrame.stack:SetAnchor(CENTER, actionButton.slot, TOPRIGHT, -12, 14)
             -- toggleFrame.stack:SetAnchor(TOPLEFT, actionButton.slot)
