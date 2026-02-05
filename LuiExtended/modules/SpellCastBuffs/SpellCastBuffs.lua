@@ -414,12 +414,20 @@ end
 
 function SpellCastBuffs:_RegisterEvents()
     -- Register events
-    eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, function () self:OnUpdate() end)
+    eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, function ()
+        self:OnUpdate()
+    end)
 
     -- Target Events
-    eventManager:RegisterForEvent(moduleName, EVENT_TARGET_CHANGED, function (_, unitTag) self:OnTargetChange(unitTag) end)
-    eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED, function (_) self:OnReticleTargetChanged() end)
-    eventManager:RegisterForEvent(moduleName .. "Disposition", EVENT_DISPOSITION_UPDATE, function (_, unitTag) self:OnDispositionUpdate(unitTag) end)
+    eventManager:RegisterForEvent(moduleName, EVENT_TARGET_CHANGED, function (_, unitTag)
+        self:OnTargetChange(unitTag)
+    end)
+    eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED, function (_)
+        self:OnReticleTargetChanged()
+    end)
+    eventManager:RegisterForEvent(moduleName .. "Disposition", EVENT_DISPOSITION_UPDATE, function (_, unitTag)
+        self:OnDispositionUpdate(unitTag)
+    end)
     eventManager:AddFilterForEvent(moduleName .. "Disposition", EVENT_DISPOSITION_UPDATE, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     -- Buff Events
@@ -465,50 +473,82 @@ function SpellCastBuffs:_RegisterEvents()
         end)
         eventManager:AddFilterForEvent(moduleName .. "Event4" .. tostring(k), EVENT_COMBAT_EVENT, REGISTER_FILTER_ABILITY_ID, k)
     end
-    eventManager:RegisterForEvent(moduleName, EVENT_BOSSES_CHANGED, function (_, forceReset) self:AddNameOnBossEngaged(forceReset) end)
+    eventManager:RegisterForEvent(moduleName, EVENT_BOSSES_CHANGED, function (_, forceReset)
+        self:AddNameOnBossEngaged(forceReset)
+    end)
 
     -- Stealth Events
-    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_STEALTH_STATE_CHANGED, function (...) self:StealthStateChanged(...) end)
-    eventManager:RegisterForEvent(moduleName .. "Reticleover", EVENT_STEALTH_STATE_CHANGED, function (...) self:StealthStateChanged(...) end)
+    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_STEALTH_STATE_CHANGED, function (_, unitTag, stealthState)
+        self:StealthStateChanged(unitTag, stealthState)
+    end)
+    eventManager:RegisterForEvent(moduleName .. "Reticleover", EVENT_STEALTH_STATE_CHANGED, function (_, unitTag, stealthState)
+        self:StealthStateChanged(unitTag, stealthState)
+    end)
     eventManager:AddFilterForEvent(moduleName .. "Player", EVENT_STEALTH_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
     eventManager:AddFilterForEvent(moduleName .. "Reticleover", EVENT_STEALTH_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     -- Disguise Events
-    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_DISGUISE_STATE_CHANGED, function (...) self:DisguiseStateChanged(...) end)
-    eventManager:RegisterForEvent(moduleName .. "Reticleover", EVENT_DISGUISE_STATE_CHANGED, function (...) self:DisguiseStateChanged(...) end)
+    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_DISGUISE_STATE_CHANGED, function (_, unitTag, disguiseState)
+        self:DisguiseStateChanged(unitTag, disguiseState)
+    end)
+    eventManager:RegisterForEvent(moduleName .. "Reticleover", EVENT_DISGUISE_STATE_CHANGED, function (_, unitTag, disguiseState)
+        self:DisguiseStateChanged(unitTag, disguiseState)
+    end)
     eventManager:AddFilterForEvent(moduleName .. "Player", EVENT_DISGUISE_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
     eventManager:AddFilterForEvent(moduleName .. "Reticleover", EVENT_DISGUISE_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     -- Artificial Effects Handling
-    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_ADDED, function (...)
-        self:ArtificialEffectUpdate(...)
+    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_ADDED, function (_, artificialEffectId)
+        self:ArtificialEffectUpdate(artificialEffectId)
     end)
-    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_REMOVED, function (...)
-        self:ArtificialEffectUpdate(...)
+    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_REMOVED, function (_, artificialEffectId)
+        self:ArtificialEffectUpdate(artificialEffectId)
     end)
 
     -- Activate/Deactivate Player, Player Dead/Alive, Vibration, and Unit Death
-    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, function (...) self:OnPlayerActivated(...) end)
-    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_DEACTIVATED, function (...) self:OnPlayerDeactivated(...) end)
-    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ALIVE, function (...) self:OnPlayerAlive(...) end)
-    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_DEAD, function (...) self:OnPlayerDead(...) end)
-    eventManager:RegisterForEvent(moduleName, EVENT_VIBRATION, function (...) self:OnVibration(...) end)
-    eventManager:RegisterForEvent(moduleName, EVENT_UNIT_DEATH_STATE_CHANGED, function (...) self:OnDeath(...) end)
+    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, function (_, initial)
+        self:OnPlayerActivated(initial)
+    end)
+    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_DEACTIVATED, function (_)
+        self:OnPlayerDeactivated()
+    end)
+    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ALIVE, function (_)
+        self:OnPlayerAlive()
+    end)
+    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_DEAD, function (_)
+        self:OnPlayerDead()
+    end)
+    eventManager:RegisterForEvent(moduleName, EVENT_VIBRATION, function (_, duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor, debugSourceInfo)
+        self:OnVibration(duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor, debugSourceInfo)
+    end)
+    eventManager:RegisterForEvent(moduleName, EVENT_UNIT_DEATH_STATE_CHANGED, function (_, unitTag, isDead)
+        self:OnDeath(unitTag, isDead)
+    end)
 
     -- Mount Events
-    eventManager:RegisterForEvent(moduleName, EVENT_MOUNTED_STATE_CHANGED, function (...) self:MountStatus(...) end)
-    eventManager:RegisterForEvent(moduleName, EVENT_COLLECTIBLE_USE_RESULT, function (...) self:CollectibleUsed(...) end)
+    eventManager:RegisterForEvent(moduleName, EVENT_MOUNTED_STATE_CHANGED, function (_, mounted)
+        self:MountStatus(mounted)
+    end)
+    eventManager:RegisterForEvent(moduleName, EVENT_COLLECTIBLE_USE_RESULT, function (_, result, isAttemptingActivation)
+        self:CollectibleUsed(result, isAttemptingActivation)
+    end)
 
     -- Inventory Events
-    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function (...) self:DisguiseItem(...) end)
+    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function (_, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
+        self:DisguiseItem(bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
+    end)
     eventManager:AddFilterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
 
     -- Duel (For resolving Target Battle Spirit Status)
-    eventManager:RegisterForEvent(moduleName, EVENT_DUEL_STARTED, function (...) self:DuelStart(...) end)
-    eventManager:RegisterForEvent(moduleName, EVENT_DUEL_FINISHED, function (...) self:DuelEnd(...) end)
+    eventManager:RegisterForEvent(moduleName, EVENT_DUEL_STARTED, function (_)
+        self:DuelStart()
+    end)
+    eventManager:RegisterForEvent(moduleName, EVENT_DUEL_FINISHED, function (_, duelResult, wasLocalPlayersResult, opponentCharacterName, opponentDisplayName, opponentAlliance, opponentGender, opponentClassId, opponentRaceId)
+        self:DuelEnd(duelResult, wasLocalPlayersResult, opponentCharacterName, opponentDisplayName, opponentAlliance, opponentGender, opponentClassId, opponentRaceId)
+    end)
 
     -- Register event to update icons/names/tooltips for some abilities where we pull information from the currently learned morph
-    eventManager:RegisterForEvent(moduleName, EVENT_SKILLS_FULL_UPDATE, function (eventId)
+    eventManager:RegisterForEvent(moduleName, EVENT_SKILLS_FULL_UPDATE, function (_)
         -- Mages Guild
         Effects_EffectOverride[40465].tooltip = zo_strformat(GetString(LUIE_STRING_SKILL_SCALDING_RUNE_TP), ((GetAbilityDuration(40468, nil, "player") or 0) / 1000) + GetNumPassiveSkillRanks(GetSkillLineIndicesFromSkillLineId(44), select(2, GetSkillLineIndicesFromSkillLineId(44)), 8))
     end)
@@ -529,9 +569,9 @@ function SpellCastBuffs:RegisterWerewolfEvents()
     eventManager:UnregisterForUpdate(moduleName .. "WerewolfTicker")
     eventManager:UnregisterForEvent(moduleName, EVENT_WEREWOLF_STATE_CHANGED)
     if self.SV.ShowWerewolf then
-        eventManager:RegisterForEvent(moduleName, EVENT_WEREWOLF_STATE_CHANGED, function (...) self:WerewolfState(...) end)
+        eventManager:RegisterForEvent(moduleName, EVENT_WEREWOLF_STATE_CHANGED, function (_, werewolf) self:WerewolfState(werewolf, nil) end)
         if IsPlayerInWerewolfForm() then
-            self:WerewolfState(nil, true, true)
+            self:WerewolfState(true, true)
         end
     end
 end
@@ -1710,16 +1750,17 @@ local function handleBGDeserterEffect(startTime)
 end
 
 -- Main function for handling artificial effects
-function SpellCastBuffs:ArtificialEffectUpdate(eventCode, effectId)
+--- @param artificialEffectId integer
+function SpellCastBuffs:ArtificialEffectUpdate(artificialEffectId)
     -- Early exit if player buffs are hidden
     if self.SV.HidePlayerBuffs then
         return
     end
 
     -- Handle effect removal if effectId is provided
-    if effectId then
-        local removeEffect = effectId
-        if effectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT or effectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT_IC then
+    if artificialEffectId then
+        local removeEffect = artificialEffectId
+        if artificialEffectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT or artificialEffectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT_IC then
             removeEffect = 999014
         end
         local context = self:DetermineContextSimple("player1", removeEffect, GetDisplayName())
@@ -1747,11 +1788,11 @@ function SpellCastBuffs:ArtificialEffectUpdate(eventCode, effectId)
 
         local tooltip, artificial
         -- Process effects and get tooltips
-        effectId, tooltip, artificial = handleBattleSpiritEffectId(activeEffectId)
+        artificialEffectId, tooltip, artificial = handleBattleSpiritEffectId(activeEffectId)
 
         -- Create and store effect
-        local context = self:DetermineContextSimple("player1", effectId, displayName)
-        self.EffectsList[context][effectId] = createEffectData(self, effectId, displayName, iconFile, effectType, startTime, endTime, duration, tooltip, artificial)
+        local context = self:DetermineContextSimple("player1", artificialEffectId, displayName)
+        self.EffectsList[context][artificialEffectId] = createEffectData(self, artificialEffectId, displayName, iconFile, effectType, startTime, endTime, duration, tooltip, artificial)
     end
 end
 
@@ -1846,7 +1887,7 @@ function SpellCastBuffs:OnDeath(eventCode, unitTag, isDead)
 
             -- If werewolf is active, reset the icon so it's not removed (otherwise it flashes off for about a second until the trailer function picks up on the fact that no power drain has occurred.
             if self.SV.ShowWerewolf and IsPlayerInWerewolfForm() then
-                self:WerewolfState(nil, true, true)
+                self:WerewolfState(true, true)
             end
         else
             -- TODO: Do we need to clear prominent target containers here? (Don't think so)
@@ -2025,7 +2066,7 @@ function SpellCastBuffs:MenuPreview()
 end
 
 -- Runs on EVENT_PLAYER_ACTIVATED listener
-function SpellCastBuffs:OnPlayerActivated(eventCode)
+function SpellCastBuffs:OnPlayerActivated(initial)
     self.playerActive = true
     self.playerResurrectStage = nil
 
@@ -2044,14 +2085,14 @@ function SpellCastBuffs:OnPlayerActivated(eventCode)
     -- Resolve Mounted icon
     if not self.SV.IgnoreMountPlayer and IsMounted() then
         LUIE_callLater(function ()
-                           self:MountStatus(nil, true)
+                           self:MountStatus(true)
                        end, 50)
     end
 
     -- Resolve Disguise Icon
     if not self.SV.IgnoreDisguise then
         LUIE_callLater(function ()
-                           self:DisguiseItem(nil, BAG_WORN, 10, nil, nil, nil, nil, nil, nil, nil, nil)
+                           self:DisguiseItem(BAG_WORN, 10, nil, nil, nil, nil, nil, nil, nil, nil)
                        end, 50)
     end
 
@@ -2064,7 +2105,7 @@ function SpellCastBuffs:OnPlayerActivated(eventCode)
 
     -- Resolve Werewolf
     if self.SV.ShowWerewolf and IsPlayerInWerewolfForm() then
-        self:WerewolfState(nil, true, true)
+        self:WerewolfState(true, true)
     end
 
     -- Sets the player to dead if reloading UI or loading in while dead.
@@ -2074,13 +2115,13 @@ function SpellCastBuffs:OnPlayerActivated(eventCode)
 end
 
 -- Runs on the EVENT_PLAYER_DEACTIVATED listener
-function SpellCastBuffs:OnPlayerDeactivated(eventCode)
+function SpellCastBuffs:OnPlayerDeactivated()
     self.playerActive = false
     self.playerResurrectStage = nil
 end
 
 -- Runs on the EVENT_PLAYER_ALIVE listener
-function SpellCastBuffs:OnPlayerAlive(eventCode)
+function SpellCastBuffs:OnPlayerAlive()
     --[[-- If player clicks "Resurrect at Wayshrine", then player is first deactivated, then he is transferred to new position, then he becomes alive (this event) then player is activated again.
     To register resurrection we need to work in this function if player is already active. --]]
     --
@@ -2101,7 +2142,7 @@ function SpellCastBuffs:OnPlayerAlive(eventCode)
 end
 
 -- Runs on the EVENT_PLAYER_DEAD listener
-function SpellCastBuffs:OnPlayerDead(eventCode)
+function SpellCastBuffs:OnPlayerDead()
     if not self.playerActive then
         return
     end
@@ -2109,7 +2150,7 @@ function SpellCastBuffs:OnPlayerDead(eventCode)
 end
 
 -- Runs on the EVENT_VIBRATION listener (detects player resurrection stage)
-function SpellCastBuffs:OnVibration(eventCode, duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor)
+function SpellCastBuffs:OnVibration(duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor, debugSourceInfo)
     if not self.playerResurrectStage then
         return
     end
@@ -2976,7 +3017,7 @@ function SpellCastBuffs:HideWerewolfIcon()
 end
 
 -- Get Werewolf State for Werewolf Buff Tracker
-function SpellCastBuffs:WerewolfState(eventCode, werewolf, onActivation)
+function SpellCastBuffs:WerewolfState(werewolf, onActivation)
     if werewolf and not self.SV.HidePlayerBuffs then
         for i = 1, 6 do
             local skillLineData = SKILLS_DATA_MANAGER:GetSkillLineDataByIndices(SKILL_TYPE_WORLD, i)
@@ -2985,7 +3026,7 @@ function SpellCastBuffs:WerewolfState(eventCode, werewolf, onActivation)
                 self.werewolfCounter = self.werewolfCounter + 1
                 if self.werewolfCounter == 3 or onActivation then
                     self:DisplayWerewolfIcon()
-                    eventManager:RegisterForEvent(moduleName, EVENT_POWER_UPDATE, function (...) self:OnPowerUpdate(...) end)
+                    eventManager:RegisterForEvent(moduleName, EVENT_POWER_UPDATE, function (eventId, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax) self:OnPowerUpdate(eventId, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax) end)
                     eventManager:AddFilterForEvent(moduleName, EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, COMBAT_MECHANIC_FLAGS_WEREWOLF, REGISTER_FILTER_UNIT_TAG, "player")
                     self.werewolfCounter = 0
                 end
@@ -3072,7 +3113,6 @@ end
 -- Called on item slot change for Disguise.
 --- - **EVENT_INVENTORY_SINGLE_SLOT_UPDATE **
 ---
---- @param eventId integer
 --- @param bagId Bag
 --- @param slotIndex integer
 --- @param isNewItem boolean
@@ -3083,7 +3123,7 @@ end
 --- @param triggeredByDisplayName string?
 --- @param isLastUpdateForMessage boolean
 --- @param bonusDropSource BonusDropSource
-function SpellCastBuffs:DisguiseItem(eventId, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
+function SpellCastBuffs:DisguiseItem(bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
     -- If slotIndex isn't the disguise/tabard slot then return
     if slotIndex ~= EQUIP_SLOT_COSTUME or self.SV.IgnoreDisguise or self.SV.HidePlayerBuffs then
         return
@@ -3099,10 +3139,9 @@ end
 -- Handles disguise changes for player/reticleover
 --- - **EVENT_DISGUISE_STATE_CHANGED **
 ---
---- @param eventId integer
 --- @param unitTag string
 --- @param disguiseState DisguiseState
-function SpellCastBuffs:DisguiseStateChanged(eventId, unitTag, disguiseState)
+function SpellCastBuffs:DisguiseStateChanged(unitTag, disguiseState)
     -- Bail out if we don't have disguise or unitTag buffs enabled
     if AreUnitsEqual(unitTag, "player") and (not self.SV.DisguiseStatePlayer or self.SV.HidePlayerBuffs) then
         return
@@ -3160,10 +3199,9 @@ end
 -- Handles stealth state changes for player/reticleover
 --- - **EVENT_STEALTH_STATE_CHANGED **
 ---
---- @param eventId integer
 --- @param unitTag string
 --- @param stealthState StealthState
-function SpellCastBuffs:StealthStateChanged(eventId, unitTag, stealthState)
+function SpellCastBuffs:StealthStateChanged(unitTag, stealthState)
     -- Bail out if we don't have stealth or unitTag buffs enabled
     if AreUnitsEqual(unitTag, "player") and (not self.SV.StealthStatePlayer or self.SV.HidePlayerBuffs) then
         return
@@ -3291,28 +3329,30 @@ function SpellCastBuffs:ReloadEffects(unitTag)
         self:OnEffectChanged(EFFECT_RESULT_UPDATED, buffSlot, buffName, unitTag, timeStarted, timeEnding, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, unitName, 0, --[[unitId]] abilityId, castByPlayer)
     end
     -- Display Disguise State (note that this function handles filtering player/target buffs if hidden)
-    self:DisguiseStateChanged(nil, unitTag, GetUnitDisguiseState(unitTag))
+    self:DisguiseStateChanged(unitTag, GetUnitDisguiseState(unitTag))
     -- Display Stealth State (note that this function handles filtering player/target buffs if hidden)
-    self:StealthStateChanged(nil, unitTag, GetUnitStealthState(unitTag))
+    self:StealthStateChanged(unitTag, GetUnitStealthState(unitTag))
 
     -- Player Specific
     if AreUnitsEqual(unitTag, "player") and not self.SV.HidePlayerBuffs then
         -- Display Assistant/Non-Combat Pet/Mount Icon
         self:CollectibleBuff()
-        self:MountStatus("", true)
+        self:MountStatus(true)
         -- Display Disguise Icon (if disguised)
         if not self.SV.IgnoreDisguise then
             self:SetDisguiseItem()
         end
         -- Update Artificial Effects
-        self:ArtificialEffectUpdate()
+        for effectId in ZO_GetNextActiveArtificialEffectIdIter do
+            self:ArtificialEffectUpdate(effectId)
+        end
         -- Display Recall Cooldown
         if self.SV.ShowRecall and not self.SV.HidePlayerDebuffs then
             self:ShowRecallCooldown()
         end
         -- Reload werewolf effects
         if self.SV.ShowWerewolf and IsPlayerInWerewolfForm() then
-            self:WerewolfState(nil, true, true)
+            self:WerewolfState(true, true)
         end
     end
 
@@ -4837,7 +4877,6 @@ function SpellCastBuffs:DuelStart(eventId)
 end
 
 -- EVENT_DUEL_FINISHED handler for removing Battle Spirit Icon on Target
---- @param eventId integer
 --- @param duelResult DuelResult
 --- @param wasLocalPlayersResult boolean
 --- @param opponentCharacterName string
@@ -4846,7 +4885,7 @@ end
 --- @param opponentGender Gender
 --- @param opponentClassId integer
 --- @param opponentRaceId integer
-function SpellCastBuffs:DuelEnd(eventId, duelResult, wasLocalPlayersResult, opponentCharacterName, opponentDisplayName, opponentAlliance, opponentGender, opponentClassId, opponentRaceId)
+function SpellCastBuffs:DuelEnd(duelResult, wasLocalPlayersResult, opponentCharacterName, opponentDisplayName, opponentAlliance, opponentGender, opponentClassId, opponentRaceId)
     self.g_currentDuelTarget = nil
     self:ReloadEffects("reticleover")
 end
@@ -5283,9 +5322,8 @@ end
 --- - Handler to create Mount Buff icon for player.
 --- - **EVENT_MOUNTED_STATE_CHANGED **
 ---
---- @param eventId integer
 --- @param mounted boolean
-function SpellCastBuffs:MountStatus(eventId, mounted)
+function SpellCastBuffs:MountStatus(mounted)
     -- Clear current mount icon
     local abilityId = 999017
     self:ClearPlayerBuff(abilityId)
@@ -5298,10 +5336,9 @@ end
 --- - Waits 100 ms + latency for the delay in activating collectibles before checking
 --- - **EVENT_COLLECTIBLE_USE_RESULT **
 ---
---- @param eventId integer
 --- @param result CollectibleUsageBlockReason
 --- @param isAttemptingActivation boolean
-function SpellCastBuffs:CollectibleUsed(eventId, result, isAttemptingActivation)
+function SpellCastBuffs:CollectibleUsed(result, isAttemptingActivation)
     local latency = GetLatency()
     latency = latency + 100
     LUIE_callLater(function () self:CollectibleBuff() end, latency)
