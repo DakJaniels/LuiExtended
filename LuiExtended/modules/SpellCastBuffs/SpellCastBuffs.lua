@@ -417,9 +417,9 @@ function SpellCastBuffs:_RegisterEvents()
     eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, function () self:OnUpdate() end)
 
     -- Target Events
-    eventManager:RegisterForEvent(moduleName, EVENT_TARGET_CHANGED, function (...) self:OnTargetChange(...) end)
-    eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED, function (...) self:OnReticleTargetChanged(...) end)
-    eventManager:RegisterForEvent(moduleName .. "Disposition", EVENT_DISPOSITION_UPDATE, function (...) self:OnDispositionUpdate(...) end)
+    eventManager:RegisterForEvent(moduleName, EVENT_TARGET_CHANGED, function (_, unitTag) self:OnTargetChange(unitTag) end)
+    eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED, function (_) self:OnReticleTargetChanged() end)
+    eventManager:RegisterForEvent(moduleName .. "Disposition", EVENT_DISPOSITION_UPDATE, function (_, unitTag) self:OnDispositionUpdate(unitTag) end)
     eventManager:AddFilterForEvent(moduleName .. "Disposition", EVENT_DISPOSITION_UPDATE, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     -- Buff Events
@@ -465,7 +465,7 @@ function SpellCastBuffs:_RegisterEvents()
         end)
         eventManager:AddFilterForEvent(moduleName .. "Event4" .. tostring(k), EVENT_COMBAT_EVENT, REGISTER_FILTER_ABILITY_ID, k)
     end
-    eventManager:RegisterForEvent(moduleName, EVENT_BOSSES_CHANGED, function (...) self:AddNameOnBossEngaged(...) end)
+    eventManager:RegisterForEvent(moduleName, EVENT_BOSSES_CHANGED, function (_, forceReset) self:AddNameOnBossEngaged(forceReset) end)
 
     -- Stealth Events
     eventManager:RegisterForEvent(moduleName .. "Player", EVENT_STEALTH_STATE_CHANGED, function (...) self:StealthStateChanged(...) end)
@@ -1756,7 +1756,7 @@ function SpellCastBuffs:ArtificialEffectUpdate(eventCode, effectId)
 end
 
 -- EVENT_BOSSES_CHANGED handler
-function SpellCastBuffs:AddNameOnBossEngaged(eventCode)
+function SpellCastBuffs:AddNameOnBossEngaged(forceReset)
     -- Clear any names we've added this way
     for k, _ in pairs(Effects_AddNameOnBossEngaged) do
         for name, _ in pairs(Effects_AddNameOnBossEngaged[k]) do
@@ -1765,18 +1765,28 @@ function SpellCastBuffs:AddNameOnBossEngaged(eventCode)
             end
         end
     end
-
+    -- if there are multiple bosses and one of them dies and despawns in the middle of the fight we
+    -- still want to show them as part of the boss bar (otherwise it will reset to 100%).
+    local currentBossCount = 0
     -- Check for bosses and add name auras when engaged.
     for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
         local unitTag = "boss" .. i
-        local bossName = DoesUnitExist(unitTag) and zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName(unitTag)) or ""
-        if Effects_AddNameOnBossEngaged[bossName] then
-            for k, v in pairs(Effects_AddNameOnBossEngaged[bossName]) do
-                Effects_AddNameAura[k] = {}
-                Effects_AddNameAura[k][1] = {}
-                Effects_AddNameAura[k][1].id = v
+        if (DoesUnitExist(unitTag)) then
+            local bossName = DoesUnitExist(unitTag) and zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName(unitTag)) or ""
+            if Effects_AddNameOnBossEngaged[bossName] then
+                for k, v in pairs(Effects_AddNameOnBossEngaged[bossName]) do
+                    Effects_AddNameAura[k] = {}
+                    Effects_AddNameAura[k][1] = {}
+                    Effects_AddNameAura[k][1].id = v
+                end
             end
+            currentBossCount = currentBossCount + 1
         end
+    end
+
+    -- if there are no bosses left it's safe to reset everything
+    if (forceReset or (currentBossCount == 0 and next(Effects_AddNameOnBossEngaged) ~= nil)) then
+        Effects_AddNameOnBossEngaged = {}
     end
 
     -- Reload Effects on current target
@@ -1824,7 +1834,7 @@ end
 function SpellCastBuffs:OnDeath(eventCode, unitTag, isDead)
     -- Wipe buffs
     if isDead then
-        if unitTag == "player" then
+        if AreUnitsEqual(unitTag, "player") then
             -- Clear all player/ground/prominent containers
             local context = { "player1", "player2", "ground", "promb_ground", "promd_ground", "promb_player", "promd_player" }
             for _, v in pairs(context) do
@@ -1853,25 +1863,28 @@ end
 
 -- Runs on the EVENT_DISPOSITION_UPDATE listener.
 -- This handler fires when the disposition of a reticleover unitTag changes. We filter for only this case.
-function SpellCastBuffs:OnDispositionUpdate(eventCode, unitTag)
-    if not self.SV.HideTargetBuffs then
-        self:AddNameAura()
+function SpellCastBuffs:OnDispositionUpdate(unitTag)
+    if (DoesUnitExist(unitTag)) then
+        if not self.SV.HideTargetBuffs then
+            self:AddNameAura()
+        end
     end
 end
 
 -- Runs on the EVENT_TARGET_CHANGE listener.
 -- This handler fires every time someone target changes.
 -- This function is needed in case the player teleports via Way Shrine
-function SpellCastBuffs:OnTargetChange(eventCode, unitTag)
-    if unitTag ~= "player" then
+function SpellCastBuffs:OnTargetChange(unitTag)
+    if not AreUnitsEqual(unitTag, "player") then
         return
+    else
+        self:OnReticleTargetChanged()
     end
-    self:OnReticleTargetChanged(eventCode)
 end
 
 -- Runs on the EVENT_RETICLE_TARGET_CHANGED listener.
 -- This handler fires every time the player's reticle target changes
-function SpellCastBuffs:OnReticleTargetChanged(eventCode)
+function SpellCastBuffs:OnReticleTargetChanged()
     self:ReloadEffects("reticleover")
 end
 
@@ -3091,9 +3104,9 @@ end
 --- @param disguiseState DisguiseState
 function SpellCastBuffs:DisguiseStateChanged(eventId, unitTag, disguiseState)
     -- Bail out if we don't have disguise or unitTag buffs enabled
-    if unitTag == "player" and (not self.SV.DisguiseStatePlayer or self.SV.HidePlayerBuffs) then
+    if AreUnitsEqual(unitTag, "player") and (not self.SV.DisguiseStatePlayer or self.SV.HidePlayerBuffs) then
         return
-    elseif unitTag == "reticleover" and (not self.SV.DisguiseStatePlayer or self.SV.HideTargetBuffs) then
+    elseif AreUnitsEqual(unitTag, "reticleover") and (not self.SV.DisguiseStatePlayer or self.SV.HideTargetBuffs) then
         return
     end
 
@@ -3152,9 +3165,9 @@ end
 --- @param stealthState StealthState
 function SpellCastBuffs:StealthStateChanged(eventId, unitTag, stealthState)
     -- Bail out if we don't have stealth or unitTag buffs enabled
-    if unitTag == "player" and (not self.SV.StealthStatePlayer or self.SV.HidePlayerBuffs) then
+    if AreUnitsEqual(unitTag, "player") and (not self.SV.StealthStatePlayer or self.SV.HidePlayerBuffs) then
         return
-    elseif unitTag == "reticleover" and (not self.SV.StealthStateTarget or self.SV.HideTargetBuffs) then
+    elseif AreUnitsEqual(unitTag, "reticleover") and (not self.SV.StealthStateTarget or self.SV.HideTargetBuffs) then
         return
     end
 
@@ -3215,7 +3228,7 @@ end
 --- @param unitTag string
 function SpellCastBuffs:ReloadEffects(unitTag)
     -- Bail if this isn't reticleover or player
-    if unitTag ~= "player" and unitTag ~= "reticleover" then
+    if not AreUnitsEqual(unitTag, "player") and not AreUnitsEqual(unitTag, "reticleover") then
         return
     end
 
@@ -3230,7 +3243,7 @@ function SpellCastBuffs:ReloadEffects(unitTag)
         end
     end
     -- Clear prominent containers
-    if unitTag == "player" then
+    if AreUnitsEqual(unitTag, "player") then
         local context = { "promb_player", "promb_ground", "promd_player", "promd_ground" }
         for _, v in pairs(context) do
             local effectsTable = self.EffectsList[v]
@@ -3283,7 +3296,7 @@ function SpellCastBuffs:ReloadEffects(unitTag)
     self:StealthStateChanged(nil, unitTag, GetUnitStealthState(unitTag))
 
     -- Player Specific
-    if unitTag == "player" and not self.SV.HidePlayerBuffs then
+    if AreUnitsEqual(unitTag, "player") and not self.SV.HidePlayerBuffs then
         -- Display Assistant/Non-Combat Pet/Mount Icon
         self:CollectibleBuff()
         self:MountStatus("", true)
@@ -3304,7 +3317,7 @@ function SpellCastBuffs:ReloadEffects(unitTag)
     end
 
     -- Target Specific
-    if unitTag == "reticleover" and not self.SV.HideTargetBuffs then
+    if AreUnitsEqual(unitTag, "reticleover") and not self.SV.HideTargetBuffs then
         -- Handle FAKE DEBUFFS between targets
         self:RestoreSavedFakeEffects()
         -- Add Name Auras
@@ -3520,7 +3533,7 @@ function SpellCastBuffs:OnEffectChanged(changeType, effectSlot, effectName, unit
         effectName = Effects_EffectOverride[abilityId].name or effectName
         effectType = Effects_EffectOverride[abilityId].type or effectType
         -- Bail out now if we hide ground snares and other effects because we are showing Damaging Auras (Only do this for the player, we don't want effects on targets to stop showing up).
-        if Effects_EffectOverride[abilityId].hideGround and self.SV.GroundDamageAura and unitTag == "player" then
+        if Effects_EffectOverride[abilityId].hideGround and self.SV.GroundDamageAura and AreUnitsEqual(unitTag, "player") then
             return
         end
     end
@@ -3531,43 +3544,43 @@ function SpellCastBuffs:OnEffectChanged(changeType, effectSlot, effectName, unit
     end
 
     -- Bail out if this is an effect from Oakensoul
-    if (self.SV.HideOakenSoul == true) and IsOakensoul(abilityId) and unitTag == "player" then
+    if (self.SV.HideOakenSoul == true) and IsOakensoul(abilityId) and AreUnitsEqual(unitTag, "player") then
         return
     end
 
     -- Hide effects if chosen in the options menu
-    if self.hidePlayerEffects[abilityId] and unitTag == "player" then
+    if self.hidePlayerEffects[abilityId] and AreUnitsEqual(unitTag, "player") then
         return
     end
 
-    if self.hideTargetEffects[abilityId] and unitTag == "reticleover" then
+    if self.hideTargetEffects[abilityId] and AreUnitsEqual(unitTag, "reticleover") then
         return
     end
 
     -- If the source of the buff isn't the player or the buff is not on the AbilityId or AbilityName override list then we don't display it
-    if unitTag ~= "player" then
+    if not AreUnitsEqual(unitTag, "player") then
         if effectType == BUFF_EFFECT_TYPE_DEBUFF and not (sourceType == COMBAT_UNIT_TYPE_PLAYER) and not (self.debuffDisplayOverrideId[abilityId] or Effects_DebuffDisplayOverrideName[effectName]) then
             return
         end
     end
 
     -- Ignore Siphoner on non-player targets
-    if abilityId == 92428 and unitTag == "reticleover" and not IsUnitPlayer("reticleover") then
+    if abilityId == 92428 and AreUnitsEqual(unitTag, "reticleover") and not IsUnitPlayer("reticleover") then
         return
     end
 
     -- If this effect isn't a prominent buff or debuff and we have certain buffs set to hidden - then hide those.
     if not (self.SV.PromDebuffTable[abilityId] or self.SV.PromDebuffTable[effectName] or self.SV.PromBuffTable[abilityId] or self.SV.PromBuffTable[effectName]) then
-        if self.SV.HidePlayerBuffs and effectType == BUFF_EFFECT_TYPE_BUFF and unitTag == "player" then
+        if self.SV.HidePlayerBuffs and effectType == BUFF_EFFECT_TYPE_BUFF and AreUnitsEqual(unitTag, "player") then
             return
         end
-        if self.SV.HidePlayerDebuffs and effectType == BUFF_EFFECT_TYPE_DEBUFF and unitTag == "player" then
+        if self.SV.HidePlayerDebuffs and effectType == BUFF_EFFECT_TYPE_DEBUFF and AreUnitsEqual(unitTag, "player") then
             return
         end
-        if self.SV.HideTargetBuffs and effectType == BUFF_EFFECT_TYPE_BUFF and unitTag ~= "player" then
+        if self.SV.HideTargetBuffs and effectType == BUFF_EFFECT_TYPE_BUFF and not AreUnitsEqual(unitTag, "player") then
             return
         end
-        if self.SV.HideTargetDebuffs and effectType == BUFF_EFFECT_TYPE_DEBUFF and unitTag ~= "player" then
+        if self.SV.HideTargetDebuffs and effectType == BUFF_EFFECT_TYPE_DEBUFF and not AreUnitsEqual(unitTag, "player") then
             return
         end
     end
@@ -5205,12 +5218,12 @@ function SpellCastBuffs:DisplayMountIcon()
         -- Target support is not implemented
 
         -- Bail out if somehow a non-player/target unitTag gets passed here
-        if unitTag ~= "player" and unitTag ~= "reticleover" then
+        if not AreUnitsEqual(unitTag, "player") and not AreUnitsEqual(unitTag, "reticleover") then
             return
         end
 
         -- Bail out if we have target mount hidden (we check for target buffs being disabled in the reticleover function that calls this function)
-        if unitTag == "reticleover" and self.SV.IgnoreMountTarget then
+        if AreUnitsEqual(unitTag, "reticleover") and self.SV.IgnoreMountTarget then
             return
         end
     ]]
