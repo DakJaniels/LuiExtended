@@ -3262,44 +3262,26 @@ function SpellCastBuffs:StealthStateChanged(unitTag, stealthState)
 end
 
 -- Used to clear existing .effectsList.unitTag and to request game API to fill it again
----
---- @param unitTag string
 function SpellCastBuffs:ReloadEffects(unitTag)
     -- Bail if this isn't reticleover or player
-    if not AreUnitsEqual(unitTag, "player") and not AreUnitsEqual(unitTag, "reticleover") then
+    if unitTag ~= "player" and unitTag ~= "reticleover" then
         return
     end
 
     -- Clear existing base containers
-    for effectType = BUFF_EFFECT_TYPE_ITERATION_BEGIN, BUFF_EFFECT_TYPE_ITERATION_END do
-        local key = unitTag .. effectType
-        local effectsTable = self.EffectsList[key]
-        if effectsTable then
-            ZO_ClearTable(effectsTable)
-        else
-            self.EffectsList[key] = {}
-        end
+    for effectType = BUFF_EFFECT_TYPE_BUFF, BUFF_EFFECT_TYPE_DEBUFF do
+        self.EffectsList[unitTag .. effectType] = {}
     end
     -- Clear prominent containers
-    if AreUnitsEqual(unitTag, "player") then
+    if unitTag == "player" then
         local context = { "promb_player", "promb_ground", "promd_player", "promd_ground" }
         for _, v in pairs(context) do
-            local effectsTable = self.EffectsList[v]
-            if effectsTable then
-                ZO_ClearTable(effectsTable)
-            else
-                self.EffectsList[v] = {}
-            end
+            self.EffectsList[v] = {}
         end
     else
         local context = { "promb_target", "promd_target" }
         for _, v in pairs(context) do
-            local effectsTable = self.EffectsList[v]
-            if effectsTable then
-                ZO_ClearTable(effectsTable)
-            else
-                self.EffectsList[v] = {}
-            end
+            self.EffectsList[v] = {}
         end
     end
 
@@ -3309,9 +3291,7 @@ function SpellCastBuffs:ReloadEffects(unitTag)
     end
 
     -- Bail out if the target is dead
-    if IsUnitDead(unitTag) then
-        return
-    end
+    if IsUnitDead(unitTag) then return end
 
     -- Get unitName to pass to OnEffectChanged
     local unitName = GetRawUnitName(unitTag)
@@ -3334,7 +3314,7 @@ function SpellCastBuffs:ReloadEffects(unitTag)
     self:StealthStateChanged(unitTag, GetUnitStealthState(unitTag))
 
     -- Player Specific
-    if AreUnitsEqual(unitTag, "player") and not self.SV.HidePlayerBuffs then
+    if unitTag == "player" and not self.SV.HidePlayerBuffs then
         -- Display Assistant/Non-Combat Pet/Mount Icon
         self:CollectibleBuff()
         self:MountStatus(true)
@@ -3357,7 +3337,7 @@ function SpellCastBuffs:ReloadEffects(unitTag)
     end
 
     -- Target Specific
-    if AreUnitsEqual(unitTag, "reticleover") and not self.SV.HideTargetBuffs then
+    if unitTag == "reticleover" and not self.SV.HideTargetBuffs then
         -- Handle FAKE DEBUFFS between targets
         self:RestoreSavedFakeEffects()
         -- Add Name Auras
