@@ -1616,7 +1616,9 @@ function SpellCastBuffs:CreateConsoleSettings()
                 Settings.IgnoreBattleSpiritPlayer = not v
                 self:UpdateContextHideList()
                 self:ReloadEffects("player")
-                self:ArtificialEffectUpdate()
+                for effectId in ZO_GetNextActiveArtificialEffectIdIter do
+                    self:ArtificialEffectUpdate(effectId)
+                end
             end,
             default = not Defaults.IgnoreBattleSpiritPlayer,
             disable = function ()
