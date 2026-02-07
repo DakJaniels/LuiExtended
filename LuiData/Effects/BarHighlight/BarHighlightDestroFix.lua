@@ -146,4 +146,5 @@ local function ExtendDestroMappingWithAllRanks()
 end
 
 --- @class (partial) BarHighlightDestroFix
-Effects.BarHighlightDestroFix = ExtendDestroMappingWithAllRanks()
+Effects.BarHighlightDestroFix = barHighlightDestroFix
+Effects.ExtendDestroMappingWithAllRanks = ExtendDestroMappingWithAllRanks
