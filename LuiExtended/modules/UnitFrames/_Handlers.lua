@@ -62,21 +62,7 @@ function UnitFrames.GroupFrames_OnMouseUp(self, button, upInside)
                             ZO_Dialogs_ShowDialog("GROUP_DISBAND_DIALOG")
                         end)
                     end
-                else
-                    if not isLFG then
-                        AddMenuItem(GetString(SI_GROUP_LIST_MENU_KICK_FROM_GROUP), function ()
-                            GroupKick(unitTag)
-                        end)
-                    end
                 end
-            end
-
-            -- Cannot vote for yourself
-            if isLFG and not isPlayer then
-                AddMenuItem(GetString(SI_GROUP_LIST_MENU_VOTE_KICK_FROM_GROUP), function ()
-                    local flags = GROUP_ELECTION_FLAGS_REQUIRE_ALL_VOTES + GROUP_ELECTION_FLAGS_IGNORE_OFFLINE_MEMBERS
-                    BeginGroupElection(GROUP_ELECTION_TYPE_KICK_MEMBER, ZO_GROUP_ELECTION_DESCRIPTORS.NONE, unitTag, flags)
-                end)
             end
         end
 
