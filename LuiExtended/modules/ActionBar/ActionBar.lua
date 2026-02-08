@@ -142,6 +142,13 @@ local BACKBAR_INDEX_END = 7           -- Separate index for backbar as long as w
 local BACKBAR_INDEX_OFFSET = 50
 local OAKENSOUL_RING_ITEM_ID = 187658 -- Oaken soul Ring: disables bar swap
 
+-- Drop callout validity functions (mirrors ZOS ZO_ABILITY_DROP_CALLOUT_VALIDITY_FUNCTION_BY_ACTION_TYPE)
+local DROP_CALLOUT_VALIDITY_BY_ACTION_TYPE =
+{
+    [ACTION_TYPE_ABILITY] = IsValidAbilityForSlot,
+    [ACTION_TYPE_CRAFTED_ABILITY] = IsValidCraftedAbilityForSlot,
+}
+
 -- -----------------------------------------------------------------------------
 -- Quickslot
 local uiQuickSlot =
@@ -303,6 +310,149 @@ end
 local function OakensoulEquipped()
     return GetItemLinkItemId(GetItemLink(BAG_WORN, EQUIP_SLOT_RING1, LINK_STYLE_DEFAULT)) == OAKENSOUL_RING_ITEM_ID
         or GetItemLinkItemId(GetItemLink(BAG_WORN, EQUIP_SLOT_RING2, LINK_STYLE_DEFAULT)) == OAKENSOUL_RING_ITEM_ID
+end
+
+--- Hide drop callouts on main bar and backbar (mirrors ZOS ActionBar drop callout behavior)
+local function HideAllAbilityActionButtonDropCallouts()
+    for i = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1, ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 do
+        local btn = ZO_ActionBar_GetButton(i)
+        if btn and btn.slot then
+            local callout = btn.slot:GetNamedChild("DropCallout")
+            if callout then
+                callout:SetHidden(true)
+            end
+        end
+    end
+    if ActionBar.SV.BarShowBack and g_backbarContainer and not g_backbarContainer:IsHidden() then
+        for i = BAR_INDEX_START, BACKBAR_INDEX_END do
+            local btn = g_backbarButtons[i + BACKBAR_INDEX_OFFSET]
+            if btn and btn.slot then
+                local callout = btn.slot:GetNamedChild("DropCallout")
+                if callout then
+                    callout:SetHidden(true)
+                end
+            end
+        end
+    end
+end
+
+--- Show drop callouts with validity coloring when dragging ability (white=valid, red=invalid)
+--- @param actionType number
+--- @param actionValue number abilityId or craftedAbilityId
+local function ShowAppropriateAbilityActionButtonDropCallouts(actionType, actionValue)
+    local validityFunction = DROP_CALLOUT_VALIDITY_BY_ACTION_TYPE[actionType]
+    if not validityFunction then
+        return
+    end
+
+    HideAllAbilityActionButtonDropCallouts()
+
+    -- Main bar
+    for i = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1, ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 do
+        local btn = ZO_ActionBar_GetButton(i)
+        if btn and btn.slot then
+            local callout = btn.slot:GetNamedChild("DropCallout")
+            if callout then
+                local isValid = validityFunction(actionValue, i)
+                callout:SetColor(1, isValid and 1 or 0, isValid and 1 or 0, 1)
+                callout:SetHidden(false)
+            end
+        end
+    end
+
+    if ActionBar.SV.BarShowBack and g_backbarContainer and not g_backbarContainer:IsHidden() then
+        for i = BAR_INDEX_START, BACKBAR_INDEX_END do
+            local esoSlotIndex = i - 1
+            local btn = g_backbarButtons[i + BACKBAR_INDEX_OFFSET]
+            if btn and btn.slot then
+                local callout = btn.slot:GetNamedChild("DropCallout")
+                if callout then
+                    local isValid = validityFunction(actionValue, esoSlotIndex)
+                    callout:SetColor(1, isValid and 1 or 0, isValid and 1 or 0, 1)
+                    callout:SetHidden(false)
+                end
+            end
+        end
+    end
+end
+
+local function AttemptPlacement(slotNum, hotbarCategory)
+    CallSecureProtected("PlaceInActionBar", slotNum, hotbarCategory)
+end
+
+local function AttemptPickup(slotNum, hotbarCategory)
+    if ZO_ActionBar_AreActionBarsLocked() then
+        return
+    end
+    CallSecureProtected("PickupAction", slotNum, hotbarCategory)
+    ClearTooltip(AbilityTooltip)
+end
+
+--- Setup drag/drop handlers for backbar
+--- @param button ActionButton
+local function SetupBackbarDragDropHandlers(button)
+    local btn = button.button
+    if not btn then return end
+
+    local function getActionBarSlotAndCategory()
+        local slotNum = button.slot.slotNum
+        local actionBarSlotIndex = slotNum - BACKBAR_INDEX_OFFSET
+        local hotbarCategory = GetInactiveHotbarCategory(g_hotbarCategory)
+        return actionBarSlotIndex, hotbarCategory
+    end
+
+    btn:SetHandler("OnReceiveDrag", function (control, mouseButton)
+        if GetCursorContentType() == MOUSE_CONTENT_EMPTY then return end
+        local actionBarSlotIndex, hotbarCategory = getActionBarSlotAndCategory()
+        AttemptPlacement(actionBarSlotIndex, hotbarCategory)
+    end)
+
+    btn:SetHandler("OnDragStart", function (control, mouseButton)
+        if GetCursorContentType() ~= MOUSE_CONTENT_EMPTY then return false end
+        if ZO_ActionBar_AreActionBarsLocked() then return false end
+        local actionBarSlotIndex, hotbarCategory = getActionBarSlotAndCategory()
+        AttemptPickup(actionBarSlotIndex, hotbarCategory)
+        ClearTooltip(AbilityTooltip)
+        ClearTooltip(ItemTooltip)
+        return true
+    end)
+
+    -- Tooltip on hover
+    btn:SetHandler("OnMouseEnter", function ()
+        if IsInGamepadPreferredMode() then return end
+        local actionBarSlotIndex, hotbarCategory = getActionBarSlotAndCategory()
+        if GetSlotType(actionBarSlotIndex, hotbarCategory) ~= ACTION_TYPE_NOTHING then
+            InitializeTooltip(ItemTooltip, btn, BOTTOM, 0, -5, TOP)
+            ItemTooltip:SetAction(actionBarSlotIndex, hotbarCategory)
+        end
+    end)
+
+    btn:SetHandler("OnMouseExit", function ()
+        ClearTooltip(ItemTooltip)
+    end)
+
+    -- Right-click context menu (Clear Slot)
+    btn:SetHandler("OnClicked", function (control, mouseButton)
+        local actionBarSlotIndex, hotbarCategory = getActionBarSlotAndCategory()
+        if mouseButton == MOUSE_BUTTON_INDEX_RIGHT then
+            if IsSlotUsed(actionBarSlotIndex, hotbarCategory) and not IsActionSlotRestricted(actionBarSlotIndex, hotbarCategory) then
+                ClearMenu()
+                AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function ()
+                    local slotType = GetSlotType(actionBarSlotIndex, hotbarCategory)
+                    if slotType == ACTION_TYPE_ITEM then
+                        local soundCategory = GetSlotItemSound(actionBarSlotIndex, hotbarCategory)
+                        if soundCategory ~= ITEM_SOUND_CATEGORY_NONE then
+                            PlayItemSound(soundCategory, ITEM_SOUND_ACTION_UNEQUIP)
+                        end
+                    end
+                    CallSecureProtected("ClearSlot", actionBarSlotIndex, hotbarCategory)
+                end)
+                ShowMenu(control)
+            end
+        elseif mouseButton == MOUSE_BUTTON_INDEX_LEFT and GetCursorContentType() ~= MOUSE_CONTENT_EMPTY then
+            AttemptPlacement(actionBarSlotIndex, hotbarCategory)
+        end
+    end)
 end
 
 -- Update actionId for backbar buttons
@@ -481,6 +631,7 @@ function ActionBar.Initialize(enabled)
         local button = ActionButton:New(i, ACTION_BUTTON_TYPE_VISIBLE, tlw, "ZO_ActionButton", HOTBAR_CATEGORY_BACKUP)
         SetupSwapAnimation(button)
         button:SetupBounceAnimation()
+        SetupBackbarDragDropHandlers(button)
         g_backbarButtons[i] = button
     end
 
@@ -851,6 +1002,8 @@ local function UnregisterActionBarNamedEvents()
     eventManager:UnregisterForEvent(moduleName .. "PowerUpdate", EVENT_POWER_UPDATE)
     eventManager:UnregisterForEvent(moduleName .. "InventoryUpdate", EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     eventManager:UnregisterForEvent(moduleName .. "OakensoulBackbar", EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+    eventManager:UnregisterForEvent(moduleName .. "CursorPickup", EVENT_CURSOR_PICKUP)
+    eventManager:UnregisterForEvent(moduleName .. "CursorDropped", EVENT_CURSOR_DROPPED)
 
     local counter = 0
     for _, _ in pairs(Castbar.CastBreakingStatus) do
@@ -960,6 +1113,18 @@ function ActionBar.RegisterEvents()
     end)
     eventManager:AddFilterForEvent(moduleName .. "OakensoulBackbar", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
 
+    -- Drop callout handlers (mirrors ZOS: show valid/invalid slot highlight when dragging abilities)
+    eventManager:RegisterForEvent(moduleName .. "CursorPickup", EVENT_CURSOR_PICKUP, function (_, cursorType, param1, param2, param3)
+        if cursorType == MOUSE_CONTENT_ACTION and DROP_CALLOUT_VALIDITY_BY_ACTION_TYPE[param1] then
+            ShowAppropriateAbilityActionButtonDropCallouts(param1, param3)
+        end
+    end)
+    eventManager:RegisterForEvent(moduleName .. "CursorDropped", EVENT_CURSOR_DROPPED, function (_, cursorType)
+        if cursorType == MOUSE_CONTENT_ACTION then
+            HideAllAbilityActionButtonDropCallouts()
+        end
+    end)
+
     if (ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled) and not IsConsoleUI() then
         SetSetting(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER, 0)
     end
@@ -1045,6 +1210,8 @@ function ActionBar.OnPlayerActivated(eventCode)
         ActionBar.BarSlotUpdate(i, true, false)
     end
     ActionBar.OnPowerUpdatePlayer("player", nil, COMBAT_MECHANIC_FLAGS_ULTIMATE, GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE))
+
+    HideAllAbilityActionButtonDropCallouts()
 
     -- Scan for bar-swap disablers on load/zone - hide back bar if active
     if ActionBar.SV.BarShowBack and g_backbarContainer then
