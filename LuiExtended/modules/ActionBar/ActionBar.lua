@@ -413,7 +413,6 @@ local function SetupBackbarDragDropHandlers(button)
         local actionBarSlotIndex, hotbarCategory = getActionBarSlotAndCategory()
         AttemptPickup(actionBarSlotIndex, hotbarCategory)
         ClearTooltip(AbilityTooltip)
-        ClearTooltip(ItemTooltip)
         return true
     end)
 
@@ -422,13 +421,13 @@ local function SetupBackbarDragDropHandlers(button)
         if IsInGamepadPreferredMode() then return end
         local actionBarSlotIndex, hotbarCategory = getActionBarSlotAndCategory()
         if GetSlotType(actionBarSlotIndex, hotbarCategory) ~= ACTION_TYPE_NOTHING then
-            InitializeTooltip(ItemTooltip, btn, BOTTOM, 0, -5, TOP)
-            ItemTooltip:SetAction(actionBarSlotIndex, hotbarCategory)
+            InitializeTooltip(AbilityTooltip, btn, BOTTOM, 0, -5, TOP)
+            AbilityTooltip:SetAction(actionBarSlotIndex, hotbarCategory)
         end
     end)
 
     btn:SetHandler("OnMouseExit", function ()
-        ClearTooltip(ItemTooltip)
+        ClearTooltip(AbilityTooltip)
     end)
 
     -- Right-click context menu (Clear Slot)
