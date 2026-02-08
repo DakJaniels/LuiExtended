@@ -131,14 +131,16 @@ local g_disableProcSound = {}                             -- When we play a proc
 local g_hotbarCategory = GetActiveHotbarCategory()        -- Set on initialization and when we swap weapons to determine the current hotbar category
 --- @type {[integer]:ActionButton}
 local g_backbarButtons = {}                               -- Table to hold backbar buttons
+local g_backbarContainer                                  -- Parent control for backbar (used for SETHOTBAR auto-hide)
 local g_activeWeaponSwapInProgress = false                -- Toggled on when weapon swapping, TODO: maybe not needed
 local g_castbarWorldMapFix = false                        -- Fix for viewing the World Map changing the player coordinates for some reason
 local g_actionBarActiveWeaponPair = GetHeldWeaponPair()
 local ACTION_BAR = ZO_ActionBar1
 local BAR_INDEX_START = 3
 local BAR_INDEX_END = 8
-local BACKBAR_INDEX_END = 7 -- Separate index for backbar as long as we're not using an ultimate button.
+local BACKBAR_INDEX_END = 7           -- Separate index for backbar as long as we're not using an ultimate button.
 local BACKBAR_INDEX_OFFSET = 50
+local OAKENSOUL_RING_ITEM_ID = 187658 -- Oaken soul Ring: disables bar swap
 
 -- -----------------------------------------------------------------------------
 -- Quickslot
@@ -295,6 +297,12 @@ local function GetInactiveHotbarCategory(activeHotbarCategory)
         return HOTBAR_CATEGORY_PRIMARY
     end
     return HOTBAR_CATEGORY_BACKUP
+end
+
+--- @return boolean
+local function OakensoulEquipped()
+    return GetItemLinkItemId(GetItemLink(BAG_WORN, EQUIP_SLOT_RING1, LINK_STYLE_DEFAULT)) == OAKENSOUL_RING_ITEM_ID
+        or GetItemLinkItemId(GetItemLink(BAG_WORN, EQUIP_SLOT_RING2, LINK_STYLE_DEFAULT)) == OAKENSOUL_RING_ITEM_ID
 end
 
 -- Update actionId for backbar buttons
@@ -467,6 +475,7 @@ function ActionBar.Initialize(enabled)
     -- Create a top level window for backbar butons
     local tlw = windowManager:CreateControl("$(parent)LUIE_Backbar", ACTION_BAR, CT_CONTROL)
     tlw:SetParent(ACTION_BAR)
+    g_backbarContainer = tlw
 
     for i = BAR_INDEX_START + BACKBAR_INDEX_OFFSET, BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET do
         local button = ActionButton:New(i, ACTION_BUTTON_TYPE_VISIBLE, tlw, "ZO_ActionButton", HOTBAR_CATEGORY_BACKUP)
@@ -691,13 +700,42 @@ function ActionBar.HookGCD()
 end
 
 -- -----------------------------------------------------------------------------
+-- Resolve ability rank for GetAbilityDuration/GetAbilityCastInfo (overrideRank).
+-- Prefer GetAbilityProgressionRankFromAbilityId (correct for morphs, e.g. rank 4); fallback to progression chain then API 5th return.
+---
+--- @param abilityId integer
+--- @return integer|nil rank 1-based rank, or nil to let API use default
+local function GetAbilityRankForDuration(abilityId)
+    local resolvedRank = GetAbilityProgressionRankFromAbilityId(abilityId)
+    if resolvedRank == nil then
+        local skillType, skillLineIndex, skillIndex, morphChoice, rankFromApi = GetSpecificSkillAbilityKeysByAbilityId(abilityId)
+        resolvedRank = rankFromApi
+        if skillType and skillLineIndex then
+            local progressionId = GetProgressionSkillProgressionId(skillType, skillLineIndex, skillIndex)
+            local morphSlot = (morphChoice == 0 and MORPH_SLOT_BASE) or (morphChoice == 1 and MORPH_SLOT_MORPH_1 or MORPH_SLOT_MORPH_2)
+            if progressionId and morphSlot then
+                local abilityIds = { GetProgressionSkillMorphSlotChainedAbilityIds(progressionId, morphSlot) }
+                for rankIndex, chainAbilityId in ipairs(abilityIds) do
+                    if chainAbilityId == abilityId then
+                        resolvedRank = rankIndex
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    return resolvedRank
+end
+
+-- -----------------------------------------------------------------------------
 -- Helper function to get override ability duration.
 ---
 --- @param abilityId integer
 --- @return integer duration
 local function GetUpdatedAbilityDuration(abilityId)
     local overrideCasterUnitTag = "player"
-    local overrideActiveRank = select(5, GetSpecificSkillAbilityKeysByAbilityId(abilityId))
+    local overrideActiveRank = GetAbilityRankForDuration(abilityId)
     local duration
 
     -- Prefer hardcoded override; otherwise use game API (ZOS tooltip order)
@@ -717,7 +755,7 @@ local function GetUpdatedAbilityDuration(abilityId)
         duration = castTime
     end
 
-    return duration
+    return duration or 0
 end
 
 -- -----------------------------------------------------------------------------
@@ -812,6 +850,7 @@ local function UnregisterActionBarNamedEvents()
     eventManager:UnregisterForEvent(moduleName .. "CombatEvent2", EVENT_COMBAT_EVENT)
     eventManager:UnregisterForEvent(moduleName .. "PowerUpdate", EVENT_POWER_UPDATE)
     eventManager:UnregisterForEvent(moduleName .. "InventoryUpdate", EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+    eventManager:UnregisterForEvent(moduleName .. "OakensoulBackbar", EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
 
     local counter = 0
     for _, _ in pairs(Castbar.CastBreakingStatus) do
@@ -910,9 +949,16 @@ function ActionBar.RegisterEvents()
     if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled then
         RegisterBarHighlightEvents()
     end
-    if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled or ActionBar.SV.CastBarEnable or ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
+    if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled or ActionBar.SV.CastBarEnable or ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled or ActionBar.SV.BarShowBack then
         RegisterEffectChanged()
     end
+    -- Register for ring slot changes - Oaken soul Ring (187658) equip/unequip toggles backbar visibility when BarShowBack
+    eventManager:RegisterForEvent(moduleName .. "OakensoulBackbar", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function (_, bagId, slotIndex)
+        if ActionBar.SV.BarShowBack and bagId == BAG_WORN and (slotIndex == EQUIP_SLOT_RING1 or slotIndex == EQUIP_SLOT_RING2) then
+            ActionBar.BackbarToggleSettings()
+        end
+    end)
+    eventManager:AddFilterForEvent(moduleName .. "OakensoulBackbar", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
 
     if (ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled) and not IsConsoleUI() then
         SetSetting(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER, 0)
@@ -999,6 +1045,23 @@ function ActionBar.OnPlayerActivated(eventCode)
         ActionBar.BarSlotUpdate(i, true, false)
     end
     ActionBar.OnPowerUpdatePlayer("player", nil, COMBAT_MECHANIC_FLAGS_ULTIMATE, GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE))
+
+    -- Scan for bar-swap disablers on load/zone - hide back bar if active
+    if ActionBar.SV.BarShowBack and g_backbarContainer then
+        if GetUnitLevel("player") < GetWeaponSwapUnlockedLevel() then
+            g_backbarContainer:SetHidden(true)
+        elseif OakensoulEquipped() then
+            g_backbarContainer:SetHidden(true)
+        else
+            for i = 1, GetNumBuffs("player") do
+                local _, _, _, _, _, _, _, _, abilityType = GetUnitBuffInfo("player", i)
+                if abilityType == ABILITY_TYPE_SETHOTBAR then
+                    g_backbarContainer:SetHidden(true)
+                    break
+                end
+            end
+        end
+    end
 end
 
 local savedPlayerX = 0.000000000000000
@@ -1555,6 +1618,21 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
         return
     end
 
+    -- Auto-hide back bar when abilityType is SETHOTBAR (e.g. Volendrung mythic forces weapon bar swap)
+    if ActionBar.SV.BarShowBack and unitTag == "player" and abilityType == ABILITY_TYPE_SETHOTBAR then
+        if changeType == EFFECT_RESULT_GAINED then
+            if g_backbarContainer then
+                g_backbarContainer:SetHidden(true)
+            end
+        elseif changeType == EFFECT_RESULT_FADED then
+            if g_backbarContainer then
+                g_backbarContainer:SetHidden(false)
+            end
+            ActionBar.BackbarToggleSettings()
+        end
+        return
+    end
+
     -- Update ultimate label on vampire stage change.
     if Effects.IsVamp[abilityId] and changeType == EFFECT_RESULT_GAINED then
         ActionBar.UpdateUltimateLabel()
@@ -2016,6 +2094,28 @@ end
 -- -----------------------------------------------------------------------------
 -- Called from the menu and on init
 function ActionBar.BackbarToggleSettings()
+    -- If BarShowBack is on, check for bar-swap disablers - keep backbar hidden while active
+    if ActionBar.SV.BarShowBack and g_backbarContainer then
+        if GetUnitLevel("player") < GetWeaponSwapUnlockedLevel() then
+            g_backbarContainer:SetHidden(true)
+            return
+        elseif OakensoulEquipped() then
+            g_backbarContainer:SetHidden(true)
+            return
+        end
+        for i = 1, GetNumBuffs("player") do
+            local _, _, _, _, _, _, _, _, abilityType = GetUnitBuffInfo("player", i)
+            if abilityType == ABILITY_TYPE_SETHOTBAR then
+                g_backbarContainer:SetHidden(true)
+                return
+            end
+        end
+    end
+
+    if g_backbarContainer then
+        g_backbarContainer:SetHidden(false)
+    end
+
     for i = BAR_INDEX_START, BACKBAR_INDEX_END do
         -- Get our backbar button
         local targetButton = g_backbarButtons[i + BACKBAR_INDEX_OFFSET]
