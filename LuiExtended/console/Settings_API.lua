@@ -16,7 +16,7 @@ local pairs = pairs
 -- SettingsAPI Class
 -- ---------------------------------------------------------------------------------------
 
---- @class (partial) SettingsAPI : ZO_InitializingObject
+--- @class (partial) SettingsAPI_Console : ZO_InitializingObject
 --- @field mediaCache table Cache for media lists to avoid regenerating them
 --- @field LUIE table LuiExtended namespace
 local SettingsAPI = ZO_InitializingObject:Subclass()
@@ -215,5 +215,5 @@ end
 -- ---------------------------------------------------------------------------------------
 -- Singleton Instance
 -- ---------------------------------------------------------------------------------------
-
+--- @class (partial) SettingsAPI_Console
 LUIE.ConsoleSettingsAPI = SettingsAPI:New()
