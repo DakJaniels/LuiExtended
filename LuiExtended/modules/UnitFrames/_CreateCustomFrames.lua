@@ -1,4 +1,3 @@
---- @diagnostic disable: missing-fields
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --

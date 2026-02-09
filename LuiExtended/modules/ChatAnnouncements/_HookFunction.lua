@@ -5453,8 +5453,8 @@ function ChatAnnouncements.HookFunction()
     ChatAnnouncements.GuildHooks()
 
     local originalDeclineLFGReadyCheckNotification = DeclineLFGReadyCheckNotification
-    -- Hook DeclineLFGReadyCheckNotification to display the message that we are not in queue any longer + LFG activity join event.
-    DeclineLFGReadyCheckNotification = function ()
+    --- Hook DeclineLFGReadyCheckNotification to display the message that we are not in queue any longer + LFG activity join event.
+    function DeclineLFGReadyCheckNotification()
         originalDeclineLFGReadyCheckNotification()
 
         local message = (GetString(SI_LFGREADYCHECKCANCELREASON3))
