@@ -1944,18 +1944,21 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
     end
 
     -- Hijack the abilityId here if we have it in the override for extra bar highlights
-    if Effects.BarHighlightExtraId[abilityId] then
-        for k, v in pairs(Effects.BarHighlightExtraId) do
-            if k == abilityId then
-                abilityId = v
-                if Effects.IsGroundMineAura[abilityId] then
-                    -- This prevents debuffs from ground mines from not fading when mouseover is changed.
-                    g_toggledSlotsPlayer[abilityId] = nil
-                    if unitTag == "reticleover" then
-                        g_mineNoTurnOff[abilityId] = true
+    -- Only proceed with ability ID hijacking if FancyActionBar is not active
+    if not isFancyActionBarEnabled then
+        if Effects.BarHighlightExtraId[abilityId] then
+            for k, v in pairs(Effects.BarHighlightExtraId) do
+                if k == abilityId then
+                    abilityId = v
+                    if Effects.IsGroundMineAura[abilityId] then
+                        -- This prevents debuffs from ground mines from not fading when mouseover is changed.
+                        g_toggledSlotsPlayer[abilityId] = nil
+                        if unitTag == "reticleover" then
+                            g_mineNoTurnOff[abilityId] = true
+                        end
                     end
+                    break
                 end
-                break
             end
         end
     end
@@ -3336,6 +3339,9 @@ end
 ---
 --- @param slotNum integer
 function ActionBar.ShowCustomToggle(slotNum)
+    if isFancyActionBarEnabled then
+        return
+    end
     if not g_uiCustomToggle[slotNum] then
         -- Don't make a highlight frame for the backbar ultimate slot since it is not created
         if slotNum == (BAR_INDEX_END + BACKBAR_INDEX_OFFSET) then
