@@ -8139,7 +8139,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_DESCRIPTION,
+            type = LHAS.ST_SECTION,
             text = GetString(LUIE_STRING_LAM_CA_DISPLAY_DESCRIPTION)
         }
 
