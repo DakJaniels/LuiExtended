@@ -8584,7 +8584,7 @@ function ChatAnnouncements.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.Notify.NotificationMailSendCA = value
-                ChatAnnouncements.RegisterMailEvents()
+                ChatAnnouncements.Mail.RegisterEvents()
             end,
             default = Defaults.Notify.NotificationMailSendCA,
             disable = function ()
