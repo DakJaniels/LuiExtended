@@ -3978,16 +3978,16 @@ local function CompanionExperienceGainHook(companionId, previousLevel, previousE
         local companionName = GetCompanionName(companionId)
         local collectibleIcon = GetCollectibleIcon(GetCompanionCollectibleId(companionId))
 
-        if ChatAnnouncements.SV.Skill.SkillLevelCA then
-            local iconFormatted = ChatAnnouncements.SV.Skill.SkillIcon and ("|t16:16:" .. collectibleIcon .. "|t ") or ""
+        if ChatAnnouncements.SV.Skills.SkillLevelCA then
+            local iconFormatted = ChatAnnouncements.SV.Skills.SkillIcon and ("|t16:16:" .. collectibleIcon .. "|t ") or ""
             printToChat(zo_strformat("<<1>><<2>> <<3>>", iconFormatted, GetString(SI_COMPANION_LEVEL_UP_NOTIFICATION), companionName), true)
         end
 
-        if ChatAnnouncements.SV.Skill.SkillLevelAlert then
+        if ChatAnnouncements.SV.Skills.SkillLevelAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>> <<2>>", GetString(SI_COMPANION_LEVEL_UP_NOTIFICATION), companionName))
         end
 
-        if ChatAnnouncements.SV.Skill.SkillLevelCSA then
+        if ChatAnnouncements.SV.Skills.SkillLevelCSA then
             local secondaryTextLines = {}
             local COMPANION_NAME_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_UNIT_REACTION_COLOR, UNIT_REACTION_COLOR_COMPANION))
             table.insert(secondaryTextLines, zo_strformat(SI_COMPANION_LEVEL_UP_NAME_CSA, zo_iconFormat(collectibleIcon, "100%", "100%"), COMPANION_NAME_COLOR:Colorize(companionName)))
@@ -4003,7 +4003,7 @@ local function CompanionExperienceGainHook(companionId, previousLevel, previousE
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
 
-        if not ChatAnnouncements.SV.Skill.SkillLevelCSA then
+        if not ChatAnnouncements.SV.Skills.SkillLevelCSA then
             PlaySound(SOUNDS.LEVEL_UP)
         end
 
@@ -4016,15 +4016,15 @@ local function ForceRespecHook(respecType)
     local title = GetString("SI_RESPECTYPE_POINTSRESETTITLE", respecType)
     local description = GetString("SI_RESPECTYPE", respecType)
 
-    if ChatAnnouncements.SV.Skill.SkillPointsCA then
+    if ChatAnnouncements.SV.Skills.SkillPointsCA then
         printToChat(zo_strformat("<<1>>: <<2>>", title, description), true)
     end
 
-    if ChatAnnouncements.SV.Skill.SkillPointsAlert then
+    if ChatAnnouncements.SV.Skills.SkillPointsAlert then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", title, description))
     end
 
-    if ChatAnnouncements.SV.Skill.SkillPointsCSA then
+    if ChatAnnouncements.SV.Skills.SkillPointsCSA then
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
         messageParams:SetText(title, description)
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
@@ -4042,16 +4042,16 @@ local function CraftedAbilityResetHook(craftedAbilityId, totalNumReset, isLastRe
         local abilityName = craftedAbilityData:GetFormattedNameWithSkillLine()
         local icon = craftedAbilityData:GetIcon()
 
-        if ChatAnnouncements.SV.Skill.SkillPointsCA then
-            local iconFormatted = ChatAnnouncements.SV.Skill.SkillIcon and ("|t16:16:" .. icon .. "|t ") or ""
+        if ChatAnnouncements.SV.Skills.SkillPointsCA then
+            local iconFormatted = ChatAnnouncements.SV.Skills.SkillIcon and ("|t16:16:" .. icon .. "|t ") or ""
             printToChat(zo_strformat("<<1>><<2>>: <<3>>", iconFormatted, GetString(SI_CRAFTED_ABILITY_RESET_ANNOUNCE_TITLE), abilityName), true)
         end
 
-        if ChatAnnouncements.SV.Skill.SkillPointsAlert then
+        if ChatAnnouncements.SV.Skills.SkillPointsAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", GetString(SI_CRAFTED_ABILITY_RESET_ANNOUNCE_TITLE), abilityName))
         end
 
-        if ChatAnnouncements.SV.Skill.SkillPointsCSA then
+        if ChatAnnouncements.SV.Skills.SkillPointsCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
             messageParams:SetText(GetString(SI_CRAFTED_ABILITY_RESET_ANNOUNCE_TITLE), abilityName)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
@@ -4062,15 +4062,15 @@ local function CraftedAbilityResetHook(craftedAbilityId, totalNumReset, isLastRe
 
         return true
     elseif isLastReset then
-        if ChatAnnouncements.SV.Skill.SkillPointsCA then
+        if ChatAnnouncements.SV.Skills.SkillPointsCA then
             printToChat(zo_strformat("<<1>>: <<2>>", GetString(SI_CRAFTED_ABILITIES_RESET_ANNOUNCE_TITLE), zo_strformat(SI_CRAFTED_ABILITIES_RESET_ANNOUNCE_BODY, totalNumReset)), true)
         end
 
-        if ChatAnnouncements.SV.Skill.SkillPointsAlert then
+        if ChatAnnouncements.SV.Skills.SkillPointsAlert then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat("<<1>>: <<2>>", GetString(SI_CRAFTED_ABILITIES_RESET_ANNOUNCE_TITLE), zo_strformat(SI_CRAFTED_ABILITIES_RESET_ANNOUNCE_BODY, totalNumReset)))
         end
 
-        if ChatAnnouncements.SV.Skill.SkillPointsCSA then
+        if ChatAnnouncements.SV.Skills.SkillPointsCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
             messageParams:SetText(GetString(SI_CRAFTED_ABILITIES_RESET_ANNOUNCE_TITLE), zo_strformat(SI_CRAFTED_ABILITIES_RESET_ANNOUNCE_BODY, totalNumReset))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
