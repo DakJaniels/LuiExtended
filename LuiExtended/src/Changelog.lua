@@ -15,8 +15,13 @@ local changelogMessages =
     -- Version Header 7.1.4.5
     "|cFFA500LuiExtended Version 7.1.4.5|r",
     "",
+        -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t If using the LUIE ActionBar, you can now pick up and drag abilities between bars using mouse mode.",
+    "",
     -- Fixed
     "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Lua Error on Companion level up. Reported on Github. Thanks",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Proc sound for 5/10 stack of Merciless Resolve, 4/8 stack of Crystal Fragments now play.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Added a check to ActionBar.Castbar to prevent nil errors.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Fixed manifest so Minion 4 should now work correctly.",
