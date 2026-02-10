@@ -3814,7 +3814,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()
-                return not LUIE.SV.UnitFrames_Enabled
+                return not (LUIE.SV.UnitFrames_Enabled and LibGroupPotionCooldowns)
             end,
             default = Defaults.GroupPotionCooldowns.enabled,
         }
