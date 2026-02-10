@@ -15,9 +15,14 @@ local changelogMessages =
     -- Version Header 7.1.4.5
     "|cFFA500LuiExtended Version 7.1.4.5|r",
     "",
-        -- New
+    -- New
     "|cFFFF00New:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t If using the LUIE ActionBar, you can now pick up and drag abilities between bars using mouse mode.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t If using the LUIE ActionBar with back bar enabled, equipping OakenSoul or anything that overrides the player bars temporarly will hide the backbar.",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ActionBar module no longer creates highlight texture if FancyActionBar is enabled. Requested change due to double highlights.",
     "",
     -- Fixed
     "|cFFFF00Fix:|r",
