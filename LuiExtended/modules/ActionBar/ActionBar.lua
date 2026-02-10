@@ -126,7 +126,7 @@ local g_potionFont                                        -- Font for Potion Tim
 local g_ultimateFont                                      -- Font for Ultimate Percentage Label
 local g_castbarFont                                       -- Font for Castbar Label & Timer
 local g_ProcSound                                         -- Proc Sound
-local g_boundArmamentsPlayed = false                      -- Specific variable to lockout Bound Armaments/Grim Focus from playing a proc sound at 5 stacks to only once per 5 seconds.
+local g_boundArmamentsPlayed = nil                        -- Specific variable to lockout Bound Armaments/Grim Focus from playing a proc sound at 5 stacks to only once per 5 seconds.
 local g_disableProcSound = {}                             -- When we play a proc sound from a bar ability changing (like power lash) we put a 3 sec ICD on it so it doesn't spam when mousing on/off a target, etc
 local g_hotbarCategory = GetActiveHotbarCategory()        -- Set on initialization and when we swap weapons to determine the current hotbar category
 --- @type {[integer]:ActionButton}
@@ -1995,17 +1995,42 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
             ActionBar.BarHighlightSwap(abilityId)
         end
     else
-        -- Also create visual enhancements from skill bar
-        -- Handle proc sound for Bound Armaments
-        if abilityId == 130293 then
+        if Effects.IsGrimFocus[abilityId] then
             if ActionBar.SV.ShowTriggered and ActionBar.SV.ProcEnableSound then
-                if stackCount ~= 4 then
-                    g_boundArmamentsPlayed = false
+                if not g_boundArmamentsPlayed[abilityId] then
+                    g_boundArmamentsPlayed[abilityId] = {}
                 end
-                if stackCount == 4 and not g_boundArmamentsPlayed then
+
+                if (stackCount == 5 or stackCount == 10) and not g_boundArmamentsPlayed[abilityId][stackCount] then
                     PlaySound(g_ProcSound)
                     PlaySound(g_ProcSound)
-                    g_boundArmamentsPlayed = true
+                    g_boundArmamentsPlayed[abilityId][stackCount] = true
+                end
+
+                if stackCount < 5 then
+                    g_boundArmamentsPlayed[abilityId][5] = false
+                    g_boundArmamentsPlayed[abilityId][10] = false
+                elseif stackCount < 10 and stackCount > 5 then
+                    g_boundArmamentsPlayed[abilityId][10] = false
+                end
+            end
+        elseif Effects.IsBoundArmaments[abilityId] then
+            if ActionBar.SV.ShowTriggered and ActionBar.SV.ProcEnableSound then
+                if not g_boundArmamentsPlayed[abilityId] then
+                    g_boundArmamentsPlayed[abilityId] = {}
+                end
+
+                if (stackCount == 4 or stackCount == 8) and not g_boundArmamentsPlayed[abilityId][stackCount] then
+                    PlaySound(g_ProcSound)
+                    PlaySound(g_ProcSound)
+                    g_boundArmamentsPlayed[abilityId][stackCount] = true
+                end
+
+                if stackCount < 4 then
+                    g_boundArmamentsPlayed[abilityId][4] = false
+                    g_boundArmamentsPlayed[abilityId][8] = false
+                elseif stackCount < 8 and stackCount > 4 then
+                    g_boundArmamentsPlayed[abilityId][8] = false
                 end
             end
         end
