@@ -2188,7 +2188,7 @@ function SpellCastBuffs:OnVibration(duration, coarseMotor, fineMotor, leftTrigge
 end
 
 -- Helper function to get CC color
---- @param self table
+--- @param self LUIE.SpellCastBuffs
 --- @param ccType integer
 --- @return table
 local function getCCColor(self, ccType)
@@ -2209,7 +2209,7 @@ local function getCCColor(self, ccType)
 end
 
 -- Helper function to determine if effect is priority
---- @param self table
+--- @param self LUIE.SpellCastBuffs
 --- @param contextType string
 --- @param id integer
 --- @param abilityName string
@@ -2220,7 +2220,7 @@ local function isPriorityEffect(self, contextType, id, abilityName)
 end
 
 -- Determine fill color based on buff type and conditions
---- @param self table
+--- @param self LUIE.SpellCastBuffs
 --- @param contextType string
 --- @param id integer
 --- @param abilityName string
@@ -2250,7 +2250,7 @@ local function determineFillColor(self, contextType, id, abilityName, unbreakabl
 end
 
 -- Helper function to set progress bar colors
---- @param self table
+--- @param self LUIE.SpellCastBuffs
 --- @param buff table
 --- @param isDebuff boolean
 --- @param isPriority boolean
@@ -2269,7 +2269,7 @@ local function setProgressBarColors(self, buff, isDebuff, isPriority)
     buff.bar.bar:SetGradientColors(colors[1], colors[2], colors[3], 1, gradientColors[1], gradientColors[2], gradientColors[3], 1)
 end
 
---- @param self table
+--- @param self LUIE.SpellCastBuffs
 --- @param buff table
 --- @param buffType integer
 --- @param unbreakable integer
@@ -2363,6 +2363,13 @@ local function EaseOutQuad(t, b, c, d)
 end
 
 -- Helper to get sort iteration parameters
+---
+---@param self LUIE.SpellCastBuffs
+---@param container string
+---@param count integer
+---@return integer
+---@return integer
+---@return integer
 local function getSortIteration(self, container, count)
     local sortDir = self.sortDirection[container]
     if sortDir == "Right to Left" or sortDir == "Top to Bottom" then
@@ -2372,6 +2379,10 @@ local function getSortIteration(self, container, count)
 end
 
 -- Find control matching effect data in active objects
+---
+---@param activeObjects unknown
+---@param effect unknown
+---@return unknown
 local function findControlForEffect(activeObjects, effect)
     for _, control in pairs(activeObjects) do
         if control.data == effect then
@@ -2381,7 +2392,7 @@ local function findControlForEffect(activeObjects, effect)
     return nil
 end
 
---- @param self table
+--- @param self LUIE.SpellCastBuffs
 --- @param currentTimeMs number
 --- @param sortedList table
 --- @param container string
@@ -2416,7 +2427,7 @@ local function updateBar(self, currentTimeMs, sortedList, container)
 end
 
 -- Setup icon visual properties
---- @param self table
+--- @param self LUIE.SpellCastBuffs
 --- @param buffControl Control The buff icon control
 --- @param effect table The effect data
 local function SetupIcon(self, buffControl, effect)
@@ -2454,6 +2465,11 @@ local function setupBuffChildReferences(buff)
 end
 
 -- Setup prominent buff elements and anchoring
+---
+---@param self LUIE.SpellCastBuffs
+---@param buff unknown
+---@param container string
+---@param effect unknown
 local function setupProminentBuff(self, buff, container, effect)
     if (container ~= "prominentbuffs" and container ~= "prominentdebuffs") or buff.name then
         return
@@ -2477,6 +2493,10 @@ local function setupProminentBuff(self, buff, container, effect)
 end
 
 -- Configure prominent buff bar visibility and anchors
+---
+---@param self LUIE.SpellCastBuffs
+---@param buff unknown
+---@param container string
 local function configureProminentBuffBar(self, buff, container)
     if not buff.name or not buff.bar then
         return
@@ -2521,6 +2541,10 @@ local function configureProminentBuffBar(self, buff, container)
 end
 
 -- Get row increment direction for manual anchoring
+---
+---@param self LUIE.SpellCastBuffs
+---@param container string
+---@return integer
 local function getRowIncrement(self, container)
     if container == "player1" or container == "target1" then
         return 1
@@ -2539,6 +2563,16 @@ local function getRowIncrement(self, container)
 end
 
 -- Anchor buff icon based on container settings
+---
+---@param self LUIE.SpellCastBuffs
+---@param buff unknown
+---@param index unknown
+---@param prevControl nil
+---@param containerData unknown
+---@param container string
+---@param row integer
+---@param iconSize unknown
+---@param iconsNum integer
 local function anchorBuffIcon(self, buff, index, prevControl, containerData, container, row, iconSize, iconsNum)
     buff:ClearAnchors()
 
@@ -2568,6 +2602,15 @@ local function anchorBuffIcon(self, buff, index, prevControl, containerData, con
 end
 
 -- Anchor first icon in row for manual alignment
+---
+---@param self LUIE.SpellCastBuffs
+---@param buff unknown
+---@param containerData unknown
+---@param alignmentDir unknown
+---@param iconSize unknown
+---@param iconsNum integer
+---@param row integer
+---@param maxIcons unknown
 local function anchorFirstIconInRow(self, buff, containerData, alignmentDir, iconSize, iconsNum, row, maxIcons)
     buff:ClearAnchors()
 
@@ -2588,6 +2631,10 @@ local function anchorFirstIconInRow(self, buff, containerData, alignmentDir, ico
 end
 
 -- Setup buff cooldown animation
+---
+---@param buff unknown
+---@param effect unknown
+---@param remain unknown
 local function setupBuffCooldown(buff, effect, remain)
     if not effect.restart or not buff.cd or buff.cd:GetDuration() ~= 0 then
         return
@@ -2604,7 +2651,7 @@ local function setupBuffCooldown(buff, effect, remain)
     effect.restart = false
 end
 
---- @param self table
+--- @param self LUIE.SpellCastBuffs
 --- @param currentTimeMs number
 --- @param sortedList table
 --- @param container string
@@ -2769,7 +2816,7 @@ end
 
 
 -- Update duration for a single buff control
---- @param self table
+--- @param self LUIE.SpellCastBuffs
 --- @param buffControl Control The buff icon control
 --- @param currentTimeMs number Current time in milliseconds
 --- @param container string Container name
@@ -2825,7 +2872,7 @@ end
 
 -- Update durations and cooldowns for active icons
 -- This runs separately from updateIcons to update time-sensitive elements without releasing objects
---- @param self table
+--- @param self LUIE.SpellCastBuffs
 --- @param currentTimeMs number
 --- @param container string
 local function UpdateTime(self, currentTimeMs, container)
@@ -2839,6 +2886,10 @@ local function UpdateTime(self, currentTimeMs, container)
 end
 
 -- Helper function to sort buffs
+---
+---@param x any
+---@param y any
+---@return boolean
 local function buffSort(x, y)
     local xDuration = (x.ends == nil or x.dur == 0 or x.groundLabel or x.toggle) and 0 or x.dur
     local yDuration = (y.ends == nil or y.dur == 0 or y.groundLabel or y.toggle) and 0 or y.dur
@@ -2862,12 +2913,23 @@ local function buffSort(x, y)
 end
 
 -- Add effect to sorted buffer list
+---
+---@param buffsSorted table
+---@param sortedCounts table
+---@param container string|unknown|nil
+---@param effect unknown
 local function addToSortedList(buffsSorted, sortedCounts, container, effect)
     sortedCounts[container] = sortedCounts[container] + 1
     buffsSorted[container][sortedCounts[container]] = effect
 end
 
 -- Determine if effect should be shown based on settings and type
+---
+---@param self LUIE.SpellCastBuffs
+---@param effect unknown
+---@param container unknown
+---@return boolean
+---@return unknown
 local function shouldShowEffect(self, effect, container)
     if effect.target == "prominent" then
         return true, container
@@ -2897,6 +2959,7 @@ local function shouldShowEffect(self, effect, container)
 end
 
 -- Runs OnUpdate - 100 ms buffer
+---
 function SpellCastBuffs:OnUpdate()
     local currentFrameTimeMilliSeconds = GetFrameTimeMilliseconds()
     local containerRouting = self.containerRouting
