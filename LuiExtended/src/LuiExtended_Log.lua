@@ -6,122 +6,255 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
---- @class NOP
---- @field Debug fun(self: NOP, message: string, ...: any)
---- @field Info fun(self: NOP, message: string, ...: any)
---- @field Warn fun(self: NOP, message: string, ...: any)
---- @field Error fun(self: NOP, message: string, ...: any)
---- @field Verbose fun(self: NOP, message: string, ...: any)
-local NOP = {}
-
---- Debug logger function that does nothing
---- @param message string The message to log
---- @param ... any Additional values to format into message
-function NOP:Debug(message, ...)
-    df(message, ...)
-end
-
---- Info logger function that does nothing
---- @param message string The message to log
---- @param ... any Additional values to format into message
-function NOP:Info(message, ...)
-    df(message, ...)
-end
-
---- Warning logger function that does nothing
---- @param message string The message to log
---- @param ... any Additional values to format into message
-function NOP:Warn(message, ...)
-    df(message, ...)
-end
-
---- Error logger function that does nothing
---- @param message string The message to log
---- @param ... any Additional values to format into message
-function NOP:Error(message, ...)
-    df(message, ...)
-end
-
---- Verbose logger function that does nothing
---- @param message string The message to log
---- @param ... any Additional values to format into message
-function NOP:Verbose(message, ...)
-    df(message, ...)
-end
-
-local string_format = string.format
-
 -- Default log settings
 LUIE.log_to_chat = false
 LUIE.log_stack_traces = true
 
---- Retrieves the logger object
---- @return table|NOP logger The logger object
-function LUIE.Logger()
-    local self = LUIE
-    if not self.logger then
-        if LibDebugLogger then
-            self.logger = LibDebugLogger.Create(self.name)
-            self.logger:SetLogTracesOverride(LUIE.log_stack_traces)
+-- Deferred log processing (coroutine-based, no LibAsync)
+local log_queue = {}
+local log_processor_scheduled = false
+
+------------------------------
+--- Debugging              ---
+------------------------------
+LUIE.show_log = false
+if LUIE.IsDevDebugEnabled() then
+    LUIE.show_log = true
+end
+LUIE.loggerName = "LUIE"
+if LibDebugLogger then
+    -- LibDebugLogger.internal.verboseWhitelist[LUIE.loggerName] = true
+    LUIE.logger = LibDebugLogger.Create(LUIE.loggerName)
+end
+
+local logger
+local viewer
+if DebugLogViewer then
+    viewer = true
+else
+    viewer = false
+end
+if LibDebugLogger then
+    logger = true
+else
+    logger = false
+end
+
+local function create_log(log_type, log_content)
+    log_content = log_content or "[nil]"
+    if not viewer and log_type == "Info" then
+        CHAT_ROUTER:AddSystemMessage(log_content)
+        return
+    end
+    if logger and log_type == "Info" then
+        LUIE.logger:Info(log_content)
+    end
+    if not LUIE.show_log then return end
+    if logger and log_type == "Debug" then
+        LUIE.logger:Debug(log_content)
+    end
+    if logger and log_type == "Verbose" then
+        LUIE.logger:Verbose(log_content)
+    end
+    if logger and log_type == "Warn" then
+        LUIE.logger:Warn(log_content)
+    end
+end
+
+-- Persistent coroutine: pop one job, create_log, yield (driven by schedule below)
+local log_co = coroutine.create(function ()
+    while true do
+        local job = table.remove(log_queue, 1)
+        if job then
+            create_log(job[1], job[2] or "[nil]")
         end
-        if not self.logger then
-            self.logger = NOP
+        coroutine.yield()
+    end
+end)
+
+local function schedule_log_processor()
+    if log_processor_scheduled then return end
+    log_processor_scheduled = true
+    local eventManager = GetEventManager()
+    eventManager:RegisterForPostEffectsUpdate("LUIE_LogProcessor", 0, function ()
+        eventManager:UnregisterForPostEffectsUpdate("LUIE_LogProcessor")
+        coroutine.resume(log_co)
+        log_processor_scheduled = false
+        if #log_queue > 0 then
+            schedule_log_processor()
+        end
+    end)
+end
+
+local function emit_message(log_type, text)
+    if text == "" then
+        text = "[Empty String]"
+    elseif text == nil then
+        text = "[nil]"
+    end
+    table.insert(log_queue, { log_type, text })
+    schedule_log_processor()
+end
+
+local function emit_userdata(log_type, udata)
+    local function_limit = 10 -- max functions to list
+    local total_limit = 20    -- max total entries (functions + non-functions)
+    local function_count = 0
+    local entry_count = 0
+
+    local function emit(msg)
+        emit_message(log_type, msg)
+    end
+
+    local function try(label, obj, fn)
+        local ok, res = pcall(fn, obj)
+        if ok and res ~= nil then
+            emit("  " .. label .. ": " .. tostring(res))
         end
     end
-    return self.logger
-end
 
-local LUIE_LOGGER = LUIE.Logger()
+    emit("Userdata: " .. tostring(udata))
 
---- Logs a message with a specified color
---- @param color string The color code for the log message
---- @param ... any Variable number of arguments to be formatted and logged
-function LUIE.Log(color, ...)
-    if LUIE.log_to_chat then
-        local message = LUIE.name .. ": "
-        if select("#", ...) > 0 then
-            message = message .. string_format(...)
+    -- Quick, high-signal probes
+    if type(udata) == "userdata" then
+        if udata.GetName then
+            try("GetName", udata, udata.GetName)
         end
-        CHAT_ROUTER:AddSystemMessage("|c" .. color .. message .. "|r")
+        if udata.GetParent then
+            try("Parent", udata, function (o)
+                local p = o:GetParent()
+                return p and p:GetName()
+            end)
+        end
+        if udata.GetOwningWindow then
+            try("Owner", udata, function (o)
+                local w = o:GetOwningWindow()
+                return w and w:GetName()
+            end)
+        end
+        if udata.GetType then
+            try("Type", udata, udata.GetType)
+        end
+    end
+
+    -- Metatable introspection with limits
+    local meta = getmetatable(udata)
+    if not meta then
+        emit("  (No metatable)")
+        return
+    end
+
+    emit("  (metatable present)")
+    local idx = meta.__index
+    if type(idx) ~= "table" then
+        emit("  __index is " .. type(idx))
+        return
+    end
+
+    for k, v in pairs(idx) do
+        if type(v) == "function" then
+            if function_count < function_limit and entry_count < total_limit then
+                emit("  Function: " .. tostring(k))
+                function_count = function_count + 1
+                entry_count = entry_count + 1
+            end
+        else
+            if entry_count < total_limit then
+                emit("  " .. tostring(k) .. ": " .. tostring(v))
+                entry_count = entry_count + 1
+            end
+        end
+
+        if entry_count >= total_limit then
+            emit("  ... (output truncated due to limit)")
+            break
+        end
     end
 end
 
---- Logs a debug message
---- @param message string The message to log
---- @param ... any Additional values to format into message
-function LUIE.Debug(message, ...)
-    LUIE.Log("666666", ...)
-    LUIE_LOGGER:Debug(message, ...)
+local function emit_table(log_type, t, indent, table_history)
+    indent = indent or "."
+    table_history = table_history or {}
+
+    if t == nil then
+        emit_message(log_type, indent .. "[Nil Table]")
+        return
+    end
+    if next(t) == nil then
+        emit_message(log_type, indent .. "[Empty Table]")
+        return
+    end
+    if table_history[t] then
+        emit_message(log_type, indent .. "[Cycle Detected]")
+        return
+    end
+    table_history[t] = true
+
+    for k, v in pairs(t) do
+        local vt = type(v)
+        if vt == "table" then
+            emit_message(log_type, indent .. "(table): " .. tostring(k) .. " = {")
+            emit_table(log_type, v, indent .. "  ", table_history)
+            emit_message(log_type, indent .. "}")
+        elseif vt == "userdata" then
+            emit_message(log_type, indent .. "(userdata): " .. tostring(k) .. " = " .. tostring(v))
+            emit_userdata(log_type, v)
+        else
+            emit_message(log_type, indent .. "(" .. vt .. "): " .. tostring(k) .. " = " .. tostring(v))
+        end
+    end
 end
 
---- Logs an info message
---- @param message string The message to log
---- @param ... any Additional values to format into message
-function LUIE.Info(message, ...)
-    LUIE.Log("999999", ...)
-    LUIE_LOGGER:Info(message, ...)
+local function contains_placeholders(str)
+    return type(str) == "string" and str:find("<<%d+>>")
 end
 
---- Logs a warning message
---- @param message string The message to log
---- @param ... any Additional values to format into message
-function LUIE.Warn(message, ...)
-    LUIE.Log("FF8800", ...)
-    LUIE_LOGGER:Warn(message, ...)
-end
+function LUIE:Log(log_type, ...)
+    if not LUIE.show_log then
+        if log_type == "Info" then
+        else
+            -- Exit early if show_log is false and log_type is not "Info"
+            return
+        end
+    end
 
---- Logs an error message
---- @param message string The message to log
---- @param ... any Additional values to format into message
-function LUIE.Error(message, ...)
-    LUIE.Log("FF6666", ...)
-    LUIE_LOGGER:Error(message, ...)
-end
+    local num_args = select("#", ...)
+    local first_arg = select(1, ...) -- The first argument is always the message string
 
---- Logs a verbose message
---- @param message string The message to log
---- @param ... any Additional values to format into message
-function LUIE.Verbose(message, ...)
-    LUIE.Log("777575", ...)
-    LUIE_LOGGER:Verbose(message, ...)
+    -- Check if the first argument is a string with placeholders
+    if type(first_arg) == "string" and contains_placeholders(first_arg) then
+        -- Extract any remaining arguments for zo_strformat (after the message string)
+        local remaining_args = { select(2, ...) }
+
+        -- Format the string with the remaining arguments
+        local formatted_value = ZO_CachedStrFormat(first_arg, unpack(remaining_args))
+
+        -- Emit the formatted message
+        emit_message(log_type, formatted_value)
+
+        -- Also emit any remaining arguments (userdata, tables, etc.)
+        for i = 1, #remaining_args do
+            local value = remaining_args[i]
+            if type(value) == "userdata" then
+                emit_userdata(log_type, value)
+            elseif type(value) == "table" then
+                emit_table(log_type, value)
+            elseif value ~= nil then
+                emit_message(log_type, tostring(value))
+            end
+        end
+        return
+    end
+
+    -- Process other argument types (userdata, tables, etc.)
+    for i = 1, num_args do
+        local value = select(i, ...)
+        if type(value) == "userdata" then
+            emit_userdata(log_type, value)
+        elseif type(value) == "table" then
+            emit_table(log_type, value)
+        else
+            emit_message(log_type, tostring(value))
+        end
+    end
 end

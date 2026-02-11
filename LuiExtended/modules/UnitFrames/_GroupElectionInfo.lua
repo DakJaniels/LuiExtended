@@ -99,7 +99,7 @@ function UnitFrames.RefreshElectionIcon(control, unitTag)
         icon = control.electionIcon
         if not icon then
             -- Still nil? Bail out, nothing to do
-            LUIE.Debug("electionIcon was NIL!")
+            LUIE:Log("Debug", "electionIcon was NIL!")
             return
         end
     end

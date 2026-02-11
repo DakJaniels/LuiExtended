@@ -727,7 +727,7 @@ function SynergyTracker:CleanupCorruptedCooldownGroups()
     ZO_ClearTable(Settings.cooldownGroups)
 
     if oldCount > 0 and LUIE.IsDevDebugEnabled() then
-        LUIE.Debug("Cleared %d old cooldown groups", oldCount)
+        LUIE:Log("Debug", "Cleared %d old cooldown groups", oldCount)
     end
 end
 
