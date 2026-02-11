@@ -9,7 +9,7 @@
 ## ConsoleDependsOn: LibHarvensAddonSettings>=20102 LibCombatAlerts LibConsoleDialogs
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705 CrutchAlerts>=20502
 ## OptionalDependsOn: LibGroupResources>=91 LibGroupCombatStats>=20251011 LibGroupPotionCooldowns>=20250727
-## OptionalDependsOn: LibDebugLogger>=268 DolgubonsLazyWritCreator>=4038 LibLazyCrafting>=4028 LootLog>=408040
+## OptionalDependsOn: LibDebugLogger>=268 DebugLogViewer>=697 DolgubonsLazyWritCreator>=4038 LibLazyCrafting>=4028 LootLog>=408040
 ## SavedVariables: LUIESV
 
 # callLater
