@@ -1439,7 +1439,7 @@ end
 local setupFont = function (fontNameKey, fontStyleKey, fontSizeKey, defaultFontStyle, defaultFontSize)
     local fontName = LUIE.Fonts[ActionBar.SV[fontNameKey]]
     if not fontName or fontName == "" then
-        LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
+        LUIE:Log("Debug", GetString(LUIE_STRING_ERROR_FONT))
         fontName = "LUIE Default Font"
     end
     local fontStyle = ActionBar.SV[fontStyleKey] or defaultFontStyle

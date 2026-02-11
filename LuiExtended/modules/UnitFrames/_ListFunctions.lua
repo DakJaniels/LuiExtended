@@ -19,7 +19,7 @@ function UnitFrames.AddCurrentPetsToCustomList(list)
             local unitName = GetUnitName(unitTag)
             if unitName ~= "" and unitName ~= nil then
                 if LUIE.IsDevDebugEnabled() then
-                    LUIE.Debug(unitName)
+                    LUIE:Log("Debug", unitName)
                 end
                 UnitFrames.AddToCustomList(list, unitName)
             end

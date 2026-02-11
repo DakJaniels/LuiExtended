@@ -7,7 +7,6 @@
 local LUIE = LUIE
 
 local printToChat = LUIE.PrintToChat
-local Debug = LUIE.Debug
 
 local LuiData = LuiData
 --- @type Data

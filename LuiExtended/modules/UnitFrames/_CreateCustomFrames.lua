@@ -27,7 +27,7 @@ local function CreateRegenAnimation(parent, anchors, dims, alpha, number)
     local config = animConfigs[number]
     if not config then
         if LUIE.IsDevDebugEnabled() then
-            LUIE.Error("[LUIE] CreateRegenAnimation: Invalid animation number '" .. tostring(number) .. "'.")
+            LUIE:Log("Error", "[LUIE] CreateRegenAnimation: Invalid animation number '" .. tostring(number) .. "'.")
         end
         return nil
     end
@@ -67,7 +67,7 @@ local function CreateRegenAnimation(parent, anchors, dims, alpha, number)
     end
 
     if LUIE.IsDevDebugEnabled() then
-        LUIE.Error("[LUIE] CreateRegenAnimation: No valid anchors found for animation.")
+        LUIE:Log("Error", "[LUIE] CreateRegenAnimation: No valid anchors found for animation.")
     end
     return nil
 end
@@ -436,7 +436,7 @@ local function CreateSmallGroupFrames()
             local libGroupContainer = control:GetNamedChild("_LibGroupContainer")
             if not libGroupContainer then
                 if LUIE.IsDevDebugEnabled() then
-                    LUIE.Error("[LUIE] CreateSmallGroupFrames: Failed to get _LibGroupContainer for " .. unitTag)
+                    LUIE:Log("Error", "[LUIE] CreateSmallGroupFrames: Failed to get _LibGroupContainer for " .. unitTag)
                 end
             end
 

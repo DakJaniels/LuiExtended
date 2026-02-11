@@ -1645,7 +1645,7 @@ function SpellCastBuffs:ApplyFont()
     -- Font setup for standard Buffs & Debuffs
     local fontName = LUIE.Fonts[self.SV.BuffFontFace]
     if not fontName or fontName == "" then
-        LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
+        LUIE:Log("Debug", GetString(LUIE_STRING_ERROR_FONT))
         fontName = "LUIE Default Font"
     end
     local fontStyle = self.SV.BuffFontStyle
@@ -1655,7 +1655,7 @@ function SpellCastBuffs:ApplyFont()
     -- Font Setup for Prominent Buffs & Debuffs
     local prominentName = LUIE.Fonts[self.SV.ProminentLabelFontFace]
     if not prominentName or prominentName == "" then
-        LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
+        LUIE:Log("Debug", GetString(LUIE_STRING_ERROR_FONT))
         prominentName = "LUIE Default Font"
     end
     local prominentStyle = self.SV.ProminentLabelFontStyle

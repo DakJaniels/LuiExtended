@@ -820,7 +820,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
         if AlertsZone[abilityId][zoneName] then
             unitName = AlertsZone[abilityId][zoneName]
             if LUIE.IsDevDebugEnabled() then
-                LUIE.Debug([[Zone Name Override:
+                LUIE:Log("Debug", [[Zone Name Override:
     Location: %s
     Unit Name: %s
     Ability ID: %d]], zoneName, unitName, abilityId)
@@ -828,7 +828,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
         elseif AlertsZone[abilityId][index] then
             unitName = AlertsZone[abilityId][index]
             if LUIE.IsDevDebugEnabled() then
-                LUIE.Debug([[Zone ID Override:
+                LUIE:Log("Debug", [[Zone ID Override:
     Zone ID: %d
     Unit Name: %s
     Ability ID: %d]], index, unitName, abilityId)
@@ -842,7 +842,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
         if AlertsMap[abilityId][mapName] then
             unitName = AlertsMap[abilityId][mapName]
             if LUIE.IsDevDebugEnabled() then
-                LUIE.Debug([[Map Name Override:
+                LUIE:Log("Debug", [[Map Name Override:
     Map: %s
     Unit Name: %s
     Ability ID: %d]], mapName, unitName, abilityId)
@@ -858,7 +858,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
                 if bossName == Alerts[abilityId].bossMatch[x] then
                     unitName = Alerts[abilityId].bossMatch[x]
                     if LUIE.IsDevDebugEnabled() then
-                        LUIE.Debug([[Boss Name Match:
+                        LUIE:Log("Debug", [[Boss Name Match:
     Boss Name: %s
     Boss Index: %d
     Match Index: %d
@@ -875,7 +875,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
             if AlertsConvert[abilityId][bossName] then
                 unitName = AlertsConvert[abilityId][bossName]
                 if LUIE.IsDevDebugEnabled() then
-                    LUIE.Debug([[Boss Add Conversion:
+                    LUIE:Log("Debug", [[Boss Add Conversion:
     Original Boss: %s
     Converted Name: %s
     Boss Index: %d
@@ -890,7 +890,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
         if savedName ~= "" and savedName ~= nil then
             unitName = savedName
             if LUIE.IsDevDebugEnabled() then
-                LUIE.Debug([[Name Override Prevented:
+                LUIE:Log("Debug", [[Name Override Prevented:
     Original Name: %s
     Ability ID: %d
     Override Type: noForcedNameOverride]], savedName, abilityId)
@@ -1427,7 +1427,7 @@ function AbilityAlerts.ApplyFontAlert()
     -- Setup Alerts Font
     local alertFontName = LUIE.Fonts[CombatInfo.SV.alerts.toggles.alertFontFace]
     if not alertFontName or alertFontName == "" then
-        LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
+        LUIE:Log("Debug", GetString(LUIE_STRING_ERROR_FONT))
         alertFontName = "LUIE Default Font"
     end
 

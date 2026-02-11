@@ -7,7 +7,6 @@
 local LUIE = LUIE
 
 local printToChat = LUIE.PrintToChat
-local Debug = LUIE.Debug
 
 local LuiData = LuiData
 --- @type Data
@@ -1146,7 +1145,7 @@ function ChatAnnouncements.ActivityStatusUpdate(eventId, result)
     -- Debug
     if result == ACTIVITY_FINDER_STATUS_FORMING_GROUP and ChatAnnouncements.savedQueueValue ~= ACTIVITY_FINDER_STATUS_FORMING_GROUP then
         if LUIE.IsDevDebugEnabled() then
-            LUIE.Debug("Old ACTIVITY_FINDER_STATUS_FORMING_GROUP event triggered")
+            LUIE:Log("Debug", "Old ACTIVITY_FINDER_STATUS_FORMING_GROUP event triggered")
         end
     end
 
@@ -1415,6 +1414,437 @@ function ChatAnnouncements.OnLootUpdated(eventId)
     eventManager:RegisterForUpdate(moduleName .. "ResetContainer", 150, ResetContainerRecentlyOpened)
 end
 
+local CURRENCY_CONFIGS =
+{
+    [CURT_MONEY] =
+    {
+        enabled = "CurrencyGoldChange",
+        color = "CurrencyGoldColorize",
+        name = "CurrencyGoldName",
+        total = "CurrencyGoldShowTotal",
+        messageTotal = "CurrencyMessageTotalGold",
+    },
+    [CURT_ALLIANCE_POINTS] =
+    {
+        enabled = "CurrencyAPShowChange",
+        color = "CurrencyAPColorize",
+        name = "CurrencyAPName",
+        total = "CurrencyAPShowTotal",
+        messageTotal = "CurrencyMessageTotalAP",
+    },
+    [CURT_TELVAR_STONES] =
+    {
+        enabled = "CurrencyTVChange",
+        color = "CurrencyTVColorize",
+        name = "CurrencyTVName",
+        total = "CurrencyTVShowTotal",
+        messageTotal = "CurrencyMessageTotalTV",
+    },
+    [CURT_WRIT_VOUCHERS] =
+    {
+        enabled = "CurrencyWVChange",
+        color = "CurrencyWVColorize",
+        name = "CurrencyWVName",
+        total = "CurrencyWVShowTotal",
+        messageTotal = "CurrencyMessageTotalWV",
+    },
+    [CURT_STYLE_STONES] =
+    {
+        enabled = "CurrencyOutfitTokenChange",
+        color = "CurrencyOutfitTokenColorize",
+        name = "CurrencyOutfitTokenName",
+        total = "CurrencyOutfitTokenShowTotal",
+        messageTotal = "CurrencyMessageTotalOutfitToken",
+    },
+    [CURT_CHAOTIC_CREATIA] =
+    {
+        enabled = "CurrencyTransmuteChange",
+        color = "CurrencyTransmuteColorize",
+        name = "CurrencyTransmuteName",
+        total = "CurrencyTransmuteShowTotal",
+        messageTotal = "CurrencyMessageTotalTransmute",
+    },
+    [CURT_EVENT_TICKETS] =
+    {
+        enabled = "CurrencyEventChange",
+        color = "CurrencyEventColorize",
+        name = "CurrencyEventName",
+        total = "CurrencyEventShowTotal",
+        messageTotal = "CurrencyMessageTotalEvent",
+    },
+    [CURT_UNDAUNTED_KEYS] =
+    {
+        enabled = "CurrencyUndauntedChange",
+        color = "CurrencyUndauntedColorize",
+        name = "CurrencyUndauntedName",
+        total = "CurrencyUndauntedShowTotal",
+        messageTotal = "CurrencyMessageTotalUndaunted",
+    },
+    [CURT_CROWNS] =
+    {
+        enabled = "CurrencyCrownsChange",
+        color = "CurrencyCrownsColorize",
+        name = "CurrencyCrownsName",
+        total = "CurrencyCrownsShowTotal",
+        messageTotal = "CurrencyMessageTotalCrowns",
+    },
+    [CURT_CROWN_GEMS] =
+    {
+        enabled = "CurrencyCrownGemsChange",
+        color = "CurrencyCrownGemsColorize",
+        name = "CurrencyCrownGemsName",
+        total = "CurrencyCrownGemsShowTotal",
+        messageTotal = "CurrencyMessageTotalCrownGems",
+    },
+    [CURT_ENDEAVOR_SEALS] =
+    {
+        enabled = "CurrencyEndeavorsChange",
+        color = "CurrencyEndeavorsColorize",
+        name = "CurrencyEndeavorsName",
+        total = "CurrencyEndeavorsShowTotal",
+        messageTotal = "CurrencyMessageTotalEndeavors",
+    },
+    [CURT_ENDLESS_DUNGEON] =
+    {
+        enabled = "CurrencyEndlessChange",
+        color = "CurrencyEndlessColorize",
+        name = "CurrencyEndlessName",
+        total = "CurrencyEndlessShowTotal",
+        messageTotal = "CurrencyMessageTotalEndless",
+        iconType = CURT_ARCHIVAL_FORTUNES,
+    },
+}
+
+local AP_THROTTLE_REASONS =
+{
+    [CURRENCY_CHANGE_REASON_KILL] = true,
+    [CURRENCY_CHANGE_REASON_KEEP_REPAIR] = true,
+    [CURRENCY_CHANGE_REASON_PVP_RESURRECT] = true,
+}
+
+local TV_THROTTLE_REASONS =
+{
+    [CURRENCY_CHANGE_REASON_LOOT] = true,
+    [CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER] = true,
+}
+
+local DEBUG_REASON_SET =
+{
+    [CURRENCY_CHANGE_REASON_ACTION] = true,
+    [CURRENCY_CHANGE_REASON_KEEP_UPGRADE] = true,
+    [CURRENCY_CHANGE_REASON_DEPRECATED_0] = true,
+    [CURRENCY_CHANGE_REASON_DEPRECATED_2] = true,
+    [CURRENCY_CHANGE_REASON_SOUL_HEAL] = true,
+    [CURRENCY_CHANGE_REASON_CASH_ON_DELIVERY] = true,
+    [CURRENCY_CHANGE_REASON_ABILITY_UPGRADE_PURCHASE] = true,
+    [CURRENCY_CHANGE_REASON_DEPRECATED_1] = true,
+    [CURRENCY_CHANGE_REASON_STABLESPACE] = true,
+    [CURRENCY_CHANGE_REASON_ACHIEVEMENT] = true,
+    [CURRENCY_CHANGE_REASON_TRAIT_REVEAL] = true,
+    [CURRENCY_CHANGE_REASON_REFORGE] = true,
+    [CURRENCY_CHANGE_REASON_RECIPE] = true,
+    [CURRENCY_CHANGE_REASON_CONSUME_FOOD_DRINK] = true,
+    [CURRENCY_CHANGE_REASON_CONSUME_POTION] = true,
+    [CURRENCY_CHANGE_REASON_HARVEST_REAGENT] = true,
+    [CURRENCY_CHANGE_REASON_RESEARCH_TRAIT] = true,
+    [CURRENCY_CHANGE_REASON_GUILD_TABARD] = true,
+    [CURRENCY_CHANGE_REASON_GUILD_FORWARD_CAMP] = true,
+    [CURRENCY_CHANGE_REASON_BANK_FEE] = true,
+    [CURRENCY_CHANGE_REASON_CHARACTER_UPGRADE] = true,
+    [CURRENCY_CHANGE_REASON_TRIBUTE] = true,
+}
+
+local REASON_MESSAGE_KEYS =
+{
+    [CURRENCY_CHANGE_REASON_QUESTREWARD] = "CurrencyMessageReceive",
+    [CURRENCY_CHANGE_REASON_DECONSTRUCT] = "CurrencyMessageReceive",
+    [CURRENCY_CHANGE_REASON_MEDAL] = "CurrencyMessageReceive",
+    [CURRENCY_CHANGE_REASON_TRADINGHOUSE_REFUND] = "CurrencyMessageReceive",
+    [CURRENCY_CHANGE_REASON_JUMP_FAILURE_REFUND] = "CurrencyMessageReceive",
+    [CURRENCY_CHANGE_REASON_CONVERSATION] = "CurrencyMessagePay",
+    [CURRENCY_CHANGE_REASON_EDIT_GUILD_HERALDRY] = "CurrencyMessageSpend",
+    [CURRENCY_CHANGE_REASON_GUILD_TABARD] = "CurrencyMessageSpend",
+    [CURRENCY_CHANGE_REASON_TRAVEL_GRAVEYARD] = "CurrencyMessageWayshrine",
+    [CURRENCY_CHANGE_REASON_CRAFT] = "CurrencyMessageUse",
+    [CURRENCY_CHANGE_REASON_RECONSTRUCTION] = "CurrencyMessageUse",
+    [CURRENCY_CHANGE_REASON_ENDLESS_DUNGEON_VISION_REROLL] = "CurrencyMessageUse",
+    [CURRENCY_CHANGE_REASON_VENDOR_REPAIR] = "CurrencyMessageRepair",
+    [CURRENCY_CHANGE_REASON_STUCK] = "CurrencyMessageUnstuck",
+    [CURRENCY_CHANGE_REASON_BOUNTY_PAID_FENCE] = "CurrencyMessageBounty",
+    [CURRENCY_CHANGE_REASON_KEEP_REPAIR] = "CurrencyMessageEarn",
+    [CURRENCY_CHANGE_REASON_PVP_RESURRECT] = "CurrencyMessageEarn",
+    [CURRENCY_CHANGE_REASON_OFFENSIVE_KEEP_REWARD] = "CurrencyMessageEarn",
+    [CURRENCY_CHANGE_REASON_DEFENSIVE_KEEP_REWARD] = "CurrencyMessageEarn",
+    [CURRENCY_CHANGE_REASON_ANTIQUITY_REWARD] = "CurrencyMessageExcavate",
+    [CURRENCY_CHANGE_REASON_BANK_DEPOSIT] = "CurrencyMessageDeposit",
+    [CURRENCY_CHANGE_REASON_GUILD_BANK_DEPOSIT] = "CurrencyMessageDepositGuild",
+    [CURRENCY_CHANGE_REASON_BANK_WITHDRAWAL] = "CurrencyMessageWithdraw",
+    [CURRENCY_CHANGE_REASON_GUILD_BANK_WITHDRAWAL] = "CurrencyMessageWithdrawGuild",
+    [CURRENCY_CHANGE_REASON_PICKPOCKET] = "CurrencyMessagePickpocket",
+    [CURRENCY_CHANGE_REASON_LOOT] = "CurrencyMessageLoot",
+    [CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER] = "CurrencyMessageLoot",
+    [CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER] = "CurrencyMessageLoot",
+    [CURRENCY_CHANGE_REASON_LOOT_STOLEN] = "CurrencyMessageSteal",
+    [CURRENCY_CHANGE_REASON_DEATH] = "CurrencyMessageLost",
+    [CURRENCY_CHANGE_REASON_CROWN_CRATE_DUPLICATE] = "CurrencyMessageReceive",
+    [CURRENCY_CHANGE_REASON_ITEM_CONVERTED_TO_GEMS] = "CurrencyMessageReceive",
+    [CURRENCY_CHANGE_REASON_CROWNS_PURCHASED] = "CurrencyMessageReceive",
+    [CURRENCY_CHANGE_REASON_PURCHASED_WITH_ENDEAVOR_SEALS] = "CurrencyMessageSpend",
+}
+
+local function SavePurchaseData(changeType, formattedValue, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageTotal)
+    local saved = ChatAnnouncements.savedPurchase
+    saved.changeType = changeType
+    saved.formattedValue = formattedValue
+    saved.currencyTypeColor = currencyTypeColor
+    saved.currencyIcon = currencyIcon
+    saved.currencyName = currencyName
+    saved.currencyTotal = currencyTotal
+    saved.messageTotal = messageTotal
+end
+
+local function SavePurchaseIfEnabled(context)
+    if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
+        SavePurchaseData(context.changeType, context.formattedValue, context.currencyTypeColor, context.currencyIcon, context.currencyName, context.currencyTotal, context.messageTotal)
+        return true
+    end
+    return false
+end
+
+local function HandleCurrencyThrottleAndFilter(currencyType, reason, delta)
+    local svCurrency = ChatAnnouncements.SV.Currency
+
+    if currencyType == CURT_MONEY then
+        if svCurrency.CurrencyGoldThrottle and (reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_KILL) then
+            LUIE_callLater(ChatAnnouncements.CurrencyGoldThrottlePrinter, 50)
+            ChatAnnouncements.currencyGoldThrottleValue = ChatAnnouncements.currencyGoldThrottleValue + delta
+            ChatAnnouncements.currencyGoldThrottleTotal = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+            return true
+        end
+        if svCurrency.CurrencyGoldFilter > 0 and (reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_KILL) and delta < svCurrency.CurrencyGoldFilter then
+            return true
+        end
+        return false
+    end
+
+    if currencyType == CURT_ALLIANCE_POINTS then
+        if svCurrency.CurrencyAPThrottle > 0 and AP_THROTTLE_REASONS[reason] then
+            eventManager:UnregisterForUpdate(moduleName .. "BufferedAP")
+            eventManager:RegisterForUpdate(moduleName .. "BufferedAP", svCurrency.CurrencyAPThrottle, ChatAnnouncements.CurrencyAPThrottlePrinter)
+            ChatAnnouncements.currencyAPThrottleValue = ChatAnnouncements.currencyAPThrottleValue + delta
+            ChatAnnouncements.currencyAPThrottleTotal = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
+            return true
+        end
+        if svCurrency.CurrencyAPFilter > 0 and AP_THROTTLE_REASONS[reason] and delta < svCurrency.CurrencyAPFilter then
+            return true
+        end
+        if svCurrency.CurrencyAPThrottle > 0 and not AP_THROTTLE_REASONS[reason] then
+            ChatAnnouncements.CurrencyAPThrottlePrinter()
+        end
+        return false
+    end
+
+    if currencyType == CURT_TELVAR_STONES then
+        if svCurrency.CurrencyTVThrottle > 0 and TV_THROTTLE_REASONS[reason] and not ChatAnnouncements.containerRecentlyOpened then
+            eventManager:UnregisterForUpdate(moduleName .. "BufferedTV")
+            eventManager:RegisterForUpdate(moduleName .. "BufferedTV", svCurrency.CurrencyTVThrottle, ChatAnnouncements.CurrencyTVThrottlePrinter)
+            ChatAnnouncements.currencyTVThrottleValue = ChatAnnouncements.currencyTVThrottleValue + delta
+            ChatAnnouncements.currencyTVThrottleTotal = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
+            return true
+        end
+        if svCurrency.CurrencyTVFilter > 0 and TV_THROTTLE_REASONS[reason] and delta < svCurrency.CurrencyTVFilter then
+            return true
+        end
+        if svCurrency.CurrencyTVThrottle > 0 and not TV_THROTTLE_REASONS[reason] then
+            ChatAnnouncements.CurrencyTVThrottlePrinter()
+        end
+        return false
+    end
+
+    return false
+end
+
+local function BuildCurrencyDisplay(config, currencyType, delta)
+    local svCurrency = ChatAnnouncements.SV.Currency
+    local iconType = config.iconType or currencyType
+    local currencyTypeColor = ChatAnnouncements.Colors[config.color]:ToHex()
+    local currencyIcon = svCurrency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(iconType), 16, 16) or ""
+    local currencyName = zo_strformat(svCurrency[config.name], delta)
+    local currencyTotal = svCurrency[config.total]
+    local messageTotal = svCurrency[config.messageTotal]
+    return currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageTotal
+end
+
+local function ResolveMessageByReason(context)
+    local svContext = ChatAnnouncements.SV.ContextMessages
+    local reason = context.reason
+    local delta = context.delta
+
+    if reason == CURRENCY_CHANGE_REASON_VENDOR then
+        context.messageChange = delta > 0 and svContext.CurrencyMessageReceive or svContext.CurrencyMessageSpend
+        if SavePurchaseIfEnabled(context) then
+            return true
+        end
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_BUYBACK then
+        context.messageChange = svContext.CurrencyMessageSpend
+        if SavePurchaseIfEnabled(context) then
+            return true
+        end
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_SELL_STOLEN then
+        context.messageChange = svContext.CurrencyMessageReceive
+        if SavePurchaseIfEnabled(context) then
+            return true
+        end
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_TRADINGHOUSE_LISTING then
+        if ChatAnnouncements.SV.Currency.CurrencyGoldHideListingAH then
+            return true
+        end
+        SavePurchaseData(context.changeType, context.formattedValue, context.currencyTypeColor, context.currencyIcon, context.currencyName, context.currencyTotal, context.messageTotal)
+        return true
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_VENDOR_LAUNDER then
+        context.messageChange = svContext.CurrencyMessageSpend
+        if SavePurchaseIfEnabled(context) then
+            return true
+        end
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_TRADINGHOUSE_PURCHASE then
+        if ChatAnnouncements.SV.Currency.CurrencyGoldHideAH then
+            return true
+        end
+        context.messageChange = svContext.CurrencyMessageSpend
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_TRADE then
+        local tradeTarget = ChatAnnouncements.tradeTarget or ""
+        if delta > 0 then
+            context.messageChange = tradeTarget ~= "" and svContext.CurrencyMessageTradeIn or svContext.CurrencyMessageTradeInNoName
+        else
+            context.messageChange = tradeTarget ~= "" and svContext.CurrencyMessageTradeOut or svContext.CurrencyMessageTradeOutNoName
+        end
+        if tradeTarget ~= "" then
+            context.messageType = "LUIE_CURRENCY_TRADE"
+        end
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_MAIL then
+        if delta > 0 then
+            local mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
+            ChatAnnouncements.currentMailSender = mailSender
+            context.messageChange = mailSender ~= "" and svContext.CurrencyMessageMailIn or svContext.CurrencyMessageMailInNoName
+            if mailSender ~= "" then
+                context.messageType = "LUIE_CURRENCY_MAIL"
+            end
+        else
+            if ChatAnnouncements.Mail.codPresent then
+                local mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
+                ChatAnnouncements.currentMailSender = mailSender
+                context.messageChange = svContext.CurrencyMessageMailCOD
+                if mailSender ~= "" then
+                    context.messageType = "LUIE_CURRENCY_MAIL"
+                end
+            else
+                return true
+            end
+        end
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_BAGSPACE then
+        context.messageChange = svContext.CurrencyMessageStorage
+        context.messageType = "LUIE_CURRENCY_BAG"
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_BANKSPACE then
+        context.messageChange = svContext.CurrencyMessageStorage
+        context.messageType = "LUIE_CURRENCY_BANK"
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_BATTLEGROUND then
+        context.messageChange = delta < 0 and svContext.CurrencyMessageCampaign or svContext.CurrencyMessageReceive
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_RESPEC_SKILLS then
+        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILLS)
+        context.messageChange = svContext.CurrencyMessageSkills
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_RESPEC_ATTRIBUTES then
+        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_ATTRIBUTES)
+        context.messageChange = svContext.CurrencyMessageAttributes
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_RESPEC_MORPHS then
+        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_MORPHS)
+        context.messageChange = svContext.CurrencyMessageMorphs
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_RESPEC_CHAMPION then
+        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_CHAMPION)
+        context.messageChange = svContext.CurrencyMessageChampion
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_BOUNTY_PAID_GUARD or reason == CURRENCY_CHANGE_REASON_BOUNTY_CONFISCATED then
+        context.messageChange = svContext.CurrencyMessageConfiscate
+        LUIE_callLater(ChatAnnouncements.JusticeDisplayConfiscate, 50)
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_REWARD then
+        context.messageChange = context.currencyType == CURT_ENDEAVOR_SEALS and svContext.CurrencyMessageEarn or svContext.CurrencyMessageReceive
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_KILL then
+        context.messageChange = context.currencyType == CURT_ALLIANCE_POINTS and svContext.CurrencyMessageEarn or svContext.CurrencyMessageLoot
+        return false
+    end
+
+    if reason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_GEMS or reason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_CROWNS then
+        if context.currencyType == CURT_STYLE_STONES or context.currencyType == CURT_EVENT_TICKETS then
+            context.messageChange = svContext.CurrencyMessageReceive
+        else
+            context.messageChange = svContext.CurrencyMessageSpend
+        end
+        return false
+    end
+
+    local messageKey = REASON_MESSAGE_KEYS[reason]
+    if messageKey then
+        context.messageChange = svContext[messageKey]
+        return false
+    end
+
+    if DEBUG_REASON_SET[reason] then
+        context.messageChange = zo_strformat(GetString(LUIE_STRING_CA_DEBUG_MSG_CURRENCY), reason)
+        return false
+    end
+
+    context.messageChange = svContext.CurrencyMessageLoot
+    return false
+end
+
 --- - **EVENT_CURRENCY_UPDATE **
 ---
 --- @param currencyType CurrencyType
@@ -1433,7 +1863,7 @@ function ChatAnnouncements.OnCurrencyUpdate(currencyType, currencyLocation, newA
             "--> oldAmount: " .. tostring(oldAmount) .. "\n" ..
             "--> reason: " .. tostring(reason) .. "\n" ..
             "--> reasonSupplementaryInfo: " .. tostring(reasonSupplementaryInfo)
-        Debug(traceback)
+        LUIE:Log("Debug", traceback)
     end
 
     if currencyLocation ~= CURRENCY_LOCATION_CHARACTER and currencyLocation ~= CURRENCY_LOCATION_ACCOUNT then
@@ -1466,177 +1896,20 @@ function ChatAnnouncements.OnCurrencyUpdate(currencyType, currencyLocation, newA
     local messageTotal      --- @type string
     local messageType
 
-    if currencyType == CURT_MONEY then -- Gold
-        -- Send change info to the throttle printer and end function now if we throttle gold from loot.
-        if not ChatAnnouncements.SV.Currency.CurrencyGoldChange then
-            return
-        end
-        if ChatAnnouncements.SV.Currency.CurrencyGoldThrottle and (reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_KILL) then
-            -- NOTE: Unlike other throttle events, we used LUIE_callLater here because we have to make the call immediately
-            -- (if some of the gold is looted after items, the message will appear after the loot if we don't use LUIE_callLater instead of a RegisterForUpdate)
-            LUIE_callLater(ChatAnnouncements.CurrencyGoldThrottlePrinter, 50)
-            ChatAnnouncements.currencyGoldThrottleValue = ChatAnnouncements.currencyGoldThrottleValue + UpOrDown
-            ChatAnnouncements.currencyGoldThrottleTotal = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
-            return
-        end
-
-        -- If looted gold is below the filter value, end now.
-        if ChatAnnouncements.SV.Currency.CurrencyGoldFilter > 0 and (reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_KILL) then
-            if UpOrDown < ChatAnnouncements.SV.Currency.CurrencyGoldFilter then
-                return
-            end
-        end
-
-        currencyTypeColor = ChatAnnouncements.Colors.CurrencyGoldColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_MONEY), 16, 16) or ""
-        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, UpOrDown)
-        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyGoldShowTotal
-        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalGold
-    elseif currencyType == CURT_ALLIANCE_POINTS then -- Alliance Points
-        if not ChatAnnouncements.SV.Currency.CurrencyAPShowChange then
-            return
-        end
-        -- Send change info to the throttle printer and end function now if we throttle Alliance Points Gained
-        if ChatAnnouncements.SV.Currency.CurrencyAPThrottle > 0 and (reason == CURRENCY_CHANGE_REASON_KILL or reason == CURRENCY_CHANGE_REASON_KEEP_REPAIR or reason == CURRENCY_CHANGE_REASON_PVP_RESURRECT) then
-            eventManager:UnregisterForUpdate(moduleName .. "BufferedAP")
-            eventManager:RegisterForUpdate(moduleName .. "BufferedAP", ChatAnnouncements.SV.Currency.CurrencyAPThrottle, ChatAnnouncements.CurrencyAPThrottlePrinter)
-            ChatAnnouncements.currencyAPThrottleValue = ChatAnnouncements.currencyAPThrottleValue + UpOrDown
-            ChatAnnouncements.currencyAPThrottleTotal = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
-            return
-        end
-
-        -- If earned AP is below the filter value, end now.
-        if ChatAnnouncements.SV.Currency.CurrencyAPFilter > 0 and (reason == CURRENCY_CHANGE_REASON_KILL or reason == CURRENCY_CHANGE_REASON_KEEP_REPAIR or reason == CURRENCY_CHANGE_REASON_PVP_RESURRECT) then
-            if UpOrDown < ChatAnnouncements.SV.Currency.CurrencyAPFilter then
-                return
-            end
-        end
-
-        -- Immediately print value if another source of AP is gained (or spent)
-        if ChatAnnouncements.SV.Currency.CurrencyAPThrottle > 0 and (reason ~= CURRENCY_CHANGE_REASON_KILL and reason ~= CURRENCY_CHANGE_REASON_KEEP_REPAIR and reason ~= CURRENCY_CHANGE_REASON_PVP_RESURRECT) then
-            ChatAnnouncements.CurrencyAPThrottlePrinter()
-        end
-
-        currencyTypeColor = ChatAnnouncements.Colors.CurrencyAPColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_ALLIANCE_POINTS), 16, 16) or ""
-        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyAPName, UpOrDown)
-        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyAPShowTotal
-        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalAP
-    elseif currencyType == CURT_TELVAR_STONES then -- TelVar Stones
-        if not ChatAnnouncements.SV.Currency.CurrencyTVChange then
-            return
-        end
-        -- Send change info to the throttle printer and end function now if we throttle Tel Var Gained
-        -- If a container was recently opened then don't throttle the currency change.
-        if ChatAnnouncements.SV.Currency.CurrencyTVThrottle > 0 and (reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER) and not ChatAnnouncements.containerRecentlyOpened then
-            eventManager:UnregisterForUpdate(moduleName .. "BufferedTV")
-            eventManager:RegisterForUpdate(moduleName .. "BufferedTV", ChatAnnouncements.SV.Currency.CurrencyTVThrottle, ChatAnnouncements.CurrencyTVThrottlePrinter)
-            ChatAnnouncements.currencyTVThrottleValue = ChatAnnouncements.currencyTVThrottleValue + UpOrDown
-            ChatAnnouncements.currencyTVThrottleTotal = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
-            return
-        end
-
-        -- If earned Tel Var is below the filter value, end now.
-        if ChatAnnouncements.SV.Currency.CurrencyTVFilter > 0 and (reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER) then
-            if UpOrDown < ChatAnnouncements.SV.Currency.CurrencyTVFilter then
-                return
-            end
-        end
-
-        -- Immediately print value if another source of TV is gained or lost
-        if ChatAnnouncements.SV.Currency.CurrencyTVThrottle > 0 and (reason ~= CURRENCY_CHANGE_REASON_LOOT and reason ~= CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER) then
-            ChatAnnouncements.CurrencyTVThrottlePrinter()
-        end
-
-        currencyTypeColor = ChatAnnouncements.Colors.CurrencyTVColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_TELVAR_STONES), 16, 16) or ""
-        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyTVName, UpOrDown)
-        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyTVShowTotal
-        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalTV
-    elseif currencyType == CURT_WRIT_VOUCHERS then -- Writ Vouchers
-        if not ChatAnnouncements.SV.Currency.CurrencyWVChange then
-            return
-        end
-        currencyTypeColor = ChatAnnouncements.Colors.CurrencyWVColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_WRIT_VOUCHERS), 16, 16) or ""
-        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyWVName, UpOrDown)
-        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyWVShowTotal
-        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalWV
-    elseif currencyType == CURT_STYLE_STONES then -- Outfit Tokens
-        if not ChatAnnouncements.SV.Currency.CurrencyOutfitTokenChange then
-            return
-        end
-        currencyTypeColor = ChatAnnouncements.Colors.CurrencyOutfitTokenColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_STYLE_STONES), 16, 16) or ""
-        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyOutfitTokenName, UpOrDown)
-        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyOutfitTokenShowTotal
-        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalOutfitToken
-    elseif currencyType == CURT_CHAOTIC_CREATIA then -- Transmute Crystals
-        if not ChatAnnouncements.SV.Currency.CurrencyTransmuteChange then
-            return
-        end
-        currencyTypeColor = ChatAnnouncements.Colors.CurrencyTransmuteColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_CHAOTIC_CREATIA), 16, 16) or ""
-        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyTransmuteName, UpOrDown)
-        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyTransmuteShowTotal
-        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalTransmute
-    elseif currencyType == CURT_EVENT_TICKETS then -- Event Tickets
-        if not ChatAnnouncements.SV.Currency.CurrencyEventChange then
-            return
-        end
-        currencyTypeColor = ChatAnnouncements.Colors.CurrencyEventColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_EVENT_TICKETS), 16, 16) or ""
-        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyEventName, UpOrDown)
-        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyEventShowTotal
-        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalEvent
-    elseif currencyType == CURT_UNDAUNTED_KEYS then -- Undaunted Keys
-        if not ChatAnnouncements.SV.Currency.CurrencyUndauntedChange then
-            return
-        end
-        currencyTypeColor = ChatAnnouncements.Colors.CurrencyUndauntedColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_UNDAUNTED_KEYS), 16, 16) or ""
-        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyUndauntedName, UpOrDown)
-        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyUndauntedShowTotal
-        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalUndaunted
-    elseif currencyType == CURT_CROWNS then -- Crowns
-        if not ChatAnnouncements.SV.Currency.CurrencyCrownsChange then
-            return
-        end
-        currencyTypeColor = ChatAnnouncements.Colors.CurrencyCrownsColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWNS), 16, 16) or ""
-        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyCrownsName, UpOrDown)
-        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyCrownsShowTotal
-        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalCrowns
-    elseif currencyType == CURT_CROWN_GEMS then -- Crown Gems
-        if not ChatAnnouncements.SV.Currency.CurrencyCrownGemsChange then
-            return
-        end
-        currencyTypeColor = ChatAnnouncements.Colors.CurrencyCrownGemsColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS), 16, 16) or ""
-        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyCrownGemsName, UpOrDown)
-        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyCrownGemsShowTotal
-        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalCrownGems
-    elseif currencyType == CURT_ENDEAVOR_SEALS then -- Seals of Endeavor
-        if not ChatAnnouncements.SV.Currency.CurrencyEndeavorsChange then
-            return
-        end
-        currencyTypeColor = ChatAnnouncements.Colors.CurrencyEndeavorsColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_ENDEAVOR_SEALS), 16, 16) or ""
-        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyEndeavorsName, UpOrDown)
-        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyEndeavorsShowTotal
-        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalEndeavors
-    elseif currencyType == CURT_ENDLESS_DUNGEON then -- Archival Fortunes
-        if not ChatAnnouncements.SV.Currency.CurrencyEndlessChange then
-            return
-        end
-        currencyTypeColor = ChatAnnouncements.Colors.CurrencyEndlessColorize:ToHex()
-        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_ARCHIVAL_FORTUNES), 16, 16) or ""
-        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyEndlessName, UpOrDown)
-        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyEndlessShowTotal
-        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalEndless
-    else -- If for some reason there is no currency messageType, end the function now
+    local config = CURRENCY_CONFIGS[currencyType]
+    if not config then
         return
     end
+
+    if config.enabled and not ChatAnnouncements.SV.Currency[config.enabled] then
+        return
+    end
+
+    if HandleCurrencyThrottleAndFilter(currencyType, reason, UpOrDown) then
+        return
+    end
+
+    currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageTotal = BuildCurrencyDisplay(config, currencyType, UpOrDown)
 
     -- Did we gain or lose currency
     if UpOrDown > 0 then
@@ -1646,7 +1919,7 @@ function ChatAnnouncements.OnCurrencyUpdate(currencyType, currencyLocation, newA
             changeColor = ChatAnnouncements.Colors.CurrencyColorize:ToHex()
         end
         changeType = ZO_CommaDelimitDecimalNumber(newAmount - oldAmount)
-    elseif UpOrDown < 0 then
+    else
         if ChatAnnouncements.SV.Currency.CurrencyContextColor then
             changeColor = ChatAnnouncements.Colors.CurrencyDownColorize:ToHex()
         else
@@ -1655,217 +1928,33 @@ function ChatAnnouncements.OnCurrencyUpdate(currencyType, currencyLocation, newA
         changeType = ZO_CommaDelimitDecimalNumber(oldAmount - newAmount)
     end
 
-    -- Determine syntax based on reason
-    if reason == CURRENCY_CHANGE_REASON_VENDOR and UpOrDown > 0 then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
-        if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-            ChatAnnouncements.savedPurchase.changeType = changeType
-            ChatAnnouncements.savedPurchase.formattedValue = formattedValue
-            ChatAnnouncements.savedPurchase.currencyTypeColor = currencyTypeColor
-            ChatAnnouncements.savedPurchase.currencyIcon = currencyIcon
-            ChatAnnouncements.savedPurchase.currencyName = currencyName
-            ChatAnnouncements.savedPurchase.currencyTotal = currencyTotal
-            ChatAnnouncements.savedPurchase.messageTotal = messageTotal
-            return
-        end
-    elseif reason == CURRENCY_CHANGE_REASON_VENDOR and UpOrDown < 0 then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
-        if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-            ChatAnnouncements.savedPurchase.changeType = changeType
-            ChatAnnouncements.savedPurchase.formattedValue = formattedValue
-            ChatAnnouncements.savedPurchase.currencyTypeColor = currencyTypeColor
-            ChatAnnouncements.savedPurchase.currencyIcon = currencyIcon
-            ChatAnnouncements.savedPurchase.currencyName = currencyName
-            ChatAnnouncements.savedPurchase.currencyTotal = currencyTotal
-            ChatAnnouncements.savedPurchase.messageTotal = messageTotal
-            return
-        end
-    elseif reason == CURRENCY_CHANGE_REASON_MAIL and UpOrDown > 0 then
-        -- Get the correct sender from the queue for this currency change
-        local mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
-        ChatAnnouncements.currentMailSender = mailSender
-        messageChange = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
-        if mailSender ~= "" then
-            messageType = "LUIE_CURRENCY_MAIL"
-        end
-    elseif reason == CURRENCY_CHANGE_REASON_MAIL and UpOrDown < 0 then
-        if ChatAnnouncements.Mail.codPresent then
-            -- Get the correct sender from the queue for COD
-            local mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
-            ChatAnnouncements.currentMailSender = mailSender
-            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailCOD
-            if mailSender ~= "" then
-                messageType = "LUIE_CURRENCY_MAIL"
-            end
-        else
-            return
-        end
-    elseif reason == CURRENCY_CHANGE_REASON_BUYBACK then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
-        if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-            ChatAnnouncements.savedPurchase.changeType = changeType
-            ChatAnnouncements.savedPurchase.formattedValue = formattedValue
-            ChatAnnouncements.savedPurchase.currencyTypeColor = currencyTypeColor
-            ChatAnnouncements.savedPurchase.currencyIcon = currencyIcon
-            ChatAnnouncements.savedPurchase.currencyName = currencyName
-            ChatAnnouncements.savedPurchase.currencyTotal = currencyTotal
-            ChatAnnouncements.savedPurchase.messageTotal = messageTotal
-            return
-        end
-    elseif reason == CURRENCY_CHANGE_REASON_TRADE and UpOrDown > 0 then
-        messageChange = ChatAnnouncements.tradeTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeInNoName
-        if ChatAnnouncements.tradeTarget ~= "" then
-            messageType = "LUIE_CURRENCY_TRADE"
-        end
-    elseif reason == CURRENCY_CHANGE_REASON_TRADE and UpOrDown < 0 then
-        messageChange = ChatAnnouncements.tradeTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeOut or ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeOutNoName
-        if ChatAnnouncements.tradeTarget ~= "" then
-            messageType = "LUIE_CURRENCY_TRADE"
-        end
-    elseif reason == CURRENCY_CHANGE_REASON_QUESTREWARD or reason == CURRENCY_CHANGE_REASON_DECONSTRUCT or reason == CURRENCY_CHANGE_REASON_MEDAL or reason == CURRENCY_CHANGE_REASON_TRADINGHOUSE_REFUND or reason == CURRENCY_CHANGE_REASON_JUMP_FAILURE_REFUND then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
-    elseif reason == CURRENCY_CHANGE_REASON_SELL_STOLEN then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
-        if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-            ChatAnnouncements.savedPurchase.changeType = changeType
-            ChatAnnouncements.savedPurchase.formattedValue = formattedValue
-            ChatAnnouncements.savedPurchase.currencyTypeColor = currencyTypeColor
-            ChatAnnouncements.savedPurchase.currencyIcon = currencyIcon
-            ChatAnnouncements.savedPurchase.currencyName = currencyName
-            ChatAnnouncements.savedPurchase.currencyTotal = currencyTotal
-            ChatAnnouncements.savedPurchase.messageTotal = messageTotal
-            return
-        end
-    elseif reason == CURRENCY_CHANGE_REASON_BAGSPACE then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageStorage
-        messageType = "LUIE_CURRENCY_BAG"
-    elseif reason == CURRENCY_CHANGE_REASON_BANKSPACE then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageStorage
-        messageType = "LUIE_CURRENCY_BANK"
-    elseif reason == CURRENCY_CHANGE_REASON_CONVERSATION then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePay
-    elseif reason == CURRENCY_CHANGE_REASON_EDIT_GUILD_HERALDRY or reason == CURRENCY_CHANGE_REASON_GUILD_TABARD then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
-    elseif reason == CURRENCY_CHANGE_REASON_BATTLEGROUND and UpOrDown < 0 then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageCampaign
-    elseif reason == CURRENCY_CHANGE_REASON_BATTLEGROUND and UpOrDown > 0 then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
-    elseif reason == CURRENCY_CHANGE_REASON_TRAVEL_GRAVEYARD then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWayshrine
-    elseif reason == CURRENCY_CHANGE_REASON_CRAFT or reason == CURRENCY_CHANGE_REASON_RECONSTRUCTION then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse
-    elseif reason == CURRENCY_CHANGE_REASON_ENDLESS_DUNGEON_VISION_REROLL then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse
-    elseif reason == CURRENCY_CHANGE_REASON_VENDOR_REPAIR then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageRepair
-    elseif reason == CURRENCY_CHANGE_REASON_TRADINGHOUSE_LISTING then
-        if ChatAnnouncements.SV.Currency.CurrencyGoldHideListingAH then
-            return
-        end
-        ChatAnnouncements.savedPurchase.changeType = changeType
-        ChatAnnouncements.savedPurchase.formattedValue = formattedValue
-        ChatAnnouncements.savedPurchase.currencyTypeColor = currencyTypeColor
-        ChatAnnouncements.savedPurchase.currencyIcon = currencyIcon
-        ChatAnnouncements.savedPurchase.currencyName = currencyName
-        ChatAnnouncements.savedPurchase.currencyTotal = currencyTotal
-        ChatAnnouncements.savedPurchase.messageTotal = messageTotal
+    local context =
+    {
+        reason = reason,
+        delta = UpOrDown,
+        currencyType = currencyType,
+        changeType = changeType,
+        formattedValue = formattedValue,
+        currencyTypeColor = currencyTypeColor,
+        currencyIcon = currencyIcon,
+        currencyName = currencyName,
+        currencyTotal = currencyTotal,
+        messageTotal = messageTotal,
+        messageChange = nil,
+        messageType = nil,
+    }
+
+    if ResolveMessageByReason(context) then
         return
-    elseif reason == CURRENCY_CHANGE_REASON_RESPEC_SKILLS then
-        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILLS)
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSkills
-    elseif reason == CURRENCY_CHANGE_REASON_RESPEC_ATTRIBUTES then
-        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_ATTRIBUTES)
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageAttributes
-    elseif reason == CURRENCY_CHANGE_REASON_STUCK then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUnstuck
-    elseif reason == CURRENCY_CHANGE_REASON_RESPEC_MORPHS then
-        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_MORPHS)
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageMorphs
-    elseif reason == CURRENCY_CHANGE_REASON_BOUNTY_PAID_FENCE then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageBounty
-    elseif reason == CURRENCY_CHANGE_REASON_RESPEC_CHAMPION then
-        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_CHAMPION)
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageChampion
-    elseif reason == CURRENCY_CHANGE_REASON_VENDOR_LAUNDER then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
-        if not ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
-        else
-            ChatAnnouncements.savedPurchase.changeType = changeType
-            ChatAnnouncements.savedPurchase.formattedValue = formattedValue
-            ChatAnnouncements.savedPurchase.currencyTypeColor = currencyTypeColor
-            ChatAnnouncements.savedPurchase.currencyIcon = currencyIcon
-            ChatAnnouncements.savedPurchase.currencyName = currencyName
-            ChatAnnouncements.savedPurchase.currencyTotal = currencyTotal
-            ChatAnnouncements.savedPurchase.messageTotal = messageTotal
-            return
-        end
-    elseif reason == CURRENCY_CHANGE_REASON_KEEP_REPAIR or reason == CURRENCY_CHANGE_REASON_PVP_RESURRECT or reason == CURRENCY_CHANGE_REASON_OFFENSIVE_KEEP_REWARD or reason == CURRENCY_CHANGE_REASON_DEFENSIVE_KEEP_REWARD then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageEarn
-    elseif reason == CURRENCY_CHANGE_REASON_REWARD then
-        -- Display "earn" for Seals of Endeavor
-        if currencyType == CURT_ENDEAVOR_SEALS then
-            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageEarn
-        else
-            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
-        end
-    elseif reason == CURRENCY_CHANGE_REASON_ANTIQUITY_REWARD then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageExcavate
-    elseif reason == CURRENCY_CHANGE_REASON_TRADINGHOUSE_PURCHASE then
-        if ChatAnnouncements.SV.Currency.CurrencyGoldHideAH then
-            return
-        end
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
-    elseif reason == CURRENCY_CHANGE_REASON_BANK_DEPOSIT then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit
-    elseif reason == CURRENCY_CHANGE_REASON_GUILD_BANK_DEPOSIT then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositGuild
-    elseif reason == CURRENCY_CHANGE_REASON_BANK_WITHDRAWAL then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw
-    elseif reason == CURRENCY_CHANGE_REASON_GUILD_BANK_WITHDRAWAL then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawGuild
-    elseif reason == CURRENCY_CHANGE_REASON_BOUNTY_PAID_GUARD or reason == CURRENCY_CHANGE_REASON_BOUNTY_CONFISCATED then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageConfiscate
-        LUIE_callLater(ChatAnnouncements.JusticeDisplayConfiscate, 50)
-    elseif reason == CURRENCY_CHANGE_REASON_PICKPOCKET then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePickpocket
-    elseif reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER or reason == CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
-    elseif reason == CURRENCY_CHANGE_REASON_LOOT_STOLEN then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSteal
-    elseif reason == CURRENCY_CHANGE_REASON_KILL then
-        if currencyType == CURT_ALLIANCE_POINTS then
-            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageEarn
-        else
-            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
-        end
-    elseif reason == CURRENCY_CHANGE_REASON_DEATH then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLost
-    elseif reason == CURRENCY_CHANGE_REASON_CROWN_CRATE_DUPLICATE or reason == CURRENCY_CHANGE_REASON_ITEM_CONVERTED_TO_GEMS or reason == CURRENCY_CHANGE_REASON_CROWNS_PURCHASED then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
-    elseif reason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_GEMS or reason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_CROWNS then
-        if currencyType == CURT_STYLE_STONES or currencyType == CURT_EVENT_TICKETS then
-            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
-        else
-            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
-        end
-    elseif reason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_ENDEAVOR_SEALS then
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
-        -- ==============================================================================
-        -- DEBUG EVENTS - Don't know if these are implemented or what they are for.
-    elseif reason == CURRENCY_CHANGE_REASON_ACTION or reason == CURRENCY_CHANGE_REASON_KEEP_UPGRADE or reason == CURRENCY_CHANGE_REASON_DEPRECATED_0 or reason == CURRENCY_CHANGE_REASON_DEPRECATED_2 or reason == CURRENCY_CHANGE_REASON_SOUL_HEAL or reason == CURRENCY_CHANGE_REASON_CASH_ON_DELIVERY or reason == CURRENCY_CHANGE_REASON_ABILITY_UPGRADE_PURCHASE or reason == CURRENCY_CHANGE_REASON_DEPRECATED_1 or reason == CURRENCY_CHANGE_REASON_STABLESPACE or reason == CURRENCY_CHANGE_REASON_ACHIEVEMENT or reason == CURRENCY_CHANGE_REASON_TRAIT_REVEAL or reason == CURRENCY_CHANGE_REASON_REFORGE or reason == CURRENCY_CHANGE_REASON_RECIPE or reason == CURRENCY_CHANGE_REASON_CONSUME_FOOD_DRINK or reason == CURRENCY_CHANGE_REASON_CONSUME_POTION or reason == CURRENCY_CHANGE_REASON_HARVEST_REAGENT or reason == CURRENCY_CHANGE_REASON_RESEARCH_TRAIT or reason == CURRENCY_CHANGE_REASON_GUILD_TABARD or reason == CURRENCY_CHANGE_REASON_GUILD_FORWARD_CAMP or reason == CURRENCY_CHANGE_REASON_BANK_FEE or reason == CURRENCY_CHANGE_REASON_CHARACTER_UPGRADE or reason == CURRENCY_CHANGE_REASON_TRIBUTE then
-        messageChange = zo_strformat(GetString(LUIE_STRING_CA_DEBUG_MSG_CURRENCY), reason)
-        -- END DEBUG EVENTS
-        -- ==============================================================================
-        -- If none of these returned true, then we must have just looted the currency (Potentially a few currency change events I missed too may have to adjust later)
-    else
-        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
     end
+
+    messageChange = context.messageChange
+    messageType = context.messageType
 
     -- Haven't seen this one yet but it's more recently added and thus probably used for something.
     if reason == CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER then
         if LUIE.IsDevDebugEnabled() then
-            LUIE.Debug("Currency Change Reason 76 - CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER")
+            LUIE:Log("Debug", "Currency Change Reason 76 - CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER")
         end
     end
 
@@ -3270,7 +3359,7 @@ function ChatAnnouncements.ResolveQuestItemChange()
             if newValue < ChatAnnouncements.questItemIndex[itemId].stack then
                 -- Easy temporary debug for my accounts only
                 -- if LUIE.IsDevDebugEnabled() then
-                --     LUIE.Debug(itemId .. " Removed")
+                --     LUIE.LUIE:Log("Debug",itemId .. " Removed")
                 -- end
                 --
 
@@ -3344,7 +3433,7 @@ function ChatAnnouncements.ResolveQuestItemChange()
             if newValue > ChatAnnouncements.questItemIndex[itemId].stack then
                 -- Easy debug for my devs only
                 -- if LUIE.IsDevDebugEnabled() then
-                --     LUIE.Debug(itemId .. " Added")
+                --     LUIE.LUIE:Log("Debug",itemId .. " Added")
                 -- end
                 --
                 countChange = newValue - ChatAnnouncements.questItemIndex[itemId].stack
@@ -3481,7 +3570,7 @@ function ChatAnnouncements.OnLootReceived(eventId, receivedBy, itemName, quantit
     --         "--> questItemIcon: " .. tostring(questItemIcon) .. "\n" ..
     --         "--> itemId: " .. tostring(itemId) .. "\n" ..
     --         "--> isStolen: " .. tostring(isStolen)
-    --     Debug(traceback)
+    --     LUIE:Log("Debug",traceback)
     -- end
 
     -- If the player loots an item
@@ -3946,7 +4035,7 @@ function ChatAnnouncements.ItemCounterDelay(icon, stack, itemType, itemId, itemL
     -- Return if we have an invalid itemId or stack
     if itemId == 0 or not stack then
         if LUIE.IsDevDebugEnabled() then
-            LUIE.Debug("Item counter returned invalid items")
+            LUIE:Log("Debug", "Item counter returned invalid items")
         end
         return
     end
@@ -4101,7 +4190,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
     --         "--> triggeredByDisplayName: " .. tostring(triggeredByDisplayName) .. "\n" ..
     --         "--> isLastUpdateForMessage: " .. tostring(isLastUpdateForMessage) .. "\n" ..
     --         "--> bonusDropSource: " .. tostring(bonusDropSource)
-    --     Debug(traceback)
+    --     LUIE:Log("Debug",traceback)
     -- end
 
     -- End right now if this is any other reason (durability loss, etc)
@@ -4793,7 +4882,7 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
     --         "--> triggeredByDisplayName: " .. tostring(triggeredByDisplayName) .. "\n" ..
     --         "--> isLastUpdateForMessage: " .. tostring(isLastUpdateForMessage) .. "\n" ..
     --         "--> bonusDropSource: " .. tostring(bonusDropSource)
-    --     Debug(traceback)
+    --     LUIE:Log("Debug",traceback)
     -- end
     -- End right now if this is any other reason (durability loss, etc)
     if inventoryUpdateReason ~= INVENTORY_UPDATE_REASON_DEFAULT then
@@ -5479,7 +5568,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotIndex, isNewI
     --         "--> triggeredByDisplayName: " .. tostring(triggeredByDisplayName) .. "\n" ..
     --         "--> isLastUpdateForMessage: " .. tostring(isLastUpdateForMessage) .. "\n" ..
     --         "--> bonusDropSource: " .. tostring(bonusDropSource)
-    --     Debug(traceback)
+    --     LUIE:Log("Debug",traceback)
     -- end
     -- End right now if this is any other reason (durability loss, etc)
     if inventoryUpdateReason ~= INVENTORY_UPDATE_REASON_DEFAULT then
@@ -5883,7 +5972,7 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotIndex, i
     --         "--> triggeredByDisplayName: " .. tostring(triggeredByDisplayName) .. "\n" ..
     --         "--> isLastUpdateForMessage: " .. tostring(isLastUpdateForMessage) .. "\n" ..
     --         "--> bonusDropSource: " .. tostring(bonusDropSource)
-    --     Debug(traceback)
+    --     LUIE:Log("Debug",traceback)
     -- end
 
     local receivedBy = ""
@@ -6043,7 +6132,7 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotIndex, isNew
     --         "--> triggeredByDisplayName: " .. tostring(triggeredByDisplayName) .. "\n" ..
     --         "--> isLastUpdateForMessage: " .. tostring(isLastUpdateForMessage) .. "\n" ..
     --         "--> bonusDropSource: " .. tostring(bonusDropSource)
-    --     Debug(traceback)
+    --     LUIE:Log("Debug",traceback)
     -- end
 
     -- End right now if this is any other reason (durability loss, etc)
@@ -6415,7 +6504,7 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
     --         "--> eventCode: " .. tostring(eventCode) .. "\n" ..
     --         "--> unitTag: " .. tostring(unitTag) .. "\n" ..
     --         "--> disguiseState: " .. tostring(disguiseState)
-    --     Debug(traceback)
+    --     LUIE:Log("Debug",traceback)
     -- end
 
     if disguiseState == DISGUISE_STATE_DANGER then
@@ -6680,7 +6769,7 @@ function ChatAnnouncements.HandleClickEvent(rawLink, mouseButton, linkText, link
     --         "--> categoryIndex: " .. tostring(categoryIndex) .. "\n" ..
     --         "--> collectionIndex: " .. tostring(collectionIndex) .. "\n" ..
     --         "--> bookIndex: " .. tostring(bookIndex)
-    --     Debug(traceback)
+    --     LUIE:Log("Debug",traceback)
     -- end
 
     if linkType == "LINK_TYPE_LUIE_BOOK" then
