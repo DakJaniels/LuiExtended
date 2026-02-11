@@ -983,12 +983,14 @@ function ActionBar.UpdateBarHighlightTables()
             end
         end
         local counter = 0
-        for abilityId, _ in pairs(g_barOverrideCI) do
+        for ability_Id, _ in pairs(g_barOverrideCI) do
             counter = counter + 1
             local eventName = (moduleName .. "CombatEventBar" .. counter)
-            eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, ActionBar.OnCombatEventBar)
+            eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+                ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+            end)
             -- Register filter for specific abilityId's in table only, and filter for source = player, no errors
-            eventManager:AddFilterForEvent(eventName, EVENT_COMBAT_EVENT, REGISTER_FILTER_ABILITY_ID, abilityId, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, "player")
+            eventManager:AddFilterForEvent(eventName, EVENT_COMBAT_EVENT, REGISTER_FILTER_ABILITY_ID, ability_Id, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, "player")
         end
     end
 end
@@ -997,7 +999,9 @@ end
 -- Clear and then (maybe) re-register event listeners for Combat/Power/Slot Updates
 function ActionBar.RegisterEvents()
     eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, ActionBar.OnUpdate)
-    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, ActionBar.OnPlayerActivated)
+    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, function (eventId, initial)
+        ActionBar.OnPlayerActivated()
+    end)
 
     eventManager:UnregisterForEvent(moduleName, EVENT_COMBAT_EVENT)
     eventManager:UnregisterForEvent(moduleName, EVENT_POWER_UPDATE)
@@ -1013,17 +1017,21 @@ function ActionBar.RegisterEvents()
     eventManager:UnregisterForEvent(moduleName .. "CastBar", EVENT_ACTIVE_WEAPON_PAIR_CHANGED)
     eventManager:UnregisterForEvent(moduleName, EVENT_RETICLE_HIDDEN_UPDATE)
     if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
-        eventManager:RegisterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT, function (eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+        eventManager:RegisterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
             ActionBar.OnCombatEvent(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
         end)
         eventManager:AddFilterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_BLOCKED_DAMAGE)
-        eventManager:RegisterForEvent(moduleName .. "PowerUpdate", EVENT_POWER_UPDATE, ActionBar.OnPowerUpdatePlayer)
+        eventManager:RegisterForEvent(moduleName .. "PowerUpdate", EVENT_POWER_UPDATE, function (_, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+            ActionBar.OnPowerUpdatePlayer(unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+        end)
         eventManager:AddFilterForEvent(moduleName .. "PowerUpdate", EVENT_POWER_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
-        eventManager:RegisterForEvent(moduleName .. "InventoryUpdate", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ActionBar.OnInventorySlotUpdate)
+        eventManager:RegisterForEvent(moduleName .. "InventoryUpdate", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function (_, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
+            ActionBar.OnInventorySlotUpdate(bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
+        end)
         eventManager:AddFilterForEvent(moduleName .. "InventoryUpdate", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT, REGISTER_FILTER_IS_NEW_ITEM, false)
     end
     if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled or ActionBar.SV.CastBarEnable then
-        eventManager:RegisterForEvent(moduleName .. "CombatEvent2", EVENT_COMBAT_EVENT, function (eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+        eventManager:RegisterForEvent(moduleName .. "CombatEvent2", EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
             ActionBar.OnCombatEvent(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
         end)
         eventManager:AddFilterForEvent(moduleName .. "CombatEvent2", EVENT_COMBAT_EVENT, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false)
@@ -1033,17 +1041,29 @@ function ActionBar.RegisterEvents()
         for result, _ in pairs(Castbar.CastBreakingStatus) do
             counter = counter + 1
             local eventName = (moduleName .. "CombatEventCC" .. counter)
-            eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, function (eventId, actionResult, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+            eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, function (_, actionResult, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
                 ActionBar.OnCombatEventBreakCast(actionResult, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
             end)
             eventManager:AddFilterForEvent(eventName, EVENT_COMBAT_EVENT, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_COMBAT_RESULT, result)
         end
-        eventManager:RegisterForEvent(moduleName, EVENT_START_SOUL_GEM_RESURRECTION, ActionBar.SoulGemResurrectionStart)
-        eventManager:RegisterForEvent(moduleName, EVENT_END_SOUL_GEM_RESURRECTION, ActionBar.SoulGemResurrectionEnd)
-        eventManager:RegisterForEvent(moduleName, EVENT_GAME_CAMERA_UI_MODE_CHANGED, ActionBar.OnGameCameraUIModeChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_END_SIEGE_CONTROL, ActionBar.OnSiegeEnd)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_ABILITY_USED, ActionBar.OnAbilityUsed)
-        eventManager:RegisterForEvent(moduleName .. "CastBar", EVENT_ACTIVE_WEAPON_PAIR_CHANGED, CastBarOnActiveWeaponPairChanged)
+        eventManager:RegisterForEvent(moduleName, EVENT_START_SOUL_GEM_RESURRECTION, function (_, durationMs)
+            ActionBar.SoulGemResurrectionStart(durationMs)
+        end)
+        eventManager:RegisterForEvent(moduleName, EVENT_END_SOUL_GEM_RESURRECTION, function (_)
+            ActionBar.SoulGemResurrectionEnd()
+        end)
+        eventManager:RegisterForEvent(moduleName, EVENT_GAME_CAMERA_UI_MODE_CHANGED, function (_)
+            ActionBar.OnGameCameraUIModeChanged()
+        end)
+        eventManager:RegisterForEvent(moduleName, EVENT_END_SIEGE_CONTROL, function (_)
+            ActionBar.OnSiegeEnd()
+        end)
+        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_ABILITY_USED, function (_, actionSlotIndex)
+            ActionBar.OnAbilityUsed(actionSlotIndex)
+        end)
+        eventManager:RegisterForEvent(moduleName .. "CastBar", EVENT_ACTIVE_WEAPON_PAIR_CHANGED, function (_, activeWeaponPair, locked)
+            CastBarOnActiveWeaponPairChanged(activeWeaponPair, locked)
+        end)
         -- eventManager:RegisterForEvent(moduleName, EVENT_CLIENT_INTERACT_RESULT, ActionBar.ClientInteractResult)
         -- counter = 0
         -- for id, _ in pairs(Effects.CastBreakOnRemoveEvent) do
@@ -1054,18 +1074,36 @@ function ActionBar.RegisterEvents()
         -- end
     end
     if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled or ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, ActionBar.OnActiveHotbarUpdate)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, ActionBar.OnSlotsFullUpdate)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_UPDATED, ActionBar.OnSlotUpdated)
-        eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_WEAPON_PAIR_CHANGED, ActionBar.OnActiveWeaponPairChanged)
+        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, function (_, didActiveHotbarChange, shouldUpdateAbilityAssignments, activeHotbarCategory)
+            ActionBar.OnActiveHotbarUpdate(didActiveHotbarChange, shouldUpdateAbilityAssignments, activeHotbarCategory)
+        end)
+        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, function (_)
+            ActionBar.OnSlotsFullUpdate()
+        end)
+        eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_UPDATED, function (_, actionSlotIndex)
+            ActionBar.OnSlotUpdated(actionSlotIndex)
+        end)
+        eventManager:RegisterForEvent(moduleName, EVENT_ACTIVE_WEAPON_PAIR_CHANGED, function (_, activeWeaponPair, locked)
+            ActionBar.OnActiveWeaponPairChanged(activeWeaponPair, locked)
+        end)
     end
     if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled then
-        eventManager:RegisterForEvent(moduleName, EVENT_UNIT_DEATH_STATE_CHANGED, ActionBar.OnDeath)
-        eventManager:RegisterForEvent(moduleName, EVENT_TARGET_CHANGED, ActionBar.OnTargetChange)
-        eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED, ActionBar.OnReticleTargetChanged)
-        eventManager:RegisterForEvent(moduleName, EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, ActionBar.BackbarSetupTemplate)
+        eventManager:RegisterForEvent(moduleName, EVENT_UNIT_DEATH_STATE_CHANGED, function (_, unitTag, isDead)
+            ActionBar.OnDeath(unitTag, isDead)
+        end)
+        eventManager:RegisterForEvent(moduleName, EVENT_TARGET_CHANGED, function (_, unitTag)
+            ActionBar.OnTargetChange(unitTag)
+        end)
+        eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_TARGET_CHANGED, function (_)
+            ActionBar.OnReticleTargetChanged()
+        end)
+        eventManager:RegisterForEvent(moduleName, EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function (_, gamepadPreferred)
+            ActionBar.BackbarSetupTemplate()
+        end)
 
-        eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEM_USED, ActionBar.InventoryItemUsed)
+        eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEM_USED, function (_, itemSoundCategory)
+            ActionBar.InventoryItemUsed()
+        end)
 
         -- Setup bar highlight
         ActionBar.UpdateBarHighlightTables()
@@ -1102,7 +1140,9 @@ function ActionBar.RegisterEvents()
         end
     end
 
-    eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_HIDDEN_UPDATE, ActionBar.OnReticleHiddenUpdate)
+    eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_HIDDEN_UPDATE, function (_, hidden)
+        ActionBar.OnReticleHiddenUpdate(hidden)
+    end)
 end
 
 -- -----------------------------------------------------------------------------
@@ -1174,7 +1214,7 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Used to populate abilities icons after the user has logged on
-function ActionBar.OnPlayerActivated(eventCode)
+function ActionBar.OnPlayerActivated()
     -- Manually trigger event to update stats
     g_hotbarCategory = GetActiveHotbarCategory()
     ActionBar.OnSlotsFullUpdate()
@@ -1370,7 +1410,7 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Run on the EVENT_GAME_CAMERA_UI_MODE_CHANGED handler
-function ActionBar.OnGameCameraUIModeChanged(eventCode)
+function ActionBar.OnGameCameraUIModeChanged()
     -- Changing zones in the World Map for some reason changes the player coordinates so when the player clicks on a Wayshrine to teleport the cast gets interrupted
     -- This buffer fixes this issue
     g_castbarWorldMapFix = true
@@ -1384,7 +1424,7 @@ end
 -- -----------------------------------------------------------------------------
 -- Run on the EVENT_END_SIEGE_CONTROL handler
 -- Used to break the cast for Stow Siege Weapon if the player exits siege control.
-function ActionBar.OnSiegeEnd(eventCode)
+function ActionBar.OnSiegeEnd()
     if castbar.id == 12256 then
         ActionBar.StopCastBar()
     end
@@ -1392,7 +1432,7 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Stops Attack Cast when releasing heavy attacks
-function ActionBar.OnAbilityUsed(eventCode, actionSlotIndex)
+function ActionBar.OnAbilityUsed(actionSlotIndex)
     if actionSlotIndex == 2 then
         ActionBar.StopCastBar()
     end
@@ -1561,24 +1601,24 @@ end
 -- Runs on the EVENT_TARGET_CHANGE listener.
 -- This handler fires every time the someone target changes.
 -- This function is needed in case the player teleports via Way Shrine
-function ActionBar.OnTargetChange(eventCode, unitTag)
+function ActionBar.OnTargetChange(unitTag)
     if unitTag ~= "player" then
         return
     end
-    ActionBar.OnReticleTargetChanged(eventCode)
+    ActionBar.OnReticleTargetChanged()
 end
 
 -- -----------------------------------------------------------------------------
 -- Runs on the EVENT_RETICLE_HIDDEN_UPDATE listener.
 -- This handler fires when the reticle visibility changes
-function ActionBar.OnReticleHiddenUpdate(eventId, hidden)
+function ActionBar.OnReticleHiddenUpdate(hidden)
     g_reticleHidden = hidden
 end
 
 -- -----------------------------------------------------------------------------
 -- Runs on the EVENT_RETICLE_TARGET_CHANGED listener.
 -- This handler fires every time the player's reticle target changes
-function ActionBar.OnReticleTargetChanged(eventCode)
+function ActionBar.OnReticleTargetChanged()
     -- Skip processing if reticle is hidden
     if g_reticleHidden then
         return
@@ -2632,9 +2672,8 @@ end
 
 -- -----------------------------------------------------------------------------
 ---
---- @param eventCode integer
 --- @param durationMs integer
-function ActionBar.SoulGemResurrectionStart(eventCode, durationMs)
+function ActionBar.SoulGemResurrectionStart(durationMs)
     -- Just in case any other casts are present - stop them first
     ActionBar.StopCastBar()
 
@@ -2670,8 +2709,7 @@ end
 
 -- -----------------------------------------------------------------------------
 ---
---- @param eventCode integer
-function ActionBar.SoulGemResurrectionEnd(eventCode)
+function ActionBar.SoulGemResurrectionEnd()
     ActionBar.StopCastBar()
 end
 
@@ -3312,10 +3350,9 @@ end
 
 --- - **EVENT_UNIT_DEATH_STATE_CHANGED **
 ---
---- @param eventId integer
 --- @param unitTag string
 --- @param isDead boolean
-function ActionBar.OnDeath(eventId, unitTag, isDead)
+function ActionBar.OnDeath(unitTag, isDead)
     -- And toggle buttons
     if unitTag == "player" then
         for slotNum = BAR_INDEX_START, BAR_INDEX_END do
@@ -3493,7 +3530,6 @@ end
 -- -----------------------------------------------------------------------------
 --- - **EVENT_INVENTORY_SINGLE_SLOT_UPDATE **
 ---
---- @param eventId integer
 --- @param bagId Bag
 --- @param slotIndex integer
 --- @param isNewItem boolean
@@ -3504,7 +3540,7 @@ end
 --- @param triggeredByDisplayName string?
 --- @param isLastUpdateForMessage boolean
 --- @param bonusDropSource BonusDropSource
-function ActionBar.OnInventorySlotUpdate(eventId, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
+function ActionBar.OnInventorySlotUpdate(bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
     if stackCountChange >= 0 then
         ActionBar.UpdateUltimateLabel()
     end
