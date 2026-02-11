@@ -436,7 +436,7 @@ local function SetupBackbarDragDropHandlers(button)
         local actionBarSlotIndex, hotbarCategory = getActionBarSlotAndCategory()
         if GetSlotType(actionBarSlotIndex, hotbarCategory) ~= ACTION_TYPE_NOTHING then
             InitializeTooltip(AbilityTooltip, btn, BOTTOM, 0, -5, TOP)
-            AbilityTooltip:SetAction(actionBarSlotIndex, hotbarCategory)
+            AbilityTooltip:SetAbilityId(GetSlotTrueBoundId(actionBarSlotIndex, hotbarCategory))
         end
     end)
 
