@@ -44,6 +44,65 @@ Effects.IsWeaponAttack =
 }
 
 --------------------------------------------------------------------------------------------------------------------------------
+-- List of abilities flagged as a Toggle. For the purpose of adding a "T" label to the buff icon.
+--------------------------------------------------------------------------------------------------------------------------------
+Effects.IsToggle =
+{
+    -- Innate
+    [20299] = true, -- Sneak -- Used for hidden
+    [20309] = true, -- Hidden -- Used for invisibility
+    [40165] = true, -- Scene Choreo Brace (Monster Fight))
+    [29761] = true, -- Brace (Guard)
+
+    -- Sets
+    [117082] = true, -- Frozen Watcher (Frozen Watcher)
+    [134930] = true, -- Duneripper's Scales (Duneripper)
+    [135554] = true, -- Grave Guardian (Grave Guardian's)
+
+    -- Sorcerer
+    [23304] = true, -- Summon Unstable Familiar
+    [23319] = true, -- Summon Unstable Clannfear
+    [23316] = true, -- Summon Volatile Familiar
+    [24613] = true, -- Summon Winged Twilight
+    [24636] = true, -- Summon Twilight Tormentor
+    [24639] = true, -- Summon Twilight Matriarch
+    [24785] = true, -- Overload
+    [24806] = true, -- Energy Overload
+    [24804] = true, -- Power Overload
+
+    -- Warden
+    [85982] = true, -- Feral Guardian
+    [85986] = true, -- Eternal Guardian
+    [85990] = true, -- Wild Guardian
+
+    -- Psijic Order
+    [103923] = true, -- Concentrated Barrier
+    [103966] = true, -- Concentrated Barrier
+    [103543] = true, -- Mend Wounds
+    [103747] = true, -- Mend Spirit
+    [103755] = true, -- Symbiosis
+    [103492] = true, -- Meditate
+    [103652] = true, -- Deep Thoughts
+    [103665] = true, -- Introspection
+
+    -- Support
+    [80923] = true, -- Guard (Guard)
+    [80947] = true, -- Mystic Guard (Mystic Guard)
+    [80983] = true, -- Stalwart Guard (Stalwart Guard)
+
+    -- Vampire
+    [132141] = true, -- Blood Frenzy
+    [134160] = true, -- Simmering Frenzy
+    [135841] = true, -- Sated Fury
+    [32986] = true,  -- Mist Form
+    [38963] = true,  -- Elusive Mist
+    [38965] = true,  -- Blood Mist
+
+    -- NPC Abilities
+    [44258] = true, -- Magelight (Soulbrander)
+}
+
+--------------------------------------------------------------------------------------------------------------------------------
 -- Context Based Hidden Effects - Used by SpellCastBuffs.UpdateContextHideList to bulk hide certain abilities from displaying Buffs/Debuffs in the menu options.
 --------------------------------------------------------------------------------------------------------------------------------
 

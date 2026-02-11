@@ -11,11 +11,19 @@ local Data = LuiData.Data
 local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
--- LuiData for the most part overwrites default ability tooltips due to the fact they are only exposed for buffs/debuffs that are on the player. In some cases there is no description with scaling or we need to still use the default where possible.
+-- Table of NAME or ID's to add a third line to the tooltip. Any ability listed here should use its source ability as the tooltip, and this added 3 line will describe the effect. Used for major/minor effects & potions/poison primarily.
+--------------------------------------------------------------------------------------------------------------------------------
+Effects.TooltipNameOverride =
+{
+    -- TODO: Maybe remove
+}
+
+--------------------------------------------------------------------------------------------------------------------------------
+-- LUIE for the most part overwrites default ability tooltips due to the fact they are only exposed for buffs/debuffs that are on the player. In some cases there is no description with scaling or we need to still use the default where possible.
 -- The most noteworthy case of this is Mundus Boons, where there is a tooltip but no description. We want to display a generic tooltip describing the effect if mousing over another player - but display the default value with accurate number for self.
 --------------------------------------------------------------------------------------------------------------------------------
---- @class (partial) TooltipUseDefault
-local tooltipUseDefault =
+---@class TooltipUseDefault
+Effects.TooltipUseDefault =
 {
     [13940] = true, -- Boon: The Warrior
     [13943] = true, -- Boon: The Mage
@@ -31,6 +39,3 @@ local tooltipUseDefault =
     [13984] = true, -- Boon: The Shadow
     [13985] = true, -- Boon: The Tower
 }
-
---- @class (partial) TooltipUseDefault
-Effects.TooltipUseDefault = tooltipUseDefault
