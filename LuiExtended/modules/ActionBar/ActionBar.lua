@@ -126,7 +126,7 @@ local g_potionFont                                        -- Font for Potion Tim
 local g_ultimateFont                                      -- Font for Ultimate Percentage Label
 local g_castbarFont                                       -- Font for Castbar Label & Timer
 local g_ProcSound                                         -- Proc Sound
-local g_boundArmamentsPlayed = nil                        -- Specific variable to lockout Bound Armaments/Grim Focus from playing a proc sound at 5 stacks to only once per 5 seconds.
+local g_boundArmamentsPlayed = {}                        -- Specific variable to lockout Bound Armaments/Grim Focus from playing a proc sound at 5 stacks to only once per 5 seconds.
 local g_disableProcSound = {}                             -- When we play a proc sound from a bar ability changing (like power lash) we put a 3 sec ICD on it so it doesn't spam when mousing on/off a target, etc
 local g_hotbarCategory = GetActiveHotbarCategory()        -- Set on initialization and when we swap weapons to determine the current hotbar category
 --- @type {[integer]:ActionButton}
@@ -1739,8 +1739,9 @@ local isStackBaseAbility =
 --- @param sourceType CombatUnitType
 --- @param passThrough any
 --- @param savedId integer
-function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType, passThrough, savedId) -- If we're displaying a fake bar highlight then bail out here (sometimes we need a fake aura that doesn't end to simulate effects that can be overwritten, such as Major/Minor buffs. Technically we don't want to stop the
-    -- highlight of the original ability since we can only track one buff per slot and overwriting the buff with a longer duration buff shouldn't throw the player off by making the glow disappear earlier.
+function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType, passThrough, savedId)
+    -- If we're displaying a fake bar highlight then bail out here (sometimes we need a fake aura that doesn't end to simulate effects that can be overwritten, such as Major/Minor buffs.
+    -- Technically we don't want to stop the highlight of the original ability since we can only track one buff per slot and overwriting the buff with a longer duration buff shouldn't throw the player off by making the glow disappear earlier.
     if g_barFakeAura[abilityId] and not passThrough then
         return
     end
