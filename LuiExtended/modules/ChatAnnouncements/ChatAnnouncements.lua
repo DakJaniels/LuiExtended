@@ -1504,7 +1504,7 @@ local CURRENCY_CONFIGS =
         total = "CurrencyEndeavorsShowTotal",
         messageTotal = "CurrencyMessageTotalEndeavors",
     },
-    [CURT_ENDLESS_DUNGEON] =
+    [CURT_ARCHIVAL_FORTUNES] =
     {
         enabled = "CurrencyEndlessChange",
         color = "CurrencyEndlessColorize",
