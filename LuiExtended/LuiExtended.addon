@@ -56,7 +56,6 @@ frontend/Changelog.xml
 frontend/CombatText.xml
 frontend/CrowdControlTracker.xml
 frontend/InfoPanel.xml
-frontend/SpellCastBuffs.xml
 frontend/SynergyTracker.xml
 frontend/UnitFrames.xml
 
@@ -119,8 +118,12 @@ modules/CombatInfo/CombatInfo.lua
 modules/InfoPanel/InfoPanel.lua
 
 # Modules - Spell Cast Buffs
-modules/SpellCastBuffs/Namespace.lua
 modules/SpellCastBuffs/SpellCastBuffs.lua
+modules/SpellCastBuffs/Collectibles.lua
+modules/SpellCastBuffs/Cyrodiil.lua
+modules/SpellCastBuffs/Stealth.lua
+modules/SpellCastBuffs/Debug.lua
+modules/SpellCastBuffs/Werewolf.lua
 
 # Modules - Slash Commands
 modules/SlashCommands/SlashCommands.lua
