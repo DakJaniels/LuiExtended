@@ -3329,7 +3329,7 @@ function UnitFrames.CustomFramesApplyLayoutCompanion(unhide)
 
     companion:SetDimensions(UnitFrames.SV.CompanionWidth, UnitFrames.SV.CompanionHeight)
     unitFrame.control:ClearAnchors()
-    unitFrame.control:SetAnchorFill()
+    unitFrame.control:SetAnchorFill(companion)
     unitFrame.control:SetDimensions(UnitFrames.SV.CompanionWidth, UnitFrames.SV.CompanionHeight)
     unitFrame.name:SetDimensions(UnitFrames.SV.CompanionWidth - UnitFrames.SV.CompanionNameClip - 10, UnitFrames.SV.CompanionHeight - 2)
     unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.CompanionWidth - 50, UnitFrames.SV.CompanionHeight - 2)
