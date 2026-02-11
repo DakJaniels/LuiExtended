@@ -107,6 +107,11 @@ local function GetAchievementInfoIcon(achievementId)
     return icon
 end
 
+local function escapePercents(s)
+    return s and s:gsub("%%", "%%%%") or s
+end
+
+
 local g_firstLoad = true
 
 local ChatEventFormattersDelete =
@@ -337,7 +342,9 @@ function ChatAnnouncements.RegisterGoldEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_COD_CHANGED)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_REMOVED)
 
-    eventManager:RegisterForEvent(moduleName, EVENT_CURRENCY_UPDATE, ChatAnnouncements.OnCurrencyUpdate)
+    eventManager:RegisterForEvent(moduleName, EVENT_CURRENCY_UPDATE, function (_, currencyType, currencyLocation, newAmount, oldAmount, reason, reasonSupplementaryInfo)
+        ChatAnnouncements.OnCurrencyUpdate(currencyType, currencyLocation, newAmount, oldAmount, reason, reasonSupplementaryInfo)
+    end)
     eventManager:RegisterForEvent(moduleName, EVENT_LOOT_UPDATED, ChatAnnouncements.OnLootUpdated)
 end
 
@@ -1410,25 +1417,24 @@ end
 
 --- - **EVENT_CURRENCY_UPDATE **
 ---
---- @param eventId integer
 --- @param currencyType CurrencyType
 --- @param currencyLocation CurrencyLocation
 --- @param newAmount integer
 --- @param oldAmount integer
 --- @param reason CurrencyChangeReason
 --- @param reasonSupplementaryInfo integer
-function ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocation, newAmount, oldAmount, reason, reasonSupplementaryInfo)
+function ChatAnnouncements.OnCurrencyUpdate(currencyType, currencyLocation, newAmount, oldAmount, reason, reasonSupplementaryInfo)
     -- DEBUG
-    -- if LUIE.IsDevDebugEnabled() then
-    --     local traceback = "Currency Update:\n" ..
-    --         "--> currencyType: " .. tostring(currencyType) .. "\n" ..
-    --         "--> currencyLocation: " .. tostring(currencyLocation) .. "\n" ..
-    --         "--> newAmount: " .. tostring(newAmount) .. "\n" ..
-    --         "--> oldAmount: " .. tostring(oldAmount) .. "\n" ..
-    --         "--> reason: " .. tostring(reason) .. "\n" ..
-    --         "--> reasonSupplementaryInfo: " .. tostring(reasonSupplementaryInfo)
-    --     Debug(traceback)
-    -- end
+    if LUIE.IsDevDebugEnabled() then
+        local traceback = "Currency Update:\n" ..
+            "--> currencyType: " .. tostring(currencyType) .. "\n" ..
+            "--> currencyLocation: " .. tostring(currencyLocation) .. "\n" ..
+            "--> newAmount: " .. tostring(newAmount) .. "\n" ..
+            "--> oldAmount: " .. tostring(oldAmount) .. "\n" ..
+            "--> reason: " .. tostring(reason) .. "\n" ..
+            "--> reasonSupplementaryInfo: " .. tostring(reasonSupplementaryInfo)
+        Debug(traceback)
+    end
 
     if currencyLocation ~= CURRENCY_LOCATION_CHARACTER and currencyLocation ~= CURRENCY_LOCATION_ACCOUNT then
         return
@@ -1921,29 +1927,39 @@ end
 --- @param currencyTypeColor string
 --- @param currencyIcon string
 --- @param currencyName string
---- @param currencyTotal string
+--- @param currencyTotal boolean
 --- @param messageChange string
 --- @param messageTotal string
 --- @param messageType LUIE_CURRENCY_TYPE
 --- @param carriedItem string
 --- @param carriedItemTotal string
 function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, messageType, carriedItem, carriedItemTotal)
-    local messageP1 -- First part of message - Change
-    local messageP2 -- Second part of the message (if enabled) - Total
-    local item
-    local name
+    messageType = messageType or ""
+    changeColor = changeColor or ""
+    currencyTypeColor = currencyTypeColor or ""
+    currencyIcon = currencyIcon or ""
+    changeType = changeType or ""
+    currencyName = currencyName or ""
+    formattedValue = formattedValue or ""
+    messageChange = messageChange or ""
+    messageTotal = messageTotal or ""
+    carriedItem = carriedItem or ""
+    carriedItemTotal = carriedItemTotal or ""
 
-    messageP1 = ("|r|c" .. currencyTypeColor .. currencyIcon .. " " .. changeType .. currencyName .. "|r|c" .. changeColor)
+    local isVendor = messageType == "LUIE_CURRENCY_VENDOR"
+    local isHeraldry = messageType == "LUIE_CURRENCY_HERALDRY"
+    local isPostage = messageType == "LUIE_CURRENCY_POSTAGE"
+    local showVendorTotal = isVendor and ChatAnnouncements.SV.Inventory.LootVendorTotalCurrency
+    local shouldBuildTotal = (currencyTotal and not isHeraldry) or showVendorTotal
+    local shouldFormatTotal = currencyTotal or showVendorTotal
+    local shouldShowTotal = (currencyTotal and not isHeraldry and not isVendor and not isPostage) or showVendorTotal
 
-    if (currencyTotal and messageType ~= "LUIE_CURRENCY_HERALDRY") or (messageType == "LUIE_CURRENCY_VENDOR" and ChatAnnouncements.SV.Inventory.LootVendorTotalCurrency) then
-        messageP2 = ("|r|c" .. currencyTypeColor .. currencyIcon .. " " .. formattedValue .. "|r|c" .. changeColor)
-    else
-        messageP2 = "|r"
-    end
+    local messageP1 = string_format("|r|c%s%s %s%s|r|c%s", currencyTypeColor, currencyIcon, changeType, currencyName, changeColor)
+    local messageP2 = shouldBuildTotal and string_format("|r|c%s%s %s|r|c%s", currencyTypeColor, currencyIcon, formattedValue, changeColor) or "|r"
 
     local formattedMessageP1
     if messageType == "LUIE_CURRENCY_BAG" or messageType == "LUIE_CURRENCY_BANK" then
-        formattedMessageP1 = (string_format(messageChange, ResolveStorageType(changeColor, messageType), messageP1))
+        formattedMessageP1 = string_format(messageChange, ResolveStorageType(changeColor, messageType), messageP1)
         -- TODO: Fix later
         --[[
     elseif messageType == "LUIE_CURRENCY_HERALDRY" then
@@ -1953,32 +1969,33 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
         ]]
         --
     elseif messageType == "LUIE_CURRENCY_RIDING_SPEED" or messageType == "LUIE_CURRENCY_RIDING_CAPACITY" or messageType == "LUIE_CURRENCY_RIDING_STAMINA" then
-        formattedMessageP1 = (string_format(messageChange, ResolveRidingStats(changeColor, messageType), messageP1))
-    elseif messageType == "LUIE_CURRENCY_VENDOR" then
-        item = string_format("|r" .. carriedItem .. "|c" .. changeColor)
-        formattedMessageP1 = (string_format(messageChange, item, messageP1))
+        formattedMessageP1 = string_format(messageChange, ResolveRidingStats(changeColor, messageType), messageP1)
+    elseif isVendor then
+        local item = string_format("|r%s|c%s", carriedItem, changeColor)
+        formattedMessageP1 = string_format(messageChange, item, messageP1)
     elseif messageType == "LUIE_CURRENCY_TRADE" then
-        name = string_format("|r" .. ChatAnnouncements.tradeTarget .. "|c" .. changeColor)
-        formattedMessageP1 = (string_format(messageChange, messageP1, name))
+        local tradeTarget = ChatAnnouncements.tradeTarget or ""
+        local name = string_format("|r%s|c%s", tradeTarget, changeColor)
+        formattedMessageP1 = string_format(messageChange, messageP1, name)
     elseif messageType == "LUIE_CURRENCY_MAIL" then
         -- Use currentMailSender which was set from the queue when currency change occurred
         -- Don't use Mail.target as fallback during take all, as it gets contaminated
-        local mailSender = ChatAnnouncements.currentMailSender
-        name = string_format("|r" .. mailSender .. "|c" .. changeColor)
-        formattedMessageP1 = (string_format(messageChange, messageP1, name))
+        local mailSender = ChatAnnouncements.currentMailSender or ""
+        local name = string_format("|r%s|c%s", mailSender, changeColor)
+        formattedMessageP1 = string_format(messageChange, messageP1, name)
     else
-        formattedMessageP1 = (string_format(messageChange, messageP1))
+        formattedMessageP1 = string_format(messageChange, messageP1)
     end
-    local formattedMessageP2 = (currencyTotal or (messageType == "LUIE_CURRENCY_VENDOR" and ChatAnnouncements.SV.Inventory.LootVendorTotalCurrency)) and (string_format(messageTotal, messageP2)) or messageP2
+    local formattedMessageP2 = shouldFormatTotal and ((messageTotal ~= "" and string_format(messageTotal, messageP2)) or messageP2) or messageP2
     local finalMessage
-    if currencyTotal and messageType ~= "LUIE_CURRENCY_HERALDRY" and messageType ~= "LUIE_CURRENCY_VENDOR" and messageType ~= "LUIE_CURRENCY_POSTAGE" or (messageType == "LUIE_CURRENCY_VENDOR" and ChatAnnouncements.SV.Inventory.LootVendorTotalCurrency) then
-        if messageType == "LUIE_CURRENCY_VENDOR" then
+    if shouldShowTotal then
+        if isVendor then
             finalMessage = string_format("|c%s%s|r%s |c%s%s|r", changeColor, formattedMessageP1, carriedItemTotal, changeColor, formattedMessageP2)
         else
             finalMessage = string_format("|c%s%s|r |c%s%s|r", changeColor, formattedMessageP1, changeColor, formattedMessageP2)
         end
     else
-        if messageType == "LUIE_CURRENCY_VENDOR" then
+        if isVendor then
             finalMessage = string_format("|c%s%s|r%s", changeColor, formattedMessageP1, carriedItemTotal)
         else
             finalMessage = string_format("|c%s%s|r", changeColor, formattedMessageP1)
