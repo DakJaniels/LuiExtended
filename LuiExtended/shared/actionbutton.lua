@@ -84,111 +84,110 @@ local function SetupEmptyActionSlot(slotObject, slotId)
     slotObject:Clear()
 end
 
-SetupSlotHandlers =
-{
-    [ACTION_TYPE_ABILITY]         = SetupAbilitySlot,
-    [ACTION_TYPE_ITEM]            = SetupItemSlot,
-    [ACTION_TYPE_CRAFTED_ABILITY] = SetupAbilitySlot,
-    [ACTION_TYPE_COLLECTIBLE]     = SetupCollectibleActionSlot,
-    [ACTION_TYPE_QUEST_ITEM]      = SetupQuestItemActionSlot,
-    [ACTION_TYPE_EMOTE]           = SetupEmoteActionSlot,
-    [ACTION_TYPE_QUICK_CHAT]      = SetupQuickChatActionSlot,
-    [ACTION_TYPE_NOTHING]         = SetupEmptyActionSlot,
-}
+function LUIE.HookActionButton()
+    SetupSlotHandlers =
+    {
+        [ACTION_TYPE_ABILITY]         = SetupAbilitySlot,
+        [ACTION_TYPE_ITEM]            = SetupItemSlot,
+        [ACTION_TYPE_CRAFTED_ABILITY] = SetupAbilitySlot,
+        [ACTION_TYPE_COLLECTIBLE]     = SetupCollectibleActionSlot,
+        [ACTION_TYPE_QUEST_ITEM]      = SetupQuestItemActionSlot,
+        [ACTION_TYPE_EMOTE]           = SetupEmoteActionSlot,
+        [ACTION_TYPE_QUICK_CHAT]      = SetupQuickChatActionSlot,
+        [ACTION_TYPE_NOTHING]         = SetupEmptyActionSlot,
+    }
 
-ZO_PreHook(ActionButton, "UpdateActivationHighlight", function (self)
-    local slotNum = self:GetSlot()
-    local hotbarCategory = self:GetHotbarCategory()
-    local slotType = GetSlotType(slotNum, hotbarCategory)
-    local slotIsEmpty = (slotType == ACTION_TYPE_NOTHING)
-    local abilityId = GetSlotTrueBoundId(slotNum, hotbarCategory)
+    ActionButton["UpdateActivationHighlight"] = function (self)
+        local slotNum = self:GetSlot()
+        local hotbarCategory = self:GetHotbarCategory()
+        local slotType = GetSlotType(slotNum, hotbarCategory)
+        local slotIsEmpty = (slotType == ACTION_TYPE_NOTHING)
+        local abilityId = GetSlotTrueBoundId(slotNum, hotbarCategory)
 
-    local showHighlight = not slotIsEmpty and (ActionSlotHasActivationHighlight(slotNum, hotbarCategory) or Effects.IsAbilityActiveGlow[abilityId] == true) and not self.useFailure and not self.showingCooldown
-    local isShowingHighlight = self.activationHighlight:IsControlHidden() == false
+        local showHighlight = not slotIsEmpty and (ActionSlotHasActivationHighlight(slotNum, hotbarCategory) or Effects.IsAbilityActiveGlow[abilityId] == true) and not self.useFailure and not self.showingCooldown
+        local isShowingHighlight = self.activationHighlight:IsControlHidden() == false
 
-    if showHighlight ~= isShowingHighlight then
-        self.activationHighlight:SetHidden(not showHighlight)
+        if showHighlight ~= isShowingHighlight then
+            self.activationHighlight:SetHidden(not showHighlight)
 
-        if showHighlight then
-            local _, _, activationAnimationTexture = GetSlotTexture(slotNum, hotbarCategory)
-            self.activationHighlight:SetTexture(activationAnimationTexture)
+            if showHighlight then
+                local _, _, activationAnimationTexture = GetSlotTexture(slotNum, hotbarCategory)
+                self.activationHighlight:SetTexture(activationAnimationTexture)
 
-            local anim = self.activationHighlight.animation
-            if not anim then
-                anim = CreateSimpleAnimation(ANIMATION_TEXTURE, self.activationHighlight)
-                anim:SetImageData(64, 1)
-                anim:SetFramerate(30)
-                anim:GetTimeline():SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
+                local anim = self.activationHighlight.animation
+                if not anim then
+                    anim = CreateSimpleAnimation(ANIMATION_TEXTURE, self.activationHighlight)
+                    anim:SetImageData(64, 1)
+                    anim:SetFramerate(30)
+                    anim:GetTimeline():SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
 
-                self.activationHighlight.animation = anim
-            end
+                    self.activationHighlight.animation = anim
+                end
 
-            anim:GetTimeline():PlayFromStart()
-        else
-            local anim = self.activationHighlight.animation
-            if anim then
-                anim:GetTimeline():Stop()
+                anim:GetTimeline():PlayFromStart()
+            else
+                local anim = self.activationHighlight.animation
+                if anim then
+                    anim:GetTimeline():Stop()
+                end
             end
         end
     end
-    return true
-end)
 
-ZO_PreHook(ActionButton, "UpdateState", function (self)
-    local slotNum = self:GetSlot()
-    local hotbarCategory = self:GetHotbarCategory()
-    local slotType = GetSlotType(slotNum, hotbarCategory)
-    local slotIsEmpty = (slotType == ACTION_TYPE_NOTHING)
-    local abilityId = GetSlotTrueBoundId(slotNum, hotbarCategory)
+    ActionButton["UpdateState"] = function (self)
+        local slotNum = self:GetSlot()
+        local hotbarCategory = self:GetHotbarCategory()
+        local slotType = GetSlotType(slotNum, hotbarCategory)
+        local slotIsEmpty = (slotType == ACTION_TYPE_NOTHING)
+        local abilityId = GetSlotTrueBoundId(slotNum, hotbarCategory)
 
-    self.button.actionId = GetSlotTrueBoundId(slotNum, hotbarCategory)
+        self.button.actionId = GetSlotTrueBoundId(slotNum, hotbarCategory)
 
-    self:UpdateUseFailure()
+        self:UpdateUseFailure()
 
-    local isToggled = IsSlotToggled(slotNum, hotbarCategory) == true or Effects.IsAbilityActiveHighlight[abilityId] == true
-    self.status:SetHidden(slotIsEmpty or not isToggled)
+        local isToggled = IsSlotToggled(slotNum, hotbarCategory) == true or Effects.IsAbilityActiveHighlight[abilityId] == true
+        self.status:SetHidden(slotIsEmpty or not isToggled)
 
-    self:UpdateActivationHighlight()
-    self:UpdateCooldown(FORCE_SUPPRESS_COOLDOWN_SOUND)
-    return true
-end)
-
-ZO_PreHook(ActionButton, "ApplyStyle", function (self, template)
-    ApplyTemplateToControl(self.slot, template)
-
-    local isGamepad = IsInGamepadPreferredMode()
-    self.button:SetNormalTexture(isGamepad and "" or ACTION_BUTTON_BORDERS.normal)
-    self.button:SetPressedTexture(isGamepad and "" or ACTION_BUTTON_BORDERS.mouseDown)
-    self.countText:SetFont(isGamepad and "ZoFontGamepadBold27" or "ZoFontGameShadow")
-    self:ApplySwapAnimationStyle()
-
-    if ZO_ActionBar_IsUltimateSlot(self:GetSlot(), self:GetHotbarCategory()) then
-        local decoration = self.slot:GetNamedChild("Decoration")
-        if decoration then
-            decoration:SetHidden(isGamepad)
-        end
+        self:UpdateActivationHighlight()
+        self:UpdateCooldown(FORCE_SUPPRESS_COOLDOWN_SOUND)
     end
 
-    if self.showingCooldown then
-        self.cooldown:SetHidden(isGamepad)
+    ActionButton["ApplyStyle"] = function (self, template)
+        WINDOW_MANAGER:ApplyTemplateToControl(self.slot, template)
 
-        if isGamepad then
-            local slotNum = self:GetSlot()
-            local hotbarCategory = self:GetHotbarCategory()
-            local remain = GetSlotCooldownInfo(slotNum, hotbarCategory)
-            self:PlayAbilityUsedBounce(BOUNCE_DURATION_MS + remain)
+        local isGamepad = IsInGamepadPreferredMode()
+        self.button:SetNormalTexture(isGamepad and "" or ACTION_BUTTON_BORDERS.normal)
+        self.button:SetPressedTexture(isGamepad and "" or ACTION_BUTTON_BORDERS.mouseDown)
+        self.countText:SetFont(isGamepad and "ZoFontGamepadBold27" or "ZoFontGameShadow")
+        self:ApplySwapAnimationStyle()
 
-            if not self.itemQtyFailure then
-                self.icon:SetDesaturation(0)
+        if ZO_ActionBar_IsUltimateSlot(self:GetSlot(), self:GetHotbarCategory()) then
+            local decoration = self.slot:GetNamedChild("Decoration")
+            if decoration then
+                decoration:SetHidden(isGamepad)
+            end
+        end
+
+        if self.showingCooldown then
+            self.cooldown:SetHidden(isGamepad)
+
+            if isGamepad then
+                local slotNum = self:GetSlot()
+                local hotbarCategory = self:GetHotbarCategory()
+                local remain = GetSlotCooldownInfo(slotNum, hotbarCategory)
+                self:PlayAbilityUsedBounce(BOUNCE_DURATION_MS + remain)
+
+                if not self.itemQtyFailure then
+                    self.icon:SetDesaturation(0)
+                end
+            else
+                self:ResetBounceAnimation()
             end
         else
             self:ResetBounceAnimation()
         end
-    else
-        self:ResetBounceAnimation()
-    end
 
-    self:SetCooldownEdgeState(self.showingCooldown)
-    self:UpdateUsable()
-    return true
-end)
+        self:SetCooldownEdgeState(self.showingCooldown)
+        self:UpdateUsable()
+    end
+end
