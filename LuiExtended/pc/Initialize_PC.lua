@@ -46,6 +46,7 @@ end
 
 function LUIE:InitializeHooks()
     self.API_Hooks()
+    self.HookActionButton()
     self.HookSynergy()
     self.InitializeHooksSkillAdvisor()
     self.HookGamePadIcons()

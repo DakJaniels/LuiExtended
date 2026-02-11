@@ -126,7 +126,7 @@ local g_potionFont                                        -- Font for Potion Tim
 local g_ultimateFont                                      -- Font for Ultimate Percentage Label
 local g_castbarFont                                       -- Font for Castbar Label & Timer
 local g_ProcSound                                         -- Proc Sound
-local g_boundArmamentsPlayed = {}                        -- Specific variable to lockout Bound Armaments/Grim Focus from playing a proc sound at 5 stacks to only once per 5 seconds.
+local g_boundArmamentsPlayed = {}                         -- Specific variable to lockout Bound Armaments/Grim Focus from playing a proc sound at 5 stacks to only once per 5 seconds.
 local g_disableProcSound = {}                             -- When we play a proc sound from a bar ability changing (like power lash) we put a 3 sec ICD on it so it doesn't spam when mousing on/off a target, etc
 local g_hotbarCategory = GetActiveHotbarCategory()        -- Set on initialization and when we swap weapons to determine the current hotbar category
 --- @type {[integer]:ActionButton}
@@ -734,6 +734,12 @@ function ActionBar.OnActiveWeaponPairChanged(activeWeaponPair, locked)
     g_hotbarCategory = GetActiveHotbarCategory()
     g_activeWeaponSwapInProgress = true
     UpdateBackbarButtonActionIds()
+end
+
+local function CastBarOnActiveWeaponPairChanged(activeWeaponPair, locked)
+    if not ActionBar.SV.CastBarEnable then
+        return
+    end
     ActionBar.StopCastBar()
 end
 
@@ -1004,6 +1010,8 @@ function ActionBar.RegisterEvents()
     eventManager:UnregisterForEvent(moduleName .. "OakensoulBackbar", EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     eventManager:UnregisterForEvent(moduleName .. "CursorPickup", EVENT_CURSOR_PICKUP)
     eventManager:UnregisterForEvent(moduleName .. "CursorDropped", EVENT_CURSOR_DROPPED)
+    eventManager:UnregisterForEvent(moduleName .. "CastBar", EVENT_ACTIVE_WEAPON_PAIR_CHANGED)
+    eventManager:UnregisterForEvent(moduleName, EVENT_RETICLE_HIDDEN_UPDATE)
     if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
         eventManager:RegisterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT, function (eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
             ActionBar.OnCombatEvent(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
@@ -1035,6 +1043,7 @@ function ActionBar.RegisterEvents()
         eventManager:RegisterForEvent(moduleName, EVENT_GAME_CAMERA_UI_MODE_CHANGED, ActionBar.OnGameCameraUIModeChanged)
         eventManager:RegisterForEvent(moduleName, EVENT_END_SIEGE_CONTROL, ActionBar.OnSiegeEnd)
         eventManager:RegisterForEvent(moduleName, EVENT_ACTION_SLOT_ABILITY_USED, ActionBar.OnAbilityUsed)
+        eventManager:RegisterForEvent(moduleName .. "CastBar", EVENT_ACTIVE_WEAPON_PAIR_CHANGED, CastBarOnActiveWeaponPairChanged)
         -- eventManager:RegisterForEvent(moduleName, EVENT_CLIENT_INTERACT_RESULT, ActionBar.ClientInteractResult)
         -- counter = 0
         -- for id, _ in pairs(Effects.CastBreakOnRemoveEvent) do
