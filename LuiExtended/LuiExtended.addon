@@ -4,7 +4,7 @@
 ## Version: 7.1.4.6
 ## AddOnVersion: 7146
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
-## DependsOn: LuiMedia>=7130 LuiData>=7202
+## DependsOn: LuiMedia>=7130 LuiData>=7203
 ## PCDependsOn: LibAddonMenu-2.0>=41
 ## ConsoleDependsOn: LibHarvensAddonSettings>=20102 LibCombatAlerts LibConsoleDialogs
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705 CrutchAlerts>=20502
