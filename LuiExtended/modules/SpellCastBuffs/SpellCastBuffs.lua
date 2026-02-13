@@ -1547,9 +1547,63 @@ function SpellCastBuffs.ResetSingleIcon(container, buff, AnchorItem)
 end
 
 -- Right Click Cancel Buff function
-function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
-    if upInside and button == MOUSE_BUTTON_INDEX_RIGHT and self.buffSlot and not self.isArtificial then
-        CancelBuff(self.buffSlot)
+function SpellCastBuffs.Buff_OnMouseUp(control, button, upInside)
+    if upInside and button == MOUSE_BUTTON_INDEX_RIGHT then
+        ClearMenu()
+
+        -- Cache values since control may be reused/hidden by object pooling
+        local id, name = control.effectId, control.effectName
+        local buffSlot = control.buffSlot
+
+        -- Blacklist
+        local blacklist = SpellCastBuffs.SV.BlacklistTable
+        local isBlacklisted = blacklist[id] or blacklist[name]
+        AddMenuItem(isBlacklisted and "Remove from Blacklist" or "Add to Blacklist", function ()
+            if isBlacklisted then
+                SpellCastBuffs.RemoveFromCustomList(blacklist, id)
+                SpellCastBuffs.RemoveFromCustomList(blacklist, name)
+            else
+                SpellCastBuffs.AddToCustomList(blacklist, id)
+                SpellCastBuffs.AddToCustomList(blacklist, name)
+            end
+        end)
+
+        -- Prominent Buffs
+        local promBuffs = SpellCastBuffs.SV.PromBuffTable
+        local isPromBuff = promBuffs[id] or promBuffs[name]
+        AddMenuItem(isPromBuff and "Remove from Prominent Buffs" or "Add to Prominent Buffs", function ()
+            if isPromBuff then
+                SpellCastBuffs.RemoveFromCustomList(promBuffs, id)
+                SpellCastBuffs.RemoveFromCustomList(promBuffs, name)
+            else
+                SpellCastBuffs.AddToCustomList(promBuffs, id)
+                SpellCastBuffs.AddToCustomList(promBuffs, name)
+            end
+        end)
+
+        -- Prominent Debuffs
+        local promDebuffs = SpellCastBuffs.SV.PromDebuffTable
+        local isPromDebuff = promDebuffs[id] or promDebuffs[name]
+        AddMenuItem(isPromDebuff and "Remove from Prominent Debuffs" or "Add to Prominent Debuffs", function ()
+            if isPromDebuff then
+                SpellCastBuffs.RemoveFromCustomList(promDebuffs, id)
+                SpellCastBuffs.RemoveFromCustomList(promDebuffs, name)
+            else
+                SpellCastBuffs.AddToCustomList(promDebuffs, id)
+                SpellCastBuffs.AddToCustomList(promDebuffs, name)
+            end
+        end)
+
+        -- Cancel Buff (if possible)
+        if buffSlot then
+            AddMenuItem("Cancel Buff", function ()
+                CancelBuff(buffSlot)
+            end)
+        end
+
+        -- Don't pass control as owner - prevents OnEffectivelyHidden handler
+        -- that would close menu when pooled control gets repositioned/hidden
+        ShowMenu(nil)
     end
 end
 
@@ -1558,20 +1612,19 @@ local function ClearStickyTooltip()
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
 end
 
--- TODO: Localize
 local buffTypes =
 {
-    [LUIE_BUFF_TYPE_BUFF] = "Buff",
-    [LUIE_BUFF_TYPE_DEBUFF] = "Debuff",
-    [LUIE_BUFF_TYPE_UB_BUFF] = "Cosmetic Buff",
-    [LUIE_BUFF_TYPE_UB_DEBUFF] = "Unbreakable Debuff",
-    [LUIE_BUFF_TYPE_GROUND_BUFF_TRACKER] = "AOE Buff Tracker",
-    [LUIE_BUFF_TYPE_GROUND_DEBUFF_TRACKER] = "AOE Debuff Tracker",
-    [LUIE_BUFF_TYPE_GROUND_AOE_BUFF] = "AOE Buff",
-    [LUIE_BUFF_TYPE_GROUND_AOE_DEBUFF] = "AOE Debuff",
-    [LUIE_BUFF_TYPE_ENVIRONMENT_BUFF] = "Zone Buff",
-    [LUIE_BUFF_TYPE_ENVIRONMENT_DEBUFF] = "Hazard",
-    [LUIE_BUFF_TYPE_NONE] = "None",
+    [LUIE_BUFF_TYPE_BUFF] = GetString(LUIE_STRING_BUFF_TYPE_BUFF),
+    [LUIE_BUFF_TYPE_DEBUFF] = GetString(LUIE_STRING_BUFF_TYPE_DEBUFF),
+    [LUIE_BUFF_TYPE_UB_BUFF] = GetString(LUIE_STRING_BUFF_TYPE_UB_BUFF),
+    [LUIE_BUFF_TYPE_UB_DEBUFF] = GetString(LUIE_STRING_BUFF_TYPE_UB_DEBUFF),
+    [LUIE_BUFF_TYPE_GROUND_BUFF_TRACKER] = GetString(LUIE_STRING_BUFF_TYPE_GROUND_BUFF_TRACKER),
+    [LUIE_BUFF_TYPE_GROUND_DEBUFF_TRACKER] = GetString(LUIE_STRING_BUFF_TYPE_GROUND_DEBUFF_TRACKER),
+    [LUIE_BUFF_TYPE_GROUND_AOE_BUFF] = GetString(LUIE_STRING_BUFF_TYPE_GROUND_AOE_BUFF),
+    [LUIE_BUFF_TYPE_GROUND_AOE_DEBUFF] = GetString(LUIE_STRING_BUFF_TYPE_GROUND_AOE_DEBUFF),
+    [LUIE_BUFF_TYPE_ENVIRONMENT_BUFF] = GetString(LUIE_STRING_BUFF_TYPE_ENVIRONMENT_BUFF),
+    [LUIE_BUFF_TYPE_ENVIRONMENT_DEBUFF] = GetString(LUIE_STRING_BUFF_TYPE_ENVIRONMENT_DEBUFF),
+    [LUIE_BUFF_TYPE_NONE] = GetString(LUIE_STRING_BUFF_TYPE_NONE),
 }
 
 function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
@@ -1582,11 +1635,9 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
         GameTooltip:AddLine("", "", ZO_NORMAL_TEXT:UnpackRGB())
         -- Add Ability ID Line
         if SpellCastBuffs.SV.TooltipAbilityId then
-            local labelAbilityId = control.effectId and control.effectId or "None"
-            if labelAbilityId == "Fake" then
-                artificial = true
-            end
-            if artificial then
+            local labelAbilityId = control.effectId or "None"
+            local isArtificial = labelAbilityId == "Fake" and true or artificial
+            if isArtificial then
                 labelAbilityId = "Artificial"
             end
             GameTooltip:AddHeaderLine("Ability ID", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
@@ -1596,7 +1647,7 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
 
         -- Add Buff Type Line
         if SpellCastBuffs.SV.TooltipBuffType then
-            local buffType = control.buffType and control.buffType or LUIE_BUFF_TYPE_NONE
+            local buffType = control.buffType or LUIE_BUFF_TYPE_NONE
             local effectId = control.effectId
             if effectId and Effects.EffectOverride[effectId] and Effects.EffectOverride[effectId].unbreakable then
                 buffType = buffType + 2
@@ -1610,6 +1661,15 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
             -- Setup tooltips for ground buff/debuff effects
             if effectId and (Effects.AddGroundDamageAura[effectId] or (Effects.EffectOverride[effectId] and Effects.EffectOverride[effectId].groundLabel)) then
                 buffType = buffType + 6
+            end
+
+            -- Setup tooltips for Fake Player Offline Auras
+            if effectId and Effects.FakePlayerOfflineAura[effectId] then
+                if Effects.FakePlayerOfflineAura[effectId].ground then
+                    buffType = 6
+                else
+                    buffType = 5
+                end
             end
 
             GameTooltip:AddHeaderLine("Type", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
@@ -1661,9 +1721,9 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
                     if Effects.EffectOverride[control.effectId].tooltipValue2 then
                         value2 = Effects.EffectOverride[control.effectId].tooltipValue2
                     elseif Effects.EffectOverride[control.effectId].tooltipValue2Mod then
-                        value2 = math.floor(duration + Effects.EffectOverride[control.effectId].tooltipValue2Mod + 0.5)
+                        value2 = zo_floor(duration + Effects.EffectOverride[control.effectId].tooltipValue2Mod + 0.5)
                     elseif Effects.EffectOverride[control.effectId].tooltipValue2Id then
-                        value2 = math.floor(GetAbilityDuration(Effects.EffectOverride[control.effectId].tooltipValue2Id) + 0.5) / 1000
+                        value2 = zo_floor((GetAbilityDuration(Effects.EffectOverride[control.effectId].tooltipValue2Id, nil, "player" or nil) or 0) + 0.5) / 1000
                     else
                         value2 = 0
                     end
@@ -1675,9 +1735,17 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
                 else
                     value3 = 0
                 end
-                duration = math.floor((duration * 10) + 0.5) / 10
+                duration = zo_floor((duration * 10) + 0.5) / 10
 
                 tooltipText = (Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltip) and zo_strformat(Effects.EffectOverride[control.effectId].tooltip, duration, value2, value3) or ""
+
+                -- If there is a special tooltip to use for targets only, then set this now
+                local containerContext = control.container
+                if containerContext == "target1" or containerContext == "target2" or containerContext == "targetb" or containerContext == "targetd" or containerContext == "promb_target" or containerContext == "promd_target" then
+                    if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltipOther then
+                        tooltipText = zo_strformat(Effects.EffectOverride[control.effectId].tooltipOther, duration, value2, value3)
+                    end
+                end
 
                 -- Use separate Veteran difficulty tooltip if applicable.
                 if LUIE.ResolveVeteranDifficulty() == true and Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltipVet then
@@ -1697,14 +1765,14 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
 
                 -- Display Default Description if no internal effect description is present
                 if tooltipText == "" or tooltipText == nil then
-                    if GetAbilityDescription(control.effectId) ~= "" then
-                        tooltipText = GetAbilityDescription(control.effectId)
+                    if GetAbilityDescription(control.effectId, nil, "player" or nil) ~= "" then
+                        tooltipText = GetAbilityDescription(control.effectId, nil, "player" or nil)
                     end
                 end
 
                 -- Dynamic Tooltip if present
                 if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].dynamicTooltip then
-                    tooltipText = LUIE.DynamicTooltip(control.effectId)
+                    tooltipText = LUIE.DynamicTooltip(control.effectId) or tooltipText -- Fallback to original tooltipText if nil
                 end
             else
                 duration = 0
@@ -1718,17 +1786,26 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
             end
         end
 
+        -- Set the Tooltip to be default if custom tooltips aren't enabled
+        if not SpellCastBuffs.SV.TooltipCustom then
+            tooltipText = GetAbilityEffectDescription(control.buffSlot)
+            tooltipText = StringOnlyGSUB(tooltipText, "\n$", "") -- Remove blank end line
+        end
+
         local thirdLine
         local duration = control.duration / 1000
-        if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltipDurFix then
-            duration = duration + Effects.EffectOverride[control.effectId].tooltipDurFix
+
+        if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].duration then
+            duration = duration + Effects.EffectOverride[control.effectId].duration
         end
-        if Effects.TooltipNameOverride[control.effectName] then
-            thirdLine = zo_strformat(Effects.TooltipNameOverride[control.effectName], duration)
-        end
-        if Effects.TooltipNameOverride[control.effectId] then
-            thirdLine = zo_strformat(Effects.TooltipNameOverride[control.effectId], duration)
-        end
+
+        -- if Effects.TooltipNameOverride[control.effectName] then
+        --     thirdLine = zo_strformat(Effects.TooltipNameOverride[control.effectName], duration)
+        -- end
+        -- if Effects.TooltipNameOverride[control.effectId] then
+        --     thirdLine = zo_strformat(Effects.TooltipNameOverride[control.effectId], duration)
+        -- end
+
         -- Have to trim trailing spaces on the end of tooltips
         if tooltipText ~= "" then
             tooltipText = string.match(tooltipText, ".*%S")
@@ -1760,6 +1837,24 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
 
         -- Tooltip Debug
         -- GameTooltip:SetAbilityId(117391)
+
+        -- Debug show default Tooltip on my account
+        -- if LUIE.PlayerDisplayName == "@ArtOfShred" or LUIE.PlayerDisplayName == "@ArtOfShredPTS" --[[or LUIE.PlayerDisplayName == '@dack_janiels']] then
+        if LUIE.IsDevDebugEnabled() then
+            GameTooltip:AddLine("Default Tooltip Below:", "", colorText:UnpackRGBA())
+
+            local newtooltipText
+
+            if GetAbilityEffectDescription(control.buffSlot) ~= "" then
+                newtooltipText = GetAbilityEffectDescription(control.buffSlot)
+            end
+            if newtooltipText ~= "" and newtooltipText ~= nil then
+                GameTooltip:SetVerticalPadding(1)
+                ZO_Tooltip_AddDivider(GameTooltip)
+                GameTooltip:SetVerticalPadding(5)
+                GameTooltip:AddLine(newtooltipText, "", colorText:UnpackRGBA())
+            end
+        end
     end
 end
 
@@ -2374,17 +2469,24 @@ function SpellCastBuffs.OnEffectChanged(eventCode, changeType, effectSlot, effec
     local context = unitTag .. effectType
 
     -- Override for Off-Balance Immunity to show it as a prominent debuff for tracking.
-    if abilityId == 134599 then
-        if context == "reticleover1" then
-            if (SpellCastBuffs.SV.PromDebuffTable[abilityId] or SpellCastBuffs.SV.PromDebuffTable[effectName]) then
+    if abilityId == 134599 or abilityId == 120014 then
+        if context == "reticleover1" or context == "reticleover2" then
+            if SpellCastBuffs.SV.PromDebuffTable[abilityId] or SpellCastBuffs.SV.PromDebuffTable[effectName] then
                 context = "promd_target"
             end
         elseif context == "player1" then
-            if (SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName]) then
+            if SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName] then
                 context = "promb_player"
             end
         end
     else
+        -- Special handling for Bound Armaments - only show in prominent buffs if stack count >= 4
+        if abilityId == 203447 and stackCount < 4 then
+            -- Force context to be non-prominent if stacks are too low
+            if context == "promb_player" then
+                context = "player1"
+            end
+        end
         context = SpellCastBuffs.DetermineContext(context, abilityId, effectName, castByPlayer)
     end
 
