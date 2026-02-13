@@ -313,9 +313,10 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_BUFF_UNLOCKWINDOW),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_UNLOCKWINDOW_TP),
             getFunction = function ()
-                return SpellCastBuffs.SetMovingState
+                return g_BuffsMovingEnabled
             end,
             setFunction = function (v)
+                g_BuffsMovingEnabled = v
                 if v and SpellCastBuffs.SV.lockPositionToUnitFrames == nil then
                     SpellCastBuffs.SV.lockPositionToUnitFrames = false
                 end
