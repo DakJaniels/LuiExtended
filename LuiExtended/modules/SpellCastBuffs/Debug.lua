@@ -81,16 +81,9 @@ function SpellCastBuffs.EventEffectDebug(eventCode, changeType, effectSlot, effe
     end
     unitName = unitName .. " (" .. unitTag .. ")"
 
-    local cmxHIDE
-    if CMX and CMX.CustomAbilityHide and CMX.CustomAbilityHide[abilityId] then
-        cmxHIDE = " + HIDDEN CMX"
-    else
-        cmxHIDE = ""
-    end
-
     local finalString
     if Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].hide then
-        finalString = (iconFormatted .. "|c00E200 [" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. cmxHIDE .. ": [Tag] " .. unitName .. "|r")
+        finalString = (iconFormatted .. "|c00E200 [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. "|r")
         finalString = MillisecondTimestampDebug(finalString)
         -- Use CHAT_ROUTER to bypass some other addons modifying this string
         CHAT_ROUTER:AddSystemMessage(finalString)
@@ -222,8 +215,7 @@ function SpellCastBuffs.TempSlashCheckRemovedAbilities()
     end
 end
 
-local displayName = GetDisplayName()
-if displayName == "@ArtOfShredPTS" or displayName == "@ArtOfShredLegacy" or displayName == "@HammerOfGlory" then
+if LUIE.IsDevDebugEnabled() then
     SLASH_COMMANDS["/filter"] = SpellCastBuffs.TempSlashFilter
     SLASH_COMMANDS["/ground"] = SpellCastBuffs.TempSlashGround
     SLASH_COMMANDS["/zonecheck"] = SpellCastBuffs.TempSlashZoneCheck

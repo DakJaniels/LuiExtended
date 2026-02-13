@@ -377,6 +377,7 @@ function SpellCastBuffs.Initialize(enabled)
     -- Create controls
     -- Create temporary table to store references to scenes locally
     local fragments = {}
+    SpellCastBuffs.hudFragments = fragments
 
     -- We will not create TopLevelWindows when buff frames are locked to Custom Unit Frames
     if SpellCastBuffs.SV.lockPositionToUnitFrames and LUIE.UnitFrames.CustomFrames.player and LUIE.UnitFrames.CustomFrames.player.buffs and LUIE.UnitFrames.CustomFrames.player.debuffs then
@@ -668,7 +669,9 @@ function SpellCastBuffs.Initialize(enabled)
     SpellCastBuffs.RegisterWerewolfEvents()
 
     -- Debug
-    SpellCastBuffs.RegisterDebugEvents()
+    if not IsConsoleUI() then
+        SpellCastBuffs.RegisterDebugEvents()
+    end
 
     -- Variable adjustment if needed
     if not LUIESV.Default[GetDisplayName()]["$AccountWide"].AdjustVarsSCB then
@@ -720,7 +723,7 @@ function SpellCastBuffs.RegisterDebugEvents()
     end
 
     -- Debugs only enabled for my accounts
-    if LUIE.PlayerDisplayName == "@ArtOfShredPTS" or LUIE.PlayerDisplayName == "@ArtOfShredLegacy" then
+    if LUIE.IsDevDebugEnabled() then
         eventManager:RegisterForEvent(moduleName .. "AuthorDebugCombat", EVENT_COMBAT_EVENT, SpellCastBuffs.AuthorCombatDebug)
         eventManager:RegisterForEvent(moduleName .. "AuthorDebugEffect", EVENT_EFFECT_CHANGED, SpellCastBuffs.AuthorEffectDebug)
     end
@@ -1137,6 +1140,20 @@ end
 function SpellCastBuffs.SetMovingState(state)
     if not SpellCastBuffs.Enabled then
         return
+    end
+
+    -- When unlocked, add buff fragments to LibHarvensAddonSettingsScene so preview is visible while settings menu is open.
+    if IsConsoleUI() then
+        local gameMenuScene = sceneManager:GetScene("LibHarvensAddonSettingsScene")
+        if SpellCastBuffs.hudFragments then
+            for _, frag in pairs(SpellCastBuffs.hudFragments) do
+                if state then
+                    gameMenuScene:AddFragment(frag)
+                else
+                    gameMenuScene:RemoveFragment(frag)
+                end
+            end
+        end
     end
 
     local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]

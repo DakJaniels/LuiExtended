@@ -72,7 +72,7 @@ eventManager:RegisterForEvent(LUIE.name, EVENT_ADD_ON_LOADED, function (eventId,
     LUIE.CombatText.Initialize(LUIE.SV.CombatText_Enabled)
     LUIE.InfoPanel.Initialize(LUIE.SV.InfoPanel_Enabled)
     LUIE.UnitFrames.Initialize(LUIE.SV.UnitFrames_Enabled)
-    LUIE.SpellCastBuffs:Initialize(LUIE.SV.SpellCastBuff_Enable)
+    LUIE.SpellCastBuffs.Initialize(LUIE.SV.SpellCastBuff_Enable)
     LUIE.SlashCommands.Initialize(LUIE.SV.SlashCommands_Enable)
     -- -----------------------------------------------------------------------------
     -- Load Timestamp Color
@@ -86,7 +86,7 @@ eventManager:RegisterForEvent(LUIE.name, EVENT_ADD_ON_LOADED, function (eventId,
     LUIE.CombatText.CreateConsoleSettings()
     LUIE.InfoPanel.CreateConsoleSettings()
     LUIE.UnitFrames.CreateConsoleSettings()
-    LUIE.SpellCastBuffs:CreateConsoleSettings()
+    LUIE.SpellCastBuffs.CreateConsoleSettings()
     LUIE.SlashCommands.CreateConsoleSettings()
     -- -----------------------------------------------------------------------------
     -- Register global event listeners
