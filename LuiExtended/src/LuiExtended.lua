@@ -28,8 +28,8 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.1.4.6"
-LUIE.addonVersion = 7146
+LUIE.version = "7.1.4.7"
+LUIE.addonVersion = 7147
 LUIE.author = "ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
 LUIE.github = "https://github.com/DakJaniels/LuiExtended"
