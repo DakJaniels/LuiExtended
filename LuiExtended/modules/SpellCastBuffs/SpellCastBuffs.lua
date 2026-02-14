@@ -232,6 +232,7 @@ SpellCastBuffs.EffectsList =
 }
 
 local uiTlw = {}                   -- GUI
+--- @type {[string]:TopLevelWindow}
 local containerRouting = {}        -- Routing for Auras
 local g_alignmentDirection = {}    -- Holds alignment direction for all containers
 local g_sortDirection = {}         -- Holds sorting direction for all containers
@@ -527,7 +528,7 @@ function SpellCastBuffs.Initialize(enabled)
     table.insert(fragments, fragmentP2)
 
     -- Separate container for players long term buffs
-    if true then
+    if SpellCastBuffs.SV.LongTermEffectsSeparate then
         uiTlw.player_long = windowManager:CreateTopLevelWindow(nil)
         uiTlw.player_long:SetClampedToScreen(true)
         uiTlw.player_long:SetMouseEnabled(false)
@@ -878,7 +879,7 @@ function SpellCastBuffs.ResetContainerOrientation()
     containerRouting.promd_player = "prominentdebuffs"
 
     -- Separate container for players long term buffs
-    if true then
+    if SpellCastBuffs.SV.LongTermEffectsSeparate then
         uiTlw.player_long:SetHandler("OnMoveStop", function (self)
             if self.alignVertical then
                 SpellCastBuffs.SV.playerVOffsetX = self:GetLeft()
