@@ -249,6 +249,30 @@ local g_ignoreAbilityId = {}       -- Ignored abilityId's on EVENT_COMBAT_EVENT,
 -- Add buff containers into LUIE namespace
 SpellCastBuffs.BuffContainers = uiTlw
 
+--- @type table<number, string>
+local oakensoul = Effects.IsOakenSoul
+
+--- @return boolean
+local function OakensoulEquipped()
+    if GetItemLinkItemId(GetItemLink(BAG_WORN, 11, LINK_STYLE_DEFAULT)) == 187658 or GetItemLinkItemId(GetItemLink(BAG_WORN, 12, LINK_STYLE_DEFAULT)) == 187658 then
+        return true
+    end
+    return false
+end
+
+--- @param buffId number
+--- @return boolean
+local function IsOakensoul(buffId)
+    if OakensoulEquipped() then
+        for id in pairs(oakensoul) do
+            if buffId == id then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 -- Quadratic easing out - decelerating to zero velocity (For buff fade)
 local function EaseOutQuad(t, b, c, d)
     t = t / d
@@ -2249,7 +2273,24 @@ end
 
 -- Runs on the EVENT_EFFECT_CHANGED listener.
 -- This handler fires every long-term effect added or removed
-function SpellCastBuffs.OnEffectChanged(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, castByPlayer)
+--- @param eventId integer
+--- @param changeType EffectResult
+--- @param effectSlot integer
+--- @param effectName string
+--- @param unitTag string
+--- @param beginTime number
+--- @param endTime number
+--- @param stackCount integer
+--- @param iconName string
+--- @param deprecatedBuffType string
+--- @param effectType BuffEffectType
+--- @param abilityType AbilityType
+--- @param statusEffectType StatusEffectType
+--- @param unitName string
+--- @param unitId integer
+--- @param abilityId integer
+--- @param sourceType CombatUnitType
+function SpellCastBuffs.OnEffectChanged(eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
     -- Change the effect type / name before we determine if we want to filter anything else.
     if Effects.EffectOverride[abilityId] then
         effectName = Effects.EffectOverride[abilityId].name or effectName
@@ -2265,6 +2306,11 @@ function SpellCastBuffs.OnEffectChanged(eventCode, changeType, effectSlot, effec
         return
     end
 
+    -- Bail out if this is an effect from Oakensoul
+    if (SpellCastBuffs.SV.HideOakenSoul == true) and IsOakensoul(abilityId) and unitTag == "player" then
+        return
+    end
+
     -- Hide effects if chosen in the options menu
     if hidePlayerEffects[abilityId] and unitTag == "player" then
         return
@@ -2276,7 +2322,7 @@ function SpellCastBuffs.OnEffectChanged(eventCode, changeType, effectSlot, effec
 
     -- If the source of the buff isn't the player or the buff is not on the AbilityId or AbilityName override list then we don't display it
     if unitTag ~= "player" then
-        if effectType == BUFF_EFFECT_TYPE_DEBUFF and not (castByPlayer == COMBAT_UNIT_TYPE_PLAYER) and not (debuffDisplayOverrideId[abilityId] or Effects.DebuffDisplayOverrideName[effectName]) then
+        if effectType == BUFF_EFFECT_TYPE_DEBUFF and not (sourceType == COMBAT_UNIT_TYPE_PLAYER) and not (debuffDisplayOverrideId[abilityId] or Effects.DebuffDisplayOverrideName[effectName]) then
             return
         end
     end
@@ -2504,7 +2550,7 @@ function SpellCastBuffs.OnEffectChanged(eventCode, changeType, effectSlot, effec
                 context = "player1"
             end
         end
-        context = SpellCastBuffs.DetermineContext(context, abilityId, effectName, castByPlayer)
+        context = SpellCastBuffs.DetermineContext(context, abilityId, effectName, sourceType)
     end
 
     -- Exit here if there is no container to hold this effect
@@ -2521,7 +2567,7 @@ function SpellCastBuffs.OnEffectChanged(eventCode, changeType, effectSlot, effec
             local fakeEffectType = Effects.EffectOverride[id] and Effects.EffectOverride[id].type or effectType
             if not (SpellCastBuffs.SV.BlacklistTable[name] or SpellCastBuffs.SV.BlacklistTable[id]) then
                 local simulatedContext = unitTag .. fakeEffectType
-                simulatedContext = SpellCastBuffs.DetermineContext(simulatedContext, id, name, castByPlayer)
+                simulatedContext = SpellCastBuffs.DetermineContext(simulatedContext, id, name, sourceType)
                 SpellCastBuffs.EffectsList[simulatedContext][Effects.EffectCreateSkillAura[abilityId].abilityId] = nil
             end
         end
@@ -2567,7 +2613,7 @@ function SpellCastBuffs.OnEffectChanged(eventCode, changeType, effectSlot, effec
                 local fakeUnbreakable = Effects.EffectOverride[id] and Effects.EffectOverride[id].unbreakable or 0
                 if not (SpellCastBuffs.SV.BlacklistTable[name] or SpellCastBuffs.SV.BlacklistTable[id]) then
                     local simulatedContext = unitTag .. fakeEffectType
-                    simulatedContext = SpellCastBuffs.DetermineContext(simulatedContext, id, name, castByPlayer)
+                    simulatedContext = SpellCastBuffs.DetermineContext(simulatedContext, id, name, sourceType)
 
                     -- Create Buff
                     local icon = Effects.EffectCreateSkillAura[abilityId].icon or GetAbilityIcon(id)
