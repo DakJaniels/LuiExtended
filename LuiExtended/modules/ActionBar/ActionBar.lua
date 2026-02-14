@@ -1124,6 +1124,7 @@ function ActionBar.RegisterEvents()
     eventManager:RegisterForEvent(moduleName .. "wolf", EVENT_WEREWOLF_STATE_CHANGED, function (_, werewolf)
         g_backbarContainer:SetHidden(werewolf)
     end)
+    eventManager:RegisterForEvent(moduleName, EVENT_ARMORY_BUILD_RESTORE_RESPONSE, ActionBar.BackbarToggleSettings)
     -- Drop callout handlers (mirrors ZOS: show valid/invalid slot highlight when dragging abilities)
     eventManager:RegisterForEvent(moduleName .. "CursorPickup", EVENT_CURSOR_PICKUP, function (_, cursorType, param1, param2, param3)
         if cursorType == MOUSE_CONTENT_ACTION and DROP_CALLOUT_VALIDITY_BY_ACTION_TYPE[param1] then
