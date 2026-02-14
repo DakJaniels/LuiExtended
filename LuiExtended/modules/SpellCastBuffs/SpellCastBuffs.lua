@@ -578,7 +578,7 @@ function SpellCastBuffs.Initialize(enabled)
         if uiTlw[v].preview == nil then
             -- Create background areas for preview position purposes
             -- Preview could use CT_BACKDROP instead of CT_TEXTURE
-            uiTlw[v].preview = windowManager:CreateControl(nil, uiTlw[v], CT_TEXTURE)
+            uiTlw[v].preview = windowManager:CreateControlFromVirtual(nil, uiTlw[v], "ZO_InsetTexture")
             uiTlw[v].preview:SetAnchorFill(uiTlw[v])
             uiTlw[v].preview:SetTexture("/esoui/art/miscellaneous/inset_bg.dds")
             uiTlw[v].preview:SetDrawLayer(DL_BACKGROUND)
@@ -601,8 +601,22 @@ function SpellCastBuffs.Initialize(enabled)
             -- Create table to store created contols for icons
             uiTlw[v].icons = {}
 
+            -- Create object pool for buff icons (reduces control creation overhead)
+            local container = v
+            local effectType = (container == "prominentbuffs" or container == "prominentdebuffs") and 1 or nil
+            local factory = function (pool, key)
+                return SpellCastBuffs.CreateSingleIcon(container, nil, effectType)
+            end
+            local reset = function (control)
+                control:SetHidden(true)
+                control:ClearAnchors()
+            end
+            uiTlw[v].iconPool = ZO_ObjectPool:New(factory, reset, true)
+
             -- add this top level window to global controls list, so it can be hidden
-            if uiTlw[v]:GetType() == CT_TOPLEVELCONTROL then LUIE.Components[moduleName .. v] = uiTlw[v] end
+            if uiTlw[v]:GetType() == CT_TOPLEVELCONTROL then
+                LUIE.Components[moduleName .. v] = uiTlw[v]
+            end
         end
     end
 
@@ -1426,9 +1440,9 @@ function SpellCastBuffs.Reset()
         needs_reset[container] = true
     end
     for _, container in pairs(containerRouting) do
-        if needs_reset[container] then
-            for i = 1, #uiTlw[container].icons do
-                SpellCastBuffs.ResetSingleIcon(container, uiTlw[container].icons[i], uiTlw[container].icons[i - 1])
+        if needs_reset[container] and uiTlw[container].icons then
+            for i, icon in ipairs(uiTlw[container].icons) do
+                SpellCastBuffs.ResetSingleIcon(container, icon, uiTlw[container].icons[i - 1])
             end
         end
         needs_reset[container] = false
@@ -2153,13 +2167,13 @@ function SpellCastBuffs.ApplyFont()
         needs_reset[container] = true
     end
     for _, container in pairs(containerRouting) do
-        if needs_reset[container] then
-            for i = 1, #uiTlw[container].icons do
+        if needs_reset[container] and uiTlw[container].icons then
+            for i, icon in ipairs(uiTlw[container].icons) do
                 -- Set label font
-                uiTlw[container].icons[i].label:SetFont(g_buffsFont)
+                icon.label:SetFont(g_buffsFont)
                 -- Set prominent buff label font
-                if uiTlw[container].icons[i].name then
-                    uiTlw[container].icons[i].name:SetFont(g_prominentFont)
+                if icon.name then
+                    icon.name:SetFont(g_prominentFont)
                 end
             end
         end
@@ -4258,9 +4272,15 @@ function SpellCastBuffs.updateIcons(currentTime, sortedList, container)
         -- Get current buff definition
         local effect = sortedList[i]
         index = index + 1
-        -- Check if the icon for buff #index exists otherwise create new icon
+        -- Check if the icon for buff #index exists otherwise acquire from pool or create
         if uiTlw[container].icons[index] == nil then
-            uiTlw[container].icons[index] = SpellCastBuffs.CreateSingleIcon(container, uiTlw[container].icons[index - 1], effect.type)
+            if uiTlw[container].iconPool then
+                local buff, key = uiTlw[container].iconPool:AcquireObject()
+                SpellCastBuffs.ResetSingleIcon(container, buff, uiTlw[container].icons[index - 1])
+                uiTlw[container].icons[index] = buff
+            else
+                uiTlw[container].icons[index] = SpellCastBuffs.CreateSingleIcon(container, uiTlw[container].icons[index - 1], effect.type)
+            end
         end
 
         -- Calculate remaining time
@@ -4392,9 +4412,17 @@ function SpellCastBuffs.updateIcons(currentTime, sortedList, container)
         end
     end
 
-    -- Hide rest of icons
-    for i = iconsNum + 1, #uiTlw[container].icons do
-        uiTlw[container].icons[i]:SetHidden(true)
+    -- Release or hide excess icons
+    local iconPool = uiTlw[container].iconPool
+    local oldCount = #uiTlw[container].icons
+    for i = iconsNum + 1, oldCount do
+        local buff = uiTlw[container].icons[i]
+        if iconPool and buff and buff.poolKey then
+            iconPool:ReleaseObject(buff.poolKey)
+        else
+            buff:SetHidden(true)
+        end
+        uiTlw[container].icons[i] = nil
     end
 
     -- Save icon number processed to compare in next update iteration
