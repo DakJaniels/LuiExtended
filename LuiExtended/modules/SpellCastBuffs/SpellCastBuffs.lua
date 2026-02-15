@@ -1736,6 +1736,17 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
 end
 
 -- OnMouseEnter for Buff Tooltips
+---
+--- @param control {
+---    buffSlot: number,
+---    buffType: number,
+---    container: unknown,
+---    duration: number,
+---    effectId: number,
+---    effectName: string,
+---    isArtificial: boolean,
+---    tooltip: string,
+--- }
 function SpellCastBuffs.Buff_OnMouseEnter(control)
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
 
