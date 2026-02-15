@@ -64,61 +64,60 @@ end
 --- @param addonName string
 eventManager:RegisterForEvent(LUIE.name, EVENT_ADD_ON_LOADED, function (eventId, addonName)
     -- Only initialize our own addon
-    if LUIE.name ~= addonName then
-        return
+    if addonName == LUIE.name then
+        -- -----------------------------------------------------------------------------
+        -- Load saved variables
+        LoadSavedVars()
+        LUIE.UpdateGuildData(nil, nil, nil, nil)
+        -- -----------------------------------------------------------------------------
+        -- Initialize Hooks
+        LUIE:InitializeHooks()
+        --
+        LUIE.OtherAddonCompatability.isActionDurationReminderEnabled = LUIE.IsItEnabled("ActionDurationReminder")
+        LUIE.OtherAddonCompatability.isFancyActionBarEnabled = LUIE.IsItEnabled("FancyActionBar")
+        LUIE.OtherAddonCompatability.isFancyActionBarPlusEnabled = LUIE.IsItEnabled("FancyActionBar\43")
+        LUIE.OtherAddonCompatability.isWritCreatorEnabled = LUIE.IsItEnabled("DolgubonsLazyWritCreator")
+        -- -----------------------------------------------------------------------------
+        -- Toggle Alert Frame Visibility if needed
+        LUIE.SetupAlertFrameVisibility()
+        LUIE.PlayerNameRaw = GetRawUnitName("player")
+        LUIE.PlayerNameFormatted = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("player"))
+        LUIE.PlayerDisplayName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitDisplayName("player"))
+        LUIE.PlayerFaction = GetUnitAlliance("player")
+        -- -----------------------------------------------------------------------------
+        -- Initialize this addon modules according to user preferences
+        LUIE.ChatAnnouncements.Initialize(LUIE.SV.ChatAnnouncements_Enable)
+        LUIE.ActionBar.Initialize(LUIE.SV.ActionBar_Enabled)
+        LUIE.CombatInfo.Initialize(LUIE.SV.CombatInfo_Enabled)
+        LUIE.CombatText.Initialize(LUIE.SV.CombatText_Enabled)
+        LUIE.InfoPanel.Initialize(LUIE.SV.InfoPanel_Enabled)
+        LUIE.UnitFrames.Initialize(LUIE.SV.UnitFrames_Enabled)
+        LUIE.SpellCastBuffs.Initialize(LUIE.SV.SpellCastBuff_Enable)
+        LUIE.SlashCommands.Initialize(LUIE.SV.SlashCommands_Enable)
+        -- -----------------------------------------------------------------------------
+        -- Load Timestamp Color
+        LUIE.UpdateTimeStampColor()
+        -- -----------------------------------------------------------------------------
+        -- Create settings menus for our addon
+        LUIE.CreateSettings()
+        LUIE.ChatAnnouncements.CreateSettings()
+        LUIE.ActionBar.CreateSettings()
+        LUIE.CombatInfo.CreateSettings()
+        LUIE.CombatText.CreateSettings()
+        LUIE.InfoPanel.CreateSettings()
+        LUIE.UnitFrames.CreateSettings()
+        LUIE.SpellCastBuffs.CreateSettings()
+        LUIE.SlashCommands.CreateSettings()
+        LUIE.SlashCommands.MigrateSettings()
+        -- -----------------------------------------------------------------------------
+        -- Display changelog screen
+        if LUIE.SV.ShowChangeLog == true then
+            LUIE.ChangelogScreen()
+        end
+        -- -----------------------------------------------------------------------------
+        -- Register global event listeners
+        RegisterEvents()
+        -- -----------------------------------------------------------------------------
+        eventManager:UnregisterForEvent(addonName, eventId)
     end
-    -- Once we know it's ours, lets unregister the event listener
-    eventManager:UnregisterForEvent(addonName, eventId)
-    -- -----------------------------------------------------------------------------
-    -- Load saved variables
-    LoadSavedVars()
-    LUIE.UpdateGuildData(nil, nil, nil, nil)
-    -- -----------------------------------------------------------------------------
-    -- Initialize Hooks
-    LUIE:InitializeHooks()
-    --
-    LUIE.OtherAddonCompatability.isActionDurationReminderEnabled = LUIE.IsItEnabled("ActionDurationReminder")
-    LUIE.OtherAddonCompatability.isFancyActionBarEnabled = LUIE.IsItEnabled("FancyActionBar")
-    LUIE.OtherAddonCompatability.isFancyActionBarPlusEnabled = LUIE.IsItEnabled("FancyActionBar\43")
-    LUIE.OtherAddonCompatability.isWritCreatorEnabled = LUIE.IsItEnabled("DolgubonsLazyWritCreator")
-    -- -----------------------------------------------------------------------------
-    -- Toggle Alert Frame Visibility if needed
-    LUIE.SetupAlertFrameVisibility()
-    LUIE.PlayerNameRaw = GetRawUnitName("player")
-    LUIE.PlayerNameFormatted = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("player"))
-    LUIE.PlayerDisplayName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitDisplayName("player"))
-    LUIE.PlayerFaction = GetUnitAlliance("player")
-    -- -----------------------------------------------------------------------------
-    -- Initialize this addon modules according to user preferences
-    LUIE.ChatAnnouncements.Initialize(LUIE.SV.ChatAnnouncements_Enable)
-    LUIE.ActionBar.Initialize(LUIE.SV.ActionBar_Enabled)
-    LUIE.CombatInfo.Initialize(LUIE.SV.CombatInfo_Enabled)
-    LUIE.CombatText.Initialize(LUIE.SV.CombatText_Enabled)
-    LUIE.InfoPanel.Initialize(LUIE.SV.InfoPanel_Enabled)
-    LUIE.UnitFrames.Initialize(LUIE.SV.UnitFrames_Enabled)
-    LUIE.SpellCastBuffs.Initialize(LUIE.SV.SpellCastBuff_Enable)
-    LUIE.SlashCommands.Initialize(LUIE.SV.SlashCommands_Enable)
-    -- -----------------------------------------------------------------------------
-    -- Load Timestamp Color
-    LUIE.UpdateTimeStampColor()
-    -- -----------------------------------------------------------------------------
-    -- Create settings menus for our addon
-    LUIE.CreateSettings()
-    LUIE.ChatAnnouncements.CreateSettings()
-    LUIE.ActionBar.CreateSettings()
-    LUIE.CombatInfo.CreateSettings()
-    LUIE.CombatText.CreateSettings()
-    LUIE.InfoPanel.CreateSettings()
-    LUIE.UnitFrames.CreateSettings()
-    LUIE.SpellCastBuffs.CreateSettings()
-    LUIE.SlashCommands.CreateSettings()
-    LUIE.SlashCommands.MigrateSettings()
-    -- -----------------------------------------------------------------------------
-    -- Display changelog screen
-    if LUIE.SV.ShowChangeLog == true then
-        LUIE.ChangelogScreen()
-    end
-    -- -----------------------------------------------------------------------------
-    -- Register global event listeners
-    RegisterEvents()
 end)
