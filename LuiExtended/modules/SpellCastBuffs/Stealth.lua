@@ -34,8 +34,7 @@ function SpellCastBuffs.SetDisguiseItem()
     -- Determine Context
     local context = SpellCastBuffs.DetermineContextSimple("player1", abilityId, abilityName)
     -- Create Buff
-    SpellCastBuffs.EffectsList[context][abilityId] =
-    {
+    SpellCastBuffs.EffectsList[context][abilityId] = SpellCastBuffs.CreateEffect({
         target = SpellCastBuffs.DetermineTarget(context),
         type = 1,
         id = abilityId,
@@ -48,7 +47,7 @@ function SpellCastBuffs.SetDisguiseItem()
         forced = "long",
         restart = true,
         iconNum = 0
-    }
+    })
 end
 
 -- Called on item slot change for Disguise.
@@ -90,8 +89,7 @@ function SpellCastBuffs.DisguiseStateChanged(eventCode, unitTag, disguiseState)
 
     -- Add disguise icon if we are in any state of disguise
     if (disguiseState == DISGUISE_STATE_DISGUISED or disguiseState == DISGUISE_STATE_DANGER or disguiseState == DISGUISE_STATE_SUSPICIOUS or disguiseState == DISGUISE_STATE_DISCOVERED) then
-        SpellCastBuffs.EffectsList[context][abilityId] =
-        {
+        SpellCastBuffs.EffectsList[context][abilityId] = SpellCastBuffs.CreateEffect({
             target = SpellCastBuffs.DetermineTarget(context),
             type = 1,
             id = abilityId,
@@ -103,7 +101,7 @@ function SpellCastBuffs.DisguiseStateChanged(eventCode, unitTag, disguiseState)
             forced = "short",
             restart = true,
             iconNum = 0
-        }
+        })
     end
 end
 
@@ -146,8 +144,7 @@ function SpellCastBuffs.StealthStateChanged(eventCode, unitTag, stealthState)
         local abilityId = 20299
         local abilityName = Abilities.Innate_Sneak
         context = SpellCastBuffs.DetermineContextSimple(context, abilityId, abilityName)
-        SpellCastBuffs.EffectsList[context][abilityId] =
-        {
+        SpellCastBuffs.EffectsList[context][abilityId] = SpellCastBuffs.CreateEffect({
             target = SpellCastBuffs.DetermineTarget(context),
             type = 1,
             id = abilityId,
@@ -159,14 +156,13 @@ function SpellCastBuffs.StealthStateChanged(eventCode, unitTag, stealthState)
             forced = "short",
             restart = true,
             iconNum = 0
-        }
+        })
         -- Add invisible icon if we are invisible
     elseif (stealthState == STEALTH_STATE_STEALTH or stealthState == STEALTH_STATE_STEALTH_ALMOST_DETECTED) then
         local abilityId = 20309
         local abilityName = Abilities.Innate_Hidden
         context = SpellCastBuffs.DetermineContextSimple(context, abilityId, abilityName)
-        SpellCastBuffs.EffectsList[context][abilityId] =
-        {
+        SpellCastBuffs.EffectsList[context][abilityId] = SpellCastBuffs.CreateEffect({
             target = SpellCastBuffs.DetermineTarget(context),
             type = 1,
             id = abilityId,
@@ -178,6 +174,6 @@ function SpellCastBuffs.StealthStateChanged(eventCode, unitTag, stealthState)
             forced = "short",
             restart = true,
             iconNum = 0
-        }
+        })
     end
 end

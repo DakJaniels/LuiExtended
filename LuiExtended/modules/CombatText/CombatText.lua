@@ -17,6 +17,9 @@ local printToChat = LUIE.PrintToChat
 local eventManager = GetEventManager()
 local chatSystem = ZO_GetChatSystem()
 
+-- Table cache system is now global: use LUIE.GetCachedTable() and LUIE.RecycleTable()
+-- See LuiExtended.lua for implementation details
+
 local panelTitles =
 {
     LUIE_CombatText_Outgoing = GetString(LUIE_STRING_CT_PANEL_OUTGOING),
@@ -173,20 +176,17 @@ function CombatText.ApplyFont()
     end
 end
 
+--- Create or recreate the combat event viewer based on animation type<br>
+--- Uses instance-based callback system via eventListener reference
 function CombatText.CreateCombatEventViewer()
-    if not CombatText.Enabled or not CombatText.poolManager then
+    if not CombatText.Enabled or not CombatText.poolManager or not CombatText.combatEventListener then
         return
     end
 
     -- Remove old combat event viewer if it exists
     if CombatText.combatEventViewer then
-        -- Unregister callbacks
-        local callbackManager = CALLBACK_MANAGER
-        if CombatText.combatEventViewer.callbackRefs and CombatText.combatEventViewer.callbackRefs[CombatTextConstants.eventType.COMBAT] then
-            for _, callbackRef in ipairs(CombatText.combatEventViewer.callbackRefs[CombatTextConstants.eventType.COMBAT]) do
-                callbackManager:UnregisterCallback(CombatTextConstants.eventType.COMBAT, callbackRef)
-            end
-        end
+        -- With ZO_CallbackObject, callbacks are managed by the listener instance
+        -- No manual unregistration needed - just clear the viewer reference
         CombatText.combatEventViewer = nil
     end
 
@@ -194,13 +194,13 @@ function CombatText.CreateCombatEventViewer()
     local animationType = CombatText.SV.animation.animationType
     local newViewer
     if animationType == "cloud" then
-        newViewer = LUIE.CombatTextCombatCloudEventViewer:New(CombatText.poolManager)
+        newViewer = LUIE.CombatTextCombatCloudEventViewer:New(CombatText.poolManager, CombatText.combatEventListener)
     elseif animationType == "hybrid" then
-        newViewer = LUIE.CombatTextCombatHybridEventViewer:New(CombatText.poolManager)
+        newViewer = LUIE.CombatTextCombatHybridEventViewer:New(CombatText.poolManager, CombatText.combatEventListener)
     elseif animationType == "scroll" then
-        newViewer = LUIE.CombatTextCombatScrollEventViewer:New(CombatText.poolManager)
+        newViewer = LUIE.CombatTextCombatScrollEventViewer:New(CombatText.poolManager, CombatText.combatEventListener)
     elseif animationType == "ellipse" then
-        newViewer = LUIE.CombatTextCombatEllipseEventViewer:New(CombatText.poolManager)
+        newViewer = LUIE.CombatTextCombatEllipseEventViewer:New(CombatText.poolManager, CombatText.combatEventListener)
     end
     CombatText.combatEventViewer = newViewer
 end
@@ -293,23 +293,23 @@ function CombatText.Initialize(enabled)
     -- Pool Manager
     CombatText.poolManager = LUIE.CombatTextPoolManager:New(CombatTextConstants.poolType) ---@type LuiExtended.CombatTextPoolManager
 
-    -- Event Listeners
-    LUIE.CombatTextCombatEventListener:New()
-    LUIE.CombatTextPointsAllianceEventListener:New()
-    LUIE.CombatTextPointsExperienceEventListener:New()
-    LUIE.CombatTextPointsChampionEventListener:New()
-    LUIE.CombatTextResourcesPowerEventListener:New()
-    LUIE.CombatTextResourcesUltimateEventListener:New()
-    LUIE.CombatTextResourcesPotionEventListener:New()
-    LUIE.CombatTextDeathListener:New()
+    -- Event Listeners (with ZO_CallbackObject support)
+    CombatText.combatEventListener = LUIE.CombatTextCombatEventListener:New()
+    CombatText.pointsAllianceListener = LUIE.CombatTextPointsAllianceEventListener:New()
+    CombatText.pointsExperienceListener = LUIE.CombatTextPointsExperienceEventListener:New()
+    CombatText.pointsChampionListener = LUIE.CombatTextPointsChampionEventListener:New()
+    CombatText.resourcesPowerListener = LUIE.CombatTextResourcesPowerEventListener:New()
+    CombatText.resourcesUltimateListener = LUIE.CombatTextResourcesUltimateEventListener:New()
+    CombatText.resourcesPotionListener = LUIE.CombatTextResourcesPotionEventListener:New()
+    CombatText.deathListener = LUIE.CombatTextDeathListener:New()
 
-    -- Event Viewers
+    -- Event Viewers (now receive listener references for callback registration)
     -- Memory optimization: Only instantiate the active animation viewer
     CombatText:CreateCombatEventViewer()
-    CombatText.crowdControlEventViewer = LUIE.CombatTextCrowdControlEventViewer:New(CombatText.poolManager)
-    CombatText.pointEventViewer = LUIE.CombatTextPointEventViewer:New(CombatText.poolManager)
-    CombatText.resourceEventViewer = LUIE.CombatTextResourceEventViewer:New(CombatText.poolManager)
-    CombatText.deathEventViewer = LUIE.CombatTextDeathViewer:New(CombatText.poolManager)
+    CombatText.crowdControlEventViewer = LUIE.CombatTextCrowdControlEventViewer:New(CombatText.poolManager, CombatText.combatEventListener)
+    CombatText.pointEventViewer = LUIE.CombatTextPointEventViewer:New(CombatText.poolManager, CombatText.pointsAllianceListener)
+    CombatText.resourceEventViewer = LUIE.CombatTextResourceEventViewer:New(CombatText.poolManager, CombatText.resourcesPowerListener)
+    CombatText.deathEventViewer = LUIE.CombatTextDeathViewer:New(CombatText.poolManager, CombatText.deathListener)
 
     -- Variable adjustment if needed
     if not LUIESV.Default[GetDisplayName()]["$AccountWide"].AdjustVarsCT then

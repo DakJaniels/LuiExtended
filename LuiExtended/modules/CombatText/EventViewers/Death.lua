@@ -16,8 +16,8 @@ local eventType = LuiData.Data.CombatTextConstants.eventType
 
 local zo_strformat = zo_strformat
 
-function CombatTextDeathViewer:Initialize(poolManager)
-    LUIE.CombatTextEventViewer.Initialize(self, poolManager)
+function CombatTextDeathViewer:Initialize(poolManager, eventListener)
+    LUIE.CombatTextEventViewer.Initialize(self, poolManager, eventListener)
     self:RegisterCallback(eventType.DEATH, function (...) self:OnEvent(...) end)
     self.locationOffset = 0 -- Simple way to avoid overlapping. When number of active notes is back to 0, the offset is also reset
     self.activePoints = 0

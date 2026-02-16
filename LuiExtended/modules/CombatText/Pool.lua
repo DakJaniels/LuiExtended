@@ -15,12 +15,19 @@ LUIE.CombatTextPool = CombatTextPool
 
 local poolTypes = LuiData.Data.CombatTextConstants.poolType
 
+-- Pre-computed easing functions (module-level caching for performance)
 local fastSlow = ZO_GenerateCubicBezierEase(0.3, 0.9, 0.7, 1)
 local slowFast = ZO_GenerateCubicBezierEase(0.63, 0.1, 0.83, 0.69)
 local even = ZO_GenerateCubicBezierEase(0.63, 1.2, 0.83, 1)
 
-local easeOutIn = function (progress)
-    return ZO_EaseInOutQuadratic(progress)
+-- Ellipse easing (quadratic ease-in-out) - extracted from inline closures for performance
+local ellipseEasing = function (p)
+    if p < 0.5 then
+        p = p + p
+        return 0.5 * p * p
+    end
+    p = (1 - p) + (1 - p)
+    return 1 - 0.5 * p * p
 end
 
 local animationConfigs =
@@ -88,7 +95,7 @@ local animationConfigs =
     },
     [poolTypes.ANIMATION_ELLIPSE_X] =
     {
-        { type = "move", label = "scrollX", duration = 2500, delay = 0, easing = easeOutIn },
+        { type = "move", label = "scrollX", duration = 2500, delay = 0, easing = ellipseEasing },
     },
     [poolTypes.ANIMATION_ELLIPSE_Y] =
     {
@@ -98,8 +105,8 @@ local animationConfigs =
     },
     [poolTypes.ANIMATION_ELLIPSE_X_CRIT] =
     {
-        { type = "scale", from = 1.5,        to = 1,          duration = 150, delay = 0,         easing = slowFast },
-        { type = "move",  label = "scrollX", duration = 2500, delay = 0,      easing = easeOutIn                   },
+        { type = "scale", from = 1.5, to = 1, duration = 150, delay = 0, easing = slowFast },
+        { type = "move", label = "scrollX", duration = 2500, delay = 0, easing = ellipseEasing },
     },
     [poolTypes.ANIMATION_ELLIPSE_Y_CRIT] =
     {
