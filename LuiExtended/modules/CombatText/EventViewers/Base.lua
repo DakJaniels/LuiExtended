@@ -150,7 +150,7 @@ function CombatTextEventViewer:FormatAlertString(inputFormat, params)
     end))
 end
 
-function CombatTextEventViewer:GetTextAtributes(powerType, damageType, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
+function CombatTextEventViewer:GetTextAttributes(powerType, damageType, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
     local Settings = LUIE.CombatText.SV
 
     local textFormat = Settings.formats.damage
