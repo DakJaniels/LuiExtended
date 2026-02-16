@@ -125,6 +125,7 @@ modules/SpellCastBuffs/Collectibles.lua
 modules/SpellCastBuffs/Cyrodiil.lua
 modules/SpellCastBuffs/Stealth.lua
 modules/SpellCastBuffs/Debug.lua
+modules/SpellCastBuffs/DevDebug.lua
 modules/SpellCastBuffs/Werewolf.lua
 
 # Modules - Slash Commands
