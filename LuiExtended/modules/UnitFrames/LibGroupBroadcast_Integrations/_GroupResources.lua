@@ -249,6 +249,20 @@ local function HideResourceBars(unitTag)
     end
 end
 
+-- Seed bars from LibGroupResources cache (when layout is applied, before first broadcast callback)
+local function RefreshResourceBarValuesFromCache()
+    Shared.ForEachActiveGroupMember(function (unitTag)
+        local current, maximum, percentage = GroupResources:GetMagicka(unitTag)
+        if current and maximum then
+            UpdateResourceBar(unitTag, current, maximum, percentage, COMBAT_MECHANIC_FLAGS_MAGICKA)
+        end
+        current, maximum, percentage = GroupResources:GetStamina(unitTag)
+        if current and maximum then
+            UpdateResourceBar(unitTag, current, maximum, percentage, COMBAT_MECHANIC_FLAGS_STAMINA)
+        end
+    end)
+end
+
 -- Initialize LibGroupBroadcast integration
 function GroupResourcesManager.Initialize()
     if isInitialized then return end
@@ -306,10 +320,8 @@ function GroupResourcesManager.SetupFrames()
     Shared.ForEachActiveGroupMember(function (unitTag, frameData)
         AddResourceBarsToFrame(frameData, useRaidFrames)
         UpdateResourceBarLayout(frameData, useRaidFrames)
-
-        -- Bars will be shown/hidden by update callbacks based on actual resource data
-        -- This ensures they're ready to be displayed when data arrives
     end)
+    RefreshResourceBarValuesFromCache()
 end
 
 -- Update all resource bar layouts (called from menu)
@@ -320,6 +332,7 @@ function GroupResourcesManager.UpdateAllLayouts()
     Shared.ForEachActiveGroupMember(function (unitTag, frameData)
         UpdateResourceBarLayout(frameData, useRaidFrames)
     end)
+    RefreshResourceBarValuesFromCache()
 end
 
 -- Refresh colors on all bars

@@ -36,6 +36,24 @@ local function __applyFont(unitTag)
     end
 end
 
+--- Apply default text colour to a single default frame's power labels (module-scope helper).
+local function ApplyDefaultFrameColor(unitTag)
+    if UnitFrames.DefaultFrames[unitTag] then
+        local unitFrame = UnitFrames.DefaultFrames[unitTag]
+        for _, powerType in pairs({ COMBAT_MECHANIC_FLAGS_HEALTH, COMBAT_MECHANIC_FLAGS_MAGICKA, COMBAT_MECHANIC_FLAGS_STAMINA }) do
+            if unitFrame[powerType] then
+                unitFrame[powerType].color = UnitFrames.SV.DefaultTextColour
+                unitFrame[powerType].label:SetColor(UnitFrames.SV.DefaultTextColour[1], UnitFrames.SV.DefaultTextColour[2], UnitFrames.SV.DefaultTextColour[3])
+            end
+        end
+    end
+end
+
+--- Create a font string for custom frames (module-scope helper to avoid closure in CustomFramesApplyFont).
+local function CustomFramesMakeFont(fontName, fontStyle, size)
+    return LUIE.CreateFontString(fontName, size, fontStyle)
+end
+
 -- Apply selected font for all known label on default unit frames
 function UnitFrames.DefaultFramesApplyFont(unitTag)
     -- Apply setting only for one requested unitTag
@@ -54,29 +72,10 @@ end
 
 -- Reapplies color for default unit frames extender module labels
 function UnitFrames.DefaultFramesApplyColor()
-    -- Helper function
-    local applyDefaultColor = function (unitTag)
-        if UnitFrames.DefaultFrames[unitTag] then
-            local unitFrame = UnitFrames.DefaultFrames[unitTag]
-            for _, powerType in pairs(
-                {
-                    COMBAT_MECHANIC_FLAGS_HEALTH,
-                    COMBAT_MECHANIC_FLAGS_MAGICKA,
-                    COMBAT_MECHANIC_FLAGS_STAMINA,
-                }) do
-                if unitFrame[powerType] then
-                    unitFrame[powerType].color = UnitFrames.SV.DefaultTextColour
-                    unitFrame[powerType].label:SetColor(UnitFrames.SV.DefaultTextColour[1], UnitFrames.SV.DefaultTextColour[2], UnitFrames.SV.DefaultTextColour[3])
-                end
-            end
-        end
-    end
-
-    -- Apply setting for all possible unitTags
-    applyDefaultColor("player")
-    applyDefaultColor("reticleover")
+    ApplyDefaultFrameColor("player")
+    ApplyDefaultFrameColor("reticleover")
     for i = 0, 12 do
-        applyDefaultColor("group" .. i)
+        ApplyDefaultFrameColor("group" .. i)
     end
 end
 
@@ -95,42 +94,39 @@ function UnitFrames.CustomFramesApplyFont()
     local sizeCaption = (UnitFrames.SV.CustomFontOther and UnitFrames.SV.CustomFontOther > 0) and UnitFrames.SV.CustomFontOther or 16
     local sizeBars = (UnitFrames.SV.CustomFontBars and UnitFrames.SV.CustomFontBars > 0) and UnitFrames.SV.CustomFontBars or 14
 
-    local __mkFont = function (size) return LUIE.CreateFontString(fontName, size, fontStyle) end
-
-    -- After fonts is applied unhide frames, so player can see changes even from menu
     for _, baseName in pairs({ "player", "reticleover", "companion", "SmallGroup", "RaidGroup", "boss", "AvaPlayerTarget", "PetGroup" }) do
         for i = 0, 12 do
             local unitTag = (i == 0) and baseName or (baseName .. i)
             if UnitFrames.CustomFrames[unitTag] then
                 local unitFrame = UnitFrames.CustomFrames[unitTag]
                 if unitFrame.name then
-                    unitFrame.name:SetFont(__mkFont((unitFrame.name:GetParent() == unitFrame.topInfo) and sizeCaption or sizeBars))
+                    unitFrame.name:SetFont(CustomFramesMakeFont(fontName, fontStyle, (unitFrame.name:GetParent() == unitFrame.topInfo) and sizeCaption or sizeBars))
                 end
                 if unitFrame.level then
-                    unitFrame.level:SetFont(__mkFont(sizeCaption))
+                    unitFrame.level:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeCaption))
                 end
                 if unitFrame.className then
-                    unitFrame.className:SetFont(__mkFont(sizeCaption))
+                    unitFrame.className:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeCaption))
                 end
                 if unitFrame.title then
-                    unitFrame.title:SetFont(__mkFont(sizeCaption))
+                    unitFrame.title:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeCaption))
                 end
                 if unitFrame.avaRank then
-                    unitFrame.avaRank:SetFont(__mkFont(sizeCaption))
+                    unitFrame.avaRank:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeCaption))
                 end
                 if unitFrame.dead then
-                    unitFrame.dead:SetFont(__mkFont(sizeBars))
+                    unitFrame.dead:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeBars))
                 end
                 for _, powerType in pairs({ COMBAT_MECHANIC_FLAGS_HEALTH, COMBAT_MECHANIC_FLAGS_MAGICKA, COMBAT_MECHANIC_FLAGS_STAMINA }) do
                     if unitFrame[powerType] then
                         if unitFrame[powerType].label then
-                            unitFrame[powerType].label:SetFont(__mkFont(sizeBars))
+                            unitFrame[powerType].label:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeBars))
                         end
                         if unitFrame[powerType].labelOne then
-                            unitFrame[powerType].labelOne:SetFont(__mkFont(sizeBars))
+                            unitFrame[powerType].labelOne:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeBars))
                         end
                         if unitFrame[powerType].labelTwo then
-                            unitFrame[powerType].labelTwo:SetFont(__mkFont(sizeBars))
+                            unitFrame[powerType].labelTwo:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeBars))
                         end
                     end
                 end

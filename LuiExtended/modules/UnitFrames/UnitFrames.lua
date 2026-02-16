@@ -2267,90 +2267,6 @@ function UnitFrames.OnBossesChanged(eventCode)
     end
 end
 
---- Dynamically calculate frame positioning based on resolution with dimension compensation
---- Supports ultrawide (21:9), 16:10, and multi-monitor setups
---- @param screenWidth number UI canvas width in UI units
---- @param screenHeight number UI canvas height in UI units
---- @param baseCoords table<string, number[]> Base coordinate tables for 1080p reference
---- @param frameDimensions table<string, {width: number, height: number}> Current frame dimensions from saved variables
---- @return table<string, number[]> coords Calculated position coordinates for each frame type
---- @return {widthResolutionScale: number, heightResolutionScale: number, aspectRatioScale: number, isMultiMonitorLikely: boolean, actualAspectRatio: number} scaleFactors Debug scale factors
-local function CalculateDynamicPositioning(screenWidth, screenHeight, baseCoords, frameDimensions)
-    local aspectRatio = screenWidth / screenHeight
-    local baseline169 = 16 / 9
-    local maxAspectRatio = 2.45 -- Cap at ~21:9 (catches 32:9 and multi-monitor setups)
-
-    local widthResolutionScale = screenWidth / 1920
-    local heightResolutionScale = screenHeight / 1080
-    local aspectRatioScale = aspectRatio / baseline169
-
-    if UnitFrames.SV.AspectRatioOverride and UnitFrames.SV.AspectRatioOverride ~= 0 then
-        aspectRatioScale = UnitFrames.SV.AspectRatioOverride
-    end
-
-    -- Multi-monitor protection: cap extreme aspect ratios to prevent UI spreading across screens
-    local isMultiMonitorLikely = aspectRatio > maxAspectRatio
-    if isMultiMonitorLikely and (not UnitFrames.SV.AspectRatioOverride or UnitFrames.SV.AspectRatioOverride == 0) then
-        local cappedAspectRatio = maxAspectRatio
-        local cappedAspectRatioScale = cappedAspectRatio / baseline169
-
-        aspectRatioScale = cappedAspectRatioScale
-        widthResolutionScale = heightResolutionScale * (cappedAspectRatio / baseline169)
-    end
-
-    -- Baseline dimensions at 1080p (reference point for scaling)
-    local baselineDimensions =
-    {
-        player = { width = 300, height = 30 },
-        reticleover = { width = 300, height = 36 },
-        companion = { width = 220, height = 30 },
-        SmallGroup1 = { width = 220, height = 30 },
-        RaidGroup1 = { width = 220, height = 30 },
-        PetGroup1 = { width = 220, height = 30 },
-        boss1 = { width = 300, height = 36 },
-        AvaPlayerTarget = { width = 300, height = 36 },
-    }
-
-    --- @param coords number[]
-    --- @param frameType string
-    --- @return number[]
-    local function scaleCoords(coords, frameType)
-        local baseline = baselineDimensions[frameType] or baselineDimensions.player
-        local current = frameDimensions[frameType] or baseline
-
-        local widthRatio = current.width / baseline.width
-        local heightRatio = current.height / baseline.height
-
-        local scaledX = coords[1] * widthResolutionScale * widthRatio
-        local scaledY = coords[2] * math.pow(heightResolutionScale, 1.2) * aspectRatioScale * heightRatio
-
-        return { scaledX, scaledY }
-    end
-
-    local scaleFactors =
-    {
-        widthResolutionScale = widthResolutionScale,
-        heightResolutionScale = heightResolutionScale,
-        aspectRatioScale = aspectRatioScale,
-        isMultiMonitorLikely = isMultiMonitorLikely,
-        actualAspectRatio = aspectRatio,
-    }
-
-    return
-        {
-            player = scaleCoords(baseCoords.player, "player"),
-            playerCenter = scaleCoords(baseCoords.playerCenter, "player"),
-            reticleover = scaleCoords(baseCoords.reticleover, "reticleover"),
-            reticleoverCenter = scaleCoords(baseCoords.reticleoverCenter, "reticleover"),
-            companion = scaleCoords(baseCoords.companion, "companion"),
-            SmallGroup1 = scaleCoords(baseCoords.SmallGroup1, "SmallGroup1"),
-            RaidGroup1 = scaleCoords(baseCoords.RaidGroup1, "RaidGroup1"),
-            PetGroup1 = scaleCoords(baseCoords.PetGroup1, "PetGroup1"),
-            boss1 = scaleCoords(baseCoords.boss1, "boss1"),
-            AvaPlayerTarget = scaleCoords(baseCoords.AvaPlayerTarget, "AvaPlayerTarget"),
-        }, scaleFactors
-end
-
 --- Set anchors for all top level windows of CustomFrames
 function UnitFrames.CustomFramesSetPositions()
     --- @type table<string, table>
@@ -2390,7 +2306,7 @@ function UnitFrames.CustomFramesSetPositions()
         AvaPlayerTarget = { width = UnitFrames.SV.AvaTargetBarWidth, height = UnitFrames.SV.AvaTargetBarHeight },
     }
 
-    local coords, scaleFactors = CalculateDynamicPositioning(screenWidth, screenHeight, baseCoordinates, frameDimensions)
+    local coords, scaleFactors = UnitFrames.CalculateDynamicPositioning(screenWidth, screenHeight, baseCoordinates, frameDimensions)
 
     -- if LUIE.IsDevDebugEnabled() then
     --     local aspectRatio = screenWidth / screenHeight

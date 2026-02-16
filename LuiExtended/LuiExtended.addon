@@ -164,6 +164,7 @@ modules/UnitFrames/_ListFunctions.lua
 modules/UnitFrames/_MenuFunctions.lua
 modules/UnitFrames/_FontFunctions.lua
 modules/UnitFrames/_Debug.lua
+modules/UnitFrames/_DynamicPositioning.lua
 modules/UnitFrames/UnitFrames.lua
 
 # Settings - Console
