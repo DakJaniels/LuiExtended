@@ -26,7 +26,7 @@ local callbackManager = CALLBACK_MANAGER
 CombatTextEventViewer.resourceNames = setmetatable({},
                                                    {
                                                        __index = function (t, k)
-                                                           t[k] = GetString("SI_COMBATMECHANICTYPE", k)
+                                                           t[k] = GetString("SI_COMBATMECHANICFLAGS", k)
                                                            return t[k]
                                                        end,
                                                    })
