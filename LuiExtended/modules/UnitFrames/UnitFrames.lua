@@ -3200,6 +3200,9 @@ local function CustomFramesApplyAlphaAndBuffs(frame, idle, oocAlpha, incAlpha, h
     end
 end
 
+-- Cache so we only apply when idle state actually changes (avoids 17 frame updates on every power event)
+local lastCustomFramesApplyInCombatIdle = nil
+
 -- This function reduces opacity of custom frames when player is out of combat and has full attributes
 function UnitFrames.CustomFramesApplyInCombat()
     local idle = true
@@ -3210,6 +3213,11 @@ function UnitFrames.CustomFramesApplyInCombat()
     else
         idle = UnitFrames.statFull.combat
     end
+
+    if idle == lastCustomFramesApplyInCombatIdle then
+        return
+    end
+    lastCustomFramesApplyInCombatIdle = idle
 
     CustomFramesApplyAlphaAndBuffs(
         UnitFrames.CustomFrames["player"],
