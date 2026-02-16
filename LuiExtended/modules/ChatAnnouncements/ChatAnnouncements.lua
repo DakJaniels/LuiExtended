@@ -1854,18 +1854,6 @@ end
 --- @param reason CurrencyChangeReason
 --- @param reasonSupplementaryInfo integer
 function ChatAnnouncements.OnCurrencyUpdate(currencyType, currencyLocation, newAmount, oldAmount, reason, reasonSupplementaryInfo)
-    -- DEBUG
-    if LUIE.IsDevDebugEnabled() then
-        local traceback = "Currency Update:\n" ..
-            "--> currencyType: " .. tostring(currencyType) .. "\n" ..
-            "--> currencyLocation: " .. tostring(currencyLocation) .. "\n" ..
-            "--> newAmount: " .. tostring(newAmount) .. "\n" ..
-            "--> oldAmount: " .. tostring(oldAmount) .. "\n" ..
-            "--> reason: " .. tostring(reason) .. "\n" ..
-            "--> reasonSupplementaryInfo: " .. tostring(reasonSupplementaryInfo)
-        LUIE:Log("Debug", traceback)
-    end
-
     if currencyLocation ~= CURRENCY_LOCATION_CHARACTER and currencyLocation ~= CURRENCY_LOCATION_ACCOUNT then
         return
     end
@@ -1875,6 +1863,18 @@ function ChatAnnouncements.OnCurrencyUpdate(currencyType, currencyLocation, newA
     -- If the total gold change was 0 or (Reason 7 = Command) or (Reason 28 = Mount Feed) or (Reason 35 = Player Init) or (Reason 81 = Expiration) - End Now
     if UpOrDown == 0 or reason == CURRENCY_CHANGE_REASON_COMMAND or reason == CURRENCY_CHANGE_REASON_FEED_MOUNT or reason == CURRENCY_CHANGE_REASON_PLAYER_INIT or reason == CURRENCY_CHANGE_REASON_EXPIRATION then
         return
+    end
+
+        -- DEBUG
+    if LUIE.IsDevDebugEnabled() then
+        local traceback = "Currency Update:\n" ..
+            "--> currencyType: " .. tostring(currencyType) .. "\n" ..
+            "--> currencyLocation: " .. tostring(currencyLocation) .. "\n" ..
+            "--> newAmount: " .. tostring(newAmount) .. "\n" ..
+            "--> oldAmount: " .. tostring(oldAmount) .. "\n" ..
+            "--> reason: " .. tostring(reason) .. "\n" ..
+            "--> reasonSupplementaryInfo: " .. tostring(reasonSupplementaryInfo)
+        LUIE:Log("Debug", traceback)
     end
 
     local formattedValue = ZO_CommaDelimitDecimalNumber(newAmount)
