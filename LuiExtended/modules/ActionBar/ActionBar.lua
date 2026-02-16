@@ -1757,6 +1757,217 @@ local isStackBaseAbility =
     [24165] = true, -- Bound Armaments
 }
 
+-- Proc sound thresholds: abilityId -> { threshold1, threshold2 }. Used by IsGrimFocus and IsBoundArmaments.
+local PROC_SOUND_THRESHOLDS =
+{
+    [122585] = { 5, 10 },  -- Grim Focus
+    [122587] = { 5, 10 },   -- Relentless Focus
+    [122586] = { 5, 10 },   -- Merciless Resolve
+    [203447] = { 4, 8 },    -- Bound Armaments
+}
+
+--- Iterate over front and back toggled slots for abilityId; call fn(slotNum) for each valid slot.
+local function ForEachToggledSlot(abilityId, fn)
+    local front = g_toggledSlotsFront[abilityId]
+    local back = g_toggledSlotsBack[abilityId]
+    if front and g_uiCustomToggle[front] then fn(front) end
+    if back and g_uiCustomToggle[back] then fn(back) end
+end
+
+--- Set stack label on all toggled slots for abilityId. textOrNil: number to display, or nil/0 for empty.
+local function SetToggledStackLabels(abilityId, textOrNil)
+    local text = (textOrNil and textOrNil > 0) and tostring(textOrNil) or ""
+    ForEachToggledSlot(abilityId, function(slotNum)
+        g_uiCustomToggle[slotNum].stack:SetText(text)
+    end)
+end
+
+--- Hide all toggled slots for abilityId.
+local function HideToggledSlots(abilityId)
+    ForEachToggledSlot(abilityId, function(slotNum)
+        ActionBar.HideSlot(slotNum, abilityId)
+    end)
+end
+
+--- Show all toggled slots for abilityId.
+local function ShowToggledSlots(abilityId, currentTime)
+    if g_toggledSlotsFront[abilityId] then
+        ActionBar.ShowSlot(g_toggledSlotsFront[abilityId], abilityId, currentTime, false)
+    end
+    if g_toggledSlotsBack[abilityId] then
+        ActionBar.ShowSlot(g_toggledSlotsBack[abilityId], abilityId, currentTime, false)
+    end
+end
+
+--- Play proc sound at stack thresholds. Used by Grim Focus and Bound Armaments.
+local function PlayProcSoundAtStacks(abilityId, stackCount)
+    local thresholds = PROC_SOUND_THRESHOLDS[abilityId]
+    if not thresholds or not ActionBar.SV.ShowTriggered or not ActionBar.SV.ProcEnableSound then return end
+    if not g_boundArmamentsPlayed[abilityId] then
+        g_boundArmamentsPlayed[abilityId] = {}
+    end
+    local t1, t2 = thresholds[1], thresholds[2]
+    if (stackCount == t1 or stackCount == t2) and not g_boundArmamentsPlayed[abilityId][stackCount] then
+        PlaySound(g_ProcSound)
+        PlaySound(g_ProcSound)
+        g_boundArmamentsPlayed[abilityId][stackCount] = true
+    end
+    if stackCount < t1 then
+        g_boundArmamentsPlayed[abilityId][t1] = false
+        g_boundArmamentsPlayed[abilityId][t2] = false
+    elseif stackCount < t2 and stackCount > t1 then
+        g_boundArmamentsPlayed[abilityId][t2] = false
+    end
+end
+
+--- Try BarHighlightSwap if abilityId has a CheckOnFade config.
+local function TryBarHighlightSwap(abilityId)
+    if Effects.BarHighlightCheckOnFade[abilityId] then
+        ActionBar.BarHighlightSwap(abilityId)
+    end
+end
+
+--- Handle ground effect FADED: mine stack decrement, stack labels, HideSlot when stacks reach 0, or non-mine fade.
+local function OnGroundEffectFaded(abilityId)
+    if abilityId == 32958 then return end -- Ignore Shifting Standard
+    local currentTime = GetGameTimeMilliseconds()
+    if g_protectAbilityRemoval[abilityId] and g_protectAbilityRemoval[abilityId] >= currentTime then return end
+
+    if Effects.IsGroundMineAura[abilityId] or Effects.IsGroundMineStack[abilityId] then
+        if not g_mineStacks[abilityId] then return end
+        g_mineStacks[abilityId] = g_mineStacks[abilityId] - Effects.EffectGroundDisplay[abilityId].stackRemove
+
+        if ActionBar.SV.BarShowLabel and not Effects.HideGroundMineStacks[abilityId] then
+            SetToggledStackLabels(abilityId, g_mineStacks[abilityId] > 0 and g_mineStacks[abilityId] or nil)
+        end
+
+        if g_mineStacks[abilityId] == 0 and not g_mineNoTurnOff[abilityId] then
+            if g_toggledSlotsRemain[abilityId] then HideToggledSlots(abilityId) end
+            g_toggledSlotsRemain[abilityId] = nil
+            g_toggledSlotsStack[abilityId] = nil
+            TryBarHighlightSwap(abilityId)
+        end
+    else
+        if g_barNoRemove[abilityId] then return end
+        if g_toggledSlotsRemain[abilityId] then HideToggledSlots(abilityId) end
+        g_toggledSlotsRemain[abilityId] = nil
+        g_toggledSlotsStack[abilityId] = nil
+    end
+end
+
+--- Handle ground effect GAINED: mine stack init, ShowSlot.
+local function OnGroundEffectGained(abilityId, endTime, stackCount)
+    if g_mineNoTurnOff[abilityId] then g_mineNoTurnOff[abilityId] = nil end
+    local currentTime = GetGameTimeMilliseconds()
+    g_protectAbilityRemoval[abilityId] = currentTime + 150
+
+    if Effects.IsGroundMineAura[abilityId] then
+        g_mineStacks[abilityId] = Effects.EffectGroundDisplay[abilityId].stackReset
+    elseif Effects.IsGroundMineStack[abilityId] then
+        g_mineStacks[abilityId] = g_mineStacks[abilityId] and (g_mineStacks[abilityId] + Effects.EffectGroundDisplay[abilityId].stackRemove) or 1
+        if g_mineStacks[abilityId] > Effects.EffectGroundDisplay[abilityId].stackReset then
+            g_mineStacks[abilityId] = Effects.EffectGroundDisplay[abilityId].stackReset
+        end
+    end
+
+    if ActionBar.SV.ShowToggled and (g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId]) then
+        g_toggledSlotsPlayer[abilityId] = true
+        g_toggledSlotsRemain[abilityId] = 1000 * endTime
+        g_toggledSlotsStack[abilityId] = stackCount
+        ShowToggledSlots(abilityId, currentTime)
+    end
+end
+
+--- Handle non-ground effect FADED: Grim Focus stack clear, proc stop, toggle hide, BarHighlightSwap.
+local function OnEffectFaded(abilityId)
+    if isStackCounter[abilityId] then
+        for k in pairs(isStackBaseAbility) do
+            g_toggledSlotsStack[k] = nil
+            if ActionBar.SV.ShowToggled and ActionBar.SV.BarShowLabel and (g_toggledSlotsFront[k] or g_toggledSlotsBack[k]) then
+                SetToggledStackLabels(k, nil)
+            end
+        end
+    end
+
+    if g_barNoRemove[abilityId] then
+        TryBarHighlightSwap(abilityId)
+        return
+    end
+
+    if g_triggeredSlotsRemain[abilityId] then
+        if g_triggeredSlotsFront[abilityId] and g_uiProcAnimation[g_triggeredSlotsFront[abilityId]] then
+            g_uiProcAnimation[g_triggeredSlotsFront[abilityId]]:Stop()
+        end
+        if g_triggeredSlotsBack[abilityId] and g_uiProcAnimation[g_triggeredSlotsBack[abilityId]] then
+            g_uiProcAnimation[g_triggeredSlotsBack[abilityId]]:Stop()
+        end
+        g_triggeredSlotsRemain[abilityId] = nil
+    end
+
+    if g_toggledSlotsRemain[abilityId] then
+        HideToggledSlots(abilityId)
+        g_toggledSlotsRemain[abilityId] = nil
+        if not isStackBaseAbility[abilityId] then g_toggledSlotsStack[abilityId] = nil end
+    end
+
+    TryBarHighlightSwap(abilityId)
+end
+
+--- Handle non-ground effect GAINED: proc sound, proc animation, ShowSlot, Grim Focus stack labels.
+local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeType)
+    PlayProcSoundAtStacks(abilityId, stackCount)
+
+    if g_triggeredSlotsFront[abilityId] or g_triggeredSlotsBack[abilityId] then
+        if ActionBar.SV.ShowTriggered then
+            local currentTime = GetGameTimeMilliseconds()
+            if ActionBar.SV.ProcEnableSound and unitTag == "player" and g_triggeredSlotsFront[abilityId] then
+                if abilityId == 46327 and changeType == EFFECT_RESULT_GAINED then
+                    PlaySound(g_ProcSound)
+                    PlaySound(g_ProcSound)
+                else
+                    PlaySound(g_ProcSound)
+                    PlaySound(g_ProcSound)
+                end
+            end
+            g_triggeredSlotsRemain[abilityId] = 1000 * endTime
+            local remain = g_triggeredSlotsRemain[abilityId] - currentTime
+            if g_triggeredSlotsFront[abilityId] then
+                ActionBar.PlayProcAnimations(g_triggeredSlotsFront[abilityId])
+                if ActionBar.SV.BarShowLabel and g_uiProcAnimation[g_triggeredSlotsFront[abilityId]] then
+                    g_uiProcAnimation[g_triggeredSlotsFront[abilityId]].procLoopTexture.label:SetText(FormatDurationSeconds(remain))
+                end
+            end
+            if g_triggeredSlotsBack[abilityId] then
+                ActionBar.PlayProcAnimations(g_triggeredSlotsBack[abilityId])
+                if ActionBar.SV.BarShowLabel and g_uiProcAnimation[g_triggeredSlotsBack[abilityId]] then
+                    g_uiProcAnimation[g_triggeredSlotsBack[abilityId]].procLoopTexture.label:SetText(FormatDurationSeconds(remain))
+                end
+            end
+        end
+    end
+
+    if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
+        if ActionBar.SV.ShowToggled then
+            local currentTime = GetGameTimeMilliseconds()
+            g_toggledSlotsRemain[abilityId] = 1000 * endTime
+            if not isStackBaseAbility[abilityId] then g_toggledSlotsStack[abilityId] = stackCount end
+            ShowToggledSlots(abilityId, currentTime)
+        end
+    end
+
+    if isStackCounter[abilityId] then
+        for i = 1, GetNumBuffs(unitTag) do
+            local baseId = select(11, GetUnitBuffInfo(unitTag, i))
+            if isStackBaseAbility[baseId] then
+                g_toggledSlotsStack[baseId] = stackCount
+                if ActionBar.SV.ShowToggled and ActionBar.SV.BarShowLabel and (g_toggledSlotsFront[baseId] or g_toggledSlotsBack[baseId]) then
+                    SetToggledStackLabels(baseId, g_toggledSlotsStack[baseId] and g_toggledSlotsStack[baseId] > 0 and g_toggledSlotsStack[baseId] or nil)
+                end
+            end
+        end
+    end
+end
+
 -- Extra returns here - passThrough & savedId
 ---
 --- @param changeType EffectResult
@@ -1825,341 +2036,33 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
     end
 
     if (Effects.EffectGroundDisplay[abilityId] or Effects.LinkedGroundMine[abilityId]) and not passThrough then
-        if Effects.LinkedGroundMine[abilityId] then
-            abilityId = Effects.LinkedGroundMine[abilityId]
-        end
-
+        if Effects.LinkedGroundMine[abilityId] then abilityId = Effects.LinkedGroundMine[abilityId] end
         if changeType == EFFECT_RESULT_FADED then
-            if abilityId == 32958 then return end -- Ignore Shifting Standard
-            local currentTime = GetGameTimeMilliseconds()
-            if not g_protectAbilityRemoval[abilityId] or g_protectAbilityRemoval[abilityId] < currentTime then
-                if (Effects.IsGroundMineAura[abilityId] or Effects.IsGroundMineStack[abilityId]) then
-                    if g_mineStacks[abilityId] then
-                        g_mineStacks[abilityId] = g_mineStacks[abilityId] - Effects.EffectGroundDisplay[abilityId].stackRemove
-
-                        -- Set Stacks label if changed
-                        if ActionBar.SV.BarShowLabel then
-                            if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
-                                if not Effects.HideGroundMineStacks[abilityId] then
-                                    local slotNum = g_toggledSlotsFront[abilityId]
-                                    if g_uiCustomToggle[slotNum] then
-                                        if g_mineStacks[abilityId] > 0 then
-                                            g_uiCustomToggle[slotNum].stack:SetText(g_mineStacks[abilityId])
-                                        else
-                                            g_uiCustomToggle[slotNum].stack:SetText("")
-                                        end
-                                    end
-                                end
-                            end
-                            if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
-                                if not Effects.HideGroundMineStacks[abilityId] then
-                                    local slotNum = g_toggledSlotsBack[abilityId]
-                                    if g_uiCustomToggle[slotNum] then
-                                        if g_mineStacks[abilityId] > 0 then
-                                            g_uiCustomToggle[slotNum].stack:SetText(g_mineStacks[abilityId])
-                                        else
-                                            g_uiCustomToggle[slotNum].stack:SetText("")
-                                        end
-                                    end
-                                end
-                            end
-                        end
-
-                        -- Handle stacks reaching 0
-                        if g_mineStacks[abilityId] == 0 and not g_mineNoTurnOff[abilityId] then
-                            if g_toggledSlotsRemain[abilityId] then
-                                if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
-                                    local slotNum = g_toggledSlotsFront[abilityId]
-                                    ActionBar.HideSlot(slotNum, abilityId)
-                                end
-                                if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
-                                    local slotNum = g_toggledSlotsBack[abilityId]
-                                    ActionBar.HideSlot(slotNum, abilityId)
-                                end
-                            end
-                            g_toggledSlotsRemain[abilityId] = nil
-                            g_toggledSlotsStack[abilityId] = nil
-                            if Effects.BarHighlightCheckOnFade[abilityId] then
-                                ActionBar.BarHighlightSwap(abilityId)
-                            end
-                        end
-                    end
-                else
-                    -- Ignore fading event if override is true
-                    if g_barNoRemove[abilityId] then return end
-                    -- Stop any toggle animation associated with this effect
-                    if g_toggledSlotsRemain[abilityId] then
-                        if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
-                            local slotNum = g_toggledSlotsFront[abilityId]
-                            ActionBar.HideSlot(slotNum, abilityId)
-                        end
-                        if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
-                            local slotNum = g_toggledSlotsBack[abilityId]
-                            ActionBar.HideSlot(slotNum, abilityId)
-                        end
-                    end
-                    g_toggledSlotsRemain[abilityId] = nil
-                    g_toggledSlotsStack[abilityId] = nil
-                end
-            end
-        elseif changeType == EFFECT_RESULT_GAINED then
-            if g_mineNoTurnOff[abilityId] then
-                g_mineNoTurnOff[abilityId] = nil
-            end
-
-            local currentTime = GetGameTimeMilliseconds()
-            g_protectAbilityRemoval[abilityId] = currentTime + 150
-
-            if Effects.IsGroundMineAura[abilityId] then
-                g_mineStacks[abilityId] = Effects.EffectGroundDisplay[abilityId].stackReset
-            elseif Effects.IsGroundMineStack[abilityId] then
-                -- Check if this is an existing mine with stacks
-                if g_mineStacks[abilityId] then
-                    g_mineStacks[abilityId] = g_mineStacks[abilityId] + Effects.EffectGroundDisplay[abilityId].stackRemove
-                    -- Otherwise set the count to 1
-                else
-                    g_mineStacks[abilityId] = 1
-                end
-                -- If the stack counter is higher than a manual limit we set then override it to that value
-                if g_mineStacks[abilityId] > Effects.EffectGroundDisplay[abilityId].stackReset then
-                    g_mineStacks[abilityId] = Effects.EffectGroundDisplay[abilityId].stackReset
-                end
-            end
-
-            -- Bar Tracker
-            if ActionBar.SV.ShowToggled then
-                -- We set this to true but never set remove it, this is effectively an on the fly way to create an indentifier for ground effects that shouldn't be removed on reticle target change, only on fade.
-                g_toggledSlotsPlayer[abilityId] = true
-                currentTime = GetGameTimeMilliseconds()
-                if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
-                    g_toggledSlotsRemain[abilityId] = 1000 * endTime
-                    g_toggledSlotsStack[abilityId] = stackCount
-                    if g_toggledSlotsFront[abilityId] then
-                        local slotNum = g_toggledSlotsFront[abilityId]
-                        ActionBar.ShowSlot(slotNum, abilityId, currentTime, false)
-                    end
-                    if g_toggledSlotsBack[abilityId] then
-                        local slotNum = g_toggledSlotsBack[abilityId]
-                        ActionBar.ShowSlot(slotNum, abilityId, currentTime, false)
-                    end
-                end
-            end
+            OnGroundEffectFaded(abilityId)
+        else
+            OnGroundEffectGained(abilityId, endTime, stackCount)
         end
-    end
-
-    -- Hijack the abilityId here if we have it in the override for extra bar highlights
-    -- Only proceed with ability ID hijacking if FancyActionBar is not active
-    if not isFancyActionBarEnabled then
-        if Effects.BarHighlightExtraId[abilityId] then
-            for k, v in pairs(Effects.BarHighlightExtraId) do
-                if k == abilityId then
-                    abilityId = v
-                    if Effects.IsGroundMineAura[abilityId] then
-                        -- This prevents debuffs from ground mines from not fading when mouseover is changed.
-                        g_toggledSlotsPlayer[abilityId] = nil
-                        if unitTag == "reticleover" then
-                            g_mineNoTurnOff[abilityId] = true
-                        end
-                    end
-                    break
-                end
-            end
-        end
-    end
-
-    if unitTag ~= "player" and unitTag ~= "reticleover" then
         return
     end
 
-    if changeType == EFFECT_RESULT_FADED then -- delete Effect
-        -- Remove stacks when Grim Focus ends
-        if isStackCounter[abilityId] then
-            for k, v in pairs(isStackBaseAbility) do
-                g_toggledSlotsStack[k] = nil
-                if g_toggledSlotsFront[k] or g_toggledSlotsBack[k] then
-                    if ActionBar.SV.ShowToggled and ActionBar.SV.BarShowLabel then
-                        if g_toggledSlotsFront[k] then
-                            local slotNum = g_toggledSlotsFront[k]
-                            if g_uiCustomToggle[slotNum] then
-                                g_uiCustomToggle[slotNum].stack:SetText("")
-                            end
-                        end
-                        if g_toggledSlotsBack[k] then
-                            local slotNum = g_toggledSlotsBack[k]
-                            if g_uiCustomToggle[slotNum] then
-                                g_uiCustomToggle[slotNum].stack:SetText("")
-                            end
-                        end
-                    end
-                end
+    -- Hijack abilityId for extra bar highlights (skip if FancyActionBar active)
+    if not isFancyActionBarEnabled then
+        local extraId = Effects.BarHighlightExtraId[abilityId]
+        if extraId then
+            abilityId = extraId
+            if Effects.IsGroundMineAura[abilityId] then
+                g_toggledSlotsPlayer[abilityId] = nil
+                if unitTag == "reticleover" then g_mineNoTurnOff[abilityId] = true end
             end
         end
+    end
 
-        -- Ignore fading event if override is true
-        if g_barNoRemove[abilityId] then
-            if Effects.BarHighlightCheckOnFade[abilityId] then
-                ActionBar.BarHighlightSwap(abilityId)
-            end
-            return
-        end
+    if unitTag ~= "player" and unitTag ~= "reticleover" then return end
 
-        -- Stop any proc animation associated with this effect
-        if g_triggeredSlotsRemain[abilityId] then
-            if g_triggeredSlotsFront[abilityId] and g_uiProcAnimation[g_triggeredSlotsFront[abilityId]] then
-                g_uiProcAnimation[g_triggeredSlotsFront[abilityId]]:Stop()
-            end
-            if g_triggeredSlotsBack[abilityId] and g_uiProcAnimation[g_triggeredSlotsBack[abilityId]] then
-                g_uiProcAnimation[g_triggeredSlotsBack[abilityId]]:Stop()
-            end
-            g_triggeredSlotsRemain[abilityId] = nil
-        end
-        -- Stop any toggle animation associated with this effect
-        if g_toggledSlotsRemain[abilityId] then
-            if g_toggledSlotsFront[abilityId] and g_uiCustomToggle[g_toggledSlotsFront[abilityId]] then
-                local slotNum = g_toggledSlotsFront[abilityId]
-                ActionBar.HideSlot(slotNum, abilityId)
-            end
-            if g_toggledSlotsBack[abilityId] and g_uiCustomToggle[g_toggledSlotsBack[abilityId]] then
-                local slotNum = g_toggledSlotsBack[abilityId]
-                ActionBar.HideSlot(slotNum, abilityId)
-            end
-            g_toggledSlotsRemain[abilityId] = nil
-            -- Don't modify stacks for Grim Focus since we use the actual stack ids to handle this
-            if not isStackBaseAbility[abilityId] then
-                g_toggledSlotsStack[abilityId] = nil
-            end
-        end
-
-        if Effects.BarHighlightCheckOnFade[abilityId] then
-            ActionBar.BarHighlightSwap(abilityId)
-        end
+    if changeType == EFFECT_RESULT_FADED then
+        OnEffectFaded(abilityId)
     else
-        if Effects.IsGrimFocus[abilityId] then
-            if ActionBar.SV.ShowTriggered and ActionBar.SV.ProcEnableSound then
-                if not g_boundArmamentsPlayed[abilityId] then
-                    g_boundArmamentsPlayed[abilityId] = {}
-                end
-
-                if (stackCount == 5 or stackCount == 10) and not g_boundArmamentsPlayed[abilityId][stackCount] then
-                    PlaySound(g_ProcSound)
-                    PlaySound(g_ProcSound)
-                    g_boundArmamentsPlayed[abilityId][stackCount] = true
-                end
-
-                if stackCount < 5 then
-                    g_boundArmamentsPlayed[abilityId][5] = false
-                    g_boundArmamentsPlayed[abilityId][10] = false
-                elseif stackCount < 10 and stackCount > 5 then
-                    g_boundArmamentsPlayed[abilityId][10] = false
-                end
-            end
-        elseif Effects.IsBoundArmaments[abilityId] then
-            if ActionBar.SV.ShowTriggered and ActionBar.SV.ProcEnableSound then
-                if not g_boundArmamentsPlayed[abilityId] then
-                    g_boundArmamentsPlayed[abilityId] = {}
-                end
-
-                if (stackCount == 4 or stackCount == 8) and not g_boundArmamentsPlayed[abilityId][stackCount] then
-                    PlaySound(g_ProcSound)
-                    PlaySound(g_ProcSound)
-                    g_boundArmamentsPlayed[abilityId][stackCount] = true
-                end
-
-                if stackCount < 4 then
-                    g_boundArmamentsPlayed[abilityId][4] = false
-                    g_boundArmamentsPlayed[abilityId][8] = false
-                elseif stackCount < 8 and stackCount > 4 then
-                    g_boundArmamentsPlayed[abilityId][8] = false
-                end
-            end
-        end
-        -- start any proc animation associated with this effect
-        if g_triggeredSlotsFront[abilityId] or g_triggeredSlotsBack[abilityId] then
-            local currentTime = GetGameTimeMilliseconds()
-            if ActionBar.SV.ShowTriggered then
-                -- Play sound twice so its a little louder.
-                if ActionBar.SV.ProcEnableSound and unitTag == "player" and g_triggeredSlotsFront[abilityId] then
-                    if abilityId == 46327 then
-                        if changeType == EFFECT_RESULT_GAINED then
-                            PlaySound(g_ProcSound)
-                            PlaySound(g_ProcSound)
-                        end
-                    else
-                        PlaySound(g_ProcSound)
-                        PlaySound(g_ProcSound)
-                    end
-                end
-                g_triggeredSlotsRemain[abilityId] = 1000 * endTime
-                local remain = g_triggeredSlotsRemain[abilityId] - currentTime
-                -- Front
-                if g_triggeredSlotsFront[abilityId] then
-                    ActionBar.PlayProcAnimations(g_triggeredSlotsFront[abilityId])
-                    if ActionBar.SV.BarShowLabel and g_uiProcAnimation[g_triggeredSlotsFront[abilityId]] then
-                        g_uiProcAnimation[g_triggeredSlotsFront[abilityId]].procLoopTexture.label:SetText(FormatDurationSeconds(remain))
-                    end
-                end
-                -- Back
-                if g_triggeredSlotsBack[abilityId] then
-                    ActionBar.PlayProcAnimations(g_triggeredSlotsBack[abilityId])
-                    if ActionBar.SV.BarShowLabel and g_uiProcAnimation[g_triggeredSlotsBack[abilityId]] then
-                        g_uiProcAnimation[g_triggeredSlotsBack[abilityId]].procLoopTexture.label:SetText(FormatDurationSeconds(remain))
-                    end
-                end
-            end
-        end
-        -- Display active effects
-        if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
-            local currentTime = GetGameTimeMilliseconds()
-            if ActionBar.SV.ShowToggled then
-                g_toggledSlotsRemain[abilityId] = 1000 * endTime
-                -- Don't modify stacks for Grim Focus since we use the actual stack ids to handle this
-                if not isStackBaseAbility[abilityId] then
-                    g_toggledSlotsStack[abilityId] = stackCount
-                end
-                if g_toggledSlotsFront[abilityId] then
-                    local slotNum = g_toggledSlotsFront[abilityId]
-                    ActionBar.ShowSlot(slotNum, abilityId, currentTime, false)
-                end
-                if g_toggledSlotsBack[abilityId] then
-                    local slotNum = g_toggledSlotsBack[abilityId]
-                    ActionBar.ShowSlot(slotNum, abilityId, currentTime, false)
-                end
-            end
-        end
-
-        -- Set stack count when Grim Focus duration buff changes
-        if isStackCounter[abilityId] then
-            for i = 1, GetNumBuffs(unitTag) do
-                abilityId = select(11, GetUnitBuffInfo(unitTag, i))
-                if isStackBaseAbility[abilityId] then
-                    g_toggledSlotsStack[abilityId] = stackCount
-                    if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
-                        if ActionBar.SV.ShowToggled and ActionBar.SV.BarShowLabel then
-                            if g_toggledSlotsFront[abilityId] then
-                                local slotNum = g_toggledSlotsFront[abilityId]
-                                if g_uiCustomToggle[slotNum] then
-                                    if g_toggledSlotsStack[abilityId] and g_toggledSlotsStack[abilityId] > 0 then
-                                        g_uiCustomToggle[slotNum].stack:SetText(g_toggledSlotsStack[abilityId])
-                                    else
-                                        g_uiCustomToggle[slotNum].stack:SetText("")
-                                    end
-                                end
-                            end
-                            if g_toggledSlotsBack[abilityId] then
-                                local slotNum = g_toggledSlotsBack[abilityId]
-                                if g_uiCustomToggle[slotNum] then
-                                    if g_toggledSlotsStack[abilityId] and g_toggledSlotsStack[abilityId] > 0 then
-                                        g_uiCustomToggle[slotNum].stack:SetText(g_toggledSlotsStack[abilityId])
-                                    else
-                                        g_uiCustomToggle[slotNum].stack:SetText("")
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
+        OnEffectGained(abilityId, unitTag, endTime, stackCount, changeType)
     end
 end
 
