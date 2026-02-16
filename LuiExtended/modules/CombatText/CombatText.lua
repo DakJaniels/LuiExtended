@@ -291,7 +291,7 @@ function CombatText.Initialize(enabled)
     LUIE_CombatText_Outgoing:SetResizeHandleSize(MOUSE_CURSOR_RESIZE_NS)
 
     -- Pool Manager
-    CombatText.poolManager = LUIE.CombatTextPoolManager:New(CombatTextConstants.poolType)
+    CombatText.poolManager = LUIE.CombatTextPoolManager:New(CombatTextConstants.poolType) ---@type LuiExtended.CombatTextPoolManager
 
     -- Event Listeners
     LUIE.CombatTextCombatEventListener:New()

@@ -151,6 +151,7 @@ function CombatTextPool:Initialize(poolType)
         control.icon:ClearAnchors()
         control.icon:SetHidden(true)
         control.icon._lastTexture = nil
+        control:SetHidden(true)
     end
 
     local function CreateAnimation()
