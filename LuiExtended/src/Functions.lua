@@ -112,7 +112,7 @@ do
 
     --- Migrates old string-based font style to numeric constant
     --- @param styleValue string|number Font style value
-    --- @return number|nil Numeric font style constant
+    --- @return number Numeric font style constant
     local function MigrateFontStyle(styleValue)
         if type(styleValue) == "string" then
             return LUIE_FONT_STYLE_TO_CONSTANT[styleValue]
