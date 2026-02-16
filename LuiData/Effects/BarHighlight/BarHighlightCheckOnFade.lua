@@ -32,8 +32,8 @@ local TARGET_UNIT_TAG = "reticleover"
 --- @field unitTag string Unit tag to filter effects ("player" or "reticleover")
 --- @field id2Tag string | nil Unit tag to filter effects ("player" or "reticleover")
 --- @field id3Tag string | nil Unit tag to filter effects ("player" or "reticleover")
---- @field duration integer | nil Override duration for the effect (in milliseconds)
---- @field durationMod integer | nil Duration modifier to subtract from final duration
+--- @field duration integer | nil Ability ID whose duration to use (passed to GetUpdatedAbilityDuration). When set, fake path is used instead of buff scan.
+--- @field durationMod integer | nil Ability ID whose duration to subtract from duration (e.g. Phantasmal Escape from Major Evasion). Passed to GetUpdatedAbilityDuration.
 
 --- @type table<integer, BarHighlightOverrideEntry>
 local barHighlightCheckOnFade =

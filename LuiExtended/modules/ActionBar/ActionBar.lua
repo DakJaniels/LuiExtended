@@ -1686,70 +1686,56 @@ end
 
 -- -----------------------------------------------------------------------------
 ---
--- Iterate until we find the buff we're looking for, if it's present, then send a dummy event using the duration info from that buff but the id from the original ability.
+-- When the primary tracked effect fades, iterate over unit buffs to see if another buff is present.
+-- If found, send a dummy EFFECT_RESULT_GAINED event using that buff's duration/stack info but the original ability's id.
+-- This allows bar highlights to "swap" to an alternative buff (e.g. Minor Maim from Grave Grasp vs Ghostly Embrace).
+--
+--- @param abilityId integer The original ability id (key into BarHighlightCheckOnFade).
+--
+-- Priority system: id1 > id2 > id3. First match wins. Each id may use a different unitTag via id2Tag/id3Tag.
+-- castByPlayer must be true: when two instances of the same buff exist (one player-cast, one not), we only highlight our own.
+--
+-- Paths:
+--   1. duration > 0: duration and durationMod are ability IDs. GetUpdatedAbilityDuration(id) returns ms; we use duration_ms - durationMod_ms for the synthetic aura.
+--   2. id1/id2/id3: Scan buffs on unitTag (or id2Tag/id3Tag overrides), find first match, fire event.
 function ActionBar.BarHighlightSwap(abilityId)
-    local id1 = Effects.BarHighlightCheckOnFade[abilityId].id1 or 0
-    local id2 = Effects.BarHighlightCheckOnFade[abilityId].id2 or 0
-    local id3 = Effects.BarHighlightCheckOnFade[abilityId].id3 or 0
-    local unitTag = Effects.BarHighlightCheckOnFade[abilityId].unitTag
-    local id2Tag = Effects.BarHighlightCheckOnFade[abilityId].id2Tag
-    local id3Tag = Effects.BarHighlightCheckOnFade[abilityId].id3Tag
-    local duration = Effects.BarHighlightCheckOnFade[abilityId].duration or 0
-    local durationMod = Effects.BarHighlightCheckOnFade[abilityId].durationMod or 0
-    -- If the unitTag doesn't exist, bail out here
+    local cfg = Effects.BarHighlightCheckOnFade[abilityId]
+    if not cfg then return end
+
+    local unitTag = cfg.unitTag
     if not DoesUnitExist(unitTag) then return end
 
-    -- If we have a fake duration assigned, use that
+    -- Path 1: Fake duration. duration and durationMod are ability IDs; GetUpdatedAbilityDuration returns ms. Result: duration_ms - durationMod_ms.
+    local duration = cfg.duration or 0
+    local durationMod = cfg.durationMod or 0
     if duration > 0 then
         local fakeDuration = GetUpdatedAbilityDuration(duration) - GetUpdatedAbilityDuration(durationMod)
         local timeStarted = GetGameTimeSeconds()
         local timeEnding = timeStarted + (fakeDuration / 1000)
-        -- Fill in set values here since we know this is a fake self aura if we have a fake duration
         ActionBar.OnEffectChanged(EFFECT_RESULT_GAINED, nil, nil, unitTag, timeStarted, timeEnding, 0, nil, nil, 1, ABILITY_TYPE_BONUS, 0, nil, nil, abilityId, 1, true, nil)
         return
     end
 
-    -- Id's serve as a priority system, if we find an id then we process it and this function returns.
-    -- It's important we check that the id both exists and is castByPlayer, in the case of 2 of the same id being present with one not cast by the player.
-
-    -- Iterate through buffs and look for id1 if it exists
-    if id1 ~= 0 then
-        for i = 1, GetNumBuffs(unitTag) do
-            local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityIdNew, canClickOff, castByPlayer = GetUnitBuffInfo(unitTag, i)
-            if id1 == abilityIdNew then
-                -- Only send an event if castByPlayer is true
-                if castByPlayer == true then
-                    ActionBar.OnEffectChanged(EFFECT_RESULT_GAINED, nil, nil, unitTag, timeStarted, timeEnding, stackCount, nil, buffType, effectType, abilityType, statusEffectType, nil, nil, abilityId, COMBAT_UNIT_TYPE_PLAYER, true, nil)
-                    return
-                end
-            end
-        end
-    end
-    -- Swap tag here for id2 checking
-    if id2Tag then unitTag = id2Tag end
-    -- Only iterate again if there is a second ID to look for
+    -- Path 2: Buff scan. Build priority-ordered checks: { id, tag } per fallback.
+    -- id1 uses unitTag; id2 uses id2Tag if set, else unitTag; id3 uses id3Tag if set, else current tag.
+    local checks = {}
+    local id1, id2, id3 = cfg.id1 or 0, cfg.id2 or 0, cfg.id3 or 0
+    if id1 ~= 0 then checks[#checks + 1] = { id = id1, tag = unitTag } end
     if id2 ~= 0 then
-        for i = 1, GetNumBuffs(unitTag) do
-            local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityIdNew, canClickOff, castByPlayer = GetUnitBuffInfo(unitTag, i)
-            if id2 == abilityIdNew then
-                if castByPlayer == true then
-                    ActionBar.OnEffectChanged(EFFECT_RESULT_GAINED, nil, nil, unitTag, timeStarted, timeEnding, stackCount, nil, buffType, effectType, abilityType, statusEffectType, nil, nil, abilityId, COMBAT_UNIT_TYPE_PLAYER, true, nil)
-                    return
-                end
-            end
-        end
+        unitTag = cfg.id2Tag or unitTag
+        checks[#checks + 1] = { id = id2, tag = unitTag }
     end
-    -- Swap tag here for id2 checking
-    if id3Tag then unitTag = id2Tag end
-    -- Only iterate again if there is a third ID to look for
     if id3 ~= 0 then
-        for i = 1, GetNumBuffs(unitTag) do
-            local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityIdNew, canClickOff, castByPlayer = GetUnitBuffInfo(unitTag, i)
-            if id3 == abilityIdNew then
-                if castByPlayer == true then
-                    ActionBar.OnEffectChanged(EFFECT_RESULT_GAINED, nil, nil, unitTag, timeStarted, timeEnding, stackCount, nil, buffType, effectType, abilityType, statusEffectType, nil, nil, abilityId, COMBAT_UNIT_TYPE_PLAYER, true, nil)
-                    return
-                end
+        unitTag = cfg.id3Tag or unitTag
+        checks[#checks + 1] = { id = id3, tag = unitTag }
+    end
+
+    for _, c in ipairs(checks) do
+        for i = 1, GetNumBuffs(c.tag) do
+            local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityIdNew, canClickOff, castByPlayer = GetUnitBuffInfo(c.tag, i)
+            if c.id == abilityIdNew and castByPlayer then
+                ActionBar.OnEffectChanged(EFFECT_RESULT_GAINED, nil, nil, c.tag, timeStarted, timeEnding, stackCount, nil, buffType, effectType, abilityType, statusEffectType, nil, nil, abilityId, COMBAT_UNIT_TYPE_PLAYER, true, nil)
+                return
             end
         end
     end
