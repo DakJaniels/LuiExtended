@@ -87,7 +87,7 @@ function SpellCastBuffs.AuthorCombatDebug(eventCode, result, isError, abilityNam
         local finalString = (iconFormatted .. "[" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [S] " .. source .. " --> [T] " .. target .. " [R] " .. formattedResult)
         for k, cc in ipairs(chatSystem.containers) do
             local chatContainer = cc
-            local chatWindow = cc.windows[2]
+            local chatWindow = cc.windows[3]
             if chatWindow == nil then chatWindow = cc.windows[1] end
             chatContainer:AddEventMessageToWindow(chatWindow, finalString, CHAT_CATEGORY_SYSTEM)
         end
@@ -114,7 +114,7 @@ function SpellCastBuffs.AuthorEffectDebug(eventCode, changeType, effectSlot, eff
         local finalString = (iconFormatted .. refreshOnly .. "|c00E200 [" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [Tag] " .. unitName .. "|r")
         for k, cc in ipairs(chatSystem.containers) do
             local chatContainer = cc
-            local chatWindow = cc.windows[2]
+            local chatWindow = cc.windows[3]
             if chatWindow == nil then chatWindow = cc.windows[1] end
             chatContainer:AddEventMessageToWindow(chatWindow, finalString, CHAT_CATEGORY_SYSTEM)
         end
