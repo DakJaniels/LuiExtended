@@ -58,7 +58,7 @@ local PointType = CombatTextConstants.pointType
 -- Uses weak values (__mode='v') to allow garbage collection of unused entries
 local abilityNameCache = setmetatable({},
                                       {
-                                          __mode = 'v',  -- Weak values: entries can be GC'd when no longer referenced
+                                          __mode = "v", -- Weak values: entries can be GC'd when no longer referenced
                                           __index = function (t, abilityId)
                                               local name = ZO_CachedStrFormat("<<C:1>>", GetAbilityName(abilityId))
                                               t[abilityId] = name
@@ -70,7 +70,7 @@ local abilityNameCache = setmetatable({},
 -- Uses weak values (__mode='v') to allow garbage collection of unused entries
 local sourceNameCache = setmetatable({},
                                      {
-                                         __mode = 'v',  -- Weak values: entries can be GC'd when no longer referenced
+                                         __mode = "v", -- Weak values: entries can be GC'd when no longer referenced
                                          __index = function (t, sourceName)
                                              local formatted = ZO_CachedStrFormat("<<C:1>>", sourceName)
                                              t[sourceName] = formatted

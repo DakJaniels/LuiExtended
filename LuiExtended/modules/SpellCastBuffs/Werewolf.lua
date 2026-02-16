@@ -34,7 +34,8 @@ function SpellCastBuffs.DisplayWerewolfIcon()
     SetWerewolfIcon()
     local context = SpellCastBuffs.DetermineContextSimple("player1", g_werewolfId, g_werewolfName)
     local power = GetUnitPower("player", POWERTYPE_WEREWOLF)
-    SpellCastBuffs.EffectsList[context]["Werewolf Indicator"] = SpellCastBuffs.CreateEffect({
+    SpellCastBuffs.EffectsList[context]["Werewolf Indicator"] =
+    {
         target = "player",
         type = 1,
         id = g_werewolfId,
@@ -47,7 +48,7 @@ function SpellCastBuffs.DisplayWerewolfIcon()
         restart = true,
         iconNum = 0,
         werewolf = power / 1000
-    })
+    }
 end
 
 function SpellCastBuffs.HideWerewolfIcon()

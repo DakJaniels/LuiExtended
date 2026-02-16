@@ -577,7 +577,7 @@ function ActionBar.Initialize(enabled)
     local UNUSED = nil
     local quickslotButton = ZO_ActionBar_GetButton(UNUSED, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
     local quickslotButtonButton = quickslotButton and quickslotButton.button
-    
+
     local quickslotLabel = windowManager:CreateControl("$(parent)Label", quickslotButtonButton, CT_LABEL)
     quickslotLabel:SetAnchor(CENTER, quickslotButtonButton, CENTER, 0, 0)
     quickslotLabel:SetFont(g_potionFont or "LUIE Default Font")
@@ -588,7 +588,7 @@ function ActionBar.Initialize(enabled)
     quickslotLabel:SetDrawTier(DT_HIGH)
     quickslotLabel:SetHidden(true)
     uiQuickSlot.label = quickslotLabel
-    
+
     if ActionBar.SV.PotionTimerColor then
         quickslotLabel:SetColor(unpack(uiQuickSlot.colour))
     else
@@ -598,7 +598,7 @@ function ActionBar.Initialize(enabled)
 
     -- Create Ultimate Overlay Labels
     local ActionButton8 = ZO_ActionBar_GetButton(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1)
-    
+
     -- Ultimate value label (numeric display above slot)
     local ultimateValueLabel = windowManager:CreateControl("$(parent)LabelVal", ActionButton8.button, CT_LABEL)
     ultimateValueLabel:SetAnchor(BOTTOM, ActionButton8.button, TOP, 0, -3)
@@ -608,7 +608,7 @@ function ActionBar.Initialize(enabled)
     ultimateValueLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
     ultimateValueLabel:SetHidden(true)
     uiUltimate.LabelVal = ultimateValueLabel
-    
+
     -- Ultimate percentage label (overlay on slot)
     local ultimatePctLabel = windowManager:CreateControl("$(parent)LabelPct", ActionButton8.button, CT_LABEL)
     ultimatePctLabel:SetFont(g_ultimateFont or "LUIE Default Font")
@@ -1757,10 +1757,10 @@ local isStackBaseAbility =
 -- Proc sound thresholds: abilityId -> { threshold1, threshold2 }. Used by IsGrimFocus and IsBoundArmaments.
 local PROC_SOUND_THRESHOLDS =
 {
-    [122585] = { 5, 10 },  -- Grim Focus
-    [122587] = { 5, 10 },   -- Relentless Focus
-    [122586] = { 5, 10 },   -- Merciless Resolve
-    [203447] = { 4, 8 },    -- Bound Armaments
+    [122585] = { 5, 10 }, -- Grim Focus
+    [122587] = { 5, 10 }, -- Relentless Focus
+    [122586] = { 5, 10 }, -- Merciless Resolve
+    [203447] = { 4, 8 },  -- Bound Armaments
 }
 
 --- Iterate over front and back toggled slots for abilityId; call fn(slotNum) for each valid slot.
@@ -1774,14 +1774,14 @@ end
 --- Set stack label on all toggled slots for abilityId. textOrNil: number to display, or nil/0 for empty.
 local function SetToggledStackLabels(abilityId, textOrNil)
     local text = (textOrNil and textOrNil > 0) and tostring(textOrNil) or ""
-    ForEachToggledSlot(abilityId, function(slotNum)
+    ForEachToggledSlot(abilityId, function (slotNum)
         g_uiCustomToggle[slotNum].stack:SetText(text)
     end)
 end
 
 --- Hide all toggled slots for abilityId.
 local function HideToggledSlots(abilityId)
-    ForEachToggledSlot(abilityId, function(slotNum)
+    ForEachToggledSlot(abilityId, function (slotNum)
         ActionBar.HideSlot(slotNum, abilityId)
     end)
 end
@@ -3193,20 +3193,20 @@ function ActionBar.PlayProcAnimations(slotNum)
         end
         return
     end
-    
+
     -- Don't create for backbar ultimate slot
     if slotNum == (BAR_INDEX_END + BACKBAR_INDEX_OFFSET) then
         return
     end
-    
+
     -- Set placeholder immediately to prevent race condition
     g_uiProcAnimation[slotNum] = true
-    
+
     -- Get action button
-    local actionButton = slotNum < BACKBAR_INDEX_OFFSET 
-        and ZO_ActionBar_GetButton(slotNum) 
+    local actionButton = slotNum < BACKBAR_INDEX_OFFSET
+        and ZO_ActionBar_GetButton(slotNum)
         or g_backbarButtons[slotNum]
-    
+
     -- Create proc loop texture from virtual template
     local procLoopTexture = windowManager:CreateControlFromVirtual("$(parent)Loop_LUIE", actionButton.slot, "ZO_PendingLoop_Glow")
     procLoopTexture:SetAnchor(TOPLEFT, actionButton.slot:GetNamedChild("FlipCard"))
@@ -3275,32 +3275,32 @@ function ActionBar.ShowCustomToggle(slotNum)
     if isFancyActionBarEnabled then
         return
     end
-    
+
     -- Early return if already exists and is a control (not placeholder)
     local existingToggle = g_uiCustomToggle[slotNum]
     if existingToggle and existingToggle ~= true then
         existingToggle:SetHidden(false)
         return
     end
-    
+
     -- Don't create for backbar ultimate slot
     if slotNum == (BAR_INDEX_END + BACKBAR_INDEX_OFFSET) then
         return
     end
-    
+
     -- If placeholder exists, skip (creation already in progress)
     if existingToggle == true then
         return
     end
-    
+
     -- Set placeholder immediately to prevent race condition
     g_uiCustomToggle[slotNum] = true
-    
+
     -- Get action button
-    local actionButton = slotNum < BACKBAR_INDEX_OFFSET 
-        and ZO_ActionBar_GetButton(slotNum) 
+    local actionButton = slotNum < BACKBAR_INDEX_OFFSET
+        and ZO_ActionBar_GetButton(slotNum)
         or g_backbarButtons[slotNum]
-    
+
     -- Create toggle frame
     local toggleFrame = windowManager:CreateControl("$(parent)Toggle_LUIE", actionButton.slot, CT_TEXTURE)
     toggleFrame:SetAnchor(TOPLEFT, actionButton.slot:GetNamedChild("FlipCard"))
@@ -3311,7 +3311,7 @@ function ActionBar.ShowCustomToggle(slotNum)
     toggleFrame:SetDrawLevel(actionButton.slot:GetDrawLevel() + 1)
     toggleFrame:SetDrawTier(DT_HIGH)
     toggleFrame:SetColor(0.5, 1, 0.5, 1)
-    
+
     -- Create label control
     local label = windowManager:CreateControl("$(parent)Label", toggleFrame, CT_LABEL)
     label:SetFont(g_barFont or "LUIE Default Font")
@@ -3326,7 +3326,7 @@ function ActionBar.ShowCustomToggle(slotNum)
     label:SetColor(1, 1, 1, 1)
     label:SetHidden(false)
     toggleFrame.label = label
-    
+
     -- Create stack label control
     local stack = windowManager:CreateControl("$(parent)Stack", toggleFrame, CT_LABEL)
     stack:SetFont(g_barFont or "LUIE Default Font")
@@ -3341,7 +3341,7 @@ function ActionBar.ShowCustomToggle(slotNum)
     stack:SetColor(1, 1, 1, 1)
     stack:SetHidden(false)
     toggleFrame.stack = stack
-    
+
     -- Replace placeholder with actual frame and show it
     g_uiCustomToggle[slotNum] = toggleFrame
     toggleFrame:SetHidden(false)

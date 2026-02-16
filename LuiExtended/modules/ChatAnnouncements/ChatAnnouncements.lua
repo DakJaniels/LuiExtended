@@ -1865,7 +1865,7 @@ function ChatAnnouncements.OnCurrencyUpdate(currencyType, currencyLocation, newA
         return
     end
 
-        -- DEBUG
+    -- DEBUG
     if LUIE.IsDevDebugEnabled() then
         local traceback = "Currency Update:\n" ..
             "--> currencyType: " .. tostring(currencyType) .. "\n" ..

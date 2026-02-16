@@ -45,7 +45,8 @@ function SpellCastBuffs.LoadBattleSpiritTarget()
         else
             tooltip = Tooltips.Innate_Battle_Spirit
         end
-        SpellCastBuffs.EffectsList["reticleover1"][abilityId] = SpellCastBuffs.CreateEffect({
+        SpellCastBuffs.EffectsList["reticleover1"][abilityId] =
+        {
             type = 1,
             id = abilityId,
             name = Abilities.Skill_Battle_Spirit,
@@ -57,6 +58,6 @@ function SpellCastBuffs.LoadBattleSpiritTarget()
             forced = "short",
             restart = true,
             iconNum = 0,
-        })
+        }
     end
 end

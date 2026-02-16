@@ -105,8 +105,8 @@ local animationConfigs =
     },
     [poolTypes.ANIMATION_ELLIPSE_X_CRIT] =
     {
-        { type = "scale", from = 1.5, to = 1, duration = 150, delay = 0, easing = slowFast },
-        { type = "move", label = "scrollX", duration = 2500, delay = 0, easing = ellipseEasing },
+        { type = "scale", from = 1.5,        to = 1,          duration = 150, delay = 0,             easing = slowFast },
+        { type = "move",  label = "scrollX", duration = 2500, delay = 0,      easing = ellipseEasing                   },
     },
     [poolTypes.ANIMATION_ELLIPSE_Y_CRIT] =
     {

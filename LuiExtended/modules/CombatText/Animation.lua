@@ -78,7 +78,7 @@ end
 
 function CombatTextAnimation:Alpha(stepName, startAlpha, endAlpha, duration, delay, easingFunc)
     local step = self.timeline:InsertAnimation(ANIMATION_ALPHA, nil, delay or 0)
-    ---@cast step AnimationObjectAlpha
+    --- @cast step AnimationObjectAlpha
     step:SetAlphaValues(startAlpha, endAlpha)
     step:SetDuration(duration)
     step:SetEasingFunction(easingFunc or linearEase)
@@ -88,7 +88,7 @@ end
 
 function CombatTextAnimation:Scale(stepName, startScale, endScale, duration, delay, easingFunc)
     local step = self.timeline:InsertAnimation(ANIMATION_SCALE, nil, delay or 0)
-    ---@cast step AnimationObjectScale
+    --- @cast step AnimationObjectScale
     step:SetScaleValues(startScale, endScale)
     step:SetDuration(duration)
     step:SetEasingFunction(easingFunc or linearEase)
@@ -98,7 +98,7 @@ end
 
 function CombatTextAnimation:Move(stepName, offsetX, offsetY, duration, delay, easingFunc)
     local step = self.timeline:InsertAnimation(ANIMATION_TRANSLATE, nil, delay or 0)
-    ---@cast step AnimationObjectTranslate
+    --- @cast step AnimationObjectTranslate
     step:SetTranslateDeltas(offsetX, offsetY, TRANSLATE_ANIMATION_DELTA_TYPE_FROM_START)
     step:SetDuration(duration)
     step:SetEasingFunction(easingFunc or linearEase)

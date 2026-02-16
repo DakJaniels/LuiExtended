@@ -47,7 +47,7 @@ function CombatTextCombatEllipseEventViewer:OnEvent(combatType, powerType, value
             flags.isHot = isHot
             flags.isHotCritical = isHotCritical
             local throttleTime = self:GetThrottleTime(Settings, flags)
-            LUIE.RecycleTable(flags)  -- Return to cache immediately after use
+            LUIE.RecycleTable(flags) -- Return to cache immediately after use
             LUIE_callLater(function ()
                                self:ViewFromEventBuffer(combatType, powerType, eventKey, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
                            end, throttleTime)
@@ -95,7 +95,7 @@ function CombatTextCombatEllipseEventViewer:View(combatType, powerType, value, a
     flags.isBlocked = isBlocked
     flags.isInterrupted = isInterrupted
     local textFormat, fontSize, textColor = self:GetTextAttributes(powerType, damageType, flags)
-    LUIE.RecycleTable(flags)  -- Return to cache immediately after use
+    LUIE.RecycleTable(flags) -- Return to cache immediately after use
     if hits > 1 and Settings.toggles.showThrottleTrailer then
         value = string_format("%s (%d)", value, hits)
     end

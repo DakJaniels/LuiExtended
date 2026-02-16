@@ -27,98 +27,6 @@ local hidePlayerEffects = {}       -- Table of Effects to hide on Player - gener
 local hideTargetEffects = {}       -- Table of Effects to hide on Target - generated on load or updated from Menu
 local debuffDisplayOverrideId = {} -- Table of Effects (by id) that should show on the target regardless of who applied them.
 
---------------------------------------------------------------------------------
--- HavokScript Effect Structure (Performance-Critical)
---------------------------------------------------------------------------------
--- Using HavokScript's compiled struct for native bytecode performance.
--- Field access via slots is cache-friendly and type-safe at compile-time.
--- 
--- SENTINEL VALUES for nullable fields (HavokScript has no native nil):
---   - ends:    -1 for nil (permanent effects)
---   - werewolf: -1 for nil, 0.0-1.0 for power percentage
---   - forced:  "" for nil, "long" or "short" otherwise
---   - tooltip: "" for nil
---------------------------------------------------------------------------------
-hstructure LUIE_SpellCastBuffs_Effect_Struct
-    -- Core identification
-    id : number;
-    buffSlot : number;
-    
-    -- Metadata
-    name : string;
-    target : string;
-    type : number;           -- BUFF_EFFECT_TYPE_BUFF or BUFF_EFFECT_TYPE_DEBUFF
-    
-    -- Visual
-    icon : string;
-    iconNum : number;
-    
-    -- Timing
-    dur : number;
-    starts : number;
-    ends : number;           -- Use -1 for nil (permanent effects)
-    
-    -- State flags
-    restart : boolean;
-    toggle : boolean;
-    groundLabel : boolean;
-    artificial : boolean;
-    
-    -- Special values
-    stack : number;
-    unbreakable : number;
-    werewolf : number;       -- Use -1 for nil, 0.0-1.0 for power percentage
-    
-    -- Optional strings
-    forced : string;         -- Use "" for nil, "long" or "short" otherwise
-    tooltip : string;        -- Use "" for nil
-end
-
---------------------------------------------------------------------------------
--- Effect Constructor (hmake wrapper with sentinel handling)
---------------------------------------------------------------------------------
---- Creates a new effect using HavokScript's compiled structure.
---- Automatically handles nil -> sentinel conversions for nullable fields.
----
---- @param opts table Effect properties
---- @return LUIE_SpellCastBuffs_Effect_Struct
-function SpellCastBuffs.CreateEffect(opts)
-    return hmake LUIE_SpellCastBuffs_Effect_Struct {
-        -- Core identification
-        id = opts.id,
-        buffSlot = opts.buffSlot or 0,
-        
-        -- Metadata
-        name = opts.name,
-        target = opts.target,
-        type = opts.type,
-        
-        -- Visual
-        icon = opts.icon,
-        iconNum = opts.iconNum or 0,
-        
-        -- Timing
-        dur = opts.dur,
-        starts = opts.starts,
-        ends = opts.ends or -1,  -- Sentinel: -1 for nil (permanent)
-        
-        -- State flags
-        restart = opts.restart or false,
-        toggle = opts.toggle or false,
-        groundLabel = opts.groundLabel or false,
-        artificial = opts.artificial or false,
-        
-        -- Special values
-        stack = opts.stack or 0,
-        unbreakable = opts.unbreakable or 0,
-        werewolf = opts.werewolf or -1,  -- Sentinel: -1 for nil
-        
-        -- Optional strings (sentinels: "" for nil)
-        forced = opts.forced or "",
-        tooltip = opts.tooltip or "",
-    }
-end
-
 local windowTitles =
 {
     playerb          = GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS),
@@ -340,17 +248,17 @@ local g_protectAbilityRemoval = {} -- AbilityId's set to a timestamp here to pre
 local g_ignoreAbilityId = {}       -- Ignored abilityId's on EVENT_COMBAT_EVENT, some events fire twice and we need to ignore every other one.
 
 -- Persistent tables for OnUpdate to eliminate allocations (ZOS-style architecture)
-local g_buffsSorted = {}           -- Persistent sorted buffs table, cleared each update instead of reallocated
-local g_needs_update = {}          -- Persistent update tracking table
-local g_isProminent = {}           -- Persistent prominent buff tracking table
-local g_blockEffectData = {}       -- Persistent block buff effect data to avoid allocation when blocking
+local g_buffsSorted = {}     -- Persistent sorted buffs table, cleared each update instead of reallocated
+local g_needs_update = {}    -- Persistent update tracking table
+local g_isProminent = {}     -- Persistent prominent buff tracking table
+local g_blockEffectData = {} -- Persistent block buff effect data to avoid allocation when blocking
 
 -- Persistent context tables to eliminate allocations in hot paths
-local g_playerBuffContext = { "player1", "promd_player", "promb_player" }  -- For ClearPlayerBuff
-local g_playerReloadContext = { "player1", "player2", "ground", "promb_ground", "promd_ground", "promb_player", "promd_player" }  -- For ReloadEffects (player)
-local g_playerPromContext = { "promb_player", "promb_ground", "promd_player", "promd_ground" }  -- For ReloadEffects prominent (player)
-local g_targetPromContext = { "promb_target", "promd_target" }  -- For ReloadEffects prominent (target)
-local g_needsReset = {}  -- For ApplyIconSize/ApplyFont
+local g_playerBuffContext = { "player1", "promd_player", "promb_player" }                                                        -- For ClearPlayerBuff
+local g_playerReloadContext = { "player1", "player2", "ground", "promb_ground", "promd_ground", "promb_player", "promd_player" } -- For ReloadEffects (player)
+local g_playerPromContext = { "promb_player", "promb_ground", "promd_player", "promd_ground" }                                   -- For ReloadEffects prominent (player)
+local g_targetPromContext = { "promb_target", "promd_target" }                                                                   -- For ReloadEffects prominent (target)
+local g_needsReset = {}                                                                                                          -- For ApplyIconSize/ApplyFont
 
 -- Add buff containers into LUIE namespace
 SpellCastBuffs.BuffContainers = uiTlw
@@ -1545,7 +1453,7 @@ function SpellCastBuffs.Reset()
     for k in pairs(g_needsReset) do
         g_needsReset[k] = nil
     end
-    
+
     -- And reset sizes of already existing icons
     for _, container in pairs(containerRouting) do
         g_needsReset[container] = true
@@ -1887,8 +1795,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
             return
         end
 
-        -- NOTE: Sentinel check - tooltip == "" means nil
-        if control.tooltip and control.tooltip ~= "" then
+        if control.tooltip then
             tooltipText = control.tooltip
         else
             local duration
@@ -2288,7 +2195,7 @@ function SpellCastBuffs.ApplyFont()
     for k in pairs(g_needsReset) do
         g_needsReset[k] = nil
     end
-    
+
     -- And reset sizes of already existing icons
     for _, container in pairs(containerRouting) do
         g_needsReset[container] = true
@@ -2330,7 +2237,7 @@ function SpellCastBuffs.OnEffectChangedGround(eventCode, changeType, effectSlot,
     gt1.promD = "promd_player"
     gt1.type = BUFF_EFFECT_TYPE_BUFF
     groundType[1] = gt1
-    
+
     local gt2 = LUIE.GetCachedTable()
     gt2.info = Effects.EffectGroundDisplay[abilityId].debuff
     gt2.context = "player2"
@@ -2338,7 +2245,7 @@ function SpellCastBuffs.OnEffectChangedGround(eventCode, changeType, effectSlot,
     gt2.promD = "promd_target"
     gt2.type = BUFF_EFFECT_TYPE_DEBUFF
     groundType[2] = gt2
-    
+
     local gt3 = LUIE.GetCachedTable()
     gt3.info = Effects.EffectGroundDisplay[abilityId].ground
     gt3.context = "ground"
@@ -2409,7 +2316,8 @@ function SpellCastBuffs.OnEffectChangedGround(eventCode, changeType, effectSlot,
                     if stackCount > Effects.EffectGroundDisplay[abilityId].stackReset then stackCount = Effects.EffectGroundDisplay[abilityId].stackReset end
                 end
 
-                SpellCastBuffs.EffectsList[context][abilityId] = SpellCastBuffs.CreateEffect({
+                SpellCastBuffs.EffectsList[context][abilityId] =
+                {
                     target = SpellCastBuffs.DetermineTarget(context),
                     type = groundType[i].type,
                     id = abilityId,
@@ -2426,11 +2334,11 @@ function SpellCastBuffs.OnEffectChangedGround(eventCode, changeType, effectSlot,
                     buffSlot = effectSlot,
                     groundLabel = groundLabel,
                     toggle = toggle,
-                })
+                }
             end
         end
     end
-    
+
     -- Recycle cached tables
     LUIE.RecycleTable(groundType[1])
     LUIE.RecycleTable(groundType[2])
@@ -2557,7 +2465,7 @@ function SpellCastBuffs.OnEffectChanged(eventId, changeType, effectSlot, effectN
                 end
             end
         end
-        
+
         -- Recycle context table
         LUIE.RecycleTable(context)
     end
@@ -2597,7 +2505,7 @@ function SpellCastBuffs.OnEffectChanged(eventId, changeType, effectSlot, effectN
                 end
             end
         end
-        
+
         -- Recycle context table
         LUIE.RecycleTable(context)
     end
@@ -2794,7 +2702,8 @@ function SpellCastBuffs.OnEffectChanged(eventId, changeType, effectSlot, effectN
 
                     -- Create Buff
                     local icon = Effects.EffectCreateSkillAura[abilityId].icon or GetAbilityIcon(id)
-                    SpellCastBuffs.EffectsList[simulatedContext][Effects.EffectCreateSkillAura[abilityId].abilityId] = SpellCastBuffs.CreateEffect({
+                    SpellCastBuffs.EffectsList[simulatedContext][Effects.EffectCreateSkillAura[abilityId].abilityId] =
+                    {
                         target = SpellCastBuffs.DetermineTarget(simulatedContext),
                         type = fakeEffectType,
                         id = id,
@@ -2810,7 +2719,7 @@ function SpellCastBuffs.OnEffectChanged(eventId, changeType, effectSlot, effectN
                         unbreakable = fakeUnbreakable,
                         groundLabel = groundLabel,
                         toggle = toggle,
-                    })
+                    }
                 end
             end
         end
@@ -2839,7 +2748,8 @@ function SpellCastBuffs.OnEffectChanged(eventId, changeType, effectSlot, effectN
         end
 
         -- Buffs are created based on their effectSlot, this allows multiple buffs/debuffs of the same type to appear.
-        SpellCastBuffs.EffectsList[context][effectSlot] = SpellCastBuffs.CreateEffect({
+        SpellCastBuffs.EffectsList[context][effectSlot] =
+        {
             target = SpellCastBuffs.DetermineTarget(context),
             type = effectType,
             id = abilityId,
@@ -2856,7 +2766,7 @@ function SpellCastBuffs.OnEffectChanged(eventId, changeType, effectSlot, effectN
             buffSlot = savedEffectSlot,
             groundLabel = groundLabel,
             toggle = toggle,
-        })
+        }
     end
 end
 
@@ -2915,7 +2825,8 @@ end
 
 -- Creates effect data structure
 local function createEffectData(effectId, displayName, iconFile, effectType, startTime, endTime, duration, tooltip, artificial)
-    return SpellCastBuffs.CreateEffect({
+    return
+    {
         target = SpellCastBuffs.DetermineTarget("player1"),
         type = effectType,
         id = effectId,
@@ -2929,7 +2840,7 @@ local function createEffectData(effectId, displayName, iconFile, effectType, sta
         restart = true,
         iconNum = 0,
         artificial = artificial,
-    })
+    }
 end
 
 -- Handles BG deserter specific logic
@@ -4162,13 +4073,13 @@ function SpellCastBuffs.AddNameAura()
             if SpellCastBuffs.SV.BlacklistTable[v.id] or SpellCastBuffs.SV.BlacklistTable[abilityName] then
                 return
             end
-            SpellCastBuffs.EffectsList["reticleover2"]["Name Specific Buff" .. k] = SpellCastBuffs.CreateEffect({
+            SpellCastBuffs.EffectsList["reticleover2"]["Name Specific Buff" .. k] = {
                 target="reticleover", type=BUFF_EFFECT_TYPE_DEBUFF,
                 id= v.id, name= abilityName, icon= abilityIcon,
                 dur=0, starts=1, ends=nil,
                 forced = "short",
                 restart=true, iconNum=0
-            })
+            }
         end
     end
     ]]
@@ -4218,7 +4129,7 @@ end
 
 --- Sort function for buff/debuff effects
 --- Called by table.sort() - designed for minimal overhead per call
---- 
+---
 --- SORTING PRIORITY (highest to lowest):
 --- 1. Toggle effects (e.g., Block, Sneak) - always sorted to front
 --- 2. Permanent/ground effects (0 duration) - sorted by name
@@ -4239,36 +4150,35 @@ end
 --- @return boolean sortResult True if x should appear before y in sorted list
 local function buffSort(x, y)
     -- Calculate effective duration (0 for permanent/toggle/ground effects)
-    -- NOTE: Sentinel check - ends == -1 means nil (permanent effect)
-    local xDuration = (x.ends == -1 or x.dur == 0 or x.groundLabel or x.toggle) and 0 or x.dur
-    local yDuration = (y.ends == -1 or y.dur == 0 or y.groundLabel or y.toggle) and 0 or y.dur
-    
+    local xDuration = (x.ends == nil or x.dur == 0 or x.groundLabel or x.toggle) and 0 or x.dur
+    local yDuration = (y.ends == nil or y.dur == 0 or y.groundLabel or y.toggle) and 0 or y.dur
+
     -- PRIORITY 1: Toggle effects (Block, Sneak, etc.) - always sort to front
     if x.toggle or y.toggle then
         if xDuration == 0 and yDuration == 0 then
             -- Both are permanent/toggle
             if x.toggle and y.toggle then
-                return (x.name < y.name)  -- Both toggles: alphabetical by name
+                return (x.name < y.name) -- Both toggles: alphabetical by name
             elseif x.toggle and not y.toggle then
-                return true  -- x is toggle, y is permanent: toggle comes first
+                return true              -- x is toggle, y is permanent: toggle comes first
             else
-                return false  -- y is toggle, x is permanent: y comes first
+                return false             -- y is toggle, x is permanent: y comes first
             end
         else
-            return (xDuration == 0)  -- Permanent/toggle before temporary
+            return (xDuration == 0) -- Permanent/toggle before temporary
         end
-    
-    -- PRIORITY 2: Both permanent/ground effects (0 duration) - alphabetical by name
+
+        -- PRIORITY 2: Both permanent/ground effects (0 duration) - alphabetical by name
     elseif xDuration == 0 and yDuration == 0 then
         return (x.name < y.name)
-    
-    -- PRIORITY 3: Both temporary effects - sort by expiration time
+
+        -- PRIORITY 3: Both temporary effects - sort by expiration time
     elseif xDuration ~= 0 and yDuration ~= 0 then
         -- If started at same time, sort alphabetically
         -- Otherwise, sort by expiration (longest remaining first)
         return (x.starts == y.starts) and (x.name < y.name) or (x.ends > y.ends)
-    
-    -- PRIORITY 4: Mixed permanent/temporary - permanent first
+
+        -- PRIORITY 4: Mixed permanent/temporary - permanent first
     else
         return (xDuration == 0)
     end
@@ -4289,11 +4199,11 @@ function SpellCastBuffs.OnUpdate(currentTime)
     for k in pairs(g_isProminent) do
         g_isProminent[k] = nil
     end
-    
+
     -- Initialize containers
     for _, container in pairs(containerRouting) do
         g_needs_update[container] = true
-        
+
         -- Prepare sort container (reuse existing or create once)
         if g_buffsSorted[container] == nil then
             g_buffsSorted[container] = {}
@@ -4310,8 +4220,7 @@ function SpellCastBuffs.OnUpdate(currentTime)
         local container = containerRouting[context]
         for k, v in pairs(effectsList) do
             -- Remove effect (that is not permanent and has duration)
-            -- NOTE: Sentinel check - ends == -1 means nil (permanent effect)
-            if v.ends ~= -1 and v.dur > 0 and v.ends < currentTime then
+            if v.ends ~= nil and v.dur > 0 and v.ends < currentTime then
                 effectsList[k] = nil
                 -- Or append to correct container
             elseif container then
@@ -4322,8 +4231,7 @@ function SpellCastBuffs.OnUpdate(currentTime)
                     if v.target == "prominent" then
                         table.insert(g_buffsSorted[container], v)
                         -- If the effect is not flagged as long or 0 duration and flagged to display in short container, then display normally.
-                        -- NOTE: Sentinel checks - ends == -1 means nil, forced == "" means nil
-                    elseif v.type == BUFF_EFFECT_TYPE_DEBUFF or v.forced == "short" or not (v.forced == "long" or v.ends == -1 or v.dur == 0) then
+                    elseif v.type == BUFF_EFFECT_TYPE_DEBUFF or v.forced == "short" or not (v.forced == "long" or v.ends == nil or v.dur == 0) then
                         if v.target == "reticleover" and SpellCastBuffs.SV.ShortTermEffects_Target then
                             table.insert(g_buffsSorted[container], v)
                         elseif v.target == "player" and SpellCastBuffs.SV.ShortTermEffects_Player then
@@ -4366,7 +4274,7 @@ function SpellCastBuffs.OnUpdate(currentTime)
             local abilityId = 974
             local abilityName = Abilities.Innate_Brace
             local context = SpellCastBuffs.DetermineContextSimple("player1", abilityId, abilityName)
-            
+
             -- Use persistent block effect data table to avoid allocation
             g_blockEffectData.target = SpellCastBuffs.DetermineTarget(context)
             g_blockEffectData.type = 1
@@ -4380,7 +4288,7 @@ function SpellCastBuffs.OnUpdate(currentTime)
             g_blockEffectData.iconNum = 0
             g_blockEffectData.forced = "short"
             g_blockEffectData.toggle = true
-            
+
             SpellCastBuffs.EffectsList[context][abilityId] = g_blockEffectData
         else
             SpellCastBuffs.ClearPlayerBuff(974)
@@ -4411,12 +4319,10 @@ function SpellCastBuffs.updateBar(currentTime, sortedList, container)
         local effect = sortedList[i]
 
         local ground = effect.groundLabel
-        -- NOTE: Sentinel check - ends == -1 OR nil means permanent effect (defensive for legacy effects)
-        local remain = (effect.ends and effect.ends ~= -1) and (effect.ends - currentTime) or nil
+        local remain = (effect.ends ~= nil) and (effect.ends - currentTime) or nil
         local buff = uiTlw[container].icons[index]
         local auraStarts = effect.starts or nil
-        -- NOTE: Sentinel check - ends == -1 OR nil, convert to nil for local var (defensive for legacy effects)
-        local auraEnds = (effect.ends and effect.ends ~= -1) and effect.ends or nil
+        local auraEnds = effect.ends or nil
         -- Modify recall penalty to show forced max duration
         if effect.id == 999016 then
             auraStarts = auraEnds - 600000
@@ -4426,7 +4332,7 @@ function SpellCastBuffs.updateBar(currentTime, sortedList, container)
         if buff and buff.bar and buff.bar.bar then
             if auraStarts and auraEnds and remain > 0 and not ground then
                 buff.bar.bar:SetValue(1 - ((currentTime - auraStarts) / (auraEnds - auraStarts)))
-            elseif effect.werewolf and effect.werewolf ~= -1 then  -- Sentinel check: -1 OR nil means no werewolf power
+            elseif effect.werewolf then
                 buff.bar.bar:SetValue(effect.werewolf)
             else
                 buff.bar.bar:SetValue(1)
@@ -4496,8 +4402,7 @@ function SpellCastBuffs.updateIcons(currentTime, sortedList, container)
         end
 
         -- Calculate remaining time
-        -- NOTE: Sentinel check - ends == -1 OR nil means permanent effect
-        local remain = (effect.ends and effect.ends ~= -1) and (effect.ends - currentTime) or nil
+        local remain = (effect.ends ~= nil) and (effect.ends - currentTime) or nil
         local name = (effect.name ~= nil) and effect.name or nil
 
         local buff = uiTlw[container].icons[index]
