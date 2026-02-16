@@ -80,9 +80,9 @@ do
     -- Mapping from LUIE string-based font styles to ZOS numeric constants
     local LUIE_FONT_STYLE_TO_CONSTANT =
     {
-        ["normal"] = nil,
-        ["|normal"] = nil,
-        [""] = nil,
+        ["normal"] = FONT_STYLE_NORMAL,
+        ["|normal"] = FONT_STYLE_NORMAL,
+        [""] = FONT_STYLE_NORMAL,
         ["shadow"] = FONT_STYLE_SHADOW,
         ["|shadow"] = FONT_STYLE_SHADOW,
         ["outline"] = FONT_STYLE_OUTLINE,
@@ -133,7 +133,7 @@ do
 
     local FONT_STYLE_CHOICES_VALUES =
     {
-        nil, -- normal = no style
+        FONT_STYLE_NORMAL,
         FONT_STYLE_SHADOW,
         FONT_STYLE_OUTLINE,
         FONT_STYLE_OUTLINE_THICK,
