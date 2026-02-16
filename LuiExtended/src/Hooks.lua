@@ -332,7 +332,8 @@ LUIE.API_Hooks = function ()
         --- @param casterUnitTag? string
         --- @return string abilityName
         GetAbilityName = function (abilityId, casterUnitTag)
-            local abilityName = zos_GetAbilityName(abilityId, casterUnitTag)
+            local overrideCasterUnitTag = casterUnitTag or "player"
+            local abilityName = zos_GetAbilityName(abilityId, overrideCasterUnitTag)
             if Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].name then
                 abilityName = Effects.EffectOverride[abilityId].name
             end
