@@ -210,6 +210,7 @@ function Block.OnBlockUpdate()
         return
     end
     if bothRegen or not sv.showRemainingBlocks then
+        Block.remainingBlocksLabel:SetText("")
         Block.remainingBlocksLabel:Clean()
         return
     end
@@ -380,6 +381,9 @@ local function CreateBlockIndicatorWindow()
     texture:SetAnchor(TOPLEFT, win, TOPLEFT, 0, 0)
     texture:SetDimensions(BLOCK_INDICATOR_SIZE, BLOCK_INDICATOR_SIZE)
     texture:SetHidden(true)
+    texture:SetBlendMode(TEX_BLEND_MODE_ADD)
+    texture:SetPixelRoundingEnabled(true)
+    texture:SetShaderEffectType(SHADER_EFFECT_TYPE_CAUSTIC)
     Block.blockIndicatorTexture = texture
     Block.ApplyBlockShieldTexture()
 
@@ -388,9 +392,11 @@ local function CreateBlockIndicatorWindow()
     label:SetAnchor(TOPLEFT, texture, TOPLEFT, 1, -2)
     label:SetDimensions(BLOCK_INDICATOR_SIZE, BLOCK_INDICATOR_SIZE)
     label:SetColor(1, 1, 1, 1)
-    label:SetStyleColor(255, 0, 0, 0)
     label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+
+    local shadowLabel = label:GetNamedChild("Shadow")
+    shadowLabel:SetColor(0, 0, 0, 1)
 
     blockIndicatorFragment = ZO_HUDFadeSceneFragment:New(win, 0, 0)
     HUD_UI_SCENE:AddFragment(blockIndicatorFragment)
