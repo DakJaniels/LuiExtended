@@ -66,6 +66,20 @@ local BOSS_THRESHOLD_LABEL_COLOR = { 1, 0.95, 0.7, 1 }
 local BOSS_THRESHOLD_LABEL_DIMENSIONS = { 56, 16 }
 local DEFAULT_BOSS_THRESHOLD_PERCENTS = { 25, 50, 75 }
 
+-- Anchor point string to constant mapping
+local ANCHOR_MAPPING =
+{
+    ["TOP"] = TOP,
+    ["BOTTOM"] = BOTTOM,
+    ["LEFT"] = LEFT,
+    ["RIGHT"] = RIGHT,
+    ["CENTER"] = CENTER,
+    ["TOPLEFT"] = TOPLEFT,
+    ["TOPRIGHT"] = TOPRIGHT,
+    ["BOTTOMLEFT"] = BOTTOMLEFT,
+    ["BOTTOMRIGHT"] = BOTTOMRIGHT,
+}
+
 -- Labels for Offline/Dead/Resurrection Status
 local strDead = GetString(SI_UNIT_FRAME_STATUS_DEAD)
 local strOffline = GetString(SI_UNIT_FRAME_STATUS_OFFLINE)
@@ -532,7 +546,13 @@ local function ApplyBossThresholdMarkersToHealthFrame(healthFrame, thresholdInfo
             line:SetMouseEnabled(false)
 
             local label = windowManager:CreateControl(nil, container, CT_LABEL)
-            label:SetFont("ZoFontGameSmall")
+            -- Update font to use better readable font
+            if IsConsoleUI() then
+                label:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
+            else
+                label:SetFont("$(BOLD_FONT)|16|soft-shadow-thin")
+            end
+
             label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
             label:SetVerticalAlignment(TEXT_ALIGN_BOTTOM)
             label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -540,7 +560,7 @@ local function ApplyBossThresholdMarkersToHealthFrame(healthFrame, thresholdInfo
             label:SetText("")
             label:SetHidden(true)
             label:SetDrawTier(DT_HIGH)
-            label:SetDrawLayer(DL_OVERLAY)
+            label:SetDrawLayer(DL_TEXT)
             label:SetDrawLevel(7)
             label:SetMouseEnabled(false)
             label:SetColor(unpack(BOSS_THRESHOLD_LABEL_COLOR))
@@ -567,7 +587,13 @@ local function ApplyBossThresholdMarkersToHealthFrame(healthFrame, thresholdInfo
 
         label:ClearAnchors()
         label:SetDimensions(BOSS_THRESHOLD_LABEL_DIMENSIONS[1], BOSS_THRESHOLD_LABEL_DIMENSIONS[2])
-        label:SetAnchor(BOTTOM, line, TOP, 0, -2)
+
+        local labelAnchor = ANCHOR_MAPPING[UnitFrames.SV.BossThresholdLabelAnchor] or BOTTOM
+        local labelRelativeAnchor = ANCHOR_MAPPING[UnitFrames.SV.BossThresholdLabelRelativeAnchor] or TOP
+        local labelOffsetX = UnitFrames.SV.BossThresholdLabelOffsetX or 0
+        local labelOffsetY = UnitFrames.SV.BossThresholdLabelOffsetY or -2
+
+        label:SetAnchor(labelAnchor, line, labelRelativeAnchor, labelOffsetX, labelOffsetY)
         label:SetText(zo_strformat("<<1>>%", percent))
         label:SetHidden(false)
     end
@@ -3175,12 +3201,13 @@ function UnitFrames.CustomFramesApplyLayoutBosses()
     end
 
     local bosses = UnitFrames.CustomFrames["boss1"].tlw
-    bosses:SetDimensions(UnitFrames.SV.BossBarWidth, UnitFrames.SV.BossBarHeight * 6 + 2 * 5)
+    local spacing = UnitFrames.SV.BossBarSpacing or 2
+    bosses:SetDimensions(UnitFrames.SV.BossBarWidth, UnitFrames.SV.BossBarHeight * 6 + spacing * 5)
 
     for i = 1, 7 do
         local unitFrame = UnitFrames.CustomFrames["boss" .. i]
         unitFrame.control:ClearAnchors()
-        unitFrame.control:SetAnchor(TOPLEFT, bosses, TOPLEFT, 0, (UnitFrames.SV.BossBarHeight + 2) * (i - 1))
+        unitFrame.control:SetAnchor(TOPLEFT, bosses, TOPLEFT, 0, (UnitFrames.SV.BossBarHeight + spacing) * (i - 1))
         unitFrame.control:SetDimensions(UnitFrames.SV.BossBarWidth, UnitFrames.SV.BossBarHeight)
         unitFrame.name:SetDimensions(UnitFrames.SV.BossBarWidth - 50, UnitFrames.SV.BossBarHeight - 2)
         unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.BossBarWidth - 50, UnitFrames.SV.BossBarHeight - 2)

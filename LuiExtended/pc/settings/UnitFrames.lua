@@ -4647,6 +4647,27 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                -- Boss Bars Spacing
+                type = "slider",
+                name = "Boss Frame Vertical Spacing",
+                tooltip = "Vertical spacing between boss frames.",
+                min = 0,
+                max = 20,
+                step = 1,
+                getFunc = function ()
+                    return Settings.BossBarSpacing
+                end,
+                setFunc = function (value)
+                    Settings.BossBarSpacing = value
+                    UnitFrames.CustomFramesApplyLayoutBosses()
+                end,
+                width = "full",
+                default = Defaults.BossBarSpacing,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses)
+                end,
+            },
+            {
                 -- Out-of-Combat frame opacity
                 type = "slider",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMESB_OPACITYOOC),
@@ -4758,6 +4779,86 @@ function UnitFrames.CreateSettings()
                 default = Defaults.BossShowThresholdMarkers,
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses)
+                end,
+            },
+            {
+                -- Threshold Label Anchor Point
+                type = "dropdown",
+                name = "Threshold Label Anchor Point",
+                tooltip = "Choose where on the label to anchor from.",
+                choices = { "TOP", "BOTTOM", "LEFT", "RIGHT", "CENTER", "TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT" },
+                getFunc = function ()
+                    return Settings.BossThresholdLabelAnchor
+                end,
+                setFunc = function (value)
+                    Settings.BossThresholdLabelAnchor = value
+                    UnitFrames.UpdateBossThresholds()
+                end,
+                width = "full",
+                default = Defaults.BossThresholdLabelAnchor,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses and Settings.BossShowThresholdMarkers)
+                end,
+            },
+            {
+                -- Threshold Label Relative Anchor Point
+                type = "dropdown",
+                name = "Threshold Label Relative Anchor Point",
+                tooltip = "Choose where on the threshold line to anchor the label to.",
+                choices = { "TOP", "BOTTOM", "LEFT", "RIGHT", "CENTER", "TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT" },
+                getFunc = function ()
+                    return Settings.BossThresholdLabelRelativeAnchor
+                end,
+                setFunc = function (value)
+                    Settings.BossThresholdLabelRelativeAnchor = value
+                    UnitFrames.UpdateBossThresholds()
+                end,
+                width = "full",
+                default = Defaults.BossThresholdLabelRelativeAnchor,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses and Settings.BossShowThresholdMarkers)
+                end,
+            },
+            {
+                -- Threshold Label X Offset
+                type = "slider",
+                name = "Threshold Label X Offset",
+                tooltip = "Horizontal offset for the threshold label position.",
+                min = -100,
+                max = 100,
+                step = 1,
+                getFunc = function ()
+                    return Settings.BossThresholdLabelOffsetX
+                end,
+                setFunc = function (value)
+                    Settings.BossThresholdLabelOffsetX = value
+                    UnitFrames.UpdateBossThresholds()
+                end,
+                width = "full",
+                default = Defaults.BossThresholdLabelOffsetX,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses and Settings.BossShowThresholdMarkers)
+                end,
+            },
+            {
+                -- Threshold Label Y Offset
+                type = "slider",
+                name = "Threshold Label Y Offset",
+                tooltip = "Vertical offset for the threshold label position.",
+                min = -100,
+                max = 100,
+                step = 1,
+                getFunc = function ()
+                    return Settings.BossThresholdLabelOffsetY
+                end,
+                setFunc = function (value)
+                    Settings.BossThresholdLabelOffsetY = value
+                    UnitFrames.UpdateBossThresholds()
+                end,
+                width = "full",
+                default = Defaults.BossThresholdLabelOffsetY,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses and Settings.BossShowThresholdMarkers)
                 end,
             },
         },

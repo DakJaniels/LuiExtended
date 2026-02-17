@@ -64,56 +64,43 @@ local function DebugSingleFrame(frameType)
     UnitFrames.UpdateStaticControls(frame)
 end
 
-local function DebugMultipleFrames(frameConfig)
-    local raidContainer = UnitFrames.CustomFrames["RaidGroup1"].tlw
-    if raidContainer then
-        -- Make container visible
-        raidContainer:SetHidden(false)
+-- Debug Functions
 
-        -- Position container
-        raidContainer:ClearAnchors()
-        raidContainer:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 100)
+local function CustomFramesDebugGroup()
+    local groupContainer = UnitFrames.CustomFrames["SmallGroup1"].tlw
+    if not groupContainer then return end
 
-        -- Get dimensions from saved variables
-        local frameWidth = UnitFrames.SV.RaidBarWidth
-        local frameHeight = UnitFrames.SV.RaidBarHeight
-        local spacing = 0 -- Remove spacing between frames for tight stacking
+    -- Make container visible
+    groupContainer:SetHidden(false)
 
-        -- Set container size
-        raidContainer:SetDimensions(frameWidth, frameHeight * frameConfig.size)
+    -- Position container
+    groupContainer:ClearAnchors()
+    groupContainer:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 100)
 
-        -- Position frames
-        for i = 1, frameConfig.size do
-            local unitTag = frameConfig.prefix .. i
-            local frame = UnitFrames.CustomFrames[unitTag]
-            if frame then
-                frame.unitTag = UNIT_FRAMES.SINGLE.PLAYER
-                frame.control:SetHidden(false)
+    -- Apply proper group layout (this sets dimensions and spacing correctly)
+    UnitFrames.CustomFramesApplyLayoutGroup(false)
 
-                -- Position frame with no spacing
-                frame.control:ClearAnchors()
-                frame.control:SetAnchor(TOPLEFT, raidContainer, TOPLEFT, 0, (i - 1) * frameHeight)
-                frame.control:SetDimensions(frameWidth, frameHeight)
-
-                -- Ensure name label is properly set
-                if frame.name then
-                    frame.name:SetText("DEBUG") -- Set consistent name for debug
-                    frame.name:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
-                end
-
-                UnitFrames.UpdateStaticControls(frame)
-            end
+    -- Show all group frames and set them to player unitTag for preview
+    for i = 1, UNIT_FRAMES.SMALL_GROUP.size do
+        local unitTag = UNIT_FRAMES.SMALL_GROUP.prefix .. i
+        local frame = UnitFrames.CustomFrames[unitTag]
+        if frame then
+            frame.unitTag = UNIT_FRAMES.SINGLE.PLAYER
+            frame.control:SetHidden(false)
+            UnitFrames.UpdateStaticControls(frame)
         end
     end
 
-    -- Handle special cases
-    if frameConfig.special and frameConfig.special.first then
-        local firstFrame = UnitFrames.CustomFrames[frameConfig.prefix .. "1"]
+    -- Handle leader icon for first frame
+    if UNIT_FRAMES.SMALL_GROUP.special and UNIT_FRAMES.SMALL_GROUP.special.first then
+        local firstFrame = UnitFrames.CustomFrames[UNIT_FRAMES.SMALL_GROUP.prefix .. "1"]
         if firstFrame then
-            for component, settings in pairs(frameConfig.special.first) do
+            for component, settings in pairs(UNIT_FRAMES.SMALL_GROUP.special.first) do
                 if firstFrame[component] then
+                    --- @diagnostic disable-next-line: undefined-field
                     firstFrame[component]:SetHidden(false)
                     if settings.texture then
+                        --- @diagnostic disable-next-line: undefined-field
                         firstFrame[component]:SetTexture(settings.texture)
                     end
                 end
@@ -121,20 +108,35 @@ local function DebugMultipleFrames(frameConfig)
         end
     end
 
-    if frameConfig.prefix == UNIT_FRAMES.SMALL_GROUP.prefix or
-    frameConfig.prefix == UNIT_FRAMES.RAID_GROUP.prefix then
-        UnitFrames.OnLeaderUpdate(nil, frameConfig.prefix .. "1")
-    end
-end
-
--- Debug Functions
-
-local function CustomFramesDebugGroup()
-    DebugMultipleFrames(UNIT_FRAMES.SMALL_GROUP)
+    UnitFrames.OnLeaderUpdate(nil, UNIT_FRAMES.SMALL_GROUP.prefix .. "1")
 end
 
 local function CustomFramesDebugRaid()
-    DebugMultipleFrames(UNIT_FRAMES.RAID_GROUP)
+    local raidContainer = UnitFrames.CustomFrames["RaidGroup1"].tlw
+    if not raidContainer then return end
+
+    -- Make container visible
+    raidContainer:SetHidden(false)
+
+    -- Position container
+    raidContainer:ClearAnchors()
+    raidContainer:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 100)
+
+    -- Apply proper raid layout (this sets dimensions and spacing correctly)
+    UnitFrames.CustomFramesApplyLayoutRaid(false)
+
+    -- Show all raid frames and set them to player unitTag for preview
+    for i = 1, UNIT_FRAMES.RAID_GROUP.size do
+        local unitTag = UNIT_FRAMES.RAID_GROUP.prefix .. i
+        local frame = UnitFrames.CustomFrames[unitTag]
+        if frame then
+            frame.unitTag = UNIT_FRAMES.SINGLE.PLAYER
+            frame.control:SetHidden(false)
+            UnitFrames.UpdateStaticControls(frame)
+        end
+    end
+
+    UnitFrames.OnLeaderUpdate(nil, UNIT_FRAMES.RAID_GROUP.prefix .. "1")
 end
 
 local function CustomFramesDebugPlayer()
@@ -146,11 +148,59 @@ local function CustomFramesDebugTarget()
 end
 
 local function CustomFramesDebugPets()
-    DebugMultipleFrames(UNIT_FRAMES.PET_GROUP)
+    local petContainer = UnitFrames.CustomFrames["PetGroup1"].tlw
+    if not petContainer then return end
+
+    -- Make container visible
+    petContainer:SetHidden(false)
+
+    -- Position container
+    petContainer:ClearAnchors()
+    petContainer:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 100)
+
+    -- Apply proper pet layout (this sets dimensions and spacing correctly)
+    UnitFrames.CustomFramesApplyLayoutPet(true)
+
+    -- Show all pet frames and set them to player unitTag for preview
+    for i = 1, UNIT_FRAMES.PET_GROUP.size do
+        local unitTag = UNIT_FRAMES.PET_GROUP.prefix .. i
+        local frame = UnitFrames.CustomFrames[unitTag]
+        if frame then
+            frame.unitTag = UNIT_FRAMES.SINGLE.PLAYER
+            frame.control:SetHidden(false)
+            UnitFrames.UpdateStaticControls(frame)
+        end
+    end
 end
 
 local function CustomFramesDebugBosses()
-    DebugMultipleFrames(UNIT_FRAMES.BOSS)
+    -- Special handling for boss frames since they have their own container and layout logic
+    local bossContainer = UnitFrames.CustomFrames["boss1"].tlw
+    if not bossContainer then return end
+
+    -- Make container visible
+    bossContainer:SetHidden(false)
+
+    -- Position container
+    bossContainer:ClearAnchors()
+    bossContainer:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 100)
+
+    -- Apply proper boss layout (this sets dimensions and spacing correctly)
+    UnitFrames.CustomFramesApplyLayoutBosses()
+
+    -- Show all boss frames and set them to player unitTag for preview
+    for i = 1, UNIT_FRAMES.BOSS.size do
+        local unitTag = UNIT_FRAMES.BOSS.prefix .. i
+        local frame = UnitFrames.CustomFrames[unitTag]
+        if frame then
+            frame.unitTag = UNIT_FRAMES.SINGLE.PLAYER
+            frame.control:SetHidden(false)
+            UnitFrames.UpdateStaticControls(frame)
+        end
+    end
+
+    -- Update threshold markers to display them properly on each frame
+    UnitFrames.UpdateBossThresholds()
 end
 
 local function CustomFramesDebugCompanion()
@@ -168,8 +218,6 @@ local DEBUG_COMMANDS =
     ["/luiufcomp"] = CustomFramesDebugCompanion,
 }
 
---- Initializes debug slash commands
---- These commands are only available when developer debug mode is enabled
 for command, handler in pairs(DEBUG_COMMANDS) do
     SLASH_COMMANDS[command] = handler
 end
