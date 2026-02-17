@@ -15,7 +15,8 @@ local CombatInfo = LUIE.CombatInfo
 local ActionBar = LUIE.ActionBar
 local CrowdControlTracker = CombatInfo.CrowdControlTracker
 local AbilityAlerts = CombatInfo.AbilityAlerts
-local SynergyTracker = CombatInfo.SynergyTracker
+local SynergyTracker = CombatInfo.SynergyTrackerInstance
+local Block = CombatInfo.Block
 
 local type, pairs = type, pairs
 local table_insert = table.insert
@@ -3059,7 +3060,7 @@ function CombatInfo.CreateSettings()
                     return Settings.synergy.unlocked
                 end,
                 setFunc = function (value)
-                    local tracker = CombatInfo.SynergyTrackerInstance
+                    local tracker = SynergyTracker
                     if tracker then
                         tracker:SetUnlocked(value)
                     end
@@ -3076,7 +3077,7 @@ function CombatInfo.CreateSettings()
                 name = "Reset Position",
                 tooltip = "Reset the synergy display to default position.",
                 func = function ()
-                    local tracker = CombatInfo.SynergyTrackerInstance
+                    local tracker = SynergyTracker
                     if tracker then
                         tracker:ResetPosition()
                     end
@@ -3129,7 +3130,7 @@ function CombatInfo.CreateSettings()
                     else
                         Settings.synergy.displayMode = "multi"
                     end
-                    local tracker = CombatInfo.SynergyTrackerInstance
+                    local tracker = SynergyTracker
                     if tracker then
                         tracker:UpdateDisplay()
                     end
@@ -3153,7 +3154,7 @@ function CombatInfo.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.synergy.maxDisplay = value
-                    local tracker = CombatInfo.SynergyTrackerInstance
+                    local tracker = SynergyTracker
                     if tracker then
                         tracker:UpdateDisplay()
                     end
@@ -3174,7 +3175,7 @@ function CombatInfo.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.synergy.showPriority = value
-                    local tracker = CombatInfo.SynergyTrackerInstance
+                    local tracker = SynergyTracker
                     if tracker then
                         tracker:UpdateDisplayOptions()
                     end
@@ -3195,7 +3196,7 @@ function CombatInfo.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.synergy.showKeybinds = value
-                    local tracker = CombatInfo.SynergyTrackerInstance
+                    local tracker = SynergyTracker
                     if tracker then
                         tracker:UpdateDisplayOptions()
                     end
@@ -3233,7 +3234,7 @@ function CombatInfo.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.synergy.showCooldowns = value
-                    local tracker = CombatInfo.SynergyTrackerInstance
+                    local tracker = SynergyTracker
                     if tracker then
                         if not value then
                             tracker.synergyCooldowns = {}
@@ -3261,7 +3262,7 @@ function CombatInfo.CreateSettings()
                 name = "Clear All Priority Overrides",
                 tooltip = "Remove all custom priority overrides and reset to game defaults.",
                 func = function ()
-                    local tracker = CombatInfo.SynergyTrackerInstance
+                    local tracker = SynergyTracker
                     if tracker then
                         tracker:ClearAllPriorityOverrides()
                     end
@@ -3278,7 +3279,7 @@ function CombatInfo.CreateSettings()
                 tooltip = "Remove all synergies from the blacklist.",
                 func = function ()
                     Settings.synergy.blacklist = {}
-                    local tracker = CombatInfo.SynergyTrackerInstance
+                    local tracker = SynergyTracker
                     if tracker then
                         tracker:RefreshActiveSynergies()
                     end
@@ -3306,7 +3307,7 @@ function CombatInfo.CreateSettings()
     }
 
     -- Dynamically add detected synergies to the settings menu
-    local tracker = CombatInfo.SynergyTrackerInstance
+    local tracker = SynergyTracker
     local detectedList = tracker and tracker:GetDetectedSynergiesSorted() or {}
     if #detectedList > 0 then
         local synergySubmenu = optionsDataCombatInfo[#optionsDataCombatInfo]
@@ -3383,6 +3384,65 @@ function CombatInfo.CreateSettings()
                          })
         end
     end
+
+    -- Block Indicator
+    optionsDataCombatInfo[#optionsDataCombatInfo + 1] =
+    {
+        type = "submenu",
+        name = "Block Indicator",
+        controls =
+        {
+            {
+                type = "description",
+                text = "Shows a shield icon while blocking and optional remaining block count. Bloodlord's Embrace tracker appears when the set is equipped.",
+            },
+            {
+                type = "slider",
+                name = "Update interval (ms)",
+                tooltip = "How often the block indicator and remaining blocks are updated.",
+                min = 0,
+                max = 100,
+                step = 1,
+                getFunc = function ()
+                    return Settings.block.updateIntervalMs
+                end,
+                setFunc = function (value)
+                    Settings.block.updateIntervalMs = value
+                    Block.RegisterUpdateLoop()
+                end,
+                default = Defaults.block.updateIntervalMs,
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = "Show remaining blocks",
+                tooltip = "Display how many blocks you can perform with current stamina/magicka.",
+                getFunc = function ()
+                    return Settings.block.showRemainingBlocks
+                end,
+                setFunc = function (value)
+                    Settings.block.showRemainingBlocks = value
+                    Block.RefreshBlockCost()
+                end,
+                default = Defaults.block.showRemainingBlocks,
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = "Color shield by block resource (stamina/magicka)",
+                tooltip = "Tint the shield icon by the resource used for blocking.",
+                getFunc = function ()
+                    return Settings.block.colorShieldByResource
+                end,
+                setFunc = function (value)
+                    Settings.block.colorShieldByResource = value
+                    Block.ApplyBlockShieldTexture()
+                end,
+                default = Defaults.block.colorShieldByResource,
+                width = "full",
+            },
+        },
+    }
 
     -- Register the settings panel
     if LUIE.SV.CombatInfo_Enabled then

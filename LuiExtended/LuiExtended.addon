@@ -114,6 +114,7 @@ modules/CombatInfo/Namespace.lua
 modules/CombatInfo/AbilityAlerts.lua
 modules/CombatInfo/CrowdControlTracker.lua
 modules/CombatInfo/SynergyTracker.lua
+modules/CombatInfo/Block.lua
 modules/CombatInfo/CombatInfo.lua
 
 # Modules - Info Panel

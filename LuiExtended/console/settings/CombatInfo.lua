@@ -13,6 +13,8 @@ local CombatInfo = LUIE.CombatInfo
 local CrowdControlTracker = CombatInfo.CrowdControlTracker
 local AbilityAlerts = CombatInfo.AbilityAlerts
 local SynergyTracker = CombatInfo.SynergyTracker
+local Block = CombatInfo.Block
+
 
 local type, pairs = type, pairs
 local zo_strformat = zo_strformat
@@ -3525,6 +3527,100 @@ function CombatInfo.CreateConsoleSettings()
         end
     end)
 
+    -- Build Block Indicator Section
+    buildSectionSettings("Block", function (settings)
+        settings[#settings + 1] = { type = LHAS.ST_SECTION, label = "Block Indicator" }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Shows a shield icon while blocking and optional remaining block count. Bloodlord's Embrace tracker appears when the set is equipped.",
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "Update interval (ms)",
+            min = 0,
+            max = 100,
+            format = "%.0f",
+            getFunction = function ()
+                return Settings.block.updateIntervalMs
+            end,
+            setFunction = function (value)
+                Settings.block.updateIntervalMs = value
+                Block.RegisterUpdateLoop()
+            end,
+            default = Defaults.block.updateIntervalMs,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "Show remaining blocks",
+            getFunction = function ()
+                return Settings.block.showRemainingBlocks
+            end,
+            setFunction = function (value)
+                Settings.block.showRemainingBlocks = value
+                Block.RefreshBlockCost()
+            end,
+            default = Defaults.block.showRemainingBlocks,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "Color shield by block resource (stamina/magicka)",
+            getFunction = function ()
+                return Settings.block.colorShieldByResource
+            end,
+            setFunction = function (value)
+                Settings.block.colorShieldByResource = value
+                Block.ApplyBlockShieldTexture()
+            end,
+            default = Defaults.colorShieldByResource,
+        }
+        local gwBlock = GuiRoot:GetWidth()
+        local ghBlock = GuiRoot:GetHeight()
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
+            min = -gwBlock,
+            max = gwBlock,
+            step = 10,
+            format = "%.0f",
+            getFunction = function ()
+                return (Settings.block.bloodlordEmbracePosition or Defaults.block.bloodlordEmbracePosition).left
+            end,
+            setFunction = function (value)
+                Settings.block.bloodlordEmbracePosition = Settings.block.bloodlordEmbracePosition or { left = Defaults.block.bloodlordEmbracePosition.left, top = Defaults.block.bloodlordEmbracePosition.top }
+                Settings.block.bloodlordEmbracePosition.left = value
+                Block.ApplyBloodlordEmbracePosition()
+            end,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
+            min = -ghBlock,
+            max = ghBlock,
+            step = 10,
+            format = "%.0f",
+            getFunction = function ()
+                return (Settings.block.bloodlordEmbracePosition or Defaults.block.bloodlordEmbracePosition).top
+            end,
+            setFunction = function (value)
+                Settings.block.bloodlordEmbracePosition = Settings.block.bloodlordEmbracePosition or
+                    {
+                        left = Defaults.block.bloodlordEmbracePosition.left,
+                        top = Defaults.block.bloodlordEmbracePosition.top
+                    }
+                Settings.block.bloodlordEmbracePosition.top = value
+                Block.ApplyBloodlordEmbracePosition()
+            end,
+        }
+    end)
+
     -- Create back button
     backButton =
     {
@@ -3572,6 +3668,7 @@ function CombatInfo.CreateConsoleSettings()
     menuButtons[#menuButtons + 1] = createMenuButton("ActiveCombatAlerts", GetString(LUIE_STRING_LAM_CI_HEADER_ACTIVE_COMBAT_ALERT), sectionGroups["ActiveCombatAlerts"])
     menuButtons[#menuButtons + 1] = createMenuButton("CrowdControlTracker", GetString(LUIE_STRING_LAM_CI_CCT_HEADER), sectionGroups["CrowdControlTracker"])
     menuButtons[#menuButtons + 1] = createMenuButton("SynergyTracker", "Synergy Tracker", sectionGroups["SynergyTracker"])
+    menuButtons[#menuButtons + 1] = createMenuButton("Block", "Block Indicator", sectionGroups["Block"])
 
     -- Initialize main menu with initial settings and menu buttons
     local mainMenuSettings = {}

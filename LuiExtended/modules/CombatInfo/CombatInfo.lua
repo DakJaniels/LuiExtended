@@ -164,6 +164,8 @@ function CombatInfo.Initialize(enabled)
 
     CombatInfo.InitializeSynergyTracker()
 
+    CombatInfo.Block.Initialize()
+
     if not LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsCI then
         LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsCI = 0
     end
