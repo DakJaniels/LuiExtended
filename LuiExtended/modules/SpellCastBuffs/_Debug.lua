@@ -59,8 +59,7 @@ function SpellCastBuffs.EventCombatDebug(eventId, result, isError, abilityName, 
     local source = zo_strformat("<<C:1>>", sourceName)
     local target = zo_strformat("<<C:1>>", targetName)
     local ability = zo_strformat("<<C:1>>", nameFormatted)
-    local duration
-    duration = GetAbilityDuration(abilityId)
+    local duration = GetAbilityDuration(abilityId)
     if duration == nil then
         duration = "0"
     end

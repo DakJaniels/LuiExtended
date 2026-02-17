@@ -121,13 +121,23 @@ modules/CombatInfo/CombatInfo.lua
 modules/InfoPanel/InfoPanel.lua
 
 # Modules - Spell Cast Buffs
+modules/SpellCastBuffs/_Namespace.lua
+modules/SpellCastBuffs/_Collectibles.lua
+modules/SpellCastBuffs/_ContextFunctions.lua
+modules/SpellCastBuffs/_Cyrodiil.lua
+modules/SpellCastBuffs/_Debug.lua
+modules/SpellCastBuffs/_DevDebug.lua
+modules/SpellCastBuffs/_ListFunctions.lua
+modules/SpellCastBuffs/_OnCombatAddNameEvent.lua
+modules/SpellCastBuffs/_OnCombatEventIn.lua
+modules/SpellCastBuffs/_OnCombatEventOut.lua
+modules/SpellCastBuffs/_OnEffectChanged.lua
+modules/SpellCastBuffs/_OnEffectChangedGround.lua
+modules/SpellCastBuffs/_OnUpdate.lua
+modules/SpellCastBuffs/_ReloadEffects.lua
+modules/SpellCastBuffs/_Stealth.lua
+modules/SpellCastBuffs/_Werewolf.lua
 modules/SpellCastBuffs/SpellCastBuffs.lua
-modules/SpellCastBuffs/Collectibles.lua
-modules/SpellCastBuffs/Cyrodiil.lua
-modules/SpellCastBuffs/Stealth.lua
-modules/SpellCastBuffs/Debug.lua
-modules/SpellCastBuffs/DevDebug.lua
-modules/SpellCastBuffs/Werewolf.lua
 
 # Modules - Slash Commands
 modules/SlashCommands/SlashCommands.lua

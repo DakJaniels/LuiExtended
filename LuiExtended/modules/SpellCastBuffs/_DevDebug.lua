@@ -87,7 +87,7 @@ function SpellCastBuffs.AuthorCombatDebug(eventCode, result, isError, abilityNam
         local finalString = (iconFormatted .. "[" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [S] " .. source .. " --> [T] " .. target .. " [R] " .. formattedResult)
         for k, cc in ipairs(chatSystem.containers) do
             local chatContainer = cc
-            local chatWindow = cc.windows[3]
+            local chatWindow = cc.windows[2]
             if chatWindow == nil then chatWindow = cc.windows[1] end
             chatContainer:AddEventMessageToWindow(chatWindow, finalString, CHAT_CATEGORY_SYSTEM)
         end
@@ -114,7 +114,7 @@ function SpellCastBuffs.AuthorEffectDebug(eventCode, changeType, effectSlot, eff
         local finalString = (iconFormatted .. refreshOnly .. "|c00E200 [" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [Tag] " .. unitName .. "|r")
         for k, cc in ipairs(chatSystem.containers) do
             local chatContainer = cc
-            local chatWindow = cc.windows[3]
+            local chatWindow = cc.windows[2]
             if chatWindow == nil then chatWindow = cc.windows[1] end
             chatContainer:AddEventMessageToWindow(chatWindow, finalString, CHAT_CATEGORY_SYSTEM)
         end
@@ -149,18 +149,13 @@ end
 --- @field zoneFlags table Various boolean flags about the current zone
 --- @field keyInfo table Map key information if available
 --- @field cadwellInfo table Cadwell's Almanac information if available
---- @field  scaleLevelConstraints {
----    max: integer,
----    min: integer,
----    type: ScaleLevelConstraintType,
---- }
 
 --- Collects and returns zone and map information
 --- @return ZoneMapInfo Information about current zone and map
 local function CollectZoneMapInfo()
     -- Set map to player location and handle callback
     if SetMapToPlayerLocation() == SET_MAP_RESULT_MAP_CHANGED then
-        CALLBACK_MANAGER:FireCallbacks("OnWorldMapChanged")
+        LUIE:FireCallbacks("OnWorldMapChanged")
     end
 
     -- Get basic zone and map info
@@ -325,7 +320,7 @@ local function CollectZoneMapInfo()
 
     -- Reset map to player location
     if SetMapToPlayerLocation() == SET_MAP_RESULT_MAP_CHANGED then
-        CALLBACK_MANAGER:FireCallbacks("OnWorldMapChanged")
+        LUIE:FireCallbacks("OnWorldMapChanged")
     end
 
     -- Return collected information
@@ -590,7 +585,9 @@ local DEBUG_COMMANDS =
 
 --- Initializes debug slash commands
 --- These commands are only available when developer debug mode is enabled
-for command, handler in pairs(DEBUG_COMMANDS) do
-    SLASH_COMMANDS[command] = handler
+if LUIE.IsDevDebugEnabled() then
+    for command, handler in pairs(DEBUG_COMMANDS) do
+        SLASH_COMMANDS[command] = handler
+    end
 end
 -- -----------------------------------------------------------------------------

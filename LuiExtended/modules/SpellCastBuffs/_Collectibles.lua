@@ -1,15 +1,21 @@
---[[
-    LuiExtended
-    License: The MIT License (MIT)
---]]
+-- -----------------------------------------------------------------------------
+--  LuiExtended                                                               --
+--  Distributed under The MIT License (MIT) (see LICENSE file)                --
+-- -----------------------------------------------------------------------------
+
+--- @class (partial) LuiExtended
+local LUIE = LUIE
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
 
+local LuiData = LuiData
 local Data = LuiData.Data
+local Effects = Data.Effects
 local Abilities = Data.Abilities
 local Tooltips = Data.Tooltips
-local AssistantIcons = Data.Effects.AssistantIcons
+local AssistantIcons = Effects.AssistantIcons
 
+local pairs = pairs
 local zo_strformat = zo_strformat
 
 -- Called by SpellCastBuffs.MountStatus to display mount icon
@@ -30,11 +36,10 @@ function SpellCastBuffs.DisplayMountIcon()
     --
 
     -- Check mounted state
-    local playerName = GetRawUnitName("player")
-    local mountedState = GetTargetMountedStateInfo(playerName)
+    local name = GetRawUnitName("player")
+    local mountedState = GetTargetMountedStateInfo(name)
 
     if mountedState == MOUNTED_STATE_MOUNT_RIDER or mountedState == MOUNTED_STATE_MOUNT_PASSENGER then
-        local name
         local description
         local icon
         if mountedState == MOUNTED_STATE_MOUNT_RIDER then
@@ -45,8 +50,8 @@ function SpellCastBuffs.DisplayMountIcon()
                 name, description, icon = GetCollectibleInfo(collectible)
 
                 -- Add the nickname into the name if present
-                if (nickname ~= "" and nickname ~= nil) then
-                    name = zo_strformat('<<1>> "<<2>>"', name, nickname)
+                if nickname ~= "" and nickname ~= nil then
+                    name = zo_strformat(GetString(SI_COLLECTIBLE_NAME_WITH_NICKNAME_FORMATTER), name, nickname)
                 end
             else
                 name = Abilities.Innate_Mounted
@@ -76,13 +81,17 @@ function SpellCastBuffs.DisplayMountIcon()
             ends = nil, -- ends=nil : last buff in sorting
             forced = "long",
             restart = true,
-            iconNum = 0
+            iconNum = 0,
         }
     end
 end
 
--- EVENT_MOUNTED_STATE_CHANGED handler to create Mount Buff icon for player
-function SpellCastBuffs.MountStatus(eventCode, mounted)
+--- - Handler to create Mount Buff icon for player.
+--- - **EVENT_MOUNTED_STATE_CHANGED **
+---
+--- @param eventId integer
+--- @param mounted boolean
+function SpellCastBuffs.MountStatus(eventId, mounted)
     -- Clear current mount icon
     local abilityId = 999017
     SpellCastBuffs.ClearPlayerBuff(abilityId)
@@ -92,11 +101,16 @@ function SpellCastBuffs.MountStatus(eventCode, mounted)
     end
 end
 
--- EVENT_COLLECTIBLE_USE_RESULT handler - Waits 100 ms + latency for the delay in activating collectibles before checking
-function SpellCastBuffs.CollectibleUsed(eventCode, result, isAttemptingActivation)
+--- - Waits 100 ms + latency for the delay in activating collectibles before checking
+--- - **EVENT_COLLECTIBLE_USE_RESULT **
+---
+--- @param eventId integer
+--- @param result CollectibleUsageBlockReason
+--- @param isAttemptingActivation boolean
+function SpellCastBuffs.CollectibleUsed(eventId, result, isAttemptingActivation)
     local latency = GetLatency()
     latency = latency + 100
-    LUIE_callLater(SpellCastBuffs.CollectibleBuff, latency)
+    zo_callLater(SpellCastBuffs.CollectibleBuff, latency)
 end
 
 -- Handles delayed call from SpellCastBuffs.CollectibleUsed()
@@ -135,8 +149,8 @@ function SpellCastBuffs.CollectibleBuff()
             name, description, icon = GetCollectibleInfo(collectible)
 
             -- Add the nickname into the name if present
-            if (nickname ~= "" and nickname ~= nil) then
-                name = zo_strformat('<<1>> "<<2>>"', name, nickname)
+            if nickname ~= "" and nickname ~= nil then
+                name = zo_strformat(GetString(SI_COLLECTIBLE_NAME_WITH_NICKNAME_FORMATTER), name, nickname)
             end
         else
             name = Abilities.Innate_Vanity_Pet
@@ -161,7 +175,7 @@ function SpellCastBuffs.CollectibleBuff()
             ends = nil, -- ends=nil : last buff in sorting
             forced = "long",
             restart = true,
-            iconNum = 0
+            iconNum = 0,
         }
     end
 
@@ -187,7 +201,7 @@ function SpellCastBuffs.CollectibleBuff()
             ends = nil, -- ends=nil : last buff in sorting
             forced = "long",
             restart = true,
-            iconNum = 0
+            iconNum = 0,
         }
     end
 end

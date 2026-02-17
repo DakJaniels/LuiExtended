@@ -16,7 +16,7 @@ local function __applyFont(unitTag)
     local fontName = LUIE.Fonts[UnitFrames.SV.DefaultFontFace]
     if not fontName or fontName == "" then
         -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
+        --     LUIE:Log("Debug",GetString(LUIE_STRING_ERROR_FONT))
         -- end
         fontName = "LUIE Default Font"
     end
@@ -85,7 +85,7 @@ function UnitFrames.CustomFramesApplyFont()
     local fontName = LUIE.Fonts[UnitFrames.SV.CustomFontFace]
     if not fontName or fontName == "" then
         -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
+        --     LUIE:Log("Debug",GetString(LUIE_STRING_ERROR_FONT))
         -- end
         fontName = "LUIE Default Font"
     end

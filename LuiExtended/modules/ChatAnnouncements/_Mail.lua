@@ -124,7 +124,7 @@ function Mail.OnReadable(mailId)
 
             -- -- Debug: Log the raw sender names for verification
             -- if LUIE.IsDevDebugEnabled() then
-            --     LUIE.Debug(string.format("Raw Mail Data - Display: %s, Character: %s, Category: %s, FromPlayer: %s",
+            --     LUIE:Log("Debug",string.format("Raw Mail Data - Display: %s, Character: %s, Category: %s, FromPlayer: %s",
             --                              dataTable.senderDisplayName, dataTable.senderCharacterName, dataTable.category, tostring(dataTable.isFromPlayer)))
             -- end
 
@@ -181,7 +181,7 @@ function Mail.GetNextSender()
     if #Mail.senderQueue > 0 then
         local sender = table.remove(Mail.senderQueue, 1)
         -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE.Debug(string.format("Mail sender queue: consumed '%s', remaining: %d", sender, #Mail.senderQueue))
+        --     LUIE:Log("Debug",string.format("Mail sender queue: consumed '%s', remaining: %d", sender, #Mail.senderQueue))
         -- end
         return sender
     end
@@ -242,7 +242,7 @@ function Mail.OnTakeAllResponse(result, category, headersRemoved)
 
     -- if LUIE.IsDevDebugEnabled() then
     --     local resultStr = result == MAIL_TAKE_ATTACHMENT_RESULT_SUCCESS and "SUCCESS" or "FAIL"
-    --     LUIE.Debug(string.format("Take All completed: result=%s, category=%d, headersRemoved=%s, queue remaining=%d",
+    --     LUIE:Log("Debug",string.format("Take All completed: result=%s, category=%d, headersRemoved=%s, queue remaining=%d",
     --         resultStr, category, tostring(headersRemoved), #Mail.senderQueue))
     -- end
 end
@@ -295,7 +295,7 @@ local function PopulateMailSenderQueue()
 
                 -- if LUIE.IsDevDebugEnabled() then
                 --     local senderDisplayName, senderCharacterName = GetMailSender(mailId)
-                --     LUIE.Debug(string.format("Found mail %d: mailId=%s, displayName='%s', charName='%s', resolved='%s', attachments=%d, money=%d",
+                --     LUIE:Log("Debug",string.format("Found mail %d: mailId=%s, displayName='%s', charName='%s', resolved='%s', attachments=%d, money=%d",
                 --         mailCount, Id64ToString(mailId), senderDisplayName or "", senderCharacterName or "", mailTarget or "", numAttachments or 0, attachedMoney or 0))
                 -- end
 
@@ -308,7 +308,7 @@ local function PopulateMailSenderQueue()
                     end
 
                     -- if LUIE.IsDevDebugEnabled() then
-                    --     LUIE.Debug(string.format("Populating queue: mailId=%s, sender='%s', attachments=%d, money=%d",
+                    --     LUIE:Log("Debug",string.format("Populating queue: mailId=%s, sender='%s', attachments=%d, money=%d",
                     --         Id64ToString(mailId), mailTarget, numAttachments, attachedMoney))
                     -- end
 
@@ -327,7 +327,7 @@ local function PopulateMailSenderQueue()
     end
 
     -- if LUIE.IsDevDebugEnabled() then
-    --     LUIE.Debug(string.format("Mail sender queue populated: %d mails found, %d queue entries", mailCount, #Mail.senderQueue))
+    --     LUIE:Log("Debug",string.format("Mail sender queue populated: %d mails found, %d queue entries", mailCount, #Mail.senderQueue))
     -- end
 end
 
