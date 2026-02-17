@@ -112,7 +112,7 @@ function Block.RefreshBlockCost()
     -- Use the game's advanced stat API instead of manual calculation
     -- Returns: displayFormat, flatValue, percentValue
     local _, flatValue = GetAdvancedStatValue(ADVANCED_STAT_DISPLAY_TYPE_BLOCK_COST)
-    
+
     if flatValue and flatValue > 0 then
         cachedBlockCost = flatValue
     end
@@ -142,7 +142,12 @@ end
 function Block.ResetBloodlordEmbraceState()
     bloodlordEmbraceTargetUnitId = 0
     if Block.bloodlordGui then
+        -- Stop flicker effect for inactive state
+        FLICKER_EFFECT:UnregisterControl(Block.bloodlordGui.icon)
+
+        -- Reset to inactive state
         Block.bloodlordGui.icon:SetAlpha(BLOCK_INDICATOR_INACTIVE_ALPHA)
+        Block.bloodlordGui.icon:SetColor(1, 1, 1, BLOCK_INDICATOR_INACTIVE_ALPHA)
         Block.bloodlordGui.border:SetEdgeColor(1, 0, 0, 1)
         Block.bloodlordGui.targetLabel:SetColor(1, 0, 0, 1)
         Block.bloodlordGui.targetLabel:SetText("None")
@@ -205,7 +210,7 @@ function Block.OnBlockUpdate()
         return
     end
     if bothRegen or not sv.showRemainingBlocks then
-        Block.remainingBlocksLabel:SetText("")
+        Block.remainingBlocksLabel:Clean()
         return
     end
     local powerType = staminaRegen > 0 and COMBAT_MECHANIC_FLAGS_MAGICKA or COMBAT_MECHANIC_FLAGS_STAMINA
@@ -238,7 +243,7 @@ end
 --- @param targetUnitId integer
 --- @param abilityId integer
 --- @param overflow integer
-function Block.OnCombatEvent(eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId,overflow)
+function Block.OnCombatEvent(eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     local now = GetGameTimeMilliseconds()
 
     if abilityId == BLOODLORD_EMBRACE_DEBUFF_ABILITY_ID then
@@ -246,7 +251,14 @@ function Block.OnCombatEvent(eventId, result, isError, abilityName, abilityGraph
             bloodlordEmbraceLastApplyTime = now
             bloodlordEmbraceTargetUnitId = targetUnitId
             if Block.bloodlordGui then
-                Block.bloodlordGui.icon:SetAlpha(1)
+                -- Start vampiric flicker effect for active state
+                local SPEED_MULTIPLIER = 0.8
+                local ALPHA_STRENGTH = 0.3
+                local COLOR_STRENGTH = 0.2
+                FLICKER_EFFECT:RegisterControl(Block.bloodlordGui.icon, SPEED_MULTIPLIER, ALPHA_STRENGTH, COLOR_STRENGTH)
+                FLICKER_EFFECT:SetControlBaseColor(Block.bloodlordGui.icon, ZO_ColorDef:New(1, 0.2, 0.2, 1)) -- Blood red tint
+
+                -- Update border and label colors
                 Block.bloodlordGui.border:SetEdgeColor(0, 1, 0, 1)
                 Block.bloodlordGui.targetLabel:SetColor(0, 1, 0, 1)
                 Block.bloodlordGui.targetLabel:SetText(zo_strformat(SI_UNIT_NAME, targetName))
@@ -345,7 +357,7 @@ function Block.ApplyBlockShieldTexture()
     Block.blockIndicatorTexture:SetColor(1, 1, 1, 1)
 end
 
---- Applies saved Bloodlord's Embrace window position from SV (e.g. after console slider change).
+--- Applies saved Bloodlord's Embrace window position from SV
 function Block.ApplyBloodlordEmbracePosition()
     if not Block.bloodlordWindow then
         return
