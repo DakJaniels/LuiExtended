@@ -7,6 +7,7 @@
 --- @class (partial) LUIE.CombatInfo.Block
 
 local LUIE = LUIE
+local UI = LUIE.UI
 --- @class (partial) LUIE.CombatInfo
 local CombatInfo = LUIE.CombatInfo
 --- @class (partial) Block
@@ -26,7 +27,7 @@ local moduleName = Block.name
 -- ---------------------------------------------------------------------------
 
 local BASE_BLOCK_COST = 1730
-local BLOCK_INDICATOR_SIZE = 48
+local BLOCK_INDICATOR_SIZE = 64
 local BLOCK_INDICATOR_INACTIVE_ALPHA = 0.3
 local DEBOUNCE_DELAY_MS = 500
 local BLOODLORD_EMBRACE_DEBUFF_ABILITY_ID = 139903
@@ -39,7 +40,10 @@ local BLOODLORD_EMBRACE_BORDER_SIZE = 62
 local PANEL_WIDTH = 130
 local PANEL_HEIGHT = 30
 local PANEL_PADDING = 5
-local BLOODLORD_EMBRACE_WINDOW_SIZE = 50
+local BLOODLORD_EMBRACE_GAP = 8
+local BLOODLORD_EMBRACE_PANEL_GAP = 4
+local BLOODLORD_EMBRACE_WINDOW_WIDTH = BLOODLORD_EMBRACE_ABILITY_ICON_SIZE + BLOODLORD_EMBRACE_GAP + PANEL_WIDTH
+local BLOODLORD_EMBRACE_WINDOW_HEIGHT = (2 * PANEL_HEIGHT) + BLOODLORD_EMBRACE_PANEL_GAP
 local EQUIP_SLOT_EXCLUDE_FROM_ITEM_UPDATE = { [13] = true, [14] = true }
 local BLOCK_SHIELD_MEDIA = LUIE_MEDIA_COMBATINFO_BLOCK_SHIELD_DDS
 local BLOCK_SHIELD_GREY_MEDIA = LUIE_MEDIA_COMBATINFO_BLOCK_SHIELD_GREY_DDS
@@ -413,7 +417,7 @@ local function CreateBlockIndicatorWindow()
     Block.remainingBlocksLabel = label
 end
 
-local function CreateBloodlordEmbraceAbilityControl(parent, baseName, offsetX, abilityId, showBorder)
+local function CreateBloodlordEmbraceAbilityControl(parent, baseName, offsetX, showBorder)
     local ctrl = windowManager:CreateControl(baseName, parent, CT_CONTROL)
     ctrl:ClearAnchors()
     ctrl:SetAnchor(TOPLEFT, parent, TOPLEFT, offsetX, 0)
@@ -437,7 +441,13 @@ local function CreateBloodlordEmbraceAbilityControl(parent, baseName, offsetX, a
     back:SetCenterColor(0, 0, 0, 1)
 
     local icon = windowManager:CreateControl(baseName .. "Icon", ctrl, CT_TEXTURE)
-    icon:SetTexture(LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_BLOODLORDS_EMBRACE_DDS)
+    local fileName
+    if LUIE.SV.CustomIcons then
+        fileName = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_BLOODLORDS_EMBRACE_DDS
+    else
+        fileName = [[/esoui/art/icons/achievement_u23_qualifiedblooddonor.dds]]
+    end
+    icon:SetTexture(fileName)
     icon:ClearAnchors()
     icon:SetAnchor(TOPLEFT, ctrl, TOPLEFT, 0, 0)
     icon:SetAlpha(BLOCK_INDICATOR_INACTIVE_ALPHA)
@@ -489,7 +499,7 @@ local function CreateBloodlordEmbraceWindow()
 
     local win = windowManager:CreateTopLevelWindow(moduleName .. "BloodlordEmbrace")
     win:SetClampedToScreen(true)
-    win:SetDimensions(BLOODLORD_EMBRACE_WINDOW_SIZE, BLOODLORD_EMBRACE_WINDOW_SIZE)
+    win:SetDimensions(BLOODLORD_EMBRACE_WINDOW_WIDTH, BLOODLORD_EMBRACE_WINDOW_HEIGHT)
     win:ClearAnchors()
     win:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, pos.left, pos.top)
     win:SetMouseEnabled(true)
@@ -501,9 +511,28 @@ local function CreateBloodlordEmbraceWindow()
         CombatInfo.SV.block.bloodlordEmbracePosition = { left = x, top = y }
     end)
 
-    local abilityGui = CreateBloodlordEmbraceAbilityControl(win, moduleName .. "BloodlordIcon", 0, BLOODLORD_EMBRACE_DEBUFF_ABILITY_ID, true)
-    local targetPanel = CreateBloodlordEmbracePanel(win, moduleName .. "BloodlordTarget", 58, -6, "Current Target", "None", 1, 0, 0)
-    local magickaPanel = CreateBloodlordEmbracePanel(win, moduleName .. "BloodlordMagicka", 58, PANEL_HEIGHT - 4, "Magicka returned", "0", 0.5, 0.5, 1)
+    local rootFlex = UI:FlexControl(win, "fill", "inherit", false, { container = { direction = FLEX_DIRECTION_ROW } })
+
+    local abilityGui = CreateBloodlordEmbraceAbilityControl(rootFlex, moduleName .. "BloodlordIcon", 0, true)
+    abilityGui.ctrl:SetFlexBasis(BLOODLORD_EMBRACE_ABILITY_ICON_SIZE)
+    abilityGui.ctrl:SetFlexShrink(0)
+    abilityGui.ctrl:SetFlexMargins(0, 0, BLOODLORD_EMBRACE_GAP, 0)
+
+    local columnFlex = UI:FlexControl(rootFlex, nil, nil, false,
+                                      {
+                                          container = { direction = FLEX_DIRECTION_COLUMN, itemAlignment = FLEX_ALIGNMENT_FLEX_START },
+                                          item = { basis = PANEL_WIDTH, shrink = 0 },
+                                      })
+
+    local targetPanel = CreateBloodlordEmbracePanel(columnFlex, moduleName .. "BloodlordTarget", 0, 0, "Current Target", "None", 1, 0, 0)
+    targetPanel.ctrl:SetFlexBasis(PANEL_HEIGHT)
+    targetPanel.ctrl:SetFlexShrink(0)
+    targetPanel.ctrl:SetFlexMargins(0, 0, 0, BLOODLORD_EMBRACE_PANEL_GAP)
+
+    local magickaPanel = CreateBloodlordEmbracePanel(columnFlex, moduleName .. "BloodlordMagicka", 0, 0, "Magicka returned", "0", 0.5, 0.5, 1)
+    magickaPanel.ctrl:SetFlexBasis(PANEL_HEIGHT)
+    magickaPanel.ctrl:SetFlexShrink(0)
+    magickaPanel.ctrl:SetFlexMargins(0, 0, 0, 0)
 
     bloodlordEmbraceFragment = ZO_HUDFadeSceneFragment:New(win, 0, 0)
     -- Fragment added/removed by RefreshBloodlordEmbraceVisibility when set is equipped

@@ -351,8 +351,8 @@ end
 --- }
 
 --- @class flexConfig
---- @field container flexConfig_container
---- @field item flexConfig_item
+--- @field container flexConfig_container?
+--- @field item flexConfig_item?
 
 -- -----------------------------------------------------------------------------
 --- Creates a flex-enabled control element with optional container and/or item properties
