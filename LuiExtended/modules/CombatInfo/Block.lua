@@ -109,8 +109,6 @@ function Block.RefreshBlockCost()
         return
     end
 
-    -- Use the game's advanced stat API instead of manual calculation
-    -- Returns: displayFormat, flatValue, percentValue
     local _, flatValue = GetAdvancedStatValue(ADVANCED_STAT_DISPLAY_TYPE_BLOCK_COST)
 
     if flatValue and flatValue > 0 then
@@ -431,12 +429,7 @@ local function CreateBloodlordEmbraceAbilityControl(parent, baseName, offsetX, s
     back:SetCenterColor(0, 0, 0, 1)
 
     local icon = windowManager:CreateControl(baseName .. "Icon", ctrl, CT_TEXTURE)
-    local fileName
-    if LUIE.SV.CustomIcons then
-        fileName = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_BLOODLORDS_EMBRACE_DDS
-    else
-        fileName = [[/esoui/art/icons/achievement_u23_qualifiedblooddonor.dds]]
-    end
+    local fileName = [[/esoui/art/icons/achievement_u23_qualifiedblooddonor.dds]]
     icon:SetTexture(fileName)
     icon:ClearAnchors()
     icon:SetAnchor(TOPLEFT, ctrl, TOPLEFT, 0, 0)
