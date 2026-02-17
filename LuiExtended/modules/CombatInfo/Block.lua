@@ -84,6 +84,42 @@ local function GetUsableFont()
     return font
 end
 
+local function GetTitleFont()
+    local sv = CombatInfo.SV.block
+    local fontFaceChoice = sv.bloodlordEmbraceFontFace or CombatInfo.Defaults.block.bloodlordEmbraceFontFace
+    local fontFace = LUIE.Fonts[fontFaceChoice]
+    if not fontFace then
+        fontFace = "LUIE Default Font"
+    end
+    local fontSize = sv.bloodlordEmbraceTitleSize or CombatInfo.Defaults.block.bloodlordEmbraceTitleSize
+    local fontStyle = sv.bloodlordEmbraceFontStyle or CombatInfo.Defaults.block.bloodlordEmbraceFontStyle
+    return LUIE.CreateFontString(fontFace, fontSize, fontStyle)
+end
+
+local function GetValueFont()
+    local sv = CombatInfo.SV.block
+    local fontFaceChoice = sv.bloodlordEmbraceFontFace or CombatInfo.Defaults.block.bloodlordEmbraceFontFace
+    local fontFace = LUIE.Fonts[fontFaceChoice]
+    if not fontFace then
+        fontFace = "LUIE Default Font"
+    end
+    local fontSize = sv.bloodlordEmbraceValueSize or CombatInfo.Defaults.block.bloodlordEmbraceValueSize
+    local fontStyle = sv.bloodlordEmbraceFontStyle or CombatInfo.Defaults.block.bloodlordEmbraceFontStyle
+    return LUIE.CreateFontString(fontFace, fontSize, fontStyle)
+end
+
+local function GetBlockIndicatorFont()
+    local sv = CombatInfo.SV.block
+    local fontFaceChoice = sv.blockIndicatorFontFace or CombatInfo.Defaults.block.blockIndicatorFontFace
+    local fontFace = LUIE.Fonts[fontFaceChoice]
+    if not fontFace then
+        fontFace = "LUIE Default Font"
+    end
+    local fontSize = sv.blockIndicatorFontSize or CombatInfo.Defaults.block.blockIndicatorFontSize
+    local fontStyle = sv.blockIndicatorFontStyle or CombatInfo.Defaults.block.blockIndicatorFontStyle
+    return LUIE.CreateFontString(fontFace, fontSize, fontStyle)
+end
+
 --- Returns whether any of the given set links are equipped with at least minPieces.
 --- @param setLinks table Array of item links
 --- @param minPieces number Minimum equipped pieces (default 1)
@@ -366,6 +402,37 @@ function Block.ApplyBloodlordEmbracePosition()
     Block.bloodlordWindow:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, pos.left, pos.top)
 end
 
+function Block.ApplyBlockIndicatorFont()
+    if not Block.remainingBlocksLabel then
+        return
+    end
+    local font = GetBlockIndicatorFont()
+    Block.remainingBlocksLabel:SetFont(font)
+    if Block.remainingBlocksShadowLabel then
+        Block.remainingBlocksShadowLabel:SetFont(font)
+    end
+end
+
+function Block.ApplyBloodlordEmbraceFonts()
+    if not Block.bloodlordGui then
+        return
+    end
+    local titleFont = GetTitleFont()
+    local valueFont = GetValueFont()
+    if Block.bloodlordGui.targetTitle then
+        Block.bloodlordGui.targetTitle:SetFont(titleFont)
+    end
+    if Block.bloodlordGui.targetLabel then
+        Block.bloodlordGui.targetLabel:SetFont(valueFont)
+    end
+    if Block.bloodlordGui.magickaTitle then
+        Block.bloodlordGui.magickaTitle:SetFont(titleFont)
+    end
+    if Block.bloodlordGui.magickaLabel then
+        Block.bloodlordGui.magickaLabel:SetFont(valueFont)
+    end
+end
+
 local function CreateBlockIndicatorWindow()
     local win = windowManager:CreateTopLevelWindow(moduleName .. "BlockIndicator")
     win:SetClampedToScreen(true)
@@ -393,8 +460,12 @@ local function CreateBlockIndicatorWindow()
     label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
+    local blockIndicatorFont = GetBlockIndicatorFont()
+    label:SetFont(blockIndicatorFont)
+
     local shadowLabel = label:GetNamedChild("Shadow")
     shadowLabel:SetColor(0, 0, 0, 1)
+    shadowLabel:SetFont(blockIndicatorFont)
 
     blockIndicatorFragment = ZO_HUDFadeSceneFragment:New(win, 0, 0)
     HUD_UI_SCENE:AddFragment(blockIndicatorFragment)
@@ -403,6 +474,7 @@ local function CreateBlockIndicatorWindow()
     Block.blockIndicatorWindow = win
     Block.blockIndicatorTexture = texture
     Block.remainingBlocksLabel = label
+    Block.remainingBlocksShadowLabel = shadowLabel
 end
 
 local function CreateBloodlordEmbraceAbilityControl(parent, baseName, offsetX, showBorder)
@@ -440,7 +512,8 @@ local function CreateBloodlordEmbraceAbilityControl(parent, baseName, offsetX, s
 end
 
 local function CreateBloodlordEmbracePanel(parent, baseName, offsetX, offsetY, titleText, valueText, valueR, valueG, valueB)
-    local font = GetUsableFont()
+    local titleFont = GetTitleFont()
+    local valueFont = GetValueFont()
     local ctrl = windowManager:CreateControl(baseName, parent, CT_CONTROL)
     ctrl:ClearAnchors()
     ctrl:SetAnchor(TOPLEFT, parent, TOPLEFT, offsetX, offsetY)
@@ -459,7 +532,7 @@ local function CreateBloodlordEmbracePanel(parent, baseName, offsetX, offsetY, t
     title:SetAnchor(TOPLEFT, ctrl, TOPLEFT, PANEL_PADDING, 1)
     title:SetDimensions(PANEL_WIDTH - 2 * PANEL_PADDING, PANEL_HEIGHT - 1)
     title:SetColor(1, 1, 1, 1)
-    title:SetFont(font)
+    title:SetFont(titleFont)
     title:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
     title:SetVerticalAlignment(TEXT_ALIGN_TOP)
     title:SetText(titleText)
@@ -469,12 +542,12 @@ local function CreateBloodlordEmbracePanel(parent, baseName, offsetX, offsetY, t
     label:SetAnchor(TOPLEFT, ctrl, TOPLEFT, PANEL_PADDING, 0)
     label:SetDimensions(PANEL_WIDTH - 2 * PANEL_PADDING, PANEL_HEIGHT)
     label:SetColor(valueR, valueG, valueB, 1)
-    label:SetFont(font)
+    label:SetFont(valueFont)
     label:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
     label:SetVerticalAlignment(TEXT_ALIGN_BOTTOM)
     label:SetText(valueText)
 
-    return { ctrl = ctrl, label = label }
+    return { ctrl = ctrl, title = title, label = label }
 end
 
 local function CreateBloodlordEmbraceWindow()
@@ -526,7 +599,9 @@ local function CreateBloodlordEmbraceWindow()
     {
         icon = abilityGui.icon,
         border = abilityGui.border,
+        targetTitle = targetPanel.title,
         targetLabel = targetPanel.label,
+        magickaTitle = magickaPanel.title,
         magickaLabel = magickaPanel.label,
     }
 end
@@ -564,6 +639,9 @@ end
 
 function Block.Initialize()
     if not CombatInfo.Enabled then
+        return
+    end
+    if not CombatInfo.SV.block.enabled then
         return
     end
     CreateBlockIndicatorWindow()

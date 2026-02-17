@@ -3397,6 +3397,21 @@ function CombatInfo.CreateSettings()
                 text = "Shows a shield icon while blocking and optional remaining block count. Bloodlord's Embrace tracker appears when the set is equipped.",
             },
             {
+                type = "checkbox",
+                name = "Enable Block Indicator",
+                tooltip = "Enable the block indicator system. Changes require a UI reload (/reloadui).",
+                default = Defaults.block.enabled,
+                getFunc = function ()
+                    return Settings.block.enabled
+                end,
+                setFunc = function (value)
+                    Settings.block.enabled = value
+                end,
+                width = "full",
+                warning = "Requires UI reload (/reloadui) to take effect.",
+                requiresReload = true,
+            },
+            {
                 type = "slider",
                 name = "Update interval (ms)",
                 tooltip = "How often the block indicator and remaining blocks are updated.",
@@ -3412,6 +3427,9 @@ function CombatInfo.CreateSettings()
                 end,
                 default = Defaults.block.updateIntervalMs,
                 width = "full",
+                disabled = function ()
+                    return not Settings.block.enabled
+                end,
             },
             {
                 type = "checkbox",
@@ -3426,6 +3444,76 @@ function CombatInfo.CreateSettings()
                 end,
                 default = Defaults.block.showRemainingBlocks,
                 width = "full",
+                disabled = function ()
+                    return not Settings.block.enabled
+                end,
+            },
+            {
+                type = "dropdown",
+                name = "Block Indicator Font Face",
+                tooltip = "Font used for the block indicator remaining blocks count.",
+                choices = SettingsAPI.GetFontsList(),
+                sort = "name-up",
+                getFunc = function ()
+                    return Settings.block.blockIndicatorFontFace
+                end,
+                setFunc = function (value)
+                    Settings.block.blockIndicatorFontFace = value
+                    Block.ApplyBlockIndicatorFont()
+                end,
+                default = Defaults.block.blockIndicatorFontFace,
+                width = "full",
+                disabled = function ()
+                    return not Settings.block.enabled
+                end,
+            },
+            {
+                type = "dropdown",
+                name = "Block Indicator Font Style",
+                tooltip = "Font style for the block indicator remaining blocks count.",
+                choices = LUIE.FONT_STYLE_CHOICES,
+                getFunc = function ()
+                    for i, value in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
+                        if value == Settings.block.blockIndicatorFontStyle then
+                            return LUIE.FONT_STYLE_CHOICES[i]
+                        end
+                    end
+                    return LUIE.FONT_STYLE_CHOICES[1]
+                end,
+                setFunc = function (value)
+                    for i, name in ipairs(LUIE.FONT_STYLE_CHOICES) do
+                        if name == value then
+                            Settings.block.blockIndicatorFontStyle = LUIE.FONT_STYLE_CHOICES_VALUES[i]
+                            Block.ApplyBlockIndicatorFont()
+                            return
+                        end
+                    end
+                end,
+                default = Defaults.block.blockIndicatorFontStyle,
+                width = "full",
+                disabled = function ()
+                    return not Settings.block.enabled
+                end,
+            },
+            {
+                type = "slider",
+                name = "Block Indicator Font Size",
+                tooltip = "Font size for the block indicator remaining blocks count.",
+                min = 10,
+                max = 32,
+                step = 1,
+                getFunc = function ()
+                    return Settings.block.blockIndicatorFontSize
+                end,
+                setFunc = function (value)
+                    Settings.block.blockIndicatorFontSize = value
+                    Block.ApplyBlockIndicatorFont()
+                end,
+                default = Defaults.block.blockIndicatorFontSize,
+                width = "full",
+                disabled = function ()
+                    return not Settings.block.enabled
+                end,
             },
             {
                 type = "checkbox",
@@ -3440,6 +3528,96 @@ function CombatInfo.CreateSettings()
                 end,
                 default = Defaults.block.colorShieldByResource,
                 width = "full",
+                disabled = function ()
+                    return not Settings.block.enabled
+                end,
+            },
+            {
+                type = "dropdown",
+                name = "Bloodlord Embrace Font Face",
+                tooltip = "Font used for Bloodlord's Embrace tracker text.",
+                choices = SettingsAPI.GetFontsList(),
+                sort = "name-up",
+                getFunc = function ()
+                    return Settings.block.bloodlordEmbraceFontFace
+                end,
+                setFunc = function (value)
+                    Settings.block.bloodlordEmbraceFontFace = value
+                    Block.ApplyBloodlordEmbraceFonts()
+                end,
+                default = Defaults.block.bloodlordEmbraceFontFace,
+                width = "full",
+                disabled = function ()
+                    return not Settings.block.enabled
+                end,
+            },
+            {
+                type = "dropdown",
+                name = "Bloodlord Embrace Font Style",
+                tooltip = "Font style for Bloodlord's Embrace tracker text.",
+                choices = LUIE.FONT_STYLE_CHOICES,
+                getFunc = function ()
+                    for i, value in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
+                        if value == Settings.block.bloodlordEmbraceFontStyle then
+                            return LUIE.FONT_STYLE_CHOICES[i]
+                        end
+                    end
+                    return LUIE.FONT_STYLE_CHOICES[1]
+                end,
+                setFunc = function (value)
+                    for i, name in ipairs(LUIE.FONT_STYLE_CHOICES) do
+                        if name == value then
+                            Settings.block.bloodlordEmbraceFontStyle = LUIE.FONT_STYLE_CHOICES_VALUES[i]
+                            Block.ApplyBloodlordEmbraceFonts()
+                            return
+                        end
+                    end
+                end,
+                default = Defaults.block.bloodlordEmbraceFontStyle,
+                width = "full",
+                disabled = function ()
+                    return not Settings.block.enabled
+                end,
+            },
+            {
+                type = "slider",
+                name = "Bloodlord Embrace Title Font Size",
+                tooltip = "Font size for Bloodlord's Embrace tracker titles (e.g. 'Current Target').",
+                min = 8,
+                max = 24,
+                step = 1,
+                getFunc = function ()
+                    return Settings.block.bloodlordEmbraceTitleSize
+                end,
+                setFunc = function (value)
+                    Settings.block.bloodlordEmbraceTitleSize = value
+                    Block.ApplyBloodlordEmbraceFonts()
+                end,
+                default = Defaults.block.bloodlordEmbraceTitleSize,
+                width = "full",
+                disabled = function ()
+                    return not Settings.block.enabled
+                end,
+            },
+            {
+                type = "slider",
+                name = "Bloodlord Embrace Value Font Size",
+                tooltip = "Font size for Bloodlord's Embrace tracker values (target name, magicka returned).",
+                min = 8,
+                max = 24,
+                step = 1,
+                getFunc = function ()
+                    return Settings.block.bloodlordEmbraceValueSize
+                end,
+                setFunc = function (value)
+                    Settings.block.bloodlordEmbraceValueSize = value
+                    Block.ApplyBloodlordEmbraceFonts()
+                end,
+                default = Defaults.block.bloodlordEmbraceValueSize,
+                width = "full",
+                disabled = function ()
+                    return not Settings.block.enabled
+                end,
             },
         },
     }

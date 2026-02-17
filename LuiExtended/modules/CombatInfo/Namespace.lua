@@ -243,9 +243,17 @@ CombatInfo.Defaults =
     },
     block =
     {
+        enabled = false,
         updateIntervalMs = 10,
         showRemainingBlocks = false,
         colorShieldByResource = false,
+        blockIndicatorFontFace = "LUIE Default Font",
+        blockIndicatorFontStyle = FONT_STYLE_SOFT_SHADOW_THICK,
+        blockIndicatorFontSize = 18,
         bloodlordEmbracePosition = { left = 1165, top = 275 },
+        bloodlordEmbraceFontFace = "LUIE Default Font",
+        bloodlordEmbraceFontStyle = FONT_STYLE_SOFT_SHADOW_THICK,
+        bloodlordEmbraceTitleSize = 12,
+        bloodlordEmbraceValueSize = 14,
     },
 }

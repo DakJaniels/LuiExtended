@@ -3537,10 +3537,24 @@ function CombatInfo.CreateConsoleSettings()
         }
         settings[#settings + 1] =
         {
+            type = LHAS.ST_CHECKBOX,
+            label = "Enable Block Indicator (Requires UI Reload)",
+            tooltip = "Enable the block indicator system. Changes require a UI reload (/reloadui).",
+            getFunction = function ()
+                return Settings.block.enabled
+            end,
+            setFunction = function (value)
+                Settings.block.enabled = value
+            end,
+            default = Defaults.block.enabled,
+        }
+        settings[#settings + 1] =
+        {
             type = LHAS.ST_SLIDER,
             label = "Update interval (ms)",
             min = 0,
             max = 100,
+            step = 5,
             format = "%.0f",
             getFunction = function ()
                 return Settings.block.updateIntervalMs
@@ -3550,6 +3564,9 @@ function CombatInfo.CreateConsoleSettings()
                 Block.RegisterUpdateLoop()
             end,
             default = Defaults.block.updateIntervalMs,
+            disable = function ()
+                return not Settings.block.enabled
+            end,
         }
         settings[#settings + 1] =
         {
@@ -3563,6 +3580,69 @@ function CombatInfo.CreateConsoleSettings()
                 Block.RefreshBlockCost()
             end,
             default = Defaults.block.showRemainingBlocks,
+            disable = function ()
+                return not Settings.block.enabled
+            end,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "Block Indicator Font Face",
+            items = fontItems,
+            getFunction = function ()
+                return Settings.block.blockIndicatorFontFace
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.block.blockIndicatorFontFace = value
+                Block.ApplyBlockIndicatorFont()
+            end,
+            default = Defaults.block.blockIndicatorFontFace,
+            disable = function ()
+                return not Settings.block.enabled
+            end,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "Block Indicator Font Style",
+            items = fontStyleItems,
+            getFunction = function ()
+                local value = Settings.block.blockIndicatorFontStyle
+                for i, choiceValue in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
+                    if choiceValue == value then
+                        return LUIE.FONT_STYLE_CHOICES[i]
+                    end
+                end
+                return LUIE.FONT_STYLE_CHOICES[1]
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.block.blockIndicatorFontStyle = item.data
+                Block.ApplyBlockIndicatorFont()
+            end,
+            default = Defaults.block.blockIndicatorFontStyle,
+            disable = function ()
+                return not Settings.block.enabled
+            end,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "Block Indicator Font Size",
+            min = 10,
+            max = 32,
+            step = 1,
+            format = "%.0f",
+            getFunction = function ()
+                return Settings.block.blockIndicatorFontSize
+            end,
+            setFunction = function (value)
+                Settings.block.blockIndicatorFontSize = value
+                Block.ApplyBlockIndicatorFont()
+            end,
+            default = Defaults.block.blockIndicatorFontSize,
+            disable = function ()
+                return not Settings.block.enabled
+            end,
         }
         settings[#settings + 1] =
         {
@@ -3575,7 +3655,10 @@ function CombatInfo.CreateConsoleSettings()
                 Settings.block.colorShieldByResource = value
                 Block.ApplyBlockShieldTexture()
             end,
-            default = Defaults.colorShieldByResource,
+            default = Defaults.block.colorShieldByResource,
+            disable = function ()
+                return not Settings.block.enabled
+            end,
         }
         local gwBlock = GuiRoot:GetWidth()
         local ghBlock = GuiRoot:GetHeight()
@@ -3595,6 +3678,9 @@ function CombatInfo.CreateConsoleSettings()
                 Settings.block.bloodlordEmbracePosition = Settings.block.bloodlordEmbracePosition or { left = Defaults.block.bloodlordEmbracePosition.left, top = Defaults.block.bloodlordEmbracePosition.top }
                 Settings.block.bloodlordEmbracePosition.left = value
                 Block.ApplyBloodlordEmbracePosition()
+            end,
+            disable = function ()
+                return not Settings.block.enabled
             end,
         }
         settings[#settings + 1] =
@@ -3617,6 +3703,89 @@ function CombatInfo.CreateConsoleSettings()
                     }
                 Settings.block.bloodlordEmbracePosition.top = value
                 Block.ApplyBloodlordEmbracePosition()
+            end,
+            disable = function ()
+                return not Settings.block.enabled
+            end,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "Bloodlord Embrace Font Face",
+            items = fontItems,
+            getFunction = function ()
+                return Settings.block.bloodlordEmbraceFontFace
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.block.bloodlordEmbraceFontFace = value
+                Block.ApplyBloodlordEmbraceFonts()
+            end,
+            default = Defaults.block.bloodlordEmbraceFontFace,
+            disable = function ()
+                return not Settings.block.enabled
+            end,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = "Bloodlord Embrace Font Style",
+            items = fontStyleItems,
+            getFunction = function ()
+                local value = Settings.block.bloodlordEmbraceFontStyle
+                for i, choiceValue in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
+                    if choiceValue == value then
+                        return LUIE.FONT_STYLE_CHOICES[i]
+                    end
+                end
+                return LUIE.FONT_STYLE_CHOICES[1]
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.block.bloodlordEmbraceFontStyle = item.data
+                Block.ApplyBloodlordEmbraceFonts()
+            end,
+            default = Defaults.block.bloodlordEmbraceFontStyle,
+            disable = function ()
+                return not Settings.block.enabled
+            end,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "Bloodlord Embrace Title Font Size",
+            min = 8,
+            max = 24,
+            step = 1,
+            format = "%.0f",
+            getFunction = function ()
+                return Settings.block.bloodlordEmbraceTitleSize
+            end,
+            setFunction = function (value)
+                Settings.block.bloodlordEmbraceTitleSize = value
+                Block.ApplyBloodlordEmbraceFonts()
+            end,
+            default = Defaults.block.bloodlordEmbraceTitleSize,
+            disable = function ()
+                return not Settings.block.enabled
+            end,
+        }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "Bloodlord Embrace Value Font Size",
+            min = 8,
+            max = 24,
+            step = 1,
+            format = "%.0f",
+            getFunction = function ()
+                return Settings.block.bloodlordEmbraceValueSize
+            end,
+            setFunction = function (value)
+                Settings.block.bloodlordEmbraceValueSize = value
+                Block.ApplyBloodlordEmbraceFonts()
+            end,
+            default = Defaults.block.bloodlordEmbraceValueSize,
+            disable = function ()
+                return not Settings.block.enabled
             end,
         }
     end)
