@@ -51,21 +51,28 @@ local EventType = CombatTextConstants.eventType
 local CrowdControlType = CombatTextConstants.crowdControlType
 local PointType = CombatTextConstants.pointType
 
+-- Table cache moved to CombatText.lua for shared access across all viewers
+-- Use LUIE.GetCachedTable() and LUIE.RecycleTable() instead
+
 -- Memory optimization: Cache formatted ability names to avoid repeated string allocations
+-- Uses weak values (__mode='v') to allow garbage collection of unused entries
 local abilityNameCache = setmetatable({},
                                       {
+                                          __mode = "v", -- Weak values: entries can be GC'd when no longer referenced
                                           __index = function (t, abilityId)
-                                              local name = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
+                                              local name = ZO_CachedStrFormat("<<C:1>>", GetAbilityName(abilityId))
                                               t[abilityId] = name
                                               return name
                                           end
                                       })
 
 -- Memory optimization: Cache formatted source names
+-- Uses weak values (__mode='v') to allow garbage collection of unused entries
 local sourceNameCache = setmetatable({},
                                      {
+                                         __mode = "v", -- Weak values: entries can be GC'd when no longer referenced
                                          __index = function (t, sourceName)
-                                             local formatted = zo_strformat("<<C:1>>", sourceName)
+                                             local formatted = ZO_CachedStrFormat("<<C:1>>", sourceName)
                                              t[sourceName] = formatted
                                              return formatted
                                          end
@@ -86,6 +93,47 @@ local isWarned =
 local function resetCCWarning(ccType)
     isWarned[ccType] = false
 end
+
+-- Crowd control configuration: ordered by type for data-driven processing
+local CC_CONFIG =
+{
+    {
+        flag = "isDisoriented",
+        toggleKey = "showDisoriented",
+        warnKey = "disoriented",
+        ccType = "DISORIENTED",
+    },
+    {
+        flag = "isFeared",
+        toggleKey = "showFeared",
+        warnKey = "feared",
+        ccType = "FEARED",
+    },
+    {
+        flag = "isOffBalanced",
+        toggleKey = "showOffBalanced",
+        warnKey = "offBalanced",
+        ccType = "OFFBALANCED",
+    },
+    {
+        flag = "isSilenced",
+        toggleKey = "showSilenced",
+        warnKey = "silenced",
+        ccType = "SILENCED",
+    },
+    {
+        flag = "isStunned",
+        toggleKey = "showStunned",
+        warnKey = "stunned",
+        ccType = "STUNNED",
+    },
+    {
+        flag = "isCharmed",
+        toggleKey = "showCharmed",
+        warnKey = "charmed",
+        ccType = "CHARMED",
+    },
+}
 
 -- Memory optimization: Pre-compute boolean lookups to avoid repeated table access
 local resultTypeCache = setmetatable({},
@@ -130,8 +178,10 @@ local cachedZoneData =
     mapName = ""
 }
 
---- @param zoneName string|nil
---- @param zoneId integer|nil
+--- Update the cached zone and map data<br>
+--- Minimizes repeated API calls for location information
+--- @param zoneName string? Optional zone name (fetched if not provided)
+--- @param zoneId integer? Optional zone ID (fetched if not provided)
 local function updateZoneCache(zoneName, zoneId)
     if zoneId then
         cachedZoneData.zoneId = zoneId
@@ -149,6 +199,100 @@ end
 -- Memory optimization: Cache PlaySound string constant
 local SOUND_ABILITY_FAILED = "Ability_Failed"
 
+--- Resolve ability name with contextual overrides<br>
+--- Applies overrides based on source name, zone, and map in priority order
+--- @param abilityId integer The base ability ID
+--- @param sourceName string The source/caster name
+--- @return string abilityName The resolved ability name
+local function ResolveAbilityName(abilityId, sourceName)
+    local abilityName = abilityNameCache[abilityId]
+
+    -- Override by source name
+    local effectOverrideByName = EffectOverrideByName[abilityId]
+    if effectOverrideByName then
+        local sourceNameCheck = sourceNameCache[sourceName]
+        local nameOverride = effectOverrideByName[sourceNameCheck]
+        if nameOverride and nameOverride.name then
+            abilityName = nameOverride.name
+        end
+    end
+
+    -- Override by zone
+    local effectZoneOverride = ZoneDataOverride[abilityId]
+    if effectZoneOverride then
+        local zoneOverride = effectZoneOverride[cachedZoneData.zoneId]
+            or effectZoneOverride[cachedZoneData.zoneName]
+        if zoneOverride and zoneOverride.name then
+            abilityName = zoneOverride.name
+        end
+    end
+
+    -- Override by map
+    local effectMapOverride = MapDataOverride[abilityId]
+    if effectMapOverride then
+        local mapOverride = effectMapOverride[cachedZoneData.mapName]
+        if mapOverride and mapOverride.name then
+            abilityName = mapOverride.name
+        end
+    end
+
+    return abilityName
+end
+
+--- Check if a combat event should be displayed based on flags and settings<br>
+--- Evaluates all combat event types against their respective toggle settings
+--- @param flags table Event flags (isDamage, isHealing, etc.)
+--- @param toggles table Settings toggles for this combat direction
+--- @param powerType integer Combat mechanic flags
+--- @param hitValue integer The damage/healing value
+--- @param overkill boolean If this is overkill damage
+--- @param overheal boolean If this is overheal
+--- @return boolean shouldShow True if event should be displayed
+local function ShouldShowCombatEvent(flags, toggles, powerType, hitValue, overkill, overheal)
+    return (flags.isDodged and toggles.showDodged)
+        or (flags.isMiss and toggles.showMiss)
+        or (flags.isImmune and toggles.showImmune)
+        or (flags.isReflected and toggles.showReflected)
+        or (flags.isDamageShield and toggles.showDamageShield)
+        or (flags.isParried and toggles.showParried)
+        or (flags.isBlocked and toggles.showBlocked)
+        or (flags.isInterrupted and toggles.showInterrupted)
+        or (flags.isDot and toggles.showDot and (hitValue > 0 or overkill))
+        or (flags.isDotCritical and toggles.showDot and (hitValue > 0 or overkill))
+        or (flags.isHot and toggles.showHot and (hitValue > 0 or overheal))
+        or (flags.isHotCritical and toggles.showHot and (hitValue > 0 or overheal))
+        or (flags.isHealing and toggles.showHealing and (hitValue > 0 or overheal))
+        or (flags.isHealingCritical and toggles.showHealing and (hitValue > 0 or overheal))
+        or (flags.isDamage and toggles.showDamage and (hitValue > 0 or overkill))
+        or (flags.isDamageCritical and toggles.showDamage and (hitValue > 0 or overkill))
+        or (flags.isEnergize and toggles.showEnergize and (powerType == COMBAT_MECHANIC_FLAGS_MAGICKA or powerType == COMBAT_MECHANIC_FLAGS_STAMINA))
+        or (flags.isEnergize and toggles.showUltimateEnergize and powerType == COMBAT_MECHANIC_FLAGS_ULTIMATE)
+        or (flags.isDrain and toggles.showDrain and (powerType == COMBAT_MECHANIC_FLAGS_MAGICKA or powerType == COMBAT_MECHANIC_FLAGS_STAMINA))
+end
+
+--- Process crowd control events in a data-driven manner<br>
+--- Handles CC debouncing and event triggering for all CC types
+--- @param self LuiExtended.CombatTextCombatEventListener The event listener instance
+--- @param flags table Event flags containing CC state
+--- @param toggles table Settings toggles for this combat direction
+--- @param combatType integer Combat direction (INCOMING or OUTGOING)
+--- @note Caller MUST check isWarned.combat before calling this function
+local function ProcessCrowdControlEvents(self, flags, toggles, combatType)
+    for _, config in ipairs(CC_CONFIG) do
+        if flags[config.flag] and toggles[config.toggleKey] then
+            if isWarned[config.warnKey] then
+                PlaySound(SOUND_ABILITY_FAILED)
+            else
+                self:TriggerEvent(EventType.CROWDCONTROL, CrowdControlType[config.ccType], combatType)
+                isWarned[config.warnKey] = true
+                LUIE_callLater(function () resetCCWarning(config.warnKey) end, 1000)
+            end
+        end
+    end
+end
+
+--- Initialize combat event listener<br>
+--- Registers for incoming/outgoing combat events, combat state changes, and zone changes
 function CombatTextCombatEventListener:Initialize()
     LUIE.CombatTextEventListener.Initialize(self)
     self:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function ()
@@ -172,6 +316,8 @@ function CombatTextCombatEventListener:Initialize()
     end)
 end
 
+--- Handle player activation event<br>
+--- Initializes zone cache and sets combat state if player is already in combat
 function CombatTextCombatEventListener:OnPlayerActivated()
     updateZoneCache() -- Initialize zone cache
     if IsUnitInCombat("player") then
@@ -179,203 +325,93 @@ function CombatTextCombatEventListener:OnPlayerActivated()
     end
 end
 
---- @param result ActionResult
---- @param isError boolean
---- @param abilityName string
---- @param abilityGraphic integer
---- @param abilityActionSlotType ActionSlotType
---- @param sourceName string
---- @param sourceType CombatUnitType
---- @param targetName string
---- @param targetType CombatUnitType
---- @param hitValue integer
---- @param powerType CombatMechanicFlags
---- @param damageType DamageType
---- @param log boolean
---- @param sourceUnitId integer
---- @param targetUnitId integer
---- @param abilityId integer
---- @param overflow integer
+--- Handle incoming combat events (player as target)<br>
+--- Processes damage, healing, mitigation, and crowd control events targeting the player<br>
+--- Applies ability name overrides, checks blacklist, and triggers appropriate combat text events
+--- @param result ActionResult The combat result type (damage, heal, miss, etc.)
+--- @param isError boolean If the combat event represents an error
+--- @param abilityName string Base ability name from game API
+--- @param abilityGraphic integer Ability visual effect ID
+--- @param abilityActionSlotType ActionSlotType The action slot type
+--- @param sourceName string Name of the source unit (attacker/healer)
+--- @param sourceType CombatUnitType Type of source unit
+--- @param targetName string Name of target unit (player)
+--- @param targetType CombatUnitType Type of target unit
+--- @param hitValue integer Amount of damage/healing
+--- @param powerType CombatMechanicFlags Resource type (health, magicka, stamina, ultimate)
+--- @param damageType DamageType Type of damage (physical, magic, etc.)
+--- @param log boolean If this should be logged
+--- @param sourceUnitId integer Unit ID of source
+--- @param targetUnitId integer Unit ID of target
+--- @param abilityId integer The ability ID
+--- @param overflow integer Overkill/overheal amount
 function CombatTextCombatEventListener:OnCombatIn(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     local Settings = LUIE.CombatText.SV
     local settingsCommon, settingsToggles = Settings.common, Settings.toggles
     local combatType, togglesInOut = CombatType.INCOMING, settingsToggles.incoming
-    abilityName = abilityNameCache[abilityId]
 
-    -- Memory optimization: Cache Effects table lookups
-    local effectOverrideByName = EffectOverrideByName[abilityId]
-    local effectZoneOverride = ZoneDataOverride[abilityId]
-    local effectMapOverride = MapDataOverride[abilityId]
-    local effectHideSCT = EffectHideSCT[abilityId]
-
-    local sourceNameCheck = sourceNameCache[sourceName]
-
-    -- Handle effects that override by UnitName
-    if effectOverrideByName then
-        if effectOverrideByName[sourceNameCheck] then
-            if effectOverrideByName[sourceNameCheck].name then
-                abilityName = effectOverrideByName[sourceNameCheck].name
-            end
-        end
-    end
-
-    -- Handle effects that override by ZoneId (using cached zone data)
-    if effectZoneOverride then
-        if effectZoneOverride[cachedZoneData.zoneId] then
-            if effectZoneOverride[cachedZoneData.zoneId].name then
-                abilityName = effectZoneOverride[cachedZoneData.zoneId].name
-            end
-        end
-        if effectZoneOverride[cachedZoneData.zoneName] then
-            if effectZoneOverride[cachedZoneData.zoneName].name then
-                abilityName = effectZoneOverride[cachedZoneData.zoneName].name
-            end
-        end
-    end
-
-    -- Override name, icon, or hide based on Map Name (using cached map data)
-    if effectMapOverride then
-        if effectMapOverride[cachedZoneData.mapName] then
-            if effectMapOverride[cachedZoneData.mapName].name then
-                abilityName = effectMapOverride[cachedZoneData.mapName].name
-            end
-        end
-    end
+    -- Resolve ability name with all contextual overrides
+    abilityName = ResolveAbilityName(abilityId, sourceName)
 
     -- Bail out if the abilityId is on the Blacklist Table
     if Settings.blacklist[abilityId] or Settings.blacklist[abilityName] then
         return
     end
 
-    ---------------------------------------------------------------------------------------------------------------------------------------
-    -- //RESULTS//--
-    ---------------------------------------------------------------------------------------------------------------------------------------
-    -- Memory optimization: Use pre-computed cache instead of 24+ table lookups
-    local rt = resultTypeCache[result]
-    local isDamage, isDamageCritical, isDot, isDotCritical = rt.isDamage, rt.isDamageCritical, rt.isDot, rt.isDotCritical
-    local isHealing, isHealingCritical, isHot, isHotCritical = rt.isHealing, rt.isHealingCritical, rt.isHot, rt.isHotCritical
-    local isEnergize, isDrain = rt.isEnergize, rt.isDrain
-    local isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted = rt.isMiss, rt.isImmune, rt.isParried, rt.isReflected, rt.isDamageShield, rt.isDodged, rt.isBlocked, rt.isInterrupted
-    local isDisoriented, isFeared, isOffBalanced, isSilenced, isStunned, isCharmed = rt.isDisoriented, rt.isFeared, rt.isOffBalanced, rt.isSilenced, rt.isStunned, rt.isCharmed
-    -- Overflow
-    local overkill, overheal = (settingsCommon.overkill and overflow > 0 and (isDamage or isDamageCritical or isDot or isDotCritical)), (settingsCommon.overheal and overflow > 0 and (isHealing or isHealingCritical or isHot or isHotCritical))
-    ---------------------------------------------------------------------------------------------------------------------------------------
-    -- //COMBAT TRIGGERS//--
-    ---------------------------------------------------------------------------------------------------------------------------------------
-    if
-       (isDodged and togglesInOut.showDodged)
-    or (isMiss and togglesInOut.showMiss)
-    or (isImmune and togglesInOut.showImmune)
-    or (isReflected and togglesInOut.showReflected)
-    or (isDamageShield and togglesInOut.showDamageShield)
-    or (isParried and togglesInOut.showParried)
-    or (isBlocked and togglesInOut.showBlocked)
-    or (isInterrupted and togglesInOut.showInterrupted)
-    or (isDot and togglesInOut.showDot and (hitValue > 0 or overkill))
-    or (isDotCritical and togglesInOut.showDot and (hitValue > 0 or overkill))
-    or (isHot and togglesInOut.showHot and (hitValue > 0 or overheal))
-    or (isHotCritical and togglesInOut.showHot and (hitValue > 0 or overheal))
-    or (isHealing and togglesInOut.showHealing and (hitValue > 0 or overheal))
-    or (isHealingCritical and togglesInOut.showHealing and (hitValue > 0 or overheal))
-    or (isDamage and togglesInOut.showDamage and (hitValue > 0 or overkill))
-    or (isDamageCritical and togglesInOut.showDamage and (hitValue > 0 or overkill))
-    or (isEnergize and togglesInOut.showEnergize and (powerType == COMBAT_MECHANIC_FLAGS_MAGICKA or powerType == COMBAT_MECHANIC_FLAGS_STAMINA))
-    or (isEnergize and togglesInOut.showUltimateEnergize and powerType == COMBAT_MECHANIC_FLAGS_ULTIMATE)
-    or (isDrain and togglesInOut.showDrain and (powerType == COMBAT_MECHANIC_FLAGS_MAGICKA or powerType == COMBAT_MECHANIC_FLAGS_STAMINA))
-    then
+    -- Check if ability should be hidden from SCT
+    local effectHideSCT = EffectHideSCT[abilityId]
+
+    -- Memory optimization: Use pre-computed cache to get all event flags
+    local flags = resultTypeCache[result]
+
+    -- Calculate overflow conditions
+    local overkill = settingsCommon.overkill and overflow > 0 and
+        (flags.isDamage or flags.isDamageCritical or flags.isDot or flags.isDotCritical)
+    local overheal = settingsCommon.overheal and overflow > 0 and
+        (flags.isHealing or flags.isHealingCritical or flags.isHot or flags.isHotCritical)
+
+    -- Combat event processing
+    if ShouldShowCombatEvent(flags, togglesInOut, powerType, hitValue, overkill, overheal) then
         if overkill or overheal then
             hitValue = hitValue + overflow
         end
-        if not effectHideSCT then                                                                          -- Check if ability is on the hide list
-            if (settingsToggles.inCombatOnly and isWarned.combat) or not settingsToggles.inCombatOnly then -- Check if 'in combat only' is ticked
-                self:TriggerEvent(EventType.COMBAT, combatType, powerType, hitValue, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
+        if not effectHideSCT then
+            if (settingsToggles.inCombatOnly and isWarned.combat) or not settingsToggles.inCombatOnly then
+                self:TriggerEvent(EventType.COMBAT, combatType, powerType, hitValue, abilityName, abilityId, damageType, sourceName,
+                                  flags.isDamage, flags.isDamageCritical, flags.isHealing, flags.isHealingCritical, flags.isEnergize, flags.isDrain,
+                                  flags.isDot, flags.isDotCritical, flags.isHot, flags.isHotCritical, flags.isMiss, flags.isImmune, flags.isParried,
+                                  flags.isReflected, flags.isDamageShield, flags.isDodged, flags.isBlocked, flags.isInterrupted)
             end
         end
     end
-    ---------------------------------------------------------------------------------------------------------------------------------------
-    -- //CROWD CONTROL TRIGGERS//--
-    ---------------------------------------------------------------------------------------------------------------------------------------
-    if isWarned.combat then -- Only show CC/Debuff events when in combat
-        -- Disoriented
-        if isDisoriented and togglesInOut.showDisoriented then
-            if isWarned.disoriented then
-                PlaySound(SOUND_ABILITY_FAILED) -- will play a sound every disoriented event afterwards, as any failed action during a CC retriggers the event, causing text flood if buttons are spammed
-            else
-                self:TriggerEvent(EventType.CROWDCONTROL, CrowdControlType.DISORIENTED, combatType)
-                isWarned.disoriented = true
-                LUIE_callLater(function () resetCCWarning("disoriented") end, 1000)
-            end -- 1 second buffer
-        end
-        -- Feared
-        if isFeared and togglesInOut.showFeared then
-            if isWarned.feared then
-                PlaySound(SOUND_ABILITY_FAILED)
-            else
-                self:TriggerEvent(EventType.CROWDCONTROL, CrowdControlType.FEARED, combatType)
-                isWarned.feared = true
-                LUIE_callLater(function () resetCCWarning("feared") end, 1000)
-            end -- 1 second buffer
-        end
-        -- OffBalanced
-        if isOffBalanced and togglesInOut.showOffBalanced then
-            if isWarned.offBalanced then
-                PlaySound(SOUND_ABILITY_FAILED)
-            else
-                self:TriggerEvent(EventType.CROWDCONTROL, CrowdControlType.OFFBALANCED, combatType)
-                isWarned.offBalanced = true
-                LUIE_callLater(function () resetCCWarning("offBalanced") end, 1000)
-            end -- 1 second buffer
-        end
-        -- Silenced
-        if isSilenced and togglesInOut.showSilenced then
-            if isWarned.silenced then
-                PlaySound(SOUND_ABILITY_FAILED)
-            else
-                self:TriggerEvent(EventType.CROWDCONTROL, CrowdControlType.SILENCED, combatType)
-                isWarned.silenced = true
-                LUIE_callLater(function () resetCCWarning("silenced") end, 1000)
-            end -- 1 second buffer
-        end
-        -- Stunned
-        if isStunned and togglesInOut.showStunned then
-            if isWarned.stunned then
-                PlaySound(SOUND_ABILITY_FAILED)
-            else
-                self:TriggerEvent(EventType.CROWDCONTROL, CrowdControlType.STUNNED, combatType)
-                isWarned.stunned = true
-                LUIE_callLater(function () resetCCWarning("stunned") end, 1000)
-            end -- 1 second buffer
-        end
-        -- Charmed
-        if isCharmed and togglesInOut.showCharmed then
-            if isWarned.charmed then
-                PlaySound(SOUND_ABILITY_FAILED)
-            else
-                self:TriggerEvent(EventType.CROWDCONTROL, CrowdControlType.CHARMED, combatType)
-                isWarned.charmed = true
-                LUIE_callLater(function () resetCCWarning("charmed") end, 1000)
-            end -- 1 second buffer
-        end
+
+    -- Crowd control event processing - ONLY call if in combat and ANY CC flag is set
+    -- This guard eliminates ~99% of ProcessCrowdControlEvents calls since most combat events have no CC
+    if isWarned.combat and (flags.isDisoriented or flags.isFeared or flags.isOffBalanced or flags.isSilenced or flags.isStunned or flags.isCharmed) then
+        ProcessCrowdControlEvents(self, flags, togglesInOut, combatType)
     end
 end
 
---- @param result ActionResult
---- @param isError boolean
---- @param abilityName string
---- @param abilityGraphic integer
---- @param abilityActionSlotType ActionSlotType
---- @param sourceName string
---- @param sourceType CombatUnitType
---- @param targetName string
---- @param targetType CombatUnitType
---- @param hitValue integer
---- @param powerType CombatMechanicFlags
---- @param damageType DamageType
---- @param log boolean
---- @param sourceUnitId integer
---- @param targetUnitId integer
---- @param abilityId integer
---- @param overflow integer
+--- Handle outgoing combat events (player as source)<br>
+--- Processes damage, healing, mitigation from player or player pet to other targets<br>
+--- Filters duplicate player-to-player events, checks blacklist, triggers combat text
+--- @param result ActionResult The combat result type (damage, heal, miss, etc.)
+--- @param isError boolean If the combat event represents an error
+--- @param abilityName string Base ability name from game API
+--- @param abilityGraphic integer Ability visual effect ID
+--- @param abilityActionSlotType ActionSlotType The action slot type
+--- @param sourceName string Name of the source unit (player/pet)
+--- @param sourceType CombatUnitType Type of source unit
+--- @param targetName string Name of target unit
+--- @param targetType CombatUnitType Type of target unit
+--- @param hitValue integer Amount of damage/healing
+--- @param powerType CombatMechanicFlags Resource type (health, magicka, stamina, ultimate)
+--- @param damageType DamageType Type of damage (physical, magic, etc.)
+--- @param log boolean If this should be logged
+--- @param sourceUnitId integer Unit ID of source
+--- @param targetUnitId integer Unit ID of target
+--- @param abilityId integer The ability ID
+--- @param overflow integer Overkill/overheal amount
 function CombatTextCombatEventListener:OnCombatOut(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     -- Don't display duplicate messages for events sourced from the player that target the player
     if targetType == COMBAT_UNIT_TYPE_PLAYER or targetType == COMBAT_UNIT_TYPE_PLAYER_PET then
@@ -385,146 +421,70 @@ function CombatTextCombatEventListener:OnCombatOut(result, isError, abilityName,
     local Settings = LUIE.CombatText.SV
     local settingsCommon, settingsToggles = Settings.common, Settings.toggles
     local combatType, togglesInOut = CombatType.OUTGOING, settingsToggles.outgoing
-    abilityName = abilityNameCache[abilityId]
 
-    -- Memory optimization: Cache Effects table lookup
-    local effectHideSCT = EffectHideSCT[abilityId]
+    -- Use cached ability name (no overrides needed for outgoing - player abilities)
+    abilityName = abilityNameCache[abilityId]
 
     -- Bail out if the abilityId is on the Blacklist Table
     if Settings.blacklist[abilityId] or Settings.blacklist[abilityName] then
         return
     end
 
-    ---------------------------------------------------------------------------------------------------------------------------------------
-    --- *RESULTS*
-    ---------------------------------------------------------------------------------------------------------------------------------------
-    local rt = resultTypeCache[result]
-    local isDamage, isDamageCritical, isDot, isDotCritical = rt.isDamage, rt.isDamageCritical, rt.isDot, rt.isDotCritical
-    local isHealing, isHealingCritical, isHot, isHotCritical = rt.isHealing, rt.isHealingCritical, rt.isHot, rt.isHotCritical
-    local isEnergize, isDrain = rt.isEnergize, rt.isDrain
-    local isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted = rt.isMiss, rt.isImmune, rt.isParried, rt.isReflected, rt.isDamageShield, rt.isDodged, rt.isBlocked, rt.isInterrupted
-    local isDisoriented, isFeared, isOffBalanced, isSilenced, isStunned, isCharmed = rt.isDisoriented, rt.isFeared, rt.isOffBalanced, rt.isSilenced, rt.isStunned, rt.isCharmed
-    -- Overflow
-    local overkill, overheal = (settingsCommon.overkill and overflow > 0 and (isDamage or isDamageCritical or isDot or isDotCritical)), (settingsCommon.overheal and overflow > 0 and (isHealing or isHealingCritical or isHot or isHotCritical))
+    -- Check if ability should be hidden from SCT
+    local effectHideSCT = EffectHideSCT[abilityId]
 
-    ---------------------------------------------------------------------------------------------------------------------------------------
-    --- *COMBAT TRIGGERS*
-    ---------------------------------------------------------------------------------------------------------------------------------------
-    if
-       (isDodged and togglesInOut.showDodged)
-    or (isMiss and togglesInOut.showMiss)
-    or (isImmune and togglesInOut.showImmune)
-    or (isReflected and togglesInOut.showReflected)
-    or (isDamageShield and togglesInOut.showDamageShield)
-    or (isParried and togglesInOut.showParried)
-    or (isBlocked and togglesInOut.showBlocked)
-    or (isInterrupted and togglesInOut.showInterrupted)
-    or (isDot and togglesInOut.showDot and (hitValue > 0 or overkill))
-    or (isDotCritical and togglesInOut.showDot and (hitValue > 0 or overkill))
-    or (isHot and togglesInOut.showHot and (hitValue > 0 or overheal))
-    or (isHotCritical and togglesInOut.showHot and (hitValue > 0 or overheal))
-    or (isHealing and togglesInOut.showHealing and (hitValue > 0 or overheal))
-    or (isHealingCritical and togglesInOut.showHealing and (hitValue > 0 or overheal))
-    or (isDamage and togglesInOut.showDamage and (hitValue > 0 or overkill))
-    or (isDamageCritical and togglesInOut.showDamage and (hitValue > 0 or overkill))
-    or (isEnergize and togglesInOut.showEnergize and (powerType == COMBAT_MECHANIC_FLAGS_MAGICKA or powerType == COMBAT_MECHANIC_FLAGS_STAMINA))
-    or (isEnergize and togglesInOut.showUltimateEnergize and powerType == COMBAT_MECHANIC_FLAGS_ULTIMATE)
-    or (isDrain and togglesInOut.showDrain and (powerType == COMBAT_MECHANIC_FLAGS_MAGICKA or powerType == COMBAT_MECHANIC_FLAGS_STAMINA))
-    then
+    -- Memory optimization: Use pre-computed cache to get all event flags
+    local flags = resultTypeCache[result]
+
+    -- Calculate overflow conditions
+    local overkill = settingsCommon.overkill and overflow > 0 and
+        (flags.isDamage or flags.isDamageCritical or flags.isDot or flags.isDotCritical)
+    local overheal = settingsCommon.overheal and overflow > 0 and
+        (flags.isHealing or flags.isHealingCritical or flags.isHot or flags.isHotCritical)
+
+    -- Combat event processing
+    if ShouldShowCombatEvent(flags, togglesInOut, powerType, hitValue, overkill, overheal) then
         if overkill or overheal then
             hitValue = hitValue + overflow
         end
-        if not effectHideSCT then                                                                          -- Check if ability is on the hide list
-            if (settingsToggles.inCombatOnly and isWarned.combat) or not settingsToggles.inCombatOnly then -- Check if 'in combat only' is ticked
-                self:TriggerEvent(EventType.COMBAT, combatType, powerType, hitValue, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
+        if not effectHideSCT then
+            if (settingsToggles.inCombatOnly and isWarned.combat) or not settingsToggles.inCombatOnly then
+                self:TriggerEvent(EventType.COMBAT, combatType, powerType, hitValue, abilityName, abilityId, damageType, sourceName,
+                                  flags.isDamage, flags.isDamageCritical, flags.isHealing, flags.isHealingCritical, flags.isEnergize, flags.isDrain,
+                                  flags.isDot, flags.isDotCritical, flags.isHot, flags.isHotCritical, flags.isMiss, flags.isImmune, flags.isParried,
+                                  flags.isReflected, flags.isDamageShield, flags.isDodged, flags.isBlocked, flags.isInterrupted)
             end
         end
     end
-    ---------------------------------------------------------------------------------------------------------------------------------------
-    -- //CROWD CONTROL TRIGGERS//--
-    ---------------------------------------------------------------------------------------------------------------------------------------
-    if isWarned.combat then -- Only show CC/Debuff events when in combat
-        -- Disoriented
-        if isDisoriented and togglesInOut.showDisoriented then
-            if isWarned.disoriented then
-                PlaySound(SOUND_ABILITY_FAILED) -- will play a sound every disoriented event afterwards, as any failed action during a CC retriggers the event, causing text flood if buttons are spammed
-            else
-                self:TriggerEvent(EventType.CROWDCONTROL, CrowdControlType.DISORIENTED, combatType)
-                isWarned.disoriented = true
-                LUIE_callLater(function () resetCCWarning("disoriented") end, 1000)
-            end -- 1 second buffer
-        end
-        -- Feared
-        if isFeared and togglesInOut.showFeared then
-            if isWarned.feared then
-                PlaySound(SOUND_ABILITY_FAILED)
-            else
-                self:TriggerEvent(EventType.CROWDCONTROL, CrowdControlType.FEARED, combatType)
-                isWarned.feared = true
-                LUIE_callLater(function () resetCCWarning("feared") end, 1000)
-            end -- 1 second buffer
-        end
-        -- OffBalanced
-        if isOffBalanced and togglesInOut.showOffBalanced then
-            if isWarned.offBalanced then
-                PlaySound(SOUND_ABILITY_FAILED)
-            else
-                self:TriggerEvent(EventType.CROWDCONTROL, CrowdControlType.OFFBALANCED, combatType)
-                isWarned.offBalanced = true
-                LUIE_callLater(function () resetCCWarning("offBalanced") end, 1000)
-            end -- 1 second buffer
-        end
-        -- Silenced
-        if isSilenced and togglesInOut.showSilenced then
-            if isWarned.silenced then
-                PlaySound(SOUND_ABILITY_FAILED)
-            else
-                self:TriggerEvent(EventType.CROWDCONTROL, CrowdControlType.SILENCED, combatType)
-                isWarned.silenced = true
-                LUIE_callLater(function () resetCCWarning("silenced") end, 1000)
-            end -- 1 second buffer
-        end
-        -- Stunned
-        if isStunned and togglesInOut.showStunned then
-            if isWarned.stunned then
-                PlaySound(SOUND_ABILITY_FAILED)
-            else
-                self:TriggerEvent(EventType.CROWDCONTROL, CrowdControlType.STUNNED, combatType)
-                isWarned.stunned = true
-                LUIE_callLater(function () resetCCWarning("stunned") end, 1000)
-            end -- 1 second buffer
-        end
-        -- Charmed
-        if isCharmed and togglesInOut.showCharmed then
-            if isWarned.charmed then
-                PlaySound(SOUND_ABILITY_FAILED)
-            else
-                self:TriggerEvent(EventType.CROWDCONTROL, CrowdControlType.CHARMED, combatType)
-                isWarned.charmed = true
-                LUIE_callLater(function () resetCCWarning("charmed") end, 1000)
-            end -- 1 second buffer
-        end
+
+    -- Crowd control event processing - ONLY call if in combat and ANY CC flag is set
+    -- This guard eliminates ~99% of ProcessCrowdControlEvents calls since most combat events have no CC
+    if isWarned.combat and (flags.isDisoriented or flags.isFeared or flags.isOffBalanced or flags.isSilenced or flags.isStunned or flags.isCharmed) then
+        ProcessCrowdControlEvents(self, flags, togglesInOut, combatType)
     end
 end
 
----------------------------------------------------------------------------------------------------------------------------------------
---- - COMBAT STATE EVENTS & TRIGGERS
----------------------------------------------------------------------------------------------------------------------------------------
----
---- @param inCombat boolean
+--- Handle player combat state changes<br>
+--- Triggers "In Combat" and "Out of Combat" text notifications based on settings<br>
+--- Manages combat state tracking for event filtering
+--- @param inCombat boolean True if entering combat, false if leaving combat
 function CombatTextCombatEventListener:CombatState(inCombat)
     local Settings = LUIE.CombatText.SV
     local settingsToggles = Settings.toggles
 
-    if not isWarned.combat then
+    -- Use the actual inCombat parameter from the game event instead of toggling blindly
+    if inCombat and not isWarned.combat then
+        -- Entering combat
         isWarned.combat = true
         if settingsToggles.showInCombat then
             self:TriggerEvent(EventType.POINT, PointType.IN_COMBAT, nil)
         end
-    else
+    elseif not inCombat and isWarned.combat then
+        -- Leaving combat
         isWarned.combat = false
         if settingsToggles.showOutCombat then
             self:TriggerEvent(EventType.POINT, PointType.OUT_COMBAT, nil)
         end
     end
+    -- else: State hasn't changed (duplicate event or already in correct state) - do nothing
 end

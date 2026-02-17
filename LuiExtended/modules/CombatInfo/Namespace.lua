@@ -26,6 +26,12 @@ CombatInfo.SynergyTracker =
     name = LUIE.name .. "CombatInfo" .. "SynergyTracker",
 }
 
+--- @class (partial) Block
+CombatInfo.Block =
+{
+    name = LUIE.name .. "CombatInfo" .. "Block",
+}
+
 -- Module state
 CombatInfo.Enabled = false
 CombatInfo.SV = {}
@@ -234,5 +240,12 @@ CombatInfo.Defaults =
         priorityOverrides = {},
         cooldownGroups = {},
         blacklist = {},
+    },
+    block =
+    {
+        updateIntervalMs = 10,
+        showRemainingBlocks = false,
+        colorShieldByResource = false,
+        bloodlordEmbracePosition = { left = 1165, top = 275 },
     },
 }

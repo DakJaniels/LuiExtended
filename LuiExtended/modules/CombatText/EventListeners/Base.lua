@@ -6,13 +6,12 @@
 --- @class LuiExtended
 local LUIE = LUIE
 
---- @class (partial) LuiExtended.CombatTextEventListener : ZO_InitializingObject
-local CombatTextEventListener = ZO_InitializingObject:Subclass()
+--- @class (partial) LuiExtended.CombatTextEventListener : ZO_InitializingCallbackObject
+local CombatTextEventListener = ZO_InitializingCallbackObject:Subclass()
 
 --- @class (partial) LuiExtended.CombatTextEventListener
 LUIE.CombatTextEventListener = CombatTextEventListener
 
-local callbackManager = CALLBACK_MANAGER
 local eventManager = EVENT_MANAGER
 
 local moduleName = LUIE.name .. "CombatText"
@@ -20,8 +19,10 @@ local moduleName = LUIE.name .. "CombatText"
 --- @type integer
 local eventPostfix = 1 -- Used to create unique name when registering multiple times to the same game event
 
+--- Initialize event listener with callback support<br>
+--- ZO_InitializingCallbackObject automatically handles callback registry setup
 function CombatTextEventListener:Initialize()
-    -- Base initialization - can be overridden by subclasses
+    -- Base class initialization (no need to manually call ZO_CallbackObject.Initialize)
 end
 
 --- @param event any
@@ -50,7 +51,9 @@ function CombatTextEventListener:RegisterForUpdate(name, timer, func, ...)
     eventManager:RegisterForUpdate(moduleName .. "Event" .. tostring(name) .. "_" .. eventPostfix, timer, func)
 end
 
---- @param ... any
+--- Fire a callback event to all registered listeners<br>
+--- Uses instance-based callback system instead of global CALLBACK_MANAGER
+--- @param ... any Event type and arguments to pass to callbacks
 function CombatTextEventListener:TriggerEvent(...)
-    callbackManager:FireCallbacks(...)
+    self:FireCallbacks(...)
 end

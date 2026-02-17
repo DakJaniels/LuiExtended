@@ -10,7 +10,7 @@ local eventManager = GetEventManager()
 LuiMedia = {}
 LuiMedia.__index = LuiMedia
 LuiMedia.__name = "LuiMedia"
-LuiMedia.__version = 7130
+LuiMedia.__version = 7131
 
 -- -----------------------------------------------------------------------------
 -- Font Name Constants

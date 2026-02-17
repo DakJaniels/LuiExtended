@@ -14,8 +14,8 @@ local poolTypes = LuiData.Data.CombatTextConstants.poolType
 local eventType = LuiData.Data.CombatTextConstants.eventType
 local resourceTypes = LuiData.Data.CombatTextConstants.resourceType
 
-function CombatTextResourceEventViewer:Initialize(poolManager)
-    LUIE.CombatTextEventViewer.Initialize(self, poolManager)
+function CombatTextResourceEventViewer:Initialize(poolManager, eventListener)
+    LUIE.CombatTextEventViewer.Initialize(self, poolManager, eventListener)
     self:RegisterCallback(eventType.RESOURCE, function (...) self:OnEvent(...) end)
     self.locationOffset = 0 -- Simple way to avoid overlapping. When the number of active notes is back to 0, the offset is also reset
     self.activeResources = 0

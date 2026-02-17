@@ -204,7 +204,7 @@ function GroupPotionCooldownsManager.Initialize()
     -- query method is buggy and returns nil/empty data even when cooldowns are active
     lgpc:RegisterForEvent(LibGroupPotionCooldowns.EVENT_GROUP_COOLDOWN_UPDATE, function (unitTag, potionData)
         -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE.Debug("[LUIE] GROUP_COOLDOWN_UPDATE: " .. unitTag .. " isOnCooldown=" .. tostring(potionData.isOnCooldown))
+        --     LUIE:Log("Debug","[LUIE] GROUP_COOLDOWN_UPDATE: " .. unitTag .. " isOnCooldown=" .. tostring(potionData.isOnCooldown))
         -- end
         -- Cache the data for periodic updates
         potionDataCache[unitTag] = potionData
@@ -213,7 +213,7 @@ function GroupPotionCooldownsManager.Initialize()
 
     lgpc:RegisterForEvent(LibGroupPotionCooldowns.EVENT_PLAYER_COOLDOWN_UPDATE, function (unitTag, potionData)
         -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE.Debug("[LUIE] PLAYER_COOLDOWN_UPDATE: " .. unitTag .. " isOnCooldown=" .. tostring(potionData.isOnCooldown))
+        --     LUIE:Log("Debug","[LUIE] PLAYER_COOLDOWN_UPDATE: " .. unitTag .. " isOnCooldown=" .. tostring(potionData.isOnCooldown))
         -- end
         -- Cache the data for periodic updates
         potionDataCache[unitTag] = potionData

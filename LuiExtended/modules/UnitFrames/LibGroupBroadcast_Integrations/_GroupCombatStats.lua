@@ -134,7 +134,7 @@ local function UpdateUltimateDisplay(unitTag, ultData)
     local frameData = Shared.GetFrameData(unitTag)
     if not frameData or not frameData.combatStats then
         -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE.Debug("[LUIE GroupCombatStats] No frameData/combatStats for: " .. tostring(unitTag))
+        --     LUIE:Log("Debug","[LUIE GroupCombatStats] No frameData/combatStats for: " .. tostring(unitTag))
         -- end
         return
     end
@@ -145,7 +145,7 @@ local function UpdateUltimateDisplay(unitTag, ultData)
     local ultValue = ultData.ultValue or 0
 
     -- if LUIE.IsDevDebugEnabled() then
-    --     LUIE.Debug("[LUIE GroupCombatStats] UpdateUltimate: " .. unitTag .. " value=" .. ultValue .. " ult1ID=" .. (ultData.ult1ID or 0) .. " ult1Cost=" .. (ultData.ult1Cost or 0))
+    --     LUIE:Log("Debug","[LUIE GroupCombatStats] UpdateUltimate: " .. unitTag .. " value=" .. ultValue .. " ult1ID=" .. (ultData.ult1ID or 0) .. " ult1Cost=" .. (ultData.ult1Cost or 0))
     -- end
 
     -- Helper to update a single ult icon

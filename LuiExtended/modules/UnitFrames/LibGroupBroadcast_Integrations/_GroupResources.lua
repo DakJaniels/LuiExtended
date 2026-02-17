@@ -173,7 +173,7 @@ local function UpdateResourceBar(unitTag, current, maximum, percentage, powerTyp
     local frameData = Shared.GetFrameData(unitTag)
     if not frameData then
         -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE.Debug("[LUIE GroupResources] No frameData for unitTag: " .. tostring(unitTag))
+        --     LUIE:Log("Debug","[LUIE GroupResources] No frameData for unitTag: " .. tostring(unitTag))
         -- end
         return
     end
@@ -186,13 +186,13 @@ local function UpdateResourceBar(unitTag, current, maximum, percentage, powerTyp
 
     if not resourceData or not resourceData.bar or not resourceData.backdrop then
         -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE.Debug("[LUIE GroupResources] Missing resourceData for " .. unitTag .. " " .. resourceKey)
+        --     LUIE:Log("Debug","[LUIE GroupResources] Missing resourceData for " .. unitTag .. " " .. resourceKey)
         -- end
         return
     end
 
     -- if LUIE.IsDevDebugEnabled() then
-    --     LUIE.Debug("[LUIE GroupResources] UpdateResourceBar: " .. unitTag .. " " .. resourceKey .. " = " .. current .. "/" .. maximum)
+    --     LUIE:Log("Debug","[LUIE GroupResources] UpdateResourceBar: " .. unitTag .. " " .. resourceKey .. " = " .. current .. "/" .. maximum)
     -- end
 
     local bar = resourceData.bar
@@ -273,14 +273,14 @@ function GroupResourcesManager.Initialize()
     -- Register callbacks for resource updates directly with the GroupResources API
     GroupResources:RegisterForMagickaChanges(function (unitTag, unitName, current, maximum, percentage)
         -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE.Debug("[LUIE GroupResources] Magicka callback: " .. tostring(unitTag) .. " " .. tostring(unitName) .. " " .. tostring(current) .. "/" .. tostring(maximum))
+        --     LUIE:Log("Debug","[LUIE GroupResources] Magicka callback: " .. tostring(unitTag) .. " " .. tostring(unitName) .. " " .. tostring(current) .. "/" .. tostring(maximum))
         -- end
         UpdateResourceBar(unitTag, current, maximum, percentage, COMBAT_MECHANIC_FLAGS_MAGICKA)
     end)
 
     GroupResources:RegisterForStaminaChanges(function (unitTag, unitName, current, maximum, percentage)
         -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE.Debug("[LUIE GroupResources] Stamina callback: " .. tostring(unitTag) .. " " .. tostring(unitName) .. " " .. tostring(current) .. "/" .. tostring(maximum))
+        --     LUIE:Log("Debug","[LUIE GroupResources] Stamina callback: " .. tostring(unitTag) .. " " .. tostring(unitName) .. " " .. tostring(current) .. "/" .. tostring(maximum))
         -- end
         UpdateResourceBar(unitTag, current, maximum, percentage, COMBAT_MECHANIC_FLAGS_STAMINA)
     end)

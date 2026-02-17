@@ -142,7 +142,7 @@ function InfoPanel.ApplyFont()
     if not fontName or fontName == "" then
         fontName = "LUIE Default Font"
         -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE.Debug(GetString(LUIE_STRING_ERROR_FONT))
+        --     LUIE:Log("Debug",GetString(LUIE_STRING_ERROR_FONT))
         -- end
     end
 

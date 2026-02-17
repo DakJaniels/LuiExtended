@@ -15,8 +15,8 @@ LUIE.CombatTextCombatEllipseEventViewer = CombatTextCombatEllipseEventViewer
 local CombatTextConstants = LuiData.Data.CombatTextConstants
 local AbbreviateNumber = LUIE.AbbreviateNumber
 local string_format = string.format
-function CombatTextCombatEllipseEventViewer:Initialize(poolManager)
-    LUIE.CombatTextEventViewer.Initialize(self, poolManager)
+function CombatTextCombatEllipseEventViewer:Initialize(poolManager, eventListener)
+    LUIE.CombatTextEventViewer.Initialize(self, poolManager, eventListener)
     self:RegisterCallback(CombatTextConstants.eventType.COMBAT, function (...) self:OnEvent(...) end)
     self.eventBuffer = {}
     self.activeControls = { [CombatTextConstants.combatType.OUTGOING] = {}, [CombatTextConstants.combatType.INCOMING] = {} }
@@ -36,7 +36,18 @@ function CombatTextCombatEllipseEventViewer:OnEvent(combatType, powerType, value
         local eventKey = abilityId .. "_" .. combatType .. "_" .. damageType .. "_" .. (isDamage and "1" or isDamageCritical and "2" or isHealing and "3" or isHealingCritical and "4" or isDot and "5" or isDotCritical and "6" or isHot and "7" or isHotCritical and "8" or isMiss and "9" or isImmune and "10" or isParried and "11" or isReflected and "12" or isDamageShield and "13" or isDodged and "14" or isBlocked and "15" or isInterrupted and "16" or isEnergize and "17" or isDrain and "18" or "0")
         if self.eventBuffer[eventKey] == nil then
             self.eventBuffer[eventKey] = { value = value, hits = 1 }
-            local throttleTime = self:GetThrottleTime(Settings, isDamage, isDamageCritical, isDot, isDotCritical, isHealing, isHealingCritical, isHot, isHotCritical)
+            -- Use cached table instead of allocating new one
+            local flags = LUIE.GetCachedTable()
+            flags.isDamage = isDamage
+            flags.isDamageCritical = isDamageCritical
+            flags.isDot = isDot
+            flags.isDotCritical = isDotCritical
+            flags.isHealing = isHealing
+            flags.isHealingCritical = isHealingCritical
+            flags.isHot = isHot
+            flags.isHotCritical = isHotCritical
+            local throttleTime = self:GetThrottleTime(Settings, flags)
+            LUIE.RecycleTable(flags) -- Return to cache immediately after use
             LUIE_callLater(function ()
                                self:ViewFromEventBuffer(combatType, powerType, eventKey, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
                            end, throttleTime)
@@ -63,7 +74,28 @@ function CombatTextCombatEllipseEventViewer:View(combatType, powerType, value, a
 
     local control, controlPoolKey = self.poolManager:GetPoolObject(CombatTextConstants.poolType.CONTROL)
 
-    local textFormat, fontSize, textColor = self:GetTextAttributes(powerType, damageType, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
+    -- Use cached table instead of allocating new one
+    local flags = LUIE.GetCachedTable()
+    flags.isDamage = isDamage
+    flags.isDamageCritical = isDamageCritical
+    flags.isDot = isDot
+    flags.isDotCritical = isDotCritical
+    flags.isHealing = isHealing
+    flags.isHealingCritical = isHealingCritical
+    flags.isHot = isHot
+    flags.isHotCritical = isHotCritical
+    flags.isEnergize = isEnergize
+    flags.isDrain = isDrain
+    flags.isMiss = isMiss
+    flags.isImmune = isImmune
+    flags.isParried = isParried
+    flags.isReflected = isReflected
+    flags.isDamageShield = isDamageShield
+    flags.isDodged = isDodged
+    flags.isBlocked = isBlocked
+    flags.isInterrupted = isInterrupted
+    local textFormat, fontSize, textColor = self:GetTextAttributes(powerType, damageType, flags)
+    LUIE.RecycleTable(flags) -- Return to cache immediately after use
     if hits > 1 and Settings.toggles.showThrottleTrailer then
         value = string_format("%s (%d)", value, hits)
     end

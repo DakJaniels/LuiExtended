@@ -789,7 +789,7 @@ end
 --- @param unitTag string
 function UnitFrames.OnUnitCreated(eventId, unitTag)
     -- if LUIE.IsDevDebugEnabled() then
-    --     LUIE.Debug(string_format("[%s] OnUnitCreated: %s (%s)", GetTimeString(), unitTag, GetUnitName(unitTag)))
+    --     LUIE:Log("Debug",string_format("[%s] OnUnitCreated: %s (%s)", GetTimeString(), unitTag, GetUnitName(unitTag)))
     -- end
     -- Create on-fly UI controls for default UI group member and reread his values
     if UnitFrames.DefaultFrames.SmallGroup then
@@ -826,7 +826,7 @@ end
 --- @param unitTag string
 function UnitFrames.OnUnitDestroyed(eventId, unitTag)
     -- if LUIE.IsDevDebugEnabled() then
-    --     LUIE.Debug(string_format("[%s] OnUnitDestroyed: %s (%s)", GetTimeString(), unitTag, GetUnitName(unitTag)))
+    --     LUIE:Log("Debug",string_format("[%s] OnUnitDestroyed: %s (%s)", GetTimeString(), unitTag, GetUnitName(unitTag)))
     -- end
     -- Make sure we do not try to update bars on this unitTag before full group update is complete
     if "group" == (zo_strsub(unitTag, 0, 5)) then
@@ -955,7 +955,7 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
                     or (reactionType == UNIT_REACTION_HOSTILE and isMonster)
                 local shouldHide = IsUnitDead("reticleover") and isNPC
                 -- if LUIE.IsDevDebugEnabled() then
-                --     LUIE.Debug("reactionType:%d isMonster:%s isNPC:%s", reactionType, tostring(isMonster), tostring(isNPC))
+                --     LUIE:Log("Debug","reactionType:%d isMonster:%s isNPC:%s", reactionType, tostring(isMonster), tostring(isNPC))
                 -- end
                 UnitFrames.CustomFrames["reticleover"].control:SetHidden(shouldHide)
             end
@@ -2313,11 +2313,11 @@ function UnitFrames.CustomFramesSetPositions()
     --     local uiGlobalScale = GetUIGlobalScale()
     --     local pixelWidth = screenWidth * uiGlobalScale
     --     local pixelHeight = screenHeight * uiGlobalScale
-    --     LUIE.Debug("Unit Frames: UI Canvas " .. screenWidth .. LUIE_TINY_X_FORMATTER .. screenHeight .. " UI units (" .. string_format("%.0f", pixelWidth) .. LUIE_TINY_X_FORMATTER .. string_format("%.0f", pixelHeight) .. " pixels, scale: " .. string_format("%.2f", uiGlobalScale) .. ")")
-    --     LUIE.Debug("Unit Frames: Aspect ratio: " .. string_format("%.4f", aspectRatio) .. (scaleFactors.isMultiMonitorLikely and " [EXTREME ASPECT RATIO - Capped to prevent multi-monitor spread]" or ""))
-    --     LUIE.Debug("Unit Frames: Width scale: " .. string_format("%.3f", scaleFactors.widthResolutionScale) .. ", Height scale: " .. string_format("%.3f", scaleFactors.heightResolutionScale) .. ", Aspect ratio scale: " .. string_format("%.3f", scaleFactors.aspectRatioScale))
-    --     LUIE.Debug("Unit Frames: Player frame dimensions: " .. frameDimensions.player.width .. "x" .. frameDimensions.player.height .. " UI units (base: 300x30)")
-    --     LUIE.Debug("Unit Frames: Player calculated position: " .. string_format("%.1f", coords.player[1]) .. ", " .. string_format("%.1f", coords.player[2]) .. " UI units")
+    --     LUIE:Log("Debug","Unit Frames: UI Canvas " .. screenWidth .. LUIE_TINY_X_FORMATTER .. screenHeight .. " UI units (" .. string_format("%.0f", pixelWidth) .. LUIE_TINY_X_FORMATTER .. string_format("%.0f", pixelHeight) .. " pixels, scale: " .. string_format("%.2f", uiGlobalScale) .. ")")
+    --     LUIE:Log("Debug","Unit Frames: Aspect ratio: " .. string_format("%.4f", aspectRatio) .. (scaleFactors.isMultiMonitorLikely and " [EXTREME ASPECT RATIO - Capped to prevent multi-monitor spread]" or ""))
+    --     LUIE:Log("Debug","Unit Frames: Width scale: " .. string_format("%.3f", scaleFactors.widthResolutionScale) .. ", Height scale: " .. string_format("%.3f", scaleFactors.heightResolutionScale) .. ", Aspect ratio scale: " .. string_format("%.3f", scaleFactors.aspectRatioScale))
+    --     LUIE:Log("Debug","Unit Frames: Player frame dimensions: " .. frameDimensions.player.width .. "x" .. frameDimensions.player.height .. " UI units (base: 300x30)")
+    --     LUIE:Log("Debug","Unit Frames: Player calculated position: " .. string_format("%.1f", coords.player[1]) .. ", " .. string_format("%.1f", coords.player[2]) .. " UI units")
     -- end
 
     if UnitFrames.SV.PlayerFrameOptions == 1 then

@@ -16,8 +16,8 @@ local eventType = LuiData.Data.CombatTextConstants.eventType
 local combatType = LuiData.Data.CombatTextConstants.combatType
 local crowdControlTypes = LuiData.Data.CombatTextConstants.crowdControlType
 
-function CombatTextCrowdControlEventViewer:Initialize(poolManager)
-    LUIE.CombatTextEventViewer.Initialize(self, poolManager)
+function CombatTextCrowdControlEventViewer:Initialize(poolManager, eventListener)
+    LUIE.CombatTextEventViewer.Initialize(self, poolManager, eventListener)
     self:RegisterCallback(eventType.CROWDCONTROL, function (...) self:OnEvent(...) end)
     self.locationOffset = { [combatType.OUTGOING] = 0, [combatType.INCOMING] = 0 }
     self.activeCrowdControls = { [combatType.OUTGOING] = 0, [combatType.INCOMING] = 0 }

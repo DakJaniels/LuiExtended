@@ -1,8 +1,8 @@
 ## Title: LuiMedia
 ## Author: ArtOfShred, DakJaniels, psypanda, Saenic & SpellBuilder
-## Version: 7.1.3.0
+## Version: 7.1.3.1
 ## APIVersion: 101048 101049
-## AddOnVersion: 7130
+## AddOnVersion: 7131
 ## Description: Provides custom media (fonts, sounds, textures) for LuiExtended.
 ## DependsOn: LibMediaProvider>=36
 ## IsLibrary: true

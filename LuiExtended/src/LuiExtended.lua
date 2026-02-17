@@ -28,8 +28,8 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.1.4.8"
-LUIE.addonVersion = 7148
+LUIE.version = "7.1.4.9"
+LUIE.addonVersion = 7149
 LUIE.author = "@dack_janiels[PC]"
 LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
@@ -111,6 +111,56 @@ LUIE.Sounds = LuiMedia.GetSounds()
 LUIE.StatusbarTextures = LuiMedia.GetStatusbarTextures()
 
 -- -----------------------------------------------------------------------------
+-- GLOBAL TABLE CACHE SYSTEM
+-- Provides high-performance table recycling across all LUIE modules
+-- Eliminates thousands of table allocations per second in hot code paths
+-- -----------------------------------------------------------------------------
+
+--- @type table<table, boolean>
+local g_tableCache = setmetatable({}, {__mode='k'})  -- Weak keys for automatic cleanup
+
+--- Get a recycled table from cache or create a new one
+--- Use this in hot code paths (event handlers, update loops) to eliminate allocations
+--- @return table t A clean table ready for use
+--- @usage local myTable = LUIE.GetCachedTable()
+---        myTable.foo = "bar"
+---        -- ... use table ...
+---        LUIE.RecycleTable(myTable)  -- Return to cache when done
+function LUIE.GetCachedTable()
+    local t = next(g_tableCache)
+    if t then
+        g_tableCache[t] = nil
+        -- Clear any remaining contents
+        for k in pairs(t) do
+            t[k] = nil
+        end
+    else
+        t = {}
+    end
+    return t
+end
+
+--- Return a table to the cache for future reuse
+--- Always call this when you're done with a cached table to enable recycling
+--- @param t table The table to recycle
+--- @usage LUIE.RecycleTable(myTable)
+function LUIE.RecycleTable(t)
+    if t then
+        g_tableCache[t] = true
+    end
+end
+
+--- Get current cache statistics (for debugging/profiling)
+--- @return number count Number of tables currently in cache
+function LUIE.GetTableCacheStats()
+    local count = 0
+    for _ in pairs(g_tableCache) do
+        count = count + 1
+    end
+    return count
+end
+
+-- -----------------------------------------------------------------------------
 local function readonlytable(t)
     return setmetatable({},
                         {
@@ -151,8 +201,8 @@ local DEVS = readonlytable
         },
         ["@dack_janiels"] =
         {
-            enabled = true,
-            debug = true,
+            enabled = false,
+            debug = false,
         },
         ["@dack_janiels.luie"] =
         {

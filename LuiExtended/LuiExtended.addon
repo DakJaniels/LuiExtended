@@ -2,10 +2,10 @@
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101048 101049
-## Version: 7.1.4.8
-## AddOnVersion: 7148
+## Version: 7.1.4.9
+## AddOnVersion: 7149
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
-## DependsOn: LuiMedia>=7130 LuiData>=7203
+## DependsOn: LuiMedia>=7131 LuiData>=7204
 ## PCDependsOn: LibAddonMenu-2.0>=41
 ## ConsoleDependsOn: LibHarvensAddonSettings>=20102 LibCombatAlerts LibConsoleDialogs
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705 CrutchAlerts>=20502
@@ -114,19 +114,30 @@ modules/CombatInfo/Namespace.lua
 modules/CombatInfo/AbilityAlerts.lua
 modules/CombatInfo/CrowdControlTracker.lua
 modules/CombatInfo/SynergyTracker.lua
+modules/CombatInfo/Block.lua
 modules/CombatInfo/CombatInfo.lua
 
 # Modules - Info Panel
 modules/InfoPanel/InfoPanel.lua
 
 # Modules - Spell Cast Buffs
+modules/SpellCastBuffs/_Namespace.lua
+modules/SpellCastBuffs/_Collectibles.lua
+modules/SpellCastBuffs/_ContextFunctions.lua
+modules/SpellCastBuffs/_Cyrodiil.lua
+modules/SpellCastBuffs/_Debug.lua
+modules/SpellCastBuffs/_DevDebug.lua
+modules/SpellCastBuffs/_ListFunctions.lua
+modules/SpellCastBuffs/_OnCombatAddNameEvent.lua
+modules/SpellCastBuffs/_OnCombatEventIn.lua
+modules/SpellCastBuffs/_OnCombatEventOut.lua
+modules/SpellCastBuffs/_OnEffectChanged.lua
+modules/SpellCastBuffs/_OnEffectChangedGround.lua
+modules/SpellCastBuffs/_OnUpdate.lua
+modules/SpellCastBuffs/_ReloadEffects.lua
+modules/SpellCastBuffs/_Stealth.lua
+modules/SpellCastBuffs/_Werewolf.lua
 modules/SpellCastBuffs/SpellCastBuffs.lua
-modules/SpellCastBuffs/Collectibles.lua
-modules/SpellCastBuffs/Cyrodiil.lua
-modules/SpellCastBuffs/Stealth.lua
-modules/SpellCastBuffs/Debug.lua
-modules/SpellCastBuffs/DevDebug.lua
-modules/SpellCastBuffs/Werewolf.lua
 
 # Modules - Slash Commands
 modules/SlashCommands/SlashCommands.lua
