@@ -152,42 +152,42 @@ function LUIE.HookActionButton()
         self:UpdateCooldown(FORCE_SUPPRESS_COOLDOWN_SOUND)
     end
 
-    ActionButton["ApplyStyle"] = function (self, template)
-        WINDOW_MANAGER:ApplyTemplateToControl(self.slot, template)
+    -- ActionButton["ApplyStyle"] = function (self, template)
+    --     WINDOW_MANAGER:ApplyTemplateToControl(self.slot, template)
 
-        local isGamepad = IsInGamepadPreferredMode()
-        self.button:SetNormalTexture(isGamepad and "" or ACTION_BUTTON_BORDERS.normal)
-        self.button:SetPressedTexture(isGamepad and "" or ACTION_BUTTON_BORDERS.mouseDown)
-        self.countText:SetFont(isGamepad and "ZoFontGamepadBold27" or "ZoFontGameShadow")
-        self:ApplySwapAnimationStyle()
+    --     local isGamepad = IsInGamepadPreferredMode()
+    --     self.button:SetNormalTexture(isGamepad and "" or ACTION_BUTTON_BORDERS.normal)
+    --     self.button:SetPressedTexture(isGamepad and "" or ACTION_BUTTON_BORDERS.mouseDown)
+    --     self.countText:SetFont(isGamepad and "ZoFontGamepadBold27" or "ZoFontGameShadow")
+    --     self:ApplySwapAnimationStyle()
 
-        if ZO_ActionBar_IsUltimateSlot(self:GetSlot(), self:GetHotbarCategory()) then
-            local decoration = self.slot:GetNamedChild("Decoration")
-            if decoration then
-                decoration:SetHidden(isGamepad)
-            end
-        end
+    --     if ZO_ActionBar_IsUltimateSlot(self:GetSlot(), self:GetHotbarCategory()) then
+    --         local decoration = self.slot:GetNamedChild("Decoration")
+    --         if decoration then
+    --             decoration:SetHidden(isGamepad)
+    --         end
+    --     end
 
-        if self.showingCooldown then
-            self.cooldown:SetHidden(isGamepad)
+    --     if self.showingCooldown then
+    --         self.cooldown:SetHidden(isGamepad)
 
-            if isGamepad then
-                local slotNum = self:GetSlot()
-                local hotbarCategory = self:GetHotbarCategory()
-                local remain = GetSlotCooldownInfo(slotNum, hotbarCategory)
-                self:PlayAbilityUsedBounce(BOUNCE_DURATION_MS + remain)
+    --         if isGamepad then
+    --             local slotNum = self:GetSlot()
+    --             local hotbarCategory = self:GetHotbarCategory()
+    --             local remain = GetSlotCooldownInfo(slotNum, hotbarCategory)
+    --             self:PlayAbilityUsedBounce(BOUNCE_DURATION_MS + remain)
 
-                if not self.itemQtyFailure then
-                    self.icon:SetDesaturation(0)
-                end
-            else
-                self:ResetBounceAnimation()
-            end
-        else
-            self:ResetBounceAnimation()
-        end
+    --             if not self.itemQtyFailure then
+    --                 self.icon:SetDesaturation(0)
+    --             end
+    --         else
+    --             self:ResetBounceAnimation()
+    --         end
+    --     else
+    --         self:ResetBounceAnimation()
+    --     end
 
-        self:SetCooldownEdgeState(self.showingCooldown)
-        self:UpdateUsable()
-    end
+    --     self:SetCooldownEdgeState(self.showingCooldown)
+    --     self:UpdateUsable()
+    -- end
 end
