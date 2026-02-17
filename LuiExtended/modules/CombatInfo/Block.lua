@@ -35,8 +35,8 @@ local BLOODLORD_EMBRACE_ENERGIZE_ABILITY_ID = 139914
 local BLOODLORD_EMBRACE_EFFECT_FADE_GRACE_MS = 200
 local BLOODLORD_EMBRACE_MIN_SET_PIECES = 1
 local BLOODLORD_EMBRACE_ABILITY_ICON_SIZE = 50
-local BLOODLORD_EMBRACE_BORDER_INSET = -6
-local BLOODLORD_EMBRACE_BORDER_SIZE = 62
+local BLOODLORD_EMBRACE_BORDER_INSET = -2
+local BLOODLORD_EMBRACE_BORDER_SIZE = 54
 local PANEL_WIDTH = 130
 local PANEL_HEIGHT = 30
 local PANEL_PADDING = 5
@@ -109,83 +109,12 @@ function Block.RefreshBlockCost()
         return
     end
 
-    local activeWeaponPair = GetActiveWeaponPairInfo()
-    local offHandSlot = (activeWeaponPair == 1) and EQUIP_SLOT_OFF_HAND or EQUIP_SLOT_BACKUP_OFF
-    local mainHandSlot = (activeWeaponPair == 1) and EQUIP_SLOT_MAIN_HAND or EQUIP_SLOT_BACKUP_MAIN
-
-    -- Sturdy trait (body + active off-hand)
-    local sturdyMultiplier = 1
-    local bodySlots =
-    {
-        offHandSlot,
-        EQUIP_SLOT_HEAD,
-        EQUIP_SLOT_SHOULDERS,
-        EQUIP_SLOT_CHEST,
-        EQUIP_SLOT_WAIST,
-        EQUIP_SLOT_LEGS,
-        EQUIP_SLOT_HAND,
-        EQUIP_SLOT_FEET,
-    }
-    for _, slotIndex in pairs(bodySlots) do
-        local link = GetItemLink(BAG_WORN, slotIndex, LINK_STYLE_DEFAULT)
-        local traitType, traitDesc = GetItemLinkTraitInfo(link)
-        if traitType == ITEM_TRAIT_TYPE_ARMOR_STURDY and traitDesc then
-            local s1, s2 = string.find(traitDesc, "%d%.%d")
-            local value = tonumber(s1 and string.sub(traitDesc, s1, s2) or string.match(traitDesc, "[0-9]+"))
-            if value then
-                sturdyMultiplier = sturdyMultiplier - value / 100
-            end
-        end
-    end
-
-    -- Bracing enchant (jewelry)
-    local bracingFlatReduction = 0
-    local jewelrySlots = { EQUIP_SLOT_NECK, EQUIP_SLOT_RING1, EQUIP_SLOT_RING2 }
-    for _, slotIndex in pairs(jewelrySlots) do
-        local _, enchantName, enchantDesc = GetItemLinkEnchantInfo(GetItemLink(BAG_WORN, slotIndex, LINK_STYLE_DEFAULT))
-        if enchantName == "Bracing Enchantment" and enchantDesc then
-            local s1, s2 = string.find(enchantDesc, "[0-9]+")
-            if s1 then
-                local value = tonumber(string.sub(enchantDesc, s1, s2))
-                if value then
-                    bracingFlatReduction = bracingFlatReduction + value
-                end
-            end
-        end
-    end
-
-    -- Weapon passives and slotted ability (Frost Staff or Shield)
-    local passiveMultiplier = 1
-    local abilityMultiplier = 1
-    local mainWeaponType = GetItemWeaponType(BAG_WORN, mainHandSlot)
-    local offWeaponType = GetItemWeaponType(BAG_WORN, offHandSlot)
-
-    if mainWeaponType == WEAPONTYPE_FROST_STAFF then
-        local upgradeInfo = GetSkillAbilityUpgradeInfo(SKILL_TYPE_WEAPON, 5, 10)
-        if upgradeInfo then
-            passiveMultiplier = 1 - (upgradeInfo * 18) / 100
-        end
-    elseif offWeaponType == WEAPONTYPE_SHIELD then
-        local upgradeInfo = GetSkillAbilityUpgradeInfo(SKILL_TYPE_WEAPON, 2, 7)
-        if upgradeInfo then
-            passiveMultiplier = 1 - (upgradeInfo * 18) / 100
-        end
-        local defensivePostureAbilityId = GetSkillAbilityId(SKILL_TYPE_WEAPON, 2, 4, true)
-        local hotbarCategory = GetActiveHotbarCategory()
-        for slot = 3, 7 do
-            if GetSlotTrueBoundId(slot, hotbarCategory) == defensivePostureAbilityId then
-                abilityMultiplier = abilityMultiplier - 8 / 100
-            end
-        end
-    end
-
-    -- Champion points (block cost reduction star)
-    local cpSpent = GetNumPointsSpentOnChampionSkill(8) * 0.01
-    local cpMultiplier = 1 - zo_floor(0.25 * cpSpent * (2 - cpSpent) * 100) / 100
-
-    cachedBlockCost = zo_floor((BASE_BLOCK_COST * cpMultiplier - bracingFlatReduction) * sturdyMultiplier * passiveMultiplier * abilityMultiplier)
-    if cachedBlockCost < 1 then
-        cachedBlockCost = 1
+    -- Use the game's advanced stat API instead of manual calculation
+    -- Returns: displayFormat, flatValue, percentValue
+    local _, flatValue = GetAdvancedStatValue(ADVANCED_STAT_DISPLAY_TYPE_BLOCK_COST)
+    
+    if flatValue and flatValue > 0 then
+        cachedBlockCost = flatValue
     end
 end
 
@@ -279,8 +208,8 @@ function Block.OnBlockUpdate()
         Block.remainingBlocksLabel:SetText("")
         return
     end
-    local powerType = staminaRegen > 0 and POWERTYPE_MAGICKA or POWERTYPE_STAMINA
-    local current, _, _ = GetUnitPower("player", powerType)
+    local powerType = staminaRegen > 0 and COMBAT_MECHANIC_FLAGS_MAGICKA or COMBAT_MECHANIC_FLAGS_STAMINA
+    local current, max, effectiveMax = GetUnitPower("player", powerType)
     local numBlocks = (current > 0 and cachedBlockCost > 0) and zo_floor(current / cachedBlockCost) or 0
     Block.remainingBlocksLabel:SetText(tostring(numBlocks))
 end
@@ -289,7 +218,27 @@ end
 -- Event handlers
 -- ---------------------------------------------------------------------------
 
-function Block.OnCombatEvent(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId)
+--- - **EVENT_COMBAT_EVENT **
+---
+--- @param eventId integer
+--- @param result ActionResult
+--- @param isError boolean
+--- @param abilityName string
+--- @param abilityGraphic integer
+--- @param abilityActionSlotType ActionSlotType
+--- @param sourceName string
+--- @param sourceType CombatUnitType
+--- @param targetName string
+--- @param targetType CombatUnitType
+--- @param hitValue integer
+--- @param powerType CombatMechanicFlags
+--- @param damageType DamageType
+--- @param log boolean
+--- @param sourceUnitId integer
+--- @param targetUnitId integer
+--- @param abilityId integer
+--- @param overflow integer
+function Block.OnCombatEvent(eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId,overflow)
     local now = GetGameTimeMilliseconds()
 
     if abilityId == BLOODLORD_EMBRACE_DEBUFF_ABILITY_ID then
@@ -319,7 +268,11 @@ function Block.OnCombatEvent(eventCode, result, isError, abilityName, abilityGra
     end
 end
 
-function Block.OnCombatStateChanged(eventCode, inCombat)
+--- - **EVENT_PLAYER_COMBAT_STATE **
+---
+--- @param eventId integer
+--- @param inCombat boolean
+function Block.OnCombatStateChanged(eventId, inCombat)
     if inCombat then
         bloodlordEmbraceTotalMagickaReturned = 0
         if Block.bloodlordGui and Block.bloodlordGui.magickaLabel then
@@ -330,18 +283,37 @@ function Block.OnCombatStateChanged(eventCode, inCombat)
     end
 end
 
-function Block.OnInventorySlotUpdate(eventCode, bagId, slotId, isNewItem, itemSound, updateReason, countChange)
-    if bagId ~= BAG_WORN or updateReason ~= 0 then
+--- - **EVENT_INVENTORY_SINGLE_SLOT_UPDATE **
+---
+--- @param eventId integer
+--- @param bagId Bag
+--- @param slotIndex integer
+--- @param isNewItem boolean
+--- @param itemSoundCategory ItemUISoundCategory
+--- @param inventoryUpdateReason integer
+--- @param stackCountChange integer
+--- @param triggeredByCharacterName string?
+--- @param triggeredByDisplayName string?
+--- @param isLastUpdateForMessage boolean
+--- @param bonusDropSource BonusDropSource
+function Block.OnInventorySlotUpdate(eventId, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
+    if bagId ~= BAG_WORN or inventoryUpdateReason ~= 0 then
         return
     end
-    if EQUIP_SLOT_EXCLUDE_FROM_ITEM_UPDATE[slotId] then
+    if EQUIP_SLOT_EXCLUDE_FROM_ITEM_UPDATE[slotIndex] then
         return
     end
     Block.DebounceInventory()
 end
 
-function Block.OnActiveHotbarUpdated(eventCode, didChange, shouldUpdate, category)
-    if didChange then
+--- - **EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED **
+---
+--- @param eventId integer
+--- @param didActiveHotbarChange boolean
+--- @param shouldUpdateAbilityAssignments boolean
+--- @param activeHotbarCategory HotBarCategory
+function Block.OnActiveHotbarUpdated(eventId, didActiveHotbarChange, shouldUpdateAbilityAssignments, activeHotbarCategory)
+    if didActiveHotbarChange then
         Block.DebounceActionSlots()
     end
 end
@@ -498,6 +470,7 @@ local function CreateBloodlordEmbraceWindow()
     local pos = CombatInfo.SV.block.bloodlordEmbracePosition or CombatInfo.Defaults.block.bloodlordEmbracePosition
 
     local win = windowManager:CreateTopLevelWindow(moduleName .. "BloodlordEmbrace")
+    win:SetExcludeFromFlexbox(true)
     win:SetClampedToScreen(true)
     win:SetDimensions(BLOODLORD_EMBRACE_WINDOW_WIDTH, BLOODLORD_EMBRACE_WINDOW_HEIGHT)
     win:ClearAnchors()
