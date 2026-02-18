@@ -43,7 +43,6 @@ eventManager:RegisterForEvent(LUIE.name, EVENT_ADD_ON_LOADED, function (eventId,
         -- Initialize Hooks
         LUIE.API_Hooks()
         LUIE.HookActionButton()
-        LUIE.HookSynergy()
         LUIE.InitializeHooksSkillAdvisor()
         LUIE.HookGamePadIcons()
         LUIE.HookGamePadStats()
