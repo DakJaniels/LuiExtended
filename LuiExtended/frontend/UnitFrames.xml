@@ -2986,8 +2986,7 @@
               </Controls>
             </Backdrop>
             <Control name="$(parent)_LibGroupContainer"
-                     hidden="false">
-            </Control>
+                     hidden="false" />
             <Backdrop name="$(parent)_ResourceMagicka"
                       centerColor="66000000"
                       edgeColor="99000000"
@@ -3183,8 +3182,7 @@
               </Controls>
             </Backdrop>
             <Control name="$(parent)_LibGroupContainer"
-                     hidden="false">
-            </Control>
+                     hidden="false" />
             <Backdrop name="$(parent)_ResourceMagicka"
                       centerColor="66000000"
                       edgeColor="99000000"
@@ -3379,8 +3377,7 @@
               </Controls>
             </Backdrop>
             <Control name="$(parent)_LibGroupContainer"
-                     hidden="false">
-            </Control>
+                     hidden="false" />
             <Backdrop name="$(parent)_ResourceMagicka"
                       centerColor="66000000"
                       edgeColor="99000000"
@@ -3575,8 +3572,7 @@
               </Controls>
             </Backdrop>
             <Control name="$(parent)_LibGroupContainer"
-                     hidden="false">
-            </Control>
+                     hidden="false" />
             <Backdrop name="$(parent)_ResourceMagicka"
                       centerColor="66000000"
                       edgeColor="99000000"
@@ -3771,8 +3767,7 @@
               </Controls>
             </Backdrop>
             <Control name="$(parent)_LibGroupContainer"
-                     hidden="false">
-            </Control>
+                     hidden="false" />
             <Backdrop name="$(parent)_ResourceMagicka"
                       centerColor="66000000"
                       edgeColor="99000000"
@@ -3967,8 +3962,7 @@
               </Controls>
             </Backdrop>
             <Control name="$(parent)_LibGroupContainer"
-                     hidden="false">
-            </Control>
+                     hidden="false" />
             <Backdrop name="$(parent)_ResourceMagicka"
                       centerColor="66000000"
                       edgeColor="99000000"
@@ -4163,8 +4157,7 @@
               </Controls>
             </Backdrop>
             <Control name="$(parent)_LibGroupContainer"
-                     hidden="false">
-            </Control>
+                     hidden="false" />
             <Backdrop name="$(parent)_ResourceMagicka"
                       centerColor="66000000"
                       edgeColor="99000000"
@@ -4359,8 +4352,7 @@
               </Controls>
             </Backdrop>
             <Control name="$(parent)_LibGroupContainer"
-                     hidden="false">
-            </Control>
+                     hidden="false" />
             <Backdrop name="$(parent)_ResourceMagicka"
                       centerColor="66000000"
                       edgeColor="99000000"
@@ -4555,8 +4547,7 @@
               </Controls>
             </Backdrop>
             <Control name="$(parent)_LibGroupContainer"
-                     hidden="false">
-            </Control>
+                     hidden="false" />
             <Backdrop name="$(parent)_ResourceMagicka"
                       centerColor="66000000"
                       edgeColor="99000000"
@@ -4751,8 +4742,7 @@
               </Controls>
             </Backdrop>
             <Control name="$(parent)_LibGroupContainer"
-                     hidden="false">
-            </Control>
+                     hidden="false" />
             <Backdrop name="$(parent)_ResourceMagicka"
                       centerColor="66000000"
                       edgeColor="99000000"
@@ -4947,8 +4937,7 @@
               </Controls>
             </Backdrop>
             <Control name="$(parent)_LibGroupContainer"
-                     hidden="false">
-            </Control>
+                     hidden="false" />
             <Backdrop name="$(parent)_ResourceMagicka"
                       centerColor="66000000"
                       edgeColor="99000000"
@@ -5143,8 +5132,7 @@
               </Controls>
             </Backdrop>
             <Control name="$(parent)_LibGroupContainer"
-                     hidden="false">
-            </Control>
+                     hidden="false" />
             <Backdrop name="$(parent)_ResourceMagicka"
                       centerColor="66000000"
                       edgeColor="99000000"
