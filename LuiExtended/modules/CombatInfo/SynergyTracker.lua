@@ -332,17 +332,43 @@ function SynergyTracker:UpdateDisplay()
     end
 
     if displayMode == "single" then
-        -- Iterate in priority order and pick the first non-blacklisted available synergy
-        local showName, showIcon, showPrompt
+        -- Build a candidate list and sort by priority, since index order is not priority order.
+        local singleCandidates = {}
         for i = 1, numSynergies do
             local name, icon, prompt, priority, abilityId, canBeUsed = GetSynergyInfoAtIndex(i)
             if abilityId and abilityId > 0 and not Settings.blacklist[abilityId] then
-                showName = name
-                showIcon = icon
-                showPrompt = prompt
-                break
+                table.insert(singleCandidates,
+                             {
+                                 index = i,
+                                 name = name,
+                                 icon = icon,
+                                 prompt = prompt,
+                                 priority = Settings.priorityOverrides[abilityId] or priority or 0,
+                                 abilityId = abilityId,
+                                 canBeUsed = canBeUsed,
+                             })
             end
         end
+
+        table.sort(singleCandidates, function (a, b)
+            if a.priority ~= b.priority then
+                return a.priority > b.priority
+            end
+
+            local aName = a.name or ""
+            local bName = b.name or ""
+            if aName ~= bName then
+                return aName < bName
+            end
+
+            return a.index < b.index
+        end)
+
+        local topSynergy = singleCandidates[1]
+        local showName = topSynergy and topSynergy.name
+        local showIcon = topSynergy and topSynergy.icon
+        local showPrompt = topSynergy and topSynergy.prompt
+        local showAbilityId = topSynergy and topSynergy.abilityId
 
         local hasSynergy = showName ~= nil
         if hasSynergy and self.synergyControls[1] then
@@ -359,6 +385,7 @@ function SynergyTracker:UpdateDisplay()
             if control.posNum then
                 control.posNum:SetHidden(true)
             end
+            control.abilityId = showAbilityId
             control.row:SetHidden(false)
         end
 
