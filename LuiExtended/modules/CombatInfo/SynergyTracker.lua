@@ -335,7 +335,7 @@ function SynergyTracker:UpdateDisplay()
         -- Build a candidate list and sort by priority, since index order is not priority order.
         local singleCandidates = {}
         for i = 1, numSynergies do
-            local name, icon, prompt, priority, abilityId, canBeUsed = GetSynergyInfoAtIndex(i)
+            local name, icon, prompt, priority, abilityId = GetSynergyInfoAtIndex(i)
             if abilityId and abilityId > 0 and not Settings.blacklist[abilityId] then
                 table.insert(singleCandidates,
                              {
@@ -345,7 +345,6 @@ function SynergyTracker:UpdateDisplay()
                                  prompt = prompt,
                                  priority = Settings.priorityOverrides[abilityId] or priority or 0,
                                  abilityId = abilityId,
-                                 canBeUsed = canBeUsed,
                              })
             end
         end
@@ -370,14 +369,14 @@ function SynergyTracker:UpdateDisplay()
         local showPrompt = topSynergy and topSynergy.prompt
         local showAbilityId = topSynergy and topSynergy.abilityId
 
-        local hasSynergy = showName ~= nil
+        local hasSynergy = topSynergy ~= nil
         if hasSynergy and self.synergyControls[1] then
             local control = self.synergyControls[1]
             if control.icon then
                 control.icon:SetTexture(showIcon)
             end
             if control.name then
-                control.name:SetText(showPrompt ~= "" and showPrompt or showName)
+                control.name:SetText((showPrompt and showPrompt ~= "") and showPrompt or (showName or ""))
             end
             if control.priority then
                 control.priority:SetHidden(true)
