@@ -238,7 +238,6 @@ CombatInfo.Defaults =
         offsetY = 200,
         detectedSynergies = {},
         priorityOverrides = {},
-        cooldownGroups = {},
         blacklist = {},
     },
     block =
