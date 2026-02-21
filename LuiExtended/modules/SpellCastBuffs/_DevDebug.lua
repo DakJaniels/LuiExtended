@@ -155,7 +155,7 @@ end
 local function CollectZoneMapInfo()
     -- Set map to player location and handle callback
     if SetMapToPlayerLocation() == SET_MAP_RESULT_MAP_CHANGED then
-        LUIE:FireCallbacks("OnWorldMapChanged")
+        CALLBACK_MANAGER:FireCallbacks("OnWorldMapChanged")
     end
 
     -- Get basic zone and map info
@@ -320,7 +320,7 @@ local function CollectZoneMapInfo()
 
     -- Reset map to player location
     if SetMapToPlayerLocation() == SET_MAP_RESULT_MAP_CHANGED then
-        LUIE:FireCallbacks("OnWorldMapChanged")
+        CALLBACK_MANAGER:FireCallbacks("OnWorldMapChanged")
     end
 
     -- Return collected information
