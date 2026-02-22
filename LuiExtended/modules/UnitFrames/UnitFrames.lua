@@ -1311,7 +1311,7 @@ function UnitFrames.UpdateStaticControls(unitFrame)
     local savedTitle
     -- If unitFrame has unit title label control
     if unitFrame.title ~= nil then
-        local title = GetUnitCaption(unitFrame.unitTag)
+        local title
         local ava = ""
         if unitFrame.isPlayer then
             title = GetUnitTitle(unitFrame.unitTag)
@@ -1327,10 +1327,14 @@ function UnitFrames.UpdateStaticControls(unitFrame)
                     title = (ava ~= "") and ava or (title ~= "") and title or ""
                 end
             end
+            title = title or ""
+        else
+            local unitCaption = GetUnitCaption(unitFrame.unitTag)
+            title = unitCaption and zo_strformat(SI_TOOLTIP_UNIT_CAPTION, unitCaption) or ""
         end
-        title = title or ""
         local titletext = StringOnlyGSUB(title, "%^%a+", "")
         unitFrame.title:SetText(titletext)
+        unitFrame.title:SetWidth(unitFrame.title:GetStringWidth(titletext))
         if unitFrame.unitTag == "reticleover" then
             unitFrame.title:SetHidden(not UnitFrames.SV.TargetEnableRank and not UnitFrames.SV.TargetEnableTitle)
         end
@@ -1344,8 +1348,7 @@ function UnitFrames.UpdateStaticControls(unitFrame)
         if unitFrame.isPlayer then
             unitFrame.avaRankIcon:SetTexture(GetAvARankIcon(unitFrame.avaRankValue))
             local alliance = GetUnitAlliance(unitFrame.unitTag)
-            local color = GetAllianceColor(alliance)
-            unitFrame.avaRankIcon:SetColor(color.r, color.g, color.b)
+            unitFrame.avaRankIcon:SetColor(GetAllianceColor(alliance):UnpackRGBA())
 
             if unitFrame.unitTag == "reticleover" and UnitFrames.SV.TargetEnableRankIcon then
                 unitFrame.avaRank:SetText(tostring(unitFrame.avaRankValue))
