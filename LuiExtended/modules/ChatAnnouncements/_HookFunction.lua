@@ -4607,6 +4607,7 @@ end
 
 -- EVENT_ARTIFACT_CONTROL_STATE (CSA Handler)
 local function ArtifactControlStateHook(artifactName, keepId, characterName, playerAlliance, controlEvent, controlState, campaignId, displayName)
+    if not IsPlayerInAvAWorld() then return end
     local nameToShow = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(displayName) or characterName
     local description, soundId = GetAvAArtifactEventDescription(artifactName, keepId, nameToShow, playerAlliance, controlEvent, campaignId)
 
