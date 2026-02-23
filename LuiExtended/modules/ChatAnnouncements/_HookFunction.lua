@@ -4637,6 +4637,7 @@ end
 
 -- EVENT_DAEDRIC_ARTIFACT_OBJECTIVE_SPAWNED_BUT_NOT_REVEALED (CSA Handler)
 local function DaedricArtifactObjectiveSpawnedButNotRevealedHook(daedricArtifactId)
+    if not IsPlayerInAvAWorld() then return end
     local daedricArtifactName = GetDaedricArtifactDisplayName(daedricArtifactId)
     local description = zo_strformat(SI_DAEDRIC_ARTIFACT_SPAWNED, daedricArtifactName)
 
@@ -4664,6 +4665,7 @@ end
 
 -- EVENT_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED (CSA Handler)
 local function DaedricArtifactObjectiveStateChangedHook(objectiveKeepId, objectiveObjectiveId, battlegroundContext, objectiveControlEvent, objectiveControlState, holderAlliance, lastHolderAlliance, pinType, daedricArtifactId, lastObjectiveControlState)
+    if not IsPlayerInAvAWorld() then return end
     local description
     local soundId
 
@@ -4705,6 +4707,7 @@ end
 
 -- EVENT_KEEP_GATE_STATE_CHANGED (CSA Handler)
 local function KeepGateStateChangedHook(keepId, open)
+    if not IsPlayerInAvAWorld() then return end
     local description, soundId = GetGateStateChangedDescription(keepId, open)
 
     if description then
@@ -4733,6 +4736,7 @@ end
 
 -- EVENT_CORONATE_EMPEROR_NOTIFICATION (CSA Handler)
 local function CoronateEmperorNotificationHook(campaignId, playerCharacterName, playerAlliance, playerDisplayName)
+    if not IsPlayerInAvAWorld() then return end
     local description, soundId = GetCoronateEmperorEventDescription(campaignId, playerCharacterName, playerAlliance, playerDisplayName)
 
     if description then
@@ -4762,6 +4766,7 @@ end
 
 -- EVENT_DEPOSE_EMPEROR_NOTIFICATION (CSA Handler)
 local function DeposeEmperorNotificationHook(campaignId, playerCharacterName, playerAlliance, abdication, playerDisplayName)
+    if not IsPlayerInAvAWorld() then return end
     local description, soundId = GetDeposeEmperorEventDescription(campaignId, playerCharacterName, playerAlliance, abdication, playerDisplayName)
 
     if description then
