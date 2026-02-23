@@ -46,11 +46,38 @@ local controlCounters =
 --- @return string|nil uniqueName The generated unique control name or nil if not in debug mode
 local function GetUniqueControlName(controlType)
     if not UI.isInDebug then
-        return nil
+        return ""
     end
     controlCounters[controlType] = controlCounters[controlType] + 1
     return string.format("LUIE_%s_Unique_%d", controlType, controlCounters[controlType])
 end
+
+-- A handy chaining function for quickly setting up UI elements
+-- Allows us to reference methods to set properties without calling the specific object
+function UI.Chain(object)
+    -- Setup the metatable
+    local T = {}
+    setmetatable(T,
+                 {
+                     __index = function (t, func)
+                         -- Know when to stop chaining
+                         if func == "__END" then
+                             return object
+                         end
+
+                         -- Otherwise, add the method to the parent object
+                         return function (self, ...)
+                             assert(object[func], func .. " missing in object")
+                             object[func](object, ...)
+                             return self
+                         end
+                     end
+                 })
+
+    -- Return the metatable
+    return T
+end
+
 -- -----------------------------------------------------------------------------
 --- Creates an empty top-level window control
 --- @param anchors? table Array of anchor points: [point, relativeTo, relativePoint, offsetX, offsetY]
@@ -332,22 +359,23 @@ end
 
 -- : Configure as flex container (parent)
 --- @alias flexConfig_container {
---- direction: FlexDirection, -- (ROW, COLUMN, ROW_REVERSE, COLUMN_REVERSE)
---- justification: FlexJustification, --(FLEX_START, CENTER, FLEX_END, SPACE_BETWEEN, SPACE_AROUND, SPACE_EVENLY)
---- itemAlignment: FlexAlignment, --(FLEX_START, CENTER, FLEX_END, STRETCH, BASELINE)
---- contentAlignment: FlexAlignment, --(alignment of multiple lines)
---- wrap: FlexWrap, --(NO_WRAP, WRAP, WRAP_REVERSE)
---- padding: table|number, --(internal padding: table with edges or single number for all)
+--- direction: FlexDirection, --(main axis: FLEX_DIRECTION_ROW/COLUMN/ROW_REVERSE/COLUMN_REVERSE)
+--- justification: FlexJustification, --(main-axis packing: FLEX_JUSTIFICATION_FLEX_START/CENTER/FLEX_END/SPACE_BETWEEN/SPACE_AROUND/SPACE_EVENLY)
+--- itemAlignment: FlexAlignment, --(cross-axis per-item alignment: FLEX_ALIGNMENT_FLEX_START/CENTER/FLEX_END/STRETCH/BASELINE)
+--- contentAlignment: FlexAlignment, --(cross-axis alignment of wrapped lines: FLEX_ALIGNMENT_FLEX_START/CENTER/FLEX_END/SPACE_BETWEEN/SPACE_AROUND)
+--- wrap: FlexWrap, --(line wrapping: FLEX_WRAP_NO_WRAP/WRAP/WRAP_REVERSE)
+--- padding: number|table, --(internal padding: number for all edges, or { [FLEX_EDGE_LEFT]=v, ... } / {l,t,r,b}; no per-edge setter exists)
 --- }
 
--- :Configure as flex item (child)
+-- : Configure as flex item (child)
 --- @alias flexConfig_item {
---- grow: number, --(flex grow factor, default 0)
---- shrink: number, --(flex shrink factor, default 1)
---- basis: number, --(base size before growing/shrinking)
---- alignSelf: FlexAlignment, --(override parent's item alignment)
---- margin: table|number, --(external margins: table with edges or single number for all - use margins for gaps between children)
---- exclude: boolean, --(exclude from flex layout)
+--- flex: number|nil, --(shorthand: sets grow AND shrink together; pass nil to reset to defaults)
+--- grow: number, --(grow factor, default 0; overrides flex shorthand if both given)
+--- shrink: number, --(shrink factor, default 1; overrides flex shorthand if both given)
+--- basis: number, --(base size before flex; default auto)
+--- alignSelf: FlexAlignment, --(per-item cross-axis override: FLEX_ALIGNMENT_AUTO resets to parent itemAlignment)
+--- margin: number|table, --(gaps: number for all edges, or edge-keyed { [FLEX_EDGE_END]=4 }; supports START/END/HORIZONTAL/VERTICAL/ALL)
+--- exclude: boolean, --(true = excluded from yoga layout calculation; does not affect render visibility)
 --- }
 
 --- @class flexConfig
@@ -423,24 +451,21 @@ function UI:FlexControl(parent, anchors, dims, hidden, flexConfig)
                 control:SetChildFlexWrap(container.wrap)
             end
 
-            -- Internal padding
-            if container.padding then
+            -- Internal padding.
+            -- No per-edge SetFlexPadding(edge, val) exists; only bulk SetFlexPaddings(l,t,r,b).
+            -- Accepts a single number (all edges) or a table in either form:
+            --   edge-keyed: { [FLEX_EDGE_LEFT]=4, [FLEX_EDGE_RIGHT]=4 }
+            --   LTRB array: { 4, 0, 4, 0 }
+            -- Both forms can coexist; edge keys (0-based) take priority over array slots (1-based).
+            if container.padding ~= nil then
                 if type(container.padding) == "number" then
-                    -- Single number applies to all edges
                     control:SetFlexPaddings(container.padding, container.padding, container.padding, container.padding)
                 elseif type(container.padding) == "table" then
-                    -- Table of specific edges or LTRB array
-                    if #container.padding == 4 then
-                        -- Array format: {left, top, right, bottom}
-                        control:SetFlexPaddings(container.padding[1], container.padding[2], container.padding[3], container.padding[4])
-                    else
-                        -- Edge table format: { [FLEX_EDGE_LEFT] = 4, [FLEX_EDGE_RIGHT] = 4, ... }
-                        local left = container.padding[FLEX_EDGE_LEFT] or 0
-                        local top = container.padding[FLEX_EDGE_TOP] or 0
-                        local right = container.padding[FLEX_EDGE_RIGHT] or 0
-                        local bottom = container.padding[FLEX_EDGE_BOTTOM] or 0
-                        control:SetFlexPaddings(left, top, right, bottom)
-                    end
+                    local l = container.padding[FLEX_EDGE_LEFT] or container.padding[1] or 0
+                    local t = container.padding[FLEX_EDGE_TOP] or container.padding[2] or 0
+                    local r = container.padding[FLEX_EDGE_RIGHT] or container.padding[3] or 0
+                    local b = container.padding[FLEX_EDGE_BOTTOM] or container.padding[4] or 0
+                    control:SetFlexPaddings(l, t, r, b)
                 end
             end
         end
@@ -449,49 +474,48 @@ function UI:FlexControl(parent, anchors, dims, hidden, flexConfig)
         if flexConfig.item then
             local item = flexConfig.item
 
+            -- Combined shorthand: sets grow AND shrink together (nilable = reset to defaults).
+            -- Individual grow/shrink below will override if both are provided.
+            if item.flex ~= nil then
+                control:SetFlex(item.flex)
+            end
+
             -- Grow factor (default: 0)
-            if item.grow then
+            if item.grow ~= nil then
                 control:SetFlexGrow(item.grow)
             end
 
             -- Shrink factor (default: 1)
-            if item.shrink then
+            if item.shrink ~= nil then
                 control:SetFlexShrink(item.shrink)
             end
 
-            -- Base size before growing/shrinking
-            if item.basis then
+            -- Base size before growing/shrinking (default: auto)
+            if item.basis ~= nil then
                 control:SetFlexBasis(item.basis)
             end
 
-            -- Override parent's item alignment
-            if item.alignSelf then
+            -- Per-item cross-axis alignment override (FLEX_ALIGNMENT_AUTO resets to parent itemAlignment)
+            if item.alignSelf ~= nil then
                 control:SetFlexAlignSelf(item.alignSelf)
             end
 
-            -- Margins
-            if item.margin then
+            -- Margins: number = all edges via SetFlexMargin(FLEX_EDGE_ALL, v).
+            -- Table iterates pairs() so every FlexEdge key is forwarded directly to SetFlexMargin,
+            -- including logical edges START(4), END(5), HORIZONTAL(6), VERTICAL(7), ALL(8).
+            -- This avoids the broken '#' length check (FLEX_EDGE_LEFT = 0 is outside Lua's 1-based sequence).
+            if item.margin ~= nil then
                 if type(item.margin) == "number" then
-                    -- Single number applies to all edges
-                    control:SetFlexMargins(item.margin, item.margin, item.margin, item.margin)
+                    control:SetFlexMargin(FLEX_EDGE_ALL, item.margin)
                 elseif type(item.margin) == "table" then
-                    -- Table of specific edges or LTRB array
-                    if #item.margin == 4 then
-                        -- Array format: {left, top, right, bottom}
-                        control:SetFlexMargins(item.margin[1], item.margin[2], item.margin[3], item.margin[4])
-                    else
-                        -- Edge table format: { [FLEX_EDGE_LEFT] = 4, [FLEX_EDGE_RIGHT] = 4, ... }
-                        local left = item.margin[FLEX_EDGE_LEFT] or 0
-                        local top = item.margin[FLEX_EDGE_TOP] or 0
-                        local right = item.margin[FLEX_EDGE_RIGHT] or 0
-                        local bottom = item.margin[FLEX_EDGE_BOTTOM] or 0
-                        control:SetFlexMargins(left, top, right, bottom)
+                    for edge, val in pairs(item.margin) do
+                        control:SetFlexMargin(edge, val)
                     end
                 end
             end
 
-            -- Exclude from flex layout
-            if item.exclude then
+            -- Exclude from yoga layout calculation (does not affect render visibility).
+            if item.exclude ~= nil then
                 control:SetExcludeFromFlexbox(item.exclude)
             end
         end

@@ -241,6 +241,14 @@ SpellCastBuffs.windowTitles =
     prominentdebuffs = GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS),
 }
 
+---@generic K, V
+---@class SpellCastBuffs_EffectsList_Control : Control
+---@field icons { [K]: SpellCastBuffs_EffectsList_Control }
+
+---@class SpellCastBuffs_EffectsList : Control
+---@field [string] {iconHolder:Control}|SpellCastBuffs_EffectsList_Control
+
+---@type SpellCastBuffs_EffectsList
 local uiTlw = {} -- GUI
 
 -- Routing for Auras

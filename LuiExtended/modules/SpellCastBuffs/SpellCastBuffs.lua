@@ -145,6 +145,25 @@ local function InitializePreviewLabels()
     end
 end
 
+-- Flex container classification tables — defined here so Initialize can reference them.
+-- WRAP_CONTAINERS: multi-row containers whose iconHolder uses FLEX_WRAP_WRAP / WRAP_REVERSE.
+-- SINGLE_AXIS_CONTAINERS: single-line containers that never wrap.
+local WRAP_CONTAINERS =
+{
+    playerb = true,
+    playerd = true,
+    targetb = true,
+    targetd = true,
+    player1 = true,
+    player2 = true,
+    target1 = true,
+    target2 = true,
+}
+local SINGLE_AXIS_CONTAINERS =
+{
+    player_long = true, prominentbuffs = true, prominentdebuffs = true,
+}
+
 -- Initialization
 function SpellCastBuffs.Initialize(enabled)
     -- Load settings
@@ -331,21 +350,50 @@ function SpellCastBuffs.Initialize(enabled)
             -- SpellCastBuffs.BuffContainers[v].preview = UI:Backdrop( SpellCastBuffs.BuffContainers[v], "fill", nil, nil, nil, true )
             SpellCastBuffs.BuffContainers[v].preview = UI:Texture(SpellCastBuffs.BuffContainers[v], "fill", nil, "/esoui/art/miscellaneous/inset_bg.dds", DL_BACKGROUND, true)
             SpellCastBuffs.BuffContainers[v].previewLabel = UI:Label(SpellCastBuffs.BuffContainers[v].preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", SpellCastBuffs.windowTitles[v] .. (SpellCastBuffs.SV.lockPositionToUnitFrames and (v ~= "player_long" and v ~= "prominentbuffs" and v ~= "prominentdebuffs") and " (locked)" or ""), false)
+        end
+        -- Create flex container that will hold and lay out the icons.
+        -- Dimensions must be passed at creation time so yoga has a concrete container size when
+        -- SetChildLayout runs. Priority: (1) actual parent width if already sized (UF containers),
+        -- (2) the user-configurable SV width for standalone TLW containers, (3) a safe fallback.
+        -- Reset() will call SetDimensions again with the definitive values.
+        local isWrapContainer = WRAP_CONTAINERS[v] == true
+        local initFlexDir = SpellCastBuffs.BuffContainers[v].alignVertical and FLEX_DIRECTION_COLUMN or FLEX_DIRECTION_ROW
+        local holderWrap = isWrapContainer and FLEX_WRAP_WRAP or FLEX_WRAP_NO_WRAP
+        local initIconSize = SpellCastBuffs.SV.IconSize
+        -- Determine creation-time width: real parent width > SV-driven width > fallback
+        local parentW = SpellCastBuffs.BuffContainers[v]:GetWidth()
+        local initW
+        if parentW and parentW > 0 then
+            initW = parentW
+        elseif v == "playerb" then
+            initW = SpellCastBuffs.SV.WidthPlayerBuffs
+        elseif v == "playerd" then
+            initW = SpellCastBuffs.SV.WidthPlayerDebuffs
+        elseif v == "targetb" then
+            initW = SpellCastBuffs.SV.WidthTargetBuffs
+        elseif v == "targetd" then
+            initW = SpellCastBuffs.SV.WidthTargetDebuffs
+        else
+            initW = 400 -- UF containers: Reset() will overwrite with t:GetWidth()
+        end
+        local initH = isWrapContainer and (initIconSize * 10) or (initIconSize + 6)
+        SpellCastBuffs.BuffContainers[v].iconHolder = UI:FlexControl(SpellCastBuffs.BuffContainers[v], { TOPLEFT, TOPLEFT, 0, 0 }, { initW, initH }, false,
+                                                                     {
+                                                                         container =
+                                                                         {
+                                                                             direction        = initFlexDir,
+                                                                             wrap             = holderWrap,
+                                                                             justification    = FLEX_JUSTIFICATION_FLEX_START,
+                                                                             itemAlignment    = FLEX_ALIGNMENT_FLEX_START,
+                                                                             contentAlignment = FLEX_ALIGNMENT_FLEX_START,
+                                                                         }
+                                                                     })
+        -- Create table to store created contols for icons
+        SpellCastBuffs.BuffContainers[v].icons = {}
 
-            -- Create control that will hold the icons
-            SpellCastBuffs.BuffContainers[v].prevIconsCount = 0
-            -- We need this container only for icons that are aligned in one row/column automatically.
-            -- Thus we do not create containers for player and target buffs/debuffs on custom frames
-            if v ~= "player1" and v ~= "player2" and v ~= "target1" and v ~= "target2" and v ~= "playerb" and v ~= "playerd" and v ~= "targetb" and v ~= "targetd" then
-                SpellCastBuffs.BuffContainers[v].iconHolder = UI:Control(SpellCastBuffs.BuffContainers[v], nil, nil, false)
-            end
-            -- Create table to store created contols for icons
-            SpellCastBuffs.BuffContainers[v].icons = {}
-
-            -- add this top level window to global controls list, so it can be hidden
-            if SpellCastBuffs.BuffContainers[v]:GetType() == CT_TOPLEVELCONTROL then
-                LUIE.Components[moduleName .. v] = SpellCastBuffs.BuffContainers[v]
-            end
+        -- add this top level window to global controls list, so it can be hidden
+        if SpellCastBuffs.BuffContainers[v]:GetType() == CT_TOPLEVELCONTROL then
+            LUIE.Components[moduleName .. v] = SpellCastBuffs.BuffContainers[v]
         end
     end
 
@@ -586,66 +634,132 @@ function SpellCastBuffs.ResetContainerOrientation()
     SpellCastBuffs.SetTlwPosition()
 end
 
--- Set SpellCastBuffs.alignmentDirection table to equal the values from our SV Table & converts string values to proper alignment values. Called from Settings Menu & on Initialize
+-- Returns the appropriate FLEX_WRAP_* constant for a given container
+local function GetFlexWrap(containerKey)
+    if SINGLE_AXIS_CONTAINERS[containerKey] then
+        return FLEX_WRAP_NO_WRAP
+    end
+    if containerKey == "player1" or containerKey == "target1" then
+        return FLEX_WRAP_WRAP
+    end
+    if containerKey == "player2" or containerKey == "target2" then
+        return FLEX_WRAP_WRAP_REVERSE
+    end
+    local stackSV =
+    {
+        playerb = SpellCastBuffs.SV.StackPlayerBuffs,
+        playerd = SpellCastBuffs.SV.StackPlayerDebuffs,
+        targetb = SpellCastBuffs.SV.StackTargetBuffs,
+        targetd = SpellCastBuffs.SV.StackTargetDebuffs,
+    }
+    return (stackSV[containerKey] == "Down") and FLEX_WRAP_WRAP or FLEX_WRAP_WRAP_REVERSE
+end
+
+-- Maps the SV alignment string + the resolved flex direction to a FLEX_JUSTIFICATION_* constant.
+-- All alignment values are treated as PHYSICAL (left/right/center on screen), independent of
+-- whether the flex direction is reversed. This lets users combine any sort + alignment freely.
+--
+-- "Centered":
+--   Returns FLEX_CENTER for all container types. UnitFrames.lua explicitly calls SetWidth() on
+--   the buffs/debuffs containers so they span the full UF bar width and are horizontally centered
+--   below the frame. FLEX_CENTER then centers each row within that bar width, producing true
+--   visual centering. TLW containers are also user-width-sized; FLEX_CENTER clusters each row
+--   around the center of the user-set width. This matches the old anchor-to-center behavior
+--   where every row of icons started at the container's center point.
+--
+-- "Left"/"Top" and "Right"/"Bottom":
+--   Packs the group at the PHYSICAL left/right edge of the container.
+--   For reversed directions (ROW_REVERSE, COLUMN_REVERSE) the logical and physical ends are
+--   swapped, so the justification constant is inverted to maintain physical alignment.
+local function GetFlexJustification(containerKey, flexDir)
+    local dir = SpellCastBuffs.alignmentDirection[containerKey]
+
+    if dir == "Centered" then
+        return FLEX_JUSTIFICATION_CENTER
+    end
+
+    -- Physical end = "Right" or "Bottom". For reversed flex directions the logical end is on the
+    -- opposite physical side, so flip the flag to keep the result physically consistent.
+    local wantsPhysicalEnd = (dir == "Right" or dir == "Bottom")
+    local isReversed = (flexDir == FLEX_DIRECTION_ROW_REVERSE or flexDir == FLEX_DIRECTION_COLUMN_REVERSE)
+    if isReversed then wantsPhysicalEnd = not wantsPhysicalEnd end
+
+    return wantsPhysicalEnd and FLEX_JUSTIFICATION_FLEX_END or FLEX_JUSTIFICATION_FLEX_START
+end
+
+-- Applies current flex direction, wrap, and justification to a container's iconHolder.
+-- The iconHolder anchor is always TOPLEFT (set at creation, never changed here).
+-- flexDir is passed to GetFlexJustification so physical alignment can invert the constant
+-- for reversed directions (ROW_REVERSE, COLUMN_REVERSE) without an extra API round-trip.
+---
+--- @param containerKey string
+local function ApplyFlexContainerConfig(containerKey)
+    local bc = SpellCastBuffs.BuffContainers[containerKey]
+    if not bc or not bc.iconHolder then return end
+
+    local sortDir = SpellCastBuffs.sortDirection[containerKey]
+    local flexDir
+    if     sortDir == "Left to Right" then
+        flexDir = FLEX_DIRECTION_ROW
+    elseif sortDir == "Right to Left" then
+        flexDir = FLEX_DIRECTION_ROW_REVERSE
+    elseif sortDir == "Bottom to Top" then
+        flexDir = FLEX_DIRECTION_COLUMN_REVERSE
+    elseif sortDir == "Top to Bottom" then
+        flexDir = FLEX_DIRECTION_COLUMN
+    end
+
+    -- Fall back to the holder's current direction if sortDir is unrecognised.
+    local resolvedFlexDir = flexDir or bc.iconHolder:GetChildFlexDirection()
+
+    if flexDir then bc.iconHolder:SetChildFlexDirection(flexDir) end
+    bc.iconHolder:SetChildFlexWrap(GetFlexWrap(containerKey))
+    bc.iconHolder:SetChildFlexJustification(GetFlexJustification(containerKey, resolvedFlexDir))
+    -- Pack flex lines (rows/columns) at the cross-axis start.
+    -- For WRAP this means rows are packed at the TOP; for WRAP_REVERSE the cross-axis is reversed
+    -- so FLEX_START == physical BOTTOM, which is exactly where debuff rows should anchor.
+    -- For single-axis containers this is a no-op (there is only one line).
+    bc.iconHolder:SetChildFlexContentAlignment(FLEX_ALIGNMENT_FLEX_START)
+end
+
+-- Populate SpellCastBuffs.alignmentDirection from SV settings.
+-- Values are kept as the SV strings ("Left", "Right", "Centered", "Top", "Bottom")
+-- and consumed directly by GetFlexJustification — no translation to anchor constants needed.
+-- Called from Settings Menu and on Initialize.
 function SpellCastBuffs.SetupContainerAlignment()
     SpellCastBuffs.alignmentDirection = {}
 
-    SpellCastBuffs.alignmentDirection.player1 = SpellCastBuffs.SV.AlignmentBuffsPlayer   -- No icon holder for anchored buffs/debuffs - This value gets passed to SpellCastBuffs.updateIcons()
-    SpellCastBuffs.alignmentDirection.playerb = SpellCastBuffs.SV.AlignmentBuffsPlayer   -- No icon holder for anchored buffs/debuffs - This value gets passed to SpellCastBuffs.updateIcons()
-    SpellCastBuffs.alignmentDirection.player2 = SpellCastBuffs.SV.AlignmentDebuffsPlayer -- No icon holder for anchored buffs/debuffs - This value gets passed to SpellCastBuffs.updateIcons()
-    SpellCastBuffs.alignmentDirection.playerd = SpellCastBuffs.SV.AlignmentDebuffsPlayer -- No icon holder for anchored buffs/debuffs - This value gets passed to SpellCastBuffs.updateIcons()
-    SpellCastBuffs.alignmentDirection.target1 = SpellCastBuffs.SV.AlignmentBuffsTarget   -- No icon holder for anchored buffs/debuffs - This value gets passed to SpellCastBuffs.updateIcons()
-    SpellCastBuffs.alignmentDirection.targetb = SpellCastBuffs.SV.AlignmentBuffsTarget   -- No icon holder for anchored buffs/debuffs - This value gets passed to SpellCastBuffs.updateIcons()
-    SpellCastBuffs.alignmentDirection.target2 = SpellCastBuffs.SV.AlignmentDebuffsTarget -- No icon holder for anchored buffs/debuffs - This value gets passed to SpellCastBuffs.updateIcons()
-    SpellCastBuffs.alignmentDirection.targetd = SpellCastBuffs.SV.AlignmentDebuffsTarget -- No icon holder for anchored buffs/debuffs - This value gets passed to SpellCastBuffs.updateIcons()
+    SpellCastBuffs.alignmentDirection.player1 = SpellCastBuffs.SV.AlignmentBuffsPlayer
+    SpellCastBuffs.alignmentDirection.playerb = SpellCastBuffs.SV.AlignmentBuffsPlayer
+    SpellCastBuffs.alignmentDirection.player2 = SpellCastBuffs.SV.AlignmentDebuffsPlayer
+    SpellCastBuffs.alignmentDirection.playerd = SpellCastBuffs.SV.AlignmentDebuffsPlayer
+    SpellCastBuffs.alignmentDirection.target1 = SpellCastBuffs.SV.AlignmentBuffsTarget
+    SpellCastBuffs.alignmentDirection.targetb = SpellCastBuffs.SV.AlignmentBuffsTarget
+    SpellCastBuffs.alignmentDirection.target2 = SpellCastBuffs.SV.AlignmentDebuffsTarget
+    SpellCastBuffs.alignmentDirection.targetd = SpellCastBuffs.SV.AlignmentDebuffsTarget
 
-    -- Set Long Term Effects Alignment
     if SpellCastBuffs.SV.LongTermEffectsSeparateAlignment == 1 then
-        -- Horizontal
         SpellCastBuffs.alignmentDirection.player_long = SpellCastBuffs.SV.AlignmentLongHorz
     elseif SpellCastBuffs.SV.LongTermEffectsSeparateAlignment == 2 then
-        -- Vertical
         SpellCastBuffs.alignmentDirection.player_long = SpellCastBuffs.SV.AlignmentLongVert
     end
 
-    -- Set Prominent Buffs Alignment
     if SpellCastBuffs.SV.ProminentBuffContainerAlignment == 1 then
-        -- Horizontal
         SpellCastBuffs.alignmentDirection.prominentbuffs = SpellCastBuffs.SV.AlignmentPromBuffsHorz
     elseif SpellCastBuffs.SV.ProminentBuffContainerAlignment == 2 then
-        -- Vertical
         SpellCastBuffs.alignmentDirection.prominentbuffs = SpellCastBuffs.SV.AlignmentPromBuffsVert
     end
 
-    -- Set Prominent Debuffs Alignment
     if SpellCastBuffs.SV.ProminentDebuffContainerAlignment == 1 then
-        -- Horizontal
         SpellCastBuffs.alignmentDirection.prominentdebuffs = SpellCastBuffs.SV.AlignmentPromDebuffsHorz
     elseif SpellCastBuffs.SV.ProminentDebuffContainerAlignment == 2 then
-        -- Vertical
         SpellCastBuffs.alignmentDirection.prominentdebuffs = SpellCastBuffs.SV.AlignmentPromDebuffsVert
     end
 
-    for k, v in pairs(SpellCastBuffs.alignmentDirection) do
-        if v == "Left" then
-            SpellCastBuffs.alignmentDirection[k] = LEFT
-        elseif v == "Right" then
-            SpellCastBuffs.alignmentDirection[k] = RIGHT
-        elseif v == "Centered" then
-            SpellCastBuffs.alignmentDirection[k] = CENTER
-        elseif v == "Top" then
-            SpellCastBuffs.alignmentDirection[k] = TOP
-        elseif v == "Bottom" then
-            SpellCastBuffs.alignmentDirection[k] = BOTTOM
-        else
-            SpellCastBuffs.alignmentDirection[k] = CENTER -- Fallback
-        end
-    end
-
     for k, v in pairs(SpellCastBuffs.containerRouting) do
-        if SpellCastBuffs.BuffContainers[v].iconHolder and SpellCastBuffs.alignmentDirection[v] then
-            SpellCastBuffs.BuffContainers[v].iconHolder:ClearAnchors()
-            SpellCastBuffs.BuffContainers[v].iconHolder:SetAnchor(SpellCastBuffs.alignmentDirection[v])
+        local bc = SpellCastBuffs.BuffContainers[v]
+        if bc and bc.iconHolder then
+            ApplyFlexContainerConfig(v)
         end
     end
 end
@@ -653,7 +767,7 @@ end
 -- Set SpellCastBuffs.sortDirection table to equal the values from our SV table. Called from Settings Menu & on Initialize
 function SpellCastBuffs.SetupContainerSort()
     -- Clear the sort direction table
-    SpellCastBuffs.sortDirection = {}
+    ZO_ClearTable(SpellCastBuffs.sortDirection)
 
     -- Set sort order for player/target containers
     SpellCastBuffs.sortDirection.player1 = SpellCastBuffs.SV.SortBuffsPlayer
@@ -690,6 +804,10 @@ function SpellCastBuffs.SetupContainerSort()
     elseif SpellCastBuffs.SV.ProminentDebuffContainerAlignment == 2 then
         -- Vertical
         SpellCastBuffs.sortDirection.prominentdebuffs = SpellCastBuffs.SV.SortPromDebuffsVert
+    end
+
+    for k, v in pairs(SpellCastBuffs.containerRouting) do
+        ApplyFlexContainerConfig(v)
     end
 end
 
@@ -1038,60 +1156,80 @@ function SpellCastBuffs.Reset()
     -- Update padding between icons
     SpellCastBuffs.padding = zo_floor(0.5 + SpellCastBuffs.SV.IconSize / 13)
 
-    -- Set size of top level window
+    -- Set size of top level window.
+    -- Wrap containers get a tall budget so yoga has room to lay out multiple lines.
+    -- The TLW is transparent, so extra height is invisible unless icons actually fill it.
+    local wrapH = SpellCastBuffs.SV.IconSize * 10 -- room for ~10 rows at any icon size
+
     -- Player
     if SpellCastBuffs.BuffContainers.playerb and SpellCastBuffs.BuffContainers.playerb:GetType() == CT_TOPLEVELCONTROL then
-        SpellCastBuffs.BuffContainers.playerb:SetDimensions(SpellCastBuffs.SV.WidthPlayerBuffs, SpellCastBuffs.SV.IconSize + 6)
-        SpellCastBuffs.BuffContainers.playerd:SetDimensions(SpellCastBuffs.SV.WidthPlayerDebuffs, SpellCastBuffs.SV.IconSize + 6)
-        SpellCastBuffs.BuffContainers.playerb.maxIcons = zo_max(1, zo_floor((SpellCastBuffs.BuffContainers.playerb:GetWidth() - 4 * SpellCastBuffs.padding) / (SpellCastBuffs.SV.IconSize + SpellCastBuffs.padding)))
-        SpellCastBuffs.BuffContainers.playerd.maxIcons = zo_max(1, zo_floor((SpellCastBuffs.BuffContainers.playerd:GetWidth() - 4 * SpellCastBuffs.padding) / (SpellCastBuffs.SV.IconSize + SpellCastBuffs.padding)))
+        local pbW, pdW = SpellCastBuffs.SV.WidthPlayerBuffs, SpellCastBuffs.SV.WidthPlayerDebuffs
+        SpellCastBuffs.BuffContainers.playerb:SetDimensions(pbW, wrapH)
+        SpellCastBuffs.BuffContainers.playerd:SetDimensions(pdW, wrapH)
+        if SpellCastBuffs.BuffContainers.playerb.iconHolder then
+            SpellCastBuffs.BuffContainers.playerb.iconHolder:SetDimensions(pbW, wrapH)
+        end
+        if SpellCastBuffs.BuffContainers.playerd.iconHolder then
+            SpellCastBuffs.BuffContainers.playerd.iconHolder:SetDimensions(pdW, wrapH)
+        end
     else
-        SpellCastBuffs.BuffContainers.player2:SetHeight(SpellCastBuffs.SV.IconSize)
-        SpellCastBuffs.BuffContainers.player2.firstAnchor = { TOPLEFT, TOP }
-        SpellCastBuffs.BuffContainers.player2.maxIcons = zo_max(1, zo_floor((SpellCastBuffs.BuffContainers.player2:GetWidth() - 4 * SpellCastBuffs.padding) / (SpellCastBuffs.SV.IconSize + SpellCastBuffs.padding)))
-
-        SpellCastBuffs.BuffContainers.player1:SetHeight(SpellCastBuffs.SV.IconSize)
-        SpellCastBuffs.BuffContainers.player1.firstAnchor = { TOPLEFT, TOP }
-        SpellCastBuffs.BuffContainers.player1.maxIcons = zo_max(1, zo_floor((SpellCastBuffs.BuffContainers.player1:GetWidth() - 4 * SpellCastBuffs.padding) / (SpellCastBuffs.SV.IconSize + SpellCastBuffs.padding)))
+        -- Unit frame containers: width comes from the UF control itself; read it back explicitly
+        local iconH = SpellCastBuffs.SV.IconSize
+        local p1 = SpellCastBuffs.BuffContainers.player1
+        local p2 = SpellCastBuffs.BuffContainers.player2
+        p1:SetHeight(iconH)
+        p2:SetHeight(iconH)
+        if p1.iconHolder then p1.iconHolder:SetDimensions(p1:GetWidth(), iconH) end
+        if p2.iconHolder then p2.iconHolder:SetDimensions(p2:GetWidth(), iconH) end
     end
 
     -- Target
     if SpellCastBuffs.BuffContainers.targetb and SpellCastBuffs.BuffContainers.targetb:GetType() == CT_TOPLEVELCONTROL then
-        SpellCastBuffs.BuffContainers.targetb:SetDimensions(SpellCastBuffs.SV.WidthTargetBuffs, SpellCastBuffs.SV.IconSize + 6)
-        SpellCastBuffs.BuffContainers.targetd:SetDimensions(SpellCastBuffs.SV.WidthTargetDebuffs, SpellCastBuffs.SV.IconSize + 6)
-        SpellCastBuffs.BuffContainers.targetb.maxIcons = zo_max(1, zo_floor((SpellCastBuffs.BuffContainers.targetb:GetWidth() - 4 * SpellCastBuffs.padding) / (SpellCastBuffs.SV.IconSize + SpellCastBuffs.padding)))
-        SpellCastBuffs.BuffContainers.targetd.maxIcons = zo_max(1, zo_floor((SpellCastBuffs.BuffContainers.targetd:GetWidth() - 4 * SpellCastBuffs.padding) / (SpellCastBuffs.SV.IconSize + SpellCastBuffs.padding)))
+        local tbW, tdW = SpellCastBuffs.SV.WidthTargetBuffs, SpellCastBuffs.SV.WidthTargetDebuffs
+        SpellCastBuffs.BuffContainers.targetb:SetDimensions(tbW, wrapH)
+        SpellCastBuffs.BuffContainers.targetd:SetDimensions(tdW, wrapH)
+        if SpellCastBuffs.BuffContainers.targetb.iconHolder then
+            SpellCastBuffs.BuffContainers.targetb.iconHolder:SetDimensions(tbW, wrapH)
+        end
+        if SpellCastBuffs.BuffContainers.targetd.iconHolder then
+            SpellCastBuffs.BuffContainers.targetd.iconHolder:SetDimensions(tdW, wrapH)
+        end
     else
-        SpellCastBuffs.BuffContainers.target2:SetHeight(SpellCastBuffs.SV.IconSize)
-        SpellCastBuffs.BuffContainers.target2.firstAnchor = { TOPLEFT, TOP }
-        SpellCastBuffs.BuffContainers.target2.maxIcons = zo_max(1, zo_floor((SpellCastBuffs.BuffContainers.target2:GetWidth() - 4 * SpellCastBuffs.padding) / (SpellCastBuffs.SV.IconSize + SpellCastBuffs.padding)))
-
-        SpellCastBuffs.BuffContainers.target1:SetHeight(SpellCastBuffs.SV.IconSize)
-        SpellCastBuffs.BuffContainers.target1.firstAnchor = { TOPLEFT, TOP }
-        SpellCastBuffs.BuffContainers.target1.maxIcons = zo_max(1, zo_floor((SpellCastBuffs.BuffContainers.target1:GetWidth() - 4 * SpellCastBuffs.padding) / (SpellCastBuffs.SV.IconSize + SpellCastBuffs.padding)))
+        -- Unit frame containers: width comes from the UF control itself; read it back explicitly
+        local iconH = SpellCastBuffs.SV.IconSize
+        local t1 = SpellCastBuffs.BuffContainers.target1
+        local t2 = SpellCastBuffs.BuffContainers.target2
+        t1:SetHeight(iconH)
+        t2:SetHeight(iconH)
+        if t1.iconHolder then t1.iconHolder:SetDimensions(t1:GetWidth(), iconH) end
+        if t2.iconHolder then t2.iconHolder:SetDimensions(t2:GetWidth(), iconH) end
     end
 
     -- Player long buffs
     if SpellCastBuffs.BuffContainers.player_long then
-        if SpellCastBuffs.BuffContainers.player_long.alignVertical then
-            SpellCastBuffs.BuffContainers.player_long:SetDimensions(SpellCastBuffs.SV.IconSize + 6, 400)
+        local pl = SpellCastBuffs.BuffContainers.player_long
+        local plW, plH
+        if pl.alignVertical then
+            plW, plH = SpellCastBuffs.SV.IconSize + 6, 400
         else
-            SpellCastBuffs.BuffContainers.player_long:SetDimensions(500, SpellCastBuffs.SV.IconSize + 6)
+            plW, plH = 500, SpellCastBuffs.SV.IconSize + 6
         end
+        pl:SetDimensions(plW, plH)
+        if pl.iconHolder then pl.iconHolder:SetDimensions(plW, plH) end
     end
 
     -- Prominent buffs & debuffs
     if SpellCastBuffs.BuffContainers.prominentbuffs then
-        if SpellCastBuffs.BuffContainers.prominentbuffs.alignVertical then
-            SpellCastBuffs.BuffContainers.prominentbuffs:SetDimensions(SpellCastBuffs.SV.IconSize + 6, 400)
-        else
-            SpellCastBuffs.BuffContainers.prominentbuffs:SetDimensions(500, SpellCastBuffs.SV.IconSize + 6)
-        end
-        if SpellCastBuffs.BuffContainers.prominentdebuffs.alignVertical then
-            SpellCastBuffs.BuffContainers.prominentdebuffs:SetDimensions(SpellCastBuffs.SV.IconSize + 6, 400)
-        else
-            SpellCastBuffs.BuffContainers.prominentdebuffs:SetDimensions(500, SpellCastBuffs.SV.IconSize + 6)
-        end
+        local pb = SpellCastBuffs.BuffContainers.prominentbuffs
+        local pd = SpellCastBuffs.BuffContainers.prominentdebuffs
+        local pbW, pbH = pb.alignVertical and (SpellCastBuffs.SV.IconSize + 6) or 500,
+            pb.alignVertical and 400 or (SpellCastBuffs.SV.IconSize + 6)
+        local pdW, pdH = pd.alignVertical and (SpellCastBuffs.SV.IconSize + 6) or 500,
+            pd.alignVertical and 400 or (SpellCastBuffs.SV.IconSize + 6)
+        pb:SetDimensions(pbW, pbH)
+        pd:SetDimensions(pdW, pdH)
+        if pb.iconHolder then pb.iconHolder:SetDimensions(pbW, pbH) end
+        if pd.iconHolder then pd.iconHolder:SetDimensions(pdW, pdH) end
     end
 
     -- Set Alignment and Sort Direction
@@ -1106,7 +1244,7 @@ function SpellCastBuffs.Reset()
     for _, container in pairs(SpellCastBuffs.containerRouting) do
         if needs_reset[container] then
             for i = 1, #SpellCastBuffs.BuffContainers[container].icons do
-                SpellCastBuffs.ResetSingleIcon(container, SpellCastBuffs.BuffContainers[container].icons[i], SpellCastBuffs.BuffContainers[container].icons[i - 1])
+                SpellCastBuffs.ResetSingleIcon(container, SpellCastBuffs.BuffContainers[container].icons[i])
             end
         end
         needs_reset[container] = false
@@ -1117,8 +1255,61 @@ function SpellCastBuffs.Reset()
     end
 end
 
+-- Applies the correct flex margins to a single buff icon.
+-- Must be called AFTER SetExcludeFromFlexbox(false) so margins are set on a live Yoga node.
+-- Called from both ResetSingleIcon (full reset) and updateIcons (every re-show).
+--
+-- Uses explicit PHYSICAL edges (not FLEX_EDGE_END/START) because ESO's Yoga implementation
+-- does not appear to resolve logical edges by flex direction for SetFlexMargin — FLEX_EDGE_END
+-- maps to a fixed constant that works for ROW but silently applies the wrong physical edge
+-- for COLUMN layouts, resulting in zero vertical gap between stacked icons.
+--
+-- Main-axis trailing physical edge per direction:
+--   ROW            → RIGHT   (gap appears to the right of each icon)
+--   ROW_REVERSE    → LEFT    (gap appears to the left of each icon)
+--   COLUMN         → BOTTOM  (gap appears below each icon)
+--   COLUMN_REVERSE → TOP     (gap appears above each icon, flow goes bottom→top)
+--
+-- Cross-axis gutter uses one-sided margin so inter-row gap = exactly padding (not 2×padding).
+-- Vertical single-axis columns use iconSize/4 for gap so labels stay readable at any size.
+function SpellCastBuffs.ApplyIconFlexMargin(container, buff)
+    local holder = SpellCastBuffs.BuffContainers[container].iconHolder
+    local flexDir = holder and holder:GetChildFlexDirection()
+    local flexWrap = holder and holder:GetChildFlexWrap()
+    local isWrap = WRAP_CONTAINERS[container]
+    local isRow = (flexDir == FLEX_DIRECTION_ROW or flexDir == FLEX_DIRECTION_ROW_REVERSE)
+    local isWrapReverse = (flexWrap == FLEX_WRAP_WRAP_REVERSE)
+    local gap = (not isWrap and not isRow)
+        and zo_floor(SpellCastBuffs.SV.IconSize / 10)
+        or SpellCastBuffs.padding
+
+    -- Resolve the physical trailing edge for the current flex direction.
+    local trailingEdge
+    if     flexDir == FLEX_DIRECTION_ROW then
+        trailingEdge = FLEX_EDGE_RIGHT
+    elseif flexDir == FLEX_DIRECTION_ROW_REVERSE then
+        trailingEdge = FLEX_EDGE_LEFT
+    elseif flexDir == FLEX_DIRECTION_COLUMN then
+        trailingEdge = FLEX_EDGE_BOTTOM
+    elseif flexDir == FLEX_DIRECTION_COLUMN_REVERSE then
+        trailingEdge = FLEX_EDGE_TOP
+    else
+        trailingEdge = FLEX_EDGE_RIGHT
+    end
+
+    buff:SetFlexMargins(0, 0, 0, 0)
+    buff:SetFlexMargin(trailingEdge, gap)
+    if isWrap then
+        if isRow then
+            buff:SetFlexMargin(isWrapReverse and FLEX_EDGE_TOP or FLEX_EDGE_BOTTOM, SpellCastBuffs.padding)
+        else
+            buff:SetFlexMargin(isWrapReverse and FLEX_EDGE_LEFT or FLEX_EDGE_RIGHT, SpellCastBuffs.padding)
+        end
+    end
+end
+
 -- Reset only a single icon
-function SpellCastBuffs.ResetSingleIcon(container, buff, AnchorItem)
+function SpellCastBuffs.ResetSingleIcon(container, buff)
     local buffSize = SpellCastBuffs.SV.IconSize
     local frameSize = 2 * buffSize + 4
 
@@ -1244,28 +1435,7 @@ function SpellCastBuffs.ResetSingleIcon(container, buff, AnchorItem)
         end
     end
 
-    -- Position all items except first one to the right of it's neighbor
-    -- First icon is positioned automatically if the container is present
-    buff:ClearAnchors()
-    if AnchorItem == nil then
-        -- First Icon is positioned only when the container is present,
-        if SpellCastBuffs.BuffContainers[container].iconHolder then
-            if SpellCastBuffs.BuffContainers[container].alignVertical then
-                buff:SetAnchor(BOTTOM, SpellCastBuffs.BuffContainers[container].iconHolder, BOTTOM, 0, 0)
-            else
-                buff:SetAnchor(LEFT, SpellCastBuffs.BuffContainers[container].iconHolder, LEFT, 0, 0)
-            end
-        end
-
-        -- For container without holder we will reanchor first icon all the time
-        -- Rest icons go one after another.
-    else
-        if SpellCastBuffs.BuffContainers[container].alignVertical then
-            buff:SetAnchor(BOTTOM, AnchorItem, TOP, 0, -SpellCastBuffs.padding)
-        else
-            buff:SetAnchor(LEFT, AnchorItem, RIGHT, SpellCastBuffs.padding, 0)
-        end
-    end
+    SpellCastBuffs.ApplyIconFlexMargin(container, buff)
 end
 
 -- Right Click Cancel Buff function

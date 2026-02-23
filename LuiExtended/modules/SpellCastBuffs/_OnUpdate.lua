@@ -137,8 +137,13 @@ local function GetOrCreateBuffIconPool(container)
         local function BuffIconFactory(objectPool)
             local effectType = nil -- Will be set when acquired
 
-            -- Create main buff container
-            local buff = UI:Backdrop(SpellCastBuffs.BuffContainers[container], nil, nil, { 0, 0, 0, 0.5 }, { 0, 0, 0, 1 }, false)
+            -- Create main buff container as a flex item inside iconHolder.
+            -- Explicitly disable grow/shrink so icons stay fixed size regardless of container pressure.
+            -- Start excluded from yoga layout — included only when actually shown via CreateSingleIcon.
+            local buff = UI:Backdrop(SpellCastBuffs.BuffContainers[container].iconHolder, nil, nil, { 0, 0, 0, 0.5 }, { 0, 0, 0, 1 }, false)
+            buff:SetFlexGrow(0)
+            buff:SetFlexShrink(0)
+            buff:SetExcludeFromFlexbox(true)
             -- Setup mouse interaction
             buff:SetMouseEnabled(true)
             buff:SetHandler("OnMouseEnter", SpellCastBuffs.Buff_OnMouseEnter)
@@ -211,6 +216,7 @@ local function GetOrCreateBuffIconPool(container)
 
         local function BuffIconReset(buff)
             buff:SetHidden(true)
+            buff:SetExcludeFromFlexbox(true)
             buff:ClearAnchors()
             buff:SetAlpha(1)
             if buff.cd then
@@ -233,14 +239,17 @@ local function GetOrCreateBuffIconPool(container)
     return buffIconPools[container]
 end
 
-local CreateSingleIcon = function (container, AnchorItem, effectType)
+local CreateSingleIcon = function (container, effectType)
     local pool = GetOrCreateBuffIconPool(container)
     local buff = pool:AcquireObject()
 
     -- Reset icon properties for first use
-    SpellCastBuffs.ResetSingleIcon(container, buff, AnchorItem)
+    SpellCastBuffs.ResetSingleIcon(container, buff)
 
-    -- Show the buff
+    -- Include in Yoga first, then (re)apply margins — Yoga may clear node properties
+    -- on the exclude→include transition so margins must be set after SetExcludeFromFlexbox(false).
+    buff:SetExcludeFromFlexbox(false)
+    SpellCastBuffs.ApplyIconFlexMargin(container, buff)
     buff:SetHidden(false)
 
     return buff
@@ -269,30 +278,12 @@ end
 --- @param sortedList table
 --- @param container string
 local updateBar = function (currentTimeMs, sortedList, container)
-    local iconsNum = #sortedList
-    local istart, iend, istep
-
-    if SpellCastBuffs.sortDirection[container] then
-        if SpellCastBuffs.sortDirection[container] == "Left to Right" or SpellCastBuffs.sortDirection[container] == "Bottom to Top" then
-            istart, iend, istep = 1, iconsNum, 1
-        end
-        if SpellCastBuffs.sortDirection[container] == "Right to Left" or SpellCastBuffs.sortDirection[container] == "Top to Bottom" then
-            istart, iend, istep = iconsNum, 1, -1
-        end
-        -- Fall back in case for some strange reason the container doesn't exist
-    else
-        istart, iend, istep = 1, iconsNum, 1
-    end
-
-    local index = 0 -- Global icon counter
-    for i = istart, iend, istep do
-        index = index + 1
-        -- Get current buff definition
+    -- updateIcons always assigns icons[i] = sortedList[i] (1→N order).
+    -- Flex direction handles visual ordering, so bar values must use the same 1→N mapping.
+    -- Old sort-direction–based reverse iteration no longer applies.
+    for i = 1, #sortedList do
         local effect = sortedList[i]
-
-        local ground = effect.groundLabel
-        local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
-        local buff = SpellCastBuffs.BuffContainers[container].icons[index]
+        local buff = SpellCastBuffs.BuffContainers[container].icons[i]
         local auraStarts = effect.starts or nil
         local auraEnds = effect.ends or nil
         -- Modify recall penalty to show forced max duration
@@ -300,9 +291,11 @@ local updateBar = function (currentTimeMs, sortedList, container)
             auraStarts = auraEnds - 600000
         end
 
-        -- If this isn't a permanent duration buff then update the bar on every tick
+        local ground = effect.groundLabel
+        local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
+
         if buff and buff.bar and buff.bar.bar then
-            if auraStarts and auraEnds and remain > 0 and not ground then
+            if auraStarts and auraEnds and remain and remain > 0 and not ground then
                 buff.bar.bar:SetValue(1 - ((currentTimeMs - auraStarts) / (auraEnds - auraStarts)))
             elseif effect.werewolf then
                 buff.bar.bar:SetValue(effect.werewolf)
@@ -328,46 +321,16 @@ local updateIcons = function (currentTimeMs, sortedList, container)
     end
 
     local iconsNum = #sortedList
-    local istart, iend, istep
 
-    -- Set Sort Direction
-    if SpellCastBuffs.sortDirection[container] then
-        if SpellCastBuffs.sortDirection[container] == "Left to Right" or SpellCastBuffs.sortDirection[container] == "Bottom to Top" then
-            istart, iend, istep = 1, iconsNum, 1
-        end
-        if SpellCastBuffs.sortDirection[container] == "Right to Left" or SpellCastBuffs.sortDirection[container] == "Top to Bottom" then
-            istart, iend, istep = iconsNum, 1, -1
-        end
-        -- Fall back in case there is no sort direction for the container somehow
-    else
-        istart, iend, istep = 1, iconsNum, 1
-    end
-
-    -- Size of icon+padding
-    local iconSize = SpellCastBuffs.SV.IconSize + SpellCastBuffs.padding
-
-    -- Set width of contol that holds icons. This will make alignment automatic
-    if SpellCastBuffs.BuffContainers[container].iconHolder then
-        if SpellCastBuffs.BuffContainers[container].alignVertical then
-            SpellCastBuffs.BuffContainers[container].iconHolder:SetDimensions(0, iconSize * iconsNum - SpellCastBuffs.padding)
-        else
-            SpellCastBuffs.BuffContainers[container].iconHolder:SetDimensions(iconSize * iconsNum - SpellCastBuffs.padding, 0)
-        end
-    end
-
-    -- Prepare variables for manual alignment of icons
-    local row = 0 -- row counter for multi-row placement
-    local next_row_break = 1
-
-    -- Iterate over list of sorted icons
+    -- Flex layout handles visual ordering; always iterate 1→N in sorted order
     local index = 0 -- Global icon counter
-    for i = istart, iend, istep do
+    for i = 1, iconsNum do
         -- Get current buff definition
         local effect = sortedList[i]
         index = index + 1
         -- Get or create icon from pool
         if SpellCastBuffs.BuffContainers[container].icons[index] == nil then
-            SpellCastBuffs.BuffContainers[container].icons[index] = CreateSingleIcon(container, SpellCastBuffs.BuffContainers[container].icons[index - 1], effect.type)
+            SpellCastBuffs.BuffContainers[container].icons[index] = CreateSingleIcon(container, effect.type)
         end
 
         -- Calculate remaining time
@@ -375,57 +338,12 @@ local updateIcons = function (currentTimeMs, sortedList, container)
         local name = (effect.name ~= nil) and effect.name or nil
 
         local buff = SpellCastBuffs.BuffContainers[container].icons[index]
-        -- Ensure buff is shown (may have been hidden by pool reset)
+        -- Include in Yoga FIRST, then set margins.
+        -- SetExcludeFromFlexbox may clear Yoga node properties on the transition,
+        -- so margins must be (re)applied after the node is included, not before.
+        buff:SetExcludeFromFlexbox(false)
+        SpellCastBuffs.ApplyIconFlexMargin(container, buff)
         buff:SetHidden(false)
-
-        -- Perform manual alignment
-        if not SpellCastBuffs.BuffContainers[container].iconHolder then
-            if
-            iconsNum ~= SpellCastBuffs.BuffContainers[container].prevIconsCount and index == next_row_break --[[and horizontal orientation of container]]
-            then
-                -- Padding of first icon in a row
-                local anchor, leftPadding
-
-                if SpellCastBuffs.alignmentDirection[container] then
-                    if SpellCastBuffs.alignmentDirection[container] == LEFT then
-                        anchor = TOPLEFT
-                        leftPadding = SpellCastBuffs.padding
-                    elseif SpellCastBuffs.alignmentDirection[container] == RIGHT then
-                        anchor = TOPRIGHT
-                        leftPadding = -zo_min(SpellCastBuffs.BuffContainers[container].maxIcons, iconsNum - SpellCastBuffs.BuffContainers[container].maxIcons * row) * iconSize - SpellCastBuffs.padding
-                    else
-                        anchor = TOP
-                        leftPadding = -0.5 * (zo_min(SpellCastBuffs.BuffContainers[container].maxIcons, iconsNum - SpellCastBuffs.BuffContainers[container].maxIcons * row) * iconSize - SpellCastBuffs.padding)
-                    end
-                else
-                    -- Fallback
-                    anchor = TOP
-                    leftPadding = -0.5 * (zo_min(SpellCastBuffs.BuffContainers[container].maxIcons, iconsNum - SpellCastBuffs.BuffContainers[container].maxIcons * row) * iconSize - SpellCastBuffs.padding)
-                end
-
-                buff:ClearAnchors()
-                buff:SetAnchor(TOPLEFT, SpellCastBuffs.BuffContainers[container], anchor, leftPadding, row * iconSize)
-                -- Determine if we need to make next row
-                if SpellCastBuffs.BuffContainers[container].maxIcons then
-                    -- If buffs then stack down
-                    if container == "player1" or container == "target1" then
-                        row = row + 1
-                        -- If debuffs then stack up
-                    elseif container == "player2" or container == "target2" then
-                        row = row - 1
-                    elseif container == "playerb" then
-                        row = row + (SpellCastBuffs.SV.StackPlayerBuffs == "Down" and 1 or -1)
-                    elseif container == "playerd" then
-                        row = row + (SpellCastBuffs.SV.StackPlayerDebuffs == "Down" and 1 or -1)
-                    elseif container == "targetb" then
-                        row = row + (SpellCastBuffs.SV.StackTargetBuffs == "Down" and 1 or -1)
-                    elseif container == "targetd" then
-                        row = row + (SpellCastBuffs.SV.StackTargetDebuffs == "Down" and 1 or -1)
-                    end
-                    next_row_break = next_row_break + SpellCastBuffs.BuffContainers[container].maxIcons
-                end
-            end
-        end
 
         -- If previously this icon was used for different effect, then setup it again
         if effect.iconNum ~= index then
@@ -515,13 +433,12 @@ local updateIcons = function (currentTimeMs, sortedList, container)
         end
     end
 
-    -- Hide rest of icons
+    -- Hide rest of icons and remove them from yoga layout so they don't affect wrap calculations
     for i = iconsNum + 1, #SpellCastBuffs.BuffContainers[container].icons do
-        SpellCastBuffs.BuffContainers[container].icons[i]:SetHidden(true)
+        local icon = SpellCastBuffs.BuffContainers[container].icons[i]
+        icon:SetHidden(true)
+        icon:SetExcludeFromFlexbox(true)
     end
-
-    -- Save icon number processed to compare in next update iteration
-    SpellCastBuffs.BuffContainers[container].prevIconsCount = iconsNum
 end
 
 
