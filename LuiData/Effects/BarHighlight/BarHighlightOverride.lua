@@ -668,6 +668,7 @@ local barHighlightOverride =
     ---------------------------
     -- Temp -------------------
     ---------------------------
+    [217699]= { newId = 227087 }, -- Dragonknight's Banner
 }
 
 Effects.BarHighlightOverride = barHighlightOverride
