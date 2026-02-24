@@ -47,7 +47,7 @@ end
 function LUIE:InitializeHooks()
     self.API_Hooks()
     self.HookActionButton()
-    self.HookSynergy()
+    -- self.HookSynergy() --TODO: Disabled due to performance issue. Investigating.
     self.InitializeHooksSkillAdvisor()
     self.HookGamePadIcons()
     self.HookGamePadStats()
