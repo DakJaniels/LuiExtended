@@ -62,6 +62,12 @@ function UnitFrames.GroupFrames_OnMouseUp(self, button, upInside)
                             ZO_Dialogs_ShowDialog("GROUP_DISBAND_DIALOG")
                         end)
                     end
+                else
+                    if not isLFG then
+                        AddMenuItem(GetString(SI_GROUP_LIST_MENU_KICK_FROM_GROUP), function ()
+                            GroupKick(unitTag)
+                        end)
+                    end
                 end
             end
         end
