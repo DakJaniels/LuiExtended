@@ -172,6 +172,10 @@ function SpellCastBuffs.CreateSettings()
                 SpellCastBuffs.SV.lockPositionToUnitFrames = false
             end
             SpellCastBuffs.SetMovingState(value)
+            -- Refresh grid overlay so it appears when unlocking with snap enabled, and hides when locking
+            local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+            local gridSize = accountWideSettings.snapToGridSize_buffs or 15
+            GridOverlay.Refresh("buffs", value and accountWideSettings.snapToGrid_buffs, gridSize)
         end,
         width = "half",
         default = false,
