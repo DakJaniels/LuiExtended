@@ -164,6 +164,85 @@ local SINGLE_AXIS_CONTAINERS =
     player_long = true, prominentbuffs = true, prominentdebuffs = true,
 }
 
+-- Returns creation-time width for a container: parent width > SV width > fallback.
+local function GetContainerInitWidth(containerKey)
+    local buffContainer = SpellCastBuffs.BuffContainers[containerKey]
+    local parentWidth = buffContainer and buffContainer:GetWidth()
+    if parentWidth and parentWidth > 0 then
+        return parentWidth
+    end
+    if containerKey == "playerb" then return SpellCastBuffs.SV.WidthPlayerBuffs end
+    if containerKey == "playerd" then return SpellCastBuffs.SV.WidthPlayerDebuffs end
+    if containerKey == "targetb" then return SpellCastBuffs.SV.WidthTargetBuffs end
+    if containerKey == "targetd" then return SpellCastBuffs.SV.WidthTargetDebuffs end
+    return 400
+end
+
+-- Creates a TopLevel, stores it in BuffContainers[containerKey], and sets OnMoveStop to saveCallback(self).
+local function CreateDraggableTopLevel(containerKey, saveCallback)
+    SpellCastBuffs.BuffContainers[containerKey] = UI:TopLevel(nil, nil)
+    SpellCastBuffs.BuffContainers[containerKey]:SetHandler("OnMoveStop", saveCallback)
+    return SpellCastBuffs.BuffContainers[containerKey]
+end
+
+-- Creates a HUD fade fragment for a container and appends it to the given fragments table.
+local function AddHudFragment(fragmentsTable, buffContainer)
+    table_insert(fragmentsTable, ZO_HUDFadeSceneFragment:New(buffContainer, 0, 0))
+end
+
+-- Adds all fragments to the relevant HUD/siege scenes.
+local function RegisterFragmentsToScenes(fragmentsTable)
+    for _, fragment in pairs(fragmentsTable) do
+        sceneManager:GetScene("hud"):AddFragment(fragment)
+        sceneManager:GetScene("hudui"):AddFragment(fragment)
+        sceneManager:GetScene("siegeBar"):AddFragment(fragment)
+        sceneManager:GetScene("siegeBarUI"):AddFragment(fragment)
+    end
+end
+
+-- Sets buffContainer.alignVertical from SV-style alignment value (1 = horizontal/false, 2 = vertical/true).
+local function SetContainerAlignVertical(buffContainer, alignmentSVValue)
+    if alignmentSVValue == 1 then
+        buffContainer.alignVertical = false
+    elseif alignmentSVValue == 2 then
+        buffContainer.alignVertical = true
+    end
+end
+
+-- Creates preview texture/label and iconHolder for a single container; sets draw layer/tier/level and icons table.
+local function InitializeContainerLayout(containerKey)
+    local buffContainer = SpellCastBuffs.BuffContainers[containerKey]
+    buffContainer:SetDrawLayer(DL_BACKGROUND)
+    buffContainer:SetDrawTier(DT_LOW)
+    buffContainer:SetDrawLevel(DL_CONTROLS)
+    if buffContainer.preview == nil then
+        buffContainer.preview = UI:Texture(buffContainer, "fill", nil, "/esoui/art/miscellaneous/inset_bg.dds", DL_BACKGROUND, true)
+        local lockedSuffix = (SpellCastBuffs.SV.lockPositionToUnitFrames and (containerKey ~= "player_long" and containerKey ~= "prominentbuffs" and containerKey ~= "prominentdebuffs") and " (locked)" or "")
+        buffContainer.previewLabel = UI:Label(buffContainer.preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", SpellCastBuffs.windowTitles[containerKey] .. lockedSuffix, false)
+    end
+    local isWrapContainer = WRAP_CONTAINERS[containerKey] == true
+    local initialFlexDirection = buffContainer.alignVertical and FLEX_DIRECTION_COLUMN or FLEX_DIRECTION_ROW
+    local flexWrapMode = isWrapContainer and FLEX_WRAP_WRAP or FLEX_WRAP_NO_WRAP
+    local iconSize = SpellCastBuffs.SV.IconSize
+    local initialWidth = GetContainerInitWidth(containerKey)
+    local initialHeight = isWrapContainer and (iconSize * 10) or (iconSize + 6)
+    buffContainer.iconHolder = UI:FlexControl(buffContainer, { TOPLEFT, TOPLEFT, 0, 0 }, { initialWidth, initialHeight }, false,
+                                              {
+                                                  container =
+                                                  {
+                                                      direction        = initialFlexDirection,
+                                                      wrap             = flexWrapMode,
+                                                      justification    = FLEX_JUSTIFICATION_FLEX_START,
+                                                      itemAlignment    = FLEX_ALIGNMENT_FLEX_START,
+                                                      contentAlignment = FLEX_ALIGNMENT_FLEX_START,
+                                                  }
+                                              })
+    buffContainer.icons = {}
+    if buffContainer:GetType() == CT_TOPLEVELCONTROL then
+        LUIE.Components[moduleName .. containerKey] = buffContainer
+    end
+end
+
 -- Initialization
 function SpellCastBuffs.Initialize(enabled)
     -- Load settings
@@ -206,25 +285,19 @@ function SpellCastBuffs.Initialize(enabled)
         SpellCastBuffs.containerRouting.player1 = "player1"
         SpellCastBuffs.containerRouting.player2 = "player2"
     else
-        SpellCastBuffs.BuffContainers.playerb = UI:TopLevel(nil, nil)
-        local playerb_OnMoveStop = function (self)
+        CreateDraggableTopLevel("playerb", function (self)
             SpellCastBuffs.SV.playerbOffsetX = self:GetLeft()
             SpellCastBuffs.SV.playerbOffsetY = self:GetTop()
-        end
-        SpellCastBuffs.BuffContainers.playerb:SetHandler("OnMoveStop", playerb_OnMoveStop)
-        SpellCastBuffs.BuffContainers.playerd = UI:TopLevel(nil, nil)
-        local playerd_OnMoveStop = function (self)
+        end)
+        CreateDraggableTopLevel("playerd", function (self)
             SpellCastBuffs.SV.playerdOffsetX = self:GetLeft()
             SpellCastBuffs.SV.playerdOffsetY = self:GetTop()
-        end
-        SpellCastBuffs.BuffContainers.playerd:SetHandler("OnMoveStop", playerd_OnMoveStop)
+        end)
         SpellCastBuffs.containerRouting.player1 = "playerb"
         SpellCastBuffs.containerRouting.player2 = "playerd"
 
-        local fragment1 = ZO_HUDFadeSceneFragment:New(SpellCastBuffs.BuffContainers.playerb, 0, 0)
-        local fragment2 = ZO_HUDFadeSceneFragment:New(SpellCastBuffs.BuffContainers.playerd, 0, 0)
-        table_insert(fragments, fragment1)
-        table_insert(fragments, fragment2)
+        AddHudFragment(fragments, SpellCastBuffs.BuffContainers.playerb)
+        AddHudFragment(fragments, SpellCastBuffs.BuffContainers.playerd)
     end
 
     -- Create TopLevelWindows for buff frames when NOT locked to Custom Unit Frames
@@ -235,31 +308,24 @@ function SpellCastBuffs.Initialize(enabled)
         SpellCastBuffs.containerRouting.reticleover2 = "target2"
         SpellCastBuffs.containerRouting.ground = "target2"
     else
-        SpellCastBuffs.BuffContainers.targetb = UI:TopLevel(nil, nil)
-        local targetb_OnMoveStop = function (self)
+        CreateDraggableTopLevel("targetb", function (self)
             SpellCastBuffs.SV.targetbOffsetX = self:GetLeft()
             SpellCastBuffs.SV.targetbOffsetY = self:GetTop()
-        end
-        SpellCastBuffs.BuffContainers.targetb:SetHandler("OnMoveStop", targetb_OnMoveStop)
-        SpellCastBuffs.BuffContainers.targetd = UI:TopLevel(nil, nil)
-        local targetd_OnMoveStop = function (self)
+        end)
+        CreateDraggableTopLevel("targetd", function (self)
             SpellCastBuffs.SV.targetdOffsetX = self:GetLeft()
             SpellCastBuffs.SV.targetdOffsetY = self:GetTop()
-        end
-        SpellCastBuffs.BuffContainers.targetd:SetHandler("OnMoveStop", targetd_OnMoveStop)
+        end)
         SpellCastBuffs.containerRouting.reticleover1 = "targetb"
         SpellCastBuffs.containerRouting.reticleover2 = "targetd"
         SpellCastBuffs.containerRouting.ground = "targetd"
 
-        local fragment1 = ZO_HUDFadeSceneFragment:New(SpellCastBuffs.BuffContainers.targetb, 0, 0)
-        local fragment2 = ZO_HUDFadeSceneFragment:New(SpellCastBuffs.BuffContainers.targetd, 0, 0)
-        table_insert(fragments, fragment1)
-        table_insert(fragments, fragment2)
+        AddHudFragment(fragments, SpellCastBuffs.BuffContainers.targetb)
+        AddHudFragment(fragments, SpellCastBuffs.BuffContainers.targetd)
     end
 
     -- Create TopLevelWindows for Prominent Buffs
-    SpellCastBuffs.BuffContainers.prominentbuffs = UI:TopLevel(nil, nil)
-    SpellCastBuffs.BuffContainers.prominentbuffs:SetHandler("OnMoveStop", function (self)
+    CreateDraggableTopLevel("prominentbuffs", function (self)
         if self.alignVertical then
             SpellCastBuffs.SV.prominentbVOffsetX = self:GetLeft()
             SpellCastBuffs.SV.prominentbVOffsetY = self:GetTop()
@@ -268,8 +334,7 @@ function SpellCastBuffs.Initialize(enabled)
             SpellCastBuffs.SV.prominentbHOffsetY = self:GetTop()
         end
     end)
-    SpellCastBuffs.BuffContainers.prominentdebuffs = UI:TopLevel(nil, nil)
-    SpellCastBuffs.BuffContainers.prominentdebuffs:SetHandler("OnMoveStop", function (self)
+    CreateDraggableTopLevel("prominentdebuffs", function (self)
         if self.alignVertical then
             SpellCastBuffs.SV.prominentdVOffsetX = self:GetLeft()
             SpellCastBuffs.SV.prominentdVOffsetY = self:GetTop()
@@ -279,16 +344,8 @@ function SpellCastBuffs.Initialize(enabled)
         end
     end)
 
-    if SpellCastBuffs.SV.ProminentBuffContainerAlignment == 1 then
-        SpellCastBuffs.BuffContainers.prominentbuffs.alignVertical = false
-    elseif SpellCastBuffs.SV.ProminentBuffContainerAlignment == 2 then
-        SpellCastBuffs.BuffContainers.prominentbuffs.alignVertical = true
-    end
-    if SpellCastBuffs.SV.ProminentDebuffContainerAlignment == 1 then
-        SpellCastBuffs.BuffContainers.prominentdebuffs.alignVertical = false
-    elseif SpellCastBuffs.SV.ProminentDebuffContainerAlignment == 2 then
-        SpellCastBuffs.BuffContainers.prominentdebuffs.alignVertical = true
-    end
+    SetContainerAlignVertical(SpellCastBuffs.BuffContainers.prominentbuffs, SpellCastBuffs.SV.ProminentBuffContainerAlignment)
+    SetContainerAlignVertical(SpellCastBuffs.BuffContainers.prominentdebuffs, SpellCastBuffs.SV.ProminentDebuffContainerAlignment)
 
     SpellCastBuffs.containerRouting.promb_ground = "prominentbuffs"
     SpellCastBuffs.containerRouting.promb_target = "prominentbuffs"
@@ -297,16 +354,12 @@ function SpellCastBuffs.Initialize(enabled)
     SpellCastBuffs.containerRouting.promd_target = "prominentdebuffs"
     SpellCastBuffs.containerRouting.promd_player = "prominentdebuffs"
 
-    local fragmentP1 = ZO_HUDFadeSceneFragment:New(SpellCastBuffs.BuffContainers.prominentbuffs, 0, 0)
-    local fragmentP2 = ZO_HUDFadeSceneFragment:New(SpellCastBuffs.BuffContainers.prominentdebuffs, 0, 0)
-    table_insert(fragments, fragmentP1)
-    table_insert(fragments, fragmentP2)
+    AddHudFragment(fragments, SpellCastBuffs.BuffContainers.prominentbuffs)
+    AddHudFragment(fragments, SpellCastBuffs.BuffContainers.prominentdebuffs)
 
     -- Separate container for players long term buffs
-    SpellCastBuffs.BuffContainers.player_long = UI:TopLevel(nil, nil)
-    SpellCastBuffs.BuffContainers.player_long:SetHandler("OnMoveStop", function (self)
-        local left = self:GetLeft()
-        local top = self:GetTop()
+    CreateDraggableTopLevel("player_long", function (self)
+        local left, top = self:GetLeft(), self:GetTop()
         if self.alignVertical then
             SpellCastBuffs.SV.playerVOffsetX = left
             SpellCastBuffs.SV.playerVOffsetY = top
@@ -316,85 +369,22 @@ function SpellCastBuffs.Initialize(enabled)
         end
     end)
 
-    if SpellCastBuffs.SV.LongTermEffectsSeparateAlignment == 1 then
-        SpellCastBuffs.BuffContainers.player_long.alignVertical = false
-    elseif SpellCastBuffs.SV.LongTermEffectsSeparateAlignment == 2 then
-        SpellCastBuffs.BuffContainers.player_long.alignVertical = true
-    end
+    SetContainerAlignVertical(SpellCastBuffs.BuffContainers.player_long, SpellCastBuffs.SV.LongTermEffectsSeparateAlignment)
 
     SpellCastBuffs.BuffContainers.player_long.skipUpdate = 0
     SpellCastBuffs.containerRouting.player_long = "player_long"
 
-    local fragment = ZO_HUDFadeSceneFragment:New(SpellCastBuffs.BuffContainers.player_long, 0, 0)
-    fragments[#fragments + 1] = fragment
+    AddHudFragment(fragments, SpellCastBuffs.BuffContainers.player_long)
 
     -- Loop over table of fragments to add them to relevant UI Scenes
-    for _, v in pairs(fragments) do
-        sceneManager:GetScene("hud"):AddFragment(v)
-        sceneManager:GetScene("hudui"):AddFragment(v)
-        sceneManager:GetScene("siegeBar"):AddFragment(v)
-        sceneManager:GetScene("siegeBarUI"):AddFragment(v)
-    end
+    RegisterFragmentsToScenes(fragments)
 
     -- Set Buff Container Positions
     SpellCastBuffs.SetTlwPosition()
 
-    -- Loop over created controls to...
-    for _, v in pairs(SpellCastBuffs.containerRouting) do
-        -- Set Draw Priority
-        SpellCastBuffs.BuffContainers[v]:SetDrawLayer(DL_BACKGROUND)
-        SpellCastBuffs.BuffContainers[v]:SetDrawTier(DT_LOW)
-        SpellCastBuffs.BuffContainers[v]:SetDrawLevel(DL_CONTROLS)
-        if SpellCastBuffs.BuffContainers[v].preview == nil then
-            -- Create background areas for preview position purposes
-            -- SpellCastBuffs.BuffContainers[v].preview = UI:Backdrop( SpellCastBuffs.BuffContainers[v], "fill", nil, nil, nil, true )
-            SpellCastBuffs.BuffContainers[v].preview = UI:Texture(SpellCastBuffs.BuffContainers[v], "fill", nil, "/esoui/art/miscellaneous/inset_bg.dds", DL_BACKGROUND, true)
-            SpellCastBuffs.BuffContainers[v].previewLabel = UI:Label(SpellCastBuffs.BuffContainers[v].preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", SpellCastBuffs.windowTitles[v] .. (SpellCastBuffs.SV.lockPositionToUnitFrames and (v ~= "player_long" and v ~= "prominentbuffs" and v ~= "prominentdebuffs") and " (locked)" or ""), false)
-        end
-        -- Create flex container that will hold and lay out the icons.
-        -- Dimensions must be passed at creation time so yoga has a concrete container size when
-        -- SetChildLayout runs. Priority: (1) actual parent width if already sized (UF containers),
-        -- (2) the user-configurable SV width for standalone TLW containers, (3) a safe fallback.
-        -- Reset() will call SetDimensions again with the definitive values.
-        local isWrapContainer = WRAP_CONTAINERS[v] == true
-        local initFlexDir = SpellCastBuffs.BuffContainers[v].alignVertical and FLEX_DIRECTION_COLUMN or FLEX_DIRECTION_ROW
-        local holderWrap = isWrapContainer and FLEX_WRAP_WRAP or FLEX_WRAP_NO_WRAP
-        local initIconSize = SpellCastBuffs.SV.IconSize
-        -- Determine creation-time width: real parent width > SV-driven width > fallback
-        local parentW = SpellCastBuffs.BuffContainers[v]:GetWidth()
-        local initW
-        if parentW and parentW > 0 then
-            initW = parentW
-        elseif v == "playerb" then
-            initW = SpellCastBuffs.SV.WidthPlayerBuffs
-        elseif v == "playerd" then
-            initW = SpellCastBuffs.SV.WidthPlayerDebuffs
-        elseif v == "targetb" then
-            initW = SpellCastBuffs.SV.WidthTargetBuffs
-        elseif v == "targetd" then
-            initW = SpellCastBuffs.SV.WidthTargetDebuffs
-        else
-            initW = 400 -- UF containers: Reset() will overwrite with t:GetWidth()
-        end
-        local initH = isWrapContainer and (initIconSize * 10) or (initIconSize + 6)
-        SpellCastBuffs.BuffContainers[v].iconHolder = UI:FlexControl(SpellCastBuffs.BuffContainers[v], { TOPLEFT, TOPLEFT, 0, 0 }, { initW, initH }, false,
-                                                                     {
-                                                                         container =
-                                                                         {
-                                                                             direction        = initFlexDir,
-                                                                             wrap             = holderWrap,
-                                                                             justification    = FLEX_JUSTIFICATION_FLEX_START,
-                                                                             itemAlignment    = FLEX_ALIGNMENT_FLEX_START,
-                                                                             contentAlignment = FLEX_ALIGNMENT_FLEX_START,
-                                                                         }
-                                                                     })
-        -- Create table to store created contols for icons
-        SpellCastBuffs.BuffContainers[v].icons = {}
-
-        -- add this top level window to global controls list, so it can be hidden
-        if SpellCastBuffs.BuffContainers[v]:GetType() == CT_TOPLEVELCONTROL then
-            LUIE.Components[moduleName .. v] = SpellCastBuffs.BuffContainers[v]
-        end
+    -- Initialize layout (draw layer, preview, iconHolder, icons) for each container
+    for _, routedContainerKey in pairs(SpellCastBuffs.containerRouting) do
+        InitializeContainerLayout(routedContainerKey)
     end
 
     SpellCastBuffs.Reset()
@@ -839,136 +829,122 @@ function SpellCastBuffs.ResetTlwPosition()
     SpellCastBuffs.SetTlwPosition()
 end
 
+-- Cached account-wide lookup for grid snap (evaluated at call time).
+local function IsSnapToGridBuffsEnabled()
+    return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs
+end
+
+-- Applies saved or default position to a TLW. If savedX/savedY are present, optionally snaps and anchors TOPLEFT to GuiRoot; otherwise uses default anchor.
+local function ApplySimpleTlwPosition(container, savedX, savedY, defaultPoint, defaultOwner, defaultOwnerPoint, defaultOffsetX, defaultOffsetY)
+    container:ClearAnchors()
+    if savedX ~= nil and savedY ~= nil then
+        local positionX, positionY = savedX, savedY
+        if IsSnapToGridBuffsEnabled() then
+            positionX, positionY = LUIE.ApplyGridSnap(positionX, positionY, "buffs")
+        end
+        container:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, positionX, positionY)
+    else
+        container:SetAnchor(defaultPoint, defaultOwner, defaultOwnerPoint, defaultOffsetX, defaultOffsetY)
+    end
+end
+
+-- Default anchor descriptor for dual-alignment containers.
+local function DefaultAnchor(point, owner, ownerPoint, offsetX, offsetY)
+    return { point = point, owner = owner, ownerPoint = ownerPoint, offsetX = offsetX, offsetY = offsetY }
+end
+
+-- Applies saved or default position for containers with vertical/horizontal alignment. Picks saved coords and default anchor from container.alignVertical.
+local function ApplyDualAlignmentTlwPosition(container, savedVX, savedVY, savedHX, savedHY, defaultVerticalAnchor, defaultHorizontalAnchor)
+    container:ClearAnchors()
+    local savedX, savedY, defaultAnchor
+    if container.alignVertical then
+        savedX, savedY = savedVX, savedVY
+        defaultAnchor = defaultVerticalAnchor
+    else
+        savedX, savedY = savedHX, savedHY
+        defaultAnchor = defaultHorizontalAnchor
+    end
+    if savedX ~= nil and savedY ~= nil then
+        local positionX, positionY = savedX, savedY
+        if IsSnapToGridBuffsEnabled() then
+            positionX, positionY = LUIE.ApplyGridSnap(positionX, positionY, "buffs")
+        end
+        container:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, positionX, positionY)
+    else
+        container:SetAnchor(defaultAnchor.point, defaultAnchor.owner, defaultAnchor.ownerPoint, defaultAnchor.offsetX, defaultAnchor.offsetY)
+    end
+end
+
 -- Set position of windows. Called from .Initialize() and .ResetTlwPosition()
 function SpellCastBuffs.SetTlwPosition()
-    -- If icons are locked to custom frames, i.e. SpellCastBuffs.BuffContainers[] is a CT_CONTROL of LUIE.UnitFrames.CustomFrames.player we do not have to do anything here. so just bail out
-    -- Otherwise set position of SpellCastBuffs.BuffContainers[] which are CT_TOPLEVELCONTROLs to saved or default positions
+    -- If icons are locked to custom frames, BuffContainers are CT_CONTROLs on UnitFrames; otherwise they are CT_TOPLEVELCONTROLs — only position TLWs.
+    local lockToUnitFrames = SpellCastBuffs.SV.lockPositionToUnitFrames
+    local useSavedPosition = (lockToUnitFrames == nil or not lockToUnitFrames)
+
     if SpellCastBuffs.BuffContainers.playerb and SpellCastBuffs.BuffContainers.playerb:GetType() == CT_TOPLEVELCONTROL then
-        SpellCastBuffs.BuffContainers.playerb:ClearAnchors()
-        if (SpellCastBuffs.SV.lockPositionToUnitFrames == nil or not SpellCastBuffs.SV.lockPositionToUnitFrames) and SpellCastBuffs.SV.playerbOffsetX ~= nil and SpellCastBuffs.SV.playerbOffsetY ~= nil then
-            local x, y = SpellCastBuffs.SV.playerbOffsetX, SpellCastBuffs.SV.playerbOffsetY
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                x, y = LUIE.ApplyGridSnap(x, y, "buffs")
-            end
-            SpellCastBuffs.BuffContainers.playerb:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
-        else
-            SpellCastBuffs.BuffContainers.playerb:SetAnchor(BOTTOM, ZO_PlayerAttributeHealth, TOP, 0, -10)
-        end
+        ApplySimpleTlwPosition(
+            SpellCastBuffs.BuffContainers.playerb,
+            useSavedPosition and SpellCastBuffs.SV.playerbOffsetX or nil,
+            useSavedPosition and SpellCastBuffs.SV.playerbOffsetY or nil,
+            BOTTOM, ZO_PlayerAttributeHealth, TOP, 0, -10
+        )
     end
 
     if SpellCastBuffs.BuffContainers.playerd and SpellCastBuffs.BuffContainers.playerd:GetType() == CT_TOPLEVELCONTROL then
-        SpellCastBuffs.BuffContainers.playerd:ClearAnchors()
-        if (SpellCastBuffs.SV.lockPositionToUnitFrames == nil or not SpellCastBuffs.SV.lockPositionToUnitFrames) and SpellCastBuffs.SV.playerdOffsetX ~= nil and SpellCastBuffs.SV.playerdOffsetY ~= nil then
-            local x, y = SpellCastBuffs.SV.playerdOffsetX, SpellCastBuffs.SV.playerdOffsetY
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                x, y = LUIE.ApplyGridSnap(x, y, "buffs")
-            end
-            SpellCastBuffs.BuffContainers.playerd:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
-        else
-            SpellCastBuffs.BuffContainers.playerd:SetAnchor(BOTTOM, ZO_PlayerAttributeHealth, TOP, 0, -60)
-        end
+        ApplySimpleTlwPosition(
+            SpellCastBuffs.BuffContainers.playerd,
+            useSavedPosition and SpellCastBuffs.SV.playerdOffsetX or nil,
+            useSavedPosition and SpellCastBuffs.SV.playerdOffsetY or nil,
+            BOTTOM, ZO_PlayerAttributeHealth, TOP, 0, -60
+        )
     end
 
     if SpellCastBuffs.BuffContainers.targetb and SpellCastBuffs.BuffContainers.targetb:GetType() == CT_TOPLEVELCONTROL then
-        SpellCastBuffs.BuffContainers.targetb:ClearAnchors()
-        if (SpellCastBuffs.SV.lockPositionToUnitFrames == nil or not SpellCastBuffs.SV.lockPositionToUnitFrames) and SpellCastBuffs.SV.targetbOffsetX ~= nil and SpellCastBuffs.SV.targetbOffsetY ~= nil then
-            local x, y = SpellCastBuffs.SV.targetbOffsetX, SpellCastBuffs.SV.targetbOffsetY
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                x, y = LUIE.ApplyGridSnap(x, y, "buffs")
-            end
-            SpellCastBuffs.BuffContainers.targetb:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
-        else
-            SpellCastBuffs.BuffContainers.targetb:SetAnchor(TOP, ZO_TargetUnitFramereticleover, BOTTOM, 0, 60)
-        end
+        ApplySimpleTlwPosition(
+            SpellCastBuffs.BuffContainers.targetb,
+            useSavedPosition and SpellCastBuffs.SV.targetbOffsetX or nil,
+            useSavedPosition and SpellCastBuffs.SV.targetbOffsetY or nil,
+            TOP, ZO_TargetUnitFramereticleover, BOTTOM, 0, 60
+        )
     end
 
     if SpellCastBuffs.BuffContainers.targetd and SpellCastBuffs.BuffContainers.targetd:GetType() == CT_TOPLEVELCONTROL then
-        SpellCastBuffs.BuffContainers.targetd:ClearAnchors()
-        if (SpellCastBuffs.SV.lockPositionToUnitFrames == nil or not SpellCastBuffs.SV.lockPositionToUnitFrames) and SpellCastBuffs.SV.targetdOffsetX ~= nil and SpellCastBuffs.SV.targetdOffsetY ~= nil then
-            local x, y = SpellCastBuffs.SV.targetdOffsetX, SpellCastBuffs.SV.targetdOffsetY
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                x, y = LUIE.ApplyGridSnap(x, y, "buffs")
-            end
-            SpellCastBuffs.BuffContainers.targetd:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
-        else
-            SpellCastBuffs.BuffContainers.targetd:SetAnchor(TOP, ZO_TargetUnitFramereticleover, BOTTOM, 0, 110)
-        end
+        ApplySimpleTlwPosition(
+            SpellCastBuffs.BuffContainers.targetd,
+            useSavedPosition and SpellCastBuffs.SV.targetdOffsetX or nil,
+            useSavedPosition and SpellCastBuffs.SV.targetdOffsetY or nil,
+            TOP, ZO_TargetUnitFramereticleover, BOTTOM, 0, 110
+        )
     end
 
     if SpellCastBuffs.BuffContainers.player_long then
-        SpellCastBuffs.BuffContainers.player_long:ClearAnchors()
-        if SpellCastBuffs.BuffContainers.player_long.alignVertical then
-            if SpellCastBuffs.SV.playerVOffsetX ~= nil and SpellCastBuffs.SV.playerVOffsetY ~= nil then
-                local x, y = SpellCastBuffs.SV.playerVOffsetX, SpellCastBuffs.SV.playerVOffsetY
-                if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                    x, y = LUIE.ApplyGridSnap(x, y, "buffs")
-                end
-                SpellCastBuffs.BuffContainers.player_long:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
-            else
-                SpellCastBuffs.BuffContainers.player_long:SetAnchor(BOTTOMRIGHT, GuiRoot, BOTTOMRIGHT, -3, -75)
-            end
-        else
-            if SpellCastBuffs.SV.playerHOffsetX ~= nil and SpellCastBuffs.SV.playerHOffsetY ~= nil then
-                local x, y = SpellCastBuffs.SV.playerHOffsetX, SpellCastBuffs.SV.playerHOffsetY
-                if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                    x, y = LUIE.ApplyGridSnap(x, y, "buffs")
-                end
-                SpellCastBuffs.BuffContainers.player_long:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
-            else
-                SpellCastBuffs.BuffContainers.player_long:SetAnchor(BOTTOM, ZO_PlayerAttributeHealth, TOP, 0, -70)
-            end
-        end
+        ApplyDualAlignmentTlwPosition(
+            SpellCastBuffs.BuffContainers.player_long,
+            SpellCastBuffs.SV.playerVOffsetX, SpellCastBuffs.SV.playerVOffsetY,
+            SpellCastBuffs.SV.playerHOffsetX, SpellCastBuffs.SV.playerHOffsetY,
+            DefaultAnchor(BOTTOMRIGHT, GuiRoot, BOTTOMRIGHT, -3, -75),
+            DefaultAnchor(BOTTOM, ZO_PlayerAttributeHealth, TOP, 0, -70)
+        )
     end
 
-    -- Setup Prominent Buffs Position
     if SpellCastBuffs.BuffContainers.prominentbuffs then
-        SpellCastBuffs.BuffContainers.prominentbuffs:ClearAnchors()
-        if SpellCastBuffs.BuffContainers.prominentbuffs.alignVertical then
-            if SpellCastBuffs.SV.prominentbVOffsetX ~= nil and SpellCastBuffs.SV.prominentbVOffsetY ~= nil then
-                local x, y = SpellCastBuffs.SV.prominentbVOffsetX, SpellCastBuffs.SV.prominentbVOffsetY
-                if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                    x, y = LUIE.ApplyGridSnap(x, y, "buffs")
-                end
-                SpellCastBuffs.BuffContainers.prominentbuffs:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
-            else
-                SpellCastBuffs.BuffContainers.prominentbuffs:SetAnchor(CENTER, GuiRoot, CENTER, -340, -100)
-            end
-        else
-            if SpellCastBuffs.SV.prominentbHOffsetX ~= nil and SpellCastBuffs.SV.prominentbHOffsetY ~= nil then
-                local x, y = SpellCastBuffs.SV.prominentbHOffsetX, SpellCastBuffs.SV.prominentbHOffsetY
-                if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                    x, y = LUIE.ApplyGridSnap(x, y, "buffs")
-                end
-                SpellCastBuffs.BuffContainers.prominentbuffs:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
-            else
-                SpellCastBuffs.BuffContainers.prominentbuffs:SetAnchor(CENTER, GuiRoot, CENTER, -340, -100)
-            end
-        end
+        ApplyDualAlignmentTlwPosition(
+            SpellCastBuffs.BuffContainers.prominentbuffs,
+            SpellCastBuffs.SV.prominentbVOffsetX, SpellCastBuffs.SV.prominentbVOffsetY,
+            SpellCastBuffs.SV.prominentbHOffsetX, SpellCastBuffs.SV.prominentbHOffsetY,
+            DefaultAnchor(CENTER, GuiRoot, CENTER, -340, -100),
+            DefaultAnchor(CENTER, GuiRoot, CENTER, -340, -100)
+        )
     end
 
     if SpellCastBuffs.BuffContainers.prominentdebuffs then
-        SpellCastBuffs.BuffContainers.prominentdebuffs:ClearAnchors()
-        if SpellCastBuffs.BuffContainers.prominentdebuffs.alignVertical then
-            if SpellCastBuffs.SV.prominentdVOffsetX ~= nil and SpellCastBuffs.SV.prominentdVOffsetY ~= nil then
-                local x, y = SpellCastBuffs.SV.prominentdVOffsetX, SpellCastBuffs.SV.prominentdVOffsetY
-                if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                    x, y = LUIE.ApplyGridSnap(x, y, "buffs")
-                end
-                SpellCastBuffs.BuffContainers.prominentdebuffs:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
-            else
-                SpellCastBuffs.BuffContainers.prominentdebuffs:SetAnchor(CENTER, GuiRoot, CENTER, 340, -100)
-            end
-        else
-            if SpellCastBuffs.SV.prominentdHOffsetX ~= nil and SpellCastBuffs.SV.prominentdHOffsetY ~= nil then
-                local x, y = SpellCastBuffs.SV.prominentdHOffsetX, SpellCastBuffs.SV.prominentdHOffsetY
-                if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                    x, y = LUIE.ApplyGridSnap(x, y, "buffs")
-                end
-                SpellCastBuffs.BuffContainers.prominentdebuffs:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
-            else
-                SpellCastBuffs.BuffContainers.prominentdebuffs:SetAnchor(CENTER, GuiRoot, CENTER, 340, -100)
-            end
-        end
+        ApplyDualAlignmentTlwPosition(
+            SpellCastBuffs.BuffContainers.prominentdebuffs,
+            SpellCastBuffs.SV.prominentdVOffsetX, SpellCastBuffs.SV.prominentdVOffsetY,
+            SpellCastBuffs.SV.prominentdHOffsetX, SpellCastBuffs.SV.prominentdHOffsetY,
+            DefaultAnchor(CENTER, GuiRoot, CENTER, 340, -100),
+            DefaultAnchor(CENTER, GuiRoot, CENTER, 340, -100)
+        )
     end
 end
 
@@ -978,13 +954,11 @@ function SpellCastBuffs.SetMovingState(state)
         return
     end
 
-    -- Helper function to update position label
     local function UpdatePositionLabel(control, label)
         if state and label then
             local left, top = control:GetLeft(), control:GetTop()
             label:SetText(string.format("%d, %d", left, top))
             label:SetHidden(false)
-            -- Anchor label to inside top-left of the frame
             label:ClearAnchors()
             label:SetAnchor(TOPLEFT, control.preview, TOPLEFT, 2, 2)
         elseif label then
@@ -992,92 +966,55 @@ function SpellCastBuffs.SetMovingState(state)
         end
     end
 
-    -- Set moving state
-    if SpellCastBuffs.BuffContainers.playerb and SpellCastBuffs.BuffContainers.playerb:GetType() == CT_TOPLEVELCONTROL and (SpellCastBuffs.SV.lockPositionToUnitFrames == nil or not SpellCastBuffs.SV.lockPositionToUnitFrames) then
-        SpellCastBuffs.BuffContainers.playerb:SetMouseEnabled(state)
-        SpellCastBuffs.BuffContainers.playerb:SetMovable(state)
-        UpdatePositionLabel(SpellCastBuffs.BuffContainers.playerb, SpellCastBuffs.BuffContainers.playerb.preview.anchorLabel)
-
-        -- Add grid snapping handler
-        SpellCastBuffs.BuffContainers.playerb:SetHandler("OnMoveStop", function (self)
+    -- Applies moving state and OnMoveStop (snap + save) to a container. saveCallback(control, left, top) writes to SV.
+    local function SetContainerMovingState(container, saveCallback)
+        container:SetMouseEnabled(state)
+        container:SetMovable(state)
+        UpdatePositionLabel(container, container.preview and container.preview.anchorLabel)
+        container:SetHandler("OnMoveStop", function (self)
             local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
+            if IsSnapToGridBuffsEnabled() then
                 left, top = LUIE.ApplyGridSnap(left, top, "buffs")
                 self:ClearAnchors()
                 self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
             end
+            saveCallback(self, left, top)
+        end)
+    end
+
+    local lockToUnitFrames = SpellCastBuffs.SV.lockPositionToUnitFrames
+    local canMoveStandalone = (lockToUnitFrames == nil or not lockToUnitFrames)
+
+    if SpellCastBuffs.BuffContainers.playerb and SpellCastBuffs.BuffContainers.playerb:GetType() == CT_TOPLEVELCONTROL and canMoveStandalone then
+        SetContainerMovingState(SpellCastBuffs.BuffContainers.playerb, function (_, left, top)
             SpellCastBuffs.SV.playerbOffsetX = left
             SpellCastBuffs.SV.playerbOffsetY = top
         end)
     end
 
-    if SpellCastBuffs.BuffContainers.playerd and SpellCastBuffs.BuffContainers.playerd:GetType() == CT_TOPLEVELCONTROL and (SpellCastBuffs.SV.lockPositionToUnitFrames == nil or not SpellCastBuffs.SV.lockPositionToUnitFrames) then
-        SpellCastBuffs.BuffContainers.playerd:SetMouseEnabled(state)
-        SpellCastBuffs.BuffContainers.playerd:SetMovable(state)
-        UpdatePositionLabel(SpellCastBuffs.BuffContainers.playerd, SpellCastBuffs.BuffContainers.playerd.preview.anchorLabel)
-
-        -- Add grid snapping handler
-        SpellCastBuffs.BuffContainers.playerd:SetHandler("OnMoveStop", function (self)
-            local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
-                self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-            end
+    if SpellCastBuffs.BuffContainers.playerd and SpellCastBuffs.BuffContainers.playerd:GetType() == CT_TOPLEVELCONTROL and canMoveStandalone then
+        SetContainerMovingState(SpellCastBuffs.BuffContainers.playerd, function (_, left, top)
             SpellCastBuffs.SV.playerdOffsetX = left
             SpellCastBuffs.SV.playerdOffsetY = top
         end)
     end
 
-    if SpellCastBuffs.BuffContainers.targetb and SpellCastBuffs.BuffContainers.targetb:GetType() == CT_TOPLEVELCONTROL and (SpellCastBuffs.SV.lockPositionToUnitFrames == nil or not SpellCastBuffs.SV.lockPositionToUnitFrames) then
-        SpellCastBuffs.BuffContainers.targetb:SetMouseEnabled(state)
-        SpellCastBuffs.BuffContainers.targetb:SetMovable(state)
-        UpdatePositionLabel(SpellCastBuffs.BuffContainers.targetb, SpellCastBuffs.BuffContainers.targetb.preview.anchorLabel)
-
-        -- Add grid snapping handler
-        SpellCastBuffs.BuffContainers.targetb:SetHandler("OnMoveStop", function (self)
-            local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
-                self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-            end
+    if SpellCastBuffs.BuffContainers.targetb and SpellCastBuffs.BuffContainers.targetb:GetType() == CT_TOPLEVELCONTROL and canMoveStandalone then
+        SetContainerMovingState(SpellCastBuffs.BuffContainers.targetb, function (_, left, top)
             SpellCastBuffs.SV.targetbOffsetX = left
             SpellCastBuffs.SV.targetbOffsetY = top
         end)
     end
 
-    if SpellCastBuffs.BuffContainers.targetd and SpellCastBuffs.BuffContainers.targetd:GetType() == CT_TOPLEVELCONTROL and (SpellCastBuffs.SV.lockPositionToUnitFrames == nil or not SpellCastBuffs.SV.lockPositionToUnitFrames) then
-        SpellCastBuffs.BuffContainers.targetd:SetMouseEnabled(state)
-        SpellCastBuffs.BuffContainers.targetd:SetMovable(state)
-        UpdatePositionLabel(SpellCastBuffs.BuffContainers.targetd, SpellCastBuffs.BuffContainers.targetd.preview.anchorLabel)
-
-        -- Add grid snapping handler
-        SpellCastBuffs.BuffContainers.targetd:SetHandler("OnMoveStop", function (self)
-            local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
-                self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-            end
+    if SpellCastBuffs.BuffContainers.targetd and SpellCastBuffs.BuffContainers.targetd:GetType() == CT_TOPLEVELCONTROL and canMoveStandalone then
+        SetContainerMovingState(SpellCastBuffs.BuffContainers.targetd, function (_, left, top)
             SpellCastBuffs.SV.targetdOffsetX = left
             SpellCastBuffs.SV.targetdOffsetY = top
         end)
     end
 
     if SpellCastBuffs.BuffContainers.player_long then
-        SpellCastBuffs.BuffContainers.player_long:SetMouseEnabled(state)
-        SpellCastBuffs.BuffContainers.player_long:SetMovable(state)
-        UpdatePositionLabel(SpellCastBuffs.BuffContainers.player_long, SpellCastBuffs.BuffContainers.player_long.preview.anchorLabel)
-
-        -- Add grid snapping handler
-        SpellCastBuffs.BuffContainers.player_long:SetHandler("OnMoveStop", function (self)
-            local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
-                self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-            end
+        SetContainerMovingState(SpellCastBuffs.BuffContainers.player_long, function (self, left, top)
             if self.alignVertical then
                 SpellCastBuffs.SV.playerVOffsetX = left
                 SpellCastBuffs.SV.playerVOffsetY = top
@@ -1089,18 +1026,7 @@ function SpellCastBuffs.SetMovingState(state)
     end
 
     if SpellCastBuffs.BuffContainers.prominentbuffs then
-        SpellCastBuffs.BuffContainers.prominentbuffs:SetMouseEnabled(state)
-        SpellCastBuffs.BuffContainers.prominentbuffs:SetMovable(state)
-        UpdatePositionLabel(SpellCastBuffs.BuffContainers.prominentbuffs, SpellCastBuffs.BuffContainers.prominentbuffs.preview.anchorLabel)
-
-        -- Add grid snapping handler
-        SpellCastBuffs.BuffContainers.prominentbuffs:SetHandler("OnMoveStop", function (self)
-            local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
-                self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-            end
+        SetContainerMovingState(SpellCastBuffs.BuffContainers.prominentbuffs, function (self, left, top)
             if self.alignVertical then
                 SpellCastBuffs.SV.prominentbVOffsetX = left
                 SpellCastBuffs.SV.prominentbVOffsetY = top
@@ -1112,18 +1038,7 @@ function SpellCastBuffs.SetMovingState(state)
     end
 
     if SpellCastBuffs.BuffContainers.prominentdebuffs then
-        SpellCastBuffs.BuffContainers.prominentdebuffs:SetMouseEnabled(state)
-        SpellCastBuffs.BuffContainers.prominentdebuffs:SetMovable(state)
-        UpdatePositionLabel(SpellCastBuffs.BuffContainers.prominentdebuffs, SpellCastBuffs.BuffContainers.prominentdebuffs.preview.anchorLabel)
-
-        -- Add grid snapping handler
-        SpellCastBuffs.BuffContainers.prominentdebuffs:SetHandler("OnMoveStop", function (self)
-            local left, top = self:GetLeft(), self:GetTop()
-            if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs then
-                left, top = LUIE.ApplyGridSnap(left, top, "buffs")
-                self:ClearAnchors()
-                self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-            end
+        SetContainerMovingState(SpellCastBuffs.BuffContainers.prominentdebuffs, function (self, left, top)
             if self.alignVertical then
                 SpellCastBuffs.SV.prominentdVOffsetX = left
                 SpellCastBuffs.SV.prominentdVOffsetY = top
@@ -1134,17 +1049,43 @@ function SpellCastBuffs.SetMovingState(state)
         end)
     end
 
-    -- Show/hide preview
-    for _, v in pairs(SpellCastBuffs.containerRouting) do
-        SpellCastBuffs.BuffContainers[v].preview:SetHidden(not state)
+    for _, routedContainerKey in pairs(SpellCastBuffs.containerRouting) do
+        SpellCastBuffs.BuffContainers[routedContainerKey].preview:SetHidden(not state)
     end
 
-    -- Now create or remove test-effects icons
     if state then
         SpellCastBuffs.MenuPreview()
     else
         SpellCastBuffs.Reset()
     end
+end
+
+-- Sets dimensions on two TLW wrap containers and their iconHolders (player or target standalone).
+local function SetTlwWrapContainerDimensions(containerA, containerB, widthA, widthB, wrapHeight)
+    containerA:SetDimensions(widthA, wrapHeight)
+    containerB:SetDimensions(widthB, wrapHeight)
+    if containerA.iconHolder then containerA.iconHolder:SetDimensions(widthA, wrapHeight) end
+    if containerB.iconHolder then containerB.iconHolder:SetDimensions(widthB, wrapHeight) end
+end
+
+-- Sets height and iconHolder dimensions on two unit-frame containers (width from control).
+local function SetUnitFrameContainerDimensions(containerA, containerB, iconHeight)
+    containerA:SetHeight(iconHeight)
+    containerB:SetHeight(iconHeight)
+    if containerA.iconHolder then containerA.iconHolder:SetDimensions(containerA:GetWidth(), iconHeight) end
+    if containerB.iconHolder then containerB.iconHolder:SetDimensions(containerB:GetWidth(), iconHeight) end
+end
+
+-- Single-axis container (player_long, prominent): vertical = narrow×tall, horizontal = wide×short.
+local function SetSingleAxisContainerDimensions(container, alignVertical, iconSize)
+    local width, height
+    if alignVertical then
+        width, height = iconSize + 6, 400
+    else
+        width, height = 500, iconSize + 6
+    end
+    container:SetDimensions(width, height)
+    if container.iconHolder then container.iconHolder:SetDimensions(width, height) end
 end
 
 -- Reset all buff containers
@@ -1153,101 +1094,45 @@ function SpellCastBuffs.Reset()
         return
     end
 
-    -- Update padding between icons
     SpellCastBuffs.padding = zo_floor(0.5 + SpellCastBuffs.SV.IconSize / 13)
 
-    -- Set size of top level window.
-    -- Wrap containers get a tall budget so yoga has room to lay out multiple lines.
-    -- The TLW is transparent, so extra height is invisible unless icons actually fill it.
-    local wrapH = SpellCastBuffs.SV.IconSize * 10 -- room for ~10 rows at any icon size
+    local wrapHeight = SpellCastBuffs.SV.IconSize
+    local iconSize = SpellCastBuffs.SV.IconSize
+    local buffContainers = SpellCastBuffs.BuffContainers
 
     -- Player
-    if SpellCastBuffs.BuffContainers.playerb and SpellCastBuffs.BuffContainers.playerb:GetType() == CT_TOPLEVELCONTROL then
-        local pbW, pdW = SpellCastBuffs.SV.WidthPlayerBuffs, SpellCastBuffs.SV.WidthPlayerDebuffs
-        SpellCastBuffs.BuffContainers.playerb:SetDimensions(pbW, wrapH)
-        SpellCastBuffs.BuffContainers.playerd:SetDimensions(pdW, wrapH)
-        if SpellCastBuffs.BuffContainers.playerb.iconHolder then
-            SpellCastBuffs.BuffContainers.playerb.iconHolder:SetDimensions(pbW, wrapH)
-        end
-        if SpellCastBuffs.BuffContainers.playerd.iconHolder then
-            SpellCastBuffs.BuffContainers.playerd.iconHolder:SetDimensions(pdW, wrapH)
-        end
+    if buffContainers.playerb and buffContainers.playerb:GetType() == CT_TOPLEVELCONTROL then
+        SetTlwWrapContainerDimensions(buffContainers.playerb, buffContainers.playerd, SpellCastBuffs.SV.WidthPlayerBuffs, SpellCastBuffs.SV.WidthPlayerDebuffs, wrapHeight)
     else
-        -- Unit frame containers: width comes from the UF control itself; read it back explicitly
-        local iconH = SpellCastBuffs.SV.IconSize
-        local p1 = SpellCastBuffs.BuffContainers.player1
-        local p2 = SpellCastBuffs.BuffContainers.player2
-        p1:SetHeight(iconH)
-        p2:SetHeight(iconH)
-        if p1.iconHolder then p1.iconHolder:SetDimensions(p1:GetWidth(), iconH) end
-        if p2.iconHolder then p2.iconHolder:SetDimensions(p2:GetWidth(), iconH) end
+        SetUnitFrameContainerDimensions(buffContainers.player1, buffContainers.player2, iconSize)
     end
 
     -- Target
-    if SpellCastBuffs.BuffContainers.targetb and SpellCastBuffs.BuffContainers.targetb:GetType() == CT_TOPLEVELCONTROL then
-        local tbW, tdW = SpellCastBuffs.SV.WidthTargetBuffs, SpellCastBuffs.SV.WidthTargetDebuffs
-        SpellCastBuffs.BuffContainers.targetb:SetDimensions(tbW, wrapH)
-        SpellCastBuffs.BuffContainers.targetd:SetDimensions(tdW, wrapH)
-        if SpellCastBuffs.BuffContainers.targetb.iconHolder then
-            SpellCastBuffs.BuffContainers.targetb.iconHolder:SetDimensions(tbW, wrapH)
-        end
-        if SpellCastBuffs.BuffContainers.targetd.iconHolder then
-            SpellCastBuffs.BuffContainers.targetd.iconHolder:SetDimensions(tdW, wrapH)
-        end
+    if buffContainers.targetb and buffContainers.targetb:GetType() == CT_TOPLEVELCONTROL then
+        SetTlwWrapContainerDimensions(buffContainers.targetb, buffContainers.targetd, SpellCastBuffs.SV.WidthTargetBuffs, SpellCastBuffs.SV.WidthTargetDebuffs, wrapHeight)
     else
-        -- Unit frame containers: width comes from the UF control itself; read it back explicitly
-        local iconH = SpellCastBuffs.SV.IconSize
-        local t1 = SpellCastBuffs.BuffContainers.target1
-        local t2 = SpellCastBuffs.BuffContainers.target2
-        t1:SetHeight(iconH)
-        t2:SetHeight(iconH)
-        if t1.iconHolder then t1.iconHolder:SetDimensions(t1:GetWidth(), iconH) end
-        if t2.iconHolder then t2.iconHolder:SetDimensions(t2:GetWidth(), iconH) end
+        SetUnitFrameContainerDimensions(buffContainers.target1, buffContainers.target2, iconSize)
     end
 
-    -- Player long buffs
-    if SpellCastBuffs.BuffContainers.player_long then
-        local pl = SpellCastBuffs.BuffContainers.player_long
-        local plW, plH
-        if pl.alignVertical then
-            plW, plH = SpellCastBuffs.SV.IconSize + 6, 400
-        else
-            plW, plH = 500, SpellCastBuffs.SV.IconSize + 6
-        end
-        pl:SetDimensions(plW, plH)
-        if pl.iconHolder then pl.iconHolder:SetDimensions(plW, plH) end
+    -- Player long-term buffs
+    if buffContainers.player_long then
+        SetSingleAxisContainerDimensions(buffContainers.player_long, buffContainers.player_long.alignVertical, iconSize)
     end
 
     -- Prominent buffs & debuffs
-    if SpellCastBuffs.BuffContainers.prominentbuffs then
-        local pb = SpellCastBuffs.BuffContainers.prominentbuffs
-        local pd = SpellCastBuffs.BuffContainers.prominentdebuffs
-        local pbW, pbH = pb.alignVertical and (SpellCastBuffs.SV.IconSize + 6) or 500,
-            pb.alignVertical and 400 or (SpellCastBuffs.SV.IconSize + 6)
-        local pdW, pdH = pd.alignVertical and (SpellCastBuffs.SV.IconSize + 6) or 500,
-            pd.alignVertical and 400 or (SpellCastBuffs.SV.IconSize + 6)
-        pb:SetDimensions(pbW, pbH)
-        pd:SetDimensions(pdW, pdH)
-        if pb.iconHolder then pb.iconHolder:SetDimensions(pbW, pbH) end
-        if pd.iconHolder then pd.iconHolder:SetDimensions(pdW, pdH) end
+    if buffContainers.prominentbuffs then
+        SetSingleAxisContainerDimensions(buffContainers.prominentbuffs, buffContainers.prominentbuffs.alignVertical, iconSize)
+        SetSingleAxisContainerDimensions(buffContainers.prominentdebuffs, buffContainers.prominentdebuffs.alignVertical, iconSize)
     end
 
-    -- Set Alignment and Sort Direction
     SpellCastBuffs.SetupContainerAlignment()
     SpellCastBuffs.SetupContainerSort()
 
-    local needs_reset = {}
-    -- And reset sizes of already existing icons
-    for _, container in pairs(SpellCastBuffs.containerRouting) do
-        needs_reset[container] = true
-    end
-    for _, container in pairs(SpellCastBuffs.containerRouting) do
-        if needs_reset[container] then
-            for i = 1, #SpellCastBuffs.BuffContainers[container].icons do
-                SpellCastBuffs.ResetSingleIcon(container, SpellCastBuffs.BuffContainers[container].icons[i])
-            end
+    for _, routedContainerKey in pairs(SpellCastBuffs.containerRouting) do
+        local container = buffContainers[routedContainerKey]
+        for iconIndex = 1, #container.icons do
+            SpellCastBuffs.ResetSingleIcon(routedContainerKey, container.icons[iconIndex])
         end
-        needs_reset[container] = false
     end
 
     if SpellCastBuffs.playerActive then
