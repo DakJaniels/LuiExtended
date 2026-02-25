@@ -56,7 +56,7 @@ local GetSkillLineInfo = function (skillType, skillLineIndex)
 end
 
 -- EVENT_EXPERIENCE_GAIN HANDLER
-function ChatAnnouncements.OnExperienceGain(eventCode, reason, level, previousExperience, currentExperience, championPoints)
+function ChatAnnouncements.OnExperienceGain(eventId, reason, level, previousExperience, currentExperience, championPoints)
     -- d("Experience Gain) previousExperience: " .. previousExperience .. " --- " .. "currentExperience: " .. currentExperience)
     if ChatAnnouncements.SV.XP.Experience and (not (ChatAnnouncements.SV.XP.ExperienceHideCombat and reason == PROGRESS_REASON_KILL) or not reason == PROGRESS_REASON_KILL) then
         local change = currentExperience - previousExperience -- Change in Experience Points on gaining them
@@ -111,7 +111,7 @@ function ChatAnnouncements.PrintBufferedXP()
 end
 
 -- EVENT_SKILL_XP_UPDATE HANDLER
-function ChatAnnouncements.SkillXPUpdate(eventCode, skillType, skillIndex, reason, rank, previousXP, currentXP)
+function ChatAnnouncements.SkillXPUpdate(eventId, skillType, skillIndex, reason, rank, previousXP, currentXP)
     if skillType == SKILL_TYPE_GUILD then
         local lineName, _, _, lineId = GetSkillLineInfo(skillType, skillIndex)
         local formattedName = zo_strformat("<<C:1>>", lineName)
