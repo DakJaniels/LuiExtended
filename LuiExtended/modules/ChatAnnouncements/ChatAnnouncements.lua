@@ -86,6 +86,10 @@ local g_mailCODPresent = false -- Tracks whether the currently opened mail has a
 local g_inMail = false         -- Toggled on when looting mail to prevent notable item display from hiding items acquired.
 local g_mailTarget = ""        -- Target of mail being sent.
 local g_mailStacksOut = {}     -- Table for storing items to be mailed out.
+-- Take All sender queue: order matches processing (money then items per mail, by category/index)
+local g_mailSenderQueue = {}
+local g_mailSenderMap = {} -- mailId -> displayName (for reference)
+local g_mailIsTakingMail = false
 
 -- Disguise
 local g_currentDisguise = nil -- Holds current disguise itemId
@@ -537,6 +541,7 @@ end
 function ChatAnnouncements.RegisterMailEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_READABLE)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS)
+    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_ADDED)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_REMOVED)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_OPEN_MAILBOX)
@@ -545,10 +550,12 @@ function ChatAnnouncements.RegisterMailEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_COD_CHANGED)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_REMOVED)
+    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_INBOX_UPDATE)
     if ChatAnnouncements.SV.Inventory.LootMail then
         eventManager:RegisterForEvent(moduleName, EVENT_MAIL_READABLE, ChatAnnouncements.OnMailReadable)
         eventManager:RegisterForEvent(moduleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS, ChatAnnouncements.OnMailTakeAttachedItem)
     end
+    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE, ChatAnnouncements.OnMailTakeAllResponse)
     if ChatAnnouncements.SV.Inventory.LootMail or ChatAnnouncements.SV.Currency.CurrencyGoldChange then
         eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_ADDED, ChatAnnouncements.OnMailAttach)
         eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_REMOVED, ChatAnnouncements.OnMailAttachRemove)
@@ -556,6 +563,7 @@ function ChatAnnouncements.RegisterMailEvents()
         eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED, ChatAnnouncements.MailMoneyChanged)
         eventManager:RegisterForEvent(moduleName, EVENT_MAIL_COD_CHANGED, ChatAnnouncements.MailCODChanged)
         eventManager:RegisterForEvent(moduleName, EVENT_MAIL_REMOVED, ChatAnnouncements.MailRemoved)
+        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_INBOX_UPDATE, ChatAnnouncements.OnMailInboxUpdate)
     end
     if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootMail or ChatAnnouncements.SV.Currency.CurrencyGoldChange then
         eventManager:RegisterForEvent(moduleName, EVENT_MAIL_OPEN_MAILBOX, ChatAnnouncements.OnMailOpenBox)
@@ -1808,12 +1816,20 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             return
         end
     elseif reason == CURRENCY_CHANGE_REASON_MAIL and UpOrDown > 0 then
+        local mailSender = ChatAnnouncements.GetNextMailSender()
+        if mailSender ~= "" then
+            g_mailTarget = mailSender
+        end
         messageChange = g_mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
         if g_mailTarget ~= "" then
             type = "LUIE_CURRENCY_MAIL"
         end
     elseif reason == CURRENCY_CHANGE_REASON_MAIL and UpOrDown < 0 then
         if g_mailCODPresent then
+            local mailSender = ChatAnnouncements.GetNextMailSender()
+            if mailSender ~= "" then
+                g_mailTarget = mailSender
+            end
             messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailCOD
             if g_mailTarget ~= "" then
                 type = "LUIE_CURRENCY_MAIL"
@@ -2512,6 +2528,67 @@ function ChatAnnouncements.MailRemoved(eventId)
     end
 end
 
+-- Resolve sender display string and COD/attachment info for a mail (used by Take All queue).
+local function ResolveMailSender(mailId)
+    local senderDisplayName, senderCharacterName, _, _, _, fromSystem, fromCustomerService, _, numAttachments, attachedMoney, codAmount = GetMailItemInfo(mailId)
+    numAttachments = numAttachments or 0
+    attachedMoney = attachedMoney or 0
+    local mailTarget = ""
+    if fromSystem or fromCustomerService then
+        mailTarget = ZO_GAME_REPRESENTATIVE_TEXT:Colorize(senderDisplayName or "")
+    elseif senderDisplayName ~= "" and senderCharacterName ~= "" then
+        local finalName = ChatAnnouncements.ResolveNameLink(senderCharacterName, senderDisplayName)
+        mailTarget = ZO_SELECTED_TEXT:Colorize(finalName)
+    else
+        local finalName
+        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+            finalName = ZO_LinkHandler_CreateLinkWithoutBrackets(senderDisplayName or "", nil, DISPLAY_NAME_LINK_TYPE, senderDisplayName or "")
+        else
+            finalName = ZO_LinkHandler_CreateLink(senderDisplayName or "", nil, DISPLAY_NAME_LINK_TYPE, senderDisplayName or "")
+        end
+        mailTarget = ZO_SELECTED_TEXT:Colorize(finalName)
+    end
+    if mailTarget == "" and (numAttachments > 0 or attachedMoney > 0) then
+        local fallback = GetMailSender(mailId)
+        if fallback and fallback ~= "" then
+            mailTarget = ZO_GAME_REPRESENTATIVE_TEXT:Colorize(fallback)
+        end
+    end
+    return mailTarget, (codAmount and codAmount > 0), numAttachments, attachedMoney
+end
+
+-- Build sender queue in Take All order (by category/index; money then items per mail).
+local function PopulateMailSenderQueue()
+    g_mailSenderQueue = {}
+    g_mailSenderMap = {}
+    for category = MAIL_CATEGORY_ITERATION_BEGIN, MAIL_CATEGORY_ITERATION_END do
+        local numMailItems = GetNumMailItemsByCategory(category)
+        for index = 1, numMailItems do
+            local mailId = GetMailIdByIndex(category, index)
+            if mailId then
+                local mailTarget, hasCOD, numAttachments, attachedMoney = ResolveMailSender(mailId)
+                if (numAttachments and numAttachments > 0) or (attachedMoney and attachedMoney > 0) then
+                    if attachedMoney > 0 then
+                        table.insert(g_mailSenderQueue, mailTarget)
+                    end
+                    for i = 1, (numAttachments or 0) do
+                        table.insert(g_mailSenderQueue, mailTarget)
+                    end
+                    g_mailSenderMap[mailId] = mailTarget
+                end
+            end
+        end
+    end
+end
+
+--- Returns the next sender from the Take All queue, or "" if queue is empty (e.g. single mail open).
+function ChatAnnouncements.GetNextMailSender()
+    if #g_mailSenderQueue > 0 then
+        return table.remove(g_mailSenderQueue, 1)
+    end
+    return ""
+end
+
 function ChatAnnouncements.OnMailReadable(eventId, mailId)
     local senderDisplayName, senderCharacterName, _, _, _, fromSystem, fromCustomerService, _, _, _, codAmount = GetMailItemInfo(mailId)
 
@@ -2531,15 +2608,24 @@ function ChatAnnouncements.OnMailReadable(eventId, mailId)
         g_mailTarget = ZO_SELECTED_TEXT:Colorize(finalName)
     end
 
-    if codAmount > 0 then
-        g_mailCODPresent = true
-    end
+    g_mailCODPresent = (codAmount and codAmount > 0)
 end
 
 function ChatAnnouncements.OnMailTakeAttachedItem(eventId, mailId)
+    g_mailIsTakingMail = true
+    local mailTarget, hasCOD = ResolveMailSender(mailId)
+    g_mailSenderMap[mailId] = mailTarget
+    g_mailCODPresent = hasCOD
+
+    eventManager:UnregisterForUpdate(moduleName .. "ClearMailTakingFlag")
+    eventManager:RegisterForUpdate(moduleName .. "ClearMailTakingFlag", 200, function ()
+        g_mailIsTakingMail = false
+        eventManager:UnregisterForUpdate(moduleName .. "ClearMailTakingFlag")
+    end)
+
     if ChatAnnouncements.SV.Notify.NotificationMailSendCA or ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
         local mailString
-        if g_mailCODPresent then
+        if hasCOD then
             mailString = GetString(LUIE_STRING_CA_MAIL_RECEIVED_COD)
         else
             mailString = GetString(LUIE_STRING_CA_MAIL_RECEIVED)
@@ -2554,6 +2640,17 @@ function ChatAnnouncements.OnMailTakeAttachedItem(eventId, mailId)
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, mailString)
             end
         end
+    end
+end
+
+function ChatAnnouncements.OnMailTakeAllResponse(eventId, result, category, headersRemoved)
+    g_mailIsTakingMail = false
+    eventManager:UnregisterForUpdate(moduleName .. "ClearMailTakingFlag")
+end
+
+function ChatAnnouncements.OnMailInboxUpdate(eventId)
+    if g_inMail and not g_mailIsTakingMail then
+        PopulateMailSenderQueue()
     end
 end
 
@@ -2584,6 +2681,7 @@ function ChatAnnouncements.OnMailOpenBox(eventId)
         ChatAnnouncements.IndexInventory() -- Index Inventory
     end
     g_inMail = true
+    PopulateMailSenderQueue()
 end
 
 function ChatAnnouncements.OnMailCloseBox(eventId)
@@ -2596,6 +2694,10 @@ function ChatAnnouncements.OnMailCloseBox(eventId)
     end
     g_inMail = false
     g_mailStacksOut = {}
+    g_mailSenderQueue = {}
+    g_mailSenderMap = {}
+    g_mailIsTakingMail = false
+    eventManager:UnregisterForUpdate(moduleName .. "ClearMailTakingFlag")
 end
 
 -- Sends results of the trade to the Item Log print function and clears variables so they are reset for next trade interactions
@@ -4138,7 +4240,11 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
             g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
             if g_inMail then
-                logPrefix = g_mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
+                local mailSender = ChatAnnouncements.GetNextMailSender()
+                if mailSender == "" then
+                    mailSender = g_mailTarget
+                end
+                logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
             else
                 logPrefix = ""
             end
@@ -4152,7 +4258,11 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                 ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true, nil, false, true)
             end
             if g_inMail and isNewItem then
-                ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, g_mailTarget, logPrefix, gainOrLoss, false)
+                local mailSender = ChatAnnouncements.GetNextMailSender()
+                if mailSender == "" then
+                    mailSender = g_mailTarget
+                end
+                ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, mailSender, logPrefix, gainOrLoss, false)
             end
             -- EXISTING ITEM
         elseif g_inventoryStacks[slotId] then
@@ -4188,7 +4298,11 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
 
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
                 if g_inMail then
-                    logPrefix = g_mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
+                    local mailSender = ChatAnnouncements.GetNextMailSender()
+                    if mailSender == "" then
+                        mailSender = g_mailTarget
+                    end
+                    logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
                 else
                     logPrefix = ""
                 end
@@ -4202,7 +4316,11 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                     ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true, nil, false, true)
                 end
                 if g_inMail and isNewItem then
-                    ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, g_mailTarget, logPrefix, gainOrLoss, false)
+                    local mailSender = ChatAnnouncements.GetNextMailSender()
+                    if mailSender == "" then
+                        mailSender = g_mailTarget
+                    end
+                    ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, mailSender, logPrefix, gainOrLoss, false)
                 end
                 -- STACK COUNT INCREMENTED DOWN
             elseif stackCountChange < 0 then
@@ -4373,7 +4491,11 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
         local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
         local logPrefix
         if g_inMail then
-            logPrefix = g_mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
+            local mailSender = ChatAnnouncements.GetNextMailSender()
+            if mailSender == "" then
+                mailSender = g_mailTarget
+            end
+            logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
         else
             logPrefix = ""
         end
@@ -4390,7 +4512,11 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
             ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true, nil, false, true)
         end
         if g_inMail and isNewItem then
-            ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, g_mailTarget, logPrefix, gainOrLoss, false)
+            local mailSender = ChatAnnouncements.GetNextMailSender()
+            if mailSender == "" then
+                mailSender = g_mailTarget
+            end
+            ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, mailSender, logPrefix, gainOrLoss, false)
         end
     end
 
