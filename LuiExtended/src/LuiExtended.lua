@@ -45,7 +45,6 @@ end
 -- Saved variables options
 --- @diagnostic disable-next-line: missing-fields
 LUIE.SV = {}
-LUIE.SV.Migrations = {}
 LUIE.SVVer = nil
 if IsConsoleUI() then
     LUIE.SVVer = 3
@@ -101,6 +100,8 @@ LUIE.Defaults =
     snapToGridSize_buffs      = 15,
     -- snapToGrid_combatText     = false,
     -- snapToGridSize_combatText = 15,
+
+    Migrations                = {}
 }
 
 -- -----------------------------------------------------------------------------
@@ -117,7 +118,7 @@ LUIE.StatusbarTextures = LuiMedia.GetStatusbarTextures()
 -- -----------------------------------------------------------------------------
 
 --- @type table<table, boolean>
-local g_tableCache = setmetatable({}, {__mode='k'})  -- Weak keys for automatic cleanup
+local g_tableCache = setmetatable({}, { __mode = "k" }) -- Weak keys for automatic cleanup
 
 --- Get a recycled table from cache or create a new one
 --- Use this in hot code paths (event handlers, update loops) to eliminate allocations
@@ -223,21 +224,22 @@ end
 
 -- -----------------------------------------------------------------------------
 
--- do
---     local g_loggingEnabled = true
---     function ZO_Scene:Log(message)
---         if g_loggingEnabled then
---             CHAT_ROUTER:AddSystemMessage(string.format("%s - %s - %s", ZO_Scene_GetOriginColor():Colorize(GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN)), self.name, message))
---         end
---     end
-
---     function ZO_SceneManager_Follower:Log(message, sceneName)
---         if g_loggingEnabled then
---             if sceneName then
---                 CHAT_ROUTER:AddSystemMessage(string.format("%s - %s - %s", ZO_Scene_GetOriginColor():Colorize(GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN)), message, sceneName))
---             else
---                 CHAT_ROUTER:AddSystemMessage(string.format("%s - %s", ZO_Scene_GetOriginColor():Colorize(GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN)), message))
---             end
---         end
---     end
--- end
+do
+    local g_loggingEnabled = LUIE.IsDevDebugEnabled()
+    local function ZO_Scene_Log(self, message)
+        if g_loggingEnabled then
+            LUIE:Log("Verbose", string.format("%s - %s - %s", GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN), self.name, message))
+        end
+    end
+    ZO_Scene.Log = ZO_Scene_Log
+    local function ZO_SceneManager_Follower_Log(self, message, sceneName)
+        if g_loggingEnabled then
+            if sceneName then
+                LUIE:Log("Verbose", string.format("%s - %s - %s", GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN), message, sceneName))
+            else
+                LUIE:Log("Verbose", string.format("%s - %s", GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN), message))
+            end
+        end
+    end
+    ZO_SceneManager_Follower.Log = ZO_SceneManager_Follower_Log
+end

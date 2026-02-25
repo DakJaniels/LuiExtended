@@ -154,17 +154,12 @@ do
     --- @param key string
     --- @return boolean
     local function IsMigrationDone(key)
-        if not LUIE.SV or not LUIE.SV.Migrations then
-            return false
-        end
         return LUIE.SV.Migrations[key] == true
     end
 
     --- Marks a migration as completed using the given key
     --- @param key string
     local function MarkMigrationDone(key)
-        if not LUIE.SV then return end
-        LUIE.SV.Migrations = LUIE.SV.Migrations or {}
         LUIE.SV.Migrations[key] = true
     end
 
@@ -334,9 +329,6 @@ do
             formattedMessage = messageOrFormatter or ""
         end
         CHAT_ROUTER:AddSystemMessage(formattedMessage)
-        if LUIE.IsDevDebugEnabled() then
-            LUIE:Log("Verbose", messageOrFormatter, ...)
-        end
     end
 
     LUIE.AddSystemMessage = AddSystemMessage
@@ -384,9 +376,6 @@ do
     --- @param msg string: The message to be printed.
     --- @param isSystem? boolean: If true, the message is considered a system message.
     local function PrintToChat(msg, isSystem)
-        if LUIE.IsDevDebugEnabled() then
-            LUIE:Log("Verbose", msg, isSystem)
-        end
         -- Guard clause: exit early if chat system not ready
         if not ZO_GetChatSystem().primaryContainer then
             return
