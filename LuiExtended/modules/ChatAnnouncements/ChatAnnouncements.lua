@@ -121,6 +121,7 @@ local g_rcSpamPrevention = false      -- Stops LFG failed ready checks from spam
 -- Guild
 local g_selectedGuild = 1          -- Set selected guild to 1 by default, whenever the player reloads their first guild will always be selected
 local g_pendingHeraldryCost = 0    -- Pending cost of heraldry change used to modify currency messages. TODO: Fix later
+local g_heraldrySaveGuildId = nil  -- Guild ID whose heraldry save was last initiated (apply or purchase); cleared after use in GuildHeraldrySaved
 local g_disableRankMessage = false -- Variable is toggled to true when the player modifies a guild memeber's rank, this prevents the normal rank change message from displaying.
 
 -- Achievements
@@ -507,7 +508,7 @@ end
 
 function ChatAnnouncements.RegisterXPEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_EXPERIENCE_GAIN)
-    if ChatAnnouncements.SV.XP.Experience or ChatAnnouncements.SV.XP.ExperienceLevelUp then
+    if ChatAnnouncements.SV.XP.Experience or ChatAnnouncements.SV.XP.ExperienceLevelUpAlert then
         eventManager:RegisterForEvent(moduleName, EVENT_EXPERIENCE_GAIN, ChatAnnouncements.OnExperienceGain)
     end
 end
@@ -783,8 +784,8 @@ function ChatAnnouncements.GuildHeraldrySaved()
         ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
     end
 
-    if g_selectedGuild ~= nil then
-        local id = g_selectedGuild
+    local id = g_heraldrySaveGuildId or g_selectedGuild
+    if id ~= nil then
         local guildName = GetGuildName(id)
 
         local guildAlliance = GetGuildAlliance(id)
@@ -802,6 +803,7 @@ function ChatAnnouncements.GuildHeraldrySaved()
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_HERALDRY_UPDATE), guildNameAllianceAlert))
         end
     end
+    g_heraldrySaveGuildId = nil
 end
 
 -- Copied from Writ Creator for CSA handling purposes - Only called when WritCreater is detected so shouldn't cause issues
@@ -10516,6 +10518,16 @@ function ChatAnnouncements.HookFunction()
 
     -- Used to pull the cost of guild Heraldry change
     -- TODO:
+    local orig_ConfirmHeraldryApplyChanges = ZO_GuildHeraldryManager_Shared.ConfirmHeraldryApplyChanges
+    ZO_GuildHeraldryManager_Shared.ConfirmHeraldryApplyChanges = function (self, control, showDialogFunc)
+        g_heraldrySaveGuildId = self.guildId
+        return orig_ConfirmHeraldryApplyChanges(self, control, showDialogFunc)
+    end
+    local orig_ConfirmHeraldryPurchase = ZO_GuildHeraldryManager_Shared.ConfirmHeraldryPurchase
+    ZO_GuildHeraldryManager_Shared.ConfirmHeraldryPurchase = function (self, control, showDialogFunc)
+        g_heraldrySaveGuildId = self.guildId
+        return orig_ConfirmHeraldryPurchase(self, control, showDialogFunc)
+    end
     ZO_GuildHeraldryManager_Shared.AttemptSaveAndExit = function (self, showBaseScene)
         local blocked = false
 
@@ -10525,6 +10537,7 @@ function ChatAnnouncements.HookFunction()
                 local pendingCost = GetPendingHeraldryCost()
                 -- Pull Heraldry Cost to currency function to use
                 g_pendingHeraldryCost = pendingCost
+                g_heraldrySaveGuildId = self.guildId
                 local heraldryFunds = GetHeraldryGuildBankedMoney()
                 if heraldryFunds and pendingCost <= heraldryFunds then
                     self:ConfirmHeraldryApplyChanges()
