@@ -6,109 +6,286 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
-local printToChat = LUIE.PrintToChat
-
-local LuiData = LuiData
---- @type Data
-local Data = LuiData.Data
---- @type CrownStoreCollectibles
-local isShopCollectible = Data.CrownStoreCollectibles
---- @type Effects
-local Effects = Data.Effects
---- @type Quests
-local Quests = Data.Quests
-
--- -----------------------------------------------------------------------------
--- ESO API Locals.
--- -----------------------------------------------------------------------------
-
-local animationManager = GetAnimationManager()
-local eventManager = GetEventManager()
-local windowManager = GetWindowManager()
-
-local GetString = GetString
-local zo_strformat = zo_strformat
-
-
-
--- -----------------------------------------------------------------------------
--- Lua Locals.
--- -----------------------------------------------------------------------------
-
-local pairs = pairs
-local select = select
-local tonumber = tonumber
-local unpack = unpack
-local string = string
-local string_format = string.format
-local table = table
-local table_concat = table.concat
-local table_insert = table.insert
-
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
-local moduleName = ChatAnnouncements.moduleName
+local ColorizeColors = ChatAnnouncements.Colors
+
+local Data = LuiData.Data
+local Effects = Data.Effects
+local Quests = Data.Quests
+
+local printToChat = LUIE.PrintToChat
+local string_format = string.format
+local table_insert = table.insert
+local table_concat = table.concat
+
+local eventManager = GetEventManager()
+local windowManager = GetWindowManager()
+
+local moduleName = LUIE.name .. "ChatAnnouncements"
 
 ------------------------------------------------
-
-
+-- LOCAL (GLOBAL) VARIABLE SETUP ---------------
 ------------------------------------------------
 
---- Gets the total stack count for an item link from backpack, bank, and craft bag.
---- @param itemlink string The item link to check stack counts for
---- @return integer count The total stack count (backpack + bank + craft bag)
---[[[
-* GetItemLinkStacks(*string* _itemLink_)
-** _Returns:_ *integer* _stackCountBackpack_, *integer* _stackCountBank_, *integer* _stackCountCraftBag_, *integer* _stackCountHouseBanks_, *integer* _stackCountFurnitureVault_, *integer* _stackCountVengeanceBag_
+-- Basic
+local g_activatedFirstLoad = true
 
-**Example:**
-Acai Berry
-Results of function `GetItemLinkStacks("|H1:item:34349:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h")`:
-- `0` -- stackCountBackpack
-- `0` -- stackCountBank
-- `9441` -- stackCountCraftBag
-- `0` -- stackCountHouseBanks
-- `0` -- stackCountFurnitureVault
-- `0` -- stackCountVengeanceBag
-]]
-local function getItemLinkStackCount(itemlink)
-    local stackCountBackpack, stackCountBank, stackCountCraftBag, stackCountHouseBanks, stackCountFurnitureVault, stackCountVengeanceBag = GetItemLinkStacks(itemlink)
-    local count = (stackCountBackpack + stackCountBank + stackCountCraftBag) or 0
-    return count
-end
+-- Loot/Currency
+local g_savedPurchase = {}
+local g_savedLaunder = {}
+local g_savedItem = {}
+local g_isLooted = false                   -- Toggled on to modify loot notification to "looted."
+local g_isPickpocketed = false             -- Toggled on to modify loot notification to "pickpocketed."
+local g_isStolen = false                   -- Toggled on to modify loot notification to "stolen."
+local g_containerRecentlyOpened = false    -- Toggled on when a container has been recently opened.
+local g_itemReceivedIsQuestReward = false  -- Toggled on to modify loot notification to "received." This overrides the "looted" tag applied to quest item rewards.
+local g_itemReceivedIsQuestAbandon = false -- Toggled on to modify remove notification to "removed" when a quest is abandoned.
+local g_itemsConfiscated = false           -- Toggled on when items are confiscated to modify the notification message.
+local g_weAreInAStore = false              -- Toggled on when the player opens a store.
+local g_weAreInAFence = false              -- Toggled on when the player opens a fence.
+local g_weAreInAGuildStore = false         -- Toggled on when the player opens a guild store.
+local g_itemWasDestroyed = false           -- Tracker for item being destroyed
+local g_packSiege = false                  -- Tracker for siege packed
+local g_lockpickBroken = false             -- Tracker for lockpick being broken
+local g_groupLootIndex = {}                -- Table to hold group member names for group loot display.
+local g_stackSplit = false                 -- Determines if we just split an inventory item stack
+local g_combinedRecipe = false             -- Determines if we just used an item that combines a recipe to stop the "learned" message from showing.
+local g_InventoryOn = false                -- Determines if Inventory Updates for Item Changes are on
+local g_bankOn = false                     -- Determines if Bank Updates for Item Changes are on
+
+-- Currency Throttle
+local g_currencyGoldThrottleValue = 0 -- Held value for gold throttle (counter)
+local g_currencyGoldThrottleTotal = 0 -- Held value for gold throttle (total gold)
+local g_currencyAPThrottleValue = 0   -- Held value for AP throttle (counter)
+local g_currencyAPThrottleTotal = 0   -- Held value for AP throttle (total gold)
+local g_currencyTVThrottleValue = 0   -- Held value for TV throttle (counter)
+local g_currencyTVThrottleTotal = 0   -- Held value for TV throttle (total gold)
+
+-- Loot (Crafting)
+local g_smithing = {}   -- Table for smithing mode
+local g_enchanting = {} -- Table for enchanting mode
+local g_enchant_prefix_pos = {}
+local g_enchant_prefix_neg = {}
+local g_smithing_prefix_pos = {}
+local g_smithing_prefix_neg = {}
+local g_itemCounterGain = 0        -- Counter value for items created via crafting
+local g_itemCounterGainTracker = 0 -- Tracker for how many items have been counted, when we reach a certain threshold, it is too many items to display so we cut the string off.
+local g_itemStringGain = ""        -- Counter value for items created via crafting
+local g_itemCounterLoss = 0        -- Counter value for items removed via crafting
+local g_itemCounterLossTracker = 0 -- Tracker for how many items have been counted, when we reach a certain threshold, it is too many items to display so we cut the string off.
+local g_itemStringLoss = ""        -- Combined string variable for items removed via crafting
+local g_oldItem = {}               -- Saved old item for crafting upgrades
+
+-- Mail
+local g_mailCOD = 0            -- Tracks COD amount
+local g_postageAmount = 0      -- Tracks Postage amount
+local g_mailAmount = 0         -- Tracks sent money amount
+local g_mailCODPresent = false -- Tracks whether the currently opened mail has a COD value present. On receiving items from the mail this will modify the message displayed.
+local g_inMail = false         -- Toggled on when looting mail to prevent notable item display from hiding items acquired.
+local g_mailTarget = ""        -- Target of mail being sent.
+local g_mailStacksOut = {}     -- Table for storing items to be mailed out.
+
+-- Disguise
+local g_currentDisguise = nil -- Holds current disguise itemId
+local g_disguiseState = nil   -- Holds current disguise state
+
+-- Indexing
+local g_bankBag
+local g_bankStacks = {}      -- Bank Inventory Index
+local g_banksubStacks = {}   -- Subscriber Bank Inventory Index
+local g_houseBags = {}       -- House Storage Index
+local g_equippedStacks = {}  -- Equipped Items Index
+local g_inventoryStacks = {} -- Inventory Index
+local g_JusticeStacks = {}   -- Justice Items Index (only filled as a comparison table when items are confiscated)
+local g_guildBankCarry = nil -- Saves item data when an item is removed/deposited into the guild bank.
+
+-- Group
+local g_currentGroupLeaderRawName = nil     -- Tracks current Group Leader Name
+local g_currentGroupLeaderDisplayName = nil -- Tracks current Group Leader Display Name
+
+-- LFG
+local g_currentActivityId = nil       -- current activity ID for LFG.
+local g_stopGroupLeaveQueue = false   -- Stops group notification messages from printing for a short time an LFG group is formed - Called when a ready check has the possible result of success.
+local g_lfgDisableGroupEvents = false -- Stops group notification messages from printing for a short time an LFG group is formed - Called when succesfully joining a new LFG activity.
+local g_joinLFGOverride = false       -- Toggled on to stop display of standard group join message when joining an LFG group. Instead an alternate message with the LFG activity name will display.
+local g_leaveLFGOverride = false      -- Toggled on to modify group leave message to display "You are no longer in an LFG group."
+local g_showActivityStatus = true     -- Variable to control display of LFG status
+local g_lfgHideStatusCancel = false   -- Hide the cancel message that can be triggered by someone dropping queue while in an existing group.
+local g_showRCUpdates = true          -- Variable to control display of LFG Ready Check Announcements
+local g_weDeclinedTheQueue = false    -- Flagged when we decline a ready check popup for LFG queue.
+local g_savedQueueValue = 0           -- Saved LFG queue status
+local g_rcSpamPrevention = false      -- Stops LFG failed ready checks from spamming the player
+
+-- Guild
+local g_selectedGuild = 1          -- Set selected guild to 1 by default, whenever the player reloads their first guild will always be selected
+local g_pendingHeraldryCost = 0    -- Pending cost of heraldry change used to modify currency messages. TODO: Fix later
+local g_disableRankMessage = false -- Variable is toggled to true when the player modifies a guild memeber's rank, this prevents the normal rank change message from displaying.
+
+-- Achievements
+local g_achievementLastPercentage = {} -- Here we will store last displayed percentage for achievement
+
+-- Collectible Usage Tracking
+local currentAssistant = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local currentCompanion = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_COMPANION, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local currentVanity = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_VANITY_PET, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local currentSpecial = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local currentHat = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_HAT, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local currentHair = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_HAIR, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local currentHeadMark = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_HEAD_MARKING, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local currentFacialHair = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_FACIAL_HAIR_HORNS, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local currentMajorAdorn = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_FACIAL_ACCESSORY, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local currentMinorAdorn = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_PIERCING_JEWELRY, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local currentCostume = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_COSTUME, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local currentBodyMarking = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_BODY_MARKING, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local currentSkin = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_SKIN, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local currentPersonality = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_PERSONALITY, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local currentPolymorph = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_POLYMORPH, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+local lastCollectibleUsed = 0
+
+-- Quest
+local g_stopDisplaySpam = false   -- Toggled on to stop spam display of EVENT_DISPLAY_ANNOUNCEMENTS from IC zone transitions.
+local g_questIndex = {}           -- Index of all current quests. Allows us to read the index so that all quest notifications can use the difficulty icon.
+local g_questItemAdded = {}       -- Hold index of Quest items that are added - Prevents pointless and annoying messages from appearing when the same quest item is immediately added and removed when quest updates.
+local g_questItemRemoved = {}     -- Hold index of Quest items that are removed - Prevents pointless and annoying messages from appearing when the same quest item is immediately added and removed when quest updates.
+local g_loginHideQuestLoot = true -- Set to true onPlayerActivated and toggled after 3 sec
+local g_talkingToNPC = false      -- Toggled when we're in dialogue with an NPC (EVENT_CHATTER_BEGIN & EVENT_CHATTER_END)
+
+-- Trade
+local g_tradeTarget = ""    -- Saves name of target player being traded with.
+local g_tradeStacksIn = {}  -- Table for storing items to be traded in.
+local g_tradeStacksOut = {} -- Table for storing items to be traded out.
+local g_inTrade = false     -- Toggled on when in a trade.
+
+-- Antiquities
+local g_weAreInADig = false -- When in a digsite.
 
 ---
---- @param topLevelIndex integer
---- @return string name
-local function GetAchievementCategoryInfoName(topLevelIndex)
-    local AchievementCategoryInfo = { GetAchievementCategoryInfo(topLevelIndex) }
-    local name = AchievementCategoryInfo[1]
-    return name
+--- @param currencyType CurrencyType
+--- @return integer CurrencyType
+local GetCarriedCurrencyAmount = function (currencyType)
+    return GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER)
 end
+------------------------------------------------
+-- BRACKET OPTIONS -----------------------------
+------------------------------------------------
 
----
---- @param topLevelIndex luaindex
---- @param subCategoryIndex luaindex
---- @return string name
-local function GetAchievementSubCategoryInfoName(topLevelIndex, subCategoryIndex)
-    local AchievementSubCategoryInfo = { GetAchievementSubCategoryInfo(topLevelIndex, subCategoryIndex) }
-    local name = AchievementSubCategoryInfo[1]
-    return name
-end
+-- 5 Option Bracket (1)
+local bracket1 =
+{
+    [1] = "[",
+    [2] = "(",
+    [3] = "",
+    [4] = "",
+    [5] = "",
+}
 
----
---- @param achievementId integer
---- @return textureName icon
-local function GetAchievementInfoIcon(achievementId)
-    local AchievementInfo = { GetAchievementInfo(achievementId) }
-    local icon = AchievementInfo[4]
-    return icon
-end
+-- 5 Option Bracket (2)
+local bracket2 =
+{
+    [1] = "]",
+    [2] = ")",
+    [3] = " -",
+    [4] = ":",
+    [5] = "",
+}
 
-local function escapePercents(s)
-    return s and s:gsub("%%", "%%%%") or s
-end
+-- 4 Option Bracket (1)
+local bracket3 =
+{
+    [1] = "[",
+    [2] = "(",
+    [3] = "- ",
+    [4] = "",
+}
+
+-- 4 Option Bracket (2)
+local bracket4 =
+{
+    [1] = "]",
+    [2] = ")",
+    [3] = "",
+    [4] = "",
+}
+
+------------------------------------------------
+-- LINK BRACKET OPTIONS ------------------------
+------------------------------------------------
+
+local linkBrackets =
+{
+    [1] = LINK_STYLE_DEFAULT,
+    [2] = LINK_STYLE_BRACKETS,
+}
+
+local linkBracket1 =
+{
+    [1] = "",
+    [2] = "[",
+}
+
+local linkBracket2 =
+{
+    [1] = "",
+    [2] = "]",
+}
+
+------------------------------------------------
+-- ITEM BLACKLIST ------------------------------
+------------------------------------------------
+
+-- List of items to whitelist as notable loot
+local g_notableIDs =
+{
+    [56862] = true, -- Fortified Nirncrux
+    [56863] = true, -- Potent Nirncrux
+    [68342] = true, -- Hakeijo
+}
+
+-- List of items that can be removed from the players equipped item slots.
+local g_removableIDs =
+{
+    [44486] = true, -- Prismatic Blade (Fighters Guild Quests)
+    [44487] = true, -- Prismatic Greatblade (Fighters Guild Quests)
+    [44488] = true, -- Prismatic Long Bow (Fighters Guild Quests)
+    [44489] = true, -- Prismatic Flamestaff (Fighters Guild Quests)
+    [33235] = true, -- Wabbajack (Mages Guild Quests)
+}
+
+-- List of items to blacklist as annoying loot
+local g_blacklistIDs =
+{
+    -- General
+    [64713] = true, -- Laurel
+    [64690] = true, -- Malachite Shard
+    [69432] = true, -- Glass Style Motif Fragment
+
+    -- Trial Plunder
+    [114427] = true, -- Undaunted Plunder
+    [81180] = true,  -- The Serpent's Egg-Tooth
+    [74453] = true,  -- The Rid-Thar's Moon Pearls
+    [87701] = true,  -- Star-Studded Champion's Baldric
+    [87700] = true,  -- Periapt of Elinhir
+
+    -- Trial Weekly Coffers
+    [139664] = true, -- Mage's Ignorant Coffer
+    [139674] = true, -- Saint's Beatified Coffer
+    [139670] = true, -- Dro-m'Athra's Burnished Coffer
+    [138711] = true, -- Welkynar's Grounded Coffer
+
+    -- Transmutation Geodes
+    [134583] = true, -- Transmutation Geode
+    [134588] = true, -- Transmutation Geode
+    [134590] = true, -- Transmutation Geode
+    [134591] = true, -- Transmutation Geode
+    [134595] = true, -- Tester's Infinite Transmutation Geode
+    [134618] = true, -- Uncracked Transmutation Geode
+    [134622] = true, -- Uncracked Transmutation Geode
+    [134623] = true, -- Uncracked Transmutation Geode
+    [140222] = true, -- 200 Transmute Crystals (This is probably just a test item)
+}
+
 
 
 local g_firstLoad = true
@@ -130,7 +307,7 @@ local ChatEventFormattersDelete =
 function ChatAnnouncements.SlayChatHandlers()
     -- Unregister ZOS handlers for events we need to modify
     for eventCode, _ in pairs(ChatEventFormattersDelete) do
-        eventManager:UnregisterForEvent("ChatRouter", eventCode)
+        EVENT_MANAGER:UnregisterForEvent("ChatRouter", eventCode)
     end
 
     -- Slay these events in case LibChatMessage is active and hooks them
@@ -142,7 +319,7 @@ end
 
 function ChatAnnouncements.Initialize(enabled)
     -- Load settings
-    local isCharacterSpecific = LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV
+    local isCharacterSpecific = LUIESV.Default[GetDisplayName()]["$AccountWide"].CharacterSpecificSV
     if isCharacterSpecific then
         ChatAnnouncements.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, "ChatAnnouncements", ChatAnnouncements.Defaults)
     else
@@ -160,28 +337,26 @@ function ChatAnnouncements.Initialize(enabled)
     end
     ChatAnnouncements.Enabled = true
 
-    ChatAnnouncements.isWritCreatorEnabled = LUIE.IsItEnabled("DolgubonsLazyWritCreator")
-
     -- Get current group leader
-    ChatAnnouncements.currentGroupLeaderRawName = GetRawUnitName(GetGroupLeaderUnitTag())
-    ChatAnnouncements.currentGroupLeaderDisplayName = GetUnitDisplayName(GetGroupLeaderUnitTag())
-    ChatAnnouncements.currentActivityId = GetCurrentLFGActivityId()
+    g_currentGroupLeaderRawName = GetRawUnitName(GetGroupLeaderUnitTag())
+    g_currentGroupLeaderDisplayName = GetUnitDisplayName(GetGroupLeaderUnitTag())
+    g_currentActivityId = GetCurrentLFGActivityId()
 
-    -- PostHook Crafting Interface (Keyboard)
+    -- Posthook Crafting Interface (Keyboard)
     ChatAnnouncements.CraftModeOverrides()
 
     -- Register events
     ChatAnnouncements.RegisterGoldEvents()
     ChatAnnouncements.RegisterLootEvents()
-    ChatAnnouncements.Mail.Initialize()
+    ChatAnnouncements.RegisterMailEvents()
     ChatAnnouncements.RegisterXPEvents()
     ChatAnnouncements.RegisterAchievementsEvent()
     -- TODO: Possibly don't register these unless enabled, I'm not sure -- at least move to better sorted order
     eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_BAG_CAPACITY_CHANGED, ChatAnnouncements.StorageBag)
     eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_BANK_CAPACITY_CHANGED, ChatAnnouncements.StorageBank)
     -- TODO: Move these too:
-    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, ChatAnnouncements.HandleClickEvent)
-    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, ChatAnnouncements.HandleClickEvent)
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, LUIE.HandleClickEvent)
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, LUIE.HandleClickEvent)
 
     -- TODO: also move this
     eventManager:RegisterForEvent(moduleName, EVENT_SKILL_XP_UPDATE, ChatAnnouncements.SkillXPUpdate)
@@ -220,7 +395,7 @@ function ChatAnnouncements.Initialize(enabled)
     -- Stop other chat handlers from registering, then stop them again a few more times just in case.
     ChatAnnouncements.SlayChatHandlers()
     -- Call this again a few times shortly after load just in case.
-    LUIE_callLater(ChatAnnouncements.SlayChatHandlers, 1000)
+    LUIE_callLater(ChatAnnouncements.SlayChatHandlers, 100)
     LUIE_callLater(ChatAnnouncements.SlayChatHandlers, 5000)
 end
 
@@ -233,51 +408,51 @@ end
 function ChatAnnouncements.RegisterColorEvents()
     local SV = ChatAnnouncements.SV -- store the SV table in a local variable for better performance
 
-    ChatAnnouncements.Colors.CurrencyColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyColor))
-    ChatAnnouncements.Colors.CurrencyUpColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyColorUp))
-    ChatAnnouncements.Colors.CurrencyDownColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyColorDown))
-    ChatAnnouncements.Colors.CollectibleColorize1 = ZO_ColorDef:New(unpack(SV.Collectibles.CollectibleColor1))
-    ChatAnnouncements.Colors.CollectibleColorize2 = ZO_ColorDef:New(unpack(SV.Collectibles.CollectibleColor2))
-    ChatAnnouncements.Colors.CollectibleUseColorize = ZO_ColorDef:New(unpack(SV.Collectibles.CollectibleUseColor))
-    ChatAnnouncements.Colors.CurrencyGoldColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyGoldColor))
-    ChatAnnouncements.Colors.CurrencyAPColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyAPColor))
-    ChatAnnouncements.Colors.CurrencyTVColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyTVColor))
-    ChatAnnouncements.Colors.CurrencyWVColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyWVColor))
-    ChatAnnouncements.Colors.CurrencyOutfitTokenColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyOutfitTokenColor))
-    ChatAnnouncements.Colors.CurrencyUndauntedColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyUndauntedColor))
-    ChatAnnouncements.Colors.CurrencyTransmuteColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyTransmuteColor))
-    ChatAnnouncements.Colors.CurrencyEventColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyEventColor))
-    ChatAnnouncements.Colors.CurrencyCrownsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyCrownsColor))
-    ChatAnnouncements.Colors.CurrencyCrownGemsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyCrownGemsColor))
-    ChatAnnouncements.Colors.CurrencyEndeavorsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyEndeavorsColor))
-    ChatAnnouncements.Colors.CurrencyEndlessColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyEndlessColor))
-    ChatAnnouncements.Colors.DisguiseAlertColorize = ZO_ColorDef:New(unpack(SV.Notify.DisguiseAlertColor))
-    ChatAnnouncements.Colors.AchievementColorize1 = ZO_ColorDef:New(unpack(SV.Achievement.AchievementColor1))
-    ChatAnnouncements.Colors.AchievementColorize2 = ZO_ColorDef:New(unpack(SV.Achievement.AchievementColor2))
-    ChatAnnouncements.Colors.LorebookColorize1 = ZO_ColorDef:New(unpack(SV.Lorebooks.LorebookColor1))
-    ChatAnnouncements.Colors.LorebookColorize2 = ZO_ColorDef:New(unpack(SV.Lorebooks.LorebookColor2))
-    ChatAnnouncements.Colors.ExperienceMessageColorize = ZO_ColorDef:New(unpack(SV.XP.ExperienceColorMessage)):ToHex()
-    ChatAnnouncements.Colors.ExperienceNameColorize = ZO_ColorDef:New(unpack(SV.XP.ExperienceColorName)):ToHex()
-    ChatAnnouncements.Colors.ExperienceLevelUpColorize = ZO_ColorDef:New(unpack(SV.XP.ExperienceLevelUpColor))
-    ChatAnnouncements.Colors.SkillPointColorize1 = ZO_ColorDef:New(unpack(SV.Skills.SkillPointColor1))
-    ChatAnnouncements.Colors.SkillPointColorize2 = ZO_ColorDef:New(unpack(SV.Skills.SkillPointColor2))
-    ChatAnnouncements.Colors.SkillLineColorize = ZO_ColorDef:New(unpack(SV.Skills.SkillLineColor))
-    ChatAnnouncements.Colors.SkillGuildColorize = ZO_ColorDef:New(unpack(SV.Skills.SkillGuildColor)):ToHex()
-    ChatAnnouncements.Colors.SkillGuildColorizeFG = ZO_ColorDef:New(unpack(SV.Skills.SkillGuildColorFG)):ToHex()
-    ChatAnnouncements.Colors.SkillGuildColorizeMG = ZO_ColorDef:New(unpack(SV.Skills.SkillGuildColorMG)):ToHex()
-    ChatAnnouncements.Colors.SkillGuildColorizeUD = ZO_ColorDef:New(unpack(SV.Skills.SkillGuildColorUD)):ToHex()
-    ChatAnnouncements.Colors.SkillGuildColorizeTG = ZO_ColorDef:New(unpack(SV.Skills.SkillGuildColorTG)):ToHex()
-    ChatAnnouncements.Colors.SkillGuildColorizeDB = ZO_ColorDef:New(unpack(SV.Skills.SkillGuildColorDB)):ToHex()
-    ChatAnnouncements.Colors.SkillGuildColorizePO = ZO_ColorDef:New(unpack(SV.Skills.SkillGuildColorPO)):ToHex()
-    ChatAnnouncements.Colors.QuestColorLocNameColorize = ZO_ColorDef:New(unpack(SV.Quests.QuestColorLocName)):ToHex()
-    ChatAnnouncements.Colors.QuestColorLocDescriptionColorize = ZO_ColorDef:New(unpack(SV.Quests.QuestColorLocDescription)):ToHex()
-    ChatAnnouncements.Colors.QuestColorQuestNameColorize = ZO_ColorDef:New(unpack(SV.Quests.QuestColorName))
-    ChatAnnouncements.Colors.QuestColorQuestDescriptionColorize = ZO_ColorDef:New(unpack(SV.Quests.QuestColorDescription)):ToHex()
-    ChatAnnouncements.Colors.StorageRidingColorize = ZO_ColorDef:New(unpack(SV.Notify.StorageRidingColor))
-    ChatAnnouncements.Colors.StorageRidingBookColorize = ZO_ColorDef:New(unpack(SV.Notify.StorageRidingBookColor))
-    ChatAnnouncements.Colors.StorageBagColorize = ZO_ColorDef:New(unpack(SV.Notify.StorageBagColor))
-    ChatAnnouncements.Colors.GuildColorize = ZO_ColorDef:New(unpack(SV.Social.GuildColor))
-    ChatAnnouncements.Colors.AntiquityColorize = ZO_ColorDef:New(unpack(SV.Antiquities.AntiquityColor))
+    ColorizeColors.CurrencyColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyColor))
+    ColorizeColors.CurrencyUpColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyColorUp))
+    ColorizeColors.CurrencyDownColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyColorDown))
+    ColorizeColors.CollectibleColorize1 = ZO_ColorDef:New(unpack(SV.Collectibles.CollectibleColor1))
+    ColorizeColors.CollectibleColorize2 = ZO_ColorDef:New(unpack(SV.Collectibles.CollectibleColor2))
+    ColorizeColors.CollectibleUseColorize = ZO_ColorDef:New(unpack(SV.Collectibles.CollectibleUseColor))
+    ColorizeColors.CurrencyGoldColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyGoldColor))
+    ColorizeColors.CurrencyAPColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyAPColor))
+    ColorizeColors.CurrencyTVColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyTVColor))
+    ColorizeColors.CurrencyWVColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyWVColor))
+    ColorizeColors.CurrencyOutfitTokenColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyOutfitTokenColor))
+    ColorizeColors.CurrencyUndauntedColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyUndauntedColor))
+    ColorizeColors.CurrencyTransmuteColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyTransmuteColor))
+    ColorizeColors.CurrencyEventColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyEventColor))
+    ColorizeColors.CurrencyCrownsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyCrownsColor))
+    ColorizeColors.CurrencyCrownGemsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyCrownGemsColor))
+    ColorizeColors.CurrencyEndeavorsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyEndeavorsColor))
+    ColorizeColors.CurrencyEndlessColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyEndlessColor))
+    ColorizeColors.DisguiseAlertColorize = ZO_ColorDef:New(unpack(SV.Notify.DisguiseAlertColor))
+    ColorizeColors.AchievementColorize1 = ZO_ColorDef:New(unpack(SV.Achievement.AchievementColor1))
+    ColorizeColors.AchievementColorize2 = ZO_ColorDef:New(unpack(SV.Achievement.AchievementColor2))
+    ColorizeColors.LorebookColorize1 = ZO_ColorDef:New(unpack(SV.Lorebooks.LorebookColor1))
+    ColorizeColors.LorebookColorize2 = ZO_ColorDef:New(unpack(SV.Lorebooks.LorebookColor2))
+    ColorizeColors.ExperienceMessageColorize = ZO_ColorDef:New(unpack(SV.XP.ExperienceColorMessage)):ToHex()
+    ColorizeColors.ExperienceNameColorize = ZO_ColorDef:New(unpack(SV.XP.ExperienceColorName)):ToHex()
+    ColorizeColors.ExperienceLevelUpColorize = ZO_ColorDef:New(unpack(SV.XP.ExperienceLevelUpColor))
+    ColorizeColors.SkillPointColorize1 = ZO_ColorDef:New(unpack(SV.Skills.SkillPointColor1))
+    ColorizeColors.SkillPointColorize2 = ZO_ColorDef:New(unpack(SV.Skills.SkillPointColor2))
+    ColorizeColors.SkillLineColorize = ZO_ColorDef:New(unpack(SV.Skills.SkillLineColor))
+    ColorizeColors.SkillGuildColorize = ZO_ColorDef:New(unpack(SV.Skills.SkillGuildColor)):ToHex()
+    ColorizeColors.SkillGuildColorizeFG = ZO_ColorDef:New(unpack(SV.Skills.SkillGuildColorFG)):ToHex()
+    ColorizeColors.SkillGuildColorizeMG = ZO_ColorDef:New(unpack(SV.Skills.SkillGuildColorMG)):ToHex()
+    ColorizeColors.SkillGuildColorizeUD = ZO_ColorDef:New(unpack(SV.Skills.SkillGuildColorUD)):ToHex()
+    ColorizeColors.SkillGuildColorizeTG = ZO_ColorDef:New(unpack(SV.Skills.SkillGuildColorTG)):ToHex()
+    ColorizeColors.SkillGuildColorizeDB = ZO_ColorDef:New(unpack(SV.Skills.SkillGuildColorDB)):ToHex()
+    ColorizeColors.SkillGuildColorizePO = ZO_ColorDef:New(unpack(SV.Skills.SkillGuildColorPO)):ToHex()
+    ColorizeColors.QuestColorLocNameColorize = ZO_ColorDef:New(unpack(SV.Quests.QuestColorLocName)):ToHex()
+    ColorizeColors.QuestColorLocDescriptionColorize = ZO_ColorDef:New(unpack(SV.Quests.QuestColorLocDescription)):ToHex()
+    ColorizeColors.QuestColorQuestNameColorize = ZO_ColorDef:New(unpack(SV.Quests.QuestColorName))
+    ColorizeColors.QuestColorQuestDescriptionColorize = ZO_ColorDef:New(unpack(SV.Quests.QuestColorDescription)):ToHex()
+    ColorizeColors.StorageRidingColorize = ZO_ColorDef:New(unpack(SV.Notify.StorageRidingColor))
+    ColorizeColors.StorageRidingBookColorize = ZO_ColorDef:New(unpack(SV.Notify.StorageRidingBookColor))
+    ColorizeColors.StorageBagColorize = ZO_ColorDef:New(unpack(SV.Notify.StorageBagColor))
+    ColorizeColors.GuildColorize = ZO_ColorDef:New(unpack(SV.Social.GuildColor))
+    ColorizeColors.AntiquityColorize = ZO_ColorDef:New(unpack(SV.Antiquities.AntiquityColor))
 end
 
 function ChatAnnouncements.RegisterSocialEvents()
@@ -292,7 +467,7 @@ end
 function ChatAnnouncements.RegisterQuestEvents()
     eventManager:RegisterForEvent(moduleName, EVENT_QUEST_SHARED, ChatAnnouncements.QuestShared)
     -- Create a table for quests
-    for i = 1, MAX_JOURNAL_QUESTS do
+    for i = 1, 25 do
         if IsValidQuestIndex(i) then
             local name = GetJournalQuestName(i)
             local questType = GetJournalQuestType(i)
@@ -302,7 +477,7 @@ function ChatAnnouncements.RegisterQuestEvents()
                 name = GetString(SI_QUEST_JOURNAL_UNKNOWN_QUEST_NAME)
             end
 
-            ChatAnnouncements.questIndex[name] =
+            g_questIndex[name] =
             {
                 questType = questType,
                 instanceDisplayType = instanceDisplayType,
@@ -316,7 +491,7 @@ function ChatAnnouncements.RegisterGuildEvents()
     eventManager:RegisterForEvent(moduleName, EVENT_GUILD_SELF_JOINED_GUILD, ChatAnnouncements.GuildAddedSelf)
     eventManager:RegisterForEvent(moduleName, EVENT_GUILD_INVITE_ADDED, ChatAnnouncements.GuildInviteAdded)
     eventManager:RegisterForEvent(moduleName, EVENT_GUILD_MEMBER_RANK_CHANGED, ChatAnnouncements.GuildRankChanged)
-    -- eventManager:RegisterForEvent(moduleName, EVENT_HERALDRY_SAVED, ChatAnnouncements.GuildHeraldrySaved) -- TODO: Fix later
+    eventManager:RegisterForEvent(moduleName, EVENT_HERALDRY_SAVED, ChatAnnouncements.GuildHeraldrySaved) -- TODO: Fix later
     eventManager:RegisterForEvent(moduleName, EVENT_GUILD_RANKS_CHANGED, ChatAnnouncements.GuildRanksSaved)
     eventManager:RegisterForEvent(moduleName, EVENT_GUILD_RANK_CHANGED, ChatAnnouncements.GuildRankSaved)
     eventManager:RegisterForEvent(moduleName, EVENT_GUILD_DESCRIPTION_CHANGED, ChatAnnouncements.GuildTextChanged)
@@ -330,9 +505,15 @@ function ChatAnnouncements.RegisterAchievementsEvent()
     end
 end
 
+function ChatAnnouncements.RegisterXPEvents()
+    eventManager:UnregisterForEvent(moduleName, EVENT_EXPERIENCE_GAIN)
+    if ChatAnnouncements.SV.XP.Experience or ChatAnnouncements.SV.XP.ExperienceLevelUp then
+        eventManager:RegisterForEvent(moduleName, EVENT_EXPERIENCE_GAIN, ChatAnnouncements.OnExperienceGain)
+    end
+end
+
 function ChatAnnouncements.RegisterGoldEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_CURRENCY_UPDATE)
-    eventManager:UnregisterForEvent(moduleName, EVENT_LOOT_UPDATED)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_ADDED)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_REMOVED)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_CLOSE_MAILBOX)
@@ -341,10 +522,44 @@ function ChatAnnouncements.RegisterGoldEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_COD_CHANGED)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_REMOVED)
 
-    eventManager:RegisterForEvent(moduleName, EVENT_CURRENCY_UPDATE, function (_, currencyType, currencyLocation, newAmount, oldAmount, reason, reasonSupplementaryInfo)
-        ChatAnnouncements.OnCurrencyUpdate(currencyType, currencyLocation, newAmount, oldAmount, reason, reasonSupplementaryInfo)
-    end)
+    eventManager:RegisterForEvent(moduleName, EVENT_CURRENCY_UPDATE, ChatAnnouncements.OnCurrencyUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_LOOT_UPDATED, ChatAnnouncements.OnLootUpdated)
+    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_ADDED, ChatAnnouncements.OnMailAttach)
+    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_REMOVED, ChatAnnouncements.OnMailAttachRemove)
+    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_CLOSE_MAILBOX, ChatAnnouncements.OnMailCloseBox)
+    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_SEND_SUCCESS, ChatAnnouncements.OnMailSuccess)
+    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED, ChatAnnouncements.MailMoneyChanged)
+    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_COD_CHANGED, ChatAnnouncements.MailCODChanged)
+    eventManager:RegisterForEvent(moduleName, EVENT_MAIL_REMOVED, ChatAnnouncements.MailRemoved)
+end
+
+function ChatAnnouncements.RegisterMailEvents()
+    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_READABLE)
+    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS)
+    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_ADDED)
+    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_REMOVED)
+    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_OPEN_MAILBOX)
+    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_CLOSE_MAILBOX)
+    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_SEND_SUCCESS)
+    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED)
+    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_COD_CHANGED)
+    eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_REMOVED)
+    if ChatAnnouncements.SV.Inventory.LootMail then
+        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_READABLE, ChatAnnouncements.OnMailReadable)
+        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS, ChatAnnouncements.OnMailTakeAttachedItem)
+    end
+    if ChatAnnouncements.SV.Inventory.LootMail or ChatAnnouncements.SV.Currency.CurrencyGoldChange then
+        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_ADDED, ChatAnnouncements.OnMailAttach)
+        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_REMOVED, ChatAnnouncements.OnMailAttachRemove)
+        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_SEND_SUCCESS, ChatAnnouncements.OnMailSuccess)
+        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHED_MONEY_CHANGED, ChatAnnouncements.MailMoneyChanged)
+        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_COD_CHANGED, ChatAnnouncements.MailCODChanged)
+        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_REMOVED, ChatAnnouncements.MailRemoved)
+    end
+    if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootMail or ChatAnnouncements.SV.Currency.CurrencyGoldChange then
+        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_OPEN_MAILBOX, ChatAnnouncements.OnMailOpenBox)
+        eventManager:RegisterForEvent(moduleName, EVENT_MAIL_CLOSE_MAILBOX, ChatAnnouncements.OnMailCloseBox)
+    end
 end
 
 function ChatAnnouncements.RegisterLootEvents()
@@ -402,11 +617,8 @@ function ChatAnnouncements.RegisterLootEvents()
     -- INDEX
     if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
-        eventManager:RegisterForEvent(moduleName, EVENT_QUEST_COMPLETE_ATTEMPT_FAILED_INVENTORY_FULL, ChatAnnouncements.InventoryFullQuest)
-        eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_IS_FULL, ChatAnnouncements.InventoryFull)
-        eventManager:RegisterForEvent(moduleName, EVENT_LOOT_ITEM_FAILED, ChatAnnouncements.LootItemFailed)
-        ChatAnnouncements.equippedStacks = {}
-        ChatAnnouncements.inventoryStacks = {}
+        g_equippedStacks = {}
+        g_inventoryStacks = {}
         ChatAnnouncements.IndexEquipped()
         ChatAnnouncements.IndexInventory()
     end
@@ -458,6 +670,12 @@ function ChatAnnouncements.RegisterLootEvents()
     if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Notify.NotificationConfiscateCA or ChatAnnouncements.SV.Notify.NotificationConfiscateAlert or ChatAnnouncements.SV.Inventory.LootShowDisguise then
         eventManager:RegisterForEvent(moduleName, EVENT_JUSTICE_STOLEN_ITEMS_REMOVED, ChatAnnouncements.JusticeStealRemove)
     end
+
+    --[[if ChatAnnouncements.SV.ShowLootFail then
+        eventManager:RegisterForEvent(moduleName, EVENT_QUEST_COMPLETE_ATTEMPT_FAILED_INVENTORY_FULL, ChatAnnouncements.InventoryFullQuest)
+        eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_IS_FULL, ChatAnnouncements.InventoryFull)
+        eventManager:RegisterForEvent(moduleName, EVENT_LOOT_ITEM_FAILED, ChatAnnouncements.LootItemFailed)
+    end]]
 end
 
 function ChatAnnouncements.RegisterDisguiseEvents()
@@ -465,58 +683,65 @@ function ChatAnnouncements.RegisterDisguiseEvents()
     if ChatAnnouncements.SV.Notify.DisguiseCA or ChatAnnouncements.SV.Notify.DisguiseCSA or ChatAnnouncements.SV.Notify.DisguiseAlert or ChatAnnouncements.SV.Notify.DisguiseWarnCA or ChatAnnouncements.SV.Notify.DisguiseWarnCSA or ChatAnnouncements.SV.Notify.DisguiseWarnAlert then
         eventManager:RegisterForEvent(moduleName .. "Player", EVENT_DISGUISE_STATE_CHANGED, ChatAnnouncements.DisguiseState)
         eventManager:AddFilterForEvent(moduleName .. "Player", EVENT_DISGUISE_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
-        ChatAnnouncements.currentDisguise = GetItemId(BAG_WORN, EQUIP_SLOT_COSTUME) or 0 -- Get the currently equipped disguise itemId if any
-        if g_firstLoad then
-            ChatAnnouncements.disguiseState = 0
-            g_firstLoad = false
+        g_currentDisguise = GetItemId(BAG_WORN, EQUIP_SLOT_COSTUME) or 0 -- Get the currently equipped disguise itemId if any
+        if g_activatedFirstLoad then
+            g_disguiseState = 0
+            g_activatedFirstLoad = false
         else
-            ChatAnnouncements.disguiseState = GetUnitDisguiseState("player") -- Get current player disguise state
-            if ChatAnnouncements.disguiseState > 0 then
-                ChatAnnouncements.disguiseState = 1                          -- Simplify all the various states into a basic 0 = false, 1 = true value
+            g_disguiseState = GetUnitDisguiseState("player") -- Get current player disguise state
+            if g_disguiseState > 0 then
+                g_disguiseState = 1                          -- Simplify all the various states into a basic 0 = false, 1 = true value
             end
         end
     end
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Called by most functions that use character or display name to resolve LINK display method.
---
---- @param characterName string The character name
---- @param displayName string The display name
---- @return string nameLink The resolved name link
 function ChatAnnouncements.ResolveNameLink(characterName, displayName)
-    local useBrackets = ChatAnnouncements.SV.BracketOptionCharacter ~= 1
-    local displayOption = ChatAnnouncements.SV.ChatPlayerDisplayOptions
+    local nameLink
 
-    if displayOption == 1 then
-        return useBrackets and ZO_LinkHandler_CreateDisplayNameLink(displayName) or
-            ZO_LinkHandler_CreateLinkWithoutBrackets(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-    elseif displayOption == 2 then
-        return useBrackets and ZO_LinkHandler_CreateCharacterLink(characterName) or
-            ZO_LinkHandler_CreateLinkWithoutBrackets(characterName, nil, CHARACTER_LINK_TYPE, characterName)
-    else
+    if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 1 then
+        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+            nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
+        else
+            nameLink = ZO_LinkHandler_CreateLink(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
+        end
+    elseif ChatAnnouncements.SV.ChatPlayerDisplayOptions == 2 then
+        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+            nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(characterName, nil, CHARACTER_LINK_TYPE, characterName)
+        else
+            nameLink = ZO_LinkHandler_CreateLink(characterName, nil, CHARACTER_LINK_TYPE, characterName)
+        end
+    elseif ChatAnnouncements.SV.ChatPlayerDisplayOptions == 3 then
         local displayBothString = zo_strformat("<<1>><<2>>", characterName, displayName)
-        return useBrackets and ZO_LinkHandler_CreateLink(displayBothString, nil, DISPLAY_NAME_LINK_TYPE, displayName) or
-            ZO_LinkHandler_CreateLinkWithoutBrackets(displayBothString, nil, DISPLAY_NAME_LINK_TYPE, displayName)
+        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+            nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayBothString, nil, DISPLAY_NAME_LINK_TYPE, displayName)
+        else
+            nameLink = ZO_LinkHandler_CreateLink(displayBothString, nil, DISPLAY_NAME_LINK_TYPE, displayName)
+        end
     end
+
+    return nameLink
 end
 
 -- Called by most functions that use character or display name to resolve NON-LINK display method (mostly used for alerts).
---
---- @param characterName string The character name
---- @param displayName string The display name
---- @return string nameLink The resolved name string
 function ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
-    local displayOption = ChatAnnouncements.SV.ChatPlayerDisplayOptions
-
-    if displayOption == 1 then
-        return displayName
-    elseif displayOption == 2 then
-        return characterName
-    else
-        return zo_strformat("<<1>><<2>>", characterName, displayName)
+    local nameLink
+    if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 1 then
+        nameLink = displayName
+    elseif ChatAnnouncements.SV.ChatPlayerDisplayOptions == 2 then
+        nameLink = characterName
+    elseif ChatAnnouncements.SV.ChatPlayerDisplayOptions == 3 then
+        nameLink = zo_strformat("<<1>><<2>>", characterName, displayName)
     end
+
+    return nameLink
 end
 
 local function ShouldShowSocialErrorInChat(error)
@@ -532,82 +757,92 @@ function ChatAnnouncements.OnErrorSocialChat(eventCode, error)
 end
 
 function ChatAnnouncements.OnDigStart()
-    ChatAnnouncements.weAreInADig = true
+    g_weAreInADig = true
 end
 
---- - **EVENT_ANTIQUITY_DIGGING_GAME_OVER **
----
---- @param eventId integer
---- @param gameOverFlags DiggingGameOverFlags
-function ChatAnnouncements.OnDigEnd(eventId, gameOverFlags)
+function ChatAnnouncements.OnDigEnd()
     LUIE_callLater(function ()
-                       ChatAnnouncements.weAreInADig = false
+                       g_weAreInADig = false
                    end, 1000)
 end
 
 -- TODO: Fix later
---[[
 function ChatAnnouncements.GuildHeraldrySaved()
     if ChatAnnouncements.SV.Currency.CurrencyGoldChange then
         local value = g_pendingHeraldryCost > 0 and g_pendingHeraldryCost or 1000
-        local messageType = "LUIE_CURRENCY_HERALDRY"
+        local type = "LUIE_CURRENCY_HERALDRY"
         local formattedValue = nil -- Un-needed, we're not going to try to show the total guild bank gold here.
-        local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyDownColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+        local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyDownColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
         local changeType = ZO_CommaDelimitDecimalNumber(value)
-        local currencyTypeColor = ChatAnnouncements.Colors.CurrencyGoldColorize:ToHex()
-        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_MONEY), 16,16) or ""
+        local currencyTypeColor = ColorizeColors.CurrencyGoldColorize:ToHex()
+        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_gold.dds|t" or ""
         local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, value)
         local currencyTotal = nil
         local messageTotal = ""
         local messageChange = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_HERALDRY)
-        ChatAnnouncements.CurrencyPrinter(formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, messageType)
+        ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
     end
 
-    if ChatAnnouncements.selectedGuild ~= nil then
-        local id = ChatAnnouncements.selectedGuild
+    if g_selectedGuild ~= nil then
+        local id = g_selectedGuild
         local guildName = GetGuildName(id)
 
         local guildAlliance = GetGuildAlliance(id)
-        local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ChatAnnouncements.Colors.GuildColorize
+        local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
         local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
         local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
 
         if ChatAnnouncements.SV.Social.GuildManageCA then
             local finalMessage = zo_strformat(GetString(LUIE_STRING_CA_GUILD_HERALDRY_UPDATE), guildNameAlliance)
-            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, messageType = "NOTIFICATION", isSystem = true }
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "NOTIFICATION", isSystem = true }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages )
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
         end
         if ChatAnnouncements.SV.Social.GuildManageAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(LUIE_STRING_CA_GUILD_HERALDRY_UPDATE), guildNameAllianceAlert))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_HERALDRY_UPDATE), guildNameAllianceAlert))
         end
     end
 end
-]]
---
 
+-- Copied from Writ Creator for CSA handling purposes - Only called when WritCreater is detected so shouldn't cause issues
+local function isQuestWritQuest(questId)
+    local writs = WritCreater.writSearch()
+    for k, v in pairs(writs) do
+        if v == questId then
+            return true
+        end
+    end
+end
 
+-- Copied from Writ Creator for CSA handling purposes - Only called when WritCreater is detected so shouldn't cause issues
+local function rejectQuest(questIndex)
+    for itemLink, _ in pairs(WritCreater:GetSettings().skipItemQuests) do
+        if not WritCreater:GetSettings().skipItemQuests[itemLink] then
+            for i = 1, GetJournalQuestNumConditions(questIndex, QUEST_MAIN_STEP_INDEX) do
+                if DoesItemLinkFulfillJournalQuestCondition(itemLink, questIndex, 1, i) then
+                    return itemLink
+                end
+            end
+        end
+    end
+    return false
+end
 
 function ChatAnnouncements.GuildRanksSaved(eventCode, guildId)
     local guildName = GetGuildName(guildId)
     local guildAlliance = GetGuildAlliance(guildId)
-    local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ChatAnnouncements.Colors.GuildColorize
+    local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
     local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
     local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
 
     if ChatAnnouncements.SV.Social.GuildManageCA then
         local finalMessage = zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANKS_UPDATE), guildNameAlliance)
-        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-        {
-            message = finalMessage,
-            messageType = "NOTIFICATION",
-            isSystem = true
-        }
+        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "NOTIFICATION", isSystem = true }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
     end
     if ChatAnnouncements.SV.Social.GuildManageAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANKS_UPDATE), guildNameAllianceAlert))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANKS_UPDATE), guildNameAllianceAlert))
     end
 end
 
@@ -626,7 +861,7 @@ function ChatAnnouncements.GuildRankSaved(eventCode, guildId, rankIndex)
     local icon1 = GetGuildRankLargeIcon(icon)
     local guildName = GetGuildName(guildId)
     local guildAlliance = GetGuildAlliance(guildId)
-    local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ChatAnnouncements.Colors.GuildColorize
+    local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
     local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
     local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
     local rankSyntax = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(icon1, 16, 16), rankName)) or (guildColor:Colorize(rankName))
@@ -636,14 +871,14 @@ function ChatAnnouncements.GuildRankSaved(eventCode, guildId, rankIndex)
         printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_UPDATE), rankSyntax, guildNameAlliance), true)
     end
     if ChatAnnouncements.SV.Social.GuildManageAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_UPDATE), rankSyntaxAlert, guildNameAllianceAlert))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_UPDATE), rankSyntaxAlert, guildNameAllianceAlert))
     end
 end
 
 function ChatAnnouncements.GuildTextChanged(eventCode, guildId)
     local guildName = GetGuildName(guildId)
     local guildAlliance = GetGuildAlliance(guildId)
-    local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ChatAnnouncements.Colors.GuildColorize
+    local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
     local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
     local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
     -- Depending on event code set message context.
@@ -652,17 +887,12 @@ function ChatAnnouncements.GuildTextChanged(eventCode, guildId)
     if messageString ~= nil then
         if ChatAnnouncements.SV.Social.GuildManageCA then
             local finalMessage = zo_strformat(GetString(messageString), guildNameAlliance)
-            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-            {
-                message = finalMessage,
-                messageType = "NOTIFICATION",
-                isSystem = true
-            }
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "NOTIFICATION", isSystem = true }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
         end
         if ChatAnnouncements.SV.Social.GuildManageAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(messageString), guildNameAllianceAlert))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(messageString), guildNameAllianceAlert))
         end
     end
 end
@@ -673,8 +903,8 @@ function ChatAnnouncements.GuildRankChanged(eventCode, guildId, displayName, new
         return
     end
     -- If the player just updated someones rank then we hide this generic message.
-    if ChatAnnouncements.disableRankMessage == true then
-        ChatAnnouncements.disableRankMessage = false
+    if g_disableRankMessage == true then
+        g_disableRankMessage = false
         return
     end
 
@@ -702,7 +932,7 @@ function ChatAnnouncements.GuildRankChanged(eventCode, guildId, displayName, new
             local name = GetGuildName(id)
 
             local guildAlliance = GetGuildAlliance(id)
-            local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ChatAnnouncements.Colors.GuildColorize
+            local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
             local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
             local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
             local rankSyntax = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(icon, 16, 16), rankText)) or (guildColor:Colorize(rankText))
@@ -713,7 +943,7 @@ function ChatAnnouncements.GuildRankChanged(eventCode, guildId, displayName, new
                     printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED), displayNameLink, guildNameAlliance, rankSyntax), true)
                 end
                 if ChatAnnouncements.SV.Social.GuildRankAlert then
-                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED), displayName, guildNameAllianceAlert, rankSyntaxAlert))
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED), displayName, guildNameAllianceAlert, rankSyntaxAlert))
                 end
                 break
             end
@@ -721,19 +951,13 @@ function ChatAnnouncements.GuildRankChanged(eventCode, guildId, displayName, new
     end
 end
 
---- - **EVENT_GUILD_PLAYER_RANK_CHANGED **
----
---- @param eventId integer
---- @param guildId integer
---- @param rankIndex luaindex
---- @param guildRankChangeAction GuildRankChangeAction
 function ChatAnnouncements.GuildPlayerRankChanged(eventId, guildId, rankIndex, guildRankChangeAction)
     local rankText = GetFinalGuildRankName(guildId, rankIndex)
     local icon = GetFinalGuildRankTextureSmall(guildId, rankIndex)
     local guildName = GetGuildName(guildId)
 
     local guildAlliance = GetGuildAlliance(guildId)
-    local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ChatAnnouncements.Colors.GuildColorize
+    local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
     local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
     local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
     local rankSyntax = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(icon, 16, 16), rankText)) or (guildColor:Colorize(rankText))
@@ -745,38 +969,32 @@ function ChatAnnouncements.GuildPlayerRankChanged(eventId, guildId, rankIndex, g
             printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_UP_SELF), rankSyntax, guildNameAlliance), true)
         end
         if ChatAnnouncements.SV.Social.GuildRankAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_UP_SELF), rankSyntaxAlert, guildNameAllianceAlert))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_UP_SELF), rankSyntaxAlert, guildNameAllianceAlert))
         end
     elseif guildRankChangeAction == GUILD_RANK_CHANGE_ACTION_DEMOTE then
         if ChatAnnouncements.SV.Social.GuildRankCA then
             printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_DOWN_SELF), rankSyntax, guildNameAlliance), true)
         end
         if ChatAnnouncements.SV.Social.GuildRankAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_DOWN_SELF), rankSyntaxAlert, guildNameAllianceAlert))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_DOWN_SELF), rankSyntaxAlert, guildNameAllianceAlert))
         end
     end
 end
 
---- - **EVENT_GUILD_MEMBER_PROMOTE_SUCCESSFUL **
----
---- @param eventId integer
---- @param playerName string
---- @param newRankIndex integer
---- @param guildId integer
-function ChatAnnouncements.GuildMemberPromoteSuccessful(eventId, playerName, newRankIndex, guildId)
+function ChatAnnouncements.GuildMemberPromoteSuccessful(eventId, displayName, newRankIndex, guildId)
     if newRankIndex > 0 then
         local displayNameLink
         if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(playerName, nil, DISPLAY_NAME_LINK_TYPE, playerName)
+            displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
         else
-            displayNameLink = ZO_LinkHandler_CreateLink(playerName, nil, DISPLAY_NAME_LINK_TYPE, playerName)
+            displayNameLink = ZO_LinkHandler_CreateLink(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
         end
         local rankText = GetFinalGuildRankName(guildId, newRankIndex)
         local icon = GetFinalGuildRankTextureSmall(guildId, newRankIndex)
         local guildName = GetGuildName(guildId)
 
         local guildAlliance = GetGuildAlliance(guildId)
-        local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ChatAnnouncements.Colors.GuildColorize
+        local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
         local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
         local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
         local rankSyntax = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(icon, 16, 16), rankText)) or (guildColor:Colorize(rankText))
@@ -786,32 +1004,26 @@ function ChatAnnouncements.GuildMemberPromoteSuccessful(eventId, playerName, new
             printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED_PROMOTE), displayNameLink, rankSyntax, guildNameAlliance), true)
         end
         if ChatAnnouncements.SV.Social.GuildRankAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED_PROMOTE), playerName, rankSyntaxAlert, guildNameAllianceAlert))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED_PROMOTE), displayName, rankSyntaxAlert, guildNameAllianceAlert))
         end
     end
-    ChatAnnouncements.disableRankMessage = true
+    g_disableRankMessage = true
 end
 
---- - **EVENT_GUILD_MEMBER_DEMOTE_SUCCESSFUL **
----
---- @param eventId integer
---- @param playerName string
---- @param newRankIndex integer
---- @param guildId integer
-function ChatAnnouncements.GuildMemberDemoteSuccessful(eventId, playerName, newRankIndex, guildId)
+function ChatAnnouncements.GuildMemberDemoteSuccessful(eventId, displayName, newRankIndex, guildId)
     if newRankIndex <= GetNumGuildRanks(guildId) then
         local displayNameLink
         if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(playerName, nil, DISPLAY_NAME_LINK_TYPE, playerName)
+            displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
         else
-            displayNameLink = ZO_LinkHandler_CreateLink(playerName, nil, DISPLAY_NAME_LINK_TYPE, playerName)
+            displayNameLink = ZO_LinkHandler_CreateLink(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
         end
         local rankText = GetFinalGuildRankName(guildId, newRankIndex)
         local icon = GetFinalGuildRankTextureSmall(guildId, newRankIndex)
         local guildName = GetGuildName(guildId)
 
         local guildAlliance = GetGuildAlliance(guildId)
-        local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ChatAnnouncements.Colors.GuildColorize
+        local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
         local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
         local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
         local rankSyntax = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(icon, 16, 16), rankText)) or (guildColor:Colorize(rankText))
@@ -821,26 +1033,21 @@ function ChatAnnouncements.GuildMemberDemoteSuccessful(eventId, playerName, newR
             printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED_DEMOTE), displayNameLink, rankSyntax, guildNameAlliance), true)
         end
         if ChatAnnouncements.SV.Social.GuildRankAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED_DEMOTE), playerName, rankSyntaxAlert, guildNameAllianceAlert))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_RANK_CHANGED_DEMOTE), displayName, rankSyntaxAlert, guildNameAllianceAlert))
         end
     end
-    ChatAnnouncements.disableRankMessage = true
+    g_disableRankMessage = true
 end
 
---- - **EVENT_GUILD_SELF_JOINED_GUILD **
----
---- @param eventId integer
---- @param guildServerId integer
---- @param characterName string
---- @param guildId integer
-function ChatAnnouncements.GuildAddedSelf(eventId, guildServerId, characterName, guildId)
+-- EVENT_GUILD_SELF_JOINED_GUILD
+function ChatAnnouncements.GuildAddedSelf(eventCode, guildId, guildName)
     local guilds = GetNumGuilds()
     for i = 1, guilds do
         local id = GetGuildId(i)
         local name = GetGuildName(id)
-        local guildName = GetGuildName(guildId)
+
         local guildAlliance = GetGuildAlliance(id)
-        local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ChatAnnouncements.Colors.GuildColorize
+        local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
         local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
         local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
 
@@ -849,43 +1056,33 @@ function ChatAnnouncements.GuildAddedSelf(eventId, guildServerId, characterName,
                 printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_JOIN_SELF), guildNameAlliance), true)
             end
             if ChatAnnouncements.SV.Social.GuildAlert then
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(LUIE_STRING_CA_GUILD_JOIN_SELF), guildNameAllianceAlert))
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_JOIN_SELF), guildNameAllianceAlert))
             end
             break
         end
     end
 end
 
---- - **EVENT_GUILD_INVITE_ADDED **
----
---- @param eventId integer
---- @param guildId integer
---- @param guildName string
---- @param guildAlliance Alliance
---- @param inviterDisplayName string
-function ChatAnnouncements.GuildInviteAdded(eventId, guildId, guildName, guildAlliance, inviterDisplayName)
+-- EVENT_GUILD_INVITE_ADDED
+function ChatAnnouncements.GuildInviteAdded(eventCode, guildId, guildName, guildAlliance, inviterName)
     local displayNameLink
     if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-        displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(inviterDisplayName, nil, DISPLAY_NAME_LINK_TYPE, inviterDisplayName)
+        displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(inviterName, nil, DISPLAY_NAME_LINK_TYPE, inviterName)
     else
-        displayNameLink = ZO_LinkHandler_CreateLink(inviterDisplayName, nil, DISPLAY_NAME_LINK_TYPE, inviterDisplayName)
+        displayNameLink = ZO_LinkHandler_CreateLink(inviterName, nil, DISPLAY_NAME_LINK_TYPE, inviterName)
     end
-    local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ChatAnnouncements.Colors.GuildColorize
+    local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
     local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
     local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
     if ChatAnnouncements.SV.Social.GuildCA then
         printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_INCOMING_GUILD_REQUEST), displayNameLink, guildNameAlliance), true)
     end
     if ChatAnnouncements.SV.Social.GuildAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(LUIE_STRING_CA_GUILD_INCOMING_GUILD_REQUEST), inviterDisplayName, guildNameAllianceAlert))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_INCOMING_GUILD_REQUEST), inviterName, guildNameAllianceAlert))
     end
 end
 
---- - **EVENT_FRIEND_ADDED **
----
---- @param eventId integer
---- @param displayName string
-function ChatAnnouncements.FriendAdded(eventId, displayName)
+function ChatAnnouncements.FriendAdded(eventCode, displayName)
     if ChatAnnouncements.SV.Social.FriendIgnoreCA then
         local displayNameLink
         if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
@@ -896,15 +1093,11 @@ function ChatAnnouncements.FriendAdded(eventId, displayName)
         printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_ADDED, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_ADDED, displayName))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_ADDED, displayName))
     end
 end
 
---- - **EVENT_FRIEND_REMOVED **
----
---- @param eventId integer
---- @param displayName string
-function ChatAnnouncements.FriendRemoved(eventId, displayName)
+function ChatAnnouncements.FriendRemoved(eventCode, displayName)
     if ChatAnnouncements.SV.Social.FriendIgnoreCA then
         local displayNameLink
         if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
@@ -915,15 +1108,11 @@ function ChatAnnouncements.FriendRemoved(eventId, displayName)
         printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_REMOVED, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_REMOVED, displayName))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_REMOVED, displayName))
     end
 end
 
---- - **EVENT_INCOMING_FRIEND_INVITE_ADDED **
----
---- @param eventId integer
---- @param displayName string
-function ChatAnnouncements.FriendInviteAdded(eventId, displayName)
+function ChatAnnouncements.FriendInviteAdded(eventCode, displayName)
     if ChatAnnouncements.SV.Social.FriendIgnoreCA then
         local displayNameLink
         if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
@@ -934,15 +1123,11 @@ function ChatAnnouncements.FriendInviteAdded(eventId, displayName)
         printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_INCOMING_FRIEND_REQUEST, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(LUIE_STRING_CA_FRIENDS_INCOMING_FRIEND_REQUEST, displayName))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_INCOMING_FRIEND_REQUEST, displayName))
     end
 end
 
---- - **EVENT_IGNORE_ADDED **
----
---- @param eventId integer
---- @param displayName string
-function ChatAnnouncements.IgnoreAdded(eventId, displayName)
+function ChatAnnouncements.IgnoreAdded(eventCode, displayName)
     if ChatAnnouncements.SV.Social.FriendIgnoreCA then
         local displayNameLink
         if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
@@ -953,15 +1138,11 @@ function ChatAnnouncements.IgnoreAdded(eventId, displayName)
         printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_ADDED, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_ADDED, displayName))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_ADDED, displayName))
     end
 end
 
---- - **EVENT_IGNORE_REMOVED **
----
---- @param eventId integer
---- @param displayName string
-function ChatAnnouncements.IgnoreRemoved(eventId, displayName)
+function ChatAnnouncements.IgnoreRemoved(eventCode, displayName)
     if ChatAnnouncements.SV.Social.FriendIgnoreCA then
         local displayNameLink
         if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
@@ -972,23 +1153,13 @@ function ChatAnnouncements.IgnoreRemoved(eventId, displayName)
         printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_REMOVED, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_REMOVED, displayName))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_REMOVED, displayName))
     end
 end
 
---- - **EVENT_FRIEND_PLAYER_STATUS_CHANGED **
----
---- @param eventId integer
---- @param displayName string
---- @param characterName string
---- @param oldStatus PlayerStatus
---- @param newStatus PlayerStatus
-function ChatAnnouncements.FriendPlayerStatus(eventId, displayName, characterName, oldStatus, newStatus)
+function ChatAnnouncements.FriendPlayerStatus(eventCode, displayName, characterName, oldStatus, newStatus)
     local wasOnline = oldStatus ~= PLAYER_STATUS_OFFLINE
     local isOnline = newStatus ~= PLAYER_STATUS_OFFLINE
-
-    displayName = zo_strformat("<<1>>", displayName)
-    characterName = zo_strformat("<<1>>", characterName)
 
     if wasOnline ~= isOnline then
         local chatText
@@ -1024,105 +1195,90 @@ function ChatAnnouncements.FriendPlayerStatus(eventId, displayName, characterNam
             printToChat(chatText, true)
         end
         if ChatAnnouncements.SV.Social.FriendStatusAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, alertText)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
         end
     end
 end
 
---- - **EVENT_QUEST_SHARED **
----
---- @param eventId integer
---- @param questId integer
-function ChatAnnouncements.QuestShared(eventId, questId)
+function ChatAnnouncements.QuestShared(eventCode, questId)
     if ChatAnnouncements.SV.Quests.QuestShareCA or ChatAnnouncements.SV.Quests.QuestShareAlert then
         local questName, characterName, timeSinceRequestMs, displayName = GetOfferedQuestShareInfo(questId)
 
         local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
 
-        local message = zo_strformat(GetString(LUIE_STRING_CA_GROUP_INCOMING_QUEST_SHARE), finalName, ChatAnnouncements.Colors.QuestColorQuestNameColorize:Colorize(questName))
+        local message = zo_strformat(GetString(LUIE_STRING_CA_GROUP_INCOMING_QUEST_SHARE), finalName, ColorizeColors.QuestColorQuestNameColorize:Colorize(questName))
         local alertMessage = zo_strformat(GetString(LUIE_STRING_CA_GROUP_INCOMING_QUEST_SHARE_P2P), finalName, questName)
 
         if ChatAnnouncements.SV.Quests.QuestShareCA then
             printToChat(message, true)
         end
         if ChatAnnouncements.SV.Quests.QuestShareAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, alertMessage)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
         end
     end
 end
 
 -- EVENT_CHATTER_BEGIN
---- @param eventId integer
---- @param optionCount integer
---- @param debugSource integer
-function ChatAnnouncements.OnChatterBegin(eventId, optionCount, debugSource)
-    ChatAnnouncements.talkingToNPC = true
+function ChatAnnouncements.OnChatterBegin()
+    g_talkingToNPC = true
 end
 
---- - **EVENT_CHATTER_END**
----
---- @param eventId integer
-function ChatAnnouncements.OnChatterEnd(eventId)
-    ChatAnnouncements.talkingToNPC = false
+-- EVENT_CHATTER_END
+function ChatAnnouncements.OnChatterEnd()
+    g_talkingToNPC = false
 end
 
---- - **EVENT_GROUPING_TOOLS_LFG_JOINED **
----
---- @param eventId integer
---- @param locationName string
-function ChatAnnouncements.GroupingToolsLFGJoined(eventId, locationName)
+-- EVENT_GROUPING_TOOLS_LFG_JOINED
+function ChatAnnouncements.GroupingToolsLFGJoined(eventCode, locationName)
     -- Update the current activity id with the one we are in now.
-    ChatAnnouncements.currentActivityId = GetCurrentLFGActivityId()
+    g_currentActivityId = GetCurrentLFGActivityId()
     -- Get the name of the current activityId that is generated on initialization.
-    local currentActivityName = GetActivityName(ChatAnnouncements.currentActivityId)
+    local currentActivityName = GetActivityName(g_currentActivityId)
     -- If the locationName is different thant the saved currentActivityName we have entered a new LFG instance, so display this message.
     if locationName ~= currentActivityName then
         if ChatAnnouncements.SV.Group.GroupLFGCA then
             printToChat(zo_strformat(LUIE_STRING_CA_GROUPFINDER_ALERT_LFG_JOINED, locationName), true)
         end
         if ChatAnnouncements.SV.Group.GroupLFGAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(LUIE_STRING_CA_GROUPFINDER_ALERT_LFG_JOINED, locationName))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_GROUPFINDER_ALERT_LFG_JOINED, locationName))
         end
-        ChatAnnouncements.lfgDisableGroupEvents = true
+        g_lfgDisableGroupEvents = true
         LUIE_callLater(function ()
-                           ChatAnnouncements.lfgDisableGroupEvents = false
+                           g_lfgDisableGroupEvents = false
                        end, 3000)
     end
-    ChatAnnouncements.joinLFGOverride = true
+    g_joinLFGOverride = true
 end
 
---- - **EVENT_ACTIVITY_FINDER_STATUS_UPDATE **
----
---- @param eventId integer
---- @param result ActivityFinderStatus
-function ChatAnnouncements.ActivityStatusUpdate(eventId, result)
-    -- d("result: " .. result)
+-- EVENT_ACTIVITY_FINDER_STATUS_UPDATE
+function ChatAnnouncements.ActivityStatusUpdate(eventCode, status)
+    -- d("status: " .. status)
     local message
-    if ChatAnnouncements.showActivityStatus then
-        if not ChatAnnouncements.weDeclinedTheQueue then
+    if g_showActivityStatus then
+        if not g_weDeclinedTheQueue then
             -- If we are NOT queued and were formerly queued, forming group, or in a ready check, display left queue message.
-            if result == ACTIVITY_FINDER_STATUS_NONE and (ChatAnnouncements.savedQueueValue == ACTIVITY_FINDER_STATUS_QUEUED or ChatAnnouncements.savedQueueValue == ACTIVITY_FINDER_STATUS_READY_CHECK) then
+            if status == ACTIVITY_FINDER_STATUS_NONE and (g_savedQueueValue == ACTIVITY_FINDER_STATUS_QUEUED or g_savedQueueValue == ACTIVITY_FINDER_STATUS_READY_CHECK) then
                 message = (GetString(LUIE_STRING_CA_GROUPFINDER_QUEUE_END))
             end
             -- If we are queued and previously we were not queued then display a message.
-            if result == ACTIVITY_FINDER_STATUS_QUEUED and (ChatAnnouncements.savedQueueValue == ACTIVITY_FINDER_STATUS_NONE or ChatAnnouncements.savedQueueValue == ACTIVITY_FINDER_STATUS_IN_PROGRESS) then
+            if status == ACTIVITY_FINDER_STATUS_QUEUED and (g_savedQueueValue == ACTIVITY_FINDER_STATUS_NONE or g_savedQueueValue == ACTIVITY_FINDER_STATUS_IN_PROGRESS) then
                 message = (GetString(LUIE_STRING_CA_GROUPFINDER_QUEUE_START))
             end
             -- If we were in the queue and are now in progress without a ready check triggered, we left the queue to find a replacement member so this should be displayed.
-            if result == ACTIVITY_FINDER_STATUS_IN_PROGRESS and (ChatAnnouncements.savedQueueValue == ACTIVITY_FINDER_STATUS_QUEUED) then
+            if status == ACTIVITY_FINDER_STATUS_IN_PROGRESS and (g_savedQueueValue == ACTIVITY_FINDER_STATUS_QUEUED) then
                 message = (GetString(LUIE_STRING_CA_GROUPFINDER_QUEUE_END))
             end
         end
     end
 
-    -- If we queue as a group in a completed LFG activity then if someone drops the queue don't show that a group was successfully formed.
+    -- If we queue as a group in a completed LFG activity then if someone drops the queue don't show that a group was succesfully formed.
     -- This event handles everyone but the player that declined the check.
-    if (result == ACTIVITY_FINDER_STATUS_COMPLETE and ChatAnnouncements.savedQueueValue == ACTIVITY_FINDER_STATUS_QUEUED) or (result == ACTIVITY_FINDER_STATUS_QUEUED and ChatAnnouncements.savedQueueValue == ACTIVITY_FINDER_STATUS_READY_CHECK) then
+    if (status == ACTIVITY_FINDER_STATUS_COMPLETE and g_savedQueueValue == ACTIVITY_FINDER_STATUS_QUEUED) or (status == ACTIVITY_FINDER_STATUS_QUEUED and g_savedQueueValue == ACTIVITY_FINDER_STATUS_READY_CHECK) then
         -- Don't show if we already got a ready check cancel message.
-        if not ChatAnnouncements.lfgHideStatusCancel then
+        if not g_lfgHideStatusCancel then
             message = (GetString(SI_LFGREADYCHECKCANCELREASON3))
         end
-        ChatAnnouncements.showRCUpdates = true
+        g_showRCUpdates = true
     end
 
     if message then
@@ -1130,26 +1286,26 @@ function ChatAnnouncements.ActivityStatusUpdate(eventId, result)
             printToChat(message, true)
         end
         if ChatAnnouncements.SV.Group.GroupLFGQueueAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
         end
     end
 
     -- Should always trigger at the end result of a ready check failing (none when not in an activity already, complete when in a finished one).
-    if result == ACTIVITY_FINDER_STATUS_NONE then
-        ChatAnnouncements.showRCUpdates = true
+    if status == ACTIVITY_FINDER_STATUS_NONE then
+        g_showRCUpdates = true
     end
-    if result == ACTIVITY_FINDER_STATUS_READY_CHECK then
-        ChatAnnouncements.showRCUpdates = false
+    if status == ACTIVITY_FINDER_STATUS_READY_CHECK then
+        g_showRCUpdates = false
     end
 
     -- Debug
-    if result == ACTIVITY_FINDER_STATUS_FORMING_GROUP and ChatAnnouncements.savedQueueValue ~= ACTIVITY_FINDER_STATUS_FORMING_GROUP then
+    if status == ACTIVITY_FINDER_STATUS_FORMING_GROUP and g_savedQueueValue ~= ACTIVITY_FINDER_STATUS_FORMING_GROUP then
         if LUIE.IsDevDebugEnabled() then
             LUIE:Log("Debug", "Old ACTIVITY_FINDER_STATUS_FORMING_GROUP event triggered")
         end
     end
 
-    ChatAnnouncements.savedQueueValue = result
+    g_savedQueueValue = status
 end
 
 -- Map activity types to their string IDs and descriptors
@@ -1182,71 +1338,66 @@ local function GetActivityName(activityType)
     end
 end
 
---- - **EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED**
----
---- @param eventId integer
-function ChatAnnouncements.ReadyCheckUpdate(eventId)
-    if HasLFGReadyCheckNotification() then
-        local activityType, playerRole, timeRemainingSeconds = GetLFGReadyCheckNotificationInfo()
-        local tanksAccepted, tanksPending, healersAccepted, healersPending, dpsAccepted, dpsPending = GetLFGReadyCheckCounts()
+function ChatAnnouncements.ReadyCheckUpdate(eventCode)
+    local activityType, playerRole = GetLFGReadyCheckNotificationInfo()
+    local tanksAccepted, tanksPending, healersAccepted, healersPending, dpsAccepted, dpsPending = GetLFGReadyCheckCounts()
 
-        if ChatAnnouncements.showRCUpdates then
-            -- Return early if invalid activity type
-            if activityType == LFG_ACTIVITY_INVALID then return end
+    if g_showRCUpdates then
+        -- Return early if invalid activity type
+        if activityType == LFG_ACTIVITY_INVALID then return end
 
-            local activityName = GetString("SI_LFGACTIVITY", activityType)
-            if not activityName then return end
+        local activityName = GetActivityName(activityType)
+        if not activityName then return end
 
-            local message, alertText
-            if playerRole ~= 0 then
-                local roleIconSmall = zo_strformat("<<1>> ", zo_iconFormat(LUIE.GetRoleIcon(playerRole), 16, 16)) or ""
-                local roleIconLarge = zo_strformat("<<1>> ", zo_iconFormat(LUIE.GetRoleIcon(playerRole), "100%", "100%")) or ""
-                local roleString = GetString("SI_LFGROLE", playerRole)
+        local message, alertText
+        if playerRole ~= 0 then
+            local roleIconSmall = zo_strformat("<<1>> ", zo_iconFormat(ZO_GetRoleIcon(playerRole), 16, 16)) or ""
+            local roleIconLarge = zo_strformat("<<1>> ", zo_iconFormat(ZO_GetRoleIcon(playerRole), "100%", "100%")) or ""
+            local roleString = GetString("SI_LFGROLE", playerRole)
 
-                message = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_READY_CHECK_ACTIVITY_ROLE), activityName, roleIconSmall, roleString)
-                alertText = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_READY_CHECK_ACTIVITY_ROLE), activityName, roleIconLarge, roleString)
-            else
-                message = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_READY_CHECK_ACTIVITY), activityName)
-                alertText = message
-            end
-
-            if ChatAnnouncements.SV.Group.GroupLFGCA then
-                printToChat(message, true)
-            end
-            if ChatAnnouncements.SV.Group.GroupLFGAlert then
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, alertText)
-            end
+            message = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_READY_CHECK_ACTIVITY_ROLE), activityName, roleIconSmall, roleString)
+            alertText = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_READY_CHECK_ACTIVITY_ROLE), activityName, roleIconLarge, roleString)
+        else
+            message = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_READY_CHECK_ACTIVITY), activityName)
+            alertText = message
         end
 
-        ChatAnnouncements.showRCUpdates = false
-
-        -- Handle ready check completion or cancellation
-        local allCountsZero = tanksAccepted == 0 and tanksPending == 0 and
-            healersAccepted == 0 and healersPending == 0 and
-            dpsAccepted == 0 and dpsPending == 0
-
-        if not ChatAnnouncements.showRCUpdates and allCountsZero and not ChatAnnouncements.rcSpamPrevention then
-            ChatAnnouncements.rcSpamPrevention = true
-
-            -- Reset spam prevention after 1 second
-            LUIE_callLater(function ()
-                               ChatAnnouncements.rcSpamPrevention = false
-                           end, 1000)
-
-            -- Reset activity status after 1 second
-            ChatAnnouncements.showActivityStatus = false
-            LUIE_callLater(function ()
-                               ChatAnnouncements.showActivityStatus = true
-                           end, 1000)
-
-            -- Reset group leave queue after 1 second
-            ChatAnnouncements.stopGroupLeaveQueue = true
-            LUIE_callLater(function ()
-                               ChatAnnouncements.stopGroupLeaveQueue = false
-                           end, 1000)
-
-            ChatAnnouncements.showRCUpdates = true
+        if ChatAnnouncements.SV.Group.GroupLFGCA then
+            printToChat(message, true)
         end
+        if ChatAnnouncements.SV.Group.GroupLFGAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
+        end
+    end
+
+    g_showRCUpdates = false
+
+    -- Handle ready check completion or cancellation
+    local allCountsZero = tanksAccepted == 0 and tanksPending == 0 and
+        healersAccepted == 0 and healersPending == 0 and
+        dpsAccepted == 0 and dpsPending == 0
+
+    if not g_showRCUpdates and allCountsZero and not g_rcSpamPrevention then
+        g_rcSpamPrevention = true
+
+        -- Reset spam prevention after 1 second
+        LUIE_callLater(function ()
+                           g_rcSpamPrevention = false
+                       end, 1000)
+
+        -- Reset activity status after 1 second
+        g_showActivityStatus = false
+        LUIE_callLater(function ()
+                           g_showActivityStatus = true
+                       end, 1000)
+
+        -- Reset group leave queue after 1 second
+        g_stopGroupLeaveQueue = true
+        LUIE_callLater(function ()
+                           g_stopGroupLeaveQueue = false
+                       end, 1000)
+
+        g_showRCUpdates = true
     end
 end
 
@@ -1371,25 +1522,18 @@ local LUIE_AttributeDisplayType =
 }
 
 -- Called by various functions to display a respec message, type serves as the message type, delay allows the message to sync timing with the chat printer based on source.
----
---- @param respecType RespecType
 function ChatAnnouncements.PointRespecDisplay(respecType)
     local message = LUIE_AttributeDisplayType[respecType] .. "."
     local messageCSA = LUIE_AttributeDisplayType[respecType]
 
     if ChatAnnouncements.SV.DisplayAnnouncements.Respec.CA then
-        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-        {
-            message = message,
-            messageType = "MESSAGE",
-            isSystem = true
-        }
+        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE", isSystem = true }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
     end
 
     if ChatAnnouncements.SV.DisplayAnnouncements.Respec.CSA then
-        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.NONE)
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
         messageParams:SetText(messageCSA)
         messageParams:SetSound(SOUNDS.DISPLAY_ANNOUNCEMENT)
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
@@ -1397,559 +1541,443 @@ function ChatAnnouncements.PointRespecDisplay(respecType)
     end
 
     if ChatAnnouncements.SV.DisplayAnnouncements.Respec.Alert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
     end
 end
 
---- - **EVENT_LOOT_UPDATED**
----
---- @param eventId integer
-function ChatAnnouncements.OnLootUpdated(eventId)
-    ChatAnnouncements.containerRecentlyOpened = true
+function ChatAnnouncements.OnLootUpdated(eventCode)
+    g_containerRecentlyOpened = true
     local function ResetContainerRecentlyOpened()
-        ChatAnnouncements.containerRecentlyOpened = false
+        g_containerRecentlyOpened = false
         eventManager:UnregisterForUpdate(moduleName .. "ResetContainer")
     end
     eventManager:UnregisterForUpdate(moduleName .. "ResetContainer")
     eventManager:RegisterForUpdate(moduleName .. "ResetContainer", 150, ResetContainerRecentlyOpened)
 end
 
-local CURRENCY_CONFIGS =
-{
-    [CURT_MONEY] =
-    {
-        enabled = "CurrencyGoldChange",
-        color = "CurrencyGoldColorize",
-        name = "CurrencyGoldName",
-        total = "CurrencyGoldShowTotal",
-        messageTotal = "CurrencyMessageTotalGold",
-    },
-    [CURT_ALLIANCE_POINTS] =
-    {
-        enabled = "CurrencyAPShowChange",
-        color = "CurrencyAPColorize",
-        name = "CurrencyAPName",
-        total = "CurrencyAPShowTotal",
-        messageTotal = "CurrencyMessageTotalAP",
-    },
-    [CURT_TELVAR_STONES] =
-    {
-        enabled = "CurrencyTVChange",
-        color = "CurrencyTVColorize",
-        name = "CurrencyTVName",
-        total = "CurrencyTVShowTotal",
-        messageTotal = "CurrencyMessageTotalTV",
-    },
-    [CURT_WRIT_VOUCHERS] =
-    {
-        enabled = "CurrencyWVChange",
-        color = "CurrencyWVColorize",
-        name = "CurrencyWVName",
-        total = "CurrencyWVShowTotal",
-        messageTotal = "CurrencyMessageTotalWV",
-    },
-    [CURT_STYLE_STONES] =
-    {
-        enabled = "CurrencyOutfitTokenChange",
-        color = "CurrencyOutfitTokenColorize",
-        name = "CurrencyOutfitTokenName",
-        total = "CurrencyOutfitTokenShowTotal",
-        messageTotal = "CurrencyMessageTotalOutfitToken",
-    },
-    [CURT_CHAOTIC_CREATIA] =
-    {
-        enabled = "CurrencyTransmuteChange",
-        color = "CurrencyTransmuteColorize",
-        name = "CurrencyTransmuteName",
-        total = "CurrencyTransmuteShowTotal",
-        messageTotal = "CurrencyMessageTotalTransmute",
-    },
-    [CURT_EVENT_TICKETS] =
-    {
-        enabled = "CurrencyEventChange",
-        color = "CurrencyEventColorize",
-        name = "CurrencyEventName",
-        total = "CurrencyEventShowTotal",
-        messageTotal = "CurrencyMessageTotalEvent",
-    },
-    [CURT_UNDAUNTED_KEYS] =
-    {
-        enabled = "CurrencyUndauntedChange",
-        color = "CurrencyUndauntedColorize",
-        name = "CurrencyUndauntedName",
-        total = "CurrencyUndauntedShowTotal",
-        messageTotal = "CurrencyMessageTotalUndaunted",
-    },
-    [CURT_CROWNS] =
-    {
-        enabled = "CurrencyCrownsChange",
-        color = "CurrencyCrownsColorize",
-        name = "CurrencyCrownsName",
-        total = "CurrencyCrownsShowTotal",
-        messageTotal = "CurrencyMessageTotalCrowns",
-    },
-    [CURT_CROWN_GEMS] =
-    {
-        enabled = "CurrencyCrownGemsChange",
-        color = "CurrencyCrownGemsColorize",
-        name = "CurrencyCrownGemsName",
-        total = "CurrencyCrownGemsShowTotal",
-        messageTotal = "CurrencyMessageTotalCrownGems",
-    },
-    [CURT_ENDEAVOR_SEALS] =
-    {
-        enabled = "CurrencyEndeavorsChange",
-        color = "CurrencyEndeavorsColorize",
-        name = "CurrencyEndeavorsName",
-        total = "CurrencyEndeavorsShowTotal",
-        messageTotal = "CurrencyMessageTotalEndeavors",
-    },
-    [CURT_ARCHIVAL_FORTUNES] =
-    {
-        enabled = "CurrencyEndlessChange",
-        color = "CurrencyEndlessColorize",
-        name = "CurrencyEndlessName",
-        total = "CurrencyEndlessShowTotal",
-        messageTotal = "CurrencyMessageTotalEndless",
-        iconType = CURT_ARCHIVAL_FORTUNES,
-    },
-}
-
-local AP_THROTTLE_REASONS =
-{
-    [CURRENCY_CHANGE_REASON_KILL] = true,
-    [CURRENCY_CHANGE_REASON_KEEP_REPAIR] = true,
-    [CURRENCY_CHANGE_REASON_PVP_RESURRECT] = true,
-}
-
-local TV_THROTTLE_REASONS =
-{
-    [CURRENCY_CHANGE_REASON_LOOT] = true,
-    [CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER] = true,
-}
-
-local DEBUG_REASON_SET =
-{
-    [CURRENCY_CHANGE_REASON_ACTION] = true,
-    [CURRENCY_CHANGE_REASON_KEEP_UPGRADE] = true,
-    [CURRENCY_CHANGE_REASON_DEPRECATED_0] = true,
-    [CURRENCY_CHANGE_REASON_DEPRECATED_2] = true,
-    [CURRENCY_CHANGE_REASON_SOUL_HEAL] = true,
-    [CURRENCY_CHANGE_REASON_CASH_ON_DELIVERY] = true,
-    [CURRENCY_CHANGE_REASON_ABILITY_UPGRADE_PURCHASE] = true,
-    [CURRENCY_CHANGE_REASON_DEPRECATED_1] = true,
-    [CURRENCY_CHANGE_REASON_STABLESPACE] = true,
-    [CURRENCY_CHANGE_REASON_ACHIEVEMENT] = true,
-    [CURRENCY_CHANGE_REASON_TRAIT_REVEAL] = true,
-    [CURRENCY_CHANGE_REASON_REFORGE] = true,
-    [CURRENCY_CHANGE_REASON_RECIPE] = true,
-    [CURRENCY_CHANGE_REASON_CONSUME_FOOD_DRINK] = true,
-    [CURRENCY_CHANGE_REASON_CONSUME_POTION] = true,
-    [CURRENCY_CHANGE_REASON_HARVEST_REAGENT] = true,
-    [CURRENCY_CHANGE_REASON_RESEARCH_TRAIT] = true,
-    [CURRENCY_CHANGE_REASON_GUILD_TABARD] = true,
-    [CURRENCY_CHANGE_REASON_GUILD_FORWARD_CAMP] = true,
-    [CURRENCY_CHANGE_REASON_BANK_FEE] = true,
-    [CURRENCY_CHANGE_REASON_CHARACTER_UPGRADE] = true,
-    [CURRENCY_CHANGE_REASON_TRIBUTE] = true,
-}
-
-local REASON_MESSAGE_KEYS =
-{
-    [CURRENCY_CHANGE_REASON_QUESTREWARD] = "CurrencyMessageReceive",
-    [CURRENCY_CHANGE_REASON_DECONSTRUCT] = "CurrencyMessageReceive",
-    [CURRENCY_CHANGE_REASON_MEDAL] = "CurrencyMessageReceive",
-    [CURRENCY_CHANGE_REASON_TRADINGHOUSE_REFUND] = "CurrencyMessageReceive",
-    [CURRENCY_CHANGE_REASON_JUMP_FAILURE_REFUND] = "CurrencyMessageReceive",
-    [CURRENCY_CHANGE_REASON_CONVERSATION] = "CurrencyMessagePay",
-    [CURRENCY_CHANGE_REASON_EDIT_GUILD_HERALDRY] = "CurrencyMessageSpend",
-    [CURRENCY_CHANGE_REASON_GUILD_TABARD] = "CurrencyMessageSpend",
-    [CURRENCY_CHANGE_REASON_TRAVEL_GRAVEYARD] = "CurrencyMessageWayshrine",
-    [CURRENCY_CHANGE_REASON_CRAFT] = "CurrencyMessageUse",
-    [CURRENCY_CHANGE_REASON_RECONSTRUCTION] = "CurrencyMessageUse",
-    [CURRENCY_CHANGE_REASON_ENDLESS_DUNGEON_VISION_REROLL] = "CurrencyMessageUse",
-    [CURRENCY_CHANGE_REASON_VENDOR_REPAIR] = "CurrencyMessageRepair",
-    [CURRENCY_CHANGE_REASON_STUCK] = "CurrencyMessageUnstuck",
-    [CURRENCY_CHANGE_REASON_BOUNTY_PAID_FENCE] = "CurrencyMessageBounty",
-    [CURRENCY_CHANGE_REASON_KEEP_REPAIR] = "CurrencyMessageEarn",
-    [CURRENCY_CHANGE_REASON_PVP_RESURRECT] = "CurrencyMessageEarn",
-    [CURRENCY_CHANGE_REASON_OFFENSIVE_KEEP_REWARD] = "CurrencyMessageEarn",
-    [CURRENCY_CHANGE_REASON_DEFENSIVE_KEEP_REWARD] = "CurrencyMessageEarn",
-    [CURRENCY_CHANGE_REASON_ANTIQUITY_REWARD] = "CurrencyMessageExcavate",
-    [CURRENCY_CHANGE_REASON_BANK_DEPOSIT] = "CurrencyMessageDeposit",
-    [CURRENCY_CHANGE_REASON_GUILD_BANK_DEPOSIT] = "CurrencyMessageDepositGuild",
-    [CURRENCY_CHANGE_REASON_BANK_WITHDRAWAL] = "CurrencyMessageWithdraw",
-    [CURRENCY_CHANGE_REASON_GUILD_BANK_WITHDRAWAL] = "CurrencyMessageWithdrawGuild",
-    [CURRENCY_CHANGE_REASON_PICKPOCKET] = "CurrencyMessagePickpocket",
-    [CURRENCY_CHANGE_REASON_LOOT] = "CurrencyMessageLoot",
-    [CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER] = "CurrencyMessageLoot",
-    [CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER] = "CurrencyMessageLoot",
-    [CURRENCY_CHANGE_REASON_LOOT_STOLEN] = "CurrencyMessageSteal",
-    [CURRENCY_CHANGE_REASON_DEATH] = "CurrencyMessageLost",
-    [CURRENCY_CHANGE_REASON_CROWN_CRATE_DUPLICATE] = "CurrencyMessageReceive",
-    [CURRENCY_CHANGE_REASON_ITEM_CONVERTED_TO_GEMS] = "CurrencyMessageReceive",
-    [CURRENCY_CHANGE_REASON_CROWNS_PURCHASED] = "CurrencyMessageReceive",
-    [CURRENCY_CHANGE_REASON_PURCHASED_WITH_ENDEAVOR_SEALS] = "CurrencyMessageSpend",
-}
-
-local function SavePurchaseData(changeType, formattedValue, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageTotal)
-    local saved = ChatAnnouncements.savedPurchase
-    saved.changeType = changeType
-    saved.formattedValue = formattedValue
-    saved.currencyTypeColor = currencyTypeColor
-    saved.currencyIcon = currencyIcon
-    saved.currencyName = currencyName
-    saved.currencyTotal = currencyTotal
-    saved.messageTotal = messageTotal
-end
-
-local function SavePurchaseIfEnabled(context)
-    if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-        SavePurchaseData(context.changeType, context.formattedValue, context.currencyTypeColor, context.currencyIcon, context.currencyName, context.currencyTotal, context.messageTotal)
-        return true
-    end
-    return false
-end
-
-local function HandleCurrencyThrottleAndFilter(currencyType, reason, delta)
-    local svCurrency = ChatAnnouncements.SV.Currency
-
-    if currencyType == CURT_MONEY then
-        if svCurrency.CurrencyGoldThrottle and (reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_KILL) then
-            LUIE_callLater(ChatAnnouncements.CurrencyGoldThrottlePrinter, 50)
-            ChatAnnouncements.currencyGoldThrottleValue = ChatAnnouncements.currencyGoldThrottleValue + delta
-            ChatAnnouncements.currencyGoldThrottleTotal = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
-            return true
-        end
-        if svCurrency.CurrencyGoldFilter > 0 and (reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_KILL) and delta < svCurrency.CurrencyGoldFilter then
-            return true
-        end
-        return false
-    end
-
-    if currencyType == CURT_ALLIANCE_POINTS then
-        if svCurrency.CurrencyAPThrottle > 0 and AP_THROTTLE_REASONS[reason] then
-            eventManager:UnregisterForUpdate(moduleName .. "BufferedAP")
-            eventManager:RegisterForUpdate(moduleName .. "BufferedAP", svCurrency.CurrencyAPThrottle, ChatAnnouncements.CurrencyAPThrottlePrinter)
-            ChatAnnouncements.currencyAPThrottleValue = ChatAnnouncements.currencyAPThrottleValue + delta
-            ChatAnnouncements.currencyAPThrottleTotal = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
-            return true
-        end
-        if svCurrency.CurrencyAPFilter > 0 and AP_THROTTLE_REASONS[reason] and delta < svCurrency.CurrencyAPFilter then
-            return true
-        end
-        if svCurrency.CurrencyAPThrottle > 0 and not AP_THROTTLE_REASONS[reason] then
-            ChatAnnouncements.CurrencyAPThrottlePrinter()
-        end
-        return false
-    end
-
-    if currencyType == CURT_TELVAR_STONES then
-        if svCurrency.CurrencyTVThrottle > 0 and TV_THROTTLE_REASONS[reason] and not ChatAnnouncements.containerRecentlyOpened then
-            eventManager:UnregisterForUpdate(moduleName .. "BufferedTV")
-            eventManager:RegisterForUpdate(moduleName .. "BufferedTV", svCurrency.CurrencyTVThrottle, ChatAnnouncements.CurrencyTVThrottlePrinter)
-            ChatAnnouncements.currencyTVThrottleValue = ChatAnnouncements.currencyTVThrottleValue + delta
-            ChatAnnouncements.currencyTVThrottleTotal = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
-            return true
-        end
-        if svCurrency.CurrencyTVFilter > 0 and TV_THROTTLE_REASONS[reason] and delta < svCurrency.CurrencyTVFilter then
-            return true
-        end
-        if svCurrency.CurrencyTVThrottle > 0 and not TV_THROTTLE_REASONS[reason] then
-            ChatAnnouncements.CurrencyTVThrottlePrinter()
-        end
-        return false
-    end
-
-    return false
-end
-
-local function BuildCurrencyDisplay(config, currencyType, delta)
-    local svCurrency = ChatAnnouncements.SV.Currency
-    local iconType = config.iconType or currencyType
-    local currencyTypeColor = ChatAnnouncements.Colors[config.color]:ToHex()
-    local currencyIcon = svCurrency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(iconType), 16, 16) or ""
-    local currencyName = zo_strformat(svCurrency[config.name], delta)
-    local currencyTotal = svCurrency[config.total]
-    local messageTotal = svCurrency[config.messageTotal]
-    return currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageTotal
-end
-
-local function ResolveMessageByReason(context)
-    local svContext = ChatAnnouncements.SV.ContextMessages
-    local reason = context.reason
-    local delta = context.delta
-
-    if reason == CURRENCY_CHANGE_REASON_VENDOR then
-        context.messageChange = delta > 0 and svContext.CurrencyMessageReceive or svContext.CurrencyMessageSpend
-        if SavePurchaseIfEnabled(context) then
-            return true
-        end
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_BUYBACK then
-        context.messageChange = svContext.CurrencyMessageSpend
-        if SavePurchaseIfEnabled(context) then
-            return true
-        end
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_SELL_STOLEN then
-        context.messageChange = svContext.CurrencyMessageReceive
-        if SavePurchaseIfEnabled(context) then
-            return true
-        end
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_TRADINGHOUSE_LISTING then
-        if ChatAnnouncements.SV.Currency.CurrencyGoldHideListingAH then
-            return true
-        end
-        SavePurchaseData(context.changeType, context.formattedValue, context.currencyTypeColor, context.currencyIcon, context.currencyName, context.currencyTotal, context.messageTotal)
-        return true
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_VENDOR_LAUNDER then
-        context.messageChange = svContext.CurrencyMessageSpend
-        if SavePurchaseIfEnabled(context) then
-            return true
-        end
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_TRADINGHOUSE_PURCHASE then
-        if ChatAnnouncements.SV.Currency.CurrencyGoldHideAH then
-            return true
-        end
-        context.messageChange = svContext.CurrencyMessageSpend
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_TRADE then
-        local tradeTarget = ChatAnnouncements.tradeTarget or ""
-        if delta > 0 then
-            context.messageChange = tradeTarget ~= "" and svContext.CurrencyMessageTradeIn or svContext.CurrencyMessageTradeInNoName
-        else
-            context.messageChange = tradeTarget ~= "" and svContext.CurrencyMessageTradeOut or svContext.CurrencyMessageTradeOutNoName
-        end
-        if tradeTarget ~= "" then
-            context.messageType = "LUIE_CURRENCY_TRADE"
-        end
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_MAIL then
-        if delta > 0 then
-            local mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
-            ChatAnnouncements.currentMailSender = mailSender
-            context.messageChange = mailSender ~= "" and svContext.CurrencyMessageMailIn or svContext.CurrencyMessageMailInNoName
-            if mailSender ~= "" then
-                context.messageType = "LUIE_CURRENCY_MAIL"
-            end
-        else
-            if ChatAnnouncements.Mail.codPresent then
-                local mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
-                ChatAnnouncements.currentMailSender = mailSender
-                context.messageChange = svContext.CurrencyMessageMailCOD
-                if mailSender ~= "" then
-                    context.messageType = "LUIE_CURRENCY_MAIL"
-                end
-            else
-                return true
-            end
-        end
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_BAGSPACE then
-        context.messageChange = svContext.CurrencyMessageStorage
-        context.messageType = "LUIE_CURRENCY_BAG"
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_BANKSPACE then
-        context.messageChange = svContext.CurrencyMessageStorage
-        context.messageType = "LUIE_CURRENCY_BANK"
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_BATTLEGROUND then
-        context.messageChange = delta < 0 and svContext.CurrencyMessageCampaign or svContext.CurrencyMessageReceive
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_RESPEC_SKILLS then
-        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILLS)
-        context.messageChange = svContext.CurrencyMessageSkills
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_RESPEC_ATTRIBUTES then
-        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_ATTRIBUTES)
-        context.messageChange = svContext.CurrencyMessageAttributes
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_RESPEC_MORPHS then
-        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_MORPHS)
-        context.messageChange = svContext.CurrencyMessageMorphs
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_RESPEC_CHAMPION then
-        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_CHAMPION)
-        context.messageChange = svContext.CurrencyMessageChampion
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_BOUNTY_PAID_GUARD or reason == CURRENCY_CHANGE_REASON_BOUNTY_CONFISCATED then
-        context.messageChange = svContext.CurrencyMessageConfiscate
-        LUIE_callLater(ChatAnnouncements.JusticeDisplayConfiscate, 50)
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_REWARD then
-        context.messageChange = context.currencyType == CURT_ENDEAVOR_SEALS and svContext.CurrencyMessageEarn or svContext.CurrencyMessageReceive
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_KILL then
-        context.messageChange = context.currencyType == CURT_ALLIANCE_POINTS and svContext.CurrencyMessageEarn or svContext.CurrencyMessageLoot
-        return false
-    end
-
-    if reason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_GEMS or reason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_CROWNS then
-        if context.currencyType == CURT_STYLE_STONES or context.currencyType == CURT_EVENT_TICKETS then
-            context.messageChange = svContext.CurrencyMessageReceive
-        else
-            context.messageChange = svContext.CurrencyMessageSpend
-        end
-        return false
-    end
-
-    local messageKey = REASON_MESSAGE_KEYS[reason]
-    if messageKey then
-        context.messageChange = svContext[messageKey]
-        return false
-    end
-
-    if DEBUG_REASON_SET[reason] then
-        context.messageChange = zo_strformat(GetString(LUIE_STRING_CA_DEBUG_MSG_CURRENCY), reason)
-        return false
-    end
-
-    context.messageChange = svContext.CurrencyMessageLoot
-    return false
-end
-
---- - **EVENT_CURRENCY_UPDATE **
----
---- @param currencyType CurrencyType
+--- @param eventCode integer
+--- @param currency CurrencyType
 --- @param currencyLocation CurrencyLocation
---- @param newAmount integer
---- @param oldAmount integer
+--- @param newValue integer
+--- @param oldValue integer
 --- @param reason CurrencyChangeReason
 --- @param reasonSupplementaryInfo integer
-function ChatAnnouncements.OnCurrencyUpdate(currencyType, currencyLocation, newAmount, oldAmount, reason, reasonSupplementaryInfo)
+function ChatAnnouncements.OnCurrencyUpdate(eventCode, currency, currencyLocation, newValue, oldValue, reason, reasonSupplementaryInfo)
     if currencyLocation ~= CURRENCY_LOCATION_CHARACTER and currencyLocation ~= CURRENCY_LOCATION_ACCOUNT then
         return
     end
 
-    local UpOrDown = newAmount - oldAmount
+    local UpOrDown = newValue - oldValue
+
+    -- DEBUG
+    -- d("currency: " .. currency)
+    -- d("NV: " .. newValue)
+    -- d("OV: " .. oldValue)
+    -- d("reason: " .. reason)
 
     -- If the total gold change was 0 or (Reason 7 = Command) or (Reason 28 = Mount Feed) or (Reason 35 = Player Init) or (Reason 81 = Expiration) - End Now
     if UpOrDown == 0 or reason == CURRENCY_CHANGE_REASON_COMMAND or reason == CURRENCY_CHANGE_REASON_FEED_MOUNT or reason == CURRENCY_CHANGE_REASON_PLAYER_INIT or reason == CURRENCY_CHANGE_REASON_EXPIRATION then
         return
     end
 
-    -- DEBUG
-    if LUIE.IsDevDebugEnabled() then
-        local traceback = "Currency Update:\n" ..
-            "--> currencyType: " .. tostring(currencyType) .. "\n" ..
-            "--> currencyLocation: " .. tostring(currencyLocation) .. "\n" ..
-            "--> newAmount: " .. tostring(newAmount) .. "\n" ..
-            "--> oldAmount: " .. tostring(oldAmount) .. "\n" ..
-            "--> reason: " .. tostring(reason) .. "\n" ..
-            "--> reasonSupplementaryInfo: " .. tostring(reasonSupplementaryInfo)
-        LUIE:Log("Debug", traceback)
-    end
+    local formattedValue = ZO_CommaDelimitDecimalNumber(newValue)
+    local changeColor       -- Gets the value from ColorizeColors.CurrencyUpColorize or ColorizeColors.CurrencyDownColorize to color strings
+    local changeType        -- Amount of currency gained or lost
+    local currencyTypeColor -- Determines color to use for colorization of currency based off currency type.
+    local currencyIcon      -- Determines icon to use for currency based off currency type.
+    local currencyName      -- Determines name to use for currency based off type.
+    local currencyTotal     -- Determines if the total should be displayed based off type.
+    local messageChange     -- Set to a string value based on the reason code.
+    local messageTotal      -- Set to a string value based on the currency type.
+    local type
 
-    local formattedValue = ZO_CommaDelimitDecimalNumber(newAmount)
-    -- Gets the value from ChatAnnouncements.Colors.CurrencyUpColorize or ChatAnnouncements.Colors.CurrencyDownColorize to color strings.
-    local changeColor       --- @type string
-    -- Amount of currency gained or lost.
-    local changeType        --- @type string
-    -- Determines color to use for colorization of currency based off currency type.
-    local currencyTypeColor --- @type string
-    -- Determines icon to use for currency based off currency type.
-    local currencyIcon      --- @type string
-    -- Determines name to use for currency based off type.
-    local currencyName      --- @type string
-    -- Determines if the total should be displayed based off type.
-    local currencyTotal     --- @type boolean
-    -- Set to a string value based on the reason code.
-    local messageChange     --- @type string
-    -- Set to a string value based on the currency type.
-    local messageTotal      --- @type string
-    local messageType
+    if currency == CURT_MONEY then -- Gold
+        -- Send change info to the throttle printer and end function now if we throttle gold from loot.
+        if not ChatAnnouncements.SV.Currency.CurrencyGoldChange then
+            return
+        end
+        if ChatAnnouncements.SV.Currency.CurrencyGoldThrottle and (reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_KILL) then
+            -- NOTE: Unlike other throttle events, we used LUIE_callLater here because we have to make the call immediately
+            -- (if some of the gold is looted after items, the message will appear after the loot if we don't use LUIE_callLater instead of a RegisterForUpdate)
+            LUIE_callLater(ChatAnnouncements.CurrencyGoldThrottlePrinter, 50)
+            g_currencyGoldThrottleValue = g_currencyGoldThrottleValue + UpOrDown
+            g_currencyGoldThrottleTotal = GetCarriedCurrencyAmount(1)
+            return
+        end
 
-    local config = CURRENCY_CONFIGS[currencyType]
-    if not config then
+        -- If looted gold is below the filter value, end now.
+        if ChatAnnouncements.SV.Currency.CurrencyGoldFilter > 0 and (reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_KILL) then
+            if UpOrDown < ChatAnnouncements.SV.Currency.CurrencyGoldFilter then
+                return
+            end
+        end
+
+        currencyTypeColor = ColorizeColors.CurrencyGoldColorize:ToHex()
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_gold.dds|t" or ""
+        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, UpOrDown)
+        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyGoldShowTotal
+        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalGold
+    elseif currency == CURT_ALLIANCE_POINTS then -- Alliance Points
+        if not ChatAnnouncements.SV.Currency.CurrencyAPShowChange then
+            return
+        end
+        -- Send change info to the throttle printer and end function now if we throttle Alliance Points Gained
+        if ChatAnnouncements.SV.Currency.CurrencyAPThrottle > 0 and (reason == CURRENCY_CHANGE_REASON_KILL or reason == CURRENCY_CHANGE_REASON_KEEP_REPAIR or reason == CURRENCY_CHANGE_REASON_PVP_RESURRECT) then
+            eventManager:UnregisterForUpdate(moduleName .. "BufferedAP")
+            eventManager:RegisterForUpdate(moduleName .. "BufferedAP", ChatAnnouncements.SV.Currency.CurrencyAPThrottle, ChatAnnouncements.CurrencyAPThrottlePrinter)
+            g_currencyAPThrottleValue = g_currencyAPThrottleValue + UpOrDown
+            g_currencyAPThrottleTotal = GetCarriedCurrencyAmount(2)
+            return
+        end
+
+        -- If earned AP is below the filter value, end now.
+        if ChatAnnouncements.SV.Currency.CurrencyAPFilter > 0 and (reason == CURRENCY_CHANGE_REASON_KILL or reason == CURRENCY_CHANGE_REASON_KEEP_REPAIR or reason == CURRENCY_CHANGE_REASON_PVP_RESURRECT) then
+            if UpOrDown < ChatAnnouncements.SV.Currency.CurrencyAPFilter then
+                return
+            end
+        end
+
+        -- Immediately print value if another source of AP is gained (or spent)
+        if ChatAnnouncements.SV.Currency.CurrencyAPThrottle > 0 and (reason ~= CURRENCY_CHANGE_REASON_KILL and reason ~= CURRENCY_CHANGE_REASON_KEEP_REPAIR and reason ~= CURRENCY_CHANGE_REASON_PVP_RESURRECT) then
+            ChatAnnouncements.CurrencyAPThrottlePrinter()
+        end
+
+        currencyTypeColor = ColorizeColors.CurrencyAPColorize:ToHex()
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/alliancepoints.dds|t" or ""
+        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyAPName, UpOrDown)
+        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyAPShowTotal
+        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalAP
+    elseif currency == CURT_TELVAR_STONES then -- TelVar Stones
+        if not ChatAnnouncements.SV.Currency.CurrencyTVChange then
+            return
+        end
+        -- Send change info to the throttle printer and end function now if we throttle Tel Var Gained
+        -- If a container was recently opened then don't throttle the currency change.
+        if ChatAnnouncements.SV.Currency.CurrencyTVThrottle > 0 and (reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER) and not g_containerRecentlyOpened then
+            eventManager:UnregisterForUpdate(moduleName .. "BufferedTV")
+            eventManager:RegisterForUpdate(moduleName .. "BufferedTV", ChatAnnouncements.SV.Currency.CurrencyTVThrottle, ChatAnnouncements.CurrencyTVThrottlePrinter)
+            g_currencyTVThrottleValue = g_currencyTVThrottleValue + UpOrDown
+            g_currencyTVThrottleTotal = GetCarriedCurrencyAmount(3)
+            return
+        end
+
+        -- If earned Tel Var is below the filter value, end now.
+        if ChatAnnouncements.SV.Currency.CurrencyTVFilter > 0 and (reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER) then
+            if UpOrDown < ChatAnnouncements.SV.Currency.CurrencyTVFilter then
+                return
+            end
+        end
+
+        -- Immediately print value if another source of TV is gained or lost
+        if ChatAnnouncements.SV.Currency.CurrencyTVThrottle > 0 and (reason ~= CURRENCY_CHANGE_REASON_LOOT and reason ~= CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER) then
+            ChatAnnouncements.CurrencyTVThrottlePrinter()
+        end
+
+        currencyTypeColor = ColorizeColors.CurrencyTVColorize:ToHex()
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_telvar.dds|t" or ""
+        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyTVName, UpOrDown)
+        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyTVShowTotal
+        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalTV
+    elseif currency == CURT_WRIT_VOUCHERS then -- Writ Vouchers
+        if not ChatAnnouncements.SV.Currency.CurrencyWVChange then
+            return
+        end
+        currencyTypeColor = ColorizeColors.CurrencyWVColorize:ToHex()
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_writvoucher.dds|t" or ""
+        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyWVName, UpOrDown)
+        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyWVShowTotal
+        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalWV
+    elseif currency == CURT_STYLE_STONES then -- Outfit Tokens
+        if not ChatAnnouncements.SV.Currency.CurrencyOutfitTokenChange then
+            return
+        end
+        currencyTypeColor = ColorizeColors.CurrencyOutfitTokenColorize:ToHex()
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/token_clothing_16.dds|t" or ""
+        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyOutfitTokenName, UpOrDown)
+        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyOutfitTokenShowTotal
+        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalOutfitToken
+    elseif currency == CURT_CHAOTIC_CREATIA then -- Transmute Crystals
+        if not ChatAnnouncements.SV.Currency.CurrencyTransmuteChange then
+            return
+        end
+        currencyTypeColor = ColorizeColors.CurrencyTransmuteColorize:ToHex()
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_seedcrystal_16.dds|t" or ""
+        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyTransmuteName, UpOrDown)
+        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyTransmuteShowTotal
+        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalTransmute
+    elseif currency == CURT_EVENT_TICKETS then -- Event Tickets
+        if not ChatAnnouncements.SV.Currency.CurrencyEventChange then
+            return
+        end
+        currencyTypeColor = ColorizeColors.CurrencyEventColorize:ToHex()
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_eventticket.dds|t" or ""
+        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyEventName, UpOrDown)
+        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyEventShowTotal
+        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalEvent
+    elseif currency == CURT_UNDAUNTED_KEYS then -- Undaunted Keys
+        if not ChatAnnouncements.SV.Currency.CurrencyUndauntedChange then
+            return
+        end
+        currencyTypeColor = ColorizeColors.CurrencyUndauntedColorize:ToHex()
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/undauntedkey.dds|t" or ""
+        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyUndauntedName, UpOrDown)
+        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyUndauntedShowTotal
+        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalUndaunted
+    elseif currency == CURT_CROWNS then -- Crowns
+        if not ChatAnnouncements.SV.Currency.CurrencyCrownsChange then
+            return
+        end
+        currencyTypeColor = ColorizeColors.CurrencyCrownsColorize:ToHex()
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_crown.dds|t" or ""
+        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyCrownsName, UpOrDown)
+        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyCrownsShowTotal
+        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalCrowns
+    elseif currency == CURT_CROWN_GEMS then -- Crown Gems
+        if not ChatAnnouncements.SV.Currency.CurrencyCrownGemsChange then
+            return
+        end
+        currencyTypeColor = ColorizeColors.CurrencyCrownGemsColorize:ToHex()
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_crown_gems.dds|t" or ""
+        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyCrownGemsName, UpOrDown)
+        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyCrownGemsShowTotal
+        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalCrownGems
+    elseif currency == CURT_ENDEAVOR_SEALS then -- Seals of Endeavor
+        if not ChatAnnouncements.SV.Currency.CurrencyEndeavorsChange then
+            return
+        end
+        currencyTypeColor = ColorizeColors.CurrencyEndeavorsColorize:ToHex()
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:esoui/art/currency/currency_seals_of_endeavor_32.dds|t" or ""
+        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyEndeavorsName, UpOrDown)
+        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyEndeavorsShowTotal
+        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalEndeavors
+    elseif currency == CURT_ENDLESS_DUNGEON then -- Archival Fortunes
+        if not ChatAnnouncements.SV.Currency.CurrencyEndlessChange then
+            return
+        end
+        currencyTypeColor = ColorizeColors.CurrencyEndlessColorize:ToHex()
+        currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:esoui/art/currency/archivalfragments_mipmaps.dds|t" or ""
+        currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyEndlessName, UpOrDown)
+        currencyTotal = ChatAnnouncements.SV.Currency.CurrencyEndlessShowTotal
+        messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalEndless
+    else -- If for some reason there is no currency type, end the function now
         return
     end
-
-    if config.enabled and not ChatAnnouncements.SV.Currency[config.enabled] then
-        return
-    end
-
-    if HandleCurrencyThrottleAndFilter(currencyType, reason, UpOrDown) then
-        return
-    end
-
-    currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageTotal = BuildCurrencyDisplay(config, currencyType, UpOrDown)
 
     -- Did we gain or lose currency
     if UpOrDown > 0 then
         if ChatAnnouncements.SV.Currency.CurrencyContextColor then
-            changeColor = ChatAnnouncements.Colors.CurrencyUpColorize:ToHex()
+            changeColor = ColorizeColors.CurrencyUpColorize:ToHex()
         else
-            changeColor = ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+            changeColor = ColorizeColors.CurrencyColorize:ToHex()
         end
-        changeType = ZO_CommaDelimitDecimalNumber(newAmount - oldAmount)
-    else
+        changeType = ZO_CommaDelimitDecimalNumber(newValue - oldValue)
+    elseif UpOrDown < 0 then
         if ChatAnnouncements.SV.Currency.CurrencyContextColor then
-            changeColor = ChatAnnouncements.Colors.CurrencyDownColorize:ToHex()
+            changeColor = ColorizeColors.CurrencyDownColorize:ToHex()
         else
-            changeColor = ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+            changeColor = ColorizeColors.CurrencyColorize:ToHex()
         end
-        changeType = ZO_CommaDelimitDecimalNumber(oldAmount - newAmount)
+        changeType = ZO_CommaDelimitDecimalNumber(oldValue - newValue)
     end
 
-    local context =
-    {
-        reason = reason,
-        delta = UpOrDown,
-        currencyType = currencyType,
-        changeType = changeType,
-        formattedValue = formattedValue,
-        currencyTypeColor = currencyTypeColor,
-        currencyIcon = currencyIcon,
-        currencyName = currencyName,
-        currencyTotal = currencyTotal,
-        messageTotal = messageTotal,
-        messageChange = nil,
-        messageType = nil,
-    }
-
-    if ResolveMessageByReason(context) then
+    -- Determine syntax based on reason
+    if reason == CURRENCY_CHANGE_REASON_VENDOR and UpOrDown > 0 then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+        if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
+            g_savedPurchase.changeType = changeType
+            g_savedPurchase.formattedValue = formattedValue
+            g_savedPurchase.currencyTypeColor = currencyTypeColor
+            g_savedPurchase.currencyIcon = currencyIcon
+            g_savedPurchase.currencyName = currencyName
+            g_savedPurchase.currencyTotal = currencyTotal
+            g_savedPurchase.messageTotal = messageTotal
+            return
+        end
+    elseif reason == CURRENCY_CHANGE_REASON_VENDOR and UpOrDown < 0 then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
+        if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
+            g_savedPurchase.changeType = changeType
+            g_savedPurchase.formattedValue = formattedValue
+            g_savedPurchase.currencyTypeColor = currencyTypeColor
+            g_savedPurchase.currencyIcon = currencyIcon
+            g_savedPurchase.currencyName = currencyName
+            g_savedPurchase.currencyTotal = currencyTotal
+            g_savedPurchase.messageTotal = messageTotal
+            return
+        end
+    elseif reason == CURRENCY_CHANGE_REASON_MAIL and UpOrDown > 0 then
+        messageChange = g_mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
+        if g_mailTarget ~= "" then
+            type = "LUIE_CURRENCY_MAIL"
+        end
+    elseif reason == CURRENCY_CHANGE_REASON_MAIL and UpOrDown < 0 then
+        if g_mailCODPresent then
+            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailCOD
+            if g_mailTarget ~= "" then
+                type = "LUIE_CURRENCY_MAIL"
+            end
+        else
+            return
+        end
+    elseif reason == CURRENCY_CHANGE_REASON_BUYBACK then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
+        if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
+            g_savedPurchase.changeType = changeType
+            g_savedPurchase.formattedValue = formattedValue
+            g_savedPurchase.currencyTypeColor = currencyTypeColor
+            g_savedPurchase.currencyIcon = currencyIcon
+            g_savedPurchase.currencyName = currencyName
+            g_savedPurchase.currencyTotal = currencyTotal
+            g_savedPurchase.messageTotal = messageTotal
+            return
+        end
+    elseif reason == CURRENCY_CHANGE_REASON_TRADE and UpOrDown > 0 then
+        messageChange = g_tradeTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeInNoName
+        if g_tradeTarget ~= "" then
+            type = "LUIE_CURRENCY_TRADE"
+        end
+    elseif reason == CURRENCY_CHANGE_REASON_TRADE and UpOrDown < 0 then
+        messageChange = g_tradeTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeOut or ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeOutNoName
+        if g_tradeTarget ~= "" then
+            type = "LUIE_CURRENCY_TRADE"
+        end
+    elseif reason == CURRENCY_CHANGE_REASON_QUESTREWARD or reason == CURRENCY_CHANGE_REASON_DECONSTRUCT or reason == CURRENCY_CHANGE_REASON_MEDAL or reason == CURRENCY_CHANGE_REASON_TRADINGHOUSE_REFUND or reason == CURRENCY_CHANGE_REASON_JUMP_FAILURE_REFUND then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+    elseif reason == CURRENCY_CHANGE_REASON_SELL_STOLEN then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+        if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
+            g_savedPurchase.changeType = changeType
+            g_savedPurchase.formattedValue = formattedValue
+            g_savedPurchase.currencyTypeColor = currencyTypeColor
+            g_savedPurchase.currencyIcon = currencyIcon
+            g_savedPurchase.currencyName = currencyName
+            g_savedPurchase.currencyTotal = currencyTotal
+            g_savedPurchase.messageTotal = messageTotal
+            return
+        end
+    elseif reason == CURRENCY_CHANGE_REASON_BAGSPACE then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageStorage
+        type = "LUIE_CURRENCY_BAG"
+    elseif reason == CURRENCY_CHANGE_REASON_BANKSPACE then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageStorage
+        type = "LUIE_CURRENCY_BANK"
+    elseif reason == CURRENCY_CHANGE_REASON_CONVERSATION then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePay
+    elseif reason == CURRENCY_CHANGE_REASON_EDIT_GUILD_HERALDRY or reason == CURRENCY_CHANGE_REASON_GUILD_TABARD then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
+    elseif reason == CURRENCY_CHANGE_REASON_BATTLEGROUND and UpOrDown < 0 then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageCampaign
+    elseif reason == CURRENCY_CHANGE_REASON_BATTLEGROUND and UpOrDown > 0 then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+    elseif reason == CURRENCY_CHANGE_REASON_TRAVEL_GRAVEYARD then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWayshrine
+    elseif reason == CURRENCY_CHANGE_REASON_CRAFT or reason == CURRENCY_CHANGE_REASON_RECONSTRUCTION then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse
+    elseif reason == CURRENCY_CHANGE_REASON_VENDOR_REPAIR then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageRepair
+    elseif reason == CURRENCY_CHANGE_REASON_TRADINGHOUSE_LISTING then
+        if ChatAnnouncements.SV.Currency.CurrencyGoldHideListingAH then
+            return
+        end
+        g_savedPurchase.changeType = changeType
+        g_savedPurchase.formattedValue = formattedValue
+        g_savedPurchase.currencyTypeColor = currencyTypeColor
+        g_savedPurchase.currencyIcon = currencyIcon
+        g_savedPurchase.currencyName = currencyName
+        g_savedPurchase.currencyTotal = currencyTotal
+        g_savedPurchase.messageTotal = messageTotal
         return
+    elseif reason == CURRENCY_CHANGE_REASON_RESPEC_SKILLS then
+        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILLS)
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSkills
+    elseif reason == CURRENCY_CHANGE_REASON_RESPEC_ATTRIBUTES then
+        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_ATTRIBUTES)
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageAttributes
+    elseif reason == CURRENCY_CHANGE_REASON_STUCK then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUnstuck
+    elseif reason == CURRENCY_CHANGE_REASON_RESPEC_MORPHS then
+        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_MORPHS)
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageMorphs
+    elseif reason == CURRENCY_CHANGE_REASON_BOUNTY_PAID_FENCE then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageBounty
+    elseif reason == CURRENCY_CHANGE_REASON_RESPEC_CHAMPION then
+        ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_CHAMPION)
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageChampion
+    elseif reason == CURRENCY_CHANGE_REASON_VENDOR_LAUNDER then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
+        if not ChatAnnouncements.SV.Inventory.LootVendorCurrency then
+            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
+        else
+            g_savedPurchase.changeType = changeType
+            g_savedPurchase.formattedValue = formattedValue
+            g_savedPurchase.currencyTypeColor = currencyTypeColor
+            g_savedPurchase.currencyIcon = currencyIcon
+            g_savedPurchase.currencyName = currencyName
+            g_savedPurchase.currencyTotal = currencyTotal
+            g_savedPurchase.messageTotal = messageTotal
+            return
+        end
+    elseif reason == CURRENCY_CHANGE_REASON_KEEP_REPAIR or reason == CURRENCY_CHANGE_REASON_PVP_RESURRECT or reason == CURRENCY_CHANGE_REASON_OFFENSIVE_KEEP_REWARD or reason == CURRENCY_CHANGE_REASON_DEFENSIVE_KEEP_REWARD then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageEarn
+    elseif reason == CURRENCY_CHANGE_REASON_REWARD then
+        -- Display "earn" for Seals of Endeavor
+        if currency == CURT_ENDEAVOR_SEALS then
+            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageEarn
+        else
+            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+        end
+    elseif reason == CURRENCY_CHANGE_REASON_ANTIQUITY_REWARD then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageExcavate
+    elseif reason == CURRENCY_CHANGE_REASON_TRADINGHOUSE_PURCHASE then
+        if ChatAnnouncements.SV.Currency.CurrencyGoldHideAH then
+            return
+        end
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
+    elseif reason == CURRENCY_CHANGE_REASON_BANK_DEPOSIT then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit
+    elseif reason == CURRENCY_CHANGE_REASON_GUILD_BANK_DEPOSIT then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositGuild
+    elseif reason == CURRENCY_CHANGE_REASON_BANK_WITHDRAWAL then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw
+    elseif reason == CURRENCY_CHANGE_REASON_GUILD_BANK_WITHDRAWAL then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawGuild
+    elseif reason == CURRENCY_CHANGE_REASON_BOUNTY_PAID_GUARD or reason == CURRENCY_CHANGE_REASON_BOUNTY_CONFISCATED then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageConfiscate
+        LUIE_callLater(ChatAnnouncements.JusticeDisplayConfiscate, 50)
+    elseif reason == CURRENCY_CHANGE_REASON_PICKPOCKET then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePickpocket
+    elseif reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER or reason == CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
+    elseif reason == CURRENCY_CHANGE_REASON_LOOT_STOLEN then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSteal
+    elseif reason == CURRENCY_CHANGE_REASON_KILL then
+        if currency == CURT_ALLIANCE_POINTS then
+            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageEarn
+        else
+            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
+        end
+    elseif reason == CURRENCY_CHANGE_REASON_DEATH then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLost
+    elseif reason == CURRENCY_CHANGE_REASON_CROWN_CRATE_DUPLICATE or reason == CURRENCY_CHANGE_REASON_ITEM_CONVERTED_TO_GEMS or reason == CURRENCY_CHANGE_REASON_CROWNS_PURCHASED then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+    elseif reason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_GEMS or reason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_CROWNS then
+        if currency == CURT_STYLE_STONES or currency == CURT_EVENT_TICKETS then
+            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+        else
+            messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
+        end
+    elseif reason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_ENDEAVOR_SEALS then
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSpend
+        -- ==============================================================================
+        -- DEBUG EVENTS - Don't know if these are implemented or what they are for.
+    elseif reason == CURRENCY_CHANGE_REASON_ACTION or reason == CURRENCY_CHANGE_REASON_KEEP_UPGRADE or reason == CURRENCY_CHANGE_REASON_DEPRECATED_0 or reason == CURRENCY_CHANGE_REASON_DEPRECATED_2 or reason == CURRENCY_CHANGE_REASON_SOUL_HEAL or reason == CURRENCY_CHANGE_REASON_CASH_ON_DELIVERY or reason == CURRENCY_CHANGE_REASON_ABILITY_UPGRADE_PURCHASE or reason == CURRENCY_CHANGE_REASON_DEPRECATED_1 or reason == CURRENCY_CHANGE_REASON_STABLESPACE or reason == CURRENCY_CHANGE_REASON_ACHIEVEMENT or reason == CURRENCY_CHANGE_REASON_TRAIT_REVEAL or reason == CURRENCY_CHANGE_REASON_REFORGE or reason == CURRENCY_CHANGE_REASON_RECIPE or reason == CURRENCY_CHANGE_REASON_CONSUME_FOOD_DRINK or reason == CURRENCY_CHANGE_REASON_CONSUME_POTION or reason == CURRENCY_CHANGE_REASON_HARVEST_REAGENT or reason == CURRENCY_CHANGE_REASON_RESEARCH_TRAIT or reason == CURRENCY_CHANGE_REASON_GUILD_TABARD or reason == CURRENCY_CHANGE_REASON_GUILD_FORWARD_CAMP or reason == CURRENCY_CHANGE_REASON_BANK_FEE or reason == CURRENCY_CHANGE_REASON_CHARACTER_UPGRADE or reason == CURRENCY_CHANGE_REASON_TRIBUTE then
+        messageChange = zo_strformat(GetString(LUIE_STRING_CA_DEBUG_MSG_CURRENCY), reason)
+        -- END DEBUG EVENTS
+        -- ==============================================================================
+        -- If none of these returned true, then we must have just looted the currency (Potentially a few currency change events I missed too may have to adjust later)
+    else
+        messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
     end
-
-    messageChange = context.messageChange
-    messageType = context.messageType
 
     -- Haven't seen this one yet but it's more recently added and thus probably used for something.
     if reason == CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER then
@@ -1959,132 +1987,86 @@ function ChatAnnouncements.OnCurrencyUpdate(currencyType, currencyLocation, newA
     end
 
     -- Send relevant values over to the currency printer
-    ChatAnnouncements.CurrencyPrinter(currencyType, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, messageType, "", "")
-end
-
---- @alias LUIE_CURRENCY_TYPE
---- | "LUIE_CURRENCY_BAG"
---- | "LUIE_CURRENCY_BANK"
---- | "LUIE_CURRENCY_HERALDRY"
---- | "LUIE_CURRENCY_MAIL"
---- | "LUIE_CURRENCY_POSTAGE"
---- | "LUIE_CURRENCY_RIDING_CAPACITY"
---- | "LUIE_CURRENCY_RIDING_SPEED"
---- | "LUIE_CURRENCY_RIDING_STAMINA"
---- | "LUIE_CURRENCY_THROTTLE"
---- | "LUIE_CURRENCY_TRADE"
---- | "LUIE_CURRENCY_VENDOR"
-
-local function ResolveStorageType(changeColor, messageType)
-    local bagType
-    local icon
-    if messageType == "LUIE_CURRENCY_BAG" then
-        bagType = string_format(ChatAnnouncements.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_BAGTYPE1) .. ChatAnnouncements.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
-        icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/icons/store_upgrade_bag.dds|t " or ""
-    end
-    if messageType == "LUIE_CURRENCY_BANK" then
-        bagType = string_format(ChatAnnouncements.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_BAGTYPE2) .. ChatAnnouncements.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
-        icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/icons/store_upgrade_bank.dds|t " or ""
-    end
-    return string_format("|r" .. icon .. "|cFFFFFF" .. bagType .. "|r|c" .. changeColor)
-end
-
-local function ResolveRidingStats(changeColor, messageType)
-    -- if some var then icon = else no
-    local skillType
-    local icon
-    if messageType == "LUIE_CURRENCY_RIDING_SPEED" then
-        skillType = string_format(ChatAnnouncements.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_RIDINGTYPE1) .. ChatAnnouncements.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
-        icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/mounts/ridingskill_speed.dds|t " or ""
-    elseif messageType == "LUIE_CURRENCY_RIDING_CAPACITY" then
-        skillType = string_format(ChatAnnouncements.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_RIDINGTYPE2) .. ChatAnnouncements.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
-        icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/mounts/ridingskill_capacity.dds|t " or ""
-    elseif messageType == "LUIE_CURRENCY_RIDING_STAMINA" then
-        skillType = string_format(ChatAnnouncements.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_RIDINGTYPE3) .. ChatAnnouncements.linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
-        icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/mounts/ridingskill_stamina.dds|t " or ""
-    end
-    return string_format("|r" .. icon .. "|cFFFFFF" .. skillType .. "|r|c" .. changeColor)
+    ChatAnnouncements.CurrencyPrinter(currency, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
 end
 
 -- Printer function receives values from currency update or from other functions that display currency updates.
 -- Type here refers to an LUIE_CURRENCY_TYPE
----
---- @param baseCurrencyType CurrencyType
---- @param formattedValue string
---- @param changeColor string
---- @param changeType string
---- @param currencyTypeColor string
---- @param currencyIcon string
---- @param currencyName string
---- @param currencyTotal boolean
---- @param messageChange string
---- @param messageTotal string
---- @param messageType LUIE_CURRENCY_TYPE
---- @param carriedItem string
---- @param carriedItemTotal string
-function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, messageType, carriedItem, carriedItemTotal)
-    messageType = messageType or ""
-    changeColor = changeColor or ""
-    currencyTypeColor = currencyTypeColor or ""
-    currencyIcon = currencyIcon or ""
-    changeType = changeType or ""
-    currencyName = currencyName or ""
-    formattedValue = formattedValue or ""
-    messageChange = messageChange or ""
-    messageTotal = messageTotal or ""
-    carriedItem = carriedItem or ""
-    carriedItemTotal = carriedItemTotal or ""
+function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type, carriedItem, carriedItemTotal)
+    local messageP1 -- First part of message - Change
+    local messageP2 -- Second part of the message (if enabled) - Total
+    local item
+    local name
 
-    local isVendor = messageType == "LUIE_CURRENCY_VENDOR"
-    local isHeraldry = messageType == "LUIE_CURRENCY_HERALDRY"
-    local isPostage = messageType == "LUIE_CURRENCY_POSTAGE"
-    local showVendorTotal = isVendor and ChatAnnouncements.SV.Inventory.LootVendorTotalCurrency
-    local shouldBuildTotal = (currencyTotal and not isHeraldry) or showVendorTotal
-    local shouldFormatTotal = currencyTotal or showVendorTotal
-    local shouldShowTotal = (currencyTotal and not isHeraldry and not isVendor and not isPostage) or showVendorTotal
+    messageP1 = ("|r|c" .. currencyTypeColor .. currencyIcon .. " " .. changeType .. currencyName .. "|r|c" .. changeColor)
 
-    local messageP1 = string_format("|r|c%s%s %s%s|r|c%s", currencyTypeColor, currencyIcon, changeType, currencyName, changeColor)
-    local messageP2 = shouldBuildTotal and string_format("|r|c%s%s %s|r|c%s", currencyTypeColor, currencyIcon, formattedValue, changeColor) or "|r"
+    if (currencyTotal and type ~= "LUIE_CURRENCY_HERALDRY") or (type == "LUIE_CURRENCY_VENDOR" and ChatAnnouncements.SV.Inventory.LootVendorTotalCurrency) then
+        messageP2 = ("|r|c" .. currencyTypeColor .. currencyIcon .. " " .. formattedValue .. "|r|c" .. changeColor)
+    else
+        messageP2 = "|r"
+    end
 
     local formattedMessageP1
-    if messageType == "LUIE_CURRENCY_BAG" or messageType == "LUIE_CURRENCY_BANK" then
-        formattedMessageP1 = string_format(messageChange, ResolveStorageType(changeColor, messageType), messageP1)
-        -- TODO: Fix later
-        --[[
-    elseif messageType == "LUIE_CURRENCY_HERALDRY" then
-        local icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:LuiExtended/media/unitframes/ca_heraldry.dds|t " or ""
-        local heraldryMessage = string_format("|r" .. icon .. "|cFFFFFF" .. ChatAnnouncements.linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_CURRENCY_NAME_HERALDRY) .. ChatAnnouncements.linkBracket2[ChatAnnouncements.SV.BracketOptionItem] .. "|r|c" .. changeColor)
+    if type == "LUIE_CURRENCY_BAG" or type == "LUIE_CURRENCY_BANK" then
+        local function ResolveStorageType()
+            local bagType
+            local icon
+            if type == "LUIE_CURRENCY_BAG" then
+                bagType = string_format(linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_BAGTYPE1) .. linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
+                icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/icons/store_upgrade_bag.dds|t " or ""
+            end
+            if type == "LUIE_CURRENCY_BANK" then
+                bagType = string_format(linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_BAGTYPE2) .. linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
+                icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/icons/store_upgrade_bank.dds|t " or ""
+            end
+            return string_format("|r" .. icon .. "|cFFFFFF" .. bagType .. "|r|c" .. changeColor)
+        end
+        formattedMessageP1 = (string_format(messageChange, ResolveStorageType(), messageP1))
+        -- TODO:
+    elseif type == "LUIE_CURRENCY_HERALDRY" then
+        local icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:" .. LUIE_MEDIA_UNITFRAMES_CA_HERALDRY_DDS .. "|t " or ""
+        local heraldryMessage = string_format("|r" .. icon .. "|cFFFFFF" .. linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_CURRENCY_NAME_HERALDRY) .. linkBracket2[ChatAnnouncements.SV.BracketOptionItem] .. "|r|c" .. changeColor)
         formattedMessageP1 = (string_format(messageChange, messageP1, heraldryMessage))
-        ]]
-        --
-    elseif messageType == "LUIE_CURRENCY_RIDING_SPEED" or messageType == "LUIE_CURRENCY_RIDING_CAPACITY" or messageType == "LUIE_CURRENCY_RIDING_STAMINA" then
-        formattedMessageP1 = string_format(messageChange, ResolveRidingStats(changeColor, messageType), messageP1)
-    elseif isVendor then
-        local item = string_format("|r%s|c%s", carriedItem, changeColor)
-        formattedMessageP1 = string_format(messageChange, item, messageP1)
-    elseif messageType == "LUIE_CURRENCY_TRADE" then
-        local tradeTarget = ChatAnnouncements.tradeTarget or ""
-        local name = string_format("|r%s|c%s", tradeTarget, changeColor)
-        formattedMessageP1 = string_format(messageChange, messageP1, name)
-    elseif messageType == "LUIE_CURRENCY_MAIL" then
-        -- Use currentMailSender which was set from the queue when currency change occurred
-        -- Don't use Mail.target as fallback during take all, as it gets contaminated
-        local mailSender = ChatAnnouncements.currentMailSender or ""
-        local name = string_format("|r%s|c%s", mailSender, changeColor)
-        formattedMessageP1 = string_format(messageChange, messageP1, name)
+    elseif type == "LUIE_CURRENCY_RIDING_SPEED" or type == "LUIE_CURRENCY_RIDING_CAPACITY" or type == "LUIE_CURRENCY_RIDING_STAMINA" then
+        local function ResolveRidingStats()
+            -- if somevar then icon = else no
+            local skillType
+            local icon
+            if type == "LUIE_CURRENCY_RIDING_SPEED" then
+                skillType = string_format(linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_RIDINGTYPE1) .. linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
+                icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/mounts/ridingskill_speed.dds|t " or ""
+            elseif type == "LUIE_CURRENCY_RIDING_CAPACITY" then
+                skillType = string_format(linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_RIDINGTYPE2) .. linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
+                icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/mounts/ridingskill_capacity.dds|t " or ""
+            elseif type == "LUIE_CURRENCY_RIDING_STAMINA" then
+                skillType = string_format(linkBracket1[ChatAnnouncements.SV.BracketOptionItem] .. GetString(LUIE_STRING_CA_STORAGE_RIDINGTYPE3) .. linkBracket2[ChatAnnouncements.SV.BracketOptionItem])
+                icon = ChatAnnouncements.SV.Inventory.LootIcons and "|t16:16:/esoui/art/mounts/ridingskill_stamina.dds|t " or ""
+            end
+            return string_format("|r" .. icon .. "|cFFFFFF" .. skillType .. "|r|c" .. changeColor)
+        end
+        formattedMessageP1 = (string_format(messageChange, ResolveRidingStats(), messageP1))
+    elseif type == "LUIE_CURRENCY_VENDOR" then
+        item = string_format("|r" .. carriedItem .. "|c" .. changeColor)
+        formattedMessageP1 = (string_format(messageChange, item, messageP1))
+    elseif type == "LUIE_CURRENCY_TRADE" then
+        name = string_format("|r" .. g_tradeTarget .. "|c" .. changeColor)
+        formattedMessageP1 = (string_format(messageChange, messageP1, name))
+    elseif type == "LUIE_CURRENCY_MAIL" then
+        name = string_format("|r" .. g_mailTarget .. "|c" .. changeColor)
+        formattedMessageP1 = (string_format(messageChange, messageP1, name))
     else
-        formattedMessageP1 = string_format(messageChange, messageP1)
+        formattedMessageP1 = (string_format(messageChange, messageP1))
     end
-    local formattedMessageP2 = shouldFormatTotal and ((messageTotal ~= "" and string_format(messageTotal, messageP2)) or messageP2) or messageP2
+    local formattedMessageP2 = (currencyTotal or (type == "LUIE_CURRENCY_VENDOR" and ChatAnnouncements.SV.Inventory.LootVendorTotalCurrency)) and (string_format(messageTotal, messageP2)) or messageP2
     local finalMessage
-    if shouldShowTotal then
-        if isVendor then
+    if currencyTotal and type ~= "LUIE_CURRENCY_HERALDRY" and type ~= "LUIE_CURRENCY_VENDOR" and type ~= "LUIE_CURRENCY_POSTAGE" or (type == "LUIE_CURRENCY_VENDOR" and ChatAnnouncements.SV.Inventory.LootVendorTotalCurrency) then
+        if type == "LUIE_CURRENCY_VENDOR" then
             finalMessage = string_format("|c%s%s|r%s |c%s%s|r", changeColor, formattedMessageP1, carriedItemTotal, changeColor, formattedMessageP2)
         else
             finalMessage = string_format("|c%s%s|r |c%s%s|r", changeColor, formattedMessageP1, changeColor, formattedMessageP2)
         end
     else
-        if isVendor then
+        if type == "LUIE_CURRENCY_VENDOR" then
             finalMessage = string_format("|c%s%s|r%s", changeColor, formattedMessageP1, carriedItemTotal)
         else
             finalMessage = string_format("|c%s%s|r", changeColor, formattedMessageP1)
@@ -2092,519 +2074,587 @@ function ChatAnnouncements.CurrencyPrinter(baseCurrencyType, formattedValue, cha
     end
 
     -- If this value is being sent from the Throttle Printer, do not throttle the printout of the value
-    if messageType == "LUIE_CURRENCY_THROTTLE" then
+    if type == "LUIE_CURRENCY_THROTTLE" then
         printToChat(finalMessage)
         -- Otherwise sent to our Print Queued Messages function to be processed on a 50 ms delay.
     else
-        local resolveType = (messageType == "LUIE_CURRENCY_POSTAGE" and "CURRENCY_POSTAGE") or (baseCurrencyType == CURT_CROWNS and "EXPERIENCE") or "CURRENCY"
-        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-        {
-            message = finalMessage,
-            messageType = resolveType
-        }
+        local resolveType = (type == "LUIE_CURRENCY_POSTAGE" and "CURRENCY POSTAGE") or (baseCurrencyType == CURT_CROWNS and "EXPERIENCE") or "CURRENCY"
+        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = resolveType }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
     end
 end
 
 function ChatAnnouncements.CurrencyGoldThrottlePrinter()
-    if ChatAnnouncements.currencyGoldThrottleValue > 0 and ChatAnnouncements.currencyGoldThrottleValue > ChatAnnouncements.SV.Currency.CurrencyGoldFilter then
-        local formattedValue = ZO_CommaDelimitDecimalNumber(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
-        local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyUpColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
-        local changeType = ZO_CommaDelimitDecimalNumber(ChatAnnouncements.currencyGoldThrottleValue)
-        local currencyTypeColor = ChatAnnouncements.Colors.CurrencyGoldColorize:ToHex()
-        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_MONEY), 16, 16) or ""
-        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, ChatAnnouncements.currencyGoldThrottleValue)
+    if g_currencyGoldThrottleValue > 0 and g_currencyGoldThrottleValue > ChatAnnouncements.SV.Currency.CurrencyGoldFilter then
+        local formattedValue = ZO_CommaDelimitDecimalNumber(GetCarriedCurrencyAmount(1))
+        local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyUpColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
+        local changeType = ZO_CommaDelimitDecimalNumber(g_currencyGoldThrottleValue)
+        local currencyTypeColor = ColorizeColors.CurrencyGoldColorize:ToHex()
+        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_gold.dds|t" or ""
+        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, g_currencyGoldThrottleValue)
         local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyGoldShowTotal
         local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalGold
         local messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
-        local messageType = "LUIE_CURRENCY_THROTTLE"
-        ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, messageType, "", "")
+        local type = "LUIE_CURRENCY_THROTTLE"
+        ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
     end
-    ChatAnnouncements.currencyGoldThrottleValue = 0
-    ChatAnnouncements.currencyGoldThrottleTotal = 0
+    g_currencyGoldThrottleValue = 0
+    g_currencyGoldThrottleTotal = 0
 end
 
 function ChatAnnouncements.CurrencyAPThrottlePrinter()
-    if ChatAnnouncements.currencyAPThrottleValue > 0 and ChatAnnouncements.currencyAPThrottleValue > ChatAnnouncements.SV.Currency.CurrencyAPFilter then
-        local formattedValue = ZO_CommaDelimitDecimalNumber(ChatAnnouncements.currencyAPThrottleTotal)
-        local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyUpColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
-        local changeType = ZO_CommaDelimitDecimalNumber(ChatAnnouncements.currencyAPThrottleValue)
-        local currencyTypeColor = ChatAnnouncements.Colors.CurrencyAPColorize:ToHex()
-        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_ALLIANCE_POINTS), 16, 16) or ""
-        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyAPName, ChatAnnouncements.currencyAPThrottleValue)
+    if g_currencyAPThrottleValue > 0 and g_currencyAPThrottleValue > ChatAnnouncements.SV.Currency.CurrencyAPFilter then
+        local formattedValue = ZO_CommaDelimitDecimalNumber(g_currencyAPThrottleTotal)
+        local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyUpColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
+        local changeType = ZO_CommaDelimitDecimalNumber(g_currencyAPThrottleValue)
+        local currencyTypeColor = ColorizeColors.CurrencyAPColorize:ToHex()
+        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/alliancepoints.dds|t" or ""
+        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyAPName, g_currencyAPThrottleValue)
         local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyAPShowTotal
         local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalAP
         local messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageEarn
-        local messageType = "LUIE_CURRENCY_THROTTLE"
-        ChatAnnouncements.CurrencyPrinter(
-            CURT_ALLIANCE_POINTS,
-            formattedValue,
-            changeColor,
-            changeType,
-            currencyTypeColor,
-            currencyIcon,
-            currencyName,
-            currencyTotal,
-            messageChange,
-            messageTotal,
-            messageType,
-            nil,
-            nil
-        )
+        local type = "LUIE_CURRENCY_THROTTLE"
+        ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
     end
     eventManager:UnregisterForUpdate(moduleName .. "BufferedAP")
-    ChatAnnouncements.currencyAPThrottleValue = 0
-    ChatAnnouncements.currencyAPThrottleTotal = 0
+    g_currencyAPThrottleValue = 0
+    g_currencyAPThrottleTotal = 0
 end
 
 function ChatAnnouncements.CurrencyTVThrottlePrinter()
-    if ChatAnnouncements.currencyTVThrottleValue > 0 and ChatAnnouncements.currencyTVThrottleValue > ChatAnnouncements.SV.Currency.CurrencyTVFilter then
-        local formattedValue = ZO_CommaDelimitDecimalNumber(ChatAnnouncements.currencyTVThrottleTotal)
-        local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyUpColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
-        local changeType = ZO_CommaDelimitDecimalNumber(ChatAnnouncements.currencyTVThrottleValue)
-        local currencyTypeColor = ChatAnnouncements.Colors.CurrencyTVColorize:ToHex()
-        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and zo_iconFormat(ZO_Currency_GetPlatformCurrencyIcon(CURT_TELVAR_STONES), 16, 16) or ""
-        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyTVName, ChatAnnouncements.currencyTVThrottleValue)
+    if g_currencyTVThrottleValue > 0 and g_currencyTVThrottleValue > ChatAnnouncements.SV.Currency.CurrencyTVFilter then
+        local formattedValue = ZO_CommaDelimitDecimalNumber(g_currencyTVThrottleTotal)
+        local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyUpColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
+        local changeType = ZO_CommaDelimitDecimalNumber(g_currencyTVThrottleValue)
+        local currencyTypeColor = ColorizeColors.CurrencyTVColorize:ToHex()
+        local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_telvar.dds|t" or ""
+        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyTVName, g_currencyTVThrottleValue)
         local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyTVShowTotal
         local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalTV
         local messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
-        local messageType = "LUIE_CURRENCY_THROTTLE"
-        ChatAnnouncements.CurrencyPrinter(
-            CURT_TELVAR_STONES,
-            formattedValue,
-            changeColor,
-            changeType,
-            currencyTypeColor,
-            currencyIcon,
-            currencyName,
-            currencyTotal,
-            messageChange,
-            messageTotal,
-            messageType,
-            nil,
-            nil
-        )
+        local type = "LUIE_CURRENCY_THROTTLE"
+        ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
     end
     eventManager:UnregisterForUpdate(moduleName .. "BufferedTV")
-    ChatAnnouncements.currencyTVThrottleValue = 0
-    ChatAnnouncements.currencyTVThrottleTotal = 0
+    g_currencyTVThrottleValue = 0
+    g_currencyTVThrottleTotal = 0
 end
 
---- - **EVENT_LOCKPICK_BROKE **
----
---- @param eventId integer
---- @param inactivityLengthMs integer
-function ChatAnnouncements.MiscAlertLockBroke(eventId, inactivityLengthMs)
-    ChatAnnouncements.lockpickBroken = true
+function ChatAnnouncements.MiscAlertLockBroke(eventCode, inactivityLengthMs)
+    g_lockpickBroken = true
     LUIE_callLater(function ()
-                       ChatAnnouncements.lockpickBroken = false
+                       g_lockpickBroken = false
                    end, 200)
 end
 
---- - **EVENT_LOCKPICK_SUCCESS**
----
---- @param eventId integer
-function ChatAnnouncements.MiscAlertLockSuccess(eventId)
+function ChatAnnouncements.MiscAlertLockSuccess(eventCode)
     if ChatAnnouncements.SV.Notify.NotificationLockpickCA then
         local message = GetString(LUIE_STRING_CA_LOCKPICK_SUCCESS)
-        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-        {
-            message = message,
-            messageType = "NOTIFICATION"
-        }
+        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "NOTIFICATION" }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
     end
     if ChatAnnouncements.SV.Notify.NotificationLockpickAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString(LUIE_STRING_CA_LOCKPICK_SUCCESS))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_LOCKPICK_SUCCESS))
     end
-    ChatAnnouncements.lockpickBroken = true
+    g_lockpickBroken = true
     LUIE_callLater(function ()
-                       ChatAnnouncements.lockpickBroken = false
+                       g_lockpickBroken = false
                    end, 200)
 end
 
---- - **EVENT_INVENTORY_BAG_CAPACITY_CHANGED **
----
---- @param eventId integer
---- @param previousCapacity integer
---- @param currentCapacity integer
---- @param previousUpgrade integer
---- @param currentUpgrade integer
-function ChatAnnouncements.StorageBag(eventId, previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
+function ChatAnnouncements.StorageBag(eventCode, previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
     if previousCapacity > 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
         if ChatAnnouncements.SV.Notify.StorageBagCA then
-            local formattedString = ChatAnnouncements.Colors.StorageBagColorize:Colorize(zo_strformat(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
-            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-            {
-                message = formattedString,
-                messageType = "MESSAGE"
-            }
+            local formattedString = ColorizeColors.StorageBagColorize:Colorize(zo_strformat(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
         end
 
         if ChatAnnouncements.SV.Notify.StorageBagAlert then
             local text = zo_strformat(LUIE_STRING_CA_STORAGE_BAG_UPGRADE)
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, text)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
         end
     end
 end
 
---- - **EVENT_INVENTORY_BANK_CAPACITY_CHANGED **
----
---- @param eventId integer
---- @param previousCapacity integer
---- @param currentCapacity integer
---- @param previousUpgrade integer
---- @param currentUpgrade integer
-function ChatAnnouncements.StorageBank(eventId, previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
+function ChatAnnouncements.StorageBank(eventCode, previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
     if previousCapacity > 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
         if ChatAnnouncements.SV.Notify.StorageBagCA then
-            local formattedString = ChatAnnouncements.Colors.StorageBagColorize:Colorize(zo_strformat(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
-            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-            {
-                message = formattedString,
-                messageType = "MESSAGE"
-            }
+            local formattedString = ColorizeColors.StorageBagColorize:Colorize(zo_strformat(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
         end
 
         if ChatAnnouncements.SV.Notify.StorageBagAlert then
             local text = zo_strformat(LUIE_STRING_CA_STORAGE_BANK_UPGRADE)
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, text)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
         end
     end
 end
 
---- - **EVENT_BUYBACK_RECEIPT **
----
---- @param eventId integer
---- @param itemLink string
---- @param itemQuantity integer
---- @param money integer
---- @param itemSoundCategory ItemUISoundCategory
-function ChatAnnouncements.OnBuybackItem(eventId, itemLink, itemQuantity, money, itemSoundCategory)
-    local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyDownColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+function ChatAnnouncements.OnBuybackItem(eventCode, itemName, quantity, money, itemSound)
+    local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyDownColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
     if ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.Currency.CurrencyContextMergedColor then
-        changeColor = ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+        changeColor = ColorizeColors.CurrencyColorize:ToHex()
     end
-    local itemName = GetItemLinkName(itemLink)
-    local itemIcon = GetItemLinkIcon(itemLink)
+    local itemIcon, _, _, _, _ = GetItemLinkInfo(itemName)
     local icon = itemIcon
     local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon and icon ~= "") and ("|t16:16:" .. icon .. "|t ") or ""
-    local messageType = "LUIE_CURRENCY_VENDOR"
+    local type = "LUIE_CURRENCY_VENDOR"
     local messageChange = (money ~= 0 and ChatAnnouncements.SV.Inventory.LootVendorCurrency) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageBuyback or ChatAnnouncements.SV.ContextMessages.CurrencyMessageBuybackNoV
-    local itemCount = itemQuantity > 1 and (" |cFFFFFF" .. LUIE_TINY_X_FORMATTER .. "" .. itemQuantity .. "|r") or ""
+    local itemCount = quantity > 1 and (" |cFFFFFFx" .. quantity .. "|r") or ""
     local carriedItem
     if ChatAnnouncements.SV.BracketOptionItem == 1 then
         carriedItem = (formattedIcon .. itemName .. itemCount)
     else
-        carriedItem = (formattedIcon .. StringOnlyGSUB(itemName, "^|H0", "|H1", 1) .. itemCount)
+        carriedItem = (formattedIcon .. zo_strgsub(itemName, "^|H0", "|H1", 1) .. itemCount)
     end
 
     local carriedItemTotal = ""
     if ChatAnnouncements.SV.Inventory.LootVendorTotalItems then
-        local total = getItemLinkStackCount(itemLink)
-        if total >= 1 then
+        local total1, total2, total3 = GetItemLinkStacks(itemName)
+        local total = total1 + total2 + total3
+        if total > 1 then
             carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
 
     if money ~= 0 and ChatAnnouncements.SV.Inventory.LootVendorCurrency then
         -- Stop messages from printing if for some reason the currency event never triggers
-        if ChatAnnouncements.savedPurchase.formattedValue then
-            ChatAnnouncements.CurrencyPrinter(
-                nil,
-                ChatAnnouncements.savedPurchase.formattedValue,
-                changeColor,
-                ChatAnnouncements.savedPurchase.changeType,
-                ChatAnnouncements.savedPurchase.currencyTypeColor,
-                ChatAnnouncements.savedPurchase.currencyIcon,
-                ChatAnnouncements.savedPurchase.currencyName,
-                ChatAnnouncements.savedPurchase.currencyTotal,
-                messageChange,
-                ChatAnnouncements.savedPurchase.messageTotal,
-                messageType,
-                carriedItem,
-                carriedItemTotal
-            )
+        if g_savedPurchase.formattedValue then
+            ChatAnnouncements.CurrencyPrinter(nil, g_savedPurchase.formattedValue, changeColor, g_savedPurchase.changeType, g_savedPurchase.currencyTypeColor, g_savedPurchase.currencyIcon, g_savedPurchase.currencyName, g_savedPurchase.currencyTotal, messageChange, g_savedPurchase.messageTotal, type, carriedItem, carriedItemTotal)
         end
     else
         local finalMessageP1 = string_format(carriedItem .. "|r|c" .. changeColor)
         local finalMessageP2 = string_format(messageChange, finalMessageP1)
         local finalMessage = string_format("|c%s%s|r%s", changeColor, finalMessageP2, carriedItemTotal)
-        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-        {
-            message = finalMessage,
-            messageType = "CURRENCY"
-        }
+        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "CURRENCY" }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
     end
-    ChatAnnouncements.savedPurchase = {}
+    g_savedPurchase = {}
 end
 
---- - **EVENT_BUY_RECEIPT **
----
---- @param eventId integer
---- @param entryName string
---- @param entryType StoreEntryType
---- @param entryQuantity integer
---- @param money integer
---- @param specialCurrencyType1 CurrencyType
---- @param specialCurrencyInfo1 string
---- @param specialCurrencyQuantity1 integer
---- @param specialCurrencyType2 CurrencyType
---- @param specialCurrencyInfo2 string
---- @param specialCurrencyQuantity2 integer
---- @param itemSoundCategory ItemUISoundCategory
-function ChatAnnouncements.OnBuyItem(eventId, entryName, entryType, entryQuantity, money, specialCurrencyType1, specialCurrencyInfo1, specialCurrencyQuantity1, specialCurrencyType2, specialCurrencyInfo2, specialCurrencyQuantity2, itemSoundCategory)
-    -- Default the icon to the missing texture path to start with.
-    local itemIcon = ZO_NO_TEXTURE_FILE
+-- TODO: Move to a data table outside of CA (maybe?)
+local isShopCollectible =
+{
+    [GetCollectibleInfo(3)] = 3, -- Brown Paint Horse
+    [GetCollectibleInfo(4)] = 4, -- Bay Dun Horse
+    [GetCollectibleInfo(5)] = 5, -- Midnight Steed
+
+    -- [GetCollectibleInfo(4673)] = 4673, -- Storage Coffer, Fortified (from level up rewards)
+    [GetCollectibleInfo(4674)] = 4674, -- Storage Chest, Fortified (Tel Var / Writ Vouchers)
+    [GetCollectibleInfo(4675)] = 4675, -- Storage Coffer, Oaken (Tel Var / Writ Vouchers)
+    [GetCollectibleInfo(4676)] = 4676, -- Storage Coffer, Secure (Tel Var / Writ Vouchers)
+    [GetCollectibleInfo(4677)] = 4677, -- Storage Coffer, Sturdy (Tel Var / Writ Vouchers)
+    [GetCollectibleInfo(4678)] = 4678, -- Storage Chest, Oaken (Tel Var / Writ Vouchers)
+    [GetCollectibleInfo(4679)] = 4679, -- Storage Chest, Secure (Tel Var / Writ Vouchers)
+    [GetCollectibleInfo(4680)] = 4680, -- Storage Chest, Sturdy (Tel Var / Writ Vouchers)
+
+    [GetCollectibleInfo(6706)] = 6706, -- Emerald Indrik Feather
+    [GetCollectibleInfo(6707)] = 6707, -- Gilded Indrik Feather
+    [GetCollectibleInfo(6708)] = 6708, -- Onyx Indrik Feather
+    [GetCollectibleInfo(6709)] = 6709, -- Opaline Indrik Feather
+
+    [GetCollectibleInfo(6659)] = 6659, -- Dawnwood Berries of Bloom
+    [GetCollectibleInfo(6660)] = 6660, -- Dawnwood Berries of Budding
+    [GetCollectibleInfo(6661)] = 6661, -- Dawnwood Berries of Growth
+    [GetCollectibleInfo(6662)] = 6662, -- Dawnwood Berries of Ripeness
+
+    [GetCollectibleInfo(6694)] = 6694, -- Luminous Berries of Bloom
+    [GetCollectibleInfo(6695)] = 6695, -- Luminous Berries of Budding
+    [GetCollectibleInfo(6696)] = 6696, -- Luminous Berries of Growth
+    [GetCollectibleInfo(6697)] = 6697, -- Luminous Berries of Ripeness
+
+    [GetCollectibleInfo(6698)] = 6698, -- Onyx Berries of Bloom
+    [GetCollectibleInfo(6699)] = 6699, -- Onyx Berries of Budding
+    [GetCollectibleInfo(6700)] = 6700, -- Onyx Berries of Growth
+    [GetCollectibleInfo(6701)] = 6701, -- Onyx Berries of Ripeness
+
+    [GetCollectibleInfo(6702)] = 6702, -- Pure-Snow Berries of Bloom
+    [GetCollectibleInfo(6703)] = 6703, -- Pure-Snow Berries of Budding
+    [GetCollectibleInfo(6704)] = 6704, -- Pure-Snow Berries of Growth
+    [GetCollectibleInfo(6705)] = 6705, -- Pure-Snow Berries of Ripeness
+
+    [GetCollectibleInfo(7021)] = 7021, -- Spectral Berries of Bloom
+    [GetCollectibleInfo(7022)] = 7022, -- Spectral Berries of Budding
+    [GetCollectibleInfo(7023)] = 7023, -- Spectral Berries of Growth
+    [GetCollectibleInfo(7024)] = 7024, -- Spectral Berries of Ripeness
+
+    [GetCollectibleInfo(7791)] = 7791, -- Icebreath Berries of Bloom
+    [GetCollectibleInfo(7792)] = 7792, -- Icebreath Berries of Budding
+    [GetCollectibleInfo(7793)] = 7793, -- Icebreath Berries of Growth
+    [GetCollectibleInfo(7794)] = 7794, -- Icebreath Berries of Ripeness
+
+    [GetCollectibleInfo(8126)] = 8126, -- Mossheart Berries of Bloom
+    [GetCollectibleInfo(8127)] = 8127, -- Mossheart Berries of Budding
+    [GetCollectibleInfo(8128)] = 8128, -- Mossheart Berries of Growth
+    [GetCollectibleInfo(8129)] = 8129, -- Mossheart Berries of Ripeness
+
+    [GetCollectibleInfo(8196)] = 8196, -- Pact Breton Terrier
+    [GetCollectibleInfo(8197)] = 8197, -- Dominion Breton Terrier
+    [GetCollectibleInfo(8198)] = 8198, -- Covenant Breton Terrier
+
+    [GetCollectibleInfo(8866)] = 8866, -- Deadlands Flint (Unstable Morpholith)
+    [GetCollectibleInfo(8867)] = 8867, -- Rune-Etched Striker (Unstable Morpholith)
+    [GetCollectibleInfo(8868)] = 8868, -- Smoldering Bloodgrass Tinder (Unstable Morpholith)
+
+    [GetCollectibleInfo(8869)] = 8869, -- Rune-Scribed Daedra Hide (Deadlands Scorcher)
+    [GetCollectibleInfo(8870)] = 8870, -- Rune-Scribed Daedra Sleeve (Deadlands Scorcher)
+    [GetCollectibleInfo(8871)] = 8871, -- Rune-Scribed Daedra Veil (Deadlands Scorcher)
+
+    [GetCollectibleInfo(9085)] = 9085, -- Vial of Simmering Daedric Brew (Deadlands Firewalker)
+    [GetCollectibleInfo(9086)] = 9086, -- Vial of Bubbling Daedric Brew (Deadlands Firewalker)
+    [GetCollectibleInfo(9087)] = 9087, -- Vial of Scalding Daedric Brew (Deadlands Firewalker)
+
+    [GetCollectibleInfo(9163)] = 9163, -- Black Iron Bit and Bridle (Dagonic Quasigriff)
+    [GetCollectibleInfo(9164)] = 9164, -- Black Iron Stirrups (Dagonic Quasigriff)
+    [GetCollectibleInfo(9162)] = 9162, -- Smoke-Wreathed Griffon Feather (Dagonic Quasigriff)
+}
+
+function ChatAnnouncements.OnBuyItem(eventCode, itemName, entryType, quantity, money, specialCurrencyType1, specialCurrencyInfo1, specialCurrencyQuantity1, specialCurrencyType2, specialCurrencyInfo2, specialCurrencyQuantity2, itemSoundCategory)
+    local itemIcon
     if entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
-        if isShopCollectible[entryName] then
-            local id = isShopCollectible[entryName]
-            entryName = GetCollectibleLink(id, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            itemIcon = GetCollectibleIcon(id) or ZO_NO_TEXTURE_FILE
+        if isShopCollectible[itemName] then
+            local id = isShopCollectible[itemName]
+            itemName = GetCollectibleLink(id, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            itemIcon = select(3, GetCollectibleInfo(id))
         else
-            local collectibleId = GetCollectibleIdFromLink(entryName)
-            if collectibleId then
-                itemIcon = GetCollectibleIcon(collectibleId) or ZO_NO_TEXTURE_FILE
-            else
-                itemIcon = ZO_NO_TEXTURE_FILE
-            end
+            itemIcon = GetItemLinkInfo(itemName)
         end
-    else
-        -- Try to get an icon for non-collectibles, or set a different default
-        itemIcon = GetItemLinkIcon(entryName) or ZO_NO_TEXTURE_FILE
     end
 
-    local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyDownColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+    local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyDownColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
     if ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.Currency.CurrencyContextMergedColor then
-        changeColor = ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+        changeColor = ColorizeColors.CurrencyColorize:ToHex()
     end
     local icon = itemIcon
     local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon and icon ~= "") and ("|t16:16:" .. icon .. "|t ") or ""
-    local messageType = "LUIE_CURRENCY_VENDOR"
+    local type = "LUIE_CURRENCY_VENDOR"
     local messageChange = ((money ~= 0 or specialCurrencyQuantity1 ~= 0 or specialCurrencyQuantity2 ~= 0) and ChatAnnouncements.SV.Inventory.LootVendorCurrency) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageBuy or ChatAnnouncements.SV.ContextMessages.CurrencyMessageBuyNoV
-    local itemCount = entryQuantity > 1 and (" |cFFFFFF" .. LUIE_TINY_X_FORMATTER .. "" .. entryQuantity .. "|r") or ""
+    local itemCount = quantity > 1 and (" |cFFFFFFx" .. quantity .. "|r") or ""
     local carriedItem
     if ChatAnnouncements.SV.BracketOptionItem == 1 then
-        carriedItem = (formattedIcon .. entryName .. itemCount)
+        carriedItem = (formattedIcon .. itemName .. itemCount)
     else
-        carriedItem = (formattedIcon .. StringOnlyGSUB(entryName, "^|H0", "|H1", 1) .. itemCount)
+        carriedItem = (formattedIcon .. zo_strgsub(itemName, "^|H0", "|H1", 1) .. itemCount)
     end
 
     local carriedItemTotal = ""
     if ChatAnnouncements.SV.Inventory.LootVendorTotalItems then
-        local total = getItemLinkStackCount(entryName)
-        if total >= 1 then
+        local total1, total2, total3 = GetItemLinkStacks(itemName)
+        local total = total1 + total2 + total3
+        if total > 1 then
             carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
 
     if (money ~= 0 or specialCurrencyQuantity1 ~= 0 or specialCurrencyQuantity2 ~= 0) and ChatAnnouncements.SV.Inventory.LootVendorCurrency then
         -- Stop messages from printing if for some reason the currency event never triggers
-        if ChatAnnouncements.savedPurchase.formattedValue then
-            ChatAnnouncements.CurrencyPrinter(
-                nil,
-                ChatAnnouncements.savedPurchase.formattedValue,
-                changeColor,
-                ChatAnnouncements.savedPurchase.changeType,
-                ChatAnnouncements.savedPurchase.currencyTypeColor,
-                ChatAnnouncements.savedPurchase.currencyIcon,
-                ChatAnnouncements.savedPurchase.currencyName,
-                ChatAnnouncements.savedPurchase.currencyTotal,
-                messageChange,
-                ChatAnnouncements.savedPurchase.messageTotal,
-                messageType,
-                carriedItem,
-                carriedItemTotal
-            )
+        if g_savedPurchase.formattedValue then
+            ChatAnnouncements.CurrencyPrinter(nil, g_savedPurchase.formattedValue, changeColor, g_savedPurchase.changeType, g_savedPurchase.currencyTypeColor, g_savedPurchase.currencyIcon, g_savedPurchase.currencyName, g_savedPurchase.currencyTotal, messageChange, g_savedPurchase.messageTotal, type, carriedItem, carriedItemTotal)
         end
     else
         local finalMessageP1 = string_format(carriedItem .. "|r|c" .. changeColor)
         local finalMessageP2 = string_format(messageChange, finalMessageP1)
         local finalMessage = string_format("|c%s%s|r%s", changeColor, finalMessageP2, carriedItemTotal)
-        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-        {
-            message = finalMessage,
-            messageType = "CURRENCY"
-        }
+        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "CURRENCY" }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
     end
 
-    ChatAnnouncements.savedPurchase = {}
+    g_savedPurchase = {}
 end
 
---- - **EVENT_SELL_RECEIPT **
----
---- @param eventId integer
---- @param itemName string
---- @param itemQuantity integer
---- @param money integer
-function ChatAnnouncements.OnSellItem(eventId, itemName, itemQuantity, money)
-    local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyUpColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+function ChatAnnouncements.OnSellItem(eventCode, itemName, quantity, money)
+    local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyUpColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
     if ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.Currency.CurrencyContextMergedColor then
-        changeColor = ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+        changeColor = ColorizeColors.CurrencyColorize:ToHex()
     end
-    local itemIcon = GetItemLinkIcon(itemName)
+    local itemIcon, _, _, _, _ = GetItemLinkInfo(itemName)
     local icon = itemIcon
     local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon and icon ~= "") and ("|t16:16:" .. icon .. "|t ") or ""
-    local messageType = "LUIE_CURRENCY_VENDOR"
+    local type = "LUIE_CURRENCY_VENDOR"
     local messageChange
-    if ChatAnnouncements.weAreInAFence then
+    if g_weAreInAFence then
         messageChange = (money ~= 0 and ChatAnnouncements.SV.Inventory.LootVendorCurrency) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageFence or ChatAnnouncements.SV.ContextMessages.CurrencyMessageFenceNoV
     else
         messageChange = (money ~= 0 and ChatAnnouncements.SV.Inventory.LootVendorCurrency) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageSell or ChatAnnouncements.SV.ContextMessages.CurrencyMessageSellNoV
     end
-    local itemCount = itemQuantity > 1 and (" |cFFFFFF" .. LUIE_TINY_X_FORMATTER .. "" .. itemQuantity .. "|r") or ""
+    local itemCount = quantity > 1 and (" |cFFFFFFx" .. quantity .. "|r") or ""
     local carriedItem
     if ChatAnnouncements.SV.BracketOptionItem == 1 then
         carriedItem = (formattedIcon .. itemName .. itemCount)
     else
-        carriedItem = (formattedIcon .. StringOnlyGSUB(itemName, "^|H0", "|H1", 1) .. itemCount)
+        carriedItem = (formattedIcon .. zo_strgsub(itemName, "^|H0", "|H1", 1) .. itemCount)
     end
 
     local carriedItemTotal = ""
     if ChatAnnouncements.SV.Inventory.LootVendorTotalItems then
-        local total = getItemLinkStackCount(itemName)
-        if total >= 1 then
+        local total1, total2, total3 = GetItemLinkStacks(itemName)
+        local total = total1 + total2 + total3
+        if total > 1 then
             carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
 
     if money ~= 0 and ChatAnnouncements.SV.Inventory.LootVendorCurrency then
         -- Stop messages from printing if for some reason the currency event never triggers
-        if ChatAnnouncements.savedPurchase.formattedValue then
-            ChatAnnouncements.CurrencyPrinter(
-                nil,
-                ChatAnnouncements.savedPurchase.formattedValue,
-                changeColor,
-                ChatAnnouncements.savedPurchase.changeType,
-                ChatAnnouncements.savedPurchase.currencyTypeColor,
-                ChatAnnouncements.savedPurchase.currencyIcon,
-                ChatAnnouncements.savedPurchase.currencyName,
-                ChatAnnouncements.savedPurchase.currencyTotal,
-                messageChange,
-                ChatAnnouncements.savedPurchase.messageTotal,
-                messageType,
-                carriedItem,
-                carriedItemTotal
-            )
+        if g_savedPurchase.formattedValue then
+            ChatAnnouncements.CurrencyPrinter(nil, g_savedPurchase.formattedValue, changeColor, g_savedPurchase.changeType, g_savedPurchase.currencyTypeColor, g_savedPurchase.currencyIcon, g_savedPurchase.currencyName, g_savedPurchase.currencyTotal, messageChange, g_savedPurchase.messageTotal, type, carriedItem, carriedItemTotal)
         end
     else
         local finalMessageP1 = string_format(carriedItem .. "|r|c" .. changeColor)
         local finalMessageP2 = string_format(messageChange, finalMessageP1)
         local finalMessage = string_format("|c%s%s|r%s", changeColor, finalMessageP2, carriedItemTotal)
-        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-        {
-            message = finalMessage,
-            messageType = "CURRENCY"
-        }
+        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "CURRENCY" }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
     end
-    ChatAnnouncements.savedPurchase = {}
+    g_savedPurchase = {}
 end
 
---- - **EVENT_TRADING_HOUSE_RESPONSE_RECEIVED **
----
---- @param eventId integer
---- @param responseType TradingHouseResult
---- @param result TradingHouseResult
-function ChatAnnouncements.TradingHouseResponseReceived(eventId, responseType, result)
+function ChatAnnouncements.TradingHouseResponseReceived(eventCode, TradingHouseResult, result)
     -- Bail if a pending item isn't being sold
-    if not responseType == TRADING_HOUSE_RESULT_POST_PENDING then
+    if not TradingHouseResult == TRADING_HOUSE_RESULT_POST_PENDING then
         return
     end
     -- If we don't have both a valid saved currency transaction and saved message then bail out.
-    if not ChatAnnouncements.savedPurchase.formattedValue or not ChatAnnouncements.savedItem.itemLink then
-        ChatAnnouncements.savedPurchase = {}
-        ChatAnnouncements.savedItem = {}
+    if not g_savedPurchase.formattedValue or not g_savedItem.itemLink then
+        g_savedPurchase = {}
+        g_savedItem = {}
         return
     end
 
-    local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyDownColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+    local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyDownColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
     if ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.Currency.CurrencyContextMergedColor then
-        changeColor = ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+        changeColor = ColorizeColors.CurrencyColorize:ToHex()
     end
-    local messageType = "LUIE_CURRENCY_VENDOR"
+    local type = "LUIE_CURRENCY_VENDOR"
     local messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageListingValue
 
-    local icon = ChatAnnouncements.savedItem.icon
+    local icon = g_savedItem.icon
     local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon and icon ~= "") and ("|t16:16:" .. icon .. "|t ") or ""
-    local stack = ChatAnnouncements.savedItem.stack
-    local itemCount = stack > 1 and (" |cFFFFFF" .. LUIE_TINY_X_FORMATTER .. "" .. stack .. "|r") or ""
-    local itemName = ChatAnnouncements.savedItem.itemLink
+    local stack = g_savedItem.stack
+    local itemCount = stack > 1 and (" |cFFFFFFx" .. stack .. "|r") or ""
+    local itemName = g_savedItem.itemLink
 
     local carriedItem
     if ChatAnnouncements.SV.BracketOptionItem == 1 then
         carriedItem = (formattedIcon .. itemName .. itemCount)
     else
-        carriedItem = (formattedIcon .. StringOnlyGSUB(itemName, "^|H0", "|H1", 1) .. itemCount)
+        carriedItem = (formattedIcon .. zo_strgsub(itemName, "^|H0", "|H1", 1) .. itemCount)
     end
 
     local carriedItemTotal = ""
     if ChatAnnouncements.SV.Inventory.LootVendorTotalItems then
-        local total = getItemLinkStackCount(itemName)
-        if total >= 1 then
+        local total1, total2, total3 = GetItemLinkStacks(itemName)
+        local total = total1 + total2 + total3
+        if total > 1 then
             carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
 
     if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-        ChatAnnouncements.CurrencyPrinter(
-            nil,
-            ChatAnnouncements.savedPurchase.formattedValue,
-            changeColor,
-            ChatAnnouncements.savedPurchase.changeType,
-            ChatAnnouncements.savedPurchase.currencyTypeColor,
-            ChatAnnouncements.savedPurchase.currencyIcon,
-            ChatAnnouncements.savedPurchase.currencyName,
-            ChatAnnouncements.savedPurchase.currencyTotal,
-            messageChange,
-            ChatAnnouncements.savedPurchase.messageTotal,
-            messageType,
-            carriedItem,
-            carriedItemTotal
-        )
+        ChatAnnouncements.CurrencyPrinter(nil, g_savedPurchase.formattedValue, changeColor, g_savedPurchase.changeType, g_savedPurchase.currencyTypeColor, g_savedPurchase.currencyIcon, g_savedPurchase.currencyName, g_savedPurchase.currencyTotal, messageChange, g_savedPurchase.messageTotal, type, carriedItem, carriedItemTotal)
     else
-        messageType = "CURRENCY"
+        type = "CURRENCY"
         messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageList
         local finalMessageP1 = string_format(carriedItem .. "|r|c" .. changeColor)
         local finalMessageP2 = string_format(messageChange, finalMessageP1)
         local finalMessage = string_format("|c%s%s|r%s", changeColor, finalMessageP2, carriedItemTotal)
-        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-        {
-            message = finalMessage,
-            messageType = messageType
-        }
+        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = type }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
         messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageListing
-        ChatAnnouncements.CurrencyPrinter(
-            nil,
-            ChatAnnouncements.savedPurchase.formattedValue,
-            changeColor,
-            ChatAnnouncements.savedPurchase.changeType,
-            ChatAnnouncements.savedPurchase.currencyTypeColor,
-            ChatAnnouncements.savedPurchase.currencyIcon,
-            ChatAnnouncements.savedPurchase.currencyName,
-            ChatAnnouncements.savedPurchase.currencyTotal,
-            messageChange,
-            ChatAnnouncements.savedPurchase.messageTotal,
-            messageType,
-            nil,
-            nil
-        )
+        ChatAnnouncements.CurrencyPrinter(nil, g_savedPurchase.formattedValue, changeColor, g_savedPurchase.changeType, g_savedPurchase.currencyTypeColor, g_savedPurchase.currencyIcon, g_savedPurchase.currencyName, g_savedPurchase.currencyTotal, messageChange, g_savedPurchase.messageTotal, type)
     end
-    ChatAnnouncements.savedPurchase = {}
-    ChatAnnouncements.savedItem = {}
+    g_savedPurchase = {}
+    g_savedItem = {}
+end
+
+function ChatAnnouncements.MailMoneyChanged(eventCode)
+    g_mailCOD = 0
+    g_postageAmount = GetQueuedMailPostage()
+    local previousMailAmount = g_mailAmount
+    local getMailAmount = GetQueuedMoneyAttachment()
+    -- If we send more then half of the gold in our bags for some reason this event fires again so this is a workaround
+    if getMailAmount == GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) and getMailAmount ~= previousMailAmount then
+        return
+    else
+        g_mailAmount = getMailAmount
+    end
+end
+
+function ChatAnnouncements.MailCODChanged(eventCode)
+    g_mailCOD = GetQueuedCOD()
+    g_postageAmount = GetQueuedMailPostage()
+    g_mailAmount = GetQueuedMoneyAttachment()
+end
+
+function ChatAnnouncements.MailRemoved(eventCode)
+    if ChatAnnouncements.SV.Notify.NotificationMailSendCA or ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+        if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
+            local message = GetString(LUIE_STRING_CA_MAIL_DELETED_MSG)
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "NOTIFICATION", isSystem = true }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        end
+        if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_MAIL_DELETED_MSG))
+        end
+    end
+end
+
+function ChatAnnouncements.OnMailReadable(eventCode, mailId)
+    local senderDisplayName, senderCharacterName, _, _, _, fromSystem, fromCustomerService, _, _, _, codAmount = GetMailItemInfo(mailId)
+
+    -- Use different color if the mail is from System (Hireling Mail, Rewards for the Worthy, etc)
+    if fromSystem or fromCustomerService then
+        g_mailTarget = ZO_GAME_REPRESENTATIVE_TEXT:Colorize(senderDisplayName)
+    elseif senderDisplayName ~= "" and senderCharacterName ~= "" then
+        local finalName = ChatAnnouncements.ResolveNameLink(senderCharacterName, senderDisplayName)
+        g_mailTarget = ZO_SELECTED_TEXT:Colorize(finalName)
+    else
+        local finalName
+        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+            finalName = ZO_LinkHandler_CreateLinkWithoutBrackets(senderDisplayName, nil, DISPLAY_NAME_LINK_TYPE, senderDisplayName)
+        else
+            finalName = ZO_LinkHandler_CreateLink(senderDisplayName, nil, DISPLAY_NAME_LINK_TYPE, senderDisplayName)
+        end
+        g_mailTarget = ZO_SELECTED_TEXT:Colorize(finalName)
+    end
+
+    if codAmount > 0 then
+        g_mailCODPresent = true
+    end
+end
+
+function ChatAnnouncements.OnMailTakeAttachedItem(eventCode, mailId)
+    if ChatAnnouncements.SV.Notify.NotificationMailSendCA or ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+        local mailString
+        if g_mailCODPresent then
+            mailString = GetString(LUIE_STRING_CA_MAIL_RECEIVED_COD)
+        else
+            mailString = GetString(LUIE_STRING_CA_MAIL_RECEIVED)
+        end
+        if mailString then
+            if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
+                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = mailString, type = "NOTIFICATION", isSystem = true }
+                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+            if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, mailString)
+            end
+        end
+    end
+end
+
+function ChatAnnouncements.OnMailAttach(eventCode, attachmentSlot)
+    g_postageAmount = GetQueuedMailPostage()
+    g_mailAmount = GetQueuedMoneyAttachment()
+    local mailIndex = attachmentSlot
+    local bagId, slotId, icon, stack = GetQueuedItemAttachmentInfo(attachmentSlot)
+    local itemId = GetItemId(bagId, slotId)
+    local itemLink = GetMailQueuedAttachmentLink(attachmentSlot, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+    local itemType = GetItemLinkItemType(itemLink)
+    g_mailStacksOut[mailIndex] = { icon = icon, stack = stack, itemId = itemId, itemLink = itemLink, itemType = itemType }
+end
+
+-- Removes items from index if they are removed from the trade
+function ChatAnnouncements.OnMailAttachRemove(eventCode, attachmentSlot)
+    g_postageAmount = GetQueuedMailPostage()
+    g_mailAmount = GetQueuedMoneyAttachment()
+    local mailIndex = attachmentSlot
+    g_mailStacksOut[mailIndex] = nil
+end
+
+function ChatAnnouncements.OnMailOpenBox(eventCode)
+    eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+    if ChatAnnouncements.SV.Inventory.LootMail then
+        eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
+        g_inventoryStacks = {}
+        ChatAnnouncements.IndexInventory() -- Index Inventory
+    end
+    g_inMail = true
+end
+
+function ChatAnnouncements.OnMailCloseBox(eventCode)
+    eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+    if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise then
+        eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
+    end
+    if not (ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise) then
+        g_inventoryStacks = {}
+    end
+    g_inMail = false
+    g_mailStacksOut = {}
+end
+
+-- Sends results of the trade to the Item Log print function and clears variables so they are reset for next trade interactions
+
+function ChatAnnouncements.OnMailSuccess(eventCode)
+    local formattedValue = ZO_CommaDelimitDecimalNumber(GetCarriedCurrencyAmount(1))
+    local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyDownColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
+    local currencyTypeColor = ColorizeColors.CurrencyGoldColorize:ToHex()
+    local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_gold.dds|t" or ""
+    local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyGoldShowTotal
+    local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalGold
+
+    if g_postageAmount > 0 then
+        local type = "LUIE_CURRENCY_POSTAGE"
+        local changeType = ZO_CommaDelimitDecimalNumber(g_postageAmount)
+        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, g_postageAmount)
+        local messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePostage
+        ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
+    end
+
+    if not g_mailCODPresent and g_mailAmount > 0 then
+        local type = "LUIE_CURRENCY_MAIL"
+        local changeType = ZO_CommaDelimitDecimalNumber(g_mailAmount)
+        local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, g_mailAmount)
+        local messageChange = g_mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailOut or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailOutNoName
+        ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
+    end
+
+    if ChatAnnouncements.SV.Notify.NotificationMailSendCA or ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+        local mailString
+        if not g_mailCODPresent then
+            mailString = g_mailCOD > 1 and GetString(LUIE_STRING_CA_MAIL_SENT_COD) or GetString(LUIE_STRING_CA_MAIL_SENT)
+        end
+        if mailString then
+            if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
+                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = mailString, type = "NOTIFICATION", isSystem = true }
+                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+            if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, mailString)
+            end
+        end
+    end
+
+    if ChatAnnouncements.SV.Inventory.LootMail then
+        for mailIndex = 1, 6 do
+            local item = g_mailStacksOut[mailIndex]
+            if item ~= nil then
+                local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
+                local logPrefix = g_mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailOut or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailOutNoName
+                ChatAnnouncements.ItemCounterDelayOut(item.icon, item.stack, item.itemType, item.itemId, item.itemLink, g_mailTarget, logPrefix, gainOrLoss, false)
+            end
+        end
+    end
+
+    g_mailCODPresent = false
+    g_mailCOD = 0
+    g_postageAmount = 0
+    g_mailAmount = 0
+    g_mailStacksOut = {}
 end
 
 -- Helper function to return color (without |c prefix) according to current percentage
@@ -2612,12 +2662,35 @@ local function AchievementPctToColor(pct)
     return pct == 1 and "71DE73" or pct < 0.33 and "F27C7C" or pct < 0.66 and "EDE858" or "CCF048"
 end
 
---- - **EVENT_ACHIEVEMENT_UPDATED **
----
---- @param eventId integer
---- @param id integer
-function ChatAnnouncements.OnAchievementUpdated(eventId, id)
-    local topLevelIndex, categoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(id)
+--- @param achievementId any
+--- @return number|nil
+local function GetCategoryInfoFromAchievementIdDetailed(achievementId)
+    -- If the user is selecting from the recent achievements list, there
+    --  will not be an open category id, so attempt to get the category
+    --  from the achievement.
+    local categoryId = GetCategoryInfoFromAchievementId(achievementId)
+    if categoryId then
+        return categoryId
+    end
+
+    -- Some achievements cannot find their category id properly, so try
+    --  walking the achievement chain and look for one that has a category
+    --  id.
+    local tryAchievementId = GetFirstAchievementInLine(achievementId)
+    while tryAchievementId ~= 0 do
+        categoryId = GetCategoryInfoFromAchievementId(tryAchievementId)
+        if categoryId then
+            return categoryId
+        end
+        tryAchievementId = GetNextAchievementInLine(tryAchievementId)
+    end
+
+    -- We were unable to determine the correct category id.
+    return nil
+end
+
+function ChatAnnouncements.OnAchievementUpdated(eventCode, id)
+    local topLevelIndex, categoryIndex, achievementIndex = GetCategoryInfoFromAchievementIdDetailed(id)
     -- Bail out if this achievement comes from unwanted category
     if ChatAnnouncements.SV.Achievement.AchievementCategoryIgnore[topLevelIndex] then
         return
@@ -2663,9 +2736,9 @@ function ChatAnnouncements.OnAchievementUpdated(eventId, id)
                 -- Achievement step hit
                 local percentage = zo_floor(100 / totalReq * totalCmp)
 
-                if percentage > 0 and percentage % ChatAnnouncements.SV.Achievement.AchievementStep == 0 and ChatAnnouncements.achievementLastPercentage[id] ~= percentage then
+                if percentage > 0 and percentage % ChatAnnouncements.SV.Achievement.AchievementStep == 0 and g_achievementLastPercentage[id] ~= percentage then
                     showInfo = true
-                    ChatAnnouncements.achievementLastPercentage[id] = percentage
+                    g_achievementLastPercentage[id] = percentage
                 end
             end
         end
@@ -2675,26 +2748,37 @@ function ChatAnnouncements.OnAchievementUpdated(eventId, id)
             return
         end
 
-        local link = zo_strformat(GetAchievementLink(id, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionAchievement]))
+        local link = zo_strformat(GetAchievementLink(id, linkBrackets[ChatAnnouncements.SV.BracketOptionAchievement]))
         local name = zo_strformat(GetAchievementNameFromLink(link))
 
         if ChatAnnouncements.SV.Achievement.AchievementUpdateCA then
-            local catName = GetAchievementCategoryInfoName(topLevelIndex)
-            local subcatName = categoryIndex ~= nil and GetAchievementSubCategoryInfoName(topLevelIndex, categoryIndex) or "General"
-            local icon = GetAchievementInfoIcon(id)
+            local catName = GetAchievementCategoryInfo(topLevelIndex)
+            local subcatName = categoryIndex ~= nil and GetAchievementSubCategoryInfo(topLevelIndex, categoryIndex) or "General"
+            local _, _, _, icon = GetAchievementInfo(id)
             icon = ChatAnnouncements.SV.Achievement.AchievementIcon and ("|t16:16:" .. icon .. "|t ") or ""
 
-            local stringpart1 = ChatAnnouncements.Colors.AchievementColorize1:Colorize(string_format("%s%s%s %s%s", ChatAnnouncements.bracket1[ChatAnnouncements.SV.Achievement.AchievementBracketOptions], ChatAnnouncements.SV.Achievement.AchievementProgressMsg, ChatAnnouncements.bracket2[ChatAnnouncements.SV.Achievement.AchievementBracketOptions], icon, link))
+            -- Build string parts without using string_format on pre-formatted strings
+            local stringpart1 = ColorizeColors.AchievementColorize1:Colorize(
+                bracket1[ChatAnnouncements.SV.Achievement.AchievementBracketOptions] ..
+                ChatAnnouncements.SV.Achievement.AchievementProgressMsg ..
+                bracket2[ChatAnnouncements.SV.Achievement.AchievementBracketOptions] .. " " ..
+                icon .. link
+            )
 
-            local stringpart2 = ChatAnnouncements.SV.Achievement.AchievementColorProgress and string_format(" %s|c%s%d%%|r", ChatAnnouncements.Colors.AchievementColorize2:Colorize("("), AchievementPctToColor(totalCmp / totalReq), zo_floor(100 * totalCmp / totalReq)) or ChatAnnouncements.Colors.AchievementColorize2:Colorize(string_format("%d%%", zo_floor(100 * totalCmp / totalReq)))
+            local stringpart2 = ChatAnnouncements.SV.Achievement.AchievementColorProgress and
+                ColorizeColors.AchievementColorize2:Colorize(" (") ..
+                "|c" .. AchievementPctToColor(totalCmp / totalReq) .. zo_floor(100 * totalCmp / totalReq) .. "%|r" ..
+                ColorizeColors.AchievementColorize2:Colorize(")") or
+                ColorizeColors.AchievementColorize2:Colorize(" (" .. zo_floor(100 * totalCmp / totalReq) .. "%)")
 
-            local stringpart3
-            if ChatAnnouncements.SV.Achievement.AchievementCategory and ChatAnnouncements.SV.Achievement.AchievementSubcategory then
-                stringpart3 = ChatAnnouncements.Colors.AchievementColorize2:Colorize(string_format(") %s%s - %s%s", ChatAnnouncements.bracket3[ChatAnnouncements.SV.Achievement.AchievementCatBracketOptions], catName, subcatName, ChatAnnouncements.bracket4[ChatAnnouncements.SV.Achievement.AchievementCatBracketOptions]))
-            elseif ChatAnnouncements.SV.Achievement.AchievementCategory and not ChatAnnouncements.SV.Achievement.AchievementSubcategory then
-                stringpart3 = ChatAnnouncements.Colors.AchievementColorize2:Colorize(string_format(") %s%s%s", ChatAnnouncements.bracket3[ChatAnnouncements.SV.Achievement.AchievementCatBracketOptions], catName, ChatAnnouncements.bracket4[ChatAnnouncements.SV.Achievement.AchievementCatBracketOptions]))
-            else
-                stringpart3 = ChatAnnouncements.Colors.AchievementColorize2:Colorize(")")
+            local stringpart3 = ""
+            if ChatAnnouncements.SV.Achievement.AchievementCategory then
+                stringpart3 = ColorizeColors.AchievementColorize2:Colorize(
+                    " " .. bracket3[ChatAnnouncements.SV.Achievement.AchievementCatBracketOptions] ..
+                    catName ..
+                    (ChatAnnouncements.SV.Achievement.AchievementSubcategory and (" - " .. subcatName) or "") ..
+                    bracket4[ChatAnnouncements.SV.Achievement.AchievementCatBracketOptions]
+                )
             end
 
             -- Prepare details information
@@ -2703,34 +2787,40 @@ function ChatAnnouncements.OnAchievementUpdated(eventId, id)
                 -- Skyshards needs separate treatment otherwise text become too long
                 -- We also put this short information for achievements that has too many subitems
                 if topLevelIndex == 9 or #cmpInfo > 12 then
-                    stringpart4 = ChatAnnouncements.SV.Achievement.AchievementColorProgress and string_format(" %s|c%s%d|r%s|c71DE73%d|c87B7CC|r%s", ChatAnnouncements.Colors.AchievementColorize2:Colorize("("), AchievementPctToColor(totalCmp / totalReq), totalCmp, ChatAnnouncements.Colors.AchievementColorize2:Colorize("/"), totalReq, ChatAnnouncements.Colors.AchievementColorize2:Colorize(")")) or ChatAnnouncements.Colors.AchievementColorize2:Colorize(string_format(" (%d/%d)", totalCmp, totalReq))
+                    stringpart4 = ChatAnnouncements.SV.Achievement.AchievementColorProgress and
+                        ColorizeColors.AchievementColorize2:Colorize(" (") ..
+                        "|c" .. AchievementPctToColor(totalCmp / totalReq) .. totalCmp .. "|r" ..
+                        ColorizeColors.AchievementColorize2:Colorize("/") ..
+                        "|c71DE73" .. totalReq .. "|r" ..
+                        ColorizeColors.AchievementColorize2:Colorize(")") or
+                        ColorizeColors.AchievementColorize2:Colorize(" (" .. totalCmp .. "/" .. totalReq .. ")")
                 else
                     for i = 1, #cmpInfo do
-                        -- Boolean achievement stage
                         if cmpInfo[i][3] == 1 then
-                            cmpInfo[i] = ChatAnnouncements.SV.Achievement.AchievementColorProgress and string_format("|c%s%s", AchievementPctToColor(cmpInfo[i][2]), cmpInfo[i][1]) or ChatAnnouncements.Colors.AchievementColorize2:Colorize(string_format("%s%s", cmpInfo[i][2], cmpInfo[i][1]))
-                            -- Others
+                            cmpInfo[i] = "|c" .. AchievementPctToColor(cmpInfo[i][2]) .. cmpInfo[i][1] .. "|r"
                         else
                             local pct = cmpInfo[i][2] / cmpInfo[i][3]
-                            cmpInfo[i] = ChatAnnouncements.SV.Achievement.AchievementColorProgress and string_format("%s %s|c%s%d|r%s|c71DE73%d|r%s", ChatAnnouncements.Colors.AchievementColorize2:Colorize(cmpInfo[i][1]), ChatAnnouncements.Colors.AchievementColorize2:Colorize("("), AchievementPctToColor(pct), cmpInfo[i][2], ChatAnnouncements.Colors.AchievementColorize2:Colorize("/"), cmpInfo[i][3], ChatAnnouncements.Colors.AchievementColorize2:Colorize(")")) or ChatAnnouncements.Colors.AchievementColorize2:Colorize(string_format("%s (%d/%d)", cmpInfo[i][1], cmpInfo[i][2], cmpInfo[i][3]))
+                            cmpInfo[i] = ColorizeColors.AchievementColorize2:Colorize(cmpInfo[i][1] .. " (") ..
+                                "|c" .. AchievementPctToColor(pct) .. cmpInfo[i][2] .. "|r" ..
+                                ColorizeColors.AchievementColorize2:Colorize("/") ..
+                                "|c71DE73" .. cmpInfo[i][3] .. "|r" ..
+                                ColorizeColors.AchievementColorize2:Colorize(")")
                         end
                     end
-                    stringpart4 = " " .. table_concat(cmpInfo, ChatAnnouncements.Colors.AchievementColorize2:Colorize(", ")) .. ""
+                    stringpart4 = table_concat(cmpInfo, ColorizeColors.AchievementColorize2:Colorize(", "))
                 end
             end
-            local finalString = string_format("%s%s%s%s", stringpart1, stringpart2, stringpart3, stringpart4)
-            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-            {
-                message = finalString,
-                messageType = "ACHIEVEMENT"
-            }
+
+            -- Concatenate final string without using string_format
+            local finalString = stringpart1 .. stringpart2 .. stringpart3 .. stringpart4
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalString, type = "ACHIEVEMENT" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
         end
 
         if ChatAnnouncements.SV.Achievement.AchievementUpdateAlert then
             local alertMessage = zo_strformat("<<1>>: <<2>>", ChatAnnouncements.SV.Achievement.AchievementProgressMsg, name)
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, alertMessage)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
         end
     end
 end
@@ -2744,14 +2834,14 @@ end
 function ChatAnnouncements.OnTimedActivityProgressUpdated(eventCode, timedActivityIndex, previousProgress, currentProgress, complete)
     if ChatAnnouncements.SV.Notify.TimedActivityCA or ChatAnnouncements.SV.Notify.TimedActivityAlert then
         local name = GetTimedActivityName(timedActivityIndex)
-        local messageType = GetTimedActivityType(timedActivityIndex)
+        local type = GetTimedActivityType(timedActivityIndex)
         local maxProgress = GetTimedActivityMaxProgress(timedActivityIndex)
         local progress = string_format("%i / %i", currentProgress, maxProgress)
 
         local typeName
-        if messageType == TIMED_ACTIVITY_TYPE_DAILY then
+        if type == TIMED_ACTIVITY_TYPE_DAILY then
             typeName = GetString(SI_TIMEDACTIVITYTYPE0)
-        elseif messageType == TIMED_ACTIVITY_TYPE_WEEKLY then
+        elseif type == TIMED_ACTIVITY_TYPE_WEEKLY then
             typeName = GetString(SI_TIMEDACTIVITYTYPE1)
         end
 
@@ -2761,7 +2851,7 @@ function ChatAnnouncements.OnTimedActivityProgressUpdated(eventCode, timedActivi
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
             {
                 message = message,
-                messageType = "MESSAGE",
+                type = "MESSAGE",
                 activityIndex = timedActivityIndex,
                 previousProgress = previousProgress,
                 currentProgress = currentProgress,
@@ -2773,7 +2863,7 @@ function ChatAnnouncements.OnTimedActivityProgressUpdated(eventCode, timedActivi
 
         if ChatAnnouncements.SV.Notify.TimedActivityAlert then
             local alertMessage = zo_strformat(GetString(SI_APPLYOUTFITCHANGESRESULT0), GetString(SI_ACTIVITY_FINDER_CATEGORY_TIMED_ACTIVITIES))
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, alertMessage)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
         end
     end
 end
@@ -2796,7 +2886,7 @@ function ChatAnnouncements.OnPromotionalEventsActivityProgressUpdated(eventCode,
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
             {
                 message = message,
-                messageType = "MESSAGE",
+                type = "MESSAGE",
                 activityId = activityId,
                 rewardId = rewardId,
                 rewardQuantity = rewardQuantity
@@ -2807,7 +2897,7 @@ function ChatAnnouncements.OnPromotionalEventsActivityProgressUpdated(eventCode,
 
         if ChatAnnouncements.SV.Notify.PromotionalEventsActivityAlert then
             local alertMessage = zo_strformat(GetString(SI_APPLYOUTFITCHANGESRESULT0), GetString(SI_PROMOTIONAL_EVENT_TRACKER_HEADER))
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, alertMessage)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
         end
     end
 end
@@ -2840,7 +2930,7 @@ function ChatAnnouncements.OnCraftedAbilityLockStateChanged(eventCode, craftedAb
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
             {
                 message = message,
-                messageType = "SKILL",
+                type = "SKILL",
                 abilityDefId = craftedAbilityDefId,
                 isUnlocked = isUnlocked
             }
@@ -2849,7 +2939,7 @@ function ChatAnnouncements.OnCraftedAbilityLockStateChanged(eventCode, craftedAb
         end
 
         if ChatAnnouncements.SV.Notify.CraftedAbilityAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
         end
     end
 end
@@ -2881,7 +2971,7 @@ function ChatAnnouncements.OnCraftedAbilityScriptLockStateChanged(eventCode, cra
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
             {
                 message = message,
-                messageType = "SKILL",
+                type = "SKILL",
                 scriptDefId = craftedAbilityScriptDefId,
                 isUnlocked = isUnlocked
             }
@@ -2890,57 +2980,28 @@ function ChatAnnouncements.OnCraftedAbilityScriptLockStateChanged(eventCode, cra
         end
 
         if ChatAnnouncements.SV.Notify.CraftedAbilityScriptAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
         end
     end
 end
 
---- - **EVENT_GUILD_BANK_ITEM_ADDED **
----
----
---- @param eventId integer
---- @param slotId integer
---- @param addedByLocalPlayer boolean
---- @param itemSoundCategory ItemUISoundCategory
---- @param isLastUpdateForMessage boolean
-function ChatAnnouncements.GuildBankItemAdded(eventId, slotId, addedByLocalPlayer, itemSoundCategory, isLastUpdateForMessage)
+function ChatAnnouncements.GuildBankItemAdded(eventCode, slotId, addedByLocalPlayer)
     if addedByLocalPlayer then
         LUIE_callLater(ChatAnnouncements.LogGuildBankChange, 50)
     end
 end
 
---- - **EVENT_GUILD_BANK_ITEM_REMOVED **
----
----
---- @param eventId integer
---- @param slotId integer
---- @param addedByLocalPlayer boolean
---- @param itemSoundCategory ItemUISoundCategory
---- @param isLastUpdateForMessage boolean
-function ChatAnnouncements.GuildBankItemRemoved(eventId, slotId, addedByLocalPlayer, itemSoundCategory, isLastUpdateForMessage)
+function ChatAnnouncements.GuildBankItemRemoved(eventCode, slotId, addedByLocalPlayer)
     if addedByLocalPlayer then
         LUIE_callLater(ChatAnnouncements.LogGuildBankChange, 50)
     end
 end
 
 function ChatAnnouncements.LogGuildBankChange()
-    if ChatAnnouncements.guildBankCarry ~= nil then
-        ChatAnnouncements.ItemPrinter(
-            ChatAnnouncements.guildBankCarry.icon,
-            ChatAnnouncements.guildBankCarry.stack,
-            ChatAnnouncements.guildBankCarry.itemType,
-            ChatAnnouncements.guildBankCarry.itemId,
-            ChatAnnouncements.guildBankCarry.itemLink,
-            ChatAnnouncements.guildBankCarry.receivedBy,
-            ChatAnnouncements.guildBankCarry.logPrefix,
-            ChatAnnouncements.guildBankCarry.gainOrLoss,
-            false,
-            nil,
-            nil,
-            nil
-        )
+    if g_guildBankCarry ~= nil then
+        ChatAnnouncements.ItemPrinter(g_guildBankCarry.icon, g_guildBankCarry.stack, g_guildBankCarry.itemType, g_guildBankCarry.itemId, g_guildBankCarry.itemLink, g_guildBankCarry.receivedBy, g_guildBankCarry.logPrefix, g_guildBankCarry.gainOrLoss, false)
     end
-    ChatAnnouncements.guildBankCarry = nil
+    g_guildBankCarry = nil
 end
 
 function ChatAnnouncements.IndexInventory()
@@ -2951,16 +3012,9 @@ function ChatAnnouncements.IndexInventory()
         local icon, stack = GetItemInfo(BAG_BACKPACK, i)
         local itemType = GetItemType(BAG_BACKPACK, i)
         local itemId = GetItemId(BAG_BACKPACK, i)
-        local itemLink = GetItemLink(BAG_BACKPACK, i, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        local itemLink = GetItemLink(BAG_BACKPACK, i, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
         if itemLink ~= "" then
-            ChatAnnouncements.inventoryStacks[i] =
-            {
-                icon = icon,
-                stack = stack,
-                itemId = itemId,
-                itemType = itemType,
-                itemLink = itemLink
-            }
+            g_inventoryStacks[i] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
         end
     end
 end
@@ -2973,16 +3027,9 @@ function ChatAnnouncements.IndexEquipped()
         local icon, stack = GetItemInfo(BAG_WORN, i)
         local itemType = GetItemType(BAG_WORN, i)
         local itemId = GetItemId(BAG_WORN, i)
-        local itemLink = GetItemLink(BAG_WORN, i, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        local itemLink = GetItemLink(BAG_WORN, i, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
         if itemLink ~= "" then
-            ChatAnnouncements.equippedStacks[i] =
-            {
-                icon = icon,
-                stack = stack,
-                itemId = itemId,
-                itemType = itemType,
-                itemLink = itemLink
-            }
+            g_equippedStacks[i] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
         end
     end
 end
@@ -2994,37 +3041,23 @@ function ChatAnnouncements.IndexBank()
 
     for i = 0, bagsizebank do
         local icon, stack = GetItemInfo(BAG_BANK, i)
-        local bagitemlink = GetItemLink(BAG_BANK, i, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        local bagitemlink = GetItemLink(BAG_BANK, i, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
         local itemId = GetItemId(BAG_BANK, i)
-        local itemLink = GetItemLink(BAG_BANK, i, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        local itemLink = GetItemLink(BAG_BANK, i, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
         local itemType = GetItemType(BAG_BANK, i)
         if bagitemlink ~= "" then
-            ChatAnnouncements.bankStacks[i] =
-            {
-                icon = icon,
-                stack = stack,
-                itemId = itemId,
-                itemType = itemType,
-                itemLink = itemLink
-            }
+            g_bankStacks[i] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
         end
     end
 
     for i = 0, bagsizesubbank do
         local icon, stack = GetItemInfo(BAG_SUBSCRIBER_BANK, i)
-        local bagitemlink = GetItemLink(BAG_SUBSCRIBER_BANK, i, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        local bagitemlink = GetItemLink(BAG_SUBSCRIBER_BANK, i, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
         local itemId = GetItemId(BAG_SUBSCRIBER_BANK, i)
-        local itemLink = GetItemLink(BAG_SUBSCRIBER_BANK, i, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        local itemLink = GetItemLink(BAG_SUBSCRIBER_BANK, i, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
         local itemType = GetItemType(BAG_SUBSCRIBER_BANK, i)
         if bagitemlink ~= "" then
-            ChatAnnouncements.bankSubscriberStacks[i] =
-            {
-                icon = icon,
-                stack = stack,
-                itemId = itemId,
-                itemType = itemType,
-                itemLink = itemLink
-            }
+            g_banksubStacks[i] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
         end
     end
 end
@@ -3047,238 +3080,166 @@ function ChatAnnouncements.IndexHouseBags()
     for bagIndex = 1, 10 do
         local bag = HouseBags[bagIndex]
         local bagsize = GetBagSize(bag)
-        ChatAnnouncements.houseBags[bag] = {}
+        g_houseBags[bag] = {}
 
         for i = 0, bagsize do
             local icon, stack = GetItemInfo(bag, i)
-            local bagitemlink = GetItemLink(bag, i, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            local bagitemlink = GetItemLink(bag, i, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             local itemId = GetItemId(bag, i)
-            local itemLink = GetItemLink(bag, i, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            local itemLink = GetItemLink(bag, i, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             local itemType = GetItemType(bag, i)
             if bagitemlink ~= "" then
-                ChatAnnouncements.houseBags[bag][i] =
-                {
-                    icon = icon,
-                    stack = stack,
-                    itemId = itemId,
-                    itemType = itemType,
-                    itemLink = itemLink
-                }
+                g_houseBags[bag][i] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
         end
     end
 end
 
---- - **EVENT_CRAFTING_STATION_INTERACT **
----
---- @param eventId integer
---- @param craftSkill TradeskillType
---- @param sameStation boolean
---- @param craftMode CraftingInteractionMode
-function ChatAnnouncements.CraftingOpen(eventId, craftSkill, sameStation, craftMode)
+function ChatAnnouncements.CraftingOpen(eventCode, craftSkill, sameStation)
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if ChatAnnouncements.SV.Inventory.LootCraft then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdateCraft)
-        ChatAnnouncements.inventoryStacks = {}
-        ChatAnnouncements.bankStacks = {}
-        ChatAnnouncements.bankSubscriberStacks = {}
+        g_inventoryStacks = {}
+        g_bankStacks = {}
+        g_banksubStacks = {}
         ChatAnnouncements.IndexInventory() -- Index Inventory
         ChatAnnouncements.IndexBank()      -- Index Bank
     end
 end
 
---- - **EVENT_END_CRAFTING_STATION_INTERACT **
----
---- @param eventId integer
---- @param craftSkill TradeskillType
---- @param craftMode CraftingInteractionMode
-function ChatAnnouncements.CraftingClose(eventId, craftSkill, craftMode)
+function ChatAnnouncements.CraftingClose(eventCode, craftSkill)
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
     end
     if not (ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise) then
-        ChatAnnouncements.inventoryStacks = {}
+        g_inventoryStacks = {}
     end
-    ChatAnnouncements.bankStacks = {}
-    ChatAnnouncements.bankSubscriberStacks = {}
+    g_bankStacks = {}
+    g_banksubStacks = {}
 end
 
---- - **EVENT_OPEN_BANK **
----
---- @param eventId integer
---- @param bankBag Bag
-function ChatAnnouncements.BankOpen(eventId, bankBag)
+function ChatAnnouncements.BankOpen(eventCode, bankBag)
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if ChatAnnouncements.SV.Inventory.LootBank then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdateBank)
-        ChatAnnouncements.inventoryStacks = {}
-        ChatAnnouncements.bankStacks = {}
-        ChatAnnouncements.bankSubscriberStacks = {}
-        ChatAnnouncements.houseBags = {}
+        g_inventoryStacks = {}
+        g_bankStacks = {}
+        g_banksubStacks = {}
+        g_houseBags = {}
         ChatAnnouncements.IndexInventory() -- Index Inventory
         ChatAnnouncements.IndexBank()      -- Index Bank
         ChatAnnouncements.IndexHouseBags() -- Index House Bags
     end
-    ChatAnnouncements.bankBag = bankBag > 6 and 2 or 1
+    g_bankBag = bankBag > 6 and 2 or 1
 end
 
---- - **EVENT_CLOSE_BANK**
----
---- @param eventId integer
-function ChatAnnouncements.BankClose(eventId)
+function ChatAnnouncements.BankClose(eventCode)
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
     end
     if not (ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise) then
-        ChatAnnouncements.inventoryStacks = {}
+        g_inventoryStacks = {}
     end
-    ChatAnnouncements.bankStacks = {}
-    ChatAnnouncements.bankSubscriberStacks = {}
-    ChatAnnouncements.houseBags = {}
+    g_bankStacks = {}
+    g_banksubStacks = {}
+    g_houseBags = {}
 end
 
---- - **EVENT_OPEN_GUILD_BANK**
----
---- @param eventId integer
-function ChatAnnouncements.GuildBankOpen(eventId)
+function ChatAnnouncements.GuildBankOpen(eventCode)
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if ChatAnnouncements.SV.Inventory.LootBank then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdateGuildBank)
-        ChatAnnouncements.inventoryStacks = {}
+        g_inventoryStacks = {}
         ChatAnnouncements.IndexInventory() -- Index Inventory
     end
 end
 
---- - **EVENT_CLOSE_GUILD_BANK**
----
---- @param eventId integer
-function ChatAnnouncements.GuildBankClose(eventId)
+function ChatAnnouncements.GuildBankClose(eventCode)
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
     end
     if not (ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise) then
-        ChatAnnouncements.inventoryStacks = {}
+        g_inventoryStacks = {}
     end
 end
 
---- - **EVENT_OPEN_FENCE **
----
---- @param eventId integer
---- @param allowSell boolean
---- @param allowLaunder boolean
-function ChatAnnouncements.FenceOpen(eventId, allowSell, allowLaunder)
-    ChatAnnouncements.weAreInAFence = true
+function ChatAnnouncements.FenceOpen(eventCode, allowSell, allowLaunder)
+    g_weAreInAFence = true
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if ChatAnnouncements.SV.Inventory.LootVendor then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdateFence)
-        ChatAnnouncements.inventoryStacks = {}
+        g_inventoryStacks = {}
         ChatAnnouncements.IndexInventory() -- Index Inventory
     end
 end
 
---- - **EVENT_OPEN_STORE**
----
---- @param eventId integer
-function ChatAnnouncements.StoreOpen(eventId)
-    ChatAnnouncements.weAreInAStore = true
+function ChatAnnouncements.StoreOpen(eventCode)
+    g_weAreInAStore = true
 end
 
---- - **EVENT_CLOSE_STORE**
----
---- @param eventId integer
-function ChatAnnouncements.StoreClose(eventId)
+function ChatAnnouncements.StoreClose(eventCode)
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
     end
     if not (ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise) then
-        ChatAnnouncements.inventoryStacks = {}
+        g_inventoryStacks = {}
     end
     LUIE_callLater(function ()
-                       ChatAnnouncements.weAreInAStore = false
-                       ChatAnnouncements.weAreInAFence = false
+                       g_weAreInAStore = false
+                       g_weAreInAFence = false
                    end, 1000)
 end
 
---- - **EVENT_OPEN_TRADING_HOUSE**
----
---- @param eventId integer
-function ChatAnnouncements.GuildStoreOpen(eventId)
-    ChatAnnouncements.weAreInAStore = true
-    ChatAnnouncements.weAreInAGuildStore = true
+function ChatAnnouncements.GuildStoreOpen(eventCode)
+    g_weAreInAStore = true
+    g_weAreInAGuildStore = true
 end
 
---- - **EVENT_CLOSE_TRADING_HOUSE**
----
---- @param eventId integer
-function ChatAnnouncements.GuildStoreClose(eventId)
+function ChatAnnouncements.GuildStoreClose(eventCode)
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
     end
     if not (ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise) then
-        ChatAnnouncements.inventoryStacks = {}
+        g_inventoryStacks = {}
     end
     LUIE_callLater(function ()
-                       ChatAnnouncements.weAreInAStore = false
-                       ChatAnnouncements.weAreInAGuildStore = false
+                       g_weAreInAStore = false
+                       g_weAreInAGuildStore = false
                    end, 1000)
 end
 
---- - **EVENT_ITEM_LAUNDER_RESULT **
----
---- @param eventId integer
---- @param result ItemLaunderResult
-function ChatAnnouncements.FenceSuccess(eventId, result)
+function ChatAnnouncements.FenceSuccess(eventCode, result)
     if result == ITEM_LAUNDER_RESULT_SUCCESS then
         if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-            if ChatAnnouncements.savedPurchase.formattedValue ~= nil and ChatAnnouncements.savedPurchase.formattedValue ~= "" then
-                ChatAnnouncements.CurrencyPrinter(nil, ChatAnnouncements.savedPurchase.formattedValue, ChatAnnouncements.savedPurchase.changeColor, ChatAnnouncements.savedPurchase.changeType, ChatAnnouncements.savedPurchase.currencyTypeColor, ChatAnnouncements.savedPurchase.currencyIcon, ChatAnnouncements.savedPurchase.currencyName, ChatAnnouncements.savedPurchase.currencyTotal, ChatAnnouncements.savedPurchase.messageChange, ChatAnnouncements.savedPurchase.messageTotal, ChatAnnouncements.savedPurchase.messageType, ChatAnnouncements.savedPurchase.carriedItem, ChatAnnouncements.savedPurchase.carriedItemTotal)
+            if g_savedPurchase.formattedValue ~= nil and g_savedPurchase.formattedValue ~= "" then
+                ChatAnnouncements.CurrencyPrinter(nil, g_savedPurchase.formattedValue, g_savedPurchase.changeColor, g_savedPurchase.changeType, g_savedPurchase.currencyTypeColor, g_savedPurchase.currencyIcon, g_savedPurchase.currencyName, g_savedPurchase.currencyTotal, g_savedPurchase.messageChange, g_savedPurchase.messageTotal, g_savedPurchase.type, g_savedPurchase.carriedItem, g_savedPurchase.carriedItemTotal)
             end
         else
-            if ChatAnnouncements.savedLaunder.itemId ~= nil and ChatAnnouncements.savedLaunder.itemId ~= "" then
-                ChatAnnouncements.ItemPrinter(
-                    ChatAnnouncements.savedLaunder.icon,
-                    ChatAnnouncements.savedLaunder.stack,
-                    ChatAnnouncements.savedLaunder.itemType,
-                    ChatAnnouncements.savedLaunder.itemId,
-                    ChatAnnouncements.savedLaunder.itemLink,
-                    "",
-                    ChatAnnouncements.savedLaunder.logPrefix,
-                    ChatAnnouncements.savedLaunder.gainOrLoss,
-                    false,
-                    nil,
-                    nil,
-                    nil
-                )
+            if g_savedLaunder.itemId ~= nil and g_savedLaunder.itemId ~= "" then
+                ChatAnnouncements.ItemPrinter(g_savedLaunder.icon, g_savedLaunder.stack, g_savedLaunder.itemType, g_savedLaunder.itemId, g_savedLaunder.itemLink, "", g_savedLaunder.logPrefix, g_savedLaunder.gainOrLoss, false)
             end
         end
-        ChatAnnouncements.savedLaunder = {}
-        ChatAnnouncements.savedPurchase = {}
+        g_savedLaunder = {}
+        g_savedPurchase = {}
     end
 end
 
 -- Only active if destroyed items is enabled, flags the next item that is removed from inventory as destroyed.
---- - **EVENT_INVENTORY_ITEM_DESTROYED **
----
---- @param eventId integer
---- @param itemSoundCategory ItemUISoundCategory
-function ChatAnnouncements.DestroyItem(eventId, itemSoundCategory)
-    ChatAnnouncements.itemWasDestroyed = true
+function ChatAnnouncements.DestroyItem(eventCode, itemSoundCategory)
+    g_itemWasDestroyed = true
 end
 
---- - **EVENT_DISABLE_SIEGE_PACKUP_ABILITY**
----
---- @param eventId integer
-function ChatAnnouncements.OnPackSiege(eventId)
+function ChatAnnouncements.OnPackSiege()
     local function ResetPackSiege()
-        ChatAnnouncements.packSiege = false
+        g_packSiege = false
         eventManager:UnregisterForUpdate(moduleName .. "ResetPackSiege")
     end
-    ChatAnnouncements.packSiege = true
+    g_packSiege = true
     eventManager:UnregisterForUpdate(moduleName .. "ResetPackSiege")
     eventManager:RegisterForUpdate(moduleName .. "ResetPackSiege", 4000, ResetPackSiege)
 end
@@ -3293,50 +3254,38 @@ function ChatAnnouncements.GetItemLinkFromItemId(itemId)
     end
 end
 
+local questItemIndex = {}
+
 function ChatAnnouncements.AddQuestItemsToIndex()
-    ChatAnnouncements.questItemIndex = {}
+    questItemIndex = {}
 
-    for questIndex = 1, MAX_JOURNAL_QUESTS do
-        if IsValidQuestIndex(questIndex) then
-            -- Get quest tools
-            for toolIndex = 1, GetQuestToolCount(questIndex) do
-                local icon, stackCount, _, _, questItemId = GetQuestToolInfo(questIndex, toolIndex)
-                if questItemId ~= 0 then
-                    ChatAnnouncements.questItemIndex[questItemId] =
-                    {
-                        stack = stackCount,
-                        counter = 0,
-                        icon = icon
-                    }
-                end
-            end
-
-            -- Get quest items from each step and condition
-            for stepIndex = QUEST_MAIN_STEP_INDEX, GetJournalQuestNumSteps(questIndex) do
-                for conditionIndex = 1, GetJournalQuestNumConditions(questIndex, stepIndex) do
-                    local icon, stackCount, name, questItemId = GetQuestItemInfo(questIndex, stepIndex, conditionIndex)
-                    if questItemId ~= 0 then
-                        ChatAnnouncements.questItemIndex[questItemId] =
-                        {
-                            stack = stackCount,
-                            counter = 0,
-                            icon = icon
-                        }
-                    end
-                end
+    local function AddQuests(questIndex)
+        local inventory = PLAYER_INVENTORY.inventories[INVENTORY_QUEST_ITEM]
+        local itemTable = inventory.slots[questIndex]
+        if itemTable then
+            -- remove all quest items from search
+            for i = 1, #itemTable do
+                local itemId = itemTable[i].questItemId
+                local stackCount = itemTable[i].stackCount
+                local icon = itemTable[i].iconFile
+                questItemIndex[itemId] = { stack = stackCount, counter = 0, icon = icon }
             end
         end
+    end
+
+    for questIndex = 1, MAX_JOURNAL_QUESTS do
+        AddQuests(questIndex)
     end
 end
 
 function ChatAnnouncements.ResolveQuestItemChange()
-    for itemId, _ in pairs(ChatAnnouncements.questItemIndex) do
+    for itemId, _ in pairs(questItemIndex) do
         local countChange = nil
-        local newValue = ChatAnnouncements.questItemIndex[itemId].stack + ChatAnnouncements.questItemIndex[itemId].counter
+        local newValue = questItemIndex[itemId].stack + questItemIndex[itemId].counter
 
         -- Only if the value changes
-        if newValue > ChatAnnouncements.questItemIndex[itemId].stack or newValue < ChatAnnouncements.questItemIndex[itemId].stack then
-            local icon = ChatAnnouncements.questItemIndex[itemId].icon
+        if newValue > questItemIndex[itemId].stack or newValue < questItemIndex[itemId].stack then
+            local icon = questItemIndex[itemId].icon
             local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon and icon ~= "") and ("|t16:16:" .. icon .. "|t ") or ""
 
             local itemLink
@@ -3348,7 +3297,7 @@ function ChatAnnouncements.ResolveQuestItemChange()
 
             local color
             local logPrefix
-            local total = ChatAnnouncements.questItemIndex[itemId].stack + ChatAnnouncements.questItemIndex[itemId].counter
+            local total = questItemIndex[itemId].stack + questItemIndex[itemId].counter
             local totalString
 
             local formattedMessageP1
@@ -3356,31 +3305,31 @@ function ChatAnnouncements.ResolveQuestItemChange()
             local finalMessage
 
             -- Lower
-            if newValue < ChatAnnouncements.questItemIndex[itemId].stack then
+            if newValue < questItemIndex[itemId].stack then
                 -- Easy temporary debug for my accounts only
-                -- if LUIE.IsDevDebugEnabled() then
-                --     LUIE.LUIE:Log("Debug",itemId .. " Removed")
-                -- end
+                if LUIE.IsDevDebugEnabled() then
+                    LUIE:Log("Debug", itemId .. " Removed")
+                end
                 --
 
-                countChange = newValue + ChatAnnouncements.questItemIndex[itemId].counter
-                ChatAnnouncements.questItemRemoved[itemId] = true
+                countChange = newValue + questItemIndex[itemId].counter
+                g_questItemRemoved[itemId] = true
                 LUIE_callLater(function ()
-                                   ChatAnnouncements.questItemRemoved[itemId] = false
+                                   g_questItemRemoved[itemId] = false
                                end, 100)
 
-                if not Quests.QuestItemHideRemove[itemId] and not ChatAnnouncements.loginHideQuestLoot then
+                if not Quests.QuestItemHideRemove[itemId] and not g_loginHideQuestLoot then
                     if ChatAnnouncements.SV.Inventory.LootQuestRemove then
                         if ChatAnnouncements.SV.Currency.CurrencyContextColor then
-                            color = ChatAnnouncements.Colors.CurrencyDownColorize:ToHex()
+                            color = ColorizeColors.CurrencyDownColorize:ToHex()
                         else
-                            color = ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+                            color = ColorizeColors.CurrencyColorize:ToHex()
                         end
 
                         logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageRemove
 
                         -- Any items that are removed at the same time a quest is turned or advanced in will be flagged to display as "Turned In."
-                        if ChatAnnouncements.itemReceivedIsQuestReward then
+                        if g_itemReceivedIsQuestReward then
                             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestTurnIn
                         end
 
@@ -3389,17 +3338,17 @@ function ChatAnnouncements.ResolveQuestItemChange()
                                 Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_ADMINISTER and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestAdminister or Quests.ItemRemovedMessage[itemId] == LUIE_QUEST_MESSAGE_PLACE and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestPlace
                         end
 
-                        if Quests.ItemRemovedInDialogueMessage[itemId] and ChatAnnouncements.talkingToNPC then
+                        if Quests.ItemRemovedInDialogueMessage[itemId] and g_talkingToNPC then
                             logPrefix = Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_TURNIN and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestTurnIn or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_USE and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestUse or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_EXHAUST and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestExhaust or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_OFFER and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestOffer or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_DISCARD and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestDiscard or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_CONFISCATE and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestConfiscate or
                                 Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_OPEN and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestOpen or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_ADMINISTER and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestAdminister or Quests.ItemRemovedInDialogueMessage[itemId] == LUIE_QUEST_MESSAGE_PLACE and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestPlace
                         end
 
                         -- Any items that are removed at the same time a quest is abandoned will be flagged to display as "Removed."
-                        if ChatAnnouncements.itemReceivedIsQuestAbandon then
+                        if g_itemReceivedIsQuestAbandon then
                             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageRemove
                         end
 
-                        local quantity = (countChange * -1) > 1 and (" |cFFFFFF" .. LUIE_TINY_X_FORMATTER .. "" .. (countChange * -1) .. "|r") or ""
+                        local quantity = (countChange * -1) > 1 and (" |cFFFFFFx" .. (countChange * -1) .. "|r") or ""
 
                         formattedMessageP1 = ("|r" .. formattedIcon .. itemLink .. quantity .. "|c" .. color)
                         formattedMessageP2 = string_format(logPrefix, formattedMessageP1)
@@ -3413,12 +3362,7 @@ function ChatAnnouncements.ResolveQuestItemChange()
                         finalMessage = string_format("|c%s%s|r%s", color, formattedMessageP2, totalString)
 
                         eventManager:UnregisterForUpdate(moduleName .. "Printer")
-                        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-                        {
-                            message = finalMessage,
-                            messageType = "QUEST_LOOT_REMOVE",
-                            itemId = itemId
-                        }
+                        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "QUEST LOOT REMOVE", itemId = itemId }
                         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
                         eventManager:RegisterForUpdate(moduleName .. "Printer", 25, ChatAnnouncements.PrintQueuedMessages)
                     end
@@ -3430,32 +3374,32 @@ function ChatAnnouncements.ResolveQuestItemChange()
             end
 
             -- Higher
-            if newValue > ChatAnnouncements.questItemIndex[itemId].stack then
+            if newValue > questItemIndex[itemId].stack then
                 -- Easy debug for my devs only
-                -- if LUIE.IsDevDebugEnabled() then
-                --     LUIE.LUIE:Log("Debug",itemId .. " Added")
-                -- end
+                if LUIE.IsDevDebugEnabled() then
+                    LUIE:Log("Debug", itemId .. " Added")
+                end
                 --
-                countChange = newValue - ChatAnnouncements.questItemIndex[itemId].stack
-                ChatAnnouncements.questItemAdded[itemId] = true
+                countChange = newValue - questItemIndex[itemId].stack
+                g_questItemAdded[itemId] = true
                 LUIE_callLater(function ()
-                                   ChatAnnouncements.questItemAdded[itemId] = false
+                                   g_questItemAdded[itemId] = false
                                end, 100)
 
-                if not Quests.QuestItemHideLoot[itemId] and not ChatAnnouncements.loginHideQuestLoot then
+                if not Quests.QuestItemHideLoot[itemId] and not g_loginHideQuestLoot then
                     if ChatAnnouncements.SV.Inventory.LootQuestAdd then
                         if ChatAnnouncements.SV.Currency.CurrencyContextColor then
-                            color = ChatAnnouncements.Colors.CurrencyUpColorize:ToHex()
+                            color = ColorizeColors.CurrencyUpColorize:ToHex()
                         else
-                            color = ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+                            color = ColorizeColors.CurrencyColorize:ToHex()
                         end
 
-                        if ChatAnnouncements.isLooted and not ChatAnnouncements.itemReceivedIsQuestReward and not ChatAnnouncements.isPickpocketed and not ChatAnnouncements.isStolen then
+                        if g_isLooted and not g_itemReceivedIsQuestReward and not g_isPickpocketed and not g_isStolen then
                             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
-                            -- reset variables that control looted, or at least LUIE_callLater them
-                        elseif ChatAnnouncements.isPickpocketed then
+                            -- reset variables that control looted, or at least ZO_CallLater them
+                        elseif g_isPickpocketed then
                             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePickpocket
-                        elseif ChatAnnouncements.isStolen and not ChatAnnouncements.isPickpocketed then
+                        elseif g_isStolen and not g_isPickpocketed then
                             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSteal
                         else
                             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
@@ -3464,11 +3408,11 @@ function ChatAnnouncements.ResolveQuestItemChange()
                             logPrefix = Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_BUNDLE and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestBundle or Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_LOOT and ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot or Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_COMBINE and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestCombine or Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_MIX and ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestMix or Quests.ItemReceivedMessage[itemId] == LUIE_QUEST_MESSAGE_STEAL and ChatAnnouncements.SV.ContextMessages.CurrencyMessageSteal
                         end
 
-                        -- Some quest items we want to limit the maximum possible quantity displayed when looted (for weird item swapping) so replace the actual quantity with this value.
+                        -- Some quest items we want to limit the maximum possible quantity displayed when looted (for wierd item swapping) so replace the actual quantity with this value.
                         if Quests.QuestItemMaxQuantityAdd[itemId] then
                             countChange = Quests.QuestItemMaxQuantityAdd[itemId]
                         end
-                        local quantity = countChange > 1 and (" |cFFFFFF" .. LUIE_TINY_X_FORMATTER .. "" .. countChange .. "|r") or ""
+                        local quantity = countChange > 1 and (" |cFFFFFFx" .. countChange .. "|r") or ""
 
                         formattedMessageP1 = ("|r" .. formattedIcon .. itemLink .. quantity .. "|c" .. color)
                         -- Message for items being merged.
@@ -3508,12 +3452,7 @@ function ChatAnnouncements.ResolveQuestItemChange()
                         finalMessage = string_format("|c%s%s|r%s", color, formattedMessageP2, totalString)
 
                         eventManager:UnregisterForUpdate(moduleName .. "Printer")
-                        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-                        {
-                            message = finalMessage,
-                            messageType = "QUEST_LOOT_ADD",
-                            itemId = itemId
-                        }
+                        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "QUEST LOOT ADD", itemId = itemId }
                         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
                         eventManager:RegisterForUpdate(moduleName .. "Printer", 25, ChatAnnouncements.PrintQueuedMessages)
                     end
@@ -3527,11 +3466,11 @@ function ChatAnnouncements.ResolveQuestItemChange()
 
         -- If count changed, update it
         if countChange then
-            ChatAnnouncements.questItemIndex[itemId].stack = newValue
-            ChatAnnouncements.questItemIndex[itemId].counter = 0
-            -- d("New Stack Value = " .. ChatAnnouncements.questItemIndex[itemId].stack)
-            if ChatAnnouncements.questItemIndex[itemId].stack < 1 then
-                ChatAnnouncements.questItemIndex[itemId] = nil
+            questItemIndex[itemId].stack = newValue
+            questItemIndex[itemId].counter = 0
+            -- d("New Stack Value = " .. questItemIndex[itemId].stack)
+            if questItemIndex[itemId].stack < 1 then
+                questItemIndex[itemId] = nil
                 -- d("Item reached 0 or below stacks, removing")
             end
         end
@@ -3540,45 +3479,29 @@ function ChatAnnouncements.ResolveQuestItemChange()
     eventManager:UnregisterForUpdate(moduleName .. "QuestItemUpdater")
 end
 
---- - **EVENT_LOOT_RECEIVED **
----
----
---- @param eventId integer
---- @param receivedBy string
---- @param itemName string
---- @param quantity integer
---- @param soundCategory ItemUISoundCategory
---- @param lootType LootItemType
---- @param lootedBySelf boolean
---- @param isPickpocketLoot boolean
---- @param questItemIcon string
---- @param itemId integer
---- @param isStolen boolean
-function ChatAnnouncements.OnLootReceived(eventId, receivedBy, itemName, quantity, soundCategory, lootType, lootedBySelf, isPickpocketLoot, questItemIcon, itemId, isStolen)
-    local itemLink = itemName
+local function DisplayQuestItem(itemId, stackCount, icon, reset)
+    if not questItemIndex[itemId] then
+        questItemIndex[itemId] = { stack = 0, counter = 0, icon = icon }
+        -- d("New item created with 0 stack")
+    end
 
-    -- if LUIE.IsDevDebugEnabled() then
-    --     local traceback = "Loot Received:\n" ..
-    --         "--> eventCode: " .. tostring(eventId) .. "\n" ..
-    --         "--> receivedBy: " .. zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, receivedBy) .. "\n" ..
-    --         "--> itemLink: " .. tostring(itemLink) .. "\n" ..
-    --         "--> quantity: " .. tostring(quantity) .. "\n" ..
-    --         "--> itemSound: " .. tostring(soundCategory) .. "\n" ..
-    --         "--> lootType: " .. tostring(lootType) .. "\n" ..
-    --         "--> lootedBySelf: " .. tostring(lootedBySelf) .. "\n" ..
-    --         "--> isPickpocketLoot: " .. tostring(isPickpocketLoot) .. "\n" ..
-    --         "--> questItemIcon: " .. tostring(questItemIcon) .. "\n" ..
-    --         "--> itemId: " .. tostring(itemId) .. "\n" ..
-    --         "--> isStolen: " .. tostring(isStolen)
-    --     LUIE:Log("Debug",traceback)
-    -- end
+    if reset then
+        -- d(itemId .. " - Decrement by: " .. stackCount)
+        questItemIndex[itemId].counter = questItemIndex[itemId].counter - stackCount
+    else
+        -- d(itemId .. " - Increment by: " .. stackCount)
+        questItemIndex[itemId].counter = questItemIndex[itemId].counter + stackCount
+    end
+    eventManager:RegisterForUpdate(moduleName .. "QuestItemUpdater", 25, ChatAnnouncements.ResolveQuestItemChange)
+end
 
+function ChatAnnouncements.OnLootReceived(eventCode, receivedBy, itemLink, quantity, itemSound, lootType, lootedBySelf, isPickpocketLoot, questItemIcon, itemId, isStolen)
     -- If the player loots an item
     if not isPickpocketLoot and lootedBySelf then
-        ChatAnnouncements.isLooted = true
+        g_isLooted = true
 
         local function ResetIsLooted()
-            ChatAnnouncements.isLooted = false
+            g_isLooted = false
             eventManager:UnregisterForUpdate(moduleName .. "ResetLooted")
         end
         eventManager:UnregisterForUpdate(moduleName .. "ResetLooted")
@@ -3587,10 +3510,10 @@ function ChatAnnouncements.OnLootReceived(eventId, receivedBy, itemName, quantit
 
     -- If the player pickpockets an item
     if isPickpocketLoot and lootedBySelf then
-        ChatAnnouncements.isPickpocketed = true
+        g_isPickpocketed = true
 
         local function ResetIsPickpocketed()
-            ChatAnnouncements.isPickpocketed = false
+            g_isPickpocketed = false
             eventManager:UnregisterForUpdate(moduleName .. "ResetPickpocket")
         end
         eventManager:UnregisterForUpdate(moduleName .. "ResetPickpocket")
@@ -3618,14 +3541,14 @@ function ChatAnnouncements.OnLootReceived(eventId, receivedBy, itemName, quantit
         if ChatAnnouncements.SV.BracketOptionItem == 1 then
             formattedItemLink = itemLink
         else
-            formattedItemLink = StringOnlyGSUB(itemLink, "^|H0", "|H1", 1)
+            formattedItemLink = zo_strgsub(itemLink, "^|H0", "|H1", 1)
         end
 
-        local formatName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, receivedBy)
+        local formatName = zo_strformat("<<C:1>>", receivedBy)
 
         local recipient
-        if ChatAnnouncements.groupLootIndex[formatName] then
-            recipient = ZO_SELECTED_TEXT:Colorize(ChatAnnouncements.ResolveNameLink(ChatAnnouncements.groupLootIndex[formatName].characterName, ChatAnnouncements.groupLootIndex[formatName].displayName))
+        if g_groupLootIndex[formatName] then
+            recipient = ZO_SELECTED_TEXT:Colorize(ChatAnnouncements.ResolveNameLink(g_groupLootIndex[formatName].characterName, g_groupLootIndex[formatName].displayName))
         else
             local nameLink
             if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
@@ -3635,36 +3558,19 @@ function ChatAnnouncements.OnLootReceived(eventId, receivedBy, itemName, quantit
             end
             recipient = ZO_SELECTED_TEXT:Colorize(nameLink)
         end
-        ChatAnnouncements.ItemPrinter(
-            icon,
-            quantity,
-            itemType,
-            itemId,
-            formattedItemLink,
-            recipient,
-            logPrefix,
-            gainOrLoss,
-            false,
-            true,
-            nil,
-            nil
-        )
+        ChatAnnouncements.ItemPrinter(icon, quantity, itemType, itemId, formattedItemLink, recipient, logPrefix, gainOrLoss, false, true)
     end
 end
 
---- - **EVENT_INVENTORY_ITEM_USED **
----
---- @param eventId integer
---- @param itemSoundCategory ItemUISoundCategory
-function ChatAnnouncements.OnInventoryItemUsed(eventId, itemSoundCategory)
+function ChatAnnouncements.OnInventoryItemUsed(eventCode, itemSoundCategory)
     local function ResetCombinedRecipe()
-        ChatAnnouncements.combinedRecipe = false
+        g_combinedRecipe = false
         eventManager:UnregisterForUpdate(moduleName .. "ResetCombinedRecipe")
     end
 
     -- Trophy items used for recipe combination seem to have no itemSoundCategory.
     if itemSoundCategory == 0 then
-        ChatAnnouncements.combinedRecipe = true
+        g_combinedRecipe = true
         eventManager:UnregisterForUpdate(moduleName .. "ResetCombinedRecipe")
         eventManager:RegisterForUpdate(moduleName .. "ResetCombinedRecipe", 150, ResetCombinedRecipe)
     end
@@ -3672,20 +3578,20 @@ end
 
 -- If filter is true, we run the item through this function to determine if we should display it. Filter only gets set to true for group loot and relevant loot functions. Mail, trade, stores, etc don't apply the filter.
 function ChatAnnouncements.ItemFilter(itemType, itemId, itemLink, groupLoot)
-    if ChatAnnouncements.SV.Inventory.LootBlacklist and ChatAnnouncements.blacklistIDs[itemId] or (ChatAnnouncements.SV.Inventory.LootLogOverride and LootLog) then
+    if ChatAnnouncements.SV.Inventory.LootBlacklist and g_blacklistIDs[itemId] or (ChatAnnouncements.SV.Inventory.LootLogOverride and LootLog) then
         return false
     end
-
-    local specializedItemType = select(2, GetItemLinkItemType(itemLink))
+    local specializedItemType
+    itemType, specializedItemType = GetItemLinkItemType(itemLink)
     local itemQuality = GetItemLinkFunctionalQuality(itemLink)
-    local itemIsSet = GetItemLinkSetInfo(itemLink, false)
+    local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped = GetItemLinkSetInfo(itemLink, false)
 
     local itemIsKeyFragment = (itemType == ITEMTYPE_TROPHY) and (specializedItemType == SPECIALIZED_ITEMTYPE_TROPHY_KEY_FRAGMENT)
     local itemIsSpecial = (itemType == ITEMTYPE_TROPHY and not itemIsKeyFragment) or (itemType == ITEMTYPE_COLLECTIBLE) or IsItemLinkConsumable(itemLink)
 
     if ChatAnnouncements.SV.Inventory.LootOnlyNotable or groupLoot then
         -- Notable items are: any set items, any purple+ items, blue+ special items (e.g., treasure maps)
-        if itemIsSet or (itemQuality >= ITEM_FUNCTIONAL_QUALITY_ARCANE and itemIsSpecial) or (itemQuality >= ITEM_FUNCTIONAL_QUALITY_ARTIFACT and not itemIsKeyFragment) or (itemType == ITEMTYPE_COSTUME) or (itemType == ITEMTYPE_DISGUISE) or ChatAnnouncements.notableIDs[itemId] then
+        if hasSet or (itemQuality >= ITEM_FUNCTIONAL_QUALITY_ARCANE and itemIsSpecial) or (itemQuality >= ITEM_FUNCTIONAL_QUALITY_ARTIFACT and not itemIsKeyFragment) or (itemType == ITEMTYPE_COSTUME) or (itemType == ITEMTYPE_DISGUISE) or g_notableIDs[itemId] then
             return true
         end
     elseif ChatAnnouncements.SV.Inventory.LootNotTrash and (itemQuality == ITEM_FUNCTIONAL_QUALITY_TRASH) and not ((itemType == ITEMTYPE_ARMOR) or (itemType == ITEMTYPE_COSTUME) or (itemType == ITEMTYPE_DISGUISE)) then
@@ -3706,18 +3612,6 @@ local function CheckLibLazyCraftingActive()
     end
 end
 
---- @param icon string
---- @param stack integer
---- @param itemType ItemType
---- @param itemId integer
---- @param itemLink string
---- @param receivedBy string
---- @param logPrefix string
---- @param gainOrLoss integer
---- @param filter boolean
---- @param groupLoot boolean
---- @param alwaysFirst boolean
---- @param delay boolean
 function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, filter, groupLoot, alwaysFirst, delay)
     if filter then
         -- If filter returns false then bail out right now, we're not displaying this item.
@@ -3734,15 +3628,15 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
     local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon ~= "") and zo_strformat("<<1>> ", zo_iconFormat(icon, 16, 16)) or ""
     local color
     if gainOrLoss == 1 then
-        color = ChatAnnouncements.Colors.CurrencyUpColorize:ToHex()
+        color = ColorizeColors.CurrencyUpColorize:ToHex()
     elseif gainOrLoss == 2 then
-        color = ChatAnnouncements.Colors.CurrencyDownColorize:ToHex()
+        color = ColorizeColors.CurrencyDownColorize:ToHex()
         -- 3 = Gain no color, 4 = Loss no color (differentiation only exists for Crafting Strings)
     elseif gainOrLoss == 3 or gainOrLoss == 4 then
-        color = ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+        color = ColorizeColors.CurrencyColorize:ToHex()
         -- Fallback if gainOrLoss is nil or an invalid number for some reason
     else
-        color = ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+        color = ColorizeColors.CurrencyColorize:ToHex()
     end
 
     local formattedRecipient
@@ -3764,7 +3658,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
     end
 
     if stack > 1 then
-        formattedQuantity = string_format(" |cFFFFFF" .. LUIE_TINY_X_FORMATTER .. "%d|r", stack)
+        formattedQuantity = string_format(" |cFFFFFFx%d|r", stack)
     else
         formattedQuantity = ""
     end
@@ -3777,12 +3671,13 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
 
     local styleType = GetItemLinkItemStyle(itemLink) -- Get Style of the item
     local unformattedStyle = zo_strformat("<<1>>", GetItemStyleName(styleType))
-    formattedStyle = (ChatAnnouncements.SV.Inventory.LootShowStyle and styleType ~= 0 and styleType ~= ITEMSTYLE_UNIQUE and styleType ~= ITEMSTYLE_UNIVERSAL and itemType ~= ITEMTYPE_STYLE_MATERIAL and itemType ~= ITEMTYPE_GLYPH_ARMOR and itemType ~= ITEMTYPE_GLYPH_JEWELRY and itemType ~= ITEMTYPE_GLYPH_WEAPON and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgrade and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgradeFail) and string_format(" |cFFFFFF(%s)|r", unformattedStyle) or ""
+    formattedStyle = (ChatAnnouncements.SV.Inventory.LootShowStyle and styleType ~= ITEMSTYLE_NONE and styleType ~= ITEMSTYLE_UNIQUE and styleType ~= ITEMSTYLE_UNIVERSAL and itemType ~= ITEMTYPE_STYLE_MATERIAL and itemType ~= ITEMTYPE_GLYPH_ARMOR and itemType ~= ITEMTYPE_GLYPH_JEWELRY and itemType ~= ITEMTYPE_GLYPH_WEAPON and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgrade and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgradeFail) and string_format(" |cFFFFFF(%s)|r", unformattedStyle) or ""
 
     local formattedTotal = ""
     if ChatAnnouncements.SV.Inventory.LootTotal and receivedBy ~= "LUIE_INVENTORY_UPDATE_DISGUISE" and receivedBy ~= "LUIE_RECEIVE_CRAFT" and not groupLoot and (logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnRecipe and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnMotif and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnStyle) then
-        local total = getItemLinkStackCount(itemLink)
-        if total >= 1 then
+        local total1, total2, total3 = GetItemLinkStacks(itemLink)
+        local total = total1 + total2 + total3
+        if total > 1 then
             formattedTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", color, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
         end
     end
@@ -3796,29 +3691,29 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
     if receivedBy == "LUIE_RECEIVE_CRAFT" and (gainOrLoss == 1 or gainOrLoss == 3) and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgradeFail then
         local itemString2 = itemString
 
-        if ChatAnnouncements.itemStringGain ~= "" then
-            ChatAnnouncements.itemStringGain = string_format("%s|c%s,|r %s", ChatAnnouncements.itemStringGain, color, itemString2)
+        if g_itemStringGain ~= "" then
+            g_itemStringGain = string_format("%s|c%s,|r %s", g_itemStringGain, color, itemString2)
         end
-        if ChatAnnouncements.itemStringGain == "" then
-            ChatAnnouncements.itemStringGain = itemString
-        end
-
-        ChatAnnouncements.itemCounterGainTracker = ChatAnnouncements.itemCounterGainTracker + 1
-        if ChatAnnouncements.itemCounterGainTracker > 50 then
-            ChatAnnouncements.itemStringGain = string_format("|c%s too many items to display|r", color)
+        if g_itemStringGain == "" then
+            g_itemStringGain = itemString
         end
 
-        if ChatAnnouncements.itemCounterGain == 0 then
-            ChatAnnouncements.itemCounterGain = ChatAnnouncements.QueuedMessagesCounter
+        g_itemCounterGainTracker = g_itemCounterGainTracker + 1
+        if g_itemCounterGainTracker > 50 then
+            g_itemStringGain = string_format("|c%stoo many items to display|r", color)
         end
-        if ChatAnnouncements.QueuedMessagesCounter - 1 == ChatAnnouncements.itemCounterGain then
-            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.itemCounterGain
+
+        if g_itemCounterGain == 0 then
+            g_itemCounterGain = ChatAnnouncements.QueuedMessagesCounter
+        end
+        if ChatAnnouncements.QueuedMessagesCounter - 1 == g_itemCounterGain then
+            ChatAnnouncements.QueuedMessagesCounter = g_itemCounterGain
         end
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        ChatAnnouncements.QueuedMessages[ChatAnnouncements.itemCounterGain] =
+        ChatAnnouncements.QueuedMessages[g_itemCounterGain] =
         {
-            message = ChatAnnouncements.itemStringGain,
-            messageType = messageType,
+            message = g_itemStringGain,
+            type = messageType,
             formattedRecipient = formattedRecipient,
             color = color,
             logPrefix = logPrefix,
@@ -3828,29 +3723,29 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
         eventManager:RegisterForUpdate(moduleName .. "Printer", delayTimer, ChatAnnouncements.PrintQueuedMessages)
     elseif receivedBy == "LUIE_RECEIVE_CRAFT" and (gainOrLoss == 2 or gainOrLoss == 4) and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgradeFail then
         local itemString2 = itemString
-        if ChatAnnouncements.itemStringLoss ~= "" then
-            ChatAnnouncements.itemStringLoss = string_format("%s|c%s,|r %s", ChatAnnouncements.itemStringLoss, color, itemString2)
+        if g_itemStringLoss ~= "" then
+            g_itemStringLoss = string_format("%s|c%s,|r %s", g_itemStringLoss, color, itemString2)
         end
-        if ChatAnnouncements.itemStringLoss == "" then
-            ChatAnnouncements.itemStringLoss = itemString
-        end
-
-        ChatAnnouncements.itemCounterLossTracker = ChatAnnouncements.itemCounterLossTracker + 1
-        if ChatAnnouncements.itemCounterLossTracker > 50 then
-            ChatAnnouncements.itemStringLoss = string_format("|c%s too many items to display|r", color)
+        if g_itemStringLoss == "" then
+            g_itemStringLoss = itemString
         end
 
-        if ChatAnnouncements.itemCounterLoss == 0 then
-            ChatAnnouncements.itemCounterLoss = ChatAnnouncements.QueuedMessagesCounter
+        g_itemCounterLossTracker = g_itemCounterLossTracker + 1
+        if g_itemCounterLossTracker > 100 then
+            g_itemStringLoss = string_format("|c%stoo many items to display|r", color)
         end
-        if ChatAnnouncements.QueuedMessagesCounter - 1 == ChatAnnouncements.itemCounterLoss then
-            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.itemCounterLoss
+
+        if g_itemCounterLoss == 0 then
+            g_itemCounterLoss = ChatAnnouncements.QueuedMessagesCounter
+        end
+        if ChatAnnouncements.QueuedMessagesCounter - 1 == g_itemCounterLoss then
+            ChatAnnouncements.QueuedMessagesCounter = g_itemCounterLoss
         end
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        ChatAnnouncements.QueuedMessages[ChatAnnouncements.itemCounterLoss] =
+        ChatAnnouncements.QueuedMessages[g_itemCounterLoss] =
         {
-            message = ChatAnnouncements.itemStringLoss,
-            messageType = messageType,
+            message = g_itemStringLoss,
+            type = messageType,
             formattedRecipient = formattedRecipient,
             color = color,
             logPrefix = logPrefix,
@@ -3863,7 +3758,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
         {
             message = itemString,
-            messageType = messageType,
+            type = messageType,
             formattedRecipient = formattedRecipient,
             color = color,
             logPrefix = logPrefix,
@@ -3879,87 +3774,114 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
     end
 end
 
--- Simple function combines our strings or modifies the prefix if RECEIEVED instead of looted
----
---- @param message string
---- @param formattedRecipient string
---- @param color string
---- @param logPrefix string
---- @param totalString string
---- @param groupLoot boolean
 function ChatAnnouncements.ResolveItemMessage(message, formattedRecipient, color, logPrefix, totalString, groupLoot)
-    -- Conditions for looted/quest item rewards to adjust string prefix.
+    -- Ensure all parameters have valid values
+    message = message or ""
+    formattedRecipient = formattedRecipient or ""
+    color = color and (type(color) == "table" and color:IsColorDef() and color or ZO_ColorDef:New(color)) or ZO_ColorDef:New("FFFFFF")
+    logPrefix = logPrefix or ""
+    totalString = totalString or ""
+
+    -- Determine the appropriate message prefix based on item acquisition context
     if logPrefix == "" then
-        if ChatAnnouncements.isLooted and not ChatAnnouncements.itemReceivedIsQuestReward and not ChatAnnouncements.isPickpocketed and not ChatAnnouncements.isStolen then
-            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
-            -- reset variables that control looted, or at least ZO_CallLater them
-        elseif ChatAnnouncements.isPickpocketed then
-            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessagePickpocket
-        elseif ChatAnnouncements.isStolen and not ChatAnnouncements.isPickpocketed then
-            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageSteal
-        else
-            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
-        end
+        logPrefix = ChatAnnouncements.GetContextMessagePrefix() or ""
     end
 
-    local formattedMessageP1
-    local formattedMessageP2
+    -- Format the message parts with nil checks
+    local formattedMessageP1 = string_format("|r%s|c%s", message, color:ToHex()) or ""
+    local formattedMessageP2 = ChatAnnouncements.FormatContextMessage(
+        logPrefix,
+        formattedMessageP1,
+        formattedRecipient,
+        color:ToHex(),
+        groupLoot
+    ) or ""
 
-    -- Handle non group loot messages
-    if not groupLoot then
-        -- Adds additional string for previous variant of an item when an item is upgraded.
-        if logPrefix == ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgrade and ChatAnnouncements.oldItem ~= nil and (ChatAnnouncements.oldItem.itemLink ~= "" and ChatAnnouncements.oldItem.itemLink ~= nil) and ChatAnnouncements.oldItem.icon ~= nil then
-            local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and ChatAnnouncements.oldItem.icon ~= "") and zo_strformat("<<1>> ", zo_iconFormat(ChatAnnouncements.oldItem.icon, 16, 16)) or ""
-            local formattedMessageUpgrade = ("|r" .. formattedIcon .. ChatAnnouncements.oldItem.itemLink .. "|c" .. color)
-            formattedMessageP1 = ("|r" .. message .. "|c" .. color)
-            formattedMessageP2 = string_format(logPrefix, formattedMessageUpgrade, formattedMessageP1)
-            ChatAnnouncements.oldItem = {}
-        else
-            formattedMessageP1 = ("|r" .. message .. "|c" .. color)
-            if formattedRecipient == "" then
-                formattedMessageP2 = string_format(logPrefix, formattedMessageP1, "")
-            else
-                local recipient = ("|r" .. formattedRecipient .. "|c" .. color)
-                formattedMessageP2 = string_format(logPrefix, formattedMessageP1, recipient)
-            end
-        end
-        -- Handle group loot messages
-    else
-        formattedMessageP1 = ("|r" .. message .. "|c" .. color)
-        local recipient = ("|r" .. formattedRecipient .. "|c" .. color)
-        formattedMessageP2 = string_format(logPrefix, recipient, formattedMessageP1)
+    -- Construct and output the final message with additional safety checks
+    local finalMessage = string_format("|c%s%s|r%s", color:ToHex(), formattedMessageP2 or "", totalString or "")
+    if finalMessage and finalMessage ~= "" then
+        printToChat(finalMessage)
     end
 
-    local finalMessage = string_format("|c%s%s|r%s", color, formattedMessageP2, totalString)
-
-    -- LUIE.SV.DummyDumpString = finalMessage
-
-    printToChat(finalMessage)
-
-    -- Reset variables for crafted item counter
-    ChatAnnouncements.itemCounterGain = 0
-    ChatAnnouncements.itemCounterGainTracker = 0
-    ChatAnnouncements.itemCounterLoss = 0
-    ChatAnnouncements.itemCounterLossTracker = 0
-    ChatAnnouncements.itemStringGain = ""
-    ChatAnnouncements.itemStringLoss = ""
-
-    -- "You loot %s."
-    -- "You receive %s."
+    -- Reset all tracking variables
+    ChatAnnouncements.ResetTrackingVariables()
 end
 
--- Simple PostHook into ZOS crafting mode functions, based off MultiCraft, thanks Ayantir!
+-- Helper function to determine message prefix based on context
+function ChatAnnouncements.GetContextMessagePrefix()
+    if g_isLooted and not g_itemReceivedIsQuestReward and not g_isPickpocketed and not g_isStolen then
+        return ChatAnnouncements.SV.ContextMessages.CurrencyMessageLoot
+    elseif g_isPickpocketed then
+        return ChatAnnouncements.SV.ContextMessages.CurrencyMessagePickpocket
+    elseif g_isStolen and not g_isPickpocketed then
+        return ChatAnnouncements.SV.ContextMessages.CurrencyMessageSteal
+    end
+    return ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+end
+
+-- Helper function to format the context message
+function ChatAnnouncements.FormatContextMessage(logPrefix, formattedMessageP1, formattedRecipient, color, groupLoot)
+    -- Handle upgrade messages
+    if logPrefix == ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgrade and ChatAnnouncements.IsValidOldItem() then
+        local formattedIcon = ChatAnnouncements.GetFormattedIcon(g_oldItem.icon)
+        local formattedMessageUpgrade = string_format("|r%s%s|c%s", formattedIcon, g_oldItem.itemLink, color)
+        g_oldItem = {}
+        return string_format(logPrefix, formattedMessageUpgrade, formattedMessageP1)
+    end
+
+    -- Handle regular messages
+    if groupLoot then
+        local recipient = string_format("|r%s|c%s", formattedRecipient, color)
+        return string_format(logPrefix, recipient, formattedMessageP1)
+    end
+
+    -- Handle messages without recipient
+    if formattedRecipient == "" then
+        return string_format(logPrefix, formattedMessageP1, "")
+    end
+
+    -- Handle messages with recipient
+    local recipient = string_format("|r%s|c%s", formattedRecipient, color)
+    return string_format(logPrefix, formattedMessageP1, recipient)
+end
+
+-- Helper function to check if old item data is valid
+function ChatAnnouncements.IsValidOldItem()
+    return g_oldItem ~= nil and g_oldItem.itemLink ~= "" and g_oldItem.itemLink ~= nil and g_oldItem.icon ~= nil
+end
+
+-- Helper function to format icon
+function ChatAnnouncements.GetFormattedIcon(icon)
+    if not ChatAnnouncements.SV.Inventory.LootIcons or icon == "" then
+        return ""
+    end
+    -- Use zo_iconTextFormat with just the icon (no text)
+    -- 16x16 dimensions maintained, empty text string
+    return zo_iconTextFormat(icon, 16, 16, "", nil)
+end
+
+-- Reset all tracking variables
+function ChatAnnouncements.ResetTrackingVariables()
+    g_itemCounterGain = 0
+    g_itemCounterGainTracker = 0
+    g_itemCounterLoss = 0
+    g_itemCounterLossTracker = 0
+    g_itemStringGain = ""
+    g_itemStringLoss = ""
+end
+
+-- Simple posthook into ZOS crafting mode functions, based off MultiCraft, thanks Ayantir!
 function ChatAnnouncements.CraftModeOverrides()
     -- Get SMITHING mode
-    ChatAnnouncements.smithing.GetMode = LUIE.GetSmithingMode
+    g_smithing.GetMode = LUIE.GetSmithingMode
 
     -- Get ENCHANTING mode
-    ChatAnnouncements.enchanting.GetMode = LUIE.GetEnchantingMode
+    g_enchanting.GetMode = LUIE.GetEnchantingMode
 
     -- NOTE: Alchemy and provisioning don't matter, as the only options are to craft and use materials.
 
     -- Crafting Mode Syntax (Enchanting - Item Gain)
-    ChatAnnouncements.enchant_prefix_pos =
+    g_enchant_prefix_pos =
     {
         [1] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageCraft,
         [2] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive,
@@ -3967,7 +3889,7 @@ function ChatAnnouncements.CraftModeOverrides()
     }
 
     -- Crafting Mode Syntax (Enchanting - Item Loss)
-    ChatAnnouncements.enchant_prefix_neg =
+    g_enchant_prefix_neg =
     {
         [1] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse,
         [2] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageExtract,
@@ -3975,7 +3897,7 @@ function ChatAnnouncements.CraftModeOverrides()
     }
 
     -- Crafting Mode Syntax (Blacksmithing - Item Gain)
-    ChatAnnouncements.smithing_prefix_pos =
+    g_smithing_prefix_pos =
     {
         [1] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive,
         [2] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageCraft,
@@ -3986,7 +3908,7 @@ function ChatAnnouncements.CraftModeOverrides()
     }
 
     -- Crafting Mode Syntax (Blacksmithing - Item Loss)
-    ChatAnnouncements.smithing_prefix_neg =
+    g_smithing_prefix_neg =
     {
         [1] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageRefine,
         [2] = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse,
@@ -3997,40 +3919,9 @@ function ChatAnnouncements.CraftModeOverrides()
     }
 end
 
---- @class DelayedItemPool
---- @field icon string
---- @field stack integer
---- @field itemType ItemType
---- @field itemId integer
---- @field itemLink string
---- @field receivedBy string
---- @field logPrefix string
---- @field gainOrLoss integer
---- @field filter boolean
---- @field groupLoot boolean
---- @field alwaysFirst boolean
---- @field delay boolean
-
---- @alias delayedItemPool_itemTable { [integer] : DelayedItemPool }
-
---- @type delayedItemPool_itemTable
 local delayedItemPool = {}    -- Store items we are counting up when the player loots multiple bodies at once to print combined counts for any duplicate items
---- @type delayedItemPool_itemTable
 local delayedItemPoolOut = {} -- Stacks for outbound delayed item pool
 
----
---- @param icon string
---- @param stack integer
---- @param itemType ItemType
---- @param itemId integer
---- @param itemLink string
---- @param receivedBy string
---- @param logPrefix string
---- @param gainOrLoss integer
---- @param filter boolean
---- @param groupLoot boolean
---- @param alwaysFirst boolean
---- @param delay boolean
 function ChatAnnouncements.ItemCounterDelay(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, filter, groupLoot, alwaysFirst, delay)
     -- Return if we have an invalid itemId or stack
     if itemId == 0 or not stack then
@@ -4049,18 +3940,17 @@ function ChatAnnouncements.ItemCounterDelay(icon, stack, itemType, itemId, itemL
     delayedItemPool[itemId] =
     {
         icon = icon,
-        stack = stack or 0, -- Provide default value if nil
         itemType = itemType,
-        itemId = itemId,
         itemLink = itemLink,
+        stack = stack or 0, -- Provide default value if nil
         receivedBy = receivedBy,
         logPrefix = logPrefix,
         gainOrLoss = gainOrLoss,
         filter = filter,
         groupLoot = groupLoot,
         alwaysFirst = alwaysFirst,
-        delay = delay
-    } -- Save relevant parameters
+        delay = delay,
+    }
 
     -- Pass along all values to SendDelayedItems()
     eventManager:UnregisterForUpdate(moduleName .. "SendDelayedItems")
@@ -4070,39 +3960,12 @@ end
 function ChatAnnouncements.SendDelayedItems()
     for id, data in pairs(delayedItemPool) do
         if id then
-            ChatAnnouncements.ItemPrinter(
-                data.icon,
-                data.stack,
-                data.itemType,
-                data.itemId,
-                data.itemLink,
-                data.receivedBy,
-                data.logPrefix,
-                data.gainOrLoss,
-                data.filter,
-                data.groupLoot,
-                data.alwaysFirst,
-                data.delay
-            )
+            ChatAnnouncements.ItemPrinter(data.icon, data.stack, data.itemType, id, data.itemLink, data.receivedBy, data.logPrefix, data.gainOrLoss, data.filter, data.groupLoot, data.alwaysFirst, data.delay)
         end
     end
-    -- Clear pool
     delayedItemPool = {}
 end
 
----
---- @param icon string
---- @param stack integer
---- @param itemType ItemType
---- @param itemId integer
---- @param itemLink string
---- @param receivedBy string
---- @param logPrefix string
---- @param gainOrLoss integer
---- @param filter boolean
---- @param groupLoot boolean
---- @param alwaysFirst boolean
---- @param delay boolean
 function ChatAnnouncements.ItemCounterDelayOut(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, filter, groupLoot, alwaysFirst, delay)
     if delayedItemPoolOut[itemId] then
         stack = delayedItemPoolOut[itemId].stack + stack -- Add stack count first, only if item already exists.
@@ -4110,17 +3973,16 @@ function ChatAnnouncements.ItemCounterDelayOut(icon, stack, itemType, itemId, it
     delayedItemPoolOut[itemId] =
     {
         icon = icon,
-        stack = stack or 0, -- Provide default value if nil
         itemType = itemType,
-        itemId = itemId,
         itemLink = itemLink,
+        stack = stack,
         receivedBy = receivedBy,
         logPrefix = logPrefix,
         gainOrLoss = gainOrLoss,
         filter = filter,
         groupLoot = groupLoot,
         alwaysFirst = alwaysFirst,
-        delay = delay
+        delay = delay,
     } -- Save relevant parameters
 
     -- Pass along all values to SendDelayedItems()
@@ -4131,23 +3993,9 @@ end
 function ChatAnnouncements.SendDelayedItemsOut()
     for id, data in pairs(delayedItemPoolOut) do
         if id then
-            ChatAnnouncements.ItemPrinter(
-                data.icon,
-                data.stack,
-                data.itemType,
-                data.itemId,
-                data.itemLink,
-                data.receivedBy,
-                data.logPrefix,
-                data.gainOrLoss,
-                data.filter,
-                data.groupLoot,
-                data.alwaysFirst,
-                data.delay
-            )
+            ChatAnnouncements.ItemPrinter(data.icon, data.stack, data.itemType, id, data.itemLink, data.receivedBy, data.logPrefix, data.gainOrLoss, data.filter, data.groupLoot, data.alwaysFirst, data.delay)
         end
     end
-    -- Clear pool
     delayedItemPoolOut = {}
 end
 
@@ -4161,47 +4009,16 @@ local crownRidingIds =
     [135117] = true, -- Crown Lesson: Riding Capacity
 }
 
---- Runs on - **EVENT_INVENTORY_SINGLE_SLOT_UPDATE **
----
----
---- @param eventId integer
---- @param bagId Bag
---- @param slotIndex integer
---- @param isNewItem boolean
---- @param itemSoundCategory ItemUISoundCategory
---- @param inventoryUpdateReason integer
---- @param stackCountChange integer
---- @param triggeredByCharacterName string?
---- @param triggeredByDisplayName string?
---- @param isLastUpdateForMessage boolean
---- @param bonusDropSource BonusDropSource
-function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
-    -- if LUIE.IsDevDebugEnabled() then
-    --     local Debug = LUIE.Debug
-    --     local traceback = "Inventory Update:\n" ..
-    --         "--> eventId: " .. tostring(eventId) .. "\n" ..
-    --         "--> bagId: " .. tostring(bagId) .. "\n" ..
-    --         "--> slotIndex: " .. tostring(slotIndex) .. "\n" ..
-    --         "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-    --         "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
-    --         "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
-    --         "--> stackCountChange: " .. tostring(stackCountChange) .. "\n" ..
-    --         "--> triggeredByCharacterName: " .. tostring(triggeredByCharacterName) .. "\n" ..
-    --         "--> triggeredByDisplayName: " .. tostring(triggeredByDisplayName) .. "\n" ..
-    --         "--> isLastUpdateForMessage: " .. tostring(isLastUpdateForMessage) .. "\n" ..
-    --         "--> bonusDropSource: " .. tostring(bonusDropSource)
-    --     LUIE:Log("Debug",traceback)
-    -- end
-
+function ChatAnnouncements.InventoryUpdate(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
     -- End right now if this is any other reason (durability loss, etc)
     if inventoryUpdateReason ~= INVENTORY_UPDATE_REASON_DEFAULT then
         return
     end
 
-    if IsItemStolen(bagId, slotIndex) then
-        ChatAnnouncements.isStolen = true
+    if IsItemStolen(bagId, slotId) then
+        g_isStolen = true
         local function ResetIsStolen()
-            ChatAnnouncements.isStolen = false
+            g_isStolen = false
             eventManager:UnregisterForUpdate(moduleName .. "ResetStolen")
         end
         eventManager:UnregisterForUpdate(moduleName .. "ResetStolen")
@@ -4219,94 +4036,55 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
         local itemLink
         local removed
         -- NEW ITEM
-        if not ChatAnnouncements.equippedStacks[slotIndex] then
-            icon, stack = GetItemInfo(bagId, slotIndex)
-            itemType = GetItemType(bagId, slotIndex)
-            itemId = GetItemId(bagId, slotIndex)
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            ChatAnnouncements.equippedStacks[slotIndex] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
-            if ChatAnnouncements.SV.Inventory.LootShowDisguise and slotIndex == EQUIP_SLOT_COSTUME and (itemType == ITEMTYPE_COSTUME or itemType == ITEMTYPE_DISGUISE) then
+        if not g_equippedStacks[slotId] then
+            icon, stack = GetItemInfo(bagId, slotId)
+            itemType = GetItemType(bagId, slotId)
+            itemId = GetItemId(bagId, slotId)
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            g_equippedStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+            if ChatAnnouncements.SV.Inventory.LootShowDisguise and slotId == EQUIP_SLOT_COSTUME and (itemType == ITEMTYPE_COSTUME or itemType == ITEMTYPE_DISGUISE) then
                 gainOrLoss = 3
                 receivedBy = "LUIE_INVENTORY_UPDATE_DISGUISE"
                 logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDisguiseEquip
-                ChatAnnouncements.ItemPrinter(
-                    icon,
-                    stackCountChange,
-                    itemType,
-                    itemId,
-                    itemLink,
-                    receivedBy,
-                    logPrefix,
-                    gainOrLoss,
-                    false,
-                    nil,
-                    nil,
-                    nil
-                )
+                ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             end
             -- EXISTING ITEM
-        elseif ChatAnnouncements.equippedStacks[slotIndex] then
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        elseif g_equippedStacks[slotId] then
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             if itemLink == nil or itemLink == "" then
                 -- If we get a nil or blank item link, the item was destroyed and we need to use the saved value here to fill in the blanks
-                icon = ChatAnnouncements.equippedStacks[slotIndex].icon
-                stack = ChatAnnouncements.equippedStacks[slotIndex].stack
-                itemType = ChatAnnouncements.equippedStacks[slotIndex].itemType
-                itemId = ChatAnnouncements.equippedStacks[slotIndex].itemId
-                itemLink = ChatAnnouncements.equippedStacks[slotIndex].itemLink
+                icon = g_equippedStacks[slotId].icon
+                stack = g_equippedStacks[slotId].stack
+                itemType = g_equippedStacks[slotId].itemType
+                itemId = g_equippedStacks[slotId].itemId
+                itemLink = g_equippedStacks[slotId].itemLink
                 removed = true
             else
                 -- If we get a value for itemLink, then we want to use bag info to fill in the blanks
-                icon, stack = GetItemInfo(bagId, slotIndex)
-                itemType = GetItemType(bagId, slotIndex)
-                itemId = GetItemId(bagId, slotIndex)
+                icon, stack = GetItemInfo(bagId, slotId)
+                itemType = GetItemType(bagId, slotId)
+                itemId = GetItemId(bagId, slotId)
                 removed = false
             end
 
             -- STACK COUNT REMAINED THE SAME (GEAR SWAPPED)
             if stackCountChange == 0 then
-                if ChatAnnouncements.SV.Inventory.LootShowDisguise and slotIndex == EQUIP_SLOT_COSTUME and (itemType == ITEMTYPE_COSTUME or itemType == ITEMTYPE_DISGUISE) then
+                if ChatAnnouncements.SV.Inventory.LootShowDisguise and slotId == EQUIP_SLOT_COSTUME and (itemType == ITEMTYPE_COSTUME or itemType == ITEMTYPE_DISGUISE) then
                     gainOrLoss = 3
                     receivedBy = "LUIE_INVENTORY_UPDATE_DISGUISE"
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDisguiseEquip
-                    ChatAnnouncements.ItemPrinter(
-                        icon,
-                        stackCountChange,
-                        itemType,
-                        itemId,
-                        itemLink,
-                        receivedBy,
-                        logPrefix,
-                        gainOrLoss,
-                        false,
-                        nil,
-                        nil,
-                        nil
-                    )
+                    ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
                 -- STACK COUNT INCREMENTED DOWN
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
-                if ChatAnnouncements.itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
+                if g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
-                    ChatAnnouncements.ItemPrinter(
-                        icon,
-                        change,
-                        itemType,
-                        itemId,
-                        itemLink,
-                        receivedBy,
-                        logPrefix,
-                        gainOrLoss,
-                        false,
-                        nil,
-                        nil,
-                        nil
-                    )
+                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
-                if not ChatAnnouncements.itemWasDestroyed then
-                    if ChatAnnouncements.SV.Inventory.LootShowDisguise and slotIndex == EQUIP_SLOT_COSTUME and (itemType == ITEMTYPE_COSTUME or itemType == ITEMTYPE_DISGUISE) then
+                if not g_itemWasDestroyed then
+                    if ChatAnnouncements.SV.Inventory.LootShowDisguise and slotId == EQUIP_SLOT_COSTUME and (itemType == ITEMTYPE_COSTUME or itemType == ITEMTYPE_DISGUISE) then
                         if IsUnitInCombat("player") then
                             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDisguiseDestroy
                             receivedBy = "LUIE_INVENTORY_UPDATE_DISGUISE"
@@ -4316,54 +4094,21 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                             receivedBy = "LUIE_INVENTORY_UPDATE_DISGUISE"
                             gainOrLoss = 3
                         end
-                        ChatAnnouncements.ItemPrinter(
-                            icon,
-                            change,
-                            itemType,
-                            itemId,
-                            itemLink,
-                            receivedBy,
-                            logPrefix,
-                            gainOrLoss,
-                            false,
-                            nil,
-                            nil,
-                            nil
-                        )
-                    elseif not ChatAnnouncements.itemWasDestroyed and ChatAnnouncements.removableIDs[itemId] and ChatAnnouncements.SV.Inventory.LootShowRemove then
+                        ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
+                    elseif not g_itemWasDestroyed and g_removableIDs[itemId] and ChatAnnouncements.SV.Inventory.LootShowRemove then
                         gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                         logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageRemove
-                        ChatAnnouncements.ItemPrinter(
-                            icon,
-                            change,
-                            itemType,
-                            itemId,
-                            itemLink,
-                            receivedBy,
-                            logPrefix,
-                            gainOrLoss,
-                            false,
-                            nil,
-                            nil,
-                            nil
-                        )
+                        ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                     end
                 end
             end
 
             if removed then
-                if ChatAnnouncements.equippedStacks[slotIndex] then
-                    ChatAnnouncements.equippedStacks[slotIndex] = nil
+                if g_equippedStacks[slotId] then
+                    g_equippedStacks[slotId] = nil
                 end
             else
-                ChatAnnouncements.equippedStacks[slotIndex] =
-                {
-                    icon = icon,
-                    stack = stack,
-                    itemId = itemId,
-                    itemType = itemType,
-                    itemLink = itemLink
-                }
+                g_equippedStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
         end
     end
@@ -4378,92 +4123,56 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
         local itemLink
         local removed
         -- NEW ITEM
-        if not ChatAnnouncements.inventoryStacks[slotIndex] then
+        if not g_inventoryStacks[slotId] then
             -- Flag stack split as true - this will occur when a stack of items is split into multiple stacks.
             if not isNewItem then
-                ChatAnnouncements.stackSplit = true
+                g_stackSplit = true
                 eventManager:RegisterForUpdate(moduleName .. "StackTracker", 50, ChatAnnouncements.ResetStackSplit)
             end
-            icon, stack = GetItemInfo(bagId, slotIndex)
-            itemType = GetItemType(bagId, slotIndex)
-            itemId = GetItemId(bagId, slotIndex)
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            ChatAnnouncements.inventoryStacks[slotIndex] =
-            {
-                icon = icon,
-                stack = stack,
-                itemId = itemId,
-                itemType = itemType,
-                itemLink = itemLink
-            }
+            icon, stack = GetItemInfo(bagId, slotId)
+            itemType = GetItemType(bagId, slotId)
+            itemId = GetItemId(bagId, slotId)
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-            local mailSender = ""
-            if ChatAnnouncements.inMail then
-                -- Get the correct sender from the queue for this item
-                mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
-                logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
+            if g_inMail then
+                logPrefix = g_mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
             else
                 logPrefix = ""
             end
-            if ChatAnnouncements.weAreInADig then
+            if g_weAreInADig then
                 logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageExcavate
             end
-            if ChatAnnouncements.packSiege and itemType == ITEMTYPE_SIEGE then
+            if g_packSiege and itemType == ITEMTYPE_SIEGE then
                 logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageStow
             end
-            if not ChatAnnouncements.weAreInAStore and ChatAnnouncements.SV.Inventory.Loot and isNewItem and not ChatAnnouncements.inTrade and not ChatAnnouncements.inMail then
-                ChatAnnouncements.ItemCounterDelay(
-                    icon,
-                    stackCountChange,
-                    itemType,
-                    itemId,
-                    itemLink,
-                    receivedBy,
-                    logPrefix,
-                    gainOrLoss,
-                    true,
-                    nil,
-                    false,
-                    true
-                )
+            if not g_weAreInAStore and ChatAnnouncements.SV.Inventory.Loot and isNewItem and not g_inTrade and not g_inMail then
+                ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true, nil, false, true)
             end
-            if ChatAnnouncements.inMail and isNewItem then
-                ChatAnnouncements.ItemCounterDelay(
-                    icon,
-                    stackCountChange,
-                    itemType,
-                    itemId,
-                    itemLink,
-                    mailSender,
-                    logPrefix,
-                    gainOrLoss,
-                    false,
-                    nil,
-                    nil,
-                    nil
-                )
+            if g_inMail and isNewItem then
+                ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, g_mailTarget, logPrefix, gainOrLoss, false)
             end
             -- EXISTING ITEM
-        elseif ChatAnnouncements.inventoryStacks[slotIndex] then
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        elseif g_inventoryStacks[slotId] then
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             -- For item removal, we save whatever the currently indexed item is here.
-            local removedIcon = ChatAnnouncements.inventoryStacks[slotIndex].icon
-            local removedItemType = ChatAnnouncements.inventoryStacks[slotIndex].itemType
-            local removedItemId = ChatAnnouncements.inventoryStacks[slotIndex].itemId
-            local removedItemLink = ChatAnnouncements.inventoryStacks[slotIndex].itemLink
+            local removedIcon = g_inventoryStacks[slotId].icon
+            local removedItemType = g_inventoryStacks[slotId].itemType
+            local removedItemId = g_inventoryStacks[slotId].itemId
+            local removedItemLink = g_inventoryStacks[slotId].itemLink
             if itemLink == nil or itemLink == "" then
                 -- If we get a nil or blank item link, the item was destroyed and we need to use the saved value here to fill in the blanks
-                icon = ChatAnnouncements.inventoryStacks[slotIndex].icon
-                stack = ChatAnnouncements.inventoryStacks[slotIndex].stack
-                itemType = ChatAnnouncements.inventoryStacks[slotIndex].itemType
-                itemId = ChatAnnouncements.inventoryStacks[slotIndex].itemId
-                itemLink = ChatAnnouncements.inventoryStacks[slotIndex].itemLink
+                icon = g_inventoryStacks[slotId].icon
+                stack = g_inventoryStacks[slotId].stack
+                itemType = g_inventoryStacks[slotId].itemType
+                itemId = g_inventoryStacks[slotId].itemId
+                itemLink = g_inventoryStacks[slotId].itemLink
                 removed = true
             else
                 -- If we get a value for itemLink, then we want to use bag info to fill in the blanks
-                icon, stack = GetItemInfo(bagId, slotIndex)
-                itemType = GetItemType(bagId, slotIndex)
-                itemId = GetItemId(bagId, slotIndex)
+                icon, stack = GetItemInfo(bagId, slotId)
+                itemType = GetItemType(bagId, slotId)
+                itemId = GetItemId(bagId, slotId)
                 removed = false
             end
 
@@ -4471,119 +4180,41 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
             if stackCountChange > 0 then
                 -- Flag stack split as true - this will occur when two items are stacked together (dragged over each other)
                 if not isNewItem then
-                    ChatAnnouncements.stackSplit = true
+                    g_stackSplit = true
                     eventManager:RegisterForUpdate(moduleName .. "StackTracker", 50, ChatAnnouncements.ResetStackSplit)
                 end
 
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-                local mailSender = ""
-                if ChatAnnouncements.inMail then
-                    logPrefix = ChatAnnouncements.Mail.target ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
+                if g_inMail then
+                    logPrefix = g_mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
                 else
                     logPrefix = ""
                 end
-                if ChatAnnouncements.weAreInADig then
+                if g_weAreInADig then
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageExcavate
                 end
-                if ChatAnnouncements.packSiege and itemType == ITEMTYPE_SIEGE then
+                if g_packSiege and itemType == ITEMTYPE_SIEGE then
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageStow
                 end
-                if not ChatAnnouncements.weAreInAStore and ChatAnnouncements.SV.Inventory.Loot and isNewItem and not ChatAnnouncements.inTrade and not ChatAnnouncements.inMail then
-                    ChatAnnouncements.ItemCounterDelay(
-                        icon,
-                        stackCountChange,
-                        itemType,
-                        itemId,
-                        itemLink,
-                        receivedBy,
-                        logPrefix,
-                        gainOrLoss,
-                        true,
-                        nil,
-                        false,
-                        true
-                    )
+                if not g_weAreInAStore and ChatAnnouncements.SV.Inventory.Loot and isNewItem and not g_inTrade and not g_inMail then
+                    ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true, nil, false, true)
                 end
-                if ChatAnnouncements.inMail and isNewItem then
-                    -- Get the correct sender from the queue for new items
-                    mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
-                    logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
-                    ChatAnnouncements.ItemCounterDelay(
-                        icon,
-                        stackCountChange,
-                        itemType,
-                        itemId,
-                        itemLink,
-                        mailSender,
-                        logPrefix,
-                        gainOrLoss,
-                        false,
-                        nil,
-                        nil,
-                        nil
-                    )
-                end
-                -- Handle stacked items from mail (they still need to consume from queue)
-                if ChatAnnouncements.inMail and not isNewItem and stackCountChange > 0 then
-                    -- Consume from queue for stacked items too
-                    mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
-                    logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
-                    if mailSender ~= "" then
-                        ChatAnnouncements.ItemCounterDelay(
-                            icon,
-                            stackCountChange,
-                            itemType,
-                            itemId,
-                            itemLink,
-                            mailSender,
-                            logPrefix,
-                            gainOrLoss,
-                            false,
-                            nil,
-                            nil,
-                            nil
-                        )
-                    end
+                if g_inMail and isNewItem then
+                    ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, g_mailTarget, logPrefix, gainOrLoss, false)
                 end
                 -- STACK COUNT INCREMENTED DOWN
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
                 -- Check Destroyed first
-                if ChatAnnouncements.itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
+                if g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
-                    ChatAnnouncements.ItemPrinter(
-                        removedIcon,
-                        change,
-                        removedItemType,
-                        removedItemId,
-                        removedItemLink,
-                        receivedBy,
-                        logPrefix,
-                        gainOrLoss,
-                        false,
-                        nil,
-                        nil,
-                        nil
-                    )
+                    ChatAnnouncements.ItemPrinter(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false)
                     -- Check Lockpick next
-                elseif ChatAnnouncements.SV.Inventory.LootShowLockpick and ChatAnnouncements.lockpickBroken then
+                elseif ChatAnnouncements.SV.Inventory.LootShowLockpick and g_lockpickBroken then
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLockpick
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    ChatAnnouncements.ItemPrinter(
-                        removedIcon,
-                        change,
-                        removedItemType,
-                        removedItemId,
-                        removedItemLink,
-                        receivedBy,
-                        logPrefix,
-                        gainOrLoss,
-                        false,
-                        nil,
-                        nil,
-                        nil
-                    )
+                    ChatAnnouncements.ItemPrinter(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false)
                     -- Check container is emptied next
                 elseif ChatAnnouncements.SV.Inventory.LootShowContainer and (removedItemType == ITEMTYPE_CONTAINER or removedItemType == ITEMTYPE_CONTAINER_CURRENCY) then
                     -- Don't display a message if the specialized item type is a "Container Style Page"
@@ -4591,51 +4222,25 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                     if specializedType ~= SPECIALIZED_ITEMTYPE_CONTAINER_STYLE_PAGE then
                         logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageContainer
                         gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                        ChatAnnouncements.ItemPrinter(
-                            removedIcon,
-                            change,
-                            removedItemType,
-                            removedItemId,
-                            removedItemLink,
-                            receivedBy,
-                            logPrefix,
-                            gainOrLoss,
-                            false,
-                            nil,
-                            true,
-                            nil
-                        )
+                        ChatAnnouncements.ItemPrinter(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false, nil, true)
                     end
                     -- Check to see if the item was removed in dialogue and Quest Item turnin is on.
-                elseif ChatAnnouncements.talkingToNPC and not ChatAnnouncements.weAreInAStore and ChatAnnouncements.SV.Inventory.LootShowTurnIn then
+                elseif g_talkingToNPC and not g_weAreInAStore and ChatAnnouncements.SV.Inventory.LootShowTurnIn then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestTurnIn
                     LUIE_callLater(function ()
-                                       if ChatAnnouncements.stackSplit == false then
-                                           ChatAnnouncements.ItemCounterDelay(
-                                               removedIcon,
-                                               change,
-                                               removedItemType,
-                                               removedItemId,
-                                               removedItemLink,
-                                               receivedBy,
-                                               logPrefix,
-                                               gainOrLoss,
-                                               false,
-                                               false,
-                                               true,
-                                               false
-                                           )
+                                       if g_stackSplit == false then
+                                           ChatAnnouncements.ItemCounterDelay(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false, false, true, false)
                                            eventManager:UnregisterForUpdate(moduleName .. "Printer")
                                            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
                                        end
                                    end, 25)
-                elseif ChatAnnouncements.weAreInAGuildStore and ChatAnnouncements.SV.Inventory.LootShowList then
+                elseif g_weAreInAGuildStore and ChatAnnouncements.SV.Inventory.LootShowList then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageList
-                    ChatAnnouncements.savedItem = { icon = removedIcon, stack = change, itemLink = removedItemLink }
+                    g_savedItem = { icon = removedIcon, stack = change, itemLink = removedItemLink }
                     -- Check to see if the item was used
-                elseif not ChatAnnouncements.itemWasDestroyed and not ChatAnnouncements.talkingToNPC and not ChatAnnouncements.inTrade and not ChatAnnouncements.inMail then
+                elseif not g_itemWasDestroyed and not g_talkingToNPC and not g_inTrade and not g_inMail then
                     local flag -- When set to true we deliver a message on a LUIE_callLater
                     if ChatAnnouncements.SV.Inventory.LootShowUsePotion and removedItemType == ITEMTYPE_POTION then
                         gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
@@ -4695,7 +4300,7 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                     -- Learn Recipe
                     if ChatAnnouncements.SV.Inventory.LootShowRecipe and removedItemType == ITEMTYPE_RECIPE then
                         -- Show recipe message if a recipe is learned.
-                        if not ChatAnnouncements.combinedRecipe then
+                        if not g_combinedRecipe then
                             gainOrLoss = 4
                             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnRecipe
                             flag = true
@@ -4737,60 +4342,27 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
                     -- If any of these options were flagged, run a callLater on a 50ms delay to make sure we didn't just split stacks.
                     if flag then
                         LUIE_callLater(function ()
-                                           if ChatAnnouncements.stackSplit == false then
-                                               ChatAnnouncements.ItemCounterDelay(
-                                                   removedIcon,
-                                                   change,
-                                                   removedItemType,
-                                                   removedItemId,
-                                                   removedItemLink,
-                                                   receivedBy,
-                                                   logPrefix,
-                                                   gainOrLoss,
-                                                   false,
-                                                   false,
-                                                   true,
-                                                   false
-                                               )
+                                           if g_stackSplit == false then
+                                               ChatAnnouncements.ItemCounterDelay(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false, false, true, false)
                                                eventManager:UnregisterForUpdate(moduleName .. "Printer")
                                                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
                                            end
                                        end, 25)
                     end
                     -- For any leftover cases for items removed.
-                elseif not ChatAnnouncements.itemWasDestroyed and ChatAnnouncements.removableIDs[itemId] and ChatAnnouncements.SV.Inventory.LootShowRemove then
+                elseif not g_itemWasDestroyed and g_removableIDs[itemId] and ChatAnnouncements.SV.Inventory.LootShowRemove then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageRemove
-                    ChatAnnouncements.ItemPrinter(
-                        removedIcon,
-                        change,
-                        removedItemType,
-                        removedItemId,
-                        removedItemLink,
-                        receivedBy,
-                        logPrefix,
-                        gainOrLoss,
-                        false,
-                        nil,
-                        nil,
-                        nil
-                    )
+                    ChatAnnouncements.ItemPrinter(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
             end
 
             if removed then
-                if ChatAnnouncements.inventoryStacks[slotIndex] then
-                    ChatAnnouncements.inventoryStacks[slotIndex] = nil
+                if g_inventoryStacks[slotId] then
+                    g_inventoryStacks[slotId] = nil
                 end
             else
-                ChatAnnouncements.inventoryStacks[slotIndex] =
-                {
-                    icon = icon,
-                    tack = stack,
-                    itemId = itemId,
-                    itemType = itemType,
-                    itemLink = itemLink
-                }
+                g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
         end
     end
@@ -4798,92 +4370,65 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotIndex, isNewItem,
     if bagId == BAG_VIRTUAL then
         local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
         local logPrefix
-        local mailSender = ""
-        if ChatAnnouncements.inMail then
-            -- Get the correct sender from the queue for this item
-            mailSender = ChatAnnouncements.Mail.GetNextSender() or ""
-            logPrefix = mailSender ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
+        if g_inMail then
+            logPrefix = g_mailTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageMailInNoName
         else
             logPrefix = ""
         end
-        if ChatAnnouncements.weAreInADig then
+        if g_weAreInADig then
             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageExcavate
         end
-        local itemLink = tostring(ChatAnnouncements.GetItemLinkFromItemId(slotIndex))
+        local itemLink = tostring(ChatAnnouncements.GetItemLinkFromItemId(slotId))
         local icon = GetItemLinkInfo(itemLink)
         local itemType = GetItemLinkItemType(itemLink)
-        local itemId = slotIndex
+        local itemId = slotId
         local itemQuality = GetItemLinkFunctionalQuality(itemLink)
 
-        if not ChatAnnouncements.weAreInAStore and ChatAnnouncements.SV.Inventory.Loot and isNewItem and not ChatAnnouncements.inTrade and not ChatAnnouncements.inMail then
-            ChatAnnouncements.ItemCounterDelay(
-                icon,
-                stackCountChange,
-                itemType,
-                itemId,
-                itemLink,
-                receivedBy,
-                logPrefix,
-                gainOrLoss,
-                true,
-                nil,
-                false,
-                true
-            )
+        if not g_weAreInAStore and ChatAnnouncements.SV.Inventory.Loot and isNewItem and not g_inTrade and not g_inMail then
+            ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true, nil, false, true)
         end
-        if ChatAnnouncements.inMail and isNewItem then
-            ChatAnnouncements.ItemCounterDelay(
-                icon,
-                stackCountChange,
-                itemType,
-                itemId,
-                itemLink,
-                mailSender,
-                logPrefix,
-                gainOrLoss,
-                false,
-                nil,
-                nil,
-                nil
-            )
+        if g_inMail and isNewItem then
+            ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, g_mailTarget, logPrefix, gainOrLoss, false)
         end
     end
 
-    ChatAnnouncements.itemWasDestroyed = false
-    ChatAnnouncements.lockpickBroken = false
+    g_itemWasDestroyed = false
+    g_lockpickBroken = false
 end
 
---- - **EVENT_INVENTORY_SINGLE_SLOT_UPDATE **
----
----
---- @param eventId integer
---- @param bagId Bag
---- @param slotIndex integer
---- @param isNewItem boolean
---- @param itemSoundCategory ItemUISoundCategory
---- @param inventoryUpdateReason integer
---- @param stackCountChange integer
---- @param triggeredByCharacterName string?
---- @param triggeredByDisplayName string?
---- @param isLastUpdateForMessage boolean
---- @param bonusDropSource BonusDropSource
-function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
-    -- if LUIE.IsDevDebugEnabled() then
-    --     local Debug = LUIE.Debug
-    --     local traceback = "Inventory Update Craft:\n" ..
-    --         "--> eventId: " .. tostring(eventId) .. "\n" ..
-    --         "--> bagId: " .. tostring(bagId) .. "\n" ..
-    --         "--> slotIndex: " .. tostring(slotIndex) .. "\n" ..
-    --         "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-    --         "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
-    --         "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
-    --         "--> stackCountChange: " .. tostring(stackCountChange) .. "\n" ..
-    --         "--> triggeredByCharacterName: " .. tostring(triggeredByCharacterName) .. "\n" ..
-    --         "--> triggeredByDisplayName: " .. tostring(triggeredByDisplayName) .. "\n" ..
-    --         "--> isLastUpdateForMessage: " .. tostring(isLastUpdateForMessage) .. "\n" ..
-    --         "--> bonusDropSource: " .. tostring(bonusDropSource)
-    --     LUIE:Log("Debug",traceback)
-    -- end
+-- TODO: DELETE - This is a dummy function for testing chat messages being cut off.
+function ChatAnnouncements.Dummy()
+    -- Items Removed
+    LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 808, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, -200)
+    LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 4482, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, -500)
+    LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 5820, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, -800)
+
+    -- Items Gained
+    LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 4487, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 83)
+    LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 5413, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 134)
+    LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 6000, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 33)
+    LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 6001, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 232)
+    LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 23107, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 12)
+    LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 46128, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 73)
+    LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 46129, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 44)
+    LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 46130, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 58)
+    LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 64489, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 91)
+    LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 533, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 91)
+
+    d(
+        "|c0b610bYou craft |r|t16:16:/esoui/art/icons/crafting_smith_plug_standard_r_001.dds|t |H1:item:6000:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h[Dwarven Ingot]|h |cFFFFFFx33|r|c0b610b,|r |t16:16:/esoui/art/icons/crafting_ore_base_ebony_r3.dds|t |H1:item:6001:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h[Ebony Ingot]|h |cFFFFFFx232|r|c0b610b,|r |t16:16:/esoui/art/icons/crafting_ore_base_iron_r3.dds|t |H1:item:23107:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h[Orichalcum Ingot]|h |cFFFFFFx12|r|c0b610b,|r |t16:16:/esoui/art/icons/crafting_ore_base_iron_r2.dds|t |H1:item:5413:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h[Iron Ingot]|h |cFFFFFFx134|r|c0b610b,|r |t16:16:/esoui/art/icons/crafting_ore_base_high_iron_r3.dds|t |H1:item:4487:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h[Steel Ingot]|h |cFFFFFFx83|r|c0b610b,|r |t16:16:/esoui/art/icons/crafting_colossus_iron.dds|t |H1:item:64489:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h[Rubedite Ingot]|h |cFFFFFFx91|r|c0b610b,|r |t16:16:/esoui/art/icons/crafting_wood_base_oak_r3.dds|t |H1:item:533:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h[Sanded Oak]|h |cFFFFFFx91|r|c0b610b,|r |t16:16:/esoui/art/icons/crafting_ingot_voidstone.dds|t |H1:item:46130:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h[Voidstone Ingot]|h |cFFFFFFx58|r|c0b610b,|r |t16:16:/esoui/art/icons/crafting_ingot_moonstone.dds|t |H1:item:46129:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h[Quicksilver Ingot]|h |cFFFFFFx44|r|c0b610b,|r |t16:16:/esoui/art/icons/crafting_ingot_galatite.dds|t |H1:item:46128:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h[Galatite Ingot]|h |cFFFFFFx73|r|c0b610b.|r")
+
+    -- LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 803, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 24)
+    -- LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 23121, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 78)
+    -- LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 23122, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 56)
+    -- LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 23123, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 33)
+    -- LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 46139, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 131)
+    -- LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 46140, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 215)
+    -- LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 46141, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 80)
+    -- LUIE.ChatAnnouncements.InventoryUpdateCraft(0, BAG_VIRTUAL, 46142, true, nil, INVENTORY_UPDATE_REASON_DEFAULT, 66)
+end
+
+function ChatAnnouncements.InventoryUpdateCraft(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
     -- End right now if this is any other reason (durability loss, etc)
     if inventoryUpdateReason ~= INVENTORY_UPDATE_REASON_DEFAULT then
         return
@@ -4897,12 +4442,12 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
 
     -- Get string values from our crafting hook function
     if GetCraftingInteractionType() == CRAFTING_TYPE_ENCHANTING then
-        logPrefixPos = ChatAnnouncements.enchant_prefix_pos[ChatAnnouncements.enchanting.GetMode()]
-        logPrefixNeg = ChatAnnouncements.enchant_prefix_neg[ChatAnnouncements.enchanting.GetMode()]
+        logPrefixPos = g_enchant_prefix_pos[g_enchanting.GetMode()]
+        logPrefixNeg = g_enchant_prefix_neg[g_enchanting.GetMode()]
     end
     if GetCraftingInteractionType() == CRAFTING_TYPE_BLACKSMITHING or GetCraftingInteractionType() == CRAFTING_TYPE_CLOTHIER or GetCraftingInteractionType() == CRAFTING_TYPE_WOODWORKING or GetCraftingInteractionType() == CRAFTING_TYPE_JEWELRYCRAFTING then
-        logPrefixPos = ChatAnnouncements.smithing_prefix_pos[ChatAnnouncements.smithing.GetMode()]
-        logPrefixNeg = ChatAnnouncements.smithing_prefix_neg[ChatAnnouncements.smithing.GetMode()]
+        logPrefixPos = g_smithing_prefix_pos[g_smithing.GetMode()]
+        logPrefixNeg = g_smithing_prefix_neg[g_smithing.GetMode()]
     end
 
     -- If the hook function didn't return a string value (for example because the player was in Gamepad mode), then we use a default override.
@@ -4928,66 +4473,40 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
         local itemLink
         local removed
         -- NEW ITEM
-        if not ChatAnnouncements.equippedStacks[slotIndex] then
-            icon, stack = GetItemInfo(bagId, slotIndex)
-            itemType = GetItemType(bagId, slotIndex)
-            itemId = GetItemId(bagId, slotIndex)
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            ChatAnnouncements.equippedStacks[slotIndex] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+        if not g_equippedStacks[slotId] then
+            icon, stack = GetItemInfo(bagId, slotId)
+            itemType = GetItemType(bagId, slotId)
+            itemId = GetItemId(bagId, slotId)
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            g_equippedStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
             logPrefix = logPrefixPos
-            ChatAnnouncements.ItemPrinter(
-                icon,
-                stackCountChange,
-                itemType,
-                itemId,
-                itemLink,
-                receivedBy,
-                logPrefix,
-                gainOrLoss,
-                false,
-                nil,
-                nil,
-                nil
-            )
+            ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             -- EXISTING ITEM
-        elseif ChatAnnouncements.equippedStacks[slotIndex] then
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        elseif g_equippedStacks[slotId] then
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             if itemLink == nil or itemLink == "" then
                 -- If we get a nil or blank item link, the item was destroyed and we need to use the saved value here to fill in the blanks
-                icon = ChatAnnouncements.equippedStacks[slotIndex].icon
-                stack = ChatAnnouncements.equippedStacks[slotIndex].stack
-                itemType = ChatAnnouncements.equippedStacks[slotIndex].itemType
-                itemId = ChatAnnouncements.equippedStacks[slotIndex].itemId
-                itemLink = ChatAnnouncements.equippedStacks[slotIndex].itemLink
+                icon = g_equippedStacks[slotId].icon
+                stack = g_equippedStacks[slotId].stack
+                itemType = g_equippedStacks[slotId].itemType
+                itemId = g_equippedStacks[slotId].itemId
+                itemLink = g_equippedStacks[slotId].itemLink
                 removed = true
             else
                 -- If we get a value for itemLink, then we want to use bag info to fill in the blanks
-                icon, stack = GetItemInfo(bagId, slotIndex)
-                itemType = GetItemType(bagId, slotIndex)
-                itemId = GetItemId(bagId, slotIndex)
+                icon, stack = GetItemInfo(bagId, slotId)
+                itemType = GetItemType(bagId, slotId)
+                itemId = GetItemId(bagId, slotId)
                 removed = false
             end
 
             -- STACK COUNT CHANGE = 0 (UPGRADE)
             if stackCountChange == 0 then
-                ChatAnnouncements.oldItem = { itemLink = ChatAnnouncements.equippedStacks[slotIndex].itemLink, icon = icon }
+                g_oldItem = { itemLink = g_equippedStacks[slotId].itemLink, icon = icon }
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
                 logPrefix = logPrefixPos
-                ChatAnnouncements.ItemPrinter(
-                    icon,
-                    stackCountChange,
-                    itemType,
-                    itemId,
-                    itemLink,
-                    receivedBy,
-                    logPrefix,
-                    gainOrLoss,
-                    false,
-                    nil,
-                    nil,
-                    nil
-                )
+                ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 -- STACK COUNT INCREMENTED UP
             elseif stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
@@ -4995,20 +4514,7 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
                 if itemId == 33753 then
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
                 end
-                ChatAnnouncements.ItemPrinter(
-                    icon,
-                    stackCountChange,
-                    itemType,
-                    itemId,
-                    itemLink,
-                    receivedBy,
-                    logPrefix,
-                    gainOrLoss,
-                    false,
-                    nil,
-                    nil,
-                    nil
-                )
+                ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 -- STACK COUNT INCREMENTED DOWN
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
@@ -5018,36 +4524,16 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
                     if itemType == ITEMTYPE_FISH then
                         logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageFillet
                     end
-                    ChatAnnouncements.ItemPrinter(
-                        icon,
-                        change,
-                        itemType,
-                        itemId,
-                        itemLink,
-                        receivedBy,
-                        logPrefix,
-                        gainOrLoss,
-                        false,
-                        nil,
-                        nil,
-                        nil
-                    )
+                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
             end
 
             if removed then
-                if ChatAnnouncements.equippedStacks[slotIndex] then
-                    ChatAnnouncements.equippedStacks[slotIndex] = nil
+                if g_equippedStacks[slotId] then
+                    g_equippedStacks[slotId] = nil
                 end
             else
-                ChatAnnouncements.equippedStacks[slotIndex] =
-                {
-                    icon = icon,
-                    stack = stack,
-                    itemId = itemId,
-                    itemType = itemType,
-                    itemLink = itemLink
-                }
+                g_equippedStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
         end
     end
@@ -5062,79 +4548,46 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
         local itemLink
         local removed
         -- NEW ITEM
-        if not ChatAnnouncements.inventoryStacks[slotIndex] then
-            icon, stack = GetItemInfo(bagId, slotIndex)
-            itemType = GetItemType(bagId, slotIndex)
-            itemId = GetItemId(bagId, slotIndex)
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            ChatAnnouncements.inventoryStacks[slotIndex] =
-            {
-                icon = icon,
-                stack = stack,
-                itemId = itemId,
-                itemType = itemType,
-                itemLink = itemLink
-            }
+        if not g_inventoryStacks[slotId] then
+            icon, stack = GetItemInfo(bagId, slotId)
+            itemType = GetItemType(bagId, slotId)
+            itemId = GetItemId(bagId, slotId)
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
             logPrefix = logPrefixPos
             -- ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
-            ChatAnnouncements.ItemCounterDelay(
-                icon,
-                stackCountChange,
-                itemType,
-                itemId,
-                itemLink,
-                receivedBy,
-                logPrefix,
-                gainOrLoss,
-                false,
-                nil,
-                false,
-                true
-            )
+            ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, false, true)
             -- EXISTING ITEM
-        elseif ChatAnnouncements.inventoryStacks[slotIndex] then
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        elseif g_inventoryStacks[slotId] then
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             -- For item removal, we save whatever the currently indexed item is here.
-            local removedIcon = ChatAnnouncements.inventoryStacks[slotIndex].icon
-            local removedItemType = ChatAnnouncements.inventoryStacks[slotIndex].itemType
-            local removedItemId = ChatAnnouncements.inventoryStacks[slotIndex].itemId
-            local removedItemLink = ChatAnnouncements.inventoryStacks[slotIndex].itemLink
+            local removedIcon = g_inventoryStacks[slotId].icon
+            local removedItemType = g_inventoryStacks[slotId].itemType
+            local removedItemId = g_inventoryStacks[slotId].itemId
+            local removedItemLink = g_inventoryStacks[slotId].itemLink
             if itemLink == nil or itemLink == "" then
                 -- If we get a nil or blank item link, the item was destroyed and we need to use the saved value here to fill in the blanks
-                icon = ChatAnnouncements.inventoryStacks[slotIndex].icon
-                stack = ChatAnnouncements.inventoryStacks[slotIndex].stack
-                itemType = ChatAnnouncements.inventoryStacks[slotIndex].itemType
-                itemId = ChatAnnouncements.inventoryStacks[slotIndex].itemId
-                itemLink = ChatAnnouncements.inventoryStacks[slotIndex].itemLink
+                icon = g_inventoryStacks[slotId].icon
+                stack = g_inventoryStacks[slotId].stack
+                itemType = g_inventoryStacks[slotId].itemType
+                itemId = g_inventoryStacks[slotId].itemId
+                itemLink = g_inventoryStacks[slotId].itemLink
                 removed = true
             else
                 -- If we get a value for itemLink, then we want to use bag info to fill in the blanks
-                icon, stack = GetItemInfo(bagId, slotIndex)
-                itemType = GetItemType(bagId, slotIndex)
-                itemId = GetItemId(bagId, slotIndex)
+                icon, stack = GetItemInfo(bagId, slotId)
+                itemType = GetItemType(bagId, slotId)
+                itemId = GetItemId(bagId, slotId)
                 removed = false
             end
 
             -- STACK COUNT CHANGE = 0 (UPGRADE)
             if stackCountChange == 0 then
-                ChatAnnouncements.oldItem = { itemLink = ChatAnnouncements.inventoryStacks[slotIndex].itemLink, icon = icon }
+                g_oldItem = { itemLink = g_inventoryStacks[slotId].itemLink, icon = icon }
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
                 logPrefix = logPrefixPos
-                ChatAnnouncements.ItemPrinter(
-                    icon,
-                    stackCountChange,
-                    itemType,
-                    itemId,
-                    itemLink,
-                    receivedBy,
-                    logPrefix,
-                    gainOrLoss,
-                    false,
-                    nil,
-                    nil,
-                    nil
-                )
+                ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 -- STACK COUNT INCREMENTED UP
             elseif stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
@@ -5143,20 +4596,7 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
                 end
                 -- ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
-                ChatAnnouncements.ItemCounterDelay(
-                    icon,
-                    stackCountChange,
-                    itemType,
-                    itemId,
-                    itemLink,
-                    receivedBy,
-                    logPrefix,
-                    gainOrLoss,
-                    false,
-                    nil,
-                    false,
-                    true
-                )
+                ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, false, true)
                 -- STACK COUNT INCREMENTED DOWN
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
@@ -5167,36 +4607,16 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
                     if removedItemType == ITEMTYPE_FISH then
                         logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageFillet
                     end
-                    ChatAnnouncements.ItemCounterDelay(
-                        removedIcon,
-                        change,
-                        removedItemType,
-                        removedItemId,
-                        removedItemLink,
-                        receivedBy,
-                        logPrefix,
-                        gainOrLoss,
-                        false,
-                        nil,
-                        true,
-                        true
-                    )
+                    ChatAnnouncements.ItemCounterDelay(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false, nil, true, true)
                 end
             end
 
             if removed then
-                if ChatAnnouncements.inventoryStacks[slotIndex] then
-                    ChatAnnouncements.inventoryStacks[slotIndex] = nil
+                if g_inventoryStacks[slotId] then
+                    g_inventoryStacks[slotId] = nil
                 end
             else
-                ChatAnnouncements.inventoryStacks[slotIndex] =
-                {
-                    icon = icon,
-                    stack = stack,
-                    itemId = itemId,
-                    itemType = itemType,
-                    itemLink = itemLink
-                }
+                g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
         end
     end
@@ -5211,73 +4631,40 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
         local itemLink
         local removed
         -- NEW ITEM
-        if not ChatAnnouncements.bankStacks[slotIndex] then
-            icon, stack = GetItemInfo(bagId, slotIndex)
-            itemType = GetItemType(bagId, slotIndex)
-            itemId = GetItemId(bagId, slotIndex)
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            ChatAnnouncements.bankStacks[slotIndex] =
-            {
-                icon = icon,
-                stack = stack,
-                itemId = itemId,
-                itemType = itemType,
-                itemLink = itemLink
-            }
+        if not g_bankStacks[slotId] then
+            icon, stack = GetItemInfo(bagId, slotId)
+            itemType = GetItemType(bagId, slotId)
+            itemId = GetItemId(bagId, slotId)
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            g_bankStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
             logPrefix = logPrefixPos
-            ChatAnnouncements.ItemPrinter(
-                icon,
-                stackCountChange,
-                itemType,
-                itemId,
-                itemLink,
-                receivedBy,
-                logPrefix,
-                gainOrLoss,
-                false,
-                nil,
-                nil,
-                nil
-            )
+            ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             -- EXISTING ITEM
-        elseif ChatAnnouncements.bankStacks[slotIndex] then
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        elseif g_bankStacks[slotId] then
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             if itemLink == nil or itemLink == "" then
                 -- If we get a nil or blank item link, the item was destroyed and we need to use the saved value here to fill in the blanks
-                icon = ChatAnnouncements.bankStacks[slotIndex].icon
-                stack = ChatAnnouncements.bankStacks[slotIndex].stack
-                itemType = ChatAnnouncements.bankStacks[slotIndex].itemType
-                itemId = ChatAnnouncements.bankStacks[slotIndex].itemId
-                itemLink = ChatAnnouncements.bankStacks[slotIndex].itemLink
+                icon = g_bankStacks[slotId].icon
+                stack = g_bankStacks[slotId].stack
+                itemType = g_bankStacks[slotId].itemType
+                itemId = g_bankStacks[slotId].itemId
+                itemLink = g_bankStacks[slotId].itemLink
                 removed = true
             else
                 -- If we get a value for itemLink, then we want to use bag info to fill in the blanks
-                icon, stack = GetItemInfo(bagId, slotIndex)
-                itemType = GetItemType(bagId, slotIndex)
-                itemId = GetItemId(bagId, slotIndex)
+                icon, stack = GetItemInfo(bagId, slotId)
+                itemType = GetItemType(bagId, slotId)
+                itemId = GetItemId(bagId, slotId)
                 removed = false
             end
 
             -- STACK COUNT CHANGE = 0 (UPGRADE)
             if stackCountChange == 0 then
-                ChatAnnouncements.oldItem = { itemLink = ChatAnnouncements.bankStacks[slotIndex].itemLink, icon = icon }
+                g_oldItem = { itemLink = g_bankStacks[slotId].itemLink, icon = icon }
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
                 logPrefix = logPrefixPos
-                ChatAnnouncements.ItemPrinter(
-                    icon,
-                    stackCountChange,
-                    itemType,
-                    itemId,
-                    itemLink,
-                    receivedBy,
-                    logPrefix,
-                    gainOrLoss,
-                    false,
-                    nil,
-                    nil,
-                    nil
-                )
+                ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 -- STACK COUNT INCREMENTED UP
             elseif stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
@@ -5286,20 +4673,7 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
                 end
                 -- ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
-                ChatAnnouncements.ItemCounterDelay(
-                    icon,
-                    stackCountChange,
-                    itemType,
-                    itemId,
-                    itemLink,
-                    receivedBy,
-                    logPrefix,
-                    gainOrLoss,
-                    false,
-                    nil,
-                    false,
-                    true
-                )
+                ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, false, true)
                 -- STACK COUNT INCREMENTED DOWN
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
@@ -5310,36 +4684,16 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
                     if itemType == ITEMTYPE_FISH then
                         logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageFillet
                     end
-                    ChatAnnouncements.ItemCounterDelay(
-                        icon,
-                        change,
-                        itemType,
-                        itemId,
-                        itemLink,
-                        receivedBy,
-                        logPrefix,
-                        gainOrLoss,
-                        false,
-                        nil,
-                        true,
-                        true
-                    )
+                    ChatAnnouncements.ItemCounterDelay(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, true, true)
                 end
             end
 
             if removed then
-                if ChatAnnouncements.bankStacks[slotIndex] then
-                    ChatAnnouncements.bankStacks[slotIndex] = nil
+                if g_bankStacks[slotId] then
+                    g_bankStacks[slotId] = nil
                 end
             else
-                ChatAnnouncements.bankStacks[slotIndex] =
-                {
-                    icon = icon,
-                    stack = stack,
-                    itemId = itemId,
-                    itemType = itemType,
-                    itemLink = itemLink
-                }
+                g_bankStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
         end
     end
@@ -5354,73 +4708,40 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
         local itemLink
         local removed
         -- NEW ITEM
-        if not ChatAnnouncements.bankSubscriberStacks[slotIndex] then
-            icon, stack = GetItemInfo(bagId, slotIndex)
-            itemType = GetItemType(bagId, slotIndex)
-            itemId = GetItemId(bagId, slotIndex)
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            ChatAnnouncements.bankSubscriberStacks[slotIndex] =
-            {
-                icon = icon,
-                stack = stack,
-                itemId = itemId,
-                itemType = itemType,
-                itemLink = itemLink
-            }
+        if not g_banksubStacks[slotId] then
+            icon, stack = GetItemInfo(bagId, slotId)
+            itemType = GetItemType(bagId, slotId)
+            itemId = GetItemId(bagId, slotId)
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            g_banksubStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
             logPrefix = logPrefixPos
-            ChatAnnouncements.ItemPrinter(
-                icon,
-                stackCountChange,
-                itemType,
-                itemId,
-                itemLink,
-                receivedBy,
-                logPrefix,
-                gainOrLoss,
-                false,
-                nil,
-                nil,
-                nil
-            )
+            ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             -- EXISTING ITEM
-        elseif ChatAnnouncements.bankSubscriberStacks[slotIndex] then
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        elseif g_banksubStacks[slotId] then
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             if itemLink == nil or itemLink == "" then
                 -- If we get a nil or blank item link, the item was destroyed and we need to use the saved value here to fill in the blanks
-                icon = ChatAnnouncements.bankSubscriberStacks[slotIndex].icon
-                stack = ChatAnnouncements.bankSubscriberStacks[slotIndex].stack
-                itemType = ChatAnnouncements.bankSubscriberStacks[slotIndex].itemType
-                itemId = ChatAnnouncements.bankSubscriberStacks[slotIndex].itemId
-                itemLink = ChatAnnouncements.bankSubscriberStacks[slotIndex].itemLink
+                icon = g_banksubStacks[slotId].icon
+                stack = g_banksubStacks[slotId].stack
+                itemType = g_banksubStacks[slotId].itemType
+                itemId = g_banksubStacks[slotId].itemId
+                itemLink = g_banksubStacks[slotId].itemLink
                 removed = true
             else
                 -- If we get a value for itemLink, then we want to use bag info to fill in the blanks
-                icon, stack = GetItemInfo(bagId, slotIndex)
-                itemType = GetItemType(bagId, slotIndex)
-                itemId = GetItemId(bagId, slotIndex)
+                icon, stack = GetItemInfo(bagId, slotId)
+                itemType = GetItemType(bagId, slotId)
+                itemId = GetItemId(bagId, slotId)
                 removed = false
             end
 
             -- STACK COUNT CHANGE = 0 (UPGRADE)
             if stackCountChange == 0 then
-                ChatAnnouncements.oldItem = { itemLink = ChatAnnouncements.bankSubscriberStacks[slotIndex].itemLink, icon = icon }
+                g_oldItem = { itemLink = g_banksubStacks[slotId].itemLink, icon = icon }
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
                 logPrefix = logPrefixPos
-                ChatAnnouncements.ItemPrinter(
-                    icon,
-                    stackCountChange,
-                    itemType,
-                    itemId,
-                    itemLink,
-                    receivedBy,
-                    logPrefix,
-                    gainOrLoss,
-                    false,
-                    nil,
-                    nil,
-                    nil
-                )
+                ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 -- STACK COUNT INCREMENTED UP
             elseif stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
@@ -5429,20 +4750,7 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
                 end
                 -- ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
-                ChatAnnouncements.ItemCounterDelay(
-                    icon,
-                    stackCountChange,
-                    itemType,
-                    itemId,
-                    itemLink,
-                    receivedBy,
-                    logPrefix,
-                    gainOrLoss,
-                    false,
-                    nil,
-                    false,
-                    true
-                )
+                ChatAnnouncements.ItemCounterDelay(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, false, true)
                 -- STACK COUNT INCREMENTED DOWN
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
@@ -5452,36 +4760,16 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
                     if itemType == ITEMTYPE_FISH then
                         logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageFillet
                     end
-                    ChatAnnouncements.ItemCounterDelay(
-                        icon,
-                        change,
-                        itemType,
-                        itemId,
-                        itemLink,
-                        receivedBy,
-                        logPrefix,
-                        gainOrLoss,
-                        false,
-                        nil,
-                        true,
-                        true
-                    )
+                    ChatAnnouncements.ItemCounterDelay(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, true, true)
                 end
             end
 
             if removed then
-                if ChatAnnouncements.bankSubscriberStacks[slotIndex] then
-                    ChatAnnouncements.bankSubscriberStacks[slotIndex] = nil
+                if g_banksubStacks[slotId] then
+                    g_banksubStacks[slotId] = nil
                 end
             else
-                ChatAnnouncements.bankSubscriberStacks[slotIndex] =
-                {
-                    icon = icon,
-                    stack = stack,
-                    itemId = itemId,
-                    itemType = itemType,
-                    itemLink = itemLink
-                }
+                g_banksubStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
         end
     end
@@ -5489,10 +4777,10 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
     if bagId == BAG_VIRTUAL then
         local gainOrLoss
         local logPrefix
-        local itemLink = tostring(ChatAnnouncements.GetItemLinkFromItemId(slotIndex))
+        local itemLink = tostring(ChatAnnouncements.GetItemLinkFromItemId(slotId))
         local icon = GetItemLinkInfo(itemLink)
         local itemType = GetItemLinkItemType(itemLink)
-        local itemId = slotIndex
+        local itemId = slotId
         local itemQuality = GetItemLinkFunctionalQuality(itemLink)
         local change
         local alwaysFirst
@@ -5518,58 +4806,15 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotIndex, isNew
             if itemId == 33753 then
                 logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
             end
-            ChatAnnouncements.ItemCounterDelay(
-                icon,
-                change,
-                itemType,
-                itemId,
-                itemLink,
-                receivedBy,
-                logPrefix,
-                gainOrLoss,
-                false,
-                nil,
-                alwaysFirst,
-                true
-            )
+            ChatAnnouncements.ItemCounterDelay(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, alwaysFirst, true)
         end
     end
 
-    ChatAnnouncements.itemWasDestroyed = false
-    ChatAnnouncements.lockpickBroken = false
+    g_itemWasDestroyed = false
+    g_lockpickBroken = false
 end
 
---- - **EVENT_INVENTORY_SINGLE_SLOT_UPDATE **
----
----
---- @param eventId integer
---- @param bagId Bag
---- @param slotIndex integer
---- @param isNewItem boolean
---- @param itemSoundCategory ItemUISoundCategory
---- @param inventoryUpdateReason integer
---- @param stackCountChange integer
---- @param triggeredByCharacterName string?
---- @param triggeredByDisplayName string?
---- @param isLastUpdateForMessage boolean
---- @param bonusDropSource BonusDropSource
-function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
-    -- if LUIE.IsDevDebugEnabled() then
-    --     local Debug = LUIE.Debug
-    --     local traceback = "Inventory Update Bank:\n" ..
-    --         "--> eventId: " .. tostring(eventId) .. "\n" ..
-    --         "--> bagId: " .. tostring(bagId) .. "\n" ..
-    --         "--> slotIndex: " .. tostring(slotIndex) .. "\n" ..
-    --         "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-    --         "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
-    --         "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
-    --         "--> stackCountChange: " .. tostring(stackCountChange) .. "\n" ..
-    --         "--> triggeredByCharacterName: " .. tostring(triggeredByCharacterName) .. "\n" ..
-    --         "--> triggeredByDisplayName: " .. tostring(triggeredByDisplayName) .. "\n" ..
-    --         "--> isLastUpdateForMessage: " .. tostring(isLastUpdateForMessage) .. "\n" ..
-    --         "--> bonusDropSource: " .. tostring(bonusDropSource)
-    --     LUIE:Log("Debug",traceback)
-    -- end
+function ChatAnnouncements.InventoryUpdateBank(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
     -- End right now if this is any other reason (durability loss, etc)
     if inventoryUpdateReason ~= INVENTORY_UPDATE_REASON_DEFAULT then
         return
@@ -5586,85 +4831,73 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotIndex, isNewI
         local itemLink
         local removed
         -- NEW ITEM
-        if not ChatAnnouncements.inventoryStacks[slotIndex] then
-            icon, stack = GetItemInfo(bagId, slotIndex)
-            itemType = GetItemType(bagId, slotIndex)
-            itemId = GetItemId(bagId, slotIndex)
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            ChatAnnouncements.inventoryStacks[slotIndex] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+        if not g_inventoryStacks[slotId] then
+            icon, stack = GetItemInfo(bagId, slotId)
+            itemType = GetItemType(bagId, slotId)
+            itemId = GetItemId(bagId, slotId)
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-            logPrefix = ChatAnnouncements.bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage
-            if ChatAnnouncements.InventoryOn then
-                ChatAnnouncements.ItemPrinter(
-                    icon,
-                    stackCountChange,
-                    itemType,
-                    itemId,
-                    itemLink,
-                    receivedBy,
-                    logPrefix,
-                    gainOrLoss,
-                    false,
-                    nil,
-                    nil,
-                    nil)
+            logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage
+            if g_InventoryOn then
+                ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             end
             -- EXISTING ITEM
-        elseif ChatAnnouncements.inventoryStacks[slotIndex] then
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        elseif g_inventoryStacks[slotId] then
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             if itemLink == nil or itemLink == "" then
                 -- If we get a nil or blank item link, the item was destroyed and we need to use the saved value here to fill in the blanks
-                icon = ChatAnnouncements.inventoryStacks[slotIndex].icon
-                stack = ChatAnnouncements.inventoryStacks[slotIndex].stack
-                itemType = ChatAnnouncements.inventoryStacks[slotIndex].itemType
-                itemId = ChatAnnouncements.inventoryStacks[slotIndex].itemId
-                itemLink = ChatAnnouncements.inventoryStacks[slotIndex].itemLink
+                icon = g_inventoryStacks[slotId].icon
+                stack = g_inventoryStacks[slotId].stack
+                itemType = g_inventoryStacks[slotId].itemType
+                itemId = g_inventoryStacks[slotId].itemId
+                itemLink = g_inventoryStacks[slotId].itemLink
                 removed = true
             else
                 -- If we get a value for itemLink, then we want to use bag info to fill in the blanks
-                icon, stack = GetItemInfo(bagId, slotIndex)
-                itemType = GetItemType(bagId, slotIndex)
-                itemId = GetItemId(bagId, slotIndex)
+                icon, stack = GetItemInfo(bagId, slotId)
+                itemType = GetItemType(bagId, slotId)
+                itemId = GetItemId(bagId, slotId)
                 removed = false
             end
 
             -- STACK COUNT INCREMENTED UP
             if stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-                logPrefix = ChatAnnouncements.bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage
-                if ChatAnnouncements.InventoryOn then
-                    ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage
+                if g_InventoryOn then
+                    ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
                 -- STACK COUNT INCREMENTED DOWN
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
-                if ChatAnnouncements.itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
+                if g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
-                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
-                if ChatAnnouncements.InventoryOn and not ChatAnnouncements.itemWasDestroyed then
+                if g_InventoryOn and not g_itemWasDestroyed then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = ChatAnnouncements.bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit or ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
-                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                    logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit or ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
+                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
             end
 
             if removed then
-                if ChatAnnouncements.inventoryStacks[slotIndex] then
-                    ChatAnnouncements.inventoryStacks[slotIndex] = nil
+                if g_inventoryStacks[slotId] then
+                    g_inventoryStacks[slotId] = nil
                 end
             else
-                ChatAnnouncements.inventoryStacks[slotIndex] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
 
-            if not ChatAnnouncements.itemWasDestroyed then
-                ChatAnnouncements.bankOn = true
+            if not g_itemWasDestroyed then
+                g_bankOn = true
             end
-            if not ChatAnnouncements.itemWasDestroyed then
-                ChatAnnouncements.InventoryOn = false
+            if not g_itemWasDestroyed then
+                g_InventoryOn = false
             end
-            if not ChatAnnouncements.itemWasDestroyed then
+            if not g_itemWasDestroyed then
                 LUIE_callLater(ChatAnnouncements.BankFixer, 50)
             end
         end
@@ -5680,33 +4913,33 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotIndex, isNewI
         local itemLink
         local removed
         -- NEW ITEM
-        if not ChatAnnouncements.bankStacks[slotIndex] then
-            icon, stack = GetItemInfo(bagId, slotIndex)
-            itemType = GetItemType(bagId, slotIndex)
-            itemId = GetItemId(bagId, slotIndex)
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            ChatAnnouncements.bankStacks[slotIndex] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+        if not g_bankStacks[slotId] then
+            icon, stack = GetItemInfo(bagId, slotId)
+            itemType = GetItemType(bagId, slotId)
+            itemId = GetItemId(bagId, slotId)
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            g_bankStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit
-            if ChatAnnouncements.bankOn then
-                ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+            if g_bankOn then
+                ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             end
             -- EXISTING ITEM
-        elseif ChatAnnouncements.bankStacks[slotIndex] then
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        elseif g_bankStacks[slotId] then
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             if itemLink == nil or itemLink == "" then
                 -- If we get a nil or blank item link, the item was destroyed and we need to use the saved value here to fill in the blanks
-                icon = ChatAnnouncements.bankStacks[slotIndex].icon
-                stack = ChatAnnouncements.bankStacks[slotIndex].stack
-                itemType = ChatAnnouncements.bankStacks[slotIndex].itemType
-                itemId = ChatAnnouncements.bankStacks[slotIndex].itemId
-                itemLink = ChatAnnouncements.bankStacks[slotIndex].itemLink
+                icon = g_bankStacks[slotId].icon
+                stack = g_bankStacks[slotId].stack
+                itemType = g_bankStacks[slotId].itemType
+                itemId = g_bankStacks[slotId].itemId
+                itemLink = g_bankStacks[slotId].itemLink
                 removed = true
             else
                 -- If we get a value for itemLink, then we want to use bag info to fill in the blanks
-                icon, stack = GetItemInfo(bagId, slotIndex)
-                itemType = GetItemType(bagId, slotIndex)
-                itemId = GetItemId(bagId, slotIndex)
+                icon, stack = GetItemInfo(bagId, slotId)
+                itemType = GetItemType(bagId, slotId)
+                itemId = GetItemId(bagId, slotId)
                 removed = false
             end
 
@@ -5714,39 +4947,39 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotIndex, isNewI
             if stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                 logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit
-                if ChatAnnouncements.bankOn then
-                    ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                if g_bankOn then
+                    ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
                 -- STACK COUNT INCREMENTED DOWN
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
-                if ChatAnnouncements.itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
+                if g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
-                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
-                if ChatAnnouncements.bankOn and not ChatAnnouncements.itemWasDestroyed then
+                if g_bankOn and not g_itemWasDestroyed then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit
-                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
             end
 
             if removed then
-                if ChatAnnouncements.bankStacks[slotIndex] then
-                    ChatAnnouncements.bankStacks[slotIndex] = nil
+                if g_bankStacks[slotId] then
+                    g_bankStacks[slotId] = nil
                 end
             else
-                ChatAnnouncements.bankStacks[slotIndex] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                g_bankStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
 
-            if not ChatAnnouncements.itemWasDestroyed then
-                ChatAnnouncements.InventoryOn = true
+            if not g_itemWasDestroyed then
+                g_InventoryOn = true
             end
-            if not ChatAnnouncements.itemWasDestroyed then
-                ChatAnnouncements.bankOn = false
+            if not g_itemWasDestroyed then
+                g_bankOn = false
             end
-            if not ChatAnnouncements.itemWasDestroyed then
+            if not g_itemWasDestroyed then
                 LUIE_callLater(ChatAnnouncements.BankFixer, 50)
             end
         end
@@ -5762,33 +4995,33 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotIndex, isNewI
         local itemLink
         local removed
         -- NEW ITEM
-        if not ChatAnnouncements.bankSubscriberStacks[slotIndex] then
-            icon, stack = GetItemInfo(bagId, slotIndex)
-            itemType = GetItemType(bagId, slotIndex)
-            itemId = GetItemId(bagId, slotIndex)
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            ChatAnnouncements.bankSubscriberStacks[slotIndex] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+        if not g_banksubStacks[slotId] then
+            icon, stack = GetItemInfo(bagId, slotId)
+            itemType = GetItemType(bagId, slotId)
+            itemId = GetItemId(bagId, slotId)
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            g_banksubStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit
-            if ChatAnnouncements.bankOn then
-                ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+            if g_bankOn then
+                ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             end
             -- EXISTING ITEM
-        elseif ChatAnnouncements.bankSubscriberStacks[slotIndex] then
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        elseif g_banksubStacks[slotId] then
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             if itemLink == nil or itemLink == "" then
                 -- If we get a nil or blank item link, the item was destroyed and we need to use the saved value here to fill in the blanks
-                icon = ChatAnnouncements.bankSubscriberStacks[slotIndex].icon
-                stack = ChatAnnouncements.bankSubscriberStacks[slotIndex].stack
-                itemType = ChatAnnouncements.bankSubscriberStacks[slotIndex].itemType
-                itemId = ChatAnnouncements.bankSubscriberStacks[slotIndex].itemId
-                itemLink = ChatAnnouncements.bankSubscriberStacks[slotIndex].itemLink
+                icon = g_banksubStacks[slotId].icon
+                stack = g_banksubStacks[slotId].stack
+                itemType = g_banksubStacks[slotId].itemType
+                itemId = g_banksubStacks[slotId].itemId
+                itemLink = g_banksubStacks[slotId].itemLink
                 removed = true
             else
                 -- If we get a value for itemLink, then we want to use bag info to fill in the blanks
-                icon, stack = GetItemInfo(bagId, slotIndex)
-                itemType = GetItemType(bagId, slotIndex)
-                itemId = GetItemId(bagId, slotIndex)
+                icon, stack = GetItemInfo(bagId, slotId)
+                itemType = GetItemType(bagId, slotId)
+                itemId = GetItemId(bagId, slotId)
                 removed = false
             end
 
@@ -5796,39 +5029,39 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotIndex, isNewI
             if stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                 logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit
-                if ChatAnnouncements.bankOn then
-                    ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                if g_bankOn then
+                    ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
                 -- STACK COUNT INCREMENTED DOWN
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
-                if ChatAnnouncements.itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
+                if g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
-                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
-                if ChatAnnouncements.bankOn and not ChatAnnouncements.itemWasDestroyed then
+                if g_bankOn and not g_itemWasDestroyed then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit
-                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
             end
 
             if removed then
-                if ChatAnnouncements.bankSubscriberStacks[slotIndex] then
-                    ChatAnnouncements.bankSubscriberStacks[slotIndex] = nil
+                if g_banksubStacks[slotId] then
+                    g_banksubStacks[slotId] = nil
                 end
             else
-                ChatAnnouncements.bankSubscriberStacks[slotIndex] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                g_banksubStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
 
-            if not ChatAnnouncements.itemWasDestroyed then
-                ChatAnnouncements.InventoryOn = true
+            if not g_itemWasDestroyed then
+                g_InventoryOn = true
             end
-            if not ChatAnnouncements.itemWasDestroyed then
-                ChatAnnouncements.bankOn = false
+            if not g_itemWasDestroyed then
+                g_bankOn = false
             end
-            if not ChatAnnouncements.itemWasDestroyed then
+            if not g_itemWasDestroyed then
                 LUIE_callLater(ChatAnnouncements.BankFixer, 50)
             end
         end
@@ -5844,33 +5077,33 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotIndex, isNewI
         local itemLink
         local removed
         -- NEW ITEM
-        if not ChatAnnouncements.houseBags[bagId][slotIndex] then
-            icon, stack = GetItemInfo(bagId, slotIndex)
-            itemType = GetItemType(bagId, slotIndex)
-            itemId = GetItemId(bagId, slotIndex)
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            ChatAnnouncements.houseBags[bagId][slotIndex] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+        if not g_houseBags[bagId][slotId] then
+            icon, stack = GetItemInfo(bagId, slotId)
+            itemType = GetItemType(bagId, slotId)
+            itemId = GetItemId(bagId, slotId)
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            g_houseBags[bagId][slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
-            if ChatAnnouncements.bankOn then
-                ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+            if g_bankOn then
+                ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             end
             -- EXISTING ITEM
-        elseif ChatAnnouncements.houseBags[bagId][slotIndex] then
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        elseif g_houseBags[bagId][slotId] then
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             if itemLink == nil or itemLink == "" then
                 -- If we get a nil or blank item link, the item was destroyed and we need to use the saved value here to fill in the blanks
-                icon = ChatAnnouncements.houseBags[bagId][slotIndex].icon
-                stack = ChatAnnouncements.houseBags[bagId][slotIndex].stack
-                itemType = ChatAnnouncements.houseBags[bagId][slotIndex].itemType
-                itemId = ChatAnnouncements.houseBags[bagId][slotIndex].itemId
-                itemLink = ChatAnnouncements.houseBags[bagId][slotIndex].itemLink
+                icon = g_houseBags[bagId][slotId].icon
+                stack = g_houseBags[bagId][slotId].stack
+                itemType = g_houseBags[bagId][slotId].itemType
+                itemId = g_houseBags[bagId][slotId].itemId
+                itemLink = g_houseBags[bagId][slotId].itemLink
                 removed = true
             else
                 -- If we get a value for itemLink, then we want to use bag info to fill in the blanks
-                icon, stack = GetItemInfo(bagId, slotIndex)
-                itemType = GetItemType(bagId, slotIndex)
-                itemId = GetItemId(bagId, slotIndex)
+                icon, stack = GetItemInfo(bagId, slotId)
+                itemType = GetItemType(bagId, slotId)
+                itemId = GetItemId(bagId, slotId)
                 removed = false
             end
 
@@ -5878,39 +5111,39 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotIndex, isNewI
             if stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                 logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
-                if ChatAnnouncements.bankOn then
-                    ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                if g_bankOn then
+                    ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
                 -- STACK COUNT INCREMENTED DOWN
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
-                if ChatAnnouncements.itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
+                if g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
-                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
-                if ChatAnnouncements.bankOn and not ChatAnnouncements.itemWasDestroyed then
+                if g_bankOn and not g_itemWasDestroyed then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
-                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
             end
 
             if removed then
-                if ChatAnnouncements.houseBags[bagId][slotIndex] then
-                    ChatAnnouncements.houseBags[bagId][slotIndex] = nil
+                if g_houseBags[bagId][slotId] then
+                    g_houseBags[bagId][slotId] = nil
                 end
             else
-                ChatAnnouncements.houseBags[bagId][slotIndex] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                g_houseBags[bagId][slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
 
-            if not ChatAnnouncements.itemWasDestroyed then
-                ChatAnnouncements.InventoryOn = true
+            if not g_itemWasDestroyed then
+                g_InventoryOn = true
             end
-            if not ChatAnnouncements.itemWasDestroyed then
-                ChatAnnouncements.bankOn = false
+            if not g_itemWasDestroyed then
+                g_bankOn = false
             end
-            if not ChatAnnouncements.itemWasDestroyed then
+            if not g_itemWasDestroyed then
                 LUIE_callLater(ChatAnnouncements.BankFixer, 50)
             end
         end
@@ -5920,61 +5153,30 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotIndex, isNewI
         local gainOrLoss
         local stack
         local logPrefix
-        local itemLink = tostring(ChatAnnouncements.GetItemLinkFromItemId(slotIndex))
+        local itemLink = tostring(ChatAnnouncements.GetItemLinkFromItemId(slotId))
         local icon = GetItemLinkInfo(itemLink)
         local itemType = GetItemLinkItemType(itemLink)
-        local itemId = slotIndex
+        local itemId = slotId
         local itemQuality = GetItemLinkFunctionalQuality(itemLink)
 
         if stackCountChange < 1 then
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-            logPrefix = ChatAnnouncements.bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit or ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
+            logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit or ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
             stack = stackCountChange * -1
         else
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-            logPrefix = ChatAnnouncements.bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage
+            logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage
             stack = stackCountChange
         end
 
-        ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+        ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
     end
 
-    ChatAnnouncements.itemWasDestroyed = false
-    ChatAnnouncements.lockpickBroken = false
+    g_itemWasDestroyed = false
+    g_lockpickBroken = false
 end
 
---- - **EVENT_INVENTORY_SINGLE_SLOT_UPDATE **
----
----
---- @param eventId integer
---- @param bagId Bag
---- @param slotIndex integer
---- @param isNewItem boolean
---- @param itemSoundCategory ItemUISoundCategory
---- @param inventoryUpdateReason integer
---- @param stackCountChange integer
---- @param triggeredByCharacterName string?
---- @param triggeredByDisplayName string?
---- @param isLastUpdateForMessage boolean
---- @param bonusDropSource BonusDropSource
-function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
-    -- if LUIE.IsDevDebugEnabled() then
-    --     local Debug = LUIE.Debug
-    --     local traceback = "Inventory Update Guild Bank:\n" ..
-    --         "--> eventId: " .. tostring(eventId) .. "\n" ..
-    --         "--> bagId: " .. tostring(bagId) .. "\n" ..
-    --         "--> slotIndex: " .. tostring(slotIndex) .. "\n" ..
-    --         "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-    --         "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
-    --         "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
-    --         "--> stackCountChange: " .. tostring(stackCountChange) .. "\n" ..
-    --         "--> triggeredByCharacterName: " .. tostring(triggeredByCharacterName) .. "\n" ..
-    --         "--> triggeredByDisplayName: " .. tostring(triggeredByDisplayName) .. "\n" ..
-    --         "--> isLastUpdateForMessage: " .. tostring(isLastUpdateForMessage) .. "\n" ..
-    --         "--> bonusDropSource: " .. tostring(bonusDropSource)
-    --     LUIE:Log("Debug",traceback)
-    -- end
-
+function ChatAnnouncements.InventoryUpdateGuildBank(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
     local receivedBy = ""
     ---------------------------------- INVENTORY ----------------------------------
     if bagId == BAG_BACKPACK then
@@ -5987,81 +5189,81 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotIndex, i
         local itemLink
         local removed
 
-        if not ChatAnnouncements.inventoryStacks[slotIndex] then -- NEW ITEM
-            local icon1, stack1 = GetItemInfo(bagId, slotIndex)
-            itemType = GetItemType(bagId, slotIndex)
-            itemId = GetItemId(bagId, slotIndex)
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            ChatAnnouncements.inventoryStacks[slotIndex] = { icon = icon1, stack = stack1, itemId = itemId, itemType = itemType, itemLink = itemLink }
+        if not g_inventoryStacks[slotId] then -- NEW ITEM
+            local icon1, stack1 = GetItemInfo(bagId, slotId)
+            itemType = GetItemType(bagId, slotId)
+            itemId = GetItemId(bagId, slotId)
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            g_inventoryStacks[slotId] = { icon = icon1, stack = stack1, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
             logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawGuild
-            ChatAnnouncements.guildBankCarry = {}
-            ChatAnnouncements.guildBankCarry.icon = icon1
-            ChatAnnouncements.guildBankCarry.stack = stack1
-            ChatAnnouncements.guildBankCarry.gainOrLoss = gainOrLoss
-            ChatAnnouncements.guildBankCarry.logPrefix = logPrefix
-            ChatAnnouncements.guildBankCarry.receivedBy = receivedBy
-            ChatAnnouncements.guildBankCarry.itemLink = itemLink
-            ChatAnnouncements.guildBankCarry.itemId = itemId
-            ChatAnnouncements.guildBankCarry.itemType = itemType
-        elseif ChatAnnouncements.inventoryStacks[slotIndex] then -- EXISTING ITEM
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            g_guildBankCarry = {}
+            g_guildBankCarry.icon = icon1
+            g_guildBankCarry.stack = stack1
+            g_guildBankCarry.gainOrLoss = gainOrLoss
+            g_guildBankCarry.logPrefix = logPrefix
+            g_guildBankCarry.receivedBy = receivedBy
+            g_guildBankCarry.itemLink = itemLink
+            g_guildBankCarry.itemId = itemId
+            g_guildBankCarry.itemType = itemType
+        elseif g_inventoryStacks[slotId] then -- EXISTING ITEM
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             if itemLink == nil or itemLink == "" then
                 -- If we get a nil or blank item link, the item was destroyed and we need to use the saved value here to fill in the blanks
-                icon = ChatAnnouncements.inventoryStacks[slotIndex].icon
-                stack = ChatAnnouncements.inventoryStacks[slotIndex].stack
-                itemType = ChatAnnouncements.inventoryStacks[slotIndex].itemType
-                itemId = ChatAnnouncements.inventoryStacks[slotIndex].itemId
-                itemLink = ChatAnnouncements.inventoryStacks[slotIndex].itemLink
+                icon = g_inventoryStacks[slotId].icon
+                stack = g_inventoryStacks[slotId].stack
+                itemType = g_inventoryStacks[slotId].itemType
+                itemId = g_inventoryStacks[slotId].itemId
+                itemLink = g_inventoryStacks[slotId].itemLink
                 removed = true
             else
                 -- If we get a value for itemLink, then we want to use bag info to fill in the blanks
-                icon, stack = GetItemInfo(bagId, slotIndex)
-                itemType = GetItemType(bagId, slotIndex)
-                itemId = GetItemId(bagId, slotIndex)
+                icon, stack = GetItemInfo(bagId, slotId)
+                itemType = GetItemType(bagId, slotId)
+                itemId = GetItemId(bagId, slotId)
                 removed = false
             end
 
             if stackCountChange > 0 then -- STACK COUNT INCREMENTED UP
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
                 logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawGuild
-                ChatAnnouncements.guildBankCarry = {}
-                ChatAnnouncements.guildBankCarry.icon = icon
-                ChatAnnouncements.guildBankCarry.stack = stack
-                ChatAnnouncements.guildBankCarry.gainOrLoss = gainOrLoss
-                ChatAnnouncements.guildBankCarry.logPrefix = logPrefix
-                ChatAnnouncements.guildBankCarry.receivedBy = receivedBy
-                ChatAnnouncements.guildBankCarry.itemLink = itemLink
-                ChatAnnouncements.guildBankCarry.itemId = itemId
-                ChatAnnouncements.guildBankCarry.itemType = itemType
+                g_guildBankCarry = {}
+                g_guildBankCarry.icon = icon
+                g_guildBankCarry.stack = stack
+                g_guildBankCarry.gainOrLoss = gainOrLoss
+                g_guildBankCarry.logPrefix = logPrefix
+                g_guildBankCarry.receivedBy = receivedBy
+                g_guildBankCarry.itemLink = itemLink
+                g_guildBankCarry.itemId = itemId
+                g_guildBankCarry.itemType = itemType
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
-                if ChatAnnouncements.itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
+                if g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
-                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
-                if not ChatAnnouncements.itemWasDestroyed then
+                if not g_itemWasDestroyed then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositGuild
-                    ChatAnnouncements.guildBankCarry = {}
-                    ChatAnnouncements.guildBankCarry.icon = icon
-                    ChatAnnouncements.guildBankCarry.stack = stack
-                    ChatAnnouncements.guildBankCarry.gainOrLoss = gainOrLoss
-                    ChatAnnouncements.guildBankCarry.logPrefix = logPrefix
-                    ChatAnnouncements.guildBankCarry.receivedBy = receivedBy
-                    ChatAnnouncements.guildBankCarry.itemLink = itemLink
-                    ChatAnnouncements.guildBankCarry.itemId = itemId
-                    ChatAnnouncements.guildBankCarry.itemType = itemType
+                    g_guildBankCarry = {}
+                    g_guildBankCarry.icon = icon
+                    g_guildBankCarry.stack = stack
+                    g_guildBankCarry.gainOrLoss = gainOrLoss
+                    g_guildBankCarry.logPrefix = logPrefix
+                    g_guildBankCarry.receivedBy = receivedBy
+                    g_guildBankCarry.itemLink = itemLink
+                    g_guildBankCarry.itemId = itemId
+                    g_guildBankCarry.itemType = itemType
                 end
             end
 
             if removed then
-                if ChatAnnouncements.inventoryStacks[slotIndex] then
-                    ChatAnnouncements.inventoryStacks[slotIndex] = nil
+                if g_inventoryStacks[slotId] then
+                    g_inventoryStacks[slotId] = nil
                 end
             else
-                ChatAnnouncements.inventoryStacks[slotIndex] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
         end
     end
@@ -6071,10 +5273,10 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotIndex, i
         local gainOrLoss
         local stack
         local logPrefix
-        local itemLink = tostring(ChatAnnouncements.GetItemLinkFromItemId(slotIndex))
+        local itemLink = tostring(ChatAnnouncements.GetItemLinkFromItemId(slotId))
         local icon = GetItemLinkInfo(itemLink)
         local itemType = GetItemLinkItemType(itemLink)
-        local itemId = slotIndex
+        local itemId = slotId
         local itemQuality = GetItemLinkFunctionalQuality(itemLink)
 
         if stackCountChange < 1 then
@@ -6087,54 +5289,22 @@ function ChatAnnouncements.InventoryUpdateGuildBank(eventId, bagId, slotIndex, i
             stack = stackCountChange
         end
 
-        ChatAnnouncements.guildBankCarry = {}
-        ChatAnnouncements.guildBankCarry.icon = icon
-        ChatAnnouncements.guildBankCarry.stack = stack
-        ChatAnnouncements.guildBankCarry.gainOrLoss = gainOrLoss
-        ChatAnnouncements.guildBankCarry.logPrefix = logPrefix
-        ChatAnnouncements.guildBankCarry.receivedBy = receivedBy
-        ChatAnnouncements.guildBankCarry.itemLink = itemLink
-        ChatAnnouncements.guildBankCarry.itemId = itemId
-        ChatAnnouncements.guildBankCarry.itemType = itemType
-        ChatAnnouncements.guildBankCarry.itemQuality = itemQuality
+        g_guildBankCarry = {}
+        g_guildBankCarry.icon = icon
+        g_guildBankCarry.stack = stack
+        g_guildBankCarry.gainOrLoss = gainOrLoss
+        g_guildBankCarry.logPrefix = logPrefix
+        g_guildBankCarry.receivedBy = receivedBy
+        g_guildBankCarry.itemLink = itemLink
+        g_guildBankCarry.itemId = itemId
+        g_guildBankCarry.itemType = itemType
     end
 
-    ChatAnnouncements.itemWasDestroyed = false
-    ChatAnnouncements.lockpickBroken = false
+    g_itemWasDestroyed = false
+    g_lockpickBroken = false
 end
 
---- - **EVENT_INVENTORY_SINGLE_SLOT_UPDATE **
----
----
---- @param eventId integer
---- @param bagId Bag
---- @param slotIndex integer
---- @param isNewItem boolean
---- @param itemSoundCategory ItemUISoundCategory
---- @param inventoryUpdateReason integer
---- @param stackCountChange integer
---- @param triggeredByCharacterName string?
---- @param triggeredByDisplayName string?
---- @param isLastUpdateForMessage boolean
---- @param bonusDropSource BonusDropSource
-function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
-    -- if LUIE.IsDevDebugEnabled() then
-    --     local Debug = LUIE.Debug
-    --     local traceback = "Inventory Update Fence:\n" ..
-    --         "--> eventId: " .. tostring(eventId) .. "\n" ..
-    --         "--> bagId: " .. tostring(bagId) .. "\n" ..
-    --         "--> slotIndex: " .. tostring(slotIndex) .. "\n" ..
-    --         "--> isNewItem: " .. tostring(isNewItem) .. "\n" ..
-    --         "--> itemSoundCategory: " .. tostring(itemSoundCategory) .. "\n" ..
-    --         "--> inventoryUpdateReason: " .. tostring(inventoryUpdateReason) .. "\n" ..
-    --         "--> stackCountChange: " .. tostring(stackCountChange) .. "\n" ..
-    --         "--> triggeredByCharacterName: " .. tostring(triggeredByCharacterName) .. "\n" ..
-    --         "--> triggeredByDisplayName: " .. tostring(triggeredByDisplayName) .. "\n" ..
-    --         "--> isLastUpdateForMessage: " .. tostring(isLastUpdateForMessage) .. "\n" ..
-    --         "--> bonusDropSource: " .. tostring(bonusDropSource)
-    --     LUIE:Log("Debug",traceback)
-    -- end
-
+function ChatAnnouncements.InventoryUpdateFence(eventCode, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
     -- End right now if this is any other reason (durability loss, etc)
     if inventoryUpdateReason ~= INVENTORY_UPDATE_REASON_DEFAULT then
         return
@@ -6151,65 +5321,66 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotIndex, isNew
         local itemLink
         local removed
         -- NEW ITEM
-        if not ChatAnnouncements.inventoryStacks[slotIndex] then
-            icon, stack = GetItemInfo(bagId, slotIndex)
-            itemType = GetItemType(bagId, slotIndex)
-            itemId = GetItemId(bagId, slotIndex)
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-            ChatAnnouncements.inventoryStacks[slotIndex] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+        if not g_inventoryStacks[slotId] then
+            icon, stack = GetItemInfo(bagId, slotId)
+            itemType = GetItemType(bagId, slotId)
+            itemId = GetItemId(bagId, slotId)
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             -- EXISTING ITEM
-        elseif ChatAnnouncements.inventoryStacks[slotIndex] then
-            itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        elseif g_inventoryStacks[slotId] then
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             if itemLink == nil or itemLink == "" then
                 -- If we get a nil or blank item link, the item was destroyed and we need to use the saved value here to fill in the blanks
-                icon = ChatAnnouncements.inventoryStacks[slotIndex].icon
-                stack = ChatAnnouncements.inventoryStacks[slotIndex].stack
-                itemType = ChatAnnouncements.inventoryStacks[slotIndex].itemType
-                itemId = ChatAnnouncements.inventoryStacks[slotIndex].itemId
-                itemLink = ChatAnnouncements.inventoryStacks[slotIndex].itemLink
+                icon = g_inventoryStacks[slotId].icon
+                stack = g_inventoryStacks[slotId].stack
+                itemType = g_inventoryStacks[slotId].itemType
+                itemId = g_inventoryStacks[slotId].itemId
+                itemLink = g_inventoryStacks[slotId].itemLink
                 removed = true
             else
                 -- If we get a value for itemLink, then we want to use bag info to fill in the blanks
-                icon, stack = GetItemInfo(bagId, slotIndex)
-                itemType = GetItemType(bagId, slotIndex)
-                itemId = GetItemId(bagId, slotIndex)
+                icon, stack = GetItemInfo(bagId, slotId)
+                itemType = GetItemType(bagId, slotId)
+                itemId = GetItemId(bagId, slotId)
                 removed = false
             end
 
             if stackCountChange == 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
                 logPrefix = ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunder or ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunderNoV
-                if not ChatAnnouncements.weAreInAStore and ChatAnnouncements.SV.Inventory.Loot then
-                    local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyDownColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+                if not g_weAreInAStore and ChatAnnouncements.SV.Inventory.Loot then
+                    local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyDownColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
                     if ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.Currency.CurrencyContextMergedColor then
-                        changeColor = ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+                        changeColor = ColorizeColors.CurrencyColorize:ToHex()
                     end
-                    local messageType = "LUIE_CURRENCY_VENDOR"
+                    local type = "LUIE_CURRENCY_VENDOR"
 
                     local parts = { ZO_LinkHandler_ParseLink(itemLink) }
                     parts[22] = "1"
-                    local partss = table_concat(parts, ":"):sub(2, -1)
-                    itemLink = zo_strformat("|H<<1>>|h|h", partss)
+                    parts = table_concat(parts, ":"):sub(2, -1)
+                    itemLink = zo_strformat("|H<<1>>|h|h", parts)
 
                     local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon and icon ~= "") and ("|t16:16:" .. icon .. "|t ") or ""
-                    local itemCount = stack > 1 and (" |cFFFFFF" .. LUIE_TINY_X_FORMATTER .. "" .. stack .. "|r") or ""
+                    local itemCount = stack > 1 and (" |cFFFFFFx" .. stack .. "|r") or ""
                     local carriedItem = (formattedIcon .. itemLink .. itemCount)
                     local carriedItemTotal = ""
                     if ChatAnnouncements.SV.Inventory.LootVendorTotalItems then
-                        local total = getItemLinkStackCount(itemLink)
-                        if total >= 1 then
+                        local total1, total2, total3 = GetItemLinkStacks(itemLink)
+                        local total = total1 + total2 + total3
+                        if total > 1 then
                             carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
                         end
                     end
 
                     if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-                        ChatAnnouncements.savedPurchase.changeColor = changeColor
-                        ChatAnnouncements.savedPurchase.messageChange = logPrefix
-                        ChatAnnouncements.savedPurchase.messageType = messageType
-                        ChatAnnouncements.savedPurchase.carriedItem = carriedItem
-                        ChatAnnouncements.savedPurchase.carriedItemTotal = carriedItemTotal
+                        g_savedPurchase.changeColor = changeColor
+                        g_savedPurchase.messageChange = logPrefix
+                        g_savedPurchase.type = type
+                        g_savedPurchase.carriedItem = carriedItem
+                        g_savedPurchase.carriedItemTotal = carriedItemTotal
                     else
-                        ChatAnnouncements.savedLaunder =
+                        g_savedLaunder =
                         {
                             icon = icon,
                             stack = 0,
@@ -6225,49 +5396,50 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotIndex, isNew
             elseif stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
                 logPrefix = ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunder or ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunderNoV
-                --[[                 if not ChatAnnouncements.weAreInAStore and ChatAnnouncements.SV.Inventory.Loot then
+                --[[                 if not g_weAreInAStore and ChatAnnouncements.SV.Inventory.Loot then
                     --ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, true)
                 end ]]
                 -- STACK COUNT INCREMENTED DOWN
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
-                if ChatAnnouncements.itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
+                if g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
-                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 else
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
                     logPrefix = ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunder or ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunderNoV
-                    local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyDownColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+                    local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyDownColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
                     if ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.Currency.CurrencyContextMergedColor then
-                        changeColor = ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+                        changeColor = ColorizeColors.CurrencyColorize:ToHex()
                     end
-                    local messageType = "LUIE_CURRENCY_VENDOR"
+                    local type = "LUIE_CURRENCY_VENDOR"
 
                     local parts = { ZO_LinkHandler_ParseLink(itemLink) }
                     parts[22] = "1"
-                    local partss = table_concat(parts, ":"):sub(2, -1)
-                    itemLink = zo_strformat("|H<<1>>|h|h", partss)
+                    parts = table_concat(parts, ":"):sub(2, -1)
+                    itemLink = zo_strformat("|H<<1>>|h|h", parts)
 
                     local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon and icon ~= "") and ("|t16:16:" .. icon .. "|t ") or ""
-                    local itemCount = stack > 1 and (" |cFFFFFF" .. LUIE_TINY_X_FORMATTER .. "" .. stack .. "|r") or ""
+                    local itemCount = stack > 1 and (" |cFFFFFFx" .. stack .. "|r") or ""
                     local carriedItem = (formattedIcon .. itemLink .. itemCount)
                     local carriedItemTotal = ""
                     if ChatAnnouncements.SV.Inventory.LootVendorTotalItems then
-                        local total = getItemLinkStackCount(itemLink)
-                        if total >= 1 then
+                        local total1, total2, total3 = GetItemLinkStacks(itemLink)
+                        local total = total1 + total2 + total3
+                        if total > 1 then
                             carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
                         end
                     end
 
                     if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-                        ChatAnnouncements.savedPurchase.changeColor = changeColor
-                        ChatAnnouncements.savedPurchase.messageChange = logPrefix
-                        ChatAnnouncements.savedPurchase.messageType = messageType
-                        ChatAnnouncements.savedPurchase.carriedItem = carriedItem
-                        ChatAnnouncements.savedPurchase.carriedItemTotal = carriedItemTotal
+                        g_savedPurchase.changeColor = changeColor
+                        g_savedPurchase.messageChange = logPrefix
+                        g_savedPurchase.type = type
+                        g_savedPurchase.carriedItem = carriedItem
+                        g_savedPurchase.carriedItemTotal = carriedItemTotal
                     else
-                        ChatAnnouncements.savedLaunder =
+                        g_savedLaunder =
                         {
                             icon = icon,
                             stack = change,
@@ -6282,11 +5454,11 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotIndex, isNew
             end
 
             if removed then
-                if ChatAnnouncements.inventoryStacks[slotIndex] then
-                    ChatAnnouncements.inventoryStacks[slotIndex] = nil
+                if g_inventoryStacks[slotId] then
+                    g_inventoryStacks[slotId] = nil
                 end
             else
-                ChatAnnouncements.inventoryStacks[slotIndex] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
         end
     end
@@ -6294,44 +5466,45 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotIndex, isNew
     if bagId == BAG_VIRTUAL then
         local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
         local logPrefix = ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunder or ChatAnnouncements.SV.ContextMessages.CurrencyMessageLaunderNoV
-        local itemLink = GetItemLink(bagId, slotIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        local itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
         local icon = GetItemLinkInfo(itemLink)
         local itemType = GetItemLinkItemType(itemLink)
-        local itemId = slotIndex
+        local itemId = slotId
         local itemQuality = GetItemLinkFunctionalQuality(itemLink)
 
-        if not ChatAnnouncements.weAreInAStore and ChatAnnouncements.SV.Inventory.Loot then
+        if not g_weAreInAStore and ChatAnnouncements.SV.Inventory.Loot then
             local change = stackCountChange > 0 and stackCountChange or stackCountChange * -1
-            local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ChatAnnouncements.Colors.CurrencyDownColorize:ToHex() or ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+            local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyDownColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
             if ChatAnnouncements.SV.Inventory.LootVendorCurrency and ChatAnnouncements.SV.Currency.CurrencyContextMergedColor then
-                changeColor = ChatAnnouncements.Colors.CurrencyColorize:ToHex()
+                changeColor = ColorizeColors.CurrencyColorize:ToHex()
             end
-            local messageType = "LUIE_CURRENCY_VENDOR"
+            local type = "LUIE_CURRENCY_VENDOR"
 
             local parts = { ZO_LinkHandler_ParseLink(itemLink) }
             parts[22] = "1"
-            local partss = table_concat(parts, ":"):sub(2, -1)
-            itemLink = zo_strformat("|H<<1>>|h|h", partss)
+            parts = table_concat(parts, ":"):sub(2, -1)
+            itemLink = zo_strformat("|H<<1>>|h|h", parts)
 
             local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and icon and icon ~= "") and ("|t16:16:" .. icon .. "|t ") or ""
-            local itemCount = stackCountChange > 1 and (" |cFFFFFF" .. LUIE_TINY_X_FORMATTER .. "" .. stackCountChange .. "|r") or ""
+            local itemCount = stackCountChange > 1 and (" |cFFFFFFx" .. stackCountChange .. "|r") or ""
             local carriedItem = (formattedIcon .. itemLink .. itemCount)
             local carriedItemTotal = ""
             if ChatAnnouncements.SV.Inventory.LootVendorTotalItems then
-                local total = getItemLinkStackCount(itemLink)
-                if total >= 1 then
+                local total1, total2, total3 = GetItemLinkStacks(itemLink)
+                local total = total1 + total2 + total3
+                if total > 1 then
                     carriedItemTotal = string_format(" |c%s%s|r %s|cFFFFFF%s|r", changeColor, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(total))
                 end
             end
 
             if ChatAnnouncements.SV.Inventory.LootVendorCurrency then
-                ChatAnnouncements.savedPurchase.changeColor = changeColor
-                ChatAnnouncements.savedPurchase.messageChange = logPrefix
-                ChatAnnouncements.savedPurchase.messageType = messageType
-                ChatAnnouncements.savedPurchase.carriedItem = carriedItem
-                ChatAnnouncements.savedPurchase.carriedItemTotal = carriedItemTotal
+                g_savedPurchase.changeColor = changeColor
+                g_savedPurchase.messageChange = logPrefix
+                g_savedPurchase.type = type
+                g_savedPurchase.carriedItem = carriedItem
+                g_savedPurchase.carriedItemTotal = carriedItemTotal
             else
-                ChatAnnouncements.savedLaunder =
+                g_savedLaunder =
                 {
                     icon = icon,
                     stack = change,
@@ -6345,14 +5518,14 @@ function ChatAnnouncements.InventoryUpdateFence(eventId, bagId, slotIndex, isNew
         end
     end
 
-    ChatAnnouncements.itemWasDestroyed = false
-    ChatAnnouncements.lockpickBroken = false
+    g_itemWasDestroyed = false
+    g_lockpickBroken = false
 end
 
 -- Makes it so bank withdraw/deposit events only occur when we can confirm the item is crossing over.
 function ChatAnnouncements.BankFixer()
-    ChatAnnouncements.InventoryOn = false
-    ChatAnnouncements.bankOn = false
+    g_InventoryOn = false
+    g_bankOn = false
 end
 
 function ChatAnnouncements.JusticeStealRemove(eventCode)
@@ -6360,172 +5533,143 @@ function ChatAnnouncements.JusticeStealRemove(eventCode)
 end
 
 function ChatAnnouncements.JusticeDisplayConfiscate()
-    local function getConfiscateMessage()
-        if ChatAnnouncements.itemsConfiscated then
-            return GetString(LUIE_STRING_CA_JUSTICE_CONFISCATED_BOUNTY_ITEMS_MSG)
-        else
-            return GetString(LUIE_STRING_CA_JUSTICE_CONFISCATED_MSG)
-        end
-    end
     if ChatAnnouncements.SV.Notify.NotificationConfiscateCA or ChatAnnouncements.SV.Notify.NotificationConfiscateAlert then
-        local ConfiscateMessage = getConfiscateMessage()
+        local ConfiscateMessage
+        if g_itemsConfiscated then
+            ConfiscateMessage = GetString(LUIE_STRING_CA_JUSTICE_CONFISCATED_BOUNTY_ITEMS_MSG)
+        else
+            ConfiscateMessage = GetString(LUIE_STRING_CA_JUSTICE_CONFISCATED_MSG)
+        end
+
         if ChatAnnouncements.SV.Notify.NotificationConfiscateCA then
-            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-            {
-                message = ConfiscateMessage,
-                messageType = "NOTIFICATION",
-                isSystem = true
-            }
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = ConfiscateMessage, type = "NOTIFICATION", isSystem = true }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
         else
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, ConfiscateMessage)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, ConfiscateMessage)
         end
     end
-    ChatAnnouncements.itemsConfiscated = false
+    g_itemsConfiscated = false
 end
 
 function ChatAnnouncements.JusticeRemovePrint()
-    ChatAnnouncements.itemsConfiscated = true
+    g_itemsConfiscated = true
 
     -- PART 1 -- INVENTORY
     if ChatAnnouncements.SV.Inventory.LootConfiscate then
         local bagsize = GetBagSize(BAG_BACKPACK)
 
-        -- First pass: Build current inventory state
         for i = 0, bagsize do
             local icon, stack = GetItemInfo(BAG_BACKPACK, i)
             local itemType = GetItemType(BAG_BACKPACK, i)
             local itemId = GetItemId(BAG_BACKPACK, i)
-            local itemLink = GetItemLink(BAG_BACKPACK, i, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            local itemLink = GetItemLink(BAG_BACKPACK, i, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
 
             if itemLink ~= "" then
-                ChatAnnouncements.JusticeStacks[i] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                g_JusticeStacks[i] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
         end
 
-        -- Second pass: Compare with previous inventory state
         for i = 0, bagsize do
-            local inventoryitem = ChatAnnouncements.inventoryStacks[i]
-            local justiceitem = ChatAnnouncements.JusticeStacks[i]
-            if inventoryitem ~= nil and justiceitem == nil then
-                local receivedBy = ""
-                local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                local logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageConfiscate
-                ChatAnnouncements.ItemPrinter(inventoryitem.icon, inventoryitem.stack, inventoryitem.itemType, inventoryitem.itemId, inventoryitem.itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
-            end
-        end
-
-        -- Reset Justice Stacks to reuse for equipped
-        ChatAnnouncements.JusticeStacks = {}
-
-        -- PART 2 -- EQUIPPED
-        bagsize = GetBagSize(BAG_WORN)
-        -- Store weapon slot indices
-        local MAIN_HAND_SLOT = 4
-        local OFF_HAND_SLOT = 5
-        local BACKUP_MAIN_SLOT = 20
-        local BACKUP_OFF_SLOT = 21
-
-        -- Get current weapon pair
-        local activeWeaponPair = GetActiveWeaponPairInfo()
-
-        -- Build equipped items snapshot (after confiscation)
-        local currentEquippedItems = {}
-        for i = 0, bagsize do
-            local icon, stack = GetItemInfo(BAG_WORN, i)
-            local itemType = GetItemType(BAG_WORN, i)
-            local itemId = GetItemId(BAG_WORN, i)
-            local itemLink = GetItemLink(BAG_WORN, i, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-
-            if itemLink ~= "" then
-                currentEquippedItems[i] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
-            end
-        end
-
-        -- Compare equipped items
-        for i = 0, bagsize do
-            -- Skip weapon slots - we'll handle those separately
-            if i ~= MAIN_HAND_SLOT and i ~= OFF_HAND_SLOT and
-            i ~= BACKUP_MAIN_SLOT and i ~= BACKUP_OFF_SLOT then
-                local previousItem = ChatAnnouncements.equippedStacks[i]
-                local currentItem = currentEquippedItems[i]
-
-                if previousItem ~= nil and currentItem == nil then
+            local inventoryitem = g_inventoryStacks[i]
+            local justiceitem = g_JusticeStacks[i]
+            if inventoryitem ~= nil then
+                if justiceitem == nil then
                     local receivedBy = ""
                     local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     local logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageConfiscate
-                    ChatAnnouncements.ItemPrinter(previousItem.icon, previousItem.stack, previousItem.itemType, previousItem.itemId, previousItem.itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+                    if ChatAnnouncements.SV.Inventory.LootConfiscate then
+                        ChatAnnouncements.ItemPrinter(inventoryitem.icon, inventoryitem.stack, inventoryitem.itemType, inventoryitem.itemId, inventoryitem.itemLink, receivedBy, logPrefix, gainOrLoss, false)
+                    end
                 end
             end
         end
 
-        -- Handle weapon slots
-        local activeMain = (activeWeaponPair == 1) and MAIN_HAND_SLOT or BACKUP_MAIN_SLOT
-        local activeOff = (activeWeaponPair == 1) and OFF_HAND_SLOT or BACKUP_OFF_SLOT
+        -- Reset Justice Stacks to reuse for equipped
+        g_JusticeStacks = {}
 
-        -- Check if active main hand was confiscated
-        local previousActiveMain = ChatAnnouncements.equippedStacks[activeMain]
-        local currentActiveMain = currentEquippedItems[activeMain]
-        if previousActiveMain ~= nil and currentActiveMain == nil then
-            local receivedBy = ""
-            local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-            local logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageConfiscate
-            ChatAnnouncements.ItemPrinter(previousActiveMain.icon, previousActiveMain.stack, previousActiveMain.itemType, previousActiveMain.itemId, previousActiveMain.itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+        -- PART 2 -- EQUIPPED
+        bagsize = GetBagSize(BAG_WORN)
+
+        -- We have to determine the currently active weapon, and swap the slots because of some wierd interaction when your equipped weapon is confiscated.
+        -- This works even if the other weapon slot is empty or both slots have a stolen weapon.
+        local weaponInfo = GetActiveWeaponPairInfo()
+
+        -- Save weapons
+        local W1 = g_equippedStacks[4]
+        local W2 = g_equippedStacks[5]
+        local W3 = g_equippedStacks[20]
+        local W4 = g_equippedStacks[21]
+
+        -- Swap weapons depending on currently equipped pair
+        if weaponInfo == 1 then
+            g_equippedStacks[4] = W3
+            g_equippedStacks[5] = W4
         end
 
-        -- Check if active off hand was confiscated
-        local previousActiveOff = ChatAnnouncements.equippedStacks[activeOff]
-        local currentActiveOff = currentEquippedItems[activeOff]
-        if previousActiveOff ~= nil and currentActiveOff == nil then
-            local receivedBy = ""
-            local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-            local logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageConfiscate
-            ChatAnnouncements.ItemPrinter(previousActiveOff.icon, previousActiveOff.stack, previousActiveOff.itemType, previousActiveOff.itemId, previousActiveOff.itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, nil, nil)
+        if weaponInfo == 2 then
+            g_equippedStacks[20] = W1
+            g_equippedStacks[21] = W2
+        end
+
+        for i = 0, bagsize do
+            local icon, stack = GetItemInfo(BAG_WORN, i)
+            local itemType = GetItemType(BAG_WORN, i)
+            local itemId = GetItemId(BAG_WORN, i)
+            local itemLink = GetItemLink(BAG_WORN, i, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+
+            if itemLink ~= "" then
+                g_JusticeStacks[i] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+            end
+        end
+
+        for i = 0, bagsize do
+            local inventoryitem = g_equippedStacks[i]
+            local justiceitem = g_JusticeStacks[i]
+            if inventoryitem ~= nil then
+                if justiceitem == nil then
+                    local receivedBy = ""
+                    local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
+                    local logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageConfiscate
+                    if ChatAnnouncements.SV.Inventory.LootConfiscate then
+                        ChatAnnouncements.ItemPrinter(inventoryitem.icon, inventoryitem.stack, inventoryitem.itemType, inventoryitem.itemId, inventoryitem.itemLink, receivedBy, logPrefix, gainOrLoss, false)
+                    end
+                end
+            end
         end
     end
 
-    ChatAnnouncements.JusticeStacks = {} -- Clear the Justice Item Stacks since we don't need this for anything else!
-    ChatAnnouncements.equippedStacks = {}
-    ChatAnnouncements.inventoryStacks = {}
+    g_JusticeStacks = {} -- Clear the Justice Item Stacks since we don't need this for anything else!
+    g_equippedStacks = {}
+    g_inventoryStacks = {}
     ChatAnnouncements.IndexEquipped()
     ChatAnnouncements.IndexInventory() -- Reindex the inventory with the correct values!
 end
 
---- - **EVENT_DISGUISE_STATE_CHANGED **
----
---- @param eventId integer
---- @param unitTag string
---- @param disguiseState DisguiseState
-function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
-    -- if LUIE.IsDevDebugEnabled() then
-    --     local Debug = LUIE.Debug
-    --     local traceback = "Disguise State:\n" ..
-    --         "--> eventCode: " .. tostring(eventCode) .. "\n" ..
-    --         "--> unitTag: " .. tostring(unitTag) .. "\n" ..
-    --         "--> disguiseState: " .. tostring(disguiseState)
-    --     LUIE:Log("Debug",traceback)
-    -- end
+function ChatAnnouncements.DisguiseState(eventCode, unitTag, disguiseState)
+    if LUIE.IsDevDebugEnabled() then
+        local traceback = "Disguise State:\n" ..
+            "--> eventCode: " .. tostring(eventCode) .. "\n" ..
+            "--> unitTag: " .. tostring(unitTag) .. "\n" ..
+            "--> disguiseState: " .. tostring(disguiseState)
+        LUIE:Log("Debug", traceback)
+    end
 
     if disguiseState == DISGUISE_STATE_DANGER then
         if ChatAnnouncements.SV.Notify.DisguiseWarnCA then
             local message = GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DANGER)
-            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-            {
-                message = message,
-                messageType = "MESSAGE"
-            }
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
         end
         if ChatAnnouncements.SV.Notify.DisguiseWarnCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_MAJOR_TEXT, SOUNDS.GROUP_ELECTION_REQUESTED)
-            messageParams:SetText(ChatAnnouncements.Colors.DisguiseAlertColorize:Colorize(GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DANGER)))
+            messageParams:SetText(ColorizeColors.DisguiseAlertColorize:Colorize(GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DANGER)))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
         if ChatAnnouncements.SV.Notify.DisguiseWarnAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DANGER))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DANGER))
         end
 
         if (ChatAnnouncements.SV.Notify.DisguiseWarnCA or ChatAnnouncements.SV.Notify.DisguiseWarnAlert) and not ChatAnnouncements.SV.Notify.DisguiseWarnCSA then
@@ -6536,165 +5680,138 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
     if disguiseState == DISGUISE_STATE_SUSPICIOUS then
         if ChatAnnouncements.SV.Notify.DisguiseWarnCA then
             local message = GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_SUSPICIOUS)
-            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-            {
-                message = message,
-                messageType = "MESSAGE"
-            }
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
         end
         if ChatAnnouncements.SV.Notify.DisguiseWarnCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_MAJOR_TEXT, SOUNDS.GROUP_ELECTION_REQUESTED)
-            messageParams:SetText(ChatAnnouncements.Colors.DisguiseAlertColorize:Colorize(GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_SUSPICIOUS)))
+            messageParams:SetText(ColorizeColors.DisguiseAlertColorize:Colorize(GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_SUSPICIOUS)))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
         if ChatAnnouncements.SV.Notify.DisguiseWarnAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_SUSPICIOUS))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_SUSPICIOUS))
         end
         if (ChatAnnouncements.SV.Notify.DisguiseWarnCA or ChatAnnouncements.SV.Notify.DisguiseWarnAlert) and not ChatAnnouncements.SV.Notify.DisguiseWarnCSA then
             PlaySound(SOUNDS.GROUP_ELECTION_REQUESTED)
         end
     end
 
-    -- If we're still disguised and ChatAnnouncements.disguiseState is true then don't waste resources and end the function
-    if ChatAnnouncements.disguiseState == 1 and (disguiseState == DISGUISE_STATE_DISGUISED or disguiseState == DISGUISE_STATE_DANGER or disguiseState == DISGUISE_STATE_SUSPICIOUS or disguiseState == DISGUISE_STATE_DISCOVERED) then
+    -- If we're still disguised and g_disguiseState is true then don't waste resources and end the function
+    if g_disguiseState == 1 and (disguiseState == DISGUISE_STATE_DISGUISED or disguiseState == DISGUISE_STATE_DANGER or disguiseState == DISGUISE_STATE_SUSPICIOUS or disguiseState == DISGUISE_STATE_DISCOVERED) then
         return
     end
 
-    if ChatAnnouncements.disguiseState == 1 and (disguiseState == DISGUISE_STATE_NONE) then
-        local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_NONE), Effects.DisguiseIcons[ChatAnnouncements.currentDisguise].description)
+    if g_disguiseState == 1 and (disguiseState == DISGUISE_STATE_NONE) then
+        local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_NONE), Effects.DisguiseIcons[g_currentDisguise].description)
         if ChatAnnouncements.SV.Notify.DisguiseCA then
-            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-            {
-                message = message,
-                messageType = "MESSAGE"
-            }
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
         end
         if ChatAnnouncements.SV.Notify.DisguiseAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
         end
         if ChatAnnouncements.SV.Notify.DisguiseCSA then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.NONE)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
             messageParams:SetText(message)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
     end
 
-    if ChatAnnouncements.disguiseState == 0 and (disguiseState == DISGUISE_STATE_DISGUISED or disguiseState == DISGUISE_STATE_DANGER or disguiseState == DISGUISE_STATE_SUSPICIOUS or disguiseState == DISGUISE_STATE_DISCOVERED) then
-        ChatAnnouncements.currentDisguise = GetItemId(BAG_WORN, EQUIP_SLOT_COSTUME) or 0
-        local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DISGUISED), Effects.DisguiseIcons[ChatAnnouncements.currentDisguise].description)
+    if g_disguiseState == 0 and (disguiseState == DISGUISE_STATE_DISGUISED or disguiseState == DISGUISE_STATE_DANGER or disguiseState == DISGUISE_STATE_SUSPICIOUS or disguiseState == DISGUISE_STATE_DISCOVERED) then
+        g_currentDisguise = GetItemId(BAG_WORN, EQUIP_SLOT_COSTUME) or 0
+        local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DISGUISED), Effects.DisguiseIcons[g_currentDisguise].description)
         if ChatAnnouncements.SV.Notify.DisguiseCA then
-            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-            {
-                message = message,
-                messageType = "MESSAGE"
-            }
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
             ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
         end
         if ChatAnnouncements.SV.Notify.DisguiseAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
         end
         if ChatAnnouncements.SV.Notify.DisguiseCSA then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.NONE)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
             messageParams:SetText(message)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
             CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
     end
 
-    ChatAnnouncements.disguiseState = GetUnitDisguiseState("player")
+    g_disguiseState = GetUnitDisguiseState("player")
 
-    if ChatAnnouncements.disguiseState > 0 then
-        ChatAnnouncements.disguiseState = 1
+    if g_disguiseState > 0 then
+        g_disguiseState = 1
     end
 end
 
---- - **EVENT_PLAYER_ACTIVATED **
----
---- @param eventId integer
---- @param initial boolean
-function ChatAnnouncements.OnPlayerActivated(eventId, initial)
+function ChatAnnouncements.OnPlayerActivated(eventCode)
     -- Get current trades if UI is reloaded
-    local characterName, millisecondsSinceRequest, displayName = GetTradeInviteInfo()
+    local characterName, _, displayName = GetTradeInviteInfo()
 
     if characterName ~= "" and displayName ~= "" then
         local tradeName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
-        ChatAnnouncements.tradeTarget = ZO_SELECTED_TEXT:Colorize(zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, tradeName))
+        g_tradeTarget = ZO_SELECTED_TEXT:Colorize(zo_strformat("<<C:1>>", tradeName))
     end
 
     if g_firstLoad then
-        -- pChat registers formatters in EVENT_PLAYER_ACTIVATED, so delay to ensure pChat has finished
-        LUIE_callLater(function ()
-                           ChatAnnouncements.SlayChatHandlers()
-                       end, 50)
+        ChatAnnouncements.SlayChatHandlers()
         g_firstLoad = false
     end
 
     LUIE_callLater(function ()
-                       ChatAnnouncements.loginHideQuestLoot = false
+                       g_loginHideQuestLoot = false
                    end, 3000)
 
     if ChatAnnouncements.SV.Notify.DisguiseCA or ChatAnnouncements.SV.Notify.DisguiseCSA or ChatAnnouncements.SV.Notify.DisguiseAlert or ChatAnnouncements.SV.Notify.DisguiseWarnCA or ChatAnnouncements.SV.Notify.DisguiseWarnCSA or ChatAnnouncements.SV.Notify.DisguiseWarnAlert then
-        if ChatAnnouncements.disguiseState == 0 then
-            ChatAnnouncements.disguiseState = GetUnitDisguiseState("player")
-            if ChatAnnouncements.disguiseState == 0 then
+        if g_disguiseState == 0 then
+            g_disguiseState = GetUnitDisguiseState("player")
+            if g_disguiseState == 0 then
                 return
-            elseif ChatAnnouncements.disguiseState ~= 0 then
-                ChatAnnouncements.disguiseState = 1
-                ChatAnnouncements.currentDisguise = GetItemId(BAG_WORN, EQUIP_SLOT_COSTUME) or 0
-                local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DISGUISED), Effects.DisguiseIcons[ChatAnnouncements.currentDisguise].description)
+            elseif g_disguiseState ~= 0 then
+                g_disguiseState = 1
+                g_currentDisguise = GetItemId(BAG_WORN, EQUIP_SLOT_COSTUME) or 0
+                local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_DISGUISED), Effects.DisguiseIcons[g_currentDisguise].description)
                 if ChatAnnouncements.SV.Notify.DisguiseCA then
-                    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-                    {
-                        message = message,
-                        messageType = "MESSAGE"
-                    }
+                    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
                     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
                     eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
                 end
                 if ChatAnnouncements.SV.Notify.DisguiseAlert then
-                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
                 end
                 if ChatAnnouncements.SV.Notify.DisguiseCSA then
-                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.NONE)
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
                     messageParams:SetText(message)
                     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
                     CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
                 end
                 return
             end
-        elseif ChatAnnouncements.disguiseState == 1 then
-            ChatAnnouncements.disguiseState = GetUnitDisguiseState("player")
-            if ChatAnnouncements.disguiseState == 0 then
-                local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_NONE), Effects.DisguiseIcons[ChatAnnouncements.currentDisguise].description)
+        elseif g_disguiseState == 1 then
+            g_disguiseState = GetUnitDisguiseState("player")
+            if g_disguiseState == 0 then
+                local message = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_CA_JUSTICE_DISGUISE_STATE_NONE), Effects.DisguiseIcons[g_currentDisguise].description)
                 if ChatAnnouncements.SV.Notify.DisguiseCA then
-                    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-                    {
-                        message = message,
-                        messageType = "MESSAGE"
-                    }
+                    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "MESSAGE" }
                     ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
                     eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
                 end
                 if ChatAnnouncements.SV.Notify.DisguiseAlert then
-                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
                 end
                 if ChatAnnouncements.SV.Notify.DisguiseCSA then
-                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.NONE)
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
                     messageParams:SetText(message)
                     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
                     CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
                 end
                 return
-            elseif ChatAnnouncements.disguiseState ~= 0 then
-                ChatAnnouncements.disguiseState = 1
-                ChatAnnouncements.currentDisguise = GetItemId(BAG_WORN, EQUIP_SLOT_COSTUME) or 0
+            elseif g_disguiseState ~= 0 then
+                g_disguiseState = 1
+                g_currentDisguise = GetItemId(BAG_WORN, EQUIP_SLOT_COSTUME) or 0
                 return
             end
         end
@@ -6709,75 +5826,65 @@ function ChatAnnouncements.StuckOnCooldown(eventCode)
 end
 ]]
 
---- - **EVENT_QUEST_COMPLETE_ATTEMPT_FAILED_INVENTORY_FULL**
----
---- @param eventId integer
-function ChatAnnouncements.InventoryFullQuest(eventId)
+-- TODO: Replace/Remove
+
+--[[
+function ChatAnnouncements.InventoryFullQuest(eventCode)
     printToChat(GetString(SI_INVENTORY_ERROR_INVENTORY_FULL))
 end
 
---- - **EVENT_INVENTORY_IS_FULL **
----
---- @param eventId integer
---- @param numSlotsRequested integer
---- @param numSlotsFree integer
-function ChatAnnouncements.InventoryFull(eventId, numSlotsRequested, numSlotsFree)
+function ChatAnnouncements.InventoryFull(eventCode, numSlotsRequested, numSlotsFree)
     local function DisplayItemFailed()
         if numSlotsRequested == 1 then
             printToChat(GetString(SI_INVENTORY_ERROR_INVENTORY_FULL))
         else
-            printToChat(zo_strformat(GetString(SI_INVENTORY_ERROR_INSUFFICIENT_SPACE), (numSlotsRequested - numSlotsFree)))
+            printToChat(zo_strformat(GetString(SI_INVENTORY_ERROR_INSUFFICIENT_SPACE), (numSlotsRequested - numSlotsFree) ))
         end
     end
 
     LUIE_callLater(DisplayItemFailed, 100)
 end
 
---- - **EVENT_LOOT_ITEM_FAILED **
----
---- @param eventId integer
---- @param reason LootItemResult
---- @param itemLink string
-function ChatAnnouncements.LootItemFailed(eventId, reason, itemLink)
+function ChatAnnouncements.LootItemFailed(eventCode, reason, itemName)
     -- Stop Spam
     eventManager:UnregisterForEvent(moduleName, EVENT_LOOT_ITEM_FAILED)
-    local itemName = GetItemLinkName(itemLink)
+
     local function ReactivateLootItemFailed()
-        printToChat(zo_strformat(GetString("SI_LOOTITEMRESULT", reason), itemName))
+    printToChat(zo_strformat(GetString("SI_LOOTITEMRESULT", reason), itemName))
         eventManager:RegisterForEvent(moduleName, EVENT_LOOT_ITEM_FAILED, ChatAnnouncements.LootItemFailed)
     end
 
     LUIE_callLater(ReactivateLootItemFailed, 100)
 end
+]]
 
 -------------------------------------------------------------------------
--- LINK HANDLER STUFF.
+-- UPDATED CODE
 -------------------------------------------------------------------------
 
 -- LINK_HANDLER.LINK_MOUSE_UP_EVENT
 -- LINK_HANDLER.LINK_CLICKED_EVENT
 -- Custom Link Handlers to deal with when a book link in chat is clicked, this will open the book rather than the default link that only shows whether a lore entry has been read or not.
-function ChatAnnouncements.HandleClickEvent(rawLink, mouseButton, linkText, linkStyle, linkType, categoryIndex, collectionIndex, bookIndex)
-    -- if LUIE.IsDevDebugEnabled() then
-    --     local Debug = LUIE.Debug
-    --     local traceback = "Handle Click Event:\n" ..
-    --         "--> rawLink: " .. tostring(rawLink) .. "\n" ..
-    --         "--> mouseButton: " .. tostring(mouseButton) .. "\n" ..
-    --         "--> linkText: " .. tostring(linkText) .. "\n" ..
-    --         "--> linkStyle: " .. tostring(linkStyle) .. "\n" ..
-    --         "--> linkType: " .. tostring(linkType) .. "\n" ..
-    --         "--> categoryIndex: " .. tostring(categoryIndex) .. "\n" ..
-    --         "--> collectionIndex: " .. tostring(collectionIndex) .. "\n" ..
-    --         "--> bookIndex: " .. tostring(bookIndex)
-    --     LUIE:Log("Debug",traceback)
-    -- end
+function LUIE.HandleClickEvent(rawLink, mouseButton, linkText, linkStyle, linkType, categoryIndex, collectionIndex, bookIndex)
+    if LUIE.IsDevDebugEnabled() then
+        local traceback = "Handle Click Event:\n" ..
+            "--> rawLink: " .. tostring(rawLink) .. "\n" ..
+            "--> mouseButton: " .. tostring(mouseButton) .. "\n" ..
+            "--> linkText: " .. tostring(linkText) .. "\n" ..
+            "--> linkStyle: " .. tostring(linkStyle) .. "\n" ..
+            "--> linkType: " .. tostring(linkType) .. "\n" ..
+            "--> categoryIndex: " .. tostring(categoryIndex) .. "\n" ..
+            "--> collectionIndex: " .. tostring(collectionIndex) .. "\n" ..
+            "--> bookIndex: " .. tostring(bookIndex)
+        LUIE:Log("Debug", traceback)
+    end
 
-    if linkType == "LINK_TYPE_LUIE_BOOK" then
+    if linkType == "LINK_TYPE_LUIBOOK" then
         -- Read the book
         ZO_LoreLibrary_ReadBook(categoryIndex, collectionIndex, bookIndex)
         return true
     end
-    if linkType == "LINK_TYPE_LUIE_ANTIQUITY" then
+    if linkType == "LINK_TYPE_LUIANTIQUITY" then
         local categoryIndex1 = tonumber(categoryIndex)
         -- Open the codex
         if IsInGamepadPreferredMode() then
@@ -6794,72 +5901,4718 @@ function ChatAnnouncements.HandleClickEvent(rawLink, mouseButton, linkText, link
     end
 end
 
---- Handles trade invite accepted events.
---- @param eventCode number The event code that triggered this function
+-- Used by functions calling bar updates
+--- @param barParams CenterScreenPlayerProgressBarParams
+local function ValidateProgressBarParams(barParams)
+    local barType = barParams:GetParams()
+    if not (barType and PLAYER_PROGRESS_BAR:GetBarTypeInfoByBarType(barType)) then
+        local INVALID_VALUE = -1
+        assert(false, string_format("CSAH Bad Bar Params; barType: %d. Triggering Event: %d.", barType or INVALID_VALUE, barParams:GetTriggeringEvent() or INVALID_VALUE))
+    end
+end
+
+-- Used by functions calling bar updates
+local function GetRelevantBarParams(level, previousExperience, currentExperience, championPoints, triggeringEvent)
+    local championXpToNextPoint
+    if CanUnitGainChampionPoints("player") then
+        championXpToNextPoint = GetNumChampionXPInChampionPoint(championPoints)
+    end
+    if championXpToNextPoint ~= nil and currentExperience > previousExperience then
+        local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, championPoints, previousExperience, currentExperience)
+        barParams:SetTriggeringEvent(triggeringEvent)
+        return barParams
+    else
+        local levelSize = GetNumExperiencePointsInLevel(level)
+        if levelSize ~= nil and currentExperience > previousExperience then
+            local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_XP, level, previousExperience, currentExperience)
+            barParams:SetTriggeringEvent(triggeringEvent)
+            return barParams
+        end
+    end
+end
+
+-- Used by functions calling bar updates
+local function GetCurrentChampionPointsBarParams(triggeringEvent)
+    local championPoints = GetPlayerChampionPointsEarned()
+    local currentChampionXP = GetPlayerChampionXP()
+    local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, championPoints, currentChampionXP, currentChampionXP)
+    barParams:SetShowNoGain(true)
+    barParams:SetTriggeringEvent(triggeringEvent)
+    return barParams
+end
+
+-- local vars for EVENT_SKILL_XP
+local GUILD_SKILL_SHOW_REASONS =
+{
+    [PROGRESS_REASON_DARK_ANCHOR_CLOSED] = true,
+    [PROGRESS_REASON_DARK_FISSURE_CLOSED] = true,
+    [PROGRESS_REASON_BOSS_KILL] = true,
+}
+
+-- local vars for EVENT_SKILL_XP
+local GUILD_SKILL_SHOW_SOUNDS =
+{
+    [PROGRESS_REASON_DARK_ANCHOR_CLOSED] = SOUNDS.SKILL_XP_DARK_ANCHOR_CLOSED,
+    [PROGRESS_REASON_DARK_FISSURE_CLOSED] = SOUNDS.SKILL_XP_DARK_FISSURE_CLOSED,
+    [PROGRESS_REASON_BOSS_KILL] = SOUNDS.SKILL_XP_BOSS_KILLED,
+}
+
+-- Used by EVENT_SKILL_POINTS_CHANGED (CSA Handler) to ignore skill point updates in certain cases.
+local SUPPRESS_SKILL_POINT_CSA_REASONS =
+{
+    [SKILL_POINT_CHANGE_REASON_IGNORE] = true,
+    [SKILL_POINT_CHANGE_REASON_SKILL_RESPEC] = true,
+    [SKILL_POINT_CHANGE_REASON_SKILL_RESET] = true,
+}
+
+-- TODO: Check if there is an equivalency in one of the handlers for this
+local GUILD_SKILL_ICONS =
+{
+    [45] = "/esoui/art/icons/mapkey/mapkey_fightersguild.dds",
+    [44] = "/esoui/art/icons/mapkey/mapkey_magesguild.dds",
+    [55] = "/esoui/art/icons/mapkey/mapkey_undaunted.dds",
+    [117] = "/esoui/art/icons/mapkey/mapkey_thievesguild.dds",
+    [118] = "/esoui/art/icons/mapkey/mapkey_darkbrotherhood.dds",
+    [130] = "LuiExtended/media/unitframes/mapkey_psijicorder.dds",
+}
+
+-- A:ERT & EVENT HANDLER PREHOOK FUNCTIONS
+function ChatAnnouncements.HookFunction()
+    local alertHandlers = ZO_AlertText_GetHandlers()
+
+    -- EVENT_STYLE_LEARNED (Alert Handler)
+    local function StyleLearnedHook(itemStyleId, chapterIndex, isDefaultRacialStyle)
+        local flag
+        if ChatAnnouncements.SV.Inventory.LootShowMotif and ChatAnnouncements.SV.Inventory.LootRecipeHideAlert then
+            flag = true
+        else
+            flag = false
+        end
+
+        if not flag then
+            if not isDefaultRacialStyle then
+                if chapterIndex == ITEM_STYLE_CHAPTER_ALL then
+                    local text = zo_strformat(SI_NEW_STYLE_LEARNED, GetItemStyleName(itemStyleId))
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
+                else
+                    local text = zo_strformat(SI_NEW_STYLE_CHAPTER_LEARNED, GetItemStyleName(itemStyleId), GetString("SI_ITEMSTYLECHAPTER", chapterIndex))
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
+                end
+            end
+        end
+        return true
+    end
+
+    -- EVENT_RECIPE_LEARNED (Alert Handler)
+    local function RecipeLearnedHook(recipeListIndex, recipeIndex)
+        local flag
+        if ChatAnnouncements.SV.Inventory.LootShowRecipe and ChatAnnouncements.SV.Inventory.LootRecipeHideAlert then
+            flag = true
+        else
+            flag = false
+        end
+
+        if not flag then
+            local _, name = GetRecipeInfo(recipeListIndex, recipeIndex)
+            local text = zo_strformat(SI_NEW_RECIPE_LEARNED, name)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.RECIPE_LEARNED, text)
+        end
+        return true
+    end
+
+    -- EVENT_MULTIPLE_RECIPES_LEARNED (Alert Handler)
+    local function MultipleRecipeLearnedHook(numLearned)
+        local flag
+        if ChatAnnouncements.SV.Inventory.LootShowRecipe and ChatAnnouncements.SV.Inventory.LootRecipeHideAlert then
+            flag = true
+        else
+            flag = false
+        end
+
+        if not flag then
+            local text = zo_strformat(SI_NEW_RECIPES_LEARNED, numLearned)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.RECIPE_LEARNED, text)
+        end
+        return true
+    end
+
+    -- EVENT_LORE_BOOK_ALREADY_KNOWN (Alert Handler)
+    -- Note: We just hide this alert because it is pointless pretty much (only ever seen in trigger from server lag)
+    local function AlreadyKnowBookHook(bookTitle)
+        return true
+    end
+
+    -- EVENT_RIDING_SKILL_IMPROVEMENT (Alert Handler)
+    -- Note: We allow the CSA handler to handle any changes made from skill books in order to properly throttle all messages, and use the alert handler for stables upgrades.
+    local function RidingSkillImprovementAlertHook(ridingSkill, previous, current, source)
+        if source == RIDING_TRAIN_SOURCE_STABLES then
+            -- If we purchased from the stables, display a currency announcement if relevant
+            if ChatAnnouncements.SV.Currency.CurrencyGoldChange then
+                local type
+                if ridingSkill == 1 then
+                    type = "LUIE_CURRENCY_RIDING_SPEED"
+                elseif ridingSkill == 2 then
+                    type = "LUIE_CURRENCY_RIDING_CAPACITY"
+                elseif ridingSkill == 3 then
+                    type = "LUIE_CURRENCY_RIDING_STAMINA"
+                end
+                local formattedValue = ZO_CommaDelimitDecimalNumber(GetCarriedCurrencyAmount(1) + 250)
+                local changeColor = ChatAnnouncements.SV.Currency.CurrencyContextColor and ColorizeColors.CurrencyDownColorize:ToHex() or ColorizeColors.CurrencyColorize:ToHex()
+                local changeType = ZO_CommaDelimitDecimalNumber(250)
+                local currencyTypeColor = ColorizeColors.CurrencyGoldColorize:ToHex()
+                local currencyIcon = ChatAnnouncements.SV.Currency.CurrencyIcon and "|t16:16:/esoui/art/currency/currency_gold.dds|t" or ""
+                local currencyName = zo_strformat(ChatAnnouncements.SV.Currency.CurrencyGoldName, 250)
+                local currencyTotal = ChatAnnouncements.SV.Currency.CurrencyGoldShowTotal
+                local messageTotal = ChatAnnouncements.SV.Currency.CurrencyMessageTotalGold
+                local messageChange = ChatAnnouncements.SV.ContextMessages.CurrencyMessageStable
+                ChatAnnouncements.CurrencyPrinter(nil, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
+            end
+
+            if ChatAnnouncements.SV.Notify.StorageRidingCA then
+                local formattedString = ColorizeColors.StorageRidingColorize:Colorize(zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
+                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "MESSAGE" }
+                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+
+            if ChatAnnouncements.SV.Notify.StorageRidingAlert then
+                local text = zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current)
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
+            end
+
+            if ChatAnnouncements.SV.Notify.StorageRidingCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                messageParams:SetText(GetString(SI_RIDING_SKILL_ANNOUCEMENT_BANNER), zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RIDING_SKILL_IMPROVEMENT)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+        end
+        return true
+    end
+
+    -- EVENT_LORE_BOOK_LEARNED (Alert Handler)
+    local function LoreBookLearnedAlertHook(categoryIndex, collectionIndex, bookIndex, guildReputationIndex, isMaxRank)
+        if guildReputationIndex == 0 or isMaxRank then
+            -- We only want to fire this event if a player is not part of the guild or if they've reached max level in the guild.
+            -- Otherwise, the _SKILL_EXPERIENCE version of this event will send a center screen message instead.
+            local name, numCollections, categoryId = GetLoreCategoryInfo(categoryIndex)
+            if name == "Crafting Motifs" then
+                return
+            end
+
+            local collectionName, _, numKnownBooks, totalBooks, hidden = GetLoreCollectionInfo(categoryIndex, collectionIndex)
+
+            if not hidden or ChatAnnouncements.SV.Lorebooks.LorebookShowHidden then
+                local title, icon = GetLoreBookInfo(categoryIndex, collectionIndex, bookIndex)
+                local bookName
+                local bookLink
+                if ChatAnnouncements.SV.BracketOptionLorebook == 1 then
+                    bookName = string_format("%s", title)
+                    bookLink = string_format("|H0:LINK_TYPE_LUIBOOK:%s:%s:%s|h%s|h", categoryIndex, collectionIndex, bookIndex, bookName)
+                else
+                    bookName = string_format("[%s]", title)
+                    bookLink = string_format("|H1:LINK_TYPE_LUIBOOK:%s:%s:%s|h%s|h", categoryIndex, collectionIndex, bookIndex, bookName)
+                end
+
+                local stringPrefix
+                local csaPrefix
+                if categoryIndex == 1 then
+                    -- Is a lore book
+                    stringPrefix = ChatAnnouncements.SV.Lorebooks.LorebookPrefix1
+                    csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_LORE_LIBRARY_ANNOUNCE_BOOK_LEARNED)
+                else
+                    -- Is a normal book
+                    stringPrefix = ChatAnnouncements.SV.Lorebooks.LorebookPrefix2
+                    csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(LUIE_STRING_CA_LOREBOOK_BOOK)
+                end
+
+                -- Chat Announcement
+                if ChatAnnouncements.SV.Lorebooks.LorebookCA then
+                    local formattedIcon = ChatAnnouncements.SV.Lorebooks.LorebookIcon and ("|t16:16:" .. icon .. "|t ") or ""
+                    local stringPart1
+                    local stringPart2
+                    if stringPrefix ~= "" then
+                        stringPart1 = ColorizeColors.LorebookColorize1:Colorize(zo_strformat("<<1>><<2>><<3>> ", bracket1[ChatAnnouncements.SV.Lorebooks.LorebookBracket], stringPrefix, bracket2[ChatAnnouncements.SV.Lorebooks.LorebookBracket]))
+                    else
+                        stringPart1 = ""
+                    end
+                    if ChatAnnouncements.SV.Lorebooks.LorebookCategory then
+                        stringPart2 = collectionName ~= "" and ColorizeColors.LorebookColorize2:Colorize(zo_strformat(" <<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), collectionName)) or ColorizeColors.LorebookColorize2:Colorize(zo_strformat(" <<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), GetString(SI_WINDOW_TITLE_LORE_LIBRARY)))
+                    else
+                        stringPart2 = ""
+                    end
+
+                    local finalMessage = zo_strformat("<<1>><<2>><<3>><<4>>", stringPart1, formattedIcon, bookLink, stringPart2)
+                    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "COLLECTIBLE" }
+                    ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                end
+
+                -- Alert Announcement
+                if ChatAnnouncements.SV.Lorebooks.LorebookAlert then
+                    local text = collectionName ~= "" and zo_strformat("<<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), collectionName) or zo_strformat(" <<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), GetString(SI_WINDOW_TITLE_LORE_LIBRARY))
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat("<<1>> <<2>>", title, text))
+                end
+
+                -- Center Screen Announcement
+                if ChatAnnouncements.SV.Lorebooks.LorebookCSA then
+                    -- Only display a CSA if this is a Lore Book and we have Eidetic Memory books set to not show.
+                    if (categoryIndex == 1 and ChatAnnouncements.SV.Lorebooks.LorebookCSALoreOnly) or not ChatAnnouncements.SV.Lorebooks.LorebookCSALoreOnly then
+                        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.BOOK_ACQUIRED)
+                        if collectionName ~= "" then
+                            messageParams:SetText(csaPrefix, zo_strformat(LUIE_STRING_CA_LOREBOOK_ADDED_CSA, title, collectionName))
+                        else
+                            messageParams:SetText(csaPrefix, zo_strformat(LUIE_STRING_CA_LOREBOOK_ADDED_CSA, title, GetString(SI_WINDOW_TITLE_LORE_LIBRARY)))
+                        end
+                        messageParams:SetIconData(icon, "EsoUI/Art/Achievements/achievements_iconBG.dds")
+                        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LORE_BOOK_LEARNED)
+                        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+                    end
+                end
+                if not ChatAnnouncements.SV.Lorebooks.LorebookCSA then
+                    PlaySound(SOUNDS.BOOK_ACQUIRED)
+                end
+            end
+        end
+        return true
+    end
+
+    -----------------------------
+    -- DUEL ALERTS --------------
+    -----------------------------
+
+    -- EVENT_DUEL_INVITE_RECEIVED (Alert Handler)
+    local function DuelInviteReceivedAlert(inviterCharacterName, inviterDisplayName)
+        -- Display CA
+        if ChatAnnouncements.SV.Social.DuelCA then
+            local finalName = ChatAnnouncements.ResolveNameLink(inviterCharacterName, inviterDisplayName)
+            printToChat(zo_strformat(GetString(LUIE_STRING_CA_DUEL_INVITE_RECEIVED), finalName), true)
+        end
+
+        -- Display Alert
+        if ChatAnnouncements.SV.Social.DuelAlert then
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviterCharacterName, inviterDisplayName)
+            local formattedString = zo_strformat(GetString(LUIE_STRING_CA_DUEL_INVITE_RECEIVED), finalAlertName)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedString)
+        end
+
+        return true
+    end
+
+    -- EVENT_DUEL_INVITE_ACCEPTED (Alert Handler)
+    local function DuelInviteAcceptedAlert()
+        -- Display CA
+        if ChatAnnouncements.SV.Social.DuelCA then
+            printToChat(GetString(LUIE_STRING_CA_DUEL_INVITE_ACCEPTED), true)
+        end
+
+        -- Display Alert
+        if ChatAnnouncements.SV.Social.DuelAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_DUEL_INVITE_ACCEPTED))
+        end
+        PlaySound(SOUNDS.DUEL_ACCEPTED)
+        return true
+    end
+
+    -- EVENT_DUEL_INVITE_SENT (Alert Handler)
+    local function DuelInviteSentAlert(inviteeCharacterName, inviteeDisplayName)
+        -- Display CA
+        if ChatAnnouncements.SV.Social.DuelCA then
+            local finalName = ChatAnnouncements.ResolveNameLink(inviteeCharacterName, inviteeDisplayName)
+            printToChat(zo_strformat(GetString(LUIE_STRING_CA_DUEL_INVITE_SENT), finalName), true)
+        end
+
+        -- Display Alert
+        if ChatAnnouncements.SV.Social.DuelAlert then
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviteeCharacterName, inviteeDisplayName)
+            local formattedString = zo_strformat(GetString(LUIE_STRING_CA_DUEL_INVITE_SENT), finalAlertName)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedString)
+        end
+        return true
+    end
+
+    -- Register Strings here for Alert and CSA Handlers
+
+    -- Player to Player replacement strings for Duels
+    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_DUEL, GetString(LUIE_STRING_CA_DUEL_INVITE_RECEIVED), 5)
+    SafeAddString(SI_DUEL_INVITE_MESSAGE, GetString(LUIE_STRING_CA_DUEL_INVITE_RECEIVED), 5)
+    SafeAddString(SI_PLAYER_TO_PLAYER_INVITE_DUEL, GetString(LUIE_STRING_CA_DUEL_INVITE_PLAYER), 5)
+    -- These are likely a standard error response string for Duels
+    SafeAddString(SI_DUELSTATE1, GetString(LUIE_STRING_CA_DUEL_STATE1), 5)
+    SafeAddString(SI_DUELSTATE1, GetString(LUIE_STRING_CA_DUEL_STATE2), 5)
+    -- Group Player to Player notification replacement
+    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_GROUP, GetString(LUIE_STRING_CA_GROUP_INVITE_MESSAGE), 5)
+    -- Guild Invite Player to Player notification replacements
+    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_GUILD_REQUEST, GetString(LUIE_STRING_CA_GUILD_INCOMING_GUILD_REQUEST), 1)
+    SafeAddString(SI_GUILD_INVITE_MESSAGE, GetString(LUIE_STRING_CA_GUILD_INVITE_MESSAGE), 3)
+    -- Friend Invite String Replacements
+    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_FRIEND_REQUEST, GetString(LUIE_STRING_CA_FRIENDS_INCOMING_FRIEND_REQUEST), 5)
+    -- Quest Share String Replacements
+    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_QUEST_SHARE, GetString(LUIE_STRING_CA_GROUP_INCOMING_QUEST_SHARE_P2P), 5)
+    SafeAddString(SI_QUEST_SHARE_MESSAGE, GetString(LUIE_STRING_CA_GROUP_INCOMING_QUEST_SHARE_P2P), 5)
+    -- Trade String Replacements
+    SafeAddString(SI_PLAYER_TO_PLAYER_INCOMING_TRADE, GetString(LUIE_STRING_CA_TRADE_INVITE_MESSAGE), 1)
+    SafeAddString(SI_TRADE_INVITE_MESSAGE, GetString(LUIE_STRING_CA_TRADE_INVITE_MESSAGE), 1)
+    -- Mail String Replacements
+    SafeAddString(SI_SENDMAILRESULT2, GetString(LUIE_STRING_CA_MAIL_SENDMAILRESULT2), 5)
+    SafeAddString(SI_SENDMAILRESULT3, GetString(LUIE_STRING_CA_MAIL_SENDMAILRESULT3), 5)
+
+    -- EVENT_DUEL_INVITE_FAILED (Alert Handler)
+    local function DuelInviteFailedAlert(reason, targetCharacterName, targetDisplayName)
+        local userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(targetDisplayName, targetCharacterName)
+        -- Display CA
+        if ChatAnnouncements.SV.Social.DuelCA then
+            local reasonName
+            local finalName = ChatAnnouncements.ResolveNameLink(targetDisplayName, targetCharacterName)
+            if userFacingName then
+                printToChat(zo_strformat(GetString("LUIE_STRING_CA_DUEL_INVITE_FAILREASON", reason), finalName), true)
+            else
+                printToChat(zo_strformat(GetString("LUIE_STRING_CA_DUEL_INVITE_FAILREASON", reason)), true)
+            end
+        end
+
+        -- Display Alert
+        if ChatAnnouncements.SV.Social.DuelAlert then
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(targetDisplayName, targetCharacterName)
+            local formattedString = zo_strformat(GetString("LUIE_STRING_CA_DUEL_INVITE_FAILREASON", reason), finalAlertName)
+            if userFacingName then
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, formattedString)
+            else
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, (GetString("LUIE_STRING_CA_DUEL_INVITE_FAILREASON", reason)))
+            end
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        return true
+    end
+
+    -- EVENT_DUEL_INVITE_DECLINED (Alert Handler)
+    local function DuelInviteDeclinedAlert()
+        -- Display CA
+        if ChatAnnouncements.SV.Social.DuelCA then
+            printToChat(GetString(LUIE_STRING_CA_DUEL_INVITE_DECLINED), true)
+        end
+
+        -- Display Alert
+        if ChatAnnouncements.SV.Social.DuelAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString(LUIE_STRING_CA_DUEL_INVITE_DECLINED))
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        return true
+    end
+
+    -- EVENT_DUEL_INVITE_CANCELED (Alert Handler)
+    local function DuelInviteCanceledAlert()
+        -- Display CA
+        if ChatAnnouncements.SV.Social.DuelCA then
+            printToChat(GetString(LUIE_STRING_CA_DUEL_INVITE_CANCELED), true)
+        end
+
+        -- Display Alert
+        if ChatAnnouncements.SV.Social.DuelAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString(LUIE_STRING_CA_DUEL_INVITE_CANCELED))
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        return true
+    end
+
+    -- EVENT_PLEDGE_OF_MARA_RESULT (Alert Handler)
+    local function PledgeOfMaraResultAlert(result, characterName, displayName)
+        -- Note: We replace everything here and move it all into the CSA handler event
+        return true
+    end
+
+    -- EVENT_GROUP_INVITE_RESPONSE (Alert Handler)
+    local function GroupInviteResponseAlert(characterName, response, displayName)
+        local finalName
+        local finalAlertName
+
+        local nameCheck1 = ZO_GetPrimaryPlayerName(displayName, characterName)
+        local nameCheck2 = ZO_GetSecondaryPlayerName(displayName, characterName)
+
+        if nameCheck1 == "" then
+            finalName = displayName
+            finalAlertName = displayName
+        elseif nameCheck2 == "" then
+            finalName = characterName
+            finalAlertName = characterName
+        elseif nameCheck1 ~= "" and nameCheck2 ~= "" then
+            finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
+            finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
+        else
+            finalName = ""
+            finalAlertName = ""
+        end
+
+        if response ~= GROUP_INVITE_RESPONSE_ACCEPTED and response ~= GROUP_INVITE_RESPONSE_CONSIDERING_OTHER then
+            local message
+            local alertMessage
+
+            if response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED and (LUIE.PlayerNameFormatted == characterName or LUIE.PlayerDisplayName == displayName) then
+                message = zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_SELF_INVITE))
+                alertMessage = zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_SELF_INVITE))
+            elseif response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED and (IsPlayerInGroup(characterName) or IsPlayerInGroup(displayName)) then
+                message = GetString(SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER)
+                alertMessage = GetString(SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER)
+            elseif response == GROUP_INVITE_RESPONSE_IGNORED then
+                message = finalName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), finalName) or GetString(SI_PLAYER_BUSY)
+                alertMessage = finalAlertName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), finalAlertName) or GetString(SI_PLAYER_BUSY)
+            else
+                message = finalName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), finalName) or characterName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), characterName) or GetString(SI_PLAYER_BUSY)
+                alertMessage = finalAlertName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), finalAlertName) or characterName ~= "" and zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", response), characterName) or GetString(SI_PLAYER_BUSY)
+            end
+
+            if ChatAnnouncements.SV.Group.GroupCA or response == GROUP_INVITE_RESPONSE_ALREADY_GROUPED or response == GROUP_INVITE_RESPONSE_IGNORED or response == GROUP_INVITE_RESPONSE_PLAYER_NOT_FOUND then
+                printToChat(message, true)
+            end
+            if ChatAnnouncements.SV.Group.GroupAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
+            end
+            PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        end
+        return true
+    end
+
+    -- EVENT_GROUP_INVITE_ACCEPT_RESPONSE_TIMEOUT (Alert Handler)
+    local function GroupInviteTimeoutAlert()
+        printToChat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_GENERIC_JOIN_FAILURE), true)
+        if ChatAnnouncements.SV.Group.GroupAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_GENERIC_JOIN_FAILURE))
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        return true
+    end
+
+    -- EVENT_GROUP_NOTIFICATION_MESSAGE (Alert Handler)
+    local function GroupNotificationMessageAlert(groupMessageCode)
+        local message = GetString("SI_GROUPNOTIFICATIONMESSAGE", groupMessageCode)
+        if message ~= "" then
+            printToChat(message, true)
+            if ChatAnnouncements.SV.Group.GroupAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, message)
+            end
+            PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        end
+        return true
+    end
+
+    -- EVENT_GROUP_UPDATE (Alert Handler)
+    local function GroupUpdateAlert()
+        g_currentGroupLeaderRawName = GetRawUnitName(GetGroupLeaderUnitTag())
+        g_currentGroupLeaderDisplayName = GetUnitDisplayName(GetGroupLeaderUnitTag())
+    end
+
+    -- EVENT_GROUP_MEMBER_LEFT (Alert Handler)
+    local function GroupMemberLeftAlert(characterName, reason, isLocalPlayer, isLeader, displayName, actionRequiredVote)
+        ChatAnnouncements.IndexGroupLoot()
+
+        local message = nil
+        local alert = nil
+        local message2 = nil
+        local alert2 = nil
+        local sound = nil
+
+        local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
+        local finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
+
+        -- Used to check for valid links
+        local characterNameLink = ZO_LinkHandler_CreateCharacterLink(characterName)
+        local displayNameLink = ZO_LinkHandler_CreateDisplayNameLink(displayName)
+
+        local hasValidNames = characterNameLink ~= "" and displayNameLink ~= ""
+        local useDefaultReasonText = false
+        if reason == GROUP_LEAVE_REASON_DISBAND then
+            if isLeader and not isLocalPlayer then
+                useDefaultReasonText = true
+            elseif isLeader and isLocalPlayer then
+                message = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
+                alert = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
+                LUIE_callLater(function ()
+                                   ChatAnnouncements.CheckLFGStatusLeave(false)
+                               end, 100)
+            elseif isLocalPlayer then
+                LUIE_callLater(function ()
+                                   ChatAnnouncements.CheckLFGStatusLeave(false)
+                               end, 100)
+            end
+            sound = SOUNDS.GROUP_DISBAND
+        elseif reason == GROUP_LEAVE_REASON_KICKED then
+            if actionRequiredVote then
+                if isLocalPlayer then
+                    LUIE_callLater(function ()
+                                       ChatAnnouncements.CheckLFGStatusLeave(true)
+                                   end, 100)
+                    message = zo_strformat(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
+                    alert = zo_strformat(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
+                elseif hasValidNames then
+                    LUIE_callLater(function ()
+                                       ChatAnnouncements.CheckLFGStatusLeave(false)
+                                   end, 100)
+                    message = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_PASSED, finalName)
+                    alert = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_PASSED, finalAlertName)
+                    message2 = zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_KICKED), finalName)
+                    alert2 = zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_KICKED), finalAlertName)
+                end
+                sound = SOUNDS.GROUP_KICK
+            else
+                if isLeader and isLocalPlayer then
+                    message = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
+                    alert = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
+                    LUIE_callLater(function ()
+                                       ChatAnnouncements.CheckLFGStatusLeave(false)
+                                   end, 100)
+                    sound = SOUNDS.GROUP_DISBAND
+                elseif isLocalPlayer then
+                    LUIE_callLater(function ()
+                                       ChatAnnouncements.CheckLFGStatusLeave(true)
+                                   end, 100)
+                    message = zo_strformat(SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED)
+                    alert = zo_strformat(SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED)
+                    sound = SOUNDS.GROUP_KICK
+                else
+                    LUIE_callLater(function ()
+                                       ChatAnnouncements.CheckLFGStatusLeave(false)
+                                   end, 100)
+                    useDefaultReasonText = true
+                    sound = SOUNDS.GROUP_KICK
+                end
+            end
+        elseif reason == GROUP_LEAVE_REASON_VOLUNTARY or reason == GROUP_LEAVE_REASON_LEFT_BATTLEGROUND then
+            if not isLocalPlayer then
+                useDefaultReasonText = true
+                LUIE_callLater(function ()
+                                   ChatAnnouncements.CheckLFGStatusLeave(false)
+                               end, 100)
+            else
+                message = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_LEAVE_SELF), finalName))
+                alert = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_LEAVE_SELF), finalAlertName))
+                LUIE_callLater(function ()
+                                   ChatAnnouncements.CheckLFGStatusLeave(false)
+                               end, 100)
+            end
+
+            sound = SOUNDS.GROUP_LEAVE
+        elseif reason == GROUP_LEAVE_REASON_DESTROYED then
+            -- do nothing, we don't want to show additional alerts for this case
+        end
+
+        if useDefaultReasonText and hasValidNames then
+            message = zo_strformat(GetString("LUIE_STRING_GROUPLEAVEREASON", reason), finalName)
+            alert = zo_strformat(GetString("LUIE_STRING_GROUPLEAVEREASON", reason), finalAlertName)
+        end
+
+        if isLocalPlayer then
+            g_currentGroupLeaderRawName = GetRawUnitName(GetGroupLeaderUnitTag())
+            g_currentGroupLeaderDisplayName = GetUnitDisplayName(GetGroupLeaderUnitTag())
+        end
+
+        -- Only print this out if we didn't JUST join an LFG group.
+        if g_stopGroupLeaveQueue or g_lfgDisableGroupEvents then
+            return true
+        else
+            if message ~= nil then
+                if ChatAnnouncements.SV.Group.GroupCA then
+                    printToChat(message, true)
+                end
+                if ChatAnnouncements.SV.Group.GroupAlert then
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alert)
+                end
+                if sound ~= nil then
+                    PlaySound(sound)
+                end
+            end
+
+            if message2 ~= nil then
+                if ChatAnnouncements.SV.Group.GroupCA then
+                    printToChat(message2, true)
+                end
+                if ChatAnnouncements.SV.Group.GroupAlert then
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alert2)
+                end
+            end
+        end
+
+        return true
+    end
+
+    -- EVENT_GROUP_MEMBER_JOINED (Alert Handler)
+    local function OnGroupMemberJoined(characterName, displayName, isLocalPlayer)
+        -- Update index for Group Loot
+        ChatAnnouncements.IndexGroupLoot()
+        g_currentGroupLeaderRawName = GetRawUnitName(GetGroupLeaderUnitTag())
+        g_currentGroupLeaderDisplayName = GetUnitDisplayName(GetGroupLeaderUnitTag())
+
+        -- Determine if the member that joined a group is the player or another member.
+        if isLocalPlayer then
+            LUIE_callLater(ChatAnnouncements.CheckLFGStatusJoin, 100)
+        else
+            -- Get character & display names
+            local joinedMemberName = ZO_GetPrimaryPlayerName(displayName, characterName)
+            local joinedMemberAccountName = ZO_GetSecondaryPlayerName(displayName, characterName)
+            -- Resolve name links
+            local finalName = ChatAnnouncements.ResolveNameLink(joinedMemberName, joinedMemberAccountName)
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(joinedMemberName, joinedMemberAccountName)
+            -- Set final messages to send
+            local SendMessage = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalName))
+            local SendAlert = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalAlertName))
+            LUIE_callLater(function ()
+                               ChatAnnouncements.PrintJoinStatusNotSelf(SendMessage, SendAlert)
+                           end, 100)
+        end
+
+        return true
+    end
+
+    -- EVENT_LEADER_UPDATE (Alert Handler)
+    -- Note: This event only fires if the characterId of the leader has changed (it's a new leader)
+    local function LeaderUpdateAlert(leaderTag)
+        local leaderRawName = GetRawUnitName(leaderTag)
+        local showAlert = leaderRawName ~= "" and (g_currentGroupLeaderRawName ~= "" and g_currentGroupLeaderRawName ~= nil)
+        g_currentGroupLeaderRawName = leaderRawName
+        g_currentGroupLeaderDisplayName = GetUnitDisplayName(leaderTag)
+
+        -- If for some reason we don't have a valid leader name, bail out now.
+        if g_currentGroupLeaderRawName == "" or g_currentGroupLeaderRawName == nil or g_currentGroupLeaderDisplayName == "" or g_currentGroupLeaderDisplayName == nil then
+            return true
+        end
+
+        local displayString
+        local alertString
+        local finalName = ChatAnnouncements.ResolveNameLink(g_currentGroupLeaderRawName, g_currentGroupLeaderDisplayName)
+        local finalAlertName = ChatAnnouncements.ResolveNameNoLink(g_currentGroupLeaderRawName, g_currentGroupLeaderDisplayName)
+
+        if LUIE.PlayerNameRaw ~= g_currentGroupLeaderRawName then -- If another player became the leader
+            displayString = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_LEADER_CHANGED), finalName))
+            alertString = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_LEADER_CHANGED), finalAlertName))
+        elseif LUIE.PlayerNameRaw == g_currentGroupLeaderRawName then -- If the player character became the leader
+            displayString = (GetString(LUIE_STRING_CA_GROUP_LEADER_CHANGED_SELF))
+            alertString = (GetString(LUIE_STRING_CA_GROUP_LEADER_CHANGED_SELF))
+        end
+
+        -- Don't show leader updates when joining LFG.
+        if g_stopGroupLeaveQueue or g_lfgDisableGroupEvents then
+            return true
+        end
+
+        if showAlert then
+            if ChatAnnouncements.SV.Group.GroupCA then
+                printToChat(displayString, true)
+            end
+            if ChatAnnouncements.SV.Group.GroupAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertString)
+            end
+            PlaySound(SOUNDS.GROUP_PROMOTE)
+        end
+        return true
+    end
+
+    -- EVENT_ACTIVITY_QUEUE_RESULT (Alert Handler)
+    local function ActivityQueueResultAlert(result)
+        if result ~= ACTIVITY_QUEUE_RESULT_SUCCESS then
+            if ChatAnnouncements.SV.Group.GroupLFGCA then
+                printToChat(GetString("SI_ACTIVITYQUEUERESULT", result), true)
+            end
+            if ChatAnnouncements.SV.Group.GroupLFGAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString("SI_ACTIVITYQUEUERESULT", result))
+            end
+            PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        end
+        g_showRCUpdates = true
+
+        return true
+    end
+
+    -- EVENT_GROUP_ELECTION_FAILED (Alert Handler)
+    local function GroupElectionFailedAlert(failureType, descriptor)
+        if failureType ~= GROUP_ELECTION_FAILURE_NONE then
+            if ChatAnnouncements.SV.Group.GroupVoteCA then
+                printToChat(GetString("SI_GROUPELECTIONFAILURE", failureType), true)
+            end
+            if ChatAnnouncements.SV.Group.GroupVoteAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString("SI_GROUPELECTIONFAILURE", failureType))
+            end
+            PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        end
+        return true
+    end
+
+    -- Variables for EVENT_GROUP_ELECTION_RESULT
+    local GroupElectionResultToSoundId =
+    {
+        [GROUP_ELECTION_RESULT_ELECTION_WON] = SOUNDS.GROUP_ELECTION_RESULT_WON,
+        [GROUP_ELECTION_RESULT_ELECTION_LOST] = SOUNDS.GROUP_ELECTION_RESULT_LOST,
+        [GROUP_ELECTION_RESULT_ABANDONED] = SOUNDS.GROUP_ELECTION_RESULT_LOST,
+    }
+
+    -- EVENT_GROUP_ELECTION_RESULT (Alert Handler)
+    local function GroupElectionResultAlert(resultType, descriptor)
+        if resultType ~= GROUP_ELECTION_RESULT_IN_PROGRESS and resultType ~= GROUP_ELECTION_RESULT_NOT_APPLICABLE then
+            resultType = ZO_GetSimplifiedGroupElectionResultType(resultType)
+            local alertText
+            local message
+
+            -- Try to find override messages based on the descriptor
+            local alertTextOverrideLookup = ZO_GroupElectionResultToAlertTextOverrides[resultType]
+            if alertTextOverrideLookup then
+                message = alertTextOverrideLookup[descriptor]
+                alertText = alertTextOverrideLookup[descriptor]
+            end
+
+            -- No override found
+            if not alertText then
+                local electionType, _, _, targetUnitTag = GetGroupElectionInfo()
+                if not targetUnitTag then
+                    return
+                end
+                if electionType == GROUP_ELECTION_TYPE_KICK_MEMBER then
+                    if resultType == GROUP_ELECTION_RESULT_ELECTION_LOST then
+                        local kickMemberName = GetUnitName(targetUnitTag)
+                        local kickMemberAccountName = GetUnitDisplayName(targetUnitTag)
+
+                        local kickFinalName = ChatAnnouncements.ResolveNameLink(kickMemberName, kickMemberAccountName)
+                        local kickfinalAlertName = ChatAnnouncements.ResolveNameNoLink(kickMemberName, kickMemberAccountName)
+
+                        message = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_FAIL, kickFinalName)
+                        alertText = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_FAIL, kickfinalAlertName)
+                    else
+                        -- Successful kicks are handled in the GROUP_MEMBER_LEFT alert
+                        return true
+                    end
+                end
+            end
+
+            -- No specific behavior found, so just do the generic alert for the result
+            if not alertText then
+                message = GetString("SI_GROUPELECTIONRESULT", resultType)
+                alertText = GetString("SI_GROUPELECTIONRESULT", resultType)
+            end
+
+            if alertText ~= "" then
+                if type(alertText) == "function" then
+                    alertText = alertText()
+                    message = message()
+                end
+
+                if ChatAnnouncements.SV.Group.GroupVoteCA then
+                    printToChat(message, true)
+                end
+                if ChatAnnouncements.SV.Group.GroupVoteAlert then
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
+                end
+                PlaySound(GroupElectionResultToSoundId[resultType])
+            end
+        end
+        return true
+    end
+
+    -- EVENT_GROUP_ELECTION_REQUESTED (Alert Handler)
+    local function GroupElectionRequestedAlert(descriptor)
+        local alertText
+        local messageText
+        if descriptor then
+            messageText = ZO_GroupElectionDescriptorToRequestAlertText[descriptor]
+            alertText = ZO_GroupElectionDescriptorToRequestAlertText[descriptor]
+        end
+
+        if not alertText then
+            messageText = ZO_GroupElectionDescriptorToRequestAlertText[ZO_GROUP_ELECTION_DESCRIPTORS.NONE]
+            alertText = ZO_GroupElectionDescriptorToRequestAlertText[ZO_GROUP_ELECTION_DESCRIPTORS.NONE]
+        end
+
+        -- If this is a votekick then change the message.
+        -- TODO: GetGroupElectionInfo() doesn't update with EVENT_GROUP_ELECTION_REQUESTED
+        --[[
+        local electionType, _, _, targetUnitTag = GetGroupElectionInfo()
+        if electionType == GROUP_ELECTION_TYPE_KICK_MEMBER then -- Vote Kick
+            local kickMemberName = GetUnitName(targetUnitTag)
+            local kickMemberAccountName = GetUnitDisplayName(targetUnitTag)
+            if kickMemberName ~= nil and kickMemberName ~= "" and kickMemberAccountName ~= nil and kickMemberAccountName ~= "" then
+                local finalNameCA = ChatAnnouncements.ResolveNameLink(kickMemberName, kickMemberAccountName)
+                messageText = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_START_SELF), finalNameCA)
+                local finalNameAlert = ChatAnnouncements.ResolveNameNoLink(kickMemberName, kickMemberAccountName)
+                alertText = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_START_SELF), finalNameAlert)
+            end
+        end
+        ]]
+        --
+
+        if ChatAnnouncements.SV.Group.GroupVoteCA then
+            printToChat(messageText, true)
+        end
+        if ChatAnnouncements.SV.Group.GroupVoteAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
+        end
+        PlaySound(SOUNDS.GROUP_ELECTION_REQUESTED)
+        return true
+    end
+
+    -- EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED (Alert Handler)
+    local function GroupReadyCheckCancelAlert(reason)
+        local message
+
+        if reason ~= LFG_READY_CHECK_CANCEL_REASON_NOT_IN_READY_CHECK and reason ~= LFG_READY_CHECK_CANCEL_REASON_GROUP_FORMED_SUCCESSFULLY then
+            message = GetString("SI_LFGREADYCHECKCANCELREASON", reason)
+            if ChatAnnouncements.SV.Group.GroupLFGCA then
+                printToChat(message, true)
+            end
+            if ChatAnnouncements.SV.Group.GroupLFGAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
+            end
+        end
+
+        -- Stop the cancel message from status update from triggering when any other result here happens.
+        g_lfgHideStatusCancel = true
+        LUIE_callLater(function ()
+                           g_lfgHideStatusCancel = false
+                       end, 1000)
+
+        -- Sometimes if another player cancels slightly before a player in your group cancels, the "you have been placed in the front of the queue message displays. If this is the case, we want to show queue left for that event."
+        if reason ~= LFG_READY_CHECK_CANCEL_REASON_GROUP_REPLACED_IN_QUEUE then
+            g_showActivityStatus = false
+            LUIE_callLater(function ()
+                               g_showActivityStatus = true
+                           end, 1000)
+        end
+
+        g_showRCUpdates = true
+    end
+
+    -- EVENT_GROUP_VETERAN_DIFFICULTY_CHANGED (Alert Handler)
+    local function GroupDifficultyChangeAlert(isVeteranDifficulty)
+        local message
+        local sound
+        if isVeteranDifficulty then
+            message = GetString(SI_DUNGEON_DIFFICULTY_CHANGED_TO_VETERAN)
+            sound = SOUNDS.DUNGEON_DIFFICULTY_VETERAN
+        else
+            message = GetString(SI_DUNGEON_DIFFICULTY_CHANGED_TO_NORMAL)
+            sound = SOUNDS.DUNGEON_DIFFICULTY_NORMAL
+        end
+
+        if ChatAnnouncements.SV.Group.GroupCA then
+            printToChat(message, true)
+        end
+        if ChatAnnouncements.SV.Group.GroupAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
+        end
+        PlaySound(sound)
+
+        return true
+    end
+
+    -- EVENT_GUILD_SELF_LEFT_GUILD (Alert Handler)
+    local function GuildSelfLeftAlert(guildId, guildName)
+        local GuildIndexData = LUIE.GuildIndexData
+        for i = 1, 5 do
+            local guild = GuildIndexData[i]
+            if guild.name == guildName then
+                local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guild.guildAlliance) or ColorizeColors.GuildColorize
+                local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guild.guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
+                local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guild.guildAlliance), "100%", "100%", guildName) or guildName
+                local messageString = (ShouldDisplaySelfKickedFromGuildAlert(guildId)) and SI_GUILD_SELF_KICKED_FROM_GUILD or LUIE_STRING_CA_GUILD_LEAVE_SELF
+                local sound = (ShouldDisplaySelfKickedFromGuildAlert(guildId)) and SOUNDS.GENERAL_ALERT_ERROR or SOUNDS.GUILD_SELF_LEFT
+                if ChatAnnouncements.SV.Social.GuildCA then
+                    printToChat(zo_strformat(GetString(messageString), guildNameAlliance), true)
+                end
+                if ChatAnnouncements.SV.Social.GuildAlert then
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(messageString), guildNameAllianceAlert))
+                end
+                PlaySound(sound)
+                break
+            end
+        end
+
+        return true
+    end
+
+    -- EVENT_SAVE_GUILD_RANKS_RESPONSE (Alert Handler)
+    local function GuildRanksResponseAlert(guildId, result)
+        if result ~= SOCIAL_RESULT_NO_ERROR then
+            if ChatAnnouncements.SV.Social.GuildCA then
+                printToChat(GetString("SI_SOCIALACTIONRESULT", result), true)
+            elseif ChatAnnouncements.SV.Social.GuildAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString("SI_SOCIALACTIONRESULT", result))
+            end
+            PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        end
+        return true
+    end
+
+    -- EVENT_LOCKPICK_FAILED (Alert Handler)
+    local function LockpickFailedAlert(result)
+        if ChatAnnouncements.SV.Notify.NotificationLockpickCA then
+            local message = GetString(LUIE_STRING_CA_LOCKPICK_FAILED)
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "NOTIFICATION" }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        end
+        if ChatAnnouncements.SV.Notify.NotificationLockpickAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_LOCKPICK_FAILED))
+        end
+        g_lockpickBroken = true
+        LUIE_callLater(function ()
+                           g_lockpickBroken = false
+                       end, 200)
+        return true
+    end
+
+    -- EVENT_CLIENT_INTERACT_RESULT (Alert Handler)
+    local function ClientInteractResult(result, interactTargetName)
+        local formatString = GetString("SI_CLIENTINTERACTRESULT", result)
+        if formatString ~= "" then
+            printToChat(zo_strformat(formatString, interactTargetName))
+            if ChatAnnouncements.SV.Notify.NotificationLockpickAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, zo_strformat(formatString, interactTargetName))
+            end
+            local sound = ZO_ClientInteractResultSpecificSound[result] or SOUNDS.GENERAL_ALERT_ERROR
+            PlaySound(sound)
+        end
+        return true
+    end
+
+    -- EVENT_TRADE_INVITE_FAILED (Alert Handler)
+    local function TradeInviteFailedAlert(errorReason, inviteeCharacterName, inviteeDisplayName)
+        if ChatAnnouncements.SV.Notify.NotificationTradeCA or ChatAnnouncements.SV.Notify.NotificationTradeAlert then
+            local finalName = ChatAnnouncements.ResolveNameLink(inviteeCharacterName, inviteeDisplayName)
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviteeCharacterName, inviteeDisplayName)
+
+            if ChatAnnouncements.SV.Notify.NotificationTradeCA then
+                printToChat(zo_strformat(GetString("LUIE_STRING_CA_TRADEACTIONRESULT", errorReason), finalName), true)
+            end
+
+            if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString("LUIE_STRING_CA_TRADEACTIONRESULT", errorReason), finalAlertName))
+            end
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        g_tradeTarget = ""
+        return true
+    end
+
+    -- EVENT_TRADE_INVITE_CONSIDERING (Alert Handler)
+    local function TradeInviteConsideringAlert(inviterCharacterName, inviterDisplayName)
+        if ChatAnnouncements.SV.Notify.NotificationTradeCA or ChatAnnouncements.SV.Notify.NotificationTradeAlert then
+            local finalName = ChatAnnouncements.ResolveNameLink(inviterCharacterName, inviterDisplayName)
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviterCharacterName, inviterDisplayName)
+            g_tradeTarget = ZO_SELECTED_TEXT:Colorize(zo_strformat("<<C:1>>", finalName))
+
+            if ChatAnnouncements.SV.Notify.NotificationTradeCA then
+                printToChat(zo_strformat(GetString(LUIE_STRING_CA_TRADE_INVITE_MESSAGE), finalName), true)
+            end
+            if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_TRADE_INVITE_MESSAGE), finalAlertName))
+            end
+        end
+        return true
+    end
+
+    -- EVENT_TRADE_INVITE_WAITING (Alert Handler)
+    local function TradeInviteWaitingAlert(inviteeCharacterName, inviteeDisplayName)
+        if ChatAnnouncements.SV.Notify.NotificationTradeCA or ChatAnnouncements.SV.Notify.NotificationTradeAlert then
+            local finalName = ChatAnnouncements.ResolveNameLink(inviteeCharacterName, inviteeDisplayName)
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviteeCharacterName, inviteeDisplayName)
+            g_tradeTarget = ZO_SELECTED_TEXT:Colorize(zo_strformat("<<C:1>>", finalName))
+
+            if ChatAnnouncements.SV.Notify.NotificationTradeCA then
+                printToChat(zo_strformat(GetString(LUIE_STRING_CA_TRADE_INVITE_CONFIRM), finalName), true)
+            end
+            if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_TRADE_INVITE_CONFIRM), finalAlertName))
+            end
+        end
+        return true
+    end
+
+    -- EVENT_TRADE_INVITE_DECLINED (Alert Handler)
+    local function TradeInviteDeclinedAlert()
+        if ChatAnnouncements.SV.Notify.NotificationTradeCA then
+            printToChat(GetString(LUIE_STRING_CA_TRADE_INVITE_DECLINED), true)
+        end
+        if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_TRADE_INVITE_DECLINED))
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        g_tradeTarget = ""
+        g_tradeStacksIn = {}
+        g_tradeStacksOut = {}
+        return true
+    end
+
+    -- EVENT_TRADE_INVITE_CANCELED (Alert Handler)
+    local function TradeInviteCanceledAlert()
+        if ChatAnnouncements.SV.Notify.NotificationTradeCA then
+            printToChat(GetString(LUIE_STRING_CA_TRADE_INVITE_CANCELED), true)
+        end
+        if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_TRADE_INVITE_CANCELED))
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        g_tradeTarget = ""
+        g_tradeStacksIn = {}
+        g_tradeStacksOut = {}
+        return true
+    end
+
+    -- EVENT_TRADE_CANCELED (Alert Handler)
+    local function TradeCanceledAlert()
+        if ChatAnnouncements.SV.Notify.NotificationTradeCA then
+            printToChat(GetString(SI_TRADE_CANCELED), true)
+        end
+        if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_TRADE_CANCELED))
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+
+        eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+        if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise then
+            eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
+        end
+        if not (ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise) then
+            g_inventoryStacks = {}
+        end
+
+        g_tradeTarget = ""
+        g_tradeStacksIn = {}
+        g_tradeStacksOut = {}
+        g_inTrade = false
+        return true
+    end
+
+    -- EVENT_TRADE_FAILED (Alert Handler)
+    local function TradeFailedAlert(reason)
+        if ChatAnnouncements.SV.Notify.NotificationTradeCA then
+            printToChat(GetString("LUIE_STRING_CA_TRADEACTIONRESULT", reason), true)
+        end
+        if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString("LUIE_STRING_CA_TRADEACTIONRESULT", reason))
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+
+        g_tradeTarget = ""
+        g_inTrade = false
+        return true
+    end
+
+    -- EVENT_TRADE_SUCCEEDED (Alert Handler)
+    local function TradeSucceededAlert()
+        if ChatAnnouncements.SV.Notify.NotificationTradeCA then
+            local message = GetString(SI_TRADE_COMPLETE)
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = message, type = "NOTIFICATION", isSystem = true }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        end
+        if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_TRADE_COMPLETE))
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+
+        if ChatAnnouncements.SV.Inventory.LootTrade then
+            for indexOut = 1, 5 do
+                if g_tradeStacksOut[indexOut] ~= nil then
+                    local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
+                    local logPrefix = g_tradeTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeOut or ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeOutNoName
+                    local item = g_tradeStacksOut[indexOut]
+                    ChatAnnouncements.ItemCounterDelayOut(item.icon, item.stack, item.itemType, item.itemId, item.itemLink, g_tradeTarget, logPrefix, gainOrLoss, false)
+                end
+            end
+
+            for indexIn = 1, 5 do
+                if g_tradeStacksIn[indexIn] ~= nil then
+                    local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
+                    local logPrefix = g_tradeTarget ~= "" and ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeIn or ChatAnnouncements.SV.ContextMessages.CurrencyMessageTradeInNoName
+                    local item = g_tradeStacksIn[indexIn]
+                    ChatAnnouncements.ItemCounterDelay(item.icon, item.stack, item.itemType, item.itemId, item.itemLink, g_tradeTarget, logPrefix, gainOrLoss, false)
+                end
+            end
+        end
+
+        eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+        if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise then
+            eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
+        end
+        if not (ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootShowDisguise) then
+            g_inventoryStacks = {}
+        end
+
+        g_tradeTarget = ""
+        g_tradeStacksIn = {}
+        g_tradeStacksOut = {}
+        g_inTrade = false
+        return true
+    end
+
+    -- EVENT_DISCOVERY_EXPERIENCE (Alert Handler)
+    local function DiscoveryExperienceAlert(subzoneName, level, previousExperience, currentExperience, rank, previousPoints, currentPoints)
+        -- Note: We let the CSA Handler take care of this.
+        return true
+    end
+
+    -- EVENT_MAIL_SEND_FAILED (Alert Handler)
+    local function MailSendFailedAlert(reason)
+        if reason ~= MAIL_SEND_RESULT_CANCELED then
+            local function RestoreMailBackupValues()
+                g_postageAmount = GetQueuedMailPostage()
+                g_mailAmount = GetQueuedMoneyAttachment()
+                g_mailCOD = GetQueuedCOD()
+            end
+
+            -- Stop currency messages from printing here
+            if reason == MAIL_SEND_RESULT_FAIL_INVALID_NAME then
+                for i = 1, #ChatAnnouncements.QueuedMessages do
+                    if ChatAnnouncements.QueuedMessages[i].type == "CURRENCY" then
+                        ChatAnnouncements.QueuedMessages[i].type = "GARBAGE"
+                    end
+                end
+                eventManager:UnregisterForEvent(moduleName, EVENT_CURRENCY_UPDATE)
+                LUIE_callLater(function ()
+                                   eventManager:RegisterForEvent(moduleName, EVENT_CURRENCY_UPDATE, ChatAnnouncements.OnCurrencyUpdate)
+                               end, 500)
+            end
+
+            if ChatAnnouncements.SV.Notify.NotificationMailErrorCA then
+                printToChat(GetString("SI_SENDMAILRESULT", reason), true)
+            end
+            if ChatAnnouncements.SV.Notify.NotificationMailErrorAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString("SI_SENDMAILRESULT", reason))
+            end
+            PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+
+            LUIE_callLater(RestoreMailBackupValues, 50) -- Prevents values from being cleared by failed message (when inbox is full, the currency change fires first regardless and then is refunded)
+        end
+        return true
+    end
+
+    ZO_PreHook(alertHandlers, EVENT_LORE_BOOK_ALREADY_KNOWN, AlreadyKnowBookHook)
+    ZO_PreHook(alertHandlers, EVENT_RIDING_SKILL_IMPROVEMENT, RidingSkillImprovementAlertHook)
+    ZO_PreHook(alertHandlers, EVENT_LORE_BOOK_LEARNED, LoreBookLearnedAlertHook)
+    ZO_PreHook(alertHandlers, EVENT_DUEL_INVITE_RECEIVED, DuelInviteReceivedAlert)
+    ZO_PreHook(alertHandlers, EVENT_DUEL_INVITE_SENT, DuelInviteSentAlert)
+    ZO_PreHook(alertHandlers, EVENT_DUEL_INVITE_ACCEPTED, DuelInviteAcceptedAlert)
+    ZO_PreHook(alertHandlers, EVENT_DUEL_INVITE_FAILED, DuelInviteFailedAlert)
+    ZO_PreHook(alertHandlers, EVENT_DUEL_INVITE_DECLINED, DuelInviteDeclinedAlert)
+    ZO_PreHook(alertHandlers, EVENT_DUEL_INVITE_CANCELED, DuelInviteCanceledAlert)
+    ZO_PreHook(alertHandlers, EVENT_PLEDGE_OF_MARA_RESULT, PledgeOfMaraResultAlert)
+    ZO_PreHook(alertHandlers, EVENT_GROUP_INVITE_RESPONSE, GroupInviteResponseAlert)
+    ZO_PreHook(alertHandlers, EVENT_GROUP_INVITE_ACCEPT_RESPONSE_TIMEOUT, GroupInviteTimeoutAlert)
+    ZO_PreHook(alertHandlers, EVENT_GROUP_NOTIFICATION_MESSAGE, GroupNotificationMessageAlert)
+    ZO_PreHook(alertHandlers, EVENT_GROUP_UPDATE, GroupUpdateAlert)
+    ZO_PreHook(alertHandlers, EVENT_GROUP_MEMBER_LEFT, GroupMemberLeftAlert)
+    ZO_PreHook(alertHandlers, EVENT_LEADER_UPDATE, LeaderUpdateAlert)
+    ZO_PreHook(alertHandlers, EVENT_ACTIVITY_QUEUE_RESULT, ActivityQueueResultAlert)
+    ZO_PreHook(alertHandlers, EVENT_GROUP_ELECTION_FAILED, GroupElectionFailedAlert)
+    ZO_PreHook(alertHandlers, EVENT_GROUP_ELECTION_RESULT, GroupElectionResultAlert)
+    ZO_PreHook(alertHandlers, EVENT_GROUP_ELECTION_REQUESTED, GroupElectionRequestedAlert)
+    ZO_PreHook(alertHandlers, EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED, GroupReadyCheckCancelAlert)
+    ZO_PreHook(alertHandlers, EVENT_GROUP_VETERAN_DIFFICULTY_CHANGED, GroupDifficultyChangeAlert)
+
+    ZO_PreHook(alertHandlers, EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)
+
+    -- This function isn't needed if CA isn't enabled so only load it if CA is enabled
+    if ChatAnnouncements.Enabled then
+        eventManager:RegisterForEvent(moduleName, EVENT_GROUP_TYPE_CHANGED, ChatAnnouncements.OnGroupTypeChanged)
+    end
+    eventManager:RegisterForEvent(moduleName, EVENT_GROUP_INVITE_RECEIVED, ChatAnnouncements.OnGroupInviteReceived)
+    eventManager:RegisterForEvent(moduleName, EVENT_GROUP_ELECTION_NOTIFICATION_ADDED, ChatAnnouncements.VoteNotify)
+    eventManager:RegisterForEvent(moduleName, EVENT_GROUPING_TOOLS_NO_LONGER_LFG, ChatAnnouncements.LFGLeft)
+    eventManager:RegisterForEvent(moduleName, EVENT_GROUPING_TOOLS_LFG_JOINED, ChatAnnouncements.GroupingToolsLFGJoined)
+    eventManager:RegisterForEvent(moduleName, EVENT_ACTIVITY_FINDER_STATUS_UPDATE, ChatAnnouncements.ActivityStatusUpdate)
+    eventManager:RegisterForEvent(moduleName, EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED, ChatAnnouncements.ReadyCheckUpdate)
+
+    ZO_PreHook(alertHandlers, EVENT_GUILD_SELF_LEFT_GUILD, GuildSelfLeftAlert)
+    ZO_PreHook(alertHandlers, EVENT_SAVE_GUILD_RANKS_RESPONSE, GuildRanksResponseAlert)
+    ZO_PreHook(alertHandlers, EVENT_LOCKPICK_FAILED, LockpickFailedAlert)
+    ZO_PreHook(alertHandlers, EVENT_CLIENT_INTERACT_RESULT, ClientInteractResult)
+    ZO_PreHook(alertHandlers, EVENT_TRADE_INVITE_FAILED, TradeInviteFailedAlert)
+    ZO_PreHook(alertHandlers, EVENT_TRADE_INVITE_CONSIDERING, TradeInviteConsideringAlert)
+    ZO_PreHook(alertHandlers, EVENT_TRADE_INVITE_WAITING, TradeInviteWaitingAlert)
+    ZO_PreHook(alertHandlers, EVENT_TRADE_INVITE_DECLINED, TradeInviteDeclinedAlert)
+    ZO_PreHook(alertHandlers, EVENT_TRADE_INVITE_CANCELED, TradeInviteCanceledAlert)
+    ZO_PreHook(alertHandlers, EVENT_TRADE_CANCELED, TradeCanceledAlert)
+    ZO_PreHook(alertHandlers, EVENT_TRADE_FAILED, TradeFailedAlert)
+    ZO_PreHook(alertHandlers, EVENT_TRADE_SUCCEEDED, TradeSucceededAlert)
+    ZO_PreHook(alertHandlers, EVENT_DISCOVERY_EXPERIENCE, DiscoveryExperienceAlert)
+    ZO_PreHook(alertHandlers, EVENT_MAIL_SEND_FAILED, MailSendFailedAlert)
+
+    ZO_PreHook(alertHandlers, EVENT_STYLE_LEARNED, StyleLearnedHook)
+    ZO_PreHook(alertHandlers, EVENT_RECIPE_LEARNED, RecipeLearnedHook)
+    ZO_PreHook(alertHandlers, EVENT_MULTIPLE_RECIPES_LEARNED, MultipleRecipeLearnedHook)
+
+    local csaHandlers = ZO_CenterScreenAnnounce_GetEventHandlers()
+    local csaCallbackHandlers = ZO_CenterScreenAnnounce_GetCallbackHandlers()
+
+    -- EVENT_LORE_BOOK_LEARNED_SKILL_EXPERIENCE (CSA Handler)
+    local function LoreBookXPHook(categoryIndex, collectionIndex, bookIndex, guildReputationIndex, skillType, skillIndex, rank, previousXP, currentXP)
+        if guildReputationIndex > 0 then
+            local collectionName, _, numKnownBooks, totalBooks, hidden = GetLoreCollectionInfo(categoryIndex, collectionIndex)
+            local title, icon = GetLoreBookInfo(categoryIndex, collectionIndex, bookIndex)
+            local bookName
+            local bookLink
+            if ChatAnnouncements.SV.BracketOptionLorebook == 1 then
+                bookName = string_format("%s", title)
+                bookLink = string_format("|H0:LINK_TYPE_LUIBOOK:%s:%s:%s|h%s|h", categoryIndex, collectionIndex, bookIndex, bookName)
+            else
+                bookName = string_format("[%s]", title)
+                bookLink = string_format("|H1:LINK_TYPE_LUIBOOK:%s:%s:%s|h%s|h", categoryIndex, collectionIndex, bookIndex, bookName)
+            end
+
+            local stringPrefix
+            local csaPrefix
+            if categoryIndex == 1 then
+                -- Is a lore book
+                stringPrefix = ChatAnnouncements.SV.Lorebooks.LorebookPrefix1
+                csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_LORE_LIBRARY_ANNOUNCE_BOOK_LEARNED)
+            else
+                -- Is a normal book
+                stringPrefix = ChatAnnouncements.SV.Lorebooks.LorebookPrefix2
+                csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(LUIE_STRING_CA_LOREBOOK_BOOK)
+            end
+
+            -- Chat Announcement
+            if ChatAnnouncements.SV.Lorebooks.LorebookCA then
+                local formattedIcon = ChatAnnouncements.SV.Lorebooks.LorebookIcon and ("|t16:16:" .. icon .. "|t ") or ""
+                local stringPart1
+                local stringPart2
+                if stringPrefix ~= "" then
+                    stringPart1 = ColorizeColors.LorebookColorize1:Colorize(zo_strformat("<<1>><<2>><<3>> ", bracket1[ChatAnnouncements.SV.Lorebooks.LorebookBracket], stringPrefix, bracket2[ChatAnnouncements.SV.Lorebooks.LorebookBracket]))
+                else
+                    stringPart1 = ""
+                end
+                if ChatAnnouncements.SV.Lorebooks.LorebookCategory then
+                    stringPart2 = collectionName ~= "" and ColorizeColors.LorebookColorize2:Colorize(zo_strformat(" <<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), collectionName)) or ColorizeColors.LorebookColorize2:Colorize(zo_strformat(" <<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), GetString(SI_WINDOW_TITLE_LORE_LIBRARY)))
+                else
+                    stringPart2 = ""
+                end
+
+                local finalMessage = zo_strformat("<<1>><<2>><<3>><<4>>", stringPart1, formattedIcon, bookLink, stringPart2)
+                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "COLLECTIBLE" }
+                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+
+            -- Alert Announcement
+            if ChatAnnouncements.SV.Lorebooks.LorebookAlert then
+                local text = collectionName ~= "" and zo_strformat("<<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), collectionName) or zo_strformat(" <<1>> <<2>>.", GetString(LUIE_STRING_CA_LOREBOOK_ADDED_CA), GetString(SI_WINDOW_TITLE_LORE_LIBRARY))
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat("<<1>> <<2>>", title, text))
+            end
+
+            -- Center Screen Announcement
+            if ChatAnnouncements.SV.Lorebooks.LorebookCSA then
+                -- Only display a CSA if this is a Lore Book and we have Eidetic Memory books set to not show.
+                if (categoryIndex == 1 and ChatAnnouncements.SV.Lorebooks.LorebookCSALoreOnly) or not ChatAnnouncements.SV.Lorebooks.LorebookCSALoreOnly then
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.BOOK_ACQUIRED)
+                    if not LUIE.SV.HideXPBar then
+                        local barType = PLAYER_PROGRESS_BAR:GetBarType(PPB_CLASS_SKILL, skillType, skillIndex)
+                        local rankStartXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillIndex, rank)
+                        local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(barType, rank, previousXP - rankStartXP, currentXP - rankStartXP)
+                        barParams:SetTriggeringEvent(EVENT_LORE_BOOK_LEARNED_SKILL_EXPERIENCE)
+                        ValidateProgressBarParams(barParams)
+                        messageParams:SetBarParams(barParams)
+                    end
+                    if collectionName ~= "" then
+                        messageParams:SetText(csaPrefix, zo_strformat(LUIE_STRING_CA_LOREBOOK_ADDED_CSA, title, collectionName))
+                    else
+                        messageParams:SetText(csaPrefix, zo_strformat(LUIE_STRING_CA_LOREBOOK_ADDED_CSA, title, GetString(SI_WINDOW_TITLE_LORE_LIBRARY)))
+                    end
+                    messageParams:SetIconData(icon, "EsoUI/Art/Achievements/achievements_iconBG.dds")
+                    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LORE_BOOK_LEARNED_SKILL_EXPERIENCE)
+                    CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+                end
+            end
+            if not ChatAnnouncements.SV.Lorebooks.LorebookCSA then
+                PlaySound(SOUNDS.BOOK_ACQUIRED)
+            end
+        end
+        return true
+    end
+
+    -- EVENT_LORE_COLLECTION_COMPLETED (CSA Handler)
+    local function LoreCollectionHook(categoryIndex, collectionIndex, bookIndex, guildReputationIndex, isMaxRank)
+        if guildReputationIndex == 0 or isMaxRank then
+            -- Only fire this message if we're not part of the guild or at max level within the guild.
+            local collectionName, description, numKnownBooks, totalBooks, hidden, textureName = GetLoreCollectionInfo(categoryIndex, collectionIndex)
+            local stringPrefix = ChatAnnouncements.SV.Lorebooks.LorebookCollectionPrefix
+            local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_LORE_LIBRARY_COLLECTION_COMPLETED_LARGE)
+            if not hidden or ChatAnnouncements.SV.Lorebooks.LorebookShowHidden then
+                if ChatAnnouncements.SV.Lorebooks.LorebookCollectionCA then
+                    local formattedIcon
+                    local stringPart1
+                    local stringPart2
+                    if stringPrefix ~= "" then
+                        stringPart1 = ColorizeColors.LorebookColorize1:Colorize(zo_strformat("<<1>><<2>><<3>> ", bracket1[ChatAnnouncements.SV.Lorebooks.LorebookBracket], stringPrefix, bracket2[ChatAnnouncements.SV.Lorebooks.LorebookBracket]))
+                    else
+                        stringPart1 = ""
+                    end
+                    if textureName ~= "" and textureName ~= nil then
+                        formattedIcon = ChatAnnouncements.SV.Lorebooks.LorebookIcon and ("|t16:16:" .. textureName .. "|t ") or ""
+                    end
+                    if ChatAnnouncements.SV.Lorebooks.LorebookCategory then
+                        stringPart2 = ColorizeColors.LorebookColorize2:Colorize(zo_strformat(SI_LORE_LIBRARY_COLLECTION_COMPLETED_SMALL, collectionName))
+                    else
+                        stringPart2 = ""
+                    end
+
+                    local finalMessage = zo_strformat("<<1>><<2>><<3>>", stringPart1, formattedIcon, stringPart2)
+                    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "COLLECTIBLE" }
+                    ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                end
+
+                if ChatAnnouncements.SV.Lorebooks.LorebookCollectionCSA then
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.BOOK_COLLECTION_COMPLETED)
+                    messageParams:SetText(csaPrefix, zo_strformat(SI_LORE_LIBRARY_COLLECTION_COMPLETED_SMALL, collectionName))
+                    messageParams:SetIconData(textureName, "EsoUI/Art/Achievements/achievements_iconBG.dds")
+                    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LORE_COLLECTION_COMPLETED)
+                    CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+                end
+
+                if ChatAnnouncements.SV.Lorebooks.LorebookCollectionAlert then
+                    local text = zo_strformat(SI_LORE_LIBRARY_COLLECTION_COMPLETED_SMALL, collectionName)
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
+                end
+                if not ChatAnnouncements.SV.Lorebooks.LorebookCSA then
+                    PlaySound(SOUNDS.BOOK_COLLECTION_COMPLETED)
+                end
+            end
+        end
+        return true
+    end
+
+    -- EVENT_LORE_COLLECTION_COMPLETED_SKILL_EXPERIENCE (CSA Handler)
+    local function LoreCollectionXPHook(categoryIndex, collectionIndex, guildReputationIndex, skillType, skillIndex, rank, previousXP, currentXP)
+        if guildReputationIndex > 0 then
+            local collectionName, description, numKnownBooks, totalBooks, hidden, textureName = GetLoreCollectionInfo(categoryIndex, collectionIndex)
+            local stringPrefix = ChatAnnouncements.SV.Lorebooks.LorebookCollectionPrefix
+            local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_LORE_LIBRARY_COLLECTION_COMPLETED_LARGE)
+            if not hidden or ChatAnnouncements.SV.Lorebooks.LorebookShowHidden then
+                if ChatAnnouncements.SV.Lorebooks.LorebookCollectionCA then
+                    local formattedIcon
+                    local stringPart1
+                    local stringPart2
+                    if stringPrefix ~= "" then
+                        stringPart1 = ColorizeColors.LorebookColorize1:Colorize(zo_strformat("<<1>><<2>><<3>> ", bracket1[ChatAnnouncements.SV.Lorebooks.LorebookBracket], stringPrefix, bracket2[ChatAnnouncements.SV.Lorebooks.LorebookBracket]))
+                    else
+                        stringPart1 = ""
+                    end
+                    if textureName ~= "" and textureName ~= nil then
+                        formattedIcon = ChatAnnouncements.SV.Lorebooks.LorebookIcon and zo_strformat("<<1>> ", zo_iconFormat(textureName, 16, 16)) or ""
+                    end
+                    if ChatAnnouncements.SV.Lorebooks.LorebookCategory then
+                        stringPart2 = ColorizeColors.LorebookColorize2:Colorize(zo_strformat(SI_LORE_LIBRARY_COLLECTION_COMPLETED_SMALL, collectionName))
+                    else
+                        stringPart2 = ""
+                    end
+
+                    local finalMessage = zo_strformat("<<1>><<2>><<3>>", stringPart1, formattedIcon, stringPart2)
+                    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "COLLECTIBLE" }
+                    ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                end
+
+                if ChatAnnouncements.SV.Lorebooks.LorebookCollectionCSA then
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.BOOK_COLLECTION_COMPLETED)
+                    if not LUIE.SV.HideXPBar then
+                        local barType = PLAYER_PROGRESS_BAR:GetBarType(PPB_CLASS_SKILL, skillType, skillIndex)
+                        local rankStartXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillIndex, rank)
+                        local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(barType, rank, previousXP - rankStartXP, currentXP - rankStartXP)
+                        barParams:SetTriggeringEvent(EVENT_LORE_COLLECTION_COMPLETED_SKILL_EXPERIENCE)
+                        ValidateProgressBarParams(barParams)
+                        messageParams:SetBarParams(barParams)
+                    end
+                    messageParams:SetText(csaPrefix, zo_strformat(SI_LORE_LIBRARY_COLLECTION_COMPLETED_SMALL, collectionName))
+                    messageParams:SetIconData(textureName, "EsoUI/Art/Achievements/achievements_iconBG.dds")
+                    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LORE_COLLECTION_COMPLETED_SKILL_EXPERIENCE)
+                    CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+                end
+
+                if ChatAnnouncements.SV.Lorebooks.LorebookCollectionAlert then
+                    local text = zo_strformat(SI_LORE_LIBRARY_COLLECTION_COMPLETED_SMALL, collectionName)
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
+                end
+                if not ChatAnnouncements.SV.Lorebooks.LorebookCSA then
+                    PlaySound(SOUNDS.BOOK_COLLECTION_COMPLETED)
+                end
+            end
+        end
+        return true
+    end
+
+    -- EVENT_SKILL_POINTS_CHANGED (CSA Handler)
+    local function SkillPointsChangedHook(oldPoints, newPoints, oldPartialPoints, newPartialPoints, changeReason)
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        local numSkillPointsGained = newPoints - oldPoints
+        local stringPrefix = ChatAnnouncements.SV.Skills.SkillPointSkyshard
+        local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_SKYSHARD_GAINED)
+        local hasStringPrefix = stringPrefix ~= ""
+        local flagDisplay, sound, finalMessage, finalText
+
+        -- check if the skill point change was due to skyshards
+        if oldPartialPoints ~= newPartialPoints or changeReason == SKILL_POINT_CHANGE_REASON_SKYSHARD_INSTANT_UNLOCK then
+            flagDisplay = true
+            sound = SOUNDS.SKYSHARD_GAINED
+            if numSkillPointsGained < 0 then
+                return
+            end
+            local numSkyshardsGained = (newPoints * NUM_PARTIAL_SKILL_POINTS_FOR_FULL + newPartialPoints) - (oldPoints * NUM_PARTIAL_SKILL_POINTS_FOR_FULL + oldPartialPoints)
+            local largeText = zo_strformat(csaPrefix, numSkyshardsGained)
+            local stringPart1, stringPart2
+
+            -- if only the partial points changed, message out the new count of skyshard pieces
+            if newPoints == oldPoints then
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_PARTIAL_GAINED)
+                local skyshardGainedPoints = zo_strformat(SI_SKYSHARD_GAINED_POINTS, newPartialPoints, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
+                messageParams:SetText(largeText, skyshardGainedPoints)
+                finalText = zo_strformat("<<1>> (<<2>>/<<3>>)", largeText, newPartialPoints, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
+                if hasStringPrefix then
+                    if ChatAnnouncements.SV.Skills.SkillPointsPartial then
+                        stringPart1 = ColorizeColors.SkillPointColorize1:Colorize(zo_strformat("<<1>><<2>><<3>> ", bracket1[ChatAnnouncements.SV.Skills.SkillPointBracket], largeText, bracket2[ChatAnnouncements.SV.Skills.SkillPointBracket]))
+                    else
+                        stringPart1 = ColorizeColors.SkillPointColorize1:Colorize(zo_strformat("<<1>>!", largeText))
+                    end
+                else
+                    stringPart1 = ""
+                end
+                if ChatAnnouncements.SV.Skills.SkillPointsPartial then
+                    stringPart2 = ColorizeColors.SkillPointColorize2:Colorize(skyshardGainedPoints)
+                else
+                    stringPart2 = ""
+                end
+                finalMessage = zo_strformat("<<1>><<2>>", stringPart1, stringPart2)
+            else
+                local messageText
+                -- if there are no leftover skyshard pieces, don't include them in the message
+                if newPartialPoints == 0 then
+                    messageText = zo_strformat(SI_SKILL_POINT_GAINED, numSkillPointsGained)
+                else
+                    messageText = zo_strformat(SI_SKILL_POINT_AND_SKYSHARD_PIECES_GAINED, numSkillPointsGained, newPartialPoints, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
+                end
+                messageParams:SetText(largeText, messageText)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_GAINED)
+                finalText = messageText
+                if hasStringPrefix then
+                    stringPart1 = ColorizeColors.SkillPointColorize1:Colorize(zo_strformat("<<1>><<2>><<3>> ", bracket1[ChatAnnouncements.SV.Skills.SkillPointBracket], largeText, bracket2[ChatAnnouncements.SV.Skills.SkillPointBracket]))
+                else
+                    stringPart1 = ""
+                end
+                stringPart2 = ColorizeColors.SkillPointColorize2:Colorize(messageText)
+                finalMessage = zo_strformat("<<1>><<2>>.", stringPart1, stringPart2)
+            end
+        elseif numSkillPointsGained > 0 then
+            if not SUPPRESS_SKILL_POINT_CSA_REASONS[changeReason] then
+                flagDisplay = true
+                sound = SOUNDS.SKILL_GAINED
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_GAINED)
+                local skillPointGained = zo_strformat(SI_SKILL_POINT_GAINED, numSkillPointsGained)
+                messageParams:SetText(skillPointGained)
+                finalMessage = ColorizeColors.SkillPointColorize2:Colorize(skillPointGained .. ".")
+                finalText = skillPointGained .. "."
+            end
+        end
+        if flagDisplay then
+            if ChatAnnouncements.SV.Skills.SkillPointCA and finalMessage ~= "" then
+                table_insert(ChatAnnouncements.QueuedMessages, { message = finalMessage, type = "SKILL" })
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+            if ChatAnnouncements.SV.Skills.SkillPointCSA then
+                messageParams:SetSound(sound)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+            if ChatAnnouncements.SV.Skills.SkillPointAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, finalText)
+            end
+            if not ChatAnnouncements.SV.Skills.SkillPointCSA then
+                PlaySound(sound)
+            end
+        end
+        return true
+    end
+
+    -- EVENT_SKILL_LINE_ADDED (CSA Handler) -- Hooked via csaCallbackHandlers[2]
+    local function SkillLineAddedHook(skillLineData)
+        if skillLineData:IsAvailable() then
+            local skillTypeData = skillLineData:GetSkillTypeData()
+            local lineName = skillLineData:GetName()
+            local icon = skillTypeData:GetAnnounceIcon()
+
+            if ChatAnnouncements.SV.Skills.SkillLineUnlockCA then
+                local formattedIcon = ChatAnnouncements.SV.Skills.SkillLineIcon and zo_strformat("<<1>> ", zo_iconFormatInheritColor(icon, 16, 16)) or ""
+                local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(LUIE_STRING_CA_SKILL_LINE_ADDED, formattedIcon, lineName))
+                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "SKILL GAIN" }
+                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+            if ChatAnnouncements.SV.Skills.SkillLineUnlockCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.SKILL_LINE_ADDED)
+                local formattedIcon = zo_iconFormat(icon, 32, 32)
+                -- Note: We set the CSA type to SKILL_POINTS_PARTIAL_GAINED instead of SKILL_LINE_ADDED so this orders itself BEFORE some other events.
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_PARTIAL_GAINED)
+                messageParams:SetText(zo_strformat(SI_SKILL_LINE_ADDED, formattedIcon, lineName))
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+            if ChatAnnouncements.SV.Skills.SkillLineUnlockAlert then
+                local formattedIcon = ""
+                local text = zo_strformat(SI_SKILL_LINE_ADDED, formattedIcon, lineName)
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
+            end
+            if not ChatAnnouncements.SV.Skills.SkillLineUnlockCSA then
+                PlaySound(SOUNDS.SKILL_LINE_ADDED)
+            end
+            return true
+        end
+    end
+
+    -- EVENT_ABILITY_PROGRESSION_RANK_UPDATE (CSA Handler)
+    local function AbilityProgressionRankHook(progressionIndex, rank, maxRank, morph)
+        local _, _, _, atMorph = GetAbilityProgressionXPInfo(progressionIndex)
+        local name = GetAbilityProgressionAbilityInfo(progressionIndex, morph, rank)
+
+        if atMorph then
+            if ChatAnnouncements.SV.Skills.SkillAbilityCA then
+                local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(SI_MORPH_AVAILABLE_ANNOUNCEMENT, name) .. ".")
+                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "SKILL MORPH" }
+                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+
+            if ChatAnnouncements.SV.Skills.SkillAbilityCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ABILITY_MORPH_AVAILABLE)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ABILITY_PROGRESSION_RANK_MORPH)
+                messageParams:SetText(zo_strformat(SI_MORPH_AVAILABLE_ANNOUNCEMENT, name))
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            if ChatAnnouncements.SV.Skills.SkillAbilityAlert then
+                local text = zo_strformat(SI_MORPH_AVAILABLE_ANNOUNCEMENT, name) .. "."
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
+            end
+
+            if not ChatAnnouncements.SV.Skills.SkillAbilityCSA then
+                PlaySound(SOUNDS.ABILITY_MORPH_AVAILABLE)
+            end
+        else
+            if ChatAnnouncements.SV.Skills.SkillAbilityCA then
+                local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(LUIE_STRING_CA_ABILITY_RANK_UP, name, rank) .. ".")
+                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "SKILL" }
+                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+
+            if ChatAnnouncements.SV.Skills.SkillAbilityCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.ABILITY_RANK_UP)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ABILITY_PROGRESSION_RANK_UPDATE)
+                messageParams:SetText(zo_strformat(LUIE_STRING_CA_ABILITY_RANK_UP, name, rank))
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            if ChatAnnouncements.SV.Skills.SkillAbilityAlert then
+                local text = zo_strformat(LUIE_STRING_CA_ABILITY_RANK_UP, name, rank) .. "."
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
+            end
+
+            if not ChatAnnouncements.SV.Skills.SkillAbilityCSA then
+                PlaySound(SOUNDS.ABILITY_RANK_UP)
+            end
+        end
+        return true
+    end
+
+    -- EVENT_SKILL_RANK_UPDATE (CSA Handler)
+    local function SkillRankUpdateHook(skillType, skillLineIndex, rank)
+        -- crafting skill updates get deferred if they're increased while crafting animations are in progress
+        -- ZO_Skills_TieSkillInfoHeaderToCraftingSkill handles triggering the deferred center screen announce in that case
+        if skillType ~= SKILL_TYPE_RACIAL and (skillType ~= SKILL_TYPE_TRADESKILL or not ZO_CraftingUtils_IsPerformingCraftProcess()) then
+            local skillLineData = SKILLS_DATA_MANAGER:GetSkillLineDataByIndices(skillType, skillLineIndex)
+            if skillLineData and skillLineData:IsAvailable() then
+                local lineName = skillLineData:GetName()
+
+                if ChatAnnouncements.SV.Skills.SkillLineCA then
+                    local formattedString = ColorizeColors.SkillLineColorize:Colorize(zo_strformat(SI_SKILL_RANK_UP, lineName, rank) .. ".")
+                    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "SKILL LINE" }
+                    ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                end
+
+                if ChatAnnouncements.SV.Skills.SkillLineCSA then
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.SKILL_LINE_LEVELED_UP)
+                    messageParams:SetText(zo_strformat(SI_SKILL_RANK_UP, lineName, rank))
+                    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE)
+                    CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+                end
+
+                if ChatAnnouncements.SV.Skills.SkillLineAlert then
+                    local formattedText = zo_strformat(SI_SKILL_RANK_UP, lineName, rank) .. "."
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedText)
+                end
+
+                if not ChatAnnouncements.SV.Skills.SkillLineCSA then
+                    PlaySound(SOUNDS.SKILL_LINE_LEVELED_UP)
+                end
+            end
+        end
+        return true
+    end
+
+    -- EVENT_SKILL_XP_UPDATE (CSA Handler)
+    local function SkillXPUpdateHook(skillType, skillLineIndex, reason, rank, previousXP, currentXP)
+        if (skillType == SKILL_TYPE_GUILD and GUILD_SKILL_SHOW_REASONS[reason]) or reason == PROGRESS_REASON_JUSTICE_SKILL_EVENT then
+            if not LUIE.SV.HideXPBar then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_NO_TEXT)
+                local barType = PLAYER_PROGRESS_BAR:GetBarType(PPB_CLASS_SKILL, skillType, skillLineIndex)
+                local rankStartXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillLineIndex, rank)
+                local sound = GUILD_SKILL_SHOW_SOUNDS[reason]
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE)
+                if rankStartXP ~= nil then
+                    local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(barType, rank, previousXP - rankStartXP, currentXP - rankStartXP)
+                    barParams:SetTriggeringEvent(EVENT_SKILL_XP_UPDATE)
+                    ValidateProgressBarParams(barParams)
+                    messageParams:SetBarParams(barParams)
+                    CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+                else
+                    assert(false, string_format("No Rank Start XP %d %d %d %d %d %d", skillType, skillLineIndex, reason, rank, previousXP, currentXP))
+                end
+            end
+        end
+        return true
+    end
+
+    -- EVENT_COLLECTION_UPDATED (CSA Handler) -- Hooked via csaCallbackHandlers[1]
+    local function CollectibleUnlockedHook(collectionUpdateType, collectiblesByUnlockState)
+        if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGED then
+            local nowOwnedCollectibles = collectiblesByUnlockState[COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED]
+            if nowOwnedCollectibles then
+                if #nowOwnedCollectibles > MAX_INDIVIDUAL_COLLECTIBLE_UPDATES then
+                    local stringPrefix = ChatAnnouncements.SV.Collectibles.CollectiblePrefix
+                    local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE)
+
+                    if ChatAnnouncements.SV.Collectibles.CollectibleCA then
+                        local string1
+                        if stringPrefix ~= "" then
+                            string1 = ColorizeColors.CollectibleColorize1:Colorize(zo_strformat("<<1>><<2>><<3>> ", bracket1[ChatAnnouncements.SV.Collectibles.CollectibleBracket], stringPrefix, bracket2[ChatAnnouncements.SV.Collectibles.CollectibleBracket]))
+                        else
+                            string1 = ""
+                        end
+                        local string2 = ColorizeColors.CollectibleColorize2:Colorize(zo_strformat(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY, #nowOwnedCollectibles) .. ".")
+                        local finalString = zo_strformat("<<1>><<2>>", string1, string2)
+                        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalString, type = "COLLECTIBLE" }
+                        ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                    end
+
+                    -- Set message params even if CSA is disabled, we just send a dummy event so the callback handler works correctly.
+                    -- Note: This also means we don't need to Play Sound if the CSA isn't enabled since a blank one is always sent if the CSA is disabled.
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
+                    if ChatAnnouncements.SV.Collectibles.CollectibleCSA then
+                        messageParams:SetText(csaPrefix, zo_strformat(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY, #nowOwnedCollectibles))
+                        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
+                        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+                    end
+
+                    if ChatAnnouncements.SV.Collectibles.CollectibleAlert then
+                        local text = zo_strformat(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY, #nowOwnedCollectibles) .. "."
+                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
+                    end
+                    return true
+                else
+                    -- local messageParamsObjects = {}
+                    for _, collectibleData in ipairs(nowOwnedCollectibles) do
+                        local collectibleName = collectibleData:GetName()
+                        local icon = collectibleData:GetIcon()
+                        local categoryData = collectibleData:GetCategoryData()
+                        local majorCategory = categoryData:GetId()
+                        local majorCategoryTopLevelIndex = GetCategoryInfoFromCollectibleCategoryId(majorCategory)
+                        local majorCategoryName = GetCollectibleCategoryInfo(majorCategoryTopLevelIndex)
+                        local categoryName = categoryData:GetName()
+                        local collectibleId = collectibleData:GetId()
+
+                        local stringPrefix = ChatAnnouncements.SV.Collectibles.CollectiblePrefix
+                        local csaPrefix = stringPrefix ~= "" and stringPrefix or GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE)
+
+                        if ChatAnnouncements.SV.Collectibles.CollectibleCA then
+                            local link = GetCollectibleLink(collectibleId, linkBrackets[ChatAnnouncements.SV.BracketOptionCollectible])
+                            local formattedIcon = ChatAnnouncements.SV.Collectibles.CollectibleIcon and string_format("|t16:16:%s|t ", icon) or ""
+
+                            local string1
+                            if stringPrefix ~= "" then
+                                string1 = ColorizeColors.CollectibleColorize1:Colorize(zo_strformat("<<1>><<2>><<3>> ", bracket1[ChatAnnouncements.SV.Collectibles.CollectibleBracket], stringPrefix, bracket2[ChatAnnouncements.SV.Collectibles.CollectibleBracket]))
+                            else
+                                string1 = ""
+                            end
+                            local string2
+                            if ChatAnnouncements.SV.Collectibles.CollectibleCategory or ChatAnnouncements.SV.Collectibles.CollectibleSubcategory then
+                                local categoryString
+                                if ChatAnnouncements.SV.Collectibles.CollectibleCategory and ChatAnnouncements.SV.Collectibles.CollectibleSubcategory then
+                                    categoryString = (majorCategoryName .. " - " .. categoryName)
+                                elseif ChatAnnouncements.SV.Collectibles.CollectibleCategory then
+                                    categoryString = majorCategoryName
+                                else
+                                    categoryString = categoryName
+                                end
+                                string2 = ColorizeColors.CollectibleColorize2:Colorize(zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, link, categoryString) .. ".")
+                            else
+                                string2 = link
+                            end
+                            local finalString = zo_strformat("<<1>><<2>><<3>>", string1, formattedIcon, string2)
+                            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalString, type = "COLLECTIBLE" }
+                            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                        end
+
+                        -- Set message params even if CSA is disabled, we just send a dummy event so the callback handler works correctly.
+                        -- Note: This also means we don't need to Play Sound if the CSA isn't enabled since a blank one is always sent if the CSA is disabled.
+                        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
+                        if ChatAnnouncements.SV.Collectibles.CollectibleCSA then
+                            local csaString
+                            if ChatAnnouncements.SV.Collectibles.CollectibleCategory or ChatAnnouncements.SV.Collectibles.CollectibleSubcategory then
+                                local categoryString
+                                if ChatAnnouncements.SV.Collectibles.CollectibleCategory and ChatAnnouncements.SV.Collectibles.CollectibleSubcategory then
+                                    categoryString = (majorCategoryName .. " - " .. categoryName)
+                                elseif ChatAnnouncements.SV.Collectibles.CollectibleCategory then
+                                    categoryString = majorCategoryName
+                                else
+                                    categoryString = categoryName
+                                end
+                                csaString = zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, categoryString)
+                            else
+                                csaString = zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, categoryName)
+                            end
+                            messageParams:SetText(csaPrefix, csaString)
+                            messageParams:SetIconData(icon, "EsoUI/Art/Achievements/achievements_iconBG.dds")
+                            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
+                            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+                        end
+
+                        if ChatAnnouncements.SV.Collectibles.CollectibleAlert then
+                            local alertString
+                            if ChatAnnouncements.SV.Collectibles.CollectibleCategory or ChatAnnouncements.SV.Collectibles.CollectibleSubcategory then
+                                local categoryString
+                                if ChatAnnouncements.SV.Collectibles.CollectibleCategory and ChatAnnouncements.SV.Collectibles.CollectibleSubcategory then
+                                    categoryString = (majorCategoryName .. " - " .. categoryName)
+                                elseif ChatAnnouncements.SV.Collectibles.CollectibleCategory then
+                                    categoryString = majorCategoryName
+                                else
+                                    categoryString = categoryName
+                                end
+                                alertString = zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, categoryString .. ".")
+                            else
+                                alertString = zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, categoryName .. ".")
+                            end
+                            local text = alertString
+                            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
+                        end
+                    end
+                    return true
+                end
+            end
+        end
+    end
+
+    local function ResetQuestRewardStatus()
+        g_itemReceivedIsQuestReward = false
+    end
+
+    local function ResetQuestAbandonStatus()
+        g_itemReceivedIsQuestAbandon = false
+    end
+
+    -- EVENT_QUEST_ADDED (CSA Handler)
+    local function QuestAddedHook(journalIndex, questName, objectiveName)
+        eventManager:UnregisterForUpdate(moduleName .. "BufferedXP")
+        ChatAnnouncements.PrintBufferedXP()
+
+        local questType = GetJournalQuestType(journalIndex)
+        local instanceDisplayType = GetJournalQuestZoneDisplayType(journalIndex)
+        local questJournalObject = SYSTEMS:GetObject("questJournal")
+        local iconTexture = questJournalObject:GetIconTexture(questType, instanceDisplayType)
+
+        -- Add quest to index
+        g_questIndex[questName] =
+        {
+            questType = questType,
+            instanceDisplayType = instanceDisplayType,
+        }
+
+        if ChatAnnouncements.SV.Quests.QuestAcceptCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_ACCEPTED)
+            if iconTexture then
+                messageParams:SetText(zo_strformat(LUIE_STRING_CA_QUEST_ACCEPT_WITH_ICON, zo_iconFormat(iconTexture, "75%", "75%"), questName))
+            else
+                messageParams:SetText(zo_strformat(SI_NOTIFYTEXT_QUEST_ACCEPT, questName))
+            end
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if ChatAnnouncements.SV.Quests.QuestAcceptAlert then
+            local alertString
+            if iconTexture and ChatAnnouncements.SV.Quests.QuestIcon then
+                alertString = zo_strformat(LUIE_STRING_CA_QUEST_ACCEPT_WITH_ICON, zo_iconFormat(iconTexture, "75%", "75%"), questName)
+            else
+                alertString = zo_strformat(SI_NOTIFYTEXT_QUEST_ACCEPT, questName)
+            end
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertString)
+        end
+
+        -- If we don't have either CSA or Alert on (then we want to play a sound here)
+        if not ChatAnnouncements.SV.Quests.QuestAcceptCSA then
+            PlaySound(SOUNDS.QUEST_ACCEPTED)
+        end
+
+        if ChatAnnouncements.SV.Quests.QuestAcceptCA then
+            local questNameFormatted
+            local stepText = GetJournalQuestStepInfo(journalIndex, 1)
+            local formattedString
+
+            if ChatAnnouncements.SV.Quests.QuestLong then
+                questNameFormatted = (zo_strformat("|c<<1>><<2>>:|r |c<<3>><<4>>|r", ColorizeColors.QuestColorQuestNameColorize:ToHex(), questName, ColorizeColors.QuestColorQuestDescriptionColorize, stepText))
+            else
+                questNameFormatted = (zo_strformat("|c<<1>><<2>>|r", ColorizeColors.QuestColorQuestNameColorize:ToHex(), questName))
+            end
+            if iconTexture and ChatAnnouncements.SV.Quests.QuestIcon then
+                formattedString = string_format(GetString(LUIE_STRING_CA_QUEST_ACCEPT) .. zo_iconFormat(iconTexture, 16, 16) .. " " .. questNameFormatted)
+            else
+                formattedString = string_format("%s%s", GetString(LUIE_STRING_CA_QUEST_ACCEPT), questNameFormatted)
+            end
+
+            -- If this message is duplicated by another addon then don't display twice.
+            for i = 1, #ChatAnnouncements.QueuedMessages do
+                if ChatAnnouncements.QueuedMessages[i].message == formattedString then
+                    return true
+                end
+            end
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "QUEST" }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        end
+
+        return true
+    end
+
+    -- EVENT_QUEST_COMPLETE (CSA Handler)
+    local function QuestCompleteHook(questName, level, previousExperience, currentExperience, championPoints, questType, instanceDisplayType)
+        eventManager:UnregisterForUpdate(moduleName .. "BufferedXP")
+        ChatAnnouncements.PrintBufferedXP()
+
+        local questJournalObject = SYSTEMS:GetObject("questJournal")
+        local iconTexture = questJournalObject:GetIconTexture(questType, instanceDisplayType)
+
+        if ChatAnnouncements.SV.Quests.QuestCompleteCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_COMPLETED)
+            if iconTexture then
+                messageParams:SetText(zo_strformat(LUIE_STRING_CA_QUEST_COMPLETE_WITH_ICON, zo_iconFormat(iconTexture, "75%", "75%"), questName))
+            else
+                messageParams:SetText(zo_strformat(SI_NOTIFYTEXT_QUEST_COMPLETE, questName))
+            end
+            if not LUIE.SV.HideXPBar then
+                messageParams:SetBarParams(GetRelevantBarParams(level, previousExperience, currentExperience, championPoints, EVENT_QUEST_COMPLETE))
+            end
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if ChatAnnouncements.SV.Quests.QuestCompleteAlert then
+            local alertString
+            if iconTexture and ChatAnnouncements.SV.Quests.QuestIcon then
+                alertString = zo_strformat(LUIE_STRING_CA_QUEST_COMPLETE_WITH_ICON, zo_iconFormat(iconTexture, "75%", "75%"), questName)
+            else
+                alertString = zo_strformat(SI_NOTIFYTEXT_QUEST_COMPLETE, questName)
+            end
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertString)
+        end
+
+        if ChatAnnouncements.SV.Quests.QuestCompleteCA then
+            local questNameFormatted = (zo_strformat("|cFFA500<<1>>|r", questName))
+            local formattedString
+            if iconTexture and ChatAnnouncements.SV.Quests.QuestIcon then
+                formattedString = zo_strformat(LUIE_STRING_CA_QUEST_COMPLETE_WITH_ICON, zo_iconFormat(iconTexture, 16, 16), questNameFormatted)
+            else
+                formattedString = zo_strformat(SI_NOTIFYTEXT_QUEST_COMPLETE, questNameFormatted)
+            end
+            -- This event double fires on quest completion, if an equivalent message is already detected in queue, then abort!
+            for i = 1, #ChatAnnouncements.QueuedMessages do
+                if ChatAnnouncements.QueuedMessages[i].message == formattedString then
+                    return true
+                end
+            end
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "QUEST" }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        end
+
+        -- If we don't have either CSA or Alert on (then we want to play a sound here)
+        if not ChatAnnouncements.SV.Quests.QuestCompleteCSA then
+            PlaySound(SOUNDS.QUEST_COMPLETED)
+        end
+
+        -- We set this variable to true in order to override the [Looted] message syntax that would be applied to a quest reward normally.
+        if ChatAnnouncements.SV.Inventory.Loot then
+            g_itemReceivedIsQuestReward = true
+            LUIE_callLater(ResetQuestRewardStatus, 500)
+        end
+
+        return true
+    end
+
+    -- EVENT_OBJECTIVE_COMPLETED (CSA Handler)
+    -- Note we don't play a sound if the CSA is disabled here because the Quest complete message will already do this.
+    local function ObjectiveCompletedHook(zoneIndex, poiIndex, level, previousExperience, currentExperience, championPoints)
+        local name, _, _, finishedDescription = GetPOIInfo(zoneIndex, poiIndex)
+        local nameFormatted
+        local formattedText
+
+        if ChatAnnouncements.SV.Quests.QuestLocLong and finishedDescription ~= "" then
+            nameFormatted = (zo_strformat("|c<<1>><<2>>:|r |c<<3>><<4>>|r", ColorizeColors.QuestColorLocNameColorize, name, ColorizeColors.QuestColorLocDescriptionColorize, finishedDescription))
+        else
+            nameFormatted = (zo_strformat("|c<<1>><<2>>|r", ColorizeColors.QuestColorLocNameColorize, name))
+        end
+        formattedText = zo_strformat(SI_NOTIFYTEXT_OBJECTIVE_COMPLETE, nameFormatted)
+
+        if ChatAnnouncements.SV.Quests.QuestCompleteAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_NOTIFYTEXT_OBJECTIVE_COMPLETE, name))
+        end
+
+        if ChatAnnouncements.SV.Quests.QuestCompleteCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.OBJECTIVE_COMPLETED)
+            if not LUIE.SV.HideXPBar then
+                messageParams:SetBarParams(GetRelevantBarParams(level, previousExperience, currentExperience, championPoints, EVENT_OBJECTIVE_COMPLETED))
+            end
+            messageParams:SetText(zo_strformat(SI_NOTIFYTEXT_OBJECTIVE_COMPLETE, name), finishedDescription)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if ChatAnnouncements.SV.Quests.QuestCompleteCA then
+            -- This event double fires on quest completion, if an equivalent message is already detected in queue, then abort!
+            for i = 1, #ChatAnnouncements.QueuedMessages do
+                if ChatAnnouncements.QueuedMessages[i].message == formattedText then
+                    return true
+                end
+            end
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedText, type = "QUEST" }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        end
+
+        return true
+    end
+
+    -- EVENT_QUEST_CONDITION_COUNTER_CHANGED (CSA Handler)
+    -- Note: Used for quest failure and updates
+    local function ConditionCounterHook(journalIndex, questName, conditionText, conditionType, currConditionVal, newConditionVal, conditionMax, isFailCondition, stepOverrideText, isPushed, isComplete, isConditionComplete, isStepHidden, isConditionCompleteChanged)
+        if isStepHidden or (isPushed and isComplete) or (currConditionVal >= newConditionVal) then
+            return true
+        end
+
+        -- Check WritCreater settings first
+        if WritCreater and WritCreater:GetSettings().suppressQuestAnnouncements and isQuestWritQuest(journalIndex) then
+            if LUIE.IsDevDebugEnabled() then
+                LUIE:Log("Debug", [[Writ Quest Condition Suppressed:
+--> Quest: %s
+--> Index: %d
+--> Condition: %s]],
+                         questName,
+                         journalIndex,
+                         conditionText
+                )
+            end
+            return true
+        end
+
+        local type             -- This variable represents whether this message is an objective update or failure state message (1 = update, 2 = failure) There are too many conditionals to resolve what we need to print inside them so we do it after setting the formatting.
+        local alertMessage     -- Variable for alert message
+        local formattedMessage -- Variable for CA Message
+        local sound            -- Set correct sound based off context
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
+
+        if newConditionVal ~= currConditionVal and not isFailCondition then
+            sound = isConditionComplete and SOUNDS.QUEST_OBJECTIVE_COMPLETE or SOUNDS.QUEST_OBJECTIVE_INCREMENT
+            messageParams:SetSound(sound)
+        end
+
+        if isConditionComplete and conditionType == QUEST_CONDITION_TYPE_GIVE_ITEM or conditionType == QUEST_CONDITION_TYPE_TALK_TO then
+            -- We set this variable to true in order to override the [Looted] message syntax that would be applied to a quest reward normally.
+            if ChatAnnouncements.SV.Inventory.Loot then
+                g_itemReceivedIsQuestReward = true
+                LUIE_callLater(ResetQuestRewardStatus, 500)
+            end
+        end
+
+        if isConditionComplete and conditionType == QUEST_CONDITION_TYPE_GIVE_ITEM then
+            messageParams:SetText(zo_strformat(SI_TRACKED_QUEST_STEP_DONE, conditionText))
+            alertMessage = zo_strformat(SI_TRACKED_QUEST_STEP_DONE, conditionText)
+            formattedMessage = zo_strformat(SI_TRACKED_QUEST_STEP_DONE, conditionText)
+            type = 1
+        elseif stepOverrideText == "" then
+            if isFailCondition then
+                if conditionMax > 1 then
+                    messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL, conditionText, newConditionVal, conditionMax))
+                    alertMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL, conditionText, newConditionVal, conditionMax)
+                    formattedMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL, conditionText, newConditionVal, conditionMax)
+                else
+                    messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL_NO_COUNT, conditionText))
+                    alertMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL_NO_COUNT, conditionText)
+                    formattedMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL_NO_COUNT, conditionText)
+                end
+                type = 2
+            else
+                if conditionMax > 1 and newConditionVal < conditionMax then
+                    messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE, conditionText, newConditionVal, conditionMax))
+                    alertMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE, conditionText, newConditionVal, conditionMax)
+                    formattedMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE, conditionText, newConditionVal, conditionMax)
+                else
+                    messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, conditionText))
+                    alertMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, conditionText)
+                    formattedMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, conditionText)
+                end
+                type = 1
+            end
+        else
+            if isFailCondition then
+                messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL_NO_COUNT, stepOverrideText))
+                alertMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL_NO_COUNT, stepOverrideText)
+                formattedMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_FAIL_NO_COUNT, stepOverrideText)
+                type = 2
+            else
+                messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, stepOverrideText))
+                alertMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, stepOverrideText)
+                formattedMessage = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, stepOverrideText)
+                type = 1
+            end
+        end
+
+        -- Override text if its listed in the override table.
+        if Quests.QuestObjectiveCompleteOverride[formattedMessage] then
+            messageParams:SetText(Quests.QuestObjectiveCompleteOverride[formattedMessage])
+            alertMessage = Quests.QuestObjectiveCompleteOverride[formattedMessage]
+            formattedMessage = Quests.QuestObjectiveCompleteOverride[formattedMessage]
+        end
+
+        if isConditionComplete then
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED)
+        else
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED)
+        end
+
+        if type == 1 then
+            if ChatAnnouncements.SV.Quests.QuestObjCompleteCA then
+                -- This event double fires on quest completion, if an equivalent message is already detected in queue, then abort!
+                for i = 1, #ChatAnnouncements.QueuedMessages do
+                    if ChatAnnouncements.QueuedMessages[i].message == formattedMessage then
+                        return true
+                    end
+                end
+                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedMessage, type = "MESSAGE" } -- We set the message type to MESSAGE so if we loot a quest item that progresses the quest this comes after.
+                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+            if ChatAnnouncements.SV.Quests.QuestObjCompleteCSA then
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+            if ChatAnnouncements.SV.Quests.QuestObjCompleteAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
+            end
+            if not ChatAnnouncements.SV.Quests.QuestObjCompleteCSA then
+                PlaySound(sound)
+            end
+        end
+
+        if type == 2 then
+            if ChatAnnouncements.SV.Quests.QuestFailCA then
+                -- This event double fires on quest completion, if an equivalent message is already detected in queue, then abort!
+                for i = 1, #ChatAnnouncements.QueuedMessages do
+                    if ChatAnnouncements.QueuedMessages[i].message == formattedMessage then
+                        return true
+                    end
+                end
+                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedMessage, type = "MESSAGE" }
+                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+            if ChatAnnouncements.SV.Quests.QuestFailCSA then
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+            if ChatAnnouncements.SV.Quests.QuestFailAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
+            end
+            if not ChatAnnouncements.SV.Quests.QuestFailCSA then
+                PlaySound(sound)
+            end
+        end
+
+        return true
+    end
+
+    -- EVENT_QUEST_OPTIONAL_STEP_ADVANCED (CSA Handler)
+    local function OptionalStepHook(text)
+        if text ~= "" then
+            local message = zo_strformat("|c<<1>><<2>>|r", ColorizeColors.QuestColorQuestDescriptionColorize, text)
+            local formattedString = zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, message)
+
+            if ChatAnnouncements.SV.Quests.QuestObjCompleteCA then
+                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "MESSAGE" }
+                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+
+            if ChatAnnouncements.SV.Quests.QuestObjCompleteCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.QUEST_OBJECTIVE_COMPLETE)
+                messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, text))
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            if ChatAnnouncements.SV.Quests.QuestObjCompleteAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedString)
+            end
+            if not ChatAnnouncements.SV.Quests.QuestObjCompleteCSA then
+                PlaySound(SOUNDS.QUEST_OBJECTIVE_COMPLETE)
+            end
+        end
+        return true
+    end
+
+    -- EVENT_QUEST_REMOVED (Registered through CSA_MiscellaneousHandlers)
+    local function OnQuestRemoved(eventId, isCompleted, journalIndex, questName, zoneIndex, poiIndex, questID)
+        if isCompleted then
+            return
+        end
+
+        if ChatAnnouncements.SV.Quests.QuestAbandonCA or ChatAnnouncements.SV.Quests.QuestAbandonCSA or ChatAnnouncements.SV.Quests.QuestAbandonAlert then
+            local iconTexture
+
+            if g_questIndex[questName] then
+                local questJournalObject = SYSTEMS:GetObject("questJournal")
+                local questType = g_questIndex[questName].questType
+                local instanceDisplayType = g_questIndex[questName].instanceDisplayType
+                iconTexture = questJournalObject:GetIconTexture(questType, instanceDisplayType)
+            end
+
+            if ChatAnnouncements.SV.Quests.QuestAbandonCA then
+                local questNameFormatted = (zo_strformat("|cFFA500<<1>>|r", questName))
+                local formattedString
+                if iconTexture and ChatAnnouncements.SV.Quests.QuestIcon then
+                    formattedString = zo_strformat(LUIE_STRING_CA_QUEST_ABANDONED_WITH_ICON, zo_iconFormat(iconTexture, 16, 16), questNameFormatted)
+                else
+                    formattedString = zo_strformat(LUIE_STRING_CA_QUEST_ABANDONED, questNameFormatted)
+                end
+                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "MESSAGE" }
+                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+
+            if ChatAnnouncements.SV.Quests.QuestAbandonCSA then
+                local formattedString
+                if iconTexture then
+                    formattedString = zo_strformat(LUIE_STRING_CA_QUEST_ABANDONED_WITH_ICON, zo_iconFormat(iconTexture, "75%", "75%"), questName)
+                else
+                    formattedString = zo_strformat(LUIE_STRING_CA_QUEST_ABANDONED, questName)
+                end
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_ABANDONED)
+                messageParams:SetText(formattedString)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED)
+                -- CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            if ChatAnnouncements.SV.Quests.QuestAbandonAlert then
+                local formattedString
+                if iconTexture and ChatAnnouncements.SV.Quests.QuestIcon then
+                    formattedString = zo_strformat(LUIE_STRING_CA_QUEST_ABANDONED_WITH_ICON, zo_iconFormat(iconTexture, "75%", "75%"), questName)
+                else
+                    formattedString = zo_strformat(LUIE_STRING_CA_QUEST_ABANDONED, questName)
+                end
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedString)
+            end
+        end
+        if not ChatAnnouncements.SV.Quests.QuestAbandonCSA then
+            PlaySound(SOUNDS.QUEST_ABANDONED)
+        end
+
+        -- We set this variable to true in order to override the message syntax that would be applied to a quest reward normally with [Removed] instead.
+        if ChatAnnouncements.SV.Inventory.Loot then
+            g_itemReceivedIsQuestAbandon = true
+            LUIE_callLater(ResetQuestAbandonStatus, 500)
+        end
+
+        g_questIndex[questName] = nil
+    end
+
+    -- EVENT_QUEST_ADVANCED (Registered through CSA_MiscellaneousHandlers)
+    -- Note: Quest Advancement displays all the "appropriate" conditions that the player needs to do to advance the current step
+    local function OnQuestAdvanced(eventId, questIndex, questName, isPushed, isComplete, mainStepChanged, soundOverride)
+        -- Check if WritCreater is enabled & then call a copy of a local function from WritCreater to check if this is a Writ Quest
+        if WritCreater and WritCreater:GetSettings().suppressQuestAnnouncements and isQuestWritQuest(questIndex) then
+            if LUIE.IsDevDebugEnabled() then
+                LUIE:Log("Debug", [[Writ Quest Condition Suppressed:
+--> Quest: %s
+--> Index: %d
+--> Condition: %s]],
+                         questName,
+                         questIndex,
+                         isComplete and "Complete" or "Not Complete"
+                )
+            end
+            return true
+        end
+
+        if not mainStepChanged then
+            return
+        end
+
+        local sound = SOUNDS.QUEST_OBJECTIVE_STARTED
+
+        for stepIndex = QUEST_MAIN_STEP_INDEX, GetJournalQuestNumSteps(questIndex) do
+            local _, visibility, stepType, stepOverrideText, conditionCount = GetJournalQuestStepInfo(questIndex, stepIndex)
+
+            -- Override text if its listed in the override table.
+            if Quests.QuestAdvancedOverride[stepOverrideText] then
+                stepOverrideText = Quests.QuestAdvancedOverride[stepOverrideText]
+            end
+
+            if visibility == nil or visibility == QUEST_STEP_VISIBILITY_OPTIONAL then
+                if stepOverrideText ~= "" then
+                    if ChatAnnouncements.SV.Quests.QuestObjUpdateCA then
+                        -- This event sometimes results in duplicate messages - if an equivalent message is already detected in queue, then abort!
+                        for i = 1, #ChatAnnouncements.QueuedMessages do
+                            if ChatAnnouncements.QueuedMessages[i].message == stepOverrideText then
+                                -- Set the old message to blank so it gets skipped by the printer
+                                ChatAnnouncements.QueuedMessages[i].message = ""
+                            end
+                        end
+                        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = stepOverrideText, type = "MESSAGE" }
+                        ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                    end
+                    if ChatAnnouncements.SV.Quests.QuestObjUpdateCSA then
+                        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, sound)
+                        messageParams:SetText(stepOverrideText)
+                        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED)
+                        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+                        sound = nil -- no longer needed, we played it once
+                    end
+                    if ChatAnnouncements.SV.Quests.QuestObjUpdateAlert then
+                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, stepOverrideText)
+                    end
+                else
+                    for conditionIndex = 1, conditionCount do
+                        local conditionText, curCount, maxCount, isFailCondition, isConditionComplete, _, isVisible = GetJournalQuestConditionInfo(questIndex, stepIndex, conditionIndex, false)
+
+                        if not (isFailCondition or isConditionComplete) and isVisible then
+                            if ChatAnnouncements.SV.Quests.QuestObjUpdateCA then
+                                -- This event sometimes results in duplicate messages - if an equivalent message is already detected in queue, then abort!
+                                for i = 1, #ChatAnnouncements.QueuedMessages do
+                                    if ChatAnnouncements.QueuedMessages[i].message == conditionText then
+                                        -- Set the old message to blank so it gets skipped by the printer
+                                        ChatAnnouncements.QueuedMessages[i].message = ""
+                                    end
+                                end
+                                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = conditionText, type = "MESSAGE" }
+                                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                            end
+                            if ChatAnnouncements.SV.Quests.QuestObjUpdateCSA then
+                                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, sound)
+                                messageParams:SetText(conditionText)
+                                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED)
+                                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+                                sound = nil -- no longer needed, we played it once
+                            end
+                            if ChatAnnouncements.SV.Quests.QuestObjUpdateAlert then
+                                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, conditionText)
+                            end
+                        end
+                    end
+                end
+                -- We send soundOverride = true from OnQuestAdded in order to stop the sound from spamming if CSA isn't on and a quest is accepted.
+                if not ChatAnnouncements.SV.Quests.QuestObjUpdateCSA and not soundOverride then
+                    PlaySound(SOUNDS.QUEST_OBJECTIVE_STARTED)
+                end
+            end
+        end
+    end
+
+    -- EVENT_QUEST_ADDED (Registered through CSA_MiscellaneousHandlers)
+    local function OnQuestAdded(eventId, questIndex)
+        -- Handle WritCrafter integration
+        if WritCreater then
+            -- Auto-abandon quests with disallowed materials
+            local rejectedMat = rejectQuest(questIndex)
+            if rejectedMat then
+                local questName = GetJournalQuestName(questIndex)
+                printToChat(zo_strformat("Writ Crafter abandoned the <<1>> because it requires <<2>> which was disallowed in settings", questName, rejectedMat), true)
+                LUIE_callLater(function ()
+                                   AbandonQuest(questIndex)
+                               end, 500)
+                return
+            end
+            -- Suppress announcements for writ quests if configured
+            if WritCreater:GetSettings().suppressQuestAnnouncements and isQuestWritQuest(questIndex) then
+                return true
+            end
+        end
+
+        OnQuestAdvanced(EVENT_QUEST_ADVANCED, questIndex, nil, nil, nil, true, true)
+    end
+
+    -- EVENT_DISCOVERY_EXPERIENCE (CSA Handler)
+    local function DiscoveryExperienceHook(subzoneName, level, previousExperience, currentExperience, championPoints)
+        eventManager:UnregisterForUpdate(moduleName .. "BufferedXP")
+        ChatAnnouncements.PrintBufferedXP()
+
+        if ChatAnnouncements.SV.Quests.QuestLocDiscoveryCA then
+            local nameFormatted = (zo_strformat("|c<<1>><<2>>|r", ColorizeColors.QuestColorLocNameColorize, subzoneName))
+            local formattedString = zo_strformat(LUIE_STRING_CA_QUEST_DISCOVER, nameFormatted)
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "QUEST" }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        end
+
+        if ChatAnnouncements.SV.Quests.QuestLocDiscoveryCSA and not INTERACT_WINDOW:IsShowingInteraction() then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.OBJECTIVE_DISCOVERED)
+            if currentExperience > previousExperience then
+                if not LUIE.SV.HideXPBar then
+                    messageParams:SetBarParams(GetRelevantBarParams(level, previousExperience, currentExperience, championPoints, EVENT_DISCOVERY_EXPERIENCE))
+                end
+            end
+            messageParams:SetText(zo_strformat(LUIE_STRING_CA_QUEST_DISCOVER, subzoneName))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISCOVERY_EXPERIENCE)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if ChatAnnouncements.SV.Quests.QuestLocDiscoveryAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_QUEST_DISCOVER, subzoneName))
+        end
+
+        if not ChatAnnouncements.SV.Quests.QuestLocDiscoveryCSA then
+            PlaySound(SOUNDS.OBJECTIVE_DISCOVERED)
+        end
+        return true
+    end
+
+    -- EVENT_POI_DISCOVERED (CSA Handler)
+    local function PoiDiscoveredHook(zoneIndex, poiIndex)
+        eventManager:UnregisterForUpdate(moduleName .. "BufferedXP")
+        ChatAnnouncements.PrintBufferedXP()
+
+        local name, _, startDescription = GetPOIInfo(zoneIndex, poiIndex)
+
+        if ChatAnnouncements.SV.Quests.QuestLocObjectiveCA then
+            local formattedString = (zo_strformat("|c<<1>><<2>>:|r |c<<3>><<4>>|r", ColorizeColors.QuestColorLocNameColorize, name, ColorizeColors.QuestColorLocDescriptionColorize, startDescription))
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "QUEST_POI" }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        end
+
+        if ChatAnnouncements.SV.Quests.QuestLocObjectiveCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.OBJECTIVE_ACCEPTED)
+            messageParams:SetText(zo_strformat(SI_NOTIFYTEXT_OBJECTIVE_DISCOVERED, name), startDescription)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_POI_DISCOVERED)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if ChatAnnouncements.SV.Quests.QuestLocObjectiveAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_NOTIFYTEXT_OBJECTIVE_DISCOVERED, name), startDescription)
+        end
+        return true
+    end
+
+    local XP_GAIN_SHOW_REASONS =
+    {
+        [PROGRESS_REASON_PVP_EMPEROR] = true,
+        [PROGRESS_REASON_DUNGEON_CHALLENGE] = true,
+        [PROGRESS_REASON_OVERLAND_BOSS_KILL] = true,
+        [PROGRESS_REASON_SCRIPTED_EVENT] = true,
+        [PROGRESS_REASON_LOCK_PICK] = true,
+        [PROGRESS_REASON_LFG_REWARD] = true,
+    }
+
+    local XP_GAIN_SHOW_SOUNDS =
+    {
+        [PROGRESS_REASON_OVERLAND_BOSS_KILL] = SOUNDS.OVERLAND_BOSS_KILL,
+        [PROGRESS_REASON_LOCK_PICK] = SOUNDS.LOCKPICKING_SUCCESS_CELEBRATION,
+    }
+
+    -- EVENT_EXPERIENCE_GAIN (CSA Handler)
+    -- Note: This function is prehooked in order to allow the XP bar popup to be hidden. In addition we shift the sound over
+    local function ExperienceGainHook(reason, level, previousExperience, currentExperience, championPoints)
+        local sound = XP_GAIN_SHOW_SOUNDS[reason]
+
+        if XP_GAIN_SHOW_REASONS[reason] and not LUIE.SV.HideXPBar then
+            local barParams = GetRelevantBarParams(level, previousExperience, currentExperience, championPoints)
+            if barParams then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_NO_TEXT)
+                barParams:SetSound(sound)
+                ValidateProgressBarParams(barParams)
+                messageParams:SetBarParams(barParams)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_EXPERIENCE_GAIN)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+        end
+
+        -- We want to play a sound still even if the bar popup is hidden, but the delay needs to remain intact so we add a blank CSA with sound.
+        if XP_GAIN_SHOW_REASONS[reason] and LUIE.SV.HideXPBar and sound ~= nil then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
+            messageParams:SetSound(sound)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_EXPERIENCE_GAIN)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        -- Level up notification
+        local levelSize = GetNumExperiencePointsInLevel(level)
+        if levelSize ~= nil and currentExperience >= levelSize then
+            eventManager:UnregisterForUpdate(moduleName .. "BufferedXP")
+            ChatAnnouncements.PrintBufferedXP()
+
+            local CurrentLevel = level + 1
+            if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
+                local icon
+                if ChatAnnouncements.SV.XP.ExperienceLevelColorByLevel then
+                    icon = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and ZO_XP_BAR_GRADIENT_COLORS[2]:Colorize(" " .. zo_iconFormatInheritColor("LuiExtended/media/unitframes/unitframes_level_normal.dds", 16, 16)) or ""
+                else
+                    icon = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and (" " .. zo_iconFormat("LuiExtended/media/unitframes/unitframes_level_normal.dds", 16, 16)) or ""
+                end
+
+                local CurrentLevelFormatted = ""
+                if ChatAnnouncements.SV.XP.ExperienceLevelColorByLevel then
+                    CurrentLevelFormatted = ZO_XP_BAR_GRADIENT_COLORS[2]:Colorize(GetString(SI_GAMEPAD_QUEST_JOURNAL_QUEST_LEVEL) .. " " .. CurrentLevel)
+                else
+                    CurrentLevelFormatted = ColorizeColors.ExperienceLevelUpColorize:Colorize(GetString(SI_GAMEPAD_QUEST_JOURNAL_QUEST_LEVEL) .. " " .. CurrentLevel)
+                end
+
+                local formattedString
+                if ChatAnnouncements.SV.XP.ExperienceLevelColorByLevel then
+                    formattedString = zo_strformat("<<1>><<2>> <<3>><<4>>", ColorizeColors.ExperienceLevelUpColorize:Colorize(GetString(LUIE_STRING_CA_LVL_ANNOUNCE_XP)), icon, CurrentLevelFormatted, ColorizeColors.ExperienceLevelUpColorize:Colorize("!"))
+                else
+                    formattedString = zo_strformat("<<1>><<2>> <<3>><<4>>", ColorizeColors.ExperienceLevelUpColorize:Colorize(GetString(LUIE_STRING_CA_LVL_ANNOUNCE_XP)), icon, CurrentLevelFormatted, ColorizeColors.ExperienceLevelUpColorize:Colorize("!"))
+                end
+                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "EXPERIENCE LEVEL" }
+                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+
+            if ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
+                local iconCSA = (" " .. zo_iconFormat("LuiExtended/media/unitframes/unitframes_level_up.dds", "100%", "100%")) or ""
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.LEVEL_UP)
+                if ChatAnnouncements.SV.XP.ExperienceLevelUpCSAExpand then
+                    local levelUpExpanded = zo_strformat("<<1>><<2>> <<3>> <<4>>", GetString(LUIE_STRING_CA_LVL_ANNOUNCE_XP), iconCSA, GetString(SI_GAMEPAD_QUEST_JOURNAL_QUEST_LEVEL), CurrentLevel)
+                    messageParams:SetText(zo_strformat(SI_LEVEL_UP_NOTIFICATION), levelUpExpanded)
+                else
+                    messageParams:SetText(GetString(SI_LEVEL_UP_NOTIFICATION))
+                end
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LEVEL_GAIN)
+                if not LUIE.SV.HideXPBar then
+                    local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_XP, level + 1, currentExperience - levelSize, currentExperience - levelSize)
+                    barParams:SetShowNoGain(true)
+                    barParams:SetTriggeringEvent(EVENT_EXPERIENCE_GAIN)
+                    ValidateProgressBarParams(barParams)
+                    messageParams:SetBarParams(barParams)
+                end
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            if ChatAnnouncements.SV.XP.ExperienceLevelUpAlert then
+                local iconAlert = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and (" " .. zo_iconFormat("LuiExtended/media/unitframes/unitframes_level_up.dds", "75%", "75%")) or ""
+                local text = zo_strformat("<<1>><<2>> <<3>> <<4>>!", GetString(LUIE_STRING_CA_LVL_ANNOUNCE_XP), iconAlert, GetString(SI_GAMEPAD_QUEST_JOURNAL_QUEST_LEVEL), CurrentLevel)
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
+            end
+
+            -- Play Sound even if CSA is disabled
+            if not ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
+                PlaySound(SOUNDS.LEVEL_UP)
+            end
+        end
+
+        return true
+    end
+
+    -- Called by EnlightenGainHook()
+    local function GetEnlightenedGainedAnnouncement(triggeringEvent)
+        local formattedString = zo_strformat("<<1>>! <<2>>", GetString(SI_ENLIGHTENED_STATE_GAINED_HEADER), GetString(SI_ENLIGHTENED_STATE_GAINED_DESCRIPTION))
+        if ChatAnnouncements.SV.XP.ExperienceEnlightenedCA then
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "EXPERIENCE" }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        end
+
+        if ChatAnnouncements.SV.XP.ExperienceEnlightenedCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ENLIGHTENED_STATE_GAINED)
+            messageParams:SetText(zo_strformat(SI_ENLIGHTENED_STATE_GAINED_HEADER), zo_strformat(SI_ENLIGHTENED_STATE_GAINED_DESCRIPTION))
+            if not LUIE.SV.HideXPBar then
+                local barParams = GetCurrentChampionPointsBarParams(triggeringEvent)
+                ValidateProgressBarParams(barParams)
+                messageParams:SetBarParams(barParams)
+            end
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ENLIGHTENMENT_GAINED)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if ChatAnnouncements.SV.XP.ExperienceEnlightenedAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedString)
+        end
+
+        if not ChatAnnouncements.SV.XP.ExperienceEnlightenedCSA then
+            PlaySound(SOUNDS.ENLIGHTENED_STATE_GAINED)
+        end
+
+        return true
+    end
+
+    -- EVENT_ENLIGHTENED_STATE_GAINED (CSA Handler)
+    local function EnlightenGainHook()
+        if IsEnlightenedAvailableForCharacter() then
+            return GetEnlightenedGainedAnnouncement(EVENT_ENLIGHTENED_STATE_GAINED)
+        end
+    end
+
+    -- EVENT_ENLIGHTENED_STATE_LOST (CSA Handler)
+    local function EnlightenLostHook()
+        if IsEnlightenedAvailableForCharacter() then
+            local formattedString = zo_strformat("<<1>>!", GetString(SI_ENLIGHTENED_STATE_LOST_HEADER))
+
+            if ChatAnnouncements.SV.XP.ExperienceEnlightenedCA then
+                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "EXPERIENCE" }
+                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+
+            if ChatAnnouncements.SV.XP.ExperienceEnlightenedCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ENLIGHTENED_STATE_LOST)
+                if not LUIE.SV.HideXPBar then
+                    local barParams = GetCurrentChampionPointsBarParams(EVENT_ENLIGHTENED_STATE_LOST)
+                    ValidateProgressBarParams(barParams)
+                    messageParams:SetBarParams(barParams)
+                end
+                messageParams:SetText(zo_strformat(SI_ENLIGHTENED_STATE_LOST_HEADER))
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ENLIGHTENMENT_LOST)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            if ChatAnnouncements.SV.XP.ExperienceEnlightenedAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedString)
+            end
+
+            if not ChatAnnouncements.SV.XP.ExperienceEnlightenedCSA then
+                PlaySound(SOUNDS.ENLIGHTENED_STATE_LOST)
+            end
+        end
+
+        return true
+    end
+
+    local firstActivation = true
+    -- EVENT_PLAYER_ACTIVATED (CSA Handler)
+    local function PlayerActivatedHook()
+        if firstActivation then
+            firstActivation = false
+
+            if IsEnlightenedAvailableForCharacter() and GetEnlightenedPool() > 0 then
+                return GetEnlightenedGainedAnnouncement(EVENT_PLAYER_ACTIVATED)
+            end
+        end
+        return true
+    end
+
+    -- EVENT_RIDING_SKILL_IMPROVEMENT (CSA Handler)
+    -- Note: This function is effected by a throttle in centerscreenannouncehandlers, we resolve any message that needs to be throttled in this function.
+    -- Note: We allow the CSA handler to handle any changes made from skill books in order to properly throttle all messages, and use the alert handler for stables upgrades.
+    local function RidingSkillImprovementHook(ridingSkill, previous, current, source)
+        if source == RIDING_TRAIN_SOURCE_ITEM then
+            if ChatAnnouncements.SV.Notify.StorageRidingCA then
+                -- TODO: Switch to using Recipe/Learn variable in the future
+                if ChatAnnouncements.SV.Inventory.Loot then
+                    local icon
+                    local bookString
+                    local value = current - previous
+                    local learnString = GetString(LUIE_STRING_CA_STORAGE_LEARN)
+
+                    if ridingSkill == 1 then
+                        if ChatAnnouncements.SV.BracketOptionItem == 1 then
+                            bookString = "|H0:item:64700:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
+                        else
+                            bookString = "|H1:item:64700:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
+                        end
+                        icon = "|t16:16:/esoui/art/icons/store_ridinglessons_speed.dds|t "
+                    elseif ridingSkill == 2 then
+                        if ChatAnnouncements.SV.BracketOptionItem == 1 then
+                            bookString = "|H0:item:64702:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
+                        else
+                            bookString = "|H1:item:64702:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
+                        end
+                        icon = "|t16:16:/esoui/art/icons/store_ridinglessons_capacity.dds|t "
+                    elseif ridingSkill == 3 then
+                        if ChatAnnouncements.SV.BracketOptionItem == 1 then
+                            bookString = "|H0:item:64701:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
+                        else
+                            bookString = "|H1:item:64701:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"
+                        end
+                        icon = "|t16:16:/esoui/art/icons/store_ridinglessons_stamina.dds|t "
+                    end
+
+                    local formattedColor = ColorizeColors.StorageRidingBookColorize:ToHex()
+
+                    local messageP1 = ChatAnnouncements.SV.Inventory.LootIcons and (icon .. bookString) or bookString
+                    local formattedString = (messageP1 .. "|r|cFFFFFF x" .. value .. "|r|c" .. formattedColor)
+                    local messageP2 = string_format(learnString, formattedString)
+                    local finalMessage = string_format("|c%s%s|r", formattedColor, messageP2)
+
+                    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "MESSAGE" }
+                    ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                end
+
+                local formattedString = ColorizeColors.StorageRidingColorize:Colorize(zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
+                ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "MESSAGE" }
+                ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+            end
+
+            if ChatAnnouncements.SV.Notify.StorageRidingAlert then
+                local text = zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current)
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
+            end
+
+            if ChatAnnouncements.SV.Notify.StorageRidingCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                messageParams:SetText(GetString(SI_RIDING_SKILL_ANNOUCEMENT_BANNER), zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RIDING_SKILL_IMPROVEMENT)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+        end
+        return true
+    end
+
+    -- EVENT_INVENTORY_BAG_CAPACITY_CHANGED (CSA Handler)
+    local function InventoryBagCapacityHook(previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
+        if previousCapacity > 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
+            if ChatAnnouncements.SV.Notify.StorageBagCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                messageParams:SetText(GetString(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_TITLE), zo_strformat(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BAG_CAPACITY_CHANGED)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+        end
+        return true
+    end
+
+    -- EVENT_INVENTORY_BANK_CAPACITY_CHANGED (CSA Handler)
+    local function InventoryBankCapacityHook(previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
+        if previousCapacity > 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
+            if ChatAnnouncements.SV.Notify.StorageBagCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                messageParams:SetText(GetString(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_TITLE), zo_strformat(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BANK_CAPACITY_CHANGED)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+        end
+        return true
+    end
+
+    local CHAMPION_UNLOCKED_LIFESPAN_MS = 12000
+    -- EVENT_CHAMPION_LEVEL_ACHIEVED (CSA Handler)
+    local function ChampionLevelAchievedHook(wasChampionSystemUnlocked)
+        local icon = ZO_GetChampionPointsIcon()
+
+        if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
+            local formattedIcon = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and zo_strformat("<<1>> ", zo_iconFormatInheritColor(icon, 16, 16)) or ""
+            local formattedString = ColorizeColors.ExperienceLevelUpColorize:Colorize(zo_strformat(GetString(SI_CHAMPION_ANNOUNCEMENT_UNLOCKED), formattedIcon))
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "EXPERIENCE LEVEL" }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        end
+
+        if ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.CHAMPION_POINT_GAINED)
+            local formattedIcon = zo_strformat("<<1>> ", zo_iconFormat(icon, "100%", "100%"))
+            messageParams:SetText(zo_strformat(SI_CHAMPION_ANNOUNCEMENT_UNLOCKED, formattedIcon))
+            if not LUIE.SV.HideXPBar then
+                if wasChampionSystemUnlocked then
+                    local championPoints = GetPlayerChampionPointsEarned()
+                    local currentChampionXP = GetPlayerChampionXP()
+                    if not LUIE.SV.HideXPBar then
+                        local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, championPoints, currentChampionXP, currentChampionXP)
+                        barParams:SetTriggeringEvent(EVENT_CHAMPION_LEVEL_ACHIEVED)
+                        barParams:SetShowNoGain(true)
+                        ValidateProgressBarParams(barParams)
+                        messageParams:SetBarParams(barParams)
+                    end
+                else
+                    local totalChampionPoints = GetPlayerChampionPointsEarned()
+                    local championXPGained = 0
+                    for i = 0, (totalChampionPoints - 1) do
+                        championXPGained = championXPGained + GetNumChampionXPInChampionPoint(i)
+                    end
+                    if not LUIE.SV.HideXPBar then
+                        local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, 0, 0, championXPGained)
+                        barParams:SetTriggeringEvent(EVENT_CHAMPION_LEVEL_ACHIEVED)
+                        ValidateProgressBarParams(barParams)
+                        messageParams:SetBarParams(barParams)
+                    end
+                    messageParams:SetLifespanMS(CHAMPION_UNLOCKED_LIFESPAN_MS)
+                end
+            end
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_CHAMPION_LEVEL_ACHIEVED)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if ChatAnnouncements.SV.XP.ExperienceLevelUpAlert then
+            local formattedIcon = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and zo_strformat("<<1>> ", zo_iconFormat(icon, "75%", "75%")) or ""
+            local text = zo_strformat(GetString(SI_CHAMPION_ANNOUNCEMENT_UNLOCKED), formattedIcon)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
+        end
+
+        if not ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
+            PlaySound(SOUNDS.CHAMPION_POINT_GAINED)
+        end
+
+        return true
+    end
+
+    local savedEndingPoints = 0 -- We reset this value after the throttled function sends info to the chat printer
+    local savedPointDelta = 0   -- We reset this value after the throttled function sends info to the chat printer
+
+    local function ChampionPointGainedPrinter()
+        -- adding one so that we are starting from the first gained point instead of the starting champion points
+        local startingPoints = savedEndingPoints - savedPointDelta + 1
+        local championPointsByType =
+        {
+            [CHAMPION_DISCIPLINE_TYPE_WORLD] = 0,
+            [CHAMPION_DISCIPLINE_TYPE_COMBAT] = 0,
+            [CHAMPION_DISCIPLINE_TYPE_CONDITIONING] = 0,
+        }
+
+        while startingPoints <= savedEndingPoints do
+            local pointType = GetChampionPointPoolForRank(startingPoints)
+            championPointsByType[pointType] = championPointsByType[pointType] + 1
+            startingPoints = startingPoints + 1
+        end
+
+        if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
+            local formattedString = ColorizeColors.ExperienceLevelUpColorize:Colorize(zo_strformat(SI_CHAMPION_POINT_EARNED, savedPointDelta) .. ": ")
+            eventManager:UnregisterForUpdate(moduleName .. "Printer")
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "EXPERIENCE LEVEL" }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 25, ChatAnnouncements.PrintQueuedMessages)
+        end
+
+        local secondLine = ""
+        if ChatAnnouncements.SV.XP.ExperienceLevelUpCA or ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
+            for pointType, amount in pairs(championPointsByType) do
+                if amount > 0 then
+                    local disciplineData = CHAMPION_DATA_MANAGER:FindChampionDisciplineDataByType(pointType)
+                    if disciplineData == nil then
+                        return
+                    end
+                    local icon = disciplineData:GetHUDIcon()
+                    local formattedIcon = ChatAnnouncements.SV.XP.ExperienceLevelUpIcon and zo_strformat(" <<1>>", zo_iconFormat(icon, 16, 16)) or ""
+                    local disciplineName = disciplineData:GetRawName()
+
+                    local formattedString
+                    if ChatAnnouncements.SV.XP.ExperienceLevelColorByLevel then
+                        formattedString = ZO_CP_BAR_GRADIENT_COLORS[pointType][2]:Colorize(zo_strformat(LUIE_STRING_CHAMPION_POINT_TYPE, amount, formattedIcon, disciplineName))
+                    else
+                        formattedString = ColorizeColors.ExperienceLevelUpColorize:Colorize(zo_strformat(LUIE_STRING_CHAMPION_POINT_TYPE, amount, formattedIcon, disciplineName))
+                    end
+                    if ChatAnnouncements.SV.XP.ExperienceLevelUpCA then
+                        eventManager:UnregisterForUpdate(moduleName .. "Printer")
+                        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = formattedString, type = "EXPERIENCE LEVEL" }
+                        ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+                        eventManager:RegisterForUpdate(moduleName .. "Printer", 25, ChatAnnouncements.PrintQueuedMessages)
+                    end
+                    if ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
+                        secondLine = secondLine .. zo_strformat(SI_CHAMPION_POINT_TYPE, amount, icon, disciplineName) .. "\n"
+                    end
+                end
+            end
+        end
+
+        if ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.CHAMPION_POINT_GAINED)
+            messageParams:SetText(zo_strformat(SI_CHAMPION_POINT_EARNED, savedPointDelta), secondLine)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_CHAMPION_POINT_GAINED)
+            messageParams:MarkSuppressIconFrame()
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if ChatAnnouncements.SV.XP.ExperienceLevelUpAlert then
+            local text = zo_strformat("<<1>>!", GetString(SI_CHAMPION_POINT_EARNED, savedPointDelta))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, text)
+        end
+
+        if not ChatAnnouncements.SV.XP.ExperienceLevelUpCSA then
+            PlaySound(SOUNDS.CHAMPION_POINT_GAINED)
+        end
+
+        savedEndingPoints = 0
+        savedPointDelta = 0
+
+        eventManager:UnregisterForUpdate(moduleName .. "ChampionPointThrottle")
+    end
+
+    -- EVENT_CHAMPION_POINT_GAINED (CSA Handler)
+    local function ChampionPointGainedHook(pointDelta)
+        -- Print throttled XP value
+        eventManager:UnregisterForUpdate(moduleName .. "BufferedXP")
+        ChatAnnouncements.PrintBufferedXP()
+
+        savedEndingPoints = GetPlayerChampionPointsEarned()
+        savedPointDelta = savedPointDelta + pointDelta
+
+        eventManager:UnregisterForUpdate(moduleName .. "ChampionPointThrottle")
+        eventManager:RegisterForUpdate(moduleName .. "ChampionPointThrottle", 25, ChampionPointGainedPrinter)
+
+        return true
+    end
+
+    -- Local variables and functions for DuelNearBoundaryHook()
+    local DUEL_BOUNDARY_WARNING_LIFESPAN_MS = 2000
+    local DUEL_BOUNDARY_WARNING_UPDATE_TIME_MS = 2100
+    local lastEventTime = 0
+    local function CheckBoundary()
+        if IsNearDuelBoundary() then
+            -- Display CA
+            if ChatAnnouncements.SV.Social.DuelBoundaryCA then
+                printToChat(GetString(LUIE_STRING_CA_DUEL_NEAR_BOUNDARY_CSA), true)
+            end
+
+            -- Display CSA
+            if ChatAnnouncements.SV.Social.DuelBoundaryCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.DUEL_BOUNDARY_WARNING)
+                messageParams:SetText(GetString(LUIE_STRING_CA_DUEL_NEAR_BOUNDARY_CSA))
+                messageParams:SetLifespanMS(DUEL_BOUNDARY_WARNING_LIFESPAN_MS)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DUEL_NEAR_BOUNDARY)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            -- Display Alert
+            if ChatAnnouncements.SV.Social.DuelBoundaryAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, (GetString(LUIE_STRING_CA_DUEL_NEAR_BOUNDARY_CSA)))
+            end
+
+            -- Play Sound if CSA if off
+            if not ChatAnnouncements.SV.Social.DuelBoundaryCSA then
+                PlaySound(SOUNDS.DUEL_BOUNDARY_WARNING)
+            end
+        end
+    end
+
+    -- EVENT_DUEL_NEAR_BOUNDARY (CSA Handler)
+    local function DuelNearBoundaryHook(isInWarningArea)
+        if isInWarningArea then
+            local nowEventTime = GetFrameTimeMilliseconds()
+            eventManager:RegisterForUpdate("EVENT_DUEL_NEAR_BOUNDARY_LUIE", DUEL_BOUNDARY_WARNING_UPDATE_TIME_MS, CheckBoundary)
+            if nowEventTime > lastEventTime + DUEL_BOUNDARY_WARNING_UPDATE_TIME_MS then
+                lastEventTime = nowEventTime
+                CheckBoundary()
+            end
+        else
+            eventManager:UnregisterForUpdate("EVENT_DUEL_NEAR_BOUNDARY_LUIE")
+        end
+        return true
+    end
+
+    -- EVENT_DUEL_FINISHED (CSA HANDLER)
+    local function DuelFinishedHook(result, wasLocalPlayersResult, opponentCharacterName, opponentDisplayName)
+        -- Setup result format, name, and result sound
+        local resultString = wasLocalPlayersResult and GetString("LUIE_STRING_CA_DUEL_SELF_RESULT", result) or GetString("LUIE_STRING_CA_DUEL_RESULT", result)
+
+        local localPlayerWonDuel = (result == DUEL_RESULT_WON and wasLocalPlayersResult) or (result == DUEL_RESULT_FORFEIT and not wasLocalPlayersResult)
+        local localPlayerForfeitDuel = (result == DUEL_RESULT_FORFEIT and wasLocalPlayersResult)
+        local resultSound
+        if localPlayerWonDuel then
+            resultSound = SOUNDS.DUEL_WON
+        elseif localPlayerForfeitDuel then
+            resultSound = SOUNDS.DUEL_FORFEIT
+        end
+
+        -- Display CA
+        if ChatAnnouncements.SV.Social.DuelWonCA then
+            local finalName = ChatAnnouncements.ResolveNameLink(opponentCharacterName, opponentDisplayName)
+            local resultChatString
+            if wasLocalPlayersResult then
+                resultChatString = resultString
+            else
+                resultChatString = zo_strformat(resultString, finalName)
+            end
+            printToChat(resultChatString, true)
+        end
+
+        if ChatAnnouncements.SV.Social.DuelWonCSA or ChatAnnouncements.SV.Social.DuelWonAlert then
+            -- Setup String for CSA/Alert
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(opponentCharacterName, opponentDisplayName)
+            local resultCSAString
+            if wasLocalPlayersResult then
+                resultCSAString = resultString
+            else
+                resultCSAString = zo_strformat(resultString, finalAlertName)
+            end
+
+            -- Display CSA
+            if ChatAnnouncements.SV.Social.DuelWonCSA then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, resultSound)
+                messageParams:SetText(resultCSAString)
+                messageParams:MarkShowImmediately()
+                messageParams:MarkQueueImmediately()
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DUEL_FINISHED)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            -- Display Alert
+            if ChatAnnouncements.SV.Social.DuelWonAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, resultCSAString)
+            end
+        end
+
+        -- Play sound if CSA is not enabled
+        if not ChatAnnouncements.SV.Social.DuelWonCSA then
+            PlaySound(resultSound)
+        end
+        return true
+    end
+
+    -- EVENT_DUEL_COUNTDOWN (CSA Handler)
+    local function DuelCountdownHook(startTimeMS)
+        -- Display CSA
+        if ChatAnnouncements.SV.Social.DuelStartCSA then
+            local displayTime = startTimeMS - GetFrameTimeMilliseconds()
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_COUNTDOWN_TEXT, SOUNDS.DUEL_START)
+            messageParams:SetLifespanMS(displayTime)
+            messageParams:SetIconData("EsoUI/Art/HUD/HUD_Countdown_Badge_Dueling.dds")
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+        return true
+    end
+
+    -- EVENT_RAID_TRIAL_STARTED (CSA Handler)
+    local function RaidStartedHook(raidName, isWeekly)
+        -- Display CA
+        if ChatAnnouncements.SV.Group.GroupRaidCA then
+            local formattedName = zo_strformat("|cFFFFFF<<1>>|r", raidName)
+            printToChat(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_STARTED, formattedName), true)
+        end
+
+        -- Display CSA
+        if ChatAnnouncements.SV.Group.GroupRaidCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.RAID_TRIAL_STARTED)
+            messageParams:SetText(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_STARTED, raidName))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RAID_TRIAL)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        -- Display Alert
+        if ChatAnnouncements.SV.Group.GroupRaidAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_STARTED, raidName))
+        end
+
+        -- Play sound if CSA is not enabled
+        if not ChatAnnouncements.SV.Group.GroupRaidCSA then
+            PlaySound(SOUNDS.RAID_TRIAL_STARTED)
+        end
+        return true
+    end
+
+    local TRIAL_COMPLETE_LIFESPAN_MS = 10000
+    -- EVENT_RAID_TRIAL_COMPLETE (CSA Handler)
+    local function RaidCompleteHook(raidName, score, totalTime)
+        local wasUnderTargetTime = GetRaidDuration() <= GetRaidTargetTime()
+        local formattedTime = ZO_FormatTimeMilliseconds(totalTime, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_SECONDS)
+        local vitalityBonus = GetCurrentRaidLifeScoreBonus()
+        local currentCount = GetRaidReviveCountersRemaining()
+        local maxCount = GetCurrentRaidStartingReviveCounters()
+
+        -- Display CA
+        if ChatAnnouncements.SV.Group.GroupRaidCA then
+            local formattedName = zo_strformat("|cFFFFFF<<1>>|r", raidName)
+            local vitalityCounterString = zo_strformat("<<1>> <<2>>/<<3>>", zo_iconFormatInheritColor("esoui/art/trials/vitalitydepletion.dds", 16, 16), currentCount, maxCount)
+            local finalScore = ZO_DEFAULT_ENABLED_COLOR:Colorize(score)
+            vitalityBonus = ZO_DEFAULT_ENABLED_COLOR:Colorize(vitalityBonus)
+            if currentCount == 0 then
+                vitalityCounterString = ZO_DISABLED_TEXT:Colorize(vitalityCounterString)
+            else
+                vitalityCounterString = ZO_DEFAULT_ENABLED_COLOR:Colorize(vitalityCounterString)
+            end
+            if wasUnderTargetTime then
+                formattedTime = ZO_DEFAULT_ENABLED_COLOR:Colorize(formattedTime)
+            else
+                formattedTime = ZO_ERROR_COLOR:Colorize(formattedTime)
+            end
+
+            printToChat(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_COMPLETED_LARGE, formattedName), true)
+            printToChat(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_SCORETALLY, finalScore, formattedTime, vitalityBonus, vitalityCounterString), true)
+        end
+
+        -- Display CSA
+        if ChatAnnouncements.SV.Group.GroupRaidCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_RAID_COMPLETE_TEXT, SOUNDS.RAID_TRIAL_COMPLETED)
+            messageParams:SetEndOfRaidData(
+                {
+                    score,
+                    formattedTime,
+                    wasUnderTargetTime,
+                    vitalityBonus,
+                    zo_strformat(SI_REVIVE_COUNTER_REVIVES_USED, currentCount, maxCount),
+                })
+            messageParams:SetText(zo_strformat(SI_TRIAL_COMPLETED_LARGE, raidName))
+            messageParams:SetLifespanMS(TRIAL_COMPLETE_LIFESPAN_MS)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RAID_TRIAL)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        -- Display Alert
+        if ChatAnnouncements.SV.Group.GroupRaidAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_TRIAL_COMPLETED_LARGE, raidName))
+        end
+
+        -- Play sound if CSA is not enabled
+        if not ChatAnnouncements.SV.Group.GroupRaidCSA then
+            PlaySound(SOUNDS.RAID_TRIAL_COMPLETE)
+        end
+        return true
+    end
+
+    -- EVENT_RAID_TRIAL_FAILED (CSA Handler)
+    local function RaidFailedHook(raidName, score)
+        -- Display CA
+        if ChatAnnouncements.SV.Group.GroupRaidCA then
+            local formattedName = zo_strformat("|cFFFFFF<<1>>|r", raidName)
+            printToChat(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_FAILED, formattedName), true)
+        end
+
+        -- Display CSA
+        if ChatAnnouncements.SV.Group.GroupRaidCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.RAID_TRIAL_FAILED)
+            messageParams:SetText(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_FAILED, raidName))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RAID_TRIAL)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        -- Display Alert
+        if ChatAnnouncements.SV.Group.GroupRaidAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_FAILED, raidName))
+        end
+
+        -- Play sound if CSA is not enabled
+        if not ChatAnnouncements.SV.Group.GroupRaidCSA then
+            PlaySound(SOUNDS.RAID_TRIAL_FAILED)
+        end
+        return true
+    end
+
+    -- EVENT_RAID_TRIAL_NEW_BEST_SCORE (CSA Handler)
+    local function RaidBestScoreHook(raidName, score, isWeekly)
+        -- Display CA
+        if ChatAnnouncements.SV.Group.GroupRaidBestScoreCA then
+            local formattedName = zo_strformat("|cFFFFFF<<1>>|r", raidName)
+            local formattedString = isWeekly and zo_strformat(SI_TRIAL_NEW_BEST_SCORE_WEEKLY, formattedName) or zo_strformat(SI_TRIAL_NEW_BEST_SCORE_LIFETIME, formattedName)
+            printToChat(formattedString, true)
+        end
+
+        -- Display CSA
+        if ChatAnnouncements.SV.Group.GroupRaidBestScoreCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.RAID_TRIAL_NEW_BEST)
+            messageParams:SetText(zo_strformat(isWeekly and SI_TRIAL_NEW_BEST_SCORE_WEEKLY or SI_TRIAL_NEW_BEST_SCORE_LIFETIME, raidName))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RAID_TRIAL)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        -- Display Alert
+        if ChatAnnouncements.SV.Group.GroupRaidBestScoreAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(isWeekly and SI_TRIAL_NEW_BEST_SCORE_WEEKLY or SI_TRIAL_NEW_BEST_SCORE_LIFETIME, raidName))
+        end
+
+        -- Play sound ONLY if normal score is not set to display, otherwise the audio will overlap
+        if not ChatAnnouncements.SV.Group.GroupRaidBestScoreCSA and not (ChatAnnouncements.SV.Group.GroupRaidScoreCA and ChatAnnouncements.SV.Group.GroupRaidScoreCSA and ChatAnnouncements.SV.Group.GroupRaidScoreAlert) then
+            PlaySound(SOUNDS.RAID_TRIAL_NEW_BEST)
+        end
+        return true
+    end
+
+    -- EVENT_RAID_REVIVE_COUNTER_UPDATE (CSA Handler)
+    local function RaidReviveCounterHook(currentCount, countDelta)
+        if not IsRaidInProgress() then
+            return
+        end
+        if countDelta < 0 then
+            if ChatAnnouncements.SV.Group.GroupRaidReviveCA then
+                local iconCA = zo_iconFormat("EsoUI/Art/Trials/VitalityDepletion.dds", 16, 16)
+                printToChat(zo_strformat(LUIE_STRING_CA_GROUP_REVIVE_COUNTER_UPDATED, iconCA))
+            end
+
+            if ChatAnnouncements.SV.Group.GroupRaidReviveCSA then
+                local iconCSA = zo_iconFormat("EsoUI/Art/Trials/VitalityDepletion.dds", "100%", "100%")
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.RAID_TRIAL_COUNTER_UPDATE)
+                messageParams:SetText(zo_strformat(LUIE_STRING_CA_GROUP_REVIVE_COUNTER_UPDATED, iconCSA))
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RAID_TRIAL)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            if ChatAnnouncements.SV.Group.GroupRaidReviveAlert then
+                local iconAlert = zo_iconFormat("EsoUI/Art/Trials/VitalityDepletion.dds", "75%", "75%")
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_GROUP_REVIVE_COUNTER_UPDATED, iconAlert))
+            end
+
+            -- Play Sound if CSA is not enabled
+            if not ChatAnnouncements.SV.Group.GroupRaidReviveCSA then
+                PlaySound(SOUNDS.RAID_TRIAL_COUNTER_UPDATE)
+            end
+        end
+        return true
+    end
+
+    local TRIAL_SCORE_REASON_TO_ASSETS =
+    {
+        [RAID_POINT_REASON_KILL_MINIBOSS] =
+        {
+            icon = "EsoUI/Art/Trials/trialPoints_normal.dds",
+            soundId = SOUNDS.RAID_TRIAL_SCORE_ADDED_NORMAL,
+        },
+        [RAID_POINT_REASON_KILL_BOSS] =
+        {
+            icon = "EsoUI/Art/Trials/trialPoints_veryHigh.dds",
+            soundId = SOUNDS.RAID_TRIAL_SCORE_ADDED_VERY_HIGH,
+        },
+
+        [RAID_POINT_REASON_BONUS_ACTIVITY_LOW] =
+        {
+            icon = "EsoUI/Art/Trials/trialPoints_veryLow.dds",
+            soundId = SOUNDS.RAID_TRIAL_SCORE_ADDED_VERY_LOW,
+        },
+        [RAID_POINT_REASON_BONUS_ACTIVITY_MEDIUM] =
+        {
+            icon = "EsoUI/Art/Trials/trialPoints_low.dds",
+            soundId = SOUNDS.RAID_TRIAL_SCORE_ADDED_LOW,
+        },
+        [RAID_POINT_REASON_BONUS_ACTIVITY_HIGH] =
+        {
+            icon = "EsoUI/Art/Trials/trialPoints_high.dds",
+            soundId = SOUNDS.RAID_TRIAL_SCORE_ADDED_HIGH,
+        },
+
+        [RAID_POINT_REASON_SOLO_ARENA_PICKUP_ONE] =
+        {
+            icon = "EsoUI/Art/Trials/trialPoints_veryLow.dds",
+            soundId = SOUNDS.RAID_TRIAL_SCORE_ADDED_VERY_LOW,
+        },
+        [RAID_POINT_REASON_SOLO_ARENA_PICKUP_TWO] =
+        {
+            icon = "EsoUI/Art/Trials/trialPoints_low.dds",
+            soundId = SOUNDS.RAID_TRIAL_SCORE_ADDED_LOW,
+        },
+        [RAID_POINT_REASON_SOLO_ARENA_PICKUP_THREE] =
+        {
+            icon = "EsoUI/Art/Trials/trialPoints_normal.dds",
+            soundId = SOUNDS.RAID_TRIAL_SCORE_ADDED_NORMAL,
+        },
+        [RAID_POINT_REASON_SOLO_ARENA_PICKUP_FOUR] =
+        {
+            icon = "EsoUI/Art/Trials/trialPoints_high.dds",
+            soundId = SOUNDS.RAID_TRIAL_SCORE_ADDED_HIGH,
+        },
+        [RAID_POINT_REASON_SOLO_ARENA_COMPLETE] =
+        {
+            icon = "EsoUI/Art/Trials/trialPoints_veryHigh.dds",
+            soundId = SOUNDS.RAID_TRIAL_SCORE_ADDED_VERY_HIGH,
+        },
+    }
+
+    -- EVENT_RAID_TRIAL_SCORE_UPDATE (CSA Handler)
+    local function RaidScoreUpdateHook(scoreUpdateReason, scoreAmount, totalScore)
+        local reasonAssets = TRIAL_SCORE_REASON_TO_ASSETS[scoreUpdateReason]
+        if reasonAssets then
+            -- Display CA
+            if ChatAnnouncements.SV.Group.GroupRaidScoreCA then
+                local iconCA = zo_iconFormat(reasonAssets.icon, 16, 16)
+                printToChat(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_SCORE_UPDATED, iconCA, scoreAmount))
+            end
+
+            -- Display CSA
+            if ChatAnnouncements.SV.Group.GroupRaidScoreCSA then
+                local iconCSA = zo_iconFormat(reasonAssets.icon, "100%", "100%")
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, reasonAssets.soundId)
+                messageParams:SetText(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_SCORE_UPDATED, iconCSA, scoreAmount))
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RAID_TRIAL)
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+            end
+
+            -- Display Alert
+            if ChatAnnouncements.SV.Group.GroupRaidScoreAlert then
+                local iconAlert = zo_iconFormat(reasonAssets.icon, "75%", "75%")
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_SCORE_UPDATED, iconAlert, scoreAmount))
+            end
+
+            -- Play Sound if CSA is not enabled
+            if not ChatAnnouncements.SV.Group.GroupRaidScoreCSA then
+                PlaySound(reasonAssets.soundId)
+            end
+        end
+        return true
+    end
+
+    -- EVENT_ACTIVITY_FINDER_ACTIVITY_COMPLETE (CSA Handler)
+    local function ActivityFinderCompleteHook()
+        local message = GetString(SI_ACTIVITY_FINDER_ACTIVITY_COMPLETE_ANNOUNCEMENT_TEXT)
+        if ChatAnnouncements.SV.Group.GroupLFGCompleteCA then
+            printToChat(message, true)
+        end
+
+        if ChatAnnouncements.SV.Group.GroupLFGCompleteCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.LFG_COMPLETE_ANNOUNCEMENT)
+            messageParams:SetText(message)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ACTIVITY_COMPLETE)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        if ChatAnnouncements.SV.Group.GroupLFGCompleteAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
+        end
+
+        if not ChatAnnouncements.SV.Group.GroupLFGCompleteCSA then
+            PlaySound(SOUNDS.LFG_COMPLETE_ANNOUNCEMENT)
+        end
+
+        return true
+    end
+
+    local g_previousEndlessDungeonProgression = { 0, 0, 0 } -- Stage, Cycle, Arc
+
+    local function GetEndlessDungeonProgressMessageParams()
+        local stage, cycle, arc = ENDLESS_DUNGEON_MANAGER:GetProgression()
+        local previousStage, previousCycle, previousArc = unpack(g_previousEndlessDungeonProgression)
+        if stage == 1 and cycle == 1 and arc == 1 then
+            -- Force the initial CSA to roll over from all 0s to all 1s.
+            previousStage, previousCycle, previousArc = 0, 0, 0
+        end
+
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_ROLLING_METER_PROGRESS_TEXT)
+        local stageIcon, cycleIcon, arcIcon = ZO_EndlessDungeonManager.GetProgressionIcons()
+        local stageNarration, cycleNarration, arcNarration = ZO_EndlessDungeonManager.GetProgressionNarrationDescriptions(stage, cycle, arc)
+        local progressData =
+        {
+            {
+                iconTexture = arcIcon,
+                narrationDescription = arcNarration,
+                initialValue = previousArc,
+                finalValue = arc,
+            },
+            {
+                iconTexture = cycleIcon,
+                narrationDescription = cycleNarration,
+                initialValue = previousCycle,
+                finalValue = cycle,
+            },
+            {
+                iconTexture = stageIcon,
+                narrationDescription = stageNarration,
+                initialValue = previousStage,
+                finalValue = stage,
+            },
+        }
+        messageParams:SetRollingMeterProgressData(progressData)
+
+        -- Update the previous progression values.
+        g_previousEndlessDungeonProgression[1] = stage
+        g_previousEndlessDungeonProgression[2] = cycle
+        g_previousEndlessDungeonProgression[3] = arc
+
+        return messageParams
+    end
+
+    local function RefreshEndlessDungeonProgressionState()
+        local stage, cycle, arc = ENDLESS_DUNGEON_MANAGER:GetProgression()
+        g_previousEndlessDungeonProgression[1] = stage
+        g_previousEndlessDungeonProgression[2] = cycle
+        g_previousEndlessDungeonProgression[3] = arc
+    end
+
+    ENDLESS_DUNGEON_MANAGER:RegisterCallback("StateChanged", RefreshEndlessDungeonProgressionState)
+
+    local function UpdateEndlessDungeonTrackers()
+        ENDLESS_DUNGEON_HUD_TRACKER:UpdateProgress()
+        ENDLESS_DUNGEON_BUFF_TRACKER_GAMEPAD:UpdateProgress()
+        if ENDLESS_DUNGEON_BUFF_TRACKER_KEYBOARD then
+            ENDLESS_DUNGEON_BUFF_TRACKER_KEYBOARD:UpdateProgress()
+        end
+    end
+
+    local ZoneIds =
+    {
+        [1436] = "Endless Archive", -- Dungeon - Endless Archive
+        [888] = "Craglorn",         -- Zone - Craglorn
+        [584] = "Imperial City",    -- Imperial City (Overland)
+        [643] = "Imperial City",    -- Imperial City (Sewers)
+        [635] = "Dragonstar Arena", -- Dragonstar Arena
+    }
+
+    local MapIds =
+    {
+        [988] = "Maelstrom Arena", -- Vale of the Surreal (Maelstrom Arena - Stage 1)
+        [963] = "Maelstrom Arena", -- Seht's Balcony (Maelstrom Arena - Stage 2)
+        -- TODO - Need MapIds for Stage 3-9
+    }
+
+    local function ResolveDisplayAnnouncementMessages(type)
+        local settings
+        if type == "Imperial City" then
+            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ZoneIC
+        elseif type == "Craglorn" then
+            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ZoneCraglorn
+        elseif type == "Maelstrom Arena" then
+            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ArenaMaelstrom
+        elseif type == "Dragonstar Arena" then
+            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ArenaDragonstar
+        elseif type == "Endless Archive" then
+            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.DungeonEndlessArchive
+        end
+        return settings
+    end
+
+    -- EVENT_DISPLAY_ANNOUNCEMENT (CSA Handler)
+    local function DisplayAnnouncementHook(primaryText, secondaryText, icon, soundId, lifespanMS, category)
+        -- Disable Respec Display Announcement since we handle this from loot announcements (using Respec scroll)
+        if primaryText == GetString(SI_RESPECTYPE_POINTSRESETTITLE1) then
+            return true
+        end
+
+        -- Setup CSA with default function (don't display CSA here yet, we filter to check)
+        soundId = soundId == "" and SOUNDS.DISPLAY_ANNOUNCEMENT or soundId
+
+        local messageParams
+        if category == CSA_CATEGORY_ENDLESS_DUNGEON_STAGE_STARTED_TEXT then
+            -- Endless Dungeon Progression CSA special case
+            messageParams = GetEndlessDungeonProgressMessageParams()
+            if not messageParams then
+                -- The progression did not change; this should never happen.
+                return
+            end
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ENDLESS_DUNGEON_PROGRESS)
+            messageParams:SetOnDisplayCallback(UpdateEndlessDungeonTrackers)
+        else
+            -- Standard Display Announcement
+            messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(category, soundId)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
+        end
+
+        if soundId then
+            messageParams:SetSound(soundId)
+        end
+
+        if icon ~= ZO_NO_TEXTURE_FILE then
+            messageParams:SetIconData(icon)
+        end
+
+        if lifespanMS > 0 then
+            messageParams:SetLifespanMS(lifespanMS)
+        end
+
+        -- Sanitize text.
+        if primaryText == "" then
+            primaryText = nil
+        end
+        if secondaryText == "" then
+            secondaryText = nil
+        end
+
+        -- No message so return
+        if primaryText == nil and secondaryText == nil then
+            return
+        end
+
+        -- Check zoneId or mapId if needed
+        local zoneId = GetZoneId(GetCurrentMapZoneIndex())
+        local mapId = GetCurrentMapId() -- Some areas don't have proper zoneIds (Maelstrom Arena)
+        local type
+        if ZoneIds[zoneId] then
+            type = ZoneIds[zoneId]
+        elseif MapIds[mapId] then
+            type = MapIds[mapId]
+        end
+
+        local settings     -- local variable for pulling SV
+        local debugDisable -- flag to disable debug when its enabled
+
+        -- Settings either use the subcategory settings or the generic settings if no subcategory
+        if primaryText == GetString(SI_RESPECTYPE_POINTSRESETTITLE0) or primaryText == GetString(SI_RESPECTYPE_POINTSRESETTITLE1) then
+            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.Respec
+            debugDisable = true
+            -- Update message syntax here
+            if primaryText == GetString(SI_RESPECTYPE_POINTSRESETTITLE0) then
+                primaryText = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_SKILLS)
+            end
+            if primaryText == GetString(SI_RESPECTYPE_POINTSRESETTITLE1) then
+                primaryText = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_ATTRIBUTES)
+            end
+        elseif primaryText == GetString(LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_GROUPENTER_D) or primaryText == GetString(LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_GROUPLEAVE_D) then
+            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.GroupArea
+            debugDisable = true
+            -- Update message syntax here
+            if primaryText == GetString(LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_GROUPENTER_D) then
+                primaryText = GetString(LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_GROUPENTER_C)
+            end
+            if primaryText == GetString(LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_GROUPLEAVE_D) then
+                primaryText = GetString(LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_GROUPLEAVE_C)
+            end
+        elseif type then
+            settings = ResolveDisplayAnnouncementMessages(type)
+            debugDisable = true
+        else
+            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.General
+        end
+
+        -- Debug function
+        if ChatAnnouncements.SV.DisplayAnnouncements.Debug and not debugDisable then
+            d("EVENT_DISPLAY_ANNOUNCEMENT: If you see this message please post a screenshot and context for the event on the LUI Extended ESOUI page.")
+            if primaryText then
+                d("Primary Text: " .. primaryText)
+            end
+            if secondaryText then
+                d("Secondary Text: " .. secondaryText)
+            end
+            local zoneid = GetZoneId(GetCurrentMapZoneIndex())
+            d("Zone Id: " .. zoneid)
+            local mapid = GetCurrentMapId()
+            d("Map Id: " .. mapid)
+        end
+
+        -- Display CA if enabled
+        if settings.CA then
+            -- Some formatting may be needed for CA:
+            local caPrimary = primaryText
+            local caSecondary = secondaryText
+            local language = GetCVar("language.2")
+            -- Extra formatting in Imperial City: Remove "Entered: " and format it and add it back on and color the message.
+            -- Note we don't want to mess with strings outside of EN localization for now (TODO)
+            -- Custom formatting for IC messages
+            if settings == LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ZoneIC and language == "en" then
+                local prefix = GetString(LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_IC_TITLE_PREFIX)
+                caPrimary = zo_strgsub(primaryText, prefix, "")
+                caPrimary = settings.Description and string_format("%s|c%s%s: |r", prefix, ColorizeColors.QuestColorLocNameColorize, caPrimary) or string_format("%s|c%s%s|r", prefix, ColorizeColors.QuestColorLocNameColorize, caPrimary)
+                caSecondary = settings.Description and string_format("|c%s%s|r", ColorizeColors.QuestColorLocDescriptionColorize, caSecondary) or ""
+                printToChat(caPrimary .. caSecondary)
+                -- Add an "!" to the CA for Craglorn buffs
+            elseif settings == LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ZoneCraglorn and language == "en" then
+                caPrimary = primaryText .. "!"
+                printToChat(caPrimary)
+                -- Add an "!" to the Maelstrom Arena Round CA messages (VMA messages have two lines other then the rounds)
+            elseif settings == LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ArenaMaelstrom and secondaryText == nil then
+                caPrimary = primaryText .. "!"
+                printToChat(caPrimary)
+            else
+                if primaryText and secondaryText then
+                    printToChat(caPrimary .. ": " .. caSecondary)
+                elseif primaryText then
+                    printToChat(caPrimary)
+                elseif secondaryText then
+                    printToChat(caSecondary)
+                end
+            end
+        end
+
+        -- Display CSA if enabled
+        if settings.CSA then
+            messageParams:SetText(primaryText, secondaryText)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        -- Display Alert if enabled
+        if settings.Alert then
+            if primaryText and secondaryText then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, (primaryText .. ": " .. secondaryText))
+            elseif primaryText then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, primaryText)
+            elseif secondaryText then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, secondaryText)
+            end
+        end
+
+        -- If the CSA is disabled, play a sound if Chat Announcement or Alert are enabled
+        if (settings.CA or settings.Alert) and not settings.CSA then
+            if soundId then
+                PlaySound(SOUNDS.soundId)
+                -- Fallback sound if no soundId
+            else
+                PlaySound(SOUNDS.DISPLAY_ANNOUNCEMENT)
+            end
+        end
+
+        return true
+    end
+
+    -- EVENT_ACHIEVEMENT_AWARDED (CSA Handler)
+    local function AchievementAwardedHook(name, points, id)
+        local topLevelIndex, categoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(id)
+
+        -- Bail out if this achievement comes from unwanted category & we don't always show CSA
+        if ChatAnnouncements.SV.Achievement.AchievementCategoryIgnore[topLevelIndex] and not ChatAnnouncements.SV.Achievement.AchievementCompleteAlwaysCSA then
+            return true
+        end
+
+        -- Display CSA
+        if ChatAnnouncements.SV.Achievement.AchievementCompleteCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ACHIEVEMENT_AWARDED)
+            local icon = select(4, GetAchievementInfo(id))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED)
+            messageParams:SetText(ChatAnnouncements.SV.Achievement.AchievementCompleteMsg, zo_strformat(name))
+            messageParams:SetIconData(icon, "EsoUI/Art/Achievements/achievements_iconBG.dds")
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        -- Bail out if this achievement comes from unwanted category
+        if ChatAnnouncements.SV.Achievement.AchievementCategoryIgnore[topLevelIndex] then
+            return true
+        end
+
+        if ChatAnnouncements.SV.Achievement.AchievementCompleteCA then
+            local link = zo_strformat(GetAchievementLink(id, linkBrackets[ChatAnnouncements.SV.BracketOptionAchievement]))
+            local catName = GetAchievementCategoryInfo(topLevelIndex)
+            local subcatName = categoryIndex ~= nil and GetAchievementSubCategoryInfo(topLevelIndex, categoryIndex) or "General"
+            local _, _, _, icon = GetAchievementInfo(id)
+            icon = ChatAnnouncements.SV.Achievement.AchievementIcon and ("|t16:16:" .. icon .. "|t ") or ""
+
+            -- Build string parts without using string_format on pre-formatted strings
+            local stringpart1 = ColorizeColors.AchievementColorize1:Colorize(
+                bracket1[ChatAnnouncements.SV.Achievement.AchievementBracketOptions] ..
+                ChatAnnouncements.SV.Achievement.AchievementCompleteMsg ..
+                bracket2[ChatAnnouncements.SV.Achievement.AchievementBracketOptions] .. " " ..
+                icon .. link
+            )
+
+            local stringpart2 = ""
+            if ChatAnnouncements.SV.Achievement.AchievementCompPercentage then
+                stringpart2 = ChatAnnouncements.SV.Achievement.AchievementColorProgress and
+                    ColorizeColors.AchievementColorize2:Colorize(" (") ..
+                    "|c71DE73100%|r" ..
+                    ColorizeColors.AchievementColorize2:Colorize(")") or
+                    ColorizeColors.AchievementColorize2:Colorize(" (100%)")
+            end
+
+            local stringpart3 = ""
+            if ChatAnnouncements.SV.Achievement.AchievementCategory then
+                stringpart3 = ColorizeColors.AchievementColorize2:Colorize(
+                    " " .. bracket1[ChatAnnouncements.SV.Achievement.AchievementCatBracketOptions] ..
+                    catName ..
+                    (ChatAnnouncements.SV.Achievement.AchievementSubcategory and (" - " .. subcatName) or "") ..
+                    bracket2[ChatAnnouncements.SV.Achievement.AchievementCatBracketOptions]
+                )
+            end
+
+            -- Concatenate final string without using string_format
+            local finalString = stringpart1 .. stringpart2 .. stringpart3
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalString, type = "ACHIEVEMENT" }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        end
+
+        -- Display Alert
+        if ChatAnnouncements.SV.Achievement.AchievementCompleteAlert then
+            local alertMessage = zo_strformat("<<1>>: <<2>>", ChatAnnouncements.SV.Achievement.AchievementCompleteMsg, name)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
+        end
+
+        -- Play sound if CSA is disabled
+        if not ChatAnnouncements.SV.Achievement.AchievementCompleteCSA then
+            PlaySound(SOUNDS.ACHIEVEMENT_AWARDED)
+        end
+
+        return true
+    end
+
+    -- EVENT_PLEDGE_OF_MARA_RESULT (CSA Handler)
+    local function PledgeOfMaraHook(result, characterName, displayName)
+        -- Display CA (Success or Failure)
+        if ChatAnnouncements.SV.Social.PledgeOfMaraCA then
+            local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
+            printToChat(zo_strformat(GetString("LUIE_STRING_CA_MARA_PLEDGEOFMARARESULT", result), finalName), true)
+        end
+
+        if ChatAnnouncements.SV.Social.PledgeOfMaraAlert or ChatAnnouncements.SV.Social.PledgeOfMaraCSA then
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
+
+            -- Display CSA (Success Only)
+            if ChatAnnouncements.SV.Social.PledgeOfMaraCSA then
+                if result == PLEDGE_OF_MARA_RESULT_PLEDGED then
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_PLEDGE_OF_MARA_RESULT)
+                    messageParams:SetText(GetString(SI_RITUAL_OF_MARA_COMPLETION_ANNOUNCE_LARGE), zo_strformat(LUIE_STRING_CA_MARA_PLEDGEOFMARARESULT3, finalAlertName))
+                    CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+                end
+            end
+
+            -- Alert (Success or Failure)
+            if ChatAnnouncements.SV.Social.PledgeOfMaraAlert then
+                -- If the menu setting to only display Alert on Failure state is toggled, then do not display an Alert on successful Mara Event
+                if result == PLEDGE_OF_MARA_RESULT_PLEDGED and not ChatAnnouncements.SV.Social.PledgeOfMaraAlertOnlyFail then
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_MARA_PLEDGEOFMARARESULT3, finalAlertName))
+                elseif result ~= PLEDGE_OF_MARA_RESULT_PLEDGED and result ~= PLEDGE_OF_MARA_RESULT_BEGIN_PLEDGE then
+                    ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, zo_strformat(GetString("LUIE_STRING_CA_MARA_PLEDGEOFMARARESULT", result), finalAlertName))
+                end
+            end
+        end
+
+        -- Play alert sound if error result
+        if result ~= PLEDGE_OF_MARA_RESULT_PLEDGED and result ~= PLEDGE_OF_MARA_RESULT_BEGIN_PLEDGE then
+            PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        end
+
+        return true
+    end
+
+    -- EVENT_ANTIQUITY_LEAD_ACQUIRED (CSA Handler)
+    local function AntiquityLeadAcquired(antiquityId)
+        -- Get antiquity data
+        local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
+        -- Get name
+        local antiquityName = antiquityData:GetName()
+
+        if ChatAnnouncements.SV.Antiquities.AntiquityCA then
+            local antiquityColor = GetAntiquityQualityColor(antiquityData:GetQuality())
+            local antiquityIcon = antiquityData:GetIcon()
+
+            local formattedName
+            local antiquityLink
+            local linkColor = antiquityColor:ToHex()
+            if ChatAnnouncements.SV.Antiquities.AntiquityBracket == 1 then
+                formattedName = antiquityName
+                antiquityLink = string_format("|c%s|H0:LINK_TYPE_LUIANTIQUITY:%s|h%s|h|r", linkColor, antiquityId, formattedName)
+            else
+                formattedName = ("[" .. antiquityName .. "]")
+                antiquityLink = string_format("|c%s|H1:LINK_TYPE_LUIANTIQUITY:%s|h%s|h|r", linkColor, antiquityId, formattedName)
+            end
+
+            local formattedIcon = ChatAnnouncements.SV.Antiquities.AntiquityIcon and ("|t16:16:" .. antiquityIcon .. "|t ") or ""
+
+            local messageP1 = ColorizeColors.AntiquityColorize:Colorize(string_format("%s%s%s %s", bracket1[ChatAnnouncements.SV.Antiquities.AntiquityPrefixBracket], ChatAnnouncements.SV.Antiquities.AntiquityPrefix, bracket2[ChatAnnouncements.SV.Antiquities.AntiquityPrefixBracket], formattedIcon))
+            local messageP2 = antiquityLink
+            local messageP3 = ColorizeColors.AntiquityColorize:Colorize(" " .. ChatAnnouncements.SV.Antiquities.AntiquitySuffix)
+            local finalMessage = zo_strformat("<<1>><<2>><<3>>", messageP1, messageP2, messageP3)
+            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = finalMessage, type = "ANTIQUITY" }
+            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+        end
+
+        if ChatAnnouncements.SV.Antiquities.AntiquityAlert then
+            local alertMessage = zo_strformat("<<1>>: <<2>> <<3>>", ChatAnnouncements.SV.Antiquities.AntiquityPrefix, antiquityName, ChatAnnouncements.SV.Antiquities.AntiquitySuffix)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
+        end
+
+        if ChatAnnouncements.SV.Antiquities.AntiquityCSA then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            local secondaryText = zo_strformat(SI_ANTIQUITY_LEAD_ACQUIRED_TEXT, antiquityData:GetColorizedName())
+            messageParams:SetText(GetString(SI_ANTIQUITY_LEAD_ACQUIRED_TITLE), secondaryText)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_LEAD_ACQUIRED)
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+        end
+
+        return true
+    end
+
+    -- Unregister the ZOS events for handling Quest Removal/Advanced/Added to replace with our own functions
+    eventManager:UnregisterForEvent("CSA_MiscellaneousHandlers", EVENT_QUEST_REMOVED)
+    eventManager:UnregisterForEvent("CSA_MiscellaneousHandlers", EVENT_QUEST_ADVANCED)
+    eventManager:UnregisterForEvent("CSA_MiscellaneousHandlers", EVENT_QUEST_ADDED)
+    eventManager:RegisterForEvent("CSA_MiscellaneousHandlers", EVENT_QUEST_REMOVED, OnQuestRemoved)
+    eventManager:RegisterForEvent("CSA_MiscellaneousHandlers", EVENT_QUEST_ADVANCED, OnQuestAdvanced)
+    eventManager:RegisterForEvent("CSA_MiscellaneousHandlers", EVENT_QUEST_ADDED, OnQuestAdded)
+
+    ZO_PreHook(csaHandlers, EVENT_LORE_BOOK_LEARNED_SKILL_EXPERIENCE, LoreBookXPHook)
+    ZO_PreHook(csaHandlers, EVENT_LORE_COLLECTION_COMPLETED, LoreCollectionHook)
+    ZO_PreHook(csaHandlers, EVENT_LORE_COLLECTION_COMPLETED_SKILL_EXPERIENCE, LoreCollectionXPHook)
+    ZO_PreHook(csaHandlers, EVENT_SKILL_POINTS_CHANGED, SkillPointsChangedHook)
+    ZO_PreHook(csaCallbackHandlers[2], "callbackFunction", SkillLineAddedHook)
+    ZO_PreHook(csaHandlers, EVENT_ABILITY_PROGRESSION_RANK_UPDATE, AbilityProgressionRankHook)
+    ZO_PreHook(csaHandlers, EVENT_SKILL_RANK_UPDATE, SkillRankUpdateHook)
+    ZO_PreHook(csaHandlers, EVENT_SKILL_XP_UPDATE, SkillXPUpdateHook)
+    ZO_PreHook(csaCallbackHandlers[1], "callbackFunction", CollectibleUnlockedHook)
+    ZO_PreHook(csaHandlers, EVENT_QUEST_ADDED, QuestAddedHook)
+    ZO_PreHook(csaHandlers, EVENT_QUEST_COMPLETE, QuestCompleteHook)
+    ZO_PreHook(csaHandlers, EVENT_OBJECTIVE_COMPLETED, ObjectiveCompletedHook)
+    ZO_PreHook(csaHandlers, EVENT_QUEST_CONDITION_COUNTER_CHANGED, ConditionCounterHook)
+    ZO_PreHook(csaHandlers, EVENT_QUEST_OPTIONAL_STEP_ADVANCED, OptionalStepHook)
+    ZO_PreHook(csaHandlers, EVENT_DISCOVERY_EXPERIENCE, DiscoveryExperienceHook)
+    ZO_PreHook(csaHandlers, EVENT_POI_DISCOVERED, PoiDiscoveredHook)
+    ZO_PreHook(csaHandlers, EVENT_EXPERIENCE_GAIN, ExperienceGainHook)
+    ZO_PreHook(csaHandlers, EVENT_ENLIGHTENED_STATE_GAINED, EnlightenGainHook)
+    ZO_PreHook(csaHandlers, EVENT_ENLIGHTENED_STATE_LOST, EnlightenLostHook)
+    ZO_PreHook(csaHandlers, EVENT_PLAYER_ACTIVATED, PlayerActivatedHook)
+    ZO_PreHook(csaHandlers, EVENT_RIDING_SKILL_IMPROVEMENT, RidingSkillImprovementHook)
+    ZO_PreHook(csaHandlers, EVENT_INVENTORY_BAG_CAPACITY_CHANGED, InventoryBagCapacityHook)
+    ZO_PreHook(csaHandlers, EVENT_INVENTORY_BANK_CAPACITY_CHANGED, InventoryBankCapacityHook)
+    ZO_PreHook(csaHandlers, EVENT_CHAMPION_LEVEL_ACHIEVED, ChampionLevelAchievedHook)
+    ZO_PreHook(csaHandlers, EVENT_CHAMPION_POINT_GAINED, ChampionPointGainedHook)
+    ZO_PreHook(csaHandlers, EVENT_DUEL_NEAR_BOUNDARY, DuelNearBoundaryHook)
+    ZO_PreHook(csaHandlers, EVENT_DUEL_FINISHED, DuelFinishedHook)
+    ZO_PreHook(csaHandlers, EVENT_DUEL_COUNTDOWN, DuelCountdownHook)
+
+    eventManager:RegisterForEvent(moduleName, EVENT_DUEL_STARTED, ChatAnnouncements.DuelStarted)
+
+    ZO_PreHook(csaHandlers, EVENT_RAID_TRIAL_STARTED, RaidStartedHook)
+    ZO_PreHook(csaHandlers, EVENT_RAID_TRIAL_COMPLETE, RaidCompleteHook)
+    ZO_PreHook(csaHandlers, EVENT_RAID_TRIAL_FAILED, RaidFailedHook)
+    ZO_PreHook(csaHandlers, EVENT_RAID_TRIAL_NEW_BEST_SCORE, RaidBestScoreHook)
+    ZO_PreHook(csaHandlers, EVENT_RAID_REVIVE_COUNTER_UPDATE, RaidReviveCounterHook)
+    ZO_PreHook(csaHandlers, EVENT_RAID_TRIAL_SCORE_UPDATE, RaidScoreUpdateHook)
+    ZO_PreHook(csaHandlers, EVENT_ACTIVITY_FINDER_ACTIVITY_COMPLETE, ActivityFinderCompleteHook)
+    ZO_PreHook(csaHandlers, EVENT_DISPLAY_ANNOUNCEMENT, DisplayAnnouncementHook)
+    ZO_PreHook(csaHandlers, EVENT_ACHIEVEMENT_AWARDED, AchievementAwardedHook)
+    ZO_PreHook(csaHandlers, EVENT_PLEDGE_OF_MARA_RESULT, PledgeOfMaraHook)
+
+    eventManager:RegisterForEvent(moduleName, EVENT_PLEDGE_OF_MARA_OFFER, ChatAnnouncements.MaraOffer)
+
+    ZO_PreHook(csaHandlers, EVENT_ANTIQUITY_LEAD_ACQUIRED, AntiquityLeadAcquired)
+
+    -- HOOK PLAYER_TO_PLAYER Group Notifications to edit Ignore alert
+    local KEYBOARD_INTERACT_ICONS =
+    {
+        [SI_PLAYER_TO_PLAYER_WHISPER] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_whisper_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_whisper_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_whisper_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_whisper_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_ADD_GROUP] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_inviteGroup_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_inviteGroup_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_inviteGroup_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_inviteGroup_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_REMOVE_GROUP] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_removeFromGroup_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_removeFromGroup_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_removeFromGroup_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_removeFromGroup_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_ADD_FRIEND] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_addFriend_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_addFriend_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_addFriend_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_addFriend_disabled.dds",
+        },
+        [SI_CHAT_PLAYER_CONTEXT_REPORT] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_reportPlayer_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_reportPlayer_over.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_INVITE_DUEL] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_duel_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_duel_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_duel_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_duel_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_tribute_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_tribute_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_tribute_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_tribute_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_INVITE_TRADE] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_trade_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_trade_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_trade_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_trade_disabled.dds",
+        },
+        [SI_RADIAL_MENU_CANCEL_BUTTON] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_cancel_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_cancel_over.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_RIDE_MOUNT] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_joinMount_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_joinMount_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_joinMount_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_joinMount_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_DISMOUNT] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_dismount_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_dismount_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_dismount_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_dismount_disabled.dds",
+        },
+    }
+
+    local GAMEPAD_INTERACT_ICONS =
+    {
+        [SI_PLAYER_TO_PLAYER_WHISPER] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_ADD_GROUP] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_REMOVE_GROUP] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_ADD_FRIEND] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_disabled.dds",
+        },
+        [SI_CHAT_PLAYER_CONTEXT_REPORT] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_reportPlayer_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_reportPlayer_down.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_INVITE_DUEL] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_INVITE_TRADE] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_disabled.dds",
+        },
+        [SI_RADIAL_MENU_CANCEL_BUTTON] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_cancel_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_cancel_down.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_RIDE_MOUNT] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_DISMOUNT] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_disabled.dds",
+        },
+    }
+
+    local ALERT_IGNORED_STRING = IsConsoleUI() and SI_PLAYER_TO_PLAYER_BLOCKED or SI_PLAYER_TO_PLAYER_IGNORED
+
+    local function AlertIgnored(SendString)
+        local alertString = IsConsoleUI() and SI_PLAYER_TO_PLAYER_BLOCKED or SendString
+        printToChat(GetString(alertString), true)
+        if ChatAnnouncements.SV.Group.GroupAlert then
+            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, alertString)
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+    end
+
+    --- @param self ZO_PlayerToPlayer
+    --- @param isIgnored boolean
+    PLAYER_TO_PLAYER.ShowPlayerInteractMenu = function (self, isIgnored)
+        local currentTargetCharacterName = self.currentTargetCharacterName
+        local currentTargetCharacterNameRaw = self.currentTargetCharacterNameRaw
+        local currentTargetDisplayName = self.currentTargetDisplayName
+        local primaryName = ZO_GetPrimaryPlayerName(currentTargetDisplayName, currentTargetCharacterName)
+        local primaryNameInternal = ZO_GetPrimaryPlayerName(currentTargetDisplayName, currentTargetCharacterName, USE_INTERNAL_FORMAT)
+        local platformIcons = IsInGamepadPreferredMode() and GAMEPAD_INTERACT_ICONS or KEYBOARD_INTERACT_ICONS
+        local ENABLED = true
+        local DISABLED = false
+        local ENABLED_IF_NOT_IGNORED = not isIgnored
+
+        self:GetRadialMenu():Clear()
+        -- Gamecard--
+        if IsConsoleUI() then
+            self:AddShowGamerCard(currentTargetDisplayName, currentTargetCharacterName)
+        end
+
+        -- Whisper--
+        if IsChatSystemAvailableForCurrentPlatform() then
+            local nameToUse = IsConsoleUI() and currentTargetDisplayName or primaryNameInternal
+            local function WhisperOption()
+                StartChatInput(nil, CHAT_CHANNEL_WHISPER, nameToUse)
+            end
+            local function WhisperIgnore()
+                AlertIgnored(LUIE_STRING_IGNORE_ERROR_WHISPER)
+            end
+            local whisperFunction = ENABLED_IF_NOT_IGNORED and WhisperOption or WhisperIgnore
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_WHISPER), platformIcons[SI_PLAYER_TO_PLAYER_WHISPER], ENABLED_IF_NOT_IGNORED, whisperFunction)
+        end
+
+        -- Group--
+        local isGroupModificationAvailable = IsGroupModificationAvailable()
+        local groupModificationRequiresVoting = DoesGroupModificationRequireVote()
+        local isSoloOrLeader = IsUnitSoloOrGroupLeader("player")
+
+        local function AlertGroupDisabled()
+            printToChat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE), true)
+            if ChatAnnouncements.SV.Group.GroupAlert then
+                ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE))
+            end
+            PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        end
+
+        local function AlertGroupKickDisabled()
+            printToChat(GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR))
+            if ChatAnnouncements.SV.Group.GroupAlert then
+                ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR), true)
+            end
+            PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        end
+
+        local isInGroup = IsPlayerInGroup(currentTargetCharacterNameRaw)
+
+        if isInGroup then
+            local groupKickEnabled = isGroupModificationAvailable and isSoloOrLeader and not groupModificationRequiresVoting or IsInLFGGroup()
+            local lfgKick = IsInLFGGroup()
+            local groupKickFunction = nil
+            if groupKickEnabled then
+                if lfgKick then
+                    groupKickFunction = function ()
+                        LUIE.SlashCommands.SlashVoteKick(currentTargetCharacterName)
+                    end
+                else
+                    groupKickFunction = function ()
+                        GroupKickByName(currentTargetCharacterNameRaw)
+                    end
+                end
+            else
+                groupKickFunction = AlertGroupKickDisabled
+            end
+
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_REMOVE_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_REMOVE_GROUP], groupKickEnabled, groupKickFunction)
+        else
+            local groupInviteEnabled = ENABLED_IF_NOT_IGNORED and isGroupModificationAvailable and isSoloOrLeader
+            local groupInviteFunction = nil
+            if groupInviteEnabled then
+                groupInviteFunction = function ()
+                    local NOT_SENT_FROM_CHAT = false
+                    local DISPLAY_INVITED_MESSAGE = true
+                    TryGroupInviteByName(primaryNameInternal, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE)
+                end
+            else
+                if ENABLED_IF_NOT_IGNORED then
+                    groupInviteFunction = AlertGroupDisabled
+                else
+                    local function GroupIgnore()
+                        AlertIgnored(LUIE_STRING_IGNORE_ERROR_GROUP)
+                    end
+                    groupInviteFunction = GroupIgnore
+                end
+            end
+
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_ADD_GROUP], groupInviteEnabled, groupInviteFunction)
+        end
+
+        -- Friend--
+        if IsFriend(currentTargetCharacterNameRaw) then
+            local function AlreadyFriendsWarning()
+                printToChat(GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_ACCOUNT_ALREADY_FRIENDS), true)
+                if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_ACCOUNT_ALREADY_FRIENDS))
+                end
+                PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+            end
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_FRIEND), platformIcons[SI_PLAYER_TO_PLAYER_ADD_FRIEND], DISABLED, AlreadyFriendsWarning)
+        else
+            local function RequestFriendOption()
+                local isConsoleUI = IsConsoleUI()
+                if isConsoleUI then
+                    ZO_ShowConsoleAddFriendDialog(currentTargetCharacterName)
+                else
+                    RequestFriend(currentTargetDisplayName, nil)
+                end
+
+                local displayNameLink = ZO_LinkHandler_CreateLink(currentTargetDisplayName, nil, DISPLAY_NAME_LINK_TYPE, currentTargetDisplayName)
+                if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                    displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(currentTargetDisplayName, nil, DISPLAY_NAME_LINK_TYPE, currentTargetDisplayName)
+                end
+
+                local formattedMessage = zo_strformat(LUIE_STRING_SLASHCMDS_FRIEND_INVITE_MSG_LINK, displayNameLink)
+                printToChat(formattedMessage, true)
+                if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedMessage)
+                end
+            end
+            local function FriendIgnore()
+                AlertIgnored(LUIE_STRING_IGNORE_ERROR_FRIEND)
+            end
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_FRIEND), platformIcons[SI_PLAYER_TO_PLAYER_ADD_FRIEND], ENABLED_IF_NOT_IGNORED, ENABLED_IF_NOT_IGNORED and RequestFriendOption or FriendIgnore)
+        end
+
+        -- Passenger Mount--
+        if isInGroup then
+            local mountedState, isRidingGroupMount, hasFreePassengerSlot = GetTargetMountedStateInfo(currentTargetCharacterNameRaw)
+            local isPassengerForTarget = IsGroupMountPassengerForTarget(currentTargetCharacterNameRaw)
+            local groupMountEnabled = (mountedState == MOUNTED_STATE_MOUNT_RIDER and isRidingGroupMount and (not IsMounted() or isPassengerForTarget))
+            local function MountOption()
+                UseMountAsPassenger(currentTargetCharacterNameRaw)
+            end
+            local optionToShow = isPassengerForTarget and SI_PLAYER_TO_PLAYER_DISMOUNT or SI_PLAYER_TO_PLAYER_RIDE_MOUNT
+            self:AddMenuEntry(GetString(optionToShow), platformIcons[optionToShow], groupMountEnabled, MountOption)
+        end
+
+        -- Report--
+        local function ReportCallback()
+            local nameToReport = IsInGamepadPreferredMode() and currentTargetDisplayName or primaryName
+            ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(nameToReport)
+        end
+        self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, ReportCallback)
+
+        -- Duel--
+        local duelStateI, partnerCharacterName, partnerDisplayName = GetDuelInfo()
+        if duelStateI ~= DUEL_STATE_IDLE then
+            local function AlreadyDuelingWarning(duelState, characterName, displayName)
+                return function ()
+                    local userFacingPartnerName = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
+                    local statusString = GetString("SI_DUELSTATE", duelState)
+                    statusString = zo_strformat(statusString, userFacingPartnerName)
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, statusString)
+                end
+            end
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], DISABLED, AlreadyDuelingWarning(duelStateI, partnerCharacterName, partnerDisplayName))
+        else
+            local function DuelInviteOption()
+                ChallengeTargetToDuel(currentTargetCharacterName)
+            end
+            local function DuelIgnore()
+                AlertIgnored(LUIE_STRING_IGNORE_ERROR_DUEL)
+            end
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], ENABLED_IF_NOT_IGNORED, ENABLED_IF_NOT_IGNORED and DuelInviteOption or DuelIgnore)
+        end
+
+        -- Play Tribute --
+        local tributeInviteStateI, partnerCharacterNameI, partnerDisplayNameI = GetTributeInviteInfo()
+        if tributeInviteStateI ~= TRIBUTE_INVITE_STATE_NONE then
+            local function TributeInviteFailWarning(tributeInviteState, characterName, displayName)
+                return function ()
+                    local userFacingPartnerName = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
+                    local statusString = GetString("SI_TRIBUTEINVITESTATE", tributeInviteState)
+                    statusString = zo_strformat(statusString, userFacingPartnerName)
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, statusString)
+                end
+            end
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE], DISABLED, TributeInviteFailWarning(tributeInviteStateI, partnerCharacterNameI, partnerDisplayNameI))
+        else
+            local function TributeInviteOption()
+                ChallengeTargetToTribute(currentTargetCharacterName)
+            end
+            local isEnabled = ENABLED_IF_NOT_IGNORED and not ZO_IsTributeLocked()
+            local function TributeIgnore()
+                AlertIgnored(LUIE_STRING_IGNORE_ERROR_TRIBUTE)
+            end
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE], isEnabled, ENABLED_IF_NOT_IGNORED and TributeInviteOption or TributeIgnore)
+        end
+
+        -- Trade--
+        local function TradeInviteOption()
+            TRADE_WINDOW:InitiateTrade(primaryNameInternal)
+        end
+        local function TradeIgnore()
+            AlertIgnored(LUIE_STRING_IGNORE_ERROR_TRADE)
+        end
+        local tradeInviteFunction = ENABLED_IF_NOT_IGNORED and TradeInviteOption or TradeIgnore
+        self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRADE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRADE], ENABLED_IF_NOT_IGNORED, tradeInviteFunction)
+
+        -- Cancel--
+        self:AddMenuEntry(GetString(SI_RADIAL_MENU_CANCEL_BUTTON), platformIcons[SI_RADIAL_MENU_CANCEL_BUTTON], ENABLED)
+
+        self:GetRadialMenu():Show()
+        self.showingPlayerInteractMenu = true
+        self.isLastRadialMenuGamepad = IsInGamepadPreferredMode()
+    end
+
+    -- Since the Crown Store Gifting functionality was added, hooking these functions seems to cause an insecure code issue when receiving gifts via the Player to Player notification system.
+    -- TODO: Try to securecall some of this or maybe use a message specific filter (hook alerts handling?)
+    --[[
+
+    --local INTERACT_TYPE_TRADE_INVITE = 3
+    local INTERACT_TYPE_GROUP_INVITE = 4
+    local INTERACT_TYPE_QUEST_SHARE = 5
+    local INTERACT_TYPE_FRIEND_REQUEST = 6
+    local INTERACT_TYPE_GUILD_INVITE = 7
+
+    local INCOMING_MESSAGE_TEXT = {
+        --[INTERACT_TYPE_TRADE_INVITE] = GetString(LUIE_STRING_NOTIFICATION_TRADE_INVITE),
+        [INTERACT_TYPE_GROUP_INVITE] = GetString(LUIE_STRING_NOTIFICATION_GROUP_INVITE),
+        [INTERACT_TYPE_QUEST_SHARE] = GetString(LUIE_STRING_NOTIFICATION_SHARE_QUEST_INVITE),
+        [INTERACT_TYPE_FRIEND_REQUEST] = GetString(LUIE_STRING_NOTIFICATION_FRIEND_INVITE),
+        [INTERACT_TYPE_GUILD_INVITE] = GetString(LUIE_STRING_NOTIFICATION_GUILD_INVITE)
+    }
+
+    local function DisplayNotificationMessage(message, data)
+        local typeString = INCOMING_MESSAGE_TEXT[data.incomingType]
+        if typeString then
+            -- Group Invite
+            if data.incomingType == INTERACT_TYPE_GROUP_INVITE then
+                if ChatAnnouncements.SV.Group.GroupCA then
+                    printToChat(zo_strformat(message, typeString), true)
+                end
+                if ChatAnnouncements.SV.Group.GroupAlert then
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(message, typeString))
+                end
+            -- Guild Invite
+            elseif data.incomingType == INTERACT_TYPE_GUILD_INVITE then
+                if ChatAnnouncements.SV.Social.GuildCA then
+                    printToChat(zo_strformat(message, typeString), true)
+                end
+                if ChatAnnouncements.SV.Social.GuildAlert then
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(message, typeString))
+                end
+            -- Friend Invite
+            elseif data.incomingType == INTERACT_TYPE_FRIEND_REQUEST then
+                if ChatAnnouncements.SV.Social.FriendIgnoreCA then
+                    printToChat(zo_strformat(message, typeString), true)
+                end
+                if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(message, typeString))
+                end
+            -- Quest Shared
+            elseif data.incomingType == INTERACT_TYPE_QUEST_SHARE then
+                if ChatAnnouncements.SV.Quests.QuestShareCA then
+                    printToChat(zo_strformat(message, typeString), true)
+                end
+                if ChatAnnouncements.SV.Quests.QuestShareAlert then
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(message, typeString))
+                end
+            else
+                ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(message, typeString))
+            end
+        end
+    end
+
+    local function NotificationAccepted(data)
+        if not data.dontRemoveOnAccept then
+            data.pendingResponse = false
+        end
+        if data.acceptCallback then
+            data.acceptCallback()
+            if data.uniqueSounds then
+                PlaySound(data.uniqueSounds.accept)
+            else
+                PlaySound(SOUNDS.DIALOG_ACCEPT)
+            end
+            DisplayNotificationMessage(GetString(SI_NOTIFICATION_ACCEPTED), data)
+        end
+    end
+
+    local function NotificationDeclined(data)
+        if not data.dontRemoveOnDecline then
+            data.pendingResponse = false
+        end
+        if data.declineCallback then
+            data.declineCallback()
+            if data.uniqueSounds then
+                PlaySound(data.uniqueSounds.decline)
+            else
+                PlaySound(SOUNDS.DIALOG_DECLINE)
+            end
+            DisplayNotificationMessage(GetString(SI_NOTIFICATION_DECLINED), data)
+        end
+    end
+
+    PLAYER_TO_PLAYER.Accept = function(self, incomingEntry)
+        local index = self:GetIndexFromIncomingQueue(incomingEntry)
+        if index then
+            if not incomingEntry.dontRemoveOnAccept then
+                self:RemoveEntryFromIncomingQueueTable(index)
+            end
+            NotificationAccepted(incomingEntry)
+        else
+            self:OnPromptAccepted()
+        end
+    end
+
+    PLAYER_TO_PLAYER.Decline = function(self, incomingEntry)
+        local index = self:GetIndexFromIncomingQueue(incomingEntry)
+        if index then
+            if not incomingEntry.dontRemoveOnDecline then
+                self:RemoveEntryFromIncomingQueueTable(index)
+            end
+            NotificationDeclined(incomingEntry)
+        else
+            self:OnPromptDeclined()
+        end
+    end
+
+    --With proper timing, both of these events can fire in the same frame, making it possible to be responding but having already cleared the incoming queue
+    PLAYER_TO_PLAYER.OnPromptAccepted = function(self)
+        if self.showingResponsePrompt and #self.incomingQueue > 0 then
+            local incomingEntryToRespondTo = self.incomingQueue[1]
+            if not incomingEntryToRespondTo.dontRemoveOnAccept then
+                self:RemoveEntryFromIncomingQueueTable(1)
+            end
+            NotificationAccepted(incomingEntryToRespondTo)
+        end
+    end
+
+    PLAYER_TO_PLAYER.OnPromptDeclined = function(self)
+        if self.showingResponsePrompt and #self.incomingQueue > 0 then
+            local incomingEntryToRespondTo = self.incomingQueue[1]
+            if not incomingEntryToRespondTo.dontRemoveOnDecline then
+                self:RemoveEntryFromIncomingQueueTable(1)
+            end
+            NotificationDeclined(incomingEntryToRespondTo)
+        end
+    end
+    ]]
+    --
+
+    -- Required when hooking ZO_MailSend_Gamepad:IsValid()
+    -- Returns whether there is any item attached.
+    local function IsAnyItemAttached(bagId, slotIndex)
+        for i = 1, MAIL_MAX_ATTACHED_ITEMS do
+            local queuedFromBag = GetQueuedItemAttachmentInfo(i)
+            if queuedFromBag ~= 0 then -- Slot is filled.
+                return true
+            end
+        end
+        return false
+    end
+
+    -- Hook Gamepad mail name function
+    local orgIsMailValid = ZO_MailSend_Gamepad.IsMailValid
+    local IsMailValid = function (self, ...)
+        local to = self.mailView:GetAddress()
+        if (not to) or (to == "") then
+            return false
+        end
+
+        local nameLink
+        if zo_strmatch(to, "@") == "@" then
+            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(to, nil, DISPLAY_NAME_LINK_TYPE, to)
+            else
+                nameLink = ZO_LinkHandler_CreateLink(to, nil, DISPLAY_NAME_LINK_TYPE, to)
+            end
+        else
+            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(to, nil, CHARACTER_LINK_TYPE, to)
+            else
+                nameLink = ZO_LinkHandler_CreateLink(to, nil, CHARACTER_LINK_TYPE, to)
+            end
+        end
+        g_mailTarget = ZO_SELECTED_TEXT:Colorize(nameLink)
+
+        local subject = self.mailView:GetSubject()
+        local hasSubject = subject and (subject ~= "")
+        local body = self.mailView:GetBody()
+        local hasBody = body and (body ~= "")
+        orgIsMailValid(self, ...)
+        return hasSubject or hasBody or (GetQueuedMoneyAttachment() > 0) or IsAnyItemAttached()
+    end
+    ZO_MailSend_Gamepad.IsMailValid = IsMailValid
+    -- Hook MAIL_SEND.Send to get name of player we send to.
+    MAIL_SEND.Send = function (self)
+        windowManager:SetFocusByName("")
+        if not self.sendMoneyMode and GetQueuedCOD() == 0 then
+            if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
+                printToChat(GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE), true)
+            end
+            if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE))
+            end
+            PlaySound(SOUNDS.NEGATIVE_CLICK)
+        else
+            SendMail(self.to:GetText(), self.subject:GetText(), self.body:GetText())
+
+            local mailTarget = self.to:GetText()
+            local nameLink
+            -- Here we look for @ character in the sent mail, if the player send to an account then we want the link to be an account name link, otherwise, it's a character name link.
+            if zo_strmatch(mailTarget, "@") == "@" then
+                if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                    nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(mailTarget, nil, DISPLAY_NAME_LINK_TYPE, mailTarget)
+                else
+                    nameLink = ZO_LinkHandler_CreateLink(mailTarget, nil, DISPLAY_NAME_LINK_TYPE, mailTarget)
+                end
+            else
+                if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                    nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(mailTarget, nil, CHARACTER_LINK_TYPE, mailTarget)
+                else
+                    nameLink = ZO_LinkHandler_CreateLink(mailTarget, nil, CHARACTER_LINK_TYPE, mailTarget)
+                end
+            end
+
+            g_mailTarget = ZO_SELECTED_TEXT:Colorize(nameLink)
+        end
+    end
+
+    PLAYER_INVENTORY.AddQuestItem = function (self, questItem, searchType)
+        local inventory = self.inventories[INVENTORY_QUEST_ITEM]
+
+        questItem.inventory = inventory
+        -- store all tools and items in a subtable under the questIndex for faster access
+        local questIndex = questItem.questIndex
+        if not inventory.slots[questIndex] then
+            inventory.slots[questIndex] = {}
+        end
+        questItem.slotIndex = questIndex
+        table_insert(inventory.slots[questIndex], questItem)
+
+        -- Display Item if set to display
+        if ChatAnnouncements.SV.Inventory.LootQuestAdd or ChatAnnouncements.SV.Inventory.LootQuestRemove then
+            DisplayQuestItem(questItem.questItemId, questItem.stackCount, questItem.iconFile, false)
+        end
+    end
+
+    PLAYER_INVENTORY.ResetQuest = function (self, questIndex)
+        local inventory = self.inventories[INVENTORY_QUEST_ITEM]
+        local itemTable = inventory.slots[questIndex]
+        if itemTable then
+            -- remove all quest items from search
+            for i = 1, #itemTable do
+                -- Display Item if set to display
+                if ChatAnnouncements.SV.Inventory.LootQuestAdd or ChatAnnouncements.SV.Inventory.LootQuestRemove then
+                    local itemId = itemTable[i].questItemId
+                    local stackCount = itemTable[i].stackCount
+                    local icon = itemTable[i].iconFile
+                    DisplayQuestItem(itemId, stackCount, icon, true)
+                end
+            end
+        end
+        inventory.slots[questIndex] = nil
+    end
+
+    -- Called by hooked TryGroupInviteByName function
+    -- TODO: Maybe see about links for names here for non-menu
+    local function CompleteGroupInvite(characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
+        local isLeader = IsUnitGroupLeader("player")
+        local groupSize = GetGroupSize()
+        local ALERT = true
+
+        if isLeader and groupSize == SMALL_GROUP_SIZE_THRESHOLD then
+            ZO_Dialogs_ShowPlatformDialog("LARGE_GROUP_INVITE_WARNING", characterOrDisplayName, { mainTextParams = { SMALL_GROUP_SIZE_THRESHOLD } })
+        else
+            GroupInviteByName(characterOrDisplayName)
+
+            ZO_Menu_SetLastCommandWasFromMenu(not sentFromChat)
+            if isMenu then
+                local link
+                if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                    link = ZO_LinkHandler_CreateLinkWithoutBrackets(characterOrDisplayName, nil, CHARACTER_LINK_TYPE, characterOrDisplayName)
+                else
+                    link = ZO_LinkHandler_CreateLink(characterOrDisplayName, nil, CHARACTER_LINK_TYPE, characterOrDisplayName)
+                end
+                printToChat(zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MENU), link), true)
+                if ChatAnnouncements.SV.Group.GroupAlert then
+                    ZO_Alert(ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MENU), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
+                end
+            else
+                printToChat(zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)), true)
+                if ChatAnnouncements.SV.Group.GroupAlert then
+                    ZO_Alert(ALERT, nil, zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
+                end
+            end
+        end
+    end
+
+    -- HOOK Group Invite function so we can modify CA/Alert here
+    TryGroupInviteByName = function (characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
+        if IsPlayerInGroup(characterOrDisplayName) then
+            printToChat(GetString(SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER), true)
+            if ChatAnnouncements.SV.Group.GroupAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER)
+            end
+            PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+            return
+        end
+
+        local isLeader = IsUnitGroupLeader("player")
+        local groupSize = GetGroupSize()
+
+        if not isLeader and groupSize > 0 then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE))
+            return
+        end
+
+        if IsConsoleUI() then
+            local displayName = characterOrDisplayName
+
+            local function GroupInviteCallback(success)
+                if success then
+                    CompleteGroupInvite(displayName, sentFromChat, displayInvitedMessage, isMenu)
+                end
+            end
+
+            ZO_ConsoleAttemptInteractOrError(GroupInviteCallback, displayName, ZO_PLAYER_CONSOLE_INFO_REQUEST_DONT_BLOCK, ZO_CONSOLE_CAN_COMMUNICATE_ERROR_ALERT, ZO_ID_REQUEST_TYPE_DISPLAY_NAME, displayName)
+        else
+            if IsIgnored(characterOrDisplayName) then
+                printToChat(GetString(LUIE_STRING_IGNORE_ERROR_GROUP), true)
+                if ChatAnnouncements.SV.Group.GroupAlert then
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, LUIE_STRING_IGNORE_ERROR_GROUP)
+                end
+                PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+                return
+            end
+
+            CompleteGroupInvite(characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
+        end
+    end
+
+    -- Hook for EVENT_GUILD_MEMBER_ADDED
+    GUILD_ROSTER_MANAGER.OnGuildMemberAdded = function (self, guildId, displayName)
+        self:RefreshData()
+
+        local data = self:FindDataByDisplayName(displayName)
+        if data and data.rankId ~= DEFAULT_INVITED_RANK then
+            local hasCharacter, rawCharacterName, zone, class, alliance, level, championPoints = GetGuildMemberCharacterInfo(self.guildId, data.index)
+            local displayNameLink = ChatAnnouncements.ResolveNameLink(rawCharacterName, displayName)
+            local guildName = self.guildName
+            local guildAlliance = GetGuildAlliance(guildId)
+            local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
+            local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
+            local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
+
+            if ChatAnnouncements.SV.Social.GuildCA then
+                printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_ROSTER_ADDED), displayNameLink, guildNameAlliance), true)
+            end
+            if ChatAnnouncements.SV.Social.GuildAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_ROSTER_ADDED), displayName, guildNameAllianceAlert))
+            end
+            PlaySound(SOUNDS.GUILD_ROSTER_ADDED)
+        end
+    end
+
+    -- Hook for EVENT_GUILD_MEMBER_REMOVED
+    GUILD_ROSTER_MANAGER.OnGuildMemberRemoved = function (self, guildId, rawCharacterName, displayName)
+        local displayNameLink = ChatAnnouncements.ResolveNameLink(rawCharacterName, displayName)
+        local guildName = self.guildName
+        local guildAlliance = GetGuildAlliance(guildId)
+        local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
+        local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
+        local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
+
+        if ChatAnnouncements.SV.Social.GuildCA then
+            printToChat(zo_strformat(GetString(LUIE_STRING_CA_GUILD_ROSTER_LEFT), displayNameLink, guildNameAlliance), true)
+        end
+        if ChatAnnouncements.SV.Social.GuildAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GUILD_ROSTER_LEFT), displayName, guildNameAllianceAlert))
+        end
+        PlaySound(SOUNDS.GUILD_ROSTER_REMOVED)
+
+        self:RefreshData()
+    end
+
+    local EVENT_NAMESPACE = "GuildRoster"
+    -- Unregister ZOS Guild Roster events and replace with our own.
+    eventManager:UnregisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_PLAYER_RANK_CHANGED)
+    eventManager:UnregisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_PROMOTE_SUCCESSFUL)
+    eventManager:UnregisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_DEMOTE_SUCCESSFUL)
+    eventManager:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_PLAYER_RANK_CHANGED, ChatAnnouncements.GuildPlayerRankChanged)
+    eventManager:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_PROMOTE_SUCCESSFUL, ChatAnnouncements.GuildMemberPromoteSuccessful)
+    eventManager:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_DEMOTE_SUCCESSFUL, ChatAnnouncements.GuildMemberDemoteSuccessful)
+
+    -- Hook for Guild Invite function used from Guild Menu
+    ZO_TryGuildInvite = function (guildId, displayName)
+        -- TODO: Update when more alerts are added to CA
+        if not DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_INVITE) then
+            ZO_AlertEvent(EVENT_SOCIAL_ERROR, SOCIAL_RESULT_NO_INVITE_PERMISSION)
+            return
+        end
+
+        -- TODO: Update when more alerts are added to CA
+        if GetNumGuildMembers(guildId) == MAX_GUILD_MEMBERS then
+            ZO_AlertEvent(EVENT_SOCIAL_ERROR, SOCIAL_RESULT_NO_ROOM)
+            return
+        end
+
+        local guildName = GetGuildName(guildId)
+        local guildAlliance = GetGuildAlliance(guildId)
+        local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
+        local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
+        local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
+
+        if IsConsoleUI() then
+            local function GuildInviteCallback(success)
+                if success then
+                    GuildInvite(guildId, displayName)
+                    if ChatAnnouncements.SV.Social.GuildCA then
+                        printToChat(zo_strformat(LUIE_STRING_CA_GUILD_ROSTER_INVITED_MESSAGE, UndecorateDisplayName(displayName), guildNameAlliance), true)
+                    end
+                    if ChatAnnouncements.SV.Social.GuildAlert then
+                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_GUILD_ROSTER_INVITED_MESSAGE, UndecorateDisplayName(displayName), guildNameAllianceAlert))
+                    end
+                end
+            end
+
+            ZO_ConsoleAttemptInteractOrError(GuildInviteCallback, displayName, ZO_PLAYER_CONSOLE_INFO_REQUEST_DONT_BLOCK, ZO_CONSOLE_CAN_COMMUNICATE_ERROR_ALERT, ZO_ID_REQUEST_TYPE_DISPLAY_NAME, displayName)
+        else
+            -- TODO: This needs fixed in the API so that character names are also factored in here. This check here is just about pointless as it stands.
+            if IsIgnored(displayName) then
+                if ChatAnnouncements.SV.Social.GuildCA then
+                    printToChat(GetString(LUIE_STRING_IGNORE_ERROR_GUILD), true)
+                end
+                if ChatAnnouncements.SV.Social.GuildAlert then
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_IGNORE_ERROR_GUILD))
+                end
+                PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+                return
+            end
+
+            GuildInvite(guildId, displayName)
+            if ChatAnnouncements.SV.Social.GuildCA then
+                printToChat(zo_strformat(LUIE_STRING_CA_GUILD_ROSTER_INVITED_MESSAGE, displayName, guildNameAlliance), true)
+            end
+            if ChatAnnouncements.SV.Social.GuildAlert then
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(LUIE_STRING_CA_GUILD_ROSTER_INVITED_MESSAGE, displayName, guildNameAllianceAlert))
+            end
+        end
+    end
+
+    -- Called when changing guilds in the Guild tab
+    GUILD_SHARED_INFO.SetGuildId = function (self, guildId)
+        self.guildId = guildId
+        self:Refresh(guildId)
+        -- Set selected guild for use when resolving Rank/Heraldry updates
+        g_selectedGuild = guildId
+    end
+
+    -- Called when changing guilds in the Guild tab or leaving/joining a guild
+    GUILD_SHARED_INFO.Refresh = function (self, guildId)
+        if self.guildId and self.guildId == guildId then
+            local count = GetControl(self.control, "Count")
+            local numGuildMembers, numOnline = GetGuildInfo(guildId)
+
+            count:SetText(zo_strformat(SI_GUILD_NUM_MEMBERS_ONLINE_FORMAT, numOnline, numGuildMembers))
+
+            self.canDepositToBank = DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_BANK_DEPOSIT)
+            if self.canDepositToBank then
+                self.bankIcon:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+            else
+                self.bankIcon:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+            end
+
+            self.canUseTradingHouse = DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_TRADING_HOUSE)
+            if self.canUseTradingHouse then
+                self.tradingHouseIcon:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+            else
+                self.tradingHouseIcon:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+            end
+
+            self.canUseHeraldry = DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_HERALDRY)
+            if self.canUseHeraldry then
+                self.heraldryIcon:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+            else
+                self.heraldryIcon:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+            end
+        end
+        -- Set selected guild for use when resolving Rank/Heraldry updates
+        g_selectedGuild = guildId
+    end
+
+    -- Used to pull the cost of guild Heraldry change
+    -- TODO:
+    ZO_GuildHeraldryManager_Shared.AttemptSaveAndExit = function (self, showBaseScene)
+        local blocked = false
+
+        if HasPendingHeraldryChanges() then
+            self:SetPendingExit(true)
+            if not IsCreatingHeraldryForFirstTime() then
+                local pendingCost = GetPendingHeraldryCost()
+                -- Pull Heraldry Cost to currency function to use
+                g_pendingHeraldryCost = pendingCost
+                local heraldryFunds = GetHeraldryGuildBankedMoney()
+                if heraldryFunds and pendingCost <= heraldryFunds then
+                    self:ConfirmHeraldryApplyChanges()
+                    blocked = true
+                end
+            end
+        end
+
+        if not blocked then
+            self:ConfirmExit(showBaseScene)
+        end
+    end
+
+    -- Replace the default DeclineLFGReadyCheckNotification function to display the message that we are not in queue any longer + LFG activity join event.
+    local zos_DeclineLFGReadyCheckNotification = DeclineLFGReadyCheckNotification
+    DeclineLFGReadyCheckNotification = function (self)
+        zos_DeclineLFGReadyCheckNotification()
+
+        local message = (GetString(SI_LFGREADYCHECKCANCELREASON3))
+        g_showRCUpdates = true
+        g_weDeclinedTheQueue = true
+        LUIE_callLater(function ()
+                           g_weDeclinedTheQueue = false
+                       end, 1000)
+
+        if ChatAnnouncements.SV.Group.GroupLFGQueueCA then
+            printToChat(message, true)
+        end
+        if ChatAnnouncements.SV.Group.GroupLFGQueueAlert then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
+        end
+    end
+end
+
 function ChatAnnouncements.TradeInviteAccepted(eventCode)
     if ChatAnnouncements.SV.Notify.NotificationTradeCA then
         printToChat(GetString(LUIE_STRING_CA_TRADE_INVITE_ACCEPTED), true)
     end
     if ChatAnnouncements.SV.Notify.NotificationTradeAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString(LUIE_STRING_CA_TRADE_INVITE_ACCEPTED))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_TRADE_INVITE_ACCEPTED))
     end
 
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if ChatAnnouncements.SV.Inventory.LootTrade then
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ChatAnnouncements.InventoryUpdate)
-        ChatAnnouncements.inventoryStacks = {}
+        g_inventoryStacks = {}
         ChatAnnouncements.IndexInventory() -- Index Inventory
     end
-    ChatAnnouncements.inTrade = true
+    g_inTrade = true
 end
 
---- - **EVENT_TRADE_ITEM_ADDED **
----
---- @param eventId integer
---- @param who TradeParticipant
---- @param tradeIndex luaindex
---- @param itemSoundCategory ItemUISoundCategory
-function ChatAnnouncements.OnTradeAdded(eventId, who, tradeIndex, itemSoundCategory)
+-- Adds items to index if they are added in a trade
+function ChatAnnouncements.OnTradeAdded(eventCode, who, tradeIndex, itemSoundCategory)
     local index = tradeIndex
     local name, icon, stack = GetTradeItemInfo(who, tradeIndex)
-    local itemLink = GetTradeItemLink(who, tradeIndex, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+    local itemLink = GetTradeItemLink(who, tradeIndex, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
     local itemId = GetItemLinkItemId(itemLink)
     local itemType = GetItemLinkItemType(itemLink)
 
     if who == 0 then
-        ChatAnnouncements.tradeStacksOut[index] = { icon = icon, stack = stack, itemId = itemId, itemLink = itemLink, itemType = itemType }
+        g_tradeStacksOut[index] = { icon = icon, stack = stack, itemId = itemId, itemLink = itemLink, itemType = itemType }
     else
-        ChatAnnouncements.tradeStacksIn[index] = { icon = icon, stack = stack, itemId = itemId, itemLink = itemLink, itemType = itemType }
+        g_tradeStacksIn[index] = { icon = icon, stack = stack, itemId = itemId, itemLink = itemLink, itemType = itemType }
     end
 end
 
---- - **EVENT_TRADE_ITEM_REMOVED **
----
---- @param eventId integer
---- @param who TradeParticipant
---- @param tradeIndex luaindex
---- @param itemSoundCategory ItemUISoundCategory
-function ChatAnnouncements.OnTradeRemoved(eventId, who, tradeIndex, itemSoundCategory)
+-- Removes items from index if they are removed from the trade
+function ChatAnnouncements.OnTradeRemoved(eventCode, who, tradeIndex, itemSoundCategory)
     local indexOut = tradeIndex
     if who == 0 then
-        ChatAnnouncements.tradeStacksOut[indexOut] = nil
+        g_tradeStacksOut[indexOut] = nil
     else
-        ChatAnnouncements.tradeStacksIn[indexOut] = nil
+        g_tradeStacksIn[indexOut] = nil
     end
 end
 
 -- Called on player joining a group to determine if message syntax should show group or LFG group.
 function ChatAnnouncements.CheckLFGStatusJoin()
-    if not ChatAnnouncements.stopGroupLeaveQueue then
-        if not ChatAnnouncements.lfgDisableGroupEvents then
-            if IsInLFGGroup() and not ChatAnnouncements.joinLFGOverride then
+    if not g_stopGroupLeaveQueue then
+        if not g_lfgDisableGroupEvents then
+            if IsInLFGGroup() and not g_joinLFGOverride then
                 if ChatAnnouncements.SV.Group.GroupCA then
                     printToChat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_SELF_LFG), true)
                 end
                 if ChatAnnouncements.SV.Group.GroupAlert then
-                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_SELF_LFG))
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_SELF_LFG))
                 end
-            elseif not IsInLFGGroup() and not ChatAnnouncements.joinLFGOverride then
+            elseif not IsInLFGGroup() and not g_joinLFGOverride then
                 local isLeader = IsUnitGroupLeader("player") -- If the player is the leader, then they must have formed the group.
                 if ChatAnnouncements.SV.Group.GroupCA then
                     if isLeader then
@@ -6870,14 +10623,14 @@ function ChatAnnouncements.CheckLFGStatusJoin()
                 end
                 if ChatAnnouncements.SV.Group.GroupAlert then
                     if isLeader then
-                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_FORM))
+                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_FORM))
                     else
-                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_SELF))
+                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN_SELF))
                     end
                 end
                 -- If the player is the leader, show the other member as joining the group.
                 if isLeader and not IsInLFGGroup() then
-                    local groupSize = GetGroupSize() + GetNumCompanionsInGroup()
+                    local groupSize = GetGroupSize()
                     -- If for some reason the group is bigger or smaller than just 2 people (initial formation), then don't proceed here.
                     if groupSize == 2 then
                         local unitToJoin
@@ -6899,16 +10652,14 @@ function ChatAnnouncements.CheckLFGStatusJoin()
                 end
             end
         end
-        ChatAnnouncements.joinLFGOverride = false
+        g_joinLFGOverride = false
     end
 end
 
---- Called when another player joins the group.
---- @param SendMessage boolean Whether to send a chat message
---- @param SendAlert boolean Whether to send an alert
+-- Called when another player joins the group.
 function ChatAnnouncements.PrintJoinStatusNotSelf(SendMessage, SendAlert)
     -- Bail out if we're hiding events from LFG.
-    if ChatAnnouncements.stopGroupLeaveQueue or ChatAnnouncements.lfgDisableGroupEvents then
+    if g_stopGroupLeaveQueue or g_lfgDisableGroupEvents then
         return
     end
 
@@ -6917,64 +10668,52 @@ function ChatAnnouncements.PrintJoinStatusNotSelf(SendMessage, SendAlert)
         printToChat(SendMessage, true)
     end
     if ChatAnnouncements.SV.Group.GroupAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, SendAlert)
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, SendAlert)
     end
 end
 
---- Called on player leaving a group to determine if message syntax should show group or LFG group.
---- @param WasKicked boolean Whether the player was kicked from the group
+-- Called on player leaving a group to determine if message syntax should show group or LFG group.
 function ChatAnnouncements.CheckLFGStatusLeave(WasKicked)
     -- Bail out if we joined an LFG group.
-    if ChatAnnouncements.stopGroupLeaveQueue or ChatAnnouncements.lfgDisableGroupEvents then
-        ChatAnnouncements.leaveLFGOverride = false
+    if g_stopGroupLeaveQueue or g_lfgDisableGroupEvents then
+        g_leaveLFGOverride = false
         return
     end
-    if ChatAnnouncements.leaveLFGOverride and GetGroupSize() == 0 then
+    if g_leaveLFGOverride and GetGroupSize() == 0 then
         if ChatAnnouncements.SV.Group.GroupCA then
             printToChat(GetString(LUIE_STRING_CA_GROUP_QUIT_LFG), true)
         end
         if ChatAnnouncements.SV.Group.GroupAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString(LUIE_STRING_CA_GROUP_QUIT_LFG))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_QUIT_LFG))
         end
     end
-    ChatAnnouncements.leaveLFGOverride = false
+    g_leaveLFGOverride = false
 end
 
---- - **EVENT_GROUP_INVITE_RECEIVED **
----
---- @param eventId integer
---- @param inviterCharacterName string
---- @param inviterDisplayName string
-function ChatAnnouncements.OnGroupInviteReceived(eventId, inviterCharacterName, inviterDisplayName)
+-- EVENT_GROUP_INVITE_RECEIVED
+function ChatAnnouncements.OnGroupInviteReceived(eventCode, inviterName, inviterDisplayName)
     if ChatAnnouncements.SV.Group.GroupCA then
-        local finalName = ChatAnnouncements.ResolveNameLink(inviterCharacterName, inviterDisplayName)
+        local finalName = ChatAnnouncements.ResolveNameLink(inviterName, inviterDisplayName)
         local message = zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MESSAGE), finalName)
         printToChat(message, true)
     end
     if ChatAnnouncements.SV.Group.GroupAlert then
-        local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviterCharacterName, inviterDisplayName)
+        local finalAlertName = ChatAnnouncements.ResolveNameNoLink(inviterName, inviterDisplayName)
         local alertText = zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MESSAGE), finalAlertName)
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, alertText)
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
     end
 end
 
---- Indexes group loot.
 function ChatAnnouncements.IndexGroupLoot()
     local groupSize = GetGroupSize()
     for i = 1, groupSize do
         local characterName = GetUnitName("group" .. i)
         local displayName = GetUnitDisplayName("group" .. i)
-        ChatAnnouncements.groupLootIndex[characterName] =
-        {
-            characterName = characterName,
-            displayName = displayName
-        }
+        g_groupLootIndex[characterName] = { characterName = characterName, displayName = displayName }
     end
 end
 
---- Handles group type change events. Runs on the `EVENT_GROUP_TYPE_CHANGED` event.
---- @param eventCode number The event code that triggered this function
---- @param largeGroup boolean Whether the group is now a large group
+-- EVENT_GROUP_TYPE_CHANGED
 function ChatAnnouncements.OnGroupTypeChanged(eventCode, largeGroup)
     local message
     if largeGroup then
@@ -6987,12 +10726,11 @@ function ChatAnnouncements.OnGroupTypeChanged(eventCode, largeGroup)
         printToChat(message, true)
     end
     if ChatAnnouncements.SV.Group.GroupAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
     end
 end
 
---- Handles vote notification events. Runs on the `EVENT_GROUP_ELECTION_NOTIFICATION_ADDED` event.
---- @param eventCode number The event code that triggered this function
+-- EVENT_GROUP_ELECTION_NOTIFICATION_ADDED
 function ChatAnnouncements.VoteNotify(eventCode)
     local electionType, timeRemainingSeconds, electionDescriptor, targetUnitTag = GetGroupElectionInfo()
     if electionType == GROUP_ELECTION_TYPE_GENERIC_UNANIMOUS then -- Ready Check
@@ -7000,7 +10738,7 @@ function ChatAnnouncements.VoteNotify(eventCode)
             printToChat(GetString(SI_GROUP_ELECTION_READY_CHECK_MESSAGE), true)
         end
         if ChatAnnouncements.SV.Group.GroupVoteAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString(SI_GROUP_ELECTION_READY_CHECK_MESSAGE))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GROUP_ELECTION_READY_CHECK_MESSAGE))
         end
     end
 
@@ -7016,27 +10754,21 @@ function ChatAnnouncements.VoteNotify(eventCode)
         if ChatAnnouncements.SV.Group.GroupVoteAlert then
             local finalAlertName = ChatAnnouncements.ResolveNameNoLink(kickMemberName, kickMemberAccountName)
             local alertText = zo_strformat(GetString(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_START), finalAlertName)
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, alertText)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
         end
     end
 end
 
---- Handles LFG leave events. Runs on the `EVENT_GROUPING_TOOLS_NO_LONGER_LFG` event.
---- @param eventCode number The event code that triggered this function
+-- EVENT_GROUPING_TOOLS_NO_LONGER_LFG
 function ChatAnnouncements.LFGLeft(eventCode)
-    ChatAnnouncements.leaveLFGOverride = true
+    g_leaveLFGOverride = true
 end
 
---- - **EVENT_PLEDGE_OF_MARA_OFFER **
----
---- @param eventId integer
---- @param targetCharacterName string
---- @param isSender boolean
---- @param targetDisplayName string
-function ChatAnnouncements.MaraOffer(eventId, targetCharacterName, isSender, targetDisplayName)
+-- EVENT_PLEDGE_OF_MARA_OFFER - EVENT HANDLER
+function ChatAnnouncements.MaraOffer(eventCode, characterName, isSender, displayName)
     -- Display CA
     if ChatAnnouncements.SV.Social.PledgeOfMaraCA then
-        local finalName = ChatAnnouncements.ResolveNameLink(targetCharacterName, targetDisplayName)
+        local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
         if isSender then
             printToChat(zo_strformat(GetString(SI_PLEDGE_OF_MARA_SENDER_MESSAGE), finalName), true)
         else
@@ -7046,19 +10778,18 @@ function ChatAnnouncements.MaraOffer(eventId, targetCharacterName, isSender, tar
 
     -- Display Alert
     if ChatAnnouncements.SV.Social.PledgeOfMaraAlert then
-        local finalAlertName = ChatAnnouncements.ResolveNameNoLink(targetCharacterName, targetDisplayName)
+        local finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
         local alertString
         if isSender then
             alertString = zo_strformat(GetString(SI_PLEDGE_OF_MARA_SENDER_MESSAGE), finalAlertName)
         else
             alertString = zo_strformat(GetString(SI_PLEDGE_OF_MARA_MESSAGE), finalAlertName)
         end
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, alertString)
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertString)
     end
 end
 
---- Handles duel start events. Runs on the `EVENT_DUEL_STARTED` event.
---- @param eventCode number The event code that triggered this function
+-- EVENT_DUEL_STARTED -- EVENT HANDLER
 function ChatAnnouncements.DuelStarted(eventCode)
     -- Display CA
     if ChatAnnouncements.SV.Social.DuelStartCA or ChatAnnouncements.SV.Social.DuelStartAlert then
@@ -7077,7 +10808,7 @@ function ChatAnnouncements.DuelStarted(eventCode)
         end
 
         if ChatAnnouncements.SV.Social.DuelStartAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
         end
     end
 
@@ -7087,10 +10818,46 @@ function ChatAnnouncements.DuelStarted(eventCode)
     end
 end
 
---- Resets stack split tracking.
 function ChatAnnouncements.ResetStackSplit()
-    ChatAnnouncements.stackSplit = false
+    g_stackSplit = false
     eventManager:UnregisterForUpdate(moduleName .. "StackTracker")
+end
+
+function ChatAnnouncements.PrintQueuedMessages()
+    local messageTypes =
+    {
+        "NOTIFICATION", "QUEST_POI", "QUEST", "EXPERIENCE", "EXPERIENCE LEVEL", "SKILL GAIN", "SKILL MORPH",
+        "SKILL LINE", "SKILL", "CURRENCY POSTAGE", "QUEST LOOT REMOVE", "CONTAINER", "CURRENCY", "QUEST LOOT ADD",
+        "LOOT", "ANTIQUITY", "COLLECTIBLE", "ACHIEVEMENT", "MESSAGE"
+    }
+
+    for _, messageType in ipairs(messageTypes) do
+        for i = 1, #ChatAnnouncements.QueuedMessages do
+            local message = ChatAnnouncements.QueuedMessages[i]
+            if message and message.message ~= "" and message.type == messageType then
+                if messageType == "QUEST LOOT REMOVE" then
+                    local itemId = message.itemId
+                    if not g_questItemAdded[itemId] then
+                        printToChat(message.message)
+                    end
+                elseif messageType == "CONTAINER" or messageType == "LOOT" then
+                    ChatAnnouncements.ResolveItemMessage(message.message, message.formattedRecipient, message.color, message.logPrefix, message.totalString, message.groupLoot)
+                elseif messageType == "QUEST LOOT ADD" then
+                    local itemId = message.itemId
+                    if not g_questItemRemoved[itemId] then
+                        printToChat(message.message)
+                    end
+                else
+                    local isSystem = message.isSystem or false
+                    printToChat(message.message, isSystem)
+                end
+            end
+        end
+    end
+
+    ZO_ClearTable(ChatAnnouncements.QueuedMessages)
+    ChatAnnouncements.QueuedMessagesCounter = 1
+    eventManager:UnregisterForUpdate(moduleName .. "Printer")
 end
 
 local mementoTable =
@@ -7101,39 +10868,33 @@ local mementoTable =
     [479] = GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_WITCH),
 }
 
---- Announces memento usage in chat.
 function ChatAnnouncements.AnnounceMemento()
-    local messageString = mementoTable[LUIE.LastMementoUsed] or nil
-    if messageString == nil then
+    local string = mementoTable[LUIE.LastMementoUsed] or nil
+    if string == nil then
         LUIE.LastMementoUsed = 0
         return
     end
 
-    local collectibleId = LUIE.LastMementoUsed
-    local name = GetCollectibleName(collectibleId)
-    local icon = GetCollectibleIcon(collectibleId)
-    local link = GetCollectibleLink(collectibleId, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionCollectibleUse])
+    local link = GetCollectibleLink(LUIE.LastMementoUsed, linkBrackets[ChatAnnouncements.SV.BracketOptionCollectibleUse])
+    local name = GetCollectibleName(LUIE.LastMementoUsed)
+    local icon = GetCollectibleIcon(LUIE.LastMementoUsed)
 
     local formattedIcon = ChatAnnouncements.SV.Collectibles.CollectibleUseIcon and ("|t16:16:" .. icon .. "|t ") or ""
 
-    local message = zo_strformat(messageString, link, formattedIcon)
-    local alert = zo_strformat(messageString, name, "")
+    local message = zo_strformat(string, link, formattedIcon)
+    local alert = zo_strformat(string, name, "")
 
-    if message and ChatAnnouncements.SV.Collectibles.CollectibleUseCA or collectibleId > 0 then
-        message = ChatAnnouncements.Colors.CollectibleUseColorize:Colorize(message)
+    if message and ChatAnnouncements.SV.Collectibles.CollectibleUseCA or LUIE.LastMementoUsed > 0 then
+        message = ColorizeColors.CollectibleUseColorize:Colorize(message)
         printToChat(message)
     end
     if alert and ChatAnnouncements.SV.Collectibles.CollectibleUseAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, alert)
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alert)
     end
 
     LUIE.LastMementoUsed = 0
 end
 
---- Handles collectible usage events. Runs on the `EVENT_COLLECTIBLE_USE_RESULT` event.
---- @param eventCode number The event code that triggered this function
---- @param result CollectibleUsageBlockReason The result of the collectible usage attempt (COLLECTIBLE_USAGE_BLOCK_REASON_*)
---- @param isAttemptingActivation boolean
 function ChatAnnouncements.CollectibleUsed(eventCode, result, isAttemptingActivation)
     if result ~= COLLECTIBLE_USAGE_BLOCK_REASON_NOT_BLOCKED then
         return
@@ -7143,7 +10904,6 @@ function ChatAnnouncements.CollectibleUsed(eventCode, result, isAttemptingActiva
     LUIE_callLater(ChatAnnouncements.CollectibleResult, latency)
 end
 
---- Processes the result of a collectible usage.
 function ChatAnnouncements.CollectibleResult()
     ChatAnnouncements.AnnounceMemento()
 
@@ -7163,149 +10923,149 @@ function ChatAnnouncements.CollectibleResult()
     local newPersonality = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_PERSONALITY, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
     local newPolymorph = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_POLYMORPH, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
 
-    if newAssistant ~= ChatAnnouncements.currentAssistant then
+    if newAssistant ~= currentAssistant then
         if newAssistant == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentAssistant
+            lastCollectibleUsed = currentAssistant
         else
-            ChatAnnouncements.lastCollectibleUsed = newAssistant
-            -- ChatAnnouncements.currentCompanion = newAssistant -- fixes summoning assistant, if companion already summoned, from using sys message/icon of old companion instead of new assistant
+            lastCollectibleUsed = newAssistant
+            -- currentCompanion = newAssistant -- fixes summoning assistant, if companion already summoned, from using sys message/icon of old companion instead of new assistant
         end
     end
-    if newCompanion ~= ChatAnnouncements.currentCompanion then
+    if newCompanion ~= currentCompanion then
         if newCompanion == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentCompanion
+            lastCollectibleUsed = currentCompanion
         else
-            ChatAnnouncements.lastCollectibleUsed = newCompanion
+            lastCollectibleUsed = newCompanion
         end
     end
-    if newVanity ~= ChatAnnouncements.currentVanity then
+    if newVanity ~= currentVanity then
         if newVanity == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentVanity
+            lastCollectibleUsed = currentVanity
         else
-            ChatAnnouncements.lastCollectibleUsed = newVanity
+            lastCollectibleUsed = newVanity
         end
     end
-    if newSpecial ~= ChatAnnouncements.currentSpecial then
+    if newSpecial ~= currentSpecial then
         if newSpecial == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentSpecial
+            lastCollectibleUsed = currentSpecial
         else
-            ChatAnnouncements.lastCollectibleUsed = newSpecial
+            lastCollectibleUsed = newSpecial
         end
     end
-    if newHat ~= ChatAnnouncements.currentHat then
+    if newHat ~= currentHat then
         if newHat == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentHat
+            lastCollectibleUsed = currentHat
         else
-            ChatAnnouncements.lastCollectibleUsed = newHat
+            lastCollectibleUsed = newHat
         end
     end
-    if newHair ~= ChatAnnouncements.currentHair then
+    if newHair ~= currentHair then
         if newHair == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentHair
+            lastCollectibleUsed = currentHair
         else
-            ChatAnnouncements.lastCollectibleUsed = newHair
+            lastCollectibleUsed = newHair
         end
     end
-    if newHeadMark ~= ChatAnnouncements.currentHeadMark then
+    if newHeadMark ~= currentHeadMark then
         if newHeadMark == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentHeadMark
+            lastCollectibleUsed = currentHeadMark
         else
-            ChatAnnouncements.lastCollectibleUsed = newHeadMark
+            lastCollectibleUsed = newHeadMark
         end
     end
-    if newFacialHair ~= ChatAnnouncements.currentFacialHair then
+    if newFacialHair ~= currentFacialHair then
         if newFacialHair == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentFacialHair
+            lastCollectibleUsed = currentFacialHair
         else
-            ChatAnnouncements.lastCollectibleUsed = newFacialHair
+            lastCollectibleUsed = newFacialHair
         end
     end
-    if newMajorAdorn ~= ChatAnnouncements.currentMajorAdorn then
+    if newMajorAdorn ~= currentMajorAdorn then
         if newMajorAdorn == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentMajorAdorn
+            lastCollectibleUsed = currentMajorAdorn
         else
-            ChatAnnouncements.lastCollectibleUsed = newMajorAdorn
+            lastCollectibleUsed = newMajorAdorn
         end
     end
-    if newMinorAdorn ~= ChatAnnouncements.currentMinorAdorn then
+    if newMinorAdorn ~= currentMinorAdorn then
         if newMinorAdorn == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentMinorAdorn
+            lastCollectibleUsed = currentMinorAdorn
         else
-            ChatAnnouncements.lastCollectibleUsed = newMinorAdorn
+            lastCollectibleUsed = newMinorAdorn
         end
     end
-    if newCostume ~= ChatAnnouncements.currentCostume then
+    if newCostume ~= currentCostume then
         if newCostume == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentCostume
+            lastCollectibleUsed = currentCostume
         else
-            ChatAnnouncements.lastCollectibleUsed = newCostume
+            lastCollectibleUsed = newCostume
         end
     end
-    if newBodyMarking ~= ChatAnnouncements.currentBodyMarking then
+    if newBodyMarking ~= currentBodyMarking then
         if newBodyMarking == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentBodyMarking
+            lastCollectibleUsed = currentBodyMarking
         else
-            ChatAnnouncements.lastCollectibleUsed = newBodyMarking
+            lastCollectibleUsed = newBodyMarking
         end
     end
-    if newSkin ~= ChatAnnouncements.currentSkin then
+    if newSkin ~= currentSkin then
         if newSkin == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentSkin
+            lastCollectibleUsed = currentSkin
         else
-            ChatAnnouncements.lastCollectibleUsed = newSkin
+            lastCollectibleUsed = newSkin
         end
     end
-    if newPersonality ~= ChatAnnouncements.currentPersonality then
+    if newPersonality ~= currentPersonality then
         if newPersonality == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentPersonality
+            lastCollectibleUsed = currentPersonality
         else
-            ChatAnnouncements.lastCollectibleUsed = newPersonality
+            lastCollectibleUsed = newPersonality
         end
     end
-    if newPolymorph ~= ChatAnnouncements.currentPolymorph then
+    if newPolymorph ~= currentPolymorph then
         if newPolymorph == 0 then
-            ChatAnnouncements.lastCollectibleUsed = ChatAnnouncements.currentPolymorph
+            lastCollectibleUsed = currentPolymorph
         else
-            ChatAnnouncements.lastCollectibleUsed = newPolymorph
+            lastCollectibleUsed = newPolymorph
         end
     end
 
-    ChatAnnouncements.currentAssistant = newAssistant
-    ChatAnnouncements.currentCompanion = newCompanion
-    ChatAnnouncements.currentVanity = newVanity
-    ChatAnnouncements.currentSpecial = newSpecial
-    ChatAnnouncements.currentHat = newHat
-    ChatAnnouncements.currentHair = newHair
-    ChatAnnouncements.currentHeadMark = newHeadMark
-    ChatAnnouncements.currentFacialHair = newFacialHair
-    ChatAnnouncements.currentMajorAdorn = newMajorAdorn
-    ChatAnnouncements.currentMinorAdorn = newMinorAdorn
-    ChatAnnouncements.currentCostume = newCostume
-    ChatAnnouncements.currentBodyMarking = newBodyMarking
-    ChatAnnouncements.currentSkin = newSkin
-    ChatAnnouncements.currentPersonality = newPersonality
-    ChatAnnouncements.currentPolymorph = newPolymorph
+    currentAssistant = newAssistant
+    currentCompanion = newCompanion
+    currentVanity = newVanity
+    currentSpecial = newSpecial
+    currentHat = newHat
+    currentHair = newHair
+    currentHeadMark = newHeadMark
+    currentFacialHair = newFacialHair
+    currentMajorAdorn = newMajorAdorn
+    currentMinorAdorn = newMinorAdorn
+    currentCostume = newCostume
+    currentBodyMarking = newBodyMarking
+    currentSkin = newSkin
+    currentPersonality = newPersonality
+    currentPolymorph = newPolymorph
 
     -- If neither menu option is enabled, then bail out here
     if not (ChatAnnouncements.SV.Collectibles.CollectibleUseCA or ChatAnnouncements.SV.Collectibles.CollectibleUseAlert) then
         if not LUIE.SlashCollectibleOverride then
-            ChatAnnouncements.lastCollectibleUsed = 0
+            lastCollectibleUsed = 0
             return
         end
     end
 
-    if ChatAnnouncements.lastCollectibleUsed == 0 then
+    if lastCollectibleUsed == 0 then
         LUIE.SlashCollectibleOverride = false
         return
     end
-    local collectibleType = GetCollectibleCategoryType(ChatAnnouncements.lastCollectibleUsed)
+    local collectibleType = GetCollectibleCategoryType(lastCollectibleUsed)
 
-    local message = ""
-    local alert = ""
-    local link = GetCollectibleLink(ChatAnnouncements.lastCollectibleUsed, ChatAnnouncements.linkBrackets[ChatAnnouncements.SV.BracketOptionCollectibleUse])
-    local name = GetCollectibleName(ChatAnnouncements.lastCollectibleUsed)
-    local nickname = GetCollectibleNickname(ChatAnnouncements.lastCollectibleUsed)
-    local icon = GetCollectibleIcon(ChatAnnouncements.lastCollectibleUsed)
+    local message
+    local alert
+    local link = GetCollectibleLink(lastCollectibleUsed, linkBrackets[ChatAnnouncements.SV.BracketOptionCollectibleUse])
+    local name = GetCollectibleName(lastCollectibleUsed)
+    local nickname = GetCollectibleNickname(lastCollectibleUsed)
+    local icon = GetCollectibleIcon(lastCollectibleUsed)
     local formattedIcon = ChatAnnouncements.SV.Collectibles.CollectibleUseIcon and ("|t16:16:" .. icon .. "|t ") or ""
 
     -- Vanity
@@ -7352,7 +11112,7 @@ function ChatAnnouncements.CollectibleResult()
             (collectibleType == COLLECTIBLE_CATEGORY_TYPE_SKIN) and GetString(SI_COLLECTIBLECATEGORYTYPE11) or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_PERSONALITY) and GetString(SI_COLLECTIBLECATEGORYTYPE9) or (collectibleType == COLLECTIBLE_CATEGORY_TYPE_POLYMORPH) and GetString(SI_COLLECTIBLECATEGORYTYPE12)
 
         if collectibleType == (COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE and (ChatAnnouncements.SV.Collectibles.CollectibleUseCategory12 or LUIE.SlashCollectibleOverride)) or (collectibleType ~= COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE and (ChatAnnouncements.SV.Collectibles.CollectibleUseCategory3 or LUIE.SlashCollectibleOverride)) then
-            if GetActiveCollectibleByType(GetCollectibleCategoryType(ChatAnnouncements.lastCollectibleUsed), GAMEPLAY_ACTOR_CATEGORY_PLAYER) > 0 then
+            if GetActiveCollectibleByType(GetCollectibleCategoryType(lastCollectibleUsed), GAMEPLAY_ACTOR_CATEGORY_PLAYER) > 0 then
                 message = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_USE_CATEGORY), categoryString, link, formattedIcon)
                 alert = zo_strformat(GetString(LUIE_STRING_SLASHCMDS_COLLECTIBLE_USE_CATEGORY), categoryString, name, "")
             else
@@ -7363,13 +11123,13 @@ function ChatAnnouncements.CollectibleResult()
     end
 
     if message and ChatAnnouncements.SV.Collectibles.CollectibleUseCA or LUIE.SlashCollectibleOverride then
-        message = ChatAnnouncements.Colors.CollectibleUseColorize:Colorize(message)
+        message = ColorizeColors.CollectibleUseColorize:Colorize(message)
         printToChat(message)
     end
     if alert and ChatAnnouncements.SV.Collectibles.CollectibleUseAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, alert)
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alert)
     end
 
-    ChatAnnouncements.lastCollectibleUsed = 0
+    lastCollectibleUsed = 0
     LUIE.SlashCollectibleOverride = false
 end

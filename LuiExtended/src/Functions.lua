@@ -334,6 +334,9 @@ do
             formattedMessage = messageOrFormatter or ""
         end
         CHAT_ROUTER:AddSystemMessage(formattedMessage)
+        if LUIE.IsDevDebugEnabled() then
+            LUIE:Log("Verbose", messageOrFormatter, ...)
+        end
     end
 
     LUIE.AddSystemMessage = AddSystemMessage
@@ -381,6 +384,9 @@ do
     --- @param msg string: The message to be printed.
     --- @param isSystem? boolean: If true, the message is considered a system message.
     local function PrintToChat(msg, isSystem)
+        if LUIE.IsDevDebugEnabled() then
+            LUIE:Log("Verbose", msg, isSystem)
+        end
         -- Guard clause: exit early if chat system not ready
         if not ZO_GetChatSystem().primaryContainer then
             return

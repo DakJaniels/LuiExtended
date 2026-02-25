@@ -6,65 +6,20 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
-
--- -----------------------------------------------------------------------------
--- ESO API Locals.
--- -----------------------------------------------------------------------------
-
-local GetString = GetString
-
--- -----------------------------------------------------------------------------
 -- ChatAnnouncements namespace
--- -----------------------------------------------------------------------------
---- @class (partial) ChatAnnouncements : ZO_Object
---- @field ColorizeColors ChatAnnouncements_ColorizeColors
---- @field Mail ChatAnnouncements.Mail
---- @field inMail boolean Toggled on when looting mail to prevent notable item display from hiding items acquired.
---- @field currentMailSender string Current mail sender for currency formatting (updated from queue)
-local ChatAnnouncements = ZO_Object:Subclass()
+--- @class (partial) ChatAnnouncements
+local ChatAnnouncements = {}
 
 --- @class (partial) ChatAnnouncements
 LUIE.ChatAnnouncements = ChatAnnouncements
 
-ChatAnnouncements.moduleName = LUIE.name .. "ChatAnnouncements"
-
-
---- @class QueuedMessage
---- @field message string
---- @field messageType string
---- @field isSystem? boolean
---- @field itemId? integer
---- @field formattedRecipient? string
---- @field color? any
---- @field logPrefix? string
---- @field totalString? string
---- @field groupLoot? boolean
-
 -- Queued Messages Storage for CA Modules
-ChatAnnouncements.QueuedMessages = {} --- @type table<integer,QueuedMessage>
+ChatAnnouncements.QueuedMessages = {}
 ChatAnnouncements.QueuedMessagesCounter = 1
+
 -- Setup Color Table
---- @class (partial) ChatAnnouncements_ColorizeColors
 ChatAnnouncements.Colors = {}
 
---- @class questItem
---- @field questIndex integer
---- @field questItemId integer
---- @field stackCount integer
---- @field inventory table
---- @field slotIndex integer
---- @field iconFile string
-
---- @alias questItem_itemTable { [integer] : questItem }
-
---- @alias luiequestItemIndex {
---- stack : integer,
---- counter : integer,
---- icon : string,
---- }
-
---- @type table<integer, luiequestItemIndex>
-ChatAnnouncements.questItemIndex = {}
 ------------------------------------------------
 -- DEFAULT VARIABLE SETUP ----------------------
 ------------------------------------------------
@@ -228,27 +183,6 @@ ChatAnnouncements.Defaults =
         CraftedAbilityAlert = false,
         CraftedAbilityScriptCA = true,
         CraftedAbilityScriptAlert = false,
-
-        -- Broadcasts
-        NotificationBroadcastCA = true,
-        NotificationBroadcastCSA = true,
-        NotificationBroadcastAlert = false,
-
-        -- ESO Plus
-        NotificationESOPlusCA = true,
-        NotificationESOPlusCSA = true,
-        NotificationESOPlusAlert = false,
-
-        -- Outfit
-        NotificationOutfitCA = true,
-        NotificationOutfitCSA = true,
-        NotificationOutfitAlert = false,
-
-        -- Daily Rewards
-        NotificationDailyRewardCA = true,
-        NotificationDailyRewardCSA = true,
-        NotificationDailyRewardAlert = false,
-        NotificationDailyRewardIcon = true,
     },
 
     -- Collectibles
@@ -309,13 +243,6 @@ ChatAnnouncements.Defaults =
         AntiquitySuffix = "",
         AntiquityColor = { 0.75, 0.75, 0.75, 1 },
         AntiquityIcon = true,
-
-        AntiquityDiggingCA = true,
-        AntiquityDiggingCSA = true,
-        AntiquityDiggingAlert = false,
-        AntiquityScryingCA = true,
-        AntiquityScryingCSA = true,
-        AntiquityScryingAlert = false,
     },
 
     -- Quest
@@ -357,10 +284,6 @@ ChatAnnouncements.Defaults =
         QuestObjUpdateCA = false,
         QuestObjUpdateCSA = true,
         QuestObjUpdateAlert = false,
-
-        QuestEndeavorCA = true,
-        QuestEndeavorCSA = true,
-        QuestEndeavorAlert = false,
     },
 
     -- Experience
@@ -410,14 +333,6 @@ ChatAnnouncements.Defaults =
         SkillAbilityAlert = false,
         SkillLineIcon = true,
         SkillLineColor = { 0.75, 0.75, 0.75, 1 },
-
-        SkillLevelCA = true,
-        SkillLevelCSA = true,
-        SkillLevelAlert = false,
-        SkillIcon = true,
-        SkillPointsCA = true,
-        SkillPointsCSA = true,
-        SkillPointsAlert = false,
 
         SkillGuildFighters = true,
         SkillGuildMages = true,
@@ -525,7 +440,6 @@ ChatAnnouncements.Defaults =
     {
         Loot = true,
         LootLogOverride = false,
-        -- LootIgnoreFiltering = false,
         LootBank = true,
         LootBlacklist = false,
         LootTotal = false,
@@ -567,10 +481,6 @@ ChatAnnouncements.Defaults =
         LootRecipeHideAlert = true,
         LootQuestAdd = true,
         LootQuestRemove = false,
-
-        LootCraftedSetCA = true,
-        LootCraftedSetCSA = true,
-        LootCraftedSetAlert = false,
     },
 
     ContextMessages =
@@ -666,34 +576,6 @@ ChatAnnouncements.Defaults =
         CurrencyMessageDisguiseDestroy = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_DISGUISE_DESTROY),
     },
 
-    -- Miscellaneous
-    Misc =
-    {
-        -- Tales of Tribute
-        MiscTributeCA = true,
-        MiscTributeCSA = true,
-        MiscTributeAlert = false,
-    },
-
-    -- PvP
-    PVP =
-    {
-        -- AvA
-        PVPAvACA = true,
-        PVPAvACSA = true,
-        PVPAvAAlert = false,
-
-        -- Kills
-        PVPKillCA = true,
-        PVPKillCSA = true,
-        PVPKillAlert = false,
-
-        -- Battlegrounds
-        PVPBattlegroundCA = true,
-        PVPBattlegroundCSA = true,
-        PVPBattlegroundAlert = false,
-    },
-
     DisplayAnnouncements =
     {
         Debug = false, -- Display EVENT_DISPLAY_ANNOUNCEMENT debug messages
@@ -747,258 +629,4 @@ ChatAnnouncements.Defaults =
             Alert = false,
         },
     },
-}
-
-------------------------------------------------
--- LOCAL (GLOBAL) VARIABLE SETUP ---------------
-------------------------------------------------
-
-ChatAnnouncements.isWritCreatorEnabled = LUIE.OtherAddonCompatability.isWritCreatorEnabled or false
-
--- Loot/Currency
-ChatAnnouncements.savedPurchase = {}
-ChatAnnouncements.savedLaunder = {}
-ChatAnnouncements.savedItem = {}
-ChatAnnouncements.isLooted = false                   -- Toggled on to modify loot notification to "looted."
-ChatAnnouncements.isPickpocketed = false             -- Toggled on to modify loot notification to "pickpocketed."
-ChatAnnouncements.isStolen = false                   -- Toggled on to modify loot notification to "stolen."
-ChatAnnouncements.containerRecentlyOpened = false    -- Toggled on when a container has been recently opened.
-ChatAnnouncements.itemReceivedIsQuestReward = false  -- Toggled on to modify loot notification to "received." This overrides the "looted" tag applied to quest item rewards.
-ChatAnnouncements.itemReceivedIsQuestAbandon = false -- Toggled on to modify remove notification to "removed" when a quest is abandoned.
-ChatAnnouncements.itemsConfiscated = false           -- Toggled on when items are confiscated to modify the notification message.
-ChatAnnouncements.weAreInAStore = false              -- Toggled on when the player opens a store.
-ChatAnnouncements.weAreInAFence = false              -- Toggled on when the player opens a fence.
-ChatAnnouncements.weAreInAGuildStore = false         -- Toggled on when the player opens a guild store.
-ChatAnnouncements.itemWasDestroyed = false           -- Tracker for item being destroyed
-ChatAnnouncements.packSiege = false                  -- Tracker for siege packed
-ChatAnnouncements.lockpickBroken = false             -- Tracker for lockpick being broken
-ChatAnnouncements.groupLootIndex = {}                -- Table to hold group member names for group loot display.
-ChatAnnouncements.stackSplit = false                 -- Determines if we just split an inventory item stack
-ChatAnnouncements.combinedRecipe = false             -- Determines if we just used an item that combines a recipe to stop the "learned" message from showing.
-ChatAnnouncements.InventoryOn = false                -- Determines if Inventory Updates for Item Changes are on
-ChatAnnouncements.bankOn = false                     -- Determines if Bank Updates for Item Changes are on
-
--- Currency Throttle
-ChatAnnouncements.currencyGoldThrottleValue = 0 -- Held value for gold throttle (counter)
-ChatAnnouncements.currencyGoldThrottleTotal = 0 -- Held value for gold throttle (total gold)
-ChatAnnouncements.currencyAPThrottleValue = 0   -- Held value for AP throttle (counter)
-ChatAnnouncements.currencyAPThrottleTotal = 0   -- Held value for AP throttle (total gold)
-ChatAnnouncements.currencyTVThrottleValue = 0   -- Held value for TV throttle (counter)
-ChatAnnouncements.currencyTVThrottleTotal = 0   -- Held value for TV throttle (total gold)
-
--- Loot (Crafting)
-ChatAnnouncements.smithing = {}   -- Table for smithing mode
-ChatAnnouncements.enchanting = {} -- Table for enchanting mode
-ChatAnnouncements.enchant_prefix_pos = {}
-ChatAnnouncements.enchant_prefix_neg = {}
-ChatAnnouncements.smithing_prefix_pos = {}
-ChatAnnouncements.smithing_prefix_neg = {}
-ChatAnnouncements.itemCounterGain = 0        -- Counter value for items created via crafting
-ChatAnnouncements.itemCounterGainTracker = 0 -- Tracker for how many items have been counted, when we reach a certain threshold, it is too many items to display so we cut the string off.
-ChatAnnouncements.itemStringGain = ""        -- Counter value for items created via crafting
-ChatAnnouncements.itemCounterLoss = 0        -- Counter value for items removed via crafting
-ChatAnnouncements.itemCounterLossTracker = 0 -- Tracker for how many items have been counted, when we reach a certain threshold, it is too many items to display so we cut the string off.
-ChatAnnouncements.itemStringLoss = ""        -- Combined string variable for items removed via crafting
-ChatAnnouncements.oldItem = {}               -- Saved old item for crafting upgrades
-
--- Mail (state moved to ChatAnnouncements.Mail module)
-ChatAnnouncements.inMail = false         -- Toggled on when looting mail to prevent notable item display from hiding items acquired.
-ChatAnnouncements.currentMailSender = "" -- Current mail sender for currency formatting (updated from queue)
-
--- Disguise
-ChatAnnouncements.currentDisguise = nil -- Holds current disguise itemId
-ChatAnnouncements.disguiseState = nil   -- Holds current disguise state
-
--- Indexing
-ChatAnnouncements.bankBag = nil
-ChatAnnouncements.bankStacks = {}           -- Bank Inventory Index
-ChatAnnouncements.bankSubscriberStacks = {} -- Subscriber Bank Inventory Index
-ChatAnnouncements.houseBags = {}            -- House Storage Index
-ChatAnnouncements.equippedStacks = {}       -- Equipped Items Index
-ChatAnnouncements.inventoryStacks = {}      -- Inventory Index
-ChatAnnouncements.JusticeStacks = {}        -- Justice Items Index (only filled as a comparison table when items are confiscated)
-ChatAnnouncements.guildBankCarry = nil      -- Saves item data when an item is removed/deposited into the guild bank.
-
--- Group
-ChatAnnouncements.currentGroupLeaderRawName = nil     -- Tracks current Group Leader Name
-ChatAnnouncements.currentGroupLeaderDisplayName = nil -- Tracks current Group Leader Display Name
-
--- LFG
-ChatAnnouncements.currentActivityId = nil       -- current activity ID for LFG.
-ChatAnnouncements.stopGroupLeaveQueue = false   -- Stops group notification messages from printing for a short time an LFG group is formed - Called when a ready check has the possible result of success.
-ChatAnnouncements.lfgDisableGroupEvents = false -- Stops group notification messages from printing for a short time an LFG group is formed - Called when successfully joining a new LFG activity.
-ChatAnnouncements.joinLFGOverride = false       -- Toggled on to stop display of standard group join message when joining an LFG group. Instead an alternate message with the LFG activity name will display.
-ChatAnnouncements.leaveLFGOverride = false      -- Toggled on to modify group leave message to display "You are no longer in an LFG group."
-ChatAnnouncements.showActivityStatus = true     -- Variable to control display of LFG status
-ChatAnnouncements.lfgHideStatusCancel = false   -- Hide the cancel message that can be triggered by someone dropping queue while in an existing group.
-ChatAnnouncements.showRCUpdates = true          -- Variable to control display of LFG Ready Check Announcements
-ChatAnnouncements.weDeclinedTheQueue = false    -- Flagged when we decline a ready check popup for LFG queue.
-ChatAnnouncements.savedQueueValue = 0           -- Saved LFG queue status
-ChatAnnouncements.rcSpamPrevention = false      -- Stops LFG failed ready checks from spamming the player
-
--- Guild
-ChatAnnouncements.selectedGuild = 1          -- Set selected guild to 1 by default, whenever the player reloads their first guild will always be selected
--- ChatAnnouncements.pendingHeraldryCost         = 0             -- Pending cost of heraldry change used to modify currency messages. TODO: Fix later
-ChatAnnouncements.disableRankMessage = false -- Variable is toggled to true when the player modifies a guild member's rank, this prevents the normal rank change message from displaying.
-
--- Achievements
-ChatAnnouncements.achievementLastPercentage = {} -- Here we will store last displayed percentage for achievement
-
--- Collectible Usage Tracking
-ChatAnnouncements.currentAssistant = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.currentCompanion = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_COMPANION, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.currentVanity = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_VANITY_PET, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.currentSpecial = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.currentHat = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_HAT, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.currentHair = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_HAIR, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.currentHeadMark = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_HEAD_MARKING, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.currentFacialHair = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_FACIAL_HAIR_HORNS, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.currentMajorAdorn = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_FACIAL_ACCESSORY, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.currentMinorAdorn = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_PIERCING_JEWELRY, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.currentCostume = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_COSTUME, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.currentBodyMarking = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_BODY_MARKING, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.currentSkin = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_SKIN, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.currentPersonality = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_PERSONALITY, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.currentPolymorph = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_POLYMORPH, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-ChatAnnouncements.lastCollectibleUsed = 0
-
--- Quest
-ChatAnnouncements.stopDisplaySpam = false   -- Toggled on to stop spam display of EVENT_DISPLAY_ANNOUNCEMENTS from IC zone transitions.
-ChatAnnouncements.questIndex = {}           -- Index of all current quests. Allows us to read the index so that all quest notifications can use the difficulty icon.
-ChatAnnouncements.questItemAdded = {}       -- Hold index of Quest items that are added - Prevents pointless and annoying messages from appearing when the same quest item is immediately added and removed when quest updates.
-ChatAnnouncements.questItemRemoved = {}     -- Hold index of Quest items that are removed - Prevents pointless and annoying messages from appearing when the same quest item is immediately added and removed when quest updates.
-ChatAnnouncements.loginHideQuestLoot = true -- Set to true onPlayerActivated and toggled after 3 sec
-ChatAnnouncements.talkingToNPC = false      -- Toggled when we're in dialogue with an NPC (EVENT_CHATTER_BEGIN & EVENT_CHATTER_END)
-
--- Trade
-ChatAnnouncements.tradeTarget = ""    -- Saves name of target player being traded with.
-ChatAnnouncements.tradeStacksIn = {}  -- Table for storing items to be traded in.
-ChatAnnouncements.tradeStacksOut = {} -- Table for storing items to be traded out.
-ChatAnnouncements.inTrade = false     -- Toggled on when in a trade.
-
--- Antiquities
-ChatAnnouncements.weAreInADig = false -- When in a digsite.
-
--- Experience
-ChatAnnouncements.xpCombatBufferValue = 0      -- Buffered XP Value
-ChatAnnouncements.guildSkillThrottle = 0       -- Buffered Fighter's Guild Reputation Value
-ChatAnnouncements.guildSkillThrottleLine = nil -- Grab the name for Fighter's Guild reputation (since index isn't always the same) to pass over to Buffered Printer Function
-
-------------------------------------------------
--- BRACKET OPTIONS -----------------------------
-------------------------------------------------
-
--- 5 Option Bracket (1)
-ChatAnnouncements.bracket1 =
-{
-    [1] = "[",
-    [2] = "(",
-    [3] = "",
-    [4] = "",
-    [5] = "",
-}
-
--- 5 Option Bracket (2)
-ChatAnnouncements.bracket2 =
-{
-    [1] = "]",
-    [2] = ")",
-    [3] = " -",
-    [4] = ":",
-    [5] = "",
-}
-
--- 4 Option Bracket (1)
-ChatAnnouncements.bracket3 =
-{
-    [1] = "[",
-    [2] = "(",
-    [3] = "- ",
-    [4] = "",
-}
-
--- 4 Option Bracket (2)
-ChatAnnouncements.bracket4 =
-{
-    [1] = "]",
-    [2] = ")",
-    [3] = "",
-    [4] = "",
-}
-
-------------------------------------------------
--- LINK BRACKET OPTIONS ------------------------
-------------------------------------------------
-
-ChatAnnouncements.linkBrackets =
-{
-    [1] = LINK_STYLE_DEFAULT,
-    [2] = LINK_STYLE_BRACKETS,
-}
-
-ChatAnnouncements.linkBracket1 =
-{
-    [1] = "",
-    [2] = "[",
-}
-
-ChatAnnouncements.linkBracket2 =
-{
-    [1] = "",
-    [2] = "]",
-}
-
-------------------------------------------------
--- ITEM BLACKLIST ------------------------------
-------------------------------------------------
-
--- List of items to whitelist as notable loot
-ChatAnnouncements.notableIDs =
-{
-    [56862] = true, -- Fortified Nirncrux
-    [56863] = true, -- Potent Nirncrux
-    [68342] = true, -- Hakeijo
-}
-
--- List of items that can be removed from the players equipped item slots.
-ChatAnnouncements.removableIDs =
-{
-    [44486] = true, -- Prismatic Blade (Fighters Guild Quests)
-    [44487] = true, -- Prismatic Greatblade (Fighters Guild Quests)
-    [44488] = true, -- Prismatic Long Bow (Fighters Guild Quests)
-    [44489] = true, -- Prismatic Flamestaff (Fighters Guild Quests)
-    [33235] = true, -- Wabbajack (Mages Guild Quests)
-}
-
--- List of items to blacklist as annoying loot
-ChatAnnouncements.blacklistIDs =
-{
-    -- General
-    [64713] = true, -- Laurel
-    [64690] = true, -- Malachite Shard
-    [69432] = true, -- Glass Style Motif Fragment
-
-    -- Trial Plunder
-    [114427] = true, -- Undaunted Plunder
-    [81180] = true,  -- The Serpent's Egg-Tooth
-    [74453] = true,  -- The Rid-Thar's Moon Pearls
-    [87701] = true,  -- Star-Studded Champion's Baldric
-    [87700] = true,  -- Periapt of Elinhir
-
-    -- Trial Weekly Coffers
-    [139664] = true, -- Mage's Ignorant Coffer
-    [139674] = true, -- Saint's Beatified Coffer
-    [139670] = true, -- Dro-m'Athra's Burnished Coffer
-    [138711] = true, -- Welkynar's Grounded Coffer
-
-    -- Transmutation Geodes
-    [134583] = true, -- Transmutation Geode
-    [134588] = true, -- Transmutation Geode
-    [134590] = true, -- Transmutation Geode
-    [134591] = true, -- Transmutation Geode
-    [134595] = true, -- Tester's Infinite Transmutation Geode
-    [134618] = true, -- Uncracked Transmutation Geode
-    [134622] = true, -- Uncracked Transmutation Geode
-    [134623] = true, -- Uncracked Transmutation Geode
-    [140222] = true, -- 200 Transmute Crystals (This is probably just a test item)
 }

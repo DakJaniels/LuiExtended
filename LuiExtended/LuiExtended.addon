@@ -69,12 +69,8 @@ pc/Unlock.lua
 console/Unlock.lua
 
 # Modules - Chat Announcements
-modules/ChatAnnouncements/_Namespace.lua
-modules/ChatAnnouncements/_PrintQueuedMessages.lua
-modules/ChatAnnouncements/_HookFunction.lua
-modules/ChatAnnouncements/_PlayerToPlayerHook.lua
-modules/ChatAnnouncements/_Mail.lua
-modules/ChatAnnouncements/_Experience.lua
+modules/ChatAnnouncements/ChatAnnouncementsConstants.lua
+modules/ChatAnnouncements/ChatAnnouncementsExperience.lua
 modules/ChatAnnouncements/ChatAnnouncements.lua
 
 # Modules - Combat Text
