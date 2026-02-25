@@ -6,11 +6,8 @@
 --- @class LuiExtended
 local LUIE = LUIE
 
---- @class (partial) LuiExtended.CombatTextCombatEventListener : LuiExtended.CombatTextEventListener
+--- @class (partial) CombatTextCombatEventListener : LuiExtended.CombatTextEventListener
 local CombatTextCombatEventListener = LUIE.CombatTextEventListener:Subclass()
-
---- @class (partial) LuiExtended.CombatTextCombatEventListener
-LUIE.CombatTextCombatEventListener = CombatTextCombatEventListener
 
 local Effects = LuiData.Data.Effects
 local CombatTextConstants = LuiData.Data.CombatTextConstants
@@ -488,3 +485,6 @@ function CombatTextCombatEventListener:CombatState(inCombat)
     end
     -- else: State hasn't changed (duplicate event or already in correct state) - do nothing
 end
+
+--- @class (partial) LuiExtended.CombatTextCombatEventListener : CombatTextCombatEventListener
+LUIE.CombatTextCombatEventListener = CombatTextCombatEventListener:Subclass()

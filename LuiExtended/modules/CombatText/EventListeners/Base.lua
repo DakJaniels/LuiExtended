@@ -6,11 +6,9 @@
 --- @class LuiExtended
 local LUIE = LUIE
 
---- @class (partial) LuiExtended.CombatTextEventListener : ZO_InitializingCallbackObject
+--- @class (partial) CombatTextEventListener : ZO_InitializingCallbackObject
 local CombatTextEventListener = ZO_InitializingCallbackObject:Subclass()
 
---- @class (partial) LuiExtended.CombatTextEventListener
-LUIE.CombatTextEventListener = CombatTextEventListener
 
 local eventManager = EVENT_MANAGER
 
@@ -21,7 +19,7 @@ local eventPostfix = 1 -- Used to create unique name when registering multiple t
 
 --- Initialize event listener with callback support<br>
 --- ZO_InitializingCallbackObject automatically handles callback registry setup
-function CombatTextEventListener:Initialize()
+function CombatTextEventListener:Initialize(...)
     -- Base class initialization (no need to manually call ZO_CallbackObject.Initialize)
 end
 
@@ -57,3 +55,6 @@ end
 function CombatTextEventListener:TriggerEvent(...)
     self:FireCallbacks(...)
 end
+
+--- @class (partial) LuiExtended.CombatTextEventListener : CombatTextEventListener
+LUIE.CombatTextEventListener = CombatTextEventListener:Subclass()

@@ -311,6 +311,18 @@ function CombatText.Initialize(enabled)
     CombatText.resourceEventViewer = LUIE.CombatTextResourceEventViewer:New(CombatText.poolManager, CombatText.resourcesPowerListener)
     CombatText.deathEventViewer = LUIE.CombatTextDeathViewer:New(CombatText.poolManager, CombatText.deathListener)
 
+    -- Wire combat state (IN_COMBAT/OUT_COMBAT) into point viewer (fired by combatEventListener)
+    CombatText.combatEventListener:RegisterCallback(CombatTextConstants.eventType.POINT, function (...)
+        CombatText.pointEventViewer:OnEvent(...)
+    end)
+    -- Wire ultimate/potion ready into resource viewer (fired by resourcesUltimateListener, resourcesPotionListener)
+    CombatText.resourcesUltimateListener:RegisterCallback(CombatTextConstants.eventType.RESOURCE, function (...)
+        CombatText.resourceEventViewer:OnEvent(...)
+    end)
+    CombatText.resourcesPotionListener:RegisterCallback(CombatTextConstants.eventType.RESOURCE, function (...)
+        CombatText.resourceEventViewer:OnEvent(...)
+    end)
+
     -- Variable adjustment if needed
     if not LUIESV.Default[GetDisplayName()]["$AccountWide"].AdjustVarsCT then
         LUIESV.Default[GetDisplayName()]["$AccountWide"].AdjustVarsCT = 0
