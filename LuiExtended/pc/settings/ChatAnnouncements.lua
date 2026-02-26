@@ -572,7 +572,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.Currency.CurrencyAPShowChange and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.TotalCurrencyAPName,
+                default = Defaults.Currency.CurrencyAPName,
             },
             {
                 -- Show Alliance Points Total
@@ -4142,7 +4142,7 @@ function ChatAnnouncements.CreateSettings()
                 disabled = function ()
                     return not (Settings.XP.ExperienceLevelUpCA or Settings.XP.ExperienceLevelUpCSA or Settings.XP.ExperienceLevelUpAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.XP.ExperienceExperienceLevelUpIcon,
+                default = Defaults.XP.ExperienceLevelUpIcon,
             },
             {
                 -- Experience Level Up Color
@@ -4708,7 +4708,7 @@ function ChatAnnouncements.CreateSettings()
                 end,
                 width = "full",
                 disabled = function ()
-                    return not (Settings.Skills.SkillLineUnlockCA or Settings.Skills.SkillLineUnlockCSA or Settings.Skills.SkillLineUnlockAlert or Settings.Skills.SkillLineAlertCA or Settings.Skills.SkillLineAlertCSA or Settings.Skills.SkillLineAlertAlert or Settings.Skills.SkillAbilityCA or Settings.Skills.SkillAbilityCSA or Settings.Skills.SkillAbilityAlert and LUIE.SV.ChatAnnouncements_Enable)
+                    return not (Settings.Skills.SkillLineUnlockCA or Settings.Skills.SkillLineUnlockCSA or Settings.Skills.SkillLineUnlockAlert or Settings.Skills.SkillLineCA or Settings.Skills.SkillLineCSA or Settings.Skills.SkillLineAlert or Settings.Skills.SkillAbilityCA or Settings.Skills.SkillAbilityCSA or Settings.Skills.SkillAbilityAlert and LUIE.SV.ChatAnnouncements_Enable)
                 end,
                 default =
                 {

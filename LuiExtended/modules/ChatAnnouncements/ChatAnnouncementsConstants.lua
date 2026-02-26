@@ -14,8 +14,19 @@ local ChatAnnouncements = {}
 --- @class (partial) ChatAnnouncements
 LUIE.ChatAnnouncements = ChatAnnouncements
 
+--- @class QueuedMessage
+--- @field message string
+--- @field type string
+--- @field isSystem? boolean
+--- @field itemId? integer
+--- @field formattedRecipient? string
+--- @field color? any
+--- @field logPrefix? string
+--- @field totalString? string
+--- @field groupLoot? boolean
+
 -- Queued Messages Storage for CA Modules
-ChatAnnouncements.QueuedMessages = {}
+ChatAnnouncements.QueuedMessages = {} --- @type table<integer,QueuedMessage>
 ChatAnnouncements.QueuedMessagesCounter = 1
 
 -- Setup Color Table
@@ -46,7 +57,7 @@ ChatAnnouncements.Colors = {}
 
 --- Achievement default settings.
 --- @class CAAchievementDefaults
---- @field AchievementCategoryIgnore integer[] Inverted list of achievements to be tracked
+--- @field AchievementCategoryIgnore table<integer, boolean> Inverted list of achievements to be tracked
 --- @field AchievementProgressMsg string
 --- @field AchievementCompleteMsg string
 --- @field AchievementColorProgress boolean
