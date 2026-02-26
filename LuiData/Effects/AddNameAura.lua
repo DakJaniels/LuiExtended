@@ -14,7 +14,7 @@ local UnitNames = Data.UnitNames
 --------------------------------------------------------------------------------------------------------------------------------
 -- When a target name matches a string here, add id's in the table with the name and icon specified. We use this primarily to add CC Immunity buffs for bosses.
 --------------------------------------------------------------------------------------------------------------------------------
-
+---@class AddNameAura
 local addNameAura =
 {
 

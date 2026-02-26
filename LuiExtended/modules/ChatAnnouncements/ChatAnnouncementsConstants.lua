@@ -477,6 +477,7 @@ ChatAnnouncements.Colors = {}
 --- @field CurrencyMessageConfiscate string
 --- @field CurrencyMessageDeposit string
 --- @field CurrencyMessageDepositStorage string
+--- @field CurrencyMessageDepositFurnitureVault string
 --- @field CurrencyMessageDepositGuild string
 --- @field CurrencyMessageEarn string
 --- @field CurrencyMessageLoot string
@@ -510,6 +511,7 @@ ChatAnnouncements.Colors = {}
 --- @field CurrencyMessagePostage string
 --- @field CurrencyMessageWithdraw string
 --- @field CurrencyMessageWithdrawStorage string
+--- @field CurrencyMessageWithdrawFurnitureVault string
 --- @field CurrencyMessageWithdrawGuild string
 --- @field CurrencyMessageStable string
 --- @field CurrencyMessageStorage string
@@ -1093,6 +1095,7 @@ ChatAnnouncements.Defaults =
         CurrencyMessageConfiscate = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_CONFISCATE),
         CurrencyMessageDeposit = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_DEPOSIT),
         CurrencyMessageDepositStorage = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_DEPOSITSTORAGE),
+        CurrencyMessageDepositFurnitureVault = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_DEPOSIT_FURNITURE_VAULT),
         CurrencyMessageDepositGuild = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_DEPOSITGUILD),
         CurrencyMessageEarn = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_EARN),
         CurrencyMessageLoot = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_LOOT),
@@ -1126,6 +1129,7 @@ ChatAnnouncements.Defaults =
         CurrencyMessagePostage = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_POSTAGE),
         CurrencyMessageWithdraw = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_WITHDRAW),
         CurrencyMessageWithdrawStorage = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_WITHDRAWSTORAGE),
+        CurrencyMessageWithdrawFurnitureVault = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_WITHDRAW_FURNITURE_VAULT),
         CurrencyMessageWithdrawGuild = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_WITHDRAWGUILD),
         CurrencyMessageStable = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_STABLE),
         CurrencyMessageStorage = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_STORAGE),

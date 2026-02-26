@@ -220,5 +220,3 @@ end
 
 --- @class LUIE.GridOverlayManager
 LUIE.GridOverlay = GridOverlayManager
-
-return GridOverlayManager

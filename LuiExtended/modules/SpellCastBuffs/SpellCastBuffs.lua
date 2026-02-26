@@ -442,8 +442,12 @@ function SpellCastBuffs.Initialize(enabled)
     eventManager:AddFilterForEvent(moduleName .. "Reticleover", EVENT_DISGUISE_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     -- Artificial Effects Handling
-    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_ADDED, SpellCastBuffs.ArtificialEffectUpdate)
-    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_REMOVED, SpellCastBuffs.ArtificialEffectUpdate)
+    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_ADDED, function (_, artificialEffectId)
+        SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
+    end)
+    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_REMOVED, function (_, artificialEffectId)
+        SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
+    end)
 
     -- Activate/Deactivate Player, Player Dead/Alive, Vibration, and Unit Death
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, SpellCastBuffs.OnPlayerActivated)
@@ -1686,9 +1690,8 @@ end
 
 -- Runs on the EVENT_ARTIFICIAL_EFFECT_ADDED / EVENT_ARTIFICIAL_EFFECT_REMOVED listener.
 -- This handler fires whenever an ArtificialEffectId is added or removed
---- @param eventId integer
---- @param artificialEffectId integer|nil
-function SpellCastBuffs.ArtificialEffectUpdate(eventId, artificialEffectId)
+--- @param artificialEffectId integer
+function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
     if SpellCastBuffs.SV.HidePlayerBuffs then
         return
     end

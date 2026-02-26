@@ -3394,6 +3394,40 @@ function ChatAnnouncements.CreateSettings()
                 default = Defaults.ContextMessages.CurrencyMessageWithdrawStorage,
             },
             {
+                -- Loot Message (Furnishing Vault Deposit)
+                type = "editbox",
+                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPOSIT_FURNITURE_VAULT),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPOSIT_FURNITURE_VAULT_TP),
+                getFunc = function ()
+                    return Settings.ContextMessages.CurrencyMessageDepositFurnitureVault
+                end,
+                setFunc = function (value)
+                    Settings.ContextMessages.CurrencyMessageDepositFurnitureVault = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.ContextMessages.CurrencyMessageDepositFurnitureVault,
+            },
+            {
+                -- Loot Message (Furnishing Vault Withdraw)
+                type = "editbox",
+                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WITHDRAW_FURNITURE_VAULT),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WITHDRAW_FURNITURE_VAULT_TP),
+                getFunc = function ()
+                    return Settings.ContextMessages.CurrencyMessageWithdrawFurnitureVault
+                end,
+                setFunc = function (value)
+                    Settings.ContextMessages.CurrencyMessageWithdrawFurnitureVault = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.ContextMessages.CurrencyMessageWithdrawFurnitureVault,
+            },
+            {
                 -- Lost Message
                 type = "editbox",
                 name = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LOST),

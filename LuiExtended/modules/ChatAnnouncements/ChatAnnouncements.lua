@@ -97,13 +97,15 @@ local g_disguiseState = nil   -- Holds current disguise state
 
 -- Indexing
 local g_bankBag
-local g_bankStacks = {}      -- Bank Inventory Index
-local g_banksubStacks = {}   -- Subscriber Bank Inventory Index
-local g_houseBags = {}       -- House Storage Index
-local g_equippedStacks = {}  -- Equipped Items Index
-local g_inventoryStacks = {} -- Inventory Index
-local g_JusticeStacks = {}   -- Justice Items Index (only filled as a comparison table when items are confiscated)
-local g_guildBankCarry = nil -- Saves item data when an item is removed/deposited into the guild bank.
+local g_currentBankBagId          -- actual bag id of current bank tab (BAG_BANK, BAG_FURNITURE_VAULT, house bank, etc.)
+local g_bankStacks = {}           -- Bank Inventory Index
+local g_banksubStacks = {}        -- Subscriber Bank Inventory Index
+local g_houseBags = {}            -- House Storage Index
+local g_furnitureVaultStacks = {} -- Furnishing Vault (BAG_FURNITURE_VAULT) index
+local g_equippedStacks = {}       -- Equipped Items Index
+local g_inventoryStacks = {}      -- Inventory Index
+local g_JusticeStacks = {}        -- Justice Items Index (only filled as a comparison table when items are confiscated)
+local g_guildBankCarry = nil      -- Saves item data when an item is removed/deposited into the guild bank.
 
 -- Group
 local g_currentGroupLeaderRawName = nil     -- Tracks current Group Leader Name
@@ -606,6 +608,7 @@ function ChatAnnouncements.RegisterLootEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_CLOSE_GUILD_BANK)
     eventManager:UnregisterForEvent(moduleName, EVENT_GUILD_BANK_ITEM_ADDED)
     eventManager:UnregisterForEvent(moduleName, EVENT_GUILD_BANK_ITEM_REMOVED)
+    eventManager:UnregisterForEvent(moduleName, EVENT_FURNITURE_ITEMS_TRANSFERRED_TO_FURNITURE_VAULT)
     -- CRAFT
     eventManager:UnregisterForEvent(moduleName, EVENT_CRAFTING_STATION_INTERACT)
     eventManager:UnregisterForEvent(moduleName, EVENT_END_CRAFTING_STATION_INTERACT)
@@ -664,6 +667,7 @@ function ChatAnnouncements.RegisterLootEvents()
         eventManager:RegisterForEvent(moduleName, EVENT_CLOSE_BANK, ChatAnnouncements.BankClose)
         eventManager:RegisterForEvent(moduleName, EVENT_OPEN_GUILD_BANK, ChatAnnouncements.GuildBankOpen)
         eventManager:RegisterForEvent(moduleName, EVENT_CLOSE_GUILD_BANK, ChatAnnouncements.GuildBankClose)
+        eventManager:RegisterForEvent(moduleName, EVENT_FURNITURE_ITEMS_TRANSFERRED_TO_FURNITURE_VAULT, ChatAnnouncements.OnFurnitureItemsTransferredToVault)
     end
     if ChatAnnouncements.SV.Inventory.LootTrade then
         eventManager:RegisterForEvent(moduleName, EVENT_TRADE_ITEM_ADDED, ChatAnnouncements.OnTradeAdded)
@@ -1635,8 +1639,8 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         [CURT_STYLE_STONES]           = { "CurrencyOutfitTokenChange", "CurrencyOutfitTokenColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_STYLE_STONES), "CurrencyOutfitTokenName", "CurrencyOutfitTokenShowTotal", "CurrencyMessageTotalOutfitToken" },
         [CURT_TRANSMUTE_CRYSTALS]     = { "CurrencyTransmuteChange", "CurrencyTransmuteColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TRANSMUTE_CRYSTALS), "CurrencyTransmuteName", "CurrencyTransmuteShowTotal", "CurrencyMessageTotalTransmute" },
         [CURT_UNDAUNTED_KEYS]         = { "CurrencyUndauntedChange", "CurrencyUndauntedColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_UNDAUNTED_KEYS), "CurrencyUndauntedName", "CurrencyUndauntedShowTotal", "CurrencyMessageTotalUndaunted" },
-        [CURT_CROWNS]                 = { "CurrencyCrownsChange", "CurrencyCrownsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_CROWNS), "CurrencyCrownsName", "CurrencyCrownsShowTotal", "CurrencyMessageTotalCrowns" },
-        [CURT_CROWN_GEMS]             = { "CurrencyCrownGemsChange", "CurrencyCrownGemsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_CROWN_GEMS), "CurrencyCrownGemsName", "CurrencyCrownGemsShowTotal", "CurrencyMessageTotalCrownGems" },
+        [CURT_CROWNS]                 = { "CurrencyCrownsChange", "CurrencyCrownsColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWNS), "CurrencyCrownsName", "CurrencyCrownsShowTotal", "CurrencyMessageTotalCrowns" },
+        [CURT_CROWN_GEMS]             = { "CurrencyCrownGemsChange", "CurrencyCrownGemsColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS), "CurrencyCrownGemsName", "CurrencyCrownGemsShowTotal", "CurrencyMessageTotalCrownGems" },
         [CURT_ENDLESS_DUNGEON]        = { "CurrencyEndlessChange", "CurrencyEndlessColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_ENDLESS_DUNGEON), "CurrencyEndlessName", "CurrencyEndlessShowTotal", "CurrencyMessageTotalEndless" },
         [CURT_SEALS]                  = { "CurrencySealsChange", "CurrencySealsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_SEALS), "CurrencySealsName", "CurrencySealsShowTotal", "CurrencyMessageTotalSeals" },
         [CURT_TRADE_BARS]             = { "CurrencyTradeBarsChange", "CurrencyTradeBarsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TRADE_BARS), "CurrencyTradeBarsName", "CurrencyTradeBarsShowTotal", "CurrencyMessageTotalTradeBars" },
@@ -3023,6 +3027,21 @@ function ChatAnnouncements.LogGuildBankChange()
     g_guildBankCarry = nil
 end
 
+function ChatAnnouncements.OnFurnitureItemsTransferredToVault(eventId, numEligibleSlotsTransferred, numEligibleSlots)
+    if not ChatAnnouncements.SV.Inventory.LootBank or numEligibleSlotsTransferred == 0 then
+        return
+    end
+    local msg
+    if numEligibleSlotsTransferred == numEligibleSlots then
+        msg = zo_strformat(GetString(SI_FURNITURE_VAULT_STOWED_ALL_ITEMS), numEligibleSlotsTransferred)
+    else
+        msg = zo_strformat(GetString(SI_FURNITURE_VAULT_STOWED_ITEMS), numEligibleSlotsTransferred, numEligibleSlots)
+    end
+    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] = { message = msg, type = "MESSAGE" }
+    ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+end
+
 function ChatAnnouncements.IndexInventory()
     -- d("Debug - Inventory Indexed!")
     local bagsize = GetBagSize(BAG_BACKPACK)
@@ -3114,6 +3133,25 @@ function ChatAnnouncements.IndexHouseBags()
     end
 end
 
+function ChatAnnouncements.IndexFurnitureVault()
+    if not BAG_FURNITURE_VAULT then
+        return
+    end
+    g_furnitureVaultStacks = {}
+    local slotId = GetNextFurnitureVaultSlotId(nil)
+    while slotId do
+        local icon, stack = GetItemInfo(BAG_FURNITURE_VAULT, slotId)
+        local bagitemlink = GetItemLink(BAG_FURNITURE_VAULT, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        local itemId = GetItemId(BAG_FURNITURE_VAULT, slotId)
+        local itemLink = GetItemLink(BAG_FURNITURE_VAULT, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+        local itemType = GetItemType(BAG_FURNITURE_VAULT, slotId)
+        if bagitemlink ~= "" then
+            g_furnitureVaultStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+        end
+        slotId = GetNextFurnitureVaultSlotId(slotId)
+    end
+end
+
 function ChatAnnouncements.CraftingOpen(eventId, craftSkill, sameStation)
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
     if ChatAnnouncements.SV.Inventory.LootCraft then
@@ -3146,11 +3184,14 @@ function ChatAnnouncements.BankOpen(eventId, bankBag)
         g_bankStacks = {}
         g_banksubStacks = {}
         g_houseBags = {}
-        ChatAnnouncements.IndexInventory() -- Index Inventory
-        ChatAnnouncements.IndexBank()      -- Index Bank
-        ChatAnnouncements.IndexHouseBags() -- Index House Bags
+        g_furnitureVaultStacks = {}
+        ChatAnnouncements.IndexInventory()      -- Index Inventory
+        ChatAnnouncements.IndexBank()           -- Index Bank
+        ChatAnnouncements.IndexHouseBags()      -- Index House Bags
+        ChatAnnouncements.IndexFurnitureVault() -- Index Furnishing Vault
     end
     g_bankBag = bankBag > 6 and 2 or 1
+    g_currentBankBagId = bankBag
 end
 
 function ChatAnnouncements.BankClose(eventId)
@@ -3164,6 +3205,7 @@ function ChatAnnouncements.BankClose(eventId)
     g_bankStacks = {}
     g_banksubStacks = {}
     g_houseBags = {}
+    g_furnitureVaultStacks = {}
 end
 
 function ChatAnnouncements.GuildBankOpen(eventId)
@@ -4892,7 +4934,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
             itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
             g_inventoryStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-            logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage
+            logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or (g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage)
             if g_InventoryOn then
                 ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
             end
@@ -4918,7 +4960,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
             -- STACK COUNT INCREMENTED UP
             if stackCountChange > 0 then
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-                logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage
+                logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or (g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage)
                 if g_InventoryOn then
                     ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
@@ -4932,7 +4974,7 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
                 end
                 if g_InventoryOn and not g_itemWasDestroyed then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit or ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
+                    logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit or (g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage)
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
             end
@@ -5121,6 +5163,85 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
         end
     end
 
+    if BAG_FURNITURE_VAULT and bagId == BAG_FURNITURE_VAULT then
+        local gainOrLoss
+        local logPrefix
+        local icon
+        local stack
+        local itemType
+        local itemId
+        local itemLink
+        local removed
+        -- NEW ITEM
+        if not g_furnitureVaultStacks[slotId] then
+            icon, stack = GetItemInfo(bagId, slotId)
+            itemType = GetItemType(bagId, slotId)
+            itemId = GetItemId(bagId, slotId)
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            g_furnitureVaultStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+            gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
+            logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
+            if g_bankOn then
+                ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
+            end
+            -- EXISTING ITEM
+        elseif g_furnitureVaultStacks[slotId] then
+            itemLink = GetItemLink(bagId, slotId, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
+            if itemLink == nil or itemLink == "" then
+                icon = g_furnitureVaultStacks[slotId].icon
+                stack = g_furnitureVaultStacks[slotId].stack
+                itemType = g_furnitureVaultStacks[slotId].itemType
+                itemId = g_furnitureVaultStacks[slotId].itemId
+                itemLink = g_furnitureVaultStacks[slotId].itemLink
+                removed = true
+            else
+                icon, stack = GetItemInfo(bagId, slotId)
+                itemType = GetItemType(bagId, slotId)
+                itemId = GetItemId(bagId, slotId)
+                removed = false
+            end
+
+            -- STACK COUNT INCREMENTED UP
+            if stackCountChange > 0 then
+                gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
+                logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
+                if g_bankOn then
+                    ChatAnnouncements.ItemPrinter(icon, stackCountChange, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
+                end
+            elseif stackCountChange < 0 then
+                local change = stackCountChange * -1
+                if g_itemWasDestroyed and ChatAnnouncements.SV.Inventory.LootShowDestroy then
+                    gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
+                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDestroy
+                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
+                end
+                if g_bankOn and not g_itemWasDestroyed then
+                    gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
+                    logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage
+                    ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
+                end
+            end
+
+            if removed then
+                if g_furnitureVaultStacks[slotId] then
+                    g_furnitureVaultStacks[slotId] = nil
+                end
+            else
+                g_furnitureVaultStacks[slotId] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+            end
+
+            if not g_itemWasDestroyed then
+                g_InventoryOn = true
+            end
+            if not g_itemWasDestroyed then
+                g_bankOn = false
+            end
+            if not g_itemWasDestroyed then
+                LUIE_callLater(ChatAnnouncements.BankFixer, 50)
+            end
+        end
+    end
+
     if bagId > 6 and bagId < 16 then
         local gainOrLoss
         local logPrefix
@@ -5215,11 +5336,11 @@ function ChatAnnouncements.InventoryUpdateBank(eventId, bagId, slotId, isNewItem
 
         if stackCountChange < 1 then
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-            logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit or ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage
+            logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeposit or (g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageDepositStorage)
             stack = stackCountChange * -1
         else
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-            logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage
+            logPrefix = g_bankBag == 1 and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdraw or (g_currentBankBagId == BAG_FURNITURE_VAULT and ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawFurnitureVault or ChatAnnouncements.SV.ContextMessages.CurrencyMessageWithdrawStorage)
             stack = stackCountChange
         end
 

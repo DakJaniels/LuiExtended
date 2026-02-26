@@ -376,6 +376,7 @@ do
     --- @param msg string: The message to be printed.
     --- @param isSystem? boolean: If true, the message is considered a system message.
     local function PrintToChat(msg, isSystem)
+        LUIE:Log("Verbose",msg, isSystem)
         -- Guard clause: exit early if chat system not ready
         if not ZO_GetChatSystem().primaryContainer then
             return

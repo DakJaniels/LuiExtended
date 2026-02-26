@@ -76,7 +76,9 @@ SpellCastBuffs.ReloadEffects = function (unitTag)
             SpellCastBuffs.SetDisguiseItem()
         end
         -- Update Artificial Effects
-        SpellCastBuffs.ArtificialEffectUpdate()
+        for effectId in ZO_GetNextActiveArtificialEffectIdIter do
+            SpellCastBuffs.ArtificialEffectUpdate(effectId)
+        end
         -- Display Recall Cooldown
         if SpellCastBuffs.SV.ShowRecall and not SpellCastBuffs.SV.HidePlayerDebuffs then
             SpellCastBuffs.ShowRecallCooldown()

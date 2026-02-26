@@ -3399,6 +3399,40 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPOSIT_FURNITURE_VAULT),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPOSIT_FURNITURE_VAULT_TP),
+            getFunction = function ()
+                return Settings.ContextMessages.CurrencyMessageDepositFurnitureVault
+            end,
+            setFunction = function (value)
+                Settings.ContextMessages.CurrencyMessageDepositFurnitureVault = value
+            end,
+            default = Defaults.ContextMessages.CurrencyMessageDepositFurnitureVault,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WITHDRAW_FURNITURE_VAULT),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WITHDRAW_FURNITURE_VAULT_TP),
+            getFunction = function ()
+                return Settings.ContextMessages.CurrencyMessageWithdrawFurnitureVault
+            end,
+            setFunction = function (value)
+                Settings.ContextMessages.CurrencyMessageWithdrawFurnitureVault = value
+            end,
+            default = Defaults.ContextMessages.CurrencyMessageWithdrawFurnitureVault,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
             label = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LOST),
             tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_LOST_TP),
             getFunction = function ()

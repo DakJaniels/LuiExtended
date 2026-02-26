@@ -16,56 +16,7 @@
 --- @field ReversedLogic table
 --- @field SpecialCC table
 
---- @class (partial) Effects
---- @field AddGroundDamageAura AddGroundDamageAura Table of fake ground damage aura definitions
---- @field AddNameOnBossEngaged AddNameOnBossEngaged Table of effects that add names when boss is engaged
---- @field AddNameOnEvent AddNameOnEvent Table of effects that add names on specific events
---- @field AddNoDurationBarHighlight table<integer, boolean> Table of effects that should highlight without duration
---- @field AddStackOnEvent AddStackOnEvent Table of effects that add stacks on specific events
---- @field ArtificialEffectOverride ArtificialEffectOverride Table of artificial effect overrides
---- @field AssistantIcons AssistantIcons Table of assistant icon definitions
---- @field BarHighlightCheckOnFade table<integer, BarHighlightOverrideEntry> Table of effects to check highlight on fade
---- @field BarHighlightCruxMap BarHighlightCruxMap Table mapping Crux effect to abilities that show Crux stacks
---- @field BarHighlightDestroFix BarHighlightDestroFix Table of destruction staff highlight fixes
---- @field BarHighlightExtraId BarHighlightExtraId Table of additional effect IDs for highlighting
---- @field BarHighlightOverride table<integer, BarHighlightOverrideOptions> Table of highlight override definitions
---- @field BarHighlightStack BarHighlightStack Table of stack-based highlight effects
---- @field BarIdOverride BarIdOverride Table of bar ID overrides
---- @field DisguiseIcons EffectsDisguiseIcons Table of disguise icon definitions
---- @field EffectCreateSkillAura EffectCreateSkillAura Table of skill aura creation definitions
---- @field EffectGroundDisplay EffectGroundDisplay Table of fake ground effect display definitions
---- @field EffectHideSCT EffectHideSCT Table of effects to hide from SCT
---- @field EffectMergeId EffectMergeId Table of effect ID merge definitions
---- @field EffectMergeName EffectMergeName Table of effect name merge definitions
---- @field EffectOverride EffectOverride Table of general effect overrides
---- @field EffectOverrideByName EffectOverrideByName Table of name-based effect overrides
---- @field EffectPullDuration EffectPullDuration Table of duration pull definitions
---- @field EffectSourceOverride EffectSourceOverride Table of effect source overrides
---- @field FakeExternalBuffs FakeExternalBuffs Table of fake external buff definitions
---- @field FakeExternalDebuffs FakeExternalDebuffs Table of fake player debuff definitions
---- @field FakePlayerBuffs FakePlayerBuffs Table of fake external debuff definitions
---- @field FakePlayerDebuffs FakePlayerDebuffs Table of fake player buff definitions
---- @field FakePlayerOfflineAura FakePlayerOfflineAura Table of fake offline aura definitions
---- @field FakeStagger FakeStagger Table of fake stagger effect definitions
---- @field HasAbilityProc HasAbilityProc Table of ability proc definitions
---- @field IsAbilityProc IsAbilityProc
---- @field BaseForAbilityProc BaseForAbilityProc
---- @field IsAbilityActiveGlow IsAbilityActiveGlow Table of ability active glow effects
---- @field IsAbilityActiveHighlight IsAbilityActiveHighlight Table of ability active highlight effects
---- @field IsBloodFrenzy IsBloodFrenzy Table of blood frenzy effect definitions
---- @field IsGrimFocus IsGrimFocus Table of grim focus effect definitions
---- @field IsOakenSoul EffectIsOakenSoul table of Oakensoul localized buff names
---- @field KeepUpgradeAlliance KeepUpgradeAlliance Table of keep upgrade alliance definitions
---- @field KeepUpgradeNameFix KeepUpgradeNameFix Table of keep upgrade name fixes
---- @field KeepUpgradeOverride KeepUpgradeOverride Table of keep upgrade overrides
---- @field KeepUpgradeTooltip KeepUpgradeTooltip Table of keep upgrade tooltip definitions
---- @field MajorMinor MajorMinor Table of major/minor effect definitions
---- @field MapDataOverride MapDataOverride Table of map data overrides
---- @field RemoveAbilityActiveHighlight RemoveAbilityActiveHighlight Table of effects to remove active highlight
---- @field SynergyNameOverride SynergyNameOverride Table of synergy name overrides
---- @field TooltipUseDefault TooltipUseDefault Table of effects using default tooltips
---- @field ZoneBuffs ZoneBuffs Table of zone-specific buff definitions
---- @field ZoneDataOverride ZoneDataOverride Table of zone data overrides
+
 
 --- @class (partial) Data
 --- @field Abilities AbilityTables
@@ -138,6 +89,57 @@ local DebugResults = {}
 local DebugAuras = {}
 local DebugStatus = {}
 
+--- @class (partial) Effects
+--- @field AddNameAura AddNameAura
+--- @field AddGroundDamageAura AddGroundDamageAura Table of fake ground damage aura definitions
+--- @field AddNameOnBossEngaged AddNameOnBossEngaged Table of effects that add names when boss is engaged
+--- @field AddNameOnEvent AddNameOnEvent Table of effects that add names on specific events
+--- @field AddNoDurationBarHighlight table<integer, boolean> Table of effects that should highlight without duration
+--- @field AddStackOnEvent AddStackOnEvent Table of effects that add stacks on specific events
+--- @field ArtificialEffectOverride ArtificialEffectOverride Table of artificial effect overrides
+--- @field AssistantIcons AssistantIcons Table of assistant icon definitions
+--- @field BarHighlightCheckOnFade table<integer, BarHighlightOverrideEntry> Table of effects to check highlight on fade
+--- @field BarHighlightCruxMap BarHighlightCruxMap Table mapping Crux effect to abilities that show Crux stacks
+--- @field BarHighlightDestroFix BarHighlightDestroFix Table of destruction staff highlight fixes
+--- @field BarHighlightExtraId BarHighlightExtraId Table of additional effect IDs for highlighting
+--- @field BarHighlightOverride table<integer, BarHighlightOverrideOptions> Table of highlight override definitions
+--- @field BarHighlightStack BarHighlightStack Table of stack-based highlight effects
+--- @field BarIdOverride BarIdOverride Table of bar ID overrides
+--- @field DisguiseIcons EffectsDisguiseIcons Table of disguise icon definitions
+--- @field EffectCreateSkillAura EffectCreateSkillAura Table of skill aura creation definitions
+--- @field EffectGroundDisplay EffectGroundDisplay Table of fake ground effect display definitions
+--- @field EffectHideSCT EffectHideSCT Table of effects to hide from SCT
+--- @field EffectMergeId EffectMergeId Table of effect ID merge definitions
+--- @field EffectMergeName EffectMergeName Table of effect name merge definitions
+--- @field EffectOverride EffectOverride Table of general effect overrides
+--- @field EffectOverrideByName EffectOverrideByName Table of name-based effect overrides
+--- @field EffectPullDuration EffectPullDuration Table of duration pull definitions
+--- @field EffectSourceOverride EffectSourceOverride Table of effect source overrides
+--- @field FakeExternalBuffs FakeExternalBuffs Table of fake external buff definitions
+--- @field FakeExternalDebuffs FakeExternalDebuffs Table of fake player debuff definitions
+--- @field FakePlayerBuffs FakePlayerBuffs Table of fake external debuff definitions
+--- @field FakePlayerDebuffs FakePlayerDebuffs Table of fake player buff definitions
+--- @field FakePlayerOfflineAura FakePlayerOfflineAura Table of fake offline aura definitions
+--- @field FakeStagger FakeStagger Table of fake stagger effect definitions
+--- @field HasAbilityProc HasAbilityProc Table of ability proc definitions
+--- @field IsAbilityProc IsAbilityProc
+--- @field BaseForAbilityProc BaseForAbilityProc
+--- @field IsAbilityActiveGlow IsAbilityActiveGlow Table of ability active glow effects
+--- @field IsAbilityActiveHighlight IsAbilityActiveHighlight Table of ability active highlight effects
+--- @field IsBloodFrenzy IsBloodFrenzy Table of blood frenzy effect definitions
+--- @field IsGrimFocus IsGrimFocus Table of grim focus effect definitions
+--- @field IsOakenSoul EffectIsOakenSoul table of Oakensoul localized buff names
+--- @field KeepUpgradeAlliance KeepUpgradeAlliance Table of keep upgrade alliance definitions
+--- @field KeepUpgradeNameFix KeepUpgradeNameFix Table of keep upgrade name fixes
+--- @field KeepUpgradeOverride KeepUpgradeOverride Table of keep upgrade overrides
+--- @field KeepUpgradeTooltip KeepUpgradeTooltip Table of keep upgrade tooltip definitions
+--- @field MajorMinor MajorMinor Table of major/minor effect definitions
+--- @field MapDataOverride MapDataOverride Table of map data overrides
+--- @field RemoveAbilityActiveHighlight RemoveAbilityActiveHighlight Table of effects to remove active highlight
+--- @field SynergyNameOverride SynergyNameOverride Table of synergy name overrides
+--- @field TooltipUseDefault TooltipUseDefault Table of effects using default tooltips
+--- @field ZoneBuffs ZoneBuffs Table of zone-specific buff definitions
+--- @field ZoneDataOverride ZoneDataOverride Table of zone data overrides
 local Effects =
 {
     AddGroundDamageAura = {},
