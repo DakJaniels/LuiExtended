@@ -1522,6 +1522,7 @@ local RESPEC_TYPE_CHAMPION = 1
 local RESPEC_TYPE_ATTRIBUTES = 2
 local RESPEC_TYPE_SKILLS = 3
 local RESPEC_TYPE_MORPHS = 4
+local RESPEC_TYPE_SKILL_LINE = 5
 
 local LUIE_AttributeDisplayType =
 {
@@ -1529,6 +1530,7 @@ local LUIE_AttributeDisplayType =
     [RESPEC_TYPE_ATTRIBUTES] = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_ATTRIBUTES),
     [RESPEC_TYPE_SKILLS] = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_SKILLS),
     [RESPEC_TYPE_MORPHS] = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_MORPHS),
+    [RESPEC_TYPE_SKILL_LINE] = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_SKILL_LINE),
 }
 
 -- Called by various functions to display a respec message, type serves as the message type, delay allows the message to sync timing with the chat printer based on source.
@@ -1854,6 +1856,9 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         elseif changeReason == CURRENCY_CHANGE_REASON_RESPEC_MORPHS then
             ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_MORPHS)
             return contextMessages.CurrencyMessageMorphs, nil, "continue"
+        elseif changeReason == CURRENCY_CHANGE_REASON_RESPEC_SUBCLASS then
+            ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILL_LINE)
+            return contextMessages.CurrencyMessageSkillLine, nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_RESPEC_CHAMPION then
             ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_CHAMPION)
             return contextMessages.CurrencyMessageChampion, nil, "continue"
@@ -7424,7 +7429,7 @@ function ChatAnnouncements.HookFunction()
         elseif numSkillPointsGained > 0 then
             if not SUPPRESS_SKILL_POINT_CSA_REASONS[changeReason] then
                 flagDisplay = true
-                sound = SOUNDS.SKILL_GAINED
+                sound = SOUNDS.SKILL_POINT_GAINED
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_GAINED)
                 local skillPointGained = zo_strformat(SI_SKILL_POINT_GAINED, numSkillPointsGained)
                 messageParams:SetText(skillPointGained)
@@ -8987,7 +8992,7 @@ function ChatAnnouncements.HookFunction()
 
         -- Play sound if CSA is not enabled
         if not ChatAnnouncements.SV.Group.GroupRaidCSA then
-            PlaySound(SOUNDS.RAID_TRIAL_COMPLETE)
+            PlaySound(SOUNDS.RAID_TRIAL_COMPLETED)
         end
         return true
     end
@@ -9353,7 +9358,7 @@ function ChatAnnouncements.HookFunction()
         local debugDisable -- flag to disable debug when its enabled
 
         -- Settings either use the subcategory settings or the generic settings if no subcategory
-        if primaryText == GetString(SI_RESPECTYPE_POINTSRESETTITLE0) or primaryText == GetString(SI_RESPECTYPE_POINTSRESETTITLE1) then
+        if primaryText == GetString(SI_RESPECTYPE_POINTSRESETTITLE0) or primaryText == GetString(SI_RESPECTYPE_POINTSRESETTITLE1) or primaryText == GetString(SI_RESPECTYPE_POINTSRESETTITLE4) then
             settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.Respec
             debugDisable = true
             -- Update message syntax here
@@ -9362,6 +9367,9 @@ function ChatAnnouncements.HookFunction()
             end
             if primaryText == GetString(SI_RESPECTYPE_POINTSRESETTITLE1) then
                 primaryText = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_ATTRIBUTES)
+            end
+            if primaryText == GetString(SI_RESPECTYPE_POINTSRESETTITLE4) then
+                primaryText = GetString(LUIE_STRING_CA_CURRENCY_NOTIFY_SKILL_LINE)
             end
         elseif primaryText == GetString(LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_GROUPENTER_D) or primaryText == GetString(LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_GROUPLEAVE_D) then
             settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.GroupArea
@@ -9449,7 +9457,7 @@ function ChatAnnouncements.HookFunction()
         -- If the CSA is disabled, play a sound if Chat Announcement or Alert are enabled
         if (settings.CA or settings.Alert) and not settings.CSA then
             if soundId then
-                PlaySound(SOUNDS.soundId)
+                PlaySound(SOUNDS.NONE)
                 -- Fallback sound if no soundId
             else
                 PlaySound(SOUNDS.DISPLAY_ANNOUNCEMENT)

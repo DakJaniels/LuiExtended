@@ -499,6 +499,7 @@ ChatAnnouncements.Colors = {}
 --- @field CurrencyMessageAttributes string
 --- @field CurrencyMessageSkills string
 --- @field CurrencyMessageMorphs string
+--- @field CurrencyMessageSkillLine string
 --- @field CurrencyMessageBounty string
 --- @field CurrencyMessageTrader string
 --- @field CurrencyMessageRepair string
@@ -1094,6 +1095,7 @@ ChatAnnouncements.Defaults =
         CurrencyMessageAttributes = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_ATTRIBUTES),
         CurrencyMessageSkills = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_SKILLS),
         CurrencyMessageMorphs = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_MORPHS),
+        CurrencyMessageSkillLine = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_SKILL_LINE),
         CurrencyMessageBounty = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_BOUNTY),
         CurrencyMessageTrader = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TRADER),
         CurrencyMessageRepair = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_REPAIR),
