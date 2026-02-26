@@ -7,7 +7,7 @@
 local LuiData = LuiData
 
 local Data = LuiData.Data
---- @class (partial) Effects
+
 local Effects = Data.Effects
 
 local BUFF_EFFECT_TYPE_BUFF = BUFF_EFFECT_TYPE_BUFF

@@ -7,7 +7,7 @@
 local LuiData = LuiData
 
 local Data = LuiData.Data
---- @class (partial) Effects
+
 local Effects = Data.Effects
 
 local contingency = { newId = 222285, showFakeAura = true, noRemove = true, duration = 22000 }

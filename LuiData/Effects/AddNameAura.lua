@@ -7,7 +7,6 @@
 local LuiData = LuiData
 
 local Data = LuiData.Data
---- @class (partial) Effects
 local Effects = Data.Effects
 local UnitNames = Data.UnitNames
 

@@ -7,7 +7,7 @@
 local LuiData = LuiData
 
 local Data = LuiData.Data
---- @class (partial) Effects
+
 local Effects = Data.Effects
 local Tooltips = LuiData.Data.Tooltips
 local Abilities = LuiData.Data.Abilities

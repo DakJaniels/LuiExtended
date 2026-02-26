@@ -1,11 +1,11 @@
 ## Title: |cE12000L|cFFFFB0ui E|rxtended|
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
-## APIVersion: 101048 101049
-## Version: 7.1.5.0
-## AddOnVersion: 7150
+## APIVersion: 101049 101050
+## Version: 7.2.0.0
+## AddOnVersion: 7200
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
-## DependsOn: LuiMedia>=7131 LuiData>=7204
+## DependsOn: LuiMedia>=7131 LuiData>=7205
 ## PCDependsOn: LibAddonMenu-2.0>=41
 ## ConsoleDependsOn: LibHarvensAddonSettings>=20102 LibCombatAlerts LibConsoleDialogs
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705 CrutchAlerts>=20502
