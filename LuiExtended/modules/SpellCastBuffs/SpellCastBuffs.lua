@@ -1684,127 +1684,82 @@ function SpellCastBuffs.ApplyFont()
     end
 end
 
--- Constants for artificial effect types
-local ARTIFICIAL_EFFECTS =
-{
-    ESO_PLUS = 0,
-    BATTLE_SPIRIT = 1,
-    BATTLE_SPIRIT_IC = 2,
-    BG_DESERTER = 3
-}
-
--- Configuration for special effect durations
-local EFFECT_DURATIONS =
-{
-    [ARTIFICIAL_EFFECTS.BG_DESERTER] =
-    {
-        duration = 300000,
-        effectType = BUFF_EFFECT_TYPE_BUFF
-    }
-}
-
--- Handles Battle Spirit effect ID conversion and tooltip assignment
-local function handleBattleSpiritEffectId(activeEffectId)
-    local tooltip = nil
-    local artificial = true
-    local effectId = activeEffectId
-
-    -- Handle different effect types
-    if activeEffectId == ARTIFICIAL_EFFECTS.ESO_PLUS then
-        tooltip = Tooltips.Innate_ESO_Plus
-    elseif activeEffectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT then
-        tooltip = Tooltips.Innate_Battle_Spirit
-        effectId = 999014
-        artificial = false
-    elseif activeEffectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT_IC then
-        tooltip = Tooltips.Innate_Battle_Spirit_Imperial_City
-        effectId = 999014
-        artificial = false
-    end
-
-    return effectId, tooltip, artificial
-end
-
--- Handles removal of artificial effects
-local function handleEffectRemoval(effectId)
-    local removeEffect = effectId
-    if effectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT or effectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT_IC then
-        removeEffect = 999014
-    end
-
-    local displayName = GetDisplayName()
-    local context = SpellCastBuffs.DetermineContextSimple("player1", removeEffect, displayName)
-    SpellCastBuffs.EffectsList[context][removeEffect] = nil
-end
-
--- Creates effect data structure
-local function createEffectData(effectId, displayName, iconFile, effectType, startTime, endTime, duration, tooltip, artificial)
-    return
-    {
-        target = SpellCastBuffs.DetermineTarget("player1"),
-        type = effectType,
-        id = effectId,
-        name = displayName,
-        icon = iconFile,
-        tooltip = tooltip,
-        dur = duration,
-        starts = startTime,
-        ends = endTime,
-        forced = "long",
-        restart = true,
-        iconNum = 0,
-        artificial = artificial,
-    }
-end
-
--- Handles BG deserter specific logic
-local function handleBGDeserterEffect(startTime)
-    local duration = EFFECT_DURATIONS[ARTIFICIAL_EFFECTS.BG_DESERTER].duration
-    local endTime = startTime + (GetLFGCooldownTimeRemainingSeconds(LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE) * 1000)
-    return duration, endTime, EFFECT_DURATIONS[ARTIFICIAL_EFFECTS.BG_DESERTER].effectType
-end
-
--- Main function for handling artificial effects
-function SpellCastBuffs.ArtificialEffectUpdate(eventCode, effectId)
-    -- Early exit if player buffs are hidden
+-- Runs on the EVENT_ARTIFICIAL_EFFECT_ADDED / EVENT_ARTIFICIAL_EFFECT_REMOVED listener.
+-- This handler fires whenever an ArtificialEffectId is added or removed
+--- @param eventId integer
+--- @param artificialEffectId integer|nil
+function SpellCastBuffs.ArtificialEffectUpdate(eventId, artificialEffectId)
     if SpellCastBuffs.SV.HidePlayerBuffs then
         return
     end
 
-    -- Handle effect removal if effectId is provided
-    if effectId then
-        handleEffectRemoval(effectId)
+    if artificialEffectId then
+        local removeEffect = artificialEffectId
+        -- Battle Spirit handling (1, 2): set to fake id so it matches the target display
+        if artificialEffectId == 1 or artificialEffectId == 2 then
+            removeEffect = 999014
+        end
+        -- Artificial effects are always stored under "player1"; remove from there.
+        local context = "player1"
+        SpellCastBuffs.EffectsList[context][removeEffect] = nil
     end
 
-    -- Process active artificial effects
-    for activeEffectId in ZO_GetNextActiveArtificialEffectIdIter do
-        -- Skip if effect should be ignored based on settings
-        if (activeEffectId == ARTIFICIAL_EFFECTS.ESO_PLUS and SpellCastBuffs.SV.IgnoreEsoPlusPlayer) or
-        ((activeEffectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT or activeEffectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT_IC) and
-            SpellCastBuffs.SV.IgnoreBattleSpiritPlayer) then
-            return
+    for effectId in ZO_GetNextActiveArtificialEffectIdIter do
+        -- Skip only this effect when its "show" setting is off; do not bail out of the loop.
+        local skip = (effectId == 0 and SpellCastBuffs.SV.IgnoreEsoPlusPlayer) or
+            ((effectId == 1 or effectId == 2) and SpellCastBuffs.SV.IgnoreBattleSpiritPlayer)
+        if skip then
+            -- continue to next effect
+        else
+            local displayName, iconFile, effectType, _, timeStartedS, timeEndingS = GetArtificialEffectInfo(effectId)
+            local duration = 0
+
+            if effectId == 3 then
+                duration = 300000
+                timeEndingS = timeStartedS + (GetLFGCooldownTimeRemainingSeconds(LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE) * 1000)
+                effectType = BUFF_EFFECT_TYPE_BUFF
+            elseif effectId == 0 or effectId == 1 or effectId == 2 then
+                -- ESO Plus and Battle Spirit are permanent; no timer.
+                duration = 0
+                timeEndingS = nil
+            end
+
+            local tooltip = nil
+            local artificial = true
+            if effectId == 0 then
+                tooltip = Tooltips.Innate_ESO_Plus
+            elseif effectId == 1 or effectId == 2 then
+                if effectId == 1 then
+                    tooltip = Tooltips.Innate_Battle_Spirit
+                else
+                    tooltip = Tooltips.Innate_Battle_Spirit_Imperial_City
+                end
+                effectId = 999014
+                artificial = false
+            end
+
+            -- Route artificial effects (Battle Spirit, ESO Plus, BG Deserter, etc.) always to player context
+            -- so they land in player_long when "Show Battle Spirit on Player" / LongTermEffects are enabled.
+            -- If we used DetermineContextSimple, 999014 in PromBuffTable would promote to promb_player and
+            -- the effect would show in prominent buffs instead of the long-term player container.
+            local context = "player1"
+            SpellCastBuffs.EffectsList[context][effectId] =
+            {
+                target = SpellCastBuffs.DetermineTarget(context),
+                type = effectType,
+                id = effectId,
+                name = displayName,
+                icon = iconFile,
+                tooltip = tooltip,
+                dur = duration,
+                starts = timeStartedS,
+                ends = timeEndingS,
+                forced = "long",
+                restart = true,
+                iconNum = 0,
+                artificial = artificial,
+            }
         end
-
-        -- Get effect info
-        local displayName, iconFile, effectType, _, startTime = GetArtificialEffectInfo(activeEffectId)
-        local duration = 0
-        local endTime = nil
-
-        -- Handle BG deserter specific case
-        if activeEffectId == ARTIFICIAL_EFFECTS.BG_DESERTER then
-            duration, endTime, effectType = handleBGDeserterEffect(startTime)
-        end
-
-        local tooltip, artificial
-        -- Process effects and get tooltips
-        effectId, tooltip, artificial = handleBattleSpiritEffectId(activeEffectId)
-
-        -- Create and store effect
-        local context = SpellCastBuffs.DetermineContextSimple("player1", effectId, displayName)
-        SpellCastBuffs.EffectsList[context][effectId] = createEffectData(
-            effectId, displayName, iconFile, effectType, startTime,
-            endTime, duration, tooltip, artificial
-        )
     end
 end
 
@@ -2076,23 +2031,23 @@ function SpellCastBuffs.OnPlayerActivated(eventCode)
 
     -- Resolve Mounted icon
     if not SpellCastBuffs.SV.IgnoreMountPlayer and IsMounted() then
-        zo_callLater(function ()
-                         SpellCastBuffs.MountStatus(nil, true)
-                     end, 50)
+        LUIE_callLater(function ()
+                           SpellCastBuffs.MountStatus(nil, true)
+                       end, 50)
     end
 
     -- Resolve Disguise Icon
     if not SpellCastBuffs.SV.IgnoreDisguise then
-        zo_callLater(function ()
-                         SpellCastBuffs.DisguiseItem(nil, BAG_WORN, 10, nil, nil, nil, nil, nil, nil, nil, nil)
-                     end, 50)
+        LUIE_callLater(function ()
+                           SpellCastBuffs.DisguiseItem(nil, BAG_WORN, 10, nil, nil, nil, nil, nil, nil, nil, nil)
+                       end, 50)
     end
 
     -- Resolve Assistant Icon
     if not SpellCastBuffs.SV.IgnorePet or not SpellCastBuffs.SV.IgnoreAssistant then
-        zo_callLater(function ()
-                         SpellCastBuffs.CollectibleBuff()
-                     end, 50)
+        LUIE_callLater(function ()
+                           SpellCastBuffs.CollectibleBuff()
+                       end, 50)
     end
 
     -- Resolve Werewolf

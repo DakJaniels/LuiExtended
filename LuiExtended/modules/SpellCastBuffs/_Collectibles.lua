@@ -110,7 +110,7 @@ end
 function SpellCastBuffs.CollectibleUsed(eventId, result, isAttemptingActivation)
     local latency = GetLatency()
     latency = latency + 100
-    zo_callLater(SpellCastBuffs.CollectibleBuff, latency)
+    LUIE_callLater(SpellCastBuffs.CollectibleBuff, latency)
 end
 
 -- Handles delayed call from SpellCastBuffs.CollectibleUsed()
