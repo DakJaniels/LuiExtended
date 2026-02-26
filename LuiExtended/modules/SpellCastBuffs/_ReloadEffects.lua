@@ -62,15 +62,15 @@ SpellCastBuffs.ReloadEffects = function (unitTag)
         SpellCastBuffs.OnEffectChanged(0, EFFECT_RESULT_UPDATED, buffSlot, buffName, unitTag, timeStarted, timeEnding, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, unitName, 0, --[[unitId]] abilityId, castByPlayer)
     end
     -- Display Disguise State (note that this function handles filtering player/target buffs if hidden)
-    SpellCastBuffs.DisguiseStateChanged(nil, unitTag, GetUnitDisguiseState(unitTag))
+    SpellCastBuffs.DisguiseStateChanged( unitTag, GetUnitDisguiseState(unitTag))
     -- Display Stealth State (note that this function handles filtering player/target buffs if hidden)
-    SpellCastBuffs.StealthStateChanged(nil, unitTag, GetUnitStealthState(unitTag))
+    SpellCastBuffs.StealthStateChanged( unitTag, GetUnitStealthState(unitTag))
 
     -- Player Specific
     if unitTag == "player" and not SpellCastBuffs.SV.HidePlayerBuffs then
         -- Display Assistant/Non-Combat Pet/Mount Icon
         SpellCastBuffs.CollectibleBuff()
-        SpellCastBuffs.MountStatus("", true)
+        SpellCastBuffs.MountStatus(true)
         -- Display Disguise Icon (if disguised)
         if not SpellCastBuffs.SV.IgnoreDisguise then
             SpellCastBuffs.SetDisguiseItem()

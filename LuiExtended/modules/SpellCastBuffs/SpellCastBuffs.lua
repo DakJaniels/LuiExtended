@@ -430,22 +430,30 @@ function SpellCastBuffs.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_BOSSES_CHANGED, SpellCastBuffs.AddNameOnBossEngaged)
 
     -- Stealth Events
-    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_STEALTH_STATE_CHANGED, SpellCastBuffs.StealthStateChanged)
-    eventManager:RegisterForEvent(moduleName .. "Reticleover", EVENT_STEALTH_STATE_CHANGED, SpellCastBuffs.StealthStateChanged)
+    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_STEALTH_STATE_CHANGED, function (eventId, unitTag, stealthState)
+        SpellCastBuffs.StealthStateChanged(unitTag, stealthState)
+    end)
+    eventManager:RegisterForEvent(moduleName .. "Reticleover", EVENT_STEALTH_STATE_CHANGED, function (eventId, unitTag, stealthState)
+        SpellCastBuffs.StealthStateChanged(unitTag, stealthState)
+    end)
     eventManager:AddFilterForEvent(moduleName .. "Player", EVENT_STEALTH_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
     eventManager:AddFilterForEvent(moduleName .. "Reticleover", EVENT_STEALTH_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     -- Disguise Events
-    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_DISGUISE_STATE_CHANGED, SpellCastBuffs.DisguiseStateChanged)
-    eventManager:RegisterForEvent(moduleName .. "Reticleover", EVENT_DISGUISE_STATE_CHANGED, SpellCastBuffs.DisguiseStateChanged)
+    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_DISGUISE_STATE_CHANGED, function (eventId, unitTag, disguiseState)
+        SpellCastBuffs.DisguiseStateChanged(unitTag, disguiseState)
+    end)
+    eventManager:RegisterForEvent(moduleName .. "Reticleover", EVENT_DISGUISE_STATE_CHANGED, function (eventId, unitTag, disguiseState)
+        SpellCastBuffs.DisguiseStateChanged(unitTag, disguiseState)
+    end)
     eventManager:AddFilterForEvent(moduleName .. "Player", EVENT_DISGUISE_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
     eventManager:AddFilterForEvent(moduleName .. "Reticleover", EVENT_DISGUISE_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     -- Artificial Effects Handling
-    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_ADDED, function (_, artificialEffectId)
+    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_ADDED, function (eventId, artificialEffectId)
         SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
     end)
-    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_REMOVED, function (_, artificialEffectId)
+    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_REMOVED, function (eventId, artificialEffectId)
         SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
     end)
 
@@ -458,11 +466,15 @@ function SpellCastBuffs.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_UNIT_DEATH_STATE_CHANGED, SpellCastBuffs.OnDeath)
 
     -- Mount Events
-    eventManager:RegisterForEvent(moduleName, EVENT_MOUNTED_STATE_CHANGED, SpellCastBuffs.MountStatus)
+    eventManager:RegisterForEvent(moduleName, EVENT_MOUNTED_STATE_CHANGED, function (_, mounted)
+        SpellCastBuffs.MountStatus(mounted)
+    end)
     eventManager:RegisterForEvent(moduleName, EVENT_COLLECTIBLE_USE_RESULT, SpellCastBuffs.CollectibleUsed)
 
     -- Inventory Events
-    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, SpellCastBuffs.DisguiseItem)
+    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function (eventId, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
+        SpellCastBuffs.DisguiseItem(bagId, slotIndex)
+    end)
     eventManager:AddFilterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
 
     -- Duel (For resolving Target Battle Spirit Status)
@@ -2035,14 +2047,14 @@ function SpellCastBuffs.OnPlayerActivated(eventCode)
     -- Resolve Mounted icon
     if not SpellCastBuffs.SV.IgnoreMountPlayer and IsMounted() then
         LUIE_callLater(function ()
-                           SpellCastBuffs.MountStatus(nil, true)
+                           SpellCastBuffs.MountStatus(true)
                        end, 50)
     end
 
     -- Resolve Disguise Icon
     if not SpellCastBuffs.SV.IgnoreDisguise then
         LUIE_callLater(function ()
-                           SpellCastBuffs.DisguiseItem(nil, BAG_WORN, 10, nil, nil, nil, nil, nil, nil, nil, nil)
+                           SpellCastBuffs.DisguiseItem(BAG_WORN, 10)
                        end, 50)
     end
 

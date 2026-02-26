@@ -56,25 +56,16 @@ end
 -- Called on item slot change for Disguise.
 --- - **EVENT_INVENTORY_SINGLE_SLOT_UPDATE **
 ---
---- @param eventId integer
 --- @param bagId Bag
 --- @param slotIndex integer
---- @param isNewItem boolean
---- @param itemSoundCategory ItemUISoundCategory
---- @param inventoryUpdateReason integer
---- @param stackCountChange integer
---- @param triggeredByCharacterName string?
---- @param triggeredByDisplayName string?
---- @param isLastUpdateForMessage boolean
---- @param bonusDropSource BonusDropSource
-function SpellCastBuffs.DisguiseItem(eventId, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
+function SpellCastBuffs.DisguiseItem(bagId, slotIndex)
     -- If slotIndex isn't the disguise/tabard slot then return
     if slotIndex ~= EQUIP_SLOT_COSTUME or SpellCastBuffs.SV.IgnoreDisguise or SpellCastBuffs.SV.HidePlayerBuffs then
         return
     end
 
     -- Set current disguise
-    SpellCastBuffs.currentDisguise = GetItemId(BAG_WORN, EQUIP_SLOT_COSTUME) or 0
+    SpellCastBuffs.currentDisguise = GetItemId(bagId, EQUIP_SLOT_COSTUME) or 0
 
     -- Set the icon for the disguise to display
     SpellCastBuffs.SetDisguiseItem()
@@ -83,10 +74,9 @@ end
 -- Handles disguise changes for player/reticleover
 --- - **EVENT_DISGUISE_STATE_CHANGED **
 ---
---- @param eventId integer
 --- @param unitTag string
 --- @param disguiseState DisguiseState
-function SpellCastBuffs.DisguiseStateChanged(eventId, unitTag, disguiseState)
+function SpellCastBuffs.DisguiseStateChanged(unitTag, disguiseState)
     -- Bail out if we don't have disguise or unitTag buffs enabled
     if unitTag == "player" and (not SpellCastBuffs.SV.DisguiseStatePlayer or SpellCastBuffs.SV.HidePlayerBuffs) then
         return
@@ -144,10 +134,9 @@ end
 -- Handles stealth state changes for player/reticleover
 --- - **EVENT_STEALTH_STATE_CHANGED **
 ---
---- @param eventId integer
 --- @param unitTag string
 --- @param stealthState StealthState
-function SpellCastBuffs.StealthStateChanged(eventId, unitTag, stealthState)
+function SpellCastBuffs.StealthStateChanged(unitTag, stealthState)
     -- Bail out if we don't have stealth or unitTag buffs enabled
     if unitTag == "player" and (not SpellCastBuffs.SV.StealthStatePlayer or SpellCastBuffs.SV.HidePlayerBuffs) then
         return
