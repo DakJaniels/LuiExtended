@@ -202,8 +202,8 @@ local DEVS = readonlytable
         },
         ["@dack_janiels"] =
         {
-            enabled = true,
-            debug = true,
+            enabled = false,
+            debug = false,
         },
         ["@dack_janiels.luie"] =
         {
@@ -226,19 +226,18 @@ end
 
 do
     local g_loggingEnabled = LUIE.IsDevDebugEnabled()
+    if not g_loggingEnabled then
+        return
+    end
     local function ZO_Scene_Log(self, message)
-        if g_loggingEnabled then
-            LUIE:Log("Verbose", string.format("%s - %s - %s", GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN), self.name, message))
-        end
+        LUIE:Log("Verbose", string.format("%s - %s - %s", GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN), self.name, message))
     end
     ZO_Scene.Log = ZO_Scene_Log
     local function ZO_SceneManager_Follower_Log(self, message, sceneName)
-        if g_loggingEnabled then
-            if sceneName then
-                LUIE:Log("Verbose", string.format("%s - %s - %s", GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN), message, sceneName))
-            else
-                LUIE:Log("Verbose", string.format("%s - %s", GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN), message))
-            end
+        if sceneName then
+            LUIE:Log("Verbose", string.format("%s - %s - %s", GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN), message, sceneName))
+        else
+            LUIE:Log("Verbose", string.format("%s - %s", GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN), message))
         end
     end
     ZO_SceneManager_Follower.Log = ZO_SceneManager_Follower_Log
