@@ -1,0 +1,18 @@
+**********************
+***Functions Added ***
+**********************
+
+* HousingEditorIsPreviewInspectionEnabled()
+** _Returns:_ *bool* _enabled_
+
+* HousingEditorSetPreviewInspectionEnabled(*bool* _enabled_)
+
+* HousingEditorTogglePreviewInspectionEnabled()
+
+
+
+*******************
+***Events Added ***
+*******************
+
+* EVENT_HOUSING_PREVIEW_INSPECTION_STATE_CHANGED (*bool* _isPreviewInspectionEnabled_)

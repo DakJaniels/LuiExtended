@@ -1,0 +1,41 @@
+******************
+***Enums Added ***
+******************
+
+* NOTIFICATION_TYPE_TRIBUTE_INVITE
+
+
+* ACTIVITY_QUEUE_RESULT_IN_TRIBUTE_MATCH
+* ACTIVITY_QUEUE_RESULT_TRIBUTE_ACCESS_DENIED
+
+
+* TRIBUTE_MATCH_EVENT_SELF_QUEUED
+* TRIBUTE_MATCH_EVENT_SELF_UNAVAILABLE
+* TRIBUTE_MATCH_EVENT_TARGET_QUEUED
+* TRIBUTE_MATCH_EVENT_UNKNOWN_TARGET_FAILURE
+
+
+
+********************
+***Enums Changed ***
+********************
+
+Renamed
+* SOCIAL_RESULT_TRIBUTE_NOT_FRIENDS
+to
+* SOCIAL_RESULT_TRIBUTE_INVALID_INVITE
+
+
+
+************************
+***Functions Changed ***
+************************
+
+Renamed
+* InviteToTribute(*string* _displayName_)
+to
+* InviteToTributeByDisplayName(*string* _displayName_)
+
+
+Added _highlightActiveFavorState_ and _suppressNotCollectibleWarning_
+* SetTributePatron(*integer* _patronId_, *bool* _highlightActiveFavorState_, *bool* _suppressNotCollectibleWarning_)

@@ -1,0 +1,14 @@
+******************
+***Enums Added ***
+******************
+
+* UI_SETTING_SHOW_HOUSE_TRACKER
+
+
+
+************************
+***Functions Removed ***
+************************
+
+* ShouldShowChatNarrationSettings()
+** _Returns:_ *bool* _shouldShowChatNarrationSettings_

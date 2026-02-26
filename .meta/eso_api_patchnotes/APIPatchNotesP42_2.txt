@@ -1,0 +1,67 @@
+*******************
+*** Enums Added ***
+*******************
+
+* LINK_TYPE_ABILITY
+* LINK_TYPE_CRAFTED_ABILITY
+
+
+
+*********************
+*** Globals Removed ***
+*********************
+
+* MAX_BOSSES
+
+
+
+***********************
+*** Functions Added ***
+***********************
+
+* GetAbilityLink(*integer* _abilityId_, *[LinkStyle|#LinkStyle]* _linkStyle_)
+** _Returns:_ *string* _link_
+
+
+* GetCraftedAbilityLink(*integer* _craftedAbilityId_, *integer* _primaryScriptId_, *integer* _secondaryScriptId_, *integer* _tertiaryScriptId_, *[LinkStyle|#LinkStyle]* _linkStyle_)
+** _Returns:_ *string* _link_
+
+
+* GetCraftedAbilityIdsFromLink(*string* _link_)
+** _Returns:_ *integer* _craftedAbilityId_, *integer* _primaryScriptId_, *integer* _secondaryScriptId_, *integer* _tertiaryScriptId_
+
+
+* GetAbilityCraftedAbilityId(*integer* _abilityId_)
+** _Returns:_ *integer* _craftedAbilityId_
+
+
+* GetAbilityIdFromLink(*string* _link_)
+** _Returns:_ *integer* _abilityId_
+
+
+* DoesGuildHistoryEventCategoryHaveUpToDateEvents(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_)
+** _Returns:_ *bool* _hasUpToDateEvents_
+
+
+* IsGuildHistoryRequestTargetingEvents(*integer* _requestId_)
+** _Returns:_ *bool* _isTargetingEvents_
+
+
+
+*************************
+*** Functions Changed ***
+*************************
+
+Added _targetNewestEventId_ and _targetOldestEventId_
+* RequestMoreGuildHistoryEvents(*integer* _requestId_, *bool* _queueRequestIfOnCooldown_, *integer53:nilable* _targetNewestEventId_, *integer53:nilable* _targetOldestEventId_)
+** _Returns:_ *[GuildHistoryDataReadyState|#GuildHistoryDataReadyState]* _readyState_
+
+
+
+**********************
+*** Events Changed ***
+**********************
+
+Added _hideAnnouncement_
+* EVENT_QUEST_ADVANCED (*luaindex* _journalIndex_, *string* _questName_, *bool* _isPushed_, *bool* _isComplete_, *bool* _mainStepChanged_, *bool* _hideAnnouncement_)
+

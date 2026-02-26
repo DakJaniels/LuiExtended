@@ -1,0 +1,383 @@
+*******************
+*** Enums Added ***
+*******************
+
+h5. NonCombatBonusType
+* NON_COMBAT_BONUS_ARCHIVAL_FORTUNES_GAIN
+
+h5. UnitAttributeVisual
+* ATTRIBUTE_VISUAL_NO_HEALING
+
+h5. AbilityType
+* ABILITY_TYPE_PREVENTHEALING
+* ABILITY_TYPE_REPAIR
+
+h5. GroupFinderPlaystyle
+* GROUP_FINDER_PLAYSTYLE_ROLE_PLAY
+* GROUP_FINDER_PLAYSTYLE_STORY
+
+h5. ApplyOutfitChangesResult
+* APPLY_OUTFIT_CHANGES_RESULT_BLOCKED_COLLECTIBLES
+* APPLY_OUTFIT_CHANGES_RESULT_UNUSABLE_BY_COMPANION
+
+h5. GuildHistoryActivityEvent
+
+h5. GuildHistoryAvAActivityEvent
+
+h5. GuildHistoryBankedCurrencyEvent
+
+h5. GuildHistoryBankedItemEvent
+
+h5. GuildHistoryCategoryUpdateFlags
+
+h5. GuildHistoryDataReadyState
+
+h5. GuildHistoryEventCategory
+
+h5. GuildHistoryEventSubcategory
+
+h5. GuildHistoryMilestoneEvent
+
+h5. GuildHistoryRequestFlags
+
+h5. GuildHistoryRosterEvent
+
+h5. GuildHistoryTraderEvent
+
+h5. TributeMechanicSetbackType
+
+h5. ItemSetSuppressionType
+
+h5. TutorialTrigger
+* TUTORIAL_TRIGGER_TRIBUTE_SETBACK_CARD_SEEN
+
+h5. ControlType
+* CT_VECTOR
+
+h5. ObjectFit
+
+
+
+*********************
+*** Enums Removed ***
+*********************
+
+h5. SocialActionResult
+* SOCIAL_RESULT_CANT_JUMP_TARGET_IN_HOMESHOW
+
+h5. GuildEventType
+
+h5. GuildHistoryAllianceWarSubcategories
+
+h5. GuildHistoryCategory
+
+h5. GuildHistoryGeneralSubcategories
+
+h5. GuildHistoryStoreSubcategories
+
+
+
+*********************
+*** Enums Changed ***
+*********************
+
+* LOOT_TYPE_ENDLESS_DUNGEON_CURRENCY
+to
+* LOOT_TYPE_ARCHIVAL_FORTUNES
+
+
+* CURT_ENDLESS_DUNGEON
+to
+* CURT_ARCHIVAL_FORTUNES
+
+
+* REWARD_TYPE_ENDLESS_DUNGEON_CURRENCY
+to
+* REWARD_TYPE_ARCHIVAL_FORTUNES
+
+
+* STORE_FAILURE_NOT_ENOUGH_ENDLESS_DUNGEON_CURRENCY
+to
+* STORE_FAILURE_NOT_ENOUGH_ARCHIVAL_FORTUNES
+
+
+
+***********************
+*** Functions Added ***
+***********************
+
+* IsGuildMate(*string* _charOrDisplayName_)
+** _Returns:_ *bool* _isGuildMate_
+
+* GetItemSetSuppressionInfo(*integer* _itemSetId_)
+** _Returns:_ *[ItemSetSuppressionType|#ItemSetSuppressionType]* _suppressionType_, *integer* _refId_
+
+* GetItemSetSuppressionName(*integer* _itemSetId_)
+** _Returns:_ *string* _text_
+
+* ClearGuildHistoryCache(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]:nilable* _category_, *integer* _keepResultsFromLastNumSeconds_)
+** _Returns:_ *bool* _success_
+
+* GetNumGuildHistoryEvents(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_)
+** _Returns:_ *integer* _numEvents_
+
+* GetGuildHistoryEventIndicesForTimeRange(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_, *integer53* _newestTimeS_, *integer53* _oldestTimeS_)
+** _Returns:_ *luaindex:nilable* _newestEventIndex_, *luaindex:nilable* _oldestEventIndex_
+
+* GetOldestGuildHistoryEventIndexForUpToDateEventsWithoutGaps(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_)
+** _Returns:_ *luaindex:nilable* _oldestEventIndex_
+
+* GetNumGuildHistoryEventRanges(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_)
+** _Returns:_ *integer* _numGuildHistoryEventRanges_
+
+* GetGuildHistoryEventRangeInfo(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_, *luaindex* _rangeIndex_)
+** _Returns:_ *integer53* _newestTimeS_, *integer53* _oldestTimeS_, *integer53* _newestEventId_, *integer53* _oldestEventId_
+
+* GetGuildHistoryEventId(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_, *luaindex* _eventIndex_)
+** _Returns:_ *integer53* _eventId_
+
+* GetGuildHistoryRosterEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
+** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *[GuildHistoryRosterEvent|#GuildHistoryRosterEvent]* _eventType_, *string* _actingDisplayName_, *string* _targetDisplayName_, *integer:nilable* _rankId_
+
+* GetGuildHistoryBankedItemEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
+** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *[GuildHistoryBankedItemEvent|#GuildHistoryBankedItemEvent]* _eventType_, *string* _displayName_, *string* _itemLink_, *integer* _quantity_
+
+* GetGuildHistoryBankedCurrencyEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
+** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *[GuildHistoryBankedCurrencyEvent|#GuildHistoryBankedCurrencyEvent]* _eventType_, *string* _displayName_, *[CurrencyType|#CurrencyType]* _currencyType_, *integer* _amount_, *string* _kioskName_
+
+* GetGuildHistoryTraderEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
+** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *[GuildHistoryTraderEvent|#GuildHistoryTraderEvent]* _eventType_, *string* _sellerDisplayName_, *string* _buyerDisplayName_, *string* _itemLink_, *integer* _quantity_, *integer* _price_, *integer* _tax_
+
+* GetGuildHistoryMilestoneEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
+** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *[GuildHistoryMilestoneEvent|#GuildHistoryMilestoneEvent]* _eventType_
+
+* GetGuildHistoryActivityEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
+** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *[GuildHistoryActivityEvent|#GuildHistoryActivityEvent]* _eventType_, *string* _displayName_
+
+* GetGuildHistoryAvAActivityEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
+** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *[GuildHistoryAvAActivityEvent|#GuildHistoryAvAActivityEvent]* _eventType_, *string* _displayName_, *integer* _keepId_, *integer* _campaignId_
+
+* GetGuildHistoryRequestMinCooldownMs()
+** _Returns:_ *integer* _minCooldownMs_
+
+* CreateGuildHistoryRequest(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_, *integer53* _newestTimeS_, *integer53* _oldestTimeS_)
+** _Returns:_ *integer* _requestId_
+
+* GetGuildHistoryRequestFlags(*integer* _requestId_)
+** _Returns:_ *[GuildHistoryRequestFlags|#GuildHistoryRequestFlags]* _flags_
+
+* IsGuildHistoryRequestComplete(*integer* _requestId_)
+** _Returns:_ *bool* _isComplete_
+
+* DoesGuildHistoryHaveOutstandingRequest()
+** _Returns:_ *bool* _hasOutstandingRequest_
+
+* RequestMoreGuildHistoryEvents(*integer* _requestId_, *bool* _queueRequestIfOnCooldown_)
+** _Returns:_ *[GuildHistoryDataReadyState|#GuildHistoryDataReadyState]* _readyState_
+
+* DestroyGuildHistoryRequest(*integer* _requestId_)
+** _Returns:_ *bool* _successfullyDestroyed_
+
+* DoesTributeCardHaveSetbackMechanic(*integer* _cardDefId_)
+** _Returns:_ *bool* _hasSetbackMechanic_
+
+* GetTributeMechanicSetbackTypeForPlayer(*[TributeMechanic|#TributeMechanic]* _mechanicType_, *[TributePlayerPerspective|#TributePlayerPerspective]* _targetPlayer_)
+** _Returns:_ *[TributeMechanicSetbackType|#TributeMechanicSetbackType]* _mechanicSetbackType_
+
+
+h3. Control
+* GetAncestor(*luaindex* _ancestorIndex_)
+** _Returns:_ *object* _ancestorControl_
+
+* GetNamedSibling(*string* _siblingName_)
+** _Returns:_ *object* _returnedControl_
+
+* GetNormal()
+** _Returns:_ *number* _normalX_, *number* _normalY_, *number* _normalZ_
+
+* GetNormalizedCameraFacing()
+** _Returns:_ *number* _normalizedCameraFacingValue_
+
+
+h3. LineControl
+* ClearGradientColors()
+
+
+h3. TextureControl
+* ClearGradientColors()
+
+
+h3. VectorControl
+* SetObjectFit(*[ObjectFit|#ObjectFit]* _objectFit_)
+
+* SetPictureIndex(*integer* _index_)
+
+* SetSlugAsset(*string* _filename_)
+
+
+h3. WindowManager
+* GetCameraForward(*[Space|#Space]* _space_)
+** _Returns:_ *number* _forwardX_, *number* _forwardY_, *number* _forwardZ_
+
+
+
+*************************
+*** Functions Removed ***
+*************************
+
+* GetNumGuildHistoryCategories()
+** _Returns:_ *integer* _numCategories_
+
+* DoesGuildHistoryCategoryHaveMoreEvents(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+** _Returns:_ *bool* _hasMoreEvents_
+
+* HasGuildHistoryCategoryEverBeenRequested(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+** _Returns:_ *bool* _hasEverBeenRequested_
+
+* DoesGuildHistoryCategoryHaveOutstandingRequest(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+** _Returns:_ *bool* _hasOutstandingRequest_
+
+* IsGuildHistoryCategoryRequestQueued(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+** _Returns:_ *bool* _isQueued_
+
+* RequestMoreGuildHistoryCategoryEvents(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_, *bool* _queueRequestIfOnCooldown_)
+** _Returns:_ *bool* _requested_
+
+* GetNumGuildEvents(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+** _Returns:_ *integer* _numEvents_
+
+* GetGuildEventInfo(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_, *luaindex* _eventIndex_)
+** _Returns:_ *[GuildEventType|#GuildEventType]* _eventType_, *integer* _secsSinceEvent_, *variant* _param1_, *variant* _param2_, *variant* _param3_, *variant* _param4_, *variant* _param5_, *variant* _param6_, *integer* _eventId_
+
+* GetGuildEventId(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_, *luaindex* _eventIndex_)
+** _Returns:_ *id64* _guildEventId_
+
+
+h3. WindowManager
+* AreCustomCursorsEnabled()
+** _Returns:_ *bool* _enabled_
+
+* GetControlAtPoint(*layout_measurement* _x_, *layout_measurement* _y_)
+** _Returns:_ *object* _mouseOverControl_
+
+
+
+
+*************************
+*** Functions Changed ***
+*************************
+
+* GetUnitBuffInfo(*string* _unitTag_, *luaindex* _buffIndex_)
+** _Returns:_ *string* _buffName_, *number* _timeStarted_, *number* _timeEnding_, *integer* _buffSlot_, *integer* _stackCount_, *textureName* _iconFilename_, *string* _deprecatedBuffType_, *[BuffEffectType|#BuffEffectType]* _effectType_, *[AbilityType|#AbilityType]* _abilityType_, *[StatusEffectType|#StatusEffectType]* _statusEffectType_, *integer* _abilityId_, *bool* _canClickOff_, *bool* _castByPlayer_
+buffType changed to deprecatedBuffType
+
+
+* ResetGroupFinderFilterAndDraftOptionsToDefault()
+to
+* ResetGroupFinderFilterAndDraftDifficultyToDefault()
+
+
+* IsCollectibleBlocked(*integer* _collectibleId_, *[GameplayActorCategory|#GameplayActorCategory]* _actorCategory_)
+** _Returns:_ *bool* _isBlocked_
+Added actorCategory
+
+
+* GetCollectibleBlockReason(*integer* _collectibleId_, *[GameplayActorCategory|#GameplayActorCategory]* _actorCategory_)
+** _Returns:_ *[CollectibleUsageBlockReason|#CollectibleUsageBlockReason]* _usageBlockReason_
+Added actorCategory
+
+
+* GetCollectibleRestrictionsByType(*integer* _collectibleId_, *[CollectibleRestrictionType|#CollectibleRestrictionType]* _restrictionType_, *[GameplayActorCategory|#GameplayActorCategory]* _actorCategory_)
+** _Returns:_ *bool* _hasRestrictions_, *bool* _passesRestrictions_, *string* _allowedNamesString_
+Added actorCategory
+
+
+* SetPlaybackType(*[AnimationPlayback|#AnimationPlayback]* _playbackType_, *integer* _maxLoopCount_)
+playbackType changed from integer to AnimationPlayback
+
+
+h3. ButtonControl
+* GetState()
+** _Returns:_ *[ButtonState|#ButtonState]* _state_
+state changed from integer to ButtonState
+
+* SetMouseOverBlendMode(*[TextureBlendMode|#TextureBlendMode]* _blendMode_)
+blendMode changed from integer to TextureBlendMode
+
+* SetState(*[ButtonState|#ButtonState]* _newState_, *bool* _locked_)
+newState changed from integer to ButtonState
+
+
+h3. SliderControl
+* GetOrientation()
+** _Returns:_ *[ControlOrientation|#ControlOrientation]* _orientation_
+orientation changed from integer to ControlOrientation
+
+* SetOrientation(*[ControlOrientation|#ControlOrientation]* _orientation_)
+orientation changed from integer to ControlOrientation
+
+
+h3. StatusBarControl
+* SetBarAlignment(*[BarAlignment|#BarAlignment]* _barAlignment_)
+barAlignment changed from integer to BarAlignment
+
+* SetOrientation(*[ControlOrientation|#ControlOrientation]* _orientation_)
+orientation changed from integer to ControlOrientation
+
+
+h3. WindowManager
+* SetMouseCursor(*[MouseCursorType|#MouseCursorType]* _cursorType_)
+cursorType changed from integer to MouseCursorType
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_GUILD_HISTORY_CATEGORY_UPDATED (*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _eventCategory_, *[GuildHistoryCategoryUpdateFlags|#GuildHistoryCategoryUpdateFlags]* _flags_)
+
+* EVENT_ULTIMATE_ABILITY_COST_CHANGED (*integer* _cost_, *integer* _ultimateResource_)
+
+
+
+**********************
+*** Events Removed ***
+**********************
+
+* EVENT_HOME_SHOW_LEADERBOARD_DATA_CHANGED (*integer* _voteCategory_, *[HouseCategoryType|#HouseCategoryType]* _houseCategory_)
+
+* EVENT_GUILD_HISTORY_CATEGORY_UPDATED (*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+
+* EVENT_GUILD_HISTORY_RESPONSE_RECEIVED (*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+
+
+
+**********************
+*** Events Changed ***
+**********************
+
+* EVENT_EFFECT_CHANGED (*[EffectResult|#EffectResult]* _changeType_, *integer* _effectSlot_, *string* _effectName_, *string* _unitTag_, *number* _beginTime_, *number* _endTime_, *integer* _stackCount_, *string* _iconName_, *string* _deprecatedBuffType_, *[BuffEffectType|#BuffEffectType]* _effectType_, *[AbilityType|#AbilityType]* _abilityType_, *[StatusEffectType|#StatusEffectType]* _statusEffectType_, *string* _unitName_, *integer* _unitId_, *integer* _abilityId_, *[CombatUnitType|#CombatUnitType]* _sourceType_)
+buffType changed to deprecatedBuffType
+
+
+
+***************************
+*** UI XML Layout Added ***
+***************************
+
+h4. Attributes:
+* objectFit *[ObjectFit|#ObjectFit]*
+
+h5. Controls
+* [Child: Vector|#Vector]
+
+h5. FallbackFont
+* _attribute:_ *string* _font_
+
+h5. GuiXml
+* [Child: FallbackFont|#FallbackFont]
+
+h5. Vector
+* [Inherits: Control|#Control]
+* [Child: objectFit|#Attributes]

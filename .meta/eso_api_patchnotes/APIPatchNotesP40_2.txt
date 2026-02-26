@@ -1,0 +1,118 @@
+*******************
+*** Enums Added ***
+*******************
+
+* TUTORIAL_TRIGGER_DISCOVERED_ENDLESS_DUNGEON
+
+
+* GROUP_FINDER_ACTION_RESULT_FAILED_PLATFORM_RESTRICTIONS
+
+
+* GROUP_FINDER_PLAYSTYLE_ACHIEVEMENT
+
+
+* GIFT_ACTION_RESULT_GIFTING_SYSTEM_LOCKED
+
+
+* GROUP_DIFFICULTY_CHANGE_REASON_ACTIVE_GROUP_LISTING
+
+
+
+
+*********************
+*** Enums Removed ***
+*********************
+
+* NOTIFICATION_TYPE_GIFTING_UNLOCKED
+* NOTIFICATION_TYPE_GIFT_GRACE_STARTED
+
+
+h5. CurrencyVendor
+* CVD_ADDED_BY_DEV
+* CVD_BAM
+* CVD_CONVERTED_FROM_OLD_VC
+* CVD_CS
+* CVD_DEFAULT
+* CVD_DMM
+* CVD_EPIC
+* CVD_GOOGLE
+* CVD_INITIAL_CURRENCY
+* CVD_PSN
+* CVD_STEAM
+* CVD_STEAM_ALT
+* CVD_TWITCH
+* CVD_XBOX
+
+
+
+
+*********************
+*** Enums Changed ***
+*********************
+
+* COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_TIMED_EVENT
+to
+* COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_LEADERBOARD_EVENT
+
+
+
+
+***********************
+*** Functions Added ***
+***********************
+
+* ResetGroupFinderFilterAndDraftOptionsToDefault()
+
+
+
+
+*************************
+*** Functions Removed ***
+*************************
+
+* HasGiftingGracePeriodStartedNotification()
+** _Returns:_ *bool* _hasNotification_
+
+
+* ClearGiftingGracePeriodStartedNotification()
+
+
+* HasGiftingUnlockedNotification()
+** _Returns:_ *bool* _hasGiftingUnlockedNotification_
+
+
+* ClearGiftingUnlockedNotification()
+
+
+
+
+*************************
+*** Functions Changed ***
+*************************
+
+Added _resetDifficulty_
+* UpdateGroupFinderFilterOptions(*bool* _resetDifficulty_)
+
+
+Renamed
+* HasPendingAcceptedApplication()
+to
+* HasPendingAcceptedGroupFinderApplication()
+
+
+Renamed
+* IsRoleChangeRequested()
+to
+* IsGroupFinderRoleChangeRequested()
+
+
+
+
+**********************
+*** Events Removed ***
+**********************
+
+* EVENT_GIFTING_GRACE_PERIOD_STARTED_NOTIFICATION_CLEARED
+
+
+* EVENT_GIFTING_UNLOCKED_NOTIFICATION_CLEARED

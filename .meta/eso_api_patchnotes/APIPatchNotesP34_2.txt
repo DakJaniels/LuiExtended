@@ -1,0 +1,88 @@
+******************
+***Enums Added ***
+******************
+
+* PROGRESS_REASON_TRIBUTE_CAMPAIGN
+* PROGRESS_REASON_TRIBUTE_CLUB
+
+
+* TUTORIAL_TRIGGER_TRIBUTE_CURSE_CARD_SEEN
+* TUTORIAL_TRIGGER_TRIBUTE_FINDER_OPENED
+
+
+* ACTIVITY_QUEUE_RESULT_TRIBUTE_INVALID_AREA
+
+
+* GAMEPAD_SETTING_USE_KEYBOARD_LOGIN
+
+
+* UI_SETTING_AUTO_DECLINE_TRIBUTE_INVITES
+
+
+* TRIBUTE_MECHANIC_AGENT_SELF_HEAL
+
+
+* TRIBUTE_VICTORY_TYPE_EARLY_CONCESSION
+
+
+h5. TributeTargetSelectionConfirmationResult
+* TRIBUTE_TARGET_SELECTION_CONFIRMATION_RESULT_NOT_ENOUGH_TARGETS
+* TRIBUTE_TARGET_SELECTION_CONFIRMATION_RESULT_SUCCESS
+* TRIBUTE_TARGET_SELECTION_CONFIRMATION_RESULT_TARGET_SELECTION_NOT_ACTIVE
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* OnSelectedDigToolChanged()
+
+
+* DoesTributeSkipPatronDrafting()
+** _Returns:_ *bool* _skipsDrafting_
+
+
+* GetTributePlayerPerspectiveResource(*[TributePlayerPerspective|#TributePlayerPerspective]* _playerPerspective_, *[TributeResource|#TributeResource]* _resource_)
+** _Returns:_ *integer* _value_
+
+
+* GetTributeRemainingTimeForTurn()
+** _Returns:_ *integer:nilable* _timeRemainingMs_
+
+
+* GetTributePrestigeRequiredToWin()
+** _Returns:_ *integer* _requiredPrestige_
+
+
+* IsTributeCardCurse(*integer* _cardDefId_)
+** _Returns:_ *bool* _isCurse_
+
+
+* GetTributePatronFamily(*integer* _patronId_)
+** _Returns:_ *integer* _family_
+
+
+* GetCampaignMatchResultFromHistoryByMatchIndex(*luaindex* _matchIndex_, *integer:nilable* _campaignId_)
+** _Returns:_ *bool* _hasRecord_, *bool* _wasAWin_
+
+
+
+************************
+***Functions Removed ***
+************************
+
+* GetCampaignMatchResultFromHistoryByIndex(*integer* _matchIndex_, *integer:nilable* _campaignId_)
+** _Returns:_ *bool* _wasAWin_
+
+
+* GetCampaignMatchResultFromHistoryByMatchNumber(*integer* _matchIndex_, *integer:nilable* _campaignId_)
+** _Returns:_ *bool* _hasRecord_, *bool* _wasAWin_
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_ANTIQUITY_SELECTED_TOOL_CHANGED

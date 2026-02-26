@@ -1,0 +1,404 @@
+******************
+***Enums Added ***
+******************
+
+* STORE_FAILURE_ALREADY_OWN_COMBINATION_RESULT
+
+
+* TRIBUTE_TARGET_SELECTION_CONFIRMATION_RESULT_REQUIRES_TAUNT_AGENTS
+
+
+* UNIT_EXPRESSION
+
+
+h5. BlockState
+* BLOCK_STATE_ACTIVE
+* BLOCK_STATE_BLOCKED
+* BLOCK_STATE_CLIENT_REQUESTED
+* BLOCK_STATE_DRAINED
+* BLOCK_STATE_IDLE
+* BLOCK_STATE_NONE
+* BLOCK_STATE_OVERRIDDEN
+
+
+h5. ChildLayoutType
+* CHILD_LAYOUT_TYPE_FLEX
+* CHILD_LAYOUT_TYPE_NONE
+
+
+h5. FlexAlignment
+* FLEX_ALIGNMENT_AUTO
+* FLEX_ALIGNMENT_BASELINE
+* FLEX_ALIGNMENT_CENTER
+* FLEX_ALIGNMENT_FLEX_END
+* FLEX_ALIGNMENT_FLEX_START
+* FLEX_ALIGNMENT_SPACE_AROUND
+* FLEX_ALIGNMENT_SPACE_BETWEEN
+* FLEX_ALIGNMENT_STRETCH
+
+
+h5. FlexDirection
+* FLEX_DIRECTION_COLUMN
+* FLEX_DIRECTION_COLUMN_REVERSE
+* FLEX_DIRECTION_ROW
+* FLEX_DIRECTION_ROW_REVERSE
+
+
+h5. FlexEdge
+* FLEX_EDGE_ALL
+* FLEX_EDGE_BOTTOM
+* FLEX_EDGE_END
+* FLEX_EDGE_HORIZONTAL
+* FLEX_EDGE_LEFT
+* FLEX_EDGE_RIGHT
+* FLEX_EDGE_START
+* FLEX_EDGE_TOP
+* FLEX_EDGE_VERTICAL
+
+
+h5. FlexJustification
+* FLEX_JUSTIFICATION_CENTER
+* FLEX_JUSTIFICATION_FLEX_END
+* FLEX_JUSTIFICATION_FLEX_START
+* FLEX_JUSTIFICATION_SPACE_AROUND
+* FLEX_JUSTIFICATION_SPACE_BETWEEN
+* FLEX_JUSTIFICATION_SPACE_EVENLY
+
+
+h5. FlexWrap
+* FLEX_WRAP_NO_WRAP
+* FLEX_WRAP_WRAP
+* FLEX_WRAP_WRAP_REVERSE
+
+
+h5. HitTestingDesiredHandlers
+* HIT_TESTING_DESIRED_HANDLERS_ANY
+* HIT_TESTING_DESIRED_HANDLERS_MOUSE_WHEEL_ONLY
+* HIT_TESTING_DESIRED_HANDLERS_RECEIVE_DRAG_ONLY
+
+
+h5. PreferredInputDeviceType
+* PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD
+* PREFERRED_INPUT_DEVICE_TYPE_KEYBOARD
+* PREFERRED_INPUT_DEVICE_TYPE_KEYBOARD_OR_MOUSE
+* PREFERRED_INPUT_DEVICE_TYPE_MOUSE
+
+
+
+********************
+***Enums Removed ***
+********************
+
+* CAMPAIGN_ALLIANCE_LOCK_REASON_NOT_LOCKED
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* ClearBindsForUnknownActions()
+
+
+* GetActionDefaultBindingInfo(*luaindex* _layerIndex_, *luaindex* _categoryIndex_, *luaindex* _actionIndex_, *luaindex* _bindingIndex_)
+** _Returns:_ *[KeyCode|#KeyCode]* _keyCode_, *[KeyCode|#KeyCode]* _mod1_, *[KeyCode|#KeyCode]* _mod2_, *[KeyCode|#KeyCode]* _mod3_, *[KeyCode|#KeyCode]* _mod4_
+
+
+* GetHighestPriorityActionBindingInfoFromNameAndInputDevice(*string* _actionName_, *[PreferredInputDeviceType|#PreferredInputDeviceType]* _preferredInputDeviceType_)
+** _Returns:_ *[KeyCode|#KeyCode]* _keyCode_, *[KeyCode|#KeyCode]* _mod1_, *[KeyCode|#KeyCode]* _mod2_, *[KeyCode|#KeyCode]* _mod3_, *[KeyCode|#KeyCode]* _mod4_
+
+
+* IsCurrentBindingDefault(*string* _actionName_, *luaindex* _bindingIndex_)
+** _Returns:_ *bool* _isDefault_
+
+
+* OnMapUpdateComplete()
+
+
+* DoesActivitySetHaveAvailablityRequirementList(*integer* _activitySetId_)
+** _Returns:_ *bool* _hasAvailablityReq_
+
+
+* DoesActivitySetPassAvailablityRequirementList(*integer* _activitySetId_)
+** _Returns:_ *bool* _passesAvailablityReq_, *integer* _errorStringId_
+
+
+* GetNumSavedKeybindings()
+** _Returns:_ *integer* _numSavedBindings_
+
+
+* GetMaxNumSavedKeybindings()
+** _Returns:_ *integer* _maxNumSavedBindings_
+
+
+* GetCollectibleFurnitureDataIdForPreview(*integer* _collectibleId_)
+** _Returns:_ *integer* _furnitureDataId_
+
+
+* DoesAnyMarketProductPresentationMatchFilter(*integer* _marketProductId_, *integer* _filterTypes_)
+** _Returns:_ *bool* _matchesFilter_
+
+
+* CanCollectibleBePreviewed(*integer* _collectibleId_)
+** _Returns:_ *bool* _canCollectibleBePreviewed_
+
+
+* GetTributeMatchStatistics()
+** _Returns:_ *integer* _matchDurationMS_, *integer* _goldAccumulated_, *integer* _cardsAcquired_
+
+
+* GetTributeMatchCampaignId()
+** _Returns:_ *integer* _tributeMatchCampaignId_
+
+
+* GetNumTributeClubRankRewardLists()
+** _Returns:_ *integer* _numTributeClubRankRewardLists_
+
+
+* GetTributeClubRankRewardListIdByIndex(*luaindex* _rewardListIndex_)
+** _Returns:_ *integer* _rewardListId_
+
+
+* GetTributeGeneralMatchRewardListId()
+** _Returns:_ *integer* _rewardListId_
+
+
+* GetTributeGeneralMatchLFGRewardUIDataId()
+** _Returns:_ *integer* _rewardUIDataId_
+
+
+* GetPendingTributeClubExperience()
+** _Returns:_ *integer* _pendingClubXP_
+
+
+* GetPendingTributeCampaignExperience()
+** _Returns:_ *integer* _pendingCampaignXP_
+
+
+* GetNewTributeCampaignRank()
+** _Returns:_ *[TributeTier|#TributeTier]* _newTributeCampaignRank_
+
+
+* GetTributeForfeitPenaltyDurationMs()
+** _Returns:_ *integer* _forfeitPenaltyMs_
+
+
+* GetTributeResultsWinnerInfo()
+** _Returns:_ *[TributePlayerPerspective|#TributePlayerPerspective]* _winningPlayerPerspective_, *[TributeVictoryType|#TributeVictoryType]* _victoryType_
+
+
+* GetTributeCardPortraitIcon(*integer* _cardDefId_)
+** _Returns:_ *textureName* _portraitIcon_
+
+
+* GetActiveTributeCampaignTimeRemainingS()
+** _Returns:_ *integer* _timeRemainingS_
+
+
+h3. AnimationObject
+* GetType()
+** _Returns:_ *[AnimationType|#AnimationType]* _animationObjectType_
+
+
+h3. AnimationTimeline
+* ClearAnimatedControlFromAllAnimations()
+
+
+h3. Control
+* GetChildFlexContentAlignment()
+** _Returns:_ *[FlexAlignment|#FlexAlignment]* _alignment_
+
+* GetChildFlexDirection()
+** _Returns:_ *[FlexDirection|#FlexDirection]* _direction_
+
+* GetChildFlexItemAlignment()
+** _Returns:_ *[FlexAlignment|#FlexAlignment]* _alignment_
+
+* GetChildFlexJustification()
+** _Returns:_ *[FlexJustification|#FlexJustification]* _justification_
+
+* GetChildFlexWrap()
+** _Returns:_ *[FlexWrap|#FlexWrap]* _wrap_
+
+* GetChildLayout()
+** _Returns:_ *[ChildLayoutType|#ChildLayoutType]* _childLayoutType_
+
+* GetExcludeFromFlexbox()
+** _Returns:_ *bool* _exclude_
+
+* GetFlex()
+** _Returns:_ *number:nilable* _growOrShrink_
+
+* GetFlexAlignSelf()
+** _Returns:_ *[FlexAlignment|#FlexAlignment]* _alignment_
+
+* GetFlexBasis()
+** _Returns:_ *number* _basis_
+
+* GetFlexGrow()
+** _Returns:_ *number* _grow_
+
+* GetFlexMargin(*[FlexEdge|#FlexEdge]* _edge_)
+** _Returns:_ *number* _margin_
+
+* GetFlexShrink()
+** _Returns:_ *number* _shrink_
+
+* GetResizeToFitConstrains()
+** _Returns:_ *[AnchorConstrains|#AnchorConstrains]* _constrains_
+
+
+h3. EditControl
+* GetDefaultText()
+** _Returns:_ *string* _apRet_
+
+* SetDefaultText(*string* _aDefaultText_)
+
+* SetDefaultTextColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
+
+
+h3. WindowManager
+* AreCustomCursorsEnabled()
+** _Returns:_ *bool* _enabled_
+
+* CreateCursor(*layout_measurement* _x_, *layout_measurement* _y_)
+** _Returns:_ *integer* _cursorId_
+
+* DestroyCursor(*integer* _cursorId_)
+
+* GetControlAtCursor(*integer* _cursorId_, *[HitTestingDesiredHandlers|#HitTestingDesiredHandlers]* _desiredHandlers_)
+** _Returns:_ *object* _controlAtCursor_
+
+* UpdateCursorPosition(*integer* _cursorId_, *layout_measurement* _x_, *layout_measurement* _y_)
+
+
+
+************************
+***Functions Removed ***
+************************
+
+* GetActiveTributeCampaignTimeRemainingMs()
+** _Returns:_ *integer* _timeRemainingMs_
+
+
+h3. EditControl
+* SetDefaultTextForVirtualKeyboard(*string* _aText_)
+
+
+
+************************
+***Functions Changed ***
+************************
+
+Added _timeRemainingMS_
+* GetDuelInfo()
+** _Returns:_ *[DuelState|#DuelState]* _duelState_, *string* _partnerCharacterName_, *string* _partnerDisplayName_, *integer* _timeRemainingMS_
+* GetTributeInviteInfo()
+** _Returns:_ *[TributeInviteState|#TributeInviteState]* _tributeInviteState_, *string* _partnerCharacterName_, *string* _partnerDisplayName_, *[TributePlayerType|#TributePlayerType]* _targetType_, *integer* _timeRemainingMS_
+
+
+Added _hideInUi_
+* GetCollectibleTagInfo(*integer* _collectibleId_, *luaindex* _tagIndex_)
+** _Returns:_ *string* _tagDescription_, *[ItemTagCategory|#ItemTagCategory]* _tagCategory_, *bool* _hideInUi_
+
+
+h3. AnimationTimeline
+Changed type to *[AnimationType|#AnimationType]*
+* InsertAnimation(*[AnimationType|#AnimationType]* _animationType_, *object* _animatedControl_, *integer* _offset_)
+** _Returns:_ *object* _animation_
+
+
+h3. Control
+Changed type to *[AnchorPosition|#AnchorPosition]*
+* GetAnchor(*integer* _anchorIndex_)
+** _Returns:_ *bool* _isValidAnchor_, *[AnchorPosition|#AnchorPosition]* _point_, *object* _relativeTo_, *[AnchorPosition|#AnchorPosition]* _relativePoint_, *number* _offsetX_, *number* _offsetY_, *[AnchorConstrains|#AnchorConstrains]* _anchorConstrains_
+
+
+h3. TooltipControl
+Added _showAcquireHint_
+* SetTributePatron(*integer* _patronId_, *bool* _highlightActiveFavorState_, *bool* _suppressNotCollectibleWarning_, *bool* _showAcquireHint_)
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_HOLIDAYS_CHANGED
+
+
+* EVENT_TRIBUTE_MATCH_END_SUMMARY_READY
+
+
+
+**********************
+*** Events Changed ***
+**********************
+
+Added _timeRemainingMS_
+* EVENT_DUEL_INVITE_RECEIVED (*string* _inviterCharacterName_, *string* _inviterDisplayName_, *integer* _timeRemainingMS_)
+* EVENT_TRIBUTE_INVITE_RECEIVED (*string* _inviterCharacterName_, *string* _inviterDisplayName_, *integer* _timeRemainingMS_)
+
+
+
+***************************
+*** UI XML Layout Added ***
+***************************
+
+h4. Attributes:
+* childLayout *[ChildLayoutType|#ChildLayoutType]*
+* defaultText *string*
+* defaultTextColor *string*
+* excludeFromFlexContainer *bool*
+* flex *number*
+* flexBasis *number*
+* flexContentAlignment *[FlexAlignment|#FlexAlignment]*
+* flexDirection *[FlexDirection|#FlexDirection]*
+* flexGrow *number*
+* flexItemAlignment *[FlexAlignment|#FlexAlignment]*
+* flexJustification *[FlexJustification|#FlexJustification]*
+* flexSelfAlignment *[FlexAlignment|#FlexAlignment]*
+* flexShrink *number*
+* flexWrap *[FlexWrap|#FlexWrap]*
+* resizeToFitConstrains *[AnchorConstrains|#AnchorConstrains]*
+
+
+h5. Control
+* [Child: FlexMargin|#FlexMargin]
+* [Child: childLayout|#Attributes]
+* [Child: excludeFromFlexContainer|#Attributes]
+* [Child: flex|#Attributes]
+* [Child: flexBasis|#Attributes]
+* [Child: flexContentAlignment|#Attributes]
+* [Child: flexDirection|#Attributes]
+* [Child: flexGrow|#Attributes]
+* [Child: flexItemAlignment|#Attributes]
+* [Child: flexJustification|#Attributes]
+* [Child: flexSelfAlignment|#Attributes]
+* [Child: flexShrink|#Attributes]
+* [Child: flexWrap|#Attributes]
+* [Child: resizeToFitConstrains|#Attributes]
+
+
+h5. EditBox
+* [Child: defaultText|#Attributes]
+* [Child: defaultTextColor|#Attributes]
+* [Child: text|#Attributes]
+
+
+h5. FlexMargin
+* _attribute:_ *number* _left_
+* _attribute:_ *number* _top_
+* _attribute:_ *number* _right_
+* _attribute:_ *number* _bottom_
+
+
+
+*****************************
+*** UI XML Layout Changed ***
+*****************************
+
+h5. OnUserAreaCreated
+Changed to unscaled
+* [Inherits: OnSetControlEventHandler|#OnSetControlEventHandler]
+* ScriptArguments: local self, areaData, areaText, unscaledLeft, unscaledRight, unscaledTop, unscaledBottom, continuation = ...

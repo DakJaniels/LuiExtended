@@ -1,0 +1,14 @@
+******************
+***Enums Added ***
+******************
+
+* ACTION_RESULT_BAD_TARGET_COMBAT_STATE
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* GetMarketProductAssociatedAchievementId(*integer* _marketProductId_)
+** _Returns:_ *integer* _associatedAchievementId_

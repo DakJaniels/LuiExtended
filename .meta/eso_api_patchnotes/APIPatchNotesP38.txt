@@ -1,0 +1,390 @@
+******************
+***Enums Added ***
+******************
+
+* APPROVED_URL_ESO_ACCOUNT_LINKING
+
+
+* TUTORIAL_TRIGGER_EVENT_TICKET_DROP_ON_COOLDOWN
+* TUTORIAL_TRIGGER_FILLETING_OPENED
+* TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_FISH_PRESENT
+* TUTORIAL_TRIGGER_TRIBUTE_CONFINE_CARD_SEEN
+* TUTORIAL_TRIGGER_TRIBUTE_DONATE_CARD_SEEN
+
+
+* ABILITY_TYPE_HOTBARSLOTOVERRIDE
+
+
+* CHAPTER_MAGMA
+
+
+* DECONSTRUCT_ACTION_NAME_FILLET
+
+
+* ITEM_USE_TYPE_FILLET_FISH
+
+
+* WEAPON_CONFIG_TYPE_SHIELD_ONLY
+
+
+* UI_SETTING_AUTOMATIC_QUEST_TRACKING
+* UI_SETTING_SHOW_GUILD_KEEP_NOTICES
+
+
+* ACCESSIBILITY_SETTING_ACCESSIBLE_QUICKWHEELS
+* ACCESSIBILITY_SETTING_GAMEPAD_AIM_ASSIST_INTENSITY
+* ACCESSIBILITY_SETTING_MOUSE_AIM_ASSIST_INTENSITY
+
+
+* STORE_FAILURE_AWARDS_FRAGMENT_OF_ALREADY_OWNED_COLLECTIBLE
+
+
+* TRIBUTE_BOARD_LOCATION_OPPONENT_PRISON
+* TRIBUTE_BOARD_LOCATION_PLAYER_PRISON
+
+
+* TRIBUTE_MECHANIC_CONFINE_CARDS
+* TRIBUTE_MECHANIC_DONATE_CARDS
+
+
+* TRIBUTE_PATRON_REQUIREMENT_DISCARD_CARD
+
+
+* TRIBUTE_TARGET_SELECTION_CONFIRMATION_RESULT_MAX_CONFINE_TARGETS_REACHED
+
+
+* PROVISIONER_SPECIAL_INGREDIENT_TYPE_FILLET
+
+
+h5. RandomRollResult
+* RANDOM_ROLL_RESULT_FAILED
+* RANDOM_ROLL_RESULT_INVALID_NUM_ROLLS
+* RANDOM_ROLL_RESULT_INVALID_RESULT
+* RANDOM_ROLL_RESULT_SUCCESS
+
+
+h5. CollectibleUserFlags
+* COLLECTIBLE_USER_FLAG_FAVORITE
+
+
+h5. GuildKeepNoticesSettingChoice
+* GUILD_KEEP_NOTICES_SETTING_CHOICE_ALERT
+* GUILD_KEEP_NOTICES_SETTING_CHOICE_CHAT
+* GUILD_KEEP_NOTICES_SETTING_CHOICE_DONT_SHOW
+
+
+h5. RandomMountType
+* RANDOM_MOUNT_TYPE_ANY
+* RANDOM_MOUNT_TYPE_FAVORITE
+* RANDOM_MOUNT_TYPE_NONE
+
+
+
+********************
+***Enums Removed ***
+********************
+
+* ACCOUNT_LABEL_HERON
+
+
+* PLATFORM_STORE_LABEL_HERON
+
+
+* UI_PLATFORM_HERON
+
+
+* PLATFORM_SERVICE_TYPE_HERON
+
+
+* PLAYER_PLATFORM_STADIA
+
+
+* TUTORIAL_TRIGGER_HERON_THIRD_PARTY_CONTROLLER_SHOWING
+* TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_POISONS_PRESENT
+
+
+* GUILD_EVENT_BANKGOLD_GUILD_STORE_TAX
+* GUILD_EVENT_BANKGOLD_PURCHASE_HERALDRY
+* GUILD_EVENT_GUILD_DELETE
+* GUILD_EVENT_GUILD_INVITEDECLINED
+* GUILD_EVENT_GUILD_INVITEPURGED
+* GUILD_EVENT_GUILD_INVITEREVOKED
+* GUILD_EVENT_GUILD_KIOSK_PURCHASE_REFUND
+* GUILD_EVENT_GUILD_REMOVE
+* GUILD_EVENT_GUILD_UNINVITE
+* GUILD_EVENT_ITEM_LISTED
+* GUILD_EVENT_NAME_CHANGED
+
+
+* MOUSE_CURSOR_GENERIC_HOLD_ABILITY
+* MOUSE_CURSOR_GENERIC_HOLD_COLLECTIBLE
+* MOUSE_CURSOR_GENERIC_HOLD_EMOTE
+* MOUSE_CURSOR_GENERIC_HOLD_ITEM
+* MOUSE_CURSOR_GENERIC_HOLD_QUEST_ITEM
+
+
+* GRAPHICS_PRESETS_HERON
+
+
+
+********************
+***Enums Changed ***
+********************
+
+* GAMEPAD_TYPE_HERON
+to
+* GAMEPAD_TYPE_STADIA
+
+
+
+********************
+***Globals Added ***
+********************
+
+* RANDOM_ROLL_MAX_NUM_ROLLS
+* RANDOM_ROLL_MAX_RESULT
+* RANDOM_ROLL_MIN_RESULT
+
+
+* STANDARD_GROUP_SIZE_THRESHOLD
+* LARGE_GROUP_SIZE_THRESHOLD
+* MAX_GROUP_SIZE_THRESHOLD
+
+
+* TRIBUTE_DEFAULT_PATRON_USAGE_COUNT
+
+
+
+**********************
+***Globals Removed ***
+**********************
+
+* GROUP_SIZE_MAX
+* RAID_GROUP_SIZE_THRESHOLD
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* Id64ToNumber(*id64* _id_)
+** _Returns:_ *integer53* _number_, *bool* _lostPrecisionUseId64ToString_
+
+
+* NumberToId64(*integer53* _number_)
+** _Returns:_ *id64* _id_, *bool* _lostPrecisionUseStringToId64_
+
+
+* BitXor(*integer53* _valueA_, *integer53* _valueB_)
+** _Returns:_ *integer53* _result_
+
+
+* BitNot(*integer53* _value_, *integer* _numBits_)
+** _Returns:_ *integer53* _result_
+
+
+* ShouldShowAdvancedUIErrors()
+** _Returns:_ *bool* _shouldShowAdvancedUIErrors_
+
+
+* GetGuildRankIndex(*integer* _guildId_, *integer* _rankId_)
+** _Returns:_ *luaindex:nilable* _rankIndex_
+
+
+* ClearActiveNarration()
+
+
+* IsActionLayerTopLayerByName(*string* _layerName_)
+** _Returns:_ *bool* _isTopLayer_
+
+
+* IsActionSlotMutable(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+** _Returns:_ *bool* _isMutable_
+
+
+* ActionSlotHasEffectiveSlotAbilityData(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+** _Returns:_ *bool* _hasEffectiveSlotAbilityData_
+
+
+* RandomDiceRoll *private* (*integer* _maxValue_, *integer* _numRolls_, *integer* _modifier_)
+** _Returns:_ *[RandomRollResult|#RandomRollResult]* _result_
+
+
+* RandomRangeRoll *private* (*integer* _minValue_, *integer* _maxValue_)
+** _Returns:_ *[RandomRollResult|#RandomRollResult]* _result_
+
+
+* IsZoneCollectibleLocked(*luaindex* _zoneIndex_)
+** _Returns:_ *bool* _isZoneCollectibleLocked_
+
+
+* SetRandomMountType(*[RandomMountType|#RandomMountType]* _randomMountType_, *[GameplayActorCategory|#GameplayActorCategory]* _actorCategory_)
+
+
+* GetRandomMountType(*[GameplayActorCategory|#GameplayActorCategory]* _actorCategory_)
+** _Returns:_ *[RandomMountType|#RandomMountType]* _randomMountType_
+
+
+* HasClaimedAccountReward(*integer* _rewardDefId_)
+** _Returns:_ *bool* _hasClaimedAccountReward_
+
+
+* HasFishInBag(*[Bag|#Bag]* _bagId_)
+** _Returns:_ *bool* _hasFish_
+
+
+* HasAnyUnlockedCollectiblesByCategoryType(*[CollectibleCategoryType|#CollectibleCategoryType]* _collectibleCategoryType_)
+** _Returns:_ *bool* _hasAnyUnlocked_
+
+
+* HasAnyUnlockedCollectiblesAvailableToActorCategoryByCategoryType(*[CollectibleCategoryType|#CollectibleCategoryType]* _collectibleCategoryType_, *[GameplayActorCategory|#GameplayActorCategory]* _actorCategory_)
+** _Returns:_ *bool* _hasAnyUnlocked_
+
+
+* IsCollectibleCategoryFavoritable(*[CollectibleCategoryType|#CollectibleCategoryType]* _collectibleCategoryType_)
+** _Returns:_ *bool* _canBeFavorited_
+
+
+* GetCollectibleDefaultNickname(*integer* _collectibleId_)
+** _Returns:_ *string* _name_
+
+
+* SetOrClearCollectibleUserFlag(*integer* _collectibleId_, *[CollectibleUserFlags|#CollectibleUserFlags]* _userFlag_, *bool* _isSet_)
+
+
+* GetCollectibleUserFlags(*integer* _collectibleId_)
+** _Returns:_ *[CollectibleUserFlags|#CollectibleUserFlags]* _userFlags_
+
+
+* DoesCollectibleCategoryContainAnyCollectiblesWithUserFlags(*[CollectibleCategoryType|#CollectibleCategoryType]* _categoryType_, *[CollectibleUserFlags|#CollectibleUserFlags]* _userFlags_)
+** _Returns:_ *bool* _containsCollectible_
+
+
+* CanAcquireCollectibleByDefId(*integer* _collectibleId_)
+** _Returns:_ *bool* _canAcquire_
+
+
+* GetMarketProductItemRewardListId *private* (*integer* _marketProductId_)
+** _Returns:_ *integer* _rewardListId_
+
+
+* DoesTributeCardHaveMechanicType(*integer* _cardDefId_, *[TributeMechanic|#TributeMechanic]* _mechanicType_)
+** _Returns:_ *bool* _hasMechanicType_
+
+
+h3. Control
+* GetFlexPadding(*[FlexEdge|#FlexEdge]* _edge_)
+** _Returns:_ *number* _padding_
+
+* SetFlexPaddings(*number* _left_, *number* _top_, *number* _right_, *number* _bottom_)
+
+* SetTransformScaleZ(*number* _scaleZ_)
+
+
+h3. TooltipControl
+* SetTributePatronWithFavorState(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _highlightFavorState_)
+
+
+
+************************
+***Functions Removed ***
+************************
+
+* GetFriendHeronName(*luaindex* _friendIndex_)
+** _Returns:_ *string:nilable* _heronName_
+
+
+* IsHeronUI()
+** _Returns:_ *bool* _isHeronUI_
+
+
+
+************************
+***Functions Changed ***
+************************
+
+Changed type to *integer53*
+* CompareId64ToNumber(*id64* _id_, *integer* _number_)
+* BitAnd(*integer* _valueA_, *integer* _valueB_)
+* BitOr(*integer* _valueA_, *integer* _valueB_)
+* BitLShift(*integer* _value_, *integer* _numBits_)
+* BitRShift(*integer* _value_, *integer* _numBits_)
+* GetDiffBetweenTimeStamps(*integer53* _laterTime_, *integer53* _earlierTime_)
+* GetDateElementsFromTimestamp(*integer53* _timestamp_)
+* GetDayOfTheWeekIndex(*integer53* _timestamp_)
+* GetTimeStamp()
+** _Returns:_ *integer53* _timestamp_
+* GetTimestampForStartOfDate(*integer* _year_, *integer* _month_, *integer* _day_, *bool* _inLocalTime_)
+** _Returns:_ *integer53* _timestamp_
+* GetAchievementTimestamp(*integer* _achievementId_)
+** _Returns:_ *integer53* _timestamp_
+
+
+Added _targetingFormatterOverrideText_
+* GetTributeMechanicTargetingText(*[TributeMechanic|#TributeMechanic]* _mechanicType_, *integer* _quantity_, *integer* _param1_, *integer* _param2_, *integer* _param3_, *string* _targetingFormatterOverrideText_)
+** _Returns:_ *string* _targetingText_
+* GetTributePatronRequirementTargetingText(*[TributePatronRequirement|#TributePatronRequirement]* _requirementType_, *integer* _quantity_, *integer* _param1_, *integer* _param2_, *string* _targetingFormatterOverrideText_)
+** _Returns:_ *string* _targetingText_
+
+
+h3. Control
+Added _scaleZ_
+* GetTransformScale()
+** _Returns:_ *number* _scaleX_, *number* _scaleY_, *number* _scaleZ_
+
+Changed type to *[ControlType|#ControlType]*
+* GetType()
+** _Returns:_ *[ControlType|#ControlType]* _type_
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_COLLECTIBLE_USER_FLAGS_UPDATED (*integer* _collectibleId_, *integer* _oldFlags_, *integer* _newFlags_)
+
+* EVENT_GUILD_KEEP_ATTACK_UPDATE (*[ChannelType|#ChannelType]* _channel_, *integer* _numGuardsKilled_, *integer* _numAttackers_, *string* _location_)
+
+* EVENT_RANDOM_DICE_ROLL (*string* _displayName_, *string* _characterName_, *integer* _maxValue_, *integer* _numDice_, *integer* _modifier_, *integer* _rollResult_)
+* EVENT_RANDOM_MOUNT_SETTING_CHANGED (*[RandomMountType|#RandomMountType]* _playerRandomMountType_, *[RandomMountType|#RandomMountType]* _companionRandomMountType_)
+* EVENT_RANDOM_RANGE_ROLL (*string* _displayName_, *string* _characterName_, *integer* _minValue_, *integer* _maxValue_, *integer* _rollResult_)
+
+
+
+**********************
+*** Events Removed ***
+**********************
+
+* EVENT_FRIEND_HERON_INFO_BATCH_UPDATED
+
+* EVENT_HERON_URL_REQUESTED (*string* _urlString_)
+
+
+**********************
+*** Events Changed ***
+**********************
+
+Added _errorCode_
+* EVENT_LUA_ERROR (*string* _error_, *integer* _errorCode_)
+
+
+
+***************************
+*** UI XML Layout Added ***
+***************************
+
+h5. FlexPadding
+* _attribute:_ *number* _left_
+* _attribute:_ *number* _top_
+* _attribute:_ *number* _right_
+* _attribute:_ *number* _bottom_
+
+
+h5. Control
+* [Child: FlexPadding|#FlexPadding]
+
+
+h5. TransformScale
+* _attribute:_ *number* _z_
