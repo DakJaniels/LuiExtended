@@ -1,0 +1,790 @@
+******************
+***Enums Added ***
+******************
+
+* INSTANCE_TYPE_GATEABLE_DUNGEON
+
+* LOOT_TYPE_CURRENCY
+* LOOT_TYPE_DEPRECATED_1
+* LOOT_TYPE_DEPRECATED_2
+* LOOT_TYPE_DEPRECATED_3
+* LOOT_TYPE_DEPRECATED_4
+* LOOT_TYPE_DEPRECATED_5
+* LOOT_TYPE_DEPRECATED_6
+* LOOT_TYPE_DEPRECATED_7
+* LOOT_TYPE_DEPRECATED_8
+
+* NON_COMBAT_BONUS_SLOTTED_ABILITY_EXP
+
+* NOTIFICATION_TYPE_CONSOLE_ADDON_MEMORY_LIMIT_REACHED
+* NOTIFICATION_TYPE_CONSOLE_ADDON_SAVED_VARIABLES_LIMIT_REACHED
+
+* SOCIAL_RESULT_RESTRICTED_COMMUNICATION
+
+* UI_SYSTEM_CHARACTER_STATS
+* UI_SYSTEM_GROUP_FINDER
+* UI_SYSTEM_SKILLS
+
+* ATTRIBUTE_VISUAL_FORCE_INCREASED_POWER_STAT_VISUAL
+
+h5. ReturningPlayerInstanceJumpResult
+* RETURNING_PLAYER_INSTANCE_JUMP_RESULT_ALREADY_IN_INSTANCE
+* RETURNING_PLAYER_INSTANCE_JUMP_RESULT_JUMP_FAILED
+* RETURNING_PLAYER_INSTANCE_JUMP_RESULT_NOT_ELIGIBLE
+* RETURNING_PLAYER_INSTANCE_JUMP_RESULT_SUCCESS
+
+* CHAPTER_CRAG
+
+* CURRENCY_CHANGE_REASON_RESPEC_SUBCLASS
+
+* HOUSING_FURNITURE_LOCATION_FILTER_FURNITURE_VAULT
+
+* BAG_FURNITURE_VAULT
+
+* INVENTORY_COUNT_BAG_OPTION_FURNITURE
+
+* ITEM_USE_TYPE_ROLL_LOOT_TABLE
+
+* QUEST_CONDITION_TYPE_SUBCLASS_SWAP_SKILL_LINE
+* QUEST_CONDITION_TYPE_SUBCLASS_TRAIN_SKILL_LINE
+
+* CAMERA_SETTING_INVERT_X
+
+* GAMEPAD_SETTING_DEADZONE_INNER_LEFT_STICK
+* GAMEPAD_SETTING_DEADZONE_INNER_RIGHT_STICK
+* GAMEPAD_SETTING_DEADZONE_OUTER_LEFT_STICK
+* GAMEPAD_SETTING_DEADZONE_OUTER_RIGHT_STICK
+* GAMEPAD_SETTING_DEADZONE_TRIGGERS
+
+* OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_DEADZONES
+
+* UI_SETTING_RESTRICTED_COMMUNICATION
+
+* TRADE_ACTION_RESULT_ON_TRADE_COOLDOWN
+
+h5. AnnouncementBannerOverrideType
+* ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_ARMOR_STYLES
+* ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_CRATE
+* ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_CURRENCIES
+* ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_GENERAL_REWARDS
+* ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_MOTIF
+* ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_NONE
+* ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_WEAPON_STYLES
+
+* CLAIM_REWARD_RESULT_EXCEEDS_CURRENCY_CAP
+* CLAIM_REWARD_RESULT_NOT_RETURNING_PLAYER
+
+* ABILITY_PROGRESSION_RESULT_SUBCLASSING_ABILITY_PURCHASE_DISABLED
+
+* RESPEC_RESULT_INVALID_SKILL_SELECTION
+* RESPEC_RESULT_SCROLL_NOT_ALLOWED
+* RESPEC_RESULT_SKILL_ACTIVATE_ACTIVATING_SKILL_NOT_AVALIABLE
+* RESPEC_RESULT_SKILL_ACTIVATE_ACTIVATING_SKILL_NOT_A_CLASS_SKILL
+* RESPEC_RESULT_SKILL_ACTIVATE_ACTIVATING_SKILL_NOT_A_VALID_SKILL
+* RESPEC_RESULT_SKILL_ACTIVATE_ACTIVATING_TWO_SUBSKILLS_FROM_SAME_CLASS
+* RESPEC_RESULT_SKILL_ACTIVATE_CHARACTER_HAS_NO_CLASS
+* RESPEC_RESULT_SKILL_ACTIVATE_NEED_ONE_SKILL_FROM_CHARACTER_CLASS
+* RESPEC_RESULT_SKILL_ACTIVATE_NEED_TO_OWN_CLASS
+* RESPEC_RESULT_SKILL_ACTIVATE_UNEQUAL_NUMBER_OF_REMOVES_AND_ADDS
+* RESPEC_RESULT_SKILL_ALREADY_IN_TRAINING
+* RESPEC_RESULT_SKILL_ALREADY_MASTERED
+* RESPEC_RESULT_SKILL_REMOVED_WHILE_SUBCLASSING
+* RESPEC_RESULT_SKILL_SWAPPING_DISABLED
+* RESPEC_RESULT_SKILL_SWAPPING_INVALID_MODE
+* RESPEC_RESULT_SKILL_TRAINING_CAN_NOT_TRAIN_ANYMORE_SKILLS
+* RESPEC_RESULT_SKILL_TRAINING_NEED_TO_OWN_CLASS
+* RESPEC_RESULT_SKILL_TRAINING_NOT_AN_ACCOUNT_SKILL
+* RESPEC_RESULT_SKILL_TRAINING_NOT_A_CLASS_SKILL
+* RESPEC_RESULT_SKILL_TRAINING_NOT_A_VALID_SKILL
+* RESPEC_RESULT_SUBCLASSING_ABILITY_PURCHASE_DISABLED
+* RESPEC_RESULT_SUBCLASSING_ACCESS_DENIED
+* RESPEC_RESULT_SUBCLASSING_DISABLED
+* RESPEC_RESULT_SUBCLASSING_SKILL_SWAPPING_DISABLED
+* RESPEC_RESULT_SUBCLASSING_TRAINING_DISABLED
+* RESPEC_RESULT_SUBCLASSING_TRAINING_INVALID_MODE
+
+* RESPEC_TYPE_SUBCLASS
+
+* SKILL_POINT_ALLOCATION_MODE_SUBCLASS_ONLY
+
+h5. SubclassingAccessLevel
+* SUBCLASSING_ACCESS_LEVEL_CONDITIONAL
+* SUBCLASSING_ACCESS_LEVEL_FULL
+* SUBCLASSING_ACCESS_LEVEL_NONE
+
+* GIFT_ACTION_RESULT_RESTRICTED_COMMUNICATION
+
+* MARKET_OPEN_OPERATION_SKILLS_SCRIBING_LIBRARY
+* MARKET_OPEN_OPERATION_SKILLS_SUBCLASSING
+
+* MAP_FILTER_ARENAS
+* MAP_FILTER_NONE
+
+* STORE_FAILURE_NOT_ENOUGH_CURRENCY
+* STORE_FAILURE_REUSE_1
+* STORE_FAILURE_REUSE_2
+* STORE_FAILURE_REUSE_3
+* STORE_FAILURE_REUSE_4
+* STORE_FAILURE_REUSE_5
+* STORE_FAILURE_REUSE_6
+
+* MAIL_SEND_RESULT_FAIL_RESTRICTED_COMMUNICATION
+
+* ACTION_RESULT_AT_PET_LIMIT
+* ACTION_RESULT_BAD_TARGET_COMBAT_STATE
+
+* TUTORIAL_TRIGGER_CURRENCY_GAINED
+* TUTORIAL_TRIGGER_DEPRECATED_4
+* TUTORIAL_TRIGGER_DEPRECATED_5
+* TUTORIAL_TRIGGER_DEPRECATED_6
+* TUTORIAL_TRIGGER_DEPRECATED_7
+* TUTORIAL_TRIGGER_DEPRECATED_8
+* TUTORIAL_TRIGGER_DEPRECATED_9
+* TUTORIAL_TRIGGER_DEPRECATED_10
+* TUTORIAL_TRIGGER_FURNITURE_VAULT_REMIND_ON_PLACE
+* TUTORIAL_TRIGGER_SUBCLASSING_SWAP_SKILL_LINE_POINTER_BOX
+* TUTORIAL_TRIGGER_SUBCLASSING_SYSTEM
+* TUTORIAL_TRIGGER_SUBCLASSING_TRAIN_SKILL_LINE
+
+h5. ModBrowserCategoryType
+* MOD_BROWSER_CATEGORY_TYPE_ABILITY_BAR
+* MOD_BROWSER_CATEGORY_TYPE_BANK_AND_INVENTORY
+* MOD_BROWSER_CATEGORY_TYPE_BETA
+* MOD_BROWSER_CATEGORY_TYPE_BUFFS_AND_DEBUFFS
+* MOD_BROWSER_CATEGORY_TYPE_CAST_BARS_AND_COOLDOWNS
+* MOD_BROWSER_CATEGORY_TYPE_CHARACTER_PROGRESSION
+* MOD_BROWSER_CATEGORY_TYPE_CHAT
+* MOD_BROWSER_CATEGORY_TYPE_COMBAT
+* MOD_BROWSER_CATEGORY_TYPE_CRAFTING
+* MOD_BROWSER_CATEGORY_TYPE_DATA
+* MOD_BROWSER_CATEGORY_TYPE_GUILD_TRADERS_AND_VENDORS
+* MOD_BROWSER_CATEGORY_TYPE_HOUSING
+* MOD_BROWSER_CATEGORY_TYPE_INFO_AND_PLUGIN_BARS
+* MOD_BROWSER_CATEGORY_TYPE_LIBRARIES
+* MOD_BROWSER_CATEGORY_TYPE_MAIL
+* MOD_BROWSER_CATEGORY_TYPE_MAP_AND_COMPASS
+* MOD_BROWSER_CATEGORY_TYPE_MISC
+* MOD_BROWSER_CATEGORY_TYPE_PLUGINS_AND_PATCHES
+* MOD_BROWSER_CATEGORY_TYPE_PVP
+* MOD_BROWSER_CATEGORY_TYPE_ROLEPLAY
+* MOD_BROWSER_CATEGORY_TYPE_SOCIAL
+* MOD_BROWSER_CATEGORY_TYPE_TOOLTIP
+* MOD_BROWSER_CATEGORY_TYPE_TRIALS
+* MOD_BROWSER_CATEGORY_TYPE_UI_GRAPHICS
+* MOD_BROWSER_CATEGORY_TYPE_UNIT_FRAMES
+* MOD_BROWSER_CATEGORY_TYPE_UTILITY
+
+
+h5. ModBrowserListingReportReason
+* MOD_BROWSER_LISTING_REPORT_REASON_CHILD_ABUSE
+* MOD_BROWSER_LISTING_REPORT_REASON_DOXING
+* MOD_BROWSER_LISTING_REPORT_REASON_HATE_SPEECH
+* MOD_BROWSER_LISTING_REPORT_REASON_IMMINENT_HARM
+* MOD_BROWSER_LISTING_REPORT_REASON_MISLEADING
+* MOD_BROWSER_LISTING_REPORT_REASON_NONE
+* MOD_BROWSER_LISTING_REPORT_REASON_NUDITY
+* MOD_BROWSER_LISTING_REPORT_REASON_OTHER
+* MOD_BROWSER_LISTING_REPORT_REASON_PROFANE
+* MOD_BROWSER_LISTING_REPORT_REASON_SELF_HARM
+* MOD_BROWSER_LISTING_REPORT_REASON_STOLEN_COPYRIGHT
+* MOD_BROWSER_LISTING_REPORT_REASON_TERRORISM
+
+
+h5. ModBrowserListingReportResult
+* MOD_BROWSER_LISTING_REPORT_RESULT_FAILURE
+* MOD_BROWSER_LISTING_REPORT_RESULT_SUCCESS
+
+
+h5. ModBrowserListingReportSource
+* MOD_BROWSER_LISTING_REPORT_SOURCE_CONTENTS
+* MOD_BROWSER_LISTING_REPORT_SOURCE_DESCRIPTION
+* MOD_BROWSER_LISTING_REPORT_SOURCE_IMAGE
+* MOD_BROWSER_LISTING_REPORT_SOURCE_NAME
+* MOD_BROWSER_LISTING_REPORT_SOURCE_NONE
+
+
+h5. ModBrowserLoadDependenciesResult
+* MOD_BROWSER_LOAD_DEPENDENCIES_RESULT_LOAD_DEPENDENCIES_FAILED
+* MOD_BROWSER_LOAD_DEPENDENCIES_RESULT_SUCCESS
+
+
+h5. ModBrowserLoadImageResult
+* MOD_BROWSER_LOAD_IMAGE_RESULT_IMAGE_DOESNT_EXIST
+* MOD_BROWSER_LOAD_IMAGE_RESULT_LOAD_IMAGE_FAILED
+* MOD_BROWSER_LOAD_IMAGE_RESULT_SUCCESS
+
+
+h5. ModBrowserLoadReleaseNoteResult
+* MOD_BROWSER_LOAD_RELEASE_NOTE_RESULT_LOAD_RELEASE_NOTE_FAILED
+* MOD_BROWSER_LOAD_RELEASE_NOTE_RESULT_SUCCESS
+
+
+h5. ModBrowserRequestListingsResult
+* MOD_BROWSER_REQUEST_LISTINGS_RESULT_REQUEST_LISTINGS_FAILED
+* MOD_BROWSER_REQUEST_LISTINGS_RESULT_SUCCESS
+
+
+h5. ModBrowserSearchType
+* MOD_BROWSER_SEARCH_TYPE_BROWSE
+* MOD_BROWSER_SEARCH_TYPE_SUBSCRIBED
+
+
+h5. ModInstallState
+* MOD_INSTALL_STATE_INSTALLED
+* MOD_INSTALL_STATE_INSTALLING
+* MOD_INSTALL_STATE_NOT_INSTALLED
+* MOD_INSTALL_STATE_UNINSTALLING
+* MOD_INSTALL_STATE_UPDATE_AVAILABLE
+
+* GRAPHICS_PRESETS_PS5_PRO
+
+
+
+********************
+***Enums Removed ***
+********************
+
+* LOOT_TYPE_ARCHIVAL_FORTUNES
+* LOOT_TYPE_CHAOTIC_CREATIA
+* LOOT_TYPE_EVENT_TICKET
+* LOOT_TYPE_IMPERIAL_FRAGMENTS
+* LOOT_TYPE_MONEY
+* LOOT_TYPE_STYLE_STONES
+* LOOT_TYPE_TELVAR_STONES
+* LOOT_TYPE_UNDAUNTED_KEYS
+* LOOT_TYPE_WRIT_VOUCHERS
+
+* STORE_FAILURE_NOT_ENOUGH_ALLIANCE_POINTS
+* STORE_FAILURE_NOT_ENOUGH_ARCHIVAL_FORTUNES
+* STORE_FAILURE_NOT_ENOUGH_CHAOS_CREATIA
+* STORE_FAILURE_NOT_ENOUGH_EVENT_TICKETS
+* STORE_FAILURE_NOT_ENOUGH_IMPERIAL_FRAGMENTS
+* STORE_FAILURE_NOT_ENOUGH_STYLE_STONES
+* STORE_FAILURE_NOT_ENOUGH_TELVAR_STONES
+* STORE_FAILURE_NOT_ENOUGH_UNDAUNTED_KEYS
+* STORE_FAILURE_NOT_ENOUGH_WRIT_VOUCHERS
+
+* TUTORIAL_TRIGGER_CURRENCY_GAINED_ARCHIVAL_FORTUNES
+* TUTORIAL_TRIGGER_CURRENCY_GAINED_CHAOTIC_CREATIA
+* TUTORIAL_TRIGGER_CURRENCY_GAINED_CROWN_GEMS
+* TUTORIAL_TRIGGER_CURRENCY_GAINED_ENDEAVOR_SEALS
+* TUTORIAL_TRIGGER_CURRENCY_GAINED_EVENT_TICKETS
+* TUTORIAL_TRIGGER_CURRENCY_GAINED_IMPERIAL_FRAGMENTS
+* TUTORIAL_TRIGGER_CURRENCY_GAINED_STYLE_STONES
+* TUTORIAL_TRIGGER_CURRENCY_GAINED_UNDAUNTED_KEYS
+* TUTORIAL_TRIGGER_REUSE_1
+
+* GRAPHICS_PRESETS_REUSE_ME
+
+
+
+********************
+***Globals Added ***
+********************
+
+* ABILITY_SKILLPOINT_COST
+* MAX_SKILL_LINES_IN_TRAINING
+* SUBCLASS_ABILITY_SKILLPOINT_COST
+* MOD_BROWSER_REPORT_LISTING_COMMENT_MAX_LENGTH
+* MOD_BROWSER_TEXT_SEARCH_MAX_LENGTH
+* ACCOUNT_NAME_MAX_LENGTH
+* ACCOUNT_NAME_MIN_LENGTH
+* CHARNAME_MIN_LENGTH
+* DECORATED_DISPLAY_NAME_MAX_LENGTH
+* DISPLAY_NAME_PREFIX_BYTE
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* ResetConsolePublicUserSettingsToDefault()
+
+* GetClassIdByIndex(*luaindex* _index_)
+** _Returns:_ *integer* _classId_
+
+* AreId64sEqual(*id64* _firstId_, *id64* _secondId_)
+** _Returns:_ *bool* _areEqual_
+
+* IsId64EqualToNumber(*id64* _id_, *integer53* _number_)
+** _Returns:_ *bool* _areEqual_
+
+* IsGameInWindowedMode()
+** _Returns:_ *bool* _isInWindowedMode_
+
+* DoesPlatformSupportModBrowser()
+** _Returns:_ *bool* _usesMods_
+
+* DeleteSavedVariablesForAddonIndex(*luaindex* _addOnIndex_)
+
+* GetTotalUserAddOnMemoryPoolUsageMB()
+** _Returns:_ *number* _totalUserAddOnMemoryPoolCapacityMB_
+
+* GetTotalUserAddOnMemoryPoolCapacityMB()
+** _Returns:_ *number* _totalUserAddOnMemoryPoolCapacityMB_
+
+* GetTotalUserAddOnCPUTimeUsedNowMS()
+** _Returns:_ *number* _totalUserAddOnCPUTimeUsedThisFrameMS_
+
+* GetTotalUserAddOnCPUTimeUsedLastFrameMS()
+** _Returns:_ *number* _totalUserAddOnCPUTimeUsedLastFrameMS_
+
+* GetTotalUserAddOnCPUTimeAvailableEachFrameMS()
+** _Returns:_ *number* _totalUserAddOnCPUTimeAvailableEachFrameMS_
+
+* HasActiveEditControl()
+** _Returns:_ *bool* _hasActiveEditControl_
+
+* ShouldWarnConsoleAddOnMemoryLimit()
+** _Returns:_ *bool* _warnConsoleAddOnMemoryLimit_
+
+* ShouldWarnConsoleAddOnSavedVariableLimit()
+** _Returns:_ *bool* _warnConsoleAddOnSavedVariableLimit_
+
+* ClearWarnConsoleAddOnMemoryLimit()
+
+* ClearWarnConsoleAddOnSavedVariableLimit()
+
+* IsCommunicationRestrictedAccount()
+** _Returns:_ *bool* _isCommunicationRestrictedAccount_
+
+* ResetGamepadDeadzonesToDefault()
+
+* PickupAbilityById *protected* (*integer* _abilityId_)
+
+* IsCommunicationRestricted()
+** _Returns:_ *bool* _isCommunicationRestricted_
+
+* CanCommunicateWith(*string* _characterOrDisplayName_, *id64* _consoleId_)
+** _Returns:_ *bool* _isCommunicationPermitted_
+
+* GetEffectiveAbilityIdForAbilityOnHotbarForArmoryBuild(*integer* _abilityId_, *luaindex* _buildIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+
+* CanAbandonJournalQuest(*luaindex* _journalQuestIndex_)
+** _Returns:_ *bool* _canAbandon_
+
+* IsChannelCategoryCommunicationRestricted(*[ChatChannelCategories|#ChatChannelCategories]* _channelCategory_)
+** _Returns:_ *bool* _isChannelRestricted_
+
+* GenerateQuestNameTooltipLine(*luaindex* _questIndex_)
+** _Returns:_ *string* _text_, *[InterfaceColorType|#InterfaceColorType]* _interfaceColorType_, *integer* _color_
+
+* GetPOIMapFilterOverride(*luaindex* _zoneIndex_, *luaindex* _poiIndex_)
+** _Returns:_ *[MapFilter|#MapFilter]* _mapFilterOverride_
+
+* GetSkillLinePointCostMultiplier(*[SkillType|#SkillType]* _skillType_, *luaindex* _skillLineIndex_)
+** _Returns:_ *integer* _multiplier_
+
+* GetSkillAbilityCharacterLevelNeededToUnlock(*[SkillType|#SkillType]* _skillType_, *luaindex* _skillLineIndex_, *luaindex* _skillIndex_)
+** _Returns:_ *integer* _levelNeededToUnlock_
+
+* IsPlayerClassSkillLineById(*integer* _skillLineId_)
+** _Returns:_ *bool* _isPlayerClassSkillLine_
+
+* GetSkillLineMasteryCollectibleId(*integer* _skillLineId_)
+** _Returns:_ *integer* _collectibleId_
+
+* GetSubclassingAchievementId()
+** _Returns:_ *integer* _achievementId_
+
+* GetSubclassingQuestId()
+** _Returns:_ *integer* _questId_
+
+* BestowSubclassingQuest()
+
+* GetSubclassingAccessLevel()
+** _Returns:_ *[SubclassingAccessLevel|#SubclassingAccessLevel]* _accessLevel_
+
+* HasAccessToSubclassing()
+** _Returns:_ *bool* _hasAccess_
+
+* AddTrainingToAllocationRequest(*integer* _skillLineIdsToTrain_)
+
+* DeactivateSkillLinesInAllocationRequest(*integer* _skillLineIdsToDeactivate_)
+
+* ActivateSkillLinesInAllocationRequest(*integer* _skillLineIdsToDeactivate_)
+
+* GetClassAccessCollectibleId(*integer* _classId_)
+** _Returns:_ *integer* _collectibleId_
+
+* GetNumSkillLinesForClass(*integer* _classId_)
+** _Returns:_ *integer* _numSkillLines_
+
+* GetSkillLineIdForClass(*integer* _classId_, *luaindex* _classSkillLineIndex_)
+** _Returns:_ *integer* _skillLineId_
+
+* GetSkillLineClassId(*[SkillType|#SkillType]* _skillType_, *luaindex* _skillLineIndex_)
+** _Returns:_ *integer* _classId_
+
+* GetSubclassingHelpIndices()
+** _Returns:_ *luaindex:nilable* _helpCategoryIndex_, *luaindex:nilable* _helpIndex_
+
+* HasShownReturningPlayerAnnouncement()
+** _Returns:_ *bool* _hasShownAnnouncement_
+
+* FlagReturningPlayerAnnouncementSeen()
+
+* HousingEditorGetRetrieveToBag()
+** _Returns:_ *[Bag|#Bag]* _bagId_
+
+* HousingEditorSetRetrieveToBag(*[Bag|#Bag]* _bagId_)
+
+* GetPromotionalEventCampaignActivityDescription(*id64* _campaignKey_, *luaindex* _activityIndex_)
+** _Returns:_ *string* _description_
+
+* StowAllFurnitureItems()
+
+* CanStowFurnitureItem(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
+** _Returns:_ *bool* _canBeStowed_
+
+* IsItemLockedSetPiece(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
+** _Returns:_ *bool* _isLockedSetPiece_
+
+* CanItemBeUsedToLearn(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
+** _Returns:_ *bool* _canBeUsedToLearn_
+
+* IsItemLinkLockedSetPiece(*string* _itemLink_)
+** _Returns:_ *bool* _isLockedSetPiece_
+
+* CanItemLinkBeUsedToLearn(*string* _itemLink_)
+** _Returns:_ *bool* _canBeUsedToLearn_
+
+* IsFurnitureVault(*[Bag|#Bag]* _bagId_)
+** _Returns:_ *bool* _isFurnitureVault_
+
+* GetCurrencyAcquiredUISound(*[CurrencyType|#CurrencyType]* _currencyType_)
+** _Returns:_ *string* _soundId_
+
+* GetCurrencyTransactUISound(*[CurrencyType|#CurrencyType]* _currencyType_)
+** _Returns:_ *string* _soundId_
+
+* GetFurnitureVaultCollectibleId()
+** _Returns:_ *integer* _collectibleId_
+
+* GetCollectibleForBag(*[Bag|#Bag]* _bagId_)
+** _Returns:_ *integer* _collectibleId_
+
+* GetBagForCollectible(*integer* _collectibleId_)
+** _Returns:_ *[Bag|#Bag]:nilable* _bagId_
+
+* GetMarketProductAssociatedAchievementId(*integer* _marketProductId_)
+** _Returns:_ *integer* _associatedAchievementId_
+
+* GetMailItemRewardMailInfo(*integer* _rewardId_)
+** _Returns:_ *string* _sender_, *string* _subject_, *string* _body_
+
+* GetNumReturningPlayerDailyLoginRewards()
+** _Returns:_ *integer* _numLoginRewards_
+
+* GetNumReturningPlayerDailyLoginRewardsClaimed()
+** _Returns:_ *integer* _numClaimedLoginRewards_
+
+* GetReturningPlayerDailyLoginRewardInfo(*luaindex* _rewardIndex_)
+** _Returns:_ *integer* _rewardId_, *integer* _quantity_
+
+* GetReturningPlayerDailyLoginClaimableRewardIndex()
+** _Returns:_ *luaindex:nilable* _rewardIndex_
+
+* ClaimCurrentReturningPlayerDailyLoginReward()
+
+* GetTimeUntilNextReturningPlayerDailyLoginRewardClaimS()
+** _Returns:_ *integer* _timeUntilNextRewardClaimS_
+
+* GetNumClaimableReturningPlayerRewards()
+** _Returns:_ *integer* _numClaimableRewards_
+
+* GetPromotionalEventCampaignAnnouncementBannerOverrideType(*id64* _campaignKey_)
+** _Returns:_ *[AnnouncementBannerOverrideType|#AnnouncementBannerOverrideType]* _overrideType_
+
+* AreAllPromotionalEventCampaignRewardsClaimed(*id64* _campaignKey_)
+** _Returns:_ *bool* _areAllClaimed_
+
+* ShouldPromotionalEventCampaignBeVisible(*id64* _campaignKey_)
+** _Returns:_ *bool* _shouldPromotionalEventCampaignBeVisible_
+
+* IsReturningPlayer()
+** _Returns:_ *bool* _isReturningPlayer_
+
+* IsReturningPlayerPromotionalEventsCampaign(*id64* _campaignKey_)
+** _Returns:_ *bool* _isReturningPlayerCampaign_
+
+* GetCampaignKeyForNextReturningPlayerCampaign(*integer* _campaignId_)
+** _Returns:_ *id64:nilable* _campaignKey_
+
+* GetPromotionalEventCampaignUIPriority(*integer* _campaignId_)
+** _Returns:_ *integer* _uiPriority_
+
+* TryAutoTrackNextPromotionalEventActivity()
+** _Returns:_ *id64* _campaignKeyAutoTracked_
+
+* GetReturningPlayerIntroGameplayData()
+** _Returns:_ *id64:nilable* _campaignKey_, *[PromotionalEventCampaignComponentType|#PromotionalEventCampaignComponentType]:nilable* _componentType_, *luaindex:nilable* _index_
+
+* GetReturningPlayerCampaignDisplayName()
+** _Returns:_ *string* _displayName_
+
+* GetReturningPlayerIntroGameplayDisplayName()
+** _Returns:_ *string* _displayName_
+
+* GetReturningPlayerIntroGameplayDescription()
+** _Returns:_ *string* _description_
+
+* GetNumReturningPlayerPrimaryRewards()
+** _Returns:_ *integer* _numRewards_
+
+* GetReturningPlayerPrimaryRewardData(*luaindex* _rewardIndex_)
+** _Returns:_ *id64* _campaignKey_, *[PromotionalEventCampaignComponentType|#PromotionalEventCampaignComponentType]* _componentType_, *luaindex* _index_
+
+* IsInReturningPlayerIntroWorld()
+** _Returns:_ *bool* _isInReturningPlayerIntroWorld_
+
+* GetExpectedJumpToReturningPlayerIntroGameplayResult()
+** _Returns:_ *[ReturningPlayerInstanceJumpResult|#ReturningPlayerInstanceJumpResult]* _expectedResult_
+
+* RequestJumpToReturningPlayerIntroGameplay *private* ()
+
+* ShouldShowReturningPlayerLeaveIntroPrompt()
+** _Returns:_ *bool* _shouldShow_
+
+* MarkReturningPlayerLeaveIntroPromptShown()
+
+* HandleReturningPlayerUISystemShown(*[UISystem|#UISystem]* _uiSystem_)
+
+h3. AddOnManager
+
+* ClearUnusedAddOnSavedVariables()
+
+* GetTotalUnusedAddOnSavedVariablesDiskUsageMB()
+** _Returns:_ *number* _totalUnusedAddOnSavedVariablesDiskUsageMB_
+
+* GetTotalUserAddOnSavedVariablesDiskCapacityMB()
+** _Returns:_ *number* _totalUserAddOnSavedVariablesDiskCapacityMB_
+
+* GetTotalUserAddOnSavedVariablesDiskUsageMB()
+** _Returns:_ *number* _totalUserAddOnSavedVariablesDiskUsageMB_
+
+* GetUserAddOnSavedVariablesDiskUsageMB(*luaindex* _addOnIndex_)
+** _Returns:_ *number* _userAddOnSavedVariablesDiskUsageMB_
+
+h3. SynchronizingObject
+* Broadcast(*string* _message_)
+
+h3. TextureControl
+* SetTextureFromGuiTexture(*object* _guiTexture_)
+
+h3. TooltipControl
+* AppendQuestName(*luaindex* _questIndex_)
+
+* SetRewardList(*integer* _rewardListId_)
+
+* SetSubclassingSkillLineById(*integer* _skillLineId_)
+
+h3. VectorControl
+* GetObjectFit()
+** _Returns:_ *[ObjectFit|#ObjectFit]* _objectFit_
+
+h3. ScriptEventManager
+* AddFilterForEvent(*string* _name_, *integer* _event_, *variant* _filterParameter_)
+** _Returns:_ *bool* _success_
+
+* RegisterForAllEvents(*string* _name_, *function* _callback_)
+** _Returns:_ *bool* _ret_
+
+* RegisterForEvent(*string* _name_, *integer* _event_, *function* _callback_)
+** _Returns:_ *bool* _ret_
+
+* RegisterForPostEffectsUpdate(*string* _name_, *integer* _minInterval_, *function* _callback_)
+** _Returns:_ *bool* _ret_
+
+* RegisterForUpdate(*string* _name_, *integer* _minInterval_, *function* _callback_)
+** _Returns:_ *bool* _ret_
+
+* UnregisterForAllEvents(*string* _name_)
+** _Returns:_ *bool* _ret_
+
+* UnregisterForEvent(*string* _name_, *integer* _event_)
+** _Returns:_ *bool* _ret_
+
+* UnregisterForPostEffectsUpdate(*string* _name_)
+** _Returns:_ *bool* _ret_
+
+* UnregisterForUpdate(*string* _name_)
+** _Returns:_ *bool* _ret_
+
+
+
+************************
+***Functions Removed ***
+************************
+
+* GetCollectibleForHouseBankBag(*[Bag|#Bag]* _houseBankBagId_)
+** _Returns:_ *integer* _collectibleId_
+
+* GetCollectibleBankAccessBag(*integer* _collectibleId_)
+** _Returns:_ *[Bag|#Bag]:nilable* _houseBankBagId_
+
+* GetPromotionalEventCampaignAnnouncementBannerText(*id64* _campaignKey_)
+** _Returns:_ *string* _bannerText_
+
+
+
+************************
+***Functions Changed ***
+************************
+
+Added _canBeUsedToLearn_
+* GetLootItemInfo(*luaindex* _lootIndex_)
+** _Returns:_ *integer* _lootId_, *string* _name_, *textureName* _icon_, *integer* _count_, *integer* _quality_, *integer* _value_, *bool* _isQuest_, *bool* _stolen_, *[LootItemType|#LootItemType]* _lootType_, *bool* _isLockedSetPiece_, *bool* _canBeUsedToLearn_
+
+Added _isAccountSkill_ and _isInTraining_
+* GetSkillLineDynamicInfo(*[SkillType|#SkillType]* _skillType_, *luaindex* _skillLineIndex_)
+** _Returns:_ *luaindex* _rank_, *bool* _isAdvised_, *bool* _isActive_, *bool* _isDiscovered_, *bool* _isAccountSkill_, *bool* _isInTraining_
+
+Added _characterLevelNeeded_
+* GetSpecificSkillAbilityInfo(*[SkillType|#SkillType]* _skillType_, *luaindex* _skillLineIndex_, *luaindex* _skillIndex_, *integer* _morphChoice_, *integer* _rank_)
+** _Returns:_ *integer* _abilityId_, *luaindex* _skillLineRankNeeded_, *integer* _characterLevelNeeded_
+
+Added _choiceId_
+* TryClaimPromotionalEventCapstoneReward(*id64* _campaignKey_, *integer:nilable* _choiceId_)
+
+Added _choiceId_
+* TryClaimPromotionalEventActivityReward(*id64* _campaignKey_, *luaindex* _activityIndex_, *integer:nilable* _choiceId_)
+
+Added _choiceId_
+* TryClaimPromotionalEventActivityReward(*id64* _campaignKey_, *luaindex* _activityIndex_, *integer:nilable* _choiceId_)
+
+Added _choiceId_
+* TryClaimPromotionalEventMilestoneReward(*id64* _campaignKey_, *luaindex* _milestoneIndex_, *integer:nilable* _choiceId_)
+
+Added _stackCountFurnitureVault_
+* GetItemLinkStacks(*string* _itemLink_)
+** _Returns:_ *integer* _stackCountBackpack_, *integer* _stackCountBank_, *integer* _stackCountCraftBag_, *integer* _stackCountHouseBanks_, *integer* _stackCountFurnitureVault_
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_FURNITURE_ITEMS_TRANSFERRED_TO_FURNITURE_VAULT (*integer* _numEligibleSlotsTransferred_, *integer* _numEligibleSlots_)
+
+* EVENT_HOUSING_FURNITURE_RETRIEVE_TO_BAG_CHANGED (*[Bag|#Bag]* _bagId_)
+
+* EVENT_PLAYER_TELEPORTED_LOCALLY
+
+* EVENT_RETURNING_PLAYER_DAILY_LOGIN_REWARD_CLAIMED
+
+* EVENT_RETURNING_PLAYER_INSTANCE_JUMP_RESULT (*[ReturningPlayerInstanceJumpResult|#ReturningPlayerInstanceJumpResult]* _result_)
+
+* EVENT_CONSOLE_ADDONS_DISABLED_STATE_CHANGED (*bool* _consoleAddonsDisabled_)
+
+* EVENT_MOD_BROWSER_SEARCH_COMPLETE (*[ModBrowserRequestListingsResult|#ModBrowserRequestListingsResult]* _result_, *integer* _searchId_)
+
+* EVENT_MOD_INSTALL_STATE_CHANGED (*[ModInstallState|#ModInstallState]* _installState_)
+
+* EVENT_MOD_LISTING_DEPENDENCIES_LOAD_COMPLETE (*luaindex* _listingIndex_,*[ModBrowserLoadDependenciesResult|#ModBrowserLoadDependenciesResult]* _result_)
+
+* EVENT_MOD_LISTING_IMAGE_LOAD_COMPLETE (*luaindex* _listingIndex_, *luaindex* _imageIndex_, *[ModBrowserLoadImageResult|#ModBrowserLoadImageResult]* _result_)
+
+* EVENT_MOD_LISTING_RELEASE_NOTE_LOAD_COMPLETE (*luaindex* _listingIndex_, *luaindex* _releaseIndex_, *[ModBrowserLoadReleaseNoteResult|#ModBrowserLoadReleaseNoteResult]* _result_)
+
+* EVENT_MOD_LISTING_REPORT_SUBMITTED (*[ModBrowserListingReportResult|#ModBrowserListingReportResult]* _result_)
+
+* EVENT_ADD_ONS_LOADED
+
+* EVENT_CONSOLE_ADD_ONS_MEMORY_LIMIT_REACHED
+
+* EVENT_CONSOLE_ADD_ONS_SAVED_VARIABLES_LIMIT_REACHED
+
+* EVENT_ACCOUNT_EMAIL_ACTIVATION_EMAIL_SENT
+* EVENT_CONSOLE_INFO_RECEIVED (*integer* _requestKey_, *string* _displayName_, *id64* _consoleId_, *bool* _success_)
+* EVENT_FRIEND_CHARACTER_INFO_RECEIVED (*string* _displayName_, *bool* _hasCharacter_, *string* _characterName_, *string* _zoneName_, *integer* _classType_, *[Alliance|#Alliance]* _alliance_, *integer* _level_, *integer* _championPoints_)
+* EVENT_GROUP_MEMBER_ACCOUNT_NAME_UPDATED (*string* _unitTag_, *string* _accountName_)
+* EVENT_UNSUCCESSFUL_REQUEST_RESULT (*string* _resultMessage_)
+* EVENT_VOICE_CHANNEL_AVAILABLE (*string* _channelName_, *bool* _muted_, *bool* _joined_, *bool* _transmit_)
+* EVENT_VOICE_CHANNEL_JOINED (*string* _channelName_)
+* EVENT_VOICE_CHANNEL_LEFT (*string* _channelName_)
+* EVENT_VOICE_CHANNEL_UNAVAILABLE (*string* _channelName_)
+* EVENT_VOICE_CHAT_TRANSCRIPT (*string* _channelName_, *string* _fromName_, *string* _text_, *string* _fromDisplayName_)
+* EVENT_VOICE_DEVICE_INFO (*string* _deviceName_, *bool* _isInput_, *bool* _isCurrent_)
+* EVENT_VOICE_MUTE_LIST_UPDATED
+* EVENT_VOICE_TRANSMIT_CHANNEL_CHANGED (*string* _channelName_)
+* EVENT_VOICE_USER_JOINED_CHANNEL (*string* _channelName_, *string* _displayName_, *string* _characterName_, *bool* _isSpeaking_)
+* EVENT_VOICE_USER_LEFT_CHANNEL (*string* _channelName_, *string* _displayName_)
+* EVENT_VOICE_USER_SPEAKING (*string* _channelName_, *string* _displayName_, *string* _characterName_, *bool* _speaking_)
+
+* EVENT_CONSOLE_TEXT_VALIDATION_RESULT (*integer* _key_, *bool* _valid_)
+
+* EVENT_CONTROLLER_CONNECTED
+
+* EVENT_CONTROLLER_DISCONNECTED
+
+* EVENT_DURANGO_ACCOUNT_PICKER_RETURNED
+
+* EVENT_PLATFORMS_LIST_LOADED (*[ConsoleServerChoice|#ConsoleServerChoice]* _server_)
+
+* EVENT_PLATFORM_ACHIEVEMENT_TRIGGERED
+
+* EVENT_PLATFORM_STORE_DIALOG_FINISHED (*[PlatformStoreDialogResult|#PlatformStoreDialogResult]* _result_)
+
+* EVENT_PROFILE_CARD_DIALOG_CLOSED
+
+* EVENT_PROFILE_CARD_DIALOG_OPENED
+
+* EVENT_PROFILE_DURANGO_SIGNED_OUT
+
+* EVENT_PROFILE_LOGIN_REQUESTED
+
+* EVENT_PROFILE_LOGIN_RESULT (*bool* _isSuccess_, *[ProfileLoginError|#ProfileLoginError]* _error_)
+
+* EVENT_PROFILE_ORBIS_SIGNED_OUT
+
+* EVENT_PROFILE_SAVELOAD_FAIL (*string* _failReason_)
+
+* EVENT_PROFILE_SAVELOAD_REQUESTED
+
+* EVENT_PROFILE_SAVELOAD_SUCCESSFUL
+
+* EVENT_RESEND_VERIFICATION_EMAIL_RESULT (*bool* _success_)
+
+* EVENT_RESUME_FROM_SUSPEND
+
+* EVENT_SAVE_DATA_COMPLETE
+
+* EVENT_SAVE_DATA_START
+
+* EVENT_SELECT_FROM_USER_LIST_DIALOG_RESULT (*bool* _hasResult_, *string* _displayName_, *id64* _consoleId_)
+
+* EVENT_SLD_SAVE_LOAD_ERROR (*[SaveLoadDialogError|#SaveLoadDialogError]* _errorType_)
+
+* EVENT_START_WAIT_SPINNER
+
+* EVENT_STOP_WAIT_SPINNER
+
+* EVENT_SYSTEM_HELP_OPENED
+
+* EVENT_SYSTEM_MENU_CLOSED
+
+* EVENT_SYSTEM_MENU_OPENED
+
+* EVENT_WEB_BROWSER_CLOSED
+
+* EVENT_WEB_BROWSER_OPENED
+
+
+
+**********************
+*** Events Removed ***
+**********************
+
+* EVENT_SHOW_PROMOTIONAL_EVENT_SCENE
+
+
+
+**********************
+*** Events Changed ***
+**********************
+
+Added _reasonParam1_
+* EVENT_STORE_FAILURE (*[StoreFailure|#StoreFailure]* _reason_, *integer* _errorStringId_, *integer* _reasonParam1_)

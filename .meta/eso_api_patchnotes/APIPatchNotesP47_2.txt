@@ -1,0 +1,35 @@
+***********************
+*** Functions Added ***
+***********************
+
+* GetActiveSpectacleEventPhaseCompleteNotificationMessage(*integer* _activeSpectacleEventId_)
+** _Returns:_ *string* _phaseCompleteNotificationMessage_
+
+* GetSpectacleEventPhaseStartedAnnouncementInfo(*integer* _activeSpectacleEventId_, *integer* _activeSpectacleEventPhaseId_)
+** _Returns:_ *string* _broadcastMessage_, *string* _soundId_
+
+* GetSpectacleEventPhaseCompleteAnnouncementInfo(*integer* _activeSpectacleEventId_, *integer* _activeSpectacleEventPhaseId_)
+** _Returns:_ *string* _broadcastMessage_, *string* _soundId_
+
+* GetActiveSpectacleEventIdsForWhichPOIIsPrimary(*luaindex* _zoneIndex_, *luaindex* _poiIndex_)
+** _Uses variable returns..._
+** _Returns:_ *integer* _primaryActiveSpectacleEventId_
+
+
+
+*************************
+*** Functions Removed ***
+*************************
+
+* GetActiveSpectacleEventPhaseEndedNotificationMessage(*integer* _activeSpectacleEventId_)
+** _Returns:_ *string* _phaseEndedNotificationMessage_
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_LORE_BOOK_COLLECTION_LEARNED (*luaindex* _categoryIndex_, *luaindex* _collectionIndex_, *integer* _numBooksLearned_)
+
+* EVENT_SPECTACLE_EVENT_PHASE_UPDATED (*integer* _spectacleId_, *integer* _oldActivePhaseId_, *integer* _newActivePhaseId_, *bool* _isInitialUpdate_)

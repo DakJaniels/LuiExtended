@@ -1,0 +1,638 @@
+******************
+***Enums Added ***
+******************
+
+* APPROVED_URL_ESO_ACCOUNT_EDIT
+
+* JUMP_RESULT_JUMP_FAILED_TOO_MANY_JUMP_REQUESTS
+
+* NON_COMBAT_BONUS_TOME_POINTS_GAIN
+
+* PROGRESS_REASON_AZ_SKIRMISH_COMPLETED
+* PROGRESS_REASON_CHARACTER_UPGRADE
+
+* TOOLTIP_GAME_DATA_TEAM_SCORE
+
+* UI_SYSTEM_TAMRIEL_TOMES
+
+* ZONE_DISPLAY_TYPE_ADVENTURE_ZONE
+
+* ABILITY_TYPE_DISABLEGAMEPLAYMECHANICS
+* ABILITY_TYPE_MODIFYSTACKCOUNT
+
+* GROUP_FINDER_CATEGORY_ADVENTURE_ZONE
+
+* LFG_ACTIVITY_ADVENTURE_ZONE
+
+* TIMED_ACTIVITY_TYPE_SEASONAL
+
+* QUEUE_FOR_CAMPAIGN_RESULT_AT_TEL_VAR_THRESHOLD
+
+* VENGEANCE_ACTION_RESULT_PERK_LOCKED
+
+* COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_EFFECT
+
+* CURRENCY_CHANGE_REASON_CACHE_REDEEMED_FOR_TOME_POINTS
+* CURRENCY_CHANGE_REASON_PURCHASED_TAMRIEL_TOMES_PREMIUM_PLUS
+* CURRENCY_CHANGE_REASON_PURCHASED_TAMRIEL_TOMES_REWARD
+* CURRENCY_CHANGE_REASON_PURCHASED_WITH_SEALS
+* CURRENCY_CHANGE_REASON_PURCHASED_WITH_TRADE_BARS
+* CURRENCY_CHANGE_REASON_TOME_CHALLENGE_REROLL
+* CURRENCY_CHANGE_REASON_WEEKLY_REROLL_GRANT
+
+* CURT_SEALS
+* CURT_TOME_CHALLENGE_REROLLS
+* CURT_TOME_POINTS
+* CURT_TOME_POINT_CACHES
+* CURT_TOME_TOKENS
+* CURT_TRADE_BARS
+
+* ITEMTYPE_CONSUMABLE_ABILITY
+
+* SPECIALIZED_ITEMTYPE_CONSUMABLE_ABILITY
+
+* CLAIM_REWARD_RESULT_CAMPAIGN_INVALID
+* CLAIM_REWARD_RESULT_REWARD_TRACK_CANNOT_AFFORD
+* CLAIM_REWARD_RESULT_REWARD_TRACK_INACTIVE_TRACK
+* CLAIM_REWARD_RESULT_REWARD_TRACK_LOCKED_TRACK
+* CLAIM_REWARD_RESULT_REWARD_TRACK_REWARD_ALREADY_CLAIMED
+* CLAIM_REWARD_RESULT_REWARD_TRACK_TIER_LOCKED
+* CLAIM_REWARD_RESULT_TAMRIEL_TOMES_CHALLENGE_ALREADY_CLAIMED
+* CLAIM_REWARD_RESULT_TAMRIEL_TOMES_CHALLENGE_NOT_ENOUGH_PROGRESS
+* CLAIM_REWARD_RESULT_TAMRIEL_TOMES_NOT_ENOUGH_CACHES
+
+* REWARD_TYPE_ADVENTURE_ZONE_FACTION_POINTS
+* REWARD_TYPE_TRADE_BARS
+
+* RESPEC_RESULT_CAST_CANCELED
+* RESPEC_RESULT_ON_COOLDOWN_ATTRIBUTES
+* RESPEC_RESULT_ON_COOLDOWN_SKILLS
+
+* MKCT_SEALS
+* MKCT_TRADE_BARS
+
+* MARKET_PRODUCT_FILTER_TYPE_COST_SEALS
+* MARKET_PRODUCT_FILTER_TYPE_COST_TRADE_BARS
+
+* MARKET_PURCHASE_RESULT_CANNOT_GIFT_SEAL_PRODUCTS
+* MARKET_PURCHASE_RESULT_CANNOT_GIFT_TRADE_BAR_PRODUCTS
+* MARKET_PURCHASE_RESULT_NOT_ENOUGH_SEALS
+* MARKET_PURCHASE_RESULT_NOT_ENOUGH_TRADE_BARS
+
+* WORLD_EVENT_TYPE_SCRIPTED_EVENT
+* WORLD_EVENT_TYPE_STATIC_MONSTER
+
+h5. GroupMessageSource
+* GROUP_MESSAGE_SOURCE_ACTION
+* GROUP_MESSAGE_SOURCE_CHAT
+* GROUP_MESSAGE_SOURCE_COMBAT
+* GROUP_MESSAGE_SOURCE_COMBAT_UPDATEHEALTH
+* GROUP_MESSAGE_SOURCE_EFFECTLIST
+* GROUP_MESSAGE_SOURCE_MOVEMENT
+* GROUP_MESSAGE_SOURCE_QUEST
+* GROUP_MESSAGE_SOURCE_STATECHANGE
+* GROUP_MESSAGE_SOURCE_UNKNOWN
+
+* INTERACT_TARGET_TYPE_RESPEC
+
+h5. AdventureZoneBoss
+* ADVENTURE_ZONE_BOSS_PARCH_INSTANCE_BOSS
+* ADVENTURE_ZONE_BOSS_PARCH_WORLD_BOSS_1
+* ADVENTURE_ZONE_BOSS_PARCH_WORLD_BOSS_2
+* ADVENTURE_ZONE_BOSS_SKITTERING_INSTANCE_BOSS
+* ADVENTURE_ZONE_BOSS_SKITTERING_WORLD_BOSS_1
+* ADVENTURE_ZONE_BOSS_SKITTERING_WORLD_BOSS_2
+* ADVENTURE_ZONE_BOSS_SORROWS_FRIEND_INSTANCE_BOSS
+* ADVENTURE_ZONE_BOSS_SORROWS_FRIEND_WORLD_BOSS_1
+* ADVENTURE_ZONE_BOSS_SORROWS_FRIEND_WORLD_BOSS_2
+* ADVENTURE_ZONE_BOSS_TRIAL_BOSS
+
+h5. AdventureZoneBossState
+* ADVENTURE_ZONE_BOSS_STATE_AVAILABLE
+* ADVENTURE_ZONE_BOSS_STATE_DEFEATED
+* ADVENTURE_ZONE_BOSS_STATE_REQUIRES_KEY
+
+h5. AdventureZoneFaction
+* ADVENTURE_ZONE_FACTION_GLITTERING_GLOAD
+* ADVENTURE_ZONE_FACTION_NONE
+* ADVENTURE_ZONE_FACTION_THE_RUCKUS
+* ADVENTURE_ZONE_FACTION_THOUSAND_EYES
+
+h5. AdventureZoneWorldEventLocationState
+* ADVENTURE_ZONE_WORLD_EVENT_LOCATION_STATE_ACTIVE
+* ADVENTURE_ZONE_WORLD_EVENT_LOCATION_STATE_INACTIVE
+* ADVENTURE_ZONE_WORLD_EVENT_LOCATION_STATE_STARTS_SOON
+
+h5. TeamType
+* TEAM_TYPE_ADVENTURE_ZONE
+* TEAM_TYPE_ALLIANCE
+* TEAM_TYPE_BATTLEGROUND
+* TEAM_TYPE_NONE
+
+* FRAMING_SCREEN_REWARD_TRACK_BOOK
+
+* TUTORIAL_TRIGGER_TAMRIEL_TOMES_CHALLENGES_OPENED
+* TUTORIAL_TRIGGER_TAMRIEL_TOMES_OPENED
+* TUTORIAL_TRIGGER_TIMED_ACTIVITIES_OPENED
+* TUTORIAL_TRIGGER_TRADE_BAR_DROP_ON_COOLDOWN
+* TUTORIAL_TRIGGER_TRADE_BAR_STORE_OPENED
+
+h5. RewardTrackComponent
+* REWARD_TRACK_COMPONENT_PRIMARY
+* REWARD_TRACK_COMPONENT_SECONDARY
+
+h5. RewardTrackProgressResult
+* REWARD_TRACK_PROGRESS_RESULT_ALREADY_AT_HIGHEST_TIER
+* REWARD_TRACK_PROGRESS_RESULT_INTERNAL_ERROR
+* REWARD_TRACK_PROGRESS_RESULT_REWARD_TRACK_INACTIVE
+* REWARD_TRACK_PROGRESS_RESULT_SUCCESS
+
+h5. RewardTrackType
+* REWARD_TRACK_TYPE_NONE
+* REWARD_TRACK_TYPE_TAMRIEL_TOMES
+
+h5. TamrielTomeChallengeRerollResult
+* TOMES_CHALLENGE_REROLL_RESULT_CANNOT_AFFORD
+* TOMES_CHALLENGE_REROLL_RESULT_INTERNAL_ERROR
+* TOMES_CHALLENGE_REROLL_RESULT_INVALID_CHALLENGE_TYPE
+* TOMES_CHALLENGE_REROLL_RESULT_NO_AVAILABLE_OPTIONS
+* TOMES_CHALLENGE_REROLL_RESULT_REWARDS_ALREADY_CLAIMED
+* TOMES_CHALLENGE_REROLL_RESULT_SUCCESS
+
+h5. TamrielTomeProductType
+* TAMRIEL_TOME_PRODUCT_TYPE_PREMIUM
+* TAMRIEL_TOME_PRODUCT_TYPE_PREMIUM_PLUS
+* TAMRIEL_TOME_PRODUCT_TYPE_PREMIUM_PLUS_UPGRADE
+
+h5. DirectPurchaseCheckUserPurchaseEligibilityResult
+* DIRECT_PURCHASE_CHECK_USER_PURCHASE_ELIGIBILITY_RESULT_ELIGIBLE
+* DIRECT_PURCHASE_CHECK_USER_PURCHASE_ELIGIBILITY_RESULT_ERROR
+* DIRECT_PURCHASE_CHECK_USER_PURCHASE_ELIGIBILITY_RESULT_INELIGIBLE
+
+h5. DirectPurchasePurchaseSkuResult
+* DIRECT_PURCHASE_PURCHASE_SKU_RESULT_ALREADY_OWNED
+* DIRECT_PURCHASE_PURCHASE_SKU_RESULT_CANCELED
+* DIRECT_PURCHASE_PURCHASE_SKU_RESULT_ERROR
+* DIRECT_PURCHASE_PURCHASE_SKU_RESULT_SUCCESS
+
+h5. DirectPurchaseQueryCatalogResult
+* DIRECT_PURCHASE_QUERY_CATALOG_RESULT_QUERY_CATALOG_FAILED
+* DIRECT_PURCHASE_QUERY_CATALOG_RESULT_SUCCESS
+
+* FONT_STYLE_OUTLINE_SHADOW
+* FONT_STYLE_OUTLINE_SHADOW_THICK
+
+* MAP_PIN_TYPE_WORLD_EVENT_MAP_LOCATION_ACTIVE
+
+* GAMEPAD_TYPE_DEPRECATED
+
+
+
+********************
+***Enums Removed ***
+********************
+
+h5. CampaignBuffType
+* CAMPAIGNBUFF_DEFENSIVE_ARTIFACT
+* CAMPAIGNBUFF_EMPEROR
+* CAMPAIGNBUFF_KEEP
+* CAMPAIGNBUFF_OFFENSIVE_ARTIFACT
+
+* CURRENCY_CHANGE_REASON_PURCHASED_WITH_ENDEAVOR_SEALS
+
+* CURT_ENDEAVOR_SEALS
+* CURT_EVENT_TICKETS
+
+* REWARD_TYPE_EVENT_TICKETS
+
+* MKCT_ENDEAVOR_SEALS
+
+* MARKET_PRODUCT_FILTER_TYPE_COST_ENDEAVOR_SEALS
+
+* MARKET_PURCHASE_RESULT_CANNOT_GIFT_ENDEAVOR_SEAL_PRODUCTS
+* MARKET_PURCHASE_RESULT_NOT_ENOUGH_ENDEAVOR_SEALS
+
+* WORLD_EVENT_TYPE_DARK_ANCHOR
+* WORLD_EVENT_TYPE_FISSURE
+* WORLD_EVENT_TYPE_GEYSER
+* WORLD_EVENT_TYPE_HARROWSTORM
+* WORLD_EVENT_TYPE_MIRRORMOOR
+* WORLD_EVENT_TYPE_SIEGE_CAMP
+
+* TUTORIAL_TRIGGER_ENDEAVORS_OPENED
+
+* TUTORIAL_TRIGGER_EVENT_TICKET_DROP_ON_COOLDOWN
+
+* GAMEPAD_TYPE_PS4_NO_TOUCHPAD
+
+
+
+********************
+***Globals Added ***
+********************
+
+* RESPEC_CAST_TIME_MS
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* ShouldAllowFullscreenExclusive()
+** _Returns:_ *bool* _shouldAllowFullscreenExclusive_
+
+* SetRepresentedGuildId(*integer* _guildId_)
+
+* GetRepresentedGuildId()
+** _Returns:_ *integer* _guildId_
+
+* IsPlayerWearingGuildTabard()
+** _Returns:_ *bool* _isWearingGuildTabard_
+
+* IsGameCoreUI()
+** _Returns:_ *bool* _isGameCoreUI_
+
+* GetUnitAdventureZoneFaction(*string* _unitTag_)
+** _Returns:_ *[AdventureZoneFaction|#AdventureZoneFaction]* _adventureZoneFaction_
+
+* GetNumUpgradesPerStablemasterTraining()
+** _Returns:_ *integer* _numUpgrades_
+
+* SetTamrielTomesNormalizedConfirmationAmount(*number* _aNormalizedConfirmationAmount_)
+
+* GetFastTravelNodeZoneDisplayType(*luaindex* _nodeIndex_)
+** _Returns:_ *[ZoneDisplayType|#ZoneDisplayType]* _zoneDisplayType_
+
+* DoesTelVarAmountPreventQueuingForCampaign(*integer* _campaignId_)
+** _Returns:_ *bool* _isPreventedFromQueuing_
+
+* GetIsInDisableSelfResurrectInPlaceSubzone()
+** _Returns:_ *bool* _isInDisabledSelfResurrectInPlaceSubzone_
+
+* CancelSkillPointAllocationRequest()
+
+* GetSkillRespecCastTimeRemainingMs()
+** _Returns:_ *integer* _timeRemainingMs_
+
+* StartSkillRespecFromUI()
+
+* CancelAttributePointAllocationRequest()
+
+* GetAttributeRespecCastTimeRemainingMs()
+** _Returns:_ *integer* _timeRemainingMs_
+
+* StartAttributeRespecFromUI()
+
+* GetCurrencyBonusPercentage(*[CurrencyType|#CurrencyType]* _currencyType_)
+** _Returns:_ *integer* _bonusPercentage_
+
+* GetWorldEventNumSteps(*integer* _worldEventId_)
+** _Returns:_ *integer* _numSteps_
+
+* GetParticipatingWorldEventStep()
+** _Returns:_ *integer* _worldEventInstanceId_, *luaindex* _stepIndex_
+
+* GetWorldEventCurrentStepExpireTimeS(*integer* _worldEventInstanceId_)
+** _Returns:_ *integer53* _endTimeS_
+
+* GetWorldEventCurrentStepProgress(*integer* _worldEventInstanceId_)
+** _Returns:_ *integer* _currentProgress_, *integer* _maxProgress_
+
+* GetWorldEventStepName(*integer* _worldEventInstanceId_, *luaindex* _stepIndex_)
+** _Returns:_ *string* _name_
+
+* GetWorldEventStepDescription(*integer* _worldEventInstanceId_, *luaindex* _stepIndex_)
+** _Returns:_ *string* _description_
+
+* GetTimedActivityEncodedId(*luaindex* _index_)
+** _Returns:_ *id64* _encodedId_
+
+* GetTimedActivityCurrencyRewardInfo(*luaindex* _index_)
+** _Returns:_ *[CurrencyType|#CurrencyType]* _currencyType_, *integer* _quantity_
+
+* GetTimedActivityEndTimeS(*luaindex* _index_)
+** _Returns:_ *integer53* _endTimeS_
+
+* GetTimedActivityNumTimesClaimed(*luaindex* _index_)
+** _Returns:_ *integer* _numTimesClaimed_
+
+* GetTimedActivityTotalNumTimesClaimable(*luaindex* _index_)
+** _Returns:_ *integer* _totalNumTimesClaimable_
+
+* ClaimTimedActivityReward(*luaindex* _index_)
+
+* RerollTimedActivity(*luaindex* _index_)
+** _Returns:_ *[TamrielTomeChallengeRerollResult|#TamrielTomeChallengeRerollResult]* _result_
+
+* GetTrackedTimedActivityInfo()
+** _Returns:_ *luaindex:nilable* _index_, *id64* _timedActivityEncodedId_
+
+* TrackTimedActivity(*luaindex* _index_)
+
+* ClearTrackedTimedActivity()
+
+* GetTimedActivityTypeResetTimeS(*[TimedActivityType|#TimedActivityType]* _activityType_)
+** _Returns:_ *integer53* _resetTimeS_
+
+* IsGroupFinderCategoryAvailable(*[GroupFinderCategory|#GroupFinderCategory]* _category_)
+** _Returns:_ *bool* _isAvailable_
+
+* IsVengeancePerkUnlockedForSlot(*integer* _perkDefId_, *[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _slotFlag_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *bool* _isUnlocked_
+
+* GetActiveReferenceTrackIdsForRewardTrackType(*[RewardTrackType|#RewardTrackType]* _rewardTrackType_)
+** _Uses variable returns..._
+** _Returns:_ *integer* _referenceTrackId_
+
+* IsReferenceTrackActive(*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *integer* _referenceTrackId_)
+** _Returns:_ *bool* _isActive_
+
+* GetReferenceTrackIdFromIndex(*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *luaindex* _referenceTrackIndex_)
+** _Returns:_ *integer* _referenceTrackId_
+
+* GetReferenceTrackIndex(*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *integer* _referenceTrackId_)
+** _Returns:_ *luaindex:nilable* _referenceTrackIndex_
+
+* GetRewardTrackIdFromReferenceTrackId(*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *integer* _referenceTrackId_)
+** _Returns:_ *integer* _rewardTrackId_
+
+* GetNumReferenceTracksForType(*[RewardTrackType|#RewardTrackType]* _rewardTrackType_)
+** _Returns:_ *integer* _numReferenceTracksForType_
+
+* GetInfoForRewardTrack(*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *luaindex* _referenceTrackIndex_)
+** _Returns:_ *integer* _trackId_, *luaindex* _currentTier_, *integer* _progressToNextTier_, *integer* _endTime_
+
+* GetRewardTrackRewardClaimedState(*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *luaindex* _referenceTrackIndex_, *luaindex* _tier_, *[RewardTrackComponent|#RewardTrackComponent]* _rewardTrackComponent_, *luaindex* _rewardIndex_)
+** _Returns:_ *bool* _isClaimed_, *bool* _isFallback_, *bool* _isInfinitelyRepeatableReward_
+
+* GetRewardTrackInfinitelyRepeatableRewardClaimedState(*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *luaindex* _referenceTrackIndex_, *[RewardTrackComponent|#RewardTrackComponent]* _rewardTrackComponent_)
+** _Returns:_ *integer:nilable* _numTimesAlreadyClaimed_, *integer:nilable* _numTimesStillClaimable_
+
+* ClaimRewardTrackReward(*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *luaindex* _referenceTrackIndex_, *luaindex* _tier_, *[RewardTrackComponent|#RewardTrackComponent]* _rewardTrackComponent_, *luaindex* _rewardIndex_)
+
+* HasAccessToRewardTrackComponent(*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *luaindex* _referenceTrackIndex_, *[RewardTrackComponent|#RewardTrackComponent]* _rewardTrackComponent_)
+** _Returns:_ *bool* _hasAccess_
+
+* HasTamrielTomeProductType(*integer* _tomeId_, *[TamrielTomeProductType|#TamrielTomeProductType]* _productType_)
+** _Returns:_ *bool* _hasLevel_
+
+* TryPurchaseTamrielTomePremiumPlus(*integer* _tomeId_)
+
+* TryRedeemCachesForTomePoints(*integer* _numToRedeem_)
+
+* GetRewardTrackDisplayName(*integer* _rewardTrackId_)
+** _Returns:_ *string* _displayName_
+
+* GetRewardTrackBackgroundFileIndex(*integer* _rewardTrackId_)
+** _Returns:_ *textureName* _fileIndex_
+
+* GetNumBaseTiersForRewardTrack(*integer* _rewardTrackId_)
+** _Returns:_ *integer* _numTiers_
+
+* GetNumBonusTiersForRewardTrack(*integer* _rewardTrackId_)
+** _Returns:_ *integer* _numTiers_
+
+* GetTotalNumTiersForRewardTrack(*integer* _rewardTrackId_)
+** _Returns:_ *integer* _numTiers_
+
+* GetNumRewardsAtRewardTrackTier(*integer* _rewardTrackId_, *luaindex* _tierIndex_, *[RewardTrackComponent|#RewardTrackComponent]* _rewardTrackComponent_)
+** _Returns:_ *integer* _numRewards_
+
+* GetTotalProgressAtRewardTrackTier(*integer* _rewardTrackId_, *luaindex* _tierIndex_)
+** _Returns:_ *integer* _totalProgress_
+
+* GetTamrielTomeIntroBackgroundFileIndex(*integer* _tamrielTomeId_)
+** _Returns:_ *textureName* _introFileIndex_
+
+* GetTamrielTomePremiumUpgradeBackgroundFileIndex(*integer* _tamrielTomeId_)
+** _Returns:_ *textureName* _premiumUpgradeBackgroundFileIndex_
+
+* GetNumTamrielTomeHighlights(*integer* _tamrielTomeId_)
+** _Returns:_ *integer* _numHighlights_
+
+* GetTamrielTomeHighlightInfo(*integer* _tamrielTomeId_, *luaindex* _highlightIndex_)
+** _Returns:_ *string* _title_, *string* _text_
+
+* GetNumTamrielTomeFeaturedRewards(*integer* _tamrielTomeId_)
+** _Returns:_ *integer* _numFeaturedRewards_
+
+* GetTamrielTomeFeaturedRewardInfo(*integer* _tamrielTomeId_, *luaindex* _featuredRewardIndex_)
+** _Returns:_ *luaindex* _tier_, *[RewardTrackComponent|#RewardTrackComponent]* _rewardTrackComponent_, *luaindex* _rewardIndex_
+
+* GetCurrencyCostToUpgradeTamrielTome()
+** _Returns:_ *integer* _currencyCost_
+
+* GetTamrielTomesRewardInfo(*integer* _rewardTrackId_, *luaindex* _tierIndex_, *[RewardTrackComponent|#RewardTrackComponent]* _rewardTrackComponent_, *luaindex* _rewardIndex_)
+** _Returns:_ *integer* _rewardId_, *integer* _overrideAmount_, *integer* _cost_, *[ItemDisplayQuality|#ItemDisplayQuality]* _displayQuality_, *bool* _hideQuality_
+
+* GetRewardTrackSettings()
+** _Returns:_ *bool* _isSystemEnabled_
+
+* IsAdventureZoneActive()
+** _Returns:_ *bool* _isAdventureZoneActive_
+
+* GetAdventureZoneDisplayName()
+** _Returns:_ *string* _zoneName_
+
+* IsInAdventureZone()
+** _Returns:_ *bool* _isInAdventureZone_
+
+* GetAdventureZonePlayerReputation()
+** _Returns:_ *integer* _playerReputation_
+
+* GetAdventureZoneFactionReputation(*[AdventureZoneFaction|#AdventureZoneFaction]* _faction_)
+** _Returns:_ *integer* _factionReputation_
+
+* GetAdventureZoneEventDisplayName(*luaindex* _locationIndex_)
+** _Returns:_ *string* _displayName_
+
+* GetAdventureZoneEventLocationName(*luaindex* _locationIndex_)
+** _Returns:_ *string* _locationName_
+
+* GetAdventureZoneEventLocationBackgroundFileIndex(*luaindex* _locationIndex_)
+** _Returns:_ *textureName* _fileIndex_
+
+* GetAdventureZoneEventLocationState(*luaindex* _locationIndex_)
+** _Returns:_ *[AdventureZoneWorldEventLocationState|#AdventureZoneWorldEventLocationState]* _locationState_
+
+* GetAdventureZoneEventLocationTimeLeftToStartMs(*luaindex* _locationIndex_)
+** _Returns:_ *integer* _timeLeftToStartMs_
+
+* ShowAdventureZoneEventLocationOnMap(*luaindex* _locationIndex_)
+
+* HasAdventureZoneKeyFragment(*[AdventureZoneBoss|#AdventureZoneBoss]* _boss_)
+** _Returns:_ *bool* _hasKeyFragment_
+
+* GetAdventureZoneBossState(*[AdventureZoneBoss|#AdventureZoneBoss]* _boss_)
+** _Returns:_ *[AdventureZoneBossState|#AdventureZoneBossState]* _bossState_
+
+* GetAdventureZoneBossName(*[AdventureZoneBoss|#AdventureZoneBoss]* _boss_)
+** _Returns:_ *string* _bossName_
+
+* GetAdventureZoneBossDescription(*[AdventureZoneBoss|#AdventureZoneBoss]* _boss_)
+** _Returns:_ *string* _bossDescription_
+
+* GetAdventureZoneBossIconFileIndex(*[AdventureZoneBoss|#AdventureZoneBoss]* _boss_)
+** _Returns:_ *textureName* _fileIndex_
+
+* GetAdventureZoneBossKeyIconFileIndex(*[AdventureZoneBoss|#AdventureZoneBoss]* _boss_)
+** _Returns:_ *textureName* _fileIndex_
+
+* GetAdventureZoneBossKeyFragmentIconFileIndex(*[AdventureZoneBoss|#AdventureZoneBoss]* _boss_)
+** _Returns:_ *textureName* _fileIndex_
+
+* GetAdventureZoneBossAchievementInfo(*[AdventureZoneBoss|#AdventureZoneBoss]* _boss_)
+** _Returns:_ *integer* _achievementId_, *luaindex* _achievementCriterionIndex_
+
+* ShowAdventureZoneBossOnMap(*[AdventureZoneBoss|#AdventureZoneBoss]* _boss_
+
+* GetPlayerStoredCurrencyAmount(*[CurrencyType|#CurrencyType]* _currencyType_)
+** _Returns:_ *integer* _amount_
+
+* BuyBagSpaceFromInventory()
+
+* GetItemLinkOnUseAbilityId(*string* _itemLink_)
+** _Returns:_ *integer* _abilityId_
+
+* GetTamrielTomeCurrencyPerBooster()
+** _Returns:_ *integer* _currencyAmount_
+
+* IsCollectiblePlaceableFurniture(*integer* _collectibleId_, *bool* _ignoreHideMode_)
+** _Returns:_ *bool* _isPlaceable_
+
+* QuerySkuCatalog()
+** _Returns:_ *integer* _queryId_
+
+* IsSkuAvailableForPurchase(*integer* _skuDefId_)
+** _Returns:_ *bool* _isSkuAvailableForPurchase_
+
+* GetSkuPricingInfo(*integer* _skuDefId_)
+** _Returns:_ *number* _currentPrice_, *number* _basePrice_, *string* _currency_
+
+* RequestPurchaseSku(*integer* _skuDefId_)
+** _Returns:_ *integer* _requestId_
+
+* CheckUserPurchaseEligibility()
+** _Returns:_ *integer* _requestId_
+
+* GetTamrielTomeSkuId(*integer* _tamrielTomeDefId_, *[TamrielTomeProductType|#TamrielTomeProductType]* _tamrielTomeProductType_)
+** _Returns:_ *integer* _skuDefId_
+
+* RequestOpenTamrielTome(*integer:nilable* _optionalTomeId_)
+
+* GetActiveTamrielTomeSeasonEndTimeS()
+** _Returns:_ *integer53* _endTimeS_
+
+* GetActiveTamrielTomeSeasonDefId()
+** _Returns:_ *integer* _tamrielTomeDefId_
+
+h3. CanvasControl
+* Circle(*number* _x_, *number* _y_, *number* _radius_)
+* ComputeCurrentPathLength()
+** _Returns:_ *number* _length_
+
+h3. LabelControl
+* SetTracking(*number* _textTrackingEm_)
+
+h3. TooltipControl
+* AppendTeamScore(*[TeamType|#TeamType]* _teamType_, *integer* _teamValue_)
+* SetAdventureZoneBoss(*[AdventureZoneBoss|#AdventureZoneBoss]* _boss_)
+
+h3. WindowManager
+* GetFontStyleString(*[FontStyle|#FontStyle]* _fontStyle_)
+** _Returns:_ *string* _fontStyleString_
+
+
+
+************************
+***Functions Removed ***
+************************
+
+* GetNumTimedActivitiesCompleted(*[TimedActivityType|#TimedActivityType]:nilable* _activityType_)
+** _Returns:_ *integer* _numTimedActivities_
+
+* GetTimedActivityTypeLimit(*[TimedActivityType|#TimedActivityType]* _activityType_)
+** _Returns:_ *integer* _maxActivities_
+
+* GetTimedActivityTimeRemainingSeconds(*luaindex* _index_)
+** _Returns:_ *integer* _timeRemainingSeconds_
+
+
+
+************************
+***Functions Changed ***
+************************
+
+Added _usesTradeBars_
+* GetStoreCurrencyTypes()
+** _Returns:_ *bool* _usesMoney_, *bool* _usesAlliancePoints_, *bool* _usesTelvarStones_, *bool* _usesWritVouchers_, *bool* _usesTradeBars_
+
+Changed type of _perkDefId_ to luaindex
+* IsVengeancePerkDisabled(*luaindex* _perkDefId_)
+** _Returns:_ *bool* _isDisabled_
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_ADVENTURE_ZONE_FACTION_CHOSEN (*[AdventureZoneFaction|#AdventureZoneFaction]* _newFaction_)
+
+* EVENT_ADVENTURE_ZONE_FACTION_REPUTATION_CHANGED (*integer* _newReputation_, *integer* _deltaReputation_)
+
+* EVENT_ADVENTURE_ZONE_FACTION_STANDING_UPDATE_RECEIVED
+
+* EVENT_REWARD_TRACK_PROGRESS_GAINED (*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *integer* _trackId_, *luaindex* _newTier_, *integer* _newProgress_)
+
+* EVENT_REWARD_TRACK_REWARD_CLAIMED (*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *integer* _trackId_, *luaindex* _tier_, *[RewardTrackComponent|#RewardTrackComponent]* _rewardComponent_, *luaindex* _rewardIndex_, *bool* _isFallback_)
+
+* EVENT_REWARD_TRACK_SETTINGS_UPDATE_RECEIVED
+
+* EVENT_REWARD_TRACK_STARTED (*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *integer* _trackId_)
+
+* EVENT_REWARD_TRACK_UPDATE_RECEIVED
+
+* EVENT_START_ATTRIBUTE_RESPEC_CAST
+
+* EVENT_START_SKILL_RESPEC_CAST
+
+* EVENT_TAMRIEL_TOME_PURCHASE_RESULT (*integer* _tomeId_, *[TamrielTomePurchaseResult|#TamrielTomePurchaseResult]* _purchaseResult_)
+
+* EVENT_TIMED_ACTIVITY_TRACKING_UPDATED (*id64* _timedActivityEncodedId_)
+
+* EVENT_WORLD_EVENT_PARTICIPATION_BEGIN (*integer* _worldEventInstanceId_, *luaindex* _stepIndex_)
+
+* EVENT_WORLD_EVENT_PARTICIPATION_END (*integer* _worldEventInstanceId_)
+
+* EVENT_WORLD_EVENT_STEP_CHANGED (*integer* _worldEventInstanceId_, *luaindex* _newStepIndex_)
+
+* EVENT_WORLD_EVENT_STEP_PROGRESS_CHANGED (*integer* _worldEventInstanceId_, *luaindex* _stepIndex_, *integer* _newCurrentProgress_, *integer* _newMaxProgress_)
+
+* EVENT_DIRECT_PURCHASE_CHECK_USER_PURCHASE_ELIGIBILITY_RESULT (*[DirectPurchaseCheckUserPurchaseEligibilityResult|#DirectPurchaseCheckUserPurchaseEligibilityResult]* _result_)
+
+* EVENT_DIRECT_PURCHASE_PURCHASE_SKU_RESULT (*[DirectPurchasePurchaseSkuResult|#DirectPurchasePurchaseSkuResult]* _result_)
+
+* EVENT_DIRECT_PURCHASE_QUERY_CATALOG_COMPLETE (*[DirectPurchaseQueryCatalogResult|#DirectPurchaseQueryCatalogResult]* _result_, *integer* _queryId_)
+
+* EVENT_TRADE_BAR_UPDATE (*integer* _tradeBarAmount_, *integer* _difference_, *[CurrencyChangeReason|#CurrencyChangeReason]* _reason_)
+
+
+
+**********************
+*** Events Removed ***
+**********************
+
+* EVENT_TIMED_ACTIVITY_TYPE_PROGRESS_UPDATED (*[TimedActivityType|#TimedActivityType]* _timedActivityType_, *integer* _previousNumCompleted_, *integer* _currentNumCompleted_, *bool* _complete_)
+
+* EVENT_EVENT_TICKET_UPDATE (*integer* _eventTicketAmount_, *integer* _difference_, *[CurrencyChangeReason|#CurrencyChangeReason]* _reason_)
+
+
+
+**********************
+*** Events Changed ***
+**********************
+
+Added _parameter_
+* EVENT_QUEUE_FOR_CAMPAIGN_RESPONSE (*[QueueForCampaignResponseType|#QueueForCampaignResponseType]* _response_, *integer* _parameter_)

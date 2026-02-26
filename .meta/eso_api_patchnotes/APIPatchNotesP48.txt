@@ -1,0 +1,424 @@
+*******************
+*** Enums Added ***
+*******************
+
+* ACTION_TYPE_VENGEANCE_PERK
+
+
+* BOOK_MEDIUM_BLOODY_YELLOWED_PAPER
+
+
+* CENTER_SCREEN_ANNOUNCE_TYPE_VENGEANCE_LOADOUT_EQUIPPED
+
+
+* JUMP_RESULT_JUMP_ON_COOLDOWN
+
+
+* MOUSE_CONTENT_VENGEANCE_PERK
+
+
+* UI_SYSTEM_VENGEANCE
+
+
+* KEEP_RECALL_STONE_USE_RESULT_ON_COOLDOWN
+
+
+* BAG_VENGEANCE
+
+
+* INVENTORY_COUNT_BAG_OPTION_BACKPACK_AND_VENGEANCE
+* INVENTORY_COUNT_BAG_OPTION_BACKPACK_AND_WORN_AND_VENGEANCE
+* INVENTORY_COUNT_BAG_OPTION_VENGEANCE
+
+
+* LOOT_ITEM_RESULT_NOT_IN_VENGEANCE
+
+
+* QUEST_CONDITION_TYPE_USE_EMOTE
+
+
+* UI_SETTING_COMPASS_DISTANCE_TRACKING
+
+
+* RESPEC_RESULT_IN_VENGEANCE
+
+
+* RESPEC_TYPE_VENGEANCE_PERKS
+* RESPEC_TYPE_VENGEANCE_ROLE
+
+
+* MARKET_PURCHASE_RESULT_CAMPAIGN_LOCKED
+
+
+* GROUP_ELECTION_FAILURE_GROUP_MEMBER_IN_READY_CHECK
+
+
+* TUTORIAL_TRIGGER_VENGEANCE_INVENTORY_OPENED
+* TUTORIAL_TRIGGER_VENGEANCE_LOADOUTS_OPENED
+* TUTORIAL_TRIGGER_VENGEANCE_PERKS_OPENED
+
+
+* CT_CANVAS
+
+
+h5. VengeanceActionResult
+* VENGEANCE_ACTION_RESULT_DEAD
+* VENGEANCE_ACTION_RESULT_FAILED_PERK_APPLICATION
+* VENGEANCE_ACTION_RESULT_FAILED_PERK_REMOVAL
+* VENGEANCE_ACTION_RESULT_INVALID_LOADOUT
+* VENGEANCE_ACTION_RESULT_INVALID_PERK
+* VENGEANCE_ACTION_RESULT_INVALID_PERK_FOR_LOADOUT
+* VENGEANCE_ACTION_RESULT_INVALID_PERK_SLOT
+* VENGEANCE_ACTION_RESULT_INVALID_ROLE
+* VENGEANCE_ACTION_RESULT_INVALID_ROLE_FOR_LOADOUT
+* VENGEANCE_ACTION_RESULT_INVALID_SUBZONE
+* VENGEANCE_ACTION_RESULT_IN_COMBAT
+* VENGEANCE_ACTION_RESULT_LOADOUTS_NOT_SUPPORTED
+* VENGEANCE_ACTION_RESULT_PERK_ALREADY_EQUIPPED
+* VENGEANCE_ACTION_RESULT_PERK_DISABLED
+* VENGEANCE_ACTION_RESULT_PERK_SLOT_INCOMPATIBLE
+* VENGEANCE_ACTION_RESULT_ROLE_ALREADY_EQUIPPED
+* VENGEANCE_ACTION_RESULT_ROLE_DISABLED
+* VENGEANCE_ACTION_RESULT_ROLE_SWAP_ON_COOLDOWN
+* VENGEANCE_ACTION_RESULT_SUCCESS
+
+
+h5. VengeanceMiscStat
+* VENGEANCE_MISC_STAT_DAMAGE_DONE
+* VENGEANCE_MISC_STAT_HEALING_DONE
+* VENGEANCE_MISC_STAT_HEALING_TAKEN
+* VENGEANCE_MISC_STAT_MOUNT_SPEED
+* VENGEANCE_MISC_STAT_NONE
+
+
+h5. VengeancePerkSlotFlags
+* VENGEANCE_PERK_SLOT_BLUE
+* VENGEANCE_PERK_SLOT_RED
+* VENGEANCE_PERK_SLOT_RED_BLUE
+* VENGEANCE_PERK_SLOT_RED_YELLOW
+* VENGEANCE_PERK_SLOT_RED_YELLOW_BLUE
+* VENGEANCE_PERK_SLOT_YELLOW
+* VENGEANCE_PERK_SLOT_YELLOW_BLUE
+
+
+h5. DerivedStatDisplayType
+* DERIVED_STAT_DISPLAY_FLAT_VALUE
+* DERIVED_STAT_DISPLAY_PERCENT
+
+
+
+*********************
+*** Enums Removed ***
+*********************
+
+* LEADERBOARD_TYPE_ENDLESS_DUNGEON_CLASS
+
+
+
+*********************
+*** Enums Changed ***
+*********************
+
+* CURT_CHAOTIC_CREATIA
+renamed to
+* CURT_TRANSMUTE_CRYSTALS
+
+
+
+*********************
+*** Globals Added ***
+*********************
+
+* MAX_PERKS_AVAILABLE_PER_LOADOUT
+
+
+
+***********************
+*** Functions Added ***
+***********************
+
+* GetCursorVengeancePerkData()
+** _Returns:_ *luaindex:nilable* _vengeancePerkIndex_, *[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]:nilable* _vengeancePerkSlotFlag_
+
+* PickupVengeancePerk *protected* (*luaindex* _vengeancePerkIndex_, *[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _vengeancePerkSlotFlag_)
+
+* GetNumberOfAvailableSynergies()
+** _Returns:_ *integer* _numAvailable_
+
+* GetSynergyInfoAtIndex(*luaindex* _synergyIndex_)
+** _Returns:_ *string* _synergyName_, *textureName* _iconFilename_, *string* _prompt_, *integer* _priority_, *integer* _synergyAbilityId_, *bool* _canBeUsed_
+
+* CanUseSynergyAtIndex(*luaindex* _synergyIndex_)
+** _Returns:_ *bool* _canBeUsed_
+
+* SetSynergyPriorityOverride(*integer* _synergyAbilityId_, *integer* _priority_)
+
+* GetSynergyPriorityOverride(*integer* _synergyAbilityId_)
+** _Returns:_ *integer* _priority_
+
+* ClearSynergyPriorityOverride(*integer* _synergyAbilityId_)
+
+* ClearAllSynergyPriorityOverrides()
+
+* ActivateSynergyAtIndex *private* (*luaindex* _synergyIndex_)
+** _Returns:_ *[ClientUseAbilityResult|#ClientUseAbilityResult]* _castResult_
+
+* GetJournalQuestId(*luaindex* _journalQuestIndex_)
+** _Returns:_ *integer* _questId_
+
+* GetQuestType(*integer* _questId_)
+** _Returns:_ *[QuestType|#QuestType]* _questType_
+
+* GetQuestRepeatableType(*integer* _questId_)
+** _Returns:_ *[QuestRepeatableType|#QuestRepeatableType]* _repeatType_
+
+* GetBookMediumInfo(*integer* _mediumId_)
+** _Returns:_ *textureName* _bg_, *integer* _numPages_, *integer* _pageWidthPixels_, *integer* _pageHeightPixels_, *integer* _pageYOffsetPixels_, *integer* _leftPageXOffsetPixels_, *integer* _rightPageXOffsetPixels_, *string* _openUISound_, *string* _closeUISound_, *string* _turnPageUISound_
+
+* GetBookMediumFontInfo(*integer* _mediumId_, *bool* _isGamepad_)
+** _Returns:_ *string* _titleFontName_, *integer* _titleFontSize_, *[FontStyle|#FontStyle]* _titleFontStyle_, *string* _bodyFontName_, *integer* _bodyFontSize_, *[FontStyle|#FontStyle]* _bodyFontStyle_, *number* _fontColorR_, *number* _fontColorG_, *number* _fontColorB_, *number* _fontColorA_, *number* _fontStyleColorR_, *number* _fontStyleColorG_, *number* _fontStyleColorB_, *number* _fontStyleColorA_
+
+* HasReceivedPromotionalEventUpdate()
+** _Returns:_ *bool* _hasReceivedUpdate_
+
+* RequestSetLoadoutRoleByIndex(*luaindex* _index_)
+** _Returns:_ *[VengeanceActionResult|#VengeanceActionResult]* _result_
+
+* CanLoadoutRoleBeEquippedByIndex(*luaindex* _index_)
+** _Returns:_ *[VengeanceActionResult|#VengeanceActionResult]* _result_
+
+* GetNumberOfVengeanceRolesAvailableToPlayer()
+** _Returns:_ *integer* _result_
+
+* GetVengeanceRoleNameAtIndex(*luaindex* _index_)
+** _Returns:_ *string* _roleName_
+
+* GetVengeanceRoleIconAtIndex(*luaindex:nilable* _roleIndex_)
+** _Returns:_ *textureName* _icon_
+
+* IsLoadoutRoleEquippedAtIndex(*luaindex* _index_)
+** _Returns:_ *bool* _isEquipped_
+
+* GetRemainingCooldownForRoleSwapMs()
+** _Returns:_ *integer* _cooldownRemaining_
+
+* GetNumberOfImportantDerivedStatDisplaysForRoleAtIndex(*luaindex* _index_)
+** _Returns:_ *integer* _result_
+
+* GetImportantDerivedStatDisplayInfoForRoleAtIndex(*luaindex* _roleIndex_, *luaindex* _statIndex_)
+** _Returns:_ *[DerivedStats|#DerivedStats]* _derivedStat_, *integer* _oldValue_, *integer* _newValue_, *[DerivedStatDisplayType|#DerivedStatDisplayType]* _displayType_
+
+* GetNumberOfImportantMiscStatDisplaysForRoleAtIndex(*luaindex* _index_)
+** _Returns:_ *integer* _result_
+
+* GetImportantMiscStatDisplayInfoForRoleAtIndex(*luaindex* _roleIndex_, *luaindex* _statIndex_)
+** _Returns:_ *[VengeanceMiscStat|#VengeanceMiscStat]* _miscStat_, *number* _oldValue_, *number* _newValue_, *[DerivedStatDisplayType|#DerivedStatDisplayType]* _displayType_
+
+* GetAbilityIdForHotbarSlotAtIndex(*luaindex* _roleIndex_, *[HotBarCategory|#HotBarCategory]* _hotbar_, *luaindex* _slot_)
+** _Returns:_ *integer* _abilityId_
+
+* GetDerivedStatValueForRoleAtIndex(*[DerivedStats|#DerivedStats]* _derivedStat_, *luaindex* _roleIndex_)
+** _Returns:_ *integer* _statValue_
+
+* GetNumberOfPerksAvailableToLoadoutRoleDef(*luaindex:nilable* _roleIndex_)
+** _Returns:_ *integer* _numPerks_
+
+* GetNumberOfPerksAvailableToLoadoutRoleDefInSlot(*[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _aSlotFlag_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *integer* _numPerks_
+
+* CanPerkBeSlottedInSlotForRole(*luaindex* _slotIndex_, *[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _aSlotFlag_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *[VengeanceActionResult|#VengeanceActionResult]* _result_
+
+* RequestSetPerkSelectionForRoleByIndex(*luaindex* _redPerkIndex_, *luaindex* _yellowPerkIndex_, *luaindex* _bluePerkIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *[VengeanceActionResult|#VengeanceActionResult]* _result_
+
+* GetVengeancePerkNameAtIndex(*luaindex* _perkIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *string* _perkName_
+
+* GetVengeancePerkTooltipTextAtIndex(*luaindex* _perkIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *string* _tooltipText_
+
+* GetActiveLoadoutRoleIndex()
+** _Returns:_ *luaindex* _roleIndex_
+
+* GetIndexOfPerkInSlotForRole(*[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _slotFlag_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *luaindex* _globalPerkIndex_
+
+* GetSlotIndexOfPerkInSlotForRole(*[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _slotFlag_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *luaindex* _perkSlotIndex_
+
+* GetNumberOfSlotFlagsForPerkAtIndex(*luaindex* _globalPerkIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *integer* _numSlotFlags_
+
+* GetSlotFlagForSlotAtIndex(*luaindex* _globalPerkIndex_, *luaindex* _slotFlagIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _slotFlag_
+
+* GetPerkIndexForSlotAtSlotIndex(*[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _slotFlag_, *luaindex* _slotIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *luaindex* _globalPerkIndex_
+
+* GetVengeancePerkIconAtIndex(*luaindex* _perkIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *textureName* _icon_
+
+* GetVengeancePerkIcon(*integer* _defId_)
+** _Returns:_ *textureName* _icon_
+
+* GetVengeanceRoleIcon(*integer* _defId_)
+** _Returns:_ *textureName* _icon_
+
+* IsItemVisuallyDisabledInVengeance(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
+** _Returns:_ *bool* _isDisabled_
+
+* IsItemLinkVisuallyDisabledInVengeance(*string* _itemLink_)
+** _Returns:_ *bool* _isDisabled_
+
+* IsItemLinkUsableOutsideVengeance(*string* _itemLink_)
+** _Returns:_ *bool* _canUseOutsideVengeance_
+
+* GetCurrencyTypeFromRewardType(*[RewardType|#RewardType]* _rewardType_)
+** _Returns:_ *[CurrencyType|#CurrencyType]* _currencyType_
+
+* ShouldShowCurrencyInCurrencyPanel(*[CurrencyType|#CurrencyType]* _currencyType_)
+** _Returns:_ *bool* _shouldShowInCurrencyPanel_
+
+
+h3. CanvasControl
+* Arc(*number* _centerX_, *number* _centerY_, *number* _radius_, *number* _startAngle_, *number* _endAngle_, *bool* _isCounterClockwise_)
+
+* ArcTo(*number* _controlPoint1X_, *number* _controlPoint1Y_, *number* _controlPoint2X_, *number* _controlPoint2Y_, *number* _radius_)
+
+* BeginPath()
+
+* Clear()
+
+* ClosePath()
+
+* Fill()
+
+* FillRect(*number* _x_, *number* _y_, *number* _width_, *number* _height_)
+
+* GetObjectFit()
+** _Returns:_ *[ObjectFit|#ObjectFit]* _objectFit_
+
+* LineTo(*number* _x_, *number* _y_)
+
+* MoveTo(*number* _x_, *number* _y_)
+
+* QuadraticCurveTo(*number* _controlPointX_, *number* _controlPointY_, *number* _endPointX_, *number* _endPointY_)
+
+* Rect(*number* _x_, *number* _y_, *number* _width_, *number* _height_)
+
+* RoundRect(*number* _x_, *number* _y_, *number* _width_, *number* _height_, *number* _upperLeftRadius_, *number* _upperRightRadius_, *number* _lowerRightRadius_, *number* _lowerLeftRadius_)
+
+* SetCanvasSize(*number* _width_, *number* _height_)
+
+* SetFillColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
+
+* SetObjectFit(*[ObjectFit|#ObjectFit]* _objectFit_)
+
+* SetStrokeCapStyle(*[StrokeCapStyle|#StrokeCapStyle]* _capStyle_)
+
+* SetStrokeColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
+
+* SetStrokeJoinType(*[StrokeJoinType|#StrokeJoinType]* _joinType_, *number* _miterLimit_)
+
+* SetStrokeLineDash(*number* _lineDashArray_)
+
+* SetStrokeLineDashOffset(*number* _lineDashOffset_)
+
+* SetStrokeWidth(*number* _width_)
+
+* Stroke()
+
+* StrokeRect(*number* _x_, *number* _y_, *number* _width_, *number* _height_)
+
+
+h3. TooltipControl
+* SetVengeancePerk(*luaindex* _perkIndex_, *[VengeanceActionResult|#VengeanceActionResult]:nilable* _actionResult_, *luaindex:nilable* _roleIndex_)
+
+* SetVengeancePerkId(*integer* _perkDefId_)
+
+
+
+*************************
+*** Functions Changed ***
+*************************
+
+Removed arg _classId_
+* QueryRaidLeaderboardData(*[RaidCategory|#RaidCategory]* _raidCategory_, *integer* _raidId_)
+** _Returns:_ *[LeaderboardDataReadyState|#LeaderboardDataReadyState]* _readyState_
+
+* GetNumChallengeOfTheWeekLeaderboardEntries()
+** _Returns:_ *integer* _count_
+
+* GetNumChallengeLeaderboardEntries(*integer* _raidId_)
+** _Returns:_ *integer* _count_
+
+* GetChallengeOfTheWeekLeaderboardEntryInfo(*luaindex* _entryIndex_)
+** _Returns:_ *integer* _ranking_, *string* _charName_, *integer* _time_, *integer* _retClassId_, *integer* _allianceId_, *string* _displayName_
+
+* GetChallengeLeaderboardEntryInfo(*integer* _raidId_, *luaindex* _entryIndex_)
+** _Returns:_ *integer* _ranking_, *string* _charName_, *integer* _time_, *integer* _retClassId_, *integer* _allianceId_, *string* _displayName_
+
+* QueryEndlessDungeonLeaderboardData(*[EndlessDungeonGroupType|#EndlessDungeonGroupType]* _endlessDungeonGroupType_, *integer* _endlessDungeonId_)
+** _Returns:_ *[LeaderboardDataReadyState|#LeaderboardDataReadyState]* _readyState_
+
+* GetNumEndlessDungeonOfTheWeekSoloLeaderboardEntries()
+** _Returns:_ *integer* _count_
+
+* GetNumEndlessDungeonSoloLeaderboardEntries(*integer* _endlessDungeonId_)
+** _Returns:_ *integer* _count_
+
+* GetEndlessDungeonOfTheWeekSoloLeaderboardEntryInfo(*luaindex* _entryIndex_)
+** _Returns:_ *integer* _ranking_, *string* _charName_, *integer* _score_, *integer* _retClassId_, *string* _displayName_, *integer* _stage_, *integer* _cycle_, *integer* _arc_
+
+* GetEndlessDungeonSoloLeaderboardEntryInfo(*integer* _endlessDungeonId_, *luaindex* _entryIndex_)
+** _Returns:_ *integer* _ranking_, *string* _charName_, *integer* _score_, *integer* _retClassId_, *string* _displayName_, *integer* _stage_, *integer* _cycle_, *integer* _arc_
+
+
+Changed medium enum to medium id (same number values)
+* ReadLoreBook(*luaindex* _categoryIndex_, *luaindex* _collectionIndex_, *luaindex* _bookIndex_)
+** _Returns:_ *string* _body_, *integer* _mediumId_, *bool* _showTitle_
+
+
+Added return _stackCountVengeanceBag_
+* GetItemLinkStacks(*string* _itemLink_)
+** _Returns:_ *integer* _stackCountBackpack_, *integer* _stackCountBank_, *integer* _stackCountCraftBag_, *integer* _stackCountHouseBanks_, *integer* _stackCountFurnitureVault_, *integer* _stackCountVengeanceBag_
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_VENGEANCE_ACTION_RESULT (*[VengeanceActionResult|#VengeanceActionResult]* _vengeanceActionResult_)
+* EVENT_VENGEANCE_EXIT_LOADOUT_SWAP_SUBZONE
+* EVENT_VENGEANCE_LOADOUT_ROLE_UPDATED
+* EVENT_VENGEANCE_PERKS_UPDATED
+
+
+**********************
+*** Events Changed ***
+**********************
+
+Removed _classId_
+* EVENT_ENDLESS_DUNGEON_LEADERBOARD_DATA_RECEIVED (*[EndlessDungeonGroupType|#EndlessDungeonGroupType]* _endlessDungeonGroupType_, *integer* _endlessDungeonId_)
+* EVENT_RAID_LEADERBOARD_DATA_RECEIVED (*[RaidCategory|#RaidCategory]* _raidCategory_, *integer* _raidId_)
+
+
+Changed medium enum to medium id (same number values)
+* EVENT_SHOW_BOOK (*string* _bookTitle_, *string* _body_, *integer* _mediumId_, *bool* _showTitle_, *integer* _bookId_)
+
+
+
+*****************
+*** XML Added ***
+*****************
+
+h5. Canvas
+* [Inherits: Control|#Control]
+* [Child: CanvasSize|#CanvasSize]
+* [Child: objectFit|#Attributes]
+
+h5. CanvasSize
+* _attribute:_ *number* _width_
+* _attribute:_ *number* _height_
