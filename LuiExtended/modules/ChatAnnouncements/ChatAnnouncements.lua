@@ -378,8 +378,8 @@ function ChatAnnouncements.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY, ChatAnnouncements.OnDigStart)
     eventManager:RegisterForEvent(moduleName, EVENT_ANTIQUITY_DIGGING_GAME_OVER, ChatAnnouncements.OnDigEnd)
 
-    -- Timed Activity
-    eventManager:RegisterForEvent(moduleName, EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED, ChatAnnouncements.OnTimedActivityProgressUpdated)
+    -- Timed Activity (P49: EVENT_TIMED_ACTIVITY_TRACKING_UPDATED replaces EVENT_TIMED_ACTIVITY_TYPE_PROGRESS_UPDATED)
+    eventManager:RegisterForEvent(moduleName, EVENT_TIMED_ACTIVITY_TRACKING_UPDATED, ChatAnnouncements.OnTimedActivityTrackingUpdated)
 
     -- Promotional Events Activity
     eventManager:RegisterForEvent(moduleName, EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, ChatAnnouncements.OnPromotionalEventsActivityProgressUpdated)
@@ -426,11 +426,15 @@ function ChatAnnouncements.RegisterColorEvents()
     ColorizeColors.CurrencyOutfitTokenColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyOutfitTokenColor))
     ColorizeColors.CurrencyUndauntedColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyUndauntedColor))
     ColorizeColors.CurrencyTransmuteColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyTransmuteColor))
-    ColorizeColors.CurrencyEventColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyEventColor))
     ColorizeColors.CurrencyCrownsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyCrownsColor))
     ColorizeColors.CurrencyCrownGemsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyCrownGemsColor))
-    ColorizeColors.CurrencyEndeavorsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyEndeavorsColor))
     ColorizeColors.CurrencyEndlessColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyEndlessColor))
+    ColorizeColors.CurrencySealsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencySealsColor))
+    ColorizeColors.CurrencyTradeBarsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyTradeBarsColor))
+    ColorizeColors.CurrencyTomePointsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyTomePointsColor))
+    ColorizeColors.CurrencyTomePointCachesColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyTomePointCachesColor))
+    ColorizeColors.CurrencyTomeTokensColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyTomeTokensColor))
+    ColorizeColors.CurrencyTomeChallengeRerollsColorize = ZO_ColorDef:New(unpack(SV.Currency.CurrencyTomeChallengeRerollsColor))
     ColorizeColors.DisguiseAlertColorize = ZO_ColorDef:New(unpack(SV.Notify.DisguiseAlertColor))
     ColorizeColors.AchievementColorize1 = ZO_ColorDef:New(unpack(SV.Achievement.AchievementColor1))
     ColorizeColors.AchievementColorize2 = ZO_ColorDef:New(unpack(SV.Achievement.AchievementColor2))
@@ -1626,15 +1630,19 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
     -- Descriptor table for currencies without throttle/filter (icon path uses |t16:16:...|t when CurrencyIcon is true)
     local SIMPLE_CURRENCY =
     {
-        [CURT_WRIT_VOUCHERS]   = { "CurrencyWVChange", "CurrencyWVColorize", "/esoui/art/currency/currency_writvoucher.dds", "CurrencyWVName", "CurrencyWVShowTotal", "CurrencyMessageTotalWV" },
-        [CURT_STYLE_STONES]    = { "CurrencyOutfitTokenChange", "CurrencyOutfitTokenColorize", "/esoui/art/currency/token_clothing_16.dds", "CurrencyOutfitTokenName", "CurrencyOutfitTokenShowTotal", "CurrencyMessageTotalOutfitToken" },
-        [CURT_CHAOTIC_CREATIA] = { "CurrencyTransmuteChange", "CurrencyTransmuteColorize", "/esoui/art/currency/currency_seedcrystal_16.dds", "CurrencyTransmuteName", "CurrencyTransmuteShowTotal", "CurrencyMessageTotalTransmute" },
-        [CURT_EVENT_TICKETS]   = { "CurrencyEventChange", "CurrencyEventColorize", "/esoui/art/currency/currency_eventticket.dds", "CurrencyEventName", "CurrencyEventShowTotal", "CurrencyMessageTotalEvent" },
-        [CURT_UNDAUNTED_KEYS]  = { "CurrencyUndauntedChange", "CurrencyUndauntedColorize", "/esoui/art/currency/undauntedkey.dds", "CurrencyUndauntedName", "CurrencyUndauntedShowTotal", "CurrencyMessageTotalUndaunted" },
-        [CURT_CROWNS]          = { "CurrencyCrownsChange", "CurrencyCrownsColorize", "/esoui/art/currency/currency_crown.dds", "CurrencyCrownsName", "CurrencyCrownsShowTotal", "CurrencyMessageTotalCrowns" },
-        [CURT_CROWN_GEMS]      = { "CurrencyCrownGemsChange", "CurrencyCrownGemsColorize", "/esoui/art/currency/currency_crown_gems.dds", "CurrencyCrownGemsName", "CurrencyCrownGemsShowTotal", "CurrencyMessageTotalCrownGems" },
-        [CURT_ENDEAVOR_SEALS]  = { "CurrencyEndeavorsChange", "CurrencyEndeavorsColorize", "esoui/art/currency/currency_seals_of_endeavor_32.dds", "CurrencyEndeavorsName", "CurrencyEndeavorsShowTotal", "CurrencyMessageTotalEndeavors" },
-        [CURT_ENDLESS_DUNGEON] = { "CurrencyEndlessChange", "CurrencyEndlessColorize", "esoui/art/currency/archivalfragments_mipmaps.dds", "CurrencyEndlessName", "CurrencyEndlessShowTotal", "CurrencyMessageTotalEndless" },
+        [CURT_WRIT_VOUCHERS]          = { "CurrencyWVChange", "CurrencyWVColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_WRIT_VOUCHERS), "CurrencyWVName", "CurrencyWVShowTotal", "CurrencyMessageTotalWV" },
+        [CURT_STYLE_STONES]           = { "CurrencyOutfitTokenChange", "CurrencyOutfitTokenColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_STYLE_STONES), "CurrencyOutfitTokenName", "CurrencyOutfitTokenShowTotal", "CurrencyMessageTotalOutfitToken" },
+        [CURT_TRANSMUTE_CRYSTALS]     = { "CurrencyTransmuteChange", "CurrencyTransmuteColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TRANSMUTE_CRYSTALS), "CurrencyTransmuteName", "CurrencyTransmuteShowTotal", "CurrencyMessageTotalTransmute" },
+        [CURT_UNDAUNTED_KEYS]         = { "CurrencyUndauntedChange", "CurrencyUndauntedColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_UNDAUNTED_KEYS), "CurrencyUndauntedName", "CurrencyUndauntedShowTotal", "CurrencyMessageTotalUndaunted" },
+        [CURT_CROWNS]                 = { "CurrencyCrownsChange", "CurrencyCrownsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_CROWNS), "CurrencyCrownsName", "CurrencyCrownsShowTotal", "CurrencyMessageTotalCrowns" },
+        [CURT_CROWN_GEMS]             = { "CurrencyCrownGemsChange", "CurrencyCrownGemsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_CROWN_GEMS), "CurrencyCrownGemsName", "CurrencyCrownGemsShowTotal", "CurrencyMessageTotalCrownGems" },
+        [CURT_ENDLESS_DUNGEON]        = { "CurrencyEndlessChange", "CurrencyEndlessColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_ENDLESS_DUNGEON), "CurrencyEndlessName", "CurrencyEndlessShowTotal", "CurrencyMessageTotalEndless" },
+        [CURT_SEALS]                  = { "CurrencySealsChange", "CurrencySealsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_SEALS), "CurrencySealsName", "CurrencySealsShowTotal", "CurrencyMessageTotalSeals" },
+        [CURT_TRADE_BARS]             = { "CurrencyTradeBarsChange", "CurrencyTradeBarsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TRADE_BARS), "CurrencyTradeBarsName", "CurrencyTradeBarsShowTotal", "CurrencyMessageTotalTradeBars" },
+        [CURT_TOME_POINTS]            = { "CurrencyTomePointsChange", "CurrencyTomePointsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TOME_POINTS), "CurrencyTomePointsName", "CurrencyTomePointsShowTotal", "CurrencyMessageTotalTomePoints" },
+        [CURT_TOME_POINT_CACHES]      = { "CurrencyTomePointCachesChange", "CurrencyTomePointCachesColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TOME_POINT_CACHES), "CurrencyTomePointCachesName", "CurrencyTomePointCachesShowTotal", "CurrencyMessageTotalTomePointCaches" },
+        [CURT_TOME_TOKENS]            = { "CurrencyTomeTokensChange", "CurrencyTomeTokensColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TOME_TOKENS), "CurrencyTomeTokensName", "CurrencyTomeTokensShowTotal", "CurrencyMessageTotalTomeTokens" },
+        [CURT_TOME_CHALLENGE_REROLLS] = { "CurrencyTomeChallengeRerollsChange", "CurrencyTomeChallengeRerollsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TOME_CHALLENGE_REROLLS), "CurrencyTomeChallengeRerollsName", "CurrencyTomeChallengeRerollsShowTotal", "CurrencyMessageTotalTomeChallengeRerolls" },
     }
 
     local function GetCurrencyDisplayInfo(currencyType, amountDelta, changeReason)
@@ -1757,7 +1765,6 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         [CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER] = "CurrencyMessageLoot",
         [CURRENCY_CHANGE_REASON_LOOT_STOLEN] = "CurrencyMessageSteal",
         [CURRENCY_CHANGE_REASON_DEATH] = "CurrencyMessageLost",
-        [CURRENCY_CHANGE_REASON_PURCHASED_WITH_ENDEAVOR_SEALS] = "CurrencyMessageSpend",
         [CURRENCY_CHANGE_REASON_EDIT_GUILD_HERALDRY] = "CurrencyMessageSpend",
         [CURRENCY_CHANGE_REASON_GUILD_TABARD] = "CurrencyMessageSpend",
         [CURRENCY_CHANGE_REASON_KEEP_REPAIR] = "CurrencyMessageEarn",
@@ -1769,6 +1776,14 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         [CURRENCY_CHANGE_REASON_CROWN_CRATE_DUPLICATE] = "CurrencyMessageReceive",
         [CURRENCY_CHANGE_REASON_ITEM_CONVERTED_TO_GEMS] = "CurrencyMessageReceive",
         [CURRENCY_CHANGE_REASON_CROWNS_PURCHASED] = "CurrencyMessageReceive",
+        [CURRENCY_CHANGE_REASON_PURCHASED_WITH_SEALS] = "CurrencyMessageSpend",
+        [CURRENCY_CHANGE_REASON_PURCHASED_WITH_TRADE_BARS] = "CurrencyMessageSpend",
+        [CURRENCY_CHANGE_REASON_CACHE_REDEEMED_FOR_TOME_POINTS] = "CurrencyMessageReceive",
+        [CURRENCY_CHANGE_REASON_PURCHASED_TAMRIEL_TOMES_PREMIUM_PLUS] = "CurrencyMessageSpend",
+        [CURRENCY_CHANGE_REASON_PURCHASED_TAMRIEL_TOMES_REWARD] = "CurrencyMessageSpend",
+        [CURRENCY_CHANGE_REASON_TOME_CHALLENGE_REROLL] = "CurrencyMessageSpend",
+        [CURRENCY_CHANGE_REASON_WEEKLY_REROLL_GRANT] = "CurrencyMessageReceive",
+        [CURRENCY_CHANGE_REASON_ENDLESS_DUNGEON_VISION_REROLL] = "CurrencyMessageSpend",
     }
     local reasonToCurrencyType =
     {
@@ -1868,7 +1883,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             end
             return contextMessages.CurrencyMessageSpend, nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_REWARD then
-            return (currencyType == CURT_ENDEAVOR_SEALS and contextMessages.CurrencyMessageEarn or contextMessages.CurrencyMessageReceive), nil, "continue"
+            return (currencyType == CURT_SEALS and contextMessages.CurrencyMessageEarn or contextMessages.CurrencyMessageReceive), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_TRADINGHOUSE_PURCHASE then
             if ChatAnnouncements.SV.Currency.CurrencyGoldHideAH then
                 return nil, nil, "return"
@@ -1880,7 +1895,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         elseif changeReason == CURRENCY_CHANGE_REASON_KILL then
             return (currencyType == CURT_ALLIANCE_POINTS and contextMessages.CurrencyMessageEarn or contextMessages.CurrencyMessageLoot), nil, "continue"
         elseif changeReason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_GEMS or changeReason == CURRENCY_CHANGE_REASON_PURCHASED_WITH_CROWNS then
-            return (currencyType == CURT_STYLE_STONES or currencyType == CURT_EVENT_TICKETS) and contextMessages.CurrencyMessageReceive or contextMessages.CurrencyMessageSpend, nil, "continue"
+            return (currencyType == CURT_STYLE_STONES or currencyType == CURT_SEALS or currencyType == CURT_TRADE_BARS) and contextMessages.CurrencyMessageReceive or contextMessages.CurrencyMessageSpend, nil, "continue"
         elseif debugReasonIds[changeReason] then
             return zo_strformat(GetString(LUIE_STRING_CA_DEBUG_MSG_CURRENCY), changeReason), nil, "continue"
         end
@@ -1900,7 +1915,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
     messageChange = messageChangeResult
     type = typeResult
 
-    -- Haven't seen this one yet but it's more recently added and thus probably used for something.
+    -- CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER (76): opening currency containers (e.g. Transmutation Geode, other geodes that grant crystals/currency). Mapped to CurrencyMessageLoot above.
     if reason == CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER then
         if LUIE.IsDevDebugEnabled() then
             LUIE:Log("Debug", "Currency Change Reason 76 - CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER")
@@ -2832,46 +2847,42 @@ function ChatAnnouncements.OnAchievementUpdated(eventId, id)
     end
 end
 
---- - *EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED*
---- @param eventId integer
---- @param timedActivityIndex luaindex
---- @param previousProgress integer
---- @param currentProgress integer
---- @param complete boolean
-function ChatAnnouncements.OnTimedActivityProgressUpdated(eventId, timedActivityIndex, previousProgress, currentProgress, complete)
-    if ChatAnnouncements.SV.Notify.TimedActivityCA or ChatAnnouncements.SV.Notify.TimedActivityAlert then
-        local name = GetTimedActivityName(timedActivityIndex)
-        local type = GetTimedActivityType(timedActivityIndex)
-        local maxProgress = GetTimedActivityMaxProgress(timedActivityIndex)
-        local progress = string_format("%i / %i", currentProgress, maxProgress)
-
-        local typeName
-        if type == TIMED_ACTIVITY_TYPE_DAILY then
-            typeName = GetString(SI_TIMEDACTIVITYTYPE0)
-        elseif type == TIMED_ACTIVITY_TYPE_WEEKLY then
-            typeName = GetString(SI_TIMEDACTIVITYTYPE1)
-        end
-
-        local message = string_format("[%s] %s: %s", zo_strformat(GetString(LUIE_STRING_CA_DISPLAY_TIMED_ACTIVITIES), typeName), name, progress)
-
-        if ChatAnnouncements.SV.Notify.TimedActivityCA then
-            ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-            {
-                message = message,
-                type = "MESSAGE",
-                activityIndex = timedActivityIndex,
-                previousProgress = previousProgress,
-                currentProgress = currentProgress,
-                complete = complete
-            }
-            ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-            eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
-        end
-
-        if ChatAnnouncements.SV.Notify.TimedActivityAlert then
-            local alertMessage = zo_strformat(GetString(SI_APPLYOUTFITCHANGESRESULT0), GetString(SI_ACTIVITY_FINDER_CATEGORY_TIMED_ACTIVITIES))
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
-        end
+--- - *EVENT_TIMED_ACTIVITY_TRACKING_UPDATED* (P49)
+--- @param eventId number
+--- @param timedActivityEncodedId id64
+function ChatAnnouncements.OnTimedActivityTrackingUpdated(eventId, timedActivityEncodedId)
+    if not (ChatAnnouncements.SV.Notify.TimedActivityCA or ChatAnnouncements.SV.Notify.TimedActivityAlert) then return end
+    local index, trackedEncodedId = GetTrackedTimedActivityInfo()
+    if index == nil or trackedEncodedId ~= timedActivityEncodedId then return end
+    local name = GetTimedActivityName(index)
+    local activityType = GetTimedActivityType(index)
+    local numClaimed = GetTimedActivityNumTimesClaimed(index)
+    local totalClaimable = GetTimedActivityTotalNumTimesClaimable(index)
+    local progress = string_format("%i / %i", numClaimed, totalClaimable)
+    local typeName
+    if activityType == TIMED_ACTIVITY_TYPE_DAILY then
+        typeName = GetString(SI_TIMEDACTIVITYTYPE0)
+    elseif activityType == TIMED_ACTIVITY_TYPE_WEEKLY then
+        typeName = GetString(SI_TIMEDACTIVITYTYPE1)
+    elseif activityType == TIMED_ACTIVITY_TYPE_SEASONAL then
+        typeName = GetString(SI_TIMEDACTIVITYTYPE2) or "Seasonal"
+    else
+        typeName = tostring(activityType)
+    end
+    local message = string_format("[%s] %s: %s", zo_strformat(GetString(LUIE_STRING_CA_DISPLAY_TIMED_ACTIVITIES), typeName), name, progress)
+    if ChatAnnouncements.SV.Notify.TimedActivityCA then
+        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
+        {
+            message = message,
+            type = "MESSAGE",
+            activityIndex = index,
+        }
+        ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+    end
+    if ChatAnnouncements.SV.Notify.TimedActivityAlert then
+        local alertMessage = zo_strformat(GetString(SI_APPLYOUTFITCHANGESRESULT0), GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_LABEL))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
     end
 end
 
@@ -10355,6 +10366,7 @@ function ChatAnnouncements.HookFunction()
     end
 
     -- HOOK Group Invite function so we can modify CA/Alert here
+    --- @diagnostic disable-next-line: missing-global-doc
     TryGroupInviteByName = function (characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
         if IsPlayerInGroup(characterOrDisplayName) then
             printToChat(GetString(SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER), true)
@@ -10453,6 +10465,7 @@ function ChatAnnouncements.HookFunction()
     eventManager:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_DEMOTE_SUCCESSFUL, ChatAnnouncements.GuildMemberDemoteSuccessful)
 
     -- Hook for Guild Invite function used from Guild Menu
+    --- @diagnostic disable-next-line: missing-global-doc
     ZO_TryGuildInvite = function (guildId, displayName)
         -- TODO: Update when more alerts are added to CA
         if not DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_INVITE) then

@@ -1229,94 +1229,90 @@ function ChatAnnouncements.CreateSettings()
                 default = Defaults.Currency.CurrencyMessageTotalTransmute,
             },
             {
-                -- Show Event Tickets
+                -- Show Seals
                 type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENT),
-                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENT_TP),
+                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALS),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALS_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyEventChange
+                    return Settings.Currency.CurrencySealsChange
                 end,
                 setFunc = function (value)
-                    Settings.Currency.CurrencyEventChange = value
+                    Settings.Currency.CurrencySealsChange = value
                 end,
                 width = "full",
                 disabled = function ()
                     return not LUIE.SV.ChatAnnouncements_Enable
                 end,
-                default = Defaults.Currency.CurrencyEventChange,
+                default = Defaults.Currency.CurrencySealsChange,
             },
             {
-                -- Show Event Tickets Color
                 type = "colorpicker",
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTCOLOR)),
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALSCOLOR)),
                 getFunc = function ()
-                    return unpack(Settings.Currency.CurrencyEventColor)
+                    return unpack(Settings.Currency.CurrencySealsColor)
                 end,
                 setFunc = function (r, g, b, a)
-                    Settings.Currency.CurrencyEventColor = { r, g, b, a }
+                    Settings.Currency.CurrencySealsColor = { r, g, b, a }
                     ChatAnnouncements.RegisterColorEvents()
                 end,
                 width = "full",
                 disabled = function ()
-                    return not (Settings.Currency.CurrencyEventChange and LUIE.SV.ChatAnnouncements_Enable)
+                    return not (Settings.Currency.CurrencySealsChange and LUIE.SV.ChatAnnouncements_Enable)
                 end,
                 default =
                 {
-                    r = Defaults.Currency.CurrencyEventColor[1],
-                    g = Defaults.Currency.CurrencyEventColor[2],
-                    b = Defaults.Currency.CurrencyEventColor[3],
+                    r = Defaults.Currency.CurrencySealsColor[1],
+                    g = Defaults.Currency.CurrencySealsColor[2],
+                    b = Defaults.Currency.CurrencySealsColor[3],
                 },
             },
             {
-                -- Show Event Tickets Name
                 type = "editbox",
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTNAME)),
-                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTNAME_TP),
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALSNAME)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALSNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyEventName
+                    return Settings.Currency.CurrencySealsName
                 end,
                 setFunc = function (value)
-                    Settings.Currency.CurrencyEventName = value
+                    Settings.Currency.CurrencySealsName = value
                 end,
                 width = "full",
                 disabled = function ()
-                    return not (Settings.Currency.CurrencyEventChange and LUIE.SV.ChatAnnouncements_Enable)
+                    return not (Settings.Currency.CurrencySealsChange and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.Currency.CurrencyEventName,
+                default = Defaults.Currency.CurrencySealsName,
             },
             {
-                -- Show Event Tickets Total
                 type = "checkbox",
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTTOTAL)),
-                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTTOTAL_TP),
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALSTOTAL)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALSTOTAL_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyEventShowTotal
+                    return Settings.Currency.CurrencySealsShowTotal
                 end,
                 setFunc = function (value)
-                    Settings.Currency.CurrencyEventShowTotal = value
+                    Settings.Currency.CurrencySealsShowTotal = value
                 end,
                 width = "full",
                 disabled = function ()
-                    return not (Settings.Currency.CurrencyEventChange and LUIE.SV.ChatAnnouncements_Enable)
+                    return not (Settings.Currency.CurrencySealsChange and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.Currency.CurrencyEventShowTotal,
+                default = Defaults.Currency.CurrencySealsShowTotal,
             },
             {
-                -- Total Currency Message (Event Tickets)
                 type = "editbox",
-                name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_EVENTTOTAL_MSG)),
-                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_EVENTTOTAL_MSG_TP),
+                name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SEALSTOTAL_MSG)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SEALSTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalEvent
+                    return Settings.Currency.CurrencyMessageTotalSeals
                 end,
                 setFunc = function (value)
-                    Settings.Currency.CurrencyMessageTotalEvent = value
+                    Settings.Currency.CurrencyMessageTotalSeals = value
                 end,
                 width = "full",
                 disabled = function ()
-                    return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyEventChange and Settings.Currency.CurrencyEventShowTotal)
+                    return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencySealsChange and Settings.Currency.CurrencySealsShowTotal)
                 end,
-                default = Defaults.Currency.CurrencyMessageTotalEvent,
+                default = Defaults.Currency.CurrencyMessageTotalSeals,
             },
             {
                 -- Show Crowns
@@ -1500,94 +1496,434 @@ function ChatAnnouncements.CreateSettings()
             },
 
             {
-                -- Show Endeavors
+                -- Show Trade Bars
                 type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORS),
-                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORS_TP),
+                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARS),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARS_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyEndeavorsChange
+                    return Settings.Currency.CurrencyTradeBarsChange
                 end,
                 setFunc = function (value)
-                    Settings.Currency.CurrencyEndeavorsChange = value
+                    Settings.Currency.CurrencyTradeBarsChange = value
                 end,
                 width = "full",
                 disabled = function ()
                     return not LUIE.SV.ChatAnnouncements_Enable
                 end,
-                default = Defaults.Currency.CurrencyEndeavorsChange,
+                default = Defaults.Currency.CurrencyTradeBarsChange,
             },
             {
-                -- Show Endeavors Color
                 type = "colorpicker",
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSCOLOR)),
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARSCOLOR)),
                 getFunc = function ()
-                    return unpack(Settings.Currency.CurrencyEndeavorsColor)
+                    return unpack(Settings.Currency.CurrencyTradeBarsColor)
                 end,
                 setFunc = function (r, g, b, a)
-                    Settings.Currency.CurrencyEndeavorsColor = { r, g, b, a }
+                    Settings.Currency.CurrencyTradeBarsColor = { r, g, b, a }
                     ChatAnnouncements.RegisterColorEvents()
                 end,
                 width = "full",
                 disabled = function ()
-                    return not (Settings.Currency.CurrencyEndeavorsChange and LUIE.SV.ChatAnnouncements_Enable)
+                    return not (Settings.Currency.CurrencyTradeBarsChange and LUIE.SV.ChatAnnouncements_Enable)
                 end,
                 default =
                 {
-                    r = Defaults.Currency.CurrencyEndeavorsColor[1],
-                    g = Defaults.Currency.CurrencyEndeavorsColor[2],
-                    b = Defaults.Currency.CurrencyEndeavorsColor[3],
+                    r = Defaults.Currency.CurrencyTradeBarsColor[1],
+                    g = Defaults.Currency.CurrencyTradeBarsColor[2],
+                    b = Defaults.Currency.CurrencyTradeBarsColor[3],
                 },
             },
             {
-                -- Show Endeavors Name
                 type = "editbox",
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSNAME)),
-                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSNAME_TP),
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARSNAME)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARSNAME_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyEndeavorsName
+                    return Settings.Currency.CurrencyTradeBarsName
                 end,
                 setFunc = function (value)
-                    Settings.Currency.CurrencyEndeavorsName = value
+                    Settings.Currency.CurrencyTradeBarsName = value
                 end,
                 width = "full",
                 disabled = function ()
-                    return not (Settings.Currency.CurrencyEndeavorsChange and LUIE.SV.ChatAnnouncements_Enable)
+                    return not (Settings.Currency.CurrencyTradeBarsChange and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.Currency.CurrencyEndeavorsName,
+                default = Defaults.Currency.CurrencyTradeBarsName,
             },
             {
-                -- Show Endeavors Total
                 type = "checkbox",
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSTOTAL)),
-                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSTOTAL_TP),
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARSTOTAL)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARSTOTAL_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyEndeavorsShowTotal
+                    return Settings.Currency.CurrencyTradeBarsShowTotal
                 end,
                 setFunc = function (value)
-                    Settings.Currency.CurrencyEndeavorsShowTotal = value
+                    Settings.Currency.CurrencyTradeBarsShowTotal = value
                 end,
                 width = "full",
                 disabled = function ()
-                    return not (Settings.Currency.CurrencyEndeavorsChange and LUIE.SV.ChatAnnouncements_Enable)
+                    return not (Settings.Currency.CurrencyTradeBarsChange and LUIE.SV.ChatAnnouncements_Enable)
                 end,
-                default = Defaults.Currency.CurrencyEndeavorsShowTotal,
+                default = Defaults.Currency.CurrencyTradeBarsShowTotal,
             },
             {
-                -- Total Currency Message (Endeavors)
                 type = "editbox",
-                name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_ENDEAVORSTOTAL_MSG)),
-                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_ENDEAVORSTOTAL_MSG_TP),
+                name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_TRADEBARSTOTAL_MSG)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TRADEBARSTOTAL_MSG_TP),
                 getFunc = function ()
-                    return Settings.Currency.CurrencyMessageTotalEndeavors
+                    return Settings.Currency.CurrencyMessageTotalTradeBars
                 end,
                 setFunc = function (value)
-                    Settings.Currency.CurrencyMessageTotalEndeavors = value
+                    Settings.Currency.CurrencyMessageTotalTradeBars = value
                 end,
                 width = "full",
                 disabled = function ()
-                    return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyEndeavorsChange and Settings.Currency.CurrencyEndeavorsShowTotal)
+                    return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyTradeBarsChange and Settings.Currency.CurrencyTradeBarsShowTotal)
                 end,
-                default = Defaults.Currency.CurrencyMessageTotalEndeavors,
+                default = Defaults.Currency.CurrencyMessageTotalTradeBars,
+            },
+            {
+                -- Show Tome Points
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTS),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTS_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyTomePointsChange
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyTomePointsChange = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Currency.CurrencyTomePointsChange,
+            },
+            {
+                type = "colorpicker",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTSCOLOR)),
+                getFunc = function ()
+                    return unpack(Settings.Currency.CurrencyTomePointsColor)
+                end,
+                setFunc = function (r, g, b, a)
+                    Settings.Currency.CurrencyTomePointsColor = { r, g, b, a }
+                    ChatAnnouncements.RegisterColorEvents()
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyTomePointsChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default =
+                {
+                    r = Defaults.Currency.CurrencyTomePointsColor[1],
+                    g = Defaults.Currency.CurrencyTomePointsColor[2],
+                    b = Defaults.Currency.CurrencyTomePointsColor[3],
+                },
+            },
+            {
+                type = "editbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTSNAME)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTSNAME_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyTomePointsName
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyTomePointsName = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyTomePointsChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Currency.CurrencyTomePointsName,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTSTOTAL)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTSTOTAL_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyTomePointsShowTotal
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyTomePointsShowTotal = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyTomePointsChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Currency.CurrencyTomePointsShowTotal,
+            },
+            {
+                type = "editbox",
+                name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMEPOINTSTOTAL_MSG)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMEPOINTSTOTAL_MSG_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyMessageTotalTomePoints
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyMessageTotalTomePoints = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyTomePointsChange and Settings.Currency.CurrencyTomePointsShowTotal)
+                end,
+                default = Defaults.Currency.CurrencyMessageTotalTomePoints,
+            },
+            {
+                -- Show Tome Point Caches
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHES),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHES_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyTomePointCachesChange
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyTomePointCachesChange = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Currency.CurrencyTomePointCachesChange,
+            },
+            {
+                type = "colorpicker",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHESCOLOR)),
+                getFunc = function ()
+                    return unpack(Settings.Currency.CurrencyTomePointCachesColor)
+                end,
+                setFunc = function (r, g, b, a)
+                    Settings.Currency.CurrencyTomePointCachesColor = { r, g, b, a }
+                    ChatAnnouncements.RegisterColorEvents()
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyTomePointCachesChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default =
+                {
+                    r = Defaults.Currency.CurrencyTomePointCachesColor[1],
+                    g = Defaults.Currency.CurrencyTomePointCachesColor[2],
+                    b = Defaults.Currency.CurrencyTomePointCachesColor[3],
+                },
+            },
+            {
+                type = "editbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHESNAME)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHESNAME_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyTomePointCachesName
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyTomePointCachesName = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyTomePointCachesChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Currency.CurrencyTomePointCachesName,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHESTOTAL)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHESTOTAL_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyTomePointCachesShowTotal
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyTomePointCachesShowTotal = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyTomePointCachesChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Currency.CurrencyTomePointCachesShowTotal,
+            },
+            {
+                type = "editbox",
+                name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMEPOINTCACHESTOTAL_MSG)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMEPOINTCACHESTOTAL_MSG_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyMessageTotalTomePointCaches
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyMessageTotalTomePointCaches = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyTomePointCachesChange and Settings.Currency.CurrencyTomePointCachesShowTotal)
+                end,
+                default = Defaults.Currency.CurrencyMessageTotalTomePointCaches,
+            },
+            {
+                -- Show Tome Tokens
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENS),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENS_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyTomeTokensChange
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyTomeTokensChange = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Currency.CurrencyTomeTokensChange,
+            },
+            {
+                type = "colorpicker",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENSCOLOR)),
+                getFunc = function ()
+                    return unpack(Settings.Currency.CurrencyTomeTokensColor)
+                end,
+                setFunc = function (r, g, b, a)
+                    Settings.Currency.CurrencyTomeTokensColor = { r, g, b, a }
+                    ChatAnnouncements.RegisterColorEvents()
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyTomeTokensChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default =
+                {
+                    r = Defaults.Currency.CurrencyTomeTokensColor[1],
+                    g = Defaults.Currency.CurrencyTomeTokensColor[2],
+                    b = Defaults.Currency.CurrencyTomeTokensColor[3],
+                },
+            },
+            {
+                type = "editbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENSNAME)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENSNAME_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyTomeTokensName
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyTomeTokensName = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyTomeTokensChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Currency.CurrencyTomeTokensName,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENSTOTAL)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENSTOTAL_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyTomeTokensShowTotal
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyTomeTokensShowTotal = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyTomeTokensChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Currency.CurrencyTomeTokensShowTotal,
+            },
+            {
+                type = "editbox",
+                name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMETOKENSTOTAL_MSG)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMETOKENSTOTAL_MSG_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyMessageTotalTomeTokens
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyMessageTotalTomeTokens = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyTomeTokensChange and Settings.Currency.CurrencyTomeTokensShowTotal)
+                end,
+                default = Defaults.Currency.CurrencyMessageTotalTomeTokens,
+            },
+            {
+                -- Show Tome Challenge Rerolls
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLS),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLS_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyTomeChallengeRerollsChange
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyTomeChallengeRerollsChange = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.Currency.CurrencyTomeChallengeRerollsChange,
+            },
+            {
+                type = "colorpicker",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLSCOLOR)),
+                getFunc = function ()
+                    return unpack(Settings.Currency.CurrencyTomeChallengeRerollsColor)
+                end,
+                setFunc = function (r, g, b, a)
+                    Settings.Currency.CurrencyTomeChallengeRerollsColor = { r, g, b, a }
+                    ChatAnnouncements.RegisterColorEvents()
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyTomeChallengeRerollsChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default =
+                {
+                    r = Defaults.Currency.CurrencyTomeChallengeRerollsColor[1],
+                    g = Defaults.Currency.CurrencyTomeChallengeRerollsColor[2],
+                    b = Defaults.Currency.CurrencyTomeChallengeRerollsColor[3],
+                },
+            },
+            {
+                type = "editbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLSNAME)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLSNAME_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyTomeChallengeRerollsName
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyTomeChallengeRerollsName = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyTomeChallengeRerollsChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Currency.CurrencyTomeChallengeRerollsName,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLSTOTAL)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLSTOTAL_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyTomeChallengeRerollsShowTotal
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyTomeChallengeRerollsShowTotal = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (Settings.Currency.CurrencyTomeChallengeRerollsChange and LUIE.SV.ChatAnnouncements_Enable)
+                end,
+                default = Defaults.Currency.CurrencyTomeChallengeRerollsShowTotal,
+            },
+            {
+                type = "editbox",
+                name = zo_strformat("\t\t\t\t\t\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMECHALLENGEREROLLSTOTAL_MSG)),
+                tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMECHALLENGEREROLLSTOTAL_MSG_TP),
+                getFunc = function ()
+                    return Settings.Currency.CurrencyMessageTotalTomeChallengeRerolls
+                end,
+                setFunc = function (value)
+                    Settings.Currency.CurrencyMessageTotalTomeChallengeRerolls = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyTomeChallengeRerollsChange and Settings.Currency.CurrencyTomeChallengeRerollsShowTotal)
+                end,
+                default = Defaults.Currency.CurrencyMessageTotalTomeChallengeRerolls,
             },
         },
     }
@@ -8973,8 +9309,8 @@ function ChatAnnouncements.CreateSettings()
             {
                 -- Timed Activity (ChatAnnouncements)
                 type = "checkbox",
-                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT), GetString(SI_ACTIVITY_FINDER_CATEGORY_TIMED_ACTIVITIES)),
-                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA), GetString(SI_ACTIVITY_FINDER_CATEGORY_TIMED_ACTIVITIES)),
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT), GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_LABEL)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA), GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_LABEL)),
                 getFunc = function ()
                     return Settings.Notify.TimedActivityCA
                 end,
@@ -8990,8 +9326,8 @@ function ChatAnnouncements.CreateSettings()
             {
                 -- Timed Activity (Alert)
                 type = "checkbox",
-                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT), GetString(SI_ACTIVITY_FINDER_CATEGORY_TIMED_ACTIVITIES)),
-                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT), GetString(SI_ACTIVITY_FINDER_CATEGORY_TIMED_ACTIVITIES)),
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT), GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_LABEL)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT), GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_LABEL)),
                 getFunc = function ()
                     return Settings.Notify.TimedActivityAlert
                 end,
