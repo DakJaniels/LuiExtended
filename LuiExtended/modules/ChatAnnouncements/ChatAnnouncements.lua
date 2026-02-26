@@ -151,6 +151,7 @@ local lastCollectibleUsed = 0
 
 -- Quest
 local g_stopDisplaySpam = false   -- Toggled on to stop spam display of EVENT_DISPLAY_ANNOUNCEMENTS from IC zone transitions.
+--- @type  {[string]:{questType:QuestType,zoneDisplayType:ZoneDisplayType}}
 local g_questIndex = {}           -- Index of all current quests. Allows us to read the index so that all quest notifications can use the difficulty icon.
 local g_questItemAdded = {}       -- Hold index of Quest items that are added - Prevents pointless and annoying messages from appearing when the same quest item is immediately added and removed when quest updates.
 local g_questItemRemoved = {}     -- Hold index of Quest items that are removed - Prevents pointless and annoying messages from appearing when the same quest item is immediately added and removed when quest updates.
@@ -476,11 +477,11 @@ end
 function ChatAnnouncements.RegisterQuestEvents()
     eventManager:RegisterForEvent(moduleName, EVENT_QUEST_SHARED, ChatAnnouncements.QuestShared)
     -- Create a table for quests
-    for i = 1, 25 do
+    for i = 1, MAX_JOURNAL_QUESTS do
         if IsValidQuestIndex(i) then
             local name = GetJournalQuestName(i)
             local questType = GetJournalQuestType(i)
-            local instanceDisplayType = GetJournalQuestZoneDisplayType(i)
+            local zoneDisplayType = GetJournalQuestZoneDisplayType(i)
 
             if name == "" then
                 name = GetString(SI_QUEST_JOURNAL_UNKNOWN_QUEST_NAME)
@@ -489,7 +490,7 @@ function ChatAnnouncements.RegisterQuestEvents()
             g_questIndex[name] =
             {
                 questType = questType,
-                instanceDisplayType = instanceDisplayType,
+                zoneDisplayType = zoneDisplayType,
             }
         end
     end
@@ -7760,15 +7761,15 @@ function ChatAnnouncements.HookFunction()
         ChatAnnouncements.PrintBufferedXP()
 
         local questType = GetJournalQuestType(journalIndex)
-        local instanceDisplayType = GetJournalQuestZoneDisplayType(journalIndex)
+        local zoneDisplayType = GetJournalQuestZoneDisplayType(journalIndex)
         local questJournalObject = SYSTEMS:GetObject("questJournal")
-        local iconTexture = questJournalObject:GetIconTexture(questType, instanceDisplayType)
+        local iconTexture = questJournalObject:GetIconTexture(questType, zoneDisplayType)
 
         -- Add quest to index
         g_questIndex[questName] =
         {
             questType = questType,
-            instanceDisplayType = instanceDisplayType,
+            zoneDisplayType = zoneDisplayType,
         }
 
         if ChatAnnouncements.SV.Quests.QuestAcceptCSA then
@@ -7828,12 +7829,12 @@ function ChatAnnouncements.HookFunction()
     end
 
     -- EVENT_QUEST_COMPLETE (CSA Handler)
-    local function QuestCompleteHook(questName, level, previousExperience, currentExperience, championPoints, questType, instanceDisplayType)
+    local function QuestCompleteHook(questName, level, previousExperience, currentExperience, championPoints, questType, zoneDisplayType)
         eventManager:UnregisterForUpdate(moduleName .. "BufferedXP")
         ChatAnnouncements.PrintBufferedXP()
 
         local questJournalObject = SYSTEMS:GetObject("questJournal")
-        local iconTexture = questJournalObject:GetIconTexture(questType, instanceDisplayType)
+        local iconTexture = questJournalObject:GetIconTexture(questType, zoneDisplayType)
 
         if ChatAnnouncements.SV.Quests.QuestCompleteCSA then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_COMPLETED)
@@ -8122,8 +8123,8 @@ function ChatAnnouncements.HookFunction()
             if g_questIndex[questName] then
                 local questJournalObject = SYSTEMS:GetObject("questJournal")
                 local questType = g_questIndex[questName].questType
-                local instanceDisplayType = g_questIndex[questName].instanceDisplayType
-                iconTexture = questJournalObject:GetIconTexture(questType, instanceDisplayType)
+                local zoneDisplayType = g_questIndex[questName].zoneDisplayType
+                iconTexture = questJournalObject:GetIconTexture(questType, zoneDisplayType)
             end
 
             if ChatAnnouncements.SV.Quests.QuestAbandonCA then
