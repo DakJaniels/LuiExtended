@@ -349,7 +349,9 @@ function ChatAnnouncements.Initialize(enabled)
 
     -- Posthook Crafting Interface (Keyboard)
     ChatAnnouncements.CraftModeOverrides()
-
+    eventManager:RegisterForEvent(moduleName, EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function ()
+        ChatAnnouncements.CraftModeOverrides()
+    end)
     -- Register events
     ChatAnnouncements.RegisterGoldEvents()
     ChatAnnouncements.RegisterLootEvents()
@@ -1626,15 +1628,15 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
     -- Descriptor table for currencies without throttle/filter (icon path uses |t16:16:...|t when CurrencyIcon is true)
     local SIMPLE_CURRENCY =
     {
-        [CURT_WRIT_VOUCHERS]   = { "CurrencyWVChange", "CurrencyWVColorize", "/esoui/art/currency/currency_writvoucher.dds", "CurrencyWVName", "CurrencyWVShowTotal", "CurrencyMessageTotalWV" },
-        [CURT_STYLE_STONES]    = { "CurrencyOutfitTokenChange", "CurrencyOutfitTokenColorize", "/esoui/art/currency/token_clothing_16.dds", "CurrencyOutfitTokenName", "CurrencyOutfitTokenShowTotal", "CurrencyMessageTotalOutfitToken" },
-        [CURT_CHAOTIC_CREATIA] = { "CurrencyTransmuteChange", "CurrencyTransmuteColorize", "/esoui/art/currency/currency_seedcrystal_16.dds", "CurrencyTransmuteName", "CurrencyTransmuteShowTotal", "CurrencyMessageTotalTransmute" },
-        [CURT_EVENT_TICKETS]   = { "CurrencyEventChange", "CurrencyEventColorize", "/esoui/art/currency/currency_eventticket.dds", "CurrencyEventName", "CurrencyEventShowTotal", "CurrencyMessageTotalEvent" },
-        [CURT_UNDAUNTED_KEYS]  = { "CurrencyUndauntedChange", "CurrencyUndauntedColorize", "/esoui/art/currency/undauntedkey.dds", "CurrencyUndauntedName", "CurrencyUndauntedShowTotal", "CurrencyMessageTotalUndaunted" },
-        [CURT_CROWNS]          = { "CurrencyCrownsChange", "CurrencyCrownsColorize", "/esoui/art/currency/currency_crown.dds", "CurrencyCrownsName", "CurrencyCrownsShowTotal", "CurrencyMessageTotalCrowns" },
-        [CURT_CROWN_GEMS]      = { "CurrencyCrownGemsChange", "CurrencyCrownGemsColorize", "/esoui/art/currency/currency_crown_gems.dds", "CurrencyCrownGemsName", "CurrencyCrownGemsShowTotal", "CurrencyMessageTotalCrownGems" },
-        [CURT_ENDEAVOR_SEALS]  = { "CurrencyEndeavorsChange", "CurrencyEndeavorsColorize", "esoui/art/currency/currency_seals_of_endeavor_32.dds", "CurrencyEndeavorsName", "CurrencyEndeavorsShowTotal", "CurrencyMessageTotalEndeavors" },
-        [CURT_ENDLESS_DUNGEON] = { "CurrencyEndlessChange", "CurrencyEndlessColorize", "esoui/art/currency/archivalfragments_mipmaps.dds", "CurrencyEndlessName", "CurrencyEndlessShowTotal", "CurrencyMessageTotalEndless" },
+        [CURT_WRIT_VOUCHERS]      = { "CurrencyWVChange", "CurrencyWVColorize", "/esoui/art/currency/currency_writvoucher.dds", "CurrencyWVName", "CurrencyWVShowTotal", "CurrencyMessageTotalWV" },
+        [CURT_STYLE_STONES]       = { "CurrencyOutfitTokenChange", "CurrencyOutfitTokenColorize", "/esoui/art/currency/token_clothing_16.dds", "CurrencyOutfitTokenName", "CurrencyOutfitTokenShowTotal", "CurrencyMessageTotalOutfitToken" },
+        [CURT_TRANSMUTE_CRYSTALS] = { "CurrencyTransmuteChange", "CurrencyTransmuteColorize", "/esoui/art/currency/currency_seedcrystal_16.dds", "CurrencyTransmuteName", "CurrencyTransmuteShowTotal", "CurrencyMessageTotalTransmute" },
+        [CURT_EVENT_TICKETS]      = { "CurrencyEventChange", "CurrencyEventColorize", "/esoui/art/currency/currency_eventticket.dds", "CurrencyEventName", "CurrencyEventShowTotal", "CurrencyMessageTotalEvent" },
+        [CURT_UNDAUNTED_KEYS]     = { "CurrencyUndauntedChange", "CurrencyUndauntedColorize", "/esoui/art/currency/undauntedkey.dds", "CurrencyUndauntedName", "CurrencyUndauntedShowTotal", "CurrencyMessageTotalUndaunted" },
+        [CURT_CROWNS]             = { "CurrencyCrownsChange", "CurrencyCrownsColorize", "/esoui/art/currency/currency_crown.dds", "CurrencyCrownsName", "CurrencyCrownsShowTotal", "CurrencyMessageTotalCrowns" },
+        [CURT_CROWN_GEMS]         = { "CurrencyCrownGemsChange", "CurrencyCrownGemsColorize", "/esoui/art/currency/currency_crown_gems.dds", "CurrencyCrownGemsName", "CurrencyCrownGemsShowTotal", "CurrencyMessageTotalCrownGems" },
+        [CURT_ENDEAVOR_SEALS]     = { "CurrencyEndeavorsChange", "CurrencyEndeavorsColorize", "esoui/art/currency/currency_seals_of_endeavor_32.dds", "CurrencyEndeavorsName", "CurrencyEndeavorsShowTotal", "CurrencyMessageTotalEndeavors" },
+        [CURT_ARCHIVAL_FORTUNES]  = { "CurrencyEndlessChange", "CurrencyEndlessColorize", "esoui/art/currency/archivalfragments_mipmaps.dds", "CurrencyEndlessName", "CurrencyEndlessShowTotal", "CurrencyMessageTotalEndless" },
     }
 
     local function GetCurrencyDisplayInfo(currencyType, amountDelta, changeReason)
@@ -3695,7 +3697,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
 
     local styleType = GetItemLinkItemStyle(itemLink) -- Get Style of the item
     local unformattedStyle = zo_strformat("<<1>>", GetItemStyleName(styleType))
-    formattedStyle = (ChatAnnouncements.SV.Inventory.LootShowStyle and styleType ~= ITEMSTYLE_NONE and styleType ~= ITEMSTYLE_UNIQUE and styleType ~= ITEMSTYLE_UNIVERSAL and itemType ~= ITEMTYPE_STYLE_MATERIAL and itemType ~= ITEMTYPE_GLYPH_ARMOR and itemType ~= ITEMTYPE_GLYPH_JEWELRY and itemType ~= ITEMTYPE_GLYPH_WEAPON and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgrade and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgradeFail) and string_format(" |cFFFFFF(%s)|r", unformattedStyle) or ""
+    formattedStyle = (ChatAnnouncements.SV.Inventory.LootShowStyle and styleType ~= 0 and styleType ~= 10 and styleType ~= GetUniversalStyleId() and itemType ~= ITEMTYPE_STYLE_MATERIAL and itemType ~= ITEMTYPE_GLYPH_ARMOR and itemType ~= ITEMTYPE_GLYPH_JEWELRY and itemType ~= ITEMTYPE_GLYPH_WEAPON and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgrade and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUpgradeFail) and string_format(" |cFFFFFF(%s)|r", unformattedStyle) or ""
 
     local formattedTotal = ""
     if ChatAnnouncements.SV.Inventory.LootTotal and receivedBy ~= "LUIE_INVENTORY_UPDATE_DISGUISE" and receivedBy ~= "LUIE_RECEIVE_CRAFT" and not groupLoot and (logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnRecipe and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnMotif and logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageLearnStyle) then
@@ -9690,602 +9692,86 @@ function ChatAnnouncements.HookFunction()
     ZO_PreHook(csaHandlers, EVENT_ANTIQUITY_LEAD_ACQUIRED, AntiquityLeadAcquired)
 
     -- HOOK PLAYER_TO_PLAYER Group Notifications to edit Ignore alert
-    local KEYBOARD_INTERACT_ICONS =
-    {
-        [SI_PLAYER_TO_PLAYER_WHISPER] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/radialIcon_whisper_up.dds",
-            enabledSelected = "EsoUI/Art/HUD/radialIcon_whisper_over.dds",
-            disabledNormal = "EsoUI/Art/HUD/radialIcon_whisper_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/radialIcon_whisper_disabled.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_ADD_GROUP] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/radialIcon_inviteGroup_up.dds",
-            enabledSelected = "EsoUI/Art/HUD/radialIcon_inviteGroup_over.dds",
-            disabledNormal = "EsoUI/Art/HUD/radialIcon_inviteGroup_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/radialIcon_inviteGroup_disabled.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_REMOVE_GROUP] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/radialIcon_removeFromGroup_up.dds",
-            enabledSelected = "EsoUI/Art/HUD/radialIcon_removeFromGroup_over.dds",
-            disabledNormal = "EsoUI/Art/HUD/radialIcon_removeFromGroup_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/radialIcon_removeFromGroup_disabled.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_ADD_FRIEND] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/radialIcon_addFriend_up.dds",
-            enabledSelected = "EsoUI/Art/HUD/radialIcon_addFriend_over.dds",
-            disabledNormal = "EsoUI/Art/HUD/radialIcon_addFriend_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/radialIcon_addFriend_disabled.dds",
-        },
-        [SI_CHAT_PLAYER_CONTEXT_REPORT] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/radialIcon_reportPlayer_up.dds",
-            enabledSelected = "EsoUI/Art/HUD/radialIcon_reportPlayer_over.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_INVITE_DUEL] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/radialIcon_duel_up.dds",
-            enabledSelected = "EsoUI/Art/HUD/radialIcon_duel_over.dds",
-            disabledNormal = "EsoUI/Art/HUD/radialIcon_duel_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/radialIcon_duel_disabled.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/radialIcon_tribute_up.dds",
-            enabledSelected = "EsoUI/Art/HUD/radialIcon_tribute_over.dds",
-            disabledNormal = "EsoUI/Art/HUD/radialIcon_tribute_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/radialIcon_tribute_disabled.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_INVITE_TRADE] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/radialIcon_trade_up.dds",
-            enabledSelected = "EsoUI/Art/HUD/radialIcon_trade_over.dds",
-            disabledNormal = "EsoUI/Art/HUD/radialIcon_trade_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/radialIcon_trade_disabled.dds",
-        },
-        [SI_RADIAL_MENU_CANCEL_BUTTON] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/radialIcon_cancel_up.dds",
-            enabledSelected = "EsoUI/Art/HUD/radialIcon_cancel_over.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_RIDE_MOUNT] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/radialIcon_joinMount_up.dds",
-            enabledSelected = "EsoUI/Art/HUD/radialIcon_joinMount_over.dds",
-            disabledNormal = "EsoUI/Art/HUD/radialIcon_joinMount_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/radialIcon_joinMount_disabled.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_DISMOUNT] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/radialIcon_dismount_up.dds",
-            enabledSelected = "EsoUI/Art/HUD/radialIcon_dismount_over.dds",
-            disabledNormal = "EsoUI/Art/HUD/radialIcon_dismount_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/radialIcon_dismount_disabled.dds",
-        },
-    }
+    ChatAnnouncements.PlayerToPlayerHook()
 
-    local GAMEPAD_INTERACT_ICONS =
-    {
-        [SI_PLAYER_TO_PLAYER_WHISPER] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_down.dds",
-            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_down.dds",
-            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_disabled.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_ADD_GROUP] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_down.dds",
-            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_down.dds",
-            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_disabled.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_REMOVE_GROUP] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_down.dds",
-            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_down.dds",
-            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_disabled.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_ADD_FRIEND] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_down.dds",
-            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_down.dds",
-            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_disabled.dds",
-        },
-        [SI_CHAT_PLAYER_CONTEXT_REPORT] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_reportPlayer_down.dds",
-            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_reportPlayer_down.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_INVITE_DUEL] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_down.dds",
-            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_down.dds",
-            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_disabled.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_down.dds",
-            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_down.dds",
-            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_disabled.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_INVITE_TRADE] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_down.dds",
-            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_down.dds",
-            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_disabled.dds",
-        },
-        [SI_RADIAL_MENU_CANCEL_BUTTON] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_cancel_down.dds",
-            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_cancel_down.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_RIDE_MOUNT] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_down.dds",
-            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_down.dds",
-            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_disabled.dds",
-        },
-        [SI_PLAYER_TO_PLAYER_DISMOUNT] =
-        {
-            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_down.dds",
-            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_down.dds",
-            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_disabled.dds",
-            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_disabled.dds",
-        },
-    }
-
-    local ALERT_IGNORED_STRING = IsConsoleUI() and SI_PLAYER_TO_PLAYER_BLOCKED or SI_PLAYER_TO_PLAYER_IGNORED
-
-    local function AlertIgnored(SendString)
-        local alertString = IsConsoleUI() and SI_PLAYER_TO_PLAYER_BLOCKED or SendString
-        printToChat(GetString(alertString), true)
-        if ChatAnnouncements.SV.Group.GroupAlert then
-            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, alertString)
-        end
-        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
-    end
-
-    --- @param self ZO_PlayerToPlayer
-    --- @param isIgnored boolean
-    PLAYER_TO_PLAYER.ShowPlayerInteractMenu = function (self, isIgnored)
-        local currentTargetCharacterName = self.currentTargetCharacterName
-        local currentTargetCharacterNameRaw = self.currentTargetCharacterNameRaw
-        local currentTargetDisplayName = self.currentTargetDisplayName
-        local primaryName = ZO_GetPrimaryPlayerName(currentTargetDisplayName, currentTargetCharacterName)
-        local primaryNameInternal = ZO_GetPrimaryPlayerName(currentTargetDisplayName, currentTargetCharacterName, USE_INTERNAL_FORMAT)
-        local platformIcons = IsInGamepadPreferredMode() and GAMEPAD_INTERACT_ICONS or KEYBOARD_INTERACT_ICONS
-        local ENABLED = true
-        local DISABLED = false
-        local ENABLED_IF_NOT_IGNORED = not isIgnored
-
-        self:GetRadialMenu():Clear()
-        -- Gamecard--
-        if IsConsoleUI() then
-            self:AddShowGamerCard(currentTargetDisplayName, currentTargetCharacterName)
-        end
-
-        -- Whisper--
-        if IsChatSystemAvailableForCurrentPlatform() then
-            local nameToUse = IsConsoleUI() and currentTargetDisplayName or primaryNameInternal
-            local function WhisperOption()
-                StartChatInput(nil, CHAT_CHANNEL_WHISPER, nameToUse)
-            end
-            local function WhisperIgnore()
-                AlertIgnored(LUIE_STRING_IGNORE_ERROR_WHISPER)
-            end
-            local whisperFunction = ENABLED_IF_NOT_IGNORED and WhisperOption or WhisperIgnore
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_WHISPER), platformIcons[SI_PLAYER_TO_PLAYER_WHISPER], ENABLED_IF_NOT_IGNORED, whisperFunction)
-        end
-
-        -- Group--
-        local isGroupModificationAvailable = IsGroupModificationAvailable()
-        local groupModificationRequiresVoting = DoesGroupModificationRequireVote()
-        local isSoloOrLeader = IsUnitSoloOrGroupLeader("player")
-
-        local function AlertGroupDisabled()
-            printToChat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE), true)
-            if ChatAnnouncements.SV.Group.GroupAlert then
-                ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE))
-            end
-            PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
-        end
-
-        local function AlertGroupKickDisabled()
-            printToChat(GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR))
-            if ChatAnnouncements.SV.Group.GroupAlert then
-                ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR), true)
-            end
-            PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
-        end
-
-        local isInGroup = IsPlayerInGroup(currentTargetCharacterNameRaw)
-
-        if isInGroup then
-            local groupKickEnabled = isGroupModificationAvailable and isSoloOrLeader and not groupModificationRequiresVoting or IsInLFGGroup()
-            local lfgKick = IsInLFGGroup()
-            local groupKickFunction = nil
-            if groupKickEnabled then
-                if lfgKick then
-                    groupKickFunction = function ()
-                        LUIE.SlashCommands.SlashVoteKick(currentTargetCharacterName)
-                    end
-                else
-                    groupKickFunction = function ()
-                        GroupKickByName(currentTargetCharacterNameRaw)
-                    end
-                end
+    -- Helper to create formatted name link for mail target
+    local function CreateMailTargetLink(targetName)
+        local nameLink
+        if zo_strmatch(targetName, "@") == "@" then
+            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(targetName, nil, DISPLAY_NAME_LINK_TYPE, targetName)
             else
-                groupKickFunction = AlertGroupKickDisabled
+                nameLink = ZO_LinkHandler_CreateLink(targetName, nil, DISPLAY_NAME_LINK_TYPE, targetName)
             end
-
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_REMOVE_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_REMOVE_GROUP], groupKickEnabled, groupKickFunction)
         else
-            local groupInviteEnabled = ENABLED_IF_NOT_IGNORED and isGroupModificationAvailable and isSoloOrLeader
-            local groupInviteFunction = nil
-            if groupInviteEnabled then
-                groupInviteFunction = function ()
-                    local NOT_SENT_FROM_CHAT = false
-                    local DISPLAY_INVITED_MESSAGE = true
-                    TryGroupInviteByName(primaryNameInternal, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE)
-                end
+            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(targetName, nil, CHARACTER_LINK_TYPE, targetName)
             else
-                if ENABLED_IF_NOT_IGNORED then
-                    groupInviteFunction = AlertGroupDisabled
-                else
-                    local function GroupIgnore()
-                        AlertIgnored(LUIE_STRING_IGNORE_ERROR_GROUP)
-                    end
-                    groupInviteFunction = GroupIgnore
-                end
+                nameLink = ZO_LinkHandler_CreateLink(targetName, nil, CHARACTER_LINK_TYPE, targetName)
             end
-
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_ADD_GROUP], groupInviteEnabled, groupInviteFunction)
         end
-
-        -- Friend--
-        if IsFriend(currentTargetCharacterNameRaw) then
-            local function AlreadyFriendsWarning()
-                printToChat(GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_ACCOUNT_ALREADY_FRIENDS), true)
-                if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_ACCOUNT_ALREADY_FRIENDS))
-                end
-                PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
-            end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_FRIEND), platformIcons[SI_PLAYER_TO_PLAYER_ADD_FRIEND], DISABLED, AlreadyFriendsWarning)
-        else
-            local function RequestFriendOption()
-                local isConsoleUI = IsConsoleUI()
-                if isConsoleUI then
-                    ZO_ShowConsoleAddFriendDialog(currentTargetCharacterName)
-                else
-                    RequestFriend(currentTargetDisplayName, nil)
-                end
-
-                local displayNameLink = ZO_LinkHandler_CreateLink(currentTargetDisplayName, nil, DISPLAY_NAME_LINK_TYPE, currentTargetDisplayName)
-                if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                    displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(currentTargetDisplayName, nil, DISPLAY_NAME_LINK_TYPE, currentTargetDisplayName)
-                end
-
-                local formattedMessage = zo_strformat(LUIE_STRING_SLASHCMDS_FRIEND_INVITE_MSG_LINK, displayNameLink)
-                printToChat(formattedMessage, true)
-                if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, formattedMessage)
-                end
-            end
-            local function FriendIgnore()
-                AlertIgnored(LUIE_STRING_IGNORE_ERROR_FRIEND)
-            end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_FRIEND), platformIcons[SI_PLAYER_TO_PLAYER_ADD_FRIEND], ENABLED_IF_NOT_IGNORED, ENABLED_IF_NOT_IGNORED and RequestFriendOption or FriendIgnore)
-        end
-
-        -- Passenger Mount--
-        if isInGroup then
-            local mountedState, isRidingGroupMount, hasFreePassengerSlot = GetTargetMountedStateInfo(currentTargetCharacterNameRaw)
-            local isPassengerForTarget = IsGroupMountPassengerForTarget(currentTargetCharacterNameRaw)
-            local groupMountEnabled = (mountedState == MOUNTED_STATE_MOUNT_RIDER and isRidingGroupMount and (not IsMounted() or isPassengerForTarget))
-            local function MountOption()
-                UseMountAsPassenger(currentTargetCharacterNameRaw)
-            end
-            local optionToShow = isPassengerForTarget and SI_PLAYER_TO_PLAYER_DISMOUNT or SI_PLAYER_TO_PLAYER_RIDE_MOUNT
-            self:AddMenuEntry(GetString(optionToShow), platformIcons[optionToShow], groupMountEnabled, MountOption)
-        end
-
-        -- Report--
-        local function ReportCallback()
-            local nameToReport = IsInGamepadPreferredMode() and currentTargetDisplayName or primaryName
-            ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(nameToReport)
-        end
-        self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, ReportCallback)
-
-        -- Duel--
-        local duelStateI, partnerCharacterName, partnerDisplayName = GetDuelInfo()
-        if duelStateI ~= DUEL_STATE_IDLE then
-            local function AlreadyDuelingWarning(duelState, characterName, displayName)
-                return function ()
-                    local userFacingPartnerName = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
-                    local statusString = GetString("SI_DUELSTATE", duelState)
-                    statusString = zo_strformat(statusString, userFacingPartnerName)
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, statusString)
-                end
-            end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], DISABLED, AlreadyDuelingWarning(duelStateI, partnerCharacterName, partnerDisplayName))
-        else
-            local function DuelInviteOption()
-                ChallengeTargetToDuel(currentTargetCharacterName)
-            end
-            local function DuelIgnore()
-                AlertIgnored(LUIE_STRING_IGNORE_ERROR_DUEL)
-            end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], ENABLED_IF_NOT_IGNORED, ENABLED_IF_NOT_IGNORED and DuelInviteOption or DuelIgnore)
-        end
-
-        -- Play Tribute --
-        local tributeInviteStateI, partnerCharacterNameI, partnerDisplayNameI = GetTributeInviteInfo()
-        if tributeInviteStateI ~= TRIBUTE_INVITE_STATE_NONE then
-            local function TributeInviteFailWarning(tributeInviteState, characterName, displayName)
-                return function ()
-                    local userFacingPartnerName = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
-                    local statusString = GetString("SI_TRIBUTEINVITESTATE", tributeInviteState)
-                    statusString = zo_strformat(statusString, userFacingPartnerName)
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, statusString)
-                end
-            end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE], DISABLED, TributeInviteFailWarning(tributeInviteStateI, partnerCharacterNameI, partnerDisplayNameI))
-        else
-            local function TributeInviteOption()
-                ChallengeTargetToTribute(currentTargetCharacterName)
-            end
-            local isEnabled = ENABLED_IF_NOT_IGNORED and not ZO_IsTributeLocked()
-            local function TributeIgnore()
-                AlertIgnored(LUIE_STRING_IGNORE_ERROR_TRIBUTE)
-            end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE], isEnabled, ENABLED_IF_NOT_IGNORED and TributeInviteOption or TributeIgnore)
-        end
-
-        -- Trade--
-        local function TradeInviteOption()
-            TRADE_WINDOW:InitiateTrade(primaryNameInternal)
-        end
-        local function TradeIgnore()
-            AlertIgnored(LUIE_STRING_IGNORE_ERROR_TRADE)
-        end
-        local tradeInviteFunction = ENABLED_IF_NOT_IGNORED and TradeInviteOption or TradeIgnore
-        self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRADE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRADE], ENABLED_IF_NOT_IGNORED, tradeInviteFunction)
-
-        -- Cancel--
-        self:AddMenuEntry(GetString(SI_RADIAL_MENU_CANCEL_BUTTON), platformIcons[SI_RADIAL_MENU_CANCEL_BUTTON], ENABLED)
-
-        self:GetRadialMenu():Show()
-        self.showingPlayerInteractMenu = true
-        self.isLastRadialMenuGamepad = IsInGamepadPreferredMode()
+        return ZO_SELECTED_TEXT:Colorize(nameLink)
     end
 
-    -- Since the Crown Store Gifting functionality was added, hooking these functions seems to cause an insecure code issue when receiving gifts via the Player to Player notification system.
-    -- TODO: Try to securecall some of this or maybe use a message specific filter (hook alerts handling?)
-    --[[
-
-    --local INTERACT_TYPE_TRADE_INVITE = 3
-    local INTERACT_TYPE_GROUP_INVITE = 4
-    local INTERACT_TYPE_QUEST_SHARE = 5
-    local INTERACT_TYPE_FRIEND_REQUEST = 6
-    local INTERACT_TYPE_GUILD_INVITE = 7
-
-    local INCOMING_MESSAGE_TEXT = {
-        --[INTERACT_TYPE_TRADE_INVITE] = GetString(LUIE_STRING_NOTIFICATION_TRADE_INVITE),
-        [INTERACT_TYPE_GROUP_INVITE] = GetString(LUIE_STRING_NOTIFICATION_GROUP_INVITE),
-        [INTERACT_TYPE_QUEST_SHARE] = GetString(LUIE_STRING_NOTIFICATION_SHARE_QUEST_INVITE),
-        [INTERACT_TYPE_FRIEND_REQUEST] = GetString(LUIE_STRING_NOTIFICATION_FRIEND_INVITE),
-        [INTERACT_TYPE_GUILD_INVITE] = GetString(LUIE_STRING_NOTIFICATION_GUILD_INVITE)
-    }
-
-    local function DisplayNotificationMessage(message, data)
-        local typeString = INCOMING_MESSAGE_TEXT[data.incomingType]
-        if typeString then
-            -- Group Invite
-            if data.incomingType == INTERACT_TYPE_GROUP_INVITE then
-                if ChatAnnouncements.SV.Group.GroupCA then
-                    printToChat(zo_strformat(message, typeString), true)
-                end
-                if ChatAnnouncements.SV.Group.GroupAlert then
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(message, typeString))
-                end
-            -- Guild Invite
-            elseif data.incomingType == INTERACT_TYPE_GUILD_INVITE then
-                if ChatAnnouncements.SV.Social.GuildCA then
-                    printToChat(zo_strformat(message, typeString), true)
-                end
-                if ChatAnnouncements.SV.Social.GuildAlert then
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(message, typeString))
-                end
-            -- Friend Invite
-            elseif data.incomingType == INTERACT_TYPE_FRIEND_REQUEST then
-                if ChatAnnouncements.SV.Social.FriendIgnoreCA then
-                    printToChat(zo_strformat(message, typeString), true)
-                end
-                if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(message, typeString))
-                end
-            -- Quest Shared
-            elseif data.incomingType == INTERACT_TYPE_QUEST_SHARE then
-                if ChatAnnouncements.SV.Quests.QuestShareCA then
-                    printToChat(zo_strformat(message, typeString), true)
-                end
-                if ChatAnnouncements.SV.Quests.QuestShareAlert then
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(message, typeString))
-                end
-            else
-                ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(message, typeString))
-            end
-        end
-    end
-
-    local function NotificationAccepted(data)
-        if not data.dontRemoveOnAccept then
-            data.pendingResponse = false
-        end
-        if data.acceptCallback then
-            data.acceptCallback()
-            if data.uniqueSounds then
-                PlaySound(data.uniqueSounds.accept)
-            else
-                PlaySound(SOUNDS.DIALOG_ACCEPT)
-            end
-            DisplayNotificationMessage(GetString(SI_NOTIFICATION_ACCEPTED), data)
-        end
-    end
-
-    local function NotificationDeclined(data)
-        if not data.dontRemoveOnDecline then
-            data.pendingResponse = false
-        end
-        if data.declineCallback then
-            data.declineCallback()
-            if data.uniqueSounds then
-                PlaySound(data.uniqueSounds.decline)
-            else
-                PlaySound(SOUNDS.DIALOG_DECLINE)
-            end
-            DisplayNotificationMessage(GetString(SI_NOTIFICATION_DECLINED), data)
-        end
-    end
-
-    PLAYER_TO_PLAYER.Accept = function(self, incomingEntry)
-        local index = self:GetIndexFromIncomingQueue(incomingEntry)
-        if index then
-            if not incomingEntry.dontRemoveOnAccept then
-                self:RemoveEntryFromIncomingQueueTable(index)
-            end
-            NotificationAccepted(incomingEntry)
-        else
-            self:OnPromptAccepted()
-        end
-    end
-
-    PLAYER_TO_PLAYER.Decline = function(self, incomingEntry)
-        local index = self:GetIndexFromIncomingQueue(incomingEntry)
-        if index then
-            if not incomingEntry.dontRemoveOnDecline then
-                self:RemoveEntryFromIncomingQueueTable(index)
-            end
-            NotificationDeclined(incomingEntry)
-        else
-            self:OnPromptDeclined()
-        end
-    end
-
-    --With proper timing, both of these events can fire in the same frame, making it possible to be responding but having already cleared the incoming queue
-    PLAYER_TO_PLAYER.OnPromptAccepted = function(self)
-        if self.showingResponsePrompt and #self.incomingQueue > 0 then
-            local incomingEntryToRespondTo = self.incomingQueue[1]
-            if not incomingEntryToRespondTo.dontRemoveOnAccept then
-                self:RemoveEntryFromIncomingQueueTable(1)
-            end
-            NotificationAccepted(incomingEntryToRespondTo)
-        end
-    end
-
-    PLAYER_TO_PLAYER.OnPromptDeclined = function(self)
-        if self.showingResponsePrompt and #self.incomingQueue > 0 then
-            local incomingEntryToRespondTo = self.incomingQueue[1]
-            if not incomingEntryToRespondTo.dontRemoveOnDecline then
-                self:RemoveEntryFromIncomingQueueTable(1)
-            end
-            NotificationDeclined(incomingEntryToRespondTo)
-        end
-    end
-    ]]
-    --
-
-    -- Required when hooking ZO_MailSend_Gamepad:IsValid()
-    -- Returns whether there is any item attached.
-    local function IsAnyItemAttached(bagId, slotIndex)
+    -- Returns whether there is any item attached (required when hooking ZO_MailSend_Gamepad:IsMailValid)
+    local function IsAnyItemAttached()
         for i = 1, MAIL_MAX_ATTACHED_ITEMS do
             local queuedFromBag = GetQueuedItemAttachmentInfo(i)
-            if queuedFromBag ~= 0 then -- Slot is filled.
+            if queuedFromBag ~= 0 then
                 return true
             end
         end
         return false
     end
 
-    -- Hook Gamepad mail name function
-    local orgIsMailValid = ZO_MailSend_Gamepad.IsMailValid
-    local IsMailValid = function (self, ...)
+    -- Hook Gamepad mail validation
+    --- @diagnostic disable-next-line: duplicate-set-field
+    function ZO_MailSend_Gamepad:IsMailValid(...)
         local to = self.mailView:GetAddress()
         if (not to) or (to == "") then
             return false
         end
 
-        local nameLink
-        if zo_strmatch(to, "@") == "@" then
-            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(to, nil, DISPLAY_NAME_LINK_TYPE, to)
-            else
-                nameLink = ZO_LinkHandler_CreateLink(to, nil, DISPLAY_NAME_LINK_TYPE, to)
-            end
-        else
-            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(to, nil, CHARACTER_LINK_TYPE, to)
-            else
-                nameLink = ZO_LinkHandler_CreateLink(to, nil, CHARACTER_LINK_TYPE, to)
-            end
-        end
-        g_mailTarget = ZO_SELECTED_TEXT:Colorize(nameLink)
+        g_mailTarget = CreateMailTargetLink(to)
 
         local subject = self.mailView:GetSubject()
         local hasSubject = subject and (subject ~= "")
         local body = self.mailView:GetBody()
         local hasBody = body and (body ~= "")
-        orgIsMailValid(self, ...)
         return hasSubject or hasBody or (GetQueuedMoneyAttachment() > 0) or IsAnyItemAttached()
     end
-    ZO_MailSend_Gamepad.IsMailValid = IsMailValid
-    -- Hook MAIL_SEND.Send to get name of player we send to.
-    MAIL_SEND.Send = function (self)
-        windowManager:SetFocusByName("")
-        if not self.sendMoneyMode and GetQueuedCOD() == 0 then
-            if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
-                printToChat(GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE), true)
-            end
-            if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
-                ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE))
-            end
-            PlaySound(SOUNDS.NEGATIVE_CLICK)
-        else
-            SendMail(self.to:GetText(), self.subject:GetText(), self.body:GetText())
 
+    -- Hook MAIL_SEND.Send to capture mail target and validate COD
+    if MAIL_SEND then
+        MAIL_SEND.Send = function (self)
+            windowManager:SetFocusByName("")
+
+            -- Validate COD mode
+            if not self.sendMoneyMode and GetQueuedCOD() == 0 then
+                if ChatAnnouncements.SV.Notify.NotificationMailSendCA then
+                    printToChat(GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE), true)
+                end
+                if ChatAnnouncements.SV.Notify.NotificationMailSendAlert then
+                    ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NONE, GetString(LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE))
+                end
+                PlaySound(SOUNDS.NEGATIVE_CLICK)
+                return
+            end
+
+            -- Capture mail target before send
             local mailTarget = self.to:GetText()
-            local nameLink
-            -- Here we look for @ character in the sent mail, if the player send to an account then we want the link to be an account name link, otherwise, it's a character name link.
-            if zo_strmatch(mailTarget, "@") == "@" then
-                if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                    nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(mailTarget, nil, DISPLAY_NAME_LINK_TYPE, mailTarget)
-                else
-                    nameLink = ZO_LinkHandler_CreateLink(mailTarget, nil, DISPLAY_NAME_LINK_TYPE, mailTarget)
-                end
-            else
-                if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                    nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(mailTarget, nil, CHARACTER_LINK_TYPE, mailTarget)
-                else
-                    nameLink = ZO_LinkHandler_CreateLink(mailTarget, nil, CHARACTER_LINK_TYPE, mailTarget)
-                end
-            end
+            g_mailTarget = CreateMailTargetLink(mailTarget)
 
-            g_mailTarget = ZO_SELECTED_TEXT:Colorize(nameLink)
+            -- Send the mail
+            SendMail(self.to:GetText(), self.subject:GetText(), self.body:GetText())
         end
     end
 
-    PLAYER_INVENTORY.AddQuestItem = function (self, questItem, searchType)
+    --- @param self ZO_InventoryManager
+    --- @param questItem questItem
+    --- @param searchType any
+    --- @diagnostic disable-next-line: duplicate-set-field
+    function PLAYER_INVENTORY:AddQuestItem(questItem, searchType)
         local inventory = self.inventories[INVENTORY_QUEST_ITEM]
 
         questItem.inventory = inventory
@@ -10303,9 +9789,13 @@ function ChatAnnouncements.HookFunction()
         end
     end
 
-    PLAYER_INVENTORY.ResetQuest = function (self, questIndex)
+    --- @param self ZO_InventoryManager
+    --- @param questIndex integer
+    --- @diagnostic disable-next-line: duplicate-set-field
+    function PLAYER_INVENTORY:ResetQuest(questIndex)
         local inventory = self.inventories[INVENTORY_QUEST_ITEM]
         local itemTable = inventory.slots[questIndex]
+        --- @cast itemTable questItem_itemTable
         if itemTable then
             -- remove all quest items from search
             for i = 1, #itemTable do
@@ -10321,12 +9811,11 @@ function ChatAnnouncements.HookFunction()
         inventory.slots[questIndex] = nil
     end
 
-    -- Called by hooked TryGroupInviteByName function
+    -- Custom CompleteGroupInvite with enhanced chat announcements
     -- TODO: Maybe see about links for names here for non-menu
     local function CompleteGroupInvite(characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
         local isLeader = IsUnitGroupLeader("player")
         local groupSize = GetGroupSize()
-        local ALERT = true
 
         if isLeader and groupSize == SMALL_GROUP_SIZE_THRESHOLD then
             ZO_Dialogs_ShowPlatformDialog("LARGE_GROUP_INVITE_WARNING", characterOrDisplayName, { mainTextParams = { SMALL_GROUP_SIZE_THRESHOLD } })
@@ -10343,34 +9832,34 @@ function ChatAnnouncements.HookFunction()
                 end
                 printToChat(zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MENU), link), true)
                 if ChatAnnouncements.SV.Group.GroupAlert then
-                    ZO_Alert(ALERT, nil, zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MENU), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString(LUIE_STRING_CA_GROUP_INVITE_MENU), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
                 end
             else
                 printToChat(zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)), true)
                 if ChatAnnouncements.SV.Group.GroupAlert then
-                    ZO_Alert(ALERT, nil, zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, zo_strformat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
                 end
             end
         end
     end
 
-    -- HOOK Group Invite function so we can modify CA/Alert here
-    TryGroupInviteByName = function (characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
+    -- Hook TryGroupInviteByName to add custom chat announcements and handle isMenu parameter
+    ZO_PreHook("TryGroupInviteByName", function (characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
         if IsPlayerInGroup(characterOrDisplayName) then
             printToChat(GetString(SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER), true)
             if ChatAnnouncements.SV.Group.GroupAlert then
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER)
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, SI_GROUP_ALERT_INVITE_PLAYER_ALREADY_MEMBER)
             end
             PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
-            return
+            return true -- Prevent original from running
         end
 
         local isLeader = IsUnitGroupLeader("player")
         local groupSize = GetGroupSize()
 
         if not isLeader and groupSize > 0 then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE))
-            return
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE))
+            return true -- Prevent original from running
         end
 
         if IsConsoleUI() then
@@ -10383,19 +9872,21 @@ function ChatAnnouncements.HookFunction()
             end
 
             ZO_ConsoleAttemptInteractOrError(GroupInviteCallback, displayName, ZO_PLAYER_CONSOLE_INFO_REQUEST_DONT_BLOCK, ZO_CONSOLE_CAN_COMMUNICATE_ERROR_ALERT, ZO_ID_REQUEST_TYPE_DISPLAY_NAME, displayName)
+            return true -- Prevent original from running
         else
             if IsIgnored(characterOrDisplayName) then
                 printToChat(GetString(LUIE_STRING_IGNORE_ERROR_GROUP), true)
                 if ChatAnnouncements.SV.Group.GroupAlert then
-                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, LUIE_STRING_IGNORE_ERROR_GROUP)
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, LUIE_STRING_IGNORE_ERROR_GROUP)
                 end
                 PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
-                return
+                return true -- Prevent original from running
             end
 
             CompleteGroupInvite(characterOrDisplayName, sentFromChat, displayInvitedMessage, isMenu)
+            return true -- Prevent original from running
         end
-    end
+    end)
 
     -- Hook for EVENT_GUILD_MEMBER_ADDED
     --- @diagnostic disable-next-line: duplicate-set-field
@@ -10603,7 +10094,7 @@ function ChatAnnouncements.HookFunction()
             printToChat(message, true)
         end
         if ChatAnnouncements.SV.Group.GroupLFGQueueAlert then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, message)
         end
     end
 end
