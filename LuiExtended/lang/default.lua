@@ -530,7 +530,18 @@ local strings =
     -- LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_DSA = "Dragonstar Arena",
     LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_IC_TITLE_PREFIX = "Entered: ",
     LUIE_STRING_CA_TIMED_ACTIVITIES_LABEL = "Timed Activities",
+    LUIE_STRING_CA_TIMED_ACTIVITIES_TRACKING = "Timed Activities (Tracking)",
+    LUIE_STRING_CA_TIMED_ACTIVITIES_PROGRESS = "Timed Activities (Progress)",
     LUIE_STRING_CA_DISPLAY_TIMED_ACTIVITIES = "<<1>> Timed Activities",
+    LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_ALWAYS = "Every update",
+    LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_MILESTONE = "Milestones (25%, 50%, 75%, 100%)",
+    LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_COMPLETE = "Completion only",
+    LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_ALL = "All activities",
+    LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_TRACKED = "Tracked only (pinned to quest tracker)",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_FREQ = "Timed Activity Progress Frequency",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_FREQ_TP = "When to announce Timed Activity progress updates.",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_SCOPE = "Timed Activity Progress Scope",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_SCOPE_TP = "Which activities to announce: all that progress, or only the one pinned to the quest tracker.",
 
     -- CombatText
     LUIE_STRING_CT_COMBAT_IN_DEFAULT = "Entered Combat",

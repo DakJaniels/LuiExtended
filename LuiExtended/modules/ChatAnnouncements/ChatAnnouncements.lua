@@ -384,8 +384,11 @@ function ChatAnnouncements.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY, ChatAnnouncements.OnDigStart)
     eventManager:RegisterForEvent(moduleName, EVENT_ANTIQUITY_DIGGING_GAME_OVER, ChatAnnouncements.OnDigEnd)
 
-    -- Timed Activity (P49: EVENT_TIMED_ACTIVITY_TRACKING_UPDATED replaces EVENT_TIMED_ACTIVITY_TYPE_PROGRESS_UPDATED)
-    eventManager:RegisterForEvent(moduleName, EVENT_TIMED_ACTIVITY_TRACKING_UPDATED, ChatAnnouncements.OnTimedActivityTrackingUpdated)
+    -- Timed Activity
+    if IsTimedActivitySystemAvailable() then
+        eventManager:RegisterForEvent(moduleName, EVENT_TIMED_ACTIVITY_TRACKING_UPDATED, ChatAnnouncements.OnTimedActivityTrackingUpdated)
+        eventManager:RegisterForEvent(moduleName, EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED, ChatAnnouncements.OnTimedActivityProgressUpdated)
+    end
 
     -- Promotional Events Activity
     eventManager:RegisterForEvent(moduleName, EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, ChatAnnouncements.OnPromotionalEventsActivityProgressUpdated)
@@ -1644,7 +1647,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         [CURT_UNDAUNTED_KEYS]         = { "CurrencyUndauntedChange", "CurrencyUndauntedColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_UNDAUNTED_KEYS), "CurrencyUndauntedName", "CurrencyUndauntedShowTotal", "CurrencyMessageTotalUndaunted" },
         [CURT_CROWNS]                 = { "CurrencyCrownsChange", "CurrencyCrownsColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWNS), "CurrencyCrownsName", "CurrencyCrownsShowTotal", "CurrencyMessageTotalCrowns" },
         [CURT_CROWN_GEMS]             = { "CurrencyCrownGemsChange", "CurrencyCrownGemsColorize", ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS), "CurrencyCrownGemsName", "CurrencyCrownGemsShowTotal", "CurrencyMessageTotalCrownGems" },
-        [CURT_ARCHIVAL_FORTUNES]        = { "CurrencyEndlessChange", "CurrencyEndlessColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_ARCHIVAL_FORTUNES), "CurrencyEndlessName", "CurrencyEndlessShowTotal", "CurrencyMessageTotalEndless" },
+        [CURT_ARCHIVAL_FORTUNES]      = { "CurrencyEndlessChange", "CurrencyEndlessColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_ARCHIVAL_FORTUNES), "CurrencyEndlessName", "CurrencyEndlessShowTotal", "CurrencyMessageTotalEndless" },
         [CURT_SEALS]                  = { "CurrencySealsChange", "CurrencySealsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_SEALS), "CurrencySealsName", "CurrencySealsShowTotal", "CurrencyMessageTotalSeals" },
         [CURT_TRADE_BARS]             = { "CurrencyTradeBarsChange", "CurrencyTradeBarsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TRADE_BARS), "CurrencyTradeBarsName", "CurrencyTradeBarsShowTotal", "CurrencyMessageTotalTradeBars" },
         [CURT_TOME_POINTS]            = { "CurrencyTomePointsChange", "CurrencyTomePointsColorize", ZO_Currency_GetPlatformCurrencyLootIcon(CURT_TOME_POINTS), "CurrencyTomePointsName", "CurrencyTomePointsShowTotal", "CurrencyMessageTotalTomePoints" },
@@ -2855,18 +2858,15 @@ function ChatAnnouncements.OnAchievementUpdated(eventId, id)
     end
 end
 
---- - *EVENT_TIMED_ACTIVITY_TRACKING_UPDATED* (P49)
---- @param eventId number
---- @param timedActivityEncodedId id64
-function ChatAnnouncements.OnTimedActivityTrackingUpdated(eventId, timedActivityEncodedId)
-    if not (ChatAnnouncements.SV.Notify.TimedActivityCA or ChatAnnouncements.SV.Notify.TimedActivityAlert) then return end
-    local index, trackedEncodedId = GetTrackedTimedActivityInfo()
-    if index == nil or trackedEncodedId ~= timedActivityEncodedId then return end
+--- Builds a Timed Activity chat message with the activity name wrapped in a clickable link.
+--- @param index luaindex
+--- @param currentVal integer Current value (numClaimed for tracking, currentProgress for progress)
+--- @param maxVal integer Max value (totalClaimable for tracking, maxProgress for progress)
+--- @return string message
+local function BuildTimedActivityMessage(index, currentVal, maxVal)
     local name = GetTimedActivityName(index)
     local activityType = GetTimedActivityType(index)
-    local numClaimed = GetTimedActivityNumTimesClaimed(index)
-    local totalClaimable = GetTimedActivityTotalNumTimesClaimable(index)
-    local progress = string_format("%i / %i", numClaimed, totalClaimable)
+    local progress = string_format("%i / %i", currentVal, maxVal)
     local typeName
     if activityType == TIMED_ACTIVITY_TYPE_DAILY then
         typeName = GetString(SI_TIMEDACTIVITYTYPE0)
@@ -2877,18 +2877,82 @@ function ChatAnnouncements.OnTimedActivityTrackingUpdated(eventId, timedActivity
     else
         typeName = tostring(activityType)
     end
-    local message = string_format("[%s] %s: %s", zo_strformat(GetString(LUIE_STRING_CA_DISPLAY_TIMED_ACTIVITIES), typeName), name, progress)
+    local prefix = string_format("[%s] ", zo_strformat(GetString(LUIE_STRING_CA_DISPLAY_TIMED_ACTIVITIES), typeName))
+    local bracketOpt = ChatAnnouncements.SV.BracketOptionItem or 1
+    local formattedName = (bracketOpt == 1) and name or ("[" .. name .. "]")
+    local nameLink = string_format("|H%d:LINK_TYPE_LUITIMEDACTIVITY:0|h%s|h", bracketOpt == 1 and 0 or 1, formattedName)
+    return string_format("%s%s: %s", prefix, nameLink, progress)
+end
+
+--- - *EVENT_TIMED_ACTIVITY_TRACKING_UPDATED* (P49)
+--- @param eventId number
+--- @param timedActivityEncodedId id64
+function ChatAnnouncements.OnTimedActivityTrackingUpdated(eventId, timedActivityEncodedId)
+    if not IsTimedActivitySystemAvailable() then return end
+    if not (ChatAnnouncements.SV.Notify.TimedActivityCA or ChatAnnouncements.SV.Notify.TimedActivityAlert) then return end
+    local index, trackedEncodedId = GetTrackedTimedActivityInfo()
+    if index == nil or trackedEncodedId ~= timedActivityEncodedId then return end
+    local numClaimed = GetTimedActivityNumTimesClaimed(index)
+    local totalClaimable = GetTimedActivityTotalNumTimesClaimable(index)
+    local message = BuildTimedActivityMessage(index, numClaimed, totalClaimable)
     if ChatAnnouncements.SV.Notify.TimedActivityCA then
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
         {
             message = message,
             type = "MESSAGE",
-            activityIndex = index,
         }
         ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
     end
     if ChatAnnouncements.SV.Notify.TimedActivityAlert then
+        local alertMessage = zo_strformat(GetString(SI_APPLYOUTFITCHANGESRESULT0), GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_LABEL))
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
+    end
+end
+
+--- - *EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED*
+--- @param eventId number
+--- @param index luaindex
+--- @param previousProgress integer
+--- @param currentProgress integer
+--- @param complete boolean
+function ChatAnnouncements.OnTimedActivityProgressUpdated(eventId, index, previousProgress, currentProgress, complete)
+    if not IsTimedActivitySystemAvailable() then return end
+    if not (ChatAnnouncements.SV.Notify.TimedActivityProgressCA or ChatAnnouncements.SV.Notify.TimedActivityProgressAlert) then return end
+    local scope = ChatAnnouncements.SV.Notify.TimedActivityProgressScope or "all"
+    if scope == "tracked" then
+        local trackedIndex = GetTrackedTimedActivityInfo()
+        if trackedIndex == nil or trackedIndex ~= index then return end
+    end
+    local numActivities = GetNumTimedActivities()
+    if index < 1 or index > numActivities then return end
+    local maxProgress = GetTimedActivityMaxProgress(index)
+    local freq = ChatAnnouncements.SV.Notify.TimedActivityProgressFrequency or "complete"
+    if freq == "complete" and not complete then return end
+    if freq == "milestone" then
+        if maxProgress <= 0 then return end
+        local pctPrev = (previousProgress / maxProgress) * 100
+        local pctCur = (currentProgress / maxProgress) * 100
+        local atMilestone = false
+        for _, m in ipairs({ 25, 50, 75, 100 }) do
+            if pctPrev < m and pctCur >= m then
+                atMilestone = true
+                break
+            end
+        end
+        if not atMilestone then return end
+    end
+    local message = BuildTimedActivityMessage(index, currentProgress, maxProgress)
+    if ChatAnnouncements.SV.Notify.TimedActivityProgressCA then
+        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
+        {
+            message = message,
+            type = "MESSAGE",
+        }
+        ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+    end
+    if ChatAnnouncements.SV.Notify.TimedActivityProgressAlert then
         local alertMessage = zo_strformat(GetString(SI_APPLYOUTFITCHANGESRESULT0), GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_LABEL))
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
     end
@@ -6071,6 +6135,12 @@ function LUIE.HandleClickEvent(rawLink, mouseButton, linkText, linkStyle, linkTy
             end
         else
             ANTIQUITY_LORE_KEYBOARD:ShowAntiquity(categoryIndex1)
+        end
+        return true
+    end
+    if linkType == "LINK_TYPE_LUITIMEDACTIVITY" then
+        if IsTimedActivitySystemAvailable() then
+            ZO_ShowTimedActivities()
         end
         return true
     end

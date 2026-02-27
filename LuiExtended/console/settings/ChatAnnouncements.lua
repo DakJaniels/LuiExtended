@@ -8649,7 +8649,8 @@ function ChatAnnouncements.CreateConsoleSettings()
 
     -- Build Miscellaneous Announcements Section
     buildSectionSettings("Miscellaneous", function (settings)
-        local timedActivitiesLabel = GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_LABEL)
+        local timedActivitiesTrackingLabel = GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_TRACKING)
+        local timedActivitiesProgressLabel = GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_PROGRESS)
         settings[#settings + 1] =
         {
             type = LHAS.ST_SECTION,
@@ -9086,8 +9087,8 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT), timedActivitiesLabel),
-            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA), timedActivitiesLabel),
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT), timedActivitiesTrackingLabel),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA), timedActivitiesTrackingLabel),
             getFunction = function ()
                 return Settings.Notify.TimedActivityCA
             end,
@@ -9096,15 +9097,15 @@ function ChatAnnouncements.CreateConsoleSettings()
             end,
             default = Defaults.Notify.TimedActivityCA,
             disable = function ()
-                return not LUIE.SV.ChatAnnouncements_Enable
+                return not LUIE.SV.ChatAnnouncements_Enable or not IsTimedActivitySystemAvailable()
             end
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT), timedActivitiesLabel),
-            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT), timedActivitiesLabel),
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT), timedActivitiesTrackingLabel),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT), timedActivitiesTrackingLabel),
             getFunction = function ()
                 return Settings.Notify.TimedActivityAlert
             end,
@@ -9113,7 +9114,88 @@ function ChatAnnouncements.CreateConsoleSettings()
             end,
             default = Defaults.Notify.TimedActivityAlert,
             disable = function ()
-                return not LUIE.SV.ChatAnnouncements_Enable
+                return not LUIE.SV.ChatAnnouncements_Enable or not IsTimedActivitySystemAvailable()
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT), timedActivitiesProgressLabel),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA), timedActivitiesProgressLabel),
+            getFunction = function ()
+                return Settings.Notify.TimedActivityProgressCA
+            end,
+            setFunction = function (value)
+                Settings.Notify.TimedActivityProgressCA = value
+            end,
+            default = Defaults.Notify.TimedActivityProgressCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable or not IsTimedActivitySystemAvailable()
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT), timedActivitiesProgressLabel),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT), timedActivitiesProgressLabel),
+            getFunction = function ()
+                return Settings.Notify.TimedActivityProgressAlert
+            end,
+            setFunction = function (value)
+                Settings.Notify.TimedActivityProgressAlert = value
+            end,
+            default = Defaults.Notify.TimedActivityProgressAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable or not IsTimedActivitySystemAvailable()
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_CA_TIMED_ACTIVITY_SCOPE),
+            tooltip = GetString(LUIE_STRING_LAM_CA_TIMED_ACTIVITY_SCOPE_TP),
+            items = function ()
+                return {
+                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_ALL), data = "all" },
+                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_TRACKED), data = "tracked" },
+                }
+            end,
+            getFunction = function ()
+                return Settings.Notify.TimedActivityProgressScope or Defaults.Notify.TimedActivityProgressScope
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.Notify.TimedActivityProgressScope = item.data
+            end,
+            default = Defaults.Notify.TimedActivityProgressScope,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable or not IsTimedActivitySystemAvailable()
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_CA_TIMED_ACTIVITY_FREQ),
+            tooltip = GetString(LUIE_STRING_LAM_CA_TIMED_ACTIVITY_FREQ_TP),
+            items = function ()
+                return {
+                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_ALWAYS), data = "always" },
+                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_MILESTONE), data = "milestone" },
+                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_COMPLETE), data = "complete" },
+                }
+            end,
+            getFunction = function ()
+                return Settings.Notify.TimedActivityProgressFrequency or Defaults.Notify.TimedActivityProgressFrequency
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.Notify.TimedActivityProgressFrequency = item.data
+            end,
+            default = Defaults.Notify.TimedActivityProgressFrequency,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable or not IsTimedActivitySystemAvailable()
             end
         }
 

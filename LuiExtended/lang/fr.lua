@@ -524,7 +524,18 @@ local strings =
     -- LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_DSA = "Dragonstar Arena",
     LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_IC_TITLE_PREFIX = "Entré dans: ",
     LUIE_STRING_CA_TIMED_ACTIVITIES_LABEL = "Activités temporisées",
+    LUIE_STRING_CA_TIMED_ACTIVITIES_TRACKING = "Activités temporisées (Suivi)",
+    LUIE_STRING_CA_TIMED_ACTIVITIES_PROGRESS = "Activités temporisées (Progression)",
     LUIE_STRING_CA_DISPLAY_TIMED_ACTIVITIES = "Activités temporisées <<1>>",
+    LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_ALWAYS = "Chaque mise à jour",
+    LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_MILESTONE = "Jalons (25%, 50%, 75%, 100%)",
+    LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_COMPLETE = "Completion uniquement",
+    LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_ALL = "Toutes les activités",
+    LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_TRACKED = "Suivie uniquement (épinglée au suivi de quêtes)",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_FREQ = "Fréquence de progression des activités temporisées",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_FREQ_TP = "Quand annoncer les mises à jour de progression des activités temporisées.",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_SCOPE = "Portée de progression des activités temporisées",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_SCOPE_TP = "Quelles activités annoncer : toutes celles en progression ou uniquement celle épinglée au suivi de quêtes.",
 
     -- CombatText
     LUIE_STRING_CT_COMBAT_IN_DEFAULT = "Début du combat",

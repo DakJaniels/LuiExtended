@@ -523,6 +523,18 @@ local strings =
     -- LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_DSA = "Drachenstern-Arena",
     LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_IC_TITLE_PREFIX = "Betreten: ",
     LUIE_STRING_CA_TIMED_ACTIVITIES_LABEL = "Zeitgebundene Aktivitäten",
+    LUIE_STRING_CA_TIMED_ACTIVITIES_TRACKING = "Zeitgebundene Aktivitäten (Verfolgung)",
+    LUIE_STRING_CA_TIMED_ACTIVITIES_PROGRESS = "Zeitgebundene Aktivitäten (Fortschritt)",
+    LUIE_STRING_CA_DISPLAY_TIMED_ACTIVITIES = "<<1>> Zeitgebundene Aktivitäten",
+    LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_ALWAYS = "Jede Aktualisierung",
+    LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_MILESTONE = "Meilensteine (25%, 50%, 75%, 100%)",
+    LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_COMPLETE = "Nur bei Abschluss",
+    LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_ALL = "Alle Aktivitäten",
+    LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_TRACKED = "Nur verfolgt (an Quest-Tracker angeheftet)",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_FREQ = "Häufigkeit Fortschritt zeitgebundener Aktivitäten",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_FREQ_TP = "Wann Fortschrittsaktualisierungen zeitgebundener Aktivitäten angekündigt werden sollen.",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_SCOPE = "Umfang Fortschritt zeitgebundener Aktivitäten",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_SCOPE_TP = "Welche Aktivitäten angekündigt werden: alle mit Fortschritt oder nur die am Quest-Tracker angeheftete.",
 
     -- CombatText
     LUIE_STRING_CT_COMBAT_IN_DEFAULT = "Kampf begonnen",

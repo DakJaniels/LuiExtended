@@ -524,6 +524,18 @@ local strings =
     -- LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_DSA = "Арена Драгонстара",
     LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_IC_TITLE_PREFIX = "Вход: ",
     LUIE_STRING_CA_TIMED_ACTIVITIES_LABEL = "Временные активности",
+    LUIE_STRING_CA_TIMED_ACTIVITIES_TRACKING = "Временные активности (Отслеживание)",
+    LUIE_STRING_CA_TIMED_ACTIVITIES_PROGRESS = "Временные активности (Прогресс)",
+    LUIE_STRING_CA_DISPLAY_TIMED_ACTIVITIES = "<<1>> Временные активности",
+    LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_ALWAYS = "Каждое обновление",
+    LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_MILESTONE = "Вехи (25%, 50%, 75%, 100%)",
+    LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_COMPLETE = "Только при завершении",
+    LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_ALL = "Все активности",
+    LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_TRACKED = "Только отслеживаемая (закреплена в трекере квестов)",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_FREQ = "Частота прогресса временных активностей",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_FREQ_TP = "Когда объявлять обновления прогресса временных активностей.",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_SCOPE = "Область прогресса временных активностей",
+    LUIE_STRING_LAM_CA_TIMED_ACTIVITY_SCOPE_TP = "Какие активности объявлять: все с прогрессом или только закреплённую в трекере квестов.",
 
     -- CombatText
     LUIE_STRING_CT_COMBAT_IN_DEFAULT = "В бою",

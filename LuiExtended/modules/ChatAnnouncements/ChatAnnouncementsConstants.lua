@@ -167,6 +167,10 @@ ChatAnnouncements.Colors = {}
 --- @field StorageBagAlert boolean
 --- @field TimedActivityCA boolean
 --- @field TimedActivityAlert boolean
+--- @field TimedActivityProgressCA boolean
+--- @field TimedActivityProgressAlert boolean
+--- @field TimedActivityProgressScope string
+--- @field TimedActivityProgressFrequency string
 --- @field PromotionalEventsActivityCA boolean
 --- @field PromotionalEventsActivityAlert boolean
 --- @field CraftedAbilityCA boolean
@@ -763,6 +767,10 @@ ChatAnnouncements.Defaults =
 
         TimedActivityCA = false,
         TimedActivityAlert = false,
+        TimedActivityProgressCA = false,
+        TimedActivityProgressAlert = false,
+        TimedActivityProgressScope = "all",
+        TimedActivityProgressFrequency = "complete",
         PromotionalEventsActivityCA = false,
         PromotionalEventsActivityAlert = false,
 
