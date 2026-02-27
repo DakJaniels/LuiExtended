@@ -3137,9 +3137,6 @@ function ChatAnnouncements.IndexHouseBags()
 end
 
 function ChatAnnouncements.IndexFurnitureVault()
-    if not BAG_FURNITURE_VAULT then
-        return
-    end
     g_furnitureVaultStacks = {}
     local slotId = GetNextFurnitureVaultSlotId(nil)
     while slotId do
