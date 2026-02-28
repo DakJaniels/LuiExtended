@@ -132,7 +132,7 @@ local DebugStatus = {}
 --- @field KeepUpgradeAlliance KeepUpgradeAlliance Table of keep upgrade alliance definitions
 --- @field KeepUpgradeNameFix KeepUpgradeNameFix Table of keep upgrade name fixes
 --- @field KeepUpgradeOverride KeepUpgradeOverride Table of keep upgrade overrides
---- @field KeepUpgradeTooltip KeepUpgradeTooltip Table of keep upgrade tooltip definitions
+--- @field KeepUpgrade_Tooltip KeepUpgrade_Tooltip Table of keep upgrade tooltip definitions
 --- @field MajorMinor MajorMinor Table of major/minor effect definitions
 --- @field MapDataOverride MapDataOverride Table of map data overrides
 --- @field RemoveAbilityActiveHighlight RemoveAbilityActiveHighlight Table of effects to remove active highlight
@@ -209,7 +209,7 @@ local Effects =
     KeepUpgradeAlliance = {},
     KeepUpgradeNameFix = {},
     KeepUpgradeOverride = {},
-    KeepUpgradeTooltip = {},
+    KeepUpgrade_Tooltip = {},
     LinkedGroundMine = {},
     MajorMinor = {},
     MapDataOverride = {},

@@ -12,8 +12,8 @@ local Effects = Data.Effects
 local Tooltips = LuiData.Data.Tooltips
 local Abilities = LuiData.Data.Abilities
 
---- @class (partial) KeepUpgradeTooltip
-local keepUpgradeTooltip =
+--- @class (partial) KeepUpgrade_Tooltip
+local keepUpgrade_Tooltip =
 {
     [Abilities.Keep_Upgrade_Food_Guard_Range] = Tooltips.Keep_Upgrade_Food_Guard_Range,
     [Abilities.Keep_Upgrade_Food_Heartier_Guards] = Tooltips.Keep_Upgrade_Food_Heartier_Guards,
@@ -34,5 +34,5 @@ local keepUpgradeTooltip =
     [Abilities.Keep_Upgrade_Food_Guard_Abilities] = Tooltips.Keep_Upgrade_Food_Guard_Abilities,
 }
 
---- @class (partial) KeepUpgradeTooltip
-Effects.KeepUpgradeTooltip = keepUpgradeTooltip
+--- @class (partial) KeepUpgrade_Tooltip
+Effects.KeepUpgrade_Tooltip = keepUpgrade_Tooltip

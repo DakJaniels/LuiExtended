@@ -388,11 +388,8 @@ local abilityTables =
     Set_Wilderqueens_Arch = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(34870)),
     Set_Plague_Slinger = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(102113)),
     Set_Ice_Furnace = GetString(LUIE_STRING_SKILL_SET_ICE_FURNACE),
-    Set_Hand_of_Mephala =
-    {
-        ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(84353)),
-        ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(84355))
-    },
+    Set_Hand_of_Mephala = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(84353)),
+    Set_Hand_of_Mephala_Webbing = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(84357)),
     Set_Tormentor = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(67280)),
     Set_Destructive_Mage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(51315)),
     Set_Healing_Mage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(51442)),
