@@ -51,7 +51,7 @@ end
 -- GridOverlay instance (single shared overlay, deferred pools, fragment-driven visibility)
 -- -----------------------------------------------------------------------------
 
---- @class LUIE.GridOverlay
+--- @class LUIE.GridOverlay : ZO_DeferredInitializingObject
 local GridOverlay = ZO_DeferredInitializingObject:Subclass()
 GridOverlay.__index = GridOverlay
 
@@ -63,6 +63,7 @@ function GridOverlay:Initialize(identifier, fragment, control)
     self.verticalPool = nil
     self.horizontalPool = nil
     self.size = 0
+    self:OnDeferredInitialize()
 end
 
 function GridOverlay:OnDeferredInitialize()
@@ -73,14 +74,23 @@ function GridOverlay:OnDeferredInitialize()
     local function horizontalLineFactory(objectPool, objectKey)
         return ZO_ObjectPool_CreateControl(LINE_TEMPLATE_H, objectPool, parentControl)
     end
-    local verticalPool = ZO_ObjectPool:New(verticalLineFactory, ResetLine)
-    verticalPool:SetCustomFactoryBehavior(function (line) ApplyLineStyle(line) end)
-    verticalPool:SetCustomAcquireBehavior(function (line) line:SetHidden(false) end)
-    self.verticalPool = verticalPool
-    local horizontalPool = ZO_ObjectPool:New(horizontalLineFactory, ResetLine)
-    horizontalPool:SetCustomFactoryBehavior(function (line) ApplyLineStyle(line) end)
-    horizontalPool:SetCustomAcquireBehavior(function (line) line:SetHidden(false) end)
-    self.horizontalPool = horizontalPool
+    --- @diagnostic disable-next-line: assign-type-mismatch
+    self.verticalPool = ZO_ObjectPool:New(verticalLineFactory, ResetLine) --- @type ZO_ObjectPool
+    self.verticalPool:SetCustomFactoryBehavior(function (line)
+        ApplyLineStyle(line)
+    end)
+    self.verticalPool:SetCustomAcquireBehavior(function (line)
+        line:SetHidden(false)
+    end)
+
+    --- @diagnostic disable-next-line: assign-type-mismatch
+    self.horizontalPool = ZO_ObjectPool:New(horizontalLineFactory, ResetLine) --- @type ZO_ObjectPool
+    self.horizontalPool:SetCustomFactoryBehavior(function (line)
+        ApplyLineStyle(line)
+    end)
+    self.horizontalPool:SetCustomAcquireBehavior(function (line)
+        line:SetHidden(false)
+    end)
 end
 
 function GridOverlay:GetControl()
@@ -204,6 +214,8 @@ end
 -- -----------------------------------------------------------------------------
 
 --- @class LUIE.GridOverlayManager
+--- @field requesters table<string, { visible: boolean, size: number }>
+--- @field sharedOverlay LUIE.GridOverlay?
 local GridOverlayManager =
 {
     requesters = {},
@@ -211,6 +223,8 @@ local GridOverlayManager =
 
 local SHARED_OVERLAY_ID = "shared"
 
+--- @param manager LUIE.GridOverlayManager
+--- @return LUIE.GridOverlay?
 local function GetSharedOverlay(manager)
     if not manager.sharedOverlay then
         local control = windowManager:GetControlByName(OVERLAY_CONTROL_NAME)
@@ -227,7 +241,9 @@ local function GetSharedOverlay(manager)
         control:SetHidden(true)
         control:SetClampedToScreen(false)
         local fragment = ZO_SimpleSceneFragment:New(control)
-        manager.sharedOverlay = GridOverlay:New(SHARED_OVERLAY_ID, fragment, control)
+        local overlay = GridOverlay:New(SHARED_OVERLAY_ID, fragment, control)
+        --- @cast overlay LUIE.GridOverlay
+        manager.sharedOverlay = overlay
     end
     return manager.sharedOverlay
 end
