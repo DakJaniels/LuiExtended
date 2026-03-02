@@ -913,8 +913,8 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
 
         -- And color of custom target name always. Also change 'labelOne' for critters
         if UnitFrames.CustomFrames["reticleover"] then
-            UnitFrames.CustomFrames["reticleover"].hostile = (reactionType == UNIT_REACTION_HOSTILE) and UnitFrames.SV.TargetEnableSkull
-            UnitFrames.CustomFrames["reticleover"].skull:SetHidden(not UnitFrames.CustomFrames["reticleover"].hostile or (UnitFrames.savedHealth.reticleover[1] == 0) or (100 * UnitFrames.savedHealth.reticleover[1] / UnitFrames.savedHealth.reticleover[3] > UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH].threshold))
+            UnitFrames.reticleoverHostile = (reactionType == UNIT_REACTION_HOSTILE) and UnitFrames.SV.TargetEnableSkull
+            UnitFrames.CustomFrames["reticleover"].skull:SetHidden(not UnitFrames.reticleoverHostile or (UnitFrames.savedHealth.reticleover[1] == 0) or (100 * UnitFrames.savedHealth.reticleover[1] / UnitFrames.savedHealth.reticleover[3] > UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH].threshold))
             UnitFrames.CustomFrames["reticleover"].name:SetColor(color[1], color[2], color[3], 1)
             UnitFrames.CustomFrames["reticleover"].className:SetColor(color[1], color[2], color[3], 1)
             if isCritter then
@@ -982,7 +982,7 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
 
         -- Hide target frame bars control, LTE will clear buffs and remove then itself, SpellCastBuffs should continue to display ground buffs
         if UnitFrames.CustomFrames["reticleover"] then
-            UnitFrames.CustomFrames["reticleover"].hostile = false
+            UnitFrames.reticleoverHostile = false
             UnitFrames.CustomFrames["reticleover"].skull:SetHidden(true)
             UnitFrames.CustomFrames["reticleover"].control:SetHidden(true) -- UnitFrames.CustomFrames["reticleover"].canHide )
         end
@@ -1805,7 +1805,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
         positionMode = "recenter"
 
         CustomFramesClearAltBarReferences(player)
-        player.ChampionXP = alt
+        player.ChampionXP = alt --[[@as LUIE_Player_Health|LUIE_Player_Resource]]
 
         UnitFrames.OnChampionPointGained()
 
@@ -1832,7 +1832,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
         positionMode = "recenter"
 
         CustomFramesClearAltBarReferences(player)
-        player.Experience = alt
+        player.Experience = alt --[[@as LUIE_Player_Health|LUIE_Player_Resource]]
 
         local championXP = GetNumChampionXPInChampionPoint(GetPlayerChampionPointsEarned()) or GetPlayerChampionXP()
         player.Experience.bar:SetMinMax(0, player.isChampion and championXP or GetUnitXPMax("player"))
