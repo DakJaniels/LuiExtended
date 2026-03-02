@@ -103,37 +103,42 @@ local g_ultimateCurrent = 0                               -- Current ultimate va
 local g_ultimateSlot = ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 -- Ultimate slot number
 local g_uiProcAnimation = {}                              -- Animation for bar slots
 local g_uiCustomToggle = {}                               -- Toggle slots for bar Slots
-local g_triggeredSlotsFront = {}                          -- Triggered bar highlight slots
-local g_triggeredSlotsBack = {}                           -- Triggered bar highlight slots
-local g_triggeredSlotsRemain = {}                         -- Table of remaining durations on proc abilities
-local g_toggledSlotsBack = {}                             -- Toggled bar highlight slots
-local g_toggledSlotsFront = {}                            -- Toggled bar highlight slots
-local g_toggledSlotsRemain = {}                           -- Table of remaining durations on active abilities
-local g_toggledSlotsStack = {}                            -- Table of stacks for active abilities
-local g_toggledSlotsPlayer = {}                           -- Table of abilities that target the player (bar highlight doesn't fade on reticleover change)
-local g_potionUsed = false                                -- Toggled on when a potion is used to prevent OnSlotsFullUpdate from updating timers.
---- @type {[integer]:BarHighlightOverrideOptions}
-local g_barOverrideCI = {}                                -- Table for storing abilityId's from Effects.BarHighlightOverride that should show as an aura
-local g_barFakeAura = {}                                  -- Table for storing abilityId's that only display a fakeaura
-local g_barDurationOverride = {}                          -- Table for storing abilitiyId's that ignore ending event
-local g_barNoRemove = {}                                  -- Table of abilities we don't remove from bar highlight
-local g_protectAbilityRemoval = {}                        -- AbilityId's set to a timestamp here to prevent removal of bar highlight when refreshing ground auras from causing the highlight to fade.
-local g_mineStacks = {}                                   -- Individual AbilityId ground mine stack information
-local g_mineNoTurnOff = {}                                -- When this variable is true for an abilityId - don't remove the bar highlight for a mine (We we have reticleover target and the mine effect applies on the enemy)
-local g_reticleHidden = false                             -- Track if reticle is hidden to skip unnecessary processing
-local g_barFont                                           -- Font for Ability Highlight Label
-local g_potionFont                                        -- Font for Potion Timer Label
-local g_ultimateFont                                      -- Font for Ultimate Percentage Label
-local g_castbarFont                                       -- Font for Castbar Label & Timer
-local g_ProcSound                                         -- Proc Sound
-local g_boundArmamentsPlayed = {}                         -- Specific variable to lockout Bound Armaments/Grim Focus from playing a proc sound at 5 stacks to only once per 5 seconds.
-local g_disableProcSound = {}                             -- When we play a proc sound from a bar ability changing (like power lash) we put a 3 sec ICD on it so it doesn't spam when mousing on/off a target, etc
-local g_hotbarCategory = GetActiveHotbarCategory()        -- Set on initialization and when we swap weapons to determine the current hotbar category
+--- Returns the custom toggle control for slotNum, or nil if missing or still a placeholder.
+local function GetCustomToggleControl(slotNum)
+    local t = g_uiCustomToggle[slotNum]
+    return (t and t ~= true) and t or nil
+end
+local g_triggeredSlotsFront = {}                   -- Triggered bar highlight slots
+local g_triggeredSlotsBack = {}                    -- Triggered bar highlight slots
+local g_triggeredSlotsRemain = {}                  -- Table of remaining durations on proc abilities
+local g_toggledSlotsBack = {}                      -- Toggled bar highlight slots
+local g_toggledSlotsFront = {}                     -- Toggled bar highlight slots
+local g_toggledSlotsRemain = {}                    -- Table of remaining durations on active abilities
+local g_toggledSlotsStack = {}                     -- Table of stacks for active abilities
+local g_toggledSlotsPlayer = {}                    -- Table of abilities that target the player (bar highlight doesn't fade on reticleover change)
+local g_potionUsed = false                         -- Toggled on when a potion is used to prevent OnSlotsFullUpdate from updating timers.
+--- @type {[integer]:boolean}
+local g_barOverrideCI = {}                         -- Table for storing abilityId's from Effects.BarHighlightOverride that should show as an aura
+local g_barFakeAura = {}                           -- Table for storing abilityId's that only display a fakeaura
+local g_barDurationOverride = {}                   -- Table for storing abilitiyId's that ignore ending event
+local g_barNoRemove = {}                           -- Table of abilities we don't remove from bar highlight
+local g_protectAbilityRemoval = {}                 -- AbilityId's set to a timestamp here to prevent removal of bar highlight when refreshing ground auras from causing the highlight to fade.
+local g_mineStacks = {}                            -- Individual AbilityId ground mine stack information
+local g_mineNoTurnOff = {}                         -- When this variable is true for an abilityId - don't remove the bar highlight for a mine (We we have reticleover target and the mine effect applies on the enemy)
+local g_reticleHidden = false                      -- Track if reticle is hidden to skip unnecessary processing
+local g_barFont                                    -- Font for Ability Highlight Label
+local g_potionFont                                 -- Font for Potion Timer Label
+local g_ultimateFont                               -- Font for Ultimate Percentage Label
+local g_castbarFont                                -- Font for Castbar Label & Timer
+local g_ProcSound                                  -- Proc Sound
+local g_boundArmamentsPlayed = {}                  -- Specific variable to lockout Bound Armaments/Grim Focus from playing a proc sound at 5 stacks to only once per 5 seconds.
+local g_disableProcSound = {}                      -- When we play a proc sound from a bar ability changing (like power lash) we put a 3 sec ICD on it so it doesn't spam when mousing on/off a target, etc
+local g_hotbarCategory = GetActiveHotbarCategory() -- Set on initialization and when we swap weapons to determine the current hotbar category
 --- @type {[integer]:ActionButton}
-local g_backbarButtons = {}                               -- Table to hold backbar buttons
-local g_backbarContainer                                  -- Parent control for backbar (used for SETHOTBAR auto-hide)
-local g_activeWeaponSwapInProgress = false                -- Toggled on when weapon swapping, TODO: maybe not needed
-local g_castbarWorldMapFix = false                        -- Fix for viewing the World Map changing the player coordinates for some reason
+local g_backbarButtons = {}                        -- Table to hold backbar buttons
+local g_backbarContainer                           -- Parent control for backbar (used for SETHOTBAR auto-hide)
+local g_activeWeaponSwapInProgress = false         -- Toggled on when weapon swapping, TODO: maybe not needed
+local g_castbarWorldMapFix = false                 -- Fix for viewing the World Map changing the player coordinates for some reason
 local g_actionBarActiveWeaponPair = GetHeldWeaponPair()
 local ACTION_BAR = ZO_ActionBar1
 local BAR_INDEX_START = 3
@@ -566,7 +571,6 @@ function ActionBar.Initialize(enabled)
     end
     ActionBar.Enabled = true
 
-    Effects.BarHighlightDestroFix = Effects.ExtendDestroMappingWithAllRanks()
     -- -----------------------------------------------------------------------------
     ActionBar.ApplyFont()
     ActionBar.ApplyProcSound()
@@ -710,10 +714,11 @@ function ActionBar.SetupBackBarIcons(button, flip)
     if flip then
         local desaturate = true
 
-        if g_uiCustomToggle and g_uiCustomToggle[slotNum] then
+        local customToggle = GetCustomToggleControl(slotNum)
+        if customToggle then
             desaturate = false
 
-            if g_uiCustomToggle[slotNum]:IsHidden() then
+            if customToggle:IsHidden() then
                 ActionBar.BackbarHideSlot(slotNum)
                 desaturate = true
             end
@@ -1508,8 +1513,10 @@ function ActionBar.ApplyFont()
         g_uiProcAnimation[k].procLoopTexture.label:SetFont(g_barFont)
     end
     for k, _ in pairs(g_uiCustomToggle) do
-        g_uiCustomToggle[k].label:SetFont(g_barFont)
-        g_uiCustomToggle[k].stack:SetFont(g_barFont)
+        if g_uiCustomToggle[k] ~= true then
+            g_uiCustomToggle[k].label:SetFont(g_barFont)
+            g_uiCustomToggle[k].stack:SetFont(g_barFont)
+        end
     end
 
     g_potionFont = setupFont("PotionTimerFontFace", "PotionTimerFontStyle", "PotionTimerFontSize", FONT_STYLE_OUTLINE, 17)
@@ -1558,16 +1565,19 @@ function ActionBar.ResetBarLabel()
     end
 
     for k, _ in pairs(g_uiCustomToggle) do
-        g_uiCustomToggle[k].label:SetText("")
+        if g_uiCustomToggle[k] ~= true then
+            g_uiCustomToggle[k].label:SetText("")
+        end
     end
 
     for i = BAR_INDEX_START, BAR_INDEX_END do
         -- Clear base action bars
         local actionButton = ZO_ActionBar_GetButton(i)
-        if g_uiCustomToggle[i] then
-            g_uiCustomToggle[i].label:ClearAnchors()
-            g_uiCustomToggle[i].label:SetAnchor(TOPLEFT, actionButton.slot)
-            g_uiCustomToggle[i].label:SetAnchor(BOTTOMRIGHT, actionButton.slot, nil, 0, -ActionBar.SV.BarLabelPosition)
+        local c = GetCustomToggleControl(i)
+        if c then
+            c.label:ClearAnchors()
+            c.label:SetAnchor(TOPLEFT, actionButton.slot)
+            c.label:SetAnchor(BOTTOMRIGHT, actionButton.slot, nil, 0, -ActionBar.SV.BarLabelPosition)
         elseif g_uiProcAnimation[i] then
             g_uiProcAnimation[i].procLoopTexture.label:ClearAnchors()
             g_uiProcAnimation[i].procLoopTexture.label:SetAnchor(TOPLEFT, actionButton.slot)
@@ -1576,10 +1586,11 @@ function ActionBar.ResetBarLabel()
 
         local backIndex = i + BACKBAR_INDEX_OFFSET
         local actionButtonBB = g_backbarButtons[backIndex]
-        if g_uiCustomToggle[backIndex] then
-            g_uiCustomToggle[backIndex].label:ClearAnchors()
-            g_uiCustomToggle[backIndex].label:SetAnchor(TOPLEFT, actionButtonBB.slot)
-            g_uiCustomToggle[backIndex].label:SetAnchor(BOTTOMRIGHT, actionButtonBB.slot, nil, 0, -ActionBar.SV.BarLabelPosition)
+        local cBack = GetCustomToggleControl(backIndex)
+        if cBack then
+            cBack.label:ClearAnchors()
+            cBack.label:SetAnchor(TOPLEFT, actionButtonBB.slot)
+            cBack.label:SetAnchor(BOTTOMRIGHT, actionButtonBB.slot, nil, 0, -ActionBar.SV.BarLabelPosition)
         elseif g_uiProcAnimation[backIndex] then
             g_uiProcAnimation[backIndex].procLoopTexture.label:ClearAnchors()
             g_uiProcAnimation[backIndex].procLoopTexture.label:SetAnchor(TOPLEFT, actionButtonBB.slot)
@@ -1767,8 +1778,8 @@ local PROC_SOUND_THRESHOLDS =
 local function ForEachToggledSlot(abilityId, fn)
     local front = g_toggledSlotsFront[abilityId]
     local back = g_toggledSlotsBack[abilityId]
-    if front and g_uiCustomToggle[front] then fn(front) end
-    if back and g_uiCustomToggle[back] then fn(back) end
+    if front and GetCustomToggleControl(front) then fn(front) end
+    if back and GetCustomToggleControl(back) then fn(back) end
 end
 
 --- Set stack label on all toggled slots for abilityId. textOrNil: number to display, or nil/0 for empty.
@@ -2068,7 +2079,10 @@ end
 --- @param slotNum integer
 --- @param abilityId integer
 function ActionBar.HideSlot(slotNum, abilityId)
-    g_uiCustomToggle[slotNum]:SetHidden(true)
+    local c = GetCustomToggleControl(slotNum)
+    if c then
+        c:SetHidden(true)
+    end
     if slotNum > BACKBAR_INDEX_OFFSET then
         if slotNum ~= BAR_INDEX_END + BACKBAR_INDEX_OFFSET then
             ActionBar.BackbarHideSlot(slotNum)
@@ -2098,20 +2112,21 @@ function ActionBar.ShowSlot(slotNum, abilityId, currentTimeMS, desaturate)
         uiUltimate.LabelPct:SetHidden(true)
     end
     if ActionBar.SV.BarShowLabel then
-        if not g_uiCustomToggle[slotNum] then
+        local c = GetCustomToggleControl(slotNum)
+        if not c then
             return
         end
         local remain = g_toggledSlotsRemain[abilityId] - currentTimeMS
-        g_uiCustomToggle[slotNum].label:SetText(SetBarRemainLabel(remain, abilityId))
+        c.label:SetText(SetBarRemainLabel(remain, abilityId))
         if g_toggledSlotsStack[abilityId] and g_toggledSlotsStack[abilityId] > 0 then
-            g_uiCustomToggle[slotNum].stack:SetText(g_toggledSlotsStack[abilityId])
+            c.stack:SetText(g_toggledSlotsStack[abilityId])
         elseif g_mineStacks[abilityId] and g_mineStacks[abilityId] > 0 then
             -- No stack for Time Freeze
             if not Effects.HideGroundMineStacks[abilityId] then
-                g_uiCustomToggle[slotNum].stack:SetText(g_mineStacks[abilityId])
+                c.stack:SetText(g_mineStacks[abilityId])
             end
         else
-            g_uiCustomToggle[slotNum].stack:SetText("")
+            c.stack:SetText("")
         end
     end
 end
@@ -2858,21 +2873,23 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
                 end
                 if g_toggledSlotsFront[abilityId] then
                     local slotNum = g_toggledSlotsFront[abilityId]
-                    if g_uiCustomToggle[slotNum] then
+                    local c = GetCustomToggleControl(slotNum)
+                    if c then
                         if g_toggledSlotsStack[abilityId] and g_toggledSlotsStack[abilityId] > 0 then
-                            g_uiCustomToggle[slotNum].stack:SetText(g_toggledSlotsStack[abilityId])
+                            c.stack:SetText(g_toggledSlotsStack[abilityId])
                         else
-                            g_uiCustomToggle[slotNum].stack:SetText("")
+                            c.stack:SetText("")
                         end
                     end
                 end
                 if g_toggledSlotsBack[abilityId] then
                     local slotNum = g_toggledSlotsBack[abilityId]
-                    if g_uiCustomToggle[slotNum] then
+                    local c = GetCustomToggleControl(slotNum)
+                    if c then
                         if g_toggledSlotsStack[abilityId] and g_toggledSlotsStack[abilityId] > 0 then
-                            g_uiCustomToggle[slotNum].stack:SetText(g_toggledSlotsStack[abilityId])
+                            c.stack:SetText(g_toggledSlotsStack[abilityId])
                         else
-                            g_uiCustomToggle[slotNum].stack:SetText("")
+                            c.stack:SetText("")
                         end
                     end
                 end
@@ -2998,9 +3015,9 @@ function ActionBar.BarSlotUpdate(slotNum, wasfullUpdate, onlyProc)
             end
         end
 
-        if g_uiCustomToggle[slotNum] then
-            -- g_uiCustomToggle[slotNum].label:SetText("")
-            g_uiCustomToggle[slotNum]:SetHidden(true)
+        local c = GetCustomToggleControl(slotNum)
+        if c then
+            c:SetHidden(true)
         end
     end
 
@@ -3035,13 +3052,14 @@ function ActionBar.BarSlotUpdate(slotNum, wasfullUpdate, onlyProc)
         end
     end
 
-    if showFakeAura then
+    if showFakeAura and ability_id then
         if not g_barFakeAura[ability_id] then
             g_barFakeAura[ability_id] = true
             g_barOverrideCI[ability_id] = true
 
-            if Effects.BarHighlightOverride[ability_id] and Effects.BarHighlightOverride[ability_id].duration then
-                g_barDurationOverride[ability_id] = Effects.BarHighlightOverride[ability_id].duration
+            local override = Effects.BarHighlightOverride[ability_id]
+            if override and override.duration then
+                g_barDurationOverride[ability_id] = override.duration
             end
         end
     end
@@ -3097,7 +3115,7 @@ function ActionBar.BarSlotUpdate(slotNum, wasfullUpdate, onlyProc)
     end
 
     -- Check for active duration to display highlight for abilities on bar swap
-    if onlyProc == false then
+    if onlyProc == false and toggledSlots and ability_id then
         if duration > 0 or Effects.AddNoDurationBarHighlight[ability_id] or Effects.MajorMinor[ability_id] then
             toggledSlots[ability_id] = slotNum
             if g_toggledSlotsRemain[ability_id] then
@@ -3107,9 +3125,10 @@ function ActionBar.BarSlotUpdate(slotNum, wasfullUpdate, onlyProc)
                     local desaturate
                     local slotIndex = slotNum > BACKBAR_INDEX_OFFSET and slotNum - BACKBAR_INDEX_OFFSET or nil
                     if slotIndex then
-                        if g_uiCustomToggle[slotIndex] then
+                        local c = GetCustomToggleControl(slotIndex)
+                        if c then
                             desaturate = false
-                            if g_uiCustomToggle[slotIndex]:IsHidden() then
+                            if c:IsHidden() then
                                 ActionBar.BackbarHideSlot(slotNum)
                                 desaturate = true
                             end
@@ -3251,8 +3270,9 @@ function ActionBar.OnDeath(unitTag, isDead)
     -- And toggle buttons
     if unitTag == "player" then
         for slotNum = BAR_INDEX_START, BAR_INDEX_END do
-            if g_uiCustomToggle[slotNum] then
-                g_uiCustomToggle[slotNum]:SetHidden(true)
+            local c = GetCustomToggleControl(slotNum)
+            if c then
+                c:SetHidden(true)
                 --[[if slotNum == 8 and ActionBar.SV.UltimatePctEnabled and IsSlotUsed(g_ultimateSlot) then
                     uiUltimate.LabelPct:SetHidden(false)
                 end]]
@@ -3260,8 +3280,9 @@ function ActionBar.OnDeath(unitTag, isDead)
             end
         end
         for slotNum = BAR_INDEX_START + BACKBAR_INDEX_OFFSET, BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET do
-            if g_uiCustomToggle[slotNum] then
-                g_uiCustomToggle[slotNum]:SetHidden(true)
+            local c = GetCustomToggleControl(slotNum)
+            if c then
+                c:SetHidden(true)
             end
         end
     end
@@ -3386,7 +3407,8 @@ function ActionBar.OnPowerUpdatePlayer(unitTag, powerIndex, powerType, powerValu
             if pct < 100 then
                 -- Check Ultimate Percent Setting & if slot is used then check if the slot is currently showing a toggle
                 local setHiddenPct = not ActionBar.SV.UltimatePctEnabled
-                if ActionBar.SV.ShowToggledUltimate and g_uiCustomToggle[8] and not g_uiCustomToggle[8]:IsHidden() then
+                local c8 = GetCustomToggleControl(8)
+                if ActionBar.SV.ShowToggledUltimate and c8 and not c8:IsHidden() then
                     setHiddenPct = true
                 end
                 uiUltimate.LabelPct:SetHidden(setHiddenPct)
@@ -3404,7 +3426,8 @@ function ActionBar.OnPowerUpdatePlayer(unitTag, powerIndex, powerType, powerValu
             else
                 -- Check Ultimate Percent Setting & if slot is used then check if the slot is currently showing a toggle
                 local setHiddenPct = not ActionBar.SV.UltimatePctEnabled
-                if (ActionBar.SV.ShowToggledUltimate and g_uiCustomToggle[8] and not g_uiCustomToggle[8]:IsHidden()) or ActionBar.SV.UltimateHideFull then
+                local c8 = GetCustomToggleControl(8)
+                if (ActionBar.SV.ShowToggledUltimate and c8 and not c8:IsHidden()) or ActionBar.SV.UltimateHideFull then
                     setHiddenPct = true
                 end
                 uiUltimate.LabelPct:SetHidden(setHiddenPct)
