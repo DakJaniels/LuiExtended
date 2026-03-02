@@ -39,6 +39,26 @@ UnitFrames.VisualizerModules =
 --- @type table<string, LUIE_UnitAttributeVisualizer>
 UnitFrames.Visualizers = {}
 UnitFrames.AvaCustFrames = {}
+
+--- Default frame power entry (label + color, optional threshold for target).
+--- @class UnitFrames.DefaultFramePowerEntry
+--- @field label Control
+--- @field color table
+--- @field threshold number|nil
+
+--- Per-unit default frame entry (unitTag + optional power-type entries, classIcon, friendIcon).
+--- @class UnitFrames.DefaultFrameUnitEntry
+--- @field unitTag string
+--- @field [number] UnitFrames.DefaultFramePowerEntry
+--- @field classIcon Control|nil
+--- @field friendIcon Control|nil
+
+--- Default frames table: unitTag -> unit entry, plus optional SmallGroup flag.
+--- @class UnitFrames.DefaultFramesTable
+--- @field [string] UnitFrames.DefaultFrameUnitEntry
+--- @field SmallGroup boolean|nil
+
+--- @type UnitFrames.DefaultFramesTable
 UnitFrames.DefaultFrames = {}
 UnitFrames.MaxChampionPoint = 3600
 UnitFrames.defaultTargetNameLabel = nil
@@ -323,44 +343,13 @@ UnitFrames.Defaults =
 
 UnitFrames.SV = {}
 
+--- Frame data tables are added by _CreateCustomFrames when each frame is created (XML loads first).
+--- @class UnitFrames.CustomFramesTable
+--- @field [string] table
+
 --- @type UnitFrames.CustomFramesTable
 UnitFrames.CustomFrames =
 {
-    ["AvaPlayerTarget"] = {},
-    ["boss1"] = {},
-    ["boss2"] = {},
-    ["boss3"] = {},
-    ["boss4"] = {},
-    ["boss5"] = {},
-    ["boss6"] = {},
-    ["boss7"] = {},
-    ["companion"] = {},
-    ["controlledsiege"] = {},
-    ["PetGroup1"] = {},
-    ["PetGroup2"] = {},
-    ["PetGroup3"] = {},
-    ["PetGroup4"] = {},
-    ["PetGroup5"] = {},
-    ["PetGroup6"] = {},
-    ["PetGroup7"] = {},
-    ["player"] = {},
-    ["RaidGroup1"] = {},
-    ["RaidGroup2"] = {},
-    ["RaidGroup3"] = {},
-    ["RaidGroup4"] = {},
-    ["RaidGroup5"] = {},
-    ["RaidGroup6"] = {},
-    ["RaidGroup7"] = {},
-    ["RaidGroup8"] = {},
-    ["RaidGroup9"] = {},
-    ["RaidGroup10"] = {},
-    ["RaidGroup11"] = {},
-    ["RaidGroup12"] = {},
-    ["reticleover"] = {},
-    ["SmallGroup1"] = {},
-    ["SmallGroup2"] = {},
-    ["SmallGroup3"] = {},
-    ["SmallGroup4"] = {},
 }
 UnitFrames.CustomFramesMovingState = false
 UnitFrames.reticleoverHostile = false -- boolean: hostile target and TargetEnableSkull (avoids assign-type-mismatch on frame.hostile)

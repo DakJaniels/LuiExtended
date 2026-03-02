@@ -56,7 +56,6 @@ end
 
 -- Runs on the EVENT_EFFECT_CHANGED listener.
 -- This handler fires every long-term effect added or removed
---- @param eventId integer
 --- @param changeType EffectResult
 --- @param effectSlot integer
 --- @param effectName string
@@ -73,7 +72,7 @@ end
 --- @param unitId integer
 --- @param abilityId integer
 --- @param sourceType CombatUnitType
-function SpellCastBuffs.OnEffectChanged(eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
     -- Change the effect type / name before we determine if we want to filter anything else.
     if Effects.EffectOverride[abilityId] then
         effectName = Effects.EffectOverride[abilityId].name or effectName

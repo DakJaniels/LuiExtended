@@ -59,7 +59,7 @@ SpellCastBuffs.ReloadEffects = function (unitTag)
             --- @diagnostic disable-next-line: cast-local-type
             castByPlayer = COMBAT_UNIT_TYPE_OTHER
         end
-        SpellCastBuffs.OnEffectChanged(0, EFFECT_RESULT_UPDATED, buffSlot, buffName, unitTag, timeStarted, timeEnding, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, unitName, 0, --[[unitId]] abilityId, castByPlayer)
+        SpellCastBuffs.OnEffectChanged(EFFECT_RESULT_UPDATED, buffSlot, buffName, unitTag, timeStarted, timeEnding, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, unitName, 0, --[[unitId]] abilityId, castByPlayer)
     end
     -- Display Disguise State (note that this function handles filtering player/target buffs if hidden)
     SpellCastBuffs.DisguiseStateChanged(unitTag, GetUnitDisguiseState(unitTag))

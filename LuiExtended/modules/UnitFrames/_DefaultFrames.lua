@@ -11,6 +11,14 @@ local UI = LUIE.UI
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
 
+--- ESO default player attribute bar control (has runtime field playerAttributeBarObject).
+--- @class ZO_PlayerAttributeBarControl : Control
+--- @field playerAttributeBarObject { timeline: table }
+
+--- @class ZO_PlayerAttributeHealth : ZO_PlayerAttributeBarControl
+--- @class ZO_PlayerAttributeMagicka : ZO_PlayerAttributeBarControl
+--- @class ZO_PlayerAttributeStamina : ZO_PlayerAttributeBarControl
+
 local pairs = pairs
 local eventManager = GetEventManager()
 local windowManager = GetWindowManager()
@@ -164,8 +172,9 @@ function UnitFrames.CreateDefaultFrames()
 
     -- When default Target frame is enabled set the threshold value to change color of label and add label to default fade list
     if UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH] then
-        UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH].threshold = UnitFrames.targetThreshold
-        table.insert(UnitFrames.targetUnitFrame.fadeComponents, UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH].label)
+        local healthEntry = UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH]
+        healthEntry.threshold = UnitFrames.targetThreshold
+        table.insert(UnitFrames.targetUnitFrame.fadeComponents, healthEntry.label)
     end
 
     -- Create classIcon and friendIcon: they should work even when default unit frames extender is disabled
@@ -216,9 +225,15 @@ function UnitFrames.SetDefaultFramesTransparency(min_pct_value, max_pct_value)
     local max_value = UnitFrames.SV.DefaultIncTransparency / 100
 
     local animationIndex = 1
-    ZO_PlayerAttributeHealth.playerAttributeBarObject.timeline:GetAnimation(animationIndex):SetAlphaValues(min_value, max_value)
-    ZO_PlayerAttributeMagicka.playerAttributeBarObject.timeline:GetAnimation(animationIndex):SetAlphaValues(min_value, max_value)
-    ZO_PlayerAttributeStamina.playerAttributeBarObject.timeline:GetAnimation(animationIndex):SetAlphaValues(min_value, max_value)
+    --- @type ZO_PlayerAttributeBarControl
+    local healthBar = ZO_PlayerAttributeHealth
+    healthBar.playerAttributeBarObject.timeline:GetAnimation(animationIndex):SetAlphaValues(min_value, max_value)
+    --- @type ZO_PlayerAttributeBarControl
+    local magickaBar = ZO_PlayerAttributeMagicka
+    magickaBar.playerAttributeBarObject.timeline:GetAnimation(animationIndex):SetAlphaValues(min_value, max_value)
+    --- @type ZO_PlayerAttributeBarControl
+    local staminaBar = ZO_PlayerAttributeStamina
+    staminaBar.playerAttributeBarObject.timeline:GetAnimation(animationIndex):SetAlphaValues(min_value, max_value)
 
     local inCombat = IsUnitInCombat("player")
     ZO_PlayerAttributeHealth:SetAlpha(inCombat and max_value or min_value)

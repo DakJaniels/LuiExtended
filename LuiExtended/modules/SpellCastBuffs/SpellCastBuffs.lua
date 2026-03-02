@@ -401,8 +401,12 @@ function SpellCastBuffs.Initialize(enabled)
     eventManager:AddFilterForEvent(moduleName .. "Disposition", EVENT_DISPOSITION_UPDATE, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     -- Buff Events
-    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_EFFECT_CHANGED, SpellCastBuffs.OnEffectChanged)
-    eventManager:RegisterForEvent(moduleName .. "Target", EVENT_EFFECT_CHANGED, SpellCastBuffs.OnEffectChanged)
+    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_EFFECT_CHANGED, function (eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+        SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+    end)
+    eventManager:RegisterForEvent(moduleName .. "Target", EVENT_EFFECT_CHANGED, function (eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+        SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+    end)
     eventManager:AddFilterForEvent(moduleName .. "Player", EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
     eventManager:AddFilterForEvent(moduleName .. "Target", EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
@@ -1340,6 +1344,9 @@ function SpellCastBuffs.ResetSingleIcon(container, buff)
 end
 
 -- Right Click Cancel Buff function
+--- @param self SpellCastBuffs_BuffIcon_Control
+--- @param button number
+--- @param upInside boolean
 function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
     if upInside and button == MOUSE_BUTTON_INDEX_RIGHT then
         ClearMenu()
@@ -1395,7 +1402,7 @@ function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
 end
 
 local function ClearStickyTooltip()
-    ClearTooltip(GameTooltip)
+    ClearTooltip(InformationTooltip)
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
 end
 
@@ -1417,9 +1424,9 @@ local buffTypes =
 function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
     -- Add bottom divider and info if present:
     if SpellCastBuffs.SV.TooltipAbilityId or SpellCastBuffs.SV.TooltipBuffType then
-        ZO_Tooltip_AddDivider(GameTooltip)
-        GameTooltip:SetVerticalPadding(4)
-        GameTooltip:AddLine("", "", ZO_NORMAL_TEXT:UnpackRGB())
+        ZO_Tooltip_AddDivider(InformationTooltip)
+        InformationTooltip:SetVerticalPadding(4)
+        InformationTooltip:AddLine("", "", ZO_NORMAL_TEXT:UnpackRGB())
         -- Add Ability ID Line
         if SpellCastBuffs.SV.TooltipAbilityId then
             local labelAbilityId = control.effectId or "None"
@@ -1427,8 +1434,8 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
             if isArtificial then
                 labelAbilityId = "Artificial"
             end
-            GameTooltip:AddHeaderLine("Ability ID", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
-            GameTooltip:AddHeaderLine(labelAbilityId, "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
+            InformationTooltip:AddHeaderLine("Ability ID", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
+            InformationTooltip:AddHeaderLine(labelAbilityId, "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
             detailsLine = detailsLine + 1
         end
 
@@ -1459,8 +1466,8 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
                 end
             end
 
-            GameTooltip:AddHeaderLine("Type", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
-            GameTooltip:AddHeaderLine(buffTypes[buffType], "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
+            InformationTooltip:AddHeaderLine("Type", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
+            InformationTooltip:AddHeaderLine(buffTypes[buffType], "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
             detailsLine = detailsLine + 1
         end
     end
@@ -1470,7 +1477,7 @@ end
 function SpellCastBuffs.Buff_OnMouseEnter(control)
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
 
-    InitializeTooltip(GameTooltip, control, BOTTOM, 0, -5, TOP)
+    InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -5, TOP)
     -- Setup Text
     local tooltipText = ""
     local detailsLine
@@ -1478,19 +1485,19 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
     local tooltipTitle = zo_strformat(SI_ABILITY_TOOLTIP_NAME, control.effectName)
     if control.isArtificial then
         tooltipText = GetArtificialEffectTooltipText(control.effectId)
-        GameTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
+        InformationTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
         detailsLine = 3
         if SpellCastBuffs.SV.TooltipEnable then
-            GameTooltip:SetVerticalPadding(1)
-            ZO_Tooltip_AddDivider(GameTooltip)
-            GameTooltip:SetVerticalPadding(5)
-            GameTooltip:AddLine(tooltipText, "", colorText:UnpackRGBA())
+            InformationTooltip:SetVerticalPadding(1)
+            ZO_Tooltip_AddDivider(InformationTooltip)
+            InformationTooltip:SetVerticalPadding(5)
+            InformationTooltip:AddLine(tooltipText, "", colorText:UnpackRGBA())
             detailsLine = 5
         end
         SpellCastBuffs.TooltipBottomLine(control, detailsLine, true)
     else
         if not SpellCastBuffs.SV.TooltipEnable then
-            GameTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
+            InformationTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
             detailsLine = 3
             SpellCastBuffs.TooltipBottomLine(control, detailsLine)
             return
@@ -1576,7 +1583,12 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
         -- Set the Tooltip to be default if custom tooltips aren't enabled
         if not LUIE.SpellCastBuffs.SV.TooltipCustom then
             tooltipText = GetAbilityEffectDescription(control.buffSlot)
-            tooltipText = StringOnlyGSUB(tooltipText, "\n$", "") -- Remove blank end line
+            if not tooltipText or tooltipText == "" then
+                tooltipText = GetAbilityDescription(control.effectId, nil, "player")
+            end
+            if tooltipText then
+                tooltipText = StringOnlyGSUB(tooltipText, "\n$", "") -- Remove blank end line
+            end
         end
 
         local thirdLine
@@ -1603,44 +1615,46 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
 
         detailsLine = 5
 
-        GameTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
+        InformationTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
         if tooltipText ~= "" and tooltipText ~= nil then
-            GameTooltip:SetVerticalPadding(1)
-            ZO_Tooltip_AddDivider(GameTooltip)
-            GameTooltip:SetVerticalPadding(5)
-            GameTooltip:AddLine(tooltipText, "", colorText:UnpackRGBA())
+            InformationTooltip:SetVerticalPadding(1)
+            ZO_Tooltip_AddDivider(InformationTooltip)
+            InformationTooltip:SetVerticalPadding(5)
+            InformationTooltip:AddLine(tooltipText, "", colorText:UnpackRGBA())
         end
         if thirdLine ~= "" and thirdLine ~= nil then
             if tooltipText == "" or tooltipText == nil then
-                GameTooltip:SetVerticalPadding(1)
-                ZO_Tooltip_AddDivider(GameTooltip)
-                GameTooltip:SetVerticalPadding(5)
+                InformationTooltip:SetVerticalPadding(1)
+                ZO_Tooltip_AddDivider(InformationTooltip)
+                InformationTooltip:SetVerticalPadding(5)
             end
             detailsLine = 7
-            GameTooltip:AddLine(thirdLine, "", ZO_NORMAL_TEXT:UnpackRGB())
+            InformationTooltip:AddLine(thirdLine, "", ZO_NORMAL_TEXT:UnpackRGB())
         end
 
         SpellCastBuffs.TooltipBottomLine(control, detailsLine)
 
         -- Tooltip Debug
-        -- GameTooltip:SetAbilityId(117391)
+        -- InformationTooltip:SetAbilityId(117391)
 
         -- Debug show default Tooltip on my account
         -- if LUIE.PlayerDisplayName == "@ArtOfShred" or LUIE.PlayerDisplayName == "@ArtOfShredPTS" --[[or LUIE.PlayerDisplayName == '@dack_janiels']] then
         if LUIE.IsDevDebugEnabled() then
-            GameTooltip:AddLine("Default Tooltip Below:", "", colorText:UnpackRGBA())
+            InformationTooltip:AddLine("Default Tooltip Below:", "", colorText:UnpackRGBA())
 
-            local newtooltipText
-
-            if GetAbilityEffectDescription(control.buffSlot) ~= "" then
-                newtooltipText = GetAbilityEffectDescription(control.buffSlot)
+            local newtooltipText = GetAbilityEffectDescription(control.buffSlot)
+            if not newtooltipText or newtooltipText == "" then
+                newtooltipText = GetAbilityDescription(control.effectId, nil, "player")
             end
-            if newtooltipText ~= "" and newtooltipText ~= nil then
-                GameTooltip:SetVerticalPadding(1)
-                ZO_Tooltip_AddDivider(GameTooltip)
-                GameTooltip:SetVerticalPadding(5)
-                GameTooltip:AddLine(newtooltipText, "", colorText:UnpackRGBA())
+            if newtooltipText and newtooltipText ~= "" then
+                newtooltipText = StringOnlyGSUB(newtooltipText, "\n$", "")
+            else
+                newtooltipText = "(no default description)"
             end
+            InformationTooltip:SetVerticalPadding(1)
+            ZO_Tooltip_AddDivider(InformationTooltip)
+            InformationTooltip:SetVerticalPadding(5)
+            InformationTooltip:AddLine(newtooltipText, "", colorText:UnpackRGBA())
         end
     end
 end
@@ -1650,7 +1664,7 @@ function SpellCastBuffs.Buff_OnMouseExit(control)
     if SpellCastBuffs.SV.TooltipSticky > 0 then
         eventManager:RegisterForUpdate(moduleName .. "StickyTooltip", SpellCastBuffs.SV.TooltipSticky, ClearStickyTooltip)
     else
-        ClearTooltip(GameTooltip)
+        ClearTooltip(InformationTooltip)
     end
 end
 
