@@ -60,6 +60,7 @@ frontend/CombatText.xml
 frontend/CrowdControlTracker.xml
 frontend/InfoPanel.xml
 frontend/SynergyTracker.xml
+frontend/GridOverlay.xml
 frontend/UnitFrames.xml
 
 # Unlock

@@ -86,7 +86,7 @@ end
 --- @return integer y
 function Unlock.ApplyGridSnap(left, top, gridType)
     local gridSetting = "snapToGrid" .. (gridType and ("_" .. gridType) or "")
-    local sizeSetting = "snapToGridSize" .. (gridType and ("_" .. gridType) or "")
+    local sizeSetting = "snapToGridSize_default"
 
     if LUIE.SV[gridSetting] then
         local gridSize = LUIE.SV[sizeSetting] or 10

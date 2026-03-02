@@ -1,0 +1,45 @@
+<!--
+      LuiExtended
+      License: The MIT License (MIT)
+-->
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
+  <Controls>
+    <TopLevelControl name="LUIEGridOverlayShared"
+                     mouseEnabled="false"
+                     movable="false"
+                     clampedToScreen="false"
+                     hidden="true"
+                     alpha="1"
+                     layer="0"
+                     level="1"
+                     tier="0">
+      <Anchor point="TOPLEFT"
+              relativeTo="GuiRoot"
+              relativePoint="TOPLEFT"
+              offsetX="0"
+              offsetY="0" />
+      <Anchor point="BOTTOMRIGHT"
+              relativeTo="GuiRoot"
+              relativePoint="BOTTOMRIGHT"
+              offsetX="0"
+              offsetY="0" />
+    </TopLevelControl>
+    <!-- Virtual template for grid lines (used by line pool); two names so
+            vertical/horizontal pools get unique control names via ZO_ObjectPool_CreateControl -->
+    <Line name="LUIE_GridOverlay_Line_V"
+          virtual="true"
+          hidden="true"
+          thickness="1"
+          layer="0"
+          level="2"
+          tier="0" />
+    <Line name="LUIE_GridOverlay_Line_H"
+          virtual="true"
+          hidden="true"
+          thickness="1"
+          layer="0"
+          level="2"
+          tier="0" />
+  </Controls>
+</GuiXml>

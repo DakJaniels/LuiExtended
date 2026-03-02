@@ -20,7 +20,7 @@ SpellCastBuffs.ReloadEffects = function (unitTag)
     end
 
     -- Clear existing base containers
-    for effectType = BUFF_EFFECT_TYPE_ITERATION_BEGIN, BUFF_EFFECT_TYPE_ITERATION_END do
+    for effectType = BUFF_EFFECT_TYPE_BUFF, BUFF_EFFECT_TYPE_DEBUFF do
         SpellCastBuffs.EffectsList[unitTag .. effectType] = {}
     end
     -- Clear prominent containers
@@ -62,9 +62,9 @@ SpellCastBuffs.ReloadEffects = function (unitTag)
         SpellCastBuffs.OnEffectChanged(0, EFFECT_RESULT_UPDATED, buffSlot, buffName, unitTag, timeStarted, timeEnding, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, unitName, 0, --[[unitId]] abilityId, castByPlayer)
     end
     -- Display Disguise State (note that this function handles filtering player/target buffs if hidden)
-    SpellCastBuffs.DisguiseStateChanged( unitTag, GetUnitDisguiseState(unitTag))
+    SpellCastBuffs.DisguiseStateChanged(unitTag, GetUnitDisguiseState(unitTag))
     -- Display Stealth State (note that this function handles filtering player/target buffs if hidden)
-    SpellCastBuffs.StealthStateChanged( unitTag, GetUnitStealthState(unitTag))
+    SpellCastBuffs.StealthStateChanged(unitTag, GetUnitStealthState(unitTag))
 
     -- Player Specific
     if unitTag == "player" and not SpellCastBuffs.SV.HidePlayerBuffs then

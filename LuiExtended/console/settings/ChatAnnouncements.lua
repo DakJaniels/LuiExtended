@@ -9158,8 +9158,9 @@ function ChatAnnouncements.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_CA_TIMED_ACTIVITY_SCOPE),
             tooltip = GetString(LUIE_STRING_LAM_CA_TIMED_ACTIVITY_SCOPE_TP),
             items = function ()
-                return {
-                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_ALL), data = "all" },
+                return
+                {
+                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_ALL),     data = "all"     },
                     { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_TRACKED), data = "tracked" },
                 }
             end,
@@ -9181,10 +9182,11 @@ function ChatAnnouncements.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_CA_TIMED_ACTIVITY_FREQ),
             tooltip = GetString(LUIE_STRING_LAM_CA_TIMED_ACTIVITY_FREQ_TP),
             items = function ()
-                return {
-                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_ALWAYS), data = "always" },
+                return
+                {
+                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_ALWAYS),    data = "always"    },
                     { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_MILESTONE), data = "milestone" },
-                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_COMPLETE), data = "complete" },
+                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_COMPLETE),  data = "complete"  },
                 }
             end,
             getFunction = function ()
