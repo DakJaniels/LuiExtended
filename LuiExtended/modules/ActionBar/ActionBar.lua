@@ -1,3 +1,4 @@
+--- @diagnostic disable: duplicate-doc-field
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
@@ -7,7 +8,84 @@
 local LUIE = LUIE
 
 -- ActionBar namespace
+--- ZOS action button (ZO_ActionBar); minimal stub for type references in this module.
+--- @class ActionButton
+--- @field slot table
+--- @field button table
+--- @field flipCard table
+--- @field icon table
+--- @field glow table
+--- @field slotNum number
+--- @field cooldownCompleteAnim ActionButtonCooldownCompleteAnim
+--- Control for cooldown-complete animation; holds optional animation object (see ESO ActionButton.lua).
+--- @class ActionButtonCooldownCompleteAnim
+--- @field animation? table
+--- RGBA color tuple (0-1). Used for cast bar gradient, etc.
+--- @alias AB_Color number[]
+--- Custom list table (ability blacklist, etc.): keys integer or string, value true.
+--- @alias AB_CustomList table<integer|string, boolean>
 --- @class (partial) LUIE.ActionBar
+--- @field Enabled boolean
+--- @field Defaults ActionBarDefaults
+--- @field CastBarUnlocked boolean
+--- @field Initialize fun(enabled: boolean)
+--- @field SetupBackBarIcons fun(button: ActionButton, flip: boolean)
+--- @field OnActiveWeaponPairChanged fun(activeWeaponPair: ActiveWeaponPair, locked: boolean)
+--- @field HookGCD fun()
+--- @field UpdateBarHighlightTables fun()
+--- @field RegisterEvents fun()
+--- @field ClearCustomList fun(list: AB_CustomList)
+--- @field AddToCustomList fun(list: AB_CustomList, input: any)
+--- @field RemoveFromCustomList fun(list: AB_CustomList, input: any)
+--- @field OnPlayerActivated fun()
+--- @field OnUpdate fun(currentTimeMS: number)
+--- @field OnGameCameraUIModeChanged fun()
+--- @field OnSiegeEnd fun()
+--- @field OnAbilityUsed fun(actionSlotIndex: number)
+--- @field StopCastBar fun()
+--- @field OnUpdateCastbar fun(currentTimeMS: number)
+--- @field ApplyFont fun()
+--- @field ApplyProcSound fun(menu: table?)
+--- @field ResetUltimateLabel fun()
+--- @field ResetBarLabel fun()
+--- @field ResetPotionTimerLabel fun()
+--- @field OnTargetChange fun(unitTag: string)
+--- @field OnReticleHiddenUpdate fun(hidden: boolean)
+--- @field OnReticleTargetChanged fun()
+--- @field BarHighlightSwap fun(abilityId: number)
+--- @field OnEffectChanged fun(changeType: number, effectSlot: number, effectName: string, unitTag: string, beginTime: number, endTime: number, stackCount: number, iconName: string, deprecatedBuffType: number, effectType: number, abilityType: number, statusEffectType: number, unitName: string, unitId: number, abilityId: number, sourceType: number, passThrough: table?, savedId: number?)
+--- @field HideSlot fun(slotNum: number, abilityId: number)
+--- @field ShowSlot fun(slotNum: number, abilityId: number, currentTimeMS: number?, desaturate: boolean?)
+--- @field BackbarHideSlot fun(slotNum: number)
+--- @field BackbarShowSlot fun(slotNum: number)
+--- @field ToggleBackbarSaturation fun(slotNum: number, desaturate: boolean)
+--- @field BackbarSetupTemplate fun()
+--- @field BackbarToggleSettings fun()
+--- @field CreateCastBar fun()
+--- @field ResizeCastBar fun()
+--- @field UpdateCastBar fun()
+--- @field ResetCastBarPosition fun()
+--- @field SetCastBarPosition fun()
+--- @field SetMovingState fun(state: boolean)
+--- @field GenerateCastbarPreview fun(state: boolean)
+--- @field ClientInteractResult fun(eventCode: number, result: number, interactTargetName: string)
+--- @field SoulGemResurrectionStart fun(durationMs: number)
+--- @field SoulGemResurrectionEnd fun()
+--- @field OnCombatEventBreakCast fun(result: number, isError: boolean, abilityName: string, abilityGraphic: number, abilityActionSlotType: number, sourceName: string, sourceType: number, targetName: string, targetType: number, hitValue: number, powerType: number, damageType: number, log: string, sourceUnitId: number, targetUnitId: number, abilityId: number, overflow: number)
+--- @field OnCombatEvent fun(result: number, isError: boolean, abilityName: string, abilityGraphic: number, abilityActionSlotType: number, sourceName: string, sourceType: number, targetName: string, targetType: number, hitValue: number, powerType: number, damageType: number, log: string, sourceUnitId: number, targetUnitId: number, abilityId: number, overflow: number)
+--- @field OnCombatEventSpecialFilters fun(eventCode: number, result: number, isError: boolean, abilityName: string, abilityGraphic: number, abilityActionSlotType: number, sourceName: string, sourceType: number, targetName: string, targetType: number, hitValue: number, powerType: number, damageType: number, log: string, sourceUnitId: number, targetUnitId: number, abilityId: number)
+--- @field OnCombatEventBar fun(result: number, isError: boolean, abilityName: string, abilityGraphic: number, abilityActionSlotType: number, sourceName: string, sourceType: number, targetName: string, targetType: number, hitValue: number, powerType: number, damageType: number, log: string, sourceUnitId: number, targetUnitId: number, abilityId: number, overflow: number)
+--- @field OnSlotUpdated fun(actionSlotIndex: number)
+--- @field BarSlotUpdate fun(slotNum: number, wasfullUpdate: boolean, onlyProc: boolean)
+--- @field UpdateUltimateLabel fun()
+--- @field InventoryItemUsed fun()
+--- @field OnActiveHotbarUpdate fun(didActiveHotbarChange: boolean, shouldUpdateAbilityAssignments: boolean, activeHotbarCategory: number)
+--- @field OnSlotsFullUpdate fun()
+--- @field PlayProcAnimations fun(slotNum: number)
+--- @field OnDeath fun(unitTag: string, isDead: boolean)
+--- @field ShowCustomToggle fun(slotNum: number)
+--- @field OnPowerUpdatePlayer fun(unitTag: string, powerIndex: number?, powerType: number, powerValue: number, powerMax: number, powerEffectiveMax: number)
+--- @field OnInventorySlotUpdate fun(bagId: Bag, slotIndex: number, isNewItem: boolean, itemSoundCategory: ItemUISoundCategory, inventoryUpdateReason: number, stackCountChange: number, triggeredByCharacterName: string?, triggeredByDisplayName: string?, isLastUpdateForMessage: boolean, bonusDropSource: BonusDropSource)
 local ActionBar = {}
 ActionBar.__index = ActionBar
 LUIE.ActionBar = ActionBar
@@ -34,7 +112,66 @@ local chatSystem = ZO_GetChatSystem()
 
 local moduleName = LUIE.name .. "ActionBar"
 
+--- Default settings for ActionBar module (saved vars shape).
+--- @class ActionBarDefaults
+--- @field blacklist AB_CustomList
+--- @field GlobalShowGCD boolean
+--- @field GlobalPotion boolean
+--- @field GlobalFlash boolean
+--- @field GlobalDesat boolean
+--- @field GlobalLabelColor boolean
+--- @field GlobalMethod integer
+--- @field UltimateLabelEnabled boolean
+--- @field UltimatePctEnabled boolean
+--- @field UltimateHideFull boolean
+--- @field UltimateGeneration boolean
+--- @field UltimateLabelPosition integer
+--- @field UltimateFontFace string
+--- @field UltimateFontStyle FontStyle
+--- @field UltimateFontSize integer
+--- @field ShowTriggered boolean
+--- @field ProcEnableSound boolean
+--- @field ProcSoundName string
+--- @field ShowToggled boolean
+--- @field ShowToggledUltimate boolean
+--- @field BarShowLabel boolean
+--- @field BarLabelPosition integer
+--- @field BarFontFace string
+--- @field BarFontStyle FontStyle
+--- @field BarFontSize integer
+--- @field BarMillis boolean
+--- @field BarMillisAboveTen boolean
+--- @field BarMillisThreshold integer
+--- @field BarShowBack boolean
+--- @field BarDarkUnused boolean
+--- @field BarDesaturateUnused boolean
+--- @field BarHideUnused boolean
+--- @field PotionTimerShow boolean
+--- @field PotionTimerLabelPosition integer
+--- @field PotionTimerFontFace string
+--- @field PotionTimerFontStyle FontStyle
+--- @field PotionTimerFontSize integer
+--- @field PotionTimerColor boolean
+--- @field PotionTimerMillis boolean
+--- @field CastBarEnable boolean
+--- @field CastBarSizeW number
+--- @field CastBarSizeH number
+--- @field CastBarIconSize number
+--- @field CastBarTexture string
+--- @field CastBarLabel boolean
+--- @field CastBarTimer boolean
+--- @field CastBarFontFace string
+--- @field CastBarFontStyle FontStyle
+--- @field CastBarFontSize integer
+--- @field CastBarGradientC1 AB_Color
+--- @field CastBarGradientC2 AB_Color
+--- @field CastBarHeavy boolean
+--- @field CastbarOffsetX number | nil
+--- @field CastbarOffsetY number | nil
+--- @field CastBarCustomPosition table | nil
+
 ActionBar.Enabled = false
+--- @type ActionBarDefaults
 ActionBar.Defaults =
 {
     blacklist = {},
@@ -89,9 +226,13 @@ ActionBar.Defaults =
     CastBarGradientC1 = { 0, 47 / 255, 130 / 255, 1 },
     CastBarGradientC2 = { 82 / 255, 215 / 255, 1, 1 },
     CastBarHeavy = false,
+    CastbarOffsetX = nil,
+    CastbarOffsetY = nil,
+    CastBarCustomPosition = nil,
 }
 
-ActionBar.SV = nil
+--- @type ActionBarDefaults
+ActionBar.SV = ...
 ActionBar.CastBarUnlocked = false
 
 local isFancyActionBarEnabled = OtherAddonCompatability.isFancyActionBarPlusEnabled or LUIE.IsItEnabled("FancyActionBar\43") or LUIE.IsItEnabled("FancyActionBar")
@@ -102,7 +243,8 @@ local g_ultimateCost = 0                                  -- Cost of ultimate Ab
 local g_ultimateCurrent = 0                               -- Current ultimate value
 local g_ultimateSlot = ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 -- Ultimate slot number
 local g_uiProcAnimation = {}                              -- Animation for bar slots
-local g_uiCustomToggle = {}                               -- Toggle slots for bar Slots
+--- @type table<number, any>
+local g_uiCustomToggle = {}                               -- Toggle slots for bar Slots (value: control or true placeholder)
 --- Returns the custom toggle control for slotNum, or nil if missing or still a placeholder.
 local function GetCustomToggleControl(slotNum)
     local t = g_uiCustomToggle[slotNum]
@@ -110,20 +252,30 @@ local function GetCustomToggleControl(slotNum)
 end
 local g_triggeredSlotsFront = {}                   -- Triggered bar highlight slots
 local g_triggeredSlotsBack = {}                    -- Triggered bar highlight slots
+--- @type table<number, number>
 local g_triggeredSlotsRemain = {}                  -- Table of remaining durations on proc abilities
 local g_toggledSlotsBack = {}                      -- Toggled bar highlight slots
 local g_toggledSlotsFront = {}                     -- Toggled bar highlight slots
+--- @type table<number, number>
 local g_toggledSlotsRemain = {}                    -- Table of remaining durations on active abilities
+--- @type table<number, number>
 local g_toggledSlotsStack = {}                     -- Table of stacks for active abilities
+--- @type table<number, boolean>
 local g_toggledSlotsPlayer = {}                    -- Table of abilities that target the player (bar highlight doesn't fade on reticleover change)
 local g_potionUsed = false                         -- Toggled on when a potion is used to prevent OnSlotsFullUpdate from updating timers.
 --- @type {[integer]:boolean}
 local g_barOverrideCI = {}                         -- Table for storing abilityId's from Effects.BarHighlightOverride that should show as an aura
+--- @type {[integer]:boolean}
 local g_barFakeAura = {}                           -- Table for storing abilityId's that only display a fakeaura
+--- @type {[integer]:number}
 local g_barDurationOverride = {}                   -- Table for storing abilitiyId's that ignore ending event
+--- @type {[integer]:boolean}
 local g_barNoRemove = {}                           -- Table of abilities we don't remove from bar highlight
+--- @type {[integer]:number}
 local g_protectAbilityRemoval = {}                 -- AbilityId's set to a timestamp here to prevent removal of bar highlight when refreshing ground auras from causing the highlight to fade.
+--- @type {[integer]:number}
 local g_mineStacks = {}                            -- Individual AbilityId ground mine stack information
+--- @type {[integer]:boolean}
 local g_mineNoTurnOff = {}                         -- When this variable is true for an abilityId - don't remove the bar highlight for a mine (We we have reticleover target and the mine effect applies on the enemy)
 local g_reticleHidden = false                      -- Track if reticle is hidden to skip unnecessary processing
 local g_barFont                                    -- Font for Ability Highlight Label
@@ -132,6 +284,7 @@ local g_ultimateFont                               -- Font for Ultimate Percenta
 local g_castbarFont                                -- Font for Castbar Label & Timer
 local g_ProcSound                                  -- Proc Sound
 local g_boundArmamentsPlayed = {}                  -- Specific variable to lockout Bound Armaments/Grim Focus from playing a proc sound at 5 stacks to only once per 5 seconds.
+--- @type {[integer]:boolean}
 local g_disableProcSound = {}                      -- When we play a proc sound from a bar ability changing (like power lash) we put a 3 sec ICD on it so it doesn't spam when mousing on/off a target, etc
 local g_hotbarCategory = GetActiveHotbarCategory() -- Set on initialization and when we swap weapons to determine the current hotbar category
 --- @type {[integer]:ActionButton}
@@ -183,6 +336,7 @@ local uiUltimate =
 
 -- -----------------------------------------------------------------------------
 -- Cooldown Animation Types for GCD Tracking
+--- @enum AB_CooldownMethod
 local CooldownMethod =
 {
     [1] = CD_TYPE_RADIAL,
@@ -307,6 +461,17 @@ end
 --- @param button ActionButton
 local function SetupSwapAnimation(button)
     button:SetupSwapAnimation(OnSwapAnimationHalfDone, OnSwapAnimationDone)
+end
+
+--- Create a single backbar ActionButton (mirrors ESO ActionBar.lua MakeActionButton pattern).
+--- @param slotNum integer
+--- @param parent Control
+--- @param template string
+--- @param hotbarCategory number
+--- @return integer|ZO_InitializingObject|ActionButton
+local function MakeActionButton(slotNum, parent, template, hotbarCategory)
+    local button = ActionButton:New(slotNum, ACTION_BUTTON_TYPE_VISIBLE, parent, template, hotbarCategory)
+    return button
 end
 
 ---
@@ -493,7 +658,7 @@ local function FormatDurationSeconds(remain)
 end
 
 -- Module initialization
----
+--- Load saved vars, run migrations, create UI (quickslot/ultimate/backbar/castbar), register events.
 --- @param enabled boolean
 function ActionBar.Initialize(enabled)
     -- -----------------------------------------------------------------------------
@@ -602,10 +767,10 @@ function ActionBar.Initialize(enabled)
 
     -- Create Ultimate Overlay Labels
     local ActionButton8 = ZO_ActionBar_GetButton(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1)
-
+    local ActionButton8_button = ActionButton8 and ActionButton8.button
     -- Ultimate value label (numeric display above slot)
-    local ultimateValueLabel = windowManager:CreateControl("$(parent)LabelVal", ActionButton8.button, CT_LABEL)
-    ultimateValueLabel:SetAnchor(BOTTOM, ActionButton8.button, TOP, 0, -3)
+    local ultimateValueLabel = windowManager:CreateControl("$(parent)LabelVal", ActionButton8_button, CT_LABEL)
+    ultimateValueLabel:SetAnchor(BOTTOM, ActionButton8_button, TOP, 0, -3)
     ultimateValueLabel:SetFont("$(BOLD_FONT)|16|soft-shadow-thick")
     ultimateValueLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     ultimateValueLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
@@ -614,20 +779,20 @@ function ActionBar.Initialize(enabled)
     uiUltimate.LabelVal = ultimateValueLabel
 
     -- Ultimate percentage label (overlay on slot)
-    local ultimatePctLabel = windowManager:CreateControl("$(parent)LabelPct", ActionButton8.button, CT_LABEL)
+    local ultimatePctLabel = windowManager:CreateControl("$(parent)LabelPct", ActionButton8_button, CT_LABEL)
     ultimatePctLabel:SetFont(g_ultimateFont or "LUIE Default Font")
     ultimatePctLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     ultimatePctLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     ultimatePctLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
-    ultimatePctLabel:SetAnchor(TOPLEFT, ActionButton8.slot)
-    ultimatePctLabel:SetAnchor(BOTTOMRIGHT, ActionButton8.slot, nil, 0, -ActionBar.SV.UltimateLabelPosition)
+    ultimatePctLabel:SetAnchor(TOPLEFT, ActionButton8_button)
+    ultimatePctLabel:SetAnchor(BOTTOMRIGHT, ActionButton8_button, nil, 0, -ActionBar.SV.UltimateLabelPosition)
     ultimatePctLabel:SetColor(unpack(uiUltimate.colour))
     ultimatePctLabel:SetHidden(true)
     uiUltimate.LabelPct = ultimatePctLabel
 
     -- Ultimate ready burst texture
-    local ultimateTexture = windowManager:CreateControl("$(parent)Texture", ActionButton8.button, CT_TEXTURE)
-    ultimateTexture:SetAnchor(CENTER, ActionButton8.button, CENTER, 0, 0)
+    local ultimateTexture = windowManager:CreateControl("$(parent)Texture", ActionButton8_button, CT_TEXTURE)
+    ultimateTexture:SetAnchor(CENTER, ActionButton8_button, CENTER, 0, 0)
     ultimateTexture:SetDimensions(160, 160)
     ultimateTexture:SetTexture("/esoui/art/crafting/white_burst.dds")
     ultimateTexture:SetDrawLayer(DL_BACKGROUND)
@@ -642,7 +807,7 @@ function ActionBar.Initialize(enabled)
     g_backbarContainer = tlw
 
     for i = BAR_INDEX_START + BACKBAR_INDEX_OFFSET, BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET do
-        local button = ActionButton:New(i, ACTION_BUTTON_TYPE_VISIBLE, tlw, "ZO_ActionButton", HOTBAR_CATEGORY_BACKUP)
+        local button = MakeActionButton(i, tlw, "ZO_ActionButton", HOTBAR_CATEGORY_BACKUP)
         SetupSwapAnimation(button)
         SetupBounceAnimation(button)
         SetupBackbarDragDropHandlers(button)
@@ -729,7 +894,7 @@ function ActionBar.SetupBackBarIcons(button, flip)
 end
 
 -- -----------------------------------------------------------------------------
----
+--- Called when active weapon pair changes; updates hotbar category and backbar.
 --- @param activeWeaponPair ActiveWeaponPair
 --- @param locked boolean
 function ActionBar.OnActiveWeaponPairChanged(activeWeaponPair, locked)
@@ -747,11 +912,12 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Hook to update GCD support
+--- Hooks ActionButton UpdateUsable/UpdateCooldown for global GCD display.
 function ActionBar.HookGCD()
     ---
     --- @param self ActionButton
     --- @diagnostic disable-next-line: duplicate-set-field
-    ActionButton.UpdateUsable = function (self)
+    function ActionButton:UpdateUsable()
         local slotnum = self:GetSlot()
         local hotbarCategory = self.slot.slotNum == 1 and HOTBAR_CATEGORY_QUICKSLOT_WHEEL or g_hotbarCategory
         local isGamepad = IsInGamepadPreferredMode()
@@ -782,7 +948,7 @@ function ActionBar.HookGCD()
     --- @param self ActionButton
     --- @param options table
     --- @diagnostic disable-next-line: duplicate-set-field
-    ActionButton.UpdateCooldown = function (self, options)
+    function ActionButton:UpdateCooldown(options)
         local slotnum = self:GetSlot()
         local hotbarCategory = self.slot.slotNum == 1 and HOTBAR_CATEGORY_QUICKSLOT_WHEEL or g_hotbarCategory
         local remain, duration, global, globalSlotType = GetSlotCooldownInfo(slotnum, hotbarCategory)
@@ -824,18 +990,21 @@ function ActionBar.HookGCD()
                 if self.showingCooldown then
                     -- Stop flash from appearing on potion/ultimate if toggled off.
                     if not IsSlotItemConsumable(slotnum, hotbarCategory) or duration > 1000 or ActionBar.SV.GlobalPotion then
-                        self.cooldownCompleteAnim.animation = self.cooldownCompleteAnim.animation or CreateSimpleAnimation(ANIMATION_TEXTURE, self.cooldownCompleteAnim)
+                        if self.cooldownCompleteAnim.animation == nil then
+                            self.cooldownCompleteAnim.animation = CreateSimpleAnimation(ANIMATION_TEXTURE, self.cooldownCompleteAnim)
+                        end
                         local anim = self.cooldownCompleteAnim.animation
+                        if anim then
+                            self.cooldownCompleteAnim:SetHidden(false)
+                            self.cooldown:SetHidden(false)
 
-                        self.cooldownCompleteAnim:SetHidden(false)
-                        self.cooldown:SetHidden(false)
+                            anim:SetImageData(16, 1)
+                            anim:SetFramerate(zo_round(GetFramerate()))
+                            anim:GetTimeline():PlayFromStart()
 
-                        anim:SetImageData(16, 1)
-                        anim:SetFramerate(zo_round(GetFramerate()))
-                        anim:GetTimeline():PlayFromStart()
-
-                        if updateChromaQuickslot then
-                            ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect("ACTION_BUTTON_9")
+                            if updateChromaQuickslot then
+                                ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect("ACTION_BUTTON_9")
+                            end
                         end
                     end
                 end
@@ -935,6 +1104,7 @@ end
 -- -----------------------------------------------------------------------------
 -- Called on initialization and menu changes
 -- Pull data from Effects.BarHighlightOverride Tables to filter the display of Bar Highlight abilities based off menu settings.
+--- Rebuilds bar highlight override/fake-aura tables and (re)registers combat event filters.
 function ActionBar.UpdateBarHighlightTables()
     g_uiProcAnimation = {}
     g_uiCustomToggle = {}
@@ -999,6 +1169,7 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Clear and then (maybe) re-register event listeners for Combat/Power/Slot Updates
+--- Registers update loop and all ActionBar event handlers (player activated, combat, power, slots, etc.).
 function ActionBar.RegisterEvents()
     eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, ActionBar.OnUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, function (eventId, initial)
@@ -1151,8 +1322,8 @@ function ActionBar.RegisterEvents()
 end
 
 -- -----------------------------------------------------------------------------
----
---- @param list table
+--- Clears all entries from a custom list (e.g. blacklist); prints to chat.
+--- @param list AB_CustomList
 function ActionBar.ClearCustomList(list)
     local listRef = list == ActionBar.SV.blacklist and GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST) or ""
     for k, v in pairs(list) do
@@ -1165,8 +1336,9 @@ end
 
 -- -----------------------------------------------------------------------------
 -- List Handling (Add) for Prominent Auras & Blacklist
---- @param list table
---- @param input any
+--- Adds an ability id or name to a custom list (e.g. blacklist); prints to chat.
+--- @param list AB_CustomList
+--- @param input any Ability id (number string) or name string
 function ActionBar.AddToCustomList(list, input)
     local id = tonumber(input)
     local listRef = list == ActionBar.SV.blacklist and GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST) or ""
@@ -1195,8 +1367,9 @@ end
 
 -- -----------------------------------------------------------------------------
 -- List Handling (Remove) for Prominent Auras & Blacklist
---- @param list any
---- @param input any
+--- Removes an ability id or name from a custom list (e.g. blacklist); prints to chat.
+--- @param list AB_CustomList
+--- @param input any Ability id (number string) or name string
 function ActionBar.RemoveFromCustomList(list, input)
     local id = tonumber(input)
     local listRef = list == ActionBar.SV.blacklist and GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST) or ""
@@ -1219,6 +1392,7 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Used to populate abilities icons after the user has logged on
+--- Runs on EVENT_PLAYER_ACTIVATED: full slot update, ultimate label, backbar visibility, drop callouts.
 function ActionBar.OnPlayerActivated()
     -- Manually trigger event to update stats
     g_hotbarCategory = GetActiveHotbarCategory()
@@ -1415,6 +1589,7 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Run on the EVENT_GAME_CAMERA_UI_MODE_CHANGED handler
+--- Sets world-map castbar fix buffer; breaks siege cast on window open if applicable.
 function ActionBar.OnGameCameraUIModeChanged()
     -- Changing zones in the World Map for some reason changes the player coordinates so when the player clicks on a Wayshrine to teleport the cast gets interrupted
     -- This buffer fixes this issue
@@ -1429,6 +1604,7 @@ end
 -- -----------------------------------------------------------------------------
 -- Run on the EVENT_END_SIEGE_CONTROL handler
 -- Used to break the cast for Stow Siege Weapon if the player exits siege control.
+--- Stops cast bar when siege control ends (e.g. Stow Siege Weapon 12256).
 function ActionBar.OnSiegeEnd()
     if castbar.id == 12256 then
         ActionBar.StopCastBar()
@@ -1437,6 +1613,8 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Stops Attack Cast when releasing heavy attacks
+--- Stops cast bar when quickslot (slot 2) ability is used (e.g. heavy attack release).
+--- @param actionSlotIndex number
 function ActionBar.OnAbilityUsed(actionSlotIndex)
     if actionSlotIndex == 2 then
         ActionBar.StopCastBar()
@@ -1444,6 +1622,7 @@ function ActionBar.OnAbilityUsed(actionSlotIndex)
 end
 
 -- -----------------------------------------------------------------------------
+--- Hides and stops the cast bar; unregisters cast bar update. If cast bar is unlocked, shows preview.
 function ActionBar.StopCastBar()
     local state = ActionBar.CastBarUnlocked
     -- Don't hide the cast bar if we have it unlocked to move.
@@ -1463,6 +1642,8 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Updates Cast Bar - only enabled when Cast Bar is unhidden
+--- Update tick: refreshes cast bar progress and timer label; stops when remain <= 0.
+--- @param currentTimeMS number
 function ActionBar.OnUpdateCastbar(currentTimeMS)
     -- Update castbar
     local castStarts = castbar.starts
@@ -1503,6 +1684,7 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Updates local variables with new font.
+--- Applies SV font settings to bar, quickslot, ultimate, and castbar labels.
 function ActionBar.ApplyFont()
     if not ActionBar.Enabled then
         return
@@ -1534,6 +1716,8 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Updates Proc Sound - called on initialization and menu changes
+--- Sets proc sound from SV; optionally plays it if menu is provided.
+--- @param menu table? If set, plays the sound for preview.
 function ActionBar.ApplyProcSound(menu)
     local barProcSound = LUIE.Sounds[ActionBar.SV.ProcSoundName]
     if not barProcSound or barProcSound == "" then
@@ -1550,15 +1734,18 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Resets the ultimate labels on menu option change
+--- Re-anchors ultimate percent label using SV UltimateLabelPosition.
 function ActionBar.ResetUltimateLabel()
     uiUltimate.LabelPct:ClearAnchors()
-    local actionButton = ZO_ActionBar_GetButton(8)
-    uiUltimate.LabelPct:SetAnchor(TOPLEFT, actionButton.slot)
-    uiUltimate.LabelPct:SetAnchor(BOTTOMRIGHT, actionButton.slot, nil, 0, -ActionBar.SV.UltimateLabelPosition)
+    local ActionButton8 = ZO_ActionBar_GetButton(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1)
+    local ActionButton8_slot = ActionButton8 and ActionButton8.slot
+    uiUltimate.LabelPct:SetAnchor(TOPLEFT, ActionButton8_slot)
+    uiUltimate.LabelPct:SetAnchor(BOTTOMRIGHT, ActionButton8_slot, nil, 0, -ActionBar.SV.UltimateLabelPosition)
 end
 
 -- -----------------------------------------------------------------------------
 -- Resets bar labels on menu option change
+--- Clears and re-anchors all bar highlight labels (proc + toggle) per SV BarLabelPosition.
 function ActionBar.ResetBarLabel()
     for k, _ in pairs(g_uiProcAnimation) do
         g_uiProcAnimation[k].procLoopTexture.label:SetText("")
@@ -1573,15 +1760,16 @@ function ActionBar.ResetBarLabel()
     for i = BAR_INDEX_START, BAR_INDEX_END do
         -- Clear base action bars
         local actionButton = ZO_ActionBar_GetButton(i)
+        local actionButton_slot = actionButton and actionButton.slot
         local c = GetCustomToggleControl(i)
         if c then
             c.label:ClearAnchors()
-            c.label:SetAnchor(TOPLEFT, actionButton.slot)
-            c.label:SetAnchor(BOTTOMRIGHT, actionButton.slot, nil, 0, -ActionBar.SV.BarLabelPosition)
+            c.label:SetAnchor(TOPLEFT, actionButton_slot)
+            c.label:SetAnchor(BOTTOMRIGHT, actionButton_slot, nil, 0, -ActionBar.SV.BarLabelPosition)
         elseif g_uiProcAnimation[i] then
             g_uiProcAnimation[i].procLoopTexture.label:ClearAnchors()
-            g_uiProcAnimation[i].procLoopTexture.label:SetAnchor(TOPLEFT, actionButton.slot)
-            g_uiProcAnimation[i].procLoopTexture.label:SetAnchor(BOTTOMRIGHT, actionButton.slot, nil, 0, -ActionBar.SV.BarLabelPosition)
+            g_uiProcAnimation[i].procLoopTexture.label:SetAnchor(TOPLEFT, actionButton_slot)
+            g_uiProcAnimation[i].procLoopTexture.label:SetAnchor(BOTTOMRIGHT, actionButton_slot, nil, 0, -ActionBar.SV.BarLabelPosition)
         end
 
         local backIndex = i + BACKBAR_INDEX_OFFSET
@@ -1601,6 +1789,7 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Resets Potion Timer label - called on initialization and menu changes
+--- Re-anchors quickslot timer label using SV PotionTimerLabelPosition.
 function ActionBar.ResetPotionTimerLabel()
     local QSB = ACTION_BAR:GetNamedChild("QuickslotButtonButton")
     uiQuickSlot.label:ClearAnchors()
@@ -1612,6 +1801,8 @@ end
 -- Runs on the EVENT_TARGET_CHANGE listener.
 -- This handler fires every time the someone target changes.
 -- This function is needed in case the player teleports via Way Shrine
+--- Refreshes bar highlight on reticle target when player becomes the target (e.g. wayshrine).
+--- @param unitTag string
 function ActionBar.OnTargetChange(unitTag)
     if unitTag ~= "player" then
         return
@@ -1622,6 +1813,8 @@ end
 -- -----------------------------------------------------------------------------
 -- Runs on the EVENT_RETICLE_HIDDEN_UPDATE listener.
 -- This handler fires when the reticle visibility changes
+--- Stores reticle hidden state for skipping bar highlight updates.
+--- @param hidden boolean
 function ActionBar.OnReticleHiddenUpdate(hidden)
     g_reticleHidden = hidden
 end
@@ -1629,6 +1822,7 @@ end
 -- -----------------------------------------------------------------------------
 -- Runs on the EVENT_RETICLE_TARGET_CHANGED listener.
 -- This handler fires every time the player's reticle target changes
+--- Updates bar highlights when reticle target changes; hides/shows toggled slots and re-scans buffs.
 function ActionBar.OnReticleTargetChanged()
     -- Skip processing if reticle is hidden
     if g_reticleHidden then
@@ -1977,7 +2171,7 @@ local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeTyp
 end
 
 -- Extra returns here - passThrough & savedId
----
+--- Handles EVENT_EFFECT_CHANGED: bar highlights, cast bar break, SETHOTBAR backbar hide, BarHighlightSwap, etc.
 --- @param changeType EffectResult
 --- @param effectSlot integer
 --- @param effectName string
@@ -2075,7 +2269,7 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
 end
 
 -- -----------------------------------------------------------------------------
----
+--- Hides the custom toggle control for a slot; updates backbar/saturation/ultimate pct as needed.
 --- @param slotNum integer
 --- @param abilityId integer
 function ActionBar.HideSlot(slotNum, abilityId)
@@ -2095,7 +2289,7 @@ function ActionBar.HideSlot(slotNum, abilityId)
 end
 
 -- -----------------------------------------------------------------------------
----
+--- Shows the custom toggle for a slot, updates backbar/saturation, and sets duration/stack labels.
 --- @param slotNum integer
 --- @param abilityId integer
 --- @param currentTimeMS integer
@@ -2132,7 +2326,7 @@ function ActionBar.ShowSlot(slotNum, abilityId, currentTimeMS, desaturate)
 end
 
 -- -----------------------------------------------------------------------------
----
+--- Hides the backbar slot control when BarHideUnused is enabled.
 --- @param slotNum integer
 function ActionBar.BackbarHideSlot(slotNum)
     if ActionBar.SV.BarHideUnused then
@@ -2143,7 +2337,7 @@ function ActionBar.BackbarHideSlot(slotNum)
 end
 
 -- -----------------------------------------------------------------------------
----
+--- Shows the backbar slot control when BarShowBack is enabled.
 --- @param slotNum integer
 function ActionBar.BackbarShowSlot(slotNum)
     -- Unhide the slot
@@ -2155,7 +2349,7 @@ function ActionBar.BackbarShowSlot(slotNum)
 end
 
 -- -----------------------------------------------------------------------------
----
+--- Sets backbar slot icon desaturation/dark unused state per SV.
 --- @param slotNum integer
 --- @param desaturate boolean
 function ActionBar.ToggleBackbarSaturation(slotNum, desaturate)
@@ -2171,6 +2365,7 @@ end
 
 -- -----------------------------------------------------------------------------
 -- Called on initialization and when swapping in and out of Gamepad mode
+--- Applies platform style (keyboard/gamepad) to backbar button layout and anchors.
 function ActionBar.BackbarSetupTemplate()
     local style = GetPlatformConstants()
     local weaponSwapControl = style.weaponSwapControl
@@ -2200,12 +2395,15 @@ function ActionBar.BackbarSetupTemplate()
     local finalOffset = -(offsetY * style.backbarOffsetMultiplier)
     local ActionButton3 = GetControl("ActionButton3")
     local ActionButton53 = GetControl("ActionButton53")
-    ActionButton53:ClearAnchors()
-    ActionButton53:SetAnchor(CENTER, ActionButton3, CENTER, 0, finalOffset)
+    if ActionButton53 then
+        ActionButton53:ClearAnchors()
+        ActionButton53:SetAnchor(CENTER, ActionButton3, CENTER, 0, finalOffset)
+    end
 end
 
 -- -----------------------------------------------------------------------------
 -- Called from the menu and on init
+--- Shows/hides backbar container and slots per SV (BarShowBack, BarHideUnused, BarDarkUnused, etc.).
 function ActionBar.BackbarToggleSettings()
     -- If BarShowBack is on, check for bar-swap disablers - keep backbar hidden while active
     if ActionBar.SV.BarShowBack and g_backbarContainer then
@@ -2247,6 +2445,7 @@ function ActionBar.BackbarToggleSettings()
 end
 
 -- -----------------------------------------------------------------------------
+--- Creates the cast bar TLW, preview, backdrop, icon, bar, and registers it with HUD scenes.
 function ActionBar.CreateCastBar()
     local fontString
     if IsConsoleUI() then
@@ -2418,6 +2617,7 @@ function ActionBar.CreateCastBar()
 end
 
 -- -----------------------------------------------------------------------------
+--- Resizes cast bar and icon to SV dimensions (CastBarSizeW, CastBarSizeH, CastBarIconSize).
 function ActionBar.ResizeCastBar()
     uiTlw.castBar:SetDimensions(ActionBar.SV.CastBarSizeW + ActionBar.SV.CastBarIconSize + 4, ActionBar.SV.CastBarSizeH)
     castbar:ClearAnchors()
@@ -2444,6 +2644,7 @@ function ActionBar.ResizeCastBar()
 end
 
 -- -----------------------------------------------------------------------------
+--- Applies cast bar texture, gradient, font, and visibility from SV; called on init and settings change.
 function ActionBar.UpdateCastBar()
     if not ActionBar.SV.CastBarEnable then
         return
@@ -2458,6 +2659,7 @@ function ActionBar.UpdateCastBar()
 end
 
 -- -----------------------------------------------------------------------------
+--- Resets cast bar position to default (center screen).
 function ActionBar.ResetCastBarPosition()
     if not ActionBar.SV.CastBarEnable then
         return
@@ -2470,6 +2672,7 @@ function ActionBar.ResetCastBarPosition()
 end
 
 -- -----------------------------------------------------------------------------
+--- Positions cast bar from SV (custom or default); called on load and when unlocking movement.
 function ActionBar.SetCastBarPosition()
     if uiTlw.castBar and uiTlw.castBar:GetType() == CT_TOPLEVELCONTROL then
         uiTlw.castBar:ClearAnchors()
@@ -2612,7 +2815,7 @@ function ActionBar.SoulGemResurrectionStart(durationMs)
 end
 
 -- -----------------------------------------------------------------------------
----
+--- Stops cast bar and clears resurrection state.
 function ActionBar.SoulGemResurrectionEnd()
     ActionBar.StopCastBar()
 end
@@ -3141,7 +3344,8 @@ function ActionBar.BarSlotUpdate(slotNum, wasfullUpdate, onlyProc)
     end
 end
 
----
+--- -----------------------------------------------------------------------------
+--- Refreshes ultimate slot label (cost, percentage) from current power and slot ability.
 function ActionBar.UpdateUltimateLabel()
     -- Get the currently slotted ultimate cost
     local bar = g_hotbarCategory
@@ -3151,7 +3355,8 @@ function ActionBar.UpdateUltimateLabel()
     ActionBar.OnPowerUpdatePlayer("player", nil, COMBAT_MECHANIC_FLAGS_ULTIMATE, g_ultimateCurrent, 0, 0)
 end
 
----
+--- -----------------------------------------------------------------------------
+--- Called when an inventory item is used; refreshes ultimate label.
 function ActionBar.InventoryItemUsed()
     g_potionUsed = true
     LUIE_callLater(function ()
@@ -3161,6 +3366,8 @@ end
 
 --- - **EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED **
 ---
+-- -----------------------------------------------------------------------------
+--- Handles EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED: updates hotbar category, backbar icons, ultimate.
 --- @param didActiveHotbarChange boolean
 --- @param shouldUpdateAbilityAssignments boolean
 --- @param activeHotbarCategory HotBarCategory
@@ -3178,7 +3385,7 @@ function ActionBar.OnActiveHotbarUpdate(didActiveHotbarChange, shouldUpdateAbili
 end
 
 --- - **EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED**
----
+--- Full refresh of all bar slots (main + backbar), potion timer, and backbar visibility.
 function ActionBar.OnSlotsFullUpdate()
     -- Don't update bars if this full update event was from using an inventory item
     if g_potionUsed == true then

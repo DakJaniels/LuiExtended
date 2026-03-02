@@ -37,18 +37,21 @@ local barHighlightOverride =
     ---------------------------
 
     -- Ardent Flame
-    [23806] = { newId = 23808 },  -- Lava Whip --> Off Balance
-    [20805] = { newId = 122658 }, -- Molten Whip --> Seething Fury
-    [20816] = { newId = 164731 }, -- Flame Lash --> Off Balance
-    [20824] = { newId = 164731 }, -- Flame Lash --> Off Balance
-    [20657] = { newId = 44363 },  -- Searing Strike
-    [20668] = { newId = 44369 },  -- Venomous Claw
-    [20660] = { newId = 44373 },  -- Burning Embers
-    [20917] = { newId = 31102 },  -- Fiery Breath
-    [20944] = { newId = 31103 },  -- Noxious Breath
-    [20930] = { newId = 31104 },  -- Engulfing Flames
-    [20499] = { newId = 61737 },  -- Empowering Chains --> Empower
-    [32963] = { newId = 32958 },  -- Shifting Standard
+    [23806] = { newId = 23808 },                        -- Lava Whip --> Off Balance
+    [20805] = { newId = 122658 },                       -- Molten Whip --> Seething Fury
+    [20816] = { newId = 164731 },                       -- Flame Lash --> Off Balance
+    [20824] = { newId = 164731 },                       -- Flame Lash --> Off Balance
+    [20657] = { newId = 44363 },                        -- Searing Strike
+    [20668] = { newId = 44369 },                        -- Searing Claw
+    [31837] = { showFakeAura = true, duration = 4000 }, -- Core of Flame
+    [32792] = { showFakeAura = true, duration = 4000 }, -- Soul of Flame
+    [32785] = { showFakeAura = true, duration = 4000 }, -- Heart of Flame
+    [20660] = { newId = 44373 },                        -- Burning Embers
+    [20917] = { newId = 31102 },                        -- Fiery Breath
+    [20944] = { newId = 31103 },                        -- Noxious Breath
+    [20930] = { newId = 31104 },                        -- Engulfing Flames
+    [20499] = { newId = 61737 },                        -- Empowering Chains --> Empower
+    [32963] = { newId = 32958 },                        -- Shifting Standard
 
     -- Draconic Power
     [20245] = { newId = 20527 },                        -- Dark Talons
@@ -59,19 +62,17 @@ local barHighlightOverride =
     [32722] = { showFakeAura = true, noRemove = true }, -- Coagulating Blood
 
     [21014] = { newId = 108798 },                       -- Protective Plate
-    [31837] = { newId = 31841, showFakeAura = true },   -- Inhale
-    [32792] = { newId = 32796, showFakeAura = true },   -- Deep Breath
-    [32785] = { newId = 32788, showFakeAura = true },   -- Draw Essence
+
     [29012] = { newId = 114590 },                       -- Dragon Leap --> Stun
     [32719] = { newId = 114600 },                       -- Take Flight --> Stun
     [32715] = { newId = 61814 },                        -- Ferocious Leap
 
     -- Earthen Heart
-    [133037] = { newId = 29032 },                     -- Stonefist
-    [133027] = { newId = 31816 },                     -- Stone Giant
-    [29043] = { newId = 92507, showFakeAura = true }, -- Molten Weapons --> Major Sorcery
-    [31874] = { newId = 92503, showFakeAura = true }, -- Igneous Weapons --> Major Sorcery
-    [31888] = { newId = 76537, showFakeAura = true }, -- Molten Armaments
+    [133037] = { newId = 29032 },                      -- Stonefist
+    [133027] = { newId = 31816 },                      -- Stone Giant
+    [29043] = { newId = 258658, showFakeAura = true }, -- Molten Weapons --> Major Sorcery
+    [31874] = { newId = 258666, showFakeAura = true }, -- Igneous Weapons --> Major Sorcery
+    [31888] = { newId = 258661, showFakeAura = true }, -- Molten Armaments
 
     ---------------------------
     -- Nightblade -------------
@@ -668,7 +669,7 @@ local barHighlightOverride =
     ---------------------------
     -- Temp -------------------
     ---------------------------
-    [217699]= { newId = 227087 }, -- Dragonknight's Banner
+    [217699] = { newId = 227087 }, -- Dragonknight's Banner
 }
 
 Effects.BarHighlightOverride = barHighlightOverride
