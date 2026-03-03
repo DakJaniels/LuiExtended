@@ -12,6 +12,34 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.0.0
+    "|cFFA500LuiExtended Version 7.2.0.0|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: support for new currency types (Seals, Trade Bars); settings, labels, and tooltips updated across languages. Tome Points and cache handling improved.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: furnishing vault announcements and related event handling.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: track multi versus single weekly challenges, with settings and localization (DE, FR, RU, TR, default).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t GridOverlay refactor: functionality and settings updated; new XML, bindings, Unlock/BlacklistDialog, SpellCastBuffs/UnitFrames integration, AbilityAlerts/Changelog frontend touched.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: optional hostile flag for attribute visuals.",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: instanceDisplayType changed to zoneDisplayType to align with api doc.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: event callback tweaks (Collectibles, ReloadEffects, Stealth); furnishing vault and related logic.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: merge from main (PlayerToPlayer hooks, settings_tweaks); gamepad behavior adjusted.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t LuiData effects: broad updates across BarHighlight, Fake effects, Overrides, KeepUpgrade, OakenSoul, and related namespaces.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t BarHighlight: populate table on player activated (DestroFix); ActionBar cleanup and BarHighlight data/override updates.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ActionBar: nil checks and robustness.",
+    "",
+    -- Fixed
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: artificial effect logic.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Hand of Mephala: LuiData KeepUpgrade/Override, AbilityTables, UnitNamesTable, ZoneNamesTable, and data namespace.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t LuiData AbilityTables fix.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs and UnitFrames: missing saved-variable defaults and tooltip fixes.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: debug formatting.",
+    "",
     -- Version Header 7.1.4.5
     "|cFFA500LuiExtended Version 7.1.4.5|r",
     "",
