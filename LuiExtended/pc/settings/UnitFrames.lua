@@ -1555,7 +1555,7 @@ function UnitFrames.CreateSettings()
                 type = "slider",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_PLAYER_WIDTH),
                 min = 200,
-                max = 500,
+                max = 1000,
                 step = 5,
                 getFunc = function ()
                     return Settings.PlayerBarWidth
@@ -1835,7 +1835,7 @@ function UnitFrames.CreateSettings()
                 type = "slider",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_WIDTH),
                 min = 200,
-                max = 500,
+                max = 1000,
                 step = 5,
                 getFunc = function ()
                     return Settings.TargetBarWidth

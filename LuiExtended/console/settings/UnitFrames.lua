@@ -1452,7 +1452,7 @@ function UnitFrames.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_PLAYER_WIDTH),
             tooltip = nil,
             min = 200,
-            max = 500,
+            max = 1000,
             step = 5,
             getFunction = function ()
                 return Settings.PlayerBarWidth
@@ -1736,7 +1736,7 @@ function UnitFrames.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_WIDTH),
             tooltip = nil,
             min = 200,
-            max = 500,
+            max = 1000,
             step = 5,
             getFunction = function ()
                 return Settings.TargetBarWidth
