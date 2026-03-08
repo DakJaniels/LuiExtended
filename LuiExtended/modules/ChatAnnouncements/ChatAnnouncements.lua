@@ -8141,9 +8141,9 @@ function ChatAnnouncements.HookFunction()
 --> Quest: %s
 --> Index: %d
 --> Condition: %s]],
-                         questName,
-                         journalIndex,
-                         conditionText
+                                                questName,
+                                                journalIndex,
+                                                conditionText
                 ))
             end
             return true
@@ -8377,9 +8377,9 @@ function ChatAnnouncements.HookFunction()
 --> Quest: %s
 --> Index: %d
 --> Condition: %s]],
-                         questName,
-                         questIndex,
-                         isComplete and "Complete" or "Not Complete"
+                                                questName,
+                                                questIndex,
+                                                isComplete and "Complete" or "Not Complete"
                 ))
             end
             return true
