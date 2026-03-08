@@ -49,11 +49,9 @@ InfoPanel.Defaults =
 InfoPanel.SV = {}
 InfoPanel.panelUnlocked = false
 
-local combatShowTimerName = moduleName .. "CombatShowTimer"
 local combatFadeUpdateName = moduleName .. "CombatFade"
 
 local COMBAT_FADE_DURATION = 0.25 -- seconds
-local panelFadeAnimation = nil
 local panelHiddenByCombat = false -- true after we hid the panel for combat; so we only fade-in when showing after combat
 
 -- UI elements
@@ -181,7 +179,6 @@ end
 
 -- Cancels any "show after delay" timer and combat fade update, then shows the panel. Uses manual fade-in when we had previously hidden it for combat; otherwise just show.
 function InfoPanel.CancelCombatHideAndShow()
-    eventManager:UnregisterForUpdate(combatShowTimerName)
     eventManager:UnregisterForUpdate(combatFadeUpdateName)
     if not InfoPanel.Enabled or not uiPanel then
         return
@@ -222,11 +219,7 @@ function InfoPanel.OnPlayerCombatState(inCombat)
         return
     end
     if inCombat then
-        eventManager:UnregisterForUpdate(combatShowTimerName)
         eventManager:UnregisterForUpdate(combatFadeUpdateName)
-        if panelFadeAnimation then
-            panelFadeAnimation:Stop()
-        end
         uiPanel:SetHidden(false)
         local startAlpha = uiPanel:GetAlpha()
         if startAlpha <= 0 then
@@ -396,9 +389,6 @@ function InfoPanel.Initialize(enabled)
     -- Reference XML-created controls
     uiPanel = LUIE_InfoPanel
     InfoPanel.Panel = uiPanel
-
-    panelFadeAnimation = ZO_AlphaAnimation:New(uiPanel) --- @type LUIE_InfoPanel|ZO_AlphaAnimation
-    panelFadeAnimation:SetMinMaxAlpha(0, 1)
 
     panelFragment = ZO_HUDFadeSceneFragment:New(uiPanel, 0, 0)
 
