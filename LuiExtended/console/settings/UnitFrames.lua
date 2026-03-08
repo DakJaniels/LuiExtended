@@ -817,15 +817,15 @@ function UnitFrames.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_CURSOR),
             tooltip = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_CURSOR_TP),
             getFunction = function ()
-                return UnitFrames.SV.TargetLingerInCursorMode
+                return Settings.TargetLingerInCursorMode
             end,
             setFunction = function (value)
-                UnitFrames.SV.TargetLingerInCursorMode = value
+                Settings.TargetLingerInCursorMode = value
             end,
             disable = function ()
-                return not (LUIE.SV.UnitFrames_Enabled and UnitFrames.SV.CustomFramesTarget)
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
             end,
-            default = UnitFrames.Defaults.TargetLingerInCursorMode,
+            default = Defaults.TargetLingerInCursorMode,
         }
 
         settings[#settings + 1] =
@@ -837,15 +837,15 @@ function UnitFrames.CreateConsoleSettings()
             max = 30,
             step = 5,
             getFunction = function ()
-                return UnitFrames.SV.TargetLingerDuration
+                return Settings.TargetLingerDuration
             end,
             setFunction = function (value)
-                UnitFrames.SV.TargetLingerDuration = value
+                Settings.TargetLingerDuration = value
             end,
             disable = function ()
-                return not (LUIE.SV.UnitFrames_Enabled and UnitFrames.SV.CustomFramesTarget and UnitFrames.SV.TargetLingerInCursorMode)
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget and Settings.TargetLingerInCursorMode)
             end,
-            default = UnitFrames.Defaults.TargetLingerDuration,
+            default = Defaults.TargetLingerDuration,
         }
     end)
 
