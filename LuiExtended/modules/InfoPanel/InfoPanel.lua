@@ -44,9 +44,15 @@ InfoPanel.Defaults =
     FontSize = 16,
     FontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
     transparency = 100,
+    HideInCombat = false,
 }
 InfoPanel.SV = {}
 InfoPanel.panelUnlocked = false
+
+local combatFadeUpdateName = moduleName .. "CombatFade"
+
+local COMBAT_FADE_DURATION = 0.25 -- seconds
+local panelHiddenByCombat = false -- true after we hid the panel for combat; so we only fade-in when showing after combat
 
 -- UI elements
 local g_infoPanelFont = nil -- This will be initialized when settings are loaded
@@ -168,6 +174,78 @@ function InfoPanel.SetDisplayOnMap()
         sceneManager:GetScene("worldMap"):AddFragment(panelFragment)
     else
         sceneManager:GetScene("worldMap"):RemoveFragment(panelFragment)
+    end
+end
+
+-- Cancels any "show after delay" timer and combat fade update, then shows the panel. Uses manual fade-in when we had previously hidden it for combat; otherwise just show.
+function InfoPanel.CancelCombatHideAndShow()
+    eventManager:UnregisterForUpdate(combatFadeUpdateName)
+    if not InfoPanel.Enabled or not uiPanel then
+        return
+    end
+    if not panelHiddenByCombat then
+        uiPanel:SetHidden(false)
+        InfoPanel.ApplyTransparency()
+        return
+    end
+    panelHiddenByCombat = false
+    local targetAlpha = (InfoPanel.SV.transparency and InfoPanel.SV.transparency / 100) or 1
+    uiPanel:SetHidden(false)
+    uiPanel:SetAlpha(0)
+    local startTime = GetFrameTimeMilliseconds()
+    eventManager:RegisterForUpdate(combatFadeUpdateName, 16, function ()
+        if not InfoPanel.Enabled or not uiPanel then
+            eventManager:UnregisterForUpdate(combatFadeUpdateName)
+            return
+        end
+        local elapsed = (GetFrameTimeMilliseconds() - startTime) / 1000
+        if elapsed >= COMBAT_FADE_DURATION then
+            eventManager:UnregisterForUpdate(combatFadeUpdateName)
+            uiPanel:SetAlpha(targetAlpha)
+            return
+        end
+        local a = targetAlpha * (elapsed / COMBAT_FADE_DURATION)
+        uiPanel:SetAlpha(a)
+    end)
+end
+
+-- Runs on EVENT_PLAYER_COMBAT_STATE. Fades out and hides when entering combat; fades in when leaving combat.
+function InfoPanel.OnPlayerCombatState(inCombat)
+    if not InfoPanel.Enabled or not uiPanel then
+        return
+    end
+    if not InfoPanel.SV.HideInCombat then
+        InfoPanel.CancelCombatHideAndShow()
+        return
+    end
+    if inCombat then
+        eventManager:UnregisterForUpdate(combatFadeUpdateName)
+        uiPanel:SetHidden(false)
+        local startAlpha = uiPanel:GetAlpha()
+        if startAlpha <= 0 then
+            uiPanel:SetHidden(true)
+            panelHiddenByCombat = true
+            return
+        end
+        local startTime = GetFrameTimeMilliseconds()
+        eventManager:RegisterForUpdate(combatFadeUpdateName, 16, function ()
+            if not InfoPanel.Enabled or not uiPanel then
+                eventManager:UnregisterForUpdate(combatFadeUpdateName)
+                return
+            end
+            local elapsed = (GetFrameTimeMilliseconds() - startTime) / 1000
+            if elapsed >= COMBAT_FADE_DURATION then
+                eventManager:UnregisterForUpdate(combatFadeUpdateName)
+                uiPanel:SetAlpha(0)
+                uiPanel:SetHidden(true)
+                panelHiddenByCombat = true
+                return
+            end
+            local a = startAlpha * (1 - elapsed / COMBAT_FADE_DURATION)
+            uiPanel:SetAlpha(a)
+        end)
+    else
+        InfoPanel.CancelCombatHideAndShow()
     end
 end
 
@@ -400,9 +478,23 @@ function InfoPanel.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_BAG_CAPACITY_CHANGED, InfoPanel.OnBagCapacityChanged)
     eventManager:RegisterForEvent(moduleName, EVENT_CARRIED_CURRENCY_UPDATE, InfoPanel.OnCurrencyUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_RIDING_SKILL_IMPROVEMENT, InfoPanel.UpdateMountFeedTimer)
+
     eventManager:RegisterForUpdate(moduleName .. "01", ZO_ONE_SECOND_IN_MILLISECONDS, InfoPanel.OnUpdate01)
     eventManager:RegisterForUpdate(moduleName .. "10", ZO_ONE_SECOND_IN_MILLISECONDS * 10, InfoPanel.OnUpdate10)
     eventManager:RegisterForUpdate(moduleName .. "60", ZO_ONE_MINUTE_IN_MILLISECONDS, InfoPanel.OnUpdate60)
+
+    -- Combat state: always register so enabling HideInCombat in settings later works. Handler checks HideInCombat.
+    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_COMBAT_STATE, function (eventId, inCombat)
+        InfoPanel.OnPlayerCombatState(inCombat)
+    end)
+    if not InfoPanel.SV.HideInCombat then
+        -- XML defaults to hidden="true"; ensure panel is visible when option is off
+        uiPanel:SetHidden(false)
+        InfoPanel.ApplyTransparency()
+    else
+        -- Sync initial visibility when option is on (e.g. show panel if not in combat)
+        InfoPanel.OnPlayerCombatState(IsUnitInCombat("player"))
+    end
 end
 
 -- Get current panel position (center X, Y). For console sliders.

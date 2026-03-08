@@ -1474,6 +1474,8 @@ local strings =
     LUIE_STRING_LAM_PNL_UNLOCKPANEL_TP = "Allow mouse dragging for Info Panel.",
     LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP = "Display Info Panel on World Map Screen",
     LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP_TP = "Display the Info Panel when you are viewing the world map. This option can be toggled if your Info Panel position clips with any important elements on the World Map screen.",
+    LUIE_STRING_LAM_PNL_HIDEINCOMBAT = "Hide Info Panel in combat",
+    LUIE_STRING_LAM_PNL_HIDEINCOMBAT_TP = "Hide the Info Panel when you enter combat. It becomes visible again when combat ends.",
 
     -- Module: Unit Frames
     LUIE_STRING_LAM_UF_BLACKLIST_ADDLIST = "Add Pet Name to Whitelist",
@@ -1622,6 +1624,10 @@ local strings =
     LUIE_STRING_LAM_UF_CFRAMESPT_EXETEXTURE_TP = "Display Skull texture next to custom target frame for low-health target that should be executed.",
     LUIE_STRING_LAM_UF_CFRAMESPT_EXETHRESHOLD = "Target - Execute Health % Threshold",
     LUIE_STRING_LAM_UF_CFRAMESPT_EXETHRESHOLD_TP = "Determines the threshold of health to color the target label text red, as well as display the skull execute texture if enabled.",
+    LUIE_STRING_LAM_UF_TARGET_LINGER_CURSOR = "Keep Target Frame Visible in Cursor Mode",
+    LUIE_STRING_LAM_UF_TARGET_LINGER_CURSOR_TP = "When the reticle target is cleared (e.g. cursor mode), keep the custom target frame visible with the last target's name and health instead of hiding it.",
+    LUIE_STRING_LAM_UF_TARGET_LINGER_DURATION = "Auto-Clear Lingered Target After (seconds)",
+    LUIE_STRING_LAM_UF_TARGET_LINGER_DURATION_TP = "After this many seconds with no target, the lingered frame and buffs are cleared. Set to 0 to never auto-clear.",
     LUIE_STRING_LAM_UF_CFRAMESPT_HEADER = "Custom Unit Frames (Player & Target)",
     LUIE_STRING_LAM_UF_CFRAMESPT_M_HORIZ_ADJUST = "Magicka Bar Horizontal Position",
     LUIE_STRING_LAM_UF_CFRAMESPT_M_HORIZ_ADJUST_TP = "Adjust the horizontal position of the magicka bar. If you wish to relocate all frames, unlock the custom frames and move them instead.",

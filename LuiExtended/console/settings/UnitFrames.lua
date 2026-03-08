@@ -810,6 +810,43 @@ function UnitFrames.CreateConsoleSettings()
             end,
             default = Defaults.QuickHideDead,
         }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_CURSOR),
+            tooltip = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_CURSOR_TP),
+            getFunction = function ()
+                return Settings.TargetLingerInCursorMode
+            end,
+            setFunction = function (value)
+                Settings.TargetLingerInCursorMode = value
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
+            end,
+            default = Defaults.TargetLingerInCursorMode,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_DURATION),
+            tooltip = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_DURATION_TP),
+            min = 0,
+            max = 30,
+            step = 5,
+            getFunction = function ()
+                return Settings.TargetLingerDuration
+            end,
+            setFunction = function (value)
+                Settings.TargetLingerDuration = value
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget and Settings.TargetLingerInCursorMode)
+            end,
+            default = Defaults.TargetLingerDuration,
+        }
     end)
 
     -- Build Custom Unit Frame Color Options Section
@@ -1415,7 +1452,7 @@ function UnitFrames.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_PLAYER_WIDTH),
             tooltip = nil,
             min = 200,
-            max = 500,
+            max = 1000,
             step = 5,
             getFunction = function ()
                 return Settings.PlayerBarWidth
@@ -1699,7 +1736,7 @@ function UnitFrames.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_WIDTH),
             tooltip = nil,
             min = 200,
-            max = 500,
+            max = 1000,
             step = 5,
             getFunction = function ()
                 return Settings.TargetBarWidth

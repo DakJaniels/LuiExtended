@@ -847,11 +847,35 @@ function UnitFrames.OnTargetChange(eventId, unitTag)
     UnitFrames.OnReticleTargetChanged(eventId)
 end
 
+-- Clears the custom target frame and reticleover buffs (used when no target and not lingering, or when linger timeout fires).
+function UnitFrames.ClearTargetFrame()
+    UnitFrames.targetFrameLingered = false
+    UnitFrames.savedHealth.reticleover = { 1, 1, 1, 0, 0 }
+    if UnitFrames.CustomFrames["reticleover"] then
+        UnitFrames.reticleoverHostile = false
+        UnitFrames.CustomFrames["reticleover"].skull:SetHidden(true)
+        UnitFrames.CustomFrames["reticleover"].control:SetHidden(true)
+    end
+    if UnitFrames.CustomFrames["AvaPlayerTarget"] then
+        UnitFrames.CustomFrames["AvaPlayerTarget"].control:SetHidden(true)
+    end
+    if UnitFrames.SV.ReticleColourByReaction then
+        ZO_ReticleContainerReticle:SetColor(1, 1, 1, 1)
+    end
+    if LUIE.SpellCastBuffs and LUIE.SpellCastBuffs.ReloadEffects then
+        LUIE.SpellCastBuffs.ReloadEffects("reticleover")
+    end
+end
+
 -- Runs on the EVENT_RETICLE_TARGET_CHANGED listener.
 -- This handler fires every time the player's reticle target changes.
 -- Used to read initial values of target's health and shield.
 function UnitFrames.OnReticleTargetChanged(eventCode)
     if DoesUnitExist("reticleover") then
+        if UnitFrames.targetLingerTimerActive then
+            eventManager:UnregisterForUpdate(UnitFrames.targetLingerTimeoutName)
+            UnitFrames.targetLingerTimerActive = false
+        end
         UnitFrames.ReloadValues("reticleover")
 
         local isWithinRange = IsUnitInGroupSupportRange("reticleover")
@@ -946,6 +970,7 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
                 -- end
                 UnitFrames.CustomFrames["reticleover"].control:SetHidden(shouldHide)
             end
+            UnitFrames.targetFrameLingered = true
         end
 
         -- Unhide second target frame only for player enemies
@@ -969,26 +994,28 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
 
         -- Target is invalid: reset stored values to defaults
     else
-        UnitFrames.savedHealth.reticleover = { 1, 1, 1, 0, 0 }
+        local linger = UnitFrames.SV.TargetLingerInCursorMode and UnitFrames.CustomFrames["reticleover"] and UnitFrames.targetFrameLingered
+        if not linger then
+            UnitFrames.ClearTargetFrame()
 
-        --[[ Removed due to causing custom UI elements to abruptly fade out. Left here in case there is any reason to re-enable.
-        if UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH] then
-            UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetHidden(true)
-        end
-        UnitFrames.DefaultFrames.reticleover.classIcon:SetHidden(true)
-        UnitFrames.DefaultFrames.reticleover.friendIcon:SetHidden(true)
-        ]]
-        --
-
-        -- Hide target frame bars control, LTE will clear buffs and remove then itself, SpellCastBuffs should continue to display ground buffs
-        if UnitFrames.CustomFrames["reticleover"] then
-            UnitFrames.reticleoverHostile = false
-            UnitFrames.CustomFrames["reticleover"].skull:SetHidden(true)
-            UnitFrames.CustomFrames["reticleover"].control:SetHidden(true) -- UnitFrames.CustomFrames["reticleover"].canHide )
-        end
-        -- Hide second target frame
-        if UnitFrames.CustomFrames["AvaPlayerTarget"] then
-            UnitFrames.CustomFrames["AvaPlayerTarget"].control:SetHidden(true) -- UnitFrames.CustomFrames["AvaPlayerTarget"].canHide )
+            --[[ Removed due to causing custom UI elements to abruptly fade out. Left here in case there is any reason to re-enable.
+            if UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH] then
+                UnitFrames.DefaultFrames.reticleover[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetHidden(true)
+            end
+            UnitFrames.DefaultFrames.reticleover.classIcon:SetHidden(true)
+            UnitFrames.DefaultFrames.reticleover.friendIcon:SetHidden(true)
+            ]]
+            --
+        else
+            local duration = UnitFrames.SV.TargetLingerDuration and UnitFrames.SV.TargetLingerDuration > 0 and UnitFrames.SV.TargetLingerDuration or 0
+            if duration > 0 and not UnitFrames.targetLingerTimerActive then
+                UnitFrames.targetLingerTimerActive = true
+                eventManager:RegisterForUpdate(UnitFrames.targetLingerTimeoutName, duration * 1000, function ()
+                    eventManager:UnregisterForUpdate(UnitFrames.targetLingerTimeoutName)
+                    UnitFrames.targetLingerTimerActive = false
+                    UnitFrames.ClearTargetFrame()
+                end)
+            end
         end
 
         -- Revert back the color of reticle to white

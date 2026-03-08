@@ -500,6 +500,29 @@ function InfoPanel.CreateConsoleSettings()
             end
         })
 
+    -- Hide Info Panel in combat
+    panel:AddSetting(
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_PNL_HIDEINCOMBAT),
+            tooltip = GetString(LUIE_STRING_LAM_PNL_HIDEINCOMBAT_TP),
+            getFunction = function ()
+                return Settings.HideInCombat
+            end,
+            setFunction = function (value)
+                Settings.HideInCombat = value
+                if not value then
+                    InfoPanel.CancelCombatHideAndShow()
+                else
+                    InfoPanel.OnPlayerCombatState(IsUnitInCombat("player"))
+                end
+            end,
+            disable = function ()
+                return not LUIE.SV.InfoPanel_Enabled
+            end,
+            default = Defaults.HideInCombat,
+        })
+
     -- Disable Info Colors
     panel:AddSetting(
         {
