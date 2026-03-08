@@ -81,16 +81,9 @@ function SlashCommands.Initialize(enabled)
 end
 
 function SlashCommands.RegisterSlashCommands()
-    if GetAPIVersion() >= 101049 then
-        local autoComplete = ZO_GetChatSystem().textEntry.slashCommandAutoComplete
-        if autoComplete then
-            autoComplete:ClearPossibleCommandMatches()
-        end
-    else
-        local autoComplete = ZO_GetChatSystem().textEntry.slashCommandAutoComplete
-        if autoComplete then
-            autoComplete:InvalidateSlashCommandCache()
-        end
+    local autoComplete = ZO_GetChatSystem().textEntry.slashCommandAutoComplete
+    if autoComplete then
+        autoComplete:ClearPossibleCommandMatches()
     end
 
     -- Register commands that replace default functions
