@@ -810,6 +810,43 @@ function UnitFrames.CreateConsoleSettings()
             end,
             default = Defaults.QuickHideDead,
         }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_CURSOR),
+            tooltip = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_CURSOR_TP),
+            getFunction = function ()
+                return UnitFrames.SV.TargetLingerInCursorMode
+            end,
+            setFunction = function (value)
+                UnitFrames.SV.TargetLingerInCursorMode = value
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and UnitFrames.SV.CustomFramesTarget)
+            end,
+            default = UnitFrames.Defaults.TargetLingerInCursorMode,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_DURATION),
+            tooltip = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_DURATION_TP),
+            min = 0,
+            max = 30,
+            step = 5,
+            getFunction = function ()
+                return UnitFrames.SV.TargetLingerDuration
+            end,
+            setFunction = function (value)
+                UnitFrames.SV.TargetLingerDuration = value
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and UnitFrames.SV.CustomFramesTarget and UnitFrames.SV.TargetLingerInCursorMode)
+            end,
+            default = UnitFrames.Defaults.TargetLingerDuration,
+        }
     end)
 
     -- Build Custom Unit Frame Color Options Section

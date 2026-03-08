@@ -823,6 +823,42 @@ function UnitFrames.CreateSettings()
                     return not LUIE.SV.UnitFrames_Enabled
                 end,
             },
+            {
+                -- Keep Target Frame Visible in Cursor Mode
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_CURSOR),
+                tooltip = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_CURSOR_TP),
+                getFunc = function ()
+                    return Settings.TargetLingerInCursorMode
+                end,
+                setFunc = function (value)
+                    Settings.TargetLingerInCursorMode = value
+                end,
+                width = "full",
+                default = Defaults.TargetLingerInCursorMode,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
+                end,
+            },
+            {
+                type = "slider",
+                name = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_DURATION),
+                tooltip = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_DURATION_TP),
+                min = 0,
+                max = 30,
+                step = 5,
+                getFunc = function ()
+                    return Settings.TargetLingerDuration
+                end,
+                setFunc = function (value)
+                    Settings.TargetLingerDuration = value
+                end,
+                width = "full",
+                default = Defaults.TargetLingerDuration,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget and Settings.TargetLingerInCursorMode)
+                end,
+            },
         },
     }
     -- Unit Frames - Custom Unit Frame Color Options Submenu

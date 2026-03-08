@@ -81,6 +81,8 @@ UnitFrames.Enabled = false
 UnitFrames.Defaults =
 {
     QuickHideDead = false,
+    TargetLingerInCursorMode = false,
+    TargetLingerDuration = 10,
     ShortenNumbers = false,
     RepositionFrames = true,
     DefaultOocTransparency = 85,
@@ -352,4 +354,7 @@ UnitFrames.CustomFrames =
 {
 }
 UnitFrames.CustomFramesMovingState = false
-UnitFrames.reticleoverHostile = false -- boolean: hostile target and TargetEnableSkull (avoids assign-type-mismatch on frame.hostile)
+UnitFrames.reticleoverHostile = false  -- boolean: hostile target and TargetEnableSkull (avoids assign-type-mismatch on frame.hostile)
+UnitFrames.targetFrameLingered = false -- true after we have shown a valid target; prevents blank frame/icons on load when TargetLingerInCursorMode is on
+UnitFrames.targetLingerTimeoutName = UnitFrames.moduleName .. "TargetLingerTimeout"
+UnitFrames.targetLingerTimerActive = false
