@@ -68,8 +68,9 @@ local barHighlightOverride =
     [32715] = { newId = 61814 },                        -- Ferocious Leap
 
     -- Earthen Heart
-    [133037] = { newId = 29032 },                      -- Stonefist
-    [133027] = { newId = 31816 },                      -- Stone Giant
+    [29032] = { newId = 134310 },                      -- Superheated Ward
+    [31816] = { newId = 134340 },                      -- Magma Fist
+    [31820] = { newId = 261754 },                      -- Volcanic Ward
     [29043] = { newId = 258658, showFakeAura = true }, -- Molten Weapons --> Major Sorcery
     [31874] = { newId = 258666, showFakeAura = true }, -- Igneous Weapons --> Major Sorcery
     [31888] = { newId = 258661, showFakeAura = true }, -- Molten Armaments
