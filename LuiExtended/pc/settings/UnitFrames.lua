@@ -824,6 +824,24 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                -- Hide Player Frame When Dead
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_HIDE_PLAYER_FRAME_DEATH),
+                tooltip = GetString(LUIE_STRING_LAM_UF_HIDE_PLAYER_FRAME_DEATH_TP),
+                getFunc = function ()
+                    return Settings.HidePlayerFrameOnDeath
+                end,
+                setFunc = function (value)
+                    Settings.HidePlayerFrameOnDeath = value
+                    UnitFrames.UpdatePlayerFrameDeathVisibility()
+                end,
+                width = "full",
+                default = Defaults.HidePlayerFrameOnDeath,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+                end,
+            },
+            {
                 -- Keep Target Frame Visible in Cursor Mode
                 type = "checkbox",
                 name = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_CURSOR),
