@@ -337,6 +337,22 @@ function InfoPanel.CreateSettings()
         false
     )
 
+    -- Hide Info Panel in combat
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_HIDEINCOMBAT),
+        GetString(LUIE_STRING_LAM_PNL_HIDEINCOMBAT_TP),
+        function () return Settings.HideInCombat end,
+        function (value)
+            Settings.HideInCombat = value
+            if not value then
+                InfoPanel.CancelCombatHideAndShow()
+            end
+        end,
+        "full",
+        function () return not LUIE.SV.InfoPanel_Enabled end,
+        Defaults.HideInCombat
+    )
+
     -- Disable Info Colors
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_DISABLECOLORSRO),

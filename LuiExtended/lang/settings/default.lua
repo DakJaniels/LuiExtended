@@ -1474,6 +1474,8 @@ local strings =
     LUIE_STRING_LAM_PNL_UNLOCKPANEL_TP = "Allow mouse dragging for Info Panel.",
     LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP = "Display Info Panel on World Map Screen",
     LUIE_STRING_LAM_PNL_DISPLAYONWORLDMAP_TP = "Display the Info Panel when you are viewing the world map. This option can be toggled if your Info Panel position clips with any important elements on the World Map screen.",
+    LUIE_STRING_LAM_PNL_HIDEINCOMBAT = "Hide Info Panel in combat",
+    LUIE_STRING_LAM_PNL_HIDEINCOMBAT_TP = "Hide the Info Panel when you enter combat. It becomes visible again when combat ends.",
 
     -- Module: Unit Frames
     LUIE_STRING_LAM_UF_BLACKLIST_ADDLIST = "Add Pet Name to Whitelist",
