@@ -1,0 +1,35 @@
+**********************
+***Functions Added ***
+**********************
+
+* CanHousingEditorPlacementPreviewMarketProduct(*integer* _marketProductId_)
+** _Returns:_ *bool* _canPreview_
+
+
+* HousingEditorClearPreviewMarketProductTransform *private* ()
+
+
+* HousingEditorEndMarketProductPlacementPreview *private* ()
+
+
+* IsHousingEditorPreviewingMarketProductPlacement()
+** _Returns:_ *bool* _isPreviewingMarketProductPlacement_
+
+
+* HousingEditorRequestMarketProductPlacementPreview *private* (*integer* _marketProductId_)
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+
+* HousingEditorSavePreviewMarketProductTransform *private* ()
+
+
+* HasSuppressedCompanion()
+** _Returns:_ *bool* _hasSuppressedCompanion_
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_GROUP_ELECTION_PROGRESS_UPDATED

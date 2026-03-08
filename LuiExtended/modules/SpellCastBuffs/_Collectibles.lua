@@ -89,9 +89,8 @@ end
 --- - Handler to create Mount Buff icon for player.
 --- - **EVENT_MOUNTED_STATE_CHANGED **
 ---
---- @param eventId integer
 --- @param mounted boolean
-function SpellCastBuffs.MountStatus(eventId, mounted)
+function SpellCastBuffs.MountStatus(mounted)
     -- Clear current mount icon
     local abilityId = 999017
     SpellCastBuffs.ClearPlayerBuff(abilityId)
@@ -110,7 +109,7 @@ end
 function SpellCastBuffs.CollectibleUsed(eventId, result, isAttemptingActivation)
     local latency = GetLatency()
     latency = latency + 100
-    zo_callLater(SpellCastBuffs.CollectibleBuff, latency)
+    LUIE_callLater(SpellCastBuffs.CollectibleBuff, latency)
 end
 
 -- Handles delayed call from SpellCastBuffs.CollectibleUsed()

@@ -154,42 +154,6 @@ function UnitFrames.CustomFramesApplyBarAlignment()
     end
 end
 
--- Prevent base ZO_UnitFrames from doing duplicate work alongside LUIE Custom Frames
-local function LUIE_UnregisterDefaultUnitFrames()
-    local ev = ZO_UnitFrames
-    ev:UnregisterForEvent(EVENT_TARGET_CHANGED)
-
-    ev:UnregisterForEvent(EVENT_UNIT_CHARACTER_NAME_CHANGED)
-
-    ev:UnregisterForEvent(EVENT_RETICLE_TARGET_CHANGED)
-    ev:UnregisterForEvent(EVENT_UNIT_CREATED)
-    ev:UnregisterForEvent(EVENT_UNIT_DESTROYED)
-    ev:UnregisterForEvent(EVENT_LEVEL_UPDATE)
-    ev:UnregisterForEvent(EVENT_LEADER_UPDATE)
-    ev:UnregisterForEvent(EVENT_DISPOSITION_UPDATE)
-    ev:UnregisterForEvent(EVENT_GROUP_SUPPORT_RANGE_UPDATE)
-    ev:UnregisterForEvent(EVENT_GROUP_UPDATE)
-    ev:UnregisterForEvent(EVENT_GROUP_MEMBER_JOINED)
-    ev:UnregisterForEvent(EVENT_GROUP_MEMBER_LEFT)
-    ev:UnregisterForEvent(EVENT_GROUP_MEMBER_CONNECTED_STATUS)
-    ev:UnregisterForEvent(EVENT_GROUP_MEMBER_ROLE_CHANGED)
-    ev:UnregisterForEvent(EVENT_ACTIVE_COMPANION_STATE_CHANGED)
-    ev:UnregisterForEvent(EVENT_UNIT_DEATH_STATE_CHANGED)
-    ev:UnregisterForEvent(EVENT_RANK_POINT_UPDATE)
-    ev:UnregisterForEvent(EVENT_CHAMPION_POINT_UPDATE)
-    ev:UnregisterForEvent(EVENT_TITLE_UPDATE)
-    ev:UnregisterForEvent(EVENT_PLAYER_ACTIVATED)
-    ev:UnregisterForEvent(EVENT_INTERFACE_SETTING_CHANGED)
-    ev:UnregisterForEvent(EVENT_GUILD_NAME_AVAILABLE)
-    ev:UnregisterForEvent(EVENT_GUILD_ID_CHANGED)
-
-    ev:UnregisterForEvent(EVENT_GROUP_ELECTION_REQUESTED)
-    ev:UnregisterForEvent(EVENT_GROUP_ELECTION_NOTIFICATION_ADDED)
-    ev:UnregisterForEvent(EVENT_GROUP_ELECTION_PROGRESS_UPDATED)
-    ev:UnregisterForEvent(EVENT_GROUP_ELECTION_RESULT)
-    ev:UnregisterForEvent(EVENT_TARGET_MARKER_UPDATE)
-end
-
 -- Main entry point to this module
 function UnitFrames.Initialize(enabled)
     -- Load settings
@@ -328,9 +292,6 @@ function UnitFrames.Initialize(enabled)
 
     -- Next events make sense only for CustomFrames
     if UnitFrames.CustomFrames["player"] or UnitFrames.CustomFrames["reticleover"] or UnitFrames.CustomFrames["companion"] or UnitFrames.CustomFrames["SmallGroup1"] or UnitFrames.CustomFrames["RaidGroup1"] or UnitFrames.CustomFrames["boss1"] or UnitFrames.CustomFrames["PetGroup1"] then
-        if GetUnitDisplayName("player") == "@dack_janiels" then
-            LUIE_UnregisterDefaultUnitFrames()
-        end
         eventManager:RegisterForEvent(moduleName, EVENT_COMBAT_EVENT, UnitFrames.OnCombatEvent)
         eventManager:AddFilterForEvent(moduleName, EVENT_COMBAT_EVENT, REGISTER_FILTER_IS_ERROR, true)
 
@@ -952,8 +913,8 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
 
         -- And color of custom target name always. Also change 'labelOne' for critters
         if UnitFrames.CustomFrames["reticleover"] then
-            UnitFrames.CustomFrames["reticleover"].hostile = (reactionType == UNIT_REACTION_HOSTILE) and UnitFrames.SV.TargetEnableSkull
-            UnitFrames.CustomFrames["reticleover"].skull:SetHidden(not UnitFrames.CustomFrames["reticleover"].hostile or (UnitFrames.savedHealth.reticleover[1] == 0) or (100 * UnitFrames.savedHealth.reticleover[1] / UnitFrames.savedHealth.reticleover[3] > UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH].threshold))
+            UnitFrames.reticleoverHostile = (reactionType == UNIT_REACTION_HOSTILE) and UnitFrames.SV.TargetEnableSkull
+            UnitFrames.CustomFrames["reticleover"].skull:SetHidden(not UnitFrames.reticleoverHostile or (UnitFrames.savedHealth.reticleover[1] == 0) or (100 * UnitFrames.savedHealth.reticleover[1] / UnitFrames.savedHealth.reticleover[3] > UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH].threshold))
             UnitFrames.CustomFrames["reticleover"].name:SetColor(color[1], color[2], color[3], 1)
             UnitFrames.CustomFrames["reticleover"].className:SetColor(color[1], color[2], color[3], 1)
             if isCritter then
@@ -1021,7 +982,7 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
 
         -- Hide target frame bars control, LTE will clear buffs and remove then itself, SpellCastBuffs should continue to display ground buffs
         if UnitFrames.CustomFrames["reticleover"] then
-            UnitFrames.CustomFrames["reticleover"].hostile = false
+            UnitFrames.reticleoverHostile = false
             UnitFrames.CustomFrames["reticleover"].skull:SetHidden(true)
             UnitFrames.CustomFrames["reticleover"].control:SetHidden(true) -- UnitFrames.CustomFrames["reticleover"].canHide )
         end
@@ -1844,7 +1805,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
         positionMode = "recenter"
 
         CustomFramesClearAltBarReferences(player)
-        player.ChampionXP = alt
+        player.ChampionXP = alt --[[@as LUIE_Player_Health|LUIE_Player_Resource]]
 
         UnitFrames.OnChampionPointGained()
 
@@ -1871,7 +1832,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
         positionMode = "recenter"
 
         CustomFramesClearAltBarReferences(player)
-        player.Experience = alt
+        player.Experience = alt --[[@as LUIE_Player_Health|LUIE_Player_Resource]]
 
         local championXP = GetNumChampionXPInChampionPoint(GetPlayerChampionPointsEarned()) or GetPlayerChampionXP()
         player.Experience.bar:SetMinMax(0, player.isChampion and championXP or GetUnitXPMax("player"))

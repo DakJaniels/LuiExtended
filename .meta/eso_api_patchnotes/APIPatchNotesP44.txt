@@ -1,0 +1,514 @@
+******************
+***Enums Added ***
+******************
+
+* BROADCAST_TYPE_NONE
+
+* CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_ROUND_STARTING
+* CENTER_SCREEN_ANNOUNCE_TYPE_PROMOTIONAL_EVENT_REWARD_CLAIMED
+
+* LOOT_TYPE_IMPERIAL_FRAGMENTS
+
+h5. PlatformStoreDialogResult
+* PLATFORM_STORE_DIALOG_RESULT_CLOSED_FROM_CODE
+* PLATFORM_STORE_DIALOG_RESULT_ERROR
+* PLATFORM_STORE_DIALOG_RESULT_PURCHASED
+* PLATFORM_STORE_DIALOG_RESULT_USER_CANCELED
+
+* LFG_COOLDOWN_BATTLEGROUND_DESERTED_MMR
+* LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE
+
+* LFG_GROUP_TYPE_BIG_TEAM_BATTLE
+
+h5. PromotionalEventCampaignComponentType
+* PROMOTIONAL_EVENTS_COMPONENT_TYPE_ACTIVITY
+* PROMOTIONAL_EVENTS_COMPONENT_TYPE_MILESTONE_REWARD
+* PROMOTIONAL_EVENTS_COMPONENT_TYPE_SCHEDULE
+
+* BATTLEGROUND_LEADERBOARD_TYPE_COMPETITIVE
+
+h5. BattlegroundMMRBonusType
+* BG_MMR_BONUS_ALL
+* BG_MMR_BONUS_JOIN_IN_PROGRESS
+* BG_MMR_BONUS_LFM_REQUESTED
+
+* COLLECTIBLE_USAGE_BLOCK_REASON_COMPANION_INTRO_QUEST_BLOCKED_BY_ZONE
+
+* ADVANCED_STAT_DISPLAY_TYPE_ALLIANCE_POINTS_BONUS
+* ADVANCED_STAT_DISPLAY_TYPE_COIN_BONUS
+* ADVANCED_STAT_DISPLAY_TYPE_INSPIRATION_BONUS
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_ALLIANCE_POINTS_BONUS
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_ALL_XP
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_COIN_BONUS
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_INSPIRATION_BONUS
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_TELVAR_BONUS
+* ADVANCED_STAT_DISPLAY_TYPE_TELVAR_BONUS
+
+* CURT_IMPERIAL_FRAGMENTS
+
+* INTERFACE_TEXT_COLOR_PROMOTIONAL_EVENTS
+* INTERFACE_TEXT_COLOR_PROMOTIONAL_EVENTS_DIMMED
+* INTERFACE_TEXT_COLOR_PROMOTIONAL_EVENTS_HIGHLIGHT
+
+* PROGRESSION_COLOR_PROMOTIONAL_EVENT_END
+* PROGRESSION_COLOR_PROMOTIONAL_EVENT_START
+
+* UI_SETTING_TEXT_LANGUAGE
+
+* REWARD_TYPE_IMPERIAL_FRAGMENTS
+
+* MARKET_OPEN_OPERATION_PROMOTIONAL_EVENTS
+
+* STORE_FAILURE_NOT_ENOUGH_IMPERIAL_FRAGMENTS
+
+h5. BattlegroundRoundResult
+* BATTLEGROUND_ROUND_RESULT_ENEMY_LEFT
+* BATTLEGROUND_ROUND_RESULT_HIGHEST_SCORE_WIN
+* BATTLEGROUND_ROUND_RESULT_INVALID
+* BATTLEGROUND_ROUND_RESULT_LAST_TEAM_STANDING
+* BATTLEGROUND_ROUND_RESULT_SCORE_LIMIT_REACHED
+* BATTLEGROUND_ROUND_RESULT_STALEMATE
+* BATTLEGROUND_ROUND_RESULT_TIEBREAKER_LIVES_REMAINING
+* BATTLEGROUND_ROUND_RESULT_TIEBREAKER_MEDAL_SCORE
+* BATTLEGROUND_ROUND_RESULT_TIEBREAKER_PLAYERS_ALIVE
+
+* TUTORIAL_TRIGGER_CURRENCY_GAINED_IMPERIAL_FRAGMENTS
+* TUTORIAL_TRIGGER_PROMOTIONAL_EVENTS_HUD_REWARD_TO_CLAIM
+* TUTORIAL_TRIGGER_PROMOTIONAL_EVENTS_HUD_TRACKER_SHOWN
+* TUTORIAL_TRIGGER_PROMOTIONAL_EVENTS_OPENED
+
+
+
+********************
+***Enums Removed ***
+********************
+
+* LFG_COOLDOWN_BATTLEGROUND_DESERTED
+
+* COLLECTIBLE_CATEGORY_TYPE_ABILITY_SKIN
+
+* HOUSING_REQUEST_RESULT_HOME_SHOW_NOT_ENOUGH_PLACED
+* HOUSING_REQUEST_RESULT_LISTED
+* HOUSING_REQUEST_RESULT_NOT_HOME_SHOW
+
+h5. AnchorPosition
+* NONE
+
+
+
+********************
+***Enums Changed ***
+********************
+
+* BATTLEGROUND_STATE_POSTGAME
+to
+* BATTLEGROUND_STATE_POSTROUND
+
+* BATTLEGROUND_STATE_PREGAME
+to
+* BATTLEGROUND_STATE_PREROUND
+
+
+
+********************
+***Globals Added ***
+********************
+
+* BIG_TEAM_BATTLE_QUEUE_SIZE_THRESHOLD
+
+* ZO_DEFAULT_LANGUAGE_SETTING_VALUE
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* ZoGetOfficialGameLanguage()
+** _Returns:_ *[OfficialLanguage|#OfficialLanguage]* _language_
+
+* ZoIsOfficialLanguageSupported(*[OfficialLanguage|#OfficialLanguage]* _language_)
+** _Returns:_ *bool* _isSupported_
+
+* ZoIsIgnoringPatcherLanguage()
+** _Returns:_ *bool* _isIgnoringPatcherLanguage_
+
+* ShowPlatformESOVOAdditionalContentUI *private* ()
+
+* IsSpectatorCameraActive()
+** _Returns:_ *bool* _isActive_
+
+* SetSpectatorCameraEnabled *private* (*bool* _enable_)
+
+* GetSpectatableUnitName(*luaindex* _index_)
+** _Returns:_ *string* _name_
+
+* GetNumSpectatableUnits()
+** _Returns:_ *integer* _numUnits_
+
+* SetSpectatorCameraTargetIndex(*luaindex* _index_)
+
+* GetSpectatorCameraTargetIndex()
+** _Returns:_ *luaindex* _index_
+
+* SpectatorCameraTargetNext()
+
+* SpectatorCameraTargetPrev()
+
+* IsNewCharacterNotificationSuppressionActive()
+** _Returns:_ *bool* _isSuppressionActive_
+
+* IsActiveWorldStarterWorld()
+** _Returns:_ *bool* _isStarterWorld_
+
+* GetCurrentBattlegroundGameType(*luaindex:nilable* _roundIndex_)
+** _Returns:_ *[BattlegroundGameType|#BattlegroundGameType]* _gameType_
+
+* GetScoreToWinCurrentBattlegroundRound(*luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _result_
+
+* GetCurrentBattlegroundRoundNearingVictoryPercent(*luaindex:nilable* _roundIndex_)
+** _Returns:_ *number* _nearingVictoryPercent_
+
+* GetCurrentBattlegroundRoundMaxActiveSequencedObjectives(*luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _maxActiveSequencedObjectives_
+
+* GetCurrentBattlegroundRoundIndex()
+** _Returns:_ *luaindex:nilable* _currentRound_
+
+* GetLocalPlayerBattlegroundLivesRemaining()
+** _Returns:_ *integer* _numLives_
+
+* HasTeamWonBattlegroundEarly()
+** _Returns:_ *bool* _isWonEarly_
+
+* DidLocalPlayerJoinBattlegroundInProgress()
+** _Returns:_ *bool* _joinedInProgress_
+
+* DidCurrentBattlegroundRequestLFM()
+** _Returns:_ *bool* _lfmRequested_
+
+* DoesCurrentBattlegroundImpactMMR()
+** _Returns:_ *bool* _impactsMMR_
+
+* GetCurrentBattlegroundMMRReductionBonusTypes()
+** _Returns:_ *[BattlegroundMMRBonusType|#BattlegroundMMRBonusType]* _bonusTypes_
+
+* GetCurrentBattlegroundMMRLossReductionBonus()
+** _Returns:_ *number* _bonusReductionPercent_
+
+* GetBattlegroundName(*integer* _battlegroundId_)
+** _Returns:_ *string* _name_
+
+* GetBattlegroundDescription(*integer* _battlegroundId_)
+** _Returns:_ *string* _description_
+
+* GetBattlegroundNumRounds(*integer* _battlegroundId_)
+** _Returns:_ *integer* _numRounds_
+
+* DoesBattlegroundHaveRounds(*integer* _battlegroundId_)
+** _Returns:_ *bool* _hasRounds_
+
+* GetBattlegroundNumTeams(*integer* _battlegroundId_)
+** _Returns:_ *integer* _numTeams_
+
+* GetBattlegroundTeamByIndex(*integer* _battlegroundId_, *luaindex* _teamIndex_)
+** _Returns:_ *[BattlegroundTeam|#BattlegroundTeam]:nilable* _battlegroundTeam_
+
+* DoesBattlegroundHaveTeam(*integer* _battlegroundId_, *[BattlegroundTeam|#BattlegroundTeam]* _battlegroundTeam_)
+** _Returns:_ *bool* _hasTeam_
+
+* DoesBattlegroundHaveLimitedPlayerLives(*integer* _battlegroundId_)
+** _Returns:_ *bool* _hasLimitedLives_
+
+* GetBattlegroundMaxPlayerLives(*integer* _battlegroundId_)
+** _Returns:_ *integer* _maxPlayerLives_
+
+* GetBattlegroundTeamSize(*integer* _battlegroundId_)
+** _Returns:_ *integer* _teamSize_
+
+* GetScoreboardEntryNumLivesRemaining(*luaindex* _entryIndex_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _numLivesRemaining_
+
+* GenerateCumulativeMedalInfoForScoreboardEntry(*luaindex* _entryIndex_, *luaindex:nilable* _roundIndex_)
+
+* GetNextBattlegroundCumulativeMedalId(*integer:nilable* _lastMedalId_)
+** _Returns:_ *integer:nilable* _nextMedalId_
+
+* GetBattlegroundCumulativeNumEarnedMedalsById(*integer* _medalId_)
+** _Returns:_ *integer* _count_
+
+* GetCurrentBattlegroundRoundResult(*luaindex:nilable* _roundIndex_)
+** _Returns:_ *[BattlegroundRoundResult|#BattlegroundRoundResult]:nilable* _roundResult_
+
+* GetCurrentBattlegroundScore(*luaindex* _roundIndex_, *[BattlegroundTeam|#BattlegroundTeam]* _team_)
+** _Returns:_ *integer* _score_
+
+* GetCurrentBattlegroundRoundsWonByTeam(*[BattlegroundTeam|#BattlegroundTeam]* _battlegroundTeam_)
+** _Returns:_ *integer* _numWins_
+
+* DidCurrentBattlegroundTeamWinOrTieRound(*[BattlegroundTeam|#BattlegroundTeam]* _battlegroundTeam_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *bool* _wonOrTied_
+
+* DoesPlayerHaveLockpickingCompanionBonus()
+** _Returns:_ *bool* _playerHasCompanionBonus_
+
+* GetLockpickingCompanionBonusName()
+** _Returns:_ *string* _lockpickingCompanionBonusName_
+
+* GetLockpickingCompanionBonusTimeMS()
+** _Returns:_ *integer* _lockpickingCompanionBonusTime_
+
+* DoesActivitySetHaveMMR(*integer* _activitySetId_)
+** _Returns:_ *bool* _hasMMR_
+
+* GetPlayerMMRByType(*[LFGActivity|#LFGActivity]* _activity_)
+** _Returns:_ *integer* _mmrRating_
+
+* GetTimedActivityRequiredCollectible(*integer* _timedActivityId_)
+** _Returns:_ *integer* _requiredCollectible_
+
+* GetNumPromotionalEventCampaignActivities(*id64* _campaignKey_)
+** _Returns:_ *integer* _numActivities_
+
+* GetNumPromotionalEventCampaignMilestoneRewards(*id64* _campaignKey_)
+** _Returns:_ *integer* _numMilestoneRewards_
+
+* GetPromotionalEventCampaignProgress(*id64* _campaignKey_)
+** _Returns:_ *integer* _numActivitiesCompleted_, *bool* _isCapstoneRewardClaimed_
+
+* TryClaimPromotionalEventCapstoneReward(*id64* _campaignKey_)
+
+* GetPromotionalEventCampaignActivityInfo(*id64* _campaignKey_, *luaindex* _activityIndex_)
+** _Returns:_ *integer* _activityId_, *string* _displayName_, *string* _description_, *integer* _completionThreshold_, *integer* _rewardId_, *integer* _rewardQuantity_
+
+* GetPromotionalEventCampaignActivityProgress(*id64* _campaignKey_, *luaindex* _activityIndex_)
+** _Returns:_ *integer* _progress_, *bool* _isRewardClaimed_
+
+* TryClaimPromotionalEventActivityReward(*id64* _campaignKey_, *luaindex* _activityIndex_)
+
+* GetPromotionalEventCampaignMilestoneInfo(*id64* _campaignKey_, *luaindex* _milestoneIndex_)
+** _Returns:_ *integer* _completionThreshold_, *integer* _rewardId_, *integer* _rewardQuantity_
+
+* IsPromotionalEventCampaignMilestoneRewardClaimed(*id64* _campaignKey_, *luaindex* _milestoneIndex_)
+** _Returns:_ *bool* _isRewardClaimed_
+
+* TryClaimPromotionalEventMilestoneReward(*id64* _campaignKey_, *luaindex* _milestoneIndex_)
+
+* IsAnyPromotionalEventCampaignRewardClaimable(*id64* _campaignKey_)
+** _Returns:_ *bool* _isAnyClaimable_
+
+* TryClaimAllAvailablePromotionalEventCampaignRewards(*id64* _campaignKey_)
+
+* GetRecentlyClaimedPromotionalEventRewards(*id64* _campaignKey_)
+** _Uses variable returns..._
+** _Returns:_ *[PromotionalEventCampaignComponentType|#PromotionalEventCampaignComponentType]* _type_, *luaindex* _index_
+
+* TryAutoTrackNextPromotionalEventCampaign()
+** _Returns:_ *id64* _campaignKeyAutoTracked_
+
+* GetTrackedPromotionalEventActivityInfo()
+** _Returns:_ *id64* _campaignKey_, *luaindex* _activityIndex_
+
+* TrackPromotionalEventActivity(*id64* _campaignKey_, *luaindex* _activityIndex_)
+
+* ClearTrackedPromotionalEventActivity()
+
+* GetMarketProductBundleInspectChildProductsAsList *private* (*integer* _marketProductId_)
+** _Returns:_ *bool* _inspectAsList_
+
+* IsChapterContentPass(*integer* _chapterUpgradeId_)
+** _Returns:_ *bool* _isContentPass_
+
+* IsPromotionalEventSystemLocked()
+** _Returns:_ *bool* _isLocked_
+
+* GetNumActivePromotionalEventCampaigns()
+** _Returns:_ *integer* _numActiveCampaigns_
+
+* GetActivePromotionalEventCampaignKey(*luaindex* _campaignIndex_)
+** _Returns:_ *id64* _campaignKey_
+
+* GetSecondsRemainingInPromotionalEventCampaign(*id64* _campaignKey_)
+** _Returns:_ *integer* _secondsRemaining_
+
+* GetPromotionalEventCampaignInfo(*id64* _campaignKey_)
+** _Returns:_ *integer* _campaignId_, *integer* _numActivities_, *integer* _numMilestones_, *integer* _capstoneCompletionThreshold_, *integer* _capstoneRewardId_, *integer* _capstoneRewardQuantity_
+
+* GetPromotionalEventCampaignAnnouncementBannerText(*id64* _campaignKey_)
+** _Returns:_ *string* _bannerText_
+
+* GetPromotionalEventCampaignDisplayName(*integer* _campaignId_)
+** _Returns:_ *string* _displayName_
+
+* GetPromotionalEventCampaignDescription(*integer* _campaignId_)
+** _Returns:_ *string* _description_
+
+* GetPromotionalEventCampaignLargeBackgroundFileIndex(*integer* _campaignId_)
+** _Returns:_ *textureName* _backgroundFile_
+
+* GetPromotionalEventCampaignAnnouncementBackgroundFileIndex(*integer* _campaignId_)
+** _Returns:_ *textureName* _backgroundFile_
+
+
+h3. Control
+* GetWaveDampingCoefficients()
+** _Returns:_ *number* _minX_, *number* _maxX_, *number* _minY_, *number* _maxY_
+
+* SetWaveDampingCoefficients(*number* _minX_, *number* _maxX_, *number* _minY_, *number* _maxY_)
+
+
+
+************************
+***Functions Removed ***
+************************
+
+* GetMarketProductBundleHidesChildProducts *private* (*integer* _marketProductId_)
+** _Returns:_ *bool* _hidesChildProducts_
+
+
+
+************************
+***Functions Changed ***
+************************
+
+Added _roundIndex_
+* GetItemLinkStacks(*string* _itemLink_)
+** _Returns:_ *integer* _stackCountBackpack_, *integer* _stackCountBank_, *integer* _stackCountCraftBag_, *integer* _stackCountHouseBanks_
+
+* GetBattlegroundGameType(*integer* _battlegroundId_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *[BattlegroundGameType|#BattlegroundGameType]* _gameType_
+
+* GetNumScoreboardEntries(*luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _numItems_
+
+* GetScoreboardEntryInfo(*luaindex* _entryIndex_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *string* _characterName_, *string* _displayName_, *[BattlegroundTeam|#BattlegroundTeam]* _team_, *bool* _isLocalPlayer_
+
+* GetScoreboardEntryBattlegroundTeam(*luaindex* _entryIndex_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *[BattlegroundTeam|#BattlegroundTeam]* _team_
+
+* GetScoreboardEntryClassId(*luaindex* _entryIndex_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _classId_
+
+* GetScoreboardEntryScoreByType(*luaindex* _entryIndex_, *[ScoreTrackerEntryType|#ScoreTrackerEntryType]* _scoreType_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _score_
+
+* GetNextScoreboardEntryMedalId(*luaindex* _entryIndex_, *luaindex:nilable* _roundIndex_, *integer:nilable* _lastMedalId_)
+** _Returns:_ *integer:nilable* _nextMedalId_
+
+* GetScoreboardEntryNumEarnedMedalsById(*luaindex* _entryIndex_, *integer* _medalId_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _count_
+
+* GetBattlegroundCumulativeScoreForScoreboardEntryByType(*luaindex* _entryIndex_, *[ScoreTrackerEntryType|#ScoreTrackerEntryType]* _scoreType_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _score_
+
+* GetScoreboardPlayerEntryIndex(*luaindex* _roundIndex_)
+
+
+Added _arg7_
+* LocalizeString(*string* _formatString_, *string* _arg1_, *string* _arg2_, *string* _arg3_, *string* _arg4_, *string* _arg5_, *string* _arg6_, *string* _arg7_)
+** _Returns:_ *string* _localizedString_
+
+
+Renamed from GetScoreToWinBattleground
+Added _roundIndex_
+* GetScoreToWinBattlegroundRound(*integer* _battlegroundId_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _result_
+
+Renamed from GetBattlegroundNearingVictoryPercent
+Added _roundIndex_
+* GetBattlegroundRoundNearingVictoryPercent(*integer* _battlegroundId_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *number* _nearingVictoryPercent_
+
+Renamed from GetBattlegroundMaxActiveSequencedObjectives
+Added _roundIndex_
+* GetBattlegroundRoundMaxActiveSequencedObjectives(*integer* _battlegroundId_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _maxActiveSequencedObjectives_
+
+Added _leaderboardType_
+* GetBattlegroundLeaderboardsSchedule(*[BattlegroundLeaderboardType|#BattlegroundLeaderboardType]* _leaderboardType_)
+** _Returns:_ *integer* _secondsUntilEnd_, *integer* _secondsUntilNextStart_
+
+Renamed from GetTributeMatchCampaignId
+Changed return from integer to id64
+* GetTributeMatchCampaignKey()
+** _Returns:_ *id64* _tributeMatchCampaignKey_
+
+Changed _campaignId_ to id64 _campaignKey_
+* GetTributePlayerCampaignRank(*id64:nilable* _campaignKey_)
+** _Returns:_ *[TributeTier|#TributeTier]* _tributeCampaignRank_
+
+* GetTributePlayerCampaignTotalExperience(*id64:nilable* _campaignKey_)
+** _Returns:_ *integer* _totalTributeCampaignExperience_
+
+* GetTributeCampaignRankExperienceRequirement(*[TributeTier|#TributeTier]* _tributeCampaignRank_, *id64:nilable* _campaignKey_)
+** _Returns:_ *integer* _experienceRequirement_
+
+* GetTributePlayerExperienceInCurrentCampaignRank(*id64:nilable* _campaignKey_)
+** _Returns:_ *integer* _experience_, *integer* _rankExperienceRequirement_
+
+* GetCampaignMatchResultFromHistoryByMatchIndex(*luaindex* _matchIndex_, *id64:nilable* _campaignKey_)
+** _Returns:_ *bool* _hasRecord_, *bool* _wasAWin_
+
+* GetTotalCampaignMatchesPlayed(*id64:nilable* _campaignKey_)
+** _Returns:_ *integer* _totalMatchesPlayed_
+
+* GetCurrentCampaignMatchStreak(*id64:nilable* _campaignKey_)
+** _Returns:_ *integer* _currentStreak_
+
+* IsPlacedInCampaign(*id64:nilable* _campaignKey_)
+** _Returns:_ *bool* _isPlaced_
+
+* GetCampaignPlacementRank(*id64:nilable* _campaignKey_)
+** _Returns:_ *[TributeTier|#TributeTier]* _tributeCampaignRank_
+
+* GetNumRequiredPlacementMatches(*id64:nilable* _campaignKey_)
+** _Returns:_ *integer* _requiredMatches_
+
+Changed return from integer to id64
+* GetActiveTributeCampaignKey()
+** _Returns:_ *id64* _tributeCampaignKey_
+
+* RequestTributeCampaignData(*id64:nilable* _campaignKey_)
+** _Returns:_ *[TributePlayerInitializationState|#TributePlayerInitializationState]* _state_
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_LOCKPICK_BREAK_PREVENTED
+* EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED (*id64* _campaignKey_, *luaindex* _activityIndex_, *integer* _previousProgress_, *integer* _newProgress_, *bool* _isRewardClaimed_)
+* EVENT_PROMOTIONAL_EVENTS_ACTIVITY_TRACKING_UPDATED (*id64* _trackedCampaignKey_, *luaindex* _trackedActivityIndex_)
+* EVENT_PROMOTIONAL_EVENTS_REWARDS_CLAIMED (*id64* _campaignKey_)
+* EVENT_SHOW_PROMOTIONAL_EVENT_SCENE
+* EVENT_PROMOTIONAL_EVENTS_CAMPAIGNS_UPDATED
+* EVENT_ACTIVE_DISPLAY_CHANGED
+
+
+
+**********************
+*** Events Changed ***
+**********************
+
+Changed _campaignId_ to id64 _campaignKey_
+* EVENT_TRIBUTE_CAMPAIGN_CHANGE (*id64* _campaignKey_)
+
+* EVENT_TRIBUTE_PLAYER_CAMPAIGN_INIT (*id64* _campaignKey_, *bool* _success_, *bool* _isActive_)
+
+
+
+*****************
+*** XML Added ***
+*****************
+
+h5. Control
+* [Child: WaveDampingCoefficients|#WaveDampingCoefficients]
+
+h5. WaveDampingCoefficients
+* _attribute:_ *number* _minX_
+* _attribute:_ *number* _maxX_
+* _attribute:_ *number* _minY_
+* _attribute:_ *number* _maxY_

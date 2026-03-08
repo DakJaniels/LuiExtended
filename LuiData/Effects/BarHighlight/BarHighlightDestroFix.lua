@@ -7,7 +7,7 @@
 local LuiData = LuiData
 
 local Data = LuiData.Data
---- @class (partial) Effects
+
 local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
@@ -145,6 +145,6 @@ local function ExtendDestroMappingWithAllRanks()
     end
 end
 
---- @class (partial) BarHighlightDestroFix
-Effects.BarHighlightDestroFix = barHighlightDestroFix
-Effects.ExtendDestroMappingWithAllRanks = ExtendDestroMappingWithAllRanks
+GetEventManager():RegisterForEvent(LuiData.name, EVENT_PLAYER_ACTIVATED, function ()
+    Effects.BarHighlightDestroFix = ExtendDestroMappingWithAllRanks()
+end)

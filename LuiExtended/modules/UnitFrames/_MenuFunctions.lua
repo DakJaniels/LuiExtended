@@ -50,7 +50,7 @@ function UnitFrames.CustomFramesSetMovingState(state)
 
     local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
     local gridEnabled = accountWideSettings and accountWideSettings.snapToGrid_unitFrames
-    local gridSize = (accountWideSettings and accountWideSettings.snapToGridSize_unitFrames) or 15
+    local gridSize = (accountWideSettings and accountWideSettings.snapToGridSize_default) or 15
     GridOverlay.Refresh("unitFrames", state and gridEnabled, gridSize)
 
     -- PC/Keyboard version

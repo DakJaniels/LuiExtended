@@ -1238,15 +1238,15 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENT),
-            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENT_TP),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALS),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALS_TP),
             getFunction = function ()
-                return Settings.Currency.CurrencyEventChange
+                return Settings.Currency.CurrencySealsChange
             end,
             setFunction = function (value)
-                Settings.Currency.CurrencyEventChange = value
+                Settings.Currency.CurrencySealsChange = value
             end,
-            default = Defaults.Currency.CurrencyEventChange,
+            default = Defaults.Currency.CurrencySealsChange,
             disable = function ()
                 return not LUIE.SV.ChatAnnouncements_Enable
             end
@@ -1255,68 +1255,68 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALSCOLOR),
             getFunction = function ()
-                return Settings.Currency.CurrencyEventColor[1], Settings.Currency.CurrencyEventColor[2], Settings.Currency.CurrencyEventColor[3], Settings.Currency.CurrencyEventColor[4]
+                return Settings.Currency.CurrencySealsColor[1], Settings.Currency.CurrencySealsColor[2], Settings.Currency.CurrencySealsColor[3], Settings.Currency.CurrencySealsColor[4]
             end,
             setFunction = function (r, g, b, a)
-                Settings.Currency.CurrencyEventColor = { r, g, b, a }
+                Settings.Currency.CurrencySealsColor = { r, g, b, a }
                 ChatAnnouncements.RegisterColorEvents()
             end,
-            default = Defaults.Currency.CurrencyEventColor,
+            default = Defaults.Currency.CurrencySealsColor,
             disable = function ()
-                return not (Settings.Currency.CurrencyEventChange and LUIE.SV.ChatAnnouncements_Enable)
+                return not (Settings.Currency.CurrencySealsChange and LUIE.SV.ChatAnnouncements_Enable)
             end
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTNAME),
-            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTNAME_TP),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALSNAME),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALSNAME_TP),
             getFunction = function ()
-                return Settings.Currency.CurrencyEventName
+                return Settings.Currency.CurrencySealsName
             end,
             setFunction = function (value)
-                Settings.Currency.CurrencyEventName = value
+                Settings.Currency.CurrencySealsName = value
             end,
-            default = Defaults.Currency.CurrencyEventName,
+            default = Defaults.Currency.CurrencySealsName,
             disable = function ()
-                return not (Settings.Currency.CurrencyEventChange and LUIE.SV.ChatAnnouncements_Enable)
+                return not (Settings.Currency.CurrencySealsChange and LUIE.SV.ChatAnnouncements_Enable)
             end
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTTOTAL),
-            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWEVENTTOTAL_TP),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALSTOTAL),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWSEALSTOTAL_TP),
             getFunction = function ()
-                return Settings.Currency.CurrencyEventShowTotal
+                return Settings.Currency.CurrencySealsShowTotal
             end,
             setFunction = function (value)
-                Settings.Currency.CurrencyEventShowTotal = value
+                Settings.Currency.CurrencySealsShowTotal = value
             end,
-            default = Defaults.Currency.CurrencyEventShowTotal,
+            default = Defaults.Currency.CurrencySealsShowTotal,
             disable = function ()
-                return not (Settings.Currency.CurrencyEventChange and LUIE.SV.ChatAnnouncements_Enable)
+                return not (Settings.Currency.CurrencySealsChange and LUIE.SV.ChatAnnouncements_Enable)
             end
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_EVENTTOTAL_MSG),
-            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_EVENTTOTAL_MSG_TP),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SEALSTOTAL_MSG),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SEALSTOTAL_MSG_TP),
             getFunction = function ()
-                return Settings.Currency.CurrencyMessageTotalEvent
+                return Settings.Currency.CurrencyMessageTotalSeals
             end,
             setFunction = function (value)
-                Settings.Currency.CurrencyMessageTotalEvent = value
+                Settings.Currency.CurrencyMessageTotalSeals = value
             end,
-            default = Defaults.Currency.CurrencyMessageTotalEvent,
+            default = Defaults.Currency.CurrencyMessageTotalSeals,
             disable = function ()
-                return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyEventChange and Settings.Currency.CurrencyEventShowTotal)
+                return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencySealsChange and Settings.Currency.CurrencySealsShowTotal)
             end
         }
 
@@ -1492,19 +1492,19 @@ function ChatAnnouncements.CreateConsoleSettings()
             end
         }
 
-        -- Endeavors
+        -- Trade Bars
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORS),
-            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORS_TP),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARS),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARS_TP),
             getFunction = function ()
-                return Settings.Currency.CurrencyEndeavorsChange
+                return Settings.Currency.CurrencyTradeBarsChange
             end,
             setFunction = function (value)
-                Settings.Currency.CurrencyEndeavorsChange = value
+                Settings.Currency.CurrencyTradeBarsChange = value
             end,
-            default = Defaults.Currency.CurrencyEndeavorsChange,
+            default = Defaults.Currency.CurrencyTradeBarsChange,
             disable = function ()
                 return not LUIE.SV.ChatAnnouncements_Enable
             end
@@ -1513,68 +1513,412 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_COLOR,
-            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSCOLOR),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARSCOLOR),
             getFunction = function ()
-                return Settings.Currency.CurrencyEndeavorsColor[1], Settings.Currency.CurrencyEndeavorsColor[2], Settings.Currency.CurrencyEndeavorsColor[3], Settings.Currency.CurrencyEndeavorsColor[4]
+                return Settings.Currency.CurrencyTradeBarsColor[1], Settings.Currency.CurrencyTradeBarsColor[2], Settings.Currency.CurrencyTradeBarsColor[3], Settings.Currency.CurrencyTradeBarsColor[4]
             end,
             setFunction = function (r, g, b, a)
-                Settings.Currency.CurrencyEndeavorsColor = { r, g, b, a }
+                Settings.Currency.CurrencyTradeBarsColor = { r, g, b, a }
                 ChatAnnouncements.RegisterColorEvents()
             end,
-            default = Defaults.Currency.CurrencyEndeavorsColor,
+            default = Defaults.Currency.CurrencyTradeBarsColor,
             disable = function ()
-                return not (Settings.Currency.CurrencyEndeavorsChange and LUIE.SV.ChatAnnouncements_Enable)
+                return not (Settings.Currency.CurrencyTradeBarsChange and LUIE.SV.ChatAnnouncements_Enable)
             end
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSNAME),
-            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSNAME_TP),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARSNAME),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARSNAME_TP),
             getFunction = function ()
-                return Settings.Currency.CurrencyEndeavorsName
+                return Settings.Currency.CurrencyTradeBarsName
             end,
             setFunction = function (value)
-                Settings.Currency.CurrencyEndeavorsName = value
+                Settings.Currency.CurrencyTradeBarsName = value
             end,
-            default = Defaults.Currency.CurrencyEndeavorsName,
+            default = Defaults.Currency.CurrencyTradeBarsName,
             disable = function ()
-                return not (Settings.Currency.CurrencyEndeavorsChange and LUIE.SV.ChatAnnouncements_Enable)
+                return not (Settings.Currency.CurrencyTradeBarsChange and LUIE.SV.ChatAnnouncements_Enable)
             end
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSTOTAL),
-            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWENDEAVORSTOTAL_TP),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARSTOTAL),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTRADEBARSTOTAL_TP),
             getFunction = function ()
-                return Settings.Currency.CurrencyEndeavorsShowTotal
+                return Settings.Currency.CurrencyTradeBarsShowTotal
             end,
             setFunction = function (value)
-                Settings.Currency.CurrencyEndeavorsShowTotal = value
+                Settings.Currency.CurrencyTradeBarsShowTotal = value
             end,
-            default = Defaults.Currency.CurrencyEndeavorsShowTotal,
+            default = Defaults.Currency.CurrencyTradeBarsShowTotal,
             disable = function ()
-                return not (Settings.Currency.CurrencyEndeavorsChange and LUIE.SV.ChatAnnouncements_Enable)
+                return not (Settings.Currency.CurrencyTradeBarsChange and LUIE.SV.ChatAnnouncements_Enable)
             end
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_EDIT,
-            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_ENDEAVORSTOTAL_MSG),
-            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_ENDEAVORSTOTAL_MSG_TP),
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_TRADEBARSTOTAL_MSG),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TRADEBARSTOTAL_MSG_TP),
             getFunction = function ()
-                return Settings.Currency.CurrencyMessageTotalEndeavors
+                return Settings.Currency.CurrencyMessageTotalTradeBars
             end,
             setFunction = function (value)
-                Settings.Currency.CurrencyMessageTotalEndeavors = value
+                Settings.Currency.CurrencyMessageTotalTradeBars = value
             end,
-            default = Defaults.Currency.CurrencyMessageTotalEndeavors,
+            default = Defaults.Currency.CurrencyMessageTotalTradeBars,
             disable = function ()
-                return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyEndeavorsChange and Settings.Currency.CurrencyEndeavorsShowTotal)
+                return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyTradeBarsChange and Settings.Currency.CurrencyTradeBarsShowTotal)
+            end
+        }
+
+        -- Tome Points
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTS),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTS_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomePointsChange
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyTomePointsChange = value
+            end,
+            default = Defaults.Currency.CurrencyTomePointsChange,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTSCOLOR),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomePointsColor[1], Settings.Currency.CurrencyTomePointsColor[2], Settings.Currency.CurrencyTomePointsColor[3], Settings.Currency.CurrencyTomePointsColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.Currency.CurrencyTomePointsColor = { r, g, b, a }
+                ChatAnnouncements.RegisterColorEvents()
+            end,
+            default = Defaults.Currency.CurrencyTomePointsColor,
+            disable = function ()
+                return not (Settings.Currency.CurrencyTomePointsChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTSNAME),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTSNAME_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomePointsName
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyTomePointsName = value
+            end,
+            default = Defaults.Currency.CurrencyTomePointsName,
+            disable = function ()
+                return not (Settings.Currency.CurrencyTomePointsChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTSTOTAL),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTSTOTAL_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomePointsShowTotal
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyTomePointsShowTotal = value
+            end,
+            default = Defaults.Currency.CurrencyTomePointsShowTotal,
+            disable = function ()
+                return not (Settings.Currency.CurrencyTomePointsChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMEPOINTSTOTAL_MSG),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMEPOINTSTOTAL_MSG_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyMessageTotalTomePoints
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyMessageTotalTomePoints = value
+            end,
+            default = Defaults.Currency.CurrencyMessageTotalTomePoints,
+            disable = function ()
+                return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyTomePointsChange and Settings.Currency.CurrencyTomePointsShowTotal)
+            end
+        }
+
+        -- Tome Point Caches
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHES),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHES_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomePointCachesChange
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyTomePointCachesChange = value
+            end,
+            default = Defaults.Currency.CurrencyTomePointCachesChange,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHESCOLOR),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomePointCachesColor[1], Settings.Currency.CurrencyTomePointCachesColor[2], Settings.Currency.CurrencyTomePointCachesColor[3], Settings.Currency.CurrencyTomePointCachesColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.Currency.CurrencyTomePointCachesColor = { r, g, b, a }
+                ChatAnnouncements.RegisterColorEvents()
+            end,
+            default = Defaults.Currency.CurrencyTomePointCachesColor,
+            disable = function ()
+                return not (Settings.Currency.CurrencyTomePointCachesChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHESNAME),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHESNAME_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomePointCachesName
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyTomePointCachesName = value
+            end,
+            default = Defaults.Currency.CurrencyTomePointCachesName,
+            disable = function ()
+                return not (Settings.Currency.CurrencyTomePointCachesChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHESTOTAL),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMEPOINTCACHESTOTAL_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomePointCachesShowTotal
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyTomePointCachesShowTotal = value
+            end,
+            default = Defaults.Currency.CurrencyTomePointCachesShowTotal,
+            disable = function ()
+                return not (Settings.Currency.CurrencyTomePointCachesChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMEPOINTCACHESTOTAL_MSG),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMEPOINTCACHESTOTAL_MSG_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyMessageTotalTomePointCaches
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyMessageTotalTomePointCaches = value
+            end,
+            default = Defaults.Currency.CurrencyMessageTotalTomePointCaches,
+            disable = function ()
+                return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyTomePointCachesChange and Settings.Currency.CurrencyTomePointCachesShowTotal)
+            end
+        }
+
+        -- Tome Tokens
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENS),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENS_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomeTokensChange
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyTomeTokensChange = value
+            end,
+            default = Defaults.Currency.CurrencyTomeTokensChange,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENSCOLOR),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomeTokensColor[1], Settings.Currency.CurrencyTomeTokensColor[2], Settings.Currency.CurrencyTomeTokensColor[3], Settings.Currency.CurrencyTomeTokensColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.Currency.CurrencyTomeTokensColor = { r, g, b, a }
+                ChatAnnouncements.RegisterColorEvents()
+            end,
+            default = Defaults.Currency.CurrencyTomeTokensColor,
+            disable = function ()
+                return not (Settings.Currency.CurrencyTomeTokensChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENSNAME),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENSNAME_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomeTokensName
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyTomeTokensName = value
+            end,
+            default = Defaults.Currency.CurrencyTomeTokensName,
+            disable = function ()
+                return not (Settings.Currency.CurrencyTomeTokensChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENSTOTAL),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMETOKENSTOTAL_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomeTokensShowTotal
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyTomeTokensShowTotal = value
+            end,
+            default = Defaults.Currency.CurrencyTomeTokensShowTotal,
+            disable = function ()
+                return not (Settings.Currency.CurrencyTomeTokensChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMETOKENSTOTAL_MSG),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMETOKENSTOTAL_MSG_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyMessageTotalTomeTokens
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyMessageTotalTomeTokens = value
+            end,
+            default = Defaults.Currency.CurrencyMessageTotalTomeTokens,
+            disable = function ()
+                return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyTomeTokensChange and Settings.Currency.CurrencyTomeTokensShowTotal)
+            end
+        }
+
+        -- Tome Challenge Rerolls
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLS),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLS_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomeChallengeRerollsChange
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyTomeChallengeRerollsChange = value
+            end,
+            default = Defaults.Currency.CurrencyTomeChallengeRerollsChange,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLSCOLOR),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomeChallengeRerollsColor[1], Settings.Currency.CurrencyTomeChallengeRerollsColor[2], Settings.Currency.CurrencyTomeChallengeRerollsColor[3], Settings.Currency.CurrencyTomeChallengeRerollsColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.Currency.CurrencyTomeChallengeRerollsColor = { r, g, b, a }
+                ChatAnnouncements.RegisterColorEvents()
+            end,
+            default = Defaults.Currency.CurrencyTomeChallengeRerollsColor,
+            disable = function ()
+                return not (Settings.Currency.CurrencyTomeChallengeRerollsChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLSNAME),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLSNAME_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomeChallengeRerollsName
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyTomeChallengeRerollsName = value
+            end,
+            default = Defaults.Currency.CurrencyTomeChallengeRerollsName,
+            disable = function ()
+                return not (Settings.Currency.CurrencyTomeChallengeRerollsChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLSTOTAL),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_SHOWTOMECHALLENGEREROLLSTOTAL_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyTomeChallengeRerollsShowTotal
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyTomeChallengeRerollsShowTotal = value
+            end,
+            default = Defaults.Currency.CurrencyTomeChallengeRerollsShowTotal,
+            disable = function ()
+                return not (Settings.Currency.CurrencyTomeChallengeRerollsChange and LUIE.SV.ChatAnnouncements_Enable)
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMECHALLENGEREROLLSTOTAL_MSG),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_TOMECHALLENGEREROLLSTOTAL_MSG_TP),
+            getFunction = function ()
+                return Settings.Currency.CurrencyMessageTotalTomeChallengeRerolls
+            end,
+            setFunction = function (value)
+                Settings.Currency.CurrencyMessageTotalTomeChallengeRerolls = value
+            end,
+            default = Defaults.Currency.CurrencyMessageTotalTomeChallengeRerolls,
+            disable = function ()
+                return not (LUIE.SV.ChatAnnouncements_Enable and Settings.Currency.CurrencyTomeChallengeRerollsChange and Settings.Currency.CurrencyTomeChallengeRerollsShowTotal)
             end
         }
     end)
@@ -3047,6 +3391,40 @@ function ChatAnnouncements.CreateConsoleSettings()
                 Settings.ContextMessages.CurrencyMessageWithdrawStorage = value
             end,
             default = Defaults.ContextMessages.CurrencyMessageWithdrawStorage,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPOSIT_FURNITURE_VAULT),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_DEPOSIT_FURNITURE_VAULT_TP),
+            getFunction = function ()
+                return Settings.ContextMessages.CurrencyMessageDepositFurnitureVault
+            end,
+            setFunction = function (value)
+                Settings.ContextMessages.CurrencyMessageDepositFurnitureVault = value
+            end,
+            default = Defaults.ContextMessages.CurrencyMessageDepositFurnitureVault,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_EDIT,
+            label = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WITHDRAW_FURNITURE_VAULT),
+            tooltip = GetString(LUIE_STRING_LAM_CA_CURRENCY_MESSAGE_WITHDRAW_FURNITURE_VAULT_TP),
+            getFunction = function ()
+                return Settings.ContextMessages.CurrencyMessageWithdrawFurnitureVault
+            end,
+            setFunction = function (value)
+                Settings.ContextMessages.CurrencyMessageWithdrawFurnitureVault = value
+            end,
+            default = Defaults.ContextMessages.CurrencyMessageWithdrawFurnitureVault,
             disable = function ()
                 return not LUIE.SV.ChatAnnouncements_Enable
             end
@@ -5921,7 +6299,6 @@ function ChatAnnouncements.CreateConsoleSettings()
                 return not (Settings.Antiquities.AntiquityCA or Settings.Antiquities.AntiquityCSA or Settings.Antiquities.AntiquityAlert and LUIE.SV.ChatAnnouncements_Enable)
             end
         }
-
     end)
 
     -- Build Achievements Announcements Section
@@ -8272,8 +8649,8 @@ function ChatAnnouncements.CreateConsoleSettings()
 
     -- Build Miscellaneous Announcements Section
     buildSectionSettings("Miscellaneous", function (settings)
-        local sid = rawget(_G, "SI_ACTIVITY_FINDER_CATEGORY_TIMED_ACTIVITIES")
-        local timedActivitiesLabel = (sid and GetString(sid)) or "Timed Activities"
+        local timedActivitiesTrackingLabel = GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_TRACKING)
+        local timedActivitiesProgressLabel = GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_PROGRESS)
         settings[#settings + 1] =
         {
             type = LHAS.ST_SECTION,
@@ -8710,8 +9087,8 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT), timedActivitiesLabel),
-            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA), timedActivitiesLabel),
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT), timedActivitiesTrackingLabel),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA), timedActivitiesTrackingLabel),
             getFunction = function ()
                 return Settings.Notify.TimedActivityCA
             end,
@@ -8720,15 +9097,15 @@ function ChatAnnouncements.CreateConsoleSettings()
             end,
             default = Defaults.Notify.TimedActivityCA,
             disable = function ()
-                return not LUIE.SV.ChatAnnouncements_Enable
+                return not LUIE.SV.ChatAnnouncements_Enable or not IsTimedActivitySystemAvailable()
             end
         }
 
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
-            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT), timedActivitiesLabel),
-            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT), timedActivitiesLabel),
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT), timedActivitiesTrackingLabel),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT), timedActivitiesTrackingLabel),
             getFunction = function ()
                 return Settings.Notify.TimedActivityAlert
             end,
@@ -8737,7 +9114,90 @@ function ChatAnnouncements.CreateConsoleSettings()
             end,
             default = Defaults.Notify.TimedActivityAlert,
             disable = function ()
-                return not LUIE.SV.ChatAnnouncements_Enable
+                return not LUIE.SV.ChatAnnouncements_Enable or not IsTimedActivitySystemAvailable()
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT), timedActivitiesProgressLabel),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA), timedActivitiesProgressLabel),
+            getFunction = function ()
+                return Settings.Notify.TimedActivityProgressCA
+            end,
+            setFunction = function (value)
+                Settings.Notify.TimedActivityProgressCA = value
+            end,
+            default = Defaults.Notify.TimedActivityProgressCA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable or not IsTimedActivitySystemAvailable()
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT), timedActivitiesProgressLabel),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_MISC_PROGRESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT), timedActivitiesProgressLabel),
+            getFunction = function ()
+                return Settings.Notify.TimedActivityProgressAlert
+            end,
+            setFunction = function (value)
+                Settings.Notify.TimedActivityProgressAlert = value
+            end,
+            default = Defaults.Notify.TimedActivityProgressAlert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable or not IsTimedActivitySystemAvailable()
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_CA_TIMED_ACTIVITY_SCOPE),
+            tooltip = GetString(LUIE_STRING_LAM_CA_TIMED_ACTIVITY_SCOPE_TP),
+            items = function ()
+                return
+                {
+                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_ALL),     data = "all"     },
+                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_SCOPE_TRACKED), data = "tracked" },
+                }
+            end,
+            getFunction = function ()
+                return Settings.Notify.TimedActivityProgressScope or Defaults.Notify.TimedActivityProgressScope
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.Notify.TimedActivityProgressScope = item.data
+            end,
+            default = Defaults.Notify.TimedActivityProgressScope,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable or not IsTimedActivitySystemAvailable()
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_CA_TIMED_ACTIVITY_FREQ),
+            tooltip = GetString(LUIE_STRING_LAM_CA_TIMED_ACTIVITY_FREQ_TP),
+            items = function ()
+                return
+                {
+                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_ALWAYS),    data = "always"    },
+                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_MILESTONE), data = "milestone" },
+                    { name = GetString(LUIE_STRING_CA_TIMED_ACTIVITY_FREQ_COMPLETE),  data = "complete"  },
+                }
+            end,
+            getFunction = function ()
+                return Settings.Notify.TimedActivityProgressFrequency or Defaults.Notify.TimedActivityProgressFrequency
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.Notify.TimedActivityProgressFrequency = item.data
+            end,
+            default = Defaults.Notify.TimedActivityProgressFrequency,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable or not IsTimedActivitySystemAvailable()
             end
         }
 
@@ -8842,7 +9302,6 @@ function ChatAnnouncements.CreateConsoleSettings()
                 return not LUIE.SV.ChatAnnouncements_Enable
             end
         }
-
     end)
 
     -- Create back button

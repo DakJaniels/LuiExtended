@@ -11,7 +11,7 @@ local zo_strformat = zo_strformat
 local GetItemLinkName = GetItemLinkName
 
 --- @class (partial) UnitNames
-local unitNames =
+Data.UnitNames =
 {
 
     ----------------------------------------------------------------
@@ -631,6 +631,3 @@ local unitNames =
     NPC_Coldsnap_Ogre = "Coldsnap Ogre",
     Boss_Icestalker = "Icestalker",
 }
-
---- @class (partial) UnitNames
-Data.UnitNames = unitNames

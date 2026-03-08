@@ -1,0 +1,57 @@
+*******************
+*** Enums Added ***
+*******************
+
+* NOTIFICATION_TYPE_HOUSE_TOURS_HOUSE_RECOMMENDED
+
+
+* HOUSE_TOURS_LISTING_TAG_CELESTIAL
+* HOUSE_TOURS_LISTING_TAG_EXHIBITS
+* HOUSE_TOURS_LISTING_TAG_HORROR
+* HOUSE_TOURS_LISTING_TAG_MAZES
+* HOUSE_TOURS_LISTING_TAG_RESIDENCES
+* HOUSE_TOURS_LISTING_TAG_RUINS
+* HOUSE_TOURS_LISTING_TAG_TAVERNS
+
+
+
+*********************
+*** Enums Removed ***
+*********************
+
+* HOUSE_TOURS_LISTING_TAG_CONVENTIONAL
+* HOUSE_TOURS_LISTING_TAG_SINISTER
+
+
+
+*************************
+*** Functions Removed ***
+*************************
+
+* RemoveHouseToursTopRecommendedHouseNotificationByHouseId(*integer* _houseId_)
+
+
+
+*************************
+*** Functions Changed ***
+*************************
+
+Added _isFromInit_
+* EVENT_CRAFTED_ABILITY_LOCK_STATE_CHANGED (*integer* _craftedAbilityDefId_, *bool* _isUnlocked_, *bool* _isFromInit_)
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_HOUSE_TOURS_LISTING_RECOMMENDED_NOTIFICATIONS_UPDATED
+
+
+
+**********************
+*** Events Removed ***
+**********************
+
+* EVENT_HOUSE_TOURS_LISTING_RECOMMENDED_NOTIFICATION_ADDED (*integer* _houseId_)
+* EVENT_HOUSE_TOURS_LISTING_RECOMMENDED_NOTIFICATION_REMOVED (*integer* _houseId_)

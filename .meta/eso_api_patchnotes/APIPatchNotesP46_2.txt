@@ -1,0 +1,28 @@
+******************
+***Enums Added ***
+******************
+
+* RETURNING_PLAYER_INSTANCE_JUMP_RESULT_CANT_JUMP_FROM_ZONE
+
+* HOUSING_REQUEST_RESULT_FURNITURE_VAULT_COLLECTIBLE_BLACKLISTED
+
+* ITEMTYPE_CONTAINER_STACKABLE
+
+
+
+********************
+***Enums Removed ***
+********************
+
+* HOUSING_REQUEST_RESULT_REUSE_ME1
+
+* ITEM_USE_TYPE_ROLL_LOOT_TABLE
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* GetNextFurnitureVaultSlotId(*integer:nilable* _lastSlotId_)
+** _Returns:_ *integer:nilable* _nextSlotId_

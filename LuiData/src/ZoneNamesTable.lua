@@ -8,7 +8,7 @@ local LuiData = LuiData
 local Data = LuiData.Data
 
 --- @class (partial) ZoneNames
-local zoneNames =
+Data.ZoneNames =
 {
 
     ----------------------------------------------------------------
@@ -61,6 +61,3 @@ local zoneNames =
 
     Zone_Tempest_Island = "Tempest Island",
 }
-
---- @class (partial) ZoneNames
-Data.ZoneNames = zoneNames

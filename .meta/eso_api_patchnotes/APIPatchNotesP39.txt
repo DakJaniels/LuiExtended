@@ -1,0 +1,151 @@
+******************
+***Enums Added ***
+******************
+
+* NOTIFICATION_TYPE_DISABLED_ADDON
+
+
+* ABILITY_TYPE_PERSISTENTRADIUS
+
+
+* SPECIALIZED_COLLECTIBLE_TYPE_HOUSEGUEST
+
+
+* GUILD_BANK_INVENTORY_FULL
+
+
+* UI_SETTING_SHOW_PVP_KILL_FEED_NOTIFICATIONS
+
+
+* RESPEC_RESULT_UNKNOWN_REPEC_REQUEST_TYPE
+
+
+h5. ForcedZoneExitCause
+* INSTANCE_KICK_REASON_INSTANCE_SHUTDOWN
+* INSTANCE_KICK_REASON_NONE
+* INSTANCE_KICK_REASON_NOT_IN_REQUIRED_GROUP
+* INSTANCE_KICK_REASON_WANT_TO_LEAVE
+
+
+* COMPANION_SUMMON_RESULT_BLOCKED_BY_ASSISTANT
+* COMPANION_SUMMON_RESULT_REMOVED_FOR_ASSISTANT
+
+
+h5. OfficialLanguage
+* OFFICIAL_LANGUAGE_CHINESE_S
+* OFFICIAL_LANGUAGE_ENGLISH
+* OFFICIAL_LANGUAGE_FRENCH
+* OFFICIAL_LANGUAGE_GERMAN
+* OFFICIAL_LANGUAGE_JAPANESE
+* OFFICIAL_LANGUAGE_RUSSIAN
+* OFFICIAL_LANGUAGE_SPANISH
+
+
+
+********************
+***Globals Added ***
+********************
+
+
+
+**********************
+***Globals Removed ***
+**********************
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* GetCurrentSynergyInfo()
+** _Returns:_ *bool* _hasSynergy_, *string* _synergyName_, *textureName* _iconFilename_, *string* _prompt_, *integer* _priority_
+
+
+* GetInstanceKickReason()
+** _Returns:_ *[ForcedZoneExitCause|#ForcedZoneExitCause]* _reason_
+
+
+* GetNumKillLocationAllianceKills(*luaindex* _index_, *[Alliance|#Alliance]* _alliance_)
+** _Returns:_ *integer* _numKills_
+
+
+* ClearActivityFinderSearch()
+
+
+* StartActivityFinderSearch()
+** _Returns:_ *[ActivityQueueResult|#ActivityQueueResult]* _result_
+
+
+* GetNumAttainSkillLineRanksInAchievement(*integer* _achievementId_)
+** _Returns:_ *integer* _numAttainSkillLineRanks_
+
+
+* GetNumSkyshardsInAchievement(*integer* _achievementId_)
+** _Returns:_ *integer* _numSkyshards_
+
+
+* ClearForceDisabledAddOnNotification(*luaindex* _disabledAddonIndex_)
+
+
+* GetForceDisabledAddOnInfo(*luaindex* _disabledAddonIndex_)
+** _Returns:_ *string* _addonName_, *bool* _shouldShowNotification_
+
+
+* GetNumForceDisabledAddOns()
+** _Returns:_ *integer* _numDisabledAddons_
+
+
+* WasAddOnDetected(*string* _addOnName_)
+** _Returns:_ *bool* _wasDetected_
+
+
+h3. WindowManager
+* GetMouseFocusControl()
+** _Returns:_ *object* _mouseFocusControl_
+
+
+
+************************
+***Functions Removed ***
+************************
+
+* GetSynergyInfo()
+** _Returns:_ *string:nilable* _synergyName_, *textureName:nilable* _iconFilename_, *integer:nilable* _priority_
+
+
+* IsInTutorialZone()
+** _Returns:_ *bool* _isInTutorialZone_
+
+
+* ClearGroupFinderSearch()
+
+
+* StartGroupFinderSearch()
+** _Returns:_ *[ActivityQueueResult|#ActivityQueueResult]* _result_
+
+
+
+************************
+***Functions Changed ***
+************************
+
+Added _stackCountHouseBanks_
+* GetItemLinkStacks(*string* _itemLink_)
+** _Returns:_ *integer* _stackCountBackpack_, *integer* _stackCountBank_, *integer* _stackCountCraftBag_, *integer* _stackCountHouseBanks_
+
+
+Added _arg7_
+* LocalizeString(*string* _formatString_, *string* _arg1_, *string* _arg2_, *string* _arg3_, *string* _arg4_, *string* _arg5_, *string* _arg6_, *string* _arg7_)
+** _Returns:_ *string* _localizedString_
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_PVP_KILL_FEED_DEATH (*string* _killLocation_, *string* _killerPlayerCharacterName_, *string* _killerPlayerDisplayName_, *[Alliance|#Alliance]* _killerPlayerAlliance_, *integer* _killerPlayerRank_, *string* _victimPlayerCharacterName_, *string* _victimPlayerDisplayName_, *[Alliance|#Alliance]* _victimPlayerAlliance_, *integer* _victimPlayerRank_)
+
+
+* EVENT_FORCE_DISABLED_ADDONS_UPDATED

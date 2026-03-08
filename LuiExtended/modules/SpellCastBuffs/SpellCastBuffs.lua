@@ -401,8 +401,12 @@ function SpellCastBuffs.Initialize(enabled)
     eventManager:AddFilterForEvent(moduleName .. "Disposition", EVENT_DISPOSITION_UPDATE, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     -- Buff Events
-    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_EFFECT_CHANGED, SpellCastBuffs.OnEffectChanged)
-    eventManager:RegisterForEvent(moduleName .. "Target", EVENT_EFFECT_CHANGED, SpellCastBuffs.OnEffectChanged)
+    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_EFFECT_CHANGED, function (eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+        SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+    end)
+    eventManager:RegisterForEvent(moduleName .. "Target", EVENT_EFFECT_CHANGED, function (eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+        SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+    end)
     eventManager:AddFilterForEvent(moduleName .. "Player", EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
     eventManager:AddFilterForEvent(moduleName .. "Target", EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
@@ -430,20 +434,32 @@ function SpellCastBuffs.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_BOSSES_CHANGED, SpellCastBuffs.AddNameOnBossEngaged)
 
     -- Stealth Events
-    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_STEALTH_STATE_CHANGED, SpellCastBuffs.StealthStateChanged)
-    eventManager:RegisterForEvent(moduleName .. "Reticleover", EVENT_STEALTH_STATE_CHANGED, SpellCastBuffs.StealthStateChanged)
+    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_STEALTH_STATE_CHANGED, function (eventId, unitTag, stealthState)
+        SpellCastBuffs.StealthStateChanged(unitTag, stealthState)
+    end)
+    eventManager:RegisterForEvent(moduleName .. "Reticleover", EVENT_STEALTH_STATE_CHANGED, function (eventId, unitTag, stealthState)
+        SpellCastBuffs.StealthStateChanged(unitTag, stealthState)
+    end)
     eventManager:AddFilterForEvent(moduleName .. "Player", EVENT_STEALTH_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
     eventManager:AddFilterForEvent(moduleName .. "Reticleover", EVENT_STEALTH_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     -- Disguise Events
-    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_DISGUISE_STATE_CHANGED, SpellCastBuffs.DisguiseStateChanged)
-    eventManager:RegisterForEvent(moduleName .. "Reticleover", EVENT_DISGUISE_STATE_CHANGED, SpellCastBuffs.DisguiseStateChanged)
+    eventManager:RegisterForEvent(moduleName .. "Player", EVENT_DISGUISE_STATE_CHANGED, function (eventId, unitTag, disguiseState)
+        SpellCastBuffs.DisguiseStateChanged(unitTag, disguiseState)
+    end)
+    eventManager:RegisterForEvent(moduleName .. "Reticleover", EVENT_DISGUISE_STATE_CHANGED, function (eventId, unitTag, disguiseState)
+        SpellCastBuffs.DisguiseStateChanged(unitTag, disguiseState)
+    end)
     eventManager:AddFilterForEvent(moduleName .. "Player", EVENT_DISGUISE_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
     eventManager:AddFilterForEvent(moduleName .. "Reticleover", EVENT_DISGUISE_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     -- Artificial Effects Handling
-    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_ADDED, SpellCastBuffs.ArtificialEffectUpdate)
-    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_REMOVED, SpellCastBuffs.ArtificialEffectUpdate)
+    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_ADDED, function (eventId, artificialEffectId)
+        SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
+    end)
+    eventManager:RegisterForEvent(moduleName, EVENT_ARTIFICIAL_EFFECT_REMOVED, function (eventId, artificialEffectId)
+        SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
+    end)
 
     -- Activate/Deactivate Player, Player Dead/Alive, Vibration, and Unit Death
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, SpellCastBuffs.OnPlayerActivated)
@@ -454,11 +470,15 @@ function SpellCastBuffs.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_UNIT_DEATH_STATE_CHANGED, SpellCastBuffs.OnDeath)
 
     -- Mount Events
-    eventManager:RegisterForEvent(moduleName, EVENT_MOUNTED_STATE_CHANGED, SpellCastBuffs.MountStatus)
+    eventManager:RegisterForEvent(moduleName, EVENT_MOUNTED_STATE_CHANGED, function (_, mounted)
+        SpellCastBuffs.MountStatus(mounted)
+    end)
     eventManager:RegisterForEvent(moduleName, EVENT_COLLECTIBLE_USE_RESULT, SpellCastBuffs.CollectibleUsed)
 
     -- Inventory Events
-    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, SpellCastBuffs.DisguiseItem)
+    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function (eventId, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
+        SpellCastBuffs.DisguiseItem(bagId, slotIndex)
+    end)
     eventManager:AddFilterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
 
     -- Duel (For resolving Target Battle Spirit Status)
@@ -1324,6 +1344,9 @@ function SpellCastBuffs.ResetSingleIcon(container, buff)
 end
 
 -- Right Click Cancel Buff function
+--- @param self SpellCastBuffs_BuffIcon_Control
+--- @param button number
+--- @param upInside boolean
 function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
     if upInside and button == MOUSE_BUTTON_INDEX_RIGHT then
         ClearMenu()
@@ -1379,7 +1402,7 @@ function SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
 end
 
 local function ClearStickyTooltip()
-    ClearTooltip(GameTooltip)
+    ClearTooltip(InformationTooltip)
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
 end
 
@@ -1401,9 +1424,9 @@ local buffTypes =
 function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
     -- Add bottom divider and info if present:
     if SpellCastBuffs.SV.TooltipAbilityId or SpellCastBuffs.SV.TooltipBuffType then
-        ZO_Tooltip_AddDivider(GameTooltip)
-        GameTooltip:SetVerticalPadding(4)
-        GameTooltip:AddLine("", "", ZO_NORMAL_TEXT:UnpackRGB())
+        ZO_Tooltip_AddDivider(InformationTooltip)
+        InformationTooltip:SetVerticalPadding(4)
+        InformationTooltip:AddLine("", "", ZO_NORMAL_TEXT:UnpackRGB())
         -- Add Ability ID Line
         if SpellCastBuffs.SV.TooltipAbilityId then
             local labelAbilityId = control.effectId or "None"
@@ -1411,8 +1434,8 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
             if isArtificial then
                 labelAbilityId = "Artificial"
             end
-            GameTooltip:AddHeaderLine("Ability ID", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
-            GameTooltip:AddHeaderLine(labelAbilityId, "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
+            InformationTooltip:AddHeaderLine("Ability ID", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
+            InformationTooltip:AddHeaderLine(labelAbilityId, "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
             detailsLine = detailsLine + 1
         end
 
@@ -1443,8 +1466,8 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
                 end
             end
 
-            GameTooltip:AddHeaderLine("Type", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
-            GameTooltip:AddHeaderLine(buffTypes[buffType], "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
+            InformationTooltip:AddHeaderLine("Type", "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
+            InformationTooltip:AddHeaderLine(buffTypes[buffType], "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
             detailsLine = detailsLine + 1
         end
     end
@@ -1454,7 +1477,7 @@ end
 function SpellCastBuffs.Buff_OnMouseEnter(control)
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
 
-    InitializeTooltip(GameTooltip, control, BOTTOM, 0, -5, TOP)
+    InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -5, TOP)
     -- Setup Text
     local tooltipText = ""
     local detailsLine
@@ -1462,19 +1485,19 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
     local tooltipTitle = zo_strformat(SI_ABILITY_TOOLTIP_NAME, control.effectName)
     if control.isArtificial then
         tooltipText = GetArtificialEffectTooltipText(control.effectId)
-        GameTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
+        InformationTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
         detailsLine = 3
         if SpellCastBuffs.SV.TooltipEnable then
-            GameTooltip:SetVerticalPadding(1)
-            ZO_Tooltip_AddDivider(GameTooltip)
-            GameTooltip:SetVerticalPadding(5)
-            GameTooltip:AddLine(tooltipText, "", colorText:UnpackRGBA())
+            InformationTooltip:SetVerticalPadding(1)
+            ZO_Tooltip_AddDivider(InformationTooltip)
+            InformationTooltip:SetVerticalPadding(5)
+            InformationTooltip:AddLine(tooltipText, "", colorText:UnpackRGBA())
             detailsLine = 5
         end
         SpellCastBuffs.TooltipBottomLine(control, detailsLine, true)
     else
         if not SpellCastBuffs.SV.TooltipEnable then
-            GameTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
+            InformationTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
             detailsLine = 3
             SpellCastBuffs.TooltipBottomLine(control, detailsLine)
             return
@@ -1560,7 +1583,12 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
         -- Set the Tooltip to be default if custom tooltips aren't enabled
         if not LUIE.SpellCastBuffs.SV.TooltipCustom then
             tooltipText = GetAbilityEffectDescription(control.buffSlot)
-            tooltipText = StringOnlyGSUB(tooltipText, "\n$", "") -- Remove blank end line
+            if not tooltipText or tooltipText == "" then
+                tooltipText = GetAbilityDescription(control.effectId, nil, "player")
+            end
+            if tooltipText then
+                tooltipText = StringOnlyGSUB(tooltipText, "\n$", "") -- Remove blank end line
+            end
         end
 
         local thirdLine
@@ -1587,44 +1615,46 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
 
         detailsLine = 5
 
-        GameTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
+        InformationTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
         if tooltipText ~= "" and tooltipText ~= nil then
-            GameTooltip:SetVerticalPadding(1)
-            ZO_Tooltip_AddDivider(GameTooltip)
-            GameTooltip:SetVerticalPadding(5)
-            GameTooltip:AddLine(tooltipText, "", colorText:UnpackRGBA())
+            InformationTooltip:SetVerticalPadding(1)
+            ZO_Tooltip_AddDivider(InformationTooltip)
+            InformationTooltip:SetVerticalPadding(5)
+            InformationTooltip:AddLine(tooltipText, "", colorText:UnpackRGBA())
         end
         if thirdLine ~= "" and thirdLine ~= nil then
             if tooltipText == "" or tooltipText == nil then
-                GameTooltip:SetVerticalPadding(1)
-                ZO_Tooltip_AddDivider(GameTooltip)
-                GameTooltip:SetVerticalPadding(5)
+                InformationTooltip:SetVerticalPadding(1)
+                ZO_Tooltip_AddDivider(InformationTooltip)
+                InformationTooltip:SetVerticalPadding(5)
             end
             detailsLine = 7
-            GameTooltip:AddLine(thirdLine, "", ZO_NORMAL_TEXT:UnpackRGB())
+            InformationTooltip:AddLine(thirdLine, "", ZO_NORMAL_TEXT:UnpackRGB())
         end
 
         SpellCastBuffs.TooltipBottomLine(control, detailsLine)
 
         -- Tooltip Debug
-        -- GameTooltip:SetAbilityId(117391)
+        -- InformationTooltip:SetAbilityId(117391)
 
         -- Debug show default Tooltip on my account
         -- if LUIE.PlayerDisplayName == "@ArtOfShred" or LUIE.PlayerDisplayName == "@ArtOfShredPTS" --[[or LUIE.PlayerDisplayName == '@dack_janiels']] then
         if LUIE.IsDevDebugEnabled() then
-            GameTooltip:AddLine("Default Tooltip Below:", "", colorText:UnpackRGBA())
+            InformationTooltip:AddLine("Default Tooltip Below:", "", colorText:UnpackRGBA())
 
-            local newtooltipText
-
-            if GetAbilityEffectDescription(control.buffSlot) ~= "" then
-                newtooltipText = GetAbilityEffectDescription(control.buffSlot)
+            local newtooltipText = GetAbilityEffectDescription(control.buffSlot)
+            if not newtooltipText or newtooltipText == "" then
+                newtooltipText = GetAbilityDescription(control.effectId, nil, "player")
             end
-            if newtooltipText ~= "" and newtooltipText ~= nil then
-                GameTooltip:SetVerticalPadding(1)
-                ZO_Tooltip_AddDivider(GameTooltip)
-                GameTooltip:SetVerticalPadding(5)
-                GameTooltip:AddLine(newtooltipText, "", colorText:UnpackRGBA())
+            if newtooltipText and newtooltipText ~= "" then
+                newtooltipText = StringOnlyGSUB(newtooltipText, "\n$", "")
+            else
+                newtooltipText = "(no default description)"
             end
+            InformationTooltip:SetVerticalPadding(1)
+            ZO_Tooltip_AddDivider(InformationTooltip)
+            InformationTooltip:SetVerticalPadding(5)
+            InformationTooltip:AddLine(newtooltipText, "", colorText:UnpackRGBA())
         end
     end
 end
@@ -1634,7 +1664,7 @@ function SpellCastBuffs.Buff_OnMouseExit(control)
     if SpellCastBuffs.SV.TooltipSticky > 0 then
         eventManager:RegisterForUpdate(moduleName .. "StickyTooltip", SpellCastBuffs.SV.TooltipSticky, ClearStickyTooltip)
     else
-        ClearTooltip(GameTooltip)
+        ClearTooltip(InformationTooltip)
     end
 end
 
@@ -1684,127 +1714,81 @@ function SpellCastBuffs.ApplyFont()
     end
 end
 
--- Constants for artificial effect types
-local ARTIFICIAL_EFFECTS =
-{
-    ESO_PLUS = 0,
-    BATTLE_SPIRIT = 1,
-    BATTLE_SPIRIT_IC = 2,
-    BG_DESERTER = 3
-}
-
--- Configuration for special effect durations
-local EFFECT_DURATIONS =
-{
-    [ARTIFICIAL_EFFECTS.BG_DESERTER] =
-    {
-        duration = 300000,
-        effectType = BUFF_EFFECT_TYPE_BUFF
-    }
-}
-
--- Handles Battle Spirit effect ID conversion and tooltip assignment
-local function handleBattleSpiritEffectId(activeEffectId)
-    local tooltip = nil
-    local artificial = true
-    local effectId = activeEffectId
-
-    -- Handle different effect types
-    if activeEffectId == ARTIFICIAL_EFFECTS.ESO_PLUS then
-        tooltip = Tooltips.Innate_ESO_Plus
-    elseif activeEffectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT then
-        tooltip = Tooltips.Innate_Battle_Spirit
-        effectId = 999014
-        artificial = false
-    elseif activeEffectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT_IC then
-        tooltip = Tooltips.Innate_Battle_Spirit_Imperial_City
-        effectId = 999014
-        artificial = false
-    end
-
-    return effectId, tooltip, artificial
-end
-
--- Handles removal of artificial effects
-local function handleEffectRemoval(effectId)
-    local removeEffect = effectId
-    if effectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT or effectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT_IC then
-        removeEffect = 999014
-    end
-
-    local displayName = GetDisplayName()
-    local context = SpellCastBuffs.DetermineContextSimple("player1", removeEffect, displayName)
-    SpellCastBuffs.EffectsList[context][removeEffect] = nil
-end
-
--- Creates effect data structure
-local function createEffectData(effectId, displayName, iconFile, effectType, startTime, endTime, duration, tooltip, artificial)
-    return
-    {
-        target = SpellCastBuffs.DetermineTarget("player1"),
-        type = effectType,
-        id = effectId,
-        name = displayName,
-        icon = iconFile,
-        tooltip = tooltip,
-        dur = duration,
-        starts = startTime,
-        ends = endTime,
-        forced = "long",
-        restart = true,
-        iconNum = 0,
-        artificial = artificial,
-    }
-end
-
--- Handles BG deserter specific logic
-local function handleBGDeserterEffect(startTime)
-    local duration = EFFECT_DURATIONS[ARTIFICIAL_EFFECTS.BG_DESERTER].duration
-    local endTime = startTime + (GetLFGCooldownTimeRemainingSeconds(LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE) * 1000)
-    return duration, endTime, EFFECT_DURATIONS[ARTIFICIAL_EFFECTS.BG_DESERTER].effectType
-end
-
--- Main function for handling artificial effects
-function SpellCastBuffs.ArtificialEffectUpdate(eventCode, effectId)
-    -- Early exit if player buffs are hidden
+-- Runs on the EVENT_ARTIFICIAL_EFFECT_ADDED / EVENT_ARTIFICIAL_EFFECT_REMOVED listener.
+-- This handler fires whenever an ArtificialEffectId is added or removed
+--- @param artificialEffectId integer
+function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
     if SpellCastBuffs.SV.HidePlayerBuffs then
         return
     end
 
-    -- Handle effect removal if effectId is provided
-    if effectId then
-        handleEffectRemoval(effectId)
+    if artificialEffectId then
+        local removeEffect = artificialEffectId
+        -- Battle Spirit handling (1, 2): set to fake id so it matches the target display
+        if artificialEffectId == 1 or artificialEffectId == 2 then
+            removeEffect = 999014
+        end
+        -- Artificial effects are always stored under "player1"; remove from there.
+        local context = "player1"
+        SpellCastBuffs.EffectsList[context][removeEffect] = nil
     end
 
-    -- Process active artificial effects
-    for activeEffectId in ZO_GetNextActiveArtificialEffectIdIter do
-        -- Skip if effect should be ignored based on settings
-        if (activeEffectId == ARTIFICIAL_EFFECTS.ESO_PLUS and SpellCastBuffs.SV.IgnoreEsoPlusPlayer) or
-        ((activeEffectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT or activeEffectId == ARTIFICIAL_EFFECTS.BATTLE_SPIRIT_IC) and
-            SpellCastBuffs.SV.IgnoreBattleSpiritPlayer) then
-            return
+    for effectId in ZO_GetNextActiveArtificialEffectIdIter do
+        -- Skip only this effect when its "show" setting is off; do not bail out of the loop.
+        local skip = (effectId == 0 and SpellCastBuffs.SV.IgnoreEsoPlusPlayer) or
+            ((effectId == 1 or effectId == 2) and SpellCastBuffs.SV.IgnoreBattleSpiritPlayer)
+        if skip then
+            -- continue to next effect
+        else
+            local displayName, iconFile, effectType, _, timeStartedS, timeEndingS = GetArtificialEffectInfo(effectId)
+            local duration = 0
+
+            if effectId == 3 then
+                duration = 300000
+                timeEndingS = timeStartedS + (GetLFGCooldownTimeRemainingSeconds(LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE) * 1000)
+                effectType = BUFF_EFFECT_TYPE_BUFF
+            elseif effectId == 0 or effectId == 1 or effectId == 2 then
+                -- ESO Plus and Battle Spirit are permanent; no timer.
+                duration = 0
+                timeEndingS = nil
+            end
+
+            local tooltip = nil
+            local artificial = true
+            if effectId == 0 then
+                tooltip = Tooltips.Innate_ESO_Plus
+            elseif effectId == 1 or effectId == 2 then
+                if effectId == 1 then
+                    tooltip = Tooltips.Innate_Battle_Spirit
+                else
+                    tooltip = Tooltips.Innate_Battle_Spirit_Imperial_City
+                end
+                effectId = 999014
+                artificial = false
+            end
+
+            -- Route artificial effects (Battle Spirit, ESO Plus, BG Deserter, etc.) always to player context
+            -- so they land in player_long when "Show Battle Spirit on Player" / LongTermEffects are enabled.
+            -- If we used DetermineContextSimple, 999014 in PromBuffTable would promote to promb_player and
+            -- the effect would show in prominent buffs instead of the long-term player container.
+            local context = "player1"
+            SpellCastBuffs.EffectsList[context][effectId] =
+            {
+                target = SpellCastBuffs.DetermineTarget(context),
+                type = effectType,
+                id = effectId,
+                name = displayName,
+                icon = iconFile,
+                tooltip = tooltip,
+                dur = duration,
+                starts = timeStartedS,
+                ends = timeEndingS,
+                forced = "long",
+                restart = true,
+                iconNum = 0,
+                artificial = artificial,
+            }
         end
-
-        -- Get effect info
-        local displayName, iconFile, effectType, _, startTime = GetArtificialEffectInfo(activeEffectId)
-        local duration = 0
-        local endTime = nil
-
-        -- Handle BG deserter specific case
-        if activeEffectId == ARTIFICIAL_EFFECTS.BG_DESERTER then
-            duration, endTime, effectType = handleBGDeserterEffect(startTime)
-        end
-
-        local tooltip, artificial
-        -- Process effects and get tooltips
-        effectId, tooltip, artificial = handleBattleSpiritEffectId(activeEffectId)
-
-        -- Create and store effect
-        local context = SpellCastBuffs.DetermineContextSimple("player1", effectId, displayName)
-        SpellCastBuffs.EffectsList[context][effectId] = createEffectData(
-            effectId, displayName, iconFile, effectType, startTime,
-            endTime, duration, tooltip, artificial
-        )
     end
 end
 
@@ -2076,23 +2060,23 @@ function SpellCastBuffs.OnPlayerActivated(eventCode)
 
     -- Resolve Mounted icon
     if not SpellCastBuffs.SV.IgnoreMountPlayer and IsMounted() then
-        zo_callLater(function ()
-                         SpellCastBuffs.MountStatus(nil, true)
-                     end, 50)
+        LUIE_callLater(function ()
+                           SpellCastBuffs.MountStatus(true)
+                       end, 50)
     end
 
     -- Resolve Disguise Icon
     if not SpellCastBuffs.SV.IgnoreDisguise then
-        zo_callLater(function ()
-                         SpellCastBuffs.DisguiseItem(nil, BAG_WORN, 10, nil, nil, nil, nil, nil, nil, nil, nil)
-                     end, 50)
+        LUIE_callLater(function ()
+                           SpellCastBuffs.DisguiseItem(BAG_WORN, 10)
+                       end, 50)
     end
 
     -- Resolve Assistant Icon
     if not SpellCastBuffs.SV.IgnorePet or not SpellCastBuffs.SV.IgnoreAssistant then
-        zo_callLater(function ()
-                         SpellCastBuffs.CollectibleBuff()
-                     end, 50)
+        LUIE_callLater(function ()
+                           SpellCastBuffs.CollectibleBuff()
+                       end, 50)
     end
 
     -- Resolve Werewolf

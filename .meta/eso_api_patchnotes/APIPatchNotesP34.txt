@@ -1,0 +1,1343 @@
+******************
+***Enums Added ***
+******************
+
+* BACKGROUND_LIST_FILTER_TARGET_TRIBUTE_PATRON_ID
+
+
+* CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_TRIBUTE_CARD_UPDATED
+* CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_CLUB_RANK_CHANGED
+* CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED
+
+
+* LEADERBOARD_TYPE_TRIBUTE
+
+
+* LOOT_TYPE_TRIBUTE_CARD_UPGRADE
+
+
+* LOOT_TABLE_ENTRY_TYPE_TRIBUTE_CARD_UPGRADE
+
+
+* PROGRESS_REASON_FISSURE_COMPLETED
+
+
+* REGISTER_FILTER_PATRON_DRAFT_ID
+
+
+* SOCIAL_RESULT_TRIBUTE_NOT_FRIENDS
+
+
+* TUTORIAL_TRIGGER_REUSE_ME1
+* TUTORIAL_TRIGGER_TRIBUTE_AGENT_CARD_SEEN
+* TUTORIAL_TRIGGER_TRIBUTE_CARD_UPGRADED
+* TUTORIAL_TRIGGER_TRIBUTE_CHOICE_CARD_SEEN
+* TUTORIAL_TRIGGER_TRIBUTE_CLUE_ACQUIRED
+* TUTORIAL_TRIGGER_TRIBUTE_CONTRACT_AGENT_CARD_SEEN
+* TUTORIAL_TRIGGER_TRIBUTE_CONTRACT_CARD_SEEN
+* TUTORIAL_TRIGGER_TRIBUTE_LOSE_PRESTIGE
+* TUTORIAL_TRIGGER_TRIBUTE_PVP_VICTORY
+* TUTORIAL_TRIGGER_TRIBUTE_TAUNT_AGENT_CARD_SEEN
+
+
+* UI_SYSTEM_TRIBUTE
+* UI_SYSTEM_TRIBUTE_FINDER
+
+
+* ACTIVITY_QUEUE_RESULT_REQUEST_QUEUED
+* ACTIVITY_QUEUE_RESULT_REQUEST_QUEUE_FAILURE
+* ACTIVITY_QUEUE_RESULT_TRIBUTE_LFG_DISABLED
+
+
+* LFG_ACTIVITY_TRIBUTE_CASUAL
+* LFG_ACTIVITY_TRIBUTE_COMPETITIVE
+
+
+* LFG_COOLDOWN_TRIBUTE_DESERTED
+* LFG_COOLDOWN_TRIBUTE_REWARD_GRANTED
+
+
+* CHAPTER_DUNE
+
+
+* COLLECTIBLE_CATEGORY_SPECIALIZATION_TRIBUTE_PATRONS
+
+
+* COLLECTIBLE_CATEGORY_TYPE_TRIBUTE_PATRON
+
+
+* CURRENCY_CHANGE_REASON_TRIBUTE
+
+
+* GUILD_LANGUAGE_ATTRIBUTE_VALUE_SPANISH
+
+
+* CHAT_CHANNEL_ZONE_LANGUAGE_6
+
+
+* CHAT_CATEGORY_ZONE_SPANISH
+
+
+* OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_SPA
+
+
+* INTERFACE_COLOR_TYPE_TRIBUTE_RESOURCE
+* INTERFACE_COLOR_TYPE_TRIBUTE_TIER
+
+
+* SPECIALIZED_ITEMTYPE_TROPHY_TRIBUTE_CLUE
+
+
+* AUDIO_SETTING_INTRO_MUSIC
+
+
+* COMPANION_REACTION_FREQUENCY_RATE_VERY_LOW
+
+
+* SETTING_PANEL_ACCESSIBILITY
+
+
+* SETTING_TYPE_ACCESSIBILITY
+
+
+* REWARD_ENTRY_TYPE_TRIBUTE_CARD_UPGRADE
+* REWARD_ENTRY_TYPE_TRIBUTE_CLUB_EXPERIENCE
+
+
+* REWARD_ITEM_TYPE_TRIBUTE_CARD_UPGRADE
+
+
+* REWARD_TYPE_TRIBUTE_CLUB_EXPERIENCE
+
+
+* HOTBAR_CATEGORY_ALLY_WHEEL
+* HOTBAR_CATEGORY_EMOTE_WHEEL
+* HOTBAR_CATEGORY_MEMENTO_WHEEL
+* HOTBAR_CATEGORY_QUICKSLOT_WHEEL
+* HOTBAR_CATEGORY_TOOL_WHEEL
+
+
+* ARMORY_BUILD_RESTORE_RESULT_EFFECT_COUNT_LIMIT
+* ARMORY_BUILD_RESTORE_RESULT_IN_COMBAT
+* ARMORY_BUILD_RESTORE_RESULT_IN_WEREWOLF_FORM
+* ARMORY_BUILD_RESTORE_RESULT_NO_INTERACTION
+* ARMORY_BUILD_RESTORE_RESULT_SPECIAL_HOTBAR_ACTIVE
+
+
+* ARMORY_BUILD_SAVE_RESULT_EFFECT_COUNT_LIMIT
+* ARMORY_BUILD_SAVE_RESULT_IN_COMBAT
+* ARMORY_BUILD_SAVE_RESULT_IN_WEREWOLF_FORM
+* ARMORY_BUILD_SAVE_RESULT_NO_INTERACTION
+* ARMORY_BUILD_SAVE_RESULT_SPECIAL_HOTBAR_ACTIVE
+
+
+* ACHIEVEMENT_PERSISTENCE_UNDEFINED
+
+
+* CHATTER_START_TRIBUTE
+
+
+* CHATTER_END_TRIBUTE
+
+
+* INTERACTION_TRIBUTE
+
+
+* ACTION_RESULT_SELF_PLAYING_TRIBUTE
+* ACTION_RESULT_TARGET_PLAYING_TRIBUTE
+
+
+h5. LeaderboardDataReadyState
+* LEADERBOARD_DATA_READY
+* LEADERBOARD_DATA_RESPONSE_PENDING
+
+
+h5. CombatMechanicFlags
+* COMBAT_MECHANIC_FLAGS_DAEDRIC
+* COMBAT_MECHANIC_FLAGS_HEALTH
+* COMBAT_MECHANIC_FLAGS_MAGICKA
+* COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA
+* COMBAT_MECHANIC_FLAGS_STAMINA
+* COMBAT_MECHANIC_FLAGS_ULTIMATE
+* COMBAT_MECHANIC_FLAGS_WEREWOLF
+
+
+h5. MundusStone
+* MUNDUS_STONE_APPRENTICE
+* MUNDUS_STONE_ATRONACH
+* MUNDUS_STONE_INVALID
+* MUNDUS_STONE_LADY
+* MUNDUS_STONE_LORD
+* MUNDUS_STONE_LOVER
+* MUNDUS_STONE_MAGE
+* MUNDUS_STONE_RITUAL
+* MUNDUS_STONE_SERPENT
+* MUNDUS_STONE_SHADOW
+* MUNDUS_STONE_STEED
+* MUNDUS_STONE_THIEF
+* MUNDUS_STONE_TOWER
+* MUNDUS_STONE_WARRIOR
+
+
+h5. AccessibilitySetting
+* ACCESSIBILITY_SETTING_ACCESSIBILITY_MODE
+* ACCESSIBILITY_SETTING_SEND_TRANSCRIPT_TO_TEXT_CHAT
+* ACCESSIBILITY_SETTING_TEXT_CHAT_ACCESSIBILITY
+* ACCESSIBILITY_SETTING_VOICE_CHAT_ACCESSIBILITY
+
+
+h5. CompanionRapportAdjustmentAmount
+* RAPPORT_ADJUSTMENT_AMOUNT_ASTRONOMICAL
+* RAPPORT_ADJUSTMENT_AMOUNT_CUSTOM_A
+* RAPPORT_ADJUSTMENT_AMOUNT_CUSTOM_B
+* RAPPORT_ADJUSTMENT_AMOUNT_LARGE
+* RAPPORT_ADJUSTMENT_AMOUNT_MEDIUM
+* RAPPORT_ADJUSTMENT_AMOUNT_MINISCULE
+* RAPPORT_ADJUSTMENT_AMOUNT_NONE
+* RAPPORT_ADJUSTMENT_AMOUNT_SMALL
+* RAPPORT_ADJUSTMENT_AMOUNT_VERY_ASTRONOMICAL
+* RAPPORT_ADJUSTMENT_AMOUNT_VERY_LARGE
+
+
+h5. TributeBoardLocation
+* TRIBUTE_BOARD_LOCATION_CREATED_CARD_INTRO
+* TRIBUTE_BOARD_LOCATION_DOCKS
+* TRIBUTE_BOARD_LOCATION_DOCKS_DECK
+* TRIBUTE_BOARD_LOCATION_DOCKS_DECK_INTRO
+* TRIBUTE_BOARD_LOCATION_DOCKS_DISCARD
+* TRIBUTE_BOARD_LOCATION_OPPONENT_BOARD_ACTION
+* TRIBUTE_BOARD_LOCATION_OPPONENT_BOARD_AGENT
+* TRIBUTE_BOARD_LOCATION_OPPONENT_COOLDOWN
+* TRIBUTE_BOARD_LOCATION_OPPONENT_DECK
+* TRIBUTE_BOARD_LOCATION_OPPONENT_DECK_INTRO
+* TRIBUTE_BOARD_LOCATION_OPPONENT_HAND
+* TRIBUTE_BOARD_LOCATION_OPPONENT_PERM_REMOVED
+* TRIBUTE_BOARD_LOCATION_PLAYER_BOARD_ACTION
+* TRIBUTE_BOARD_LOCATION_PLAYER_BOARD_AGENT
+* TRIBUTE_BOARD_LOCATION_PLAYER_COOLDOWN
+* TRIBUTE_BOARD_LOCATION_PLAYER_DECK
+* TRIBUTE_BOARD_LOCATION_PLAYER_DECK_INTRO
+* TRIBUTE_BOARD_LOCATION_PLAYER_HAND
+* TRIBUTE_BOARD_LOCATION_PLAYER_PERM_REMOVED
+
+
+h5. TributeCardStateFlags
+* TRIBUTE_CARD_STATE_FLAGS_BUYABLE
+* TRIBUTE_CARD_STATE_FLAGS_CALLOUT
+* TRIBUTE_CARD_STATE_FLAGS_DAMAGEABLE
+* TRIBUTE_CARD_STATE_FLAGS_HIGHLIGHTED
+* TRIBUTE_CARD_STATE_FLAGS_PLAYABLE
+* TRIBUTE_CARD_STATE_FLAGS_STACK_DAMAGEABLE
+* TRIBUTE_CARD_STATE_FLAGS_STACK_PLAYABLE
+* TRIBUTE_CARD_STATE_FLAGS_TARGETABLE
+* TRIBUTE_CARD_STATE_FLAGS_TARGETED
+
+
+h5. TributeCardType
+* TRIBUTE_CARD_TYPE_ACTION
+* TRIBUTE_CARD_TYPE_AGENT
+
+
+h5. TributeClubRank
+* TRIBUTE_CLUB_RANK_ADEPT
+* TRIBUTE_CLUB_RANK_EXPERT
+* TRIBUTE_CLUB_RANK_INITIATE
+* TRIBUTE_CLUB_RANK_MASTER
+* TRIBUTE_CLUB_RANK_NOVICE
+* TRIBUTE_CLUB_RANK_REGULAR
+* TRIBUTE_CLUB_RANK_TRAINEE
+* TRIBUTE_CLUB_RANK_VETERAN
+
+
+h5. TributeDockSlot
+* TRIBUTE_DOCK_SLOT_FIVE
+* TRIBUTE_DOCK_SLOT_FOUR
+* TRIBUTE_DOCK_SLOT_ONE
+* TRIBUTE_DOCK_SLOT_THREE
+* TRIBUTE_DOCK_SLOT_TWO
+
+
+h5. TributeGameFlowState
+* TRIBUTE_GAME_FLOW_STATE_BOARD_SETUP
+* TRIBUTE_GAME_FLOW_STATE_GAME_OVER
+* TRIBUTE_GAME_FLOW_STATE_INACTIVE
+* TRIBUTE_GAME_FLOW_STATE_INTRO
+* TRIBUTE_GAME_FLOW_STATE_PATRON_DRAFT
+* TRIBUTE_GAME_FLOW_STATE_PLAYING
+
+
+h5. TributeInputStyle
+* TRIBUTE_INPUT_STYLE_GAMEPAD
+* TRIBUTE_INPUT_STYLE_MOUSE
+* TRIBUTE_INPUT_STYLE_NONE
+
+
+h5. TributeInviteState
+* TRIBUTE_INVITE_STATE_GAME_PENDING
+* TRIBUTE_INVITE_STATE_INVITE_ACCEPTED
+* TRIBUTE_INVITE_STATE_INVITE_CONSIDERING
+* TRIBUTE_INVITE_STATE_INVITE_REQUESTING
+* TRIBUTE_INVITE_STATE_NONE
+
+
+h5. TributeLeaderboardTier
+* TRIBUTE_LEADERBOARD_TIER_NONE
+* TRIBUTE_LEADERBOARD_TIER_TOP_10
+* TRIBUTE_LEADERBOARD_TIER_TOP_2
+
+
+h5. TributeLeaderboardType
+* TRIBUTE_LEADERBOARD_TYPE_RANKED
+
+
+h5. TributeMatchEvent
+* TRIBUTE_MATCH_EVENT_ACTIVE_PLAYER_AFK
+* TRIBUTE_MATCH_EVENT_ALREADY_IN_MATCH
+* TRIBUTE_MATCH_EVENT_CAMPAIGN_ENDED
+* TRIBUTE_MATCH_EVENT_CAMPAIGN_MATCH_TYPE_MISMATCH
+* TRIBUTE_MATCH_EVENT_CAMPAIGN_MISMATCH
+* TRIBUTE_MATCH_EVENT_CAMPAIGN_NOT_STARTED
+* TRIBUTE_MATCH_EVENT_CANNOT_ACCEPT
+* TRIBUTE_MATCH_EVENT_CANNOT_CANCEL
+* TRIBUTE_MATCH_EVENT_CANNOT_CONCEDE
+* TRIBUTE_MATCH_EVENT_CANNOT_DECLINE
+* TRIBUTE_MATCH_EVENT_CANNOT_FORFEIT
+* TRIBUTE_MATCH_EVENT_CANNOT_WIN
+* TRIBUTE_MATCH_EVENT_FAILED_SETUP
+* TRIBUTE_MATCH_EVENT_FORCED_SHUTDOWN
+* TRIBUTE_MATCH_EVENT_INVALID_INVITE
+* TRIBUTE_MATCH_EVENT_INVALID_INVITER
+* TRIBUTE_MATCH_EVENT_MATCHES_DISABLED
+* TRIBUTE_MATCH_EVENT_MATCH_FULL
+* TRIBUTE_MATCH_EVENT_NATURAL_SHUTDOWN
+* TRIBUTE_MATCH_EVENT_NONE
+* TRIBUTE_MATCH_EVENT_NOT_IN_MATCH
+* TRIBUTE_MATCH_EVENT_NO_ACTIVE_CAMPAIGN
+* TRIBUTE_MATCH_EVENT_PLAYER_ACCEPT
+* TRIBUTE_MATCH_EVENT_PLAYER_CANCEL
+* TRIBUTE_MATCH_EVENT_PLAYER_CONCEDE
+* TRIBUTE_MATCH_EVENT_PLAYER_DEATH
+* TRIBUTE_MATCH_EVENT_PLAYER_DECLINE
+* TRIBUTE_MATCH_EVENT_PLAYER_EXIT
+* TRIBUTE_MATCH_EVENT_PLAYER_FORFEIT
+* TRIBUTE_MATCH_EVENT_PLAYER_LOST
+* TRIBUTE_MATCH_EVENT_PLAYER_WON
+* TRIBUTE_MATCH_EVENT_PROXY_DESTROY
+* TRIBUTE_MATCH_EVENT_RANKED_MATCHES_DISABLED
+* TRIBUTE_MATCH_EVENT_RECENTLY_DECLINED
+* TRIBUTE_MATCH_EVENT_REGION_SHUTDOWN
+* TRIBUTE_MATCH_EVENT_SELF_ACTIVE_TRIBUTE
+* TRIBUTE_MATCH_EVENT_SELF_CONSIDERING_INVITE
+* TRIBUTE_MATCH_EVENT_SELF_CRAFTING
+* TRIBUTE_MATCH_EVENT_SELF_CS_CAMPAIGN_DISABLED
+* TRIBUTE_MATCH_EVENT_SELF_CS_DISABLED
+* TRIBUTE_MATCH_EVENT_SELF_DEAD
+* TRIBUTE_MATCH_EVENT_SELF_INELIGIBLE_AREA
+* TRIBUTE_MATCH_EVENT_SELF_IN_COMBAT
+* TRIBUTE_MATCH_EVENT_SELF_LOADING
+* TRIBUTE_MATCH_EVENT_SELF_MATCH_REJECT_INVITE_TYPE
+* TRIBUTE_MATCH_EVENT_SELF_NOT_INITIALIZED
+* TRIBUTE_MATCH_EVENT_SELF_NO_ACCESS
+* TRIBUTE_MATCH_EVENT_SELF_ON_TIMEOUT
+* TRIBUTE_MATCH_EVENT_SELF_PENDING_REQUEST
+* TRIBUTE_MATCH_EVENT_SELF_SWIMMING
+* TRIBUTE_MATCH_EVENT_SELF_TRAVELING
+* TRIBUTE_MATCH_EVENT_SYSTEM_DISBAND
+* TRIBUTE_MATCH_EVENT_TARGET_ACTIVE_TRIBUTE
+* TRIBUTE_MATCH_EVENT_TARGET_CONSIDERING_INVITE
+* TRIBUTE_MATCH_EVENT_TARGET_CRAFTING
+* TRIBUTE_MATCH_EVENT_TARGET_CS_CAMPAIGN_DISABLED
+* TRIBUTE_MATCH_EVENT_TARGET_CS_DISABLED
+* TRIBUTE_MATCH_EVENT_TARGET_DEAD
+* TRIBUTE_MATCH_EVENT_TARGET_INELIGIBLE_AREA
+* TRIBUTE_MATCH_EVENT_TARGET_INVALID
+* TRIBUTE_MATCH_EVENT_TARGET_IN_COMBAT
+* TRIBUTE_MATCH_EVENT_TARGET_LOADING
+* TRIBUTE_MATCH_EVENT_TARGET_MATCH_REJECT_INVITE_TYPE
+* TRIBUTE_MATCH_EVENT_TARGET_NOT_INITIALIZED
+* TRIBUTE_MATCH_EVENT_TARGET_NO_ACCESS
+* TRIBUTE_MATCH_EVENT_TARGET_ON_TIMEOUT
+* TRIBUTE_MATCH_EVENT_TARGET_PENDING_REQUEST
+* TRIBUTE_MATCH_EVENT_TARGET_SELF
+* TRIBUTE_MATCH_EVENT_TARGET_SWIMMING
+* TRIBUTE_MATCH_EVENT_TARGET_TRAVELING
+* TRIBUTE_MATCH_EVENT_TARGET_UNAVAILABLE
+* TRIBUTE_MATCH_EVENT_TOO_FAR
+* TRIBUTE_MATCH_EVENT_TOO_MANY_NEARBY
+* TRIBUTE_MATCH_EVENT_TRIBUTE_CAMPAIGN_INITIALIZING
+
+
+h5. TributeMatchPhase
+* TRIBUTE_MATCH_PHASE_BOARD_SETUP
+* TRIBUTE_MATCH_PHASE_PATRON_DRAFT
+* TRIBUTE_MATCH_PHASE_POST_GAME
+* TRIBUTE_MATCH_PHASE_PRE_GAME
+* TRIBUTE_MATCH_PHASE_RUNNING
+
+
+h5. TributeMatchType
+* TRIBUTE_MATCH_TYPE_CASUAL
+* TRIBUTE_MATCH_TYPE_CLIENT
+* TRIBUTE_MATCH_TYPE_COMPETITIVE
+* TRIBUTE_MATCH_TYPE_DEFAULT
+* TRIBUTE_MATCH_TYPE_PRIVATE
+
+
+h5. TributeMechanic
+* TRIBUTE_MECHANIC_ACQUIRE_CARDS
+* TRIBUTE_MECHANIC_BONUS_PATRON_INTERACTION
+* TRIBUTE_MECHANIC_CREATE_CARDS
+* TRIBUTE_MECHANIC_CULL_FROM_DOCKS
+* TRIBUTE_MECHANIC_DESTROY_CARDS
+* TRIBUTE_MECHANIC_DISCARD_CARDS
+* TRIBUTE_MECHANIC_DRAW_CARDS
+* TRIBUTE_MECHANIC_GAIN_RESOURCES
+* TRIBUTE_MECHANIC_HEAL_AGENT
+* TRIBUTE_MECHANIC_KO_AGENT
+* TRIBUTE_MECHANIC_LOSE_RESOURCES
+* TRIBUTE_MECHANIC_REFRESH_CARDS
+* TRIBUTE_MECHANIC_TOSS_CARDS
+
+
+h5. TributeMechanicTargetType
+* TRIBUTE_MECHANIC_TARGET_TYPE_EXACT_QUANTITY
+* TRIBUTE_MECHANIC_TARGET_TYPE_NOT_TARGETED
+* TRIBUTE_MECHANIC_TARGET_TYPE_UP_TO_QUANTITY
+
+
+h5. TributeMechanicTrigger
+* TRIBUTE_MECHANIC_TRIGGER_ACTIVATION
+* TRIBUTE_MECHANIC_TRIGGER_COMBO
+
+
+h5. TributeMoveAction
+* TRIBUTE_MOVE_ACTION_ACTIVATE_AGENT
+* TRIBUTE_MOVE_ACTION_BEGIN_TURN
+* TRIBUTE_MOVE_ACTION_BUY_CARD
+* TRIBUTE_MOVE_ACTION_DRAFT_PATRON
+* TRIBUTE_MOVE_ACTION_END_TURN
+* TRIBUTE_MOVE_ACTION_PLAY_CARD
+* TRIBUTE_MOVE_ACTION_READY_UP
+* TRIBUTE_MOVE_ACTION_SELECT_CHOOSE_ONE_MECHANIC
+* TRIBUTE_MOVE_ACTION_SELECT_TARGETS
+* TRIBUTE_MOVE_ACTION_USE_PATRON_POWER
+* TRIBUTE_MOVE_ACTION_USE_POWER_TO_DAMAGE_AGENT
+
+
+h5. TributePatronDraftId
+* TRIBUTE_PATRON_DRAFT_ID_FIRST_PLAYER_FIRST_PICK
+* TRIBUTE_PATRON_DRAFT_ID_FIRST_PLAYER_SECOND_PICK
+* TRIBUTE_PATRON_DRAFT_ID_NEUTRAL
+* TRIBUTE_PATRON_DRAFT_ID_SECOND_PLAYER_FIRST_PICK
+* TRIBUTE_PATRON_DRAFT_ID_SECOND_PLAYER_SECOND_PICK
+
+
+h5. TributePatronPerspectiveFavorState
+* TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_FAVORS_OPPONENT
+* TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_FAVORS_PLAYER
+* TRIBUTE_PATRON_PERSPECTIVE_FAVOR_STATE_NEUTRAL
+
+
+h5. TributePatronRequirement
+* TRIBUTE_PATRON_REQUIREMENT_HAS_CARD
+* TRIBUTE_PATRON_REQUIREMENT_PAY_RESOURCE
+* TRIBUTE_PATRON_REQUIREMENT_SACRIFICE_CARD
+
+
+h5. TributePatronStateFlags
+* TRIBUTE_PATRON_STATE_FLAGS_CALLOUT
+* TRIBUTE_PATRON_STATE_FLAGS_HIGHLIGHTED
+* TRIBUTE_PATRON_STATE_FLAGS_SELECTABLE
+* TRIBUTE_PATRON_STATE_FLAGS_SELECTED
+
+
+h5. TributePlayerId
+* TRIBUTE_PLAYER_ID_ONE
+* TRIBUTE_PLAYER_ID_TWO
+
+
+h5. TributePlayerInitializationState
+* TRIBUTE_PLAYER_INITIALIZATION_STATE_FAILURE
+* TRIBUTE_PLAYER_INITIALIZATION_STATE_NONE
+* TRIBUTE_PLAYER_INITIALIZATION_STATE_PENDING
+* TRIBUTE_PLAYER_INITIALIZATION_STATE_SUCCESS
+
+
+h5. TributePlayerPerspective
+* TRIBUTE_PLAYER_PERSPECTIVE_OPPONENT
+* TRIBUTE_PLAYER_PERSPECTIVE_SELF
+
+
+h5. TributePlayerType
+* TRIBUTE_PLAYER_TYPE_BASE
+* TRIBUTE_PLAYER_TYPE_NPC
+* TRIBUTE_PLAYER_TYPE_PLAYER
+* TRIBUTE_PLAYER_TYPE_REMOTE_PLAYER
+
+
+h5. TributeResource
+* TRIBUTE_RESOURCE_GOLD
+* TRIBUTE_RESOURCE_POWER
+* TRIBUTE_RESOURCE_PRESTIGE
+
+
+h5. TributeTargetCardType
+* TRIBUTE_TARGET_TYPE_ACTION
+* TRIBUTE_TARGET_TYPE_AGENT
+* TRIBUTE_TARGET_TYPE_ANY
+* TRIBUTE_TARGET_TYPE_SAME_SUIT
+
+
+h5. TributeTargetSelectionTriggerType
+* TRIBUTE_TARGET_SELECTION_TRIGGER_TYPE_MECHANIC
+* TRIBUTE_TARGET_SELECTION_TRIGGER_TYPE_NONE
+* TRIBUTE_TARGET_SELECTION_TRIGGER_TYPE_PATRON_REQUIREMENT
+
+
+h5. TributeTier
+* TRIBUTE_TIER_COPPER
+* TRIBUTE_TIER_ELECTRUM
+* TRIBUTE_TIER_INVALID
+* TRIBUTE_TIER_PEWTER
+* TRIBUTE_TIER_PLATINUM
+* TRIBUTE_TIER_SILVER
+* TRIBUTE_TIER_UNRANKED
+
+
+h5. TributeVictoryType
+* TRIBUTE_VICTORY_TYPE_CONCESSION
+* TRIBUTE_VICTORY_TYPE_NONE
+* TRIBUTE_VICTORY_TYPE_PATRON
+* TRIBUTE_VICTORY_TYPE_PRESTIGE
+* TRIBUTE_VICTORY_TYPE_SYSTEM_DISBAND
+
+
+
+h5. FSRMode
+* FSR_MODE_BALANCED
+* FSR_MODE_OFF
+* FSR_MODE_PERFORMANCE
+* FSR_MODE_QUALITY
+* FSR_MODE_ULTRA_QUALITY
+
+
+********************
+***Enums Removed ***
+********************
+
+h5. CombatMechanicType
+* POWERTYPE_DAEDRIC
+* POWERTYPE_HEALTH
+* POWERTYPE_HEALTH_BONUS
+* POWERTYPE_INVALID
+* POWERTYPE_MAGICKA
+* POWERTYPE_MOUNT_STAMINA
+* POWERTYPE_STAMINA
+* POWERTYPE_ULTIMATE
+* POWERTYPE_WEREWOLF
+
+
+
+********************
+***Enums Changed ***
+********************
+
+Renamed 
+* MOUSE_BUTTON_INDEX_4
+* MOUSE_BUTTON_INDEX_5
+to
+* MOUSE_BUTTON_INDEX_BUTTON_4
+* MOUSE_BUTTON_INDEX_BUTTON_5
+
+
+
+********************
+***Globals Added ***
+********************
+
+* TRIBUTE_CHAPTER_ZONE_ID
+* TRIBUTE_PATRON_SELECTION_DELAY_SECONDS
+
+
+
+**********************
+***Globals Removed ***
+**********************
+
+* ACTION_BAR_EMOTE_QUICK_SLOT_SIZE
+* ACTION_BAR_FIRST_EMOTE_QUICK_SLOT_INDEX
+* ACTION_BAR_FIRST_UTILITY_BAR_SLOT
+* ACTION_BAR_FIRST_WEAPON_SLOT_INDEX
+* NUM_POWER_POOLS
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* ShouldShowFSRSetting()
+** _Returns:_ *bool* _shouldShowFSRSetting_
+
+
+* IsValidItemForSlotByItemId(*integer* _itemId_, *luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+** _Returns:_ *bool* _valid_
+
+
+* GetAllyUnitBlockState(*string* _unitTag_)
+** _Returns:_ *[BlockState|#BlockState]* _state_
+
+
+* GetRaidLeaderboardName(*integer* _raidId_)
+** _Returns:_ *string* _name_
+
+
+* GetRaidLeaderboardUISortIndex(*[RaidCategory|#RaidCategory]* _raidCategory_, *integer* _raidId_)
+** _Returns:_ *luaindex* _uiSortIndex_
+
+
+* GetNextTributeLeaderboardType(*[TributeLeaderboardType|#TributeLeaderboardType]:nilable* _lastTributeLeaderboardType_)
+** _Returns:_ *[TributeLeaderboardType|#TributeLeaderboardType]:nilable* _nextTributeLeaderboardType_
+
+
+* GetTributeLeaderboardLocalPlayerInfo(*[TributeLeaderboardType|#TributeLeaderboardType]* _tributeLeaderboardType_)
+** _Returns:_ *integer* _currentRank_, *integer* _currentScore_
+
+
+* QueryTributeLeaderboardData(*[TributeLeaderboardType|#TributeLeaderboardType]* _tributeLeaderboardType_)
+** _Returns:_ *[LeaderboardDataReadyState|#LeaderboardDataReadyState]* _readyState_
+
+
+* GetNumTributeLeaderboardEntries(*[TributeLeaderboardType|#TributeLeaderboardType]* _tributeLeaderboardType_)
+** _Returns:_ *integer* _numLeaderboardEntries_
+
+
+* GetTributeLeaderboardEntryInfo(*[TributeLeaderboardType|#TributeLeaderboardType]* _tributeLeaderboardType_, *luaindex* _entryIndex_)
+** _Returns:_ *integer* _rank_, *string* _displayName_, *string* _characterName_, *integer* _score_
+
+
+* GetTributeLeaderboardsSchedule()
+** _Returns:_ *integer* _secondsUntilEnd_, *integer* _secondsUntilNextStart_
+
+
+* RequestTributeLeaderboardRank()
+** _Returns:_ *[LeaderboardDataReadyState|#LeaderboardDataReadyState]* _readyState_
+
+
+* GetTributeLeaderboardRankInfo()
+** _Returns:_ *integer* _playerLeaderboardRank_, *integer* _totalLeaderboardSize_
+
+
+* InviteToTribute(*string* _displayName_)
+
+
+* IsActiveAbilityHotBarCategory(*[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+** _Returns:_ *bool* _isActiveAbilityCategory_
+
+
+* IsActionSlotRestricted(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+** _Returns:_ *bool* _locked_
+
+
+* GetJournalQuestRewardTributeCardUpgradeInfo(*luaindex* _journalQuestIndex_, *luaindex* _rewardIndex_)
+** _Returns:_ *integer* _patronDefId_, *luaindex* _cardIndex_
+
+
+* HasCompletedQuest(*integer* _questId_)
+** _Returns:_ *bool* _hasCompleted_
+
+
+* GetLootTributeCardUpgradeInfo(*integer* _lootId_)
+** _Returns:_ *integer* _tributePatronDefId_, *luaindex* _tributeCardIndex_
+
+
+* GetAchievementRewardTributeCardUpgradeInfo(*integer* _achievementId_)
+** _Returns:_ *bool* _hasRewardOfType_, *integer* _tributePatronId_, *luaindex* _tributeCardIndex_
+
+
+* GetHotbarForCollectibleCategoryId(*integer* _categoryId_)
+** _Returns:_ *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_
+
+
+* GetArmoryBuildPrimaryMundusStone(*luaindex* _buildIndex_)
+** _Returns:_ *[MundusStone|#MundusStone]* _mundusStone_
+
+* GetArmoryBuildSecondaryMundusStone(*luaindex* _buildIndex_)
+** _Returns:_ *[MundusStone|#MundusStone]* _mundusStone_
+
+
+* GetTributeInviteInfo()
+** _Returns:_ *[TributeInviteState|#TributeInviteState]* _tributeInviteState_, *string* _partnerCharacterName_, *string* _partnerDisplayName_, *[TributePlayerType|#TributePlayerType]* _targetType_
+
+
+* ChallengeTargetToTribute(*string* _characterOrDisplayName_)
+
+
+* AcceptTribute()
+
+
+* DeclineTribute()
+
+
+* StartTributePatronSearch(*string* _searchString_)
+
+
+* GetNumTributePatronSearchResults()
+** _Returns:_ *integer* _numSearchResults_
+
+
+* GetTributePatronSearchResult(*luaindex* _searchResultIndex_)
+** _Returns:_ *integer* _patronId_
+
+
+* GetTributeRequiredCollectibleId()
+** _Returns:_ *integer* _requiredCollectibleId_
+
+
+* GetTributeRequiredQuestId()
+** _Returns:_ *integer* _requiredQuestId_
+
+
+* RequestTributeExit(*bool* _isInterceptingCloseAction_)
+
+
+* TriggerTutorialWithPosition(*[TutorialTrigger|#TutorialTrigger]* _tutorialTrigger_, *[AnchorPosition|#AnchorPosition]* _anchor_, *number* _offsetX_, *number* _offsetY_)
+** _Returns:_ *bool* _success_
+
+
+* GetTutorialIndex(*[TutorialTrigger|#TutorialTrigger]* _tutorialTrigger_)
+** _Returns:_ *luaindex* _tutorialIndex_
+
+
+* GetTutorialIndex(*[TutorialTrigger|#TutorialTrigger]* _tutorialTrigger_)
+** _Returns:_ *luaindex* _tutorialIndex_
+
+
+* IsCollectibleTributePatronBookCardUpgraded(*integer* _patronId_, *luaindex* _cardIndex_)
+** _Returns:_ *bool* _isCardUpgraded_
+
+
+* GetRewardListDisplayName(*integer* _rewardListId_)
+** _Returns:_ *string* _displayName_
+
+
+* GetRewardListDescription(*integer* _rewardListId_)
+** _Returns:_ *string* _displayName_
+
+
+* GetTributeCardUpgradeRewardTributeCardUpgradeInfo(*integer* _rewardId_)
+** _Returns:_ *integer* _tributePatronDefId_, *luaindex* _tributeCardIndex_
+
+
+* GetNextAbilityMechanicFlag(*integer* _abilityId_, *[CombatMechanicFlags|#CombatMechanicFlags]:nilable* _lastMechanicFlag_)
+** _Returns:_ *[CombatMechanicFlags|#CombatMechanicFlags]:nilable* _nextMechanicFlag_
+
+
+* GetTributePlayerInfo(*[TributePlayerPerspective|#TributePlayerPerspective]* _playerPerspective_)
+** _Returns:_ *string* _name_, *[TributePlayerType|#TributePlayerType]* _playerType_
+
+* GetTributeMatchType()
+** _Returns:_ *[TributeMatchType|#TributeMatchType]* _matchType_
+
+* TributeMatchEndSummaryComplete()
+
+* GetActiveTributePlayerPerspective()
+** _Returns:_ *[TributePlayerPerspective|#TributePlayerPerspective]* _playerPerspective_
+
+* GetNumPatronsFavoringPlayerPerspective(*[TributePlayerPerspective|#TributePlayerPerspective]* _playerPerspective_)
+** _Returns:_ *integer* _numPatronsFavored_
+
+* GetTributeMechanicIconPath(*[TributeMechanic|#TributeMechanic]* _mechanicType_, *integer* _param1_, *integer* _param2_, *integer* _param3_)
+** _Returns:_ *string* _iconPath_
+
+* GetTributePatronRequirementIconPath(*[TributePatronRequirement|#TributePatronRequirement]* _requirementType_, *integer* _param1_, *integer* _param2_)
+** _Returns:_ *string* _iconPath_
+
+* GetTributeMechanicTargetingText(*[TributeMechanic|#TributeMechanic]* _mechanicType_, *integer* _quantity_, *integer* _param1_, *integer* _param2_, *integer* _param3_)
+** _Returns:_ *string* _targetingText_
+
+* GetTributePatronRequirementTargetingText(*[TributePatronRequirement|#TributePatronRequirement]* _requirementType_, *integer* _quantity_, *integer* _param1_, *integer* _param2_)
+** _Returns:_ *string* _targetingText_
+
+* GetNumTributePatrons()
+** _Returns:_ *integer* _numPatrons_
+
+* GetTributePatronIdAtIndex(*luaindex* _index_)
+** _Returns:_ *integer* _patronId_
+
+* GetTributeCardPortrait(*integer* _cardDefId_)
+** _Returns:_ *textureName* _portrait_, *textureName* _portraitGlow_
+
+* GetTributePatronSuitAtlas(*integer* _patronId_, *[TributeCardType|#TributeCardType]* _cardType_)
+** _Returns:_ *textureName* _suitAtlas_, *textureName* _suitAtlasGlow_
+
+* GetTributePatronCollectibleId(*integer* _patronId_)
+** _Returns:_ *integer* _collectibleId_
+
+* GetTributePatronSuitIcon(*integer* _patronId_)
+** _Returns:_ *textureName* _suitIcon_
+
+* GetTributePatronSmallIcon(*integer* _patronId_)
+** _Returns:_ *textureName* _smallIcon_
+
+* GetTributePatronLargeIcon(*integer* _patronId_)
+** _Returns:_ *textureName* _largeIcon_
+
+* GetTributePatronLargeRingIcon(*integer* _patronId_)
+** _Returns:_ *textureName* _largeRingIcon_
+
+* GetTributeCardType(*integer* _cardDefId_)
+** _Returns:_ *[TributeCardType|#TributeCardType]* _cardType_
+
+* GetTributeCardName(*integer* _cardDefId_)
+** _Returns:_ *string* _name_
+
+* GetTributeCardAcquireCost(*integer* _cardDefId_)
+** _Returns:_ *[TributeResource|#TributeResource]* _resource_, *integer* _quantity_
+
+* GetTributeCardDefeatCost(*integer* _cardDefId_)
+** _Returns:_ *[TributeResource|#TributeResource]* _resource_, *integer* _quantity_
+
+* DoesTributeCardTaunt(*integer* _cardDefId_)
+** _Returns:_ *bool* _taunts_
+
+* IsTributeCardContract(*integer* _cardDefId_)
+** _Returns:_ *bool* _isContract_
+
+* DoesTributeCardChooseOneMechanic(*integer* _cardDefId_)
+** _Returns:_ *bool* _chooseOneMechanic_
+
+* GetTributeCardFlavorText(*integer* _cardDefId_)
+** _Returns:_ *string* _flavorText_
+
+* GetTributeCardUpgradeHintText(*integer* _patronId_, *luaindex* _cardIndex_)
+** _Returns:_ *string* _updateHintText_
+
+* GetTributeCardRarity(*integer* _cardDefId_)
+** _Returns:_ *[ItemDisplayQuality|#ItemDisplayQuality]* _itemRarity_
+
+* GetNumTributeCardMechanics(*integer* _cardDefId_, *[TributeMechanicTrigger|#TributeMechanicTrigger]* _trigger_)
+** _Returns:_ *integer* _numMechanics_
+
+* GetTributeCardMechanicInfo(*integer* _cardDefId_, *[TributeMechanicTrigger|#TributeMechanicTrigger]* _trigger_, *luaindex* _mechanicIndex_)
+** _Returns:_ *[TributeMechanic|#TributeMechanic]* _mechanicType_, *integer* _quantity_, *integer* _comboNum_, *integer* _param1_, *integer* _param2_, *integer* _param3_
+
+* GetTributeCardMechanicText(*integer* _cardDefId_, *[TributeMechanicTrigger|#TributeMechanicTrigger]* _trigger_, *luaindex* _mechanicIndex_, *bool* _prependIcon_)
+** _Returns:_ *string* _mechanicText_
+
+* GetTributePatronName(*integer* _patronId_)
+** _Returns:_ *string* _patronName_
+
+* GetTributePatronRarity(*integer* _patronId_)
+** _Returns:_ *[ItemDisplayQuality|#ItemDisplayQuality]* _itemRarity_
+
+* IsTributePatronNeutral(*integer* _patronId_)
+** _Returns:_ *bool* _isNeutral_
+
+* DoesTributePatronSkipNeutralFavorState(*integer* _patronId_)
+** _Returns:_ *bool* _doesSkipNeutral_
+
+* GetTributePatronCategoryId(*integer* _patronId_)
+** _Returns:_ *integer* _categoryId_
+
+* GetTributePatronCategoryName(*integer* _categoryId_)
+** _Returns:_ *string* _categoryName_
+
+* GetTributePatronCategoryGamepadIcon(*integer* _categoryId_)
+** _Returns:_ *textureName* _gamepadIcon_
+
+* GetTributePatronCategoryKeyboardIcons(*integer* _categoryId_)
+** _Returns:_ *textureName* _unpressedButtonIcon_, *textureName* _pressedButtonIcon_, *textureName* _mouseoverButtonIcon_
+
+* GetTributePatronCategorySortOrder(*integer* _categoryId_)
+** _Returns:_ *integer* _sortOrder_
+
+* GetTributePatronLoreDescription(*integer* _patronId_)
+** _Returns:_ *string* _loreDescription_
+
+* GetTributePatronPlayStyleDescription(*integer* _patronId_)
+** _Returns:_ *string* _playStyleDescription_
+
+* GetTributePatronAcquireHint(*integer* _patronId_)
+** _Returns:_ *string* _acquireHint_
+
+* GetNumTributePatronRequirementsForFavorState(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_)
+** _Returns:_ *integer* _numRequirements_
+
+* GetTributePatronRequirementInfo(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_, *luaindex* _requirementIndex_)
+** _Returns:_ *[TributePatronRequirement|#TributePatronRequirement]* _requirementType_, *integer* _quantity_, *integer* _param1_, *integer* _param2_
+
+* GetTributePatronRequirementText(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_, *luaindex* _requirementIndex_)
+** _Returns:_ *string* _requirementText_
+
+* GetTributePatronRequirementsText(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_)
+** _Returns:_ *string* _requirementsText_
+
+* GetNumTributePatronMechanicsForFavorState(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_)
+** _Returns:_ *integer* _numMechanics_
+
+* GetTributePatronMechanicText(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_, *luaindex* _mechanicIndex_, *bool* _prependIcon_)
+** _Returns:_ *string* _mechanicText_
+
+* GetTributePatronMechanicsText(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_)
+** _Returns:_ *string* _mechanicsText_
+
+* GetTributePatronNumStarterCards(*integer* _patronId_)
+** _Returns:_ *integer* _numStarterCards_
+
+* GetTributePatronStarterCardIdByIndex(*integer* _patronId_, *luaindex* _cardIndex_)
+** _Returns:_ *integer* _cardId_
+
+* GetTributePatronNumDockCards(*integer* _patronId_)
+** _Returns:_ *integer* _numStarterCards_
+
+* GetTributePatronDockCardInfoByIndex(*integer* _patronId_, *luaindex* _cardIndex_)
+** _Returns:_ *integer* _baseCardId_, *integer* _upgradeCardId_, *integer* _quantity_
+
+* GetTributePlayerClubRank()
+** _Returns:_ *[TributeClubRank|#TributeClubRank]* _tributeClubRank_
+
+* GetTributePlayerClubTotalExperience()
+** _Returns:_ *integer* _totalTributeClubExperience_
+
+* GetTributeClubRankExperienceRequirement(*[TributeClubRank|#TributeClubRank]* _tributeClubRank_)
+** _Returns:_ *integer* _experienceRequirement_
+
+* GetTributeClubRankNPCSkillLevelEquivalent(*[TributeClubRank|#TributeClubRank]* _tributeClubRank_)
+** _Returns:_ *[TributeNPCSkillLevel|#TributeNPCSkillLevel]* _npcSkillLevel_
+
+* GetTributePlayerExperienceInCurrentClubRank()
+** _Returns:_ *integer* _experience_, *integer* _clubRankRequirement_
+
+* GetClubMatchResultFromHistoryByIndex(*integer* _matchIndex_)
+** _Returns:_ *bool* _wasAWin_
+
+* GetClubMatchResultFromHistoryByMatchNumber(*integer* _matchIndex_)
+** _Returns:_ *bool* _hasRecord_, *bool* _wasAWin_
+
+* GetTotalClubMatchesPlayed()
+** _Returns:_ *integer* _totalMatchesPlayed_
+
+* GetCurrentClubMatchStreak()
+** _Returns:_ *integer* _currentStreak_
+
+* GetTributePlayerCampaignRank(*integer:nilable* _campaignId_)
+** _Returns:_ *[TributeTier|#TributeTier]* _tributeCampaignRank_
+
+* GetTributePlayerCampaignTotalExperience(*integer:nilable* _campaignId_)
+** _Returns:_ *integer* _totalTributeCampaignExperience_
+
+* GetTributeCampaignRankExperienceRequirement(*[TributeTier|#TributeTier]* _tributeCampaignRank_, *integer:nilable* _campaignId_)
+** _Returns:_ *integer* _experienceRequirement_
+
+* GetTributePlayerExperienceInCurrentCampaignRank(*integer:nilable* _campaignId_)
+** _Returns:_ *integer* _experience_, *integer* _rankExperienceRequirement_
+
+* GetCampaignMatchResultFromHistoryByIndex(*integer* _matchIndex_, *integer:nilable* _campaignId_)
+** _Returns:_ *bool* _wasAWin_
+
+* GetCampaignMatchResultFromHistoryByMatchNumber(*integer* _matchIndex_, *integer:nilable* _campaignId_)
+** _Returns:_ *bool* _hasRecord_, *bool* _wasAWin_
+
+* GetTotalCampaignMatchesPlayed(*integer:nilable* _campaignId_)
+** _Returns:_ *integer* _totalMatchesPlayed_
+
+* GetCurrentCampaignMatchStreak(*integer:nilable* _campaignId_)
+** _Returns:_ *integer* _currentStreak_
+
+* IsPlacedInCampaign(*integer:nilable* _campaignId_)
+** _Returns:_ *bool* _isPlaced_
+
+* GetCampaignPlacementRank(*integer:nilable* _campaignId_)
+** _Returns:_ *[TributeTier|#TributeTier]* _tributeCampaignRank_
+
+* GetNumRequiredPlacementMatches(*integer:nilable* _campaignId_)
+** _Returns:_ *integer* _requiredMatches_
+
+* GetActiveTributeCampaignId()
+** _Returns:_ *integer* _tributeCampaignDefId_
+
+* GetActiveTributeCampaignTierRewardListId(*[TributeTier|#TributeTier]* _tributeCampaignRank_)
+** _Returns:_ *integer* _rewardListId_
+
+* GetActiveTributeCampaignLeaderboardTierRewardListId(*[TributeLeaderboardTier|#TributeLeaderboardTier]* _tributeCampaignRank_)
+** _Returns:_ *integer* _rewardListId_
+
+* GetNextRaidLeaderboardId(*[RaidCategory|#RaidCategory]* _raidCategory_, *integer:nilable* _lastRaidId_)
+** _Returns:_ *integer:nilable* _nextRaidId_
+
+* RequestTributeClubData()
+** _Returns:_ *[TributePlayerInitializationState|#TributePlayerInitializationState]* _state_
+
+* RequestActiveTributeCampaignData()
+** _Returns:_ *[TributePlayerInitializationState|#TributePlayerInitializationState]* _state_
+
+* RequestTributeCampaignData(*integer:nilable* _campaignId_)
+** _Returns:_ *[TributePlayerInitializationState|#TributePlayerInitializationState]* _state_
+
+* GetActiveTributeCampaignTimeRemainingMs()
+** _Returns:_ *integer* _timeRemainingMs_
+
+* HasActiveCampaignStarted()
+** _Returns:_ *bool* _hasStarted_
+
+h3. Control
+* AppendChild *protected-attributes* (*object* _childControl_)
+* InsertChildBefore *protected-attributes* (*object* _childControl_, *object* _nextChild_)
+* ClearDimensions *protected-attributes* ()
+* ClearTransform()
+* ClearWaveEffect()
+* GetNumAnchors()
+** _Returns:_ *integer* _numAnchors_
+* SetAnchorOffsets(*layout_measurement* _offsetX_, *layout_measurement* _offsetY_, *luaindex* _anchorIndex_)
+* ProjectRectToScreen()
+** _Returns:_ *number* _x1_, *number* _y1_, *number* _x2_, *number* _y2_, *number* _x3_, *number* _y3_, *number* _x4_, *number* _y4_
+* ProjectRectToScreenAndBuildAABB()
+** _Returns:_ *number* _left_, *number* _top_, *number* _right_, *number* _bottom_
+* ProjectRectToScreenAndComputeAABBPoint(*[AnchorPosition|#AnchorPosition]* _point_)
+** _Returns:_ *number* _screenX_, *number* _screenY_
+* ProjectRectToScreenAndComputeClampedAABBPoint(*[AnchorPosition|#AnchorPosition]* _point_)
+** _Returns:_ *number* _screenX_, *number* _screenY_
+* ProjectToScreen(*number* _normalizedX_, *number* _normalizedY_)
+** _Returns:_ *number* _screenX_, *number* _screenY_
+
+
+h3. TooltipControl
+* SetTributeBoardLocationPatrons(*[TributeBoardLocation|#TributeBoardLocation]* _boardLocation_)
+* SetTributeCard(*integer* _patronId_, *integer* _cardId_)
+* SetTributeLeaderboardRewardList(*integer* _rewardListId_)
+* SetTributePatron(*integer* _patronId_)
+* SetTributePatronDockCard(*integer* _patronId_, *luaindex* _cardIndex_, *bool* _showUpgrade_)
+* SetTributePatronStarterCard(*integer* _patronId_, *luaindex* _cardIndex_)
+* SetTributeSeasonRewardList(*[TributeTier|#TributeTier]* _tributeTier_, *integer* _rewardListId_)
+
+
+
+************************
+***Functions Removed ***
+************************
+
+* IsValidItemForSlotByItemInfo(*integer* _itemId_, *integer* _itemQualityDefId_, *integer* _itemRequiredLevel_, *integer* _itemInstanceData_, *luaindex* _actionSlotIndex_)
+** _Returns:_ *bool* _valid_
+
+
+* GetRaidLeaderboardInfo(*[RaidCategory|#RaidCategory]* _raidCategory_, *luaindex* _raidIndex_)
+** _Returns:_ *string* _name_, *integer* _raidId_
+
+
+* QueryHomeShowLeaderboardData()
+
+
+* GetNumHomeShowVoteCategories()
+** _Returns:_ *integer* _numVoteCategories_
+
+
+* GetHomeShowLeaderboardVoteCategoryName(*integer* _voteCategory_)
+** _Returns:_ *string* _homeShowEventName_
+
+
+* GetHomeShowLeaderboardLocalPlayerInfo(*integer* _voteCategory_, *[HouseCategoryType|#HouseCategoryType]* _houseCategory_)
+** _Returns:_ *integer* _personalBestRank_, *integer* _personalBestScore_
+
+
+* GetNumHomeShowLeaderboardEntries(*integer* _voteCategory_, *[HouseCategoryType|#HouseCategoryType]* _houseCategory_)
+** _Returns:_ *integer* _numEntries_
+
+
+* GetHomeShowLeaderboardEntryInfo(*integer* _voteCategory_, *[HouseCategoryType|#HouseCategoryType]* _houseCategory_, *luaindex* _entryIndex_)
+** _Returns:_ *integer* _rank_, *string* _playerDisplayname_, *integer* _houseCollectibleId_, *integer* _score_
+
+
+* GetHomeShowLeaderboardTimeInfo()
+** _Returns:_ *integer* _secondsUntilNextUpdate_
+
+
+* IsSlotLocked(*luaindex* _actionSlotIndex_)
+** _Returns:_ *bool* _locked_
+
+
+
+************************
+***Functions Changed ***
+************************
+
+Changed type to *deprecated_timestamp_64*
+* GetDiffBetweenTimeStamps(*deprecated_timestamp_64* _laterTime_, *deprecated_timestamp_64* _earlierTime_)
+** _Returns:_ *number* _difference_
+* GetTimeStamp()
+** _Returns:_ *deprecated_timestamp_64* _timestamp_
+* GetDateElementsFromTimestamp(*deprecated_timestamp_64* _timestamp_)
+** _Returns:_ *integer* _year_, *integer* _month_, *integer* _day_
+* GetTimestampForStartOfDate(*integer* _year_, *integer* _month_, *integer* _day_, *bool* _inLocalTime_)
+** _Returns:_ *deprecated_timestamp_64* _timestamp_
+* GetDayOfTheWeekIndex(*deprecated_timestamp_64* _timestamp_)
+** _Returns:_ *integer* _weekdayIndex_
+
+
+Changed type to *[CombatMechanicFlags|#CombatMechanicFlags]*
+* GetUnitPower(*string* _unitTag_, *[CombatMechanicFlags|#CombatMechanicFlags]* _powerType_)
+** _Returns:_ *integer* _current_, *integer* _max_, *integer* _effectiveMax_
+* GetAllUnitAttributeVisualizerEffectInfo(*string* _unitTag_)
+** _Uses variable returns..._
+** _Returns:_ *[UnitAttributeVisual|#UnitAttributeVisual]* _unitAttributeVisual_, *[DerivedStats|#DerivedStats]* _statType_, *[Attributes|#Attributes]* _attributeType_, *[CombatMechanicType|#CombatMechanicType]* _powerType_, *number* _value_, *number* _maxValue_
+* GetUnitAttributeVisualizerEffectInfo(*string* _unitTag_, *[UnitAttributeVisual|#UnitAttributeVisual]* _unitAttributeVisual_, *[DerivedStats|#DerivedStats]* _statType_, *[Attributes|#Attributes]* _attributeType_, *[CombatMechanicType|#CombatMechanicType]* _powerType_)
+** _Returns:_ *number:nilable* _value_, *number:nilable* _maxValue_, *integer:nilable* _sequenceId_
+
+
+Changed type to *[ChannelType|#ChannelType]*
+* SendChatMessage *private* (*string* _message_, *[ChannelType|#ChannelType]* _channelId_, *string* _target_)
+* GetChatChannelId(*string* _name_)
+** _Returns:_ *[ChannelType|#ChannelType]* _channelId_
+
+
+Changed
+* GetSlotAbilityCost(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+** _Returns:_ *integer* _abilityCost_, *integer* _mechanicType_
+to
+* GetSlotAbilityCost(*luaindex* _actionSlotIndex_, *[CombatMechanicFlags|#CombatMechanicFlags]* _mechanicType_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+** _Returns:_ *integer* _abilityCost_
+
+
+Added _hotbarCategory_
+* GetSlotName(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* GetSlotItemDisplayQuality(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+* GetSlotCooldownInfo(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* IsSlotUsable(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* OnSlotDownAndUp *private* (*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* OnSlotDown *private* (*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* OnSlotUp *private* (*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* GetSlotItemCount(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+* GetSlotItemSound(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+* IsSlotItemConsumable(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+* IsValidItemForSlot(*[Bag|#Bag]* _bagId_, *integer* _bagSlotIndex_, *luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+* IsValidCollectibleForSlot(*integer* _collectibleId_, *luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+* IsValidQuestItemForSlot(*integer* _questItemId_, *luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+* IsValidEmoteForSlot(*integer* _emoteId_, *luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+* IsValidQuickChatForSlot(*integer* _quickChatId_, *luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+* GetFirstFreeValidSlotForItem(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+* GetFirstFreeValidSlotForSimpleAction(*[ActionBarSlotType|#ActionBarSlotType]* _actionType_, *integer* _actionId_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* FindActionSlotMatchingItem(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+* FindActionSlotMatchingSimpleAction(*[ActionBarSlotType|#ActionBarSlotType]* _actionType_, *integer* _actionId_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* PlaceInActionBar *protected* (*luaindex* _actionSlot_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* PickupAction *protected* (*luaindex* _actionSlot_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* ClearSlot *protected* (*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* SelectSlotAbility *protected* (*luaindex* _abilityIndex_, *luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* SelectSlotItem *protected* (*[Bag|#Bag]* _bagId_, *integer* _bagSlotIndex_, *luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+* SelectSlotSimpleAction *protected* (*[ActionBarSlotType|#ActionBarSlotType]* _actionType_, *integer* _actionId_, *luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* SelectLastSlottedItem *protected* (*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+* GetSlotItemLink(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
+
+Changed
+* QueryRaidLeaderboardData()
+* QueryBattlegroundLeaderboardData()
+* QueryCampaignLeaderboardData()
+to
+* QueryRaidLeaderboardData(*[RaidCategory|#RaidCategory]* _raidCategory_, *integer* _raidId_, *integer* _classId_)
+** _Returns:_ *[LeaderboardDataReadyState|#LeaderboardDataReadyState]* _readyState_
+* QueryBattlegroundLeaderboardData(*[BattlegroundLeaderboardType|#BattlegroundLeaderboardType]* _battlegroundType_)
+** _Returns:_ *[LeaderboardDataReadyState|#LeaderboardDataReadyState]* _readyState_
+* QueryCampaignLeaderboardData(*[Alliance|#Alliance]* _alliance_)
+** _Returns:_ *[LeaderboardDataReadyState|#LeaderboardDataReadyState]* _readyState_
+
+
+Changed to _raidId_
+* GetRaidLeaderboardLocalPlayerInfo(*integer* _raidId_)
+* GetNumTrialLeaderboardEntries(*integer* _raidId_)
+* GetNumChallengeLeaderboardEntries(*integer* _raidId_, *integer* _classId_)
+* GetTrialLeaderboardEntryInfo(*integer* _raidId_, *luaindex* _entryIndex_)
+* GetChallengeLeaderboardEntryInfo(*integer* _raidId_, *integer* _classId_, *luaindex* _entryIndex_)
+* GetPlayerRaidParticipationInfo(*integer* _raidId_)
+* GetPlayerRaidProgressInfo(*integer* _raidId_)
+
+
+Added ActionSlot to front of function names
+* ActionSlotHasCostFailure(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* ActionSlotHasRequirementFailure(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* ActionSlotHasWeaponSlotFailure(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* ActionSlotHasTargetFailure(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* ActionSlotHasRangeFailure(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* ActionSlotHasLeapKeepTargetFailure(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* ActionSlotHasSubzoneFailure(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* ActionSlotHasStatusEffectFailure(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* ActionSlotHasFallingFailure(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* ActionSlotHasSwimmingFailure(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* ActionSlotHasMountedFailure(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* ActionSlotHasReincarnatingFailure(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* ActionSlotHasActivationHighlight(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+* ActionSlotHasNonCostStateFailure(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+
+
+Type is now nilable
+* IsActionSlotLocked(*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+** _Returns:_ *bool* _isLocked_
+
+
+Changed type to *integer* _tutorialId_
+* HasSeenTutorial(*integer* _tutorialId_)
+** _Returns:_ *bool* _seen_
+* CanTutorialBeSeen(*integer* _tutorialId_)
+** _Returns:_ *bool* _canBeSeen_
+
+Changed
+* GetAbilityCost(*integer* _abilityId_, *integer:nilable* _overrideRank_)
+** _Returns:_ *integer* _cost_, *[CombatMechanicType|#CombatMechanicType]* _mechanic_
+* GetAbilityCostOverTime(*integer* _abilityId_, *integer:nilable* _overrideRank_)
+** _Returns:_ *integer* _cost_, *[CombatMechanicType|#CombatMechanicType]* _mechanicType_, *integer* _chargeFrequencyMS_
+to
+* GetAbilityCost(*integer* _abilityId_, *[CombatMechanicFlags|#CombatMechanicFlags]* _mechanicFlag_, *integer:nilable* _overrideRank_)
+** _Returns:_ *integer* _cost_
+* GetAbilityCostOverTime(*integer* _abilityId_, *[CombatMechanicFlags|#CombatMechanicFlags]* _mechanic_, *integer:nilable* _overrideRank_)
+** _Returns:_ *integer* _cost_, *integer* _chargeFrequencyMS_
+
+h3. Control
+Changed type
+* GetDrawLayer()
+** _Returns:_ *[DrawLayer|#DrawLayer]* _layer_
+* SetDrawLayer *protected-attributes* (*[DrawLayer|#DrawLayer]* _layer_)
+* GetDrawTier()
+** _Returns:_ *[DrawTier|#DrawTier]* _tier_
+* SetDrawTier *protected-attributes* (*[DrawTier|#DrawTier]* _tier_)
+
+
+h3. EditControl
+Changed type
+* SetTextType(*[TextType|#TextType]* _textType_)
+
+
+h3. LabelControl
+Changed type to *layout_measurement*
+* AnchorToBaseline(*object* _toLabel_, *layout_measurement* _offsetX_, *[AnchorPosition|#AnchorPosition]* _anchorSide_)
+
+
+h3. TooltipControl
+Added _hotbarCategory_
+* SetAction(*luaindex* _aSlotId_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_BATTLEGROUND_LEADERBOARD_DATA_RECEIVED (*[BattlegroundLeaderboardType|#BattlegroundLeaderboardType]* _battlegroundType_)
+
+
+* EVENT_CAMPAIGN_LEADERBOARD_DATA_RECEIVED (*integer* _campaignId_, *[Alliance|#Alliance]* _alliance_)
+
+
+* EVENT_RAID_LEADERBOARD_DATA_RECEIVED (*[RaidCategory|#RaidCategory]* _raidCategory_, *integer* _raidId_, *integer* _classId_)
+
+
+* EVENT_RAID_OF_THE_WEEK_INFO_RECEIVED
+
+
+* EVENT_RAID_OF_THE_WEEK_TURNOVER
+
+
+* EVENT_DISPLAY_TUTORIAL_WITH_ANCHOR (*luaindex* _tutorialIndex_, *[AnchorPosition|#AnchorPosition]* _anchor_, *number* _offsetX_, *number* _offsetY_)
+
+
+* EVENT_FORWARD_TRANSCRIPT_TO_TEXT_CHAT_ACCESSIBILITY_SETTING_CHANGED
+
+
+* EVENT_STOP_ANTIQUITY_DIGGING
+
+
+* EVENT_TRIBUTE_CAMPAIGN_CHANGE (*integer* _campaignId_)
+
+
+* EVENT_TRIBUTE_CLUB_EXPERIENCE_GAINED (*integer* _currentXP_, *integer* _deltaXP_)
+
+
+* EVENT_TRIBUTE_CLUB_INIT (*bool* _success_)
+
+
+* EVENT_TRIBUTE_CLUB_RANK_CHANGED (*[TributeClubRank|#TributeClubRank]* _newClubRank_)
+
+
+* EVENT_TRIBUTE_EXIT_RESPONSE (*bool* _accept_)
+
+
+* EVENT_TRIBUTE_INVITE_ACCEPTED
+
+
+* EVENT_TRIBUTE_INVITE_CANCELED
+
+
+* EVENT_TRIBUTE_INVITE_DECLINED
+
+
+* EVENT_TRIBUTE_INVITE_FAILED (*[TributeMatchEvent|#TributeMatchEvent]* _reason_, *string* _targetCharacterName_, *string* _targetDisplayName_)
+
+
+* EVENT_TRIBUTE_INVITE_RECEIVED (*string* _inviterCharacterName_, *string* _inviterDisplayName_)
+
+
+* EVENT_TRIBUTE_INVITE_REMOVED
+
+
+* EVENT_TRIBUTE_INVITE_SENT (*string* _inviteeCharacterName_, *string* _inviteeDisplayName_)
+
+
+* EVENT_TRIBUTE_LEADERBOARD_DATA_RECEIVED (*[TributeLeaderboardType|#TributeLeaderboardType]* _leaderboardType_)
+
+
+* EVENT_TRIBUTE_LEADERBOARD_RANK_RECEIVED (*[TributeLeaderboardType|#TributeLeaderboardType]* _leaderboardType_)
+
+
+* EVENT_TRIBUTE_PATRONS_SEARCH_RESULTS_READY
+
+
+* EVENT_TRIBUTE_PLAYER_CAMPAIGN_INIT (*integer* _campaignId_, *bool* _success_, *bool* _isActive_)
+
+
+* EVENT_TRIBUTE_GAME_FLOW_STATE_CHANGE (*[TributeGameFlowState|#TributeGameFlowState]* _flowState_)
+
+
+* EVENT_TRIBUTE_PATRON_PROGRESSION_DATA_CHANGED (*integer:nilable* _patronId_)
+
+
+* EVENT_TRIBUTE_PLAYER_TURN_STARTED (*bool* _isLocalPlayer_)
+
+
+* EVENT_VOICE_CHAT_ACCESSIBILITY_SETTING_CHANGED
+
+
+
+**********************
+*** Events Removed ***
+**********************
+
+* EVENT_BATTLEGROUND_LEADERBOARD_DATA_CHANGED
+
+
+* EVENT_CAMPAIGN_LEADERBOARD_DATA_CHANGED
+
+
+* EVENT_RAID_LEADERBOARD_DATA_CHANGED
+
+
+
+**********************
+*** Events Changed ***
+**********************
+
+Changed type to *[CombatMechanicFlags|#CombatMechanicFlags]*
+* EVENT_COMBAT_EVENT (*[ActionResult|#ActionResult]* _result_, *bool* _isError_, *string* _abilityName_, *integer* _abilityGraphic_, *[ActionSlotType|#ActionSlotType]* _abilityActionSlotType_, *string* _sourceName_, *[CombatUnitType|#CombatUnitType]* _sourceType_, *string* _targetName_, *[CombatUnitType|#CombatUnitType]* _targetType_, *integer* _hitValue_, *[CombatMechanicFlags|#CombatMechanicFlags]* _powerType_, *[DamageType|#DamageType]* _damageType_, *bool* _log_, *integer* _sourceUnitId_, *integer* _targetUnitId_, *integer* _abilityId_, *integer* _overflow_)
+* EVENT_POWER_UPDATE (*string* _unitTag_, *luaindex* _powerIndex_, *[CombatMechanicFlags|#CombatMechanicFlags]* _powerType_, *integer* _powerValue_, *integer* _powerMax_, *integer* _powerEffectiveMax_)
+* EVENT_UNIT_ATTRIBUTE_VISUAL_ADDED (*string* _unitTag_, *[UnitAttributeVisual|#UnitAttributeVisual]* _unitAttributeVisual_, *[DerivedStats|#DerivedStats]* _statType_, *[Attributes|#Attributes]* _attributeType_, *[CombatMechanicFlags|#CombatMechanicFlags]* _powerType_, *number* _value_, *number* _maxValue_, *integer* _sequenceId_)
+* EVENT_UNIT_ATTRIBUTE_VISUAL_REMOVED (*string* _unitTag_, *[UnitAttributeVisual|#UnitAttributeVisual]* _unitAttributeVisual_, *[DerivedStats|#DerivedStats]* _statType_, *[Attributes|#Attributes]* _attributeType_, *[CombatMechanicFlags|#CombatMechanicFlags]* _powerType_, *number* _value_, *number* _maxValue_, *integer* _sequenceId_)
+* EVENT_UNIT_ATTRIBUTE_VISUAL_UPDATED (*string* _unitTag_, *[UnitAttributeVisual|#UnitAttributeVisual]* _unitAttributeVisual_, *[DerivedStats|#DerivedStats]* _statType_, *[Attributes|#Attributes]* _attributeType_, *[CombatMechanicFlags|#CombatMechanicFlags]* _powerType_, *number* _oldValue_, *number* _newValue_, *number* _oldMaxValue_, *number* _newMaxValue_, *integer* _sequenceId_)
+
+
+Added _adjustmentAmountType_
+* EVENT_COMPANION_RAPPORT_UPDATE (*integer* _companionId_, *integer* _previousRapport_, *integer* _currentRapport_, *[CompanionRapportAdjustmentAmount|#CompanionRapportAdjustmentAmount]* _adjustmentAmountType_)
+
+
+
+***************************
+*** UI XML Layout Added ***
+***************************
+
+h5. AnchorToBaseline
+Type changed to *layout_measurement*
+* _attribute:_ *layout_measurement* _offsetX_

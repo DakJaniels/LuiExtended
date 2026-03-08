@@ -1,0 +1,831 @@
+*******************
+*** Enums Added ***
+*******************
+
+* ACTION_TYPE_CRAFTED_ABILITY
+
+
+* BACKGROUND_LIST_FILTER_TARGET_CRAFTED_ABILITY_COMBINATION
+* BACKGROUND_LIST_FILTER_TARGET_CRAFTED_ABILITY_ID
+* BACKGROUND_LIST_FILTER_TARGET_CRAFTED_ABILITY_SCRIPT_ID
+
+
+* BOOK_MEDIUM_ELVEN_SCROLL
+
+
+h5. Gender
+* GENDER_FEMALE
+* GENDER_MALE
+* GENDER_NEUTER
+
+
+* MOUSE_CONTENT_CRAFTED_ABILITY
+* MOUSE_CONTENT_CRAFTED_ABILITY_SCRIPT
+
+
+* NOTIFICATION_TYPE_CRAFTED_ABILITY_RESET
+
+
+* PROGRESS_REASON_MIRRORMOOR_COMPLETED
+
+
+h5. VideoPlaybackErrorReason
+* VIDEO_PLAYBACK_ERROR_REASON_INVALID_VIDEO_NAME
+* VIDEO_PLAYBACK_ERROR_REASON_UNABLE_TO_FIND_VIDEO
+
+
+* ABILITY_TYPE_PLAYERFLIGHT
+
+
+h5. ScribingSlot
+* SCRIBING_SLOT_NONE
+* SCRIBING_SLOT_PRIMARY
+* SCRIBING_SLOT_SECONDARY
+* SCRIBING_SLOT_TERTIARY
+
+
+h5. GroupFinderStatus
+* GROUP_FINDER_STATUS_AVAILABLE
+* GROUP_FINDER_STATUS_DISABLED
+* GROUP_FINDER_STATUS_DOWN
+
+
+h5. KeepUpgradeLine
+* KEEP_UPGRADE_LINE_DEFENSIVE
+* KEEP_UPGRADE_LINE_FOOD
+* KEEP_UPGRADE_LINE_NONE
+* KEEP_UPGRADE_LINE_ORE
+* KEEP_UPGRADE_LINE_PRODUCTION
+* KEEP_UPGRADE_LINE_WOOD
+
+
+h5. ReleaseKeepResultType
+* RELEASE_KEEP_RESULT_TYPE_GUILD_DOES_NOT_HAVE_A_KEEP
+* RELEASE_KEEP_RESULT_TYPE_GUILD_DOES_NOT_OWN_KEEP
+* RELEASE_KEEP_RESULT_TYPE_INSUFFICIENT_PERMISSION
+* RELEASE_KEEP_RESULT_TYPE_INTERNAL_ERROR
+* RELEASE_KEEP_RESULT_TYPE_INVALID_DATA
+* RELEASE_KEEP_RESULT_TYPE_KEEP_DOES_NOT_EXIST
+* RELEASE_KEEP_RESULT_TYPE_NOT_IN_GUILD
+* RELEASE_KEEP_RESULT_TYPE_SOCIAL_DISABLED
+* RELEASE_KEEP_RESULT_TYPE_STILL_ON_COOLDOWN
+* RELEASE_KEEP_RESULT_TYPE_SUCCESS
+
+
+* CHAPTER_PENINSULA
+
+
+* COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE
+
+
+* COLLECTIBLE_USAGE_BLOCK_REASON_MOUNT_IN_COMBAT
+* COLLECTIBLE_USAGE_BLOCK_REASON_UNACQUIRED_SKILL
+
+
+* BOSS_RANK_SEVEN
+
+
+* ENCOUNTER_LOG_LINE_TYPE_ENDLESS_DUNGEON_BEGIN
+* ENCOUNTER_LOG_LINE_TYPE_ENDLESS_DUNGEON_BUFF_ADDED
+* ENCOUNTER_LOG_LINE_TYPE_ENDLESS_DUNGEON_BUFF_REMOVED
+* ENCOUNTER_LOG_LINE_TYPE_ENDLESS_DUNGEON_END
+* ENCOUNTER_LOG_LINE_TYPE_ENDLESS_DUNGEON_INIT
+* ENCOUNTER_LOG_LINE_TYPE_ENDLESS_DUNGEON_STAGE_END
+
+
+* MOUNT_FAILURE_REASON_MOUNT_IN_COMBAT
+
+
+* INTERFACE_COLOR_TYPE_BATTLEGROUND_TEAM
+* INTERFACE_COLOR_TYPE_NAME_PLATE_EFFECT_VISUAL_END
+* INTERFACE_COLOR_TYPE_NAME_PLATE_EFFECT_VISUAL_START
+
+
+* GAMEPAD_ITEM_CATEGORY_COMPANION_AMULET
+* GAMEPAD_ITEM_CATEGORY_COMPANION_AXE
+* GAMEPAD_ITEM_CATEGORY_COMPANION_BOW
+* GAMEPAD_ITEM_CATEGORY_COMPANION_CHEST
+* GAMEPAD_ITEM_CATEGORY_COMPANION_DAGGER
+* GAMEPAD_ITEM_CATEGORY_COMPANION_FEET
+* GAMEPAD_ITEM_CATEGORY_COMPANION_HAMMER
+* GAMEPAD_ITEM_CATEGORY_COMPANION_HANDS
+* GAMEPAD_ITEM_CATEGORY_COMPANION_HEAD
+* GAMEPAD_ITEM_CATEGORY_COMPANION_LEGS
+* GAMEPAD_ITEM_CATEGORY_COMPANION_RING
+* GAMEPAD_ITEM_CATEGORY_COMPANION_SHIELD
+* GAMEPAD_ITEM_CATEGORY_COMPANION_SHOULDERS
+* GAMEPAD_ITEM_CATEGORY_COMPANION_STAFF
+* GAMEPAD_ITEM_CATEGORY_COMPANION_SWORD
+* GAMEPAD_ITEM_CATEGORY_COMPANION_WAIST
+
+
+h5. InventoryCountBagOption
+* INVENTORY_COUNT_BAG_OPTION_BACKPACK
+* INVENTORY_COUNT_BAG_OPTION_BACKPACK_AND_BANK
+* INVENTORY_COUNT_BAG_OPTION_BACKPACK_AND_BANK_AND_CRAFT_BAG
+* INVENTORY_COUNT_BAG_OPTION_BACKPACK_AND_CRAFT_BAG
+* INVENTORY_COUNT_BAG_OPTION_BACKPACK_AND_WORN
+* INVENTORY_COUNT_BAG_OPTION_BANK
+* INVENTORY_COUNT_BAG_OPTION_CRAFT_BAG
+* INVENTORY_COUNT_BAG_OPTION_GUILD_BANK
+* INVENTORY_COUNT_BAG_OPTION_HOUSE_BANKS
+* INVENTORY_COUNT_BAG_OPTION_HOUSE_BANK_EIGHT
+* INVENTORY_COUNT_BAG_OPTION_HOUSE_BANK_FIVE
+* INVENTORY_COUNT_BAG_OPTION_HOUSE_BANK_FOUR
+* INVENTORY_COUNT_BAG_OPTION_HOUSE_BANK_NINE
+* INVENTORY_COUNT_BAG_OPTION_HOUSE_BANK_ONE
+* INVENTORY_COUNT_BAG_OPTION_HOUSE_BANK_SEVEN
+* INVENTORY_COUNT_BAG_OPTION_HOUSE_BANK_SIX
+* INVENTORY_COUNT_BAG_OPTION_HOUSE_BANK_TEN
+* INVENTORY_COUNT_BAG_OPTION_HOUSE_BANK_THREE
+* INVENTORY_COUNT_BAG_OPTION_HOUSE_BANK_TWO
+* INVENTORY_COUNT_BAG_OPTION_WORN
+
+
+* ITEMTYPE_CRAFTED_ABILITY
+* ITEMTYPE_CRAFTED_ABILITY_SCRIPT
+* ITEMTYPE_SCRIBING_INK
+
+
+* ITEM_SOUND_CATEGORY_CRAFTED_ABILITY
+* ITEM_SOUND_CATEGORY_CRAFTED_ABILITY_SCRIPT
+* ITEM_SOUND_CATEGORY_ENCHANTED_MEDALLION
+
+
+* ITEM_USE_TYPE_CRAFTED_ABILITY
+* ITEM_USE_TYPE_CRAFTED_ABILITY_SCRIPT
+
+
+h5. ScribingItemUseResult
+* SCRIBING_ITEM_USE_RESULT_CRAFTED_ABILITY_ALREADY_UNLOCKED
+* SCRIBING_ITEM_USE_RESULT_CRAFTED_ABILITY_SCRIPT_ALREADY_UNLOCKED
+* SCRIBING_ITEM_USE_RESULT_NONE
+
+
+* SPECIALIZED_ITEMTYPE_CRAFTED_ABILITY
+* SPECIALIZED_ITEMTYPE_CRAFTED_ABILITY_SCRIPT_PRIMARY
+* SPECIALIZED_ITEMTYPE_CRAFTED_ABILITY_SCRIPT_SECONDARY
+* SPECIALIZED_ITEMTYPE_CRAFTED_ABILITY_SCRIPT_TERTIARY
+* SPECIALIZED_ITEMTYPE_SCRIBING_INK
+
+
+* CRAFTING_RESULT_EMPTY_SCRIPT_SLOT
+* CRAFTING_RESULT_GRIMOIRE_DISABLED
+* CRAFTING_RESULT_INVALID_GRIMOIRE
+* CRAFTING_RESULT_INVALID_SCRIBING_COMBINATION
+* CRAFTING_RESULT_INVALID_SCRIPT
+* CRAFTING_RESULT_SCRIBING_DISABLED
+* CRAFTING_RESULT_SKILL_UNCHANGED
+* CRAFTING_RESULT_UNOWNED_GRIMOIRE
+* CRAFTING_RESULT_UNOWNED_SCRIPT
+
+
+* QUEST_TYPE_SCRIBING
+
+
+* ACCESSIBILITY_SETTING_TEXT_INPUT_NARRATION
+
+
+h5. SetOptions
+* SETTINGS_SET_OPTION_DO_NOT_SAVE_TO_PERSISTED_DATA
+* SETTINGS_SET_OPTION_SAVE_TO_PERSISTED_DATA
+
+
+h5. GregorianCalendarMonths
+* GREGORIAN_CALENDAR_MONTHS_MONTH_EIGHT
+* GREGORIAN_CALENDAR_MONTHS_MONTH_ELEVEN
+* GREGORIAN_CALENDAR_MONTHS_MONTH_FIVE
+* GREGORIAN_CALENDAR_MONTHS_MONTH_FOUR
+* GREGORIAN_CALENDAR_MONTHS_MONTH_NINE
+* GREGORIAN_CALENDAR_MONTHS_MONTH_ONE
+* GREGORIAN_CALENDAR_MONTHS_MONTH_SEVEN
+* GREGORIAN_CALENDAR_MONTHS_MONTH_SIX
+* GREGORIAN_CALENDAR_MONTHS_MONTH_TEN
+* GREGORIAN_CALENDAR_MONTHS_MONTH_THREE
+* GREGORIAN_CALENDAR_MONTHS_MONTH_TWELVE
+* GREGORIAN_CALENDAR_MONTHS_MONTH_TWO
+
+
+h5. MacroEditorNodeType
+* MACRO_EDITOR_NODE_TYPE_COMMAND_MACRO
+* MACRO_EDITOR_NODE_TYPE_FOLDER
+* MACRO_EDITOR_NODE_TYPE_INFO
+* MACRO_EDITOR_NODE_TYPE_LUA_MACRO
+
+
+* RESPEC_RESULT_ABILITY_DISABLED
+* RESPEC_RESULT_CRAFTED_ABILITY_SCRIPT_DISABLED
+* RESPEC_RESULT_SCRIBING_DISABLED
+
+
+h5. WorldEventType
+* WORLD_EVENT_TYPE_DARK_ANCHOR
+* WORLD_EVENT_TYPE_FISSURE
+* WORLD_EVENT_TYPE_GEYSER
+* WORLD_EVENT_TYPE_HARROWSTORM
+* WORLD_EVENT_TYPE_MIRRORMOOR
+* WORLD_EVENT_TYPE_MONSTER_HUNT
+
+
+* TRIBUTE_MECHANIC_KO_ALL
+
+
+h5. TributeNPCSkillLevel
+* TRIBUTE_NPC_SKILL_LEVEL_ADEPT
+* TRIBUTE_NPC_SKILL_LEVEL_HIDDEN_MASTER
+* TRIBUTE_NPC_SKILL_LEVEL_INVALID
+* TRIBUTE_NPC_SKILL_LEVEL_NOVICE
+* TRIBUTE_NPC_SKILL_LEVEL_VETERAN
+
+
+* CLIENT_INTERACT_RESULT_SCRIBING_DISABLED
+* CLIENT_INTERACT_RESULT_SCRIBING_INTERNAL_ERROR
+
+
+h5. MailCategory
+* MAIL_CATEGORY_INFO_ONLY_SYSTEM_MAIL
+* MAIL_CATEGORY_PLAYER_MAIL
+* MAIL_CATEGORY_SYSTEM_MAIL
+
+
+h5. MailExpirationType
+* MAIL_EXPIRE_TYPE_DEFAULT
+* MAIL_EXPIRE_TYPE_EXTREMELY_LONG
+* MAIL_EXPIRE_TYPE_LONG
+* MAIL_EXPIRE_TYPE_SHORT
+* MAIL_EXPIRE_TYPE_VERY_LONG
+* MAIL_EXPIRE_TYPE_VERY_SHORT
+
+
+h5. MailTakeAttachmentResult
+* MAIL_TAKE_ATTACHMENT_RESULT_FAIL_ALREADY_HAS_UNIQUE_ITEM
+* MAIL_TAKE_ATTACHMENT_RESULT_FAIL_NOTHING_TO_CLAIM
+* MAIL_TAKE_ATTACHMENT_RESULT_FAIL_NO_INVENTORY_SPACE
+* MAIL_TAKE_ATTACHMENT_RESULT_FAIL_SERVER_ERROR
+* MAIL_TAKE_ATTACHMENT_RESULT_SUCCESS
+
+
+* REQUEST_READ_MAIL_RESULT_ANOTHER_REQUEST_PENDING
+
+
+h5. HirelingType
+* HIRELING_TYPE_BLACKSMITHING
+* HIRELING_TYPE_CLOTHIER
+* HIRELING_TYPE_ENCHANTING
+* HIRELING_TYPE_JEWELRYCRAFTING
+* HIRELING_TYPE_PROVISIONING
+* HIRELING_TYPE_WOODWORKING
+
+
+h5. ScribingErrorResult
+* SCRIBING_ERROR_RESULT_CANNOT_OVERWRITE_CRAFTED_ABILITY
+* SCRIBING_ERROR_RESULT_CRAFTED_ABILITY_ALREADY_UNLOCKED
+* SCRIBING_ERROR_RESULT_CRAFTED_ABILITY_NOT_UNLOCKED
+* SCRIBING_ERROR_RESULT_CRAFTED_ABILITY_SCRIPT_NOT_LOCKED
+* SCRIBING_ERROR_RESULT_CRAFTED_ABILITY_SCRIPT_NOT_UNLOCKED
+* SCRIBING_ERROR_RESULT_DUPLICATE_CRAFTED_ABILITY
+* SCRIBING_ERROR_RESULT_FAILED_SKILL_TRANSITION
+* SCRIBING_ERROR_RESULT_FAILED_TO_REMOVE_CRAFTED_ABILITY
+* SCRIBING_ERROR_RESULT_FAILURE_TO_LOCK_CRAFTED_ABILITY_SCRIPT
+* SCRIBING_ERROR_RESULT_FAILURE_TO_UNLOCK_CRAFTED_ABILITY_SCRIPT
+* SCRIBING_ERROR_RESULT_INVALID_CRAFTED_ABILITY_DEF
+* SCRIBING_ERROR_RESULT_INVALID_CRAFTED_ABILITY_SCRIPT_DEF
+* SCRIBING_ERROR_RESULT_INVALID_CRAFTED_ABILITY_TYPE
+* SCRIBING_ERROR_RESULT_INVALID_ENTRY_POINT
+* SCRIBING_ERROR_RESULT_INVALID_LINKED_SKILL
+* SCRIBING_ERROR_RESULT_MARKED_FOR_DELETE
+* SCRIBING_ERROR_RESULT_NONE
+* SCRIBING_ERROR_RESULT_NO_SCRIPTS_UPDATED
+* SCRIBING_ERROR_RESULT_PRIMARY_CRAFTED_ABILITY_SCRIPT_DISABLED
+* SCRIBING_ERROR_RESULT_PRIMARY_CRAFTED_ABILITY_SCRIPT_NOT_UNLOCKED
+* SCRIBING_ERROR_RESULT_SECONDARY_CRAFTED_ABILITY_SCRIPT_DISABLED
+* SCRIBING_ERROR_RESULT_SECONDARY_CRAFTED_ABILITY_SCRIPT_NOT_UNLOCKED
+* SCRIBING_ERROR_RESULT_TERTIARY_CRAFTED_ABILITY_SCRIPT_DISABLED
+* SCRIBING_ERROR_RESULT_TERTIARY_CRAFTED_ABILITY_SCRIPT_NOT_UNLOCKED
+
+
+h5. ScribingTooltipDisplayFlags
+* SCRIBING_TOOLTIP_DISPLAY_FLAGS_SCRIPT_COMPATIBILITY_ERROR
+* SCRIBING_TOOLTIP_DISPLAY_FLAGS_SCRIPT_LOCKED_ERROR
+* SCRIBING_TOOLTIP_DISPLAY_FLAGS_SHOW_ACQUIRE_HINT
+* SCRIBING_TOOLTIP_DISPLAY_FLAGS_SHOW_ERRORS
+* SCRIBING_TOOLTIP_DISPLAY_FLAGS_SHOW_SELECTED_SCRIPTS
+
+
+* CRAFTING_TYPE_SCRIBING
+
+
+* TUTORIAL_TRIGGER_MOUNT_SET
+* TUTORIAL_TRIGGER_SCRIBING_ABILITY_SCRIBED
+* TUTORIAL_TRIGGER_SCRIBING_GRIMOIRE_SELECTED
+* TUTORIAL_TRIGGER_SCRIBING_OPENED
+* TUTORIAL_TRIGGER_SCRIBING_SCRIPT_SELECTED
+* TUTORIAL_TRIGGER_SKILLS_SCRIBING_OPENED
+* TUTORIAL_TRIGGER_SKILLS_SKILL_STYLING
+* TUTORIAL_TRIGGER_SKILL_BUILD_SELECTION_GAMEPAD
+
+
+h5. MapArrowType
+* MAP_ARROW_TYPE_GUTTER
+* MAP_ARROW_TYPE_INSIDE
+* MAP_ARROW_TYPE_NONE
+
+
+h5. CharacterResolution
+* CHARACTER_RESOLUTION_HIGH
+* CHARACTER_RESOLUTION_LOW
+* CHARACTER_RESOLUTION_MEDIUM
+* CHARACTER_RESOLUTION_ULTRA
+
+
+
+*********************
+*** Enums Changed ***
+*********************
+
+h5. BattlegroundAlliance
+* BATTLEGROUND_ALLIANCE_FIRE_DRAKES
+* BATTLEGROUND_ALLIANCE_NONE
+* BATTLEGROUND_ALLIANCE_PIT_DAEMONS
+* BATTLEGROUND_ALLIANCE_STORM_LORDS
+to
+h5. BattlegroundTeam
+* BATTLEGROUND_TEAM_FIRE_DRAKES
+* BATTLEGROUND_TEAM_INVALID
+* BATTLEGROUND_TEAM_PIT_DAEMONS
+* BATTLEGROUND_TEAM_STORM_LORDS
+
+
+
+*********************
+*** Globals Added ***
+*********************
+
+* MAIL_EXPIRATION_IMMINENT_THRESHOLD_DAYS
+* MAX_MAILS_PER_CATEGORY
+
+
+
+***********************
+*** Functions Added ***
+***********************
+
+* CanSystemEnableHDR()
+** _Returns:_ *bool* _canEnableHDR_
+
+
+* GetPurchasableCollectibleIdForCollectible(*integer* _collectibleId_)
+** _Returns:_ *integer* _purchasableCollectibleId_
+
+
+* GetCursorCraftedAbilityId()
+** _Returns:_ *integer:nilable* _craftedAbilityId_
+
+
+* GetCursorCraftedAbilityScriptId()
+** _Returns:_ *integer:nilable* _scriptId_
+
+
+* PickupCraftedAbility *protected* (*integer* _craftedAbilityId_)
+
+
+* PickupCraftedAbilityScript *protected* (*integer* _craftedAbilityScriptId_)
+
+
+* ReplyToPendingInteraction(*bool* _isConfirmed_)
+
+
+* GenerateCraftedAbilityScriptSlotDescriptionForAbilityDescription(*integer* _abilityId_, *[ScribingSlot|#ScribingSlot]* _slotType_, *string* _casterUnitTag_)
+** _Returns:_ *string* _description_
+
+
+* GetCraftedAbilitySkillCraftedAbilityId(*[SkillType|#SkillType]* _skillType_, *luaindex* _skillLineIndex_, *luaindex* _skillIndex_)
+** _Returns:_ *integer* _craftedAbilityId_
+
+
+* IsCraftedAbilitySkill(*[SkillType|#SkillType]* _skillType_, *luaindex* _skillLineIndex_, *luaindex* _skillIndex_)
+** _Returns:_ *bool* _isCraftedAbility_
+
+
+* GetSkillAbilityIndicesFromCraftedAbilityId(*integer* _craftedAbilityId_)
+** _Returns:_ *[SkillType|#SkillType]* _skillType_, *luaindex* _skillLineIndex_, *luaindex* _skillIndex_
+
+
+* GetNumMailItemsByCategory(*[MailCategory|#MailCategory]* _category_)
+** _Returns:_ *integer* _numMail_
+
+
+* GetMailIdByIndex(*[MailCategory|#MailCategory]* _category_, *luaindex* _index_)
+** _Returns:_ *id64* _mailId_
+
+
+* TakeMailAttachments(*id64* _mailId_, *bool* _deleteOnClaim_)
+
+
+* TakeAllMailAttachmentsInCategory(*[MailCategory|#MailCategory]* _category_, *bool* _deleteOnClaim_)
+
+
+* CanTryTakeAllMailAttachmentsInCategory(*[MailCategory|#MailCategory]* _category_, *bool* _deleteOnClaim_)
+** _Returns:_ *bool* _canTakeAttachments_
+
+
+* GetNumProgressionSkillAbilityFxOverrides(*integer* _progressionId_)
+** _Returns:_ *integer* _numAbilityFxOverrides_
+
+
+* GetProgressionSkillAbilityFxOverrideCollectibleIdByIndex(*integer* _progressionId_, *luaindex* _index_)
+** _Returns:_ *integer* _collectibleId_
+
+
+* GetActiveProgressionSkillAbilityFxOverrideCollectibleId(*integer* _progressionId_)
+** _Returns:_ *integer* _collectibleId_
+
+
+* GetAbilityFxOverrideProgressionId(*integer* _abilityFxOverrideId_)
+** _Returns:_ *integer* _progressionId_
+
+
+* GetNumUnlockedHirelingCorrespondence(*[HirelingType|#HirelingType]* _hirelingType_)
+** _Returns:_ *integer* _current_, *integer* _max_
+
+
+* GetHirelingCorrespondenceInfoByIndex(*[HirelingType|#HirelingType]* _hirelingType_, *luaindex* _index_)
+** _Returns:_ *string* _sender_, *string* _subject_, *string* _message_, *textureName* _icon_
+
+
+* GetLastCraftingResultAbilityId()
+** _Returns:_ *integer* _abilityId_
+
+
+* RequestScribe(*integer* _craftedAbilityId_, *integer* _primaryScriptId_, *integer* _secondaryScriptId_, *integer* _tertiaryScriptId_)
+
+
+* SetCraftedAbilityScriptSelectionOverride(*integer* _craftedAbilityId_, *integer* _primaryScriptId_, *integer* _secondaryScriptId_, *integer* _tertiaryScriptId_)
+
+
+* GetCraftedAbilityScriptSelectionOverride()
+** _Returns:_ *integer* _craftedAbilityId_, *integer* _primaryScriptId_, *integer* _secondaryScriptId_, *integer* _tertiaryScriptId_
+
+
+* IsCraftedAbilityScriptCompatibleWithSelections(*integer* _checkScriptId_, *integer* _craftedAbilityId_, *integer* _selectedPrimaryScriptId_, *integer* _selectedSecondaryScriptId_, *integer* _selectedTertiaryScriptId_)
+** _Returns:_ *bool* _isCompatible_
+
+
+* ResetCraftedAbilityScriptSelectionOverride()
+
+
+* IsScribingEnabled()
+** _Returns:_ *bool* _isScribingEnabled_
+
+
+* GetNumCraftedAbilities()
+** _Returns:_ *integer* _numCraftedAbilities_
+
+
+* GetCraftedAbilityIdAtIndex(*luaindex* _index_)
+** _Returns:_ *integer* _craftedAbilityId_
+
+
+* GetScribingInkItemLink(*[LinkStyle|#LinkStyle]* _linkStyle_)
+** _Returns:_ *string* _link_
+
+
+* GetCostToScribeScripts(*integer* _craftedAbilityId_, *integer* _primaryScriptId_, *integer* _secondaryScriptId_, *integer* _tertiaryScriptId_)
+** _Returns:_ *integer* _cost_
+
+
+* IsScribableScriptCombinationForCraftedAbility(*integer* _craftedAbilityId_, *integer* _selectedPrimaryScriptId_, *integer* _selectedSecondaryScriptId_, *integer* _selectedTertiaryScriptId_)
+** _Returns:_ *bool* _isScribableCombination_
+
+
+* IsCraftedAbilityScribed(*integer* _craftedAbilityId_)
+** _Returns:_ *bool* _isScribed_
+
+
+* IsCraftedAbilityScriptUnlocked(*integer* _craftedAbilityScriptId_)
+** _Returns:_ *bool* _isUnlocked_
+
+
+* GetAbilityIdForCraftedAbilityId(*integer* _craftedAbilityId_)
+** _Returns:_ *integer* _abilityId_
+
+
+* GetSkillTypeForCraftedAbilityId(*integer* _craftedAbilityId_)
+** _Returns:_ *[SkillType|#SkillType]* _skillType_
+
+
+* IsCraftedAbilityScriptActive(*integer* _craftedAbilityId_, *integer* _craftedAbilityScriptId_)
+** _Returns:_ *bool* _isActive_
+
+
+* GetCraftedAbilityActiveScriptIds(*integer* _craftedAbilityId_)
+** _Returns:_ *integer* _primaryScriptId_, *integer* _secondaryScriptId_, *integer* _tertiaryScriptId_
+
+
+* IsCraftedAbilityUnlocked(*integer* _craftedAbilityId_)
+** _Returns:_ *bool* _isUnlocked_
+
+
+* IsCraftedAbilityDisabled(*integer* _craftedAbilityId_)
+** _Returns:_ *bool* _isDisabled_
+
+
+* IsCraftedAbilityScriptDisabled(*integer* _craftedAbilityScriptId_)
+** _Returns:_ *bool* _isDisabled_
+
+
+* GetNumScriptsInSlotForCraftedAbility(*integer* _craftedAbilityId_, *[ScribingSlot|#ScribingSlot]* _slotType_)
+** _Returns:_ *integer* _numScripts_
+
+
+* GetScriptIdAtSlotIndexForCraftedAbility(*integer* _craftedAbilityId_, *[ScribingSlot|#ScribingSlot]* _slotType_, *luaindex* _index_)
+** _Returns:_ *integer* _scriptDefId_
+
+
+* GetCraftedAbilityScriptDisplayName(*integer* _craftedAbilityScriptId_)
+** _Returns:_ *string* _displayName_
+
+
+* GetCraftedAbilityScriptDescription(*integer* _craftedAbilityId_, *integer* _craftedAbilityScriptId_)
+** _Returns:_ *string* _description_
+
+
+* GetCraftedAbilityScriptGeneralDescription(*integer* _craftedAbilityScriptId_)
+** _Returns:_ *string* _description_
+
+
+* GetCraftedAbilityScriptIcon(*integer* _craftedAbilityScriptId_)
+** _Returns:_ *textureName* _icon_
+
+
+* GetCraftedAbilityScriptAcquireHint(*integer* _craftedAbilityScriptId_)
+** _Returns:_ *string* _acquireHint_
+
+
+* GetCraftedAbilityScriptScribingSlot(*integer* _craftedAbilityScriptId_)
+** _Returns:_ *[ScribingSlot|#ScribingSlot]* _slot_
+
+
+* GetCraftedAbilityDisplayName(*integer* _craftedAbilityId_)
+** _Returns:_ *string* _displayName_
+
+
+* GetCraftedAbilityDescription(*integer* _craftedAbilityId_)
+** _Returns:_ *string* _description_
+
+
+* GetCraftedAbilityIcon(*integer* _craftedAbilityId_)
+** _Returns:_ *textureName* _icon_
+
+
+* GetCraftedAbilityAcquireHint(*integer* _craftedAbilityId_)
+** _Returns:_ *string* _acquireHint_
+
+
+* GetCraftedAbilityRepresentativeAbilityId(*integer* _craftedAbilityId_, *string* _casterUnitTag_)
+** _Returns:_ *integer* _abilityId_
+
+
+* SetTrackedZoneStoryAssisted(*bool* _isAssisted_)
+
+
+* TryCleanExistingGuildHistoryRequestParameters(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_, *integer53* _newestTimeS_, *integer53* _oldestTimeS_)
+** _Returns:_ *integer* _requestId_
+
+
+* GetItemLinkItemUseReferenceId(*string* _itemLink_)
+** _Returns:_ *integer* _onUseReferenceId_
+
+
+* GetItemLinkInventoryCount(*string* _itemLink_, *[InventoryCountBagOption|#InventoryCountBagOption]* _countType_)
+** _Returns:_ *integer* _inventoryCount_
+
+
+* GetCollectibleLinkedAchievement(*integer* _collectibleId_)
+** _Returns:_ *integer* _achievementId_
+
+
+* GetScribingCollectibleId()
+** _Returns:_ *integer* _scribingCollectibleId_
+
+
+* IsZoneStoryTracked()
+** _Returns:_ *bool* _isTracked_
+
+
+* IsZoneStoryAssisted()
+** _Returns:_ *bool* _isAssisted_
+
+
+* GetAbilityBaseCostInfo(*integer* _abilityId_, *integer:nilable* _overrideRank_, *string* _casterUnitTag_)
+** _Returns:_ *integer:nilable* _baseCost_, *[CombatMechanicFlags|#CombatMechanicFlags]:nilable* _mechanicFlags_, *bool:nilable* _isCostChargedPerTick_
+
+
+* GetAbilityCostPerTick(*integer* _abilityId_, *[CombatMechanicFlags|#CombatMechanicFlags]* _mechanic_, *integer:nilable* _overrideRank_)
+** _Returns:_ *integer* _costPerTick_
+
+
+* GetAbilityFrequencyMS(*integer* _abilityId_, *string* _casterUnitTag_)
+** _Returns:_ *integer:nilable* _frequencyMS_
+
+
+h3. LabelControl
+
+* GetFontFaceName()
+** _Returns:_ *string* _text_
+
+* SetSmallCaps(*bool* _smallCaps_)
+
+* SetStrikethrough(*bool* _strikethrough_)
+
+* SetUnderline(*bool* _underline_)
+
+
+h3. TooltipControl
+
+* SetCraftedAbility(*integer* _craftedAbilityId_, *integer* _primaryScriptId_, *integer* _secondaryScriptId_, *integer* _tertiaryScriptId_, *[ScribingTooltipDisplayFlags|#ScribingTooltipDisplayFlags]* _displayFlags_)
+
+* SetCraftedAbilityScript(*integer* _craftedAbilityId_, *integer* _craftedAbilityScriptId_, *integer* _primaryScriptId_, *integer* _secondaryScriptId_, *integer* _tertiaryScriptId_, *[ScribingTooltipDisplayFlags|#ScribingTooltipDisplayFlags]* _displayFlags_)
+
+
+
+*************************
+*** Functions Removed ***
+*************************
+
+* SetPendingInteractionConfirmed(*bool* _isConfirmed_)
+
+
+* GetMaxMailItems()
+** _Returns:_ *integer* _maxMail_
+
+
+* StartItemSetCollectionSearch(*string* _searchString_)
+
+
+* GetNumItemSetCollectionSearchResults()
+** _Returns:_ *integer* _numSearchResults_
+
+
+* GetItemSetCollectionSearchResult(*luaindex* _searchResultIndex_)
+** _Returns:_ *integer* _itemSetId_
+
+
+* StartTributePatronSearch(*string* _searchString_)
+
+
+* GetNumTributePatronSearchResults()
+** _Returns:_ *integer* _numSearchResults_
+
+
+* GetTributePatronSearchResult(*luaindex* _searchResultIndex_)
+** _Returns:_ *integer* _patronId_
+
+
+* IsZoneStoryActivelyTracking()
+** _Returns:_ *bool* _isActivelyTracking_
+
+
+* GetAbilityCostOverTime(*integer* _abilityId_, *[CombatMechanicFlags|#CombatMechanicFlags]* _mechanic_, *integer:nilable* _overrideRank_)
+** _Returns:_ *integer* _cost_, *integer* _chargeFrequencyMS_
+
+
+
+*************************
+*** Functions Changed ***
+*************************
+
+Renamed GetBattlegroundAllianceName to GetBattlegroundTeamName
+
+
+Added value3, value4
+* AddBackgroundListFilterEntry(*integer* _taskId_, *integer* _value1_, *integer* _value2_, *integer* _value3_, *integer* _value4_)
+
+* GetBackgroundListFilterResult(*integer* _taskId_, *luaindex* _resultIndex_)
+** _Returns:_ *integer* _value1_, *integer* _value2_, *integer* _value3_, *integer* _value4_
+
+
+Renamed GetUnitBattlegroundAlliance to GetUnitBattlegroundTeam
+
+
+Added _casterUnitTag_
+* GetAbilityBuffType(*integer* _abilityId_, *string* _casterUnitTag_)
+** _Returns:_ *[BuffType|#BuffType]* _buffType_
+** _Returns:_ *bool* _isValid_
+
+* GetAbilityName(*integer* _abilityId_, *string* _casterUnitTag_)
+** _Returns:_ *string* _abilityName_
+
+
+Added _actorCategory
+* GetStoreEntryInfo(*luaindex* _entryIndex_)
+** _Returns:_ *textureName* _icon_, *string* _name_, *integer* _stack_, *integer* _price_, *integer* _sellPrice_, *bool* _meetsRequirementsToBuy_, *bool* _meetsRequirementsToUse_, *integer* _quality_, *bool* _questNameColor_, *[CurrencyType|#CurrencyType]* _currencyType1_, *integer* _currencyQuantity1_, *[CurrencyType|#CurrencyType]* _currencyType2_, *integer* _currencyQuantity2_, *[StoreEntryType|#StoreEntryType]* _entryType_, *[StoreFailure|#StoreFailure]* _buyStoreFailure_, *integer* _buyErrorStringId_, *integer* _actorCategory
+
+
+Added _category_
+* IsLocalMailboxFull(*[MailCategory|#MailCategory]* _category_)
+** _Returns:_ *bool* _isFull_
+
+* GetMailItemInfo(*id64* _mailId_)
+** _Returns:_ *string* _senderDisplayName_, *string* _senderCharacterName_, *string* _subject_, *textureName* _icon_, *bool* _unread_, *bool* _fromSystem_, *bool* _fromCustomerService_, *bool* _returned_, *integer* _numAttachments_, *integer* _attachedMoney_, *integer* _codAmount_, *integer:nilable* _expiresInDays_, *integer* _secsSinceReceived_, *[MailCategory|#MailCategory]* _category_
+
+
+Removed _forceDelete_
+* DeleteMail(*id64* _mailId_)
+
+
+Added _abilityFxIcon_
+* GetKillingAttackInfo(*luaindex* _index_)
+** _Returns:_ *string* _attackName_, *integer* _attackDamage_, *textureName* _attackIcon_, *bool* _wasKillingBlow_, *integer* _castTimeAgoMS_, *integer* _durationMS_, *integer* _numAttackHits_, *integer* _abilityId_, *textureName:nilable* _abilityFxIcon_
+
+
+Renamed GetKillingAttackerBattlegroundAlliance to GetKillingBattlegroundTeam
+
+
+Removed _castTime_, _channelTime_, added _durationValue_, made all returns nilable
+* GetAbilityCastInfo(*integer* _abilityId_, *integer:nilable* _overrideRank_, *string* _casterUnitTag_)
+** _Returns:_ *bool:nilable* _channeled_, *integer:nilable* _durationValue_
+
+
+Made all returns nilable
+* GetAbilityRange(*integer* _abilityId_, *integer:nilable* _overrideRank_, *string* _casterUnitTag_)
+** _Returns:_ *integer:nilable* _minRangeCM_, *integer:nilable* _maxRangeCM_
+
+* GetAbilityRadius(*integer* _abilityId_, *integer:nilable* _overrideRank_, *string* _casterUnitTag_)
+** _Returns:_ *integer:nilable* _radius_
+
+* GetAbilityAngleDistance(*integer* _abilityId_)
+** _Returns:_ *integer:nilable* _angleDistance_
+
+* GetAbilityDuration(*integer* _abilityId_, *integer:nilable* _overrideRank_, *string* _casterUnitTag_)
+** _Returns:_ *integer:nilable* _durationMs_
+
+* GetAbilityCooldown(*integer* _abilityId_, *string* _casterUnitTag_)
+** _Returns:_ *integer:nilable* _durationMs_
+
+
+Added _casterUnitTag_, made all returns nilable
+* IsAbilityDurationToggled(*integer* _abilityId_, *string* _casterUnitTag_)
+** _Returns:_ *bool:nilable* _isAbilityDurationToggled_
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_CRAFTED_ABILITY_LOCK_STATE_CHANGED (*integer* _craftedAbilityDefId_, *bool* _isUnlocked_)
+
+* EVENT_CRAFTED_ABILITY_RESET (*integer* _craftedAbilityDefId_, *integer* _totalNumReset_, *bool* _isLastReset_)
+
+* EVENT_CRAFTED_ABILITY_SCRIPT_LOCK_STATE_CHANGED (*integer* _craftedAbilityScriptDefId_, *bool* _isUnlocked_)
+
+* EVENT_CRAFTED_ABILITY_SEARCH_RESULTS_READY
+
+* EVENT_DELETE_MAIL_RESPONSE (*id64* _mailId_, *bool* _success_)
+
+* EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE (*[MailTakeAttachmentResult|#MailTakeAttachmentResult]* _result_, *[MailCategory|#MailCategory]* _category_, *bool* _headersRemoved_)
+
+* EVENT_MAIL_WITH_ATTACHMENTS_AVAILABLE (*bool* _hasAttachments_, *bool* _hasExpiringAttachments_)
+
+* EVENT_NEW_HIRELING_CORRESPONDENCE_RECEIVED
+
+* EVENT_SCRIBING_DISABLED
+
+* EVENT_SCRIBING_ERROR_RESULT (*[ScribingErrorResult|#ScribingErrorResult]* _result_)
+
+* EVENT_SCRIBING_ITEM_USE_RESULT (*[ScribingItemUseResult|#ScribingItemUseResult]* _result_)
+
+* EVENT_SKILL_STYLE_DISABLED_BY_SERVER (*bool* _isDisabled_)
+
+* EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_INITIALIZED
+
+* EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_UPDATED
+
+* EVENT_ACTIVE_MONITOR_CHANGED
+
+
+
+**********************
+*** Events Changed ***
+**********************
+
+Changed all instances of BattlegroundAlliance to BattlegroundTeam
+* EVENT_BATTLEGROUND_KILL (*string* _killedPlayerCharacterName_, *string* _killedPlayerDisplayName_, *[BattlegroundTeam|#BattlegroundTeam]* _killedPlayerBattlegroundTeam_, *string* _killingPlayerCharacterName_, *string* _killingPlayerDisplayName_, *[BattlegroundTeam|#BattlegroundTeam]* _killingPlayerBattlegroundTeam_, *[BattlegroundKillType|#BattlegroundKillType]* _battlegroundKillType_, *integer* _killingAbilityId_)
+
+
+
+***************************
+*** UI XML Layout Added ***
+***************************
+
+h4. Attributes:
+* smallCaps *bool*
+* strikethrough *bool*
+* underline *bool*
+
+
+h5. Label
+* [Child: smallCaps|#Attributes]
+* [Child: strikethrough|#Attributes]
+* [Child: underline|#Attributes]

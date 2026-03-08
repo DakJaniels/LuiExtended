@@ -167,6 +167,10 @@ ChatAnnouncements.Colors = {}
 --- @field StorageBagAlert boolean
 --- @field TimedActivityCA boolean
 --- @field TimedActivityAlert boolean
+--- @field TimedActivityProgressCA boolean
+--- @field TimedActivityProgressAlert boolean
+--- @field TimedActivityProgressScope string
+--- @field TimedActivityProgressFrequency string
 --- @field PromotionalEventsActivityCA boolean
 --- @field PromotionalEventsActivityAlert boolean
 --- @field CraftedAbilityCA boolean
@@ -365,10 +369,6 @@ ChatAnnouncements.Colors = {}
 --- @field CurrencyTransmuteColor CA_Color
 --- @field CurrencyTransmuteName string
 --- @field CurrencyTransmuteShowTotal boolean
---- @field CurrencyEventChange boolean
---- @field CurrencyEventColor CA_Color
---- @field CurrencyEventName string
---- @field CurrencyEventShowTotal boolean
 --- @field CurrencyCrownsChange boolean
 --- @field CurrencyCrownsColor CA_Color
 --- @field CurrencyCrownsName string
@@ -377,10 +377,30 @@ ChatAnnouncements.Colors = {}
 --- @field CurrencyCrownGemsColor CA_Color
 --- @field CurrencyCrownGemsName string
 --- @field CurrencyCrownGemsShowTotal boolean
---- @field CurrencyEndeavorsChange boolean
---- @field CurrencyEndeavorsColor CA_Color
---- @field CurrencyEndeavorsName string
---- @field CurrencyEndeavorsShowTotal boolean
+--- @field CurrencySealsChange boolean
+--- @field CurrencySealsColor CA_Color
+--- @field CurrencySealsName string
+--- @field CurrencySealsShowTotal boolean
+--- @field CurrencyTradeBarsChange boolean
+--- @field CurrencyTradeBarsColor CA_Color
+--- @field CurrencyTradeBarsName string
+--- @field CurrencyTradeBarsShowTotal boolean
+--- @field CurrencyTomePointsChange boolean
+--- @field CurrencyTomePointsColor CA_Color
+--- @field CurrencyTomePointsName string
+--- @field CurrencyTomePointsShowTotal boolean
+--- @field CurrencyTomePointCachesChange boolean
+--- @field CurrencyTomePointCachesColor CA_Color
+--- @field CurrencyTomePointCachesName string
+--- @field CurrencyTomePointCachesShowTotal boolean
+--- @field CurrencyTomeTokensChange boolean
+--- @field CurrencyTomeTokensColor CA_Color
+--- @field CurrencyTomeTokensName string
+--- @field CurrencyTomeTokensShowTotal boolean
+--- @field CurrencyTomeChallengeRerollsChange boolean
+--- @field CurrencyTomeChallengeRerollsColor CA_Color
+--- @field CurrencyTomeChallengeRerollsName string
+--- @field CurrencyTomeChallengeRerollsShowTotal boolean
 --- @field CurrencyOutfitTokenChange boolean
 --- @field CurrencyOutfitTokenColor CA_Color
 --- @field CurrencyOutfitTokenName string
@@ -398,10 +418,14 @@ ChatAnnouncements.Colors = {}
 --- @field CurrencyMessageTotalTV string
 --- @field CurrencyMessageTotalWV string
 --- @field CurrencyMessageTotalTransmute string
---- @field CurrencyMessageTotalEvent string
 --- @field CurrencyMessageTotalCrowns string
 --- @field CurrencyMessageTotalCrownGems string
---- @field CurrencyMessageTotalEndeavors string
+--- @field CurrencyMessageTotalSeals string
+--- @field CurrencyMessageTotalTradeBars string
+--- @field CurrencyMessageTotalTomePoints string
+--- @field CurrencyMessageTotalTomePointCaches string
+--- @field CurrencyMessageTotalTomeTokens string
+--- @field CurrencyMessageTotalTomeChallengeRerolls string
 --- @field CurrencyMessageTotalOutfitToken string
 --- @field CurrencyMessageTotalUndaunted string
 --- @field CurrencyMessageTotalEndless string
@@ -457,6 +481,7 @@ ChatAnnouncements.Colors = {}
 --- @field CurrencyMessageConfiscate string
 --- @field CurrencyMessageDeposit string
 --- @field CurrencyMessageDepositStorage string
+--- @field CurrencyMessageDepositFurnitureVault string
 --- @field CurrencyMessageDepositGuild string
 --- @field CurrencyMessageEarn string
 --- @field CurrencyMessageLoot string
@@ -490,6 +515,7 @@ ChatAnnouncements.Colors = {}
 --- @field CurrencyMessagePostage string
 --- @field CurrencyMessageWithdraw string
 --- @field CurrencyMessageWithdrawStorage string
+--- @field CurrencyMessageWithdrawFurnitureVault string
 --- @field CurrencyMessageWithdrawGuild string
 --- @field CurrencyMessageStable string
 --- @field CurrencyMessageStorage string
@@ -741,6 +767,10 @@ ChatAnnouncements.Defaults =
 
         TimedActivityCA = false,
         TimedActivityAlert = false,
+        TimedActivityProgressCA = false,
+        TimedActivityProgressAlert = false,
+        TimedActivityProgressScope = "all",
+        TimedActivityProgressFrequency = "complete",
         PromotionalEventsActivityCA = false,
         PromotionalEventsActivityAlert = false,
 
@@ -958,10 +988,6 @@ ChatAnnouncements.Defaults =
         CurrencyTransmuteColor = { 1, 1, 1, 1 },
         CurrencyTransmuteName = GetString(LUIE_STRING_CA_CURRENCY_TRANSMUTE_CRYSTAL),
         CurrencyTransmuteShowTotal = false,
-        CurrencyEventChange = true,
-        CurrencyEventColor = { 250 / 255, 173 / 255, 187 / 255, 1 },
-        CurrencyEventName = GetString(LUIE_STRING_CA_CURRENCY_EVENT_TICKET),
-        CurrencyEventShowTotal = false,
         CurrencyCrownsChange = false,
         CurrencyCrownsColor = { 1, 1, 1, 1 },
         CurrencyCrownsName = GetString(LUIE_STRING_CA_CURRENCY_CROWN),
@@ -970,10 +996,30 @@ ChatAnnouncements.Defaults =
         CurrencyCrownGemsColor = { 244 / 255, 56 / 255, 247 / 255, 1 },
         CurrencyCrownGemsName = GetString(LUIE_STRING_CA_CURRENCY_CROWN_GEM),
         CurrencyCrownGemsShowTotal = false,
-        CurrencyEndeavorsChange = true,
-        CurrencyEndeavorsColor = { 1, 1, 1, 1 },
-        CurrencyEndeavorsName = GetString(LUIE_STRING_CA_CURRENCY_ENDEAVOR),
-        CurrencyEndeavorsShowTotal = false,
+        CurrencySealsChange = true,
+        CurrencySealsColor = { 1, 1, 1, 1 },
+        CurrencySealsName = GetString(LUIE_STRING_CA_CURRENCY_SEALS),
+        CurrencySealsShowTotal = false,
+        CurrencyTradeBarsChange = true,
+        CurrencyTradeBarsColor = { 1, 1, 1, 1 },
+        CurrencyTradeBarsName = GetString(LUIE_STRING_CA_CURRENCY_TRADE_BARS),
+        CurrencyTradeBarsShowTotal = false,
+        CurrencyTomePointsChange = true,
+        CurrencyTomePointsColor = { 1, 1, 1, 1 },
+        CurrencyTomePointsName = GetString(LUIE_STRING_CA_CURRENCY_TOME_POINTS),
+        CurrencyTomePointsShowTotal = false,
+        CurrencyTomePointCachesChange = true,
+        CurrencyTomePointCachesColor = { 1, 1, 1, 1 },
+        CurrencyTomePointCachesName = GetString(LUIE_STRING_CA_CURRENCY_TOME_POINT_CACHES),
+        CurrencyTomePointCachesShowTotal = false,
+        CurrencyTomeTokensChange = true,
+        CurrencyTomeTokensColor = { 1, 1, 1, 1 },
+        CurrencyTomeTokensName = GetString(LUIE_STRING_CA_CURRENCY_TOME_TOKENS),
+        CurrencyTomeTokensShowTotal = false,
+        CurrencyTomeChallengeRerollsChange = true,
+        CurrencyTomeChallengeRerollsColor = { 1, 1, 1, 1 },
+        CurrencyTomeChallengeRerollsName = GetString(LUIE_STRING_CA_CURRENCY_TOME_CHALLENGE_REROLLS),
+        CurrencyTomeChallengeRerollsShowTotal = false,
         CurrencyOutfitTokenChange = true,
         CurrencyOutfitTokenColor = { 255 / 255, 225 / 255, 125 / 255, 1 },
         CurrencyOutfitTokenName = GetString(LUIE_STRING_CA_CURRENCY_OUTFIT_TOKENS),
@@ -991,10 +1037,14 @@ ChatAnnouncements.Defaults =
         CurrencyMessageTotalTV = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALTV),
         CurrencyMessageTotalWV = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALWV),
         CurrencyMessageTotalTransmute = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALTRANSMUTE),
-        CurrencyMessageTotalEvent = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALEVENT),
         CurrencyMessageTotalCrowns = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALCROWNS),
         CurrencyMessageTotalCrownGems = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALGEMS),
-        CurrencyMessageTotalEndeavors = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALENDEAVORS),
+        CurrencyMessageTotalSeals = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALSEALS),
+        CurrencyMessageTotalTradeBars = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALTRADEBARS),
+        CurrencyMessageTotalTomePoints = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALTOMEPOINTS),
+        CurrencyMessageTotalTomePointCaches = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALTOMEPOINTCACHES),
+        CurrencyMessageTotalTomeTokens = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALTOMETOKENS),
+        CurrencyMessageTotalTomeChallengeRerolls = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALTOMECHALLENGEREROLLS),
         CurrencyMessageTotalOutfitToken = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALOUTFITTOKENS),
         CurrencyMessageTotalUndaunted = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALUNDAUNTED),
         CurrencyMessageTotalEndless = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_TOTALENDLESS),
@@ -1053,6 +1103,7 @@ ChatAnnouncements.Defaults =
         CurrencyMessageConfiscate = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_CONFISCATE),
         CurrencyMessageDeposit = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_DEPOSIT),
         CurrencyMessageDepositStorage = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_DEPOSITSTORAGE),
+        CurrencyMessageDepositFurnitureVault = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_DEPOSIT_FURNITURE_VAULT),
         CurrencyMessageDepositGuild = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_DEPOSITGUILD),
         CurrencyMessageEarn = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_EARN),
         CurrencyMessageLoot = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_LOOT),
@@ -1086,6 +1137,7 @@ ChatAnnouncements.Defaults =
         CurrencyMessagePostage = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_POSTAGE),
         CurrencyMessageWithdraw = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_WITHDRAW),
         CurrencyMessageWithdrawStorage = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_WITHDRAWSTORAGE),
+        CurrencyMessageWithdrawFurnitureVault = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_WITHDRAW_FURNITURE_VAULT),
         CurrencyMessageWithdrawGuild = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_WITHDRAWGUILD),
         CurrencyMessageStable = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_STABLE),
         CurrencyMessageStorage = GetString(LUIE_STRING_CA_CURRENCY_MESSAGE_STORAGE),

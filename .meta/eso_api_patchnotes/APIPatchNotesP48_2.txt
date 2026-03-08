@@ -1,0 +1,27 @@
+*******************
+*** Enums Added ***
+*******************
+
+* ITEM_TOOLTIP_COLOR_SUPPRESSED
+
+* SCRIBING_ITEM_USE_RESULT_NOT_ALLOWED_IN_VENGEANCE
+
+* SCRIBING_ERROR_RESULT_NOT_ALLOWED_IN_VENGEANCE
+
+
+
+***********************
+*** Functions Added ***
+***********************
+
+* GetItemPoisonSuppressionInfo()
+** _Returns:_ *[ItemBonusSuppressionType|#ItemBonusSuppressionType]* _suppressionType_, *integer* _refId_
+
+* IsVengeancePerkDisabled(*luaindex* _perkDefId_)
+** _Returns:_ *bool* _isDisabled_
+
+* IsVengeancePerkAtIndexDisabled(*luaindex* _globalPerkIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *bool* _isDisabled_
+
+* IsVengeancePerkAtSlotIndexDisabled(*[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _slotFlag_, *luaindex* _slotIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *bool* _isDisabled_

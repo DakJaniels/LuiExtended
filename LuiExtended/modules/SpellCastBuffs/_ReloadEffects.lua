@@ -20,7 +20,7 @@ SpellCastBuffs.ReloadEffects = function (unitTag)
     end
 
     -- Clear existing base containers
-    for effectType = BUFF_EFFECT_TYPE_ITERATION_BEGIN, BUFF_EFFECT_TYPE_ITERATION_END do
+    for effectType = BUFF_EFFECT_TYPE_BUFF, BUFF_EFFECT_TYPE_DEBUFF do
         SpellCastBuffs.EffectsList[unitTag .. effectType] = {}
     end
     -- Clear prominent containers
@@ -59,24 +59,26 @@ SpellCastBuffs.ReloadEffects = function (unitTag)
             --- @diagnostic disable-next-line: cast-local-type
             castByPlayer = COMBAT_UNIT_TYPE_OTHER
         end
-        SpellCastBuffs.OnEffectChanged(0, EFFECT_RESULT_UPDATED, buffSlot, buffName, unitTag, timeStarted, timeEnding, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, unitName, 0, --[[unitId]] abilityId, castByPlayer)
+        SpellCastBuffs.OnEffectChanged(EFFECT_RESULT_UPDATED, buffSlot, buffName, unitTag, timeStarted, timeEnding, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, unitName, 0, --[[unitId]] abilityId, castByPlayer)
     end
     -- Display Disguise State (note that this function handles filtering player/target buffs if hidden)
-    SpellCastBuffs.DisguiseStateChanged(nil, unitTag, GetUnitDisguiseState(unitTag))
+    SpellCastBuffs.DisguiseStateChanged(unitTag, GetUnitDisguiseState(unitTag))
     -- Display Stealth State (note that this function handles filtering player/target buffs if hidden)
-    SpellCastBuffs.StealthStateChanged(nil, unitTag, GetUnitStealthState(unitTag))
+    SpellCastBuffs.StealthStateChanged(unitTag, GetUnitStealthState(unitTag))
 
     -- Player Specific
     if unitTag == "player" and not SpellCastBuffs.SV.HidePlayerBuffs then
         -- Display Assistant/Non-Combat Pet/Mount Icon
         SpellCastBuffs.CollectibleBuff()
-        SpellCastBuffs.MountStatus("", true)
+        SpellCastBuffs.MountStatus(true)
         -- Display Disguise Icon (if disguised)
         if not SpellCastBuffs.SV.IgnoreDisguise then
             SpellCastBuffs.SetDisguiseItem()
         end
         -- Update Artificial Effects
-        SpellCastBuffs.ArtificialEffectUpdate()
+        for effectId in ZO_GetNextActiveArtificialEffectIdIter do
+            SpellCastBuffs.ArtificialEffectUpdate(effectId)
+        end
         -- Display Recall Cooldown
         if SpellCastBuffs.SV.ShowRecall and not SpellCastBuffs.SV.HidePlayerDebuffs then
             SpellCastBuffs.ShowRecallCooldown()

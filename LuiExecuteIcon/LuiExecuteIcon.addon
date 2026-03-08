@@ -1,0 +1,21 @@
+## Title: LuiExecuteIcon
+## Author: @dack_janiels[PC]
+## APIVersion: 101049 101050
+## Version: 1.0.0.0
+## AddOnVersion: 10000
+## Description: Shows execute skull icon next to target frame when hostile target is in execute range.
+## PCDependsOn: LibAddonMenu-2.0>=41
+## ConsoleDependsOn: LibHarvensAddonSettings
+## OptionalDependsOn: KhajiitFengShui
+## SavedVariables: LuiExecuteIconSV
+## ValidateSavedVariables: 1
+
+LuiExecuteIcon.xml
+LuiExecuteIcon.lua
+LuiExecuteIconSettings.lua
+
+# This Add-on is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates.
+# The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States and/or other countries.
+# All rights reserved
+#
+# You can read the full terms at https://account.elderscrollsonline.com/add-on-terms

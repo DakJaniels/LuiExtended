@@ -1,0 +1,618 @@
+*******************
+*** Enums Added ***
+*******************
+
+h5. AdditionalContentType
+* ADDITIONAL_CONTENT_TYPE_VO
+
+
+h5. BroadcastType
+* BROADCAST_TYPE_HOTFIX_WARNING
+* BROADCAST_TYPE_MAINTENANCE_WARNING
+
+
+* JUMP_RESULT_JUMP_CONVERTED_TO_LOCAL
+* JUMP_RESULT_JUMP_CONVERTED_TO_REMOTE
+
+
+* NAME_RULE_DISALLOWED_NAME
+
+
+* SOCIAL_RESULT_DISALLOWED_NAME
+
+
+* ACTIVITY_QUEUE_RESULT_LOCKED_QUEUE
+
+
+h5. HouseToursStatus
+* HOUSE_TOURS_STATUS_DISABLED
+* HOUSE_TOURS_STATUS_READY
+* HOUSE_TOURS_STATUS_UNINITIALIZED
+
+
+h5. HouseTourFavoriteOperationType
+* HOUSE_TOURS_FAVORITE_OPERATION_TYPE_CREATE
+* HOUSE_TOURS_FAVORITE_OPERATION_TYPE_DELETE
+
+
+h5. HouseTourListingResult
+* HOUSE_TOURS_LISTING_RESULT_BAD_NICKNAME
+* HOUSE_TOURS_LISTING_RESULT_COOLDOWN_NOT_READY
+* HOUSE_TOURS_LISTING_RESULT_CREATE_FAILED
+* HOUSE_TOURS_LISTING_RESULT_DELETE_FAILED
+* HOUSE_TOURS_LISTING_RESULT_DUPLICATE_TAGS
+* HOUSE_TOURS_LISTING_RESULT_HOUSE_ALREADY_LISTED
+* HOUSE_TOURS_LISTING_RESULT_HOUSE_NOT_LISTED
+* HOUSE_TOURS_LISTING_RESULT_HOUSE_NOT_OWNED
+* HOUSE_TOURS_LISTING_RESULT_INVALID_HOUSE
+* HOUSE_TOURS_LISTING_RESULT_INVALID_PERMISSIONS
+* HOUSE_TOURS_LISTING_RESULT_INVALID_TAG
+* HOUSE_TOURS_LISTING_RESULT_NO_CHANGES
+* HOUSE_TOURS_LISTING_RESULT_REQUEST_TIMEOUT
+* HOUSE_TOURS_LISTING_RESULT_SUCCESS
+* HOUSE_TOURS_LISTING_RESULT_TOO_MANY_TAGS
+* HOUSE_TOURS_LISTING_RESULT_UPDATE_FAILED
+
+
+h5. HouseTourListingTag
+* HOUSE_TOURS_LISTING_TAG_AQUATIC
+* HOUSE_TOURS_LISTING_TAG_ARENAS
+* HOUSE_TOURS_LISTING_TAG_ARTWORK
+* HOUSE_TOURS_LISTING_TAG_COLORFUL
+* HOUSE_TOURS_LISTING_TAG_CONVENTIONAL
+* HOUSE_TOURS_LISTING_TAG_COZY
+* HOUSE_TOURS_LISTING_TAG_CREATURES
+* HOUSE_TOURS_LISTING_TAG_DINING
+* HOUSE_TOURS_LISTING_TAG_ELEGANT
+* HOUSE_TOURS_LISTING_TAG_FESTIVE
+* HOUSE_TOURS_LISTING_TAG_FROM_SCRATCH
+* HOUSE_TOURS_LISTING_TAG_GAMES
+* HOUSE_TOURS_LISTING_TAG_GARDENS
+* HOUSE_TOURS_LISTING_TAG_HIDDEN_SECRETS
+* HOUSE_TOURS_LISTING_TAG_LABORATORIES
+* HOUSE_TOURS_LISTING_TAG_LIBRARIES
+* HOUSE_TOURS_LISTING_TAG_LORE_FRIENDLY
+* HOUSE_TOURS_LISTING_TAG_MAGIC
+* HOUSE_TOURS_LISTING_TAG_MARKETS
+* HOUSE_TOURS_LISTING_TAG_MECHANISMS
+* HOUSE_TOURS_LISTING_TAG_OTHER_WORLDS
+* HOUSE_TOURS_LISTING_TAG_PLAYFUL
+* HOUSE_TOURS_LISTING_TAG_ROLEPLAY
+* HOUSE_TOURS_LISTING_TAG_SACRED
+* HOUSE_TOURS_LISTING_TAG_SINISTER
+* HOUSE_TOURS_LISTING_TAG_STRONGHOLDS
+* HOUSE_TOURS_LISTING_TAG_TOWNS
+* HOUSE_TOURS_LISTING_TAG_UNDER_CONSTRUCTION
+
+
+h5. HouseTourListingType
+* HOUSE_TOURS_LISTING_TYPE_BROWSE
+* HOUSE_TOURS_LISTING_TYPE_FAVORITE
+* HOUSE_TOURS_LISTING_TYPE_RECOMMENDED
+
+
+h5. HouseTourRequestListingsResult
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_DUPLICATE_CATEGORY_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_DUPLICATE_HOUSE_ID_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_DUPLICATE_TAG_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_FILTERED_SEARCH_DISABLED
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_INVALID_CATEGORY_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_INVALID_HOUSE_ID_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_INVALID_TAG_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_REQUEST_LISTINGS_FAILED
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_SUCCESS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_TOO_MANY_CATEGORY_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_TOO_MANY_HOUSE_ID_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_TOO_MANY_TAG_FILTERS
+
+
+h5. HouseTourSaveFavoriteResult
+* HOUSE_TOURS_SAVE_FAVORITE_RESULT_CREATE_FAILED
+* HOUSE_TOURS_SAVE_FAVORITE_RESULT_DELETE_FAILED
+* HOUSE_TOURS_SAVE_FAVORITE_RESULT_DUPLICATE_FAVORITE
+* HOUSE_TOURS_SAVE_FAVORITE_RESULT_HOUSE_OWNER
+* HOUSE_TOURS_SAVE_FAVORITE_RESULT_INVALID_HOUSE
+* HOUSE_TOURS_SAVE_FAVORITE_RESULT_SUCCESS
+* HOUSE_TOURS_SAVE_FAVORITE_RESULT_TOO_MANY_FAVORITES
+
+
+h5. HouseTourSaveRecommendationResult
+* HOUSE_TOURS_SAVE_RECOMMENDATION_RESULT_CREATE_FAILED
+* HOUSE_TOURS_SAVE_RECOMMENDATION_RESULT_DUPLICATE_RECOMMENDATION
+* HOUSE_TOURS_SAVE_RECOMMENDATION_RESULT_HIT_RECOMMENDATION_WEEKLY_LIMIT
+* HOUSE_TOURS_SAVE_RECOMMENDATION_RESULT_HOUSE_NOT_LISTED
+* HOUSE_TOURS_SAVE_RECOMMENDATION_RESULT_HOUSE_OWNER
+* HOUSE_TOURS_SAVE_RECOMMENDATION_RESULT_SUCCESS
+
+
+h5. HouseToursListingOperationType
+* HOUSE_TOURS_LISTING_OPERATION_TYPE_CREATE
+* HOUSE_TOURS_LISTING_OPERATION_TYPE_DELETE
+* HOUSE_TOURS_LISTING_OPERATION_TYPE_NONE
+* HOUSE_TOURS_LISTING_OPERATION_TYPE_UPDATE
+
+
+h5. HouseToursListingSortType
+* HOUSE_TOURS_LISTING_SORT_TYPE_FURNITURE_COUNT
+* HOUSE_TOURS_LISTING_SORT_TYPE_HOUSE_NAME
+* HOUSE_TOURS_LISTING_SORT_TYPE_NONE
+
+
+* CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_HOUSE_TOUR_LISTING
+
+
+h5. CustomerServiceAskForHelpReportHouseTourListingCategory
+* CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_HOUSE_TOUR_LISTING_CATEGORY_INAPPROPRIATE_NICKNAME
+* CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_HOUSE_TOUR_LISTING_CATEGORY_NONE
+* CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_HOUSE_TOUR_LISTING_CATEGORY_OFFENSIVE_ARRANGEMENT
+
+
+* CAMPAIGN_QUEUE_REQUEST_STATE_CAMPAIGN_CLOSED
+
+
+* SCT_EVENT_TYPE_TAUNTED
+
+
+* ACTION_RESULT_TAUNTED
+
+
+* TUTORIAL_TRIGGER_GAINED_LOCKPICK
+* TUTORIAL_TRIGGER_HOUSE_TOURS_MANAGE_LISTINGS_OPENED_POINTER_BOX
+* TUTORIAL_TRIGGER_HOUSE_TOURS_OPENED
+* TUTORIAL_TRIGGER_HOUSE_VISITED_AS_GUEST
+* TUTORIAL_TRIGGER_LOCKPICKING_PRACTICE_OPENED
+* TUTORIAL_TRIGGER_UNOWNED_LOCK_VIEWED
+
+
+* KEY_OEM_8_BACK_TICK
+
+
+
+*********************
+*** Enums Removed ***
+*********************
+
+h5. MacroEditorNodeType
+* MACRO_EDITOR_NODE_TYPE_COMMAND_MACRO
+* MACRO_EDITOR_NODE_TYPE_FOLDER
+* MACRO_EDITOR_NODE_TYPE_INFO
+* MACRO_EDITOR_NODE_TYPE_LUA_MACRO
+
+
+
+*********************
+*** Globals Added ***
+*********************
+
+* DECORATED_DISPLAY_NAME_MAX_LENGTH
+* MAX_HOUSE_TOURS_CATEGORY_TYPE_FILTERS
+* MAX_HOUSE_TOURS_HOUSE_FILTERS
+* MAX_HOUSE_TOURS_LISTING_FAVORITES
+* MAX_HOUSE_TOURS_LISTING_TAGS
+* MAX_HOUSE_TOURS_WEEKLY_RECOMMENDATIONS
+* BIG_TEAM_BATTLE_SIZE_THRESHOLD
+
+
+
+***********************
+*** Functions Added ***
+***********************
+
+* GetHelpId(*luaindex* _helpCategoryIndex_, *luaindex* _helpIndex_)
+** _Returns:_ *integer:nilable* _helpId_
+
+
+* SetCustomerServiceTicketIncludeScreenshot(*bool* _includeScreenshot_)
+
+
+* SetCustomerServiceTicketHouseListingTarget(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+
+
+* SetCustomerServiceTicketHouseListingCurrentHouseTarget()
+
+
+* GetHouseFurnitureCount(*integer* _houseId_)
+** _Returns:_ *integer:nilable* _furnitureCount_
+
+
+* AreHousingPermissionsChangesPending()
+** _Returns:_ *bool* _changesPending_
+
+
+* GetHousingStarterQuestId()
+** _Returns:_ *integer* _questId_
+
+
+* RequestBestowHousingStarterQuest()
+
+
+* GetHouseToursStatus()
+** _Returns:_ *[HouseToursStatus|#HouseToursStatus]* _status_
+
+
+* IsHouseToursListingOnCooldown()
+** _Returns:_ *bool* _isOnCooldown_
+
+
+* IsHouseToursSearchOnCooldown()
+** _Returns:_ *bool* _isOnCooldown_
+
+
+* RequestHouseToursSearch(*[HouseTourListingType|#HouseTourListingType]* _listingType_)
+** _Returns:_ *integer:nilable* _searchId_
+
+
+* SetHouseToursCategoryTypeFilter(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *[HouseCategoryType|#HouseCategoryType]* _houseCategoryType_)
+** _Returns:_ *bool* _success_
+
+
+* SetHouseToursDisplayNameFilter(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *string* _ownerDisplayName_)
+** _Returns:_ *bool* _success_
+
+
+* SetHouseToursHouseIdFilter(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *integer* _houseId_)
+** _Returns:_ *bool* _success_
+
+
+* SetHouseToursTagFilter(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *[HouseTourListingTag|#HouseTourListingTag]* _tag_)
+** _Returns:_ *bool* _success_
+
+
+* GetNumHouseToursSearchListings(*[HouseTourListingType|#HouseTourListingType]* _listingType_)
+** _Returns:_ *integer* _numSearchListings_
+
+
+* GetNumHouseToursUnfilteredListings(*[HouseTourListingType|#HouseTourListingType]* _listingType_)
+** _Returns:_ *integer* _numUnfilteredListings_
+
+
+* GetHouseToursListingCollectibleIdByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Returns:_ *integer* _collectibleId_
+
+
+* GetHouseToursListingHouseIdByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Returns:_ *integer* _houseId_
+
+
+* GetHouseToursListingNicknameByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Returns:_ *string* _nickname_
+
+
+* GetHouseToursListingOwnerDisplayNameByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Returns:_ *string* _displayName_
+
+
+* GetHouseToursListingFurnitureCountByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Returns:_ *integer:nilable* _furnitureCount_
+
+
+* GetHouseToursListingTagsByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Uses variable returns..._
+** _Returns:_ *[HouseTourListingTag|#HouseTourListingTag]* _tag_
+
+
+* IsHouseToursListingFavoriteByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Returns:_ *bool* _isFavorite_
+
+
+* IsHouseToursListingListedByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Returns:_ *bool* _isListed_
+
+
+* GetNumHouseToursTopRecommendedHouseNotifications()
+** _Returns:_ *integer* _numNotifications_
+
+
+* GetHouseToursTopRecommendedHouseNotification(*luaindex* _notificationIndex_)
+** _Returns:_ *integer* _houseId_
+
+
+* RemoveHouseToursTopRecommendedHouseNotificationByHouseId(*integer* _houseId_)
+
+
+* GetHouseToursRecommendationsTimeRemainingS()
+** _Returns:_ *integer* _timeRemainingS_
+
+
+* RequestCreateHouseToursListing(*integer* _houseId_, *[HouseTourListingTag|#HouseTourListingTag]* _tag_)
+
+
+* RequestUpdateHouseToursListing(*integer* _houseId_, *[HouseTourListingTag|#HouseTourListingTag]* _tag_)
+
+
+* RequestDeleteHouseToursListing(*integer* _houseId_)
+
+
+* IsHouseListed(*integer* _houseId_)
+** _Returns:_ *bool* _isListed_
+
+
+* GetNumHouseToursPlayerListingRecommendations(*integer* _houseId_)
+** _Returns:_ *integer* _recommendationCount_
+
+
+* GetHouseToursPlayerListingTagsByHouseId(*integer* _houseId_)
+** _Uses variable returns..._
+** _Returns:_ *[HouseTourListingTag|#HouseTourListingTag]* _tag_
+
+
+* CanFavoriteHouses()
+** _Returns:_ *bool* _canFavorite_
+
+
+* GetNumFavoriteHouses()
+** _Returns:_ *integer* _numFavorites_
+
+
+* RequestRecommendCurrentHouse()
+
+
+* RequestUpdateCurrentHouseFavoriteStatus(*[HouseTourFavoriteOperationType|#HouseTourFavoriteOperationType]* _operationType_)
+
+
+* RequestUpdateHouseToursListingFavoriteStatusByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_, *[HouseTourFavoriteOperationType|#HouseTourFavoriteOperationType]* _operationType_)
+
+
+* IsCurrentHouseListed()
+** _Returns:_ *bool* _isListed_
+
+
+* IsCurrentHouseFavorite()
+** _Returns:_ *bool* _isFavorited_
+
+
+* IsCurrentHouseRecommended()
+** _Returns:_ *bool* _isRecommended_
+
+
+* GetCurrentHouseTourListingCollectibleId()
+** _Returns:_ *integer* _collectibleId_
+
+
+* GetCurrentHouseTourListingHouseId()
+** _Returns:_ *integer* _houseId_
+
+
+* GetCurrentHouseTourListingFurnitureCount()
+** _Returns:_ *integer:nilable* _numFurnishings_
+
+
+* GetCurrentHouseTourListingNickname()
+** _Returns:_ *string* _nickname_
+
+
+* GetCurrentHouseTourListingOwnerDisplayName()
+** _Returns:_ *string* _ownerDisplayName_
+
+
+* GetCurrentHouseTourListingTags()
+** _Uses variable returns..._
+** _Returns:_ *[HouseTourListingTag|#HouseTourListingTag]* _tag_
+
+
+* CanRecommendHouses()
+** _Returns:_ *bool* _canRecommendedHouses_
+
+
+* GetNumHousesRecommendedByLocalPlayer()
+** _Returns:_ *integer* _numRecommendations_
+
+
+* IsHouseDefaultAccessSettingValidForHouseToursListing(*[HousePermissionDefaultAccessSetting|#HousePermissionDefaultAccessSetting]* _housePermissionDefaultAccessSetting_)
+** _Returns:_ *bool* _isValid_
+
+
+* GetNewestAndOldestRedactedGuildHistoryEventIds(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_)
+** _Returns:_ *integer53:nilable* _newestRedactedEventId_, *integer53:nilable* _oldestRedactedEventId_
+
+
+* GetGuildHistoryCacheDefaultMaxNumDays(*[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_)
+** _Returns:_ *integer* _numDays_
+
+
+* GetNumNewCollectibles()
+** _Returns:_ *integer* _count_
+
+
+* GetNumNewCollectiblesByCategoryType(*[CollectibleCategoryType|#CollectibleCategoryType]* _collectibleCategoryType_)
+** _Returns:_ *integer* _count_
+
+
+* IsValidHouseName(*string* _houseName_)
+** _Uses variable returns..._
+** _Returns:_ *[NamingError|#NamingError]* _violationCode_
+
+
+* GetMarketProductNumFacadeChildren *private* (*integer* _marketProductId_)
+** _Returns:_ *integer* _numChildren_
+
+
+* GetMarketProductFacadeChildId *private* (*integer* _marketProductId_, *luaindex* _childIndex_)
+** _Returns:_ *integer* _childId_
+
+
+* PreviewCollectibleAction *private* (*integer* _collectibleDefId_, *luaindex* _action_)
+
+
+* PreviewInventoryItemCollectibleAction(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *luaindex* _action_)
+
+
+* PreviewStoreEntryCollectibleAction(*luaindex* _entryIndex_, *luaindex* _action_)
+
+
+* PreviewTradingHouseSearchResultItemCollectibleAction(*luaindex* _index_, *luaindex* _action_)
+
+
+* PreviewRewardCollectibleAction(*integer* _rewardId_, *luaindex* _action_)
+
+
+* GetNumCollectiblePreviewActions(*integer* _collectibleDefId_, *luaindex* _variation_)
+** _Returns:_ *integer* _numActions_
+
+
+* GetCollectiblePreviewActionDisplayName(*integer* _collectibleDefId_, *luaindex* _variation_, *luaindex* _action_)
+** _Returns:_ *string* _previewActionDisplayName_
+
+
+* GetNumCollectibleAsFurniturePreviewActions(*integer* _collectibleDefId_, *luaindex* _variation_)
+** _Returns:_ *integer* _numActions_
+
+
+* GetCollectibleAsFurniturePreviewActionDisplayName(*integer* _collectibleDefId_, *luaindex* _variation_, *luaindex* _action_)
+** _Returns:_ *string* _previewActionDisplayName_
+
+
+* GetNumInventoryItemPreviewCollectibleActions(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *luaindex* _variation_)
+** _Returns:_ *integer* _numActions_
+
+
+* GetInventoryItemPreviewCollectibleActionDisplayName(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *luaindex* _variation_, *luaindex* _action_)
+** _Returns:_ *string* _actionDisplayName_
+
+
+* GetNumStoreEntryPreviewCollectibleActions(*luaindex* _entryIndex_, *luaindex* _variation_)
+** _Returns:_ *integer* _numActions_
+
+
+* GetStoreEntryPreviewCollectibleActionDisplayName(*luaindex* _entryIndex_, *luaindex* _variation_, *luaindex* _action_)
+** _Returns:_ *string* _actionDisplayName_
+
+
+* GetNumTradingHouseSearchResultItemPreviewCollectibleActions(*luaindex* _index_, *luaindex* _variation_)
+** _Returns:_ *integer* _numActions_
+
+
+* GetTradingHouseSearchResultItemPreviewCollectibleActionDisplayName(*luaindex* _index_, *luaindex* _variation_, *luaindex* _action_)
+** _Returns:_ *string* _actionDisplayName_
+
+
+* PreviewMarketProductCollectibleAction *private* (*integer* _marketProductId_, *luaindex* _action_)
+
+
+* GetNumMarketProductCollectiblePreviewActions(*integer* _marketProductId_, *luaindex* _variation_)
+** _Returns:_ *integer* _numActions_
+
+
+* GetMarketProductCollectiblePreviewActionDisplayName(*integer* _marketProductId_, *luaindex* _variation_, *luaindex* _action_)
+** _Returns:_ *string* _actionDisplayName_
+
+
+* GetNumRewardPreviewCollectibleActions(*integer* _rewardId_, *luaindex* _variation_)
+** _Returns:_ *integer* _numActions_
+
+
+* GetRewardPreviewCollectibleActionDisplayName(*integer* _rewardId_, *luaindex* _variation_, *luaindex* _action_)
+** _Returns:_ *string* _actionDisplayName_
+
+
+h3. EditControl
+* GetFont()
+** _Returns:_ *string* _text_
+
+* GetFontFaceName()
+** _Returns:_ *string* _text_
+
+* GetFontSize()
+** _Returns:_ *number* _fontSize_
+
+* GetFontStyle()
+** _Returns:_ *string* _text_
+
+
+h3. LabelControl
+* GetFont()
+** _Returns:_ *string* _text_
+
+* GetFontSize()
+** _Returns:_ *number* _fontSize_
+
+* GetFontStyle()
+** _Returns:_ *string* _text_
+
+
+h3. TextureControl
+* SetTextureFileName(*string* _filename_)
+
+
+
+*************************
+*** Functions Removed ***
+*************************
+
+* CanSystemEnableHDR()
+** _Returns:_ *bool* _canEnableHDR_
+
+
+* GetScoringTeam()
+** _Returns:_ *integer* _result_
+
+
+
+*************************
+*** Functions Changed ***
+*************************
+
+No longer *private*
+* IsInUI(*string* _guiName_)
+** _Returns:_ *bool* _isInUI_
+
+
+Added _fromHouseTours_
+* JumpToSpecificHouse(*string* _displayName_, *integer* _houseId_, *bool* _fromHouseTours_)
+
+
+Renamed return to _allowsChampionPoints_ just to be more honest about what it is
+* DoesCurrentCampaignRulesetAllowChampionPoints()
+** _Returns:_ *bool* _allowsChampionPoints_
+
+
+Added _eventType_
+* GetGuildHistoryEventBasicInfo(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_, *luaindex* _eventIndex_)
+** _Returns:_ *integer53* _eventId_, *integer53* _timestamp_, *bool* _isRedacted_, *integer* _eventType_
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_FIXED_BROADCAST (*[BroadcastType|#BroadcastType]* _broadcastType_, *integer* _arg1_)
+
+* EVENT_HOUSE_FURNITURE_COUNT_UPDATED (*integer* _houseId_, *integer* _furnitureCount_)
+
+* EVENT_HOUSE_TOURS_CURRENT_HOUSE_LISTING_UPDATED
+
+* EVENT_HOUSE_TOURS_HOUSE_RECOMMENDATION_COUNT_UPDATED (*integer* _houseId_, *integer* _recommendationCount_)
+
+* EVENT_HOUSE_TOURS_LISTING_OPERATION_COOLDOWN_STATE_CHANGED (*bool* _isOnCooldown_)
+
+* EVENT_HOUSE_TOURS_LISTING_OPERATION_RESPONSE (*[HouseToursListingOperationType|#HouseToursListingOperationType]* _operationType_, *integer* _houseId_, *[HouseTourListingResult|#HouseTourListingResult]* _result_)
+
+* EVENT_HOUSE_TOURS_LISTING_OPERATION_STARTED (*[HouseToursListingOperationType|#HouseToursListingOperationType]* _operationType_, *integer* _houseId_)
+
+* EVENT_HOUSE_TOURS_LISTING_RECOMMENDED_NOTIFICATION_ADDED (*integer* _houseId_)
+
+* EVENT_HOUSE_TOURS_LISTING_RECOMMENDED_NOTIFICATION_REMOVED (*integer* _houseId_)
+
+* EVENT_HOUSE_TOURS_SAVE_FAVORITE_OPERATION_COMPLETE (*[HouseTourFavoriteOperationType|#HouseTourFavoriteOperationType]* _operationType_, *[HouseTourSaveFavoriteResult|#HouseTourSaveFavoriteResult]* _result_, *string* _ownerDisplayName_, *integer* _houseId_)
+
+* EVENT_HOUSE_TOURS_SAVE_RECOMMENDATION_OPERATION_COMPLETE (*[HouseTourSaveRecommendationResult|#HouseTourSaveRecommendationResult]* _result_)
+
+* EVENT_HOUSE_TOURS_SEARCH_COMPLETE (*[HouseTourListingType|#HouseTourListingType]* _listingType_, *[HouseTourRequestListingsResult|#HouseTourRequestListingsResult]* _result_, *integer* _searchId_)
+
+* EVENT_HOUSE_TOURS_SEARCH_COOLDOWN_COMPLETE
+
+* EVENT_HOUSE_TOURS_STATUS_UPDATED
+
+* EVENT_HOUSING_PERMISSIONS_SAVE_COMPLETE
+
+* EVENT_HOUSING_PERMISSIONS_SAVE_PENDING
+
+* EVENT_PREVIEW_COLLECTIBLE_ACTION_RESET
+
+
+
+**********************
+*** Events Removed ***
+**********************
+
+* EVENT_ACTIVE_MONITOR_CHANGED

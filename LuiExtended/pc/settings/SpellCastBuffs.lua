@@ -174,7 +174,7 @@ function SpellCastBuffs.CreateSettings()
             SpellCastBuffs.SetMovingState(value)
             -- Refresh grid overlay so it appears when unlocking with snap enabled, and hides when locking
             local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
-            local gridSize = accountWideSettings.snapToGridSize_buffs or 15
+            local gridSize = accountWideSettings.snapToGridSize_default or 15
             GridOverlay.Refresh("buffs", value and accountWideSettings.snapToGrid_buffs, gridSize)
         end,
         width = "half",
@@ -194,7 +194,7 @@ function SpellCastBuffs.CreateSettings()
         setFunc = function (value)
             local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
             accountWideSettings.snapToGrid_buffs = value
-            local gridSize = accountWideSettings.snapToGridSize_buffs or 15
+            local gridSize = accountWideSettings.snapToGridSize_default or 15
             GridOverlay.Refresh("buffs", g_BuffsMovingEnabled and value, gridSize)
         end,
         width = "half",
@@ -210,11 +210,11 @@ function SpellCastBuffs.CreateSettings()
         max = 100,
         step = 5,
         getFunc = function ()
-            return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_buffs or 15
+            return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_default or 15
         end,
         setFunc = function (value)
             local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
-            accountWideSettings.snapToGridSize_buffs = value
+            accountWideSettings.snapToGridSize_default = value
             GridOverlay.Refresh("buffs", g_BuffsMovingEnabled and accountWideSettings.snapToGrid_buffs, value)
         end,
         width = "half",
@@ -1250,7 +1250,9 @@ function SpellCastBuffs.CreateSettings()
                     Settings.IgnoreBattleSpiritPlayer = not value
                     SpellCastBuffs.UpdateContextHideList()
                     SpellCastBuffs.ReloadEffects("player")
-                    SpellCastBuffs.ArtificialEffectUpdate()
+                    for effectId in ZO_GetNextActiveArtificialEffectIdIter do
+                        SpellCastBuffs.ArtificialEffectUpdate(effectId)
+                    end
                 end,
                 width = "full",
                 default = not Defaults.IgnoreBattleSpiritPlayer,

@@ -31,6 +31,16 @@ local PromBuffs, PromBuffsValues = {}, {}
 local PromDebuffs, PromDebuffsValues = {}, {}
 local Blacklist, BlacklistValues = {}, {}
 
+-- Temp edit-box text for LHAS "add to list" fields (not stored in SV; console-only UI scratch)
+local tempEditText =
+{
+    priorityBuffs = "",
+    priorityDebuffs = "",
+    prominentBuffs = "",
+    prominentDebuffs = "",
+    blacklist = "",
+}
+
 -- Create a list of abilityId's / abilityName's to use for Blacklist (LHAS version)
 local function GenerateCustomListLHAS(input)
     local items = {}
@@ -59,9 +69,7 @@ local dialogs =
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG), GetString(LUIE_STRING_CUSTOM_LIST_AURA_BLACKLIST)),
         callback = function (_)
             SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.BlacklistTable)
-            if LHAS and LHAS.RefreshAddonSettings then
-                LHAS:RefreshAddonSettings()
-            end
+            LHAS:RefreshAddonSettings()
         end,
     },
     [2] =
@@ -71,9 +79,7 @@ local dialogs =
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG_LIST), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
         callback = function (_)
             SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.PromBuffTable)
-            if LHAS and LHAS.RefreshAddonSettings then
-                LHAS:RefreshAddonSettings()
-            end
+            LHAS:RefreshAddonSettings()
         end,
     },
     [3] =
@@ -83,9 +89,7 @@ local dialogs =
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG_LIST), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
         callback = function (_)
             SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.PromDebuffTable)
-            if LHAS and LHAS.RefreshAddonSettings then
-                LHAS:RefreshAddonSettings()
-            end
+            LHAS:RefreshAddonSettings()
         end,
     },
 
@@ -96,9 +100,7 @@ local dialogs =
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG_LIST), GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_BUFFS)),
         callback = function (_)
             SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.PriorityBuffTable)
-            if LHAS and LHAS.RefreshAddonSettings then
-                LHAS:RefreshAddonSettings()
-            end
+            LHAS:RefreshAddonSettings()
         end,
     },
     [5] =
@@ -108,9 +110,7 @@ local dialogs =
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG_LIST), GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_DEBUFFS)),
         callback = function (_)
             SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.PriorityDebuffTable)
-            if LHAS and LHAS.RefreshAddonSettings then
-                LHAS:RefreshAddonSettings()
-            end
+            LHAS:RefreshAddonSettings()
         end,
     },
 }
@@ -3457,11 +3457,6 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_DIALOGUE_DESCRIPT),
         }
 
-        -- Store temp text for adding priority buffs
-        if not Settings.tempPriorityBuffsText then
-            Settings.tempPriorityBuffsText = ""
-        end
-
         -- Add Priority Buff edit box
         settings[#settings + 1] =
         {
@@ -3469,10 +3464,10 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             getFunction = function ()
-                return Settings.tempPriorityBuffsText or ""
+                return tempEditText.priorityBuffs or ""
             end,
             setFunction = function (value)
-                Settings.tempPriorityBuffsText = value
+                tempEditText.priorityBuffs = value
             end,
             disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
@@ -3486,18 +3481,14 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             clickHandler = function ()
-                local text = Settings.tempPriorityBuffsText or ""
+                local text = tempEditText.priorityBuffs or ""
                 if text and text ~= "" then
                     SpellCastBuffs.AddToCustomList(Settings.PriorityBuffTable, text)
-                    Settings.tempPriorityBuffsText = ""
+                    tempEditText.priorityBuffs = ""
                     -- Refresh the dialog if it's open
-                    if LUIE.BlacklistDialogs and LUIE.BlacklistDialogs["LUIE_MANAGE_PRIORITY_BUFFS"] then
-                        LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PRIORITY_BUFFS")
-                    end
+                    LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PRIORITY_BUFFS")
                     -- Refresh settings to clear the edit box
-                    if LHAS and LHAS.RefreshAddonSettings then
-                        LHAS:RefreshAddonSettings()
-                    end
+                    LHAS:RefreshAddonSettings()
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
@@ -3533,11 +3524,6 @@ function SpellCastBuffs.CreateConsoleSettings()
             buttonText = GetString(LUIE_STRING_LAM_UF_PRIORITY_CLEAR_BUFFS),
         }
 
-        -- Store temp text for adding priority debuffs
-        if not Settings.tempPriorityDebuffsText then
-            Settings.tempPriorityDebuffsText = ""
-        end
-
         -- Add Priority Debuff edit box
         settings[#settings + 1] =
         {
@@ -3545,10 +3531,10 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             getFunction = function ()
-                return Settings.tempPriorityDebuffsText or ""
+                return tempEditText.priorityDebuffs or ""
             end,
             setFunction = function (value)
-                Settings.tempPriorityDebuffsText = value
+                tempEditText.priorityDebuffs = value
             end,
             disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
@@ -3562,18 +3548,14 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             clickHandler = function ()
-                local text = Settings.tempPriorityDebuffsText or ""
+                local text = tempEditText.priorityDebuffs or ""
                 if text and text ~= "" then
                     SpellCastBuffs.AddToCustomList(Settings.PriorityDebuffTable, text)
-                    Settings.tempPriorityDebuffsText = ""
+                    tempEditText.priorityDebuffs = ""
                     -- Refresh the dialog if it's open
-                    if LUIE.BlacklistDialogs and LUIE.BlacklistDialogs["LUIE_MANAGE_PRIORITY_DEBUFFS"] then
-                        LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PRIORITY_DEBUFFS")
-                    end
+                    LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PRIORITY_DEBUFFS")
                     -- Refresh settings to clear the edit box
-                    if LHAS and LHAS.RefreshAddonSettings then
-                        LHAS:RefreshAddonSettings()
-                    end
+                    LHAS:RefreshAddonSettings()
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
@@ -3694,7 +3676,13 @@ function SpellCastBuffs.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSTYLE_TP),
             items = fontStyleItems,
             getFunction = function ()
-                return Settings.ProminentLabelFontStyle
+                local v = Settings.ProminentLabelFontStyle
+                for i = 1, #fontStyleItems do
+                    if fontStyleItems[i].data == v then
+                        return fontStyleItems[i]
+                    end
+                end
+                return fontStyleItems[1]
             end,
             setFunction = function (combobox, value, item)
                 Settings.ProminentLabelFontStyle = item.data or item.name or value
@@ -3903,9 +3891,10 @@ function SpellCastBuffs.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFFLABELDIRECTION),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_BUFFLABELDIRECTION_TP),
-            items = { "Right", "Left" },
+            items = { { name = "Right", data = "Right" }, { name = "Left", data = "Left" } },
             getFunction = function ()
-                return Settings.ProminentBuffLabelDirection
+                local v = Settings.ProminentBuffLabelDirection
+                return (v == "Left") and { name = "Left", data = "Left" } or { name = "Right", data = "Right" }
             end,
             setFunction = function (combobox, value, item)
                 Settings.ProminentBuffLabelDirection = item.data or item.name or value
@@ -3923,9 +3912,10 @@ function SpellCastBuffs.CreateConsoleSettings()
             type = LHAS.ST_DROPDOWN,
             label = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFFLABELDIRECTION),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_DEBUFFLABELDIRECTION_TP),
-            items = { "Right", "Left" },
+            items = { { name = "Right", data = "Right" }, { name = "Left", data = "Left" } },
             getFunction = function ()
-                return Settings.ProminentDebuffLabelDirection
+                local v = Settings.ProminentDebuffLabelDirection
+                return (v == "Left") and { name = "Left", data = "Left" } or { name = "Right", data = "Right" }
             end,
             setFunction = function (combobox, value, item)
                 Settings.ProminentDebuffLabelDirection = item.data or item.name or value
@@ -3943,11 +3933,6 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_BUFF_PROM_DIALOGUE_DESCRIPT),
         }
 
-        -- Store temp text for adding prominent buffs
-        if not Settings.tempProminentBuffsText then
-            Settings.tempProminentBuffsText = ""
-        end
-
         -- Add Prominent Buff edit box
         settings[#settings + 1] =
         {
@@ -3955,10 +3940,10 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             getFunction = function ()
-                return Settings.tempProminentBuffsText or ""
+                return tempEditText.prominentBuffs or ""
             end,
             setFunction = function (value)
-                Settings.tempProminentBuffsText = value
+                tempEditText.prominentBuffs = value
             end,
             disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
@@ -3972,18 +3957,14 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             clickHandler = function ()
-                local text = Settings.tempProminentBuffsText or ""
+                local text = tempEditText.prominentBuffs or ""
                 if text and text ~= "" then
                     SpellCastBuffs.AddToCustomList(Settings.PromBuffTable, text)
-                    Settings.tempProminentBuffsText = ""
+                    tempEditText.prominentBuffs = ""
                     -- Refresh the dialog if it's open
-                    if LUIE.BlacklistDialogs and LUIE.BlacklistDialogs["LUIE_MANAGE_PROMINENT_BUFFS"] then
-                        LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PROMINENT_BUFFS")
-                    end
+                    LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PROMINENT_BUFFS")
                     -- Refresh settings to clear the edit box
-                    if LHAS and LHAS.RefreshAddonSettings then
-                        LHAS:RefreshAddonSettings()
-                    end
+                    LHAS:RefreshAddonSettings()
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
@@ -4019,11 +4000,6 @@ function SpellCastBuffs.CreateConsoleSettings()
             buttonText = GetString(LUIE_STRING_LAM_UF_PROMINENT_CLEAR_BUFFS),
         }
 
-        -- Store temp text for adding prominent debuffs
-        if not Settings.tempProminentDebuffsText then
-            Settings.tempProminentDebuffsText = ""
-        end
-
         -- Add Prominent Debuff edit box
         settings[#settings + 1] =
         {
@@ -4031,10 +4007,10 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             getFunction = function ()
-                return Settings.tempProminentDebuffsText or ""
+                return tempEditText.prominentDebuffs or ""
             end,
             setFunction = function (value)
-                Settings.tempProminentDebuffsText = value
+                tempEditText.prominentDebuffs = value
             end,
             disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
@@ -4048,18 +4024,14 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             clickHandler = function ()
-                local text = Settings.tempProminentDebuffsText or ""
+                local text = tempEditText.prominentDebuffs or ""
                 if text and text ~= "" then
                     SpellCastBuffs.AddToCustomList(Settings.PromDebuffTable, text)
-                    Settings.tempProminentDebuffsText = ""
+                    tempEditText.prominentDebuffs = ""
                     -- Refresh the dialog if it's open
-                    if LUIE.BlacklistDialogs and LUIE.BlacklistDialogs["LUIE_MANAGE_PROMINENT_DEBUFFS"] then
-                        LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PROMINENT_DEBUFFS")
-                    end
+                    LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PROMINENT_DEBUFFS")
                     -- Refresh settings to clear the edit box
-                    if LHAS and LHAS.RefreshAddonSettings then
-                        LHAS:RefreshAddonSettings()
-                    end
+                    LHAS:RefreshAddonSettings()
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
@@ -4119,9 +4091,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_BUFF_TP),
             clickHandler = function ()
                 SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MinorBuffs)
-                if LHAS and LHAS.RefreshAddonSettings then
-                    LHAS:RefreshAddonSettings()
-                end
+                LHAS:RefreshAddonSettings()
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
             end,
@@ -4139,9 +4109,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_BUFF_TP),
             clickHandler = function ()
                 SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MajorBuffs)
-                if LHAS and LHAS.RefreshAddonSettings then
-                    LHAS:RefreshAddonSettings()
-                end
+                LHAS:RefreshAddonSettings()
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
             end,
@@ -4159,9 +4127,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_DEBUFF_TP),
             clickHandler = function ()
                 SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MinorDebuffs)
-                if LHAS and LHAS.RefreshAddonSettings then
-                    LHAS:RefreshAddonSettings()
-                end
+                LHAS:RefreshAddonSettings()
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
             end,
@@ -4179,9 +4145,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_DEBUFF_TP),
             clickHandler = function ()
                 SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MajorDebuffs)
-                if LHAS and LHAS.RefreshAddonSettings then
-                    LHAS:RefreshAddonSettings()
-                end
+                LHAS:RefreshAddonSettings()
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
             end,
@@ -4191,11 +4155,6 @@ function SpellCastBuffs.CreateConsoleSettings()
             end,
         }
 
-        -- Store temp text for adding items
-        if not Settings.tempBlacklistText then
-            Settings.tempBlacklistText = ""
-        end
-
         -- Add Item edit box
         settings[#settings + 1] =
         {
@@ -4203,10 +4162,10 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             getFunction = function ()
-                return Settings.tempBlacklistText or ""
+                return tempEditText.blacklist or ""
             end,
             setFunction = function (value)
-                Settings.tempBlacklistText = value
+                tempEditText.blacklist = value
             end,
             disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
@@ -4220,18 +4179,14 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST_TP),
             clickHandler = function ()
-                local text = Settings.tempBlacklistText or ""
+                local text = tempEditText.blacklist or ""
                 if text and text ~= "" then
                     SpellCastBuffs.AddToCustomList(Settings.BlacklistTable, text)
-                    Settings.tempBlacklistText = ""
+                    tempEditText.blacklist = ""
                     -- Refresh the blacklist dialog if it's open
-                    if LUIE.BlacklistDialogs and LUIE.BlacklistDialogs["LUIE_MANAGE_BLACKLIST"] then
-                        LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
-                    end
+                    LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
                     -- Refresh settings to clear the edit box
-                    if LHAS and LHAS.RefreshAddonSettings then
-                        LHAS:RefreshAddonSettings()
-                    end
+                    LHAS:RefreshAddonSettings()
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
@@ -4265,6 +4220,40 @@ function SpellCastBuffs.CreateConsoleSettings()
                 LUIE.ShowBlacklistDialog("LUIE_MANAGE_BLACKLIST")
             end,
             buttonText = GetString(LUIE_STRING_CUSTOM_LIST_AURA_BLACKLIST),
+            disable = function ()
+                return not LUIE.SV.SpellCastBuff_Enable
+            end,
+        }
+    end)
+
+    -- Build Debug Options Section
+    buildSectionSettings("Debug", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = "Debug Options",
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Development and debugging options for buffs and debuffs.",
+        }
+
+        -- Show AbilityId on Buffs & Debuffs
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "Show AbilityId on Buffs & Debuffs",
+            tooltip = "Toggle the display of AbilityId on buffs and debuffs - useful for adding auras to Prominent Buffs & Debuffs or the Aura Blacklist.",
+            getFunction = function ()
+                return Settings.ShowDebugAbilityId
+            end,
+            setFunction = function (v)
+                Settings.ShowDebugAbilityId = v
+                SpellCastBuffs.Reset()
+            end,
+            default = Defaults.ShowDebugAbilityId,
             disable = function ()
                 return not LUIE.SV.SpellCastBuff_Enable
             end,
@@ -4326,6 +4315,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     menuButtons[#menuButtons + 1] = createMenuButton("Priority", GetString(LUIE_STRING_LAM_BUFF_PRIORITY_HEADER))
     menuButtons[#menuButtons + 1] = createMenuButton("Prominent", GetString(LUIE_STRING_LAM_BUFF_PROM_HEADER))
     menuButtons[#menuButtons + 1] = createMenuButton("Blacklist", GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_HEADER))
+    menuButtons[#menuButtons + 1] = createMenuButton("Debug", "Debug Options")
 
     -- Initialize main menu
     local mainMenuSettings = {}

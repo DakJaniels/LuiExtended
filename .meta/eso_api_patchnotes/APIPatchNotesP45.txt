@@ -1,0 +1,398 @@
+******************
+***Enums Added ***
+******************
+
+* NOTIFICATION_TYPE_SLOTS_RESET
+
+h5. PlatformDialogResult
+* PLATFORM_DIALOG_RESULT_CLOSED_FROM_CODE
+* PLATFORM_DIALOG_RESULT_ERROR
+* PLATFORM_DIALOG_RESULT_OK
+* PLATFORM_DIALOG_RESULT_USER_CANCELED
+
+* SOCIAL_RESULT_REGION_SPINNING_DOWN
+
+* ACTIVITY_QUEUE_RESULT_ACTIVITY_DISABLED
+* ACTIVITY_QUEUE_RESULT_REMOVED_FROM_DISABLED_ACTIVITY
+
+h5. PromotionalEventRewardFlags
+* PROMOTIONAL_EVENTS_REWARD_FLAG_CLAIMED
+* PROMOTIONAL_EVENTS_REWARD_FLAG_CLAIMED_FALLBACK
+* PROMOTIONAL_EVENTS_REWARD_FLAG_FALLBACK
+
+* BUFF_TYPE_DEPRECATED_0
+* BUFF_TYPE_GALLOP
+
+h5. HouseFlags
+* HOUSE_FLAGS_SUPPORTS_WEATHER_CONTROL
+
+h5. QuestConditionType
+* QUEST_CONDITION_TYPE_ABILITY_TYPE_USED_ON_NPC
+* QUEST_CONDITION_TYPE_ABILITY_TYPE_USED_ON_TABLE
+* QUEST_CONDITION_TYPE_ABILITY_USED_ON_NPC
+* QUEST_CONDITION_TYPE_ABILITY_USED_ON_TABLE
+* QUEST_CONDITION_TYPE_ADVANCE_COMPLETABLE_SIBLINGS
+* QUEST_CONDITION_TYPE_ARTIFACT_CAPTURED
+* QUEST_CONDITION_TYPE_ARTIFACT_RETURNED
+* QUEST_CONDITION_TYPE_BATTLEGROUND_EARNED_POINTS
+* QUEST_CONDITION_TYPE_BATTLEGROUND_PARTICIPATION
+* QUEST_CONDITION_TYPE_BATTLEGROUND_VICTORY
+* QUEST_CONDITION_TYPE_CAPTURE_KEEP_TYPE
+* QUEST_CONDITION_TYPE_CAPTURE_KEEP_TYPE_UNIQUE_KEEPS
+* QUEST_CONDITION_TYPE_CAPTURE_SPECIFIC_KEEP
+* QUEST_CONDITION_TYPE_COLLECT_ITEM
+* QUEST_CONDITION_TYPE_CRAFT_ITEM
+* QUEST_CONDITION_TYPE_CRAFT_RANDOM_WRIT_ITEM
+* QUEST_CONDITION_TYPE_DECONSTRUCT_ITEM
+* QUEST_CONDITION_TYPE_DISMISSED_COMPANION
+* QUEST_CONDITION_TYPE_EARN_CHAMPION_POINT
+* QUEST_CONDITION_TYPE_ENTER_SUBZONE
+* QUEST_CONDITION_TYPE_ENTER_ZONE
+* QUEST_CONDITION_TYPE_EQUIP_ITEM
+* QUEST_CONDITION_TYPE_EVENT_FAIL
+* QUEST_CONDITION_TYPE_EVENT_SUCCESS
+* QUEST_CONDITION_TYPE_EXIT_SUBZONE
+* QUEST_CONDITION_TYPE_FOLLOWER_GAINED
+* QUEST_CONDITION_TYPE_FOLLOWER_LOST
+* QUEST_CONDITION_TYPE_GATHER_ITEM
+* QUEST_CONDITION_TYPE_GATHER_ITEM_TRAIT
+* QUEST_CONDITION_TYPE_GATHER_ITEM_TYPE
+* QUEST_CONDITION_TYPE_GIVE_ITEM
+* QUEST_CONDITION_TYPE_GOTO_POINT
+* QUEST_CONDITION_TYPE_GUILD_TRADER_GOLD_TRANSACTION
+* QUEST_CONDITION_TYPE_HAS_ITEM
+* QUEST_CONDITION_TYPE_INTERACT_MONSTER
+* QUEST_CONDITION_TYPE_INTERACT_OBJECT
+* QUEST_CONDITION_TYPE_INTERACT_OBJECT_IN_STATE
+* QUEST_CONDITION_TYPE_INTERACT_SIMPLE_OBJECT
+* QUEST_CONDITION_TYPE_INTERACT_SIMPLE_OBJECT_IN_STATE
+* QUEST_CONDITION_TYPE_KILL_BOUNTY_CLASSIFICATION_TYPE
+* QUEST_CONDITION_TYPE_KILL_ENEMY_GUARDS
+* QUEST_CONDITION_TYPE_KILL_ENEMY_PLAYERS
+* QUEST_CONDITION_TYPE_KILL_ENEMY_PLAYERS_OF_CLASS
+* QUEST_CONDITION_TYPE_KILL_ENEMY_PLAYERS_WHILE_DEFENDING_KEEP
+* QUEST_CONDITION_TYPE_KILL_MONSTER
+* QUEST_CONDITION_TYPE_KILL_MONSTER_TABLE
+* QUEST_CONDITION_TYPE_KILL_MONSTER_TYPE
+* QUEST_CONDITION_TYPE_LEAVE_REVIVE_COUNTER_LIST
+* QUEST_CONDITION_TYPE_LEVEL_UP
+* QUEST_CONDITION_TYPE_LOOT_TREASURE_CHEST
+* QUEST_CONDITION_TYPE_NPC_GOAL
+* QUEST_CONDITION_TYPE_NPC_GOAL_FAIL
+* QUEST_CONDITION_TYPE_PICKPOCKET_ITEM
+* QUEST_CONDITION_TYPE_PLAYER_DEATH
+* QUEST_CONDITION_TYPE_PLAYER_LOGOUT
+* QUEST_CONDITION_TYPE_READ_BOOK
+* QUEST_CONDITION_TYPE_SCRIBE_ABILITY
+* QUEST_CONDITION_TYPE_SCRIPT_ACTION
+* QUEST_CONDITION_TYPE_SELL_LAUNDER_ITEM
+* QUEST_CONDITION_TYPE_SUMMONED_COMPANION
+* QUEST_CONDITION_TYPE_TALK_TO
+* QUEST_CONDITION_TYPE_TIMER
+* QUEST_CONDITION_TYPE_TRANSITION_INTERACT_OBJECT
+* QUEST_CONDITION_TYPE_TRIBUTE_LOST_MATCH_MONSTER
+* QUEST_CONDITION_TYPE_TRIBUTE_LOST_MATCH_PLAYER
+* QUEST_CONDITION_TYPE_TRIBUTE_WON_MATCH_MONSTER
+* QUEST_CONDITION_TYPE_TRIBUTE_WON_MATCH_PLAYER
+* QUEST_CONDITION_TYPE_UNEARTH_ANTIQUITY
+* QUEST_CONDITION_TYPE_USE_QUEST_ITEM
+* QUEST_CONDITION_TYPE_VENDOR_GOLD_TRANSACTION
+
+h5. QuestPinPositionSymbolicState
+* QUEST_PIN_STATE_HAS_ADDITIONAL_SYMBOLIC_POSITION
+* QUEST_PIN_STATE_IS_SYMBOLIC_POSITION
+* QUEST_PIN_STATE_NONE
+
+* ACCESSIBILITY_SETTING_PLAYER_WAYPOINT_ICON_COLOR
+
+* CLAIM_REWARD_RESULT_CAMPAIGN_DISABLED
+
+* CHAMPION_PURCHASE_USING_LOADOUT
+
+* HOT_BAR_RESULT_USING_LOADOUT
+
+* RESPEC_RESULT_CHAMPION_SKILL_REMOVED_FROM_ARMORY_BAR
+* RESPEC_RESULT_CHAMPION_SKILL_REMOVED_FROM_BAR
+
+* RESPEC_TYPE_CHAMPION_SLOTS
+
+* MAP_FILTER_DUNGEONS
+* MAP_FILTER_HOUSES
+* MAP_FILTER_TRIALS
+
+* MAP_FILTER_TYPE_GLOBAL
+
+h5. GroupAddOnDataBroadcastResult
+* GROUP_ADD_ON_DATA_BROADCAST_RESULT_INVALID_AUTH_KEY
+* GROUP_ADD_ON_DATA_BROADCAST_RESULT_INVALID_GROUP
+* GROUP_ADD_ON_DATA_BROADCAST_RESULT_ON_COOLDOWN
+* GROUP_ADD_ON_DATA_BROADCAST_RESULT_SUCCESS
+* GROUP_ADD_ON_DATA_BROADCAST_RESULT_TOO_LARGE
+
+* GROUP_ELECTION_FAILURE_ADDON_FORBIDDEN
+
+* ARMORY_BUILD_RESTORE_RESULT_USING_LOADOUT
+
+* ARMORY_BUILD_SAVE_RESULT_USING_LOADOUT
+
+* CLIENT_INTERACT_RESULT_CAMPAIGN_DISABLED
+
+h5. DialogueToneType
+* DIALOGUE_TONE_TYPE_FLIRTY
+* DIALOGUE_TONE_TYPE_GRIM
+* DIALOGUE_TONE_TYPE_JOKER
+* DIALOGUE_TONE_TYPE_KIND
+* DIALOGUE_TONE_TYPE_MERCIFUL
+* DIALOGUE_TONE_TYPE_NEUTRAL
+* DIALOGUE_TONE_TYPE_NONE
+* DIALOGUE_TONE_TYPE_RUTHLESS
+
+* MAIL_TAKE_ATTACHMENT_RESULT_FAIL_CAMPAIGN_DISABLED
+
+* ACTION_RESULT_SIEGE_BLOCKED
+* ACTION_RESULT_SIEGE_PACKED_UP
+
+h5. BattlegroundResult
+* BATTLEGROUND_RESULT_INVALID
+* BATTLEGROUND_RESULT_LOSS
+* BATTLEGROUND_RESULT_TIE
+* BATTLEGROUND_RESULT_WIN
+
+* TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED
+* TUTORIAL_TRIGGER_DEPRECATED_1
+* TUTORIAL_TRIGGER_DEPRECATED_2
+* TUTORIAL_TRIGGER_DEPRECATED_3
+* TUTORIAL_TRIGGER_DIALOGUE_TONE_SEEN
+* TUTORIAL_TRIGGER_ENTER_CYRODIIL_CHAMPIONS
+* TUTORIAL_TRIGGER_GAINED_SET_ITEM
+* TUTORIAL_TRIGGER_REUSE_1
+* TUTORIAL_TRIGGER_REUSE_2
+* TUTORIAL_TRIGGER_REUSE_3
+* TUTORIAL_TRIGGER_REUSE_4
+* TUTORIAL_TRIGGER_REUSE_5
+* TUTORIAL_TRIGGER_REUSE_6
+
+* UNIT_AUTO
+
+
+
+********************
+***Enums Removed ***
+********************
+
+* BUFF_TYPE_MAJOR_GALLOP
+* BUFF_TYPE_MINOR_GALLOP
+
+* SOCKET_TYPE_ENCHANTMENT
+* SOCKET_TYPE_NONE
+
+* TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED_1
+* TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED_10
+* TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED_2
+* TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED_3
+* TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED_4
+* TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED_5
+* TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED_6
+* TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED_7
+* TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED_8
+* TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED_9
+
+
+
+**********************
+***Globals Removed ***
+**********************
+
+* ZO_DEFAULT_LANGUAGE_SETTING_VALUE
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* ZoGetOfficialGameLanguageDescriptor()
+** _Returns:_ *string* _languageDescriptor_
+
+* BCP47StringForZoOfficialLanguage(*[OfficialLanguage|#OfficialLanguage]* _language_)
+** _Returns:_ *string* _languageDescriptor_
+
+* GetRaceAndGenderSilhouetteTexture(*integer* _raceDefId_, *[Gender|#Gender]* _gender_)
+** _Returns:_ *string* _icon_
+
+* GetUnitActiveMundusStoneBuffIndices(*string* _unitTag_)
+** _Uses variable returns..._
+** _Returns:_ *luaindex* _mundusStoneBuffIndex_
+
+* RegisterForGroupAddOnDataBroadcastAuthKey(*string* _addOnName_)
+** _Returns:_ *integer:nilable* _authKey_, *string* _registeredAddOnName_
+
+* BroadcastAddOnDataToGroup(*integer* _authKey_, *integer* _data_)
+** _Returns:_ *[GroupAddOnDataBroadcastResult|#GroupAddOnDataBroadcastResult]* _result_
+** Note: _data_ is a variable argument, you can pass in up to 8
+
+* GetGroupAddOnDataBroadcastCooldownRemainingMS()
+** _Returns:_ *integer* _cooldownRemainingMS_
+
+* GetNumAvailableMundusStoneSlots()
+** _Returns:_ *integer* _numMundusStoneSlots_
+
+* GetNumMapBlobs()
+** _Returns:_ *integer* _numBlobs_
+
+* GetMapBlobNameInfo(*luaindex* _blobIndex_)
+** _Returns:_ *string* _locationName_, *number* _normalizedX_, *number* _normalizedZ_, *number* _normalizedWidth_, *number* _scale_
+
+* ShouldMapShowPriorityFastTravelOnly()
+** _Returns:_ *bool* _showPriorityFastTravelOnly_
+
+* GetPOIInstanceType(*luaindex* _zoneIndex_, *luaindex* _poiIndex_)
+** _Returns:_ *[InstanceType|#InstanceType]* _instanceType_
+
+* GetFastTravelNodeMapPriority(*luaindex* _nodeIndex_)
+** _Returns:_ *integer:nilable* _mapPriority_
+
+* IsFastTravelNodeAutoDiscovered(*luaindex* _nodeIndex_)
+** _Returns:_ *bool* _isAutoDiscovered_
+
+* ShouldShowLeaderboardForBattlegroundLeaderboardType(*[BattlegroundLeaderboardType|#BattlegroundLeaderboardType]* _battlegroundLeaderboardType_)
+** _Returns:_ *bool* _shouldShow_
+
+* GetBattlegroundResultForTeam(*[BattlegroundTeam|#BattlegroundTeam]* _battlegroundTeam_)
+** _Returns:_ *[BattlegroundResult|#BattlegroundResult]* _result_
+
+* GetMundusStoneHelpIndices()
+** _Returns:_ *luaindex:nilable* _helpCategoryIndex_, *luaindex:nilable* _helpIndex_
+
+* IsLFGActivitySetDisabled(*integer* _activitySetId_)
+** _Returns:_ *bool* _disabled_
+
+* IsLFGActivityDisabled(*integer* _activityId_)
+** _Returns:_ *bool* _disabled_
+
+* GetTotalFenceHagglingBonus()
+** _Returns:_ *integer* _bonus_
+
+* GetCompanionRace(*integer* _companionId_)
+** _Returns:_ *integer* _aRaceDefId_
+
+* GetCompanionGender(*integer* _companionId_)
+** _Returns:_ *[Gender|#Gender]* _gender_
+
+* TriggerTutorialWithParam(*[TutorialTrigger|#TutorialTrigger]* _tutorialTrigger_, *integer* _param_)
+** _Returns:_ *bool* _success_
+
+* GetHouseFlags(*integer* _houseId_)
+** _Returns:_ *[HouseFlags|#HouseFlags]* _flags_
+
+* GetFallbackReward(*integer* _rewardId_)
+** _Returns:_ *integer* _fallbackRewardId_, *integer* _fallbackRewardQuantity_
+
+* ShouldUseFallbackReward(*integer* _rewardId_)
+** _Returns:_ *bool* _shouldUseFallback_
+
+* GetChapterOverrideDisplayName(*integer* _chapterUpgradeId_)
+** _Returns:_ *string* _overrideDisplayName_
+
+h3. Control
+* SetControlAlpha *protected-attributes* (*number* _alpha_)
+* SetControlScale *protected-attributes* (*number* _scale_)
+
+h3. LabelControl
+* GetControlColor()
+	** _Returns:_ *number* _r_, *number* _g_, *number* _b_, *number* _a_
+* SetControlColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
+
+h3. TextureControl
+* GetControlColor()
+	** _Returns:_ *number* _r_, *number* _g_, *number* _b_, *number* _a_
+* SetControlColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
+
+
+
+************************
+***Functions Removed ***
+************************
+
+
+* GetAbilityMundusStoneType(*integer* _abilityId_)
+** _Returns:_ *[MundusStone|#MundusStone]* _mundusStoneType_
+
+* GetAbilityNumDerivedStats(*integer* _abilityId_)
+** _Returns:_ *integer* _numDerivedStats_
+
+* GetAbilityDerivedStatAndEffectByIndex(*integer* _abilityId_, *luaindex* _index_)
+** _Returns:_ *[DerivedStats|#DerivedStats]* _derivedStat_, *integer* _effect_
+
+* GetAbilityNumAdvancedStats(*integer* _abilityId_)
+** _Returns:_ *integer* _numAdvancedStats_
+
+* GetAbilityAdvancedStatAndEffectByIndex(*integer* _abilityId_, *luaindex* _index_)
+** _Returns:_ *[AdvancedStatDisplayType|#AdvancedStatDisplayType]* _advancedStat_, *[AdvancedStatDisplayFormat|#AdvancedStatDisplayFormat]* _displayFormat_, *integer* _effect_
+
+* GetMundusWarningLevel()
+** _Returns:_ *integer* _warningLevel_
+
+
+
+************************
+***Functions Changed ***
+************************
+
+Added _isSymbolicLocation_
+* GetMapPlayerPosition(*string* _unitTag_)
+** _Returns:_ *number* _normalizedX_, *number* _normalizedZ_, *number* _heading_, *bool* _isShownInCurrentMap_, *bool* _isSymbolicLocation_
+
+Added _dialogueTone_
+* GetChatterOption(*luaindex* _optionIndex_)
+** _Returns:_ *string* _optionString_, *integer* _optionType_, *integer* _optionalArgument_, *bool* _isImportant_, *bool* _chosenBefore_, *integer* _teleportNPC_, *[DialogueToneType|#DialogueToneType]* _dialogueTone_
+
+Made _roundIndex_ nilable
+* GetScoreboardLocalPlayerEntryIndex(*luaindex:nilable* _roundIndex_)
+** _Returns:_ *luaindex* _playerIndex_
+
+Removed _isCapstoneRewardClaimed_, added _capstoneRewardFlags_
+* GetPromotionalEventCampaignProgress(*id64* _campaignKey_)
+** _Returns:_ *integer* _numActivitiesCompleted_, *[PromotionalEventRewardFlags|#PromotionalEventRewardFlags]* _capstoneRewardFlags_
+
+Removed _isRewardClaimed_, added _rewardFlags_
+* GetPromotionalEventCampaignActivityProgress(*id64* _campaignKey_, *luaindex* _activityIndex_)
+** _Returns:_ *integer* _progress_, *[PromotionalEventRewardFlags|#PromotionalEventRewardFlags]* _rewardFlags_
+
+Removed _isRewardClaimed_, added _rewardFlags_
+* GetPromotionalEventCampaignMilestoneRewardFlags(*id64* _campaignKey_, *luaindex* _milestoneIndex_)
+** _Returns:_ *[PromotionalEventRewardFlags|#PromotionalEventRewardFlags]* _rewardFlags_
+
+Made _param_ nilable
+* GetTutorialId(*[TutorialTrigger|#TutorialTrigger]* _tutorialTrigger_, *integer:nilable* _param_)
+
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_ARMORY_BUILD_CHAMPION_SLOTS_MODIFIED
+* EVENT_BATTLEGROUND_MMR_LOSS_REDUCED (*[BattlegroundMMRBonusType|#BattlegroundMMRBonusType]* _reductionReason_)
+* EVENT_CLEAR_NEW_ON_ALL_SKILL_LINES
+* EVENT_DISABLED_ACTIVITIES_UPDATE
+* EVENT_GROUP_ADD_ON_DATA_RECEIVED (*string* _senderUnitTag_, *integer* _data1_, *integer* _data2_, *integer* _data3_, *integer* _data4_, *integer* _data5_, *integer* _data6_, *integer* _data7_, *integer* _data8_)
+* EVENT_PENDING_CURRENCY_REWARD_CACHED (*[CurrencyType|#CurrencyType]* _currencyType_, *[CurrencyLocation|#CurrencyLocation]* _currencyLocation_, *integer* _amount_, *[CurrencyChangeReason|#CurrencyChangeReason]* _reason_, *integer* _reasonSupplementaryInfo_)
+* EVENT_PENDING_EXPERIENCE_REWARD_CACHED (*[ProgressReason|#ProgressReason]* _reason_, *integer* _amount_)
+* EVENT_MAX_CHARACTER_SLOTS_CHANGED (*integer* _newMaxCharacterSlots_)
+
+
+
+**********************
+*** Events Changed ***
+**********************
+
+Changed _isRewardClaimed_ to PromotionalEventRewardFlags _rewardFlags_
+* EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED (*id64* _campaignKey_, *luaindex* _activityIndex_, *integer* _previousProgress_, *integer* _newProgress_, *[PromotionalEventRewardFlags|#PromotionalEventRewardFlags]* _rewardFlags_)
+
+Added _symbolicState_, _additionalSymbolicLocX_, and _additionalSymbolicLocY_
+* EVENT_QUEST_POSITION_REQUEST_COMPLETE (*integer* _taskId_, *[MapDisplayPinType|#MapDisplayPinType]* _pinType_, *number* _xLoc_, *number* _yLoc_, *number* _areaRadius_, *bool* _insideCurrentMapWorld_, *bool* _isBreadcrumb_, *integer* _teleportNPCId_, *integer* _waypointId_, *[QuestPinPositionSymbolicState|#QuestPinPositionSymbolicState]* _symbolicState_, *number* _additionalSymbolicLocX_, *number* _additionalSymbolicLocY_)
+
+Changed _tutorialTrigger_ to int tutorialProductId
+* EVENT_MARKET_PURCHASE_RESULT (*[MarketPurchasableResult|#MarketPurchasableResult]* _purchaseResult_, *integer* _tutorialProductId_, *bool* _wasGift_)

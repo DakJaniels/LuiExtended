@@ -1,0 +1,396 @@
+******************
+***Enums Added ***
+******************
+
+* PLATFORM_STORE_LABEL_EPIC
+
+
+* PLATFORM_SERVICE_TYPE_EPIC
+
+
+* PLAYER_PLATFORM_EPIC
+
+
+* SCT_EVENT_TYPE_CHARMED
+
+
+* HOUSE_PERMISSION_OPTIONS_CATEGORIES_OCCUPANTS
+
+
+* HOUSING_REQUEST_RESULT_KICK_OCCUPANT_SELF
+
+
+* ITEM_USE_TYPE_ATTRIBUTE_RESPEC
+
+
+* QUEST_REPEAT_MONTHLY
+* QUEST_REPEAT_WEEKLY
+
+
+* IN_WORLD_UI_SETTING_TARGET_MARKER_SIZE
+
+
+* UI_SETTING_COMPASS_TARGET_MARKERS
+
+
+* RESPEC_RESULT_IS_IN_COMBAT_ATTRIBUTE
+* RESPEC_RESULT_NOT_ENOUGH_ATTRIBUTE_POINTS
+
+
+* ACTION_RESULT_CHARMED
+
+
+* SHADER_EFFECT_TYPE_GAUSSIAN_BLUR
+* SHADER_EFFECT_TYPE_MOTION_BLUR
+* SHADER_EFFECT_TYPE_RADIAL_BLUR
+
+
+h5. ScreenReaderNarrationType
+* NARRATION_TYPE_ALERT
+* NARRATION_TYPE_CENTER_SCREEN_ANNOUNCEMENT
+* NARRATION_TYPE_EDIT_BOX
+* NARRATION_TYPE_HUD
+* NARRATION_TYPE_TEXT_CHAT
+* NARRATION_TYPE_UI_SCREEN
+
+
+h5. AttributePointAllocationMode
+* ATTRIBUTE_POINT_ALLOCATION_MODE_FULL
+* ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY
+
+
+h5. TriggerExcludeType
+* TRIGGER_EXCLUDE_TYPE_NONE
+* TRIGGER_EXCLUDE_TYPE_TRANSFER_DAMAGE
+
+
+h5. HousingFurnitureBoundFilter
+* HOUSING_FURNITURE_BOUND_FILTER_ALL
+* HOUSING_FURNITURE_BOUND_FILTER_BOUND
+* HOUSING_FURNITURE_BOUND_FILTER_UNBOUND
+
+
+h5. HousingFurnitureLocationFilter
+* HOUSING_FURNITURE_LOCATION_FILTER_ALL
+* HOUSING_FURNITURE_LOCATION_FILTER_BACKPACK
+* HOUSING_FURNITURE_LOCATION_FILTER_BANK
+* HOUSING_FURNITURE_LOCATION_FILTER_COLLECTIBLES
+* HOUSING_FURNITURE_LOCATION_FILTER_STORAGE\
+
+
+
+********************
+***Enums Changed ***
+********************
+
+Renamed
+* ABILITY_TYPE_DEPRECATED
+to
+* ABILITY_TYPE_DIRECTEDMOVEMENTABILITY
+
+
+Renamed
+h5. SkillRespecPaymentType
+* SKILL_RESPEC_PAYMENT_TYPE_GOLD
+* SKILL_RESPEC_PAYMENT_TYPE_RESPEC_SCROLL
+to
+h5. RespecPaymentType
+* RESPEC_PAYMENT_TYPE_GOLD
+* RESPEC_PAYMENT_TYPE_RESPEC_SCROLL
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* GetTimeStamp32()
+** _Returns:_ *integer* _timestamp_
+
+
+* ShouldKeyCodeUseKeyMarkup(*[KeyCode|#KeyCode]* _keyCode_)
+** _Returns:_ *bool* _shouldUseKeyMarkup_
+
+
+* AddPartialPendingNarrationText(*string* _text_)
+
+
+* FinalizePartialPendingNarrationText(*integer* _pauseBetweenTextMs_)
+
+
+* ClearNarrationQueue(*[ScreenReaderNarrationType|#ScreenReaderNarrationType]* _narrationType_)
+
+
+* ClearAllNarrationQueues()
+
+
+* SetTextChatNarrationQueueEnabled(*bool* _enabled_)
+
+
+* SetCenterScreenAnnounceNarrationQueueEnabled(*bool* _enabled_)
+
+
+* ResetChatToDefaults()
+
+
+* GetChatterOptionWaypoints(*luaindex* _optionIndex_)
+** _Uses variable returns..._
+** _Returns:_ *integer* _waypointId_
+
+
+* SendAttributePointAllocationRequest(*[RespecPaymentType|#RespecPaymentType]* _respecPaymentType_, *integer* _healthDelta_, *integer* _magickaDelta_, *integer* _staminaDelta_)
+
+
+* GetPendingAttributeRespecScrollItemLink()
+** _Returns:_ *string* _itemLink_
+
+
+* GetAttributeRespecGoldCost()
+** _Returns:_ *integer* _cost_
+
+
+* GetLoreBookOverrideImageFromBookId(*integer* _bookId_)
+** _Returns:_ *textureName:nilable* _overrideImage_, *[AnchorPosition|#AnchorPosition]:nilable* _overrideImageTitlePosition_
+
+
+* HousingEditorRequestResetEngagedTargetDummies()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+
+* HousingEditorRequestKickOccupant(*luaindex* _occupantIndex_)
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+
+* GetHouseOccupantName(*luaindex* _index_)
+** _Returns:_ *string* _displayName_, *string* _characterName_
+
+
+* GetTributePatronMechanicInfo(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_, *luaindex* _mechanicIndex_)
+** _Returns:_ *[TributeMechanic|#TributeMechanic]* _mechanicType_, *integer* _quantity_, *integer* _param1_, *integer* _param2_, *integer* _param3_
+
+
+* GetNumTributePatronPassiveMechanicsForFavorState(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_)
+** _Returns:_ *integer* _numPassiveMechanics_
+
+
+* GetTributePatronPassiveMechanicInfo(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_, *luaindex* _mechanicIndex_)
+** _Returns:_ *[TributeMechanic|#TributeMechanic]* _mechanicType_, *integer* _quantity_, *integer* _param1_, *integer* _param2_, *integer* _param3_, *integer* _triggerId_
+
+
+* GetTributePatronPassiveMechanicText(*integer* _patronId_, *[TributePatronPerspectiveFavorState|#TributePatronPerspectiveFavorState]* _favorState_, *luaindex* _mechanicIndex_, *bool* _prependIcon_)
+** _Returns:_ *string* _passiveMechanicText_
+
+
+h3. Control
+* ClearShaderEffectOptions()
+
+* ClearSuggestedDimensions *protected-attributes* ()
+
+* DoesControlDescendFrom(*object* _root_)
+** _Returns:_ *bool* _doesControlDescendFromRoot_
+
+* GetGaussianBlur()
+** _Returns:_ *integer* _kernelSize_, *number* _factor_
+
+* GetMotionBlur()
+** _Returns:_ *number* _blurVectorXAsAPercentageOfControlWidth_, *number* _blurVectorYAsAPercentageOfControlHeight_, *integer* _numSamples_
+
+* GetRadialBlur()
+** _Returns:_ *number* _originX_, *number* _originY_, *integer* _numSamples_, *number* _blurRadius_, *number* _offsetRadius_
+
+* GetSuggestedDimensions()
+** _Returns:_ *number* _width_, *number* _height_
+
+* GetSuggestedHeight()
+** _Returns:_ *number* _height_
+
+* GetSuggestedWidth()
+** _Returns:_ *number* _width_
+
+* GetTop()
+** _Returns:_ *number* _top_
+
+* SetGaussianBlur(*integer* _kernelSize_, *number* _factor_)
+
+* SetMotionBlur(*number* _blurVectorXAsAPercentageOfControlWidth_, *number* _blurVectorYAsAPercentageOfControlHeight_, *integer* _numSamples_)
+
+* SetRadialBlur(*number* _originX_, *number* _originY_, *integer* _numSamples_, *number* _blurRadius_, *number* _offsetRadius_)
+
+* SuggestDimensions *protected-attributes* (*number* _width_, *number* _height_)
+
+* SuggestHeight *protected-attributes* (*number* _height_)
+
+* SuggestWidth *protected-attributes* (*number* _width_)
+
+
+h3. LabelControl
+* GetShaderEffectType()
+** _Returns:_ *[ShaderEffectType|#ShaderEffectType]* _shaderEffectType_
+
+* GetTextForLines(*luaindex* _startLine_, *luaindex* _endLine_)
+** _Returns:_ *string* _apRet_
+
+* SetShaderEffectType(*[ShaderEffectType|#ShaderEffectType]* _shaderEffectType_)
+
+* SetStoreLineEndingCharacterIndices(*bool* _storeLineEndingCharacterIndices_)
+
+
+h3. WindowManager
+* GetCursorPosition(*integer* _cursorId_)
+** _Returns:_ *number* _x_, *number* _y_
+
+* GetUIMousePosition()
+** _Returns:_ *number* _x_, *number* _y_
+
+
+
+************************
+***Functions Removed ***
+************************
+
+* ShouldShowScreenNarrationSetting()
+** _Returns:_ *bool* _shouldShowScreenNarrationSetting_
+
+
+* ClearReadTextChatToClientQueue()
+
+
+* ClearReadUITextToClientQueue()
+
+
+* SetReadTextChatToClientQueueEnabled(*bool* _enabled_)
+
+
+* GetUIMousePosition()
+** _Returns:_ *number* _x_, *number* _y_
+
+
+h3. Control
+* ClearWaveEffect()
+
+
+
+************************
+***Functions Changed ***
+************************
+
+Added  _narrationType_
+* RequestReadPendingNarrationTextToClient(*[ScreenReaderNarrationType|#ScreenReaderNarrationType]* _narrationType_)
+
+
+Removed teleportWaypointIndex
+* GetChatterOption(*luaindex* _optionIndex_)
+** _Returns:_ *string* _optionString_, *integer* _optionType_, *integer* _optionalArgument_, *bool* _isImportant_, *bool* _chosenBefore_, *integer* _teleportNPC_
+
+
+Changed type to *[RespecPaymentType|#RespecPaymentType]*
+* PrepareSkillPointAllocationRequest(*[SkillPointAllocationMode|#SkillPointAllocationMode]* _allocationMode_, *[RespecPaymentType|#RespecPaymentType]* _respecPaymentType_)
+
+
+h3. Control
+Changed type to *layout_measurement*
+* SetResizeToFitPadding(*layout_measurement* _width_, *layout_measurement* _height_)
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_ATTRIBUTE_RESPEC_RESULT (*[RespecResult|#RespecResult]* _result_)
+
+
+* EVENT_HOUSING_OCCUPANT_ARRIVED (*string* _accountName_, *string* _characterName_)
+
+
+* EVENT_HOUSING_OCCUPANT_DEPARTED (*string* _accountName_, *string* _characterName_)
+
+
+* EVENT_START_ATTRIBUTE_RESPEC (*[AttributePointAllocationMode|#AttributePointAllocationMode]* _allocationMode_, *[RespecPaymentType|#RespecPaymentType]* _paymentType_)
+
+
+
+**********************
+*** Events Removed ***
+**********************
+
+* EVENT_BATTLE_STANDARDS_UPDATED
+
+
+* EVENT_TRIBUTE_MATCH_END_SUMMARY_READY
+
+
+* EVENT_TUTORIAL_HIDDEN (*luaindex* _tutorialIndex_)
+
+
+
+**********************
+*** Events Changed ***
+**********************
+
+Changed  _teleportWaypointIndex_ to _waypointId_
+* EVENT_GROUP_MEMBER_POSITION_REQUEST_COMPLETE (*integer* _taskId_, *id64* _charId_, *bool* _isGroupLeader_, *bool* _isBreadcrumb_, *integer* _teleportNPCId_, *integer* _waypointId_)
+* EVENT_QUEST_POSITION_REQUEST_COMPLETE (*integer* _taskId_, *[MapDisplayPinType|#MapDisplayPinType]* _pinType_, *number* _xLoc_, *number* _yLoc_, *number* _areaRadius_, *bool* _insideCurrentMapWorld_, *bool* _isBreadcrumb_, *integer* _teleportNPCId_, *integer* _waypointId_)
+
+
+Added _previousPopulation_
+* EVENT_HOUSING_POPULATION_CHANGED (*integer* _newPopulation_, *integer* _previousPopulation_)
+
+
+Changed type to *[RespecPaymentType|#RespecPaymentType]*
+* EVENT_START_SKILL_RESPEC (*[SkillPointAllocationMode|#SkillPointAllocationMode]* _allocationMode_, *[RespecPaymentType|#RespecPaymentType]* _paymentType_)
+
+
+
+***************************
+*** UI XML Layout Added ***
+***************************
+
+h4. Attributes:
+* storeLineEndingCharacterIndices *bool*
+* value *number*
+
+
+h5. Control
+* [Child: GaussianBlur|#GaussianBlur]
+* [Child: MotionBlur|#MotionBlur]
+* [Child: RadialBlur|#RadialBlur]
+
+
+h5. Label
+* [Child: shaderEffectType|#Attributes]
+* [Child: storeLineEndingCharacterIndices|#Attributes]
+
+
+h5. GaussianBlur
+* _attribute:_ *integer* _kernelSize_
+* _attribute:_ *number* _factor_
+
+
+h5. MotionBlur
+* _attribute:_ *number* _blurVectorXAsAPercentageOfControlWidth_
+* _attribute:_ *number* _blurVectorYAsAPercentageOfControlHeight_
+* _attribute:_ *integer* _numSamples_
+
+
+h5. RadialBlur
+* _attribute:_ *number* _originX_
+* _attribute:_ *number* _originY_
+* _attribute:_ *integer* _numSamples_
+* _attribute:_ *number* _blurRadius_
+* _attribute:_ *number* _offsetRadius_
+
+
+h5. StatusBar
+* [Child: value|#Attributes]
+
+
+
+*****************************
+*** UI XML Layout Changed ***
+*****************************
+
+Type changed to *layout_measurement*
+h5. ResizeToFitPadding
+* _attribute:_ *layout_measurement* _width_
+* _attribute:_ *layout_measurement* _height_

@@ -1,0 +1,377 @@
+*******************
+*** Enums Added ***
+*******************
+
+* NOTIFICATION_TYPE_SPECTACLE_EVENT_PHASE_CHANGED
+
+
+* PROGRESS_REASON_SIEGE_CAMP_COMPLETED
+
+
+* TOOLTIP_GAME_DATA_PROGRESS_BAR
+
+
+* ABILITY_TYPE_PAUSECOOLDOWN
+
+
+* CURRENCY_CHANGE_REASON_ENDLESS_DUNGEON_VISION_REROLL
+
+
+* SPECIALIZED_ITEMTYPE_CONTAINER_STACKABLE
+
+
+* QUEST_CONDITION_TYPE_SPECTACLE_EVENT_PHASE_CHANGE
+
+
+* AUDIO_SETTING_SPATIAL_SOUND
+* AUDIO_SETTING_SPATIAL_SOUND_QUALITY
+
+
+* CAMERA_SETTING_SENSITIVITY_FIRST_PERSON_X
+* CAMERA_SETTING_SENSITIVITY_FIRST_PERSON_Y
+* CAMERA_SETTING_SENSITIVITY_THIRD_PERSON_X
+* CAMERA_SETTING_SENSITIVITY_THIRD_PERSON_Y
+
+
+* GAMEPAD_SETTING_CAMERA_SENSITIVITY_X
+* GAMEPAD_SETTING_CAMERA_SENSITIVITY_Y
+
+
+* IN_WORLD_UI_SETTING_TOGGLE_SPRINT
+
+
+* ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_FURNISHING
+
+
+* REWARD_TYPE_SPECTACLE_PROGRESS
+
+
+* WORLD_EVENT_TYPE_SIEGE_CAMP
+
+
+* CHATTER_ENDLESS_DUNGEON_BUFF_SELECTOR_REROLL_VISIONS
+
+
+* ACTION_RESULT_CAST_AT_PET_LIMIT
+
+
+h5. EndlessDungeonBuffSelectorRerollError
+* ENDLESS_DUNGEON_BUFF_REROLL_ERROR_CANNOT_AFFORD
+* ENDLESS_DUNGEON_BUFF_REROLL_ERROR_INTERNAL_ERROR
+* ENDLESS_DUNGEON_BUFF_REROLL_ERROR_NO_AVAILABLE_CHOICES
+
+
+h5. SpatialSoundQualitySetting
+* SPATIAL_SOUND_QUALITY_SETTING_HIGH
+* SPATIAL_SOUND_QUALITY_SETTING_LOW
+
+
+h5. ItemStatValeRequestType
+* ITEM_STAT_VALUE_REQUEST_TYPE_CURRENT_APPLIED_VALUE
+* ITEM_STAT_VALUE_REQUEST_TYPE_CURRENT_EFFECTIVE_VALUE
+
+
+h5. ItemTooltipDisplayFlags
+* ITEM_TOOLTIP_DISPLAY_FLAGS_DONT_SAVE_ITEM_CONTEXT
+* ITEM_TOOLTIP_DISPLAY_FLAGS_EQUIPPED
+* ITEM_TOOLTIP_DISPLAY_FLAGS_FULL_CHARGES_AND_DURABILITY
+* ITEM_TOOLTIP_DISPLAY_FLAGS_HIDE_ARMORY_BUILD
+* ITEM_TOOLTIP_DISPLAY_FLAGS_HIDE_SIEGE_CONDITION
+* ITEM_TOOLTIP_DISPLAY_FLAGS_HIDE_TRAIT
+* ITEM_TOOLTIP_DISPLAY_FLAGS_ITEM_ALREADY_BOUND
+* ITEM_TOOLTIP_DISPLAY_FLAGS_LINK_CRAFTED
+* ITEM_TOOLTIP_DISPLAY_FLAGS_SHOW_QUANTITY_IN_TITLE
+* ITEM_TOOLTIP_DISPLAY_FLAGS_SHOW_SUPPRESSION
+* ITEM_TOOLTIP_DISPLAY_FLAGS_SHOW_TRAIT_AS_NEW
+* ITEM_TOOLTIP_DISPLAY_FLAGS_SUBTOOLTIP
+
+
+h5. EnergySustainabilityScreenDimAndResolution
+* ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION_DISABLED
+* ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION_FIVE_MINS
+* ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION_TEN_MINS
+
+
+*********************
+*** Enums Removed ***
+*********************
+
+* CAMERA_SETTING_SENSITIVITY_FIRST_PERSON
+* CAMERA_SETTING_SENSITIVITY_THIRD_PERSON
+
+
+* GAMEPAD_SETTING_CAMERA_SENSITIVITY
+
+
+* LOGIN_STATUS_OVERFLOW_KICK_WAITING
+* LOGIN_STATUS_OVERFLOW_WAITING
+
+
+
+*********************
+*** Enums Changed ***
+*********************
+
+ItemSetSuppressionType (ITEM_SET_) changed to ItemBonusSuppressionType (ITEM_BONUS_)
+h5. ItemBonusSuppressionType
+* ITEM_BONUS_SUPPRESSION_TYPE_ABILITY
+* ITEM_BONUS_SUPPRESSION_TYPE_BATTLE_GROUND
+* ITEM_BONUS_SUPPRESSION_TYPE_CAMPAIGN
+* ITEM_BONUS_SUPPRESSION_TYPE_ITEMSET
+* ITEM_BONUS_SUPPRESSION_TYPE_NONE
+
+
+* TUTORIAL_TRIGGER_ENTER_CYRODIIL_CHAMPIONS
+changed to
+* TUTORIAL_TRIGGER_ENTER_VENGEANCE_CAMPAIGN
+
+
+
+***********************
+*** Functions Added ***
+***********************
+
+* GetJournalQuestRewardActiveSpectacleEventId(*luaindex* _journalQuestIndex_, *luaindex* _rewardIndex_)
+** _Returns:_ *integer* _activeSpectacleEventId_
+
+* CanAcceptActiveSpectacleEventQuest(*integer* _activeSpectacleEventId_)
+** _Returns:_ *bool* _canAcceptQuest_
+
+* GetNumActiveSpectacleEvents()
+** _Returns:_ *integer* _numActiveSpectacleEvents_
+
+* GetActiveSpectacleEventId(*luaindex* _activeSpectacleEventIndex_)
+** _Returns:_ *integer* _spectacleEventDefId_
+
+* GetActiveSpectacleEventDisplayName(*integer* _activeSpectacleEventId_)
+** _Returns:_ *string* _displayName_
+
+* GetActiveSpectacleEventPhaseInfo(*integer* _activeSpectacleEventId_)
+** _Returns:_ *luaindex* _currentPhase_, *integer* _numPhases_
+
+* GetActiveSpectacleEventPhaseDisplayName(*integer* _activeSpectacleEventId_)
+** _Returns:_ *string* _displayName_
+
+* GetActiveSpectacleEventPhaseDescription(*integer* _activeSpectacleEventId_)
+** _Returns:_ *string* _description_
+
+* GetActiveSpectacleEventPhaseStartedNotificationMessage(*integer* _activeSpectacleEventId_)
+** _Returns:_ *string* _phaseStartedNotificationMessage_
+
+* GetActiveSpectacleEventPhaseEndedNotificationMessage(*integer* _activeSpectacleEventId_)
+** _Returns:_ *string* _phaseEndedNotificationMessage_
+
+* GetActiveSpectacleEventPhaseProgressPercentage(*integer* _activeSpectacleEventId_)
+** _Returns:_ *number* _progressPercentage_
+
+* IsCurrentActiveSpectacleEventPhaseComplete(*integer* _activeSpectacleEventId_)
+** _Returns:_ *bool* _isCurrentPhaseComplete_
+
+* GetSecondsRemainingUntilNextActiveSpectacleEventPhase(*integer* _activeSpectacleEventId_)
+** _Returns:_ *number* _secondsRemaining_
+
+* GetActiveSpectacleEventQuestIndex(*integer* _activeSpectacleEventId_)
+** _Returns:_ *luaindex:nilable* _questIndex_
+
+* RequestBestowActiveSpectacleEventQuest(*integer* _activeSpectacleEventId_)
+
+* GetActiveSpectacleEventIdsForZoneIndex(*luaindex* _zoneIndex_)
+** _Uses variable returns..._
+** _Returns:_ *integer* _activeSpectacleEventId_
+
+* GetActiveSpectacleEventIdsForPOI(*luaindex* _zoneIndex_, *luaindex* _poiIndex_)
+** _Uses variable returns..._
+** _Returns:_ *integer* _activeSpectacleEventId_
+
+* IsActiveSpectacleEventPhaseTransitionEnabled(*integer* _activeSpectacleEventId_)
+** _Returns:_ *bool* _phaseTransitionEnabled_
+
+* GetActiveSpectacleEventLootIconGamepad(*integer* _activeSpectacleEventId_)
+** _Returns:_ *textureName* _lootIcon_
+
+* GetActiveSpectacleEventLootIconKeyboard(*integer* _activeSpectacleEventId_)
+** _Returns:_ *textureName* _lootIcon_
+
+* GetActiveSpectacleEventActivityFinderBackgroundGamepad(*integer* _activeSpectacleEventId_)
+** _Returns:_ *textureName* _backgroundTexture_
+
+* GetActiveSpectacleEventActivityFinderBackgroundKeyboard(*integer* _activeSpectacleEventId_)
+** _Returns:_ *textureName* _backgroundTexture_
+
+* GetActiveSpectacleEventNumFeaturedAchievements(*integer* _activeSpectacleEventId_)
+** _Returns:_ *integer* _numFeaturedAchievements_
+
+* GetActiveSpectacleEventFeaturedAchievementsId(*integer* _activeSpectacleEventId_, *luaindex* _achievementIndex_)
+** _Returns:_ *integer* _achievementId_
+
+* IsCharmAbility(*integer* _abilityId_)
+** _Returns:_ *bool* _isCharmAbility_
+
+* IsInteractVOPlaying()
+** _Returns:_ *bool* _isPlaying_
+
+* ReplayLastInteractVO()
+
+* CanReplayLastInteractVO()
+** _Returns:_ *bool* _canReplay_
+
+* GetItemTraitSuppressionInfo(*[ItemTraitType|#ItemTraitType]* _itemTraitType_)
+** _Returns:_ *[ItemBonusSuppressionType|#ItemBonusSuppressionType]* _suppressionType_, *integer* _refId_
+
+* GetItemEnchantSuppressionInfo()
+** _Returns:_ *[ItemBonusSuppressionType|#ItemBonusSuppressionType]* _suppressionType_, *integer* _refId_
+
+* GetItemBonusSuppressionName(*[ItemBonusSuppressionType|#ItemBonusSuppressionType]* _suppressionType_, *integer* _refId_)
+** _Returns:_ *string* _text_
+
+* ShouldPlayerMinimapBeZoomedIn()
+** _Returns:_ *bool* _zoomIn_
+
+* GetZoneIndexByMapId(*integer* _mapId_)
+** _Returns:_ *luaindex:nilable* _zoneIndex_
+
+* IsCurrentCampaignVengeanceRuleset()
+** _Returns:_ *bool* _isInVengeance_
+
+* IsLFGAccountDisabled()
+** _Returns:_ *bool* _disabled_
+
+* DumpGuildHistoryChunkInformation(*integer:nilable* _guildId_)
+
+* GetDraftedPatronId(*[TributePatronDraftId|#TributePatronDraftId]* _patronDraftId_)
+** _Returns:_ *integer* _patronDefId_
+
+* DoesPlatformSupportFramerateCapInMenus()
+** _Returns:_ *bool* _isFramerateCapSupported_
+
+* DoesPlatformSupportScreenDimAndResolutionDrop()
+** _Returns:_ *bool* _isScreenDimAndResolutionDropSupported_
+
+* DoesPlatformSupportSpatialSound()
+** _Returns:_ *bool* _isSpatialSoundSupported_
+
+* DoesPlatformSupportSpatialSoundQuality()
+** _Returns:_ *bool* _isSpatialSoundQualitySupported_
+
+* CanRerollCurrentBuffSelectorOptions()
+** _Returns:_ *bool* _canRerollBuffs_
+
+* GetEndlessDungeonBuffSelectorRerollCost()
+** _Returns:_ *integer* _rerollCost_
+
+* RerollEndlessDungeonBuffSelection *private* ()
+
+* GetMarketProductUnlockedByAchievementId(*integer* _marketProductId_)
+** _Returns:_ *integer* _achievementId_
+
+* GetMarketProductUnlockedByCollectibleIds(*integer* _marketProductId_)
+** _Uses variable returns..._
+** _Returns:_ *integer* _collectibleIds_
+
+* GetMarketProductUnlockedHelpIndices(*integer* _marketProductId_)
+** _Returns:_ *luaindex:nilable* _helpCategoryIndex_, *luaindex:nilable* _helpIndex_
+
+
+h3. BackdropControl
+* GetCenterTextureFileName()
+** _Returns:_ *string* _filename_
+
+* GetEdgeColor()
+** _Returns:_ *number* _r_, *number* _g_, *number* _b_, *number* _a_
+
+* GetEdgeTextureFileName()
+** _Returns:_ *string* _filename_
+
+* SetCenterTextureFileName(*string* _filename_)
+
+* SetEdgeTextureFileName(*string* _filename_)
+
+
+h3. LineControl
+h3. TextureControl
+* GetTextureCoordsInPixels()
+** _Returns:_ *integer* _left_, *integer* _right_, *integer* _top_, *integer* _bottom_
+
+
+h3. TooltipControl
+* AppendZoneSpectacleTooltip(*integer* _spectacleId_)
+
+
+*************************
+*** Functions Removed ***
+*************************
+
+* GetItemSetSuppressionName(*integer* _itemSetId_)
+** _Returns:_ *string* _text_
+
+* GetMarketProductUnlockedByAchievementInfo(*integer* _marketProductId_)
+** _Returns:_ *integer* _achievementId_, *bool* _hasCompletedAchievement_, *luaindex:nilable* _helpCategoryIndex_, *luaindex:nilable* _helpIndex_
+
+
+
+*************************
+*** Functions Changed ***
+*************************
+
+Added return _mapId_
+* GetMapMouseoverInfo(*number* _normalizedMouseX_, *number* _normalizedMouseY_)
+** _Returns:_ *string* _locationName_, *string* _textureFile_, *number* _textureWidthNormalized_, *number* _textureHeightNormalized_, *number* _textureXOffsetNormalized_, *number* _textureYOffsetNormalized_, *integer* _mapId_
+
+Added arg _mapDisplay_
+* PingMap(*[MapDisplayPinType|#MapDisplayPinType]* _pingType_, *[MapDisplayType|#MapDisplayType]* _mapDisplayType_, *number* _normalizedX_, *number* _normalizedZ_, *object* _mapDisplay_)
+
+Add return _addonTitle_
+* GetForceDisabledAddOnInfo(*luaindex* _disabledAddonIndex_)
+** _Returns:_ *string* _addonName_, *bool* _shouldShowNotification_, *string* _addonTitle_
+
+
+h3. Control
+Added arg _doOnce_
+* RegisterForEvent(*integer* _event_, *function* _callback_, *bool* _doOnce_)
+** _Returns:_ *bool* _success_
+
+
+h3. ScriptEventManager
+Added arg _doOnce_
+* RegisterForEvent(*string* _name_, *integer* _event_, *function* _callback_, *bool* _doOnce_)
+** _Returns:_ *bool* _ret_
+
+
+h3. TooltipControl
+Added arg _lineSpacing_
+* AddLine(*string* _text_, *string* _font_, *number* _r_, *number* _g_, *number* _b_, *[AnchorPosition|#AnchorPosition]* _lineAnchor_, *[ModifyTextType|#ModifyTextType]* _modifyTextType_, *[TextAlignment|#TextAlignment]* _textAlignment_, *bool* _setToFullSize_, *number* _minWidth_, *layout_measurement* _lineSpacing_)
+Added arg _displayFlags_
+* SetBagItem(*[Bag|#Bag]* _bagIndex_, *integer* _slotIndex_, *[ItemTooltipDisplayFlags|#ItemTooltipDisplayFlags]* _displayFlags_)
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_ENDLESS_DUNGEON_BUFF_SELECTOR_REROLL_FAILED (*[EndlessDungeonBuffSelectorRerollError|#EndlessDungeonBuffSelectorRerollError]* _errorReason_)
+
+* EVENT_SPECTACLE_EVENT_UPDATED (*integer* _spectacleId_)
+
+* EVENT_ADDONS_DISABLED_STATE_CHANGED (*bool* _forceDisabled_)
+
+* EVENT_INTERACT_VO_PLAYING_STATE_UPDATED
+
+
+
+*****************
+*** XML Added ***
+*****************
+
+
+h5. OnLabelTextChanged
+* [Inherits: OnSetControlEventHandler|#OnSetControlEventHandler]
+* ScriptArguments: local label = ...
+
+h5. OnLabelUserAreaCreated
+* [Inherits: OnSetControlEventHandler|#OnSetControlEventHandler]
+* ScriptArguments: local label, areaData, areaText, unscaledLeft, unscaledRight, unscaledTop, unscaledBottom, continuation = ...
+
+h5. Tooltip
+* [Child: OnLabelTextChanged|#OnLabelTextChanged]
+* [Child: OnLabelUserAreaCreated|#OnLabelUserAreaCreated]

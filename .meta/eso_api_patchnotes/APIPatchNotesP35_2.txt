@@ -1,0 +1,32 @@
+******************
+***Enums Added ***
+******************
+
+* TRIBUTE_MATCH_EVENT_SELF_IN_MATCH
+* TRIBUTE_MATCH_EVENT_TARGET_IN_MATCH
+
+
+* INTERACT_TARGET_TYPE_TRIBUTE
+
+
+
+h5. TributeCardPile
+* TRIBUTE_CARD_PILE_BOARD_ACTION
+* TRIBUTE_CARD_PILE_BOARD_AGENT
+* TRIBUTE_CARD_PILE_COOLDOWN
+* TRIBUTE_CARD_PILE_DECK
+* TRIBUTE_CARD_PILE_DOCKS
+* TRIBUTE_CARD_PILE_DOCKS_DECK
+* TRIBUTE_CARD_PILE_DOCKS_DISCARD
+* TRIBUTE_CARD_PILE_HAND
+* TRIBUTE_CARD_PILE_PERM_REMOVED
+
+
+
+**********************
+***Functions Changed ***
+**********************
+
+Added _showLore_
+h3. TooltipControl
+* SetTributePatron(*integer* _patronId_, *bool* _highlightActiveFavorState_, *bool* _suppressNotCollectibleWarning_, *bool* _showAcquireHint_, *bool* _showLore_)

@@ -222,7 +222,7 @@ function UnitFrames.CreateSettings()
         setFunc = function (value)
             local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
             accountWideSettings.snapToGrid_unitFrames = value
-            local gridSize = accountWideSettings.snapToGridSize_unitFrames or 15
+            local gridSize = accountWideSettings.snapToGridSize_default or 15
             GridOverlay.Refresh("unitFrames", g_FramesMovingEnabled and value, gridSize)
         end,
         width = "half",
@@ -238,11 +238,11 @@ function UnitFrames.CreateSettings()
         max = 100,
         step = 5,
         getFunc = function ()
-            return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_unitFrames or 15
+            return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_default or 15
         end,
         setFunc = function (value)
             local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
-            accountWideSettings.snapToGridSize_unitFrames = value
+            accountWideSettings.snapToGridSize_default = value
             GridOverlay.Refresh("unitFrames", g_FramesMovingEnabled and accountWideSettings.snapToGrid_unitFrames, value)
         end,
         width = "half",

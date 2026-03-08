@@ -9,14 +9,235 @@ local GetString = GetString
 local LUIE = LUIE
 
 -- SpellCastBuffs namespace
---- @class (partial) LUIE.SpellCastBuffs
+--- @class (partial) SpellCastBuffs : ZO_Object
+--- @field moduleName string
+--- @field Enabled boolean
+--- @field SV SCBDefaults
+--- @field EffectsList table<SpellCastBuffsContext, table>
+--- @field hidePlayerEffects table
+--- @field hideTargetEffects table
+--- @field debuffDisplayOverrideId table
+--- @field windowTitles table<string, string>
+--- @field containerRouting table<string, string>
+--- @field alignmentDirection table<string, string>
+--- @field sortDirection table<string, string>
+--- @field playerActive boolean
+--- @field playerDead boolean
+--- @field playerResurrectStage number?
+--- @field buffsFont string
+--- @field prominentFont string
+--- @field padding number
+--- @field protectAbilityRemoval table
+--- @field ignoreAbilityId table
+--- @field BuffContainers table<string, any>
+--- @field currentDisguise number
+--- @field werewolfName string
+--- @field werewolfIcon string
+--- @field werewolfId number
+--- @field werewolfCounter number
+--- @field werewolfQuest number
+--- @field InternalStackCounter table
 local SpellCastBuffs = ZO_Object:Subclass()
---- @class (partial) LUIE.SpellCastBuffs
-LUIE.SpellCastBuffs = SpellCastBuffs
+
+------------------------------------------------
+-- DEFAULT VARIABLE TYPES (SV / Defaults) ------
+------------------------------------------------
+
+--- RGBA color tuple (0-1). Used for buff/debuff/CC colors.
+--- @alias SCB_Color number[]
+
+--- Nested color table for buff, debuff, priority, CC, etc.
+--- @class SCBColors
+--- @field buff SCB_Color
+--- @field debuff SCB_Color
+--- @field prioritybuff SCB_Color
+--- @field prioritydebuff SCB_Color
+--- @field unbreakable SCB_Color
+--- @field cosmetic SCB_Color
+--- @field nocc SCB_Color
+--- @field stun SCB_Color
+--- @field knockback SCB_Color
+--- @field levitate SCB_Color
+--- @field disorient SCB_Color
+--- @field fear SCB_Color
+--- @field charm SCB_Color
+--- @field silence SCB_Color
+--- @field stagger SCB_Color
+--- @field snare SCB_Color
+--- @field root SCB_Color
+
+--- Root default settings for SpellCastBuffs (SV and Defaults share this shape).
+--- @class SCBDefaults
+--- @field ColorCosmetic boolean
+--- @field ColorUnbreakable boolean
+--- @field ColorCC boolean
+--- @field colors SCBColors
+--- @field IconSize number
+--- @field LabelPosition number
+--- @field BuffFontFace string
+--- @field BuffFontStyle FontStyle
+--- @field BuffFontSize number
+--- @field BuffShowLabel boolean
+--- @field AlignmentBuffsPlayer string
+--- @field SortBuffsPlayer string
+--- @field AlignmentDebuffsPlayer string
+--- @field SortDebuffsPlayer string
+--- @field AlignmentBuffsTarget string
+--- @field SortBuffsTarget string
+--- @field AlignmentDebuffsTarget string
+--- @field SortDebuffsTarget string
+--- @field AlignmentLongHorz string
+--- @field SortLongHorz string
+--- @field AlignmentLongVert string
+--- @field SortLongVert string
+--- @field AlignmentPromBuffsHorz string
+--- @field SortPromBuffsHorz string
+--- @field AlignmentPromBuffsVert string
+--- @field SortPromBuffsVert string
+--- @field AlignmentPromDebuffsHorz string
+--- @field SortPromDebuffsHorz string
+--- @field AlignmentPromDebuffsVert string
+--- @field SortPromDebuffsVert string
+--- @field StackPlayerBuffs string
+--- @field StackPlayerDebuffs string
+--- @field StackTargetBuffs string
+--- @field StackTargetDebuffs string
+--- @field WidthPlayerBuffs number
+--- @field WidthPlayerDebuffs number
+--- @field WidthTargetBuffs number
+--- @field WidthTargetDebuffs number
+--- @field GlowIcons boolean
+--- @field RemainingText boolean
+--- @field RemainingTextColoured boolean
+--- @field RemainingTextMillis boolean
+--- @field RemainingCooldown boolean
+--- @field FadeOutIcons boolean
+--- @field lockPositionToUnitFrames boolean
+--- @field LongTermEffects_Player boolean
+--- @field LongTermEffects_Target boolean
+--- @field ShortTermEffects_Player boolean
+--- @field ShortTermEffects_Target boolean
+--- @field IgnoreMundusPlayer boolean
+--- @field IgnoreMundusTarget boolean
+--- @field IgnoreVampPlayer boolean
+--- @field IgnoreVampTarget boolean
+--- @field IgnoreLycanPlayer boolean
+--- @field IgnoreLycanTarget boolean
+--- @field IgnoreDiseasePlayer boolean
+--- @field IgnoreDiseaseTarget boolean
+--- @field IgnoreBitePlayer boolean
+--- @field IgnoreBiteTarget boolean
+--- @field IgnoreCyrodiilPlayer boolean
+--- @field IgnoreCyrodiilTarget boolean
+--- @field IgnoreBattleSpiritPlayer boolean
+--- @field IgnoreBattleSpiritTarget boolean
+--- @field IgnoreEsoPlusPlayer boolean
+--- @field IgnoreEsoPlusTarget boolean
+--- @field IgnoreSoulSummonsPlayer boolean
+--- @field IgnoreSoulSummonsTarget boolean
+--- @field IgnoreSetICDPlayer boolean
+--- @field IgnoreAbilityICDPlayer boolean
+--- @field IgnoreFoodPlayer boolean
+--- @field IgnoreFoodTarget boolean
+--- @field IgnoreExperiencePlayer boolean
+--- @field IgnoreExperienceTarget boolean
+--- @field IgnoreAllianceXPPlayer boolean
+--- @field IgnoreAllianceXPTarget boolean
+--- @field IgnoreDisguise boolean
+--- @field IgnoreCostume boolean
+--- @field IgnoreHat boolean
+--- @field IgnoreSkin boolean
+--- @field IgnorePolymorph boolean
+--- @field IgnoreAssistant boolean
+--- @field IgnorePet boolean
+--- @field PetDetail boolean
+--- @field IgnoreMountPlayer boolean
+--- @field IgnoreMountTarget boolean
+--- @field MountDetail boolean
+--- @field LongTermEffectsSeparate boolean
+--- @field LongTermEffectsSeparateAlignment number
+--- @field ShowBlockPlayer boolean
+--- @field ShowBlockTarget boolean
+--- @field StealthStatePlayer boolean
+--- @field StealthStateTarget boolean
+--- @field DisguiseStatePlayer boolean
+--- @field DisguiseStateTarget boolean
+--- @field ShowResurrectionImmunity boolean
+--- @field ShowRecall boolean
+--- @field ShowWerewolf boolean
+--- @field HideOakenSoul boolean
+--- @field HidePlayerBuffs boolean
+--- @field HidePlayerDebuffs boolean
+--- @field HideTargetBuffs boolean
+--- @field HideTargetDebuffs boolean
+--- @field HideGroundEffects boolean
+--- @field ExtraBuffs boolean
+--- @field ExtraExpanded boolean
+--- @field ShowDebugCombat boolean
+--- @field ShowDebugEffect boolean
+--- @field ShowDebugFilter boolean
+--- @field ShowDebugAbilityId boolean
+--- @field HideReduce boolean
+--- @field GroundDamageAura boolean
+--- @field ProminentLabel boolean
+--- @field ProminentLabelFontFace string
+--- @field ProminentLabelFontStyle FontStyle
+--- @field ProminentLabelFontSize number
+--- @field ProminentProgress boolean
+--- @field ProminentProgressTexture string
+--- @field ProminentProgressBuffC1 SCB_Color
+--- @field ProminentProgressBuffC2 SCB_Color
+--- @field ProminentProgressDebuffC1 SCB_Color
+--- @field ProminentProgressDebuffC2 SCB_Color
+--- @field ProminentProgressBuffPriorityC1 SCB_Color
+--- @field ProminentProgressBuffPriorityC2 SCB_Color
+--- @field ProminentProgressDebuffPriorityC1 SCB_Color
+--- @field ProminentProgressDebuffPriorityC2 SCB_Color
+--- @field ProminentBuffContainerAlignment number
+--- @field ProminentDebuffContainerAlignment number
+--- @field ProminentBuffLabelDirection string
+--- @field ProminentDebuffLabelDirection string
+--- @field PriorityBuffTable table
+--- @field PriorityDebuffTable table
+--- @field PromBuffTable table
+--- @field PromDebuffTable table
+--- @field BlacklistTable table
+--- @field WhitelistTable table
+--- @field ListMode string
+--- @field TooltipEnable boolean
+--- @field TooltipCustom boolean
+--- @field TooltipSticky number
+--- @field TooltipAbilityId boolean
+--- @field TooltipBuffType boolean
+--- @field UseDefaultIcon boolean
+--- @field DefaultIconOptions number
+--- @field ShowSharedEffects boolean
+--- @field ShowSharedMajorMinor boolean
+--- @field playerbOffsetX number|nil
+--- @field playerbOffsetY number|nil
+--- @field playerdOffsetX number|nil
+--- @field playerdOffsetY number|nil
+--- @field targetbOffsetX number|nil
+--- @field targetbOffsetY number|nil
+--- @field targetdOffsetX number|nil
+--- @field targetdOffsetY number|nil
+--- @field playerVOffsetX number|nil
+--- @field playerVOffsetY number|nil
+--- @field playerHOffsetX number|nil
+--- @field playerHOffsetY number|nil
+--- @field prominentbVOffsetX number|nil
+--- @field prominentbVOffsetY number|nil
+--- @field prominentbHOffsetX number|nil
+--- @field prominentbHOffsetY number|nil
+--- @field prominentdVOffsetX number|nil
+--- @field prominentdVOffsetY number|nil
+--- @field prominentdHOffsetX number|nil
+--- @field prominentdHOffsetY number|nil
 
 SpellCastBuffs.moduleName = LUIE.name .. "SpellCastBuffs"
 
 SpellCastBuffs.Enabled = false
+--- @type SCBDefaults
 SpellCastBuffs.Defaults =
 {
     ColorCosmetic = true,
@@ -185,8 +406,29 @@ SpellCastBuffs.Defaults =
     DefaultIconOptions = 1,
     ShowSharedEffects = true,
     ShowSharedMajorMinor = true,
+    playerbOffsetX = nil,
+    playerbOffsetY = nil,
+    playerdOffsetX = nil,
+    playerdOffsetY = nil,
+    targetbOffsetX = nil,
+    targetbOffsetY = nil,
+    targetdOffsetX = nil,
+    targetdOffsetY = nil,
+    playerVOffsetX = nil,
+    playerVOffsetY = nil,
+    playerHOffsetX = nil,
+    playerHOffsetY = nil,
+    prominentbVOffsetX = nil,
+    prominentbVOffsetY = nil,
+    prominentbHOffsetX = nil,
+    prominentbHOffsetY = nil,
+    prominentdVOffsetX = nil,
+    prominentdVOffsetY = nil,
+    prominentdHOffsetX = nil,
+    prominentdHOffsetY = nil,
 }
-SpellCastBuffs.SV = {}
+--- @type SCBDefaults
+SpellCastBuffs.SV = ...
 
 --- @alias SpellCastBuffsContext string
 --- | `"player1"`
@@ -205,6 +447,7 @@ SpellCastBuffs.SV = {}
 --- | `"targetd"`
 
 -- Saved Effects
+--- @type table<SpellCastBuffsContext, table>
 SpellCastBuffs.EffectsList =
 {
     player1 = {},
@@ -222,10 +465,11 @@ SpellCastBuffs.EffectsList =
 }
 
 
-SpellCastBuffs.hidePlayerEffects = {}       -- Table of Effects to hide on Player - generated on load or updated from Menu
-SpellCastBuffs.hideTargetEffects = {}       -- Table of Effects to hide on Target - generated on load or updated from Menu
-SpellCastBuffs.debuffDisplayOverrideId = {} -- Table of Effects (by id) that should show on the target regardless of who applied them.
+SpellCastBuffs.hidePlayerEffects = {}       --- @type table Table of Effects to hide on Player - generated on load or updated from Menu
+SpellCastBuffs.hideTargetEffects = {}       --- @type table Table of Effects to hide on Target - generated on load or updated from Menu
+SpellCastBuffs.debuffDisplayOverrideId = {} --- @type table Table of Effects (by id) that should show on the target regardless of who applied them.
 
+--- @type table<string, string>
 SpellCastBuffs.windowTitles =
 {
     playerb = GetString(LUIE_STRING_SCB_WINDOWTITLE_PLAYERBUFFS),
@@ -241,21 +485,36 @@ SpellCastBuffs.windowTitles =
     prominentdebuffs = GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS),
 }
 
----@generic K, V
----@class SpellCastBuffs_EffectsList_Control : Control
----@field icons { [K]: SpellCastBuffs_EffectsList_Control }
+--- @generic K, V
+--- Buff icon control (single aura icon); extends Control with effect data for tooltips/right-click.
+--- @class SpellCastBuffs_BuffIcon_Control : Control
+--- @field effectId number?
+--- @field effectName string?
+--- @field buffSlot number?
+--- @field [any] any
 
----@class SpellCastBuffs_EffectsList : Control
----@field [string] {iconHolder:Control}|SpellCastBuffs_EffectsList_Control
+--- Container control or table: TopLevel/Control with optional iconHolder, icons, preview, alignVertical, etc.
+--- Used for both SpellCastBuffs-created containers and UnitFrames-provided controls (player1, player2, target1, target2).
+--- @class SpellCastBuffs_EffectsList_Control : Control
+--- @field icons table<number, SpellCastBuffs_BuffIcon_Control>?
+--- @field iconHolder Control?
+--- @field preview Control?
+--- @field alignVertical boolean?
+--- @field previewLabel Control?
+--- @field skipUpdate number?
+--- @field [any] any
 
----@type SpellCastBuffs_EffectsList
+--- BuffContainers value: our container Control, UnitFrames Control, or table. Accepts any so assignment from
+--- LUIE.UnitFrames.CustomFrames.player.buffs (Control) and field access (.iconHolder, .preview, etc.) both type-check.
+--- @type table<string, any>
 local uiTlw = {} -- GUI
 
 -- Routing for Auras
+--- @type table<string, string>
 SpellCastBuffs.containerRouting = {}
 
-SpellCastBuffs.alignmentDirection = {}    -- Holds alignment direction for all containers
-SpellCastBuffs.sortDirection = {}         -- Holds sorting direction for all containers
+SpellCastBuffs.alignmentDirection = {}    --- @type table<string, string> Holds alignment direction for all containers
+SpellCastBuffs.sortDirection = {}         --- @type table<string, string> Holds sorting direction for all containers
 
 SpellCastBuffs.playerActive = false       -- Player Active State
 SpellCastBuffs.playerDead = false         -- Player Dead State
@@ -270,17 +529,19 @@ SpellCastBuffs.ignoreAbilityId = {}       -- Ignored abilityId's on EVENT_COMBAT
 -- Add buff containers into LUIE namespace
 SpellCastBuffs.BuffContainers = uiTlw
 
--- Stealth Varaiables
--- Handles long term Disguise Item Icon (appears when wearing a disguise even if not in a disguised state)
+-- Stealth Variables
 SpellCastBuffs.currentDisguise = 0
 
--- Werewolf Varaiables
-SpellCastBuffs.werewolfName = ""   -- Name for current Werewolf Transformation morph
-SpellCastBuffs.werewolfIcon = ""   -- Icon for current Werewolf Transformation morph
-SpellCastBuffs.werewolfId = 0      -- AbilityId for Werewolf Transformation morph
-SpellCastBuffs.werewolfCounter = 0 -- Counter for Werewolf transformation events
-SpellCastBuffs.werewolfQuest = 0   -- Counter for Werewolf transformation events (Quest)
+-- Werewolf Variables
+SpellCastBuffs.werewolfName = ""   --- @type string
+SpellCastBuffs.werewolfIcon = ""   --- @type string
+SpellCastBuffs.werewolfId = 0      --- @type number
+SpellCastBuffs.werewolfCounter = 0 --- @type number
+SpellCastBuffs.werewolfQuest = 0   --- @type number
 
 -- Counter variable for ACTION_RESULT_EFFECT_GAINED / ACTION_RESULT_EFFECT_FADED tracking for some buffs that are broken
--- Handles buffs that rather than refreshing on reapplication create an individual instance and therefore have GAINED/FADED events every single time the effect ticks.
+--- @type table
 SpellCastBuffs.InternalStackCounter = {}
+
+--- @class (partial) LUIE.SpellCastBuffs : SpellCastBuffs
+LUIE.SpellCastBuffs = SpellCastBuffs:New()

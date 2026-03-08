@@ -1,0 +1,73 @@
+*******************
+*** Enums Added ***
+*******************
+
+h5. PlatformDialogResult
+* PLATFORM_DIALOG_RESULT_CLOSED_FROM_CODE
+* PLATFORM_DIALOG_RESULT_ERROR
+* PLATFORM_DIALOG_RESULT_OK
+* PLATFORM_DIALOG_RESULT_USER_CANCELED
+
+
+h5. BattlegroundResult
+* BATTLEGROUND_RESULT_INVALID
+* BATTLEGROUND_RESULT_LOSS
+* BATTLEGROUND_RESULT_TIE
+* BATTLEGROUND_RESULT_WIN
+
+
+* ACTIVITY_QUEUE_RESULT_ACTIVITY_DISABLED
+* ACTIVITY_QUEUE_RESULT_REMOVED_FROM_DISABLED_ACTIVITY
+
+
+
+***********************
+*** Globals Removed ***
+***********************
+
+* ZO_DEFAULT_LANGUAGE_SETTING_VALUE
+
+
+
+***********************
+*** Functions Added ***
+***********************
+
+* ShouldShowLeaderboardForBattlegroundLeaderboardType(*[BattlegroundLeaderboardType|#BattlegroundLeaderboardType]* _battlegroundLeaderboardType_)
+** _Returns:_ *bool* _shouldShow_
+
+
+* GetBattlegroundResultForTeam(*[BattlegroundTeam|#BattlegroundTeam]* _battlegroundTeam_)
+** _Returns:_ *[BattlegroundResult|#BattlegroundResult]* _result_
+
+
+* GetScoreboardLocalPlayerEntryIndex(*luaindex:nilable* _roundIndex_)
+** _Returns:_ *luaindex* _playerIndex_
+
+
+* IsLFGActivitySetDisabled(*integer* _activitySetId_)
+** _Returns:_ *bool* _disabled_
+
+
+* IsLFGActivityDisabled(*integer* _activityId_)
+** _Returns:_ *bool* _disabled_
+
+
+
+*************************
+*** Functions Removed ***
+*************************
+
+* GetScoreboardPlayerEntryIndex(*luaindex* _roundIndex_)
+** _Returns:_ *luaindex* _playerIndex_
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_BATTLEGROUND_MMR_LOSS_REDUCED (*[BattlegroundMMRBonusType|#BattlegroundMMRBonusType]* _reductionReason_)
+
+
+* EVENT_DISABLED_ACTIVITIES_UPDATE
