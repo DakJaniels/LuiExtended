@@ -12,6 +12,17 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.0.1
+    "|cFFA500LuiExtended Version 7.2.0.1|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: option to keep the custom target frame visible in cursor mode; when the reticle target is cleared (e.g. opening inventory or map), the frame and its SpellCastBuffs target icons can linger with the last target's data. Optional auto-clear after 5–30 seconds (or never).",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: custom player and target frame bar width slider max increased from 500 to 1000.",
+    "",
     -- Version Header 7.2.0.0
     "|cFFA500LuiExtended Version 7.2.0.0|r",
     "",
