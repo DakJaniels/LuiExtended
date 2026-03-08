@@ -513,6 +513,8 @@ function InfoPanel.CreateConsoleSettings()
                 Settings.HideInCombat = value
                 if not value then
                     InfoPanel.CancelCombatHideAndShow()
+                else
+                    InfoPanel.OnPlayerCombatState(IsUnitInCombat("player"))
                 end
             end,
             disable = function ()

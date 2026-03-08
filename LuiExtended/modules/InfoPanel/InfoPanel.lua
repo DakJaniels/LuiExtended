@@ -493,15 +493,17 @@ function InfoPanel.Initialize(enabled)
     eventManager:RegisterForUpdate(moduleName .. "10", ZO_ONE_SECOND_IN_MILLISECONDS * 10, InfoPanel.OnUpdate10)
     eventManager:RegisterForUpdate(moduleName .. "60", ZO_ONE_MINUTE_IN_MILLISECONDS, InfoPanel.OnUpdate60)
 
-    -- Initial combat state only when Hide in combat is enabled (otherwise leave panel as RearrangePanel/ApplyTransparency left it)
-    if InfoPanel.SV.HideInCombat then
-        eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_COMBAT_STATE, function (eventId, inCombat)
-            InfoPanel.OnPlayerCombatState(inCombat)
-        end)
-    else
+    -- Combat state: always register so enabling HideInCombat in settings later works. Handler checks HideInCombat.
+    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_COMBAT_STATE, function (eventId, inCombat)
+        InfoPanel.OnPlayerCombatState(inCombat)
+    end)
+    if not InfoPanel.SV.HideInCombat then
         -- XML defaults to hidden="true"; ensure panel is visible when option is off
         uiPanel:SetHidden(false)
         InfoPanel.ApplyTransparency()
+    else
+        -- Sync initial visibility when option is on (e.g. show panel if not in combat)
+        InfoPanel.OnPlayerCombatState(IsUnitInCombat("player"))
     end
 end
 

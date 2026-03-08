@@ -346,6 +346,8 @@ function InfoPanel.CreateSettings()
             Settings.HideInCombat = value
             if not value then
                 InfoPanel.CancelCombatHideAndShow()
+            else
+                InfoPanel.OnPlayerCombatState(IsUnitInCombat("player"))
             end
         end,
         "full",
