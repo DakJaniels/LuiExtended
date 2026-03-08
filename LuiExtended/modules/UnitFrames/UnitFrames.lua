@@ -666,6 +666,7 @@ function UnitFrames.OnPlayerActivated(eventId, initial)
     -- We need to call this here to clear companion/pet unit frames when entering houses/instances as they are not destroyed
     UnitFrames.CompanionUpdate()
     UnitFrames.CustomPetUpdate()
+    UnitFrames.UpdatePlayerFrameDeathVisibility()
 end
 
 function UnitFrames.CustomFramesUnreferencePetControl(first)
@@ -1553,6 +1554,18 @@ function UnitFrames.OnGroupMemberChange(eventCode, memberName)
                    end, 200)
 end
 
+-- Updates custom player frame visibility based on HidePlayerFrameOnDeath and current death state.
+function UnitFrames.UpdatePlayerFrameDeathVisibility()
+    if not UnitFrames.CustomFrames["player"] then
+        return
+    end
+    if UnitFrames.SV.HidePlayerFrameOnDeath then
+        UnitFrames.CustomFrames["player"].control:SetHidden(IsUnitDead("player"))
+    else
+        UnitFrames.CustomFrames["player"].control:SetHidden(false)
+    end
+end
+
 -- Runs on the EVENT_UNIT_DEATH_STATE_CHANGED listener.
 -- This handler fires every time a valid unitTag dies or is resurrected
 function UnitFrames.OnDeath(eventCode, unitTag, isDead)
@@ -1579,6 +1592,10 @@ function UnitFrames.OnDeath(eventCode, unitTag, isDead)
                 end
             end
         end
+    end
+
+    if unitTag == "player" then
+        UnitFrames.UpdatePlayerFrameDeathVisibility()
     end
 end
 

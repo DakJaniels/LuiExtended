@@ -814,6 +814,24 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_HIDE_PLAYER_FRAME_DEATH),
+            tooltip = GetString(LUIE_STRING_LAM_UF_HIDE_PLAYER_FRAME_DEATH_TP),
+            getFunction = function ()
+                return Settings.HidePlayerFrameOnDeath
+            end,
+            setFunction = function (value)
+                Settings.HidePlayerFrameOnDeath = value
+                UnitFrames.UpdatePlayerFrameDeathVisibility()
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+            end,
+            default = Defaults.HidePlayerFrameOnDeath,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_CURSOR),
             tooltip = GetString(LUIE_STRING_LAM_UF_TARGET_LINGER_CURSOR_TP),
             getFunction = function ()

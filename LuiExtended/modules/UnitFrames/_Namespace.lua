@@ -81,6 +81,7 @@ UnitFrames.Enabled = false
 UnitFrames.Defaults =
 {
     QuickHideDead = false,
+    HidePlayerFrameOnDeath = false,
     TargetLingerInCursorMode = false,
     TargetLingerDuration = 10,
     ShortenNumbers = false,
