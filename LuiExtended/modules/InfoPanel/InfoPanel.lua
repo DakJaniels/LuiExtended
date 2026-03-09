@@ -375,9 +375,10 @@ function InfoPanel.Initialize(enabled)
     end
 
     -- Migrate old string-based font styles to numeric constants (run once)
-    if not LUIE.IsMigrationDone("infopanel_fontstyles") then
+    -- Migrate font style (string/display/nil -> valid 0-7); run once per account
+    if not LUIE.IsMigrationDone("infopanel_fontstyles_v2") then
         InfoPanel.SV.FontStyle = LUIE.MigrateFontStyle(InfoPanel.SV.FontStyle)
-        LUIE.MarkMigrationDone("infopanel_fontstyles")
+        LUIE.MarkMigrationDone("infopanel_fontstyles_v2")
     end
 
     -- Disable module if setting not toggled on
@@ -411,7 +412,7 @@ function InfoPanel.Initialize(enabled)
     end
     local fontStyle = InfoPanel.SV.FontStyle
     local fontSize = (InfoPanel.SV.FontSize and InfoPanel.SV.FontSize > 0) and InfoPanel.SV.FontSize or 16
-    g_infoPanelFont = ZO_CreateFontString(fontName, fontSize, fontStyle)
+    g_infoPanelFont = LUIE.CreateFontString(fontName, fontSize, fontStyle)
 
     -- Top Row Controls
     uiLatency.control = LUIE_InfoPanel_TopRow_Latency

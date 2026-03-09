@@ -165,10 +165,11 @@ function UnitFrames.Initialize(enabled)
     end
 
     -- Migrate old string-based font styles to numeric constants (run once)
-    if not LUIE.IsMigrationDone("unitframes_fontstyles") then
+    -- Migrate font styles (string/display/nil -> valid 0-7); run once per account
+    if not LUIE.IsMigrationDone("unitframes_fontstyles_v2") then
         UnitFrames.SV.DefaultFontStyle = LUIE.MigrateFontStyle(UnitFrames.SV.DefaultFontStyle)
         UnitFrames.SV.CustomFontStyle = LUIE.MigrateFontStyle(UnitFrames.SV.CustomFontStyle)
-        LUIE.MarkMigrationDone("unitframes_fontstyles")
+        LUIE.MarkMigrationDone("unitframes_fontstyles_v2")
     end
 
     if UnitFrames.SV.DefaultOocTransparency < 0 or UnitFrames.SV.DefaultOocTransparency > 100 then

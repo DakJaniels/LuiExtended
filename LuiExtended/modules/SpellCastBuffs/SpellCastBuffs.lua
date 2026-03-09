@@ -254,10 +254,11 @@ function SpellCastBuffs.Initialize(enabled)
     end
 
     -- Migrate old string-based font styles to numeric constants (run once)
-    if not LUIE.IsMigrationDone("spellcastbuffs_fontstyles") then
+    -- Migrate font styles (string/display/nil -> valid 0-7); run once per account
+    if not LUIE.IsMigrationDone("spellcastbuffs_fontstyles_v2") then
         SpellCastBuffs.SV.BuffFontStyle = LUIE.MigrateFontStyle(SpellCastBuffs.SV.BuffFontStyle)
         SpellCastBuffs.SV.ProminentLabelFontStyle = LUIE.MigrateFontStyle(SpellCastBuffs.SV.ProminentLabelFontStyle)
-        LUIE.MarkMigrationDone("spellcastbuffs_fontstyles")
+        LUIE.MarkMigrationDone("spellcastbuffs_fontstyles_v2")
     end
 
     -- Correct read values
@@ -1682,7 +1683,7 @@ function SpellCastBuffs.ApplyFont()
     end
     local fontStyle = SpellCastBuffs.SV.BuffFontStyle
     local fontSize = (SpellCastBuffs.SV.BuffFontSize and SpellCastBuffs.SV.BuffFontSize > 0) and SpellCastBuffs.SV.BuffFontSize or 17
-    SpellCastBuffs.buffsFont = ZO_CreateFontString(fontName, fontSize, fontStyle)
+    SpellCastBuffs.buffsFont = LUIE.CreateFontString(fontName, fontSize, fontStyle)
 
     -- Font Setup for Prominent Buffs & Debuffs
     local prominentName = LUIE.Fonts[SpellCastBuffs.SV.ProminentLabelFontFace]
@@ -1692,7 +1693,7 @@ function SpellCastBuffs.ApplyFont()
     end
     local prominentStyle = SpellCastBuffs.SV.ProminentLabelFontStyle
     local prominentSize = (SpellCastBuffs.SV.ProminentLabelFontSize and SpellCastBuffs.SV.ProminentLabelFontSize > 0) and SpellCastBuffs.SV.ProminentLabelFontSize or 17
-    SpellCastBuffs.prominentFont = ZO_CreateFontString(prominentName, prominentSize, prominentStyle)
+    SpellCastBuffs.prominentFont = LUIE.CreateFontString(prominentName, prominentSize, prominentStyle)
 
     local needs_reset = {}
     -- And reset sizes of already existing icons

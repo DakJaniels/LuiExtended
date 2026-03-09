@@ -257,9 +257,10 @@ function CombatText.Initialize(enabled)
     end
 
     -- Migrate old string-based font styles to numeric constants (run once)
-    if not LUIE.IsMigrationDone("combattext_fontstyles") then
+    -- Migrate font style (string/display/nil -> valid 0-7); run once per account
+    if not LUIE.IsMigrationDone("combattext_fontstyles_v2") then
         CombatText.SV.fontStyle = LUIE.MigrateFontStyle(CombatText.SV.fontStyle)
-        LUIE.MarkMigrationDone("combattext_fontstyles")
+        LUIE.MarkMigrationDone("combattext_fontstyles_v2")
     end
 
     -- Disable module if setting not toggled on

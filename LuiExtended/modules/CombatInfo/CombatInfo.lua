@@ -138,12 +138,13 @@ function CombatInfo.Initialize(enabled)
         CombatInfo.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "CombatInfo", CombatInfo.Defaults)
     end
 
-    if not LUIE.IsMigrationDone("combatinfo_fontstyles") then
+    -- Migrate font styles (string/display/nil -> valid 0-7); run once per account
+    if not LUIE.IsMigrationDone("combatinfo_fontstyles_v2") then
         CombatInfo.SV.CastBarFontStyle = LUIE.MigrateFontStyle(CombatInfo.SV.CastBarFontStyle)
         if CombatInfo.SV.alerts and CombatInfo.SV.alerts.toggles then
             CombatInfo.SV.alerts.toggles.alertFontStyle = LUIE.MigrateFontStyle(CombatInfo.SV.alerts.toggles.alertFontStyle)
         end
-        LUIE.MarkMigrationDone("combatinfo_fontstyles")
+        LUIE.MarkMigrationDone("combatinfo_fontstyles_v2")
     end
 
     if not enabled then
