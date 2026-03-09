@@ -375,9 +375,10 @@ function InfoPanel.Initialize(enabled)
     end
 
     -- Migrate old string-based font styles to numeric constants (run once)
-    if not LUIE.IsMigrationDone("infopanel_fontstyles") then
+    -- Migrate font style (string/display/nil -> valid 0-7); run once per account
+    if not LUIE.IsMigrationDone("infopanel_fontstyles_v2") then
         InfoPanel.SV.FontStyle = LUIE.MigrateFontStyle(InfoPanel.SV.FontStyle)
-        LUIE.MarkMigrationDone("infopanel_fontstyles")
+        LUIE.MarkMigrationDone("infopanel_fontstyles_v2")
     end
 
     -- Disable module if setting not toggled on

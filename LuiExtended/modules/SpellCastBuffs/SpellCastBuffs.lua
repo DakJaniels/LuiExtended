@@ -254,10 +254,11 @@ function SpellCastBuffs.Initialize(enabled)
     end
 
     -- Migrate old string-based font styles to numeric constants (run once)
-    if not LUIE.IsMigrationDone("spellcastbuffs_fontstyles") then
+    -- Migrate font styles (string/display/nil -> valid 0-7); run once per account
+    if not LUIE.IsMigrationDone("spellcastbuffs_fontstyles_v2") then
         SpellCastBuffs.SV.BuffFontStyle = LUIE.MigrateFontStyle(SpellCastBuffs.SV.BuffFontStyle)
         SpellCastBuffs.SV.ProminentLabelFontStyle = LUIE.MigrateFontStyle(SpellCastBuffs.SV.ProminentLabelFontStyle)
-        LUIE.MarkMigrationDone("spellcastbuffs_fontstyles")
+        LUIE.MarkMigrationDone("spellcastbuffs_fontstyles_v2")
     end
 
     -- Correct read values

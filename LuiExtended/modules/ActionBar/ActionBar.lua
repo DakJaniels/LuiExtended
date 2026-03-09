@@ -712,12 +712,13 @@ function ActionBar.Initialize(enabled)
 
     -- -----------------------------------------------------------------------------
     -- Migrate font styles if needed
-    if not LUIE.IsMigrationDone("actionbar_fontstyles") then
+    -- Migrate font styles (string/display/nil -> valid 0-7); run once per account
+    if not LUIE.IsMigrationDone("actionbar_fontstyles_v2") then
         ActionBar.SV.UltimateFontStyle = LUIE.MigrateFontStyle(ActionBar.SV.UltimateFontStyle)
         ActionBar.SV.BarFontStyle = LUIE.MigrateFontStyle(ActionBar.SV.BarFontStyle)
         ActionBar.SV.PotionTimerFontStyle = LUIE.MigrateFontStyle(ActionBar.SV.PotionTimerFontStyle)
         ActionBar.SV.CastBarFontStyle = LUIE.MigrateFontStyle(ActionBar.SV.CastBarFontStyle)
-        LUIE.MarkMigrationDone("actionbar_fontstyles")
+        LUIE.MarkMigrationDone("actionbar_fontstyles_v2")
     end
 
     -- -----------------------------------------------------------------------------
