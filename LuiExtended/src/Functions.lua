@@ -107,9 +107,7 @@ do
     --- @return string Font string
     local function CreateFontString(faceName, size, style)
         local styleConstant = LUIE_FONT_STYLE_DEFAULT
-        if style == nil then
-            styleConstant = LUIE_FONT_STYLE_DEFAULT
-        elseif type(style) == "string" then
+        if type(style) == "string" then
             styleConstant = LUIE_FONT_STYLE_TO_CONSTANT[style] or LUIE_FONT_STYLE_DEFAULT
         elseif type(style) == "number" and style >= 0 and style <= 7 then
             styleConstant = style
