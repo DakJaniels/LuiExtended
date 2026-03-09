@@ -95,29 +95,44 @@ do
         ["|soft-shadow-thick"] = FONT_STYLE_SOFT_SHADOW_THICK,
     }
 
+    -- Default when value is missing, unknown, or out of range (FontStyle must be integer 0-7 per API)
+    local LUIE_FONT_STYLE_DEFAULT = FONT_STYLE_SOFT_SHADOW_THIN
+
     --- Creates a font string using ZOS's ZO_CreateFontString function
-    --- Supports both string-based and numeric font styles for backwards compatibility
+    --- Supports both string-based and numeric font styles for backwards compatibility.
+    --- Ensures the third argument is always a valid FontStyle (integer 0-7).
     --- @param faceName string Font face name
     --- @param size number Font size
     --- @param style string|number|nil Font style (string will be converted to constant)
     --- @return string Font string
     local function CreateFontString(faceName, size, style)
-        local styleConstant = style
-        -- Convert string styles to numeric constants if needed
-        if type(style) == "string" then
-            styleConstant = LUIE_FONT_STYLE_TO_CONSTANT[style]
+        local styleConstant = LUIE_FONT_STYLE_DEFAULT
+        if style == nil then
+            styleConstant = LUIE_FONT_STYLE_DEFAULT
+        elseif type(style) == "string" then
+            styleConstant = LUIE_FONT_STYLE_TO_CONSTANT[style] or LUIE_FONT_STYLE_DEFAULT
+        elseif type(style) == "number" and style >= 0 and style <= 7 then
+            styleConstant = style
         end
         return ZO_CreateFontString(faceName, size, styleConstant)
     end
 
-    --- Migrates old string-based font style to numeric constant
-    --- @param styleValue string|number Font style value
-    --- @return number Numeric font style constant
+    --- Migrates old string-based font style to numeric constant.
+    --- Returns a valid FontStyle (0-7); never returns nil.
+    --- @param styleValue string|number|nil Font style value from SV
+    --- @return number Numeric font style constant (0-7)
     local function MigrateFontStyle(styleValue)
-        if type(styleValue) == "string" then
-            return LUIE_FONT_STYLE_TO_CONSTANT[styleValue]
+        if styleValue == nil then
+            return LUIE_FONT_STYLE_DEFAULT
         end
-        return styleValue
+        if type(styleValue) == "string" then
+            local result = LUIE_FONT_STYLE_TO_CONSTANT[styleValue]
+            return result or LUIE_FONT_STYLE_DEFAULT
+        end
+        if type(styleValue) == "number" and styleValue >= 0 and styleValue <= 7 then
+            return styleValue
+        end
+        return LUIE_FONT_STYLE_DEFAULT
     end
 
     -- Font style choices for settings menus

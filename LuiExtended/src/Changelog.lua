@@ -12,6 +12,13 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.0.2
+    "|cFFA500LuiExtended Version 7.2.0.2|r",
+    "",
+    -- Fixed
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Info Panel / font system: fixed crash \"Checking type on argument fontStyle failed in GetFontStyleString_lua\" when SavedVariables contained a display string (e.g. |cFFFFFFNormal|r) or invalid FontStyle. Migration and font creation now normalize values and use a safe default; Info Panel and SpellCastBuffs use the shared wrapper so only valid FontStyle integers (0–7) are passed to the game API.",
+    "",
     -- Version Header 7.2.0.1
     "|cFFA500LuiExtended Version 7.2.0.1|r",
     "",

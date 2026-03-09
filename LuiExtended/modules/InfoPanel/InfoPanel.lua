@@ -411,7 +411,7 @@ function InfoPanel.Initialize(enabled)
     end
     local fontStyle = InfoPanel.SV.FontStyle
     local fontSize = (InfoPanel.SV.FontSize and InfoPanel.SV.FontSize > 0) and InfoPanel.SV.FontSize or 16
-    g_infoPanelFont = ZO_CreateFontString(fontName, fontSize, fontStyle)
+    g_infoPanelFont = LUIE.CreateFontString(fontName, fontSize, fontStyle)
 
     -- Top Row Controls
     uiLatency.control = LUIE_InfoPanel_TopRow_Latency

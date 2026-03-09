@@ -1682,7 +1682,7 @@ function SpellCastBuffs.ApplyFont()
     end
     local fontStyle = SpellCastBuffs.SV.BuffFontStyle
     local fontSize = (SpellCastBuffs.SV.BuffFontSize and SpellCastBuffs.SV.BuffFontSize > 0) and SpellCastBuffs.SV.BuffFontSize or 17
-    SpellCastBuffs.buffsFont = ZO_CreateFontString(fontName, fontSize, fontStyle)
+    SpellCastBuffs.buffsFont = LUIE.CreateFontString(fontName, fontSize, fontStyle)
 
     -- Font Setup for Prominent Buffs & Debuffs
     local prominentName = LUIE.Fonts[SpellCastBuffs.SV.ProminentLabelFontFace]
@@ -1692,7 +1692,7 @@ function SpellCastBuffs.ApplyFont()
     end
     local prominentStyle = SpellCastBuffs.SV.ProminentLabelFontStyle
     local prominentSize = (SpellCastBuffs.SV.ProminentLabelFontSize and SpellCastBuffs.SV.ProminentLabelFontSize > 0) and SpellCastBuffs.SV.ProminentLabelFontSize or 17
-    SpellCastBuffs.prominentFont = ZO_CreateFontString(prominentName, prominentSize, prominentStyle)
+    SpellCastBuffs.prominentFont = LUIE.CreateFontString(prominentName, prominentSize, prominentStyle)
 
     local needs_reset = {}
     -- And reset sizes of already existing icons
