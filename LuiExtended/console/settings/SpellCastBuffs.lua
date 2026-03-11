@@ -293,6 +293,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     {
         { key = "playerb", xKey = "playerbOffsetX", yKey = "playerbOffsetY", label = "Player Buffs",   disable = function () return Settings.lockPositionToUnitFrames end },
         { key = "playerd", xKey = "playerdOffsetX", yKey = "playerdOffsetY", label = "Player Debuffs", disable = function () return Settings.lockPositionToUnitFrames end },
+        { key = "player_long", xKey = "player_longOffsetX", yKey = "player_longOffsetY", label = "Player Long", disable = function () return false end },
         { key = "targetb", xKey = "targetbOffsetX", yKey = "targetbOffsetY", label = "Target Buffs",   disable = function () return Settings.lockPositionToUnitFrames end },
         { key = "targetd", xKey = "targetdOffsetX", yKey = "targetdOffsetY", label = "Target Debuffs", disable = function () return Settings.lockPositionToUnitFrames end },
     }
@@ -400,66 +401,6 @@ function SpellCastBuffs.CreateConsoleSettings()
                 default = 0,
             }
         end
-        -- Player Long (V or H based on alignVertical)
-        local function playerLongGetXY()
-            local vert = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.player_long and SpellCastBuffs.BuffContainers.player_long.alignVertical
-            local xKey = vert and "playerVOffsetX" or "playerHOffsetX"
-            local yKey = vert and "playerVOffsetY" or "playerHOffsetY"
-            return xKey, yKey
-        end
-        settings[#settings + 1] = { type = LHAS.ST_LABEL, label = "Player Long" }
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_SLIDER,
-            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X),
-            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
-            min = -gw,
-            max = gw,
-            step = 10,
-            getFunction = function ()
-                local xKey, _ = playerLongGetXY()
-                local v = Settings[xKey]
-                if v ~= nil then return v end
-                local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.player_long
-                return (c and c.GetLeft) and c:GetLeft() or 0
-            end,
-            setFunction = function (value)
-                local xKey, yKey = playerLongGetXY()
-                Settings[xKey] = value
-                if Settings[yKey] == nil then
-                    local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.player_long
-                    Settings[yKey] = (c and c.GetTop) and c:GetTop() or 0
-                end
-                SpellCastBuffs.SetTlwPosition()
-            end,
-            default = 0,
-        }
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_SLIDER,
-            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y),
-            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
-            min = -gh,
-            max = gh,
-            step = 10,
-            getFunction = function ()
-                local _, yKey = playerLongGetXY()
-                local v = Settings[yKey]
-                if v ~= nil then return v end
-                local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.player_long
-                return (c and c.GetTop) and c:GetTop() or 0
-            end,
-            setFunction = function (value)
-                local xKey, yKey = playerLongGetXY()
-                if Settings[xKey] == nil then
-                    local c = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.player_long
-                    Settings[xKey] = (c and c.GetLeft) and c:GetLeft() or 0
-                end
-                Settings[yKey] = value
-                SpellCastBuffs.SetTlwPosition()
-            end,
-            default = 0,
-        }
         -- Prominent Buffs (V or H based on alignVertical)
         local function prominentBGetXY()
             local vert = SpellCastBuffs.BuffContainers and SpellCastBuffs.BuffContainers.prominentbuffs and SpellCastBuffs.BuffContainers.prominentbuffs.alignVertical
