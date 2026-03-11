@@ -220,8 +220,7 @@ end
 -- ---------------------------------------------------------------------------
 
 function Block.OnBlockUpdate()
-    local isSprinting = IsPlayerMoving() and IsShiftKeyDown()
-    local isBlocking = IsBlockActive() and not isSprinting
+    local isBlocking = IsBlockActive()
     local inCombat = IsUnitInCombat("player")
     local staminaRegen = GetPlayerStat(inCombat and STAT_STAMINA_REGEN_COMBAT or STAT_STAMINA_REGEN_IDLE, STAT_BONUS_OPTION_APPLY_BONUS)
     local magickaRegen = GetPlayerStat(inCombat and STAT_MAGICKA_REGEN_COMBAT or STAT_MAGICKA_REGEN_IDLE, STAT_BONUS_OPTION_APPLY_BONUS)
@@ -234,6 +233,10 @@ function Block.OnBlockUpdate()
     Block.blockIndicatorTexture:SetHidden(bothRegen or not isBlocking)
 
     local sv = CombatInfo.SV.block
+    -- When indicator is visible and shader is disabled, re-apply NONE each update so the setting reliably takes effect.
+    if not (bothRegen or not isBlocking) and sv.useBlockIndicatorShader == false then
+        Block.blockIndicatorTexture:SetShaderEffectType(SHADER_EFFECT_TYPE_NONE)
+    end
     if sv.colorShieldByResource then
         Block.blockIndicatorTexture:SetColor(0, staminaRegen > 0 and 0.5 or 1, magickaRegen > 0 and 0 or 1, 1)
     else
@@ -392,6 +395,19 @@ function Block.ApplyBlockShieldTexture()
     Block.blockIndicatorTexture:SetColor(1, 1, 1, 1)
 end
 
+--- Applies block indicator shader effect from settings (caustic vs none).
+function Block.ApplyBlockIndicatorShader()
+    if not Block.blockIndicatorTexture then
+        return
+    end
+    local useShader = CombatInfo.SV.block.useBlockIndicatorShader ~= false
+    Block.blockIndicatorTexture:SetShaderEffectType(useShader and SHADER_EFFECT_TYPE_CAUSTIC or SHADER_EFFECT_TYPE_NONE)
+    -- Re-apply texture so the shader change is picked up by the engine (avoids stale/cached effect).
+    local sv = CombatInfo.SV.block
+    local useGrey = sv.colorShieldByResource
+    Block.blockIndicatorTexture:SetTexture(useGrey and BLOCK_SHIELD_GREY_MEDIA or BLOCK_SHIELD_MEDIA)
+end
+
 --- Applies saved Bloodlord's Embrace window position from SV
 function Block.ApplyBloodlordEmbracePosition()
     if not Block.bloodlordWindow then
@@ -448,7 +464,11 @@ local function CreateBlockIndicatorWindow()
     texture:SetHidden(true)
     texture:SetBlendMode(TEX_BLEND_MODE_ADD)
     texture:SetPixelRoundingEnabled(true)
-    texture:SetShaderEffectType(SHADER_EFFECT_TYPE_CAUSTIC)
+    if CombatInfo.SV.block.useBlockIndicatorShader ~= false then
+        texture:SetShaderEffectType(SHADER_EFFECT_TYPE_CAUSTIC)
+    else
+        texture:SetShaderEffectType(SHADER_EFFECT_TYPE_NONE)
+    end
     Block.blockIndicatorTexture = texture
     Block.ApplyBlockShieldTexture()
 

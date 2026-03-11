@@ -3660,6 +3660,23 @@ function CombatInfo.CreateConsoleSettings()
                 return not Settings.block.enabled
             end,
         }
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CI_BLOCK_USE_SHADER),
+            tooltip = GetString(LUIE_STRING_LAM_CI_BLOCK_USE_SHADER_TP),
+            getFunction = function ()
+                return CombatInfo.SV.block.useBlockIndicatorShader ~= false
+            end,
+            setFunction = function (value)
+                CombatInfo.SV.block.useBlockIndicatorShader = value
+                Block.ApplyBlockIndicatorShader()
+            end,
+            default = Defaults.block.useBlockIndicatorShader,
+            disable = function ()
+                return not Settings.block.enabled
+            end,
+        }
         local gwBlock = GuiRoot:GetWidth()
         local ghBlock = GuiRoot:GetHeight()
         settings[#settings + 1] =

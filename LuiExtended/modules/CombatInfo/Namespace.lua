@@ -246,6 +246,7 @@ CombatInfo.Defaults =
         updateIntervalMs = 10,
         showRemainingBlocks = false,
         colorShieldByResource = false,
+        useBlockIndicatorShader = true,
         blockIndicatorFontFace = "LUIE Default Font",
         blockIndicatorFontStyle = FONT_STYLE_SOFT_SHADOW_THICK,
         blockIndicatorFontSize = 18,

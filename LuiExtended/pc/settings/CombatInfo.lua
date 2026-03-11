@@ -3534,6 +3534,23 @@ function CombatInfo.CreateSettings()
                 end,
             },
             {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_CI_BLOCK_USE_SHADER),
+                tooltip = GetString(LUIE_STRING_LAM_CI_BLOCK_USE_SHADER_TP),
+                getFunc = function ()
+                    return CombatInfo.SV.block.useBlockIndicatorShader ~= false
+                end,
+                setFunc = function (value)
+                    CombatInfo.SV.block.useBlockIndicatorShader = value
+                    Block.ApplyBlockIndicatorShader()
+                end,
+                default = Defaults.block.useBlockIndicatorShader,
+                width = "full",
+                disabled = function ()
+                    return not Settings.block.enabled
+                end,
+            },
+            {
                 type = "dropdown",
                 name = "Bloodlord Embrace Font Face",
                 tooltip = "Font used for Bloodlord's Embrace tracker text.",

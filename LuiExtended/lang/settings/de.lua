@@ -1295,6 +1295,10 @@ local strings =
     LUIE_STRING_LAM_CI_ENEMY_MARKER = "Gegner-Markierungen anzeigen",
     LUIE_STRING_LAM_CI_ENEMY_MARKER_TP = "Zeigt einen roten Pfeil über dem Kopf von Gegnern an, mit denen du dich im Kampf befindest.",
     LUIE_STRING_LAM_CI_ENEMY_MARKER_SIZE = "Gegner-Markierungsgröße",
+
+    -- CI Block Indicator
+    LUIE_STRING_LAM_CI_BLOCK_USE_SHADER = "Block-Indikator-Shader-Effekt verwenden",
+    LUIE_STRING_LAM_CI_BLOCK_USE_SHADER_TP = "Wendet einen Kaustik-Shader auf den Block-Indikator an. Deaktivieren, wenn das Symbol mit der Zeit verblasst.",
     LUIE_STRING_LAM_CI_HEADER_POTION = "Schnellzugriff-Abklingzeit-Timer-Optionen",
     LUIE_STRING_LAM_CI_POTION = "Schnellzugriff-Abklingzeit-Timer anzeigen",
     LUIE_STRING_LAM_CI_POTION_TP = "Zeigt einen Abklingzeit-Timer für Tränke und andere Schnellzugriff-Gegenstände an.",

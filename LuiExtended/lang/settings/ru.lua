@@ -1304,6 +1304,10 @@ local strings =
     LUIE_STRING_LAM_CI_ENEMY_MARKER = "Show Enemy Markers",
     LUIE_STRING_LAM_CI_ENEMY_MARKER_TP = "Display a red arrow over the head of enemies you are currently in combat with.",
     LUIE_STRING_LAM_CI_ENEMY_MARKER_SIZE = "Enemy Marker Size",
+
+    -- CI Block Indicator
+    LUIE_STRING_LAM_CI_BLOCK_USE_SHADER = "Use block indicator shader effect",
+    LUIE_STRING_LAM_CI_BLOCK_USE_SHADER_TP = "Apply caustic shader to the block indicator. Disable if the icon fades out over time.",
     LUIE_STRING_LAM_CI_HEADER_POTION = "Перезарядка быстрой ячейки",
     LUIE_STRING_LAM_CI_POTION = "Перезарядка быстрой ячейки",
     LUIE_STRING_LAM_CI_POTION_TP = "Показывает таймер перезарядки для зелий и прочих предметов в ячейке быстрого доступа.",

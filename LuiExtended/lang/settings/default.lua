@@ -1385,6 +1385,10 @@ local strings =
     LUIE_STRING_LAM_CI_ENEMY_MARKER_TP = "Display a red arrow over the head of enemies you are currently in combat with.",
     LUIE_STRING_LAM_CI_ENEMY_MARKER_SIZE = "Enemy Marker Size",
 
+    -- CI Block Indicator
+    LUIE_STRING_LAM_CI_BLOCK_USE_SHADER = "Use block indicator shader effect",
+    LUIE_STRING_LAM_CI_BLOCK_USE_SHADER_TP = "Apply caustic shader to the block indicator. Disable if the icon fades out over time.",
+
     -- CI CCT
     LUIE_STRING_LAM_CI_CCT_HEADER = "Crowd Control Tracker",
     LUIE_STRING_LAM_CI_CCT_DESCRIPTION = "Display an animated icon when you are under the effects of crowd control. The options below allow you to customize the color, sound, and naming method for the alerts displayed. Additionally you can display alerts when standing in the radius of damaging area of effect abilities, with the option to enable/disable various categories with different sounds.",

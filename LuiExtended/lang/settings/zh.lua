@@ -1307,6 +1307,10 @@ local strings =
     LUIE_STRING_LAM_CI_ENEMY_MARKER = "显示敌人标记",
     LUIE_STRING_LAM_CI_ENEMY_MARKER_TP = "在你当前战斗中的敌人头上显示一个红色箭头。",
     LUIE_STRING_LAM_CI_ENEMY_MARKER_SIZE = "敌人标记大小",
+
+    -- CI Block Indicator
+    LUIE_STRING_LAM_CI_BLOCK_USE_SHADER = "使用格挡指示器着色器效果",
+    LUIE_STRING_LAM_CI_BLOCK_USE_SHADER_TP = "对格挡指示器应用焦散着色器。若图标随时间逐渐变淡可关闭此项。",
     LUIE_STRING_LAM_CI_HEADER_POTION = "快速槽冷却计时器选项",
     LUIE_STRING_LAM_CI_POTION = "显示快速槽冷却计时器",
     LUIE_STRING_LAM_CI_POTION_TP = "为药水和其他快速槽物品显示冷却计时器。",
