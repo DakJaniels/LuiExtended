@@ -172,7 +172,7 @@ local GAMEPAD_INTERACT_ICONS =
     },
 }
 
-local ALERT_IGNORED_STRING = IsConsoleUI() and SI_PLAYER_TO_PLAYER_BLOCKED or SI_PLAYER_TO_PLAYER_IGNORED
+local ALERT_IGNORED_STRING = ZO_IsConsoleOrGameCoreUI() and SI_PLAYER_TO_PLAYER_BLOCKED or SI_PLAYER_TO_PLAYER_IGNORED
 
 -- Custom alert helpers
 local function AlertIgnored(customStringId)
@@ -218,6 +218,8 @@ end
 
 -- HOOK PLAYER_TO_PLAYER Group Notifications to edit Ignore alert
 function ChatAnnouncements.PlayerToPlayerHook()
+    local originalShowPlayerInteractMenu = ZO_PlayerToPlayer.ShowPlayerInteractMenu
+
     function ZO_PlayerToPlayer:AddMenuEntry(text, icons, enabled, selectedFunction, errorReason)
         local normalIcon = enabled and icons.enabledNormal or icons.disabledNormal
         local selectedIcon = enabled and icons.enabledSelected or icons.disabledSelected
@@ -225,6 +227,13 @@ function ChatAnnouncements.PlayerToPlayerHook()
     end
 
     function ZO_PlayerToPlayer:ShowPlayerInteractMenu(isIgnored)
+        -- On console/GameCore, building the menu from addon code taints the callstack so
+        -- the Gamer Card option hits private APIs. Delegate to ZOS so the menu is built
+        -- in trusted context and Gamer Card works.
+        if ZO_IsConsoleOrGameCoreUI() then
+            return originalShowPlayerInteractMenu(self, isIgnored)
+        end
+
         local currentTargetCharacterName = self.currentTargetCharacterName
         local currentTargetCharacterNameRaw = self.currentTargetCharacterNameRaw
         local currentTargetDisplayName = self.currentTargetDisplayName
@@ -240,24 +249,11 @@ function ChatAnnouncements.PlayerToPlayerHook()
 
         self:GetRadialMenu():Clear()
 
-        -- Gamecard--
-        if IsConsoleUI() then
-            self:AddShowGamerCard(currentTargetDisplayName, currentTargetCharacterName)
-        end
-
         -- Whisper
         if IsChatSystemAvailableForCurrentPlatform() then
             local nameToUse = primaryNameInternal
             local function WhisperOption()
-                -- On console, call StartTextEntry directly with dontShowHUDWindow to avoid SetSetting security error
-                if IsConsoleUI() then
-                    local chatSystem = ZO_GetChatSystem()
-                    if chatSystem then
-                        chatSystem:StartTextEntry(nil, CHAT_CHANNEL_WHISPER, nameToUse, true)
-                    end
-                else
-                    StartChatInput(nil, CHAT_CHANNEL_WHISPER, nameToUse)
-                end
+                StartChatInput(nil, CHAT_CHANNEL_WHISPER, nameToUse)
             end
             local isEnabled = ENABLED_IF_NOT_IGNORED and isRestrictedCommunicationPermitted
             local whisperFunction = isEnabled and WhisperOption or disabledOption
@@ -302,21 +298,17 @@ function ChatAnnouncements.PlayerToPlayerHook()
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_FRIEND), platformIcons[SI_PLAYER_TO_PLAYER_ADD_FRIEND], DISABLED, AlreadyFriendsWarning)
         else
             local function RequestFriendOption()
-                if IsConsoleUI() then
-                    ZO_ShowConsoleAddFriendDialog(currentTargetCharacterName)
-                else
-                    RequestFriend(currentTargetDisplayName)
+                RequestFriend(currentTargetDisplayName)
 
-                    local displayNameLink = ZO_LinkHandler_CreateLink(currentTargetDisplayName, nil, DISPLAY_NAME_LINK_TYPE, currentTargetDisplayName)
-                    if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                        displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(currentTargetDisplayName, nil, DISPLAY_NAME_LINK_TYPE, currentTargetDisplayName)
-                    end
+                local displayNameLink = ZO_LinkHandler_CreateLink(currentTargetDisplayName, nil, DISPLAY_NAME_LINK_TYPE, currentTargetDisplayName)
+                if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                    displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(currentTargetDisplayName, nil, DISPLAY_NAME_LINK_TYPE, currentTargetDisplayName)
+                end
 
-                    local formattedMessage = zo_strformat(LUIE_STRING_SLASHCMDS_FRIEND_INVITE_MSG_LINK, displayNameLink)
+                local formattedMessage = zo_strformat(LUIE_STRING_SLASHCMDS_FRIEND_INVITE_MSG_LINK, displayNameLink)
 
-                    if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, formattedMessage)
-                    end
+                if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, formattedMessage)
                 end
             end
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_FRIEND), platformIcons[SI_PLAYER_TO_PLAYER_ADD_FRIEND], ENABLED_IF_NOT_IGNORED, ENABLED_IF_NOT_IGNORED and RequestFriendOption or AlertIgnored)
@@ -424,10 +416,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
         end
     end
 
-    function ZO_PlayerToPlayer:AddShowGamerCard(targetDisplayName, targetCharacterName)
-        self:GetRadialMenu():AddEntry(GetString(ZO_GetGamerCardStringId()), "EsoUI/Art/HUD/Gamepad/gp_radialIcon_gamercard_down.dds", "EsoUI/Art/HUD/Gamepad/gp_radialIcon_gamercard_down.dds",
-                                      function ()
-                                          ZO_ShowGamerCardFromDisplayNameOrFallback(targetDisplayName, ZO_ID_REQUEST_TYPE_CHARACTER_NAME, targetCharacterName)
-                                      end)
-    end
+    -- Do not override AddShowGamerCard: the gamer card flow calls private APIs
+    -- (GetConsoleInfoFromCharName). Let ZOS's implementation add the entry so
+    -- the callback runs in trusted context when ZO_IsConsoleOrGameCoreUI().
 end
