@@ -220,7 +220,8 @@ end
 -- ---------------------------------------------------------------------------
 
 function Block.OnBlockUpdate()
-    local isBlocking = IsBlockActive()
+    local isSprinting = IsPlayerMoving() and IsShiftKeyDown()
+    local isBlocking = IsBlockActive() and not isSprinting
     local inCombat = IsUnitInCombat("player")
     local staminaRegen = GetPlayerStat(inCombat and STAT_STAMINA_REGEN_COMBAT or STAT_STAMINA_REGEN_IDLE, STAT_BONUS_OPTION_APPLY_BONUS)
     local magickaRegen = GetPlayerStat(inCombat and STAT_MAGICKA_REGEN_COMBAT or STAT_MAGICKA_REGEN_IDLE, STAT_BONUS_OPTION_APPLY_BONUS)
