@@ -251,17 +251,9 @@ function ChatAnnouncements.PlayerToPlayerHook()
 
         -- Whisper
         if IsChatSystemAvailableForCurrentPlatform() then
-            local nameToUse = ZO_IsConsoleOrGameCoreUI() and currentTargetDisplayName or primaryNameInternal
+            local nameToUse = primaryNameInternal
             local function WhisperOption()
-                -- On console, call StartTextEntry directly with dontShowHUDWindow to avoid SetSetting security error
-                if ZO_IsConsoleOrGameCoreUI() then
-                    local chatSystem = ZO_GetChatSystem()
-                    if chatSystem then
-                        chatSystem:StartTextEntry(nil, CHAT_CHANNEL_WHISPER, nameToUse, true)
-                    end
-                else
-                    StartChatInput(nil, CHAT_CHANNEL_WHISPER, nameToUse)
-                end
+                StartChatInput(nil, CHAT_CHANNEL_WHISPER, nameToUse)
             end
             local isEnabled = ENABLED_IF_NOT_IGNORED and isRestrictedCommunicationPermitted
             local whisperFunction = isEnabled and WhisperOption or disabledOption
@@ -306,21 +298,17 @@ function ChatAnnouncements.PlayerToPlayerHook()
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_FRIEND), platformIcons[SI_PLAYER_TO_PLAYER_ADD_FRIEND], DISABLED, AlreadyFriendsWarning)
         else
             local function RequestFriendOption()
-                if ZO_IsConsoleOrGameCoreUI() then
-                    ZO_ShowConsoleAddFriendDialog(currentTargetCharacterName)
-                else
-                    RequestFriend(currentTargetDisplayName)
+                RequestFriend(currentTargetDisplayName)
 
-                    local displayNameLink = ZO_LinkHandler_CreateLink(currentTargetDisplayName, nil, DISPLAY_NAME_LINK_TYPE, currentTargetDisplayName)
-                    if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                        displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(currentTargetDisplayName, nil, DISPLAY_NAME_LINK_TYPE, currentTargetDisplayName)
-                    end
+                local displayNameLink = ZO_LinkHandler_CreateLink(currentTargetDisplayName, nil, DISPLAY_NAME_LINK_TYPE, currentTargetDisplayName)
+                if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+                    displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(currentTargetDisplayName, nil, DISPLAY_NAME_LINK_TYPE, currentTargetDisplayName)
+                end
 
-                    local formattedMessage = zo_strformat(LUIE_STRING_SLASHCMDS_FRIEND_INVITE_MSG_LINK, displayNameLink)
+                local formattedMessage = zo_strformat(LUIE_STRING_SLASHCMDS_FRIEND_INVITE_MSG_LINK, displayNameLink)
 
-                    if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, formattedMessage)
-                    end
+                if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, formattedMessage)
                 end
             end
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_FRIEND), platformIcons[SI_PLAYER_TO_PLAYER_ADD_FRIEND], ENABLED_IF_NOT_IGNORED, ENABLED_IF_NOT_IGNORED and RequestFriendOption or AlertIgnored)
