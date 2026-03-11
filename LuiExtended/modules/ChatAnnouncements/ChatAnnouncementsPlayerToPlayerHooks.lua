@@ -365,7 +365,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
             local function DuelInviteOption()
                 ChallengeTargetToDuel(currentTargetCharacterName)
             end
-            local isEnabled = ENABLED_IF_NOT_IGNORED and (not ZO_IsConsoleOrGameCoreUI() or not IsCommunicationRestricted()) and isRestrictedCommunicationPermitted
+            local isEnabled = ENABLED_IF_NOT_IGNORED and isRestrictedCommunicationPermitted
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], isEnabled, isEnabled and DuelInviteOption or disabledOption)
         end
 
@@ -396,7 +396,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
                 end
                 PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
             end
-            local isEnabled = ENABLED_IF_NOT_IGNORED and not ZO_IsTributeLocked() and (not ZO_IsConsoleOrGameCoreUI() or not IsCommunicationRestricted()) and isRestrictedCommunicationPermitted
+            local isEnabled = ENABLED_IF_NOT_IGNORED and not ZO_IsTributeLocked() and isRestrictedCommunicationPermitted
             local entryFunction
             if isEnabled then
                 entryFunction = TributeInviteOption
@@ -412,7 +412,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
         local function TradeInviteOption()
             TRADE_WINDOW:InitiateTrade(primaryNameInternal)
         end
-        local isEnabled = ENABLED_IF_NOT_IGNORED and (not ZO_IsConsoleOrGameCoreUI() or not IsCommunicationRestricted()) and isRestrictedCommunicationPermitted
+        local isEnabled = ENABLED_IF_NOT_IGNORED and isRestrictedCommunicationPermitted
         local tradeInviteFunction = isEnabled and TradeInviteOption or disabledOption
         self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRADE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRADE], isEnabled, tradeInviteFunction)
 
