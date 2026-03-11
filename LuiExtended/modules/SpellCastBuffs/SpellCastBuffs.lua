@@ -360,14 +360,8 @@ function SpellCastBuffs.Initialize(enabled)
 
     -- Separate container for players long term buffs
     CreateDraggableTopLevel("player_long", function (self)
-        local left, top = self:GetLeft(), self:GetTop()
-        if self.alignVertical then
-            SpellCastBuffs.SV.playerVOffsetX = left
-            SpellCastBuffs.SV.playerVOffsetY = top
-        else
-            SpellCastBuffs.SV.playerHOffsetX = left
-            SpellCastBuffs.SV.playerHOffsetY = top
-        end
+        SpellCastBuffs.SV.player_longOffsetX = self:GetLeft()
+        SpellCastBuffs.SV.player_longOffsetY = self:GetTop()
     end)
 
     SetContainerAlignVertical(SpellCastBuffs.BuffContainers.player_long, SpellCastBuffs.SV.LongTermEffectsSeparateAlignment)
@@ -379,6 +373,7 @@ function SpellCastBuffs.Initialize(enabled)
 
     -- Loop over table of fragments to add them to relevant UI Scenes
     RegisterFragmentsToScenes(fragments)
+    SpellCastBuffs.BuffFragments = fragments
 
     -- Set Buff Container Positions
     SpellCastBuffs.SetTlwPosition()
@@ -621,13 +616,8 @@ function SpellCastBuffs.ResetContainerOrientation()
     ---
     --- @param self TopLevelWindow|table
     local player_long_OnMoveStop = function (self)
-        if self.alignVertical then
-            SpellCastBuffs.SV.playerVOffsetX = self:GetLeft()
-            SpellCastBuffs.SV.playerVOffsetY = self:GetTop()
-        else
-            SpellCastBuffs.SV.playerHOffsetX = self:GetLeft()
-            SpellCastBuffs.SV.playerHOffsetY = self:GetTop()
-        end
+        SpellCastBuffs.SV.player_longOffsetX = self:GetLeft()
+        SpellCastBuffs.SV.player_longOffsetY = self:GetTop()
     end
     -- Separate container for players long term buffs
     SpellCastBuffs.BuffContainers.player_long:SetHandler("OnMoveStop", player_long_OnMoveStop)
@@ -835,6 +825,8 @@ function SpellCastBuffs.ResetTlwPosition()
     SpellCastBuffs.SV.targetbOffsetY = nil
     SpellCastBuffs.SV.targetdOffsetX = nil
     SpellCastBuffs.SV.targetdOffsetY = nil
+    SpellCastBuffs.SV.player_longOffsetX = nil
+    SpellCastBuffs.SV.player_longOffsetY = nil
     SpellCastBuffs.SV.playerVOffsetX = nil
     SpellCastBuffs.SV.playerVOffsetY = nil
     SpellCastBuffs.SV.playerHOffsetX = nil
@@ -939,12 +931,11 @@ function SpellCastBuffs.SetTlwPosition()
     end
 
     if SpellCastBuffs.BuffContainers.player_long then
-        ApplyDualAlignmentTlwPosition(
+        ApplySimpleTlwPosition(
             SpellCastBuffs.BuffContainers.player_long,
-            SpellCastBuffs.SV.playerVOffsetX, SpellCastBuffs.SV.playerVOffsetY,
-            SpellCastBuffs.SV.playerHOffsetX, SpellCastBuffs.SV.playerHOffsetY,
-            DefaultAnchor(BOTTOMRIGHT, GuiRoot, BOTTOMRIGHT, -3, -75),
-            DefaultAnchor(BOTTOM, ZO_PlayerAttributeHealth, TOP, 0, -70)
+            SpellCastBuffs.SV.player_longOffsetX,
+            SpellCastBuffs.SV.player_longOffsetY,
+            RIGHT, GuiRoot, RIGHT, 0, 0
         )
     end
 
@@ -973,6 +964,18 @@ end
 function SpellCastBuffs.SetMovingState(state)
     if not SpellCastBuffs.Enabled then
         return
+    end
+
+    -- When unlocked on console, add buff fragments to settings scene so frames are visible while addon settings are open
+    if IsConsoleUI() and SpellCastBuffs.BuffFragments then
+        local settingsScene = sceneManager:GetScene("LibHarvensAddonSettingsScene")
+        for _, fragment in pairs(SpellCastBuffs.BuffFragments) do
+            if state then
+                settingsScene:AddFragment(fragment)
+            else
+                settingsScene:RemoveFragment(fragment)
+            end
+        end
     end
 
     local function UpdatePositionLabel(control, label)
@@ -1035,14 +1038,9 @@ function SpellCastBuffs.SetMovingState(state)
     end
 
     if SpellCastBuffs.BuffContainers.player_long then
-        SetContainerMovingState(SpellCastBuffs.BuffContainers.player_long, function (self, left, top)
-            if self.alignVertical then
-                SpellCastBuffs.SV.playerVOffsetX = left
-                SpellCastBuffs.SV.playerVOffsetY = top
-            else
-                SpellCastBuffs.SV.playerHOffsetX = left
-                SpellCastBuffs.SV.playerHOffsetY = top
-            end
+        SetContainerMovingState(SpellCastBuffs.BuffContainers.player_long, function (_, left, top)
+            SpellCastBuffs.SV.player_longOffsetX = left
+            SpellCastBuffs.SV.player_longOffsetY = top
         end)
     end
 
