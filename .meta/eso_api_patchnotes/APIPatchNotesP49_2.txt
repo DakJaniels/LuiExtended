@@ -1,0 +1,128 @@
+******************
+***Enums Added ***
+******************
+
+h5. PlatformStoreIconLocation
+* PLATFORM_STORE_ICON_LOCATION_LOWER_CENTER
+* PLATFORM_STORE_ICON_LOCATION_LOWER_LEFT
+* PLATFORM_STORE_ICON_LOCATION_LOWER_RIGHT
+
+* CURRENCY_CHANGE_REASON_EVENT_TICKET_TO_TRADE_BARS_CONVERSION
+
+* RESPEC_RESULT_DISALLOWED_IN_ACTIVITY
+
+* ADVENTURE_ZONE_FACTION_GLITTERING_GOAD
+
+h5. TamrielTomePurchaseResult
+* TAMRIEL_TOME_PURCHASE_RESULT_ALREADY_OWNED
+* TAMRIEL_TOME_PURCHASE_RESULT_INVALID
+* TAMRIEL_TOME_PURCHASE_RESULT_NOT_ENOUGH_CURRENCY
+* TAMRIEL_TOME_PURCHASE_RESULT_SUCCESS
+* TAMRIEL_TOME_PURCHASE_RESULT_TIMED_OUT
+
+* DIRECT_PURCHASE_PURCHASE_SKU_RESULT_CARD_DECLINED
+* DIRECT_PURCHASE_PURCHASE_SKU_RESULT_INVALID_PAYMENT_INFO
+* DIRECT_PURCHASE_PURCHASE_SKU_RESULT_TIMED_OUT
+
+
+
+********************
+***Enums Removed ***
+********************
+
+* ADVENTURE_ZONE_FACTION_GLITTERING_GLOAD
+
+
+
+********************
+***Globals Added ***
+********************
+
+* RESPEC_CAST_TIME_MS
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* GetTomePointGainBonusPercentage()
+** _Returns:_ *integer* _bonusPercentage_
+
+
+* GetTamrielTomePremiumPlusBonusRewardInfo(*integer* _tamrielTomeId_)
+** _Returns:_ *integer* _rewardId_, *integer* _rewardQuantity_
+
+
+* GetTamrielTomePremiumPlusRewardDescription(*integer* _tamrielTomeId_)
+** _Returns:_ *string* _description_
+
+
+* GetCostToProgressToNextTier(*integer* _rewardTrackId_, *luaindex* _tierIndex_)
+** _Returns:_ *integer* _costToProgress_
+
+
+* HasInfinitelyRepeatableTierForRewardTrack(*integer* _rewardTrackId_)
+** _Returns:_ *bool* _hasInfinitelyRepeatableTier_
+
+
+* GetInfinitelyRepeatableTierForRewardTrack(*integer* _rewardTrackId_)
+** _Returns:_ *luaindex* _infinitelyRepeatableTier_
+
+
+* GetHighestTierPossibleForRewardTrack(*integer* _rewardTrackId_)
+** _Returns:_ *integer* _numTiers_
+
+
+* IsDirectPurchaseEnabled()
+** _Returns:_ *bool* _isEnabled_
+
+
+* GetAdventureZoneEventLocationStartTimestampMs(*luaindex* _locationIndex_)
+** _Returns:_ *integer53* _startTimestamp_
+
+
+* GetSkuDisplayName(*integer* _skuDefId_)
+** _Returns:_ *string* _displayName_
+
+
+* GetSkuPricingInfoFormatted(*integer* _skuDefId_)
+** _Returns:_ *string* _currentPrice_, *string* _basePrice_
+
+
+
+************************
+***Functions Removed ***
+************************
+
+* GetAdventureZoneEventLocationTimeLeftToStartMs(*luaindex* _locationIndex_)
+** _Returns:_ *integer* _timeLeftToStartMs_
+
+
+
+************************
+***Functions Changed ***
+************************
+
+Added _ignoreRateLimit_, made private
+* QuerySkuCatalog *private* (*bool* _ignoreRateLimit_)
+** _Returns:_ *integer* _queryId_
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_ADVENTURE_ZONE_WORLD_EVENT_INIT
+
+* EVENT_ADVENTURE_ZONE_WORLD_EVENT_STARTS_SOON
+
+
+
+**********************
+*** Events Changed ***
+**********************
+
+Added _skuId_
+* EVENT_DIRECT_PURCHASE_PURCHASE_SKU_RESULT (*integer* _skuId_, *[DirectPurchasePurchaseSkuResult|#DirectPurchasePurchaseSkuResult]* _result_)

@@ -24,12 +24,18 @@ LUIE.HookGamePadStats = function ()
         UPCOMING_LEVEL_UP_REWARDS = 7,
         ADVANCED_ATTRIBUTES = 8,
         MUNDUS = 9,
+        GUILD = 10,
     }
 
 
 
     function ZO_GamepadStats:RefreshMainList()
         if self.currentTitleDropdown and self.currentTitleDropdown:IsDropdownVisible() then
+            self.refreshMainListOnDropdownClose = true
+            return
+        end
+
+        if self.currentGuildDropdown and self.currentGuildDropdown:IsDropdownVisible() then
             self.refreshMainListOnDropdownClose = true
             return
         end
@@ -137,6 +143,9 @@ LUIE.HookGamePadStats = function ()
         -- Character Info
         self.mainList:AddEntryWithHeader("ZO_GamepadMenuEntryTemplate", self.advancedStatsEntry)
         self.mainList:AddEntry("ZO_GamepadMenuEntryTemplate", self.characterEntry)
+
+        -- Guild (tabard)
+        self.mainList:AddEntryWithHeader("ZO_GamepadStatGuildRow", self.guildEntry)
 
         -- Active Effects--
         self.numActiveEffects = 0
