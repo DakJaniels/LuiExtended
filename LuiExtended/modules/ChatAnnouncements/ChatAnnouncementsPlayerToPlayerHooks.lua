@@ -18,218 +18,219 @@ local zo_strformat = zo_strformat
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
-local KEYBOARD_INTERACT_ICONS =
-{
-    [SI_PLAYER_TO_PLAYER_WHISPER] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/radialIcon_whisper_up.dds",
-        enabledSelected = "EsoUI/Art/HUD/radialIcon_whisper_over.dds",
-        disabledNormal = "EsoUI/Art/HUD/radialIcon_whisper_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/radialIcon_whisper_disabled.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_ADD_GROUP] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/radialIcon_inviteGroup_up.dds",
-        enabledSelected = "EsoUI/Art/HUD/radialIcon_inviteGroup_over.dds",
-        disabledNormal = "EsoUI/Art/HUD/radialIcon_inviteGroup_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/radialIcon_inviteGroup_disabled.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_REMOVE_GROUP] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/radialIcon_removeFromGroup_up.dds",
-        enabledSelected = "EsoUI/Art/HUD/radialIcon_removeFromGroup_over.dds",
-        disabledNormal = "EsoUI/Art/HUD/radialIcon_removeFromGroup_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/radialIcon_removeFromGroup_disabled.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_ADD_FRIEND] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/radialIcon_addFriend_up.dds",
-        enabledSelected = "EsoUI/Art/HUD/radialIcon_addFriend_over.dds",
-        disabledNormal = "EsoUI/Art/HUD/radialIcon_addFriend_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/radialIcon_addFriend_disabled.dds",
-    },
-    [SI_CHAT_PLAYER_CONTEXT_REPORT] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/radialIcon_reportPlayer_up.dds",
-        enabledSelected = "EsoUI/Art/HUD/radialIcon_reportPlayer_over.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_INVITE_DUEL] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/radialIcon_duel_up.dds",
-        enabledSelected = "EsoUI/Art/HUD/radialIcon_duel_over.dds",
-        disabledNormal = "EsoUI/Art/HUD/radialIcon_duel_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/radialIcon_duel_disabled.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/radialIcon_tribute_up.dds",
-        enabledSelected = "EsoUI/Art/HUD/radialIcon_tribute_over.dds",
-        disabledNormal = "EsoUI/Art/HUD/radialIcon_tribute_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/radialIcon_tribute_disabled.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_INVITE_TRADE] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/radialIcon_trade_up.dds",
-        enabledSelected = "EsoUI/Art/HUD/radialIcon_trade_over.dds",
-        disabledNormal = "EsoUI/Art/HUD/radialIcon_trade_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/radialIcon_trade_disabled.dds",
-    },
-    [SI_RADIAL_MENU_CANCEL_BUTTON] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/radialIcon_cancel_up.dds",
-        enabledSelected = "EsoUI/Art/HUD/radialIcon_cancel_over.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_RIDE_MOUNT] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/radialIcon_joinMount_up.dds",
-        enabledSelected = "EsoUI/Art/HUD/radialIcon_joinMount_over.dds",
-        disabledNormal = "EsoUI/Art/HUD/radialIcon_joinMount_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/radialIcon_joinMount_disabled.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_DISMOUNT] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/radialIcon_dismount_up.dds",
-        enabledSelected = "EsoUI/Art/HUD/radialIcon_dismount_over.dds",
-        disabledNormal = "EsoUI/Art/HUD/radialIcon_dismount_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/radialIcon_dismount_disabled.dds",
-    },
-}
-
-local GAMEPAD_INTERACT_ICONS =
-{
-    [SI_PLAYER_TO_PLAYER_WHISPER] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_down.dds",
-        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_down.dds",
-        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_disabled.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_ADD_GROUP] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_down.dds",
-        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_down.dds",
-        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_disabled.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_REMOVE_GROUP] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_down.dds",
-        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_down.dds",
-        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_disabled.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_ADD_FRIEND] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_down.dds",
-        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_down.dds",
-        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_disabled.dds",
-    },
-    [SI_CHAT_PLAYER_CONTEXT_REPORT] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_reportPlayer_down.dds",
-        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_reportPlayer_down.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_INVITE_DUEL] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_down.dds",
-        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_down.dds",
-        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_disabled.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_down.dds",
-        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_down.dds",
-        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_disabled.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_INVITE_TRADE] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_down.dds",
-        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_down.dds",
-        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_disabled.dds",
-    },
-    [SI_RADIAL_MENU_CANCEL_BUTTON] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_cancel_down.dds",
-        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_cancel_down.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_RIDE_MOUNT] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_down.dds",
-        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_down.dds",
-        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_disabled.dds",
-    },
-    [SI_PLAYER_TO_PLAYER_DISMOUNT] =
-    {
-        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_down.dds",
-        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_down.dds",
-        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_disabled.dds",
-        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_disabled.dds",
-    },
-}
-
-local ALERT_IGNORED_STRING = ZO_IsConsoleOrGameCoreUI() and SI_PLAYER_TO_PLAYER_BLOCKED or SI_PLAYER_TO_PLAYER_IGNORED
-
--- Custom alert helpers
-local function AlertIgnored(customStringId)
-    local stringId = customStringId or ALERT_IGNORED_STRING
-    printToChat(GetString(stringId), true)
-    if ChatAnnouncements.SV.Group.GroupAlert then
-        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, stringId)
-    end
-    PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
-end
-
-local function AlertRestrictedCommunication()
-    printToChat(GetString(SI_PLAYER_TO_PLAYER_RESTRICTED_COMMUNICATION), true)
-    if ChatAnnouncements.SV.Group.GroupAlert then
-        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_PLAYER_TO_PLAYER_RESTRICTED_COMMUNICATION)
-    end
-    PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
-end
-
-local function AlertGroupDisabled()
-    printToChat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE), true)
-    if ChatAnnouncements.SV.Group.GroupAlert then
-        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE))
-    end
-    PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
-end
-
-local function AlertGroupKickDisabled()
-    printToChat(GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR))
-    if ChatAnnouncements.SV.Group.GroupAlert then
-        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR))
-    end
-    PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
-end
-
-local function AlreadyFriendsWarning()
-    printToChat(GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_ACCOUNT_ALREADY_FRIENDS), true)
-    if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
-        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_ACCOUNT_ALREADY_FRIENDS))
-    end
-    PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
-end
-
 -- HOOK PLAYER_TO_PLAYER Group Notifications to edit Ignore alert
 function ChatAnnouncements.PlayerToPlayerHook()
-    local originalShowPlayerInteractMenu = ZO_PlayerToPlayer.ShowPlayerInteractMenu
+    local KEYBOARD_INTERACT_ICONS =
+    {
+        [SI_PLAYER_TO_PLAYER_WHISPER] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_whisper_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_whisper_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_whisper_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_whisper_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_ADD_GROUP] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_inviteGroup_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_inviteGroup_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_inviteGroup_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_inviteGroup_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_REMOVE_GROUP] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_removeFromGroup_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_removeFromGroup_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_removeFromGroup_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_removeFromGroup_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_ADD_FRIEND] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_addFriend_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_addFriend_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_addFriend_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_addFriend_disabled.dds",
+        },
+        [SI_CHAT_PLAYER_CONTEXT_REPORT] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_reportPlayer_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_reportPlayer_over.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_INVITE_DUEL] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_duel_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_duel_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_duel_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_duel_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_tribute_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_tribute_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_tribute_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_tribute_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_INVITE_TRADE] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_trade_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_trade_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_trade_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_trade_disabled.dds",
+        },
+        [SI_RADIAL_MENU_CANCEL_BUTTON] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_cancel_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_cancel_over.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_RIDE_MOUNT] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_joinMount_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_joinMount_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_joinMount_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_joinMount_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_DISMOUNT] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/radialIcon_dismount_up.dds",
+            enabledSelected = "EsoUI/Art/HUD/radialIcon_dismount_over.dds",
+            disabledNormal = "EsoUI/Art/HUD/radialIcon_dismount_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/radialIcon_dismount_disabled.dds",
+        },
+    }
 
+    local GAMEPAD_INTERACT_ICONS =
+    {
+        [SI_PLAYER_TO_PLAYER_WHISPER] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_whisper_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_ADD_GROUP] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_inviteGroup_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_REMOVE_GROUP] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_ADD_FRIEND] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_disabled.dds",
+        },
+        [SI_CHAT_PLAYER_CONTEXT_REPORT] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_reportPlayer_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_reportPlayer_down.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_INVITE_DUEL] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_tribute_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_INVITE_TRADE] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_trade_disabled.dds",
+        },
+        [SI_RADIAL_MENU_CANCEL_BUTTON] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_cancel_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_cancel_down.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_RIDE_MOUNT] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_disabled.dds",
+        },
+        [SI_PLAYER_TO_PLAYER_DISMOUNT] =
+        {
+            enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_down.dds",
+            enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_down.dds",
+            disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_disabled.dds",
+            disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_disabled.dds",
+        },
+    }
+
+    local ALERT_IGNORED_STRING = ZO_IsConsoleOrGameCoreUI() and SI_PLAYER_TO_PLAYER_BLOCKED or SI_PLAYER_TO_PLAYER_IGNORED
+
+    -- Custom alert helpers
+    local function AlertIgnored(customStringId)
+        local stringId = customStringId or ALERT_IGNORED_STRING
+        printToChat(GetString(stringId), true)
+        if ChatAnnouncements.SV.Group.GroupAlert then
+            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, stringId)
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+    end
+
+    local function AlertRestrictedCommunication()
+        printToChat(GetString(SI_PLAYER_TO_PLAYER_RESTRICTED_COMMUNICATION), true)
+        if ChatAnnouncements.SV.Group.GroupAlert then
+            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_PLAYER_TO_PLAYER_RESTRICTED_COMMUNICATION)
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+    end
+
+    local function AlertGroupDisabled()
+        printToChat(GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE), true)
+        if ChatAnnouncements.SV.Group.GroupAlert then
+            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString("LUIE_STRING_CA_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_ONLY_LEADER_CAN_INVITE))
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+    end
+
+    local function AlertGroupKickDisabled()
+        printToChat(GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR))
+        if ChatAnnouncements.SV.Group.GroupAlert then
+            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR))
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+    end
+
+    local function AlreadyFriendsWarning()
+        printToChat(GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_ACCOUNT_ALREADY_FRIENDS), true)
+        if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
+            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_ACCOUNT_ALREADY_FRIENDS))
+        end
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+    end
+
+
+    local originalShowPlayerInteractMenu = ZO_PlayerToPlayer.ShowPlayerInteractMenu
+    local originalAddMenuEntry = ZO_PlayerToPlayer.AddMenuEntry
     function ZO_PlayerToPlayer:AddMenuEntry(text, icons, enabled, selectedFunction, errorReason)
+        if ZO_IsConsoleOrGameCoreUI() then
+            return originalAddMenuEntry(self, text, icons, enabled, selectedFunction, errorReason)
+        end
         local normalIcon = enabled and icons.enabledNormal or icons.disabledNormal
         local selectedIcon = enabled and icons.enabledSelected or icons.disabledSelected
         self:GetRadialMenu():AddEntry(text, normalIcon, selectedIcon, selectedFunction, errorReason)
     end
 
     function ZO_PlayerToPlayer:ShowPlayerInteractMenu(isIgnored)
-        -- On console/GameCore, building the menu from addon code taints the callstack so
-        -- the Gamer Card option hits private APIs. Delegate to ZOS so the menu is built
-        -- in trusted context and Gamer Card works.
         if ZO_IsConsoleOrGameCoreUI() then
             return originalShowPlayerInteractMenu(self, isIgnored)
         end
@@ -415,8 +416,4 @@ function ChatAnnouncements.PlayerToPlayerHook()
             SCREEN_NARRATION_MANAGER:QueueCustomEntry("PlayerToPlayerWheel", NARRATE_HEADER)
         end
     end
-
-    -- Do not override AddShowGamerCard: the gamer card flow calls private APIs
-    -- (GetConsoleInfoFromCharName). Let ZOS's implementation add the entry so
-    -- the callback runs in trusted context when ZO_IsConsoleOrGameCoreUI().
 end
