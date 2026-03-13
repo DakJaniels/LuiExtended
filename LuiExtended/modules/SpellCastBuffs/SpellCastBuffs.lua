@@ -1769,6 +1769,14 @@ function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
                 tooltip = Tooltips.Innate_Looking_for_Group
             elseif effectId == 4 then
                 tooltip = Tooltips.Innate_Battleground_Deserter
+            elseif effectId == 5 then
+                tooltip = Tooltips.Innate_Underdog_Damage_Bonus
+            elseif effectId == 6 then
+                tooltip = Tooltips.Innate_Underdog_Healing_Bonus
+            elseif effectId == 7 then
+                tooltip = Tooltips.Innate_Solo_Queue_Experience_Bonus
+            elseif effectId == 8 then
+                tooltip = Tooltips.Innate_Solo_Queue_Alliance_Point_Bonus
             end
 
             -- Route artificial effects (Battle Spirit, ESO Plus, BG Deserter, etc.) always to player context
