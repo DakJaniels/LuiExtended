@@ -63,11 +63,15 @@ local strings =
     LUIE_STRING_SKILL_TAUNT_TP = "Provoqué.",
     LUIE_STRING_SKILL_TAUNT_OTHER_TP = "This enemy is taunted and will concentrate all attacks on you for |cFFFFFF<<1>>|r seconds.",
     LUIE_STRING_SKILL_DISGUISE_TP = "Une fois déguisé, vous poouvez être détecté par les sentinelles ou en effectuant des actions suspectes.\n\nSubir des dégâts autres que par chute détruira votre déguisement.",
-    LUIE_STRING_SKILL_BATTLE_SPIRIT_TP = "• Reduce damage taken and shield strength by |cFFFFFF50|r%\n• Reduce healing received by |cFFFFFF55|r%\n• Reduce Health Recovery by |cFFFFFF50|r%\n• Increase the range of abilities with a range greater than |cFFFFFF28|r meters by |cFFFFFF8|r meters",
-    LUIE_STRING_SKILL_BATTLE_SPIRIT_IMPERIAL_CITY_TP = "• Reduce damage taken and shield strength by |cFFFFFF50|r%\n• Reduce healing received by |cFFFFFF55|r%\n• Reduce Health Recovery by |cFFFFFF50|r%",
+    LUIE_STRING_SKILL_BATTLE_SPIRIT_TP = "• Les dégâts subis et la force des Boucliers protecteurs sont diminués de |cFFFFFF50|r %\n• Les soins reçus sont diminués de |cFFFFFF55|r %\n• La récupération de Santé est diminuée de |cFFFFFF50|r %\n• Les portées de compétence de |cFFFFFF28|r mètres ou plus sont augmentées de |cFFFFFF8|r mètres\n• Réduit les soins reçus de |cFFFFFF33|r % lorsque vous avez 8 effets de soins persistants ou plus actifs en même temps.",
+    LUIE_STRING_SKILL_BATTLE_SPIRIT_IMPERIAL_CITY_TP = "• Les dégâts subis et la force des Boucliers protecteurs sont diminués de |cFFFFFF50|r %\n• Les soins reçus sont diminués de |cFFFFFF55|r %\n• La récupération de Santé est diminuée de |cFFFFFF50|r %\n• Réduit les soins reçus de |cFFFFFF33|r % lorsque vous avez 8 effets de soins persistants ou plus actifs en même temps.",
     LUIE_STRING_SKILL_RECALL_PENALTY_TP = "Vous vous êtes récemment téléporté à un Oratoire, vous devez payer des frais supplémentaires pour le faire à nouveau.",
-    LUIE_STRING_SKILL_BATTLEGROUND_DESERTER_TP = "Vous avez quitté un champ de bataille plus tôt et ne pouvez plus en rejoindre ou gagner des points d'alliance à partir de sources JcJ.",
-    LUIE_STRING_SKILL_LOOKING_FOR_GROUP_TP = "• Augmente la santé maximale de |cFFFFFF20|r%\n• Augmente les dégâts des armes et des sorts de |cFFFFFF25|r%",
+    LUIE_STRING_SKILL_BATTLEGROUND_DESERTER_TP = "• Vous ne pouvez pas vous mettre en file d'attente d'un Champ de bataille.\n• Vous ne pouvez gagner de Points d'Alliance d'aucune source.",
+    LUIE_STRING_SKILL_LOOKING_FOR_GROUP_TP = "• Santé maximale augmentée de |cFFFFFF20|r %\n• Dégâts physiques et magiques augmentés de |cFFFFFF25|r %",
+    LUIE_STRING_SKILL_UNDERDOG_DAMAGE_BONUS_TP = "Dégâts infligés augmentés de <<1>> %.\n\nCet effet est influencé par le nombre de joueurs manquants dans votre équipe.",
+    LUIE_STRING_SKILL_UNDERDOG_HEALING_BONUS_TP = "Soins prodigués augmentés de <<1>> %.\n\nCet effet est influencé par le nombre de joueurs manquants dans votre équipe.",
+    LUIE_STRING_SKILL_SOLO_QUEUE_EXPERIENCE_BONUS_TP = "Augmente l'expérience gagnée de <<1>> %.",
+    LUIE_STRING_SKILL_SOLO_QUEUE_ALLIANCE_POINT_BONUS_TP = "Augmente les points d'alliance gagnés de <<1>> %.",
 
     ----------------------------------------------------------------
     -- ITEM / CONSUMABLE TOOLTIPS ----------------------------------
@@ -93,7 +97,7 @@ local strings =
     LUIE_STRING_SKILL_REMOVE_TOOLTIP_PACK_LEADERS_BROTH = "Si vous êtes un loup-garou, la moelle riche facilitera aussi légèrement votre transformation.\nCes effets sont échelonnés en fonction de votre niveau.",                                          -- Must be exact match in each localization
     LUIE_STRING_SKILL_ADD_TOOLTIP_PACK_LEADERS_BROTH = "\nSi vous êtes un loup-garou, la moelle riche facilitera aussi légèrement votre transformation.",
     LUIE_STRING_SKILL_REMOVE_TOOLTIP_DISASTROUSLY_BLOODY = "Si vous êtes un vampire, le sang contaminé dans cette boisson vous corrompt, augmentant votre niveau à 4.\nCes effets sont échelonnés en fonction de votre niveau.",                             -- Must be exact match in each localization
-    LUIE_STRING_SKILL_ESO_PLUS_TP = "Augmente les points d'expérience, d'or et d'inspiration gagnés de |cFFFFFF10|r%.\nAugmente la vitesse de recherche de trait de |cFFFFFF10|r%.",
+    LUIE_STRING_SKILL_ESO_PLUS_TP = "Gagnez +10 % d'expérience, d'or, de points de Tome (Défis uniquement), de points d'Alliance (Seulement pour les lignes de compétences JcJ, le rang d'Alliance et les monnaies), de pierres de Tel Var (sur les monstres seulement), de fortunes d'Archive et d'inspiration d'artisanat, ainsi que la vitesse de recherche des traits.",
 
     -- Collectible
     LUIE_STRING_SKILL_COLLECTIBLE_MYSTERY_MEAT = "Viande mystère",

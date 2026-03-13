@@ -63,11 +63,15 @@ local strings =
     LUIE_STRING_SKILL_TAUNT_TP = "Спровоцирован.",
     LUIE_STRING_SKILL_TAUNT_OTHER_TP = "This enemy is taunted and will concentrate all attacks on you for |cFFFFFF<<1>>|r seconds.",
     LUIE_STRING_SKILL_DISGUISE_TP = "Disguised. You can be revealed by sentries or performing suspicious activity.\n\nTaking any damage other than fall damage will destroy your disguise.",
-    LUIE_STRING_SKILL_BATTLE_SPIRIT_TP = "• Reduce damage taken and shield strength by |cFFFFFF50|r%\n• Reduce healing received by |cFFFFFF55|r%\n• Reduce Health Recovery by |cFFFFFF50|r%\n• Increase the range of abilities with a range greater than |cFFFFFF28|r meters by |cFFFFFF8|r meters",
-    LUIE_STRING_SKILL_BATTLE_SPIRIT_IMPERIAL_CITY_TP = "• Reduce damage taken and shield strength by |cFFFFFF50|r%\n• Reduce healing received by |cFFFFFF55|r%\n• Reduce Health Recovery by |cFFFFFF50|r%",
+    LUIE_STRING_SKILL_BATTLE_SPIRIT_TP = "• Получаемый урон и сила щитов уменьшены на |cFFFFFF50%|r.\n• Получаемое лечение уменьшено на |cFFFFFF55%|r.\n• Пока на вас действуют 3 или более эффектов периодического лечения, текущее получаемое лечение уменьшается на |cFFFFFF50%|r.\n• Восстановление здоровья уменьшено на |cFFFFFF50%|r.\n• У способностей с дальностью действия |cFFFFFF28|r м или более дальность действия увеличивается на |cFFFFFF8|r м.",
+    LUIE_STRING_SKILL_BATTLE_SPIRIT_IMPERIAL_CITY_TP = "• Получаемый урон и сила щитов уменьшены на |cFFFFFF50%|r.\n• Получаемое лечение уменьшено на |cFFFFFF55%|r.\n• Восстановление здоровья уменьшено на |cFFFFFF50%|r.\n• Пока на вас действуют 3 или более эффектов периодического лечения, текущее получаемое лечение уменьшается на |cFFFFFF50%|r.",
     LUIE_STRING_SKILL_RECALL_PENALTY_TP = "Вы недавно пользовались перемещением к дорожному святилищу и должно заплатить дополнительное золото, чтобы воспользоваться им вновь.",
-    LUIE_STRING_SKILL_BATTLEGROUND_DESERTER_TP = "You left a Battleground match early and cannot queue again or earn Alliance points from any PvP sources.",
-    LUIE_STRING_SKILL_LOOKING_FOR_GROUP_TP = "• Increase Max Health by |cFFFFFF20|r%\n• Increase Weapon and Spell Damage by |cFFFFFF25|r%",
+    LUIE_STRING_SKILL_BATTLEGROUND_DESERTER_TP = "• Вы не можете встать в очередь на матч на поле сражения.\n• Вы не можете получать очки альянса из любого источника PvP.",
+    LUIE_STRING_SKILL_LOOKING_FOR_GROUP_TP = "• Максимальный запас здоровья увеличен на |cFFFFFF20%|r.\n• Сила оружия и заклинаний увеличена на |cFFFFFF25%|r.",
+    LUIE_STRING_SKILL_UNDERDOG_DAMAGE_BONUS_TP = "Наносимый урон увеличивается на <<1>>%.\n\nЭтот эффект зависит от количества недостающих игроков в вашей группе.",
+    LUIE_STRING_SKILL_UNDERDOG_HEALING_BONUS_TP = "Исходящее лечение увеличивается на <<1>>%.\n\nЭтот эффект зависит от количества недостающих игроков в вашей группе.",
+    LUIE_STRING_SKILL_SOLO_QUEUE_EXPERIENCE_BONUS_TP = "Количество получаемого опыта увеличивается на <<1>>%.",
+    LUIE_STRING_SKILL_SOLO_QUEUE_ALLIANCE_POINT_BONUS_TP = "Количество получаемых очков альянса увеличивается на <<1>>%.",
 
     ----------------------------------------------------------------
     -- ITEM / CONSUMABLE TOOLTIPS ----------------------------------
@@ -93,7 +97,7 @@ local strings =
     LUIE_STRING_SKILL_REMOVE_TOOLTIP_PACK_LEADERS_BROTH = "If you are a werewolf, the rich marrow will also slightly ease your transformation.\nThese effects are scaled based on your level.", -- Must be exact match in each localization
     LUIE_STRING_SKILL_ADD_TOOLTIP_PACK_LEADERS_BROTH = "\nIf you are a werewolf, the rich marrow will also slightly ease your transformation.",
     LUIE_STRING_SKILL_REMOVE_TOOLTIP_DISASTROUSLY_BLOODY = "If you are a vampire, the tainted blood in this drink will corrupt you, increasing your Stage to 4.\nThese effects are scaled based on your level.", -- Must be exact match in each localization
-    LUIE_STRING_SKILL_ESO_PLUS_TP = "Увеличивает получаемые Опыт, Золото и Вдохновение на |cFFFFFF10|r%.\nУвеличивает скорость исследования особенностей на |cFFFFFF10|r%.",
+    LUIE_STRING_SKILL_ESO_PLUS_TP = "Количество получаемых опыта, золота, очков фолиантов (за деяния), очков альянса (валюта, а также прогресс в звании и военных навыках), камней Тель-Вар (за убийство монстров), ценностей из Архива, ремесленного вдохновения, а также скорость изучения особенностей увеличиваются на 10%.",
 
     -- Collectible
     LUIE_STRING_SKILL_COLLECTIBLE_MYSTERY_MEAT = "Mystery Meat",

@@ -317,6 +317,10 @@ local tooltips =
     Innate_Ayleid_Well_Fortified = GetString(LUIE_STRING_SKILL_AYLEID_WELL_FORTIFIED_TP),
     Innate_Firelight = GetString(LUIE_STRING_SKILL_FIRELIGHT_TP),
     Innate_ESO_Plus = GetString(LUIE_STRING_SKILL_ESO_PLUS_TP),
+    Innate_Underdog_Damage_Bonus = GetString(LUIE_STRING_SKILL_UNDERDOG_DAMAGE_BONUS_TP),
+    Innate_Underdog_Healing_Bonus = GetString(LUIE_STRING_SKILL_UNDERDOG_HEALING_BONUS_TP),
+    Innate_Solo_Queue_Experience_Bonus = GetString(LUIE_STRING_SKILL_SOLO_QUEUE_EXPERIENCE_BONUS_TP),
+    Innate_Solo_Queue_Alliance_Point_Bonus = GetString(LUIE_STRING_SKILL_SOLO_QUEUE_ALLIANCE_POINT_BONUS_TP),
 
     -- Mundus Stones
     Boon_Lady = GetString(LUIE_STRING_SKILL_MUNDUS_BASIC_LADY),

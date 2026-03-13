@@ -72,6 +72,42 @@ local artificialEffectOverride =
         override = true,
         tooltip = Tooltips.Innate_Battleground_Deserter -- Custom tooltip for deserter penalty
     },
+
+    -- Underdog Damage Bonus
+    -- Index 5: PvP underdog bonus to damage
+    [5] =
+    {
+        override = true,
+        name = "Underdog Damage Bonus",
+        tooltip = Tooltips.Innate_Underdog_Damage_Bonus,
+    },
+
+    -- Underdog Healing Bonus
+    -- Index 6: PvP underdog bonus to healing
+    [6] =
+    {
+        override = true,
+        name = "Underdog Healing Bonus",
+        tooltip = Tooltips.Innate_Underdog_Healing_Bonus,
+    },
+
+    -- Solo Queue Experience Bonus
+    -- Index 7: Solo queue battleground experience bonus
+    [7] =
+    {
+        override = true,
+        name = "Solo Queue Experience Bonus",
+        tooltip = Tooltips.Innate_Solo_Queue_Experience_Bonus,
+    },
+
+    -- Solo Queue Alliance Point Bonus
+    -- Index 8: Solo queue battleground AP bonus
+    [8] =
+    {
+        override = true,
+        name = "Solo Queue Alliance Point Bonus",
+        tooltip = Tooltips.Innate_Solo_Queue_Alliance_Point_Bonus,
+    },
 }
 
 
