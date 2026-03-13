@@ -359,11 +359,15 @@ LUIE.HookGamePadStats = function ()
                     selectedData.isArtificial = true
                 end
                 if selectedData.isArtificial then
+                    -- Map artificial effect IDs to our tracking IDs (game order: 0=ESO Plus, 1=Battle Spirit, 2=LFG, 3=IC Battle Spirit, 4=BG Deserter, 5-8=bonuses)
                     if abilityId == 0 then
-                        -- ESO Plus
-                        labelAbilityId = 63601
-                    elseif abilityId == 1 or abilityId == 2 then
-                        labelAbilityId = 999014
+                        labelAbilityId = 63601 -- ESO Plus
+                    elseif abilityId == 1 or abilityId == 3 then
+                        labelAbilityId = 999014 -- Battle Spirit / IC Battle Spirit
+                    elseif abilityId == 2 then
+                        labelAbilityId = 999016 -- Looking For Group
+                    elseif abilityId == 4 then
+                        labelAbilityId = 999015 -- Battleground Deserter
                     else
                         labelAbilityId = "Artificial"
                     end
