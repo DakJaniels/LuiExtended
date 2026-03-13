@@ -47,6 +47,7 @@ local castBarTable =
         [ACTION_RESULT_FEARED] = true,
         [ACTION_RESULT_DISORIENTED] = true,
         [ACTION_RESULT_CHARMED] = true,
+        [ACTION_RESULT_WEAPONSWAP] = true,
     },
 
     --------------------------------------------------------------------------------------------------------------------------------
@@ -419,6 +420,9 @@ local castBarTable =
         ----------------------------------------------------------------
         -- PLAYER ABILITIES --------------------------------------------
         ----------------------------------------------------------------
+
+        -- Dragonknight
+        [20930] = 4800, -- Engulfing Dragonfire
 
         -- Necromancer
         [115478] = 1200, -- Bone Goliath Self Snare (Bone Goliath Transformation)
@@ -828,6 +832,7 @@ local castBarTable =
         [119107] = true, -- NAME ME Infect Brew (Winnowing Plague Decoction)
 
         -- Dragonknight
+        [20930] = true, -- Engulfing Dragonfire
         [29032] = true, -- Stonefist (Stonefist)
         [31816] = true, -- Stone Giant (Stone Giant)
 

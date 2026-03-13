@@ -49,7 +49,7 @@ local barHighlightOverride =
     [20660] = { newId = 44373 },                        -- Burning Embers
     [20917] = { newId = 31102 },                        -- Fiery Breath
     [20944] = { newId = 31103 },                        -- Noxious Breath
-    [20930] = { newId = 31104 },                        -- Engulfing Flames
+    [20930] = { newId = 20930 },                        -- Engulfing Flames
     [20499] = { newId = 61737 },                        -- Empowering Chains --> Empower
     [32963] = { newId = 32958 },                        -- Shifting Standard
 
