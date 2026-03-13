@@ -1723,8 +1723,8 @@ function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
 
     if artificialEffectId then
         local removeEffect = artificialEffectId
-        -- Battle Spirit handling (1, 2): set to fake id so it matches the target display
-        if artificialEffectId == 1 or artificialEffectId == 2 then
+        -- Battle Spirit handling (1 = Cyrodiil/BG/Duels, 3 = Imperial City): set to fake id so it matches the target display
+        if artificialEffectId == 1 or artificialEffectId == 3 then
             removeEffect = 999014
         end
         -- Artificial effects are always stored under "player1"; remove from there.
@@ -1735,19 +1735,20 @@ function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
     for effectId in ZO_GetNextActiveArtificialEffectIdIter do
         -- Skip only this effect when its "show" setting is off; do not bail out of the loop.
         local skip = (effectId == 0 and SpellCastBuffs.SV.IgnoreEsoPlusPlayer) or
-            ((effectId == 1 or effectId == 2) and SpellCastBuffs.SV.IgnoreBattleSpiritPlayer)
+            ((effectId == 1 or effectId == 3) and SpellCastBuffs.SV.IgnoreBattleSpiritPlayer)
         if skip then
             -- continue to next effect
         else
             local displayName, iconFile, effectType, _, timeStartedS, timeEndingS = GetArtificialEffectInfo(effectId)
             local duration = 0
 
-            if effectId == 3 then
+            -- [4] = Battleground Deserter (has cooldown); [0],[1],[3] = permanent (ESO Plus, Battle Spirit, IC Battle Spirit)
+            if effectId == 4 then
                 duration = 300000
                 timeEndingS = timeStartedS + (GetLFGCooldownTimeRemainingSeconds(LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE) * 1000)
                 effectType = BUFF_EFFECT_TYPE_BUFF
-            elseif effectId == 0 or effectId == 1 or effectId == 2 then
-                -- ESO Plus and Battle Spirit are permanent; no timer.
+            elseif effectId == 0 or effectId == 1 or effectId == 3 then
+                -- ESO Plus and Battle Spirit (Cyrodiil + Imperial City) are permanent; no timer.
                 duration = 0
                 timeEndingS = nil
             end
@@ -1756,14 +1757,18 @@ function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
             local artificial = true
             if effectId == 0 then
                 tooltip = Tooltips.Innate_ESO_Plus
-            elseif effectId == 1 or effectId == 2 then
-                if effectId == 1 then
-                    tooltip = Tooltips.Innate_Battle_Spirit
-                else
-                    tooltip = Tooltips.Innate_Battle_Spirit_Imperial_City
-                end
+            elseif effectId == 1 then
+                tooltip = Tooltips.Innate_Battle_Spirit
                 effectId = 999014
                 artificial = false
+            elseif effectId == 3 then
+                tooltip = Tooltips.Innate_Battle_Spirit_Imperial_City
+                effectId = 999014
+                artificial = false
+            elseif effectId == 2 then
+                tooltip = Tooltips.Innate_Looking_for_Group
+            elseif effectId == 4 then
+                tooltip = Tooltips.Innate_Battleground_Deserter
             end
 
             -- Route artificial effects (Battle Spirit, ESO Plus, BG Deserter, etc.) always to player context

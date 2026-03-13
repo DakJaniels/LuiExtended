@@ -116,34 +116,31 @@ LUIE.HookKeyboardStats = function ()
     -- Process artificial effects
     local function ProcessArtificialEffects(effectsRows, effectsRowPool)
         for effectId in ZO_GetNextActiveArtificialEffectIdIter do
-            -- Skip ESO Plus buff (effectId == 0)
-            if effectId ~= 0 then
-                local displayName, iconFile, effectType, sortOrder, startTime, endTime = GetArtificialEffectInfo(effectId)
-                local effectsRow = effectsRowPool:AcquireObject()
-                effectsRow.name:SetText(zo_strformat(SI_ABILITY_TOOLTIP_NAME, displayName))
-                effectsRow.icon:SetTexture(iconFile)
-                effectsRow.effectType = effectType
-                local duration = startTime - endTime
+            local displayName, iconFile, effectType, sortOrder, startTime, endTime = GetArtificialEffectInfo(effectId)
+            local effectsRow = effectsRowPool:AcquireObject()
+            effectsRow.name:SetText(zo_strformat(SI_ABILITY_TOOLTIP_NAME, displayName))
+            effectsRow.icon:SetTexture(iconFile)
+            effectsRow.effectType = effectType
+            local duration = startTime - endTime
+            effectsRow.time:SetHidden(duration == 0)
+            effectsRow.time.endTime = endTime
+            effectsRow.sortOrder = sortOrder
+            effectsRow.tooltipTitle = zo_strformat(SI_ABILITY_TOOLTIP_NAME, displayName)
+            effectsRow.effectId = effectId
+            effectsRow.isArtificial = true
+            effectsRow.isArtificialTooltip = true
+
+            -- Special handling for Battleground Deserter Penalty [4]
+            if effectId == 4 then
+                startTime = GetFrameTimeSeconds()
+                local cooldown = GetLFGCooldownTimeRemainingSeconds(LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE)
+                endTime = startTime + cooldown
+                duration = startTime - endTime
                 effectsRow.time:SetHidden(duration == 0)
                 effectsRow.time.endTime = endTime
-                effectsRow.sortOrder = sortOrder
-                effectsRow.tooltipTitle = zo_strformat(SI_ABILITY_TOOLTIP_NAME, displayName)
-                effectsRow.effectId = effectId
-                effectsRow.isArtificial = true
-                effectsRow.isArtificialTooltip = true
-
-                -- Special handling for Battleground Deserter Penalty
-                if effectId == 1 then
-                    startTime = GetFrameTimeSeconds()
-                    local cooldown = GetLFGCooldownTimeRemainingSeconds(LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE)
-                    endTime = startTime + cooldown
-                    duration = startTime - endTime
-                    effectsRow.time:SetHidden(duration == 0)
-                    effectsRow.time.endTime = endTime
-                    effectsRow.isArtificial = false -- Sort with normal buffs
-                end
-                table.insert(effectsRows, effectsRow)
+                effectsRow.isArtificial = false -- Sort with normal buffs
             end
+            table.insert(effectsRows, effectsRow)
         end
         return effectsRows
     end
@@ -327,22 +324,15 @@ LUIE.HookKeyboardStats = function ()
                     control.artificial = true
                 end
                 if control.isArtificial then
-                    -- Map artificial effect IDs to our tracking IDs
+                    -- Map artificial effect IDs to our tracking IDs (game order: 0=ESO Plus, 1=Battle Spirit, 2=LFG, 3=IC Battle Spirit, 4=BG Deserter, 5-8=bonuses)
                     if control.effectId == 0 then
-                        -- ESO Plus
-                        labelAbilityId = 63601
-                    elseif control.effectId == 1 or control.effectId == 2 then
-                        -- Battle Spirit (Cyrodiil)
-                        labelAbilityId = 999014
-                    elseif control.effectId == 3 then
-                        -- Battleground Deserter
-                        labelAbilityId = 999015
+                        labelAbilityId = 63601 -- ESO Plus
+                    elseif control.effectId == 1 or control.effectId == 3 then
+                        labelAbilityId = 999014 -- Battle Spirit / IC Battle Spirit
+                    elseif control.effectId == 2 then
+                        labelAbilityId = 999016 -- Looking For Group
                     elseif control.effectId == 4 then
-                        -- LFG Deserter
-                        labelAbilityId = 999016
-                    elseif control.effectId == 5 then
-                        -- Battle Spirit (Imperial City)
-                        labelAbilityId = 999018
+                        labelAbilityId = 999015 -- Battleground Deserter
                     else
                         labelAbilityId = "Artificial"
                     end
