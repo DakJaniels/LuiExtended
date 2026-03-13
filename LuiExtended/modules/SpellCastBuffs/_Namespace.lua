@@ -213,6 +213,8 @@ local SpellCastBuffs = ZO_Object:Subclass()
 --- @field DefaultIconOptions number
 --- @field ShowSharedEffects boolean
 --- @field ShowSharedMajorMinor boolean
+--- @field player_longOffsetX number|nil
+--- @field player_longOffsetY number|nil
 --- @field playerbOffsetX number|nil
 --- @field playerbOffsetY number|nil
 --- @field playerdOffsetX number|nil
