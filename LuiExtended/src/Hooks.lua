@@ -366,6 +366,16 @@ LUIE.API_Hooks = function ()
             local function GenArtificialEffectTooltipText(tooltip)
                 if Effects.ArtificialEffectOverride[artificialEffectId] and Effects.ArtificialEffectOverride[artificialEffectId].tooltip then
                     tooltip = Effects.ArtificialEffectOverride[artificialEffectId].tooltip
+                    -- Effects 5-8 use <<1>> for the percentage; get value from game and format
+                    if tooltip and tooltip:find("<<1>>") then
+                        local zosText = zos_GetArtificialEffectTooltipText(artificialEffectId)
+                        local value = zosText and (zosText:match("(%d+)%s*%%") or zosText:match("(%d+).-%%"))
+                        if value then
+                            tooltip = zo_strformat(tooltip, value)
+                        else
+                            tooltip = zosText or tooltip
+                        end
+                    end
                     return tooltip
                 else
                     tooltip = zos_GetArtificialEffectTooltipText(artificialEffectId)
