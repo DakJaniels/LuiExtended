@@ -21,6 +21,7 @@ local contingency = { newId = 222285, showFakeAura = true, noRemove = true, dura
 --- @field noRemove boolean | nil Whether to keep the effect active on fading or target change
 --- @field duration integer | nil Override duration for the effect (in milliseconds)
 --- @field hide boolean | nil Whether to hide this bar highlight entirely
+--- @field combatTrack boolean|nil Register EVENT_COMBAT_EVENT for newId without g_barFakeAura (keeps EVENT_EFFECT_CHANGED for fade)
 
 --- @type table<integer, BarHighlightOverrideOptions>
 local barHighlightOverride =
@@ -39,8 +40,11 @@ local barHighlightOverride =
     -- Ardent Flame
     [23806] = { newId = 23808 },                        -- Lava Whip --> Off Balance
     [20805] = { newId = 122658 },                       -- Molten Whip --> Seething Fury
-    [20816] = { newId = 164731 },                       -- Flame Lash --> Off Balance
-    [20824] = { newId = 164731 },                       -- Flame Lash --> Off Balance
+    -- Flame Lash / Power Lash (U41+): stacks use abilityId 34117 in EVENT_COMBAT_EVENT (EFFECT_GAINED hitValue=stacks, EFFECT_GAINED_DURATION hitValue=ms).
+    -- combatTrack registers combat listener without g_barFakeAura so player buff fade still clears via EVENT_EFFECT_CHANGED.
+    [20816] = { newId = 34117, combatTrack = true, duration = 20000 },
+    [20824] = { newId = 34117 },
+    [23105] = { newId = 34117, combatTrack = true, duration = 20000 },
     [20657] = { newId = 44363 },                        -- Searing Strike
     [20668] = { newId = 44369 },                        -- Searing Claw
     [31837] = { showFakeAura = true, duration = 4000 }, -- Core of Flame
