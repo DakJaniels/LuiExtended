@@ -20,6 +20,8 @@ local Effects = Data.Effects
 --- @type table<integer, boolean>
 local addNoDurationBarHighlight =
 {
+    -- Dragonknight
+    [34117] = true, -- Power Lash stacks (Flame Lash); combat supplies duration; API may still read 0 for bar slot registration
 
     -- Necromancer
     [115240] = true, -- Bitter Harvest

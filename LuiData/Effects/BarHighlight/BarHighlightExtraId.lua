@@ -25,6 +25,8 @@ local barHighlightExtraId =
 {
 
     -- Dragonknight
+    [20824] = 34117, -- Power Lash proc bar id --> stack buff id used in combat / buff events
+    [23105] = 34117, -- Power Lash (alt rank) --> same stack id
     [20253] = 31898, -- Burning Talons
     [61785] = 32685, -- Fossilize
 
