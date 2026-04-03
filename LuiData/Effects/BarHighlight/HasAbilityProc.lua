@@ -22,6 +22,7 @@ local Abilities = Data.Abilities
 Effects.IsAbilityProc =
 {
     [20824] = true, -- Power Lash (Flame Lash)
+    [23105] = true, -- Power Lash (Flame Lash)
     [61907] = true, -- Assassin's Will (Grim Focus)
     [61932] = true, -- Assassin's Scourge (Relentless Focus)
     [61930] = true, -- Assassin's Will (Merciless Resolve)

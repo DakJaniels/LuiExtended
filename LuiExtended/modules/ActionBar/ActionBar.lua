@@ -2365,6 +2365,50 @@ function ActionBar.ToggleBackbarSaturation(slotNum, desaturate)
 end
 
 -- -----------------------------------------------------------------------------
+local ACTION_BUTTON_BGS = { ability = "EsoUI/Art/ActionBar/abilityInset.dds", item = "EsoUI/Art/ActionBar/quickslotBG.dds" }
+local ACTION_BUTTON_BORDERS = { normal = "EsoUI/Art/ActionBar/abilityFrame64_up.dds", mouseDown = "EsoUI/Art/ActionBar/abilityFrame64_down.dds" }
+local FORCE_SUPPRESS_COOLDOWN_SOUND = true
+local BOUNCE_DURATION_MS = 500
+
+local ApplyStyle = function (self, template)
+    WINDOW_MANAGER:ApplyTemplateToControl(self.slot, template)
+
+    local isGamepad = IsInGamepadPreferredMode()
+    self.button:SetNormalTexture(isGamepad and "" or ACTION_BUTTON_BORDERS.normal)
+    self.button:SetPressedTexture(isGamepad and "" or ACTION_BUTTON_BORDERS.mouseDown)
+    self.countText:SetFont(isGamepad and "ZoFontGamepadBold27" or "ZoFontGameShadow")
+    self:ApplySwapAnimationStyle()
+
+    if ZO_ActionBar_IsUltimateSlot(self:GetSlot(), self:GetHotbarCategory()) then
+        local decoration = self.slot:GetNamedChild("Decoration")
+        if decoration then
+            decoration:SetHidden(isGamepad)
+        end
+    end
+
+    if self.showingCooldown then
+        self.cooldown:SetHidden(isGamepad)
+
+        if isGamepad then
+            local slotNum = self:GetSlot()
+            local hotbarCategory = self:GetHotbarCategory()
+            local remain = GetSlotCooldownInfo(slotNum, hotbarCategory)
+            self:PlayAbilityUsedBounce(BOUNCE_DURATION_MS + remain)
+
+            if not self.itemQtyFailure then
+                self.icon:SetDesaturation(0)
+            end
+        else
+            self:ResetBounceAnimation()
+        end
+    else
+        self:ResetBounceAnimation()
+    end
+
+    self:SetCooldownEdgeState(self.showingCooldown)
+    self:UpdateUsable()
+end
+
 -- Called on initialization and when swapping in and out of Gamepad mode
 --- Applies platform style (keyboard/gamepad) to backbar button layout and anchors.
 function ActionBar.BackbarSetupTemplate()
@@ -2385,7 +2429,7 @@ function ActionBar.BackbarSetupTemplate()
                 anchorTarget = weaponSwapControl
             end
             targetButton:ApplyAnchor(anchorTarget, style.abilitySlotOffsetX)
-            targetButton:ApplyStyle(buttonTemplate)
+            ApplyStyle(targetButton, buttonTemplate)
         end
 
         lastButton = targetButton

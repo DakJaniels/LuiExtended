@@ -30,7 +30,7 @@ local function SetupActionSlot(slotObject, slotId)
 
     -- Added function - Replace icons if needed
     local abilityId = GetSlotTrueBoundId(slotId, slotObject:GetHotbarCategory())
-    if Effects.BarIdOverride[abilityId] then
+    if Effects.BarIdOverride[abilityId] and not Effects.IsAbilityProc[abilityId] and not Effects.BaseForAbilityProc[abilityId] then
         slotIcon = Effects.BarIdOverride[abilityId]
     end
 
