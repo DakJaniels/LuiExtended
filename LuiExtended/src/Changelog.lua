@@ -12,6 +12,25 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.0.4
+    "|cFFA500LuiExtended Version 7.2.0.4|r",
+    "",
+    -- Fixed
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Error when clicking link for timed activities due to 11.3.5 code change in the `ZO_TimedActivities_Manager` Class.",
+    "",
+    -- Version Header 7.2.0.3 (console)
+    "|cFFA500LuiExtended Version 7.2.0.3|r",
+    "|c888888Console only.|r",
+    "",
+    -- Fixed
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Error on player interaction.",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: setting to move the player long buffs container.",
+    "",
     -- Version Header 7.2.0.2
     "|cFFA500LuiExtended Version 7.2.0.2|r",
     "",
