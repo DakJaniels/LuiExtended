@@ -6140,7 +6140,7 @@ function LUIE.HandleClickEvent(rawLink, mouseButton, linkText, linkStyle, linkTy
     end
     if linkType == "LINK_TYPE_LUITIMEDACTIVITY" then
         if IsTimedActivitySystemAvailable() then
-            ZO_ShowTimedActivities()
+            TIMED_ACTIVITIES_MANAGER:ShowTimedActivitiesScene()
         end
         return true
     end
