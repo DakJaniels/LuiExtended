@@ -16,6 +16,7 @@ local Effects = Data.Effects
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- When a bar ability proc with a matching id appears, change the icon.
+-- Note: SetupActionSlot skips BarIdOverride for ids in IsAbilityProc (flicker fix); use EffectOverride[].icon for those (see actionbutton SetupActionSlot).
 --------------------------------------------------------------------------------------------------------------------------------
 --- @class (partial) BarIdOverride
 local barIdOverride =
