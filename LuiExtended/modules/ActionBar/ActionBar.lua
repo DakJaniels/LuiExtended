@@ -1145,6 +1145,11 @@ function ActionBar.UpdateBarHighlightTables()
                     end
                     g_barFakeAura[abilityId] = true
                 end
+            elseif value.combatTrack == true and value.newId then
+                g_barOverrideCI[value.newId] = true
+                if value.duration then
+                    g_barDurationOverride[value.newId] = value.duration
+                end
             else
                 if value.noRemove then
                     if value.newId then
@@ -1619,6 +1624,46 @@ end
 function ActionBar.OnAbilityUsed(actionSlotIndex)
     if actionSlotIndex == 2 then
         ActionBar.StopCastBar()
+    end
+
+    -- Power Lash consumes a stack per cast; combat often does not emit EFFECT_GAINED per stack, so sync from slot use (bound 20824 / 23105).
+    local POWER_LASH_STACK_TRACK = 34117
+    if not ActionBar.SV.ShowToggled then
+        return
+    end
+    if not (g_toggledSlotsFront[POWER_LASH_STACK_TRACK] or g_toggledSlotsBack[POWER_LASH_STACK_TRACK]) or not g_toggledSlotsRemain[POWER_LASH_STACK_TRACK] then
+        return
+    end
+
+    local bound = GetSlotTrueBoundId(actionSlotIndex, g_hotbarCategory)
+    if bound ~= 20824 and bound ~= 23105 then
+        return
+    end
+
+    local stacks = g_toggledSlotsStack[POWER_LASH_STACK_TRACK]
+    if not stacks or stacks <= 0 then
+        return
+    end
+
+    stacks = stacks - 1
+    g_toggledSlotsStack[POWER_LASH_STACK_TRACK] = stacks > 0 and stacks or nil
+
+    local now = GetGameTimeMilliseconds()
+    if not g_toggledSlotsStack[POWER_LASH_STACK_TRACK] then
+        g_toggledSlotsRemain[POWER_LASH_STACK_TRACK] = nil
+        if g_toggledSlotsFront[POWER_LASH_STACK_TRACK] then
+            ActionBar.HideSlot(g_toggledSlotsFront[POWER_LASH_STACK_TRACK], POWER_LASH_STACK_TRACK)
+        end
+        if g_toggledSlotsBack[POWER_LASH_STACK_TRACK] then
+            ActionBar.HideSlot(g_toggledSlotsBack[POWER_LASH_STACK_TRACK], POWER_LASH_STACK_TRACK)
+        end
+    else
+        if g_toggledSlotsFront[POWER_LASH_STACK_TRACK] then
+            ActionBar.ShowSlot(g_toggledSlotsFront[POWER_LASH_STACK_TRACK], POWER_LASH_STACK_TRACK, now, false)
+        end
+        if g_toggledSlotsBack[POWER_LASH_STACK_TRACK] then
+            ActionBar.ShowSlot(g_toggledSlotsBack[POWER_LASH_STACK_TRACK], POWER_LASH_STACK_TRACK, now, false)
+        end
     end
 end
 
@@ -2151,10 +2196,16 @@ local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeTyp
 
     if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
         if ActionBar.SV.ShowToggled then
-            local currentTime = GetGameTimeMilliseconds()
-            g_toggledSlotsRemain[abilityId] = 1000 * endTime
-            if not isStackBaseAbility[abilityId] then g_toggledSlotsStack[abilityId] = stackCount end
-            ShowToggledSlots(abilityId, currentTime)
+            if abilityId == 34117 and stackCount == 0 then
+                HideToggledSlots(abilityId)
+                g_toggledSlotsRemain[abilityId] = nil
+                g_toggledSlotsStack[abilityId] = nil
+            else
+                local currentTime = GetGameTimeMilliseconds()
+                g_toggledSlotsRemain[abilityId] = 1000 * endTime
+                if not isStackBaseAbility[abilityId] then g_toggledSlotsStack[abilityId] = stackCount end
+                ShowToggledSlots(abilityId, currentTime)
+            end
         end
     end
 
@@ -3149,9 +3200,38 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
         local currentTimeMS = GetFrameTimeMilliseconds()
         if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
             if ActionBar.SV.ShowToggled then
-                local duration = GetUpdatedAbilityDuration(abilityId)
-                local endTime = currentTimeMS + duration
-                g_toggledSlotsRemain[abilityId] = endTime
+                local skipToggleShow = false
+                -- Power Lash stacks (34117): combat hitValue = stack count (EFFECT_GAINED) or duration ms (EFFECT_GAINED_DURATION); see EVENT_COMBAT_EVENT logs.
+                if abilityId == 34117 then
+                    if result == ACTION_RESULT_EFFECT_GAINED and type(hitValue) == "number" and hitValue <= 0 then
+                        g_toggledSlotsRemain[abilityId] = nil
+                        g_toggledSlotsStack[abilityId] = nil
+                        if g_toggledSlotsFront[abilityId] then
+                            ActionBar.HideSlot(g_toggledSlotsFront[abilityId], abilityId)
+                        end
+                        if g_toggledSlotsBack[abilityId] then
+                            ActionBar.HideSlot(g_toggledSlotsBack[abilityId], abilityId)
+                        end
+                        skipToggleShow = true
+                    else
+                        if result == ACTION_RESULT_EFFECT_GAINED_DURATION and type(hitValue) == "number" and hitValue >= 500 then
+                            g_toggledSlotsRemain[abilityId] = currentTimeMS + hitValue
+                        else
+                            local duration = GetUpdatedAbilityDuration(abilityId)
+                            g_toggledSlotsRemain[abilityId] = currentTimeMS + duration
+                        end
+                        if result == ACTION_RESULT_EFFECT_GAINED and type(hitValue) == "number" and hitValue > 0 and hitValue <= 20 then
+                            g_toggledSlotsStack[abilityId] = hitValue
+                            if ActionBar.SV.BarShowLabel then
+                                SetToggledStackLabels(abilityId, hitValue)
+                            end
+                        end
+                    end
+                else
+                    local duration = GetUpdatedAbilityDuration(abilityId)
+                    local endTime = currentTimeMS + duration
+                    g_toggledSlotsRemain[abilityId] = endTime
+                end
                 -- Handling for Crystallized Shield + Morphs
                 if abilityId == 86135 or abilityId == 86139 or abilityId == 86143 then
                     g_toggledSlotsStack[abilityId] = 3
@@ -3161,13 +3241,15 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
                     g_toggledSlotsStack[abilityId] = 1
                 end
                 -- Toggle highlight on
-                if g_toggledSlotsFront[abilityId] then
-                    local slotNum = g_toggledSlotsFront[abilityId]
-                    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMS, false)
-                end
-                if g_toggledSlotsBack[abilityId] then
-                    local slotNum = g_toggledSlotsBack[abilityId]
-                    ActionBar.ShowSlot(slotNum, abilityId, currentTimeMS, false)
+                if not skipToggleShow then
+                    if g_toggledSlotsFront[abilityId] then
+                        local slotNum = g_toggledSlotsFront[abilityId]
+                        ActionBar.ShowSlot(slotNum, abilityId, currentTimeMS, false)
+                    end
+                    if g_toggledSlotsBack[abilityId] then
+                        local slotNum = g_toggledSlotsBack[abilityId]
+                        ActionBar.ShowSlot(slotNum, abilityId, currentTimeMS, false)
+                    end
                 end
             end
         end
