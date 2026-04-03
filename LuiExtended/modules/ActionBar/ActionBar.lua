@@ -1487,7 +1487,7 @@ function ActionBar.OnUpdate(currentTimeMS)
         local frontToggle = front and g_uiCustomToggle[front]
         local backToggle = back and g_uiCustomToggle[back]
         -- Update Label (FRONT)
-        if v < currentTimeMS then
+        if v < currentTimeMS and not Effects.IsGrimFocus[k] then
             if frontToggle then
                 ActionBar.HideSlot(front, k)
             end
@@ -1626,16 +1626,41 @@ function ActionBar.OnAbilityUsed(actionSlotIndex)
         ActionBar.StopCastBar()
     end
 
-    -- Power Lash consumes a stack per cast; combat often does not emit EFFECT_GAINED per stack, so sync from slot use (bound 20824 / 23105).
-    local POWER_LASH_STACK_TRACK = 34117
     if not ActionBar.SV.ShowToggled then
-        return
-    end
-    if not (g_toggledSlotsFront[POWER_LASH_STACK_TRACK] or g_toggledSlotsBack[POWER_LASH_STACK_TRACK]) or not g_toggledSlotsRemain[POWER_LASH_STACK_TRACK] then
         return
     end
 
     local bound = GetSlotTrueBoundId(actionSlotIndex, g_hotbarCategory)
+
+    -- Grim Focus morphs: spectral proc (Assassin's Will / Scourge) consumes stacks; combat/effect sync can lag.
+    local GRIM_PROC_TO_STACK_TRACK =
+    {
+        [61907] = 122585, -- Assassin's Will (Grim Focus)
+        [61932] = 122587, -- Assassin's Scourge (Relentless Focus)
+        [61930] = 122586, -- Assassin's Will (Merciless Resolve)
+    }
+    local grimTrack = GRIM_PROC_TO_STACK_TRACK[bound]
+    if grimTrack then
+        if not (g_toggledSlotsFront[grimTrack] or g_toggledSlotsBack[grimTrack]) or not g_toggledSlotsRemain[grimTrack] then
+            return
+        end
+        g_toggledSlotsRemain[grimTrack] = nil
+        g_toggledSlotsStack[grimTrack] = nil
+        if g_toggledSlotsFront[grimTrack] then
+            ActionBar.HideSlot(g_toggledSlotsFront[grimTrack], grimTrack)
+        end
+        if g_toggledSlotsBack[grimTrack] then
+            ActionBar.HideSlot(g_toggledSlotsBack[grimTrack], grimTrack)
+        end
+        return
+    end
+
+    -- Power Lash consumes a stack per cast; combat often does not emit EFFECT_GAINED per stack, so sync from slot use (bound 20824 / 23105).
+    local POWER_LASH_STACK_TRACK = 34117
+    if not (g_toggledSlotsFront[POWER_LASH_STACK_TRACK] or g_toggledSlotsBack[POWER_LASH_STACK_TRACK]) or not g_toggledSlotsRemain[POWER_LASH_STACK_TRACK] then
+        return
+    end
+
     if bound ~= 20824 and bound ~= 23105 then
         return
     end
@@ -2196,7 +2221,7 @@ local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeTyp
 
     if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
         if ActionBar.SV.ShowToggled then
-            if abilityId == 34117 and stackCount == 0 then
+            if (abilityId == 34117 or Effects.IsGrimFocus[abilityId]) and stackCount == 0 then
                 HideToggledSlots(abilityId)
                 g_toggledSlotsRemain[abilityId] = nil
                 g_toggledSlotsStack[abilityId] = nil
@@ -3201,8 +3226,9 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
         if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
             if ActionBar.SV.ShowToggled then
                 local skipToggleShow = false
-                -- Power Lash stacks (34117): combat hitValue = stack count (EFFECT_GAINED) or duration ms (EFFECT_GAINED_DURATION); see EVENT_COMBAT_EVENT logs.
-                if abilityId == 34117 then
+                -- Power Lash stacks (34117); Grim Focus morph buffs (122585/122587/122586): combat hitValue = stack count (EFFECT_GAINED) or duration ms (EFFECT_GAINED_DURATION); see EVENT_COMBAT_EVENT logs.
+                if abilityId == 34117 or Effects.IsGrimFocus[abilityId] then
+                    local stackCap = abilityId == 34117 and 20 or 40
                     if result == ACTION_RESULT_EFFECT_GAINED and type(hitValue) == "number" and hitValue <= 0 then
                         g_toggledSlotsRemain[abilityId] = nil
                         g_toggledSlotsStack[abilityId] = nil
@@ -3220,7 +3246,7 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
                             local duration = GetUpdatedAbilityDuration(abilityId)
                             g_toggledSlotsRemain[abilityId] = currentTimeMS + duration
                         end
-                        if result == ACTION_RESULT_EFFECT_GAINED and type(hitValue) == "number" and hitValue > 0 and hitValue <= 20 then
+                        if result == ACTION_RESULT_EFFECT_GAINED and type(hitValue) == "number" and hitValue > 0 and hitValue <= stackCap then
                             g_toggledSlotsStack[abilityId] = hitValue
                             if ActionBar.SV.BarShowLabel then
                                 SetToggledStackLabels(abilityId, hitValue)

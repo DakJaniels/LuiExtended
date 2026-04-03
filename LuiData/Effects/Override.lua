@@ -1930,7 +1930,7 @@ local effectOverride =
     [107054] = { icon = "/esoui/art/icons/ability_nightblade_005_a.dds" }, -- Relentless Focus (Relentless Focus)
     [122587] = { tooltip = Tooltips.Skill_Grim_Focus_Defense },            -- Relentless Focus (Relentless Focus)
 
-    [107055] = { icon = "/esoui/art/icons/ability_nightblade_005_b.dds" }, -- Merciless Resolve (Merciless Resolve)
+    [61919] = { icon = "/esoui/art/icons/ability_rogue_058.dds" }, -- Merciless Resolve (Merciless Resolve)
     [122586] = { tooltip = Tooltips.Skill_Grim_Focus_Defense },            -- Merciless Resolve (Merciless Resolve)
 
     -- Death Stroke / Incapacitating Strike / Soul Harvest
