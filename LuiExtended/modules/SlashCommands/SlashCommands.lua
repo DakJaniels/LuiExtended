@@ -215,12 +215,8 @@ function SlashCommands.RegisterSlashCommands()
         SLASH_COMMANDS["/dismisspets"] = SlashCommands.SlashPet
     end
     if SlashCommands.SV.SlashCake then
-        SLASH_COMMANDS["/cake"] = function (...)
-            SlashCommands.SlashCollectible(13520)
-        end
-        SLASH_COMMANDS["/jubilee"] = function (...)
-            SlashCommands.SlashCollectible(13520)
-        end
+        SLASH_COMMANDS["/cake"] = SlashCommands.SlashCake
+        SLASH_COMMANDS["/jubilee"] = SlashCommands.SlashCake
     end
     if SlashCommands.SV.SlashPie then
         SLASH_COMMANDS["/pie"] = function (...)

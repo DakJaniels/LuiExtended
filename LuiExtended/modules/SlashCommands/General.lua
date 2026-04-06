@@ -306,6 +306,24 @@ function SlashCommands.SlashDecon()
     SlashCommands.SlashCollectible(SlashCommands.SV.SlashDeconChoice)
 end
 
+local TOOLS_CATEGORY_ID = 66
+local cachedCakeId
+
+local function GetJubileeCakeCollectibleId()
+    if not cachedCakeId then
+        local categoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataById(TOOLS_CATEGORY_ID)
+        local numCollectibles = categoryData:GetNumCollectibles()
+        if numCollectibles > 0 then
+            cachedCakeId = categoryData:GetCollectibleDataByIndex(numCollectibles):GetId()
+        end
+    end
+    return cachedCakeId
+end
+
+function SlashCommands.SlashCake()
+    SlashCommands.SlashCollectible(GetJubileeCakeCollectibleId())
+end
+
 -- Slash Command to equip a chosen outfit by number
 function SlashCommands.SlashOutfit(option)
     if option == "" or option == nil then
