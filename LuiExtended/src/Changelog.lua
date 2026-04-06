@@ -15,11 +15,15 @@ local changelogMessages =
     -- Version Header 7.2.0.4
     "|cFFA500LuiExtended Version 7.2.0.4|r",
     "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SlashCommands: `/cake` and `/jubilee` should now work without needing yearly updates...",
+    "",
     -- Fixed
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Error when clicking link for timed activities due to 11.3.5 code change in the `ZO_TimedActivities_Manager` Class.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action bar: Flame Lash / Power Lash proc icon flicker (GitHub #379) — `SetupActionSlot` no longer applies `BarIdOverride` for proc/base pairs flagged in `IsAbilityProc` / `BaseForAbilityProc` (global `actionbutton` hook; disabling the ActionBar module alone did not avoid it).",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action bar: Power Lash stack buff (abilityId 34117, U41+ 5× / 20s) — bar highlight tracks combat/buff data via `combatTrack`, toggled labels show stacks and timer; stacks decrement on Power Lash cast (`OnAbilityUsed`), timer and overlay clear when stacks reach zero; sync from `EVENT_EFFECT_CHANGED` / combat when ZOS reports zero stacks.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action bar: Power Lash stack buff (abilityId 34117, U41+ 5x / 20s) — bar highlight tracks combat/buff data via `combatTrack`, toggled labels show stacks and timer; stacks decrement on Power Lash cast (`OnAbilityUsed`), timer and overlay clear when stacks reach zero; sync from `EVENT_EFFECT_CHANGED` / combat when ZOS reports zero stacks.",
     "",
     -- Version Header 7.2.0.3 (console)
     "|cFFA500LuiExtended Version 7.2.0.3|r",
