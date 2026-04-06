@@ -90,15 +90,9 @@ local barHighlightOverride =
     [33375] = { newId = 61716 },                   -- Blur --> Major Evasion
     [35414] = { newId = 61716 },                   -- Mirage --> Major Evasion
     [35419] = { newId = 125314, noRemove = true }, -- Phantasmal Escape --> Major Evasion
-    -- Grim Focus morphs: stack count on bar uses buff id 122585/122587/122586 in EVENT_COMBAT_EVENT (EFFECT_GAINED hitValue=stacks on player).
-    -- combatTrack registers combat listener without g_barFakeAura so buff fade still clears via EVENT_EFFECT_CHANGED.
-    [61902] = { newId = 122585, combatTrack = true, duration = 600000 },
-    [61927] = { newId = 122587, combatTrack = true, duration = 600000 },
-    [61919] = { newId = 122586, combatTrack = true, duration = 600000 },
-    -- Spectral proc replaces base on bar; same stack buff id as morph (BarSlotUpdate must key toggles like combat events).
-    [61907] = { newId = 122585 }, -- Assassin's Will (Grim Focus)
-    [61932] = { newId = 122587 }, -- Assassin's Scourge (Relentless Focus)
-    [61930] = { newId = 122586 }, -- Assassin's Will (Merciless Resolve)
+    [61902] = { newId = 122585 },                  -- Grim Focus
+    [61927] = { newId = 122587 },                  -- Relentless Focus
+    [61919] = { newId = 122586 },                  -- Merciless Resolve
     [33398] = { newId = 61389 },                   -- Death Stroke --> Damage Taken Increased
     [36508] = { newId = 61393 },                   -- Incapacitating Strike --> Damage Taken Increased
     [36514] = { newId = 61400 },                   -- Soul Harvest --> Damage Taken Increased
