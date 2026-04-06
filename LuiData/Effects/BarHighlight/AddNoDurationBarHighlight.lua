@@ -23,11 +23,6 @@ local addNoDurationBarHighlight =
     -- Dragonknight
     [34117] = true, -- Power Lash stacks (Flame Lash); combat supplies duration; API may still read 0 for bar slot registration
 
-    -- Nightblade (Grim Focus morph buff ids on bar after override)
-    [122585] = true, -- Grim Focus
-    [122587] = true, -- Relentless Focus
-    [122586] = true, -- Merciless Resolve
-
     -- Necromancer
     [115240] = true, -- Bitter Harvest
     [124165] = true, -- Deaden Pain
