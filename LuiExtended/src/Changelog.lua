@@ -12,6 +12,13 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.0.5
+    "|cFFA500LuiExtended Version 7.2.0.5|r",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SlashCommands: Added base ui unlock for battering ram status identicator.",
+    "",
     -- Version Header 7.2.0.4
     "|cFFA500LuiExtended Version 7.2.0.4|r",
     "",
