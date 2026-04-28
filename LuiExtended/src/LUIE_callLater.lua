@@ -17,9 +17,9 @@ LUIE_callLater = function (callback, minInterval)
     local name = "LUIE_CallLaterFunction" .. id
     LUIE_CallLaterId = LUIE_CallLaterId + 1
 
-    eventManager:RegisterForUpdate(name, minInterval, function ()
-        eventManager:UnregisterForUpdate(name)
-        func(id)
+    eventManager:RegisterForPostEffectsUpdate(name, minInterval, function ()
+        eventManager:UnregisterForPostEffectsUpdate(name)
+        callback(id)
     end)
     return id
 end
@@ -27,5 +27,5 @@ end
 ---
 --- @param id integer
 LUIE_removeCallLater = function (id)
-    eventManager:UnregisterForUpdate("LUIE_CallLaterFunction" .. id)
+    eventManager:UnregisterForPostEffectsUpdate("LUIE_CallLaterFunction" .. id)
 end
