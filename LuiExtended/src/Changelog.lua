@@ -12,6 +12,13 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.0.6
+    "|cFFA500LuiExtended Version 7.2.0.6|r",
+    "",
+    -- Fixed
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: incorrect items were showing as being confiscated.",
+    "",
     -- Version Header 7.2.0.5
     "|cFFA500LuiExtended Version 7.2.0.5|r",
     "",
