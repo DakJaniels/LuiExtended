@@ -716,7 +716,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
     -- Setup refire delay
     if Alerts[abilityId].refire then
         refireDelay[abilityId] = true
-        LUIE_callLater(function ()
+        zo_callLater(function ()
                            refireDelay[abilityId] = nil
                        end, Alerts[abilityId].refire) -- buffer by X time
     end
@@ -730,7 +730,7 @@ function AbilityAlerts.ProcessAlert(abilityId, unitName, sourceUnitId)
         else
             refireTime = 250
         end
-        LUIE_callLater(function ()
+        zo_callLater(function ()
                            refireDelay[abilityId] = nil
                        end, refireTime) -- buffer by X time
     end
@@ -1067,7 +1067,7 @@ function AbilityAlerts.AlertEffectChanged(eventCode, changeType, effectSlot, eff
 
     if Settings.toggles.alertEnable and (Settings.toggles.mitigationAura or IsUnitInDungeon("player")) and Alerts[abilityId] and Alerts[abilityId].auradetect then
         if changeType == EFFECT_RESULT_FADED then
-            LUIE_callLater(function ()
+            zo_callLater(function ()
                                CheckInterruptEvent(unitId, abilityId)
                            end, 100)
             return
@@ -1082,7 +1082,7 @@ function AbilityAlerts.AlertEffectChanged(eventCode, changeType, effectSlot, eff
             return
         end
 
-        LUIE_callLater(function ()
+        zo_callLater(function ()
                            AbilityAlerts.ProcessAlert(abilityId, unitName, unitId)
                        end, 50)
     end
@@ -1155,7 +1155,7 @@ function AbilityAlerts.OnCombatIn(eventCode, result, isError, abilityName, abili
             -- Return if any results occur which we absolutely don't want to display alerts for & stop spam when enemy is out of line of sight, etc and trying to cast
             if result == ACTION_RESULT_EFFECT_FADED or result == ACTION_RESULT_ABILITY_ON_COOLDOWN or result == ACTION_RESULT_BAD_TARGET or result == ACTION_RESULT_BUSY or result == ACTION_RESULT_FAILED or result == ACTION_RESULT_INVALID or result == ACTION_RESULT_CANT_SEE_TARGET or result == ACTION_RESULT_TARGET_DEAD or result == ACTION_RESULT_TARGET_OUT_OF_RANGE or result == ACTION_RESULT_TARGET_TOO_CLOSE or result == ACTION_RESULT_TARGET_NOT_IN_VIEW then
                 refireDelay[abilityId] = true
-                LUIE_callLater(function ()
+                zo_callLater(function ()
                                    refireDelay[abilityId] = nil
                                end, 1000) -- buffer by X time
                 return
@@ -1175,7 +1175,7 @@ function AbilityAlerts.OnCombatIn(eventCode, result, isError, abilityName, abili
                     end
                 end
 
-                LUIE_callLater(function ()
+                zo_callLater(function ()
                                    AbilityAlerts.ProcessAlert(abilityId, sourceName, sourceUnitId)
                                end, 50)
             end
@@ -1208,7 +1208,7 @@ function AbilityAlerts.OnCombatAlert(eventCode, resultType, isError, abilityName
             -- Return if any results occur which we absolutely don't want to display alerts for & stop spam when enemy is out of line of sight, etc and trying to cast
             if resultType == ACTION_RESULT_EFFECT_FADED or resultType == ACTION_RESULT_ABILITY_ON_COOLDOWN or resultType == ACTION_RESULT_BAD_TARGET or resultType == ACTION_RESULT_BUSY or resultType == ACTION_RESULT_FAILED or resultType == ACTION_RESULT_INVALID or resultType == ACTION_RESULT_CANT_SEE_TARGET or resultType == ACTION_RESULT_TARGET_DEAD or resultType == ACTION_RESULT_TARGET_OUT_OF_RANGE or resultType == ACTION_RESULT_TARGET_TOO_CLOSE or resultType == ACTION_RESULT_TARGET_NOT_IN_VIEW then
                 refireDelay[abilityId] = true
-                LUIE_callLater(function ()
+                zo_callLater(function ()
                                    refireDelay[abilityId] = nil
                                end, 1000) -- buffer by X time
                 return
@@ -1228,7 +1228,7 @@ function AbilityAlerts.OnCombatAlert(eventCode, resultType, isError, abilityName
                     end
                 end
 
-                LUIE_callLater(function ()
+                zo_callLater(function ()
                                    AbilityAlerts.ProcessAlert(abilityId, sourceName, sourceUnitId)
                                end, 50)
             end

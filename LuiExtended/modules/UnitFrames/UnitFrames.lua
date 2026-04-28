@@ -1550,7 +1550,7 @@ function UnitFrames.OnGroupMemberRoleChange(eventCode, unitTag, dps, healer, tan
 end
 
 function UnitFrames.OnGroupMemberChange(eventCode, memberName)
-    LUIE_callLater(function ()
+    zo_callLater(function ()
                        UnitFrames.CustomFramesApplyColors(false)
                    end, 200)
 end

@@ -282,7 +282,7 @@ local function ProcessCrowdControlEvents(self, flags, toggles, combatType)
             else
                 self:TriggerEvent(EventType.CROWDCONTROL, CrowdControlType[config.ccType], combatType)
                 isWarned[config.warnKey] = true
-                LUIE_callLater(function () resetCCWarning(config.warnKey) end, 1000)
+                zo_callLater(function () resetCCWarning(config.warnKey) end, 1000)
             end
         end
     end

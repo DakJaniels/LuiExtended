@@ -12,6 +12,13 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.0.8
+    "|cFFA500LuiExtended Version 7.2.0.8|r",
+    "",
+    -- Change
+    "|cFFFF00Change:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t General: Swapped to using zo_callLater. it might make the code happy, who knows...",
+    "",
     -- Version Header 7.2.0.7
     "|cFFA500LuiExtended Version 7.2.0.7|r",
     "",

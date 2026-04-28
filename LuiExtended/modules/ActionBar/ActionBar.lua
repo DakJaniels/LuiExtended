@@ -2864,7 +2864,7 @@ function ActionBar.ClientInteractResult(eventCode, result, interactTargetName)
                 local name = data.name
                 local duration = data.duration
                 local delay = data.delay
-                LUIE_callLater(function() DisplayInteractCast(icon, name, duration) end, delay)
+                zo_callLater(function() DisplayInteractCast(icon, name, duration) end, delay)
             end
         end
     end
@@ -3121,7 +3121,7 @@ function ActionBar.OnCombatEvent(result, isError, abilityName, abilityGraphic, a
 
     -- Fix to lower the duration of the next cast of Profane Symbol quest ability for Scion of the Blood Matron (Vampire)
     if abilityId == 39507 then
-        LUIE_callLater(function ()
+        zo_callLater(function ()
                            Castbar.CastDurationFix[39507] = 19500
                        end, 5000)
     end
@@ -3417,7 +3417,7 @@ function ActionBar.BarSlotUpdate(slotNum, wasfullUpdate, onlyProc)
                     PlaySound(g_ProcSound)
                     -- Only play a proc sound every 3 seconds (matches Power Lash cd)
                     g_disableProcSound[slotNum] = true
-                    LUIE_callLater(function ()
+                    zo_callLater(function ()
                                        g_disableProcSound[slotNum] = false
                                    end, 3000)
                 end
@@ -3486,7 +3486,7 @@ end
 --- Called when an inventory item is used; refreshes ultimate label.
 function ActionBar.InventoryItemUsed()
     g_potionUsed = true
-    LUIE_callLater(function ()
+    zo_callLater(function ()
                        g_potionUsed = false
                    end, 200)
 end

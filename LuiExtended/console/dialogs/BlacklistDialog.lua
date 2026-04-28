@@ -156,7 +156,7 @@ function BlacklistDialog.Setup(dialog, data)
                     if entryType == "item" and itemData then
                         data.onSelectCallback(itemData)
                         -- Refresh the dialog
-                        LUIE_callLater(function ()
+                        zo_callLater(function ()
                                            BlacklistDialog.Refresh(dialogControl, data)
                                        end, 50)
                     end
@@ -214,7 +214,7 @@ function BlacklistDialog.Setup(dialog, data)
 
     -- Reactivate the entry list if it was active before rebuilding
     if wasActive and dialog.entryList then
-        LUIE_callLater(function ()
+        zo_callLater(function ()
                            if dialog.entryList and dialog:IsControlHidden() == false then
                                dialog.entryList:Activate()
                            end
@@ -222,7 +222,7 @@ function BlacklistDialog.Setup(dialog, data)
     end
 
     -- Clear the rebuilding flag after a short delay
-    LUIE_callLater(function ()
+    zo_callLater(function ()
                        rebuildingDialogs[dialogKey] = nil
                    end, 100)
 end

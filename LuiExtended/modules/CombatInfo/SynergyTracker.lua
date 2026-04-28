@@ -163,9 +163,9 @@ function SynergyTracker:Initialize()
     local function OnSceneStateChange(oldState, newState)
         local isShown = newState == SCENE_SHOWN
         if isShown then
-            LUIE_callLater(function () self:OnShowing() end, 0)
+            zo_callLater(function () self:OnShowing() end, 0)
         else
-            LUIE_callLater(function () self:OnHidden() end, 0)
+            zo_callLater(function () self:OnHidden() end, 0)
         end
         if not Settings.unlocked then
             self.control:SetHidden(not isShown)
@@ -224,7 +224,7 @@ function SynergyTracker:Initialize()
     end)
     eventManager:AddFilterForEvent(moduleName, EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
 
-    LUIE_callLater(function () self:RefreshActiveSynergies() end, 100)
+    zo_callLater(function () self:RefreshActiveSynergies() end, 100)
 end
 
 --- Called when HUD scene is showing

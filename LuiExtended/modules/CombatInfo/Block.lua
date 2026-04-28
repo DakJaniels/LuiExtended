@@ -197,7 +197,7 @@ function Block.DebounceInventory()
         return
     end
     debounceInventoryPending = true
-    LUIE_callLater(function ()
+    zo_callLater(function ()
                        Block.RefreshBlockCost()
                        Block.RefreshBloodlordEmbraceVisibility()
                        debounceInventoryPending = false
@@ -209,7 +209,7 @@ function Block.DebounceActionSlots()
         return
     end
     debounceActionSlotsPending = true
-    LUIE_callLater(function ()
+    zo_callLater(function ()
                        Block.RefreshBlockCost()
                        debounceActionSlotsPending = false
                    end, DEBOUNCE_DELAY_MS)

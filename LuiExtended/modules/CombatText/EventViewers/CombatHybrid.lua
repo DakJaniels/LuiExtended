@@ -47,7 +47,7 @@ function CombatTextCombatHybridEventViewer:OnEvent(combatType, powerType, value,
             flags.isHotCritical = isHotCritical
             local throttleTime = self:GetThrottleTime(Settings, flags)
             LUIE.RecycleTable(flags) -- Return to cache immediately after use
-            LUIE_callLater(function ()
+            zo_callLater(function ()
                                self:ViewFromEventBuffer(combatType, powerType, eventKey, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
                            end, throttleTime)
         else
