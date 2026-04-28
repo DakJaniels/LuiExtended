@@ -17,10 +17,10 @@ LUIE_callLater = function (callback, minInterval)
     local name = "LUIE_CallLaterFunction" .. id
     LUIE_CallLaterId = LUIE_CallLaterId + 1
 
+    local DO_ONCE = true
     eventManager:RegisterForPostEffectsUpdate(name, minInterval, function ()
-        eventManager:UnregisterForPostEffectsUpdate(name)
-        callback(id)
-    end)
+                                                  callback(id)
+                                              end, DO_ONCE)
     return id
 end
 
