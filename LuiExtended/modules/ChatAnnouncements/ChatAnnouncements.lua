@@ -5791,89 +5791,97 @@ function ChatAnnouncements.JusticeDisplayConfiscate()
     g_itemsConfiscated = false
 end
 
+local function BuildItemCountMap(stacksTable)
+    --- @type table<string,{count:integer,sample:{icon:any,stack:integer,itemId:integer,itemType:integer,itemLink:string}}>
+    local map = {}
+    if not stacksTable then
+        return map
+    end
+    for _, item in pairs(stacksTable) do
+        if item and item.itemLink and item.itemLink ~= "" then
+            local key = item.itemLink
+            local stack = tonumber(item.stack) or 0
+            local entry = map[key]
+            if entry then
+                entry.count = entry.count + stack
+            else
+                map[key] = { count = stack, sample = item }
+            end
+        end
+    end
+    return map
+end
+
+local function DiffRemoved(beforeMap, afterMap)
+    --- @type {removedCount:integer,sample:{icon:any,stack:integer,itemId:integer,itemType:integer,itemLink:string}}[]
+    local removed = {}
+    for itemLink, beforeEntry in pairs(beforeMap) do
+        local afterCount = (afterMap[itemLink] and afterMap[itemLink].count) or 0
+        local removedCount = (beforeEntry.count or 0) - afterCount
+        if removedCount and removedCount > 0 then
+            removed[#removed + 1] = { removedCount = removedCount, sample = beforeEntry.sample }
+        end
+    end
+    return removed
+end
+
 function ChatAnnouncements.JusticeRemovePrint()
     g_itemsConfiscated = true
 
     -- PART 1 -- INVENTORY
     if ChatAnnouncements.SV.Inventory.LootConfiscate then
-        local bagsize = GetBagSize(BAG_BACKPACK)
+        -- Build an "after" snapshot across BOTH backpack and worn.
+        -- Confiscation can force gear to move between worn/backpack; we only want items removed entirely.
+        local afterStacks = {}
 
-        for i = 0, bagsize do
+        local backpackSize = GetBagSize(BAG_BACKPACK)
+        for i = 0, backpackSize do
             local icon, stack = GetItemInfo(BAG_BACKPACK, i)
             local itemType = GetItemType(BAG_BACKPACK, i)
             local itemId = GetItemId(BAG_BACKPACK, i)
             local itemLink = GetItemLink(BAG_BACKPACK, i, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-
             if itemLink ~= "" then
-                g_JusticeStacks[i] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                afterStacks[#afterStacks + 1] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
         end
 
-        for i = 0, bagsize do
-            local inventoryitem = g_inventoryStacks[i]
-            local justiceitem = g_JusticeStacks[i]
-            if inventoryitem ~= nil then
-                if justiceitem == nil then
-                    local receivedBy = ""
-                    local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    local logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageConfiscate
-                    if ChatAnnouncements.SV.Inventory.LootConfiscate then
-                        ChatAnnouncements.ItemPrinter(inventoryitem.icon, inventoryitem.stack, inventoryitem.itemType, inventoryitem.itemId, inventoryitem.itemLink, receivedBy, logPrefix, gainOrLoss, false)
-                    end
-                end
-            end
-        end
-
-        -- Reset Justice Stacks to reuse for equipped
-        g_JusticeStacks = {}
-
-        -- PART 2 -- EQUIPPED
-        bagsize = GetBagSize(BAG_WORN)
-
-        -- We have to determine the currently active weapon, and swap the slots because of some wierd interaction when your equipped weapon is confiscated.
-        -- This works even if the other weapon slot is empty or both slots have a stolen weapon.
-        local weaponInfo = GetActiveWeaponPairInfo()
-
-        -- Save weapons
-        local W1 = g_equippedStacks[4]
-        local W2 = g_equippedStacks[5]
-        local W3 = g_equippedStacks[20]
-        local W4 = g_equippedStacks[21]
-
-        -- Swap weapons depending on currently equipped pair
-        if weaponInfo == 1 then
-            g_equippedStacks[4] = W3
-            g_equippedStacks[5] = W4
-        end
-
-        if weaponInfo == 2 then
-            g_equippedStacks[20] = W1
-            g_equippedStacks[21] = W2
-        end
-
-        for i = 0, bagsize do
+        local wornSize = GetBagSize(BAG_WORN)
+        for i = 0, wornSize do
             local icon, stack = GetItemInfo(BAG_WORN, i)
             local itemType = GetItemType(BAG_WORN, i)
             local itemId = GetItemId(BAG_WORN, i)
             local itemLink = GetItemLink(BAG_WORN, i, linkBrackets[ChatAnnouncements.SV.BracketOptionItem])
-
             if itemLink ~= "" then
-                g_JusticeStacks[i] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
+                afterStacks[#afterStacks + 1] = { icon = icon, stack = stack, itemId = itemId, itemType = itemType, itemLink = itemLink }
             end
         end
 
-        for i = 0, bagsize do
-            local inventoryitem = g_equippedStacks[i]
-            local justiceitem = g_JusticeStacks[i]
-            if inventoryitem ~= nil then
-                if justiceitem == nil then
-                    local receivedBy = ""
-                    local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                    local logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageConfiscate
-                    if ChatAnnouncements.SV.Inventory.LootConfiscate then
-                        ChatAnnouncements.ItemPrinter(inventoryitem.icon, inventoryitem.stack, inventoryitem.itemType, inventoryitem.itemId, inventoryitem.itemLink, receivedBy, logPrefix, gainOrLoss, false)
-                    end
-                end
+        -- Build a "before" snapshot across BOTH backpack and worn.
+        local beforeAll = {}
+        for _, item in pairs(g_inventoryStacks) do
+            beforeAll[#beforeAll + 1] = item
+        end
+        for _, item in pairs(g_equippedStacks) do
+            beforeAll[#beforeAll + 1] = item
+        end
+
+        local beforeMap = BuildItemCountMap(beforeAll)
+        local afterMap = BuildItemCountMap(afterStacks)
+        local removedItems = DiffRemoved(beforeMap, afterMap)
+
+        if #removedItems == 0 then
+            -- No items removed, so don't treat this as item-confiscation.
+            g_itemsConfiscated = false
+        end
+
+        for i = 1, #removedItems do
+            local removed = removedItems[i]
+            local sample = removed.sample
+            if sample and removed.removedCount > 0 then
+                local receivedBy = ""
+                local gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
+                local logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageConfiscate
+                ChatAnnouncements.ItemPrinter(sample.icon, removed.removedCount, sample.itemType, sample.itemId, sample.itemLink, receivedBy, logPrefix, gainOrLoss, false)
             end
         end
     end
