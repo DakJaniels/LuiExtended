@@ -40,7 +40,8 @@ local Unlock =
         [ZO_PlayerProgress] = { GetString(LUIE_STRING_DEFAULT_FRAME_PLAYER_PROGRESS) },                              -- Needs custom template applied
         [ZO_EndDunHUDTrackerContainer] = { GetString(LUIE_STRING_DEFAULT_FRAME_ENDLESS_DUNGEON_TRACKER), 230, 100 }, -- Needs custom template applied
         [ZO_ReticleContainerInteract] = { GetString(LUIE_STRING_DEFAULT_FRAME_RETICLE_CONTAINER_INTERACT) },
-        [ZO_RamTopLevel] = {GetString(SI_SIEGETYPE3), 290, 110}
+        [ZO_RamTopLevel] = { GetString(SI_SIEGETYPE3), 290, 110 },
+        [ZO_AdvZoneHUDTrackerContainer] = { "Dynamic Events Tracker", 230, 100 }, -- Needs custom template applied
     }
 }
 
@@ -378,6 +379,7 @@ function Unlock.SetElementPosition()
     Unlock.ReplaceDefaultTemplate(COMPASS_FRAME, "ApplyStyle", "ZO_CompassFrame")
     Unlock.ReplaceDefaultTemplate(PLAYER_PROGRESS_BAR, "RefreshTemplate", "ZO_PlayerProgress")
     Unlock.ReplaceDefaultTemplate(ZO_HUDTracker_Base, "RefreshAnchors", "ZO_EndDunHUDTrackerContainer")
+    Unlock.ReplaceDefaultTemplate(ZO_HUDTracker_Base, "RefreshAnchors", "ZO_AdvZoneHUDTrackerContainer")
 end
 
 --- Setup element movers based on the provided state
