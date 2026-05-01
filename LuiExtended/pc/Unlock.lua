@@ -60,6 +60,10 @@ if not IsConsoleUI() then
     end
 end
 
+if ZO_AdvZoneHUD_TopLevel then
+    Unlock.defaultPanels[ZO_AdvZoneHUD_TopLevel] = { "NightMarket Favor counter" , 64, 64}
+end
+
 -- -----------------------------------------------------------------------------
 -- Grid Snap Functions
 -- -----------------------------------------------------------------------------
@@ -130,12 +134,13 @@ end
 --- @param config {[1]:string, [2]:number?, [3]:number?} The table containing adjustment values
 function Unlock.AdjustElement(element, config)
     element:SetClampedToScreen(true)
-    if config[2] then
-        element:SetWidth(config[2])
+    local width, height = config[2], config[3]
+    if element == ZO_AdvZoneHUD_TopLevel and ZO_HUDTelvarMeter then
+        width = ZO_HUDTelvarMeter:GetWidth()
+        height = ZO_HUDTelvarMeter:GetHeight()
     end
-    if config[3] then
-        element:SetHeight(config[3])
-    end
+    if width then element:SetWidth(width) end
+    if height then element:SetHeight(height) end
 end
 
 --- Helper function to set the anchor of an element
@@ -290,12 +295,13 @@ end
 --- @return TopLevelWindow|nil mover The created mover window or nil if initialization failed
 function Unlock.InitializeElementMover(element, config)
     -- Adjust width and height constraints if provided
-    if config[2] then
-        element:SetWidth(config[2])
+    local width, height = config[2], config[3]
+    if element == ZO_AdvZoneHUD_TopLevel and ZO_HUDTelvarMeter then
+        width = ZO_HUDTelvarMeter:GetWidth()
+        height = ZO_HUDTelvarMeter:GetHeight()
     end
-    if config[3] then
-        element:SetHeight(config[3])
-    end
+    if width then element:SetWidth(width) end
+    if height then element:SetHeight(height) end
 
     -- Retrieve the anchor information for the element
     for i = 0, MAX_ANCHORS - 1 do
