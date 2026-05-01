@@ -30,6 +30,17 @@ local POTION_ICON = LUIE_MEDIA_ICONS_POTIONS_POTION_001_DDS
 -- We maintain our own cache because the library's GetUnitPotionData() is buggy
 local potionDataCache = {}
 
+local function GetPotionCooldownControls(frameData)
+    if not frameData or not frameData.potionCooldown then return nil end
+
+    local backdrop = frameData.potionCooldown.backdrop
+    local icon = frameData.potionCooldown.icon
+    local label = frameData.potionCooldown.label
+
+    if not backdrop or not icon then return nil end
+    return backdrop, icon, label
+end
+
 -- Add potion cooldown display to a custom frame
 local function AddPotionCooldownToFrame(frameData, isRaid)
     if not frameData or not frameData.control then return end
@@ -67,6 +78,7 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
             if container then
                 frameData.libGroupContainer = container
             else
+                frameData.potionCooldown = nil
                 return -- Can't proceed without container
             end
         end
@@ -81,10 +93,15 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
         -- Get potion controls from XML
         frameData.potionCooldown.backdrop = container:GetNamedChild("_PotionBackdrop")
         if not frameData.potionCooldown.backdrop then
+            frameData.potionCooldown = nil
             return -- Can't proceed without potion controls
         end
         frameData.potionCooldown.icon = frameData.potionCooldown.backdrop:GetNamedChild("_Icon")
         frameData.potionCooldown.label = frameData.potionCooldown.backdrop:GetNamedChild("_Label")
+        if not frameData.potionCooldown.icon then
+            frameData.potionCooldown = nil
+            return -- Can't proceed without potion controls
+        end
 
         -- Set dimensions based on settings
         frameData.potionCooldown.backdrop:SetDimensions(iconSize, iconSize)
@@ -109,7 +126,7 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
         frameData.potionCooldown.icon:SetDrawLevel(15)
 
         -- Apply font to label if showRemainingTime is enabled
-        if Settings.showRemainingTime then
+        if Settings.showRemainingTime and frameData.potionCooldown.label then
             local fontSize = isRaid and 10 or 12
             local rootSettings = Shared.GetSettings()
             local fontFace = LUIE.Fonts[rootSettings.CustomFontFace]
@@ -129,29 +146,26 @@ local function UpdatePotionCooldownDisplay(unitTag, potionData)
     local Settings = Shared.GetPotionCooldownSettings()
     if not Settings or not Settings.enabled then return end
 
-    local backdrop = frameData.potionCooldown.backdrop
-    local icon = frameData.potionCooldown.icon
-    local label = frameData.potionCooldown.label
+    local backdrop, icon, label = GetPotionCooldownControls(frameData)
+    if not backdrop then return end
 
-    if potionData.isOnCooldown then
-        -- Calculate remaining time
-        local currentTime = GetGameTimeMilliseconds()
-        local hasCooldownUntil = potionData.hasCooldownUntil or 0
-        local remainingMS = hasCooldownUntil - currentTime
+    -- Calculate remaining time from the library's game-time timestamp.
+    local currentTime = GetGameTimeMilliseconds()
+    local hasCooldownUntil = potionData.hasCooldownUntil or 0
+    local remainingMS = hasCooldownUntil - currentTime
 
+    if potionData.isOnCooldown and remainingMS > 0 then
         -- On cooldown - show red/dark tint
         backdrop:SetCenterColor(0.3, 0, 0, 0.9)
         icon:SetColor(0.5, 0.5, 0.5, 1) -- Desaturated
 
         -- Show remaining time if enabled
         if Settings.showRemainingTime and label then
-            if remainingMS > 0 then
-                local seconds = math.ceil(remainingMS / 1000)
-                label:SetText(string.format("|cFF6666%ds|r", seconds))
-                label:SetHidden(false)
-            else
-                label:SetHidden(true)
-            end
+            local seconds = math.ceil(remainingMS / 1000)
+            label:SetText(string.format("|cFF6666%ds|r", seconds))
+            label:SetHidden(false)
+        elseif label then
+            label:SetHidden(true)
         end
     else
         -- Ready - show normal/green tint
