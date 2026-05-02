@@ -675,6 +675,11 @@ local castBarTable =
         [199791] = true, -- Recall of the Crusader
         [181388] = true, -- Recall of the Galen Wilds
         [221093] = true, -- Recall of the Outer Darkness
+        [229849] = true, -- Mages Guild Recall
+        [240795] = true, -- World-Eater's Fiery Recall
+        [259040] = true,
+        [247620] = true, -- Recall of the Wingblade
+        [232080] = true, -- Bramblebird Recall
 
         -- Misc Items
         [206063] = true, -- CreateAttunableStation (Attunable Crafting Station)
@@ -828,8 +833,7 @@ local castBarTable =
         [119107] = true, -- NAME ME Infect Brew (Winnowing Plague Decoction)
 
         -- Dragonknight
-        [29032] = true, -- Stonefist (Stonefist)
-        [31816] = true, -- Stone Giant (Stone Giant)
+        [20930] = true, -- Engulfing Dragonfire
 
         -- Nightblade
         [33398] = true,  -- Death Stroke (Nightblade)
