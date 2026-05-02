@@ -199,3 +199,25 @@ function CombatInfo.Initialize(enabled)
     end
     LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsCI = 2
 end
+
+--- Console LibHarvens "reset to defaults": replace saved vars with a deep copy of `CombatInfo.Defaults`, then refresh active UI.
+function CombatInfo.ResetToDefaults()
+    local sv = CombatInfo.SV
+    if not sv then
+        return
+    end
+    for k in pairs(sv) do
+        sv[k] = nil
+    end
+    ZO_DeepTableCopy(CombatInfo.Defaults, sv)
+    if not CombatInfo.Enabled then
+        return
+    end
+    CombatInfo.SetMarker()
+    CombatInfo.AbilityAlerts.ApplyFontAlert()
+    CombatInfo.AbilityAlerts.SetAlertFramePosition()
+    CombatInfo.AbilityAlerts.SetAlertColors()
+    CombatInfo.AbilityAlerts.ResetAlertSize()
+    CombatInfo.CrowdControlTracker.UpdateAOEList()
+    CombatInfo.CrowdControlTracker.Initialize()
+end
