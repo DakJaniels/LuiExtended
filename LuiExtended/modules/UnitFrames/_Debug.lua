@@ -232,9 +232,14 @@ end
 local function DebugAll()
     UnitFrames.debugAllActive = not UnitFrames.debugAllActive
     if UnitFrames.debugAllActive then
+        UnitFrames.debugAllCapturedMovingState = UnitFrames.CustomFramesMovingState == true
         EnableAllPreviews()
+        UnitFrames.CustomFramesSetMovingState(true)
     else
+        local revertMoving = UnitFrames.debugAllCapturedMovingState == true
+        UnitFrames.debugAllCapturedMovingState = nil
         DisableAllPreviews()
+        UnitFrames.CustomFramesSetMovingState(revertMoving)
     end
 end
 

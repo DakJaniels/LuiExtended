@@ -22,7 +22,6 @@ local PetNames = LuiData.Data.PetNames
 local pairs = pairs
 local table = table
 local table_insert = table.insert
-local g_FramesMovingEnabled = false -- Helper local flag
 
 local nameDisplayOptions =
 {
@@ -190,17 +189,16 @@ function UnitFrames.CreateSettings()
         width = "full",
     }
 
-    -- Custom Unit Frames Unlock
+    -- Custom Unit Frames Unlock (canonical state: UnitFrames.CustomFramesMovingState, see _MenuFunctions CustomFramesSetMovingState)
     optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
     {
         type = "checkbox",
         name = GetString(LUIE_STRING_LAM_UF_CFRAMES_UNLOCK),
         tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_UNLOCK_TP),
         getFunc = function ()
-            return g_FramesMovingEnabled
+            return UnitFrames.CustomFramesMovingState == true
         end,
         setFunc = function (value)
-            g_FramesMovingEnabled = value
             UnitFrames.CustomFramesSetMovingState(value)
         end,
         width = "half",
@@ -223,7 +221,7 @@ function UnitFrames.CreateSettings()
             local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
             accountWideSettings.snapToGrid_unitFrames = value
             local gridSize = accountWideSettings.snapToGridSize_default or 15
-            GridOverlay.Refresh("unitFrames", g_FramesMovingEnabled and value, gridSize)
+            GridOverlay.Refresh("unitFrames", (UnitFrames.CustomFramesMovingState == true) and value, gridSize)
         end,
         width = "half",
         default = false,
@@ -243,7 +241,7 @@ function UnitFrames.CreateSettings()
         setFunc = function (value)
             local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
             accountWideSettings.snapToGridSize_default = value
-            GridOverlay.Refresh("unitFrames", g_FramesMovingEnabled and accountWideSettings.snapToGrid_unitFrames, value)
+            GridOverlay.Refresh("unitFrames", (UnitFrames.CustomFramesMovingState == true) and accountWideSettings.snapToGrid_unitFrames, value)
         end,
         width = "half",
         default = 15,
