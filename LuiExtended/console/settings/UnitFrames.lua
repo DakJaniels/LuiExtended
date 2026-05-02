@@ -23,7 +23,6 @@ local PetNames = LuiData.Data.PetNames
 local pairs = pairs
 local table = table
 local table_insert = table.insert
-local g_FramesMovingEnabled = false -- Helper local flag
 
 local nameDisplayOptions =
 {
