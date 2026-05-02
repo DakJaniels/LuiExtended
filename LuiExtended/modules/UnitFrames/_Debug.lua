@@ -12,210 +12,247 @@ local UnitFrames = LUIE.UnitFrames
 -- -----------------------------------------------------------------------------
 -- * DEBUG FUNCTIONS *
 -- -----------------------------------------------------------------------------
+-- Slash command driven previews that exercise the same layout / static / power
+-- pipelines used at runtime so debugging reflects the user's saved positions,
+-- bar dimensions, label visibility, and SV-driven control toggles.
+--
+-- All previews mirror live data from the player so power bars, names, class
+-- icon, etc. populate immediately without waiting for unrelated events.
+local PREVIEW_SOURCE_UNIT = "player"
 
--- Constants
-local UNIT_FRAMES =
-{
-    SMALL_GROUP =
-    {
-        prefix = "SmallGroup",
-        size = 4,
-        special =
-        {
-            first =
-            {
-                friendIcon =
-                {
-                    texture = "/esoui/art/campaign/campaignbrowser_friends.dds"
-                }
-            }
-        }
-    },
-    RAID_GROUP =
-    {
-        prefix = "RaidGroup",
-        size = 12
-    },
-    PET_GROUP =
-    {
-        prefix = "PetGroup",
-        size = 7
-    },
-    BOSS =
-    {
-        prefix = "boss",
-        size = 7
-    },
-    SINGLE =
-    {
-        PLAYER = "player",
-        TARGET = "reticleover",
-        COMPANION = "companion"
-    }
-}
+local function NotifyMissing(name)
+    LUIE.AddSystemMessage(string.format("[LUIE] UnitFrames debug: '%s' frame not enabled in settings.", name))
+end
 
--- Helper function to debug a single frame
-local function DebugSingleFrame(frameType)
-    local frame = UnitFrames.CustomFrames[frameType]
+-- -----------------------------------------------------------------------------
+-- Shared helpers
+-- -----------------------------------------------------------------------------
+
+-- Re-applies SV-backed (or dynamic-default) anchors to every custom TLW.
+local function ApplyPositions()
+    if UnitFrames.CustomFramesSetPositions then
+        UnitFrames.CustomFramesSetPositions()
+    end
+end
+
+-- Pushes live attribute values from `sourceUnitTag` into every numeric power
+-- key on the supplied frame, exactly like UnitFrames.OnPowerUpdate would on a
+-- real EVENT_POWER_UPDATE for that unit.
+local function PushPowerValues(frame, sourceUnitTag)
     if not frame then return end
+    for powerType, control in pairs(frame) do
+        if type(powerType) == "number" and control then
+            local powerValue, _, powerEffectiveMax = GetUnitPower(sourceUnitTag, powerType)
+            UnitFrames.UpdateAttribute(sourceUnitTag, powerType, control, powerValue, powerEffectiveMax, false, nil)
+        end
+    end
+end
 
-    frame.unitTag = UNIT_FRAMES.SINGLE.PLAYER
-    frame.control:SetHidden(false)
+-- Sets the preview unitTag and refreshes name labels, class icon, role icon,
+-- AVA rank, etc. through the same path the runtime uses.
+local function RefreshFrameStatics(frame, sourceUnitTag)
+    if not frame then return end
+    frame.unitTag = sourceUnitTag
     UnitFrames.UpdateStaticControls(frame)
 end
 
--- Debug Functions
+-- Unhides both the TLW and the inner control. Layout functions only flip the
+-- TLW when called with unhide=true; we always pass false so we can pick which
+-- frames within a shared layout group become visible.
+local function ShowFrame(frame)
+    if not frame then return end
+    if frame.tlw then frame.tlw:SetHidden(false) end
+    if frame.control then frame.control:SetHidden(false) end
+end
 
-local function CustomFramesDebugGroup()
-    local groupContainer = UnitFrames.CustomFrames["SmallGroup1"].tlw
-    if not groupContainer then return end
+local function PreviewFrame(frame, sourceUnitTag)
+    if not frame then return end
+    ShowFrame(frame)
+    RefreshFrameStatics(frame, sourceUnitTag)
+    PushPowerValues(frame, sourceUnitTag)
+end
 
-    -- Make container visible
-    groupContainer:SetHidden(false)
+-- -----------------------------------------------------------------------------
+-- Single-frame previews
+-- -----------------------------------------------------------------------------
 
-    -- Position container
-    groupContainer:ClearAnchors()
-    groupContainer:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 100)
+local function DebugPlayer()
+    local frame = UnitFrames.CustomFrames["player"]
+    if not frame then
+        NotifyMissing("player")
+        return
+    end
+    ApplyPositions()
+    UnitFrames.CustomFramesApplyLayoutPlayer(false)
+    PreviewFrame(frame, PREVIEW_SOURCE_UNIT)
+end
 
-    -- Apply proper group layout (this sets dimensions and spacing correctly)
+local function DebugTarget()
+    local frame = UnitFrames.CustomFrames["reticleover"]
+    if not frame then
+        NotifyMissing("reticleover")
+        return
+    end
+    ApplyPositions()
+    UnitFrames.CustomFramesApplyLayoutPlayer(false)
+    PreviewFrame(frame, PREVIEW_SOURCE_UNIT)
+end
+
+local function DebugAva()
+    local frame = UnitFrames.CustomFrames["AvaPlayerTarget"]
+    if not frame then
+        NotifyMissing("AvaPlayerTarget")
+        return
+    end
+    ApplyPositions()
+    UnitFrames.CustomFramesApplyLayoutPlayer(false)
+    PreviewFrame(frame, PREVIEW_SOURCE_UNIT)
+end
+
+local function DebugCompanion()
+    local frame = UnitFrames.CustomFrames["companion"]
+    if not frame then
+        NotifyMissing("companion")
+        return
+    end
+    ApplyPositions()
+    UnitFrames.CustomFramesApplyLayoutCompanion(false)
+    PreviewFrame(frame, PREVIEW_SOURCE_UNIT)
+end
+
+local function DebugGroup()
+    local first = UnitFrames.CustomFrames["SmallGroup1"]
+    if not first then
+        NotifyMissing("SmallGroup")
+        return
+    end
+    ApplyPositions()
     UnitFrames.CustomFramesApplyLayoutGroup(false)
-
-    -- Show all group frames and set them to player unitTag for preview
-    for i = 1, UNIT_FRAMES.SMALL_GROUP.size do
-        local unitTag = UNIT_FRAMES.SMALL_GROUP.prefix .. i
-        local frame = UnitFrames.CustomFrames[unitTag]
-        if frame then
-            frame.unitTag = UNIT_FRAMES.SINGLE.PLAYER
-            frame.control:SetHidden(false)
-            UnitFrames.UpdateStaticControls(frame)
-        end
+    if first.tlw then first.tlw:SetHidden(false) end
+    for i = 1, 4 do
+        PreviewFrame(UnitFrames.CustomFrames["SmallGroup" .. i], PREVIEW_SOURCE_UNIT)
     end
+    UnitFrames.OnLeaderUpdate(nil, "SmallGroup1")
+end
 
-    -- Handle leader icon for first frame
-    if UNIT_FRAMES.SMALL_GROUP.special and UNIT_FRAMES.SMALL_GROUP.special.first then
-        local firstFrame = UnitFrames.CustomFrames[UNIT_FRAMES.SMALL_GROUP.prefix .. "1"]
-        if firstFrame then
-            for component, settings in pairs(UNIT_FRAMES.SMALL_GROUP.special.first) do
-                if firstFrame[component] then
-                    --- @diagnostic disable-next-line: undefined-field
-                    firstFrame[component]:SetHidden(false)
-                    if settings.texture then
-                        --- @diagnostic disable-next-line: undefined-field
-                        firstFrame[component]:SetTexture(settings.texture)
-                    end
-                end
-            end
-        end
+local function DebugRaid()
+    local first = UnitFrames.CustomFrames["RaidGroup1"]
+    if not first then
+        NotifyMissing("RaidGroup")
+        return
     end
-
-    UnitFrames.OnLeaderUpdate(nil, UNIT_FRAMES.SMALL_GROUP.prefix .. "1")
-end
-
-local function CustomFramesDebugRaid()
-    local raidContainer = UnitFrames.CustomFrames["RaidGroup1"].tlw
-    if not raidContainer then return end
-
-    -- Make container visible
-    raidContainer:SetHidden(false)
-
-    -- Position container
-    raidContainer:ClearAnchors()
-    raidContainer:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 100)
-
-    -- Apply proper raid layout (this sets dimensions and spacing correctly)
-    UnitFrames.CustomFramesApplyLayoutRaid(false)
-
-    -- Show all raid frames and set them to player unitTag for preview
-    for i = 1, UNIT_FRAMES.RAID_GROUP.size do
-        local unitTag = UNIT_FRAMES.RAID_GROUP.prefix .. i
-        local frame = UnitFrames.CustomFrames[unitTag]
-        if frame then
-            frame.unitTag = UNIT_FRAMES.SINGLE.PLAYER
-            frame.control:SetHidden(false)
-            UnitFrames.UpdateStaticControls(frame)
-        end
+    ApplyPositions()
+    UnitFrames.CustomFramesApplyLayoutRaid(false, true)
+    if first.tlw then first.tlw:SetHidden(false) end
+    for i = 1, 12 do
+        PreviewFrame(UnitFrames.CustomFrames["RaidGroup" .. i], PREVIEW_SOURCE_UNIT)
     end
-
-    UnitFrames.OnLeaderUpdate(nil, UNIT_FRAMES.RAID_GROUP.prefix .. "1")
+    UnitFrames.OnLeaderUpdate(nil, "RaidGroup1")
 end
 
-local function CustomFramesDebugPlayer()
-    DebugSingleFrame(UNIT_FRAMES.SINGLE.PLAYER)
-end
-
-local function CustomFramesDebugTarget()
-    DebugSingleFrame(UNIT_FRAMES.SINGLE.TARGET)
-end
-
-local function CustomFramesDebugPets()
-    local petContainer = UnitFrames.CustomFrames["PetGroup1"].tlw
-    if not petContainer then return end
-
-    -- Make container visible
-    petContainer:SetHidden(false)
-
-    -- Position container
-    petContainer:ClearAnchors()
-    petContainer:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 100)
-
-    -- Apply proper pet layout (this sets dimensions and spacing correctly)
-    UnitFrames.CustomFramesApplyLayoutPet(true)
-
-    -- Show all pet frames and set them to player unitTag for preview
-    for i = 1, UNIT_FRAMES.PET_GROUP.size do
-        local unitTag = UNIT_FRAMES.PET_GROUP.prefix .. i
-        local frame = UnitFrames.CustomFrames[unitTag]
-        if frame then
-            frame.unitTag = UNIT_FRAMES.SINGLE.PLAYER
-            frame.control:SetHidden(false)
-            UnitFrames.UpdateStaticControls(frame)
-        end
+local function DebugPets()
+    local first = UnitFrames.CustomFrames["PetGroup1"]
+    if not first then
+        NotifyMissing("PetGroup")
+        return
+    end
+    ApplyPositions()
+    UnitFrames.CustomFramesApplyLayoutPet(false)
+    if first.tlw then first.tlw:SetHidden(false) end
+    for i = 1, 7 do
+        PreviewFrame(UnitFrames.CustomFrames["PetGroup" .. i], PREVIEW_SOURCE_UNIT)
     end
 end
 
-local function CustomFramesDebugBosses()
-    -- Special handling for boss frames since they have their own container and layout logic
-    local bossContainer = UnitFrames.CustomFrames["boss1"].tlw
-    if not bossContainer then return end
-
-    -- Make container visible
-    bossContainer:SetHidden(false)
-
-    -- Position container
-    bossContainer:ClearAnchors()
-    bossContainer:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 100)
-
-    -- Apply proper boss layout (this sets dimensions and spacing correctly)
+local function DebugBosses()
+    local first = UnitFrames.CustomFrames["boss1"]
+    if not first then
+        NotifyMissing("boss")
+        return
+    end
+    ApplyPositions()
+    -- CustomFramesApplyLayoutBosses already unhides the boss TLW at the end;
+    -- still safe to call ShowFrame on each child to flip their controls.
     UnitFrames.CustomFramesApplyLayoutBosses()
+    for i = 1, 7 do
+        PreviewFrame(UnitFrames.CustomFrames["boss" .. i], PREVIEW_SOURCE_UNIT)
+    end
+    UnitFrames.ApplyBossThresholdMarkersSlashDebugPreview()
+end
 
-    -- Show all boss frames and set them to player unitTag for preview
-    for i = 1, UNIT_FRAMES.BOSS.size do
-        local unitTag = UNIT_FRAMES.BOSS.prefix .. i
-        local frame = UnitFrames.CustomFrames[unitTag]
-        if frame then
-            frame.unitTag = UNIT_FRAMES.SINGLE.PLAYER
-            frame.control:SetHidden(false)
-            UnitFrames.UpdateStaticControls(frame)
+-- -----------------------------------------------------------------------------
+-- Toggle-all
+-- -----------------------------------------------------------------------------
+
+UnitFrames.debugAllActive = UnitFrames.debugAllActive or false
+
+local function EnableAllPreviews()
+    DebugPlayer()
+    DebugTarget()
+    DebugAva()
+    DebugCompanion()
+    DebugGroup()
+    DebugRaid()
+    DebugPets()
+    DebugBosses()
+end
+
+-- Restores game-driven state by routing through the same public refresh
+-- functions runtime uses. Avoids duplicating hide/clear logic.
+local function DisableAllPreviews()
+    if UnitFrames.CustomFrames["player"] and UnitFrames.ReloadValues then
+        UnitFrames.ReloadValues("player")
+    end
+
+    if UnitFrames.CustomFrames["reticleover"] or UnitFrames.CustomFrames["AvaPlayerTarget"] then
+        if DoesUnitExist("reticleover") and UnitFrames.OnReticleTargetChanged then
+            UnitFrames.OnReticleTargetChanged(nil)
+        elseif UnitFrames.ClearTargetFrame then
+            UnitFrames.ClearTargetFrame()
         end
     end
 
-    -- Update threshold markers to display them properly on each frame
-    UnitFrames.UpdateBossThresholds()
+    if UnitFrames.CustomFrames["companion"] and UnitFrames.CompanionUpdate then
+        UnitFrames.CompanionUpdate()
+    end
+
+    if UnitFrames.CustomFrames["PetGroup1"] and UnitFrames.CustomPetUpdate then
+        UnitFrames.CustomPetUpdate()
+    end
+
+    if (UnitFrames.CustomFrames["SmallGroup1"] or UnitFrames.CustomFrames["RaidGroup1"]) and UnitFrames.CustomFramesGroupUpdate then
+        UnitFrames.CustomFramesGroupUpdate()
+    end
+
+    if UnitFrames.CustomFrames["boss1"] and UnitFrames.OnBossesChanged then
+        UnitFrames.OnBossesChanged(nil)
+    end
 end
 
-local function CustomFramesDebugCompanion()
-    DebugSingleFrame(UNIT_FRAMES.SINGLE.COMPANION)
+local function DebugAll()
+    UnitFrames.debugAllActive = not UnitFrames.debugAllActive
+    if UnitFrames.debugAllActive then
+        EnableAllPreviews()
+    else
+        DisableAllPreviews()
+    end
 end
+
+-- -----------------------------------------------------------------------------
+-- Slash command registration
+-- -----------------------------------------------------------------------------
 
 local DEBUG_COMMANDS =
 {
-    ["/luiufsm"] = CustomFramesDebugGroup,
-    ["/luiufraid"] = CustomFramesDebugRaid,
-    ["/luiufplayer"] = CustomFramesDebugPlayer,
-    ["/luiuftar"] = CustomFramesDebugTarget,
-    ["/luiufpet"] = CustomFramesDebugPets,
-    ["/luiufboss"] = CustomFramesDebugBosses,
-    ["/luiufcomp"] = CustomFramesDebugCompanion,
+    ["/luiufsm"]     = DebugGroup,
+    ["/luiufraid"]   = DebugRaid,
+    ["/luiufplayer"] = DebugPlayer,
+    ["/luiuftar"]    = DebugTarget,
+    ["/luiufava"]    = DebugAva,
+    ["/luiufpet"]    = DebugPets,
+    ["/luiufboss"]   = DebugBosses,
+    ["/luiufcomp"]   = DebugCompanion,
+    ["/luiufall"]    = DebugAll,
 }
 
 for command, handler in pairs(DEBUG_COMMANDS) do

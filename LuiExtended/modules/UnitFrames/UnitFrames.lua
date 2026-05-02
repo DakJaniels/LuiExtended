@@ -933,6 +933,30 @@ function UnitFrames.UpdateBossThresholds()
     ApplyBossThresholdMarkers(thresholdInfo)
 end
 
+--- Used by UnitFrames slash debug only. Paints threshold markers from built-in percentages;
+--- does not call CrutchAlerts (GetBossThresholds requires live boss units).
+function UnitFrames.ApplyBossThresholdMarkersSlashDebugPreview()
+    if not UnitFrames.CustomFrames or not UnitFrames.CustomFrames["boss1"] then
+        return
+    end
+
+    if not UnitFrames.SV.BossShowThresholdMarkers then
+        UnitFrames.activeBossThresholds = nil
+        UnitFrames.lastBossThresholdColumnSig = nil
+        ApplyBossThresholdMarkers(nil)
+        return
+    end
+
+    local columns = {}
+    for _, pct in ipairs(DEFAULT_BOSS_THRESHOLD_PERCENTS) do
+        table_insert(columns, { percent = pct, mechanic = "", scope = "common" })
+    end
+    table_sort(columns, function (a, b) return a.percent > b.percent end)
+    local thresholdInfo = { columns = columns }
+    UnitFrames.activeBossThresholds = thresholdInfo
+    ApplyBossThresholdMarkers(thresholdInfo)
+end
+
 --- Re-applies stage colors and marker positions from cached threshold columns (no Crutch API call).
 --- Invoked on boss EVENT_POWER_UPDATE so ACTIVE / IMMINENT / PASSED tracks current HP.
 function UnitFrames.RepaintBossThresholdMarkers()
@@ -3376,7 +3400,9 @@ local function GetRaidIntegrationWidth()
     return 0
 end
 
-function UnitFrames.CustomFramesApplyLayoutRaid(unhide)
+--- @param unhide boolean When true, unhides the raid TLW after layout.
+--- @param layoutAllRaidSlots boolean When true, lay out all 12 raid slots using SavedVariables (RaidLayout, spacers, bar sizes) even if the group has fewer members (UnitFrames slash debug preview). Uses unitTag `player` for role / leader / online checks so RaidIconOptions behave consistently.
+function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
     if not UnitFrames.CustomFrames["RaidGroup1"] or not UnitFrames.CustomFrames["RaidGroup1"].tlw then
         return
     end
@@ -3439,11 +3465,21 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide)
         end
     end
 
-    -- Position and configure each unit frame
-    for i = 1, GetGroupSize() do
-        local index = UnitFrames.SV.SortRoleRaid and playerList[i] or i
+    local maxSlots = layoutAllRaidSlots and 12 or GetGroupSize()
+
+    for i = 1, maxSlots do
+        local index
+        local unitTag
+
+        if layoutAllRaidSlots then
+            index = i
+            unitTag = "player"
+        else
+            index = UnitFrames.SV.SortRoleRaid and playerList[i] or i
+            unitTag = GetGroupUnitTagByIndex(index)
+        end
+
         local unitFrame = UnitFrames.CustomFrames["RaidGroup" .. index]
-        local unitTag = GetGroupUnitTagByIndex(index)
         local rhb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
 
         -- Calculate position and set frame dimensions
