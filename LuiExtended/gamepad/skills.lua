@@ -359,11 +359,18 @@ LUIE.HookGamePadStats = function ()
                     selectedData.isArtificial = true
                 end
                 if selectedData.isArtificial then
+                    -- ArtificialEffectId (live): 0 ESO Plus, 1 Battle Spirit, 2 LFG, 3 Battle Spirit Imperial City,
+                    -- 4 Battleground Deserter, 5–8 Underdog / Solo Queue bonuses.
                     if abilityId == 0 then
-                        -- ESO Plus
                         labelAbilityId = 63601
-                    elseif abilityId == 1 or abilityId == 2 then
+                    elseif abilityId == 1 or abilityId == 3 then
                         labelAbilityId = 999014
+                    elseif abilityId == 2 then
+                        labelAbilityId = "2 (LFG)"
+                    elseif abilityId == 4 then
+                        labelAbilityId = "4 (BG Deserter)"
+                    elseif abilityId >= 5 and abilityId <= 8 then
+                        labelAbilityId = abilityId
                     else
                         labelAbilityId = "Artificial"
                     end

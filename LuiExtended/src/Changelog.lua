@@ -36,6 +36,7 @@ local changelogMessages =
 
     -- Fixed
     "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: artificial effect ids aligned with the live API — Imperial City Battle Spirit (id 3) no longer mis-handled as Battleground Deserter; LFG (id 2) uses the LFG tooltip instead of IC Battle Spirit; deserter timer logic moved to id 4.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: boss threshold markers and mechanic labels align to the health bar (labels were anchored from the bar center horizontally; lines used the left edge).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: boss threshold markers clear when no boss units exist (wipe / despawn) instead of lingering on screen.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: custom group/raid frame repositioning — member controls have mouse disabled while moving so the top-level window reliably receives drags.",
