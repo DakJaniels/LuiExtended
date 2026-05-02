@@ -39,7 +39,7 @@ local function scaleCoords(coords, frameType, baselineDimensions, frameDimension
     local widthRatio = current.width / baseline.width
     local heightRatio = current.height / baseline.height
     local scaledX = coords[1] * widthResolutionScale * widthRatio
-    local scaledY = coords[2] * math.pow(heightResolutionScale, 1.2) * aspectRatioScale * heightRatio
+    local scaledY = coords[2] * zo_pow(heightResolutionScale, 1.2) * aspectRatioScale * heightRatio
     return { scaledX, scaledY }
 end
 

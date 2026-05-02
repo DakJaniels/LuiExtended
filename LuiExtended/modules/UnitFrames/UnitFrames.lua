@@ -63,22 +63,16 @@ local g_PendingUpdate =
 local BOSS_THRESHOLD_MARKER_WIDTH = 2
 local BOSS_THRESHOLD_MARKER_COLOR = { 1, 0.85, 0.1, 0.8 }
 local BOSS_THRESHOLD_LABEL_COLOR = { 1, 0.95, 0.7, 1 }
-local BOSS_THRESHOLD_LABEL_DIMENSIONS = { 56, 16 }
-local DEFAULT_BOSS_THRESHOLD_PERCENTS = { 25, 50, 75 }
-
--- Anchor point string to constant mapping
-local ANCHOR_MAPPING =
+-- Fallback stage colors when CrutchAlerts is not loaded (matches CrutchAlerts/main/CrutchAlerts.lua defaultOptions.bossHealthBar)
+local THRESHOLD_STAGE_COLORS_FALLBACK =
 {
-    ["TOP"] = TOP,
-    ["BOTTOM"] = BOTTOM,
-    ["LEFT"] = LEFT,
-    ["RIGHT"] = RIGHT,
-    ["CENTER"] = CENTER,
-    ["TOPLEFT"] = TOPLEFT,
-    ["TOPRIGHT"] = TOPRIGHT,
-    ["BOTTOMLEFT"] = BOTTOMLEFT,
-    ["BOTTOMRIGHT"] = BOTTOMRIGHT,
+    active = { 0.53, 0.53, 0.53, 0.9 },
+    imminent = { 1, 1, 0, 0.67 },
+    passed = { 0.53, 0.53, 0.53, 0.4 },
 }
+local BOSS_THRESHOLD_TOP_LABEL_DIMENSIONS = { 48, 16 }
+local BOSS_THRESHOLD_BOTTOM_LABEL_DIMENSIONS = { 120, 16 }
+local DEFAULT_BOSS_THRESHOLD_PERCENTS = { 25, 50, 75 }
 
 -- Labels for Offline/Dead/Resurrection Status
 local strDead = GetString(SI_UNIT_FRAME_STATUS_DEAD)
@@ -320,6 +314,13 @@ function UnitFrames.Initialize(enabled)
         eventManager:RegisterForEvent(moduleName, EVENT_LEADER_UPDATE, UnitFrames.OnLeaderUpdate)
         eventManager:RegisterForEvent(moduleName, EVENT_BOSSES_CHANGED, UnitFrames.OnBossesChanged)
 
+        -- Subscribe to CrutchAlerts threshold-change notifications so dynamic threshold
+        -- overrides (e.g. Z'Maja stage detection) repaint the markers.
+        -- See CrutchAlerts/bosshealthbar/BossHealthBarAPI.lua:117-135.
+        if LUIE.OtherAddonCompatability.isCrutchAlertsEnabled then
+            CrutchAlerts.BossHealthBar.RegisterThresholdsChangeListener("LUIE_UnitFrames", UnitFrames.OnCrutchThresholdsChanged)
+        end
+
         eventManager:RegisterForEvent(moduleName, EVENT_GUILD_SELF_LEFT_GUILD, UnitFrames.SocialUpdateFrames)
         eventManager:RegisterForEvent(moduleName, EVENT_GUILD_SELF_JOINED_GUILD, UnitFrames.SocialUpdateFrames)
         eventManager:RegisterForEvent(moduleName, EVENT_GUILD_MEMBER_ADDED, UnitFrames.SocialUpdateFrames)
@@ -414,37 +415,62 @@ function UnitFrames.FormatSimpleLabel(label, format)
     label.format = format
 end
 
+--- Builds a renderable column list from CrutchAlerts BossHealthBar data.
+--- Each column is { percent, mechanic, scope = "common"|"multi", bossIndex? }.
+--- Returns nil when no usable thresholds (so the default-percents fallback runs).
 local function FetchCrutchBossThresholds()
     local crutch = CrutchAlerts
-    if not crutch then
+
+    local data = crutch.BossHealthBar.GetBossThresholds()
+    if type(data) ~= "table" then
         return nil
     end
 
-    local thresholdData = crutch.BossHealthBar.GetBossThresholds()
-    if not thresholdData then
-        return nil
-    end
+    local columns = {}
 
-    local percents = {}
-    for percent in pairs(thresholdData) do
-        if type(percent) == "number" then
-            table_insert(percents, percent)
+    -- Per-boss multi thresholds: if any bossN sub-table exists, only those are emitted
+    -- (mirrors CrutchAlerts BossHealthBar.lua:486-498).
+    local hasMulti = false
+    for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
+        local sub = data["boss" .. i]
+        if type(sub) == "table" then
+            hasMulti = true
+            for percent, mechanic in pairs(sub) do
+                if type(percent) == "number" then
+                    table_insert(columns,
+                                 {
+                                     percent = percent,
+                                     mechanic = type(mechanic) == "string" and mechanic or "",
+                                     scope = "multi",
+                                     bossIndex = i,
+                                 })
+                end
+            end
         end
     end
 
-    if #percents == 0 then
+    if not hasMulti then
+        for percent, mechanic in pairs(data) do
+            if type(percent) == "number" then
+                table_insert(columns,
+                             {
+                                 percent = percent,
+                                 mechanic = type(mechanic) == "string" and mechanic or "",
+                                 scope = "common",
+                             })
+            end
+        end
+    end
+
+    if #columns == 0 then
         return nil
     end
 
-    table_sort(percents)
-
-    return
-    {
-        percents = percents,
-        map = thresholdData,
-    }
+    table_sort(columns, function (a, b) return a.percent > b.percent end)
+    return { columns = columns }
 end
 
+--- Hides every per-bar (multi-mode) line marker on the given health frame.
 local function HideBossThresholdMarkers(healthFrame)
     if not healthFrame or not healthFrame.thresholdMarkers then
         return
@@ -454,172 +480,465 @@ local function HideBossThresholdMarkers(healthFrame)
         if marker.line then
             marker.line:SetHidden(true)
         end
-        if marker.label then
-            marker.label:SetHidden(true)
+    end
+end
+
+local function HidePool(pool)
+    if not pool then return end
+    for _, ctl in ipairs(pool) do
+        ctl:SetHidden(true)
+    end
+end
+
+--- Hides the stack-level container plus every per-bar marker.
+local function HideAllBossThresholdMarkers()
+    if UnitFrames.CustomFrames then
+        for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
+            local frame = UnitFrames.CustomFrames["boss" .. i]
+            if frame and frame[COMBAT_MECHANIC_FLAGS_HEALTH] then
+                HideBossThresholdMarkers(frame[COMBAT_MECHANIC_FLAGS_HEALTH])
+            end
+        end
+    end
+
+    local stack = UnitFrames.bossThresholdStack
+    if stack then
+        HidePool(stack.topLabels)
+        HidePool(stack.bottomLabels)
+        HidePool(stack.commonLines)
+        if stack.control then
+            stack.control:SetHidden(true)
         end
     end
 end
 
-local function ApplyBossThresholdMarkersToHealthFrame(healthFrame, thresholdInfo)
-    if not healthFrame or not thresholdInfo then
+--- Lazily creates the stack-level threshold container parented to the boss tlw.
+--- It owns three control pools: top percent labels, bottom rotated mechanic-name labels,
+--- and common-mode vertical lines that span the full visible boss stack.
+local function EnsureThresholdStack(tlw)
+    local stack = UnitFrames.bossThresholdStack
+    if stack and stack.control then
+        return stack
+    end
+
+    local container = windowManager:CreateControl(nil, tlw, CT_CONTROL)
+    container:SetMouseEnabled(false)
+    container:SetDrawTier(DT_HIGH)
+    container:SetDrawLayer(DL_OVERLAY)
+
+    stack =
+    {
+        control = container,
+        topLabels = {},
+        bottomLabels = {},
+        commonLines = {},
+    }
+    UnitFrames.bossThresholdStack = stack
+    return stack
+end
+
+--- Returns (firstFrame, lastFrame) of the visible boss frames so the stack control
+--- can re-anchor itself to span exactly the visible bars (matches Crutch's behavior in
+--- BossHealthBar.lua:683-755 where the container width follows the highest visible tag).
+local function GetVisibleBossSpan()
+    if not UnitFrames.CustomFrames then return nil, nil end
+    local first, last
+    for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
+        local frame = UnitFrames.CustomFrames["boss" .. i]
+        if frame and frame.control and not frame.control:IsHidden() then
+            first = first or frame
+            last = frame
+        end
+    end
+    return first, last
+end
+
+local function GetThresholdStageColorsFromCrutch()
+    local c = CrutchAlerts and CrutchAlerts.savedOptions and CrutchAlerts.savedOptions.bossHealthBar
+    if c and c.activeColor and c.imminentColor and c.passedColor then
+        return c.activeColor, c.imminentColor, c.passedColor
+    end
+    return THRESHOLD_STAGE_COLORS_FALLBACK.active, THRESHOLD_STAGE_COLORS_FALLBACK.imminent, THRESHOLD_STAGE_COLORS_FALLBACK.passed
+end
+
+local function RoundBossThresholdHealthPercent(percentRaw)
+    local cr = CrutchAlerts and CrutchAlerts.savedOptions and CrutchAlerts.savedOptions.bossHealthBar
+    if cr and cr.useFloorRounding == false then
+        return zo_round(percentRaw)
+    end
+    return zo_floor(percentRaw)
+end
+
+local function GetRoundedBossHealthPercent(bossIndex)
+    local tag = "boss" .. bossIndex
+    local saved = UnitFrames.savedHealth and UnitFrames.savedHealth[tag]
+    local pv, pmax
+    if saved and saved[2] and saved[2] > 0 then
+        pv, pmax = saved[1], saved[2]
+    elseif DoesUnitExist(tag) then
+        pv, pmax = GetUnitPower(tag, COMBAT_MECHANIC_FLAGS_HEALTH)
+    else
+        return 0
+    end
+    if not pmax or pmax <= 0 then
+        return 0
+    end
+    return RoundBossThresholdHealthPercent(100 * pv / pmax)
+end
+
+local function GetHighestVisibleBossRoundedHealthPercent()
+    local highest = 0
+    for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
+        local frame = UnitFrames.CustomFrames["boss" .. i]
+        if frame and frame.control and not frame.control:IsHidden() and DoesUnitExist("boss" .. i) then
+            local h = GetRoundedBossHealthPercent(i)
+            if h > highest then
+                highest = h
+            end
+        end
+    end
+    return highest
+end
+
+local function BossThresholdStageKey(column)
+    return string_format("%s:%s:%d", column.scope, tostring(column.bossIndex or 0), column.percent)
+end
+
+--- Advances stage state for one threshold column (mirrors Crutch BossHealthBar.lua:330-354).
+local function AdvanceBossThresholdStage(column, healthToCheck)
+    if not UnitFrames.bossThresholdStageState then
+        UnitFrames.bossThresholdStageState = {}
+    end
+    local key = BossThresholdStageKey(column)
+    local state = UnitFrames.bossThresholdStageState[key] or "ACTIVE"
+    local p = column.percent
+    if state ~= "PASSED" and healthToCheck < p - 1 then
+        state = "PASSED"
+    elseif state ~= "IMMINENT" and healthToCheck >= p - 1 and healthToCheck <= p + 5 then
+        state = "IMMINENT"
+    end
+    UnitFrames.bossThresholdStageState[key] = state
+    return state
+end
+
+local function ApplyThresholdStageToBackdrop(backdrop, state)
+    local activeC, imminentC, passedC = GetThresholdStageColorsFromCrutch()
+    local c = activeC
+    if state == "PASSED" then
+        c = passedC
+    elseif state == "IMMINENT" then
+        c = imminentC
+    end
+    backdrop:SetCenterColor(c[1], c[2], c[3], c[4])
+    backdrop:SetEdgeColor(c[1], c[2], c[3], c[4])
+end
+
+local function ApplyThresholdStageToLabel(label, state)
+    local activeC, imminentC, passedC = GetThresholdStageColorsFromCrutch()
+    local c = activeC
+    if state == "PASSED" then
+        c = passedC
+    elseif state == "IMMINENT" then
+        c = imminentC
+    end
+    label:SetColor(c[1], c[2], c[3], c[4])
+end
+
+local function CreateThresholdLine(parent)
+    local line = windowManager:CreateControl(nil, parent, CT_BACKDROP)
+    line:SetCenterColor(BOSS_THRESHOLD_MARKER_COLOR[1], BOSS_THRESHOLD_MARKER_COLOR[2], BOSS_THRESHOLD_MARKER_COLOR[3], BOSS_THRESHOLD_MARKER_COLOR[4])
+    line:SetEdgeColor(BOSS_THRESHOLD_MARKER_COLOR[1], BOSS_THRESHOLD_MARKER_COLOR[2], BOSS_THRESHOLD_MARKER_COLOR[3], BOSS_THRESHOLD_MARKER_COLOR[4])
+    line:SetEdgeTexture("", 1, 1, 0, 0)
+    line:SetDrawTier(DT_HIGH)
+    line:SetDrawLayer(DL_OVERLAY)
+    line:SetDrawLevel(6)
+    line:SetMouseEnabled(false)
+    line:SetHidden(true)
+    return line
+end
+
+local function CreateThresholdLabel(parent, dimensions, isBottom)
+    local label = windowManager:CreateControl(nil, parent, CT_LABEL)
+    if IsConsoleUI() then
+        label:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
+    else
+        label:SetFont("$(BOLD_FONT)|16|soft-shadow-thin")
+    end
+    label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+    label:SetVerticalAlignment(isBottom and TEXT_ALIGN_TOP or TEXT_ALIGN_BOTTOM)
+    label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+    label:SetDimensions(dimensions[1], dimensions[2])
+    label:SetText("")
+    label:SetHidden(true)
+    label:SetDrawTier(DT_HIGH)
+    label:SetDrawLayer(DL_TEXT)
+    label:SetDrawLevel(7)
+    label:SetMouseEnabled(false)
+    label:SetColor(BOSS_THRESHOLD_LABEL_COLOR[1], BOSS_THRESHOLD_LABEL_COLOR[2], BOSS_THRESHOLD_LABEL_COLOR[3], BOSS_THRESHOLD_LABEL_COLOR[4])
+    return label
+end
+
+--- Draws (or reuses) a per-bar line at the given x offset inside one boss's thresholdContainer.
+--- Used in multi mode so each boss's threshold line is attributed to that bar only.
+local function ApplyMultiLineToFrame(healthFrame, lineX, height, stage)
+    if not healthFrame or not healthFrame.thresholdContainer then
         return
     end
 
     local container = healthFrame.thresholdContainer
-    if not container then
-        return
-    end
-
     local markers = healthFrame.thresholdMarkers
     if not markers then
         markers = {}
         healthFrame.thresholdMarkers = markers
     end
 
-    local width = container:GetWidth()
-    if width <= 0 and UnitFrames.SV then
-        width = UnitFrames.SV.BossBarWidth or width
-    end
-
-    local height = container:GetHeight()
-    if height <= 0 and UnitFrames.SV then
-        height = UnitFrames.SV.BossBarHeight or height
-    end
-
-    if width <= 0 or height <= 0 then
-        HideBossThresholdMarkers(healthFrame)
-        return
-    end
-
-    for idx, percent in ipairs(thresholdInfo.percents) do
-        local marker = markers[idx]
-        if not marker then
-            local line = windowManager:CreateControl(nil, container, CT_BACKDROP)
-            line:SetCenterColor(BOSS_THRESHOLD_MARKER_COLOR[1], BOSS_THRESHOLD_MARKER_COLOR[2], BOSS_THRESHOLD_MARKER_COLOR[3], BOSS_THRESHOLD_MARKER_COLOR[4])
-            line:SetEdgeColor(BOSS_THRESHOLD_MARKER_COLOR[1], BOSS_THRESHOLD_MARKER_COLOR[2], BOSS_THRESHOLD_MARKER_COLOR[3], BOSS_THRESHOLD_MARKER_COLOR[4])
-            line:SetEdgeTexture("", 8, 1, 1, 1)
-            line:SetDrawLayer(DL_BACKGROUND)
-            line:SetDimensions(BOSS_THRESHOLD_MARKER_WIDTH, height)
-            line:SetHidden(true)
-            line:SetEdgeTexture("", 1, 1, 0, 0)
-            line:SetDrawTier(DT_HIGH)
-            line:SetDrawLayer(DL_OVERLAY)
-            line:SetDrawLevel(6)
-            line:SetMouseEnabled(false)
-
-            local label = windowManager:CreateControl(nil, container, CT_LABEL)
-            -- Update font to use better readable font
-            if IsConsoleUI() then
-                label:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
-            else
-                label:SetFont("$(BOLD_FONT)|16|soft-shadow-thin")
-            end
-
-            label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
-            label:SetVerticalAlignment(TEXT_ALIGN_BOTTOM)
-            label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
-            label:SetDimensions(BOSS_THRESHOLD_LABEL_DIMENSIONS[1], BOSS_THRESHOLD_LABEL_DIMENSIONS[2])
-            label:SetText("")
-            label:SetHidden(true)
-            label:SetDrawTier(DT_HIGH)
-            label:SetDrawLayer(DL_TEXT)
-            label:SetDrawLevel(7)
-            label:SetMouseEnabled(false)
-            label:SetColor(unpack(BOSS_THRESHOLD_LABEL_COLOR))
-
-            marker = { line = line, label = label }
-            markers[idx] = marker
-        end
-
-        local line = marker.line
-        local label = marker.label
-
-        line:SetDimensions(BOSS_THRESHOLD_MARKER_WIDTH, height)
-        local normalized = zo_clamp(percent / 100, 0, 1)
-        local offset = normalized * width - (BOSS_THRESHOLD_MARKER_WIDTH / 2)
-        local maxAnchor = width - BOSS_THRESHOLD_MARKER_WIDTH
-        if maxAnchor < 0 then
-            maxAnchor = 0
-        end
-        offset = zo_clamp(offset, 0, maxAnchor)
-        line:ClearAnchors()
-        line:SetAnchor(TOPLEFT, container, TOPLEFT, offset, 0)
-        line:SetAnchor(BOTTOMLEFT, container, BOTTOMLEFT, offset, 0)
-        line:SetHidden(false)
-
-        label:ClearAnchors()
-        label:SetDimensions(BOSS_THRESHOLD_LABEL_DIMENSIONS[1], BOSS_THRESHOLD_LABEL_DIMENSIONS[2])
-
-        local labelAnchor = ANCHOR_MAPPING[UnitFrames.SV.BossThresholdLabelAnchor] or BOTTOM
-        local labelRelativeAnchor = ANCHOR_MAPPING[UnitFrames.SV.BossThresholdLabelRelativeAnchor] or TOP
-        local labelOffsetX = UnitFrames.SV.BossThresholdLabelOffsetX or 0
-        local labelOffsetY = UnitFrames.SV.BossThresholdLabelOffsetY or -2
-
-        label:SetAnchor(labelAnchor, line, labelRelativeAnchor, labelOffsetX, labelOffsetY)
-        label:SetText(zo_strformat("<<1>>%", percent))
-        label:SetHidden(false)
-    end
-
-    for idx = #thresholdInfo.percents + 1, #markers do
-        local marker = markers[idx]
-        if marker then
-            if marker.line then
-                marker.line:SetHidden(true)
-            end
-            if marker.label then
-                marker.label:SetHidden(true)
-            end
+    local marker
+    for _, m in ipairs(markers) do
+        if m.line and m.line:IsHidden() then
+            marker = m
+            break
         end
     end
+    if not marker then
+        marker = { line = CreateThresholdLine(container) }
+        table_insert(markers, marker)
+    end
+
+    local line = marker.line
+    line:ClearAnchors()
+    line:SetDimensions(BOSS_THRESHOLD_MARKER_WIDTH, height)
+    line:SetAnchor(TOPLEFT, container, TOPLEFT, lineX, 0)
+    line:SetAnchor(BOTTOMLEFT, container, BOTTOMLEFT, lineX, 0)
+    ApplyThresholdStageToBackdrop(line, stage)
+    line:SetHidden(false)
 end
 
+--- Renders the full threshold pipeline:
+--- - re-anchors the stack container across boss1..lastVisible
+--- - top percent labels above the stack, bottom rotated mechanic-name labels below
+--- - common-mode lines span the full stack height
+--- - multi-mode lines are drawn on the relevant boss bar only
 local function ApplyBossThresholdMarkers(thresholdInfo)
-    if not UnitFrames.CustomFrames then
+    if not UnitFrames.CustomFrames or not UnitFrames.CustomFrames["boss1"] then
         return
     end
 
+    if not thresholdInfo or not thresholdInfo.columns or #thresholdInfo.columns == 0 then
+        HideAllBossThresholdMarkers()
+        return
+    end
+
+    -- Hide per-bar markers up front; we re-show only the multi-mode ones we use this pass.
     for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
         local frame = UnitFrames.CustomFrames["boss" .. i]
         if frame and frame[COMBAT_MECHANIC_FLAGS_HEALTH] then
-            if thresholdInfo then
-                ApplyBossThresholdMarkersToHealthFrame(frame[COMBAT_MECHANIC_FLAGS_HEALTH], thresholdInfo)
-            else
-                HideBossThresholdMarkers(frame[COMBAT_MECHANIC_FLAGS_HEALTH])
+            HideBossThresholdMarkers(frame[COMBAT_MECHANIC_FLAGS_HEALTH])
+        end
+    end
+
+    local first, last = GetVisibleBossSpan()
+    if not first or not last or not first.tlw then
+        HideAllBossThresholdMarkers()
+        return
+    end
+
+    local stack = EnsureThresholdStack(first.tlw)
+    local container = stack.control
+    container:SetHidden(false)
+    container:ClearAnchors()
+    container:SetAnchor(TOPLEFT, first.control, TOPLEFT, 0, 0)
+    container:SetAnchor(BOTTOMRIGHT, last.control, BOTTOMRIGHT, 0, 0)
+
+    local height = container:GetHeight()
+    if height <= 0 and UnitFrames.SV then
+        local visibleCount = 0
+        for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
+            local frame = UnitFrames.CustomFrames["boss" .. i]
+            if frame and frame.control and not frame.control:IsHidden() then
+                visibleCount = visibleCount + 1
+            end
+        end
+        local spacing = UnitFrames.SV.BossBarSpacing or 0
+        height = (UnitFrames.SV.BossBarHeight or 0) * visibleCount + spacing * zo_max(0, visibleCount - 1)
+    end
+
+    if height <= 0 then
+        HideAllBossThresholdMarkers()
+        return
+    end
+
+    local firstHF = first[COMBAT_MECHANIC_FLAGS_HEALTH]
+    local thresh = firstHF and firstHF.thresholdContainer
+    local barWidth = thresh and thresh:GetWidth() or 0
+    if barWidth <= 0 and UnitFrames.SV then
+        barWidth = UnitFrames.SV.BossBarWidth or 0
+    end
+    if barWidth <= 0 then
+        HideAllBossThresholdMarkers()
+        return
+    end
+
+    local originX = 0
+    if thresh and container then
+        originX = thresh:GetLeft() - container:GetLeft()
+    end
+
+    local sig = ""
+    for _, col in ipairs(thresholdInfo.columns) do
+        sig = sig .. col.scope .. ":" .. tostring(col.bossIndex or 0) .. ":" .. col.percent .. ";"
+    end
+    if UnitFrames.lastBossThresholdColumnSig ~= sig then
+        UnitFrames.bossThresholdStageState = {}
+        UnitFrames.lastBossThresholdColumnSig = sig
+    end
+
+    local labelOffsetX = (UnitFrames.SV and UnitFrames.SV.BossThresholdLabelOffsetX) or 0
+    local rawOffsetY = (UnitFrames.SV and UnitFrames.SV.BossThresholdLabelOffsetY) or -2
+    local labelOffsetY = zo_abs(rawOffsetY)
+
+    local maxLineStart = originX + zo_max(0, barWidth - BOSS_THRESHOLD_MARKER_WIDTH)
+    local bottomDim = BOSS_THRESHOLD_BOTTOM_LABEL_DIMENSIONS
+
+    local highestHealth = GetHighestVisibleBossRoundedHealthPercent()
+
+    for idx, column in ipairs(thresholdInfo.columns) do
+        local topLabel = stack.topLabels[idx]
+        if not topLabel then
+            topLabel = CreateThresholdLabel(container, BOSS_THRESHOLD_TOP_LABEL_DIMENSIONS, false)
+            stack.topLabels[idx] = topLabel
+        end
+
+        local bottomLabel = stack.bottomLabels[idx]
+        if not bottomLabel then
+            bottomLabel = CreateThresholdLabel(container, bottomDim, true)
+            bottomLabel:SetTransformNormalizedOriginPoint(0.5, 0.5)
+            bottomLabel:SetTransformRotationZ(ZO_HALF_PI)
+            stack.bottomLabels[idx] = bottomLabel
+        end
+
+        local commonLine = stack.commonLines[idx]
+        if not commonLine then
+            commonLine = CreateThresholdLine(container)
+            stack.commonLines[idx] = commonLine
+        end
+
+        local healthToCheck = highestHealth
+        if column.scope == "multi" and column.bossIndex then
+            healthToCheck = GetRoundedBossHealthPercent(column.bossIndex)
+        end
+        local stage = AdvanceBossThresholdStage(column, healthToCheck)
+
+        local normalized = zo_clamp(column.percent / 100, 0, 1)
+        local lineX = zo_clamp(
+            originX + normalized * barWidth - BOSS_THRESHOLD_MARKER_WIDTH / 2,
+            originX,
+            maxLineStart
+        )
+        local cx = lineX + BOSS_THRESHOLD_MARKER_WIDTH / 2 + labelOffsetX
+
+        topLabel:ClearAnchors()
+        topLabel:SetDimensions(BOSS_THRESHOLD_TOP_LABEL_DIMENSIONS[1], BOSS_THRESHOLD_TOP_LABEL_DIMENSIONS[2])
+        topLabel:SetAnchor(BOTTOM, container, TOPLEFT, cx, -labelOffsetY)
+        topLabel:SetText(zo_strformat("<<1>>%", column.percent))
+        ApplyThresholdStageToLabel(topLabel, stage)
+        topLabel:SetHidden(false)
+
+        bottomLabel:ClearAnchors()
+        bottomLabel:SetDimensions(bottomDim[1], bottomDim[2])
+        if column.mechanic and column.mechanic ~= "" then
+            bottomLabel:SetAnchor(CENTER, container, BOTTOMLEFT, cx, labelOffsetY + bottomDim[1] / 2)
+            bottomLabel:SetText(column.mechanic)
+            ApplyThresholdStageToLabel(bottomLabel, stage)
+            bottomLabel:SetHidden(false)
+        else
+            bottomLabel:SetHidden(true)
+        end
+
+        if column.scope == "common" then
+            commonLine:ClearAnchors()
+            commonLine:SetDimensions(BOSS_THRESHOLD_MARKER_WIDTH, height)
+            commonLine:SetAnchor(TOPLEFT, container, TOPLEFT, lineX, 0)
+            commonLine:SetAnchor(BOTTOMLEFT, container, BOTTOMLEFT, lineX, 0)
+            ApplyThresholdStageToBackdrop(commonLine, stage)
+            commonLine:SetHidden(false)
+        else
+            commonLine:SetHidden(true)
+
+            local frame = column.bossIndex and UnitFrames.CustomFrames["boss" .. column.bossIndex] or nil
+            if frame and frame[COMBAT_MECHANIC_FLAGS_HEALTH] then
+                local hf = frame[COMBAT_MECHANIC_FLAGS_HEALTH]
+                local barHeight = hf.thresholdContainer and hf.thresholdContainer:GetHeight() or 0
+                if barHeight <= 0 and UnitFrames.SV then
+                    barHeight = UnitFrames.SV.BossBarHeight or 0
+                end
+                local tc = hf.thresholdContainer
+                local localBarW = tc and tc:GetWidth() or 0
+                if localBarW <= 0 and UnitFrames.SV then
+                    localBarW = UnitFrames.SV.BossBarWidth or 0
+                end
+                local localMaxStart = zo_max(0, localBarW - BOSS_THRESHOLD_MARKER_WIDTH)
+                local multiLineX = zo_clamp(
+                    normalized * localBarW - BOSS_THRESHOLD_MARKER_WIDTH / 2,
+                    0,
+                    localMaxStart
+                )
+                if barHeight > 0 then
+                    ApplyMultiLineToFrame(hf, multiLineX, barHeight, stage)
+                end
             end
         end
     end
+
+    -- Hide unused pool entries past the column count
+    local lastUsed = #thresholdInfo.columns
+    local poolMax = zo_max(#stack.topLabels, #stack.bottomLabels, #stack.commonLines)
+    for idx = lastUsed + 1, poolMax do
+        if stack.topLabels[idx] then stack.topLabels[idx]:SetHidden(true) end
+        if stack.bottomLabels[idx] then stack.bottomLabels[idx]:SetHidden(true) end
+        if stack.commonLines[idx] then stack.commonLines[idx]:SetHidden(true) end
+    end
+end
+
+--- Listener fired by CrutchAlerts when a threshold override is added/removed
+--- (e.g. Z'Maja stage detection). Re-runs the fetch + render pipeline.
+function UnitFrames.OnCrutchThresholdsChanged(_, _)
+    UnitFrames.UpdateBossThresholds()
 end
 
 function UnitFrames.UpdateBossThresholds()
     if not UnitFrames.CustomFrames or not UnitFrames.CustomFrames["boss1"] then
         UnitFrames.activeBossThresholds = nil
+        UnitFrames.lastBossThresholdColumnSig = nil
         return
     end
 
     if not UnitFrames.SV.BossShowThresholdMarkers then
         UnitFrames.activeBossThresholds = nil
+        UnitFrames.lastBossThresholdColumnSig = nil
         ApplyBossThresholdMarkers(nil)
         return
     end
 
     local thresholdInfo = FetchCrutchBossThresholds()
     if not thresholdInfo then
-        local fallbackPercents = {}
-        local fallbackMap = {}
+        local columns = {}
         for _, pct in ipairs(DEFAULT_BOSS_THRESHOLD_PERCENTS) do
-            table_insert(fallbackPercents, pct)
-            fallbackMap[pct] = ""
+            table_insert(columns, { percent = pct, mechanic = "", scope = "common" })
         end
-
-        thresholdInfo =
-        {
-            percents = fallbackPercents,
-            map = fallbackMap,
-        }
+        table_sort(columns, function (a, b) return a.percent > b.percent end)
+        thresholdInfo = { columns = columns }
     end
 
     UnitFrames.activeBossThresholds = thresholdInfo
     ApplyBossThresholdMarkers(thresholdInfo)
+end
+
+--- Re-applies stage colors and marker positions from cached threshold columns (no Crutch API call).
+--- Invoked on boss EVENT_POWER_UPDATE so ACTIVE / IMMINENT / PASSED tracks current HP.
+function UnitFrames.RepaintBossThresholdMarkers()
+    if UnitFrames.SV and UnitFrames.SV.BossShowThresholdMarkers and UnitFrames.activeBossThresholds then
+        ApplyBossThresholdMarkers(UnitFrames.activeBossThresholds)
+    end
 end
 
 -- Runs on the EVENT_PLAYER_ACTIVATED listener.
@@ -1551,8 +1870,8 @@ end
 
 function UnitFrames.OnGroupMemberChange(eventCode, memberName)
     zo_callLater(function ()
-                       UnitFrames.CustomFramesApplyColors(false)
-                   end, 200)
+                     UnitFrames.CustomFramesApplyColors(false)
+                 end, 200)
 end
 
 -- Updates custom player frame visibility based on HidePlayerFrameOnDeath and current death state.
@@ -1857,7 +2176,7 @@ function UnitFrames.CustomFramesSetupAlternative(isWerewolf, isSiege, isMounted)
         local enlightenedPool = 4 * GetEnlightenedPool()
         local xp = GetPlayerChampionXP()
         local maxBar = GetNumChampionXPInChampionPoint(GetPlayerChampionPointsEarned()) or xp
-        local enlightenedBar = math.min(enlightenedPool + xp, maxBar)
+        local enlightenedBar = zo_min(enlightenedPool + xp, maxBar)
 
         player.ChampionXP.enlightenment:SetMinMax(0, maxBar)
         player.ChampionXP.enlightenment:SetValue(enlightenedBar)
@@ -2296,9 +2615,15 @@ function UnitFrames.OnBossesChanged(eventCode)
         end
     end
 
-    -- Only update boss thresholds if there are actually bosses present
     if hasBosses then
         UnitFrames.UpdateBossThresholds()
+    else
+        -- Bosses despawned (wipe, end of encounter, etc.): drop cached columns and hide
+        -- stack + per-bar markers; otherwise lines/labels stay on screen.
+        UnitFrames.activeBossThresholds = nil
+        UnitFrames.lastBossThresholdColumnSig = nil
+        UnitFrames.bossThresholdStageState = nil
+        ApplyBossThresholdMarkers(nil)
     end
 end
 

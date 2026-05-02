@@ -12,11 +12,42 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.1.0
+    "|cFFA500LuiExtended Version 7.2.1.0|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ActionBar: companion ultimate tracking — optional value and percent labels on the companion ultimate slot (font, colors, vertical offset, hide when full); quickslot/keybind layout follows ZOS companion anchor chain when the companion button is shown.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t CombatInfo (console): reset-to-defaults restores the module's saved settings from defaults and refreshes Ability Alerts and Crowd Control Tracker UI.",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: `ZO_AdvZoneHUD_TopLevel` (Night Market favor counter) mover uses `ZO_HUDTelvarMeter` width/height when present so the frame tracks the Telvar/stone meter layout.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: custom frame color handling updated to respect saved alpha values.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: CrutchAlerts Boss Health Bar integration — uses the current API (including per-boss `boss1`/`boss2` threshold tables when the encounter provides them); stack-level percent labels above the boss block and rotated mechanic names below; shared thresholds draw a single line through all visible boss bars; listens for `BossHealthBar.RegisterThresholdsChangeListener` so programmatic overrides refresh markers; ACTIVE / IMMINENT / PASSED tinting matches Crutch bar colors and updates as boss HP changes (rounding follows Crutch `useFloorRounding` when Crutch is loaded).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Settings (PC & console): boss threshold marker anchor dropdowns removed (obsolete with the stack layout); X/Y controls are a horizontal nudge for both label rows and shared vertical padding from the bar block.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t DependsOn: LuiData minimum version raised to match bundled data (see manifest).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Internal: several modules now use ZO math globals (`zo_floor`, `zo_max`, `zo_min`, etc.) instead of `math.*` for consistency with ESO UI code.",
+    "",
+
+    -- Fixed
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: boss threshold markers and mechanic labels align to the health bar (labels were anchored from the bar center horizontally; lines used the left edge).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: boss threshold markers clear when no boss units exist (wipe / despawn) instead of lingering on screen.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: custom group/raid frame repositioning — member controls have mouse disabled while moving so the top-level window reliably receives drags.",
+    "",
+    -- Version Header 7.2.0.9
+    "|cFFA500LuiExtended Version 7.2.0.9|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Dynamic Events Tracker (Night Market) mover.",
+    "",
     -- Version Header 7.2.0.8
     "|cFFA500LuiExtended Version 7.2.0.8|r",
     "",
-    -- Change
-    "|cFFFF00Change:|r",
+    -- Fixed
+    "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t General: Swapped to using zo_callLater. it might make the code happy, who knows...",
     "",
     -- Version Header 7.2.0.7
@@ -24,7 +55,7 @@ local changelogMessages =
     "",
     -- Fixed
     "|cFFFF00Fix:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t General: Revert api change.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t General: Fix a API change from update 50 that made it to live.",
     "",
     -- Version Header 7.2.0.6
     "|cFFA500LuiExtended Version 7.2.0.6|r",
@@ -38,7 +69,7 @@ local changelogMessages =
     "",
     -- Changes
     "|cFFFF00Changes:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SlashCommands: Added base ui unlock for battering ram status identicator.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Added base UI unlock for battering ram status indicator.",
     "",
     -- Version Header 7.2.0.4
     "|cFFA500LuiExtended Version 7.2.0.4|r",

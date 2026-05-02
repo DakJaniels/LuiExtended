@@ -4836,48 +4836,10 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
-                -- Threshold Label Anchor Point
-                type = "dropdown",
-                name = "Threshold Label Anchor Point",
-                tooltip = "Choose where on the label to anchor from.",
-                choices = { "TOP", "BOTTOM", "LEFT", "RIGHT", "CENTER", "TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT" },
-                getFunc = function ()
-                    return Settings.BossThresholdLabelAnchor
-                end,
-                setFunc = function (value)
-                    Settings.BossThresholdLabelAnchor = value
-                    UnitFrames.UpdateBossThresholds()
-                end,
-                width = "full",
-                default = Defaults.BossThresholdLabelAnchor,
-                disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses and Settings.BossShowThresholdMarkers)
-                end,
-            },
-            {
-                -- Threshold Label Relative Anchor Point
-                type = "dropdown",
-                name = "Threshold Label Relative Anchor Point",
-                tooltip = "Choose where on the threshold line to anchor the label to.",
-                choices = { "TOP", "BOTTOM", "LEFT", "RIGHT", "CENTER", "TOPLEFT", "TOPRIGHT", "BOTTOMLEFT", "BOTTOMRIGHT" },
-                getFunc = function ()
-                    return Settings.BossThresholdLabelRelativeAnchor
-                end,
-                setFunc = function (value)
-                    Settings.BossThresholdLabelRelativeAnchor = value
-                    UnitFrames.UpdateBossThresholds()
-                end,
-                width = "full",
-                default = Defaults.BossThresholdLabelRelativeAnchor,
-                disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses and Settings.BossShowThresholdMarkers)
-                end,
-            },
-            {
                 -- Threshold Label X Offset
                 type = "slider",
                 name = "Threshold Label X Offset",
-                tooltip = "Horizontal offset for the threshold label position.",
+                tooltip = "Horizontal nudge applied to both the top percent label and the bottom mechanic-name label.",
                 min = -100,
                 max = 100,
                 step = 1,
@@ -4895,10 +4857,10 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
-                -- Threshold Label Y Offset
+                -- Threshold Label Y Padding
                 type = "slider",
-                name = "Threshold Label Y Offset",
-                tooltip = "Vertical offset for the threshold label position.",
+                name = "Threshold Label Y Padding",
+                tooltip = "Padding away from the boss stack. Top percent labels are pushed up by this many pixels and bottom rotated mechanic-name labels are pushed down by the same amount.",
                 min = -100,
                 max = 100,
                 step = 1,

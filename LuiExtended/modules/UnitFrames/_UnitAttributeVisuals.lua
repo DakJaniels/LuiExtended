@@ -105,6 +105,8 @@ function UnitFrames.OnPowerUpdate(unitTag, powerIndex, powerType, powerValue, po
 
         if bossMaxChanged then
             UnitFrames.UpdateBossThresholds()
+        elseif string_sub(unitTag, 1, 4) == "boss" then
+            UnitFrames.RepaintBossThresholdMarkers()
         end
     end
 

@@ -247,7 +247,7 @@ local function GetFoodBuffInfos(unitTag)
             local timeLeft = 0
             if timeEnding then
                 local currentTime = GetGameTimeMilliseconds()
-                timeLeft = math.max(0, math.floor((timeEnding * 1000 - currentTime) / 1000))
+                timeLeft = zo_max(0, zo_floor((timeEnding * 1000 - currentTime) / 1000))
             end
 
             return calculatedBuffType, isDrink, abilityId, buffName, timeStarted, timeEnding, iconTexture, timeLeft
@@ -415,12 +415,12 @@ local function UpdateRemainingTimeDisplay(frameData, timeEnds)
     local remainingMS = (timeEnds * 1000) - currentTime
 
     if remainingMS > 0 then
-        local seconds = math.ceil(remainingMS / 1000)
+        local seconds = zo_ceil(remainingMS / 1000)
         if seconds >= 3600 then
-            local hours = math.floor(seconds / 3600)
+            local hours = zo_floor(seconds / 3600)
             frameData.foodDrinkBuff.label:SetText(string.format("|cFFFFFF%dh|r", hours))
         elseif seconds >= 60 then
-            local minutes = math.floor(seconds / 60)
+            local minutes = zo_floor(seconds / 60)
             frameData.foodDrinkBuff.label:SetText(string.format("|cFFFFFF%dm|r", minutes))
         else
             frameData.foodDrinkBuff.label:SetText(string.format("|cFFFFFF%ds|r", seconds))
