@@ -349,6 +349,127 @@ function ActionBar.CreateSettings()
         },
     }
 
+    -- Action Bar - Companion Ultimate Options Submenu
+    optionsDataActionBar[#optionsDataActionBar + 1] =
+    {
+        type = "submenu",
+        name = GetString(LUIE_STRING_LAM_AB_HEADER_COMPANION_ULTIMATE),
+        controls =
+        {
+            {
+                type = "description",
+                text = GetString(LUIE_STRING_LAM_AB_COMPANION_NOTE),
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_AB_COMPANION_SHOW_VAL),
+                tooltip = GetString(LUIE_STRING_LAM_AB_COMPANION_SHOW_VAL_TP),
+                getFunc = function () return Settings.CompanionUltimateLabelEnabled end,
+                setFunc = function (value)
+                    Settings.CompanionUltimateLabelEnabled = value
+                    ActionBar.RegisterEvents()
+                    ActionBar.UpdateCompanionUltimateLabel()
+                    ActionBar.RefreshCompanionQuickslotAnchors()
+                end,
+                width = "full",
+                disabled = function () return not LUIE.SV.ActionBar_Enabled end,
+                default = Defaults.CompanionUltimateLabelEnabled,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_AB_COMPANION_SHOW_PCT),
+                tooltip = GetString(LUIE_STRING_LAM_AB_COMPANION_SHOW_PCT_TP),
+                getFunc = function () return Settings.CompanionUltimatePctEnabled end,
+                setFunc = function (value)
+                    Settings.CompanionUltimatePctEnabled = value
+                    ActionBar.RegisterEvents()
+                    ActionBar.UpdateCompanionUltimateLabel()
+                    ActionBar.RefreshCompanionQuickslotAnchors()
+                end,
+                width = "full",
+                disabled = function () return not LUIE.SV.ActionBar_Enabled end,
+                default = Defaults.CompanionUltimatePctEnabled,
+            },
+            {
+                type = "slider",
+                name = AddIndent(GetString(LUIE_STRING_LAM_AB_SHARED_POSITION), 1),
+                tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_POSITION_TP),
+                min = -72,
+                max = 40,
+                step = 2,
+                getFunc = function () return Settings.CompanionUltimateLabelPosition end,
+                setFunc = function (value)
+                    Settings.CompanionUltimateLabelPosition = value
+                    ActionBar.ResetCompanionUltimateLabel()
+                end,
+                width = "full",
+                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end,
+                default = Defaults.CompanionUltimateLabelPosition,
+            },
+            {
+                type = "dropdown",
+                name = AddIndent(GetString(LUIE_STRING_LAM_FONT), 1),
+                tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
+                choices = GetFontsList(),
+                getFunc = function () return Settings.CompanionUltimateFontFace end,
+                setFunc = function (var)
+                    Settings.CompanionUltimateFontFace = var
+                    ActionBar.ApplyFont()
+                end,
+                width = "full",
+                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end,
+                default = Defaults.CompanionUltimateFontFace,
+                sort = "name-up",
+            },
+            {
+                type = "slider",
+                name = AddIndent(GetString(LUIE_STRING_LAM_FONT_SIZE), 1),
+                tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSIZE_TP),
+                min = 10,
+                max = 30,
+                step = 1,
+                getFunc = function () return Settings.CompanionUltimateFontSize end,
+                setFunc = function (value)
+                    Settings.CompanionUltimateFontSize = value
+                    ActionBar.ApplyFont()
+                end,
+                width = "full",
+                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end,
+                default = Defaults.CompanionUltimateFontSize,
+            },
+            {
+                type = "dropdown",
+                name = zo_strformat("\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
+                tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
+                choices = LUIE.FONT_STYLE_CHOICES,
+                choicesValues = LUIE.FONT_STYLE_CHOICES_VALUES,
+                sort = "name-up",
+                getFunc = function () return Settings.CompanionUltimateFontStyle end,
+                setFunc = function (var)
+                    Settings.CompanionUltimateFontStyle = var
+                    ActionBar.ApplyFont()
+                end,
+                width = "full",
+                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end,
+                default = Defaults.CompanionUltimateFontStyle,
+            },
+            {
+                type = "checkbox",
+                name = AddIndent(GetString(LUIE_STRING_LAM_AB_COMPANION_HIDEFULL), 1),
+                tooltip = GetString(LUIE_STRING_LAM_AB_COMPANION_HIDEFULL_TP),
+                getFunc = function () return Settings.CompanionUltimateHideFull end,
+                setFunc = function (value)
+                    Settings.CompanionUltimateHideFull = value
+                    ActionBar.UpdateCompanionUltimateLabel()
+                end,
+                width = "full",
+                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end,
+                default = Defaults.CompanionUltimateHideFull,
+            },
+        },
+    }
+
     -- Action Bar - Bar Ability Highlight Options Submenu
     optionsDataActionBar[#optionsDataActionBar + 1] =
     {

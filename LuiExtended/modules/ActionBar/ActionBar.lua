@@ -78,6 +78,11 @@ local LUIE = LUIE
 --- @field OnSlotUpdated fun(actionSlotIndex: number)
 --- @field BarSlotUpdate fun(slotNum: number, wasfullUpdate: boolean, onlyProc: boolean)
 --- @field UpdateUltimateLabel fun()
+--- @field UpdateCompanionUltimateLabel fun(optCurrent:number?)
+--- @field ResetCompanionUltimateLabel fun()
+--- @field RefreshCompanionQuickslotAnchors fun()
+--- @field EnsureCompanionUltimateLabels fun()
+--- @field OnPowerUpdateCompanion fun(unitTag: string, powerIndex: luaindex?, powerType: CombatMechanicFlags, powerValue: integer, powerMax: integer, powerEffectiveMax: integer)
 --- @field InventoryItemUsed fun()
 --- @field OnActiveHotbarUpdate fun(didActiveHotbarChange: boolean, shouldUpdateAbilityAssignments: boolean, activeHotbarCategory: number)
 --- @field OnSlotsFullUpdate fun()
@@ -169,6 +174,17 @@ local moduleName = LUIE.name .. "ActionBar"
 --- @field CastbarOffsetX number | nil
 --- @field CastbarOffsetY number | nil
 --- @field CastBarCustomPosition table | nil
+--- @field CompanionUltimateLabelEnabled boolean
+--- @field CompanionUltimatePctEnabled boolean
+--- @field CompanionUltimateHideFull boolean
+--- @field CompanionUltimateLabelPosition integer
+--- @field CompanionUltimateFontFace string
+--- @field CompanionUltimateFontStyle FontStyle
+--- @field CompanionUltimateFontSize integer
+--- @field CompanionUltimateColorDefault AB_Color
+--- @field CompanionUltimateColor100 AB_Color
+--- @field CompanionUltimateColor80 AB_Color
+--- @field CompanionUltimateColor50 AB_Color
 
 ActionBar.Enabled = false
 --- @type ActionBarDefaults
@@ -229,6 +245,17 @@ ActionBar.Defaults =
     CastbarOffsetX = nil,
     CastbarOffsetY = nil,
     CastBarCustomPosition = nil,
+    CompanionUltimateLabelEnabled = true,
+    CompanionUltimatePctEnabled = true,
+    CompanionUltimateHideFull = true,
+    CompanionUltimateLabelPosition = -20,
+    CompanionUltimateFontFace = "LUIE Default Font",
+    CompanionUltimateFontStyle = FONT_STYLE_OUTLINE,
+    CompanionUltimateFontSize = 18,
+    CompanionUltimateColorDefault = { 0.941, 0.973, 0.957, 1 },
+    CompanionUltimateColor100 = { 0.878, 0.941, 0.251, 1 },
+    CompanionUltimateColor80 = { 0.941, 0.565, 0.251, 1 },
+    CompanionUltimateColor50 = { 0.941, 0.251, 0.125, 1 },
 }
 
 --- @type ActionBarDefaults
@@ -281,6 +308,7 @@ local g_reticleHidden = false                      -- Track if reticle is hidden
 local g_barFont                                    -- Font for Ability Highlight Label
 local g_potionFont                                 -- Font for Potion Timer Label
 local g_ultimateFont                               -- Font for Ultimate Percentage Label
+local g_companionUltimateFont                      -- Font for companion ultimate percent label
 local g_castbarFont                                -- Font for Castbar Label & Timer
 local g_ProcSound                                  -- Proc Sound
 local g_boundArmamentsPlayed = {}                  -- Specific variable to lockout Bound Armaments/Grim Focus from playing a proc sound at 5 stacks to only once per 5 seconds.
@@ -333,6 +361,23 @@ local uiUltimate =
     FadeTime = 0,
     NotFull = false,
 }
+
+-- Companion ultimate overlay (mirrors FancyActionBar companion controls)
+local uiCompanionUltimate =
+{
+    LabelVal = nil,
+    LabelPct = nil,
+    FadeTime = 0,
+    NotFull = false,
+}
+
+local g_companionUltimateLabelsCreated = false
+
+--- Matches ZOS `ShouldShowCompanionUltimateButton` (same condition as `Ingame/ActionBar/ActionBar.lua`): companion may not exist until summoned/active.
+--- @return boolean
+local function ShouldShowCompanionUltimateButton()
+    return DoesUnitExist("companion") and HasActiveCompanion()
+end
 
 -- -----------------------------------------------------------------------------
 -- Cooldown Animation Types for GCD Tracking
@@ -405,6 +450,54 @@ local KEYBOARD_CONSTANTS =
 local function GetPlatformConstants()
     return IsInGamepadPreferredMode() and GAMEPAD_CONSTANTS or KEYBOARD_CONSTANTS
 end
+
+--- ZOS `SetCompanionAnchors` KeybindBG + quickslot chain, plus FAB-style companion slot pin when the companion button exists (see ZOS `Ingame/ActionBar/ActionBar.lua`).
+--- @param style LUIE_ACTIONBAR_GAMEPAD_CONSTANTS | LUIE_ACTIONBAR_KEYBOARD_CONSTANTS
+--- @param weaponSwapControl table
+local function ApplyCompanionAnchors(style, weaponSwapControl)
+    local companionBtn = ZO_ActionBar_GetButton(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1, HOTBAR_CATEGORY_COMPANION)
+    local quickslotBtn = ZO_ActionBar_GetButton(nil, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
+    local keybindBG = ACTION_BAR:GetNamedChild("KeybindBG")
+    if not quickslotBtn or not weaponSwapControl then
+        return
+    end
+    local IS_ANCHORED_LEFT = true
+    local scale = ACTION_BAR:GetScale()
+
+    if ShouldShowCompanionUltimateButton() then
+        if companionBtn then
+            companionBtn:SetEnabled(true)
+            companionBtn.slot:ClearAnchors()
+            companionBtn.slot:SetAnchor(RIGHT, weaponSwapControl, LEFT, -style.quickslotOffsetXFromFirstSlot * scale)
+            quickslotBtn:ApplyAnchor(companionBtn.slot, style.quickslotOffsetXFromCompanionUltimate, IS_ANCHORED_LEFT)
+        else
+            quickslotBtn:ApplyAnchor(weaponSwapControl, style.quickslotOffsetXFromFirstSlot, IS_ANCHORED_LEFT)
+        end
+        if keybindBG then
+            keybindBG:SetDimensions(style.keybindBGWidth, style.keybindBGHeight)
+            keybindBG:SetAnchor(BOTTOM, nil, nil, style.keybindBGAnchorOffsetX, 0)
+        end
+    else
+        if companionBtn then
+            companionBtn:SetEnabled(false)
+        end
+        quickslotBtn:ApplyAnchor(weaponSwapControl, style.quickslotOffsetXFromFirstSlot, IS_ANCHORED_LEFT)
+        if keybindBG then
+            keybindBG:SetDimensions(style.keybindBGWidthWithoutCompanion, style.keybindBGHeight)
+            keybindBG:SetAnchor(BOTTOM, nil, nil, style.keybindBGAnchorOffsetXWithoutCompanion, 0)
+        end
+    end
+end
+
+local function RefreshCompanionQuickslotAnchors()
+    local styleConstants = GetPlatformConstants()
+    local weaponSwapControl = ACTION_BAR:GetNamedChild("WeaponSwap")
+    if weaponSwapControl then
+        ApplyCompanionAnchors(styleConstants, weaponSwapControl)
+    end
+end
+
+ActionBar.RefreshCompanionQuickslotAnchors = RefreshCompanionQuickslotAnchors
 
 -- -----------------------------------------------------------------------------
 
@@ -711,6 +804,30 @@ function ActionBar.Initialize(enabled)
     end
 
     -- -----------------------------------------------------------------------------
+    -- Backfill companion ultimate SV keys (FAB-aligned); must run before font style migration
+    if not LUIE.IsMigrationDone("actionbar_companion_ultimate_v1") then
+        local dc = ActionBar.Defaults
+        local companionKeys =
+        {
+            "CompanionUltimateLabelEnabled", "CompanionUltimatePctEnabled", "CompanionUltimateHideFull",
+            "CompanionUltimateLabelPosition", "CompanionUltimateFontFace", "CompanionUltimateFontStyle",
+            "CompanionUltimateFontSize", "CompanionUltimateColorDefault", "CompanionUltimateColor100",
+            "CompanionUltimateColor80", "CompanionUltimateColor50",
+        }
+        for _, key in ipairs(companionKeys) do
+            if ActionBar.SV[key] == nil then
+                local v = dc[key]
+                if type(v) == "table" then
+                    ActionBar.SV[key] = { v[1], v[2], v[3], v[4] }
+                else
+                    ActionBar.SV[key] = v
+                end
+            end
+        end
+        LUIE.MarkMigrationDone("actionbar_companion_ultimate_v1")
+    end
+
+    -- -----------------------------------------------------------------------------
     -- Migrate font styles if needed
     -- Migrate font styles (string/display/nil -> valid 0-7); run once per account
     if not LUIE.IsMigrationDone("actionbar_fontstyles_v2") then
@@ -718,6 +835,7 @@ function ActionBar.Initialize(enabled)
         ActionBar.SV.BarFontStyle = LUIE.MigrateFontStyle(ActionBar.SV.BarFontStyle)
         ActionBar.SV.PotionTimerFontStyle = LUIE.MigrateFontStyle(ActionBar.SV.PotionTimerFontStyle)
         ActionBar.SV.CastBarFontStyle = LUIE.MigrateFontStyle(ActionBar.SV.CastBarFontStyle)
+        ActionBar.SV.CompanionUltimateFontStyle = LUIE.MigrateFontStyle(ActionBar.SV.CompanionUltimateFontStyle)
         LUIE.MarkMigrationDone("actionbar_fontstyles_v2")
     end
 
@@ -1195,6 +1313,11 @@ function ActionBar.RegisterEvents()
     eventManager:UnregisterForEvent(moduleName .. "CursorDropped", EVENT_CURSOR_DROPPED)
     eventManager:UnregisterForEvent(moduleName .. "CastBar", EVENT_ACTIVE_WEAPON_PAIR_CHANGED)
     eventManager:UnregisterForEvent(moduleName, EVENT_RETICLE_HIDDEN_UPDATE)
+    eventManager:UnregisterForEvent(moduleName .. "CompanionPower", EVENT_POWER_UPDATE)
+    eventManager:UnregisterForEvent(moduleName .. "UltCostChanged", EVENT_ULTIMATE_ABILITY_COST_CHANGED)
+    eventManager:UnregisterForEvent(moduleName .. "CompanionZone", EVENT_ZONE_CHANGED)
+    eventManager:UnregisterForEvent(moduleName .. "CompanionState", EVENT_ACTIVE_COMPANION_STATE_CHANGED)
+    eventManager:UnregisterForEvent(moduleName .. "CompanionAnchorsWpn", EVENT_ACTIVE_WEAPON_PAIR_CHANGED)
     if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
         eventManager:RegisterForEvent(moduleName .. "CombatEvent1", EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
             ActionBar.OnCombatEvent(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
@@ -1322,6 +1445,29 @@ function ActionBar.RegisterEvents()
         end
     end
 
+    if ActionBar.SV.CompanionUltimateLabelEnabled or ActionBar.SV.CompanionUltimatePctEnabled then
+        eventManager:RegisterForEvent(moduleName .. "CompanionPower", EVENT_POWER_UPDATE, function (_, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+            ActionBar.OnPowerUpdateCompanion(unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+        end)
+        eventManager:AddFilterForEvent(moduleName .. "CompanionPower", EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, COMBAT_MECHANIC_FLAGS_ULTIMATE, REGISTER_FILTER_UNIT_TAG, "companion")
+    end
+    if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled or ActionBar.SV.CompanionUltimateLabelEnabled or ActionBar.SV.CompanionUltimatePctEnabled then
+        eventManager:RegisterForEvent(moduleName .. "UltCostChanged", EVENT_ULTIMATE_ABILITY_COST_CHANGED, function ()
+            ActionBar.UpdateUltimateLabel()
+            ActionBar.UpdateCompanionUltimateLabel()
+        end)
+    end
+
+    eventManager:RegisterForEvent(moduleName .. "CompanionZone", EVENT_ZONE_CHANGED, function ()
+        RefreshCompanionQuickslotAnchors()
+    end)
+    eventManager:RegisterForEvent(moduleName .. "CompanionState", EVENT_ACTIVE_COMPANION_STATE_CHANGED, function (_, newState, oldState)
+        ActionBar.OnActiveCompanionStateChanged(newState)
+    end)
+    eventManager:RegisterForEvent(moduleName .. "CompanionAnchorsWpn", EVENT_ACTIVE_WEAPON_PAIR_CHANGED, function ()
+        RefreshCompanionQuickslotAnchors()
+    end)
+
     eventManager:RegisterForEvent(moduleName, EVENT_RETICLE_HIDDEN_UPDATE, function (_, hidden)
         ActionBar.OnReticleHiddenUpdate(hidden)
     end)
@@ -1402,6 +1548,8 @@ end
 function ActionBar.OnPlayerActivated()
     -- Manually trigger event to update stats
     g_hotbarCategory = GetActiveHotbarCategory()
+    ActionBar.EnsureCompanionUltimateLabels()
+    RefreshCompanionQuickslotAnchors()
     ActionBar.OnSlotsFullUpdate()
     for i = (BAR_INDEX_START + BACKBAR_INDEX_OFFSET), (BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET) do
         -- Update Bar Slots on initial load (don't want to do it normally when we do a slot update)
@@ -1757,6 +1905,11 @@ function ActionBar.ApplyFont()
         uiUltimate.LabelPct:SetFont(g_ultimateFont)
     end
 
+    g_companionUltimateFont = setupFont("CompanionUltimateFontFace", "CompanionUltimateFontStyle", "CompanionUltimateFontSize", FONT_STYLE_OUTLINE, 17)
+    if uiCompanionUltimate.LabelPct then
+        uiCompanionUltimate.LabelPct:SetFont(g_companionUltimateFont)
+    end
+
     g_castbarFont = setupFont("CastBarFontFace", "CastBarFontStyle", "CastBarFontSize", FONT_STYLE_SOFT_SHADOW_THIN, 16)
 end
 
@@ -1787,6 +1940,166 @@ function ActionBar.ResetUltimateLabel()
     local ActionButton8_slot = ActionButton8 and ActionButton8.slot
     uiUltimate.LabelPct:SetAnchor(TOPLEFT, ActionButton8_slot)
     uiUltimate.LabelPct:SetAnchor(BOTTOMRIGHT, ActionButton8_slot, nil, 0, -ActionBar.SV.UltimateLabelPosition)
+end
+
+-- -----------------------------------------------------------------------------
+--- Creates companion ultimate overlay labels on first use (after CompanionUltimateButton exists).
+function ActionBar.EnsureCompanionUltimateLabels()
+    if g_companionUltimateLabelsCreated then
+        return
+    end
+    if not ActionBar.SV.CompanionUltimateLabelEnabled and not ActionBar.SV.CompanionUltimatePctEnabled then
+        return
+    end
+    local companionBtn = ZO_ActionBar_GetButton(g_ultimateSlot, HOTBAR_CATEGORY_COMPANION)
+    local companionButton = companionBtn and companionBtn.button
+    if not companionButton then
+        return
+    end
+
+    local ultimateValueLabel = windowManager:CreateControl("$(parent)LUIECompanionLabelVal", companionButton, CT_LABEL)
+    ultimateValueLabel:SetAnchor(BOTTOM, companionButton, TOP, 0, -3)
+    ultimateValueLabel:SetFont("$(BOLD_FONT)|16|soft-shadow-thick")
+    ultimateValueLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+    ultimateValueLabel:SetVerticalAlignment(TEXT_ALIGN_TOP)
+    ultimateValueLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+    ultimateValueLabel:SetHidden(not ActionBar.SV.CompanionUltimateLabelEnabled)
+    uiCompanionUltimate.LabelVal = ultimateValueLabel
+
+    local ultimatePctLabel = windowManager:CreateControl("$(parent)LUIECompanionLabelPct", companionButton, CT_LABEL)
+    ultimatePctLabel:SetFont(g_companionUltimateFont or "LUIE Default Font")
+    ultimatePctLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+    ultimatePctLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
+    ultimatePctLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+    ultimatePctLabel:SetAnchor(TOPLEFT, companionButton)
+    ultimatePctLabel:SetAnchor(BOTTOMRIGHT, companionButton, nil, 0, -ActionBar.SV.CompanionUltimateLabelPosition)
+    ultimatePctLabel:SetColor(unpack(ActionBar.SV.CompanionUltimateColorDefault))
+    ultimatePctLabel:SetDrawLayer(DL_OVERLAY)
+    ultimatePctLabel:SetDrawTier(DT_HIGH)
+    ultimatePctLabel:SetHidden(not ActionBar.SV.CompanionUltimatePctEnabled)
+    uiCompanionUltimate.LabelPct = ultimatePctLabel
+
+    g_companionUltimateLabelsCreated = true
+    ActionBar.ApplyFont()
+    ActionBar.ResetCompanionUltimateLabel()
+end
+
+--- Re-anchors companion ultimate percent label using SV CompanionUltimateLabelPosition.
+function ActionBar.ResetCompanionUltimateLabel()
+    if not uiCompanionUltimate.LabelPct then
+        return
+    end
+    uiCompanionUltimate.LabelPct:ClearAnchors()
+    local companionBtn = ZO_ActionBar_GetButton(g_ultimateSlot, HOTBAR_CATEGORY_COMPANION)
+    local companionSlot = companionBtn and companionBtn.slot
+    if not companionSlot then
+        return
+    end
+    uiCompanionUltimate.LabelPct:SetAnchor(TOPLEFT, companionSlot)
+    uiCompanionUltimate.LabelPct:SetAnchor(BOTTOMRIGHT, companionSlot, nil, 0, -ActionBar.SV.CompanionUltimateLabelPosition)
+end
+
+--- Refreshes companion ultimate slot label (cost, percentage) from companion power and slot ability.
+--- @param optCurrent number|nil Current ultimate value; if nil, read from API.
+function ActionBar.UpdateCompanionUltimateLabel(optCurrent)
+    if not ActionBar.SV.CompanionUltimateLabelEnabled and not ActionBar.SV.CompanionUltimatePctEnabled then
+        if uiCompanionUltimate.LabelVal then
+            uiCompanionUltimate.LabelVal:SetHidden(true)
+        end
+        if uiCompanionUltimate.LabelPct then
+            uiCompanionUltimate.LabelPct:SetHidden(true)
+        end
+        return
+    end
+    ActionBar.EnsureCompanionUltimateLabels()
+    if not uiCompanionUltimate.LabelVal and not uiCompanionUltimate.LabelPct then
+        return
+    end
+    local isCompanionActive = ShouldShowCompanionUltimateButton()
+    if not isCompanionActive then
+        if uiCompanionUltimate.LabelVal then
+            uiCompanionUltimate.LabelVal:SetHidden(true)
+        end
+        if uiCompanionUltimate.LabelPct then
+            uiCompanionUltimate.LabelPct:SetHidden(true)
+        end
+        return
+    end
+
+    local current = optCurrent
+    if current == nil then
+        current = GetUnitPower("companion", COMBAT_MECHANIC_FLAGS_ULTIMATE)
+    end
+    local maxCost = GetSlotAbilityCost(g_ultimateSlot, COMBAT_MECHANIC_FLAGS_ULTIMATE, HOTBAR_CATEGORY_COMPANION) or 0
+
+    if maxCost <= 0 or not IsSlotUsed(g_ultimateSlot, HOTBAR_CATEGORY_COMPANION) then
+        if uiCompanionUltimate.LabelVal then
+            uiCompanionUltimate.LabelVal:SetHidden(true)
+        end
+        if uiCompanionUltimate.LabelPct then
+            uiCompanionUltimate.LabelPct:SetHidden(true)
+        end
+        return
+    end
+
+    local pct = zo_floor((current / maxCost) * 100)
+    if pct > 100 then
+        pct = 100
+    end
+
+    local sv = ActionBar.SV
+    if uiCompanionUltimate.LabelVal and sv.CompanionUltimateLabelEnabled then
+        uiCompanionUltimate.LabelVal:SetText(current .. "/" .. maxCost)
+        local hideVal = sv.CompanionUltimateHideFull and current >= maxCost
+        uiCompanionUltimate.LabelVal:SetHidden(hideVal)
+    end
+
+    if uiCompanionUltimate.LabelPct and sv.CompanionUltimatePctEnabled then
+        local colourRow = sv.CompanionUltimateColor50
+        if pct >= 100 then
+            colourRow = sv.CompanionUltimateColor100
+        elseif pct >= 80 then
+            colourRow = sv.CompanionUltimateColor80
+        end
+        uiCompanionUltimate.LabelPct:SetColor(unpack(colourRow))
+        uiCompanionUltimate.LabelPct:SetText(pct .. "%")
+        local hidePct = sv.CompanionUltimateHideFull and current >= maxCost
+        uiCompanionUltimate.LabelPct:SetHidden(hidePct)
+    end
+end
+
+--- Companion ultimate power path only (see `REGISTER_FILTER_UNIT_TAG` / `REGISTER_FILTER_POWER_TYPE` on CompanionPower).
+--- @param _unitTag string Filtered to `"companion"`.
+--- @param _powerIndex luaindex?
+--- @param _powerType CombatMechanicFlags Filtered to ultimate.
+--- @param powerValue integer
+--- @param powerMax integer
+--- @param _powerEffectiveMax integer
+function ActionBar.OnPowerUpdateCompanion(_unitTag, _powerIndex, _powerType, powerValue, powerMax, _powerEffectiveMax)
+    uiCompanionUltimate.NotFull = (powerValue < powerMax)
+    ActionBar.UpdateCompanionUltimateLabel(powerValue)
+end
+
+--- @param newState CompanionState
+function ActionBar.OnActiveCompanionStateChanged(newState)
+    RefreshCompanionQuickslotAnchors()
+    local active = newState == COMPANION_STATE_ACTIVE
+    if active then
+        if uiCompanionUltimate.LabelVal and ActionBar.SV.CompanionUltimateLabelEnabled then
+            uiCompanionUltimate.LabelVal:SetHidden(false)
+        end
+        if uiCompanionUltimate.LabelPct and ActionBar.SV.CompanionUltimatePctEnabled then
+            uiCompanionUltimate.LabelPct:SetHidden(false)
+        end
+        ActionBar.UpdateCompanionUltimateLabel()
+    else
+        if uiCompanionUltimate.LabelVal then
+            uiCompanionUltimate.LabelVal:SetHidden(true)
+        end
+        if uiCompanionUltimate.LabelPct then
+            uiCompanionUltimate.LabelPct:SetHidden(true)
+        end
+    end
 end
 
 -- -----------------------------------------------------------------------------
@@ -2495,6 +2808,8 @@ function ActionBar.BackbarSetupTemplate()
         ActionButton53:ClearAnchors()
         ActionButton53:SetAnchor(CENTER, ActionButton3, CENTER, 0, finalOffset)
     end
+
+    RefreshCompanionQuickslotAnchors()
 end
 
 -- -----------------------------------------------------------------------------
@@ -3122,8 +3437,8 @@ function ActionBar.OnCombatEvent(result, isError, abilityName, abilityGraphic, a
     -- Fix to lower the duration of the next cast of Profane Symbol quest ability for Scion of the Blood Matron (Vampire)
     if abilityId == 39507 then
         zo_callLater(function ()
-                           Castbar.CastDurationFix[39507] = 19500
-                       end, 5000)
+                         Castbar.CastDurationFix[39507] = 19500
+                     end, 5000)
     end
 end
 
@@ -3418,8 +3733,8 @@ function ActionBar.BarSlotUpdate(slotNum, wasfullUpdate, onlyProc)
                     -- Only play a proc sound every 3 seconds (matches Power Lash cd)
                     g_disableProcSound[slotNum] = true
                     zo_callLater(function ()
-                                       g_disableProcSound[slotNum] = false
-                                   end, 3000)
+                                     g_disableProcSound[slotNum] = false
+                                 end, 3000)
                 end
             end
         end
@@ -3487,8 +3802,8 @@ end
 function ActionBar.InventoryItemUsed()
     g_potionUsed = true
     zo_callLater(function ()
-                       g_potionUsed = false
-                   end, 200)
+                     g_potionUsed = false
+                 end, 200)
 end
 
 --- - **EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED **
@@ -3521,6 +3836,8 @@ function ActionBar.OnSlotsFullUpdate()
 
     -- Handle ultimate label first
     ActionBar.UpdateUltimateLabel()
+    ActionBar.UpdateCompanionUltimateLabel()
+    RefreshCompanionQuickslotAnchors()
 
     -- Update action bar skills
     for i = BAR_INDEX_START, BAR_INDEX_END do
