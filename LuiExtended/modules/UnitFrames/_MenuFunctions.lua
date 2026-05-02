@@ -44,6 +44,27 @@ function UnitFrames.ResetCompassBarMenu()
     end
 end
 
+--- While reposition mode is on, disable mouse on group/raid member controls so the movable TLW receives drags.
+--- Raid tiles the TLW with mouse-enabled children; small group leaves gaps but this keeps behavior consistent.
+--- @param enabled boolean True to restore mouse (normal play), false during frame moving.
+local function CustomFramesSetGroupMemberMouseEnabledForMoving(enabled)
+    for i = 1, 4 do
+        local frame = UnitFrames.CustomFrames["SmallGroup" .. i]
+        if frame and frame.control then
+            frame.control:SetMouseEnabled(enabled)
+            if frame.topInfo then
+                frame.topInfo:SetMouseEnabled(enabled)
+            end
+        end
+    end
+    for i = 1, 12 do
+        local frame = UnitFrames.CustomFrames["RaidGroup" .. i]
+        if frame and frame.control then
+            frame.control:SetMouseEnabled(enabled)
+        end
+    end
+end
+
 -- Unlock CustomFrames for moving. Called from Settings Menu.
 function UnitFrames.CustomFramesSetMovingState(state)
     UnitFrames.CustomFramesMovingState = state
@@ -110,6 +131,8 @@ function UnitFrames.CustomFramesSetMovingState(state)
         -- Target Frame will now always display old information
         UnitFrames.CustomFrames["reticleover"].canHide = not state
     end
+
+    CustomFramesSetGroupMemberMouseEnabledForMoving(not state)
 end
 
 -- Apply selected colors for all known bars on custom unit frames
@@ -119,35 +142,35 @@ function UnitFrames.CustomFramesApplyColors(isMenu)
         UnitFrames.SV.CustomColourHealth[1],
         UnitFrames.SV.CustomColourHealth[2],
         UnitFrames.SV.CustomColourHealth[3],
-        0.9,
+        UnitFrames.SV.CustomColourHealth[4],
     }
     local shield =
     {
         UnitFrames.SV.CustomColourShield[1],
         UnitFrames.SV.CustomColourShield[2],
         UnitFrames.SV.CustomColourShield[3],
-        0,
+        UnitFrames.SV.CustomColourShield[4],
     }
     local trauma =
     {
         UnitFrames.SV.CustomColourTrauma[1],
         UnitFrames.SV.CustomColourTrauma[2],
         UnitFrames.SV.CustomColourTrauma[3],
-        0.9,
-    } -- .a value will be fixed in the loop
+        UnitFrames.SV.CustomColourTrauma[4],
+    }
     local magicka =
     {
         UnitFrames.SV.CustomColourMagicka[1],
         UnitFrames.SV.CustomColourMagicka[2],
         UnitFrames.SV.CustomColourMagicka[3],
-        0.9,
+        UnitFrames.SV.CustomColourMagicka[4],
     }
     local stamina =
     {
         UnitFrames.SV.CustomColourStamina[1],
         UnitFrames.SV.CustomColourStamina[2],
         UnitFrames.SV.CustomColourStamina[3],
-        0.9,
+        UnitFrames.SV.CustomColourStamina[4],
     }
 
     local dps =
@@ -155,21 +178,21 @@ function UnitFrames.CustomFramesApplyColors(isMenu)
         UnitFrames.SV.CustomColourDPS[1],
         UnitFrames.SV.CustomColourDPS[2],
         UnitFrames.SV.CustomColourDPS[3],
-        0.9,
+        UnitFrames.SV.CustomColourDPS[4],
     }
     local healer =
     {
         UnitFrames.SV.CustomColourHealer[1],
         UnitFrames.SV.CustomColourHealer[2],
         UnitFrames.SV.CustomColourHealer[3],
-        0.9,
+        UnitFrames.SV.CustomColourHealer[4],
     }
     local tank =
     {
         UnitFrames.SV.CustomColourTank[1],
         UnitFrames.SV.CustomColourTank[2],
         UnitFrames.SV.CustomColourTank[3],
-        0.9,
+        UnitFrames.SV.CustomColourTank[4],
     }
     local invalid = { 75 / 255, 75 / 255, 75 / 255, 0.9 }
 
@@ -178,58 +201,58 @@ function UnitFrames.CustomFramesApplyColors(isMenu)
         UnitFrames.SV.CustomColourDragonknight[1],
         UnitFrames.SV.CustomColourDragonknight[2],
         UnitFrames.SV.CustomColourDragonknight[3],
-        0.9,
+        UnitFrames.SV.CustomColourDragonknight[4],
     } -- Dragonkight
     local class2 =
     {
         UnitFrames.SV.CustomColourSorcerer[1],
         UnitFrames.SV.CustomColourSorcerer[2],
         UnitFrames.SV.CustomColourSorcerer[3],
-        0.9,
+        UnitFrames.SV.CustomColourSorcerer[4],
     } -- Sorcerer
     local class3 =
     {
         UnitFrames.SV.CustomColourNightblade[1],
         UnitFrames.SV.CustomColourNightblade[2],
         UnitFrames.SV.CustomColourNightblade[3],
-        0.9,
+        UnitFrames.SV.CustomColourNightblade[4],
     } -- Nightblade
     local class4 =
     {
         UnitFrames.SV.CustomColourWarden[1],
         UnitFrames.SV.CustomColourWarden[2],
         UnitFrames.SV.CustomColourWarden[3],
-        0.9,
+        UnitFrames.SV.CustomColourWarden[4],
     } -- Warden
     local class5 =
     {
         UnitFrames.SV.CustomColourNecromancer[1],
         UnitFrames.SV.CustomColourNecromancer[2],
         UnitFrames.SV.CustomColourNecromancer[3],
-        0.9,
+        UnitFrames.SV.CustomColourNecromancer[4],
     } -- Necromancer
     local class6 =
     {
         UnitFrames.SV.CustomColourTemplar[1],
         UnitFrames.SV.CustomColourTemplar[2],
         UnitFrames.SV.CustomColourTemplar[3],
-        0.9,
+        UnitFrames.SV.CustomColourTemplar[4],
     } -- Templar
     local class117 =
     {
         UnitFrames.SV.CustomColourArcanist[1],
         UnitFrames.SV.CustomColourArcanist[2],
         UnitFrames.SV.CustomColourArcanist[3],
-        0.9,
-    }                                                                                                                              -- Arcanist
+        UnitFrames.SV.CustomColourArcanist[4],
+    }                                                                                                                                                           -- Arcanist
 
-    local petcolor = { UnitFrames.SV.CustomColourPet[1], UnitFrames.SV.CustomColourPet[2], UnitFrames.SV.CustomColourPet[3], 0.9 } -- Player Pet
+    local petcolor = { UnitFrames.SV.CustomColourPet[1], UnitFrames.SV.CustomColourPet[2], UnitFrames.SV.CustomColourPet[3], UnitFrames.SV.CustomColourPet[4] } -- Player Pet
     local companioncolor =
     {
         UnitFrames.SV.CustomColourCompanionFrame[1],
         UnitFrames.SV.CustomColourCompanionFrame[2],
         UnitFrames.SV.CustomColourCompanionFrame[3],
-        0.9,
+        UnitFrames.SV.CustomColourCompanionFrame[4],
     } -- Companion
 
     local health_bg =
@@ -237,28 +260,28 @@ function UnitFrames.CustomFramesApplyColors(isMenu)
         0.1 * UnitFrames.SV.CustomColourHealth[1],
         0.1 * UnitFrames.SV.CustomColourHealth[2],
         0.1 * UnitFrames.SV.CustomColourHealth[3],
-        0.9,
+        UnitFrames.SV.CustomColourHealth[4],
     }
     local shield_bg =
     {
         0.1 * UnitFrames.SV.CustomColourShield[1],
         0.1 * UnitFrames.SV.CustomColourShield[2],
         0.1 * UnitFrames.SV.CustomColourShield[3],
-        0.9,
+        UnitFrames.SV.CustomColourShield[4],
     }
     local magicka_bg =
     {
         0.1 * UnitFrames.SV.CustomColourMagicka[1],
         0.1 * UnitFrames.SV.CustomColourMagicka[2],
         0.1 * UnitFrames.SV.CustomColourMagicka[3],
-        0.9,
+        UnitFrames.SV.CustomColourMagicka[4],
     }
     local stamina_bg =
     {
         0.1 * UnitFrames.SV.CustomColourStamina[1],
         0.1 * UnitFrames.SV.CustomColourStamina[2],
         0.1 * UnitFrames.SV.CustomColourStamina[3],
-        0.9,
+        UnitFrames.SV.CustomColourStamina[4],
     }
 
     local dps_bg =
@@ -266,72 +289,72 @@ function UnitFrames.CustomFramesApplyColors(isMenu)
         0.1 * UnitFrames.SV.CustomColourDPS[1],
         0.1 * UnitFrames.SV.CustomColourDPS[2],
         0.1 * UnitFrames.SV.CustomColourDPS[3],
-        0.9,
+        UnitFrames.SV.CustomColourDPS[4],
     }
     local healer_bg =
     {
         0.1 * UnitFrames.SV.CustomColourHealer[1],
         0.1 * UnitFrames.SV.CustomColourHealer[2],
         0.1 * UnitFrames.SV.CustomColourHealer[3],
-        0.9,
+        UnitFrames.SV.CustomColourHealer[4],
     }
     local tank_bg =
     {
         0.1 * UnitFrames.SV.CustomColourTank[1],
         0.1 * UnitFrames.SV.CustomColourTank[2],
         0.1 * UnitFrames.SV.CustomColourTank[3],
-        0.9,
+        UnitFrames.SV.CustomColourTank[4],
     }
-    local invalid_bg = { 0.1 * invalid[1], 0.1 * invalid[2], 0.1 * invalid[3], 0.9 }
+    local invalid_bg = { 0.1 * invalid[1], 0.1 * invalid[2], 0.1 * invalid[3], invalid[4] }
 
     local class1_bg =
     {
         0.1 * UnitFrames.SV.CustomColourDragonknight[1],
         0.1 * UnitFrames.SV.CustomColourDragonknight[2],
         0.1 * UnitFrames.SV.CustomColourDragonknight[3],
-        0.9,
+        UnitFrames.SV.CustomColourDragonknight[4],
     } -- Dragonkight
     local class2_bg =
     {
         0.1 * UnitFrames.SV.CustomColourSorcerer[1],
         0.1 * UnitFrames.SV.CustomColourSorcerer[2],
         0.1 * UnitFrames.SV.CustomColourSorcerer[3],
-        0.9,
+        UnitFrames.SV.CustomColourSorcerer[4],
     } -- Sorcerer
     local class3_bg =
     {
         0.1 * UnitFrames.SV.CustomColourNightblade[1],
         0.1 * UnitFrames.SV.CustomColourNightblade[2],
         0.1 * UnitFrames.SV.CustomColourNightblade[3],
-        0.9,
+        UnitFrames.SV.CustomColourNightblade[4],
     } -- Nightblade
     local class4_bg =
     {
         0.1 * UnitFrames.SV.CustomColourWarden[1],
         0.1 * UnitFrames.SV.CustomColourWarden[2],
         0.1 * UnitFrames.SV.CustomColourWarden[3],
-        0.9,
+        UnitFrames.SV.CustomColourWarden[4],
     } -- Warden
     local class5_bg =
     {
         0.1 * UnitFrames.SV.CustomColourNecromancer[1],
         0.1 * UnitFrames.SV.CustomColourNecromancer[2],
         0.1 * UnitFrames.SV.CustomColourNecromancer[3],
-        0.9,
+        UnitFrames.SV.CustomColourNecromancer[4],
     } -- Necromancer
     local class6_bg =
     {
         0.1 * UnitFrames.SV.CustomColourTemplar[1],
         0.1 * UnitFrames.SV.CustomColourTemplar[2],
         0.1 * UnitFrames.SV.CustomColourTemplar[3],
-        0.9,
+        UnitFrames.SV.CustomColourTemplar[4],
     } -- Templar
     local class117_bg =
     {
         0.1 * UnitFrames.SV.CustomColourArcanist[1],
         0.1 * UnitFrames.SV.CustomColourArcanist[2],
         0.1 * UnitFrames.SV.CustomColourArcanist[3],
-        0.9,
+        UnitFrames.SV.CustomColourArcanist[4],
     } -- Arcanist
 
     local petcolor_bg =
@@ -339,35 +362,35 @@ function UnitFrames.CustomFramesApplyColors(isMenu)
         0.1 * UnitFrames.SV.CustomColourPet[1],
         0.1 * UnitFrames.SV.CustomColourPet[2],
         0.1 * UnitFrames.SV.CustomColourPet[3],
-        0.9,
+        UnitFrames.SV.CustomColourPet[4],
     } -- Player Pet
     local companioncolor_bg =
     {
         0.1 * UnitFrames.SV.CustomColourCompanionFrame[1],
         0.1 * UnitFrames.SV.CustomColourCompanionFrame[2],
         0.1 * UnitFrames.SV.CustomColourCompanionFrame[3],
-        0.9,
+        UnitFrames.SV.CustomColourCompanionFrame[4],
     } -- Companion
     local invulnerablecolor =
     {
         UnitFrames.SV.CustomColourInvulnerable[1],
         UnitFrames.SV.CustomColourInvulnerable[2],
         UnitFrames.SV.CustomColourInvulnerable[3],
-        0.9,
+        UnitFrames.SV.CustomColourInvulnerable[4],
     } -- Invulnerable
     local invulnerablecolor_inlay =
     {
         UnitFrames.SV.CustomColourInvulnerable[1],
         UnitFrames.SV.CustomColourInvulnerable[2],
         UnitFrames.SV.CustomColourInvulnerable[3],
-        0.9,
+        UnitFrames.SV.CustomColourInvulnerable[4],
     }
 
     local isBattleground = IsActiveWorldBattleground()
 
     -- After color is applied unhide frames, so player can see changes even from menu
     for _, baseName in pairs({ "player", "reticleover", "boss", "AvaPlayerTarget" }) do
-        shield[4] = (UnitFrames.SV.CustomShieldBarSeparate and not (baseName == "boss")) and 0.9 or (UnitFrames.SV.ShieldAlpha / 100)
+        shield[4] = (UnitFrames.SV.CustomShieldBarSeparate and not (baseName == "boss")) and UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha / 100)
         for i = 0, 7 do
             local unitTag = (i == 0) and baseName or (baseName .. i)
             if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
@@ -500,7 +523,7 @@ function UnitFrames.CustomFramesApplyColors(isMenu)
     local increment = false   -- Once we reach a value set by Increment Marker (group tag of the player), we need to increment all further tags by +1 in order to get the correct color for them.
     local incrementMarker = 0 -- Marker -- Once we reach this value in iteration, we have to add +1 to default unitTag index for all other units.
     for _, baseName in pairs({ "SmallGroup", "RaidGroup" }) do
-        shield[4] = (UnitFrames.SV.CustomShieldBarSeparate and not (baseName == "RaidGroup")) and 0.9 or (UnitFrames.SV.ShieldAlpha / 100)
+        shield[4] = (UnitFrames.SV.CustomShieldBarSeparate and not (baseName == "RaidGroup")) and UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha / 100)
 
         -- Extra loop if player is excluded in Small Group Frames
         if UnitFrames.SV.GroupExcludePlayer and not (baseName == "RaidGroup") then
