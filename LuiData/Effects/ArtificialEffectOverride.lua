@@ -50,7 +50,7 @@ local artificialEffectOverride =
     [2] =
     {
         override = true,
-        name = StringOnlyGSUB(GetArtificialEffectInfo(1), "For", "for"), -- Adjusts capitalization in LFG text
+        name = StringOnlyGSUB(GetArtificialEffectInfo(2), "For", "for"), -- Adjusts capitalization in LFG text
         tooltip = Tooltips.Innate_Looking_for_Group                      -- Custom tooltip for LFG status
     },
 
