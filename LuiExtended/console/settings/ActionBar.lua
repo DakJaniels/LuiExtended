@@ -410,6 +410,141 @@ function ActionBar.CreateConsoleSettings()
         }
     end)
 
+    -- Build Companion Ultimate Options Section
+    buildSectionSettings("CompanionUltimate", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SECTION,
+            label = GetString(LUIE_STRING_LAM_AB_HEADER_COMPANION_ULTIMATE),
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_AB_COMPANION_NOTE),
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_COMPANION_SHOW_VAL),
+            tooltip = GetString(LUIE_STRING_LAM_AB_COMPANION_SHOW_VAL_TP),
+            getFunction = function () return Settings.CompanionUltimateLabelEnabled end,
+            setFunction = function (value)
+                Settings.CompanionUltimateLabelEnabled = value
+                ActionBar.RegisterEvents()
+                ActionBar.UpdateCompanionUltimateLabel()
+                ActionBar.RefreshCompanionQuickslotAnchors()
+            end,
+            default = Defaults.CompanionUltimateLabelEnabled,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_COMPANION_SHOW_PCT),
+            tooltip = GetString(LUIE_STRING_LAM_AB_COMPANION_SHOW_PCT_TP),
+            getFunction = function () return Settings.CompanionUltimatePctEnabled end,
+            setFunction = function (value)
+                Settings.CompanionUltimatePctEnabled = value
+                ActionBar.RegisterEvents()
+                ActionBar.UpdateCompanionUltimateLabel()
+                ActionBar.RefreshCompanionQuickslotAnchors()
+            end,
+            default = Defaults.CompanionUltimatePctEnabled,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_AB_SHARED_POSITION),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_POSITION_TP),
+            min = -72,
+            max = 40,
+            step = 2,
+            format = "%.0f",
+            getFunction = function () return Settings.CompanionUltimateLabelPosition end,
+            setFunction = function (value)
+                Settings.CompanionUltimateLabelPosition = value
+                ActionBar.ResetCompanionUltimateLabel()
+            end,
+            default = Defaults.CompanionUltimateLabelPosition,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_FONT),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
+            items = fontItems,
+            getFunction = function () return Settings.CompanionUltimateFontFace end,
+            setFunction = function (combobox, value, item)
+                Settings.CompanionUltimateFontFace = item.data
+                ActionBar.ApplyFont()
+            end,
+            default = Defaults.CompanionUltimateFontFace,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_FONT_SIZE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSIZE_TP),
+            min = 10,
+            max = 30,
+            step = 1,
+            format = "%.0f",
+            getFunction = function () return Settings.CompanionUltimateFontSize end,
+            setFunction = function (value)
+                Settings.CompanionUltimateFontSize = value
+                ActionBar.ApplyFont()
+            end,
+            default = Defaults.CompanionUltimateFontSize,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_DROPDOWN,
+            label = GetString(LUIE_STRING_LAM_FONT_STYLE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
+            items = fontStyleItems,
+            getFunction = function ()
+                local value = Settings.CompanionUltimateFontStyle
+                for i, choiceValue in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
+                    if choiceValue == value then
+                        return LUIE.FONT_STYLE_CHOICES[i]
+                    end
+                end
+                return LUIE.FONT_STYLE_CHOICES[1]
+            end,
+            setFunction = function (combobox, value, item)
+                Settings.CompanionUltimateFontStyle = item.data
+                ActionBar.ApplyFont()
+            end,
+            default = Defaults.CompanionUltimateFontStyle,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_COMPANION_HIDEFULL),
+            tooltip = GetString(LUIE_STRING_LAM_AB_COMPANION_HIDEFULL_TP),
+            getFunction = function () return Settings.CompanionUltimateHideFull end,
+            setFunction = function (value)
+                Settings.CompanionUltimateHideFull = value
+                ActionBar.UpdateCompanionUltimateLabel()
+            end,
+            default = Defaults.CompanionUltimateHideFull,
+            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end
+        }
+    end)
+
     -- Build Bar Ability Highlight Options Section
     buildSectionSettings("BarAbilityHighlight", function (settings)
         settings[#settings + 1] =
@@ -1241,6 +1376,7 @@ function ActionBar.CreateConsoleSettings()
     -- Add all submenu buttons
     menuButtons[#menuButtons + 1] = createMenuButton("GlobalCooldown", GetString(LUIE_STRING_LAM_AB_HEADER_GCD), sectionGroups["GlobalCooldown"])
     menuButtons[#menuButtons + 1] = createMenuButton("UltimateTracking", GetString(LUIE_STRING_LAM_AB_HEADER_ULTIMATE), sectionGroups["UltimateTracking"])
+    menuButtons[#menuButtons + 1] = createMenuButton("CompanionUltimate", GetString(LUIE_STRING_LAM_AB_HEADER_COMPANION_ULTIMATE), sectionGroups["CompanionUltimate"])
     menuButtons[#menuButtons + 1] = createMenuButton("BarAbilityHighlight", GetString(LUIE_STRING_LAM_AB_HEADER_BAR), sectionGroups["BarAbilityHighlight"])
     menuButtons[#menuButtons + 1] = createMenuButton("QuickslotCooldown", GetString(LUIE_STRING_LAM_AB_HEADER_POTION), sectionGroups["QuickslotCooldown"])
     menuButtons[#menuButtons + 1] = createMenuButton("CastBar", GetString(LUIE_STRING_LAM_AB_HEADER_CASTBAR), sectionGroups["CastBar"])
