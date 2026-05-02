@@ -167,7 +167,7 @@ function UnitFrames.CustomFramesApplyFont()
                     unitFrame.botInfo:SetHeight(nameHeight)
                     -- Alternative bar present on Player
                     if unitFrame.alternative then
-                        unitFrame.alternative.backdrop:SetHeight(math.ceil(nameHeight / 3) + 2)
+                        unitFrame.alternative.backdrop:SetHeight(zo_ceil(nameHeight / 3) + 2)
                         unitFrame.alternative.icon:SetDimensions(nameHeight, nameHeight)
                     end
                     -- Title present only on Target

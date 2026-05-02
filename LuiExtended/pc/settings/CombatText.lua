@@ -3175,16 +3175,16 @@ function CombatText.CreateSettings()
                     Settings.fontSizes.damagecritical = value
                     Settings.fontSizes.healing = value
                     Settings.fontSizes.healingcritical = value
-                    Settings.fontSizes.dot = math.floor(value * 0.8)
-                    Settings.fontSizes.dotcritical = math.floor(value * 0.8)
-                    Settings.fontSizes.hot = math.floor(value * 0.8)
-                    Settings.fontSizes.hotcritical = math.floor(value * 0.8)
+                    Settings.fontSizes.dot = zo_floor(value * 0.8)
+                    Settings.fontSizes.dotcritical = zo_floor(value * 0.8)
+                    Settings.fontSizes.hot = zo_floor(value * 0.8)
+                    Settings.fontSizes.hotcritical = zo_floor(value * 0.8)
                     Settings.fontSizes.gainLoss = value
                     Settings.fontSizes.mitigation = value
-                    Settings.fontSizes.crowdControl = math.floor(value * 0.8)
-                    Settings.fontSizes.combatState = math.floor(value * 0.75)
+                    Settings.fontSizes.crowdControl = zo_floor(value * 0.8)
+                    Settings.fontSizes.combatState = zo_floor(value * 0.75)
                     Settings.fontSizes.death = value
-                    Settings.fontSizes.point = math.floor(value * 0.75)
+                    Settings.fontSizes.point = zo_floor(value * 0.75)
                     Settings.fontSizes.resource = value
                     Settings.fontSizes.readylabel = value
                     CombatText.ApplyFont()

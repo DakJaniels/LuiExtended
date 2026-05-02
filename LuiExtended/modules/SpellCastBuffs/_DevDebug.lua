@@ -473,7 +473,7 @@ function SpellCastBuffs.TempSlashZoneCheck()
             local nearestDist = 999999
 
             for _, node in ipairs(info.fastTravelInfo.items) do
-                local dist = math.sqrt((node.x - info.mapX) ^ 2 + (node.y - info.mapY) ^ 2)
+                local dist = zo_sqrt((node.x - info.mapX) ^ 2 + (node.y - info.mapY) ^ 2)
                 if dist < nearestDist then
                     nearestDist = dist
                     nearestName = node.name

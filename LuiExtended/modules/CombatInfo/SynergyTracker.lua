@@ -11,9 +11,6 @@ local CombatInfo = LUIE.CombatInfo
 
 local pairs = pairs
 local ipairs = ipairs
-local math_min = math.min
-local math_max = math.max
-local math_ceil = math.ceil
 local GetGameTimeMilliseconds = GetGameTimeMilliseconds
 local zo_strformat = zo_strformat
 local string_format = string.format
@@ -447,7 +444,7 @@ function SynergyTracker:UpdateDisplay()
         return a.name < b.name
     end)
 
-    local displayCount = math_min(#displayList, maxDisplay)
+    local displayCount = zo_min(#displayList, maxDisplay)
     for i = 1, displayCount do
         local synergyData = displayList[i]
         local control = self.synergyControls[i]
@@ -502,7 +499,7 @@ function SynergyTracker:UpdateDisplay()
     end
 
     local cooldownCount = NonContiguousCount(self.synergyCooldowns)
-    local totalToShow = math_max(numSynergies, cooldownCount)
+    local totalToShow = zo_max(numSynergies, cooldownCount)
     self.control:SetHidden(totalToShow == 0)
 
     self:UpdateCooldownDisplay()
@@ -537,7 +534,7 @@ function SynergyTracker:UpdateCooldownDisplay()
                 end
 
                 if control.cooldownText then
-                    control.cooldownText:SetText(string_format("%d", math_ceil(remaining / 1000)))
+                    control.cooldownText:SetText(string_format("%d", zo_ceil(remaining / 1000)))
                     control.cooldownText:SetHidden(false)
                 end
             else

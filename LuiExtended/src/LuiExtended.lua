@@ -60,6 +60,7 @@ LUIE.Components = {}
 LUIE.OtherAddonCompatability =
 {
     isActionDurationReminderEnabled = false,
+    isCrutchAlertsEnabled = false,
     isFancyActionBarEnabled = false,
     isFancyActionBarPlusEnabled = false,
     isWritCreatorEnabled = false

@@ -187,7 +187,7 @@ function AddonProfiler:OutputDetailedProfilingResults(results)
     end
     table.sort(sorted, function (a, b) return a.time > b.time end)
 
-    for i = 1, math.min(5, #sorted) do
+    for i = 1, zo_min(5, #sorted) do
         local func = sorted[i]
         local name = func.name
         if #name > 40 then
@@ -203,7 +203,7 @@ function AddonProfiler:OutputDetailedProfilingResults(results)
     for tag, data in pairs(self.memoryStates) do
         if tag ~= "Total" then
             local delta = data.after - data.before
-            if math.abs(delta) > 0.001 then
+            if zo_abs(delta) > 0.001 then
                 table.insert(memSorted,
                              {
                                  tag = tag,
@@ -213,12 +213,12 @@ function AddonProfiler:OutputDetailedProfilingResults(results)
             end
         end
     end
-    table.sort(memSorted, function (a, b) return math.abs(a.delta) > math.abs(b.delta) end)
+    table.sort(memSorted, function (a, b) return zo_abs(a.delta) > zo_abs(b.delta) end)
 
-    for i = 1, math.min(6, #memSorted) do
+    for i = 1, zo_min(6, #memSorted) do
         local entry = memSorted[i]
         local indicator = self:FormatMemoryChangeIndicator(entry.delta)
-        d(string.format("%s %s: %s %.2f KB", BULLET, entry.tag, indicator, math.abs(entry.delta)))
+        d(string.format("%s %s: %s %.2f KB", BULLET, entry.tag, indicator, zo_abs(entry.delta)))
     end
 end
 
@@ -227,9 +227,9 @@ end
 --- @return string The formatted memory change indicator
 function AddonProfiler:FormatMemoryChangeIndicator(delta)
     local indicator = delta > 0 and "|c00FF00[+++]|r" or "|cFF0000[-]|r"
-    if math.abs(delta) < 10 then
+    if zo_abs(delta) < 10 then
         indicator = delta > 0 and "|c00FF00[+]|r" or "|cFF0000[-]|r"
-    elseif math.abs(delta) < 100 then
+    elseif zo_abs(delta) < 100 then
         indicator = delta > 0 and "|c00FF00[++]|r" or "|cFF0000[--]|r"
     end
     return indicator
@@ -242,7 +242,7 @@ function AddonProfiler:OutputMemoryBreakdown()
     local sortedChanges = {}
     for tag, data in pairs(self.memoryStates) do
         local delta = data.after - data.before
-        if data.after > 0 and math.abs(delta) > 0.001 then
+        if data.after > 0 and zo_abs(delta) > 0.001 then
             table.insert(sortedChanges,
                          {
                              tag = tag,
@@ -252,7 +252,7 @@ function AddonProfiler:OutputMemoryBreakdown()
         end
     end
 
-    table.sort(sortedChanges, function (a, b) return math.abs(a.delta) > math.abs(b.delta) end)
+    table.sort(sortedChanges, function (a, b) return zo_abs(a.delta) > zo_abs(b.delta) end)
 
     for _, entry in ipairs(sortedChanges) do
         local tag, data, delta = entry.tag, entry.data, entry.delta
