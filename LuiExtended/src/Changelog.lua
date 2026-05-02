@@ -19,6 +19,7 @@ local changelogMessages =
     "|cFFFF00New:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ActionBar: companion ultimate tracking — optional value and percent labels on the companion ultimate slot (font, colors, vertical offset, hide when full); quickslot/keybind layout follows ZOS companion anchor chain when the companion button is shown.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t CombatInfo (console): reset-to-defaults restores the module's saved settings from defaults and refreshes Ability Alerts and Crowd Control Tracker UI.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames (debug): new `/luiufall` — toggles every custom-frame preview at once, temporarily enables frame-move mode for layout, and restores the previous unlock state when turned off.",
     "",
     -- Changes
     "|cFFFF00Changes:|r",
@@ -28,6 +29,8 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Settings (PC & console): boss threshold marker anchor dropdowns removed (obsolete with the stack layout); X/Y controls are a horizontal nudge for both label rows and shared vertical padding from the bar block.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t DependsOn: LuiData minimum version raised to match bundled data (see manifest).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Internal: several modules now use ZO math globals (`zo_floor`, `zo_max`, `zo_min`, etc.) instead of `math.*` for consistency with ESO UI code.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames (debug): slash-command previews for individual frames — `/luiufplayer`, `/luiuftar`, `/luiufsm`, `/luiufraid`, `/luiufpet`, `/luiufboss`, `/luiufcomp`, `/luiufava` show enabled custom frames with live player power and labels.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Settings (PC & console): custom frame unlock checkbox and grid-snap overlay refresh use `UnitFrames.CustomFramesMovingState` (removed duplicate local moving flag).",
     "",
 
     -- Fixed
