@@ -12,6 +12,14 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.1.1
+    "|cFFA500LuiExtended Version 7.2.1.1|r",
+    "",
+    -- Fixed
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock (PC): Night Market favor counter — frame mover matches the real counter again instead of an oversized box.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock (PC): turning on UI unlock no longer shows the favor mover across the whole screen the first time (before you move it or reload).",
+    "",
     -- Version Header 7.2.1.0
     "|cFFA500LuiExtended Version 7.2.1.0|r",
     "",
@@ -23,7 +31,6 @@ local changelogMessages =
     "",
     -- Changes
     "|cFFFF00Changes:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: `ZO_AdvZoneHUD_TopLevel` (Night Market favor counter) mover uses `ZO_HUDTelvarMeter` width/height when present so the frame tracks the Telvar/stone meter layout.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: custom frame color handling updated to respect saved alpha values.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: CrutchAlerts Boss Health Bar integration — uses the current API (including per-boss `boss1`/`boss2` threshold tables when the encounter provides them); stack-level percent labels above the boss block and rotated mechanic names below; shared thresholds draw a single line through all visible boss bars; listens for `BossHealthBar.RegisterThresholdsChangeListener` so programmatic overrides refresh markers; ACTIVE / IMMINENT / PASSED tinting matches Crutch bar colors and updates as boss HP changes (rounding follows Crutch `useFloorRounding` when Crutch is loaded).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Settings (PC & console): boss threshold marker anchor dropdowns removed (obsolete with the stack layout); X/Y controls are a horizontal nudge for both label rows and shared vertical padding from the bar block.",

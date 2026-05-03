@@ -42,27 +42,13 @@ local Unlock =
         [ZO_ReticleContainerInteract] = { GetString(LUIE_STRING_DEFAULT_FRAME_RETICLE_CONTAINER_INTERACT) },
         [ZO_RamTopLevel] = { GetString(SI_SIEGETYPE3), 290, 110 },
         [ZO_AdvZoneHUDTrackerContainer] = { "Dynamic Events Tracker", 230, 100 }, -- Needs custom template applied
+        [ZO_LootHistoryControl_Keyboard] = { GetString(LUIE_STRING_DEFAULT_FRAME_LOOT_HISTORY), 280, 400 },
+        [ZO_TutorialHudInfoTipKeyboard] = { GetString(LUIE_STRING_DEFAULT_FRAME_TUTORIALS) },
+        [ZO_AlertTextNotification] = { GetString(LUIE_STRING_DEFAULT_FRAME_ALERTS), 600, 56 },
+        [ZO_ActiveCombatTipsTip] = { GetString(LUIE_STRING_DEFAULT_FRAME_ACTIVE_COMBAT_TIPS), 250, 20 },
+        [ZO_AdvZoneHUD_TopLevel] = { "NightMarket Favor counter" },
     }
 }
-
-if not IsConsoleUI() then
-    if ZO_LootHistoryControl_Keyboard then
-        Unlock.defaultPanels[ZO_LootHistoryControl_Keyboard] = { GetString(LUIE_STRING_DEFAULT_FRAME_LOOT_HISTORY), 280, 400 }
-    end
-    if ZO_TutorialHudInfoTipKeyboard then
-        Unlock.defaultPanels[ZO_TutorialHudInfoTipKeyboard] = { GetString(LUIE_STRING_DEFAULT_FRAME_TUTORIALS) }
-    end
-    if ZO_AlertTextNotification then
-        Unlock.defaultPanels[ZO_AlertTextNotification] = { GetString(LUIE_STRING_DEFAULT_FRAME_ALERTS), 600, 56 }
-    end
-    if ZO_ActiveCombatTipsTip then
-        Unlock.defaultPanels[ZO_ActiveCombatTipsTip] = { GetString(LUIE_STRING_DEFAULT_FRAME_ACTIVE_COMBAT_TIPS), 250, 20 }
-    end
-end
-
-if ZO_AdvZoneHUD_TopLevel then
-    Unlock.defaultPanels[ZO_AdvZoneHUD_TopLevel] = { "NightMarket Favor counter" , 64, 64}
-end
 
 -- -----------------------------------------------------------------------------
 -- Grid Snap Functions
@@ -129,15 +115,54 @@ end
 -- Element Handling Functions
 -- -----------------------------------------------------------------------------
 
+--- Width/height for `ZO_AdvZoneHUD_TopLevel` that match the visible icon + score row (see ZO_AdventureZoneHUD:OnPlatformStyleChanged),
+--- not the Telvar meter and not the XML full-screen stretch anchors on the top-level control.
+--- @return number width
+--- @return number height
+local function GetAdvZoneHUDTightDimensions()
+    local icon = ZO_AdvZoneHUD_TopLevelPlayerFactionIcon
+    local label = ZO_AdvZoneHUD_TopLevelPlayerScoreLabel
+    if not icon or not label then
+        return 120, 44
+    end
+    local iw, ih = icon:GetWidth(), icon:GetHeight()
+    local lw, lh = label:GetWidth(), label:GetHeight()
+    if iw <= 0 or ih <= 0 or lw <= 0 or lh <= 0 then
+        return 120, 44
+    end
+    return lw + iw + 5, zo_max(ih, lh)
+end
+
+--- `ZO_AdvZoneHUD_TopLevel` uses TOPLEFT + BOTTOMRIGHT anchors in XML (`AdventureZoneHUD.xml`), so it fills the screen until anchors are cleared.
+--- Without saved coordinates, `SetElementPosition` never runs `SetAnchor`, `SetWidth`/`SetHeight` cannot shrink the stretch layout, and the mover initializes fullscreen.
+--- Replace stretch with a single TOPLEFT anchored where the icon + score cluster sits (child positions relative to parent, see `ZO_AdventureZoneHUD:OnPlatformStyleChanged`).
+--- @param tightW number
+--- @param tightH number
+local function ApplyAdvZoneHUDDefaultAnchorForMover(tightW, tightH)
+    local element = ZO_AdvZoneHUD_TopLevel
+    local icon = ZO_AdvZoneHUD_TopLevelPlayerFactionIcon
+    local label = ZO_AdvZoneHUD_TopLevelPlayerScoreLabel
+    if not element or not icon or not label then
+        return
+    end
+    local parentLeft = element:GetLeft()
+    local parentTop = element:GetTop()
+    local contentLeft = zo_min(icon:GetLeft(), label:GetLeft())
+    local contentTop = zo_min(icon:GetTop(), label:GetTop())
+    element:ClearAnchors()
+    element:SetWidth(tightW)
+    element:SetHeight(tightH)
+    element:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, parentLeft + contentLeft, parentTop + contentTop, ANCHOR_CONSTRAINS_XY)
+end
+
 --- Helper function to adjust an element
 --- @param element Control The element to be adjusted
 --- @param config {[1]:string, [2]:number?, [3]:number?} The table containing adjustment values
 function Unlock.AdjustElement(element, config)
     element:SetClampedToScreen(true)
     local width, height = config[2], config[3]
-    if element == ZO_AdvZoneHUD_TopLevel and ZO_HUDTelvarMeter then
-        width = ZO_HUDTelvarMeter:GetWidth()
-        height = ZO_HUDTelvarMeter:GetHeight()
+    if element == ZO_AdvZoneHUD_TopLevel then
+        width, height = GetAdvZoneHUDTightDimensions()
     end
     if width then element:SetWidth(width) end
     if height then element:SetHeight(height) end
@@ -296,9 +321,12 @@ end
 function Unlock.InitializeElementMover(element, config)
     -- Adjust width and height constraints if provided
     local width, height = config[2], config[3]
-    if element == ZO_AdvZoneHUD_TopLevel and ZO_HUDTelvarMeter then
-        width = ZO_HUDTelvarMeter:GetWidth()
-        height = ZO_HUDTelvarMeter:GetHeight()
+    if element == ZO_AdvZoneHUD_TopLevel then
+        width, height = GetAdvZoneHUDTightDimensions()
+        -- First-time unlock: break XML stretch anchors so tight dimensions and mover TLW are not fullscreen (`ApplyAdvZoneHUDDefaultAnchorForMover`).
+        if not LUIE.SV[element:GetName()] then
+            ApplyAdvZoneHUDDefaultAnchorForMover(width, height)
+        end
     end
     if width then element:SetWidth(width) end
     if height then element:SetHeight(height) end
