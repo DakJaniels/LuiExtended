@@ -419,6 +419,10 @@ end
 --- Each column is { percent, mechanic, scope = "common"|"multi", bossIndex? }.
 --- Returns nil when no usable thresholds (so the default-percents fallback runs).
 local function FetchCrutchBossThresholds()
+    if not LUIE.OtherAddonCompatability.isCrutchAlertsEnabled then
+        return nil
+    end
+
     local crutch = CrutchAlerts
 
     local data = crutch.BossHealthBar.GetBossThresholds()

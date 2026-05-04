@@ -12,6 +12,13 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.1.2
+    "|cFFA500LuiExtended Version 7.2.1.2|r",
+    "",
+    -- Fixed
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t `user:/AddOns/LuiExtended/modules/UnitFrames/UnitFrames.lua:424: attempt to index a nil value`",
+    "",
     -- Version Header 7.2.1.1
     "|cFFA500LuiExtended Version 7.2.1.1|r",
     "",
