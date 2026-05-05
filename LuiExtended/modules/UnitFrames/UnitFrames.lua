@@ -1276,9 +1276,23 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
             UnitFrames.UpdateDefaultLevelTarget()
         end
 
+        local nameR, nameG, nameB = color[1], color[2], color[3]
+        local defaultTargetNameAlpha = isWithinRange and 1 or 0.5
+        local customTargetNameAlpha = 1
+        local classR, classG, classB = nameR, nameG, nameB
+        if UnitFrames.DefaultFrames.reticleover.isPlayer then
+            local _, nr, ng, nb, na, cr, cg, cb = LUIE.ApplyListedDevUnitFrameName(GetUnitDisplayName("reticleover"), "")
+            if nr then
+                nameR, nameG, nameB = nr, ng, nb
+                defaultTargetNameAlpha = defaultTargetNameAlpha * na
+                customTargetNameAlpha = na
+                classR, classG, classB = cr, cg, cb
+            end
+        end
+
         -- Update color of default target if requested
         if UnitFrames.SV.TargetColourByReaction then
-            UnitFrames.defaultTargetNameLabel:SetColor(color[1], color[2], color[3], isWithinRange and 1 or 0.5)
+            UnitFrames.defaultTargetNameLabel:SetColor(nameR, nameG, nameB, defaultTargetNameAlpha)
         end
         if UnitFrames.SV.ReticleColourByReaction then
             ZO_ReticleContainerReticle:SetColor(reticle_color[1], reticle_color[2], reticle_color[3], 1)
@@ -1288,8 +1302,8 @@ function UnitFrames.OnReticleTargetChanged(eventCode)
         if UnitFrames.CustomFrames["reticleover"] then
             UnitFrames.reticleoverHostile = (reactionType == UNIT_REACTION_HOSTILE) and UnitFrames.SV.TargetEnableSkull
             UnitFrames.CustomFrames["reticleover"].skull:SetHidden(not UnitFrames.reticleoverHostile or (UnitFrames.savedHealth.reticleover[1] == 0) or (100 * UnitFrames.savedHealth.reticleover[1] / UnitFrames.savedHealth.reticleover[3] > UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH].threshold))
-            UnitFrames.CustomFrames["reticleover"].name:SetColor(color[1], color[2], color[3], 1)
-            UnitFrames.CustomFrames["reticleover"].className:SetColor(color[1], color[2], color[3], 1)
+            UnitFrames.CustomFrames["reticleover"].name:SetColor(nameR, nameG, nameB, customTargetNameAlpha)
+            UnitFrames.CustomFrames["reticleover"].className:SetColor(classR, classG, classB, customTargetNameAlpha)
             if isCritter then
                 UnitFrames.CustomFrames["reticleover"][COMBAT_MECHANIC_FLAGS_HEALTH].labelOne:SetText(" - Critter - ")
             end
@@ -1601,7 +1615,23 @@ function UnitFrames.UpdateStaticControls(unitFrame)
             end
         end
 
-        unitFrame.name:SetText(nameText)
+        local dn = unitFrame.isPlayer and GetUnitDisplayName(unitFrame.unitTag)
+        local styledText, nr, ng, nb, na, cr, cg, cb, ca = LUIE.ApplyListedDevUnitFrameName(dn, nameText)
+        unitFrame.name:SetText(styledText)
+        if unitFrame.isPlayer then
+            local dc = UnitFrames.SV.DefaultTextColour
+            if nr then
+                unitFrame.name:SetColor(nr, ng, nb, na)
+                if unitFrame.className then
+                    unitFrame.className:SetColor(cr, cg, cb, ca)
+                end
+            else
+                unitFrame.name:SetColor(dc[1], dc[2], dc[3], 1)
+                if unitFrame.className then
+                    unitFrame.className:SetColor(dc[1], dc[2], dc[3], 1)
+                end
+            end
+        end
     end
     -- If unitFrame has level label control
     if unitFrame.level ~= nil then
