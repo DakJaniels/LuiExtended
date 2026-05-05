@@ -490,6 +490,9 @@ local function ApplyCompanionAnchors(style, weaponSwapControl)
 end
 
 local function RefreshCompanionQuickslotAnchors()
+    if isFancyActionBarEnabled then
+        return
+    end
     local styleConstants = GetPlatformConstants()
     local weaponSwapControl = ACTION_BAR:GetNamedChild("WeaponSwap")
     if weaponSwapControl then
