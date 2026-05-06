@@ -12,6 +12,13 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+        -- Version Header 7.2.1.4
+    "|cFFA500LuiExtended Version 7.2.1.4|r",
+    "",
+    -- Fixed
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t GamePass: Swapped to ZO_IsConsoleOrGameCoreUI.",
+    "",
     -- Version Header 7.2.1.3
     "|cFFA500LuiExtended Version 7.2.1.3|r",
     "",

@@ -10,7 +10,7 @@ local eventManager = GetEventManager()
 LuiMedia = {}
 LuiMedia.__index = LuiMedia
 LuiMedia.__name = "LuiMedia"
-LuiMedia.__version = 7132
+LuiMedia.__version = 7133
 
 -- -----------------------------------------------------------------------------
 -- Font Name Constants
@@ -333,7 +333,7 @@ LuiMedia.StatusbarTextures =
 -- Initialization
 -- -----------------------------------------------------------------------------
 local function AddConsoleFonts()
-    if not IsConsoleUI() then
+    if not ZO_IsConsoleOrGameCoreUI() then
         LuiMedia.Fonts[FONT_PROSE_ANTIQUE] = ZoFontBookPaper:GetFontInfo()
         LuiMedia.Fonts[FONT_SKYRIM_HANDWRITTEN] = ZoFontBookLetter:GetFontInfo()
         LuiMedia.Fonts[FONT_TRAJAN_PRO] = ZoFontBookTablet:GetFontInfo()
@@ -348,7 +348,7 @@ local LUIE_FONT_NAME = "LUIE_SystemFont"
 local function AddDefaultFont()
     if not LuiMedia.Fonts[FONT_LUIE_DEFAULT] then
         local font = ""
-        if IsInGamepadPreferredMode() or IsConsoleUI() then
+        if IsInGamepadPreferredMode() or ZO_IsConsoleOrGameCoreUI() then
             font = CONSOLE_FONT_STRING
         else
             font = PC_FONT_STRING

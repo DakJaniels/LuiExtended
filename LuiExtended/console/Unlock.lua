@@ -43,7 +43,7 @@ local Unlock =
     }
 }
 
-if not IsConsoleUI() then
+if not ZO_IsConsoleOrGameCoreUI() then
     if ZO_LootHistoryControl_Keyboard then
         Unlock.defaultPanels[ZO_LootHistoryControl_Keyboard] = { GetString(LUIE_STRING_DEFAULT_FRAME_LOOT_HISTORY), 280, 400 }
     end

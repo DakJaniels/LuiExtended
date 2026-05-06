@@ -748,7 +748,7 @@ end
 -- Helper to set up common actions for all created frames
 local function SetupCommonFrameActions()
     local tlwOnMoveStart = function (self)
-        if not IsConsoleUI() and self.preview.anchorLabel then
+        if not ZO_IsConsoleOrGameCoreUI() and self.preview.anchorLabel then
             eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
                 self.preview.anchorLabel:SetText(zo_strformat("<<1>>, <<2>>", self:GetLeft(), self:GetTop()))
             end)
@@ -782,7 +782,7 @@ local function SetupCommonFrameActions()
             unitFrame.tlw.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
 
             -- For console UI, don't create anchorLabel - EditModeController will create a better coordLabel instead
-            if not IsConsoleUI() then
+            if not ZO_IsConsoleOrGameCoreUI() then
                 unitFrame.tlw.preview.anchorLabel = windowManager:CreateControl(nil, unitFrame.tlw.preview, CT_LABEL)
                 unitFrame.tlw.preview.anchorLabel:SetFont("ZoFontGameSmall")
                 unitFrame.tlw.preview.anchorLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)

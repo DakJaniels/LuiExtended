@@ -76,7 +76,7 @@ local bloodlordEmbraceIsEquipped = false
 --- @return string font
 local function GetUsableFont()
     local font
-    if IsInGamepadPreferredMode() or IsConsoleUI() then
+    if IsInGamepadPreferredMode() or ZO_IsConsoleOrGameCoreUI() then
         font = "$(GAMEPAD_MEDIUM_FONT)|$(GP_14)|soft-shadow-thick"
     else
         font = "$(BOLD_FONT)|$(KB_12)|soft-shadow-thin"
