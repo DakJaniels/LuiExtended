@@ -663,7 +663,7 @@ end
 
 local function CreateThresholdLabel(parent, dimensions, isBottom)
     local label = windowManager:CreateControl(nil, parent, CT_LABEL)
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         label:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
     else
         label:SetFont("$(BOLD_FONT)|16|soft-shadow-thin")
@@ -1523,7 +1523,7 @@ function UnitFrames.UpdateStaticControls(unitFrame)
         local classIcon = LUIE.GetClassIcon(GetUnitClassId(unitFrame.unitTag))
         local showClass = (unitFrame.isPlayer and classIcon ~= nil) or (unitDifficulty > 1)
         local eliteIconPath
-        if IsConsoleUI() then
+        if ZO_IsConsoleOrGameCoreUI() then
             eliteIconPath = [[/esoui/art/icons/poi/poi_groupboss_complete.dds]]
         else
             eliteIconPath = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_LEVEL_ELITE_DDS
@@ -1563,7 +1563,7 @@ function UnitFrames.UpdateStaticControls(unitFrame)
         local isFriend = unitFrame.isPlayer and IsUnitFriend(unitFrame.unitTag)
         local isGuild = unitFrame.isPlayer and not isFriend and not isIgnored and IsGuildMate(unitFrame.unitTag)
         local ignoredIconPath
-        if IsConsoleUI() then
+        if ZO_IsConsoleOrGameCoreUI() then
             ignoredIconPath = [[EsoUI/Art/Contacts/tabIcon_ignored_up.dds]]
         else
             ignoredIconPath = LUIE_MEDIA_UNITFRAMES_UNITFRAMES_SOCIAL_IGNORE_DDS
@@ -2769,7 +2769,7 @@ function UnitFrames.CustomFramesSetPositions()
             UnitFrames.CustomFrames[unitTag].tlw:ClearAnchors()
             UnitFrames.CustomFrames[unitTag].tlw:SetAnchor(anchors[1], GuiRoot, anchors[2], anchors[3], anchors[4])
             -- For console UI, coordLabel is updated by EditModeController, so skip anchorLabel update
-            if not IsConsoleUI() and UnitFrames.CustomFrames[unitTag].tlw.preview.anchorLabel then
+            if not ZO_IsConsoleOrGameCoreUI() and UnitFrames.CustomFrames[unitTag].tlw.preview.anchorLabel then
                 UnitFrames.CustomFrames[unitTag].tlw.preview.anchorLabel:SetText((savedPos ~= nil and #savedPos == 2) and zo_strformat("<<1>>, <<2>>", savedPos[1], savedPos[2]) or "default")
             end
         end
@@ -2950,7 +2950,7 @@ local function ApplyCustomFrameHealthTextures(healthFrame, texture, isRoundTextu
         healthFrame.invulnerable:SetTexture(texture)
     end
     if healthFrame.invulnerableInlay then
-        local invulnerableInlayPath = IsConsoleUI() and [[EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_invulnerable_munge.dds]] or LUIE_MEDIA_UNITFRAMES_INVULNERABLE_MUNGE_DDS
+        local invulnerableInlayPath = ZO_IsConsoleOrGameCoreUI() and [[EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_invulnerable_munge.dds]] or LUIE_MEDIA_UNITFRAMES_INVULNERABLE_MUNGE_DDS
         healthFrame.invulnerableInlay:SetTexture(invulnerableInlayPath)
     end
 end

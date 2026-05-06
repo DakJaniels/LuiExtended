@@ -188,10 +188,10 @@ local function OnAddOnLoaded(_, addonName)
     sceneManager:GetScene("siegeBar"):AddFragment(fragment)
     sceneManager:GetScene("siegeBarUI"):AddFragment(fragment)
 
-    if not IsConsoleUI() then
+    if not ZO_IsConsoleOrGameCoreUI() then
         LuiExecuteIcon.RegisterPCSettings()
     end
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         LuiExecuteIcon.RegisterConsoleSettings()
     end
 end

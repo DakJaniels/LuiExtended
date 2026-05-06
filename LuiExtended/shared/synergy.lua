@@ -30,7 +30,7 @@ end
 
 -- Hook synergy popup Icon/Name (to fix inconsistencies and add custom icons for some Quest/Encounter based Synergies)
 LUIE.HookSynergy = function ()
-    if IsConsoleUI() then return end
+    if ZO_IsConsoleOrGameCoreUI() then return end
 
 
     -- PreHook: suppress the base game's PlaySound for blacklisted synergies.

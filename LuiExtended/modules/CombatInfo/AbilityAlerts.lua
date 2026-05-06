@@ -324,7 +324,7 @@ function AbilityAlerts.SetMovingStateAlert(state)
     AbilityAlerts.AlertFrameUnlocked = state
 
     -- When unlocked on console, add alert frame to settings scene so preview is visible while addon settings are open
-    if IsConsoleUI() and AbilityAlerts.alertFragment then
+    if ZO_IsConsoleOrGameCoreUI() and AbilityAlerts.alertFragment then
         local settingsScene = sceneManager:GetScene("LibHarvensAddonSettingsScene")
         if state then
             settingsScene:AddFragment(AbilityAlerts.alertFragment)

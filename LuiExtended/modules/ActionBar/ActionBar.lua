@@ -1443,7 +1443,7 @@ function ActionBar.RegisterEvents()
     end)
     -- Display default UI ultimate text if the LUIE option is enabled.
     if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
-        if not IsConsoleUI() then
+        if not ZO_IsConsoleOrGameCoreUI() then
             SetSetting(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER, 0)
         end
     end
@@ -2862,7 +2862,7 @@ end
 --- Creates the cast bar TLW, preview, backdrop, icon, bar, and registers it with HUD scenes.
 function ActionBar.CreateCastBar()
     local fontString
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         fontString = "ZoFontGamepad18"
     else
         fontString = "ZoFontGameMedium"

@@ -10071,7 +10071,7 @@ function ChatAnnouncements.HookFunction()
             return true -- Prevent original from running
         end
 
-        if IsConsoleUI() then
+        if ZO_IsConsoleOrGameCoreUI() then
             local displayName = characterOrDisplayName
 
             local function GroupInviteCallback(success)
@@ -10173,7 +10173,7 @@ function ChatAnnouncements.HookFunction()
         local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
         local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
 
-        if IsConsoleUI() then
+        if ZO_IsConsoleOrGameCoreUI() then
             local function GuildInviteCallback(success)
                 if success then
                     GuildInvite(guildId, displayName)

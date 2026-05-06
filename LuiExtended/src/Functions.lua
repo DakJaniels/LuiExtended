@@ -953,7 +953,7 @@ end
 --- @return string
 function LUIE.GetUsableFont()
     local font = ""
-    if IsInGamepadPreferredMode() or IsConsoleUI() then
+    if IsInGamepadPreferredMode() or ZO_IsConsoleOrGameCoreUI() then
         font = "$(GAMEPAD_MEDIUM_FONT)|$(GP_18)|soft-shadow-thick"
     else
         font = "$(MEDIUM_FONT)|$(KB_18)|soft-shadow-thin"

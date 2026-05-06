@@ -43,7 +43,7 @@ local HARDCODED_SHARED_COOLDOWNS =
 --- @param consoleFont string Font for gamepad/console mode
 local function SetLabelFont(label, pcFont, consoleFont)
     if label then
-        label:SetFont((IsConsoleUI() or IsInGamepadPreferredMode()) and consoleFont or pcFont)
+        label:SetFont((ZO_IsConsoleOrGameCoreUI() or IsInGamepadPreferredMode()) and consoleFont or pcFont)
     end
 end
 
@@ -670,7 +670,7 @@ function SynergyTracker:SetUnlocked(unlocked)
     local Settings = CombatInfo.SV.synergy
     Settings.unlocked = unlocked
 
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         local settingsScene = sceneManager:GetScene("LibHarvensAddonSettingsScene")
         if self.settingsSceneFragment then
             if unlocked then

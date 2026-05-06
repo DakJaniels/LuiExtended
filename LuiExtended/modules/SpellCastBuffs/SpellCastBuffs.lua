@@ -967,7 +967,7 @@ function SpellCastBuffs.SetMovingState(state)
     end
 
     -- When unlocked on console, add buff fragments to settings scene so frames are visible while addon settings are open
-    if IsConsoleUI() and SpellCastBuffs.BuffFragments then
+    if ZO_IsConsoleOrGameCoreUI() and SpellCastBuffs.BuffFragments then
         local settingsScene = sceneManager:GetScene("LibHarvensAddonSettingsScene")
         for _, fragment in pairs(SpellCastBuffs.BuffFragments) do
             if state then

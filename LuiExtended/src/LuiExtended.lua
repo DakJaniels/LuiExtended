@@ -28,8 +28,8 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.2.1.3"
-LUIE.addonVersion = 7213
+LUIE.version = "7.2.1.4"
+LUIE.addonVersion = 7214
 LUIE.author = "@dack_janiels[PC]"
 LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
@@ -38,7 +38,7 @@ LUIE.feedback = "https://github.com/DakJaniels/LuiExtended/issues"
 LUIE.translation = "https://github.com/DakJaniels/LuiExtended/tree/translations"
 LUIE.donation = "https://paypal.me/dakjaniels"
 -- -----------------------------------------------------------------------------
-if not IsConsoleUI() then
+if not ZO_IsConsoleOrGameCoreUI() then
     LUIE.LAM = LibAddonMenu2
 end
 -- -----------------------------------------------------------------------------
@@ -46,7 +46,7 @@ end
 --- @diagnostic disable-next-line: missing-fields
 LUIE.SV = {}
 LUIE.SVVer = nil
-if IsConsoleUI() then
+if ZO_IsConsoleOrGameCoreUI() then
     LUIE.SVVer = 3
 else
     LUIE.SVVer = 2
