@@ -1,8 +1,8 @@
 ## Title: LuiExecuteIcon
 ## Author: @dack_janiels[PC]
 ## APIVersion: 101049 101050
-## Version: 1.0.0.0
-## AddOnVersion: 10000
+## Version: 1.0.0.1
+## AddOnVersion: 10001
 ## Description: Shows execute skull icon next to target frame when hostile target is in execute range.
 ## PCDependsOn: LibAddonMenu-2.0>=41
 ## ConsoleDependsOn: LibHarvensAddonSettings
