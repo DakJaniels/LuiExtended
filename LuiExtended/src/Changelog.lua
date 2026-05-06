@@ -12,7 +12,14 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
-        -- Version Header 7.2.1.4
+    -- Version Header 7.2.1.5
+    "|cFFA500LuiExtended Version 7.2.1.5|r",
+    "",
+    -- Fixed
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t revert test code. thank you all who participated.",
+    "",
+    -- Version Header 7.2.1.4
     "|cFFA500LuiExtended Version 7.2.1.4|r",
     "",
     -- Fixed
