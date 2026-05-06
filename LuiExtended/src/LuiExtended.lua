@@ -177,64 +177,6 @@ end
 --- @class DevEntry
 --- @field enabled boolean Whether this developer has special access enabled
 --- @field debug boolean Whether debug mode is enabled for this developer
---- @field nameColor number[]|nil `{ r, g, b [, a] }`
---- @field nameGradientFrom number[]|nil paired with `nameGradientTo` for markup gradient
---- @field nameGradientTo number[]|nil
-
---- Default RGBA when a DevEntry omits `nameColor`.
-local DEV_NAME_COLOR_DEFAULT = { 1, 0.85, 0.35, 1 }
-
---- UTF-8 code units (ZOS provides no public iterator for addon UI strings).
-local function utf8Chars(s)
-    local chars = {}
-    local pos = 1
-    local len = #s
-    while pos <= len do
-        local byte = string.byte(s, pos)
-        local cpLen = 1
-        if byte >= 0xF0 then
-            cpLen = 4
-        elseif byte >= 0xE0 then
-            cpLen = 3
-        elseif byte >= 0xC0 then
-            cpLen = 2
-        end
-        chars[#chars + 1] = string.sub(s, pos, pos + cpLen - 1)
-        pos = pos + cpLen
-    end
-    return chars
-end
-
---- Per-character gradient via `ZO_ColorDef` (`Libraries/Utility/ZO_ColorDef.lua`).
-local function formatDevNameGradientMarkup(plainText, r1, g1, b1, r2, g2, b2)
-    local leading = ""
-    local core = plainText
-    local startIdx, endIdx = plainText:find("|t%d+:%d+:[^|]*|t")
-    if startIdx == 1 and endIdx then
-        leading = plainText:sub(1, endIdx)
-        core = plainText:sub(endIdx + 1)
-    end
-    core = core:match("^%s*(.-)%s*$") or core
-    local chars = utf8Chars(core)
-    local n = #chars
-    if n == 0 then
-        return plainText
-    end
-    local colorFrom = ZO_ColorDef:New(r1, g1, b1, 1)
-    local colorTo = ZO_ColorDef:New(r2, g2, b2, 1)
-    local colorScratch = ZO_ColorDef:New(0, 0, 0, 1)
-    local parts = {}
-    parts[#parts + 1] = leading
-    if leading ~= "" and core ~= "" then
-        parts[#parts + 1] = " "
-    end
-    for i = 1, n do
-        local t = (n <= 1) and 0 or (i - 1) / (n - 1)
-        colorScratch:SetRGB(ZO_ColorDef.LerpRGB(colorFrom, colorTo, t))
-        parts[#parts + 1] = colorScratch:Colorize(chars[i])
-    end
-    return table.concat(parts)
-end
 
 --- @type table<string, DevEntry>
 local DEVS = readonlytable
@@ -261,17 +203,13 @@ local DEVS = readonlytable
         },
         ["@dack_janiels"] =
         {
-            enabled = true,
-            debug = true,
-            nameGradientFrom = { 0.35, 0.85, 1 },
-            nameGradientTo = { 1, 0.45, 0.9 },
+            enabled = false,
+            debug = false,
         },
         ["@dack_janiels.luie"] =
         {
             enabled = false,
             debug = false,
-            nameGradientFrom = { 0.45, 1, 0.55 },
-            nameGradientTo = { 1, 0.75, 0.2 },
         },
     }
 
@@ -283,32 +221,6 @@ local DEVS = readonlytable
 function LUIE.IsDevDebugEnabled()
     local currentUser = zo_strformat("<<1>>", GetUnitDisplayName("player"))
     return DEVS[currentUser] and DEVS[currentUser].enabled and DEVS[currentUser].debug
-end
-
---- If `displayName` is in `DEVS`, returns styled text (gradient markup when configured) and RGBA for name + class labels; otherwise returns `plainText` only.
-function LUIE.ApplyListedDevUnitFrameName(displayName, plainText)
-    if not displayName or displayName == "" then
-        return plainText
-    end
-    local entry = DEVS[zo_strformat("<<1>>", displayName)]
-    if not entry then
-        return plainText
-    end
-    local gf, gt = entry.nameGradientFrom, entry.nameGradientTo
-    local nr, ng, nb, na, cr, cg, cb, ca
-    if gf and gt then
-        nr, ng, nb, na = 1, 1, 1, 1
-        cr, cg, cb, ca = gt[1], gt[2], gt[3], 1
-        plainText = formatDevNameGradientMarkup(plainText, gf[1], gf[2], gf[3], gt[1], gt[2], gt[3])
-    else
-        local c = entry.nameColor
-        nr, ng, nb, na = DEV_NAME_COLOR_DEFAULT[1], DEV_NAME_COLOR_DEFAULT[2], DEV_NAME_COLOR_DEFAULT[3], DEV_NAME_COLOR_DEFAULT[4]
-        if c then
-            nr, ng, nb, na = c[1], c[2], c[3], c[4] or 1
-        end
-        cr, cg, cb, ca = nr, ng, nb, na
-    end
-    return plainText, nr, ng, nb, na, cr, cg, cb, ca
 end
 
 -- -----------------------------------------------------------------------------
