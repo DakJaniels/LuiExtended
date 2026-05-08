@@ -279,6 +279,7 @@ local abilityTables =
     Experience_Psijic_Ambrosia = GetItemLinkName("|H0:item:64221:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),       -- Psijic Ambrosia
     Experience_Aetherial_Ambrosia = GetItemLinkName("|H0:item:120076:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),   -- Aetherial Ambrosia
     Experience_Mythic_Ambrosia = GetItemLinkName("|H0:item:115027:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),      -- Mythic Aetherial Ambrosia
+    Experience_Tonic_Portent_Favor = GetItemLinkName("|H0:item:224839:1:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),  -- Tonic of Portent Favor
     Experience_Crown_Scroll = GetItemLinkName("|H0:item:64537:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"),         -- Crown Experience Scroll
     Experience_Crown_Crate_Scroll_1 = GetItemLinkName("|H0:item:94439:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"), -- Gold Coast Experience Scroll
     Experience_Crown_Crate_Scroll_2 = GetItemLinkName("|H0:item:94440:1:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h"), -- Major Gold Coast Experience Scroll

@@ -1218,6 +1218,7 @@ local debugAuras =
     [85501] = true, -- Increased Experience (Crown Crate Experience Scroll)
     [85502] = true, -- Increased Experience (Major Crown Crate Experience Scroll)
     [85503] = true, -- Increased Experience (Grand Crown Crate Experience Scroll)
+    [262221] = true, -- Increased Favor (Tonic of Portent Favor)
 
     -- Alliance War Bonuses
     [147466] = true, -- Alliance Skill Gain (Alliance War Skill Line Scroll)
