@@ -200,6 +200,7 @@ Effects.IsExperienceBuff =
     [85502] = true,  -- Major Crown Crate Experience Scroll
     [85503] = true,  -- Grand Crown Crate Experience Scroll
     [241125] = true, -- Hero's Return Experience Scroll
+    [262221] = true, -- Tonic of Portent Favor
 
     -- Event
     [91369] = true,  -- The Pie of Misrule (Jester's Experience Boost Pie)

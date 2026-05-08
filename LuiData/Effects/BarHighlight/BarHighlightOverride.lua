@@ -40,7 +40,7 @@ local barHighlightOverride =
     -- Ardent Flame
     [23806] = { newId = 23808 },                        -- Lava Whip --> Off Balance
     [20805] = { newId = 122658 },                       -- Molten Whip --> Seething Fury
-    -- Flame Lash / Power Lash (U41+): stacks use abilityId 34117 in EVENT_COMBAT_EVENT (EFFECT_GAINED hitValue=stacks, EFFECT_GAINED_DURATION hitValue=ms).
+    -- Flame Lash / Power Lash (U49+): stacks use abilityId 34117 in EVENT_COMBAT_EVENT (EFFECT_GAINED hitValue=stacks, EFFECT_GAINED_DURATION hitValue=ms).
     -- combatTrack registers combat listener without g_barFakeAura so player buff fade still clears via EVENT_EFFECT_CHANGED.
     [20816] = { newId = 34117, combatTrack = true, duration = 20000 },
     [20824] = { newId = 34117 },
@@ -199,9 +199,9 @@ local barHighlightOverride =
     [22253] = { newId = 35632 },       -- Honor the Dead
     [26209] = { newId = 88401 },       -- Restoring Aura --> Minor Magickasteal
     [26807] = { newId = 88401 },       -- Radiant Aura --> Minor Magickasteal
-    [22265] = { showFakeAura = true }, -- Cleansing Ritual (Cleansing Ritual)
-    [22259] = { showFakeAura = true }, -- Ritual of Retribution (Ritual of Retribution)
-    [22262] = { showFakeAura = true }, -- Extended Ritual (Extended Ritual)
+    [22265] = { showFakeAura = true, noRemove = true }, -- Cleansing Ritual (Cleansing Ritual)
+    [22259] = { showFakeAura = true, noRemove = true }, -- Ritual of Retribution (Ritual of Retribution)
+    [22262] = { showFakeAura = true, noRemove = true }, -- Extended Ritual (Extended Ritual)
     [22314] = { newId = 61735 },       -- Hasty Prayer (Healing Ritual Morph)
     [22240] = { newId = 37009 },       -- Channeled Focus
     [22237] = { newId = 114842 },      -- Restoring Focus

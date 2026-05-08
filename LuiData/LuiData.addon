@@ -2,10 +2,10 @@
 ## Title: LuiData
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
-## AddOnVersion: 7207
-## Version: 7.2.0.7
+## AddOnVersion: 7208
+## Version: 7.2.0.8
 ## Description: Provides data for LuiExtended.
-## DependsOn: LuiMedia>=7132
+## DependsOn: LuiMedia>=7133
 ## IsLibrary: true
 
 lang/default.lua

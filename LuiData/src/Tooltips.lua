@@ -449,6 +449,7 @@ local tooltips =
     Experience_Psijic_Ambrosia = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HALF_HOUR_TP), "50"),
     Experience_Aetherial_Ambrosia = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HALF_HOUR_TP), "100"),
     Experience_Mythic_Aetherial_Ambrosia = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HALF_HOUR_TP), "150"),
+    Experience_Tonic_Portent_Favor = GetItemLinkOnUseAbilityDescription("|H1:item:224839:124:1:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
     Experience_Crown = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HOUR_TP), "50", "2"),
     Experience_Gold_Coast = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HOUR_TP), "50", "1"),
     Experience_Major_Gold_Coast = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HOUR_TP), "100", "1"),
