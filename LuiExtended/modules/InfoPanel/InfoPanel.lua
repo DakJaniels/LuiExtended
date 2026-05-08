@@ -127,6 +127,431 @@ local uiBags =
 
 local panelFragment
 
+-- -----------------------------------------------------------------------------
+-- Meter system (ZOS-style component objects)
+-- -----------------------------------------------------------------------------
+
+local updateDriverName = moduleName .. "UpdateDriver"
+local meters = {}
+local metersOrdered = {}
+
+function InfoPanel.GetMeter(id)
+    return meters[id]
+end
+
+local function ForEachMeter(fn)
+    for i = 1, #metersOrdered do
+        fn(metersOrdered[i])
+    end
+end
+
+local InfoPanelMeterBase = ZO_Object:Subclass()
+
+function InfoPanelMeterBase:New(...)
+    local obj = ZO_Object.New(self)
+    obj:Initialize(...)
+    return obj
+end
+
+function InfoPanelMeterBase:Initialize(infoPanel, id, intervalMs)
+    self.infoPanel = infoPanel
+    self.id = id
+    self.intervalMs = intervalMs or 1000
+    self.lastUpdateMs = nil
+end
+
+function InfoPanelMeterBase:SetInterval(intervalMs)
+    self.intervalMs = intervalMs
+end
+
+function InfoPanelMeterBase:GetInterval()
+    return self.intervalMs or 1000
+end
+
+function InfoPanelMeterBase:MarkUpdated(nowMs)
+    self.lastUpdateMs = nowMs
+end
+
+function InfoPanelMeterBase:ShouldUpdate(nowMs)
+    if self.lastUpdateMs == nil then
+        return true
+    end
+    return (nowMs - self.lastUpdateMs) >= self:GetInterval()
+end
+
+function InfoPanelMeterBase:IsEnabled()
+    return true
+end
+
+function InfoPanelMeterBase:Update(nowMs)
+    -- override
+end
+
+function InfoPanelMeterBase:ApplyFont(fontString)
+    -- override
+end
+
+-- -----------------------------------------------------------------------------
+-- Meter implementations
+-- -----------------------------------------------------------------------------
+
+local ClockMeter = InfoPanelMeterBase:Subclass()
+
+function ClockMeter:Initialize(infoPanel)
+    InfoPanelMeterBase.Initialize(self, infoPanel, "Clock", ZO_ONE_SECOND_IN_MILLISECONDS)
+end
+
+function ClockMeter:IsEnabled()
+    return not self.infoPanel.SV.HideClock
+end
+
+function ClockMeter:ApplyFont(fontString)
+    if uiClock.label then uiClock.label:SetFont(fontString) end
+end
+
+function ClockMeter:Update(nowMs)
+    if not self:IsEnabled() or not uiClock.label then return end
+    local timestring = GetTimeString()
+    uiClock.label:SetText(LUIE.CreateTimestamp(timestring, self.infoPanel.SV.ClockFormat))
+end
+
+local FpsMeter = InfoPanelMeterBase:Subclass()
+
+function FpsMeter:Initialize(infoPanel)
+    InfoPanelMeterBase.Initialize(self, infoPanel, "FPS", ZO_ONE_SECOND_IN_MILLISECONDS)
+end
+
+function FpsMeter:IsEnabled()
+    return not self.infoPanel.SV.HideFPS
+end
+
+function FpsMeter:ApplyFont(fontString)
+    if uiFps.label then uiFps.label:SetFont(fontString) end
+end
+
+function FpsMeter:Update(nowMs)
+    if not self:IsEnabled() or not uiFps.label then return end
+    local fps = GetFramerate()
+    local color = colors.WHITE
+    if not self.infoPanel.SV.DisableInfoColours then
+        color = uiFps.color[#uiFps.color].color
+        for i = 1, #uiFps.color - 1 do
+            if fps < uiFps.color[i].fps then
+                color = uiFps.color[i].color
+                break
+            end
+        end
+    end
+    uiFps.label:SetText(string_format("%d fps", fps))
+    uiFps.label:SetColor(color.r, color.g, color.b, 1)
+end
+
+local LatencyMeter = InfoPanelMeterBase:Subclass()
+
+function LatencyMeter:Initialize(infoPanel)
+    InfoPanelMeterBase.Initialize(self, infoPanel, "Latency", ZO_ONE_SECOND_IN_MILLISECONDS * 10)
+end
+
+function LatencyMeter:IsEnabled()
+    return not self.infoPanel.SV.HideLatency
+end
+
+function LatencyMeter:ApplyFont(fontString)
+    if uiLatency.label then uiLatency.label:SetFont(fontString) end
+end
+
+function LatencyMeter:Update(nowMs)
+    if not self:IsEnabled() or not uiLatency.label then return end
+    local lat = GetLatency()
+    local color = colors.WHITE
+    if not self.infoPanel.SV.DisableInfoColours then
+        color = uiLatency.color[#uiLatency.color].color
+        for i = 1, #uiLatency.color - 1 do
+            if lat < uiLatency.color[i].ping then
+                color = uiLatency.color[i].color
+                break
+            end
+        end
+    end
+    uiLatency.label:SetText(string_format("%d ms", lat))
+    uiLatency.label:SetColor(color.r, color.g, color.b, 1)
+end
+
+local SoulGemsMeter = InfoPanelMeterBase:Subclass()
+
+function SoulGemsMeter:Initialize(infoPanel)
+    InfoPanelMeterBase.Initialize(self, infoPanel, "SoulGems", ZO_ONE_MINUTE_IN_MILLISECONDS)
+end
+
+function SoulGemsMeter:IsEnabled()
+    return not self.infoPanel.SV.HideGems
+end
+
+function SoulGemsMeter:ApplyFont(fontString)
+    if uiGems.label then uiGems.label:SetFont(fontString) end
+end
+
+function SoulGemsMeter:Update(nowMs)
+    if not self:IsEnabled() or not uiGems.label or not uiGems.icon then return end
+    local myLevel = GetUnitEffectiveLevel("player")
+    local _, icon, emptyCount = GetSoulGemInfo(SOUL_GEM_TYPE_EMPTY, myLevel, true)
+    local _, iconF, fullCount = GetSoulGemInfo(SOUL_GEM_TYPE_FILLED, myLevel, true)
+    emptyCount = zo_min(emptyCount, 99)
+    fullCount = zo_min(fullCount, 9999)
+    local fullText = (fullCount > 0) and ("|c00FF00" .. fullCount .. "|r") or "|cFF00000|r"
+    if iconF ~= nil and iconF ~= "" and iconF ~= "/esoui/art/icons/icon_missing.dds" then
+        icon = iconF
+    end
+    if icon == "/esoui/art/icons/icon_missing.dds" then
+        icon = "/esoui/art/icons/soulgem_001_empty.dds"
+    end
+    uiGems.icon:SetTexture(icon)
+    uiGems.label:SetText((fullCount > 9) and fullText or (fullText .. "/" .. emptyCount))
+end
+
+local BagsMeter = InfoPanelMeterBase:Subclass()
+
+function BagsMeter:Initialize(infoPanel)
+    InfoPanelMeterBase.Initialize(self, infoPanel, "Bags", ZO_ONE_MINUTE_IN_MILLISECONDS)
+end
+
+function BagsMeter:IsEnabled()
+    return not self.infoPanel.SV.HideBags
+end
+
+function BagsMeter:ApplyFont(fontString)
+    if uiBags.label then uiBags.label:SetFont(fontString) end
+end
+
+function BagsMeter:UpdateWithCapacity(bagSize)
+    if not self:IsEnabled() or not uiBags.label then return end
+    local bagUsed = GetNumBagUsedSlots(BAG_BACKPACK)
+    local filledSlotPercentage = (bagUsed / bagSize) * 100
+    local color = uiBags.color[#uiBags.color].color
+    if bagSize - bagUsed > 10 then
+        for i = 1, #uiBags.color - 1 do
+            if filledSlotPercentage < uiBags.color[i].fill then
+                color = uiBags.color[i].color
+                break
+            end
+        end
+    end
+    uiBags.label:SetText(ZO_FormatFraction(bagUsed, bagSize))
+    uiBags.label:SetColor(color.r, color.g, color.b, 1)
+end
+
+function BagsMeter:Update(nowMs)
+    if not self:IsEnabled() then return end
+    self:UpdateWithCapacity(GetBagSize(BAG_BACKPACK))
+end
+
+local ArmourMeter = InfoPanelMeterBase:Subclass()
+
+function ArmourMeter:Initialize(infoPanel)
+    InfoPanelMeterBase.Initialize(self, infoPanel, "Armour", ZO_ONE_MINUTE_IN_MILLISECONDS)
+end
+
+function ArmourMeter:IsEnabled()
+    return not self.infoPanel.SV.HideArmour
+end
+
+function ArmourMeter:ApplyFont(fontString)
+    if uiArmour.label then uiArmour.label:SetFont(fontString) end
+end
+
+function ArmourMeter:Update(nowMs)
+    if not self:IsEnabled() or not uiArmour.label or not uiArmour.icon then return end
+    local slotCount = 0
+    local duraSum = 0
+    local totalSlots = GetBagSize(BAG_WORN)
+    for slotNum = 0, totalSlots - 1 do
+        if DoesItemHaveDurability(BAG_WORN, slotNum) == true then
+            duraSum = duraSum + GetItemCondition(BAG_WORN, slotNum)
+            slotCount = slotCount + 1
+        end
+    end
+    local duraPercentage = (slotCount == 0) and 0 or duraSum / slotCount
+    local color = uiArmour.color[#uiArmour.color].color
+    local iconcolor = uiArmour.color[#uiArmour.color].iconcolor
+    for i = 1, #uiArmour.color - 1 do
+        if duraPercentage < uiArmour.color[i].dura then
+            color = uiArmour.color[i].color
+            iconcolor = uiArmour.color[i].iconcolor
+            break
+        end
+    end
+    uiArmour.label:SetText(string_format("%d%%", duraPercentage))
+    uiArmour.label:SetColor(color.r, color.g, color.b, 1)
+    uiArmour.icon:SetColor(iconcolor.r, iconcolor.g, iconcolor.b, 1)
+end
+
+local WeaponChargesMeter = InfoPanelMeterBase:Subclass()
+
+function WeaponChargesMeter:Initialize(infoPanel)
+    InfoPanelMeterBase.Initialize(self, infoPanel, "WeaponCharges", ZO_ONE_MINUTE_IN_MILLISECONDS)
+end
+
+function WeaponChargesMeter:IsEnabled()
+    return not self.infoPanel.SV.HideWeapons
+end
+
+function WeaponChargesMeter:Update(nowMs)
+    if not self:IsEnabled() or not uiWeapons.main or not uiWeapons.swap then return end
+    for _, icon in pairs({ uiWeapons.main, uiWeapons.swap }) do
+        local charges, maxCharges = GetChargeInfoForItem(BAG_WORN, icon.slotIndex)
+        local color = colors.GRAY
+        if maxCharges > 0 then
+            color = uiWeapons.color[#uiWeapons.color].color
+            local chargesPercentage = 100 * charges / maxCharges
+            for i = 1, #uiWeapons.color - 1 do
+                if chargesPercentage < uiWeapons.color[i].charges then
+                    color = uiWeapons.color[i].color
+                    break
+                end
+            end
+        end
+        icon:SetColor(color.r, color.g, color.b, 1)
+    end
+end
+
+local GoldMeter = InfoPanelMeterBase:Subclass()
+
+function GoldMeter:Initialize(infoPanel)
+    InfoPanelMeterBase.Initialize(self, infoPanel, "Gold", ZO_ONE_MINUTE_IN_MILLISECONDS)
+end
+
+function GoldMeter:IsEnabled()
+    return not self.infoPanel.SV.HideGold
+end
+
+function GoldMeter:ApplyFont(fontString)
+    if uiGold.label then uiGold.label:SetFont(fontString) end
+end
+
+function GoldMeter:Update(nowMs)
+    if not self:IsEnabled() or not uiGold.label then return end
+    uiGold.label:SetText(ZO_CommaDelimitNumber(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)))
+    uiGold.label:SetColor(colors.GOLD.r, colors.GOLD.g, colors.GOLD.b, 1)
+end
+
+local MountFeedMeter = InfoPanelMeterBase:Subclass()
+
+function MountFeedMeter:Initialize(infoPanel)
+    InfoPanelMeterBase.Initialize(self, infoPanel, "MountFeed", ZO_ONE_MINUTE_IN_MILLISECONDS)
+    self.hideLocally = false
+end
+
+function MountFeedMeter:IsEnabled()
+    if self.hideLocally then
+        return false
+    end
+    return not self.infoPanel.SV.HideMountFeed
+end
+
+function MountFeedMeter:ApplyFont(fontString)
+    if uiFeedTimer.label then uiFeedTimer.label:SetFont(fontString) end
+end
+
+function MountFeedMeter:SetHiddenLocally(hidden)
+    if self.hideLocally == hidden then return end
+    self.hideLocally = hidden
+    uiFeedTimer.hideLocally = hidden
+    self.infoPanel.RearrangePanel()
+end
+
+function MountFeedMeter:UpdateFromEvent(eventId, ridingSkillType, previous, current, source)
+    if self.infoPanel.SV.HideMountFeed or not self.infoPanel.Enabled or not uiFeedTimer.label then
+        return
+    end
+
+    if eventId == EVENT_RIDING_SKILL_IMPROVEMENT and ridingSkillType ~= nil and current ~= nil then
+        local inventoryBonus, maxInventoryBonus, staminaBonus, maxStaminaBonus, speedBonus, maxSpeedBonus = GetRidingStats()
+        local isFullyTrained = (inventoryBonus == maxInventoryBonus and staminaBonus == maxStaminaBonus and speedBonus == maxSpeedBonus)
+        if isFullyTrained then
+            uiFeedTimer.label:SetText(GetString(LUIE_STRING_PNL_MAXED))
+            self:SetHiddenLocally(true)
+            return
+        else
+            local mountFeedTimer = GetTimeUntilCanBeTrained()
+            if mountFeedTimer and mountFeedTimer > 0 then
+                local hours = zo_floor(mountFeedTimer / ZO_ONE_HOUR_IN_MILLISECONDS)
+                local minutes = zo_floor((mountFeedTimer - (hours * ZO_ONE_HOUR_IN_MILLISECONDS)) / ZO_ONE_MINUTE_IN_MILLISECONDS)
+                uiFeedTimer.label:SetText(string_format("%dh %dm", hours, minutes))
+            else
+                uiFeedTimer.label:SetText(GetString(LUIE_STRING_PNL_TRAINNOW))
+            end
+            return
+        end
+    end
+
+    self:Update(GetFrameTimeMilliseconds())
+end
+
+function MountFeedMeter:Update(nowMs)
+    if self.infoPanel.SV.HideMountFeed or not self.infoPanel.Enabled or not uiFeedTimer.label then
+        return
+    end
+
+    local mountFeedTimer = GetTimeUntilCanBeTrained()
+    local mountFeedMessage = GetString(LUIE_STRING_PNL_MAXED)
+
+    if mountFeedTimer ~= nil then
+        if mountFeedTimer == 0 then
+            local inventoryBonus, maxInventoryBonus, staminaBonus, maxStaminaBonus, speedBonus, maxSpeedBonus = GetRidingStats()
+            if inventoryBonus ~= maxInventoryBonus or staminaBonus ~= maxStaminaBonus or speedBonus ~= maxSpeedBonus then
+                mountFeedMessage = GetString(LUIE_STRING_PNL_TRAINNOW)
+            else
+                self:SetHiddenLocally(true)
+                return
+            end
+        elseif mountFeedTimer > 0 then
+            local hours = zo_floor(mountFeedTimer / ZO_ONE_HOUR_IN_MILLISECONDS)
+            local minutes = zo_floor((mountFeedTimer - (hours * ZO_ONE_HOUR_IN_MILLISECONDS)) / ZO_ONE_MINUTE_IN_MILLISECONDS)
+            mountFeedMessage = string_format("%dh %dm", hours, minutes)
+        end
+    end
+
+    uiFeedTimer.label:SetText(mountFeedMessage)
+end
+
+-- Build/replace the meter registry (called during Initialize)
+function InfoPanel.BuildMeters()
+    meters = {}
+    metersOrdered = {}
+
+    local function AddMeter(meter)
+        meters[meter.id] = meter
+        metersOrdered[#metersOrdered + 1] = meter
+    end
+
+    AddMeter(LatencyMeter:New(InfoPanel))
+    AddMeter(FpsMeter:New(InfoPanel))
+    AddMeter(ClockMeter:New(InfoPanel))
+    AddMeter(SoulGemsMeter:New(InfoPanel))
+    AddMeter(MountFeedMeter:New(InfoPanel))
+    AddMeter(ArmourMeter:New(InfoPanel))
+    AddMeter(WeaponChargesMeter:New(InfoPanel))
+    AddMeter(BagsMeter:New(InfoPanel))
+    AddMeter(GoldMeter:New(InfoPanel))
+end
+
+function InfoPanel.OnUpdateDriver()
+    if not InfoPanel.Enabled or not uiPanel then
+        return
+    end
+    if uiPanel:IsHidden() then
+        return
+    end
+
+    local nowMs = GetFrameTimeMilliseconds()
+    ForEachMeter(function (meter)
+        if meter:IsEnabled() and meter:ShouldUpdate(nowMs) then
+            meter:Update(nowMs)
+            meter:MarkUpdated(nowMs)
+        end
+    end)
+end
+
 -- Apply transparency to the info panel
 function InfoPanel.ApplyTransparency()
     if not InfoPanel.Enabled or not uiPanel then
@@ -159,14 +584,11 @@ function InfoPanel.ApplyFont()
     g_infoPanelFont = LUIE.CreateFontString(fontName, fontSize, fontStyle)
 
     -- Apply font to all elements
-    if uiLatency.label then uiLatency.label:SetFont(g_infoPanelFont) end
-    if uiFps.label then uiFps.label:SetFont(g_infoPanelFont) end
-    if uiClock.label then uiClock.label:SetFont(g_infoPanelFont) end
-    if uiGems.label then uiGems.label:SetFont(g_infoPanelFont) end
-    if uiGold.label then uiGold.label:SetFont(g_infoPanelFont) end
-    if uiFeedTimer.label then uiFeedTimer.label:SetFont(g_infoPanelFont) end
-    if uiArmour.label then uiArmour.label:SetFont(g_infoPanelFont) end
-    if uiBags.label then uiBags.label:SetFont(g_infoPanelFont) end
+    ForEachMeter(function (meter)
+        if meter.ApplyFont then
+            meter:ApplyFont(g_infoPanelFont)
+        end
+    end)
 end
 
 function InfoPanel.SetDisplayOnMap()
@@ -254,13 +676,20 @@ function InfoPanel.RearrangePanel()
     if not InfoPanel.Enabled then
         return
     end
+    local function MeterEnabled(id, fallbackEnabled)
+        local meter = InfoPanel.GetMeter(id)
+        if meter and meter.IsEnabled then
+            return meter:IsEnabled()
+        end
+        return fallbackEnabled
+    end
     -- Reset scale of panel
     uiPanel:SetScale(1)
     -- Top row
     local anchorTop = nil
     local sizeTop = 0
     -- Latency
-    if InfoPanel.SV.HideLatency then
+    if not MeterEnabled("Latency", not InfoPanel.SV.HideLatency) then
         uiLatency.control:SetHidden(true)
     else
         uiLatency.control:ClearAnchors()
@@ -270,7 +699,7 @@ function InfoPanel.RearrangePanel()
         anchorTop = uiLatency.control
     end
     -- FPS
-    if InfoPanel.SV.HideFPS then
+    if not MeterEnabled("FPS", not InfoPanel.SV.HideFPS) then
         uiFps.control:SetHidden(true)
     else
         uiFps.control:ClearAnchors()
@@ -280,7 +709,7 @@ function InfoPanel.RearrangePanel()
         anchorTop = uiFps.control
     end
     -- Time
-    if InfoPanel.SV.HideClock then
+    if not MeterEnabled("Clock", not InfoPanel.SV.HideClock) then
         uiClock.control:SetHidden(true)
     else
         uiClock.control:ClearAnchors()
@@ -290,7 +719,7 @@ function InfoPanel.RearrangePanel()
         anchorTop = uiClock.control
     end
     -- Soulgems
-    if InfoPanel.SV.HideGems then
+    if not MeterEnabled("SoulGems", not InfoPanel.SV.HideGems) then
         uiGems.control:SetHidden(true)
     else
         uiGems.control:ClearAnchors()
@@ -305,7 +734,7 @@ function InfoPanel.RearrangePanel()
     local anchorBot = nil
     local sizeBot = 0
     -- Feed timer
-    if InfoPanel.SV.HideMountFeed or uiFeedTimer.hideLocally then
+    if not MeterEnabled("MountFeed", not InfoPanel.SV.HideMountFeed) then
         uiFeedTimer.control:SetHidden(true)
         sizeBot = sizeBot - (uiFeedTimer.control:GetWidth() * 0.15)
     else
@@ -316,7 +745,7 @@ function InfoPanel.RearrangePanel()
         anchorBot = uiFeedTimer.control
     end
     -- Durability
-    if InfoPanel.SV.HideArmour then
+    if not MeterEnabled("Armour", not InfoPanel.SV.HideArmour) then
         uiArmour.control:SetHidden(true)
     else
         uiArmour.control:ClearAnchors()
@@ -326,7 +755,7 @@ function InfoPanel.RearrangePanel()
         anchorBot = uiArmour.control
     end
     -- Charges
-    if InfoPanel.SV.HideWeapons then
+    if not MeterEnabled("WeaponCharges", not InfoPanel.SV.HideWeapons) then
         uiWeapons.control:SetHidden(true)
     else
         uiWeapons.control:ClearAnchors()
@@ -336,7 +765,7 @@ function InfoPanel.RearrangePanel()
         anchorBot = uiWeapons.control
     end
     -- Bags
-    if InfoPanel.SV.HideBags then
+    if not MeterEnabled("Bags", not InfoPanel.SV.HideBags) then
         uiBags.control:SetHidden(true)
     else
         uiBags.control:ClearAnchors()
@@ -346,12 +775,13 @@ function InfoPanel.RearrangePanel()
         anchorBot = uiBags.control
     end
     -- Gold (moved to end for right positioning)
-    if InfoPanel.SV.HideGold then
+    if not MeterEnabled("Gold", not InfoPanel.SV.HideGold) then
         uiGold.control:SetHidden(true)
     else
         uiGold.control:ClearAnchors()
         uiGold.control:SetAnchor(LEFT, anchorBot or uiBotRow, (anchorBot == nil) and LEFT or RIGHT, 0, 0)
         uiGold.control:SetHidden(false)
+        InfoPanel.UpdateGoldDisplay()
         sizeBot = sizeBot + uiGold.control:GetWidth()
         anchorBot = uiGold.control
     end
@@ -456,6 +886,9 @@ function InfoPanel.Initialize(enabled)
     uiGold.label:SetText(ZO_CommaDelimitNumber(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)))
     uiGold.label:SetColor(colors.GOLD.r, colors.GOLD.g, colors.GOLD.b, 1)
 
+    -- Build meter registry now that controls exist
+    InfoPanel.BuildMeters()
+
     InfoPanel.RearrangePanel()
 
     -- add control to global list so it can be hidden
@@ -464,14 +897,15 @@ function InfoPanel.Initialize(enabled)
     -- Panel position - only set if user has saved a custom position
     InfoPanel.ApplyPanelPosition()
 
-    -- Set init values
-    InfoPanel.OnUpdate01()
-    InfoPanel.OnUpdate10()
-    InfoPanel.OnUpdate60()
-    InfoPanel.UpdateMountFeedTimer()
-
     -- Apply font settings
     InfoPanel.ApplyFont()
+
+    -- Set init values (run once immediately, independent of visibility)
+    local nowMs = GetFrameTimeMilliseconds()
+    ForEachMeter(function (meter)
+        meter:Update(nowMs)
+        meter:MarkUpdated(nowMs)
+    end)
 
     -- Set event handlers
     eventManager:RegisterForEvent(moduleName, EVENT_LOOT_RECEIVED, InfoPanel.OnBagUpdate)
@@ -480,9 +914,8 @@ function InfoPanel.Initialize(enabled)
     eventManager:RegisterForEvent(moduleName, EVENT_CARRIED_CURRENCY_UPDATE, InfoPanel.OnCurrencyUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_RIDING_SKILL_IMPROVEMENT, InfoPanel.UpdateMountFeedTimer)
 
-    eventManager:RegisterForUpdate(moduleName .. "01", ZO_ONE_SECOND_IN_MILLISECONDS, InfoPanel.OnUpdate01)
-    eventManager:RegisterForUpdate(moduleName .. "10", ZO_ONE_SECOND_IN_MILLISECONDS * 10, InfoPanel.OnUpdate10)
-    eventManager:RegisterForUpdate(moduleName .. "60", ZO_ONE_MINUTE_IN_MILLISECONDS, InfoPanel.OnUpdate60)
+    -- Single update driver; meters handle their own intervals
+    eventManager:RegisterForUpdate(updateDriverName, ZO_ONE_SECOND_IN_MILLISECONDS, InfoPanel.OnUpdateDriver)
 
     -- Combat state: always register so enabling HideInCombat in settings later works. Handler checks HideInCombat.
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_COMBAT_STATE, function (eventId, inCombat)
@@ -573,45 +1006,13 @@ function InfoPanel.OnBagUpdate(eventId, bagId, slotIndex, isNewItem, itemSoundCa
     eventManager:RegisterForUpdate(moduleName .. "PendingBagsUpdate", 250, InfoPanel.DoBagUpdate)
 end
 
--- Helper function to update bag display
-local function UpdateBagDisplay()
-    if InfoPanel.SV.HideBags then return end
-
-    local bagSize = GetBagSize(BAG_BACKPACK)
-    local bagUsed = GetNumBagUsedSlots(BAG_BACKPACK)
-
-    local filledSlotPercentage = (bagUsed / bagSize) * 100
-    local color = uiBags.color[#uiBags.color].color
-    if bagSize - bagUsed > 10 then
-        for i = 1, #uiBags.color - 1 do
-            if filledSlotPercentage < uiBags.color[i].fill then
-                color = uiBags.color[i].color
-                break
-            end
-        end
+function InfoPanel.UpdateGoldDisplay()
+    local meter = InfoPanel.GetMeter("Gold")
+    if meter then
+        local nowMs = GetFrameTimeMilliseconds()
+        meter:Update(nowMs)
+        meter:MarkUpdated(nowMs)
     end
-    uiBags.label:SetText(ZO_FormatFraction(bagUsed, bagSize))
-    uiBags.label:SetColor(color.r, color.g, color.b, 1)
-end
-
--- Helper function to update soulgem display
-local function UpdateSoulgemDisplay()
-    if InfoPanel.SV.HideGems then return end
-
-    local myLevel = GetUnitEffectiveLevel("player")
-    local _, icon, emptyCount = GetSoulGemInfo(SOUL_GEM_TYPE_EMPTY, myLevel, true)
-    local _, iconF, fullCount = GetSoulGemInfo(SOUL_GEM_TYPE_FILLED, myLevel, true)
-    emptyCount = zo_min(emptyCount, 99)
-    fullCount = zo_min(fullCount, 9999)
-    local fullText = (fullCount > 0) and ("|c00FF00" .. fullCount .. "|r") or "|cFF00000|r"
-    if iconF ~= nil and iconF ~= "" and iconF ~= "/esoui/art/icons/icon_missing.dds" then
-        icon = iconF
-    end
-    if icon == "/esoui/art/icons/icon_missing.dds" then
-        icon = "/esoui/art/icons/soulgem_001_empty.dds"
-    end
-    uiGems.icon:SetTexture(icon)
-    uiGems.label:SetText((fullCount > 9) and fullText or (fullText .. "/" .. emptyCount))
 end
 
 -- Performs calculation of empty space in bags
@@ -620,118 +1021,40 @@ function InfoPanel.DoBagUpdate()
     -- Clear pending event
     eventManager:UnregisterForUpdate(moduleName .. "PendingBagsUpdate")
 
-    -- Update bags and soulgems
-    UpdateBagDisplay()
-    UpdateSoulgemDisplay()
-end
-
-local function FormatClock(clockFormat)
-    local timestring = GetTimeString()
-    return LUIE.CreateTimestamp(timestring, clockFormat)
-end
-
--- Helper function to update and color the clock display
-local function UpdateClock()
-    if InfoPanel.SV.HideClock then return end
-    uiClock.label:SetText(FormatClock(InfoPanel.SV.ClockFormat))
-end
-
--- Helper function to update and color the FPS display
-local function UpdateFPS()
-    if InfoPanel.SV.HideFPS then return end
-    local fps = GetFramerate()
-    local color = colors.WHITE
-    if not InfoPanel.SV.DisableInfoColours then
-        color = uiFps.color[#uiFps.color].color
-        for i = 1, #uiFps.color - 1 do
-            if fps < uiFps.color[i].fps then
-                color = uiFps.color[i].color
-                break
-            end
-        end
+    local nowMs = GetFrameTimeMilliseconds()
+    local bagsMeter = InfoPanel.GetMeter("Bags")
+    if bagsMeter then
+        bagsMeter:Update(nowMs)
+        bagsMeter:MarkUpdated(nowMs)
     end
-    uiFps.label:SetText(string_format("%d fps", fps))
-    uiFps.label:SetColor(color.r, color.g, color.b, 1)
-end
-
--- Helper function to update and color the latency display
-local function UpdateLatency()
-    if InfoPanel.SV.HideLatency then return end
-    local lat = GetLatency()
-    local color = colors.WHITE
-    if not InfoPanel.SV.DisableInfoColours then
-        color = uiLatency.color[#uiLatency.color].color
-        for i = 1, #uiLatency.color - 1 do
-            if lat < uiLatency.color[i].ping then
-                color = uiLatency.color[i].color
-                break
-            end
-        end
-    end
-    uiLatency.label:SetText(string_format("%d ms", lat))
-    uiLatency.label:SetColor(color.r, color.g, color.b, 1)
-end
-
--- Helper function to update and color armor durability display
-local function UpdateArmourDurability()
-    if InfoPanel.SV.HideArmour then return end
-
-    local slotCount = 0
-    local duraSum = 0
-    local totalSlots = GetBagSize(BAG_WORN)
-    for slotNum = 0, totalSlots - 1 do
-        if DoesItemHaveDurability(BAG_WORN, slotNum) == true then
-            duraSum = duraSum + GetItemCondition(BAG_WORN, slotNum)
-            slotCount = slotCount + 1
-        end
-    end
-    local duraPercentage = (slotCount == 0) and 0 or duraSum / slotCount
-    local color = uiArmour.color[#uiArmour.color].color
-    local iconcolor = uiArmour.color[#uiArmour.color].iconcolor
-    for i = 1, #uiArmour.color - 1 do
-        if duraPercentage < uiArmour.color[i].dura then
-            color = uiArmour.color[i].color
-            iconcolor = uiArmour.color[i].iconcolor
-            break
-        end
-    end
-    uiArmour.label:SetText(string_format("%d%%", duraPercentage))
-    uiArmour.label:SetColor(color.r, color.g, color.b, 1)
-    uiArmour.icon:SetColor(iconcolor.r, iconcolor.g, iconcolor.b, 1)
-end
-
--- Helper function to update and color weapon charges display
-local function UpdateWeaponCharges()
-    if InfoPanel.SV.HideWeapons then return end
-
-    for _, icon in pairs({ uiWeapons.main, uiWeapons.swap }) do
-        local charges, maxCharges = GetChargeInfoForItem(BAG_WORN, icon.slotIndex)
-        local color = colors.GRAY
-        if maxCharges > 0 then
-            color = uiWeapons.color[#uiWeapons.color].color
-            local chargesPercentage = 100 * charges / maxCharges
-            for i = 1, #uiWeapons.color - 1 do
-                if chargesPercentage < uiWeapons.color[i].charges then
-                    color = uiWeapons.color[i].color
-                    break
-                end
-            end
-        end
-        icon:SetColor(color.r, color.g, color.b, 1)
+    local gemsMeter = InfoPanel.GetMeter("SoulGems")
+    if gemsMeter then
+        gemsMeter:Update(nowMs)
+        gemsMeter:MarkUpdated(nowMs)
     end
 end
 
 function InfoPanel.OnUpdate01()
-    -- Update time
-    UpdateClock()
-
-    -- Update fps
-    UpdateFPS()
+    local nowMs = GetFrameTimeMilliseconds()
+    local clockMeter = InfoPanel.GetMeter("Clock")
+    if clockMeter then
+        clockMeter:Update(nowMs)
+        clockMeter:MarkUpdated(nowMs)
+    end
+    local fpsMeter = InfoPanel.GetMeter("FPS")
+    if fpsMeter then
+        fpsMeter:Update(nowMs)
+        fpsMeter:MarkUpdated(nowMs)
+    end
 end
 
 function InfoPanel.OnUpdate10()
-    -- Update latency
-    UpdateLatency()
+    local nowMs = GetFrameTimeMilliseconds()
+    local latencyMeter = InfoPanel.GetMeter("Latency")
+    if latencyMeter then
+        latencyMeter:Update(nowMs)
+        latencyMeter:MarkUpdated(nowMs)
+    end
 end
 
 -- Update mount feed timer information
@@ -741,73 +1064,26 @@ end
 --- @param current integer|nil Optional - current skill value
 --- @param source RidingTrainSource|nil Optional - source of the training
 function InfoPanel.UpdateMountFeedTimer(eventId, ridingSkillType, previous, current, source)
-    if InfoPanel.SV.HideMountFeed or not InfoPanel.Enabled then
-        return
+    local meter = InfoPanel.GetMeter("MountFeed")
+    if meter then
+        meter:UpdateFromEvent(eventId, ridingSkillType, previous, current, source)
+        meter:MarkUpdated(GetFrameTimeMilliseconds())
     end
-
-    -- If this was triggered by the EVENT_RIDING_SKILL_IMPROVEMENT event
-    if eventId == EVENT_RIDING_SKILL_IMPROVEMENT and ridingSkillType ~= nil and current ~= nil then
-        -- Get current stats to check if fully trained
-        local inventoryBonus, maxInventoryBonus, staminaBonus, maxStaminaBonus, speedBonus, maxSpeedBonus = GetRidingStats()
-        local isFullyTrained = (inventoryBonus == maxInventoryBonus and staminaBonus == maxStaminaBonus and speedBonus == maxSpeedBonus)
-
-        -- Skill was just improved - show appropriate message
-        if isFullyTrained then
-            -- All mount skills are now maxed
-            uiFeedTimer.label:SetText(GetString(LUIE_STRING_PNL_MAXED))
-            uiFeedTimer.hideLocally = true
-            InfoPanel.RearrangePanel()
-            return
-        else
-            -- Still has skills to train, show training cooldown
-            local mountFeedTimer = GetTimeUntilCanBeTrained()
-            if mountFeedTimer and mountFeedTimer > 0 then
-                local hours = zo_floor(mountFeedTimer / ZO_ONE_HOUR_IN_MILLISECONDS)
-                local minutes = zo_floor((mountFeedTimer - (hours * ZO_ONE_HOUR_IN_MILLISECONDS)) / ZO_ONE_MINUTE_IN_MILLISECONDS)
-                uiFeedTimer.label:SetText(string_format("%dh %dm", hours, minutes))
-            else
-                uiFeedTimer.label:SetText(GetString(LUIE_STRING_PNL_TRAINNOW))
-            end
-            return
-        end
-    end
-
-    -- Standard update without event - check training state
-    local mountFeedTimer, mountFeedTotalTime = GetTimeUntilCanBeTrained()
-    local mountFeedMessage = GetString(LUIE_STRING_PNL_MAXED)
-
-    if mountFeedTimer ~= nil then
-        if mountFeedTimer == 0 then
-            local inventoryBonus, maxInventoryBonus, staminaBonus, maxStaminaBonus, speedBonus, maxSpeedBonus = GetRidingStats()
-            if inventoryBonus ~= maxInventoryBonus or staminaBonus ~= maxStaminaBonus or speedBonus ~= maxSpeedBonus then
-                mountFeedMessage = GetString(LUIE_STRING_PNL_TRAINNOW)
-            else
-                uiFeedTimer.hideLocally = true
-                InfoPanel.RearrangePanel()
-                return
-            end
-        elseif mountFeedTimer > 0 then
-            local hours = zo_floor(mountFeedTimer / ZO_ONE_HOUR_IN_MILLISECONDS)
-            local minutes = zo_floor((mountFeedTimer - (hours * ZO_ONE_HOUR_IN_MILLISECONDS)) / ZO_ONE_MINUTE_IN_MILLISECONDS)
-            mountFeedMessage = string_format("%dh %dm", hours, minutes)
-        end
-    end
-
-    uiFeedTimer.label:SetText(mountFeedMessage)
 end
 
 function InfoPanel.OnUpdate60()
-    -- Update item durability
-    UpdateArmourDurability()
-
-    -- Get charges information
-    UpdateWeaponCharges()
-
-    -- Update bag slot count
+    local nowMs = GetFrameTimeMilliseconds()
+    local armourMeter = InfoPanel.GetMeter("Armour")
+    if armourMeter then
+        armourMeter:Update(nowMs)
+        armourMeter:MarkUpdated(nowMs)
+    end
+    local weaponsMeter = InfoPanel.GetMeter("WeaponCharges")
+    if weaponsMeter then
+        weaponsMeter:Update(nowMs)
+        weaponsMeter:MarkUpdated(nowMs)
+    end
     InfoPanel.DoBagUpdate()
-
-    -- Update mount feed timer periodically in case it needs to be hidden
-    -- This ensures the display updates even if no training events occur
     InfoPanel.UpdateMountFeedTimer()
 end
 
@@ -818,25 +1094,12 @@ end
 --- @param previousUpgrade integer
 --- @param currentUpgrade integer
 function InfoPanel.OnBagCapacityChanged(eventId, previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
-    -- Use event parameters to update bag display
-    if InfoPanel.SV.HideBags then return end
-
-    -- Use the currentCapacity parameter directly instead of calling GetBagSize
-    local bagSize = currentCapacity
-    local bagUsed = GetNumBagUsedSlots(BAG_BACKPACK)
-
-    local filledSlotPercentage = (bagUsed / bagSize) * 100
-    local color = uiBags.color[#uiBags.color].color
-    if bagSize - bagUsed > 10 then
-        for i = 1, #uiBags.color - 1 do
-            if filledSlotPercentage < uiBags.color[i].fill then
-                color = uiBags.color[i].color
-                break
-            end
-        end
+    local nowMs = GetFrameTimeMilliseconds()
+    local meter = InfoPanel.GetMeter("Bags")
+    if meter and meter.UpdateWithCapacity then
+        meter:UpdateWithCapacity(currentCapacity)
+        meter:MarkUpdated(nowMs)
     end
-    uiBags.label:SetText(ZO_FormatFraction(bagUsed, bagSize))
-    uiBags.label:SetColor(color.r, color.g, color.b, 1)
 end
 
 -- Update player's gold display
@@ -857,6 +1120,5 @@ function InfoPanel.OnCurrencyUpdate(eventId, currency, newValue, oldValue, reaso
     end
 
     -- Display the current amount
-    uiGold.label:SetText(ZO_CommaDelimitNumber(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)))
-    uiGold.label:SetColor(colors.GOLD.r, colors.GOLD.g, colors.GOLD.b, 1)
+    InfoPanel.UpdateGoldDisplay()
 end
