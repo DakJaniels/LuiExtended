@@ -3,15 +3,15 @@
       License: The MIT License (MIT)
 -->
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
+  xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
   <Controls>
     <TopLevelControl name="LUIE_CCTracker"
-                     mouseEnabled="true"
-                     movable="true"
-                     clampedToScreen="true"
-                     hidden="true">
+      mouseEnabled="true"
+      movable="true"
+      clampedToScreen="true"
+      hidden="true">
       <Dimensions x="64"
-                  y="64" />
+        y="64" />
       <Anchor point="CENTER" />
       <OnMoveStop>
         LUIE.CombatInfo.CrowdControlTracker.SavePosition()
@@ -19,244 +19,244 @@
       <Controls>
         <Control name="$(parent)_IconFrame">
           <Dimensions x="64"
-                      y="64" />
+            y="64" />
           <Anchor point="CENTER" />
           <Controls>
             <Texture name="$(parent)_Icon"
-                     layer="0"
-                     level="2">
+              layer="0"
+              level="2">
               <Dimensions x="52"
-                          y="52" />
+                y="52" />
               <Anchor point="CENTER"
-                      relativeTo="$(parent)"
-                      relativePoint="CENTER"
-                      offsetY="0" />
+                relativeTo="$(parent)"
+                relativePoint="CENTER"
+                offsetY="0" />
             </Texture>
             <Texture name="$(parent)_IconBG"
-                     layer="0"
-                     level="0">
+              layer="0"
+              level="0">
               <Dimensions x="58"
-                          y="58" />
+                y="58" />
               <Anchor point="CENTER"
-                      relativeTo="$(parent)"
-                      relativePoint="CENTER"
-                      offsetY="-1" />
+                relativeTo="$(parent)"
+                relativePoint="CENTER"
+                offsetY="-1" />
             </Texture>
             <Texture name="$(parent)_UnderIcon"
-                     layer="0"
-                     level="1"
-                     color="000000">
+              layer="0"
+              level="1"
+              color="000000">
               <Dimensions x="52"
-                          y="52" />
+                y="52" />
               <Anchor point="CENTER"
-                      relativeTo="$(parent)"
-                      relativePoint="CENTER" />
+                relativeTo="$(parent)"
+                relativePoint="CENTER" />
             </Texture>
             <Texture name="$(parent)_IconBorder"
-                     layer="0"
-                     level="4">
+              layer="0"
+              level="4">
               <Dimensions x="76"
-                          y="76" />
+                y="76" />
               <Anchor point="CENTER"
-                      relativeTo="$(parent)"
-                      relativePoint="CENTER"
-                      offsetY="-1" />
+                relativeTo="$(parent)"
+                relativePoint="CENTER"
+                offsetY="-1" />
             </Texture>
             <Texture name="$(parent)_IconBorderHighlight"
-                     blendMode="ADD"
-                     layer="0"
-                     level="4">
+              blendMode="ADD"
+              layer="0"
+              level="4">
               <Dimensions x="76"
-                          y="76" />
+                y="76" />
               <Anchor point="CENTER"
-                      relativeTo="$(parent)"
-                      relativePoint="CENTER"
-                      offsetY="-1" />
+                relativeTo="$(parent)"
+                relativePoint="CENTER"
+                offsetY="-1" />
             </Texture>
             <Cooldown name="$(parent)_Cooldown"
-                      inherits="ZO_DefaultCooldown"
-                      layer="0"
-                      level="3"
-                      hidden="true">
+              inherits="ZO_DefaultCooldown"
+              layer="0"
+              level="3"
+              hidden="true">
               <Dimensions x="54"
-                          y="54" />
+                y="54" />
               <Anchor point="CENTER"
-                      relativeTo="$(parent)"
-                      relativePoint="CENTER" />
+                relativeTo="$(parent)"
+                relativePoint="CENTER" />
             </Cooldown>
             <Cooldown name="$(parent)_GlobalCooldown"
-                      inherits="ZO_DefaultCooldown"
-                      layer="0"
-                      level="4"
-                      hidden="true"
-                      fillColor="FF0000">
+              inherits="ZO_DefaultCooldown"
+              layer="0"
+              level="4"
+              hidden="true"
+              fillColor="FF0000">
               <Dimensions x="58"
-                          y="58" />
+                y="58" />
               <Anchor point="CENTER"
-                      relativeTo="$(parent)"
-                      relativePoint="CENTER" />
+                relativeTo="$(parent)"
+                relativePoint="CENTER" />
             </Cooldown>
           </Controls>
         </Control>
         <Control name="$(parent)_BreakFreeFrame">
           <Dimensions x="64"
-                      y="64" />
+            y="64" />
           <Anchor point="CENTER" />
           <Controls>
             <Control name="$(parent)_Left">
               <Dimensions x="32"
-                          y="64" />
+                y="64" />
               <Anchor point="LEFT" />
               <Controls>
                 <Texture name="$(parent)_Icon"
-                         layer="0"
-                         level="3">
+                  layer="0"
+                  level="3">
                   <Dimensions x="26"
-                              y="52" />
+                    y="52" />
                   <Anchor point="RIGHT"
-                          offsetX="0"
-                          offsetY="0" />
+                    offsetX="0"
+                    offsetY="0" />
                 </Texture>
                 <Texture name="$(parent)_IconBG"
-                         layer="0"
-                         level="0"
-                         color="000000">
+                  layer="0"
+                  level="0"
+                  color="000000">
                   <Dimensions x="29"
-                              y="58" />
+                    y="58" />
                   <Anchor point="RIGHT"
-                          offsetX="0"
-                          offsetY="-1" />
+                    offsetX="0"
+                    offsetY="-1" />
                 </Texture>
                 <Texture name="$(parent)_UnderIcon"
-                         layer="0"
-                         level="1"
-                         color="000000">
+                  layer="0"
+                  level="1"
+                  color="000000">
                   <Dimensions x="26"
-                              y="52" />
+                    y="52" />
                   <Anchor point="RIGHT"
-                          offsetX="0"
-                          offsetY="0" />
+                    offsetX="0"
+                    offsetY="0" />
                 </Texture>
                 <Texture name="$(parent)_IconBorder"
-                         layer="0"
-                         level="4">
+                  layer="0"
+                  level="4">
                   <Dimensions x="38"
-                              y="76" />
+                    y="76" />
                   <Anchor point="RIGHT"
-                          offsetY="-1" />
+                    offsetY="-1" />
                 </Texture>
                 <Texture name="$(parent)_IconBorderHighlight"
-                         blendMode="ADD"
-                         layer="0"
-                         level="4">
+                  blendMode="ADD"
+                  layer="0"
+                  level="4">
                   <Dimensions x="38"
-                              y="76" />
+                    y="76" />
                   <Anchor point="RIGHT"
-                          offsetY="-1" />
+                    offsetY="-1" />
                 </Texture>
               </Controls>
             </Control>
             <Control name="$(parent)_Right">
               <Dimensions x="32"
-                          y="64" />
+                y="64" />
               <Anchor point="RIGHT" />
               <Controls>
                 <Texture name="$(parent)_Icon"
-                         layer="0"
-                         level="3">
+                  layer="0"
+                  level="3">
                   <Dimensions x="26"
-                              y="52" />
+                    y="52" />
                   <Anchor point="LEFT"
-                          offsetX="0"
-                          offsetY="0" />
+                    offsetX="0"
+                    offsetY="0" />
                 </Texture>
                 <Texture name="$(parent)_IconBG"
-                         layer="0"
-                         level="0"
-                         color="000000">
+                  layer="0"
+                  level="0"
+                  color="000000">
                   <Dimensions x="29"
-                              y="58" />
+                    y="58" />
                   <Anchor point="LEFT"
-                          offsetX="0"
-                          offsetY="-1" />
+                    offsetX="0"
+                    offsetY="-1" />
                 </Texture>
                 <Texture name="$(parent)_UnderIcon"
-                         layer="0"
-                         level="1"
-                         color="000000">
+                  layer="0"
+                  level="1"
+                  color="000000">
                   <Dimensions x="26"
-                              y="52" />
+                    y="52" />
                   <Anchor point="LEFT"
-                          offsetX="0"
-                          offsetY="0" />
+                    offsetX="0"
+                    offsetY="0" />
                 </Texture>
                 <Texture name="$(parent)_IconBorder"
-                         layer="0"
-                         level="4">
+                  layer="0"
+                  level="4">
                   <Dimensions x="38"
-                              y="76" />
+                    y="76" />
                   <Anchor point="LEFT"
-                          offsetY="-1" />
+                    offsetY="-1" />
                 </Texture>
                 <Texture name="$(parent)_IconBorderHighlight"
-                         blendMode="ADD"
-                         layer="0"
-                         level="4">
+                  blendMode="ADD"
+                  layer="0"
+                  level="4">
                   <Dimensions x="38"
-                              y="76" />
+                    y="76" />
                   <Anchor point="LEFT"
-                          offsetY="-1" />
+                    offsetY="-1" />
                 </Texture>
               </Controls>
             </Control>
             <Control name="$(parent)_Middle">
               <Dimensions x="2"
-                          y="64" />
+                y="64" />
               <Anchor point="CENTER" />
             </Control>
           </Controls>
         </Control>
         <Control name="$(parent)_TextFrame">
           <Anchor point="BOTTOM"
-                  relativeTo="$(parent)"
-                  relativePoint="TOP"
-                  offsetY="0" />
+            relativeTo="$(parent)"
+            relativePoint="TOP"
+            offsetY="0" />
           <Dimensions x="200"
-                      y="80" />
+            y="80" />
           <Controls>
             <Label name="$(parent)_Label"
-                   horizontalAlignment="CENTER"
-                   verticalAlignment="BOTTOM"
-                   inheritAlpha="true"
-                   color="FFFFFF"
-                   wrapMode="ELLIPSIS">
+              horizontalAlignment="CENTER"
+              verticalAlignment="BOTTOM"
+              inheritAlpha="true"
+              color="FFFFFF"
+              wrapMode="ELLIPSIS">
               <Dimensions x="200"
-                          y="70" />
+                y="70" />
               <Anchor point="CENTER"
-                      offsetY="0" />
+                offsetY="0" />
             </Label>
           </Controls>
         </Control>
         <Control name="$(parent)_Timer">
           <Anchor point="CENTER"
-                  relativeTo="$(parent)"
-                  relativePoint="CENTER"
-                  offsetY="0" />
+            relativeTo="$(parent)"
+            relativePoint="CENTER"
+            offsetY="0" />
           <Dimensions x="64"
-                      y="64" />
+            y="64" />
           <OnUpdate>
             LUIE.CombatInfo.CrowdControlTracker.OnUpdate(self)
           </OnUpdate>
           <Controls>
             <Label name="$(parent)_Label"
-                   horizontalAlignment="CENTER"
-                   verticalAlignment="CENTER"
-                   inheritAlpha="true"
-                   font="$(GAMEPAD_BOLD_FONT)|28|thick-outline">
+              horizontalAlignment="CENTER"
+              verticalAlignment="CENTER"
+              inheritAlpha="true"
+              font="$(GAMEPAD_BOLD_FONT)|28|thick-outline">
               <Dimensions x="64"
-                          y="64" />
+                y="64" />
               <Anchor point="CENTER"
-                      offsetY="0" />
+                offsetY="0" />
             </Label>
           </Controls>
         </Control>

@@ -198,10 +198,10 @@ function Block.DebounceInventory()
     end
     debounceInventoryPending = true
     zo_callLater(function ()
-                       Block.RefreshBlockCost()
-                       Block.RefreshBloodlordEmbraceVisibility()
-                       debounceInventoryPending = false
-                   end, DEBOUNCE_DELAY_MS)
+                     Block.RefreshBlockCost()
+                     Block.RefreshBloodlordEmbraceVisibility()
+                     debounceInventoryPending = false
+                 end, DEBOUNCE_DELAY_MS)
 end
 
 function Block.DebounceActionSlots()
@@ -210,9 +210,9 @@ function Block.DebounceActionSlots()
     end
     debounceActionSlotsPending = true
     zo_callLater(function ()
-                       Block.RefreshBlockCost()
-                       debounceActionSlotsPending = false
-                   end, DEBOUNCE_DELAY_MS)
+                     Block.RefreshBlockCost()
+                     debounceActionSlotsPending = false
+                 end, DEBOUNCE_DELAY_MS)
 end
 
 -- ---------------------------------------------------------------------------

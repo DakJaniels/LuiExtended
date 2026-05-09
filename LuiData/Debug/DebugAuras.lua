@@ -1211,13 +1211,13 @@ local debugAuras =
     -------------------------------------
 
     -- Experience Bonuses
-    [64210] = true, -- Increased Experience (Psijic Ambrosia)
-    [89683] = true, -- Increased Experience (Aetherial Ambrosia)
-    [88445] = true, -- Increasde Experience (Mythic Aetherial Ambrosia)
-    [66776] = true, -- Increased Experience (Crown Experience Scroll)
-    [85501] = true, -- Increased Experience (Crown Crate Experience Scroll)
-    [85502] = true, -- Increased Experience (Major Crown Crate Experience Scroll)
-    [85503] = true, -- Increased Experience (Grand Crown Crate Experience Scroll)
+    [64210] = true,  -- Increased Experience (Psijic Ambrosia)
+    [89683] = true,  -- Increased Experience (Aetherial Ambrosia)
+    [88445] = true,  -- Increasde Experience (Mythic Aetherial Ambrosia)
+    [66776] = true,  -- Increased Experience (Crown Experience Scroll)
+    [85501] = true,  -- Increased Experience (Crown Crate Experience Scroll)
+    [85502] = true,  -- Increased Experience (Major Crown Crate Experience Scroll)
+    [85503] = true,  -- Increased Experience (Grand Crown Crate Experience Scroll)
     [262221] = true, -- Increased Favor (Tonic of Portent Favor)
 
     -- Alliance War Bonuses

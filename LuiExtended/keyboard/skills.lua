@@ -330,7 +330,7 @@ LUIE.HookKeyboardStats = function ()
                     -- ArtificialEffectId (live): 0 ESO Plus, 1 Battle Spirit, 2 LFG, 3 Battle Spirit Imperial City,
                     -- 4 Battleground Deserter, 5 Underdog Damage, 6 Underdog Healing, 7 Solo Queue XP, 8 Solo Queue AP.
                     if control.effectId == 0 then
-                        labelAbilityId = 63601 -- ESO Plus (legacy debug label)
+                        labelAbilityId = 63601  -- ESO Plus (legacy debug label)
                     elseif control.effectId == 1 or control.effectId == 3 then
                         labelAbilityId = 999014 -- SpellCastBuffs fake id for Battle Spirit (+ IC)
                     elseif control.effectId == 2 then
