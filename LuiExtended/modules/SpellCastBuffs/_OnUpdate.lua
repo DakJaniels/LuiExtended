@@ -51,7 +51,7 @@ end
 --- @param buffType integer
 --- @param unbreakable integer
 --- @param id integer
-local SetSingleIconBuffType = function (buff, buffType, unbreakable, id)
+local function SetSingleIconBuffType(buff, buffType, unbreakable, id)
     -- Determine context type and get ability name
     local contextType = (buffType == BUFF_EFFECT_TYPE_BUFF) and "buff" or "debuff"
     local abilityName = GetAbilityName(id)
@@ -239,7 +239,7 @@ local function GetOrCreateBuffIconPool(container)
     return buffIconPools[container]
 end
 
-local CreateSingleIcon = function (container, effectType)
+local function CreateSingleIcon(container, effectType)
     local pool = GetOrCreateBuffIconPool(container)
     local buff = pool:AcquireObject()
 
@@ -261,7 +261,7 @@ end
 --- @param c number
 --- @param d number
 --- @return number
-local EaseOutQuad = function (t, b, c, d)
+local function EaseOutQuad(t, b, c, d)
     -- protect against 1 / 0
     if t == 0 then
         t = 0.0001
@@ -277,7 +277,7 @@ end
 --- @param currentTimeMs number
 --- @param sortedList table
 --- @param container string
-local updateBar = function (currentTimeMs, sortedList, container)
+local function updateBar(currentTimeMs, sortedList, container)
     -- updateIcons always assigns icons[i] = sortedList[i] (1→N order).
     -- Flex direction handles visual ordering, so bar values must use the same 1→N mapping.
     -- Old sort-direction–based reverse iteration no longer applies.
@@ -309,7 +309,7 @@ end
 --- @param currentTimeMs number
 --- @param sortedList table
 --- @param container string
-local updateIcons = function (currentTimeMs, sortedList, container)
+local function updateIcons(currentTimeMs, sortedList, container)
     -- Special workaround for container with player long buffs. We do not need to update it every 100ms, but rather 3 times less often
     if SpellCastBuffs.BuffContainers[container].skipUpdate then
         SpellCastBuffs.BuffContainers[container].skipUpdate = SpellCastBuffs.BuffContainers[container].skipUpdate + 1
@@ -460,7 +460,7 @@ end
 --- toggle: boolean,
 --- }
 --- @return boolean?
-local buffSort = function (x, y)
+local function buffSort(x, y)
     local xDuration = (x.ends == nil or x.dur == 0 or x.groundLabel or x.toggle) and 0 or x.dur
     local yDuration = (y.ends == nil or y.dur == 0 or y.groundLabel or y.toggle) and 0 or y.dur
     -- Sort toggle effects

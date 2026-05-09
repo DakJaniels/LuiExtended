@@ -13,7 +13,7 @@ local SpellCastBuffs = LUIE.SpellCastBuffs
 -- Used to clear existing .effectsList.unitTag and to request game API to fill it again
 ---
 --- @param unitTag string
-SpellCastBuffs.ReloadEffects = function (unitTag)
+function SpellCastBuffs.ReloadEffects(unitTag)
     -- Bail if this isn't reticleover or player
     if unitTag ~= "player" and unitTag ~= "reticleover" then
         return

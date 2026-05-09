@@ -9,7 +9,7 @@ local LUIE = LUIE
 local Data = LuiData.Data
 local Effects = Data.Effects
 
-LUIE.HookGamePadMap = function ()
+function LUIE.HookGamePadMap()
     -- Hook Gamepad Campaign Bonuses Tooltip
     --- @diagnostic disable-next-line: duplicate-set-field
     function CAMPAIGN_BONUSES_GAMEPAD:UpdateToolTip()
