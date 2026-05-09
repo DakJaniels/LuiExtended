@@ -2066,22 +2066,22 @@ function SpellCastBuffs.OnPlayerActivated(eventCode)
     -- Resolve Mounted icon
     if not SpellCastBuffs.SV.IgnoreMountPlayer and IsMounted() then
         zo_callLater(function ()
-                           SpellCastBuffs.MountStatus(true)
-                       end, 50)
+                         SpellCastBuffs.MountStatus(true)
+                     end, 50)
     end
 
     -- Resolve Disguise Icon
     if not SpellCastBuffs.SV.IgnoreDisguise then
         zo_callLater(function ()
-                           SpellCastBuffs.DisguiseItem(BAG_WORN, 10)
-                       end, 50)
+                         SpellCastBuffs.DisguiseItem(BAG_WORN, 10)
+                     end, 50)
     end
 
     -- Resolve Assistant Icon
     if not SpellCastBuffs.SV.IgnorePet or not SpellCastBuffs.SV.IgnoreAssistant then
         zo_callLater(function ()
-                           SpellCastBuffs.CollectibleBuff()
-                       end, 50)
+                         SpellCastBuffs.CollectibleBuff()
+                     end, 50)
     end
 
     -- Resolve Werewolf

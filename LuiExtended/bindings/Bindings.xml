@@ -3,7 +3,7 @@
       License: The MIT License (MIT)
 -->
 <Bindings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esobindings.xsd">
+    xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esobindings.xsd">
     <Layer name="SI_KEYBINDINGS_LAYER_GENERAL">
         <Category name="|cE12000L|cFFFFB0ui E|rxtended|r">
             <Action name="LUIE_COMMAND_RELOADUI">

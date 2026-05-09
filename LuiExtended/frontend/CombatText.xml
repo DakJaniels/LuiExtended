@@ -3,180 +3,180 @@
       License: The MIT License (MIT)
 -->
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
+  xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
   <Controls>
     <TopLevelControl name="LUIE_CombatText"
-                     mouseEnabled="false"
-                     clampedToScreen="true"
-                     movable="false"
-                     layer="0"
-                     level="0"
-                     tier="0">
+      mouseEnabled="false"
+      clampedToScreen="true"
+      movable="false"
+      layer="0"
+      level="0"
+      tier="0">
       <Anchor point="TOPLEFT"
-              relativeTo="GuiRoot"
-              relativePoint="TOPLEFT"
-              offsetX="0"
-              offsetY="0" />
+        relativeTo="GuiRoot"
+        relativePoint="TOPLEFT"
+        offsetX="0"
+        offsetY="0" />
       <Anchor point="BOTTOMRIGHT"
-              relativeTo="GuiRoot"
-              relativePoint="BOTTOMRIGHT"
-              offsetX="0"
-              offsetY="0" />
+        relativeTo="GuiRoot"
+        relativePoint="BOTTOMRIGHT"
+        offsetX="0"
+        offsetY="0" />
       <Controls>
         <Control name="$(parent)_Outgoing"
-                 clampedToScreen="true">
+          clampedToScreen="true">
           <Anchor point="CENTER"
-                  relativeTo="$(parent)"
-                  relativePoint="CENTER"
-                  offsetX="450"
-                  offsetY="-220" />
+            relativeTo="$(parent)"
+            relativePoint="CENTER"
+            offsetX="450"
+            offsetY="-220" />
           <Dimensions x="400"
-                      y="100" />
+            y="100" />
           <DimensionConstraints minX="200"
-                                minY="100"
-                                maxX="800"
-                                maxY="600" />
+            minY="100"
+            maxX="800"
+            maxY="600" />
           <OnMouseUp>
             LUIE.CombatText.SavePosition(self)
           </OnMouseUp>
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
-                      inherits="ZO_DefaultBackdrop"
-                      alpha="0.3"
-                      hidden="true" />
+              inherits="ZO_DefaultBackdrop"
+              alpha="0.3"
+              hidden="true" />
             <Label name="$(parent)_Label"
-                   font="$(MEDIUM_FONT)|26|soft-shadow-thick"
-                   color="FFFFFF"
-                   inheritAlpha="true"
-                   verticalAlignment="CENTER"
-                   horizontalAlignment="CENTER"
-                   text=""
-                   hidden="true"
-                   wrapMode="ELLIPSIS">
+              font="$(MEDIUM_FONT)|26|soft-shadow-thick"
+              color="FFFFFF"
+              inheritAlpha="true"
+              verticalAlignment="CENTER"
+              horizontalAlignment="CENTER"
+              text=""
+              hidden="true"
+              wrapMode="ELLIPSIS">
               <AnchorFill />
             </Label>
           </Controls>
         </Control>
         <Control name="$(parent)_Incoming"
-                 clampedToScreen="true">
+          clampedToScreen="true">
           <Anchor point="CENTER"
-                  relativeTo="$(parent)"
-                  relativePoint="CENTER"
-                  offsetX="-450"
-                  offsetY="-220" />
+            relativeTo="$(parent)"
+            relativePoint="CENTER"
+            offsetX="-450"
+            offsetY="-220" />
           <Dimensions x="400"
-                      y="100" />
+            y="100" />
           <DimensionConstraints minX="200"
-                                minY="100"
-                                maxX="800"
-                                maxY="600" />
+            minY="100"
+            maxX="800"
+            maxY="600" />
           <OnMouseUp>
             LUIE.CombatText.SavePosition(self)
           </OnMouseUp>
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
-                      inherits="ZO_DefaultBackdrop"
-                      alpha="0.3"
-                      hidden="true" />
+              inherits="ZO_DefaultBackdrop"
+              alpha="0.3"
+              hidden="true" />
             <Label name="$(parent)_Label"
-                   font="$(MEDIUM_FONT)|26|soft-shadow-thick"
-                   color="FFFFFF"
-                   inheritAlpha="true"
-                   verticalAlignment="CENTER"
-                   horizontalAlignment="CENTER"
-                   text=""
-                   hidden="true"
-                   wrapMode="ELLIPSIS">
+              font="$(MEDIUM_FONT)|26|soft-shadow-thick"
+              color="FFFFFF"
+              inheritAlpha="true"
+              verticalAlignment="CENTER"
+              horizontalAlignment="CENTER"
+              text=""
+              hidden="true"
+              wrapMode="ELLIPSIS">
               <AnchorFill />
             </Label>
           </Controls>
         </Control>
         <Control name="$(parent)_Alert"
-                 clampedToScreen="true">
+          clampedToScreen="true">
           <Anchor point="CENTER"
-                  relativeTo="$(parent)"
-                  relativePoint="CENTER"
-                  offsetX="0"
-                  offsetY="250" />
+            relativeTo="$(parent)"
+            relativePoint="CENTER"
+            offsetX="0"
+            offsetY="250" />
           <Dimensions x="400"
-                      y="100" />
+            y="100" />
           <OnMouseUp>
             LUIE.CombatText.SavePosition(self)
           </OnMouseUp>
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
-                      inherits="ZO_DefaultBackdrop"
-                      alpha="0.3"
-                      hidden="true" />
+              inherits="ZO_DefaultBackdrop"
+              alpha="0.3"
+              hidden="true" />
             <Label name="$(parent)_Label"
-                   font="$(MEDIUM_FONT)|26|soft-shadow-thick"
-                   color="FFFFFF"
-                   inheritAlpha="true"
-                   verticalAlignment="CENTER"
-                   horizontalAlignment="CENTER"
-                   text=""
-                   hidden="true"
-                   wrapMode="ELLIPSIS">
+              font="$(MEDIUM_FONT)|26|soft-shadow-thick"
+              color="FFFFFF"
+              inheritAlpha="true"
+              verticalAlignment="CENTER"
+              horizontalAlignment="CENTER"
+              text=""
+              hidden="true"
+              wrapMode="ELLIPSIS">
               <AnchorFill />
             </Label>
           </Controls>
         </Control>
         <Control name="$(parent)_Point"
-                 clampedToScreen="true">
+          clampedToScreen="true">
           <Anchor point="CENTER"
-                  relativeTo="$(parent)"
-                  relativePoint="CENTER"
-                  offsetX="0"
-                  offsetY="-300" />
+            relativeTo="$(parent)"
+            relativePoint="CENTER"
+            offsetX="0"
+            offsetY="-300" />
           <Dimensions x="400"
-                      y="100" />
+            y="100" />
           <OnMouseUp>
             LUIE.CombatText.SavePosition(self)
           </OnMouseUp>
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
-                      inherits="ZO_DefaultBackdrop"
-                      alpha="0.3"
-                      hidden="true" />
+              inherits="ZO_DefaultBackdrop"
+              alpha="0.3"
+              hidden="true" />
             <Label name="$(parent)_Label"
-                   font="$(MEDIUM_FONT)|26|soft-shadow-thick"
-                   color="FFFFFF"
-                   inheritAlpha="true"
-                   verticalAlignment="CENTER"
-                   horizontalAlignment="CENTER"
-                   text=""
-                   hidden="true"
-                   wrapMode="ELLIPSIS">
+              font="$(MEDIUM_FONT)|26|soft-shadow-thick"
+              color="FFFFFF"
+              inheritAlpha="true"
+              verticalAlignment="CENTER"
+              horizontalAlignment="CENTER"
+              text=""
+              hidden="true"
+              wrapMode="ELLIPSIS">
               <AnchorFill />
             </Label>
           </Controls>
         </Control>
         <Control name="$(parent)_Resource"
-                 clampedToScreen="true">
+          clampedToScreen="true">
           <Anchor point="CENTER"
-                  relativeTo="$(parent)"
-                  relativePoint="CENTER"
-                  offsetX="0"
-                  offsetY="375" />
+            relativeTo="$(parent)"
+            relativePoint="CENTER"
+            offsetX="0"
+            offsetY="375" />
           <Dimensions x="400"
-                      y="100" />
+            y="100" />
           <OnMouseUp>
             LUIE.CombatText.SavePosition(self)
           </OnMouseUp>
           <Controls>
             <Backdrop name="$(parent)_Backdrop"
-                      inherits="ZO_DefaultBackdrop"
-                      alpha="0.3"
-                      hidden="true" />
+              inherits="ZO_DefaultBackdrop"
+              alpha="0.3"
+              hidden="true" />
             <Label name="$(parent)_Label"
-                   font="$(MEDIUM_FONT)|26|soft-shadow-thick"
-                   color="FFFFFF"
-                   inheritAlpha="true"
-                   verticalAlignment="CENTER"
-                   horizontalAlignment="CENTER"
-                   text=""
-                   hidden="true"
-                   wrapMode="ELLIPSIS">
+              font="$(MEDIUM_FONT)|26|soft-shadow-thick"
+              color="FFFFFF"
+              inheritAlpha="true"
+              verticalAlignment="CENTER"
+              horizontalAlignment="CENTER"
+              text=""
+              hidden="true"
+              wrapMode="ELLIPSIS">
               <AnchorFill />
             </Label>
           </Controls>
@@ -185,11 +185,11 @@
     </TopLevelControl>
     <!-- Virtual / Template -->
     <Control name="LUIE_CombatText_Virtual"
-             virtual="true">
+      virtual="true">
       <Controls>
         <Label name="$(parent)_Amount" />
         <Texture name="$(parent)_Icon"
-                 hidden="true" />
+          hidden="true" />
         <!--Backdrop
         for debugging purposes-->
         <!--Backdrop

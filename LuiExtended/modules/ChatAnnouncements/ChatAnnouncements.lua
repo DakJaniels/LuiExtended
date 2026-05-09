@@ -786,8 +786,8 @@ end
 
 function ChatAnnouncements.OnDigEnd()
     zo_callLater(function ()
-                       g_weAreInADig = false
-                   end, 1000)
+                     g_weAreInADig = false
+                 end, 1000)
 end
 
 -- TODO: Fix later
@@ -1269,8 +1269,8 @@ function ChatAnnouncements.GroupingToolsLFGJoined(eventId, locationName)
         end
         g_lfgDisableGroupEvents = true
         zo_callLater(function ()
-                           g_lfgDisableGroupEvents = false
-                       end, 3000)
+                         g_lfgDisableGroupEvents = false
+                     end, 3000)
     end
     g_joinLFGOverride = true
 end
@@ -1407,20 +1407,20 @@ function ChatAnnouncements.ReadyCheckUpdate(eventId)
 
         -- Reset spam prevention after 1 second
         zo_callLater(function ()
-                           g_rcSpamPrevention = false
-                       end, 1000)
+                         g_rcSpamPrevention = false
+                     end, 1000)
 
         -- Reset activity status after 1 second
         g_showActivityStatus = false
         zo_callLater(function ()
-                           g_showActivityStatus = true
-                       end, 1000)
+                         g_showActivityStatus = true
+                     end, 1000)
 
         -- Reset group leave queue after 1 second
         g_stopGroupLeaveQueue = true
         zo_callLater(function ()
-                           g_stopGroupLeaveQueue = false
-                       end, 1000)
+                         g_stopGroupLeaveQueue = false
+                     end, 1000)
 
         g_showRCUpdates = true
     end
@@ -2091,8 +2091,8 @@ end
 function ChatAnnouncements.MiscAlertLockBroke(eventId, inactivityLengthMs)
     g_lockpickBroken = true
     zo_callLater(function ()
-                       g_lockpickBroken = false
-                   end, 200)
+                     g_lockpickBroken = false
+                 end, 200)
 end
 
 function ChatAnnouncements.MiscAlertLockSuccess(eventId)
@@ -2107,8 +2107,8 @@ function ChatAnnouncements.MiscAlertLockSuccess(eventId)
     end
     g_lockpickBroken = true
     zo_callLater(function ()
-                       g_lockpickBroken = false
-                   end, 200)
+                     g_lockpickBroken = false
+                 end, 200)
 end
 
 function ChatAnnouncements.StorageBag(eventId, previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
@@ -3314,9 +3314,9 @@ function ChatAnnouncements.StoreClose(eventId)
         g_inventoryStacks = {}
     end
     zo_callLater(function ()
-                       g_weAreInAStore = false
-                       g_weAreInAFence = false
-                   end, 1000)
+                     g_weAreInAStore = false
+                     g_weAreInAFence = false
+                 end, 1000)
 end
 
 function ChatAnnouncements.GuildStoreOpen(eventId)
@@ -3333,9 +3333,9 @@ function ChatAnnouncements.GuildStoreClose(eventId)
         g_inventoryStacks = {}
     end
     zo_callLater(function ()
-                       g_weAreInAStore = false
-                       g_weAreInAGuildStore = false
-                   end, 1000)
+                     g_weAreInAStore = false
+                     g_weAreInAGuildStore = false
+                 end, 1000)
 end
 
 function ChatAnnouncements.FenceSuccess(eventId, result)
@@ -3457,8 +3457,8 @@ function ChatAnnouncements.ResolveQuestItemChange()
                 countChange = newValue + questItemIndex[itemId].counter
                 g_questItemRemoved[itemId] = true
                 zo_callLater(function ()
-                                   g_questItemRemoved[itemId] = false
-                               end, 100)
+                                 g_questItemRemoved[itemId] = false
+                             end, 100)
 
                 if not Quests.QuestItemHideRemove[itemId] and not g_loginHideQuestLoot then
                     if ChatAnnouncements.SV.Inventory.LootQuestRemove then
@@ -3525,8 +3525,8 @@ function ChatAnnouncements.ResolveQuestItemChange()
                 countChange = newValue - questItemIndex[itemId].stack
                 g_questItemAdded[itemId] = true
                 zo_callLater(function ()
-                                   g_questItemAdded[itemId] = false
-                               end, 100)
+                                 g_questItemAdded[itemId] = false
+                             end, 100)
 
                 if not Quests.QuestItemHideLoot[itemId] and not g_loginHideQuestLoot then
                     if ChatAnnouncements.SV.Inventory.LootQuestAdd then
@@ -4409,12 +4409,12 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageQuestTurnIn
                     zo_callLater(function ()
-                                       if g_stackSplit == false then
-                                           ChatAnnouncements.ItemCounterDelay(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false, false, true, false)
-                                           eventManager:UnregisterForUpdate(moduleName .. "Printer")
-                                           eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
-                                       end
-                                   end, 25)
+                                     if g_stackSplit == false then
+                                         ChatAnnouncements.ItemCounterDelay(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false, false, true, false)
+                                         eventManager:UnregisterForUpdate(moduleName .. "Printer")
+                                         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                                     end
+                                 end, 25)
                 elseif g_weAreInAGuildStore and ChatAnnouncements.SV.Inventory.LootShowList then
                     gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
                     logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageList
@@ -4460,14 +4460,14 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                     -- If this is a Skill respec scroll, manually call an announcement for it if enabled (for some reason doesn't display an EVENT_DISPLAY_ANNOUNCEMENT on use anymore)
                     if removedItemType == ITEMTYPE_CROWN_ITEM and (itemId == 64524 or itemId == 135128) then
                         zo_callLater(function ()
-                                           ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILLS)
-                                       end, 25)
+                                         ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_SKILLS)
+                                     end, 25)
                     end
                     -- If this is an Attribute respec scroll, manually call an announcement for it if enabled (we disable EVENT_DISPLAY_ANNOUNCEMENT for this to sync it better)
                     if removedItemType == ITEMTYPE_CROWN_ITEM and (itemId == 64523 or itemId == 135130) then
                         zo_callLater(function ()
-                                           ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_ATTRIBUTES)
-                                       end, 25)
+                                         ChatAnnouncements.PointRespecDisplay(RESPEC_TYPE_ATTRIBUTES)
+                                     end, 25)
                     end
                     if ChatAnnouncements.SV.Inventory.LootShowUseMisc and (removedItemType == ITEMTYPE_RECALL_STONE or removedItemType == ITEMTYPE_TROPHY or removedItemType == ITEMTYPE_MASTER_WRIT or removedItemType == ITEMTYPE_CROWN_ITEM) then
                         -- Check to make sure the items aren't riding lesson books.
@@ -4522,12 +4522,12 @@ function ChatAnnouncements.InventoryUpdate(eventId, bagId, slotId, isNewItem, it
                     -- If any of these options were flagged, run a callLater on a 50ms delay to make sure we didn't just split stacks.
                     if flag then
                         zo_callLater(function ()
-                                           if g_stackSplit == false then
-                                               ChatAnnouncements.ItemCounterDelay(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false, false, true, false)
-                                               eventManager:UnregisterForUpdate(moduleName .. "Printer")
-                                               eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
-                                           end
-                                       end, 25)
+                                         if g_stackSplit == false then
+                                             ChatAnnouncements.ItemCounterDelay(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false, false, true, false)
+                                             eventManager:UnregisterForUpdate(moduleName .. "Printer")
+                                             eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+                                         end
+                                     end, 25)
                     end
                     -- For any leftover cases for items removed.
                 elseif not g_itemWasDestroyed and g_removableIDs[itemId] and ChatAnnouncements.SV.Inventory.LootShowRemove then
@@ -6037,8 +6037,8 @@ function ChatAnnouncements.OnPlayerActivated(eventId)
     end
 
     zo_callLater(function ()
-                       g_loginHideQuestLoot = false
-                   end, 3000)
+                     g_loginHideQuestLoot = false
+                 end, 3000)
 
     if ChatAnnouncements.SV.Notify.DisguiseCA or ChatAnnouncements.SV.Notify.DisguiseCSA or ChatAnnouncements.SV.Notify.DisguiseAlert or ChatAnnouncements.SV.Notify.DisguiseWarnCA or ChatAnnouncements.SV.Notify.DisguiseWarnCSA or ChatAnnouncements.SV.Notify.DisguiseWarnAlert then
         if g_disguiseState == 0 then
@@ -6697,26 +6697,26 @@ function ChatAnnouncements.HookFunction()
                 message = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
                 alert = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
                 zo_callLater(function ()
-                                   ChatAnnouncements.CheckLFGStatusLeave(false)
-                               end, 100)
+                                 ChatAnnouncements.CheckLFGStatusLeave(false)
+                             end, 100)
             elseif isLocalPlayer then
                 zo_callLater(function ()
-                                   ChatAnnouncements.CheckLFGStatusLeave(false)
-                               end, 100)
+                                 ChatAnnouncements.CheckLFGStatusLeave(false)
+                             end, 100)
             end
             sound = SOUNDS.GROUP_DISBAND
         elseif reason == GROUP_LEAVE_REASON_KICKED then
             if actionRequiredVote then
                 if isLocalPlayer then
                     zo_callLater(function ()
-                                       ChatAnnouncements.CheckLFGStatusLeave(true)
-                                   end, 100)
+                                     ChatAnnouncements.CheckLFGStatusLeave(true)
+                                 end, 100)
                     message = zo_strformat(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
                     alert = zo_strformat(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
                 elseif hasValidNames then
                     zo_callLater(function ()
-                                       ChatAnnouncements.CheckLFGStatusLeave(false)
-                                   end, 100)
+                                     ChatAnnouncements.CheckLFGStatusLeave(false)
+                                 end, 100)
                     message = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_PASSED, finalName)
                     alert = zo_strformat(LUIE_STRING_CA_GROUPFINDER_VOTEKICK_PASSED, finalAlertName)
                     message2 = zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_KICKED), finalName)
@@ -6728,20 +6728,20 @@ function ChatAnnouncements.HookFunction()
                     message = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
                     alert = zo_strformat(LUIE_STRING_GROUPDISBANDLEADER)
                     zo_callLater(function ()
-                                       ChatAnnouncements.CheckLFGStatusLeave(false)
-                                   end, 100)
+                                     ChatAnnouncements.CheckLFGStatusLeave(false)
+                                 end, 100)
                     sound = SOUNDS.GROUP_DISBAND
                 elseif isLocalPlayer then
                     zo_callLater(function ()
-                                       ChatAnnouncements.CheckLFGStatusLeave(true)
-                                   end, 100)
+                                     ChatAnnouncements.CheckLFGStatusLeave(true)
+                                 end, 100)
                     message = zo_strformat(SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED)
                     alert = zo_strformat(SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED)
                     sound = SOUNDS.GROUP_KICK
                 else
                     zo_callLater(function ()
-                                       ChatAnnouncements.CheckLFGStatusLeave(false)
-                                   end, 100)
+                                     ChatAnnouncements.CheckLFGStatusLeave(false)
+                                 end, 100)
                     useDefaultReasonText = true
                     sound = SOUNDS.GROUP_KICK
                 end
@@ -6750,14 +6750,14 @@ function ChatAnnouncements.HookFunction()
             if not isLocalPlayer then
                 useDefaultReasonText = true
                 zo_callLater(function ()
-                                   ChatAnnouncements.CheckLFGStatusLeave(false)
-                               end, 100)
+                                 ChatAnnouncements.CheckLFGStatusLeave(false)
+                             end, 100)
             else
                 message = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_LEAVE_SELF), finalName))
                 alert = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_LEAVE_SELF), finalAlertName))
                 zo_callLater(function ()
-                                   ChatAnnouncements.CheckLFGStatusLeave(false)
-                               end, 100)
+                                 ChatAnnouncements.CheckLFGStatusLeave(false)
+                             end, 100)
             end
 
             sound = SOUNDS.GROUP_LEAVE
@@ -6825,8 +6825,8 @@ function ChatAnnouncements.HookFunction()
             local SendMessage = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalName))
             local SendAlert = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalAlertName))
             zo_callLater(function ()
-                               ChatAnnouncements.PrintJoinStatusNotSelf(SendMessage, SendAlert)
-                           end, 100)
+                             ChatAnnouncements.PrintJoinStatusNotSelf(SendMessage, SendAlert)
+                         end, 100)
         end
 
         return true
@@ -7032,15 +7032,15 @@ function ChatAnnouncements.HookFunction()
         -- Stop the cancel message from status update from triggering when any other result here happens.
         g_lfgHideStatusCancel = true
         zo_callLater(function ()
-                           g_lfgHideStatusCancel = false
-                       end, 1000)
+                         g_lfgHideStatusCancel = false
+                     end, 1000)
 
         -- Sometimes if another player cancels slightly before a player in your group cancels, the "you have been placed in the front of the queue message displays. If this is the case, we want to show queue left for that event."
         if reason ~= LFG_READY_CHECK_CANCEL_REASON_GROUP_REPLACED_IN_QUEUE then
             g_showActivityStatus = false
             zo_callLater(function ()
-                               g_showActivityStatus = true
-                           end, 1000)
+                             g_showActivityStatus = true
+                         end, 1000)
         end
 
         g_showRCUpdates = true
@@ -7120,8 +7120,8 @@ function ChatAnnouncements.HookFunction()
         end
         g_lockpickBroken = true
         zo_callLater(function ()
-                           g_lockpickBroken = false
-                       end, 200)
+                         g_lockpickBroken = false
+                     end, 200)
         return true
     end
 
@@ -7334,8 +7334,8 @@ function ChatAnnouncements.HookFunction()
                 end
                 eventManager:UnregisterForEvent(moduleName, EVENT_CURRENCY_UPDATE)
                 zo_callLater(function ()
-                                   eventManager:RegisterForEvent(moduleName, EVENT_CURRENCY_UPDATE, ChatAnnouncements.OnCurrencyUpdate)
-                               end, 500)
+                                 eventManager:RegisterForEvent(moduleName, EVENT_CURRENCY_UPDATE, ChatAnnouncements.OnCurrencyUpdate)
+                             end, 500)
             end
 
             if ChatAnnouncements.SV.Notify.NotificationMailErrorCA then
@@ -8507,8 +8507,8 @@ function ChatAnnouncements.HookFunction()
                 local questName = GetJournalQuestName(questIndex)
                 printToChat(zo_strformat("Writ Crafter abandoned the <<1>> because it requires <<2>> which was disallowed in settings", questName, rejectedMat), true)
                 zo_callLater(function ()
-                                   AbandonQuest(questIndex)
-                               end, 500)
+                                 AbandonQuest(questIndex)
+                             end, 500)
                 return
             end
             -- Suppress announcements for writ quests if configured
@@ -10325,8 +10325,8 @@ function ChatAnnouncements.HookFunction()
         g_showRCUpdates = true
         g_weDeclinedTheQueue = true
         zo_callLater(function ()
-                           g_weDeclinedTheQueue = false
-                       end, 1000)
+                         g_weDeclinedTheQueue = false
+                     end, 1000)
 
         if ChatAnnouncements.SV.Group.GroupLFGQueueCA then
             printToChat(message, true)

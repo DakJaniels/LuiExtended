@@ -49,8 +49,8 @@ function CombatTextCombatEllipseEventViewer:OnEvent(combatType, powerType, value
             local throttleTime = self:GetThrottleTime(Settings, flags)
             LUIE.RecycleTable(flags) -- Return to cache immediately after use
             zo_callLater(function ()
-                               self:ViewFromEventBuffer(combatType, powerType, eventKey, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
-                           end, throttleTime)
+                             self:ViewFromEventBuffer(combatType, powerType, eventKey, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
+                         end, throttleTime)
         else
             self.eventBuffer[eventKey].value = self.eventBuffer[eventKey].value + value
             self.eventBuffer[eventKey].hits = self.eventBuffer[eventKey].hits + 1
