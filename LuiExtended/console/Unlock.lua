@@ -15,6 +15,18 @@ local sceneManager = SCENE_MANAGER
 local windowManager = GetWindowManager()
 -- -----------------------------------------------------------------------------
 
+--- `_Preview` overlay or Unlock-created backdrop; optional labels depend on context (`Unlock` vs UnitFrames XML).
+--- @class LUIE_PositionableTLWPreview : Control
+--- @field coordLabel LabelControl|nil
+--- @field anchorLabel LabelControl|nil
+--- @field anchorTexture TextureControl|nil
+
+--- TLW used by Unlock movers and UnitFrames custom roots (`LUIE.SV[customPositionAttr]` position persistence).
+--- @class LUIE_PositionableTopLevelWindow : TopLevelWindow
+--- @field customPositionAttr string
+--- @field preview LUIE_PositionableTLWPreview|nil
+--- @field previewLabel LabelControl|nil
+
 --- @class LUIE.Unlock : table
 --- @field frameMoverEnabled boolean Flag indicating if frame movers are currently enabled
 --- @field movers table Table of created mover frames
@@ -220,8 +232,10 @@ end
 --- @param offsetX number The X offset for the top-level window
 --- @param offsetY number The Y offset for the top-level window
 --- @param relativeTo Control The element to which the top-level window is relative
---- @return TopLevelWindow tlw The created top-level window
+--- @return LUIE_PositionableTopLevelWindow tlw The created top-level window
 function Unlock.CreateTopLevelWindow(element, config, point, relativePoint, offsetX, offsetY, relativeTo)
+    --- Runtime value is Zo `TopLevelWindow`; Unlock attaches `customPositionAttr` and `preview` (see class doc).
+    --- @type LUIE_PositionableTopLevelWindow
     local tlw = windowManager:CreateTopLevelWindow(nil)
     tlw:SetClampedToScreen(true)
     tlw:SetMouseEnabled(false)
@@ -255,7 +269,7 @@ function Unlock.CreateTopLevelWindow(element, config, point, relativePoint, offs
     -- Create coordinate label with initial position
     tlw.preview.coordLabel = Unlock.CreateCoordinateLabel(tlw.preview, positionText)
 
-    --- @param self TopLevelWindow
+    --- @param self LUIE_PositionableTopLevelWindow
     local function OnMoveStart(self)
         eventManager:RegisterForUpdate("LUIE_UnlockMoveUpdate", 200, function ()
             if self.preview and self.preview.coordLabel then
@@ -265,7 +279,7 @@ function Unlock.CreateTopLevelWindow(element, config, point, relativePoint, offs
         end)
     end
 
-    --- @param self TopLevelWindow
+    --- @param self LUIE_PositionableTopLevelWindow
     local function OnMoveStop(self)
         eventManager:UnregisterForUpdate("LUIE_UnlockMoveUpdate")
         if self.preview and self.preview.coordLabel then
@@ -285,7 +299,7 @@ end
 --- Helper function to initialize the mover for a given element
 --- @param element Control The element to create a mover for
 --- @param config {[1]:string, [2]:number?, [3]:number?} The configuration for the element
---- @return TopLevelWindow|nil mover The created mover window or nil if initialization failed
+--- @return LUIE_PositionableTopLevelWindow|nil mover The created mover window or nil if initialization failed
 function Unlock.InitializeElementMover(element, config)
     -- Adjust width and height constraints if provided
     if config[2] then
@@ -312,7 +326,7 @@ function Unlock.InitializeElementMover(element, config)
                 end
             end
 
-            --- @param self TopLevelWindow
+            --- @param self LUIE_PositionableTopLevelWindow
             local function OnMoveStop(self)
                 local left, top = self:GetLeft(), self:GetTop()
 

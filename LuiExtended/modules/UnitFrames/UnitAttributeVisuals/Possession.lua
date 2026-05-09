@@ -70,8 +70,14 @@ function PossessionModule:UpdatePossession(unitTag, value)
                 glowFadeAnim:SetAlphaValues(0, 1)
                 glowFadeAnim:SetDuration(125)
 
-                glowFadeTimeline:InsertAnimation(ANIMATION_ALPHA, glowRight, 0):SetAlphaValues(0, 1):SetDuration(125)
-                glowFadeTimeline:InsertAnimation(ANIMATION_ALPHA, glowCenter, 0):SetAlphaValues(0, 1):SetDuration(125)
+                local fadeGlowRight = glowFadeTimeline:InsertAnimation(ANIMATION_ALPHA, glowRight, 0)
+                --- @cast fadeGlowRight AnimationObjectAlpha
+                fadeGlowRight:SetAlphaValues(0, 1)
+                fadeGlowRight:SetDuration(125)
+                local fadeGlowCenter = glowFadeTimeline:InsertAnimation(ANIMATION_ALPHA, glowCenter, 0)
+                --- @cast fadeGlowCenter AnimationObjectAlpha
+                fadeGlowCenter:SetAlphaValues(0, 1)
+                fadeGlowCenter:SetDuration(125)
 
                 healthBar.glowFadeAnimation = glowFadeTimeline
                 glowLeft:SetHidden(false)
