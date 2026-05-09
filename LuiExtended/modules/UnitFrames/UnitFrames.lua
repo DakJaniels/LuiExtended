@@ -239,7 +239,7 @@ function UnitFrames.Initialize(enabled)
         UnitFrames.GroupFoodDrinkBuff.Initialize()
     end
 
-    local RefreshBossHealthBar = function (self, smoothAnimate)
+    local function RefreshBossHealthBar(self, smoothAnimate)
         local totalHealth = 0
         local totalMaxHealth = 0
 
@@ -3229,7 +3229,7 @@ function UnitFrames.CustomFramesApplyLayoutPlayer(unhide)
     end
 end
 
-local insertRole = function (list, currentRole)
+local function insertRole(list, currentRole)
     for index = 1, GetGroupSize() do
         local playerRole = GetGroupMemberSelectedRole(GetGroupUnitTagByIndex(index))
         if playerRole == currentRole then

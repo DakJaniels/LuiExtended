@@ -747,7 +747,7 @@ end
 
 -- Helper to set up common actions for all created frames
 local function SetupCommonFrameActions()
-    local tlwOnMoveStart = function (self)
+    local function tlwOnMoveStart(self)
         if not ZO_IsConsoleOrGameCoreUI() and self.preview.anchorLabel then
             eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
                 self.preview.anchorLabel:SetText(zo_strformat("<<1>>, <<2>>", self:GetLeft(), self:GetTop()))
@@ -755,7 +755,7 @@ local function SetupCommonFrameActions()
         end
     end
 
-    local tlwOnMoveStop = function (self)
+    local function tlwOnMoveStop(self)
         eventManager:UnregisterForUpdate(moduleName .. "PreviewMove")
         UnitFrames.SV[self.customPositionAttr] = { self:GetLeft(), self:GetTop() }
     end

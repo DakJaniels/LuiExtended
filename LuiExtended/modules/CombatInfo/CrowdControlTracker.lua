@@ -1367,7 +1367,7 @@ function CrowdControlTracker:BreakFreeAnimation()
     self:InsertAnimationType(timeline, ANIMATION_TRANSLATE, leftSide, animDuration, animDelay, ZO_EaseOutCubic, 0, 0, -550, 0)
     self:InsertAnimationType(timeline, ANIMATION_TRANSLATE, rightSide, animDuration, animDelay, ZO_EaseOutCubic, 0, 0, 550, 0)
 
-    local onStop = function ()
+    local function OnStop()
         leftSide:ClearAnchors()
         leftSide:SetAnchor(LEFT, LUIE_CCTracker_BreakFreeFrame, LEFT, 0, 0)
         leftSide:SetScale(1)
@@ -1376,7 +1376,7 @@ function CrowdControlTracker:BreakFreeAnimation()
         rightSide:SetScale(1)
         self.breakFreePlaying = nil
     end
-    timeline:SetHandler("OnStop", onStop, "OnStop")
+    timeline:SetHandler("OnStop", OnStop, "OnStop")
 
     timeline:PlayFromStart()
 
@@ -1434,7 +1434,7 @@ function CrowdControlTracker:StartAnimation(control, animType, test)
                 self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, CombatInfo.SV.cct.immuneDisplayTime, 100, ZO_EaseInOutQuadratic, 0.6, 0)
             end
 
-            local OnStop = function ()
+            local function OnStop()
                 control:SetScale(CombatInfo.SV.cct.controlScale)
                 control:ClearAnchors()
                 control:SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY)

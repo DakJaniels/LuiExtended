@@ -29,7 +29,7 @@ end
 -- skipping PlaySound without touching any other base-game behavior.
 
 -- Hook synergy popup Icon/Name (to fix inconsistencies and add custom icons for some Quest/Encounter based Synergies)
-LUIE.HookSynergy = function ()
+function LUIE.HookSynergy()
     if ZO_IsConsoleOrGameCoreUI() then return end
 
 

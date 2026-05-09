@@ -112,7 +112,7 @@ do
     if not GetItemLinkOnUseAbilityDescription then
         --- @param itemLink string
         --- @return string abilityDescription
-        GetItemLinkOnUseAbilityDescription = function (itemLink)
+        function GetItemLinkOnUseAbilityDescription(itemLink)
             local hasAbility, abilityHeader, abilityDescription, cooldown, hasScaling, minLevel, maxLevel, isChampionPoints, remainingCooldown = GetItemLinkOnUseAbilityInfo(itemLink)
             return abilityDescription
         end
@@ -125,7 +125,7 @@ do
     --- @param repl    string|number|table|function
     --- @param n?      integer
     --- @return string
-    StringOnlyGSUB = function (s, pattern, repl, n)
+    function StringOnlyGSUB(s, pattern, repl, n)
         -- Only use n if explicitly provided, otherwise replace all matches
         if n then
             return (zo_strgsub(s, pattern, repl, n))

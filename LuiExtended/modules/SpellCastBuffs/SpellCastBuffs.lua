@@ -571,7 +571,7 @@ end
 function SpellCastBuffs.ResetContainerOrientation()
     ---
     --- @param self TopLevelWindow|table
-    local prominentbuffs_OnMoveStop = function (self)
+    local function prominentbuffs_OnMoveStop(self)
         if self.alignVertical then
             SpellCastBuffs.SV.prominentbVOffsetX = self:GetLeft()
             SpellCastBuffs.SV.prominentbVOffsetY = self:GetTop()
@@ -584,7 +584,7 @@ function SpellCastBuffs.ResetContainerOrientation()
     SpellCastBuffs.BuffContainers.prominentbuffs:SetHandler("OnMoveStop", prominentbuffs_OnMoveStop)
     ---
     --- @param self TopLevelWindow|table
-    local prominentdebuffs_OnMoveStop = function (self)
+    local function prominentdebuffs_OnMoveStop(self)
         if self.alignVertical then
             SpellCastBuffs.SV.prominentdVOffsetX = self:GetLeft()
             SpellCastBuffs.SV.prominentdVOffsetY = self:GetTop()
@@ -615,7 +615,7 @@ function SpellCastBuffs.ResetContainerOrientation()
 
     ---
     --- @param self TopLevelWindow|table
-    local player_long_OnMoveStop = function (self)
+    local function player_long_OnMoveStop(self)
         SpellCastBuffs.SV.player_longOffsetX = self:GetLeft()
         SpellCastBuffs.SV.player_longOffsetY = self:GetTop()
     end

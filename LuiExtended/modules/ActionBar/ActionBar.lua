@@ -1868,7 +1868,7 @@ end
 --- @param defaultFontStyle integer
 --- @param defaultFontSize integer
 --- @return string
-local setupFont = function (fontNameKey, fontStyleKey, fontSizeKey, defaultFontStyle, defaultFontSize)
+local function setupFont(fontNameKey, fontStyleKey, fontSizeKey, defaultFontStyle, defaultFontSize)
     local fontName = LUIE.Fonts[ActionBar.SV[fontNameKey]]
     if not fontName or fontName == "" then
         LUIE:Log("Debug", GetString(LUIE_STRING_ERROR_FONT))
@@ -2737,7 +2737,7 @@ local ACTION_BUTTON_BORDERS = { normal = "EsoUI/Art/ActionBar/abilityFrame64_up.
 local FORCE_SUPPRESS_COOLDOWN_SOUND = true
 local BOUNCE_DURATION_MS = 500
 
-local ApplyStyle = function (self, template)
+local function ApplyStyle(self, template)
     WINDOW_MANAGER:ApplyTemplateToControl(self.slot, template)
 
     local isGamepad = IsInGamepadPreferredMode()

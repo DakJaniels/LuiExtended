@@ -10,7 +10,7 @@ local LUIE = LUIE
 local Data = LuiData.Data
 local Effects = Data.Effects
 
-LUIE.HookKeyboardMap = function ()
+function LUIE.HookKeyboardMap()
     -- Hook campaign screen to fix icons
     local function GetFormattedBonusString(data)
         if data and data.stringId then

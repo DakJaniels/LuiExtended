@@ -26,7 +26,7 @@ local LUIE = LUIE
 --- protected functions even from tainted code.
 ---
 --- PickupAbilityById is used at two callsites. Last check 2025-11-03
-LUIE.ApplyProtectedHooks = function ()
+function LUIE.ApplyProtectedHooks()
     -- Hook for regular active skills
     --- @diagnostic disable-next-line: duplicate-set-field
     function ZO_ActiveSkillProgressionData:TryPickup()

@@ -35,7 +35,7 @@ local Effects = Data.Effects
 --- @param unitId integer
 --- @param abilityId integer
 --- @param sourceType CombatUnitType
-SpellCastBuffs.OnEffectChangedGround = function (eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
+function SpellCastBuffs.OnEffectChangedGround(eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
     if SpellCastBuffs.SV.HideGroundEffects then
         return
     end

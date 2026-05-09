@@ -10,7 +10,7 @@ local LUIE = LUIE
 local Data = LuiData.Data
 local Effects = Data.Effects
 
-LUIE.HookKeyboardStats = function ()
+function LUIE.HookKeyboardStats()
     -- Hook STATS Screen Buffs & Debuffs to hide buffs not needed, update icons, names, durations, and tooltips
 
 

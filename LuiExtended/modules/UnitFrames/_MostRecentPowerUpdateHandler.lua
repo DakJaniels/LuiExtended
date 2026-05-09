@@ -17,26 +17,26 @@ local moduleName = UnitFrames.moduleName
 --- @class LUIE.UnitFrames.MostRecentEventHandler : ZO_MostRecentEventHandler
 UnitFrames.MostRecentEventHandler = ZO_MostRecentEventHandler:Subclass()
 
-UnitFrames.RegisterRecentEventHandler = function ()
-    local function LUIE_PowerUpdateEqualityFunction(existingEventInfo, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
-        local existingUnitTag = existingEventInfo[1]
-        local existingPowerType = existingEventInfo[3]
-        return existingUnitTag == unitTag and existingPowerType == powerType
-    end
+local function LUIE_PowerUpdateEqualityFunction(existingEventInfo, unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+    local existingUnitTag = existingEventInfo[1]
+    local existingPowerType = existingEventInfo[3]
+    return existingUnitTag == unitTag and existingPowerType == powerType
+end
 
-    function UnitFrames.MostRecentEventHandler:New(namespace, handlerFunction)
-        return ZO_MostRecentEventHandler.New(self, namespace, EVENT_POWER_UPDATE, LUIE_PowerUpdateEqualityFunction, handlerFunction)
-    end
+function UnitFrames.MostRecentEventHandler:New(namespace, handlerFunction)
+    return ZO_MostRecentEventHandler.New(self, namespace, EVENT_POWER_UPDATE, LUIE_PowerUpdateEqualityFunction, handlerFunction)
+end
 
-    --- @param unitTag string
-    --- @param powerIndex luaindex
-    --- @param powerType CombatMechanicFlags
-    --- @param powerValue integer
-    --- @param powerMax integer
-    --- @param powerEffectiveMax integer
-    local function MostRecentPowerUpdateHandlerFunction(unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
-        UnitFrames.OnPowerUpdate(unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
-    end
+--- @param unitTag string
+--- @param powerIndex luaindex
+--- @param powerType CombatMechanicFlags
+--- @param powerValue integer
+--- @param powerMax integer
+--- @param powerEffectiveMax integer
+local function MostRecentPowerUpdateHandlerFunction(unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+    UnitFrames.OnPowerUpdate(unitTag, powerIndex, powerType, powerValue, powerMax, powerEffectiveMax)
+end
 
+function UnitFrames.RegisterRecentEventHandler()
     UnitFrames.MostRecentEventHandler:New(moduleName, MostRecentPowerUpdateHandlerFunction)
 end

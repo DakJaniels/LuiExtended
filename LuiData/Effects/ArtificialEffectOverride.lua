@@ -14,7 +14,7 @@ local Abilities = Data.Abilities
 
 local GetArtificialEffectInfo = GetArtificialEffectInfo
 
-local ESO_Plus_Member = function ()
+local function ESO_Plus_Member()
     local displayName, _, _, _, _, _ = GetArtificialEffectInfo(0)
     return displayName
 end

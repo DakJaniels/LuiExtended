@@ -7,7 +7,7 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 
-LUIE.HookKeyboardIcons = function ()
+function LUIE.HookKeyboardIcons()
     -- Variables for Skill Window Hook
     local INCREASE_BUTTON_TEXTURES =
     {
