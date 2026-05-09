@@ -13,7 +13,14 @@ local moduleName = UnitFrames.moduleName
 
 local eventManager = GetEventManager()
 
+--- Small-group / raid unit backdrop or top-info strip (`control`, `topInfo`) — `defaultUnitTag` set in `_CreateCustomFrames.lua` and refreshed in `_MenuFunctions.lua`.
+--- @class LUIE_GroupFrameInteractionControl : Control
+--- @field defaultUnitTag string
+
 -- Right Click function for group frames - updated to match ZOS implementation
+--- @param self LUIE_GroupFrameInteractionControl
+--- @param button MouseButtonIndex Which mouse button was released; compare to MOUSE_BUTTON_INDEX_* constants.
+--- @param upInside boolean True when the mouse was released over this control.
 function UnitFrames.GroupFrames_OnMouseUp(self, button, upInside)
     local unitTag = self.defaultUnitTag
     if button == MOUSE_BUTTON_INDEX_RIGHT and upInside then

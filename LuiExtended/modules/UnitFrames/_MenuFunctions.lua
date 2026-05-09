@@ -96,7 +96,7 @@ function UnitFrames.CustomFramesSetMovingState(state)
             tlw:SetMovable(state)
             tlw:SetHidden(false)
 
-            --- @param self TopLevelWindow
+            --- @param self LUIE_PositionableTopLevelWindow
             local function OnMoveStop(self)
                 local left, top = self:GetLeft(), self:GetTop()
                 left, top = LUIE.ApplyGridSnap(left, top, "unitFrames")

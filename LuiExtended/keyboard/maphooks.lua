@@ -465,8 +465,8 @@ LUIE.HookKeyboardMap = function ()
                         icon = LUIE_MEDIA_ICONS_KEEPUPGRADE_UPGRADE_WOOD_SIEGE_CAP_2_DDS
                     end
                     -- Update the tooltips.
-                    if Effects.KeepUpgradeTooltip[name] then
-                        description = Effects.KeepUpgradeTooltip[name]
+                    if Effects.KeepUpgrade_Tooltip[name] then
+                        description = Effects.KeepUpgrade_Tooltip[name]
                     end
                     -- Update the name (Note: We do this last since our other conditionals check by name).
                     if Effects.KeepUpgradeNameFix[name] then

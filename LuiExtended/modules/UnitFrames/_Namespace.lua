@@ -38,13 +38,24 @@ UnitFrames.VisualizerModules =
 --- Table holding per-unitTag visualizer coordinator instances
 --- @type table<string, LUIE_UnitAttributeVisualizer>
 UnitFrames.Visualizers = {}
+--- Cyrodiil / alternate target mirror of CustomFrames (same per-unit shape when populated).
+--- @type UnitFrames.CustomFramesTable
 UnitFrames.AvaCustFrames = {}
+
+--- Regen/degen strip control created by CreateRegenAnimation (texture + looping translate timeline).
+--- @class UnitFrames.RegenStripControl : Control
+--- @field animation AnimationObject
+--- @field timeline AnimationTimeline
 
 --- Default frame power entry (label + color, optional threshold for target).
 --- @class UnitFrames.DefaultFramePowerEntry
 --- @field label Control
 --- @field color table
 --- @field threshold number|nil
+--- @field regen1 UnitFrames.RegenStripControl|nil
+--- @field regen2 UnitFrames.RegenStripControl|nil
+--- @field degen1 UnitFrames.RegenStripControl|nil
+--- @field degen2 UnitFrames.RegenStripControl|nil
 
 --- Per-unit default frame entry (unitTag + optional power-type entries, classIcon, friendIcon).
 --- @class UnitFrames.DefaultFrameUnitEntry
@@ -346,9 +357,24 @@ UnitFrames.Defaults =
 
 UnitFrames.SV = {}
 
+--- Power row on a custom frame (health/magicka/stamina bar aggregate); includes regen strips when enabled.
+--- @class UnitFrames.CustomFramePowerEntry
+--- @field regen1 UnitFrames.RegenStripControl|nil
+--- @field regen2 UnitFrames.RegenStripControl|nil
+--- @field degen1 UnitFrames.RegenStripControl|nil
+--- @field degen2 UnitFrames.RegenStripControl|nil
+--- @field stat table|nil
+
+--- Per-unit custom frame root (TLW, buff anchors, and numeric COMBAT_MECHANIC_FLAGS_* power rows).
+--- @class UnitFrames.CustomFrameUnitEntry
+--- @field buffs Control|nil
+--- @field debuffs Control|nil
+--- @field tlw LUIE_PositionableTopLevelWindow|nil
+--- @field [number] UnitFrames.CustomFramePowerEntry
+
 --- Frame data tables are added by _CreateCustomFrames when each frame is created (XML loads first).
 --- @class UnitFrames.CustomFramesTable
---- @field [string] table
+--- @field [string] UnitFrames.CustomFrameUnitEntry
 
 --- @type UnitFrames.CustomFramesTable
 UnitFrames.CustomFrames =

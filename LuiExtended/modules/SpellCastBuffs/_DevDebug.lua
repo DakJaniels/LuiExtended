@@ -125,6 +125,12 @@ end
 -- Map and Zone Information
 -- -----------------------------------------------------------------------------
 
+--- From `GetCurrentZoneLevelScalingConstraints()` — persisted on collected zone/map snapshot for slash debug output.
+--- @class ZoneMapInfo.ScaleLevelConstraints
+--- @field type ScaleLevelConstraintType
+--- @field min integer
+--- @field max integer
+
 --- @class ZoneMapInfo
 --- @field zoneid integer
 --- @field locName string
@@ -149,6 +155,7 @@ end
 --- @field zoneFlags table Various boolean flags about the current zone
 --- @field keyInfo table Map key information if available
 --- @field cadwellInfo table Cadwell's Almanac information if available
+--- @field scaleLevelConstraints ZoneMapInfo.ScaleLevelConstraints
 
 --- Collects and returns zone and map information
 --- @return ZoneMapInfo Information about current zone and map
