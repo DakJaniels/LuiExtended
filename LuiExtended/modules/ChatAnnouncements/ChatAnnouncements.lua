@@ -4058,6 +4058,42 @@ end
 local delayedItemPool = {}    -- Store items we are counting up when the player loots multiple bodies at once to print combined counts for any duplicate items
 local delayedItemPoolOut = {} -- Stacks for outbound delayed item pool
 
+-- ZOS enchanting station lists runes potency -> essence -> aspect (see Enchanting_Keyboard.lua creationSlotAnimation).
+-- ItemCounterDelay also batches loot and non-enchant crafting mats into this pool; those rows have no entry here.
+local DELAYED_POOL_ENCHANTING_RUNE_ORDER =
+{
+    [ITEMTYPE_ENCHANTING_RUNE_POTENCY] = 1,
+    [ITEMTYPE_ENCHANTING_RUNE_ESSENCE] = 2,
+    [ITEMTYPE_ENCHANTING_RUNE_ASPECT] = 3,
+}
+
+local function FlushDelayedItemPoolInDisplayOrder(pool)
+    local ids = {}
+    for itemId in pairs(pool) do
+        table_insert(ids, itemId)
+    end
+    table.sort(ids, function (a, b)
+        local da, db = pool[a], pool[b]
+        local pa = DELAYED_POOL_ENCHANTING_RUNE_ORDER[da.itemType]
+        local pb = DELAYED_POOL_ENCHANTING_RUNE_ORDER[db.itemType]
+        if pa ~= nil and pb ~= nil then
+            if pa ~= pb then
+                return pa < pb
+            end
+        elseif pa ~= nil then
+            return true
+        elseif pb ~= nil then
+            return false
+        end
+        return a < b
+    end)
+    for i = 1, #ids do
+        local itemId = ids[i]
+        local data = pool[itemId]
+        ChatAnnouncements.ItemPrinter(data.icon, data.stack, data.itemType, itemId, data.itemLink, data.receivedBy, data.logPrefix, data.gainOrLoss, data.filter, data.groupLoot, data.alwaysFirst, data.delay)
+    end
+end
+
 function ChatAnnouncements.ItemCounterDelay(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, filter, groupLoot, alwaysFirst, delay)
     -- Return if we have an invalid itemId or stack
     if itemId == 0 or not stack then
@@ -4094,11 +4130,7 @@ function ChatAnnouncements.ItemCounterDelay(icon, stack, itemType, itemId, itemL
 end
 
 function ChatAnnouncements.SendDelayedItems()
-    for id, data in pairs(delayedItemPool) do
-        if id then
-            ChatAnnouncements.ItemPrinter(data.icon, data.stack, data.itemType, id, data.itemLink, data.receivedBy, data.logPrefix, data.gainOrLoss, data.filter, data.groupLoot, data.alwaysFirst, data.delay)
-        end
-    end
+    FlushDelayedItemPoolInDisplayOrder(delayedItemPool)
     delayedItemPool = {}
 end
 
@@ -4127,11 +4159,7 @@ function ChatAnnouncements.ItemCounterDelayOut(icon, stack, itemType, itemId, it
 end
 
 function ChatAnnouncements.SendDelayedItemsOut()
-    for id, data in pairs(delayedItemPoolOut) do
-        if id then
-            ChatAnnouncements.ItemPrinter(data.icon, data.stack, data.itemType, id, data.itemLink, data.receivedBy, data.logPrefix, data.gainOrLoss, data.filter, data.groupLoot, data.alwaysFirst, data.delay)
-        end
-    end
+    FlushDelayedItemPoolInDisplayOrder(delayedItemPoolOut)
     delayedItemPoolOut = {}
 end
 
