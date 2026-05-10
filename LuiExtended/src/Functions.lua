@@ -869,6 +869,14 @@ do
         return zo_strformat(GetString(LUIE_STRING_SKILL_HIDDEN_TP), 100 - speed, cost)
     end
 
+    --- Live morph tooltip from skill sheet (replaces stale hard-coded Skill_*_GUARDIAN_TP strings).
+    --- @param morphAbilityId integer
+    --- @return string?
+    local function MorphAbilitySheetDescription(morphAbilityId)
+        local desc = GetAbilityDescription(morphAbilityId, nil, "player")
+        return (desc and desc ~= "") and desc or nil
+    end
+
     -- Tooltip handler definitions
     local TooltipHandlers =
     {
@@ -950,10 +958,28 @@ do
             return zo_strformat(GetString(LUIE_STRING_SKILL_IMMOVABLE), duration, counter, 65 + counter)
         end,
 
-        -- Molten Armaments (258661): combat bundle id — use morph ability description for full scaled tooltip
+        -- Molten Armaments (258661): combat bundle id — morph 31888
         [258661] = function ()
-            local desc = GetAbilityDescription(31888, nil, "player")
-            return (desc and desc ~= "") and desc or nil
+            return MorphAbilitySheetDescription(31888)
+        end,
+
+        -- Siphoning Attacks morph 36935; bundle buff 215493
+        [36935] = function ()
+            return MorphAbilitySheetDescription(36935)
+        end,
+        [215493] = function ()
+            return MorphAbilitySheetDescription(36935)
+        end,
+
+        -- Feral / Eternal / Wild Guardian (85982 / 85986 / 85990)
+        [85982] = function ()
+            return MorphAbilitySheetDescription(85982)
+        end,
+        [85986] = function ()
+            return MorphAbilitySheetDescription(85986)
+        end,
+        [85990] = function ()
+            return MorphAbilitySheetDescription(85990)
         end,
     }
 
