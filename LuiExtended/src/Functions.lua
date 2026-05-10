@@ -958,39 +958,28 @@ do
             return zo_strformat(GetString(LUIE_STRING_SKILL_IMMOVABLE), duration, counter, 65 + counter)
         end,
 
-        -- Molten Armaments (258661): combat bundle id — morph 31888
-        [258661] = function ()
-            return MorphAbilitySheetDescription(31888)
-        end,
-
-        -- Siphoning Attacks morph 36935; bundle buff 215493
-        [36935] = function ()
-            return MorphAbilitySheetDescription(36935)
-        end,
-        [215493] = function ()
-            return MorphAbilitySheetDescription(36935)
-        end,
-
-        -- Feral / Eternal / Wild Guardian (85982 / 85986 / 85990)
-        [85982] = function ()
-            return MorphAbilitySheetDescription(85982)
-        end,
-        [85986] = function ()
-            return MorphAbilitySheetDescription(85986)
-        end,
-        [85990] = function ()
-            return MorphAbilitySheetDescription(85990)
-        end,
     }
 
     -- Returns dynamic tooltips when called by Tooltip function
     ---
+    --- Registered TooltipHandlers win (Brace, Sneak, champion/armor math). Otherwise, EffectOverride[abilityId].dynamicTooltip
+    --- uses GetAbilityDescription(tooltipMorphId or abilityId) so data can opt into live sheet text without per-id Lua.
+    ---
     --- @param abilityId integer
     --- @param unitTag string|nil player or reticleover when hover context matters (e.g. 20309 Sneak)
-    --- @return string
+    --- @return string?
     local function DynamicTooltip(abilityId, unitTag)
         local handler = TooltipHandlers[abilityId]
-        return handler and handler(unitTag)
+        if handler then
+            return handler(unitTag)
+        end
+        local EffectsData = LuiData and LuiData.Data and LuiData.Data.Effects
+        local ov = EffectsData and EffectsData.EffectOverride and EffectsData.EffectOverride[abilityId]
+        if ov and ov.dynamicTooltip then
+            local morphId = ov.tooltipMorphId or abilityId
+            return MorphAbilitySheetDescription(morphId)
+        end
+        return nil
     end
 
     LUIE.DynamicTooltip = DynamicTooltip
