@@ -93,6 +93,13 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
         return
     end
 
+    -- Sneak / stealth unit buffs use live ids 20299 or 20309; synthetic rows from EVENT_STEALTH_STATE_CHANGED use 20309 — skip duplicate slot-keyed buff
+    local stealthEffectsTracked = (unitTag == "player" and SpellCastBuffs.SV.StealthStatePlayer)
+        or (unitTag == "reticleover" and SpellCastBuffs.SV.StealthStateTarget)
+    if stealthEffectsTracked and (abilityId == 20299 or abilityId == 20309) then
+        return
+    end
+
     -- Hide effects if chosen in the options menu
     if SpellCastBuffs.hidePlayerEffects[abilityId] and unitTag == "player" then
         return

@@ -117,11 +117,12 @@ function SpellCastBuffs.DisguiseStateChanged(unitTag, disguiseState)
     end
 end
 
-local function RemoveSneak(context)
+-- Legacy synthetic row used abilityId 20299 while live unit buffs report 20309 for Sneak; clear old key if present.
+local function RemoveLegacySneakSynthetic(context)
     local abilityId = 20299
     local abilityName = Abilities.Innate_Sneak
-    local contexta = SpellCastBuffs.DetermineContextSimple(context, abilityId, abilityName)
-    SpellCastBuffs.EffectsList[contexta][abilityId] = nil
+    local ctx = SpellCastBuffs.DetermineContextSimple(context, abilityId, abilityName)
+    SpellCastBuffs.EffectsList[ctx][abilityId] = nil
 end
 
 local function RemoveHidden(context)
@@ -151,14 +152,14 @@ function SpellCastBuffs.StealthStateChanged(unitTag, stealthState)
 
     -- Determine Context
     local context = unitTag .. "1"
-    -- Remove buffs first
-    RemoveSneak(context)
+    -- Remove buffs first (20309 is shared live id for Sneak; legacy 20299 synthetic must be cleared)
+    RemoveLegacySneakSynthetic(context)
     RemoveHidden(context)
 
-    -- Add hidden icon if we are hidden
+    -- Crouch sneak (live buff abilityId 20309; icon remains hidden-eye art)
     if stealthState == STEALTH_STATE_HIDDEN or stealthState == STEALTH_STATE_HIDDEN_ALMOST_DETECTED then
-        local abilityId = 20299
-        local abilityName = Abilities.Innate_Sneak
+        local abilityId = 20309
+        local abilityName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(abilityId))
         context = SpellCastBuffs.DetermineContextSimple(context, abilityId, abilityName)
         SpellCastBuffs.EffectsList[context][abilityId] =
         {
@@ -174,10 +175,10 @@ function SpellCastBuffs.StealthStateChanged(unitTag, stealthState)
             restart = true,
             iconNum = 0,
         }
-        -- Add invisible icon if we are invisible
+        -- Shadow stealth / invisibility (same live abilityId 20309, different icon)
     elseif stealthState == STEALTH_STATE_STEALTH or stealthState == STEALTH_STATE_STEALTH_ALMOST_DETECTED then
         local abilityId = 20309
-        local abilityName = Abilities.Innate_Hidden
+        local abilityName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(abilityId))
         context = SpellCastBuffs.DetermineContextSimple(context, abilityId, abilityName)
         SpellCastBuffs.EffectsList[context][abilityId] =
         {

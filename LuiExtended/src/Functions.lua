@@ -858,6 +858,17 @@ do
         return counter
     end
 
+    --- @return string
+    local function SneakMovementTooltipBody()
+        local _, _, speed = GetAdvancedStatValue(ADVANCED_STAT_DISPLAY_TYPE_SNEAK_SPEED_REDUCTION)
+        local _, cost = GetAdvancedStatValue(ADVANCED_STAT_DISPLAY_TYPE_SNEAK_COST)
+
+        if speed <= 0 or speed >= 100 then
+            return zo_strformat(GetString(LUIE_STRING_SKILL_HIDDEN_NO_SPEED_TP), cost)
+        end
+        return zo_strformat(GetString(LUIE_STRING_SKILL_HIDDEN_TP), 100 - speed, cost)
+    end
+
     -- Tooltip handler definitions
     local TooltipHandlers =
     {
@@ -896,15 +907,19 @@ do
             return zo_strformat(GetString(LUIE_STRING_SKILL_BRACE_TP), roundedMitigation, finalSpeed, cost, getResourceType())
         end,
 
-        -- Crouch
+        -- Sneak (skill id)
         [20299] = function ()
-            local _, _, speed = GetAdvancedStatValue(ADVANCED_STAT_DISPLAY_TYPE_SNEAK_SPEED_REDUCTION)
-            local _, cost = GetAdvancedStatValue(ADVANCED_STAT_DISPLAY_TYPE_SNEAK_COST)
+            return SneakMovementTooltipBody()
+        end,
 
-            if speed <= 0 or speed >= 100 then
-                return zo_strformat(GetString(LUIE_STRING_SKILL_HIDDEN_NO_SPEED_TP), cost)
+        -- Sneak buff / stealth (live unit buff id — matches client; body depends on stealth state)
+        [20309] = function (unitTag)
+            unitTag = unitTag or "player"
+            local stealthState = GetUnitStealthState(unitTag)
+            if stealthState == STEALTH_STATE_STEALTH or stealthState == STEALTH_STATE_STEALTH_ALMOST_DETECTED then
+                return GetString(LUIE_STRING_SKILL_INVISIBLE_TP)
             end
-            return zo_strformat(GetString(LUIE_STRING_SKILL_HIDDEN_TP), 100 - speed, cost)
+            return SneakMovementTooltipBody()
         end,
 
         -- Unchained
@@ -934,15 +949,22 @@ do
             local duration = (GetAbilityDuration(126583) or 0) / 1000
             return zo_strformat(GetString(LUIE_STRING_SKILL_IMMOVABLE), duration, counter, 65 + counter)
         end,
+
+        -- Molten Armaments (258661): combat bundle id — use morph ability description for full scaled tooltip
+        [258661] = function ()
+            local desc = GetAbilityDescription(31888, nil, "player")
+            return (desc and desc ~= "") and desc or nil
+        end,
     }
 
     -- Returns dynamic tooltips when called by Tooltip function
     ---
     --- @param abilityId integer
+    --- @param unitTag string|nil player or reticleover when hover context matters (e.g. 20309 Sneak)
     --- @return string
-    local function DynamicTooltip(abilityId)
+    local function DynamicTooltip(abilityId, unitTag)
         local handler = TooltipHandlers[abilityId]
-        return handler and handler()
+        return handler and handler(unitTag)
     end
 
     LUIE.DynamicTooltip = DynamicTooltip

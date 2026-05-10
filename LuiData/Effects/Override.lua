@@ -221,9 +221,9 @@ local effectOverride =
     [119068] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_ROLL_DODGE_DDS, tooltip = Tooltips.Innate_Immobilize_Immunity },                                              -- Immobilize Immunity
     [69143] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_DODGE_FATIGUE_DDS, type = BUFF_EFFECT_TYPE_DEBUFF, unbreakable = 1, tooltip = Tooltips.Innate_Dodge_Fatigue }, -- Dodge Fatigue
 
-    -- Crouch
+    -- Crouch / Sneak (skill sheet id); live player sneak buff reports 20309
     [20299] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_HIDDEN_DDS, dynamicTooltip = true },                                                                                                                          -- Sneak
-    [20309] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_INVISIBLE_DDS, tooltip = Tooltips.Innate_Invisible },                                                                                                         -- Hidden
+    [20309] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_INVISIBLE_DDS, dynamicTooltip = true },                                                                                                                       -- Sneak buff / shadow stealth (tooltip by stealth state)
     [26245] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_BLOCK_STUN_DDS, name = zo_strformat("<<1>> <<2>>", Abilities.Innate_Sneak, Abilities.Innate_Stun), tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN }, -- Slam Stun (Stun from crouch attack)
 
     -- Mount
@@ -1829,6 +1829,8 @@ local effectOverride =
     [134355] = { tooltip = Tooltips.Generic_Knockdown },                    -- Stone Giant (Stone Giant)
 
     -- Molten Weapons / Igneous Weapons / Molten Armaments
+    [258666] = { hide = true }, -- Major Sorcery bundle from Igneous Weapons (31874 shows full morph buff/tooltip)
+    [258661] = { dynamicTooltip = true }, -- Bar-highlight Major Sorcery bundle for Molten Armaments; body via DynamicTooltip -> 31888
     [76537] = { tooltip = Tooltips.Skill_Molten_Armaments }, -- Molten Armaments (Molten Armaments)
 
     -- Obsidian Shield / Igneous Shield / Fragmented Shield
