@@ -60,7 +60,8 @@ local BUFF_EFFECT_TYPE_DEBUFF = BUFF_EFFECT_TYPE_DEBUFF
     - tooltipValue2 = *number* or *string* -- Set a value to use for the 2nd input field of a tooltip that has a 2nd input field
     - tooltipValue3 = *number* or *string* -- Set a value to use for the 2nd input field of a tooltip that has a 3rd input field
     - tooltipValue2Mod = *number* -- Needed in some cases to derive a value on an ability tooltip. This value is used for effects like the snare from Sun Fire, when the duration needs to be derived from either buff since one can potentially be hidden.
-    - dynamicTooltip = true -- This uses a custom dynamic tooltip function for this ability id (note that a dynamic function for this AbilityId needs to exist and no other tooltip data should be set on this id)
+    - dynamicTooltip = true -- Prefer live skill-sheet text via GetAbilityDescription (see LUIE.DynamicTooltip fallback). Handlers in Functions.lua override when special logic is needed (Brace, Sneak, etc.).
+    - tooltipMorphId = *number* -- Optional with dynamicTooltip: buff/bundle ability id differs from the morph shown on the skill sheet — pull description from this id instead of the effect row id.
 
     CC Icon Functionality:
     - cc = LUIE_CC_TYPE_* -- Set a CC type for this ability
@@ -1830,7 +1831,7 @@ local effectOverride =
 
     -- Molten Weapons / Igneous Weapons / Molten Armaments
     [258666] = { hide = true }, -- Major Sorcery bundle from Igneous Weapons (31874 shows full morph buff/tooltip)
-    [258661] = { dynamicTooltip = true }, -- Bar-highlight Major Sorcery bundle for Molten Armaments; body via DynamicTooltip -> 31888
+    [258661] = { dynamicTooltip = true, tooltipMorphId = 31888 }, -- Molten Armaments morph (bundle id != morph)
     [76537] = { tooltip = Tooltips.Skill_Molten_Armaments }, -- Molten Armaments (Molten Armaments)
 
     -- Obsidian Shield / Igneous Shield / Fragmented Shield
@@ -2031,7 +2032,7 @@ local effectOverride =
     [33321] = { icon = "/esoui/art/icons/ability_nightblade_003.dds" },  -- Siphoning Strikes (Siphoning Strikes)
     [114957] = { icon = "/esoui/art/icons/ability_nightblade_003.dds" }, -- Siphoning Strikes (Siphoning Strikes)
     [36908] = { tooltip = Tooltips.Skill_Leeching_Strikes },             -- Leeching Strikes (Leeching Strikes)
-    [215493] = { dynamicTooltip = true },                                -- Siphoning Attacks bundle buff (full text via morph 36935)
+    [215493] = { dynamicTooltip = true, tooltipMorphId = 36935 },       -- Siphoning Attacks bundle buff → morph 36935
     [36935] = { dynamicTooltip = true },                                 -- Siphoning Attacks morph — GetAbilityDescription (was stale static TP)
 
     -- Drain Power / Power Extraction / Sap Essence
@@ -8950,7 +8951,8 @@ local effectOverride =
 --- @field tooltipValue2 (number|string)? # Value for 2nd tooltip input field
 --- @field tooltipValue3 (number|string)? # Value for 3rd tooltip input field
 --- @field tooltipValue2Mod number? # For deriving values like snare duration from either buff
---- @field dynamicTooltip boolean? # Use custom dynamic tooltip function for this ability ID
+--- @field dynamicTooltip boolean? # Use live skill-sheet description via GetAbilityDescription unless a TooltipHandlers entry exists
+--- @field tooltipMorphId integer? # With dynamicTooltip: description source id when effect id differs from morph (e.g. combat bundle vs morph)
 --- @field cc integer? # LUIE_CC_TYPE_* value for CC type
 --- @field ccMergedType integer? # CC type to show only when effects merged
 --- @field isPlayerAbility boolean? # Mark as player ability for generic CC icon usage
