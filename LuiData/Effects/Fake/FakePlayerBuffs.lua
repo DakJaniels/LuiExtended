@@ -120,7 +120,7 @@ local fakePlayerBuffs =
 
     -- Nightblade
     [90587] = { duration = "GET", shiftId = 33375, onlyExtended = true }, -- Blur
-    [90593] = { duration = "GET", shiftId = 35414, onlyExtra = true },    -- Mirage
+    -- Mirage (35414): native aura from EVENT_EFFECT_CHANGED; fake [90593] shiftId 35414 duplicated the same id under a second EffectsList key when Extra Buffs was enabled
     [90620] = { duration = "GET", shiftId = 35419, onlyExtended = true }, -- Phantasmal Escape
 
     [33317] = { duration = "GET", shiftId = 33316, onlyExtra = true },    -- Drain Power

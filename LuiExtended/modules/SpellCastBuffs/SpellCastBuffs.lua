@@ -1472,6 +1472,17 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
     end
 end
 
+--- Routed buff container key → unit tag for stealth/tooltip APIs.
+--- @param container string|nil
+--- @return string
+local function TooltipUnitTagFromBuffContainer(container)
+    if container == "target1" or container == "target2" or container == "targetb" or container == "targetd"
+        or container == "promb_target" or container == "promd_target" then
+        return "reticleover"
+    end
+    return "player"
+end
+
 -- OnMouseEnter for Buff Tooltips
 function SpellCastBuffs.Buff_OnMouseEnter(control)
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
@@ -1565,7 +1576,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
 
                 -- Dynamic Tooltip if present
                 if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].dynamicTooltip then
-                    tooltipText = LUIE.DynamicTooltip(control.effectId) or tooltipText -- Fallback to original tooltipText if nil
+                    tooltipText = LUIE.DynamicTooltip(control.effectId, TooltipUnitTagFromBuffContainer(control.container)) or tooltipText -- Fallback to original tooltipText if nil
                 end
             else
                 duration = 0
@@ -1588,6 +1599,11 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
             if tooltipText then
                 tooltipText = StringOnlyGSUB(tooltipText, "\n$", "") -- Remove blank end line
             end
+        end
+
+        -- Default-tooltip path overwrites dynamic handlers above when TooltipCustom is off
+        if type(control.effectId) == "number" and Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].dynamicTooltip then
+            tooltipText = LUIE.DynamicTooltip(control.effectId, TooltipUnitTagFromBuffContainer(control.container)) or tooltipText
         end
 
         local thirdLine
