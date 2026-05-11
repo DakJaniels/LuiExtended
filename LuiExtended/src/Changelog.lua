@@ -12,6 +12,27 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.1.6
+    "|cFFA500LuiExtended Version 7.2.1.6|r",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Many buff tooltips now use the game's current skill description instead of outdated fixed text. Custom text still applies where we intentionally override (for example Brace, Sneak, champion skills, and armor passives).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: With Custom Tooltips turned off, morph-related buff tooltips still apply correctly instead of being wiped by the default path.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t InfoPanel: Internal cleanup only — on-screen behavior should match what you're used to.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Tooltips: Minor behind-the-scenes tidy-up for damage-type wording on abilities.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Added support for Tonic of Portent Favor (shows like other XP-style buffs with correct icon and tooltip).",
+    "",
+    -- Fixed
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: When several enchanting runes are announced at once, they list in the same order as at an enchanting station (potency, then essence, then aspect).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ActionBar highlights: Templar Cleansing Ritual morphs (base, Ritual of Retribution, Extended Ritual) keep reliable duration tracking on the bar.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Igneous Weapons: removed an extra Major Sorcery bundle buff so you don't see two overlapping Sorcery icons from that skill line.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Molten Armaments: bundle tooltip matches the morph description; Sneak stealth buff uses up-to-date sneak text and avoids duplicate sneak rows when stealth is tracked.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Mirage: Extra Buffs no longer shows a duplicate fake combat buff next to the real morph aura.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Siphoning Attacks (bundle and morph); Feral, Eternal, and Wild Guardian; Inferno / Incinerate / Cauterize aura buffs — tooltips aligned with the skills window.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t InfoPanel: Backpack space (used / total) updates reliably after destroying items, after large inventory syncs, and when materials move into the craft bag.",
+    "",
     -- Version Header 7.2.1.5
     "|cFFA500LuiExtended Version 7.2.1.5|r",
     "",
