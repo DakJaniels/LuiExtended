@@ -446,9 +446,7 @@ local function CreateBlockIndicatorWindow()
     texture:SetAnchor(TOPLEFT, win, TOPLEFT, 0, 0)
     texture:SetDimensions(BLOCK_INDICATOR_SIZE, BLOCK_INDICATOR_SIZE)
     texture:SetHidden(true)
-    texture:SetBlendMode(TEX_BLEND_MODE_ADD)
     texture:SetPixelRoundingEnabled(true)
-    texture:SetShaderEffectType(SHADER_EFFECT_TYPE_CAUSTIC)
     Block.blockIndicatorTexture = texture
     Block.ApplyBlockShieldTexture()
 
