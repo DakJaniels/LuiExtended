@@ -1761,10 +1761,10 @@ local effectOverride =
     [62004] = { hide = true },                                              -- Unrelenting Grip (Unrelenting Grip)
     [77105] = { icon = "/esoui/art/icons/ability_dragonknight_005_a.dds" }, -- Unrelenting Grip (Unrelenting Grip)
 
-    -- Inferno / Flames of Oblivion / Cauterize
-    [28967] = { tooltip = Tooltips.Skill_Inferno_Active },            -- Inferno (Inferno)
-    [32853] = { tooltip = Tooltips.Skill_Flames_of_Oblivion_Active }, -- Flames of Oblivion (Flames of Oblivion)
-    [32881] = { tooltip = Tooltips.Skill_Cauterize_Active },          -- Cauterize (Cauterize)
+    -- Inferno / Incinerate / Cauterize — live sheet text (static strings were pre–Inferno rework / wrong morph names)
+    [28967] = { dynamicTooltip = true },                              -- Inferno
+    [32853] = { dynamicTooltip = true },                              -- Incinerate (was Flames of Oblivion)
+    [32881] = { dynamicTooltip = true },                              -- Cauterize
 
     -- Dragonknight Standard / Shifting Standard / Standard of Might
     [98438] = { name = Abilities.Skill_Shackle },                                                                                                -- Shackle Damage (Dragonknight Standard - Shackle Synergy)
