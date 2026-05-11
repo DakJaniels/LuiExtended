@@ -1324,11 +1324,11 @@ function ChatAnnouncements.ActivityStatusUpdate(eventId, status)
     end
 
     -- Debug
-    if status == ACTIVITY_FINDER_STATUS_FORMING_GROUP and g_savedQueueValue ~= ACTIVITY_FINDER_STATUS_FORMING_GROUP then
-        if LUIE.IsDevDebugEnabled() then
-            LUIE:Log("Debug", "Old ACTIVITY_FINDER_STATUS_FORMING_GROUP event triggered")
-        end
-    end
+    -- if status == ACTIVITY_FINDER_STATUS_FORMING_GROUP and g_savedQueueValue ~= ACTIVITY_FINDER_STATUS_FORMING_GROUP then
+    --     if LUIE.IsDevDebugEnabled() then
+    --         LUIE:Log("Debug", "Old ACTIVITY_FINDER_STATUS_FORMING_GROUP event triggered")
+    --     end
+    -- end
 
     g_savedQueueValue = status
 end
@@ -1927,11 +1927,11 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
     type = typeResult
 
     -- CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER (76): opening currency containers (e.g. Transmutation Geode, other geodes that grant crystals/currency). Mapped to CurrencyMessageLoot above.
-    if reason == CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER then
-        if LUIE.IsDevDebugEnabled() then
-            LUIE:Log("Debug", "Currency Change Reason 76 - CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER")
-        end
-    end
+    -- if reason == CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER then
+    --     if LUIE.IsDevDebugEnabled() then
+    --         LUIE:Log("Debug", "Currency Change Reason 76 - CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER")
+    --     end
+    -- end
 
     -- Send relevant values over to the currency printer
     ChatAnnouncements.CurrencyPrinter(currency, formattedValue, changeColor, changeType, currencyTypeColor, currencyIcon, currencyName, currencyTotal, messageChange, messageTotal, type)
@@ -3449,9 +3449,9 @@ function ChatAnnouncements.ResolveQuestItemChange()
             -- Lower
             if newValue < questItemIndex[itemId].stack then
                 -- Easy temporary debug for my accounts only
-                if LUIE.IsDevDebugEnabled() then
-                    LUIE:Log("Debug", itemId .. " Removed")
-                end
+                -- if LUIE.IsDevDebugEnabled() then
+                --     LUIE:Log("Debug", itemId .. " Removed")
+                -- end
                 --
 
                 countChange = newValue + questItemIndex[itemId].counter
@@ -3518,9 +3518,9 @@ function ChatAnnouncements.ResolveQuestItemChange()
             -- Higher
             if newValue > questItemIndex[itemId].stack then
                 -- Easy debug for my devs only
-                if LUIE.IsDevDebugEnabled() then
-                    LUIE:Log("Debug", itemId .. " Added")
-                end
+                -- if LUIE.IsDevDebugEnabled() then
+                --     LUIE:Log("Debug", itemId .. " Added")
+                -- end
                 --
                 countChange = newValue - questItemIndex[itemId].stack
                 g_questItemAdded[itemId] = true
@@ -4097,9 +4097,9 @@ end
 function ChatAnnouncements.ItemCounterDelay(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, filter, groupLoot, alwaysFirst, delay)
     -- Return if we have an invalid itemId or stack
     if itemId == 0 or not stack then
-        if LUIE.IsDevDebugEnabled() then
-            LUIE:Log("Debug", "Item counter returned invalid items")
-        end
+        -- if LUIE.IsDevDebugEnabled() then
+        --     LUIE:Log("Debug", "Item counter returned invalid items")
+        -- end
         return
     end
 
@@ -5922,13 +5922,13 @@ function ChatAnnouncements.JusticeRemovePrint()
 end
 
 function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
-    if LUIE.IsDevDebugEnabled() then
-        local traceback = "Disguise State:\n" ..
-            "--> eventId: " .. tostring(eventId) .. "\n" ..
-            "--> unitTag: " .. tostring(unitTag) .. "\n" ..
-            "--> disguiseState: " .. tostring(disguiseState)
-        LUIE:Log("Debug", traceback)
-    end
+    -- if LUIE.IsDevDebugEnabled() then
+    --     local traceback = "Disguise State:\n" ..
+    --         "--> eventId: " .. tostring(eventId) .. "\n" ..
+    --         "--> unitTag: " .. tostring(unitTag) .. "\n" ..
+    --         "--> disguiseState: " .. tostring(disguiseState)
+    --     LUIE:Log("Debug", traceback)
+    -- end
 
     if disguiseState == DISGUISE_STATE_DANGER then
         if ChatAnnouncements.SV.Notify.DisguiseWarnCA then
@@ -6141,18 +6141,18 @@ end
 -- LINK_HANDLER.LINK_CLICKED_EVENT
 -- Custom Link Handlers to deal with when a book link in chat is clicked, this will open the book rather than the default link that only shows whether a lore entry has been read or not.
 function LUIE.HandleClickEvent(rawLink, mouseButton, linkText, linkStyle, linkType, categoryIndex, collectionIndex, bookIndex)
-    if LUIE.IsDevDebugEnabled() then
-        local traceback = "Handle Click Event:\n" ..
-            "--> rawLink: " .. tostring(rawLink) .. "\n" ..
-            "--> mouseButton: " .. tostring(mouseButton) .. "\n" ..
-            "--> linkText: " .. tostring(linkText) .. "\n" ..
-            "--> linkStyle: " .. tostring(linkStyle) .. "\n" ..
-            "--> linkType: " .. tostring(linkType) .. "\n" ..
-            "--> categoryIndex: " .. tostring(categoryIndex) .. "\n" ..
-            "--> collectionIndex: " .. tostring(collectionIndex) .. "\n" ..
-            "--> bookIndex: " .. tostring(bookIndex)
-        LUIE:Log("Debug", traceback)
-    end
+    -- if LUIE.IsDevDebugEnabled() then
+    --     local traceback = "Handle Click Event:\n" ..
+    --         "--> rawLink: " .. tostring(rawLink) .. "\n" ..
+    --         "--> mouseButton: " .. tostring(mouseButton) .. "\n" ..
+    --         "--> linkText: " .. tostring(linkText) .. "\n" ..
+    --         "--> linkStyle: " .. tostring(linkStyle) .. "\n" ..
+    --         "--> linkType: " .. tostring(linkType) .. "\n" ..
+    --         "--> categoryIndex: " .. tostring(categoryIndex) .. "\n" ..
+    --         "--> collectionIndex: " .. tostring(collectionIndex) .. "\n" ..
+    --         "--> bookIndex: " .. tostring(bookIndex)
+    --     LUIE:Log("Debug", traceback)
+    -- end
 
     if linkType == "LINK_TYPE_LUIBOOK" then
         -- Read the book
@@ -8172,16 +8172,16 @@ function ChatAnnouncements.HookFunction()
 
         -- Check WritCreater settings first
         if WritCreater and WritCreater:GetSettings().suppressQuestAnnouncements and isQuestWritQuest(journalIndex) then
-            if LUIE.IsDevDebugEnabled() then
-                LUIE:Log("Debug", string.format([[Writ Quest Condition Suppressed:
---> Quest: %s
---> Index: %d
---> Condition: %s]],
-                                                questName,
-                                                journalIndex,
-                                                conditionText
-                ))
-            end
+--             if LUIE.IsDevDebugEnabled() then
+--                 LUIE:Log("Debug", string.format([[Writ Quest Condition Suppressed:
+-- --> Quest: %s
+-- --> Index: %d
+-- --> Condition: %s]],
+--                                                 questName,
+--                                                 journalIndex,
+--                                                 conditionText
+--                 ))
+--             end
             return true
         end
 
@@ -8408,16 +8408,16 @@ function ChatAnnouncements.HookFunction()
     local function OnQuestAdvanced(eventId, questIndex, questName, isPushed, isComplete, mainStepChanged, soundOverride)
         -- Check if WritCreater is enabled & then call a copy of a local function from WritCreater to check if this is a Writ Quest
         if WritCreater and WritCreater:GetSettings().suppressQuestAnnouncements and isQuestWritQuest(questIndex) then
-            if LUIE.IsDevDebugEnabled() then
-                LUIE:Log("Debug", string.format([[Writ Quest Condition Suppressed:
---> Quest: %s
---> Index: %d
---> Condition: %s]],
-                                                questName,
-                                                questIndex,
-                                                isComplete and "Complete" or "Not Complete"
-                ))
-            end
+--             if LUIE.IsDevDebugEnabled() then
+--                 LUIE:Log("Debug", string.format([[Writ Quest Condition Suppressed:
+-- --> Quest: %s
+-- --> Index: %d
+-- --> Condition: %s]],
+--                                                 questName,
+--                                                 questIndex,
+--                                                 isComplete and "Complete" or "Not Complete"
+--                 ))
+--             end
             return true
         end
 
