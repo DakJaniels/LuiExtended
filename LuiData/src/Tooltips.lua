@@ -32,16 +32,49 @@ local zo_strformat = zo_strformat
 -- SI_DAMAGETYPE11 = "Poison"
 -- SI_DAMAGETYPE12 = "Bleed"
 
--- Local Damagetypes for easy use
+-- Local Damagetypes for easy use (base names cached where reused with zo_strformat below)
+local str_Flame = GetString(SI_DAMAGETYPE3)
+local str_Shock = GetString(SI_DAMAGETYPE4)
+local str_Frost = GetString(SI_DAMAGETYPE6)
 local PhysicalDamage = GetString(SI_DAMAGETYPE2) .. " Damage" -- TODO: Localize
-local FlameDamage = GetString(SI_DAMAGETYPE3) .. " Damage"    -- TODO: Localize
-local ShockDamage = GetString(SI_DAMAGETYPE4) .. " Damage"    -- TODO: Localize
-local FrostDamage = GetString(SI_DAMAGETYPE6) .. " Damage"    -- TODO: Localize
+local FlameDamage = str_Flame .. " Damage"                   -- TODO: Localize
+local ShockDamage = str_Shock .. " Damage"                   -- TODO: Localize
+local FrostDamage = str_Frost .. " Damage"                   -- TODO: Localize
 local MagicDamage = GetString(SI_DAMAGETYPE8) .. " Damage"    -- TODO: Localize
 local DiseaseDamage = GetString(SI_DAMAGETYPE10) .. " Damage" -- TODO: Localize
 local PoisonDamage = GetString(SI_DAMAGETYPE11) .. " Damage"  -- TODO: Localize
 local BleedDamage = GetString(SI_DAMAGETYPE12) .. " Damage"   -- TODO: Localize
 local OblivionDamage = "Oblivion Damage"                      -- TODO: Localize
+
+-- Cached string lookups (single GetString per repeated id — reduces load-time C-call churn)
+local str_BATTLE_RUSH_TP = GetString(LUIE_STRING_SKILL_BATTLE_RUSH_TP)
+local str_DEFENSIVE_SCROLL_BONUS_TP = GetString(LUIE_STRING_SKILL_DEFENSIVE_SCROLL_BONUS_TP)
+local str_EDGE_KEEP_BONUS_TP = GetString(LUIE_STRING_SKILL_EDGE_KEEP_BONUS_TP)
+local str_ELDER_SCROLL_TP = GetString(LUIE_STRING_SKILL_ELDER_SCROLL_TP)
+local str_ELEMENTAL_STORM_TP = GetString(LUIE_STRING_SKILL_ELEMENTAL_STORM_TP)
+local str_EMPERORSHIP_ALLIANCE_BONUS_TP = GetString(LUIE_STRING_SKILL_EMPERORSHIP_ALLIANCE_BONUS_TP)
+local str_ENEMY_KEEP_BONUS_TP = GetString(LUIE_STRING_SKILL_ENEMY_KEEP_BONUS_TP)
+local str_EXPERIENCE_ALLIANCE_HALF_HOUR_TP = GetString(LUIE_STRING_SKILL_EXPERIENCE_ALLIANCE_HALF_HOUR_TP)
+local str_EXPERIENCE_ALLIANCE_HOUR_TP = GetString(LUIE_STRING_SKILL_EXPERIENCE_ALLIANCE_HOUR_TP)
+local str_EXPERIENCE_HALF_HOUR_TP = GetString(LUIE_STRING_SKILL_EXPERIENCE_HALF_HOUR_TP)
+local str_EXPERIENCE_HOUR_TP = GetString(LUIE_STRING_SKILL_EXPERIENCE_HOUR_TP)
+local str_EYE_OF_THE_STORM_TP = GetString(LUIE_STRING_SKILL_EYE_OF_THE_STORM_TP)
+local str_FOLLOW_UP_TP = GetString(LUIE_STRING_SKILL_FOLLOW_UP_TP)
+local str_GENERIC_DOT_SNARE_TP = GetString(LUIE_STRING_SKILL_GENERIC_DOT_SNARE_TP)
+local str_GENERIC_DOT_TP = GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP)
+local str_GENERIC_GROUND_AOE_SNARE_TP = GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP)
+local str_GENERIC_GROUND_AOE_STACK_TP = GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_STACK_TP)
+local str_GENERIC_GROUND_AOE_TP = GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP)
+local str_GENERIC_RAVAGE_HEALTH_POTION_TP = GetString(LUIE_STRING_SKILL_GENERIC_RAVAGE_HEALTH_POTION_TP)
+local str_HARDENED_CARAPACE_TP = GetString(LUIE_STRING_SKILL_HARDENED_CARAPACE_TP)
+local str_HAWK_EYE_TP = GetString(LUIE_STRING_SKILL_HAWK_EYE_TP)
+local str_OFFENSIVE_SCROLL_BONUS_TP = GetString(LUIE_STRING_SKILL_OFFENSIVE_SCROLL_BONUS_TP)
+local str_PERSISTENCE = GetString(LUIE_STRING_SKILL_PERSISTENCE)
+local str_REMOVE_TOOLTIP_SCALED_LEVEL = GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL)
+local str_REUSABLE_PARTS_TP = GetString(LUIE_STRING_SKILL_REUSABLE_PARTS_TP)
+local str_SET_ENGINE_GUARDIAN = GetString(LUIE_STRING_SKILL_SET_ENGINE_GUARDIAN)
+local str_SET_SUCCESSION_TP = GetString(LUIE_STRING_SKILL_SET_SUCCESSION_TP)
+local str_SIGIL_OF_POWER_TP = GetString(LUIE_STRING_SKILL_SIGIL_OF_POWER_TP)
 
 --- @class (partial) Tooltips
 local tooltips =
@@ -202,42 +235,42 @@ local tooltips =
 
     Generic_Increase_Healing_Received_No_Dur = GetString(LUIE_STRING_SKILL_GENERIC_INCREASE_HEALING_RECEIVED_NO_DUR_TP),
 
-    Generic_Bleed = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", BleedDamage),
-    Generic_Physical = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", PhysicalDamage),
-    Generic_Disease = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", DiseaseDamage),
-    Generic_Poison = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", PoisonDamage),
-    Generic_Burn = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", FlameDamage),
-    Generic_Freeze = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", FrostDamage),
-    Generic_Shock = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", ShockDamage),
-    Generic_Oblivion = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", OblivionDamage),
+    Generic_Bleed = StringOnlyGSUB(str_GENERIC_DOT_TP, "SUBSTRING", BleedDamage),
+    Generic_Physical = StringOnlyGSUB(str_GENERIC_DOT_TP, "SUBSTRING", PhysicalDamage),
+    Generic_Disease = StringOnlyGSUB(str_GENERIC_DOT_TP, "SUBSTRING", DiseaseDamage),
+    Generic_Poison = StringOnlyGSUB(str_GENERIC_DOT_TP, "SUBSTRING", PoisonDamage),
+    Generic_Burn = StringOnlyGSUB(str_GENERIC_DOT_TP, "SUBSTRING", FlameDamage),
+    Generic_Freeze = StringOnlyGSUB(str_GENERIC_DOT_TP, "SUBSTRING", FrostDamage),
+    Generic_Shock = StringOnlyGSUB(str_GENERIC_DOT_TP, "SUBSTRING", ShockDamage),
+    Generic_Oblivion = StringOnlyGSUB(str_GENERIC_DOT_TP, "SUBSTRING", OblivionDamage),
     Generic_Magic_No_Tick = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_NO_TICK_TP), "SUBSTRING", MagicDamage),
-    Generic_Magic = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), "SUBSTRING", MagicDamage),
+    Generic_Magic = StringOnlyGSUB(str_GENERIC_DOT_TP, "SUBSTRING", MagicDamage),
     Generic_HoT = GetString(LUIE_STRING_SKILL_GENERIC_HOT_TP),
     Generic_HoT_Channel = GetString(LUIE_STRING_SKILL_GENERIC_HOT_CHANNEL_TP),
 
-    Generic_Shock_Snare = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_SNARE_TP), "SUBSTRING", ShockDamage),
-    Generic_Oblivion_Snare = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_DOT_SNARE_TP), "SUBSTRING", OblivionDamage),
+    Generic_Shock_Snare = StringOnlyGSUB(str_GENERIC_DOT_SNARE_TP, "SUBSTRING", ShockDamage),
+    Generic_Oblivion_Snare = StringOnlyGSUB(str_GENERIC_DOT_SNARE_TP, "SUBSTRING", OblivionDamage),
 
-    Generic_AOE_Physical = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", PhysicalDamage),
-    Generic_AOE_Bleed = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", BleedDamage),
-    Generic_AOE_Poison = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", PoisonDamage),
-    Generic_AOE_Disease = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", DiseaseDamage),
-    Generic_AOE_Fire = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", FlameDamage),
-    Generic_AOE_Frost = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", FrostDamage),
-    Generic_AOE_Shock = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", ShockDamage),
-    Generic_AOE_Magic = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", MagicDamage),
-    Generic_AOE_Oblivion = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_TP), "SUBSTRING", OblivionDamage),
+    Generic_AOE_Physical = StringOnlyGSUB(str_GENERIC_GROUND_AOE_TP, "SUBSTRING", PhysicalDamage),
+    Generic_AOE_Bleed = StringOnlyGSUB(str_GENERIC_GROUND_AOE_TP, "SUBSTRING", BleedDamage),
+    Generic_AOE_Poison = StringOnlyGSUB(str_GENERIC_GROUND_AOE_TP, "SUBSTRING", PoisonDamage),
+    Generic_AOE_Disease = StringOnlyGSUB(str_GENERIC_GROUND_AOE_TP, "SUBSTRING", DiseaseDamage),
+    Generic_AOE_Fire = StringOnlyGSUB(str_GENERIC_GROUND_AOE_TP, "SUBSTRING", FlameDamage),
+    Generic_AOE_Frost = StringOnlyGSUB(str_GENERIC_GROUND_AOE_TP, "SUBSTRING", FrostDamage),
+    Generic_AOE_Shock = StringOnlyGSUB(str_GENERIC_GROUND_AOE_TP, "SUBSTRING", ShockDamage),
+    Generic_AOE_Magic = StringOnlyGSUB(str_GENERIC_GROUND_AOE_TP, "SUBSTRING", MagicDamage),
+    Generic_AOE_Oblivion = StringOnlyGSUB(str_GENERIC_GROUND_AOE_TP, "SUBSTRING", OblivionDamage),
 
-    Generic_AOE_Fire_Stacking = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_STACK_TP), "SUBSTRING", FlameDamage),
-    Generic_AOE_Shock_Stacking = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_STACK_TP), "SUBSTRING", ShockDamage),
+    Generic_AOE_Fire_Stacking = StringOnlyGSUB(str_GENERIC_GROUND_AOE_STACK_TP, "SUBSTRING", FlameDamage),
+    Generic_AOE_Shock_Stacking = StringOnlyGSUB(str_GENERIC_GROUND_AOE_STACK_TP, "SUBSTRING", ShockDamage),
 
-    Generic_AOE_Snare_Physical = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", PhysicalDamage),
-    Generic_AOE_Snare_Poison = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", PoisonDamage),
-    Generic_AOE_Snare_Disease = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", DiseaseDamage),
-    Generic_AOE_Snare_Fire = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", FlameDamage),
-    Generic_AOE_Snare_Frost = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", FrostDamage),
-    Generic_AOE_Snare_Shock = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", ShockDamage),
-    Generic_AOE_Snare_Magic = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_GROUND_AOE_SNARE_TP), "SUBSTRING", MagicDamage),
+    Generic_AOE_Snare_Physical = StringOnlyGSUB(str_GENERIC_GROUND_AOE_SNARE_TP, "SUBSTRING", PhysicalDamage),
+    Generic_AOE_Snare_Poison = StringOnlyGSUB(str_GENERIC_GROUND_AOE_SNARE_TP, "SUBSTRING", PoisonDamage),
+    Generic_AOE_Snare_Disease = StringOnlyGSUB(str_GENERIC_GROUND_AOE_SNARE_TP, "SUBSTRING", DiseaseDamage),
+    Generic_AOE_Snare_Fire = StringOnlyGSUB(str_GENERIC_GROUND_AOE_SNARE_TP, "SUBSTRING", FlameDamage),
+    Generic_AOE_Snare_Frost = StringOnlyGSUB(str_GENERIC_GROUND_AOE_SNARE_TP, "SUBSTRING", FrostDamage),
+    Generic_AOE_Snare_Shock = StringOnlyGSUB(str_GENERIC_GROUND_AOE_SNARE_TP, "SUBSTRING", ShockDamage),
+    Generic_AOE_Snare_Magic = StringOnlyGSUB(str_GENERIC_GROUND_AOE_SNARE_TP, "SUBSTRING", MagicDamage),
 
     Generic_AOE_Heal = GetString(LUIE_STRING_SKILL_GENERIC_GROUND_HEAL_TP),
 
@@ -269,8 +302,8 @@ local tooltips =
     Generic_Detection = GetString(LUIE_STRING_SKILL_GENERIC_DETECTION_TP),
     Generic_Detection_NPC = GetString(LUIE_STRING_SKILL_GENERIC_DETECTION_NPC_TP),
 
-    Generic_Ravage_Health_Potion = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_RAVAGE_HEALTH_POTION_TP), "SUBSTRING", PoisonDamage),
-    Generic_Gradual_Ravage_Health_Potion = StringOnlyGSUB(GetString(LUIE_STRING_SKILL_GENERIC_RAVAGE_HEALTH_POTION_TP), "SUBSTRING", BleedDamage),
+    Generic_Ravage_Health_Potion = StringOnlyGSUB(str_GENERIC_RAVAGE_HEALTH_POTION_TP, "SUBSTRING", PoisonDamage),
+    Generic_Gradual_Ravage_Health_Potion = StringOnlyGSUB(str_GENERIC_RAVAGE_HEALTH_POTION_TP, "SUBSTRING", BleedDamage),
     -- Generic_Ravage_Magicka_Potion                   = GetString(LUIE_STRING_SKILL_GENERIC_RAVAGE_MAGICKA_POTION_TP),
     -- Generic_Ravage_Stamina_Potion                   = GetString(LUIE_STRING_SKILL_GENERIC_RAVAGE_STAMINA_POTION_TP),
     Generic_Ravage_Magicka_Poison = GetString(LUIE_STRING_SKILL_GENERIC_RAVAGE_MAGICKA_POISON_TP),
@@ -382,17 +415,17 @@ local tooltips =
     Food_Crafted_Clockwork_Citrus_Filet = GetItemLinkOnUseAbilityDescription("|H1:item:133556:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
     Food_Crafted_Artaeum_Takeaway_Broth = GetItemLinkOnUseAbilityDescription("|H1:item:139018:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
     Food_Crafted_Artaeum_Pickled_Fish_Bowl = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:139016:6:1:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_ARTAEUM_BOWL), GetString(LUIE_STRING_SKILL_ADD_TOOLTIP_ARTAEUM_BOWL)),
-    Food_Crafted_Candied_Jesters_Coins = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:120762:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Lava_Foot_Soup = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112425:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Alcaire_Festival_Sword_Pie = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112439:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Pumpkin_Snack_Skewer = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87686:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Crunchy_Spider_Skewer = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87691:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Frosted_Brains = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87696:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Jagga_Drenched_Mud_Ball = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112434:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Jewels_of_Misrule = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:120764:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Rajhins_Sugar_Claws = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112438:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Sweet_Sanguine_Apples = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87685:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crafted_Bewitched_Sugar_Skulls = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:153629:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crafted_Candied_Jesters_Coins = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:120762:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Food_Crafted_Lava_Foot_Soup = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112425:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Food_Crafted_Alcaire_Festival_Sword_Pie = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112439:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Food_Crafted_Pumpkin_Snack_Skewer = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87686:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Food_Crafted_Crunchy_Spider_Skewer = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87691:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Food_Crafted_Frosted_Brains = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87696:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Food_Crafted_Jagga_Drenched_Mud_Ball = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112434:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Food_Crafted_Jewels_of_Misrule = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:120764:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Food_Crafted_Rajhins_Sugar_Claws = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112438:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Food_Crafted_Sweet_Sanguine_Apples = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87685:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Food_Crafted_Bewitched_Sugar_Skulls = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:153629:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
 
     -- Vendor / Cyrodiil Food
     Food_Vendor_Health = GetItemLinkOnUseAbilityDescription("|H1:item:57637:308:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
@@ -403,10 +436,10 @@ local tooltips =
     Food_Cyrodilic_Field_Treat = GetItemLinkOnUseAbilityDescription("|H1:item:71075:368:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
 
     -- Crown Food
-    Food_Crown_Crate_Meal = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:94437:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crown_Meal = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:64711:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crown_Vigorous_Ragout = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:124676:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Food_Crown_Combat_Mystics_Stew = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:124675:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Food_Crown_Crate_Meal = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:94437:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Food_Crown_Meal = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:64711:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Food_Crown_Vigorous_Ragout = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:124676:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Food_Crown_Combat_Mystics_Stew = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:124675:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
 
     -- Crafted Drink
     Drink_Crafted_Health = GetItemLinkOnUseAbilityDescription("|H1:item:68257:309:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
@@ -418,14 +451,14 @@ local tooltips =
     Drink_Crafted_Triple = GetItemLinkOnUseAbilityDescription("|H1:item:68276:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
     Drink_Crafted_Orzorgas_Red_Frothgar = GetItemLinkOnUseAbilityDescription("|H1:item:71056:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
     Drink_Crafted_Spring_Loaded_Infusion = GetItemLinkOnUseAbilityDescription("|H1:item:133555:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
-    Drink_Crafted_Dubious_Camoran_Throne = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:120763:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crafted_Witchmothers_Potent_Brew = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87697:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crafted_Bowl_of_Peeled_Eyeballs = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87687:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crafted_Witchmothers_Party_Punch = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87690:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crafted_Ghastly_Eye_Bowl = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87695:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crafted_Bergama_Warning_Fire = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112426:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Drink_Crafted_Dubious_Camoran_Throne = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:120763:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Drink_Crafted_Witchmothers_Potent_Brew = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87697:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Drink_Crafted_Bowl_of_Peeled_Eyeballs = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87687:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Drink_Crafted_Witchmothers_Party_Punch = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87690:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Drink_Crafted_Ghastly_Eye_Bowl = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87695:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Drink_Crafted_Bergama_Warning_Fire = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112426:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
     Drink_Crafted_Betnikh_Twice_Spiked_Ale = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112433:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_TWICE_SPIKED_ALE), ""),
-    Drink_Crafted_Snow_Bear_Glow_Wine = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112440:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Drink_Crafted_Snow_Bear_Glow_Wine = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:112440:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
     Drink_Double_Bloody_Mara = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:87699:6:1:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_DOUBLE_BLOODY_MARA), ""),
     Drink_Hissmir = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:101879:6:1:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_HISSMIR), GetString(LUIE_STRING_SKILL_ADD_TOOLTIP_HISSMIR)),
     Drink_Crafted_Disastrously_Bloody_Mara = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:153625:311:50:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_DISASTROUSLY_BLOODY), ""),
@@ -440,31 +473,31 @@ local tooltips =
     Drink_Cyrodilic_Field_Tea = GetItemLinkOnUseAbilityDescription("|H1:item:71078:368:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"),
 
     -- Crown Drink
-    Drink_Crown_Crate_Drink = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:94438:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crown_Drink = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:64712:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crown_Stout_Magic_Liqueur = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:124677:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
-    Drink_Crown_Vigorous_Tincture = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:124678:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), GetString(LUIE_STRING_SKILL_REMOVE_TOOLTIP_SCALED_LEVEL), ""),
+    Drink_Crown_Crate_Drink = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:94438:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Drink_Crown_Drink = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:64712:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Drink_Crown_Stout_Magic_Liqueur = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:124677:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
+    Drink_Crown_Vigorous_Tincture = StringOnlyGSUB(GetItemLinkOnUseAbilityDescription("|H1:item:124678:123:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h"), str_REMOVE_TOOLTIP_SCALED_LEVEL, ""),
 
     -- Experience
-    Experience_Psijic_Ambrosia = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HALF_HOUR_TP), "50"),
-    Experience_Aetherial_Ambrosia = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HALF_HOUR_TP), "100"),
-    Experience_Mythic_Aetherial_Ambrosia = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HALF_HOUR_TP), "150"),
+    Experience_Psijic_Ambrosia = zo_strformat(str_EXPERIENCE_HALF_HOUR_TP, "50"),
+    Experience_Aetherial_Ambrosia = zo_strformat(str_EXPERIENCE_HALF_HOUR_TP, "100"),
+    Experience_Mythic_Aetherial_Ambrosia = zo_strformat(str_EXPERIENCE_HALF_HOUR_TP, "150"),
     Experience_Tonic_Portent_Favor = GetItemLinkOnUseAbilityDescription("|H1:item:224839:124:1:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h"),
-    Experience_Crown = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HOUR_TP), "50", "2"),
-    Experience_Gold_Coast = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HOUR_TP), "50", "1"),
-    Experience_Major_Gold_Coast = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HOUR_TP), "100", "1"),
-    Experience_Grand_Gold_Coast = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HOUR_TP), "150", "1"),
-    Experience_Seasonal_Event = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_HOUR_TP), "100", "2"),
+    Experience_Crown = zo_strformat(str_EXPERIENCE_HOUR_TP, "50", "2"),
+    Experience_Gold_Coast = zo_strformat(str_EXPERIENCE_HOUR_TP, "50", "1"),
+    Experience_Major_Gold_Coast = zo_strformat(str_EXPERIENCE_HOUR_TP, "100", "1"),
+    Experience_Grand_Gold_Coast = zo_strformat(str_EXPERIENCE_HOUR_TP, "150", "1"),
+    Experience_Seasonal_Event = zo_strformat(str_EXPERIENCE_HOUR_TP, "100", "2"),
     Experience_Seasonal_Pelinal = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_PELINAL), "2"),
 
     -- Alliance War Experience
-    Experience_Alliance_War_Skill = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_ALLIANCE_HOUR_TP), "50"),
-    Experience_Alliance_War_Skill_Major = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_ALLIANCE_HOUR_TP), "100"),
-    Experience_Alliance_War_Skill_Grand = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_ALLIANCE_HOUR_TP), "150"),
+    Experience_Alliance_War_Skill = zo_strformat(str_EXPERIENCE_ALLIANCE_HOUR_TP, "50"),
+    Experience_Alliance_War_Skill_Major = zo_strformat(str_EXPERIENCE_ALLIANCE_HOUR_TP, "100"),
+    Experience_Alliance_War_Skill_Grand = zo_strformat(str_EXPERIENCE_ALLIANCE_HOUR_TP, "150"),
 
-    Experience_Colovian_War_Torte = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_ALLIANCE_HALF_HOUR_TP), "50"),    -- Colovian War Torte
-    Experience_Molten_War_Torte = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_ALLIANCE_HALF_HOUR_TP), "100"),     -- Molten War Torte
-    Experience_White_Gold_War_Torte = zo_strformat(GetString(LUIE_STRING_SKILL_EXPERIENCE_ALLIANCE_HALF_HOUR_TP), "150"), -- White-Gold War Torte
+    Experience_Colovian_War_Torte = zo_strformat(str_EXPERIENCE_ALLIANCE_HALF_HOUR_TP, "50"),    -- Colovian War Torte
+    Experience_Molten_War_Torte = zo_strformat(str_EXPERIENCE_ALLIANCE_HALF_HOUR_TP, "100"),     -- Molten War Torte
+    Experience_White_Gold_War_Torte = zo_strformat(str_EXPERIENCE_ALLIANCE_HALF_HOUR_TP, "150"), -- White-Gold War Torte
 
     -- Mementos
     Memento_Witchmothers_Brew = GetAbilityDescription(84369),
@@ -500,7 +533,7 @@ local tooltips =
     Set_Aslyum_Restoration_Staff = GetString(LUIE_STRING_SKILL_SET_ASYLUM_RESTORATION_STAFF),
     Set_Maelstrom_DW = GetString(LUIE_STRING_SKILL_SET_MAELSTROM_DW),
     Set_Maelstrom_1H = GetString(LUIE_STRING_SKILL_SET_MAELSTROM_1H),
-    Set_Maelstrom_2H = StringOnlyGSUB(zo_strformat(GetString(LUIE_STRING_SKILL_GENERIC_DOT_TP), 6, 1), "SUBSTRING", BleedDamage),
+    Set_Maelstrom_2H = StringOnlyGSUB(zo_strformat(str_GENERIC_DOT_TP, 6, 1), "SUBSTRING", BleedDamage),
     Set_Master_1H = GetString(LUIE_STRING_SKILL_SET_MASTER_1H),
     Set_Master_Resto = GetString(LUIE_STRING_SKILL_SET_MASTER_RESTO),
     Set_Blackrose_Dual_Wield = GetString(LUIE_STRING_SKILL_SET_BLACKROSE_DUAL_WIELD),
@@ -535,9 +568,9 @@ local tooltips =
     Set_Spawn_of_Mephala = GetString(LUIE_STRING_SKILL_SET_SPAWN_OF_MEPHALA_TP),
     Set_Stormfist = GetString(LUIE_STRING_SKILL_SET_STORMFIST_TP),
     Skill_Stormfist_Ground = GetString(LUIE_STRING_SKILL_STORMFIST_GROUND_TP),
-    Set_Engine_Guardian_Stamina = zo_strformat(GetString(LUIE_STRING_SKILL_SET_ENGINE_GUARDIAN), GetString(SI_COMBATMECHANICFLAGS4)),
-    Set_Engine_Guardian_Magicka = zo_strformat(GetString(LUIE_STRING_SKILL_SET_ENGINE_GUARDIAN), GetString(SI_COMBATMECHANICFLAGS1)),
-    Set_Engine_Guardian_Health = zo_strformat(GetString(LUIE_STRING_SKILL_SET_ENGINE_GUARDIAN), GetString(SI_COMBATMECHANICFLAGS32)),
+    Set_Engine_Guardian_Stamina = zo_strformat(str_SET_ENGINE_GUARDIAN, GetString(SI_COMBATMECHANICFLAGS4)),
+    Set_Engine_Guardian_Magicka = zo_strformat(str_SET_ENGINE_GUARDIAN, GetString(SI_COMBATMECHANICFLAGS1)),
+    Set_Engine_Guardian_Health = zo_strformat(str_SET_ENGINE_GUARDIAN, GetString(SI_COMBATMECHANICFLAGS32)),
     Set_The_Troll_King = GetString(LUIE_STRING_SKILL_SET_THE_TROLL_KING_TP),
     Set_Thurvokun = GetString(LUIE_STRING_SKILL_SET_THURVOKUN_TP),
     Set_Thurvokun_Ground = GetString(LUIE_STRING_SKILL_SET_THURVOKUN_GROUND_TP),
@@ -661,9 +694,9 @@ local tooltips =
     Set_Ravager = GetString(LUIE_STRING_SKILL_SET_RAVAGER_TP),
 
     -- Arena Sets
-    Set_Succession_Flame = zo_strformat(GetString(LUIE_STRING_SKILL_SET_SUCCESSION_TP), FlameDamage),
-    Set_Succession_Shock = zo_strformat(GetString(LUIE_STRING_SKILL_SET_SUCCESSION_TP), ShockDamage),
-    Set_Succession_Frost = zo_strformat(GetString(LUIE_STRING_SKILL_SET_SUCCESSION_TP), FrostDamage),
+    Set_Succession_Flame = zo_strformat(str_SET_SUCCESSION_TP, FlameDamage),
+    Set_Succession_Shock = zo_strformat(str_SET_SUCCESSION_TP, ShockDamage),
+    Set_Succession_Frost = zo_strformat(str_SET_SUCCESSION_TP, FrostDamage),
     Set_Para_Bellum = GetString(LUIE_STRING_SKILL_SET_PARA_BELLUM_TP),
     Set_Hex_Siphon = GetString(LUIE_STRING_SKILL_SET_HEX_SIPHON_TP),
     Set_Explosive_Rebuke = GetString(LUIE_STRING_SKILL_SET_EXPLOSIVE_REBUKE_TP),
@@ -747,8 +780,8 @@ local tooltips =
     Skill_Soul_Tether = GetString(LUIE_STRING_SKILL_SOUL_TETHER_TP),
 
     -- Sorcerer
-    Skill_Persistence_Rank_1 = zo_strformat(GetString(LUIE_STRING_SKILL_PERSISTENCE), 7),
-    Skill_Persistence_Rank_2 = zo_strformat(GetString(LUIE_STRING_SKILL_PERSISTENCE), 15),
+    Skill_Persistence_Rank_1 = zo_strformat(str_PERSISTENCE, 7),
+    Skill_Persistence_Rank_2 = zo_strformat(str_PERSISTENCE, 15),
     Skill_Crystal_Weaver = GetString(LUIE_STRING_SKILL_CRYSTAL_WEAVER_TP),
     Skill_Crystal_Weapon = GetString(LUIE_STRING_SKILL_CRYSTAL_WEAPON_TP),
     Skill_Crystal_Fragments = GetString(LUIE_STRING_SKILL_CRYSTAL_FRAGMENTS_TP),
@@ -863,8 +896,8 @@ local tooltips =
     Skill_Arctic_Blast_Ground = GetString(LUIE_STRING_SKILL_ARCTIC_BLAST_GROUND_TP),
 
     -- Necromancer
-    Skill_Reusable_Parts_Rank_1 = zo_strformat(GetString(LUIE_STRING_SKILL_REUSABLE_PARTS_TP), 25),
-    Skill_Reusable_Parts_Rank_2 = zo_strformat(GetString(LUIE_STRING_SKILL_REUSABLE_PARTS_TP), 50),
+    Skill_Reusable_Parts_Rank_1 = zo_strformat(str_REUSABLE_PARTS_TP, 25),
+    Skill_Reusable_Parts_Rank_2 = zo_strformat(str_REUSABLE_PARTS_TP, 50),
     Skill_Flame_Skull = GetString(LUIE_STRING_SKILL_FLAME_SKULL_TP),
     Skill_Ricochet_Skull = GetString(LUIE_STRING_SKILL_RICOCHET_SKULL_TP),
     Skill_Blastbones = GetString(LUIE_STRING_SKILL_BLASTBONES_TP),
@@ -910,10 +943,10 @@ local tooltips =
     ----------------------------------------------------------------
 
     -- Two Handed
-    Skill_Follow_Up_Rank_1 = zo_strformat(GetString(LUIE_STRING_SKILL_FOLLOW_UP_TP), 5),
-    Skill_Follow_Up_Rank_2 = zo_strformat(GetString(LUIE_STRING_SKILL_FOLLOW_UP_TP), 10),
-    Skill_Battle_Rush_Rank_1 = zo_strformat(GetString(LUIE_STRING_SKILL_BATTLE_RUSH_TP), 15),
-    Skill_Battle_Rush_Rank_2 = zo_strformat(GetString(LUIE_STRING_SKILL_BATTLE_RUSH_TP), 30),
+    Skill_Follow_Up_Rank_1 = zo_strformat(str_FOLLOW_UP_TP, 5),
+    Skill_Follow_Up_Rank_2 = zo_strformat(str_FOLLOW_UP_TP, 10),
+    Skill_Battle_Rush_Rank_1 = zo_strformat(str_BATTLE_RUSH_TP, 15),
+    Skill_Battle_Rush_Rank_2 = zo_strformat(str_BATTLE_RUSH_TP, 30),
     Skill_Rally = GetString(LUIE_STRING_SKILL_RALLY_TP),
     Skill_Stampede = GetString(LUIE_STRING_SKILL_STAMPEDE_TP),
     Skill_Berserker_Strike = GetString(LUIE_STRING_SKILL_BERSERKER_STRIKE_TP),
@@ -939,8 +972,8 @@ local tooltips =
     Skill_Flying_Blade = GetString(LUIE_STRING_SKILL_FLYING_BLADE_TP),
 
     -- Bow
-    Skill_Hawk_Eye_Rank_1 = zo_strformat(GetString(LUIE_STRING_SKILL_HAWK_EYE_TP), 2),
-    Skill_Hawk_Eye_Rank_2 = zo_strformat(GetString(LUIE_STRING_SKILL_HAWK_EYE_TP), 5),
+    Skill_Hawk_Eye_Rank_1 = zo_strformat(str_HAWK_EYE_TP, 2),
+    Skill_Hawk_Eye_Rank_2 = zo_strformat(str_HAWK_EYE_TP, 5),
     Skill_Volley = GetString(LUIE_STRING_SKILL_VOLLEY_TP),
     Skill_Poison_Injection = GetString(LUIE_STRING_SKILL_POISON_INJECTION_TP),
     Skill_Ballista = GetString(LUIE_STRING_SKILL_BALLISTA_TP),
@@ -961,14 +994,14 @@ local tooltips =
     Skill_U_Wall_of_Elements_Ground_Shock = GetString(LUIE_STRING_SKILL_U_WALL_OF_ELEMENTS_GROUND_SHOCK),
     Skill_U_Wall_of_Elements_Ground_Frost = GetString(LUIE_STRING_SKILL_U_WALL_OF_ELEMENTS_GROUND_FROST),
     Skill_Wall_of_Elements_Frost_Shield = GetString(LUIE_STRING_SKILL_WOE_FROST_SHIELD_TP),
-    Skill_Fire_Storm = zo_strformat(GetString(LUIE_STRING_SKILL_ELEMENTAL_STORM_TP), GetString(SI_DAMAGETYPE3)),
-    Skill_Thunder_Storm = zo_strformat(GetString(LUIE_STRING_SKILL_ELEMENTAL_STORM_TP), GetString(SI_DAMAGETYPE4)),
-    Skill_Ice_Storm = zo_strformat(GetString(LUIE_STRING_SKILL_ELEMENTAL_STORM_TP), GetString(SI_DAMAGETYPE6)),
-    Skill_Fiery_Rage = zo_strformat(GetString(LUIE_STRING_SKILL_ELEMENTAL_STORM_TP), GetString(SI_DAMAGETYPE3)),
+    Skill_Fire_Storm = zo_strformat(str_ELEMENTAL_STORM_TP, str_Flame),
+    Skill_Thunder_Storm = zo_strformat(str_ELEMENTAL_STORM_TP, str_Shock),
+    Skill_Ice_Storm = zo_strformat(str_ELEMENTAL_STORM_TP, str_Frost),
+    Skill_Fiery_Rage = zo_strformat(str_ELEMENTAL_STORM_TP, str_Flame),
     Skill_Icy_Rage = GetString(LUIE_STRING_SKILL_ICY_RAGE_TP),
-    Skill_Eye_of_Flame = zo_strformat(GetString(LUIE_STRING_SKILL_EYE_OF_THE_STORM_TP), GetString(SI_DAMAGETYPE3)),
-    Skill_Eye_of_Lightning = zo_strformat(GetString(LUIE_STRING_SKILL_EYE_OF_THE_STORM_TP), GetString(SI_DAMAGETYPE4)),
-    Skill_Eye_of_Frost = zo_strformat(GetString(LUIE_STRING_SKILL_EYE_OF_THE_STORM_TP), GetString(SI_DAMAGETYPE6)),
+    Skill_Eye_of_Flame = zo_strformat(str_EYE_OF_THE_STORM_TP, str_Flame),
+    Skill_Eye_of_Lightning = zo_strformat(str_EYE_OF_THE_STORM_TP, str_Shock),
+    Skill_Eye_of_Frost = zo_strformat(str_EYE_OF_THE_STORM_TP, str_Frost),
 
     -- Restoration Staff
     Skill_Grand_Healing = GetString(LUIE_STRING_SKILL_GRAND_HEALING),
@@ -1143,28 +1176,28 @@ local tooltips =
     Skill_Guard_Detection = GetString(LUIE_STRING_SKILL_GUARD_DETECTION_TP),
     Skill_Blessing_of_War = GetString(LUIE_STRING_SKILL_BLESSING_OF_WAR_TP),
     Skill_Home_Keep_Bonus = GetString(LUIE_STRING_SKILL_HOME_KEEP_BONUS_TP),
-    Skill_Enemy_Keep_Bonus_I = zo_strformat(GetString(LUIE_STRING_SKILL_ENEMY_KEEP_BONUS_TP), 7, 1),
-    Skill_Enemy_Keep_Bonus_II = zo_strformat(GetString(LUIE_STRING_SKILL_ENEMY_KEEP_BONUS_TP), 8, 2),
-    Skill_Enemy_Keep_Bonus_III = zo_strformat(GetString(LUIE_STRING_SKILL_ENEMY_KEEP_BONUS_TP), 9, 3),
-    Skill_Enemy_Keep_Bonus_IV = zo_strformat(GetString(LUIE_STRING_SKILL_ENEMY_KEEP_BONUS_TP), 10, 4),
-    Skill_Enemy_Keep_Bonus_V = zo_strformat(GetString(LUIE_STRING_SKILL_ENEMY_KEEP_BONUS_TP), 11, 5),
-    Skill_Enemy_Keep_Bonus_VI = zo_strformat(GetString(LUIE_STRING_SKILL_ENEMY_KEEP_BONUS_TP), 12, 6),
-    Skill_Enemy_Keep_Bonus_VII = zo_strformat(GetString(LUIE_STRING_SKILL_ENEMY_KEEP_BONUS_TP), 13, 7),
-    Skill_Enemy_Keep_Bonus_VIII = zo_strformat(GetString(LUIE_STRING_SKILL_ENEMY_KEEP_BONUS_TP), 14, 8),
-    Skill_Enemy_Keep_Bonus_IX = zo_strformat(GetString(LUIE_STRING_SKILL_ENEMY_KEEP_BONUS_TP), 15, 9),
-    Skill_Edge_Keep_Bonus_I = zo_strformat(GetString(LUIE_STRING_SKILL_EDGE_KEEP_BONUS_TP), 8),
-    Skill_Edge_Keep_Bonus_II = zo_strformat(GetString(LUIE_STRING_SKILL_EDGE_KEEP_BONUS_TP), 16),
-    Skill_Edge_Keep_Bonus_III = zo_strformat(GetString(LUIE_STRING_SKILL_EDGE_KEEP_BONUS_TP), 24),
-    Skill_Defensive_Scroll_Bonus_I = zo_strformat(GetString(LUIE_STRING_SKILL_DEFENSIVE_SCROLL_BONUS_TP), 2),
-    Skill_Defensive_Scroll_Bonus_II = zo_strformat(GetString(LUIE_STRING_SKILL_DEFENSIVE_SCROLL_BONUS_TP), 5),
-    Skill_Offensive_Scroll_Bonus_I = zo_strformat(GetString(LUIE_STRING_SKILL_OFFENSIVE_SCROLL_BONUS_TP), 2),
-    Skill_Offensive_Scroll_Bonus_II = zo_strformat(GetString(LUIE_STRING_SKILL_OFFENSIVE_SCROLL_BONUS_TP), 5),
-    Skill_Emperorship_Alliance_Bonus_I = zo_strformat(GetString(LUIE_STRING_SKILL_EMPERORSHIP_ALLIANCE_BONUS_TP), 900),
-    Skill_Emperorship_Alliance_Bonus_II = zo_strformat(GetString(LUIE_STRING_SKILL_EMPERORSHIP_ALLIANCE_BONUS_TP), 1050),
-    Skill_Emperorship_Alliance_Bonus_III = zo_strformat(GetString(LUIE_STRING_SKILL_EMPERORSHIP_ALLIANCE_BONUS_TP), 1250),
-    Skill_Emperorship_Alliance_Bonus_IV = zo_strformat(GetString(LUIE_STRING_SKILL_EMPERORSHIP_ALLIANCE_BONUS_TP), 1400),
-    Skill_Emperorship_Alliance_Bonus_V = zo_strformat(GetString(LUIE_STRING_SKILL_EMPERORSHIP_ALLIANCE_BONUS_TP), 1600),
-    Skill_Emperorship_Alliance_Bonus_VI = zo_strformat(GetString(LUIE_STRING_SKILL_EMPERORSHIP_ALLIANCE_BONUS_TP), 1750),
+    Skill_Enemy_Keep_Bonus_I = zo_strformat(str_ENEMY_KEEP_BONUS_TP, 7, 1),
+    Skill_Enemy_Keep_Bonus_II = zo_strformat(str_ENEMY_KEEP_BONUS_TP, 8, 2),
+    Skill_Enemy_Keep_Bonus_III = zo_strformat(str_ENEMY_KEEP_BONUS_TP, 9, 3),
+    Skill_Enemy_Keep_Bonus_IV = zo_strformat(str_ENEMY_KEEP_BONUS_TP, 10, 4),
+    Skill_Enemy_Keep_Bonus_V = zo_strformat(str_ENEMY_KEEP_BONUS_TP, 11, 5),
+    Skill_Enemy_Keep_Bonus_VI = zo_strformat(str_ENEMY_KEEP_BONUS_TP, 12, 6),
+    Skill_Enemy_Keep_Bonus_VII = zo_strformat(str_ENEMY_KEEP_BONUS_TP, 13, 7),
+    Skill_Enemy_Keep_Bonus_VIII = zo_strformat(str_ENEMY_KEEP_BONUS_TP, 14, 8),
+    Skill_Enemy_Keep_Bonus_IX = zo_strformat(str_ENEMY_KEEP_BONUS_TP, 15, 9),
+    Skill_Edge_Keep_Bonus_I = zo_strformat(str_EDGE_KEEP_BONUS_TP, 8),
+    Skill_Edge_Keep_Bonus_II = zo_strformat(str_EDGE_KEEP_BONUS_TP, 16),
+    Skill_Edge_Keep_Bonus_III = zo_strformat(str_EDGE_KEEP_BONUS_TP, 24),
+    Skill_Defensive_Scroll_Bonus_I = zo_strformat(str_DEFENSIVE_SCROLL_BONUS_TP, 2),
+    Skill_Defensive_Scroll_Bonus_II = zo_strformat(str_DEFENSIVE_SCROLL_BONUS_TP, 5),
+    Skill_Offensive_Scroll_Bonus_I = zo_strformat(str_OFFENSIVE_SCROLL_BONUS_TP, 2),
+    Skill_Offensive_Scroll_Bonus_II = zo_strformat(str_OFFENSIVE_SCROLL_BONUS_TP, 5),
+    Skill_Emperorship_Alliance_Bonus_I = zo_strformat(str_EMPERORSHIP_ALLIANCE_BONUS_TP, 900),
+    Skill_Emperorship_Alliance_Bonus_II = zo_strformat(str_EMPERORSHIP_ALLIANCE_BONUS_TP, 1050),
+    Skill_Emperorship_Alliance_Bonus_III = zo_strformat(str_EMPERORSHIP_ALLIANCE_BONUS_TP, 1250),
+    Skill_Emperorship_Alliance_Bonus_IV = zo_strformat(str_EMPERORSHIP_ALLIANCE_BONUS_TP, 1400),
+    Skill_Emperorship_Alliance_Bonus_V = zo_strformat(str_EMPERORSHIP_ALLIANCE_BONUS_TP, 1600),
+    Skill_Emperorship_Alliance_Bonus_VI = zo_strformat(str_EMPERORSHIP_ALLIANCE_BONUS_TP, 1750),
     Skill_Razor_Armor = GetString(LUIE_STRING_SKILL_RAZOR_ARMOR_TP),
     Skill_Unstable_Core_Cyrodiil = GetString(LUIE_STRING_SKILL_UNSTABLE_CORE_CYRODIIL_TP),
     Skill_Shattering_Prison_Cyrodiil = GetString(LUIE_STRING_SKILL_SHATTERING_PRISON_CYRODIIL_TP),
@@ -1172,12 +1205,12 @@ local tooltips =
     Skill_Power_Bash_Cyrodiil = GetString(LUIE_STRING_SKILL_POWER_BASH_CYRODIIL_TP),
     Skill_Rune_Focus_Cyrodiil = GetString(LUIE_STRING_SKILL_RUNE_FOCUS_CYRODIIL_TP),
 
-    Skill_Elder_Scroll_Altadoon = zo_strformat(GetString(LUIE_STRING_SKILL_ELDER_SCROLL_TP), GetAbilityName(15177)),
-    Skill_Elder_Scroll_Mnem = zo_strformat(GetString(LUIE_STRING_SKILL_ELDER_SCROLL_TP), GetAbilityName(15178)),
-    Skill_Elder_Scroll_Ghartok = zo_strformat(GetString(LUIE_STRING_SKILL_ELDER_SCROLL_TP), GetAbilityName(22282)),
-    Skill_Elder_Scroll_Chim = zo_strformat(GetString(LUIE_STRING_SKILL_ELDER_SCROLL_TP), GetAbilityName(22295)),
-    Skill_Elder_Scroll_Ni_Mohk = zo_strformat(GetString(LUIE_STRING_SKILL_ELDER_SCROLL_TP), GetAbilityName(22297)),
-    Skill_Elder_Scroll_Alma_Ruma = zo_strformat(GetString(LUIE_STRING_SKILL_ELDER_SCROLL_TP), GetAbilityName(22299)),
+    Skill_Elder_Scroll_Altadoon = zo_strformat(str_ELDER_SCROLL_TP, GetAbilityName(15177)),
+    Skill_Elder_Scroll_Mnem = zo_strformat(str_ELDER_SCROLL_TP, GetAbilityName(15178)),
+    Skill_Elder_Scroll_Ghartok = zo_strformat(str_ELDER_SCROLL_TP, GetAbilityName(22282)),
+    Skill_Elder_Scroll_Chim = zo_strformat(str_ELDER_SCROLL_TP, GetAbilityName(22295)),
+    Skill_Elder_Scroll_Ni_Mohk = zo_strformat(str_ELDER_SCROLL_TP, GetAbilityName(22297)),
+    Skill_Elder_Scroll_Alma_Ruma = zo_strformat(str_ELDER_SCROLL_TP, GetAbilityName(22299)),
 
     Skill_Ruinous_Cyclone = GetString(LUIE_STRING_SKILL_RUINOUS_CYCLONE),
 
@@ -1210,7 +1243,7 @@ local tooltips =
     Skill_Recover_Duel = GetString(LUIE_STRING_SKILL_RECOVER_DUEL_TP),
 
     -- Animals
-    Skill_Ancient_Skin = zo_strformat(GetString(LUIE_STRING_SKILL_HARDENED_CARAPACE_TP), 9),
+    Skill_Ancient_Skin = zo_strformat(str_HARDENED_CARAPACE_TP, 9),
     Skill_Weakness_Lion = GetString(LUIE_STRING_SKILL_WEAKNESS_LION_TP),
     Skill_Hardened_Shell = GetString(LUIE_STRING_SKILL_HARDENED_SHELL_TP),
     Skill_Slash_Cliff_Strider = GetString(LUIE_STRING_SKILL_SLASH_CLIFF_STRIDER_TP),
@@ -1249,7 +1282,7 @@ local tooltips =
     Skill_Til_Death_Self = GetString(LUIE_STRING_SKILL_TIL_DEATH_SELF_TP),
 
     -- Insects
-    Skill_Hardened_Carapace = zo_strformat(GetString(LUIE_STRING_SKILL_HARDENED_CARAPACE_TP), 15),
+    Skill_Hardened_Carapace = zo_strformat(str_HARDENED_CARAPACE_TP, 15),
     Skill_Inject_Larva = GetString(LUIE_STRING_SKILL_INJECT_LARVA_TP),
     Skill_Latch_On = GetString(LUIE_STRING_SKILL_LATCH_ON_TP),
     Skill_Kotu_Gava_Swarm = GetString(LUIE_STRING_SKILL_KOTU_GAVA_SWARM_TP),
@@ -1415,8 +1448,8 @@ local tooltips =
 
     -- Maelstrom Arena
     Skill_Sigil_of_Haste = GetString(LUIE_STRING_SKILL_SIGIL_OF_HASTE_TP),
-    Skill_Sigil_of_Power = zo_strformat(GetString(LUIE_STRING_SKILL_SIGIL_OF_POWER_TP), 990),
-    Skill_Sigil_of_Power_Veteran = zo_strformat(GetString(LUIE_STRING_SKILL_SIGIL_OF_POWER_TP), 1188),
+    Skill_Sigil_of_Power = zo_strformat(str_SIGIL_OF_POWER_TP, 990),
+    Skill_Sigil_of_Power_Veteran = zo_strformat(str_SIGIL_OF_POWER_TP, 1188),
     Skill_Sigil_of_Healing = GetString(LUIE_STRING_SKILL_SIGIL_OF_HEALING_TP),
     Skill_Sigil_of_Defense = GetString(LUIE_STRING_SKILL_SIGIL_OF_DEFENSE_TP),
 
