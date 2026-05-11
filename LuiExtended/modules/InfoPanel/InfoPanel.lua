@@ -910,6 +910,9 @@ function InfoPanel.Initialize(enabled)
     -- Set event handlers
     eventManager:RegisterForEvent(moduleName, EVENT_LOOT_RECEIVED, InfoPanel.OnBagUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, InfoPanel.OnBagUpdate)
+    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEM_DESTROYED, InfoPanel.OnBagUpdate)
+    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_FULL_UPDATE, InfoPanel.OnBagUpdate)
+    eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_ITEMS_AUTO_TRANSFERRED_TO_CRAFT_BAG, InfoPanel.OnBagUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_BAG_CAPACITY_CHANGED, InfoPanel.OnBagCapacityChanged)
     eventManager:RegisterForEvent(moduleName, EVENT_CARRIED_CURRENCY_UPDATE, InfoPanel.OnCurrencyUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_RIDING_SKILL_IMPROVEMENT, InfoPanel.UpdateMountFeedTimer)
@@ -992,7 +995,9 @@ function InfoPanel.SetScale()
     uiPanel:SetScale(InfoPanel.SV.panelScale and InfoPanel.SV.panelScale / 100 or 1)
 end
 
--- Listens to EVENT_INVENTORY_SINGLE_SLOT_UPDATE and EVENT_LOOT_RECEIVED
+-- Schedules a deferred bag/gems refresh for inventory-related events (signatures vary by eventId).
+-- Registered: EVENT_LOOT_RECEIVED, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, EVENT_INVENTORY_ITEM_DESTROYED,
+-- EVENT_INVENTORY_FULL_UPDATE, EVENT_INVENTORY_ITEMS_AUTO_TRANSFERRED_TO_CRAFT_BAG.
 --- @param eventId integer|nil
 --- @param bagId number|nil
 --- @param slotIndex number|nil
