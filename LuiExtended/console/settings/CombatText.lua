@@ -13,8 +13,6 @@ local CombatText = LUIE.CombatText
 local CombatTextConstants = LuiData.Data.CombatTextConstants
 local BlacklistPresets = LuiData.Data.CombatTextBlacklistPresets
 
-local callbackManager = CALLBACK_MANAGER
-
 local LHAS = LibHarvensAddonSettings
 
 local type, pairs = type, pairs
@@ -1975,8 +1973,12 @@ function CombatText.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST_TP),
             buttonText = GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST),
             clickHandler = function ()
-                callbackManager:FireCallbacks(CombatTextConstants.eventType.COMBAT, CombatTextConstants.combatType.INCOMING, COMBAT_MECHANIC_FLAGS_STAMINA, zo_random(7, 777), GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST), 41567, DAMAGE_TYPE_PHYSICAL, "Test", true, false, false, false, false, false, false, false, false, false, false, false, false, false)
-                callbackManager:FireCallbacks(CombatTextConstants.eventType.COMBAT, CombatTextConstants.combatType.OUTGOING, COMBAT_MECHANIC_FLAGS_STAMINA, zo_random(7, 777), GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST), 41567, DAMAGE_TYPE_PHYSICAL, "Test", true, false, false, false, false, false, false, false, false, false, false, false, false, false)
+                local listener = CombatText.combatEventListener
+                if not listener then
+                    return
+                end
+                listener:TriggerEvent(CombatTextConstants.eventType.COMBAT, CombatTextConstants.combatType.INCOMING, COMBAT_MECHANIC_FLAGS_STAMINA, zo_random(7, 777), GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST), 41567, DAMAGE_TYPE_PHYSICAL, "Test", true, false, false, false, false, false, false, false, false, false, false, false, false, false)
+                listener:TriggerEvent(CombatTextConstants.eventType.COMBAT, CombatTextConstants.combatType.OUTGOING, COMBAT_MECHANIC_FLAGS_STAMINA, zo_random(7, 777), GetString(LUIE_STRING_LAM_CT_ANIMATION_TEST), 41567, DAMAGE_TYPE_PHYSICAL, "Test", true, false, false, false, false, false, false, false, false, false, false, false, false, false)
             end
         }
     end)

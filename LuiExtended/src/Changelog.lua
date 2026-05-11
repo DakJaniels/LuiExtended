@@ -32,6 +32,7 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Mirage: Extra Buffs no longer shows a duplicate fake combat buff next to the real morph aura.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Siphoning Attacks (bundle and morph); Feral, Eternal, and Wild Guardian; Inferno / Incinerate / Cauterize aura buffs — tooltips aligned with the skills window.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t InfoPanel: Backpack space (used / total) updates reliably after destroying items, after large inventory syncs, and when materials move into the craft bag.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Test Font and Test Animation in settings now dispatch preview events on the combat event listener instead of the global callback manager, so preview text shows again (PC LAM; console animation test).",
     "",
     -- Version Header 7.2.1.5
     "|cFFA500LuiExtended Version 7.2.1.5|r",
