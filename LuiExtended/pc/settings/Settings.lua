@@ -492,7 +492,9 @@ function LUIE.CreateSettings()
         function (value) Settings.CustomIcons = value end,
         "full",
         nil,
-        Defaults.CustomIcons
+        Defaults.CustomIcons,
+        nil,
+        true
     )
 
     -- Missing Base Game Settings
