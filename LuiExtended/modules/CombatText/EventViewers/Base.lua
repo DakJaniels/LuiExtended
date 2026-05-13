@@ -257,7 +257,10 @@ CombatTextEventViewer.TEXT_ATTRIBUTE_CONFIG =
                 return Settings.colors.energizeMagicka
             elseif powerType == COMBAT_MECHANIC_FLAGS_STAMINA then
                 return Settings.colors.energizeStamina
+            elseif powerType == COMBAT_MECHANIC_FLAGS_ULTIMATE then
+                return Settings.colors.energizeUltimate
             end
+            return Settings.colors.energizeMagicka
         end
     },
 

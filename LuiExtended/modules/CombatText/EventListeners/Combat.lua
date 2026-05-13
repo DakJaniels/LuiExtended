@@ -166,6 +166,77 @@ local resultTypeCache = setmetatable({},
                                          end
                                      })
 
+-- Inferred ability resource cost (live client often omits ACTION_RESULT_POWER_DRAIN on EVENT_COMBAT_EVENT).
+-- Correlate slot use with the next matching player resource decrease within a short window.
+local lastPlayerPowerByCombatMechanicFlags =
+{
+    [COMBAT_MECHANIC_FLAGS_MAGICKA] = nil,
+    [COMBAT_MECHANIC_FLAGS_STAMINA] = nil,
+    [COMBAT_MECHANIC_FLAGS_ULTIMATE] = nil,
+}
+local pendingSlotAbilityCost =
+{
+    abilityId = 0,
+    expireGameTimeMs = 0,
+    consumedMagicka = false,
+    consumedStamina = false,
+    consumedUltimate = false,
+}
+local lastDrainDedupe =
+{
+    timeMs = 0,
+    abilityId = 0,
+    combatMechanicFlags = 0,
+    amount = 0,
+}
+
+--- @param combatMechanicFlags integer COMBAT_MECHANIC_FLAGS_* (EVENT_POWER_UPDATE / GetUnitPower pool key)
+--- @return boolean
+local function IsTrackedResourceCombatMechanicFlags(combatMechanicFlags)
+    return combatMechanicFlags == COMBAT_MECHANIC_FLAGS_MAGICKA
+        or combatMechanicFlags == COMBAT_MECHANIC_FLAGS_STAMINA
+        or combatMechanicFlags == COMBAT_MECHANIC_FLAGS_ULTIMATE
+end
+
+--- Suppress duplicate drain lines when both inferred and native POWER_DRAIN fire close together.
+--- @return boolean true if this is a duplicate of a line we already showed (caller must skip)
+local function IsRecentDuplicateDrain(abilityId, combatMechanicFlags, amount)
+    local now = GetGameTimeMilliseconds()
+    if now - lastDrainDedupe.timeMs < 220
+        and lastDrainDedupe.abilityId == abilityId
+        and lastDrainDedupe.combatMechanicFlags == combatMechanicFlags
+        and lastDrainDedupe.amount == amount then
+        return true
+    end
+    lastDrainDedupe.timeMs = now
+    lastDrainDedupe.abilityId = abilityId
+    lastDrainDedupe.combatMechanicFlags = combatMechanicFlags
+    lastDrainDedupe.amount = amount
+    return false
+end
+
+--- Remember which ability was just activated from the bar (for cost inference).
+--- @param actionSlotIndex integer
+local function SetPendingAbilityCostFromSlot(actionSlotIndex)
+    local hotbarCategory = GetActiveHotbarCategory()
+    local slotType = GetSlotType(actionSlotIndex, hotbarCategory)
+    if slotType ~= ACTION_TYPE_ABILITY and slotType ~= ACTION_TYPE_CRAFTED_ABILITY then
+        return
+    end
+    local abilityId = GetSlotBoundId(actionSlotIndex, hotbarCategory)
+    if slotType == ACTION_TYPE_CRAFTED_ABILITY then
+        abilityId = GetAbilityIdForCraftedAbilityId(abilityId)
+    end
+    if not abilityId or abilityId <= 0 then
+        return
+    end
+    pendingSlotAbilityCost.abilityId = abilityId
+    pendingSlotAbilityCost.expireGameTimeMs = GetGameTimeMilliseconds() + 900
+    pendingSlotAbilityCost.consumedMagicka = false
+    pendingSlotAbilityCost.consumedStamina = false
+    pendingSlotAbilityCost.consumedUltimate = false
+end
+
 -- Memory optimization: Cache zone/map data to avoid repeated API calls
 local cachedZoneData =
 {
@@ -239,12 +310,12 @@ end
 --- Evaluates all combat event types against their respective toggle settings
 --- @param flags table Event flags (isDamage, isHealing, etc.)
 --- @param toggles table Settings toggles for this combat direction
---- @param powerType integer Combat mechanic flags
+--- @param combatMechanicFlags integer COMBAT_MECHANIC_FLAGS_* from combat / power events
 --- @param hitValue integer The damage/healing value
 --- @param overkill boolean If this is overkill damage
 --- @param overheal boolean If this is overheal
 --- @return boolean shouldShow True if event should be displayed
-local function ShouldShowCombatEvent(flags, toggles, powerType, hitValue, overkill, overheal)
+local function ShouldShowCombatEvent(flags, toggles, combatMechanicFlags, hitValue, overkill, overheal)
     return (flags.isDodged and toggles.showDodged)
         or (flags.isMiss and toggles.showMiss)
         or (flags.isImmune and toggles.showImmune)
@@ -261,9 +332,10 @@ local function ShouldShowCombatEvent(flags, toggles, powerType, hitValue, overki
         or (flags.isHealingCritical and toggles.showHealing and (hitValue > 0 or overheal))
         or (flags.isDamage and toggles.showDamage and (hitValue > 0 or overkill))
         or (flags.isDamageCritical and toggles.showDamage and (hitValue > 0 or overkill))
-        or (flags.isEnergize and toggles.showEnergize and (powerType == COMBAT_MECHANIC_FLAGS_MAGICKA or powerType == COMBAT_MECHANIC_FLAGS_STAMINA))
-        or (flags.isEnergize and toggles.showUltimateEnergize and powerType == COMBAT_MECHANIC_FLAGS_ULTIMATE)
-        or (flags.isDrain and toggles.showDrain and (powerType == COMBAT_MECHANIC_FLAGS_MAGICKA or powerType == COMBAT_MECHANIC_FLAGS_STAMINA))
+        or (flags.isEnergize and toggles.showEnergize and (combatMechanicFlags == COMBAT_MECHANIC_FLAGS_MAGICKA or combatMechanicFlags == COMBAT_MECHANIC_FLAGS_STAMINA))
+        or (flags.isEnergize and toggles.showUltimateEnergize and combatMechanicFlags == COMBAT_MECHANIC_FLAGS_ULTIMATE)
+        -- POWER_DRAIN: do not gate on combatMechanicFlags; the client can report costs with flags we do not enumerate
+        or (flags.isDrain and toggles.showDrain)
 end
 
 --- Process crowd control events in a data-driven manner<br>
@@ -294,14 +366,14 @@ function CombatTextCombatEventListener:Initialize()
     self:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function ()
         self:OnPlayerActivated()
     end)
-    self:RegisterForEvent(EVENT_COMBAT_EVENT, function (result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
-                              self:OnCombatIn(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+    self:RegisterForEvent(EVENT_COMBAT_EVENT, function (result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, combatMechanicFlags, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+                              self:OnCombatIn(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, combatMechanicFlags, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
                           end, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER) -- Target -> Player
-    self:RegisterForEvent(EVENT_COMBAT_EVENT, function (result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
-                              self:OnCombatOut(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+    self:RegisterForEvent(EVENT_COMBAT_EVENT, function (result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, combatMechanicFlags, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+                              self:OnCombatOut(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, combatMechanicFlags, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
                           end, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER) -- Player -> Target
-    self:RegisterForEvent(EVENT_COMBAT_EVENT, function (result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
-                              self:OnCombatOut(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+    self:RegisterForEvent(EVENT_COMBAT_EVENT, function (result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, combatMechanicFlags, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+                              self:OnCombatOut(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, combatMechanicFlags, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
                           end, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER_PET) -- Player Pet -> Target
     self:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, function (inCombat)
         self:CombatState(inCombat)
@@ -310,14 +382,113 @@ function CombatTextCombatEventListener:Initialize()
     self:RegisterForEvent(EVENT_ZONE_CHANGED, function (zoneName, subZoneName, newSubzone, zoneId, subZoneId)
         updateZoneCache(zoneName, zoneId)
     end)
+    self:RegisterForEvent(EVENT_ACTION_SLOT_ABILITY_USED, function (actionSlotIndex)
+        self:OnActionSlotAbilityUsed(actionSlotIndex)
+    end)
+    self:RegisterForEvent(EVENT_POWER_UPDATE, function (_unitTag, _powerIndex, combatMechanicFlags, powerValue, powerMax, powerEffectiveMax)
+        self:OnPlayerPowerUpdate(combatMechanicFlags, powerValue, powerMax, powerEffectiveMax)
+    end, REGISTER_FILTER_UNIT_TAG, "player")
 end
 
 --- Handle player activation event<br>
 --- Initializes zone cache and sets combat state if player is already in combat
 function CombatTextCombatEventListener:OnPlayerActivated()
     updateZoneCache() -- Initialize zone cache
+    lastPlayerPowerByCombatMechanicFlags[COMBAT_MECHANIC_FLAGS_MAGICKA] = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_MAGICKA)
+    lastPlayerPowerByCombatMechanicFlags[COMBAT_MECHANIC_FLAGS_STAMINA] = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_STAMINA)
+    lastPlayerPowerByCombatMechanicFlags[COMBAT_MECHANIC_FLAGS_ULTIMATE] = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE)
+    pendingSlotAbilityCost.abilityId = 0
+    pendingSlotAbilityCost.expireGameTimeMs = 0
+    pendingSlotAbilityCost.consumedMagicka = false
+    pendingSlotAbilityCost.consumedStamina = false
+    pendingSlotAbilityCost.consumedUltimate = false
     if IsUnitInCombat("player") then
         isWarned.combat = true
+    end
+end
+
+--- Remember bar ability activation for inferred resource cost display.
+--- @param actionSlotIndex integer
+function CombatTextCombatEventListener:OnActionSlotAbilityUsed(actionSlotIndex)
+    SetPendingAbilityCostFromSlot(actionSlotIndex)
+end
+
+--- When native POWER_DRAIN combat events are missing, infer costs from player power drops after a bar use.
+--- @param combatMechanicFlags integer COMBAT_MECHANIC_FLAGS_* (REGISTER_FILTER_POWER_TYPE / GetUnitPower second argument)
+--- @param powerValue integer
+--- @param powerMax integer
+--- @param powerEffectiveMax integer
+function CombatTextCombatEventListener:OnPlayerPowerUpdate(combatMechanicFlags, powerValue, powerMax, powerEffectiveMax)
+    if not IsTrackedResourceCombatMechanicFlags(combatMechanicFlags) then
+        return
+    end
+
+    local prev = lastPlayerPowerByCombatMechanicFlags[combatMechanicFlags]
+    lastPlayerPowerByCombatMechanicFlags[combatMechanicFlags] = powerValue
+    if prev == nil then
+        return
+    end
+    if powerValue >= prev then
+        return
+    end
+
+    local delta = prev - powerValue
+    if delta < 1 then
+        return
+    end
+
+    local now = GetGameTimeMilliseconds()
+    if pendingSlotAbilityCost.abilityId == 0 or now > pendingSlotAbilityCost.expireGameTimeMs then
+        return
+    end
+
+    if combatMechanicFlags == COMBAT_MECHANIC_FLAGS_MAGICKA and pendingSlotAbilityCost.consumedMagicka then
+        return
+    end
+    if combatMechanicFlags == COMBAT_MECHANIC_FLAGS_STAMINA and pendingSlotAbilityCost.consumedStamina then
+        return
+    end
+    if combatMechanicFlags == COMBAT_MECHANIC_FLAGS_ULTIMATE and pendingSlotAbilityCost.consumedUltimate then
+        return
+    end
+
+    local Settings = LUIE.CombatText.SV
+    local settingsToggles = Settings.toggles
+    local flags = resultTypeCache[ACTION_RESULT_POWER_DRAIN]
+    if not ShouldShowCombatEvent(flags, settingsToggles.incoming, combatMechanicFlags, delta, false, false) then
+        return
+    end
+
+    local abilityId = pendingSlotAbilityCost.abilityId
+    local sourceName = GetUnitName("player")
+    local abilityName = ResolveAbilityName(abilityId, sourceName)
+
+    if Settings.blacklist[abilityId] or Settings.blacklist[abilityName] then
+        return
+    end
+
+    if EffectHideSCT[abilityId] then
+        return
+    end
+
+    if settingsToggles.inCombatOnly and not isWarned.combat then
+        return
+    end
+
+    if IsRecentDuplicateDrain(abilityId, combatMechanicFlags, delta) then
+        return
+    end
+
+    self:TriggerEvent(EventType.COMBAT, CombatType.INCOMING, combatMechanicFlags, delta, abilityName, abilityId, DAMAGE_TYPE_NONE, sourceName,
+                      false, false, false, false, false, true,
+                      false, false, false, false, false, false, false, false, false, false, false)
+
+    if combatMechanicFlags == COMBAT_MECHANIC_FLAGS_MAGICKA then
+        pendingSlotAbilityCost.consumedMagicka = true
+    elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_STAMINA then
+        pendingSlotAbilityCost.consumedStamina = true
+    elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_ULTIMATE then
+        pendingSlotAbilityCost.consumedUltimate = true
     end
 end
 
@@ -334,14 +505,14 @@ end
 --- @param targetName string Name of target unit (player)
 --- @param targetType CombatUnitType Type of target unit
 --- @param hitValue integer Amount of damage/healing
---- @param powerType CombatMechanicFlags Resource type (health, magicka, stamina, ultimate)
+--- @param combatMechanicFlags integer COMBAT_MECHANIC_FLAGS_* (resource pool for energize/drain, etc.)
 --- @param damageType DamageType Type of damage (physical, magic, etc.)
 --- @param log boolean If this should be logged
 --- @param sourceUnitId integer Unit ID of source
 --- @param targetUnitId integer Unit ID of target
 --- @param abilityId integer The ability ID
 --- @param overflow integer Overkill/overheal amount
-function CombatTextCombatEventListener:OnCombatIn(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+function CombatTextCombatEventListener:OnCombatIn(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, combatMechanicFlags, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     local Settings = LUIE.CombatText.SV
     local settingsCommon, settingsToggles = Settings.common, Settings.toggles
     local combatType, togglesInOut = CombatType.INCOMING, settingsToggles.incoming
@@ -367,13 +538,16 @@ function CombatTextCombatEventListener:OnCombatIn(result, isError, abilityName, 
         (flags.isHealing or flags.isHealingCritical or flags.isHot or flags.isHotCritical)
 
     -- Combat event processing
-    if ShouldShowCombatEvent(flags, togglesInOut, powerType, hitValue, overkill, overheal) then
+    if ShouldShowCombatEvent(flags, togglesInOut, combatMechanicFlags, hitValue, overkill, overheal) then
         if overkill or overheal then
             hitValue = hitValue + overflow
         end
+        if flags.isDrain then
+            hitValue = math.abs(hitValue)
+        end
         if not effectHideSCT then
             if (settingsToggles.inCombatOnly and isWarned.combat) or not settingsToggles.inCombatOnly then
-                self:TriggerEvent(EventType.COMBAT, combatType, powerType, hitValue, abilityName, abilityId, damageType, sourceName,
+                self:TriggerEvent(EventType.COMBAT, combatType, combatMechanicFlags, hitValue, abilityName, abilityId, damageType, sourceName,
                                   flags.isDamage, flags.isDamageCritical, flags.isHealing, flags.isHealingCritical, flags.isEnergize, flags.isDrain,
                                   flags.isDot, flags.isDotCritical, flags.isHot, flags.isHotCritical, flags.isMiss, flags.isImmune, flags.isParried,
                                   flags.isReflected, flags.isDamageShield, flags.isDodged, flags.isBlocked, flags.isInterrupted)
@@ -401,14 +575,14 @@ end
 --- @param targetName string Name of target unit
 --- @param targetType CombatUnitType Type of target unit
 --- @param hitValue integer Amount of damage/healing
---- @param powerType CombatMechanicFlags Resource type (health, magicka, stamina, ultimate)
+--- @param combatMechanicFlags integer COMBAT_MECHANIC_FLAGS_* (resource pool for energize/drain, etc.)
 --- @param damageType DamageType Type of damage (physical, magic, etc.)
 --- @param log boolean If this should be logged
 --- @param sourceUnitId integer Unit ID of source
 --- @param targetUnitId integer Unit ID of target
 --- @param abilityId integer The ability ID
 --- @param overflow integer Overkill/overheal amount
-function CombatTextCombatEventListener:OnCombatOut(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+function CombatTextCombatEventListener:OnCombatOut(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, combatMechanicFlags, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     -- Don't display duplicate messages for events sourced from the player that target the player
     if targetType == COMBAT_UNIT_TYPE_PLAYER or targetType == COMBAT_UNIT_TYPE_PLAYER_PET then
         return
@@ -416,10 +590,19 @@ function CombatTextCombatEventListener:OnCombatOut(result, isError, abilityName,
 
     local Settings = LUIE.CombatText.SV
     local settingsCommon, settingsToggles = Settings.common, Settings.toggles
-    local combatType, togglesInOut = CombatType.OUTGOING, settingsToggles.outgoing
-
-    -- Use cached ability name (no overrides needed for outgoing - player abilities)
-    abilityName = abilityNameCache[abilityId]
+    local flags = resultTypeCache[result]
+    -- Resource costs are usually reported with the ability's combat target (enemy), so they only hit OnCombatOut.
+    -- Route them to the incoming combat-text panel and incoming toggles (self resource feedback).
+    local combatType, togglesInOut
+    if flags.isDrain then
+        combatType = CombatType.INCOMING
+        togglesInOut = settingsToggles.incoming
+        abilityName = ResolveAbilityName(abilityId, sourceName)
+    else
+        combatType = CombatType.OUTGOING
+        togglesInOut = settingsToggles.outgoing
+        abilityName = abilityNameCache[abilityId]
+    end
 
     -- Bail out if the abilityId is on the Blacklist Table
     if Settings.blacklist[abilityId] or Settings.blacklist[abilityName] then
@@ -429,9 +612,6 @@ function CombatTextCombatEventListener:OnCombatOut(result, isError, abilityName,
     -- Check if ability should be hidden from SCT
     local effectHideSCT = EffectHideSCT[abilityId]
 
-    -- Memory optimization: Use pre-computed cache to get all event flags
-    local flags = resultTypeCache[result]
-
     -- Calculate overflow conditions
     local overkill = settingsCommon.overkill and overflow > 0 and
         (flags.isDamage or flags.isDamageCritical or flags.isDot or flags.isDotCritical)
@@ -439,16 +619,22 @@ function CombatTextCombatEventListener:OnCombatOut(result, isError, abilityName,
         (flags.isHealing or flags.isHealingCritical or flags.isHot or flags.isHotCritical)
 
     -- Combat event processing
-    if ShouldShowCombatEvent(flags, togglesInOut, powerType, hitValue, overkill, overheal) then
+    if ShouldShowCombatEvent(flags, togglesInOut, combatMechanicFlags, hitValue, overkill, overheal) then
         if overkill or overheal then
             hitValue = hitValue + overflow
         end
+        if flags.isDrain then
+            hitValue = math.abs(hitValue)
+        end
         if not effectHideSCT then
             if (settingsToggles.inCombatOnly and isWarned.combat) or not settingsToggles.inCombatOnly then
-                self:TriggerEvent(EventType.COMBAT, combatType, powerType, hitValue, abilityName, abilityId, damageType, sourceName,
-                                  flags.isDamage, flags.isDamageCritical, flags.isHealing, flags.isHealingCritical, flags.isEnergize, flags.isDrain,
-                                  flags.isDot, flags.isDotCritical, flags.isHot, flags.isHotCritical, flags.isMiss, flags.isImmune, flags.isParried,
-                                  flags.isReflected, flags.isDamageShield, flags.isDodged, flags.isBlocked, flags.isInterrupted)
+                local suppressDrainDuplicate = flags.isDrain and IsRecentDuplicateDrain(abilityId, combatMechanicFlags, hitValue)
+                if not suppressDrainDuplicate then
+                    self:TriggerEvent(EventType.COMBAT, combatType, combatMechanicFlags, hitValue, abilityName, abilityId, damageType, sourceName,
+                                      flags.isDamage, flags.isDamageCritical, flags.isHealing, flags.isHealingCritical, flags.isEnergize, flags.isDrain,
+                                      flags.isDot, flags.isDotCritical, flags.isHot, flags.isHotCritical, flags.isMiss, flags.isImmune, flags.isParried,
+                                      flags.isReflected, flags.isDamageShield, flags.isDodged, flags.isBlocked, flags.isInterrupted)
+                end
             end
         end
     end
