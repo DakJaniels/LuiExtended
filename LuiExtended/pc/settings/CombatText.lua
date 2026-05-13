@@ -113,6 +113,10 @@ function CombatText.CreateSettings()
                 _G[k]:SetMovable(false)
                 _G[k .. "_Backdrop"]:SetHidden(true)
                 _G[k .. "_Label"]:SetHidden(true)
+                local prev = _G[k .. "_Preview"]
+                if prev then
+                    prev:SetHidden(true)
+                end
             end
             -- Reset the unlocked state
             Settings.unlocked = false
@@ -122,26 +126,21 @@ function CombatText.CreateSettings()
         width = "full",
     }
 
-    -- Unlock Panels
     optionsDataCombatText[#optionsDataCombatText + 1] =
     {
-        type = "checkbox",
-        width = "half",
-        name = GetString(LUIE_STRING_LAM_CT_UNLOCK),
-        tooltip = GetString(LUIE_STRING_LAM_CT_UNLOCK_TP),
-        default = Defaults.unlocked,
-        getFunc = function ()
-            return Settings.unlocked
-        end,
-        setFunc = function (value)
-            Settings.unlocked = value
-            for k, _ in pairs(Settings.panels) do
-                _G[k]:SetMouseEnabled(Settings.unlocked)
-                _G[k]:SetMovable(Settings.unlocked)
-                _G[k .. "_Backdrop"]:SetHidden(not Settings.unlocked)
-                _G[k .. "_Label"]:SetHidden(not Settings.unlocked)
-            end
-        end,
+        {
+            type = "checkbox",
+            width = "half",
+            name = GetString(LUIE_STRING_LAM_CT_UNLOCK),
+            tooltip = GetString(LUIE_STRING_LAM_CT_UNLOCK_TP),
+            default = Defaults.unlocked,
+            getFunc = function ()
+                return Settings.unlocked
+            end,
+            setFunc = function (value)
+                CombatText.SetMovingState(value)
+            end,
+        },
     }
 
     -- Combat Text - Common Options
