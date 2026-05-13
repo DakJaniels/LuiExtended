@@ -136,25 +136,16 @@ function CombatText.CreateConsoleSettings()
                 _G[k]:SetMovable(false)
                 _G[k .. "_Backdrop"]:SetHidden(true)
                 _G[k .. "_Label"]:SetHidden(true)
+                local prev = _G[k .. "_Preview"]
+                if prev then
+                    prev:SetHidden(true)
+                end
             end
             -- Reset the unlocked state
             Settings.unlocked = false
             -- Reload the UI
             ReloadUI("ingame")
         end
-    }
-
-    -- Unlock Panels
-    initialSettings[#initialSettings + 1] =
-    {
-        type = LHAS.ST_CHECKBOX,
-        label = GetString(LUIE_STRING_LAM_CT_UNLOCK),
-        tooltip = GetString(LUIE_STRING_LAM_CT_UNLOCK_TP),
-        getFunction = function () return Settings.unlocked end,
-        setFunction = function (value)
-            CombatText.SetMovingState(value)
-        end,
-        default = Defaults.unlocked
     }
 
     -- Initialize all settings and menu buttons for submenus
@@ -168,6 +159,140 @@ function CombatText.CreateConsoleSettings()
         settingsBuilder(sectionSettings)
         sectionGroups[sectionName] = sectionSettings
     end
+
+    -- Panel layout (unlock + position sliders)
+    buildSectionSettings("PanelLayout", function (settings)
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_CT_POSITIONS_TP),
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CT_UNLOCK),
+            tooltip = GetString(LUIE_STRING_LAM_CT_UNLOCK_TP),
+            getFunction = function () return Settings.unlocked end,
+            setFunction = function (value)
+                CombatText.SetMovingState(value)
+            end,
+            default = Defaults.unlocked
+        }
+
+        -- Slider range: max offset of panel CENTER from screen CENTER while the panel stays on-screen
+        -- (same idea as ZO_ReanchorControlForLeftSidePanel: layout uses screen size minus control size).
+        local gw = GuiRoot:GetWidth()
+        local gh = GuiRoot:GetHeight()
+        local combatTextPanelSliderTargets =
+        {
+            { "LUIE_CombatText_Outgoing", GetString(LUIE_STRING_CT_PANEL_OUTGOING) },
+            { "LUIE_CombatText_Incoming", GetString(LUIE_STRING_CT_PANEL_INCOMING) },
+            { "LUIE_CombatText_Alert", GetString(LUIE_STRING_CT_PANEL_ALERT) },
+            { "LUIE_CombatText_Point", GetString(LUIE_STRING_CT_PANEL_POINT) },
+            { "LUIE_CombatText_Resource", GetString(LUIE_STRING_CT_PANEL_RESOURCE) },
+        }
+
+        for cj = 1, #combatTextPanelSliderTargets do
+            local ck = combatTextPanelSliderTargets[cj][1]
+            local dim = Settings.panels[ck] and Settings.panels[ck].dimensions
+            local defDim = Defaults.panels[ck].dimensions
+            local cw = (dim and dim[1]) or defDim[1]
+            local ch = (dim and dim[2]) or defDim[2]
+            local cmaxX = zo_max(0, (gw - cw) / 2)
+            local cmaxY = zo_max(0, (gh - ch) / 2)
+            if Settings.panels[ck] then
+                local ox = zo_clamp(Settings.panels[ck].offsetX, -cmaxX, cmaxX)
+                local oy = zo_clamp(Settings.panels[ck].offsetY, -cmaxY, cmaxY)
+                if ox ~= Settings.panels[ck].offsetX or oy ~= Settings.panels[ck].offsetY then
+                    Settings.panels[ck].offsetX = ox
+                    Settings.panels[ck].offsetY = oy
+                    CombatText.ReanchorPanelFromSaved(ck)
+                    local cp = _G[ck]
+                    if cp then
+                        CombatText.SavePosition(cp)
+                    end
+                end
+            end
+        end
+
+        for psi = 1, #combatTextPanelSliderTargets do
+            local panelKey = combatTextPanelSliderTargets[psi][1]
+            local panelTitle = combatTextPanelSliderTargets[psi][2]
+            local dim = Settings.panels[panelKey] and Settings.panels[panelKey].dimensions
+            local defDim = Defaults.panels[panelKey].dimensions
+            local pw = (dim and dim[1]) or defDim[1]
+            local ph = (dim and dim[2]) or defDim[2]
+            local maxOffsetX = zo_max(0, (gw - pw) / 2)
+            local maxOffsetY = zo_max(0, (gh - ph) / 2)
+
+            settings[#settings + 1] =
+            {
+                type = LHAS.ST_LABEL,
+                label = panelTitle,
+            }
+
+            settings[#settings + 1] =
+            {
+                type = LHAS.ST_SLIDER,
+                label = zo_strformat("<<1>> — <<2>>", panelTitle, GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X)),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_X_TP),
+                min = -maxOffsetX,
+                max = maxOffsetX,
+                step = 10,
+                format = "%.0f",
+                getFunction = function ()
+                    CombatText.EnsurePanelSlidersUseCenter(panelKey)
+                    return zo_clamp(Settings.panels[panelKey].offsetX, -maxOffsetX, maxOffsetX)
+                end,
+                setFunction = function (value)
+                    CombatText.EnsurePanelSlidersUseCenter(panelKey)
+                    value = zo_clamp(value, -maxOffsetX, maxOffsetX)
+                    Settings.panels[panelKey].offsetX = value
+                    Settings.panels[panelKey].point = CENTER
+                    Settings.panels[panelKey].relativePoint = CENTER
+                    Settings.panels[panelKey].x = nil
+                    Settings.panels[panelKey].y = nil
+                    CombatText.ReanchorPanelFromSaved(panelKey)
+                    local p = _G[panelKey]
+                    if p then
+                        CombatText.SavePosition(p)
+                    end
+                end,
+                default = Defaults.panels[panelKey].offsetX,
+            }
+
+            settings[#settings + 1] =
+            {
+                type = LHAS.ST_SLIDER,
+                label = zo_strformat("<<1>> — <<2>>", panelTitle, GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y)),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_POS_Y_TP),
+                min = -maxOffsetY,
+                max = maxOffsetY,
+                step = 10,
+                format = "%.0f",
+                getFunction = function ()
+                    CombatText.EnsurePanelSlidersUseCenter(panelKey)
+                    return zo_clamp(Settings.panels[panelKey].offsetY, -maxOffsetY, maxOffsetY)
+                end,
+                setFunction = function (value)
+                    CombatText.EnsurePanelSlidersUseCenter(panelKey)
+                    value = zo_clamp(value, -maxOffsetY, maxOffsetY)
+                    Settings.panels[panelKey].offsetY = value
+                    Settings.panels[panelKey].point = CENTER
+                    Settings.panels[panelKey].relativePoint = CENTER
+                    Settings.panels[panelKey].x = nil
+                    Settings.panels[panelKey].y = nil
+                    CombatText.ReanchorPanelFromSaved(panelKey)
+                    local p = _G[panelKey]
+                    if p then
+                        CombatText.SavePosition(p)
+                    end
+                end,
+                default = Defaults.panels[panelKey].offsetY,
+            }
+        end
+    end)
 
     -- Build Common Options Section
     buildSectionSettings("CommonOptions", function (settings)
@@ -2119,6 +2244,7 @@ function CombatText.CreateConsoleSettings()
     end
 
     -- Add all submenu buttons
+    menuButtons[#menuButtons + 1] = createMenuButton("PanelLayout", GetString(LUIE_STRING_LAM_CT_PANEL_LAYOUT_SUBMENU), sectionGroups["PanelLayout"])
     menuButtons[#menuButtons + 1] = createMenuButton("CommonOptions", GetString(LUIE_STRING_LAM_UF_COMMON_HEADER), sectionGroups["CommonOptions"])
     menuButtons[#menuButtons + 1] = createMenuButton("Blacklist", GetString(LUIE_STRING_LAM_CT_BLACKLIST_HEADER), sectionGroups["Blacklist"])
     menuButtons[#menuButtons + 1] = createMenuButton("DamageHealing", zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_DAMAGE_AND_HEALING), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)), sectionGroups["DamageHealing"])

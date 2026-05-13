@@ -5,6 +5,59 @@
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
   <Controls>
+    <!-- Shared preview overlay for combat text panel movers (matches Ability Alerts pattern) -->
+    <Backdrop name="LUIE_CombatText_PanelPreviewBacking"
+      virtual="true"
+      hidden="true"
+      centerColor="0D99E640"
+      edgeColor="0D99E6E6">
+      <AnchorFill />
+      <Edge edgeFileWidth="8"
+        edgeFileHeight="1"
+        edgeFilePadding="1" />
+      <Controls>
+        <Texture name="$(parent)_AnchorTexture"
+          textureFile="/esoui/art/reticle/border_topleft.dds"
+          color="FFFF00E6">
+          <Dimensions x="16"
+            y="16" />
+          <Anchor point="TOPLEFT"
+            relativeTo="$(parent)"
+            relativePoint="TOPLEFT" />
+        </Texture>
+        <Backdrop name="$(parent)_AnchorLabelBg"
+          centerColor="000000FF"
+          edgeColor="000000FF"
+          layer="OVERLAY"
+          level="0"
+          tier="DT_LOW">
+          <Anchor point="BOTTOMLEFT"
+            relativeTo="$(parent)"
+            relativePoint="TOPLEFT"
+            offsetX="0"
+            offsetY="-1" />
+          <Edge edgeFileWidth="8"
+            edgeFileHeight="1"
+            edgeFilePadding="1" />
+        </Backdrop>
+        <Label name="$(parent)_AnchorLabel"
+          font="ZoFontGameSmall"
+          color="FFFF00"
+          text="0, 0"
+          wrapMode="ELLIPSIS"
+          horizontalAlignment="CENTER"
+          verticalAlignment="CENTER"
+          layer="OVERLAY"
+          level="0"
+          tier="DT_MEDIUM">
+          <Anchor point="BOTTOMLEFT"
+            relativeTo="$(parent)"
+            relativePoint="TOPLEFT"
+            offsetX="0"
+            offsetY="-1" />
+        </Label>
+      </Controls>
+    </Backdrop>
     <TopLevelControl name="LUIE_CombatText"
       mouseEnabled="false"
       clampedToScreen="true"
@@ -36,10 +89,18 @@
             minY="100"
             maxX="800"
             maxY="600" />
+          <OnMoveStart>
+            LUIE.CombatText.OnPanelPreviewMoveStart(self)
+          </OnMoveStart>
+          <OnMoveStop>
+            LUIE.CombatText.OnPanelDragStop(self)
+          </OnMoveStop>
           <OnMouseUp>
             LUIE.CombatText.SavePosition(self)
           </OnMouseUp>
           <Controls>
+            <Backdrop name="$(parent)_Preview"
+              inherits="LUIE_CombatText_PanelPreviewBacking" />
             <Backdrop name="$(parent)_Backdrop"
               inherits="ZO_DefaultBackdrop"
               alpha="0.3"
@@ -70,10 +131,18 @@
             minY="100"
             maxX="800"
             maxY="600" />
+          <OnMoveStart>
+            LUIE.CombatText.OnPanelPreviewMoveStart(self)
+          </OnMoveStart>
+          <OnMoveStop>
+            LUIE.CombatText.OnPanelDragStop(self)
+          </OnMoveStop>
           <OnMouseUp>
             LUIE.CombatText.SavePosition(self)
           </OnMouseUp>
           <Controls>
+            <Backdrop name="$(parent)_Preview"
+              inherits="LUIE_CombatText_PanelPreviewBacking" />
             <Backdrop name="$(parent)_Backdrop"
               inherits="ZO_DefaultBackdrop"
               alpha="0.3"
@@ -100,10 +169,18 @@
             offsetY="250" />
           <Dimensions x="400"
             y="100" />
+          <OnMoveStart>
+            LUIE.CombatText.OnPanelPreviewMoveStart(self)
+          </OnMoveStart>
+          <OnMoveStop>
+            LUIE.CombatText.OnPanelDragStop(self)
+          </OnMoveStop>
           <OnMouseUp>
             LUIE.CombatText.SavePosition(self)
           </OnMouseUp>
           <Controls>
+            <Backdrop name="$(parent)_Preview"
+              inherits="LUIE_CombatText_PanelPreviewBacking" />
             <Backdrop name="$(parent)_Backdrop"
               inherits="ZO_DefaultBackdrop"
               alpha="0.3"
@@ -130,10 +207,18 @@
             offsetY="-300" />
           <Dimensions x="400"
             y="100" />
+          <OnMoveStart>
+            LUIE.CombatText.OnPanelPreviewMoveStart(self)
+          </OnMoveStart>
+          <OnMoveStop>
+            LUIE.CombatText.OnPanelDragStop(self)
+          </OnMoveStop>
           <OnMouseUp>
             LUIE.CombatText.SavePosition(self)
           </OnMouseUp>
           <Controls>
+            <Backdrop name="$(parent)_Preview"
+              inherits="LUIE_CombatText_PanelPreviewBacking" />
             <Backdrop name="$(parent)_Backdrop"
               inherits="ZO_DefaultBackdrop"
               alpha="0.3"
@@ -160,10 +245,18 @@
             offsetY="375" />
           <Dimensions x="400"
             y="100" />
+          <OnMoveStart>
+            LUIE.CombatText.OnPanelPreviewMoveStart(self)
+          </OnMoveStart>
+          <OnMoveStop>
+            LUIE.CombatText.OnPanelDragStop(self)
+          </OnMoveStop>
           <OnMouseUp>
             LUIE.CombatText.SavePosition(self)
           </OnMouseUp>
           <Controls>
+            <Backdrop name="$(parent)_Preview"
+              inherits="LUIE_CombatText_PanelPreviewBacking" />
             <Backdrop name="$(parent)_Backdrop"
               inherits="ZO_DefaultBackdrop"
               alpha="0.3"

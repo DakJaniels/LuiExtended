@@ -15,6 +15,7 @@ local pairs = pairs
 local printToChat = LUIE.PrintToChat
 
 local eventManager = GetEventManager()
+local moduleName = LUIE.name .. "CombatTextPanels"
 local chatSystem = ZO_GetChatSystem()
 
 -- Table pool: LUIE.GetCachedTable() / LUIE.RecycleTable() (see LuiExtended.lua; RecycleTable clears keys before pooling).
@@ -39,6 +40,107 @@ function CombatText.SavePosition(panel)
     panelSettings.offsetX = anchor[5]
     panelSettings.offsetY = anchor[6]
     panelSettings.dimensions = dimensions
+    CombatText.UpdatePanelPreviewLabel(panel)
+end
+
+--- @param panel Control
+function CombatText.UpdatePanelPreviewLabel(panel)
+    local preview = panel.preview
+    if preview and preview.anchorLabel then
+        preview.anchorLabel:SetText(zo_strformat("<<1>>, <<2>>", panel:GetLeft(), panel:GetTop()))
+    end
+end
+
+--- @param panel Control
+function CombatText.OnPanelPreviewMoveStart(panel)
+    local key = moduleName .. panel:GetName()
+    eventManager:RegisterForUpdate(key, 200, function ()
+        CombatText.UpdatePanelPreviewLabel(panel)
+    end)
+end
+
+--- Grid snap, then persist as CENTER offsets on `LUIE_CombatText` (matches menu x/y sliders).
+--- @param panel Control
+function CombatText.OnPanelDragStop(panel)
+    local key = moduleName .. panel:GetName()
+    eventManager:UnregisterForUpdate(key)
+
+    local Settings = CombatText.SV
+    local panelKey = panel:GetName()
+    local s = Settings.panels[panelKey]
+    if not s then
+        return
+    end
+
+    local left, top = panel:GetLeft(), panel:GetTop()
+    if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_combatText then
+        left, top = LUIE.ApplyGridSnap(left, top, "combatText")
+        panel:ClearAnchors()
+        panel:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
+    end
+
+    local parent = LUIE_CombatText
+    local pl, pt = parent:GetLeft(), parent:GetTop()
+    local pw, ph = parent:GetDimensions()
+    local pcx, pcy = pl + pw / 2, pt + ph / 2
+    local w, h = panel:GetDimensions()
+    local offsetX = left + w / 2 - pcx
+    local offsetY = top + h / 2 - pcy
+
+    panel:ClearAnchors()
+    panel:SetAnchor(CENTER, parent, CENTER, offsetX, offsetY)
+
+    s.point = CENTER
+    s.relativePoint = CENTER
+    s.offsetX = offsetX
+    s.offsetY = offsetY
+    s.x = nil
+    s.y = nil
+
+    CombatText.SavePosition(panel)
+end
+
+--- Convert legacy TOPLEFT-on-GuiRoot saves to CENTER offsets on `LUIE_CombatText` so x/y sliders match.
+--- @param panelKey string
+function CombatText.EnsurePanelSlidersUseCenter(panelKey)
+    local s = CombatText.SV.panels[panelKey]
+    if not s or not (s.point == TOPLEFT and s.relativePoint == TOPLEFT) then
+        return
+    end
+    local w, h = unpack(s.dimensions)
+    local panel = _G[panelKey]
+    if panel then
+        w, h = panel:GetDimensions()
+    end
+    local parent = LUIE_CombatText
+    local pl, pt = parent:GetLeft(), parent:GetTop()
+    local pw, ph = parent:GetDimensions()
+    local pcx, pcy = pl + pw / 2, pt + ph / 2
+    local left, top = s.offsetX, s.offsetY
+    s.offsetX = left + w / 2 - pcx
+    s.offsetY = top + h / 2 - pcy
+    s.point = CENTER
+    s.relativePoint = CENTER
+    s.x = nil
+    s.y = nil
+    CombatText.ReanchorPanelFromSaved(panelKey)
+end
+
+--- Apply saved anchors for one panel (`CENTER` on `LUIE_CombatText`, or legacy `TOPLEFT` on `GuiRoot`).
+--- @param panelKey string
+function CombatText.ReanchorPanelFromSaved(panelKey)
+    local s = CombatText.SV.panels[panelKey]
+    local panel = _G[panelKey]
+    if not panel or not s then
+        return
+    end
+    panel:ClearAnchors()
+    if s.point == TOPLEFT and s.relativePoint == TOPLEFT then
+        panel:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, s.offsetX, s.offsetY)
+    else
+        panel:SetAnchor(s.point, LUIE_CombatText, s.relativePoint, s.offsetX, s.offsetY)
+    end
+    CombatText.UpdatePanelPreviewLabel(panel)
 end
 
 --- Reset all panel positions to defaults
@@ -75,15 +177,11 @@ function CombatText.ResetPanelPositions()
     CombatText.SetMovingState(false)
 
     -- Re-apply panel positions
-    local Combattext = GetControl("Combattext")
-    if Combattext then
-        for k, s in pairs(Settings.panels) do
-            local panel = _G[k]
-            if panel then
-                panel:ClearAnchors()
-                panel:SetAnchor(s.point, Combattext, s.relativePoint, s.offsetX, s.offsetY)
-                panel:SetDimensions(unpack(s.dimensions))
-            end
+    for k, s in pairs(Settings.panels) do
+        local panel = _G[k]
+        if panel then
+            CombatText.ReanchorPanelFromSaved(k)
+            panel:SetDimensions(unpack(s.dimensions))
         end
     end
 end
@@ -228,18 +326,12 @@ function CombatText.SetMovingState(state)
             if _G[k .. "_Label"] then
                 _G[k .. "_Label"]:SetHidden(not state)
             end
-            if state then
-                -- Add grid snapping handler
-                panel:SetHandler("OnMoveStop", function (self)
-                    local left, top = self:GetLeft(), self:GetTop()
-                    if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_combatText then
-                        left, top = LUIE.ApplyGridSnap(left, top, "combatText")
-                        self:ClearAnchors()
-                        self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
-                    end
-                    Settings.panels[k].x = left
-                    Settings.panels[k].y = top
-                end)
+            local preview = panel.preview or panel:GetNamedChild("_Preview")
+            if preview then
+                preview:SetHidden(not state)
+            end
+            if not state then
+                eventManager:UnregisterForUpdate(moduleName .. k)
             end
         end
     end
@@ -272,15 +364,25 @@ function CombatText.Initialize(enabled)
     CombatText.ApplyFont()
 
     -- Set panels to player configured settings
-    local Combattext = GetControl("Combattext")
     for k, s in pairs(LUIE.CombatText.SV.panels) do
         if _G[k] ~= nil then
-            _G[k]:ClearAnchors()
-            _G[k]:SetAnchor(s.point, Combattext, s.relativePoint, s.offsetX, s.offsetY)
-            _G[k]:SetDimensions(unpack(s.dimensions))
-            _G[k]:SetHandler("OnMouseUp", CombatText.SavePosition)
+            local panel = _G[k]
+            panel:SetDimensions(unpack(s.dimensions))
+            CombatText.ReanchorPanelFromSaved(k)
+            panel:SetHandler("OnMouseUp", CombatText.SavePosition)
+            local preview = panel:GetNamedChild("_Preview")
+            if preview then
+                panel.preview = preview --- @type BackdropControl
+                panel.preview.anchorLabel = preview:GetNamedChild("_AnchorLabel")
+                panel.preview.anchorLabelBg = preview:GetNamedChild("_AnchorLabelBg")
+                panel.preview.anchorTexture = preview:GetNamedChild("_AnchorTexture")
+            end
             _G[k .. "_Label"]:SetFont(LUIE.CreateFontString(LUIE.CombatText.SV.fontFaceApplied, 26, LUIE.CombatText.SV.fontStyle))
             _G[k .. "_Label"]:SetText(panelTitles[k])
+            CombatText.UpdatePanelPreviewLabel(panel)
+            if preview then
+                preview:SetHidden(not CombatText.SV.unlocked)
+            end
         else
             LUIE.CombatText.SV.panels[k] = nil
         end
