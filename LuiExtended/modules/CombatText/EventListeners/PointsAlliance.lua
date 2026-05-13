@@ -14,7 +14,7 @@ local pointType = LuiData.Data.CombatTextConstants.pointType
 
 function CombatTextPointsAllianceEventListener:Initialize()
     LUIE.CombatTextEventListener.Initialize(self)
-    self:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, function (eventId, alliancePoints, playSound, difference, reason, reasonSupplementaryInfo) self:OnEvent(alliancePoints, playSound, difference, reason, reasonSupplementaryInfo) end)
+    self:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, function (alliancePoints, playSound, difference, reason, reasonSupplementaryInfo) self:OnEvent(alliancePoints, playSound, difference, reason, reasonSupplementaryInfo) end)
 end
 
 --- @param alliancePoints integer

@@ -13,7 +13,7 @@ local eventType = LuiData.Data.CombatTextConstants.eventType
 
 function CombatTextDeathListener:Initialize()
     LUIE.CombatTextEventListener.Initialize(self)
-    self:RegisterForEvent(EVENT_UNIT_DEATH_STATE_CHANGED, function (eventId, unitTag, isDead) self:OnEvent(unitTag, isDead) end, REGISTER_FILTER_UNIT_TAG_PREFIX, "group")
+    self:RegisterForEvent(EVENT_UNIT_DEATH_STATE_CHANGED, function (unitTag, isDead) self:OnEvent(unitTag, isDead) end, REGISTER_FILTER_UNIT_TAG_PREFIX, "group")
 end
 
 --- @param unitTag string
