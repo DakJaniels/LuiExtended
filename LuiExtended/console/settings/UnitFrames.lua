@@ -230,7 +230,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("DefaultFrames", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_DFRAMES_HEADER),
         }
 
@@ -562,7 +562,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("CustomFrames", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMES_HEADER),
         }
 
@@ -870,7 +870,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("CustomFramesColor", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMES_COLOR_HEADER),
         }
 
@@ -1318,7 +1318,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("CustomFramesPlayerTarget", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_HEADER),
         }
 
@@ -2097,7 +2097,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("CustomFramesPositions", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POSITIONS_HEADER),
         }
         settings[#settings + 1] =
@@ -2199,7 +2199,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("CustomFramesBarAlignment", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_HEADER),
         }
 
@@ -2371,7 +2371,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("CustomFramesPlayerTargetOptions", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_OPTIONS_HEADER),
         }
 
@@ -2645,7 +2645,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("CustomFramesGroup", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESG_HEADER),
         }
 
@@ -3022,7 +3022,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("CustomFramesRaid", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESR_HEADER),
         }
 
@@ -3401,7 +3401,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("GroupResources", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = "Group Resources",
         }
 
@@ -3681,7 +3681,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("GroupCombatStats", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = "Group Combat Stats",
         }
 
@@ -3772,7 +3772,7 @@ function UnitFrames.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = "Group Frames (4 player)",
         }
 
@@ -3844,7 +3844,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("GroupPotionCooldowns", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = "Group Potion Cooldowns",
         }
 
@@ -3893,7 +3893,7 @@ function UnitFrames.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = "Group Frames (4 player)",
         }
 
@@ -3965,7 +3965,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("GroupFoodDrinkBuff", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = "Group Food & Drink Buffs",
         }
 
@@ -3999,7 +3999,7 @@ function UnitFrames.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = "Food/drink buff icons are only displayed on group frames (4-player groups). Raid frames do not have space for these icons.",
         }
 
@@ -4138,7 +4138,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("CustomFramesCompanion", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_HEADER),
         }
 
@@ -4323,7 +4323,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("CustomFramesPet", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESPET_HEADER),
         }
 
@@ -4508,7 +4508,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("PetWhitelist", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_CUSTOM_LIST_UF_WHITELIST),
         }
 
@@ -4521,7 +4521,7 @@ function UnitFrames.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_BLACKLIST_DESCRIPT),
         }
 
@@ -4630,7 +4630,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("CustomFramesBoss", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESB_HEADER),
         }
 
@@ -4908,7 +4908,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("CustomFramesPvP", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMESPVP_HEADER),
         }
 
@@ -4984,7 +4984,7 @@ function UnitFrames.CreateConsoleSettings()
     buildSectionSettings("CommonOptions", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_COMMON_HEADER),
         }
 

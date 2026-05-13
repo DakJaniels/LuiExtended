@@ -300,7 +300,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     buildSectionSettings("FramePositions", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_CFRAMES_POSITIONS_HEADER),
         }
         settings[#settings + 1] =
@@ -527,7 +527,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     buildSectionSettings("PositionDisplay", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_HEADER_POSITION),
         }
 
@@ -765,7 +765,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     buildSectionSettings("LongShortTerm", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_LONG_SHORT_HEADER),
         }
 
@@ -872,7 +872,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     buildSectionSettings("Misc", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_MISC_HEADER),
         }
 
@@ -1100,7 +1100,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     buildSectionSettings("LongTerm", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_LONGTERM_HEADER),
         }
 
@@ -1713,7 +1713,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     buildSectionSettings("Icon", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_ICON_HEADER),
         }
 
@@ -1953,7 +1953,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         -- Icon Normalization Options
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_NORMALIZE_HEADER),
         }
 
@@ -2003,7 +2003,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     buildSectionSettings("Color", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER),
         }
 
@@ -2017,7 +2017,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         -- Basic Color Options
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER_BASIC),
         }
 
@@ -2084,7 +2084,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         -- Unbreakable & Cosmetic Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER_UNBREAKABLE),
         }
 
@@ -2165,7 +2165,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         -- Crowd Control Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER_CROWD_CONTROL),
         }
 
@@ -2391,7 +2391,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     buildSectionSettings("AlignmentSorting", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_SORTING_HEADER),
         }
 
@@ -2405,7 +2405,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         -- Buffs/Debuffs Alignment & Sorting
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_SORTING_NORMAL_HEADER),
         }
 
@@ -2624,7 +2624,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         -- Unanchored Player / Target Buff Options
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_SORTING_UNANCHORED_HEADER),
         }
 
@@ -2829,7 +2829,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         -- Long Term Alignment & Sorting
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_SORTING_LONGTERM_HEADER),
         }
 
@@ -2976,7 +2976,7 @@ function SpellCastBuffs.CreateConsoleSettings()
         -- Prominent Alignment & Sorting
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_SORTING_PROMINET_HEADER),
         }
 
@@ -3265,7 +3265,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     buildSectionSettings("Tooltip", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_HEADER),
         }
 
@@ -3374,7 +3374,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     buildSectionSettings("Priority", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_PRIORITY_HEADER),
         }
 
@@ -3537,7 +3537,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     buildSectionSettings("Prominent", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_PROM_HEADER),
         }
 
@@ -4013,7 +4013,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     buildSectionSettings("Blacklist", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_HEADER),
         }
 
@@ -4171,7 +4171,7 @@ function SpellCastBuffs.CreateConsoleSettings()
     buildSectionSettings("Debug", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = "Debug Options",
         }
 

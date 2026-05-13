@@ -196,7 +196,7 @@ function InfoPanel.CreateConsoleSettings()
     -- Font Options Header
     panel:AddSetting(
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_FONT)
         })
 
@@ -281,14 +281,14 @@ function InfoPanel.CreateConsoleSettings()
     -- Info Panel Options Header
     panel:AddSetting(
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_PNL_HEADER)
         })
 
     -- Elements Header
     panel:AddSetting(
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_PNL_ELEMENTS_HEADER)
         })
 
@@ -477,7 +477,7 @@ function InfoPanel.CreateConsoleSettings()
     -- Misc Header
     panel:AddSetting(
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(SI_PLAYER_MENU_MISC)
         })
 

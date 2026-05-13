@@ -175,7 +175,7 @@ function ActionBar.CreateConsoleSettings()
     buildSectionSettings("GlobalCooldown", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_AB_HEADER_GCD),
         }
 
@@ -269,7 +269,7 @@ function ActionBar.CreateConsoleSettings()
     buildSectionSettings("UltimateTracking", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_AB_HEADER_ULTIMATE),
         }
 
@@ -414,7 +414,7 @@ function ActionBar.CreateConsoleSettings()
     buildSectionSettings("CompanionUltimate", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_AB_HEADER_COMPANION_ULTIMATE),
         }
 
@@ -549,7 +549,7 @@ function ActionBar.CreateConsoleSettings()
     buildSectionSettings("BarAbilityHighlight", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_AB_HEADER_BAR),
         }
 
@@ -763,7 +763,7 @@ function ActionBar.CreateConsoleSettings()
         -- Backbar subsection
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_AB_BACKBAR_HEADER)
         }
 
@@ -838,7 +838,7 @@ function ActionBar.CreateConsoleSettings()
     buildSectionSettings("QuickslotCooldown", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_AB_HEADER_POTION),
         }
 
@@ -961,7 +961,7 @@ function ActionBar.CreateConsoleSettings()
     buildSectionSettings("CastBar", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_AB_HEADER_CASTBAR),
         }
 
@@ -1232,7 +1232,7 @@ function ActionBar.CreateConsoleSettings()
         -- Filters subsection
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_AB_CASTBAR_FILTERS_HEADER)
         }
 
@@ -1250,7 +1250,7 @@ function ActionBar.CreateConsoleSettings()
         -- Blacklist subsection
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST)
         }
 

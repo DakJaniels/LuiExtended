@@ -109,7 +109,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     buildSectionSettings("ChatMessage", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_CHATHEADER),
         }
 
@@ -366,7 +366,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     buildSectionSettings("Currency", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_CURRENCY_HEADER),
         }
 
@@ -1927,7 +1927,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     buildSectionSettings("Loot", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_LOOT_HEADER),
         }
 
@@ -2724,7 +2724,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = "Attunable Crafting Station Announcements"
         }
     end)
@@ -2733,7 +2733,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     buildSectionSettings("SharedCurrencyLoot", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_CURRENCY_CONTEXT_MENU),
         }
 
@@ -2831,7 +2831,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_CURRENCY_CONTEXT_HEADER)
         }
 
@@ -4353,13 +4353,13 @@ function ChatAnnouncements.CreateConsoleSettings()
     buildSectionSettings("Experience", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_EXP_HEADER)
         }
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_EXP_HEADER_ENLIGHTENED)
         }
 
@@ -4419,7 +4419,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_EXP_HEADER_LEVELUP)
         }
 
@@ -4549,7 +4549,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_EXP_HEADER_EXPERIENCEGAIN)
         }
 
@@ -4716,7 +4716,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_EXP_HEADER_SKILL_POINTS)
         }
 
@@ -4870,7 +4870,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_EXP_HEADER_SKILL_LINES)
         }
 
@@ -5063,7 +5063,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_EXP_HEADER_GUILDREP)
         }
 
@@ -5400,7 +5400,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = "Companion Level Up Announcements"
         }
     end)
@@ -5409,7 +5409,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     buildSectionSettings("Collectible", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_HEADER),
         }
 
@@ -5422,7 +5422,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_COL_HEADER)
         }
 
@@ -5627,7 +5627,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_USE_HEADER)
         }
 
@@ -5808,7 +5808,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_LORE_HEADER)
         }
 
@@ -6118,7 +6118,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     buildSectionSettings("Antiquities", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_HEADER),
         }
 
@@ -6131,7 +6131,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_ANTIQUITY_LEAD_HEADER)
         }
 
@@ -6305,7 +6305,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     buildSectionSettings("Achievements", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_ACHIEVE_HEADER),
         }
 
@@ -6686,7 +6686,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_ACHIEVE_CATEGORY_HEADER)
         }
 
@@ -6721,7 +6721,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     buildSectionSettings("Quest", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_QUEST_HEADER)
         }
 
@@ -7189,7 +7189,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     buildSectionSettings("Social", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_SOCIAL_HEADER),
         }
 
@@ -7202,7 +7202,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_SOCIAL_FRIENDS_HEADER)
         }
 
@@ -7276,7 +7276,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_SOCIAL_GUILD_HEADER)
         }
 
@@ -7457,7 +7457,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_SOCIAL_TRADE_HEADER)
         }
 
@@ -7497,7 +7497,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_SOCIAL_DUEL_HEADER)
         }
 
@@ -7712,7 +7712,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_SOCIAL_MARA_HEADER)
         }
 
@@ -7789,7 +7789,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     buildSectionSettings("Group", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_GROUP_HEADER),
         }
 
@@ -7802,7 +7802,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_GROUP_BASE_HEADER)
         }
 
@@ -7842,7 +7842,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_GROUP_LFG_HEADER)
         }
 
@@ -8001,7 +8001,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_GROUP_RAID_HEADER)
         }
 
@@ -8214,7 +8214,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     buildSectionSettings("Display", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER),
         }
 
@@ -8227,7 +8227,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             text = GetString(LUIE_STRING_LAM_CA_DISPLAY_DESCRIPTION)
         }
 
@@ -8301,7 +8301,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER_MISC)
         }
 
@@ -8409,7 +8409,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER_ZONE)
         }
 
@@ -8534,7 +8534,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER_ARENA)
         }
 
@@ -8591,7 +8591,7 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER_DUNGEON)
         }
 
@@ -8653,7 +8653,7 @@ function ChatAnnouncements.CreateConsoleSettings()
         local timedActivitiesProgressLabel = GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_PROGRESS)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_MISC_HEADER),
         }
 

@@ -115,7 +115,7 @@ function SlashCommands.CreateConsoleSettings()
     buildSectionSettings("GeneralCommands", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GENERAL),
         }
 
@@ -472,7 +472,7 @@ function SlashCommands.CreateConsoleSettings()
     buildSectionSettings("GroupCommands", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GROUP),
         }
 
@@ -586,7 +586,7 @@ function SlashCommands.CreateConsoleSettings()
     buildSectionSettings("GuildCommands", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GUILD),
         }
 
@@ -644,7 +644,7 @@ function SlashCommands.CreateConsoleSettings()
     buildSectionSettings("SocialCommands", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_SOCIAL),
         }
 
@@ -716,7 +716,7 @@ function SlashCommands.CreateConsoleSettings()
     buildSectionSettings("HolidayCommands", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_HOLIDAY),
         }
 
