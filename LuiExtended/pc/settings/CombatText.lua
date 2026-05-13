@@ -128,19 +128,17 @@ function CombatText.CreateSettings()
 
     optionsDataCombatText[#optionsDataCombatText + 1] =
     {
-        {
-            type = "checkbox",
-            width = "half",
-            name = GetString(LUIE_STRING_LAM_CT_UNLOCK),
-            tooltip = GetString(LUIE_STRING_LAM_CT_UNLOCK_TP),
-            default = Defaults.unlocked,
-            getFunc = function ()
-                return Settings.unlocked
-            end,
-            setFunc = function (value)
-                CombatText.SetMovingState(value)
-            end,
-        },
+        type = "checkbox",
+        width = "half",
+        name = GetString(LUIE_STRING_LAM_CT_UNLOCK),
+        tooltip = GetString(LUIE_STRING_LAM_CT_UNLOCK_TP),
+        default = Defaults.unlocked,
+        getFunc = function ()
+            return Settings.unlocked
+        end,
+        setFunc = function (value)
+            CombatText.SetMovingState(value)
+        end,
     }
 
     -- Combat Text - Common Options
