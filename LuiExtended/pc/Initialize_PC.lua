@@ -42,7 +42,7 @@ local function RegisterEvents()
         eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_JOINED_GUILD, LUIE.UpdateGuildData)
         eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_LEFT_GUILD, LUIE.UpdateGuildData)
     end
-    LUIE.ApplySceneLogOverrides()
+    -- LUIE.ApplySceneLogOverrides()
     eventManager:UnregisterForEvent(LUIE.name, EVENT_ADD_ON_LOADED)
 end
 
