@@ -182,7 +182,7 @@ function LUIE.CreateConsoleSettings()
     -- Character Profile Settings Section
     settingsData[#settingsData + 1] =
     {
-        type = LHAS.ST_SECTION,
+        type = LHAS.ST_LABEL,
         label = GetString(LUIE_STRING_LAM_SVPROFILE_HEADER)
     }
 
@@ -263,7 +263,7 @@ function LUIE.CreateConsoleSettings()
     -- Modules Header
     settingsData[#settingsData + 1] =
     {
-        type = LHAS.ST_SECTION,
+        type = LHAS.ST_LABEL,
         label = GetString(LUIE_STRING_LAM_MODULEHEADER)
     }
 
@@ -406,7 +406,7 @@ function LUIE.CreateConsoleSettings()
     -- Misc Settings
     settingsData[#settingsData + 1] =
     {
-        type = LHAS.ST_SECTION,
+        type = LHAS.ST_LABEL,
         label = GetString(LUIE_STRING_LAM_MISCHEADER)
     }
 

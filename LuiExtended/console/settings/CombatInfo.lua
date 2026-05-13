@@ -97,7 +97,7 @@ function CombatInfo.CreateConsoleSettings()
     buildSectionSettings("FloatingMarkers", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CI_ENEMY_MARKER_HEADER),
         }
 
@@ -146,7 +146,7 @@ function CombatInfo.CreateConsoleSettings()
     buildSectionSettings("ActiveCombatAlerts", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CI_HEADER_ACTIVE_COMBAT_ALERT),
         }
 
@@ -382,7 +382,7 @@ function CombatInfo.CreateConsoleSettings()
         -- Shared Options Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CI_ALERT_HEADER_SHARED)
         }
 
@@ -474,7 +474,7 @@ function CombatInfo.CreateConsoleSettings()
         -- Mitigation Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CI_ALERT_MITIGATION_HEADER)
         }
 
@@ -679,7 +679,7 @@ function CombatInfo.CreateConsoleSettings()
         -- Block Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_BLOCK)
         }
 
@@ -738,7 +738,7 @@ function CombatInfo.CreateConsoleSettings()
         -- Dodge Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_DODGE)
         }
 
@@ -780,7 +780,7 @@ function CombatInfo.CreateConsoleSettings()
         -- Avoid Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_AVOID)
         }
 
@@ -822,7 +822,7 @@ function CombatInfo.CreateConsoleSettings()
         -- Interrupt Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_INTERRUPT)
         }
 
@@ -881,7 +881,7 @@ function CombatInfo.CreateConsoleSettings()
         -- Unmit Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_UNMIT)
         }
 
@@ -940,7 +940,7 @@ function CombatInfo.CreateConsoleSettings()
         -- Power Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_POWER)
         }
 
@@ -1033,7 +1033,7 @@ function CombatInfo.CreateConsoleSettings()
         -- Destroy Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_DESTROY)
         }
 
@@ -1126,7 +1126,7 @@ function CombatInfo.CreateConsoleSettings()
         -- Summon Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_ALERT_SUMMON)
         }
 
@@ -1219,7 +1219,7 @@ function CombatInfo.CreateConsoleSettings()
         -- CC Colors Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CI_ALERT_HEADER_CC_COLOR)
         }
 
@@ -1424,7 +1424,7 @@ function CombatInfo.CreateConsoleSettings()
         -- Sounds Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CI_ALERT_SOUND_HEADER)
         }
 
@@ -2049,7 +2049,7 @@ function CombatInfo.CreateConsoleSettings()
     buildSectionSettings("CrowdControlTracker", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CI_CCT_HEADER),
         }
 
@@ -2171,7 +2171,7 @@ function CombatInfo.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CI_CCT_DISPLAY_HEADER)
         }
 
@@ -2292,7 +2292,7 @@ function CombatInfo.CreateConsoleSettings()
         -- CCT Misc Options Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CI_CCT_MISC_OPTIONS_HEADER)
         }
 
@@ -2428,7 +2428,7 @@ function CombatInfo.CreateConsoleSettings()
         -- CCT CC Colors Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CI_ALERT_HEADER_CC_COLOR)
         }
 
@@ -2618,7 +2618,7 @@ function CombatInfo.CreateConsoleSettings()
         -- CCT Root Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CI_CCT_ROOT_HEADER)
         }
 
@@ -2661,7 +2661,7 @@ function CombatInfo.CreateConsoleSettings()
         -- CCT AOE Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CI_CCT_AOE_HEADER)
         }
 
@@ -2704,7 +2704,7 @@ function CombatInfo.CreateConsoleSettings()
         -- CCT Snare Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CI_CCT_SNARE_HEADER)
         }
 
@@ -2747,7 +2747,7 @@ function CombatInfo.CreateConsoleSettings()
         -- CCT Shared Options Header (AOE Display Options)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CI_ALERT_HEADER_SHARED)
         }
 
@@ -3127,7 +3127,7 @@ function CombatInfo.CreateConsoleSettings()
     buildSectionSettings("SynergyTracker", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = "Synergy Tracker",
         }
 
@@ -3246,7 +3246,7 @@ function CombatInfo.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = "Display Options"
         }
 
@@ -3397,7 +3397,7 @@ function CombatInfo.CreateConsoleSettings()
         -- Detected Synergies & Priority Overrides Header
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = "Detected Synergies & Priority Overrides"
         }
 
@@ -3529,7 +3529,7 @@ function CombatInfo.CreateConsoleSettings()
 
     -- Build Block Indicator Section
     buildSectionSettings("Block", function (settings)
-        settings[#settings + 1] = { type = LHAS.ST_SECTION, label = "Block Indicator" }
+        settings[#settings + 1] = { type = LHAS.ST_LABEL, label = "Block Indicator" }
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,

@@ -173,7 +173,7 @@ function CombatText.CreateConsoleSettings()
     buildSectionSettings("CommonOptions", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_UF_COMMON_HEADER),
         }
 
@@ -276,7 +276,7 @@ function CombatText.CreateConsoleSettings()
     buildSectionSettings("Blacklist", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_BLACKLIST_HEADER),
         }
 
@@ -445,7 +445,7 @@ function CombatText.CreateConsoleSettings()
     buildSectionSettings("DamageHealing", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_DAMAGE_AND_HEALING), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)),
         }
 
@@ -458,7 +458,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_DAMAGE)
         }
 
@@ -532,7 +532,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_DOT)
         }
 
@@ -606,7 +606,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_HEADER_DAMAGE_COLOR)
         }
 
@@ -783,7 +783,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_HEALING)
         }
 
@@ -857,7 +857,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_HOT)
         }
 
@@ -931,7 +931,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_HEADER_HEALING_COLOR)
         }
 
@@ -970,7 +970,7 @@ function CombatText.CreateConsoleSettings()
     buildSectionSettings("ResourceGainDrain", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_RESOURCE_GAIN_DRAIN), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)),
         }
 
@@ -983,7 +983,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_HEADER_SHARED_FONT_SIZE)
         }
 
@@ -1003,7 +1003,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_ENERGIZE)
         }
 
@@ -1059,7 +1059,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_ENERGIZE_ULTIMATE)
         }
 
@@ -1105,7 +1105,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_DRAIN)
         }
 
@@ -1164,7 +1164,7 @@ function CombatText.CreateConsoleSettings()
     buildSectionSettings("Mitigation", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_MITIGATION), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)),
         }
 
@@ -1177,7 +1177,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_HEADER_SHARED_FONT_SIZE)
         }
 
@@ -1211,7 +1211,7 @@ function CombatText.CreateConsoleSettings()
         for _, mitType in ipairs(mitigationTypes) do
             settings[#settings + 1] =
             {
-                type = LHAS.ST_SECTION,
+                type = LHAS.ST_LABEL,
                 label = mitType.header
             }
 
@@ -1261,7 +1261,7 @@ function CombatText.CreateConsoleSettings()
     buildSectionSettings("CrowdControl", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_CROWD_CONTROL), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)),
         }
 
@@ -1274,7 +1274,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_HEADER_SHARED_FONT_SIZE)
         }
 
@@ -1306,7 +1306,7 @@ function CombatText.CreateConsoleSettings()
         for _, ccType in ipairs(ccTypes) do
             settings[#settings + 1] =
             {
-                type = LHAS.ST_SECTION,
+                type = LHAS.ST_LABEL,
                 label = ccType.header
             }
 
@@ -1356,7 +1356,7 @@ function CombatText.CreateConsoleSettings()
     buildSectionSettings("Notification", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_NOTIFICATION), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)),
         }
 
@@ -1369,7 +1369,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_NOTIFICATION_COMBAT_STATE)
         }
 
@@ -1449,7 +1449,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_DEATH_HEADER)
         }
 
@@ -1510,7 +1510,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_HEADER_SHARED_FONT_SIZE)
         }
 
@@ -1539,7 +1539,7 @@ function CombatText.CreateConsoleSettings()
         for _, pointType in ipairs(pointTypes) do
             settings[#settings + 1] =
             {
-                type = LHAS.ST_SECTION,
+                type = LHAS.ST_LABEL,
                 label = pointType.header
             }
 
@@ -1576,7 +1576,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_SHARED_ULTIMATE_AND_POTION_READY)
         }
 
@@ -1656,7 +1656,7 @@ function CombatText.CreateConsoleSettings()
 
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_FORMAT_DESCRIPTION)
         }
 
@@ -1685,7 +1685,7 @@ function CombatText.CreateConsoleSettings()
         for _, resType in ipairs(resourceTypes) do
             settings[#settings + 1] =
             {
-                type = LHAS.ST_SECTION,
+                type = LHAS.ST_LABEL,
                 label = GetString("LUIE_STRING_LAM_CT_NOTIFICATION_LOW_" .. resType.header)
             }
 
@@ -1740,7 +1740,7 @@ function CombatText.CreateConsoleSettings()
     buildSectionSettings("Font", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_FONT_HEADER),
         }
 
@@ -1828,7 +1828,7 @@ function CombatText.CreateConsoleSettings()
     buildSectionSettings("Animation", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_ANIMATION_HEADER),
         }
 
@@ -1987,7 +1987,7 @@ function CombatText.CreateConsoleSettings()
     buildSectionSettings("Throttle", function (settings)
         settings[#settings + 1] =
         {
-            type = LHAS.ST_SECTION,
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CT_THROTTLE_HEADER),
         }
 
