@@ -17,8 +17,7 @@ local printToChat = LUIE.PrintToChat
 local eventManager = GetEventManager()
 local chatSystem = ZO_GetChatSystem()
 
--- Table cache system is now global: use LUIE.GetCachedTable() and LUIE.RecycleTable()
--- See LuiExtended.lua for implementation details
+-- Table pool: LUIE.GetCachedTable() / LUIE.RecycleTable() (see LuiExtended.lua; RecycleTable clears keys before pooling).
 
 local panelTitles =
 {

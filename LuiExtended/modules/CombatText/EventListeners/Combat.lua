@@ -48,8 +48,7 @@ local EventType = CombatTextConstants.eventType
 local CrowdControlType = CombatTextConstants.crowdControlType
 local PointType = CombatTextConstants.pointType
 
--- Table cache moved to CombatText.lua for shared access across all viewers
--- Use LUIE.GetCachedTable() and LUIE.RecycleTable() instead
+-- Table pool: LUIE.GetCachedTable() / LUIE.RecycleTable() in LuiExtended.lua (RecycleTable clears keys).
 
 -- Memory optimization: Cache formatted ability names to avoid repeated string allocations
 -- Uses weak values (__mode='v') to allow garbage collection of unused entries

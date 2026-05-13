@@ -57,21 +57,16 @@ CombatTextEventViewer.damageTypes = setmetatable({},
                                                      end,
                                                  })
 -- Memory optimization: Cache ability icons to avoid repeated API calls
+-- Weak values: icon strings can be collected when nothing else references them
 CombatTextEventViewer.abilityIconCache = setmetatable({},
                                                       {
+                                                          __mode = "v",
                                                           __index = function (t, abilityId)
-                                                              t[abilityId] = GetAbilityIcon(abilityId)
-                                                              return t[abilityId]
+                                                              local icon = GetAbilityIcon(abilityId)
+                                                              t[abilityId] = icon
+                                                              return icon
                                                           end,
                                                       })
--- Memory optimization: Cache formatted source names
-CombatTextEventViewer.sourceNameCache = setmetatable({},
-                                                     {
-                                                         __index = function (t, sourceName)
-                                                             t[sourceName] = zo_strformat("<<C:1>>", sourceName)
-                                                             return t[sourceName]
-                                                         end,
-                                                     })
 --- Initialize event viewer with pool manager and event listener<br>
 --- The event listener provides callback registration for combat events
 --- @param poolManager LuiExtended.CombatTextPoolManager Pool manager for control/animation reuse
@@ -348,7 +343,7 @@ function CombatTextEventViewer:GetResolvedIconPath(abilityId, sourceName)
 
     -- Override by source name
     if Effects_EffectOverrideByName[abilityId] then
-        sourceName = self.sourceNameCache[sourceName]
+        sourceName = ZO_CachedStrFormat("<<C:1>>", sourceName)
         local nameOverride = Effects_EffectOverrideByName[abilityId][sourceName]
         if nameOverride and nameOverride.icon then
             iconPath = nameOverride.icon
