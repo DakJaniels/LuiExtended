@@ -24,7 +24,7 @@ function CombatTextEventListener:Initialize(...)
 end
 
 --- @param event any
---- @param func fun(...)
+--- @param func fun(...) Receives only event-specific arguments; the wrapper strips `eventCode`.
 --- @param ... any
 function CombatTextEventListener:RegisterForEvent(event, func, ...)
     eventManager:RegisterForEvent(moduleName .. "Event" .. tostring(event) .. "_" .. eventPostfix, event, function (eventCode, ...) func(...) end)
