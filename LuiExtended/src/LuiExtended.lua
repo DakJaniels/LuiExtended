@@ -114,40 +114,39 @@ LUIE.StatusbarTextures = LuiMedia.GetStatusbarTextures()
 
 -- -----------------------------------------------------------------------------
 -- GLOBAL TABLE CACHE SYSTEM
--- Provides high-performance table recycling across all LUIE modules
--- Eliminates thousands of table allocations per second in hot code paths
+-- Weak-key pool: take with next(cache) / pop entry, return with cache[t] = true.
+-- Keys are cleared in RecycleTable (not on checkout) so checkout stays cheap;
+-- pooled tables are always empty for the next borrower—needed for sparse
+-- flag tables consumed with truthy checks (e.g. if flags.isDamage then ...).
+--
+-- Contract: only pass tables from GetCachedTable() into RecycleTable(t).
+-- After RecycleTable(t), do not read or write t (it may be reused elsewhere).
 -- -----------------------------------------------------------------------------
 
 --- @type table<table, boolean>
-local g_tableCache = setmetatable({}, { __mode = "k" }) -- Weak keys for automatic cleanup
+local g_tableCache = setmetatable({}, { __mode = "k" }) -- Weak keys: forgotten tables drop out of the pool
 
---- Get a recycled table from cache or create a new one
---- Use this in hot code paths (event handlers, update loops) to eliminate allocations
---- @return table t A clean table ready for use
---- @usage local myTable = LUIE.GetCachedTable()
----        myTable.foo = "bar"
----        -- ... use table ...
----        LUIE.RecycleTable(myTable)  -- Return to cache when done
+--- Pop a pooled table or allocate a new empty table
+--- @return table t Empty: previous owner cleared keys at recycle time
+--- @usage local t = LUIE.GetCachedTable(); t.field = 1; ...; LUIE.RecycleTable(t)
 function LUIE.GetCachedTable()
     local t = next(g_tableCache)
     if t then
         g_tableCache[t] = nil
-        -- Clear any remaining contents
-        for k in pairs(t) do
-            t[k] = nil
-        end
     else
         t = {}
     end
     return t
 end
 
---- Return a table to the cache for future reuse
---- Always call this when you're done with a cached table to enable recycling
---- @param t table The table to recycle
+--- Clear all keys, then return the table to the pool for reuse
+--- @param t table Table previously obtained from GetCachedTable()
 --- @usage LUIE.RecycleTable(myTable)
 function LUIE.RecycleTable(t)
     if t then
+        for k in pairs(t) do
+            t[k] = nil
+        end
         g_tableCache[t] = true
     end
 end
