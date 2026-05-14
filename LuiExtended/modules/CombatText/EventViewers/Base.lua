@@ -453,6 +453,7 @@ end
 --- @param sourceName string? The source/caster name
 function CombatTextEventViewer:ControlLayout(control, abilityId, combatType, sourceName)
     local Settings = LUIE.CombatText.SV
+    control.label:Clean()
     local width, height = control.label:GetTextDimensions()
 
     if abilityId then
