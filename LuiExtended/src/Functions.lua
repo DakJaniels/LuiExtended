@@ -958,6 +958,44 @@ do
             return zo_strformat(GetString(LUIE_STRING_SKILL_IMMOVABLE), duration, counter, 65 + counter)
         end,
 
+        -- Web (stacking Ensnared snare) — GetAbilityDescription / GetAbilityEffectDescription often return |cFFFFFF0|r% placeholders until stack context is applied.
+        [256674] = function (unitTag)
+            unitTag = unitTag or "player"
+            local stacks = 0
+            for i = 1, GetNumBuffs(unitTag) do
+                local _, _, _, _, stackCount, _, _, _, _, _, abilityId = GetUnitBuffInfo(unitTag, i)
+                if abilityId == 256674 then
+                    stacks = stackCount or 0
+                    break
+                end
+            end
+
+            local function tryDesc(rank)
+                if not rank or rank < 1 then
+                    return nil
+                end
+                local d = GetAbilityDescription(256674, rank, unitTag)
+                if d and d ~= "" and not string.find(d, "0% per stack", 1, true) then
+                    return d
+                end
+                return nil
+            end
+
+            local fromApi = tryDesc(stacks > 0 and stacks or nil) or tryDesc(1)
+            if fromApi then
+                return fromApi
+            end
+
+            local EffectsData = LuiData and LuiData.Data and LuiData.Data.Effects
+            local ov = EffectsData and EffectsData.EffectOverride and EffectsData.EffectOverride[256674]
+            local perStack = ov and ov.tooltipPerStackPercent
+            if not perStack then
+                return nil
+            end
+            local total = perStack * stacks
+            return zo_strformat(GetString(LUIE_STRING_SKILL_WEB_ENSNARED_STACK_TP), perStack, total)
+        end,
+
     }
 
     -- Returns dynamic tooltips when called by Tooltip function
