@@ -1513,6 +1513,8 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
             return
         end
 
+        local ttUnit = TooltipUnitTagFromBuffContainer(control.container)
+
         if control.tooltip then
             tooltipText = control.tooltip
         else
@@ -1527,7 +1529,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
                     elseif Effects.EffectOverride[control.effectId].tooltipValue2Mod then
                         value2 = zo_floor(duration + Effects.EffectOverride[control.effectId].tooltipValue2Mod + 0.5)
                     elseif Effects.EffectOverride[control.effectId].tooltipValue2Id then
-                        value2 = zo_floor((GetAbilityDuration(Effects.EffectOverride[control.effectId].tooltipValue2Id, nil, "player" or nil) or 0) + 0.5) / 1000
+                        value2 = zo_floor((GetAbilityDuration(Effects.EffectOverride[control.effectId].tooltipValue2Id, nil, ttUnit) or 0) + 0.5) / 1000
                     else
                         value2 = 0
                     end
@@ -1569,14 +1571,17 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
 
                 -- Display Default Description if no internal effect description is present
                 if tooltipText == "" or tooltipText == nil then
-                    if GetAbilityDescription(control.effectId, nil, "player" or nil) ~= "" then
-                        tooltipText = GetAbilityDescription(control.effectId, nil, "player" or nil)
+                    if GetAbilityDescription(control.effectId, nil, ttUnit) ~= "" then
+                        tooltipText = GetAbilityDescription(control.effectId, nil, ttUnit)
                     end
                 end
 
-                -- Dynamic Tooltip if present
-                if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].dynamicTooltip then
-                    tooltipText = LUIE.DynamicTooltip(control.effectId, TooltipUnitTagFromBuffContainer(control.container)) or tooltipText -- Fallback to original tooltipText if nil
+                -- Dynamic tooltip (TooltipHandlers in Functions.lua, or EffectOverride.dynamicTooltip / GetAbilityDescription morph)
+                do
+                    local dynTip = LUIE.DynamicTooltip(control.effectId, ttUnit)
+                    if dynTip then
+                        tooltipText = dynTip
+                    end
                 end
             else
                 duration = 0
@@ -1594,16 +1599,19 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
         if not LUIE.SpellCastBuffs.SV.TooltipCustom then
             tooltipText = GetAbilityEffectDescription(control.buffSlot)
             if not tooltipText or tooltipText == "" then
-                tooltipText = GetAbilityDescription(control.effectId, nil, "player")
+                tooltipText = GetAbilityDescription(control.effectId, nil, ttUnit)
             end
             if tooltipText then
                 tooltipText = StringOnlyGSUB(tooltipText, "\n$", "") -- Remove blank end line
             end
         end
 
-        -- Default-tooltip path overwrites dynamic handlers above when TooltipCustom is off
-        if type(control.effectId) == "number" and Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].dynamicTooltip then
-            tooltipText = LUIE.DynamicTooltip(control.effectId, TooltipUnitTagFromBuffContainer(control.container)) or tooltipText
+        -- Default-tooltip path: re-apply TooltipHandlers / dynamicTooltip after plain description (matches custom path)
+        if type(control.effectId) == "number" then
+            local dynTip = LUIE.DynamicTooltip(control.effectId, ttUnit)
+            if dynTip then
+                tooltipText = dynTip
+            end
         end
 
         local thirdLine
@@ -1659,7 +1667,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
 
             local newtooltipText = GetAbilityEffectDescription(control.buffSlot)
             if not newtooltipText or newtooltipText == "" then
-                newtooltipText = GetAbilityDescription(control.effectId, nil, "player")
+                newtooltipText = GetAbilityDescription(control.effectId, nil, ttUnit)
             end
             if newtooltipText and newtooltipText ~= "" then
                 newtooltipText = StringOnlyGSUB(newtooltipText, "\n$", "")

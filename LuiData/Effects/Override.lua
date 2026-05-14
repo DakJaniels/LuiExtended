@@ -8860,6 +8860,9 @@ local effectOverride =
     -- temporary gap here just for ease of editing
     -- temporary gap here just for ease of editing
 
+    -- Web (stacking Ensnared snare). Client descriptions omit stack scaling (0%%); TooltipHandlers[256674] uses override rank first, then tooltipPerStackPercent.
+    [256674] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_WEB_DDS, tooltipPerStackPercent = 5 },
+
     -- Frostvault
     [117286] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SPELL_SWORD_1H_BLEED_DDS, hide = true },                                                                                                -- Rending Bleed (Coldsnap Goblin - Shared)
     [117486] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SPELL_SWORD_1H_BLEED_DDS, name = Abilities.Skill_Rending_Bleed, unbreakable = 1, tooltip = Tooltips.Generic_Bleed, tooltipValue2 = 2 }, -- Bleed (Coldsnap Goblin - Shared)
@@ -8953,6 +8956,7 @@ local effectOverride =
 --- @field tooltipValue2Mod number? # For deriving values like snare duration from either buff
 --- @field dynamicTooltip boolean? # Use live skill-sheet description via GetAbilityDescription unless a TooltipHandlers entry exists
 --- @field tooltipMorphId integer? # With dynamicTooltip: description source id when effect id differs from morph (e.g. combat bundle vs morph)
+--- @field tooltipPerStackPercent number? # Snare or similar percent per stack for TooltipHandlers fallbacks (e.g. Web 256674 when API text stays at 0%%)
 --- @field cc integer? # LUIE_CC_TYPE_* value for CC type
 --- @field ccMergedType integer? # CC type to show only when effects merged
 --- @field isPlayerAbility boolean? # Mark as player ability for generic CC icon usage

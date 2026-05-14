@@ -1275,6 +1275,7 @@ local strings =
     LUIE_STRING_SKILL_WEB_WRAP_TP = "Wrapped in webs and unable to take any action for |cFFFFFF<<1>>|r seconds.\n\nAn ally near you can activate the |cFFFFFFFree Ally|r synergy to free you.",
     LUIE_STRING_SKILL_CHATTERING_WEB_TP = "Wrapped in webs, taking Poison Damage from Spider Bites every |cFFFFFF1|r second and preventing you from taking any action for |cFFFFFF<<1>>|r seconds.\n\nAn ally near you can activate the |cFFFFFFFree Ally|r synergy to free you.",
     LUIE_STRING_SKILL_CONSTRICTING_WEBS_TP = "Wrapped in webs and unable to take any action for |cFFFFFF<<1>>|r seconds.",
+    LUIE_STRING_SKILL_WEB_ENSNARED_STACK_TP = "You are caught in webs!\nYour Movement Speed is decreased by |cFFFFFF<<1>>|r% per stack of Ensnared.\nCurrent Bonus: |cFFFFFF<<2>>|r%",
     LUIE_STRING_SKILL_PRIMAL_MAUL = "Primal Maul",
     LUIE_STRING_SKILL_ROOT_GUARD = "Root Guard",
     LUIE_STRING_SKILL_EARTH_MENDER = "Earth Mender",
