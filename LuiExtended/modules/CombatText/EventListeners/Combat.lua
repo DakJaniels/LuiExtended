@@ -202,10 +202,10 @@ end
 --- @return boolean true if this is a duplicate of a line we already showed (caller must skip)
 local function IsRecentDuplicateDrain(abilityId, combatMechanicFlags, amount)
     local now = GetGameTimeMilliseconds()
-    if now - lastDrainDedupe.timeMs < 220
-        and lastDrainDedupe.abilityId == abilityId
-        and lastDrainDedupe.combatMechanicFlags == combatMechanicFlags
-        and lastDrainDedupe.amount == amount then
+    if  now - lastDrainDedupe.timeMs < 220
+    and lastDrainDedupe.abilityId == abilityId
+    and lastDrainDedupe.combatMechanicFlags == combatMechanicFlags
+    and lastDrainDedupe.amount == amount then
         return true
     end
     lastDrainDedupe.timeMs = now
@@ -386,8 +386,8 @@ function CombatTextCombatEventListener:Initialize()
         self:OnActionSlotAbilityUsed(actionSlotIndex)
     end)
     self:RegisterForEvent(EVENT_POWER_UPDATE, function (_unitTag, _powerIndex, combatMechanicFlags, powerValue, powerMax, powerEffectiveMax)
-        self:OnPlayerPowerUpdate(combatMechanicFlags, powerValue, powerMax, powerEffectiveMax)
-    end, REGISTER_FILTER_UNIT_TAG, "player")
+                              self:OnPlayerPowerUpdate(combatMechanicFlags, powerValue, powerMax, powerEffectiveMax)
+                          end, REGISTER_FILTER_UNIT_TAG, "player")
 end
 
 --- Handle player activation event<br>

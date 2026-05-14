@@ -17,9 +17,7 @@ local pointType = LuiData.Data.CombatTextConstants.pointType
 
 function CombatTextPointsChampionEventListener:Initialize()
     LUIE.CombatTextEventListener.Initialize(self)
-    self:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, function (unitTag, oldChampionPoints, currentChampionPoints)
-        self:OnEvent(unitTag, oldChampionPoints, currentChampionPoints)
-    end, REGISTER_FILTER_UNIT_TAG, "player")
+    self:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, function (unitTag, oldChampionPoints, currentChampionPoints) self:OnEvent(unitTag, oldChampionPoints, currentChampionPoints) end, REGISTER_FILTER_UNIT_TAG, "player")
     self.gain = 0
     self.timeoutActive = false
     self.previousCP = GetUnitChampionPoints("player")
