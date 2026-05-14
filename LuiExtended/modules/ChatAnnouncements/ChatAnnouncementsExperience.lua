@@ -47,7 +47,7 @@ local g_guildSkillThrottleLine = nil -- Grab the name for Fighter's Guild reputa
 --- @return string unlockText
 --- @return boolean isActive
 --- @return boolean isDiscovered
-local function GetSkillLineInfo (skillType, skillLineIndex)
+local function GetSkillLineInfo(skillType, skillLineIndex)
     local skillLineData = SKILLS_DATA_MANAGER:GetSkillLineDataByIndices(skillType, skillLineIndex)
     if skillLineData then
         return skillLineData:GetName(), skillLineData:GetCurrentRank(), skillLineData:IsAvailable(), skillLineData:GetId(), skillLineData:IsAdvised(), skillLineData:GetUnlockText(), skillLineData:IsActive(), skillLineData:IsDiscovered()

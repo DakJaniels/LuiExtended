@@ -188,8 +188,8 @@ function CombatText.CreateConsoleSettings()
         {
             { "LUIE_CombatText_Outgoing", GetString(LUIE_STRING_CT_PANEL_OUTGOING) },
             { "LUIE_CombatText_Incoming", GetString(LUIE_STRING_CT_PANEL_INCOMING) },
-            { "LUIE_CombatText_Alert", GetString(LUIE_STRING_CT_PANEL_ALERT) },
-            { "LUIE_CombatText_Point", GetString(LUIE_STRING_CT_PANEL_POINT) },
+            { "LUIE_CombatText_Alert",    GetString(LUIE_STRING_CT_PANEL_ALERT)    },
+            { "LUIE_CombatText_Point",    GetString(LUIE_STRING_CT_PANEL_POINT)    },
             { "LUIE_CombatText_Resource", GetString(LUIE_STRING_CT_PANEL_RESOURCE) },
         }
 

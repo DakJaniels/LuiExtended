@@ -8172,16 +8172,16 @@ function ChatAnnouncements.HookFunction()
 
         -- Check WritCreater settings first
         if WritCreater and WritCreater:GetSettings().suppressQuestAnnouncements and isQuestWritQuest(journalIndex) then
---             if LUIE.IsDevDebugEnabled() then
---                 LUIE:Log("Debug", string.format([[Writ Quest Condition Suppressed:
--- --> Quest: %s
--- --> Index: %d
--- --> Condition: %s]],
---                                                 questName,
---                                                 journalIndex,
---                                                 conditionText
---                 ))
---             end
+            --             if LUIE.IsDevDebugEnabled() then
+            --                 LUIE:Log("Debug", string.format([[Writ Quest Condition Suppressed:
+            -- --> Quest: %s
+            -- --> Index: %d
+            -- --> Condition: %s]],
+            --                                                 questName,
+            --                                                 journalIndex,
+            --                                                 conditionText
+            --                 ))
+            --             end
             return true
         end
 
@@ -8408,16 +8408,16 @@ function ChatAnnouncements.HookFunction()
     local function OnQuestAdvanced(eventId, questIndex, questName, isPushed, isComplete, mainStepChanged, soundOverride)
         -- Check if WritCreater is enabled & then call a copy of a local function from WritCreater to check if this is a Writ Quest
         if WritCreater and WritCreater:GetSettings().suppressQuestAnnouncements and isQuestWritQuest(questIndex) then
---             if LUIE.IsDevDebugEnabled() then
---                 LUIE:Log("Debug", string.format([[Writ Quest Condition Suppressed:
--- --> Quest: %s
--- --> Index: %d
--- --> Condition: %s]],
---                                                 questName,
---                                                 questIndex,
---                                                 isComplete and "Complete" or "Not Complete"
---                 ))
---             end
+            --             if LUIE.IsDevDebugEnabled() then
+            --                 LUIE:Log("Debug", string.format([[Writ Quest Condition Suppressed:
+            -- --> Quest: %s
+            -- --> Index: %d
+            -- --> Condition: %s]],
+            --                                                 questName,
+            --                                                 questIndex,
+            --                                                 isComplete and "Complete" or "Not Complete"
+            --                 ))
+            --             end
             return true
         end
 
