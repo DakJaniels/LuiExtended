@@ -1477,7 +1477,7 @@ end
 --- @return string
 local function TooltipUnitTagFromBuffContainer(container)
     if container == "target1" or container == "target2" or container == "targetb" or container == "targetd"
-        or container == "promb_target" or container == "promd_target" then
+    or container == "promb_target" or container == "promd_target" then
         return "reticleover"
     end
     return "player"
