@@ -1,0 +1,665 @@
+******************
+***Enums Added ***
+******************
+
+* CENTER_SCREEN_ANNOUNCE_TYPE_VETERANCY_MAX_REWARD_CLAIMED
+* CENTER_SCREEN_ANNOUNCE_TYPE_VETERANCY_RANK_UP
+
+* NON_COMBAT_BONUS_AGGRO_RADIUS_REDUCTION
+* NON_COMBAT_BONUS_VETERANCY_PROGRESS_GAIN
+
+* NOTIFICATION_TYPE_VETERANCY_RANKED_UP_HAS_REWARDS
+
+* UI_SYSTEM_ANNOUNCEMENT
+
+* ABILITY_TYPE_SPECIALMOVEREPLACEMENT
+
+h5. ClientUseAbilityResult
+* CLIENT_USE_ABILITY_RESULT_NOT_USED
+* CLIENT_USE_ABILITY_RESULT_QUEUED
+* CLIENT_USE_ABILITY_RESULT_USED
+* CLIENT_USE_ABILITY_RESULT_USED_DO_NOT_UPDATE_LAST_USED_TIME
+
+* ACTIVITY_QUEUE_RESULT_IC_TEL_VAR_LIMIT
+
+h5. IntroGameplayExperienceJumpResult
+* INTRO_GAMEPLAY_EXPERIENCE_JUMP_RESULT_ALREADY_IN_INSTANCE
+* INTRO_GAMEPLAY_EXPERIENCE_JUMP_RESULT_CANT_JUMP_FROM_ZONE
+* INTRO_GAMEPLAY_EXPERIENCE_JUMP_RESULT_JUMP_FAILED
+* INTRO_GAMEPLAY_EXPERIENCE_JUMP_RESULT_NOT_ELIGIBLE
+* INTRO_GAMEPLAY_EXPERIENCE_JUMP_RESULT_SUCCESS
+
+h5. PromotionalEventsPersonalCampaignType
+* PROMOTIONAL_EVENTS_PERSONAL_CAMPAIGN_TYPE_LOW_LEVEL_PLAYER
+* PROMOTIONAL_EVENTS_PERSONAL_CAMPAIGN_TYPE_RETURNING_PLAYER
+
+* ADVANCED_STAT_DISPLAY_TYPE_ARMOR_CAP
+* ADVANCED_STAT_DISPLAY_TYPE_CRITICAL_PERCENT_CAP
+
+h5. OverlandDifficultyDisabledReason
+* OVERLAND_DIFFICULTY_DISABLED_REASON_GLOBAL_DEF_DISABLED
+* OVERLAND_DIFFICULTY_DISABLED_REASON_IN_PVP_ZONE
+* OVERLAND_DIFFICULTY_DISABLED_REASON_IN_RESTRICTED_ZONE
+* OVERLAND_DIFFICULTY_DISABLED_REASON_NONE
+* OVERLAND_DIFFICULTY_DISABLED_REASON_SERVER_SETTING_DISABLED
+
+h5. OverlandDifficultyType
+* OVERLAND_DIFFICULTY_TYPE_ADVENTURER
+* OVERLAND_DIFFICULTY_TYPE_BASEGAME
+* OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN
+* OVERLAND_DIFFICULTY_TYPE_VETERAN
+
+* CURRENCY_CHANGE_REASON_TAMRIEL_TOMES_END_OF_SEASON_ROLLOVER_CAP
+
+* GUILD_HISTORY_ACTIVITY_EVENT_GUILD_MAIL_DELETED
+* GUILD_HISTORY_ACTIVITY_EVENT_GUILD_MAIL_SENT
+
+h5. GuildMailerResult
+* GUILD_MAIL_RESULT_BLANK_MAIL
+* GUILD_MAIL_RESULT_INTERNAL_ERROR
+* GUILD_MAIL_RESULT_MESSAGE_BODY_TOO_LONG
+* GUILD_MAIL_RESULT_NO_MAILER_PERMISSION
+* GUILD_MAIL_RESULT_SUBJECT_TOO_LONG
+* GUILD_MAIL_RESULT_SUCCESS
+* GUILD_MAIL_RESULT_TOO_MANY_GUILD_MAILERS
+
+* GUILD_PERMISSION_SEND_DELETE_GUILD_MAILER
+
+* MAX_GUILD_MAIL_PER_GUILD
+
+* ITEM_USE_TYPE_GRANT_VETERANCY_PROGRESS
+
+* QUEST_TYPE_FAVOR
+* QUEST_TYPE_TAMRIEL_TALE
+
+* CLAIM_REWARD_RESULT_TAMRIEL_TOMES_CHALLENGES_CLAIM_ALL_PARTIAL_FAIL
+* CLAIM_REWARD_RESULT_TAMRIEL_TOMES_CHALLENGES_NO_REWARDS_TO_CLAIM
+* CLAIM_REWARD_RESULT_VETERANCY_CLAIM_ALL_PARTIAL_FAIL
+
+* RESPEC_RESULT_INVALID_LINE_ALLOCATION
+* RESPEC_RESULT_LINE_FULLY_ALLOCATED
+
+h5. SkillLinePurchaseMethod
+* SKILLLINE_PURCHASE_METHOD_LINE_ALLOCATIONS
+* SKILLLINE_PURCHASE_METHOD_SKILL_POINTS
+
+* CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_INAPPROPRIATE_MAIL
+
+h5. SystemMailListType
+* MAIL_LIST_TYPE_HIRELING
+* MAIL_LIST_TYPE_QUEST
+
+h5. RumorType
+* RUMOR_TYPE_CONSPIRACY
+* RUMOR_TYPE_NONE
+* RUMOR_TYPE_PLOT
+* RUMOR_TYPE_WHISPER
+
+* FRAMING_SCREEN_VETERANCY
+
+h5. MenuAssistanceType
+* MENU_ASSISTANCE_TYPE_GRAVEYARD
+* MENU_ASSISTANCE_TYPE_HELP
+* MENU_ASSISTANCE_TYPE_NONE
+* MENU_ASSISTANCE_TYPE_TUTORIAL
+* MENU_ASSISTANCE_TYPE_UI_SYSTEM
+
+* TUTORIAL_TRIGGER_RUMOR_STARTED
+* TUTORIAL_TRIGGER_VETERANCY_INITIAL_CLAIMABLE_REWARDS_AVAILABLE
+
+* REWARD_TRACK_TYPE_AVA_VETERANCY
+
+* DIRECT_PURCHASE_PURCHASE_SKU_RESULT_OVERLAY_UNAVAILABLE
+* DIRECT_PURCHASE_PURCHASE_SKU_RESULT_RATE_LIMITED
+
+h5. StrokeCapStyle
+* STROKE_CAP_STYLE_FLAT
+* STROKE_CAP_STYLE_ROUND
+* STROKE_CAP_STYLE_SQUARE
+* STROKE_CAP_STYLE_TRIANGLE
+
+h5. StrokeJoinType
+* STROKE_JOIN_TYPE_BEVEL
+* STROKE_JOIN_TYPE_MITER
+* STROKE_JOIN_TYPE_ROUND
+
+
+
+********************
+***Enums Removed ***
+********************
+
+h5. ReturningPlayerInstanceJumpResult
+* RETURNING_PLAYER_INSTANCE_JUMP_RESULT_ALREADY_IN_INSTANCE
+* RETURNING_PLAYER_INSTANCE_JUMP_RESULT_CANT_JUMP_FROM_ZONE
+* RETURNING_PLAYER_INSTANCE_JUMP_RESULT_JUMP_FAILED
+* RETURNING_PLAYER_INSTANCE_JUMP_RESULT_NOT_ELIGIBLE
+* RETURNING_PLAYER_INSTANCE_JUMP_RESULT_SUCCESS
+
+h5. RealmSelectMethod
+* REALM_SELECT_METHOD_DEFAULT_REALM
+* REALM_SELECT_METHOD_LAST_REALM
+* REALM_SELECT_METHOD_USER_SELECTS
+
+h5. GroupMessageSource
+* GROUP_MESSAGE_SOURCE_ACTION
+* GROUP_MESSAGE_SOURCE_CHAT
+* GROUP_MESSAGE_SOURCE_COMBAT
+* GROUP_MESSAGE_SOURCE_COMBAT_UPDATEHEALTH
+* GROUP_MESSAGE_SOURCE_EFFECTLIST
+* GROUP_MESSAGE_SOURCE_MOVEMENT
+* GROUP_MESSAGE_SOURCE_QUEST
+* GROUP_MESSAGE_SOURCE_STATECHANGE
+* GROUP_MESSAGE_SOURCE_UNKNOWN
+
+* TUTORIAL_TRIGGER_REUSE_2
+* TUTORIAL_TRIGGER_REUSE_3
+
+
+
+**********************
+***Functions Added ***
+**********************
+
+* GetNameForDisplayAtIndex(*luaindex* _displayIndex_)
+** _Returns:_ *string* _name_
+
+* GetGuildIndex(*integer* _guildId_)
+** _Returns:_ *luaindex:nilable* _guildIndex_
+
+* IsValidGuildMail(*id64* _guildMailId_)
+** _Returns:_ *bool* _isValid_
+
+* GetNumActiveGuildMailsForGuild(*integer* _guildId_)
+** _Returns:_ *integer* _numMails_
+
+* GetNextValidGuildMailId(*id64:nilable* _lastGuildMailId_)
+** _Returns:_ *id64:nilable* _nextGuildMailId_
+
+* GetNextValidGuildMailIdForGuild(*integer* _guildId_, *id64:nilable* _lastGuildMailId_)
+** _Returns:_ *id64:nilable* _nextGuildMailId_
+
+* GetGuildMailItemInfo(*id64* _guildMailId_)
+** _Returns:_ *integer* _guildId_, *string* _subject_, *string* _body_, *integer* _expiresInDays_, *integer* _expiresInSeconds_, *integer* _secsSinceReceived_, *string* _sender_
+
+* GetGuildMailTargetRanks(*id64* _guildMailId_)
+** _Uses variable returns..._
+** _Returns:_ *integer* _targetRanks_
+
+* RequestSendGuildMail(*integer* _guildId_, *string* _subject_, *string* _message_, *integer* _rankId_)
+
+* RequestDeleteGuildMail(*id64* _guildMailId_)
+
+* IsUnitMonster(*string* _unitTag_)
+** _Returns:_ *bool* _isMonster_
+
+* GetUnitOverlandDifficulty(*string* _unitTag_)
+** _Returns:_ *[OverlandDifficultyType|#OverlandDifficultyType]* _overlandDifficultyType_
+
+* RequestChangePlayerOverlandDifficulty(*[OverlandDifficultyType|#OverlandDifficultyType]* _overlandDifficultyType_)
+
+* GetGroupMaxSize()
+** _Returns:_ *integer* _maxGroupSize_
+
+* DoesTelVarAmountPreventQueuing()
+** _Returns:_ *bool* _isPreventedFromQueuing_
+
+* GetTelVarQueueThreshold()
+** _Returns:_ *integer* _telVarQueueThreshold_
+
+* IsClassMasterySkillLine(*integer* _skillLineId_)
+** _Returns:_ *bool* _isClassMasterySkillLine_
+
+* GetClassMasteryCostBySkillLineId(*integer* _skillLineId_)
+** _Returns:_ *integer* _classMasteryCost_
+
+* GetNumClassMasteryPointsBySkillLineId(*integer* _skillLineId_)
+** _Returns:_ *integer* _numClassMasteryPoints_
+
+* HasMaxRankInAnyClassSkillLine()
+** _Returns:_ *bool* _hasMaxRankInAnyClassSkillLine_
+
+* HasMaxRankInAllClassSkillLines()
+** _Returns:_ *bool* _hasMaxRankInAllClassSkillLines_
+
+* GetNumMailLists()
+** _Returns:_ *integer* _numMailLists_
+
+* GetMailListName(*luaindex* _mailListIndex_)
+** _Returns:_ *string* _mailListName_
+
+* GetMailListType(*luaindex* _mailListIndex_)
+** _Returns:_ *[SystemMailListType|#SystemMailListType]* _mailListType_
+
+* GetMailListGamepadIcon(*luaindex* _mailListIndex_)
+** _Returns:_ *textureName* _gamepadIcon_
+
+* GetNumUnlockedMailsInMailList(*luaindex* _mailListIndex_)
+** _Returns:_ *integer* _numUnlocked_, *integer* _max_
+
+* GetMailInfoFromMailList(*luaindex* _mailListIndex_, *luaindex* _mailIndex_)
+** _Returns:_ *string* _sender_, *string* _subject_, *string* _message_, *textureName* _icon_
+
+* GetHelpDefIndicesFromHelpDefId(*integer* _helpId_)
+** _Returns:_ *luaindex:nilable* _helpCategoryIndex_, *luaindex:nilable* _helpIndex_
+
+* GetWorldEventStepTimerTextOverride(*integer* _stepDefId_)
+** _Returns:_ *string* _timerTextOverride_
+
+* ClaimAllTimedActivityRewards()
+
+* HasAnyUnclaimedTimedActivityRewards()
+** _Returns:_ *bool* _hasUnclaimedRewards_
+
+* GetGoldCostOfNextTimedActivityReroll()
+** _Returns:_ *integer* _cost_
+
+* IsTimedActivityExcludedFromHUDClaimPrompt(*integer* _timedActivityId_)
+** _Returns:_ *bool* _isExcluded_
+
+* GetTimedActivityMenuAssistanceInfo(*integer* _timedActivityId_)
+** _Returns:_ *[MenuAssistanceType|#MenuAssistanceType]* _menuAssistanceType_, *integer* _referenceData_
+
+* RequestJumpToTimedActivityMenuAssistanceInfo(*integer* _timedActivityId_
+
+* GetNumSkyshards()
+** _Returns:_ *integer* _numSkyshards_
+
+* GetSkyshardId(*luaindex* _skyshardIndex_)
+** _Returns:_ *integer* _skyshardId_
+
+* GetWorldPositionForSkyshardId(*integer* _skyshardId_)
+** _Returns:_ *integer* _zoneId_, *integer* _worldX_, *integer* _worldY_, *integer* _worldZ_
+
+* GetPromotionalEventPersonalCampaignDescription(*[PromotionalEventsPersonalCampaignType|#PromotionalEventsPersonalCampaignType]* _personalCampaignType_)
+** _Returns:_ *string* _description_
+
+* GetVengeancePerkRankRequirementAtIndex(*luaindex* _perkIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *integer* _rankRequirement_
+
+* GetVengeancePerkRankRequirement(*integer* _perkDefId_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *integer* _rankRequirement_
+
+* GetNumberOfPerksUnlockedAtVeterancyRank(*luaindex* _rank_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *integer* _numUnlockedPerks_
+
+* GetPerkDefIdForPerkAtVeterancyRank(*luaindex* _rank_, *luaindex* _unlockIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *integer* _perkDefId_
+
+* GetVengeancePerkName(*integer* _perkDefId_)
+** _Returns:_ *string* _perkName_
+
+* GetVengeancePerkTooltipText(*integer* _perkDefId_)
+** _Returns:_ *string* _tooltipText_
+
+* IsVeterancySeasonActive()
+** _Returns:_ *bool* _isActive_
+
+* GetCurrentVeterancySeasonName()
+** _Returns:_ *string* _seasonName_
+
+* GetCurrentVeterancySeasonTimeRemainingS()
+** _Returns:_ *integer* _timeRemainingS_
+
+* GetNumberOfSlotFlagsForPerkDef(*luaindex* _rank_, *luaindex* _unlockIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *integer* _numSlotFlags_
+
+* GetSlotFlagForPerk(*luaindex* _rank_, *luaindex* _unlockIndex_, *luaindex* _slotIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _slotFlag_
+
+* GetCurrentVeterancySeasonId()
+** _Returns:_ *integer* _seasonId_
+
+* GetCurrentVengeanceSeasonId()
+** _Returns:_ *integer* _seasonId_
+
+* RequestParsedPerkAvailabilityForCurrentSeason()
+
+* ReleaseParsedPerkAvailabilityForCurrentSeason()
+
+* ClaimAllRewardTrackRewards(*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *luaindex* _referenceTrackIndex_)
+
+* HasUnclaimedRewardTrackRewards(*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *luaindex* _referenceTrackIndex_, *[RewardTrackComponent|#RewardTrackComponent]* _rewardTrackComponent_)
+** _Returns:_ *bool* _hasUnclaimedRewards_
+
+* IsInVeterancyProgressionZone()
+** _Returns:_ *bool* _isInVeterancyZone_
+
+* GetVeterancyRewardDefIdAtRewardTrackTierIndex(*integer* _rewardTrackId_, *luaindex* _tierIndex_, *luaindex* _rewardIndex_)
+** _Returns:_ *integer* _rewardDefId_
+
+* GetVeterancyRewardQuantityAtRewardTrackTierIndex(*integer* _rewardTrackId_, *luaindex* _tierIndex_, *luaindex* _rewardIndex_)
+** _Returns:_ *integer* _rewardQuantity_
+
+* GetVeterancyRankIcon(*luaindex* _rank_, *integer:nilable* _seasonId_)
+** _Returns:_ *textureName* _icon_
+
+* GetVeterancyRankTitle(*luaindex* _rank_, *integer:nilable* _seasonId_)
+** _Returns:_ *string* _rankTitle_
+
+* GetVeterancyLargeRankIcon(*luaindex* _rank_, *integer:nilable* _seasonId_)
+** _Returns:_ *textureName* _icon_
+
+* GetTamrielTomesEndOfSeasonTomePointRolloverCap()
+** _Returns:_ *integer* _rolloverCap_
+
+* HasTamrielTomesEndOfSeasonRecap()
+** _Returns:_ *bool* _endOfSeasonRecapAvailable_
+
+* GetTomePointsRolledOverIntoNextSeason()
+** _Returns:_ *integer* _tomePointsRolledOver_
+
+* GetTamrielTomesEndOfSeasonRecapTamrielTomeId()
+** _Returns:_ *integer* _tamrielTomeId_
+
+* GetTamrielTomesEndOfSeasonRecapRewardTrackId()
+** _Returns:_ *integer* _rewardTrackId_
+
+* HasPlayerSeenTamrielTomesEndOfSeasonRecap()
+** _Returns:_ *bool* _seen_
+
+* SetTamrielTomesEndOfSeasonRecapSeen(*bool* _seen_)
+
+* GetTamrielTomesEndOfSeasonAutoClaimInfoForReward(*luaindex* _tier_, *[RewardTrackComponent|#RewardTrackComponent]* _rewardTrackComponent_, *luaindex* _rewardIndex_)
+** _Returns:_ *bool* _wasAutoClaimed_, *bool* _wasFallbackAutoClaimed_
+
+* IsTamrielTomesEnabled()
+** _Returns:_ *bool* _isEnabled_
+
+* GetOverlandDifficulty()
+** _Returns:_ *[OverlandDifficultyType|#OverlandDifficultyType]* _overlandDifficultyType_
+
+* RequestOverlandDifficultyChange *private* (*[OverlandDifficultyType|#OverlandDifficultyType]* _overlandDifficultyType_)
+
+* GetOverlandDifficultyDescription(*[OverlandDifficultyType|#OverlandDifficultyType]* _overlandDifficultyType_)
+** _Returns:_ *string* _overlandDifficultyDescription_
+
+* GetOverlandDifficultyEffects(*[OverlandDifficultyType|#OverlandDifficultyType]* _overlandDifficultyType_)
+** _Returns:_ *string* _overlandDifficultyEffects_
+
+* GetOverlandDifficultyDisabledReason()
+** _Returns:_ *[OverlandDifficultyDisabledReason|#OverlandDifficultyDisabledReason]* _disabledReason_
+
+* GetNumPendingRumors()
+** _Returns:_ *integer* _numRumors_
+
+* GetMaxPendingRumors()
+** _Returns:_ *integer* _maxRumors_
+
+* GetNumCompleteRumors()
+** _Returns:_ *integer* _numRumors_
+
+* GetNumRumors()
+** _Returns:_ *integer* _numRumors_
+
+* GetRumorIdAtIndex(*luaindex* _index_)
+** _Returns:_ *integer* _rumorId_
+
+* GetNextPendingRumorId(*integer:nilable* _lastPendingRumorId_)
+** _Returns:_ *integer:nilable* _nextPendingRumorId_
+
+* IsRumorPending(*integer* _rumorId_)
+** _Returns:_ *bool* _isPending_
+
+* IsRumorComplete(*integer* _rumorId_)
+** _Returns:_ *bool* _isComplete_
+
+* GetRumorDisplayName(*integer* _rumorId_)
+** _Returns:_ *string* _displayName_
+
+* GetRumorBackgroundText(*integer* _rumorId_)
+** _Returns:_ *string* _backgroundText_
+
+* GetRumorCompleteText(*integer* _rumorId_)
+** _Returns:_ *string* _completeText_
+
+* GetNumHintsForPendingRumor(*integer* _pendingRumorId_)
+** _Returns:_ *integer* _numHints_
+
+* HasDiscoveredRumorHint(*integer* _pendingRumorId_, *luaindex* _hintIndex_)
+** _Returns:_ *bool* _isDiscovered_
+
+* GetRumorHintDisplayName(*integer* _pendingRumorId_, *luaindex* _hintIndex_)
+** _Returns:_ *string* _displayName_
+
+* GetRumorHintDescription(*integer* _pendingRumorId_, *luaindex* _hintIndex_)
+** _Returns:_ *string* _description_
+
+* GetRumorHintIcon(*integer* _pendingRumorId_, *luaindex* _hintIndex_)
+** _Returns:_ *textureName* _icon_
+
+* GetRumorHintBook(*integer* _pendingRumorId_, *luaindex* _hintIndex_)
+** _Returns:_ *integer* _bookId_
+
+* RequestAbandonPendingRumor(*integer* _rumorId_)
+
+* RequestCompletePendingRumor(*integer* _rumorEndingId_)
+
+* GetRumorType(*integer* _rumorId_)
+** _Returns:_ *[RumorType|#RumorType]* _rumorType_
+
+* GetUnitVeterancyRank(*string* _unitTag_)
+** _Returns:_ *luaindex* _veterancyRank_
+
+* ForceShowTutorial(*integer* _tutorialId_)
+
+* GetAddTitleRewardTitleInfo(*integer* _rewardId_)
+** _Returns:_ *string* _title_, *bool* _isAcquired_
+
+* GetAchievementSkyshardId(*integer* _achievementId_, *luaindex* _skyshardIndex_)
+** _Returns:_ *integer* _skyshardId_
+
+* IsReturningPlayerSystemLocked()
+** _Returns:_ *bool* _isLocked_
+
+* IsLowLevelPlayerSystemLocked()
+** _Returns:_ *bool* _isLocked_
+
+* IsLowLevelPlayer()
+** _Returns:_ *bool* _isLowLevelPlayer_
+
+* IsLowLevelPlayerPromotionalEventsCampaign(*id64* _campaignKey_)
+** _Returns:_ *bool* _isLowLevelPlayerCampaign_
+
+* GetCampaignKeyForNextLowLevelPlayerCampaign(*integer* _campaignId_)
+** _Returns:_ *id64:nilable* _campaignKey_
+
+* GetTextLength()
+** _Returns:_ *integer* _textLength_
+
+* SetGuildMailId(*id64* _guildMailId_)
+
+* SetPendingRumorHint(*integer* _pendingRumorId_, *luaindex* _hintIndex_)
+
+* GetMouseCursor()
+** _Returns:_ *[MouseCursorType|#MouseCursorType]* _cursorType_
+
+
+
+************************
+***Functions Removed ***
+************************
+
+* DoesTelVarAmountPreventQueuingForCampaign(*integer* _campaignId_)
+
+* GetWorldEventNumSteps(*integer* _worldEventId_)
+** _Returns:_ *integer* _numSteps_
+
+
+
+************************
+***Functions Changed ***
+************************
+
+Added _isClassMastery_
+* GetSkillLineDynamicInfo(*[SkillType|#SkillType]* _skillType_, *luaindex* _skillLineIndex_)
+** _Returns:_ *luaindex* _rank_, *bool* _isAdvised_, *bool* _isActive_, *bool* _isDiscovered_, *bool* _isAccountSkill_, *bool* _isInTraining_, *bool* _isClassMastery_
+
+HasShownReturningPlayerAnnouncement() renamed to
+* HasShownPromotionalEventPersonalCampaignAnnouncement()
+** _Returns:_ *bool* _hasShownAnnouncement_
+
+FlagReturningPlayerAnnouncementSeen() renamed to
+* FlagPromotionalEventPersonalCampaignAnnouncementSeen()
+
+Changed type of _stepDefId_ to *integer*
+* GetParticipatingWorldEventStep()
+** _Returns:_ *integer* _worldEventInstanceId_, *integer* _stepDefId_
+
+Changed type of _stepDefId_ to *integer*
+* GetWorldEventStepName(*integer* _worldEventInstanceId_, *integer* _stepDefId_)
+** _Returns:_ *string* _name_
+
+Changed type of _stepDefId_ to *integer*
+* GetWorldEventStepDescription(*integer* _stepDefId_)
+** _Returns:_ *string* _description_
+
+Added _useGold_
+* RerollTimedActivity(*luaindex* _index_, *bool* _useGold_)
+** _Returns:_ *[TamrielTomeChallengeRerollResult|#TamrielTomeChallengeRerollResult]* _result_
+
+GetReturningPlayerIntroGameplayData() renamed to
+* GetIntroGameplayExperienceData(*[PromotionalEventsPersonalCampaignType|#PromotionalEventsPersonalCampaignType]* _personalCampaignType_)
+** _Returns:_ *id64:nilable* _campaignKey_, *[PromotionalEventCampaignComponentType|#PromotionalEventCampaignComponentType]:nilable* _componentType_, *luaindex:nilable* _index_
+
+GetReturningPlayerCampaignDisplayName() renamed to
+* GetPromotionalEventPersonalCampaignDisplayName(*[PromotionalEventsPersonalCampaignType|#PromotionalEventsPersonalCampaignType]* _personalCampaignType_)
+** _Returns:_ *string* _displayName_
+
+GetReturningPlayerIntroGameplayDisplayName() renamed to
+* GetIntroGameplayExperienceDisplayName()
+** _Returns:_ *string* _displayName_
+
+GetReturningPlayerIntroGameplayDescription() renamed to
+* GetIntroGameplayExperienceDescription()
+** _Returns:_ *string* _description_
+
+GetNumReturningPlayerPrimaryRewards() renamed to
+* GetNumPromotionalEventPersonalCampaignPrimaryRewards(*[PromotionalEventsPersonalCampaignType|#PromotionalEventsPersonalCampaignType]* _personalCampaignType_)
+** _Returns:_ *integer* _numRewards_
+
+GetReturningPlayerPrimaryRewardData(*luaindex* _rewardIndex_) renamed to
+* GetPromotionalEventPersonalCampaignPrimaryRewardData(*[PromotionalEventsPersonalCampaignType|#PromotionalEventsPersonalCampaignType]* _personalCampaignType_, *luaindex* _rewardIndex_)
+** _Returns:_ *id64* _campaignKey_, *[PromotionalEventCampaignComponentType|#PromotionalEventCampaignComponentType]* _componentType_, *luaindex* _index_
+
+IsInReturningPlayerIntroWorld() renamed to
+* IsInIntroGameplayExperienceWorld()
+** _Returns:_ *bool* _isInIntroGameplayExperienceWorld_
+
+GetExpectedJumpToReturningPlayerIntroGameplayResult() renamed to
+* GetExpectedJumpToIntroGameplayExperienceResult()
+** _Returns:_ *[IntroGameplayExperienceJumpResult|#IntroGameplayExperienceJumpResult]* _expectedResult_
+
+RequestJumpToReturningPlayerIntroGameplay *private* () renamed to
+* RequestJumpToIntroGameplayExperience *private* ()
+
+ShouldShowReturningPlayerLeaveIntroPrompt() renamed to
+* ShouldShowPromotionalEventPersonalCampaignLeaveIntroPrompt()
+** _Returns:_ *bool* _shouldShow_
+
+MarkReturningPlayerLeaveIntroPromptShown() renamed to
+* MarkPromotionalEventPersonalCampaignLeaveIntroPromptShown()
+
+HandleReturningPlayerUISystemShown(*[UISystem|#UISystem]* _uiSystem_) renamed to
+* HandleUISystemShown(*[UISystem|#UISystem]* _uiSystem_)
+
+Added _vengeancePerkSlotFlag_
+* SetVengeancePerk(*luaindex* _perkIndex_, *[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _vengeancePerkSlotFlag_, *[VengeanceActionResult|#VengeanceActionResult]* _actionResult_, *luaindex:nilable* _roleIndex_)
+
+Added _vengeancePerkSlotFlag_
+* SetVengeancePerkId(*integer* _perkDefId_, *[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _vengeancePerkSlotFlag_)
+
+Added _doOnce_
+* RegisterForPostEffectsUpdate(*string* _name_, *integer* _minInterval_, *function* _callback_, *bool* _doOnce_)
+** _Returns:_ *bool* _ret_
+
+Added _doOnce_
+* RegisterForUpdate(*string* _name_, *integer* _minInterval_, *function* _callback_, *bool* _doOnce_)
+** _Returns:_ *bool* _ret_
+
+
+
+********************
+*** Events Added ***
+********************
+
+* EVENT_ACTIVE_VETERANCY_SEASON_UPDATED
+
+* EVENT_CREATE_GUILD_MAIL_RESULT (*[GuildMailerResult|#GuildMailerResult]* _result_)
+
+* EVENT_DELETE_GUILD_MAIL_RESULT (*[GuildMailerResult|#GuildMailerResult]* _result_)
+
+* EVENT_GUILD_MAIL_UPDATE
+
+* EVENT_INTRO_GAMEPLAY_EXPERIENCE_JUMP_RESULT (*[IntroGameplayExperienceJumpResult|#IntroGameplayExperienceJumpResult]* _result_)
+
+* EVENT_MAIL_LISTS_INITIALIZED
+
+* EVENT_MAIL_LISTS_UPDATED
+
+* EVENT_OVERLAND_DIFFICULTY_DISABLED_BY_SERVER_CHANGED (*bool* _newValue_)
+
+* EVENT_REWARD_TRACK_REWARDS_CLAIMED (*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *integer* _trackId_, *luaindex* _highestRewardClaimed_, *integer* _numRepeatableRewardsClaimed_)
+
+* EVENT_RUMORS_UPDATED
+
+* EVENT_RUMOR_ENDING_INITIATED (*integer* _rumorEndingDefId_)
+
+* EVENT_RUMOR_UPDATED (*integer* _rumorId_)
+
+* EVENT_TIMED_ACTIVITIES_REROLL_PRICE_RESET
+
+* EVENT_TAMRIEL_TOMES_END_OF_SEASON_RECAP_AVAILABLE
+
+* EVENT_OVERLAND_DIFFICULTY_CHANGED (*[OverlandDifficultyType|#OverlandDifficultyType]* _newValue_)
+
+
+
+**********************
+*** Events Removed ***
+**********************
+
+* EVENT_RETURNING_PLAYER_INSTANCE_JUMP_RESULT (*[ReturningPlayerInstanceJumpResult|#ReturningPlayerInstanceJumpResult]* _result_)
+
+* EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_INITIALIZED
+
+* EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_UPDATED
+
+
+
+**********************
+*** Events Changed ***
+**********************
+
+Added _previousTier_
+* EVENT_REWARD_TRACK_PROGRESS_GAINED (*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *integer* _trackId_, *luaindex* _previousTier_, *luaindex* _newTier_, *integer* _newProgress_)
+
+Added _numRepeatableRewardsClaimed_
+* EVENT_REWARD_TRACK_REWARD_CLAIMED (*[RewardTrackType|#RewardTrackType]* _rewardTrackType_, *integer* _trackId_, *luaindex* _tier_, *[RewardTrackComponent|#RewardTrackComponent]* _rewardComponent_, *luaindex* _rewardIndex_, *bool* _isFallback_, *integer* _numRepeatableRewardsClaimed_)
+
+Removed _stepIndex_, added _stepDefId_
+* EVENT_WORLD_EVENT_PARTICIPATION_BEGIN (*integer* _worldEventInstanceId_, *integer* _stepDefId_)
+
+Removed _newStepIndex_, added _newStepDefId_
+* EVENT_WORLD_EVENT_STEP_CHANGED (*integer* _worldEventInstanceId_, *integer* _newStepDefId_)
+
+Removed _stepIndex_, added _stepDefId_
+* EVENT_WORLD_EVENT_STEP_PROGRESS_CHANGED (*integer* _worldEventInstanceId_, *integer* _stepDefId_, *integer* _newCurrentProgress_, *integer* _newMaxProgress_)
+
+
+
+*****************
+*** XML Added ***
+*****************
+
+h4. Attributes:
+* slugAsset *string*
+
+
+
+**********************
+*** Controls Added ***
+**********************
+
+h5. Vector
+* [Child: slugAsset|#Attributes]
