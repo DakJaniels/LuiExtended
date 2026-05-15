@@ -30,7 +30,7 @@
                   edgeColor="000000FF"
                   layer="OVERLAY"
                   level="0"
-                  tier="DT_LOW">
+                  tier="LOW">
           <Anchor point="BOTTOMLEFT"
                   relativeTo="$(parent)"
                   relativePoint="TOPLEFT"
@@ -49,7 +49,7 @@
                verticalAlignment="CENTER"
                layer="OVERLAY"
                level="0"
-               tier="DT_MEDIUM">
+               tier="MEDIUM">
           <Anchor point="BOTTOMLEFT"
                   relativeTo="$(parent)"
                   relativePoint="TOPLEFT"
@@ -62,9 +62,9 @@
                      mouseEnabled="false"
                      clampedToScreen="true"
                      movable="false"
-                     layer="0"
+                     layer="BACKGROUND"
                      level="0"
-                     tier="0">
+                     tier="LOW">
       <Anchor point="TOPLEFT"
               relativeTo="GuiRoot"
               relativePoint="TOPLEFT"

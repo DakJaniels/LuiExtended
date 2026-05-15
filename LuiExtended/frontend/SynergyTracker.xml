@@ -97,9 +97,9 @@
                                  movable="false"
                                  clampedToScreen="true"
                                  hidden="true"
-                                 layer="0"
+                                 layer="BACKGROUND"
                                  level="1"
-                                 tier="1">
+                                 tier="MEDIUM">
                         <Dimensions x="320"
                                     y="440" />
                         <Anchor point="CENTER"
