@@ -199,6 +199,9 @@ local function IsTrackedResourceCombatMechanicFlags(combatMechanicFlags)
 end
 
 --- Suppress duplicate drain lines when both inferred and native POWER_DRAIN fire close together.
+--- @param abilityId integer
+--- @param combatMechanicFlags CombatMechanicFlags
+--- @param amount integer
 --- @return boolean true if this is a duplicate of a line we already showed (caller must skip)
 local function IsRecentDuplicateDrain(abilityId, combatMechanicFlags, amount)
     local now = GetGameTimeMilliseconds()
