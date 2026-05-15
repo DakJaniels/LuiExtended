@@ -73,6 +73,10 @@ local function GetDebugEnvironmentAllowlist()
     return allowlist
 end
 
+local function DebugEnvironmentChat(message)
+    LUIE.AddSystemMessage("[LUIE] " .. message)
+end
+
 --- @return boolean
 function LUIE.IsDebugEnvironmentActive()
     return LUIE.SV.DebugEnvironmentActive == true
@@ -84,27 +88,44 @@ end
 function LUIE.ApplyDebugEnvironment(enable)
     if enable then
         if LUIE.IsDebugEnvironmentActive() then
-            return false, "LUIE debug environment is already active. Use '/luie debug off' first."
+            return false, "Debug environment is already active. Use '/luie debug off' first."
         end
         local currentStates, entries = ScanAddOnManager()
         LUIE.SV.DebugEnvironmentRestore = currentStates
         ApplyEnabledByName(GetDebugEnvironmentAllowlist(), entries)
         LUIE.SV.DebugEnvironmentActive = true
-        return true, "LUIE debug environment enabled. Reloading UI..."
+        LUIE.SV.DebugEnvironmentPendingChat = "Debug environment is active. Only LUIE core addons are enabled. Use '/luie debug off' to restore your addon list."
+        return true, "Debug environment enabled. Reloading UI..."
     end
 
     if not LUIE.IsDebugEnvironmentActive() then
-        return false, "LUIE debug environment is not active."
+        return false, "Debug environment is not active."
     end
     local restore = LUIE.SV.DebugEnvironmentRestore
     if not restore then
         LUIE.SV.DebugEnvironmentActive = false
-        return false, "LUIE debug environment has no restore snapshot. Toggle addons manually in the AddOns menu."
+        return false, "Debug environment has no restore snapshot. Toggle addons manually in the AddOns menu."
     end
     ApplyEnabledByName(restore)
     LUIE.SV.DebugEnvironmentActive = false
     LUIE.SV.DebugEnvironmentRestore = nil
-    return true, "LUIE debug environment disabled. Reloading UI..."
+    LUIE.SV.DebugEnvironmentPendingChat = "Debug environment disabled. Your previous addon selection was restored."
+    return true, "Debug environment disabled. Reloading UI..."
+end
+
+--- Shows a chat line queued before ReloadUI (post-reload confirmation). Call after saved vars load.
+function LUIE.ShowDebugEnvironmentPendingChat()
+    if not LUIE.SV then
+        return
+    end
+    local message = LUIE.SV.DebugEnvironmentPendingChat
+    if not message or message == "" then
+        return
+    end
+    LUIE.SV.DebugEnvironmentPendingChat = nil
+    zo_callLater(function ()
+        DebugEnvironmentChat(message)
+    end, 0)
 end
 
 local function PrintDebugEnvironmentStatus()
@@ -117,14 +138,14 @@ local function PrintDebugEnvironmentStatus()
                 count = count + 1
             end
         end
-        LUIE.AddSystemMessage(string_format("[LUIE] Debug environment: active (%d addons in restore snapshot).", count))
+        DebugEnvironmentChat(string_format("Debug environment: active (%d addons in restore snapshot).", count))
     else
-        LUIE.AddSystemMessage("[LUIE] Debug environment: inactive.")
+        DebugEnvironmentChat("Debug environment: inactive.")
     end
 end
 
 local function PrintUsage()
-    LUIE.AddSystemMessage("[LUIE] Usage: /luie debug on | off | status")
+    DebugEnvironmentChat("Usage: /luie debug on | off | status")
 end
 
 function LUIE.OnLuieSlashCommand(args)
@@ -146,7 +167,7 @@ function LUIE.OnLuieSlashCommand(args)
     end
     if action == "on" then
         local success, message = LUIE.ApplyDebugEnvironment(true)
-        LUIE.AddSystemMessage("[LUIE] " .. (message or ""))
+        DebugEnvironmentChat(message or "")
         if success then
             zo_callLater(function ()
                 ReloadUI("ingame")
@@ -156,7 +177,7 @@ function LUIE.OnLuieSlashCommand(args)
     end
     if action == "off" then
         local success, message = LUIE.ApplyDebugEnvironment(false)
-        LUIE.AddSystemMessage("[LUIE] " .. (message or ""))
+        DebugEnvironmentChat(message or "")
         if success then
             zo_callLater(function ()
                 ReloadUI("ingame")
