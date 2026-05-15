@@ -90,7 +90,9 @@ local function OnAddOnLoaded(eventId, addonName)
     -- -----------------------------------------------------------------------------
     -- Register global event listeners
     eventManager:RegisterForEvent(LUIE.name, EVENT_PLAYER_ACTIVATED, LoadScreen)
-
+    --
+    SLASH_COMMANDS["/luie"] = LUIE.OnLuieSlashCommand
+    --
     -- Event registrations
     if LUIE.SV.SlashCommands_Enable or LUIE.SV.ChatAnnouncements_Enable then
         eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_JOINED_GUILD, LUIE.UpdateGuildData)
