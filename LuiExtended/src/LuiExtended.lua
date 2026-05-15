@@ -68,6 +68,8 @@ LUIE.OtherAddonCompatability =
 -- -----------------------------------------------------------------------------
 -- Default Settings
 --- @class LUIE_Defaults_SV
+--- @field DebugEnvironmentActive boolean True while /luie debug on allowlist is applied
+--- @field DebugEnvironmentRestore table<string, boolean>|nil Snapshot of addon enabled flags before debug on
 LUIE.Defaults =
 {
     CustomIcons               = true,
@@ -101,6 +103,10 @@ LUIE.Defaults =
     snapToGridSize_buffs      = 15,
     -- snapToGrid_combatText     = false,
     -- snapToGridSize_combatText = 15,
+
+    -- Debug environment (/luie debug): LUIE-core addon allowlist isolation
+    DebugEnvironmentActive    = false,
+    DebugEnvironmentRestore   = nil,
 
     Migrations                = {}
 }

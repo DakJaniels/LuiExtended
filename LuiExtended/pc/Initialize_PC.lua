@@ -26,6 +26,9 @@ end
 --- @param initial boolean
 local function LoadScreen(eventId, initial)
     eventManager:UnregisterForEvent(LUIE.name, EVENT_PLAYER_ACTIVATED)
+    --
+    SLASH_COMMANDS["/luie"] = LUIE.OnLuieSlashCommand
+    --
     -- Set Positions for moved Default UI elements
     LUIE.SetElementPosition()
     if not LUIE.SV.StartupInfo then
