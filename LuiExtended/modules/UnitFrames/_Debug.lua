@@ -83,7 +83,7 @@ local function DebugPlayer()
         return
     end
     ApplyPositions()
-    UnitFrames.CustomFramesApplyLayoutPlayer(false)
+    UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
     PreviewFrame(frame, PREVIEW_SOURCE_UNIT)
 end
 
@@ -94,7 +94,7 @@ local function DebugTarget()
         return
     end
     ApplyPositions()
-    UnitFrames.CustomFramesApplyLayoutPlayer(false)
+    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
     PreviewFrame(frame, PREVIEW_SOURCE_UNIT)
 end
 
@@ -105,7 +105,7 @@ local function DebugAva()
         return
     end
     ApplyPositions()
-    UnitFrames.CustomFramesApplyLayoutPlayer(false)
+    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(false)
     PreviewFrame(frame, PREVIEW_SOURCE_UNIT)
 end
 

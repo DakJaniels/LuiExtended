@@ -28,7 +28,9 @@ function UnitFrames.MenuUpdatePlayerFrameOptions(option)
     end
     UnitFrames.CustomFramesResetPosition(true)
     UnitFrames.CustomFramesSetupAlternative()
-    UnitFrames.CustomFramesApplyLayoutPlayer()
+    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
+    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(false)
 end
 
 function UnitFrames.ResetCompassBarMenu()
@@ -645,7 +647,18 @@ function UnitFrames.CustomFramesApplyColors(isMenu)
 end
 
 -- Reload Names from Menu function call
-function UnitFrames.CustomFramesReloadControlsMenu(player, group, raid)
+--- @param unhidePlayer boolean|nil Show player TLW after layout.
+--- @param group boolean|nil
+--- @param raid boolean|nil
+--- @param unhideReticle boolean|nil Show reticleover custom frame after layout; if nil, defaults to unhidePlayer.
+--- @param unhideAva boolean|nil Show AvAPlayerTarget after layout; if nil, defaults to unhideReticle.
+function UnitFrames.CustomFramesReloadControlsMenu(unhidePlayer, group, raid, unhideReticle, unhideAva)
+    if unhideReticle == nil then
+        unhideReticle = unhidePlayer
+    end
+    if unhideAva == nil then
+        unhideAva = unhideReticle
+    end
     UnitFrames.UpdateStaticControls(UnitFrames.DefaultFrames["player"])
     UnitFrames.UpdateStaticControls(UnitFrames.CustomFrames["player"])
     UnitFrames.UpdateStaticControls(UnitFrames.AvaCustFrames["player"])
@@ -661,7 +674,9 @@ function UnitFrames.CustomFramesReloadControlsMenu(player, group, raid)
         UnitFrames.UpdateStaticControls(UnitFrames.AvaCustFrames[unitTag])
     end
 
-    UnitFrames.CustomFramesApplyLayoutPlayer(player)
+    UnitFrames.CustomFramesApplyLayoutPlayerFrame(unhidePlayer)
+    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(unhideReticle)
+    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(unhideAva)
     UnitFrames.CustomFramesApplyLayoutGroup(group)
     UnitFrames.CustomFramesApplyLayoutRaid(raid)
 end

@@ -1691,10 +1691,11 @@ function UnitFrames.UpdateStaticControls(unitFrame)
                 unitFrame.avaRank:SetText(tostring(unitFrame.avaRankValue))
                 if unitFrame.avaRankValue > 0 then
                     unitFrame.avaRank:SetHidden(false)
+                    unitFrame.avaRankIcon:SetHidden(false)
                 else
                     unitFrame.avaRank:SetHidden(true)
+                    unitFrame.avaRankIcon:SetHidden(true)
                 end
-                unitFrame.avaRankIcon:SetHidden(false)
             else
                 unitFrame.avaRank:SetHidden(true)
                 unitFrame.avaRankIcon:SetHidden(true)
@@ -3117,116 +3118,167 @@ local function CustomFramesLayoutSetBarLabelDimensions(phb, pmb, psb)
     end
 end
 
--- Set dimensions of custom group frame and anchors or raid group members
+-- Set dimensions of custom player frame only.
+--- @param unhide boolean|nil When true, show the player TLW after layout.
+function UnitFrames.CustomFramesApplyLayoutPlayerFrame(unhide)
+    if not UnitFrames.CustomFrames.player then
+        return
+    end
+    local player = UnitFrames.CustomFrames.player
+    local phb = player[COMBAT_MECHANIC_FLAGS_HEALTH]
+    local pmb = player[COMBAT_MECHANIC_FLAGS_MAGICKA]
+    local psb = player[COMBAT_MECHANIC_FLAGS_STAMINA]
+    local alt = player.alternative
+
+    local frameHeight = CustomFramesLayoutCalculatePlayerFrameHeight(phb)
+    player.tlw:SetDimensions(UnitFrames.SV.PlayerBarWidth, frameHeight)
+    player.control:SetDimensions(UnitFrames.SV.PlayerBarWidth, frameHeight)
+
+    phb.backdrop:SetDimensions(UnitFrames.SV.PlayerBarWidth, UnitFrames.SV.PlayerBarHeightHealth)
+    phb.backdrop:SetHidden(UnitFrames.SV.HideBarHealth)
+
+    local altW = zo_ceil(UnitFrames.SV.PlayerBarWidth * 2 / 3)
+    alt.backdrop:SetWidth(altW)
+
+    if UnitFrames.SV.PlayerFrameOptions == 1 then
+        CustomFramesLayoutSetupPlayerCommon(player, UnitFrames.SV.PlayerBarWidth)
+        CustomFramesLayoutPositionResourceStacked(phb, pmb, psb, false)
+        CustomFramesLayoutSetBarLabelDimensions(phb, pmb, psb)
+    elseif UnitFrames.SV.PlayerFrameOptions == 2 then
+        CustomFramesLayoutSetupPlayerCommon(player, 1000)
+        CustomFramesLayoutPositionResourceSideBySide(phb, pmb, psb)
+        CustomFramesLayoutSetBarLabelDimensions(phb, pmb, psb)
+    else
+        CustomFramesLayoutSetupPlayerCommon(player, 1000)
+        CustomFramesLayoutPositionResourceStacked(phb, pmb, psb, true)
+        CustomFramesLayoutSetBarLabelDimensions(phb, pmb, psb)
+    end
+
+    if unhide then
+        player.tlw:SetHidden(false)
+    end
+end
+
+-- Only AvA rank label/icon on custom reticleover. Do not call full UpdateStaticControls from layout:
+-- it reanchors buffs/debuffs and clashes with the anchors set in CustomFramesApplyLayoutReticleoverFrame.
+local function CustomFramesLayoutRefreshReticleoverAvaRankOnly(unitTag)
+    unitTag = unitTag or "reticleover"
+    local target = UnitFrames.CustomFrames.reticleover
+    if not target or not target.avaRank or not target.avaRankIcon then
+        return
+    end
+    if not UnitFrames.SV.TargetEnableRankIcon then
+        target.avaRank:SetHidden(true)
+        target.avaRankIcon:SetHidden(true)
+        return
+    end
+    if not DoesUnitExist(unitTag) or not IsUnitPlayer(unitTag) then
+        target.avaRank:SetHidden(true)
+        target.avaRankIcon:SetHidden(true)
+        return
+    end
+    local rank = GetUnitAvARank(unitTag)
+    target.avaRank:SetText(tostring(rank))
+    if rank > 0 then
+        target.avaRankIcon:SetTexture(GetAvARankIcon(rank))
+        target.avaRankIcon:SetColor(GetAllianceColor(GetUnitAlliance(unitTag)):UnpackRGBA())
+        target.avaRank:SetHidden(false)
+        target.avaRankIcon:SetHidden(false)
+    else
+        target.avaRank:SetHidden(true)
+        target.avaRankIcon:SetHidden(true)
+    end
+end
+
+-- Set dimensions of custom reticleover (target) frame only.
+--- @param unhide boolean|nil When true, show the frame TLW and control after layout.
+function UnitFrames.CustomFramesApplyLayoutReticleoverFrame(unhide)
+    if not UnitFrames.CustomFrames.reticleover then
+        return
+    end
+    local target = UnitFrames.CustomFrames.reticleover
+    local thb = target[COMBAT_MECHANIC_FLAGS_HEALTH]
+
+    local frameHeight = UnitFrames.SV.TargetBarHeight + (thb.shieldbackdrop and UnitFrames.SV.CustomShieldBarHeight or 0)
+    target.tlw:SetDimensions(UnitFrames.SV.TargetBarWidth, frameHeight)
+    target.control:SetDimensions(UnitFrames.SV.TargetBarWidth, frameHeight)
+    target.topInfo:SetWidth(UnitFrames.SV.TargetBarWidth)
+    target.botInfo:SetWidth(UnitFrames.SV.TargetBarWidth)
+    target.buffAnchor:SetWidth(UnitFrames.SV.TargetBarWidth)
+    target.name:SetWidth(UnitFrames.SV.TargetBarWidth - 50)
+    target.title:SetWidth(UnitFrames.SV.TargetBarWidth - 50)
+
+    local buffsWidth = UnitFrames.SV.PlayerFrameOptions == 1 and UnitFrames.SV.TargetBarWidth or 1000
+    target.buffs:SetWidth(buffsWidth)
+    target.debuffs:SetWidth(buffsWidth)
+
+    local showTitle = UnitFrames.SV.TargetEnableTitle or UnitFrames.SV.TargetEnableRank
+    target.title:SetHidden(not showTitle)
+
+    local enableBuffAnchor = showTitle or UnitFrames.SV.TargetEnableRankIcon
+    local buffsAnchor = enableBuffAnchor and target.buffAnchor or target.control
+    if UnitFrames.SV.PlayerFrameOptions == 1 then
+        target.buffs:ClearAnchors()
+        target.buffs:SetAnchor(TOP, buffsAnchor, BOTTOM, 0, 5)
+    else
+        target.debuffs:ClearAnchors()
+        target.debuffs:SetAnchor(TOP, buffsAnchor, BOTTOM, 0, 5)
+    end
+
+    target.levelIcon:ClearAnchors()
+    target.levelIcon:SetAnchor(LEFT, target.topInfo, LEFT, target.name:GetTextWidth() + 1, 0)
+    target.skull:SetDimensions(2 * UnitFrames.SV.TargetBarHeight, 2 * UnitFrames.SV.TargetBarHeight)
+
+    thb.backdrop:SetDimensions(UnitFrames.SV.TargetBarWidth, UnitFrames.SV.TargetBarHeight)
+    CustomFramesLayoutSetupShieldBackdrop(thb.shieldbackdrop, thb.backdrop, UnitFrames.SV.TargetBarWidth)
+
+    thb.labelOne:SetDimensions(UnitFrames.SV.TargetBarWidth - 50, UnitFrames.SV.TargetBarHeight - 2)
+    thb.labelTwo:SetDimensions(UnitFrames.SV.TargetBarWidth - 50, UnitFrames.SV.TargetBarHeight - 2)
+
+    CustomFramesLayoutRefreshReticleoverAvaRankOnly(target.unitTag or "reticleover")
+
+    if unhide then
+        target.tlw:SetHidden(false)
+        target.control:SetHidden(false)
+    end
+end
+
+-- Set dimensions of custom AvA player-target frame only.
+--- @param unhide boolean|nil When true, show the frame TLW and control after layout.
+function UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(unhide)
+    if not UnitFrames.CustomFrames.AvaPlayerTarget then
+        return
+    end
+    local target = UnitFrames.CustomFrames.AvaPlayerTarget
+    local thb = target[COMBAT_MECHANIC_FLAGS_HEALTH]
+
+    local frameHeight = UnitFrames.SV.AvaTargetBarHeight + (thb.shieldbackdrop and UnitFrames.SV.CustomShieldBarHeight or 0)
+    target.tlw:SetDimensions(UnitFrames.SV.AvaTargetBarWidth, frameHeight)
+    target.control:SetDimensions(UnitFrames.SV.AvaTargetBarWidth, frameHeight)
+    target.topInfo:SetWidth(UnitFrames.SV.AvaTargetBarWidth)
+    target.botInfo:SetWidth(UnitFrames.SV.AvaTargetBarWidth)
+    target.buffAnchor:SetWidth(UnitFrames.SV.AvaTargetBarWidth)
+    target.name:SetWidth(UnitFrames.SV.AvaTargetBarWidth - 50)
+
+    thb.backdrop:SetDimensions(UnitFrames.SV.AvaTargetBarWidth, UnitFrames.SV.AvaTargetBarHeight)
+    CustomFramesLayoutSetupShieldBackdrop(thb.shieldbackdrop, thb.backdrop, UnitFrames.SV.AvaTargetBarWidth)
+
+    thb.label:SetHeight(UnitFrames.SV.AvaTargetBarHeight - 2)
+    thb.labelOne:SetHeight(UnitFrames.SV.AvaTargetBarHeight - 2)
+    thb.labelTwo:SetHeight(UnitFrames.SV.AvaTargetBarHeight - 2)
+
+    if unhide then
+        target.tlw:SetHidden(false)
+        target.control:SetHidden(false)
+    end
+end
+
+-- Applies layout for player, reticleover, and AvA custom TLWs with one unhide flag (e.g. initial setup).
+--- @param unhide boolean|nil When true, show all three frames after layout.
 function UnitFrames.CustomFramesApplyLayoutPlayer(unhide)
-    if UnitFrames.CustomFrames.player then
-        local player = UnitFrames.CustomFrames.player
-        local phb = player[COMBAT_MECHANIC_FLAGS_HEALTH]
-        local pmb = player[COMBAT_MECHANIC_FLAGS_MAGICKA]
-        local psb = player[COMBAT_MECHANIC_FLAGS_STAMINA]
-        local alt = player.alternative
-
-        local frameHeight = CustomFramesLayoutCalculatePlayerFrameHeight(phb)
-        player.tlw:SetDimensions(UnitFrames.SV.PlayerBarWidth, frameHeight)
-        player.control:SetDimensions(UnitFrames.SV.PlayerBarWidth, frameHeight)
-
-        phb.backdrop:SetDimensions(UnitFrames.SV.PlayerBarWidth, UnitFrames.SV.PlayerBarHeightHealth)
-        phb.backdrop:SetHidden(UnitFrames.SV.HideBarHealth)
-
-        local altW = zo_ceil(UnitFrames.SV.PlayerBarWidth * 2 / 3)
-        alt.backdrop:SetWidth(altW)
-
-        if UnitFrames.SV.PlayerFrameOptions == 1 then
-            CustomFramesLayoutSetupPlayerCommon(player, UnitFrames.SV.PlayerBarWidth)
-            CustomFramesLayoutPositionResourceStacked(phb, pmb, psb, false)
-            CustomFramesLayoutSetBarLabelDimensions(phb, pmb, psb)
-        elseif UnitFrames.SV.PlayerFrameOptions == 2 then
-            CustomFramesLayoutSetupPlayerCommon(player, 1000)
-            CustomFramesLayoutPositionResourceSideBySide(phb, pmb, psb)
-            CustomFramesLayoutSetBarLabelDimensions(phb, pmb, psb)
-        else
-            CustomFramesLayoutSetupPlayerCommon(player, 1000)
-            CustomFramesLayoutPositionResourceStacked(phb, pmb, psb, true)
-            CustomFramesLayoutSetBarLabelDimensions(phb, pmb, psb)
-        end
-
-        if unhide then
-            player.tlw:SetHidden(false)
-        end
-    end
-
-    if UnitFrames.CustomFrames.reticleover then
-        local target = UnitFrames.CustomFrames.reticleover
-        local thb = target[COMBAT_MECHANIC_FLAGS_HEALTH]
-
-        local frameHeight = UnitFrames.SV.TargetBarHeight + (thb.shieldbackdrop and UnitFrames.SV.CustomShieldBarHeight or 0)
-        target.tlw:SetDimensions(UnitFrames.SV.TargetBarWidth, frameHeight)
-        target.control:SetDimensions(UnitFrames.SV.TargetBarWidth, frameHeight)
-        target.topInfo:SetWidth(UnitFrames.SV.TargetBarWidth)
-        target.botInfo:SetWidth(UnitFrames.SV.TargetBarWidth)
-        target.buffAnchor:SetWidth(UnitFrames.SV.TargetBarWidth)
-        target.name:SetWidth(UnitFrames.SV.TargetBarWidth - 50)
-        target.title:SetWidth(UnitFrames.SV.TargetBarWidth - 50)
-
-        local buffsWidth = UnitFrames.SV.PlayerFrameOptions == 1 and UnitFrames.SV.TargetBarWidth or 1000
-        target.buffs:SetWidth(buffsWidth)
-        target.debuffs:SetWidth(buffsWidth)
-
-        local showTitle = UnitFrames.SV.TargetEnableTitle or UnitFrames.SV.TargetEnableRank
-        target.title:SetHidden(not showTitle)
-        target.avaRank:SetHidden(not UnitFrames.SV.TargetEnableRankIcon)
-        target.avaRankIcon:SetHidden(not UnitFrames.SV.TargetEnableRankIcon)
-
-        local enableBuffAnchor = showTitle or UnitFrames.SV.TargetEnableRankIcon
-        local buffsAnchor = enableBuffAnchor and target.buffAnchor or target.control
-        if UnitFrames.SV.PlayerFrameOptions == 1 then
-            target.buffs:ClearAnchors()
-            target.buffs:SetAnchor(TOP, buffsAnchor, BOTTOM, 0, 5)
-        else
-            target.debuffs:ClearAnchors()
-            target.debuffs:SetAnchor(TOP, buffsAnchor, BOTTOM, 0, 5)
-        end
-
-        target.levelIcon:ClearAnchors()
-        target.levelIcon:SetAnchor(LEFT, target.topInfo, LEFT, target.name:GetTextWidth() + 1, 0)
-        target.skull:SetDimensions(2 * UnitFrames.SV.TargetBarHeight, 2 * UnitFrames.SV.TargetBarHeight)
-
-        thb.backdrop:SetDimensions(UnitFrames.SV.TargetBarWidth, UnitFrames.SV.TargetBarHeight)
-        CustomFramesLayoutSetupShieldBackdrop(thb.shieldbackdrop, thb.backdrop, UnitFrames.SV.TargetBarWidth)
-
-        thb.labelOne:SetDimensions(UnitFrames.SV.TargetBarWidth - 50, UnitFrames.SV.TargetBarHeight - 2)
-        thb.labelTwo:SetDimensions(UnitFrames.SV.TargetBarWidth - 50, UnitFrames.SV.TargetBarHeight - 2)
-
-        if unhide then
-            target.tlw:SetHidden(false)
-            target.control:SetHidden(false)
-        end
-    end
-
-    if UnitFrames.CustomFrames.AvaPlayerTarget then
-        local target = UnitFrames.CustomFrames.AvaPlayerTarget
-        local thb = target[COMBAT_MECHANIC_FLAGS_HEALTH]
-
-        local frameHeight = UnitFrames.SV.AvaTargetBarHeight + (thb.shieldbackdrop and UnitFrames.SV.CustomShieldBarHeight or 0)
-        target.tlw:SetDimensions(UnitFrames.SV.AvaTargetBarWidth, frameHeight)
-        target.control:SetDimensions(UnitFrames.SV.AvaTargetBarWidth, frameHeight)
-        target.topInfo:SetWidth(UnitFrames.SV.AvaTargetBarWidth)
-        target.botInfo:SetWidth(UnitFrames.SV.AvaTargetBarWidth)
-        target.buffAnchor:SetWidth(UnitFrames.SV.AvaTargetBarWidth)
-        target.name:SetWidth(UnitFrames.SV.AvaTargetBarWidth - 50)
-
-        thb.backdrop:SetDimensions(UnitFrames.SV.AvaTargetBarWidth, UnitFrames.SV.AvaTargetBarHeight)
-        CustomFramesLayoutSetupShieldBackdrop(thb.shieldbackdrop, thb.backdrop, UnitFrames.SV.AvaTargetBarWidth)
-
-        thb.label:SetHeight(UnitFrames.SV.AvaTargetBarHeight - 2)
-        thb.labelOne:SetHeight(UnitFrames.SV.AvaTargetBarHeight - 2)
-        thb.labelTwo:SetHeight(UnitFrames.SV.AvaTargetBarHeight - 2)
-
-        if unhide then
-            target.tlw:SetHidden(false)
-            target.control:SetHidden(false)
-        end
-    end
+    UnitFrames.CustomFramesApplyLayoutPlayerFrame(unhide)
+    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(unhide)
+    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(unhide)
 end
 
 local function insertRole(list, currentRole)
@@ -3605,7 +3657,8 @@ end
 local lastCustomFramesApplyInCombatIdle = nil
 
 -- This function reduces opacity of custom frames when player is out of combat and has full attributes
-function UnitFrames.CustomFramesApplyInCombat()
+--- @param force boolean|nil When true, always reapply alpha/buffs (e.g. LAM changed SV); skips idle-only cache.
+function UnitFrames.CustomFramesApplyInCombat(force)
     local idle = true
     if UnitFrames.SV.CustomOocAlphaPower then
         for _, value in pairs(UnitFrames.statFull) do
@@ -3618,7 +3671,7 @@ function UnitFrames.CustomFramesApplyInCombat()
     -- Coerce to boolean so nil (e.g. combat unset) does not match last==nil and skip the first apply.
     idle = idle == true
 
-    if idle == lastCustomFramesApplyInCombatIdle then
+    if not force and idle == lastCustomFramesApplyInCombatIdle then
         return
     end
     lastCustomFramesApplyInCombatIdle = idle

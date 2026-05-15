@@ -12,6 +12,35 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.1.7
+    "|cFFA500LuiExtended Version 7.2.1.7|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Slash command `/luie debug on` — saves your current AddOns enable state, disables everything outside the LUIE debug allowlist (LuiExtended, LuiData, LuiMedia, LibMediaProvider; PC: LibAddonMenu-2.0; console: LibHarvensAddonSettings and LibConsoleDialogs), then reloads the UI.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t `/luie debug off` — restores the saved state and reloads; `/luie debug status` (or `/luie debug` alone) reports whether debug environment mode is active.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t After reload, a one-shot chat line confirms debug mode or that your addon list was restored.",
+    "",
+    -- Fixed
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: Fixed custom frames rendering below in-world 3D overlays (for example survey reset marker arrows and similar icons).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: Player stamina bar XML anchor now targets the Magicka backdrop by name (matches Health to Magicka) instead of MagickaBackdrop, correcting layer inheritance for that bar.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: Custom TopLevelControls use draw tier MEDIUM instead of LOW (player, target, group, raid, pet, companion, boss, Ava target).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: Out-of-combat alpha refresh no longer skips the first apply when combat state was still unset (idle coerced to boolean before cache compare).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: LAM — `CustomFramesApplyInCombat(force)` lets menu-driven alpha and hide-buff-OOC changes reapply immediately (idle-state cache still used for combat/power events when `force` is off); boss/companion/pet opacity sliders use the forced path too.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: LAM — player/target OOC and IC transparency sliders no longer call `CustomFramesApplyLayoutPlayer`, so they no longer unhide the other custom TLWs as a side effect.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: LAM — layout split into `CustomFramesApplyLayoutPlayerFrame`, `CustomFramesApplyLayoutReticleoverFrame`, and `CustomFramesApplyLayoutAvaPlayerTargetFrame` (aggregate `CustomFramesApplyLayoutPlayer` unchanged for full init); PC and console settings call the matching handler so bar and chrome tweaks only preview the frame you are editing.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: `CustomFramesReloadControlsMenu` takes separate reticle vs AvA unhide arguments so player name display vs target name display does not pop the wrong custom TLW.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: Custom reticle target — AvA rank icon is not shown when `GetUnitAvARank` is zero (no blank texture from settings-only layout); after reticle layout, `CustomFramesLayoutRefreshReticleoverAvaRankOnly` updates rank chrome without running full `UpdateStaticControls` (avoids buff/debuff anchor clashes).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Opening a container (including from inventory) no longer prints looted gold before the \"You empty [container]\" line; loot gold is held until that line prints, then flushes.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Mail category Take All — correct sender per mail (no double dequeue / stale target), per-category sender queue, dedicated delayed loot lines (no wrong merge by item id), and flush order so gold and attachments match the mail you took.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: When ACTION_RESULT_POWER_DRAIN never fires on EVENT_COMBAT_EVENT, ability costs can still show as incoming resource drain — EVENT_ACTION_SLOT_ABILITY_USED is matched to the next matching player EVENT_POWER_UPDATE decrease (magicka, stamina, ultimate via COMBAT_MECHANIC_FLAGS_*), incoming drain toggles and blacklist apply, and a late native POWER_DRAIN for the same amount is deduped so you do not get two lines.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Inferred drain no longer attributes unrelated pool ticks (for example sprint stamina) to a bar ability whose `GetAbilityCost` for that pool is zero or different — expected costs come from `GetCurrentChainedAbility` + `GetAbilityCost`, each new slot use clears the prior pending correlation, and the power drop must match within a small tolerance.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Death and Points Alliance listeners no longer treat the first callback argument as `eventId` — `CombatTextEventListener:RegisterForEvent` already strips `eventCode`, so group death alerts and alliance-point SCT use the correct payload again.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Points Champion — `EVENT_CHAMPION_POINT_UPDATE` payload `(unitTag, oldChampionPoints, currentChampionPoints)` with player filter; `POINT` callbacks from the champion listener are now wired to the point panel viewer (same bug class as missing wiring for experience); cap detection uses `CanUnitGainChampionPoints` instead of raw CP count vs 3600.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Resource energize/drain gating uses `BitAnd` on `COMBAT_MECHANIC_FLAGS_*` (power type is a bitfield). Self-target `POWER_ENERGIZE` / `POWER_DRAIN` is shown on the outgoing panel with outgoing toggles, while incoming energize/drain toggles are merged for that case so one-sided settings still show costs; `REGISTER_FILTER_IS_ERROR` false on combat event registrations.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Event viewer — energize ultimate vs normal format uses bit checks; drain colors read `drainMagicka` / `drainStamina` (and related flags); cloud/ellipse/scroll/hybrid viewers pass absolute drain amounts through `AbbreviateNumber` so the default \"-%a\" format does not double the minus when `hitValue` is negative.",
+    "",
     -- Version Header 7.2.1.6
     "|cFFA500LuiExtended Version 7.2.1.6|r",
     "",
