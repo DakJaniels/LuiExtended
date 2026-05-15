@@ -28,6 +28,7 @@ local function LoadScreen(eventId, initial)
     eventManager:UnregisterForEvent(LUIE.name, EVENT_PLAYER_ACTIVATED)
     --
     SLASH_COMMANDS["/luie"] = LUIE.OnLuieSlashCommand
+    LUIE.ShowDebugEnvironmentPendingChat()
     --
     -- Set Positions for moved Default UI elements
     LUIE.SetElementPosition()

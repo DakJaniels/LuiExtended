@@ -70,6 +70,7 @@ LUIE.OtherAddonCompatability =
 --- @class LUIE_Defaults_SV
 --- @field DebugEnvironmentActive boolean True while /luie debug on allowlist is applied
 --- @field DebugEnvironmentRestore table<string, boolean>|nil Snapshot of addon enabled flags before debug on
+--- @field DebugEnvironmentPendingChat string|nil One-shot chat line to show after the next UI reload
 LUIE.Defaults =
 {
     CustomIcons               = true,
@@ -107,6 +108,7 @@ LUIE.Defaults =
     -- Debug environment (/luie debug): LUIE-core addon allowlist isolation
     DebugEnvironmentActive    = false,
     DebugEnvironmentRestore   = nil,
+    DebugEnvironmentPendingChat = nil,
 
     Migrations                = {}
 }
