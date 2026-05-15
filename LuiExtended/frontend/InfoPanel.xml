@@ -11,7 +11,7 @@
                      movable="false"
                      hidden="true"
                      layer="BACKGROUND"
-                     tier="DT_LOW"
+                     tier="LOW"
                      level="0">
       <Anchor point="TOPRIGHT"
               relativeTo="GuiRoot"

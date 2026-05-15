@@ -11,9 +11,9 @@
                                  clampedToScreen="false"
                                  hidden="true"
                                  alpha="1"
-                                 layer="0"
+                                 layer="BACKGROUND"
                                  level="1"
-                                 tier="0">
+                                 tier="LOW">
                         <Anchor point="TOPLEFT"
                                 relativeTo="GuiRoot"
                                 relativePoint="TOPLEFT"
@@ -31,15 +31,15 @@
                       virtual="true"
                       hidden="true"
                       thickness="1"
-                      layer="0"
+                      layer="BACKGROUND"
                       level="2"
-                      tier="0" />
+                      tier="LOW" />
                 <Line name="LUIE_GridOverlay_Line_H"
                       virtual="true"
                       hidden="true"
                       thickness="1"
-                      layer="0"
+                      layer="BACKGROUND"
                       level="2"
-                      tier="0" />
+                      tier="LOW" />
         </Controls>
 </GuiXml>

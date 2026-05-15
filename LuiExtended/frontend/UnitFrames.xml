@@ -82,7 +82,7 @@
     <Backdrop name="LUIE_CombatGlowBorder"
               centerColor="66000000"
               edgeColor="FF0000"
-              tier="DT_HIGH"
+              tier="MEDIUM"
               level="3"
               hidden="true"
               virtual="true">
@@ -91,7 +91,7 @@
     </Backdrop>
     <!-- Decreased Armor Overlay Container (Full version with both textures) -->
     <Control name="LUIE_DecreasedArmorOverlay"
-             tier="DT_HIGH"
+             tier="MEDIUM"
              level="0"
              hidden="true"
              virtual="true">
@@ -127,7 +127,7 @@
     </Control>
     <!-- Small variant (only smallTex) -->
     <Control name="LUIE_DecreasedArmorOverlay_Small"
-             tier="DT_HIGH"
+             tier="MEDIUM"
              level="0"
              hidden="true"
              virtual="true">
@@ -160,7 +160,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="DT_LOW">
+                     tier="LOW">
       <Dimensions x="300"
                   y="100" />
       <Anchor point="TOPLEFT"
@@ -174,7 +174,7 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_MEDIUM"
+                 tier="MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
@@ -182,7 +182,7 @@
                       centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_MEDIUM"
+                      tier="MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
@@ -452,7 +452,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="22"
                               y="22" />
@@ -557,7 +557,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="DT_LOW">
+                     tier="LOW">
       <Dimensions x="300"
                   y="120" />
       <Anchor point="TOPLEFT"
@@ -571,7 +571,7 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_MEDIUM"
+                 tier="MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
@@ -579,7 +579,7 @@
                       centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_MEDIUM"
+                      tier="MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
@@ -793,7 +793,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="22"
                               y="22" />
@@ -945,7 +945,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="DT_LOW">
+                     tier="LOW">
       <Dimensions x="300"
                   y="100" />
       <Anchor point="TOPLEFT"
@@ -959,7 +959,7 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_MEDIUM"
+                 tier="MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
@@ -967,7 +967,7 @@
                       centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_MEDIUM"
+                      tier="MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
@@ -1132,7 +1132,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -1232,7 +1232,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="DT_LOW">
+                     tier="LOW">
       <Dimensions x="200"
                   y="50" />
       <Anchor point="TOPLEFT"
@@ -1246,7 +1246,7 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_MEDIUM"
+                 tier="MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
@@ -1254,7 +1254,7 @@
                       centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_MEDIUM"
+                      tier="MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
@@ -1399,7 +1399,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="18"
                               y="18" />
@@ -1479,7 +1479,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="22"
                               y="22" />
@@ -1501,7 +1501,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="32"
                               y="32" />
@@ -1776,7 +1776,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="18"
                               y="18" />
@@ -1855,7 +1855,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="22"
                               y="22" />
@@ -1877,7 +1877,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="32"
                               y="32" />
@@ -2151,7 +2151,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="18"
                               y="18" />
@@ -2230,7 +2230,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="22"
                               y="22" />
@@ -2252,7 +2252,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="32"
                               y="32" />
@@ -2526,7 +2526,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="18"
                               y="18" />
@@ -2605,7 +2605,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="22"
                               y="22" />
@@ -2627,7 +2627,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="32"
                               y="32" />
@@ -2787,7 +2787,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="DT_LOW">
+                     tier="LOW">
       <Dimensions x="150"
                   y="30" />
       <Anchor point="TOPLEFT"
@@ -2801,7 +2801,7 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_MEDIUM"
+                 tier="MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
@@ -2809,7 +2809,7 @@
                       centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_MEDIUM"
+                      tier="MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
@@ -2938,7 +2938,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -2950,7 +2950,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -2974,7 +2974,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -3134,7 +3134,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -3146,7 +3146,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -3170,7 +3170,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -3329,7 +3329,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -3341,7 +3341,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -3365,7 +3365,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -3524,7 +3524,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -3536,7 +3536,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -3560,7 +3560,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -3719,7 +3719,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -3731,7 +3731,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -3755,7 +3755,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -3914,7 +3914,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -3926,7 +3926,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -3950,7 +3950,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -4109,7 +4109,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -4121,7 +4121,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -4145,7 +4145,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -4304,7 +4304,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -4316,7 +4316,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -4340,7 +4340,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -4499,7 +4499,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -4511,7 +4511,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -4535,7 +4535,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -4694,7 +4694,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -4706,7 +4706,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -4730,7 +4730,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -4889,7 +4889,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -4901,7 +4901,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -4925,7 +4925,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -5084,7 +5084,7 @@
                 <Texture name="$(parent)_RoleIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="16"
                               y="16" />
@@ -5096,7 +5096,7 @@
                 <Texture name="$(parent)_ClassIcon"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="20"
                               y="20" />
@@ -5120,7 +5120,7 @@
                 <Texture name="$(parent)_Leader"
                          textureFile=""
                          layer="OVERLAY"
-                         tier="DT_MEDIUM"
+                         tier="MEDIUM"
                          hidden="false">
                   <Dimensions x="28"
                               y="28" />
@@ -5181,7 +5181,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="DT_LOW">
+                     tier="LOW">
       <Dimensions x="150"
                   y="30" />
       <Anchor point="TOPLEFT"
@@ -5195,7 +5195,7 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_MEDIUM"
+                 tier="MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
@@ -5203,7 +5203,7 @@
                       centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_MEDIUM"
+                      tier="MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
@@ -6094,7 +6094,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="DT_LOW">
+                     tier="LOW">
       <Dimensions x="150"
                   y="30" />
       <Anchor point="TOPLEFT"
@@ -6108,7 +6108,7 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_MEDIUM"
+                 tier="MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
@@ -6116,7 +6116,7 @@
                       centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_MEDIUM"
+                      tier="MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
@@ -6268,7 +6268,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="DT_LOW">
+                     tier="LOW">
       <Dimensions x="300"
                   y="50" />
       <Anchor point="TOPLEFT"
@@ -6282,7 +6282,7 @@
                  mouseEnabled="false"
                  clampedToScreen="true"
                  layer="OVERLAY"
-                 tier="DT_MEDIUM"
+                 tier="MEDIUM"
                  level="100">
           <AnchorFill />
           <Controls>
@@ -6290,7 +6290,7 @@
                       centerColor="66000000"
                       edgeColor="FFFFFF"
                       layer="OVERLAY"
-                      tier="DT_MEDIUM"
+                      tier="MEDIUM"
                       level="100">
               <Edge edgeSize="2" />
               <AnchorFill />
