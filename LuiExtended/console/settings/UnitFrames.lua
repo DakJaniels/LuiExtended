@@ -709,7 +709,9 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.CustomShieldBarHeight = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+                UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(false)
                 UnitFrames.CustomFramesApplyLayoutGroup()
             end,
             warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
@@ -1380,7 +1382,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.DisplayOptionsPlayer = item.data
-                UnitFrames.CustomFramesReloadControlsMenu(true)
+                UnitFrames.CustomFramesReloadControlsMenu(true, nil, nil, false)
             end,
             default = nameDisplayOptions[2],
             disable = function ()
@@ -1403,7 +1405,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.DisplayOptionsTarget = item.data
-                UnitFrames.CustomFramesReloadControlsMenu(true)
+                UnitFrames.CustomFramesReloadControlsMenu(false, nil, nil, true, false)
             end,
             default = nameDisplayOptions[2],
             disable = function ()
@@ -1429,7 +1431,8 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatOnePT = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
             end,
             default = Defaults.CustomFormatOnePT,
             disable = function ()
@@ -1455,7 +1458,8 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatTwoPT = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
             end,
             default = Defaults.CustomFormatTwoPT,
             disable = function ()
@@ -1476,7 +1480,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PlayerBarWidth = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1497,7 +1501,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PlayerBarHeightHealth = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1518,7 +1522,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PlayerBarHeightMagicka = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1539,7 +1543,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PlayerBarHeightStamina = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1560,8 +1564,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PlayerOocAlpha = value
-                UnitFrames.CustomFramesApplyInCombat()
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyInCombat(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
@@ -1582,8 +1585,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PlayerIncAlpha = value
-                UnitFrames.CustomFramesApplyInCombat()
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyInCombat(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
@@ -1601,7 +1603,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideBuffsPlayerOoc = value
-                UnitFrames.CustomFramesApplyInCombat()
+                UnitFrames.CustomFramesApplyInCombat(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
@@ -1619,7 +1621,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PlayerEnableYourname = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1638,7 +1640,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.PlayerEnableAltbarMSW = value
                 UnitFrames.CustomFramesSetupAlternative()
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1657,7 +1659,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.PlayerEnableAltbarXP = value
                 UnitFrames.CustomFramesSetupAlternative()
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1676,7 +1678,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.PlayerChampionColour = value
                 UnitFrames.OnChampionPointGained()
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.PlayerEnableAltbarXP)
@@ -1760,7 +1762,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetBarWidth = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
@@ -1781,7 +1783,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetBarHeight = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
@@ -1802,8 +1804,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetOocAlpha = value
-                UnitFrames.CustomFramesApplyInCombat()
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyInCombat(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
@@ -1824,8 +1825,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetIncAlpha = value
-                UnitFrames.CustomFramesApplyInCombat()
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyInCombat(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
@@ -1843,7 +1843,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.HideBuffsTargetOoc = value
-                UnitFrames.CustomFramesApplyInCombat()
+                UnitFrames.CustomFramesApplyInCombat(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
@@ -1897,7 +1897,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetEnableClass = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
@@ -1953,7 +1953,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetEnableTitle = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1971,7 +1971,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetEnableRank = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1994,7 +1994,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.TargetTitlePriority = item.data or item.name or value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
             end,
             default = Defaults.TargetTitlePriority,
             disable = function ()
@@ -2012,7 +2012,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetEnableRankIcon = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -2084,7 +2084,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.CustomOocAlphaPower = value
-                UnitFrames.CustomFramesApplyInCombat()
+                UnitFrames.CustomFramesApplyInCombat(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
@@ -2313,7 +2313,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.BarAlignCenterLabelPlayer = value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -2332,7 +2332,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.BarAlignCenterLabelTarget = value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -2358,7 +2358,8 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatCenterLabel = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
             end,
             default = Defaults.CustomFormatCenterLabel,
             disable = function ()
@@ -2419,7 +2420,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.AdjustStaminaHPos = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.PlayerFrameOptions == 2)
@@ -2440,7 +2441,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.AdjustStaminaVPos = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.PlayerFrameOptions == 2)
@@ -2461,7 +2462,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.AdjustMagickaHPos = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.PlayerFrameOptions == 2)
@@ -2482,7 +2483,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.AdjustMagickaVPos = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.PlayerFrameOptions == 2)
@@ -2503,7 +2504,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PlayerBarSpacing = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and (Settings.PlayerFrameOptions == 1 or Settings.PlayerFrameOptions == 3))
@@ -4248,7 +4249,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.CompanionOocAlpha = value
-                UnitFrames.CustomFramesApplyInCombat()
+                UnitFrames.CustomFramesApplyInCombat(true)
                 UnitFrames.CustomFramesApplyLayoutCompanion(true)
             end,
             disable = function ()
@@ -4270,7 +4271,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.CompanionIncAlpha = value
-                UnitFrames.CustomFramesApplyInCombat()
+                UnitFrames.CustomFramesApplyInCombat(true)
                 UnitFrames.CustomFramesApplyLayoutCompanion(true)
             end,
             disable = function ()
@@ -4433,7 +4434,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PetOocAlpha = value
-                UnitFrames.CustomFramesApplyInCombat()
+                UnitFrames.CustomFramesApplyInCombat(true)
                 UnitFrames.CustomFramesApplyLayoutPet(true)
             end,
             disable = function ()
@@ -4455,7 +4456,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PetIncAlpha = value
-                UnitFrames.CustomFramesApplyInCombat()
+                UnitFrames.CustomFramesApplyInCombat(true)
                 UnitFrames.CustomFramesApplyLayoutPet(true)
             end,
             disable = function ()
@@ -4760,7 +4761,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.BossOocAlpha = value
-                UnitFrames.CustomFramesApplyInCombat()
+                UnitFrames.CustomFramesApplyInCombat(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses)
@@ -4781,7 +4782,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.BossIncAlpha = value
-                UnitFrames.CustomFramesApplyInCombat()
+                UnitFrames.CustomFramesApplyInCombat(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses)
@@ -4950,7 +4951,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.AvaTargetBarWidth = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.AvaCustFramesTarget)
@@ -4971,7 +4972,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.AvaTargetBarHeight = value
-                UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(true)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.AvaCustFramesTarget)

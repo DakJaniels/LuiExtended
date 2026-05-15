@@ -20,8 +20,6 @@ local ZO_Dialogs_ShowDialog = ZO_Dialogs_ShowDialog
 local PetNames = LuiData.Data.PetNames
 
 local pairs = pairs
-local table = table
-local table_insert = table.insert
 
 local nameDisplayOptions =
 {
@@ -721,7 +719,9 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.CustomShieldBarHeight = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+                    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(false)
                     UnitFrames.CustomFramesApplyLayoutGroup()
                 end,
                 width = "full",
@@ -1496,7 +1496,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.DisplayOptionsPlayer = nameDisplayOptionsKeys[value]
-                    UnitFrames.CustomFramesReloadControlsMenu(true)
+                    UnitFrames.CustomFramesReloadControlsMenu(true, nil, nil, false)
                 end,
                 width = "full",
                 disabled = function ()
@@ -1516,7 +1516,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.DisplayOptionsTarget = nameDisplayOptionsKeys[value]
-                    UnitFrames.CustomFramesReloadControlsMenu(true)
+                    UnitFrames.CustomFramesReloadControlsMenu(false, nil, nil, true, false)
                 end,
                 width = "full",
                 disabled = function ()
@@ -1537,7 +1537,8 @@ function UnitFrames.CreateSettings()
                 setFunc = function (var)
                     Settings.CustomFormatOnePT = var
                     UnitFrames.CustomFramesFormatLabels(true)
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
                 end,
                 width = "full",
                 disabled = function ()
@@ -1558,7 +1559,8 @@ function UnitFrames.CreateSettings()
                 setFunc = function (var)
                     Settings.CustomFormatTwoPT = var
                     UnitFrames.CustomFramesFormatLabels(true)
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
                 end,
                 width = "full",
                 disabled = function ()
@@ -1578,7 +1580,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.PlayerBarWidth = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
                 end,
                 width = "full",
                 default = Defaults.PlayerBarWidth,
@@ -1598,7 +1600,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.PlayerBarHeightHealth = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
                 end,
                 width = "full",
                 default = Defaults.PlayerBarHeightHealth,
@@ -1618,7 +1620,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.PlayerBarHeightMagicka = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
                 end,
                 width = "full",
                 default = Defaults.PlayerBarHeightMagicka,
@@ -1638,7 +1640,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.PlayerBarHeightStamina = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
                 end,
                 width = "full",
                 default = Defaults.PlayerBarHeightStamina,
@@ -1659,8 +1661,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.PlayerOocAlpha = value
-                    UnitFrames.CustomFramesApplyInCombat()
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyInCombat(true)
                 end,
                 width = "full",
                 default = Defaults.PlayerOocAlpha,
@@ -1681,8 +1682,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.PlayerIncAlpha = value
-                    UnitFrames.CustomFramesApplyInCombat()
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyInCombat(true)
                 end,
                 width = "full",
                 default = Defaults.PlayerIncAlpha,
@@ -1700,7 +1700,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.HideBuffsPlayerOoc = value
-                    UnitFrames.CustomFramesApplyInCombat()
+                    UnitFrames.CustomFramesApplyInCombat(true)
                 end,
                 width = "full",
                 default = Defaults.HideBuffsPlayerOoc,
@@ -1718,7 +1718,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.PlayerEnableYourname = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
                 end,
                 width = "full",
                 default = Defaults.PlayerEnableYourname,
@@ -1737,7 +1737,7 @@ function UnitFrames.CreateSettings()
                 setFunc = function (value)
                     Settings.PlayerEnableAltbarMSW = value
                     UnitFrames.CustomFramesSetupAlternative()
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
                 end,
                 width = "full",
                 default = Defaults.PlayerEnableAltbarMSW,
@@ -1756,7 +1756,7 @@ function UnitFrames.CreateSettings()
                 setFunc = function (value)
                     Settings.PlayerEnableAltbarXP = value
                     UnitFrames.CustomFramesSetupAlternative()
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
                 end,
                 width = "full",
                 default = Defaults.PlayerEnableAltbarXP,
@@ -1775,7 +1775,7 @@ function UnitFrames.CreateSettings()
                 setFunc = function (value)
                     Settings.PlayerChampionColour = value
                     UnitFrames.OnChampionPointGained()
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
                 end,
                 width = "full",
                 default = Defaults.PlayerChampionColour,
@@ -1858,7 +1858,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.TargetBarWidth = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
                 end,
                 width = "full",
                 default = Defaults.TargetBarWidth,
@@ -1878,7 +1878,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.TargetBarHeight = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
                 end,
                 width = "full",
                 default = Defaults.TargetBarHeight,
@@ -1899,8 +1899,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.TargetOocAlpha = value
-                    UnitFrames.CustomFramesApplyInCombat()
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyInCombat(true)
                 end,
                 width = "full",
                 default = Defaults.TargetOocAlpha,
@@ -1921,8 +1920,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.TargetIncAlpha = value
-                    UnitFrames.CustomFramesApplyInCombat()
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyInCombat(true)
                 end,
                 width = "full",
                 default = Defaults.TargetIncAlpha,
@@ -1940,7 +1938,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.HideBuffsTargetOoc = value
-                    UnitFrames.CustomFramesApplyInCombat()
+                    UnitFrames.CustomFramesApplyInCombat(true)
                 end,
                 width = "full",
                 default = Defaults.HideBuffsTargetOoc,
@@ -1994,7 +1992,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.TargetEnableClass = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
                 end,
                 width = "full",
                 default = Defaults.TargetEnableClass,
@@ -2050,7 +2048,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.TargetEnableTitle = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
                 end,
                 width = "full",
                 default = Defaults.TargetEnableTitle,
@@ -2068,7 +2066,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.TargetEnableRank = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
                 end,
                 width = "full",
                 default = Defaults.TargetEnableRank,
@@ -2087,7 +2085,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.TargetTitlePriority = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
                 end,
                 width = "full",
                 default = Defaults.TargetTitlePriority,
@@ -2105,7 +2103,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.TargetEnableRankIcon = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
                 end,
                 width = "full",
                 default = Defaults.TargetEnableRankIcon,
@@ -2177,7 +2175,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.CustomOocAlphaPower = value
-                    UnitFrames.CustomFramesApplyInCombat()
+                    UnitFrames.CustomFramesApplyInCombat(true)
                 end,
                 width = "full",
                 default = Defaults.CustomOocAlphaPower,
@@ -2283,7 +2281,7 @@ function UnitFrames.CreateSettings()
                 setFunc = function (value)
                     Settings.BarAlignCenterLabelPlayer = value
                     UnitFrames.CustomFramesFormatLabels(true)
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
                 end,
                 width = "full",
                 default = Defaults.BarAlignCenterLabelPlayer,
@@ -2302,7 +2300,7 @@ function UnitFrames.CreateSettings()
                 setFunc = function (value)
                     Settings.BarAlignCenterLabelTarget = value
                     UnitFrames.CustomFramesFormatLabels(true)
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
                 end,
                 width = "full",
                 default = Defaults.BarAlignCenterLabelTarget,
@@ -2322,7 +2320,8 @@ function UnitFrames.CreateSettings()
                 setFunc = function (var)
                     Settings.CustomFormatCenterLabel = var
                     UnitFrames.CustomFramesFormatLabels(true)
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
                 end,
                 width = "full",
                 disabled = function ()
@@ -2373,7 +2372,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AdjustStaminaHPos = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
                 end,
                 width = "full",
                 default = Defaults.AdjustStaminaHPos,
@@ -2394,7 +2393,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AdjustStaminaVPos = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
                 end,
                 width = "full",
                 default = Defaults.AdjustStaminaVPos,
@@ -2415,7 +2414,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AdjustMagickaHPos = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
                 end,
                 width = "full",
                 default = Defaults.AdjustMagickaHPos,
@@ -2436,7 +2435,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AdjustMagickaVPos = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
                 end,
                 width = "full",
                 default = Defaults.AdjustMagickaVPos,
@@ -2457,7 +2456,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.PlayerBarSpacing = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
                 end,
                 width = "full",
                 default = Defaults.PlayerBarSpacing,
@@ -4244,7 +4243,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.CompanionOocAlpha = value
-                    UnitFrames.CustomFramesApplyInCombat()
+                    UnitFrames.CustomFramesApplyInCombat(true)
                     UnitFrames.CustomFramesApplyLayoutCompanion(true)
                 end,
                 width = "full",
@@ -4266,7 +4265,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.CompanionIncAlpha = value
-                    UnitFrames.CustomFramesApplyInCombat()
+                    UnitFrames.CustomFramesApplyInCombat(true)
                     UnitFrames.CustomFramesApplyLayoutCompanion(true)
                 end,
                 width = "full",
@@ -4415,7 +4414,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.PetOocAlpha = value
-                    UnitFrames.CustomFramesApplyInCombat()
+                    UnitFrames.CustomFramesApplyInCombat(true)
                     UnitFrames.CustomFramesApplyLayoutPet(true)
                 end,
                 width = "full",
@@ -4437,7 +4436,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.PetIncAlpha = value
-                    UnitFrames.CustomFramesApplyInCombat()
+                    UnitFrames.CustomFramesApplyInCombat(true)
                     UnitFrames.CustomFramesApplyLayoutPet(true)
                 end,
                 width = "full",
@@ -4732,7 +4731,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.BossOocAlpha = value
-                    UnitFrames.CustomFramesApplyInCombat()
+                    UnitFrames.CustomFramesApplyInCombat(true)
                 end,
                 width = "full",
                 default = Defaults.BossOocAlpha,
@@ -4753,7 +4752,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.BossIncAlpha = value
-                    UnitFrames.CustomFramesApplyInCombat()
+                    UnitFrames.CustomFramesApplyInCombat(true)
                 end,
                 width = "full",
                 default = Defaults.BossIncAlpha,
@@ -4915,7 +4914,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AvaTargetBarWidth = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(true)
                 end,
                 width = "full",
                 default = Defaults.AvaTargetBarWidth,
@@ -4935,7 +4934,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.AvaTargetBarHeight = value
-                    UnitFrames.CustomFramesApplyLayoutPlayer(true)
+                    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(true)
                 end,
                 width = "full",
                 default = Defaults.AvaTargetBarHeight,
