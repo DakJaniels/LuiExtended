@@ -21,8 +21,7 @@ function CombatTextPointsChampionEventListener:Initialize()
     self.gain = 0
     self.timeoutActive = false
     self.previousCP = GetUnitChampionPoints("player")
-    self.maxCP = 3600
-    self.hasMaxCP = GetUnitChampionPoints("player") >= self.maxCP
+    self.hasMaxCP = not CanUnitGainChampionPoints("player")
 end
 
 --- @param unitTag string
@@ -30,11 +29,11 @@ end
 --- @param currentChampionPoints integer
 function CombatTextPointsChampionEventListener:OnEvent(unitTag, oldChampionPoints, currentChampionPoints)
     if LUIE.CombatText.SV.toggles.showPointsChampion and not self.hasMaxCP then
-        local currentVR = GetUnitChampionPoints(unitTag)
+        local currentCP = GetUnitChampionPoints(unitTag)
         local gainDelta
-        if currentVR == self.previousCP then
+        if currentCP == self.previousCP then
             gainDelta = currentChampionPoints - oldChampionPoints
-        elseif currentVR > self.previousCP then
+        elseif currentCP > self.previousCP then
             local maxForOldRank = GetNumChampionXPInChampionPoint(self.previousCP)
             gainDelta = (maxForOldRank - oldChampionPoints) + currentChampionPoints
         else
@@ -45,8 +44,8 @@ function CombatTextPointsChampionEventListener:OnEvent(unitTag, oldChampionPoint
             self.gain = self.gain + gainDelta
         end
 
-        self.previousCP = currentVR
-        self.hasMaxCP = self.hasMaxCP or (currentVR >= self.maxCP)
+        self.previousCP = currentCP
+        self.hasMaxCP = self.hasMaxCP or not CanUnitGainChampionPoints(unitTag)
 
         -- Trigger custom event (500ms buffer)
         if self.gain > 0 and not self.timeoutActive then

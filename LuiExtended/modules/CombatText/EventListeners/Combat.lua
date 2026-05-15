@@ -181,6 +181,9 @@ local pendingSlotAbilityCost =
     consumedMagicka = false,
     consumedStamina = false,
     consumedUltimate = false,
+    expectedMagickaCost = 0,
+    expectedStaminaCost = 0,
+    expectedUltimateCost = 0,
 }
 local lastDrainDedupe =
 {
@@ -218,9 +221,34 @@ local function IsRecentDuplicateDrain(abilityId, combatMechanicFlags, amount)
     return false
 end
 
+--- Clear pending slot → cost correlation (also used before a new slot attempt).
+local function ClearPendingAbilityCost()
+    pendingSlotAbilityCost.abilityId = 0
+    pendingSlotAbilityCost.expireGameTimeMs = 0
+    pendingSlotAbilityCost.consumedMagicka = false
+    pendingSlotAbilityCost.consumedStamina = false
+    pendingSlotAbilityCost.consumedUltimate = false
+    pendingSlotAbilityCost.expectedMagickaCost = 0
+    pendingSlotAbilityCost.expectedStaminaCost = 0
+    pendingSlotAbilityCost.expectedUltimateCost = 0
+end
+
+--- @param costAbility integer ability id for tooltip/cost APIs (often chained)
+--- @param combatMechanicFlags integer COMBAT_MECHANIC_FLAGS_*
+--- @return integer non-negative whole cost, or 0 if none / invalid
+local function GetPositiveAbilityResourceCost(costAbility, combatMechanicFlags)
+    local c = GetAbilityCost(costAbility, combatMechanicFlags, nil, "player")
+    if type(c) ~= "number" or c <= 0 then
+        return 0
+    end
+    return c
+end
+
 --- Remember which ability was just activated from the bar (for cost inference).
 --- @param actionSlotIndex integer
 local function SetPendingAbilityCostFromSlot(actionSlotIndex)
+    ClearPendingAbilityCost()
+
     local hotbarCategory = GetActiveHotbarCategory()
     local slotType = GetSlotType(actionSlotIndex, hotbarCategory)
     if slotType ~= ACTION_TYPE_ABILITY and slotType ~= ACTION_TYPE_CRAFTED_ABILITY then
@@ -233,11 +261,20 @@ local function SetPendingAbilityCostFromSlot(actionSlotIndex)
     if not abilityId or abilityId <= 0 then
         return
     end
+
+    local costAbility = GetCurrentChainedAbility(abilityId)
+    local expectedMagicka = GetPositiveAbilityResourceCost(costAbility, COMBAT_MECHANIC_FLAGS_MAGICKA)
+    local expectedStamina = GetPositiveAbilityResourceCost(costAbility, COMBAT_MECHANIC_FLAGS_STAMINA)
+    local expectedUltimate = GetPositiveAbilityResourceCost(costAbility, COMBAT_MECHANIC_FLAGS_ULTIMATE)
+    if expectedMagicka == 0 and expectedStamina == 0 and expectedUltimate == 0 then
+        return
+    end
+
     pendingSlotAbilityCost.abilityId = abilityId
     pendingSlotAbilityCost.expireGameTimeMs = GetGameTimeMilliseconds() + 900
-    pendingSlotAbilityCost.consumedMagicka = false
-    pendingSlotAbilityCost.consumedStamina = false
-    pendingSlotAbilityCost.consumedUltimate = false
+    pendingSlotAbilityCost.expectedMagickaCost = expectedMagicka
+    pendingSlotAbilityCost.expectedStaminaCost = expectedStamina
+    pendingSlotAbilityCost.expectedUltimateCost = expectedUltimate
 end
 
 -- Memory optimization: Cache zone/map data to avoid repeated API calls
@@ -400,11 +437,7 @@ function CombatTextCombatEventListener:OnPlayerActivated()
     lastPlayerPowerByCombatMechanicFlags[COMBAT_MECHANIC_FLAGS_MAGICKA] = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_MAGICKA)
     lastPlayerPowerByCombatMechanicFlags[COMBAT_MECHANIC_FLAGS_STAMINA] = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_STAMINA)
     lastPlayerPowerByCombatMechanicFlags[COMBAT_MECHANIC_FLAGS_ULTIMATE] = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE)
-    pendingSlotAbilityCost.abilityId = 0
-    pendingSlotAbilityCost.expireGameTimeMs = 0
-    pendingSlotAbilityCost.consumedMagicka = false
-    pendingSlotAbilityCost.consumedStamina = false
-    pendingSlotAbilityCost.consumedUltimate = false
+    ClearPendingAbilityCost()
     if IsUnitInCombat("player") then
         isWarned.combat = true
     end
@@ -442,6 +475,23 @@ function CombatTextCombatEventListener:OnPlayerPowerUpdate(combatMechanicFlags, 
 
     local now = GetGameTimeMilliseconds()
     if pendingSlotAbilityCost.abilityId == 0 or now > pendingSlotAbilityCost.expireGameTimeMs then
+        return
+    end
+
+    local expectedCost = 0
+    if combatMechanicFlags == COMBAT_MECHANIC_FLAGS_MAGICKA then
+        expectedCost = pendingSlotAbilityCost.expectedMagickaCost
+    elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_STAMINA then
+        expectedCost = pendingSlotAbilityCost.expectedStaminaCost
+    elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_ULTIMATE then
+        expectedCost = pendingSlotAbilityCost.expectedUltimateCost
+    end
+    if expectedCost <= 0 then
+        return
+    end
+    -- Reject unrelated pool ticks (e.g. sprint) when the slotted ability has no cost or a different cost for this pool.
+    local tolerance = math.max(1, zo_floor(expectedCost * 0.01))
+    if math.abs(delta - expectedCost) > tolerance then
         return
     end
 
