@@ -3615,6 +3615,9 @@ function UnitFrames.CustomFramesApplyInCombat()
         idle = UnitFrames.statFull.combat
     end
 
+    -- Coerce to boolean so nil (e.g. combat unset) does not match last==nil and skip the first apply.
+    idle = idle == true
+
     if idle == lastCustomFramesApplyInCombatIdle then
         return
     end
