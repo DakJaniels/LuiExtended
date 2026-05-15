@@ -160,7 +160,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="LOW">
+                     tier="MEDIUM">
       <Dimensions x="300"
                   y="100" />
       <Anchor point="TOPLEFT"
@@ -373,7 +373,7 @@
               <Dimensions x="300"
                           y="20" />
               <Anchor point="TOP"
-                      relativeTo="$(parent)_MagickaBackdrop"
+                      relativeTo="$(parent)_Magicka"
                       relativePoint="BOTTOM" />
               <Edge edgeSize="1" />
               <Controls>
@@ -557,7 +557,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="LOW">
+                     tier="MEDIUM">
       <Dimensions x="300"
                   y="120" />
       <Anchor point="TOPLEFT"
@@ -945,7 +945,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="LOW">
+                     tier="MEDIUM">
       <Dimensions x="300"
                   y="100" />
       <Anchor point="TOPLEFT"
@@ -1232,7 +1232,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="LOW">
+                     tier="MEDIUM">
       <Dimensions x="200"
                   y="50" />
       <Anchor point="TOPLEFT"
@@ -2787,7 +2787,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="LOW">
+                     tier="MEDIUM">
       <Dimensions x="150"
                   y="30" />
       <Anchor point="TOPLEFT"
@@ -5181,7 +5181,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="LOW">
+                     tier="MEDIUM">
       <Dimensions x="150"
                   y="30" />
       <Anchor point="TOPLEFT"
@@ -6094,7 +6094,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="LOW">
+                     tier="MEDIUM">
       <Dimensions x="150"
                   y="30" />
       <Anchor point="TOPLEFT"
@@ -6268,7 +6268,7 @@
                      hidden="true"
                      layer="BACKGROUND"
                      level="0"
-                     tier="LOW">
+                     tier="MEDIUM">
       <Dimensions x="300"
                   y="50" />
       <Anchor point="TOPLEFT"
