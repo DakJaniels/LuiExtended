@@ -151,11 +151,11 @@ end
 -- Main entry point to this module
 function UnitFrames.Initialize(enabled)
     -- Load settings
-    local isCharacterSpecific = LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV
+    local isCharacterSpecific = LUIE.SV.CharacterSpecificSV
     if isCharacterSpecific then
-        UnitFrames.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, "UnitFrames", UnitFrames.Defaults)
+        UnitFrames.SV = ZO_SavedVars:New(LUIE.ModuleSavedVarNames.UnitFrames, LUIE.SVVer, nil, UnitFrames.Defaults, LUIE.SavedVarsProfile)
     else
-        UnitFrames.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "UnitFrames", UnitFrames.Defaults)
+        UnitFrames.SV = ZO_SavedVars:NewAccountWide(LUIE.ModuleSavedVarNames.UnitFrames, LUIE.SVVer, nil, UnitFrames.Defaults, LUIE.SavedVarsProfile)
     end
 
     -- Migrate old string-based font styles to numeric constants (run once)
@@ -204,14 +204,15 @@ function UnitFrames.Initialize(enabled)
     UnitFrames.staminaThreshold = UnitFrames.SV.LowResourceStamina
 
     -- Variable adjustment if needed
-    if not LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsUF then
-        LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsUF = 0
+    local coreAw = LUIE.GetCoreAccountWideRawTable()
+    if not coreAw.AdjustVarsUF then
+        coreAw.AdjustVarsUF = 0
     end
-    if LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsUF < 2 then
+    if coreAw.AdjustVarsUF < 2 then
         UnitFrames.SV["CustomFramesPetFramePos"] = nil
     end
     -- Increment so this doesn't occur again.
-    LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsUF = 2
+    coreAw.AdjustVarsUF = 2
 
     UnitFrames.CreateDefaultFrames()
     UnitFrames.CreateCustomFrames()

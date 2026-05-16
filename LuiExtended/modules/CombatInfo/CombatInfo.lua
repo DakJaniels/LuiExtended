@@ -131,11 +131,11 @@ end
 
 -- Module initialization
 function CombatInfo.Initialize(enabled)
-    local isCharacterSpecific = LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV
+    local isCharacterSpecific = LUIE.SV.CharacterSpecificSV
     if isCharacterSpecific then
-        CombatInfo.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, "CombatInfo", CombatInfo.Defaults)
+        CombatInfo.SV = ZO_SavedVars:New(LUIE.ModuleSavedVarNames.CombatInfo, LUIE.SVVer, nil, CombatInfo.Defaults, LUIE.SavedVarsProfile)
     else
-        CombatInfo.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "CombatInfo", CombatInfo.Defaults)
+        CombatInfo.SV = ZO_SavedVars:NewAccountWide(LUIE.ModuleSavedVarNames.CombatInfo, LUIE.SVVer, nil, CombatInfo.Defaults, LUIE.SavedVarsProfile)
     end
 
     -- Migrate font styles (string/display/nil -> valid 0-7); run once per account
@@ -167,10 +167,11 @@ function CombatInfo.Initialize(enabled)
 
     CombatInfo.Block.Initialize()
 
-    if not LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsCI then
-        LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsCI = 0
+    local coreAw = LUIE.GetCoreAccountWideRawTable()
+    if not coreAw.AdjustVarsCI then
+        coreAw.AdjustVarsCI = 0
     end
-    if LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsCI < 2 then
+    if coreAw.AdjustVarsCI < 2 then
         CombatInfo.SV.alerts.colors.stunColor = CombatInfo.Defaults.alerts.colors.stunColor
         CombatInfo.SV.alerts.colors.knockbackColor = CombatInfo.Defaults.alerts.colors.knockbackColor
         CombatInfo.SV.alerts.colors.levitateColor = CombatInfo.Defaults.alerts.colors.levitateColor
@@ -197,7 +198,7 @@ function CombatInfo.Initialize(enabled)
         CombatInfo.SV.cct.colors[ACTION_RESULT_AREA_EFFECT] = CombatInfo.Defaults.cct.colors[ACTION_RESULT_AREA_EFFECT]
         CombatInfo.SV.cct.colors.unbreakable = CombatInfo.Defaults.cct.colors.unbreakable
     end
-    LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsCI = 2
+    coreAw.AdjustVarsCI = 2
 end
 
 --- Console LibHarvens "reset to defaults": replace saved vars with a deep copy of `CombatInfo.Defaults`, then refresh active UI.

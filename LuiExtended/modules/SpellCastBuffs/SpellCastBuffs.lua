@@ -246,11 +246,11 @@ end
 -- Initialization
 function SpellCastBuffs.Initialize(enabled)
     -- Load settings
-    local isCharacterSpecific = LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV
+    local isCharacterSpecific = LUIE.SV.CharacterSpecificSV
     if isCharacterSpecific then
-        SpellCastBuffs.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, "SpellCastBuffs", SpellCastBuffs.Defaults)
+        SpellCastBuffs.SV = ZO_SavedVars:New(LUIE.ModuleSavedVarNames.SpellCastBuffs, LUIE.SVVer, nil, SpellCastBuffs.Defaults, LUIE.SavedVarsProfile)
     else
-        SpellCastBuffs.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "SpellCastBuffs", SpellCastBuffs.Defaults)
+        SpellCastBuffs.SV = ZO_SavedVars:NewAccountWide(LUIE.ModuleSavedVarNames.SpellCastBuffs, LUIE.SVVer, nil, SpellCastBuffs.Defaults, LUIE.SavedVarsProfile)
     end
 
     -- Migrate old string-based font styles to numeric constants (run once)
@@ -494,10 +494,11 @@ function SpellCastBuffs.Initialize(enabled)
     SpellCastBuffs.RegisterDebugEvents()
 
     -- Variable adjustment if needed
-    if not LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsSCB then
-        LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsSCB = 0
+    local coreAw = LUIE.GetCoreAccountWideRawTable()
+    if not coreAw.AdjustVarsSCB then
+        coreAw.AdjustVarsSCB = 0
     end
-    if LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsSCB < 2 then
+    if coreAw.AdjustVarsSCB < 2 then
         -- Set buff cc type colors
         SpellCastBuffs.SV.colors.buff = SpellCastBuffs.Defaults.colors.buff
         SpellCastBuffs.SV.colors.debuff = SpellCastBuffs.Defaults.colors.debuff
@@ -517,7 +518,7 @@ function SpellCastBuffs.Initialize(enabled)
         SpellCastBuffs.SV.colors.root = SpellCastBuffs.Defaults.colors.root
     end
     -- Increment so this doesn't occur again.
-    LUIESV["Default"][GetDisplayName()]["$AccountWide"].AdjustVarsSCB = 2
+    coreAw.AdjustVarsSCB = 2
 
     -- Initialize preview labels for all frames
     InitializePreviewLabels()
@@ -844,7 +845,7 @@ end
 
 -- Cached account-wide lookup for grid snap (evaluated at call time).
 local function IsSnapToGridBuffsEnabled()
-    return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_buffs
+    return LUIE.GetCoreAccountWideRawTable().snapToGrid_buffs
 end
 
 -- Applies saved or default position to a TLW. If savedX/savedY are present, optionally snaps and anchors TOPLEFT to GuiRoot; otherwise uses default anchor.

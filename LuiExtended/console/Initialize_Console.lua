@@ -34,14 +34,17 @@ local function OnAddOnLoaded(eventId, addonName)
     if addonName ~= LUIE.name then
         return
     end
+    LUIE.SavedVarsProfile = GetWorldName()
+    LUIE.MigrateDisplaySubtreeFromLegacyProfile()
     -- -----------------------------------------------------------------------------
     -- Load saved variables
     -- Addon options
-    LUIE.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults)
+    LUIE.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults, LUIE.SavedVarsProfile)
     if LUIE.SV.CharacterSpecificSV then
-        LUIE.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults)
+        LUIE.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults, LUIE.SavedVarsProfile)
     end
-    -- -----------------------------------------------------------------------------
+    LUIE.MigrateSplitModuleSavedVarsFromLuiESV()
+    LUIE.PruneLegacyLuiESVDefaultProfileBranch()
     LUIE.UpdateGuildData(nil, nil, nil, nil)
     -- -----------------------------------------------------------------------------
     -- Initialize Hooks

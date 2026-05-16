@@ -759,24 +759,35 @@ end
 function ActionBar.Initialize(enabled)
     -- -----------------------------------------------------------------------------
     -- Load settings
-    local isCharacterSpecific = LUIESV.Default[GetDisplayName()]["$AccountWide"].CharacterSpecificSV
+    local isCharacterSpecific = LUIE.SV.CharacterSpecificSV
     if isCharacterSpecific then
-        ActionBar.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, "ActionBar", ActionBar.Defaults)
+        ActionBar.SV = ZO_SavedVars:New(LUIE.ModuleSavedVarNames.ActionBar, LUIE.SVVer, nil, ActionBar.Defaults, LUIE.SavedVarsProfile)
     else
-        ActionBar.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "ActionBar", ActionBar.Defaults)
+        ActionBar.SV = ZO_SavedVars:NewAccountWide(LUIE.ModuleSavedVarNames.ActionBar, LUIE.SVVer, nil, ActionBar.Defaults, LUIE.SavedVarsProfile)
     end
 
     -- -----------------------------------------------------------------------------
     -- Migrate from CombatInfo module (one-time migration)
     if not LUIE.IsMigrationDone("actionbar_from_combatinfo") then
-        -- Access raw SV table directly
-        local rawSV = isCharacterSpecific
-            and LUIESV["Default"][GetDisplayName()][GetUnitName("player")]
-            or LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+        local profile = LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
+        local dn = GetDisplayName()
+        local luiDisplayRoot = _G[LUIE.SVName][profile] and _G[LUIE.SVName][profile][dn]
+        local rawSV
+        if isCharacterSpecific then
+            rawSV = luiDisplayRoot and luiDisplayRoot[GetUnitName("player")]
+        else
+            rawSV = luiDisplayRoot and luiDisplayRoot["$AccountWide"]
+        end
 
+        local combatInfoTable
         if rawSV and rawSV.CombatInfo then
-            local combatInfoTable = rawSV.CombatInfo
+            combatInfoTable = rawSV.CombatInfo
+        else
+            combatInfoTable = isCharacterSpecific and LUIE.GetRawModuleCharacterLeaf(LUIE.ModuleSavedVarNames.CombatInfo)
+                or LUIE.GetRawModuleAccountWideLeaf(LUIE.ModuleSavedVarNames.CombatInfo)
+        end
 
+        if combatInfoTable then
             -- List of fields that moved from CombatInfo to ActionBar
             local migrateFields =
             {

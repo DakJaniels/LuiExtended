@@ -73,7 +73,7 @@ function CombatText.OnPanelDragStop(panel)
     end
 
     local left, top = panel:GetLeft(), panel:GetTop()
-    if LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_combatText then
+    if LUIE.GetCoreAccountWideRawTable().snapToGrid_combatText then
         left, top = LUIE.ApplyGridSnap(left, top, "combatText")
         panel:ClearAnchors()
         panel:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, left, top)
@@ -340,11 +340,11 @@ end
 -- Module initialization
 function CombatText.Initialize(enabled)
     -- Load settings
-    local isCharacterSpecific = LUIESV.Default[GetDisplayName()]["$AccountWide"].CharacterSpecificSV
+    local isCharacterSpecific = LUIE.SV.CharacterSpecificSV
     if isCharacterSpecific then
-        CombatText.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, "CombatText", CombatText.Defaults)
+        CombatText.SV = ZO_SavedVars:New(LUIE.ModuleSavedVarNames.CombatText, LUIE.SVVer, nil, CombatText.Defaults, LUIE.SavedVarsProfile)
     else
-        CombatText.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "CombatText", CombatText.Defaults)
+        CombatText.SV = ZO_SavedVars:NewAccountWide(LUIE.ModuleSavedVarNames.CombatText, LUIE.SVVer, nil, CombatText.Defaults, LUIE.SavedVarsProfile)
     end
 
     -- Migrate old string-based font styles to numeric constants (run once)
@@ -434,31 +434,36 @@ function CombatText.Initialize(enabled)
     end)
 
     -- Variable adjustment if needed
-    if not LUIESV.Default[GetDisplayName()]["$AccountWide"].AdjustVarsCT then
-        LUIESV.Default[GetDisplayName()]["$AccountWide"].AdjustVarsCT = 0
+    local coreAw = LUIE.GetCoreAccountWideRawTable()
+    if not coreAw.AdjustVarsCT then
+        coreAw.AdjustVarsCT = 0
     end
-    if LUIESV.Default[GetDisplayName()]["$AccountWide"].AdjustVarsCT < 2 then
+    if coreAw.AdjustVarsCT < 2 then
         -- Set color for bleed damage to red
         CombatText.SV.colors.damage[DAMAGE_TYPE_BLEED] = CombatText.Defaults.colors.damage[DAMAGE_TYPE_BLEED]
     end
-    if LUIESV.Default[GetDisplayName()]["$AccountWide"].AdjustVarsCT < 3 then
+    if coreAw.AdjustVarsCT < 3 then
         -- Remove sneak drain from CT blacklist since it is no longer in the game
         if CombatText.SV.blacklist[20301] then
             CombatText.SV.blacklist[20301] = nil
         end
     end
-    if LUIESV.Default[GetDisplayName()]["$AccountWide"].AdjustVarsCT < 4 then
-        for k, v in pairs(LUIESV.Default[GetDisplayName()]) do
-            for j, _ in pairs(v) do
-                if j == "LuiExtendedCombatText" then
-                    -- Don't want to throw any errors here so make sure these values exist before trying to remove them
-                    if LUIESV.Default[GetDisplayName()][k] and LUIESV.Default[GetDisplayName()][k][j] then
-                        LUIESV.Default[GetDisplayName()][k][j] = nil
+    if coreAw.AdjustVarsCT < 4 then
+        local profile = LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
+        local displayRoot = _G[LUIE.SVName][profile][GetDisplayName()]
+        if displayRoot then
+            for k, v in pairs(displayRoot) do
+                for j, _ in pairs(v) do
+                    if j == "LuiExtendedCombatText" then
+                        -- Don't want to throw any errors here so make sure these values exist before trying to remove them
+                        if displayRoot[k] and displayRoot[k][j] then
+                            displayRoot[k][j] = nil
+                        end
                     end
                 end
             end
         end
     end
     -- Increment so this doesn't occur again.
-    LUIESV.Default[GetDisplayName()]["$AccountWide"].AdjustVarsCT = 4
+    coreAw.AdjustVarsCT = 4
 end
