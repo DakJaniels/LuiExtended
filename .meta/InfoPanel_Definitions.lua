@@ -59,6 +59,17 @@ LUIE_InfoPanel_TopRow_Latency = {}
 LUIE_InfoPanel_TopRow_Fps = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
+--- @class LUIE_InfoPanel_TopRow_Memory : LabelControl
+--- @field public font string
+--- @field public color string
+--- @field public verticalAlignment TextAlignment
+--- @field public horizontalAlignment TextAlignment
+--- @field public text string
+--- @field public wrapMode TextWrapMode
+--- @field Dimensions {x: layout_measurement, y: layout_measurement}
+LUIE_InfoPanel_TopRow_Memory = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
 --- @class LUIE_InfoPanel_TopRow_Clock : LabelControl
 --- @field public font string
 --- @field public color string
