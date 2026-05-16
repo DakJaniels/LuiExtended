@@ -93,6 +93,17 @@
               <Dimensions x="50"
                           y="20" />
             </Label>
+            <!-- Memory -->
+            <Label name="$(parent)_Memory"
+                   font="ZoFontGame"
+                   color="FFFFFF"
+                   verticalAlignment="CENTER"
+                   horizontalAlignment="CENTER"
+                   text="0M"
+                   wrapMode="ELLIPSIS">
+              <Dimensions x="58"
+                          y="20" />
+            </Label>
             <!-- Clock -->
             <Label name="$(parent)_Clock"
                    font="ZoFontGame"

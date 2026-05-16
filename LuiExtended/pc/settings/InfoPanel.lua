@@ -234,6 +234,20 @@ function InfoPanel.CreateSettings()
         true
     )
 
+    -- Show Memory
+    panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_PNL_SHOWMEMORY),
+        GetString(LUIE_STRING_LAM_PNL_SHOWMEMORY_TP),
+        function () return not Settings.HideMemory end,
+        function (value)
+            Settings.HideMemory = not value
+            InfoPanel.RearrangePanel()
+        end,
+        "full",
+        function () return not LUIE.SV.InfoPanel_Enabled end,
+        true
+    )
+
     -- Show Mount Timer
     panelSubmenuControls[#panelSubmenuControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_PNL_SHOWMOUNTTIMER),

@@ -365,6 +365,25 @@ function InfoPanel.CreateConsoleSettings()
             end
         })
 
+    -- Show Memory
+    panel:AddSetting(
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_PNL_SHOWMEMORY),
+            tooltip = GetString(LUIE_STRING_LAM_PNL_SHOWMEMORY_TP),
+            getFunction = function ()
+                return not Settings.HideMemory
+            end,
+            setFunction = function (value)
+                Settings.HideMemory = not value
+                InfoPanel.RearrangePanel()
+            end,
+            default = true,
+            disable = function ()
+                return not LUIE.SV.InfoPanel_Enabled
+            end
+        })
+
     -- Show Mount Timer
     panel:AddSetting(
         {

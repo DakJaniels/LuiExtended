@@ -17,6 +17,7 @@ local sceneManager = SCENE_MANAGER
 
 local pairs = pairs
 local string_format = string.format
+local collectgarbage = collectgarbage
 
 local moduleName = LUIE.name .. "InfoPanel"
 
@@ -45,6 +46,7 @@ InfoPanel.Defaults =
     FontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
     transparency = 100,
     HideInCombat = false,
+    HideMemory = false,
 }
 InfoPanel.SV = {}
 InfoPanel.panelUnlocked = false
@@ -90,6 +92,16 @@ local uiFps =
     },
 }
 
+local uiMemory =
+{
+    color =
+    {
+        [1] = { fill = 70, color = colors.GREEN },
+        [2] = { fill = 90, color = colors.YELLOW },
+        [3] = { color = colors.RED },
+    },
+}
+
 local uiFeedTimer =
 {
     hideLocally = false,
@@ -126,6 +138,17 @@ local uiBags =
 }
 
 local panelFragment
+
+local function FormatInfoPanelMemoryText()
+    if ZO_IsConsoleOrGameCoreUI() then
+        local usage = GetTotalUserAddOnMemoryPoolUsageMB()
+        local cap = GetTotalUserAddOnMemoryPoolCapacityMB()
+        return string_format("%d/%d", zo_floor(usage + 0.5), cap), usage, cap
+    end
+    local mb = collectgarbage("count") / 1024
+    local text = (mb >= 100) and string_format("%.0fM", mb) or string_format("%.1fM", mb)
+    return text, mb, nil
+end
 
 -- -----------------------------------------------------------------------------
 -- Meter system (ZOS-style component objects)
@@ -244,6 +267,47 @@ function FpsMeter:Update(nowMs)
     end
     uiFps.label:SetText(string_format("%d fps", fps))
     uiFps.label:SetColor(color.r, color.g, color.b, 1)
+end
+
+local MemoryMeter = InfoPanelMeterBase:Subclass()
+
+function MemoryMeter:Initialize(infoPanel)
+    InfoPanelMeterBase.Initialize(self, infoPanel, "Memory", ZO_ONE_SECOND_IN_MILLISECONDS)
+end
+
+function MemoryMeter:IsEnabled()
+    if self.infoPanel.SV.HideMemory then
+        return false
+    end
+    if ZO_IsConsoleOrGameCoreUI() then
+        return GetTotalUserAddOnMemoryPoolCapacityMB() > 0
+    end
+    return true
+end
+
+function MemoryMeter:ApplyFont(fontString)
+    if uiMemory.label then uiMemory.label:SetFont(fontString) end
+end
+
+function MemoryMeter:Update(nowMs)
+    if not self:IsEnabled() or not uiMemory.label then return end
+    local text, usage, cap = FormatInfoPanelMemoryText()
+    uiMemory.label:SetText(text)
+
+    local color = colors.WHITE
+    if not self.infoPanel.SV.DisableInfoColours then
+        if cap and cap > 0 then
+            local filledSlotPercentage = (usage / cap) * 100
+            color = uiMemory.color[#uiMemory.color].color
+            for i = 1, #uiMemory.color - 1 do
+                if filledSlotPercentage < uiMemory.color[i].fill then
+                    color = uiMemory.color[i].color
+                    break
+                end
+            end
+        end
+    end
+    uiMemory.label:SetColor(color.r, color.g, color.b, 1)
 end
 
 local LatencyMeter = InfoPanelMeterBase:Subclass()
@@ -526,6 +590,7 @@ function InfoPanel.BuildMeters()
 
     AddMeter(LatencyMeter:New(InfoPanel))
     AddMeter(FpsMeter:New(InfoPanel))
+    AddMeter(MemoryMeter:New(InfoPanel))
     AddMeter(ClockMeter:New(InfoPanel))
     AddMeter(SoulGemsMeter:New(InfoPanel))
     AddMeter(MountFeedMeter:New(InfoPanel))
@@ -708,6 +773,16 @@ function InfoPanel.RearrangePanel()
         sizeTop = sizeTop + uiFps.control:GetWidth()
         anchorTop = uiFps.control
     end
+    -- Memory
+    if not MeterEnabled("Memory", not InfoPanel.SV.HideMemory) then
+        uiMemory.control:SetHidden(true)
+    else
+        uiMemory.control:ClearAnchors()
+        uiMemory.control:SetAnchor(LEFT, anchorTop or uiTopRow, (anchorTop == nil) and LEFT or RIGHT, 0, 0)
+        uiMemory.control:SetHidden(false)
+        sizeTop = sizeTop + uiMemory.control:GetWidth()
+        anchorTop = uiMemory.control
+    end
     -- Time
     if not MeterEnabled("Clock", not InfoPanel.SV.HideClock) then
         uiClock.control:SetHidden(true)
@@ -851,6 +926,9 @@ function InfoPanel.Initialize(enabled)
 
     uiFps.label = LUIE_InfoPanel_TopRow_Fps
     uiFps.control = uiFps.label
+
+    uiMemory.label = LUIE_InfoPanel_TopRow_Memory
+    uiMemory.control = uiMemory.label
 
     uiClock.label = LUIE_InfoPanel_TopRow_Clock
     uiClock.control = uiClock.label
