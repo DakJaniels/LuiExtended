@@ -213,10 +213,10 @@ function UnitFrames.CreateSettings()
         name = "Enable Grid Snap (Unit Frames)",
         tooltip = "Enable snapping unit frames to a grid when moving them",
         getFunc = function ()
-            return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_unitFrames
+            return _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].snapToGrid_unitFrames
         end,
         setFunc = function (value)
-            local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+            local accountWideSettings = _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"]
             accountWideSettings.snapToGrid_unitFrames = value
             local gridSize = accountWideSettings.snapToGridSize_default or 15
             GridOverlay.Refresh("unitFrames", (UnitFrames.CustomFramesMovingState == true) and value, gridSize)
@@ -234,17 +234,17 @@ function UnitFrames.CreateSettings()
         max = 100,
         step = 5,
         getFunc = function ()
-            return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_default or 15
+            return _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].snapToGridSize_default or 15
         end,
         setFunc = function (value)
-            local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+            local accountWideSettings = _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"]
             accountWideSettings.snapToGridSize_default = value
             GridOverlay.Refresh("unitFrames", (UnitFrames.CustomFramesMovingState == true) and accountWideSettings.snapToGrid_unitFrames, value)
         end,
         width = "half",
         default = 15,
         disabled = function ()
-            return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_unitFrames
+            return not _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].snapToGrid_unitFrames
         end,
     }
 

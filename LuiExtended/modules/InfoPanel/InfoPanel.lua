@@ -797,11 +797,11 @@ end
 
 function InfoPanel.Initialize(enabled)
     -- Load settings
-    local isCharacterSpecific = LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV
+    local isCharacterSpecific = LUIE.SV.CharacterSpecificSV
     if isCharacterSpecific then
-        InfoPanel.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, "InfoPanel", InfoPanel.Defaults)
+        InfoPanel.SV = ZO_SavedVars:New(LUIE.ModuleSavedVarNames.InfoPanel, LUIE.SVVer, nil, InfoPanel.Defaults, LUIE.SavedVarsProfile)
     else
-        InfoPanel.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, "InfoPanel", InfoPanel.Defaults)
+        InfoPanel.SV = ZO_SavedVars:NewAccountWide(LUIE.ModuleSavedVarNames.InfoPanel, LUIE.SVVer, nil, InfoPanel.Defaults, LUIE.SavedVarsProfile)
     end
 
     -- Migrate old string-based font styles to numeric constants (run once)

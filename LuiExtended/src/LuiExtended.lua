@@ -52,6 +52,37 @@ else
     LUIE.SVVer = 2
 end
 LUIE.SVName = "LUIESV"
+--- ZO_SavedVars `profile` for megaserver-specific account-wide data (`GetWorldName()`). Set during `EVENT_ADD_ON_LOADED` before any `ZO_SavedVars` call.
+--- @type string|nil
+LUIE.SavedVarsProfile = nil
+--- Legacy ZO profile used by older LuiExtended installs (`ZO_SavedVars` default when `profile` is omitted).
+LUIE.LegacySavedVarsProfile = "Default"
+
+--- Top-level SavedVariables global name per module (see `## SavedVariables` in the addon manifest).
+LUIE.ModuleSavedVarNames =
+{
+    UnitFrames = "LUIE_UnitFrames_SV",
+    CombatText = "LUIE_CombatText_SV",
+    ChatAnnouncements = "LUIE_ChatAnnouncements_SV",
+    SpellCastBuffs = "LUIE_SpellCastBuffs_SV",
+    ActionBar = "LUIE_ActionBar_SV",
+    InfoPanel = "LUIE_InfoPanel_SV",
+    SlashCommands = "LUIE_SlashCommands_SV",
+    CombatInfo = "LUIE_CombatInfo_SV",
+}
+
+--- ZO_SavedVars namespace keys previously stored under `LUIESV` before the per-global split.
+LUIE.ModuleSavedVarNamespaceKeys =
+{
+    "UnitFrames",
+    "CombatText",
+    "ChatAnnouncements",
+    "SpellCastBuffs",
+    "ActionBar",
+    "InfoPanel",
+    "SlashCommands",
+    "CombatInfo",
+}
 -- -----------------------------------------------------------------------------
 -- Components
 LUIE.Components = {}
@@ -73,44 +104,44 @@ LUIE.OtherAddonCompatability =
 --- @field DebugEnvironmentPendingChat string|nil One-shot chat line to show after the next UI reload
 LUIE.Defaults =
 {
-    CustomIcons               = true,
-    CharacterSpecificSV       = false,
-    StartupInfo               = false,
-    HideAlertFrame            = false,
-    AlertFrameAlignment       = 3,
-    HideXPBar                 = false,
-    TempAlertHome             = false,
-    TempAlertCampaign         = false,
-    TempAlertOutfit           = false,
-    WelcomeVersion            = 0,
-    ShowChangeLog             = false,
+    CustomIcons                 = true,
+    CharacterSpecificSV         = false,
+    StartupInfo                 = false,
+    HideAlertFrame              = false,
+    AlertFrameAlignment         = 3,
+    HideXPBar                   = false,
+    TempAlertHome               = false,
+    TempAlertCampaign           = false,
+    TempAlertOutfit             = false,
+    WelcomeVersion              = 0,
+    ShowChangeLog               = false,
 
     -- Modules
-    UnitFrames_Enabled        = true,
-    InfoPanel_Enabled         = true,
-    ActionBar_Enabled         = true,
-    CombatInfo_Enabled        = true,
-    CombatText_Enabled        = true,
-    SpellCastBuff_Enable      = true,
-    ChatAnnouncements_Enable  = true,
-    SlashCommands_Enable      = true,
+    UnitFrames_Enabled          = true,
+    InfoPanel_Enabled           = true,
+    ActionBar_Enabled           = true,
+    CombatInfo_Enabled          = true,
+    CombatText_Enabled          = true,
+    SpellCastBuff_Enable        = true,
+    ChatAnnouncements_Enable    = true,
+    SlashCommands_Enable        = true,
 
     -- Grid settings
-    snapToGrid_default        = false,
-    snapToGridSize_default    = 15,
-    snapToGrid_unitFrames     = false,
-    snapToGridSize_unitFrames = 15,
-    snapToGrid_buffs          = false,
-    snapToGridSize_buffs      = 15,
+    snapToGrid_default          = false,
+    snapToGridSize_default      = 15,
+    snapToGrid_unitFrames       = false,
+    snapToGridSize_unitFrames   = 15,
+    snapToGrid_buffs            = false,
+    snapToGridSize_buffs        = 15,
     -- snapToGrid_combatText     = false,
     -- snapToGridSize_combatText = 15,
 
     -- Debug environment (/luie debug): LUIE-core addon allowlist isolation
-    DebugEnvironmentActive    = false,
-    DebugEnvironmentRestore   = nil,
+    DebugEnvironmentActive      = false,
+    DebugEnvironmentRestore     = nil,
     DebugEnvironmentPendingChat = nil,
 
-    Migrations                = {}
+    Migrations                  = {}
 }
 
 -- -----------------------------------------------------------------------------

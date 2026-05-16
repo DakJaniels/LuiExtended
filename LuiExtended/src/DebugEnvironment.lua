@@ -124,8 +124,8 @@ function LUIE.ShowDebugEnvironmentPendingChat()
     end
     LUIE.SV.DebugEnvironmentPendingChat = nil
     zo_callLater(function ()
-        DebugEnvironmentChat(message)
-    end, 0)
+                     DebugEnvironmentChat(message)
+                 end, 0)
 end
 
 local function PrintDebugEnvironmentStatus()
@@ -170,8 +170,8 @@ function LUIE.OnLuieSlashCommand(args)
         DebugEnvironmentChat(message or "")
         if success then
             zo_callLater(function ()
-                ReloadUI("ingame")
-            end, 250)
+                             ReloadUI("ingame")
+                         end, 250)
         end
         return
     end
@@ -180,8 +180,8 @@ function LUIE.OnLuieSlashCommand(args)
         DebugEnvironmentChat(message or "")
         if success then
             zo_callLater(function ()
-                ReloadUI("ingame")
-            end, 250)
+                             ReloadUI("ingame")
+                         end, 250)
         end
         return
     end

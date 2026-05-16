@@ -15,6 +15,11 @@ local changelogMessages =
     -- Version Header 7.2.1.7
     "|cFFA500LuiExtended Version 7.2.1.7|r",
     "",
+    -- Major change
+    "|cFFFF00Major Change:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SavedVariables layout: module settings now use separate account-wide globals (`LUIE_UnitFrames_SV`, `LUIE_CombatText_SV`, `LUIE_ChatAnnouncements_SV`, `LUIE_SpellCastBuffs_SV`, `LUIE_ActionBar_SV`, `LUIE_InfoPanel_SV`, `LUIE_SlashCommands_SV`, `LUIE_CombatInfo_SV`) alongside `LUIESV` (see the addon manifest). Megaserver-specific rows use the ZO_SavedVars profile from `GetWorldName()`; legacy data under profile `Default` is migrated into the new layout on load (expect one reload after update).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t PC (LAM) and console (LibHarvens): Character Profile \"Copy Profile\" uses three controls — source megaserver profile, `@DisplayName`, then `$AccountWide` or a character row matching `LUIE.SVVer`. The copy writes that path into this session's target row for `LUIESV` and every module global above.",
+    "",
     -- New
     "|cFFFF00New:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Slash command `/luie debug on` — saves your current AddOns enable state, disables everything outside the LUIE debug allowlist (LuiExtended, LuiData, LuiMedia, LibMediaProvider; PC: LibAddonMenu-2.0; console: LibHarvensAddonSettings and LibConsoleDialogs), then reloads the UI.",
@@ -525,12 +530,12 @@ function LUIE.ChangelogScreen()
     LUIE_Changelog_Text:SetText(changelog)
 
     -- Display the changelog if version number < current version
-    if LUIESV["Default"][GetDisplayName()]["$AccountWide"].WelcomeVersion ~= LUIE.version then
+    if LUIE.SV.WelcomeVersion ~= LUIE.version then
         LUIE_Changelog:SetHidden(false)
     end
 
     -- Set version to current version
-    LUIESV["Default"][GetDisplayName()]["$AccountWide"].WelcomeVersion = LUIE.version
+    LUIE.SV.WelcomeVersion = LUIE.version
 end
 
 -- -----------------------------------------------------------------------------

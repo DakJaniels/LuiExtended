@@ -11,7 +11,7 @@
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705 CrutchAlerts>=20502
 ## OptionalDependsOn: LibGroupResources>=91 LibGroupCombatStats>=20251011 LibGroupPotionCooldowns>=20250727
 ## OptionalDependsOn: LibDebugLogger>=268 DebugLogViewer>=697 DolgubonsLazyWritCreator>=4038 LibLazyCrafting>=4028 LootLog>=408040 Taneth
-## SavedVariables: LUIESV
+## SavedVariables: LUIESV LUIE_UnitFrames_SV LUIE_CombatText_SV LUIE_ChatAnnouncements_SV LUIE_SpellCastBuffs_SV LUIE_ActionBar_SV LUIE_InfoPanel_SV LUIE_SlashCommands_SV LUIE_CombatInfo_SV
 
 # Addon Profiler
 ;src/AddonProfiler.lua
@@ -174,6 +174,9 @@ modules/UnitFrames/_FontFunctions.lua
 modules/UnitFrames/_Debug.lua
 modules/UnitFrames/_DynamicPositioning.lua
 modules/UnitFrames/UnitFrames.lua
+
+# SavedVariables migration (requires module Defaults tables)
+src/SavedVariablesMigration.lua
 
 # Settings - Console
 console/Settings_API.lua

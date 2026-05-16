@@ -10,7 +10,11 @@ local g_ElementMovingEnabled
 local GridOverlay = LUIE.GridOverlay
 
 local pairs = pairs
+local ipairs = ipairs
+local type = type
 local table_concat = table.concat
+local table_sort = table.sort
+local wm = WINDOW_MANAGER
 
 -- Load Settings API
 local SettingsAPI = LUIE.SettingsAPI
@@ -25,26 +29,273 @@ function LUIE.CreateSettings()
 
     local optionsData = {}
 
-    local profileCharacters = {} -- List of character profiles
-    local profileQueuedCopy      -- Currently queued character copy name for copy button
+    -- SavedVariables profile copy: megaserver (ZO profile) -> @account -> $AccountWide or character row; applies to LUIESV + all module globals in LUIE.ModuleSavedVarNames.
+    local copyPick_server
+    local copyPick_account
+    local copyPick_bucket
+    local copyPick_sourceKind
+    local copyPick_characterName
 
-    -- Generate list of character profiles for Menu function
-    local function GenerateCharacterProfiles()
-        local isCharacterSpecific = LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV -- Pull info from SV for account wide
-        local playerName = GetUnitName("player")
+    local function ProfileCopyCurrentProfile()
+        return LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
+    end
 
-        for accountName, data in pairs(LUIESV["Default"]) do
-            for profile, vars in pairs(data) do
-                if profile == "$AccountWide" then
-                    profile = "$AccountWide (" .. accountName .. ")" -- Add display name onto Account Wide for differentiation
-                end
-                if vars.version == LUIE.SVVer and ((isCharacterSpecific and profile ~= playerName) or not isCharacterSpecific) then
-                    -- Add list of other player characters (but not self) to settings to copy. We also add AccountWide here so you can copy from your base settings if desired.
-                    profileCharacters[#profileCharacters + 1] = profile -- Use the length operator (#) to append to the table, which is faster than table.insert()
+    local function ProfileCopyEnumGlobalNames()
+        local t = { LUIE.SVName }
+        for _, modKey in ipairs(LUIE.ModuleSavedVarNamespaceKeys) do
+            local gn = LUIE.ModuleSavedVarNames[modKey]
+            if gn then
+                t[#t + 1] = gn
+            end
+        end
+        return t
+    end
+
+    local function ProfileCopyValueInList(values, v)
+        if v == nil then
+            return false
+        end
+        for i = 1, #values do
+            if values[i] == v then
+                return true
+            end
+        end
+        return false
+    end
+
+    local function ProfileCopyUnionProfileKeys()
+        local seen = {}
+        for _, gn in ipairs(ProfileCopyEnumGlobalNames()) do
+            local g = _G[gn]
+            if type(g) == "table" then
+                for k, v in pairs(g) do
+                    if type(k) == "string" and type(v) == "table" then
+                        seen[k] = true
+                    end
                 end
             end
         end
-        return profileCharacters -- Return the table of profiles
+        local list = {}
+        for k in pairs(seen) do
+            list[#list + 1] = k
+        end
+        table_sort(list)
+        return list
+    end
+
+    local function ProfileCopyBuildServerChoices()
+        local profiles = ProfileCopyUnionProfileKeys()
+        local current = ProfileCopyCurrentProfile()
+        local labels, values = {}, {}
+        for i = 1, #profiles do
+            local p = profiles[i]
+            values[i] = p
+            if p == current then
+                labels[i] = zo_strformat("<<1>> (<<2>>)", p, GetString(LUIE_STRING_LAM_SVPROFILE_COPY_CURRENT_PROFILE))
+            else
+                labels[i] = p
+            end
+        end
+        return labels, values
+    end
+
+    local function ProfileCopyBuildAccountChoices()
+        local serverProfile = copyPick_server or ProfileCopyCurrentProfile()
+        local seen = {}
+        for _, gn in ipairs(ProfileCopyEnumGlobalNames()) do
+            local g = _G[gn]
+            if type(g) == "table" then
+                local branch = g[serverProfile]
+                if type(branch) == "table" then
+                    for acc, inner in pairs(branch) do
+                        if type(acc) == "string" and type(inner) == "table" then
+                            seen[acc] = true
+                        end
+                    end
+                end
+            end
+        end
+        local keys = {}
+        for acc in pairs(seen) do
+            keys[#keys + 1] = acc
+        end
+        table_sort(keys)
+        local labels = {}
+        for i = 1, #keys do
+            labels[i] = keys[i]
+        end
+        return labels, keys
+    end
+
+    local function ProfileCopyGetTargetTriple()
+        local tgtProfile = ProfileCopyCurrentProfile()
+        local tgtAcc = GetDisplayName()
+        local core = _G[LUIE.SVName]
+        if not (core and core[tgtProfile] and core[tgtProfile][tgtAcc] and core[tgtProfile][tgtAcc]["$AccountWide"]) then
+            return nil, nil, nil, false
+        end
+        local aw = core[tgtProfile][tgtAcc]["$AccountWide"]
+        local isChar = aw.CharacterSpecificSV
+        local tgtBucket = isChar and GetUnitName("player") or "$AccountWide"
+        return tgtProfile, tgtAcc, tgtBucket, isChar
+    end
+
+    local function ProfileCopyBuildBucketChoices()
+        local serverProfile = copyPick_server or ProfileCopyCurrentProfile()
+        local accountName = copyPick_account
+        local labels, values = {}, {}
+        if not accountName then
+            return labels, values
+        end
+        local tgtP, tgtA, _, isCharSpec = ProfileCopyGetTargetTriple()
+        local playerName = GetUnitName("player")
+        local seen = {}
+        for _, gn in ipairs(ProfileCopyEnumGlobalNames()) do
+            local g = _G[gn]
+            if type(g) == "table" then
+                local acctBranch = g[serverProfile] and g[serverProfile][accountName]
+                if type(acctBranch) == "table" then
+                    for bucketKey, vars in pairs(acctBranch) do
+                        if type(bucketKey) == "string" and type(vars) == "table" and vars.version == LUIE.SVVer then
+                            if not (isCharSpec and tgtP and serverProfile == tgtP and accountName == tgtA and bucketKey == playerName) then
+                                if not seen[bucketKey] then
+                                    seen[bucketKey] = true
+                                    values[#values + 1] = bucketKey
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        table_sort(values, function (a, b)
+            if a == "$AccountWide" then
+                return true
+            end
+            if b == "$AccountWide" then
+                return false
+            end
+            return a < b
+        end)
+        for i = 1, #values do
+            local k = values[i]
+            if k == "$AccountWide" then
+                labels[i] = zo_strformat("<<1>> (<<2>>)", GetString(LUIE_STRING_LAM_SVPROFILE_COPY_BUCKET_ACCOUNTWIDE), accountName)
+            else
+                labels[i] = k
+            end
+        end
+        return labels, values
+    end
+
+    local function ProfileCopyBuildCharacterRowChoices()
+        local serverProfile = copyPick_server or ProfileCopyCurrentProfile()
+        local accountName = copyPick_account
+        local labels, values = {}, {}
+        if not accountName then
+            return labels, values
+        end
+        local tgtP, tgtA, _, isCharSpec = ProfileCopyGetTargetTriple()
+        local playerName = GetUnitName("player")
+        local seen = {}
+        for _, gn in ipairs(ProfileCopyEnumGlobalNames()) do
+            local g = _G[gn]
+            if type(g) == "table" then
+                local acctBranch = g[serverProfile] and g[serverProfile][accountName]
+                if type(acctBranch) == "table" then
+                    for bucketKey, vars in pairs(acctBranch) do
+                        if bucketKey ~= "$AccountWide" and type(bucketKey) == "string" and type(vars) == "table" and vars.version == LUIE.SVVer then
+                            if not (isCharSpec and tgtP and serverProfile == tgtP and accountName == tgtA and bucketKey == playerName) then
+                                if not seen[bucketKey] then
+                                    seen[bucketKey] = true
+                                    values[#values + 1] = bucketKey
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        table_sort(values)
+        for i = 1, #values do
+            labels[i] = values[i]
+        end
+        return labels, values
+    end
+
+    local profileCopySplitSourceUI
+    do
+        local p = ProfileCopyCurrentProfile()
+        local core = _G[LUIE.SVName]
+        local aw = core and core[p] and core[p][GetDisplayName()] and core[p][GetDisplayName()]["$AccountWide"]
+        profileCopySplitSourceUI = aw and aw.CharacterSpecificSV
+    end
+
+    local function ProfileCopyGetEffectiveSourceBucket()
+        if not profileCopySplitSourceUI then
+            return copyPick_bucket
+        end
+        if (copyPick_sourceKind or "accountwide") == "character" then
+            return copyPick_characterName
+        end
+        return "$AccountWide"
+    end
+
+    local function ProfileCopyRefreshBucketDropdown()
+        copyPick_bucket = nil
+        local ctrl = wm:GetControlByName("LUIE_LAM_ProfileCopy_Bucket")
+        if not (ctrl and ctrl.UpdateChoices) then
+            return
+        end
+        local labels, values = ProfileCopyBuildBucketChoices()
+        ctrl.data.choices = labels
+        ctrl.data.choicesValues = values
+        ctrl:UpdateChoices(labels, values)
+        ctrl:UpdateValue()
+    end
+
+    local function ProfileCopyRefreshCharacterDropdownOnly()
+        local charCtrl = wm:GetControlByName("LUIE_LAM_ProfileCopy_SourceCharacter")
+        if not (charCtrl and charCtrl.UpdateChoices) then
+            return
+        end
+        local labels, values = ProfileCopyBuildCharacterRowChoices()
+        charCtrl.data.choices = labels
+        charCtrl.data.choicesValues = values
+        charCtrl:UpdateChoices(labels, values)
+        charCtrl:UpdateValue()
+    end
+
+    local function ProfileCopyRefreshSourceRowDropdowns()
+        if profileCopySplitSourceUI then
+            copyPick_characterName = nil
+            ProfileCopyRefreshCharacterDropdownOnly()
+            local kindCtrl = wm:GetControlByName("LUIE_LAM_ProfileCopy_SourceKind")
+            if kindCtrl and kindCtrl.UpdateValue then
+                kindCtrl:UpdateValue()
+            end
+        else
+            ProfileCopyRefreshBucketDropdown()
+        end
+    end
+
+    local function ProfileCopyRefreshAccountDropdown()
+        copyPick_account = nil
+        copyPick_bucket = nil
+        if profileCopySplitSourceUI then
+            copyPick_sourceKind = "accountwide"
+            copyPick_characterName = nil
+        end
+        local ctrl = wm:GetControlByName("LUIE_LAM_ProfileCopy_Account")
+        if not (ctrl and ctrl.UpdateChoices) then
+            return
+        end
+        local labels, values = ProfileCopyBuildAccountChoices()
+        ctrl.data.choices = labels
+        ctrl.data.choicesValues = values
+        ctrl:UpdateChoices(labels, values)
+        ctrl:UpdateValue()
+        ProfileCopyRefreshSourceRowDropdowns()
     end
 
     -- Copies data either to override character's data or creates a new table if no data for that character exists.
@@ -61,7 +312,7 @@ function LUIE.CreateSettings()
         else
             deleteProfile = GetUnitName("player")
         end
-        for accountName, data in pairs(LUIESV["Default"]) do
+        for accountName, data in pairs(_G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile]) do
             if data[deleteProfile] then
                 data[deleteProfile] = nil
                 break
@@ -69,40 +320,130 @@ function LUIE.CreateSettings()
         end
     end
 
-    -- Copy a character profile & replace another.
-    local function CopyCharacterProfile()
-        local displayName = GetDisplayName()
-        if not LUIESV["Default"][displayName] or not LUIESV["Default"][displayName]["$AccountWide"] then
+    local function ProfileCopyEnsureLeaf(g, profile, account, bucket)
+        if type(g) ~= "table" then
+            return nil
+        end
+        g[profile] = g[profile] or {}
+        g[profile][account] = g[profile][account] or {}
+        if g[profile][account][bucket] == nil then
+            g[profile][account][bucket] = { version = LUIE.SVVer }
+        end
+        return g[profile][account][bucket]
+    end
+
+    local function ProfileCopyIsSameAsTarget()
+        local srcBucket = ProfileCopyGetEffectiveSourceBucket()
+        local tgtP, tgtA, tgtB = ProfileCopyGetTargetTriple()
+        if not (tgtP and tgtA and tgtB) then
+            return false
+        end
+        if not (copyPick_server and copyPick_account and srcBucket) then
+            return false
+        end
+        return copyPick_server == tgtP and copyPick_account == tgtA and srcBucket == tgtB
+    end
+
+    local function ProfileCopyIsCopyDisabled()
+        local tgtP, tgtA, tgtB = ProfileCopyGetTargetTriple()
+        if not (tgtP and tgtA and tgtB) then
+            return true
+        end
+        local srcBucket = ProfileCopyGetEffectiveSourceBucket()
+        if not (copyPick_server and copyPick_account and srcBucket) then
+            return true
+        end
+        if profileCopySplitSourceUI and (copyPick_sourceKind or "accountwide") == "character" then
+            local _, charVals = ProfileCopyBuildCharacterRowChoices()
+            if not copyPick_characterName or not ProfileCopyValueInList(charVals, copyPick_characterName) then
+                return true
+            end
+        end
+        if ProfileCopyIsSameAsTarget() then
+            return true
+        end
+        local core = _G[LUIE.SVName]
+        local src = core and core[copyPick_server] and core[copyPick_server][copyPick_account] and core[copyPick_server][copyPick_account][srcBucket]
+        if type(src) ~= "table" then
+            return true
+        end
+        return false
+    end
+
+    local function ProfileCopyExecute()
+        local tgtP, tgtA, tgtB = ProfileCopyGetTargetTriple()
+        if not (tgtP and tgtA and tgtB) then
+            CHAT_ROUTER:AddSystemMessage(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR))
             return
         end
-        local isCharacterSpecific = LUIESV["Default"][displayName]["$AccountWide"].CharacterSpecificSV -- Pull info from SV for account wide
-        local copyTarget = isCharacterSpecific and GetUnitName("player") or "$AccountWide"
-        local sourceCharacter, targetCharacter
-        local accountWideString = "$AccountWide ("
-        for accountName, data in pairs(LUIESV["Default"]) do
-            local accountWideName = accountWideString .. accountName .. ")"
-            if profileQueuedCopy == accountWideName then
-                profileQueuedCopy = "$AccountWide"
-            end -- When the account name matches the one we're iterating through, copy that value
-            for profile, vars in pairs(data) do
-                if profile == profileQueuedCopy then
-                    sourceCharacter = vars
-                end
-                if profile == copyTarget then
-                    targetCharacter = vars
+        local srcBucket = ProfileCopyGetEffectiveSourceBucket()
+        if not (copyPick_server and copyPick_account and srcBucket) then
+            CHAT_ROUTER:AddSystemMessage(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR))
+            return
+        end
+        if ProfileCopyIsSameAsTarget() then
+            return
+        end
+        local anyCopied = false
+        for _, gn in ipairs(ProfileCopyEnumGlobalNames()) do
+            local g = _G[gn]
+            if type(g) == "table" then
+                local srcLeaf = g[copyPick_server] and g[copyPick_server][copyPick_account] and g[copyPick_server][copyPick_account][srcBucket]
+                if type(srcLeaf) == "table" then
+                    local destLeaf = ProfileCopyEnsureLeaf(g, tgtP, tgtA, tgtB)
+                    if type(destLeaf) == "table" then
+                        CopyTable(srcLeaf, destLeaf)
+                        anyCopied = true
+                    end
                 end
             end
         end
-        if not sourceCharacter or not targetCharacter then
+        if not anyCopied then
             CHAT_ROUTER:AddSystemMessage(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR))
             return
-        else
-            CopyTable(sourceCharacter, targetCharacter)
-            ReloadUI("ingame")
+        end
+        ReloadUI("ingame")
+    end
+
+    copyPick_server = ProfileCopyCurrentProfile()
+    copyPick_account = nil
+    copyPick_bucket = nil
+    copyPick_sourceKind = nil
+    copyPick_characterName = nil
+    do
+        local _, accVals = ProfileCopyBuildAccountChoices()
+        if #accVals > 0 then
+            local preferred = GetDisplayName()
+            copyPick_account = ProfileCopyValueInList(accVals, preferred) and preferred or accVals[1]
         end
     end
 
-    GenerateCharacterProfiles()
+    local initialServerLabels, initialServerValues = ProfileCopyBuildServerChoices()
+    local initialAccountLabels, initialAccountValues = ProfileCopyBuildAccountChoices()
+    local initialBucketLabels, initialBucketValues
+    local initialKindLabels, initialKindValues
+    local initialCharacterLabels, initialCharacterValues
+    if profileCopySplitSourceUI then
+        copyPick_sourceKind = "accountwide"
+        initialKindLabels =
+        {
+            GetString(LUIE_STRING_LAM_SVPROFILE_COPY_KIND_ACCOUNTWIDE),
+            GetString(LUIE_STRING_LAM_SVPROFILE_COPY_KIND_CHARACTER),
+        }
+        initialKindValues = { "accountwide", "character" }
+        initialCharacterLabels, initialCharacterValues = ProfileCopyBuildCharacterRowChoices()
+    else
+        initialBucketLabels, initialBucketValues = ProfileCopyBuildBucketChoices()
+        do
+            if #initialBucketValues > 0 then
+                if ProfileCopyValueInList(initialBucketValues, "$AccountWide") then
+                    copyPick_bucket = "$AccountWide"
+                else
+                    copyPick_bucket = initialBucketValues[1]
+                end
+            end
+        end
+    end
 
     local panelData =
     {
@@ -161,9 +502,9 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         "Enable Grid Snap",
         "Enable snapping UI elements to a grid when moving them",
-        function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
+        function () return _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
         function (value)
-            local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+            local accountWideSettings = _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"]
             accountWideSettings.snapToGrid_default = value
             local gridSize = accountWideSettings.snapToGridSize_default or 15
             GridOverlay.Refresh("default", g_ElementMovingEnabled and value, gridSize)
@@ -180,14 +521,14 @@ function LUIE.CreateSettings()
         5,
         100,
         5,
-        function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGridSize_default or 15 end,
+        function () return _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].snapToGridSize_default or 15 end,
         function (value)
-            local accountWideSettings = LUIESV["Default"][GetDisplayName()]["$AccountWide"]
+            local accountWideSettings = _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"]
             accountWideSettings.snapToGridSize_default = value
             GridOverlay.Refresh("default", g_ElementMovingEnabled and accountWideSettings.snapToGrid_default, value)
         end,
         "half",
-        function () return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
+        function () return not _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].snapToGrid_default end,
         15
     )
 
@@ -213,9 +554,9 @@ function LUIE.CreateSettings()
     profileControls[#profileControls + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_SVPROFILE_SETTINGSTOGGLE),
         GetString(LUIE_STRING_LAM_SVPROFILE_SETTINGSTOGGLE_TP),
-        function () return LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV end,
+        function () return _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].CharacterSpecificSV end,
         function (value)
-            LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV = value
+            _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].CharacterSpecificSV = value
             ReloadUI("ingame")
         end,
         "full",
@@ -224,29 +565,189 @@ function LUIE.CreateSettings()
         GetString(LUIE_STRING_LAM_RELOADUI_BUTTON)
     )
 
-    -- Copy Profile Dropdown
-    local profileDropdown = SettingsAPI.CreateDropdownOption(
-        GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPY),
-        GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPY_TP),
-        profileCharacters,
-        function () return profileCharacters end,
-        function (value) profileQueuedCopy = value end,
+    -- Profile copy (source path + target / cross-megaserver notes)
+    profileControls[#profileControls + 1] = SettingsAPI.CreateDescriptionOption(
+        zo_strformat("<<1>>\n\n<<2>>\n\n<<3>>", GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPY), GetString(LUIE_STRING_LAM_SVPROFILE_COPY_TARGET_DESC), GetString(LUIE_STRING_LAM_SVPROFILE_COPY_CROSS_TP))
+    )
+
+    -- Source megaserver (ZO_SavedVars profile)
+    local serverDropdown = SettingsAPI.CreateDropdownOption(
+        GetString(LUIE_STRING_LAM_SVPROFILE_COPY_SERVER),
+        GetString(LUIE_STRING_LAM_SVPROFILE_COPY_SERVER_TP),
+        initialServerLabels,
+        function ()
+            local _, values = ProfileCopyBuildServerChoices()
+            if #values == 0 then
+                copyPick_server = ProfileCopyCurrentProfile()
+                return copyPick_server
+            end
+            if not copyPick_server or not ProfileCopyValueInList(values, copyPick_server) then
+                copyPick_server = values[1]
+            end
+            return copyPick_server
+        end,
+        function (value)
+            copyPick_server = value
+            copyPick_account = nil
+            copyPick_bucket = nil
+            zo_callLater(ProfileCopyRefreshAccountDropdown, 0)
+        end,
         "full",
         nil,
         nil,
         nil,
-        "name-up"
+        "name-up",
+        nil,
+        initialServerValues,
+        7
     )
-    profileDropdown.scrollable = true and 7
-    profileControls[#profileControls + 1] = profileDropdown
+    serverDropdown.reference = "LUIE_LAM_ProfileCopy_Server"
+    profileControls[#profileControls + 1] = serverDropdown
+
+    -- Source @account
+    local accountDropdown = SettingsAPI.CreateDropdownOption(
+        GetString(LUIE_STRING_LAM_SVPROFILE_COPY_ACCOUNT),
+        GetString(LUIE_STRING_LAM_SVPROFILE_COPY_ACCOUNT_TP),
+        initialAccountLabels,
+        function ()
+            local _, values = ProfileCopyBuildAccountChoices()
+            if #values == 0 then
+                copyPick_account = nil
+                return nil
+            end
+            if not copyPick_account or not ProfileCopyValueInList(values, copyPick_account) then
+                local preferred = GetDisplayName()
+                if ProfileCopyValueInList(values, preferred) then
+                    copyPick_account = preferred
+                else
+                    copyPick_account = values[1]
+                end
+            end
+            return copyPick_account
+        end,
+        function (value)
+            copyPick_account = value
+            copyPick_bucket = nil
+            zo_callLater(ProfileCopyRefreshSourceRowDropdowns, 0)
+        end,
+        "full",
+        nil,
+        nil,
+        nil,
+        "name-up",
+        nil,
+        initialAccountValues,
+        7
+    )
+    accountDropdown.reference = "LUIE_LAM_ProfileCopy_Account"
+    profileControls[#profileControls + 1] = accountDropdown
+
+    if profileCopySplitSourceUI then
+        local kindDropdown = SettingsAPI.CreateDropdownOption(
+            GetString(LUIE_STRING_LAM_SVPROFILE_COPY_SOURCE_KIND),
+            GetString(LUIE_STRING_LAM_SVPROFILE_COPY_SOURCE_KIND_TP),
+            initialKindLabels,
+            function ()
+                if not copyPick_sourceKind or not ProfileCopyValueInList(initialKindValues, copyPick_sourceKind) then
+                    copyPick_sourceKind = "accountwide"
+                end
+                return copyPick_sourceKind
+            end,
+            function (value)
+                copyPick_sourceKind = value
+                copyPick_characterName = nil
+                zo_callLater(ProfileCopyRefreshCharacterDropdownOnly, 0)
+            end,
+            "full",
+            nil,
+            nil,
+            nil,
+            nil,
+            nil,
+            initialKindValues,
+            7
+        )
+        kindDropdown.reference = "LUIE_LAM_ProfileCopy_SourceKind"
+        profileControls[#profileControls + 1] = kindDropdown
+
+        local charDropdown = SettingsAPI.CreateDropdownOption(
+            GetString(LUIE_STRING_LAM_SVPROFILE_COPY_SOURCE_CHARACTER),
+            GetString(LUIE_STRING_LAM_SVPROFILE_COPY_SOURCE_CHARACTER_TP),
+            initialCharacterLabels,
+            function ()
+                local _, values = ProfileCopyBuildCharacterRowChoices()
+                if #values == 0 then
+                    copyPick_characterName = nil
+                    return nil
+                end
+                if (copyPick_sourceKind or "accountwide") ~= "character" then
+                    return values[1]
+                end
+                if not copyPick_characterName or not ProfileCopyValueInList(values, copyPick_characterName) then
+                    copyPick_characterName = values[1]
+                end
+                return copyPick_characterName
+            end,
+            function (value)
+                copyPick_characterName = value
+            end,
+            "full",
+            function ()
+                return (copyPick_sourceKind or "accountwide") ~= "character"
+            end,
+            nil,
+            nil,
+            nil,
+            nil,
+            initialCharacterValues,
+            7
+        )
+        charDropdown.reference = "LUIE_LAM_ProfileCopy_SourceCharacter"
+        profileControls[#profileControls + 1] = charDropdown
+    else
+        -- Source row ($AccountWide or character) — single list when not using character-specific saved vars
+        local bucketDropdown = SettingsAPI.CreateDropdownOption(
+            GetString(LUIE_STRING_LAM_SVPROFILE_COPY_BUCKET),
+            GetString(LUIE_STRING_LAM_SVPROFILE_COPY_BUCKET_TP),
+            initialBucketLabels,
+            function ()
+                local _, values = ProfileCopyBuildBucketChoices()
+                if #values == 0 then
+                    copyPick_bucket = nil
+                    return nil
+                end
+                if not copyPick_bucket or not ProfileCopyValueInList(values, copyPick_bucket) then
+                    if ProfileCopyValueInList(values, "$AccountWide") then
+                        copyPick_bucket = "$AccountWide"
+                    else
+                        copyPick_bucket = values[1]
+                    end
+                end
+                return copyPick_bucket
+            end,
+            function (value)
+                copyPick_bucket = value
+            end,
+            "full",
+            nil,
+            nil,
+            nil,
+            nil,
+            nil,
+            initialBucketValues,
+            7
+        )
+        bucketDropdown.reference = "LUIE_LAM_ProfileCopy_Bucket"
+        profileControls[#profileControls + 1] = bucketDropdown
+    end
 
     -- Copy Profile Button
     profileControls[#profileControls + 1] = SettingsAPI.CreateButtonOption(
         GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPYBUTTON),
         GetString(LUIE_STRING_LAM_SVPROFILE_PROFILECOPYBUTTON_TP),
-        CopyCharacterProfile,
+        ProfileCopyExecute,
         "full",
-        nil,
+        ProfileCopyIsCopyDisabled,
         GetString(LUIE_STRING_LAM_RELOADUI_BUTTON)
     )
 
@@ -259,7 +760,7 @@ function LUIE.CreateSettings()
             ReloadUI("ingame")
         end,
         "half",
-        function () return not LUIESV["Default"][GetDisplayName()]["$AccountWide"].CharacterSpecificSV end,
+        function () return not _G[LUIE.SVName][LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile][GetDisplayName()]["$AccountWide"].CharacterSpecificSV end,
         GetString(LUIE_STRING_LAM_RELOADUI_BUTTON)
     )
 
