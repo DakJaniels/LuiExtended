@@ -27,6 +27,10 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t After reload, a one-shot chat line confirms debug mode or that your addon list was restored.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Info Panel: Optional memory display on the top row (after FPS). Console shows add-on memory pool used/capacity (MB); PC shows approximate Lua heap size via collectgarbage (no forced GC on the HUD tick). Toggle under Info Panel elements; console pool fill uses the same read-only color tiers as FPS/latency when enabled.",
     "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Custom Tooltips: Updated the RU lang strings for Battle Spirit, thank you Impda.",
+    "",
     -- Fixed
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: Fixed custom frames rendering below in-world 3D overlays (for example survey reset marker arrows and similar icons).",
