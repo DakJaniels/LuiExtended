@@ -55,6 +55,7 @@ local combatFadeUpdateName = moduleName .. "CombatFade"
 
 local COMBAT_FADE_DURATION = 0.25 -- seconds
 local panelHiddenByCombat = false -- true after we hid the panel for combat; so we only fade-in when showing after combat
+local MAX_FRAMERATE = 999
 
 -- UI elements
 local g_infoPanelFont = nil -- This will be initialized when settings are loaded
@@ -254,7 +255,11 @@ end
 
 function FpsMeter:Update(nowMs)
     if not self:IsEnabled() or not uiFps.label then return end
-    local fps = GetFramerate()
+    local framerate = GetFramerate()
+    if framerate > MAX_FRAMERATE then
+        framerate = MAX_FRAMERATE
+    end
+    local fps = zo_round(framerate)
     local color = colors.WHITE
     if not self.infoPanel.SV.DisableInfoColours then
         color = uiFps.color[#uiFps.color].color
