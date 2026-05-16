@@ -845,6 +845,9 @@ end
 -- -----------------------------------------------------------------------------
 
 do
+    -- LuiData is a required addon dependency (see LuiExtended.addon DependsOn).
+    local EffectOverride = LuiData.Data.Effects.EffectOverride
+
     --- @param armorType ArmorType
     --- @return integer counter
     local function GetEquippedArmorPieces(armorType)
@@ -970,24 +973,7 @@ do
                 end
             end
 
-            local function tryDesc(rank)
-                if not rank or rank < 1 then
-                    return nil
-                end
-                local d = GetAbilityDescription(256674, rank, unitTag)
-                if d and d ~= "" and not string.find(d, "0% per stack", 1, true) then
-                    return d
-                end
-                return nil
-            end
-
-            local fromApi = tryDesc(stacks > 0 and stacks or nil) or tryDesc(1)
-            if fromApi then
-                return fromApi
-            end
-
-            local EffectsData = LuiData and LuiData.Data and LuiData.Data.Effects
-            local ov = EffectsData and EffectsData.EffectOverride and EffectsData.EffectOverride[256674]
+            local ov = EffectOverride[256674]
             local perStack = ov and ov.tooltipPerStackPercent
             if not perStack then
                 return nil
@@ -1011,8 +997,7 @@ do
         if handler then
             return handler(unitTag)
         end
-        local EffectsData = LuiData and LuiData.Data and LuiData.Data.Effects
-        local ov = EffectsData and EffectsData.EffectOverride and EffectsData.EffectOverride[abilityId]
+        local ov = EffectOverride[abilityId]
         if ov and ov.dynamicTooltip then
             local morphId = ov.tooltipMorphId or abilityId
             return MorphAbilitySheetDescription(morphId)
