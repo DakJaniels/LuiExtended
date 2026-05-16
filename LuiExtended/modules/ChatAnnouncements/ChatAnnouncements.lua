@@ -4367,8 +4367,7 @@ end
 local delayedItemPool = {}    -- Store items we are counting up when the player loots multiple bodies at once to print combined counts for any duplicate items
 local delayedItemPoolOut = {} -- Stacks for outbound delayed item pool
 
--- ZOS enchanting station lists runes potency -> essence -> aspect (see Enchanting_Keyboard.lua creationSlotAnimation).
--- ItemCounterDelay also batches loot and non-enchant crafting mats into this pool; those rows have no entry here.
+-- ZOS enchanting station: potency -> essence -> aspect (Enchanting_Keyboard.lua creationSlotAnimation).
 local DELAYED_POOL_ENCHANTING_RUNE_ORDER =
 {
     [ITEMTYPE_ENCHANTING_RUNE_POTENCY] = 1,
@@ -4376,6 +4375,72 @@ local DELAYED_POOL_ENCHANTING_RUNE_ORDER =
     [ITEMTYPE_ENCHANTING_RUNE_ASPECT] = 3,
 }
 
+-- ZOS smithing/jewelry creation: material -> style -> trait (SmithingCreation_Keyboard.lua panel order).
+local DELAYED_POOL_SMITHING_COMPONENT_ORDER =
+{
+    [ITEMTYPE_BLACKSMITHING_MATERIAL] = 1,
+    [ITEMTYPE_CLOTHIER_MATERIAL] = 1,
+    [ITEMTYPE_WOODWORKING_MATERIAL] = 1,
+    [ITEMTYPE_JEWELRYCRAFTING_MATERIAL] = 1,
+    [ITEMTYPE_BLACKSMITHING_RAW_MATERIAL] = 1,
+    [ITEMTYPE_CLOTHIER_RAW_MATERIAL] = 1,
+    [ITEMTYPE_WOODWORKING_RAW_MATERIAL] = 1,
+    [ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL] = 1,
+    [ITEMTYPE_RAW_MATERIAL] = 1,
+    [ITEMTYPE_STYLE_MATERIAL] = 2,
+    [ITEMTYPE_ARMOR_TRAIT] = 3,
+    [ITEMTYPE_WEAPON_TRAIT] = 3,
+    [ITEMTYPE_JEWELRY_TRAIT] = 3,
+    [ITEMTYPE_JEWELRY_RAW_TRAIT] = 3,
+}
+
+-- ZOS alchemy station: solvent then reagents (Alchemy_Gamepad.lua slotAnimation: solventSlot, reagentSlots[1..n]).
+local DELAYED_POOL_ALCHEMY_COMPONENT_ORDER =
+{
+    [ITEMTYPE_POTION_BASE] = 1,
+    [ITEMTYPE_POISON_BASE] = 1,
+    [ITEMTYPE_REAGENT] = 2,
+}
+
+-- Provisioner UI lists recipe ingredients by ingredientIndex (Provisioner.lua / GamepadProvisioner.lua).
+-- Primary food/drink bases are shown before additives and rare seasonings (ItemFilterUtils.lua categories).
+local function GetProvisionerIngredientSortOrder(itemLink)
+    if not itemLink or itemLink == "" then
+        return nil
+    end
+    local itemType, specializedItemType = GetItemLinkItemType(itemLink)
+    if itemType ~= ITEMTYPE_INGREDIENT then
+        return nil
+    end
+    if specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_MEAT
+        or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_VEGETABLE
+        or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_FRUIT
+        or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_ALCOHOL
+        or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_TEA
+        or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_TONIC then
+        return 1
+    end
+    if specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_FOOD_ADDITIVE
+        or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE then
+        return 2
+    end
+    if specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_RARE then
+        return 3
+    end
+    return nil
+end
+
+local function GetDelayedPoolDisplaySortOrder(itemType, itemLink)
+    local order = DELAYED_POOL_ENCHANTING_RUNE_ORDER[itemType]
+        or DELAYED_POOL_SMITHING_COMPONENT_ORDER[itemType]
+        or DELAYED_POOL_ALCHEMY_COMPONENT_ORDER[itemType]
+    if order then
+        return order
+    end
+    return GetProvisionerIngredientSortOrder(itemLink)
+end
+
+-- ItemCounterDelay also batches loot and other items; rows with no entry above sort by itemId only.
 local function FlushDelayedItemPoolInDisplayOrder(pool)
     local ids = {}
     for itemId in pairs(pool) do
@@ -4383,8 +4448,8 @@ local function FlushDelayedItemPoolInDisplayOrder(pool)
     end
     table.sort(ids, function (a, b)
         local da, db = pool[a], pool[b]
-        local pa = DELAYED_POOL_ENCHANTING_RUNE_ORDER[da.itemType]
-        local pb = DELAYED_POOL_ENCHANTING_RUNE_ORDER[db.itemType]
+        local pa = GetDelayedPoolDisplaySortOrder(da.itemType, da.itemLink)
+        local pb = GetDelayedPoolDisplaySortOrder(db.itemType, db.itemLink)
         if pa ~= nil and pb ~= nil then
             if pa ~= pb then
                 return pa < pb
