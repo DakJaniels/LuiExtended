@@ -7202,12 +7202,8 @@ function ChatAnnouncements.HookFunction()
         if isLocalPlayer then
             zo_callLater(ChatAnnouncements.CheckLFGStatusJoin, 100)
         else
-            -- Get character & display names
-            local joinedMemberName = ZO_GetPrimaryPlayerName(displayName, characterName)
-            local joinedMemberAccountName = ZO_GetSecondaryPlayerName(displayName, characterName)
-            -- Resolve name links
-            local finalName = ChatAnnouncements.ResolveNameLink(joinedMemberName, joinedMemberAccountName)
-            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(joinedMemberName, joinedMemberAccountName)
+            local finalName = ChatAnnouncements.ResolveNameLink(characterName, displayName)
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
             -- Set final messages to send
             local SendMessage = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalName))
             local SendAlert = (zo_strformat(GetString(LUIE_STRING_CA_GROUP_MEMBER_JOIN), finalAlertName))
