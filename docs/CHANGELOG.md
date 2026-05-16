@@ -1,8 +1,740 @@
-# Version 6.8.8
+# LuiExtended Changelog
 
-General
+## Version 7.2.1.7
 
-- Due to frequency of updates, I have disabled showing the changelog when there is a version increase.\nIf you still would like to see a popup there is a setting under Miscellaneous Settings to enable that, requires reload.
+### Major change
+
+- SavedVariables layout: module settings now live in separate account-wide globals (LUIE_UnitFrames_SV, LUIE_CombatText_SV, LUIE_ChatAnnouncements_SV, LUIE_SpellCastBuffs_SV, LUIE_ActionBar_SV, LUIE_InfoPanel_SV, LUIE_SlashCommands_SV, LUIE_CombatInfo_SV) alongside LUIESV (see the addon manifest). Megaserver-specific rows use the ZO_SavedVars profile from your world name; legacy data under profile Default is migrated on load (expect one reload after updating).
+- PC (LAM) and console (LibHarvens): Character Profile "Copy Profile" uses three controls — source megaserver profile, @DisplayName, then $AccountWide or a character row matching LUIE.SVVer. The copy writes that path into this session's target row for LUIESV and every module global above.
+
+### New
+
+- Slash command /luie debug on — saves your current AddOns enable state, disables everything outside the LUIE debug allowlist (LuiExtended, LuiData, LuiMedia, LibMediaProvider; PC: LibAddonMenu-2.0; console: LibHarvensAddonSettings and LibConsoleDialogs), then reloads the UI.
+- /luie debug off — restores the saved state and reloads; /luie debug status (or /luie debug alone) reports whether debug environment mode is active.
+- After reload, a one-shot chat line confirms debug mode or that your addon list was restored.
+- Info Panel: Optional memory display on the top row (after FPS). Console shows add-on memory pool used/capacity (MB); PC shows approximate Lua heap size (no forced GC on the HUD tick). Toggle under Info Panel elements; on console, pool fill uses the same read-only color tiers as FPS/latency when enabled.
+
+### Changes
+
+- Custom Tooltips: Updated the RU lang strings for Battle Spirit — thank you Impda.
+- PC settings (LAM): FPS Limit slider maximum raised to 999 (vanilla interface settings only go up to 100).
+
+### Fixed
+
+- Info Panel: FPS readout is rounded and capped at 999, matching the built-in performance meter (fixes showing one FPS lower than the game meter, for example 164 vs 165).
+- UnitFrames: Fixed custom frames rendering below in-world 3D overlays (for example survey reset marker arrows and similar icons).
+- UnitFrames: Player stamina bar anchor now matches Health-to-Magicka layering (correct bar inheritance).
+- UnitFrames: Custom frames use draw tier MEDIUM instead of LOW (player, target, group, raid, pet, companion, boss, AvA target).
+- UnitFrames: Out-of-combat alpha refresh no longer skips the first apply when combat state was still unset.
+- UnitFrames: LAM — in-combat/OOC alpha and hide-buff-OOC changes from the menu reapply immediately; boss/companion/pet opacity sliders use the same immediate path.
+- UnitFrames: LAM — player/target OOC and in-combat transparency sliders no longer unhide other custom frame windows as a side effect.
+- UnitFrames: LAM — layout preview is split per frame (player, reticle target, AvA player target) so bar and chrome tweaks only affect the frame you are editing.
+- UnitFrames: LAM — player name vs target name display no longer pops the wrong custom frame window.
+- UnitFrames: Custom reticle target — AvA rank icon hidden when rank is zero; rank chrome can refresh without full static control updates (avoids buff/debuff anchor clashes).
+- ChatAnnouncements: Opening a container (including from inventory) no longer prints looted gold before the "You empty [container]" line; gold flushes after that line.
+- ChatAnnouncements: Mail Take All — correct sender per mail, proper queueing, dedicated delayed loot lines, and flush order so gold and attachments match the mail you took.
+- ChatAnnouncements: Batched crafting "You use" lines list consumed materials in station order (smithing, provisioning, alchemy) instead of sorting by item id.
+- ChatAnnouncements: Rare group-join lines with raw gamepad name-icon markup or broken links when gamepad UI was active — join messages now build name links from raw event names.
+- Combat Text: Ability costs can show as incoming resource drain even when the game never sends a native power-drain combat result (matched via slot use + power update, with dedupe so you do not get two lines).
+- Combat Text: Inferred drain no longer blames unrelated pool ticks (for example sprint stamina) on the wrong bar ability.
+- Combat Text: Group death alerts and alliance-point SCT use the correct event payload again.
+- Combat Text: Champion points — correct event wiring to the point panel, player filter, and cap detection via CanUnitGainChampionPoints.
+- Combat Text: Resource energize/drain respects mechanic bitflags; self-target costs follow outgoing toggles with sensible merge for one-sided incoming settings.
+- Combat Text: Event viewer — ultimate energize formatting, drain colors, and abbreviated drain amounts no longer double the minus sign on negative hit values.
+
+## Version 7.2.1.6
+
+### Changes
+
+- SpellCastBuffs: Many buff tooltips now use the game's current skill description instead of outdated fixed text. Custom text still applies where we intentionally override (for example Brace, Sneak, champion skills, and armor passives).
+- SpellCastBuffs: With Custom Tooltips turned off, morph-related buff tooltips still apply correctly instead of being wiped by the default path.
+- InfoPanel: Internal cleanup only — on-screen behavior should match what you're used to.
+- Tooltips: Minor behind-the-scenes tidy-up for damage-type wording on abilities.
+- Added support for Tonic of Portent Favor (shows like other XP-style buffs with correct icon and tooltip).
+
+### Fixed
+
+- ChatAnnouncements: When several enchanting runes are announced at once, they list in the same order as at an enchanting station (potency, then essence, then aspect).
+- ActionBar highlights: Templar Cleansing Ritual morphs (base, Ritual of Retribution, Extended Ritual) keep reliable duration tracking on the bar.
+- Igneous Weapons: removed an extra Major Sorcery bundle buff so you don't see two overlapping Sorcery icons from that skill line.
+- Molten Armaments: bundle tooltip matches the morph description; Sneak stealth buff uses up-to-date sneak text and avoids duplicate sneak rows when stealth is tracked.
+- Mirage: Extra Buffs no longer shows a duplicate fake combat buff next to the real morph aura.
+- Siphoning Attacks (bundle and morph); Feral, Eternal, and Wild Guardian; Inferno / Incinerate / Cauterize aura buffs — tooltips aligned with the skills window.
+- InfoPanel: Backpack space (used / total) updates reliably after destroying items, after large inventory syncs, and when materials move into the craft bag.
+- Combat Text: Test Font and Test Animation in settings now dispatch preview events on the combat event listener instead of the global callback manager, so preview text shows again (PC LAM; console animation test).
+
+## Version 7.2.1.5
+
+### Fixed
+
+- revert test code. thank you all who participated.
+
+## Version 7.2.1.4
+
+### Fixed
+
+- Gamepass api change
+
+## Version 7.2.1.3
+
+### Fixed
+
+- ActionBar: when Fancy Action Bar (FAB/FAB+) is loaded, companion quickslot re-anchoring is skipped so FAB's post-bar-swap layout is not overwritten (fixes quickslot jumping when using both addons).
+
+## Version 7.2.1.2
+
+### Fixed
+
+- address nil value error in UnitFrame
+
+## Version 7.2.1.1
+
+### Fixed
+
+- Unlock (PC): Night Market favor counter — frame mover matches the real counter again instead of an oversized box.
+- Unlock (PC): turning on UI unlock no longer shows the favor mover across the whole screen the first time (before you move it or reload).
+
+## Version 7.2.1.0
+
+### New
+
+- ActionBar: companion ultimate tracking — optional value and percent labels on the companion ultimate slot (font, colors, vertical offset, hide when full); quickslot/keybind layout follows ZOS companion anchor chain when the companion button is shown.
+- CombatInfo (console): reset-to-defaults restores the module's saved settings from defaults and refreshes Ability Alerts and Crowd Control Tracker UI.
+- UnitFrames (debug): new /luiufall — toggles every custom-frame preview at once, temporarily enables frame-move mode for layout, and restores the previous unlock state when turned off.
+
+### Changes
+
+- Unlock: ZO_AdvZoneHUD_TopLevel (Night Market favor counter) mover uses ZO_HUDTelvarMeter width/height when present so the frame tracks the Telvar/stone meter layout.
+- UnitFrames: custom frame color handling updated to respect saved alpha values.
+- UnitFrames: CrutchAlerts Boss Health Bar integration — uses the current API (including per-boss boss1/boss2 threshold tables when the encounter provides them); stack-level percent labels above the boss block and rotated mechanic names below; shared thresholds draw a single line through all visible boss bars; listens for BossHealthBar.RegisterThresholdsChangeListener so programmatic overrides refresh markers; ACTIVE / IMMINENT / PASSED tinting matches Crutch bar colors and updates as boss HP changes (rounding follows Crutch useFloorRounding when Crutch is loaded).
+- Settings (PC & console): boss threshold marker anchor dropdowns removed (obsolete with the stack layout); X/Y controls are a horizontal nudge for both label rows and shared vertical padding from the bar block.
+- DependsOn: LuiData minimum version raised to match bundled data (see manifest).
+- LuiData: Battle Spirit custom tooltip strings updated for U49 (33% healing reduction when 8 or more HoTs are active; Cyrodiil includes the ability-range line, Imperial City does not). German and French strings pulled from live client text; Russian Battle Spirit lines remain English until a verified localization export is available.
+- Internal: several modules now use ZO math globals (zo_floor, zo_max, zo_min, etc.) instead of math.* for consistency with ESO UI code.
+- UnitFrames (debug): slash-command previews for individual frames — /luiufplayer, /luiuftar, /luiufsm, /luiufraid, /luiufpet, /luiufboss, /luiufcomp, /luiufava show enabled custom frames with live player power and labels.
+- Settings (PC & console): custom frame unlock checkbox and grid-snap overlay refresh use UnitFrames.CustomFramesMovingState (removed duplicate local moving flag).
+
+### Fixed
+
+- SpellCastBuffs: artificial effect handling aligned with the live id table (0 ESO Plus through 8 Solo Queue AP bonus). Imperial City Battle Spirit (id 3) is shown with the IC tooltip instead of being treated as Battleground Deserter; LFG (id 2) uses the LFG tooltip; deserter cooldown logic applies to id 4 only; Underdog / Solo Queue entries (5–8) keep API timing instead of inheriting the old id-3 behavior.
+- LuiData: Looking For Group artificial-effect display name now reads GetArtificialEffectInfo(2) (was incorrectly using index 1).
+- Stats screen (keyboard & gamepad): optional artificial-effect Ability ID debug lines updated to the same id map as SpellCastBuffs.
+- UnitFrames: boss threshold markers and mechanic labels align to the health bar (labels were anchored from the bar center horizontally; lines used the left edge).
+- UnitFrames: boss threshold markers clear when no boss units exist (wipe / despawn) instead of lingering on screen.
+- UnitFrames: custom group/raid frame repositioning — member controls have mouse disabled while moving so the top-level window reliably receives drags.
+
+## Version 7.2.0.9
+
+### New
+
+- Unlock: Dynamic Events Tracker (Night Market) mover.
+
+## Version 7.2.0.8
+
+### Fixed
+
+- General: Swapped to using zo_callLater. it might make the code happy, who knows...
+
+## Version 7.2.0.7
+
+### Fixed
+
+- General: Fix a API change from update 50 that made it to live.
+
+## Version 7.2.0.6
+
+### Fixed
+
+- ChatAnnouncements: incorrect items were showing as being confiscated.
+
+## Version 7.2.0.5
+
+### Changes
+
+- Unlock: Added base UI unlock for battering ram status indicator.
+
+## Version 7.2.0.4
+
+### Changes
+
+- SlashCommands: `/cake` and `/jubilee` should now work without needing yearly updates...
+
+### Fixed
+
+- Error when clicking link for timed activities due to 11.3.5 code change in the `ZO_TimedActivities_Manager` Class.
+- Action bar: Flame Lash / Power Lash proc icon flicker (GitHub #379) — `SetupActionSlot` no longer applies `BarIdOverride` for proc/base pairs flagged in `IsAbilityProc` / `BaseForAbilityProc` (global `actionbutton` hook; disabling the ActionBar module alone did not avoid it).
+- Action bar: Power Lash stack buff (abilityId 34117, U41+ 5x / 20s) — bar highlight tracks combat/buff data via `combatTrack`, toggled labels show stacks and timer; stacks decrement on Power Lash cast (`OnAbilityUsed`), timer and overlay clear when stacks reach zero; sync from `EVENT_EFFECT_CHANGED` / combat when ZOS reports zero stacks.
+
+## Version 7.2.0.3
+
+### Fixed
+
+- Error on player interaction.
+
+### New
+
+- SpellCastBuffs: setting to move the player long buffs container.
+
+## Version 7.2.0.2
+
+### Fixed
+
+- Info Panel / font system: fixed crash "Checking type on argument fontStyle failed in GetFontStyleString_lua" when SavedVariables contained a display string (e.g. |cFFFFFFNormal|r) or invalid FontStyle. Migration and font creation now normalize values and use a safe default; Info Panel and SpellCastBuffs use the shared wrapper so only valid FontStyle integers (0–7) are passed to the game API.
+
+## Version 7.2.0.1
+
+### New
+
+- UnitFrames: option to hide the custom player frame when dead; the frame shows again when you are alive.
+- UnitFrames: option to keep the custom target frame visible in cursor mode; when the reticle target is cleared (e.g. opening inventory or map), the frame and its SpellCastBuffs target icons can linger with the last target's data. Optional auto-clear after 5–30 seconds (or never).
+- Info Panel: option to hide the panel in combat; it becomes visible again when combat ends.
+
+### Changes
+
+- UnitFrames: custom player and target frame bar width slider max increased from 500 to 1000.
+
+## Version 7.2.0.0
+
+### New
+
+- ChatAnnouncements: support for new currency types (Seals, Trade Bars); settings, labels, and tooltips updated across languages. Tome Points and cache handling improved.
+- ChatAnnouncements: furnishing vault announcements and related event handling.
+- ChatAnnouncements: track multi versus single weekly challenges, with settings and localization (DE, FR, RU, TR, default).
+- GridOverlay refactor: functionality and settings updated; new XML, bindings, Unlock/BlacklistDialog, SpellCastBuffs/UnitFrames integration, AbilityAlerts/Changelog frontend touched.
+- UnitFrames: optional hostile flag for attribute visuals.
+
+### Changes
+
+- ChatAnnouncements: instanceDisplayType changed to zoneDisplayType to align with api doc.
+- SpellCastBuffs: event callback tweaks (Collectibles, ReloadEffects, Stealth); furnishing vault and related logic.
+- ChatAnnouncements: merge from main (PlayerToPlayer hooks, settings_tweaks); gamepad behavior adjusted.
+- LuiData effects: broad updates across BarHighlight, Fake effects, Overrides, KeepUpgrade, OakenSoul, and related namespaces.
+- BarHighlight: populate table on player activated (DestroFix); ActionBar cleanup and BarHighlight data/override updates.
+- ActionBar: nil checks and robustness.
+
+### Fixed
+
+- SpellCastBuffs: artificial effect logic.
+- Hand of Mephala: LuiData KeepUpgrade/Override, AbilityTables, UnitNamesTable, ZoneNamesTable, and data namespace.
+- LuiData AbilityTables fix.
+- SpellCastBuffs and UnitFrames: missing saved-variable defaults and tooltip fixes.
+- ChatAnnouncements: debug formatting.
+
+## Version 7.1.5.0
+
+### Changes
+
+- Block Indicator is off by default. You can enable/disable it in the Combat Info settings.
+
+## Version 7.1.4.9
+
+### Fixed
+
+- SpellCastBuffs now sort correctly.
+- Fixed texture path in buff module.
+
+### New
+
+- Block Indicator: Located in the CombatInfo module.
+
+## Version 7.1.4.8
+
+### Fixed
+
+- Oakensoul buff filtering works again.
+
+## Version 7.1.4.7
+
+### Fixed
+
+- Backend change to buff modules controls to utilize object pooling.
+
+## Version 7.1.4.6
+
+### Fixed
+
+- ActionBar timers should be working again for abilities we have data on and ultimates.
+- Buffs module changes - fix to how to controls were being drawn.
+
+## Version 7.1.4.5
+
+### New
+
+- If using the LUIE ActionBar, you can now pick up and drag abilities between bars using mouse mode.
+- If using the LUIE ActionBar with back bar enabled, equipping OakenSoul or anything that overrides the player bars temporarily will hide the backbar.
+
+### Changes
+
+- ActionBar module no longer creates highlight texture if FancyActionBar is enabled. Requested change due to double highlights.
+
+### Fixed
+
+- Lua Error on Companion level up. Reported on Github. Thanks
+- Proc sound for 5/10 stack of Merciless Resolve, 4/8 stack of Crystal Fragments now play.
+- Added a check to ActionBar.Castbar to prevent nil errors.
+- Fixed manifest so Minion 4 should now work correctly.
+
+## Version 7.1.4.4
+
+### Changes
+
+- PVP/AVA/BATTLEGROUND center screen announcement size changed from large -> small.
+
+## Version 7.1.4.3
+
+### New
+
+- Extended chat announcements to cover more pvp/ava events, system broadcasts, eso plus, outfit change, daily login reward, tales of tribute.
+
+### Changes
+
+- Rewrote all control creations to utilize XML, this is a performance improvement.
+- Split data/media into libraries: [LuiMedia](https://www.esoui.com/downloads/info4374-LuiMedia.html) centralizes all media registration to prevent redundant table creation for modules that use custom media, work only needs to be done once right :) [LuiData](https://www.esoui.com/downloads/info4373-LuiData.html)
+- Moved action bar related things in combat info into a new action bar module; existing settings should be migrated.
+
+### Fixed
+
+- Resolved a long-standing Memory leak in the combat text module :eek:
+
+### Miscellaneous
+
+- There is probably stuff I missed in this log, but it has been an ongoing project on console, it is about time to get PC on the same version with the fixes.
+
+## Version 7.1.4.3
+
+- more ps5 texture tweaks.
+
+## Version 7.1.4.2
+
+- more ps5 texture fixes
+
+## Version 7.1.4.1
+
+- hopefully fix to some ps5 textures....
+
+## Version 7.1.4.0
+
+- Major bug fix and changes.
+- Memory leak from combat text should be fixed, it was in all my test scenarios.
+- Movers now use x/y sliders.
+- TODO: Fix movers for Combat Text panels.
+
+## Version 7.1.3.11
+
+- feat: move info panel to xml.
+- fix: unitframe stuff
+
+## Version 7.1.3.9
+
+- fix: champ star pixelation on ps5
+- feat: move custom unitframe control creation code to xml.
+- feat: move ability alert creation to xml and utilize object pools.
+
+## Version 7.1.3.8
+
+- Migrates SpellCastBuffs to an XML + metapool architecture, adds a new SynergyTracker UI, consolidates ActionBar management into the module, and updates related namespaces, settings, and event handling.
+- SpellCastBuffs (major refactor): Migrates UI to XML (TopLevelControls + virtual LUIE_SpellCastBuffIcon), adds mouse/tooltip handlers, grid-snap move support. Rewrites to method-based API (ZO_Object), centralizes event registration, and uses ZO_MetaPool for icon pooling/perf. Enhances prominent bars/labels, cooldown/stack handling, disguise/mount/WW logic; updates settings/invoke sites.
+- SynergyTracker (new UI): Adds XML-driven tracker and controller with rows, cooldown overlays, tooltips, HUD scene integration, and movement save.
+- ActionBar (consolidation): Merges manager into module, centralizes events/helpers, backbar handling, cooldown hook logic; removes ActionBarManager.lua.
+- CastBar/Namespaces: Adjusts module names/event registrations; cleans up CombatInfo/AbilityAlerts namespace setup.
+- Infrastructure: Version bump, GridOverlay docs/manager polish, settings/initialization updated for method calls.
+
+## Version 7.1.3.7
+
+- fix: console errors when interacting with a player
+- NEW LOADING LOGIC FOR CONSOLE! If ESO is not in focus, LUIE will not load until it is, this prevents many CPU budget errors, if you experience this(grey unit frames/black icons) you need to port to a house or go through a door that triggers a load screen to refresh the ui without reloading.
+
+## Version 7.1.3.6
+
+- fix: synergy tracker restore placement on reload
+
+## Version 7.1.3.5
+
+- fix: Unitframes settings options
+
+## Version 7.1.3.4
+
+- fix: Adjust InfoPanel position calculation to use center coordinates instead of top-left coordinates.
+- fix: Update companion ultimate cost calculation in ActionBar module.
+- fix: Collectibles we don't have data for were showing the default unknow icon in the Chat Announcements, switched to using the games API to parse the link if we don't have the data.
+- change: Swapped to using ZO_Currency_GetPlatformCurrencyIcon in Chat Announcements.
+- change: buff icons are being worked.
+
+## Version 7.1.3.3
+
+- more settings fixes
+
+## Version 7.1.3.2
+
+- fix: backbar for actionbar was not able to be enabled in the settings menu
+
+## Version 7.1.3.1
+
+- settings menu rework, now uses submenus
+- edit mode should now work better, no more needing to open another menu to make the backdrop clear
+- fixed reported errors from multiple discord reports, thanks all, keep reporting.
+
+## Version 7.1.3.0
+
+- Console settings overhaul. Many things still need tweaks. will be doing updates regularly to address issues.
+
+## Version 7.1.0.7
+
+### New
+
+- Crowd Control Tracker preview window with pooled controls so players can experiment with stun/immobilize visuals and the updated charm handling outside combat.
+- Unlock-mode grid overlay rebuilt as a pooled control system, tied into SpellCastBuffs and UnitFrames settings for lighter footprint and easier snapping.
+- Custom boss frames now read CrutchAlerts boss-phase thresholds, include a settings toggle, and ship localized strings for supported languages.
+
+### Changes
+
+- Combat action bar overhaul: hotbar category validation, pooled cooldown widgets, and smarter throttling to keep cooldown displays in sync.
+- Group resource bars now reformat their layout and spacing based on LibGroupBroadcast data so raid and small-group frames stay aligned with the new integrations.
+- Refactored Group Food & Drink Buffs module with localized API usage, unified data helpers, and migrated drink tracking into `LuiData/Effects` for maintenance.
+- Integrated LUIE icon/tooltip overrides, slash-command refresh, countdown timer display, and smart anchoring with other LibGroupBroadcast widgets.
+- Applied inventory event filters, update throttling, and LuiData version checks to eliminate redundant refreshes and stale-data warnings.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/v7.1.0.6...v7.1.0.7](https://github.com/DakJaniels/LuiExtended/compare/v7.1.0.6...v7.1.0.7)
+
+## Version 7.1.0.6
+
+### Fixed
+
+- Fixed LAM 'Reset to Defaults' functionality across all settings panels - frame positions, dropdown selections, and panel unlock states now properly reset to their default values.
+- Fixed 19 dropdown default values that were incorrectly using numeric indices instead of display strings, affecting player frame layout, bar alignments, raid icons, GCD method, alert filters, icon options, bracket displays, and guild rank options.
+- Fixed Combat Text panel unlock checkbox inverting its state when using LAM reset.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/v7.1.0.5...v7.1.0.6](https://github.com/DakJaniels/LuiExtended/compare/v7.1.0.5...v7.1.0.6)
+
+## Version 7.1.0.5
+
+### Fixed
+
+- Significant CombatInfo performance optimization: eliminated redundant function calls and addon state checks that were causing frame freezes on high-buff-count scenarios (especially noticeable on Arcanist).
+
+### New
+
+- Integration with LibFoodDrinkBuff: small group unit frames now display food/drink buff status icons and time remaining. Can be turned on and configured in the Unit Frames settings.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/comparev7.1.0.4...v7.1.0.5](https://github.com/DakJaniels/LuiExtended/compare/v7.1.0.4...v7.1.0.5)
+
+## Version 7.1.0.4
+
+### Fixed
+
+- No-healing overlay is now rendered above the shield overlay.
+- Shield animations are smooth again. oops.
+
+### New
+
+- Ability timers can now be manually changed in the settings.
+- Synergy Panel, viewer for recent seen synergies.
+- In-Combat unitframe border, added settings for Group and RaidGroup to have a red(by default) border around frames when in combat.
+
+### Miscellaneous
+
+- Moved code around in the CombatInfo module. *Shouldn't break anything.
+- Added two ZOS Method overwrites to bypass a *Private* function error when using custom icons; the error propagated when dragging a ability in the skills menu.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/v7.1.0.3...v7.1.0.4](https://github.com/DakJaniels/LuiExtended/compare/v7.1.0.3...v7.1.0.4)
+
+## Version 7.1.0.3
+
+### New
+
+- Added small group sort by role, just like raid frames.
+
+### Changes
+
+- LibGroupBroadcast integrations, ULT icons, potion icon, dps, hps are only visible in small group frames for now, raid frames will need ui rework to fit everything in. Resource bars should be placed below the raid frame in a small gap if that setting is enabled.
+- Migrated font system to use ZOS's native ZO_CreateFontString function.
+- Implemented migration system with SV flags to automatically convert legacy font style values (runs once per module).
+
+### Miscellaneous
+
+- Cleaned up obsolete font style string constants from localization files.
+- Consolidated settings menu font style dropdowns to use shared arrays for consistency.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/v7.1.0.2...v7.1.0.3](https://github.com/DakJaniels/LuiExtended/compare/v7.1.0.2...v7.1.0.3)
+
+## Version 7.1.0.2
+
+### New
+
+- Integration with LibGroupResources, LibGroupCombatStats, LibGroupPotionCooldowns. Tweaks will be made, need people to test and let me know.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/comparev7.1.0.1...v7.1.0.2](https://github.com/DakJaniels/LuiExtended/compare/v7.1.0.1...v7.1.0.2)
+
+## Version 7.1.0.1
+
+### Fixed
+
+- Unitframes should now show visuals correctly; somehow in testing I didn't catch a 0-index issue, sorry all. Let me know in the ESOUI comments/Github if any issues remain.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/comparev7.1.0.0...v7.1.0.1](https://github.com/DakJaniels/LuiExtended/compare/v7.1.0.0...v7.1.0.1)
+
+## Version 7.1.0.0
+
+### New
+
+- Implemented ZOS-style coordinator architecture for Unit Attribute Visualizers.
+- Added support for 16:10 displays and Steam Deck.
+
+### Changes
+
+- Completely refactored UnitFrames module for improved code quality and maintainability.
+- Enhanced no-healing indicator with distinctive diagonal stripe pattern for better visibility.
+- Reduced power shield update animation duration from 250ms to 100ms for more responsive feedback.
+- Improved attribute visualizer module architecture with proper event handling and unit-tag filtering.
+- Updated aspect ratio detection and scaling for unit frames.
+
+### Miscellaneous
+
+- Significant code cleanup and elimination of duplication throughout the codebase.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/v7.0.1.0...v7.1.0.0](https://github.com/DakJaniels/LuiExtended/compare/v7.0.1.0...v7.1.0.0)
+
+## Version 7.0.1.0
+
+### New
+
+- Added option to use @account names instead of character names in teammate death notifications (Combat Text → Group Member Death → Use Account Names).
+- Added transparency control for Info Panel (Info Panel → Info Panel Transparency, %).
+
+### Changes
+
+- Refactored font system to use 'LUIE Default Font' instead of 'Univers 67' across all modules for better consistency.
+- Added initial console support and improved settings compatibility.
+- Various settings improvements and optimizations.
+
+### Removed
+
+- Group Buffs functionality. Users should now use the dedicated 'Group Buff Panels addon by code65536' instead.
+
+### Miscellaneous
+
+- Updated terms and license information.
+- I'm sure I missed a note on some other things that changed. View the full change log on Git.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/v7.0.0.2...v7.0.1.0](https://github.com/DakJaniels/LuiExtended/compare/v7.0.0.2...v7.0.1.0)
+
+## Version 7.0.0.2
+
+### Fixed
+
+- Attempt fix for gamepadui when using the /leave command, it now shows a dialog to confirm.
+- Added Grave Lords Sacrifice timer.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/v7.0.0.1...v7.0.0.2](https://github.com/DakJaniels/LuiExtended/compare/v7.0.0.1...v7.0.0.2)
+
+## Version 7.0.0.1
+
+### Fixed
+
+- error fix for group buffs
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/v7.0.0.0...v7.0.0.1](https://github.com/DakJaniels/LuiExtended/compare/v7.0.0.0...v7.0.0.1)
+
+## Version 7.0.0.0
+
+### Fixed
+
+- Grim Focus and Bound Armorments count now go to the new 10/8 respectively.
+- Fix trailing dash persisting after countdown timer expires in AbilityAlerts.
+
+### New
+
+- Group buff tracking, found in the SpellcastBuff module, this is in beta and can be turned off.
+- Added right click support for buffs/debuffs so you can easily add/remove them to the prominent buff/debuff and group buff trackers. work in progress.
+
+- I'm sure I missed a note on some other things that changed. View the full change log on Git.
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.6.1...v7.0.0.0](https://github.com/DakJaniels/LuiExtended/compare/6.9.6.1...v7.0.0.0)
+
+## Version 6.9.6.1
+
+### Fixed
+
+- Fix for error in gamepad skills menu.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.6.0...6.9.6.1](https://github.com/DakJaniels/LuiExtended/compare/6.9.6.0...6.9.6.1)
+
+## Version 6.9.6.0
+
+### New Features
+
+- Unit Frames now display group election information, including current voting status. (Because who doesn’t want more democracy in their UI?)
+- Added a setting for custom frames to quickly hide dead enemy or neutral NPCs. This shouldn't be hiding dead players, let me know if it does. (If it does, oops—guess you’re a ghost now.)
+
+### Fixed
+
+- Addressed an issue where target frames could display duplicate icons. (Note: This fix is still under evaluation and may not fully resolve the issue. So, you know, don’t @ me if it’s still broken.)
+- Fixed an issue where the chat announcement system could display incorrect information about restricted communication permissions. (Because misinformation is so last patch.)
+
+### Improvements
+
+- Enhanced logic for more accurate identification of Destruction Staff spell icons. (Now with 20% more accuracy, probably.)
+
+### Miscellaneous
+
+- Started refactoring the codebase to improve readability and maintainability. Started with the Unit Frames module. Report any issues/errors to me in the comments or on Github. (If you find a bug, congratulations, you’re part of QA now.)
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.5.4...6.9.6.0](https://github.com/DakJaniels/LuiExtended/compare/6.9.5.4...6.9.6.0)
+
+## Version 6.9.5.4
+
+### Fixed
+
+- More tweaks. We *should* be back into a stable state. As always, let me know in the comments if you have any issues.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.5.3...6.9.5.4](https://github.com/DakJaniels/LuiExtended/compare/6.9.5.3...6.9.5.4)
+
+## Version 6.9.5.3
+
+### Fixed
+
+- Some timer fixes. More tweaks will be needed. Feedback needed! Leave a comment, or start a discusson on git <https://github.com/DakJaniels/LuiExtended/discussions>
+- Resolve error with powershield.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.5.1...6.9.5.3](https://github.com/DakJaniels/LuiExtended/compare/6.9.5.1...6.9.5.3)
+
+## Version 6.9.5.1
+
+### Fixed
+
+- Some timer fixes. Feedback needed! Leave a comment, or start a discusson on git <https://github.com/DakJaniels/LuiExtended/discussions>
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.5...6.9.5.1](https://github.com/DakJaniels/LuiExtended/compare/6.9.5...6.9.5.1)
+
+## Version 6.9.5
+
+### New-ish
+
+- Re-Enabled using the games api, if you have a conflict, turn off LUIE's backbar and label timer. * Work in progress, feedback welcome, git or comments.
+
+### Bug Fixes
+
+- Resolved an issue with Off-Balance tracking in the Prominent Debuff container.
+- Fixed missing icon chat message when purchasing items from vendors.
+- Added an option to hide the bracing buff (block) on the player. This setting can be found in Buffs & Debuffs -> Long & Short-Term Effect Options -> Short-Term Effect Filters -> Show Block - Player. Default is "ON".
+
+### Miscellaneous
+
+- Performance optimizations.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.4...6.9.5](https://github.com/DakJaniels/LuiExtended/compare/6.9.4...6.9.5)
+
+## Version 6.9.4
+
+### Revert
+
+- Removed timer code. To many issues with other action bar addons enabled.
+Yes that means timers for sorc pets dont show again.
+
+### Bug Fixes
+
+- Chat announcement fixes. Looking at you guards... if you know you know.
+- Combat Text resources now warn again if you are low.
+
+### Miscellaneous
+
+- Some other things, it's been a long weekend.
+
+### Notes
+
+- As a reminder, the combat text module can be intensive with the amount of animations that go on.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.3...6.9.4](https://github.com/DakJaniels/LuiExtended/compare/6.9.3...6.9.4)
+
+## Version 6.9.3
+
+### General
+
+- More action bar tweaks.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.2...6.9.3](https://github.com/DakJaniels/LuiExtended/compare/6.9.3...6.9.4)
+
+## Version 6.9.2
+
+### General
+
+- hotfix for ability icons being weird with fancyactionbar+. sorry all.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.1...6.9.2](https://github.com/DakJaniels/LuiExtended/compare/6.9.1...6.9.2)
+
+## Version 6.9.1
+
+### General
+
+- hotfix for unit-frame layout. sorry all.
+- removed a debug print.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.0...6.9.1](https://github.com/DakJaniels/LuiExtended/compare/6.9.0...6.9.1)
+
+## Version 6.9.0
+
+### General
+
+- Bug fixes and stability improvements.
+- Performance optimizations for texture handling.
+- Major code refactoring and organization improvements.
+- Localized many global calls in LuiData for better performance.
+- Our backbar is now hidden if ActionDurationReminder, FancyActionBar, or FancyActionBar\43 is detected. Why have more than one bar?
+
+### Features
+
+- Added support for rounded textures on unitframes. This would be the `Tube` and `Steel` textures in the texture list.
+- New tracking system for abilities without existing data.
+- Added conditional checks for displaying the last item count.
+- Tweaked the fade animation for buff/debuff icons to fade out smoother.
+
+### Improvements
+
+- Refactored CombatInfo.lua with new helper functions for code clarity.
+- Improved ability ID handling and UI element visibility.
+- Added SetHighDrawPriority, GetCorrectedAbilityId, and UpdateStackText functions.
+- Implemented changes suggested in issue #328.
+- Updated anchor logic and annotations.
+- Gamepad UI experience improvements.
+
+### Bug Fixes
+
+- Fixed ultimate event handling.
+- Added nil checks to prevent errors.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.9...6.9.0](https://github.com/DakJaniels/LuiExtended/compare/6.8.9...6.9.0)
+
+## Version 6.8.9
+
+### General
+
+- Re-encoded custom icons, reducing memory footprint by 22.5 MB, as a result `shadercache.cooked` might need to be deleted for the game to regenerate the texture paths.
+- Bug fixes and stability improvements. Please report any errors in the comments.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.8.2...6.8.9](https://github.com/DakJaniels/LuiExtended/compare/6.8.8.2...6.8.9)
+
+## Version 6.8.8.2
+
+### General
+
+- Another fix for errors in UnitFrames.lua. Please report any errors in the comments.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.8.1...6.8.8.2](https://github.com/DakJaniels/LuiExtended/compare/6.8.8.1...6.8.8.2)
+
+## Version 6.8.8.1
+
+### General
+
+- Fix for errors in UnitFrames.lua. Thank you @Anthonysc for testing
+- There is a new toggle in the unitframes module to format names with the eso target markers.
+
+Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.8...6.8.8.1](https://github.com/DakJaniels/LuiExtended/compare/6.8.8...6.8.8.1)
+
+## Version 6.8.8
+
+### General
+
+- Due to frequency of updates, I have disabled showing the changelog when there is a version increase.
+If you still would like to see a popup there is a setting under Miscellaneous Settings to enable that.
 - Added some timer data for Arcanist.
 - Fixed an error if LibChatMessasge's history feature was enabled.
 - Fixed timestamps to properly disable if "Allow Addons to Modify LUIE Messages" was toggled in the settings.
@@ -12,11 +744,9 @@ General
 
 Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.7.2...6.8.8](https://github.com/DakJaniels/LuiExtended/compare/6.8.7.2...6.8.8)
 
----
-
 ## Version 6.8.7.2
 
-General
+### General
 
 - Fixed frame snapping calculations for edge cases
 - Optimized grid snapping performance
@@ -24,54 +754,44 @@ General
 
 Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.7.1...6.8.7.2](https://github.com/DakJaniels/LuiExtended/compare/6.8.7.1...6.8.7.2)
 
----
-
 ## Version 6.8.7.1
 
-General
+### General
 
 - Minor bug fix, default frames we not snapping. They are now.
 
 Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.7...6.8.7.1](https://github.com/DakJaniels/LuiExtended/compare/6.8.7...6.8.7.1)
 
----
-
 ## Version 6.8.7
 
-General
+### General
 
 - Added a new grid snapping system. Currently only for default game frames, custom unit frames, and the buffs & debuffs module.
 - Code cleanup and optimizations.
 
 Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.6...6.8.7](https://github.com/DakJaniels/LuiExtended/compare/6.8.6...6.8.7)
 
----
-
 ## Version 6.8.6
 
-General
+### General
 
 - Added chat announcements for Grimoires and Scripts, off by Default. Can be toggled on under the Miscellaneous Announcements section of the Chat Announce settings menu.
 - Added a new font. Montserrat.
 
 Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.5...6.8.6](https://github.com/DakJaniels/LuiExtended/compare/6.8.5...6.8.6)
 
----
-
 ## Version 6.8.5
 
-General
+### General
 
 - Added chat announcements for Golden Pursuits and Weekly Endeavors, off by Default. Thanks cyberox.
 - More illegal string formatting fixes.
 
 Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.4...6.8.5](https://github.com/DakJaniels/LuiExtended/compare/6.8.4...6.8.5)
 
----
-
 ## Version 6.8.4
 
-General
+### General
 
 - Blood Craze id update so it will now be tracked on the actionbar. Thanks @ExVault.
 - Fix for chat alerts. If you know, you know...
@@ -79,11 +799,9 @@ General
 
 Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.3...6.8.4](https://github.com/DakJaniels/LuiExtended/compare/6.8.3...6.8.4)
 
----
-
 ## Version 6.8.2, 6.8.3
 
-General
+### General
 
 - LuiData tweaks
 - Font fixes
@@ -91,521 +809,150 @@ General
 
 Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.2...6.8.3](https://github.com/DakJaniels/LuiExtended/compare/6.8.2...6.8.3)
 
----
-
-## Version 6.8.1
-
-General
-
 - LUIE's data has been moved into the LuiData library, this is included with LuiExtended.
-This lowered loading times by up to 8 seconds in my testing. *results may vary.
 - Added more bar textures to use on our custom frames.
 - Improved font registration for our custom fonts.
 - Using cached strings for the combat text module. This should improve performance.
 - Code cleanup and improvements.
-
----
-
-## Version 6.8.0
-
-General
-
 - Changelog in progress...
-
----
-
-## Version 6.7.9.2-3
-
-General
-
 - Fix for operator + is not supported for number + nil error in chat announcements.
 - Added UI mover for Interact Text (affects default 'E' keybind position).
 - Fixed active guard ability toggle icon not displaying.
 - Fixed chat announcements for crafting items and materials to properly display all entries.
-
----
-
-## Version 6.7.9.1
-
-General
-
 - Fix for some unitframe errors.
-
----
-
-## Version 6.7.9
-
-General
-
 - Fix for missing buffs in Cyrodiil.
-
----
-
-## Version 6.7.8
-
-General
-
 - Added Fatecarver Immune message to the Combat Text ignore list. No more spam from that now.
 - Restructured the data folders code.
 - And many more small tweak. There shouldn't be any errors but as always let me know in the comments.
-
----
-
-## Version 6.7.7
-
-General
-
 - Updated to API version 101044
 - Fixed bug with the ESO Plus Member icon always being visible on the long buff display.
 - Hopefully fixed the illegal string format call...
 - Added new companions so you can keybind them now.
-
----
-
-## Version 6.7.5
-
-General
-
 - Oakensoul menu setting added to Buffs & Debuffs Module -> Display Options. Reload required.
-
----
-
-## Version 6.7.4
-
-General
-
 - Added preliminary support for OakenSoul, still needs some tweaks.
 - Fixed invite bug. Hopefully.
-
----
-
-## Version 6.7.3
-
-General
-
 - Added missing assistants for keybinds.
 - Added Warden AOE pre-Charm AoE to AoE alerts.
-
----
-
-## Version 6.7.1
-
-General
-
 - Update for Gold Road.
-
----
-
-## Version 6.7.0
-
-General
-
 - Updated fonts to .slug format for Update 41 API changes.
 - Fixed an issue where the Player to Player interaction menu could throw UI errors.
-
-Combat Info
-
 - Fixed issues with Negate tracking in the Crowd Control Tracker (thanks to ACastanza).
 - Fixed issues with CC Tracker occasionally throwing errors with snares & roots.
-
----
-
-## Version 6.6.9
-
-Combat Text
-
 - Fixed an issue where the Combat Text settings reset with this update. This was due to an issue where the specific Saved Variables for Combat Text were accidentally renamed. Your old settings will be restored as long as you haven't manually cleared your saved variables since the update. The renamed variables will also be cleaned up and removed so as not to inflate the size of your LUIE Saved Variables file.
 
 ---
 
 ## Version 6.6.8
 
-General
+### [General]
 
 - Added the ArchivoNarrow font as a selectable option.
 - Added the ability to move the Endless Archive progress tracker (when you Unlock Default UI Elements).
-
-Buffs & Debuffs
-
 - Updated tooltips for several effects for Cryodiil Siege weapons that were out of date.
-
-Chat Announcements
-
 - Fixed an error that could occur with currency announcements when purchasing items on the Crown Store.
 - Added an option to show an item loss message when you fillet a fish (manually).
 - Updated the context messages for filleting fish at the provisioning station to "You fillet..."
 - KNOWN ISSUE: When filleting a certain amount of fish (seems to be under ~50) the messages for filleting at the crafting station won't display the proper amount of fish used. You can read more details about this on the pinned post in the LUIE comments on ESOUI.
-
-Combat Info
-
 - Crowd Control Tracker will now no longer show a CC warning for the cosmetic stun effects when entering various portals in Endless Archive (Thanks ACastanza for finding all these abilityIds).
 - Floating Markers now use a different more detailed texture.
 - Fixed an issue where the Floating Marker was removed when changing zones.
-
----
-
-## Version 6.6.7
-
-Unit Frames
-
-- Fixed an issue where the font selection for default Unit Frames (with the extender option enabled) wasn't working correctly.",
-
----
-
-## Version 6.6.6
-
-Chat Announcements
-
+- Fixed an issue where the font selection for default Unit Frames (with the extender option enabled) wasn't working correctly.
 - Fixed an issue where Chat Announcements for fencing items were displaying incorrectly.
-
----
-
-## Version 6.6.5
-
-General
-
 - Updated the hooks for Campaign Bonuses in Cryodiil - fixes a default UI issue with the display of the Emperorship Alliance Bonus passive.
-
-Buffs & Debuffs
-
 - Reimplemented custom tooltips for Buffs & Debuffs. This now has a menu option to toggle on/off (disabled by default since custom tooltips require manual update and are not all up to date).
-
-Chat Announcements
-
 - Updated "Display Announcements" to use a much better setup (and added support for Endless Archive Progression). These are misc announcements that cover a lot of different things. Menu option configurations are updated for Display Announcements.
 - Added support for the new "Archival Fortunes" currency earned in Endless Archive.
 - Filleting fish at the crafting station now shows context-specific messages as intended.
 - Fixed an issue when mailing gold to another player - if you sent over half of the gold in your inventory the chat announcement would display the value of gold remaining in your bag as the sent amount. This is due to an API issue and required a workaround to fix.
-
-Combat Info
-
 - Added a new submenu with an option to display Floating Markers for enemies you are in combat with (thanks to DakJaniels).
 - Bar Highlight tracking for Destruction Staff abilities now works properly on the back bar.
 - Added a new menu option to track Heavy Attack casts (disabled by default).
 - Fixed an issue where AOE Damage tracking on Crowd Control Tracker wasn't working.
-
-Info Panel
-
 - Added an option to change the Clock Formatting (similar to chat timestamp formatting you can customize how the clock displays). Default settings match the current behavior of the Info Panel clock.
-
-Unit Frames
-
 - Added effects to the Unit Frames when a unit becomes Invulnerable (boss invulnerability phases, etc...).
-
----
-
-## Version 6.6.4
-
-Buffs & Debuffs
-
 - Fixed an issue where having unanchored buff frames could throw UI errors under certain conditions.
-
-Chat Announcements
-
 - Added error prevention for item chat messages throwing a UI error under certain conditions.
-
----
-
-## Version 6.6.3
-
-General
-
 - Updated Bar Highlight & Buff Tracking for these abilities and their morphs: Trap Beast (Fighters Guild), Scorch (Warden), Grim Focus (Nightblade), Bound Armaments (Sorcerer), Blood Frenzy (Vampire).
 - Abilities that "echo" now display a stack counter (for Bar Highlight & Buff Tracking) to serve as a counter - so far this includes Scorch & Haunting Curse.
-
-Buffs & Debuffs
-
 - Added options for row stacking for the Player/Target Buff & Debuff frames when the option to anchor the frames to the Custom Unit Frames is DISABLED. You can customize how wide the containers are and the direction the rows stack (up or down).
-
-Chat Announcements
-
 - Fixed an issue where the Collectible messages/announcements could throw UI errors.
-
-Combat Info
-
 - Fixed an issue where the Ultimate Label would not correctly update if Bar Highlight tracking was disabled.
 - You can now display the back bar without Bar Highlight tracking enabled if you just want to add the back bar to see it.
 - Flame Lash (Dragonknight) ability icon on the ability bar now glows when Power Lash is available (targeting an enemy that is rooted or Off-Balance).
-
-Unit Frames
-
 - Unit Frames now display the "Trauma" effect (healing absorption) - this has a customizable color and will display on all bars. You can also display the value on the bars but this must be configured in the settings menu (the dropdowns for the format now include options for adding the Trauma value).
-
----
-
-### Version 6.6.2
-
-Chat Announcements
-
 - Fixed an issue where the colors for Chat Announcement messages were not showing properly.
-
----
-
-### Version 6.6.1
-
-General
-
 - Fixed issues causing UI errors with Gamepad Mode Skills Window.
-
----
-
-### Version 6.6.0
-
-General
-
 - Tons of code optimization and cleanup thanks to DakJaniels.
 - Crystallized Shield & its morphs are now correctly tracked on Combat Info - Bar Highlight and Buffs & Debuffs (Note: the stack count only displays for the player as the ability doesn't return any information to the API about the stack count).
-
-Chat Announcements
-
 - Fixed issues caused by LUIE with "Dolgubon's Lazy Writ Crafter." The auto-abandon quest option in Writ Crafter now works properly and Quest Center Screen Announcements will now follow the "Hide Writ Quest Announcements" setting in Writ Crafter.
 - Added a toggleable option to hide the display of loot when the addon "Loot Log" is active.
 - Fixed an issue where Collectible Chat Announcements weren't displaying correctly.
-
-Combat Info
-
 - Added the option to track Immobilize & Snare effects to the Crowd Control Tracker (thanks to ACastanza). These options are disabled by default. Immobilization tracking requires the base game menu setting under Combat for Active Combat Tips to be enabled. Immobilization effects will display as snares if the setting for Immobilized Warnings is disabled.
 - Fixed an issue where the cast bar for Recall would be interrupted when teleporting to a Wayshrine in a different zone."
 - Fixed Bar Highlight tracking for some abilities.
 - Fixed Proc Sounds not working (Note: Grim Focus is going to require some work due to the changes to the ability).
-
-Unit Frames
-
 - Added the option to play Tales of Tribute with a group member to the Right Click Menu for Group Frames.
-
----
-
-### Version 6.5.1
-
-Combat Info
-
 - Re-enabled ability timers again (thanks to DakJaniels)
-
-### Version 6.5.0
-
-Combat Info
-
 - Added New AOEs to AOE Tracker Dataset & fixed certain effects showing up in CC tracker (thanks Anthonysc)
-
-### Version 6.4.9
-
-Combat Info
-
 - Fixed Exhausting Fatecarver not extending the castbar
-
----
-
-### Version 6.4.8
-
-Combat Info
-
 - Fixed Cast Bar for Fatecarver and Remedy Cascade
-
----
-
-### Version 6.4.7
-
-Slash Commands
-
 - Added /changerole command
-
-Combat Info
-
 - Added Arcanists Fatecarver and Remedy Cascade skills to Cast Bar
 - Stop Cast Bar when you get interrupted
-
----
-
-### Version 6.4.6
-
-General
-
 - Fixed keybindings for Armory and Deconstruction
-
----
-
-### Version 6.4.5
-
-Slash Commands
-
 - Added Pyroclast & Hoarfrost
 - Fixed Aderene
-
-Chat Announcements
-
 - Fixed lua error with mementos
-
----
-
-### Version 6.4.4
-
-Slash Commands
-
 - Added Armory, Fence & Deconstruction to CollectibleTables to hopefully fix a bug with Giladil
 - Added Zuqoth Armory Assistant
-- Reworked Slash Handling: Will disable armory, companion, merchant or banker if you do not have any of them unlocked. If you buy one of them you need to /reloadui for LUI to update.
-
-Unit Frames
-
+- Reworked Slash Handling: Will disable armory, companion, merchant or banker if you do not have any of them unlocked. If you buy one of them you need to /reloadui for LUI to update
 - Fixed Role colors in Battlegrounds
-
----
-
-### Version 6.4.3
-
-General
-
 - Added Sharp & Azandar Keybindings
 - Removed the Keybindings for individual Banker and Merchants (You have to select your prefered Banker and Merchant now in LUIE Settings -> SlashCommands -> General)
-
-Slash Commands
-
-- Rewritten Collectible handling to make adding new banker, merchants & companions easier in the future
+- Rewrote Collectible handling to make adding new banker, merchants & companions easier in the future
 - Added Aderene
-
-Unit Frames
-
 - Fixed Colors in Battlegrounds (thanks to Anthonysc)
-
----
-
-### Version 6.4.2
-
-General
-
 - Added Necrom companions (thanks to GwynneBleidd)
-
-Unit Frames
-
 - Added 3 x 4 Raid layout
 - Made shield bar height also work in overlay mode
-
-Combat Info
-
 - Added Charm CC support (thanks to Anthonysc)
-
----
-
-### Version 6.4.1
-
-General
-
 - Fixed Arcanist class colors (thanks Anthonysc)
-
----
-
-### Version 6.4.0
-
-General
-
 - Removed buff & debuff overrides as they were causing too many troubles
-
-Unit Frames
-
 - Changed shield bar overlay to be smaller
 - Removed 24 player group support
 - Added option to sort group by role
 - Added Arcanist class color (thanks Anthonysc)
-
----
-
-### Version 6.3.2
-
-General
-
 - Fixed an issue where the option to invite a player to a game of Tales of Tribute was missing from the Player interaction wheel.
-
----
-
-### Version 6.3.1
-
-General
-
 - German localization updated.
-
-Combat Info
-
 - Re-enabled GCD Tracker and Potion Timer and updated them to support High Isle.
 - Fixed small issue with Potion Timer colors.
 - Fixed Ultimate display.
-
----
-
-### Version 6.3.0
-
-General
-
 - German localization updated thanks to the efforts of saenic!
 - Added French localization thanks to the efforts of Zhull-GH!
 - Implemented the features of Nagolite's "Updated Assistants for Lui Extended" patch, see more details below in the Slash Commands section.
-
-Buffs & Debuffs
-
 - Made a few minor changes to tooltips and icons.
-
-Combat Info
-
 - GCD Tracker: Disabled this feature due to API changes made in High Isle breaking it.
 - Potion Timer: Disabled this feature due to API changes made in High Isle breaking it.
-
-Slash Commands
-
 - Updated Slash Commands & keybindings with support for Crow Assistants, Factotum Assistants, Ghrasharog, and Giladil the Ragpicker. Thanks to Nagolite for implementing these features!
 - Updated Slash Commands & keybindings with support for Ember and Isobel, the new companions.
 - Various quality improvements and fixes made to Slash Command & keybinding functionality for summoning assistants & companions thanks to the efforts of Nagolite.
-
----
-
-### Version 6.2.9
-
-Buffs & Debuffs
-
 - Fixed an issue where the icon for the ground tracker buff for Nova and its morphs was missing.
 - Fixed an issue where no ground tracker buff was displaying for Cleansing Ritual and its morphs.
 - Rune Focus and its morphs now show a buff when you are standing in the healing circle.
 - Vampire Stages now show as long term buffs.
 - Fixed various ability tooltips to account for changes made in the last couple updates.
-
-Chat Announcements
-
 - Alerts for collectible usage will now also display when you summon/dismiss a companion.
-
-Slash Commands
-
 - You can now specify '/home inside' or '/home outside' when warping to your primary home.
 - The '/home' slash command now has an option to toggle whether to default to warping inside or outside your primary home.
 - Added a '/companion' slash command to summon a companion and menu option to determine the default companion to summon. You can also specify the companion to summon with '/companion mirri' or '/companion bastian' or by using the '/mirri' or '/bastian' command.
 - Added keybinding options to summon either companion.
-
-Unit Frames
-
 - Added a Unit Frame for tracking your active companion (enabled by default). This frame takes the previous default position of the Pet Unit Frames. The Pet Unit Frames position will be reset to default when loading the addon and save any changes you make after.
 - Updated support for the "Dead" label to display on frames. Now companions, pets, bosses, and your target will show as "Dead" instead of at 0 Health.
 - The Target Unit Frame now displays an indicator when a player is being resurrected or reviving (to match the behavior of Group Unit Frames), this also works for the Companion Unit Frame.
-
----
-
-### Version 6.2.8
-
-Slash Commands
-
 - Fixed an issue where the '/outfit' command was not working properly due to an API change I missed.
-
-Unit Frames
-
 - Fixed an issue where a UI error would occur when mousing over a Companion with the "Target - Use Reaction Color" option enabled in Unit Frames settings.
 - Added the option to change the Reaction Color for Companions in the Custom Unit Frame Color Options menu.
-
----
-
-### Version 6.2.7
-
-Known Issues
-
 - Duration & Stack Tracking for Bar Highlight is currently disabled. Something that changed in the API broke this and I haven't been able to figure out what caused it yet despite rooting around for an exceptionally long time. I may have to rewrite this component in the future. I'd suggest using Action Duration Reminder in the meantime.
-
-Buffs & Debuffs
-
 - The Gamepad Skills Window & Gamepad Skills Advisor now properly show custom passive icons added by LUIE.
 - The Gamepad Active Effects Window now properly hides buffs & debuffs filtered out by LUIE.
 - Updated the tooltips for Alliance War Tortes / Scrolls to clarify they increase both "Alliance Rank and Alliance War Skill Line progression."
@@ -623,9 +970,6 @@ Buffs & Debuffs
 - Removed some name override data for Weapon Glyphs (the abilities are just called Crusher/Hardening/Weakening/Weapon Damage) instead of "X Enchantment." This makes the only change from the default UI renaming "Berserker" from the Glyph of Weapon Damage to "Weapon Damage."
 - Updated light/medium/heavy attacks for unarmed/weapons/Volendrung/Werewolf to match the current and updated syntax ZOS implemented ex. "Light Attack (Two Handed)."
 - The Internal Cooldown for Werewolf & Vampire Player Bites now show as Long-Term effects.
-
-Chat Announcements
-
 - Experience: Updated and restored the announcements for Champion Points being earned.
 - Experience: Cleaned up and normalized messages related to Respec Notifications.
 - Currency: Fixed an issue where currency postage values weren't always correct when sending mail.
@@ -634,40 +978,21 @@ Chat Announcements
 - Collectible: Collectible Messages now have the option to display both Category & Subcategory.
 - Group: When forming a group and inviting a player to the group, the inviter will now see a "You have formed a group" message followed by a message indicating the invited player has joined.
 - Group: When you kick the last player in a group instead of seeing a "You have been removed from the group" message, it will now be indicated that you have disbanded the group.
-
-Combat Info
-
 - Cast Bar: Added a blacklist option for the Cast Bar.
 - Crowd Control Tracker: "Hiding Spot" is now localized and hidden so non-EN clients should not have a stun effect pop up for this.
 - Potion Timer: Now shows Days/Hours/Minutes format for longer duration CD's such as Research Scrolls & Mementos.
-
-Slash Commands
-
 - Added the '/setprimaryhome' command to set the primary home.
 - Added the '/eye' command and keybind to use the Antiquarian's Eye.
 - Collectible usage keybinds and slash commands will now return an error when trying to use a Merchant/Banker/Fence in a player home.
 - Collectible usage keybinds and slash commands will now display the collectible name that can't be used when an error occurs.
 - Fixed an issue where the error alert (if enabled) for collectible usage failure when the collectible was not unlocked was missing the name of the collectible.
-
-Unit Frames
-
 - The Experience Bar will now show the proper color/icon for the Champion Point being earned.
 - Removed a setting that toggled whether to show the max Champion Points the player/target had earned vs the amount allocated. The API no longer provides information about how many points have been allocated for targets.
 - Fixed an issue where the button to whitelist Assistant names for the Pet Frames was adding "Tythis" instead of "Tythis Andromo."
-
----
-
-### Version 6.2.6
-
-General
-
 - Added options to Buffs & Debuffs, Combat Info - Ability Alerts, Combat Info - Crowd Control Tracker, and Combat Text to use default icons for crowd control effects. This is a WIP for some of the modules as certain things require manual table data to work correctly. I will be aiming to at least add full support for player abilities.
 - Reset the default color options for Buffs & Debuffs, Combat Info - Ability Alerts (Crowd Control Colors), and Combat Info - Crowd Control Tracker. This change will apply once when loading the addon and save any changes you make after.
 - Components that have a blacklist/whitelist function now all have buttons with confirmation prompts to clear the entire list.
 - Updated the keybindings for summoning Merchant/Banker/Fence to display a message in chat always. Previously this used the setting under Chat Announcements for collectible use messages.
-
-Buffs & Debuffs
-
 - Consolidated several submenus in Buffs & Debuffs.
 - You can now change the container alignment of Long Term Effects & Prominent Buffs/Debuffs without reloading the UI.
 - Prominent Buffs will no longer show clipping bars/labels when set to display with the horizontal method.
@@ -677,30 +1002,14 @@ Buffs & Debuffs
 - Fixed an issue where there was no buff icon for Argonian and Khajiit Summon Shade and its morphs.
 - Updated mouseover tooltips for buffs/debuffs to reflect if they are a ground buff/debuff, or a tracker effect for an AOE cast by the player.
 - Added the CC Immunity buff to Target Dummies that were missing it.
-
-Chat Announcements
-
 - Implemented a safeguard that should prevent a UI error from occuring when refining a large amount of crafting materials.
-
-Combat Info
-
 - Ability Alerts - Added an option for mitigation alerts to color the incoming ability name by its CC type. Adjusted a few menu options for syntax to accommodate for this change.
 - Bar Highlight - Fixed an issue where Crystallized Shield and its morphs would throw a UI error when taking damage with this component enabled.
 - Bar Highlight - Fixed an issue where the bar highlight for Argonian and Khajiit Summon Shade and its morphs didn't function properly.
 - Bar Highlight - Subterranean Assault now shows a 6 second timer when cast to track the full duration of its effect.
 - Crowd Control Tracker - Added new color options for Knockback & Pull/Levitate effects.
 - Crowd Control Tracker - Fixed an issue where unbreakable buffs would turn from the Unbreakable Color to default CC color when the break free animation played.
-
-Combat Text
-
 - Reset the default bleed damage color to red. This change will apply once when loading the addon and save any changes you make after.
-
----
-
-### Version 6.2.5
-
-Buffs & Debuffs
-
 - Optimized and reorganized the filtering code, now prominent effects will always show even when long or short-term effects are hidden.
 - "Fake" buffs such as Sneak, Disguised, and Mounted can now be displayed as prominent.
 - Updated the tooltips for Major/Minor Endurance, Fortitude, and Intellect to reflect their new % values.
@@ -714,55 +1023,19 @@ Buffs & Debuffs
 - Fixed an issue where the Target Iron Atronach, Trial was displaying duplicate buffs.
 - Updated tracking for Off Balance Immunity. Now you can set this as a Prominent Buff to track the effect on the player or a Prominent Debuff to track the effect on targets.
 - Fixed an issue where adding/removing a buff/debuff from Prominent Effects or from the Blacklist would reset the buff container anchoring.
-
-Combat Text
-
 - Combat Text automatically hid some resource regeneration/drain effects that could be slightly spammy (Bull Netch for example). This is no longer the case and instead buttons have been added to the blacklist menu for class abilities that are spammy. By default the stamina drain from sneak is added to this blacklist.
-
-Slash Commands
-
 - Updated the /cake command to use the 2021 Jubilee Cake.
 - Updated the /campaign command to work with campaigns added more recently. Thanks to TarodBOFH for discovering this issue.
-
-Unit Frames
-
 - Mousing over the XP Bar on the player frame will now show "Max XP" and hide enlightened status details if the player is at max Champion Points (to mimic the behavior of the default XP bar).
-
----
-
-### Version 6.2.4
-
-General
-
 - Fixed an issue where Combat Text was throwing UI errors for Bleed abilities. I missed that a DAMAGE_TYPE_BLEED was added with this patch as a new damage type for bleeds.
 - Fixed an issue where the Global Cooldown Tracking component of Combat Info was throwing UI errors.
-
----
-
-### Version 6.2.3
-
-General
-
 - Fixed various errors related to API changes from this update.
 - Attempted to fix an issue where the Combat Info Bar Highlight component threw errors when Shimmering Shield was hit on a Warden.
 - Removed a hooked function for Guild Heraldry updates that had been reported to cause errors.
 - Removed some unused icons and updated tooltips for most new Champion Point abilities.
 - A more detailed Change Log may be released in the future. This was a quick update for Flames of Ambition.
-
----
-
-### Version 6.2.2
-
-Known Issues
-
 - Due to API changes with Major/Minor effects the Bar Highlight component of Combat Info may have some issues tracking Major/Minor debuffs applied onto a target. In some cases they won't start tracking until you mouse off and back on to the target. This is due to some issues with the API that I hope are addressed in the future (although it may not technically qualify as a bug).
-
-General
-
 - Updated icons & tooltips for the new sets and Alliance War skill line consumables introduced in this update.
-
-Buffs & Debuffs
-
 - You can now independently control the alignment and sorting direction of each buff or debuff container. The new settings mirror the previous default settings, you may need to readjust some of these settings if you had modified them before.
 - You can now independently control the Horizontal/Vertical orientation of the Long Term Buffs, Prominent Buffs, and Prominent Debuffs container. The new settings mirror the previous default settings, you may need to readjust some of these settings if you had modified them before.
 - Added a new Alignment & Sorting Options submenu for the changes above to make changing these settings easier.
@@ -770,97 +1043,43 @@ Buffs & Debuffs
 - The toggle option for Cyrodiil buffs now only applies to Cyrodiil Scroll bonuses. Emperorship Alliance Bonus & Blessing of War will now always display (Note: The toggle setting for Battle Spirit is separate and remains unchanged).
 - The options for Consolidating Major/Minor effects has been removed due to API changes to Major/Minor effect handling.
 - Custom icons for Major/Minor effects from Potions/Poisons have been removed due to API Changes and the menu option for toggling these icons has been removed (Note: The option to toggle the default icons for Major/Minor Slayer/Aegis remains).
-
-Combat Info
-
 - Removed the "Highlight Secondary Id" option from Bar Highlight settings. This applied to all of about 2 or 3 abilities before (The magicka regen buff for Honor the Dead for example) that now always display when Highlight is enabled.
-
----
-
-### Version 6.2.1
-
-Known Issues
-
 - Currently no chat announcement/alert will display when another player joins your group. This is due to the API Event for group members joining (EVENT_GROUP_MEMBER_JOINED) not triggering properly when players join. I've reported the issue so hopefully it is addressed by the next major game update.
-
-General
-
 - Added the option to mount as a passenger to the Player to Player interact wheel. I'm not sure if passenger mounts have been added onto the live server yet.
 - Added a cast bar for mounting as a passenger and Crowd Control tracker will now display the stun effect if you get dismounted while riding as a passenger.
-
-Buffs & Debuffs
-
 - Fixed an issue where the color for the radial border of debuffs was black instead of red due to some testing I was doing and forgot to revert.
 - The mounted buff has been updated to specify whether you are mounted or riding as a passenger.
 - Updated the Thief Mundus Stone tooltip to reflect the reduced critical chance from the changes made in game update 6.1.6.
-
-Chat Announcements:
-
 - Fixed an issue where a UI error would occur when you hit Champion Level on a character with Alerts for level up enabled. Also fixed this chat announcement & alert to display the champion system icon properly.
-
-Combat Info:
-
 - Crystal Fragments will now only play its proc sound when the buff is initially gained and not when it is refreshed. This is due to an issue with its implementation - it can actually proc off of itself when you fire the instant cast frag but the buff is consumed during the GCD as it goes off.
-
----
-
-### Version 6.2.0
-
-General
-
 - Additional RU translation completed thanks to FAR747!
 - Updated aura tracking and tooltips for all sets and player abilities changed/added in the Stonethorn update.
 - Improved the quality and added new icons for sets as well as improved many NPC ability icons.
 - Improved the quality of the cast bar icons for mementos & usable items (siege, pardon edicts, etc).
 - Added cast bars & icons for several item interactions (creating Psijic Ambrosia Recipe, Aetheric Cipher, Alliance Standard-Bearer's License, etc).
 - Fixed an issue where some ability names in tooltips weren't punctuated properly due to the base UI string SI_UNIT_NAME being changed.
-
-Buffs & Debuffs
-
 - Updated the Werewolf Timer buff. It's no longer possible to determine the duration of werewolf form due to the variance in Werewolf power drain based off passives and proximity to other Werewolves - but the bar will update based on the % power value when it is set to display as a prominent buff.
 - Added an aura that displays in combat when wearing Snow Treaders (only for self due to API limitations).
 - Updated the tooltips for Mundus Stone buffs to have consistent syntax with other buffs.
 - Updated the tooltips for Daedric Titan abilities to show the correct snare speed reduction %.
 - Hid the dummy "Death Achieve Check" buff that would sometimes display on players in Veteran dungeons.
 - The debug function to display combat and buff events in chat now prints out to chat normally (so pChat and other chat addons can save the messages).
-
-Chat Announcements
-
 - Transmutation Geodes are now added to the blacklist for Group Member Loot.
 - Removed the Mercenary Motifs from the blacklist for Group Member Loot since they are no longer anywhere near as common.
 - Fixed several issues with quest item added/removed messages, including fixing the messages for combining quest items to work properly.
-
-Combat Info
-
 - Combat Alerts: Combat alerts for nearby enemy attacks will now hide when the player is in a duel.
 - Combat Alerts: Fixed an issue where the sound toggle setting for Single Target CC Abilities wasn't updating properly due to a typo in the variable name.
 - Bar Highlight: Ground Mine abilities will now display a stack count.
 - Bar Highlight: Added tracking support for Arena Weapon Sets where it was fitting.
 - Bar Highlight: Fixed an issue where some abilities that tracked multiple effect ids weren't displaying properly.
 - Bar Highlight: Fixed an error that could occasionally occur when a ground mine effect expired.
-
-Unit Frames
-
 - Fixed an error that could occasionally occur when a player changed their title.
 - Fixed an issue where sometimes the anchored player buffs frame would clip into the extra bar (horse stamina/werewolf/siege).
 - The extra bar for Werewolf will no longer show a duration remaining on the mouseover tooltip due to changes made to the skill line, and will now refer to werewolf power as "Rage."
-
----
-
-### Version 6.1.2
-
-General
-
 - Thanks to FAR747 for doing additional translation for the RU localization!
 - Updated a few icons, including a new appropriately explosive looking icon for Vicious Death.
-
-Buffs & Debuffs
-
 - Updated the tooltips for Battle Spirit, the LFG Buff, and Thrassian Stranglers to use more consistent syntax.
 - The under level 50 player Looking For Group health & power buff is now named "Looking for Group" instead of "Looking For Group" (en localization only). I have the power to fix improper title capitalization and I will use it.
-
-Chat Announcements
-
 - Note: I made a discovery recently that when the pChat addon is enabled a lot of the loot chat messages that print multiple items out will get cut very short. This has something to do with the "Enable Copy" setting in pChat, disable this option in pChat if you want the full messages to show.
 - When crafting items, if too many items are sent to the item printer at once (currently 12+), the message will now be replaced with "too many items to display." Otherwise the message wouldn't display at all. This is probably temporary, in the future I'd like to split the items received into multiple lines.
 - Chat Printer: Added a check if the Combat Metrics addon Combat Log is enabled in order to not print messages to the CMX window if you have the "Print to Specific Tabs" option enabled.
@@ -868,70 +1087,35 @@ Chat Announcements
 - Separated the "Mail Notifications" option in Misc Announcements into a separate option for "Send/Receive" and "Errors." Errors are enabled to print to chat by default (this alters the default UI behavior of displaying an alert in the corner of the screen).
 - Added a "Stow" context option for Loot Announcements for stowing siege weapons (packing your deployed siege weapons back into your inventory).
 - Added an option in Collectibles & Lorebook Announcements (enabled by default) to only display the Center Screen Announcement for books discovered if they are in the Shalidor's Library category (normal non-lore books won't show a CSA).
-
-Combat Info
-
 - Ability Alerts: Updated the sound options for Ability Alerts to use different specific categories to give more control over the sounds played. NOTE: This is a WORK IN PROGRESS, only overland abilities are setup for this. I'm hoping to have dungeon abilities updated for the Stonethorn update.
 - Ability Alerts: Added an option to show a modifier on certain messages. Currently this is enabled by default and will add an "ON YOU!" message if something is directly targeting you. There's also a "SPREAD OUT!" modifier that will be added to AOE abilities that require the group to spread out.
 - Ability Alerts: Fixed an issue where with the "Show Nearby NPC Events" setting disabled many enemy attacks wouldn't show an alert event if they were directly targeting you.
 - Bar Highlight: Fixed an issue where hitting a Warden with Crystallized Shield (and its morphs) would throw a UI error.
 - Bar Highlight: Added a customizable threshold for displaying decimal values for Bar Highlight timers (1-30 sec duration).
 - Ultimate Percentage: Fixed an issue where sometimes when you resurrected the ultimate percentage label would show at 100% even when set to hide.
-
----
-
-### Version 6.1.1
-
-General
-
 - A ton of additional Russian translation has been done by FAR747 including localizing pet names for the buttons in the Pet Unit Frames Options. If you notice any errors with translations, reach out to FAR747 on ESOUI!
 - Added Grainy Statusbar textures to the dropdown texture options for Unit Frames (thanks to saenic).
 - Updated icons/auras/alerts/etc for Volenfell as well as improved many enemy ability icons.
 - The option to unlock default UI elements has been expanded with the ability to move the Alerts Frame, Compass, and Experience Bar.
 - Fixed an issue where when moving the Objective Capture Meter frame, the objective fill for the frame wouldn't move with it.
 - Added an option to hide ALL alerts (that display by default in the upper right corner of the screen).
-
-Buffs & Debuffs
-
 - Added a toggle option under Position and Display Options for showing useful raid debuffs applied by other players (enabled by default to mimic the current behavior).
 - Added a toggle option under Position and Display Options for showing Major/Minor debuffs applied by other players (enabled by default to mimic the current behavior).
 - Added buttons under Buff & Debuff Blacklisting to separately add Major & Minor Buffs/Debuffs to the blacklist and a button to clear all entries in the ability blacklist.
-- Added a toggle option under Custom Icon & Normalization Options to use the default icons for Major & Minor Slayer/Aegis/Courage/Toughness instead of the custom LUIE icons.
-
-Chat Announcements
-
+- Added a toggle option under Custom Icon & Normalization Options to use the default icons for Major & Minor Slayer/Aegis/Courage/Toughness instead of the custom LUIE icons..
 - Fixed the order in which Antiquity announcements display in chat (after gold/loot but before collectibles/achievements).
-
-Combat Info
-
 - Bar Highlight: Expanded the ability to hide bar label fractions with an option to show fractions when the remaining duration is < 10 seconds and hide them above that duration. Thanks to saenic for implementing this feature!
 - Ability Alerts: Fixed an issue where interrupt alerts weren't showing (thanks to Niobiritzu for finding this issue).
 - Ability Alerts: Adjusted the alert for Boulder Toss (Ogrim) to have a slight post cast duration so it remains active while the rock hurtles toward your domepiece.
-- Ability Alerts: Hid the alert for the Bear Trap dropped by some NPCs since it was pretty much pointless.
-
-Combat Text
-
-- Added a button to clear all entries in the ability blacklist for Combat Text.
-
-Unit Frames
-
+- Ability Alerts: Hid the alert for the Bear Trap dropped by some NPCs since it was pretty much pointless..
+- Added a button to clear all entries in the ability blacklist for Combat Text..
 - Added a button to add all of your CURRENTLY active pets to the whitelist for pet names. This option is useful if you are using an addon like RuESO that changes the way Pet Unit Names display.
 - Added toggle options to hide the Player Health Bar label and entirely hide the Player Health Bar. I don't recommend hiding the bar but you can still do it if you like.
-
----
-
-### Version 6.1.0
-
-General
-
 - Expanded the option to unlock default UI elements and move them with more elements (Action Bar, Subtitles, Infamy Meter, etc) as well as improved the unlock functionality.
 - Updated icons/auras/tooltips/etc to adjust for changes made to the Vampire & Werewolf skill lines and quests, as well as new sets & mythic items added in Greymoor.
 - Updated icons/auras/tooltips/alerts/etc for the abilities used by enemies in the Greymoor tutorial area and enemies and bosses in Crypt of Hearts II.
 - Updated and improved some icons for enemy abilities and player sets and improved the icons used by Sorcerer and Werewolf pets.
 - Updated some player ability tooltips to account for some of the syntax changes and tooltip improvements made by game updates.
-
-Chat Announcements
-
 - General: Fixed an potential issue that could occur with the message printer in Chat Announcements if somehow there was a gap in the index of queued messages.
 - Loot: Storage Coffer/Chest collectible items that can be purchased from vendors will now display a proper collectible link when the item is purchased.
 - Loot: Fixed an issue where the "Bracket Options" setting was not properly applying to items looted by other players.
@@ -942,9 +1126,6 @@ Chat Announcements
 - Loot: Added a context message for excavating items/gold from a dig site.
 - Loot: Added options to display Chat Announcements when a Recipe/Motif/Style is learned as well as an option to disable the default alert (upper right corner message) that appears.
 - Antiquities: Added a menu for Antiquities, allowing you to customize the display of Chat Announcements/Alerts/Center Screen Announcements when discovering a lead. You can click on the Antiquity links from Chat Announcements to open the Codex entry for them.
-
-Combat Info
-
 - Bar Highlight: Added the option to display the backbar for Bar Highlight Ability Tracking with several customization options.
 - Bar Highlight: Added a stack counter to tracked abilities.
 - Bar Highlight: Cleaned up the backend for Bar Highlight tracking, and the highlights now sync with the flipcard animations when bar swapping, making everything look a little smoother.
@@ -953,195 +1134,71 @@ Combat Info
 - Ultimate Tracking: The ultimate tracking percentage label will now cap at 100% value, and both the value and percentage labels and will update when your Vampire Stage changes or when you change your equipped gear (in case you equip/unequip a set that reduces ultimate cost).
 - Ultimate Generation: Fixed an issue where the Ultimate Generation texture sometimes wouldn't display when you were generating ultimate.
 - Combat Alerts: Added a context message for "Hard CC" for the interrupt notification for abilities that can only be interrupted by hard crowd control effects.
-
-Unit Frames
-
 - The option to move default Unit Frames up/down is now independent from the option to set them to display in a pyramid mode and both of these options now update on the fly rather than requiring a /reloadui.
-- Added a new menu for Player & Target - Bar Fill Direction in Unit Frames allowing you to choose the direction the bars fill from. This allows you to have the bars behave more similarly to the default frames.
+- Added a new menu for Player & Target [*] Bar Fill Direction in Unit Frames allowing you to choose the direction the bars fill from. This allows you to have the bars behave more similarly to the default frames.
 - Added an option to the new menu to set the value label for player/target frames to display in the center of the bar instead of having a right and left label.
-
-Slash Commands
-
 - Added a slash command and keybinding option to dismiss Sorcerer and Warden pets.
-
----
-
-### Version 6.0.9
-
-General
-
 - NOTE: Currently no changes have been made for LUIE Components for the new Vampire Skill Line, Werewolf Skill Line Changes, or any new sets & mythic items added with this update. Buffs & Debuffs will not have custom icons or tooltips, Vampire Abilities won't be correctly labeled for the purpose of hiding them in the menu settings, and Bar Highlight/Cast Bars for new vampire/werewolf abilities are not implemented. Implementing everything listed here will be the priority for the next update.
 - Updated tooltips & auras for all item sets & monster helms changed in this update as well as updated custom icons for some sets.
-
-Buffs & Debuffs
-
 - Added support for new potions/poisons added in Greymoor & fixed an issue where the tick rate was not displaying correctly in the tooltips for damaging potions and poisons.
 - Temple Guards in Cyrodiil now show the correct faction specific icon for their Stealth detection ability.
-
-Chat Announcements
-
 - Added options in the menu to display when items are used/lost for: Potion, Food/Drink, Repair Kits/Siege Repair Kits, Soul Gems, Siege Deployment, misc items such as Keep Recall Stones, and items turned in for quests.
 - You no longer need to toggle on "Display Item Loss - Destroyed Items" to show other types of messages related to inventory items being lost/used/etc.
 - Fixed a longstanding issue with the "Display Materials Used" crafting loot option. This will now show the correct item when an item is pulled from the inventory instead of the craft bag.
 - Messages for crafting materials used will now merge quantities in the case of separate stacks or items being used from multiple bags. For example if you use 30 ingots, 10 from the bank, 10 from inventory, and 10 from the craft bag - they will now just show as using 30x ingot.
 - Loot messages displayed for items being crafted/deconstructed will now merge stacks instead of displaying individually. For example if you create 10 Iron Battle Axes, you'll now see "You craft [Iron Battle Axe] x10" instead of 10 individual comma separated items.
 - Added support for any addon that uses LibLazyCrafting (Dolgubon's Lazy Writ Creator, etc) for crafting messages. You will now see item messages labeled correctly as crafted/used regardless of what tab of the Crafting interface you are on.
-
-Combat Info
-
 - Updated icons & cast bars for deploying new Siege Weapons.
 - The cast bar for deploying siege will now break when you tab in and out of the game or open an ingame window (inventory, character screen, etc).
 - The cast bar for stowing siege weapons now breaks if you exit siege mode in the middle of the cast.
-
----
-
-### Version 6.0.8
-
-General
-
 - Updated icons/tooltips/alerts/cc tracker/etc for Elsweyr Tutorial, Stros M'Kai and most of Betnikh.
 - Fixed an issue with the Loot History window displacing when you unlocked and moved its position.
 - Fixed the UI error thrown when trying to reset movable base game UI elements to their default position.
 - Fixed an issue where when learning skills with a non-english localization the names would not properly format and show ^f and ^m tags.
-
-Chat Announcements
-
 - Tweaked a few minor ordering issues with quest update message chat announcements.
 - Added some additional conditional messages for quest item acquisition/usage.
-
-Combat Info
-
 - Fixed an issue with the Dampen Magic ability used by some NPC casters throwing alerts every time the shield refreshed (whenever the shield took damage). It will now only display an alert on cast.
-
-Unit Frames
-
 - Fixed an issue where the confirmation messages for adding/removing pets to the Whitelist referred to it incorrectly as the "Pet Blacklist."
-
----
-
-### Version 6.0.7
-
-Unit Frames
-
 - Switched Pet Unit Frames to use a whitelist instead of blacklist. You must add pets to the whitelist in order for them to show up. By default no entries are added here.
 - Added five buttons to add specific pets to the whitelist - Necromancer, Sorcerer, Warden, and Item Set Pets, as well as Assistants.
 - Added a button to clear the entire whitelist.
-
----
-
-### Version 6.0.6
-
-General
-
 - Updated the icons for Flying Immunites, Boss Immunites, Major Vulnerability Immunity, Off-Balance Immunity, Minor Toughness, as well as the icons for Major and Minor Aegis, Slayer, and Courage.
 - Added an option to the base LuiExtended menu to unlock several default UI elements - Quest Tracker, Battleground Score, Loot History, and Equipment Status.
-
-Buffs & Debuffs
-
 - Housing Target dummies will now display a "Boss Immunities" buff.
 - Added a "Custom Icon & Normalization Options" menu to Buffs & Debuffs. Added 3 individual options in this menu that allow you to toggle the custom icons for potion/poison/status effects that have a major/minor effect with the major/minor effect icon. The option for poisons is enabled by default.
-
-Chat Announcements
-
 - Added an option to display "Container" loot messages in Chat Announcements when you empty a container item in your inventory and it is removed.
 - Fixed some minor timing issues with the Chat Printer (the chat printer operates on a 50ms throttle to allow any event messages to be properly ordered - some events don't properly line up so they now delay the printer slightly so all queued messages display simultaneously.
 - The throttle settings for Tel Var Stones no longer apply to stones when looting them from a chest/container.
 - Achievement Tracking Categories are now hardcoded into the menu so I don't have to update the categories with each game update. This will cause these settings to reset for anyone who modified them.
 - Added an option to always show the Center Screen Announcement for Achievement Completion even if you have the category filtered out. This is how Achievement Tracking worked before this option was implemented - so it is enabled by default.
-
-Slash Commands
-
 - Using the /friend Slash Command now displays a prompt confirming the name entry & allows you to type a note to that person.
-
-Unit Frames
-
 - Unit Frame names will no longer abbreviate to "..." when cut off and will now truncate instead. This allows for better use of the frame space.
 - Added resurrection monitoring status to Group & Raid Unit Frames - now you will be able to see when a target is being resurrected, has a pending resurrection, or is self-reviving. This label updates dynamically and replaces the "Dead" label when one of these conditions is met.
 - Updated the right click handler for custom Group Unit Frames to allow you to request to add the player as a friend.
 - Increased the default Raid Frame width by 20 units. This won't modify your current settings.
 - Added Unit Frames for pets - with a new color option for the pet bar and the option to color the bar by your Class color.
 - Added a name blacklist for the new pet frames. Entering a pet name (not case-sensitive) will hide it from displaying on your UI.
-
----
-
-### Version 6.0.5
-
-General
-
 - Updated icons, tooltips, alerts, and cc tracker for several dungeons (EH I & EH II, COA I & COA II, and Tempest Island) as well as a multitude of monster attacks.
-
-Buffs & Debuffs
-
 - Fixed an issue where the default tooltips for abilities weren't displaying in the Active Effects Window on both the keyboard and gamepad UI.
-
-Chat Announcements
-
 - Added a workaround for duplicate Quest Accepted messages displayed in chat if enabled when using Dolgubon's Lazy Writ Crafter.
-
-Slash Commands
-
 - Updated the /cake command to summon the 2020 anniversary cake and updated the icon. Too little too late at this point.
 - Slash Commands are no longer set to nil when disabled in the options menu, this means you will need to reload the UI when disabling slash commands you don't want to use. This is to stop LUIE from removing commands if another addon also adds the same slash command with similar functionality.
-
----
-
-### Version 6.0.4
-
-General
-
 - Updated icons, tooltips, alerts, and cc tracker for Crypt of Hearts I.
 - Updated and added a good chunk of improved custom icons.
-
-Chat Announcements
-
 - Fixed an issue where Friend logon/logoff messages would duplicate when using pChat, now my tatsumaki is more powerful.
 - Fixed an issue where the Center Screen Announcement for completing a lore collection for a zone that resulted in Mages Guild reputation gain would throw a UI error & fixed an issue where the Chat Announcement for this event had an icon that was colored by the default system text color.
-
-Combat Info
-
 - Fixed an issue where the fallback font variable was misnamed. This could cause the addon to fail to load if for some reason the selected font wasn't found.
 - Removed a debug line from Ability Alerts that could display when enemies used abilities.
-
----
-
-### Version 6.0.3
-
-Slash Commands
-
 - Fixed an issue where using the /fence Slash Command or Keybinding would throw an error.
 - When summoning a banker, fence, or merchant with the keybinding, your Chat Announcement setting will now determine if a feedback chat message is displayed. Note that using the slash command will still always return feedback into chat.
-
----
-
-### Version 6.0.2
-
-General
-
 - Added a keybinding option for "Leave Group."
-
-Chat Announcements
-
 - Restored the ability to print chat messages to specific chat tabs.
 - Removed the "Enable pChat Message Saving" setting and replaced it with an "Allow Addons to Modify LUIE Messages." It has the same functionality but is disabled by default. This setting can always be enabled now instead of toggling off when selecting the option to print to specific chat tabs (it still won't effect messages printed to specific tabs but will handle system messages if you choose to print those in all tabs).
 - Fixed an issue where having LibChatMessage enabled would bypass some Chat Announcements toggle settings, the most common being friends logging on & off. Now if you choose to disable these messages, they will cease to display properly.
 - Fixed an issue where promoting a player to group leader or being promoted to group leader sometimes wouldn't properly show the promotion chat message/alert.
-
----
-
-### Version 6.0.1
-
-General
-
 - Fixed an issue with the Crowd Control Tracker where "Player Set AOE" was using the setting for "Player Ultimate AOE."
 - Fixed an issue where the keybinding options for Summon Banker/Merchant were reversed (Banker key summoned Merchant and vice versa).
 - Fixed a few strings missing from the German translation.
-
----
-
-### Version 6.0.0
-
-General
-
 - DE translation has been started and populated thoroughly thanks to AmonFlorian!
 - Added keybindings to summon the new Cat Banker/Merchant from the crown store.
 - Updated tooltips, auras, icons, etc for player ability and set changes in Scalebreaker, Dragonhold, and Harrowstorm, as well as did a pass on the tooltips for all of these abilities to update and add range, normalize syntax, etc.
@@ -1154,9 +1211,6 @@ General
 - Hooked into the Keep Upgrade interface in Cyrodiil (in Keyboard and Gamepad mode). Improved the icons & tooltips as well as tooltip formatting for this menu.
 - Hooked into the Campaign Bonuses tab in the Campaign Browser (in Keyboard and Gamepad mode). Improved the icons & tooltips as well as tooltip formatting for this menu.
 - The character "Active Effects" Window in gamepad mode will now display updated tooltips properly.
-
-Buffs & Debuffs
-
 - Prominent Buffs can now be sorted horizontally in addition to the default vertical setting. May still need some testing. Thanks to AmonFlorian!
 - Added an option to display the Ability Id & Buff Type of auras in the tooltips submenu for Buffs & Debuffs.
 - Improved Tooltip formatting & extended this formatting to the character "Active Effects" Window.
@@ -1173,9 +1227,6 @@ Buffs & Debuffs
 - Some buffs & debuffs were not able to be blacklisted (due to being "fake" effects) created using Combat Events instead of Effect Events. Added blacklist support for these auras.
 - Stone Giant's "Stagger" debuff will now show for all players on a target since it effects everyone attacking the target, and any Dragonknight can contribute to refreshing the stacks.
 - When the werewolf transformation timer is added to prominent buffs, it will now display the timer bar properly.
-
-Chat Announcements
-
 - Print Chat to multiple tabs is disabled currently due to significant changes that were made to the chat API - will hopefully be reimplemented in the future. You can still toggle timestamps for LUIE messages on/off.
 - Added additional achievement tracking categories for the new DLC.
 - Added a submenu into Collectible Options to enable the display of a chat message or alert when a Collectible in the Vanity Pets, Assistants, Ability Skins or one of the Appearance Changes is used.
@@ -1187,13 +1238,11 @@ Chat Announcements
 - Updated many handlers for various Chat Announcement components for API changes made over the last couple years. I will be adjusting these on each update in the future instead of letting myself get behind. A few things that weren't working should be now.
 - Added some new support to changes made to the Guild API (when roster was added). Guild rank changes will now display with better information thanks to some new events added in the API.
 - Did a pass on the Group Finder chat announcements. The event sequence for group finder is an absolute chaotic mess, but from my testing done on the PTS everything appears to display cleanly, with proper alerts for leaving/entering queue, ready check failure reasons, and entering an LFG activity. I have to hide all group events when an LFG group forms because a mess of party leaving/joining/leader changing happens during it. Hopefully with live server lag during busy times this will still function properly.
-
-Combat Info
-
 - Implemented the features of Miat's Crowd Control Tracker into LUIE (with permission, thanks to dorrino!). This version of the crowd control tracker is enhanced with several new features.
-  - Display a different border color based on the type of CC applied (including unbreakable cc).
-  - Choose a custom sound to play when effected by CC.
-  - Display an alert when standing in hostile AOE effects with various toggleable categories and different sounds options for each. This list requires manual input but I have player skills added, most overland mobs and have at least made some progress adding dungeon/arena abilities.
+- Display a different border color based on the type of CC applied (including unbreakable cc).
+- Choose a custom sound to play when effected by CC.
+- Display an alert when standing in hostile AOE effects with various toggleable categories and different sounds options for each. This list requires manual input but I have player skills added, most overland mobs and have at least made some progress adding dungeon/arena abilities.
+
 - Updated many abilities in Combat Alerts with better duration tracking and proper CC types.
 - Bar Highlight tracking now supports tracking multiple ability id's, resulting in the ability to track ground mine durations & their effects individually and to track both the physical & magical dot from Soul Trap and so on.
 - Updated Bar Highlight tracking to handle API changes made in Scalebreaker. The bar highlights were being refreshed too quickly which could lead to performance issues and resulted in a stuttering effect occuring on the "proc" animation highlight.
@@ -1204,130 +1253,52 @@ Combat Info
 - Toggling the LUIE ultimate tracker on disables the default UI ultimate tracker to stop overlap from occuring.
 - The ability alerts component has had some functionality updates. These are mostly backend feature changes that allow me to get around some of the limitations of the API to display better sources for effects that don't provide them etc, by using manual values.
 - Made some changes to interrupt detection for the cast bar due to changes due to API changes. The castbar should now cancel when the player bashes or blocks if those actions can break the cast (Harrowstorm added the ability to bash the air to interrupt channeled effects).
-
-Combat Text
-
 - Fixed an issue where the font selection wasn't working properly and would always use the default game font.
 - Combat Text font selection is now sorted alphabetically like most other long dropdown selections.
 - Added a slider to control the speed of Combat Text, thanks to AmonFlorian!
 - Added an ability blacklist menu to Combat Text. This functions in the same way as the Buffs & Debuffs blacklist - you can blacklist by AbilityId or AbilityName.
 - Fixed an error where the setting for Throttling Critical Hits was being reset when the setting for Throttling normal hits was toggled.
 - Throttle for Critical Hits menu option is now disabled when Throttle for normal hits is disabled.
-
-Slash Commands
-
 - Added a menu option to choose between the old banker/merchant or the cat banker/merchant for their respective slash commands.
 - Any slash command that uses a collectible will now display a message in chat when the collectible is summoned or unsummoned.
-
-Unit Frames
-
 - Toggling the LUIE overlay on for default unit frames now disables the default UI unitframe text menu option to stop overlap from occuring.
-
-Art Assets
-
-- Custom Art Assets by and modified from J. W. Bjerk (eleazzaar) licensed under the CC BY 3.0 license (<https://creativecommons.org/licenses/by/3.0/>)
-- Custom Art Assets by and modified from AKiZA, Angelina Avgustova, Blade Dancer, ClayManStudio, Cool Art, Dayed, Digital Worlds JSC, Ever Probe, HOSE, Jon Snow, Josch, Kalle Olli, Little Sweet Daemon, MiDaEm, Moon Tribe, N-hance Studio, PONETI, REXARD, Sky Painter, The 7 Heaven, TiGame, and TonityEden licensed under the Unity Store single entity license. (<https://unity3d.com/legal/as_terms>)
-- Custom Art Assets by and modified from a-ravlik, Horski, and micart licensed under the GraphicRiver regular license. (<https://graphicriver.net/licenses/terms/regular>)
-- Custom Art Assets by and modified from damnwing, Forrest Imel, Frostwindz, and Ruixi licensed under the GameDevMarket.net pro license. (<https://www.gamedevmarket.net/terms-conditions/#pro-licence>)
-- Custom Art Assets by and modified from Combo 21 licensed under the construct.net asset license. (<https://www.construct.net/en/game-assets/asset-licenses>)
-
----
-
-### Version 5.9.4
-
-General
-
+- Custom ability icons by and modified from eleazzaar licensed under the CC[*]3 License (<https://creativecommons.org/licenses/by/3.0/>)
+- Custom ability icons by and modified from AKiZA, Angelina Avgustova, Blade Dancer, ClayManStudio, Dayed, Digital Worlds JSC, Ever Probe, HOSE, Jon Snow, Josch, Kalle Olli, Moon Tribe, N-hance Studio, PONETI, REXARD, Sky Painter, The 7 Heaven, TiGame, and TonityEden licensed under the Unity Store single entity license. (<https://unity3d.com/legal/as_terms>)
+- Custom ability icons by and modified from a-ravlik & micart licensed under the GraphicRiver regular license. (<https://graphicriver.net/licenses/terms/regular>)
+- Custom ability icons by and modified from Forrest Imel, Frostwindz and Mizuko licensed under the GameDevMarket.net pro license. (<https://www.gamedevmarket.net/terms-conditions/#pro-licence>)
 - Fixed an issue where initiating a vote kick on a party member in LFG through the Player to Player interaction menu would throw a UI error due to referencing a renamed function.
 - Fixed an issue where recieving Crown Store gifts through the Notifications prompt would cause a Protected Call error. Unfortunately this means accepted/declined response text from sending various invite types to the player will no longer work. I'll have to find another way to handle this in the future.
-
-Buffs & Debuffs
-
 - Updated the auras/icons/tooltips/bar highlight, etc for all Necromancer skill line active and passive skills.
-
-Chat Announcements:
-
 - Fixed an issue where inviting a player to the guild would display duplicate Guild Member joined messages (since the player invited is added to the roster). Thanks to Eearslya Sleiarion for this fix!
 - Updated the currency announcements to correctly display "Earn" context message for Defensive Keep Ticks.
-
-Combat Info
-
 - Updated a significant amount of enemy abilities for Active Combat Alerts (more alerts now show the correct cast time and cc type).
-
----
-
-### Version 5.9.3
-
-General
-
 - Fixed a missing local in Hooks.lua & adjusted the load order in order to fix an issue wcausing Friend Invites to throw a UI error.
 - Death Recap will now show a source for some environmental effects that used to display with no source (a good example is some variants of traps in areas would source the damage they deal from the player instead of the trap).
-
-Buffs & Debuffs
-
 - Updated icons, auras, and tooltips for the remaining item sets added with Elsweyr.
 - Updated MOST icons, auras, tooltips, and bar highlight for Volendrung artifact weapon abilities. Still missing any effects not present or usable in the tutorial quest.
 - Updated icons, auras, tooltips, and bar highlight for the Grave Lord Necromancer skill line.
 - The Crusher & Weakening Glyph debuffs will now show for all players on targets regardless of who applied it.
 - Removed some code used to create a fake "Home Keep" buff for players in Cyrodiil due to the changed in Elsweyr showing a proper buff again.
 - Added icons/tooltips/alerts for Boss Wamasu in Craglorn.
-
-Chat Announcements
-
 - Updated the Achievement Tracking options with the missing category added with Elsweyr.
-
-Combat Info
-
 - The option to display the global cooldown on abilities when used now only hooks the default UI when enabled. If you disable this component and prefer to use another addon for handling the GCD, it is now possible.
 - Fixed a few missing strings for the default variables for Combat Alerts. These default variables have been adjusted to automatically replace the settings that were incorrect.
 - Combat Alerts now fade out over 1 sec when the effect ends for a cleaner appearance.
 - Combat Alert cast/channel time tracking has been updated to be more accurate.
 - Updated the Cast Time & CC type of many alerts. This is still a work in progress, unfortunately the majority of channeled abilities in game don't provide the correct duration in the API settings so I have to check them manually which is rather time consuming.
 - Added basic support for interrupt detection for Combat Alerts. This doesn't work in all situations, anything not directly targeting the player or creating a buff effect doesn't provide enough information to determine if an ability was interrupted.
-
-Combat Text
-
 - Added two toggles to show Overkill/Overhealing in the Common Options menu of Combat Text. These are enabled by default, resulting in damage/healing being displayed the same way it was before the API changes made with Elsweyr.
-
-Unit Frames
-
 - Added an option to swap the position of the Stamina & Magicka Bar when using the Pyramid or Separate Frames option. Contributed by Eearslya Sleiarion, thanks!
-
----
-
-### Version 5.9.2
-
-General
-
 - Removed LibStub dependency since it is embedded in both libraries LuiExtended depends on.
 - Fixed an issue with the function that loaded LMP that could cause UI Errors.
-Buffs & Debuffs
 - Fixed an issue with the Werewolf Buff Icon Option that would cause UI errors when you died in Werewolf form.
-Combat Info
 - Added localization and updated tooltips for some of the menu options for Combat Info Alerts.
-
----
-
-### Version 5.9.1
-
-General
-
 - Removed embedded libaries, you will now need to download LibAddonMenu and LibMediaProvider separately.
 - Fixed an issue where LUIE wasn't dependent on LibStub which could cause the addon not to load correctly.
-Buffs & Debuffs
 - Fixed an issue where a missing variable was causing the "Show Icon for Active Assistant" option to throw UI errors.
 - Added custom icons for a few sets added in Elsweyr.
-
----
-
-### Version 5.9.0
-
-General
-
 - Streamlined and updated some code present in modules, which probably won't be noticeable at all but may cause a slight performance increase.
 - Russian translation updated thanks to @amanozako
-
-Buffs & Debuffs
-
 - Added an option to toggle whether detailed tooltips display on mouseover and to assign a "sticky tooltip" duration to stop them from fading instantly when mousing off.
 - Updated tooltips, auras, icons, etc for all player abilities & sets changed in Elsweyr. New sets/Necromancer abilities are not done yet.
 - Updated auras for various shared vanilla dungeon boss abilities as well as updated specific auras in Elden Hollow II, Banished Cells I & II, and Spindleclutch II
@@ -1339,165 +1310,63 @@ Buffs & Debuffs
 - Fixed an issue where UI errors would appear when wearing the Dunmer Cultural Garb disguise or when wearing a Guild Tabard when doing the Arenthia questline in Reaper's March.
 - Roll Dodge Fatigue now displays stacks each time you roll dodge, and specifies it costs 33% more per stack in the tooltip.
 - Bolt Escape Fatigue tooltip updated to indicate more clearly that the cost is increased by 50% per stack.
-
-Combat Info:
-
 - Added a new Combat Alerts component, this is a revamp from the Combat Text alerts moved into this component.
 - New combat alerts now throttle by 50 ms in order to filter out dummy/bad events (out of range, etc) to prevent possible spam.
 - New combat alerts have the option to display a sound, a countdown label for the cast time of the ability, as well as color the icon border based off the type of CC the ability applies.
-
-Combat Text:
-
 - Fixed an issue introduced on the PTS due to EVENT_ACTION_SLOT_ABILITY_SLOTTED being removed.
 - Removed the Combat Alerts menu and settings, this component has been updated and moved to Combat Info.
 - Due to the above change, the "Always Hide Ingame Tips" option has been removed. You can now toggle on/off the display of ingame tips independently from LUIE's combat alerts.
-
-Unit Frames:
-
 - Added class color option for Necromancer class.
-
-Known Issues:
-
 - Some food tooltips may not be right (ZoS hasn't updated them). If they are not fixed with the live update of Elsweyr I will adjust them.
 - Most combat alerts don't have a timer added yet nor do they show the type of crowd control incoming as this must be done manually on my end.
 - I haven't had the chance to sort through Necromancer abilities yet so Combat Info Bar Highlights may not be working/accurate for all abilities.
 - The menu options for Combat Info - Active Combat Alerts are still work in progress and not localized for RU translation.
 - The timer bar for the Werewolf buff indicator if you add it to prominent buffs does not work correctly.
-
----
-
-### Version 5.8.1
-
-General
-
 - Added updated auras for more dungeons - Elden Hollow II, COA I & II, Tempest Island, Selene's Web, and Spindleclutch I & II and updated a few various icons for enemy abilities.
 - Fixed a bug where LUIE was causing Guild Trade search history to not display correctly, thanks to scorpius2k1 for discovering the source of the issue.
 - Updated the Changelog to no longer use LibMsgWin, it now uses much simpler and clean xml code to generate the log, thanks to psypanda.
-
-Buffs & Debuffs
-
 - Buff sorting updated - Now buffs will sort Toggle > Ground/Unlimited Duration > others and those will all sort alphabetically relative to their categories.
 - Lots of various table cleanup and minor optimization.
-
-Chat Announcements
-
 - Fixed an error that could occur when crafting items when switching between crafting tabs with items queued in Multicraft or with other addons like Dolgubon's Lazy Writ Crafter. Note the chat log output may not be correct when this happens - but it should no longer cause a UI error.
-- Fixed an issue where the Quest Items in your inventory would display [Received] messages when you log into a character for the first time. While the UI does send the events for this, LUIE just ignores it on login now.
-
-Combat Text
-
+- Fixed an issue where the Quest Items in your inventory would display [Received] messages when you log into a character for the first time. While the UI does send the events for this, LUIE just ignores it [B]on login now.
 - Updated filtering for combat alerts, there should no longer be duplicate alerts displayed from the same ability.
 - Added a new option for Alerts to display Unmitigatable Effects - was prompted to do this by a few dungeon abilities that you can't avoid.
-
-Slash Commands
-
 - Added new commands for /cake (/anniverary), /pie (/jester), /mead (/newlife), and /witch (/witchfest) to use the Event XP Boost mementos.
 - Added the /report 'name' command - which open the "Report a Player" window and autofills it with useful information.
-
----
-
-### Version 5.8.0
-
-General
-
 - Updated auras/icons/tooltips/cast bar/etc for all Player Abilities, Siege Weapons/Repair Kits, any missing & new item sets.
 - Updated auras/icons/tooltips/combat alerts/etc for almost all basic NPC abilities, and started working on Dungeon abilities.
-
-Buffs & Debuffs
-
 - Prominent Buffs will now display even when ALL OTHER BUFF/DEBUFF options are turned off. This was always the intended behavior, but was not working due to a massive oversight on my part.
 - Added a new toggle option for Ground Damage/Healing Auras - when enabled a debuff aura will be displayed when you are standing in a ground aoe effect (e.g. Arrow Barrage)
 - Fixed an issue where dropping a new rearming trap after only 1 of the 2 traps was consumed would result in two mine auras showing.
-
-Chat Announcements
-
 - When looting multiple bodies at once - multiple items with the same ID are now combined into a single count. This significantly reduces the amount of spam loot logging generates.
 - Updated the Achievement Options with the new category added in Wrathstone and fixed an issue where only some categories would toggle off correctly.
-
-Combat Info
-
 - Cast Bar - The cast bar will now automatically break when certain actions are taken, such as roll dodging.
 - Cast Bar - Added functionality to break the cast bar on movement for casts where this happens, as well as fixed various issues with the cast bar not refreshing when interrupting your cast & attempting to recast before the bar finished.
 - Ability Bar - Updated the default "Activation Highlight" effect (e.g. Shadow Image Teleport) to now loop the visual effect on the bar rather than playing only once.
 - Ability Bar - Guard and its morphs now display the Toggle Highlight visual effect used by other toggle effects (e.g. Mend Wounds) when active instead of just turning into an "X" icon on the bar.
-
-Combat Text
-
 - Updated Combat Alerts to work toward making them less spammy (requiring specific criteria for each ability when cast, and applying a refire delay when various error events such as an NPC being out of range are detected).
 - Added "Summon" alerts to Combat Alerts - notifying you if an enemy summons an add.
 - Fixed an error where the Interrupt message on Combat Alerts was displaying as "01Interrupt" due to a syntax error in the default color.
 - Hid a few snares that rapidly refire from ground auras or other effects that would result in spam when you were immune to them.
-
-Unit Frames
-
 - Fixed an issue introduced on the PTS where Player Names on the Group Unit Frames were being displaced from their proper positions.
-
----
-
-### Version 5.7.3
-
-General
-
-- Significantly updated the Russian localization, as well as fixed an error causing RU strings not to load at all. Thanks KiriX!
-
-Buffs & Debuffs
-
-- Updated tooltips & some auras/icons for all Weapon, Armor, Soul Magic, and Werewolf Skills.
-
-Combat Info
-
-- Fixed a few abilities that had broken Bar Highlight functionality and did some minor cleanup with this functionality.
-
----
-
-### Version 5.7.2
-
-General
-
-- Fixed typos in the RU localization that was causing UI errors. Thank you Jmopel for fixing this!
-- Fixed an issue with the hook for the Skill Window to add custom passive/racial icons that prevented Harven's Improved Skills Window from working correctly.
-
-Buffs & Debuffs
-
-- Added tooltips for all Warden abilities & for melee weapon abilities.
-- Fixed broken tooltips on Stealth-Draining / Conspicuous Poison.
-- Added an aura for the new ID used for Dismount Stun.
-- When "Hide Duplicates in Paired Auras" is toggled in SCB, the Active Effects window on the character screen will also hide the auras.
-
-Chat Announcements
-
-- Occasionally "Champion Point Gained" Center Screen Announcements can trigger at the same time, causing the output to display the wrong Champion Points gained. Added a small throttle to prevent this.
-
-Combat Info
-
-- Added a redundant check in Combat Info to stop possible duplicate controls for Bar Highlight from being created and throwing UI errors.
-
-Combat Text
-
-- Reset the "Interrupt" notification color due to a formatting error that occured.
-
----
-
-### Version 5.7.1
-
-Unit Frames
-
-- Fixed an issue where the default Player / Target / Group frames would fail to display even when enabled in the menu. This setting has been updated and the Saved Variables have been reset. Default Frames will be disabled by default and can be re-enabled by changing the menu option.
-
----
-
-### Version 5.7.0
-
-General
-
+- General: Significantly updated the Russian localization, as well as fixed an error causing RU strings not to load at all. Thanks KiriX!
+- Buffs & Debuffs: Updated tooltips & some auras/icons for all Weapon, Armor, Soul Magic, and Werewolf Skills.
+- Combat Info: Fixed a few abilities that had broken Bar Highlight functionality and did some minor cleanup with this functionality.
+- General: Fixed typos in the RU localization that was causing UI errors. Thank you Jmopel for fixing this!
+- General: Fixed an issue with the hook for the Skill Window to add custom passive/racial icons that prevented Harven's Improved Skills Window from working correctly.
+- Buffs & Debuffs: Added tooltips for all Warden abilities & for melee weapon abilities.
+- Buffs & Debuffs: Fixed broken tooltips on Stealth-Draining / Conspicuous Poison.
+- Buffs & Debuffs: Added an aura for the new ID used for Dismount Stun.
+- Buffs & Debuffs: When "Hide Duplicates in Paired Auras" is toggled in SCB, the Active Effects window on the character screen will also hide the auras.
+- Chat Announcements: Occasionally "Champion Point Gained" Center Screen Announcements can trigger at the same time, causing the output to display the wrong Champion Points gained. Added a small throttle to prevent this.
+- Combat Info: Added a redundant check in Combat Info to stop possible duplicate controls for Bar Highlight from being created and throwing UI errors.
+- Combat Text: Reset the "Interrupt" notification color due to a formatting error that occured.
+- Unit Frames - Fixed an issue where the default Player / Target / Group frames would fail to display even when enabled in the menu. This setting has been updated and the Saved Variables have been reset. Default Frames will be disabled by default and can be re-enabled by changing the menu option.
 - Did some various minor optimization, removing some old and un-needed functions and adjusting a few functions that were enabled all the time to only be used when relevant options are enabled.
 - Fixed font paths for non-English localizations.
 - Updated Russian localization with many new translations from KiriX. Thank you!
 - Fixed an issue where the new icons added for Cyrodiil Campaign Bonuses were clipping through the rounded frames in the Campaign Window.
 - Reimplemented custom icons in the Skills Menu & Skills Advisor for Racials & Various passive skill lines.
-
-Buffs & Debuffs
-
 - Fixed an issue where the Mount icon wouldn't disappear when dismounting in any other way than pressing the mount key. This is due to an issue with the API that should be addressed in a later ESO update.
 - Fixed various minor issues with buffs & debuffs from changes made in the Wolfhunter & Murkmire updates.
 - Updated tooltips for Champion abilities.
@@ -1506,14 +1375,11 @@ Buffs & Debuffs
 - Added duration into most toolips and updated the functions used for this to pull accurate values.
 - Updated tooltips for almost all item sets (missing Rewards for the Worthy Sets) and all Classes except Warden. Other skill lines will be processed in the future.
 - Added a timer to the "Battleground Deserter" debuff - and moved it into the long term effects container if enabled.
-- Started adding support to add a "G" label on any buff/debuff effect that is applied while the player is standing in a ground AoE effect. This is only implemented on some abilities but will be expanded in the future.
+- WIP - Started adding support to add a "G" label on any buff/debuff effect that is applied while the player is standing in a ground AoE effect. This is only implemented on some abilities but will be expanded in the future.
 - Fixed an issue where some undispellable debuffs (read by the game API as buffs) weren't set to debuffs in the Character Screen Active Effects Panel.
 - "Crystal Fragments Proc" has been renamed to "Crystal Fragments." If you are tracking it by name in a prominent container you will need to update the name. The abilityId remains unchanged.
 - Fixed an issue where Prominent buffs with an unlimited duration would duplicate auras when you zoned into a new aura.
 - Added fake buffs for Home Keep Bonus & Edge Keep Bonuses to Player/Target when Cyrodiil Buffs are enabled.
-
-Chat Announcements
-
 - Added currency message options for Event Tickets.
 - Fixed an issue where sometimes when rapidly looting/stealing items the message context would switch back from looted/stolen to "received."
 - Fixed an issue causing Tel'var Stone and Alliance Point transactions not to display the amount of currency spent with the merged message option enabled.
@@ -1521,31 +1387,19 @@ Chat Announcements
 - Added a note to specify that the "Show Used Crafting Items" option in Loot Announcements doesn't work properly without ESO Plus.
 - Fixed achievement tracking categories missing with the Murkmire update.
 - Fixed a UI Error that would occur from Disguise Alerts during "The Colovian Occupation" quest in Arenthia in Reaper's March. This quest puts you into a disguised state without an item in your disguise slot which was causing errors.
-
-Combat Info
-
 - Added a cast/channel bar for various mementos (replacing the icons that showed on buffs & debuffs previously).
 - Added a cast/channel bar for some seasonal quest events & items (replaced the icons that showed on buffs & debuffs previously).
 - Fixed an issue causing Crystal Fragments proc not to play a sound or be tracked.
 - Fixed a few missing Bar Highlight trackers.
 - Fixed an issue introduced with Murkmire where Bar Highlight & Ultimate Tracking was not behaving properly due to relying on a function no longer used by the API.
-- Dragonknight: Updated the icon for Power Lash to stand out a little more from Molten Whip.
-- Nightblade: Shadow Image now has a unique icon (with similar colorization to the new green color for Incapciating Strike when the player is above 120 ultimate).
-- Nightblade: The Proc Icon for Grim Focus and its morphs now shows the remaining timer for Grim Focus on it.
-- Sorcerer: Unstable Familiar & Summon Winged Twilight abilities now use different icons on their bar/for their effects. The icons matching the base icon are ingame but for some reason not used.
-
-Combat Text
-
+- Dragonknight - Updated the icon for Power Lash to stand out a little more from Molten Whip.
+- Nightblade - Shadow Image now has a unique icon (with similar colorization to the new green color for Incapciating Strike when the player is above 120 ultimate).
+- Nightblade - The Proc Icon for Grim Focus and its morphs now shows the remaining timer for Grim Focus on it.
+- Sorcerer - Unstable Familiar & Summon Winged Twilight abilities now use different icons on their bar/for their effects. The icons matching the base icon are ingame but for some reason not used.
 - Added an option to display Group Member Deaths (enabled by default).
 - Updated the variable names for Incoming Ability Alerts - this will reset the color for Block, Dodge, Avoid, and Interrupt notifications. In a previous update Combat Alerts were changed to support multiple colors for the different alert mitigation types to improve clarity - this resets this for anyone who wasn't aware as well as adds a blue color for interrupt instead of white.
-
-Info Panel
-
 - Info Panel no longer shows on all screens (Now hidden in menus, on the world map, and during dialogues).
 - Added an option to enable the Info Panel on the World Map Screen.
-
-Unit Frames
-
 - Added Resolution Selection options to UnitFrames, this changes the default anchors for UnitFrames.
 - Updated UnitFrame default positions to anchor relative to the center of the screen rather than top left.
 - If you are installing the addon for the first time or clearing saved variables - the default unit frames are now disabled by default.
@@ -1558,31 +1412,11 @@ Unit Frames
 - Fixed an issue where the Mount Stamina bar wouldn't toggle off properly when dismounting in any other way than pressing the mount key. This is due to an issue with the API that should be addressed in a later ESO update.
 - Fixed an issue where the shared transparency setting for Group/Raid frames under Custom Raid Frames would be disabled when Custom Group Frames were disabled.
 - Flipped the menu order for color Group/Raid Frames by Class/Role. Role color takes precendence and therefore is the later option listed in the menu.
-
----
-
-### Version 5.6.1
-
-Combat Info
-
-- Fixed an issue where Cast Bar custom position was not saving correctly.
-
-Unit Frames
-
-- Fixed an issue where Group and Raid frame Role Colors & Icons were not working (thanks SilverWF for finding the issue and fixing it).
-
----
-
-### Version 5.6.0
-
-General
-
+- Combat Info: Fixed an issue where Cast Bar custom position was not saving correctly.
+- Unit Frames: Fixed an issue where Group and Raid frame Role Colors & Icons were not working (thanks SilverWF for finding the issue and fixing it).
 - Temporarily removed custom icons for passives and racials in the skill tree due to the related functions for this being changed in the update. I intend to reimplement this in the future.
 - Fixed various localization issues with some components.
 - Moved UnitFrames, Buffs & Debuffs, Combat Text, and Info Panel components down to lower draw layers (preventing them from overlapping low priority layer custom addon windows).
-
-Buffs & Debuffs
-
 - It may have been possible for debuffs not cast by the player to display in prominent buffs - added a filter to only show debuffs sourced from the player.
 - Fake & Consolidated Buffs & Debuffs can now be added to Prominent Buffs & Debuffs or the Blacklist by AbilityId.
 - Mousing over buffs & debuffs now shows the tooltip information.
@@ -1594,20 +1428,10 @@ Buffs & Debuffs
 - Fixed an issue where NPC name based icon/name overrides for pets didn't correctly apply to the Death Recap Screen.
 - Buff Icon for Vanity Pet / Mount now shows the actual collectible icon overlaid over a background (Added an option to show the generic mount icon if desired).
 - Added cast bar for various general effects such as Filleting Fish, using Keep/Imperial City Retreat Sigils, Pardon Edicts, etc...
-- Werewolf Buff Indicator & Power Bar now behave correctly when dead/reincarnating
-- Fixed issue with Werewolf buff icon bouncing back and forth between effects that had a longer duration than it (due to forcing it to always have a maximum duration of 38 seconds).
-- Devour Cast Bar now ends when devour channel is broken
-- Devour now pauses Werewolf Timer buff when starting and resumes immediately when ending
-
-Chat Announcements
-
 - Added an option to show when items are removed by quests or events. This requires the destroyed item message display option to be enabled (Otherwise can't tell if a player just destroys an item).
 - Removed hook for EVENT_BROADCAST - stops duplicate server shutdown messages from being displayed.
 - Updated Achievement Tracking Categories to support all achievement categories (they have been branched out again with Wolfhunter DLC).
 - Added some additional conditionals to messages displayed when upgrading an item in order to prevent errors.
-
-Combat Info
-
 - Added option to resize Cast Bar & Cast Bar Icon
 - Cast Bar Frame is now centered by default, and resizing keeps the bar centered
 - Cast Bar - Significantly improved the display options when unlocking the Cast Bar in the menu to adjust position.
@@ -1615,17 +1439,11 @@ Combat Info
 - Fixed a bug where Bar Highlight effects that were created by EVENT_COMBAT_EVENT would be removed when mousing over another target.
 - Added cast bar indicators for for Main Story Quests, Fighters Guild, Mages Guild & the first 2 (about 50% of Greenshade as well) zones of AD quests.
 - Added cast bar for Soul Gem Resurrection.
-
-Combat Text
-
 - Combat Text menu completely reorganized in order to be more accessible. All options are now categorized together (I.E. all options for Outgoing Damage, Healing, etc are grouped together now rather than being split across multiple submenus).
 - Updated Alerts to use different colors for each type of alert in order to improve differentiation.
 - Updated Alerts to use conditionals to determine if "Name" or "No Name" prefixes should be used. These options have been added to the menu as well.
 - Fixed an issue where custom icons/ability names based off target name were not displaying correctly.
 - Added the silence effect from Negate Magic & Morphs to the blacklist for SCT - this will no longer spam immunity notifications every .5 seconds on CC Immune targets.
-
-Unit Frames
-
 - Fixed a major issue where Unit Frames did not properly follow the Account Wide / Player Specific saved variable settings in the menu.
 - Added right click handler for Group Frames - you can now acccess group menu functions by right clicking frames.
 - Fixed an issue where disabling the option to display the player in Small Group frames would cause the role of class color to be incorrect.
@@ -1633,47 +1451,22 @@ Unit Frames
 - Added tooltips to Custom Frames - Alternate Player Bar( for level information, Siege, Werewolf, and Mounted Status).
 - Alternate Player Bar - Champion XP bar now shows Enlightenment value.
 - Fixed an issue where frames weren't added to the "siegeBarUI" scene - causing your frames (and buffs if anchored) to fade when typing in chat or switching to mouse controls while using a Siege weapon.
-
----
-
-### Version 5.5.2
-
-Combat Info
-
-- Added a cast bar for player abilities. Has a variety of customization options and position customization.
-- Fixed an issue where bar highlight for some abilities wasn't working. Updated ground tracking and mine tracking to remove auras when ground effects end prematurely.
-
-Buffs & Debuffs
-
-- Ground based auras are now removed when a ground effect ends prematurely.
-- Updated mine tracker to work for Eternal Hunt set, Manifestation of Terror, and Frozen Gate + morphs.
-- Fixed an issue where disabling ground effects from display would not do anything - as well as fixed blacklisting ground abilities not working.
-- Updated icons and auras for base Cyrodiil buffs. Keep bonus now shows a stack counter equivalent to the number of enemy keeps your Alliance controls. Also hid some useless auras on Guards/Structures.
-- Added missing icon/name changes for pve bite variants of Lycantrophy and Vampirism precursors (evidently its a different abilityId than you get from player bites).
-- Updated a few various icons for auras & environmental hazards.
-
----
-
-### Version 5.5.1
-
-Combat Info
-
-- All bar proc abilities will now play a sound when available for use, not just Crystal Fragments.
-
-Buffs & Debuffs:
-
-- Fixed an issue with the prominent buffs font selector that could cause a UI error if an invalid font was selected.
-- The debug option for Combat Events and Effect Changes now display abilities with the name updated to reflect changes made by LUIE.
-
----
-
-### Version 5.5
-
-General Components
-
+- Werewolf Buff Indicator (Buffs & Debuffs) & Power Bar (Unit Frames) now behave correctly when dead/reincarnating
+- Fixed issue with Werewolf buff icon bouncing back and forth between effects that had a longer duration than it (due to forcing it to always have a maximum duration of 38 seconds).
+- Devour Cast Bar now ends when devour channel is broken
+- Devour now pauses Werewolf Timer buff when starting and resumes immediately when ending
+- Combat Info: Added a cast bar for player abilities. Has a variety of customization options and position customization.
+- Combat Info: Fixed an issue where bar highlight for some abilities wasn't working. Updated ground tracking and mine tracking to remove auras when ground effects end prematurely.
+- Buffs & Debuffs: Ground based auras are now removed when a ground effect ends prematurely.
+- Buffs & Debuffs: Updated mine tracker to work for Eternal Hunt set, Manifestation of Terror, and Frozen Gate + morphs.
+- Buffs & Debuffs: Fixed an issue where disabling ground effects from display would not do anything - as well as fixed blacklisting ground abilities not working.
+- Buffs & Debuffs: Updated icons and auras for base Cyrodiil buffs. Keep bonus now shows a stack counter equivalent to the number of enemy keeps your Alliance controls. Also hid some useless auras on Guards/Structures.
+- Buffs & Debuffs: Added missing icon/name changes for pve bite variants of Lycantrophy and Vampirism precursors (evidently its a different abilityId than you get from player bites).
+- Buffs & Debuffs: Updated a few various icons for auras & environmental hazards.
+- Combat Info: All bar proc abilities will now play a sound when available for use, not just Crystal Fragments.
+- Buffs & Debuffs: Fixed an issue with the prominent buffs font selector that could cause a UI error if an invalid font was selected.
+- Buffs & Debuffs: The debug option for Combat Events and Effect Changes now display abilities with the name updated to reflect changes made by LUIE.
 - Added RU Translation thanks to a ton of effort from KiriX!
-
-Buffs & Debuffs
 
 - Did a pass on ALL player skill line abilities - updated auras for all abilities with name corrections, icon corrections, and hid unneccessary dummy auras.
 - Added custom icons for the attacks used by Nightblade, Sorcerer, and Warden pet abilities.
@@ -1690,8 +1483,6 @@ Buffs & Debuffs
 - Fixed an issue where dummy auras added by target name (example: CC Immunity buff added to some boss NPCs) would display on dead targets.
 - Fixed an issue where Artifical Effect id's would not refresh when updating settings in the Buffs & Debuffs menu (dummy auras added by ZOS - such as Battle Spirit).
 
-Chat Announcements
-
 - Fixed an issue that was causing Disguise Notifications not to display even when enabled.
 - Updated Achievement Tracking options with all current categories.
 - Added Psijic Order guild reputation tracking.
@@ -1699,30 +1490,16 @@ Chat Announcements
 - Added a new context message option "Pay" for gold given to NPC's in conversation options.
 - Jewelry Crafting should now be supported by Loot crafting messages.
 
-Combat Info
-
 - Did a pass on ALL player skill line abilities - Bar Ability Highlight tracking is now supported for any ability the player can slot.
 - Bar Ability Highlight tracking now supports multi-target tracking, when changing targets the highlighted abilities will update based on what debuffs are currently applied to that target.
 - Fixed an issue where the Crystal Fragments proc sound wouldn't play due to a bad variable name.
 
-Combat Text
-
 - Fixed an issue where errors would be displayed when the Shorten Numbers option was enabled.
-
-Info Panel
 
 - Reimplemented the menu option to change the scaling on the Info Panel for higher resolution displays.
 - Mount feed cooldown notification updated from "Feed Now" to "Train Now."
 
-Slash Commands
-
 - Added the "/outfit" "#" command. Allows you to swap to an outfit. Also adding keybinding options.
-
----
-
-### Version 5.4
-
-General
 
 - Implemented an ingame changelog that will display on the first load with LuiExtended enabled when the version number is different than your current version. This changelog can also be viewed from the addon settings menu.
 - Added the option to switch between using ACCOUNT WIDE or CHARACTER SPECIFIC savedVariables settings. Profiles can be copied between characters or deleted from the addon settings menu.
@@ -1731,8 +1508,6 @@ General
 - Replaced GetSynergyInfo() hook with ZO_Synergy:OnSynergyAbilityChanged() hook in order to fix compatibility issue with Innocent Blade of Woe addon by dorrino. This is a better way to hook, as only the displayed icon is modified and the original synergy info is preserved.
 - Chat Printing settings have been moved to Chat Announcements - and updated to allow the option to print to individual tabs instead of all tabs. This allows you to have loot, experience, etc notifications only display in one chat tab. Also added a toggle to allow system/notification based messages to bypass this and still appear in all tabs. These settings have been reset to default due to this change.
 - Added an option to choose the color for timestamps prepended to chat messages.
-
-Buffs and Debuffs
 
 - Added the ability to track prominent player buffs & debuffs by name or AbilityId. Prominent containers support the ability to display the aura name and a timer bar.
 - Added the ability to blacklist buffs & debuffs by name or AbilityId.
@@ -1744,11 +1519,7 @@ Buffs and Debuffs
 - Fixed an unintentional change which modified the Line-Breaker debuff from the Alkosh set to be named "Roar of Alkosh." This should prevent Combat Metrics from combining the two debuffs when reporting uptime.
 - Fixed an issue where Off Balance Immunity wasn't displaying on targets and adjusted it to display as a buff rather then debuff. This effect can still be tracked by prominent buffs & debuffs due to its importance.
 
-Chat Announcements
-
 - Updated the default variable settings for Alliance Point, Tel Var Stone, and Experience Point notifications so throttling is enabled by default.
-
-Combat Info
 
 - Added an option to toggle on/off the display of bar highlight for secondary effects like the magicka restore from Honor the Dead or Major Savagery from Biting Jabs.
 - Added option to change the formatting of the Ultimate Percentage Label & set the default font/position to match that of bar highlight.
@@ -1757,13 +1528,9 @@ Combat Info
 - Fixed an issue where when bar ability highlight for the Ultimate slot was enabled along with Ultimate % label the two labels would overlap on application for a split second.
 - Fixed an issue where the initial bar highlight label created for effects would display the default base ability duration without compensating for the extra duration added to many abilites added by EVENT_EFFECT_CHANGED.
 
-Combat Text
-
 - Added an option to set Transparency for Combat Text.
 - Added an option to abbreviate numbers like 12345 to 12.3k.
 - Updated Incoming Ability Alerts to hide suggested mitigation options by default. Now messages will simply display incoming ability name/icon unless mitigation method notification is toggled on.
-
-Info Panel
 
 - Info Panel module has been moved to its own "LuiExtended - Info Panel" settings menu.
 - Fixed an issue where the Info Panel displayed over other UI menu's by adding it into the Scene Manager.
@@ -1771,15 +1538,11 @@ Info Panel
 - Fixed an issue where the Armor Durability indicator was clipped.
 - Removed outdated Imperial City Trophy Display & Scaling Options.
 
-Slash Commands
-
 - Slash Commands module has been moved to its own "LuiExtended - Slash Commands" settings menu.
 - Slash commands can now be enabled or disabled individually.
 - Added /banker, /merchant, /fence commands to summon assistants.
 - Added /ready command to initiate ready checks.
 - Added keybinding options for /banker, /merchant, /fence, /ready, /home & /regroup.
-
-Unit Frames
 
 - Added an option to display the AVA Icon & Rank Number independently from the Title or AVA Rank Name on Target Frames.
 - Added an option to set the priority for AVA Rank vs Title Display on Target Frames.
@@ -1788,64 +1551,29 @@ Unit Frames
 - Fixed an issue on Target Frames where rank 0 "Citizen" players would display with a rank number of "ava."
 - Fixed an issue where changing the Player Frames layout would also reset the position of Group, Raid, Boss, and AvA frames.
 - Fixed an issue where the AvA rank icon of players of the same faction was colored white. The AvA icon for players of the same faction will now display the proper faction color.
-
----
-
-### Version 5.3.2
-
-General
-
-- Updated LibAddonMenu to the latest version.
-
-Buffs and Debuffs
-
-- (WIP) Updating auras for Dragonknight Skills & added new custom icon for Power Lash (only rank 1 currently).
-- Added Debug Options in the Buffs and Debuffs Menu for EVENT_COMBAT_EVENT and EVENT_EFFECT_CHANGED - Mostly this is included for development.
-- Added option to only show one buff/debuff in paired effects (like Burning Talons or Throw Dagger that have a dot + snare/root of the same duration) - saves some space in the debuff container.
-- Vampire Stage now shows a Stack Counter dependant on the stage.
-- Did a pass on all basic overland Human NPC's and Human DLC NPC's as well as Justice NPC's and Cyrodiil Guards. Aura updates, icons & Combat Text alerts updated. Some Animal and Insect mobs have been updated as well.
-- Added ground mine aura tracker for Eternal Hunt set.
-
-Chat Announcements
-
-- Fixed an issue with the score always displaying as "nil" in VMA/DSA/Trial Announcements.
-- Hopefully fixed an issue where some users were getting error messages on login or looting related to the Laundered item function.
-- Updated Quest Loot display function to now display removed items first always instead of going in order of the item index.
-
-Combat Text
-
-- Added support for Combat Event based notifications to Alerts.
-- Added option to display new Alerts for two events.
-- Hid the notification that targets are immune to the Sacred Ground templar passive snare due to screen spam.
-
-Unit Frames
-
-- Fixed an issue where Guard -Invulnerable- HP bars would remain in the red execute range text color if mousing over them when the previous target was in execute range.
-- Show an alert when an important/powerful enemy ability is used such as significant power increases.
-- Show an alert when a priority target is spawned - enemies or objects that apply significant damage boost, damage reduction, or invulnerability. So far just used for Goblin Shaman's Aura of Protection.
-
----
-
-### Version 5.3.1
-
-Buffs and Debuffs
-
-- Fixed an issue where using Beast Trap (and its morphs) with the Buffs and Debuffs component enabled could throw UI errors.
+- Base - Updated LibAddonMenu to the latest version.
+- Buffs & Debuffs - (WIP) Updating auras for Dragonknight Skills & added new custom icon for Power Lash (only rank 1 currently).
+- Buffs & Debuffs - Added Debug Options in the Buffs & Debuffs Menu for EVENT_COMBAT_EVENT and EVENT_EFFECT_CHANGED - Mostly this is included for development.
+- Buffs & Debuffs: Added option to only show one buff/debuff in paired effects (like Burning Talons or Throw Dagger that have a dot + snare/root of the same duration) - saves some space in the debuff container.
+- Buffs & Debuffs - Vampire Stage now shows a Stack Counter dependant on the stage.
+- Buffs & Debuffs - Did a pass on all basic overland Human NPC's and Human DLC NPC's as well as Justice NPC's and Cyrodiil Guards. Aura updates, icons & Combat Text alerts updated. Some Animal + Insect mobs have been updated as well.
+- Buffs & Debuffs - Added ground mine aura tracker for Eternal Hunt set.
+- Chat Announcements - Fixed an issue with the score always displaying as "nil" in VMA/DSA/Trial Announcements.
+- Chat Announcements - Hopefully fixed an issue where some users were getting error messages on login or looting related to the Laundered item function.
+- Chat Announcements - Updated Quest Loot display function to now display removed items first always instead of going in order of the item index.
+- Combat Text - Added support for Combat Event based notifications to Alerts.
+- Combat Text: Added option to display new Alerts for two events:[LIST]
+- Important Buffs: Show an alert when an important/powerful enemy ability is used such as significant power increases.
+- Destroy: Show an alert when a priority target is spawned - enemies or objects that apply significant damage boost, damage reduction, or invulnerability. So far just used for Goblin Shaman's Aura of Protection.
+- Combat Text - Hid the notification that targets are immune to the Sacred Ground templar passive snare due to screen spam.
+- Unit Frames - Fixed an issue where Guard -Invulnerable- HP bars would remain in the red execute range text color if mousing over them when the previous target was in execute range.
+- Fixed an issue where using Beast Trap (and its morphs) with the Buffs & Debuffs component enabled could throw UI errors.
 - Fixed an issue where the aura for Beast Trap (and its morphs) ground duration tracking wouldn't be removed when the target dodged the attack.
-
----
-
-### Version 5.3
-
-General
-
-- Did a pass on custom override tables for Templar Skills, Destruction Staff, Restoration Staff, Fighter's Guild, and Medium Armor. Many effects are now fixed to show the proper names and icons for Buffs and Debuffs and Combat Text. Additionally many erroneous auras that displayed now longer show up - such as pointless placeholder effects when the healing effect from Healing Ward fading triggered. Bar Highlight tracking for Combat Info has been updated to track many more abilities both offensive and defensive in these ability categories.
+- Did a pass on custom override tables for Templar Skills, Destruction Staff, Restoration Staff, Fighter's Guild, and Medium Armor. Many effects are now fixed to show the proper names and icons for Buffs & Debuffs and Combat Text. Additionally many erroneous auras that displayed now longer show up - such as pointless placeholder effects when the healing effect from Healing Ward fading triggered. Bar Highlight tracking for Combat Info has been updated to track many more abilities both offensive and defensive in these ability categories.
 - The above support extends to additional addons if they use GetAbilityName() or GetAbilityIcon() functions - For example Combat Metrics will show the correct icon/name for incoming healing tracked from Templar/Restoration Staff skills with LUI Extended enabled. Previously many healing abilities were named incorrectly, a good example being the initial heal from Healing Ward being named "Grand Healing."
 - General cleanup - Removed some un-needed hooks and a few lines of outdated code from various components.
 - Fixed an issue due to an oudated hook function where the Skills Advisor would throw UI errors whenever an ability was learned.
 - Skills Advisor now reads custom icons used for Class passive abilities.
-
-Buffs and Debuffs
 
 - Added localization support for auras for player abilities, sets, and consumables.
 - Thanks to the API update added Death Recap list can now use AbilityId's to properly update ability Names & Icons.
@@ -1857,8 +1585,6 @@ Buffs and Debuffs
 - Added an option to toggle on/off the display of Extra Buff/Debuff icons for certain player abilities that don't normally show a tracking icon such as Dragon Blood or Restoring Focus.
 - Added an option to toggle on/off consolidation of Major/Minor buff/debuff auras from certain player abilities such as Dragon Blood or Restoring Focus.
 
-Chat Announcements
-
 - Updated currency context messages to support currency received from Level Up Rewards.
 - Updated icon for Outfit Change tokens.
 - Crafting loot messages will now display for equipped items (for the new base game feature to upgrade equipped items).
@@ -1866,191 +1592,78 @@ Chat Announcements
 - When buying a Horse from the Stable, the Item Link is now replaced with a Collectible Link.
 - Fixed an issue where a few functions wouldn't properly set item brackets based on the menu setting.
 
-Combat Info
-
 - Fixed an issue where label timers for active abilities highlighted on the Action bar would flash when a potion was used.
 - Fixed an issue where label timers for active abilities on the action bar didn't apply the label immediately upon the effect being gained (sometimes showing 0 duration or no label for a split second).
 - Updated bar tracking function to be more accurate. Bar tracking no longer starts until the actual EVENT_EFFECT_CHANGED or EVENT_COMBAT_EVENT fires.
 - Bar tracking now uses effect duration (with a custom table for fixing issues) rather than GetAbilityDuration() as these value's often don't match for ground targeted effects.
 - Reimplemented highlight animation for skills with a proc effect that change the Action Bar icon when enabled (Grim Focus + morphs, Silver Leash).
 
-Combat Text
-
 - Fixed an issue where the Ellipse style text did not properly display with the scrolling direction set to up.
 
-Unit Frames
-
 - Added multiple options to choose how to display the Player Name on UnitFrames. You can now select a different method for Player, Target, and Group/Raid.
-- Updated several Menu Options to change on the fly rather then requiring /reloadui.
+- Updated several Menu Options to change on the fly rather then requiring /reloadUI.
 - Updated several Menu Options to properly unhide the relevant frames when making customization changes.
-
----
-
-Version 5.2.8
-
 - Unit Frames - Fixed issue with Regen Arrows animation throwing errors if one of the few abilities in game that properly tries to apply a magicka or stamina regen animation is used. Now if the regeneration type isn't Health the function will end.
-
-### Version 5.2.7
-
-General
-
-- Death recap custom icon replacement temporarily disabled. New function is all set and will be implemented with the API changes when the Dragon Bones update goes live.
-
-Buffs and Debuffs
-
-- Added individual hide options for Player/Target for Food/Drink buffs & Experience buffs.
-- Updated localization for Consumables & Mementos
-
-Chat Announcements
-
-- Merged Currency and Loot context messages into one set, and moved the settings into their own Shared Submenu.
-- Added tracking options for Transmute Crystals, Outfit Change Tokens, Crowns, and Crown Gems to currency announcements.
-- Removed pointless ZO_Smithing and ZO_Enchanting hooks: these could cause other addons that hook the same function such as FCO Craft Filter and Multicraft not to work properly.
-- Added option to hide the Guild Trading House listing fee.
-- Fixed an issue where laundering/fencing items without "Merge Currency & Loot Messages" enabled would throw UI errors. Now added context messages for Fence/Launder without a gold value in case of this.
-- Fixed an issue where mail received when returned from another player would throw errors when loot or currency announcements were enabled.
-- Fixed an issue where the Group Leader changing would occasionally throw UI errors (after leaving group sometimes the event would fire).
-
-Combat Info
-
-- Can now toggle the Ultimate Value label and Ultimate Percentage label independently.
-- Can now toggle to display the duration label and glow effect on Ultimate ability. This will hide the % label for the duration of the active ability when enabled.
-- Removed IsError filter on Combat Text which was preventing immunity messages from displaying correctly.
-- Hopefully fixed an issue with Combat Text occasionally throwing error messages on Alerts with the Single Line Alert method option selected.
-
-Info Panel
-
-- Updated spacing and font format for Info Panel.
-- Adjusted the threshold for the colorization of various labels and removed the decimal place in FPS tracking.
-
-Unit Frames
-
-- Added an option to color target custom Unit Frame by Reaction type.
-- Guards now have an Invulnerable tag on their HP bar instead of displaying HP.
-- Fixed an issue where the Regen arrows animation was applied on Magicka/Stamina bar (this was never implemented in the game correctly to use and only seemed to trigger from something in Cyrodiil).
-- Fixed an issue where the alternate bar would not anchor correctly to the separate shield bar if enabled when using Horizontal or Pyramid unit frames.
-
----
-
-### Version 5.2.6
-
-Unit Frames
-
-- Fixed issue where setting menu option for player frame mode would throw errors if the custom target frame was disabled.
-- Fixed an issue where the a UI error would be displayed if the PVP Target Frame was enabled.
-- Fixed spacing issues with alternate bar below frames - now the distance should be normalized for all bar setups.
-- Moved menu for Additional Player Frame options down as well as updated a few menu strings.
-
----
-
-### Version 5.2.5
-
-Combat Info
-
-- Fixed a MAJOR PERFORMANCE ISSUE with the Show Global Cooldown function - This setting is now reset to disabled for all players using the addon. This setting now has a warning for high CPU usage.
-
-Buffs and Debuffs
-
-- Changed icons for the one hour buffs granted by completing World Boss events in Craglorn to use the achievement icons which fit far better for each buff.
-
-Chat Announcements
-
-- Moved Common Options settings for Chat Announcements to the bottom of the menu and fixed the missing header.
-- Moved the various events related to EVENT_DISPLAY_ANNOUNCEMENT into their own category in chat announcements. This currently includes: Respec Notifications, Entering/Leaving Group Area, DSA/Maelstrom Stages, Maelstrom Rounds, Imperial City Area Messages, Craglorn Buffs (new).
-- Display Announcements no longer display a debug message by default - You can now turn this setting on if you'd like to help process messages that are not yet included in the LUI Extended Options.
-- Fixed an issue where sending a COD payment would also send a duplicate "Mail sent!" message if Mail Notifications are on.
-- Fixed a UI error that would occur in gamepad mode when trying to send mail due to not being able to determine the recipient name.
-- Fixed Group Loot member names sometimes displaying as "nil"
-- Fixed an issue where UI errors would be thrown when attempting to trade after accepting a trade invite after reloading the UI.
-- Mail, Trade, and Group Loot functions now have fallback options in case the name of the target player cannot be resolved. There are new context menu strings for these messages.
-- Formerly when sending mail to an invalid player name, a currency sent and received message would print for the transaction and immediate refund. These messages are now suppressed.
-
-Unit Frames
-
-- Fixed an issue where regen/degen arrows would play the first time you moused over a target on loading the game.
-- Moved menu options into dropdown categories instead of one gigantic menu
-- Added new Player Frame Methods - You can now choose to have bars displayed in a horizontal spread out layout like the default UI, or in a Pyramid stack. NOTE: This setting will reset your custom positions and center the frames!!!
-- Alternate Bar (XP Tracker, Werewolf Tracker, Siege Tracker, Mount Stamina Tracker) is now located centered below the attribute bars. Additionally this frame will now move to the stamina or magicka bar if you have Horizontal or Pyramid Frames selected.
-
----
-
-### Version 5.2.4
-
-Unit Frames
-
-- Fixed a massive performance issue caused by the Unit Frames Regeneration Arrows overlay. This update should remove menu lag and fps drop when turning your camera or in crowded areas as well as FPS drop in combat. You may still experience some FPS hit when using the Scrolling Combat Text. Let me know if you have any major performance issues after this update.
-
-Combat Info
-
+- Base Addon - Death recap custom icon replacement temporarily disabled. New function is all set and will be implemented with the API changes when the Dragon Bones update goes live.
+- Buffs & Debuffs - Added individual hide options for Player/Target for Food/Drink buffs & Experience buffs.
+- Buffs & Debuffs - Updated localization for Consumables & Mementos
+- Chat Announcements - Merged Currency and Loot context messages into one set, and moved the settings into their own Shared Submenu.
+- Chat Announcements - Added tracking options for Transmute Crystals, Outfit Change Tokens, Crowns, and Crown Gems to currency announcements.
+- Chat Announcements - Removed pointless ZO_Smithing and ZO_Enchanting hooks - these could cause other addons that hook the same function such as FCO Craft Filter and Multicraft not to work properly.
+- Chat Announcements - Added option to hide the Guild Trading House listing fee.
+- Chat Announcements - Fixed an issue where laundering/fencing items without "Merge Currency & Loot Messages" enabled would throw UI errors. Now added context messages for Fence/Launder without a gold value in case of this.
+- Chat Announcements - Fixed an issue where mail received when returned from another player would throw errors when loot or currency announcements were enabled.
+- Chat Announcements - Fixed an issue where the Group Leader changing would occasionally throw UI errors (after leaving group sometimes the event would fire).
+- Combat Info - Can now toggle the Ultimate Value label and Ultimate Percentage label independently.
+- Combat Info - Can now toggle to display the duration label and glow effect on Ultimate ability. This will hide the % label for the duration of the active ability when enabled.
+- Combat Text - Removed IsError filter on Combat Text which was preventing immunity messages from displaying correctly.
+- Combat Text - Hopefully fixed an issue with Combat Text occasionally throwing error messages on Alerts with the Single Line Alert method option selected.
+- Info Panel - Updated spacing and font format for Info Panel.
+- Info Panel - Adjusted the threshold for the colorization of various labels and removed the decimal place in FPS tracking.
+- Unit Frames - Added an option to color target custom Unit Frame by Reaction type.
+- Unit Frames - Guards now have an - Invulnerable - tag on their HP bar instead of displaying HP.
+- Unit Frames - Fixed an issue where the Regen arrows animation was applied on Magicka/Stamina bar (this was never implemented in the game correctly to use and only seemed to trigger from something in Cyrodiil).
+- Unit Frames - Fixed an issue where the alternate bar would not anchor correctly to the separate shield bar if enabled when using Horizontal or Pyramid unit frames.
+- Unit Frames - Fixed issue where setting menu option for player frame mode would throw errors if the custom target frame was disabled.
+- Unit Frames - Fixed an issue where the a UI error would be displayed if the PVP Target Frame was enabled.
+- Unit Frames - Fixed spacing issues with alternate bar below frames - now the distance should be normalized for all bar setups.
+- Unit Frames - Moved menu for Additional Player Frame options down as well as updated a few menu strings.
+- Combat Info - Fixed a MAJOR PERFORMANCE ISSUE with the Show Global Cooldown function - This setting is now reset to disabled for all players using the addon. This setting now has a warning for high CPU usage.
+- Buffs & Debuffs - Changed icons for the one hour buffs granted by completing World Boss events in Craglorn to use the achievement icons which fit far better for each buff.
+- Chat Announcements - Moved Common Options settings for Chat Announcements to the bottom of the menu and fixed the missing header.
+- Chat Announcements - Moved the various events related to EVENT_DISPLAY_ANNOUNCEMENT into their own category in chat announcements. This currently includes: Respec Notifications, Entering/Leaving Group Area, DSA/Maelstrom Stages, Maelstrom Rounds, Imperial City Area Messages, Craglorn Buffs (new).
+- Chat Announcements - Display Announcements no longer display a debug message by default - You can now turn this setting on if you'd like to help process messages that are not yet included in the LUI Extended Options.
+- Chat Announcements - Fixed an issue where sending a COD payment would also send a duplicate "Mail sent!" message if Mail Notifications are on.
+- Chat Announcements - Fixed a UI error that would occur in gamepad mode when trying to send mail due to not being able to determine the recipient name.
+- Chat Announcements - Fixed Group Loot member names sometimes displaying as "nil"
+- Chat Announcements - Fixed an issue where UI errors would be thrown when attempting to trade after accepting a trade invite after reloading the UI.
+- Chat Announcements - Mail, Trade, and Group Loot functions now have fallback options in case the name of the target player cannot be resolved. There are new context menu strings for these messages.
+- Chat Announcements - Formerly when sending mail to an invalid player name, a currency sent and received message would print for the transaction and immediate refund. These messages are now suppressed.
+- Unit Frames - Fixed an issue where regen/degen arrows would play the first time you moused over a target on loading the game.
+- Unit Frames - Moved menu options into dropdown categories instead of one gigantic menu
+- Unit Frames - Added new Player Frame Methods - You can now choose to have bars displayed in a horizontal spread out layout like the default UI, or in a Pyramid stack. NOTE: This setting will reset your custom positions and center the frames!!!
+- Unit Frames - Alternate Bar (XP Tracker, Werewolf Tracker, Siege Tracker, Mount Stamina Tracker) is now located centered below the attribute bars. Additionally this frame will now move to the stamina or magicka bar if you have Horizontal or Pyramid Frames selected.
+- Fixed a MASSIVE performance issue caused by the Unit Frames Regeneration Arrows overlay - This update should remove menu lag and fps drop when turning your camera or in crowded areas as well as FPS drop in combat. You may still experience some FPS hit when using the Scrolling Combat Text. Let me know if you have any major performance issues after this update.
 - Added filters onto Combat Events for CombatInfo component to increase performance
-
-Unit Frames
-
 - WIP: Started to add a new method for Unit Frames to display the 3 bars separately on the bottom of the screen. This is a work in progress with menu option localization incomplete, default position incomplete, and missing functionality to move the mount/ww bar to the stamina/magicka frames.
-
----
-
-### Version 5.2.3
-
-Buffs and Debuffs
-
-- Added filters for EVENT_COMBAT_EVENT - Should help with performance issues.
-
-Combat Text
-
-- Added filters for EVENT_COMBAT_EVENT - Should help with performance issues.
-
-Chat Announcements
-
-- Added group loot print function back in (never intended to remove it).
-- Fixed an issue where inviting a player to group who could not be found would display "That player is busy" instead of "Could not find a played named "input" to invite."
-- Fixed an error that would occur when depositing items into the bank.
-- Temporarily removed EVENT_DISPLAY_ANNOUNCEMENT debug message. Think I've just about logged everything here now, thanks guys.
-
-Unit Frames
-
-- Frames no longer unhide in menus when group members change role/or leader is updated
-
----
-
-### Version 5.2.2
-
-General
-
-- Fixed a major issue causing group invites to not function when Chat Announcements was enabled.
-
-Chat Announcements
-
+- Buffs & Debuffs - Added filters for EVENT_COMBAT_EVENT - Should help with performance issues.
+- Combat Text - Added filters for EVENT_COMBAT_EVENT - Should help with performance issues.
+- Chat Announcements - Added group loot print function back in (never intended to remove it).
+- Chat Announcements - Fixed an issue where inviting a player to group who could not be found would display "That player is busy" instead of "Could not find a played named "input" to invite."
+- Chat Announcements - Fixed an error that would occur when depositing items into the bank.
+- Chat Announcements - Temporarily removed EVENT_DISPLAY_ANNOUNCEMENT debug message. Think I've just about logged everything here now, thanks guys.
+- Unit Frames - Frames no longer unhide in menus when group members change role/or leader is updated
+- Fixed a MAJOR issue causing group invites to not function when Chat Announcements was enabled.
 - Fixed an issue where using the Sell All Junk button at a vendor with Loot Announcements enabled would throw errors when more than one item was sold. The fix here is temporary (only one item will display - with the total value of gold received) until I have time to drum up a better solution.
-
----
-
-### Version 5.2.1
-
-Buffs and Debuffs
-
-- Fixed an issue with a missing function causing buffs fading to throw UI errors when Fade Out Expiring Icons is enabled.
-
-Chat Announcements
-
-- Hopefully fixed an issue where Guild Rank changes would throw UI errors when enabled. I am unable to verify this works currently due to lacking a guild to test in on the PTS.
-- Fixed an issue where all currency gain/loss would display unless you had all 4 currency types set to disabled.
-- Fixed an issue where certain functions in this component would trigger even when it was disabled in the settings menu.
-
-Combat Text
-
-- Controls renamed to "LUIE_CombatText" to prevent conflicts with other addons.
-- Added slight filter for combat events (previously a few variables were being set on every combat event even if it wasn't related to player or pet/target - now that only happens if the source/target is the player or pet)
-- Added an option (disabled by default) to hide nearby enemies abilities that don't directly target the player. This prevents spam from abilites that are happening out of range of the player when disabled. Note: These alerts still always display in dungeons since players are likely to all be in relatively the same area.
-- Fixed an issue where incoming mitigation warnings would always display even when disabled.
-- Added a missing menu option for turning Outgoing Reflects off. Additionally fixed the toggle options for reflects so Incoming displays attacks you Reflect and Outgoing displays attacked an enemy reflected.
-
----
-
-### Version 5.2
-
-General
-
+- Buffs & Debuffs - Fixed an issue with a missing function causing buffs fading to throw UI errors when Fade Out Expiring Icons is enabled.
+- Chat Announcements - Hopefully fixed an issue where Guild Rank changes would throw UI errors when enabled. I am unable to verify this works currently due to lacking a guild to test in on the PTS.
+- Chat Announcements - Fixed an issue where all currency gain/loss would display unless you had all 4 currency types set to disabled.
+- Chat Announcements - Fixed an issue where certain functions in this component would trigger even when it was disabled in the settings menu.
+- Combat Text - Combat text controls renamed to "LUIE_CombatText" to prevent conflicts with other addons.
+- Combat Text - Added slight filter for combat events (previously a few variables were being set on every combat event even if it wasn't related to player or pet/target - now that only happens if the source/target is the player or pet)
+- Combat Text - Added an option (disabled by default) to hide nearby enemies abilities that don't directly target the player. This prevents spam from abilites that are happening out of range of the player when disabled. Note: These alerts still always display in dungeons since players are likely to all be in relatively the same area.
+- Combat Text - Fixed an issue where incoming mitigation warnings would always display even when disabled.
+- Combat Text - Added a missing menu option for turning Outgoing Reflects off. Additionally fixed the toggle options for reflects so Incoming displays attacks you Reflect and Outgoing displays attacked an enemy reflected.
 - Damage Meter Component has been removed. Highly suggest using Combat Metrics instead. (<http://www.esoui.com/downloads/info1360-CombatMetrics.html>).
 - Combat Info component has been split into two components: Scrolling Combat text has been revamped and replaced with the more advanced features from the Combat Cloud addon. Combat Info has been updated with additional functionality. More details listed per component below.
 - Added an option to Hide the Experience Bar/Skill Progess Bar from popping up when the player earns XP from Experience Gain from Quests, Discover, Boss Kills, and Skill Line Updates. This is useful if you wish to place a UI component in the top left corner of your screen.
@@ -2063,8 +1676,6 @@ General
 - Adjusted menu options for various components to be more logically organized.
 - Fixed an issue where Buff/Debuff names, Combat Text messages and Item Styles did not display correctly on non-English clients.
 - Fixed an issue where the /kick SLASH command would prevent the /kick emote from being used. Now if you enter /kick without any additional input, the kick emote will be performed correctly.
-
-Buffs and Debuffs
 
 - Bar highlighting component removed and reimplemented in Combat Info component.
 - Buffs/Debuffs now display by EffectSlot instead of abilityId, this means if you have 3 searing strikes on your, they will all show as an individual debuff as you would expect.
@@ -2098,55 +1709,55 @@ Buffs and Debuffs
 - Added custom icons for Champion Point Passives
 - Added custom icon for Ayleid Well health bonus
 
-Chat Announcements
+### Chat Announcements
+
+## Version 5.2 (Clockwork City)
+
+###
 
 - Many announcements now send messages to a single printer function on a 50 ms throttle. This function interprets the messages it receives in order to print them in a logical manner. This means when a large number of messages is displayed from for example, a quest being completed, the messages will be displayed in a logical order. In addition this solves the issue where certain components used to cause an annoying scrolling effect as the messages were printed at different ms intervals.
 - Added individual options to toggle the display of [] brackets for Character/Account Name Links, Item Links, Lorebook Links, Collectible Links, and Achievement Links.
 - Most components now allow you to toggle on/off the display of Chat Announcements, Alerts, or Center Screen Announcements.
 - Significantly updated the syntax and display options for most components.
-- Hooked many functions in the game in order to provide more accurate information for commands and errors sent from ingame menus.
-- Shared: Added an option to use a single color for currency and item gain/loss instead of context based color.
-- Shared: Updated the syntax for Currency & Loot messages to display more detailed messages.
-- Currency: Added in several missing methods of currency acquisition with context messages.
-- Currency: Currency Names now use zo_stringformat, allowing you to enter both a singular and plural name for the currency if you wish to change it.
-- Currency: Streamlined options to throttle the gain of Alliance Points and Tel Var Stones. Now the throttle timer will be extended if additional currency is acquired instead of always displaying the currency gained a set duration after it is received. In other words: If you continue to earn AP at 3 second intervals with a 5 second throttle set, the currency gained will not print until a lapse of 5 seconds occurs between gaining currency.
-- Loot: Updated indexing function to always display accurate information about items received!
-- Loot: Fixed various issues with the display of Armor Type, Style, and Trait
-- Loot: Updated Group Loot to display either the Character or Account name of the player receiving the item based off your setting.
-- Loot: Fixed Group Loot/Notable Loot function to correctly display Green Quality set items looted.
-- Loot: Added individual options to show when a Quest Item is Looted or Removed from your inventory.
-- Loot: Added individual options to toggle the display of Total Item Count and Total Currency remaining when purchasing an item from a vendor.
-- Experience/Skills: Removed several options for cleaner functionality. Updated syntax for experience gain.
-- Experience/Skills: Now the throttle timer will be extended if additional experience is earned instead of always displaying the experience earned a set duration after it is received. In other words: If you continue to earn experience at 3 second intervals with a 5 second throttle set, the experience earned will not print until a lapse of 5 seconds occurs between earning experience.
-- Experience/Skills: Added option to toggle the display of Enlightenment State change messages.
-- Experience/Skills: Added option to toggle the display of Respec Notifications (champion points, attributes, skill points, morphs).
-- Experience/Skills: Added option to toggle the display of Skill Points earned and Skyshards absorbed with several options to adjust display.
-- Experience/Skills: Added options to toggle the display of Skill Lines Unlocked, Skill Line Progression, and Ability Progression.
-- Experience/Skills: Added options to toggle the display of Guild Reputation earned. With various options for color and syntax - and a throttle option for Fighter's Guild reputation earned from kills.
-- Collectibles/Lorebooks: Added several new options to Collectibles and Lorebooks display and updated syntax for messages.
-- Achievements: Removed several options for cleaner functionality. Added several options and updated syntax for messages.
-- Quest/POI: Quest Difficult Icon will now display in Accept/Complete/Abandon messages correctly.
-- Quest/POI: Added many new options to toggle the display of various individual quest updates.
-- Quest/POI: Added option to toggle the display of Imperial City Sewers area notification messages.
-- Social/Guild: Added many new options to toggle the display of various messages.
-- Social/Guild: Added option to color guild names and ranks based on Alliance.
-- Group/LFG/Trial: Added many new options to toggle the display of various individual LFG or Trial messages.
-- Group/LFG/Trial: Messages are now hooked to functions and should no longer display spammy/incorrect information.
-- Group/LFG/Trial: Added option to toggle the display of Maelstrom Arena/Dragonstar Arena stage start notifications.
-- Group/LFG/Trial: Added option to toggle the display of Maelstrom Arena round notifications.
-- Misc Announcements: Added option to toggle the display of Entering/Leaving Group Area notifications.
-- Misc Announcements: Updated Mail Notifications to be slightly more basic.
-- Misc Announcements: Updated options and syntax for Bag/Bank & Riding Skill Upgrades.
-
-Combat Info
+- Hooked MANY functions in the game in order to provide more accurate information for commands and errors sent from ingame menus.
+- Shared - Added an option to use a single color for currency and item gain/loss instead of context based color.
+- Shared - Updated the syntax for Currency & Loot messages to display more detailed messages.
+- Currency - Added in several missing methods of currency acquisition with context messages.
+- Currency - Currency Names now use zo_stringformat, allowing you to enter both a singular and plural name for the currency if you wish to change it.
+- Currency - Streamlined options to throttle the gain of Alliance Points and Tel Var Stones. Now the throttle timer will be extended if additional currency is acquired instead of always displaying the currency gained a set duration after it is received. In other words: If you continue to earn AP at 3 second intervals with a 5 second throttle set, the currency gained will not print until a lapse of 5 seconds occurs between gaining currency.
+- Loot - Updated indexing function to always display accurate information about items received!
+- Loot - Fixed various issues with the display of Armor Type, Style, and Trait
+- Loot - Updated Group Loot to display either the Character or Account name of the player receiving the item based off your setting.
+- Loot - Fixed Group Loot/Notable Loot function to correctly display Green Quality set items looted.
+- Loot - Added individual options to show when a Quest Item is Looted or Removed from your inventory.
+- Loot - Added individual options to toggle the display of Total Item Count and Total Currency remaining when purchasing an item from a vendor.
+- Experience/Skills - Removed several options for cleaner functionality. Updated syntax for experience gain.
+- Experience/Skills - Now the throttle timer will be extended if additional experience is earned instead of always displaying the experience earned a set duration after it is received. In other words: If you continue to earn experience at 3 second intervals with a 5 second throttle set, the experience earned will not print until a lapse of 5 seconds occurs between earning experience.
+- Experience/Skills - Added option to toggle the display of Enlightenment State change messages.
+- Experience/Skills - Added option to toggle the display of Respec Notifications (champion points, attributes, skill points, morphs).
+- Experience/Skills - Added option to toggle the display of Skill Points earned and Skyshards absorbed with several options to adjust display.
+- Experience/Skills - Added options to toggle the display of Skill Lines Unlocked, Skill Line Progression, and Ability Progression.
+- Experience/Skills - Added options to toggle the display of Guild Reputation earned. With various options for color and syntax - and a throttle option for Fighter's Guild reputation earned from kills.
+- Collectibles/Lorebooks - Added several new options to Collectibles and Lorebooks display and updated syntax for messages.
+- Achievements - Removed several options for cleaner functionality. Added several options and updated syntax for messages.
+- Quest/POI - Quest Difficult Icon will now display in Accept/Complete/Abandon messages correctly.
+- Quest/POI - Added many new options to toggle the display of various individual quest updates.
+- Quest/POI - Added option to toggle the display of Imperial City Sewers area notification messages.
+- Social/Guild - Added many new options to toggle the display of various messages.
+- Social/Guild - Added option to color guild names and ranks based on Alliance.
+- Group/LFG/Trial - Added many new options to toggle the display of various individual LFG or Trial messages.
+- Group/LFG/Trial - Messages are now hooked to functions and should no longer display spammy/incorrect information.
+- Group/LFG/Trial - Added option to toggle the display of Maelstrom Arena/Dragonstar Arena stage start notifications.
+- Group/LFG/Trial - Added option to toggle the display of Maelstrom Arena round notifications.
+- Misc Announcements - Added option to toggle the display of Entering/Leaving Group Area notifications.
+- Misc Announcements - Updated Mail Notifications to be slightly more basic.
+- Misc Announcements - Updated options and syntax for Bag/Bank & Riding Skill Upgrades.
 
 - Removed all old combat text options and damage meter options. Combat Text features moved into Combat Text component.
 - Removed old Global Cooldown function to implement new one based off the unused Zenimax GCD function. Added various options.
 - Added new Bar Ability highlight options with the ability to add a duration onto the label. This component tracks active abilities or procs.
 - Procs triggered when Bar highlight is enabled now play a sound.
 - Updated and separated old option to display a Cooldown duration for Potions and Quickslot items. Added options to configure label formatting.
-
-Combat Text
 
 - Combat Text component completed replaced by a modified and updated version of the Combat Cloud addon originally by Sideshow: <http://www.esoui.com/downloads/info281-CombatCloud.html#info>
 - Adjusted default options for Combat Text to have formatting similar to the default game combat text.
@@ -2159,9 +1770,7 @@ Combat Text
 - Added options to override the color for all Critical Damage done, all Critical Healing done, or all incoming damage. This can be used if you want to emulate the way the default game combat text is formatted.
 - Notifications to Block/Dodge/Interrupt have been overhauled and replaced with new advanced notifications, allowing you to display a warning displaying the name/icon of the incoming ability as well as the ways it can be mitigated. This option has various customization options for formatting and to choose what ranks of NPC's trigger these alerts.
 
-Unit Frames
-
-- Fixed regeneration/degeneration arrow animation
+- Fixed regeneration/degeneration arrow animation!
 - Added option to toggle the display of hot/dot animation, power change, and armor change individually for Player/Target, Group, Raid, and Boss frames.
 - Power and Armor change overlays now use the animated effects from the default unitframes.
 - Added option to change the display method for Champion Points (show above cap or limit to cap). This extends to the default unit frames as well.
@@ -2182,43 +1791,29 @@ Unit Frames
 
 ---
 
-### Version 5.1.2
-
-General
+## Version 5.1.2 Update (Horns of the Reach)
 
 - Updated API version for Horns of the Reach.
+- Buff and debuff icon countdown border now displays based on the FULL duration of the buff rather than only counting down at 8 seconds.
 - Temporarily removed function that add news icons to Death Recap until I have a chance to look at the changes to the function from this API update.
 - Removed LibAnnoyingUpdate and LibCustomTitles - Don't really see a need for these libraries to be here.
 
-Buffs and Debuffs
+## Version 5.1.1
 
-- Buff and debuff icon countdown border now displays based on the FULL duration of the buff rather than only counting down at 8 seconds.
+- Buffs & Debuffs: Fixed bar highlight for the majority of abilities to work correctly again! Note its a long time WIP to significantly enhance what shows here but it requires manual processing of every relevant rank of ability and morph to do so.
+- Buffs & Debuffs: Hiding certain buff categories from displaying on the player/target (Mundus, ESO Plus, etc) now works correctly again!
+- Buffs & Debuffs: Updated auras & icons for Air Atronach & Kotu Gava, added icons to Death Recap.
+- Chat Announcements: Added an option to show the total # of items held when an item is looted (thanks to a new ZOS function).
 
----
+## Version 5.1
 
-### Version 5.1.1
-
-Buffs and Debuffs
-
-- Fixed bar highlight for the majority of abilities to work correctly again. Note its a long time WIP to significantly enhance what shows here but it requires manual processing of every relevant rank of ability and morph to do so.
-- Hiding certain buff categories from displaying on the player/target (Mundus, ESO Plus, etc) now works correctly again!
-- Updated auras & icons for Air Atronach & Kotu Gava, added icons to Death Recap.
-
-Chat Announcements
-
-- Added an option to show the total # of items held when an item is looted (thanks to a new ZOS function).
-
----
-
-### Version 5.1
-
-General
+### General Components
 
 - Added posthooks for GetAbilityName and GetAbilityIcon, allowing new LUI ability icons and name corrections to be used by other addons (not fully implemented yet).
 - Started custom icon implementation with Death Recap - at the moment only a bit of this is done and only English localization is supported (I have to override specificially by NPC names and skill names), although most of the single player content in Morrowind has been added.
 - Updated many passive skill tree icons and racial icons. Now passives for each skill tree have icons that match the relevant style of their active abilities. Please let me know if there are any icons you don't like. Still enhancing a few of them!
 
-Unit Frames
+### Unit Frames
 
 - Fixed a major issue where Unit Frames disappeared in Battlegrounds when swapping to potions, an issue with Unit Frames disappearing randomly in player houses, and not correctly hiding when in the Housing Editor.
 - Fixed an issue where Wardens appears with a white square instead of the proper class icon
@@ -2226,17 +1821,16 @@ Unit Frames
 - Fixed an issue where bars had blank space in front of them if Role Icons were toggled on in a battleground.
 - Group and Raid Frames now shift if Role Icons are enabled and a player changes their role to none.
 
-Buffs and Debuffs
+### Buffs and Debuffs
 
 - Integrated into default UI components, the Effects Screen will now show the update names and icons of abilities, and hide relevant abilities that provide no useful information. NOTE: Does not hide special category buffs such as Cyrodiil Bonuses or Battle Spirit, these are only hidden from the LUI Buff & Debuff frames if selected.
 - Added different border colors for unbreakable/unremovable crowd control effects (haven't had time to expand implementation for this much yet)
 - Updated and enhanced many custom icons and did a pass to hide more pointless auras (blue skill placeholder icons). There is still much to do! NOTE: At the moment there are a few placeholder icons present for several effects, I will replace these as soon as I can.
 - Implemented Artificial Effect Id's (something ZOS added recently) - The only cases I've seen this used so far is for the Battle Spirt buffs when dueling or in a Battleground).
-- Disguise Buffs: Fixed an issue where the Scarlet Judge disguise would throw UI errors and added an icon for this costume.
 - Fixed various menu options here to function slightly better
-- Temporary issue: Bar highlight for many abilities is currently disabled, I am in the process of switching from a basic abilityName resolving function to using abilityId's for more control of the bar highlight. It will be reimplemented in the future.
+- TEMPORARY ISSUE: Bar highlight for many abilities is currently disabled, I am in the process of switching from a basic abilityName resolving function to using abilityId's for more control of the bar highlight. It will be reimplemented in the future.
 
-Chat Announcements
+### Chat Announcements
 
 - Corrected and updated various strings for consistency.
 - Fixed various misc small issues and adjusted timing on some chat printing events. The order of events is far less likely to be out of whack when a large amount of events happen at once.
@@ -2258,52 +1852,25 @@ Chat Announcements
 - Misc: Disguise Announcements: Fixed and updated Center Screen Messages for disguises equipped/unequipped.
 - Quest Announcements: Fixed and updated Center Screen Messages for Quests abandoned (this will now display the Icon for quest difficulty if the option is toggled on).
 
----
-
-### Version 5.03
-
-General
-
 - Hopefully fixed an issue where using a set equipping addon such as AlphaGear would cause [Received] item displays to print out randomly.
-
-Unit Frames
-
 - Added "Raid Name Clip" slider in the UnitFrames Options, this allows you to clip the raid frame name manually in order to prevent it from overlapping with the HP display.
-
-Chat Announcements
-
 - Fixed an issue where removing items from the Guild Bank would occasionally throw UI errors.
 - Added a debug message to fix an error where Crafting items with Crafted Loot Announcments on would sometimes throw errors. I'm still attempting to determine the cause of this, please notify me if you receive the error notification.
 
----
-
-### Version 5.02
-
-Buffs and Debuffs
-
-- Fixed an issue caused by the last hotfix that broke Buffs and Debuffs attaching to the custom Unitframes.
-- Fixed an issue where Hide Target Buffs menu option was missing.
-
----
-
-### Version 5.01
-
-General
-
-- Fixed an issue where the addon did not load correctly for certain people.
-
-Chat Announcements
+- Fixed an issue caused by the last hotfix that broke Buffs & Debuffs attaching to the custom unitframes.
+- Fixed an issue where Hide TARGET Buffs menu option was missing.
 
 - Fixed an issue causing Tel Var Stone currency announcements to throw UI errors.
+- Fixed an issue where the addon did not load correctly for certain people.
 
 ---
 
-### Version 5.00
+## Version 5.00
 
-General
+### LUIE Base
 
 - LUIE Chat Printing function has been updated, this option can be turned on to add timestamps to messages or help with compatibility issues with certain addons such as Social Indicators if you are also using pChat.
-- Chat Announcements and Buffs and Debuffs now have their own individual menus for easier use.
+- Chat Announcements and Buffs & Debuffs now have their own individual menus for easier use.
 - Improved functionality of existing commands.
 - Error returns from slash commands now also display a ZO Alert and play the generic error sound.
 - /regroup and /disband now return errors when attempted in LFG.
@@ -2319,7 +1886,7 @@ General
 - New Command: /gquit "#" - Quit guild # entered.
 - New Command: /gkick "#" "name" - Kicks the target player from guild # if you have permissions to do so.
 
-Chat Announcements
+### Chat Announcements (Updates and Bugfixes)
 
 - Separate many Chat Announcement components into better categories and expanded options.
 - Updated and normalized strings for various CA functions to be more consistent, a long with fixing several broken strings.
@@ -2335,6 +1902,9 @@ Chat Announcements
 - Show destroyed items and show confiscated items now also applies to EQUIPPED items.
 - Major update to Loot Announcements - Now looted items will be indexed and printed in a more accurate fashion. This means some odd events that didn't trigger a loot message before such as obtaining a ring of Mara, receiving loot from the Dark Brotherhood Supplier, or purchasing items from the Crown Store will now show a loot message.
 - Crafting Loot Announcements has been updated to now show better context specific messages based off the type of crafting you are performing (ex: Researching a item now shows as [Researched]).
+
+### Chat Announcements (New Components)
+
 - Quest Announcements: New category added with options to display quests being accepted/failed/abandoned with various additional options and POI discovery/completion options as well.
 - Group, Guild and Social Announcements have been split off from the misc menu and now have several addition sub options.
 - Loot Announcements: Added color options for [Context Specific] gain or loss messages for currency announcements.
@@ -2344,16 +1914,16 @@ Chat Announcements
 - Misc Announcements: Added option to display "Inventory is Full" messages.
 - Misc Announcements: Added Pledge of Mara
 - Misc Announcements: Added /stuck messages
-- Loot Announcements: New option to display when a Collectible is unlocked.
+- Loot Announcements: New option to display when a COLLECTIBLE is unlocked.
 - Loot Announcements: Added toggle option to show when a lockpick is broken.
 - Loot Announcements: Added a new option to display when a disguise is equipped/unequipped.
-- Misc Announcements: Added new component for Disguises that displays a message when you enter/exit a Disguise state (entering/exiting the relevant area for the disguise). These messages are context specific based off the disguise.
+- Misc Announcements: Added new component for Disguises that displays a message when you enter/exit a DISGUISE state (entering/exiting the relevant area for the disguise). These messages are context specific based off the disguise.
 - Misc Announcements: Added new component for Disguises that displays a warning message and plays an alert sound when the player is near a Sentry NPC or performing suspicious activity.
-- New throttle options: Added a throttle (delays printing of gains) and a threshold option (prevents display of values under a certain value) for Gold/AP/TV gain in Combat to prevent spam.
+- NEW THROTTLE OPTIONS: Added a throttle (delays printing of gains) and a threshold option (prevents display of values under a certain value) for Gold/AP/TV gain in Combat to prevent spam.
 - Currency Announcements: Added an option to HIDE the display of Guild Trader posting fee gold loss. This is intended as an option for players using AGS (or any other addon that prints a message when an item is purchased from a Trader).
-- Group Announcements: Added individual toggles for Group/LFG messages.
+- Group Announcements: Added invididual toggles for Group/LFG messages.
 
-Buffs and Debuffs
+### Buffs and Debuffs
 
 - Added in icons and custom auras for several champion point passive effects that were missing them.
 - Removed pointless buff icons that display for ~100 ms from the Magicka and Stamina restore effects that are applied on the player when resurrected by another player.
@@ -2375,68 +1945,80 @@ Buffs and Debuffs
 - Added new toggleable display option for various collectibles - Mount, Non-Combat Pets, Assistants, Polymorphs, Skins, Costumes, and Hats. NOTE: These icons automatically adjust and hide each other when an effect is blocking another. For example wearing a polymorph will hide active Skins, Costumes, and Hats. Pets are automatically hidden in Cyrodiil as well.
 - Added new toggleable display for disguise equipped.
 
-Unit Frames
+### Unit Frames
 
 - Updated code for resizing and positioning, names should now longer clip into icons on the player bar, and the target bar will no longer fail to shorten the name correctly.
-- Removed an unnecessary guild indexing function that was being used to display Guild Icons on Unitframes (now using a far more lightweight solution). This will likely fix issues with the game hardlocking when running LUIE with Guild Notificators.
+- Removed an unnecessary guild indexing function that was being used to display Guild Icons on unitframes (now using a far more lightweight solution). This will likely fix issues with the game hardlocking when running LUIE with Guild Notificators.
 - Raid frames now display HP value as well as % HP
 - Added toggleable option to display ROLE icon on party / raid frames.
 - Added toggleable option to color party / raid frames by ROLE.
 
----
+## Version 4.99f
 
-### Version 4.99f
-
-Unit Frames
+### BUGFIXES
 
 - Fixed a major error with the option to turn off the display of stamina/magicka bar labels or bar display. Now these features work as intended.
 - Fixed an issue where the party leader name on group frames would clip into the other icons.
-
-Chat Announcements
-
 - Fixed an annoying issue where weapon and armor trait crafting items, as well as style materials would display their trait/style.
 - Fixed an issue where withdrawing crafting materials from the guild bank was throwing UI errors (if you have a craft bag, the materials attempt to go into it).
 - Fixed an issue where removing an item from trade with items remaining in a later slot index would try to display the nonexistent item in the slot and throw an error.
+- Support added for CraftBagExtended to the Bank and Guild Bank announcements. (Limited support, some display issues when moving items between craft bag and bag during Bank transactions).
 - Fixed broken saved variables in LuiExtended.lua that affected the functionality of chat system settings.
 - Fixed the Chat Announcements toggle option to hide materials consumed by crafting - now items will be hidden with the option off, and displayed with the option on.
+- Something random caused a bag upgrade message to display for no reason with 0 upgrades purchased. I added a check  to make sure the upgrade value is 1 or greater so this erroneous message should never display again.
+- Fixed a missing icon for Dwemer Spider "Overcharge" ability.
+- Fixed a missing icon for Resurrection Immunity and added a toggle option to show or hide this buff in Spell Cast Buff preferences.
+- Updated the ground tracking timer for Spear Shards to be more accurate since the Homestead patch cast time reduction.
 
----
+### NEW ADDITIONS
 
-### Version 4.99e
+### Chat Announcements
 
-General
+- ADDED menu option to show items confiscated by a guard. This feature was implemented but missing the option to toggle it on.
+- Items received from deconstructing or items displayed from use when crafting now display in a single line separated by commas to conserve space.
+- Additionally, items confiscated by a guard now follow the single line separated by comma's format.
+- Added slider to filter out AP gain below X value (0-10000).
+- Added slider to filter out XP gain below X value (0-10000).
+- Added option to throttle XP from kills by up to 5 seconds.
+- Enhanced the XP printout function, now experience gains from Quests that also complete a world POI display both experience sources, with the correct relevant %.
+- New toggle option to display an icon for level up messages (normal level icon for normal levels, and relevant champion point for Champion Levels).
+- New toggle option to color the level display text based on the context of the level.
 
-- Added a description of the Slash Commands available in LUI to the main Addon settings window.
+### Buffs and Debuffs
 
-Chat Announcements
+- Added option to hide the display of target BUFFS.
+- Added option to hide the display of target DEBUFFS.
+- Added option to hide the display of GROUND buffs and debuffs.
+- Added an option to toggle the glow on ability bar icons on and off for active buffs.
+- Added an option to toggle the glow on ability bar icons on and off for active procs.
+
+### Unit Frames
+
+- Replaced quest marker icon for the normal experience bar with normal level icon on UnitFrames.
+- Added % HP display to raid frames.
+- Adjusted critter HP label from "-critter-" to " - Critter - " -o something about this still bothers me. Any suggestions welcome. I tried making the bar blank but that looked odd as well.
+- Added an option to configure the % of HP in which the the enemy HP bar text label turns turn as well as the execute skull displays.
+
+## Version 4.99e
 
 - Sending mail with Gold currency change announcements toggled on, but currency icons off will no longer throw a UI error from attempting to reference an invalid variable.
+- Added a description of the SLASH COMMANDS available in LUI to the main Addon settings window.
 - Fixed a minor issue where Costume items were being hidden by the Hide Trash chat announcements option.
 
 ---
 
-### Version 4.99d
-
-Chat Announcements
+## Version 4.99d
 
 - Fixed a silly oversight that caused groups of items looted from the mail to all share the icon of the first looted item. (Accidentally declared a variable as global instead of local).
-
-Buffs and Debuffs
-
 - Fixed a double declaration of a variable in SpellCastBuffs.lua (shouldn't have effected anything, but just in case).
 
 ---
 
-### Version 4.99c
-
-Unit Frames
+## Version 4.99c
 
 - Fixed an issue with raid frames where players going offline was throwing UI errors.
 - Fixed a minor issue with raid frames that caused player names to clip into the OFFLINE label if present.
 - The Unit Frames Champion XP bar now shows the correct value for completion toward the next level.
-
-Chat Announcements
-
 - Currency Change Reason 32 (AH Refund) now has a proper context message and will no longer display a debug message.
 - Lockpick failure message no longer insults you :-D
 - Grey quality clothing looted when stealing, as well as disguises looted are no longer considered trash when the filter option for hiding Trash items is toggled on.
@@ -2446,61 +2028,44 @@ Chat Announcements
 
 ---
 
-### Version 4.99b
+## Version 4.99b
 
-Buffs and Debuffs
-
-- Fixed major issue with debuffs not displaying on the player.
+- Fixed MAJOR issue with debuffs not displaying on the player.
 - Added separate Player Buff, Player Debuff, Target Buff, and Target Debuff containers when you toggle the Hard-Lock position to Unit Frames option off. This allows you to have separate buff/debuff frames without using the LUI player & target frames.
-- Added a toggle option under Buffs and Debuffs to turn off the icon display for Sprint/Gallop
-
-Unit Frames
-
 - Enhanced Party Frames to update more consistently when party members go offline.
-
-Chat Announcements
-
+- Added a toggle option under Buffs and Debuffs to turn off the icon display for Sprint/Gallop
 - Added a toggle option in Chat Announcements to turn off default string enhancements. This was added as a request due to the lack of other localization support currently. I recommend using this setting otherwise unless you are experiencing some sort of conflict with another addon.
 - Added a toggle option to complete turn off the Chat Announcements component.
 - Fixed an issue that was causing an error to generate when editing settings in the Chat Announcements loot component.
 
 ---
 
-### Version 4.99a
-
-General
+## Version 4.99a
 
 - File size decreased significantly, previously I had accidentally included various GitHub repository files in the directory.
+- Fixed an issue with debuffs not refreshing correctly when changing targets.
 - Fixed an issue with the /regroup command not displaying names correctly and trying to reinvite before the group was disbanded. (Please let me know if you experience issues with this still!)
 - Added a toggle option for social notifications (friend/ignore list messages)
 
-Buffs and Debuffs
-
-- Fixed an issue with debuffs not refreshing correctly when changing targets.
-
----
-
-### Version 4.99
-
-General
+### Overall Changes
 
 - Added new Slash commands: /home, /disband, /regroup, ginvite1,2,3,4,5.
 - Updated options for any messages LUI prints to chat. By default messages are no longer printed to system chat by default. This functionality was intended to allow players using pChat to take advantage of pChat's feature to preserve messages in chat between sessions.
 - Timestamp now has more options and the color now matches that of pChat.
 - Reorganized the folder structure of the addon, as well as updated Addon libraries.
 
-Combat Info
+### Combat Info
 
 - Fixed an issue with Ultimate % values not correctly updating outside of combat when swapping weapons.
 
-Buffs and Debuffs
+### Buffs and Debuffs
 
 - Adjusted buffs and debuffs component for the new API changes, now players will only be able to see self applied or pet applied debuffs, as well as major/minor category debuffs.
-- Updated Major and Minor debuffs to use the new Zenimax icons added to the game in Homestead.
+- Updated Major and Minor debuffs to use the new Zenimax icons added to the game in Homestead [COLOR="RED"]NOTE: if you prefer the old buff icons, you can download an optional patch [URL="https://puu.sh/ugsXY.zip"]here[/URL]. Extract effects.lua to LuiExtended\modules.[/COLOR]
 - Implemented horizontal container orientation for long term effects.
 - Updated a number of buffs that display a green highlight on the ability bar while their duration is active.
 - Updated the duration of ground tracking effects to be more accurate based on cast time. There is still some work to do here.
-- Added a significant amount of new icons for player effects - Potions, poisons, food, experience consumables, mementos, and weapon enchants.
+- Added a significant amount of new icons for player effects - Potions, poisons, food, experience consumables, momentos, and weapon enchants.
 - Added a significant amount of new icons for NPC abilities, as well as updating icons for certain player passives, champion point passives with active components, etc..
 - Many placeholder icons used by abilities or NPC abilites have been updated.
 - Implemented new "fake" buff tracking to display a buff/debuff for effects that normally do not show one in the base game. This includes the weapon and spell damage weapon enchant procs.
@@ -2508,7 +2073,7 @@ Buffs and Debuffs
 - Altered a significant amount of NPC abilities and quest based buffs and debuffs to correctly display as a buff or debuff if they were not previously, as well as hid multiple useless debuffs that provided no useful feedback to the player.
 - Corrected errors with various ability name inconsistency to provide a more polished experience. Renamed the Ability ID for weapon medium attacks so they now properly display as "Medium Attack."
 
-Chat Announcements
+### Chat Announcements
 
 - Added option to choose method of name display printed to chat for players - Character Name, Display Name, or both.
 - Added option to print Group Event messages to chat - Leaving/joining a group, disbanding, queueing, ready checks, votekicks.
@@ -2531,9 +2096,543 @@ Chat Announcements
 - New option to MERGE the results of inventory changes with currency changes where applicable.
 - Significantly overhauled the experience component - now allows the display of experience gain and levelups. With options for formatting, and the ability to toggle the display of experience gain in combat.
 
-Unit Frames
+### Unit Frames
 
 - Added the ability to individually control the size of custom Magic and Stamina bar.
 - Added the ability to hide the Magicka or Stamina bar labels, or hide the bars entirely.
 - Updated the icons on unit frames to be more consistent, as well as replaced the execute skull texture.
 - Added option to choose method of name display for player targets - Character Name, Display Name, or both.
+
+---
+
+## Version 4.35
+
+- Buff: Added Magicka Bomb to Debuffs re-adjusted some vMOL debuffs and replaced rending slashes with the actual icon instead of the bleed tick icon.
+
+---
+
+## Version 4.30
+
+- Unit Frames: Fixed smooth transition
+- Transition from Veteran ranks to Champion points after 50*
+- Buff: Fixed issues with black box on buffs and added vMOL buffs
+- Bug fixes
+
+---
+
+## Version 4.14
+
+- Unit Frames: Added option to display shield bar as separate from health
+- Unit Frames: Added option to shorten numbers from 12,345 to 12.3k
+- Bug fixes
+
+---
+
+## Version 4.13
+
+- Info Panel: added option to disable colouring of FPS/Latency
+- Unit Frames: Fixed small misalignment in raid group when having more then 1 column and spacing enabled
+- Unit Frames: Added configuration option to set custom transparency when In-Combat
+
+---
+
+## Version 4.12
+
+- Added 13 fonts from Combat Cloud addon; added optional dependency on LMP library to theoretically fetching more fonts from other addons that uses that library. You can select those new fonts in Unit Frames module. No additional fonts for Combat Info module yet
+- Lots of various minor and not changes all over the addon code
+
+---
+
+## Version 4.11
+
+- Only API version bump. Everything seems to work without any further changes. Not really tested much though.
+
+---
+
+## Version 4.10
+
+- Buffs: added back timer on Vampire Stage 1-3 buff on player
+- Various fixes here and there; typos
+
+---
+
+## Version 4.9
+
+- Buffs: added option to manually select direction of sorted buffs (LtR vs RtL)
+- CombatLog: to log incoming debuffs events
+- DamageMeter: added logic to count how many actual mobs were damaged
+
+---
+
+## Version 4.8.a
+
+- CombatLog: added option to adjust combat log font size manually
+
+---
+
+## Version 4.8
+
+- CombatInfo: added 'Cleanse Now!' alert
+- CombatLog: added more colours to messages and increased font size by 1
+- CombatLog: added option to auto-focus corresponding chat tab during combat
+- CombatLog: added option to save last 20 messages during logout
+
+---
+
+## Version 4.7
+
+- CombatInfo: changed back the default (for new installations) cloud-like floating text
+- CombatInfo: added options to filter out healing and dots events (in- and out-)
+- CombatInfo: added more colouring to cloud-like floating labels when damage-dependent colouring option is on
+- UnitFrames: fixed smooth target health bar transition on target change
+
+---
+
+## Version 4.6
+
+- Info Panel: fixed IC trophies panel items
+- UnitFrames: added smooth transition effect to custom bars (can be disabled in menu)
+- Buffs: filtered out *some* effects, that come usually (f.e. boundless storm, volatile armor, combat prayer)
+
+---
+
+## Version 4.5
+
+- Combat Log: (new) added as a part of Damage Meter module.
+- Buffs: fixed issue when buffs were disappearing on character death
+- Scrolling combat text: added option to drop some events if queue is getting too long
+- Info Panel: added 3rd row (off by default) to track IC trophies
+- Various minor fixes and optimizations
+
+---
+
+## Version 4.4
+
+- Buffs: re-added option for cooldown UI element on short buffs icons.
+- Buffs: added option to select in what format to display remaining numbers ("%.1f" vs "%.2d")
+- Various fixes in other modules
+
+---
+
+## Version 4.3
+
+- Buffs: added option to change font on icons
+- Buffs: re-implemented option to split players buffs into 2 windows (short/long). The alignment of long buffs as of now fixed to be vertical.
+
+---
+
+## Version 4.2-beta
+
+- Damage meter: added abilities icons into full damage details window
+- Buffs: re-added manual tracking of effects whose information is not provided by API (Negate, Liquid Lighting, Runes, etc).
+- Known issue: manual tracking of ground-targeted skills from time to time wrongly triggers creation of custom buff icon when the use of the skill was canceled
+
+---
+
+## Version 4.1-beta
+
+- Various fixes in all modules
+- Buffs: First part of reworked Buffs/Effects tracking. Some work is still required
+
+---
+
+## Version 4.0-beta
+
+- Updated all modules for new ESO API
+- Combat Info: updated scrolling text to include more skill names.
+- Buffs/Debuffs: currently being refactored to work better with new API. Most of the core functionality is present, but it requires more patching and testing.
+
+---
+
+## Version 3.10
+
+- Custom Unit Frames: added another target frame which will display only PvP targets
+- Combat Info: tweaked a little existing cloud-like floating labels
+- Combat Info: added completely new scrolling text labels. You can switch between existing and new ones, or you can have both of them (though a bit unpractical)
+
+---
+
+## Version 3.9
+
+- Long-term buffs: added option to enable buff icons only for player and not for target
+- Custom Unit Frames: Player and Target bars width can be controlled independently
+- Custom Unit Frames: Added label to display current anchored position of frames when they are unlocked.
+
+---
+
+## Version 3.8
+
+- Default Unit Frames Extender: added option to change overlay labels colour
+- Ultimate Generation Tracking was moved to Combat Info module. Not it will display glowing texture under Ultimate skill button
+
+---
+
+## Version 3.7
+
+- Fixed Achievement reporting on French clients
+- Changed icons on Damage Meter mini panel
+- Added option to force ChampionXP display for v1-v13 characters
+
+---
+
+## Version 3.6
+
+- Damage Meter: added graph plot feature
+- Fixed several minor bugs
+
+---
+
+## Version 3.5
+
+- Long-term effects: added Crystal Fragment Proc to ignored buffs. Now this effect is tracked only in Short-term buffs module
+- Chat Announcement: added achievement tracking routines (disabled by default)
+
+---
+
+## Version 3.4
+
+- Custom Unit Frames: added option for shield bar to be full-height instead of default half-height one
+- Custom Unit Frames: added option for target frame to show large skull texture when target should be executed (enabled by default)
+- Short-term buffs: Stealth custom buff icon is now optional and can be disabled via settings menu
+
+---
+
+## Version 3.3
+
+- Default Unit Frames: changed default font to be consistent with other default UI elements; added options to customize this font
+- Default Unit Frames: added Friend/Ignore/Guild icon to default UI small group frames
+- Custom Unit Frames: changed left label on target control for critter units. Now it will read as "-critter-" instead of default "9 / 9" health values. Right label will be hidden for critters
+
+---
+
+## Version 3.2
+
+- Unit Frames: Friend/Ignore icon is now Friend/Ignore/Guild, i.e. it will track now if player is if one of your guilds
+- Unit Frames: this Friend/Ignore/Guild was added to Custom Small Group frames and Default Target frame to the right of unit name
+- Custom Unit Frames: changed position of Leader icon on Custom Small Group frames
+- Custom Unit Frames: added options NOT to sort raid size group alphabetically and to add small vertical spacers for every 4 raid members. This way the ordering and grouping of members *should* correspond to default UI one, though it was not well tested
+- Combat Info: added EXPERIMENTAL option to Throttle (group similar) damage and heals events
+
+---
+
+## Version 3.1
+
+- Custom Unit Frames: revised group update code to solve (hopefully) short freezes during raids
+- Damage Meter: changed mini-panel default backdrop texture
+- Damage Meter: added option to make it completely transparent
+- Damage Meter: added option to hide combat time label and have only 3 other visible
+
+---
+
+## Version 3.0
+
+- Custom Unit Frames: fixed issue with experience bar for vr1-vr13 players (I hope so)
+- Custom Unit Frames: added IsFriend/IsIgnored icon to target frame
+- Short-term buffs: added option to change alignment of icons within holding container
+- Prints to chat information on Looted items, Gold and XP changes, Group events.
+
+---
+
+## Version 2.15
+
+- Short-term buffs: updated code for spell activation detection. This should help with ground-targeted spells.
+- Custom Unit Frames:
+- - Added separate options to display experience bar and Mount/Siege/WW
+- - Added option to set colour of ChampionXP bar according to champion point being earned; changed textures of champion point.
+- - Size of this alternative bar will now scale with size of the font used
+
+---
+
+## Version 2.14
+
+- Info Panel: added option to change panel scale. This should help on screens with large resolution
+- Short-term buffs: rewritten potion tracking algorithms, added passive skill effects tracking
+- Short-term buffs: added code to remove 'Mines' target debuff on first activation. This relates to Fire Rune and Daedric Mines
+
+---
+
+## Version 2.13
+
+- Combat Info: rewritten UI part of module. Now different floating text areas are unlockable and movable
+- Ultimate Tracking: added option not to hide %% value when > 100%
+- Info Panel: added option to toggle information parts to display
+- Short-term buffs: added custom "stealth" buff icon
+
+---
+
+## Version 2.12
+
+- Unit Frames: Increased maximum font and sizes of frames, optimized layout for extra large sizes
+- Unit Frames: Experience alternative bar will show ChampionXP only for level cap players. For vr1-vr13 it will continue to show your veteran rank progress
+- Combat Info: Experience floating text will take account Enlightened buff for vr14 players, i.e. the numbers displayed will relate to ChampionXP instead of raw one
+- Long-term effects: added option to hide Cyrodiil buffs
+- Short-term buffs: added "toggle" texture for skills: Surge, Momentum and Entropy
+
+---
+
+## Version 2.11
+
+- Unit Frames: Fixed issue that prevented frames to be unlocked for moving
+- Ultimate Tracking is merged into Combat Info module
+- Damage Meter: Finally completed code to display full damage statistics. Credits goes to FTC: in my version just the layout is a bit different; the code co collect statistics is almost identical to FTC one. To display statistics you can setup key binding or click on fight time label on damage meter mini panel
+
+---
+
+## Version 2.10
+
+- Short-term buffs: Added (optional) in-combat ultimate gain icon
+- Combat Info: Added (optional) floating text for interruption and stunned effects as well as miss and reflected events
+
+---
+
+## Version 2.9
+
+- Added Bosses encounter separate frames. When you are in dungeon and near Boss zone, new frame will appear and show current status of up to 6 bosses as thought by game API
+
+---
+
+## Version 2.8
+
+- Added option to display target players class as a text label (disabled by default)
+- Added feature to blink player power bars when you are out of power
+- Optimized inventory lookup code in Info Panel, so it safely ignores game flooding of evens when you are caught stealing by the guard
+- Adjusted a little timing settings for small floating labels in Combat Info module
+
+---
+
+## Version 2.7a
+
+- Added option to enable each component in default and custom frames independently of each other
+- Added new option for name colouring for Friendly Players targets
+- Fixed bug introduced in previous release
+- Added Proc animation over ActionBar slot for Crystal Fragments passive
+
+---
+
+## Version 2.6
+
+- Added options to change all sizes of player and target custom frames
+- Many bugfixes and improvements
+
+---
+
+## Version 2.5
+
+- Added option to disable alternative bar on player custom frame
+- Added options to change all sizes on group and raid custom frames
+- Adjusted the way visuals are displayed on player and target frames
+- Many bugs were fixed and a lot of code optimized
+
+---
+
+## Version 2.4
+
+- Added option to disable default target frames when default unit frames extender is not used
+- Added option to exclude yourself from small group custom frames
+- Added new visuals for increased/decreased armor and increased power on player and target frames (optional)
+
+---
+
+## Version 2.3
+
+- Bug fixes to previous release
+- Added option to disable default player frames when default unit frames extender is not used
+- Added Small Group Custom frames.
+
+---
+
+## Version 2.2 - new Unit Frames
+
+### Combat Info
+
+- added option to select font sizes for scrolling text
+- changed routing for outgoing healing
+- added option to colour outgoing damage according to damage type
+- Contains previous Default Unit Frames Externder module
+- Provides new Custom Frames for Player, Target, (Raid)Group
+- Allows to lock position of short-term buffs and debuffs to corresponding unit frames
+
+---
+
+## Version 2.1
+
+- Added option to select between 3 font families for floating combat text
+- Added display of attributes drained/energized events
+- Minor fixes to buff tracking modules
+
+---
+
+## Version 2.0
+
+- API version bump 100011
+- Dropped CrystalFragmentProc module, as now API provides needed info
+- Rewritten Short-term buffs module is the same way as FTC was modified
+- Default Unit Frames module now put commas into long numbers
+- Updates to colouring of reticle.
+
+---
+
+## Version 1.19 - pre Update 6
+
+- Updated LAM to r17
+- Added compatibility code to mount feed timer, so it does not give error on PTS
+- Added new manual "Recall" long term effect timer
+- In CombatInfo module: the previously queued areas now display numbers as they appear in game events
+
+---
+
+## Version 1.18
+
+- Added combat status "In/Out Of Combat" alert (disabled by default)
+- Bug fixes in Default Unit Frames module, related to group member shields
+
+---
+
+## Version 1.17
+
+- Added option to disable all icons in Combat Info module
+- Code cleanup in some other modules
+
+---
+
+## Version 1.16
+
+- Added more combat tips alerts, rewritten corresponding settings menu
+- Added weapon charges tracking into Info Panel
+
+---
+
+## Version 1.15
+
+- Fixes for previous release
+- Added option to menu to actually switch on and off Combat Tips alerts
+- Changed default font for Combat Alerts
+
+---
+
+## Version 1.14
+
+- NEW: Alerts for active combat tips in Combat Info module
+- NEW: Group Members class icons in Default Unit Frames extender module
+
+---
+
+## Version 1.13
+
+- NEW: Damage Meter is enabled by default now
+- Player class now properly position without gap left to target level
+- More missing icons for synergies and weapon enchantments
+
+---
+
+## Version 1.12
+
+- NEW: Displays player class icon for current target
+- More missing icons for sorc pets and lightning staff
+
+---
+
+## Version 1.11
+
+- Added some missing icons for floating text damage in Combat Info module
+- Added option to change color of reticle according to target reaction in Default Unit Frames module
+
+---
+
+## Version 1.10
+
+- Default Unit Frames module now displays health and shield numerical values for small group members
+
+---
+
+## Version 1.9.2
+
+- Minor tweaks to Combat Info Module
+- Again commented out Damage Meter.
+
+---
+
+## Version 1.9.1
+
+- Updated to add more options to Default Unit Frames module
+
+---
+
+## Version 1.9
+
+- NEW: Default Unit Frames Extender module
+- NEW: Long-term Effects Tracker
+- Minor updater here and there
+
+---
+
+## Version 1.8
+
+- Added tracking of used potions into Shot-Time Buffs module
+- Rewritten localization module. Full localization for German and French game clients
+
+---
+
+## Version 1.7
+
+- More customization of how short-time buffs looks
+- Adjustments to Combat Info module, so floating text will be more spread on screen
+
+---
+
+## Version 1.6
+
+- Reworked settings menu
+- NEW: (optional) Fadeout expiring buffs icons (disabled by default)
+- Minor bug fixes here and there
+
+---
+
+## Version 1.5a
+
+- Info Panel can be unlocked via settings and moved to desired position on screen
+
+---
+
+## Version 1.5
+
+- NEW: Prints to chat name of player who has joined and left your group
+- Added vampire feeding 5.5-seconds buff icon
+
+---
+
+## Version 1.4
+
+- Added routines to create 10-seconds Resurrection Immunity buff on player when the soul gem is used to revive
+- Some adjustments to spells timing table
+
+---
+
+## Version 1.3
+
+- Code optimization in InfoPanel
+- Added proper icon to UltimateReady alert
+- Added several missing translations of spells
+
+---
+
+## Version 1.2
+
+- Partial localization. Though some of the abilities names are still missing
+- New feature: low health/magicka/stamina alert
+- Proper handling of Burning effect from EVENT_COMBAT_EVENT to display 4-seconds debuff on target
+- Code optimization
+
+---
+
+## Version 1.1
+
+- Proper handling of ground targeted abilities
+- Removal of shield short-time buffs when shield disappears before expiration time
+- Removal of buffs and debuffs when player or target dies
+
+---
+
+## Version 1.0
+
+- Initial release
