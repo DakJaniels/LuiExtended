@@ -30,9 +30,11 @@ local changelogMessages =
     -- Changes
     "|cFFFF00Changes:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Custom Tooltips: Updated the RU lang strings for Battle Spirit, thank you Impda.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t PC settings (LAM): FPS Limit slider maximum raised to 999 (vanilla interface settings only go up to 100)",
     "",
     -- Fixed
     "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Info Panel: FPS readout uses `zo_round` on `GetFramerate()` and caps the displayed value at 999, matching the built-in performance meter (fixes showing one FPS lower than the game meter, for example 164 vs 165).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: Fixed custom frames rendering below in-world 3D overlays (for example survey reset marker arrows and similar icons).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: Player stamina bar XML anchor now targets the Magicka backdrop by name (matches Health to Magicka) instead of MagickaBackdrop, correcting layer inheritance for that bar.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: Custom TopLevelControls use draw tier MEDIUM instead of LOW (player, target, group, raid, pet, companion, boss, Ava target).",

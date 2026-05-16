@@ -1019,7 +1019,7 @@ function LUIE.CreateSettings()
         "FPS Limit",
         "Set the maximum FPS limit (requires game restart)\nDefault game UI only allows up to 100",
         1,
-        300,
+        999,
         1,
         function ()
             local minFrameTime = tonumber(GetCVar("MinFrameTime.2"))
