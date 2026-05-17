@@ -79,6 +79,7 @@ local function OnAddOnLoaded(eventId, addonName)
     LoadSavedVars()
     LUIE.MigrateSplitModuleSavedVarsFromLuiESV()
     LUIE.PruneLegacyLuiESVDefaultProfileBranch()
+    LUIE.InstallExternalSavedVarsLegacyCompat()
     LUIE.UpdateGuildData(nil, nil, nil, nil)
     -- -----------------------------------------------------------------------------
     -- Initialize Hooks

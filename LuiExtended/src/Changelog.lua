@@ -12,6 +12,19 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.1.8
+    "|cFFA500LuiExtended Version 7.2.1.8|r",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SavedVariables: Third-party addons that still read `LUIESV.Default[@DisplayName][\"$AccountWide\"]` (for example Srendarr checking LuiExtended unit frame options) are supported again — `Default` resolves to this session's megaserver profile (`GetWorldName()`), and module namespaces such as `UnitFrames` on that path overlay the split module globals after migration.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Character Profile copy (PC and console): Clearer settings labels and tooltips for megaserver, @account, copy source, and source character (less internal \"row / saved vars\" wording).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: \"Show Throttle Trailer\" tooltip wording updated (default and locale strings) — describes the (N) suffix on merged totals and that throttle ms sliders control combining hits, not this checkbox.",
+    "",
+    -- Fixed
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Attempt to fix throttle ms sliders appearing to do nothing at 0 — a 0 ms setting now bypasses the merge buffer and shows each combat event immediately instead of deferring with `zo_callLater` (which still merged same-frame hits); critical damage/heal/DoT/HoT throttle times follow the same four sliders as in the menu (damage, DoT, healing, HoT) instead of separate unused `*critical` saved vars left at 200 ms.",
+    "",
     -- Version Header 7.2.1.7
     "|cFFA500LuiExtended Version 7.2.1.7|r",
     "",
