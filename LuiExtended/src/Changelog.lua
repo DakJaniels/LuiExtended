@@ -21,6 +21,12 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: Changing fonts in several modules (Action Bar, Combat Info, Combat Text, Info Panel, Buffs & Debuffs, Unit Frames) is applied after you Reload UI, with a reminder in chat and in the menu — helps avoid memory issues on console.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: When moving UI elements, position numbers and preview names (unit frames, buff windows, cast bar, combat text, alerts) are easier to read on screen.",
     "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Quest Kill Counter Filters. Some quests show a center-screen or alert on every kill for a counter objective. Add a filter per quest so you only see the updates you care about.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t LuiExtended settings, Chat Announcements, Quest Kill Counter Filters. Turn on Enable, enter the quest name from your journal, optional objective text if you only want one step filtered, choose Milestones (kill counts like 25, 50, 75), Hide all, or Complete only, then Add Filter.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t PC: pick a rule under Remove Filter or use Clear All Filters. Console: Manage Filters to remove a saved rule. Changes apply right away; you do not need to reload the UI.",
+    "",
     -- Fixed
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console — Action Bar cast bar: Turn the cast bar on/off at the top of the section; other cast bar options stay disabled until it is on. Reset Position moves the bar back, updates the position sliders, and turns off Unlock Cast Bar so the bar is not left hidden.",
@@ -28,7 +34,6 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console settings: Section description text no longer highlights as if it were a setting you could change.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console — Slash Commands settings could fail to open.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console — Unit Frames: Position coordinates show again while custom frames are unlocked and you move them.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Quest Kill Counter Filters — cut down pop-up spam from quests that tick a counter every kill; set which kill counts (or completion only) still show a center-screen or alert message.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Fixed repeated \"You receive mail with … Gold from …\" lines after auto-looting mail and fast traveling (for example hireling gold then porting to a guild house) — mail session state now resets on zone load and mailbox close, inbox updates no longer refill the take queue while the UI is gone, and duplicate mail gold currency lines within 2.5s are suppressed.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Group death notifications no longer show a missing name (for example \" died!\") when \"Use account name\" is enabled — display name now falls back to character name, and alerts are skipped when no name is available.",
     "",

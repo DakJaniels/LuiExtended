@@ -525,11 +525,6 @@ function ChatAnnouncements.AppendQuestCounterFilterSettings(settings, Settings, 
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_HEADER),
-        }
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_DESCRIPTION),
         }
         settings[#settings + 1] =
@@ -673,11 +668,6 @@ function ChatAnnouncements.BuildQuestCounterFilterPCControls(Settings, Defaults,
 
     return
     {
-        {
-            type = "header",
-            name = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_HEADER),
-            width = "full",
-        },
         {
             type = "description",
             text = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_DESCRIPTION),
