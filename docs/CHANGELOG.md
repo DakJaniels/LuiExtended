@@ -4,37 +4,37 @@
 
 ### Fixed
 
-- Unlock: Moving the Quest Log with frame movers now keeps the world-event progress HUD (dynamic events tracker — ritual/world-event objectives such as adventure zone skirmishes) stacked directly above the quest log instead of leaving it at the default screen position.
+- Unlock: Moving the Quest Log with frame movers now keeps the world-event progress HUD (dynamic events tracker - ritual/world-event objectives such as adventure zone skirmishes) stacked directly above the quest log instead of leaving it at the default screen position.
 
 ## Version 7.2.1.8
 
 ### Changes
 
-- SavedVariables: Third-party addons that still read `LUIESV.Default[@DisplayName]["$AccountWide"]` (for example Srendarr checking LuiExtended unit frame options) are supported again — Default resolves to this session's megaserver profile (GetWorldName()), and module namespaces such as UnitFrames on that path overlay the split module globals after migration.
+- SavedVariables: Third-party addons that still read `LUIESV.Default[@DisplayName]["$AccountWide"]` (for example Srendarr checking LuiExtended unit frame options) are supported again - Default resolves to this session's megaserver profile (GetWorldName()), and module namespaces such as UnitFrames on that path overlay the split module globals after migration.
 - Character Profile copy (PC and console): Clearer settings labels and tooltips for megaserver, @account, copy source, and source character (less internal "row / saved vars" wording).
-- Combat Text: "Show Throttle Trailer" tooltip wording updated (default and locale strings) — describes the (N) suffix on merged totals and that throttle ms sliders control combining hits, not this checkbox.
+- Combat Text: "Show Throttle Trailer" tooltip wording updated (default and locale strings) - describes the (N) suffix on merged totals and that throttle ms sliders control combining hits, not this checkbox.
 
 ### Fixed
 
-- Combat Text: Attempt to fix throttle ms sliders appearing to do nothing at 0 — a 0 ms setting now bypasses the merge buffer and shows each combat event immediately instead of deferring with zo_callLater (which still merged same-frame hits); critical damage/heal/DoT/HoT throttle times follow the same four sliders as in the menu (damage, DoT, healing, HoT) instead of separate unused *critical saved vars left at 200 ms.
+- Combat Text: Attempt to fix throttle ms sliders appearing to do nothing at 0 - a 0 ms setting now bypasses the merge buffer and shows each combat event immediately instead of deferring with zo_callLater (which still merged same-frame hits); critical damage/heal/DoT/HoT throttle times follow the same four sliders as in the menu (damage, DoT, healing, HoT) instead of separate unused *critical saved vars left at 200 ms.
 
 ## Version 7.2.1.7
 
 ### Major change
 
 - SavedVariables layout: module settings now live in separate account-wide globals (LUIE_UnitFrames_SV, LUIE_CombatText_SV, LUIE_ChatAnnouncements_SV, LUIE_SpellCastBuffs_SV, LUIE_ActionBar_SV, LUIE_InfoPanel_SV, LUIE_SlashCommands_SV, LUIE_CombatInfo_SV) alongside LUIESV (see the addon manifest). Megaserver-specific rows use the ZO_SavedVars profile from your world name; legacy data under profile Default is migrated on load (expect one reload after updating).
-- PC (LAM) and console (LibHarvens): Character Profile "Copy Profile" uses three controls — source megaserver profile, @DisplayName, then $AccountWide or a character row matching LUIE.SVVer. The copy writes that path into this session's target row for LUIESV and every module global above.
+- PC (LAM) and console (LibHarvens): Character Profile "Copy Profile" uses three controls - source megaserver profile, @DisplayName, then $AccountWide or a character row matching LUIE.SVVer. The copy writes that path into this session's target row for LUIESV and every module global above.
 
 ### New
 
-- Slash command /luie debug on — saves your current AddOns enable state, disables everything outside the LUIE debug allowlist (LuiExtended, LuiData, LuiMedia, LibMediaProvider; PC: LibAddonMenu-2.0; console: LibHarvensAddonSettings and LibConsoleDialogs), then reloads the UI.
-- /luie debug off — restores the saved state and reloads; /luie debug status (or /luie debug alone) reports whether debug environment mode is active.
+- Slash command /luie debug on - saves your current AddOns enable state, disables everything outside the LUIE debug allowlist (LuiExtended, LuiData, LuiMedia, LibMediaProvider; PC: LibAddonMenu-2.0; console: LibHarvensAddonSettings and LibConsoleDialogs), then reloads the UI.
+- /luie debug off - restores the saved state and reloads; /luie debug status (or /luie debug alone) reports whether debug environment mode is active.
 - After reload, a one-shot chat line confirms debug mode or that your addon list was restored.
 - Info Panel: Optional memory display on the top row (after FPS). Console shows add-on memory pool used/capacity (MB); PC shows approximate Lua heap size (no forced GC on the HUD tick). Toggle under Info Panel elements; on console, pool fill uses the same read-only color tiers as FPS/latency when enabled.
 
 ### Changes
 
-- Custom Tooltips: Updated the RU lang strings for Battle Spirit — thank you Impda.
+- Custom Tooltips: Updated the RU lang strings for Battle Spirit - thank you Impda.
 - PC settings (LAM): FPS Limit slider maximum raised to 999 (vanilla interface settings only go up to 100).
 
 ### Fixed
@@ -44,21 +44,21 @@
 - UnitFrames: Player stamina bar anchor now matches Health-to-Magicka layering (correct bar inheritance).
 - UnitFrames: Custom frames use draw tier MEDIUM instead of LOW (player, target, group, raid, pet, companion, boss, AvA target).
 - UnitFrames: Out-of-combat alpha refresh no longer skips the first apply when combat state was still unset.
-- UnitFrames: LAM — in-combat/OOC alpha and hide-buff-OOC changes from the menu reapply immediately; boss/companion/pet opacity sliders use the same immediate path.
-- UnitFrames: LAM — player/target OOC and in-combat transparency sliders no longer unhide other custom frame windows as a side effect.
-- UnitFrames: LAM — layout preview is split per frame (player, reticle target, AvA player target) so bar and chrome tweaks only affect the frame you are editing.
-- UnitFrames: LAM — player name vs target name display no longer pops the wrong custom frame window.
-- UnitFrames: Custom reticle target — AvA rank icon hidden when rank is zero; rank chrome can refresh without full static control updates (avoids buff/debuff anchor clashes).
+- UnitFrames: LAM - in-combat/OOC alpha and hide-buff-OOC changes from the menu reapply immediately; boss/companion/pet opacity sliders use the same immediate path.
+- UnitFrames: LAM - player/target OOC and in-combat transparency sliders no longer unhide other custom frame windows as a side effect.
+- UnitFrames: LAM - layout preview is split per frame (player, reticle target, AvA player target) so bar and chrome tweaks only affect the frame you are editing.
+- UnitFrames: LAM - player name vs target name display no longer pops the wrong custom frame window.
+- UnitFrames: Custom reticle target - AvA rank icon hidden when rank is zero; rank chrome can refresh without full static control updates (avoids buff/debuff anchor clashes).
 - ChatAnnouncements: Opening a container (including from inventory) no longer prints looted gold before the "You empty [container]" line; gold flushes after that line.
-- ChatAnnouncements: Mail Take All — correct sender per mail, proper queueing, dedicated delayed loot lines, and flush order so gold and attachments match the mail you took.
+- ChatAnnouncements: Mail Take All - correct sender per mail, proper queueing, dedicated delayed loot lines, and flush order so gold and attachments match the mail you took.
 - ChatAnnouncements: Batched crafting "You use" lines list consumed materials in station order (smithing, provisioning, alchemy) instead of sorting by item id.
-- ChatAnnouncements: Rare group-join lines with raw gamepad name-icon markup or broken links when gamepad UI was active — join messages now build name links from raw event names.
+- ChatAnnouncements: Rare group-join lines with raw gamepad name-icon markup or broken links when gamepad UI was active - join messages now build name links from raw event names.
 - Combat Text: Ability costs can show as incoming resource drain even when the game never sends a native power-drain combat result (matched via slot use + power update, with dedupe so you do not get two lines).
 - Combat Text: Inferred drain no longer blames unrelated pool ticks (for example sprint stamina) on the wrong bar ability.
 - Combat Text: Group death alerts and alliance-point SCT use the correct event payload again.
-- Combat Text: Champion points — correct event wiring to the point panel, player filter, and cap detection via CanUnitGainChampionPoints.
+- Combat Text: Champion points - correct event wiring to the point panel, player filter, and cap detection via CanUnitGainChampionPoints.
 - Combat Text: Resource energize/drain respects mechanic bitflags; self-target costs follow outgoing toggles with sensible merge for one-sided incoming settings.
-- Combat Text: Event viewer — ultimate energize formatting, drain colors, and abbreviated drain amounts no longer double the minus sign on negative hit values.
+- Combat Text: Event viewer - ultimate energize formatting, drain colors, and abbreviated drain amounts no longer double the minus sign on negative hit values.
 
 ## Version 7.2.1.6
 
@@ -66,7 +66,7 @@
 
 - SpellCastBuffs: Many buff tooltips now use the game's current skill description instead of outdated fixed text. Custom text still applies where we intentionally override (for example Brace, Sneak, champion skills, and armor passives).
 - SpellCastBuffs: With Custom Tooltips turned off, morph-related buff tooltips still apply correctly instead of being wiped by the default path.
-- InfoPanel: Internal cleanup only — on-screen behavior should match what you're used to.
+- InfoPanel: Internal cleanup only - on-screen behavior should match what you're used to.
 - Tooltips: Minor behind-the-scenes tidy-up for damage-type wording on abilities.
 - Added support for Tonic of Portent Favor (shows like other XP-style buffs with correct icon and tooltip).
 
@@ -77,7 +77,7 @@
 - Igneous Weapons: removed an extra Major Sorcery bundle buff so you don't see two overlapping Sorcery icons from that skill line.
 - Molten Armaments: bundle tooltip matches the morph description; Sneak stealth buff uses up-to-date sneak text and avoids duplicate sneak rows when stealth is tracked.
 - Mirage: Extra Buffs no longer shows a duplicate fake combat buff next to the real morph aura.
-- Siphoning Attacks (bundle and morph); Feral, Eternal, and Wild Guardian; Inferno / Incinerate / Cauterize aura buffs — tooltips aligned with the skills window.
+- Siphoning Attacks (bundle and morph); Feral, Eternal, and Wild Guardian; Inferno / Incinerate / Cauterize aura buffs - tooltips aligned with the skills window.
 - InfoPanel: Backpack space (used / total) updates reliably after destroying items, after large inventory syncs, and when materials move into the craft bag.
 - Combat Text: Test Font and Test Animation in settings now dispatch preview events on the combat event listener instead of the global callback manager, so preview text shows again (PC LAM; console animation test).
 
@@ -109,27 +109,27 @@
 
 ### Fixed
 
-- Unlock (PC): Night Market favor counter — frame mover matches the real counter again instead of an oversized box.
+- Unlock (PC): Night Market favor counter - frame mover matches the real counter again instead of an oversized box.
 - Unlock (PC): turning on UI unlock no longer shows the favor mover across the whole screen the first time (before you move it or reload).
 
 ## Version 7.2.1.0
 
 ### New
 
-- ActionBar: companion ultimate tracking — optional value and percent labels on the companion ultimate slot (font, colors, vertical offset, hide when full); quickslot/keybind layout follows ZOS companion anchor chain when the companion button is shown.
+- ActionBar: companion ultimate tracking - optional value and percent labels on the companion ultimate slot (font, colors, vertical offset, hide when full); quickslot/keybind layout follows ZOS companion anchor chain when the companion button is shown.
 - CombatInfo (console): reset-to-defaults restores the module's saved settings from defaults and refreshes Ability Alerts and Crowd Control Tracker UI.
-- UnitFrames (debug): new /luiufall — toggles every custom-frame preview at once, temporarily enables frame-move mode for layout, and restores the previous unlock state when turned off.
+- UnitFrames (debug): new /luiufall - toggles every custom-frame preview at once, temporarily enables frame-move mode for layout, and restores the previous unlock state when turned off.
 
 ### Changes
 
 - Unlock: ZO_AdvZoneHUD_TopLevel (Night Market favor counter) mover uses ZO_HUDTelvarMeter width/height when present so the frame tracks the Telvar/stone meter layout.
 - UnitFrames: custom frame color handling updated to respect saved alpha values.
-- UnitFrames: CrutchAlerts Boss Health Bar integration — uses the current API (including per-boss boss1/boss2 threshold tables when the encounter provides them); stack-level percent labels above the boss block and rotated mechanic names below; shared thresholds draw a single line through all visible boss bars; listens for BossHealthBar.RegisterThresholdsChangeListener so programmatic overrides refresh markers; ACTIVE / IMMINENT / PASSED tinting matches Crutch bar colors and updates as boss HP changes (rounding follows Crutch useFloorRounding when Crutch is loaded).
+- UnitFrames: CrutchAlerts Boss Health Bar integration - uses the current API (including per-boss boss1/boss2 threshold tables when the encounter provides them); stack-level percent labels above the boss block and rotated mechanic names below; shared thresholds draw a single line through all visible boss bars; listens for BossHealthBar.RegisterThresholdsChangeListener so programmatic overrides refresh markers; ACTIVE / IMMINENT / PASSED tinting matches Crutch bar colors and updates as boss HP changes (rounding follows Crutch useFloorRounding when Crutch is loaded).
 - Settings (PC & console): boss threshold marker anchor dropdowns removed (obsolete with the stack layout); X/Y controls are a horizontal nudge for both label rows and shared vertical padding from the bar block.
 - DependsOn: LuiData minimum version raised to match bundled data (see manifest).
 - LuiData: Battle Spirit custom tooltip strings updated for U49 (33% healing reduction when 8 or more HoTs are active; Cyrodiil includes the ability-range line, Imperial City does not). German and French strings pulled from live client text; Russian Battle Spirit lines remain English until a verified localization export is available.
 - Internal: several modules now use ZO math globals (zo_floor, zo_max, zo_min, etc.) instead of math.* for consistency with ESO UI code.
-- UnitFrames (debug): slash-command previews for individual frames — /luiufplayer, /luiuftar, /luiufsm, /luiufraid, /luiufpet, /luiufboss, /luiufcomp, /luiufava show enabled custom frames with live player power and labels.
+- UnitFrames (debug): slash-command previews for individual frames - /luiufplayer, /luiuftar, /luiufsm, /luiufraid, /luiufpet, /luiufboss, /luiufcomp, /luiufava show enabled custom frames with live player power and labels.
 - Settings (PC & console): custom frame unlock checkbox and grid-snap overlay refresh use UnitFrames.CustomFramesMovingState (removed duplicate local moving flag).
 
 ### Fixed
@@ -139,7 +139,7 @@
 - Stats screen (keyboard & gamepad): optional artificial-effect Ability ID debug lines updated to the same id map as SpellCastBuffs.
 - UnitFrames: boss threshold markers and mechanic labels align to the health bar (labels were anchored from the bar center horizontally; lines used the left edge).
 - UnitFrames: boss threshold markers clear when no boss units exist (wipe / despawn) instead of lingering on screen.
-- UnitFrames: custom group/raid frame repositioning — member controls have mouse disabled while moving so the top-level window reliably receives drags.
+- UnitFrames: custom group/raid frame repositioning - member controls have mouse disabled while moving so the top-level window reliably receives drags.
 
 ## Version 7.2.0.9
 
@@ -180,8 +180,8 @@
 ### Fixed
 
 - Error when clicking link for timed activities due to 11.3.5 code change in the `ZO_TimedActivities_Manager` Class.
-- Action bar: Flame Lash / Power Lash proc icon flicker (GitHub #379) — `SetupActionSlot` no longer applies `BarIdOverride` for proc/base pairs flagged in `IsAbilityProc` / `BaseForAbilityProc` (global `actionbutton` hook; disabling the ActionBar module alone did not avoid it).
-- Action bar: Power Lash stack buff (abilityId 34117, U41+ 5x / 20s) — bar highlight tracks combat/buff data via `combatTrack`, toggled labels show stacks and timer; stacks decrement on Power Lash cast (`OnAbilityUsed`), timer and overlay clear when stacks reach zero; sync from `EVENT_EFFECT_CHANGED` / combat when ZOS reports zero stacks.
+- Action bar: Flame Lash / Power Lash proc icon flicker (GitHub #379) - `SetupActionSlot` no longer applies `BarIdOverride` for proc/base pairs flagged in `IsAbilityProc` / `BaseForAbilityProc` (global `actionbutton` hook; disabling the ActionBar module alone did not avoid it).
+- Action bar: Power Lash stack buff (abilityId 34117, U41+ 5x / 20s) - bar highlight tracks combat/buff data via `combatTrack`, toggled labels show stacks and timer; stacks decrement on Power Lash cast (`OnAbilityUsed`), timer and overlay clear when stacks reach zero; sync from `EVENT_EFFECT_CHANGED` / combat when ZOS reports zero stacks.
 
 ## Version 7.2.0.3
 
@@ -581,7 +581,7 @@ Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.6.0...6.9
 ### New Features
 
 - Unit Frames now display group election information, including current voting status. (Because who doesn’t want more democracy in their UI?)
-- Added a setting for custom frames to quickly hide dead enemy or neutral NPCs. This shouldn't be hiding dead players, let me know if it does. (If it does, oops—guess you’re a ghost now.)
+- Added a setting for custom frames to quickly hide dead enemy or neutral NPCs. This shouldn't be hiding dead players, let me know if it does. (If it does, oops-guess you’re a ghost now.)
 
 ### Fixed
 
