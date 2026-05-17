@@ -1,5 +1,17 @@
 # LuiExtended Changelog
 
+## Version 7.2.1.8
+
+### Changes
+
+- SavedVariables: Third-party addons that still read `LUIESV.Default[@DisplayName]["$AccountWide"]` (for example Srendarr checking LuiExtended unit frame options) are supported again — Default resolves to this session's megaserver profile (GetWorldName()), and module namespaces such as UnitFrames on that path overlay the split module globals after migration.
+- Character Profile copy (PC and console): Clearer settings labels and tooltips for megaserver, @account, copy source, and source character (less internal "row / saved vars" wording).
+- Combat Text: "Show Throttle Trailer" tooltip wording updated (default and locale strings) — describes the (N) suffix on merged totals and that throttle ms sliders control combining hits, not this checkbox.
+
+### Fixed
+
+- Combat Text: Attempt to fix throttle ms sliders appearing to do nothing at 0 — a 0 ms setting now bypasses the merge buffer and shows each combat event immediately instead of deferring with zo_callLater (which still merged same-frame hits); critical damage/heal/DoT/HoT throttle times follow the same four sliders as in the menu (damage, DoT, healing, HoT) instead of separate unused *critical saved vars left at 200 ms.
+
 ## Version 7.2.1.7
 
 ### Major change
@@ -592,7 +604,7 @@ Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.5.3...6.9
 
 ### Fixed
 
-- Some timer fixes. More tweaks will be needed. Feedback needed! Leave a comment, or start a discusson on git <https://github.com/DakJaniels/LuiExtended/discussions>
+- Some timer fixes. More tweaks will be needed. Feedback needed! Leave a comment, or start a discusson on git [GitHub Discussions](https://github.com/DakJaniels/LuiExtended/discussions)
 - Resolve error with powershield.
 
 Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.5.1...6.9.5.3](https://github.com/DakJaniels/LuiExtended/compare/6.9.5.1...6.9.5.3)
@@ -601,7 +613,7 @@ Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.5.1...6.9
 
 ### Fixed
 
-- Some timer fixes. Feedback needed! Leave a comment, or start a discusson on git <https://github.com/DakJaniels/LuiExtended/discussions>
+- Some timer fixes. Feedback needed! Leave a comment, or start a discusson on git [GitHub Discussions](https://github.com/DakJaniels/LuiExtended/discussions)
 
 Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.9.5...6.9.5.1](https://github.com/DakJaniels/LuiExtended/compare/6.9.5...6.9.5.1)
 
@@ -1262,10 +1274,10 @@ Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.2...6.8.3
 - Added a menu option to choose between the old banker/merchant or the cat banker/merchant for their respective slash commands.
 - Any slash command that uses a collectible will now display a message in chat when the collectible is summoned or unsummoned.
 - Toggling the LUIE overlay on for default unit frames now disables the default UI unitframe text menu option to stop overlap from occuring.
-- Custom ability icons by and modified from eleazzaar licensed under the CC[*]3 License (<https://creativecommons.org/licenses/by/3.0/>)
-- Custom ability icons by and modified from AKiZA, Angelina Avgustova, Blade Dancer, ClayManStudio, Dayed, Digital Worlds JSC, Ever Probe, HOSE, Jon Snow, Josch, Kalle Olli, Moon Tribe, N-hance Studio, PONETI, REXARD, Sky Painter, The 7 Heaven, TiGame, and TonityEden licensed under the Unity Store single entity license. (<https://unity3d.com/legal/as_terms>)
-- Custom ability icons by and modified from a-ravlik & micart licensed under the GraphicRiver regular license. (<https://graphicriver.net/licenses/terms/regular>)
-- Custom ability icons by and modified from Forrest Imel, Frostwindz and Mizuko licensed under the GameDevMarket.net pro license. (<https://www.gamedevmarket.net/terms-conditions/#pro-licence>)
+- Custom ability icons by and modified from eleazzaar licensed under the CC[*]3 License ([https://creativecommons.org/licenses/by/3.0/](https://creativecommons.org/licenses/by/3.0/))
+- Custom ability icons by and modified from AKiZA, Angelina Avgustova, Blade Dancer, ClayManStudio, Dayed, Digital Worlds JSC, Ever Probe, HOSE, Jon Snow, Josch, Kalle Olli, Moon Tribe, N-hance Studio, PONETI, REXARD, Sky Painter, The 7 Heaven, TiGame, and TonityEden licensed under the Unity Store single entity license. ([https://unity3d.com/legal/as_terms](https://unity3d.com/legal/as_terms))
+- Custom ability icons by and modified from a-ravlik & micart licensed under the GraphicRiver regular license. ([https://graphicriver.net/licenses/terms/regular](https://graphicriver.net/licenses/terms/regular))
+- Custom ability icons by and modified from Forrest Imel, Frostwindz and Mizuko licensed under the GameDevMarket.net pro license. ([https://www.gamedevmarket.net/terms-conditions/#pro-licence](https://www.gamedevmarket.net/terms-conditions/#pro-licence))
 - Fixed an issue where initiating a vote kick on a party member in LFG through the Player to Player interaction menu would throw a UI error due to referencing a renamed function.
 - Fixed an issue where recieving Crown Store gifts through the Notifications prompt would cause a Protected Call error. Unfortunately this means accepted/declined response text from sending various invite types to the player will no longer work. I'll have to find another way to handle this in the future.
 - Updated the auras/icons/tooltips/bar highlight, etc for all Necromancer skill line active and passive skills.
@@ -1664,7 +1676,7 @@ Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.2...6.8.3
 - Combat Text - Added an option (disabled by default) to hide nearby enemies abilities that don't directly target the player. This prevents spam from abilites that are happening out of range of the player when disabled. Note: These alerts still always display in dungeons since players are likely to all be in relatively the same area.
 - Combat Text - Fixed an issue where incoming mitigation warnings would always display even when disabled.
 - Combat Text - Added a missing menu option for turning Outgoing Reflects off. Additionally fixed the toggle options for reflects so Incoming displays attacks you Reflect and Outgoing displays attacked an enemy reflected.
-- Damage Meter Component has been removed. Highly suggest using Combat Metrics instead. (<http://www.esoui.com/downloads/info1360-CombatMetrics.html>).
+- Damage Meter Component has been removed. Highly suggest using Combat Metrics instead. ([Combat Metrics on ESOUI](http://www.esoui.com/downloads/info1360-CombatMetrics.html)).
 - Combat Info component has been split into two components: Scrolling Combat text has been revamped and replaced with the more advanced features from the Combat Cloud addon. Combat Info has been updated with additional functionality. More details listed per component below.
 - Added an option to Hide the Experience Bar/Skill Progess Bar from popping up when the player earns XP from Experience Gain from Quests, Discover, Boss Kills, and Skill Line Updates. This is useful if you wish to place a UI component in the top left corner of your screen.
 - Updated description and functionality of the various SLASH commands. Error messages have been streamlined and will display additional alerts based off your preferences in Chat Announcements for the relevant commands.
@@ -1759,7 +1771,7 @@ Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.2...6.8.3
 - Procs triggered when Bar highlight is enabled now play a sound.
 - Updated and separated old option to display a Cooldown duration for Potions and Quickslot items. Added options to configure label formatting.
 
-- Combat Text component completed replaced by a modified and updated version of the Combat Cloud addon originally by Sideshow: <http://www.esoui.com/downloads/info281-CombatCloud.html#info>
+- Combat Text component completed replaced by a modified and updated version of the Combat Cloud addon originally by Sideshow: [Combat Cloud on ESOUI](http://www.esoui.com/downloads/info281-CombatCloud.html#info)
 - Adjusted default options for Combat Text to have formatting similar to the default game combat text.
 - Combat Text now uses icon and name override tables from LUI buffs & debuffs components.
 - Combat Text now hides some un-needed or spammy messages such as resource drain from Sprint and Stealth.
@@ -2061,7 +2073,7 @@ Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.2...6.8.3
 ### Buffs and Debuffs
 
 - Adjusted buffs and debuffs component for the new API changes, now players will only be able to see self applied or pet applied debuffs, as well as major/minor category debuffs.
-- Updated Major and Minor debuffs to use the new Zenimax icons added to the game in Homestead [COLOR="RED"]NOTE: if you prefer the old buff icons, you can download an optional patch [URL="https://puu.sh/ugsXY.zip"]here[/URL]. Extract effects.lua to LuiExtended\modules.[/COLOR]
+- Updated Major and Minor debuffs to use the new Zenimax icons added to the game in Homestead [COLOR="RED"]NOTE: if you prefer the old buff icons, you can download an optional patch [URL="[https://puu.sh/ugsXY.zip](https://puu.sh/ugsXY.zip)"]here[/URL]. Extract effects.lua to LuiExtended\modules.[/COLOR]
 - Implemented horizontal container orientation for long term effects.
 - Updated a number of buffs that display a green highlight on the ability bar while their duration is active.
 - Updated the duration of ground tracking effects to be more accurate based on cast time. There is still some work to do here.
