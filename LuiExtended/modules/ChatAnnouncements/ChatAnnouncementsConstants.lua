@@ -32,6 +32,62 @@ ChatAnnouncements.QueuedMessagesCounter = 1
 -- Setup Color Table
 ChatAnnouncements.Colors = {}
 
+-- Runtime flags, indexes, and session state (see ChatAnnouncements.lua init).
+ChatAnnouncements.State = {}
+
+-- File-scope helpers (Lua 5.1 local limit); defined in ChatAnnouncements.lua / ChatAnnouncementsCSA.lua.
+ChatAnnouncements.Internal = {}
+
+-- Bracket / link-style options for formatted CA strings (read-only).
+ChatAnnouncements.Brackets =
+{
+    bracket1 =
+    {
+        [1] = "[",
+        [2] = "(",
+        [3] = "",
+        [4] = "",
+        [5] = "",
+    },
+    bracket2 =
+    {
+        [1] = "]",
+        [2] = ")",
+        [3] = " -",
+        [4] = ":",
+        [5] = "",
+    },
+    bracket3 =
+    {
+        [1] = "[",
+        [2] = "(",
+        [3] = "- ",
+        [4] = "",
+    },
+    bracket4 =
+    {
+        [1] = "]",
+        [2] = ")",
+        [3] = "",
+        [4] = "",
+    },
+    linkBrackets =
+    {
+        [1] = LINK_STYLE_DEFAULT,
+        [2] = LINK_STYLE_BRACKETS,
+    },
+    linkBracket1 =
+    {
+        [1] = "",
+        [2] = "[",
+    },
+    linkBracket2 =
+    {
+        [1] = "",
+        [2] = "]",
+    },
+}
+
 ------------------------------------------------
 -- DEFAULT VARIABLE SETUP ----------------------
 ------------------------------------------------
