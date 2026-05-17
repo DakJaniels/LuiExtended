@@ -32,27 +32,31 @@ function CombatTextCombatHybridEventViewer:OnEvent(combatType, powerType, value,
         self:View(combatType, powerType, value, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted, 1)
     else
         -- Memory optimization: lightweight key instead of 24-part concatenation
-        local eventKey = abilityId .. "_" .. combatType .. "_" .. damageType .. "_" .. (isDamage and "1" or isDamageCritical and "2" or isHealing and "3" or isHealingCritical and "4" or isDot and "5" or isDotCritical and "6" or isHot and "7" or isHotCritical and "8" or isMiss and "9" or isImmune and "10" or isParried and "11" or isReflected and "12" or isDamageShield and "13" or isDodged and "14" or isBlocked and "15" or isInterrupted and "16" or isEnergize and "17" or isDrain and "18" or "0")
-        if self.eventBuffer[eventKey] == nil then
-            self.eventBuffer[eventKey] = { value = value, hits = 1 }
-            -- Use cached table instead of allocating new one
-            local flags = LUIE.GetCachedTable()
-            flags.isDamage = isDamage
-            flags.isDamageCritical = isDamageCritical
-            flags.isDot = isDot
-            flags.isDotCritical = isDotCritical
-            flags.isHealing = isHealing
-            flags.isHealingCritical = isHealingCritical
-            flags.isHot = isHot
-            flags.isHotCritical = isHotCritical
-            local throttleTime = self:GetThrottleTime(Settings, flags)
-            LUIE.RecycleTable(flags) -- Return to cache immediately after use
-            zo_callLater(function ()
-                             self:ViewFromEventBuffer(combatType, powerType, eventKey, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
-                         end, throttleTime)
+        local flags = LUIE.GetCachedTable()
+        flags.isDamage = isDamage
+        flags.isDamageCritical = isDamageCritical
+        flags.isDot = isDot
+        flags.isDotCritical = isDotCritical
+        flags.isHealing = isHealing
+        flags.isHealingCritical = isHealingCritical
+        flags.isHot = isHot
+        flags.isHotCritical = isHotCritical
+        local throttleTime = self:GetThrottleTime(Settings, flags)
+        LUIE.RecycleTable(flags)
+
+        if throttleTime <= 0 then
+            self:View(combatType, powerType, value, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted, 1)
         else
-            self.eventBuffer[eventKey].value = self.eventBuffer[eventKey].value + value
-            self.eventBuffer[eventKey].hits = self.eventBuffer[eventKey].hits + 1
+            local eventKey = abilityId .. "_" .. combatType .. "_" .. damageType .. "_" .. (isDamage and "1" or isDamageCritical and "2" or isHealing and "3" or isHealingCritical and "4" or isDot and "5" or isDotCritical and "6" or isHot and "7" or isHotCritical and "8" or isMiss and "9" or isImmune and "10" or isParried and "11" or isReflected and "12" or isDamageShield and "13" or isDodged and "14" or isBlocked and "15" or isInterrupted and "16" or isEnergize and "17" or isDrain and "18" or "0")
+            if self.eventBuffer[eventKey] == nil then
+                self.eventBuffer[eventKey] = { value = value, hits = 1 }
+                zo_callLater(function ()
+                                 self:ViewFromEventBuffer(combatType, powerType, eventKey, abilityName, abilityId, damageType, sourceName, isDamage, isDamageCritical, isHealing, isHealingCritical, isEnergize, isDrain, isDot, isDotCritical, isHot, isHotCritical, isMiss, isImmune, isParried, isReflected, isDamageShield, isDodged, isBlocked, isInterrupted)
+                             end, throttleTime)
+            else
+                self.eventBuffer[eventKey].value = self.eventBuffer[eventKey].value + value
+                self.eventBuffer[eventKey].hits = self.eventBuffer[eventKey].hits + 1
+            end
         end
     end
 end
