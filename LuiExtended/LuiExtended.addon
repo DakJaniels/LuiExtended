@@ -71,7 +71,9 @@ console/Unlock.lua
 modules/ChatAnnouncements/ChatAnnouncementsConstants.lua
 modules/ChatAnnouncements/ChatAnnouncementsPlayerToPlayerHooks.lua
 modules/ChatAnnouncements/ChatAnnouncementsExperience.lua
+modules/ChatAnnouncements/ChatAnnouncementsCSA.lua
 modules/ChatAnnouncements/QuestCounterFilters.lua
+modules/ChatAnnouncements/ChatAnnouncementsHooks.lua
 modules/ChatAnnouncements/ChatAnnouncements.lua
 
 # Modules - Combat Text
