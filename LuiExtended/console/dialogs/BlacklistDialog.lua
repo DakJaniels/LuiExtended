@@ -54,7 +54,7 @@ function BlacklistDialog.Setup(dialog, data)
             {
                 template = "ZO_GamepadMenuEntryTemplate",
                 text = "", -- Empty text to prevent default "EntryItem1" text
-                header = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_REMLIST),
+                header = data.listHeaderText or GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_REMLIST),
                 templateData =
                 {
                     setup = function (control, entryData, selected, reselectingDuringRebuild, enabled, active)
@@ -107,7 +107,7 @@ function BlacklistDialog.Setup(dialog, data)
             parametricList[#parametricList + 1] =
             {
                 template = "ZO_GamepadMenuEntryTemplate",
-                text = [[Nothing here bro.]],
+                text = data.emptyListText or GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_EMPTYLIST),
                 templateData =
                 {
                     setup = function (control, entryData, selected, reselectingDuringRebuild, enabled, active)
@@ -235,7 +235,7 @@ function BlacklistDialog.Refresh(dialog, data)
 end
 
 -- Show a blacklist dialog
-function BlacklistDialog.Show(identifier, title, generateItemsFunc, onSelectCallback, addItemCallback, clearCallback)
+function BlacklistDialog.Show(identifier, title, generateItemsFunc, onSelectCallback, addItemCallback, clearCallback, listHeaderText, emptyListText)
     -- Create or get existing dialog control (ESO dialog system needs the control to exist)
     local dialogName = "LUIE_BlacklistDialog_" .. identifier
     local dialog = GetControl(dialogName)
@@ -255,6 +255,8 @@ function BlacklistDialog.Show(identifier, title, generateItemsFunc, onSelectCall
         onSelectCallback = onSelectCallback,
         addItemCallback = addItemCallback,
         clearCallback = clearCallback,
+        listHeaderText = listHeaderText,
+        emptyListText = emptyListText,
     }
 
     -- Register with ESO dialogs system

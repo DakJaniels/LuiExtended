@@ -513,7 +513,9 @@ end
 --- @param onSelectCallback function Callback when an item is selected: function(itemData)
 --- @param addItemCallback function|nil Optional callback for adding items: function(text)
 --- @param clearCallback function|nil Optional callback for clearing the list: function()
-function LUIE.RegisterBlacklistDialog(identifier, title, generateItemsFunc, onSelectCallback, addItemCallback, clearCallback)
+--- @param listHeaderText string|nil Optional header above the parametric list
+--- @param emptyListText string|nil Optional text when the list has no entries
+function LUIE.RegisterBlacklistDialog(identifier, title, generateItemsFunc, onSelectCallback, addItemCallback, clearCallback, listHeaderText, emptyListText)
     -- Store dialog data for later use
     if not LUIE.BlacklistDialogs then
         LUIE.BlacklistDialogs = {}
@@ -526,6 +528,8 @@ function LUIE.RegisterBlacklistDialog(identifier, title, generateItemsFunc, onSe
         onSelectCallback = onSelectCallback,
         addItemCallback = addItemCallback,
         clearCallback = clearCallback,
+        listHeaderText = listHeaderText,
+        emptyListText = emptyListText,
     }
 end
 
@@ -539,7 +543,16 @@ function LUIE.ShowBlacklistDialog(identifier)
 
     -- Use custom dialog system
     if LUIE.BlacklistDialog and LUIE.BlacklistDialog.Show then
-        LUIE.BlacklistDialog.Show(identifier, dialogData.title, dialogData.generateItemsFunc, dialogData.onSelectCallback, dialogData.addItemCallback, dialogData.clearCallback)
+        LUIE.BlacklistDialog.Show(
+            identifier,
+            dialogData.title,
+            dialogData.generateItemsFunc,
+            dialogData.onSelectCallback,
+            dialogData.addItemCallback,
+            dialogData.clearCallback,
+            dialogData.listHeaderText,
+            dialogData.emptyListText
+        )
     end
 end
 

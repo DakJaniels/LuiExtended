@@ -59,6 +59,9 @@ function ChatAnnouncements.CreateConsoleSettings()
     local Defaults = ChatAnnouncements.Defaults
     local Settings = ChatAnnouncements.SV
 
+    ChatAnnouncements.RegisterQuestCounterFilterDialogs()
+    ChatAnnouncements.RegisterQuestCounterFilterClearDialog()
+
     -- Register the settings panel
     if not LUIE.SV.ChatAnnouncements_Enable then
         return
@@ -7181,6 +7184,10 @@ function ChatAnnouncements.CreateConsoleSettings()
         }
     end)
 
+    buildSectionSettings("QuestCounterFilters", function (settings)
+        ChatAnnouncements.AppendQuestCounterFilterSettings(settings, Settings, Defaults, panel, SettingsAPI)
+    end)
+
     -- Build Social Announcements Section
     buildSectionSettings("Social", function (settings)
         settings[#settings + 1] =
@@ -9311,6 +9318,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_ANTIQUITY_HEADER), sectionGroups["Antiquities"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_ACHIEVE_HEADER), sectionGroups["Achievements"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_QUEST_HEADER), sectionGroups["Quest"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_HEADER), sectionGroups["QuestCounterFilters"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_SOCIAL_HEADER), sectionGroups["Social"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_GROUP_HEADER), sectionGroups["Group"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER), sectionGroups["Display"])

@@ -28,6 +28,7 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console settings: Section description text no longer highlights as if it were a setting you could change.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console — Slash Commands settings could fail to open.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console — Unit Frames: Position coordinates show again while custom frames are unlocked and you move them.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Quest Kill Counter Filters — cut down pop-up spam from quests that tick a counter every kill; set which kill counts (or completion only) still show a center-screen or alert message.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Fixed repeated \"You receive mail with … Gold from …\" lines after auto-looting mail and fast traveling (for example hireling gold then porting to a guild house) — mail session state now resets on zone load and mailbox close, inbox updates no longer refill the take queue while the UI is gone, and duplicate mail gold currency lines within 2.5s are suppressed.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Group death notifications no longer show a missing name (for example \" died!\") when \"Use account name\" is enabled — display name now falls back to character name, and alerts are skipped when no name is available.",
     "",
