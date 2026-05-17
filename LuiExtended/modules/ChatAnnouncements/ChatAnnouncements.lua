@@ -3171,10 +3171,12 @@ local function BuildTimedActivityClaimedSuffix(index, forAlert)
         return ""
     end
     local numClaimed = GetTimedActivityNumTimesClaimed(index)
+    local formatStr = GetString(SI_TIMED_ACTIVITY_CLAIMED_PROGRESS):gsub("|c%x%x%x%x%x%x", ""):gsub("|r", "")
+    local claimedProgress = zo_strformat(formatStr, numClaimed, totalClaimable)
     if forAlert then
-        return string_format(" |cAAAAAA(Claimed: %i/%i)|r", numClaimed, totalClaimable)
+        return string_format(" |cAAAAAA[%s]|r", claimedProgress)
     end
-    return " " .. zo_strformat(GetString(SI_TIMED_ACTIVITY_CLAIMED_PROGRESS), numClaimed, totalClaimable)
+    return " [" .. claimedProgress .. "]"
 end
 
 --- @param index luaindex
