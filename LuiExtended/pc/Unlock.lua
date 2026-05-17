@@ -35,6 +35,7 @@ local Unlock =
 {
     frameMoverEnabled = false,
     movers = {},
+    dynamicEventsQuestHookInstalled = false,
     defaultPanels =
     {
         [ZO_HUDInfamyMeter] = { GetString(LUIE_STRING_DEFAULT_FRAME_INFAMY_METER) },
@@ -180,6 +181,24 @@ function Unlock.AdjustElement(element, config)
     if height then element:SetHeight(height) end
 end
 
+function Unlock.ApplyDynamicEventsTrackerToQuest()
+    if not LUIE.SV[ZO_FocusedQuestTrackerPanel:GetName()] then
+        return
+    end
+    ZO_DynamicEventsTracker_TL:ClearAnchors()
+    ZO_DynamicEventsTracker_TL:SetAnchor(BOTTOMRIGHT, ZO_FocusedQuestTrackerPanel, TOPRIGHT, 0, 0, ANCHOR_CONSTRAINS_XY)
+end
+
+function Unlock.RegisterDynamicEventsQuestAnchorHook()
+    if Unlock.dynamicEventsQuestHookInstalled then
+        return
+    end
+    ZO_PostHook(ZO_DynamicEventsTracker, "RefreshAnchors", function ()
+        Unlock.ApplyDynamicEventsTrackerToQuest()
+    end)
+    Unlock.dynamicEventsQuestHookInstalled = true
+end
+
 --- Helper function to set the anchor of an element
 --- @param element Control The element to set the anchor for
 --- @param frameName string The name of the frame associated with the element
@@ -218,6 +237,10 @@ function Unlock.SetAnchor(element, frameName)
             --- @diagnostic disable-next-line: undefined-field
             alertText.fadingControlBuffer.anchor = ZO_Anchor:New(TOPRIGHT, ZO_AlertTextNotification, TOPRIGHT)
         end
+    end
+
+    if element == ZO_FocusedQuestTrackerPanel then
+        Unlock.ApplyDynamicEventsTrackerToQuest()
     end
 end
 
@@ -428,6 +451,8 @@ function Unlock.SetElementPosition()
     Unlock.ReplaceDefaultTemplate(PLAYER_PROGRESS_BAR, "RefreshTemplate", "ZO_PlayerProgress")
     Unlock.ReplaceDefaultTemplate(ZO_HUDTracker_Base, "RefreshAnchors", "ZO_EndDunHUDTrackerContainer")
     Unlock.ReplaceDefaultTemplate(ZO_HUDTracker_Base, "RefreshAnchors", "ZO_AdvZoneHUDTrackerContainer")
+    Unlock.RegisterDynamicEventsQuestAnchorHook()
+    Unlock.ApplyDynamicEventsTrackerToQuest()
 end
 
 --- Setup element movers based on the provided state
