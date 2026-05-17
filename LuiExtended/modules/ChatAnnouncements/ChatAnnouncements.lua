@@ -3161,15 +3161,34 @@ function ChatAnnouncements.OnAchievementUpdated(eventId, id)
     end
 end
 
---- Builds a Timed Activity chat message with the activity name wrapped in a clickable link.
+--- Claimed suffix for challenges (matches Timed Activities UI when total claimable > 0).
 --- @param index luaindex
---- @param currentVal integer Current value (numClaimed for tracking, currentProgress for progress)
---- @param maxVal integer Max value (totalClaimable for tracking, maxProgress for progress)
---- @return string message
-local function BuildTimedActivityMessage(index, currentVal, maxVal)
+--- @param forAlert boolean|nil
+--- @return string suffix Empty when infinitely repeatable (total claimable == 0)
+local function BuildTimedActivityClaimedSuffix(index, forAlert)
+    local totalClaimable = GetTimedActivityTotalNumTimesClaimable(index)
+    if totalClaimable <= 0 then
+        return ""
+    end
+    local numClaimed = GetTimedActivityNumTimesClaimed(index)
+    if forAlert then
+        return string_format(" |cAAAAAA(Claimed: %i/%i)|r", numClaimed, totalClaimable)
+    end
+    return " " .. zo_strformat(GetString(SI_TIMED_ACTIVITY_CLAIMED_PROGRESS), numClaimed, totalClaimable)
+end
+
+--- @param index luaindex
+--- @param currentProgress integer|nil
+--- @param maxProgress integer|nil
+--- @param forAlert boolean|nil
+--- @return string
+local function BuildTimedActivityMessage(index, currentProgress, maxProgress, forAlert)
     local name = GetTimedActivityName(index)
     local activityType = GetTimedActivityType(index)
-    local progress = string_format("%i / %i", currentVal, maxVal)
+    currentProgress = currentProgress or GetTimedActivityProgress(index)
+    maxProgress = maxProgress or GetTimedActivityMaxProgress(index)
+    local progress = string_format("%i / %i", currentProgress, maxProgress)
+    local claimedSuffix = BuildTimedActivityClaimedSuffix(index, forAlert)
     local typeName
     if activityType == TIMED_ACTIVITY_TYPE_DAILY then
         typeName = GetString(SI_TIMEDACTIVITYTYPE0)
@@ -3180,11 +3199,16 @@ local function BuildTimedActivityMessage(index, currentVal, maxVal)
     else
         typeName = tostring(activityType)
     end
-    local prefix = string_format("[%s] ", zo_strformat(GetString(LUIE_STRING_CA_DISPLAY_TIMED_ACTIVITIES), typeName))
+    local challengeHeader = string_format("[%s]", zo_strformat(GetString(SI_TIMED_ACTIVITIES_TYPE_HEADER), typeName))
     local bracketOpt = ChatAnnouncements.SV.BracketOptionItem or 1
     local formattedName = (bracketOpt == 1) and name or ("[" .. name .. "]")
-    local nameLink = string_format("|H%d:LINK_TYPE_LUITIMEDACTIVITY:0|h%s|h", bracketOpt == 1 and 0 or 1, formattedName)
-    return string_format("%s%s: %s", prefix, nameLink, progress)
+    if forAlert then
+        local headerColor = "71DE73"
+        local nameColor = "FFFF00"
+        local progressColor = "FFFFFF"
+        return string_format("|c%s%s|r |c%s%s|r: |c%s%s|r%s", headerColor, challengeHeader, nameColor, formattedName, progressColor, progress, claimedSuffix)
+    end
+    return string_format("%s %s: %s%s", challengeHeader, formattedName, progress, claimedSuffix)
 end
 
 --- - *EVENT_TIMED_ACTIVITY_TRACKING_UPDATED* (P49)
@@ -3195,9 +3219,7 @@ function ChatAnnouncements.OnTimedActivityTrackingUpdated(eventId, timedActivity
     if not (ChatAnnouncements.SV.Notify.TimedActivityCA or ChatAnnouncements.SV.Notify.TimedActivityAlert) then return end
     local index, trackedEncodedId = GetTrackedTimedActivityInfo()
     if index == nil or trackedEncodedId ~= timedActivityEncodedId then return end
-    local numClaimed = GetTimedActivityNumTimesClaimed(index)
-    local totalClaimable = GetTimedActivityTotalNumTimesClaimable(index)
-    local message = BuildTimedActivityMessage(index, numClaimed, totalClaimable)
+    local message = BuildTimedActivityMessage(index)
     if ChatAnnouncements.SV.Notify.TimedActivityCA then
         ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
         {
@@ -3208,8 +3230,7 @@ function ChatAnnouncements.OnTimedActivityTrackingUpdated(eventId, timedActivity
         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
     end
     if ChatAnnouncements.SV.Notify.TimedActivityAlert then
-        local alertMessage = zo_strformat(GetString(SI_APPLYOUTFITCHANGESRESULT0), GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_LABEL))
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, BuildTimedActivityMessage(index, nil, nil, true))
     end
 end
 
@@ -3256,8 +3277,7 @@ function ChatAnnouncements.OnTimedActivityProgressUpdated(eventId, index, previo
         eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
     end
     if ChatAnnouncements.SV.Notify.TimedActivityProgressAlert then
-        local alertMessage = zo_strformat(GetString(SI_APPLYOUTFITCHANGESRESULT0), GetString(LUIE_STRING_CA_TIMED_ACTIVITIES_LABEL))
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, BuildTimedActivityMessage(index, currentProgress, maxProgress, true))
     end
 end
 
@@ -3289,7 +3309,8 @@ function ChatAnnouncements.OnPromotionalEventsActivityProgressUpdated(eventId, c
         end
 
         if ChatAnnouncements.SV.Notify.PromotionalEventsActivityAlert then
-            local alertMessage = zo_strformat(GetString(SI_APPLYOUTFITCHANGESRESULT0), GetString(SI_PROMOTIONAL_EVENT_TRACKER_HEADER))
+            local header = GetString(SI_PROMOTIONAL_EVENT_TRACKER_HEADER)
+            local alertMessage = string_format("|c71DE73[%s]|r |cFFFF00%s|r: |cFFFFFF%s|r", header, displayName, progress)
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertMessage)
         end
     end
@@ -6558,12 +6579,6 @@ function LUIE.HandleClickEvent(rawLink, mouseButton, linkText, linkStyle, linkTy
             end
         else
             ANTIQUITY_LORE_KEYBOARD:ShowAntiquity(categoryIndex1)
-        end
-        return true
-    end
-    if linkType == "LINK_TYPE_LUITIMEDACTIVITY" then
-        if IsTimedActivitySystemAvailable() then
-            TIMED_ACTIVITIES_MANAGER:ShowTimedActivitiesScene()
         end
         return true
     end
