@@ -17,6 +17,7 @@ local table_sort = table.sort
 
 -- Load LibHarvensAddonSettings
 local LHAS = LibHarvensAddonSettings
+local SettingsAPI = LUIE.ConsoleSettingsAPI
 
 -- Create Settings Menu
 function LUIE.CreateConsoleSettings()
@@ -452,7 +453,9 @@ function LUIE.CreateConsoleSettings()
         label = GetString(LUIE_STRING_LAM_RELOADUI),
         tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
         buttonText = GetString(LUIE_STRING_LAM_RELOADUI),
-        clickHandler = function () ReloadUI("ingame") end
+        clickHandler = function ()
+            SettingsAPI:ReloadUIWithPendingClear()
+        end
     }
 
     -- -- Default UI Elements Position Unlock

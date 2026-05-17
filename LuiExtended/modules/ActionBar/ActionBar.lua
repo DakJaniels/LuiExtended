@@ -65,6 +65,8 @@ local LUIE = LUIE
 --- @field ResizeCastBar fun()
 --- @field UpdateCastBar fun()
 --- @field ResetCastBarPosition fun()
+--- @field GetCastBarOffsetX fun(): number
+--- @field GetCastBarOffsetY fun(): number
 --- @field SetCastBarPosition fun()
 --- @field SetMovingState fun(state: boolean)
 --- @field GenerateCastbarPreview fun(state: boolean)
@@ -964,6 +966,7 @@ function ActionBar.Initialize(enabled)
     ActionBar.CreateCastBar()
     ActionBar.UpdateCastBar()
     ActionBar.SetCastBarPosition()
+    LUIE.RefreshMoverOverlayFonts()
 end
 
 -- -----------------------------------------------------------------------------
@@ -2895,7 +2898,7 @@ function ActionBar.CreateCastBar()
     uiTlw.castBar.preview:SetAnchorFill(uiTlw.castBar)
     uiTlw.castBar.preview:SetHidden(true)
     uiTlw.castBar.previewLabel = windowManager:CreateControl("$(parent)Label", uiTlw.castBar.preview, CT_LABEL)
-    uiTlw.castBar.previewLabel:SetFont(fontString)
+    uiTlw.castBar.previewLabel:SetFont(ZO_IsConsoleOrGameCoreUI() and LUIE.GetPositionLabelFont() or fontString)
     uiTlw.castBar.previewLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     uiTlw.castBar.previewLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     uiTlw.castBar.previewLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -2925,7 +2928,7 @@ function ActionBar.CreateCastBar()
     uiTlw.castBar.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
 
     uiTlw.castBar.preview.anchorLabel = windowManager:CreateControl("$(parent)AnchorLabel", uiTlw.castBar.preview, CT_LABEL)
-    uiTlw.castBar.preview.anchorLabel:SetFont(fontString)
+    uiTlw.castBar.preview.anchorLabel:SetFont(LUIE.GetPositionLabelFont())
     uiTlw.castBar.preview.anchorLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     uiTlw.castBar.preview.anchorLabel:SetVerticalAlignment(TEXT_ALIGN_TOP)
     uiTlw.castBar.preview.anchorLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -3086,14 +3089,36 @@ end
 -- -----------------------------------------------------------------------------
 --- Resets cast bar position to default (center screen).
 function ActionBar.ResetCastBarPosition()
-    if not ActionBar.SV.CastBarEnable then
-        return
-    end
     ActionBar.SV.CastbarOffsetX = nil
     ActionBar.SV.CastbarOffsetY = nil
     ActionBar.SV.CastBarCustomPosition = nil
     ActionBar.SetCastBarPosition()
     ActionBar.SetMovingState(false)
+end
+
+-- -----------------------------------------------------------------------------
+--- Console/gamepad position sliders: saved TOPLEFT offsets, or live control coords when using default anchor.
+--- @return number
+function ActionBar.GetCastBarOffsetX()
+    if ActionBar.SV.CastbarOffsetX ~= nil then
+        return ActionBar.SV.CastbarOffsetX
+    end
+    if uiTlw.castBar and uiTlw.castBar.GetLeft then
+        return uiTlw.castBar:GetLeft()
+    end
+    return 0
+end
+
+-- -----------------------------------------------------------------------------
+--- @return number
+function ActionBar.GetCastBarOffsetY()
+    if ActionBar.SV.CastbarOffsetY ~= nil then
+        return ActionBar.SV.CastbarOffsetY
+    end
+    if uiTlw.castBar and uiTlw.castBar.GetTop then
+        return uiTlw.castBar:GetTop()
+    end
+    return 320
 end
 
 -- -----------------------------------------------------------------------------

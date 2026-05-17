@@ -13,6 +13,7 @@ local CollectibleTables = LuiData.Data.CollectibleTables
 
 -- Load LibHarvensAddonSettings
 local LHAS = LibHarvensAddonSettings
+local SettingsAPI = LUIE.ConsoleSettingsAPI
 
 local pairs = pairs
 local ipairs = ipairs
@@ -75,8 +76,7 @@ function SlashCommands.CreateConsoleSettings()
                                     allowDefaults = true,
                                     defaultsFunction = function ()
                                         -- Reset to defaults if needed
-                                    end,
-                                    allowRefresh = true
+                                    end
                                 })
 
     -- Collect initial settings for main menu
@@ -99,9 +99,6 @@ function SlashCommands.CreateConsoleSettings()
         clickHandler = function () ReloadUI("ingame") end
     }
 
-    -- Initialize all settings and menu buttons for submenus
-    local backButton = nil
-    local menuButtons = {}
     local sectionGroups = {}
 
     -- Helper function to build section settings
@@ -784,62 +781,12 @@ function SlashCommands.CreateConsoleSettings()
         }
     end)
 
-    -- Create back button
-    backButton =
-    {
-        type = LHAS.ST_BUTTON,
-        label = "BACK",
-        buttonText = "BACK",
-        tooltip = "",
-        clickHandler = function (control)
-            panel:RemoveAllSettings()
-            local mainMenuSettings = {}
-            for i = 1, #initialSettings do
-                mainMenuSettings[i] = initialSettings[i]
-            end
-            for i = 1, #menuButtons do
-                mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
-            end
-            panel:AddSettings(mainMenuSettings)
-            LHAS.list:SetSelectedIndexWithoutAnimation(1)
-        end
-    }
-
-    -- Create menu buttons for each section
-    local function createMenuButton(sectionName, sectionLabel, sectionSettings)
-        return
-        {
-            type = LHAS.ST_BUTTON,
-            label = sectionLabel,
-            buttonText = sectionLabel,
-            tooltip = "",
-            clickHandler = function (control)
-                panel:RemoveAllSettings()
-                local settingsWithBack = {}
-                for i = 1, #sectionSettings do
-                    settingsWithBack[i] = sectionSettings[i]
-                end
-                settingsWithBack[#settingsWithBack + 1] = backButton
-                panel:AddSettings(settingsWithBack)
-                LHAS.list:SetSelectedIndexWithoutAnimation(2)
-            end
-        }
-    end
-
-    -- Add all submenu buttons
-    menuButtons[#menuButtons + 1] = createMenuButton("GeneralCommands", GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GENERAL), sectionGroups["GeneralCommands"])
-    menuButtons[#menuButtons + 1] = createMenuButton("GroupCommands", GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GROUP), sectionGroups["GroupCommands"])
-    menuButtons[#menuButtons + 1] = createMenuButton("GuildCommands", GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GUILD), sectionGroups["GuildCommands"])
-    menuButtons[#menuButtons + 1] = createMenuButton("SocialCommands", GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_SOCIAL), sectionGroups["SocialCommands"])
-    menuButtons[#menuButtons + 1] = createMenuButton("HolidayCommands", GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_HOLIDAY), sectionGroups["HolidayCommands"])
-
-    -- Initialize main menu with initial settings and menu buttons
-    local mainMenuSettings = {}
-    for i = 1, #initialSettings do
-        mainMenuSettings[i] = initialSettings[i]
-    end
-    for i = 1, #menuButtons do
-        mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
-    end
-    panel:AddSettings(mainMenuSettings)
+    local allSettings = {}
+    SettingsAPI:AppendSettingsList(allSettings, initialSettings)
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GENERAL), sectionGroups["GeneralCommands"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GROUP), sectionGroups["GroupCommands"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_GUILD), sectionGroups["GuildCommands"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_SOCIAL), sectionGroups["SocialCommands"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_SLASHCMDSHEADER_HOLIDAY), sectionGroups["HolidayCommands"])
+    panel:AddSettings(allSettings)
 end

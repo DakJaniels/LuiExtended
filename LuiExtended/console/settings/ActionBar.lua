@@ -38,7 +38,6 @@ local function SetAbilityBarTimersEnabled()
     end
 end
 
-local castBarMovingEnabled = false -- Helper local flag
 local Blacklist, BlacklistValues = {}, {}
 
 -- Convert to LHAS format {name, data}
@@ -58,30 +57,6 @@ local function GenerateCustomListLHAS(input)
     return items
 end
 
-local dialogs =
-{
-    [1] =
-    { -- Clear Blacklist
-        identifier = "LUIE_CLEAR_CASTBAR_BLACKLIST",
-        title = GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR),
-        text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG), GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST)),
-        callback = function (dialog)
-            ActionBar.ClearCustomList(ActionBar.SV.blacklist)
-            -- Refresh settings panel if needed
-            if LHAS.RefreshAddonSettings then
-                LHAS:RefreshAddonSettings()
-            end
-        end,
-    },
-}
-
-local function loadDialogButtons()
-    for i = 1, #dialogs do
-        local dialog = dialogs[i]
-        LUIE.RegisterDialogueButton(dialog.identifier, dialog.title, dialog.text, dialog.callback)
-    end
-end
-
 function ActionBar.CreateConsoleSettings()
     local Defaults = ActionBar.Defaults
     local Settings = ActionBar.SV
@@ -90,9 +65,6 @@ function ActionBar.CreateConsoleSettings()
     if not LUIE.SV.ActionBar_Enabled then
         return
     end
-
-    -- Load Dialog Buttons
-    loadDialogButtons()
 
     -- Register custom blacklist management dialog
     LUIE.RegisterBlacklistDialog(
@@ -112,9 +84,6 @@ function ActionBar.CreateConsoleSettings()
         end
     )
 
-    -- Sync castBarMovingEnabled with ActionBar.CastBarUnlocked
-    castBarMovingEnabled = ActionBar.CastBarUnlocked or false
-
     -- Create the addon settings panel
     local panel = LHAS:AddAddon(zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_AB)),
                                 {
@@ -122,8 +91,18 @@ function ActionBar.CreateConsoleSettings()
                                     defaultsFunction = function ()
                                         -- Reset to defaults if needed
                                     end,
-                                    allowRefresh = true
                                 })
+    ActionBar.consoleSettingsPanel = panel
+
+    LUIE.RegisterDialogueButton(
+        "LUIE_CLEAR_CASTBAR_BLACKLIST",
+        GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR),
+        zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG), GetString(LUIE_STRING_CUSTOM_LIST_CASTBAR_BLACKLIST)),
+        function ()
+            ActionBar.ClearCustomList(ActionBar.SV.blacklist)
+            SettingsAPI:RefreshPanel(panel)
+        end
+    )
 
     -- Get media lists from SettingsAPI
     local fontItems = SettingsAPI:GetFontsList()
@@ -155,13 +134,12 @@ function ActionBar.CreateConsoleSettings()
         tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
         buttonText = GetString(LUIE_STRING_LAM_RELOADUI),
         clickHandler = function ()
-            ReloadUI("ingame")
+            SettingsAPI:ReloadUIWithPendingClear()
         end
     }
 
-    -- Initialize all settings and menu buttons for submenus
-    local backButton = nil
-    local menuButtons = {}
+    initialSettings[#initialSettings + 1] = SettingsAPI:ConsoleFontDeferLabelSetting()
+
     local sectionGroups = {}
 
     -- Helper function to build section settings
@@ -337,7 +315,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.UltimateFontFace end,
             setFunction = function (combobox, value, item)
                 Settings.UltimateFontFace = item.data
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
             end,
             default = Defaults.UltimateFontFace,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end
@@ -355,7 +333,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.UltimateFontSize end,
             setFunction = function (value)
                 Settings.UltimateFontSize = value
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
             end,
             default = Defaults.UltimateFontSize,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end
@@ -378,7 +356,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.UltimateFontStyle = item.data
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
             end,
             default = Defaults.UltimateFontStyle,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end
@@ -483,7 +461,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CompanionUltimateFontFace end,
             setFunction = function (combobox, value, item)
                 Settings.CompanionUltimateFontFace = item.data
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
             end,
             default = Defaults.CompanionUltimateFontFace,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end
@@ -501,7 +479,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CompanionUltimateFontSize end,
             setFunction = function (value)
                 Settings.CompanionUltimateFontSize = value
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
             end,
             default = Defaults.CompanionUltimateFontSize,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end
@@ -524,7 +502,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.CompanionUltimateFontStyle = item.data
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
             end,
             default = Defaults.CompanionUltimateFontStyle,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end
@@ -673,7 +651,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.BarFontFace end,
             setFunction = function (combobox, value, item)
                 Settings.BarFontFace = item.data
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
             end,
             default = Defaults.BarFontFace,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end
@@ -691,7 +669,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.BarFontSize end,
             setFunction = function (value)
                 Settings.BarFontSize = value
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
             end,
             default = Defaults.BarFontSize,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end
@@ -714,7 +692,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.BarFontStyle = item.data
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
             end,
             default = Defaults.BarFontStyle,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end
@@ -743,7 +721,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.BarMillisThreshold end,
             setFunction = function (value)
                 Settings.BarMillisThreshold = value
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
             end,
             default = Defaults.BarMillisThreshold,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and Settings.BarMillis and (Settings.ShowTriggered or Settings.ShowToggled)) end
@@ -887,7 +865,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.PotionTimerFontFace end,
             setFunction = function (combobox, value, item)
                 Settings.PotionTimerFontFace = item.data
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
             end,
             default = Defaults.PotionTimerFontFace,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end
@@ -905,7 +883,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.PotionTimerFontSize end,
             setFunction = function (value)
                 Settings.PotionTimerFontSize = value
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
             end,
             default = Defaults.PotionTimerFontSize,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end
@@ -928,7 +906,7 @@ function ActionBar.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.PotionTimerFontStyle = item.data
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
             end,
             default = Defaults.PotionTimerFontStyle,
             disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end
@@ -959,10 +937,19 @@ function ActionBar.CreateConsoleSettings()
 
     -- Build Cast Bar Option Section
     buildSectionSettings("CastBar", function (settings)
+        local function castBarOptionDisabled()
+            return not LUIE.SV.ActionBar_Enabled or not Settings.CastBarEnable
+        end
+
+        local function castBarFontDisabled()
+            return castBarOptionDisabled() or not (Settings.CastBarTimer or Settings.CastBarLabel)
+        end
+
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_AB_HEADER_CASTBAR),
+            canSelect = false,
         }
 
         -- Submenu description
@@ -970,6 +957,24 @@ function ActionBar.CreateConsoleSettings()
         {
             type = LHAS.ST_LABEL,
             label = "Configure cast bar display including size, position, fonts, textures, colors, filters, and blacklist management.",
+            canSelect = false,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_AB_CASTBAR_ENABLE),
+            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_ENABLE_TP),
+            getFunction = function () return Settings.CastBarEnable end,
+            setFunction = function (value)
+                Settings.CastBarEnable = value
+                ActionBar.RegisterEvents()
+                if ActionBar.consoleSettingsPanel then
+                    SettingsAPI:RefreshPanel(ActionBar.consoleSettingsPanel)
+                end
+            end,
+            default = Defaults.CastBarEnable,
+            disable = function () return not LUIE.SV.ActionBar_Enabled end,
         }
 
         settings[#settings + 1] =
@@ -977,13 +982,12 @@ function ActionBar.CreateConsoleSettings()
             type = LHAS.ST_CHECKBOX,
             label = GetString(LUIE_STRING_LAM_AB_CASTBAR_MOVE),
             tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_MOVE_TP),
-            getFunction = function () return castBarMovingEnabled end,
+            getFunction = function () return ActionBar.CastBarUnlocked end,
             setFunction = function (value)
-                castBarMovingEnabled = value
                 ActionBar.SetMovingState(value)
             end,
             default = false,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+            disable = castBarOptionDisabled,
         }
 
         settings[#settings + 1] =
@@ -992,8 +996,13 @@ function ActionBar.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_RESETPOSITION),
             tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_RESET_TP),
             buttonText = GetString(LUIE_STRING_LAM_RESETPOSITION),
-            clickHandler = ActionBar.ResetCastBarPosition,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+            clickHandler = function ()
+                ActionBar.ResetCastBarPosition()
+                if ActionBar.consoleSettingsPanel then
+                    SettingsAPI:RefreshPanel(ActionBar.consoleSettingsPanel)
+                end
+            end,
+            disable = castBarOptionDisabled,
         }
 
         local gw = GuiRoot:GetWidth()
@@ -1007,16 +1016,16 @@ function ActionBar.CreateConsoleSettings()
             max = gw,
             step = 10,
             getFunction = function ()
-                return ActionBar.SV.CastbarOffsetX ~= nil and ActionBar.SV.CastbarOffsetX or 0
+                return ActionBar.GetCastBarOffsetX()
             end,
             setFunction = function (value)
                 ActionBar.SV.CastbarOffsetX = value
                 if ActionBar.SV.CastbarOffsetY == nil then
-                    ActionBar.SV.CastbarOffsetY = 320
+                    ActionBar.SV.CastbarOffsetY = ActionBar.GetCastBarOffsetY()
                 end
                 ActionBar.SetCastBarPosition()
             end,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+            disable = castBarOptionDisabled,
         }
 
         settings[#settings + 1] =
@@ -1028,30 +1037,16 @@ function ActionBar.CreateConsoleSettings()
             max = gh,
             step = 10,
             getFunction = function ()
-                return ActionBar.SV.CastbarOffsetY ~= nil and ActionBar.SV.CastbarOffsetY or 320
+                return ActionBar.GetCastBarOffsetY()
             end,
             setFunction = function (value)
                 if ActionBar.SV.CastbarOffsetX == nil then
-                    ActionBar.SV.CastbarOffsetX = 0
+                    ActionBar.SV.CastbarOffsetX = ActionBar.GetCastBarOffsetX()
                 end
                 ActionBar.SV.CastbarOffsetY = value
                 ActionBar.SetCastBarPosition()
             end,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_CHECKBOX,
-            label = GetString(LUIE_STRING_LAM_AB_CASTBAR_ENABLE),
-            tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_ENABLE_TP),
-            getFunction = function () return Settings.CastBarEnable end,
-            setFunction = function (value)
-                Settings.CastBarEnable = value
-                ActionBar.RegisterEvents()
-            end,
-            default = Defaults.CastBarEnable,
-            disable = function () return not LUIE.SV.ActionBar_Enabled end
+            disable = castBarOptionDisabled,
         }
 
         settings[#settings + 1] =
@@ -1068,7 +1063,7 @@ function ActionBar.CreateConsoleSettings()
                 ActionBar.ResizeCastBar()
             end,
             default = Defaults.CastBarSizeW,
-            disable = function () return not LUIE.SV.ActionBar_Enabled end
+            disable = castBarOptionDisabled,
         }
 
         settings[#settings + 1] =
@@ -1085,7 +1080,7 @@ function ActionBar.CreateConsoleSettings()
                 ActionBar.ResizeCastBar()
             end,
             default = Defaults.CastBarSizeH,
-            disable = function () return not LUIE.SV.ActionBar_Enabled end
+            disable = castBarOptionDisabled,
         }
 
         settings[#settings + 1] =
@@ -1102,7 +1097,7 @@ function ActionBar.CreateConsoleSettings()
                 ActionBar.ResizeCastBar()
             end,
             default = Defaults.CastBarIconSize,
-            disable = function () return not LUIE.SV.ActionBar_Enabled end
+            disable = castBarOptionDisabled,
         }
 
         settings[#settings + 1] =
@@ -1111,9 +1106,14 @@ function ActionBar.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_AB_CASTBAR_LABEL),
             tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_LABEL_TP),
             getFunction = function () return Settings.CastBarLabel end,
-            setFunction = function (value) Settings.CastBarLabel = value end,
+            setFunction = function (value)
+                Settings.CastBarLabel = value
+                if ActionBar.consoleSettingsPanel then
+                    SettingsAPI:RefreshPanel(ActionBar.consoleSettingsPanel)
+                end
+            end,
             default = Defaults.CastBarLabel,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+            disable = castBarOptionDisabled,
         }
 
         settings[#settings + 1] =
@@ -1122,9 +1122,14 @@ function ActionBar.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER),
             tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_TP),
             getFunction = function () return Settings.CastBarTimer end,
-            setFunction = function (value) Settings.CastBarTimer = value end,
+            setFunction = function (value)
+                Settings.CastBarTimer = value
+                if ActionBar.consoleSettingsPanel then
+                    SettingsAPI:RefreshPanel(ActionBar.consoleSettingsPanel)
+                end
+            end,
             default = Defaults.CastBarTimer,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+            disable = castBarOptionDisabled,
         }
 
         settings[#settings + 1] =
@@ -1136,11 +1141,11 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarFontFace end,
             setFunction = function (combobox, value, item)
                 Settings.CastBarFontFace = item.data
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
                 ActionBar.UpdateCastBar()
             end,
             default = Defaults.CastBarFontFace,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end
+            disable = castBarFontDisabled,
         }
 
         settings[#settings + 1] =
@@ -1155,11 +1160,11 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarFontSize end,
             setFunction = function (value)
                 Settings.CastBarFontSize = value
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
                 ActionBar.UpdateCastBar()
             end,
             default = Defaults.CastBarFontSize,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end
+            disable = castBarFontDisabled,
         }
 
         settings[#settings + 1] =
@@ -1179,11 +1184,11 @@ function ActionBar.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.CastBarFontStyle = item.data
-                ActionBar.ApplyFont()
+                SettingsAPI:MarkFontDeferred("actionBar")
                 ActionBar.UpdateCastBar()
             end,
             default = Defaults.CastBarFontStyle,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end
+            disable = castBarFontDisabled,
         }
 
         settings[#settings + 1] =
@@ -1198,7 +1203,7 @@ function ActionBar.CreateConsoleSettings()
                 ActionBar.UpdateCastBar()
             end,
             default = Defaults.CastBarTexture,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+            disable = castBarOptionDisabled,
         }
 
         settings[#settings + 1] =
@@ -1212,7 +1217,7 @@ function ActionBar.CreateConsoleSettings()
                 ActionBar.UpdateCastBar()
             end,
             default = Defaults.CastBarGradientC1,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+            disable = castBarOptionDisabled,
         }
 
         settings[#settings + 1] =
@@ -1226,7 +1231,7 @@ function ActionBar.CreateConsoleSettings()
                 ActionBar.UpdateCastBar()
             end,
             default = Defaults.CastBarGradientC2,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+            disable = castBarOptionDisabled,
         }
 
         -- Filters subsection
@@ -1244,7 +1249,7 @@ function ActionBar.CreateConsoleSettings()
             getFunction = function () return Settings.CastBarHeavy end,
             setFunction = function (value) Settings.CastBarHeavy = value end,
             default = Defaults.CastBarHeavy,
-            disable = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end
+            disable = castBarOptionDisabled,
         }
 
         -- Blacklist subsection
@@ -1277,7 +1282,7 @@ function ActionBar.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.tempBlacklistText = value
             end,
-            disable = function () return not LUIE.SV.ActionBar_Enabled end
+            disable = castBarOptionDisabled,
         }
 
         -- Add Item button
@@ -1297,12 +1302,10 @@ function ActionBar.CreateConsoleSettings()
                         LUIE.RefreshBlacklistDialog("LUIE_MANAGE_CASTBAR_BLACKLIST")
                     end
                     -- Refresh settings to clear the edit box
-                    if LHAS and LHAS.RefreshAddonSettings then
-                        LHAS:RefreshAddonSettings()
-                    end
+                    SettingsAPI:RefreshPanel(panel)
                 end
             end,
-            disable = function () return not LUIE.SV.ActionBar_Enabled end
+            disable = castBarOptionDisabled,
         }
 
         settings[#settings + 1] =
@@ -1312,7 +1315,7 @@ function ActionBar.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_TP),
             buttonText = GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR),
             clickHandler = function () ZO_Dialogs_ShowGamepadDialog("LUIE_CLEAR_CASTBAR_BLACKLIST") end,
-            disable = function () return not LUIE.SV.ActionBar_Enabled end
+            disable = castBarOptionDisabled,
         }
 
         -- Manage Blacklist
@@ -1327,67 +1330,17 @@ function ActionBar.CreateConsoleSettings()
                     LUIE.ShowBlacklistDialog("LUIE_MANAGE_CASTBAR_BLACKLIST")
                 end
             end,
-            disable = function () return not LUIE.SV.ActionBar_Enabled end
+            disable = castBarOptionDisabled,
         }
     end)
 
-    -- Create back button
-    backButton =
-    {
-        type = LHAS.ST_BUTTON,
-        label = "BACK",
-        buttonText = "BACK",
-        tooltip = "",
-        clickHandler = function (control)
-            panel:RemoveAllSettings()
-            local mainMenuSettings = {}
-            for i = 1, #initialSettings do
-                mainMenuSettings[i] = initialSettings[i]
-            end
-            for i = 1, #menuButtons do
-                mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
-            end
-            panel:AddSettings(mainMenuSettings)
-            LHAS.list:SetSelectedIndexWithoutAnimation(1)
-        end
-    }
-
-    -- Create menu buttons for each section
-    local function createMenuButton(sectionName, sectionLabel, sectionSettings)
-        return
-        {
-            type = LHAS.ST_BUTTON,
-            label = sectionLabel,
-            buttonText = sectionLabel,
-            tooltip = "",
-            clickHandler = function (control)
-                panel:RemoveAllSettings()
-                local settingsWithBack = {}
-                for i = 1, #sectionSettings do
-                    settingsWithBack[i] = sectionSettings[i]
-                end
-                settingsWithBack[#settingsWithBack + 1] = backButton
-                panel:AddSettings(settingsWithBack)
-                LHAS.list:SetSelectedIndexWithoutAnimation(2)
-            end
-        }
-    end
-
-    -- Add all submenu buttons
-    menuButtons[#menuButtons + 1] = createMenuButton("GlobalCooldown", GetString(LUIE_STRING_LAM_AB_HEADER_GCD), sectionGroups["GlobalCooldown"])
-    menuButtons[#menuButtons + 1] = createMenuButton("UltimateTracking", GetString(LUIE_STRING_LAM_AB_HEADER_ULTIMATE), sectionGroups["UltimateTracking"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CompanionUltimate", GetString(LUIE_STRING_LAM_AB_HEADER_COMPANION_ULTIMATE), sectionGroups["CompanionUltimate"])
-    menuButtons[#menuButtons + 1] = createMenuButton("BarAbilityHighlight", GetString(LUIE_STRING_LAM_AB_HEADER_BAR), sectionGroups["BarAbilityHighlight"])
-    menuButtons[#menuButtons + 1] = createMenuButton("QuickslotCooldown", GetString(LUIE_STRING_LAM_AB_HEADER_POTION), sectionGroups["QuickslotCooldown"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CastBar", GetString(LUIE_STRING_LAM_AB_HEADER_CASTBAR), sectionGroups["CastBar"])
-
-    -- Initialize main menu with initial settings and menu buttons
-    local mainMenuSettings = {}
-    for i = 1, #initialSettings do
-        mainMenuSettings[i] = initialSettings[i]
-    end
-    for i = 1, #menuButtons do
-        mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
-    end
-    panel:AddSettings(mainMenuSettings)
+    local allSettings = {}
+    SettingsAPI:AppendSettingsList(allSettings, initialSettings)
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_AB_HEADER_GCD), sectionGroups["GlobalCooldown"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_AB_HEADER_ULTIMATE), sectionGroups["UltimateTracking"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_AB_HEADER_COMPANION_ULTIMATE), sectionGroups["CompanionUltimate"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_AB_HEADER_BAR), sectionGroups["BarAbilityHighlight"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_AB_HEADER_POTION), sectionGroups["QuickslotCooldown"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_AB_HEADER_CASTBAR), sectionGroups["CastBar"])
+    panel:AddSettings(allSettings)
 end

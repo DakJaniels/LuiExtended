@@ -69,7 +69,7 @@ local dialogs =
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG), GetString(LUIE_STRING_CUSTOM_LIST_AURA_BLACKLIST)),
         callback = function (_)
             SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.BlacklistTable)
-            LHAS:RefreshAddonSettings()
+            SettingsAPI:RefreshPanel(SpellCastBuffs.consoleSettingsPanel)
         end,
     },
     [2] =
@@ -79,7 +79,7 @@ local dialogs =
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG_LIST), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTBUFFS)),
         callback = function (_)
             SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.PromBuffTable)
-            LHAS:RefreshAddonSettings()
+            SettingsAPI:RefreshPanel(SpellCastBuffs.consoleSettingsPanel)
         end,
     },
     [3] =
@@ -89,7 +89,7 @@ local dialogs =
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG_LIST), GetString(LUIE_STRING_SCB_WINDOWTITLE_PROMINENTDEBUFFS)),
         callback = function (_)
             SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.PromDebuffTable)
-            LHAS:RefreshAddonSettings()
+            SettingsAPI:RefreshPanel(SpellCastBuffs.consoleSettingsPanel)
         end,
     },
 
@@ -100,7 +100,7 @@ local dialogs =
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG_LIST), GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_BUFFS)),
         callback = function (_)
             SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.PriorityBuffTable)
-            LHAS:RefreshAddonSettings()
+            SettingsAPI:RefreshPanel(SpellCastBuffs.consoleSettingsPanel)
         end,
     },
     [5] =
@@ -110,7 +110,7 @@ local dialogs =
         text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG_LIST), GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_DEBUFFS)),
         callback = function (_)
             SpellCastBuffs.ClearCustomList(SpellCastBuffs.SV.PriorityDebuffTable)
-            LHAS:RefreshAddonSettings()
+            SettingsAPI:RefreshPanel(SpellCastBuffs.consoleSettingsPanel)
         end,
     },
 }
@@ -130,9 +130,6 @@ function SpellCastBuffs.CreateConsoleSettings()
     if not LUIE.SV.SpellCastBuff_Enable then
         return
     end
-
-    -- Load Dialog Buttons
-    loadDialogButtons()
 
     -- Register custom blacklist/whitelist management dialogs
     -- Blacklist Dialog
@@ -225,11 +222,6 @@ function SpellCastBuffs.CreateConsoleSettings()
         end
     )
 
-    -- Register the settings panel
-    if not LUIE.SV.SpellCastBuff_Enable then
-        return
-    end
-
     local panel = LHAS:AddAddon(zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_BUFFSDEBUFFS)),
                                 {
                                     allowDefaults = true,
@@ -238,6 +230,8 @@ function SpellCastBuffs.CreateConsoleSettings()
                                         SpellCastBuffs.ResetTlwPosition()
                                     end,
                                 })
+    SpellCastBuffs.consoleSettingsPanel = panel
+    loadDialogButtons()
 
     -- Build font style list once for reuse
     local fontStyleItems = {}
@@ -272,13 +266,12 @@ function SpellCastBuffs.CreateConsoleSettings()
         tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
         buttonText = GetString(LUIE_STRING_LAM_RELOADUI),
         clickHandler = function ()
-            ReloadUI("ingame")
+            SettingsAPI:ReloadUIWithPendingClear()
         end,
     }
 
-    -- Initialize all settings and menu buttons for submenus
-    local backButton = nil
-    local menuButtons = {}
+    initialSettings[#initialSettings + 1] = SettingsAPI:ConsoleFontDeferLabelSetting()
+
     local sectionGroups = {}
 
     -- Helper function to build section settings
@@ -1789,6 +1782,8 @@ function SpellCastBuffs.CreateConsoleSettings()
             end,
         }
 
+        settings[#settings + 1] = SettingsAPI:ConsoleFontDeferLabelSetting()
+
         -- Buff Label Font
         settings[#settings + 1] =
         {
@@ -1801,7 +1796,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.BuffFontFace = item.data or item.name or value
-                SpellCastBuffs.ApplyFont()
+                SettingsAPI:MarkFontDeferred("spellCastBuffs")
             end,
             default = Defaults.BuffFontFace,
             disable = function ()
@@ -1824,7 +1819,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             end,
             setFunction = function (v)
                 Settings.BuffFontSize = v
-                SpellCastBuffs.ApplyFont()
+                SettingsAPI:MarkFontDeferred("spellCastBuffs")
             end,
             default = Defaults.BuffFontSize,
             disable = function ()
@@ -1849,7 +1844,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.BuffFontStyle = item.data or item.name or value
-                SpellCastBuffs.ApplyFont()
+                SettingsAPI:MarkFontDeferred("spellCastBuffs")
             end,
             default = Defaults.BuffFontStyle,
             disable = function ()
@@ -3429,7 +3424,7 @@ function SpellCastBuffs.CreateConsoleSettings()
                     -- Refresh the dialog if it's open
                     LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PRIORITY_BUFFS")
                     -- Refresh settings to clear the edit box
-                    LHAS:RefreshAddonSettings()
+                    SettingsAPI:RefreshPanel(SpellCastBuffs.consoleSettingsPanel)
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
@@ -3496,7 +3491,7 @@ function SpellCastBuffs.CreateConsoleSettings()
                     -- Refresh the dialog if it's open
                     LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PRIORITY_DEBUFFS")
                     -- Refresh settings to clear the edit box
-                    LHAS:RefreshAddonSettings()
+                    SettingsAPI:RefreshPanel(SpellCastBuffs.consoleSettingsPanel)
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
@@ -3579,7 +3574,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.ProminentLabelFontFace = item.data or item.name or value
-                SpellCastBuffs.ApplyFont()
+                SettingsAPI:MarkFontDeferred("spellCastBuffs")
             end,
             default = Defaults.ProminentLabelFontFace,
             disable = function ()
@@ -3601,7 +3596,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.ProminentLabelFontSize = value
-                SpellCastBuffs.ApplyFont()
+                SettingsAPI:MarkFontDeferred("spellCastBuffs")
             end,
             default = Defaults.ProminentLabelFontSize,
             disable = function ()
@@ -3627,7 +3622,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.ProminentLabelFontStyle = item.data or item.name or value
-                SpellCastBuffs.ApplyFont()
+                SettingsAPI:MarkFontDeferred("spellCastBuffs")
             end,
             default = Defaults.ProminentLabelFontStyle,
             disable = function ()
@@ -3905,7 +3900,7 @@ function SpellCastBuffs.CreateConsoleSettings()
                     -- Refresh the dialog if it's open
                     LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PROMINENT_BUFFS")
                     -- Refresh settings to clear the edit box
-                    LHAS:RefreshAddonSettings()
+                    SettingsAPI:RefreshPanel(SpellCastBuffs.consoleSettingsPanel)
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
@@ -3972,7 +3967,7 @@ function SpellCastBuffs.CreateConsoleSettings()
                     -- Refresh the dialog if it's open
                     LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PROMINENT_DEBUFFS")
                     -- Refresh settings to clear the edit box
-                    LHAS:RefreshAddonSettings()
+                    SettingsAPI:RefreshPanel(SpellCastBuffs.consoleSettingsPanel)
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
@@ -4032,7 +4027,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_BUFF_TP),
             clickHandler = function ()
                 SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MinorBuffs)
-                LHAS:RefreshAddonSettings()
+                SettingsAPI:RefreshPanel(SpellCastBuffs.consoleSettingsPanel)
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
             end,
@@ -4050,7 +4045,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_BUFF_TP),
             clickHandler = function ()
                 SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MajorBuffs)
-                LHAS:RefreshAddonSettings()
+                SettingsAPI:RefreshPanel(SpellCastBuffs.consoleSettingsPanel)
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
             end,
@@ -4068,7 +4063,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MINOR_DEBUFF_TP),
             clickHandler = function ()
                 SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MinorDebuffs)
-                LHAS:RefreshAddonSettings()
+                SettingsAPI:RefreshPanel(SpellCastBuffs.consoleSettingsPanel)
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
             end,
@@ -4086,7 +4081,7 @@ function SpellCastBuffs.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADD_MAJOR_DEBUFF_TP),
             clickHandler = function ()
                 SpellCastBuffs.AddBulkToCustomList(Settings.BlacklistTable, BlacklistPresets.MajorDebuffs)
-                LHAS:RefreshAddonSettings()
+                SettingsAPI:RefreshPanel(SpellCastBuffs.consoleSettingsPanel)
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
             end,
@@ -4127,7 +4122,7 @@ function SpellCastBuffs.CreateConsoleSettings()
                     -- Refresh the blacklist dialog if it's open
                     LUIE.RefreshBlacklistDialog("LUIE_MANAGE_BLACKLIST")
                     -- Refresh settings to clear the edit box
-                    LHAS:RefreshAddonSettings()
+                    SettingsAPI:RefreshPanel(SpellCastBuffs.consoleSettingsPanel)
                 end
             end,
             buttonText = GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_ADDLIST),
@@ -4201,70 +4196,20 @@ function SpellCastBuffs.CreateConsoleSettings()
         }
     end)
 
-    -- Create back button
-    backButton =
-    {
-        type = LHAS.ST_BUTTON,
-        label = "BACK",
-        buttonText = "BACK",
-        tooltip = "",
-        clickHandler = function (control)
-            panel:RemoveAllSettings()
-            local mainMenuSettings = {}
-            for i = 1, #initialSettings do
-                mainMenuSettings[i] = initialSettings[i]
-            end
-            for i = 1, #menuButtons do
-                mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
-            end
-            panel:AddSettings(mainMenuSettings)
-            LHAS.list:SetSelectedIndexWithoutAnimation(1)
-        end
-    }
-
-    -- Helper function to create menu buttons
-    local function createMenuButton(sectionName, labelText)
-        return
-        {
-            type = LHAS.ST_BUTTON,
-            label = labelText,
-            buttonText = labelText,
-            tooltip = "",
-            clickHandler = function (control)
-                panel:RemoveAllSettings()
-                local sectionSettings = {}
-                for i = 1, #sectionGroups[sectionName] do
-                    sectionSettings[i] = sectionGroups[sectionName][i]
-                end
-                sectionSettings[#sectionSettings + 1] = backButton
-                panel:AddSettings(sectionSettings)
-                LHAS.list:SetSelectedIndexWithoutAnimation(2)
-            end
-        }
-    end
-
-    -- Create menu buttons for each section
-    menuButtons[#menuButtons + 1] = createMenuButton("FramePositions", GetString(LUIE_STRING_LAM_UF_CFRAMES_POSITIONS_HEADER))
-    menuButtons[#menuButtons + 1] = createMenuButton("PositionDisplay", GetString(LUIE_STRING_LAM_BUFF_HEADER_POSITION))
-    menuButtons[#menuButtons + 1] = createMenuButton("LongShortTerm", GetString(LUIE_STRING_LAM_BUFF_LONG_SHORT_HEADER))
-    menuButtons[#menuButtons + 1] = createMenuButton("Misc", GetString(LUIE_STRING_LAM_BUFF_MISC_HEADER))
-    menuButtons[#menuButtons + 1] = createMenuButton("LongTerm", GetString(LUIE_STRING_LAM_BUFF_LONGTERM_HEADER))
-    menuButtons[#menuButtons + 1] = createMenuButton("Icon", GetString(LUIE_STRING_LAM_BUFF_ICON_HEADER))
-    menuButtons[#menuButtons + 1] = createMenuButton("Color", GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER))
-    menuButtons[#menuButtons + 1] = createMenuButton("AlignmentSorting", GetString(LUIE_STRING_LAM_BUFF_SORTING_HEADER))
-    menuButtons[#menuButtons + 1] = createMenuButton("Tooltip", GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_HEADER))
-    menuButtons[#menuButtons + 1] = createMenuButton("Priority", GetString(LUIE_STRING_LAM_BUFF_PRIORITY_HEADER))
-    menuButtons[#menuButtons + 1] = createMenuButton("Prominent", GetString(LUIE_STRING_LAM_BUFF_PROM_HEADER))
-    menuButtons[#menuButtons + 1] = createMenuButton("Blacklist", GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_HEADER))
-    menuButtons[#menuButtons + 1] = createMenuButton("Debug", "Debug Options")
-
-    -- Initialize main menu
-    local mainMenuSettings = {}
-    for i = 1, #initialSettings do
-        mainMenuSettings[i] = initialSettings[i]
-    end
-    for i = 1, #menuButtons do
-        mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
-    end
-    panel:AddSettings(mainMenuSettings)
+    local allSettings = {}
+    SettingsAPI:AppendSettingsList(allSettings, initialSettings)
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMES_POSITIONS_HEADER), sectionGroups["FramePositions"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_BUFF_HEADER_POSITION), sectionGroups["PositionDisplay"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_BUFF_LONG_SHORT_HEADER), sectionGroups["LongShortTerm"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_BUFF_MISC_HEADER), sectionGroups["Misc"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_BUFF_LONGTERM_HEADER), sectionGroups["LongTerm"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_BUFF_ICON_HEADER), sectionGroups["Icon"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_BUFF_COLOR_HEADER), sectionGroups["Color"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_BUFF_SORTING_HEADER), sectionGroups["AlignmentSorting"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_HEADER), sectionGroups["Tooltip"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_BUFF_PRIORITY_HEADER), sectionGroups["Priority"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_BUFF_PROM_HEADER), sectionGroups["Prominent"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_BUFF_BLACKLIST_HEADER), sectionGroups["Blacklist"])
+    SettingsAPI:AppendSection(allSettings, "Debug Options", sectionGroups["Debug"])
+    panel:AddSettings(allSettings)
 end

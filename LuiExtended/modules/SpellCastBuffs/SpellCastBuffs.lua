@@ -126,7 +126,7 @@ local function InitializePreviewLabels()
             end
 
             if not f.frame.preview.anchorLabel then
-                f.frame.preview.anchorLabel = UI:Label(f.frame.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, "ZoFontGameSmall", "xxx, yyy", false)
+                f.frame.preview.anchorLabel = UI:Label(f.frame.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, LUIE.GetPositionLabelFont(), "xxx, yyy", false)
                 f.frame.preview.anchorLabel:SetColor(1, 1, 0, 1)
                 f.frame.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
                 f.frame.preview.anchorLabel:SetDrawTier(DT_MEDIUM)
@@ -218,7 +218,9 @@ local function InitializeContainerLayout(containerKey)
     if buffContainer.preview == nil then
         buffContainer.preview = UI:Texture(buffContainer, "fill", nil, "/esoui/art/miscellaneous/inset_bg.dds", DL_BACKGROUND, true)
         local lockedSuffix = (SpellCastBuffs.SV.lockPositionToUnitFrames and (containerKey ~= "player_long" and containerKey ~= "prominentbuffs" and containerKey ~= "prominentdebuffs") and " (locked)" or "")
-        buffContainer.previewLabel = UI:Label(buffContainer.preview, { CENTER, CENTER }, nil, nil, "ZoFontGameMedium", SpellCastBuffs.windowTitles[containerKey] .. lockedSuffix, false)
+        buffContainer.previewLabel = UI:Label(buffContainer.preview, { CENTER, CENTER }, nil, nil, LUIE.GetPositionLabelFont(), SpellCastBuffs.windowTitles[containerKey] .. lockedSuffix, false)
+    else
+        LUIE.ApplyFramePreviewLabelFont(buffContainer.previewLabel)
     end
     local isWrapContainer = WRAP_CONTAINERS[containerKey] == true
     local initialFlexDirection = buffContainer.alignVertical and FLEX_DIRECTION_COLUMN or FLEX_DIRECTION_ROW
@@ -522,6 +524,7 @@ function SpellCastBuffs.Initialize(enabled)
 
     -- Initialize preview labels for all frames
     InitializePreviewLabels()
+    LUIE.RefreshMoverOverlayFonts()
 end
 
 function SpellCastBuffs.RegisterWerewolfEvents()

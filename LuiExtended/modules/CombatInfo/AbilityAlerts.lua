@@ -179,6 +179,7 @@ function AbilityAlerts.CreateAlertFrame()
     uiTlw.alertFrame.preview.anchorLabel = uiTlw.alertFrame.preview:GetNamedChild("_AnchorLabel")     --- @type LUIE_AlertFrame_Preview_AnchorLabel
     uiTlw.alertFrame.preview.anchorLabelBg = uiTlw.alertFrame.preview:GetNamedChild("_AnchorLabelBg") --- @type LUIE_AlertFrame_Preview_AnchorLabelBg
     uiTlw.alertFrame.preview.anchorTexture = uiTlw.alertFrame.preview:GetNamedChild("_AnchorTexture") --- @type LUIE_AlertFrame_Preview_AnchorTexture
+    LUIE.RefreshMoverOverlayFonts()
 
     -- Create control pool for alert controls
     alertPool = ZO_ControlPool:New("LUIE_AlertTemplate", uiTlw.alertFrame)

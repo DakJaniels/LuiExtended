@@ -35,6 +35,97 @@ function SettingsAPI:Initialize()
 end
 
 -- ---------------------------------------------------------------------------------------
+-- LHAS 2.1.7 console navigation helpers
+-- ---------------------------------------------------------------------------------------
+
+--- Gamepad list only skips focus when `canSelect` is set on the control; LHAS applies that from params.
+--- @param setting table
+--- @return table
+function SettingsAPI:NormalizeConsoleSetting(setting)
+    local LHAS = LibHarvensAddonSettings
+    if setting.type == LHAS.ST_LABEL and setting.canSelect == nil then
+        setting.canSelect = false
+    end
+    return setting
+end
+
+--- @param allSettings table
+--- @param settingsList table
+function SettingsAPI:AppendSettingsList(allSettings, settingsList)
+    for i = 1, #settingsList do
+        table_insert(allSettings, self:NormalizeConsoleSetting(settingsList[i]))
+    end
+end
+
+--- Appends a native ST_SECTION row and its settings (single registration; no RemoveAllSettings).
+--- @param allSettings table
+--- @param sectionLabel string|integer
+--- @param sectionRows table
+function SettingsAPI:AppendSection(allSettings, sectionLabel, sectionRows)
+    local LHAS = LibHarvensAddonSettings
+    table_insert(allSettings,
+                 {
+                     type = LHAS.ST_SECTION,
+                     label = sectionLabel,
+                 })
+    for i = 1, #sectionRows do
+        table_insert(allSettings, self:NormalizeConsoleSetting(sectionRows[i]))
+    end
+end
+
+--- Refreshes visible controls while the addon settings scene is open (LHAS RefreshAddonSettings is hide-gated).
+--- @param panel table LibHarvensAddonSettings.AddonSettings
+function SettingsAPI:RefreshPanel(panel)
+    if panel and panel.selected and panel.UpdateControls then
+        panel:UpdateControls()
+    end
+end
+
+--- Console: defer live font rebuilds until Reload UI (can exhaust memory on console).
+LUIE.ConsoleSettingsPending = LUIE.ConsoleSettingsPending or {}
+
+--- @param pendingKey string e.g. actionBar, unitFramesCustomFont
+function SettingsAPI:MarkFontDeferred(pendingKey)
+    local wasPending = LUIE.ConsoleSettingsPending[pendingKey]
+    LUIE.ConsoleSettingsPending[pendingKey] = true
+    if not wasPending and not self.fontDeferChatShown then
+        self.fontDeferChatShown = true
+        if CHAT_ROUTER then
+            CHAT_ROUTER:AddSystemMessage(GetString(LUIE_STRING_CONSOLE_FONT_APPLY_RELOAD))
+        end
+    end
+end
+
+--- @param frameType '"default"'|'"custom"'
+function SettingsAPI:MarkUnitFramesFontDeferred(frameType)
+    local key = frameType == "custom" and "unitFramesCustomFont" or "unitFramesDefaultFont"
+    self:MarkFontDeferred(key)
+end
+
+function SettingsAPI:ClearConsoleSettingsPending()
+    LUIE.ConsoleSettingsPending = {}
+    self.fontDeferChatShown = false
+end
+
+--- Call before ReloadUI from console settings menus.
+function SettingsAPI:ReloadUIWithPendingClear()
+    self:ClearConsoleSettingsPending()
+    ReloadUI("ingame")
+end
+
+--- Reminder label near font options (console).
+--- @return table
+function SettingsAPI:ConsoleFontDeferLabelSetting()
+    local LHAS = LibHarvensAddonSettings
+    return
+    {
+        type = LHAS.ST_LABEL,
+        label = GetString(LUIE_STRING_CONSOLE_FONT_PENDING_LABEL),
+        canSelect = false,
+    }
+end
+
+-- ---------------------------------------------------------------------------------------
 -- Media List Generation Functions
 -- ---------------------------------------------------------------------------------------
 -- Note: LuiMedia addon handles all LibMediaProvider registration

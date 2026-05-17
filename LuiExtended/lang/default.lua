@@ -10,6 +10,8 @@ local strings =
 
     -- LuiExtended
     LUIE_STRING_ERROR_FONT = "LUI Extended: There was a problem with selecting required font. Falling back to default.",
+    LUIE_STRING_CONSOLE_FONT_APPLY_RELOAD = "LuiExtended: Font settings saved. Reload your UI to apply changes.",
+    LUIE_STRING_CONSOLE_FONT_PENDING_LABEL = "Font and size changes apply after you use Reload UI.",
     LUIE_STRING_ERROR_SOUND = "LUI Extended: There was a problem with selecting required sound. Falling back to default.",
     LUIE_STRING_LAM_PROFILE_COPY_ERROR = "LUI Extended: There was a problem. The profile for this character was not found.",
 

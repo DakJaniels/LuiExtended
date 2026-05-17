@@ -35,8 +35,7 @@ function InfoPanel.CreateConsoleSettings()
                                     defaultsFunction = function ()
                                         -- Reset InfoPanel settings to defaults
                                         InfoPanel.ResetPosition()
-                                    end,
-                                    allowRefresh = true
+                                    end
                                 })
 
     -- Info Panel description
@@ -54,9 +53,11 @@ function InfoPanel.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
             buttonText = GetString(LUIE_STRING_LAM_RELOADUI),
             clickHandler = function ()
-                ReloadUI("ingame")
+                SettingsAPI:ReloadUIWithPendingClear()
             end
         })
+
+    panel:AddSetting(SettingsAPI:ConsoleFontDeferLabelSetting())
 
     -- Unlock InfoPanel
     panel:AddSetting(
@@ -203,6 +204,8 @@ function InfoPanel.CreateConsoleSettings()
     -- Font Face Dropdown - Get items list from SettingsAPI
     local fontItems = SettingsAPI:GetFontsList()
 
+    panel:AddSetting(SettingsAPI:ConsoleFontDeferLabelSetting())
+
     panel:AddSetting(
         {
             type = LHAS.ST_DROPDOWN,
@@ -214,7 +217,7 @@ function InfoPanel.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.FontFace = item.data
-                InfoPanel.ApplyFont()
+                SettingsAPI:MarkFontDeferred("infoPanel")
             end,
             default = Defaults.FontFace,
             disable = function ()
@@ -237,7 +240,7 @@ function InfoPanel.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.FontSize = value
-                InfoPanel.ApplyFont()
+                SettingsAPI:MarkFontDeferred("infoPanel")
             end,
             default = Defaults.FontSize,
             disable = function ()
@@ -270,7 +273,7 @@ function InfoPanel.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.FontStyle = item.data
-                InfoPanel.ApplyFont()
+                SettingsAPI:MarkFontDeferred("infoPanel")
             end,
             default = Defaults.FontStyle,
             disable = function ()

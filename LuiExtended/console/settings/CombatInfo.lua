@@ -45,8 +45,7 @@ function CombatInfo.CreateConsoleSettings()
                                     defaultsFunction = function ()
                                         -- Reset all CombatInfo settings to defaults
                                         CombatInfo:ResetToDefaults()
-                                    end,
-                                    allowRefresh = true
+                                    end
                                 })
 
     -- Get media lists from SettingsAPI
@@ -77,13 +76,12 @@ function CombatInfo.CreateConsoleSettings()
         tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
         buttonText = GetString(LUIE_STRING_LAM_RELOADUI),
         clickHandler = function ()
-            ReloadUI("ingame")
+            SettingsAPI:ReloadUIWithPendingClear()
         end
     }
 
-    -- Initialize all settings and menu buttons for submenus
-    local backButton = nil
-    local menuButtons = {}
+    initialSettings[#initialSettings + 1] = SettingsAPI:ConsoleFontDeferLabelSetting()
+
     local sectionGroups = {}
 
     -- Helper function to build section settings
@@ -268,7 +266,7 @@ function CombatInfo.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.alerts.toggles.alertFontFace = item.data
-                AbilityAlerts.ApplyFontAlert()
+                SettingsAPI:MarkFontDeferred("combatInfo")
                 AbilityAlerts.ResetAlertSize()
             end,
             disable = function ()
@@ -291,7 +289,7 @@ function CombatInfo.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.alerts.toggles.alertFontSize = value
-                AbilityAlerts.ApplyFontAlert()
+                SettingsAPI:MarkFontDeferred("combatInfo")
                 AbilityAlerts.ResetAlertSize()
             end,
             disable = function ()
@@ -317,7 +315,7 @@ function CombatInfo.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.alerts.toggles.alertFontStyle = item.data
-                AbilityAlerts.ApplyFontAlert()
+                SettingsAPI:MarkFontDeferred("combatInfo")
                 AbilityAlerts.ResetAlertSize()
             end,
             disable = function ()
@@ -3136,12 +3134,7 @@ function CombatInfo.CreateConsoleSettings()
         {
             type = LHAS.ST_LABEL,
             label = "Track and display multiple available synergies simultaneously. Set custom priorities and manage synergy preferences.",
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_LABEL,
-            label = "Track and display multiple available synergies simultaneously. Set custom priorities and manage synergy preferences."
+            canSelect = false,
         }
 
         settings[#settings + 1] =
@@ -3594,7 +3587,7 @@ function CombatInfo.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.block.blockIndicatorFontFace = value
-                Block.ApplyBlockIndicatorFont()
+                SettingsAPI:MarkFontDeferred("combatInfo")
             end,
             default = Defaults.block.blockIndicatorFontFace,
             disable = function ()
@@ -3617,7 +3610,7 @@ function CombatInfo.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.block.blockIndicatorFontStyle = item.data
-                Block.ApplyBlockIndicatorFont()
+                SettingsAPI:MarkFontDeferred("combatInfo")
             end,
             default = Defaults.block.blockIndicatorFontStyle,
             disable = function ()
@@ -3637,7 +3630,7 @@ function CombatInfo.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.block.blockIndicatorFontSize = value
-                Block.ApplyBlockIndicatorFont()
+                SettingsAPI:MarkFontDeferred("combatInfo")
             end,
             default = Defaults.block.blockIndicatorFontSize,
             disable = function ()
@@ -3718,7 +3711,7 @@ function CombatInfo.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.block.bloodlordEmbraceFontFace = value
-                Block.ApplyBloodlordEmbraceFonts()
+                SettingsAPI:MarkFontDeferred("combatInfo")
             end,
             default = Defaults.block.bloodlordEmbraceFontFace,
             disable = function ()
@@ -3741,7 +3734,7 @@ function CombatInfo.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.block.bloodlordEmbraceFontStyle = item.data
-                Block.ApplyBloodlordEmbraceFonts()
+                SettingsAPI:MarkFontDeferred("combatInfo")
             end,
             default = Defaults.block.bloodlordEmbraceFontStyle,
             disable = function ()
@@ -3761,7 +3754,7 @@ function CombatInfo.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.block.bloodlordEmbraceTitleSize = value
-                Block.ApplyBloodlordEmbraceFonts()
+                SettingsAPI:MarkFontDeferred("combatInfo")
             end,
             default = Defaults.block.bloodlordEmbraceTitleSize,
             disable = function ()
@@ -3781,7 +3774,7 @@ function CombatInfo.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.block.bloodlordEmbraceValueSize = value
-                Block.ApplyBloodlordEmbraceFonts()
+                SettingsAPI:MarkFontDeferred("combatInfo")
             end,
             default = Defaults.block.bloodlordEmbraceValueSize,
             disable = function ()
@@ -3790,62 +3783,12 @@ function CombatInfo.CreateConsoleSettings()
         }
     end)
 
-    -- Create back button
-    backButton =
-    {
-        type = LHAS.ST_BUTTON,
-        label = "BACK",
-        buttonText = "BACK",
-        tooltip = "",
-        clickHandler = function (control)
-            panel:RemoveAllSettings()
-            local mainMenuSettings = {}
-            for i = 1, #initialSettings do
-                mainMenuSettings[i] = initialSettings[i]
-            end
-            for i = 1, #menuButtons do
-                mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
-            end
-            panel:AddSettings(mainMenuSettings)
-            LHAS.list:SetSelectedIndexWithoutAnimation(1)
-        end
-    }
-
-    -- Create menu buttons for each section
-    local function createMenuButton(sectionName, sectionLabel, sectionSettings)
-        return
-        {
-            type = LHAS.ST_BUTTON,
-            label = sectionLabel,
-            buttonText = sectionLabel,
-            tooltip = "",
-            clickHandler = function (control)
-                panel:RemoveAllSettings()
-                local settingsWithBack = {}
-                for i = 1, #sectionSettings do
-                    settingsWithBack[i] = sectionSettings[i]
-                end
-                settingsWithBack[#settingsWithBack + 1] = backButton
-                panel:AddSettings(settingsWithBack)
-                LHAS.list:SetSelectedIndexWithoutAnimation(2)
-            end
-        }
-    end
-
-    -- Add all submenu buttons
-    menuButtons[#menuButtons + 1] = createMenuButton("FloatingMarkers", GetString(LUIE_STRING_LAM_CI_ENEMY_MARKER_HEADER), sectionGroups["FloatingMarkers"])
-    menuButtons[#menuButtons + 1] = createMenuButton("ActiveCombatAlerts", GetString(LUIE_STRING_LAM_CI_HEADER_ACTIVE_COMBAT_ALERT), sectionGroups["ActiveCombatAlerts"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CrowdControlTracker", GetString(LUIE_STRING_LAM_CI_CCT_HEADER), sectionGroups["CrowdControlTracker"])
-    menuButtons[#menuButtons + 1] = createMenuButton("SynergyTracker", "Synergy Tracker", sectionGroups["SynergyTracker"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Block", "Block Indicator", sectionGroups["Block"])
-
-    -- Initialize main menu with initial settings and menu buttons
-    local mainMenuSettings = {}
-    for i = 1, #initialSettings do
-        mainMenuSettings[i] = initialSettings[i]
-    end
-    for i = 1, #menuButtons do
-        mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
-    end
-    panel:AddSettings(mainMenuSettings)
+    local allSettings = {}
+    SettingsAPI:AppendSettingsList(allSettings, initialSettings)
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CI_ENEMY_MARKER_HEADER), sectionGroups["FloatingMarkers"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CI_HEADER_ACTIVE_COMBAT_ALERT), sectionGroups["ActiveCombatAlerts"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CI_CCT_HEADER), sectionGroups["CrowdControlTracker"])
+    SettingsAPI:AppendSection(allSettings, "Synergy Tracker", sectionGroups["SynergyTracker"])
+    SettingsAPI:AppendSection(allSettings, "Block Indicator", sectionGroups["Block"])
+    panel:AddSettings(allSettings)
 end

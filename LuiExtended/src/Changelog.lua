@@ -12,6 +12,24 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.2.0
+    "|cFFA500LuiExtended Version 7.2.2.0|r",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console settings: Smoother menu navigation when browsing module options, and options that depend on another setting now grey out or update right away without leaving the menu.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: Changing fonts in several modules (Action Bar, Combat Info, Combat Text, Info Panel, Buffs & Debuffs, Unit Frames) is applied after you Reload UI, with a reminder in chat and in the menu — helps avoid memory issues on console.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console: When moving UI elements, position numbers and preview names (unit frames, buff windows, cast bar, combat text, alerts) are easier to read on screen.",
+    "",
+    -- Fixed
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console — Action Bar cast bar: Turn the cast bar on/off at the top of the section; other cast bar options stay disabled until it is on. Reset Position moves the bar back, updates the position sliders, and turns off Unlock Cast Bar so the bar is not left hidden.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Reset Position works even when adjusting position from the menu, and the X/Y sliders match where the bar actually sits.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console settings: Section description text no longer highlights as if it were a setting you could change.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console — Slash Commands settings could fail to open.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console — Unit Frames: Position coordinates show again while custom frames are unlocked and you move them.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Fixed repeated \"You receive mail with … Gold from …\" lines after auto-looting mail and fast traveling (for example hireling gold then porting to a guild house) — mail session state now resets on zone load and mailbox close, inbox updates no longer refill the take queue while the UI is gone, and duplicate mail gold currency lines within 2.5s are suppressed.",
+    "",
     -- Version Header 7.2.1.8
     "|cFFA500LuiExtended Version 7.2.1.8|r",
     "",

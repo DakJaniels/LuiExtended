@@ -641,12 +641,6 @@ local function CreateCompanionFrame()
         companionTlw.customPositionAttr = "CustomFramesCompanionFramePos"
         companionTlw.preview = companionTlw:GetNamedChild("_Preview")
         companionTlw.previewLabel = companionTlw.preview:GetNamedChild("_Label") --- @type LabelControl
-        -- Update font to use better readable font
-        if IsInGamepadPreferredMode() then
-            companionTlw.previewLabel:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
-        else
-            companionTlw.previewLabel:SetFont("$(MEDIUM_FONT)|16|soft-shadow-thick")
-        end
 
         -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(companionTlw, 0, 0)
@@ -748,7 +742,7 @@ end
 -- Helper to set up common actions for all created frames
 local function SetupCommonFrameActions()
     local function tlwOnMoveStart(self)
-        if not ZO_IsConsoleOrGameCoreUI() and self.preview.anchorLabel then
+        if self.preview.anchorLabel then
             eventManager:RegisterForUpdate(moduleName .. "PreviewMove", 200, function ()
                 self.preview.anchorLabel:SetText(zo_strformat("<<1>>, <<2>>", self:GetLeft(), self:GetTop()))
             end)
@@ -781,10 +775,9 @@ local function SetupCommonFrameActions()
             unitFrame.tlw.preview.anchorTexture:SetDrawLayer(DL_OVERLAY)
             unitFrame.tlw.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
 
-            -- For console UI, don't create anchorLabel - EditModeController will create a better coordLabel instead
-            if not ZO_IsConsoleOrGameCoreUI() then
+            if not unitFrame.tlw.preview.anchorLabel then
                 unitFrame.tlw.preview.anchorLabel = windowManager:CreateControl(nil, unitFrame.tlw.preview, CT_LABEL)
-                unitFrame.tlw.preview.anchorLabel:SetFont("ZoFontGameSmall")
+                unitFrame.tlw.preview.anchorLabel:SetFont(LUIE.GetPositionLabelFont())
                 unitFrame.tlw.preview.anchorLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
                 unitFrame.tlw.preview.anchorLabel:SetVerticalAlignment(TEXT_ALIGN_TOP)
                 unitFrame.tlw.preview.anchorLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
@@ -801,6 +794,8 @@ local function SetupCommonFrameActions()
                 unitFrame.tlw.preview.anchorLabelBg:SetAnchorFill(unitFrame.tlw.preview.anchorLabel)
                 unitFrame.tlw.preview.anchorLabelBg:SetDrawLayer(DL_OVERLAY)
                 unitFrame.tlw.preview.anchorLabelBg:SetDrawTier(DT_LOW)
+            else
+                LUIE.ApplyPositionLabelFont(unitFrame.tlw.preview.anchorLabel)
             end
         end
 
@@ -1210,6 +1205,8 @@ function UnitFrames.CreateCustomFrames()
     UnitFrames.CustomFramesApplyTexture()
     UnitFrames.CustomFramesApplyFont()
     UnitFrames.CustomFramesApplyBarAlignment()
+
+    LUIE.RefreshMoverOverlayFonts()
 
     AddTopLevelWindows()
 end
