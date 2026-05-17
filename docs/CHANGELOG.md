@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.1.9
+
+### Fixed
+
+- Unlock: Moving the Quest Log with frame movers now keeps the world-event progress HUD (dynamic events tracker — ritual/world-event objectives such as adventure zone skirmishes) stacked directly above the quest log instead of leaving it at the default screen position.
+
 ## Version 7.2.1.8
 
 ### Changes
