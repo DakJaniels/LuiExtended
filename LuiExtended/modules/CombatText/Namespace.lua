@@ -12,6 +12,29 @@ LUIE.CombatText = {}
 local CombatText = LUIE.CombatText
 
 CombatText.Enabled = false
+
+--- @param unitTag string
+--- @param useAccountName boolean
+--- @return string? formattedName
+function CombatText.ResolveGroupDeathName(unitTag, useAccountName)
+    local raw
+    if useAccountName then
+        raw = GetUnitDisplayName(unitTag)
+        if raw == nil or raw == "" then
+            raw = GetUnitName(unitTag)
+        end
+    else
+        raw = GetUnitName(unitTag)
+        if raw == nil or raw == "" then
+            raw = GetUnitDisplayName(unitTag)
+        end
+    end
+    if raw == nil or raw == "" then
+        return nil
+    end
+    return zo_strformat("<<1>>", raw)
+end
+
 CombatText.Defaults =
 {
     unlocked = false,
@@ -148,6 +171,7 @@ CombatText.Defaults =
         showInCombat = true,
         showOutCombat = true,
         showDeath = true,
+        useAccountNameForDeath = false,
 
         -- Points
         showPointsAlliance = false,

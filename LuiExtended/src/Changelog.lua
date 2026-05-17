@@ -29,6 +29,7 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console — Slash Commands settings could fail to open.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Console — Unit Frames: Position coordinates show again while custom frames are unlocked and you move them.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Fixed repeated \"You receive mail with … Gold from …\" lines after auto-looting mail and fast traveling (for example hireling gold then porting to a guild house) — mail session state now resets on zone load and mailbox close, inbox updates no longer refill the take queue while the UI is gone, and duplicate mail gold currency lines within 2.5s are suppressed.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Group death notifications no longer show a missing name (for example \" died!\") when \"Use account name\" is enabled — display name now falls back to character name, and alerts are skipped when no name is available.",
     "",
     -- Version Header 7.2.1.8
     "|cFFA500LuiExtended Version 7.2.1.8|r",
