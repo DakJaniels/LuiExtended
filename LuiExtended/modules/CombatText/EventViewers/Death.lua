@@ -11,10 +11,9 @@ local CombatTextDeathViewer = LUIE.CombatTextEventViewer:Subclass()
 --- @class (partial) LuiExtended.CombatTextDeathViewer
 LUIE.CombatTextDeathViewer = CombatTextDeathViewer
 
+local CombatText = LUIE.CombatText
 local poolTypes = LuiData.Data.CombatTextConstants.poolType
 local eventType = LuiData.Data.CombatTextConstants.eventType
-
-local zo_strformat = zo_strformat
 
 function CombatTextDeathViewer:Initialize(poolManager, eventListener)
     LUIE.CombatTextEventViewer.Initialize(self, poolManager, eventListener)
@@ -26,23 +25,25 @@ end
 function CombatTextDeathViewer:OnEvent(unitTag)
     local Settings = LUIE.CombatText.SV
 
-    local name
-    if Settings.toggles.useAccountNameForDeath then
-        name = zo_strformat("<<1>>", GetUnitDisplayName(unitTag)) or ""
-    else
-        name = zo_strformat("<<1>>", GetUnitName(unitTag))
+    local name = CombatText.ResolveGroupDeathName(unitTag, Settings.toggles.useAccountNameForDeath)
+    if not name then
+        return
+    end
+
+    local text = self:FormatString(Settings.formats.death, { text = name, value = name })
+    if text == nil or text == "" or zo_strtrim(text) == "" then
+        return
     end
 
     -- Label setup
     local control, controlPoolKey = self.poolManager:GetPoolObject(poolTypes.CONTROL)
 
-    local size, color, text
+    local size, color
     ---------------------------------------------------------------------------------------------------------------------------------------
     --- - POINTS
     ---------------------------------------------------------------------------------------------------------------------------------------
     color = Settings.colors.death
     size = Settings.fontSizes.death
-    text = self:FormatString(Settings.formats.death, { text = name, value = name })
 
     self:PrepareLabel(control.label, size, color, text)
     self:ControlLayout(control)

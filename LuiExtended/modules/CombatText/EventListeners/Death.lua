@@ -9,6 +9,7 @@ local LUIE = LUIE
 --- @class (partial) CombatTextDeathListener : LuiExtended.CombatTextEventListener
 local CombatTextDeathListener = LUIE.CombatTextEventListener:Subclass()
 
+local CombatText = LUIE.CombatText
 local eventType = LuiData.Data.CombatTextConstants.eventType
 
 function CombatTextDeathListener:Initialize()
@@ -19,13 +20,17 @@ end
 --- @param unitTag string
 --- @param isDead boolean
 function CombatTextDeathListener:OnEvent(unitTag, isDead)
-    if LUIE.CombatText.SV.toggles.showDeath then
-        if isDead and "group" == zo_strsub(unitTag, 0, 5) then -- when group member dies
-            if GetUnitName(unitTag) ~= GetUnitName("player") then
-                self:TriggerEvent(eventType.DEATH, unitTag)
-            end
-        end
+    if not LUIE.CombatText.SV.toggles.showDeath or not isDead then
+        return
     end
+    if AreUnitsEqual(unitTag, "player") then
+        return
+    end
+    local toggles = LUIE.CombatText.SV.toggles
+    if not CombatText.ResolveGroupDeathName(unitTag, toggles.useAccountNameForDeath) then
+        return
+    end
+    self:TriggerEvent(eventType.DEATH, unitTag)
 end
 
 --- @class (partial) LuiExtended.CombatTextDeathListener : CombatTextDeathListener
