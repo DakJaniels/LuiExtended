@@ -185,8 +185,7 @@ function UnitFrames.CreateConsoleSettings()
                                     defaultsFunction = function ()
                                         -- Reset all frame positions when defaults is clicked
                                         UnitFrames.CustomFramesResetPosition(false)
-                                    end,
-                                    allowRefresh = true
+                                    end
                                 })
 
     -- Collect initial settings for main menu
@@ -208,15 +207,13 @@ function UnitFrames.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_RELOADUI),
             tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
             clickHandler = function ()
-                ReloadUI("ingame")
+                SettingsAPI:ReloadUIWithPendingClear()
             end,
             buttonText = GetString(LUIE_STRING_LAM_RELOADUI),
         },
+        SettingsAPI:ConsoleFontDeferLabelSetting(),
     }
 
-    -- Initialize all settings and menu buttons for submenus
-    local backButton = nil
-    local menuButtons = {}
     local sectionGroups = {}
 
     -- Helper function to build section settings
@@ -239,7 +236,10 @@ function UnitFrames.CreateConsoleSettings()
         {
             type = LHAS.ST_LABEL,
             label = "Configure which default game UI unit frames to display. Choose between ZOS default, LUIE overlay with additional information, or hide frames entirely.",
+            canSelect = false,
         }
+
+        settings[#settings + 1] = SettingsAPI:ConsoleFontDeferLabelSetting()
 
         settings[#settings + 1] =
         {
@@ -443,7 +443,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.DefaultFontFace = item.data or item.name or value
-                UnitFrames.DefaultFramesApplyFont()
+                SettingsAPI:MarkUnitFramesFontDeferred("default")
             end,
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
@@ -463,7 +463,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.DefaultFontSize = value
-                UnitFrames.DefaultFramesApplyFont()
+                SettingsAPI:MarkUnitFramesFontDeferred("default")
             end,
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
@@ -487,7 +487,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.DefaultFontStyle = item.data or item.name or value
-                UnitFrames.DefaultFramesApplyFont()
+                SettingsAPI:MarkUnitFramesFontDeferred("default")
             end,
             default = Defaults.DefaultFontStyle,
             disable = function ()
@@ -571,7 +571,10 @@ function UnitFrames.CreateConsoleSettings()
         {
             type = LHAS.ST_LABEL,
             label = "Configure font, size, and style options for custom unit frames.",
+            canSelect = false,
         }
+
+        settings[#settings + 1] = SettingsAPI:ConsoleFontDeferLabelSetting()
 
         settings[#settings + 1] =
         {
@@ -584,7 +587,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.CustomFontFace = item.data or item.name or value
-                UnitFrames.CustomFramesApplyFont()
+                SettingsAPI:MarkUnitFramesFontDeferred("custom")
             end,
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
@@ -605,7 +608,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.CustomFontOther = value
-                UnitFrames.CustomFramesApplyFont()
+                SettingsAPI:MarkUnitFramesFontDeferred("custom")
             end,
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
@@ -626,7 +629,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.CustomFontBars = value
-                UnitFrames.CustomFramesApplyFont()
+                SettingsAPI:MarkUnitFramesFontDeferred("custom")
             end,
             disable = function ()
                 return not LUIE.SV.UnitFrames_Enabled
@@ -651,7 +654,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.CustomFontStyle = item.data or item.name or value
-                UnitFrames.CustomFramesApplyFont()
+                SettingsAPI:MarkUnitFramesFontDeferred("custom")
             end,
             default = Defaults.CustomFontStyle,
             disable = function ()
@@ -4533,9 +4536,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_WHITELIST_ADD_NECROMANCER_TP),
             clickHandler = function ()
                 UnitFrames.AddBulkToCustomList(Settings.whitelist, PetNames.Necromancer)
-                if LHAS.RefreshAddonSettings then
-                    LHAS:RefreshAddonSettings()
-                end
+                SettingsAPI:RefreshPanel(panel)
                 UnitFrames.CustomPetUpdate()
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PET_WHITELIST")
@@ -4550,9 +4551,7 @@ function UnitFrames.CreateConsoleSettings()
             tooltip = GetString(LUIE_STRING_LAM_UF_WHITELIST_ADD_SORCERER_TP),
             clickHandler = function ()
                 UnitFrames.AddBulkToCustomList(Settings.whitelist, PetNames.Sorcerer)
-                if LHAS.RefreshAddonSettings then
-                    LHAS:RefreshAddonSettings()
-                end
+                SettingsAPI:RefreshPanel(panel)
                 UnitFrames.CustomPetUpdate()
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PET_WHITELIST")
@@ -4599,9 +4598,7 @@ function UnitFrames.CreateConsoleSettings()
                         LUIE.RefreshBlacklistDialog("LUIE_MANAGE_PET_WHITELIST")
                     end
                     -- Refresh settings to clear the edit box
-                    if LHAS and LHAS.RefreshAddonSettings then
-                        LHAS:RefreshAddonSettings()
-                    end
+                    SettingsAPI:RefreshPanel(panel)
                 end
             end,
             disable = function ()
@@ -5153,78 +5150,26 @@ function UnitFrames.CreateConsoleSettings()
         }
     end)
 
-    -- Create back button
-    backButton =
-    {
-        type = LHAS.ST_BUTTON,
-        label = "BACK",
-        buttonText = "BACK",
-        tooltip = "",
-        clickHandler = function (control)
-            panel:RemoveAllSettings()
-            local mainMenuSettings = {}
-            for i = 1, #initialSettings do
-                mainMenuSettings[i] = initialSettings[i]
-            end
-            for i = 1, #menuButtons do
-                mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
-            end
-            panel:AddSettings(mainMenuSettings)
-            LHAS.list:SetSelectedIndexWithoutAnimation(1)
-        end
-    }
-
-    -- Create menu buttons for each section
-    local function createMenuButton(sectionName, sectionLabel, sectionSettings)
-        return
-        {
-            type = LHAS.ST_BUTTON,
-            label = sectionLabel,
-            buttonText = sectionLabel,
-            tooltip = "",
-            clickHandler = function (control)
-                panel:RemoveAllSettings()
-                local settingsWithBack = {}
-                for i = 1, #sectionSettings do
-                    settingsWithBack[i] = sectionSettings[i]
-                end
-                settingsWithBack[#settingsWithBack + 1] = backButton
-                panel:AddSettings(settingsWithBack)
-                LHAS.list:SetSelectedIndexWithoutAnimation(2)
-            end
-        }
-    end
-
-    -- Add CommonOptions first since it contains global settings (ReloadUI, Unlock, Grid, Reset)
-    menuButtons[#menuButtons + 1] = createMenuButton("CommonOptions", GetString(LUIE_STRING_LAM_UF_COMMON_HEADER), sectionGroups["CommonOptions"])
-
-    -- Then add all other submenu buttons
-    menuButtons[#menuButtons + 1] = createMenuButton("DefaultFrames", GetString(LUIE_STRING_LAM_UF_DFRAMES_HEADER), sectionGroups["DefaultFrames"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CustomFrames", GetString(LUIE_STRING_LAM_UF_CFRAMES_HEADER), sectionGroups["CustomFrames"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesColor", GetString(LUIE_STRING_LAM_UF_CFRAMES_COLOR_HEADER), sectionGroups["CustomFramesColor"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesPlayerTarget", GetString(LUIE_STRING_LAM_UF_CFRAMESPT_HEADER), sectionGroups["CustomFramesPlayerTarget"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesPositions", GetString(LUIE_STRING_LAM_UF_CFRAMES_POSITIONS_HEADER), sectionGroups["CustomFramesPositions"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesBarAlignment", GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_HEADER), sectionGroups["CustomFramesBarAlignment"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesPlayerTargetOptions", GetString(LUIE_STRING_LAM_UF_CFRAMESPT_OPTIONS_HEADER), sectionGroups["CustomFramesPlayerTargetOptions"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesGroup", GetString(LUIE_STRING_LAM_UF_CFRAMESG_HEADER), sectionGroups["CustomFramesGroup"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesRaid", GetString(LUIE_STRING_LAM_UF_CFRAMESR_HEADER), sectionGroups["CustomFramesRaid"])
-    menuButtons[#menuButtons + 1] = createMenuButton("GroupResources", "Group Resources", sectionGroups["GroupResources"])
-    menuButtons[#menuButtons + 1] = createMenuButton("GroupCombatStats", "Group Combat Stats", sectionGroups["GroupCombatStats"])
-    menuButtons[#menuButtons + 1] = createMenuButton("GroupPotionCooldowns", "Group Potion Cooldowns", sectionGroups["GroupPotionCooldowns"])
-    menuButtons[#menuButtons + 1] = createMenuButton("GroupFoodDrinkBuff", "Group Food & Drink Buffs", sectionGroups["GroupFoodDrinkBuff"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesCompanion", GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_HEADER), sectionGroups["CustomFramesCompanion"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesPet", GetString(LUIE_STRING_LAM_UF_CFRAMESPET_HEADER), sectionGroups["CustomFramesPet"])
-    menuButtons[#menuButtons + 1] = createMenuButton("PetWhitelist", GetString(LUIE_STRING_CUSTOM_LIST_UF_WHITELIST), sectionGroups["PetWhitelist"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesBoss", GetString(LUIE_STRING_LAM_UF_CFRAMESB_HEADER), sectionGroups["CustomFramesBoss"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CustomFramesPvP", GetString(LUIE_STRING_LAM_UF_CFRAMESPVP_HEADER), sectionGroups["CustomFramesPvP"])
-
-    -- Initialize main menu with initial settings and menu buttons
-    local mainMenuSettings = {}
-    for i = 1, #initialSettings do
-        mainMenuSettings[i] = initialSettings[i]
-    end
-    for i = 1, #menuButtons do
-        mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
-    end
-    panel:AddSettings(mainMenuSettings)
+    local allSettings = {}
+    SettingsAPI:AppendSettingsList(allSettings, initialSettings)
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_COMMON_HEADER), sectionGroups["CommonOptions"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_DFRAMES_HEADER), sectionGroups["DefaultFrames"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMES_HEADER), sectionGroups["CustomFrames"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMES_COLOR_HEADER), sectionGroups["CustomFramesColor"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMESPT_HEADER), sectionGroups["CustomFramesPlayerTarget"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMES_POSITIONS_HEADER), sectionGroups["CustomFramesPositions"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMES_ALIGN_HEADER), sectionGroups["CustomFramesBarAlignment"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMESPT_OPTIONS_HEADER), sectionGroups["CustomFramesPlayerTargetOptions"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMESG_HEADER), sectionGroups["CustomFramesGroup"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMESR_HEADER), sectionGroups["CustomFramesRaid"])
+    SettingsAPI:AppendSection(allSettings, "Group Resources", sectionGroups["GroupResources"])
+    SettingsAPI:AppendSection(allSettings, "Group Combat Stats", sectionGroups["GroupCombatStats"])
+    SettingsAPI:AppendSection(allSettings, "Group Potion Cooldowns", sectionGroups["GroupPotionCooldowns"])
+    SettingsAPI:AppendSection(allSettings, "Group Food & Drink Buffs", sectionGroups["GroupFoodDrinkBuff"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_HEADER), sectionGroups["CustomFramesCompanion"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMESPET_HEADER), sectionGroups["CustomFramesPet"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_CUSTOM_LIST_UF_WHITELIST), sectionGroups["PetWhitelist"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMESB_HEADER), sectionGroups["CustomFramesBoss"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMESPVP_HEADER), sectionGroups["CustomFramesPvP"])
+    panel:AddSettings(allSettings)
 end

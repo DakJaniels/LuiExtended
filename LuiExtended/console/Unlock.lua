@@ -222,7 +222,7 @@ end
 --- @return LabelControl label The created label
 function Unlock.CreateCoordinateLabel(parent, positionText)
     local label = windowManager:CreateControl(nil, parent, CT_LABEL)
-    label:SetFont("ZoFontGameSmall")
+    label:SetFont(LUIE.GetPositionLabelFont())
     label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     label:SetVerticalAlignment(TEXT_ALIGN_TOP)
     label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)

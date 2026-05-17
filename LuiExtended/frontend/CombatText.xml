@@ -41,7 +41,7 @@
                 edgeFilePadding="1" />
         </Backdrop>
         <Label name="$(parent)_AnchorLabel"
-               font="ZoFontGameSmall"
+               font="ZoFontGamepad22"
                color="FFFF00"
                text="0, 0"
                wrapMode="ELLIPSIS"

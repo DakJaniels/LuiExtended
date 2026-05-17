@@ -28,8 +28,8 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.2.1.8"
-LUIE.addonVersion = 7218
+LUIE.version = "7.2.2.0"
+LUIE.addonVersion = 7220
 LUIE.author = "@dack_janiels[PC]"
 LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
@@ -41,6 +41,94 @@ LUIE.donation = "https://paypal.me/dakjaniels"
 if not ZO_IsConsoleOrGameCoreUI() then
     LUIE.LAM = LibAddonMenu2
 end
+
+--- Stock ZOS font for movable-frame coordinate overlays (readable on gamepad / console UI scale).
+--- @return string
+function LUIE.GetPositionLabelFont()
+    if ZO_IsConsoleOrGameCoreUI() then
+        return "ZoFontGamepad22"
+    end
+    return "ZoFontGameSmall"
+end
+
+--- @param label LabelControl|nil
+function LUIE.ApplyPositionLabelFont(label)
+    if label and label.SetFont then
+        label:SetFont(LUIE.GetPositionLabelFont())
+    end
+end
+
+--- Mover preview title labels (e.g. "Player Preview") use the same gamepad sizing as coord overlays.
+--- @param label LabelControl|nil
+function LUIE.ApplyFramePreviewLabelFont(label)
+    LUIE.ApplyPositionLabelFont(label)
+end
+
+--- XML default for mover overlay labels (`_Preview/_Label`, `_AnchorLabel`); PC init overrides via GetPositionLabelFont().
+LUIE.MOVER_OVERLAY_FONT_XML = "ZoFontGamepad22"
+
+local MOVER_OVERLAY_TLW_NAMES =
+{
+    "LUIE_CustomPlayerFrame",
+    "LUIE_CustomTargetFrame",
+    "LUIE_CustomAvaPlayerTargetFrame",
+    "LUIE_CustomSmallGroupFrame",
+    "LUIE_CustomRaidGroupFrame",
+    "LUIE_CustomPetFrame",
+    "LUIE_CustomCompanionFrame",
+    "LUIE_CustomBossFrame",
+}
+
+--- @param preview Control|nil
+local function ApplyMoverPreviewControlFonts(preview)
+    if not preview then
+        return
+    end
+    LUIE.ApplyFramePreviewLabelFont(preview:GetNamedChild("_Label"))
+    LUIE.ApplyPositionLabelFont(preview:GetNamedChild("_AnchorLabel"))
+end
+
+--- Applies console/PC-correct fonts to all mover coord + preview labels (XML defaults + runtime-created controls).
+function LUIE.RefreshMoverOverlayFonts()
+    for i = 1, #MOVER_OVERLAY_TLW_NAMES do
+        local tlw = _G[MOVER_OVERLAY_TLW_NAMES[i]]
+        if tlw then
+            ApplyMoverPreviewControlFonts(tlw.preview)
+            ApplyMoverPreviewControlFonts(tlw:GetNamedChild("_Preview"))
+        end
+    end
+
+    local alertFrame = _G["LUIE_AlertFrame"]
+    if alertFrame then
+        ApplyMoverPreviewControlFonts(alertFrame:GetNamedChild("_Preview"))
+    end
+
+    for _, panelName in ipairs({ "LUIE_CombatText_Incoming", "LUIE_CombatText_Outgoing" }) do
+        local panel = _G[panelName]
+        if panel then
+            ApplyMoverPreviewControlFonts(panel:GetNamedChild("_Preview"))
+        end
+    end
+
+    local castBar = _G["LUIE_ACTIONBAR_CASTBAR_TLC"]
+    if castBar and castBar.preview then
+        LUIE.ApplyFramePreviewLabelFont(castBar.previewLabel)
+        LUIE.ApplyPositionLabelFont(castBar.preview.anchorLabel)
+    end
+
+    local spellCastBuffs = LUIE.SpellCastBuffs
+    if spellCastBuffs and spellCastBuffs.BuffContainers then
+        for _, container in pairs(spellCastBuffs.BuffContainers) do
+            if container then
+                LUIE.ApplyFramePreviewLabelFont(container.previewLabel)
+                if container.preview then
+                    LUIE.ApplyPositionLabelFont(container.preview.anchorLabel)
+                end
+            end
+        end
+    end
+end
+
 -- -----------------------------------------------------------------------------
 -- Saved variables options
 --- @diagnostic disable-next-line: missing-fields

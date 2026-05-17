@@ -67,8 +67,7 @@ function ChatAnnouncements.CreateConsoleSettings()
     -- Create the addon settings panel
     local panel = LHAS:AddAddon(zo_strformat("<<1>> - <<2>>", LUIE.name, GetString(LUIE_STRING_LAM_CA)),
                                 {
-                                    allowDefaults = true,
-                                    allowRefresh = true
+                                    allowDefaults = true
                                 })
 
     -- Collect initial settings for main menu
@@ -89,13 +88,10 @@ function ChatAnnouncements.CreateConsoleSettings()
         tooltip = GetString(LUIE_STRING_LAM_RELOADUI_BUTTON),
         buttonText = GetString(LUIE_STRING_LAM_RELOADUI),
         clickHandler = function ()
-            ReloadUI("ingame")
+            SettingsAPI:ReloadUIWithPendingClear()
         end
     }
 
-    -- Initialize all settings and menu buttons for submenus
-    local backButton = nil
-    local menuButtons = {}
     local sectionGroups = {}
 
     -- Helper function to build section settings
@@ -9304,70 +9300,20 @@ function ChatAnnouncements.CreateConsoleSettings()
         }
     end)
 
-    -- Create back button
-    backButton =
-    {
-        type = LHAS.ST_BUTTON,
-        label = "BACK",
-        buttonText = "BACK",
-        tooltip = "",
-        clickHandler = function (control)
-            panel:RemoveAllSettings()
-            local mainMenuSettings = {}
-            for i = 1, #initialSettings do
-                mainMenuSettings[i] = initialSettings[i]
-            end
-            for i = 1, #menuButtons do
-                mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
-            end
-            panel:AddSettings(mainMenuSettings)
-            LHAS.list:SetSelectedIndexWithoutAnimation(1)
-        end
-    }
-
-    -- Create menu buttons for each section
-    local function createMenuButton(sectionName, sectionLabel, sectionSettings)
-        return
-        {
-            type = LHAS.ST_BUTTON,
-            label = sectionLabel,
-            buttonText = sectionLabel,
-            tooltip = "",
-            clickHandler = function (control)
-                panel:RemoveAllSettings()
-                local settingsWithBack = {}
-                for i = 1, #sectionSettings do
-                    settingsWithBack[i] = sectionSettings[i]
-                end
-                settingsWithBack[#settingsWithBack + 1] = backButton
-                panel:AddSettings(settingsWithBack)
-                LHAS.list:SetSelectedIndexWithoutAnimation(2)
-            end
-        }
-    end
-
-    -- Add all submenu buttons
-    menuButtons[#menuButtons + 1] = createMenuButton("ChatMessage", GetString(LUIE_STRING_LAM_CA_CHATHEADER), sectionGroups["ChatMessage"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Currency", GetString(LUIE_STRING_LAM_CA_CURRENCY_HEADER), sectionGroups["Currency"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Loot", GetString(LUIE_STRING_LAM_CA_LOOT_HEADER), sectionGroups["Loot"])
-    menuButtons[#menuButtons + 1] = createMenuButton("SharedCurrencyLoot", GetString(LUIE_STRING_LAM_CA_CURRENCY_CONTEXT_MENU), sectionGroups["SharedCurrencyLoot"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Experience", GetString(LUIE_STRING_LAM_CA_EXP_HEADER), sectionGroups["Experience"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Collectible", GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_HEADER), sectionGroups["Collectible"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Antiquities", GetString(LUIE_STRING_LAM_CA_ANTIQUITY_HEADER), sectionGroups["Antiquities"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Achievements", GetString(LUIE_STRING_LAM_CA_ACHIEVE_HEADER), sectionGroups["Achievements"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Quest", GetString(LUIE_STRING_LAM_CA_QUEST_HEADER), sectionGroups["Quest"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Social", GetString(LUIE_STRING_LAM_CA_SOCIAL_HEADER), sectionGroups["Social"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Group", GetString(LUIE_STRING_LAM_CA_GROUP_HEADER), sectionGroups["Group"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Display", GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER), sectionGroups["Display"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Miscellaneous", GetString(LUIE_STRING_LAM_CA_MISC_HEADER), sectionGroups["Miscellaneous"])
-
-    -- Initialize main menu with initial settings and menu buttons
-    local mainMenuSettings = {}
-    for i = 1, #initialSettings do
-        mainMenuSettings[i] = initialSettings[i]
-    end
-    for i = 1, #menuButtons do
-        mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
-    end
-    panel:AddSettings(mainMenuSettings)
+    local allSettings = {}
+    SettingsAPI:AppendSettingsList(allSettings, initialSettings)
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_CHATHEADER), sectionGroups["ChatMessage"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_CURRENCY_HEADER), sectionGroups["Currency"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_LOOT_HEADER), sectionGroups["Loot"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_CURRENCY_CONTEXT_MENU), sectionGroups["SharedCurrencyLoot"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_EXP_HEADER), sectionGroups["Experience"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_COLLECTIBLE_HEADER), sectionGroups["Collectible"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_ANTIQUITY_HEADER), sectionGroups["Antiquities"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_ACHIEVE_HEADER), sectionGroups["Achievements"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_QUEST_HEADER), sectionGroups["Quest"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_SOCIAL_HEADER), sectionGroups["Social"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_GROUP_HEADER), sectionGroups["Group"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER), sectionGroups["Display"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CA_MISC_HEADER), sectionGroups["Miscellaneous"])
+    panel:AddSettings(allSettings)
 end

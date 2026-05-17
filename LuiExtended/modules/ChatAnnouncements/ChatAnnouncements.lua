@@ -99,6 +99,8 @@ local g_mailBatchTakeAll = false        -- Category Take All in progress (no g_m
 local g_mailIncomingCurrencySender = "" -- Per-line mail gold sender during batch Take All
 local g_mailPendingCurrencySender = ""  -- Set by EVENT_MAIL_TAKE_ATTACHED_MONEY_SUCCESS before currency update
 local g_mailPendingItemSender = ""      -- Set by EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS before inventory update
+local MAIL_CURRENCY_ANNOUNCE_DEDUPE_MS = 2500
+local g_lastMailCurrencyAnnounce = { amount = 0, senderKey = "", timeMs = 0 }
 
 -- Disguise
 local g_currentDisguise = nil -- Holds current disguise itemId
@@ -1949,6 +1951,18 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
                 g_mailTarget = mailSender
             end
             local currencySender = g_mailBatchTakeAll and mailSender or g_mailTarget
+            if currencyType == CURT_MONEY then
+                local senderKey = currencySender ~= "" and currencySender or ""
+                local nowMs = GetGameTimeMilliseconds()
+                if  g_lastMailCurrencyAnnounce.amount == amountDelta
+                and g_lastMailCurrencyAnnounce.senderKey == senderKey
+                and (nowMs - g_lastMailCurrencyAnnounce.timeMs) < MAIL_CURRENCY_ANNOUNCE_DEDUPE_MS then
+                    return nil, nil, "return"
+                end
+                g_lastMailCurrencyAnnounce.amount = amountDelta
+                g_lastMailCurrencyAnnounce.senderKey = senderKey
+                g_lastMailCurrencyAnnounce.timeMs = nowMs
+            end
             local mailMessageChange = currencySender ~= "" and contextMessages.CurrencyMessageMailIn or contextMessages.CurrencyMessageMailInNoName
             local mailCurrencyType = (currencySender ~= "") and "LUIE_CURRENCY_MAIL" or nil
             return mailMessageChange, mailCurrencyType, "continue"
@@ -2694,6 +2708,41 @@ function ChatAnnouncements.SendDelayedMailItems()
     PrintMailDelayedLootLines(false)
 end
 
+--- Clears mail loot/session state. When preserveMailboxOpen is true, keeps g_inMail and g_mailTarget (mailbox still open after Take All).
+--- @param preserveMailboxOpen boolean|nil
+function ChatAnnouncements.ResetMailSession(preserveMailboxOpen)
+    if preserveMailboxOpen then
+        g_mailIsTakingMail = false
+        g_mailBatchTakeAll = false
+        g_mailLootQueue = {}
+        g_mailSenderMap = {}
+        g_mailDelayedLootLines = {}
+        g_mailLootLineSequence = 0
+        g_mailIncomingCurrencySender = ""
+        g_mailPendingCurrencySender = ""
+        g_mailPendingItemSender = ""
+        eventManager:UnregisterForUpdate(moduleName .. "ClearMailTakingFlag")
+        eventManager:UnregisterForUpdate(moduleName .. "FlushMailLoot")
+        return
+    end
+    g_inMail = false
+    g_mailTarget = ""
+    g_mailCODPresent = false
+    g_mailIsTakingMail = false
+    g_mailBatchTakeAll = false
+    g_mailStacksOut = {}
+    g_mailLootQueue = {}
+    g_mailSenderMap = {}
+    g_mailDelayedLootLines = {}
+    g_mailLootLineSequence = 0
+    g_mailIncomingCurrencySender = ""
+    g_mailPendingCurrencySender = ""
+    g_mailPendingItemSender = ""
+    eventManager:UnregisterForUpdate(moduleName .. "SendDelayedMailItems")
+    eventManager:UnregisterForUpdate(moduleName .. "ClearMailTakingFlag")
+    eventManager:UnregisterForUpdate(moduleName .. "FlushMailLoot")
+end
+
 local function PopulateMailSenderQueue(categoryFilter)
     g_mailLootQueue = {}
     g_mailSenderMap = {}
@@ -2859,14 +2908,7 @@ end
 function ChatAnnouncements.OnMailTakeAllResponse(eventId, result, category, headersRemoved)
     local function FinishMailTakeAllBatch()
         ChatAnnouncements.FlushMailDelayedLootLines()
-        g_mailBatchTakeAll = false
-        g_mailIsTakingMail = false
-        g_mailLootQueue = {}
-        g_mailSenderMap = {}
-        g_mailIncomingCurrencySender = ""
-        g_mailPendingCurrencySender = ""
-        g_mailPendingItemSender = ""
-        eventManager:UnregisterForUpdate(moduleName .. "ClearMailTakingFlag")
+        ChatAnnouncements.ResetMailSession(true)
     end
     ChatAnnouncements.FlushMailDelayedLootLines()
     eventManager:UnregisterForUpdate(moduleName .. "FlushMailLoot")
@@ -2874,9 +2916,7 @@ function ChatAnnouncements.OnMailTakeAllResponse(eventId, result, category, head
 end
 
 function ChatAnnouncements.OnMailInboxUpdate(eventId)
-    if g_inMail and not g_mailIsTakingMail then
-        PopulateMailSenderQueue()
-    end
+    -- Sender queue is built in OnMailOpenBox and OnPreTakeAllMailAttachmentsInCategory only.
 end
 
 function ChatAnnouncements.OnMailAttach(eventId, attachmentSlot)
@@ -2920,16 +2960,7 @@ function ChatAnnouncements.OnMailCloseBox(eventId)
     eventManager:UnregisterForUpdate(moduleName .. "SendDelayedMailItems")
     ChatAnnouncements.SendDelayedMailItems()
     ChatAnnouncements.FlushMailDelayedLootLines()
-    g_inMail = false
-    g_mailStacksOut = {}
-    g_mailLootQueue = {}
-    g_mailSenderMap = {}
-    g_mailIsTakingMail = false
-    g_mailBatchTakeAll = false
-    g_mailIncomingCurrencySender = ""
-    g_mailPendingCurrencySender = ""
-    g_mailPendingItemSender = ""
-    eventManager:UnregisterForUpdate(moduleName .. "ClearMailTakingFlag")
+    ChatAnnouncements.ResetMailSession()
 end
 
 -- Sends results of the trade to the Item Log print function and clears variables so they are reset for next trade interactions
@@ -4436,15 +4467,15 @@ local function GetProvisionerIngredientSortOrder(itemLink)
         return nil
     end
     if specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_MEAT
-        or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_VEGETABLE
-        or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_FRUIT
-        or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_ALCOHOL
-        or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_TEA
-        or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_TONIC then
+    or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_VEGETABLE
+    or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_FRUIT
+    or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_ALCOHOL
+    or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_TEA
+    or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_TONIC then
         return 1
     end
     if specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_FOOD_ADDITIVE
-        or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE then
+    or specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE then
         return 2
     end
     if specializedItemType == SPECIALIZED_ITEMTYPE_INGREDIENT_RARE then
@@ -6433,6 +6464,8 @@ function ChatAnnouncements.DisguiseState(eventId, unitTag, disguiseState)
 end
 
 function ChatAnnouncements.OnPlayerActivated(eventId)
+    ChatAnnouncements.ResetMailSession()
+
     -- Get current trades if UI is reloaded
     local characterName, _, displayName = GetTradeInviteInfo()
 

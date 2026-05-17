@@ -38,30 +38,6 @@ local function GenerateCustomListLHAS(input)
     return items
 end
 
-local dialogs =
-{
-    [1] =
-    { -- Clear Blacklist
-        identifier = "LUIE_CLEAR_CT_BLACKLIST",
-        title = GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR),
-        text = zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG), GetString(LUIE_STRING_LAM_CT_BLACKLIST_HEADER)),
-        callback = function (dialog)
-            CombatText.ClearCustomList(CombatText.SV.blacklist)
-            -- Refresh settings panel if needed
-            if LHAS.RefreshAddonSettings then
-                LHAS:RefreshAddonSettings()
-            end
-        end,
-    },
-}
-
-local function loadDialogButtons()
-    for i = 1, #dialogs do
-        local dialog = dialogs[i]
-        LUIE.RegisterDialogueButton(dialog.identifier, dialog.title, dialog.text, dialog.callback)
-    end
-end
-
 function CombatText.CreateConsoleSettings()
     local Defaults = CombatText.Defaults
     local Settings = CombatText.SV
@@ -70,9 +46,6 @@ function CombatText.CreateConsoleSettings()
     if not LUIE.SV.CombatText_Enabled then
         return
     end
-
-    -- Load Dialog Buttons
-    loadDialogButtons()
 
     -- Register custom blacklist management dialog
     LUIE.RegisterBlacklistDialog(
@@ -109,8 +82,17 @@ function CombatText.CreateConsoleSettings()
                                         -- Reset all panel positions to defaults
                                         CombatText.ResetPanelPositions()
                                     end,
-                                    allowRefresh = true
                                 })
+
+    LUIE.RegisterDialogueButton(
+        "LUIE_CLEAR_CT_BLACKLIST",
+        GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR),
+        zo_strformat(GetString(LUIE_STRING_LAM_UF_BLACKLIST_CLEAR_DIALOG), GetString(LUIE_STRING_LAM_CT_BLACKLIST_HEADER)),
+        function ()
+            CombatText.ClearCustomList(CombatText.SV.blacklist)
+            SettingsAPI:RefreshPanel(panel)
+        end
+    )
 
     -- Collect initial settings for main menu
     local initialSettings = {}
@@ -143,14 +125,12 @@ function CombatText.CreateConsoleSettings()
             end
             -- Reset the unlocked state
             Settings.unlocked = false
-            -- Reload the UI
-            ReloadUI("ingame")
+            SettingsAPI:ReloadUIWithPendingClear()
         end
     }
 
-    -- Initialize all settings and menu buttons for submenus
-    local backButton = nil
-    local menuButtons = {}
+    initialSettings[#initialSettings + 1] = SettingsAPI:ConsoleFontDeferLabelSetting()
+
     local sectionGroups = {}
 
     -- Helper function to build section settings
@@ -427,9 +407,7 @@ function CombatText.CreateConsoleSettings()
             buttonText = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_SETS),
             clickHandler = function ()
                 CombatText.AddBulkToCustomList(Settings.blacklist, BlacklistPresets.Sets)
-                if LHAS.RefreshAddonSettings then
-                    LHAS:RefreshAddonSettings()
-                end
+                SettingsAPI:RefreshPanel(panel)
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_CT_BLACKLIST")
             end
@@ -443,9 +421,7 @@ function CombatText.CreateConsoleSettings()
             buttonText = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_SORCERER),
             clickHandler = function ()
                 CombatText.AddBulkToCustomList(Settings.blacklist, BlacklistPresets.Sorcerer)
-                if LHAS.RefreshAddonSettings then
-                    LHAS:RefreshAddonSettings()
-                end
+                SettingsAPI:RefreshPanel(panel)
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_CT_BLACKLIST")
             end
@@ -459,9 +435,7 @@ function CombatText.CreateConsoleSettings()
             buttonText = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_TEMPLAR),
             clickHandler = function ()
                 CombatText.AddBulkToCustomList(Settings.blacklist, BlacklistPresets.Templar)
-                if LHAS.RefreshAddonSettings then
-                    LHAS:RefreshAddonSettings()
-                end
+                SettingsAPI:RefreshPanel(panel)
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_CT_BLACKLIST")
             end
@@ -475,9 +449,7 @@ function CombatText.CreateConsoleSettings()
             buttonText = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_WARDEN),
             clickHandler = function ()
                 CombatText.AddBulkToCustomList(Settings.blacklist, BlacklistPresets.Warden)
-                if LHAS.RefreshAddonSettings then
-                    LHAS:RefreshAddonSettings()
-                end
+                SettingsAPI:RefreshPanel(panel)
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_CT_BLACKLIST")
             end
@@ -491,9 +463,7 @@ function CombatText.CreateConsoleSettings()
             buttonText = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_NECROMANCER),
             clickHandler = function ()
                 CombatText.AddBulkToCustomList(Settings.blacklist, BlacklistPresets.Necromancer)
-                if LHAS.RefreshAddonSettings then
-                    LHAS:RefreshAddonSettings()
-                end
+                SettingsAPI:RefreshPanel(panel)
                 -- Refresh dialog if open
                 LUIE.RefreshBlacklistDialog("LUIE_MANAGE_CT_BLACKLIST")
             end
@@ -535,9 +505,7 @@ function CombatText.CreateConsoleSettings()
                         LUIE.RefreshBlacklistDialog("LUIE_MANAGE_CT_BLACKLIST")
                     end
                     -- Refresh settings to clear the edit box
-                    if LHAS and LHAS.RefreshAddonSettings then
-                        LHAS:RefreshAddonSettings()
-                    end
+                    SettingsAPI:RefreshPanel(panel)
                 end
             end
         }
@@ -1874,7 +1842,10 @@ function CombatText.CreateConsoleSettings()
         {
             type = LHAS.ST_LABEL,
             label = "Configure font settings for combat text display.",
+            canSelect = false,
         }
+
+        settings[#settings + 1] = SettingsAPI:ConsoleFontDeferLabelSetting()
 
         settings[#settings + 1] =
         {
@@ -1885,7 +1856,7 @@ function CombatText.CreateConsoleSettings()
             getFunction = function () return Settings.fontFace end,
             setFunction = function (combobox, value, item)
                 Settings.fontFace = item.data or item.name or value
-                CombatText.ApplyFont()
+                SettingsAPI:MarkFontDeferred("combatText")
             end,
             default = Defaults.fontFace
         }
@@ -1914,7 +1885,7 @@ function CombatText.CreateConsoleSettings()
                         Settings.fontSize = Defaults.fontSize
                     end
                 end
-                CombatText.ApplyFont()
+                SettingsAPI:MarkFontDeferred("combatText")
             end,
             default = Defaults.fontSize
         }
@@ -1936,7 +1907,7 @@ function CombatText.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.fontStyle = item.data
-                CombatText.ApplyFont()
+                SettingsAPI:MarkFontDeferred("combatText")
             end,
             default = (function ()
                 for i, choiceValue in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
@@ -2201,70 +2172,20 @@ function CombatText.CreateConsoleSettings()
         }
     end)
 
-    -- Create back button
-    backButton =
-    {
-        type = LHAS.ST_BUTTON,
-        label = "BACK",
-        buttonText = "BACK",
-        tooltip = "",
-        clickHandler = function (control)
-            panel:RemoveAllSettings()
-            local mainMenuSettings = {}
-            for i = 1, #initialSettings do
-                mainMenuSettings[i] = initialSettings[i]
-            end
-            for i = 1, #menuButtons do
-                mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
-            end
-            panel:AddSettings(mainMenuSettings)
-            LHAS.list:SetSelectedIndexWithoutAnimation(1)
-        end
-    }
-
-    -- Create menu buttons for each section
-    local function createMenuButton(sectionName, sectionLabel, sectionSettings)
-        return
-        {
-            type = LHAS.ST_BUTTON,
-            label = sectionLabel,
-            buttonText = sectionLabel,
-            tooltip = "",
-            clickHandler = function (control)
-                panel:RemoveAllSettings()
-                local settingsWithBack = {}
-                for i = 1, #sectionSettings do
-                    settingsWithBack[i] = sectionSettings[i]
-                end
-                settingsWithBack[#settingsWithBack + 1] = backButton
-                panel:AddSettings(settingsWithBack)
-                LHAS.list:SetSelectedIndexWithoutAnimation(2)
-            end
-        }
-    end
-
-    -- Add all submenu buttons
-    menuButtons[#menuButtons + 1] = createMenuButton("PanelLayout", GetString(LUIE_STRING_LAM_CT_PANEL_LAYOUT_SUBMENU), sectionGroups["PanelLayout"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CommonOptions", GetString(LUIE_STRING_LAM_UF_COMMON_HEADER), sectionGroups["CommonOptions"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Blacklist", GetString(LUIE_STRING_LAM_CT_BLACKLIST_HEADER), sectionGroups["Blacklist"])
-    menuButtons[#menuButtons + 1] = createMenuButton("DamageHealing", zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_DAMAGE_AND_HEALING), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)), sectionGroups["DamageHealing"])
-    menuButtons[#menuButtons + 1] = createMenuButton("ResourceGainDrain", zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_RESOURCE_GAIN_DRAIN), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)), sectionGroups["ResourceGainDrain"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Mitigation", zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_MITIGATION), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)), sectionGroups["Mitigation"])
-    menuButtons[#menuButtons + 1] = createMenuButton("CrowdControl", zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_CROWD_CONTROL), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)), sectionGroups["CrowdControl"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Notification", zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_NOTIFICATION), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)), sectionGroups["Notification"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Font", GetString(LUIE_STRING_LAM_CT_FONT_HEADER), sectionGroups["Font"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Animation", GetString(LUIE_STRING_LAM_CT_ANIMATION_HEADER), sectionGroups["Animation"])
-    menuButtons[#menuButtons + 1] = createMenuButton("Throttle", GetString(LUIE_STRING_LAM_CT_THROTTLE_HEADER), sectionGroups["Throttle"])
-
-    -- Initialize main menu with initial settings and menu buttons
     if LUIE.SV.CombatText_Enabled then
-        local mainMenuSettings = {}
-        for i = 1, #initialSettings do
-            mainMenuSettings[i] = initialSettings[i]
-        end
-        for i = 1, #menuButtons do
-            mainMenuSettings[#mainMenuSettings + 1] = menuButtons[i]
-        end
-        panel:AddSettings(mainMenuSettings)
+        local allSettings = {}
+        SettingsAPI:AppendSettingsList(allSettings, initialSettings)
+        SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CT_PANEL_LAYOUT_SUBMENU), sectionGroups["PanelLayout"])
+        SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_COMMON_HEADER), sectionGroups["CommonOptions"])
+        SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CT_BLACKLIST_HEADER), sectionGroups["Blacklist"])
+        SettingsAPI:AppendSection(allSettings, zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_DAMAGE_AND_HEALING), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)), sectionGroups["DamageHealing"])
+        SettingsAPI:AppendSection(allSettings, zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_RESOURCE_GAIN_DRAIN), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)), sectionGroups["ResourceGainDrain"])
+        SettingsAPI:AppendSection(allSettings, zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_MITIGATION), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)), sectionGroups["Mitigation"])
+        SettingsAPI:AppendSection(allSettings, zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_CROWD_CONTROL), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)), sectionGroups["CrowdControl"])
+        SettingsAPI:AppendSection(allSettings, zo_strformat("<<1>> <<2>>", GetString(LUIE_STRING_LAM_CT_HEADER_NOTIFICATION), GetString(LUIE_STRING_LAM_CT_SHARED_OPTIONS)), sectionGroups["Notification"])
+        SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CT_FONT_HEADER), sectionGroups["Font"])
+        SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CT_ANIMATION_HEADER), sectionGroups["Animation"])
+        SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_CT_THROTTLE_HEADER), sectionGroups["Throttle"])
+        panel:AddSettings(allSettings)
     end
 end
