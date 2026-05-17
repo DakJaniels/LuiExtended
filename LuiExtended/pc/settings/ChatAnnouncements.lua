@@ -12,6 +12,40 @@ local ChatAnnouncements = LUIE.ChatAnnouncements
 local zo_strformat = zo_strformat
 local table_insert = table.insert
 
+local QuestCounterFilterList, QuestCounterFilterListValues = {}, {}
+
+local function GenerateQuestCounterFilterList()
+    return ChatAnnouncements.GenerateQuestCounterFilterLAMList()
+end
+
+local function RefreshQuestCounterFilterListDropdown()
+    local listControl = rawget(_G, "LUIE_QuestCounterFilter_List")
+    if listControl then
+        listControl:UpdateChoices(GenerateQuestCounterFilterList())
+    end
+end
+
+local questCounterFilterDialogs =
+{
+    {
+        identifier = "LUIE_CLEAR_CA_QUEST_COUNTER_FILTERS",
+        title = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEAR),
+        text = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEAR_DIALOG),
+        callback = function (_)
+            ChatAnnouncements.ClearQuestCounterFilters()
+            RefreshQuestCounterFilterListDropdown()
+            LUIE.PrintToChat(GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_CLEARED), true)
+        end,
+    },
+}
+
+local function loadQuestCounterFilterDialogs()
+    for i = 1, #questCounterFilterDialogs do
+        local dialog = questCounterFilterDialogs[i]
+        LUIE.RegisterDialogueButton(dialog.identifier, dialog.title, dialog.text, dialog.callback)
+    end
+end
+
 local chatNameDisplayOptions = { "@UserID", "Character Name", "Character Name @UserID" }
 local chatNameDisplayOptionsKeys = { ["@UserID"] = 1, ["Character Name"] = 2, ["Character Name @UserID"] = 3 }
 local linkBracketDisplayOptions = { "No Brackets", "Display Brackets" }
@@ -49,6 +83,8 @@ function ChatAnnouncements.CreateSettings()
     if LAM == nil then
         return
     end
+
+    loadQuestCounterFilterDialogs()
 
     local Defaults = ChatAnnouncements.Defaults
     local Settings = ChatAnnouncements.SV
@@ -7406,6 +7442,14 @@ function ChatAnnouncements.CreateSettings()
                 default = Defaults.Quests.QuestLocLong,
             },
         },
+    }
+
+    local questCounterFilterControls = ChatAnnouncements.BuildQuestCounterFilterPCControls(Settings, Defaults, QuestCounterFilterList, QuestCounterFilterListValues)
+    optionsDataChatAnnouncements[#optionsDataChatAnnouncements + 1] =
+    {
+        type = "submenu",
+        name = GetString(LUIE_STRING_LAM_CA_QUEST_COUNTER_FILTER_HEADER),
+        controls = questCounterFilterControls,
     }
 
     -- Chat Announcements - Social Announcements Options Submenu

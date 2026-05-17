@@ -269,6 +269,8 @@ ChatAnnouncements.Colors = {}
 --- @field QuestObjUpdateCA boolean
 --- @field QuestObjUpdateCSA boolean
 --- @field QuestObjUpdateAlert boolean
+--- @field QuestCounterFilterEnable boolean
+--- @field QuestCounterFilterKeys table<string, boolean>
 
 --- Experience (XP) default settings.
 --- @class CAXPDefaults
@@ -879,6 +881,8 @@ ChatAnnouncements.Defaults =
         QuestObjUpdateCA = false,
         QuestObjUpdateCSA = true,
         QuestObjUpdateAlert = false,
+        QuestCounterFilterEnable = true,
+        QuestCounterFilterKeys = {},
     },
 
     -- Experience

@@ -401,6 +401,8 @@ function ChatAnnouncements.Initialize(enabled)
         ChatAnnouncements.SV = ZO_SavedVars:NewAccountWide(LUIE.ModuleSavedVarNames.ChatAnnouncements, LUIE.SVVer, nil, ChatAnnouncements.Defaults, LUIE.SavedVarsProfile)
     end
 
+    ChatAnnouncements.InvalidateQuestCounterFilterCache()
+
     -- Some modules might need to pull some of the color settings from CA so we want these to always be set regardless of CA module being enabled/disabled.
     ChatAnnouncements.RegisterColorEvents()
     -- Always register this function for other components to use
@@ -8615,6 +8617,10 @@ function ChatAnnouncements.HookFunction()
             --                                                 conditionText
             --                 ))
             --             end
+            return true
+        end
+
+        if not ChatAnnouncements.ShouldAllowQuestConditionCounter(journalIndex, questName, conditionText, newConditionVal, isConditionComplete, conditionMax) then
             return true
         end
 
