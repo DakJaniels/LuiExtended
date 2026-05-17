@@ -90,6 +90,15 @@ CombatTextEventViewer.THROTTLE_FLAGS =
     { flag = "isHot",             key = "hot"             },
 }
 
+-- Crit throttle keys are not exposed in settings; use the matching non-crit slider.
+CombatTextEventViewer.THROTTLE_KEY_FALLBACK =
+{
+    damagecritical = "damage",
+    dotcritical = "dot",
+    healingcritical = "healing",
+    hotcritical = "hot",
+}
+
 --- Get the throttle time in milliseconds for the given combat event flags
 --- Checks flags in priority order and returns the first matching throttle setting
 --- @param Settings table Combat text saved variables settings
@@ -98,7 +107,12 @@ CombatTextEventViewer.THROTTLE_FLAGS =
 function CombatTextEventViewer:GetThrottleTime(Settings, flags)
     for _, mapping in ipairs(self.THROTTLE_FLAGS) do
         if flags[mapping.flag] then
-            return Settings.throttles[mapping.key]
+            local key = mapping.key
+            local fallbackKey = self.THROTTLE_KEY_FALLBACK[key]
+            if fallbackKey then
+                return Settings.throttles[fallbackKey] or 0
+            end
+            return Settings.throttles[key] or 0
         end
     end
     return 0
