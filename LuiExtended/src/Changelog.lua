@@ -12,6 +12,16 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.2.3
+    "|cFFA500LuiExtended Version 7.2.2.3|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SavedVariables (7.2.1.7+ split): Additional migration repair scans profile `Default` and your megaserver row (`GetWorldName()`) so module settings are not left on defaults when a second @account had an empty megaserver shell, when backups reintroduced pre-split `LUIESV` data, or when split migration finished before legacy namespaces were cleared. Pruning `LUIESV[\"Default\"][@You]` on disk now waits until that repair completes. `InstallExternalSavedVarsLegacyCompat` no longer deletes the entire on-disk `LUIESV[\"Default\"]` tree when that helper runs (which could remove other @accounts' only copy). The `LUIESV.Default` legacy read path / metatable compat for Srendarr still only loads on PC when Srendarr is enabled (not used on console).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t New slash: `/luie svstatus` prints migration flags, whether `LUIESV` still holds legacy module tables, and a quick population hint per split global (paste for support).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Support tips: Megaserver EU vs NA use separate saved-variable profile rows; switching regions can look like a reset until you configure or copy settings per megaserver (LAM Character Profile copy). Restoring backups from AutoBackup or similar should include every SavedVariables global listed in the addon manifest (`LUIESV` and all `LUIE_*_SV`), not `LUIESV` alone, and preferably while the game is closed.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Buff and debuff icon borders should look like the stock buff bar again.",
+    "",
     -- Version Header 7.2.2.2
     "|cFFA500LuiExtended Version 7.2.2.2|r",
     "",
