@@ -6,14 +6,10 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-local UI = LUIE.UI
 
 -- Unit Frames namespace
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
-
-local AbbreviateNumber = LUIE.AbbreviateNumber
-local printToChat = LUIE.PrintToChat
 
 local type = type
 local pairs = pairs
@@ -23,11 +19,9 @@ local table_insert = table.insert
 local table_sort = table.sort
 local table_remove = table.remove
 local string_format = string.format
-local string_sub = string.sub
 local zo_strformat = zo_strformat
 
 local eventManager = GetEventManager()
-local sceneManager = SCENE_MANAGER
 local windowManager = GetWindowManager()
 
 local leaderIcons =
