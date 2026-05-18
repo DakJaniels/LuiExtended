@@ -301,10 +301,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
             local function RequestFriendOption()
                 RequestFriend(currentTargetDisplayName)
 
-                local displayNameLink = ZO_LinkHandler_CreateLink(currentTargetDisplayName, nil, DISPLAY_NAME_LINK_TYPE, currentTargetDisplayName)
-                if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                    displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(currentTargetDisplayName, nil, DISPLAY_NAME_LINK_TYPE, currentTargetDisplayName)
-                end
+                local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(currentTargetDisplayName, currentTargetDisplayName)
 
                 local formattedMessage = zo_strformat(LUIE_STRING_SLASHCMDS_FRIEND_INVITE_MSG_LINK, displayNameLink)
 

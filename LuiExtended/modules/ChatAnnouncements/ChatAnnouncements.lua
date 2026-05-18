@@ -743,46 +743,86 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
+--- Build a display-name chat link, or plain linkText if undecoratedDisplayName is missing (avoids malformed |H1:display|h links).
+--- @param linkText string Text shown for the link
+--- @param undecoratedDisplayName string|nil Undecorated @name stored in link data (must be non-empty for a link)
+--- @return string
+function ChatAnnouncements.CreateDisplayNameLink(linkText, undecoratedDisplayName)
+    if undecoratedDisplayName == nil or undecoratedDisplayName == "" then
+        return linkText or ""
+    end
+    if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+        return ZO_LinkHandler_CreateLinkWithoutBrackets(linkText, nil, DISPLAY_NAME_LINK_TYPE, undecoratedDisplayName)
+    end
+    return ZO_LinkHandler_CreateLink(linkText, nil, DISPLAY_NAME_LINK_TYPE, undecoratedDisplayName)
+end
+
+--- Build a character chat link, or empty string if characterName is missing.
+--- @param characterName string|nil
+--- @return string
+function ChatAnnouncements.CreateCharacterLink(characterName)
+    if characterName == nil or characterName == "" then
+        return ""
+    end
+    if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
+        return ZO_LinkHandler_CreateLinkWithoutBrackets(characterName, nil, CHARACTER_LINK_TYPE, characterName)
+    end
+    return ZO_LinkHandler_CreateLink(characterName, nil, CHARACTER_LINK_TYPE, characterName)
+end
+
+local function NameFieldNonEmpty(name)
+    return name ~= nil and name ~= ""
+end
+
 -- Called by most functions that use character or display name to resolve LINK display method.
 function ChatAnnouncements.ResolveNameLink(characterName, displayName)
-    local nameLink
+    local hasChar = NameFieldNonEmpty(characterName)
+    local hasDisplay = NameFieldNonEmpty(displayName)
+    local opt = ChatAnnouncements.SV.ChatPlayerDisplayOptions
 
-    if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 1 then
-        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        else
-            nameLink = ZO_LinkHandler_CreateLink(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
+    if opt == 1 then
+        if hasDisplay then
+            return ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
         end
-    elseif ChatAnnouncements.SV.ChatPlayerDisplayOptions == 2 then
-        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(characterName, nil, CHARACTER_LINK_TYPE, characterName)
-        else
-            nameLink = ZO_LinkHandler_CreateLink(characterName, nil, CHARACTER_LINK_TYPE, characterName)
+        if hasChar then
+            return ChatAnnouncements.CreateCharacterLink(characterName)
         end
-    elseif ChatAnnouncements.SV.ChatPlayerDisplayOptions == 3 then
-        local displayBothString = zo_strformat("<<1>><<2>>", characterName, displayName)
-        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayBothString, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        else
-            nameLink = ZO_LinkHandler_CreateLink(displayBothString, nil, DISPLAY_NAME_LINK_TYPE, displayName)
+        return ""
+    elseif opt == 2 then
+        if hasChar then
+            return ChatAnnouncements.CreateCharacterLink(characterName)
         end
+        if hasDisplay then
+            return ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
+        end
+        return ""
+    elseif opt == 3 then
+        if hasDisplay then
+            local displayBothString = zo_strformat("<<1>><<2>>", hasChar and characterName or "", displayName)
+            return ChatAnnouncements.CreateDisplayNameLink(displayBothString, displayName)
+        end
+        if hasChar then
+            return ChatAnnouncements.CreateCharacterLink(characterName)
+        end
+        return ""
     end
-
-    return nameLink
+    return ""
 end
 
 -- Called by most functions that use character or display name to resolve NON-LINK display method (mostly used for alerts).
 function ChatAnnouncements.ResolveNameNoLink(characterName, displayName)
-    local nameLink
-    if ChatAnnouncements.SV.ChatPlayerDisplayOptions == 1 then
-        nameLink = displayName
-    elseif ChatAnnouncements.SV.ChatPlayerDisplayOptions == 2 then
-        nameLink = characterName
-    elseif ChatAnnouncements.SV.ChatPlayerDisplayOptions == 3 then
-        nameLink = zo_strformat("<<1>><<2>>", characterName, displayName)
-    end
+    local hasChar = NameFieldNonEmpty(characterName)
+    local hasDisplay = NameFieldNonEmpty(displayName)
+    local opt = ChatAnnouncements.SV.ChatPlayerDisplayOptions
 
-    return nameLink
+    if opt == 1 then
+        return (hasDisplay and displayName) or (hasChar and characterName) or ""
+    elseif opt == 2 then
+        return (hasChar and characterName) or (hasDisplay and displayName) or ""
+    elseif opt == 3 then
+        return zo_strformat("<<1>><<2>>", hasChar and characterName or "", hasDisplay and displayName or "")
+    end
+    return ""
 end
 
 function I.ShouldShowSocialErrorInChat(error)
@@ -957,12 +997,7 @@ function ChatAnnouncements.GuildRankChanged(eventId, guildId, displayName, newRa
     local hasPermission2 = DoesGuildRankHavePermission(guildId, rankIndex, GUILD_PERMISSION_DEMOTE)
 
     if ((hasPermission1 or hasPermission2) and ChatAnnouncements.SV.Social.GuildRankDisplayOptions == 2) or (ChatAnnouncements.SV.Social.GuildRankDisplayOptions == 3) then
-        local displayNameLink
-        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        else
-            displayNameLink = ZO_LinkHandler_CreateLink(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        end
+        local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
         local rankText = GetFinalGuildRankName(guildId, newRank)
 
         local icon = GetFinalGuildRankTextureSmall(guildId, newRank)
@@ -1025,12 +1060,7 @@ end
 
 function ChatAnnouncements.GuildMemberPromoteSuccessful(eventId, displayName, newRankIndex, guildId)
     if newRankIndex > 0 then
-        local displayNameLink
-        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        else
-            displayNameLink = ZO_LinkHandler_CreateLink(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        end
+        local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
         local rankText = GetFinalGuildRankName(guildId, newRankIndex)
         local icon = GetFinalGuildRankTextureSmall(guildId, newRankIndex)
         local guildName = GetGuildName(guildId)
@@ -1054,12 +1084,7 @@ end
 
 function ChatAnnouncements.GuildMemberDemoteSuccessful(eventId, displayName, newRankIndex, guildId)
     if newRankIndex <= GetNumGuildRanks(guildId) then
-        local displayNameLink
-        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        else
-            displayNameLink = ZO_LinkHandler_CreateLink(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        end
+        local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
         local rankText = GetFinalGuildRankName(guildId, newRankIndex)
         local icon = GetFinalGuildRankTextureSmall(guildId, newRankIndex)
         local guildName = GetGuildName(guildId)
@@ -1107,12 +1132,7 @@ end
 
 -- EVENT_GUILD_INVITE_ADDED
 function ChatAnnouncements.GuildInviteAdded(eventId, guildId, guildName, guildAlliance, inviterName)
-    local displayNameLink
-    if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-        displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(inviterName, nil, DISPLAY_NAME_LINK_TYPE, inviterName)
-    else
-        displayNameLink = ZO_LinkHandler_CreateLink(inviterName, nil, DISPLAY_NAME_LINK_TYPE, inviterName)
-    end
+    local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(inviterName, inviterName)
     local guildColor = ChatAnnouncements.SV.Social.GuildAllianceColor and GetAllianceColor(guildAlliance) or ColorizeColors.GuildColorize
     local guildNameAlliance = ChatAnnouncements.SV.Social.GuildIcon and guildColor:Colorize(zo_strformat("<<1>> <<2>>", zo_iconFormatInheritColor(ZO_GetAllianceSymbolIcon(guildAlliance), 16, 16), guildName)) or (guildColor:Colorize(guildName))
     local guildNameAllianceAlert = ChatAnnouncements.SV.Social.GuildIcon and zo_iconTextFormat(ZO_GetAllianceSymbolIcon(guildAlliance), "100%", "100%", guildName) or guildName
@@ -1126,12 +1146,7 @@ end
 
 function ChatAnnouncements.FriendAdded(eventId, displayName)
     if ChatAnnouncements.SV.Social.FriendIgnoreCA then
-        local displayNameLink
-        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        else
-            displayNameLink = ZO_LinkHandler_CreateLink(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        end
+        local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
         printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_ADDED, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
@@ -1141,12 +1156,7 @@ end
 
 function ChatAnnouncements.FriendRemoved(eventId, displayName)
     if ChatAnnouncements.SV.Social.FriendIgnoreCA then
-        local displayNameLink
-        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        else
-            displayNameLink = ZO_LinkHandler_CreateLink(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        end
+        local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
         printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_FRIEND_REMOVED, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
@@ -1156,12 +1166,7 @@ end
 
 function ChatAnnouncements.FriendInviteAdded(eventId, displayName)
     if ChatAnnouncements.SV.Social.FriendIgnoreCA then
-        local displayNameLink
-        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        else
-            displayNameLink = ZO_LinkHandler_CreateLink(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        end
+        local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
         printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_INCOMING_FRIEND_REQUEST, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
@@ -1171,12 +1176,7 @@ end
 
 function ChatAnnouncements.IgnoreAdded(eventId, displayName)
     if ChatAnnouncements.SV.Social.FriendIgnoreCA then
-        local displayNameLink
-        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        else
-            displayNameLink = ZO_LinkHandler_CreateLink(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        end
+        local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
         printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_ADDED, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
@@ -1186,12 +1186,7 @@ end
 
 function ChatAnnouncements.IgnoreRemoved(eventId, displayName)
     if ChatAnnouncements.SV.Social.FriendIgnoreCA then
-        local displayNameLink
-        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        else
-            displayNameLink = ZO_LinkHandler_CreateLink(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-        end
+        local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
         printToChat(zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_IGNORE_REMOVED, displayNameLink), true)
     end
     if ChatAnnouncements.SV.Social.FriendIgnoreAlert then
@@ -1206,15 +1201,8 @@ function ChatAnnouncements.FriendPlayerStatus(eventId, displayName, characterNam
     if wasOnline ~= isOnline then
         local chatText
         local alertText
-        local displayNameLink
-        local characterNameLink
-        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            displayNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-            characterNameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(characterName, nil, CHARACTER_LINK_TYPE, characterName)
-        else
-            displayNameLink = ZO_LinkHandler_CreateLink(displayName, nil, DISPLAY_NAME_LINK_TYPE, displayName)
-            characterNameLink = ZO_LinkHandler_CreateLink(characterName, nil, CHARACTER_LINK_TYPE, characterName)
-        end
+        local displayNameLink = ChatAnnouncements.CreateDisplayNameLink(displayName, displayName)
+        local characterNameLink = ChatAnnouncements.CreateCharacterLink(characterName)
         if isOnline then
             if characterName ~= "" then
                 chatText = zo_strformat(LUIE_STRING_CA_FRIENDS_LIST_CHARACTER_LOGGED_ON, displayNameLink, characterNameLink)
@@ -1454,7 +1442,7 @@ local updatedRoleAccountName = GetUnitDisplayName(unitTag)
 local characterNameLink = ZO_LinkHandler_CreateCharacterLink(updatedRoleName)
 local displayNameLink = ZO_LinkHandler_CreateDisplayNameLink(updatedRoleAccountName)
 local displayBothString = ( zo_strformat("<<1>><<2>>", updatedRoleName, updatedRoleAccountName) )
-local displayBoth = ZO_LinkHandler_CreateLink(displayBothString, nil, DISPLAY_NAME_LINK_TYPE, updatedRoleAccountName)
+local displayBoth = ChatAnnouncements.CreateDisplayNameLink(displayBothString, updatedRoleAccountName)
 
 local rolestring1 = ""
 local rolestring2 = ""
@@ -1522,7 +1510,7 @@ function ChatAnnouncements.GMCS(eventId, unitTag, isOnline)
     local characterNameLink = ZO_LinkHandler_CreateCharacterLink(onlineRoleName)
     local displayNameLink = ZO_LinkHandler_CreateDisplayNameLink(onlineRoleDisplayName)
     local displayBothString = ( zo_strformat("<<1>><<2>>", onlineRoleName, onlineRoleDisplayName) )
-    local displayBoth = ZO_LinkHandler_CreateLink(displayBothString, nil, DISPLAY_NAME_LINK_TYPE, onlineRoleDisplayName)
+    local displayBoth = ChatAnnouncements.CreateDisplayNameLink(displayBothString, onlineRoleDisplayName)
 
 
     if not isOnline and onlineRoleName ~=LUIE.PlayerNameFormatted then
@@ -2595,17 +2583,9 @@ function I.ResolveMailSender(mailId)
         if senderDisplayName ~= "" and senderCharacterName ~= "" then
             finalName = ChatAnnouncements.ResolveNameLink(senderCharacterName, senderDisplayName)
         elseif senderDisplayName ~= "" then
-            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                finalName = ZO_LinkHandler_CreateLinkWithoutBrackets(senderDisplayName, nil, DISPLAY_NAME_LINK_TYPE, senderDisplayName)
-            else
-                finalName = ZO_LinkHandler_CreateLink(senderDisplayName, nil, DISPLAY_NAME_LINK_TYPE, senderDisplayName)
-            end
+            finalName = ChatAnnouncements.CreateDisplayNameLink(senderDisplayName, senderDisplayName)
         else
-            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                finalName = ZO_LinkHandler_CreateLinkWithoutBrackets(senderCharacterName, nil, CHARACTER_LINK_TYPE, senderCharacterName)
-            else
-                finalName = ZO_LinkHandler_CreateLink(senderCharacterName, nil, CHARACTER_LINK_TYPE, senderCharacterName)
-            end
+            finalName = ChatAnnouncements.CreateCharacterLink(senderCharacterName)
         end
         mailTarget = ZO_SELECTED_TEXT:Colorize(finalName)
     end
@@ -2824,10 +2804,12 @@ function ChatAnnouncements.OnMailReadable(eventId, mailId)
         S.g_mailTarget = ZO_SELECTED_TEXT:Colorize(finalName)
     else
         local finalName
-        if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-            finalName = ZO_LinkHandler_CreateLinkWithoutBrackets(senderDisplayName, nil, DISPLAY_NAME_LINK_TYPE, senderDisplayName)
+        if senderDisplayName ~= "" then
+            finalName = ChatAnnouncements.CreateDisplayNameLink(senderDisplayName, senderDisplayName)
+        elseif senderCharacterName ~= "" then
+            finalName = ChatAnnouncements.CreateCharacterLink(senderCharacterName)
         else
-            finalName = ZO_LinkHandler_CreateLink(senderDisplayName, nil, DISPLAY_NAME_LINK_TYPE, senderDisplayName)
+            finalName = ""
         end
         S.g_mailTarget = ZO_SELECTED_TEXT:Colorize(finalName)
     end
@@ -6667,6 +6649,9 @@ function ChatAnnouncements.IndexGroupLoot()
     for i = 1, groupSize do
         local characterName = GetUnitName("group" .. i)
         local displayName = GetUnitDisplayName("group" .. i)
+        if displayName == nil or displayName == "" then
+            displayName = characterName
+        end
         S.g_groupLootIndex[characterName] = { characterName = characterName, displayName = displayName }
     end
 end
