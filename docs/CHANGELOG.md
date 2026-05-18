@@ -1,5 +1,13 @@
 # LuiExtended Changelog
 
+## Version 7.2.2.2
+
+### Fixed
+
+- ChatAnnouncements: Prevent malformed display-name chat links (empty link payload) that could crash pChat when copying or formatting system messages. Names are normalized before building links; guild, friends, mail, group loot indexing, duel alerts, and related paths use shared helpers.
+- ChatAnnouncements: Duel invite failure alerts now pass character vs display name to name resolution in the correct order.
+- ChatAnnouncements: Group loot member index falls back to character name when unit display name is not yet available.
+
 ## Version 7.2.2.1
 
 ### Fixed
