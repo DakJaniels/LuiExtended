@@ -173,7 +173,7 @@ local function DebugBosses()
     ApplyPositions()
     -- CustomFramesApplyLayoutBosses already unhides the boss TLW at the end;
     -- still safe to call ShowFrame on each child to flip their controls.
-    UnitFrames.CustomFramesApplyLayoutBosses()
+    UnitFrames.CustomFramesApplyLayoutBosses(true)
     for i = 1, 7 do
         PreviewFrame(UnitFrames.CustomFrames["boss" .. i], PREVIEW_SOURCE_UNIT)
     end

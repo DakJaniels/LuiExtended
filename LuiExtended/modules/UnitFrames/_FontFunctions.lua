@@ -130,9 +130,6 @@ function UnitFrames.CustomFramesApplyFont()
                         end
                     end
                 end
-                if unitFrame.tlw and (i == 0 or i == 1) then
-                    unitFrame.tlw:SetHidden(false)
-                end
             end
         end
     end
