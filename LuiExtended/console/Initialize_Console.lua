@@ -44,8 +44,8 @@ local function OnAddOnLoaded(eventId, addonName)
         LUIE.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults, LUIE.SavedVarsProfile)
     end
     LUIE.MigrateSplitModuleSavedVarsFromLuiESV()
+    LUIE.RepairSplitModuleSavedVarsFromLegacy()
     LUIE.PruneLegacyLuiESVDefaultProfileBranch()
-    LUIE.InstallExternalSavedVarsLegacyCompat()
     LUIE.UpdateGuildData(nil, nil, nil, nil)
     -- -----------------------------------------------------------------------------
     -- Initialize Hooks

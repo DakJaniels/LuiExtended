@@ -13,11 +13,21 @@ local eventManager = GetEventManager()
 
 -- Load saved settings.
 local function LoadSavedVars()
+    LUIE.SavedVarsProfile = GetWorldName()
+    LUIE.MigrateDisplaySubtreeFromLegacyProfile()
     local profile = LUIE.SavedVarsProfile
     -- Addon options
     LUIE.SV = ZO_SavedVars:NewAccountWide(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults, profile)
     if LUIE.SV.CharacterSpecificSV then
         LUIE.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults, profile)
+    end
+
+    LUIE.MigrateSplitModuleSavedVarsFromLuiESV()
+    LUIE.RepairSplitModuleSavedVarsFromLegacy()
+    LUIE.PruneLegacyLuiESVDefaultProfileBranch()
+
+    if _G["Srendarr"] then
+        LUIE.InstallExternalSavedVarsLegacyCompat()
     end
 end
 
@@ -73,13 +83,10 @@ local function OnAddOnLoaded(eventId, addonName)
     if addonName ~= LUIE.name then
         return
     end
-    LUIE.SavedVarsProfile = GetWorldName()
-    LUIE.MigrateDisplaySubtreeFromLegacyProfile()
+    -- -----------------------------------------------------------------------------
     -- Load saved variables
     LoadSavedVars()
-    LUIE.MigrateSplitModuleSavedVarsFromLuiESV()
-    LUIE.PruneLegacyLuiESVDefaultProfileBranch()
-    LUIE.InstallExternalSavedVarsLegacyCompat()
+    -- -----------------------------------------------------------------------------
     LUIE.UpdateGuildData(nil, nil, nil, nil)
     -- -----------------------------------------------------------------------------
     -- Initialize Hooks

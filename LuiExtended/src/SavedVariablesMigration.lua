@@ -7,6 +7,7 @@
 local LUIE = LUIE
 
 local pairs = pairs
+local ipairs = ipairs
 local type = type
 local tostring = tostring
 
@@ -27,6 +28,39 @@ local function ShallowMergeTableSkipVersion(dest, src)
     end
 end
 
+--- Merge keys from legacy display subtree into the megaserver row when both exist (fixes empty-shell @account rows created before legacy `Default` data was copied).
+--- @param destSubtree table
+--- @param srcSubtree table
+local function MergeDisplaySubtreeMissingFromLegacy(destSubtree, srcSubtree)
+    if type(destSubtree) ~= "table" or type(srcSubtree) ~= "table" then
+        return
+    end
+    for k, v in pairs(srcSubtree) do
+        if k == "$AccountWide" and type(v) == "table" then
+            if destSubtree[k] == nil then
+                destSubtree[k] = {}
+                ZO_DeepTableCopy(v, destSubtree[k])
+            else
+                ShallowMergeTableSkipVersion(destSubtree[k], v)
+            end
+        elseif type(v) == "table" and k ~= "$AccountWide" then
+            if destSubtree[k] == nil then
+                destSubtree[k] = {}
+                ZO_DeepTableCopy(v, destSubtree[k])
+            else
+                ShallowMergeTableSkipVersion(destSubtree[k], v)
+            end
+        elseif destSubtree[k] == nil then
+            if type(v) == "table" then
+                destSubtree[k] = {}
+                ZO_DeepTableCopy(v, destSubtree[k])
+            else
+                destSubtree[k] = v
+            end
+        end
+    end
+end
+
 --- Raw `LUIESV` / `_G[LUIE.SVName]` account-wide leaf (`$AccountWide`) for the active megaserver profile.
 --- Used for legacy keys that remain on core SV (e.g. `AdjustVars*`).
 --- @return table
@@ -40,24 +74,25 @@ function LUIE.GetCoreAccountWideRawTable()
     return root[profile][dn]["$AccountWide"]
 end
 
---- If legacy ZO profile `"Default"` holds this @DisplayName but the megaserver profile branch does not, deep-copy the display subtree once.
+--- If legacy ZO profile `"Default"` holds this @DisplayName, merge or copy into the megaserver profile branch.
 function LUIE.MigrateDisplaySubtreeFromLegacyProfile()
     local root = _G[LUIE.SVName]
     if not root then
         return
     end
     local legacy = LUIE.LegacySavedVarsProfile
-    local world = LUIE.SavedVarsProfile
+    local world = LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
     local dn = GetDisplayName()
     if not root[legacy] or not root[legacy][dn] then
         return
     end
-    if root[world] and root[world][dn] then
+    if not root[world] or not root[world][dn] then
+        root[world] = root[world] or {}
+        root[world][dn] = {}
+        ZO_DeepTableCopy(root[legacy][dn], root[world][dn])
         return
     end
-    root[world] = root[world] or {}
-    root[world][dn] = {}
-    ZO_DeepTableCopy(root[legacy][dn], root[world][dn])
+    MergeDisplaySubtreeMissingFromLegacy(root[world][dn], root[legacy][dn])
 end
 
 --- @param globalName string
@@ -85,18 +120,9 @@ local function GetRawCharacterLeaf(globalName, profile, displayName, characterKe
     return g[profile][displayName][characterKey]
 end
 
---- After core `LUIE.SV` exists: move each module namespace from `LUIESV` into its own global, then clear the old namespace key.
-function LUIE.MigrateSplitModuleSavedVarsFromLuiESV()
-    if LUIE.IsMigrationDone("split_module_saved_vars_v1") then
-        return
-    end
-
-    local profile = LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
-    local dn = GetDisplayName()
-    local charSpecific = LUIE.SV.CharacterSpecificSV
-    local ver = LUIE.SVVer
-
-    local moduleDefaults =
+--- @return table
+local function BuildModuleDefaultsLookup()
+    return
     {
         UnitFrames = LUIE.UnitFrames.Defaults,
         CombatText = LUIE.CombatText.Defaults,
@@ -107,13 +133,21 @@ function LUIE.MigrateSplitModuleSavedVarsFromLuiESV()
         SlashCommands = LUIE.SlashCommands.Defaults,
         CombatInfo = LUIE.CombatInfo.Defaults,
     }
+end
 
+--- Move each module namespace from one `LUIESV` profile row into split module globals, clearing keys on the legacy bucket.
+--- @param luiRoot table
+--- @param profile string
+--- @param charSpecific boolean
+--- @param ver integer
+--- @param moduleDefaults table
+--- @param dn string
+local function MigrateModuleNamespacesFromLuiESVProfile(luiRoot, profile, charSpecific, ver, moduleDefaults, dn)
     for _, moduleKey in ipairs(LUIE.ModuleSavedVarNamespaceKeys) do
         local globalName = LUIE.ModuleSavedVarNames[moduleKey]
         local defaults = moduleDefaults[moduleKey]
         if globalName and defaults then
             if charSpecific then
-                local luiRoot = _G[LUIE.SVName]
                 local displayRoot = luiRoot and luiRoot[profile] and luiRoot[profile][dn]
                 if displayRoot then
                     local proxy = ZO_SavedVars:New(globalName, ver, nil, defaults, profile)
@@ -154,18 +188,193 @@ function LUIE.MigrateSplitModuleSavedVarsFromLuiESV()
             end
         end
     end
+end
+
+--- @param luiRoot table
+--- @param profile string
+--- @param displayName string
+--- @param charSpecific boolean
+--- @return integer
+local function CountLegacyModuleNamespacesInLuiESVProfile(luiRoot, profile, displayName, charSpecific)
+    local displayRoot = luiRoot and luiRoot[profile] and luiRoot[profile][displayName]
+    if not displayRoot then
+        return 0
+    end
+    local count = 0
+    local function countBucket(bucket)
+        if type(bucket) ~= "table" then
+            return
+        end
+        for _, moduleKey in ipairs(LUIE.ModuleSavedVarNamespaceKeys) do
+            if bucket[moduleKey] ~= nil then
+                count = count + 1
+            end
+        end
+    end
+    if charSpecific then
+        for charKey, charBucket in pairs(displayRoot) do
+            if charKey ~= "$AccountWide" and type(charBucket) == "table" then
+                countBucket(charBucket)
+            end
+        end
+    else
+        countBucket(displayRoot["$AccountWide"])
+    end
+    return count
+end
+
+--- After core `LUIE.SV` exists: move each module namespace from `LUIESV` into its own global, then clear the old namespace key.
+function LUIE.MigrateSplitModuleSavedVarsFromLuiESV()
+    if LUIE.IsMigrationDone("split_module_saved_vars_v1") then
+        return
+    end
+
+    local profile = LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
+    local dn = GetDisplayName()
+    local charSpecific = LUIE.SV.CharacterSpecificSV
+    local ver = LUIE.SVVer
+    local moduleDefaults = BuildModuleDefaultsLookup()
+    local luiRoot = _G[LUIE.SVName]
+
+    MigrateModuleNamespacesFromLuiESVProfile(luiRoot, profile, charSpecific, ver, moduleDefaults, dn)
 
     LUIE.MarkMigrationDone("split_module_saved_vars_v1")
 end
 
+--- Repair: migrate any module namespaces still present under `LUIESV` for this account (including profile `Default` after v1 only scanned the megaserver row, or after partial backup restore).
+function LUIE.RepairSplitModuleSavedVarsFromLegacy()
+    if LUIE.IsMigrationDone("split_module_saved_vars_v2") then
+        return
+    end
+    if not LUIE.SV then
+        return
+    end
+
+    local luiRoot = _G[LUIE.SVName]
+    if not luiRoot then
+        return
+    end
+
+    local charSpecific = LUIE.SV.CharacterSpecificSV
+    local ver = LUIE.SVVer
+    local dn = GetDisplayName()
+    local moduleDefaults = BuildModuleDefaultsLookup()
+    local world = LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
+    local legacy = LUIE.LegacySavedVarsProfile
+
+    MigrateModuleNamespacesFromLuiESVProfile(luiRoot, world, charSpecific, ver, moduleDefaults, dn)
+    if legacy ~= world then
+        MigrateModuleNamespacesFromLuiESVProfile(luiRoot, legacy, charSpecific, ver, moduleDefaults, dn)
+    end
+
+    if CountLegacyModuleNamespacesInLuiESVProfile(luiRoot, world, dn, charSpecific) > 0 then
+        return
+    end
+    if legacy ~= world and CountLegacyModuleNamespacesInLuiESVProfile(luiRoot, legacy, dn, charSpecific) > 0 then
+        return
+    end
+
+    LUIE.MarkMigrationDone("split_module_saved_vars_v2")
+end
+
+--- @param displayName string
+--- @return boolean
+function LUIE.LuiESVLegacyModuleNamespacesEmptyForDisplay(displayName)
+    if not LUIE.SV then
+        return true
+    end
+    local luiRoot = _G[LUIE.SVName]
+    if not luiRoot then
+        return true
+    end
+    local charSpecific = LUIE.SV.CharacterSpecificSV
+    local world = LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
+    local legacy = LUIE.LegacySavedVarsProfile
+    if CountLegacyModuleNamespacesInLuiESVProfile(luiRoot, world, displayName, charSpecific) > 0 then
+        return false
+    end
+    if legacy ~= world and CountLegacyModuleNamespacesInLuiESVProfile(luiRoot, legacy, displayName, charSpecific) > 0 then
+        return false
+    end
+    return true
+end
+
+--- Count non-version keys in a raw saved-vars leaf (cheap “populated” signal for diagnostics).
+--- @param leaf table|nil
+--- @return integer
+function LUIE.SavedVarsRawLeafNonVersionKeyCount(leaf)
+    if type(leaf) ~= "table" then
+        return 0
+    end
+    local n = 0
+    for k in pairs(leaf) do
+        if k ~= "version" then
+            n = n + 1
+        end
+    end
+    return n
+end
+
+--- Print SavedVariables migration diagnostics to chat (`/luie svstatus`).
+function LUIE.PrintSavedVariablesMigrationStatus()
+    local mig = LUIE.SV and LUIE.SV.Migrations
+    local function mkey(k)
+        return mig and mig[k] == true and "true" or "false"
+    end
+
+    local world = LUIE.SavedVarsProfile or LUIE.LegacySavedVarsProfile
+    local legacy = LUIE.LegacySavedVarsProfile
+    local dn = GetDisplayName()
+    local charSpec = LUIE.SV and LUIE.SV.CharacterSpecificSV or false
+
+    LUIE.PrintToChat("|cFFAA00[LUIE] SavedVariables migration status|r", true)
+    LUIE.PrintToChat(zo_strformat("World profile (GetWorldName): <<1>>", tostring(world)), true)
+    LUIE.PrintToChat(zo_strformat("@DisplayName: <<1>>", dn), true)
+    LUIE.PrintToChat(zo_strformat("CharacterSpecificSV: <<1>>", tostring(charSpec)), true)
+    LUIE.PrintToChat(zo_strformat("split_module_saved_vars_v1: <<1>>", mkey("split_module_saved_vars_v1")), true)
+    LUIE.PrintToChat(zo_strformat("split_module_saved_vars_v2: <<1>>", mkey("split_module_saved_vars_v2")), true)
+    LUIE.PrintToChat(zo_strformat("lui_pruned_legacy_default_profile_v1: <<1>>", mkey("lui_pruned_legacy_default_profile_v1")), true)
+
+    local luiRoot = _G[LUIE.SVName]
+    if type(luiRoot) == "table" then
+        local hasDefault = luiRoot[legacy] ~= nil and luiRoot[legacy][dn] ~= nil
+        local hasWorld = luiRoot[world] ~= nil and luiRoot[world][dn] ~= nil
+        LUIE.PrintToChat(zo_strformat("LUIESV[Default][@]: exists=<<1>>", tostring(hasDefault)), true)
+        LUIE.PrintToChat(zo_strformat("LUIESV[<<1>>][@]: exists=<<2>>", tostring(world), tostring(hasWorld)), true)
+        local cDef = CountLegacyModuleNamespacesInLuiESVProfile(luiRoot, legacy, dn, charSpec)
+        local cWorld = CountLegacyModuleNamespacesInLuiESVProfile(luiRoot, world, dn, charSpec)
+        LUIE.PrintToChat(zo_strformat("Legacy module namespaces still in LUIESV (Default profile): <<1>>", tostring(cDef)), true)
+        LUIE.PrintToChat(zo_strformat("Legacy module namespaces still in LUIESV (world profile): <<1>>", tostring(cWorld)), true)
+    else
+        LUIE.PrintToChat("LUIESV root missing.", true)
+    end
+
+    for _, moduleKey in ipairs(LUIE.ModuleSavedVarNamespaceKeys) do
+        local globalName = LUIE.ModuleSavedVarNames[moduleKey]
+        if globalName then
+            local leaf
+            if charSpec then
+                leaf = GetRawCharacterLeaf(globalName, world, dn, GetUnitName("player"))
+            else
+                leaf = GetRawAccountWideLeaf(globalName, world, dn)
+            end
+            local n = LUIE.SavedVarsRawLeafNonVersionKeyCount(leaf)
+            LUIE.PrintToChat(zo_strformat("<<1>>: rawLeafKeys(excl.version)=<<2>>", globalName, tostring(n)), true)
+        end
+    end
+end
+
 --- After per-module globals are live, remove the duplicate ZO profile branch `LUIESV["Default"][@DisplayName]`
 --- so the SavedVariables file stops carrying two copies of the same account (megaserver profile is canonical).
---- Safe only once `split_module_saved_vars_v1` has completed and the world profile row exists for this display name.
+--- Safe once split migrations completed and legacy module namespaces are gone from `LUIESV` for this display name.
 function LUIE.PruneLegacyLuiESVDefaultProfileBranch()
     if LUIE.IsMigrationDone("lui_pruned_legacy_default_profile_v1") then
         return
     end
     if not LUIE.IsMigrationDone("split_module_saved_vars_v1") then
+        return
+    end
+    if not LUIE.IsMigrationDone("split_module_saved_vars_v2") then
         return
     end
 
@@ -213,7 +422,7 @@ end
 
 -- -----------------------------------------------------------------------------
 --  External-addon legacy view of LUIESV (e.g. Srendarr: LUIESV.Default[@name]["$AccountWide"].UnitFrames.*)
---  Megaserver data lives under GetWorldName(); module tables live in per-module globals after split.
+--  Megaserver data lives under GetWorldName(); module tables live in per-module globals after migration.
 -- -----------------------------------------------------------------------------
 
 --- Weak-key cache: raw ZO bucket table -> overlay proxy (see ZO_ForwardUnimplementedMethodsForControl pattern).
@@ -322,13 +531,13 @@ local function CreateLegacyDisplayNameSubtreeProxy(savedVarsRoot, savedVarsProfi
         })
 end
 
---- In-memory archive of `LUIESV["Default"]` after megaserver split (profile copy / support still use raw globals).
+--- Reserved (legacy): was used when InstallExternalSavedVarsLegacyCompat removed the on-disk Default branch; compat no longer deletes that table.
 LUIE.ArchivedLegacyDefaultProfileBranch = nil
 
 --- Whether `InstallExternalSavedVarsLegacyCompat` has been applied to `_G[LUIE.SVName]`.
 LUIE.isExternalSavedVarsLegacyCompatInstalled = false
 
---- Redirect `LUIESV.Default` to the active megaserver profile and overlay split module namespaces for third-party reads.
+--- Redirect `LUIESV.Default` to the active megaserver profile and overlay split module namespaces for Srendarr's legacy reads. PC `Initialize_PC` loads this only when Srendarr is enabled (not used on console).
 function LUIE.InstallExternalSavedVarsLegacyCompat()
     if LUIE.isExternalSavedVarsLegacyCompatInstalled then
         return
@@ -341,11 +550,6 @@ function LUIE.InstallExternalSavedVarsLegacyCompat()
 
     local legacyProfileKey = LUIE.LegacySavedVarsProfile
     local activeMegaserverProfile = LUIE.SavedVarsProfile or legacyProfileKey
-
-    if legacyProfileKey ~= activeMegaserverProfile and type(savedVarsRoot[legacyProfileKey]) == "table" then
-        LUIE.ArchivedLegacyDefaultProfileBranch = savedVarsRoot[legacyProfileKey]
-        savedVarsRoot[legacyProfileKey] = nil
-    end
 
     local legacyDefaultProfileProxy = setmetatable(
         {},
