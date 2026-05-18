@@ -314,7 +314,7 @@ function ChatAnnouncements.HookFunction()
         -- Display CA
         if ChatAnnouncements.SV.Social.DuelCA then
             local reasonName
-            local finalName = ChatAnnouncements.ResolveNameLink(targetDisplayName, targetCharacterName)
+            local finalName = ChatAnnouncements.ResolveNameLink(targetCharacterName, targetDisplayName)
             if userFacingName then
                 printToChat(zo_strformat(GetString("LUIE_STRING_CA_DUEL_INVITE_FAILREASON", reason), finalName), true)
             else
@@ -324,7 +324,7 @@ function ChatAnnouncements.HookFunction()
 
         -- Display Alert
         if ChatAnnouncements.SV.Social.DuelAlert then
-            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(targetDisplayName, targetCharacterName)
+            local finalAlertName = ChatAnnouncements.ResolveNameNoLink(targetCharacterName, targetDisplayName)
             local formattedString = zo_strformat(GetString("LUIE_STRING_CA_DUEL_INVITE_FAILREASON", reason), finalAlertName)
             if userFacingName then
                 ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, formattedString)
@@ -3716,17 +3716,9 @@ function ChatAnnouncements.HookFunction()
     local function CreateMailTargetLink(targetName)
         local nameLink
         if zo_strmatch(targetName, "@") == "@" then
-            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(targetName, nil, DISPLAY_NAME_LINK_TYPE, targetName)
-            else
-                nameLink = ZO_LinkHandler_CreateLink(targetName, nil, DISPLAY_NAME_LINK_TYPE, targetName)
-            end
+            nameLink = ChatAnnouncements.CreateDisplayNameLink(targetName, targetName)
         else
-            if ChatAnnouncements.SV.BracketOptionCharacter == 1 then
-                nameLink = ZO_LinkHandler_CreateLinkWithoutBrackets(targetName, nil, CHARACTER_LINK_TYPE, targetName)
-            else
-                nameLink = ZO_LinkHandler_CreateLink(targetName, nil, CHARACTER_LINK_TYPE, targetName)
-            end
+            nameLink = ChatAnnouncements.CreateCharacterLink(targetName)
         end
         return ZO_SELECTED_TEXT:Colorize(nameLink)
     end
