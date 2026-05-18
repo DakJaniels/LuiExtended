@@ -26,10 +26,10 @@ function UnitFrames.MenuUpdatePlayerFrameOptions(option)
             reticleover.debuffs:SetAnchor(TOP, reticleover.buffAnchor, BOTTOM, 0, 2)
         end
     end
-    UnitFrames.CustomFramesResetPosition(true)
+    UnitFrames.CustomFramesSetPositions()
     UnitFrames.CustomFramesSetupAlternative()
-    UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
-    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
+    UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
+    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
     UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(false)
 end
 
@@ -137,8 +137,9 @@ function UnitFrames.CustomFramesSetMovingState(state)
     CustomFramesSetGroupMemberMouseEnabledForMoving(not state)
 end
 
--- Apply selected colors for all known bars on custom unit frames
-function UnitFrames.CustomFramesApplyColors(isMenu)
+-- Apply colors to custom frame subsets for LAM (avoids repainting unrelated unit tag tables).
+--- @param sections { all?: boolean, healthFamily?: boolean, playerMagickaStamina?: boolean, companion?: boolean, pet?: boolean, groupRaid?: boolean }|nil
+local function CustomFramesApplyColorsInternal(sections)
     local health =
     {
         UnitFrames.SV.CustomColourHealth[1],
@@ -390,8 +391,15 @@ function UnitFrames.CustomFramesApplyColors(isMenu)
 
     local isBattleground = IsActiveWorldBattleground()
 
-    -- After color is applied unhide frames, so player can see changes even from menu
-    for _, baseName in pairs({ "player", "reticleover", "boss", "AvaPlayerTarget" }) do
+    local runAll = sections == nil or sections.all == true
+    local applyHealthFamily = runAll or sections.healthFamily == true
+    local applyCompanionBlock = runAll or sections.companion == true
+    local applyPetLoop = runAll or sections.pet == true
+    local applyGroupRaidLoop = runAll or sections.groupRaid == true
+    local applyPlayerMagickaStamina = runAll or sections.playerMagickaStamina == true
+
+    if applyHealthFamily then
+        for _, baseName in pairs({ "player", "reticleover", "boss", "AvaPlayerTarget" }) do
         shield[4] = (UnitFrames.SV.CustomShieldBarSeparate and not (baseName == "boss")) and UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha / 100)
         for i = 0, 7 do
             local unitTag = (i == 0) and baseName or (baseName .. i)
@@ -411,17 +419,15 @@ function UnitFrames.CustomFramesApplyColors(isMenu)
                 if thb.shieldbackdrop then
                     thb.shieldbackdrop:SetCenterColor(unpack(shield_bg))
                 end
-                if isMenu then
-                    unitFrame.tlw:SetHidden(false)
-                end
             end
+        end
         end
     end
 
     local petClass = GetUnitClassId("player")
 
     -- Player Companion Frame Color
-    if UnitFrames.CustomFrames["companion"] and UnitFrames.CustomFrames["companion"].tlw then
+    if applyCompanionBlock and UnitFrames.CustomFrames["companion"] and UnitFrames.CustomFrames["companion"].tlw then
         local unitFrame = UnitFrames.CustomFrames["companion"]
         local shb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH] -- not a backdrop
         if UnitFrames.SV.CompanionUseClassColor then
@@ -463,13 +469,11 @@ function UnitFrames.CustomFramesApplyColors(isMenu)
         if shb.shieldbackdrop then
             shb.shieldbackdrop:SetCenterColor(unpack(shield_bg))
         end
-        if isMenu then
-            unitFrame.tlw:SetHidden(false)
-        end
     end
 
     -- Player Pet Frame Color
-    for i = 1, 7 do
+    if applyPetLoop then
+        for i = 1, 7 do
         local unitTag = "PetGroup" .. i
         if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
             local unitFrame = UnitFrames.CustomFrames[unitTag]
@@ -513,10 +517,8 @@ function UnitFrames.CustomFramesApplyColors(isMenu)
             if shb.shieldbackdrop then
                 shb.shieldbackdrop:SetCenterColor(unpack(shield_bg))
             end
-            if isMenu then
-                unitFrame.tlw:SetHidden(false)
-            end
         end
+    end
     end
 
     local groupSize = GetGroupSize()
@@ -524,6 +526,7 @@ function UnitFrames.CustomFramesApplyColors(isMenu)
     -- Variables to adjust frame when player frame is hidden in group
     local increment = false   -- Once we reach a value set by Increment Marker (group tag of the player), we need to increment all further tags by +1 in order to get the correct color for them.
     local incrementMarker = 0 -- Marker -- Once we reach this value in iteration, we have to add +1 to default unitTag index for all other units.
+    if applyGroupRaidLoop then
     for _, baseName in pairs({ "SmallGroup", "RaidGroup" }) do
         shield[4] = (UnitFrames.SV.CustomShieldBarSeparate and not (baseName == "RaidGroup")) and UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha / 100)
 
@@ -630,20 +633,52 @@ function UnitFrames.CustomFramesApplyColors(isMenu)
                 if thb.shieldbackdrop then
                     thb.shieldbackdrop:SetCenterColor(unpack(shield_bg))
                 end
-                if isMenu then
-                    unitFrame.tlw:SetHidden(false)
-                end
             end
         end
     end
+    end
 
     -- Player frame also requires setting of magicka and stamina bars
-    if UnitFrames.CustomFrames["player"] and UnitFrames.CustomFrames["player"].tlw then
+    if applyPlayerMagickaStamina and UnitFrames.CustomFrames["player"] and UnitFrames.CustomFrames["player"].tlw then
         UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_MAGICKA].bar:SetColor(unpack(magicka))
         UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_MAGICKA].backdrop:SetCenterColor(unpack(magicka_bg))
         UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_STAMINA].bar:SetColor(unpack(stamina))
         UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_STAMINA].backdrop:SetCenterColor(unpack(stamina_bg))
     end
+end
+
+-- Full runtime/init color pass (all sections).
+function UnitFrames.CustomFramesApplyColors()
+    CustomFramesApplyColorsInternal({ all = true })
+end
+
+-- LAM: player/reticleover/boss/Ava health bar paint + shield/trauma/invulnerable on those units; includes SmallGroup/Raid shield alpha path.
+function UnitFrames.CustomFramesApplyColorsMenuHealthShieldTraumaInvulnerableAndGroupRaid()
+    CustomFramesApplyColorsInternal({ healthFamily = true, groupRaid = true })
+end
+
+function UnitFrames.CustomFramesApplyColorsMenuPlayerMagickaStaminaOnly()
+    CustomFramesApplyColorsInternal({ playerMagickaStamina = true })
+end
+
+function UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
+    CustomFramesApplyColorsInternal({ groupRaid = true })
+end
+
+function UnitFrames.CustomFramesApplyColorsMenuCompanionFrameOnly()
+    CustomFramesApplyColorsInternal({ companion = true })
+end
+
+function UnitFrames.CustomFramesApplyColorsMenuPetFramesOnly()
+    CustomFramesApplyColorsInternal({ pet = true })
+end
+
+function UnitFrames.CustomFramesApplyReactionColorForMenu()
+    if not UnitFrames.CustomFrames["reticleover"] then
+        return
+    end
+    local isTargetPlayer = DoesUnitExist("reticleover") and IsUnitPlayer("reticleover")
+    UnitFrames.CustomFramesApplyReactionColor(isTargetPlayer)
 end
 
 -- Reload Names from Menu function call

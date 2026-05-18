@@ -18,7 +18,7 @@ local changelogMessages =
     -- Fixed
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Prevent malformed display-name chat links (empty link payload) that could crash pChat when copying or formatting system messages. Names are normalized before building links; guild, friends, mail, group loot indexing, duel alerts, and related paths use shared helpers.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Duel invite failure alerts now pass character vs display name to name resolution in the correct order.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t UnitFrames: LAM / gamepad settings no longer force unrelated custom frame top-level windows visible when changing options for another frame family; texture/font updates and per-type layout calls use the same refresh policy. Combat glow color pickers refresh glow visuals via UnitFrames.UpdateGroupCombatGlow. Reposition mode unlock still shows frames for dragging.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Group loot member index falls back to character name when unit display name is not yet available.",
     "",
     -- Version Header 7.2.2.1

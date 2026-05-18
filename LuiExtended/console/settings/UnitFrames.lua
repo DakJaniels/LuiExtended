@@ -712,10 +712,10 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.CustomShieldBarHeight = value
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
                 UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
                 UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(false)
-                UnitFrames.CustomFramesApplyLayoutGroup()
+                UnitFrames.CustomFramesApplyLayoutGroup(false)
             end,
             warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()
@@ -756,7 +756,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.ShieldAlpha = value
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuHealthShieldTraumaInvulnerableAndGroupRaid()
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and not Settings.CustomShieldBarSeparate)
@@ -896,7 +896,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourHealth = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuHealthShieldTraumaInvulnerableAndGroupRaid()
             end,
             default = Defaults.CustomColourHealth,
             disable = function ()
@@ -914,7 +914,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourShield = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuHealthShieldTraumaInvulnerableAndGroupRaid()
             end,
             default = Defaults.CustomColourShield,
             disable = function ()
@@ -932,7 +932,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourTrauma = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuHealthShieldTraumaInvulnerableAndGroupRaid()
             end,
             default = Defaults.CustomColourTrauma,
             disable = function ()
@@ -950,7 +950,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourMagicka = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuPlayerMagickaStaminaOnly()
             end,
             default = Defaults.CustomColourMagicka,
             disable = function ()
@@ -968,7 +968,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourStamina = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuPlayerMagickaStaminaOnly()
             end,
             default = Defaults.CustomColourStamina,
             disable = function ()
@@ -986,7 +986,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourInvulnerable = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuHealthShieldTraumaInvulnerableAndGroupRaid()
             end,
             default = Defaults.CustomColourInvulnerable,
             disable = function ()
@@ -1004,7 +1004,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourDPS = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             default = Defaults.CustomColourDPS,
             disable = function ()
@@ -1022,7 +1022,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourHealer = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             default = Defaults.CustomColourHealer,
             disable = function ()
@@ -1040,7 +1040,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourTank = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             default = Defaults.CustomColourTank,
             disable = function ()
@@ -1058,7 +1058,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourDragonknight = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             default = Defaults.CustomColourDragonknight,
             disable = function ()
@@ -1076,7 +1076,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourNightblade = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             default = Defaults.CustomColourNightblade,
             disable = function ()
@@ -1094,7 +1094,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourSorcerer = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             default = Defaults.CustomColourSorcerer,
             disable = function ()
@@ -1112,7 +1112,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourTemplar = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             default = Defaults.CustomColourTemplar,
             disable = function ()
@@ -1130,7 +1130,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourWarden = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             default = Defaults.CustomColourWarden,
             disable = function ()
@@ -1148,7 +1148,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourNecromancer = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             default = Defaults.CustomColourNecromancer,
             disable = function ()
@@ -1166,7 +1166,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourArcanist = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             default = Defaults.CustomColourArcanist,
             disable = function ()
@@ -1184,7 +1184,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourPlayer = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyReactionColorForMenu()
             end,
             default = Defaults.CustomColourPlayer,
             disable = function ()
@@ -1202,7 +1202,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourFriendly = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyReactionColorForMenu()
             end,
             default = Defaults.CustomColourFriendly,
             disable = function ()
@@ -1220,7 +1220,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourCompanion = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyReactionColorForMenu()
             end,
             default = Defaults.CustomColourCompanion,
             disable = function ()
@@ -1238,7 +1238,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourHostile = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyReactionColorForMenu()
             end,
             default = Defaults.CustomColourHostile,
             disable = function ()
@@ -1256,7 +1256,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourNeutral = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyReactionColorForMenu()
             end,
             default = Defaults.CustomColourNeutral,
             disable = function ()
@@ -1274,7 +1274,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourGuard = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyReactionColorForMenu()
             end,
             default = Defaults.CustomColourGuard,
             disable = function ()
@@ -1292,7 +1292,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourPet = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuPetFramesOnly()
             end,
             default = Defaults.CustomColourPet,
             disable = function ()
@@ -1310,7 +1310,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.CustomColourCompanionFrame = { r, g, b, a }
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuCompanionFrameOnly()
             end,
             default = Defaults.CustomColourCompanionFrame,
             disable = function ()
@@ -1385,7 +1385,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.DisplayOptionsPlayer = item.data
-                UnitFrames.CustomFramesReloadControlsMenu(true, nil, nil, false)
+                UnitFrames.CustomFramesReloadControlsMenu(false, nil, nil, false)
             end,
             default = nameDisplayOptions[2],
             disable = function ()
@@ -1408,7 +1408,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.DisplayOptionsTarget = item.data
-                UnitFrames.CustomFramesReloadControlsMenu(false, nil, nil, true, false)
+                UnitFrames.CustomFramesReloadControlsMenu(false, nil, nil, false, false)
             end,
             default = nameDisplayOptions[2],
             disable = function ()
@@ -1434,8 +1434,8 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatOnePT = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
             default = Defaults.CustomFormatOnePT,
             disable = function ()
@@ -1461,8 +1461,8 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatTwoPT = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
             default = Defaults.CustomFormatTwoPT,
             disable = function ()
@@ -1483,7 +1483,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PlayerBarWidth = value
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1504,7 +1504,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PlayerBarHeightHealth = value
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1525,7 +1525,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PlayerBarHeightMagicka = value
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1546,7 +1546,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PlayerBarHeightStamina = value
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1624,7 +1624,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PlayerEnableYourname = value
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1643,7 +1643,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.PlayerEnableAltbarMSW = value
                 UnitFrames.CustomFramesSetupAlternative()
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1662,7 +1662,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.PlayerEnableAltbarXP = value
                 UnitFrames.CustomFramesSetupAlternative()
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1681,7 +1681,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.PlayerChampionColour = value
                 UnitFrames.OnChampionPointGained()
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.PlayerEnableAltbarXP)
@@ -1765,7 +1765,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetBarWidth = value
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
@@ -1786,7 +1786,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetBarHeight = value
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
@@ -1900,7 +1900,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetEnableClass = value
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
@@ -1956,7 +1956,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetEnableTitle = value
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1974,7 +1974,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetEnableRank = value
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -1997,7 +1997,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.TargetTitlePriority = item.data or item.name or value
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
             default = Defaults.TargetTitlePriority,
             disable = function ()
@@ -2015,7 +2015,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.TargetEnableRankIcon = value
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -2316,7 +2316,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.BarAlignCenterLabelPlayer = value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -2335,7 +2335,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.BarAlignCenterLabelTarget = value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
@@ -2361,8 +2361,8 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatCenterLabel = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
+                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
             end,
             default = Defaults.CustomFormatCenterLabel,
             disable = function ()
@@ -2423,7 +2423,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.AdjustStaminaHPos = value
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.PlayerFrameOptions == 2)
@@ -2444,7 +2444,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.AdjustStaminaVPos = value
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.PlayerFrameOptions == 2)
@@ -2465,7 +2465,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.AdjustMagickaHPos = value
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.PlayerFrameOptions == 2)
@@ -2486,7 +2486,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.AdjustMagickaVPos = value
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.PlayerFrameOptions == 2)
@@ -2507,7 +2507,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PlayerBarSpacing = value
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(true)
+                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and (Settings.PlayerFrameOptions == 1 or Settings.PlayerFrameOptions == 3))
@@ -2693,7 +2693,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.DisplayOptionsGroupRaid = item.data
-                UnitFrames.CustomFramesReloadControlsMenu(false, true, true)
+                UnitFrames.CustomFramesReloadControlsMenu(false, false, false)
             end,
             default = nameDisplayOptions[2],
             disable = function ()
@@ -2719,7 +2719,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatOneGroup = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutGroup(true)
+                UnitFrames.CustomFramesApplyLayoutGroup(false)
             end,
             default = Defaults.CustomFormatOneGroup,
             disable = function ()
@@ -2745,7 +2745,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatTwoGroup = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutGroup(true)
+                UnitFrames.CustomFramesApplyLayoutGroup(false)
             end,
             default = Defaults.CustomFormatTwoGroup,
             disable = function ()
@@ -2766,7 +2766,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.GroupBarWidth = value
-                UnitFrames.CustomFramesApplyLayoutGroup(true)
+                UnitFrames.CustomFramesApplyLayoutGroup(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
@@ -2787,7 +2787,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.GroupBarHeight = value
-                UnitFrames.CustomFramesApplyLayoutGroup(true)
+                UnitFrames.CustomFramesApplyLayoutGroup(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
@@ -2809,7 +2809,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.GroupAlpha = value
                 UnitFrames.CustomFramesGroupAlpha()
-                UnitFrames.CustomFramesApplyLayoutGroup(true)
+                UnitFrames.CustomFramesApplyLayoutGroup(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
@@ -2830,7 +2830,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.GroupBarSpacing = value
-                UnitFrames.CustomFramesApplyLayoutGroup(true)
+                UnitFrames.CustomFramesApplyLayoutGroup(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
@@ -2849,8 +2849,8 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.GroupExcludePlayer = not value
                 UnitFrames.CustomFramesGroupUpdate()
-                UnitFrames.CustomFramesApplyLayoutGroup(true)
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyLayoutGroup(false)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
@@ -2868,7 +2868,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.RoleIconSmallGroup = value
-                UnitFrames.CustomFramesApplyLayoutGroup(true)
+                UnitFrames.CustomFramesApplyLayoutGroup(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
@@ -2886,7 +2886,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.ColorClassGroup = value
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
@@ -2904,7 +2904,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.ColorRoleGroup = value
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
@@ -2922,7 +2922,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.SortRoleGroup = value
-                UnitFrames.CustomFramesApplyLayoutGroup(true)
+                UnitFrames.CustomFramesApplyLayoutGroup(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesGroup)
@@ -3011,9 +3011,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.GroupCombatGlowColor = { r, g, b, a }
-                if UnitFrames.CustomFramesApplyColors then
-                    UnitFrames.CustomFramesApplyColors(true)
-                end
+                UnitFrames.UpdateGroupCombatGlow()
             end,
             default = Defaults.GroupCombatGlowColor,
             disable = function ()
@@ -3070,7 +3068,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.DisplayOptionsGroupRaid = item.data
-                UnitFrames.CustomFramesReloadControlsMenu(false, true, true)
+                UnitFrames.CustomFramesReloadControlsMenu(false, false, false)
             end,
             default = nameDisplayOptions[2],
             disable = function ()
@@ -3096,7 +3094,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatRaid = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutRaid(true)
+                UnitFrames.CustomFramesApplyLayoutRaid(false)
             end,
             default = Defaults.CustomFormatRaid,
             disable = function ()
@@ -3117,7 +3115,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.RaidBarWidth = value
-                UnitFrames.CustomFramesApplyLayoutRaid(true)
+                UnitFrames.CustomFramesApplyLayoutRaid(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
@@ -3138,7 +3136,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.RaidBarHeight = value
-                UnitFrames.CustomFramesApplyLayoutRaid(true)
+                UnitFrames.CustomFramesApplyLayoutRaid(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
@@ -3160,7 +3158,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.GroupAlpha = value
                 UnitFrames.CustomFramesGroupAlpha()
-                UnitFrames.CustomFramesApplyLayoutRaid(true)
+                UnitFrames.CustomFramesApplyLayoutRaid(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
@@ -3185,7 +3183,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.RaidLayout = item.data or item.name or value
-                UnitFrames.CustomFramesApplyLayoutRaid(true)
+                UnitFrames.CustomFramesApplyLayoutRaid(false)
             end,
             default = Defaults.RaidLayout,
             disable = function ()
@@ -3203,7 +3201,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.RaidSpacers = value
-                UnitFrames.CustomFramesApplyLayoutRaid(true)
+                UnitFrames.CustomFramesApplyLayoutRaid(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
@@ -3224,7 +3222,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.RaidNameClip = value
-                UnitFrames.CustomFramesApplyLayoutRaid(true)
+                UnitFrames.CustomFramesApplyLayoutRaid(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
@@ -3247,7 +3245,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (combobox, value, item)
                 Settings.RaidIconOptions = item.data
-                UnitFrames.CustomFramesApplyLayoutRaid(true)
+                UnitFrames.CustomFramesApplyLayoutRaid(false)
             end,
             default = raidIconOptions[Defaults.RaidIconOptions],
             disable = function ()
@@ -3265,7 +3263,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.ColorClassRaid = value
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
@@ -3283,7 +3281,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.ColorRoleRaid = value
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuGroupRaidMembersOnly()
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid)
@@ -3301,7 +3299,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.SortRoleRaid = value
-                UnitFrames.CustomFramesApplyLayoutRaid(true)
+                UnitFrames.CustomFramesApplyLayoutRaid(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesRaid and Settings.ColorRoleRaid)
@@ -3390,9 +3388,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (r, g, b, a)
                 Settings.RaidCombatGlowColor = { r, g, b, a }
-                if UnitFrames.CustomFramesApplyColors then
-                    UnitFrames.CustomFramesApplyColors(true)
-                end
+                UnitFrames.UpdateGroupCombatGlow()
             end,
             default = Defaults.RaidCombatGlowColor,
             disable = function ()
@@ -4189,7 +4185,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatCompanion = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutCompanion(true)
+                UnitFrames.CustomFramesApplyLayoutCompanion(false)
             end,
             default = Defaults.CustomFormatCompanion,
             disable = function ()
@@ -4210,7 +4206,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.CompanionWidth = value
-                UnitFrames.CustomFramesApplyLayoutCompanion(true)
+                UnitFrames.CustomFramesApplyLayoutCompanion(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
@@ -4231,7 +4227,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.CompanionHeight = value
-                UnitFrames.CustomFramesApplyLayoutCompanion(true)
+                UnitFrames.CustomFramesApplyLayoutCompanion(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
@@ -4253,7 +4249,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.CompanionOocAlpha = value
                 UnitFrames.CustomFramesApplyInCombat(true)
-                UnitFrames.CustomFramesApplyLayoutCompanion(true)
+                UnitFrames.CustomFramesApplyLayoutCompanion(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
@@ -4275,7 +4271,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.CompanionIncAlpha = value
                 UnitFrames.CustomFramesApplyInCombat(true)
-                UnitFrames.CustomFramesApplyLayoutCompanion(true)
+                UnitFrames.CustomFramesApplyLayoutCompanion(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
@@ -4296,7 +4292,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.CompanionNameClip = value
-                UnitFrames.CustomFramesApplyLayoutCompanion(true)
+                UnitFrames.CustomFramesApplyLayoutCompanion(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
@@ -4314,7 +4310,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.CompanionUseClassColor = value
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuCompanionFrameOnly()
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
@@ -4374,7 +4370,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (combobox, value, item)
                 Settings.CustomFormatPet = item.data or item.name or value
                 UnitFrames.CustomFramesFormatLabels(true)
-                UnitFrames.CustomFramesApplyLayoutPet(true)
+                UnitFrames.CustomFramesApplyLayoutPet(false)
             end,
             default = Defaults.CustomFormatPet,
             disable = function ()
@@ -4395,7 +4391,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PetWidth = value
-                UnitFrames.CustomFramesApplyLayoutPet(true)
+                UnitFrames.CustomFramesApplyLayoutPet(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet)
@@ -4416,7 +4412,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PetHeight = value
-                UnitFrames.CustomFramesApplyLayoutPet(true)
+                UnitFrames.CustomFramesApplyLayoutPet(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet)
@@ -4438,7 +4434,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.PetOocAlpha = value
                 UnitFrames.CustomFramesApplyInCombat(true)
-                UnitFrames.CustomFramesApplyLayoutPet(true)
+                UnitFrames.CustomFramesApplyLayoutPet(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet)
@@ -4460,7 +4456,7 @@ function UnitFrames.CreateConsoleSettings()
             setFunction = function (value)
                 Settings.PetIncAlpha = value
                 UnitFrames.CustomFramesApplyInCombat(true)
-                UnitFrames.CustomFramesApplyLayoutPet(true)
+                UnitFrames.CustomFramesApplyLayoutPet(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet)
@@ -4481,7 +4477,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PetNameClip = value
-                UnitFrames.CustomFramesApplyLayoutPet(true)
+                UnitFrames.CustomFramesApplyLayoutPet(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet)
@@ -4499,7 +4495,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.PetUseClassColor = value
-                UnitFrames.CustomFramesApplyColors(true)
+                UnitFrames.CustomFramesApplyColorsMenuPetFramesOnly()
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet)
@@ -4695,7 +4691,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.BossBarWidth = value
-                UnitFrames.CustomFramesApplyLayoutBosses()
+                UnitFrames.CustomFramesApplyLayoutBosses(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses)
@@ -4716,7 +4712,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.BossBarHeight = value
-                UnitFrames.CustomFramesApplyLayoutBosses()
+                UnitFrames.CustomFramesApplyLayoutBosses(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses)
@@ -4737,7 +4733,7 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.BossBarSpacing = value
-                UnitFrames.CustomFramesApplyLayoutBosses()
+                UnitFrames.CustomFramesApplyLayoutBosses(false)
             end,
             disable = function ()
                 return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesBosses)

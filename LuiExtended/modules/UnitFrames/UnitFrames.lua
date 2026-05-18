@@ -1010,7 +1010,7 @@ function UnitFrames.OnPlayerActivated(eventId, initial)
     UnitFrames.CustomFramesSetupAlternative()
 
     -- Apply bar colors here, has to be after player init to get group roles
-    UnitFrames.CustomFramesApplyColors(false)
+    UnitFrames.CustomFramesApplyColors()
 
     -- We need to call this here to clear companion/pet unit frames when entering houses/instances as they are not destroyed
     UnitFrames.CompanionUpdate()
@@ -1883,7 +1883,7 @@ function UnitFrames.OnGroupMemberConnectedStatus(eventCode, unitTag, isOnline)
         UnitFrames.CustomFramesSetDeadLabel(UnitFrames.CustomFrames[unitTag], isOnline and nil or strOffline)
     end
     if isOnline and (UnitFrames.SV.ColorRoleGroup or UnitFrames.SV.ColorRoleRaid) then
-        UnitFrames.CustomFramesApplyColors(false)
+        UnitFrames.CustomFramesApplyColors()
     end
 end
 
@@ -1900,7 +1900,7 @@ end
 
 function UnitFrames.OnGroupMemberChange(eventCode, memberName)
     zo_callLater(function ()
-                     UnitFrames.CustomFramesApplyColors(false)
+                     UnitFrames.CustomFramesApplyColors()
                  end, 200)
 end
 
@@ -2760,6 +2760,20 @@ UnitFrames.CustomFramePositionAttr =
     PetGroup1 = "CustomFramesPetFramePos",
 }
 
+--- Unhide a custom frame top-level window only when layout explicitly requests it (e.g. init). LAM should pass requestedUnhide false so settings changes do not force the HUD to show unrelated frames.
+--- topLevelUnitTag matches keys in UnitFrames.CustomFramePositionAttr / CustomFramesSetMovingState.
+--- @param topLevelUnitTag string
+--- @param requestedUnhide boolean|nil
+function UnitFrames.CustomFramesTryUnhideTlw(topLevelUnitTag, requestedUnhide)
+    if not requestedUnhide then
+        return
+    end
+    local customFrame = UnitFrames.CustomFrames[topLevelUnitTag]
+    if customFrame and customFrame.tlw then
+        customFrame.tlw:SetHidden(false)
+    end
+end
+
 --- Get current position for a custom frame (for console X/Y sliders).
 --- @param unitTag string
 --- @return number left
@@ -2950,53 +2964,45 @@ function UnitFrames.CustomFramesApplyTexture()
         ApplyCustomFrameResourceTextures(playerFrame[COMBAT_MECHANIC_FLAGS_MAGICKA], texture, isRoundTexture)
         ApplyCustomFrameResourceTextures(playerFrame[COMBAT_MECHANIC_FLAGS_STAMINA], texture, isRoundTexture)
         ApplyCustomFrameAlternativeTextures(playerFrame.alternative, texture, isRoundTexture)
-        playerFrame.tlw:SetHidden(false)
     end
 
     local reticleFrame = UnitFrames.CustomFrames["reticleover"]
     if reticleFrame and reticleFrame.tlw then
         ApplyCustomFrameHealthTextures(reticleFrame[COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
-        reticleFrame.tlw:SetHidden(false)
     end
 
     local avaFrame = UnitFrames.CustomFrames["AvaPlayerTarget"]
     if avaFrame and avaFrame.tlw then
         ApplyCustomFrameHealthTextures(avaFrame[COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
-        avaFrame.tlw:SetHidden(false)
     end
 
     local companionFrame = UnitFrames.CustomFrames["companion"]
     if companionFrame and companionFrame.tlw then
         ApplyCustomFrameHealthTextures(companionFrame[COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
-        companionFrame.tlw:SetHidden(false)
     end
 
     if UnitFrames.CustomFrames["SmallGroup1"] and UnitFrames.CustomFrames["SmallGroup1"].tlw then
         for i = 1, 4 do
             ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["SmallGroup" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
         end
-        UnitFrames.CustomFrames["SmallGroup1"].tlw:SetHidden(false)
     end
 
     if UnitFrames.CustomFrames["RaidGroup1"] and UnitFrames.CustomFrames["RaidGroup1"].tlw then
         for i = 1, 12 do
             ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["RaidGroup" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
         end
-        UnitFrames.CustomFrames["RaidGroup1"].tlw:SetHidden(false)
     end
 
     if UnitFrames.CustomFrames["PetGroup1"] and UnitFrames.CustomFrames["PetGroup1"].tlw then
         for i = 1, 7 do
             ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["PetGroup" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
         end
-        UnitFrames.CustomFrames["PetGroup1"].tlw:SetHidden(false)
     end
 
     if UnitFrames.CustomFrames["boss1"] and UnitFrames.CustomFrames["boss1"].tlw then
         for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
             ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["boss" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
         end
-        UnitFrames.CustomFrames["boss1"].tlw:SetHidden(false)
     end
 
     if UnitFrames.GroupResources then
@@ -3154,9 +3160,7 @@ function UnitFrames.CustomFramesApplyLayoutPlayerFrame(unhide)
         CustomFramesLayoutSetBarLabelDimensions(phb, pmb, psb)
     end
 
-    if unhide then
-        player.tlw:SetHidden(false)
-    end
+    UnitFrames.CustomFramesTryUnhideTlw("player", unhide)
 end
 
 -- Only AvA rank label/icon on custom reticleover. Do not call full UpdateStaticControls from layout:
@@ -3237,8 +3241,8 @@ function UnitFrames.CustomFramesApplyLayoutReticleoverFrame(unhide)
 
     CustomFramesLayoutRefreshReticleoverAvaRankOnly(target.unitTag or "reticleover")
 
+    UnitFrames.CustomFramesTryUnhideTlw("reticleover", unhide)
     if unhide then
-        target.tlw:SetHidden(false)
         target.control:SetHidden(false)
     end
 end
@@ -3267,8 +3271,8 @@ function UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(unhide)
     thb.labelOne:SetHeight(UnitFrames.SV.AvaTargetBarHeight - 2)
     thb.labelTwo:SetHeight(UnitFrames.SV.AvaTargetBarHeight - 2)
 
+    UnitFrames.CustomFramesTryUnhideTlw("AvaPlayerTarget", unhide)
     if unhide then
-        target.tlw:SetHidden(false)
         target.control:SetHidden(false)
     end
 end
@@ -3373,9 +3377,7 @@ function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
         end
     end
 
-    if unhide then
-        group:SetHidden(false)
-    end
+    UnitFrames.CustomFramesTryUnhideTlw("SmallGroup1", unhide)
 end
 
 --- @param index number
@@ -3571,9 +3573,7 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
         end
     end
 
-    if unhide then
-        raid:SetHidden(false)
-    end
+    UnitFrames.CustomFramesTryUnhideTlw("RaidGroup1", unhide)
 end
 
 -- Set dimensions of custom companion frame and anchors
@@ -3592,9 +3592,7 @@ function UnitFrames.CustomFramesApplyLayoutCompanion(unhide)
     unitFrame.name:SetDimensions(UnitFrames.SV.CompanionWidth - UnitFrames.SV.CompanionNameClip - 10, UnitFrames.SV.CompanionHeight - 2)
     unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.CompanionWidth - 50, UnitFrames.SV.CompanionHeight - 2)
 
-    if unhide then
-        companion:SetHidden(false)
-    end
+    UnitFrames.CustomFramesTryUnhideTlw("companion", unhide)
 end
 
 -- Set dimensions of custom pet frame and anchors
@@ -3615,25 +3613,27 @@ function UnitFrames.CustomFramesApplyLayoutPet(unhide)
         unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.PetWidth - 50, UnitFrames.SV.PetHeight - 2)
     end
 
-    if unhide then
-        pet:SetHidden(false)
-    end
+    UnitFrames.CustomFramesTryUnhideTlw("PetGroup1", unhide)
 end
 
 -- Set dimensions of custom boss frame and anchors
-function UnitFrames.CustomFramesApplyLayoutBosses()
+--- @param requestedUnhide boolean|nil When true, show the boss TLW after layout (e.g. init).
+function UnitFrames.CustomFramesApplyLayoutBosses(requestedUnhide)
     if not UnitFrames.CustomFrames["boss1"] or not UnitFrames.CustomFrames["boss1"].tlw then
         return
     end
 
     local bosses = UnitFrames.CustomFrames["boss1"].tlw
     local spacing = UnitFrames.SV.BossBarSpacing or 2
-    bosses:SetDimensions(UnitFrames.SV.BossBarWidth, UnitFrames.SV.BossBarHeight * 6 + spacing * 5)
+    local barHeight = UnitFrames.SV.BossBarHeight
+    local bossSlotCount = BOSS_RANK_ITERATION_END - BOSS_RANK_ITERATION_BEGIN + 1
+    local bossesTotalHeight = barHeight * bossSlotCount + spacing * zo_max(0, bossSlotCount - 1)
+    bosses:SetDimensions(UnitFrames.SV.BossBarWidth, bossesTotalHeight)
 
-    for i = 1, 7 do
+    for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
         local unitFrame = UnitFrames.CustomFrames["boss" .. i]
         unitFrame.control:ClearAnchors()
-        unitFrame.control:SetAnchor(TOPLEFT, bosses, TOPLEFT, 0, (UnitFrames.SV.BossBarHeight + spacing) * (i - 1))
+        unitFrame.control:SetAnchor(TOPLEFT, bosses, TOPLEFT, 0, (barHeight + spacing) * (i - BOSS_RANK_ITERATION_BEGIN))
         unitFrame.control:SetDimensions(UnitFrames.SV.BossBarWidth, UnitFrames.SV.BossBarHeight)
         unitFrame.name:SetDimensions(UnitFrames.SV.BossBarWidth - 50, UnitFrames.SV.BossBarHeight - 2)
         unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.BossBarWidth - 50, UnitFrames.SV.BossBarHeight - 2)
@@ -3641,7 +3641,7 @@ function UnitFrames.CustomFramesApplyLayoutBosses()
 
     ApplyBossThresholdMarkers(UnitFrames.activeBossThresholds)
 
-    bosses:SetHidden(false)
+    UnitFrames.CustomFramesTryUnhideTlw("boss1", requestedUnhide)
 end
 
 local function CustomFramesApplyAlphaAndBuffs(frame, idle, oocAlpha, incAlpha, hideBuffsOoc)
