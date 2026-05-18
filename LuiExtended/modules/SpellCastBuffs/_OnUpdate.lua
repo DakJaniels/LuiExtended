@@ -115,7 +115,10 @@ local function SetSingleIconBuffType(buff, buffType, unbreakable, id)
     buff.label:SetColor(textColor[1], textColor[2], textColor[3], textColor[4])
     buff.stack:SetColor(textColor[1], textColor[2], textColor[3], textColor[4])
 
-    buff.back:SetHidden(true)
+    local borderTexture = (contextType == "buff") and SpellCastBuffs.GetBuffBorderTexture() or SpellCastBuffs.GetDebuffBorderTexture()
+    buff.back:SetTexture(borderTexture)
+    SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, SpellCastBuffs.SV.IconSize)
+    buff.back:SetHidden(SpellCastBuffs.SV.GlowIcons)
     buff.drop:SetHidden(false)
 
     -- Set cooldown color if it exists
@@ -150,11 +153,13 @@ local function GetOrCreateBuffIconPool(container)
             buff:SetHandler("OnMouseExit", SpellCastBuffs.Buff_OnMouseExit)
             buff:SetHandler("OnMouseUp", SpellCastBuffs.Buff_OnMouseUp)
 
-            -- Border layer - hidden by default, shown only for non-collectible buffs
-            buff.back = UI:Texture(buff, "fill", nil, "EsoUI/Art/ActionBar/abilityFrame_buff.dds", DL_BACKGROUND, true)
+            -- Border layer (UV-cropped like ZO_BuffDebuff; texture swapped per buff/debuff in SetSingleIconBuffType)
+            buff.back = UI:Texture(buff, "fill", nil, SpellCastBuffs.GetBuffBorderTexture(), DL_BACKGROUND, true)
+            SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, SpellCastBuffs.SV.IconSize)
 
-            -- Glow border layer
+            -- Glow border layer (`buff_frame` / `debuff_frame`); pixel rounding reduces uneven edges when scaled.
             buff.frame = UI:Texture(buff, { CENTER, CENTER }, nil, nil, DL_OVERLAY, false)
+            buff.frame:SetPixelRoundingEnabled(true)
 
             -- Background layer (except for player_long container)
             if container ~= "player_long" then
@@ -187,9 +192,8 @@ local function GetOrCreateBuffIconPool(container)
             buff.stack:SetAnchor(CENTER, buff, TOPRIGHT, -SpellCastBuffs.padding * 3, SpellCastBuffs.padding * 3)
 
             if buff.iconbg then
+                -- Match ZO_DefaultCooldown / ZO_BuffDebuffIcon: fill entire slot (see WindowTemplates.xml AnchorFill).
                 buff.cd = UI:ControlWithType(buff, "fill", nil, false, nil, CT_COOLDOWN)
-                buff.cd:SetAnchor(TOPLEFT, buff, TOPLEFT, 1, 1)
-                buff.cd:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -1, -1)
                 buff.cd:SetDrawLayer(DL_BACKGROUND)
             end
 
