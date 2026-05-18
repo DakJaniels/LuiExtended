@@ -1172,14 +1172,19 @@ end
 -- maps to a fixed constant that works for ROW but silently applies the wrong physical edge
 -- for COLUMN layouts, resulting in zero vertical gap between stacked icons.
 --
--- Main-axis trailing physical edge per direction:
---   ROW            → RIGHT   (gap appears to the right of each icon)
---   ROW_REVERSE    → LEFT    (gap appears to the left of each icon)
---   COLUMN         → BOTTOM  (gap appears below each icon)
---   COLUMN_REVERSE → TOP     (gap appears above each icon, flow goes bottom→top)
+-- Main-axis spacing (implementation note, 2025): inter-icon distance is still `gap`, but the
+-- legacy "trailing margin only" setup is expressed as SetFlexMargins with half of `gap` on the
+-- flex-start physical edge and half on flex-end (integer split). That preserves neighbor spacing
+-- while keeping rows even under FLEX_JUSTIFICATION_CENTER + wrap. The physical edges used:
+--   ROW            → LEFT + RIGHT   (formerly all on RIGHT)
+--   ROW_REVERSE    → RIGHT + LEFT   (formerly all on LEFT)
+--   COLUMN         → TOP + BOTTOM   (formerly all on BOTTOM)
+--   COLUMN_REVERSE → BOTTOM + TOP   (formerly all on TOP)
 --
 -- Cross-axis gutter uses one-sided margin so inter-row gap = exactly padding (not 2×padding).
--- Vertical single-axis columns use iconSize/4 for gap so labels stay readable at any size.
+-- Vertical single-axis columns use IconSize/10 for gap so labels stay readable at any size.
+-- `SpellCastBuffs.padding` uses the same formula as older SpellCastBuffs `g_padding`:
+-- zo_floor(0.5 + IconSize / 13).
 function SpellCastBuffs.ApplyIconFlexMargin(container, buff)
     local holder = SpellCastBuffs.BuffContainers[container].iconHolder
     local flexDir = holder and holder:GetChildFlexDirection()
@@ -1191,28 +1196,67 @@ function SpellCastBuffs.ApplyIconFlexMargin(container, buff)
         and zo_floor(SpellCastBuffs.SV.IconSize / 10)
         or SpellCastBuffs.padding
 
-    -- Resolve the physical trailing edge for the current flex direction.
-    local trailingEdge
-    if     flexDir == FLEX_DIRECTION_ROW then
-        trailingEdge = FLEX_EDGE_RIGHT
+    local gapStart = zo_floor(gap / 2)
+    local gapEnd = gap - gapStart
+
+    local left, top, right, bottom = 0, 0, 0, 0
+
+    if flexDir == FLEX_DIRECTION_ROW then
+        left, right = gapStart, gapEnd
     elseif flexDir == FLEX_DIRECTION_ROW_REVERSE then
-        trailingEdge = FLEX_EDGE_LEFT
+        left, right = gapEnd, gapStart
     elseif flexDir == FLEX_DIRECTION_COLUMN then
-        trailingEdge = FLEX_EDGE_BOTTOM
+        top, bottom = gapStart, gapEnd
     elseif flexDir == FLEX_DIRECTION_COLUMN_REVERSE then
-        trailingEdge = FLEX_EDGE_TOP
+        top, bottom = gapEnd, gapStart
     else
-        trailingEdge = FLEX_EDGE_RIGHT
+        right = gap
     end
 
-    buff:SetFlexMargins(0, 0, 0, 0)
-    buff:SetFlexMargin(trailingEdge, gap)
     if isWrap then
         if isRow then
-            buff:SetFlexMargin(isWrapReverse and FLEX_EDGE_TOP or FLEX_EDGE_BOTTOM, SpellCastBuffs.padding)
+            if isWrapReverse then
+                top = top + SpellCastBuffs.padding
+            else
+                bottom = bottom + SpellCastBuffs.padding
+            end
         else
-            buff:SetFlexMargin(isWrapReverse and FLEX_EDGE_LEFT or FLEX_EDGE_RIGHT, SpellCastBuffs.padding)
+            if isWrapReverse then
+                left = left + SpellCastBuffs.padding
+            else
+                right = right + SpellCastBuffs.padding
+            end
         end
+    end
+
+    buff:SetFlexMargins(left, top, right, bottom)
+end
+
+-- ZO_BuffDebuff-style 64×64 `abilityFrame_*` / `gp_abilityFrame_*` borders (BuffDebuff.xml,
+-- BuffDebuffStyles.lua). `buff.back` fills the slot; without cropping, the full atlas scales into
+-- IconSize and the frame ring appears inset (“double frame”).
+function SpellCastBuffs.GetBuffBorderTexture()
+    return IsInGamepadPreferredMode() and "EsoUI/Art/ActionBar/Gamepad/gp_abilityFrame_buff.dds" or "EsoUI/Art/ActionBar/abilityFrame_buff.dds"
+end
+
+-- Debuff variant of GetBuffBorderTexture (same gamepad/keyboard split).
+function SpellCastBuffs.GetDebuffBorderTexture()
+    return IsInGamepadPreferredMode() and "EsoUI/Art/ActionBar/Gamepad/gp_abilityFrame_debuff.dds" or "EsoUI/Art/ActionBar/abilityFrame_debuff.dds"
+end
+
+--- Crops the 64×64 atlas to the center `iconSize` region (keyboard), or uses the gamepad XML UVs.
+--- @param texture TextureControl|nil
+--- @param iconSize number Slot width/height in px (SpellCastBuffs.SV.IconSize)
+function SpellCastBuffs.ApplyAbilityFrameTextureCoords(texture, iconSize)
+    if not texture then
+        return
+    end
+    if IsInGamepadPreferredMode() then
+        texture:SetTextureCoords(0.1094, 0.8906, 0.1094, 0.8906)
+    else
+        local inset = (64 - iconSize) / 2 / 64
+        local outer = (64 + iconSize) / 2 / 64
+        texture:SetTextureCoords(inset, outer, inset, outer)
     end
 end
 
@@ -1225,7 +1269,9 @@ function SpellCastBuffs.ResetSingleIcon(container, buff)
     -- buff:SetAlpha( 1 )
     buff:SetDimensions(buffSize, buffSize)
     buff.frame:SetDimensions(frameSize, frameSize)
+    buff.frame:SetPixelRoundingEnabled(true)
     buff.back:SetHidden(SpellCastBuffs.SV.GlowIcons)
+    SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, buffSize)
     buff.frame:SetHidden(not SpellCastBuffs.SV.GlowIcons)
     buff.label:SetAnchor(TOPLEFT, buff, LEFT, -SpellCastBuffs.padding, -SpellCastBuffs.SV.LabelPosition)
     buff.label:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, SpellCastBuffs.padding, -2)
@@ -1264,7 +1310,8 @@ function SpellCastBuffs.ResetSingleIcon(container, buff)
         buff.abilityId:SetHidden(not SpellCastBuffs.SV.ShowDebugAbilityId)
     end
 
-    local inset = (SpellCastBuffs.SV.RemainingCooldown and buff.cd ~= nil) and 3 or 1
+    -- ZO_BUFF_DEBUFF_ICON_DIMENSIONS = frame - 4 (2px inset per edge); matches abilityFrame + icon padding.
+    local inset = (SpellCastBuffs.SV.RemainingCooldown and buff.cd ~= nil) and 2 or 1
 
     buff.drop:ClearAnchors()
     buff.drop:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
