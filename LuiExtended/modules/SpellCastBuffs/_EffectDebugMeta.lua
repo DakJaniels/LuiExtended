@@ -418,6 +418,56 @@ local function addAdvancedStatDebugLines(abilityId, addLine)
     end
 end
 
+--- @param meta SCBBuffDebugMeta|nil
+--- @param override table|nil
+--- @return boolean
+local function shouldShowCcTooltipDebug(meta, override)
+    if override and (override.cc or override.ccMergedType) then
+        return true
+    end
+    if not meta then
+        return false
+    end
+    if meta.statusEffectType and meta.statusEffectType ~= STATUS_EFFECT_TYPE_NONE then
+        return true
+    end
+    local abilityType = meta.abilityType
+    if abilityType and abilityType ~= ABILITY_TYPE_NONE and abilityType ~= ABILITY_TYPE_DAMAGE and abilityType ~= ABILITY_TYPE_HEAL then
+        if abilityTypeNames[abilityType] then
+            return true
+        end
+    end
+    return false
+end
+
+--- @param override table|nil
+--- @param meta SCBBuffDebugMeta|nil
+--- @param abilityId integer|string|nil
+--- @param addLine fun(label: string, value: string)
+local function addCcTooltipDebugLines(override, meta, abilityId, addLine)
+    if not shouldShowCcTooltipDebug(meta, override) then
+        return
+    end
+
+    if override then
+        if override.cc then
+            addLine("LUIE cc", SpellCastBuffs.GetLuiCcTypeLabel(override.cc))
+        end
+        if override.ccMergedType then
+            addLine("LUIE cc (merged)", SpellCastBuffs.GetLuiCcTypeLabel(override.ccMergedType))
+        end
+        if not override.cc and not override.ccMergedType then
+            addLine("LUIE cc", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_NO_CC))
+        end
+    elseif type(abilityId) == "number" then
+        addLine("LUIE cc", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_NO_OVERRIDE))
+    end
+
+    if SpellCastBuffs.SV.ColorCC and override and override.cc then
+        addLine("CC Color", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_CC_COLOR_ON))
+    end
+end
+
 --- @param ccType integer|nil
 --- @return string
 function SpellCastBuffs.GetLuiCcTypeLabel(ccType)
@@ -662,25 +712,7 @@ function SpellCastBuffs.AddTooltipDebugMetaLines(control, detailsLine, unitTag)
         addBuffAbilityApiDebugLines(abilityId, ttUnit, addLine)
     end
 
-    if override then
-        if override.cc then
-            addLine("LUIE cc", SpellCastBuffs.GetLuiCcTypeLabel(override.cc))
-        end
-        if override.ccMergedType then
-            addLine("LUIE cc (merged)", SpellCastBuffs.GetLuiCcTypeLabel(override.ccMergedType))
-        end
-        if not override.cc and not override.ccMergedType then
-            addLine("LUIE cc", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_NO_CC))
-        end
-    elseif type(abilityId) == "number" then
-        addLine("LUIE cc", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_NO_OVERRIDE))
-    end
-
-    if SpellCastBuffs.SV.ColorCC and override and override.cc then
-        addLine("CC Color", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_CC_COLOR_ON))
-    elseif SpellCastBuffs.SV.ColorCC then
-        addLine("CC Color", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_CC_COLOR_OFF))
-    end
+    addCcTooltipDebugLines(override, meta, abilityId, addLine)
 
     return detailsLine
 end
