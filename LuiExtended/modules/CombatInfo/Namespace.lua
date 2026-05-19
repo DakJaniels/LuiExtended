@@ -229,6 +229,7 @@ CombatInfo.Defaults =
         enabled = false,
         unlocked = false,
         displayMode = "multi",
+        minimalHorizontal = false,
         maxDisplay = 10,
         showPriority = true,
         showKeybinds = true,
