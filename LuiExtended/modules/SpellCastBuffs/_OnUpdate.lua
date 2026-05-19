@@ -508,16 +508,39 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
     local buffsSorted = {}
     local sortedCounts = {}
     local displayUidCounter = {}
+    local seenAbilityIdPerContainer = {}
     local needs_update = {}
     local isProminent = {}
 
     --- @param container string
     --- @param effect table
     local function appendSortedEffect(container, effect)
+        if effect.id then
+            local seen = seenAbilityIdPerContainer[container]
+            if not seen then
+                seen = {}
+                seenAbilityIdPerContainer[container] = seen
+            end
+            local existingIndex = seen[effect.id]
+            if existingIndex then
+                local existing = buffsSorted[container][existingIndex]
+                if effect.buffSlot and existing and not existing.buffSlot then
+                    buffsSorted[container][existingIndex] = effect
+                end
+                return
+            end
+        end
         sortedCounts[container] = (sortedCounts[container] or 0) + 1
         displayUidCounter[container] = (displayUidCounter[container] or 0) + 1
         effect.displayUid = displayUidCounter[container]
-        buffsSorted[container][sortedCounts[container]] = effect
+        local index = sortedCounts[container]
+        buffsSorted[container][index] = effect
+        if effect.id then
+            local seen = seenAbilityIdPerContainer[container]
+            if seen then
+                seen[effect.id] = index
+            end
+        end
     end
 
     -- And reset sizes of already existing icons
