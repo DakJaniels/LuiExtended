@@ -17,17 +17,29 @@ local Effects = Data.Effects
 --- @field abilityType AbilityType|integer
 --- @field statusEffectType StatusEffectType|integer
 --- @field apiBuffSlot integer
---- @field sourceType CombatUnitType|integer
 --- @field unitTag string
---- @field effectType BuffEffectType|integer
---- @field stackCount integer
---- @field deprecatedBuffType string
---- @field canClickOff boolean
---- @field castByPlayer boolean
---- @field timeStarted number
---- @field timeEnding number
---- @field buffListIndex integer
---- @field iconFilename string
+--- @field sourceType CombatUnitType|integer?
+--- @field effectType BuffEffectType|integer?
+--- @field stackCount integer?
+--- @field deprecatedBuffType string?
+--- @field canClickOff boolean?
+--- @field castByPlayer boolean?
+--- @field timeStarted number?
+--- @field timeEnding number?
+--- @field buffListIndex integer?
+--- @field iconFilename string?
+
+--- @class SCBBuffDebugMetaOverlay
+--- @field effectType BuffEffectType|integer?
+--- @field stackCount integer?
+--- @field deprecatedBuffType string?
+--- @field canClickOff boolean?
+--- @field castByPlayer boolean?
+--- @field timeStarted number?
+--- @field timeEnding number?
+--- @field buffListIndex integer?
+--- @field iconFilename string?
+--- @field sourceType CombatUnitType|integer?
 
 local MAX_STAT_DEBUG_ROWS = 8
 
@@ -424,7 +436,7 @@ end
 --- @param apiBuffSlot integer
 --- @param sourceType CombatUnitType
 --- @param unitTag string
---- @param extra SCBBuffDebugMeta|nil
+--- @param extra SCBBuffDebugMetaOverlay|nil
 --- @return SCBBuffDebugMeta
 function SpellCastBuffs.BuildEffectDebugMeta(abilityType, statusEffectType, apiBuffSlot, sourceType, unitTag, extra)
     local meta =
