@@ -187,60 +187,16 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
         return
     end
 
-    -- Override name, icon, or hide based on MapZoneIndex
-    if Effects.ZoneDataOverride[abilityId] then
-        local index = GetZoneId(GetCurrentMapZoneIndex())
-        local zoneName = GetPlayerLocationName()
-        if Effects.ZoneDataOverride[abilityId][index] then
-            if Effects.ZoneDataOverride[abilityId][index].icon then
-                iconName = Effects.ZoneDataOverride[abilityId][index].icon
-            end
-            if Effects.ZoneDataOverride[abilityId][index].name then
-                effectName = Effects.ZoneDataOverride[abilityId][index].name
-            end
-            if Effects.ZoneDataOverride[abilityId][index].hide then
-                return
-            end
-        end
-        if Effects.ZoneDataOverride[abilityId][zoneName] then
-            if Effects.ZoneDataOverride[abilityId][zoneName].icon then
-                iconName = Effects.ZoneDataOverride[abilityId][zoneName].icon
-            end
-            if Effects.ZoneDataOverride[abilityId][zoneName].name then
-                effectName = Effects.ZoneDataOverride[abilityId][zoneName].name
-            end
-            if Effects.ZoneDataOverride[abilityId][zoneName].hide then
-                return
-            end
-        end
+    -- Override name, icon, or hide based on MapZoneIndex / map name
+    local hide
+    iconName, effectName, hide = SpellCastBuffs.ApplyZoneAndMapEffectOverrides(abilityId, iconName, effectName)
+    if hide then
+        return
     end
 
-    -- Override name, icon, or hide based on Map Name
-    if Effects.MapDataOverride[abilityId] then
-        local mapName = GetMapName()
-        if Effects.MapDataOverride[abilityId][mapName] then
-            if Effects.MapDataOverride[abilityId][mapName].icon then
-                iconName = Effects.MapDataOverride[abilityId][mapName].icon
-            end
-            if Effects.MapDataOverride[abilityId][mapName].name then
-                effectName = Effects.MapDataOverride[abilityId][mapName].name
-            end
-            if Effects.MapDataOverride[abilityId][mapName].hide then
-                return
-            end
-        end
-    end
-
-    -- Override name or icon based off unitName
-    if Effects.EffectOverrideByName[abilityId] then
-        unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, unitName)
-        if Effects.EffectOverrideByName[abilityId][unitName] then
-            if Effects.EffectOverrideByName[abilityId][unitName].hide then
-                return
-            end
-            iconName = Effects.EffectOverrideByName[abilityId][unitName].icon or iconName
-            effectName = Effects.EffectOverrideByName[abilityId][unitName].name or effectName
-        end
+    iconName, effectName, hide = SpellCastBuffs.ApplyEffectOverrideByNameForUnit(abilityId, unitName, iconName, effectName)
+    if hide then
+        return
     end
 
     -- Override icon with default if enabled
@@ -404,6 +360,11 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
             buffSlot = savedEffectSlot,
             groundLabel = groundLabel,
             toggle = toggle,
+            debugMeta = SpellCastBuffs.BuildEffectDebugMeta(abilityType, statusEffectType, savedEffectSlot, sourceType, unitTag,
+                                                            {
+                                                                effectType = effectType,
+                                                                stackCount = stackCount,
+                                                            }),
         }
     end
 end

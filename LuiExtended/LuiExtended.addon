@@ -2,8 +2,8 @@
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101049 101050
-## Version: 7.2.2.3
-## AddOnVersion: 7223
+## Version: 7.2.2.4
+## AddOnVersion: 7224
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
 ## DependsOn: LuiMedia>=7133 LuiData>=7209
 ## PCDependsOn: LibAddonMenu-2.0>=43
@@ -128,8 +128,10 @@ modules/SpellCastBuffs/_Debug.lua
 modules/SpellCastBuffs/_DevDebug.lua
 modules/SpellCastBuffs/_ListFunctions.lua
 modules/SpellCastBuffs/_OnCombatAddNameEvent.lua
+modules/SpellCastBuffs/_OnCombatEventHelpers.lua
 modules/SpellCastBuffs/_OnCombatEventIn.lua
 modules/SpellCastBuffs/_OnCombatEventOut.lua
+modules/SpellCastBuffs/_EffectDebugMeta.lua
 modules/SpellCastBuffs/_OnEffectChanged.lua
 modules/SpellCastBuffs/_OnEffectChangedGround.lua
 modules/SpellCastBuffs/_OnUpdate.lua

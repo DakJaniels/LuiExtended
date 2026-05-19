@@ -12,6 +12,13 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.2.4
+    "|cFFA500LuiExtended Version 7.2.2.4|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Fixed duplicate weekly challenge progress lines when two identical challenges advance at once (for example four chat messages instead of two). Progress and Tracking announcements no longer double up for the same challenge slot; each slot still announces separately.",
+    "",
     -- Version Header 7.2.2.3
     "|cFFA500LuiExtended Version 7.2.2.3|r",
     "",
