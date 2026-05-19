@@ -1471,9 +1471,21 @@ local buffTypes =
     [LUIE_BUFF_TYPE_NONE] = GetString(LUIE_STRING_BUFF_TYPE_NONE),
 }
 
-function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
+--- Routed buff container key → unit tag for stealth/tooltip APIs.
+--- @param container string|nil
+--- @return string
+local function TooltipUnitTagFromBuffContainer(container)
+    if container == "target1" or container == "target2" or container == "targetb" or container == "targetd"
+    or container == "promb_target" or container == "promd_target" then
+        return "reticleover"
+    end
+    return "player"
+end
+
+function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial, unitTag)
+    local ttUnit = unitTag or TooltipUnitTagFromBuffContainer(control.container)
     -- Add bottom divider and info if present:
-    if SpellCastBuffs.SV.TooltipAbilityId or SpellCastBuffs.SV.TooltipBuffType then
+    if SpellCastBuffs.SV.TooltipAbilityId or SpellCastBuffs.SV.TooltipBuffType or SpellCastBuffs.SV.TooltipDebugMeta then
         ZO_Tooltip_AddDivider(InformationTooltip)
         InformationTooltip:SetVerticalPadding(4)
         InformationTooltip:AddLine("", "", ZO_NORMAL_TEXT:UnpackRGB())
@@ -1521,17 +1533,18 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial)
             detailsLine = detailsLine + 1
         end
     end
+
+    if SpellCastBuffs.SV.TooltipDebugMeta then
+        detailsLine = SpellCastBuffs.AddTooltipDebugMetaLines(control, detailsLine, ttUnit)
+    end
+
+    return detailsLine
 end
 
---- Routed buff container key → unit tag for stealth/tooltip APIs.
 --- @param container string|nil
 --- @return string
-local function TooltipUnitTagFromBuffContainer(container)
-    if container == "target1" or container == "target2" or container == "targetb" or container == "targetd"
-    or container == "promb_target" or container == "promd_target" then
-        return "reticleover"
-    end
-    return "player"
+function SpellCastBuffs.TooltipUnitTagFromBuffContainer(container)
+    return TooltipUnitTagFromBuffContainer(container)
 end
 
 -- OnMouseEnter for Buff Tooltips
@@ -1555,12 +1568,12 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
             InformationTooltip:AddLine(tooltipText, "", colorText:UnpackRGBA())
             detailsLine = 5
         end
-        SpellCastBuffs.TooltipBottomLine(control, detailsLine, true)
+        SpellCastBuffs.TooltipBottomLine(control, detailsLine, true, "player")
     else
         if not SpellCastBuffs.SV.TooltipEnable then
             InformationTooltip:AddLine(tooltipTitle, "ZoFontHeader2", 1, 1, 1, nil)
             detailsLine = 3
-            SpellCastBuffs.TooltipBottomLine(control, detailsLine)
+            SpellCastBuffs.TooltipBottomLine(control, detailsLine, false, TooltipUnitTagFromBuffContainer(control.container))
             return
         end
 
@@ -1706,7 +1719,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
             InformationTooltip:AddLine(thirdLine, "", ZO_NORMAL_TEXT:UnpackRGB())
         end
 
-        SpellCastBuffs.TooltipBottomLine(control, detailsLine)
+        SpellCastBuffs.TooltipBottomLine(control, detailsLine, false, ttUnit)
 
         -- Tooltip Debug
         -- InformationTooltip:SetAbilityId(117391)

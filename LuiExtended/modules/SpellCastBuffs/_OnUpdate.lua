@@ -363,6 +363,7 @@ local function updateIcons(currentTimeMs, sortedList, container)
             buff.tooltip = effect.tooltip
             buff.duration = effect.dur or 0
             buff.container = container
+            buff.debugMeta = effect.debugMeta
 
             if effect.backdrop then
                 buff.drop:SetHidden(false)

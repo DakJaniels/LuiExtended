@@ -209,6 +209,7 @@ local SpellCastBuffs = ZO_Object:Subclass()
 --- @field TooltipSticky number
 --- @field TooltipAbilityId boolean
 --- @field TooltipBuffType boolean
+--- @field TooltipDebugMeta boolean
 --- @field UseDefaultIcon boolean
 --- @field DefaultIconOptions number
 --- @field ShowSharedEffects boolean
@@ -402,6 +403,7 @@ SpellCastBuffs.Defaults =
     TooltipSticky = 0,
     TooltipAbilityId = false,
     TooltipBuffType = false,
+    TooltipDebugMeta = false,
     UseDefaultIcon = false,
     DefaultIconOptions = 1,
     ShowSharedEffects = true,

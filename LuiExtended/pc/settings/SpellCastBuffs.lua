@@ -2844,6 +2844,22 @@ function SpellCastBuffs.CreateSettings()
                 end,
             },
             {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_DEBUG_META),
+                tooltip = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_DEBUG_META_TP),
+                getFunc = function ()
+                    return Settings.TooltipDebugMeta
+                end,
+                setFunc = function (value)
+                    Settings.TooltipDebugMeta = value
+                end,
+                width = "full",
+                default = Defaults.TooltipDebugMeta,
+                disabled = function ()
+                    return not LUIE.SV.SpellCastBuff_Enable
+                end,
+            },
+            {
                 -- Sticky Tooltip Slider
                 type = "slider",
                 name = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_STICKY),
