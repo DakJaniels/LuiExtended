@@ -222,11 +222,11 @@ function CombatText.CreateConsoleSettings()
                 step = 10,
                 format = "%.0f",
                 getFunction = function ()
-                    CombatText.EnsurePanelSlidersUseCenter(panelKey)
+                    CombatText.MigratePanelSaveToCenter(panelKey)
                     return zo_clamp(Settings.panels[panelKey].offsetX, -maxOffsetX, maxOffsetX)
                 end,
                 setFunction = function (value)
-                    CombatText.EnsurePanelSlidersUseCenter(panelKey)
+                    CombatText.MigratePanelSaveToCenter(panelKey)
                     value = zo_clamp(value, -maxOffsetX, maxOffsetX)
                     Settings.panels[panelKey].offsetX = value
                     Settings.panels[panelKey].point = CENTER
@@ -252,11 +252,11 @@ function CombatText.CreateConsoleSettings()
                 step = 10,
                 format = "%.0f",
                 getFunction = function ()
-                    CombatText.EnsurePanelSlidersUseCenter(panelKey)
+                    CombatText.MigratePanelSaveToCenter(panelKey)
                     return zo_clamp(Settings.panels[panelKey].offsetY, -maxOffsetY, maxOffsetY)
                 end,
                 setFunction = function (value)
-                    CombatText.EnsurePanelSlidersUseCenter(panelKey)
+                    CombatText.MigratePanelSaveToCenter(panelKey)
                     value = zo_clamp(value, -maxOffsetY, maxOffsetY)
                     Settings.panels[panelKey].offsetY = value
                     Settings.panels[panelKey].point = CENTER

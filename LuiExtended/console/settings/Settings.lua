@@ -274,7 +274,7 @@ function LUIE.CreateConsoleSettings()
         end
     end
 
-    local function ProfileCopyEnsureKindItems()
+    local function ProfileCopyInitKindItems()
         if #kindItems > 0 then
             return
         end
@@ -334,7 +334,7 @@ function LUIE.CreateConsoleSettings()
         end
     end
 
-    local function ProfileCopyEnsureLeaf(g, profile, account, bucket)
+    local function ProfileCopyGetOrCreateLeaf(g, profile, account, bucket)
         if type(g) ~= "table" then
             return nil
         end
@@ -404,7 +404,7 @@ function LUIE.CreateConsoleSettings()
             if type(g) == "table" then
                 local srcLeaf = g[copyPick_server] and g[copyPick_server][copyPick_account] and g[copyPick_server][copyPick_account][srcBucket]
                 if type(srcLeaf) == "table" then
-                    local destLeaf = ProfileCopyEnsureLeaf(g, tgtP, tgtA, tgtB)
+                    local destLeaf = ProfileCopyGetOrCreateLeaf(g, tgtP, tgtA, tgtB)
                     if type(destLeaf) == "table" then
                         CopyTable(srcLeaf, destLeaf)
                         anyCopied = true
@@ -435,7 +435,7 @@ function LUIE.CreateConsoleSettings()
     ProfileCopyRebuildServerItems()
     ProfileCopyRebuildAccountItems()
     if profileCopySplitSourceUI then
-        ProfileCopyEnsureKindItems()
+        ProfileCopyInitKindItems()
     end
     ProfileCopyRefreshBucketOrSplitPicks()
 
@@ -650,11 +650,11 @@ function LUIE.CreateConsoleSettings()
             label = GetString(LUIE_STRING_LAM_SVPROFILE_COPY_SOURCE_KIND),
             tooltip = GetString(LUIE_STRING_LAM_SVPROFILE_COPY_SOURCE_KIND_TP),
             items = function ()
-                ProfileCopyEnsureKindItems()
+                ProfileCopyInitKindItems()
                 return kindItems
             end,
             getFunction = function ()
-                ProfileCopyEnsureKindItems()
+                ProfileCopyInitKindItems()
                 local kind = copyPick_sourceKind or "accountwide"
                 for i = 1, #kindItems do
                     if kindItems[i].data == kind then

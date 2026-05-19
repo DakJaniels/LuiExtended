@@ -100,7 +100,7 @@ do
 
     --- Creates a font string using ZOS's ZO_CreateFontString function
     --- Supports both string-based and numeric font styles for backwards compatibility.
-    --- Ensures the third argument is always a valid FontStyle (integer 0-7).
+    --- Coerces the third argument to a valid FontStyle (integer 0-7).
     --- @param faceName string Font face name
     --- @param size number Font size
     --- @param style string|number|nil Font style (string will be converted to constant)
@@ -474,7 +474,7 @@ end
 --- @param callback function: The callback function to be executed when the button is clicked.
 --- @return table identifier: The created dialogue button table.
 function LUIE.RegisterDialogueButton(identifier, title, text, callback)
-    -- Ensure GAMEPAD_DIALOGS is available (it's a global ESO constant)
+    -- Require GAMEPAD_DIALOGS (global ESO constant)
     local dialogType = GAMEPAD_DIALOGS and GAMEPAD_DIALOGS.BASIC or 1
 
     ESO_Dialogs[identifier] =

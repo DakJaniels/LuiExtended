@@ -82,7 +82,7 @@ function UnitFrames.CustomFramesApplyBarAlignment()
     if UnitFrames.CustomFrames["player"] then
         local hpBar = UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_HEALTH]
         if hpBar and hpBar.bar then
-            -- Ensure we have a valid alignment value, default to 1 if nil
+            -- Default alignment to 1 when nil
             local healthAlignment = UnitFrames.SV.BarAlignPlayerHealth or 1
             hpBar.bar:SetBarAlignment(healthAlignment - 1)
             if hpBar.trauma then
@@ -514,7 +514,7 @@ end
 --- Lazily creates the stack-level threshold container parented to the boss tlw.
 --- It owns three control pools: top percent labels, bottom rotated mechanic-name labels,
 --- and common-mode vertical lines that span the full visible boss stack.
-local function EnsureThresholdStack(tlw)
+local function GetBossThresholdStack(tlw)
     local stack = UnitFrames.bossThresholdStack
     if stack and stack.control then
         return stack
@@ -741,7 +741,7 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
         return
     end
 
-    local stack = EnsureThresholdStack(first.tlw)
+    local stack = GetBossThresholdStack(first.tlw)
     local container = stack.control
     container:SetHidden(false)
     container:ClearAnchors()
@@ -1415,7 +1415,7 @@ function UnitFrames.ReloadValues(unitTag)
     end
 
     -- Trigger visualizer reinitialization (handles all visual states with proper sequence IDs)
-    -- This replaces the manual module Update calls to ensure proper sequence ID tracking
+    -- This replaces the manual module Update calls to keep sequence IDs in order
     local coordinator = UnitFrames.GetVisualizerForUnit(unitTag)
     if coordinator then
         coordinator:OnUnitChanged()

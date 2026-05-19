@@ -51,7 +51,7 @@ function AddonProfiler:CaptureMemoryState(tag, state)
         self.memoryStates[tag].cpuTime = os.rawclock()
         self.currentSection = tag
     elseif state == "after" then
-        -- Ensure memory usage doesn't decrease
+        -- Clamp memory usage so it does not decrease
         if self.memoryStates[tag].after == 0 or memoryKB > self.memoryStates[tag].before then
             self.memoryStates[tag].after = memoryKB
         else

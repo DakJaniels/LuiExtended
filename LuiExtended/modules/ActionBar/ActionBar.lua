@@ -83,7 +83,7 @@ local LUIE = LUIE
 --- @field UpdateCompanionUltimateLabel fun(optCurrent:number?)
 --- @field ResetCompanionUltimateLabel fun()
 --- @field RefreshCompanionQuickslotAnchors fun()
---- @field EnsureCompanionUltimateLabels fun()
+--- @field CreateCompanionUltimateLabels fun()
 --- @field OnPowerUpdateCompanion fun(unitTag: string, powerIndex: luaindex?, powerType: CombatMechanicFlags, powerValue: integer, powerMax: integer, powerEffectiveMax: integer)
 --- @field InventoryItemUsed fun()
 --- @field OnActiveHotbarUpdate fun(didActiveHotbarChange: boolean, shouldUpdateAbilityAssignments: boolean, activeHotbarCategory: number)
@@ -1565,7 +1565,7 @@ end
 function ActionBar.OnPlayerActivated()
     -- Manually trigger event to update stats
     g_hotbarCategory = GetActiveHotbarCategory()
-    ActionBar.EnsureCompanionUltimateLabels()
+    ActionBar.CreateCompanionUltimateLabels()
     RefreshCompanionQuickslotAnchors()
     ActionBar.OnSlotsFullUpdate()
     for i = (BAR_INDEX_START + BACKBAR_INDEX_OFFSET), (BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET) do
@@ -1961,7 +1961,7 @@ end
 
 -- -----------------------------------------------------------------------------
 --- Creates companion ultimate overlay labels on first use (after CompanionUltimateButton exists).
-function ActionBar.EnsureCompanionUltimateLabels()
+function ActionBar.CreateCompanionUltimateLabels()
     if g_companionUltimateLabelsCreated then
         return
     end
@@ -2028,7 +2028,7 @@ function ActionBar.UpdateCompanionUltimateLabel(optCurrent)
         end
         return
     end
-    ActionBar.EnsureCompanionUltimateLabels()
+    ActionBar.CreateCompanionUltimateLabels()
     if not uiCompanionUltimate.LabelVal and not uiCompanionUltimate.LabelPct then
         return
     end

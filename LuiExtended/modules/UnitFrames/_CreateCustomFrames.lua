@@ -849,7 +849,7 @@ local function SetupCommonFrameActions()
                             powerBar.noHealingOverlay:SetColor(0.8, 0.1, 0.1, 0.5)
                         end
 
-                        -- Ensure labels render above overlays (draw level 10 is above overlay at 5)
+                        -- Draw labels above overlays (draw level 10 is above overlay at 5)
                         if powerBar.labelOne then
                             powerBar.labelOne:SetDrawTier(DT_HIGH)
                             powerBar.labelOne:SetDrawLayer(DL_OVERLAY)
@@ -927,7 +927,7 @@ local function SetupCommonFrameActions()
                                 powerBar.shield:SetAnchor(TOPLEFT, powerBar.shieldbackdrop, TOPLEFT, 1, 1)
                                 powerBar.shield:SetAnchor(BOTTOMRIGHT, powerBar.shieldbackdrop, BOTTOMRIGHT, -1, -1)
                             end
-                            -- Ensure shield renders above no-healing overlay
+                            -- Draw shield above no-healing overlay
                             powerBar.shield:SetDrawLevel(2)
                         end
                     end

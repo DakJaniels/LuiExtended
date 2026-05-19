@@ -4331,7 +4331,7 @@ function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, 
 end
 
 function ChatAnnouncements.ResolveItemMessage(message, formattedRecipient, color, logPrefix, totalString, groupLoot)
-    -- Ensure all parameters have valid values
+    -- Default missing parameters to valid values
     message = message or ""
     formattedRecipient = formattedRecipient or ""
     color = color and (type(color) == "table" and color:IsColorDef() and color or ZO_ColorDef:New(color)) or ZO_ColorDef:New("FFFFFF")
