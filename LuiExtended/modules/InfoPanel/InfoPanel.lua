@@ -1008,7 +1008,7 @@ function InfoPanel.Initialize(enabled)
         InfoPanel.OnPlayerCombatState(inCombat)
     end)
     if not InfoPanel.SV.HideInCombat then
-        -- XML defaults to hidden="true"; ensure panel is visible when option is off
+        -- XML defaults to hidden="true"; show panel when option is off
         uiPanel:SetHidden(false)
         InfoPanel.ApplyTransparency()
     else

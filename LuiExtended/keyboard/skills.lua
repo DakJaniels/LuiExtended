@@ -229,7 +229,7 @@ function LUIE.HookKeyboardStats()
                     effectsRow.icon:SetTexture(buff.iconFile)
 
                     -- Always set the stack count text - set to empty string if stack count is 1 or less
-                    -- This ensures stack count is cleared when objects are reused from the pool
+                    -- Clears stack count when objects are reused from the pool
                     if buff.stackCount > 1 then
                         effectsRow.stackCount:SetText(buff.stackCount)
                     else

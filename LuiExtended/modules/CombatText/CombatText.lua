@@ -102,7 +102,7 @@ end
 
 --- Convert legacy TOPLEFT-on-GuiRoot saves to CENTER offsets on `LUIE_CombatText` so x/y sliders match.
 --- @param panelKey string
-function CombatText.EnsurePanelSlidersUseCenter(panelKey)
+function CombatText.MigratePanelSaveToCenter(panelKey)
     local s = CombatText.SV.panels[panelKey]
     if not s or not (s.point == TOPLEFT and s.relativePoint == TOPLEFT) then
         return

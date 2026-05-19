@@ -37,7 +37,7 @@ local GROUP_ELECTION_ICON_INFO =
 }
 
 -- -----------------------------------------------------------------------------
-local function EnsureElectionIcons()
+local function CreateElectionIcons()
     -- Small Group
     for i = 1, 4 do
         local unitTag = "SmallGroup" .. i
@@ -95,7 +95,7 @@ end
 function UnitFrames.RefreshElectionIcon(control, unitTag)
     local icon = control.electionIcon
     if not icon then
-        EnsureElectionIcons()
+        CreateElectionIcons()
         icon = control.electionIcon
         if not icon then
             -- Still nil? Bail out, nothing to do

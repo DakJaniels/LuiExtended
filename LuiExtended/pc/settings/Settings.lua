@@ -320,7 +320,7 @@ function LUIE.CreateSettings()
         end
     end
 
-    local function ProfileCopyEnsureLeaf(g, profile, account, bucket)
+    local function ProfileCopyGetOrCreateLeaf(g, profile, account, bucket)
         if type(g) ~= "table" then
             return nil
         end
@@ -390,7 +390,7 @@ function LUIE.CreateSettings()
             if type(g) == "table" then
                 local srcLeaf = g[copyPick_server] and g[copyPick_server][copyPick_account] and g[copyPick_server][copyPick_account][srcBucket]
                 if type(srcLeaf) == "table" then
-                    local destLeaf = ProfileCopyEnsureLeaf(g, tgtP, tgtA, tgtB)
+                    local destLeaf = ProfileCopyGetOrCreateLeaf(g, tgtP, tgtA, tgtB)
                     if type(destLeaf) == "table" then
                         CopyTable(srcLeaf, destLeaf)
                         anyCopied = true

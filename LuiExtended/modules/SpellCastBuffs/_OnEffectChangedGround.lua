@@ -40,7 +40,7 @@ function SpellCastBuffs.OnEffectChangedGround(eventId, changeType, effectSlot, e
         return
     end
 
-    -- Ensure all necessary contexts are initialized
+    -- Initialize required contexts if missing
     for context, _ in pairs(SpellCastBuffs.containerRouting) do
         if not SpellCastBuffs.EffectsList[context] then
             SpellCastBuffs.EffectsList[context] = {}
