@@ -152,25 +152,37 @@ function SpellCastBuffs.OnEffectChangedGround(eventId, changeType, effectSlot, e
                     end
                 end
 
-                SpellCastBuffs.EffectsList[context][abilityId] =
-                {
-                    target = SpellCastBuffs.DetermineTarget(context),
-                    type = groundType[i].type,
-                    id = abilityId,
-                    name = effectName,
-                    icon = iconName,
-                    dur = 1000 * duration,
-                    starts = 1000 * beginTime,
-                    ends = (duration > 0) and (1000 * endTime) or nil,
-                    forced = nil,
-                    restart = true,
-                    iconNum = 0,
-                    unbreakable = 0,
-                    stack = stackCount,
-                    buffSlot = effectSlot,
-                    groundLabel = groundLabel,
-                    toggle = toggle,
-                }
+                local skipGroundDuplicate = false
+                -- Native reticleover debuff/buff already uses the same target container as context "ground".
+                if unitTag == "reticleover" and SpellCastBuffs.UnitHasBuffAbilityId("reticleover", abilityId) then
+                    local routedContainer = SpellCastBuffs.containerRouting[context]
+                    local nativeContext = (groundType[i].type == BUFF_EFFECT_TYPE_DEBUFF) and "reticleover2" or "reticleover1"
+                    if routedContainer and SpellCastBuffs.containerRouting[nativeContext] == routedContainer then
+                        skipGroundDuplicate = true
+                    end
+                end
+
+                if not skipGroundDuplicate then
+                    SpellCastBuffs.EffectsList[context][abilityId] =
+                    {
+                        target = SpellCastBuffs.DetermineTarget(context),
+                        type = groundType[i].type,
+                        id = abilityId,
+                        name = effectName,
+                        icon = iconName,
+                        dur = 1000 * duration,
+                        starts = 1000 * beginTime,
+                        ends = (duration > 0) and (1000 * endTime) or nil,
+                        forced = nil,
+                        restart = true,
+                        iconNum = 0,
+                        unbreakable = 0,
+                        stack = stackCount,
+                        buffSlot = effectSlot,
+                        groundLabel = groundLabel,
+                        toggle = toggle,
+                    }
+                end
             end
         end
     end

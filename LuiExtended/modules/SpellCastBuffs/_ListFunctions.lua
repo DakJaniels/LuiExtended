@@ -390,3 +390,23 @@ function SpellCastBuffs.SetFakeCombatEffect(context, abilityId, entry)
     effectsList[uid] = entry
     effectsList[abilityId] = nil
 end
+
+--- Remove other EffectsList rows that share the same UI container and ability id (e.g. ground + reticleover2 -> target debuffs).
+--- @param keepContext string
+--- @param abilityId integer
+--- @param keepUid integer|string|nil
+function SpellCastBuffs.RemoveDuplicateEffectsInSharedContainer(keepContext, abilityId, keepUid)
+    local keepContainer = SpellCastBuffs.containerRouting[keepContext]
+    if not keepContainer or not abilityId then
+        return
+    end
+    for context, effectsList in pairs(SpellCastBuffs.EffectsList) do
+        if context ~= keepContext and SpellCastBuffs.containerRouting[context] == keepContainer then
+            for listKey, effect in pairs(effectsList) do
+                if effect.id == abilityId and listKey ~= keepUid then
+                    effectsList[listKey] = nil
+                end
+            end
+        end
+    end
+end

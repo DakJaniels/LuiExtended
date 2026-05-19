@@ -374,5 +374,8 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
                                                             }),
         }
         SpellCastBuffs.RemoveSyntheticEffectsForAbilityId(context, abilityId, nativeUid)
+        if unitTag == "reticleover" or unitTag == "player" then
+            SpellCastBuffs.RemoveDuplicateEffectsInSharedContainer(context, abilityId, nativeUid)
+        end
     end
 end
