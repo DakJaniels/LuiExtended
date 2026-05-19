@@ -24,6 +24,12 @@ local moduleName = LUIE.name .. "CombatInfo" .. "SynergyTracker"
 -- UI Constants
 local MAX_SYNERGY_SLOTS = 10
 local PREVIEW_ROW_COUNT = 3
+local ROW_WIDTH_FULL = 320
+local ROW_WIDTH_MINIMAL = 44
+local ROW_HEIGHT = 44
+local MINIMAL_SLOT_GAP = 2
+local CONTROL_WIDTH_DEFAULT = 320
+local CONTROL_HEIGHT_DEFAULT = 440
 
 --- Hardcoded shared cooldown groups
 --- Wiki: "Luminous Shards and Energy Orb's synergies uniquely share the same cooldown"
@@ -47,22 +53,161 @@ local function SetLabelFont(label, pcFont, consoleFont)
     end
 end
 
---- @class SynergyTracker : ZO_Object
+--- @class SynergyTracker : ZO_InitializingObject
 --- @field control TopLevelWindow Main UI control
 --- @field bg LUIE_SynergyTracker_UI_Background Background control for unlock mode
 --- @field activeSynergies table<integer, table> Currently active synergies
 --- @field synergyControls table[] UI controls for each synergy slot
 --- @field synergyCooldowns table<integer, table> Synergies currently on cooldown
 --- @field lastCooldownUpdate integer Last cooldown UI update time
-local SynergyTracker = ZO_Object:Subclass()
+local SynergyTracker = ZO_InitializingObject:Subclass()
 CombatInfo.SynergyTracker = SynergyTracker
 
---- Create new SynergyTracker instance
---- @return SynergyTracker
-function SynergyTracker:New()
-    local obj = ZO_Object.New(self)
-    obj:Initialize()
-    return obj
+--- Re-anchor synergy rows (vertical stack vs horizontal icon strip for minimal mode)
+--- @param displayMode string
+--- @param visibleCount integer|nil Number of slots laid out (0 = defer until next update)
+function SynergyTracker:ApplySlotAnchors(displayMode, visibleCount)
+    if not self.synergyControls or not self.control then
+        return
+    end
+
+    local Settings = CombatInfo.SV.synergy
+    local isMinimal = displayMode == "minimal"
+    local horizontal = isMinimal and Settings.minimalHorizontal
+    local slotCount = visibleCount or 0
+
+    for i = 1, MAX_SYNERGY_SLOTS do
+        local control = self.synergyControls[i]
+        if not control then
+            break
+        end
+
+        local row = control.row
+        row:ClearAnchors()
+
+        if isMinimal then
+            if slotCount > 0 and i <= slotCount then
+                if horizontal then
+                    local offsetX = (i - 1) * (ROW_WIDTH_MINIMAL + MINIMAL_SLOT_GAP)
+                    row:SetAnchor(TOPLEFT, self.control, TOPLEFT, offsetX, 0)
+                else
+                    local offsetY = (i - 1) * ROW_HEIGHT
+                    row:SetAnchor(TOPLEFT, self.control, TOPLEFT, 0, offsetY)
+                end
+            else
+                row:SetAnchor(TOPLEFT, self.control, TOPLEFT, -10000, 0)
+            end
+        elseif i == 1 then
+            row:SetAnchor(TOP, self.control, TOP, 0, 0)
+        else
+            local prevRow = self.synergyControls[i - 1].row
+            row:SetAnchor(TOP, prevRow, BOTTOM, 0, 0)
+        end
+    end
+end
+
+--- Unlock move UI: backdrop visibility and row mouse so the top-level control receives drags
+function SynergyTracker:UpdateUnlockInteraction()
+    local Settings = CombatInfo.SV.synergy
+    local unlocked = Settings.unlocked
+    local isMinimal = Settings.displayMode == "minimal"
+
+    if self.synergyControls then
+        for i = 1, MAX_SYNERGY_SLOTS do
+            local control = self.synergyControls[i]
+            if control and control.row then
+                -- Rows are mouse-enabled for tooltips; that blocks dragging the parent while unlocked
+                control.row:SetMouseEnabled(not unlocked)
+            end
+        end
+    end
+
+    if self.bg then
+        if unlocked and isMinimal then
+            self.bg:SetHidden(true)
+            self.bg:SetMouseEnabled(false)
+        elseif unlocked then
+            self.bg:SetHidden(false)
+            self.bg:SetMouseEnabled(true)
+            self.bg:SetCenterColor(0, 0, 0, 0.5)
+            self.bg:SetEdgeColor(0.3, 0.3, 0.3, 0.8)
+        else
+            self.bg:SetHidden(true)
+            self.bg:SetMouseEnabled(false)
+        end
+    end
+end
+
+--- Resize the top-level tracker for minimal layouts
+--- @param displayMode string
+--- @param visibleCount integer
+function SynergyTracker:ApplyContainerDimensions(displayMode, visibleCount)
+    if not self.control then
+        return
+    end
+
+    local Settings = CombatInfo.SV.synergy
+    if displayMode == "minimal" and visibleCount > 0 then
+        if Settings.minimalHorizontal then
+            local width = visibleCount * ROW_WIDTH_MINIMAL + (visibleCount - 1) * MINIMAL_SLOT_GAP
+            self.control:SetDimensions(width, ROW_HEIGHT)
+        else
+            self.control:SetDimensions(ROW_WIDTH_MINIMAL, visibleCount * ROW_HEIGHT)
+        end
+    else
+        self.control:SetDimensions(CONTROL_WIDTH_DEFAULT, CONTROL_HEIGHT_DEFAULT)
+    end
+end
+
+--- Apply row dimensions and child anchors for the current display mode
+--- @param displayMode string
+--- @param visibleCount integer|nil
+function SynergyTracker:ApplyRowLayout(displayMode, visibleCount)
+    if not self.synergyControls then
+        return
+    end
+
+    local isMinimal = displayMode == "minimal"
+    local rowWidth = isMinimal and ROW_WIDTH_MINIMAL or ROW_WIDTH_FULL
+
+    for i = 1, MAX_SYNERGY_SLOTS do
+        local control = self.synergyControls[i]
+        if not control then
+            break
+        end
+
+        control.row:SetDimensions(rowWidth, ROW_HEIGHT)
+
+        if isMinimal then
+            if control.name then
+                control.name:SetHidden(true)
+                control.name:SetDimensionConstraints(0, 0, 0, 0)
+            end
+            if control.posNum then
+                control.posNum:SetHidden(true)
+            end
+            if control.priority then
+                control.priority:SetHidden(true)
+            end
+        else
+            if control.name then
+                control.name:SetHidden(false)
+                control.name:SetDimensionConstraints(0, 0, 200, 44)
+            end
+            if control.priority then
+                control.priority:ClearAnchors()
+                control.priority:SetAnchor(RIGHT, control.row, RIGHT, -5, 0)
+            end
+            if control.name and control.posNum then
+                control.name:ClearAnchors()
+                control.name:SetAnchor(LEFT, control.posNum, RIGHT, 8, 0)
+            end
+        end
+    end
+
+    if visibleCount ~= nil then
+        self:ApplySlotAnchors(displayMode, visibleCount)
+    end
 end
 
 --- Initialize the SynergyTracker (creates rows from virtual template, creates fragment, registers events)
@@ -111,6 +256,13 @@ function SynergyTracker:Initialize()
         SetLabelFont(priority, "ZoFontGame", "$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
         SetLabelFont(cooldownText, "ZoFontGameBold", "$(GAMEPAD_MEDIUM_FONT)|20|soft-shadow-thick")
 
+        if cooldown then
+            cooldown:SetDrawTier(DT_MEDIUM)
+        end
+        if cooldownText then
+            cooldownText:SetDrawTier(DT_HIGH)
+        end
+
         row:SetHandler("OnMouseEnter", function (control)
             local abilityId = self.synergyControls[i].abilityId
             if abilityId and abilityId > 0 then
@@ -135,6 +287,10 @@ function SynergyTracker:Initialize()
             ClearTooltip(GameTooltip)
         end)
 
+        row:SetHandler("OnMouseUp", function (control, button, upInside)
+            self:OnSynergyRowMouseUp(control, button, upInside, i)
+        end)
+
         self.synergyControls[i] =
         {
             row = row,
@@ -151,6 +307,8 @@ function SynergyTracker:Initialize()
 
     local Settings = CombatInfo.SV.synergy
 
+    self:ApplyRowLayout(Settings.displayMode)
+
     -- Migrate away from the old cooldownGroups saved variable field
     Settings.cooldownGroups = nil
 
@@ -164,7 +322,7 @@ function SynergyTracker:Initialize()
         else
             zo_callLater(function () self:OnHidden() end, 0)
         end
-        if not Settings.unlocked then
+        if not Settings.unlocked and Settings.displayMode ~= "hidden" then
             self.control:SetHidden(not isShown)
         end
     end
@@ -188,9 +346,7 @@ function SynergyTracker:Initialize()
     self.control:SetMovable(Settings.unlocked)
     self.control:SetMouseEnabled(Settings.unlocked)
 
-    if self.bg then
-        self.bg:SetHidden(not Settings.unlocked)
-    end
+    self:UpdateUnlockInteraction()
 
     self.control:SetHandler("OnMoveStop", function ()
         local centerX, centerY = self.control:GetCenter()
@@ -201,7 +357,8 @@ function SynergyTracker:Initialize()
     self.lastCooldownUpdate = 0
     self.control:SetHandler("OnUpdate", function ()
         local currentTime = GetGameTimeMilliseconds()
-        if currentTime - self.lastCooldownUpdate >= 1000 then
+        local cooldownInterval = (CombatInfo.SV.synergy.displayMode == "minimal") and 200 or 1000
+        if currentTime - self.lastCooldownUpdate >= cooldownInterval then
             self.lastCooldownUpdate = currentTime
             self:UpdateCooldownDisplay()
         end
@@ -314,6 +471,9 @@ function SynergyTracker:UpdateDisplay()
     local numSynergies = GetNumberOfAvailableSynergies()
     local displayMode = Settings.displayMode
     local maxDisplay = Settings.maxDisplay or MAX_SYNERGY_SLOTS
+    local isMinimal = displayMode == "minimal"
+
+    self:ApplyRowLayout(displayMode)
 
     for i = 1, MAX_SYNERGY_SLOTS do
         local control = self.synergyControls[i]
@@ -326,6 +486,11 @@ function SynergyTracker:UpdateDisplay()
                 control.cooldownText:SetHidden(true)
             end
         end
+    end
+
+    if displayMode == "hidden" and not Settings.unlocked then
+        self.control:SetHidden(true)
+        return
     end
 
     if displayMode == "single" then
@@ -386,6 +551,8 @@ function SynergyTracker:UpdateDisplay()
         end
 
         self.control:SetHidden(not hasSynergy)
+        self:ApplyContainerDimensions(displayMode, 0)
+        self:UpdateUnlockInteraction()
         self:UpdateCooldownDisplay()
         return
     end
@@ -456,30 +623,43 @@ function SynergyTracker:UpdateDisplay()
             control.icon:SetTexture(synergyData.icon)
         end
 
-        local displayText
-        if displayMode == "compact" then
-            displayText = synergyData.name
-        else
-            -- "multi": prefer the game's prompt string; if empty, build a short action string
-            displayText = synergyData.prompt
-            if displayText == "" then
-                displayText = zo_strformat(SI_USE_SYNERGY, synergyData.name)
+        if isMinimal then
+            if control.name then
+                control.name:SetHidden(true)
             end
-        end
+            if control.posNum then
+                control.posNum:SetHidden(true)
+            end
+            if control.priority then
+                control.priority:SetHidden(true)
+            end
+        else
+            local displayText
+            if displayMode == "compact" then
+                displayText = synergyData.name
+            else
+                -- "multi": prefer the game's prompt string; if empty, build a short action string
+                displayText = synergyData.prompt
+                if displayText == "" then
+                    displayText = zo_strformat(SI_USE_SYNERGY, synergyData.name)
+                end
+            end
 
-        if control.name then
-            control.name:SetText(displayText)
-        end
+            if control.name then
+                control.name:SetHidden(false)
+                control.name:SetText(displayText)
+            end
 
-        if Settings.showPriority and control.priority then
-            control.priority:SetText(string_format("P%d", synergyData.priority))
-            control.priority:SetHidden(false)
-        elseif control.priority then
-            control.priority:SetHidden(true)
-        end
+            if Settings.showPriority and control.priority then
+                control.priority:SetText(string_format("P%d", synergyData.priority))
+                control.priority:SetHidden(false)
+            elseif control.priority then
+                control.priority:SetHidden(true)
+            end
 
-        if control.posNum then
-            control.posNum:SetHidden(not Settings.showKeybinds)
+            if control.posNum then
+                control.posNum:SetHidden(not Settings.showKeybinds)
+            end
         end
 
         if control.icon then
@@ -502,6 +682,17 @@ function SynergyTracker:UpdateDisplay()
     local totalToShow = zo_max(numSynergies, cooldownCount)
     self.control:SetHidden(totalToShow == 0)
 
+    if isMinimal then
+        if displayCount > 0 then
+            self:ApplyRowLayout(displayMode, displayCount)
+        end
+        self:ApplyContainerDimensions(displayMode, displayCount)
+    else
+        self:ApplyRowLayout(displayMode, MAX_SYNERGY_SLOTS)
+        self:ApplyContainerDimensions(displayMode, 0)
+    end
+
+    self:UpdateUnlockInteraction()
     self:UpdateCooldownDisplay()
 end
 
@@ -683,9 +874,7 @@ function SynergyTracker:SetUnlocked(unlocked)
 
     self.control:SetMovable(unlocked)
     self.control:SetMouseEnabled(unlocked)
-    if self.bg then
-        self.bg:SetHidden(not unlocked)
-    end
+    self:UpdateUnlockInteraction()
 
     if unlocked then
         self:ShowPreview()
@@ -702,18 +891,43 @@ end
 
 --- Show preview synergies for positioning (shows PREVIEW_ROW_COUNT rows with placeholder data)
 function SynergyTracker:ShowPreview()
-    for i = 1, PREVIEW_ROW_COUNT do
+    local Settings = CombatInfo.SV.synergy
+    local layoutMode = Settings.displayMode
+    if layoutMode == "hidden" then
+        layoutMode = "multi"
+    end
+    local isMinimal = layoutMode == "minimal"
+    local previewCount = PREVIEW_ROW_COUNT
+    if isMinimal then
+        previewCount = zo_min(Settings.maxDisplay or MAX_SYNERGY_SLOTS, MAX_SYNERGY_SLOTS)
+    end
+    self:ApplyRowLayout(layoutMode, previewCount)
+
+    for i = 1, previewCount do
         local control = self.synergyControls[i]
         if control then
             if control.icon then
                 control.icon:SetTexture("esoui/art/icons/ability_undaunted_001.dds")
             end
             if control.name then
-                control.name:SetText(string_format("Preview Synergy %d", i))
-                control.name:SetColor(1, 1, 1, 1)
+                if isMinimal then
+                    control.name:SetHidden(true)
+                else
+                    control.name:SetHidden(false)
+                    control.name:SetText(string_format("Preview Synergy %d", i))
+                    control.name:SetColor(1, 1, 1, 1)
+                end
+            end
+            if control.posNum then
+                control.posNum:SetHidden(isMinimal or not Settings.showKeybinds)
             end
             if control.priority then
-                control.priority:SetText(string_format("P%d", i))
+                if isMinimal then
+                    control.priority:SetHidden(true)
+                else
+                    control.priority:SetText(string_format("P%d", i))
+                    control.priority:SetHidden(not Settings.showPriority)
+                end
             end
             if control.icon then
                 control.icon:SetDesaturation(0)
@@ -722,13 +936,19 @@ function SynergyTracker:ShowPreview()
         end
     end
 
-    for i = PREVIEW_ROW_COUNT + 1, MAX_SYNERGY_SLOTS do
+    for i = previewCount + 1, MAX_SYNERGY_SLOTS do
         local control = self.synergyControls[i]
         if control then
             control.row:SetHidden(true)
         end
     end
 
+    if isMinimal then
+        self:ApplyRowLayout(layoutMode, previewCount)
+        self:ApplyContainerDimensions(layoutMode, previewCount)
+    end
+
+    self:UpdateUnlockInteraction()
     self.control:SetHidden(false)
 end
 
@@ -743,20 +963,79 @@ end
 --- Update display options (keybinds, priority visibility)
 function SynergyTracker:UpdateDisplayOptions()
     local Settings = CombatInfo.SV.synergy
+    local displayMode = Settings.displayMode
 
-    for i = 1, MAX_SYNERGY_SLOTS do
-        local control = self.synergyControls[i]
-        if control then
-            if control.posNum then
-                control.posNum:SetHidden(not Settings.showKeybinds)
-            end
-            if control.priority then
-                control.priority:SetHidden(not Settings.showPriority)
+    if displayMode ~= "minimal" and displayMode ~= "hidden" then
+        for i = 1, MAX_SYNERGY_SLOTS do
+            local control = self.synergyControls[i]
+            if control then
+                if control.posNum then
+                    control.posNum:SetHidden(not Settings.showKeybinds)
+                end
+                if control.priority then
+                    control.priority:SetHidden(not Settings.showPriority)
+                end
             end
         end
     end
 
     self:UpdateDisplay()
+end
+
+--- Right-click context menu on a synergy row (priority override and blacklist)
+--- @param control Control
+--- @param button integer
+--- @param upInside boolean
+--- @param slotIndex integer
+function SynergyTracker:OnSynergyRowMouseUp(control, button, upInside, slotIndex)
+    if not upInside or button ~= MOUSE_BUTTON_INDEX_RIGHT then
+        return
+    end
+
+    local Settings = CombatInfo.SV.synergy
+    if Settings.unlocked then
+        return
+    end
+
+    local slotControl = self.synergyControls[slotIndex]
+    local abilityId = slotControl and slotControl.abilityId
+    if not abilityId or abilityId <= 0 then
+        return
+    end
+
+    ClearMenu()
+
+    local abilityName = zo_strformat(SI_ABILITY_NAME, GetAbilityName(abilityId))
+    AddMenuItem(abilityName, function () end, MENU_ADD_OPTION_LABEL)
+
+    local currentOverride = Settings.priorityOverrides[abilityId]
+    local isBlacklisted = Settings.blacklist[abilityId] == true
+
+    AddMenuItem("Priority: Game Default", function ()
+        self:SetPriorityOverride(abilityId, nil)
+    end, nil, nil, nil, nil, nil, nil, currentOverride == nil)
+
+    for priority = 1, 10 do
+        local menuPriority = priority
+        AddMenuItem(string_format("Priority: %d", menuPriority), function ()
+            self:SetPriorityOverride(abilityId, menuPriority)
+        end, nil, nil, nil, nil, nil, nil, currentOverride == menuPriority)
+    end
+
+    AddMenuItem(isBlacklisted and "Remove from Blacklist" or "Add to Blacklist", function ()
+        self:SetSynergyBlacklisted(abilityId, not isBlacklisted)
+    end)
+
+    ShowMenu(control)
+end
+
+--- Set whether a synergy is blacklisted (hidden from the tracker)
+--- @param abilityId integer
+--- @param blacklisted boolean
+function SynergyTracker:SetSynergyBlacklisted(abilityId, blacklisted)
+    local Settings = CombatInfo.SV.synergy
+    Settings.blacklist[abilityId] = blacklisted and true or nil
+    self:RefreshActiveSynergies()
 end
 
 --- Set priority override for a synergy

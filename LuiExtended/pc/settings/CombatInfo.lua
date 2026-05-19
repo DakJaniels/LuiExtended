@@ -3187,13 +3187,17 @@ function CombatInfo.CreateSettings()
         {
             type = "dropdown",
             name = "Display Mode",
-            tooltip = "Single: Show only highest priority synergy (like default UI)\nMulti: Show all available synergies\nCompact: Show all synergies with short names",
-            choices = { "Single Synergy", "Multi-Synergy", "Compact Multi-Synergy" },
+            tooltip = "Single: Show only highest priority synergy (like default UI)\nMulti: Show all available synergies\nCompact: Show all synergies with short names\nIcon + Cooldown: Icon and cooldown timer only (tooltip shows ability name)\nHidden: No on-screen tracker (detection, sounds, and overrides still run)",
+            choices = { "Single Synergy", "Multi-Synergy", "Compact Multi-Synergy", "Icon + Cooldown", "Hidden" },
             getFunc = function ()
                 if Settings.synergy.displayMode == "single" then
                     return "Single Synergy"
                 elseif Settings.synergy.displayMode == "compact" then
                     return "Compact Multi-Synergy"
+                elseif Settings.synergy.displayMode == "minimal" then
+                    return "Icon + Cooldown"
+                elseif Settings.synergy.displayMode == "hidden" then
+                    return "Hidden"
                 else
                     return "Multi-Synergy"
                 end
@@ -3203,11 +3207,16 @@ function CombatInfo.CreateSettings()
                     Settings.synergy.displayMode = "single"
                 elseif value == "Compact Multi-Synergy" then
                     Settings.synergy.displayMode = "compact"
+                elseif value == "Icon + Cooldown" then
+                    Settings.synergy.displayMode = "minimal"
+                elseif value == "Hidden" then
+                    Settings.synergy.displayMode = "hidden"
                 else
                     Settings.synergy.displayMode = "multi"
                 end
                 local tracker = GetSynergyTracker()
                 if tracker then
+                    tracker:ApplyRowLayout(Settings.synergy.displayMode)
                     tracker:UpdateDisplay()
                 end
             end,
@@ -3215,6 +3224,27 @@ function CombatInfo.CreateSettings()
             default = "Multi-Synergy",
             disabled = function ()
                 return not Settings.synergy.enabled
+            end,
+        },
+        {
+            type = "checkbox",
+            name = zo_strformat("\t\t\t\t\t<<1>>", "Horizontal Icon Layout"),
+            tooltip = "When using Icon + Cooldown mode, arrange synergy icons in a horizontal row instead of a vertical list.",
+            getFunc = function ()
+                return Settings.synergy.minimalHorizontal
+            end,
+            setFunc = function (value)
+                Settings.synergy.minimalHorizontal = value
+                local tracker = GetSynergyTracker()
+                if tracker then
+                    tracker:ApplyRowLayout(Settings.synergy.displayMode)
+                    tracker:UpdateDisplay()
+                end
+            end,
+            width = "full",
+            default = Defaults.synergy.minimalHorizontal,
+            disabled = function ()
+                return not Settings.synergy.enabled or Settings.synergy.displayMode ~= "minimal"
             end,
         },
         {
@@ -3237,7 +3267,7 @@ function CombatInfo.CreateSettings()
             width = "full",
             default = Defaults.synergy.maxDisplay,
             disabled = function ()
-                return not Settings.synergy.enabled or Settings.synergy.displayMode == "single"
+                return not Settings.synergy.enabled or Settings.synergy.displayMode == "single" or Settings.synergy.displayMode == "hidden"
             end,
         },
         {
@@ -3257,7 +3287,7 @@ function CombatInfo.CreateSettings()
             width = "full",
             default = Defaults.synergy.showPriority,
             disabled = function ()
-                return not Settings.synergy.enabled
+                return not Settings.synergy.enabled or Settings.synergy.displayMode == "hidden"
             end,
         },
         {
@@ -3277,7 +3307,7 @@ function CombatInfo.CreateSettings()
             width = "full",
             default = Defaults.synergy.showKeybinds,
             disabled = function ()
-                return not Settings.synergy.enabled
+                return not Settings.synergy.enabled or Settings.synergy.displayMode == "minimal" or Settings.synergy.displayMode == "hidden"
             end,
         },
         {
@@ -3316,7 +3346,7 @@ function CombatInfo.CreateSettings()
             width = "full",
             default = Defaults.synergy.showCooldowns,
             disabled = function ()
-                return not Settings.synergy.enabled or Settings.synergy.displayMode == "single"
+                return not Settings.synergy.enabled or Settings.synergy.displayMode == "single" or Settings.synergy.displayMode == "hidden"
             end,
         },
         {
