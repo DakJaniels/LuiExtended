@@ -109,6 +109,9 @@ local MAIL_CURRENCY_ANNOUNCE_DEDUPE_MS = 2500
 local MAIL_NOTIFY_SUPPRESS_AFTER_LOOT_MS = 2000
 S.g_lastMailCurrencyAnnounce = { amount = 0, senderKey = "", timeMs = 0 }
 
+local TIMED_ACTIVITY_PROGRESS_ANNOUNCE_DEDUPE_MS = 500
+S.g_lastTimedActivityProgressAnnounce = {}
+
 -- Disguise
 S.g_currentDisguise = nil -- Holds current disguise itemId
 S.g_disguiseState = nil   -- Holds current disguise state
@@ -398,6 +401,8 @@ function ChatAnnouncements.Initialize(enabled)
 
     -- Timed Activity
     if IsTimedActivitySystemAvailable() then
+        eventManager:UnregisterForEvent(moduleName, EVENT_TIMED_ACTIVITY_TRACKING_UPDATED)
+        eventManager:UnregisterForEvent(moduleName, EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED)
         eventManager:RegisterForEvent(moduleName, EVENT_TIMED_ACTIVITY_TRACKING_UPDATED, ChatAnnouncements.OnTimedActivityTrackingUpdated)
         eventManager:RegisterForEvent(moduleName, EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED, ChatAnnouncements.OnTimedActivityProgressUpdated)
     end
@@ -3166,6 +3171,82 @@ function ChatAnnouncements.OnAchievementUpdated(eventId, id)
     end
 end
 
+--- @param index luaindex
+--- @return string
+function I.GetTimedActivityProgressAnnounceKey(index)
+    local encodedId = GetTimedActivityEncodedId(index)
+    if encodedId ~= nil then
+        return string_format("e:%s", tostring(encodedId))
+    end
+    return string_format("i:%i", index)
+end
+
+--- Suppress duplicate chat/alert for the same challenge slot at the same progress (2 game events → 2 lines, not 4).
+--- @param index luaindex
+--- @param currentProgress integer
+--- @return boolean suppress
+function I.ShouldSuppressTimedActivityProgressAnnounce(index, currentProgress)
+    local key = I.GetTimedActivityProgressAnnounceKey(index)
+    local nowMs = GetFrameTimeMilliseconds()
+    local last = S.g_lastTimedActivityProgressAnnounce[key]
+    if last and last.progress == currentProgress and (nowMs - last.timeMs) < TIMED_ACTIVITY_PROGRESS_ANNOUNCE_DEDUPE_MS then
+        return true
+    end
+    return false
+end
+
+--- @param index luaindex
+--- @param currentProgress integer
+function I.RecordTimedActivityProgressAnnounce(index, currentProgress)
+    local key = I.GetTimedActivityProgressAnnounceKey(index)
+    S.g_lastTimedActivityProgressAnnounce[key] =
+    {
+        progress = currentProgress,
+        timeMs = GetFrameTimeMilliseconds(),
+    }
+end
+
+--- @param message string
+--- @param encodedIdKey string|nil Same-slot key from GetTimedActivityProgressAnnounceKey; skips duplicate queue rows for one print batch
+function I.QueueTimedActivityChatMessage(message, encodedIdKey)
+    if encodedIdKey then
+        for i = 1, ChatAnnouncements.QueuedMessagesCounter - 1 do
+            local queued = ChatAnnouncements.QueuedMessages[i]
+            if queued and queued.type == "MESSAGE" and queued.timedActivityAnnounceKey == encodedIdKey and queued.message == message then
+                return
+            end
+        end
+    end
+    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
+    {
+        message = message,
+        type = "MESSAGE",
+        timedActivityAnnounceKey = encodedIdKey,
+    }
+    ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+end
+
+--- @param index luaindex
+--- @param currentProgress integer
+--- @param maxProgress integer
+--- @param chatEnabled boolean
+--- @param alertEnabled boolean
+function I.AnnounceTimedActivityProgress(index, currentProgress, maxProgress, chatEnabled, alertEnabled)
+    if I.ShouldSuppressTimedActivityProgressAnnounce(index, currentProgress) then
+        return
+    end
+    local announceKey = I.GetTimedActivityProgressAnnounceKey(index)
+    if chatEnabled then
+        local message = I.BuildTimedActivityMessage(index, currentProgress, maxProgress)
+        I.QueueTimedActivityChatMessage(message, announceKey)
+    end
+    if alertEnabled then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, I.BuildTimedActivityMessage(index, currentProgress, maxProgress, true))
+    end
+    I.RecordTimedActivityProgressAnnounce(index, currentProgress)
+end
+
 --- Claimed suffix for challenges (matches Timed Activities UI when total claimable > 0).
 --- @param index luaindex
 --- @param forAlert boolean|nil
@@ -3226,19 +3307,21 @@ function ChatAnnouncements.OnTimedActivityTrackingUpdated(eventId, timedActivity
     if not (ChatAnnouncements.SV.Notify.TimedActivityCA or ChatAnnouncements.SV.Notify.TimedActivityAlert) then return end
     local index, trackedEncodedId = GetTrackedTimedActivityInfo()
     if index == nil or trackedEncodedId ~= timedActivityEncodedId then return end
-    local message = I.BuildTimedActivityMessage(index)
-    if ChatAnnouncements.SV.Notify.TimedActivityCA then
-        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-        {
-            message = message,
-            type = "MESSAGE",
-        }
-        ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+    local currentProgress = GetTimedActivityProgress(index)
+    local maxProgress = GetTimedActivityMaxProgress(index)
+    -- When progress announcements are on, tracking uses the same progress text; skip duplicate lines from the same pickup.
+    if ChatAnnouncements.SV.Notify.TimedActivityProgressCA or ChatAnnouncements.SV.Notify.TimedActivityProgressAlert then
+        if I.ShouldSuppressTimedActivityProgressAnnounce(index, currentProgress) then
+            return
+        end
     end
-    if ChatAnnouncements.SV.Notify.TimedActivityAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, I.BuildTimedActivityMessage(index, nil, nil, true))
-    end
+    I.AnnounceTimedActivityProgress(
+        index,
+        currentProgress,
+        maxProgress,
+        ChatAnnouncements.SV.Notify.TimedActivityCA,
+        ChatAnnouncements.SV.Notify.TimedActivityAlert
+    )
 end
 
 --- - *EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED*
@@ -3273,19 +3356,13 @@ function ChatAnnouncements.OnTimedActivityProgressUpdated(eventId, index, previo
         end
         if not atMilestone then return end
     end
-    local message = I.BuildTimedActivityMessage(index, currentProgress, maxProgress)
-    if ChatAnnouncements.SV.Notify.TimedActivityProgressCA then
-        ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
-        {
-            message = message,
-            type = "MESSAGE",
-        }
-        ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
-        eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
-    end
-    if ChatAnnouncements.SV.Notify.TimedActivityProgressAlert then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, I.BuildTimedActivityMessage(index, currentProgress, maxProgress, true))
-    end
+    I.AnnounceTimedActivityProgress(
+        index,
+        currentProgress,
+        maxProgress,
+        ChatAnnouncements.SV.Notify.TimedActivityProgressCA,
+        ChatAnnouncements.SV.Notify.TimedActivityProgressAlert
+    )
 end
 
 --- - *EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED*
