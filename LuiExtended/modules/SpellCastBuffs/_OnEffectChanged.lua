@@ -240,7 +240,8 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
 
     if changeType == EFFECT_RESULT_FADED then
         -- delete Effect
-        SpellCastBuffs.EffectsList[context][effectSlot] = nil
+        local nativeUid = SpellCastBuffs.GetEffectUidNative(effectSlot)
+        SpellCastBuffs.EffectsList[context][nativeUid] = nil
         if Effects.EffectCreateSkillAura[abilityId] and Effects.EffectCreateSkillAura[abilityId].removeOnEnd then
             local id = Effects.EffectCreateSkillAura[abilityId].abilityId
 
@@ -249,7 +250,7 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
             if not (SpellCastBuffs.SV.BlacklistTable[name] or SpellCastBuffs.SV.BlacklistTable[id]) then
                 local simulatedContext = unitTag .. fakeEffectType
                 simulatedContext = SpellCastBuffs.DetermineContext(simulatedContext, id, name, sourceType)
-                SpellCastBuffs.EffectsList[simulatedContext][Effects.EffectCreateSkillAura[abilityId].abilityId] = nil
+                SpellCastBuffs.ClearFakeEffectEntry(simulatedContext, id)
             end
         end
 
@@ -295,25 +296,29 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
                     simulatedContext = SpellCastBuffs.DetermineContext(simulatedContext, id, name, sourceType)
 
                     -- Create Buff
-                    local icon = Effects.EffectCreateSkillAura[abilityId].icon or GetAbilityIcon(id)
-                    SpellCastBuffs.EffectsList[simulatedContext][Effects.EffectCreateSkillAura[abilityId].abilityId] =
-                    {
-                        target = SpellCastBuffs.DetermineTarget(simulatedContext),
-                        type = fakeEffectType,
-                        id = id,
-                        name = name,
-                        icon = icon,
-                        dur = 1000 * duration,
-                        starts = 1000 * beginTime,
-                        ends = (duration > 0) and (1000 * endTime) or nil,
-                        forced = forcedType,
-                        restart = true,
-                        iconNum = 0,
-                        stack = 0,
-                        unbreakable = fakeUnbreakable,
-                        groundLabel = groundLabel,
-                        toggle = toggle,
-                    }
+                    if not SpellCastBuffs.UnitHasBuffAbilityId(unitTag, id) then
+                        local icon = Effects.EffectCreateSkillAura[abilityId].icon or GetAbilityIcon(id)
+                        local auraUid = SpellCastBuffs.GetEffectUidFake(id)
+                        SpellCastBuffs.EffectsList[simulatedContext][auraUid] =
+                        {
+                            uid = auraUid,
+                            target = SpellCastBuffs.DetermineTarget(simulatedContext),
+                            type = fakeEffectType,
+                            id = id,
+                            name = name,
+                            icon = icon,
+                            dur = 1000 * duration,
+                            starts = 1000 * beginTime,
+                            ends = (duration > 0) and (1000 * endTime) or nil,
+                            forced = forcedType,
+                            restart = true,
+                            iconNum = 0,
+                            stack = 0,
+                            unbreakable = fakeUnbreakable,
+                            groundLabel = groundLabel,
+                            toggle = toggle,
+                        }
+                    end
                 end
             end
         end
@@ -342,8 +347,10 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
         end
 
         -- Buffs are created based on their effectSlot, this allows multiple buffs/debuffs of the same type to appear.
-        SpellCastBuffs.EffectsList[context][effectSlot] =
+        local nativeUid = SpellCastBuffs.GetEffectUidNative(effectSlot)
+        SpellCastBuffs.EffectsList[context][nativeUid] =
         {
+            uid = nativeUid,
             target = SpellCastBuffs.DetermineTarget(context),
             type = effectType,
             id = abilityId,
@@ -366,5 +373,6 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
                                                                 stackCount = stackCount,
                                                             }),
         }
+        SpellCastBuffs.RemoveSyntheticEffectsForAbilityId(context, abilityId, nativeUid)
     end
 end

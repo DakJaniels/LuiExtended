@@ -484,7 +484,17 @@ local function buffSort(x, y)
         return (x.name < y.name)
         -- Both non-permanent
     elseif xDuration ~= 0 and yDuration ~= 0 then
-        return (x.starts == y.starts) and (x.name < y.name) or (x.ends > y.ends)
+        if x.starts == y.starts then
+            if x.name == y.name then
+                local xDisplayUid = x.displayUid or 0
+                local yDisplayUid = y.displayUid or 0
+                if xDisplayUid ~= yDisplayUid then
+                    return xDisplayUid < yDisplayUid
+                end
+            end
+            return x.name < y.name
+        end
+        return x.ends > y.ends
         -- One permanent, one not
     else
         return (xDuration == 0)
@@ -497,8 +507,18 @@ end
 function SpellCastBuffs.OnUpdate(currentTimeMs)
     local buffsSorted = {}
     local sortedCounts = {}
+    local displayUidCounter = {}
     local needs_update = {}
     local isProminent = {}
+
+    --- @param container string
+    --- @param effect table
+    local function appendSortedEffect(container, effect)
+        sortedCounts[container] = (sortedCounts[container] or 0) + 1
+        displayUidCounter[container] = (displayUidCounter[container] or 0) + 1
+        effect.displayUid = displayUidCounter[container]
+        buffsSorted[container][sortedCounts[container]] = effect
+    end
 
     -- And reset sizes of already existing icons
     for _, container in pairs(SpellCastBuffs.containerRouting) do
@@ -508,6 +528,7 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
             buffsSorted[container] = {}
         end
         sortedCounts[container] = 0
+        displayUidCounter[container] = 0
         -- Refresh prominent buff labels on each update tick
         if container == "prominentbuffs" or container == "prominentdebuffs" then
             isProminent[container] = true
@@ -527,30 +548,27 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
                     -- Filter Effects
                     -- Always show prominent effects
                     if v.target == "prominent" then
-                        sortedCounts[container] = sortedCounts[container] + 1
-                        buffsSorted[container][sortedCounts[container]] = v
+                        appendSortedEffect(container, v)
                         -- If the effect is not flagged as long or 0 duration and flagged to display in short container, then display normally.
                     elseif v.type == BUFF_EFFECT_TYPE_DEBUFF or v.forced == "short" or not (v.forced == "long" or v.ends == nil or v.dur == 0) then
                         if v.target == "reticleover" and SpellCastBuffs.SV.ShortTermEffects_Target then
-                            sortedCounts[container] = sortedCounts[container] + 1
-                            buffsSorted[container][sortedCounts[container]] = v
+                            appendSortedEffect(container, v)
                         elseif v.target == "player" and SpellCastBuffs.SV.ShortTermEffects_Player then
-                            sortedCounts[container] = sortedCounts[container] + 1
-                            buffsSorted[container][sortedCounts[container]] = v
+                            appendSortedEffect(container, v)
                         end
                         -- If the effect is a long term effect on the target then use Long Term Target settings.
                     elseif v.target == "reticleover" and SpellCastBuffs.SV.LongTermEffects_Target then
-                        sortedCounts[container] = sortedCounts[container] + 1
-                        buffsSorted[container][sortedCounts[container]] = v
+                        appendSortedEffect(container, v)
                         -- If the effect is a long term effect on the player then use Long Term Player settings.
                     elseif v.target == "player" and SpellCastBuffs.SV.LongTermEffects_Player then
                         -- Choose container for long-term player buffs
                         if SpellCastBuffs.SV.LongTermEffectsSeparate and not (container == "prominentbuffs" or container == "prominentdebuffs") then
-                            sortedCounts.player_long = sortedCounts.player_long + 1
-                            buffsSorted.player_long[sortedCounts.player_long] = v
+                            if buffsSorted.player_long == nil then
+                                buffsSorted.player_long = {}
+                            end
+                            appendSortedEffect("player_long", v)
                         else
-                            sortedCounts[container] = sortedCounts[container] + 1
-                            buffsSorted[container][sortedCounts[container]] = v
+                            appendSortedEffect(container, v)
                         end
                     end
                 end
@@ -581,6 +599,7 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
             local context = SpellCastBuffs.DetermineContextSimple("player1", abilityId, abilityName)
             SpellCastBuffs.EffectsList[context][abilityId] =
             {
+                uid = abilityId,
                 target = SpellCastBuffs.DetermineTarget(context),
                 type = 1,
                 id = abilityId,

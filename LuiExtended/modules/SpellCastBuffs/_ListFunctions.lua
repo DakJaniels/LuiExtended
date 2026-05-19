@@ -284,3 +284,109 @@ function SpellCastBuffs.UpdateDisplayOverrideIdList()
         end
     end
 end
+
+-- -----------------------------------------------------------------------------
+-- Effect instance uid (ZOS BuffDebuff-aligned storage keys)
+-- Native rows use API buffSlot; synthetics use namespaced string uids.
+-- -----------------------------------------------------------------------------
+
+--- @param buffSlot integer|string
+--- @return integer|string
+function SpellCastBuffs.GetEffectUidNative(buffSlot)
+    return buffSlot
+end
+
+--- @param abilityId integer
+--- @return string
+local function GetEffectUidFake(abilityId)
+    return "fake:" .. tostring(abilityId)
+end
+SpellCastBuffs.GetEffectUidFake = GetEffectUidFake
+
+--- @param unitName string
+--- @param abilityId integer
+--- @return string
+function SpellCastBuffs.GetEffectUidNameAura(unitName, abilityId)
+    return "name:" .. tostring(unitName) .. ":" .. tostring(abilityId)
+end
+
+--- @param listKey integer|string
+--- @return boolean
+function SpellCastBuffs.IsSyntheticEffectKey(listKey)
+    if type(listKey) == "string" then
+        return listKey:sub(1, 5) == "fake:"
+            or listKey:sub(1, 5) == "name:"
+            or listKey:find("^Name Specific Buff", 1, true) ~= nil
+    end
+    return false
+end
+
+--- @param unitTag string
+--- @param abilityId integer
+--- @return boolean
+function SpellCastBuffs.UnitHasBuffAbilityId(unitTag, abilityId)
+    if unitTag == nil or abilityId == nil then
+        return false
+    end
+    for i = 1, GetNumBuffs(unitTag) do
+        local _, _, _, _, _, _, _, _, _, _, buffAbilityId = GetUnitBuffInfo(unitTag, i)
+        if buffAbilityId == abilityId then
+            return true
+        end
+    end
+    return false
+end
+
+--- @param context string
+--- @param abilityId integer
+--- @param keepUid integer|string|nil
+function SpellCastBuffs.RemoveSyntheticEffectsForAbilityId(context, abilityId, keepUid)
+    local effectsList = SpellCastBuffs.EffectsList[context]
+    if not effectsList then
+        return
+    end
+    local fakeUid = GetEffectUidFake(abilityId)
+    for listKey, effect in pairs(effectsList) do
+        if listKey ~= keepUid and effect.id == abilityId then
+            if listKey == fakeUid or SpellCastBuffs.IsSyntheticEffectKey(listKey) then
+                effectsList[listKey] = nil
+            elseif type(listKey) == "number" and effect.buffSlot == nil then
+                effectsList[listKey] = nil
+            end
+        end
+    end
+end
+
+--- @param context string
+--- @param abilityId integer
+--- @return table|nil
+function SpellCastBuffs.GetFakeEffectEntry(context, abilityId)
+    local effectsList = SpellCastBuffs.EffectsList[context]
+    if not effectsList then
+        return nil
+    end
+    local uid = GetEffectUidFake(abilityId)
+    return effectsList[uid] or effectsList[abilityId]
+end
+
+--- @param context string
+--- @param abilityId integer
+function SpellCastBuffs.ClearFakeEffectEntry(context, abilityId)
+    local effectsList = SpellCastBuffs.EffectsList[context]
+    if not effectsList then
+        return
+    end
+    effectsList[GetEffectUidFake(abilityId)] = nil
+    effectsList[abilityId] = nil
+end
+
+--- @param context string
+--- @param abilityId integer
+--- @param entry table
+function SpellCastBuffs.SetFakeCombatEffect(context, abilityId, entry)
+    local uid = GetEffectUidFake(abilityId)
+    entry.uid = uid
+    local effectsList = SpellCastBuffs.EffectsList[context]
+    effectsList[uid] = entry
+    effectsList[abilityId] = nil
+end

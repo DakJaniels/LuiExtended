@@ -190,7 +190,7 @@ end
 --- @param stack integer
 --- @return integer
 function SpellCastBuffs.IncrementCombatEffectStack(context, slotKey, abilityId, stack)
-    local existing = SpellCastBuffs.EffectsList[context][slotKey]
+    local existing = SpellCastBuffs.EffectsList[context][slotKey] or SpellCastBuffs.GetFakeEffectEntry(context, abilityId)
     local override = Effects.EffectOverride[abilityId]
     if not (existing and override and override.stackAdd) then
         return stack
@@ -347,10 +347,11 @@ function SpellCastBuffs.HandleIncomingCrystallizedShield(result, abilityId)
     local effectName = Effects.EffectOverrideByName[abilityId]
     context = SpellCastBuffs.DetermineContext(context, abilityId, effectName)
 
-    if SpellCastBuffs.EffectsList[context][abilityId] then
-        SpellCastBuffs.EffectsList[context][abilityId].stack = SpellCastBuffs.EffectsList[context][abilityId].stack - 1
-        if SpellCastBuffs.EffectsList[context][abilityId].stack == 0 then
-            SpellCastBuffs.EffectsList[context][abilityId] = nil
+    local existing = SpellCastBuffs.GetFakeEffectEntry(context, abilityId)
+    if existing then
+        existing.stack = existing.stack - 1
+        if existing.stack == 0 then
+            SpellCastBuffs.ClearFakeEffectEntry(context, abilityId)
         end
     end
 end
@@ -378,23 +379,30 @@ function SpellCastBuffs.HandleIncomingFakeExternalBuff(result, abilityId, source
     local iconName = config.icon or GetAbilityIcon(abilityId)
     local effectName = config.name or GetAbilityName(abilityId)
     local context = SpellCastBuffs.DetermineContextSimple("player1", abilityId, effectName)
-    SpellCastBuffs.EffectsList[context][abilityId] = nil
+    SpellCastBuffs.ClearFakeEffectEntry(context, abilityId)
+    if SpellCastBuffs.UnitHasBuffAbilityId("player", abilityId) then
+        return
+    end
     local duration = config.duration
     local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
     local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
     if source ~= "" and target == LUIE.PlayerNameFormatted then
-        SpellCastBuffs.EffectsList[context][abilityId] = SpellCastBuffs.BuildFakeCombatEffectEntry(
+        SpellCastBuffs.SetFakeCombatEffect(
             context,
-            1,
             abilityId,
-            effectName,
-            iconName,
-            duration,
-            unbreakable,
-            {
-                groundLabel = groundLabel,
-                fakeDuration = config.overrideDuration,
-            }
+            SpellCastBuffs.BuildFakeCombatEffectEntry(
+                context,
+                1,
+                abilityId,
+                effectName,
+                iconName,
+                duration,
+                unbreakable,
+                {
+                    groundLabel = groundLabel,
+                    fakeDuration = config.overrideDuration,
+                }
+            )
         )
     end
 end
@@ -425,7 +433,8 @@ function SpellCastBuffs.HandleIncomingFakeExternalDebuff(result, abilityId, sour
     end
 
     local context = "player2"
-    stack = SpellCastBuffs.IncrementCombatEffectStack(context, abilityId, abilityId, stack)
+    local fakeUid = SpellCastBuffs.GetEffectUidFake(abilityId)
+    stack = SpellCastBuffs.IncrementCombatEffectStack(context, fakeUid, abilityId, stack)
 
     if internalStack then
         if not SpellCastBuffs.InternalStackCounter[abilityId] then
@@ -436,14 +445,14 @@ function SpellCastBuffs.HandleIncomingFakeExternalDebuff(result, abilityId, sour
         elseif result == ACTION_RESULT_EFFECT_GAINED_DURATION then
             SpellCastBuffs.InternalStackCounter[abilityId] = SpellCastBuffs.InternalStackCounter[abilityId] + 1
         end
-        if SpellCastBuffs.EffectsList[context][abilityId] then
+        if SpellCastBuffs.GetFakeEffectEntry(context, abilityId) then
             if SpellCastBuffs.InternalStackCounter[abilityId] <= 0 then
-                SpellCastBuffs.EffectsList[context][abilityId] = nil
+                SpellCastBuffs.ClearFakeEffectEntry(context, abilityId)
                 SpellCastBuffs.InternalStackCounter[abilityId] = nil
             end
         end
     else
-        SpellCastBuffs.EffectsList[context][abilityId] = nil
+        SpellCastBuffs.ClearFakeEffectEntry(context, abilityId)
     end
 
     local iconName = config.icon or GetAbilityIcon(abilityId)
@@ -470,18 +479,25 @@ function SpellCastBuffs.HandleIncomingFakeExternalDebuff(result, abilityId, sour
     local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
     local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
     if source ~= "" and target == LUIE.PlayerNameFormatted then
-        SpellCastBuffs.EffectsList[context][abilityId] = SpellCastBuffs.BuildFakeCombatEffectEntry(
+        if SpellCastBuffs.UnitHasBuffAbilityId("player", abilityId) then
+            return
+        end
+        SpellCastBuffs.SetFakeCombatEffect(
             context,
-            BUFF_EFFECT_TYPE_DEBUFF,
             abilityId,
-            effectName,
-            iconName,
-            duration,
-            unbreakable,
-            {
-                groundLabel = groundLabel,
-                stack = stack,
-            }
+            SpellCastBuffs.BuildFakeCombatEffectEntry(
+                context,
+                BUFF_EFFECT_TYPE_DEBUFF,
+                abilityId,
+                effectName,
+                iconName,
+                duration,
+                unbreakable,
+                {
+                    groundLabel = groundLabel,
+                    stack = stack,
+                }
+            )
         )
     end
 end
@@ -524,8 +540,9 @@ function SpellCastBuffs.HandleIncomingFakePlayerBuff(result, abilityId, sourceNa
     local effectType = config.debuff and BUFF_EFFECT_TYPE_DEBUFF or BUFF_EFFECT_TYPE_BUFF
     local context = "player" .. effectType
 
-    if SpellCastBuffs.EffectsList[context][abilityId] and Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].stackAdd then
-        stack = SpellCastBuffs.EffectsList[context][abilityId].stack + Effects.EffectOverride[abilityId].stackAdd
+    local existingFake = SpellCastBuffs.GetFakeEffectEntry(context, abilityId)
+    if existingFake and Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].stackAdd then
+        stack = existingFake.stack + Effects.EffectOverride[abilityId].stackAdd
     end
     if abilityId == 26406 then
         SpellCastBuffs.ignoreAbilityId[abilityId] = true
@@ -543,26 +560,33 @@ function SpellCastBuffs.HandleIncomingFakePlayerBuff(result, abilityId, sourceNa
         effectName = Effects.FakePlayerBuffs[finalId] and Effects.FakePlayerBuffs[finalId].name or GetAbilityName(finalId)
     end
     context = SpellCastBuffs.DetermineContextSimple(context, finalId, effectName)
-    SpellCastBuffs.EffectsList[context][finalId] = nil
+    SpellCastBuffs.ClearFakeEffectEntry(context, finalId)
+    if SpellCastBuffs.UnitHasBuffAbilityId("player", finalId) or SpellCastBuffs.UnitHasBuffAbilityId("reticleover", finalId) then
+        return
+    end
     local forcedType = config.long and "long" or "short"
     local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
     local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
     unbreakable = (Effects.EffectOverride[finalId] and Effects.EffectOverride[finalId].unbreakable) or unbreakable
     if source == LUIE.PlayerNameFormatted and target == LUIE.PlayerNameFormatted then
-        SpellCastBuffs.EffectsList[context][finalId] = SpellCastBuffs.BuildFakeCombatEffectEntry(
+        SpellCastBuffs.SetFakeCombatEffect(
             context,
-            effectType,
             finalId,
-            effectName,
-            iconName,
-            duration,
-            unbreakable,
-            {
-                forced = forcedType,
-                groundLabel = groundLabel,
-                stack = stack,
-                toggle = toggle,
-            }
+            SpellCastBuffs.BuildFakeCombatEffectEntry(
+                context,
+                effectType,
+                finalId,
+                effectName,
+                iconName,
+                duration,
+                unbreakable,
+                {
+                    forced = forcedType,
+                    groundLabel = groundLabel,
+                    stack = stack,
+                    toggle = toggle,
+                }
+            )
         )
     end
 end
@@ -592,18 +616,24 @@ function SpellCastBuffs.HandleIncomingFakeStagger(result, abilityId, sourceName,
     local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
     local context = "player2"
     if source ~= "" and target == LUIE.PlayerNameFormatted then
-        SpellCastBuffs.EffectsList[context][abilityId] = SpellCastBuffs.BuildFakeCombatEffectEntry(
-            context,
-            BUFF_EFFECT_TYPE_DEBUFF,
-            abilityId,
-            effectName,
-            iconName,
-            duration,
-            unbreakable,
-            {
-                groundLabel = groundLabel,
-            }
-        )
+        if not SpellCastBuffs.UnitHasBuffAbilityId("player", abilityId) then
+            SpellCastBuffs.SetFakeCombatEffect(
+                context,
+                abilityId,
+                SpellCastBuffs.BuildFakeCombatEffectEntry(
+                    context,
+                    BUFF_EFFECT_TYPE_DEBUFF,
+                    abilityId,
+                    effectName,
+                    iconName,
+                    duration,
+                    unbreakable,
+                    {
+                        groundLabel = groundLabel,
+                    }
+                )
+            )
+        end
     end
 end
 
@@ -720,11 +750,12 @@ function SpellCastBuffs.HandleOutgoingFakePlayerOfflineAura(result, abilityId, s
     end
 
     local context = resolveFakePlayerOfflineAuraContext(config, abilityId, effectName)
-    if SpellCastBuffs.EffectsList[context][abilityId] and Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].stackAdd then
-        stack = SpellCastBuffs.EffectsList[context][abilityId].stack + Effects.EffectOverride[abilityId].stackAdd
+    local existingOffline = SpellCastBuffs.GetFakeEffectEntry(context, abilityId)
+    if existingOffline and Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].stackAdd then
+        stack = existingOffline.stack + Effects.EffectOverride[abilityId].stackAdd
     end
 
-    SpellCastBuffs.EffectsList[context][abilityId] = nil
+    SpellCastBuffs.ClearFakeEffectEntry(context, abilityId)
 
     local toggle = Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].toggle or false
     local iconName = config.icon or GetAbilityIcon(abilityId)
@@ -744,22 +775,29 @@ function SpellCastBuffs.HandleOutgoingFakePlayerOfflineAura(result, abilityId, s
         return
     end
 
+    if SpellCastBuffs.UnitHasBuffAbilityId("player", finalId) then
+        return
+    end
     local effectType = config.ground == true and BUFF_EFFECT_TYPE_DEBUFF or 1
     local forced = config.ground == true and "short" or forcedType
-    SpellCastBuffs.EffectsList[context][finalId] = SpellCastBuffs.BuildFakeCombatEffectEntry(
+    SpellCastBuffs.SetFakeCombatEffect(
         context,
-        effectType,
         finalId,
-        effectName,
-        iconName,
-        duration,
-        unbreakable,
-        {
-            forced = forced,
-            groundLabel = groundLabel,
-            stack = stack,
-            toggle = toggle,
-        }
+        SpellCastBuffs.BuildFakeCombatEffectEntry(
+            context,
+            effectType,
+            finalId,
+            effectName,
+            iconName,
+            duration,
+            unbreakable,
+            {
+                forced = forced,
+                groundLabel = groundLabel,
+                stack = stack,
+                toggle = toggle,
+            }
+        )
     )
 end
 
