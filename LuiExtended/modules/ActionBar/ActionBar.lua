@@ -3301,10 +3301,32 @@ function ActionBar.OnCombatEventBreakCast(result, isError, abilityName, abilityG
     end
 end
 
+local validDamageResults =
+{
+    [ACTION_RESULT_DAMAGE] = true,
+    [ACTION_RESULT_CRITICAL_DAMAGE] = true,
+    [ACTION_RESULT_PRECISE_DAMAGE] = true,
+    [ACTION_RESULT_WRECKING_DAMAGE] = true,
+    [ACTION_RESULT_DOT_TICK] = true,
+    [ACTION_RESULT_DOT_TICK_CRITICAL] = true,
+    [ACTION_RESULT_IMMUNE] = true,
+    [ACTION_RESULT_REFLECTED] = true,
+    [ACTION_RESULT_ABSORBED] = true,
+    [ACTION_RESULT_PARRIED] = true,
+    [ACTION_RESULT_DODGED] = true,
+    [ACTION_RESULT_BLOCKED] = true,
+    [ACTION_RESULT_BLOCKED_DAMAGE] = true,
+    [ACTION_RESULT_RESIST] = true,
+    [ACTION_RESULT_PARTIAL_RESIST] = true,
+    [ACTION_RESULT_MISS] = true,
+    [ACTION_RESULT_DEFENDED] = true,
+    [ACTION_RESULT_INTERCEPTED] = true,
+    [ACTION_RESULT_FALL_DAMAGE] = true,
+    [ACTION_RESULT_DAMAGE_SHIELDED] = true,
+}
+
 local function isValidDamageResult(result)
-    if result == ACTION_RESULT_BLOCKED or result == ACTION_RESULT_BLOCKED_DAMAGE or result == ACTION_RESULT_CRITICAL_DAMAGE or result == ACTION_RESULT_DAMAGE or result == ACTION_RESULT_DAMAGE_SHIELDED or result == ACTION_RESULT_IMMUNE or result == ACTION_RESULT_MISS or result == ACTION_RESULT_PARTIAL_RESIST or result == ACTION_RESULT_REFLECTED or result == ACTION_RESULT_RESIST or result == ACTION_RESULT_WRECKING_DAMAGE or result == ACTION_RESULT_DODGED then
-        return true
-    end
+    return validDamageResults[result]
 end
 
 --- - **EVENT_COMBAT_EVENT **
