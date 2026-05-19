@@ -3343,6 +3343,23 @@ function SpellCastBuffs.CreateConsoleSettings()
             end,
         }
 
+        -- settings[#settings + 1] =
+        -- {
+        --     type = LHAS.ST_CHECKBOX,
+        --     label = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_DEBUG_META),
+        --     tooltip = GetString(LUIE_STRING_LAM_BUFF_TOOLTIP_DEBUG_META_TP),
+        --     getFunction = function ()
+        --         return Settings.TooltipDebugMeta
+        --     end,
+        --     setFunction = function (v)
+        --         Settings.TooltipDebugMeta = v
+        --     end,
+        --     default = Defaults.TooltipDebugMeta,
+        --     disable = function ()
+        --         return not LUIE.SV.SpellCastBuff_Enable
+        --     end,
+        -- }
+
         -- Sticky Tooltip Slider
         settings[#settings + 1] =
         {
