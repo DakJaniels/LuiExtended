@@ -82,6 +82,7 @@ function SpellCastBuffs.ClearPlayerBuff(abilityId)
     local context = { "player1", "promd_player", "promb_player" }
     for _, v in pairs(context) do
         SpellCastBuffs.EffectsList[v][abilityId] = nil
+        SpellCastBuffs.ClearFakeEffectEntry(v, abilityId)
     end
 end
 
@@ -1867,6 +1868,7 @@ function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
             local context = "player1"
             SpellCastBuffs.EffectsList[context][effectId] =
             {
+                uid = effectId,
                 target = SpellCastBuffs.DetermineTarget(context),
                 type = effectType,
                 id = effectId,
@@ -2052,6 +2054,18 @@ end
 -- Called by EVENT_RETICLE_TARGET_CHANGED listener - Displays fake buffs based off unitName (primarily for displaying Boss Immunities)
 function SpellCastBuffs.AddNameAura()
     local unitName = GetUnitName("reticleover")
+    for _, contextKey in ipairs({ "reticleover1", "reticleover2", "promb_target", "promd_target" }) do
+        local effectsList = SpellCastBuffs.EffectsList[contextKey]
+        if effectsList then
+            for listKey in pairs(effectsList) do
+                if SpellCastBuffs.IsSyntheticEffectKey(listKey) and type(listKey) == "string" and listKey:sub(1, 5) == "name:" then
+                    effectsList[listKey] = nil
+                elseif type(listKey) == "string" and listKey:find("^Name Specific Buff", 1, true) then
+                    effectsList[listKey] = nil
+                end
+            end
+        end
+    end
     -- We need to check to make sure the mob is not dead, and also check to make sure the unitTag is not the player (just in case someones name exactly matches that of a boss NPC)
     if Effects.AddNameAura[unitName] and GetUnitReaction("reticleover") == UNIT_REACTION_HOSTILE and not IsUnitPlayer("reticleover") and not IsUnitDead("reticleover") then
         for k, v in pairs(Effects.AddNameAura[unitName]) do
@@ -2080,23 +2094,29 @@ function SpellCastBuffs.AddNameAura()
 
             local buffType = v.debuff or BUFF_EFFECT_TYPE_BUFF
             local context = v.debuff and "reticleover2" or "reticleover1"
-            local abilityId = v.debuff
-            context = SpellCastBuffs.DetermineContext(context, abilityId, abilityName)
-            SpellCastBuffs.EffectsList[context]["Name Specific Buff" .. k] =
-            {
-                target = SpellCastBuffs.DetermineTarget(context),
-                type = buffType,
-                id = v.id,
-                name = abilityName,
-                icon = abilityIcon,
-                dur = 0,
-                starts = 1,
-                ends = nil,
-                forced = "short",
-                restart = true,
-                iconNum = 0,
-                stack = stack,
-            }
+            context = SpellCastBuffs.DetermineContext(context, v.id, abilityName)
+            if SpellCastBuffs.UnitHasBuffAbilityId("reticleover", v.id) then
+                SpellCastBuffs.RemoveSyntheticEffectsForAbilityId(context, v.id, nil)
+            else
+                local nameUid = SpellCastBuffs.GetEffectUidNameAura(unitName, v.id)
+                SpellCastBuffs.EffectsList[context]["Name Specific Buff" .. k] = nil
+                SpellCastBuffs.EffectsList[context][nameUid] =
+                {
+                    uid = nameUid,
+                    target = SpellCastBuffs.DetermineTarget(context),
+                    type = buffType,
+                    id = v.id,
+                    name = abilityName,
+                    icon = abilityIcon,
+                    dur = 0,
+                    starts = 1,
+                    ends = nil,
+                    forced = "short",
+                    restart = true,
+                    iconNum = 0,
+                    stack = stack,
+                }
+            end
         end
     end
 end

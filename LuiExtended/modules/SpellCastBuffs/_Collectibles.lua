@@ -69,6 +69,7 @@ function SpellCastBuffs.DisplayMountIcon()
         local context = SpellCastBuffs.DetermineContextSimple("player1", abilityId, abilityName)
         SpellCastBuffs.EffectsList[context][abilityId] =
         {
+            uid = abilityId,
             target = SpellCastBuffs.DetermineTarget(context),
             type = 1,
             id = abilityId,
