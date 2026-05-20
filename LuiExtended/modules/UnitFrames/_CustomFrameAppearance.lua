@@ -81,8 +81,15 @@ function UnitFrames.EnsureCustomFrameAppearance(category)
     return sv.CustomFrameAppearance[category]
 end
 
+
 --- @param category string
---- @return table fontFace, fontStyle, fontBars, fontOther, texture
+--- @return {
+---    fontBars: integer,
+---    fontFace: string,
+---    fontOther: integer,
+---    fontStyle: integer,
+---    texture: string,
+---}
 function UnitFrames.GetCustomFrameAppearance(category)
     local sv = UnitFrames.SV
     local defaults = UnitFrames.Defaults
