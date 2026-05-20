@@ -368,10 +368,8 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
             groundLabel = groundLabel,
             toggle = toggle,
             debugMeta = SpellCastBuffs.BuildEffectDebugMeta(abilityType, statusEffectType, savedEffectSlot, sourceType, unitTag,
-                                                            {
-                                                                effectType = effectType,
-                                                                stackCount = stackCount,
-                                                            }),
+                                                            SpellCastBuffs.SnapshotLiveBuffDebugOverlay(
+                                                                unitTag, abilityId, savedEffectSlot, beginTime, endTime, stackCount, effectType, iconName)),
         }
         SpellCastBuffs.RemoveSyntheticEffectsForAbilityId(context, abilityId, nativeUid)
         if unitTag == "reticleover" or unitTag == "player" then

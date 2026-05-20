@@ -1562,6 +1562,7 @@ function SpellCastBuffs.TooltipBottomLine(control, detailsLine, artificial, unit
     end
 
     if SpellCastBuffs.SV.TooltipDebugMeta then
+        InformationTooltip:AddVerticalPadding(4)
         detailsLine = SpellCastBuffs.AddTooltipDebugMetaLines(control, detailsLine, ttUnit)
     end
 

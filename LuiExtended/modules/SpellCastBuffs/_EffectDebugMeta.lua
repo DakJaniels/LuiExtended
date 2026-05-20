@@ -530,9 +530,10 @@ end
 --- @param unitTag string
 --- @param abilityId integer
 --- @param preferredBuffSlot integer|nil
+--- @param preferredBuffListIndex integer|nil
 --- @return SCBBuffDebugMeta|nil
-local function lookupDebugMetaFromUnitBuffs(unitTag, abilityId, preferredBuffSlot)
-    local fallback
+local function lookupDebugMetaFromUnitBuffs(unitTag, abilityId, preferredBuffSlot, preferredBuffListIndex)
+    local matches = {}
     for i = 1, GetNumBuffs(unitTag) do
         local _, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, deprecatedBuffType, effectType, abilityType, statusEffectType, buffAbilityId, rowCanClickOff, rowCastByPlayer = GetUnitBuffInfo(unitTag, i)
         if buffAbilityId == abilityId then
@@ -541,13 +542,70 @@ local function lookupDebugMetaFromUnitBuffs(unitTag, abilityId, preferredBuffSlo
             row.castByPlayer = rowCastByPlayer
             row.buffListIndex = i
             row.iconFilename = iconFilename
-            if preferredBuffSlot and buffSlot == preferredBuffSlot then
-                return row
-            end
-            fallback = fallback or row
+            matches[#matches + 1] = row
         end
     end
-    return fallback
+
+    if #matches == 0 then
+        return nil
+    end
+    if #matches == 1 then
+        return matches[1]
+    end
+
+    if preferredBuffListIndex then
+        for _, row in ipairs(matches) do
+            if row.buffListIndex == preferredBuffListIndex then
+                return row
+            end
+        end
+    end
+
+    if preferredBuffSlot then
+        for _, row in ipairs(matches) do
+            if row.apiBuffSlot == preferredBuffSlot then
+                return row
+            end
+        end
+    end
+
+    return matches[1]
+end
+
+--- Snapshot list index + API timings from GetUnitBuffInfo while the effect row is live.
+--- @param unitTag string
+--- @param abilityId integer
+--- @param effectSlot integer
+--- @param beginTime number
+--- @param endTime number
+--- @param stackCount integer
+--- @param effectType BuffEffectType
+--- @param iconFilename string
+--- @return SCBBuffDebugMetaOverlay
+function SpellCastBuffs.SnapshotLiveBuffDebugOverlay(unitTag, abilityId, effectSlot, beginTime, endTime, stackCount, effectType, iconFilename)
+    for i = 1, GetNumBuffs(unitTag) do
+        local _, timeStarted, timeEnding, buffSlot, stacks, icon, _, rowEffectType, _, _, buffAbilityId = GetUnitBuffInfo(unitTag, i)
+        if buffAbilityId == abilityId and buffSlot == effectSlot then
+            return
+            {
+                buffListIndex = i,
+                timeStarted = timeStarted,
+                timeEnding = timeEnding,
+                stackCount = stacks,
+                effectType = rowEffectType,
+                iconFilename = icon,
+            }
+        end
+    end
+
+    return
+    {
+        timeStarted = beginTime,
+        timeEnding = endTime,
+        stackCount = stackCount,
+        effectType = effectType,
+        iconFilename = iconFilename,
+    }
 end
 
 --- @param control table
@@ -556,10 +614,11 @@ end
 function SpellCastBuffs.ResolveEffectDebugMetaForTooltip(control, unitTag)
     local abilityId = control.effectId
     local preferredBuffSlot = control.buffSlot or (control.debugMeta and control.debugMeta.apiBuffSlot)
+    local preferredBuffListIndex = control.debugMeta and control.debugMeta.buffListIndex
     local live
 
     if type(abilityId) == "number" and unitTag and unitTag ~= "" then
-        live = lookupDebugMetaFromUnitBuffs(unitTag, abilityId, preferredBuffSlot)
+        live = lookupDebugMetaFromUnitBuffs(unitTag, abilityId, preferredBuffSlot, preferredBuffListIndex)
     end
 
     if live then
@@ -597,7 +656,7 @@ local function addUnitBuffTimingLines(meta, control, unitTag, addLine)
     end
 
     if control.duration and control.duration > 0 then
-        addLine("LUIE Duration", string.format("%s ms", tostring(control.duration)))
+        addLine("LUIE Duration (internal)", formatSeconds(control.duration / 1000))
     end
 
     if meta and meta.buffListIndex and isMundusStoneBuffIndex(unitTag, meta.buffListIndex) then
@@ -632,7 +691,7 @@ local function addBuffAbilityApiDebugLines(abilityId, unitTag, addLine)
 
     local durationMs = GetAbilityDuration(abilityId, nil, unitTag)
     if durationMs and durationMs > 0 then
-        addLine("GetAbilityDuration", string.format("%s ms", tostring(durationMs)))
+        addLine("GetAbilityDuration (def)", string.format("%s ms (%.2fs)", tostring(durationMs), durationMs / 1000))
     end
 
     local cooldownMs = GetAbilityCooldown(abilityId, unitTag)
@@ -665,10 +724,12 @@ function SpellCastBuffs.AddTooltipDebugMetaLines(control, detailsLine, unitTag)
     local override = type(abilityId) == "number" and Effects.EffectOverride[abilityId] or nil
     local ttUnit = (unitTag and unitTag ~= "") and unitTag or "player"
 
+    -- Flow layout (AddLine): header rows (AddHeaderLine) share a fixed grid with detailsLine and
+    -- collide with multi-line description text when dozens of debug rows are appended.
     local function addLine(label, value)
-        InformationTooltip:AddHeaderLine(label, "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_LEFT, ZO_NORMAL_TEXT:UnpackRGB())
-        InformationTooltip:AddHeaderLine(value, "ZoFontWinT1", detailsLine, TOOLTIP_HEADER_SIDE_RIGHT, 1, 1, 1)
-        detailsLine = detailsLine + 1
+        local lineText = string.format("%s: %s", ZO_NORMAL_TEXT:Colorize(label), tostring(value))
+        InformationTooltip:AddLine(lineText, "ZoFontWinT1", ZO_NORMAL_TEXT:UnpackRGB())
+        InformationTooltip:SetVerticalPadding(2)
     end
 
     if meta then
