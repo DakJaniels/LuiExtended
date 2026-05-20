@@ -69,6 +69,46 @@ local function FormatNumber(value)
     return tostring(AbbreviateNumber(value, SHORTEN, COMMA))
 end
 
+local attributeVisualEffectCacheFrameId
+local attributeVisualEffectCacheByUnitTag = {}
+
+--- Per-frame cache of GetAllUnitAttributeVisualizerEffectInfo for a unitTag.
+--- @param unitTag string
+--- @return table<string, integer>
+function UnitFrames.GetAttributeVisualEffectValueCache(unitTag)
+    local frameId = GetFrameTimeSeconds()
+    if attributeVisualEffectCacheFrameId ~= frameId then
+        attributeVisualEffectCacheFrameId = frameId
+        ZO_ClearTable(attributeVisualEffectCacheByUnitTag)
+    end
+
+    local attributeVisualCache = attributeVisualEffectCacheByUnitTag[unitTag]
+    if attributeVisualCache then
+        return attributeVisualCache
+    end
+
+    attributeVisualCache = {}
+    local results = { GetAllUnitAttributeVisualizerEffectInfo(unitTag) }
+    for i = 1, #results, 6 do
+        local cacheKey = string.format("%d_%d_%d_%d", results[i], results[i + 1], results[i + 2], results[i + 3])
+        attributeVisualCache[cacheKey] = results[i + 4]
+    end
+    attributeVisualEffectCacheByUnitTag[unitTag] = attributeVisualCache
+    return attributeVisualCache
+end
+
+--- @param unitTag string
+--- @param visualType UnitAttributeVisual
+--- @param statType DerivedStats
+--- @param attributeType Attributes
+--- @param powerTypeQuery CombatMechanicFlags
+--- @return integer
+function UnitFrames.GetAttributeVisualEffectValue(unitTag, visualType, statType, attributeType, powerTypeQuery)
+    local cache = UnitFrames.GetAttributeVisualEffectValueCache(unitTag)
+    local cacheKey = string.format("%d_%d_%d_%d", visualType, statType, attributeType, powerTypeQuery)
+    return cache[cacheKey] or 0
+end
+
 -- -----------------------------------------------------------------------------
 -- Power Update Handler
 -- -----------------------------------------------------------------------------
@@ -171,20 +211,7 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
 
     local pct = zo_floor(100 * powerValue / powerEffectiveMax)
 
-    -- Cache all attribute visualizer effects for this unit in one batch call
-    local attributeVisualCache = {}
-    local results = { GetAllUnitAttributeVisualizerEffectInfo(unitTag) }
-    for i = 1, #results, 6 do
-        local visualType = results[i]
-        local statType = results[i + 1]
-        local attributeType = results[i + 2]
-        local powerTypeResult = results[i + 3]
-        local value = results[i + 4]
-
-        -- Build cache key: visualType_statType_attributeType_powerType
-        local cacheKey = string.format("%d_%d_%d_%d", visualType, statType, attributeType, powerTypeResult)
-        attributeVisualCache[cacheKey] = value
-    end
+    local attributeVisualCache = UnitFrames.GetAttributeVisualEffectValueCache(unitTag)
 
     -- Helper to query cache
     local function getAttributeVisual(visualType, statType, attributeType, powerTypeQuery)

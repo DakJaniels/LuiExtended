@@ -42,6 +42,22 @@ end
 -- Internal Implementation
 -- -----------------------------------------------------------------------------
 
+--- Health from GetUnitPower when the unit exists so overlay updates stay in sync with
+--- coalesced EVENT_POWER_UPDATE (UAV events can fire before savedHealth is flushed).
+--- @param unitTag string
+--- @return integer healthValue, integer healthEffectiveMax
+local function GetHealthPowerForUnit(unitTag)
+    if DoesUnitExist(unitTag) then
+        local healthValue, _, healthEffectiveMax = GetUnitPower(unitTag, COMBAT_MECHANIC_FLAGS_HEALTH)
+        return healthValue, healthEffectiveMax
+    end
+    local saved = UnitFrames.savedHealth[unitTag]
+    if saved then
+        return saved[1], saved[3]
+    end
+    return 0, 1
+end
+
 --- Updates shield value for given unit
 --- @param unitTag string
 --- @param value number
@@ -53,7 +69,7 @@ function PowerShieldModule:UpdateShield(unitTag, value, maxValue)
 
     UnitFrames.savedHealth[unitTag][4] = value
 
-    local healthValue, _, healthEffectiveMax, _ = unpack(UnitFrames.savedHealth[unitTag])
+    local healthValue, healthEffectiveMax = GetHealthPowerForUnit(unitTag)
 
     -- Update frames
     if UnitFrames.DefaultFrames[unitTag] then
@@ -120,7 +136,7 @@ function PowerShieldModule:UpdateTrauma(unitTag, value, maxValue)
 
     UnitFrames.savedHealth[unitTag][5] = value
 
-    local healthValue, _, healthEffectiveMax, _ = unpack(UnitFrames.savedHealth[unitTag])
+    local healthValue, healthEffectiveMax = GetHealthPowerForUnit(unitTag)
 
     -- Update frames
     if UnitFrames.DefaultFrames[unitTag] then
@@ -137,17 +153,7 @@ function PowerShieldModule:UpdateTrauma(unitTag, value, maxValue)
     end
 
     -- Update no-healing overlay inner ring when trauma changes
-    local noHealingValue = 0
-    local results = { GetAllUnitAttributeVisualizerEffectInfo(unitTag) }
-    for i = 1, #results, 6 do
-        if  results[i] == ATTRIBUTE_VISUAL_NO_HEALING
-        and results[i + 1] == STAT_MITIGATION
-        and results[i + 2] == ATTRIBUTE_HEALTH
-        and results[i + 3] == COMBAT_MECHANIC_FLAGS_HEALTH then
-            noHealingValue = results[i + 4]
-            break
-        end
-    end
+    local noHealingValue = UnitFrames.GetAttributeVisualEffectValue(unitTag, ATTRIBUTE_VISUAL_NO_HEALING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
 
     if noHealingValue > 0 then
         self:UpdateNoHealing(unitTag, noHealingValue)
@@ -185,14 +191,8 @@ function PowerShieldModule:UpdateNoHealing(unitTag, value)
     end
 
     local isActive = value > 0
-    local healthValue, _, healthEffectiveMax, _ = unpack(UnitFrames.savedHealth[unitTag])
+    local healthValue, healthEffectiveMax = GetHealthPowerForUnit(unitTag)
     local traumaValue = UnitFrames.savedHealth[unitTag][5] or 0
-
-    -- Calculate fake health (health minus trauma)
-    local fakeHealthValue = healthValue - traumaValue
-    if fakeHealthValue < 0 then
-        fakeHealthValue = 0
-    end
 
     -- Helper to update no-healing overlays with fade animation
     -- Works like shield overlay: actively sets value to match health
