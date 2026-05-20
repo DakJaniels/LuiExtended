@@ -302,15 +302,29 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_SLIDER,
-            label = GetString(LUIE_STRING_LAM_CT_TRANSPARENCY),
-            tooltip = GetString(LUIE_STRING_LAM_CT_TRANSPARENCY_TP),
+            label = GetString(LUIE_STRING_LAM_CT_OOC_TRANSPARENCY),
+            tooltip = GetString(LUIE_STRING_LAM_CT_OOC_TRANSPARENCY_TP),
             min = 0,
             max = 100,
-            step = 1,
+            step = 5,
             format = "%.0f",
-            getFunction = function () return Settings.common.transparencyValue end,
-            setFunction = function (v) Settings.common.transparencyValue = v end,
-            default = Defaults.common.transparencyValue
+            getFunction = function () return Settings.common.oocAlpha end,
+            setFunction = function (v) Settings.common.oocAlpha = v end,
+            default = Defaults.common.oocAlpha
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_CT_IC_TRANSPARENCY),
+            tooltip = GetString(LUIE_STRING_LAM_CT_IC_TRANSPARENCY_TP),
+            min = 0,
+            max = 100,
+            step = 5,
+            format = "%.0f",
+            getFunction = function () return Settings.common.incAlpha end,
+            setFunction = function (v) Settings.common.incAlpha = v end,
+            default = Defaults.common.incAlpha
         }
 
         settings[#settings + 1] =

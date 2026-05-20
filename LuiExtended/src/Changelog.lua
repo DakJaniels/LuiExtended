@@ -15,8 +15,17 @@ local changelogMessages =
     -- Version Header 7.2.2.4
     "|cFFA500LuiExtended Version 7.2.2.4|r",
     "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Out-of-combat and in-combat opacity sliders (0-100%) under Display Options. Affects the game action bar (`ZO_ActionBar1`, including LUIE backbar and slot overlays) and the cast bar when cast bar is enabled. PC and console.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Buffs & Debuffs (SpellCastBuffs): Out-of-combat and in-combat opacity sliders under Position and Display. Applies to each active buff/debuff container (floating top-level windows or unit-frame-locked buff/debuff regions).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Replaced single Set Transparency with separate out-of-combat and in-combat sliders (0-100%). Existing saves copy the old value to both. PC and console.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Info - Synergy Tracker: Out-of-combat and in-combat opacity sliders under Display Options (0-100%, same style as unit frames).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Info - Synergy Tracker: Display mode Icon + Cooldown (minimal) and Hidden (no HUD list; detection, sounds, blacklist, and priority overrides still run). Optional horizontal layout for minimal. Right-click synergy rows for priority (game default and 1-10) and blacklist. Minimal mode uses tiered sort (ready -> active waiting -> cooldown -> idle).",
+    "",
     -- Fix
     "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar / Buffs & Debuffs: Opacity sliders apply reliably after `/reloadui` (uses live `ZO_ActionBar1` at apply time; buff containers re-apply when HUD fade resets alpha). Combat state still updates OOC vs in-combat values.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Fixed duplicate weekly challenge progress lines when two identical challenges advance at once (for example four chat messages instead of two). Progress and Tracking announcements no longer double up for the same challenge slot; each slot still announces separately.",
     "",
     -- Version Header 7.2.2.3

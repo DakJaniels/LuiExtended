@@ -90,7 +90,8 @@ CombatText.Defaults =
     },
     common =
     {
-        transparencyValue = 100,
+        oocAlpha = 100,
+        incAlpha = 100,
         overkill = true,
         overheal = true,
         abbreviateNumbers = false,
