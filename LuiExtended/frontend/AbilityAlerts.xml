@@ -4,220 +4,220 @@
 -->
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
-        <Controls>
-                <TopLevelControl name="LUIE_AlertFrame"
-                                 mouseEnabled="false"
-                                 movable="false"
-                                 clampedToScreen="true"
-                                 hidden="true"
-                                 layer="BACKGROUND"
-                                 level="0"
-                                 tier="LOW">
-                        <Dimensions x="500"
-                                    y="36" />
-                        <Anchor point="CENTER"
-                                relativeTo="GuiRoot"
-                                relativePoint="CENTER"
-                                offsetX="0"
-                                offsetY="-250" />
-                        <OnMoveStart>
+  <Controls>
+    <TopLevelControl name="LUIE_AlertFrame"
+                     mouseEnabled="false"
+                     movable="false"
+                     clampedToScreen="true"
+                     hidden="true"
+                     layer="BACKGROUND"
+                     level="0"
+                     tier="LOW">
+      <Dimensions x="500"
+                  y="36" />
+      <Anchor point="CENTER"
+              relativeTo="GuiRoot"
+              relativePoint="CENTER"
+              offsetX="0"
+              offsetY="-250" />
+      <OnMoveStart>
 				LUIE.CombatInfo.AbilityAlerts.OnMoveStart(self)
 			</OnMoveStart>
-                        <OnMoveStop>
+      <OnMoveStop>
 				LUIE.CombatInfo.AbilityAlerts.OnMoveStop(self)
 			</OnMoveStop>
-                        <Controls>
-                                <!-- Preview background -->
-                                <Backdrop name="$(parent)_Preview"
-                                          hidden="true"
-                                          centerColor="0D99E640"
-                                          edgeColor="0D99E6E6">
-                                        <AnchorFill />
-                                        <Edge edgeFileWidth="8"
-                                              edgeFileHeight="1"
-                                              edgeFilePadding="1" />
-                                        <Controls>
-                                                <!-- Anchor texture -->
-                                                <Texture name="$(parent)_AnchorTexture"
-                                                         textureFile="/esoui/art/reticle/border_topleft.dds"
-                                                         color="FFFF00E6">
-                                                        <Dimensions x="16"
-                                                                    y="16" />
-                                                        <Anchor point="TOPLEFT"
-                                                                relativeTo="$(parent)"
-                                                                relativePoint="TOPLEFT" />
-                                                </Texture>
-                                                <!-- Position label background -->
-                                                <Backdrop name="$(parent)_AnchorLabelBg"
-                                                          centerColor="000000FF"
-                                                          edgeColor="000000FF"
-                                                          layer="OVERLAY"
-                                                          level="0"
-                                                          tier="LOW">
-                                                        <Anchor point="BOTTOMLEFT"
-                                                                relativeTo="$(parent)"
-                                                                relativePoint="TOPLEFT"
-                                                                offsetX="0"
-                                                                offsetY="-1" />
-                                                        <Edge edgeFileWidth="8"
-                                                              edgeFileHeight="1"
-                                                              edgeFilePadding="1" />
-                                                </Backdrop>
-                                                <!-- Position label -->
-                                                <Label name="$(parent)_AnchorLabel"
-                                                       font="ZoFontGamepad22"
-                                                       color="FFFF00"
-                                                       text="xxx, yyy"
-                                                       wrapMode="ELLIPSIS"
-                                                       horizontalAlignment="CENTER"
-                                                       verticalAlignment="CENTER"
-                                                       layer="OVERLAY"
-                                                       level="0"
-                                                       tier="MEDIUM">
-                                                        <Anchor point="BOTTOMLEFT"
-                                                                relativeTo="$(parent)"
-                                                                relativePoint="TOPLEFT"
-                                                                offsetX="0"
-                                                                offsetY="-1" />
-                                                </Label>
-                                        </Controls>
-                                </Backdrop>
-                        </Controls>
-                </TopLevelControl>
-                <!-- Virtual template for alert controls (used by control pool) -->
-                <Control name="LUIE_AlertTemplate"
-                         virtual="true"
-                         hidden="true">
-                        <Dimensions x="300"
-                                    y="32" />
-                        <Controls>
-                                <!-- Prefix label -->
-                                <Label name="$(parent)_Prefix"
-                                       wrapMode="ELLIPSIS"
-                                       horizontalAlignment="CENTER"
-                                       verticalAlignment="CENTER">
-                                        <Anchor point="LEFT"
-                                                relativeTo="$(parent)"
-                                                relativePoint="LEFT"
-                                                offsetX="0"
-                                                offsetY="0" />
-                                </Label>
-                                <!-- Name label -->
-                                <Label name="$(parent)_Name"
-                                       wrapMode="ELLIPSIS"
-                                       horizontalAlignment="CENTER"
-                                       verticalAlignment="CENTER">
-                                        <Anchor point="LEFT"
-                                                relativeTo="$(parent)_Prefix"
-                                                relativePoint="RIGHT"
-                                                offsetX="0"
-                                                offsetY="0" />
-                                </Label>
-                                <!-- Modifier label -->
-                                <Label name="$(parent)_Modifier"
-                                       wrapMode="ELLIPSIS"
-                                       horizontalAlignment="CENTER"
-                                       verticalAlignment="CENTER">
-                                        <Anchor point="LEFT"
-                                                relativeTo="$(parent)_Name"
-                                                relativePoint="RIGHT"
-                                                offsetX="0"
-                                                offsetY="0" />
-                                </Label>
-                                <!-- Icon container -->
-                                <Backdrop name="$(parent)_Icon"
-                                          centerColor="00000080"
-                                          edgeColor="000000FF">
-                                        <Dimensions x="32"
-                                                    y="32" />
-                                        <Anchor point="LEFT"
-                                                relativeTo="$(parent)_Modifier"
-                                                relativePoint="RIGHT"
-                                                offsetX="6"
-                                                offsetY="0" />
-                                        <Edge edgeFileWidth="8"
-                                              edgeFileHeight="1"
-                                              edgeFilePadding="1" />
-                                        <Controls>
-                                                <!-- Icon border -->
-                                                <Texture name="$(parent)_Back"
-                                                         textureFile="LuiMedia/media/icons/icon_border/icon_border.dds"
-                                                         layer="BACKGROUND">
-                                                        <AnchorFill />
-                                                </Texture>
-                                                <!-- Icon background -->
-                                                <Backdrop name="$(parent)_IconBg"
-                                                          centerColor="000000E6"
-                                                          edgeColor="000000E6">
-                                                        <Anchor point="TOPLEFT"
-                                                                relativeTo="$(parent)"
-                                                                relativePoint="TOPLEFT"
-                                                                offsetX="3"
-                                                                offsetY="3" />
-                                                        <Anchor point="BOTTOMRIGHT"
-                                                                relativeTo="$(parent)"
-                                                                relativePoint="BOTTOMRIGHT"
-                                                                offsetX="-3"
-                                                                offsetY="-3" />
-                                                        <Edge edgeFileWidth="8"
-                                                              edgeFileHeight="1"
-                                                              edgeFilePadding="1" />
-                                                </Backdrop>
-                                                <!-- Cooldown control -->
-                                                <Cooldown name="$(parent)_Cd"
-                                                          fillColor="00000000"
-                                                          layer="BACKGROUND">
-                                                        <Anchor point="TOPLEFT"
-                                                                relativeTo="$(parent)"
-                                                                relativePoint="TOPLEFT"
-                                                                offsetX="1"
-                                                                offsetY="1" />
-                                                        <Anchor point="BOTTOMRIGHT"
-                                                                relativeTo="$(parent)"
-                                                                relativePoint="BOTTOMRIGHT"
-                                                                offsetX="-1"
-                                                                offsetY="-1" />
-                                                </Cooldown>
-                                                <!-- Icon texture -->
-                                                <Texture name="$(parent)_Icon"
-                                                         textureFile="/esoui/art/icons/icon_missing.dds"
-                                                         layer="CONTROLS">
-                                                        <Anchor point="TOPLEFT"
-                                                                relativeTo="$(parent)"
-                                                                relativePoint="TOPLEFT"
-                                                                offsetX="3"
-                                                                offsetY="3" />
-                                                        <Anchor point="BOTTOMRIGHT"
-                                                                relativeTo="$(parent)"
-                                                                relativePoint="BOTTOMRIGHT"
-                                                                offsetX="-3"
-                                                                offsetY="-3" />
-                                                </Texture>
-                                        </Controls>
-                                </Backdrop>
-                                <!-- Mitigation label -->
-                                <Label name="$(parent)_Mitigation"
-                                       wrapMode="ELLIPSIS"
-                                       horizontalAlignment="CENTER"
-                                       verticalAlignment="CENTER">
-                                        <Anchor point="LEFT"
-                                                relativeTo="$(parent)_Icon"
-                                                relativePoint="RIGHT"
-                                                offsetX="6"
-                                                offsetY="0" />
-                                </Label>
-                                <!-- Timer label -->
-                                <Label name="$(parent)_Timer"
-                                       wrapMode="ELLIPSIS"
-                                       horizontalAlignment="CENTER"
-                                       verticalAlignment="CENTER">
-                                        <Anchor point="LEFT"
-                                                relativeTo="$(parent)_Mitigation"
-                                                relativePoint="RIGHT"
-                                                offsetX="0"
-                                                offsetY="0" />
-                                </Label>
-                        </Controls>
-                </Control>
-        </Controls>
+      <Controls>
+        <!-- Preview background -->
+        <Backdrop name="$(parent)_Preview"
+                  hidden="true"
+                  centerColor="0D99E640"
+                  edgeColor="0D99E6E6">
+          <AnchorFill />
+          <Edge edgeFileWidth="8"
+                edgeFileHeight="1"
+                edgeFilePadding="1" />
+          <Controls>
+            <!-- Anchor texture -->
+            <Texture name="$(parent)_AnchorTexture"
+                     textureFile="/esoui/art/reticle/border_topleft.dds"
+                     color="FFFF00E6">
+              <Dimensions x="16"
+                          y="16" />
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="TOPLEFT" />
+            </Texture>
+            <!-- Position label background -->
+            <Backdrop name="$(parent)_AnchorLabelBg"
+                      centerColor="000000FF"
+                      edgeColor="000000FF"
+                      layer="OVERLAY"
+                      level="0"
+                      tier="LOW">
+              <Anchor point="BOTTOMLEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="TOPLEFT"
+                      offsetX="0"
+                      offsetY="-1" />
+              <Edge edgeFileWidth="8"
+                    edgeFileHeight="1"
+                    edgeFilePadding="1" />
+            </Backdrop>
+            <!-- Position label -->
+            <Label name="$(parent)_AnchorLabel"
+                   font="ZoFontGamepad22"
+                   color="FFFF00"
+                   text="xxx, yyy"
+                   wrapMode="ELLIPSIS"
+                   horizontalAlignment="CENTER"
+                   verticalAlignment="CENTER"
+                   layer="OVERLAY"
+                   level="0"
+                   tier="MEDIUM">
+              <Anchor point="BOTTOMLEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="TOPLEFT"
+                      offsetX="0"
+                      offsetY="-1" />
+            </Label>
+          </Controls>
+        </Backdrop>
+      </Controls>
+    </TopLevelControl>
+    <!-- Virtual template for alert controls (used by control pool) -->
+    <Control name="LUIE_AlertTemplate"
+             virtual="true"
+             hidden="true">
+      <Dimensions x="300"
+                  y="32" />
+      <Controls>
+        <!-- Prefix label -->
+        <Label name="$(parent)_Prefix"
+               wrapMode="ELLIPSIS"
+               horizontalAlignment="CENTER"
+               verticalAlignment="CENTER">
+          <Anchor point="LEFT"
+                  relativeTo="$(parent)"
+                  relativePoint="LEFT"
+                  offsetX="0"
+                  offsetY="0" />
+        </Label>
+        <!-- Name label -->
+        <Label name="$(parent)_Name"
+               wrapMode="ELLIPSIS"
+               horizontalAlignment="CENTER"
+               verticalAlignment="CENTER">
+          <Anchor point="LEFT"
+                  relativeTo="$(parent)_Prefix"
+                  relativePoint="RIGHT"
+                  offsetX="0"
+                  offsetY="0" />
+        </Label>
+        <!-- Modifier label -->
+        <Label name="$(parent)_Modifier"
+               wrapMode="ELLIPSIS"
+               horizontalAlignment="CENTER"
+               verticalAlignment="CENTER">
+          <Anchor point="LEFT"
+                  relativeTo="$(parent)_Name"
+                  relativePoint="RIGHT"
+                  offsetX="0"
+                  offsetY="0" />
+        </Label>
+        <!-- Icon container -->
+        <Backdrop name="$(parent)_Icon"
+                  centerColor="00000080"
+                  edgeColor="000000FF">
+          <Dimensions x="32"
+                      y="32" />
+          <Anchor point="LEFT"
+                  relativeTo="$(parent)_Modifier"
+                  relativePoint="RIGHT"
+                  offsetX="6"
+                  offsetY="0" />
+          <Edge edgeFileWidth="8"
+                edgeFileHeight="1"
+                edgeFilePadding="1" />
+          <Controls>
+            <!-- Icon border -->
+            <Texture name="$(parent)_Back"
+                     textureFile="LuiMedia/media/icons/icon_border/icon_border.dds"
+                     layer="BACKGROUND">
+              <AnchorFill />
+            </Texture>
+            <!-- Icon background -->
+            <Backdrop name="$(parent)_IconBg"
+                      centerColor="000000E6"
+                      edgeColor="000000E6">
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="TOPLEFT"
+                      offsetX="3"
+                      offsetY="3" />
+              <Anchor point="BOTTOMRIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="BOTTOMRIGHT"
+                      offsetX="-3"
+                      offsetY="-3" />
+              <Edge edgeFileWidth="8"
+                    edgeFileHeight="1"
+                    edgeFilePadding="1" />
+            </Backdrop>
+            <!-- Cooldown control -->
+            <Cooldown name="$(parent)_Cd"
+                      fillColor="00000000"
+                      layer="BACKGROUND">
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="TOPLEFT"
+                      offsetX="1"
+                      offsetY="1" />
+              <Anchor point="BOTTOMRIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="BOTTOMRIGHT"
+                      offsetX="-1"
+                      offsetY="-1" />
+            </Cooldown>
+            <!-- Icon texture -->
+            <Texture name="$(parent)_Icon"
+                     textureFile="/esoui/art/icons/icon_missing.dds"
+                     layer="CONTROLS">
+              <Anchor point="TOPLEFT"
+                      relativeTo="$(parent)"
+                      relativePoint="TOPLEFT"
+                      offsetX="3"
+                      offsetY="3" />
+              <Anchor point="BOTTOMRIGHT"
+                      relativeTo="$(parent)"
+                      relativePoint="BOTTOMRIGHT"
+                      offsetX="-3"
+                      offsetY="-3" />
+            </Texture>
+          </Controls>
+        </Backdrop>
+        <!-- Mitigation label -->
+        <Label name="$(parent)_Mitigation"
+               wrapMode="ELLIPSIS"
+               horizontalAlignment="CENTER"
+               verticalAlignment="CENTER">
+          <Anchor point="LEFT"
+                  relativeTo="$(parent)_Icon"
+                  relativePoint="RIGHT"
+                  offsetX="6"
+                  offsetY="0" />
+        </Label>
+        <!-- Timer label -->
+        <Label name="$(parent)_Timer"
+               wrapMode="ELLIPSIS"
+               horizontalAlignment="CENTER"
+               verticalAlignment="CENTER">
+          <Anchor point="LEFT"
+                  relativeTo="$(parent)_Mitigation"
+                  relativePoint="RIGHT"
+                  offsetX="0"
+                  offsetY="0" />
+        </Label>
+      </Controls>
+    </Control>
+  </Controls>
 </GuiXml>

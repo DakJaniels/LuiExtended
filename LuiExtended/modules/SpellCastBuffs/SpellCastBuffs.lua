@@ -543,15 +543,15 @@ function SpellCastBuffs.Initialize(enabled)
     SpellCastBuffs.ApplyDisplayAlpha()
     -- HUD fade fragments can force alpha to 1 after init; /reloadui does not fire PLAYER_ACTIVATED
     zo_callLater(function ()
-        if SpellCastBuffs.Enabled then
-            SpellCastBuffs.ApplyDisplayAlpha()
-        end
-    end, 0)
+                     if SpellCastBuffs.Enabled then
+                         SpellCastBuffs.ApplyDisplayAlpha()
+                     end
+                 end, 0)
     zo_callLater(function ()
-        if SpellCastBuffs.Enabled then
-            SpellCastBuffs.ApplyDisplayAlpha()
-        end
-    end, 300)
+                     if SpellCastBuffs.Enabled then
+                         SpellCastBuffs.ApplyDisplayAlpha()
+                     end
+                 end, 300)
 end
 
 function SpellCastBuffs.RegisterWerewolfEvents()

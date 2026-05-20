@@ -473,4 +473,3 @@ LUIE.ResetElementPosition = Unlock.ResetElementPosition
 
 -- Store the Unlock module in LUIE
 LUIE.Unlock = Unlock
-

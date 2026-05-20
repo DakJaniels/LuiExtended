@@ -1096,14 +1096,14 @@ function SynergyTracker:OnSynergyRowMouseUp(control, button, upInside, slotIndex
     local isBlacklisted = Settings.blacklist[abilityId] == true
 
     AddMenuItem("Priority: Game Default", function ()
-        self:SetPriorityOverride(abilityId, nil)
-    end, nil, nil, nil, nil, nil, nil, currentOverride == nil)
+                    self:SetPriorityOverride(abilityId, nil)
+                end, nil, nil, nil, nil, nil, nil, currentOverride == nil)
 
     for priority = 1, 10 do
         local menuPriority = priority
         AddMenuItem(string_format("Priority: %d", menuPriority), function ()
-            self:SetPriorityOverride(abilityId, menuPriority)
-        end, nil, nil, nil, nil, nil, nil, currentOverride == menuPriority)
+                        self:SetPriorityOverride(abilityId, menuPriority)
+                    end, nil, nil, nil, nil, nil, nil, currentOverride == menuPriority)
     end
 
     AddMenuItem(isBlacklisted and "Remove from Blacklist" or "Add to Blacklist", function ()

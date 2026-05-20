@@ -455,6 +455,7 @@ end
 --- name: string,
 --- starts: number,
 --- toggle: boolean,
+--- displayUid?: number,
 --- }
 --- @param y {
 --- dur: number|nil,
@@ -463,6 +464,7 @@ end
 --- name: string,
 --- starts: number,
 --- toggle: boolean,
+--- displayUid?: number,
 --- }
 --- @return boolean?
 local function buffSort(x, y)
