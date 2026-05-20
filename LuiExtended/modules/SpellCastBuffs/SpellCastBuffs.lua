@@ -29,6 +29,7 @@ local sceneManager = SCENE_MANAGER
 local windowManager = GetWindowManager()
 
 local moduleName = SpellCastBuffs.moduleName
+local g_scbDisplayAlpha -- Last alpha for buff containers (HUD fade can reset to 1 on reload)
 
 
 
@@ -274,6 +275,13 @@ function SpellCastBuffs.Initialize(enabled)
         return
     end
     SpellCastBuffs.Enabled = true
+
+    if SpellCastBuffs.SV.oocAlpha == nil then
+        SpellCastBuffs.SV.oocAlpha = SpellCastBuffs.Defaults.oocAlpha
+    end
+    if SpellCastBuffs.SV.incAlpha == nil then
+        SpellCastBuffs.SV.incAlpha = SpellCastBuffs.Defaults.incAlpha
+    end
 
     -- Before we start creating controls, update icons font
     SpellCastBuffs.ApplyFont()
@@ -526,6 +534,24 @@ function SpellCastBuffs.Initialize(enabled)
     -- Initialize preview labels for all frames
     InitializePreviewLabels()
     LUIE.RefreshMoverOverlayFonts()
+
+    eventManager:UnregisterForEvent(moduleName .. "CombatState")
+    eventManager:RegisterForEvent(moduleName .. "CombatState", EVENT_PLAYER_COMBAT_STATE, function ()
+        SpellCastBuffs.ApplyDisplayAlpha()
+    end)
+
+    SpellCastBuffs.ApplyDisplayAlpha()
+    -- HUD fade fragments can force alpha to 1 after init; /reloadui does not fire PLAYER_ACTIVATED
+    zo_callLater(function ()
+        if SpellCastBuffs.Enabled then
+            SpellCastBuffs.ApplyDisplayAlpha()
+        end
+    end, 0)
+    zo_callLater(function ()
+        if SpellCastBuffs.Enabled then
+            SpellCastBuffs.ApplyDisplayAlpha()
+        end
+    end, 300)
 end
 
 function SpellCastBuffs.RegisterWerewolfEvents()
@@ -2154,6 +2180,45 @@ function SpellCastBuffs.MenuPreview()
     end
 end
 
+--- Set buff container opacity from in-combat / out-of-combat saved values (0–100).
+function SpellCastBuffs.ApplyDisplayAlpha()
+    if not SpellCastBuffs.Enabled then
+        g_scbDisplayAlpha = nil
+        return
+    end
+
+    local oocAlpha = SpellCastBuffs.SV.oocAlpha or 100
+    local incAlpha = SpellCastBuffs.SV.incAlpha or 100
+    local alpha = 0.01 * (IsUnitInCombat("player") and incAlpha or oocAlpha)
+    g_scbDisplayAlpha = alpha
+
+    local seen = {}
+    for _, control in pairs(SpellCastBuffs.BuffContainers) do
+        if control and control.SetAlpha and not seen[control] then
+            seen[control] = true
+            control:SetAlpha(alpha)
+        end
+    end
+end
+
+--- Re-apply container alpha if ZO_HUDFadeSceneFragment or other UI reset it.
+function SpellCastBuffs.EnforceDisplayAlpha()
+    if not g_scbDisplayAlpha then
+        return
+    end
+
+    local alpha = g_scbDisplayAlpha
+    local seen = {}
+    for _, control in pairs(SpellCastBuffs.BuffContainers) do
+        if control and control.SetAlpha and control.GetAlpha and not seen[control] then
+            seen[control] = true
+            if zo_abs(control:GetAlpha() - alpha) > 0.001 then
+                control:SetAlpha(alpha)
+            end
+        end
+    end
+end
+
 -- Runs on EVENT_PLAYER_ACTIVATED listener
 function SpellCastBuffs.OnPlayerActivated(eventCode)
     SpellCastBuffs.playerActive = true
@@ -2201,6 +2266,8 @@ function SpellCastBuffs.OnPlayerActivated(eventCode)
     if IsUnitDead("player") then
         SpellCastBuffs.playerDead = true
     end
+
+    SpellCastBuffs.ApplyDisplayAlpha()
 end
 
 -- Runs on the EVENT_PLAYER_DEACTIVATED listener

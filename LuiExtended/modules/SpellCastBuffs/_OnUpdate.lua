@@ -505,6 +505,8 @@ end
 -- Runs OnUpdate - 100 ms buffer
 --- @param currentTimeMs number
 function SpellCastBuffs.OnUpdate(currentTimeMs)
+    SpellCastBuffs.EnforceDisplayAlpha()
+
     local buffsSorted = {}
     local sortedCounts = {}
     local displayUidCounter = {}

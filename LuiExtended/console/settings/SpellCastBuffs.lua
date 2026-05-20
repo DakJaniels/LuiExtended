@@ -531,6 +531,57 @@ function SpellCastBuffs.CreateConsoleSettings()
             label = "Configure position and display options for buffs and debuffs.",
         }
 
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Display Options",
+            canSelect = false,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "Out-of-Combat Opacity",
+            tooltip = "Buff and debuff display opacity while out of combat (0–100%).",
+            min = 0,
+            max = 100,
+            step = 5,
+            format = "%.0f",
+            getFunction = function ()
+                return Settings.oocAlpha
+            end,
+            setFunction = function (v)
+                Settings.oocAlpha = v
+                SpellCastBuffs.ApplyDisplayAlpha()
+            end,
+            default = Defaults.oocAlpha,
+            disable = function ()
+                return not LUIE.SV.SpellCastBuff_Enable
+            end,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "In-Combat Opacity",
+            tooltip = "Buff and debuff display opacity while in combat (0–100%).",
+            min = 0,
+            max = 100,
+            step = 5,
+            format = "%.0f",
+            getFunction = function ()
+                return Settings.incAlpha
+            end,
+            setFunction = function (v)
+                Settings.incAlpha = v
+                SpellCastBuffs.ApplyDisplayAlpha()
+            end,
+            default = Defaults.incAlpha,
+            disable = function ()
+                return not LUIE.SV.SpellCastBuff_Enable
+            end,
+        }
+
         -- Hide OakenSoul
         settings[#settings + 1] =
         {
