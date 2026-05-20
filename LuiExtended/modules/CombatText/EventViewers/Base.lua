@@ -484,7 +484,7 @@ function CombatTextEventViewer:ControlLayout(control, abilityId, combatType, sou
         self:HideIcon(control, width, height)
     end
 
-    control.icon:SetAlpha(Settings.common.transparencyValue / 100)
+    control.icon:SetAlpha(LUIE.CombatText.GetTextAlpha())
 end
 
 --- Register a callback for a combat text event<br>
@@ -510,7 +510,7 @@ function CombatTextEventViewer:PrepareLabel(label, fontSize, color, text)
     label:SetColor(unpack(color))
     local fontString = LUIE.CreateFontString(Settings.fontFaceApplied, fontSize, Settings.fontStyle)
     label:SetFont(fontString)
-    label:SetAlpha(Settings.common.transparencyValue / 100)
+    label:SetAlpha(LUIE.CombatText.GetTextAlpha())
 end
 
 ---

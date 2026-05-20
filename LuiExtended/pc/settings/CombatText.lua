@@ -162,19 +162,34 @@ function CombatText.CreateSettings()
                 default = Defaults.toggles.inCombatOnly,
             },
             {
-                -- Transparency
                 type = "slider",
-                name = GetString(LUIE_STRING_LAM_CT_TRANSPARENCY),
-                tooltip = GetString(LUIE_STRING_LAM_CT_TRANSPARENCY_TP),
+                name = GetString(LUIE_STRING_LAM_CT_OOC_TRANSPARENCY),
+                tooltip = GetString(LUIE_STRING_LAM_CT_OOC_TRANSPARENCY_TP),
                 min = 0,
                 max = 100,
+                step = 5,
                 getFunc = function ()
-                    return Settings.common.transparencyValue
+                    return Settings.common.oocAlpha
                 end,
                 setFunc = function (v)
-                    Settings.common.transparencyValue = v
+                    Settings.common.oocAlpha = v
                 end,
-                default = Defaults.common.transparencyValue,
+                default = Defaults.common.oocAlpha,
+            },
+            {
+                type = "slider",
+                name = GetString(LUIE_STRING_LAM_CT_IC_TRANSPARENCY),
+                tooltip = GetString(LUIE_STRING_LAM_CT_IC_TRANSPARENCY_TP),
+                min = 0,
+                max = 100,
+                step = 5,
+                getFunc = function ()
+                    return Settings.common.incAlpha
+                end,
+                setFunc = function (v)
+                    Settings.common.incAlpha = v
+                end,
+                default = Defaults.common.incAlpha,
             },
 
             {

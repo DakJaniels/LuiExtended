@@ -264,6 +264,16 @@ function CombatText.RemoveFromCustomList(list, input)
     end
 end
 
+--- Alpha (0–1) for floating combat text labels/icons from OOC/IC saved values.
+--- @return number
+function CombatText.GetTextAlpha()
+    local common = CombatText.SV.common
+    local oocAlpha = common.oocAlpha or common.transparencyValue or 100
+    local incAlpha = common.incAlpha or common.transparencyValue or 100
+    local percent = IsUnitInCombat("player") and incAlpha or oocAlpha
+    return percent / 100
+end
+
 function CombatText.ApplyFont()
     local fontName = LUIE.Fonts[LUIE.CombatText.SV.fontFace]
     LUIE.CombatText.SV.fontFaceApplied = fontName
@@ -352,6 +362,14 @@ function CombatText.Initialize(enabled)
     if not LUIE.IsMigrationDone("combattext_fontstyles_v2") then
         CombatText.SV.fontStyle = LUIE.MigrateFontStyle(CombatText.SV.fontStyle)
         LUIE.MarkMigrationDone("combattext_fontstyles_v2")
+    end
+
+    local common = CombatText.SV.common
+    if common.oocAlpha == nil then
+        common.oocAlpha = common.transparencyValue or CombatText.Defaults.common.oocAlpha
+    end
+    if common.incAlpha == nil then
+        common.incAlpha = common.transparencyValue or CombatText.Defaults.common.incAlpha
     end
 
     -- Disable module if setting not toggled on
