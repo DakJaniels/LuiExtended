@@ -43,6 +43,67 @@ local HARDCODED_SHARED_COOLDOWNS =
     [88758] = { 26832, 95922, 39301, 88758 }, -- Healing Combustion (Energy Orb)
 }
 
+local SORT_TIER_READY = 1
+local SORT_TIER_ACTIVE_WAIT = 2
+local SORT_TIER_COOLDOWN = 3
+local SORT_TIER_IDLE = 4
+local SORT_GAME_INDEX_INACTIVE = 999
+
+--- @param entry table
+--- @return integer
+local function GetSynergyDisplaySortTier(entry)
+    if entry.isOnCooldown and entry.cooldownRemaining and entry.cooldownRemaining > 0 then
+        return SORT_TIER_COOLDOWN
+    end
+    if entry.isActive and entry.canBeUsed then
+        return SORT_TIER_READY
+    end
+    if entry.isActive then
+        return SORT_TIER_ACTIVE_WAIT
+    end
+    return SORT_TIER_IDLE
+end
+
+--- Tiered sort for Icon + Cooldown (minimal) display mode
+--- @param a table
+--- @param b table
+--- @return boolean
+local function CompareSynergyDisplayEntriesMinimal(a, b)
+    local tierA = GetSynergyDisplaySortTier(a)
+    local tierB = GetSynergyDisplaySortTier(b)
+    if tierA ~= tierB then
+        return tierA < tierB
+    end
+    if tierA == SORT_TIER_COOLDOWN then
+        if a.cooldownRemaining ~= b.cooldownRemaining then
+            return a.cooldownRemaining < b.cooldownRemaining
+        end
+    end
+    if a.priority ~= b.priority then
+        return a.priority > b.priority
+    end
+    local indexA = a.gameIndex or SORT_GAME_INDEX_INACTIVE
+    local indexB = b.gameIndex or SORT_GAME_INDEX_INACTIVE
+    if indexA ~= indexB then
+        return indexA < indexB
+    end
+    return a.name < b.name
+end
+
+--- Legacy multi / compact list sort
+--- @param a table
+--- @param b table
+--- @return boolean
+local function CompareSynergyDisplayEntriesLegacy(a, b)
+    if a.isActive ~= b.isActive then
+        return a.isActive
+    end
+    if a.priority ~= b.priority then
+        return a.priority > b.priority
+    end
+    return a.name < b.name
+end
+
 --- Set font on a label, selecting between PC and console variants
 --- @param label LabelControl|nil
 --- @param pcFont string Font for keyboard/mouse mode
@@ -364,7 +425,14 @@ function SynergyTracker:Initialize()
         end
     end)
 
-    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, function () self:OnSynergyAbilityChanged() end)
+    eventManager:RegisterForEvent(moduleName .. "CombatState", EVENT_PLAYER_COMBAT_STATE, function ()
+        self:ApplyDisplayAlpha()
+    end)
+
+    eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, function ()
+        self:OnSynergyAbilityChanged()
+        self:ApplyDisplayAlpha()
+    end)
     eventManager:RegisterForEvent(moduleName, EVENT_SYNERGY_ABILITY_CHANGED, function () self:OnSynergyAbilityChanged() end)
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_DEAD, function () self:OnPlayerDead() end)
 
@@ -377,6 +445,8 @@ function SynergyTracker:Initialize()
         self:OnEffectChanged(changeType, abilityId)
     end)
     eventManager:AddFilterForEvent(moduleName, EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
+
+    self:ApplyDisplayAlpha()
 
     zo_callLater(function () self:RefreshActiveSynergies() end, 100)
 end
@@ -490,6 +560,7 @@ function SynergyTracker:UpdateDisplay()
 
     if displayMode == "hidden" and not Settings.unlocked then
         self.control:SetHidden(true)
+        self:ApplyDisplayAlpha()
         return
     end
 
@@ -554,6 +625,7 @@ function SynergyTracker:UpdateDisplay()
         self:ApplyContainerDimensions(displayMode, 0)
         self:UpdateUnlockInteraction()
         self:UpdateCooldownDisplay()
+        self:ApplyDisplayAlpha()
         return
     end
 
@@ -597,19 +669,16 @@ function SynergyTracker:UpdateDisplay()
                              isOnCooldown = isOnCooldown,
                              cooldownRemaining = cooldownRemaining,
                              isActive = isActive,
+                             gameIndex = activeData and activeData.index or SORT_GAME_INDEX_INACTIVE,
                          })
         end
     end
 
-    table.sort(displayList, function (a, b)
-        if a.isActive ~= b.isActive then
-            return a.isActive
-        end
-        if a.priority ~= b.priority then
-            return a.priority > b.priority
-        end
-        return a.name < b.name
-    end)
+    if isMinimal then
+        table.sort(displayList, CompareSynergyDisplayEntriesMinimal)
+    else
+        table.sort(displayList, CompareSynergyDisplayEntriesLegacy)
+    end
 
     local displayCount = zo_min(#displayList, maxDisplay)
     for i = 1, displayCount do
@@ -694,6 +763,7 @@ function SynergyTracker:UpdateDisplay()
 
     self:UpdateUnlockInteraction()
     self:UpdateCooldownDisplay()
+    self:ApplyDisplayAlpha()
 end
 
 --- Update cooldown timer displays (called every second via OnUpdate throttle)
@@ -855,6 +925,19 @@ function SynergyTracker:ApplyPosition()
     self.control:SetAnchor(CENTER, GuiRoot, CENTER, x, y)
 end
 
+--- Set tracker opacity from in-combat / out-of-combat saved values (0–100, like unit frames)
+function SynergyTracker:ApplyDisplayAlpha()
+    if not self.control then
+        return
+    end
+
+    local Settings = CombatInfo.SV.synergy
+    local oocAlpha = Settings.oocAlpha or 100
+    local incAlpha = Settings.incAlpha or 100
+    local inCombat = IsUnitInCombat("player")
+    self.control:SetAlpha(0.01 * (inCombat and incAlpha or oocAlpha))
+end
+
 --- Unlock/lock UI for positioning
 --- @param unlocked boolean Whether to unlock the UI
 function SynergyTracker:SetUnlocked(unlocked)
@@ -949,6 +1032,7 @@ function SynergyTracker:ShowPreview()
     end
 
     self:UpdateUnlockInteraction()
+    self:ApplyDisplayAlpha()
     self.control:SetHidden(false)
 end
 
