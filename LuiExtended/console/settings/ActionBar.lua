@@ -140,6 +140,53 @@ function ActionBar.CreateConsoleSettings()
 
     initialSettings[#initialSettings + 1] = SettingsAPI:ConsoleFontDeferLabelSetting()
 
+    initialSettings[#initialSettings + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = "Display Options",
+        canSelect = false,
+    }
+
+    initialSettings[#initialSettings + 1] =
+    {
+        type = LHAS.ST_SLIDER,
+        label = "Out-of-Combat Opacity",
+        tooltip = "Action bar and cast bar opacity while out of combat (0–100%).",
+        min = 0,
+        max = 100,
+        step = 5,
+        format = "%.0f",
+        getFunction = function ()
+            return Settings.oocAlpha
+        end,
+        setFunction = function (v)
+            Settings.oocAlpha = v
+            ActionBar.ApplyDisplayAlpha()
+        end,
+        default = Defaults.oocAlpha,
+        disable = function () return not LUIE.SV.ActionBar_Enabled end,
+    }
+
+    initialSettings[#initialSettings + 1] =
+    {
+        type = LHAS.ST_SLIDER,
+        label = "In-Combat Opacity",
+        tooltip = "Action bar and cast bar opacity while in combat (0–100%).",
+        min = 0,
+        max = 100,
+        step = 5,
+        format = "%.0f",
+        getFunction = function ()
+            return Settings.incAlpha
+        end,
+        setFunction = function (v)
+            Settings.incAlpha = v
+            ActionBar.ApplyDisplayAlpha()
+        end,
+        default = Defaults.incAlpha,
+        disable = function () return not LUIE.SV.ActionBar_Enabled end,
+    }
+
     local sectionGroups = {}
 
     -- Helper function to build section settings
