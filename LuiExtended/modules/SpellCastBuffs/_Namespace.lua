@@ -234,6 +234,8 @@ local SpellCastBuffs = ZO_Object:Subclass()
 --- @field prominentdVOffsetY number|nil
 --- @field prominentdHOffsetX number|nil
 --- @field prominentdHOffsetY number|nil
+--- @field oocAlpha number
+--- @field incAlpha number
 
 SpellCastBuffs.moduleName = LUIE.name .. "SpellCastBuffs"
 
@@ -408,6 +410,8 @@ SpellCastBuffs.Defaults =
     DefaultIconOptions = 1,
     ShowSharedEffects = true,
     ShowSharedMajorMinor = true,
+    oocAlpha = 100,
+    incAlpha = 100,
     playerbOffsetX = nil,
     playerbOffsetY = nil,
     playerdOffsetX = nil,
