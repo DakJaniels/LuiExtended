@@ -175,6 +175,8 @@ modules/UnitFrames/LibGroupBroadcast_Integrations/_GroupResources.lua
 modules/UnitFrames/_GroupFoodDrinkBuff.lua
 modules/UnitFrames/_ListFunctions.lua
 modules/UnitFrames/_MenuFunctions.lua
+modules/UnitFrames/_CustomFrameAppearance.lua
+modules/UnitFrames/_AppearanceSettingsControls.lua
 modules/UnitFrames/_FontFunctions.lua
 modules/UnitFrames/_Debug.lua
 modules/UnitFrames/_DynamicPositioning.lua

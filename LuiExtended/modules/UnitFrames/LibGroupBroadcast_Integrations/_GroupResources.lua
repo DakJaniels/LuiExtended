@@ -116,7 +116,8 @@ local function UpdateResourceBarLayout(frameData, isRaid)
 
     -- Apply textures and gradient colors to bars
     local rootSettings = Shared.GetSettings()
-    local texture = LUIE.StatusbarTextures[rootSettings.CustomTexture]
+    local groupAppearance = UnitFrames.GetCustomFrameAppearance("group")
+    local texture = LUIE.StatusbarTextures[groupAppearance.texture]
 
     magBar:SetTexture(texture)
     magBar:SetPixelRoundingEnabled(true)
@@ -140,7 +141,7 @@ local function UpdateResourceBarLayout(frameData, isRaid)
         stamBar:SetGradientColors(startR, startG, startB, startA, endR, endG, endB, endA)
     end
 
-    local isRoundTexture = rootSettings.CustomTexture == "Tube" or rootSettings.CustomTexture == "Steel"
+    local isRoundTexture = groupAppearance.texture == "Tube" or groupAppearance.texture == "Steel"
 
     if texture then
         magBackdrop:SetCenterTexture(texture)

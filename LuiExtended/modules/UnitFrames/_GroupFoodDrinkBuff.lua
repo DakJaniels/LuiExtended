@@ -370,9 +370,9 @@ local function CreateFoodDrinkBuffUI(frameData)
         local fontSize = 12
         label:SetDrawLayer(DL_OVERLAY)
         label:SetDrawLevel(16)
-        local rootSettings = Shared.GetSettings()
-        local fontFace = LUIE.Fonts[rootSettings.CustomFontFace]
-        local fontStyle = rootSettings.CustomFontStyle
+        local appearance = UnitFrames.GetCustomFrameAppearance("group")
+        local fontFace = LUIE.Fonts[appearance.fontFace]
+        local fontStyle = appearance.fontStyle
         label:SetFont(LUIE.CreateFontString(fontFace, fontSize, fontStyle))
         frameData.foodDrinkBuff.label = label
     end
