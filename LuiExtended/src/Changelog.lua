@@ -22,6 +22,7 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Replaced single Set Transparency with separate out-of-combat and in-combat sliders (0-100%). Existing saves copy the old value to both. PC and console.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Info - Synergy Tracker: Out-of-combat and in-combat opacity sliders under Display Options (0-100%, same style as unit frames).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Info - Synergy Tracker: Display mode Icon + Cooldown (minimal) and Hidden (no HUD list; detection, sounds, blacklist, and priority overrides still run). Optional horizontal layout for minimal. Right-click synergy rows for priority (game default and 1-10) and blacklist. Minimal mode uses tiered sort (ready -> active waiting -> cooldown -> idle).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom frame font and bar texture are no longer one global set for every frame. Under Custom Unit Frames, Font/Texture Settings provides separate profiles for Player, Target, Group, Raid, Companion, Pet, Boss, and AvA (font, font style, label size, bar size, texture). Existing saves copy your previous global custom font/texture into all eight categories on first load. PC uses nested submenus; console uses a dedicated Font/Texture Settings section. Group broadcast overlays (combat stats, potion cooldowns, food/drink buff, group resources) use the Group profile (raid potion labels use Raid when on raid frames).",
     "",
     -- Fix
     "|cFFFF00Fix:|r",
