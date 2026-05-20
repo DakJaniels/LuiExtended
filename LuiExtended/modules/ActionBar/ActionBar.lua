@@ -187,6 +187,8 @@ local moduleName = LUIE.name .. "ActionBar"
 --- @field CompanionUltimateColor100 AB_Color
 --- @field CompanionUltimateColor80 AB_Color
 --- @field CompanionUltimateColor50 AB_Color
+--- @field oocAlpha number
+--- @field incAlpha number
 
 ActionBar.Enabled = false
 --- @type ActionBarDefaults
@@ -258,6 +260,8 @@ ActionBar.Defaults =
     CompanionUltimateColor100 = { 0.878, 0.941, 0.251, 1 },
     CompanionUltimateColor80 = { 0.941, 0.565, 0.251, 1 },
     CompanionUltimateColor50 = { 0.941, 0.251, 0.125, 1 },
+    oocAlpha = 100,
+    incAlpha = 100,
 }
 
 --- @type ActionBarDefaults
@@ -320,10 +324,15 @@ local g_hotbarCategory = GetActiveHotbarCategory() -- Set on initialization and 
 --- @type {[integer]:ActionButton}
 local g_backbarButtons = {}                        -- Table to hold backbar buttons
 local g_backbarContainer                           -- Parent control for backbar (used for SETHOTBAR auto-hide)
+local g_actionBarDisplayAlpha                      -- Last alpha applied to ZO_ActionBar1 (re-apply if UI resets it)
 local g_activeWeaponSwapInProgress = false         -- Toggled on when weapon swapping, TODO: maybe not needed
 local g_castbarWorldMapFix = false                 -- Fix for viewing the World Map changing the player coordinates for some reason
 local g_actionBarActiveWeaponPair = GetHeldWeaponPair()
-local ACTION_BAR = ZO_ActionBar1
+--- Always resolve at runtime; file-load snapshot of ZO_ActionBar1 can be wrong before UI exists.
+local function GetActionBarControl()
+    return ZO_ActionBar1
+end
+local ACTION_BAR = GetActionBarControl()
 local BAR_INDEX_START = 3
 local BAR_INDEX_END = 8
 local BACKBAR_INDEX_END = 7           -- Separate index for backbar as long as we're not using an ultimate button.
@@ -871,6 +880,13 @@ function ActionBar.Initialize(enabled)
     end
     ActionBar.Enabled = true
 
+    if ActionBar.SV.oocAlpha == nil then
+        ActionBar.SV.oocAlpha = ActionBar.Defaults.oocAlpha
+    end
+    if ActionBar.SV.incAlpha == nil then
+        ActionBar.SV.incAlpha = ActionBar.Defaults.incAlpha
+    end
+
     -- -----------------------------------------------------------------------------
     ActionBar.ApplyFont()
     ActionBar.ApplyProcSound()
@@ -937,8 +953,9 @@ function ActionBar.Initialize(enabled)
 
     -- -----------------------------------------------------------------------------
     -- Create a top level window for backbar butons
-    local tlw = windowManager:CreateControl("LUIE_Backbar", ACTION_BAR, CT_CONTROL)
-    tlw:SetParent(ACTION_BAR)
+    local actionBarParent = GetActionBarControl()
+    local tlw = windowManager:CreateControl("LUIE_Backbar", actionBarParent, CT_CONTROL)
+    tlw:SetParent(actionBarParent)
     g_backbarContainer = tlw
 
     for i = BAR_INDEX_START + BACKBAR_INDEX_OFFSET, BACKBAR_INDEX_END + BACKBAR_INDEX_OFFSET do
@@ -967,6 +984,8 @@ function ActionBar.Initialize(enabled)
     ActionBar.UpdateCastBar()
     ActionBar.SetCastBarPosition()
     LUIE.RefreshMoverOverlayFonts()
+
+    ActionBar.ApplyDisplayAlpha()
 end
 
 -- -----------------------------------------------------------------------------
@@ -1312,9 +1331,17 @@ end
 -- Clear and then (maybe) re-register event listeners for Combat/Power/Slot Updates
 --- Registers update loop and all ActionBar event handlers (player activated, combat, power, slots, etc.).
 function ActionBar.RegisterEvents()
+    eventManager:UnregisterForUpdate(moduleName .. "OnUpdate")
+    eventManager:UnregisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED)
+    eventManager:UnregisterForEvent(moduleName .. "CombatState")
+
     eventManager:RegisterForUpdate(moduleName .. "OnUpdate", 100, ActionBar.OnUpdate)
     eventManager:RegisterForEvent(moduleName, EVENT_PLAYER_ACTIVATED, function (eventId, initial)
         ActionBar.OnPlayerActivated()
+    end)
+
+    eventManager:RegisterForEvent(moduleName .. "CombatState", EVENT_PLAYER_COMBAT_STATE, function ()
+        ActionBar.ApplyDisplayAlpha()
     end)
 
     eventManager:UnregisterForEvent(moduleName, EVENT_COMBAT_EVENT)
@@ -1560,6 +1587,29 @@ function ActionBar.RemoveFromCustomList(list, input)
 end
 
 -- -----------------------------------------------------------------------------
+--- Set action bar and cast bar opacity from in-combat / out-of-combat saved values (0–100).
+function ActionBar.ApplyDisplayAlpha()
+    if not ActionBar.Enabled then
+        g_actionBarDisplayAlpha = nil
+        return
+    end
+
+    local oocAlpha = ActionBar.SV.oocAlpha or 100
+    local incAlpha = ActionBar.SV.incAlpha or 100
+    local alpha = 0.01 * (IsUnitInCombat("player") and incAlpha or oocAlpha)
+    g_actionBarDisplayAlpha = alpha
+
+    local actionBar = GetActionBarControl()
+    if actionBar and actionBar.SetAlpha then
+        actionBar:SetAlpha(alpha)
+    end
+
+    if uiTlw.castBar and ActionBar.SV.CastBarEnable and uiTlw.castBar.SetAlpha then
+        uiTlw.castBar:SetAlpha(alpha)
+    end
+end
+
+-- -----------------------------------------------------------------------------
 -- Used to populate abilities icons after the user has logged on
 --- Runs on EVENT_PLAYER_ACTIVATED: full slot update, ultimate label, backbar visibility, drop callouts.
 function ActionBar.OnPlayerActivated()
@@ -1592,6 +1642,8 @@ function ActionBar.OnPlayerActivated()
             end
         end
     end
+
+    ActionBar.ApplyDisplayAlpha()
 end
 
 local savedPlayerX = 0.000000000000000
@@ -1617,6 +1669,15 @@ end
 ---
 --- @param currentTimeMS integer
 function ActionBar.OnUpdate(currentTimeMS)
+    if g_actionBarDisplayAlpha then
+        local actionBar = GetActionBarControl()
+        if actionBar and actionBar.GetAlpha and actionBar.SetAlpha then
+            if zo_abs(actionBar:GetAlpha() - g_actionBarDisplayAlpha) > 0.001 then
+                actionBar:SetAlpha(g_actionBarDisplayAlpha)
+            end
+        end
+    end
+
     -- Procs
     for k, v in pairs(g_triggeredSlotsRemain) do
         local remain = v - currentTimeMS
@@ -2827,6 +2888,7 @@ function ActionBar.BackbarSetupTemplate()
     end
 
     RefreshCompanionQuickslotAnchors()
+    ActionBar.ApplyDisplayAlpha()
 end
 
 -- -----------------------------------------------------------------------------
