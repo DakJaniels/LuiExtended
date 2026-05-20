@@ -3243,6 +3243,56 @@ function CombatInfo.CreateConsoleSettings()
             label = "Display Options"
         }
 
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "Out-of-Combat Opacity",
+            tooltip = "Synergy tracker opacity while out of combat (0–100%).",
+            min = 0,
+            max = 100,
+            step = 5,
+            format = "%.0f",
+            getFunction = function ()
+                return Settings.synergy.oocAlpha
+            end,
+            setFunction = function (v)
+                Settings.synergy.oocAlpha = v
+                local tracker = CombatInfo.SynergyTrackerInstance
+                if tracker then
+                    tracker:ApplyDisplayAlpha()
+                end
+            end,
+            disable = function ()
+                return not Settings.synergy.enabled
+            end,
+            default = Defaults.synergy.oocAlpha
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = "In-Combat Opacity",
+            tooltip = "Synergy tracker opacity while in combat (0–100%).",
+            min = 0,
+            max = 100,
+            step = 5,
+            format = "%.0f",
+            getFunction = function ()
+                return Settings.synergy.incAlpha
+            end,
+            setFunction = function (v)
+                Settings.synergy.incAlpha = v
+                local tracker = CombatInfo.SynergyTrackerInstance
+                if tracker then
+                    tracker:ApplyDisplayAlpha()
+                end
+            end,
+            disable = function ()
+                return not Settings.synergy.enabled
+            end,
+            default = Defaults.synergy.incAlpha
+        }
+
         -- Build display mode items
         local displayModeItems =
         {
