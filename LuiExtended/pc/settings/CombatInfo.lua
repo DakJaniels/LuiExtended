@@ -3185,6 +3185,52 @@ function CombatInfo.CreateSettings()
             name = "Display Options",
         },
         {
+            type = "slider",
+            name = zo_strformat("\t\t\t\t\t<<1>>", "Out-of-Combat Opacity"),
+            tooltip = "Synergy tracker opacity while out of combat (0–100%).",
+            min = 0,
+            max = 100,
+            step = 5,
+            getFunc = function ()
+                return Settings.synergy.oocAlpha
+            end,
+            setFunc = function (value)
+                Settings.synergy.oocAlpha = value
+                local tracker = GetSynergyTracker()
+                if tracker then
+                    tracker:ApplyDisplayAlpha()
+                end
+            end,
+            width = "full",
+            default = Defaults.synergy.oocAlpha,
+            disabled = function ()
+                return not Settings.synergy.enabled
+            end,
+        },
+        {
+            type = "slider",
+            name = zo_strformat("\t\t\t\t\t<<1>>", "In-Combat Opacity"),
+            tooltip = "Synergy tracker opacity while in combat (0–100%).",
+            min = 0,
+            max = 100,
+            step = 5,
+            getFunc = function ()
+                return Settings.synergy.incAlpha
+            end,
+            setFunc = function (value)
+                Settings.synergy.incAlpha = value
+                local tracker = GetSynergyTracker()
+                if tracker then
+                    tracker:ApplyDisplayAlpha()
+                end
+            end,
+            width = "full",
+            default = Defaults.synergy.incAlpha,
+            disabled = function ()
+                return not Settings.synergy.enabled
+            end,
+        },
+        {
             type = "dropdown",
             name = "Display Mode",
             tooltip = "Single: Show only highest priority synergy (like default UI)\nMulti: Show all available synergies\nCompact: Show all synergies with short names\nIcon + Cooldown: Icon and cooldown timer only (tooltip shows ability name)\nHidden: No on-screen tracker (detection, sounds, and overrides still run)",
