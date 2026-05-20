@@ -128,9 +128,9 @@ local function AddPotionCooldownToFrame(frameData, isRaid)
         -- Apply font to label if showRemainingTime is enabled
         if Settings.showRemainingTime and frameData.potionCooldown.label then
             local fontSize = isRaid and 10 or 12
-            local rootSettings = Shared.GetSettings()
-            local fontFace = LUIE.Fonts[rootSettings.CustomFontFace]
-            local fontStyle = rootSettings.CustomFontStyle
+            local appearance = UnitFrames.GetCustomFrameAppearance(isRaid and "raid" or "group")
+            local fontFace = LUIE.Fonts[appearance.fontFace]
+            local fontStyle = appearance.fontStyle
             frameData.potionCooldown.label:SetFont(LUIE.CreateFontString(fontFace, fontSize, fontStyle))
         end
     end

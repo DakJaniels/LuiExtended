@@ -570,115 +570,8 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
-            label = "Configure font, size, and style options for custom unit frames.",
+            label = "Configure shield bar, smooth transitions, and other global custom frame options. Font and texture settings are in the next section.",
             canSelect = false,
-        }
-
-        settings[#settings + 1] = SettingsAPI:ConsoleFontDeferLabelSetting()
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_DROPDOWN,
-            label = GetString(LUIE_STRING_LAM_FONT),
-            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_TP),
-            items = SettingsAPI:GetFontsList(),
-            getFunction = function ()
-                return { data = Settings.CustomFontFace }
-            end,
-            setFunction = function (combobox, value, item)
-                Settings.CustomFontFace = item.data or item.name or value
-                SettingsAPI:MarkUnitFramesFontDeferred("custom")
-            end,
-            disable = function ()
-                return not LUIE.SV.UnitFrames_Enabled
-            end,
-            default = Defaults.CustomFontFace,
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_SLIDER,
-            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_LABELS),
-            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_LABELS_TP),
-            min = 10,
-            max = 30,
-            step = 1,
-            getFunction = function ()
-                return Settings.CustomFontOther
-            end,
-            setFunction = function (value)
-                Settings.CustomFontOther = value
-                SettingsAPI:MarkUnitFramesFontDeferred("custom")
-            end,
-            disable = function ()
-                return not LUIE.SV.UnitFrames_Enabled
-            end,
-            default = Defaults.CustomFontOther,
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_SLIDER,
-            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_BARS),
-            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_BARS_TP),
-            min = 10,
-            max = 30,
-            step = 1,
-            getFunction = function ()
-                return Settings.CustomFontBars
-            end,
-            setFunction = function (value)
-                Settings.CustomFontBars = value
-                SettingsAPI:MarkUnitFramesFontDeferred("custom")
-            end,
-            disable = function ()
-                return not LUIE.SV.UnitFrames_Enabled
-            end,
-            default = Defaults.CustomFontBars,
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_DROPDOWN,
-            label = GetString(LUIE_STRING_LAM_FONT_STYLE),
-            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_STYLE_TP),
-            items = function ()
-                local fontStyleItems = {}
-                for i, styleName in ipairs(LUIE.FONT_STYLE_CHOICES) do
-                    fontStyleItems[i] = { name = styleName, data = LUIE.FONT_STYLE_CHOICES_VALUES[i] }
-                end
-                return fontStyleItems
-            end,
-            getFunction = function ()
-                return { data = Settings.CustomFontStyle }
-            end,
-            setFunction = function (combobox, value, item)
-                Settings.CustomFontStyle = item.data or item.name or value
-                SettingsAPI:MarkUnitFramesFontDeferred("custom")
-            end,
-            default = Defaults.CustomFontStyle,
-            disable = function ()
-                return not LUIE.SV.UnitFrames_Enabled
-            end,
-        }
-
-        settings[#settings + 1] =
-        {
-            type = LHAS.ST_DROPDOWN,
-            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE),
-            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE_TP),
-            items = SettingsAPI:GetStatusbarTexturesList(),
-            getFunction = function ()
-                return { data = Settings.CustomTexture }
-            end,
-            setFunction = function (combobox, value, item)
-                Settings.CustomTexture = item.data or item.name or value
-                UnitFrames.CustomFramesApplyTexture()
-            end,
-            default = Defaults.CustomTexture,
-            disable = function ()
-                return not LUIE.SV.UnitFrames_Enabled
-            end,
         }
 
         settings[#settings + 1] =
@@ -869,6 +762,13 @@ function UnitFrames.CreateConsoleSettings()
             end,
             default = Defaults.TargetLingerDuration,
         }
+    end)
+
+    buildSectionSettings("CustomFramesFontTexture", function (settings)
+        local sectionRows = UnitFrames.BuildLHASFontTextureSettingsSection(Settings, Defaults, SettingsAPI)
+        for i = 1, #sectionRows do
+            settings[#settings + 1] = sectionRows[i]
+        end
     end)
 
     -- Build Custom Unit Frame Color Options Section
@@ -5151,6 +5051,7 @@ function UnitFrames.CreateConsoleSettings()
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_COMMON_HEADER), sectionGroups["CommonOptions"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_DFRAMES_HEADER), sectionGroups["DefaultFrames"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMES_HEADER), sectionGroups["CustomFrames"])
+    SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_TEXTURE_HEADER), sectionGroups["CustomFramesFontTexture"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMES_COLOR_HEADER), sectionGroups["CustomFramesColor"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMESPT_HEADER), sectionGroups["CustomFramesPlayerTarget"])
     SettingsAPI:AppendSection(allSettings, GetString(LUIE_STRING_LAM_UF_CFRAMES_POSITIONS_HEADER), sectionGroups["CustomFramesPositions"])

@@ -122,6 +122,73 @@ UnitFrames.Defaults =
     CustomFontBars = 16,
     CustomFontOther = 20,
     CustomTexture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+    CustomFrameAppearance =
+    {
+        player =
+        {
+            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
+            fontBars = 16,
+            fontOther = 20,
+            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+        },
+        target =
+        {
+            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
+            fontBars = 16,
+            fontOther = 20,
+            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+        },
+        group =
+        {
+            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
+            fontBars = 16,
+            fontOther = 20,
+            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+        },
+        raid =
+        {
+            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
+            fontBars = 16,
+            fontOther = 20,
+            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+        },
+        companion =
+        {
+            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
+            fontBars = 16,
+            fontOther = 20,
+            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+        },
+        pet =
+        {
+            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
+            fontBars = 16,
+            fontOther = 20,
+            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+        },
+        boss =
+        {
+            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
+            fontBars = 16,
+            fontOther = 20,
+            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+        },
+        ava =
+        {
+            fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
+            fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
+            fontBars = 16,
+            fontOther = 20,
+            texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
+        },
+    },
     HideBuffsPlayerOoc = false,
     HideBuffsTargetOoc = false,
     PlayerOocAlpha = 85,
