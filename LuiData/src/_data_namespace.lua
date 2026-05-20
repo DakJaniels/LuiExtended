@@ -136,7 +136,7 @@ local DebugStatus = {}
 --- @field MajorMinor MajorMinor Table of major/minor effect definitions
 --- @field MapDataOverride MapDataOverride Table of map data overrides
 --- @field RemoveAbilityActiveHighlight RemoveAbilityActiveHighlight Table of effects to remove active highlight
---- @field SynergyNameOverride SynergyNameOverride Table of synergy name overrides
+--- @field SynergyNameOverride table<string, SynergyNameOverrideEntry> Table of synergy name overrides
 --- @field TooltipUseDefault TooltipUseDefault Table of effects using default tooltips
 --- @field ZoneBuffs ZoneBuffs Table of zone-specific buff definitions
 --- @field ZoneDataOverride ZoneDataOverride Table of zone data overrides

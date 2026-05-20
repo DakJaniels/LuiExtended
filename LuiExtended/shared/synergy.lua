@@ -9,6 +9,11 @@ local LUIE = LUIE
 local Data = LuiData.Data
 local Effects = Data.Effects
 
+--- @class ZO_Synergy : ZO_Object
+--- @field icon TextureControl
+--- @field action LabelControl
+--- @field lastSynergyName? string
+
 
 -- Finds the abilityId of the synergy currently shown by GetCurrentSynergyInfo() by matching its
 -- name through GetSynergyInfoAtIndex. The list index order is not guaranteed to match priority
@@ -75,6 +80,7 @@ function LUIE.HookSynergy()
         end
 
         if hasSynergy and synergyName and Effects.SynergyNameOverride[synergyName] then
+            --- @type SynergyNameOverrideEntry
             local override = Effects.SynergyNameOverride[synergyName]
 
             if override.icon then

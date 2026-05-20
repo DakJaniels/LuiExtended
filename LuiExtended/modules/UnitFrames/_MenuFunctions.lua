@@ -400,27 +400,27 @@ local function CustomFramesApplyColorsInternal(sections)
 
     if applyHealthFamily then
         for _, baseName in pairs({ "player", "reticleover", "boss", "AvaPlayerTarget" }) do
-        shield[4] = (UnitFrames.SV.CustomShieldBarSeparate and not (baseName == "boss")) and UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha / 100)
-        for i = 0, 7 do
-            local unitTag = (i == 0) and baseName or (baseName .. i)
-            if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
-                local unitFrame = UnitFrames.CustomFrames[unitTag]
-                local thb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH] -- not a backdrop
-                thb.bar:SetColor(unpack(health))
-                thb.backdrop:SetCenterColor(unpack(health_bg))
-                thb.shield:SetColor(unpack(shield))
-                thb.trauma:SetColor(unpack(trauma))
-                if thb.invulnerable then
-                    thb.invulnerable:SetColor(unpack(invulnerablecolor))
-                end
-                if thb.invulnerableInlay then
-                    thb.invulnerableInlay:SetColor(unpack(invulnerablecolor_inlay))
-                end
-                if thb.shieldbackdrop then
-                    thb.shieldbackdrop:SetCenterColor(unpack(shield_bg))
+            shield[4] = (UnitFrames.SV.CustomShieldBarSeparate and not (baseName == "boss")) and UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha / 100)
+            for i = 0, 7 do
+                local unitTag = (i == 0) and baseName or (baseName .. i)
+                if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
+                    local unitFrame = UnitFrames.CustomFrames[unitTag]
+                    local thb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH] -- not a backdrop
+                    thb.bar:SetColor(unpack(health))
+                    thb.backdrop:SetCenterColor(unpack(health_bg))
+                    thb.shield:SetColor(unpack(shield))
+                    thb.trauma:SetColor(unpack(trauma))
+                    if thb.invulnerable then
+                        thb.invulnerable:SetColor(unpack(invulnerablecolor))
+                    end
+                    if thb.invulnerableInlay then
+                        thb.invulnerableInlay:SetColor(unpack(invulnerablecolor_inlay))
+                    end
+                    if thb.shieldbackdrop then
+                        thb.shieldbackdrop:SetCenterColor(unpack(shield_bg))
+                    end
                 end
             end
-        end
         end
     end
 
@@ -474,51 +474,51 @@ local function CustomFramesApplyColorsInternal(sections)
     -- Player Pet Frame Color
     if applyPetLoop then
         for i = 1, 7 do
-        local unitTag = "PetGroup" .. i
-        if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
-            local unitFrame = UnitFrames.CustomFrames[unitTag]
-            local shb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH] -- not a backdrop
-            if UnitFrames.SV.PetUseClassColor then
-                local class_color
-                local class_bg
-                if petClass == 1 then
-                    class_color = class1
-                    class_bg = class1_bg
-                elseif petClass == 2 then
-                    class_color = class2
-                    class_bg = class2_bg
-                elseif petClass == 3 then
-                    class_color = class3
-                    class_bg = class3_bg
-                elseif petClass == 4 then
-                    class_color = class4
-                    class_bg = class4_bg
-                elseif petClass == 5 then
-                    class_color = class5
-                    class_bg = class5_bg
-                elseif petClass == 6 then
-                    class_color = class6
-                    class_bg = class6_bg
-                elseif petClass == 117 then
-                    class_color = class117
-                    class_bg = class117_bg
-                else -- Fallback option just in case
-                    class_color = petcolor
-                    class_bg = petcolor_bg
+            local unitTag = "PetGroup" .. i
+            if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
+                local unitFrame = UnitFrames.CustomFrames[unitTag]
+                local shb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH] -- not a backdrop
+                if UnitFrames.SV.PetUseClassColor then
+                    local class_color
+                    local class_bg
+                    if petClass == 1 then
+                        class_color = class1
+                        class_bg = class1_bg
+                    elseif petClass == 2 then
+                        class_color = class2
+                        class_bg = class2_bg
+                    elseif petClass == 3 then
+                        class_color = class3
+                        class_bg = class3_bg
+                    elseif petClass == 4 then
+                        class_color = class4
+                        class_bg = class4_bg
+                    elseif petClass == 5 then
+                        class_color = class5
+                        class_bg = class5_bg
+                    elseif petClass == 6 then
+                        class_color = class6
+                        class_bg = class6_bg
+                    elseif petClass == 117 then
+                        class_color = class117
+                        class_bg = class117_bg
+                    else -- Fallback option just in case
+                        class_color = petcolor
+                        class_bg = petcolor_bg
+                    end
+                    shb.bar:SetColor(unpack(class_color))
+                    shb.backdrop:SetCenterColor(unpack(class_bg))
+                else
+                    shb.bar:SetColor(unpack(companioncolor))
+                    shb.backdrop:SetCenterColor(unpack(companioncolor_bg))
                 end
-                shb.bar:SetColor(unpack(class_color))
-                shb.backdrop:SetCenterColor(unpack(class_bg))
-            else
-                shb.bar:SetColor(unpack(companioncolor))
-                shb.backdrop:SetCenterColor(unpack(companioncolor_bg))
-            end
-            shb.shield:SetColor(unpack(shield))
-            shb.trauma:SetColor(unpack(trauma))
-            if shb.shieldbackdrop then
-                shb.shieldbackdrop:SetCenterColor(unpack(shield_bg))
+                shb.shield:SetColor(unpack(shield))
+                shb.trauma:SetColor(unpack(trauma))
+                if shb.shieldbackdrop then
+                    shb.shieldbackdrop:SetCenterColor(unpack(shield_bg))
+                end
             end
         end
-    end
     end
 
     local groupSize = GetGroupSize()
@@ -527,115 +527,115 @@ local function CustomFramesApplyColorsInternal(sections)
     local increment = false   -- Once we reach a value set by Increment Marker (group tag of the player), we need to increment all further tags by +1 in order to get the correct color for them.
     local incrementMarker = 0 -- Marker -- Once we reach this value in iteration, we have to add +1 to default unitTag index for all other units.
     if applyGroupRaidLoop then
-    for _, baseName in pairs({ "SmallGroup", "RaidGroup" }) do
-        shield[4] = (UnitFrames.SV.CustomShieldBarSeparate and not (baseName == "RaidGroup")) and UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha / 100)
+        for _, baseName in pairs({ "SmallGroup", "RaidGroup" }) do
+            shield[4] = (UnitFrames.SV.CustomShieldBarSeparate and not (baseName == "RaidGroup")) and UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha / 100)
 
-        -- Extra loop if player is excluded in Small Group Frames
-        if UnitFrames.SV.GroupExcludePlayer and not (baseName == "RaidGroup") then
-            -- Force increment groupTag by +1 for determining class/role if player frame is removed from display
-            for i = 1, groupSize do
-                if i > 4 then
-                    break
-                end
-                local defaultUnitTag = GetGroupUnitTagByIndex(i)
-                if AreUnitsEqual(defaultUnitTag, "player") then
-                    incrementMarker = i
-                end
-            end
-        end
-
-        for i = 1, groupSize do
-            local unitTag = baseName .. i
-            if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
-                if i == incrementMarker then
-                    increment = true
-                end
-                local defaultUnitTag
-                -- Set default frame reference to +1 if Player Frame is hidden and we reach that index, otherwise, proceed as normal
-                if increment then
-                    defaultUnitTag = GetGroupUnitTagByIndex(i + 1)
-                    if i + 1 > 4 and baseName == "SmallGroup" then
+            -- Extra loop if player is excluded in Small Group Frames
+            if UnitFrames.SV.GroupExcludePlayer and not (baseName == "RaidGroup") then
+                -- Force increment groupTag by +1 for determining class/role if player frame is removed from display
+                for i = 1, groupSize do
+                    if i > 4 then
                         break
-                    end -- Bail out if we're at the end of the small group list
-                else
-                    defaultUnitTag = GetGroupUnitTagByIndex(i)
+                    end
+                    local defaultUnitTag = GetGroupUnitTagByIndex(i)
+                    if AreUnitsEqual(defaultUnitTag, "player") then
+                        incrementMarker = i
+                    end
                 end
+            end
 
-                -- Also update control for Right Click Menu
-                UnitFrames.CustomFrames[unitTag].control.defaultUnitTag = defaultUnitTag
-                if UnitFrames.CustomFrames[unitTag].topInfo then
-                    UnitFrames.CustomFrames[unitTag].topInfo.defaultUnitTag = defaultUnitTag
-                end
-
-                local class = GetUnitClassId(defaultUnitTag)
-                local role = isBattleground and LFG_ROLE_DPS or GetGroupMemberSelectedRole(defaultUnitTag)
-
-                local unitFrame = UnitFrames.CustomFrames[unitTag]
-                local thb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH] -- not a backdrop
-
-                local group = groupSize <= 4
-                local raid = groupSize > 4
-                if not UnitFrames.SV.CustomFramesGroup then
-                    raid = true
-                    group = false
-                end
-
-                if (group and UnitFrames.SV.ColorRoleGroup) or (raid and UnitFrames.SV.ColorRoleRaid) then
-                    if role == LFG_ROLE_DPS then
-                        thb.bar:SetColor(unpack(dps))
-                        thb.backdrop:SetCenterColor(unpack(dps_bg))
-                    elseif role == LFG_ROLE_HEAL then
-                        thb.bar:SetColor(unpack(healer))
-                        thb.backdrop:SetCenterColor(unpack(healer_bg))
-                    elseif role == LFG_ROLE_TANK then
-                        thb.bar:SetColor(unpack(tank))
-                        thb.backdrop:SetCenterColor(unpack(tank_bg))
+            for i = 1, groupSize do
+                local unitTag = baseName .. i
+                if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
+                    if i == incrementMarker then
+                        increment = true
+                    end
+                    local defaultUnitTag
+                    -- Set default frame reference to +1 if Player Frame is hidden and we reach that index, otherwise, proceed as normal
+                    if increment then
+                        defaultUnitTag = GetGroupUnitTagByIndex(i + 1)
+                        if i + 1 > 4 and baseName == "SmallGroup" then
+                            break
+                        end -- Bail out if we're at the end of the small group list
                     else
-                        thb.bar:SetColor(unpack(invalid)) -- do not use health as fallback because it might look like tank
-                        thb.backdrop:SetCenterColor(unpack(invalid_bg))
+                        defaultUnitTag = GetGroupUnitTagByIndex(i)
                     end
-                elseif (group and UnitFrames.SV.ColorClassGroup) or (raid and UnitFrames.SV.ColorClassRaid) and class ~= 0 then
-                    local class_color
-                    local class_bg
-                    if class == 1 then
-                        class_color = class1
-                        class_bg = class1_bg
-                    elseif class == 2 then
-                        class_color = class2
-                        class_bg = class2_bg
-                    elseif class == 3 then
-                        class_color = class3
-                        class_bg = class3_bg
-                    elseif class == 4 then
-                        class_color = class4
-                        class_bg = class4_bg
-                    elseif class == 5 then
-                        class_color = class5
-                        class_bg = class5_bg
-                    elseif class == 6 then
-                        class_color = class6
-                        class_bg = class6_bg
-                    elseif class == 117 then
-                        class_color = class117
-                        class_bg = class117_bg
-                    else -- Fallback option just in case
-                        class_color = invalid
-                        class_bg = invalid_bg
+
+                    -- Also update control for Right Click Menu
+                    UnitFrames.CustomFrames[unitTag].control.defaultUnitTag = defaultUnitTag
+                    if UnitFrames.CustomFrames[unitTag].topInfo then
+                        UnitFrames.CustomFrames[unitTag].topInfo.defaultUnitTag = defaultUnitTag
                     end
-                    thb.bar:SetColor(unpack(class_color))
-                    thb.backdrop:SetCenterColor(unpack(class_bg))
-                else
-                    thb.bar:SetColor(unpack(health))
-                    thb.backdrop:SetCenterColor(unpack(health_bg))
-                end
-                thb.shield:SetColor(unpack(shield))
-                thb.trauma:SetColor(unpack(trauma))
-                if thb.shieldbackdrop then
-                    thb.shieldbackdrop:SetCenterColor(unpack(shield_bg))
+
+                    local class = GetUnitClassId(defaultUnitTag)
+                    local role = isBattleground and LFG_ROLE_DPS or GetGroupMemberSelectedRole(defaultUnitTag)
+
+                    local unitFrame = UnitFrames.CustomFrames[unitTag]
+                    local thb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH] -- not a backdrop
+
+                    local group = groupSize <= 4
+                    local raid = groupSize > 4
+                    if not UnitFrames.SV.CustomFramesGroup then
+                        raid = true
+                        group = false
+                    end
+
+                    if (group and UnitFrames.SV.ColorRoleGroup) or (raid and UnitFrames.SV.ColorRoleRaid) then
+                        if role == LFG_ROLE_DPS then
+                            thb.bar:SetColor(unpack(dps))
+                            thb.backdrop:SetCenterColor(unpack(dps_bg))
+                        elseif role == LFG_ROLE_HEAL then
+                            thb.bar:SetColor(unpack(healer))
+                            thb.backdrop:SetCenterColor(unpack(healer_bg))
+                        elseif role == LFG_ROLE_TANK then
+                            thb.bar:SetColor(unpack(tank))
+                            thb.backdrop:SetCenterColor(unpack(tank_bg))
+                        else
+                            thb.bar:SetColor(unpack(invalid)) -- do not use health as fallback because it might look like tank
+                            thb.backdrop:SetCenterColor(unpack(invalid_bg))
+                        end
+                    elseif (group and UnitFrames.SV.ColorClassGroup) or (raid and UnitFrames.SV.ColorClassRaid) and class ~= 0 then
+                        local class_color
+                        local class_bg
+                        if class == 1 then
+                            class_color = class1
+                            class_bg = class1_bg
+                        elseif class == 2 then
+                            class_color = class2
+                            class_bg = class2_bg
+                        elseif class == 3 then
+                            class_color = class3
+                            class_bg = class3_bg
+                        elseif class == 4 then
+                            class_color = class4
+                            class_bg = class4_bg
+                        elseif class == 5 then
+                            class_color = class5
+                            class_bg = class5_bg
+                        elseif class == 6 then
+                            class_color = class6
+                            class_bg = class6_bg
+                        elseif class == 117 then
+                            class_color = class117
+                            class_bg = class117_bg
+                        else -- Fallback option just in case
+                            class_color = invalid
+                            class_bg = invalid_bg
+                        end
+                        thb.bar:SetColor(unpack(class_color))
+                        thb.backdrop:SetCenterColor(unpack(class_bg))
+                    else
+                        thb.bar:SetColor(unpack(health))
+                        thb.backdrop:SetCenterColor(unpack(health_bg))
+                    end
+                    thb.shield:SetColor(unpack(shield))
+                    thb.trauma:SetColor(unpack(trauma))
+                    if thb.shieldbackdrop then
+                        thb.shieldbackdrop:SetCenterColor(unpack(shield_bg))
+                    end
                 end
             end
         end
-    end
     end
 
     -- Player frame also requires setting of magicka and stamina bars

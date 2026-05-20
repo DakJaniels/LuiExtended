@@ -14,7 +14,12 @@ local Abilities = Data.Abilities
 --------------------------------------------------------------------------------------------------------------------------------
 -- Synergy Icon Overrides - When a synergy with a matching ability name appears, change the icon or name.
 --------------------------------------------------------------------------------------------------------------------------------
---- @class (partial) SynergyNameOverride
+
+--- @class SynergyNameOverrideEntry
+--- @field icon? string
+--- @field name? string
+
+--- @type table<string, SynergyNameOverrideEntry>
 local synergyNameOverride =
 {
     ["Tonal Inverter"] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_QUEST_TONAL_INVERTER_DDS },                                                 -- Tonal Inverter (Divine Intervention)
@@ -32,5 +37,5 @@ local synergyNameOverride =
     [Abilities.Set_Sanguine_Burst] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_HOLLOWFANG_DDS },                                           -- Sanguine Burst (Lady Thorn)
 }
 
---- @class (partial) SynergyNameOverride
+--- @type table<string, SynergyNameOverrideEntry>
 Effects.SynergyNameOverride = synergyNameOverride

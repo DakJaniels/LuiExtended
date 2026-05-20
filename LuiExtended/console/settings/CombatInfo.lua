@@ -3296,11 +3296,11 @@ function CombatInfo.CreateConsoleSettings()
         -- Build display mode items
         local displayModeItems =
         {
-            { name = "Single Synergy",                 data = "single"  },
-            { name = "Multi-Synergy",                  data = "multi"   },
-            { name = "Compact Multi-Synergy",          data = "compact" },
-            { name = "Icon + Cooldown",                data = "minimal" },
-            { name = "Hidden",                         data = "hidden"  },
+            { name = "Single Synergy",        data = "single"  },
+            { name = "Multi-Synergy",         data = "multi"   },
+            { name = "Compact Multi-Synergy", data = "compact" },
+            { name = "Icon + Cooldown",       data = "minimal" },
+            { name = "Hidden",                data = "hidden"  },
         }
 
         settings[#settings + 1] =
