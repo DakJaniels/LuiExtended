@@ -1,5 +1,27 @@
 # LuiExtended Changelog
 
+## Version 7.2.2.4
+
+### New
+
+- Action Bar: Out-of-combat and in-combat opacity sliders (0-100%) under Display Options. Affects the game action bar (ZO_ActionBar1, including LUIE backbar and slot overlays) and the cast bar when cast bar is enabled. PC and console.
+- Buffs & Debuffs (SpellCastBuffs): Out-of-combat and in-combat opacity sliders under Position and Display. Applies to each active buff/debuff container (floating top-level windows or unit-frame-locked buff/debuff regions).
+- Combat Text: Replaced single Set Transparency with separate out-of-combat and in-combat sliders (0-100%). Existing saves copy the old value to both. PC and console.
+- Combat Info - Synergy Tracker: Out-of-combat and in-combat opacity sliders under Display Options (0-100%, same style as unit frames).
+- Combat Info - Synergy Tracker: Display mode Icon + Cooldown (minimal) and Hidden (no HUD list; detection, sounds, blacklist, and priority overrides still run). Optional horizontal layout for minimal. Right-click synergy rows for priority (game default and 1-10) and blacklist. Minimal mode uses tiered sort (ready -> active waiting -> cooldown -> idle).
+- Unit Frames: Custom frame font and bar texture are no longer one global set for every frame. Under Custom Unit Frames, Font/Texture Settings provides separate profiles for Player, Target, Group, Raid, Companion, Pet, Boss, and AvA (font, font style, label size, bar size, texture). Existing saves copy your previous global custom font/texture into all eight categories on first load. PC uses nested submenus; console uses a dedicated Font/Texture Settings section. Group broadcast overlays (combat stats, potion cooldowns, food/drink buff, group resources) use the Group profile (raid potion labels use Raid when on raid frames).
+- Buffs & Debuffs: Optional Display API debug on Tooltip (PC, under Tooltip Options). Hovering a buff icon can show status effect type, ability type, API buff slot, LuiData EffectOverride/CC hints, and live list-index timing overlay lines for tuning icons and tooltips.
+
+### Changes
+
+- Unit Frames: Attribute visual updates (shield, regeneration, stat change) use coalesced power updates and cached visual state to cut redundant bar refreshes.
+
+### Fixed
+
+- Action Bar / Buffs & Debuffs: Opacity sliders apply reliably after /reloadui (uses live ZO_ActionBar1 at apply time; buff containers re-apply when HUD fade resets alpha). Combat state still updates OOC vs in-combat values.
+- ChatAnnouncements: Fixed duplicate weekly challenge progress lines when two identical challenges advance at once (for example four chat messages instead of two). Progress and Tracking announcements no longer double up for the same challenge slot; each slot still announces separately.
+- Buffs & Debuffs: Fewer duplicate buff icons when ground auras and target buff/debuff rows route to the same container (shared-container dedupe and per-container ability dedupe on refresh).
+
 ## Version 7.2.2.3
 
 ### Fixed
