@@ -79,29 +79,8 @@ function RegenerationModule:UpdateRegen(unitTag, statType, attributeType, powerT
         return
     end
 
-    local value1 = 0
-    local value2 = 0
-
-    -- Get all attribute visualizer effects for this unit in one call
-    local results = { GetAllUnitAttributeVisualizerEffectInfo(unitTag) }
-
-    -- Process results in groups of 6 (visualType, statType, attributeType, powerType, value, maxValue)
-    for i = 1, #results, 6 do
-        local visualType = results[i]
-        local retStatType = results[i + 1]
-        local retAttributeType = results[i + 2]
-        local retPowerType = results[i + 3]
-        local retValue = results[i + 4]
-
-        -- Filter for matching stat/attribute/power combination
-        if retStatType == statType and retAttributeType == attributeType and retPowerType == powerType then
-            if visualType == ATTRIBUTE_VISUAL_INCREASED_REGEN_POWER then
-                value1 = retValue
-            elseif visualType == ATTRIBUTE_VISUAL_DECREASED_REGEN_POWER then
-                value2 = retValue
-            end
-        end
-    end
+    local value1 = UnitFrames.GetAttributeVisualEffectValue(unitTag, ATTRIBUTE_VISUAL_INCREASED_REGEN_POWER, statType, attributeType, powerType)
+    local value2 = UnitFrames.GetAttributeVisualEffectValue(unitTag, ATTRIBUTE_VISUAL_DECREASED_REGEN_POWER, statType, attributeType, powerType)
 
     if value1 < 0 then
         value1 = 1

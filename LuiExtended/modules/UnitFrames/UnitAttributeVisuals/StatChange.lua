@@ -64,26 +64,8 @@ function StatChangeModule:UpdateStat(unitTag, statType, attributeType, powerType
 
     -- If we have a control, proceed next
     if #statControls > 0 then
-        local value = 0
-
-        -- Get all attribute visualizer effects for this unit in one call
-        local results = { GetAllUnitAttributeVisualizerEffectInfo(unitTag) }
-
-        -- Process results in groups of 6 (visualType, statType, attributeType, powerType, value, maxValue)
-        for i = 1, #results, 6 do
-            local visualType = results[i]
-            local retStatType = results[i + 1]
-            local retAttributeType = results[i + 2]
-            local retPowerType = results[i + 3]
-            local retValue = results[i + 4]
-
-            -- Filter for matching stat/attribute/power combination
-            if retStatType == statType and retAttributeType == attributeType and retPowerType == powerType then
-                if visualType == ATTRIBUTE_VISUAL_INCREASED_STAT or visualType == ATTRIBUTE_VISUAL_DECREASED_STAT then
-                    value = value + retValue
-                end
-            end
-        end
+        local value = UnitFrames.GetAttributeVisualEffectValue(unitTag, ATTRIBUTE_VISUAL_INCREASED_STAT, statType, attributeType, powerType)
+            + UnitFrames.GetAttributeVisualEffectValue(unitTag, ATTRIBUTE_VISUAL_DECREASED_STAT, statType, attributeType, powerType)
 
         for _, control in pairs(statControls) do
             -- Hide proper controls if they exist

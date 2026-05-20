@@ -121,7 +121,7 @@ function LUIE_UnitAttributeVisualizer:OnUnitAttributeVisualRemoved(unitTag, visu
     for _, module in pairs(self.modules) do
         if module:IsRelevant(visualType, stat, attribute, powerType) then
             local mostRecentUpdate = module:GetMostRecentUpdate(visualType, stat, attribute, powerType, unitTag)
-            if mostRecentUpdate and sequenceId >= mostRecentUpdate then
+            if mostRecentUpdate and sequenceId > mostRecentUpdate then
                 module:OnVisualizationRemoved(unitTag, visualType, stat, attribute, powerType, value, maxValue, sequenceId)
                 module:SetMostRecentUpdate(visualType, stat, attribute, powerType, nil, unitTag)
             end
