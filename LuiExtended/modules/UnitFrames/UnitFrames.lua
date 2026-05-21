@@ -54,6 +54,21 @@ local g_PendingUpdate =
     VeteranXP = { flag = false, delay = 5000, name = moduleName .. "PendingVeteranXP" },
 }
 
+local pendingCrutchAlertsVersionWarning = false
+local CRUTCH_ALERTS_MIN_VERSION_WARNING = "CrutchAlerts was detected but is below the minimum supported version (v2.15.0). Reinstall or update CrutchAlerts to restore boss threshold markers."
+
+--- Chat is not ready during addon load; queue warning until primaryContainer exists.
+local function TryShowPendingCrutchAlertsVersionWarning()
+    if not pendingCrutchAlertsVersionWarning then
+        return
+    end
+    if not ZO_GetChatSystem().primaryContainer then
+        return
+    end
+    pendingCrutchAlertsVersionWarning = false
+    LUIE.PrintToChat(CRUTCH_ALERTS_MIN_VERSION_WARNING, true)
+end
+
 local BOSS_THRESHOLD_MARKER_WIDTH = 2
 local BOSS_THRESHOLD_MARKER_COLOR = { 1, 0.85, 0.1, 0.8 }
 local BOSS_THRESHOLD_LABEL_COLOR = { 1, 0.95, 0.7, 1 }
@@ -315,7 +330,14 @@ function UnitFrames.Initialize(enabled)
         -- overrides (e.g. Z'Maja stage detection) repaint the markers.
         -- See CrutchAlerts/bosshealthbar/BossHealthBarAPI.lua:117-135.
         if LUIE.OtherAddonCompatability.isCrutchAlertsEnabled then
-            CrutchAlerts.BossHealthBar.RegisterThresholdsChangeListener("LUIE_UnitFrames", UnitFrames.OnCrutchThresholdsChanged)
+            local bhb = CrutchAlerts and CrutchAlerts.BossHealthBar
+            local bhb_rtcl = bhb and bhb.RegisterThresholdsChangeListener
+            if bhb_rtcl then
+                bhb_rtcl("LUIE_UnitFrames", UnitFrames.OnCrutchThresholdsChanged)
+            else
+                pendingCrutchAlertsVersionWarning = true
+                zo_callLater(TryShowPendingCrutchAlertsVersionWarning, 0)
+            end
         end
 
         eventManager:RegisterForEvent(moduleName, EVENT_GUILD_SELF_LEFT_GUILD, UnitFrames.SocialUpdateFrames)
@@ -972,6 +994,8 @@ end
 --- @param eventId integer
 --- @param initial boolean
 function UnitFrames.OnPlayerActivated(eventId, initial)
+    TryShowPendingCrutchAlertsVersionWarning()
+
     -- Reload values for player frames (this triggers visualizer OnUnitChanged which initializes all power types)
     UnitFrames.ReloadValues("player")
 
