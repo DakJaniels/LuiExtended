@@ -52,6 +52,7 @@ src/Changelog.lua
 
 # Frontend
 frontend/AbilityAlerts.xml
+frontend/ChangelogTemplates.xml
 frontend/Changelog.xml
 frontend/CombatText.xml
 frontend/CrowdControlTracker.xml

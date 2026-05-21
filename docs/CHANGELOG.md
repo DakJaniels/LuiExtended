@@ -1,5 +1,22 @@
 # LuiExtended Changelog
 
+## Version 7.2.2.6
+
+### New
+
+- ChatAnnouncements: Display Announcements — [B]Event Zone: Night Market (PC and console). Separate chat, center-screen, and alert toggles for [B]Daring Race, [B]Arachnid Invasion, and [B]Guiding Light Still missing some; will be added when I see them.
+- Classified Night Market [C]EVENT_DISPLAY_ANNOUNCEMENT[/C] lines by activity text (not whole zone 1559): Daring Race (for example Tempest earned, race objectives, Daring Race: … Complete, Void Collapse); Arachnid Invasion (invasion begins, defense complete, invasion repelled); Guiding Light (countdown, begins, complete, and reward earned lines such as Agonizing Tether or Exsanguinate).
+
+### Changes
+
+- ChatAnnouncements: Display Announcement debug (when enabled) also logs category, icon path, and lifespanMS to help report new center-screen text on the ESOUI thread.
+- PC settings: Font face and font style dropdowns preview each entry in the list (LuiExtended fontable_dropdown LAM control; fixed preview size, no dependency on a forked LibAddonMenu). Texture dropdowns preview status bar art (textureable_dropdown) for Unit Frames per-category appearance, Action Bar cast bar, and Buffs & Debuffs prominent progress texture.
+- Unit Frames: Changing font or bar texture under a Custom Unit Frames appearance category (Player, Target, Group, etc.) reapplies only that category instead of refreshing every custom frame type on each slider or dropdown change.
+
+### Fixed
+
+- Combat Text (PC): All color picker defaults in settings now include alpha so LAM Reset to Default restores full RGBA (opacity), not RGB only.
+
 ## Version 7.2.2.5
 
 ### Fixed
