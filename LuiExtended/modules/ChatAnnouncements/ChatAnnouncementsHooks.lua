@@ -3281,6 +3281,47 @@ function ChatAnnouncements.HookFunction()
         end
     end
 
+    -- Daring Race (Night Market event zone) display announcements — text match only, not whole zone 1559
+    local function IsDaringRaceDisplayAnnouncement(primaryText)
+        if not primaryText then
+            return false
+        end
+        if primaryText == GetString(LUIE_STRING_CA_DISPLAY_DARING_RACE_TEMPEST_EARNED) then
+            return true
+        end
+        if primaryText == GetString(LUIE_STRING_CA_DISPLAY_DARING_RACE_VOID_TEARS) then
+            return true
+        end
+        if primaryText == GetString(LUIE_STRING_CA_DISPLAY_DARING_RACE_VOID_COLLAPSE_COMPLETE) then
+            return true
+        end
+        return zo_strfind(primaryText, GetString(LUIE_STRING_CA_DISPLAY_DARING_RACE_PREFIX), 1, true) ~= nil
+    end
+
+    local function IsArachnidInvasionDisplayAnnouncement(primaryText, secondaryText)
+        if primaryText == GetString(LUIE_STRING_CA_DISPLAY_ARACHNID_INVASION_BEGINS) then
+            return true
+        end
+        if primaryText == GetString(LUIE_STRING_CA_DISPLAY_ARACHNID_DEFENSE_COMPLETE) then
+            return true
+        end
+        if secondaryText == GetString(LUIE_STRING_CA_DISPLAY_ARACHNID_INVASION_REPELLED) then
+            return true
+        end
+        return false
+    end
+
+    local function IsGuidingLightDisplayAnnouncement(primaryText)
+        if not primaryText then
+            return false
+        end
+        return primaryText == GetString(LUIE_STRING_CA_DISPLAY_GUIDING_LIGHT_SHINES_10)
+            or primaryText == GetString(LUIE_STRING_CA_DISPLAY_GUIDING_LIGHT_BEGINS)
+            or primaryText == GetString(LUIE_STRING_CA_DISPLAY_GUIDING_LIGHT_COMPLETE)
+            or primaryText == GetString(LUIE_STRING_CA_DISPLAY_GUIDING_LIGHT_AGONIZING_TETHER_EARNED)
+            or primaryText == GetString(LUIE_STRING_CA_DISPLAY_GUIDING_LIGHT_EXSANGUINATE_EARNED)
+    end
+
     local ZoneIds =
     {
         [1436] = "Endless Archive", -- Dungeon - Endless Archive
@@ -3401,6 +3442,15 @@ function ChatAnnouncements.HookFunction()
             if primaryText == GetString(LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_GROUPLEAVE_D) then
                 primaryText = GetString(LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_GROUPLEAVE_C)
             end
+        elseif IsDaringRaceDisplayAnnouncement(primaryText) then
+            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ZoneNightMarket
+            debugDisable = true
+        elseif IsArachnidInvasionDisplayAnnouncement(primaryText, secondaryText) then
+            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ZoneNightMarketArachnid
+            debugDisable = true
+        elseif IsGuidingLightDisplayAnnouncement(primaryText) then
+            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.ZoneNightMarketGuidingLight
+            debugDisable = true
         elseif type then
             settings = ResolveDisplayAnnouncementMessages(type)
             debugDisable = true
@@ -3421,6 +3471,9 @@ function ChatAnnouncements.HookFunction()
             d("Zone Id: " .. zoneid)
             local mapid = GetCurrentMapId()
             d("Map Id: " .. mapid)
+            d("Category: " .. tostring(category))
+            d("Icon: " .. tostring(icon))
+            d("LifespanMS: " .. tostring(lifespanMS))
         end
 
         -- Display CA if enabled
