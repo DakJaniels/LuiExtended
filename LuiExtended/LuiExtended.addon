@@ -47,13 +47,8 @@ keyboard/hooks.lua
 keyboard/maphooks.lua
 keyboard/skills.lua
 
-src/Changelog.lua
-
-
 # Frontend
 frontend/AbilityAlerts.xml
-frontend/ChangelogTemplates.xml
-frontend/Changelog.xml
 frontend/CombatText.xml
 frontend/CrowdControlTracker.xml
 frontend/InfoPanel.xml
@@ -74,6 +69,7 @@ modules/ChatAnnouncements/ChatAnnouncementsPlayerToPlayerHooks.lua
 modules/ChatAnnouncements/ChatAnnouncementsExperience.lua
 modules/ChatAnnouncements/ChatAnnouncementsCSA.lua
 modules/ChatAnnouncements/QuestCounterFilters.lua
+modules/ChatAnnouncements/ChatAnnouncementsNightMarketDisplay.lua
 modules/ChatAnnouncements/ChatAnnouncementsHooks.lua
 modules/ChatAnnouncements/ChatAnnouncements.lua
 
@@ -201,6 +197,11 @@ console/settings/UnitFrames.lua
 # Dialogs - Console
 console/dialogs/BlacklistDialog.xml
 console/dialogs/BlacklistDialog.lua
+
+# Changelog - PC only
+pc/frontend/ChangelogTemplates.xml
+pc/frontend/Changelog.xml
+pc/Changelog.lua
 
 # Settings - PC
 pc/Settings_API.lua
