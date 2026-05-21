@@ -8,10 +8,64 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 local zo_strformat = zo_strformat
 local table_concat = table.concat
-local GetDisplayName = GetDisplayName
+local MOUSE_BUTTON_INDEX_LEFT = MOUSE_BUTTON_INDEX_LEFT
+local TOPLEFT = TOPLEFT
+local BOTTOMLEFT = BOTTOMLEFT
+local LEFT = LEFT
+local RIGHT = RIGHT
+local TEXT_ALIGN_LEFT = TEXT_ALIGN_LEFT
+-- -----------------------------------------------------------------------------
+
+local CHANGELOG_THEME =
+{
+    surface = { 0.05, 0.05, 0.07, 0.92 },
+    surfaceAlt = { 0.12, 0.11, 0.14, 0.95 },
+    border = { 0.35, 0.32, 0.28, 1 },
+    spacing =
+    {
+        sm = 8,
+        md = 12,
+    },
+    fontTitle = "ZoFontWinH2",
+    fontSection = "ZoFontWinH4",
+    fontBody = "ZoFontGame",
+    sectionHeaderHeight = 40,
+    sectionBodyPadding = 8,
+}
+local CHANGELOG_CONTENT_WIDTH = 830
+local CHANGELOG_VERSION_HEADER_MATCH = "|cFFA500LuiExtended Version "
+local CHANGELOG_SCROLL_THUMB = "EsoUI/Art/Miscellaneous/scrollbox_elevator.dds"
+local CHANGELOG_SCROLL_THUMB_DISABLED = "EsoUI/Art/Miscellaneous/scrollbox_elevator_disabled.dds"
+local CHANGELOG_SCROLL_TRACK = "EsoUI/Art/Miscellaneous/scrollbox_track.dds"
+local CHANGELOG_SCROLL_THUMB_WIDTH = 8
+local CHANGELOG_SCROLL_THUMB_HEIGHT = 32
+
+local CHANGELOG_SECTION_HEADER_TEMPLATE = "LUIE_Changelog_SectionHeader_Template"
+local CHANGELOG_SECTION_BODY_TEMPLATE = "LUIE_Changelog_SectionBody_Template"
+local changelogSectionHeaderPool
+local changelogSectionBodyPool
+
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.2.6
+    "|cFFA500LuiExtended Version 7.2.2.6|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Display Announcements — Event Zone: Night Market (PC and console). Separate chat, center-screen, and alert toggles for Daring Race, Arachnid Invasion, and Guiding Light. Still missing some; will be added when I see them.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Classified Night Market EVENT_DISPLAY_ANNOUNCEMENT lines by activity text (not whole zone 1559): Daring Race (for example Tempest earned, race objectives, Daring Race: … Complete, Void Collapse); Arachnid Invasion (invasion begins, defense complete, invasion repelled); Guiding Light (countdown, begins, complete, and reward earned lines such as Agonizing Tether or Exsanguinate).",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Display Announcement debug (when enabled) also logs category, icon path, and lifespanMS to help report new center-screen text on the ESOUI thread.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t PC settings: Font face and font style dropdowns preview each entry in the list (LuiExtended fontable_dropdown LAM control; fixed preview size, no dependency on a forked LibAddonMenu). Texture dropdowns preview status bar art (textureable_dropdown) for Unit Frames per-category appearance, Action Bar cast bar, and Buffs & Debuffs prominent progress texture.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Changing font or bar texture under a Custom Unit Frames appearance category (Player, Target, Group, etc.) reapplies only that category instead of refreshing every custom frame type on each slider or dropdown change.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text (PC): All color picker defaults in settings now include alpha so LAM Reset to Default restores full RGBA (opacity), not RGB only.",
+    "",
     -- Version Header 7.2.2.5
     "|cFFA500LuiExtended Version 7.2.2.5|r",
     "",
@@ -611,6 +665,322 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t I'm sure I missed a note on some other things that changed. View the full change log on Git.",
     "",
 }
+
+-- -----------------------------------------------------------------------------
+--- @param messages table
+--- @return { title: string, lines: string[] }[]
+local function ParseChangelogVersionSections(messages)
+    local sections = {}
+    local current
+    for i = 1, #messages do
+        local line = messages[i]
+        if zo_strfind(line, CHANGELOG_VERSION_HEADER_MATCH, 1, true) then
+            current = { title = line, lines = {} }
+            sections[#sections + 1] = current
+        elseif current then
+            current.lines[#current.lines + 1] = line
+        end
+    end
+    return sections
+end
+
+local function FormatChangelogSectionBody(lines)
+    local bodyLines = {}
+    for lineIndex = 1, #lines do
+        local line = lines[lineIndex]
+        if line ~= "" then
+            bodyLines[#bodyLines + 1] = StringOnlyGSUB(line, "%[%*%]", "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t")
+        end
+    end
+    return table_concat(bodyLines, "\n")
+end
+
+local function GetChangelogVersionDisplayTitle(coloredTitle)
+    local plain = coloredTitle:gsub("|c%x+", ""):gsub("|r", "")
+    local version = zo_strmatch(plain, "Version%s+([%d%.]+)")
+    if version then
+        return "Version " .. version
+    end
+    return plain
+end
+
+local function ApplyChangelogBackdrop(backdrop, variant)
+    if not backdrop then
+        return
+    end
+    local colors = CHANGELOG_THEME[variant] or CHANGELOG_THEME.surface
+    backdrop:SetCenterColor(colors[1], colors[2], colors[3], colors[4])
+    local border = CHANGELOG_THEME.border
+    backdrop:SetEdgeColor(border[1], border[2], border[3], border[4])
+end
+
+local function ApplyChangelogScrollTheme()
+    local scrollContainer = LUIE_Changelog_Container
+    local scrollBar = LUIE_Changelog_ContainerScrollBar
+    if not scrollBar then
+        return
+    end
+
+    if scrollContainer then
+        ZO_Scroll_SetUseFadeGradient(scrollContainer, false)
+    end
+
+    scrollBar:SetThumbTexture(CHANGELOG_SCROLL_THUMB, CHANGELOG_SCROLL_THUMB_DISABLED, nil, CHANGELOG_SCROLL_THUMB_WIDTH, CHANGELOG_SCROLL_THUMB_HEIGHT)
+
+    scrollBar:SetBackgroundTopTexture(CHANGELOG_SCROLL_TRACK, 0, 0, 1, 1)
+    scrollBar:SetBackgroundMiddleTexture(CHANGELOG_SCROLL_TRACK, 0, 0, 1, 1)
+    scrollBar:SetBackgroundBottomTexture(CHANGELOG_SCROLL_TRACK, 0, 0, 1, 1)
+
+    local track = CHANGELOG_THEME.surfaceAlt
+    scrollBar:SetColor(track[1], track[2], track[3], track[4])
+
+    local accentR, accentG, accentB, accentA = ZO_SELECTED_TEXT:UnpackRGBA()
+    local thumb = scrollBar:GetThumbTextureControl()
+    if thumb then
+        thumb:SetColor(accentR, accentG, accentB, accentA)
+    end
+
+    local thumbMunge = scrollBar:GetNamedChild("ThumbMunge")
+    if thumbMunge then
+        thumbMunge:SetHidden(true)
+    end
+end
+
+local function ApplyChangelogWindowTheme()
+    ApplyChangelogBackdrop(LUIE_Changelog_Background, "surface")
+    ApplyChangelogBackdrop(LUIE_Changelog_TitleBarBg, "surfaceAlt")
+
+    local titleR, titleG, titleB, titleA = ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA()
+    LUIE_Changelog_Title:SetColor(titleR, titleG, titleB, titleA)
+
+    local aboutR, aboutG, aboutB, aboutA = ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA()
+    LUIE_Changelog_About:SetColor(aboutR, aboutG, aboutB, aboutA)
+
+    ApplyChangelogScrollTheme()
+end
+
+local function EnsureChangelogSectionPools(scrollChild)
+    if not changelogSectionHeaderPool then
+        changelogSectionHeaderPool = ZO_ControlPool:New(CHANGELOG_SECTION_HEADER_TEMPLATE, scrollChild, "SecHdr")
+        changelogSectionHeaderPool:SetCustomResetBehavior(function (header)
+            header.treeNode = nil
+            header.treeView = nil
+            header.titleLabel = nil
+            header.toggleBtn = nil
+            header.sectionLines = nil
+            header.bodyWrap = nil
+            header.bodyPoolKey = nil
+            header.bodyNode = nil
+        end)
+    end
+    if not changelogSectionBodyPool then
+        changelogSectionBodyPool = ZO_ControlPool:New(CHANGELOG_SECTION_BODY_TEMPLATE, scrollChild, "SecBody")
+        changelogSectionBodyPool:SetCustomResetBehavior(function (wrap)
+            wrap.bodyLabel = nil
+        end)
+    end
+end
+
+local function SetupChangelogSectionHeader(header, title, expanded)
+    ApplyChangelogBackdrop(header:GetNamedChild("Bg"), "surfaceAlt")
+
+    local titleLabel = header:GetNamedChild("Title")
+    titleLabel:SetText(title)
+    local accentR, accentG, accentB, accentA = ZO_SELECTED_TEXT:UnpackRGBA()
+    titleLabel:SetColor(accentR, accentG, accentB, accentA)
+
+    local toggleBtn = header:GetNamedChild("Toggle")
+    toggleBtn:SetText(expanded and "-" or "+")
+
+    header.titleLabel = titleLabel
+    header.toggleBtn = toggleBtn
+end
+
+local function SetupChangelogSectionBody(wrap, lines)
+    local bodyWidth = CHANGELOG_CONTENT_WIDTH - CHANGELOG_THEME.sectionBodyPadding * 2
+    local bodyText = FormatChangelogSectionBody(lines)
+
+    wrap:SetWidth(CHANGELOG_CONTENT_WIDTH)
+
+    local bodyBg = wrap:GetNamedChild("Bg")
+    ApplyChangelogBackdrop(bodyBg, "surface")
+
+    local label = wrap:GetNamedChild("Text")
+    label:SetWidth(bodyWidth)
+    label:SetText(bodyText)
+    local bodyR, bodyG, bodyB, bodyA = ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA()
+    label:SetColor(bodyR, bodyG, bodyB, bodyA)
+
+    local pad = CHANGELOG_THEME.sectionBodyPadding
+    local _, textHeight = label:GetTextDimensions()
+    local wrapHeight = textHeight + pad * 2
+    label:SetHeight(textHeight)
+    wrap:SetHeight(wrapHeight)
+    bodyBg:SetHeight(wrapHeight)
+
+    wrap.bodyLabel = label
+end
+
+local function SetChangelogSectionExpanded(header, expanded)
+    if header.toggleBtn then
+        header.toggleBtn:SetText(expanded and "-" or "+")
+    end
+end
+
+local function RemoveChangelogControlFromList(controls, control)
+    for controlIndex = #controls, 1, -1 do
+        if controls[controlIndex] == control then
+            table.remove(controls, controlIndex)
+            return
+        end
+    end
+end
+
+local function AttachChangelogSectionBody(header, headerNode, tree, controls)
+    if header.bodyNode or not header.sectionLines then
+        return
+    end
+
+    local bodyWrap, poolKey = changelogSectionBodyPool:AcquireObject()
+    SetupChangelogSectionBody(bodyWrap, header.sectionLines)
+    header.bodyWrap = bodyWrap
+    header.bodyPoolKey = poolKey
+    header.bodyNode = tree:AddChild(headerNode, bodyWrap, CHANGELOG_THEME.spacing.md)
+    controls[#controls + 1] = bodyWrap
+end
+
+local function DetachChangelogSectionBody(header, tree, controls)
+    if not header.bodyNode then
+        return
+    end
+
+    tree:RemoveNode(header.bodyNode)
+    if header.bodyWrap then
+        RemoveChangelogControlFromList(controls, header.bodyWrap)
+    end
+    if header.bodyPoolKey then
+        changelogSectionBodyPool:ReleaseObject(header.bodyPoolKey)
+    end
+    header.bodyWrap = nil
+    header.bodyPoolKey = nil
+    header.bodyNode = nil
+end
+
+local function ReleaseChangelogTreeUI()
+    if LUIE.changelogTree then
+        LUIE.changelogTree:Clear()
+    end
+    if changelogSectionHeaderPool then
+        changelogSectionHeaderPool:ReleaseAllObjects()
+    end
+    if changelogSectionBodyPool then
+        changelogSectionBodyPool:ReleaseAllObjects()
+    end
+    LUIE.changelogControls = {}
+end
+
+local function UpdateChangelogScrollChildHeight(scrollChild, controls)
+    local maxBottom = 0
+    for controlIndex = 1, #controls do
+        local control = controls[controlIndex]
+        if not control:IsHidden() then
+            local bottom = control:GetTop() + control:GetHeight()
+            maxBottom = zo_max(maxBottom, bottom)
+        end
+    end
+    scrollChild:SetHeight(zo_max(400, maxBottom - scrollChild:GetTop() + 12))
+end
+
+local function BuildChangelogTreeUI()
+    local scrollChild = LUIE_Changelog_ContainerScrollChild
+    if not scrollChild then
+        return
+    end
+
+    ReleaseChangelogTreeUI()
+
+    local sections = ParseChangelogVersionSections(changelogMessages)
+    if #sections == 0 then
+        return
+    end
+
+    EnsureChangelogSectionPools(scrollChild)
+
+    local treeAnchor = ZO_Anchor:New(TOPLEFT, scrollChild, TOPLEFT, 4, 4)
+    local tree = ZO_TreeControl:New(treeAnchor, 14, 8)
+    tree:SetRelativePoint(BOTTOMLEFT)
+    LUIE.changelogTree = tree
+
+    local lastHeaderNode
+    LUIE.changelogControls = {}
+    local controls = LUIE.changelogControls
+
+    for sectionIndex = 1, #sections do
+        local section = sections[sectionIndex]
+        local openByDefault = sectionIndex == 1
+        local displayTitle = GetChangelogVersionDisplayTitle(section.title)
+
+        local header = changelogSectionHeaderPool:AcquireObject(sectionIndex)
+        SetupChangelogSectionHeader(header, displayTitle, openByDefault)
+
+        local headerNode
+        if lastHeaderNode == nil then
+            headerNode = tree:AddChild(nil, header)
+        else
+            headerNode = tree:AddSibling(lastHeaderNode, header)
+        end
+        lastHeaderNode = headerNode
+
+        header.treeNode = headerNode
+        header.treeView = tree
+        header.sectionLines = section.lines
+
+        if not openByDefault then
+            headerNode:ToggleExpanded(false)
+        end
+        SetChangelogSectionExpanded(header, openByDefault)
+
+        local function toggleSection()
+            if header.treeNode then
+                header.treeNode:ToggleExpanded()
+            end
+        end
+
+        headerNode:SetExpandedCallback(function (node, expanded)
+            local sectionHeader = node:GetControl()
+            SetChangelogSectionExpanded(sectionHeader, expanded)
+            if expanded then
+                AttachChangelogSectionBody(sectionHeader, node, tree, controls)
+            else
+                DetachChangelogSectionBody(sectionHeader, tree, controls)
+            end
+            tree:Update()
+            UpdateChangelogScrollChildHeight(scrollChild, controls)
+        end)
+
+        header:SetHandler("OnMouseUp", function (_, button, upInside)
+            if upInside and button == MOUSE_BUTTON_INDEX_LEFT then
+                toggleSection()
+            end
+        end)
+
+        header.toggleBtn:SetHandler("OnMouseUp", function (_, button, upInside)
+            if upInside and button == MOUSE_BUTTON_INDEX_LEFT then
+                toggleSection()
+            end
+        end)
+
+        controls[#controls + 1] = header
+
+        if openByDefault then
+            AttachChangelogSectionBody(header, headerNode, tree, controls)
+        end
+    end
+
+    tree:Update()
+    UpdateChangelogScrollChildHeight(scrollChild, controls)
+end
+
 -- -----------------------------------------------------------------------------
 -- Hide toggle called by the menu or xml button
 function LUIE.ToggleChangelog(option)
@@ -622,16 +992,10 @@ end
 -- -----------------------------------------------------------------------------
 -- Called on initialize
 function LUIE.ChangelogScreen()
-    -- concat messages into one string
-    local changelog = table_concat(changelogMessages, "\n")
-    -- If text start with '*' replace it with bullet texture
-    changelog = StringOnlyGSUB(changelog, "%[%*%]", "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t")
-    -- Set the window title
+    ApplyChangelogWindowTheme()
     LUIE_Changelog_Title:SetText(zo_strformat("<<1>> Changelog", LUIE.name))
-    -- Set the about string
     LUIE_Changelog_About:SetText(zo_strformat("v<<1>> by <<2>>", LUIE.version, LUIE.author))
-    -- Set the changelog text
-    LUIE_Changelog_Text:SetText(changelog)
+    BuildChangelogTreeUI()
 
     -- Display the changelog if version number < current version
     if LUIE.SV.WelcomeVersion ~= LUIE.version then

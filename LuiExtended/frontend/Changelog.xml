@@ -1,79 +1,105 @@
 <!--
       LuiExtended
       License: The MIT License (MIT)
+      Changelog chrome styled like LibFlexUI DefaultTheme (self-contained, no LibFlexUI dependency).
 -->
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
-        <Controls>
-                <TopLevelControl name="LUIE_Changelog"
-                                 mouseEnabled="true"
-                                 movable="true"
-                                 clampedToScreen="true"
-                                 hidden="true"
-                                 tier="MEDIUM"
-                                 layer="CONTROLS">
-                        <Dimensions x="900"
-                                    y="700" />
-                        <Anchor point="CENTER"
-                                relativeTo="GuiRoot"
-                                relativePoint="CENTER"
-                                offsetY="-120" />
-                        <Controls>
-                                <Backdrop name="$(parent)_Background"
-                                          inherits="ZO_ThinBackdrop">
-                                        <AnchorFill />
-                                </Backdrop>
-                                <Label name="$(parent)_Title"
-                                       font="ZoFontWindowTitle"
-                                       wrapMode="ELLIPSIS"
-                                       verticalAlignment="TOP">
-                                        <Anchor relativeTo="$(parent)"
-                                                relativePoint="TOPLEFT"
-                                                point="TOPLEFT"
-                                                offsetX="5"
-                                                offsetY="5" />
-                                </Label>
-                                <Label name="$(parent)_About"
-                                       font="ZoFontGame"
-                                       wrapMode="ELLIPSIS">
-                                        <Anchor relativeTo="$(parent)"
-                                                relativePoint="TOPLEFT"
-                                                point="TOPLEFT"
-                                                offsetX="10"
-                                                offsetY="40" />
-                                </Label>
-                                <Button name="$(parent)_Close"
-                                        inherits="ZO_CloseButton">
-                                        <Anchor point="TOPRIGHT"
-                                                offsetY="3"
-                                                offsetX="-3" />
-                                        <OnClicked>
-                        LUIE.ToggleChangelog(true)
-                    </OnClicked>
-                                </Button>
-                                <Control name="$(parent)_Container"
-                                         inherits="ZO_ScrollContainer">
-                                        <OnInitialized>
-                        ZO_Scroll_Initialize(self)
-                    </OnInitialized>
-                                        <Dimensions x="895"
-                                                    y="620" />
-                                        <Anchor point="BOTTOMLEFT"
-                                                relativeTo="$(parent)"
-                                                relativePoint="TOPLEFT"
-                                                offsetX="6"
-                                                offsetY="690" />
-                                </Control>
-                                <Label name="$(parent)_Text"
-                                       font="ZoFontGame"
-                                       wrapMode="ELLIPSIS">
-                                        <Dimensions x="870" />
-                                        <OnInitialized>
-                        self:SetParent(GetControl("LUIE_Changelog_ContainerScrollChild"))
-                        self:SetAnchor(TOPLEFT, LUIE_Changelog_ContainerScrollChild, TOPLEFT, 4, 4)
-                    </OnInitialized>
-                                </Label>
-                        </Controls>
-                </TopLevelControl>
-        </Controls>
+  <Controls>
+    <TopLevelControl name="LUIE_Changelog"
+                     mouseEnabled="true"
+                     movable="true"
+                     clampedToScreen="true"
+                     hidden="true"
+                     tier="MEDIUM"
+                     layer="CONTROLS">
+      <Dimensions x="900"
+                  y="700" />
+      <Anchor point="CENTER"
+              relativeTo="GuiRoot"
+              relativePoint="CENTER"
+              offsetY="-120" />
+      <Controls>
+        <Backdrop name="LUIE_Changelog_Background"
+                  edgeColor="59524A"
+                  centerColor="0D0C12">
+          <AnchorFill />
+        </Backdrop>
+        <Texture name="LUIE_Changelog_BackgroundMungeOverlay"
+                 textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop_white.dds"
+                 hidden="true">
+          <Dimensions x="1"
+                      y="1" />
+          <Anchor point="TOPLEFT"
+                  relativeTo="LUIE_Changelog_Background"
+                  relativePoint="TOPLEFT" />
+        </Texture>
+        <Control name="$(parent)_TitleBar">
+          <Dimensions y="36" />
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)"
+                  relativePoint="TOPLEFT" />
+          <Anchor point="TOPRIGHT"
+                  relativeTo="$(parent)"
+                  relativePoint="TOPRIGHT" />
+          <Controls>
+            <Backdrop name="LUIE_Changelog_TitleBarBg"
+                      edgeColor="59524A"
+                      centerColor="1F1C24">
+              <AnchorFill />
+            </Backdrop>
+            <Label name="LUIE_Changelog_Title"
+                   font="ZoFontWinH2"
+                   wrapMode="ELLIPSIS"
+                   verticalAlignment="CENTER"
+                   horizontalAlignment="CENTER"
+                   color="FFFFFF">
+              <AnchorFill />
+            </Label>
+            <Button name="LUIE_Changelog_Close"
+                    font="ZoFontGame"
+                    text="X"
+                    mouseEnabled="true">
+              <Dimensions x="40"
+                          y="28" />
+              <Anchor point="TOPRIGHT"
+                      offsetX="-8"
+                      offsetY="4" />
+              <OnClicked>
+                LUIE.ToggleChangelog(true)
+              </OnClicked>
+            </Button>
+          </Controls>
+        </Control>
+        <Label name="$(parent)_About"
+               font="ZoFontGameSmall"
+               wrapMode="ELLIPSIS"
+               color="AAAAAA"
+               verticalAlignment="CENTER">
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)_TitleBar"
+                  relativePoint="BOTTOMLEFT"
+                  offsetX="12"
+                  offsetY="4" />
+          <Dimensions y="20" />
+        </Label>
+        <Control name="$(parent)_Container"
+                 inherits="ZO_ScrollContainer">
+          <OnInitialized>
+            ZO_Scroll_Initialize(self)
+          </OnInitialized>
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)_About"
+                  relativePoint="BOTTOMLEFT"
+                  offsetX="8"
+                  offsetY="8" />
+          <Anchor point="BOTTOMRIGHT"
+                  relativeTo="$(parent)"
+                  relativePoint="BOTTOMRIGHT"
+                  offsetX="-8"
+                  offsetY="-8" />
+        </Control>
+      </Controls>
+    </TopLevelControl>
+  </Controls>
 </GuiXml>
