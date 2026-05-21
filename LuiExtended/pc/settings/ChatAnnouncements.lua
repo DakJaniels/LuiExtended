@@ -8643,6 +8643,165 @@ function ChatAnnouncements.CreateSettings()
                 default = Defaults.DisplayAnnouncements.GroupArea.Alert,
             },
             {
+                -- Event Zone: Night Market Header
+                type = "header",
+                name = GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER_EVENT_ZONE_NIGHT_MARKET),
+                width = "full",
+            },
+            {
+                -- Night Market (ChatAnnouncements)
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_DARING_RACE), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_DARING_RACE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.DisplayAnnouncements.ZoneNightMarket.CA
+                end,
+                setFunc = function (value)
+                    Settings.DisplayAnnouncements.ZoneNightMarket.CA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.DisplayAnnouncements.ZoneNightMarket.CA,
+            },
+            {
+                -- Night Market (CSA)
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_DARING_RACE), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_DARING_RACE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+                getFunc = function ()
+                    return Settings.DisplayAnnouncements.ZoneNightMarket.CSA
+                end,
+                setFunc = function (value)
+                    Settings.DisplayAnnouncements.ZoneNightMarket.CSA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.DisplayAnnouncements.ZoneNightMarket.CSA,
+            },
+            {
+                -- Night Market (Alert)
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_DARING_RACE), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_DARING_RACE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.DisplayAnnouncements.ZoneNightMarket.Alert
+                end,
+                setFunc = function (value)
+                    Settings.DisplayAnnouncements.ZoneNightMarket.Alert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.DisplayAnnouncements.ZoneNightMarket.Alert,
+            },
+            {
+                -- Night Market Arachnid Invasion (ChatAnnouncements)
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ARACHNID), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ARACHNID_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.DisplayAnnouncements.ZoneNightMarketArachnid.CA
+                end,
+                setFunc = function (value)
+                    Settings.DisplayAnnouncements.ZoneNightMarketArachnid.CA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.DisplayAnnouncements.ZoneNightMarketArachnid.CA,
+            },
+            {
+                -- Night Market Arachnid Invasion (CSA)
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ARACHNID), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ARACHNID_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+                getFunc = function ()
+                    return Settings.DisplayAnnouncements.ZoneNightMarketArachnid.CSA
+                end,
+                setFunc = function (value)
+                    Settings.DisplayAnnouncements.ZoneNightMarketArachnid.CSA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.DisplayAnnouncements.ZoneNightMarketArachnid.CSA,
+            },
+            {
+                -- Night Market Arachnid Invasion (Alert)
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ARACHNID), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ARACHNID_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.DisplayAnnouncements.ZoneNightMarketArachnid.Alert
+                end,
+                setFunc = function (value)
+                    Settings.DisplayAnnouncements.ZoneNightMarketArachnid.Alert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.DisplayAnnouncements.ZoneNightMarketArachnid.Alert,
+            },
+            {
+                -- Night Market Guiding Light (ChatAnnouncements)
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_GUIDING_LIGHT), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_GUIDING_LIGHT_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.DisplayAnnouncements.ZoneNightMarketGuidingLight.CA
+                end,
+                setFunc = function (value)
+                    Settings.DisplayAnnouncements.ZoneNightMarketGuidingLight.CA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.DisplayAnnouncements.ZoneNightMarketGuidingLight.CA,
+            },
+            {
+                -- Night Market Guiding Light (CSA)
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_GUIDING_LIGHT), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_GUIDING_LIGHT_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+                getFunc = function ()
+                    return Settings.DisplayAnnouncements.ZoneNightMarketGuidingLight.CSA
+                end,
+                setFunc = function (value)
+                    Settings.DisplayAnnouncements.ZoneNightMarketGuidingLight.CSA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.DisplayAnnouncements.ZoneNightMarketGuidingLight.CSA,
+            },
+            {
+                -- Night Market Guiding Light (Alert)
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_GUIDING_LIGHT), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_GUIDING_LIGHT_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.DisplayAnnouncements.ZoneNightMarketGuidingLight.Alert
+                end,
+                setFunc = function (value)
+                    Settings.DisplayAnnouncements.ZoneNightMarketGuidingLight.Alert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.DisplayAnnouncements.ZoneNightMarketGuidingLight.Alert,
+            },
+            {
                 -- Zone Notifications Header
                 type = "header",
                 name = GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER_ZONE),

@@ -8413,6 +8413,165 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER_EVENT_ZONE_NIGHT_MARKET)
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_DARING_RACE), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_DARING_RACE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+            getFunction = function ()
+                return Settings.DisplayAnnouncements.ZoneNightMarket.CA
+            end,
+            setFunction = function (value)
+                Settings.DisplayAnnouncements.ZoneNightMarket.CA = value
+            end,
+            default = Defaults.DisplayAnnouncements.ZoneNightMarket.CA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_DARING_RACE), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_DARING_RACE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+            getFunction = function ()
+                return Settings.DisplayAnnouncements.ZoneNightMarket.CSA
+            end,
+            setFunction = function (value)
+                Settings.DisplayAnnouncements.ZoneNightMarket.CSA = value
+            end,
+            default = Defaults.DisplayAnnouncements.ZoneNightMarket.CSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_DARING_RACE), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_DARING_RACE_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+            getFunction = function ()
+                return Settings.DisplayAnnouncements.ZoneNightMarket.Alert
+            end,
+            setFunction = function (value)
+                Settings.DisplayAnnouncements.ZoneNightMarket.Alert = value
+            end,
+            default = Defaults.DisplayAnnouncements.ZoneNightMarket.Alert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ARACHNID), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ARACHNID_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+            getFunction = function ()
+                return Settings.DisplayAnnouncements.ZoneNightMarketArachnid.CA
+            end,
+            setFunction = function (value)
+                Settings.DisplayAnnouncements.ZoneNightMarketArachnid.CA = value
+            end,
+            default = Defaults.DisplayAnnouncements.ZoneNightMarketArachnid.CA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ARACHNID), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ARACHNID_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+            getFunction = function ()
+                return Settings.DisplayAnnouncements.ZoneNightMarketArachnid.CSA
+            end,
+            setFunction = function (value)
+                Settings.DisplayAnnouncements.ZoneNightMarketArachnid.CSA = value
+            end,
+            default = Defaults.DisplayAnnouncements.ZoneNightMarketArachnid.CSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ARACHNID), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ARACHNID_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+            getFunction = function ()
+                return Settings.DisplayAnnouncements.ZoneNightMarketArachnid.Alert
+            end,
+            setFunction = function (value)
+                Settings.DisplayAnnouncements.ZoneNightMarketArachnid.Alert = value
+            end,
+            default = Defaults.DisplayAnnouncements.ZoneNightMarketArachnid.Alert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_GUIDING_LIGHT), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_GUIDING_LIGHT_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+            getFunction = function ()
+                return Settings.DisplayAnnouncements.ZoneNightMarketGuidingLight.CA
+            end,
+            setFunction = function (value)
+                Settings.DisplayAnnouncements.ZoneNightMarketGuidingLight.CA = value
+            end,
+            default = Defaults.DisplayAnnouncements.ZoneNightMarketGuidingLight.CA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_GUIDING_LIGHT), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_GUIDING_LIGHT_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+            getFunction = function ()
+                return Settings.DisplayAnnouncements.ZoneNightMarketGuidingLight.CSA
+            end,
+            setFunction = function (value)
+                Settings.DisplayAnnouncements.ZoneNightMarketGuidingLight.CSA = value
+            end,
+            default = Defaults.DisplayAnnouncements.ZoneNightMarketGuidingLight.CSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_GUIDING_LIGHT), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_GUIDING_LIGHT_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+            getFunction = function ()
+                return Settings.DisplayAnnouncements.ZoneNightMarketGuidingLight.Alert
+            end,
+            setFunction = function (value)
+                Settings.DisplayAnnouncements.ZoneNightMarketGuidingLight.Alert = value
+            end,
+            default = Defaults.DisplayAnnouncements.ZoneNightMarketGuidingLight.Alert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
             label = GetString(LUIE_STRING_LAM_CA_DISPLAY_HEADER_ZONE)
         }
 

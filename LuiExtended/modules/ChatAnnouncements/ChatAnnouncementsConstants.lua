@@ -641,6 +641,9 @@ ChatAnnouncements.Brackets =
 --- @field ArenaMaelstrom CADisplayAnnouncementSection
 --- @field ArenaDragonstar CADisplayAnnouncementSection
 --- @field DungeonEndlessArchive CADisplayAnnouncementSection
+--- @field ZoneNightMarket CADisplayAnnouncementSection
+--- @field ZoneNightMarketArachnid CADisplayAnnouncementSection
+--- @field ZoneNightMarketGuidingLight CADisplayAnnouncementSection
 
 --- Root default settings for ChatAnnouncements.
 --- @class CADefaults
@@ -1304,6 +1307,24 @@ ChatAnnouncements.Defaults =
         DungeonEndlessArchive =
         {
             CA = true,
+            CSA = true,
+            Alert = false,
+        },
+        ZoneNightMarket =
+        {
+            CA = false,
+            CSA = true,
+            Alert = false,
+        },
+        ZoneNightMarketArachnid =
+        {
+            CA = false,
+            CSA = true,
+            Alert = false,
+        },
+        ZoneNightMarketGuidingLight =
+        {
+            CA = false,
             CSA = true,
             Alert = false,
         },
