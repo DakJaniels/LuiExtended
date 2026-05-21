@@ -12,6 +12,13 @@ local GetDisplayName = GetDisplayName
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.2.5
+    "|cFFA500LuiExtended Version 7.2.2.5|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Smithing and universal deconstruction (station deconstruction tab, Giladil, and LibLazyCrafting deconstruct queues such as Dolgubon's Lazy Writ Creator) now use deconstruct/receive item messages (and extract for glyphs) instead of craft/use. Destroyed gear no longer shows as \"You use.\" LibLazyCrafting provisioning writs and other active craft/improve paths still use craft/use labels.",
+    "",
     -- Version Header 7.2.2.4
     "|cFFA500LuiExtended Version 7.2.2.4|r",
     "",
