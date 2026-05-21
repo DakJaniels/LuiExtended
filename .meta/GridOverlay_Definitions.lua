@@ -1,38 +1,38 @@
--- ////// START : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended/frontend\GridOverlay.xml
+-- ////// START : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\GridOverlay.xml
 ---------- LVL: 00 ----------
 ---------- LVL: 01 ----------
 ---------- LVL: 02 ----------
 -- ---------------------------------------------------------------------------------------------------------------------
 --
---- @class LUIEGridOverlayShared : TopLevelWindow
---- @field public mouseEnabled boolean
---- @field public movable boolean
---- @field public clampedToScreen boolean
---- @field public hidden boolean
---- @field public alpha number
---- @field public layer DrawLayer
---- @field public level integer
---- @field public tier DrawTier
---- @field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
---- @field Anchor2 {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@class LUIEGridOverlayShared : TopLevelWindow
+---@field public mouseEnabled boolean
+---@field public movable boolean
+---@field public clampedToScreen boolean
+---@field public hidden boolean
+---@field public alpha number
+---@field public layer DrawLayer
+---@field public level integer
+---@field public tier DrawTier
+---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
+---@field Anchor2 {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition, offsetX: layout_measurement, offsetY: layout_measurement}
 LUIEGridOverlayShared = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
---- @class LUIE_GridOverlay_Line_V : LineControl
---- @field public hidden boolean
---- @field public thickness layout_measurement
---- @field public layer DrawLayer
---- @field public level integer
---- @field public tier DrawTier
+---@class LUIE_GridOverlay_Line_V : LineControl
+---@field public hidden boolean
+---@field public thickness layout_measurement
+---@field public layer DrawLayer
+---@field public level integer
+---@field public tier DrawTier
 LUIE_GridOverlay_Line_V = {}
 -- ---------------------------------------------------------------------------------------------------------------------
 --
---- @class LUIE_GridOverlay_Line_H : LineControl
---- @field public hidden boolean
---- @field public thickness layout_measurement
---- @field public layer DrawLayer
---- @field public level integer
---- @field public tier DrawTier
+---@class LUIE_GridOverlay_Line_H : LineControl
+---@field public hidden boolean
+---@field public thickness layout_measurement
+---@field public layer DrawLayer
+---@field public level integer
+---@field public tier DrawTier
 LUIE_GridOverlay_Line_H = {}
 ---------- LVL: 03 ----------
--- ////// END   : GENERATED FROM C:/Users/dack_janiels/Documents/LUIE/LuiExtended/LuiExtended/frontend\GridOverlay.xml
+-- ////// END   : GENERATED FROM C:\Users\dack_janiels\Documents\LUIE\LuiExtended\LuiExtended\frontend\GridOverlay.xml
