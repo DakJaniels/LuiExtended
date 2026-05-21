@@ -189,28 +189,33 @@ function CombatInfo.CreateSettings()
                 end,
                 default = Defaults.alerts.toggles.alertEnable,
             },
-            {
-                -- Alert Font Face
-                type = "dropdown",
-                scrollable = 7,
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT)),
-                tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_FONTFACE_TP),
-                choices = SettingsAPI.GetFontsList(),
-                sort = "name-up",
-                getFunc = function ()
+            SettingsAPI.CreateFontableDropdownOption(
+                zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT)),
+                GetString(LUIE_STRING_LAM_CI_ALERT_FONTFACE_TP),
+                SettingsAPI.GetFontsList(),
+                function ()
                     return Settings.alerts.toggles.alertFontFace
                 end,
-                setFunc = function (var)
+                function (var)
                     Settings.alerts.toggles.alertFontFace = var
                     AbilityAlerts.ApplyFontAlert()
                     AbilityAlerts.ResetAlertSize()
                 end,
-                width = "full",
-                default = Defaults.alerts.toggles.alertFontFace,
-                disabled = function ()
+                SettingsAPI.DropdownItemFontFacePreview(
+                    function () return Settings.alerts.toggles.alertFontFace end,
+                    function () return Settings.alerts.toggles.alertFontSize end,
+                    function () return Settings.alerts.toggles.alertFontStyle end),
+                "full",
+                function ()
                     return not Settings.alerts.toggles.alertEnable
                 end,
-            },
+                Defaults.alerts.toggles.alertFontFace,
+                nil,
+                "name-up",
+                nil,
+                nil,
+                7
+            ),
             {
                 -- Alert Font Size
                 type = "slider",
@@ -233,28 +238,25 @@ function CombatInfo.CreateSettings()
                     return not Settings.alerts.toggles.alertEnable
                 end,
             },
-            {
-                -- Alert Font Style
-                type = "dropdown",
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
-                tooltip = GetString(LUIE_STRING_LAM_CI_ALERT_FONTSTYLE_TP),
-                choices = LUIE.FONT_STYLE_CHOICES,
-                choicesValues = LUIE.FONT_STYLE_CHOICES_VALUES,
-                sort = "name-up",
-                getFunc = function ()
+            SettingsAPI.CreateFontStyleDropdown(
+                zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
+                GetString(LUIE_STRING_LAM_CI_ALERT_FONTSTYLE_TP),
+                function ()
                     return Settings.alerts.toggles.alertFontStyle
                 end,
-                setFunc = function (var)
+                function (var)
                     Settings.alerts.toggles.alertFontStyle = var
                     AbilityAlerts.ApplyFontAlert()
                     AbilityAlerts.ResetAlertSize()
                 end,
-                width = "full",
-                default = Defaults.alerts.toggles.alertFontStyle,
-                disabled = function ()
+                function () return Settings.alerts.toggles.alertFontFace end,
+                function () return Settings.alerts.toggles.alertFontSize end,
+                "full",
+                function ()
                     return not Settings.alerts.toggles.alertEnable
                 end,
-            },
+                Defaults.alerts.toggles.alertFontStyle
+            ),
             {
                 -- Alert Timer
                 type = "checkbox",
@@ -3525,31 +3527,38 @@ function CombatInfo.CreateSettings()
                     return not Settings.block.enabled
                 end,
             },
-            {
-                type = "dropdown",
-                name = "Block Indicator Font Face",
-                tooltip = "Font used for the block indicator remaining blocks count.",
-                choices = SettingsAPI.GetFontsList(),
-                sort = "name-up",
-                getFunc = function ()
+            SettingsAPI.CreateFontDropdown(
+                "Block Indicator Font Face",
+                "Font used for the block indicator remaining blocks count.",
+                function ()
                     return Settings.block.blockIndicatorFontFace
                 end,
-                setFunc = function (value)
+                function (value)
                     Settings.block.blockIndicatorFontFace = value
                     Block.ApplyBlockIndicatorFont()
                 end,
-                default = Defaults.block.blockIndicatorFontFace,
-                width = "full",
-                disabled = function ()
+                "full",
+                function ()
                     return not Settings.block.enabled
                 end,
-            },
-            {
-                type = "dropdown",
-                name = "Block Indicator Font Style",
-                tooltip = "Font style for the block indicator remaining blocks count.",
-                choices = LUIE.FONT_STYLE_CHOICES,
-                getFunc = function ()
+                Defaults.block.blockIndicatorFontFace,
+                nil,
+                "name-up",
+                function () return Settings.block.blockIndicatorFontSize end,
+                function ()
+                    for i, value in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
+                        if value == Settings.block.blockIndicatorFontStyle then
+                            return LUIE.FONT_STYLE_CHOICES[i]
+                        end
+                    end
+                    return LUIE.FONT_STYLE_CHOICES[1]
+                end
+            ),
+            SettingsAPI.CreateFontableDropdownOption(
+                "Block Indicator Font Style",
+                "Font style for the block indicator remaining blocks count.",
+                LUIE.FONT_STYLE_CHOICES,
+                function ()
                     for i, value in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
                         if value == Settings.block.blockIndicatorFontStyle then
                             return LUIE.FONT_STYLE_CHOICES[i]
@@ -3557,7 +3566,7 @@ function CombatInfo.CreateSettings()
                     end
                     return LUIE.FONT_STYLE_CHOICES[1]
                 end,
-                setFunc = function (value)
+                function (value)
                     for i, name in ipairs(LUIE.FONT_STYLE_CHOICES) do
                         if name == value then
                             Settings.block.blockIndicatorFontStyle = LUIE.FONT_STYLE_CHOICES_VALUES[i]
@@ -3566,12 +3575,15 @@ function CombatInfo.CreateSettings()
                         end
                     end
                 end,
-                default = Defaults.block.blockIndicatorFontStyle,
-                width = "full",
-                disabled = function ()
+                SettingsAPI.DropdownItemFontStylePreview(
+                    function () return Settings.block.blockIndicatorFontFace end,
+                    function () return Settings.block.blockIndicatorFontSize end),
+                "full",
+                function ()
                     return not Settings.block.enabled
                 end,
-            },
+                Defaults.block.blockIndicatorFontStyle
+            ),
             {
                 type = "slider",
                 name = "Block Indicator Font Size",
@@ -3609,31 +3621,38 @@ function CombatInfo.CreateSettings()
                     return not Settings.block.enabled
                 end,
             },
-            {
-                type = "dropdown",
-                name = "Bloodlord Embrace Font Face",
-                tooltip = "Font used for Bloodlord's Embrace tracker text.",
-                choices = SettingsAPI.GetFontsList(),
-                sort = "name-up",
-                getFunc = function ()
+            SettingsAPI.CreateFontDropdown(
+                "Bloodlord Embrace Font Face",
+                "Font used for Bloodlord's Embrace tracker text.",
+                function ()
                     return Settings.block.bloodlordEmbraceFontFace
                 end,
-                setFunc = function (value)
+                function (value)
                     Settings.block.bloodlordEmbraceFontFace = value
                     Block.ApplyBloodlordEmbraceFonts()
                 end,
-                default = Defaults.block.bloodlordEmbraceFontFace,
-                width = "full",
-                disabled = function ()
+                "full",
+                function ()
                     return not Settings.block.enabled
                 end,
-            },
-            {
-                type = "dropdown",
-                name = "Bloodlord Embrace Font Style",
-                tooltip = "Font style for Bloodlord's Embrace tracker text.",
-                choices = LUIE.FONT_STYLE_CHOICES,
-                getFunc = function ()
+                Defaults.block.bloodlordEmbraceFontFace,
+                nil,
+                "name-up",
+                function () return Settings.block.bloodlordEmbraceTitleFontSize end,
+                function ()
+                    for i, value in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
+                        if value == Settings.block.bloodlordEmbraceFontStyle then
+                            return LUIE.FONT_STYLE_CHOICES[i]
+                        end
+                    end
+                    return LUIE.FONT_STYLE_CHOICES[1]
+                end
+            ),
+            SettingsAPI.CreateFontableDropdownOption(
+                "Bloodlord Embrace Font Style",
+                "Font style for Bloodlord's Embrace tracker text.",
+                LUIE.FONT_STYLE_CHOICES,
+                function ()
                     for i, value in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
                         if value == Settings.block.bloodlordEmbraceFontStyle then
                             return LUIE.FONT_STYLE_CHOICES[i]
@@ -3641,7 +3660,7 @@ function CombatInfo.CreateSettings()
                     end
                     return LUIE.FONT_STYLE_CHOICES[1]
                 end,
-                setFunc = function (value)
+                function (value)
                     for i, name in ipairs(LUIE.FONT_STYLE_CHOICES) do
                         if name == value then
                             Settings.block.bloodlordEmbraceFontStyle = LUIE.FONT_STYLE_CHOICES_VALUES[i]
@@ -3650,12 +3669,15 @@ function CombatInfo.CreateSettings()
                         end
                     end
                 end,
-                default = Defaults.block.bloodlordEmbraceFontStyle,
-                width = "full",
-                disabled = function ()
+                SettingsAPI.DropdownItemFontStylePreview(
+                    function () return Settings.block.bloodlordEmbraceFontFace end,
+                    function () return Settings.block.bloodlordEmbraceTitleFontSize end),
+                "full",
+                function ()
                     return not Settings.block.enabled
                 end,
-            },
+                Defaults.block.bloodlordEmbraceFontStyle
+            ),
             {
                 type = "slider",
                 name = "Bloodlord Embrace Title Font Size",

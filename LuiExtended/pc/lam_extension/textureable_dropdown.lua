@@ -1,0 +1,455 @@
+--[[textureableDropdownData = {
+    type = "textureable_dropdown",
+    name = "My Dropdown", -- or string id or function returning a string
+    choices = {"table", "of", "choices"},
+    choicesValues = {"foo", 2, "three"}, -- if specified, these values will get passed to setFunc instead (optional)
+    getFunc = function() return db.var end, -- if multiSelect is true the getFunc must return a table
+    setFunc = function(var) db.var = var doStuff() end, -- if multiSelect is true the setFunc's var must be a table
+    tooltip = "Dropdown's tooltip text.", -- or string id or function returning a string (optional)
+    choicesTooltips = {"tooltip 1", "tooltip 2", "tooltip 3"}, -- or array of string ids or array of functions returning a string (optional)
+    sort = "name-up", -- or "name-down", "numeric-up", "numeric-down", "value-up", "value-down", "numericvalue-up", "numericvalue-down" (optional) - if not provided, list will not be sorted
+    width = "full", -- or "half" (optional)
+    scrollable = true, -- boolean or number, if set the dropdown will feature a scroll bar if there are a large amount of choices and limit the visible lines to the specified number or 10 if true is used (optional)
+    disabled = function() return db.someBooleanSetting end, -- or boolean (optional)
+    warning = "May cause permanent awesomeness.", -- or string id or function returning a string (optional)
+    requiresReload = false, -- boolean, if set to true, the warning text will contain a notice that changes are only applied after an UI reload and any change to the value will make the "Apply Settings" button appear on the panel which will reload the UI when pressed (optional)
+    default = defaults.var, -- default value or function that returns the default value (optional)
+    helpUrl = "https://www.esoui.com/portal.php?id=218&a=faq", -- a string URL or a function that returns the string URL (optional)
+    reference = "MyAddonDropdown", -- unique global reference to control (optional)
+    resetFunc = function(dropdownControl) d("defaults reset") end, -- custom function to run after the control is reset to defaults (optional)
+    multiSelect = false, -- boolean or function returning a boolean. If set to true you can select multiple entries at the list (optional)
+    multiSelectTextFormatter = SI_COMBO_BOX_DEFAULT_MULTISELECTION_TEXT_FORMATTER, -- or string id or function returning a string. If specified, this will be used with zo_strformat(multiSelectTextFormatter, numSelectedItems) to set the "selected item text". Only incombination with multiSelect = true (optional)
+    multiSelectNoSelectionText = SI_COMBO_BOX_DEFAULT_NO_SELECTION_TEXT, -- or string id or function returning a string. Only incombination with multiSelect = true (optional)
+    multiSelectMaxSelections = 5, --Number or function returning a number of the maximum of selectable entries. If not specified there is no max selection. Only incombination with multiSelect = true (optional)
+    itemTexture = function(choiceValue, choiceName) return "path/to/texture.dds" end, -- required: function(choiceValue, choiceName) returning a texture file path for SetTexture (nil = skip). Uses LUIE_ComboBoxStatusbarEntry row template (bar + name).
+} ]]
+
+
+local widgetVersion = 1
+local LAM = LibAddonMenu2
+if not LAM:RegisterWidget("textureable_dropdown", widgetVersion) then return end
+
+local GetDefaultValue = LAM.util.GetDefaultValue
+
+local wm = WINDOW_MANAGER
+
+local LUIE_COMBO_STATUSBAR_ENTRY_TEMPLATE = "LUIE_ComboBoxStatusbarEntry"
+local LUIE_COMBO_STATUSBAR_ENTRY_HEIGHT = 32
+-- LAM container is ~1/3 panel width; preview bar (110) + label need a wider combobox and popup.
+local LUIE_TEXTUREABLE_DROPDOWN_MIN_CONTAINER_WIDTH = 175
+-- XML: preview backdrop 110 + gap 8 + label padding (ZO Show only measures text width).
+local LUIE_TEXTUREABLE_DROPDOWN_PREVIEW_EXTRA_WIDTH = 126
+
+local TEXTURE_DROPDOWN_SHOW_HOOK_REGISTERED = false
+
+local function ApplyTextureableDropdownContainerWidth(control, combobox, dropdown, minWidth)
+    minWidth = minWidth or LUIE_TEXTUREABLE_DROPDOWN_MIN_CONTAINER_WIDTH
+    local container = control.container
+    local containerWidth = container:GetWidth()
+    if containerWidth >= minWidth then
+        dropdown.m_containerWidth = combobox:GetWidth()
+        return
+    end
+    container:SetWidth(minWidth)
+    combobox:SetDimensions(minWidth, combobox:GetHeight())
+    dropdown.m_containerWidth = minWidth
+end
+
+local function SetupTextureableDropdownShowHook()
+    if TEXTURE_DROPDOWN_SHOW_HOOK_REGISTERED then
+        return
+    end
+    TEXTURE_DROPDOWN_SHOW_HOOK_REGISTERED = true
+    SecurePostHook(ZO_ComboBoxDropdown_Keyboard, "Show", function (self, comboBox, itemTable)
+        for i = 1, #itemTable do
+            if itemTable[i].customEntryTemplate == LUIE_COMBO_STATUSBAR_ENTRY_TEMPLATE then
+                self.control:SetWidth(self.control:GetWidth() + LUIE_TEXTUREABLE_DROPDOWN_PREVIEW_EXTRA_WIDTH)
+                return
+            end
+        end
+    end)
+end
+
+SetupTextureableDropdownShowHook()
+
+-- choiceValue for itemTexture(choiceValue, choiceName): item.value if choicesValues, else item.name (ZO combo item entry).
+local function GetComboItemCallbackValue(item)
+    local value = item.value
+    if value == nil then
+        value = item.name
+    end
+    return value
+end
+
+local LUIE_COMBO_ENTRY_ITEMTEXTURE_KEY = "luiEItemTexture"
+
+local function SetupTextureableComboEntry(control, data, ...)
+    local dropdownObject = data.m_dropdownObject
+    dropdownObject:SetupEntryBase(control, data, ...)
+
+    control.m_label = control:GetNamedChild("Label")
+    dropdownObject:SetupEntryLabel(control.m_label, data)
+
+    local previewBar = control:GetNamedChild("PreviewBar")
+    if not previewBar then
+        return
+    end
+
+    local item = data.GetDataSource and data:GetDataSource()
+    local itemTextureFn = item and item[LUIE_COMBO_ENTRY_ITEMTEXTURE_KEY]
+    if type(itemTextureFn) ~= "function" then
+        previewBar:SetHidden(true)
+        return
+    end
+
+    local texturePath = itemTextureFn(GetComboItemCallbackValue(item), item.name)
+    if not texturePath or texturePath == "" then
+        previewBar:SetHidden(true)
+        return
+    end
+
+    previewBar:SetHidden(false)
+    previewBar:SetMinMax(0, 1)
+    previewBar:SetValue(1)
+    previewBar:SetTexture(texturePath)
+end
+
+local SORT_BY_VALUE = { ["value"] = {} }
+local SORT_BY_VALUE_NUMERIC = { ["value"] = { isNumeric = true } }
+local SORT_TYPES =
+{
+    name = ZO_SORT_BY_NAME,
+    numeric = ZO_SORT_BY_NAME_NUMERIC,
+    value = SORT_BY_VALUE,
+    numericvalue = SORT_BY_VALUE_NUMERIC,
+}
+local SORT_ORDERS =
+{
+    up = ZO_SORT_ORDER_UP,
+    down = ZO_SORT_ORDER_DOWN,
+}
+
+local DEFAULT_VISIBLE_ROWS = 10
+local PADDING_Y = ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y
+local ROUNDING_MARGIN = 0.01 -- needed to avoid rare issue with too many anchors processed
+
+local function UpdateDisabled(control)
+    local disable
+    if type(control.data.disabled) == "function" then
+        disable = control.data.disabled()
+    else
+        disable = control.data.disabled
+    end
+
+    control.dropdown:SetEnabled(not disable)
+    if disable then
+        control.label:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+    else
+        control.label:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+    end
+end
+
+local function UpdateMultiSelectSelected(control, values)
+    local data = control.data
+    assert(values ~= nil, string.format("[LAM2]Dropdown - Values for multiSelect %q are missing", control:GetName()))
+
+    local dropdown = control.dropdown
+    dropdown.m_selectedItemData = {}
+    dropdown.m_multiSelectItemData = {}
+
+    local choicesValues = data.choicesValues
+    local usesChoicesValues = choicesValues ~= nil
+
+    for _, toCompare in ipairs(values) do
+        dropdown:SetSelectedItemByEval(function (entry)
+                                           if usesChoicesValues then
+                                               return entry.value == toCompare
+                                           else
+                                               return entry.name == toCompare
+                                           end
+                                       end, true)
+    end
+    dropdown:RefreshSelectedItemText()
+end
+
+local function CallMultiSelectSetFunc(control, values)
+    local data = control.data
+    if values == nil then
+        values = {}
+        local usesChoicesValues = data.choicesValues ~= nil
+        for _, entry in ipairs(control.dropdown:GetSelectedItemData()) do
+            if usesChoicesValues then
+                values[#values + 1] = entry.value
+            else
+                values[#values + 1] = entry.name
+            end
+        end
+    end
+    data.setFunc(values)
+end
+
+local function UpdateValue(control, forceDefault, value)
+    local isMultiSelectionEnabled = control.isMultiSelectionEnabled
+    if forceDefault then -- if we are forcing defaults
+        local value = GetDefaultValue(control.data.default)
+        if isMultiSelectionEnabled then
+            value = value or {}
+            control.data.setFunc(value)
+            UpdateMultiSelectSelected(control, value)
+        else
+            control.data.setFunc(value)
+            control.dropdown:SetSelectedItem(control.choices[value])
+        end
+    elseif value ~= nil then
+        if isMultiSelectionEnabled then
+            -- Coming from LAM 2.0 DiscardChangesOnReloadControls? Passing in the saved control.startValue table
+            if type(value) ~= "table" then value = nil end
+            CallMultiSelectSetFunc(control, value)
+        else
+            control.data.setFunc(value)
+        end
+        -- after setting this value, let's refresh the others to see if any should be disabled or have their settings changed
+        LAM.util.RequestRefreshIfNeeded(control)
+    else
+        if isMultiSelectionEnabled then
+            local values = control.data.getFunc()
+            values = values or {}
+            UpdateMultiSelectSelected(control, values)
+        else
+            value = control.data.getFunc()
+            control.dropdown:SetSelectedItem(control.choices[value])
+        end
+    end
+end
+
+local function DropdownCallback(control, choiceText, choice)
+    local updateValue = choice.value
+    if updateValue == nil then updateValue = choiceText end
+    choice.control:UpdateValue(false, updateValue)
+end
+
+local function DoShowTooltip(control, tooltip)
+    local tooltipText = LAM.util.GetStringFromValue(tooltip)
+    if tooltipText ~= nil and tooltipText ~= "" then
+        InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 0, BOTTOMRIGHT)
+        SetTooltipText(InformationTooltip, tooltipText)
+        InformationTooltipTopLevel:BringWindowToTop()
+    end
+end
+
+local function ShowTooltip(control)
+    DoShowTooltip(control, control.dataEntry.data.tooltip)
+end
+
+local function HideTooltip()
+    ClearTooltip(InformationTooltip)
+end
+
+local function SetupTooltips(comboBox)
+    SecurePostHook(ZO_ComboBoxDropdown_Keyboard, "OnEntryMouseEnter", function (comboBoxRowCtrl)
+        local lComboBox = comboBoxRowCtrl.m_owner
+        if lComboBox ~= nil and lComboBox == comboBox then
+            ShowTooltip(comboBoxRowCtrl)
+        end
+    end)
+
+    SecurePostHook(ZO_ComboBoxDropdown_Keyboard, "OnEntryMouseExit", function (comboBoxCtrl)
+        HideTooltip()
+    end)
+end
+
+local function UpdateChoices(control, choices, choicesValues, choicesTooltips)
+    control.dropdown:ClearItems() -- remove previous choices --(need to call :SetSelectedItem()?)
+    ZO_ClearTable(control.choices)
+
+    -- build new list of choices
+    local choices = choices or control.data.choices
+    local choicesValues = choicesValues or control.data.choicesValues
+    local choicesTooltips = choicesTooltips or control.data.choicesTooltips
+
+    if choicesValues then
+        assert(#choices == #choicesValues, "choices and choicesValues need to have the same size")
+    end
+
+    if choicesTooltips then
+        assert(#choices == #choicesTooltips, "choices and choicesTooltips need to have the same size")
+        SetupTooltips(control.dropdown)
+    end
+
+    for i = 1, #choices do
+        local entry = control.dropdown:CreateItemEntry(choices[i], DropdownCallback)
+        entry.control = control
+        if choicesValues then
+            entry.value = choicesValues[i]
+        end
+        if choicesTooltips then
+            entry.tooltip = choicesTooltips[i]
+        end
+        local entryValue = entry.value
+        if entryValue == nil then entryValue = entry.name end
+        control.choices[entryValue] = entry.name
+
+        if type(control.data.itemTexture) == "function" then
+            entry[LUIE_COMBO_ENTRY_ITEMTEXTURE_KEY] = control.data.itemTexture
+        end
+        ZO_ComboBox.SetItemEntryCustomTemplate(entry, LUIE_COMBO_STATUSBAR_ENTRY_TEMPLATE)
+
+        control.dropdown:AddItem(entry, not control.data.sort and ZO_COMBOBOX_SUPRESS_UPDATE) -- if sort type/order isn't specified, then don't sort
+    end
+end
+
+local function GrabSortingInfo(sortInfo)
+    local t, i = {}, 1
+    for info in string.gmatch(sortInfo, "([^%-]+)") do
+        t[i] = info
+        i = i + 1
+    end
+
+    return t
+end
+
+-- Change the height of the combobox dropdown
+local function SetDropdownHeight(control, dropdown, dropdownData)
+    local entrySpacing = dropdown:GetSpacing()
+    local numSortedItems = #dropdown.m_sortedItems
+    local visibleRows, min, max
+
+    local isScrollable = dropdownData.scrollable
+    visibleRows = type(dropdownData.scrollable) == "number" and dropdownData.scrollable or DEFAULT_VISIBLE_ROWS
+    -- Either scrollable combobox: Show number of entries passed in by the data.scrollable, or use default number of entries (10)
+    -- but if less than default number of entries in the dropdown list, then shrink the max value to the number of entrries!
+    if numSortedItems < visibleRows then
+        min = numSortedItems
+        max = numSortedItems
+    else
+        if isScrollable then
+            min = (DEFAULT_VISIBLE_ROWS < visibleRows and DEFAULT_VISIBLE_ROWS) or visibleRows
+            max = (DEFAULT_VISIBLE_ROWS > visibleRows and DEFAULT_VISIBLE_ROWS) or visibleRows
+        else
+            -- Or show all entries if no scrollbar is requested
+            min = DEFAULT_VISIBLE_ROWS
+            max = numSortedItems
+        end
+    end
+
+    -- Entries to actually calculate the height = "number of sorted items" * "template height" + "number of sorted items -1" * spacing (last item got no spacing)
+    local numEntries = zo_clamp(numSortedItems, min, max)
+    local entryHeightWithSpacing = LUIE_COMBO_STATUSBAR_ENTRY_HEIGHT + dropdown.m_dropdownObject.spacing
+    local allItemsHeight = (entryHeightWithSpacing * numEntries) - entrySpacing + (PADDING_Y * 2) + ROUNDING_MARGIN
+    dropdown:SetHeight(allItemsHeight)
+    ZO_ScrollList_Commit(dropdown.m_scroll)
+
+    return visibleRows, min, max
+end
+
+local function OnMultiSelectComboBoxMouseUp(control, combobox, button, upInside, alt, shift, ctrl, command)
+    if button == MOUSE_BUTTON_INDEX_RIGHT and upInside then
+        ClearMenu()
+        local lDropdown = ZO_ComboBox_ObjectFromContainer(combobox)
+
+        AddMenuItem(GetString(SI_ITEMFILTERTYPE0), function ()
+            lDropdown.m_multiSelectItemData = {}
+            local maxSelections = lDropdown.m_maxNumSelections
+            for index, _ in pairs(lDropdown.m_sortedItems) do
+                if maxSelections == nil or maxSelections == 0 or maxSelections >= index then
+                    lDropdown:SetSelected(index, true)
+                end
+            end
+            lDropdown:RefreshSelectedItemText()
+            CallMultiSelectSetFunc(control, nil)
+        end)
+        AddMenuItem(GetString(SI_KEEPRESOURCETYPE0), function ()
+            lDropdown:ClearAllSelections()
+            CallMultiSelectSetFunc(control, nil)
+        end)
+        ShowMenu(combobox)
+    end
+end
+
+
+function LAMCreateControl.textureable_dropdown(parent, textureableDropdownData, controlName)
+    assert(type(textureableDropdownData.itemTexture) == "function", "[LUIE] textureable_dropdown requires itemTexture")
+    local control = LAM.util.CreateLabelAndContainerControl(parent, textureableDropdownData, controlName)
+    control.choices = {}
+
+    local countControl = parent
+    local name = parent:GetName()
+    if not name or #name == 0 then
+        countControl = LAMCreateControl
+        name = "LAM"
+    end
+    local comboboxCount = (countControl.comboboxCount or 0) + 1
+    countControl.comboboxCount = comboboxCount
+    control.combobox = wm:CreateControlFromVirtual(zo_strjoin(nil, name, "Combobox", comboboxCount), control.container, "ZO_ComboBox")
+
+    local combobox = control.combobox
+    combobox:SetAnchor(TOPLEFT)
+    combobox:SetDimensions(control.container:GetDimensions())
+    combobox:SetHandler("OnMouseEnter", function () ZO_Options_OnMouseEnter(control) end)
+    combobox:SetHandler("OnMouseExit", function () ZO_Options_OnMouseExit(control) end)
+    control.dropdown = ZO_ComboBox_ObjectFromContainer(combobox)
+    local dropdown = control.dropdown
+    dropdown:SetSortsItems(false) -- need to sort ourselves in order to be able to sort by value
+    ApplyTextureableDropdownContainerWidth(control, combobox, dropdown, textureableDropdownData.dropdownMinWidth)
+
+    local isMultiSelectionEnabled = GetDefaultValue(textureableDropdownData.multiSelect)
+    control.isMultiSelectionEnabled = isMultiSelectionEnabled
+
+    -- Multiselection
+    if isMultiSelectionEnabled == true then
+        -- Add context menu to the multiselect dropdown: Select all / Clear all selections
+        combobox:SetHandler("OnMouseUp", function (...) OnMultiSelectComboBoxMouseUp(control, ...) end, "LUIETextureableDropdownWidgetOnMouseUp")
+
+        local multiSelectionTextFormatter = GetDefaultValue(textureableDropdownData.multiSelectTextFormatter) or GetString(SI_COMBO_BOX_DEFAULT_MULTISELECTION_TEXT_FORMATTER)
+        local multiSelectionNoSelectionText = GetDefaultValue(textureableDropdownData.multiSelectNoSelectionText) or GetString(SI_COMBO_BOX_DEFAULT_NO_SELECTION_TEXT)
+        dropdown:EnableMultiSelect(multiSelectionTextFormatter, multiSelectionNoSelectionText)
+
+        local maxSelections = GetDefaultValue(textureableDropdownData.multiSelectMaxSelections)
+        if type(maxSelections) == "number" then
+            dropdown:SetMaxSelections(maxSelections)
+        end
+    else
+        dropdown:DisableMultiSelect()
+    end
+
+    ZO_PreHook(dropdown, "UpdateItems", function (self)
+        assert(not self.m_sortsItems, "built-in dropdown sorting was reactivated, sorting is handled by LAM")
+        if control.m_sortOrder ~= nil and control.m_sortType then
+            local sortKey = next(control.m_sortType)
+            local sortFunc = function (item1, item2) return ZO_TableOrderingFunction(item1, item2, sortKey, control.m_sortType, control.m_sortOrder) end
+            table.sort(self.m_sortedItems, sortFunc)
+        end
+    end)
+
+    dropdown:AddCustomEntryTemplate(LUIE_COMBO_STATUSBAR_ENTRY_TEMPLATE, LUIE_COMBO_STATUSBAR_ENTRY_HEIGHT, SetupTextureableComboEntry)
+
+    if textureableDropdownData.sort then
+        local sortInfo = GrabSortingInfo(textureableDropdownData.sort)
+        control.m_sortType, control.m_sortOrder = SORT_TYPES[sortInfo[1]], SORT_ORDERS[sortInfo[2]]
+    elseif textureableDropdownData.choicesValues then
+        control.m_sortType, control.m_sortOrder = ZO_SORT_ORDER_UP, SORT_BY_VALUE
+    end
+
+    if textureableDropdownData.warning ~= nil or textureableDropdownData.requiresReload then
+        control.warning = wm:CreateControlFromVirtual(nil, control, "ZO_Options_WarningIcon")
+        control.warning:SetAnchor(RIGHT, combobox, LEFT, -5, 0)
+        control.UpdateWarning = LAM.util.UpdateWarning
+        control:UpdateWarning()
+    end
+
+    control.SetDropdownHeight = SetDropdownHeight
+    control.AdjustDimensions = function () end -- no longer needed, but we keep it just in case someone else calls it from outside
+    control.UpdateChoices = UpdateChoices
+    control:UpdateChoices(textureableDropdownData.choices, textureableDropdownData.choicesValues)
+    control.UpdateValue = UpdateValue
+    control:UpdateValue()
+    if textureableDropdownData.disabled ~= nil then
+        control.UpdateDisabled = UpdateDisabled
+        control:UpdateDisabled()
+    end
+
+    LAM.util.RegisterForRefreshIfNeeded(control)
+    LAM.util.RegisterForReloadIfNeeded(control)
+
+    return control
+end

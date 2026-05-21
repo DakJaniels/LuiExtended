@@ -438,27 +438,26 @@ function UnitFrames.CreateSettings()
                 end,
                 default = Defaults.Format,
             },
-            {
-                -- DefaultFrames Font
-                type = "dropdown",
-                scrollable = 7,
-                name = GetString(LUIE_STRING_LAM_FONT),
-                tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_FONT_TP),
-                choices = SettingsAPI.GetFontsList(),
-                sort = "name-up",
-                getFunc = function ()
+            SettingsAPI.CreateFontDropdown(
+                GetString(LUIE_STRING_LAM_FONT),
+                GetString(LUIE_STRING_LAM_UF_DFRAMES_FONT_TP),
+                function ()
                     return Settings.DefaultFontFace
                 end,
-                setFunc = function (var)
+                function (var)
                     Settings.DefaultFontFace = var
                     UnitFrames.DefaultFramesApplyFont()
                 end,
-                width = "full",
-                disabled = function ()
+                "full",
+                function ()
                     return not LUIE.SV.UnitFrames_Enabled
                 end,
-                default = Defaults.DefaultFontFace,
-            },
+                Defaults.DefaultFontFace,
+                nil,
+                "name-up",
+                function () return Settings.DefaultFontSize end,
+                function () return Settings.DefaultFontStyle end
+            ),
             {
                 -- DefaultFrames Font Size
                 type = "slider",
@@ -480,27 +479,24 @@ function UnitFrames.CreateSettings()
                 end,
                 default = Defaults.DefaultFontSize,
             },
-            {
-                -- DefaultFrames Font Style
-                type = "dropdown",
-                name = GetString(LUIE_STRING_LAM_FONT_STYLE),
-                tooltip = GetString(LUIE_STRING_LAM_UF_DFRAMES_FONT_STYLE_TP),
-                choices = LUIE.FONT_STYLE_CHOICES,
-                choicesValues = LUIE.FONT_STYLE_CHOICES_VALUES,
-                sort = "name-up",
-                getFunc = function ()
+            SettingsAPI.CreateFontStyleDropdown(
+                GetString(LUIE_STRING_LAM_FONT_STYLE),
+                GetString(LUIE_STRING_LAM_UF_DFRAMES_FONT_STYLE_TP),
+                function ()
                     return Settings.DefaultFontStyle
                 end,
-                setFunc = function (var)
+                function (var)
                     Settings.DefaultFontStyle = var
                     UnitFrames.DefaultFramesApplyFont()
                 end,
-                width = "full",
-                disabled = function ()
+                function () return Settings.DefaultFontFace end,
+                function () return Settings.DefaultFontSize end,
+                "full",
+                function ()
                     return not LUIE.SV.UnitFrames_Enabled
                 end,
-                default = Defaults.DefaultFontStyle,
-            },
+                Defaults.DefaultFontStyle
+            ),
             {
                 -- Color of text labels
                 type = "colorpicker",

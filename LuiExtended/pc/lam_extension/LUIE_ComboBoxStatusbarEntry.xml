@@ -1,0 +1,47 @@
+<!--
+      LuiExtended
+      License: The MIT License (MIT)
+-->
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
+  <Controls>
+    <Control name="LUIE_ComboBoxStatusbarEntry"
+             inherits="ZO_ComboBoxEntry"
+             mouseEnabled="true"
+             virtual="true">
+      <Dimensions y="32" />
+      <Controls>
+        <Backdrop name="$(parent)PreviewBG"
+                  inherits="ZO_DefaultBackdrop"
+                  tier="LOW">
+          <Dimensions x="110"
+                      y="18" />
+          <Anchor point="LEFT"
+                  offsetX="ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
+          <Edge file="EsoUI/Art/ChatWindow/chatBorder.dds"
+                edgeFileWidth="128"
+                edgeFileHeight="16" />
+        </Backdrop>
+        <StatusBar name="$(parent)PreviewBar"
+                   inherits="ZO_DefaultStatusBar">
+          <Dimensions x="106"
+                      y="14" />
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)PreviewBG"
+                  relativePoint="CENTER" />
+        </StatusBar>
+        <Label name="$(parent)Label"
+               override="true"
+               wrapMode="ELLIPSIS"
+               maxLineCount="1">
+          <Anchor point="LEFT"
+                  relativeTo="$(parent)PreviewBG"
+                  relativePoint="RIGHT"
+                  offsetX="8" />
+          <Anchor point="RIGHT"
+                  offsetX="-ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
+        </Label>
+      </Controls>
+    </Control>
+  </Controls>
+</GuiXml>

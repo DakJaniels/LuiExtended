@@ -611,6 +611,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.damage[0][1],
                     g = Defaults.colors.damage[0][2],
                     b = Defaults.colors.damage[0][3],
+                    a = Defaults.colors.damage[0][4],
                 },
             },
             {
@@ -629,6 +630,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.damage[1][1],
                     g = Defaults.colors.damage[1][2],
                     b = Defaults.colors.damage[1][3],
+                    a = Defaults.colors.damage[1][4],
                 },
             },
             {
@@ -647,6 +649,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.damage[2][1],
                     g = Defaults.colors.damage[2][2],
                     b = Defaults.colors.damage[2][3],
+                    a = Defaults.colors.damage[2][4],
                 },
             },
             {
@@ -665,6 +668,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.damage[12][1],
                     g = Defaults.colors.damage[12][2],
                     b = Defaults.colors.damage[12][3],
+                    a = Defaults.colors.damage[12][4],
                 },
             },
             {
@@ -683,6 +687,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.damage[3][1],
                     g = Defaults.colors.damage[3][2],
                     b = Defaults.colors.damage[3][3],
+                    a = Defaults.colors.damage[3][4],
                 },
             },
             {
@@ -701,6 +706,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.damage[4][1],
                     g = Defaults.colors.damage[4][2],
                     b = Defaults.colors.damage[4][3],
+                    a = Defaults.colors.damage[4][4],
                 },
             },
             {
@@ -719,6 +725,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.damage[5][1],
                     g = Defaults.colors.damage[5][2],
                     b = Defaults.colors.damage[5][3],
+                    a = Defaults.colors.damage[5][4],
                 },
             },
             {
@@ -737,6 +744,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.damage[6][1],
                     g = Defaults.colors.damage[6][2],
                     b = Defaults.colors.damage[6][3],
+                    a = Defaults.colors.damage[6][4],
                 },
             },
             {
@@ -755,6 +763,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.damage[7][1],
                     g = Defaults.colors.damage[7][2],
                     b = Defaults.colors.damage[7][3],
+                    a = Defaults.colors.damage[7][4],
                 },
             },
             {
@@ -773,6 +782,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.damage[8][1],
                     g = Defaults.colors.damage[8][2],
                     b = Defaults.colors.damage[8][3],
+                    a = Defaults.colors.damage[8][4],
                 },
             },
             {
@@ -791,6 +801,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.damage[9][1],
                     g = Defaults.colors.damage[9][2],
                     b = Defaults.colors.damage[9][3],
+                    a = Defaults.colors.damage[9][4],
                 },
             },
             {
@@ -809,6 +820,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.damage[10][1],
                     g = Defaults.colors.damage[10][2],
                     b = Defaults.colors.damage[10][3],
+                    a = Defaults.colors.damage[10][4],
                 },
             },
             {
@@ -827,6 +839,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.damage[11][1],
                     g = Defaults.colors.damage[11][2],
                     b = Defaults.colors.damage[11][3],
+                    a = Defaults.colors.damage[11][4],
                 },
             },
             {
@@ -858,6 +871,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.criticalDamageOverride[1],
                     g = Defaults.colors.criticalDamageOverride[2],
                     b = Defaults.colors.criticalDamageOverride[3],
+                    a = Defaults.colors.criticalDamageOverride[4],
                 },
             },
             {
@@ -889,6 +903,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.incomingDamageOverride[1],
                     g = Defaults.colors.incomingDamageOverride[2],
                     b = Defaults.colors.incomingDamageOverride[3],
+                    a = Defaults.colors.incomingDamageOverride[4],
                 },
             },
             {
@@ -1107,6 +1122,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.healing[1],
                     g = Defaults.colors.healing[2],
                     b = Defaults.colors.healing[3],
+                    a = Defaults.colors.healing[4],
                 },
             },
             {
@@ -1138,6 +1154,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.criticalHealingOverride[1],
                     g = Defaults.colors.criticalHealingOverride[2],
                     b = Defaults.colors.criticalHealingOverride[3],
+                    a = Defaults.colors.criticalHealingOverride[4],
                 },
             },
         },
@@ -1239,6 +1256,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.energizeMagicka[1],
                     g = Defaults.colors.energizeMagicka[2],
                     b = Defaults.colors.energizeMagicka[3],
+                    a = Defaults.colors.energizeMagicka[4],
                 },
             },
             {
@@ -1258,6 +1276,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.energizeStamina[1],
                     g = Defaults.colors.energizeStamina[2],
                     b = Defaults.colors.energizeStamina[3],
+                    a = Defaults.colors.energizeStamina[4],
                 },
             },
             {
@@ -1323,6 +1342,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.energizeUltimate[1],
                     g = Defaults.colors.energizeUltimate[2],
                     b = Defaults.colors.energizeUltimate[3],
+                    a = Defaults.colors.energizeUltimate[4],
                 },
             },
             {
@@ -1389,6 +1409,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.drainMagicka[1],
                     g = Defaults.colors.drainMagicka[2],
                     b = Defaults.colors.drainMagicka[3],
+                    a = Defaults.colors.drainMagicka[4],
                 },
             },
             {
@@ -1408,6 +1429,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.drainStamina[1],
                     g = Defaults.colors.drainStamina[2],
                     b = Defaults.colors.drainStamina[3],
+                    a = Defaults.colors.drainStamina[4],
                 },
             },
         },
@@ -1503,7 +1525,7 @@ function CombatText.CreateSettings()
                 setFunc = function (r, g, b, a)
                     Settings.colors.miss = { r, g, b, a }
                 end,
-                default = { r = Defaults.colors.miss[1], g = Defaults.colors.miss[2], b = Defaults.colors.miss[3] },
+                default = { r = Defaults.colors.miss[1], g = Defaults.colors.miss[2], b = Defaults.colors.miss[3], a = Defaults.colors.miss[4] },
             },
             {
                 type = "header",
@@ -1568,6 +1590,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.immune[1],
                     g = Defaults.colors.immune[2],
                     b = Defaults.colors.immune[3],
+                    a = Defaults.colors.immune[4],
                 },
             },
             {
@@ -1633,6 +1656,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.parried[1],
                     g = Defaults.colors.parried[2],
                     b = Defaults.colors.parried[3],
+                    a = Defaults.colors.parried[4],
                 },
             },
             {
@@ -1698,6 +1722,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.reflected[1],
                     g = Defaults.colors.reflected[2],
                     b = Defaults.colors.reflected[3],
+                    a = Defaults.colors.reflected[4],
                 },
             },
             {
@@ -1763,6 +1788,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.damageShield[1],
                     g = Defaults.colors.damageShield[2],
                     b = Defaults.colors.damageShield[3],
+                    a = Defaults.colors.damageShield[4],
                 },
             },
             {
@@ -1828,6 +1854,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.dodged[1],
                     g = Defaults.colors.dodged[2],
                     b = Defaults.colors.dodged[3],
+                    a = Defaults.colors.dodged[4],
                 },
             },
             {
@@ -1893,6 +1920,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.blocked[1],
                     g = Defaults.colors.blocked[2],
                     b = Defaults.colors.blocked[3],
+                    a = Defaults.colors.blocked[4],
                 },
             },
             {
@@ -1958,6 +1986,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.interrupted[1],
                     g = Defaults.colors.interrupted[2],
                     b = Defaults.colors.interrupted[3],
+                    a = Defaults.colors.interrupted[4],
                 },
             },
         },
@@ -2058,6 +2087,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.disoriented[1],
                     g = Defaults.colors.disoriented[2],
                     b = Defaults.colors.disoriented[3],
+                    a = Defaults.colors.disoriented[4],
                 },
             },
             {
@@ -2123,6 +2153,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.feared[1],
                     g = Defaults.colors.feared[2],
                     b = Defaults.colors.feared[3],
+                    a = Defaults.colors.feared[4],
                 },
             },
             {
@@ -2188,6 +2219,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.offBalanced[1],
                     g = Defaults.colors.offBalanced[2],
                     b = Defaults.colors.offBalanced[3],
+                    a = Defaults.colors.offBalanced[4],
                 },
             },
             {
@@ -2253,6 +2285,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.silenced[1],
                     g = Defaults.colors.silenced[2],
                     b = Defaults.colors.silenced[3],
+                    a = Defaults.colors.silenced[4],
                 },
             },
             {
@@ -2318,6 +2351,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.stunned[1],
                     g = Defaults.colors.stunned[2],
                     b = Defaults.colors.stunned[3],
+                    a = Defaults.colors.stunned[4],
                 },
             },
             {
@@ -2383,6 +2417,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.charmed[1],
                     g = Defaults.colors.charmed[2],
                     b = Defaults.colors.charmed[3],
+                    a = Defaults.colors.charmed[4],
                 },
             },
         },
@@ -2495,6 +2530,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.inCombat[1],
                     g = Defaults.colors.inCombat[2],
                     b = Defaults.colors.inCombat[3],
+                    a = Defaults.colors.inCombat[4],
                 },
             },
             {
@@ -2514,6 +2550,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.outCombat[1],
                     g = Defaults.colors.outCombat[2],
                     b = Defaults.colors.outCombat[3],
+                    a = Defaults.colors.outCombat[4],
                 },
             },
             {
@@ -2591,7 +2628,7 @@ function CombatText.CreateSettings()
                 setFunc = function (r, g, b, a)
                     Settings.colors.death = { r, g, b, a }
                 end,
-                default = { r = Defaults.colors.death[1], g = Defaults.colors.death[2], b = Defaults.colors.death[3] },
+                default = { r = Defaults.colors.death[1], g = Defaults.colors.death[2], b = Defaults.colors.death[3], a = Defaults.colors.death[4] },
             },
             {
                 type = "header",
@@ -2662,6 +2699,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.pointsAlliance[1],
                     g = Defaults.colors.pointsAlliance[2],
                     b = Defaults.colors.pointsAlliance[3],
+                    a = Defaults.colors.pointsAlliance[4],
                 },
             },
             {
@@ -2712,6 +2750,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.pointsExperience[1],
                     g = Defaults.colors.pointsExperience[2],
                     b = Defaults.colors.pointsExperience[3],
+                    a = Defaults.colors.pointsExperience[4],
                 },
             },
             {
@@ -2762,6 +2801,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.pointsChampion[1],
                     g = Defaults.colors.pointsChampion[2],
                     b = Defaults.colors.pointsChampion[3],
+                    a = Defaults.colors.pointsChampion[4],
                 },
             },
             {
@@ -2860,6 +2900,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.ultimateReady[1],
                     g = Defaults.colors.ultimateReady[2],
                     b = Defaults.colors.ultimateReady[3],
+                    a = Defaults.colors.ultimateReady[4],
                 },
             },
             {
@@ -2879,6 +2920,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.potionReady[1],
                     g = Defaults.colors.potionReady[2],
                     b = Defaults.colors.potionReady[3],
+                    a = Defaults.colors.potionReady[4],
                 },
             },
         },
@@ -2999,6 +3041,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.lowHealth[1],
                     g = Defaults.colors.lowHealth[2],
                     b = Defaults.colors.lowHealth[3],
+                    a = Defaults.colors.lowHealth[4],
                 },
             },
             {
@@ -3068,6 +3111,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.lowMagicka[1],
                     g = Defaults.colors.lowMagicka[2],
                     b = Defaults.colors.lowMagicka[3],
+                    a = Defaults.colors.lowMagicka[4],
                 },
             },
             {
@@ -3137,6 +3181,7 @@ function CombatText.CreateSettings()
                     r = Defaults.colors.lowStamina[1],
                     g = Defaults.colors.lowStamina[2],
                     b = Defaults.colors.lowStamina[3],
+                    a = Defaults.colors.lowStamina[4],
                 },
             },
         },
@@ -3149,24 +3194,24 @@ function CombatText.CreateSettings()
         name = GetString(LUIE_STRING_LAM_CT_FONT_HEADER),
         controls =
         {
-            {
-                -- Font Face Dropdown
-                type = "dropdown",
-                scrollable = 7,
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT)),
-                tooltip = GetString(LUIE_STRING_LAM_CT_FONT_FACE_TP),
-                choices = SettingsAPI.GetFontsList(),
-                sort = "name-up",
-                getFunc = function ()
+            SettingsAPI.CreateFontDropdown(
+                zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT)),
+                GetString(LUIE_STRING_LAM_CT_FONT_FACE_TP),
+                function ()
                     return Settings.fontFace
                 end,
-                setFunc = function (var)
+                function (var)
                     Settings.fontFace = var
                     CombatText.ApplyFont()
                 end,
-                width = "full",
-                default = Defaults.fontFace,
-            },
+                "full",
+                nil,
+                Defaults.fontFace,
+                nil,
+                "name-up",
+                function () return Settings.fontSize end,
+                function () return Settings.fontStyle end
+            ),
             {
                 -- Font Size
                 type = "slider",
@@ -3202,24 +3247,22 @@ function CombatText.CreateSettings()
                 width = "full",
                 default = Defaults.fontSize,
             },
-            {
-                -- Font Style
-                type = "dropdown",
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
-                tooltip = GetString(LUIE_STRING_LAM_CT_FONT_STYLE_TP),
-                choices = LUIE.FONT_STYLE_CHOICES,
-                choicesValues = LUIE.FONT_STYLE_CHOICES_VALUES,
-                sort = "name-up",
-                getFunc = function ()
+            SettingsAPI.CreateFontStyleDropdown(
+                zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
+                GetString(LUIE_STRING_LAM_CT_FONT_STYLE_TP),
+                function ()
                     return Settings.fontStyle
                 end,
-                setFunc = function (var)
+                function (var)
                     Settings.fontStyle = var
                     CombatText.ApplyFont()
                 end,
-                width = "full",
-                default = Defaults.fontStyle,
-            },
+                function () return Settings.fontFace end,
+                function () return Settings.fontSize end,
+                "full",
+                nil,
+                Defaults.fontStyle
+            ),
             {
                 -- Test Font Button
                 type = "button",

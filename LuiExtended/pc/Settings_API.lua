@@ -47,6 +47,83 @@ function SettingsAPI.GetFontsList()
     return fontsList
 end
 
+-- Fixed size for fontable_dropdown previews (face/style only — not the in-game font size slider).
+SettingsAPI.LAM_DROPDOWN_PREVIEW_FONT_SIZE = 14
+
+-- Memoize font strings for fontable_dropdown list previews (ZO scroll list recycles rows).
+local lamPreviewFontStringCache = {}
+local function CachedLamPreviewFontString(facePath, size, style)
+    local k = (facePath or "") .. "\0" .. tostring(size) .. "\0" .. tostring(style or "")
+    local v = lamPreviewFontStringCache[k]
+    if v == nil then
+        v = LUIE.CreateFontString(facePath, size, style)
+        lamPreviewFontStringCache[k] = v
+    end
+    return v
+end
+
+--- Map dropdown style args (choicesValues entry or label) for CreateFontString.
+--- @param choiceValue any
+--- @param choiceName string|nil
+--- @return any
+function SettingsAPI.ResolveFontStyleForPreview(choiceValue, choiceName)
+    local v = choiceValue
+    if v == nil then
+        v = choiceName
+    end
+    if v == nil then
+        return nil
+    end
+    for i, val in ipairs(LUIE.FONT_STYLE_CHOICES_VALUES) do
+        if val == v then
+            return val
+        end
+    end
+    for i, name in ipairs(LUIE.FONT_STYLE_CHOICES) do
+        if name == v then
+            return LUIE.FONT_STYLE_CHOICES_VALUES[i]
+        end
+    end
+    return v
+end
+
+--- itemFont for fontable_dropdown: preview each font face at LAM preview size + current style.
+--- @param getFace fun(): string|nil
+--- @param getSize fun(): number|nil unused; previews use LAM_DROPDOWN_PREVIEW_FONT_SIZE
+--- @param getStyle fun(): any|nil
+--- @return function(choiceValue, choiceName)
+function SettingsAPI.DropdownItemFontFacePreview(getFace, getSize, getStyle)
+    local previewSize = SettingsAPI.LAM_DROPDOWN_PREVIEW_FONT_SIZE
+    return function (faceKey, choiceName)
+        local fp = LUIE.Fonts[faceKey]
+        if not fp then
+            return nil
+        end
+        local st
+        if getStyle then
+            st = SettingsAPI.ResolveFontStyleForPreview(getStyle(), nil)
+        end
+        return CachedLamPreviewFontString(fp, previewSize, st)
+    end
+end
+
+--- itemFont for fontable_dropdown: preview each style at LAM preview size + current face.
+--- @param getFace fun(): string|nil
+--- @param getSize fun(): number|nil unused; previews use LAM_DROPDOWN_PREVIEW_FONT_SIZE
+--- @return function(choiceValue, choiceName)
+function SettingsAPI.DropdownItemFontStylePreview(getFace, getSize)
+    local previewSize = SettingsAPI.LAM_DROPDOWN_PREVIEW_FONT_SIZE
+    return function (styleValue, choiceName)
+        local styleResolved = SettingsAPI.ResolveFontStyleForPreview(styleValue, choiceName)
+        local faceKey = getFace and getFace() or nil
+        local fp = (faceKey and LUIE.Fonts[faceKey]) or LUIE.Fonts["LUIE Default Font"]
+        if not fp then
+            return nil
+        end
+        return CachedLamPreviewFontString(fp, previewSize, styleResolved)
+    end
+end
+
 --- Get list of all sounds (LuiMedia already has everything including external media)
 --- @return table soundsList
 function SettingsAPI.GetSoundsList()
@@ -155,6 +232,69 @@ function SettingsAPI.CreateDropdownOption(name, tooltip, choices, getFunc, setFu
         choices = choices,
         getFunc = getFunc,
         setFunc = setFunc,
+        width = width or "full"
+    }
+
+    if tooltip then
+        option.tooltip = tooltip
+    end
+
+    if disabled then
+        option.disabled = disabled
+    end
+
+    if default ~= nil then
+        option.default = default
+    end
+
+    if warning then
+        option.warning = warning
+    end
+
+    if sort then
+        option.sort = sort
+    end
+
+    if requiresReload then
+        option.requiresReload = true
+    end
+
+    if choicesValues then
+        option.choicesValues = choicesValues
+    end
+
+    if scrollable then
+        option.scrollable = scrollable
+    end
+
+    return option
+end
+
+--- LuiExtended LAM widget: dropdown with per-row font preview (requires pc/lam_extension/fontable_dropdown.lua).
+--- @param name string
+--- @param tooltip string|nil
+--- @param choices table
+--- @param getFunc function
+--- @param setFunc function
+--- @param itemFont function
+--- @param width string|nil
+--- @param disabled function|nil
+--- @param default any|nil
+--- @param warning string|nil
+--- @param sort string|nil
+--- @param requiresReload boolean|nil
+--- @param choicesValues table|nil
+--- @param scrollable boolean|number|nil
+--- @return table option
+function SettingsAPI.CreateFontableDropdownOption(name, tooltip, choices, getFunc, setFunc, itemFont, width, disabled, default, warning, sort, requiresReload, choicesValues, scrollable)
+    local option =
+    {
+        type = "fontable_dropdown",
+        name = name,
+        choices = choices,
+        getFunc = getFunc,
+        setFunc = setFunc,
+        itemFont = itemFont,
         width = width or "full"
     }
 
@@ -474,7 +614,7 @@ end
 -- Common Option Patterns
 -- -----------------------------------------------------------------------------
 
---- Create a font selection dropdown
+--- Create a font selection dropdown (fontable_dropdown with face preview).
 --- @param name string
 --- @param tooltip string
 --- @param getFunc function
@@ -484,19 +624,57 @@ end
 --- @param default string|nil
 --- @param warning string|nil
 --- @param sort string|nil
+--- @param getSize fun(): number|nil Used for style context only; preview size is LAM_DROPDOWN_PREVIEW_FONT_SIZE
+--- @param getStyle fun(): any|nil Current font style for row preview
 --- @return table option
-function SettingsAPI.CreateFontDropdown(name, tooltip, getFunc, setFunc, width, disabled, default, warning, sort)
-    return SettingsAPI.CreateDropdownOption(
+function SettingsAPI.CreateFontDropdown(name, tooltip, getFunc, setFunc, width, disabled, default, warning, sort, getSize, getStyle)
+    return SettingsAPI.CreateFontableDropdownOption(
         name,
         tooltip,
         SettingsAPI.GetFontsList(),
         getFunc,
         setFunc,
+        SettingsAPI.DropdownItemFontFacePreview(getFunc, getSize, getStyle),
         width,
         disabled,
         default,
         warning,
-        sort
+        sort or "name-up",
+        nil,
+        nil,
+        7
+    )
+end
+
+--- Font style dropdown with per-row preview (fontable_dropdown).
+--- @param name string
+--- @param tooltip string|nil
+--- @param getFunc function
+--- @param setFunc function
+--- @param getFace fun(): string|nil
+--- @param getSize fun(): number|nil
+--- @param width string|nil
+--- @param disabled function|nil
+--- @param default any|nil
+--- @param warning string|nil
+--- @param sort string|nil
+--- @return table option
+function SettingsAPI.CreateFontStyleDropdown(name, tooltip, getFunc, setFunc, getFace, getSize, width, disabled, default, warning, sort)
+    return SettingsAPI.CreateFontableDropdownOption(
+        name,
+        tooltip,
+        LUIE.FONT_STYLE_CHOICES,
+        getFunc,
+        setFunc,
+        SettingsAPI.DropdownItemFontStylePreview(getFace, getSize),
+        width,
+        disabled,
+        default,
+        warning,
+        sort or "name-up",
+        nil,
+        LUIE.FONT_STYLE_CHOICES_VALUES,
+        nil
     )
 end
 
@@ -526,9 +704,84 @@ function SettingsAPI.CreateSoundDropdown(name, tooltip, getFunc, setFunc, width,
     )
 end
 
---- Create a statusbar texture selection dropdown
+--- Resolve LuiMedia statusbar texture path for dropdown row preview.
+--- @param choiceValue any
+--- @param choiceName string
+--- @return string|nil
+function SettingsAPI.DropdownItemStatusbarTexture(choiceValue, choiceName)
+    local key = choiceName or choiceValue
+    if key == nil then
+        return nil
+    end
+    return LUIE.StatusbarTextures[key]
+end
+
+--- LAM widget: dropdown with per-row statusbar texture preview (requires textureable_dropdown.lua + XML).
 --- @param name string
---- @param tooltip string
+--- @param tooltip string|nil
+--- @param choices table
+--- @param getFunc function
+--- @param setFunc function
+--- @param itemTexture function
+--- @param width string|nil
+--- @param disabled function|nil
+--- @param default any|nil
+--- @param warning string|nil
+--- @param sort string|nil
+--- @param requiresReload boolean|nil
+--- @param choicesValues table|nil
+--- @param scrollable boolean|number|nil
+--- @return table option
+function SettingsAPI.CreateTextureableDropdownOption(name, tooltip, choices, getFunc, setFunc, itemTexture, width, disabled, default, warning, sort, requiresReload, choicesValues, scrollable)
+    local option =
+    {
+        type = "textureable_dropdown",
+        name = name,
+        choices = choices,
+        getFunc = getFunc,
+        setFunc = setFunc,
+        itemTexture = itemTexture,
+        width = width or "full",
+    }
+
+    if tooltip then
+        option.tooltip = tooltip
+    end
+
+    if disabled then
+        option.disabled = disabled
+    end
+
+    if default ~= nil then
+        option.default = default
+    end
+
+    if warning then
+        option.warning = warning
+    end
+
+    if sort then
+        option.sort = sort
+    end
+
+    if requiresReload then
+        option.requiresReload = true
+    end
+
+    if choicesValues then
+        option.choicesValues = choicesValues
+    end
+
+    if scrollable then
+        option.scrollable = scrollable
+    end
+
+    return option
+end
+
+--- Create a statusbar texture selection dropdown (textureable_dropdown with bar preview).
+--- @param name string
+--- @param tooltip string|nil
 --- @param getFunc function
 --- @param setFunc function
 --- @param width string|nil
@@ -538,17 +791,21 @@ end
 --- @param sort string|nil
 --- @return table option
 function SettingsAPI.CreateStatusbarTextureDropdown(name, tooltip, getFunc, setFunc, width, disabled, default, warning, sort)
-    return SettingsAPI.CreateDropdownOption(
+    return SettingsAPI.CreateTextureableDropdownOption(
         name,
         tooltip,
         SettingsAPI.GetStatusbarTexturesList(),
         getFunc,
         setFunc,
+        SettingsAPI.DropdownItemStatusbarTexture,
         width,
         disabled,
         default,
         warning,
-        sort
+        sort or "name-up",
+        nil,
+        nil,
+        7
     )
 end
 
