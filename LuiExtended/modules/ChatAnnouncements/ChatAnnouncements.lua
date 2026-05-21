@@ -4154,15 +4154,25 @@ function ChatAnnouncements.ItemFilter(itemType, itemId, itemLink, groupLoot)
     end
 end
 
+--- True when LibLazyCrafting is running a request where UI tab/mode is unreliable (writ smithing, improve, provisioning).
+--- Uses LibLazyCrafting.isCurrentlyCrafting[1] like LLC internals (see LibLazyCrafting.lua).
+--- @return boolean
 function I.CheckLibLazyCraftingActive()
-    -- If an addon is installed that uses LibLazyCrafting, we need to replace the messages with used and crafted.
-    if LibLazyCrafting then
-        if LibLazyCrafting:IsPerformingCraftProcess() then
-            return true
-        end
-    else
+    if not LibLazyCrafting or not LibLazyCrafting.isCurrentlyCrafting then
         return false
     end
+    if LibLazyCrafting.isCurrentlyCrafting[1] ~= true then
+        return false
+    end
+    -- Manual or LLC deconstruction: use deconstruct/receive (or station decon tab prefixes).
+    if LUIE.IsSmithingDeconstructionContext() then
+        return false
+    end
+    -- LLC enchanting uses ENCHANTING mode tables (craft/use vs extract/receive by tab).
+    if LibLazyCrafting.isCurrentlyCrafting[2] == "enchanting" then
+        return false
+    end
+    return true
 end
 
 function ChatAnnouncements.ItemPrinter(icon, stack, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, filter, groupLoot, alwaysFirst, delay)
@@ -5115,6 +5125,7 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
     end
 
     local ResolveCraftingUsed = LUIE.ResolveCraftingUsed
+    local isSmithingDeconstruction = LUIE.IsSmithingDeconstructionContext()
 
     local receivedBy = "LUIE_RECEIVE_CRAFT" -- This keyword tells our item printer to print the items in a list separated by commas, to conserve space for the display of crafting mats consumed.
     local logPrefixPos = ChatAnnouncements.SV.ContextMessages.CurrencyMessageCraft
@@ -5125,9 +5136,26 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
         logPrefixPos = S.g_enchant_prefix_pos[S.g_enchanting.GetMode()]
         logPrefixNeg = S.g_enchant_prefix_neg[S.g_enchanting.GetMode()]
     end
-    if GetCraftingInteractionType() == CRAFTING_TYPE_BLACKSMITHING or GetCraftingInteractionType() == CRAFTING_TYPE_CLOTHIER or GetCraftingInteractionType() == CRAFTING_TYPE_WOODWORKING or GetCraftingInteractionType() == CRAFTING_TYPE_JEWELRYCRAFTING then
-        logPrefixPos = S.g_smithing_prefix_pos[S.g_smithing.GetMode()]
-        logPrefixNeg = S.g_smithing_prefix_neg[S.g_smithing.GetMode()]
+    local craftingInteractionType = GetCraftingInteractionType()
+    local isSmithingCraftingType = craftingInteractionType == CRAFTING_TYPE_BLACKSMITHING
+        or craftingInteractionType == CRAFTING_TYPE_CLOTHIER
+        or craftingInteractionType == CRAFTING_TYPE_WOODWORKING
+        or craftingInteractionType == CRAFTING_TYPE_JEWELRYCRAFTING
+        or (IsSmithingCraftingType and IsSmithingCraftingType(craftingInteractionType))
+
+    if isSmithingCraftingType then
+        local smithingMode = S.g_smithing.GetMode()
+        if LUIE.IsSmithingDeconstructionContext() then
+            smithingMode = SMITHING_MODE_DECONSTRUCTION
+        end
+        logPrefixPos = S.g_smithing_prefix_pos[smithingMode]
+        logPrefixNeg = S.g_smithing_prefix_neg[smithingMode]
+    end
+
+    -- Universal deconstruction (Giladil, etc.) may not report a smithing interaction type; still use decon verbs.
+    if LUIE.IsSmithingDeconstructionContext() and craftingInteractionType ~= CRAFTING_TYPE_ENCHANTING then
+        logPrefixPos = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
+        logPrefixNeg = ChatAnnouncements.SV.ContextMessages.CurrencyMessageDeconstruct
     end
 
     -- If the hook function didn't return a string value (for example because the player was in Gamepad mode), then we use a default override.
@@ -5141,6 +5169,18 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
     if I.CheckLibLazyCraftingActive() then
         logPrefixPos = ChatAnnouncements.SV.ContextMessages.CurrencyMessageCraft
         logPrefixNeg = ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse
+    end
+
+    local function ApplyCraftItemLossVerb(itemType, logPrefix)
+        if itemType == ITEMTYPE_GLYPH_ARMOR or itemType == ITEMTYPE_GLYPH_WEAPON or itemType == ITEMTYPE_GLYPH_JEWELRY then
+            if craftingInteractionType == CRAFTING_TYPE_ENCHANTING or isSmithingDeconstruction then
+                return ChatAnnouncements.SV.ContextMessages.CurrencyMessageExtract
+            end
+        end
+        if itemType == ITEMTYPE_FISH then
+            return ChatAnnouncements.SV.ContextMessages.CurrencyMessageFillet
+        end
+        return logPrefix
     end
 
     if bagId == BAG_WORN then
@@ -5199,11 +5239,9 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                logPrefix = ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or logPrefixNeg
+                logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse) or logPrefixNeg
                 if logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or ChatAnnouncements.SV.Inventory.LootShowCraftUse then -- If the logprefix isn't (used) then this is a deconstructed message, otherwise only display if used item display is enabled.
-                    if itemType == ITEMTYPE_FISH then
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageFillet
-                    end
+                    logPrefix = ApplyCraftItemLossVerb(itemType, logPrefix)
                     ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
                 end
             end
@@ -5281,12 +5319,10 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                logPrefix = ResolveCraftingUsed(removedItemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or logPrefixNeg
+                logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(removedItemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse) or logPrefixNeg
                 if logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or ChatAnnouncements.SV.Inventory.LootShowCraftUse then -- If the logprefix isn't (used) then this is a deconstructed message, otherwise only display if used item display is enabled.
                     -- ChatAnnouncements.ItemPrinter(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false)
-                    if removedItemType == ITEMTYPE_FISH then
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageFillet
-                    end
+                    logPrefix = ApplyCraftItemLossVerb(removedItemType, logPrefix)
                     ChatAnnouncements.ItemCounterDelay(removedIcon, change, removedItemType, removedItemId, removedItemLink, receivedBy, logPrefix, gainOrLoss, false, nil, true, true)
                 end
             end
@@ -5358,12 +5394,10 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                logPrefix = ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or logPrefixNeg
+                logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse) or logPrefixNeg
                 if logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or ChatAnnouncements.SV.Inventory.LootShowCraftUse then -- If the logprefix isn't (used) then this is a deconstructed message, otherwise only display if used item display is enabled.
                     -- ChatAnnouncements.ItemPrinter(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false)
-                    if itemType == ITEMTYPE_FISH then
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageFillet
-                    end
+                    logPrefix = ApplyCraftItemLossVerb(itemType, logPrefix)
                     ChatAnnouncements.ItemCounterDelay(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, true, true)
                 end
             end
@@ -5435,11 +5469,9 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
             elseif stackCountChange < 0 then
                 local change = stackCountChange * -1
                 gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-                logPrefix = ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or logPrefixNeg
+                logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse) or logPrefixNeg
                 if logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or ChatAnnouncements.SV.Inventory.LootShowCraftUse then -- If the logprefix isn't (used) then this is a deconstructed message, otherwise only display if used item display is enabled.
-                    if itemType == ITEMTYPE_FISH then
-                        logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageFillet
-                    end
+                    logPrefix = ApplyCraftItemLossVerb(itemType, logPrefix)
                     ChatAnnouncements.ItemCounterDelay(icon, change, itemType, itemId, itemLink, receivedBy, logPrefix, gainOrLoss, false, nil, true, true)
                 end
             end
@@ -5467,22 +5499,20 @@ function ChatAnnouncements.InventoryUpdateCraft(eventId, bagId, slotId, isNewIte
 
         if stackCountChange > 0 then
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
-            logPrefix = ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive or logPrefixPos
+            logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive) or logPrefixPos
             change = stackCountChange
             alwaysFirst = false
         end
 
         if stackCountChange < 0 then
             gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
-            logPrefix = ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or logPrefixNeg
+            logPrefix = (not isSmithingDeconstruction and ResolveCraftingUsed(itemType) and ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse) or logPrefixNeg
             change = stackCountChange * -1
             alwaysFirst = true
         end
 
         if logPrefix ~= ChatAnnouncements.SV.ContextMessages.CurrencyMessageUse or ChatAnnouncements.SV.Inventory.LootShowCraftUse then
-            if itemType == ITEMTYPE_FISH then
-                logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageFillet
-            end
+            logPrefix = ApplyCraftItemLossVerb(itemType, logPrefix)
             if itemId == 33753 then
                 logPrefix = ChatAnnouncements.SV.ContextMessages.CurrencyMessageReceive
             end

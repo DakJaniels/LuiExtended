@@ -24,6 +24,7 @@ LUIE.ChatAnnouncements = ChatAnnouncements
 --- @field logPrefix? string
 --- @field totalString? string
 --- @field groupLoot? boolean
+--- @field timedActivityAnnounceKey? string Dedupe key from GetTimedActivityProgressAnnounceKey (MESSAGE rows only)
 
 -- Queued Messages Storage for CA Modules
 ChatAnnouncements.QueuedMessages = {} --- @type table<integer,QueuedMessage>

@@ -804,9 +804,105 @@ do
         -- SMITHING_MODE_CONSOLIDATED_SET_SELECTION = 7
         --
         -- Return mode (defaulting to SMITHING_MODE_ROOT if for some reason mode is nil)
-        return mode or SMITHING_MODE_ROOT
+        mode = mode or SMITHING_MODE_ROOT
+
+        local craftingType = GetCraftingInteractionType()
+        if craftingType == CRAFTING_TYPE_ENCHANTING
+        or craftingType == CRAFTING_TYPE_ALCHEMY
+        or craftingType == CRAFTING_TYPE_PROVISIONING
+        or craftingType == CRAFTING_TYPE_SCRIBING then
+            return mode
+        end
+
+        if GetCraftingInteractionMode() == CRAFTING_INTERACTION_MODE_UNIVERSAL_DECONSTRUCTION then
+            return SMITHING_MODE_DECONSTRUCTION
+        end
+
+        if SCENE_MANAGER:IsShowing("universalDeconstructionSceneKeyboard")
+        or SCENE_MANAGER:IsShowing("universalDeconstructionSceneGamepad") then
+            return SMITHING_MODE_DECONSTRUCTION
+        end
+
+        return mode
     end
     LUIE.GetSmithingMode = GetSmithingMode
+
+    --- LibLazyCrafting deconstruct queue is active (Writ Crafter bulk decon, etc.). LLC does not set isCurrentlyCrafting during deconstruct.
+    --- @return boolean
+    local function IsLibLazyCraftingDeconstructing()
+        if not LibLazyCrafting or not LibLazyCrafting.craftingQueue then
+            return false
+        end
+        if LibLazyCrafting.isCurrentlyCrafting and LibLazyCrafting.isCurrentlyCrafting[1] == true then
+            local kind = LibLazyCrafting.isCurrentlyCrafting[2]
+            if kind == "smithing" or kind == "improve" or kind == "improvement" then
+                return false
+            end
+        end
+        for _, stations in pairs(LibLazyCrafting.craftingQueue) do
+            if type(stations) == "table" then
+                for station, queue in pairs(stations) do
+                    if type(station) == "number" and type(queue) == "table" then
+                        for i = 1, #queue do
+                            local request = queue[i]
+                            if request and request.type == "deconstruct" then
+                                return true
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        return false
+    end
+    LUIE.IsLibLazyCraftingDeconstructing = IsLibLazyCraftingDeconstructing
+
+    --- True while the player is deconstructing at a smithing station or universal deconstructor (Giladil, etc.).
+    --- @return boolean
+    local function IsSmithingDeconstructionContext()
+        local craftingType = GetCraftingInteractionType()
+
+        -- Another station is active; SMITHING.mode can stay on DECONSTRUCTION after Giladil.
+        if craftingType == CRAFTING_TYPE_ENCHANTING
+        or craftingType == CRAFTING_TYPE_ALCHEMY
+        or craftingType == CRAFTING_TYPE_PROVISIONING
+        or craftingType == CRAFTING_TYPE_SCRIBING then
+            return false
+        end
+
+        if GetCraftingInteractionMode() == CRAFTING_INTERACTION_MODE_UNIVERSAL_DECONSTRUCTION then
+            return true
+        end
+
+        if SCENE_MANAGER:IsShowing("universalDeconstructionSceneKeyboard")
+        or SCENE_MANAGER:IsShowing("universalDeconstructionSceneGamepad") then
+            return true
+        end
+
+        if ZO_Smithing_IsUniversalDeconstructionCraftingMode and ZO_Smithing_IsUniversalDeconstructionCraftingMode() then
+            return true
+        end
+
+        if IsLibLazyCraftingDeconstructing() then
+            if craftingType == CRAFTING_TYPE_INVALID or DECONSTRUCTIBLE_CRAFTING_TYPES[craftingType] then
+                return true
+            end
+        end
+
+        if not DECONSTRUCTIBLE_CRAFTING_TYPES[craftingType] then
+            return false
+        end
+
+        local mode
+        if IsInGamepadPreferredMode() == true then
+            mode = SMITHING_GAMEPAD and SMITHING_GAMEPAD.mode
+        else
+            mode = SMITHING and SMITHING.mode
+        end
+
+        return mode == SMITHING_MODE_DECONSTRUCTION
+    end
+    LUIE.IsSmithingDeconstructionContext = IsSmithingDeconstructionContext
     local function GetEnchantingMode()
         local enchantingMode
         if IsInGamepadPreferredMode() == true then
@@ -824,12 +920,15 @@ do
     --- @param itemType number The item type to check
     --- @return boolean @Returns true if the item can be deconstructed in current context
     local function ResolveCraftingUsed(itemType)
-        local craftingType = GetCraftingInteractionType()
-        local DECONSTRUCTION_MODE = 3
+        if IsSmithingDeconstructionContext() then
+            return false
+        end
 
-        -- Check if current crafting type allows deconstruction and we're in deconstruction mode
+        local craftingType = GetCraftingInteractionType()
+
+        -- Legacy: only used outside deconstruction; never force "use" on destroyed equipment during decon.
         return DECONSTRUCTIBLE_CRAFTING_TYPES[craftingType]
-            and GetSmithingMode() == DECONSTRUCTION_MODE
+            and GetSmithingMode() == SMITHING_MODE_DECONSTRUCTION
             and DECONSTRUCTIBLE_ITEM_TYPES[itemType] or false
     end
     LUIE.ResolveCraftingUsed = ResolveCraftingUsed
