@@ -193,6 +193,47 @@ local lastDrainDedupe =
     amount = 0,
 }
 
+local MITIGATION_DEDUPE_WINDOW_MS = 250
+
+local lastMitigationDedupe =
+{
+    timeMs = 0,
+    combatType = 0,
+    result = 0,
+    abilityId = 0,
+    targetUnitId = 0,
+}
+
+--- @param flags table Event flags from resultTypeCache
+--- @return boolean
+local function IsMitigationCombatResult(flags)
+    return flags.isMiss or flags.isImmune or flags.isParried or flags.isReflected
+        or flags.isDamageShield or flags.isDodged or flags.isBlocked or flags.isInterrupted
+end
+
+--- Suppress duplicate mitigation lines when the client fires the same result twice per cast (e.g. IMMUNE bash).
+--- @param combatType integer CombatTextConstants.combatType INCOMING or OUTGOING
+--- @param result ActionResult
+--- @param abilityId integer
+--- @param targetUnitId integer
+--- @return boolean true if this is a duplicate of a line we already showed (caller must skip)
+local function IsRecentDuplicateMitigation(combatType, result, abilityId, targetUnitId)
+    local now = GetGameTimeMilliseconds()
+    if now - lastMitigationDedupe.timeMs < MITIGATION_DEDUPE_WINDOW_MS
+    and lastMitigationDedupe.combatType == combatType
+    and lastMitigationDedupe.result == result
+    and lastMitigationDedupe.abilityId == abilityId
+    and lastMitigationDedupe.targetUnitId == targetUnitId then
+        return true
+    end
+    lastMitigationDedupe.timeMs = now
+    lastMitigationDedupe.combatType = combatType
+    lastMitigationDedupe.result = result
+    lastMitigationDedupe.abilityId = abilityId
+    lastMitigationDedupe.targetUnitId = targetUnitId
+    return false
+end
+
 --- @param combatMechanicFlags integer COMBAT_MECHANIC_FLAGS_* (EVENT_POWER_UPDATE / GetUnitPower pool key)
 --- @return boolean
 local function IsTrackedResourceCombatMechanicFlags(combatMechanicFlags)
@@ -600,10 +641,14 @@ function CombatTextCombatEventListener:OnCombatIn(result, isError, abilityName, 
         end
         if not effectHideSCT then
             if (settingsToggles.inCombatOnly and isWarned.combat) or not settingsToggles.inCombatOnly then
-                self:TriggerEvent(EventType.COMBAT, combatType, combatMechanicFlags, hitValue, abilityName, abilityId, damageType, sourceName,
-                                  flags.isDamage, flags.isDamageCritical, flags.isHealing, flags.isHealingCritical, flags.isEnergize, flags.isDrain,
-                                  flags.isDot, flags.isDotCritical, flags.isHot, flags.isHotCritical, flags.isMiss, flags.isImmune, flags.isParried,
-                                  flags.isReflected, flags.isDamageShield, flags.isDodged, flags.isBlocked, flags.isInterrupted)
+                local suppressMitigationDuplicate = IsMitigationCombatResult(flags)
+                    and IsRecentDuplicateMitigation(combatType, result, abilityId, targetUnitId)
+                if not suppressMitigationDuplicate then
+                    self:TriggerEvent(EventType.COMBAT, combatType, combatMechanicFlags, hitValue, abilityName, abilityId, damageType, sourceName,
+                                      flags.isDamage, flags.isDamageCritical, flags.isHealing, flags.isHealingCritical, flags.isEnergize, flags.isDrain,
+                                      flags.isDot, flags.isDotCritical, flags.isHot, flags.isHotCritical, flags.isMiss, flags.isImmune, flags.isParried,
+                                      flags.isReflected, flags.isDamageShield, flags.isDodged, flags.isBlocked, flags.isInterrupted)
+                end
             end
         end
     end
@@ -682,7 +727,9 @@ function CombatTextCombatEventListener:OnCombatOut(result, isError, abilityName,
         if not effectHideSCT then
             if (settingsToggles.inCombatOnly and isWarned.combat) or not settingsToggles.inCombatOnly then
                 local suppressDrainDuplicate = flags.isDrain and IsRecentDuplicateDrain(abilityId, combatMechanicFlags, hitValue)
-                if not suppressDrainDuplicate then
+                local suppressMitigationDuplicate = IsMitigationCombatResult(flags)
+                    and IsRecentDuplicateMitigation(combatType, result, abilityId, targetUnitId)
+                if not suppressDrainDuplicate and not suppressMitigationDuplicate then
                     self:TriggerEvent(EventType.COMBAT, combatType, combatMechanicFlags, hitValue, abilityName, abilityId, damageType, sourceName,
                                       flags.isDamage, flags.isDamageCritical, flags.isHealing, flags.isHealingCritical, flags.isEnergize, flags.isDrain,
                                       flags.isDot, flags.isDotCritical, flags.isHot, flags.isHotCritical, flags.isMiss, flags.isImmune, flags.isParried,
