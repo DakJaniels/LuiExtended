@@ -8569,6 +8569,46 @@ function ChatAnnouncements.CreateConsoleSettings()
             end
         }
 
+        local function AddNightMarketDisplayCheckbox(svKey, labelStringId, tooltipStringId, channel)
+            local channelShort = channel == "CA" and LUIE_STRING_LAM_CA_SHARED_CA_SHORT
+                or channel == "CSA" and LUIE_STRING_LAM_CA_SHARED_CSA_SHORT
+                or LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT
+            local channelFull = channel == "CA" and LUIE_STRING_LAM_CA_SHARED_CA
+                or channel == "CSA" and LUIE_STRING_LAM_CA_SHARED_CSA
+                or LUIE_STRING_LAM_CA_SHARED_ALERT
+            settings[#settings + 1] =
+            {
+                type = LHAS.ST_CHECKBOX,
+                label = zo_strformat(GetString(labelStringId), GetString(channelShort)),
+                tooltip = zo_strformat(GetString(tooltipStringId), GetString(channelFull)),
+                getFunction = function ()
+                    return Settings.DisplayAnnouncements[svKey][channel]
+                end,
+                setFunction = function (value)
+                    Settings.DisplayAnnouncements[svKey][channel] = value
+                end,
+                default = Defaults.DisplayAnnouncements[svKey][channel],
+                disable = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end
+            }
+        end
+
+        local nightMarketDisplaySections =
+        {
+            { svKey = "ZoneNightMarketBoulderDash", label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_BOULDER_DASH, tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_BOULDER_DASH_TP },
+            { svKey = "ZoneNightMarketRewards", label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_REWARDS, tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_REWARDS_TP },
+            { svKey = "ZoneNightMarketScavengingMaw", label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_SCAVENGING_MAW, tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_SCAVENGING_MAW_TP },
+            { svKey = "ZoneNightMarketZoneHunt", label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ZONE_HUNT, tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ZONE_HUNT_TP },
+            { svKey = "ZoneNightMarketEssence", label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ESSENCE, tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ESSENCE_TP },
+            { svKey = "ZoneNightMarketMisc", label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_MISC, tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_MISC_TP },
+        }
+        for _, section in ipairs(nightMarketDisplaySections) do
+            AddNightMarketDisplayCheckbox(section.svKey, section.label, section.tooltip, "CA")
+            AddNightMarketDisplayCheckbox(section.svKey, section.label, section.tooltip, "CSA")
+            AddNightMarketDisplayCheckbox(section.svKey, section.label, section.tooltip, "Alert")
+        end
+
         settings[#settings + 1] =
         {
             type = LHAS.ST_LABEL,
