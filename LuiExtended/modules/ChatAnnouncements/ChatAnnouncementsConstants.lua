@@ -642,8 +642,14 @@ ChatAnnouncements.Brackets =
 --- @field ArenaDragonstar CADisplayAnnouncementSection
 --- @field DungeonEndlessArchive CADisplayAnnouncementSection
 --- @field ZoneNightMarket CADisplayAnnouncementSection
+--- @field ZoneNightMarketBoulderDash CADisplayAnnouncementSection
 --- @field ZoneNightMarketArachnid CADisplayAnnouncementSection
 --- @field ZoneNightMarketGuidingLight CADisplayAnnouncementSection
+--- @field ZoneNightMarketRewards CADisplayAnnouncementSection
+--- @field ZoneNightMarketScavengingMaw CADisplayAnnouncementSection
+--- @field ZoneNightMarketZoneHunt CADisplayAnnouncementSection
+--- @field ZoneNightMarketEssence CADisplayAnnouncementSection
+--- @field ZoneNightMarketMisc CADisplayAnnouncementSection
 
 --- Root default settings for ChatAnnouncements.
 --- @class CADefaults
@@ -1316,6 +1322,12 @@ ChatAnnouncements.Defaults =
             CSA = true,
             Alert = false,
         },
+        ZoneNightMarketBoulderDash =
+        {
+            CA = false,
+            CSA = true,
+            Alert = false,
+        },
         ZoneNightMarketArachnid =
         {
             CA = false,
@@ -1323,6 +1335,36 @@ ChatAnnouncements.Defaults =
             Alert = false,
         },
         ZoneNightMarketGuidingLight =
+        {
+            CA = false,
+            CSA = true,
+            Alert = false,
+        },
+        ZoneNightMarketRewards =
+        {
+            CA = false,
+            CSA = true,
+            Alert = false,
+        },
+        ZoneNightMarketScavengingMaw =
+        {
+            CA = false,
+            CSA = true,
+            Alert = false,
+        },
+        ZoneNightMarketZoneHunt =
+        {
+            CA = false,
+            CSA = true,
+            Alert = false,
+        },
+        ZoneNightMarketEssence =
+        {
+            CA = false,
+            CSA = true,
+            Alert = false,
+        },
+        ZoneNightMarketMisc =
         {
             CA = false,
             CSA = true,
