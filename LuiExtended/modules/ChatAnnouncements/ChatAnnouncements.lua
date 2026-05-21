@@ -3376,8 +3376,8 @@ function ChatAnnouncements.OnPromotionalEventsActivityProgressUpdated(eventId, c
     if ChatAnnouncements.SV.Notify.PromotionalEventsActivityCA or ChatAnnouncements.SV.Notify.PromotionalEventsActivityAlert then
         local activityId, displayName, description, completionThreshold, rewardId, rewardQuantity = GetPromotionalEventCampaignActivityInfo(campaignKey, activityIndex)
         local progress = string_format("%i / %i", newProgress, completionThreshold)
-
-        local message = string_format("[%s] %s: %s", GetString(SI_PROMOTIONAL_EVENT_TRACKER_HEADER), displayName, progress)
+        local iconString = zo_iconTextFormat("EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_up.dds", 16, 16, GetString(SI_PROMOTIONAL_EVENT_TRACKER_HEADER), true, true)
+        local message = string_format("[%s] %s: %s", iconString, displayName, progress)
 
         if ChatAnnouncements.SV.Notify.PromotionalEventsActivityCA then
             ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
