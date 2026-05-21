@@ -111,7 +111,7 @@ function InfoPanel.CreateSettings()
     local fontSubmenuControls = {}
 
     -- Font Face Dropdown
-    local fontDropdown = SettingsAPI.CreateFontDropdown(
+    fontSubmenuControls[#fontSubmenuControls + 1] = SettingsAPI.CreateFontDropdown(
         GetString(LUIE_STRING_LAM_FONT),
         GetString(LUIE_STRING_LAM_FONT),
         function () return Settings.FontFace end,
@@ -123,10 +123,10 @@ function InfoPanel.CreateSettings()
         function () return not LUIE.SV.InfoPanel_Enabled end,
         Defaults.FontFace,
         nil,
-        "name-up"
+        "name-up",
+        function () return Settings.FontSize end,
+        function () return Settings.FontStyle end
     )
-    fontDropdown.scrollable = true and 7
-    fontSubmenuControls[#fontSubmenuControls + 1] = fontDropdown
 
     -- Font Size Slider
     fontSubmenuControls[#fontSubmenuControls + 1] = SettingsAPI.CreateSliderOption(
@@ -146,22 +146,19 @@ function InfoPanel.CreateSettings()
     )
 
     -- Font Style Dropdown
-    fontSubmenuControls[#fontSubmenuControls + 1] = SettingsAPI.CreateDropdownOption(
+    fontSubmenuControls[#fontSubmenuControls + 1] = SettingsAPI.CreateFontStyleDropdown(
         GetString(LUIE_STRING_LAM_FONT_STYLE),
         GetString(LUIE_STRING_LAM_CT_FONT_STYLE_TP),
-        LUIE.FONT_STYLE_CHOICES,
         function () return Settings.FontStyle end,
         function (var)
             Settings.FontStyle = var
             InfoPanel.ApplyFont()
         end,
+        function () return Settings.FontFace end,
+        function () return Settings.FontSize end,
         "full",
         function () return not LUIE.SV.InfoPanel_Enabled end,
-        Defaults.FontStyle,
-        nil,
-        "name-up",
-        nil,
-        LUIE.FONT_STYLE_CHOICES_VALUES
+        Defaults.FontStyle
     )
 
     optionsDataInfoPanel[#optionsDataInfoPanel + 1] = SettingsAPI.CreateSubmenuOption(

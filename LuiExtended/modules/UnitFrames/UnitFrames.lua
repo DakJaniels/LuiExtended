@@ -2981,63 +2981,120 @@ local function GetStatusbarTextureForCategory(category)
     return texture, isRoundTexture
 end
 
--- Apply selected texture for all known bars on custom unit frames
-function UnitFrames.CustomFramesApplyTexture()
-    local playerTexture, playerRound = GetStatusbarTextureForCategory("player")
+function UnitFrames.CustomFramesApplyTexturePlayer()
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("player")
     local playerFrame = UnitFrames.CustomFrames["player"]
-    if playerFrame and playerFrame.tlw then
-        ApplyCustomFrameHealthTextures(playerFrame[COMBAT_MECHANIC_FLAGS_HEALTH], playerTexture, playerRound)
-        ApplyCustomFrameResourceTextures(playerFrame[COMBAT_MECHANIC_FLAGS_MAGICKA], playerTexture, playerRound)
-        ApplyCustomFrameResourceTextures(playerFrame[COMBAT_MECHANIC_FLAGS_STAMINA], playerTexture, playerRound)
-        ApplyCustomFrameAlternativeTextures(playerFrame.alternative, playerTexture, playerRound)
+    if not playerFrame or not playerFrame.tlw then
+        return
     end
+    ApplyCustomFrameHealthTextures(playerFrame[COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
+    ApplyCustomFrameResourceTextures(playerFrame[COMBAT_MECHANIC_FLAGS_MAGICKA], texture, isRoundTexture)
+    ApplyCustomFrameResourceTextures(playerFrame[COMBAT_MECHANIC_FLAGS_STAMINA], texture, isRoundTexture)
+    ApplyCustomFrameAlternativeTextures(playerFrame.alternative, texture, isRoundTexture)
+end
 
-    local targetTexture, targetRound = GetStatusbarTextureForCategory("target")
+function UnitFrames.CustomFramesApplyTextureTarget()
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("target")
     local reticleFrame = UnitFrames.CustomFrames["reticleover"]
-    if reticleFrame and reticleFrame.tlw then
-        ApplyCustomFrameHealthTextures(reticleFrame[COMBAT_MECHANIC_FLAGS_HEALTH], targetTexture, targetRound)
+    if not reticleFrame or not reticleFrame.tlw then
+        return
     end
+    ApplyCustomFrameHealthTextures(reticleFrame[COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
+end
 
-    local avaTexture, avaRound = GetStatusbarTextureForCategory("ava")
+function UnitFrames.CustomFramesApplyTextureAva()
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("ava")
     local avaFrame = UnitFrames.CustomFrames["AvaPlayerTarget"]
-    if avaFrame and avaFrame.tlw then
-        ApplyCustomFrameHealthTextures(avaFrame[COMBAT_MECHANIC_FLAGS_HEALTH], avaTexture, avaRound)
+    if not avaFrame or not avaFrame.tlw then
+        return
     end
+    ApplyCustomFrameHealthTextures(avaFrame[COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
+end
 
-    local companionTexture, companionRound = GetStatusbarTextureForCategory("companion")
+function UnitFrames.CustomFramesApplyTextureCompanion()
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("companion")
     local companionFrame = UnitFrames.CustomFrames["companion"]
-    if companionFrame and companionFrame.tlw then
-        ApplyCustomFrameHealthTextures(companionFrame[COMBAT_MECHANIC_FLAGS_HEALTH], companionTexture, companionRound)
+    if not companionFrame or not companionFrame.tlw then
+        return
     end
+    ApplyCustomFrameHealthTextures(companionFrame[COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
+end
 
-    local groupTexture, groupRound = GetStatusbarTextureForCategory("group")
-    if UnitFrames.CustomFrames["SmallGroup1"] and UnitFrames.CustomFrames["SmallGroup1"].tlw then
-        for i = 1, 4 do
-            ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["SmallGroup" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], groupTexture, groupRound)
-        end
+function UnitFrames.CustomFramesApplyTextureGroup()
+    if not (UnitFrames.CustomFrames["SmallGroup1"] and UnitFrames.CustomFrames["SmallGroup1"].tlw) then
+        return
     end
-
-    local raidTexture, raidRound = GetStatusbarTextureForCategory("raid")
-    if UnitFrames.CustomFrames["RaidGroup1"] and UnitFrames.CustomFrames["RaidGroup1"].tlw then
-        for i = 1, 12 do
-            ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["RaidGroup" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], raidTexture, raidRound)
-        end
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("group")
+    for i = 1, 4 do
+        ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["SmallGroup" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
     end
+end
 
-    local petTexture, petRound = GetStatusbarTextureForCategory("pet")
-    if UnitFrames.CustomFrames["PetGroup1"] and UnitFrames.CustomFrames["PetGroup1"].tlw then
-        for i = 1, 7 do
-            ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["PetGroup" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], petTexture, petRound)
-        end
+function UnitFrames.CustomFramesApplyTextureRaid()
+    if not (UnitFrames.CustomFrames["RaidGroup1"] and UnitFrames.CustomFrames["RaidGroup1"].tlw) then
+        return
     end
-
-    local bossTexture, bossRound = GetStatusbarTextureForCategory("boss")
-    if UnitFrames.CustomFrames["boss1"] and UnitFrames.CustomFrames["boss1"].tlw then
-        for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
-            ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["boss" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], bossTexture, bossRound)
-        end
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("raid")
+    for i = 1, 12 do
+        ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["RaidGroup" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
     end
+end
 
+function UnitFrames.CustomFramesApplyTexturePet()
+    if not (UnitFrames.CustomFrames["PetGroup1"] and UnitFrames.CustomFrames["PetGroup1"].tlw) then
+        return
+    end
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("pet")
+    for i = 1, 7 do
+        ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["PetGroup" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
+    end
+end
+
+function UnitFrames.CustomFramesApplyTextureBoss()
+    if not (UnitFrames.CustomFrames["boss1"] and UnitFrames.CustomFrames["boss1"].tlw) then
+        return
+    end
+    local texture, isRoundTexture = GetStatusbarTextureForCategory("boss")
+    for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
+        ApplyCustomFrameHealthTextures(UnitFrames.CustomFrames["boss" .. i][COMBAT_MECHANIC_FLAGS_HEALTH], texture, isRoundTexture)
+    end
+end
+
+--- Apply bar textures for one appearance profile (player, target, group, raid, companion, pet, boss, ava).
+--- @param category string
+function UnitFrames.CustomFramesApplyTextureForCategory(category)
+    if category == "player" then
+        UnitFrames.CustomFramesApplyTexturePlayer()
+    elseif category == "target" then
+        UnitFrames.CustomFramesApplyTextureTarget()
+    elseif category == "group" then
+        UnitFrames.CustomFramesApplyTextureGroup()
+    elseif category == "raid" then
+        UnitFrames.CustomFramesApplyTextureRaid()
+    elseif category == "companion" then
+        UnitFrames.CustomFramesApplyTextureCompanion()
+    elseif category == "pet" then
+        UnitFrames.CustomFramesApplyTexturePet()
+    elseif category == "boss" then
+        UnitFrames.CustomFramesApplyTextureBoss()
+    elseif category == "ava" then
+        UnitFrames.CustomFramesApplyTextureAva()
+    end
+    if (category == "group" or category == "raid") and UnitFrames.GroupResources then
+        UnitFrames.GroupResources.UpdateAllLayouts()
+    end
+end
+
+-- Apply selected texture for all custom frame appearance profiles (init / full refresh).
+function UnitFrames.CustomFramesApplyTexture()
+    UnitFrames.CustomFramesApplyTexturePlayer()
+    UnitFrames.CustomFramesApplyTextureTarget()
+    UnitFrames.CustomFramesApplyTextureAva()
+    UnitFrames.CustomFramesApplyTextureCompanion()
+    UnitFrames.CustomFramesApplyTextureGroup()
+    UnitFrames.CustomFramesApplyTextureRaid()
+    UnitFrames.CustomFramesApplyTexturePet()
+    UnitFrames.CustomFramesApplyTextureBoss()
     if UnitFrames.GroupResources then
         UnitFrames.GroupResources.UpdateAllLayouts()
     end

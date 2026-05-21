@@ -52,42 +52,40 @@ function UnitFrames.BuildLAMAppearanceCategoryControls(category, settings, defau
 
     return
     {
-        {
-            type = "dropdown",
-            scrollable = 7,
-            name = GetString(LUIE_STRING_LAM_FONT),
-            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_TP),
-            choices = settingsAPI.GetFontsList(),
-            sort = "name-up",
-            getFunc = function ()
+        settingsAPI.CreateFontDropdown(
+            GetString(LUIE_STRING_LAM_FONT),
+            GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_TP),
+            function ()
                 return UnitFrames.GetCustomFrameAppearance(category).fontFace
             end,
-            setFunc = function (var)
+            function (var)
                 GetAppearanceEntry(settings, category).fontFace = var
-                UnitFrames.CustomFramesApplyFont()
+                UnitFrames.CustomFramesApplyFontForCategory(category)
             end,
-            width = "full",
-            disabled = disabledFunc,
-            default = defaultEntry and defaultEntry.fontFace or defaults.CustomFontFace,
-        },
-        {
-            type = "dropdown",
-            name = GetString(LUIE_STRING_LAM_FONT_STYLE),
-            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_STYLE_TP),
-            choices = LUIE.FONT_STYLE_CHOICES,
-            choicesValues = LUIE.FONT_STYLE_CHOICES_VALUES,
-            sort = "name-up",
-            getFunc = function ()
+            "full",
+            disabledFunc,
+            defaultEntry and defaultEntry.fontFace or defaults.CustomFontFace,
+            nil,
+            "name-up",
+            function () return UnitFrames.GetCustomFrameAppearance(category).fontOther end,
+            function () return UnitFrames.GetCustomFrameAppearance(category).fontStyle end
+        ),
+        settingsAPI.CreateFontStyleDropdown(
+            GetString(LUIE_STRING_LAM_FONT_STYLE),
+            GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_STYLE_TP),
+            function ()
                 return UnitFrames.GetCustomFrameAppearance(category).fontStyle
             end,
-            setFunc = function (var)
+            function (var)
                 GetAppearanceEntry(settings, category).fontStyle = var
-                UnitFrames.CustomFramesApplyFont()
+                UnitFrames.CustomFramesApplyFontForCategory(category)
             end,
-            width = "full",
-            disabled = disabledFunc,
-            default = defaultEntry and defaultEntry.fontStyle or defaults.CustomFontStyle,
-        },
+            function () return UnitFrames.GetCustomFrameAppearance(category).fontFace end,
+            function () return UnitFrames.GetCustomFrameAppearance(category).fontOther end,
+            "full",
+            disabledFunc,
+            defaultEntry and defaultEntry.fontStyle or defaults.CustomFontStyle
+        ),
         {
             type = "slider",
             name = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_LABELS),
@@ -100,7 +98,7 @@ function UnitFrames.BuildLAMAppearanceCategoryControls(category, settings, defau
             end,
             setFunc = function (value)
                 GetAppearanceEntry(settings, category).fontOther = value
-                UnitFrames.CustomFramesApplyFont()
+                UnitFrames.CustomFramesApplyFontForCategory(category)
             end,
             width = "half",
             disabled = disabledFunc,
@@ -118,30 +116,26 @@ function UnitFrames.BuildLAMAppearanceCategoryControls(category, settings, defau
             end,
             setFunc = function (value)
                 GetAppearanceEntry(settings, category).fontBars = value
-                UnitFrames.CustomFramesApplyFont()
+                UnitFrames.CustomFramesApplyFontForCategory(category)
             end,
             width = "half",
             disabled = disabledFunc,
             default = defaultEntry and defaultEntry.fontBars or defaults.CustomFontBars,
         },
-        {
-            type = "dropdown",
-            scrollable = 7,
-            name = GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE),
-            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE_TP),
-            choices = settingsAPI.GetStatusbarTexturesList(),
-            sort = "name-up",
-            getFunc = function ()
+        settingsAPI.CreateStatusbarTextureDropdown(
+            GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE),
+            GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE_TP),
+            function ()
                 return UnitFrames.GetCustomFrameAppearance(category).texture
             end,
-            setFunc = function (var)
+            function (var)
                 GetAppearanceEntry(settings, category).texture = var
-                UnitFrames.CustomFramesApplyTexture()
+                UnitFrames.CustomFramesApplyTextureForCategory(category)
             end,
-            width = "full",
-            disabled = disabledFunc,
-            default = defaultEntry and defaultEntry.texture or defaults.CustomTexture,
-        },
+            "full",
+            disabledFunc,
+            defaultEntry and defaultEntry.texture or defaults.CustomTexture
+        ),
     }
 end
 
@@ -252,7 +246,7 @@ function UnitFrames.BuildLHASAppearanceCategoryRows(category, settings, defaults
         end,
         setFunction = function (combobox, value, item)
             GetAppearanceEntry(settings, category).texture = item.data or item.name or value
-            UnitFrames.CustomFramesApplyTexture()
+            UnitFrames.CustomFramesApplyTextureForCategory(category)
         end,
         default = defaultEntry and defaultEntry.texture or defaults.CustomTexture,
         disable = disabledFunc,

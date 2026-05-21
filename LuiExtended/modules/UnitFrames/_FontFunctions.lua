@@ -65,37 +65,213 @@ local function ResolveCustomFrameFont(appearance)
     return fontName, fontStyle, sizeCaption, sizeBars
 end
 
-local function ApplyCustomFrameFontToUnitFrame(unitFrame, fontName, fontStyle, sizeCaption, sizeBars)
+local function ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
     if unitFrame.name then
-        unitFrame.name:SetFont(CustomFramesMakeFont(fontName, fontStyle, (unitFrame.name:GetParent() == unitFrame.topInfo) and sizeCaption or sizeBars))
+        unitFrame.name:SetFont((unitFrame.name:GetParent() == unitFrame.topInfo) and fontCaption or fontBars)
     end
     if unitFrame.level then
-        unitFrame.level:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeCaption))
+        unitFrame.level:SetFont(fontCaption)
     end
     if unitFrame.className then
-        unitFrame.className:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeCaption))
+        unitFrame.className:SetFont(fontCaption)
     end
     if unitFrame.title then
-        unitFrame.title:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeCaption))
+        unitFrame.title:SetFont(fontCaption)
     end
     if unitFrame.avaRank then
-        unitFrame.avaRank:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeCaption))
+        unitFrame.avaRank:SetFont(fontCaption)
     end
     if unitFrame.dead then
-        unitFrame.dead:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeBars))
+        unitFrame.dead:SetFont(fontBars)
     end
-    for _, powerType in pairs({ COMBAT_MECHANIC_FLAGS_HEALTH, COMBAT_MECHANIC_FLAGS_MAGICKA, COMBAT_MECHANIC_FLAGS_STAMINA }) do
-        if unitFrame[powerType] then
-            if unitFrame[powerType].label then
-                unitFrame[powerType].label:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeBars))
-            end
-            if unitFrame[powerType].labelOne then
-                unitFrame[powerType].labelOne:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeBars))
-            end
-            if unitFrame[powerType].labelTwo then
-                unitFrame[powerType].labelTwo:SetFont(CustomFramesMakeFont(fontName, fontStyle, sizeBars))
-            end
+    local health = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH]
+    if health then
+        if health.label then
+            health.label:SetFont(fontBars)
         end
+        if health.labelOne then
+            health.labelOne:SetFont(fontBars)
+        end
+        if health.labelTwo then
+            health.labelTwo:SetFont(fontBars)
+        end
+    end
+    local magicka = unitFrame[COMBAT_MECHANIC_FLAGS_MAGICKA]
+    if magicka then
+        if magicka.label then
+            magicka.label:SetFont(fontBars)
+        end
+        if magicka.labelOne then
+            magicka.labelOne:SetFont(fontBars)
+        end
+        if magicka.labelTwo then
+            magicka.labelTwo:SetFont(fontBars)
+        end
+    end
+    local stamina = unitFrame[COMBAT_MECHANIC_FLAGS_STAMINA]
+    if stamina then
+        if stamina.label then
+            stamina.label:SetFont(fontBars)
+        end
+        if stamina.labelOne then
+            stamina.labelOne:SetFont(fontBars)
+        end
+        if stamina.labelTwo then
+            stamina.labelTwo:SetFont(fontBars)
+        end
+    end
+end
+
+local function ApplyCustomFrameNameLabelHeights(unitFrame, sizeCaption)
+    if not unitFrame or not unitFrame.tlw then
+        return
+    end
+    unitFrame.name:SetHeight(2 * sizeCaption)
+    local nameHeight = unitFrame.name:GetTextHeight()
+    unitFrame.topInfo:SetHeight(nameHeight)
+    if unitFrame.levelIcon then
+        unitFrame.levelIcon:SetDimensions(nameHeight, nameHeight)
+        unitFrame.levelIcon:ClearAnchors()
+        unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 1, 0)
+    end
+    unitFrame.classIcon:SetDimensions(nameHeight + 2, nameHeight + 2)
+    if unitFrame.friendIcon then
+        unitFrame.friendIcon:SetDimensions(nameHeight + 2, nameHeight + 2)
+        unitFrame.friendIcon:ClearAnchors()
+        unitFrame.friendIcon:SetAnchor(RIGHT, unitFrame.classIcon, LEFT, nameHeight / 6, 0)
+    end
+    if unitFrame.botInfo then
+        unitFrame.botInfo:SetHeight(nameHeight)
+        if unitFrame.alternative then
+            unitFrame.alternative.backdrop:SetHeight(zo_ceil(nameHeight / 3) + 2)
+            unitFrame.alternative.icon:SetDimensions(nameHeight, nameHeight)
+        end
+        if unitFrame.title then
+            unitFrame.title:SetHeight(2 * sizeCaption)
+        end
+    end
+    if unitFrame.buffAnchor then
+        unitFrame.buffAnchor:SetHeight(nameHeight)
+    end
+end
+
+local function MakeCustomFrameFontStrings(category)
+    local appearance = UnitFrames.GetCustomFrameAppearance(category)
+    local fontName, fontStyle, sizeCaption, sizeBars = ResolveCustomFrameFont(appearance)
+    return CustomFramesMakeFont(fontName, fontStyle, sizeCaption), CustomFramesMakeFont(fontName, fontStyle, sizeBars), sizeCaption
+end
+
+function UnitFrames.CustomFramesApplyFontPlayer()
+    local unitFrame = UnitFrames.CustomFrames["player"]
+    if not unitFrame or not unitFrame.tlw then
+        return
+    end
+    local fontCaption, fontBars, sizeCaption = MakeCustomFrameFontStrings("player")
+    ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
+    ApplyCustomFrameNameLabelHeights(unitFrame, sizeCaption)
+end
+
+function UnitFrames.CustomFramesApplyFontTarget()
+    local unitFrame = UnitFrames.CustomFrames["reticleover"]
+    if not unitFrame or not unitFrame.tlw then
+        return
+    end
+    local fontCaption, fontBars, sizeCaption = MakeCustomFrameFontStrings("target")
+    ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
+    ApplyCustomFrameNameLabelHeights(unitFrame, sizeCaption)
+end
+
+function UnitFrames.CustomFramesApplyFontAva()
+    local unitFrame = UnitFrames.CustomFrames["AvaPlayerTarget"]
+    if not unitFrame or not unitFrame.tlw then
+        return
+    end
+    local fontCaption, fontBars, sizeCaption = MakeCustomFrameFontStrings("ava")
+    ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
+    ApplyCustomFrameNameLabelHeights(unitFrame, sizeCaption)
+end
+
+function UnitFrames.CustomFramesApplyFontCompanion()
+    local unitFrame = UnitFrames.CustomFrames["companion"]
+    if not unitFrame or not unitFrame.tlw then
+        return
+    end
+    local fontCaption, fontBars = MakeCustomFrameFontStrings("companion")
+    ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
+end
+
+function UnitFrames.CustomFramesApplyFontGroup()
+    if not (UnitFrames.CustomFrames["SmallGroup1"] and UnitFrames.CustomFrames["SmallGroup1"].tlw) then
+        return
+    end
+    local fontCaption, fontBars, sizeCaption = MakeCustomFrameFontStrings("group")
+    for i = 1, 4 do
+        local unitFrame = UnitFrames.CustomFrames["SmallGroup" .. i]
+        if unitFrame then
+            ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
+            ApplyCustomFrameNameLabelHeights(unitFrame, sizeCaption)
+        end
+    end
+end
+
+function UnitFrames.CustomFramesApplyFontRaid()
+    if not (UnitFrames.CustomFrames["RaidGroup1"] and UnitFrames.CustomFrames["RaidGroup1"].tlw) then
+        return
+    end
+    local fontCaption, fontBars = MakeCustomFrameFontStrings("raid")
+    for i = 1, 12 do
+        local unitFrame = UnitFrames.CustomFrames["RaidGroup" .. i]
+        if unitFrame then
+            ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
+        end
+    end
+end
+
+function UnitFrames.CustomFramesApplyFontPet()
+    if not (UnitFrames.CustomFrames["PetGroup1"] and UnitFrames.CustomFrames["PetGroup1"].tlw) then
+        return
+    end
+    local fontCaption, fontBars = MakeCustomFrameFontStrings("pet")
+    for i = 1, 7 do
+        local unitFrame = UnitFrames.CustomFrames["PetGroup" .. i]
+        if unitFrame then
+            ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
+        end
+    end
+end
+
+function UnitFrames.CustomFramesApplyFontBoss()
+    if not (UnitFrames.CustomFrames["boss1"] and UnitFrames.CustomFrames["boss1"].tlw) then
+        return
+    end
+    local fontCaption, fontBars = MakeCustomFrameFontStrings("boss")
+    for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
+        local unitFrame = UnitFrames.CustomFrames["boss" .. i]
+        if unitFrame then
+            ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
+        end
+    end
+end
+
+--- Apply fonts for one appearance profile (player, target, group, raid, companion, pet, boss, ava).
+--- @param category string
+function UnitFrames.CustomFramesApplyFontForCategory(category)
+    if category == "player" then
+        UnitFrames.CustomFramesApplyFontPlayer()
+    elseif category == "target" then
+        UnitFrames.CustomFramesApplyFontTarget()
+    elseif category == "group" then
+        UnitFrames.CustomFramesApplyFontGroup()
+    elseif category == "raid" then
+        UnitFrames.CustomFramesApplyFontRaid()
+    elseif category == "companion" then
+        UnitFrames.CustomFramesApplyFontCompanion()
+    elseif category == "pet" then
+        UnitFrames.CustomFramesApplyFontPet()
+    elseif category == "boss" then
+        UnitFrames.CustomFramesApplyFontBoss()
+    elseif category == "ava" then
+        UnitFrames.CustomFramesApplyFontAva()
     end
 end
 
@@ -124,62 +300,14 @@ function UnitFrames.DefaultFramesApplyColor()
     end
 end
 
--- Apply selected font for all known label on custom unit frames
+-- Apply selected font for all custom frame appearance profiles (init / full refresh).
 function UnitFrames.CustomFramesApplyFont()
-    for _, baseName in pairs({ "player", "reticleover", "companion", "SmallGroup", "RaidGroup", "boss", "AvaPlayerTarget", "PetGroup" }) do
-        local category = UnitFrames.GetAppearanceCategoryForBaseName(baseName)
-        if category then
-            local appearance = UnitFrames.GetCustomFrameAppearance(category)
-            local fontName, fontStyle, sizeCaption, sizeBars = ResolveCustomFrameFont(appearance)
-            for i = 0, 12 do
-                local unitTag = (i == 0) and baseName or (baseName .. i)
-                if UnitFrames.CustomFrames[unitTag] then
-                    ApplyCustomFrameFontToUnitFrame(UnitFrames.CustomFrames[unitTag], fontName, fontStyle, sizeCaption, sizeBars)
-                end
-            end
-        end
-    end
-
-    -- Adjust height of Name and Title labels on Player, Target and SmallGroup frames
-    for _, baseName in pairs({ "player", "reticleover", "SmallGroup", "AvaPlayerTarget" }) do
-        local category = UnitFrames.GetAppearanceCategoryForBaseName(baseName)
-        if category then
-            local appearance = UnitFrames.GetCustomFrameAppearance(category)
-            local _, _, sizeCaption = ResolveCustomFrameFont(appearance)
-            for i = 0, 4 do
-                local unitTag = (i == 0) and baseName or (baseName .. i)
-                if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
-                    local unitFrame = UnitFrames.CustomFrames[unitTag]
-                    -- Name should always be present
-                    unitFrame.name:SetHeight(2 * sizeCaption)
-                    local nameHeight = unitFrame.name:GetTextHeight()
-                    unitFrame.topInfo:SetHeight(nameHeight)
-                    if unitFrame.levelIcon then
-                        unitFrame.levelIcon:SetDimensions(nameHeight, nameHeight)
-                        unitFrame.levelIcon:ClearAnchors()
-                        unitFrame.levelIcon:SetAnchor(LEFT, unitFrame.topInfo, LEFT, unitFrame.name:GetTextWidth() + 1, 0)
-                    end
-                    unitFrame.classIcon:SetDimensions(nameHeight + 2, nameHeight + 2)
-                    if unitFrame.friendIcon then
-                        unitFrame.friendIcon:SetDimensions(nameHeight + 2, nameHeight + 2)
-                        unitFrame.friendIcon:ClearAnchors()
-                        unitFrame.friendIcon:SetAnchor(RIGHT, unitFrame.classIcon, LEFT, nameHeight / 6, 0)
-                    end
-                    if unitFrame.botInfo then
-                        unitFrame.botInfo:SetHeight(nameHeight)
-                        if unitFrame.alternative then
-                            unitFrame.alternative.backdrop:SetHeight(zo_ceil(nameHeight / 3) + 2)
-                            unitFrame.alternative.icon:SetDimensions(nameHeight, nameHeight)
-                        end
-                        if unitFrame.title then
-                            unitFrame.title:SetHeight(2 * sizeCaption)
-                        end
-                    end
-                    if unitFrame.buffAnchor then
-                        unitFrame.buffAnchor:SetHeight(nameHeight)
-                    end
-                end
-            end
-        end
-    end
+    UnitFrames.CustomFramesApplyFontPlayer()
+    UnitFrames.CustomFramesApplyFontTarget()
+    UnitFrames.CustomFramesApplyFontAva()
+    UnitFrames.CustomFramesApplyFontCompanion()
+    UnitFrames.CustomFramesApplyFontGroup()
+    UnitFrames.CustomFramesApplyFontRaid()
+    UnitFrames.CustomFramesApplyFontPet()
+    UnitFrames.CustomFramesApplyFontBoss()
 end

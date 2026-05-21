@@ -5,6 +5,7 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
+local SettingsAPI = LUIE.SettingsAPI
 
 --- @class (partial) LUIE.ActionBar
 local ActionBar = LUIE.ActionBar
@@ -18,15 +19,6 @@ local table_insert = table.insert
 local globalMethodOptions = { "Radial", "Vertical Reveal" }
 local globalMethodOptionsKeys = { ["Radial"] = 1, ["Vertical Reveal"] = 2 }
 
--- Helper function to get fonts list
-local function GetFontsList()
-    local fontsList = {}
-    for font, _ in pairs(LUIE.Fonts) do
-        table_insert(fontsList, font)
-    end
-    return fontsList
-end
-
 -- Helper function to get sounds list
 local function GetSoundsList()
     local soundsList = {}
@@ -34,15 +26,6 @@ local function GetSoundsList()
         table_insert(soundsList, sound)
     end
     return soundsList
-end
-
--- Helper function to get statusbar textures list
-local function GetStatusbarTexturesList()
-    local texturesList = {}
-    for texture, _ in pairs(LUIE.StatusbarTextures) do
-        table_insert(texturesList, texture)
-    end
-    return texturesList
 end
 
 -- Helper function to add indentation to names
@@ -320,21 +303,22 @@ function ActionBar.CreateSettings()
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end,
                 default = Defaults.UltimateLabelPosition,
             },
-            {
-                type = "dropdown",
-                name = AddIndent(GetString(LUIE_STRING_LAM_FONT), 1),
-                tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
-                choices = GetFontsList(),
-                getFunc = function () return Settings.UltimateFontFace end,
-                setFunc = function (var)
+            SettingsAPI.CreateFontDropdown(
+                AddIndent(GetString(LUIE_STRING_LAM_FONT), 1),
+                GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
+                function () return Settings.UltimateFontFace end,
+                function (var)
                     Settings.UltimateFontFace = var
                     ActionBar.ApplyFont()
                 end,
-                width = "full",
-                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end,
-                default = Defaults.UltimateFontFace,
-                sort = "name-up",
-            },
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end,
+                Defaults.UltimateFontFace,
+                nil,
+                "name-up",
+                function () return Settings.UltimateFontSize end,
+                function () return Settings.UltimateFontStyle end
+            ),
             {
                 type = "slider",
                 name = AddIndent(GetString(LUIE_STRING_LAM_FONT_SIZE), 1),
@@ -351,22 +335,20 @@ function ActionBar.CreateSettings()
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end,
                 default = Defaults.UltimateFontSize,
             },
-            {
-                type = "dropdown",
-                name = zo_strformat("\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
-                tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
-                choices = LUIE.FONT_STYLE_CHOICES,
-                choicesValues = LUIE.FONT_STYLE_CHOICES_VALUES,
-                sort = "name-up",
-                getFunc = function () return Settings.UltimateFontStyle end,
-                setFunc = function (var)
+            SettingsAPI.CreateFontStyleDropdown(
+                zo_strformat("\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
+                GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
+                function () return Settings.UltimateFontStyle end,
+                function (var)
                     Settings.UltimateFontStyle = var
                     ActionBar.ApplyFont()
                 end,
-                width = "full",
-                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end,
-                default = Defaults.UltimateFontStyle,
-            },
+                function () return Settings.UltimateFontFace end,
+                function () return Settings.UltimateFontSize end,
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.UltimatePctEnabled) end,
+                Defaults.UltimateFontStyle
+            ),
             {
                 type = "checkbox",
                 name = AddIndent(GetString(LUIE_STRING_LAM_AB_ULTIMATE_HIDEFULL), 1),
@@ -451,21 +433,22 @@ function ActionBar.CreateSettings()
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end,
                 default = Defaults.CompanionUltimateLabelPosition,
             },
-            {
-                type = "dropdown",
-                name = AddIndent(GetString(LUIE_STRING_LAM_FONT), 1),
-                tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
-                choices = GetFontsList(),
-                getFunc = function () return Settings.CompanionUltimateFontFace end,
-                setFunc = function (var)
+            SettingsAPI.CreateFontDropdown(
+                AddIndent(GetString(LUIE_STRING_LAM_FONT), 1),
+                GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
+                function () return Settings.CompanionUltimateFontFace end,
+                function (var)
                     Settings.CompanionUltimateFontFace = var
                     ActionBar.ApplyFont()
                 end,
-                width = "full",
-                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end,
-                default = Defaults.CompanionUltimateFontFace,
-                sort = "name-up",
-            },
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end,
+                Defaults.CompanionUltimateFontFace,
+                nil,
+                "name-up",
+                function () return Settings.CompanionUltimateFontSize end,
+                function () return Settings.CompanionUltimateFontStyle end
+            ),
             {
                 type = "slider",
                 name = AddIndent(GetString(LUIE_STRING_LAM_FONT_SIZE), 1),
@@ -482,22 +465,20 @@ function ActionBar.CreateSettings()
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end,
                 default = Defaults.CompanionUltimateFontSize,
             },
-            {
-                type = "dropdown",
-                name = zo_strformat("\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
-                tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
-                choices = LUIE.FONT_STYLE_CHOICES,
-                choicesValues = LUIE.FONT_STYLE_CHOICES_VALUES,
-                sort = "name-up",
-                getFunc = function () return Settings.CompanionUltimateFontStyle end,
-                setFunc = function (var)
+            SettingsAPI.CreateFontStyleDropdown(
+                zo_strformat("\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
+                GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
+                function () return Settings.CompanionUltimateFontStyle end,
+                function (var)
                     Settings.CompanionUltimateFontStyle = var
                     ActionBar.ApplyFont()
                 end,
-                width = "full",
-                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end,
-                default = Defaults.CompanionUltimateFontStyle,
-            },
+                function () return Settings.CompanionUltimateFontFace end,
+                function () return Settings.CompanionUltimateFontSize end,
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.CompanionUltimatePctEnabled) end,
+                Defaults.CompanionUltimateFontStyle
+            ),
             {
                 type = "checkbox",
                 name = AddIndent(GetString(LUIE_STRING_LAM_AB_COMPANION_HIDEFULL), 1),
@@ -618,21 +599,22 @@ function ActionBar.CreateSettings()
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end,
                 default = Defaults.BarLabelPosition,
             },
-            {
-                type = "dropdown",
-                name = AddIndent(GetString(LUIE_STRING_LAM_FONT), 2),
-                tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
-                choices = GetFontsList(),
-                getFunc = function () return Settings.BarFontFace end,
-                setFunc = function (var)
+            SettingsAPI.CreateFontDropdown(
+                AddIndent(GetString(LUIE_STRING_LAM_FONT), 2),
+                GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
+                function () return Settings.BarFontFace end,
+                function (var)
                     Settings.BarFontFace = var
                     ActionBar.ApplyFont()
                 end,
-                width = "full",
-                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end,
-                default = Defaults.BarFontFace,
-                sort = "name-up",
-            },
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end,
+                Defaults.BarFontFace,
+                nil,
+                "name-up",
+                function () return Settings.BarFontSize end,
+                function () return Settings.BarFontStyle end
+            ),
             {
                 type = "slider",
                 name = AddIndent(GetString(LUIE_STRING_LAM_FONT_SIZE), 2),
@@ -649,22 +631,20 @@ function ActionBar.CreateSettings()
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end,
                 default = Defaults.BarFontSize,
             },
-            {
-                type = "dropdown",
-                name = zo_strformat("\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
-                tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
-                choices = LUIE.FONT_STYLE_CHOICES,
-                choicesValues = LUIE.FONT_STYLE_CHOICES_VALUES,
-                sort = "name-up",
-                getFunc = function () return Settings.BarFontStyle end,
-                setFunc = function (var)
+            SettingsAPI.CreateFontStyleDropdown(
+                zo_strformat("\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
+                GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
+                function () return Settings.BarFontStyle end,
+                function (var)
                     Settings.BarFontStyle = var
                     ActionBar.ApplyFont()
                 end,
-                width = "full",
-                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end,
-                default = Defaults.BarFontStyle,
-            },
+                function () return Settings.BarFontFace end,
+                function () return Settings.BarFontSize end,
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.BarShowLabel and (Settings.ShowTriggered or Settings.ShowToggled)) end,
+                Defaults.BarFontStyle
+            ),
             {
                 type = "checkbox",
                 name = AddIndent(GetString(LUIE_STRING_LAM_BUFF_SHOWSECONDFRACTIONS), 2),
@@ -807,21 +787,22 @@ function ActionBar.CreateSettings()
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end,
                 default = Defaults.PotionTimerLabelPosition,
             },
-            {
-                type = "dropdown",
-                name = AddIndent(GetString(LUIE_STRING_LAM_FONT), 1),
-                tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
-                choices = GetFontsList(),
-                getFunc = function () return Settings.PotionTimerFontFace end,
-                setFunc = function (var)
+            SettingsAPI.CreateFontDropdown(
+                AddIndent(GetString(LUIE_STRING_LAM_FONT), 1),
+                GetString(LUIE_STRING_LAM_AB_SHARED_FONT_TP),
+                function () return Settings.PotionTimerFontFace end,
+                function (var)
                     Settings.PotionTimerFontFace = var
                     ActionBar.ApplyFont()
                 end,
-                width = "full",
-                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end,
-                default = Defaults.PotionTimerFontFace,
-                sort = "name-up",
-            },
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end,
+                Defaults.PotionTimerFontFace,
+                nil,
+                "name-up",
+                function () return Settings.PotionTimerFontSize end,
+                function () return Settings.PotionTimerFontStyle end
+            ),
             {
                 type = "slider",
                 name = AddIndent(GetString(LUIE_STRING_LAM_FONT_SIZE), 1),
@@ -838,22 +819,20 @@ function ActionBar.CreateSettings()
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end,
                 default = Defaults.PotionTimerFontSize,
             },
-            {
-                type = "dropdown",
-                name = zo_strformat("\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
-                tooltip = GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
-                choices = LUIE.FONT_STYLE_CHOICES,
-                choicesValues = LUIE.FONT_STYLE_CHOICES_VALUES,
-                sort = "name-up",
-                getFunc = function () return Settings.PotionTimerFontStyle end,
-                setFunc = function (var)
+            SettingsAPI.CreateFontStyleDropdown(
+                zo_strformat("\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
+                GetString(LUIE_STRING_LAM_AB_SHARED_FONTSTYLE_TP),
+                function () return Settings.PotionTimerFontStyle end,
+                function (var)
                     Settings.PotionTimerFontStyle = var
                     ActionBar.ApplyFont()
                 end,
-                width = "full",
-                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end,
-                default = Defaults.PotionTimerFontStyle,
-            },
+                function () return Settings.PotionTimerFontFace end,
+                function () return Settings.PotionTimerFontSize end,
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.PotionTimerShow) end,
+                Defaults.PotionTimerFontStyle
+            ),
             {
                 type = "checkbox",
                 name = AddIndent(GetString(LUIE_STRING_LAM_AB_POTION_COLOR), 1),
@@ -984,22 +963,23 @@ function ActionBar.CreateSettings()
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
                 default = Defaults.CastBarTimer,
             },
-            {
-                type = "dropdown",
-                name = AddIndent(GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTFACE), 2),
-                tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTFACE_TP),
-                choices = GetFontsList(),
-                getFunc = function () return Settings.CastBarFontFace end,
-                setFunc = function (var)
+            SettingsAPI.CreateFontDropdown(
+                AddIndent(GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTFACE), 2),
+                GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTFACE_TP),
+                function () return Settings.CastBarFontFace end,
+                function (var)
                     Settings.CastBarFontFace = var
                     ActionBar.ApplyFont()
                     ActionBar.UpdateCastBar()
                 end,
-                width = "full",
-                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end,
-                default = Defaults.CastBarFontFace,
-                sort = "name-up",
-            },
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end,
+                Defaults.CastBarFontFace,
+                nil,
+                "name-up",
+                function () return Settings.CastBarFontSize end,
+                function () return Settings.CastBarFontStyle end
+            ),
             {
                 type = "slider",
                 name = AddIndent(GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSIZE), 2),
@@ -1017,38 +997,33 @@ function ActionBar.CreateSettings()
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end,
                 default = Defaults.CastBarFontSize,
             },
-            {
-                type = "dropdown",
-                name = zo_strformat("\t\t<<1>>", GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSTYLE)),
-                tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSTYLE_TP),
-                choices = LUIE.FONT_STYLE_CHOICES,
-                choicesValues = LUIE.FONT_STYLE_CHOICES_VALUES,
-                sort = "name-up",
-                getFunc = function () return Settings.CastBarFontStyle end,
-                setFunc = function (var)
+            SettingsAPI.CreateFontStyleDropdown(
+                zo_strformat("\t\t<<1>>", GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSTYLE)),
+                GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTSTYLE_TP),
+                function () return Settings.CastBarFontStyle end,
+                function (var)
                     Settings.CastBarFontStyle = var
                     ActionBar.ApplyFont()
                     ActionBar.UpdateCastBar()
                 end,
-                width = "full",
-                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end,
-                default = Defaults.CastBarFontStyle,
-            },
-            {
-                type = "dropdown",
-                name = AddIndent(GetString(LUIE_STRING_LAM_AB_CASTBAR_TEXTURE), 1),
-                tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_TEXTURE_TP),
-                choices = GetStatusbarTexturesList(),
-                getFunc = function () return Settings.CastBarTexture end,
-                setFunc = function (value)
+                function () return Settings.CastBarFontFace end,
+                function () return Settings.CastBarFontSize end,
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and (Settings.CastBarTimer or Settings.CastBarLabel)) end,
+                Defaults.CastBarFontStyle
+            ),
+            SettingsAPI.CreateStatusbarTextureDropdown(
+                AddIndent(GetString(LUIE_STRING_LAM_AB_CASTBAR_TEXTURE), 1),
+                GetString(LUIE_STRING_LAM_AB_CASTBAR_TEXTURE_TP),
+                function () return Settings.CastBarTexture end,
+                function (value)
                     Settings.CastBarTexture = value
                     ActionBar.UpdateCastBar()
                 end,
-                width = "full",
-                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
-                default = Defaults.CastBarTexture,
-                sort = "name-up",
-            },
+                "full",
+                function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
+                Defaults.CastBarTexture
+            ),
             {
                 type = "colorpicker",
                 name = AddIndent(GetString(LUIE_STRING_LAM_AB_CASTBAR_GRADIENTC1), 1),

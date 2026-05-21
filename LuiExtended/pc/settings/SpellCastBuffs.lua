@@ -1507,27 +1507,26 @@ function SpellCastBuffs.CreateSettings()
                     return not (Settings.RemainingText and LUIE.SV.SpellCastBuff_Enable)
                 end,
             },
-            {
-                -- Buff Label Font
-                type = "dropdown",
-                scrollable = 7,
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT)),
-                tooltip = GetString(LUIE_STRING_LAM_BUFF_FONT_TP),
-                choices = SettingsAPI.GetFontsList(),
-                sort = "name-up",
-                getFunc = function ()
+            SettingsAPI.CreateFontDropdown(
+                zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT)),
+                GetString(LUIE_STRING_LAM_BUFF_FONT_TP),
+                function ()
                     return Settings.BuffFontFace
                 end,
-                setFunc = function (var)
+                function (var)
                     Settings.BuffFontFace = var
                     SpellCastBuffs.ApplyFont()
                 end,
-                width = "full",
-                default = Defaults.BuffFontFace,
-                disabled = function ()
+                "full",
+                function ()
                     return not (Settings.RemainingText and LUIE.SV.SpellCastBuff_Enable)
                 end,
-            },
+                Defaults.BuffFontFace,
+                nil,
+                "name-up",
+                function () return Settings.BuffFontSize end,
+                function () return Settings.BuffFontStyle end
+            ),
             {
                 -- Buff Font Size
                 type = "slider",
@@ -1549,27 +1548,24 @@ function SpellCastBuffs.CreateSettings()
                     return not (Settings.RemainingText and LUIE.SV.SpellCastBuff_Enable)
                 end,
             },
-            {
-                -- Buff Font Style
-                type = "dropdown",
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
-                tooltip = GetString(LUIE_STRING_LAM_BUFF_FONTSTYLE_TP),
-                choices = LUIE.FONT_STYLE_CHOICES,
-                choicesValues = LUIE.FONT_STYLE_CHOICES_VALUES,
-                sort = "name-up",
-                getFunc = function ()
+            SettingsAPI.CreateFontStyleDropdown(
+                zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_FONT_STYLE)),
+                GetString(LUIE_STRING_LAM_BUFF_FONTSTYLE_TP),
+                function ()
                     return Settings.BuffFontStyle
                 end,
-                setFunc = function (var)
+                function (var)
                     Settings.BuffFontStyle = var
                     SpellCastBuffs.ApplyFont()
                 end,
-                width = "full",
-                default = Defaults.BuffFontStyle,
-                disabled = function ()
+                function () return Settings.BuffFontFace end,
+                function () return Settings.BuffFontSize end,
+                "full",
+                function ()
                     return not (Settings.RemainingText and LUIE.SV.SpellCastBuff_Enable)
                 end,
-            },
+                Defaults.BuffFontStyle
+            ),
             {
                 -- Buff Colored Label
                 type = "checkbox",
@@ -3068,27 +3064,26 @@ function SpellCastBuffs.CreateSettings()
                     return not LUIE.SV.SpellCastBuff_Enable
                 end,
             },
-            {
-                -- Prominent Buffs Label Font Face
-                type = "dropdown",
-                scrollable = 7,
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE)),
-                tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE_TP),
-                choices = SettingsAPI.GetFontsList(),
-                sort = "name-up",
-                getFunc = function ()
+            SettingsAPI.CreateFontDropdown(
+                zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE)),
+                GetString(LUIE_STRING_LAM_BUFF_PROM_FONTFACE_TP),
+                function ()
                     return Settings.ProminentLabelFontFace
                 end,
-                setFunc = function (var)
+                function (var)
                     Settings.ProminentLabelFontFace = var
                     SpellCastBuffs.ApplyFont()
                 end,
-                width = "full",
-                default = Defaults.ProminentLabelFontFace,
-                disabled = function ()
+                "full",
+                function ()
                     return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentLabel)
                 end,
-            },
+                Defaults.ProminentLabelFontFace,
+                nil,
+                "name-up",
+                function () return Settings.ProminentLabelFontSize end,
+                function () return Settings.ProminentLabelFontStyle end
+            ),
             {
                 -- Prominent Buffs Label Font Size
                 type = "slider",
@@ -3110,27 +3105,24 @@ function SpellCastBuffs.CreateSettings()
                     return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentLabel)
                 end,
             },
-            {
-                -- Prominent Buffs Label Font Style
-                type = "dropdown",
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSTYLE)),
-                tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSTYLE_TP),
-                choices = LUIE.FONT_STYLE_CHOICES,
-                choicesValues = LUIE.FONT_STYLE_CHOICES_VALUES,
-                sort = "name-up",
-                getFunc = function ()
+            SettingsAPI.CreateFontStyleDropdown(
+                zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSTYLE)),
+                GetString(LUIE_STRING_LAM_BUFF_PROM_FONTSTYLE_TP),
+                function ()
                     return Settings.ProminentLabelFontStyle
                 end,
-                setFunc = function (var)
+                function (var)
                     Settings.ProminentLabelFontStyle = var
                     SpellCastBuffs.ApplyFont()
                 end,
-                width = "full",
-                default = Defaults.ProminentLabelFontStyle,
-                disabled = function ()
+                function () return Settings.ProminentLabelFontFace end,
+                function () return Settings.ProminentLabelFontSize end,
+                "full",
+                function ()
                     return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentLabel)
                 end,
-            },
+                Defaults.ProminentLabelFontStyle
+            ),
             {
                 -- Prominent Buffs Progress Bar
                 type = "checkbox",
@@ -3149,27 +3141,22 @@ function SpellCastBuffs.CreateSettings()
                     return not LUIE.SV.SpellCastBuff_Enable
                 end,
             },
-            {
-                -- Prominent Buffs Progress Bar Texture
-                type = "dropdown",
-                scrollable = 7,
-                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE)),
-                tooltip = GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE_TP),
-                choices = SettingsAPI.GetStatusbarTexturesList(),
-                sort = "name-up",
-                getFunc = function ()
+            SettingsAPI.CreateStatusbarTextureDropdown(
+                zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE)),
+                GetString(LUIE_STRING_LAM_BUFF_PROM_PROGRESSBAR_TEXTURE_TP),
+                function ()
                     return Settings.ProminentProgressTexture
                 end,
-                setFunc = function (value)
+                function (value)
                     Settings.ProminentProgressTexture = value
                     SpellCastBuffs.Reset()
                 end,
-                width = "full",
-                default = Defaults.ProminentProgressTexture,
-                disabled = function ()
+                "full",
+                function ()
                     return not (LUIE.SV.SpellCastBuff_Enable and Settings.ProminentProgress)
                 end,
-            },
+                Defaults.ProminentProgressTexture
+            ),
             {
                 -- Prominent Buffs Gradient Color 1
                 type = "colorpicker",

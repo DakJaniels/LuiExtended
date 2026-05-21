@@ -2,8 +2,8 @@
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101049 101050
-## Version: 7.2.2.5
-## AddOnVersion: 7225
+## Version: 7.2.2.6
+## AddOnVersion: 7226
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
 ## DependsOn: LuiMedia>=7133 LuiData>=7209
 ## PCDependsOn: LibAddonMenu-2.0>=43
@@ -203,6 +203,9 @@ console/dialogs/BlacklistDialog.lua
 
 # Settings - PC
 pc/Settings_API.lua
+pc/lam_extension/LUIE_ComboBoxStatusbarEntry.xml
+pc/lam_extension/fontable_dropdown.lua
+pc/lam_extension/textureable_dropdown.lua
 pc/settings/Settings.lua
 pc/settings/ChatAnnouncements.lua
 pc/settings/CombatInfo.lua
