@@ -90,6 +90,21 @@ local function CreatePossessionHaloAnimation(backdrop)
     return halo
 end
 
+-- Increased power animated halo (32-frame sprite sheet: 4 columns x 8 rows)
+local function CreateIncreasedPowerTexture(backdrop)
+    local powerTex = windowManager:CreateControl(nil, backdrop, CT_TEXTURE)
+    local texturePath = ZO_IsConsoleOrGameCoreUI() and "EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_increasedPower_animatedHalo_32fr.dds" or "EsoUI/Art/UnitAttributeVisualizer/increasedPower_animatedHalo_32fr.dds"
+    powerTex:SetTexture(texturePath)
+    powerTex:SetDrawLayer(DL_BACKGROUND)
+    powerTex:SetAnchor(LEFT, backdrop, LEFT, -80, 0)
+    powerTex:SetAnchor(RIGHT, backdrop, RIGHT, 80, 0)
+    powerTex:SetHeight(128)
+    powerTex:SetDrawTier(DT_LOW)
+    powerTex:SetHidden(true)
+
+    return powerTex
+end
+
 -- No-healing fade animation (controls overlay and stripe)
 local function CreateNoHealingFadeAnimation(overlay, stripeOverlay)
     if not overlay then
@@ -608,6 +623,7 @@ local function CreatePetFrames()
             local unitTag = "PetGroup" .. i
             local control = pet:GetNamedChild("_" .. unitTag)
             local shb = control:GetNamedChild("_Health")
+            local combatGlow = CreateCombatGlowBorder(shb)
 
             UnitFrames.CustomFrames[unitTag] =
             {
@@ -623,6 +639,7 @@ local function CreatePetFrames()
                     ["noHealingOverlay"] = shb:GetNamedChild("_NoHealingOverlay"),
                     ["noHealingStripe"] = shb:GetNamedChild("_NoHealingStripe"),
                     ["possessionOverlay"] = shb:GetNamedChild("_PossessionOverlay"),
+                    ["combatGlow"] = combatGlow,
                 },
                 ["dead"] = shb:GetNamedChild("_Dead"),
                 ["name"] = shb:GetNamedChild("_Name"),
@@ -656,6 +673,7 @@ local function CreateCompanionFrame()
 
         local companion = companionTlw:GetNamedChild("_Companion")
         local shb = companion:GetNamedChild("_Health")
+        local combatGlow = CreateCombatGlowBorder(shb)
 
         UnitFrames.CustomFrames["companion"] =
         {
@@ -672,6 +690,7 @@ local function CreateCompanionFrame()
                 ["noHealingOverlay"] = shb:GetNamedChild("_NoHealingOverlay"),
                 ["noHealingStripe"] = shb:GetNamedChild("_NoHealingStripe"),
                 ["possessionOverlay"] = shb:GetNamedChild("_PossessionOverlay"),
+                ["combatGlow"] = combatGlow,
             },
             ["dead"] = shb:GetNamedChild("_Dead"),
             ["name"] = shb:GetNamedChild("_Name"),
@@ -989,9 +1008,11 @@ local function SetupRegenAnimations(frameConfig)
     end
 end
 
--- Generic function to setup armor overlays
+-- Generic function to setup armor and power stat overlays
 local function SetupArmorOverlays(frameConfig)
-    if not UnitFrames.SV[frameConfig.enableFlag] then
+    local armorEnabled = frameConfig.enableFlag and UnitFrames.SV[frameConfig.enableFlag]
+    local powerEnabled = frameConfig.powerEnableFlag and UnitFrames.SV[frameConfig.powerEnableFlag]
+    if not armorEnabled and not powerEnabled then
         return
     end
 
@@ -1005,18 +1026,26 @@ local function SetupArmorOverlays(frameConfig)
             end
 
             local backdrop = frame[COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
-            frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_ARMOR_RATING] =
-            {
-                ["dec"] = CreateDecreasedArmorOverlay(backdrop, false),
-                ["inc"] = backdrop:GetNamedChild("_ArmorInc"), -- Get from XML (already hidden by default)
-            }
+            if armorEnabled then
+                frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_ARMOR_RATING] =
+                {
+                    ["dec"] = CreateDecreasedArmorOverlay(backdrop, false),
+                    ["inc"] = backdrop:GetNamedChild("_ArmorInc"), -- Get from XML (already hidden by default)
+                }
+            end
+            if powerEnabled then
+                frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_POWER] =
+                {
+                    ["inc"] = CreateIncreasedPowerTexture(backdrop),
+                }
+            end
         end
     end
 end
 
 -- Helper to set up Power Glow animations for all frames that have it displayed
 local function SetupPowerGlowAnimations()
-    local baseNameList = { "player", "reticleover", "AvaPlayerTarget", "boss", "SmallGroup", "RaidGroup" }
+    local baseNameList = { "player", "reticleover", "AvaPlayerTarget", "boss", "SmallGroup", "RaidGroup", "companion", "PetGroup" }
     local baseNameKey = nil
     local baseName
     while true do
@@ -1089,7 +1118,7 @@ function UnitFrames.CreateCustomFrames()
             prefix = "reticleover",
             startIndex = 0,
             endIndex = 0,
-            enableFlag = "PlayerEnableRegen",
+            enableFlag = "TargetEnableRegen",
             widthSV = "TargetBarWidth",
             heightSV = "TargetBarHeight",
             heightMultiplier = 0.3
@@ -1098,7 +1127,7 @@ function UnitFrames.CreateCustomFrames()
             prefix = "AvaPlayerTarget",
             startIndex = 0,
             endIndex = 0,
-            enableFlag = "PlayerEnableRegen",
+            enableFlag = "TargetEnableRegen",
             widthSV = "AvaTargetBarWidth",
             heightSV = "AvaTargetBarHeight",
             heightMultiplier = 0.3
@@ -1130,6 +1159,24 @@ function UnitFrames.CreateCustomFrames()
             heightSV = "BossBarHeight",
             heightMultiplier = 0.3
         },
+        {
+            prefix = "companion",
+            startIndex = 0,
+            endIndex = 0,
+            enableFlag = "CompanionEnableRegen",
+            widthSV = "CompanionWidth",
+            heightSV = "CompanionHeight",
+            heightMultiplier = 0.4
+        },
+        {
+            prefix = "PetGroup",
+            startIndex = 1,
+            endIndex = 7,
+            enableFlag = "PetEnableRegen",
+            widthSV = "PetWidth",
+            heightSV = "PetHeight",
+            heightMultiplier = 0.4
+        },
     }
 
     local configKey = nil
@@ -1147,19 +1194,22 @@ function UnitFrames.CreateCustomFrames()
             prefix = "player",
             startIndex = 0,
             endIndex = 0,
-            enableFlag = "PlayerEnableArmor"
+            enableFlag = "PlayerEnableArmor",
+            powerEnableFlag = "PlayerEnablePower",
         },
         {
             prefix = "reticleover",
             startIndex = 0,
             endIndex = 0,
-            enableFlag = "PlayerEnableArmor"
+            enableFlag = "TargetEnableArmor",
+            powerEnableFlag = "TargetEnablePower",
         },
         {
             prefix = "AvaPlayerTarget",
             startIndex = 0,
             endIndex = 0,
-            enableFlag = "PlayerEnableArmor"
+            enableFlag = "TargetEnableArmor",
+            powerEnableFlag = "TargetEnablePower",
         },
         {
             prefix = "SmallGroup",
@@ -1178,6 +1228,20 @@ function UnitFrames.CreateCustomFrames()
             startIndex = BOSS_RANK_ITERATION_BEGIN,
             endIndex = BOSS_RANK_ITERATION_END,
             enableFlag = "BossEnableArmor"
+        },
+        {
+            prefix = "companion",
+            startIndex = 0,
+            endIndex = 0,
+            enableFlag = "CompanionEnableArmor",
+            powerEnableFlag = "CompanionEnablePower",
+        },
+        {
+            prefix = "PetGroup",
+            startIndex = 1,
+            endIndex = 7,
+            enableFlag = "PetEnableArmor",
+            powerEnableFlag = "PetEnablePower",
         },
     }
 
@@ -1199,6 +1263,10 @@ function UnitFrames.CreateCustomFrames()
     UnitFrames.CustomFramesApplyLayoutCompanion(true)
     UnitFrames.CustomPetUpdate()
     UnitFrames.CompanionUpdate()
+    UnitFrames.CustomFramesApplyCompanionInCombat(true)
+    UnitFrames.UpdateCompanionCombatGlow()
+    UnitFrames.CustomFramesApplyPetInCombat(true)
+    UnitFrames.UpdatePetCombatGlow()
     UnitFrames.CustomFramesApplyLayoutBosses(true)
     UnitFrames.CustomFramesSetPositions()
     UnitFrames.CustomFramesFormatLabels(true)
