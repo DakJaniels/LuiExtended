@@ -641,6 +641,7 @@ ChatAnnouncements.Brackets =
 --- @field ArenaMaelstrom CADisplayAnnouncementSection
 --- @field ArenaDragonstar CADisplayAnnouncementSection
 --- @field DungeonEndlessArchive CADisplayAnnouncementSection
+--- @field DungeonTrial CADisplayAnnouncementSection
 --- @field ZoneNightMarket CADisplayAnnouncementSection
 --- @field ZoneNightMarketBoulderDash CADisplayAnnouncementSection
 --- @field ZoneNightMarketArachnid CADisplayAnnouncementSection
@@ -1313,6 +1314,12 @@ ChatAnnouncements.Defaults =
         DungeonEndlessArchive =
         {
             CA = true,
+            CSA = true,
+            Alert = false,
+        },
+        DungeonTrial =
+        {
+            CA = false,
             CSA = true,
             Alert = false,
         },

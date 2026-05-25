@@ -13,6 +13,7 @@
 - Unit Frames: Split combined **Custom Unit Frames (Player & Target)** settings into separate **Custom Unit Frames (Player)** and **Custom Unit Frames (Target)** sections (PC LAM and console). Target-only options (title, rank, transparency, etc.) no longer require the player frame to be enabled.
 - Unit Frames: Player and target custom frame **label format** (left/right) settings use separate saved variables; existing shared formats are copied to both on first load after update.
 - Unit Frames: Armor, power, and HoT/DoT overlay toggles and **Treat Missing Power as In-Combat** are separate for player vs target (`PlayerEnable*` / `TargetEnable*`, `PlayerOocAlphaPower` / `TargetOocAlphaPower`). PvP target frame uses target overlay flags. Reload UI required for overlay toggles.
+- Unit Frames: Font/Texture settings clarify that **Font Size (Label)** applies to unit names and captions and **Font Size (Bar)** applies to bar attribute text, with separate submenus per frame type (Player, Target, Group, Raid, Companion, Pet, Boss, AvA). Per-category appearance no longer falls back to deprecated global `CustomFont*` values at runtime, so menu sliders match applied fonts.
 - Combat Text: Optional setting **Show ability cast costs as drain (Incoming)** (PC and console, default off). **Display Resource Drain (Incoming)** still shows drains from the combat log unless you enable cast-cost display.
 
 ### Fixed
