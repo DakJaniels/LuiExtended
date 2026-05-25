@@ -65,14 +65,14 @@
         </AlphaAnimation>
       </Animations>
     </AnimationTimeline>
-    <!-- Power Glow Animation (sprite sheet for increased power effect) -->
+    <!-- Increased power halo: increasedPower_animatedHalo_32fr.dds (2048x1024, 4x8 cells) -->
     <AnimationTimeline name="LUIE_PowerGlowAnimation"
                        playbackType="LOOP"
                        loopCount="LOOP_INDEFINITELY">
       <Animations>
         <TextureAnimation cellsWide="4"
                           cellsHigh="8"
-                          duration="1000" />
+                          framerate="32" />
       </Animations>
     </AnimationTimeline>
   </Animations>
