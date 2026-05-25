@@ -14,6 +14,45 @@ local sceneManager = SCENE_MANAGER
 
 -- -----------------------------------------------------------------------------
 
+--- Instantiate a custom unit frame top-level window from XML virtual template.
+--- @param globalName string
+--- @param templateName string
+--- @return TopLevelWindow
+local function CreateLUIETopLevel(globalName, templateName)
+    return CreateControlFromVirtual(globalName, GuiRoot, templateName)
+end
+
+--- Vertically stack member controls (first anchors to parent TOPLEFT).
+--- @param parent Control
+--- @param memberNamePrefix string e.g. "_RaidGroup" (GetNamedChild uses "_" .. "RaidGroup" .. i)
+--- @param count number
+local function ApplyStackedMemberAnchors(parent, unitTagPrefix, count, startIndex)
+    startIndex = startIndex or 1
+    local previous
+    for offset = 0, count - 1 do
+        local i = startIndex + offset
+        local control = parent:GetNamedChild("_" .. unitTagPrefix .. i)
+        if control then
+            control:ClearAnchors()
+            if offset == 0 then
+                control:SetAnchor(TOPLEFT, parent, TOPLEFT, 0, 0)
+            else
+                control:SetAnchor(TOPLEFT, previous, BOTTOMLEFT, 0, 0)
+            end
+            previous = control
+        end
+    end
+end
+
+--- @param parent Control
+--- @param baseName string Full control name prefix without numeric suffix (e.g. parent:GetName() .. "_RaidGroup")
+--- @param templateName string
+--- @param rangeMin number
+--- @param rangeMax number
+local function CreateMemberRangeFromVirtual(parent, baseName, templateName, rangeMin, rangeMax)
+    CreateControlRangeFromVirtual(baseName, parent, templateName, rangeMin, rangeMax)
+end
+
 -- Default Regen/degen animation used on default group frames and custom frames
 local function CreateRegenAnimation(parent, anchors, dims, alpha, number)
     local animConfigs =
@@ -37,7 +76,8 @@ local function CreateRegenAnimation(parent, anchors, dims, alpha, number)
     end
 
     local updateDims = { dims[2] * 1.9, dims[2] * 0.85 }
-    local control = windowManager:CreateControl(nil, parent, CT_TEXTURE)
+    local parentName = parent:GetName() or ("LUIE_UF_Parent_" .. tostring(parent))
+    local control = windowManager:CreateControl(parentName .. "_RegenAnim_" .. number, parent, CT_TEXTURE)
     if anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
         control:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
     end
@@ -74,7 +114,8 @@ end
 
 -- Possession halo animated texture (32-frame sprite sheet: 4 columns x 8 rows)
 local function CreatePossessionHaloAnimation(backdrop)
-    local halo = windowManager:CreateControl(nil, backdrop, CT_TEXTURE)
+    local parentName = backdrop:GetName() or ("LUIE_UF_Parent_" .. tostring(backdrop))
+    local halo = windowManager:CreateControl(parentName .. "_PossessionHalo", backdrop, CT_TEXTURE)
     halo:SetTexture("EsoUI/Art/UnitAttributeVisualizer/possession_animatedHalo_32fr.dds")
     halo:SetDrawLayer(DL_BACKGROUND)
     halo:SetAnchor(LEFT, backdrop, LEFT, -80, 0)
@@ -92,7 +133,8 @@ end
 
 -- Increased power animated halo (32-frame sprite sheet: 4 columns x 8 rows)
 local function CreateIncreasedPowerTexture(backdrop)
-    local powerTex = windowManager:CreateControl(nil, backdrop, CT_TEXTURE)
+    local parentName = backdrop:GetName() or ("LUIE_UF_Parent_" .. tostring(backdrop))
+    local powerTex = windowManager:CreateControl(parentName .. "_IncreasedPowerHalo", backdrop, CT_TEXTURE)
     local texturePath = ZO_IsConsoleOrGameCoreUI() and "EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_increasedPower_animatedHalo_32fr.dds" or "EsoUI/Art/UnitAttributeVisualizer/increasedPower_animatedHalo_32fr.dds"
     powerTex:SetTexture(texturePath)
     powerTex:SetDrawLayer(DL_BACKGROUND)
@@ -174,8 +216,7 @@ end
 -- Helper to create the Player Frame
 local function CreatePlayerFrame()
     if UnitFrames.SV.CustomFramesPlayer then
-        -- Get references to XML-created controls
-        local playerTlw = LUIE_CustomPlayerFrame
+        local playerTlw = CreateLUIETopLevel("LUIE_CustomPlayerFrame", "LUIE_UF_PlayerFrame_Template")
         playerTlw.customPositionAttr = "CustomFramesPlayerFramePos"
         playerTlw.preview = playerTlw:GetNamedChild("_Preview")
         local player = playerTlw:GetNamedChild("_Player")
@@ -188,7 +229,6 @@ local function CreatePlayerFrame()
         local alt = botInfo:GetNamedChild("_Alternative")
         local pli = topInfo:GetNamedChild("_LevelIcon")
 
-        -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(playerTlw, 0, 0)
 
         sceneManager:GetScene("hud"):AddFragment(fragment)
@@ -280,7 +320,7 @@ end
 local function CreateTargetFrame()
     if UnitFrames.SV.CustomFramesTarget then
         -- Get references to XML-created controls
-        local targetTlw = LUIE_CustomTargetFrame
+        local targetTlw = CreateLUIETopLevel("LUIE_CustomTargetFrame", "LUIE_UF_TargetFrame_Template")
         targetTlw.customPositionAttr = "CustomFramesTargetFramePos"
         targetTlw.preview = targetTlw:GetNamedChild("_Preview")
         targetTlw.previewLabel = targetTlw.preview:GetNamedChild("_Label")
@@ -358,7 +398,7 @@ end
 local function CreateAvaPlayerTargetFrame()
     if UnitFrames.SV.AvaCustFramesTarget then
         -- Get references to XML-created controls
-        local targetTlw = LUIE_CustomAvaPlayerTargetFrame
+        local targetTlw = CreateLUIETopLevel("LUIE_CustomAvaPlayerTargetFrame", "LUIE_UF_AvaPlayerTargetFrame_Template")
         targetTlw.customPositionAttr = "AvaCustFramesTargetFramePos"
         targetTlw.preview = targetTlw:GetNamedChild("_Preview")
         targetTlw.previewLabel = targetTlw.preview:GetNamedChild("_Label")
@@ -423,12 +463,13 @@ end
 local function CreateSmallGroupFrames()
     if UnitFrames.SV.CustomFramesGroup then
         -- Get references to XML-created controls
-        local group = LUIE_CustomSmallGroupFrame
+        local group = CreateLUIETopLevel("LUIE_CustomSmallGroupFrame", "LUIE_UF_SmallGroupFrame_Template")
+        CreateMemberRangeFromVirtual(group, group:GetName() .. "_SmallGroup", "LUIE_UF_SmallGroupMember_Template", 1, 4)
+        ApplyStackedMemberAnchors(group, "SmallGroup", 4)
         group.customPositionAttr = "CustomFramesGroupFramePos"
         group.preview = group:GetNamedChild("_Preview")
         group.previewLabel = group.preview:GetNamedChild("_Label")
 
-        -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(group, 0, 0)
 
         local sceneList = { "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }
@@ -517,12 +558,13 @@ end
 local function CreateRaidGroupFrames()
     if UnitFrames.SV.CustomFramesRaid then
         -- Get references to XML-created controls
-        local raid = LUIE_CustomRaidGroupFrame
+        local raid = CreateLUIETopLevel("LUIE_CustomRaidGroupFrame", "LUIE_UF_RaidGroupFrame_Template")
+        CreateMemberRangeFromVirtual(raid, raid:GetName() .. "_RaidGroup", "LUIE_UF_RaidGroupMember_Template", 1, 12)
+        ApplyStackedMemberAnchors(raid, "RaidGroup", 12)
         raid.customPositionAttr = "CustomFramesRaidFramePos"
         raid.preview = raid:GetNamedChild("_Preview")
         raid.previewLabel = raid.preview:GetNamedChild("_Label")
 
-        -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(raid, 0, 0)
 
         local sceneList = { "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }
@@ -602,12 +644,13 @@ end
 local function CreatePetFrames()
     if UnitFrames.SV.CustomFramesPet then
         -- Get references to XML-created controls
-        local pet = LUIE_CustomPetFrame
+        local pet = CreateLUIETopLevel("LUIE_CustomPetFrame", "LUIE_UF_PetFrame_Template")
+        CreateMemberRangeFromVirtual(pet, pet:GetName() .. "_PetGroup", "LUIE_UF_PetGroupMember_Template", 1, 7)
+        ApplyStackedMemberAnchors(pet, "PetGroup", 7)
         pet.customPositionAttr = "CustomFramesPetFramePos"
         pet.preview = pet:GetNamedChild("_Preview")
         pet.previewLabel = pet.preview:GetNamedChild("_Label")
 
-        -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(pet, 0, 0)
 
         local sceneList = { "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }
@@ -654,7 +697,7 @@ end
 local function CreateCompanionFrame()
     if UnitFrames.SV.CustomFramesCompanion then
         -- Get references to XML-created controls
-        local companionTlw = LUIE_CustomCompanionFrame
+        local companionTlw = CreateLUIETopLevel("LUIE_CustomCompanionFrame", "LUIE_UF_CompanionFrame_Template")
         companionTlw.customPositionAttr = "CustomFramesCompanionFramePos"
         companionTlw.preview = companionTlw:GetNamedChild("_Preview")
         companionTlw.previewLabel = companionTlw.preview:GetNamedChild("_Label") --- @type LabelControl
@@ -704,12 +747,13 @@ end
 local function CreateBossFrames()
     if UnitFrames.SV.CustomFramesBosses then
         -- Get references to XML-created controls
-        local bosses = LUIE_CustomBossFrame
+        local bosses = CreateLUIETopLevel("LUIE_CustomBossFrame", "LUIE_UF_BossFrame_Template")
+        CreateMemberRangeFromVirtual(bosses, bosses:GetName() .. "_boss", "LUIE_UF_BossMember_Template", BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END)
+        ApplyStackedMemberAnchors(bosses, "boss", BOSS_RANK_ITERATION_END - BOSS_RANK_ITERATION_BEGIN + 1, BOSS_RANK_ITERATION_BEGIN)
         bosses.customPositionAttr = "CustomFramesBossesFramePos"
         bosses.preview = bosses:GetNamedChild("_Preview")
         bosses.previewLabel = bosses.preview:GetNamedChild("_Label")
 
-        -- Add to scene fragments (controls are already created via XML)
         local fragment = ZO_HUDFadeSceneFragment:New(bosses, 0, 0)
 
         local sceneList = { "hud", "hudui", "siegeBar", "siegeBarUI", "loot" }

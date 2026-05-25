@@ -457,7 +457,7 @@ UnitFrames.SV = {}
 --- @field tlw LUIE_PositionableTopLevelWindow|nil
 --- @field [number] UnitFrames.CustomFramePowerEntry
 
---- Frame data tables are added by _CreateCustomFrames when each frame is created (XML loads first).
+--- Frame data tables are added by _CreateCustomFrames when each frame is created (virtual templates load from XML; instances created at runtime).
 --- @class UnitFrames.CustomFramesTable
 --- @field [string] UnitFrames.CustomFrameUnitEntry
 
