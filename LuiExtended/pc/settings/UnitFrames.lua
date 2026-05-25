@@ -1704,6 +1704,46 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_PLAYER_DODGE_PREDICTION),
+                tooltip = GetString(LUIE_STRING_LAM_UF_PLAYER_DODGE_PREDICTION_TP),
+                getFunc = function ()
+                    return Settings.ShowPlayerDodgePrediction
+                end,
+                setFunc = function (value)
+                    Settings.ShowPlayerDodgePrediction = value
+                    UnitFrames.PlayerDodgePrediction.Refresh()
+                end,
+                width = "full",
+                default = Defaults.ShowPlayerDodgePrediction,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+                end,
+            },
+            {
+                type = "colorpicker",
+                name = zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_UF_PLAYER_DODGE_PREDICTION_COLOR)),
+                tooltip = GetString(LUIE_STRING_LAM_UF_PLAYER_DODGE_PREDICTION_COLOR_TP),
+                getFunc = function ()
+                    return unpack(Settings.PlayerDodgePredictionColor)
+                end,
+                setFunc = function (r, g, b, a)
+                    Settings.PlayerDodgePredictionColor = { r, g, b, a }
+                    UnitFrames.PlayerDodgePrediction.Refresh()
+                end,
+                width = "full",
+                default =
+                {
+                    r = Defaults.PlayerDodgePredictionColor[1],
+                    g = Defaults.PlayerDodgePredictionColor[2],
+                    b = Defaults.PlayerDodgePredictionColor[3],
+                    a = Defaults.PlayerDodgePredictionColor[4],
+                },
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.ShowPlayerDodgePrediction)
+                end,
+            },
+            {
                 -- Display Armor stat change
                 type = "checkbox",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_ARMOR), GetString(LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_PLAYER)),
