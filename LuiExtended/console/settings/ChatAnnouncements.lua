@@ -8800,6 +8800,57 @@ function ChatAnnouncements.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_TRIAL), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_TRIAL_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+            getFunction = function ()
+                return Settings.DisplayAnnouncements.DungeonTrial.CA
+            end,
+            setFunction = function (value)
+                Settings.DisplayAnnouncements.DungeonTrial.CA = value
+            end,
+            default = Defaults.DisplayAnnouncements.DungeonTrial.CA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_TRIAL), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_TRIAL_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+            getFunction = function ()
+                return Settings.DisplayAnnouncements.DungeonTrial.CSA
+            end,
+            setFunction = function (value)
+                Settings.DisplayAnnouncements.DungeonTrial.CSA = value
+            end,
+            default = Defaults.DisplayAnnouncements.DungeonTrial.CSA,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_TRIAL), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+            tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_TRIAL_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+            getFunction = function ()
+                return Settings.DisplayAnnouncements.DungeonTrial.Alert
+            end,
+            setFunction = function (value)
+                Settings.DisplayAnnouncements.DungeonTrial.Alert = value
+            end,
+            default = Defaults.DisplayAnnouncements.DungeonTrial.Alert,
+            disable = function ()
+                return not LUIE.SV.ChatAnnouncements_Enable
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
             label = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_ENDLESS), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
             tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_ENDLESS_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
             getFunction = function ()

@@ -3401,6 +3401,9 @@ function ChatAnnouncements.HookFunction()
             if primaryText == GetString(LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_GROUPLEAVE_D) then
                 primaryText = GetString(LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_GROUPLEAVE_C)
             end
+        elseif primaryText == GetString(LUIE_STRING_CA_DISPLAY_DUNGEON_JOINING_ENCOUNTER_IN_PROGRESS) then
+            settings = LUIE.ChatAnnouncements.SV.DisplayAnnouncements.DungeonTrial
+            debugDisable = true
         else
             local nightMarketSettings = ChatAnnouncements.ResolveNightMarketDisplayAnnouncement(primaryText, secondaryText)
             if nightMarketSettings then

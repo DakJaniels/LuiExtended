@@ -9221,6 +9221,54 @@ function ChatAnnouncements.CreateSettings()
                 width = "full",
             },
             {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_TRIAL), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_TRIAL_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CA)),
+                getFunc = function ()
+                    return Settings.DisplayAnnouncements.DungeonTrial.CA
+                end,
+                setFunc = function (value)
+                    Settings.DisplayAnnouncements.DungeonTrial.CA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.DisplayAnnouncements.DungeonTrial.CA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_TRIAL), GetString(LUIE_STRING_LAM_CA_SHARED_CSA_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_TRIAL_TP), GetString(LUIE_STRING_LAM_CA_SHARED_CSA)),
+                getFunc = function ()
+                    return Settings.DisplayAnnouncements.DungeonTrial.CSA
+                end,
+                setFunc = function (value)
+                    Settings.DisplayAnnouncements.DungeonTrial.CSA = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.DisplayAnnouncements.DungeonTrial.CSA,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_TRIAL), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT_SHORT)),
+                tooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_TRIAL_TP), GetString(LUIE_STRING_LAM_CA_SHARED_ALERT)),
+                getFunc = function ()
+                    return Settings.DisplayAnnouncements.DungeonTrial.Alert
+                end,
+                setFunc = function (value)
+                    Settings.DisplayAnnouncements.DungeonTrial.Alert = value
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.ChatAnnouncements_Enable
+                end,
+                default = Defaults.DisplayAnnouncements.DungeonTrial.Alert,
+            },
+            {
                 -- Endless Archive Notifications (ChatAnnouncements)
                 type = "checkbox",
                 name = zo_strformat(GetString(LUIE_STRING_LAM_CA_DISPLAY_DUNGEON_ENDLESS), GetString(LUIE_STRING_LAM_CA_SHARED_CA_SHORT)),
