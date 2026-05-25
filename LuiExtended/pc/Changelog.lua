@@ -48,6 +48,14 @@ local changelogSectionBodyPool
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.2.7
+    "|cFFA500LuiExtended Version 7.2.2.7|r",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Changelog: Moved changelog code so it would only load on pc as it does not work on console at this time.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Added more Night Market chat settings, check the settings.",
+    "",
     -- Version Header 7.2.2.6
     "|cFFA500LuiExtended Version 7.2.2.6|r",
     "",
