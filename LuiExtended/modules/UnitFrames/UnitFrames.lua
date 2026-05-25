@@ -176,6 +176,7 @@ function UnitFrames.Initialize(enabled)
     end
 
     UnitFrames.MigrateCustomFrameAppearance()
+    UnitFrames.MigrateCustomFrameAppearanceV2()
     UnitFrames.MigratePlayerTargetLabelFormats()
     UnitFrames.MigratePlayerTargetOverlayFlags()
 
