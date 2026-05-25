@@ -531,6 +531,7 @@ local strings =
     -- LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_MA_ROUNDF = "Final Round",
     -- LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_DSA = "Dragonstar Arena",
     LUIE_STRING_CA_DISPLAY_ANNOUNCEMENT_IC_TITLE_PREFIX = "Entered: ",
+    LUIE_STRING_CA_DISPLAY_DUNGEON_JOINING_ENCOUNTER_IN_PROGRESS = "Joining Encounter in Progress",
     -- Night Market EVENT_DISPLAY_ANNOUNCEMENT (match via GetString for localization)
     LUIE_STRING_CA_DISPLAY_DARING_RACE_TEMPEST_EARNED = "Tempest Earned",
     LUIE_STRING_CA_DISPLAY_DARING_RACE_VOID_TEARS = "Race to close the Void Tears before this essence subsides.",

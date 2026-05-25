@@ -261,7 +261,14 @@ end
 --- @param disabledFunc function|nil
 --- @return table[]
 function UnitFrames.BuildLAMFontTextureSettingsSubmenu(settings, defaults, settingsAPI, disabledFunc)
-    local controls = {}
+    local controls =
+    {
+        {
+            type = "description",
+            text = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_TEXTURE_NOTE),
+            width = "full",
+        },
+    }
     for _, category in ipairs(UnitFrames.APPEARANCE_CATEGORY_IDS) do
         local titleId = UnitFrames.APPEARANCE_CATEGORY_TITLE_STRINGS[category]
         controls[#controls + 1] =
@@ -286,6 +293,12 @@ function UnitFrames.BuildLHASFontTextureSettingsSection(settings, defaults, sett
     {
         type = LHAS.ST_LABEL,
         label = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_TEXTURE_HEADER),
+    }
+    rows[#rows + 1] =
+    {
+        type = LHAS.ST_LABEL,
+        label = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_TEXTURE_NOTE),
+        canSelect = false,
     }
     rows[#rows + 1] = settingsAPI:ConsoleFontDeferLabelSetting()
 

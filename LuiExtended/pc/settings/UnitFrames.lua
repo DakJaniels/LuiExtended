@@ -582,6 +582,7 @@ function UnitFrames.CreateSettings()
             {
                 type = "submenu",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_TEXTURE_HEADER),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_TEXTURE_HEADER_TP),
                 controls = UnitFrames.BuildLAMFontTextureSettingsSubmenu(Settings, Defaults, SettingsAPI),
             },
             {
