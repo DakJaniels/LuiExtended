@@ -173,6 +173,7 @@ local lastPlayerPowerByCombatMechanicFlags =
     [COMBAT_MECHANIC_FLAGS_MAGICKA] = nil,
     [COMBAT_MECHANIC_FLAGS_STAMINA] = nil,
     [COMBAT_MECHANIC_FLAGS_ULTIMATE] = nil,
+    [COMBAT_MECHANIC_FLAGS_HEALTH] = nil,
 }
 local pendingSlotAbilityCost =
 {
@@ -181,9 +182,15 @@ local pendingSlotAbilityCost =
     consumedMagicka = false,
     consumedStamina = false,
     consumedUltimate = false,
+    consumedHealth = false,
     expectedMagickaCost = 0,
     expectedStaminaCost = 0,
     expectedUltimateCost = 0,
+    expectedHealthCost = 0,
+    spentMagicka = 0,
+    spentStamina = 0,
+    spentUltimate = 0,
+    spentHealth = 0,
 }
 local lastDrainDedupe =
 {
@@ -240,6 +247,25 @@ local function IsTrackedResourceCombatMechanicFlags(combatMechanicFlags)
     return combatMechanicFlags == COMBAT_MECHANIC_FLAGS_MAGICKA
         or combatMechanicFlags == COMBAT_MECHANIC_FLAGS_STAMINA
         or combatMechanicFlags == COMBAT_MECHANIC_FLAGS_ULTIMATE
+        or combatMechanicFlags == COMBAT_MECHANIC_FLAGS_HEALTH
+end
+
+--- Accept full upfront cost or partial ticks (channel / multi-tick costs) toward expected slotted cost.
+--- @param delta integer
+--- @param expectedCost integer
+--- @param spentSoFar integer
+--- @return boolean allowShow
+--- @return boolean poolFullyPaid
+local function EvaluateInferredPoolDrain(delta, expectedCost, spentSoFar)
+    if expectedCost <= 0 or delta < 1 or delta > expectedCost then
+        return false, false
+    end
+    local totalSpent = spentSoFar + delta
+    local tolerance = math.max(1, zo_floor(expectedCost * 0.01))
+    if totalSpent > expectedCost + tolerance then
+        return false, true
+    end
+    return true, totalSpent >= expectedCost - tolerance
 end
 
 --- Suppress duplicate drain lines when both inferred and native POWER_DRAIN fire close together.
@@ -269,9 +295,15 @@ local function ClearPendingAbilityCost()
     pendingSlotAbilityCost.consumedMagicka = false
     pendingSlotAbilityCost.consumedStamina = false
     pendingSlotAbilityCost.consumedUltimate = false
+    pendingSlotAbilityCost.consumedHealth = false
     pendingSlotAbilityCost.expectedMagickaCost = 0
     pendingSlotAbilityCost.expectedStaminaCost = 0
     pendingSlotAbilityCost.expectedUltimateCost = 0
+    pendingSlotAbilityCost.expectedHealthCost = 0
+    pendingSlotAbilityCost.spentMagicka = 0
+    pendingSlotAbilityCost.spentStamina = 0
+    pendingSlotAbilityCost.spentUltimate = 0
+    pendingSlotAbilityCost.spentHealth = 0
 end
 
 --- @param costAbility integer ability id for tooltip/cost APIs (often chained)
@@ -307,7 +339,8 @@ local function SetPendingAbilityCostFromSlot(actionSlotIndex)
     local expectedMagicka = GetPositiveAbilityResourceCost(costAbility, COMBAT_MECHANIC_FLAGS_MAGICKA)
     local expectedStamina = GetPositiveAbilityResourceCost(costAbility, COMBAT_MECHANIC_FLAGS_STAMINA)
     local expectedUltimate = GetPositiveAbilityResourceCost(costAbility, COMBAT_MECHANIC_FLAGS_ULTIMATE)
-    if expectedMagicka == 0 and expectedStamina == 0 and expectedUltimate == 0 then
+    local expectedHealth = GetPositiveAbilityResourceCost(costAbility, COMBAT_MECHANIC_FLAGS_HEALTH)
+    if expectedMagicka == 0 and expectedStamina == 0 and expectedUltimate == 0 and expectedHealth == 0 then
         return
     end
 
@@ -316,6 +349,7 @@ local function SetPendingAbilityCostFromSlot(actionSlotIndex)
     pendingSlotAbilityCost.expectedMagickaCost = expectedMagicka
     pendingSlotAbilityCost.expectedStaminaCost = expectedStamina
     pendingSlotAbilityCost.expectedUltimateCost = expectedUltimate
+    pendingSlotAbilityCost.expectedHealthCost = expectedHealth
 end
 
 -- Memory optimization: Cache zone/map data to avoid repeated API calls
@@ -478,6 +512,7 @@ function CombatTextCombatEventListener:OnPlayerActivated()
     lastPlayerPowerByCombatMechanicFlags[COMBAT_MECHANIC_FLAGS_MAGICKA] = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_MAGICKA)
     lastPlayerPowerByCombatMechanicFlags[COMBAT_MECHANIC_FLAGS_STAMINA] = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_STAMINA)
     lastPlayerPowerByCombatMechanicFlags[COMBAT_MECHANIC_FLAGS_ULTIMATE] = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE)
+    lastPlayerPowerByCombatMechanicFlags[COMBAT_MECHANIC_FLAGS_HEALTH] = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_HEALTH)
     ClearPendingAbilityCost()
     if IsUnitInCombat("player") then
         isWarned.combat = true
@@ -487,7 +522,9 @@ end
 --- Remember bar ability activation for inferred resource cost display.
 --- @param actionSlotIndex integer
 function CombatTextCombatEventListener:OnActionSlotAbilityUsed(actionSlotIndex)
-    SetPendingAbilityCostFromSlot(actionSlotIndex)
+    if LUIE.CombatText.SV.common.inferResourceDrainOnCast then
+        SetPendingAbilityCostFromSlot(actionSlotIndex)
+    end
 end
 
 --- When native POWER_DRAIN combat events are missing, infer costs from player power drops after a bar use.
@@ -496,6 +533,9 @@ end
 --- @param powerMax integer
 --- @param powerEffectiveMax integer
 function CombatTextCombatEventListener:OnPlayerPowerUpdate(combatMechanicFlags, powerValue, powerMax, powerEffectiveMax)
+    if not LUIE.CombatText.SV.common.inferResourceDrainOnCast then
+        return
+    end
     if not IsTrackedResourceCombatMechanicFlags(combatMechanicFlags) then
         return
     end
@@ -520,30 +560,59 @@ function CombatTextCombatEventListener:OnPlayerPowerUpdate(combatMechanicFlags, 
     end
 
     local expectedCost = 0
+    local spentSoFar = 0
     if combatMechanicFlags == COMBAT_MECHANIC_FLAGS_MAGICKA then
+        if pendingSlotAbilityCost.consumedMagicka then
+            return
+        end
         expectedCost = pendingSlotAbilityCost.expectedMagickaCost
+        spentSoFar = pendingSlotAbilityCost.spentMagicka
     elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_STAMINA then
+        if pendingSlotAbilityCost.consumedStamina then
+            return
+        end
         expectedCost = pendingSlotAbilityCost.expectedStaminaCost
+        spentSoFar = pendingSlotAbilityCost.spentStamina
     elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_ULTIMATE then
+        if pendingSlotAbilityCost.consumedUltimate then
+            return
+        end
         expectedCost = pendingSlotAbilityCost.expectedUltimateCost
-    end
-    if expectedCost <= 0 then
-        return
-    end
-    -- Reject unrelated pool ticks (e.g. sprint) when the slotted ability has no cost or a different cost for this pool.
-    local tolerance = math.max(1, zo_floor(expectedCost * 0.01))
-    if math.abs(delta - expectedCost) > tolerance then
+        spentSoFar = pendingSlotAbilityCost.spentUltimate
+    elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_HEALTH then
+        if pendingSlotAbilityCost.consumedHealth then
+            return
+        end
+        expectedCost = pendingSlotAbilityCost.expectedHealthCost
+        spentSoFar = pendingSlotAbilityCost.spentHealth
+    else
         return
     end
 
-    if combatMechanicFlags == COMBAT_MECHANIC_FLAGS_MAGICKA and pendingSlotAbilityCost.consumedMagicka then
+    local allowShow, poolFullyPaid = EvaluateInferredPoolDrain(delta, expectedCost, spentSoFar)
+    if not allowShow then
+        if poolFullyPaid then
+            if combatMechanicFlags == COMBAT_MECHANIC_FLAGS_MAGICKA then
+                pendingSlotAbilityCost.consumedMagicka = true
+            elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_STAMINA then
+                pendingSlotAbilityCost.consumedStamina = true
+            elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_ULTIMATE then
+                pendingSlotAbilityCost.consumedUltimate = true
+            elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_HEALTH then
+                pendingSlotAbilityCost.consumedHealth = true
+            end
+        end
         return
     end
-    if combatMechanicFlags == COMBAT_MECHANIC_FLAGS_STAMINA and pendingSlotAbilityCost.consumedStamina then
-        return
-    end
-    if combatMechanicFlags == COMBAT_MECHANIC_FLAGS_ULTIMATE and pendingSlotAbilityCost.consumedUltimate then
-        return
+
+    if combatMechanicFlags == COMBAT_MECHANIC_FLAGS_MAGICKA then
+        pendingSlotAbilityCost.spentMagicka = spentSoFar + delta
+    elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_STAMINA then
+        pendingSlotAbilityCost.spentStamina = spentSoFar + delta
+    elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_ULTIMATE then
+        pendingSlotAbilityCost.spentUltimate = spentSoFar + delta
+    elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_HEALTH then
+        pendingSlotAbilityCost.spentHealth = spentSoFar + delta
     end
 
     local Settings = LUIE.CombatText.SV
@@ -577,12 +646,16 @@ function CombatTextCombatEventListener:OnPlayerPowerUpdate(combatMechanicFlags, 
                       false, false, false, false, false, true,
                       false, false, false, false, false, false, false, false, false, false, false)
 
-    if combatMechanicFlags == COMBAT_MECHANIC_FLAGS_MAGICKA then
-        pendingSlotAbilityCost.consumedMagicka = true
-    elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_STAMINA then
-        pendingSlotAbilityCost.consumedStamina = true
-    elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_ULTIMATE then
-        pendingSlotAbilityCost.consumedUltimate = true
+    if poolFullyPaid then
+        if combatMechanicFlags == COMBAT_MECHANIC_FLAGS_MAGICKA then
+            pendingSlotAbilityCost.consumedMagicka = true
+        elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_STAMINA then
+            pendingSlotAbilityCost.consumedStamina = true
+        elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_ULTIMATE then
+            pendingSlotAbilityCost.consumedUltimate = true
+        elseif combatMechanicFlags == COMBAT_MECHANIC_FLAGS_HEALTH then
+            pendingSlotAbilityCost.consumedHealth = true
+        end
     end
 end
 

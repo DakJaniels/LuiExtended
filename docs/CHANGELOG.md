@@ -1,5 +1,20 @@
 # LuiExtended Changelog
 
+## Version 7.2.2.7
+
+### Changes
+
+- Changelog: Moved changelog code so it would only load on PC (not supported on console at this time).
+- ChatAnnouncements: Added more Night Market chat settings.
+
+### New
+
+- Combat Text: Optional setting **Show ability cast costs as drain (Incoming)** (PC and console, default off). **Display Resource Drain (Incoming)** still shows drains from the combat log unless you enable cast-cost display.
+
+### Fixed
+
+- Combat Text: Fixed duplicate mitigation floating text (for example two **Immune Bash** lines when bashing a hard-targeted immune enemy out of range).
+
 ## Version 7.2.2.6
 
 ### New

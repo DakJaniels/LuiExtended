@@ -484,6 +484,11 @@ function CombatText.Initialize(enabled)
             end
         end
     end
+    if coreAw.AdjustVarsCT < 5 then
+        if CombatText.SV.common.inferResourceDrainOnCast == nil then
+            CombatText.SV.common.inferResourceDrainOnCast = CombatText.Defaults.common.inferResourceDrainOnCast
+        end
+    end
     -- Increment so this doesn't occur again.
-    coreAw.AdjustVarsCT = 4
+    coreAw.AdjustVarsCT = 5
 end

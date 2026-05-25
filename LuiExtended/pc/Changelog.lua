@@ -56,6 +56,14 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Changelog: Moved changelog code so it would only load on pc as it does not work on console at this time.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Added more Night Market chat settings, check the settings.",
     "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Optional setting Show ability cast costs as drain (Incoming) (PC and console, default off). Display Resource Drain (Incoming) still shows drains from the combat log unless you turn cast-cost display on.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Fixed duplicate mitigation floating text (for example two Immune Bash lines when bashing a hard-targeted immune enemy out of range).",
+    "",
     -- Version Header 7.2.2.6
     "|cFFA500LuiExtended Version 7.2.2.6|r",
     "",

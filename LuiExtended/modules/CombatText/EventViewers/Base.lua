@@ -273,6 +273,8 @@ CombatTextEventViewer.TEXT_ATTRIBUTE_CONFIG =
                 return Settings.colors.energizeStamina
             elseif powerType == COMBAT_MECHANIC_FLAGS_ULTIMATE then
                 return Settings.colors.energizeUltimate
+            elseif powerType == COMBAT_MECHANIC_FLAGS_HEALTH then
+                return Settings.colors.healing
             end
             return Settings.colors.energizeMagicka
         end

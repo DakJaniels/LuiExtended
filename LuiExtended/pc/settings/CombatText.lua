@@ -1365,6 +1365,22 @@ function CombatText.CreateSettings()
                 default = Defaults.toggles.incoming.showDrain,
             },
             {
+                type = "checkbox",
+                width = "full",
+                name = GetString(LUIE_STRING_LAM_CT_INFER_CAST_RESOURCE_DRAIN),
+                tooltip = GetString(LUIE_STRING_LAM_CT_INFER_CAST_RESOURCE_DRAIN_TP),
+                getFunc = function ()
+                    return Settings.common.inferResourceDrainOnCast
+                end,
+                setFunc = function (v)
+                    Settings.common.inferResourceDrainOnCast = v
+                end,
+                default = Defaults.common.inferResourceDrainOnCast,
+                disabled = function ()
+                    return not Settings.toggles.incoming.showDrain
+                end,
+            },
+            {
                 -- Resource Drain (Outgoing)
                 type = "checkbox",
                 width = "half",

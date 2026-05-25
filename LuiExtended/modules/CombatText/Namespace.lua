@@ -97,6 +97,8 @@ CombatText.Defaults =
         abbreviateNumbers = false,
         useDefaultIcon = false,
         defaultIconOptions = 1,
+        -- Infer incoming drain from bar ability use + power drop (combat log often omits POWER_DRAIN)
+        inferResourceDrainOnCast = false,
     },
     -- Toggle Defaults
     toggles =
