@@ -1605,6 +1605,42 @@ function UnitFrames.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_PLAYER_DODGE_PREDICTION),
+            tooltip = GetString(LUIE_STRING_LAM_UF_PLAYER_DODGE_PREDICTION_TP),
+            getFunction = function ()
+                return Settings.ShowPlayerDodgePrediction
+            end,
+            setFunction = function (value)
+                Settings.ShowPlayerDodgePrediction = value
+                UnitFrames.PlayerDodgePrediction.Refresh()
+            end,
+            default = Defaults.ShowPlayerDodgePrediction,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+            end,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_COLOR,
+            label = GetString(LUIE_STRING_LAM_UF_PLAYER_DODGE_PREDICTION_COLOR),
+            tooltip = GetString(LUIE_STRING_LAM_UF_PLAYER_DODGE_PREDICTION_COLOR_TP),
+            getFunction = function ()
+                return Settings.PlayerDodgePredictionColor[1], Settings.PlayerDodgePredictionColor[2], Settings.PlayerDodgePredictionColor[3], Settings.PlayerDodgePredictionColor[4]
+            end,
+            setFunction = function (r, g, b, a)
+                Settings.PlayerDodgePredictionColor = { r, g, b, a }
+                UnitFrames.PlayerDodgePrediction.Refresh()
+            end,
+            default = Defaults.PlayerDodgePredictionColor,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.ShowPlayerDodgePrediction)
+            end,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
             label = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_ARMOR), GetString(LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_PLAYER)),
             tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_ARMOR_TP),
             getFunction = function ()

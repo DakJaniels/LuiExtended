@@ -89,6 +89,18 @@
       <AnchorFill />
       <Edge edgeSize="2" />
     </Backdrop>
+    <!-- Player stamina dodge prediction marker (ZO_ControlPool) -->
+    <Backdrop name="LUIE_DodgePredictionMarker"
+              virtual="true"
+              hidden="true"
+              mouseEnabled="false"
+              tier="MEDIUM"
+              layer="OVERLAY"
+              level="6">
+      <Dimensions x="2"
+                  y="1" />
+      <Edge edgeSize="0" />
+    </Backdrop>
     <!-- Decreased Armor Overlay Container (Full version with both textures) -->
     <Control name="LUIE_DecreasedArmorOverlay"
              tier="MEDIUM"

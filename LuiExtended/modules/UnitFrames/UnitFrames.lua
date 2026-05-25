@@ -116,6 +116,7 @@ function UnitFrames.CustomFramesApplyBarAlignment()
             local staminaAlignment = UnitFrames.SV.BarAlignPlayerStamina or 1
             stamBar.bar:SetBarAlignment(staminaAlignment - 1)
         end
+        UnitFrames.PlayerDodgePrediction.Refresh()
     end
 
     if UnitFrames.CustomFrames["reticleover"] then
@@ -230,6 +231,7 @@ function UnitFrames.Initialize(enabled)
 
     UnitFrames.CreateDefaultFrames()
     UnitFrames.CreateCustomFrames()
+    UnitFrames.PlayerDodgePrediction.Initialize()
 
     -- Initialize LibGroupBroadcast integrations if available
     if UnitFrames.GroupResources then
@@ -3305,6 +3307,7 @@ function UnitFrames.CustomFramesApplyLayoutPlayerFrame(unhide)
     end
 
     UnitFrames.CustomFramesTryUnhideTlw("player", unhide)
+    UnitFrames.PlayerDodgePrediction.Refresh()
 end
 
 -- Only AvA rank label/icon on custom reticleover. Do not call full UpdateStaticControls from layout:
@@ -3818,7 +3821,7 @@ function UnitFrames.CustomFramesApplyInCombat(force)
     local playerIdle = CustomFramesComputeOocIdle(UnitFrames.SV.PlayerOocAlphaPower)
     local targetIdle = CustomFramesComputeOocIdle(UnitFrames.SV.TargetOocAlphaPower)
 
-    if not force
+    if  not force
     and playerIdle == lastCustomFramesApplyInCombatPlayerIdle
     and targetIdle == lastCustomFramesApplyInCombatTargetIdle then
         return

@@ -58,6 +58,7 @@ local changelogMessages =
     "",
     -- New
     "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Optional next roll dodge indicator on the custom player stamina bar (PC and console, default off). A vertical line shows where your stamina would be after one dodge; it turns red if you cannot afford that dodge. Updates for Dodge Fatigue and for Expert Evasion when that champion perk is slotted on your bar.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Combat Text: Optional setting Show ability cast costs as drain (Incoming) (PC and console, default off). Display Resource Drain (Incoming) still shows drains from the combat log unless you turn cast-cost display on.",
     "",
     -- Fix
