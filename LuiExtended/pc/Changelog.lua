@@ -48,6 +48,16 @@ local changelogSectionBodyPool
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.2.8
+    "|cFFA500LuiExtended Version 7.2.2.8|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Roll dodge stamina indicator on the custom player bar now follows Left to Right, Right to Left, and Center stamina bar alignment settings.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: With Center alignment, the dodge indicator uses two lines that bracket your stamina after the next dodge (the band moves inward toward the middle as stamina drops).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Roll dodge prediction includes Medium Armor Athletics dodge cost reduction (per piece of medium armor worn).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Roll dodge indicator tracks more smoothly when Custom Smooth Bar is enabled on player frames.",
+    "",
     -- Version Header 7.2.2.7
     "|cFFA500LuiExtended Version 7.2.2.7|r",
     "",
