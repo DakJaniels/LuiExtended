@@ -1,5 +1,14 @@
 # LuiExtended Changelog
 
+## Version 7.2.2.8
+
+### Fixed
+
+- Unit Frames: Roll dodge stamina indicator on the custom player bar now follows **Left to Right**, **Right to Left**, and **Center** stamina bar alignment settings.
+- Unit Frames: With **Center** alignment, the dodge indicator uses two lines that bracket your stamina after the next dodge (the band moves inward toward the middle as stamina drops).
+- Unit Frames: Roll dodge prediction includes **Medium Armor Athletics** dodge cost reduction (per piece of medium armor worn).
+- Unit Frames: Roll dodge indicator tracks more smoothly when **Custom Smooth Bar** is enabled on player frames.
+
 ## Version 7.2.2.7
 
 ### Changes
@@ -9,11 +18,7 @@
 
 ### New
 
-- Unit Frames: Custom companion and pet frames support optional HoT/DoT, armor, and power attribute overlays (PC and console settings; all overlay toggles default off; reload UI to apply overlay toggles). Optional per-unit combat glow border with color picker (default off). Companion and pet OOC/in-combat transparency now follows each unit's own combat state instead of the player's.
-- Unit Frames: Split combined **Custom Unit Frames (Player & Target)** settings into separate **Custom Unit Frames (Player)** and **Custom Unit Frames (Target)** sections (PC LAM and console). Target-only options (title, rank, transparency, etc.) no longer require the player frame to be enabled.
-- Unit Frames: Player and target custom frame **label format** (left/right) settings use separate saved variables; existing shared formats are copied to both on first load after update.
-- Unit Frames: Armor, power, and HoT/DoT overlay toggles and **Treat Missing Power as In-Combat** are separate for player vs target (`PlayerEnable*` / `TargetEnable*`, `PlayerOocAlphaPower` / `TargetOocAlphaPower`). PvP target frame uses target overlay flags. Reload UI required for overlay toggles.
-- Unit Frames: Font/Texture settings clarify that **Font Size (Label)** applies to unit names and captions and **Font Size (Bar)** applies to bar attribute text, with separate submenus per frame type (Player, Target, Group, Raid, Companion, Pet, Boss, AvA). Per-category appearance no longer falls back to deprecated global `CustomFont*` values at runtime, so menu sliders match applied fonts.
+- Unit Frames: Optional next roll dodge indicator on the custom player stamina bar (PC and console, default off). A vertical line shows where your stamina would be after one dodge; it turns red if you cannot afford that dodge. Updates for **Dodge Fatigue** and for **Expert Evasion** when that champion perk is slotted on your bar.
 - Combat Text: Optional setting **Show ability cast costs as drain (Incoming)** (PC and console, default off). **Display Resource Drain (Incoming)** still shows drains from the combat log unless you enable cast-cost display.
 
 ### Fixed
@@ -24,7 +29,7 @@
 
 ### New
 
-- ChatAnnouncements: Display Announcements — [B]Event Zone: Night Market (PC and console). Separate chat, center-screen, and alert toggles for [B]Daring Race, [B]Arachnid Invasion, and [B]Guiding Light Still missing some; will be added when I see them.
+- ChatAnnouncements: Display Announcements — **Event Zone: Night Market** (PC and console). Separate chat, center-screen, and alert toggles for **Daring Race**, **Arachnid Invasion**, and **Guiding Light** Still missing some; will be added when I see them.
 - Classified Night Market [C]EVENT_DISPLAY_ANNOUNCEMENT[/C] lines by activity text (not whole zone 1559): Daring Race (for example Tempest earned, race objectives, Daring Race: … Complete, Void Collapse); Arachnid Invasion (invasion begins, defense complete, invasion repelled); Guiding Light (countdown, begins, complete, and reward earned lines such as Agonizing Tether or Exsanguinate).
 
 ### Changes
@@ -1460,7 +1465,7 @@ Full Changelog: [https://github.com/DakJaniels/LuiExtended/compare/6.8.2...6.8.3
 - Buff sorting updated - Now buffs will sort Toggle > Ground/Unlimited Duration > others and those will all sort alphabetically relative to their categories.
 - Lots of various table cleanup and minor optimization.
 - Fixed an error that could occur when crafting items when switching between crafting tabs with items queued in Multicraft or with other addons like Dolgubon's Lazy Writ Crafter. Note the chat log output may not be correct when this happens - but it should no longer cause a UI error.
-- Fixed an issue where the Quest Items in your inventory would display [Received] messages when you log into a character for the first time. While the UI does send the events for this, LUIE just ignores it [B]on login now.
+- Fixed an issue where the Quest Items in your inventory would display [Received] messages when you log into a character for the first time. While the UI does send the events for this, LUIE just ignores it on login now.
 - Updated filtering for combat alerts, there should no longer be duplicate alerts displayed from the same ability.
 - Added a new option for Alerts to display Unmitigatable Effects - was prompted to do this by a few dungeon abilities that you can't avoid.
 - Added new commands for /cake (/anniverary), /pie (/jester), /mead (/newlife), and /witch (/witchfest) to use the Event XP Boost mementos.
