@@ -1229,6 +1229,17 @@ function CombatText.CreateConsoleSettings()
         settings[#settings + 1] =
         {
             type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_CT_INFER_CAST_RESOURCE_DRAIN),
+            tooltip = GetString(LUIE_STRING_LAM_CT_INFER_CAST_RESOURCE_DRAIN_TP),
+            getFunction = function () return Settings.common.inferResourceDrainOnCast end,
+            setFunction = function (v) Settings.common.inferResourceDrainOnCast = v end,
+            default = Defaults.common.inferResourceDrainOnCast,
+            disable = function () return not Settings.toggles.incoming.showDrain end,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
             label = zo_strformat("<<1>> <<2>> (<<3>>)", GetString(LUIE_STRING_LAM_CT_SHARED_DISPLAY), GetString(LUIE_STRING_LAM_CT_SHARED_DRAIN), GetString(LUIE_STRING_LAM_CT_SHARED_OUTGOING)),
             tooltip = GetString(LUIE_STRING_LAM_CT_OUTGOING_DRAIN_TP),
             getFunction = function () return Settings.toggles.outgoing.showDrain end,
