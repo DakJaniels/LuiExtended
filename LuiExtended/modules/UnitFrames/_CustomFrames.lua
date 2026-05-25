@@ -31,7 +31,7 @@ function UnitFrames.CustomFramesFormatLabels(menu)
                         frame.labelOne,
                         isCenter,
                         UnitFrames.SV.CustomFormatCenterLabel,
-                        UnitFrames.SV.CustomFormatOnePT,
+                        UnitFrames.SV.CustomFormatOnePlayer,
                         frame.backdrop
                     )
                 end
@@ -40,7 +40,7 @@ function UnitFrames.CustomFramesFormatLabels(menu)
                     UnitFrames.FormatSecondaryLabel(
                         frame.labelTwo,
                         isCenter,
-                        UnitFrames.SV.CustomFormatTwoPT
+                        UnitFrames.SV.CustomFormatTwoPlayer
                     )
                 end
             end
@@ -60,7 +60,7 @@ function UnitFrames.CustomFramesFormatLabels(menu)
                 frame.labelOne,
                 isCenter,
                 UnitFrames.SV.CustomFormatCenterLabel,
-                UnitFrames.SV.CustomFormatOnePT,
+                UnitFrames.SV.CustomFormatOneTarget,
                 frame.backdrop
             )
         end
@@ -69,7 +69,7 @@ function UnitFrames.CustomFramesFormatLabels(menu)
             UnitFrames.FormatSecondaryLabel(
                 frame.labelTwo,
                 isCenter,
-                UnitFrames.SV.CustomFormatTwoPT
+                UnitFrames.SV.CustomFormatTwoTarget
             )
         end
     end
@@ -157,4 +157,43 @@ function UnitFrames.CustomFramesFormatLabels(menu)
             UnitFrames.ReloadValues(baseTag)
         end
     end
+end
+
+--- Copy legacy shared Player/Target label formats into per-frame keys (one-time).
+function UnitFrames.MigratePlayerTargetLabelFormats()
+    if LUIE.IsMigrationDone("unitframes_pt_label_formats_split") then
+        return
+    end
+    local sv = UnitFrames.SV
+    if sv.CustomFormatOnePT ~= nil then
+        sv.CustomFormatOnePlayer = sv.CustomFormatOnePT
+        sv.CustomFormatOneTarget = sv.CustomFormatOnePT
+    end
+    if sv.CustomFormatTwoPT ~= nil then
+        sv.CustomFormatTwoPlayer = sv.CustomFormatTwoPT
+        sv.CustomFormatTwoTarget = sv.CustomFormatTwoPT
+    end
+    LUIE.MarkMigrationDone("unitframes_pt_label_formats_split")
+end
+
+--- Split legacy shared Player/Target overlay and OOC-power toggles (one-time).
+function UnitFrames.MigratePlayerTargetOverlayFlags()
+    if LUIE.IsMigrationDone("unitframes_pt_overlay_flags_split") then
+        return
+    end
+    local sv = UnitFrames.SV
+    if sv.PlayerEnableArmor ~= nil then
+        sv.TargetEnableArmor = sv.PlayerEnableArmor
+    end
+    if sv.PlayerEnablePower ~= nil then
+        sv.TargetEnablePower = sv.PlayerEnablePower
+    end
+    if sv.PlayerEnableRegen ~= nil then
+        sv.TargetEnableRegen = sv.PlayerEnableRegen
+    end
+    if sv.CustomOocAlphaPower ~= nil then
+        sv.PlayerOocAlphaPower = sv.CustomOocAlphaPower
+        sv.TargetOocAlphaPower = sv.CustomOocAlphaPower
+    end
+    LUIE.MarkMigrationDone("unitframes_pt_overlay_flags_split")
 end

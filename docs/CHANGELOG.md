@@ -9,6 +9,10 @@
 
 ### New
 
+- Unit Frames: Custom companion and pet frames support optional HoT/DoT, armor, and power attribute overlays (PC and console settings; all overlay toggles default off; reload UI to apply overlay toggles). Optional per-unit combat glow border with color picker (default off). Companion and pet OOC/in-combat transparency now follows each unit's own combat state instead of the player's.
+- Unit Frames: Split combined **Custom Unit Frames (Player & Target)** settings into separate **Custom Unit Frames (Player)** and **Custom Unit Frames (Target)** sections (PC LAM and console). Target-only options (title, rank, transparency, etc.) no longer require the player frame to be enabled.
+- Unit Frames: Player and target custom frame **label format** (left/right) settings use separate saved variables; existing shared formats are copied to both on first load after update.
+- Unit Frames: Armor, power, and HoT/DoT overlay toggles and **Treat Missing Power as In-Combat** are separate for player vs target (`PlayerEnable*` / `TargetEnable*`, `PlayerOocAlphaPower` / `TargetOocAlphaPower`). PvP target frame uses target overlay flags. Reload UI required for overlay toggles.
 - Combat Text: Optional setting **Show ability cast costs as drain (Incoming)** (PC and console, default off). **Display Resource Drain (Incoming)** still shows drains from the combat log unless you enable cast-cost display.
 
 ### Fixed

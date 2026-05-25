@@ -176,6 +176,8 @@ function UnitFrames.Initialize(enabled)
     end
 
     UnitFrames.MigrateCustomFrameAppearance()
+    UnitFrames.MigratePlayerTargetLabelFormats()
+    UnitFrames.MigratePlayerTargetOverlayFlags()
 
     if UnitFrames.SV.DefaultOocTransparency < 0 or UnitFrames.SV.DefaultOocTransparency > 100 then
         UnitFrames.SV.DefaultOocTransparency = UnitFrames.Defaults.DefaultOocTransparency
@@ -363,6 +365,19 @@ function UnitFrames.Initialize(enabled)
         -- Register periodic update for group combat glow (checks every 500ms)
         if UnitFrames.CustomFrames["SmallGroup1"] or UnitFrames.CustomFrames["RaidGroup1"] then
             eventManager:RegisterForUpdate(moduleName .. "_CombatGlow", 500, UnitFrames.UpdateGroupCombatGlow)
+        end
+
+        if UnitFrames.CustomFrames["companion"] then
+            eventManager:RegisterForUpdate(moduleName .. "_CompanionCombat", 500, function ()
+                UnitFrames.CustomFramesApplyCompanionInCombat()
+                UnitFrames.UpdateCompanionCombatGlow()
+            end)
+        end
+        if UnitFrames.CustomFrames["PetGroup1"] then
+            eventManager:RegisterForUpdate(moduleName .. "_PetCombat", 500, function ()
+                UnitFrames.CustomFramesApplyPetInCombat()
+                UnitFrames.UpdatePetCombatGlow()
+            end)
         end
     end
 
@@ -1059,6 +1074,8 @@ function UnitFrames.CompanionUpdate()
         if UnitFrames.CustomFrames[unitTag] then
             UnitFrames.CustomFrames[unitTag].control:SetHidden(false)
             UnitFrames.ReloadValues(unitTag)
+            UnitFrames.CustomFramesApplyCompanionInCombat(true)
+            UnitFrames.UpdateCompanionCombatGlow()
         end
     else
         UnitFrames.CustomFrames[unitTag].control:SetHidden(true)
@@ -1118,6 +1135,8 @@ function UnitFrames.CustomPetUpdate()
             UnitFrames.ReloadValues(v.unitTag)
         end
     end
+    UnitFrames.CustomFramesApplyPetInCombat(true)
+    UnitFrames.UpdatePetCombatGlow()
 end
 
 -- Runs on the EVENT_ACTIVE_COMPANION_STATE_CHANGED listener.
@@ -1790,7 +1809,7 @@ function UnitFrames.OnPlayerCombatState(eventCode, inCombat)
     UnitFrames.CustomFramesApplyInCombat()
 end
 
-local function UpdateGroupFrameCombatGlow(frame, unitTag, isGroupFrame)
+local function UpdateFrameCombatGlow(frame, unitTag, glowColor)
     if not frame or not frame[COMBAT_MECHANIC_FLAGS_HEALTH] or not frame[COMBAT_MECHANIC_FLAGS_HEALTH].combatGlow then
         return
     end
@@ -1800,11 +1819,15 @@ local function UpdateGroupFrameCombatGlow(frame, unitTag, isGroupFrame)
         return
     end
     local isInCombat = IsUnitActivelyEngaged(unitTag) or IsUnitInCombat(unitTag)
-    local glowColor = isGroupFrame and UnitFrames.SV.GroupCombatGlowColor or UnitFrames.SV.RaidCombatGlowColor
     if glowColor then
         glow:SetEdgeColor(glowColor[1], glowColor[2], glowColor[3], glowColor[4] or 1)
     end
     glow:SetHidden(not isInCombat)
+end
+
+local function UpdateGroupFrameCombatGlow(frame, unitTag, isGroupFrame)
+    local glowColor = isGroupFrame and UnitFrames.SV.GroupCombatGlowColor or UnitFrames.SV.RaidCombatGlowColor
+    UpdateFrameCombatGlow(frame, unitTag, glowColor)
 end
 
 -- Updates combat glow on group frames based on combat state
@@ -1825,6 +1848,36 @@ function UnitFrames.UpdateGroupCombatGlow()
             local frame = UnitFrames.CustomFrames["RaidGroup" .. i]
             if frame then
                 UpdateGroupFrameCombatGlow(frame, frame.unitTag, false)
+            end
+        end
+    end
+end
+
+-- Updates combat glow border on the companion custom frame (per-unit combat state).
+function UnitFrames.UpdateCompanionCombatGlow()
+    if UnitFrames.SV.CompanionCombatGlow and UnitFrames.CustomFrames["companion"] and UnitFrames.CustomFrames["companion"].tlw then
+        UpdateFrameCombatGlow(UnitFrames.CustomFrames["companion"], "companion", UnitFrames.SV.CompanionCombatGlowColor)
+    elseif UnitFrames.CustomFrames["companion"] and UnitFrames.CustomFrames["companion"][COMBAT_MECHANIC_FLAGS_HEALTH] and UnitFrames.CustomFrames["companion"][COMBAT_MECHANIC_FLAGS_HEALTH].combatGlow then
+        UnitFrames.CustomFrames["companion"][COMBAT_MECHANIC_FLAGS_HEALTH].combatGlow:SetHidden(true)
+    end
+end
+
+-- Updates combat glow border on pet custom frames (per-unit combat state).
+function UnitFrames.UpdatePetCombatGlow()
+    if UnitFrames.SV.PetCombatGlow and UnitFrames.CustomFrames["PetGroup1"] and UnitFrames.CustomFrames["PetGroup1"].tlw then
+        for i = 1, 7 do
+            local frame = UnitFrames.CustomFrames["PetGroup" .. i]
+            if frame and not frame.control:IsHidden() and frame.unitTag then
+                UpdateFrameCombatGlow(frame, frame.unitTag, UnitFrames.SV.PetCombatGlowColor)
+            elseif frame and frame[COMBAT_MECHANIC_FLAGS_HEALTH] and frame[COMBAT_MECHANIC_FLAGS_HEALTH].combatGlow then
+                frame[COMBAT_MECHANIC_FLAGS_HEALTH].combatGlow:SetHidden(true)
+            end
+        end
+    elseif UnitFrames.CustomFrames["PetGroup1"] and UnitFrames.CustomFrames["PetGroup1"].tlw then
+        for i = 1, 7 do
+            local frame = UnitFrames.CustomFrames["PetGroup" .. i]
+            if frame and frame[COMBAT_MECHANIC_FLAGS_HEALTH] and frame[COMBAT_MECHANIC_FLAGS_HEALTH].combatGlow then
+                frame[COMBAT_MECHANIC_FLAGS_HEALTH].combatGlow:SetHidden(true)
             end
         end
     end
@@ -3744,55 +3797,54 @@ local function CustomFramesApplyAlphaAndBuffs(frame, idle, oocAlpha, incAlpha, h
 end
 
 -- Cache so we only apply when idle state actually changes (avoids 17 frame updates on every power event)
-local lastCustomFramesApplyInCombatIdle = nil
+local lastCustomFramesApplyInCombatPlayerIdle = nil
+local lastCustomFramesApplyInCombatTargetIdle = nil
+
+local function CustomFramesComputeOocIdle(useMissingPowerAsCombat)
+    if useMissingPowerAsCombat then
+        local idle = true
+        for _, value in pairs(UnitFrames.statFull) do
+            idle = idle and value
+        end
+        return idle == true
+    end
+    return UnitFrames.statFull.combat == true
+end
 
 -- This function reduces opacity of custom frames when player is out of combat and has full attributes
 --- @param force boolean|nil When true, always reapply alpha/buffs (e.g. LAM changed SV); skips idle-only cache.
 function UnitFrames.CustomFramesApplyInCombat(force)
-    local idle = true
-    if UnitFrames.SV.CustomOocAlphaPower then
-        for _, value in pairs(UnitFrames.statFull) do
-            idle = idle and value
-        end
-    else
-        idle = UnitFrames.statFull.combat
-    end
+    local playerIdle = CustomFramesComputeOocIdle(UnitFrames.SV.PlayerOocAlphaPower)
+    local targetIdle = CustomFramesComputeOocIdle(UnitFrames.SV.TargetOocAlphaPower)
 
-    -- Coerce to boolean so nil (e.g. combat unset) does not match last==nil and skip the first apply.
-    idle = idle == true
-
-    if not force and idle == lastCustomFramesApplyInCombatIdle then
+    if not force
+    and playerIdle == lastCustomFramesApplyInCombatPlayerIdle
+    and targetIdle == lastCustomFramesApplyInCombatTargetIdle then
         return
     end
-    lastCustomFramesApplyInCombatIdle = idle
+    lastCustomFramesApplyInCombatPlayerIdle = playerIdle
+    lastCustomFramesApplyInCombatTargetIdle = targetIdle
 
     CustomFramesApplyAlphaAndBuffs(
         UnitFrames.CustomFrames["player"],
-        idle,
+        playerIdle,
         0.01 * UnitFrames.SV.PlayerOocAlpha,
         0.01 * UnitFrames.SV.PlayerIncAlpha,
         UnitFrames.SV.HideBuffsPlayerOoc
     )
     CustomFramesApplyAlphaAndBuffs(
         UnitFrames.CustomFrames["AvaPlayerTarget"],
-        idle,
+        targetIdle,
         0.01 * UnitFrames.SV.TargetOocAlpha,
         0.01 * UnitFrames.SV.TargetIncAlpha,
         false
     )
     CustomFramesApplyAlphaAndBuffs(
         UnitFrames.CustomFrames["reticleover"],
-        idle,
+        targetIdle,
         0.01 * UnitFrames.SV.TargetOocAlpha,
         0.01 * UnitFrames.SV.TargetIncAlpha,
         UnitFrames.SV.HideBuffsTargetOoc
-    )
-    CustomFramesApplyAlphaAndBuffs(
-        UnitFrames.CustomFrames["companion"],
-        idle,
-        0.01 * UnitFrames.SV.CompanionOocAlpha,
-        0.01 * UnitFrames.SV.CompanionIncAlpha,
-        false
     )
 
     local oocAlphaBoss = 0.01 * UnitFrames.SV.BossOocAlpha
@@ -3800,23 +3852,59 @@ function UnitFrames.CustomFramesApplyInCombat(force)
     for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
         CustomFramesApplyAlphaAndBuffs(
             UnitFrames.CustomFrames["boss" .. i],
-            idle,
+            playerIdle,
             oocAlphaBoss,
             incAlphaBoss,
             false
         )
     end
+end
 
+local lastCompanionIdle = nil
+local lastPetIdleByUnitTag = {}
+
+local function IsUnitIdleForCombatAlpha(unitTag)
+    if not unitTag or not DoesUnitExist(unitTag) then
+        return true
+    end
+    return not (IsUnitActivelyEngaged(unitTag) or IsUnitInCombat(unitTag))
+end
+
+--- Applies OOC/in-combat transparency from the companion unit's own combat state.
+--- @param force boolean|nil When true, always reapply alpha; skips idle cache.
+function UnitFrames.CustomFramesApplyCompanionInCombat(force)
+    local companionFrame = UnitFrames.CustomFrames["companion"]
+    if not companionFrame or not companionFrame.tlw or not DoesUnitExist("companion") then
+        return
+    end
+    local idle = IsUnitIdleForCombatAlpha("companion")
+    if force or lastCompanionIdle ~= idle then
+        lastCompanionIdle = idle
+        CustomFramesApplyAlphaAndBuffs(
+            companionFrame,
+            idle,
+            0.01 * UnitFrames.SV.CompanionOocAlpha,
+            0.01 * UnitFrames.SV.CompanionIncAlpha,
+            false
+        )
+    end
+end
+
+--- Applies OOC/in-combat transparency from each active pet unit's own combat state.
+--- @param force boolean|nil When true, always reapply alpha; skips per-unit idle cache.
+function UnitFrames.CustomFramesApplyPetInCombat(force)
     local oocAlphaPet = 0.01 * UnitFrames.SV.PetOocAlpha
     local incAlphaPet = 0.01 * UnitFrames.SV.PetIncAlpha
     for i = 1, 7 do
-        CustomFramesApplyAlphaAndBuffs(
-            UnitFrames.CustomFrames["PetGroup" .. i],
-            idle,
-            oocAlphaPet,
-            incAlphaPet,
-            false
-        )
+        local frame = UnitFrames.CustomFrames["PetGroup" .. i]
+        if frame and frame.tlw and not frame.control:IsHidden() and frame.unitTag and DoesUnitExist(frame.unitTag) then
+            local unitTag = frame.unitTag
+            local idle = IsUnitIdleForCombatAlpha(unitTag)
+            if force or lastPetIdleByUnitTag[unitTag] ~= idle then
+                lastPetIdleByUnitTag[unitTag] = idle
+                CustomFramesApplyAlphaAndBuffs(frame, idle, oocAlphaPet, incAlphaPet, false)
+            end
+        end
     end
 end
 

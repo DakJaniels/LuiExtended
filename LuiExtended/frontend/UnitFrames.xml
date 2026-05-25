@@ -5304,6 +5304,17 @@
                     </Texture>
                   </Controls>
                 </Control>
+                <Texture name="$(parent)_ArmorInc"
+                         textureFile="/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds"
+                         layer="OVERLAY"
+                         hidden="true">
+                  <Dimensions x="24"
+                              y="24" />
+                  <Anchor point="CENTER"
+                          relativeTo="$(parent)"
+                          relativePoint="CENTER"
+                          offsetX="13" />
+                </Texture>
                 <Label name="$(parent)_Label"
                        text="zz%"
                        font="ZoFontGameSmall"
@@ -5427,6 +5438,17 @@
                     </Texture>
                   </Controls>
                 </Control>
+                <Texture name="$(parent)_ArmorInc"
+                         textureFile="/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds"
+                         layer="OVERLAY"
+                         hidden="true">
+                  <Dimensions x="24"
+                              y="24" />
+                  <Anchor point="CENTER"
+                          relativeTo="$(parent)"
+                          relativePoint="CENTER"
+                          offsetX="13" />
+                </Texture>
                 <Label name="$(parent)_Label"
                        text="zz%"
                        font="ZoFontGameSmall"
@@ -5550,6 +5572,17 @@
                     </Texture>
                   </Controls>
                 </Control>
+                <Texture name="$(parent)_ArmorInc"
+                         textureFile="/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds"
+                         layer="OVERLAY"
+                         hidden="true">
+                  <Dimensions x="24"
+                              y="24" />
+                  <Anchor point="CENTER"
+                          relativeTo="$(parent)"
+                          relativePoint="CENTER"
+                          offsetX="13" />
+                </Texture>
                 <Label name="$(parent)_Label"
                        text="zz%"
                        font="ZoFontGameSmall"
@@ -5673,6 +5706,17 @@
                     </Texture>
                   </Controls>
                 </Control>
+                <Texture name="$(parent)_ArmorInc"
+                         textureFile="/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds"
+                         layer="OVERLAY"
+                         hidden="true">
+                  <Dimensions x="24"
+                              y="24" />
+                  <Anchor point="CENTER"
+                          relativeTo="$(parent)"
+                          relativePoint="CENTER"
+                          offsetX="13" />
+                </Texture>
                 <Label name="$(parent)_Label"
                        text="zz%"
                        font="ZoFontGameSmall"
@@ -5796,6 +5840,17 @@
                     </Texture>
                   </Controls>
                 </Control>
+                <Texture name="$(parent)_ArmorInc"
+                         textureFile="/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds"
+                         layer="OVERLAY"
+                         hidden="true">
+                  <Dimensions x="24"
+                              y="24" />
+                  <Anchor point="CENTER"
+                          relativeTo="$(parent)"
+                          relativePoint="CENTER"
+                          offsetX="13" />
+                </Texture>
                 <Label name="$(parent)_Label"
                        text="zz%"
                        font="ZoFontGameSmall"
@@ -5919,6 +5974,17 @@
                     </Texture>
                   </Controls>
                 </Control>
+                <Texture name="$(parent)_ArmorInc"
+                         textureFile="/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds"
+                         layer="OVERLAY"
+                         hidden="true">
+                  <Dimensions x="24"
+                              y="24" />
+                  <Anchor point="CENTER"
+                          relativeTo="$(parent)"
+                          relativePoint="CENTER"
+                          offsetX="13" />
+                </Texture>
                 <Label name="$(parent)_Label"
                        text="zz%"
                        font="ZoFontGameSmall"
@@ -6042,6 +6108,17 @@
                     </Texture>
                   </Controls>
                 </Control>
+                <Texture name="$(parent)_ArmorInc"
+                         textureFile="/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds"
+                         layer="OVERLAY"
+                         hidden="true">
+                  <Dimensions x="24"
+                              y="24" />
+                  <Anchor point="CENTER"
+                          relativeTo="$(parent)"
+                          relativePoint="CENTER"
+                          offsetX="13" />
+                </Texture>
                 <Label name="$(parent)_Label"
                        text="zz%"
                        font="ZoFontGameSmall"
@@ -6216,6 +6293,17 @@
                     </Texture>
                   </Controls>
                 </Control>
+                <Texture name="$(parent)_ArmorInc"
+                         textureFile="/esoui/art/icons/alchemy/crafting_alchemy_trait_increasearmor.dds"
+                         layer="OVERLAY"
+                         hidden="true">
+                  <Dimensions x="24"
+                              y="24" />
+                  <Anchor point="CENTER"
+                          relativeTo="$(parent)"
+                          relativePoint="CENTER"
+                          offsetX="13" />
+                </Texture>
                 <Label name="$(parent)_Label"
                        text="zz%"
                        font="ZoFontGameSmall"

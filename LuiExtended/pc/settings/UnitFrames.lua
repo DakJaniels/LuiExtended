@@ -1337,11 +1337,11 @@ function UnitFrames.CreateSettings()
         },
     }
 
-    -- Unit Frames - Custom Unit Frames (Player & Target) Options Submenu
+    -- Unit Frames - Custom Unit Frames (Player) Options Submenu
     optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
     {
         type = "submenu",
-        name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_HEADER),
+        name = GetString(LUIE_STRING_LAM_UF_CFRAMESPLAYER_HEADER),
         controls =
         {
             {
@@ -1357,24 +1357,6 @@ function UnitFrames.CreateSettings()
                 end,
                 width = "full",
                 default = Defaults.CustomFramesPlayer,
-                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
-                disabled = function ()
-                    return not LUIE.SV.UnitFrames_Enabled
-                end,
-            },
-            {
-                -- Enable LUIE Target frame
-                type = "checkbox",
-                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_ENABLE_TARGET),
-                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_ENABLE_TARGET_TP),
-                getFunc = function ()
-                    return Settings.CustomFramesTarget
-                end,
-                setFunc = function (value)
-                    Settings.CustomFramesTarget = value
-                end,
-                width = "full",
-                default = Defaults.CustomFramesTarget,
                 warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
                     return not LUIE.SV.UnitFrames_Enabled
@@ -1401,26 +1383,6 @@ function UnitFrames.CreateSettings()
                 default = nameDisplayOptions[2],
             },
             {
-                -- Player Name Display Method (Target)
-                type = "dropdown",
-                name = GetString(LUIE_STRING_LAM_UF_COMMON_NAMEDISPLAY_TARGET),
-                tooltip = GetString(LUIE_STRING_LAM_UF_COMMON_NAMEDISPLAY_TARGET_TP),
-                choices = nameDisplayOptions,
-                sort = "name-up",
-                getFunc = function ()
-                    return nameDisplayOptions[Settings.DisplayOptionsTarget]
-                end,
-                setFunc = function (value)
-                    Settings.DisplayOptionsTarget = nameDisplayOptionsKeys[value]
-                    UnitFrames.CustomFramesReloadControlsMenu(false, nil, nil, false, false)
-                end,
-                width = "full",
-                disabled = function ()
-                    return not LUIE.SV.UnitFrames_Enabled
-                end,
-                default = nameDisplayOptions[2],
-            },
-            {
                 -- Custom Unit Frames format left label
                 type = "dropdown",
                 name = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT),
@@ -1428,19 +1390,18 @@ function UnitFrames.CreateSettings()
                 choices = formatOptions,
                 sort = "name-up",
                 getFunc = function ()
-                    return Settings.CustomFormatOnePT
+                    return Settings.CustomFormatOnePlayer
                 end,
                 setFunc = function (var)
-                    Settings.CustomFormatOnePT = var
+                    Settings.CustomFormatOnePlayer = var
                     UnitFrames.CustomFramesFormatLabels(true)
                     UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
-                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
                 end,
                 width = "full",
                 disabled = function ()
                     return not LUIE.SV.UnitFrames_Enabled
                 end,
-                default = Defaults.CustomFormatOnePT,
+                default = Defaults.CustomFormatOnePlayer,
             },
             {
                 -- Custom Unit Frames format right label
@@ -1450,19 +1411,18 @@ function UnitFrames.CreateSettings()
                 choices = formatOptions,
                 sort = "name-up",
                 getFunc = function ()
-                    return Settings.CustomFormatTwoPT
+                    return Settings.CustomFormatTwoPlayer
                 end,
                 setFunc = function (var)
-                    Settings.CustomFormatTwoPT = var
+                    Settings.CustomFormatTwoPlayer = var
                     UnitFrames.CustomFramesFormatLabels(true)
                     UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
-                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
                 end,
                 width = "full",
                 disabled = function ()
                     return not LUIE.SV.UnitFrames_Enabled
                 end,
-                default = Defaults.CustomFormatTwoPT,
+                default = Defaults.CustomFormatTwoPlayer,
             },
             {
                 -- Player Bars Width
@@ -1562,7 +1522,7 @@ function UnitFrames.CreateSettings()
                 width = "full",
                 default = Defaults.PlayerOocAlpha,
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
                 end,
             },
             {
@@ -1583,7 +1543,7 @@ function UnitFrames.CreateSettings()
                 width = "full",
                 default = Defaults.PlayerIncAlpha,
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
                 end,
             },
             {
@@ -1601,7 +1561,7 @@ function UnitFrames.CreateSettings()
                 width = "full",
                 default = Defaults.HideBuffsPlayerOoc,
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
                 end,
             },
             {
@@ -1743,6 +1703,168 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                -- Display Armor stat change
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_ARMOR), GetString(LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_PLAYER)),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_ARMOR_TP),
+                getFunc = function ()
+                    return Settings.PlayerEnableArmor
+                end,
+                setFunc = function (value)
+                    Settings.PlayerEnableArmor = value
+                end,
+                width = "full",
+                default = Defaults.PlayerEnableArmor,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+                end,
+            },
+            {
+                -- Display Power stat change
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_POWER), GetString(LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_PLAYER)),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_POWER_TP),
+                getFunc = function ()
+                    return Settings.PlayerEnablePower
+                end,
+                setFunc = function (value)
+                    Settings.PlayerEnablePower = value
+                end,
+                width = "full",
+                default = Defaults.PlayerEnablePower,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+                end,
+            },
+            {
+                -- Custom Unit Frames Display HoT / DoT Animations
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_REGEN), GetString(LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_PLAYER)),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_REGEN_TP),
+                getFunc = function ()
+                    return Settings.PlayerEnableRegen
+                end,
+                setFunc = function (value)
+                    Settings.PlayerEnableRegen = value
+                end,
+                width = "full",
+                default = Defaults.PlayerEnableRegen,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+                end,
+            },
+            {
+                -- Treat Missing Power as In-Combat
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MISSPOWERCOMBAT),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MISSPOWERCOMBAT_TP),
+                getFunc = function ()
+                    return Settings.PlayerOocAlphaPower
+                end,
+                setFunc = function (value)
+                    Settings.PlayerOocAlphaPower = value
+                    UnitFrames.CustomFramesApplyInCombat(true)
+                end,
+                width = "full",
+                default = Defaults.PlayerOocAlphaPower,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+                end,
+            },
+        },
+    }
+
+    -- Unit Frames - Custom Unit Frames (Target) Options Submenu
+    optionsDataUnitFrames[#optionsDataUnitFrames + 1] =
+    {
+        type = "submenu",
+        name = GetString(LUIE_STRING_LAM_UF_CFRAMESTARGET_HEADER),
+        controls =
+        {
+            {
+                -- Enable LUIE Target frame
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_ENABLE_TARGET),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_ENABLE_TARGET_TP),
+                getFunc = function ()
+                    return Settings.CustomFramesTarget
+                end,
+                setFunc = function (value)
+                    Settings.CustomFramesTarget = value
+                end,
+                width = "full",
+                default = Defaults.CustomFramesTarget,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not LUIE.SV.UnitFrames_Enabled
+                end,
+            },
+            {
+                -- Player Name Display Method (Target)
+                type = "dropdown",
+                name = GetString(LUIE_STRING_LAM_UF_COMMON_NAMEDISPLAY_TARGET),
+                tooltip = GetString(LUIE_STRING_LAM_UF_COMMON_NAMEDISPLAY_TARGET_TP),
+                choices = nameDisplayOptions,
+                sort = "name-up",
+                getFunc = function ()
+                    return nameDisplayOptions[Settings.DisplayOptionsTarget]
+                end,
+                setFunc = function (value)
+                    Settings.DisplayOptionsTarget = nameDisplayOptionsKeys[value]
+                    UnitFrames.CustomFramesReloadControlsMenu(false, nil, nil, false, false)
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.UnitFrames_Enabled
+                end,
+                default = nameDisplayOptions[2],
+            },
+            {
+                -- Custom Unit Frames format left label
+                type = "dropdown",
+                name = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_LEFT_TP),
+                choices = formatOptions,
+                sort = "name-up",
+                getFunc = function ()
+                    return Settings.CustomFormatOneTarget
+                end,
+                setFunc = function (var)
+                    Settings.CustomFormatOneTarget = var
+                    UnitFrames.CustomFramesFormatLabels(true)
+                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.UnitFrames_Enabled
+                end,
+                default = Defaults.CustomFormatOneTarget,
+            },
+            {
+                -- Custom Unit Frames format right label
+                type = "dropdown",
+                name = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_LABEL_RIGHT_TP),
+                choices = formatOptions,
+                sort = "name-up",
+                getFunc = function ()
+                    return Settings.CustomFormatTwoTarget
+                end,
+                setFunc = function (var)
+                    Settings.CustomFormatTwoTarget = var
+                    UnitFrames.CustomFramesFormatLabels(true)
+                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+                end,
+                width = "full",
+                disabled = function ()
+                    return not LUIE.SV.UnitFrames_Enabled
+                end,
+                default = Defaults.CustomFormatTwoTarget,
+            },
+            {
                 -- Target Bars Width
                 type = "slider",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_TARGET_WIDTH),
@@ -1800,7 +1922,7 @@ function UnitFrames.CreateSettings()
                 width = "full",
                 default = Defaults.TargetOocAlpha,
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
                 end,
             },
             {
@@ -1821,7 +1943,7 @@ function UnitFrames.CreateSettings()
                 width = "full",
                 default = Defaults.TargetIncAlpha,
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
                 end,
             },
             {
@@ -1839,7 +1961,7 @@ function UnitFrames.CreateSettings()
                 width = "full",
                 default = Defaults.HideBuffsTargetOoc,
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
                 end,
             },
             {
@@ -1949,7 +2071,7 @@ function UnitFrames.CreateSettings()
                 width = "full",
                 default = Defaults.TargetEnableTitle,
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
                 end,
             },
             {
@@ -1967,7 +2089,7 @@ function UnitFrames.CreateSettings()
                 width = "full",
                 default = Defaults.TargetEnableRank,
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
                 end,
             },
             {
@@ -1986,7 +2108,7 @@ function UnitFrames.CreateSettings()
                 width = "full",
                 default = Defaults.TargetTitlePriority,
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer and Settings.TargetEnableRank and Settings.TargetEnableTitle)
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget and Settings.TargetEnableRank and Settings.TargetEnableTitle)
                 end,
             },
             {
@@ -2004,61 +2126,61 @@ function UnitFrames.CreateSettings()
                 width = "full",
                 default = Defaults.TargetEnableRankIcon,
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
                 end,
             },
             {
                 -- Display Armor stat change
                 type = "checkbox",
-                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_ARMOR), GetString(LUIE_STRING_LAM_UF_SHARED_PT)),
+                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_ARMOR), GetString(LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_TARGET)),
                 tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_ARMOR_TP),
                 getFunc = function ()
-                    return Settings.PlayerEnableArmor
+                    return Settings.TargetEnableArmor
                 end,
                 setFunc = function (value)
-                    Settings.PlayerEnableArmor = value
+                    Settings.TargetEnableArmor = value
                 end,
                 width = "full",
-                default = Defaults.PlayerEnableArmor,
+                default = Defaults.TargetEnableArmor,
                 warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
                 end,
             },
             {
                 -- Display Power stat change
                 type = "checkbox",
-                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_POWER), GetString(LUIE_STRING_LAM_UF_SHARED_PT)),
+                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_POWER), GetString(LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_TARGET)),
                 tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_POWER_TP),
                 getFunc = function ()
-                    return Settings.PlayerEnablePower
+                    return Settings.TargetEnablePower
                 end,
                 setFunc = function (value)
-                    Settings.PlayerEnablePower = value
+                    Settings.TargetEnablePower = value
                 end,
                 width = "full",
-                default = Defaults.PlayerEnablePower,
+                default = Defaults.TargetEnablePower,
                 warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
                 end,
             },
             {
                 -- Custom Unit Frames Display HoT / DoT Animations
                 type = "checkbox",
-                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_REGEN), GetString(LUIE_STRING_LAM_UF_SHARED_PT)),
+                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_REGEN), GetString(LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_TARGET)),
                 tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_REGEN_TP),
                 getFunc = function ()
-                    return Settings.PlayerEnableRegen
+                    return Settings.TargetEnableRegen
                 end,
                 setFunc = function (value)
-                    Settings.PlayerEnableRegen = value
+                    Settings.TargetEnableRegen = value
                 end,
                 width = "full",
-                default = Defaults.PlayerEnableRegen,
+                default = Defaults.TargetEnableRegen,
                 warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
-                    return not LUIE.SV.UnitFrames_Enabled
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
                 end,
             },
             {
@@ -2067,16 +2189,16 @@ function UnitFrames.CreateSettings()
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MISSPOWERCOMBAT),
                 tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESPT_MISSPOWERCOMBAT_TP),
                 getFunc = function ()
-                    return Settings.CustomOocAlphaPower
+                    return Settings.TargetOocAlphaPower
                 end,
                 setFunc = function (value)
-                    Settings.CustomOocAlphaPower = value
+                    Settings.TargetOocAlphaPower = value
                     UnitFrames.CustomFramesApplyInCombat(true)
                 end,
                 width = "full",
-                default = Defaults.CustomOocAlphaPower,
+                default = Defaults.TargetOocAlphaPower,
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomFramesPlayer or Settings.CustomFramesTarget))
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
                 end,
             },
         },
@@ -2162,7 +2284,7 @@ function UnitFrames.CreateSettings()
                 width = "full",
                 default = alignmentOptions[Defaults.BarAlignTarget],
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPlayer)
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesTarget)
                 end,
             },
 
@@ -4123,6 +4245,97 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_ARMOR), GetString(LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_COMPANION)),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_ARMOR_TP),
+                getFunc = function ()
+                    return Settings.CompanionEnableArmor
+                end,
+                setFunc = function (value)
+                    Settings.CompanionEnableArmor = value
+                end,
+                width = "full",
+                default = Defaults.CompanionEnableArmor,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_POWER), GetString(LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_COMPANION)),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_POWER_TP),
+                getFunc = function ()
+                    return Settings.CompanionEnablePower
+                end,
+                setFunc = function (value)
+                    Settings.CompanionEnablePower = value
+                end,
+                width = "full",
+                default = Defaults.CompanionEnablePower,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_REGEN), GetString(LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_COMPANION)),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_REGEN_TP),
+                getFunc = function ()
+                    return Settings.CompanionEnableRegen
+                end,
+                setFunc = function (value)
+                    Settings.CompanionEnableRegen = value
+                end,
+                width = "full",
+                default = Defaults.CompanionEnableRegen,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = "Show Combat Glow",
+                tooltip = "Display a glow border around the companion health bar when the companion is in combat.",
+                getFunc = function ()
+                    return Settings.CompanionCombatGlow
+                end,
+                setFunc = function (value)
+                    Settings.CompanionCombatGlow = value
+                    UnitFrames.UpdateCompanionCombatGlow()
+                end,
+                width = "full",
+                default = Defaults.CompanionCombatGlow,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
+                end,
+            },
+            {
+                type = "colorpicker",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Combat Glow Color"),
+                tooltip = "Set the color of the combat glow border displayed around the companion frame.",
+                getFunc = function ()
+                    return unpack(Settings.CompanionCombatGlowColor)
+                end,
+                setFunc = function (r, g, b, a)
+                    Settings.CompanionCombatGlowColor = { r, g, b, a }
+                    UnitFrames.UpdateCompanionCombatGlow()
+                end,
+                width = "full",
+                default =
+                {
+                    r = Defaults.CompanionCombatGlowColor[1],
+                    g = Defaults.CompanionCombatGlowColor[2],
+                    b = Defaults.CompanionCombatGlowColor[3],
+                    a = Defaults.CompanionCombatGlowColor[4],
+                },
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion and Settings.CompanionCombatGlow)
+                end,
+            },
+            {
                 -- Companion - Out-of-Combat frame opacity
                 type = "slider",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_OOCPACITY),
@@ -4135,7 +4348,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.CompanionOocAlpha = value
-                    UnitFrames.CustomFramesApplyInCombat(true)
+                    UnitFrames.CustomFramesApplyCompanionInCombat(true)
                     UnitFrames.CustomFramesApplyLayoutCompanion(false)
                 end,
                 width = "full",
@@ -4157,7 +4370,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.CompanionIncAlpha = value
-                    UnitFrames.CustomFramesApplyInCombat(true)
+                    UnitFrames.CustomFramesApplyCompanionInCombat(true)
                     UnitFrames.CustomFramesApplyLayoutCompanion(false)
                 end,
                 width = "full",
@@ -4294,6 +4507,97 @@ function UnitFrames.CreateSettings()
                 end,
             },
             {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_ARMOR), GetString(LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_PET)),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_ARMOR_TP),
+                getFunc = function ()
+                    return Settings.PetEnableArmor
+                end,
+                setFunc = function (value)
+                    Settings.PetEnableArmor = value
+                end,
+                width = "full",
+                default = Defaults.PetEnableArmor,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_POWER), GetString(LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_PET)),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_POWER_TP),
+                getFunc = function ()
+                    return Settings.PetEnablePower
+                end,
+                setFunc = function (value)
+                    Settings.PetEnablePower = value
+                end,
+                width = "full",
+                default = Defaults.PetEnablePower,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = zo_strformat(GetString(LUIE_STRING_LAM_UF_SHARED_REGEN), GetString(LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_PET)),
+                tooltip = GetString(LUIE_STRING_LAM_UF_SHARED_REGEN_TP),
+                getFunc = function ()
+                    return Settings.PetEnableRegen
+                end,
+                setFunc = function (value)
+                    Settings.PetEnableRegen = value
+                end,
+                width = "full",
+                default = Defaults.PetEnableRegen,
+                warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = "Show Combat Glow",
+                tooltip = "Display a glow border around pet health bars when the pet is in combat.",
+                getFunc = function ()
+                    return Settings.PetCombatGlow
+                end,
+                setFunc = function (value)
+                    Settings.PetCombatGlow = value
+                    UnitFrames.UpdatePetCombatGlow()
+                end,
+                width = "full",
+                default = Defaults.PetCombatGlow,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet)
+                end,
+            },
+            {
+                type = "colorpicker",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Combat Glow Color"),
+                tooltip = "Set the color of the combat glow border displayed around pet frames.",
+                getFunc = function ()
+                    return unpack(Settings.PetCombatGlowColor)
+                end,
+                setFunc = function (r, g, b, a)
+                    Settings.PetCombatGlowColor = { r, g, b, a }
+                    UnitFrames.UpdatePetCombatGlow()
+                end,
+                width = "full",
+                default =
+                {
+                    r = Defaults.PetCombatGlowColor[1],
+                    g = Defaults.PetCombatGlowColor[2],
+                    b = Defaults.PetCombatGlowColor[3],
+                    a = Defaults.PetCombatGlowColor[4],
+                },
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesPet and Settings.PetCombatGlow)
+                end,
+            },
+            {
                 -- Pet - Out-of-Combat frame opacity
                 type = "slider",
                 name = GetString(LUIE_STRING_LAM_UF_CFRAMESPET_OOCPACITY),
@@ -4306,7 +4610,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.PetOocAlpha = value
-                    UnitFrames.CustomFramesApplyInCombat(true)
+                    UnitFrames.CustomFramesApplyPetInCombat(true)
                     UnitFrames.CustomFramesApplyLayoutPet(false)
                 end,
                 width = "full",
@@ -4328,7 +4632,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.PetIncAlpha = value
-                    UnitFrames.CustomFramesApplyInCombat(true)
+                    UnitFrames.CustomFramesApplyPetInCombat(true)
                     UnitFrames.CustomFramesApplyLayoutPet(false)
                 end,
                 width = "full",
