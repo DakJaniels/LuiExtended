@@ -1107,10 +1107,7 @@ local function SetupPowerGlowAnimations()
                 -- Use XML-defined animation timeline
                 control.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("LUIE_PowerGlowAnimation", control)
                 control.animation = control.timeline:GetAnimation(1)
-
-                -- Configure framerate dynamically based on current game framerate
-                control.animation:SetFramerate(GetFramerate())
-
+                control.animation:SetFramerate(32)
                 control.timeline:PlayFromStart()
             end
         end
