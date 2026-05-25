@@ -1154,7 +1154,7 @@ function ActionBar.HookGCD()
                             self.cooldown:SetHidden(false)
 
                             anim:SetImageData(16, 1)
-                            anim:SetFramerate(zo_round(GetFramerate()))
+                            anim:SetFramerate(30)
                             anim:GetTimeline():PlayFromStart()
 
                             if updateChromaQuickslot then
