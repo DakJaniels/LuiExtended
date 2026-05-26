@@ -945,6 +945,12 @@ function SpellCastBuffs.AddTooltipDebugMetaLines(control, detailsLine, unitTag)
     end
 
     if type(abilityId) == "number" then
+        if override and override.dynamicTooltip then
+            local morphId = override.tooltipMorphId or abilityId
+            if morphId ~= abilityId then
+                addLine("Tooltip description id", tostring(morphId))
+            end
+        end
         addBuffAbilityApiDebugLines(abilityId, ttUnit, addLine)
     end
 

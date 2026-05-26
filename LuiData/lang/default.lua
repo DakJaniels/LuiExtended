@@ -900,6 +900,7 @@ local strings =
     LUIE_STRING_SKILL_SET_ASYLUM_RESTORATION_STAFF = "Reduce the cost of your Magicka and Stamina healing abilities by |cFFFFFF21|r% for |cFFFFFF<<1>>|r seconds.",
     LUIE_STRING_SKILL_SET_MAELSTROM_DW = "Your single target damage over time abilities used within |cFFFFFF<<1>>|r seconds gain |cFFFFFF1690|r Spell and Weapon Damage.",
     LUIE_STRING_SKILL_SET_MAELSTROM_1H = "Your next fully-charged Heavy Attack used within |cFFFFFF5|r seconds restores |cFFFFFF1904|r Magicka and Stamina.",
+    LUIE_STRING_SKILL_SET_MAELSTROM_2H = "Activating Critical Charge stirs up a barbarous lust for battle within you for <<1>>, increasing your damage done with direct damage attacks by <<2>>, up to a maximum of |cffffff12|r%. This effect scales off the higher of your Weapon or Spell Damage.",
     LUIE_STRING_SKILL_SET_MASTER_1H = "Gain Spell and Physical Resistance equal to the amount you healed or overhealed with Puncturing Remedy for |cFFFFFF<<1>>|r seconds.",
     LUIE_STRING_SKILL_SET_MASTER_RESTO = "Restoring |cFFFFFF117|r Magicka and Stamina every |cFFFFFF1|r second for |cFFFFFF<<1>>|r seconds.",
     LUIE_STRING_SKILL_SET_BLACKROSE_DUAL_WIELD = "Reduce damage taken and increase damage done by |cFFFFFF10|r% for |cFFFFFF2|r seconds.",
