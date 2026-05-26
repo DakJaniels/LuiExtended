@@ -37,6 +37,7 @@ local eventsRegistered = false
 local smoothUpdateRegistered = false
 local markerPool
 local expertEvasionOnCooldown = false
+local playerDodgeFatigueStacks = 0
 local DODGE_PREDICTION_SMOOTH_UPDATE = moduleName .. "DodgePredictionSmoothUpdate"
 
 local function IsFeatureEnabled()
@@ -116,11 +117,43 @@ local function SyncExpertEvasionCooldownFromBuffs()
     expertEvasionOnCooldown = PlayerHasBuffAbility(EXPERT_EVASION_COOLDOWN_ABILITY_ID)
 end
 
+local function SyncPlayerDodgeFatigueStacksFromBuffs()
+    playerDodgeFatigueStacks = 0
+    for i = 1, GetNumBuffs("player") do
+        local _, _, _, _, stackCount, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", i)
+        if abilityId == DODGE_FATIGUE_ABILITY_ID then
+            playerDodgeFatigueStacks = stackCount or 0
+            return
+        end
+    end
+end
+
 --- @param changeType integer
 --- @param abilityId integer
+--- @param stackCount integer|nil
+--- @return boolean stateChanged
+local function OnDodgeFatigueEffectChanged(changeType, abilityId, stackCount)
+    if abilityId ~= DODGE_FATIGUE_ABILITY_ID then
+        return false
+    end
+    if changeType == EFFECT_RESULT_FADED then
+        playerDodgeFatigueStacks = 0
+    elseif changeType == EFFECT_RESULT_GAINED
+    or     changeType == EFFECT_RESULT_UPDATED
+    or     changeType == EFFECT_RESULT_FULL_REFRESH then
+        playerDodgeFatigueStacks = stackCount or 0
+    else
+        return false
+    end
+    return true
+end
+
+--- @param changeType integer
+--- @param abilityId integer
+--- @return boolean stateChanged
 local function OnExpertEvasionEffectChanged(changeType, abilityId)
     if abilityId ~= EXPERT_EVASION_COOLDOWN_ABILITY_ID then
-        return
+        return false
     end
     if changeType == EFFECT_RESULT_FADED then
         expertEvasionOnCooldown = false
@@ -128,7 +161,10 @@ local function OnExpertEvasionEffectChanged(changeType, abilityId)
     or     changeType == EFFECT_RESULT_UPDATED
     or     changeType == EFFECT_RESULT_FULL_REFRESH then
         expertEvasionOnCooldown = true
+    else
+        return false
     end
+    return true
 end
 
 --- @return number percent increase per Dodge Fatigue stack (ability 69143 sheet).
@@ -150,13 +186,7 @@ end
 
 --- @return integer
 local function GetPlayerDodgeFatigueStacks()
-    for i = 1, GetNumBuffs("player") do
-        local _, _, _, _, stackCount, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", i)
-        if abilityId == DODGE_FATIGUE_ABILITY_ID then
-            return stackCount or 0
-        end
-    end
-    return 0
+    return playerDodgeFatigueStacks
 end
 
 --- @return integer
@@ -492,7 +522,8 @@ local function ApplyLineColor(line, canAfford)
     line:SetEdgeColor(r, g, b, a)
 end
 
-function UnitFrames.PlayerDodgePrediction.Refresh()
+--- @param positionOnly boolean|nil When true, reuse last predicted cost (stamina bar value updates only).
+function UnitFrames.PlayerDodgePrediction.Refresh(positionOnly)
     local staminaFrame = GetPlayerStaminaFrame()
 
     if not IsFeatureEnabled() then
@@ -507,7 +538,12 @@ function UnitFrames.PlayerDodgePrediction.Refresh()
         return
     end
 
-    local cost = GetPredictedRollDodgeStaminaCost()
+    local cost
+    if positionOnly and staminaFrame.dodgePredictionLastCost then
+        cost = staminaFrame.dodgePredictionLastCost
+    else
+        cost = GetPredictedRollDodgeStaminaCost()
+    end
     if cost <= 0 then
         ReleaseStaminaMarker(staminaFrame)
         return
@@ -563,9 +599,11 @@ function UnitFrames.PlayerDodgePrediction.RegisterEvents()
     end
 
     local effectHandler = moduleName .. "DodgePredictionEffect"
-    eventManager:RegisterForEvent(effectHandler, EVENT_EFFECT_CHANGED, function (_, changeType, _, _, _, _, _, _, _, _, _, _, _, _, _, abilityId)
-        OnExpertEvasionEffectChanged(changeType, abilityId)
-        onRefresh()
+    eventManager:RegisterForEvent(effectHandler, EVENT_EFFECT_CHANGED, function (_, changeType, _, _, _, _, _, stackCount, _, _, _, _, _, _, _, abilityId)
+        if OnExpertEvasionEffectChanged(changeType, abilityId)
+        or OnDodgeFatigueEffectChanged(changeType, abilityId, stackCount) then
+            onRefresh()
+        end
     end)
     eventManager:AddFilterForEvent(effectHandler, EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
 
@@ -580,6 +618,7 @@ function UnitFrames.PlayerDodgePrediction.RegisterEvents()
 
     eventManager:RegisterForEvent(moduleName .. "DodgePredictionPlayerActivated", EVENT_PLAYER_ACTIVATED, function ()
         SyncExpertEvasionCooldownFromBuffs()
+        SyncPlayerDodgeFatigueStacksFromBuffs()
         onRefresh()
     end)
 
@@ -606,6 +645,7 @@ function UnitFrames.PlayerDodgePrediction.Initialize()
         return
     end
     SyncExpertEvasionCooldownFromBuffs()
+    SyncPlayerDodgeFatigueStacksFromBuffs()
     UnitFrames.PlayerDodgePrediction.RegisterEvents()
     UnitFrames.PlayerDodgePrediction.Refresh()
 end
