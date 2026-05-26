@@ -9,7 +9,6 @@ local LUIE = LUIE
 local UnitFrames = LUIE.UnitFrames
 local moduleName = UnitFrames.moduleName
 local eventManager = GetEventManager()
-local windowManager = GetWindowManager()
 local sceneManager = SCENE_MANAGER
 
 -- -----------------------------------------------------------------------------
@@ -24,8 +23,9 @@ end
 
 --- Vertically stack member controls (first anchors to parent TOPLEFT).
 --- @param parent Control
---- @param memberNamePrefix string e.g. "_RaidGroup" (GetNamedChild uses "_" .. "RaidGroup" .. i)
+--- @param unitTagPrefix string e.g. "RaidGroup" (GetNamedChild uses "_" .. unitTagPrefix .. i)
 --- @param count number
+--- @param startIndex number|nil default 1
 local function ApplyStackedMemberAnchors(parent, unitTagPrefix, count, startIndex)
     startIndex = startIndex or 1
     local previous
@@ -76,8 +76,7 @@ local function CreateRegenAnimation(parent, anchors, dims, alpha, number)
     end
 
     local updateDims = { dims[2] * 1.9, dims[2] * 0.85 }
-    local parentName = parent:GetName() or ("LUIE_UF_Parent_" .. tostring(parent))
-    local control = windowManager:CreateControl(parentName .. "_RegenAnim_" .. number, parent, CT_TEXTURE)
+    local control = parent:CreateControl("$(parent)_RegenAnim_" .. number, CT_TEXTURE)
     if anchors ~= nil and #anchors >= 2 and #anchors <= 5 then
         control:SetAnchor(anchors[1], anchors[5] or parent, anchors[2], anchors[3] or 0, anchors[4] or 0)
     end
@@ -114,8 +113,7 @@ end
 
 -- Possession halo animated texture (32-frame sprite sheet: 4 columns x 8 rows)
 local function CreatePossessionHaloAnimation(backdrop)
-    local parentName = backdrop:GetName() or ("LUIE_UF_Parent_" .. tostring(backdrop))
-    local halo = windowManager:CreateControl(parentName .. "_PossessionHalo", backdrop, CT_TEXTURE)
+    local halo = backdrop:CreateControl("$(parent)_PossessionHalo", CT_TEXTURE)
     halo:SetTexture("EsoUI/Art/UnitAttributeVisualizer/possession_animatedHalo_32fr.dds")
     halo:SetDrawLayer(DL_BACKGROUND)
     halo:SetAnchor(LEFT, backdrop, LEFT, -80, 0)
@@ -133,8 +131,7 @@ end
 
 -- Increased power animated halo (32-frame sprite sheet: 4 columns x 8 rows)
 local function CreateIncreasedPowerTexture(backdrop)
-    local parentName = backdrop:GetName() or ("LUIE_UF_Parent_" .. tostring(backdrop))
-    local powerTex = windowManager:CreateControl(parentName .. "_IncreasedPowerHalo", backdrop, CT_TEXTURE)
+    local powerTex = backdrop:CreateControl("$(parent)_IncreasedPowerHalo", CT_TEXTURE)
     local texturePath = ZO_IsConsoleOrGameCoreUI() and "EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_increasedPower_animatedHalo_32fr.dds" or "EsoUI/Art/UnitAttributeVisualizer/increasedPower_animatedHalo_32fr.dds"
     powerTex:SetTexture(texturePath)
     powerTex:SetDrawLayer(DL_BACKGROUND)
@@ -173,11 +170,7 @@ end
 
 -- Combat glow border (static red glow for group frames in combat)
 local function CreateCombatGlowBorder(backdrop)
-    -- Create from XML virtual template with parent-based unique name
-    local parentName = backdrop:GetName() or ("LUIE_UF_Backdrop_" .. tostring(backdrop))
-    local uniqueName = parentName .. "_CombatGlow"
-
-    local glow = windowManager:CreateControlFromVirtual(uniqueName, backdrop, "LUIE_CombatGlowBorder")
+    local glow = CreateControlFromVirtual("$(parent)_CombatGlow", backdrop, "LUIE_CombatGlowBorder")
 
     -- Configure blend mode (can't be set in XML)
     glow:SetBlendMode(TEX_BLEND_MODE_ADD)
@@ -191,12 +184,8 @@ end
 --- @param small boolean
 --- @return Control
 local function CreateDecreasedArmorOverlay(parent, small)
-    -- Create from XML virtual template with parent-based unique name
-    local parentName = parent:GetName() or ("LUIE_UF_Parent_" .. tostring(parent))
-    local uniqueName = parentName .. "_DecreasedArmorOverlay"
-
     local templateName = small and "LUIE_DecreasedArmorOverlay_Small" or "LUIE_DecreasedArmorOverlay"
-    local control = windowManager:CreateControlFromVirtual(uniqueName, parent, templateName)
+    local control = CreateControlFromVirtual("$(parent)_DecreasedArmorOverlay", parent, templateName)
 
     -- Get texture references
     control.smallTex = control:GetNamedChild("_SmallTex")       --- @type TextureControl
@@ -831,7 +820,7 @@ local function SetupCommonFrameActions()
             unitFrame.tlw:SetHandler("OnMoveStop", tlwOnMoveStop)
 
             -- Create anchor preview
-            unitFrame.tlw.preview.anchorTexture = windowManager:CreateControl(nil, unitFrame.tlw.preview, CT_TEXTURE)
+            unitFrame.tlw.preview.anchorTexture = unitFrame.tlw.preview:CreateControl("$(parent)AnchorTexture", CT_TEXTURE)
             unitFrame.tlw.preview.anchorTexture:SetAnchor(TOPLEFT, unitFrame.tlw.preview, TOPLEFT)
             unitFrame.tlw.preview.anchorTexture:SetDimensions(16, 16)
             unitFrame.tlw.preview.anchorTexture:SetTexture("/esoui/art/reticle/border_topleft.dds")
@@ -839,7 +828,7 @@ local function SetupCommonFrameActions()
             unitFrame.tlw.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
 
             if not unitFrame.tlw.preview.anchorLabel then
-                unitFrame.tlw.preview.anchorLabel = windowManager:CreateControl(nil, unitFrame.tlw.preview, CT_LABEL)
+                unitFrame.tlw.preview.anchorLabel = unitFrame.tlw.preview:CreateControl("$(parent)AnchorLabel", CT_LABEL)
                 unitFrame.tlw.preview.anchorLabel:SetFont(LUIE.GetPositionLabelFont())
                 unitFrame.tlw.preview.anchorLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
                 unitFrame.tlw.preview.anchorLabel:SetVerticalAlignment(TEXT_ALIGN_TOP)
@@ -849,7 +838,7 @@ local function SetupCommonFrameActions()
                 unitFrame.tlw.preview.anchorLabel:SetColor(1, 1, 0, 1)
                 unitFrame.tlw.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
                 unitFrame.tlw.preview.anchorLabel:SetDrawTier(DT_MEDIUM)
-                unitFrame.tlw.preview.anchorLabelBg = windowManager:CreateControl(nil, unitFrame.tlw.preview.anchorLabel, CT_BACKDROP)
+                unitFrame.tlw.preview.anchorLabelBg = unitFrame.tlw.preview.anchorLabel:CreateControl("$(parent)Bg", CT_BACKDROP)
                 unitFrame.tlw.preview.anchorLabelBg:SetCenterColor(0, 0, 0, 1)
                 unitFrame.tlw.preview.anchorLabelBg:SetEdgeColor(0, 0, 0, 1)
                 unitFrame.tlw.preview.anchorLabelBg:SetEdgeTexture("", 8, 1, 1, 1)
@@ -981,7 +970,7 @@ local function SetupCommonFrameActions()
                                     powerBar.shield:SetHeight(UnitFrames.SV.CustomShieldBarHeight)
                                 end
                             else
-                                powerBar.shieldbackdrop = windowManager:CreateControl(nil, frame.control, CT_BACKDROP)
+                                powerBar.shieldbackdrop = frame.control:CreateControl("$(parent)ShieldBackdrop", CT_BACKDROP)
                                 powerBar.shieldbackdrop:SetCenterColor(0, 0, 0, 0.4)
                                 powerBar.shieldbackdrop:SetEdgeColor(0, 0, 0, 0.6)
                                 powerBar.shieldbackdrop:SetEdgeTexture("", 8, 1, 1, 1)
