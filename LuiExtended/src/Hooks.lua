@@ -138,11 +138,14 @@ function LUIE.API_Hooks()
         --- @return boolean castByPlayer
         GetUnitBuffInfo = function (unitTag, buffIndex)
             local buffName, startTime, endTime, buffSlot, stackCount, iconFile, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer = zos_GetUnitBuffInfo(unitTag, buffIndex)
-            if Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].name then
-                buffName = Effects.EffectOverride[abilityId].name
-            end
-            if Effects.EffectOverride[abilityId] and Effects.EffectOverride[abilityId].icon then
-                iconFile = Effects.EffectOverride[abilityId].icon
+            local override = Effects.EffectOverride[abilityId]
+            if override then
+                if override.name then
+                    buffName = override.name
+                end
+                if override.icon then
+                    iconFile = override.icon
+                end
             end
             return buffName, startTime, endTime, buffSlot, stackCount, iconFile, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer
         end
