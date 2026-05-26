@@ -2891,6 +2891,36 @@ function UnitFrames.CustomFramesResetPosition(playerOnly)
     UnitFrames.CustomFramesSetPositions()
 end
 
+--- Tint STAT_POWER / possession halo textures on a bar backdrop (same API as in-game `/script` on the halo control).
+--- @param backdrop BackdropControl
+--- @param colorRGB number[] { r, g, b, a } in 0..1
+--- @param alpha number|nil
+--- @param backgroundMultiplier number|nil multiplier for _PowerHaloTrack only
+function UnitFrames.ApplyBarBackdropHaloColors(backdrop, colorRGB, alpha, backgroundMultiplier)
+    if not backdrop or not colorRGB then
+        return
+    end
+    alpha = alpha or colorRGB[4] or 0.9
+    backgroundMultiplier = backgroundMultiplier or 0.1
+
+    local r, g, b = colorRGB[1], colorRGB[2], colorRGB[3]
+
+    local powerHaloTrack = backdrop:GetNamedChild("_PowerHaloTrack")
+    if powerHaloTrack then
+        powerHaloTrack:SetColor(backgroundMultiplier * r, backgroundMultiplier * g, backgroundMultiplier * b, alpha)
+    end
+
+    local increasedPowerHalo = backdrop:GetNamedChild("_IncreasedPowerHalo")
+    if increasedPowerHalo then
+        increasedPowerHalo:SetColor(r, g, b, alpha)
+    end
+
+    local possessionHalo = backdrop:GetNamedChild("_PossessionHalo")
+    if possessionHalo then
+        possessionHalo:SetColor(r, g, b, alpha)
+    end
+end
+
 -- Helper function to apply colors directly to bar and backdrop
 local function ApplyBarColors(bar, backdrop, colorRGB, alpha, backgroundMultiplier)
     alpha = alpha or 0.9
@@ -2900,10 +2930,7 @@ local function ApplyBarColors(bar, backdrop, colorRGB, alpha, backgroundMultipli
     bar:SetColor(r, g, b, alpha)
     backdrop:SetCenterColor(backgroundMultiplier * r, backgroundMultiplier * g, backgroundMultiplier * b, alpha)
 
-    local powerHaloTrack = backdrop:GetNamedChild("_PowerHaloTrack")
-    if powerHaloTrack then
-        powerHaloTrack:SetColor(backgroundMultiplier * r, backgroundMultiplier * g, backgroundMultiplier * b, alpha)
-    end
+    UnitFrames.ApplyBarBackdropHaloColors(backdrop, colorRGB, alpha, backgroundMultiplier)
 end
 
 function UnitFrames.CustomFramesApplyColorsSingle(unitTag)

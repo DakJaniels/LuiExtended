@@ -20,6 +20,194 @@ local UnitFrames = LUIE.UnitFrames
 -- icon, etc. populate immediately without waiting for unrelated events.
 local PREVIEW_SOURCE_UNIT = "player"
 
+UnitFrames.debugAttributeVisualOverrides = UnitFrames.debugAttributeVisualOverrides or {}
+
+local function VisualEffectCacheKey(visualType, statType, attributeType, powerType)
+    return string.format("%d_%d_%d_%d", visualType, statType, attributeType, powerType)
+end
+
+local function SetDebugVisualOverride(visualUnitTag, visualType, statType, attributeType, powerType, value)
+    UnitFrames.debugAttributeVisualOverrides[visualUnitTag] = UnitFrames.debugAttributeVisualOverrides[visualUnitTag] or {}
+    local key = VisualEffectCacheKey(visualType, statType, attributeType, powerType)
+    if value == nil or value == 0 then
+        UnitFrames.debugAttributeVisualOverrides[visualUnitTag][key] = nil
+    else
+        UnitFrames.debugAttributeVisualOverrides[visualUnitTag][key] = value
+    end
+    if UnitFrames.InvalidateAttributeVisualEffectCache then
+        UnitFrames.InvalidateAttributeVisualEffectCache(visualUnitTag)
+    end
+end
+
+function UnitFrames.ClearDebugAttributeVisualOverrides(visualUnitTag)
+    if visualUnitTag then
+        UnitFrames.debugAttributeVisualOverrides[visualUnitTag] = nil
+        if UnitFrames.InvalidateAttributeVisualEffectCache then
+            UnitFrames.InvalidateAttributeVisualEffectCache(visualUnitTag)
+        end
+    else
+        UnitFrames.debugAttributeVisualOverrides = {}
+        if UnitFrames.InvalidateAttributeVisualEffectCache then
+            UnitFrames.InvalidateAttributeVisualEffectCache(nil)
+        end
+    end
+end
+
+local function EnsureSavedHealthForFrame(frameKey, sourceUnitTag)
+    if not UnitFrames.savedHealth[frameKey] then
+        UnitFrames.savedHealth[frameKey] = { 1, 1, 1, 0, 0 }
+    end
+    local saved = UnitFrames.savedHealth[frameKey]
+    local healthValue, healthMax, healthEffectiveMax = GetUnitPower(sourceUnitTag, COMBAT_MECHANIC_FLAGS_HEALTH)
+    saved[1] = healthValue
+    saved[2] = healthMax
+    saved[3] = healthEffectiveMax
+end
+
+-- Pushes live power into `frame` while using `frameKey` for savedHealth / visualizer lookups.
+local function PushPowerValuesForFrame(frame, frameKey, sourceUnitTag)
+    if not frame then return end
+    EnsureSavedHealthForFrame(frameKey, sourceUnitTag)
+    for powerType, control in pairs(frame) do
+        if type(powerType) == "number" and control then
+            local powerValue, powerMax, powerEffectiveMax = GetUnitPower(sourceUnitTag, powerType)
+            UnitFrames.UpdateAttribute(frameKey, powerType, control, powerValue, powerEffectiveMax, false, nil)
+        end
+    end
+end
+
+local function ResolveFrameKey(frameArg)
+    if not frameArg or frameArg == "" then
+        return "player"
+    end
+    local aliases =
+    {
+        sg1 = "SmallGroup1", sg2 = "SmallGroup2", sg3 = "SmallGroup3", sg4 = "SmallGroup4",
+        rg1 = "RaidGroup1", rg2 = "RaidGroup2", tar = "reticleover", target = "reticleover",
+    }
+    local key = aliases[string.lower(frameArg)] or frameArg
+    if UnitFrames.CustomFrames[key] then
+        return key
+    end
+    return key
+end
+
+local function RefreshDebugAttributeVisualizers(visualUnitTag)
+    local mods = UnitFrames.VisualizerModules
+    if not mods then return end
+
+    local healthEffectiveMax = 1
+    if UnitFrames.savedHealth[visualUnitTag] then
+        healthEffectiveMax = UnitFrames.savedHealth[visualUnitTag][3] or 1
+    end
+    if healthEffectiveMax < 1 then
+        healthEffectiveMax = 1
+    end
+
+    if mods.StatChangeModule then
+        mods.StatChangeModule:UpdateStat(visualUnitTag, STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+        mods.StatChangeModule:UpdateStat(visualUnitTag, STAT_POWER, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+    end
+    if mods.RegenerationModule then
+        mods.RegenerationModule:UpdateRegen(visualUnitTag, STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+        mods.RegenerationModule:UpdateRegen(visualUnitTag, STAT_MAGICKA_REGEN_COMBAT, ATTRIBUTE_MAGICKA, COMBAT_MECHANIC_FLAGS_MAGICKA)
+        mods.RegenerationModule:UpdateRegen(visualUnitTag, STAT_STAMINA_REGEN_COMBAT, ATTRIBUTE_STAMINA, COMBAT_MECHANIC_FLAGS_STAMINA)
+    end
+    if mods.PossessionModule then
+        local possessionValue = UnitFrames.GetAttributeVisualEffectValue(visualUnitTag, ATTRIBUTE_VISUAL_POSSESSION, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+        mods.PossessionModule:UpdatePossession(visualUnitTag, possessionValue)
+    end
+    if mods.UnwaveringModule then
+        mods.UnwaveringModule:UpdateInvulnerable(visualUnitTag)
+    end
+    if mods.PowerShieldModule then
+        local shieldValue = UnitFrames.GetAttributeVisualEffectValue(visualUnitTag, ATTRIBUTE_VISUAL_POWER_SHIELDING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+        local traumaValue = UnitFrames.GetAttributeVisualEffectValue(visualUnitTag, ATTRIBUTE_VISUAL_TRAUMA, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+        local noHealValue = UnitFrames.GetAttributeVisualEffectValue(visualUnitTag, ATTRIBUTE_VISUAL_NO_HEALING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH)
+        mods.PowerShieldModule:UpdateShield(visualUnitTag, shieldValue, healthEffectiveMax)
+        mods.PowerShieldModule:UpdateTrauma(visualUnitTag, traumaValue, healthEffectiveMax)
+        mods.PowerShieldModule:UpdateNoHealing(visualUnitTag, noHealValue)
+    end
+end
+
+local DEBUG_VISUAL_PRESET_NAMES =
+{
+    "power", "powerdec", "armor", "armordec", "hot", "dot", "maghot", "stamhot",
+    "shield", "trauma", "noheal", "possession", "unwavering", "clear",
+}
+
+local function ApplyDebugVisualPreset(visualUnitTag, presetName)
+    presetName = string.lower(presetName or "")
+
+    local isKnown = presetName == "" or presetName == "clear"
+    if not isKnown then
+        for _, name in ipairs(DEBUG_VISUAL_PRESET_NAMES) do
+            if name == presetName then
+                isKnown = true
+                break
+            end
+        end
+    end
+    if not isKnown then
+        return false
+    end
+
+    UnitFrames.ClearDebugAttributeVisualOverrides(visualUnitTag)
+    if UnitFrames.savedHealth[visualUnitTag] then
+        UnitFrames.savedHealth[visualUnitTag][4] = 0
+        UnitFrames.savedHealth[visualUnitTag][5] = 0
+    end
+
+    local maxHealth = (UnitFrames.savedHealth[visualUnitTag] and UnitFrames.savedHealth[visualUnitTag][3]) or 20000
+    if maxHealth < 1 then maxHealth = 20000 end
+
+    if presetName == "clear" or presetName == "" then
+        RefreshDebugAttributeVisualizers(visualUnitTag)
+        return true
+    end
+
+    if presetName == "power" then
+        SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_INCREASED_STAT, STAT_POWER, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, 1)
+    elseif presetName == "powerdec" then
+        SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_DECREASED_STAT, STAT_POWER, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, -1)
+    elseif presetName == "armor" then
+        SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_DECREASED_STAT, STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, -1)
+    elseif presetName == "armordec" then
+        SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_INCREASED_STAT, STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, 1)
+    elseif presetName == "hot" then
+        SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_INCREASED_REGEN_POWER, STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, -1)
+    elseif presetName == "dot" then
+        SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_DECREASED_REGEN_POWER, STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, 1)
+    elseif presetName == "maghot" then
+        SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_INCREASED_REGEN_POWER, STAT_MAGICKA_REGEN_COMBAT, ATTRIBUTE_MAGICKA, COMBAT_MECHANIC_FLAGS_MAGICKA, -1)
+    elseif presetName == "stamhot" then
+        SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_INCREASED_REGEN_POWER, STAT_STAMINA_REGEN_COMBAT, ATTRIBUTE_STAMINA, COMBAT_MECHANIC_FLAGS_STAMINA, -1)
+    elseif presetName == "shield" then
+        local shieldAmount = zo_floor(maxHealth * 0.35)
+        SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_POWER_SHIELDING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, shieldAmount)
+        if UnitFrames.savedHealth[visualUnitTag] then
+            UnitFrames.savedHealth[visualUnitTag][4] = shieldAmount
+        end
+    elseif presetName == "trauma" then
+        local traumaAmount = zo_floor(maxHealth * 0.25)
+        SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_TRAUMA, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, traumaAmount)
+        if UnitFrames.savedHealth[visualUnitTag] then
+            UnitFrames.savedHealth[visualUnitTag][5] = traumaAmount
+        end
+    elseif presetName == "noheal" then
+        SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_NO_HEALING, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, 1)
+    elseif presetName == "possession" then
+        SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_POSSESSION, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, 1)
+    elseif presetName == "unwavering" then
+        SetDebugVisualOverride(visualUnitTag, ATTRIBUTE_VISUAL_UNWAVERING_POWER, STAT_MITIGATION, ATTRIBUTE_HEALTH, COMBAT_MECHANIC_FLAGS_HEALTH, 1)
+    else
+        return false
+    end
+
+    RefreshDebugAttributeVisualizers(visualUnitTag)
+    return true
+end
+
 local function NotifyMissing(name)
     LUIE.AddSystemMessage(string.format("[LUIE] UnitFrames debug: '%s' frame not enabled in settings.", name))
 end
@@ -70,6 +258,68 @@ local function PreviewFrame(frame, sourceUnitTag)
     ShowFrame(frame)
     RefreshFrameStatics(frame, sourceUnitTag)
     PushPowerValues(frame, sourceUnitTag)
+end
+
+local function ShowFrameForDebug(frameKey)
+    local frame = UnitFrames.CustomFrames[frameKey]
+    if not frame then
+        return nil
+    end
+    ShowFrame(frame)
+    if string.sub(frameKey, 1, 10) == "SmallGroup" then
+        ApplyPositions()
+        UnitFrames.CustomFramesApplyLayoutGroup(false)
+        if frame.tlw then frame.tlw:SetHidden(false) end
+    elseif string.sub(frameKey, 1, 9) == "RaidGroup" then
+        ApplyPositions()
+        UnitFrames.CustomFramesApplyLayoutRaid(false, true)
+        if frame.tlw then frame.tlw:SetHidden(false) end
+    elseif frameKey == "player" then
+        ApplyPositions()
+        UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
+    elseif frameKey == "reticleover" then
+        ApplyPositions()
+        UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+    elseif string.sub(frameKey, 1, 4) == "boss" then
+        ApplyPositions()
+        UnitFrames.CustomFramesApplyLayoutBosses(true)
+    end
+    RefreshFrameStatics(frame, PREVIEW_SOURCE_UNIT)
+    PushPowerValuesForFrame(frame, frameKey, PREVIEW_SOURCE_UNIT)
+    return frame
+end
+
+local function DebugAttributeVisuals(arg1, arg2)
+    if not arg1 or arg1 == "" or string.lower(arg1) == "help" then
+        LUIE.AddSystemMessage("[LUIE] /luieufdebug <frame> <preset>  — frame: player, reticleover, SmallGroup1, sg1, RaidGroup1, boss1, …")
+        LUIE.AddSystemMessage("[LUIE] Presets: " .. table.concat(DEBUG_VISUAL_PRESET_NAMES, ", "))
+        return
+    end
+
+    local frameKey
+    local presetName
+
+    if arg2 and arg2 ~= "" then
+        frameKey = ResolveFrameKey(arg1)
+        presetName = string.lower(arg2)
+    else
+        frameKey = ResolveFrameKey("player")
+        presetName = string.lower(arg1)
+    end
+
+    if not UnitFrames.CustomFrames[frameKey] then
+        LUIE.AddSystemMessage(string.format("[LUIE] UnitFrames debug: unknown or disabled frame '%s'.", frameKey))
+        return
+    end
+
+    ShowFrameForDebug(frameKey)
+
+    if not ApplyDebugVisualPreset(frameKey, presetName) then
+        LUIE.AddSystemMessage(string.format("[LUIE] Unknown visual preset '%s'. Use /luieufdebug help.", presetName))
+        return
+    end
+
+    LUIE.AddSystemMessage(string.format("[LUIE] UnitFrames visual debug: %s → %s", frameKey, presetName))
 end
 
 -- -----------------------------------------------------------------------------
@@ -200,6 +450,8 @@ end
 -- Restores game-driven state by routing through the same public refresh
 -- functions runtime uses. Avoids duplicating hide/clear logic.
 local function DisableAllPreviews()
+    UnitFrames.ClearDebugAttributeVisualOverrides(nil)
+
     if UnitFrames.CustomFrames["player"] and UnitFrames.ReloadValues then
         UnitFrames.ReloadValues("player")
     end
@@ -259,6 +511,15 @@ local DEBUG_COMMANDS =
     ["/luiufcomp"]   = DebugCompanion,
     ["/luiufall"]    = DebugAll,
 }
+
+SLASH_COMMANDS["/luieufdebug"] = function (arg)
+    local frameArg, presetArg = arg:match("^(%S+)%s+(%S+)$")
+    if frameArg then
+        DebugAttributeVisuals(frameArg, presetArg)
+    else
+        DebugAttributeVisuals(arg, nil)
+    end
+end
 
 for command, handler in pairs(DEBUG_COMMANDS) do
     SLASH_COMMANDS[command] = handler

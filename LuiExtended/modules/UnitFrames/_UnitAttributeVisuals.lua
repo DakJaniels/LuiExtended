@@ -93,8 +93,26 @@ function UnitFrames.GetAttributeVisualEffectValueCache(unitTag)
         local cacheKey = string.format("%d_%d_%d_%d", results[i], results[i + 1], results[i + 2], results[i + 3])
         attributeVisualCache[cacheKey] = results[i + 4]
     end
+
+    local debugOverrides = UnitFrames.debugAttributeVisualOverrides
+    if debugOverrides and debugOverrides[unitTag] then
+        for cacheKey, overrideValue in pairs(debugOverrides[unitTag]) do
+            attributeVisualCache[cacheKey] = overrideValue
+        end
+    end
+
     attributeVisualEffectCacheByUnitTag[unitTag] = attributeVisualCache
     return attributeVisualCache
+end
+
+--- Clears cached GetAllUnitAttributeVisualizerEffectInfo for one or all unit tags (debug overrides).
+--- @param unitTag string|nil
+function UnitFrames.InvalidateAttributeVisualEffectCache(unitTag)
+    if unitTag then
+        attributeVisualEffectCacheByUnitTag[unitTag] = nil
+    else
+        ZO_ClearTable(attributeVisualEffectCacheByUnitTag)
+    end
 end
 
 --- @param unitTag string
