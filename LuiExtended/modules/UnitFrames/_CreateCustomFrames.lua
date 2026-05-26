@@ -82,13 +82,12 @@ local function CreateRegenAnimation(parent, anchors, dims, alpha, number)
     end
     control:SetDimensions(updateDims[1], updateDims[2])
     control:SetTexture(config.texture)
-    control:SetDrawLayer(2)
+    control:SetDrawLayer(DL_OVERLAY)
+    control:SetDrawLevel(parent:GetDrawLevel() + 1)
     control:SetHidden(true)
+    control:SetAlpha(alpha or 0)
     local distance = dims[1] * config.distanceMult
     local offsetX = dims[1] * config.offsetXMult
-
-    control:SetAlpha(alpha or 0)
-    control:SetDrawLayer(DL_CONTROLS)
 
     -- Find the first valid anchor and set up the animation
     for i = 0, MAX_ANCHORS - 1 do
@@ -121,24 +120,24 @@ local function SetHealthBarAbovePowerHalo(backdrop, bar)
         return
     end
 
-    bar:SetDrawLayer(DL_CONTROLS)
+    --bar:SetDrawLayer(DL_CONTROLS)
     bar:SetDrawLevel(HEALTH_BAR_FILL_DRAW_LEVEL)
 
     local trauma = backdrop:GetNamedChild("_Trauma")
     if trauma then
-        trauma:SetDrawLayer(DL_CONTROLS)
+        -- trauma:SetDrawLayer(DL_CONTROLS)
         trauma:SetDrawLevel(HEALTH_BAR_FILL_DRAW_LEVEL + 1)
     end
 
     local shield = backdrop:GetNamedChild("_Shield")
     if shield then
-        shield:SetDrawLayer(DL_CONTROLS)
+        -- shield:SetDrawLayer(DL_CONTROLS)
         shield:SetDrawLevel(HEALTH_BAR_FILL_DRAW_LEVEL + 2)
     end
 end
 
 -- Opaque full-bar track so empty status bar region does not show the animated halo (status fill is only partial width)
-local function EnsureHealthBarPowerHaloTrack(backdrop, bar)
+local function CreateHealthBarPowerHaloTrack(backdrop, bar)
     if not backdrop or not bar then
         return nil
     end
@@ -172,7 +171,7 @@ local function CreateBarBackgroundHalo(backdrop, bar, controlNameSuffix, zoTextu
         return nil
     end
 
-    EnsureHealthBarPowerHaloTrack(backdrop, bar)
+    CreateHealthBarPowerHaloTrack(backdrop, bar)
     SetHealthBarAbovePowerHalo(backdrop, bar)
 
     local halo = CreateControlFromVirtual("$(parent)_" .. controlNameSuffix, backdrop, zoTextureVirtual)

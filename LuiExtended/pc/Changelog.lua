@@ -48,6 +48,19 @@ local changelogSectionBodyPool
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.3.0
+    "|cFFA500LuiExtended Version 7.2.3.0|r",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Player and Target Display Power Change Overlay now default to off. A one-time migration turns the overlay off for existing saves that still had the previous default (on). Re-enable under Custom Unit Frames if you want the increased-power halo.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: When that overlay is enabled, increased power and possession animated halo textures on the custom health bar tint with the same RGBA as the health bar when LUIE applies custom frame colors.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom frame unit names now always use Font Size (Label) for that frame type (Player, Target, Group, Raid, Companion, Pet, Boss, AvA). Names on raid, pet, and similar layouts on the health bar no longer use Font Size (Bar) by mistake (for example name at 16 while the label slider shows 22).",
+    "",
+
     -- Version Header 7.2.2.9
     "|cFFA500LuiExtended Version 7.2.2.9|r",
     "",

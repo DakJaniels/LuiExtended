@@ -391,6 +391,12 @@ local function CustomFramesApplyColorsInternal(sections)
 
     local isBattleground = IsActiveWorldBattleground()
 
+    local function ApplyHealthBarHalos(healthBar, barColor)
+        if healthBar and healthBar.backdrop and barColor then
+            UnitFrames.ApplyBarBackdropHaloColors(healthBar.backdrop, barColor, barColor[4], 0.1)
+        end
+    end
+
     local runAll = sections == nil or sections.all == true
     local applyHealthFamily = runAll or sections.healthFamily == true
     local applyCompanionBlock = runAll or sections.companion == true
@@ -408,6 +414,7 @@ local function CustomFramesApplyColorsInternal(sections)
                     local thb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH] -- not a backdrop
                     thb.bar:SetColor(unpack(health))
                     thb.backdrop:SetCenterColor(unpack(health_bg))
+                    ApplyHealthBarHalos(thb, health)
                     thb.shield:SetColor(unpack(shield))
                     thb.trauma:SetColor(unpack(trauma))
                     if thb.invulnerable then
@@ -460,9 +467,11 @@ local function CustomFramesApplyColorsInternal(sections)
             end
             shb.bar:SetColor(unpack(class_color))
             shb.backdrop:SetCenterColor(unpack(class_bg))
+            ApplyHealthBarHalos(shb, class_color)
         else
             shb.bar:SetColor(unpack(petcolor))
             shb.backdrop:SetCenterColor(unpack(petcolor_bg))
+            ApplyHealthBarHalos(shb, petcolor)
         end
         shb.shield:SetColor(unpack(shield))
         shb.trauma:SetColor(unpack(trauma))
@@ -508,9 +517,11 @@ local function CustomFramesApplyColorsInternal(sections)
                     end
                     shb.bar:SetColor(unpack(class_color))
                     shb.backdrop:SetCenterColor(unpack(class_bg))
+                    ApplyHealthBarHalos(shb, class_color)
                 else
                     shb.bar:SetColor(unpack(companioncolor))
                     shb.backdrop:SetCenterColor(unpack(companioncolor_bg))
+                    ApplyHealthBarHalos(shb, companioncolor)
                 end
                 shb.shield:SetColor(unpack(shield))
                 shb.trauma:SetColor(unpack(trauma))
@@ -584,15 +595,19 @@ local function CustomFramesApplyColorsInternal(sections)
                         if role == LFG_ROLE_DPS then
                             thb.bar:SetColor(unpack(dps))
                             thb.backdrop:SetCenterColor(unpack(dps_bg))
+                            ApplyHealthBarHalos(thb, dps)
                         elseif role == LFG_ROLE_HEAL then
                             thb.bar:SetColor(unpack(healer))
                             thb.backdrop:SetCenterColor(unpack(healer_bg))
+                            ApplyHealthBarHalos(thb, healer)
                         elseif role == LFG_ROLE_TANK then
                             thb.bar:SetColor(unpack(tank))
                             thb.backdrop:SetCenterColor(unpack(tank_bg))
+                            ApplyHealthBarHalos(thb, tank)
                         else
                             thb.bar:SetColor(unpack(invalid)) -- do not use health as fallback because it might look like tank
                             thb.backdrop:SetCenterColor(unpack(invalid_bg))
+                            ApplyHealthBarHalos(thb, invalid)
                         end
                     elseif (group and UnitFrames.SV.ColorClassGroup) or (raid and UnitFrames.SV.ColorClassRaid) and class ~= 0 then
                         local class_color
@@ -624,9 +639,11 @@ local function CustomFramesApplyColorsInternal(sections)
                         end
                         thb.bar:SetColor(unpack(class_color))
                         thb.backdrop:SetCenterColor(unpack(class_bg))
+                        ApplyHealthBarHalos(thb, class_color)
                     else
                         thb.bar:SetColor(unpack(health))
                         thb.backdrop:SetCenterColor(unpack(health_bg))
+                        ApplyHealthBarHalos(thb, health)
                     end
                     thb.shield:SetColor(unpack(shield))
                     thb.trauma:SetColor(unpack(trauma))
@@ -640,10 +657,15 @@ local function CustomFramesApplyColorsInternal(sections)
 
     -- Player frame also requires setting of magicka and stamina bars
     if applyPlayerMagickaStamina and UnitFrames.CustomFrames["player"] and UnitFrames.CustomFrames["player"].tlw then
-        UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_MAGICKA].bar:SetColor(unpack(magicka))
-        UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_MAGICKA].backdrop:SetCenterColor(unpack(magicka_bg))
-        UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_STAMINA].bar:SetColor(unpack(stamina))
-        UnitFrames.CustomFrames["player"][COMBAT_MECHANIC_FLAGS_STAMINA].backdrop:SetCenterColor(unpack(stamina_bg))
+        local playerFrame = UnitFrames.CustomFrames["player"]
+        local magickaFrame = playerFrame[COMBAT_MECHANIC_FLAGS_MAGICKA]
+        magickaFrame.bar:SetColor(unpack(magicka))
+        magickaFrame.backdrop:SetCenterColor(unpack(magicka_bg))
+        UnitFrames.ApplyBarBackdropHaloColors(magickaFrame.backdrop, magicka, magicka[4], 0.1)
+        local staminaFrame = playerFrame[COMBAT_MECHANIC_FLAGS_STAMINA]
+        staminaFrame.bar:SetColor(unpack(stamina))
+        staminaFrame.backdrop:SetCenterColor(unpack(stamina_bg))
+        UnitFrames.ApplyBarBackdropHaloColors(staminaFrame.backdrop, stamina, stamina[4], 0.1)
     end
 end
 
