@@ -28,12 +28,14 @@ local DebugResults = Data.DebugResults
 
 local pairs = pairs
 local ipairs = ipairs
+local table_insert = table.insert
 local table_sort = table.sort
 local string_format = string.format
 local zo_round = zo_round
 local tostring = tostring
 
 local DoesAbilityExist = DoesAbilityExist
+local GetAbilityName = GetAbilityName
 local GetZoneId = GetZoneId
 local GetCurrentMapZoneIndex = GetCurrentMapZoneIndex
 local GetPlayerLocationName = GetPlayerLocationName
@@ -509,14 +511,33 @@ function SpellCastBuffs.TempSlashZoneCheck()
     end
 end
 
---- Checks for removed abilities by iterating through LuiData.Data.DebugAuras and checking if each ability still exists.
---- Outputs a list of ability IDs that no longer exist in the game to chat.
+--- DebugAuras keys where DoesAbilityExist is false (effect-only / retired rows; not always safe to delete from EffectOverride).
+--- Sorted output; flags EffectOverride; logs full lines to LUIE debug log.
 function SpellCastBuffs.TempSlashCheckRemovedAbilities()
-    AddSystemMessage("Removed AbilityIds:")
+    local missing = {}
     for abilityId in pairs(DebugAuras) do
-        if not DoesAbilityExist(abilityId) then
-            AddSystemMessage(tostring(abilityId))
+        if abilityId > 0 and not DoesAbilityExist(abilityId) then
+            table_insert(missing, abilityId)
         end
+    end
+    table_sort(missing)
+
+    AddSystemMessage(string_format("DebugAuras: %d ids without DoesAbilityExist (see log for detail)", #missing))
+    for _, abilityId in ipairs(missing) do
+        local tags = {}
+        if EffectOverride[abilityId] then
+            table_insert(tags, "EffectOverride")
+        end
+        local abilityName = GetAbilityName(abilityId)
+        if abilityName and abilityName ~= "" then
+            table_insert(tags, zo_strformat("<<C:1>>", abilityName))
+        end
+        local line = tostring(abilityId)
+        if #tags > 0 then
+            line = string_format("%s  (%s)", line, table.concat(tags, ", "))
+        end
+        AddSystemMessage(line)
+        LUIE:Log("Debug", line)
     end
 end
 

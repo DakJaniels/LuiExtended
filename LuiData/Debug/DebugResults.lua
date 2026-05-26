@@ -9,7 +9,8 @@ if ZO_IsConsoleOrGameCoreUI() then return end
 --- @class (partial) LuiData
 local LuiData = LuiData
 local Data = LuiData.Data
--- For debug function - convert result reason codes to string value
+-- Short labels for combat debug (EVENT_COMBAT_EVENT result). Keys match ACTION_RESULT_* numeric values.
+-- Enum reference: in-client dump (INVALID / ITERATION_* are not stored here).
 --- @class DebugResults
 local debugResults =
 {
@@ -66,7 +67,7 @@ local debugResults =
     [2380] = "WRONG WEAPON",
     [2390] = "PACIFY",
     [2391] = "TARGET NOT PVP FLAGGED",
-    [2392] = "LINKED CAST",
+    [2392] = "TAUNT",
     [2400] = "LEVITATE",
     [2410] = "INTERCEPT",
     [2420] = "FALL DMG",
@@ -111,6 +112,7 @@ local debugResults =
     [3130] = "KILLED BY SUBZONE",
     [3140] = "MERCENARY LIMIT",
     [3150] = "MOBILE GRAVEYARD LIMIT",
+    -- Legacy alliance standard / camp placement (not in latest ACTION_RESULT enum dump; keep for old logs)
     [3160] = "STANDARD LIMIT",
     [3170] = "STANDARD MISMATCH",
     [3180] = "STANDARD ALREADY EXISTS",
@@ -128,7 +130,7 @@ local debugResults =
     [3450] = "CANT SWAP HOTBAR IS OVERRIDDEN",
     [3460] = "SOUL GEM RESURRECTION ACCEPTED",
     [3461] = "KILLED BY DAEDRIC WEAPON",
-    [3470] = "HEAL ABORBED",
+    [3470] = "HEAL ABSORBED",
     [3480] = "DIED COMPANION XP",
     [3490] = "SELF PLAYING TRIBUTE",
     [3500] = "TARGET PLAYING TRIBUTE",
@@ -137,6 +139,7 @@ local debugResults =
     [3530] = "SIEGE PACKED UP",
     [3540] = "AT PET LIMIT",
     [3550] = "BAD TARGET COMBAT STATE",
+    [3560] = "CAST AT PET LIMIT",
     [1073741825] = "DOT",
     [1073741826] = "DOT!",
     [1073741840] = "HOT",
