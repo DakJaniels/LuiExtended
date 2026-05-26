@@ -111,37 +111,95 @@ local function CreateRegenAnimation(parent, anchors, dims, alpha, number)
     return nil
 end
 
--- Possession halo animated texture (32-frame sprite sheet: 4 columns x 8 rows)
-local function CreatePossessionHaloAnimation(backdrop)
-    local halo = backdrop:CreateControl("$(parent)_PossessionHalo", CT_TEXTURE)
-    halo:SetTexture("EsoUI/Art/UnitAttributeVisualizer/possession_animatedHalo_32fr.dds")
-    halo:SetDrawLayer(DL_BACKGROUND)
-    halo:SetAnchor(LEFT, backdrop, LEFT, -80, 0)
-    halo:SetAnchor(RIGHT, backdrop, RIGHT, 80, 0)
-    halo:SetHeight(128)
+-- STAT_POWER / possession full-bar halos: lowest layer on backdrop; opaque track + health fill draw above (see ArmorDamage.lua)
+local STAT_POWER_HALO_DRAW_LEVEL = 1
+local STAT_POWER_TRACK_DRAW_LEVEL = 5
+local HEALTH_BAR_FILL_DRAW_LEVEL = 10
+
+local function SetHealthBarAbovePowerHalo(backdrop, bar)
+    if not backdrop or not bar then
+        return
+    end
+
+    bar:SetDrawLayer(DL_CONTROLS)
+    bar:SetDrawLevel(HEALTH_BAR_FILL_DRAW_LEVEL)
+
+    local trauma = backdrop:GetNamedChild("_Trauma")
+    if trauma then
+        trauma:SetDrawLayer(DL_CONTROLS)
+        trauma:SetDrawLevel(HEALTH_BAR_FILL_DRAW_LEVEL + 1)
+    end
+
+    local shield = backdrop:GetNamedChild("_Shield")
+    if shield then
+        shield:SetDrawLayer(DL_CONTROLS)
+        shield:SetDrawLevel(HEALTH_BAR_FILL_DRAW_LEVEL + 2)
+    end
+end
+
+-- Opaque full-bar track so empty status bar region does not show the animated halo (status fill is only partial width)
+local function EnsureHealthBarPowerHaloTrack(backdrop, bar)
+    if not backdrop or not bar then
+        return nil
+    end
+
+    local track = backdrop:GetNamedChild("_PowerHaloTrack")
+    if not track then
+        track = backdrop:CreateControl("$(parent)_PowerHaloTrack", CT_STATUSBAR)
+        track:SetAnchor(TOPLEFT, bar, TOPLEFT, 0, 0)
+        track:SetAnchor(BOTTOMRIGHT, bar, BOTTOMRIGHT, 0, 0)
+        track:SetDrawTier(DT_LOW)
+        track:SetDrawLayer(DL_BACKGROUND)
+        track:SetDrawLevel(STAT_POWER_TRACK_DRAW_LEVEL)
+        track:SetMinMax(0, 1)
+        track:SetValue(1)
+        track:SetMouseEnabled(false)
+        local r, g, b, a = backdrop:GetCenterColor()
+        track:SetColor(r, g, b, a)
+    end
+
+    return track
+end
+
+--- @param backdrop BackdropControl
+--- @param bar StatusBarControl
+--- @param controlNameSuffix string
+--- @param zoTextureVirtual string
+--- @param animationTimelineVirtual string
+--- @return TextureControl|nil
+local function CreateBarBackgroundHalo(backdrop, bar, controlNameSuffix, zoTextureVirtual, animationTimelineVirtual)
+    if not backdrop or not bar then
+        return nil
+    end
+
+    EnsureHealthBarPowerHaloTrack(backdrop, bar)
+    SetHealthBarAbovePowerHalo(backdrop, bar)
+
+    local halo = CreateControlFromVirtual("$(parent)_" .. controlNameSuffix, backdrop, zoTextureVirtual)
+    ApplyTemplateToControl(halo, ZO_GetPlatformTemplate(zoTextureVirtual))
     halo:SetDrawTier(DT_LOW)
+    halo:SetDrawLayer(DL_BACKGROUND)
+    halo:SetDrawLevel(STAT_POWER_HALO_DRAW_LEVEL)
+    halo:SetAnchor(LEFT, bar, LEFT, -80, 0)
+    halo:SetAnchor(RIGHT, bar, RIGHT, 80, 0)
+    halo:SetHeight(128)
     halo:SetHidden(true)
 
-    -- Use XML-defined animation timeline
-    halo.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("LUIE_PossessionHaloAnimation", halo)
+    halo.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual(animationTimelineVirtual, halo)
     halo.animation = halo.timeline:GetAnimation(1)
+    halo.animation:SetFramerate(32)
 
     return halo
 end
 
--- Increased power animated halo (32-frame sprite sheet: 4 columns x 8 rows)
-local function CreateIncreasedPowerTexture(backdrop)
-    local powerTex = backdrop:CreateControl("$(parent)_IncreasedPowerHalo", CT_TEXTURE)
-    local texturePath = ZO_IsConsoleOrGameCoreUI() and "EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_increasedPower_animatedHalo_32fr.dds" or "EsoUI/Art/UnitAttributeVisualizer/increasedPower_animatedHalo_32fr.dds"
-    powerTex:SetTexture(texturePath)
-    powerTex:SetDrawLayer(DL_BACKGROUND)
-    powerTex:SetAnchor(LEFT, backdrop, LEFT, -80, 0)
-    powerTex:SetAnchor(RIGHT, backdrop, RIGHT, 80, 0)
-    powerTex:SetHeight(128)
-    powerTex:SetDrawTier(DT_LOW)
-    powerTex:SetHidden(true)
+-- Possession halo animated texture (32-frame sprite sheet: 4 columns x 8 rows)
+local function CreatePossessionHaloAnimation(backdrop, bar)
+    return CreateBarBackgroundHalo(backdrop, bar, "PossessionHalo", "ZO_PossessionHaloTexture", "PossessionHaloAnimation")
+end
 
-    return powerTex
+-- Increased power animated halo (STAT_POWER, 32-frame sprite sheet: 4 columns x 8 rows)
+local function CreateIncreasedPowerTexture(backdrop, bar)
+    return CreateBarBackgroundHalo(backdrop, bar, "IncreasedPowerHalo", "ZO_IncreasedPowerTexture", "IncreasedPowerAnimation")
 end
 
 -- No-healing fade animation (controls overlay and stripe)
@@ -953,8 +1011,10 @@ local function SetupCommonFrameActions()
                                 powerBar.possessionGlowRight = powerBar.possessionOverlay:GetNamedChild("_GlowRight")
                                 powerBar.possessionGlowCenter = powerBar.possessionOverlay:GetNamedChild("_GlowCenter")
 
-                                -- Create animated halo texture using helper function
-                                powerBar.possessionHalo = CreatePossessionHaloAnimation(powerBar.backdrop)
+                                -- Create animated halo texture (child of _Bar, ZOS layering)
+                                if powerBar.bar then
+                                    powerBar.possessionHalo = CreatePossessionHaloAnimation(powerBar.backdrop, powerBar.bar)
+                                end
                             end
                         end
 
@@ -1059,6 +1119,7 @@ local function SetupArmorOverlays(frameConfig)
             end
 
             local backdrop = frame[COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
+            local bar = frame[COMBAT_MECHANIC_FLAGS_HEALTH].bar
             if armorEnabled then
                 frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_ARMOR_RATING] =
                 {
@@ -1066,10 +1127,10 @@ local function SetupArmorOverlays(frameConfig)
                     ["inc"] = backdrop:GetNamedChild("_ArmorInc"), -- Get from XML (already hidden by default)
                 }
             end
-            if powerEnabled then
+            if powerEnabled and bar then
                 frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_POWER] =
                 {
-                    ["inc"] = CreateIncreasedPowerTexture(backdrop),
+                    ["inc"] = CreateIncreasedPowerTexture(backdrop, bar),
                 }
             end
         end
@@ -1093,11 +1154,11 @@ local function SetupPowerGlowAnimations()
             and frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_POWER].inc then
                 local control = frame[COMBAT_MECHANIC_FLAGS_HEALTH].stat[STAT_POWER].inc
 
-                -- Use XML-defined animation timeline
-                control.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("LUIE_PowerGlowAnimation", control)
-                control.animation = control.timeline:GetAnimation(1)
-                control.animation:SetFramerate(32)
-                control.timeline:PlayFromStart()
+                if not control.timeline then
+                    control.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("IncreasedPowerAnimation", control)
+                    control.animation = control.timeline:GetAnimation(1)
+                    control.animation:SetFramerate(32)
+                end
             end
         end
     end
