@@ -181,6 +181,7 @@ function UnitFrames.Initialize(enabled)
     UnitFrames.MigrateCustomFrameAppearanceV2()
     UnitFrames.MigratePlayerTargetLabelFormats()
     UnitFrames.MigratePlayerTargetOverlayFlags()
+    UnitFrames.MigratePowerOverlayDefaultOff()
 
     if UnitFrames.SV.DefaultOocTransparency < 0 or UnitFrames.SV.DefaultOocTransparency > 100 then
         UnitFrames.SV.DefaultOocTransparency = UnitFrames.Defaults.DefaultOocTransparency

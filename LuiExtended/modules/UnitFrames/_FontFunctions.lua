@@ -67,7 +67,7 @@ end
 
 local function ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
     if unitFrame.name then
-        unitFrame.name:SetFont((unitFrame.name:GetParent() == unitFrame.topInfo) and fontCaption or fontBars)
+        unitFrame.name:SetFont(fontCaption)
     end
     if unitFrame.level then
         unitFrame.level:SetFont(fontCaption)

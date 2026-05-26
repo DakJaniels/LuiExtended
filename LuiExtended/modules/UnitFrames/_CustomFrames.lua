@@ -197,3 +197,18 @@ function UnitFrames.MigratePlayerTargetOverlayFlags()
     end
     LUIE.MarkMigrationDone("unitframes_pt_overlay_flags_split")
 end
+
+--- Power overlay was previously default-on for player/target; default is now off (one-time).
+function UnitFrames.MigratePowerOverlayDefaultOff()
+    if LUIE.IsMigrationDone("unitframes_power_overlay_default_off") then
+        return
+    end
+    local sv = UnitFrames.SV
+    if sv.PlayerEnablePower == true then
+        sv.PlayerEnablePower = false
+    end
+    if sv.TargetEnablePower == true then
+        sv.TargetEnablePower = false
+    end
+    LUIE.MarkMigrationDone("unitframes_power_overlay_default_off")
+end
