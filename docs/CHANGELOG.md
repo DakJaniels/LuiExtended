@@ -1,5 +1,23 @@
 # LuiExtended Changelog
 
+## Version 7.2.2.9
+
+### New
+
+- ChatAnnouncements: Adventure Zone faction reputation gains are now announced in chat as loot-style messages (with optional icon and optional running total, matching your Loot settings).
+- SpellCastBuffs (debug): Tooltip debug meta now supports an overflow tooltip column so large debug dumps don’t run off-screen.
+
+### Changes
+
+- Unit Frames: Next roll dodge prediction now tracks **Dodge Fatigue** stacks from buffs (and refreshes on stack changes) for more accurate predicted stamina cost.
+- SpellCastBuffs (debug): Debug meta now lists all Derived/Advanced stat rows (no longer capped to a small number of rows), with overflow handled via the secondary tooltip.
+- Unit Frames: Increased Power / possession halo visuals better match the health bar (layering + bar texture/color consistency) and avoid showing the animated halo in the empty portion of the bar.
+
+### Fixed
+
+- LuiData: Maelstrom 2H (Merciless Charge) set buff tooltip text is now correct and uses the proper dynamic description source.
+- LuiData/Debug: Updated Maelstrom-related debug aura/result mappings and corrected minor label issues (for example “HEAL ABSORBED”).
+
 ## Version 7.2.2.8
 
 ### Fixed

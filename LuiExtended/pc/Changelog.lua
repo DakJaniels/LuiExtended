@@ -48,6 +48,25 @@ local changelogSectionBodyPool
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.2.9
+    "|cFFA500LuiExtended Version 7.2.2.9|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Adventure Zone faction reputation gains are now announced in chat as loot-style messages (with optional icon and optional total, matching Loot settings).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs (debug): Tooltip debug meta supports an overflow tooltip column so large debug dumps don’t run off-screen.",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Next roll dodge prediction now tracks Dodge Fatigue stacks from buffs (and refreshes on stack changes) for more accurate predicted stamina cost.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs (debug): Debug meta now lists all Derived/Advanced stat rows; overflow continues in the secondary tooltip.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Increased Power / possession halo visuals better match the health bar (layering + bar texture/color consistency) and no longer show the animated halo in the empty part of the bar.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t LuiData: Maelstrom 2H (Merciless Charge) set buff tooltip text is now correct and uses the proper dynamic description source.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t LuiData/Debug: Updated Maelstrom-related debug aura/result mappings and corrected minor label issues (for example \"HEAL ABSORBED\").",
+    "",
     -- Version Header 7.2.2.8
     "|cFFA500LuiExtended Version 7.2.2.8|r",
     "",
