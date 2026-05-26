@@ -41,7 +41,14 @@ local Effects = Data.Effects
 --- @field iconFilename string?
 --- @field sourceType CombatUnitType|integer?
 
-local MAX_STAT_DEBUG_ROWS = 8
+local DEBUG_LINE_HEIGHT = 20
+local SCREEN_MARGIN = 24
+local BETWEEN_TOOLTIP_OFFSET_X = 20
+--- Soft cap so debug meta splits to the overflow column before the primary tooltip grows off the top of the screen.
+--- (ZO_Tooltip dimensionConstraints.maxHeight clamps a section but does not spawn a second tooltip; see ZO_Tooltip.lua GetDimensionWithContraints.)
+local PRIMARY_DEBUG_LINE_CAP = 14
+
+local debugMetaOverflowTooltip
 
 local advancedStatDisplayFormatNames =
 {
@@ -371,8 +378,7 @@ local function addDerivedStatDebugLines(abilityId, addLine)
 
     addLine("Derived #", tostring(numDerived))
 
-    local limit = zo_min(numDerived, MAX_STAT_DEBUG_ROWS)
-    for index = 1, limit do
+    for index = 1, numDerived do
         local derivedStat, effect = GetAbilityDerivedStatAndEffectByIndex(abilityId, index)
         if derivedStat ~= nil then
             addLine(
@@ -380,10 +386,6 @@ local function addDerivedStatDebugLines(abilityId, addLine)
                 string.format("%s → %s", formatStatWithId(derivedStatNames, derivedStat), tostring(effect or 0))
             )
         end
-    end
-
-    if numDerived > limit then
-        addLine("derived", string.format("… +%d more row(s)", numDerived - limit))
     end
 end
 
@@ -397,8 +399,7 @@ local function addAdvancedStatDebugLines(abilityId, addLine)
 
     addLine("Advanced #", tostring(numAdvanced))
 
-    local limit = zo_min(numAdvanced, MAX_STAT_DEBUG_ROWS)
-    for index = 1, limit do
+    for index = 1, numAdvanced do
         local statType, displayFormat, effectValue = GetAbilityAdvancedStatAndEffectByIndex(abilityId, index)
         if statType ~= nil then
             addLine(
@@ -411,10 +412,6 @@ local function addAdvancedStatDebugLines(abilityId, addLine)
                 )
             )
         end
-    end
-
-    if numAdvanced > limit then
-        addLine("advanced", string.format("… +%d more row(s)", numAdvanced - limit))
     end
 end
 
@@ -710,6 +707,187 @@ local function addBuffAbilityApiDebugLines(abilityId, unitTag, addLine)
     end
 end
 
+--- @param label string
+--- @param value string
+--- @return string
+local function formatDebugMetaLineText(label, value)
+    return string.format("%s: %s", ZO_NORMAL_TEXT:Colorize(label), tostring(value))
+end
+
+--- @param tooltip TooltipControl
+--- @param label string
+--- @param value string
+local function appendDebugMetaLineToTooltip(tooltip, label, value)
+    tooltip:AddLine(formatDebugMetaLineText(label, value), "ZoFontWinT1", ZO_NORMAL_TEXT:UnpackRGB())
+    tooltip:SetVerticalPadding(2)
+end
+
+--- @return TooltipControl
+local function GetDebugMetaOverflowTooltip()
+    if not debugMetaOverflowTooltip then
+        debugMetaOverflowTooltip = LUIE_SCB_DebugOverflowTooltip
+    end
+    return debugMetaOverflowTooltip
+end
+
+--- @param numLines integer
+--- @return integer
+local function computePrimaryDebugLineCount(numLines)
+    if numLines <= 1 then
+        return numLines
+    end
+
+    local screenHeight = select(2, GuiRoot:GetDimensions())
+    local _, tooltipTop = InformationTooltip:GetScreenRect()
+    local roomAbove = zo_max(0, tooltipTop - SCREEN_MARGIN)
+    local maxByRoom = zo_floor(roomAbove / DEBUG_LINE_HEIGHT)
+    local maxByScreen = zo_floor((screenHeight - (2 * SCREEN_MARGIN)) / DEBUG_LINE_HEIGHT)
+
+    local cap = zo_min(PRIMARY_DEBUG_LINE_CAP, maxByRoom, maxByScreen)
+    cap = zo_max(1, cap)
+
+    if numLines <= cap then
+        return numLines
+    end
+    return cap
+end
+
+--- @param debugLines { label: string, value: string }[]
+--- @param cap integer
+--- @return integer
+local function resolvePrimarySplitCount(debugLines, cap)
+    local numLines = #debugLines
+    if numLines <= cap then
+        return numLines
+    end
+    for i = 1, numLines do
+        local label = debugLines[i].label
+        if label == "Derived #" or label == "Advanced #" then
+            if i > 1 then
+                return zo_min(i - 1, cap)
+            end
+        end
+    end
+    return cap
+end
+
+-- Matches Tooltip.lua quadrant ids (CalculateQuandrant / DynamicAnchorLayout).
+local QUAD_TOPLEFT = 1
+local QUAD_TOPRIGHT = 2
+local QUAD_BOTTOMRIGHT = 3
+local QUAD_BOTTOMLEFT = 4
+
+--- @param control Control
+--- @return integer quadrant
+local function calculateBuffIconQuadrant(control)
+    local left, top, right, bottom = control:GetScreenRect()
+    local scale = control:GetScale()
+    if scale == 0 then
+        scale = 1
+    end
+    local middleX = (left + right) / (2 * scale)
+    local middleY = (top + bottom) / (2 * scale)
+    local screenWidth, screenHeight = GuiRoot:GetDimensions()
+    local screenMidX = screenWidth / 2
+    local screenMidY = screenHeight / 2
+
+    if middleX >= screenMidX and middleY < screenMidY then
+        return QUAD_TOPRIGHT
+    elseif middleX >= screenMidX and middleY >= screenMidY then
+        return QUAD_BOTTOMRIGHT
+    elseif middleX < screenMidX and middleY >= screenMidY then
+        return QUAD_BOTTOMLEFT
+    end
+    return QUAD_TOPLEFT
+end
+
+--- @param overflow TooltipControl
+--- @param primary TooltipControl
+--- @param buffControl Control|nil
+local function anchorDebugOverflowBesidePrimary(overflow, primary, buffControl)
+    if overflow.animation then
+        overflow.animation:Stop()
+    end
+    overflow:SetHidden(false)
+    overflow:SetAlpha(1)
+
+    local screenWidth = select(1, GuiRoot:GetDimensions())
+    local primaryLeft, _, primaryRight, _ = primary:GetScreenRect()
+    local overflowLeft, _, overflowRight, _ = overflow:GetScreenRect()
+    local overflowWidth = overflowRight - overflowLeft
+    if overflowWidth <= 0 then
+        overflowWidth = primaryRight - primaryLeft
+    end
+    if overflowWidth <= 0 then
+        overflowWidth = 280
+    end
+
+    local gap = BETWEEN_TOOLTIP_OFFSET_X
+    local roomRight = screenWidth - SCREEN_MARGIN - primaryRight
+    local roomLeft = primaryLeft - SCREEN_MARGIN
+    local fitsRight = roomRight >= overflowWidth + gap
+    local fitsLeft = roomLeft >= overflowWidth + gap
+
+    -- Tooltip.lua: left-half screen → comparative on primary's right; right-half → comparative on left.
+    local preferRightByQuadrant = false
+    if buffControl then
+        local quadrant = calculateBuffIconQuadrant(buffControl)
+        preferRightByQuadrant = quadrant == QUAD_TOPLEFT or quadrant == QUAD_BOTTOMLEFT
+    end
+
+    if fitsRight and (not fitsLeft or preferRightByQuadrant) then
+        overflow:SetOwner(primary, TOPLEFT, gap, 0, TOPRIGHT)
+    elseif fitsLeft then
+        overflow:SetOwner(primary, TOPRIGHT, -gap, 0, TOPLEFT)
+    elseif roomRight >= roomLeft then
+        overflow:SetOwner(primary, TOPLEFT, gap, 0, TOPRIGHT)
+    else
+        overflow:SetOwner(primary, TOPRIGHT, -gap, 0, TOPLEFT)
+    end
+end
+
+--- @param debugLines { label: string, value: string }[]
+--- @param buffControl Control|nil
+local function flushDebugMetaTooltips(debugLines, buffControl)
+    local numLines = #debugLines
+    if numLines == 0 then
+        SpellCastBuffs.ClearDebugMetaOverflowTooltip()
+        return
+    end
+
+    local primaryCount = resolvePrimarySplitCount(debugLines, computePrimaryDebugLineCount(numLines))
+
+    for i = 1, primaryCount do
+        local row = debugLines[i]
+        appendDebugMetaLineToTooltip(InformationTooltip, row.label, row.value)
+    end
+
+    if numLines <= primaryCount then
+        SpellCastBuffs.ClearDebugMetaOverflowTooltip()
+        return
+    end
+
+    local overflow = GetDebugMetaOverflowTooltip()
+    if overflow.ClearLines then
+        overflow:ClearLines()
+    end
+    overflow:AddLine("Debug meta (continued)", "ZoFontWinT1", ZO_NORMAL_TEXT:UnpackRGB())
+    overflow:SetVerticalPadding(2)
+
+    for i = primaryCount + 1, numLines do
+        local row = debugLines[i]
+        appendDebugMetaLineToTooltip(overflow, row.label, row.value)
+    end
+
+    anchorDebugOverflowBesidePrimary(overflow, InformationTooltip, buffControl)
+end
+
+function SpellCastBuffs.ClearDebugMetaOverflowTooltip()
+    if debugMetaOverflowTooltip then
+        ClearTooltipImmediately(debugMetaOverflowTooltip)
+    end
+end
+
 --- @param control table
 --- @param detailsLine integer
 --- @param unitTag string
@@ -724,12 +902,9 @@ function SpellCastBuffs.AddTooltipDebugMetaLines(control, detailsLine, unitTag)
     local override = type(abilityId) == "number" and Effects.EffectOverride[abilityId] or nil
     local ttUnit = (unitTag and unitTag ~= "") and unitTag or "player"
 
-    -- Flow layout (AddLine): header rows (AddHeaderLine) share a fixed grid with detailsLine and
-    -- collide with multi-line description text when dozens of debug rows are appended.
+    local debugLines = {}
     local function addLine(label, value)
-        local lineText = string.format("%s: %s", ZO_NORMAL_TEXT:Colorize(label), tostring(value))
-        InformationTooltip:AddLine(lineText, "ZoFontWinT1", ZO_NORMAL_TEXT:UnpackRGB())
-        InformationTooltip:SetVerticalPadding(2)
+        debugLines[#debugLines + 1] = { label = label, value = value }
     end
 
     if meta then
@@ -774,6 +949,8 @@ function SpellCastBuffs.AddTooltipDebugMetaLines(control, detailsLine, unitTag)
     end
 
     addCcTooltipDebugLines(override, meta, abilityId, addLine)
+
+    flushDebugMetaTooltips(debugLines, control)
 
     return detailsLine
 end

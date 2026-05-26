@@ -1549,6 +1549,7 @@ end
 
 local function ClearStickyTooltip()
     ClearTooltip(InformationTooltip)
+    SpellCastBuffs.ClearDebugMetaOverflowTooltip()
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
 end
 
@@ -1648,6 +1649,7 @@ end
 function SpellCastBuffs.Buff_OnMouseEnter(control)
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
 
+    SpellCastBuffs.ClearDebugMetaOverflowTooltip()
     InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -5, TOP)
     -- Setup Text
     local tooltipText = ""
@@ -1849,6 +1851,7 @@ function SpellCastBuffs.Buff_OnMouseExit(control)
         eventManager:RegisterForUpdate(moduleName .. "StickyTooltip", SpellCastBuffs.SV.TooltipSticky, ClearStickyTooltip)
     else
         ClearTooltip(InformationTooltip)
+        SpellCastBuffs.ClearDebugMetaOverflowTooltip()
     end
 end
 
