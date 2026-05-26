@@ -898,7 +898,7 @@ function ActionBar.Initialize(enabled)
     local quickslotButton = ZO_ActionBar_GetButton(UNUSED, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
     local quickslotButtonButton = quickslotButton and quickslotButton.button
 
-    local quickslotLabel = windowManager:CreateControl("$(parent)Label", quickslotButtonButton, CT_LABEL)
+    local quickslotLabel = quickslotButtonButton:CreateControl("$(parent)Label", CT_LABEL)
     quickslotLabel:SetAnchor(CENTER, quickslotButtonButton, CENTER, 0, 0)
     quickslotLabel:SetFont(g_potionFont or "LUIE Default Font")
     quickslotLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
@@ -920,7 +920,7 @@ function ActionBar.Initialize(enabled)
     local ActionButton8 = ZO_ActionBar_GetButton(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1)
     local ActionButton8_button = ActionButton8 and ActionButton8.button
     -- Ultimate value label (numeric display above slot)
-    local ultimateValueLabel = windowManager:CreateControl("$(parent)LabelVal", ActionButton8_button, CT_LABEL)
+    local ultimateValueLabel = ActionButton8_button:CreateControl("$(parent)LabelVal", CT_LABEL)
     ultimateValueLabel:SetAnchor(BOTTOM, ActionButton8_button, TOP, 0, -3)
     ultimateValueLabel:SetFont("$(BOLD_FONT)|16|soft-shadow-thick")
     ultimateValueLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
@@ -930,7 +930,7 @@ function ActionBar.Initialize(enabled)
     uiUltimate.LabelVal = ultimateValueLabel
 
     -- Ultimate percentage label (overlay on slot)
-    local ultimatePctLabel = windowManager:CreateControl("$(parent)LabelPct", ActionButton8_button, CT_LABEL)
+    local ultimatePctLabel = ActionButton8_button:CreateControl("$(parent)LabelPct", CT_LABEL)
     ultimatePctLabel:SetFont(g_ultimateFont or "LUIE Default Font")
     ultimatePctLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     ultimatePctLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
@@ -942,7 +942,7 @@ function ActionBar.Initialize(enabled)
     uiUltimate.LabelPct = ultimatePctLabel
 
     -- Ultimate ready burst texture
-    local ultimateTexture = windowManager:CreateControl("$(parent)Texture", ActionButton8_button, CT_TEXTURE)
+    local ultimateTexture = ActionButton8_button:CreateControl("$(parent)Texture", CT_TEXTURE)
     ultimateTexture:SetAnchor(CENTER, ActionButton8_button, CENTER, 0, 0)
     ultimateTexture:SetDimensions(160, 160)
     ultimateTexture:SetTexture("/esoui/art/crafting/white_burst.dds")
@@ -954,7 +954,7 @@ function ActionBar.Initialize(enabled)
     -- -----------------------------------------------------------------------------
     -- Create a top level window for backbar butons
     local actionBarParent = GetActionBarControl()
-    local tlw = windowManager:CreateControl("LUIE_Backbar", actionBarParent, CT_CONTROL)
+    local tlw = actionBarParent:CreateControl("LUIE_Backbar", CT_CONTROL)
     tlw:SetParent(actionBarParent)
     g_backbarContainer = tlw
 
@@ -2035,7 +2035,7 @@ function ActionBar.CreateCompanionUltimateLabels()
         return
     end
 
-    local ultimateValueLabel = windowManager:CreateControl("$(parent)LUIECompanionLabelVal", companionButton, CT_LABEL)
+    local ultimateValueLabel = companionButton:CreateControl("$(parent)LUIECompanionLabelVal", CT_LABEL)
     ultimateValueLabel:SetAnchor(BOTTOM, companionButton, TOP, 0, -3)
     ultimateValueLabel:SetFont("$(BOLD_FONT)|16|soft-shadow-thick")
     ultimateValueLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
@@ -2044,7 +2044,7 @@ function ActionBar.CreateCompanionUltimateLabels()
     ultimateValueLabel:SetHidden(not ActionBar.SV.CompanionUltimateLabelEnabled)
     uiCompanionUltimate.LabelVal = ultimateValueLabel
 
-    local ultimatePctLabel = windowManager:CreateControl("$(parent)LUIECompanionLabelPct", companionButton, CT_LABEL)
+    local ultimatePctLabel = companionButton:CreateControl("$(parent)LUIECompanionLabelPct", CT_LABEL)
     ultimatePctLabel:SetFont(g_companionUltimateFont or "LUIE Default Font")
     ultimatePctLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     ultimatePctLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
@@ -2952,14 +2952,14 @@ function ActionBar.CreateCastBar()
     uiTlw.castBar:SetDimensions(ActionBar.SV.CastBarSizeW + ActionBar.SV.CastBarIconSize + 4, ActionBar.SV.CastBarSizeH)
 
     -- Setup Preview
-    uiTlw.castBar.preview = windowManager:CreateControl("$(parent)Preview", uiTlw.castBar, CT_BACKDROP)
+    uiTlw.castBar.preview = uiTlw.castBar:CreateControl("$(parent)Preview", CT_BACKDROP)
     uiTlw.castBar.preview:SetCenterColor(0, 0, 0, 0.4)
     uiTlw.castBar.preview:SetEdgeColor(0, 0, 0, 0.6)
     uiTlw.castBar.preview:SetEdgeTexture("", 8, 1, 1, 1)
     uiTlw.castBar.preview:SetDrawLayer(DL_BACKGROUND)
     uiTlw.castBar.preview:SetAnchorFill(uiTlw.castBar)
     uiTlw.castBar.preview:SetHidden(true)
-    uiTlw.castBar.previewLabel = windowManager:CreateControl("$(parent)Label", uiTlw.castBar.preview, CT_LABEL)
+    uiTlw.castBar.previewLabel = uiTlw.castBar.preview:CreateControl("$(parent)Label", CT_LABEL)
     uiTlw.castBar.previewLabel:SetFont(ZO_IsConsoleOrGameCoreUI() and LUIE.GetPositionLabelFont() or fontString)
     uiTlw.castBar.previewLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     uiTlw.castBar.previewLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
@@ -2982,14 +2982,14 @@ function ActionBar.CreateCastBar()
         ActionBar.SV.CastBarCustomPosition = { uiTlw.castBar:GetLeft(), uiTlw.castBar:GetTop() }
     end)
 
-    uiTlw.castBar.preview.anchorTexture = windowManager:CreateControl("$(parent)AnchorTexture", uiTlw.castBar.preview, CT_TEXTURE)
+    uiTlw.castBar.preview.anchorTexture = uiTlw.castBar.preview:CreateControl("$(parent)AnchorTexture", CT_TEXTURE)
     uiTlw.castBar.preview.anchorTexture:SetAnchor(TOPLEFT, uiTlw.castBar.preview, TOPLEFT)
     uiTlw.castBar.preview.anchorTexture:SetDimensions(16, 16)
     uiTlw.castBar.preview.anchorTexture:SetTexture("/esoui/art/reticle/border_topleft.dds")
     uiTlw.castBar.preview.anchorTexture:SetDrawLayer(DL_OVERLAY)
     uiTlw.castBar.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
 
-    uiTlw.castBar.preview.anchorLabel = windowManager:CreateControl("$(parent)AnchorLabel", uiTlw.castBar.preview, CT_LABEL)
+    uiTlw.castBar.preview.anchorLabel = uiTlw.castBar.preview:CreateControl("$(parent)AnchorLabel", CT_LABEL)
     uiTlw.castBar.preview.anchorLabel:SetFont(LUIE.GetPositionLabelFont())
     uiTlw.castBar.preview.anchorLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     uiTlw.castBar.preview.anchorLabel:SetVerticalAlignment(TEXT_ALIGN_TOP)
@@ -2999,7 +2999,7 @@ function ActionBar.CreateCastBar()
     uiTlw.castBar.preview.anchorLabel:SetColor(1, 1, 0, 1)
     uiTlw.castBar.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
     uiTlw.castBar.preview.anchorLabel:SetDrawTier(DT_MEDIUM)
-    uiTlw.castBar.preview.anchorLabelBg = windowManager:CreateControl("$(parent)Bg", uiTlw.castBar.preview.anchorLabel, CT_BACKDROP)
+    uiTlw.castBar.preview.anchorLabelBg = uiTlw.castBar.preview.anchorLabel:CreateControl("$(parent)Bg", CT_BACKDROP)
     uiTlw.castBar.preview.anchorLabelBg:SetCenterColor(0, 0, 0, 1)
     uiTlw.castBar.preview.anchorLabelBg:SetEdgeColor(0, 0, 0, 1)
     uiTlw.castBar.preview.anchorLabelBg:SetEdgeTexture("", 8, 1, 1, 1)
@@ -3015,7 +3015,7 @@ function ActionBar.CreateCastBar()
     sceneManager:GetScene("siegeBar"):AddFragment(fragment)
     sceneManager:GetScene("siegeBarUI"):AddFragment(fragment)
 
-    castbar = windowManager:CreateControl("$(parent)Backdrop", uiTlw.castBar, CT_BACKDROP)
+    castbar = uiTlw.castBar:CreateControl("$(parent)Backdrop", CT_BACKDROP)
     castbar:SetCenterColor(0, 0, 0, 0.5)
     castbar:SetEdgeColor(0, 0, 0, 1)
     castbar:SetEdgeTexture("", 8, 1, 1, 1)
@@ -3028,12 +3028,12 @@ function ActionBar.CreateCastBar()
 
     castbar:SetDimensions(ActionBar.SV.CastBarIconSize, ActionBar.SV.CastBarIconSize)
 
-    castbar.back = windowManager:CreateControl("$(parent)Back", castbar, CT_TEXTURE)
+    castbar.back = castbar:CreateControl("$(parent)Back", CT_TEXTURE)
     castbar.back:SetTexture(LUIE_MEDIA_ICONS_ICON_BORDER_ICON_BORDER_DDS)
     castbar.back:SetAnchor(TOPLEFT, castbar, TOPLEFT)
     castbar.back:SetAnchor(BOTTOMRIGHT, castbar, BOTTOMRIGHT)
 
-    castbar.iconbg = windowManager:CreateControl("$(parent)IconBg", castbar, CT_BACKDROP)
+    castbar.iconbg = castbar:CreateControl("$(parent)IconBg", CT_BACKDROP)
     castbar.iconbg:SetCenterColor(0, 0, 0, 0.9)
     castbar.iconbg:SetEdgeColor(0, 0, 0, 0.9)
     castbar.iconbg:SetEdgeTexture("", 8, 1, 1, 1)
@@ -3042,7 +3042,7 @@ function ActionBar.CreateCastBar()
     castbar.iconbg:SetAnchor(TOPLEFT, castbar, TOPLEFT, 3, 3)
     castbar.iconbg:SetAnchor(BOTTOMRIGHT, castbar, BOTTOMRIGHT, -3, -3)
 
-    castbar.icon = windowManager:CreateControl("$(parent)Icon", castbar, CT_TEXTURE)
+    castbar.icon = castbar:CreateControl("$(parent)Icon", CT_TEXTURE)
     castbar.icon:SetTexture("/esoui/art/icons/icon_missing.dds")
     castbar.icon:SetDrawLayer(DL_CONTROLS)
     castbar.icon:SetAnchor(TOPLEFT, castbar, TOPLEFT, 3, 3)
@@ -3050,10 +3050,10 @@ function ActionBar.CreateCastBar()
 
     castbar.bar =
     {
-        ["backdrop"] = windowManager:CreateControl("$(parent)Backdrop", castbar, CT_BACKDROP),
-        ["bar"] = windowManager:CreateControl("$(parent)Bar", castbar, CT_STATUSBAR),
-        ["name"] = windowManager:CreateControl("$(parent)Name", castbar, CT_LABEL),
-        ["timer"] = windowManager:CreateControl("$(parent)Time", castbar, CT_LABEL),
+        ["backdrop"] = castbar:CreateControl("$(parent)Backdrop", CT_BACKDROP),
+        ["bar"] = castbar:CreateControl("$(parent)Bar", CT_STATUSBAR),
+        ["name"] = castbar:CreateControl("$(parent)Name", CT_LABEL),
+        ["timer"] = castbar:CreateControl("$(parent)Time", CT_LABEL),
     }
     castbar.bar.backdrop:SetCenterColor(0, 0, 0, 0.4)
     castbar.bar.backdrop:SetEdgeColor(0, 0, 0, 0.6)
@@ -4008,7 +4008,7 @@ function ActionBar.PlayProcAnimations(slotNum)
     procLoopTexture:SetHidden(true)
 
     -- Create label control
-    local label = windowManager:CreateControl("$(parent)Label", procLoopTexture, CT_LABEL)
+    local label = procLoopTexture:CreateControl("$(parent)Label", CT_LABEL)
     label:SetFont(g_barFont or "LUIE Default Font")
     label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
@@ -4097,7 +4097,7 @@ function ActionBar.ShowCustomToggle(slotNum)
         or g_backbarButtons[slotNum]
 
     -- Create toggle frame
-    local toggleFrame = windowManager:CreateControl("$(parent)Toggle_LUIE", actionButton.slot, CT_TEXTURE)
+    local toggleFrame = actionButton.slot:CreateControl("$(parent)Toggle_LUIE", CT_TEXTURE)
     toggleFrame:SetAnchor(TOPLEFT, actionButton.slot:GetNamedChild("FlipCard"))
     toggleFrame:SetAnchor(BOTTOMRIGHT, actionButton.slot:GetNamedChild("FlipCard"))
     toggleFrame:SetTexture("/esoui/art/actionbar/actionslot_toggledon.dds")
@@ -4108,7 +4108,7 @@ function ActionBar.ShowCustomToggle(slotNum)
     toggleFrame:SetColor(0.5, 1, 0.5, 1)
 
     -- Create label control
-    local label = windowManager:CreateControl("$(parent)Label", toggleFrame, CT_LABEL)
+    local label = toggleFrame:CreateControl("$(parent)Label", CT_LABEL)
     label:SetFont(g_barFont or "LUIE Default Font")
     label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
@@ -4123,7 +4123,7 @@ function ActionBar.ShowCustomToggle(slotNum)
     toggleFrame.label = label
 
     -- Create stack label control
-    local stack = windowManager:CreateControl("$(parent)Stack", toggleFrame, CT_LABEL)
+    local stack = toggleFrame:CreateControl("$(parent)Stack", CT_LABEL)
     stack:SetFont(g_barFont or "LUIE Default Font")
     stack:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     stack:SetVerticalAlignment(TEXT_ALIGN_CENTER)
