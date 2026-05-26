@@ -2899,6 +2899,11 @@ local function ApplyBarColors(bar, backdrop, colorRGB, alpha, backgroundMultipli
     local r, g, b = colorRGB[1], colorRGB[2], colorRGB[3]
     bar:SetColor(r, g, b, alpha)
     backdrop:SetCenterColor(backgroundMultiplier * r, backgroundMultiplier * g, backgroundMultiplier * b, alpha)
+
+    local powerHaloTrack = backdrop:GetNamedChild("_PowerHaloTrack")
+    if powerHaloTrack then
+        powerHaloTrack:SetColor(backgroundMultiplier * r, backgroundMultiplier * g, backgroundMultiplier * b, alpha)
+    end
 end
 
 function UnitFrames.CustomFramesApplyColorsSingle(unitTag)
@@ -3006,6 +3011,10 @@ local function ApplyCustomFrameHealthTextures(healthFrame, texture, isRoundTextu
     if not healthFrame then return end
     ApplyCustomFrameTextureToBackdrop(healthFrame.backdrop, texture, isRoundTexture)
     healthFrame.bar:SetTexture(texture)
+    local powerHaloTrack = healthFrame.backdrop:GetNamedChild("_PowerHaloTrack")
+    if powerHaloTrack then
+        powerHaloTrack:SetTexture(texture)
+    end
     if healthFrame.shieldbackdrop then
         ApplyCustomFrameTextureToBackdrop(healthFrame.shieldbackdrop, texture, isRoundTexture)
     end

@@ -26,6 +26,11 @@ LUIE_SCB_EffectsRegion_Template = {}
 ---@field public layer DrawLayer
 ---@field public tier DrawTier
 LUIE_SCB_Tlw_Template = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_SCB_DebugOverflowTooltipTopLevel : TopLevelWindow, TooltipTopLevel
+---@field public tier DrawTier
+LUIE_SCB_DebugOverflowTooltipTopLevel = {}
 ---------- LVL: 03 ----------
 ---------- LVL: 04 ----------
 -- ---------------------------------------------------------------------------------------------------------------------
@@ -160,6 +165,11 @@ LUIE_SCB_Tlw_Template_Preview = {}
 ---@field public hidden boolean
 ---@field Anchor {point: AnchorPosition, relativeTo: string, relativePoint: AnchorPosition}
 LUIE_SCB_Tlw_Template_IconHolder = {}
+-- ---------------------------------------------------------------------------------------------------------------------
+--
+---@class LUIE_SCB_DebugOverflowTooltip : TooltipControl, ZO_BaseTooltip
+---@field public tier DrawTier
+LUIE_SCB_DebugOverflowTooltip = {}
 ---------- LVL: 05 ----------
 ---------- LVL: 06 ----------
 -- ---------------------------------------------------------------------------------------------------------------------

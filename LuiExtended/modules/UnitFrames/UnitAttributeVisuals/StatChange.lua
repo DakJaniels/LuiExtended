@@ -80,7 +80,18 @@ function StatChangeModule:UpdateStat(unitTag, statType, attributeType, powerType
                     control.dec.normalTex:SetHidden(shouldHide)
                 end
             end
-            if control.inc then
+            if control.inc and statType == STAT_POWER then
+                local incValue = UnitFrames.GetAttributeVisualEffectValue(unitTag, ATTRIBUTE_VISUAL_INCREASED_STAT, statType, attributeType, powerType)
+                local shouldHide = incValue <= 0
+                control.inc:SetHidden(shouldHide)
+                if control.inc.timeline then
+                    if shouldHide then
+                        control.inc.timeline:Stop()
+                    elseif not control.inc.timeline:IsPlaying() then
+                        control.inc.timeline:PlayFromStart()
+                    end
+                end
+            elseif control.inc then
                 control.inc:SetHidden(value <= 0)
             end
         end
