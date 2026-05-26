@@ -178,7 +178,7 @@ function UnitFrames.OnPowerUpdate(unitTag, powerIndex, powerType, powerValue, po
     end
 
     if unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_STAMINA then
-        UnitFrames.PlayerDodgePrediction.Refresh()
+        UnitFrames.PlayerDodgePrediction.Refresh(true)
     end
 
     -- If players powerValue is zero, issue new blinking event on Custom Frames

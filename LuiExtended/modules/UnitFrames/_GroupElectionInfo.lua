@@ -10,7 +10,6 @@ local LUIE = LUIE
 local UnitFrames = LUIE.UnitFrames
 
 local eventManager = GetEventManager()
-local windowManager = GetWindowManager()
 
 local GROUP_ELECTION_ICON_INFO =
 {
@@ -44,7 +43,7 @@ local function CreateElectionIcons()
         local frame = UnitFrames.CustomFrames[unitTag]
         if frame and not frame.electionIcon then
             local parent = frame.topInfo or frame.control or frame[COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
-            local icon = windowManager:CreateControl(nil, parent, CT_TEXTURE)
+            local icon = parent:CreateControl("$(parent)ElectionIcon", CT_TEXTURE)
             icon:SetDrawTier(DT_HIGH)
             icon:SetDrawLayer(DL_OVERLAY)
             icon:SetDimensions(20, 20)
@@ -63,7 +62,7 @@ local function CreateElectionIcons()
         local frame = UnitFrames.CustomFrames[unitTag]
         if frame and not frame.electionIcon then
             local parent = frame.control or frame[COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
-            local icon = windowManager:CreateControl(nil, parent, CT_TEXTURE)
+            local icon = parent:CreateControl("$(parent)ElectionIcon", CT_TEXTURE)
             icon:SetDrawTier(DT_HIGH)
             icon:SetDrawLayer(DL_OVERLAY)
             icon:SetDimensions(18, 18)

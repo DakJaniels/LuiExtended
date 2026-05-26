@@ -21,7 +21,6 @@ local UnitFrames = LUIE.UnitFrames
 
 local pairs = pairs
 local eventManager = GetEventManager()
-local windowManager = GetWindowManager()
 
 
 local defaultPos = {}
@@ -156,7 +155,7 @@ function UnitFrames.CreateDefaultFrames()
         for powerType, parent in pairs(fields) do
             UnitFrames.DefaultFrames[unitTag][powerType] =
             {
-                ["label"] = windowManager:CreateControl(nil, parent, CT_LABEL),
+                ["label"] = parent:CreateControl("$(parent)LUIEExtenderLabel", CT_LABEL),
                 ["color"] = UnitFrames.SV.DefaultTextColour,
             }
             UnitFrames.DefaultFrames[unitTag][powerType].label:SetFont("LUIE Default Font")
@@ -178,10 +177,10 @@ function UnitFrames.CreateDefaultFrames()
     end
 
     -- Create classIcon and friendIcon: they should work even when default unit frames extender is disabled
-    UnitFrames.DefaultFrames.reticleover.classIcon = windowManager:CreateControl(nil, UnitFrames.targetUnitFrame.frame, CT_TEXTURE)
+    UnitFrames.DefaultFrames.reticleover.classIcon = UnitFrames.targetUnitFrame.frame:CreateControl("$(parent)LUIEClassIcon", CT_TEXTURE)
     UnitFrames.DefaultFrames.reticleover.classIcon:SetDimensions(32, 32)
     UnitFrames.DefaultFrames.reticleover.classIcon:SetHidden(true)
-    UnitFrames.DefaultFrames.reticleover.friendIcon = windowManager:CreateControl(nil, UnitFrames.targetUnitFrame.frame, CT_TEXTURE)
+    UnitFrames.DefaultFrames.reticleover.friendIcon = UnitFrames.targetUnitFrame.frame:CreateControl("$(parent)LUIEFriendIcon", CT_TEXTURE)
     UnitFrames.DefaultFrames.reticleover.friendIcon:SetDimensions(32, 32)
     UnitFrames.DefaultFrames.reticleover.friendIcon:SetHidden(true)
     UnitFrames.DefaultFrames.reticleover.friendIcon:SetAnchor(TOPLEFT, ZO_TargetUnitFramereticleoverTextArea, TOPRIGHT, 30, -4)
@@ -261,12 +260,12 @@ function UnitFrames.DefaultFramesCreateUnitGroupControls(unitTag)
                     ["unitTag"] = unitTag,
                     [COMBAT_MECHANIC_FLAGS_HEALTH] =
                     {
-                        label = windowManager:CreateControl(nil, parentBar, CT_LABEL),
+                        label = parentBar:CreateControl("$(parent)LUIEExtenderLabel", CT_LABEL),
                         color = UnitFrames.SV.DefaultTextColour,
-                        shield = windowManager:CreateControl(nil, parentBar, CT_STATUSBAR),
+                        shield = parentBar:CreateControl("$(parent)LUIEShield", CT_STATUSBAR),
                     },
-                    ["classIcon"] = windowManager:CreateControl(nil, parentName, CT_TEXTURE),
-                    ["friendIcon"] = windowManager:CreateControl(nil, parentName, CT_TEXTURE),
+                    ["classIcon"] = parentName:CreateControl("$(parent)LUIEClassIcon", CT_TEXTURE),
+                    ["friendIcon"] = parentName:CreateControl("$(parent)LUIEFriendIcon", CT_TEXTURE),
                 }
                 UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetFont("LUIE Default Font")
                 UnitFrames.DefaultFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)

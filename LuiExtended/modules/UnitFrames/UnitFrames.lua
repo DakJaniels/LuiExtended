@@ -22,7 +22,8 @@ local string_format = string.format
 local zo_strformat = zo_strformat
 
 local eventManager = GetEventManager()
-local windowManager = GetWindowManager()
+
+local bossThresholdControlSerial = 0
 
 local leaderIcons =
 {
@@ -562,7 +563,7 @@ local function GetBossThresholdStack(tlw)
         return stack
     end
 
-    local container = windowManager:CreateControl(nil, tlw, CT_CONTROL)
+    local container = tlw:CreateControl("$(parent)BossThresholdStack", CT_CONTROL)
     container:SetMouseEnabled(false)
     container:SetDrawTier(DT_HIGH)
     container:SetDrawLayer(DL_OVERLAY)
@@ -686,7 +687,8 @@ local function ApplyThresholdStageToLabel(label, state)
 end
 
 local function CreateThresholdLine(parent)
-    local line = windowManager:CreateControl(nil, parent, CT_BACKDROP)
+    bossThresholdControlSerial = bossThresholdControlSerial + 1
+    local line = parent:CreateControl("$(parent)ThresholdLine" .. bossThresholdControlSerial, CT_BACKDROP)
     line:SetCenterColor(BOSS_THRESHOLD_MARKER_COLOR[1], BOSS_THRESHOLD_MARKER_COLOR[2], BOSS_THRESHOLD_MARKER_COLOR[3], BOSS_THRESHOLD_MARKER_COLOR[4])
     line:SetEdgeColor(BOSS_THRESHOLD_MARKER_COLOR[1], BOSS_THRESHOLD_MARKER_COLOR[2], BOSS_THRESHOLD_MARKER_COLOR[3], BOSS_THRESHOLD_MARKER_COLOR[4])
     line:SetEdgeTexture("", 1, 1, 0, 0)
@@ -699,7 +701,9 @@ local function CreateThresholdLine(parent)
 end
 
 local function CreateThresholdLabel(parent, dimensions, isBottom)
-    local label = windowManager:CreateControl(nil, parent, CT_LABEL)
+    bossThresholdControlSerial = bossThresholdControlSerial + 1
+    local labelSuffix = isBottom and "ThresholdLabelBottom" or "ThresholdLabelTop"
+    local label = parent:CreateControl("$(parent)" .. labelSuffix .. bossThresholdControlSerial, CT_LABEL)
     if ZO_IsConsoleOrGameCoreUI() then
         label:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
     else
