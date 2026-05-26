@@ -40,6 +40,22 @@ local auraLifecycleCombatResults =
     [ACTION_RESULT_EFFECT_FADED] = true,
 }
 
+--- Routed buff container keys that only display debuffs (default debuff border on pool acquire).
+local debuffAuraContainerKeys =
+{
+    player2 = true,
+    playerd = true,
+    target2 = true,
+    targetd = true,
+    prominentdebuffs = true,
+}
+
+--- @param containerKey string
+--- @return boolean
+function SpellCastBuffs.IsDebuffAuraContainer(containerKey)
+    return debuffAuraContainerKeys[containerKey] == true
+end
+
 --- @param result ActionResult
 --- @return boolean
 function SpellCastBuffs.IsGroundDamageAuraCombatResult(result)
@@ -331,6 +347,7 @@ function SpellCastBuffs.HandleIncomingGroundDamageAura(result, abilityId, abilit
             fakeDuration = true,
         }
     )
+    SpellCastBuffs.MarkDisplayDirty()
 end
 
 --- @param result ActionResult
@@ -707,6 +724,7 @@ function SpellCastBuffs.HandleOutgoingGroundMineTrapBeast(result, abilityId, sou
 
     local context = resolveGroundMineEffectContext(compareId)
     SpellCastBuffs.EffectsList[context][compareId] = nil
+    SpellCastBuffs.MarkDisplayDirty()
 end
 
 --- @param config table
@@ -837,6 +855,7 @@ local function placeOutgoingReticleTargetFakeEffect(abilityId, targetName, sourc
         unbreakable,
         opts
     )
+    SpellCastBuffs.MarkDisplayDirty()
 end
 
 --- @param result ActionResult

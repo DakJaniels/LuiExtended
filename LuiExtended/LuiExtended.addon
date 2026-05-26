@@ -55,6 +55,7 @@ frontend/InfoPanel.xml
 frontend/SynergyTracker.xml
 frontend/GridOverlay.xml
 frontend/UnitFrames.xml
+frontend/SpellCastBuffs.xml
 
 # Unlock
 src/GridOverlay.lua
@@ -131,6 +132,7 @@ modules/SpellCastBuffs/_OnCombatEventOut.lua
 modules/SpellCastBuffs/_EffectDebugMeta.lua
 modules/SpellCastBuffs/_OnEffectChanged.lua
 modules/SpellCastBuffs/_OnEffectChangedGround.lua
+modules/SpellCastBuffs/_BuffIconPool.lua
 modules/SpellCastBuffs/_OnUpdate.lua
 modules/SpellCastBuffs/_ReloadEffects.lua
 modules/SpellCastBuffs/_Stealth.lua

@@ -186,4 +186,5 @@ function SpellCastBuffs.OnEffectChangedGround(eventId, changeType, effectSlot, e
             end
         end
     end
+    SpellCastBuffs.MarkDisplayDirty()
 end

@@ -10,7 +10,6 @@ local LUIE = LUIE
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
 
-local UI = LUIE.UI
 local LuiData = LuiData
 --- @type Data
 local Data = LuiData.Data
@@ -26,7 +25,6 @@ local table_sort = table.sort
 -- local displayName = GetDisplayName()
 local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
-local windowManager = GetWindowManager()
 
 local moduleName = SpellCastBuffs.moduleName
 local g_scbDisplayAlpha -- Last alpha for buff containers (HUD fade can reset to 1 on reload)
@@ -85,6 +83,7 @@ function SpellCastBuffs.ClearPlayerBuff(abilityId)
         SpellCastBuffs.EffectsList[v][abilityId] = nil
         SpellCastBuffs.ClearFakeEffectEntry(v, abilityId)
     end
+    SpellCastBuffs.MarkDisplayDirty()
 end
 
 -- Initialize preview labels for all frames
@@ -116,31 +115,44 @@ local function InitializePreviewLabels()
 
     for _, f in ipairs(frames) do
         if f.frame then
-            -- Create preview container if it doesn't exist
             if not f.frame.preview then
-                f.frame.preview = UI:Control(f.frame, "fill", nil, false)
+                f.frame.preview = f.frame:GetNamedChild("_Preview")
+            end
+            local preview = f.frame.preview
+            if preview then
+                if not preview.anchorTexture then
+                    preview.anchorTexture = preview:CreateControl("$(parent)AnchorTexture", CT_TEXTURE)
+                    preview.anchorTexture:SetAnchor(TOPLEFT, preview, TOPLEFT)
+                    preview.anchorTexture:SetDimensions(16, 16)
+                    preview.anchorTexture:SetTexture("/esoui/art/reticle/border_topleft.dds")
+                    preview.anchorTexture:SetDrawLayer(DL_OVERLAY)
+                    preview.anchorTexture:SetColor(1, 1, 0, 0.9)
+                end
+
+                if not preview.anchorLabel then
+                    preview.anchorLabel = preview:CreateControl("$(parent)AnchorLabel", CT_LABEL)
+                    preview.anchorLabel:SetFont(LUIE.GetPositionLabelFont())
+                    preview.anchorLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+                    preview.anchorLabel:SetVerticalAlignment(TEXT_ALIGN_TOP)
+                    preview.anchorLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+                    preview.anchorLabel:SetAnchor(BOTTOMLEFT, preview, TOPLEFT, 0, -1)
+                    preview.anchorLabel:SetText("xxx, yyy")
+                    preview.anchorLabel:SetColor(1, 1, 0, 1)
+                    preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
+                    preview.anchorLabel:SetDrawTier(DT_MEDIUM)
+                    preview.anchorLabelBg = preview.anchorLabel:CreateControl("$(parent)Bg", CT_BACKDROP)
+                    preview.anchorLabelBg:SetCenterColor(0, 0, 0, 1)
+                    preview.anchorLabelBg:SetEdgeColor(0, 0, 0, 1)
+                    preview.anchorLabelBg:SetEdgeTexture("", 8, 1, 1, 1)
+                    preview.anchorLabelBg:SetDrawLayer(DL_BACKGROUND)
+                    preview.anchorLabelBg:SetAnchorFill(preview.anchorLabel)
+                    preview.anchorLabelBg:SetDrawLayer(DL_OVERLAY)
+                    preview.anchorLabelBg:SetDrawTier(DT_LOW)
+                else
+                    LUIE.ApplyPositionLabelFont(preview.anchorLabel)
+                end
             end
 
-            -- Create texture and label for anchor preview
-            if not f.frame.preview.anchorTexture then
-                f.frame.preview.anchorTexture = UI:Texture(f.frame.preview, { TOPLEFT, TOPLEFT }, { 16, 16 }, "/esoui/art/reticle/border_topleft.dds", DL_OVERLAY, false)
-                f.frame.preview.anchorTexture:SetColor(1, 1, 0, 0.9)
-            end
-
-            if not f.frame.preview.anchorLabel then
-                f.frame.preview.anchorLabel = UI:Label(f.frame.preview, { BOTTOMLEFT, TOPLEFT, 0, -1 }, nil, { 0, 2 }, LUIE.GetPositionLabelFont(), "xxx, yyy", false)
-                f.frame.preview.anchorLabel:SetColor(1, 1, 0, 1)
-                f.frame.preview.anchorLabel:SetDrawLayer(DL_OVERLAY)
-                f.frame.preview.anchorLabel:SetDrawTier(DT_MEDIUM)
-            end
-
-            if not f.frame.preview.anchorLabelBg then
-                f.frame.preview.anchorLabelBg = UI:Backdrop(f.frame.preview.anchorLabel, "fill", nil, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, false)
-                f.frame.preview.anchorLabelBg:SetDrawLayer(DL_OVERLAY)
-                f.frame.preview.anchorLabelBg:SetDrawTier(DT_LOW)
-            end
-
-            -- Add movement handlers
             f.frame:SetHandler("OnMoveStart", OnMoveStart)
             f.frame:SetHandler("OnMoveStop", OnMoveStop)
         end
@@ -180,11 +192,73 @@ local function GetContainerInitWidth(containerKey)
     return 400
 end
 
+-- Returns the appropriate FLEX_WRAP_* constant for a given container
+local function GetFlexWrap(containerKey)
+    if SINGLE_AXIS_CONTAINERS[containerKey] then
+        return FLEX_WRAP_NO_WRAP
+    end
+    if containerKey == "player1" or containerKey == "target1" then
+        return FLEX_WRAP_WRAP
+    end
+    if containerKey == "player2" or containerKey == "target2" then
+        return FLEX_WRAP_WRAP_REVERSE
+    end
+    local stackSV =
+    {
+        playerb = SpellCastBuffs.SV.StackPlayerBuffs,
+        playerd = SpellCastBuffs.SV.StackPlayerDebuffs,
+        targetb = SpellCastBuffs.SV.StackTargetBuffs,
+        targetd = SpellCastBuffs.SV.StackTargetDebuffs,
+    }
+    return (stackSV[containerKey] == "Down") and FLEX_WRAP_WRAP or FLEX_WRAP_WRAP_REVERSE
+end
+
+-- Maps the SV alignment string + the resolved flex direction to a FLEX_JUSTIFICATION_* constant.
+local function GetFlexJustification(containerKey, flexDir)
+    local dir = SpellCastBuffs.alignmentDirection[containerKey]
+
+    if dir == "Centered" then
+        return FLEX_JUSTIFICATION_CENTER
+    end
+
+    local wantsPhysicalEnd = (dir == "Right" or dir == "Bottom")
+    local isReversed = (flexDir == FLEX_DIRECTION_ROW_REVERSE or flexDir == FLEX_DIRECTION_COLUMN_REVERSE)
+    if isReversed then wantsPhysicalEnd = not wantsPhysicalEnd end
+
+    return wantsPhysicalEnd and FLEX_JUSTIFICATION_FLEX_END or FLEX_JUSTIFICATION_FLEX_START
+end
+
+--- @param containerKey string
+local function ApplyFlexContainerConfig(containerKey)
+    local bc = SpellCastBuffs.BuffContainers[containerKey]
+    if not bc or not bc.iconHolder then return end
+
+    local sortDir = SpellCastBuffs.sortDirection[containerKey]
+    local flexDir
+    if     sortDir == "Left to Right" then
+        flexDir = FLEX_DIRECTION_ROW
+    elseif sortDir == "Right to Left" then
+        flexDir = FLEX_DIRECTION_ROW_REVERSE
+    elseif sortDir == "Bottom to Top" then
+        flexDir = FLEX_DIRECTION_COLUMN_REVERSE
+    elseif sortDir == "Top to Bottom" then
+        flexDir = FLEX_DIRECTION_COLUMN
+    end
+
+    local resolvedFlexDir = flexDir or bc.iconHolder:GetChildFlexDirection()
+
+    if flexDir then bc.iconHolder:SetChildFlexDirection(flexDir) end
+    bc.iconHolder:SetChildFlexWrap(GetFlexWrap(containerKey))
+    bc.iconHolder:SetChildFlexJustification(GetFlexJustification(containerKey, resolvedFlexDir))
+    bc.iconHolder:SetChildFlexContentAlignment(FLEX_ALIGNMENT_FLEX_START)
+end
+
 -- Creates a TopLevel, stores it in BuffContainers[containerKey], and sets OnMoveStop to saveCallback(self).
 local function CreateDraggableTopLevel(containerKey, saveCallback)
-    SpellCastBuffs.BuffContainers[containerKey] = UI:TopLevel(nil, nil)
-    SpellCastBuffs.BuffContainers[containerKey]:SetHandler("OnMoveStop", saveCallback)
-    return SpellCastBuffs.BuffContainers[containerKey]
+    local tlw = CreateControlFromVirtual("LUIE_SCB_" .. containerKey, GuiRoot, "LUIE_SCB_Tlw_Template")
+    SpellCastBuffs.BuffContainers[containerKey] = tlw
+    tlw:SetHandler("OnMoveStop", saveCallback)
+    return tlw
 end
 
 -- Creates a HUD fade fragment for a container and appends it to the given fragments table.
@@ -211,40 +285,70 @@ local function SetContainerAlignVertical(buffContainer, alignmentSVValue)
     end
 end
 
+--- @param buffContainer Control
+local function WireEffectsRegionNamedChildren(buffContainer)
+    if not buffContainer.preview then
+        buffContainer.preview = buffContainer:GetNamedChild("_Preview")
+    end
+    if buffContainer.preview and not buffContainer.previewLabel then
+        buffContainer.previewLabel = buffContainer.preview:GetNamedChild("_Label")
+    end
+    if not buffContainer.iconHolder then
+        buffContainer.iconHolder = buffContainer:GetNamedChild("_IconHolder")
+    end
+end
+
+--- @param holder Control
+--- @param direction integer|nil
+--- @param wrap integer|nil
+local function SetupIconHolderFlexLayout(holder, direction, wrap)
+    holder:SetChildLayout(CHILD_LAYOUT_TYPE_FLEX)
+    if direction then
+        holder:SetChildFlexDirection(direction)
+    end
+    if wrap then
+        holder:SetChildFlexWrap(wrap)
+    end
+    holder:SetChildFlexJustification(FLEX_JUSTIFICATION_FLEX_START)
+    holder:SetChildFlexItemAlignment(FLEX_ALIGNMENT_FLEX_START)
+    holder:SetChildFlexContentAlignment(FLEX_ALIGNMENT_FLEX_START)
+end
+
 -- Creates preview texture/label and iconHolder for a single container; sets draw layer/tier/level and icons table.
 local function InitializeContainerLayout(containerKey)
     local buffContainer = SpellCastBuffs.BuffContainers[containerKey]
     buffContainer:SetDrawLayer(DL_BACKGROUND)
     buffContainer:SetDrawTier(DT_LOW)
     buffContainer:SetDrawLevel(DL_CONTROLS)
-    if buffContainer.preview == nil then
-        buffContainer.preview = UI:Texture(buffContainer, "fill", nil, "/esoui/art/miscellaneous/inset_bg.dds", DL_BACKGROUND, true)
-        local lockedSuffix = (SpellCastBuffs.SV.lockPositionToUnitFrames and (containerKey ~= "player_long" and containerKey ~= "prominentbuffs" and containerKey ~= "prominentdebuffs") and " (locked)" or "")
-        buffContainer.previewLabel = UI:Label(buffContainer.preview, { CENTER, CENTER }, nil, nil, LUIE.GetPositionLabelFont(), SpellCastBuffs.windowTitles[containerKey] .. lockedSuffix, false)
-    else
+
+    WireEffectsRegionNamedChildren(buffContainer)
+
+    local lockedSuffix = (SpellCastBuffs.SV.lockPositionToUnitFrames and (containerKey ~= "player_long" and containerKey ~= "prominentbuffs" and containerKey ~= "prominentdebuffs") and " (locked)" or "")
+    if buffContainer.previewLabel then
+        buffContainer.previewLabel:SetText(SpellCastBuffs.windowTitles[containerKey] .. lockedSuffix)
         LUIE.ApplyFramePreviewLabelFont(buffContainer.previewLabel)
     end
+
     local isWrapContainer = WRAP_CONTAINERS[containerKey] == true
     local initialFlexDirection = buffContainer.alignVertical and FLEX_DIRECTION_COLUMN or FLEX_DIRECTION_ROW
     local flexWrapMode = isWrapContainer and FLEX_WRAP_WRAP or FLEX_WRAP_NO_WRAP
     local iconSize = SpellCastBuffs.SV.IconSize
     local initialWidth = GetContainerInitWidth(containerKey)
     local initialHeight = isWrapContainer and (iconSize * 10) or (iconSize + 6)
-    buffContainer.iconHolder = UI:FlexControl(buffContainer, { TOPLEFT, TOPLEFT, 0, 0 }, { initialWidth, initialHeight }, false,
-                                              {
-                                                  container =
-                                                  {
-                                                      direction        = initialFlexDirection,
-                                                      wrap             = flexWrapMode,
-                                                      justification    = FLEX_JUSTIFICATION_FLEX_START,
-                                                      itemAlignment    = FLEX_ALIGNMENT_FLEX_START,
-                                                      contentAlignment = FLEX_ALIGNMENT_FLEX_START,
-                                                  }
-                                              })
-    buffContainer.icons = {}
+
+    if buffContainer.iconHolder then
+        buffContainer.iconHolder:SetDimensions(initialWidth, initialHeight)
+        SetupIconHolderFlexLayout(buffContainer.iconHolder, initialFlexDirection, flexWrapMode)
+    end
+
+    if not buffContainer.icons then
+        buffContainer.icons = {}
+    end
     if buffContainer:GetType() == CT_TOPLEVELCONTROL then
         LUIE.Components[moduleName .. containerKey] = buffContainer
     end
+
+    ApplyFlexContainerConfig(containerKey)
 end
 
 -- Initialization
@@ -285,6 +389,8 @@ function SpellCastBuffs.Initialize(enabled)
 
     -- Before we start creating controls, update icons font
     SpellCastBuffs.ApplyFont()
+
+    SpellCastBuffs.InitializeBuffIconPools()
 
     -- Create controls
     -- Create temporary table to store references to scenes locally
@@ -664,94 +770,6 @@ function SpellCastBuffs.ResetContainerOrientation()
 
     -- Set Buff Container Positions
     SpellCastBuffs.SetTlwPosition()
-end
-
--- Returns the appropriate FLEX_WRAP_* constant for a given container
-local function GetFlexWrap(containerKey)
-    if SINGLE_AXIS_CONTAINERS[containerKey] then
-        return FLEX_WRAP_NO_WRAP
-    end
-    if containerKey == "player1" or containerKey == "target1" then
-        return FLEX_WRAP_WRAP
-    end
-    if containerKey == "player2" or containerKey == "target2" then
-        return FLEX_WRAP_WRAP_REVERSE
-    end
-    local stackSV =
-    {
-        playerb = SpellCastBuffs.SV.StackPlayerBuffs,
-        playerd = SpellCastBuffs.SV.StackPlayerDebuffs,
-        targetb = SpellCastBuffs.SV.StackTargetBuffs,
-        targetd = SpellCastBuffs.SV.StackTargetDebuffs,
-    }
-    return (stackSV[containerKey] == "Down") and FLEX_WRAP_WRAP or FLEX_WRAP_WRAP_REVERSE
-end
-
--- Maps the SV alignment string + the resolved flex direction to a FLEX_JUSTIFICATION_* constant.
--- All alignment values are treated as PHYSICAL (left/right/center on screen), independent of
--- whether the flex direction is reversed. This lets users combine any sort + alignment freely.
---
--- "Centered":
---   Returns FLEX_CENTER for all container types. UnitFrames.lua explicitly calls SetWidth() on
---   the buffs/debuffs containers so they span the full UF bar width and are horizontally centered
---   below the frame. FLEX_CENTER then centers each row within that bar width, producing true
---   visual centering. TLW containers are also user-width-sized; FLEX_CENTER clusters each row
---   around the center of the user-set width. This matches the old anchor-to-center behavior
---   where every row of icons started at the container's center point.
---
--- "Left"/"Top" and "Right"/"Bottom":
---   Packs the group at the PHYSICAL left/right edge of the container.
---   For reversed directions (ROW_REVERSE, COLUMN_REVERSE) the logical and physical ends are
---   swapped, so the justification constant is inverted to maintain physical alignment.
-local function GetFlexJustification(containerKey, flexDir)
-    local dir = SpellCastBuffs.alignmentDirection[containerKey]
-
-    if dir == "Centered" then
-        return FLEX_JUSTIFICATION_CENTER
-    end
-
-    -- Physical end = "Right" or "Bottom". For reversed flex directions the logical end is on the
-    -- opposite physical side, so flip the flag to keep the result physically consistent.
-    local wantsPhysicalEnd = (dir == "Right" or dir == "Bottom")
-    local isReversed = (flexDir == FLEX_DIRECTION_ROW_REVERSE or flexDir == FLEX_DIRECTION_COLUMN_REVERSE)
-    if isReversed then wantsPhysicalEnd = not wantsPhysicalEnd end
-
-    return wantsPhysicalEnd and FLEX_JUSTIFICATION_FLEX_END or FLEX_JUSTIFICATION_FLEX_START
-end
-
--- Applies current flex direction, wrap, and justification to a container's iconHolder.
--- The iconHolder anchor is always TOPLEFT (set at creation, never changed here).
--- flexDir is passed to GetFlexJustification so physical alignment can invert the constant
--- for reversed directions (ROW_REVERSE, COLUMN_REVERSE) without an extra API round-trip.
----
---- @param containerKey string
-local function ApplyFlexContainerConfig(containerKey)
-    local bc = SpellCastBuffs.BuffContainers[containerKey]
-    if not bc or not bc.iconHolder then return end
-
-    local sortDir = SpellCastBuffs.sortDirection[containerKey]
-    local flexDir
-    if     sortDir == "Left to Right" then
-        flexDir = FLEX_DIRECTION_ROW
-    elseif sortDir == "Right to Left" then
-        flexDir = FLEX_DIRECTION_ROW_REVERSE
-    elseif sortDir == "Bottom to Top" then
-        flexDir = FLEX_DIRECTION_COLUMN_REVERSE
-    elseif sortDir == "Top to Bottom" then
-        flexDir = FLEX_DIRECTION_COLUMN
-    end
-
-    -- Fall back to the holder's current direction if sortDir is unrecognised.
-    local resolvedFlexDir = flexDir or bc.iconHolder:GetChildFlexDirection()
-
-    if flexDir then bc.iconHolder:SetChildFlexDirection(flexDir) end
-    bc.iconHolder:SetChildFlexWrap(GetFlexWrap(containerKey))
-    bc.iconHolder:SetChildFlexJustification(GetFlexJustification(containerKey, resolvedFlexDir))
-    -- Pack flex lines (rows/columns) at the cross-axis start.
-    -- For WRAP this means rows are packed at the TOP; for WRAP_REVERSE the cross-axis is reversed
-    -- so FLEX_START == physical BOTTOM, which is exactly where debuff rows should anchor.
-    -- For single-axis containers this is a no-op (there is only one line).
-    bc.iconHolder:SetChildFlexContentAlignment(FLEX_ALIGNMENT_FLEX_START)
 end
 
 -- Populate SpellCastBuffs.alignmentDirection from SV settings.
@@ -1188,6 +1206,8 @@ function SpellCastBuffs.Reset()
     if SpellCastBuffs.playerActive then
         SpellCastBuffs.ReloadEffects("player")
     end
+
+    SpellCastBuffs.MarkDisplayLayoutDirty()
 end
 
 -- Applies the correct flex margins to a single buff icon.
@@ -1287,21 +1307,38 @@ function SpellCastBuffs.ApplyAbilityFrameTextureCoords(texture, iconSize)
     end
 end
 
--- Reset only a single icon
-function SpellCastBuffs.ResetSingleIcon(container, buff)
+-- Keeps pooled flex icons square so radial cooldown + abilityFrame UVs are not stretched.
+--- @param buff Control
+--- @param buffSize number
+function SpellCastBuffs.ApplyBuffIconSlotDimensions(buff, buffSize)
+    buff:SetDimensions(buffSize, buffSize)
+    buff:SetDimensionConstraints(buffSize, buffSize, buffSize, buffSize)
+    buff:SetFlexBasis(buffSize)
+    buff:SetFlexGrow(0)
+    buff:SetFlexShrink(0)
+end
+
+-- Layout, anchors, and visibility for one icon (pool acquire or settings refresh).
+function SpellCastBuffs.ApplySingleIconLayout(container, buff)
     local buffSize = SpellCastBuffs.SV.IconSize
     local frameSize = 2 * buffSize + 4
 
-    buff:SetHidden(true)
-    -- buff:SetAlpha( 1 )
-    buff:SetDimensions(buffSize, buffSize)
+    SpellCastBuffs.ApplyBuffIconSlotDimensions(buff, buffSize)
+    buff.frame:ClearAnchors()
+    buff.frame:SetAnchor(CENTER, buff, CENTER, 0, 0)
     buff.frame:SetDimensions(frameSize, frameSize)
     buff.frame:SetPixelRoundingEnabled(true)
     buff.back:SetHidden(SpellCastBuffs.SV.GlowIcons)
+    if buff.buffType then
+        local borderTexture = (buff.buffType == BUFF_EFFECT_TYPE_BUFF) and SpellCastBuffs.GetBuffBorderTexture() or SpellCastBuffs.GetDebuffBorderTexture()
+        buff.back:SetTexture(borderTexture)
+    end
     SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, buffSize)
     buff.frame:SetHidden(not SpellCastBuffs.SV.GlowIcons)
     buff.label:SetAnchor(TOPLEFT, buff, LEFT, -SpellCastBuffs.padding, -SpellCastBuffs.SV.LabelPosition)
     buff.label:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, SpellCastBuffs.padding, -2)
+    buff.label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+    buff.label:SetVerticalAlignment(TEXT_ALIGN_BOTTOM)
     buff.label:SetHidden(not SpellCastBuffs.SV.RemainingText)
     buff.stack:SetAnchor(CENTER, buff, BOTTOMLEFT, 0, 0)
     buff.stack:SetAnchor(CENTER, buff, TOPRIGHT, -SpellCastBuffs.padding * 3, SpellCastBuffs.padding * 3)
@@ -1327,18 +1364,31 @@ function SpellCastBuffs.ResetSingleIcon(container, buff)
         end
     end
 
-    if buff.cd ~= nil then
+    if container == "player_long" then
+        -- Long-term strip never uses radial cooldown or inset bg (shared pool template always has cd/iconbg).
+        if buff.iconbg then
+            buff.iconbg:SetHidden(true)
+        end
+        if buff.cd then
+            buff.cd:SetHidden(true)
+        end
+    elseif buff.cd ~= nil then
         buff.cd:SetHidden(not SpellCastBuffs.SV.RemainingCooldown)
-        -- We do not need black icon background when there is no Cooldown control present
         buff.iconbg:SetHidden(not SpellCastBuffs.SV.RemainingCooldown)
     end
 
     if buff.abilityId ~= nil then
         buff.abilityId:SetHidden(not SpellCastBuffs.SV.ShowDebugAbilityId)
+        if SpellCastBuffs.SV.ShowDebugAbilityId and buff.abilityId:GetText() ~= "" then
+            SpellCastBuffs.FitAbilityIdLabelFont(buff)
+        end
     end
 
     -- ZO_BUFF_DEBUFF_ICON_DIMENSIONS = frame - 4 (2px inset per edge); matches abilityFrame + icon padding.
-    local inset = (SpellCastBuffs.SV.RemainingCooldown and buff.cd ~= nil) and 2 or 1
+    local inset = 1
+    if container ~= "player_long" and SpellCastBuffs.SV.RemainingCooldown and buff.cd ~= nil then
+        inset = 2
+    end
 
     buff.drop:ClearAnchors()
     buff.drop:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
@@ -1351,6 +1401,17 @@ function SpellCastBuffs.ResetSingleIcon(container, buff)
         buff.iconbg:ClearAnchors()
         buff.iconbg:SetAnchor(TOPLEFT, buff, TOPLEFT, inset, inset)
         buff.iconbg:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, -inset, -inset)
+    end
+
+    if buff.back then
+        buff.back:ClearAnchors()
+        buff.back:SetAnchor(TOPLEFT, buff, TOPLEFT, 0, 0)
+        buff.back:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, 0, 0)
+    end
+    if buff.cd and container ~= "player_long" then
+        buff.cd:ClearAnchors()
+        buff.cd:SetAnchor(TOPLEFT, buff, TOPLEFT, 0, 0)
+        buff.cd:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, 0, 0)
     end
 
     if container == "prominentbuffs" then
@@ -1417,6 +1478,14 @@ function SpellCastBuffs.ResetSingleIcon(container, buff)
         end
     end
 
+    buff.lastAppliedIconSize = buffSize
+    buff.lastLayoutVersion = SpellCastBuffs.displayLayoutVersion
+end
+
+-- Reset only a single icon
+function SpellCastBuffs.ResetSingleIcon(container, buff)
+    buff:SetHidden(true)
+    SpellCastBuffs.ApplySingleIconLayout(container, buff)
     SpellCastBuffs.ApplyIconFlexMargin(container, buff)
 end
 
@@ -1784,6 +1853,33 @@ function SpellCastBuffs.Buff_OnMouseExit(control)
 end
 
 -- Updates local variable with new font and resets all existing icons
+--- Shrink ability-id debug text to fit the icon width (LabelControl:WasTruncated, ZO_FontAdjustingWrapLabel pattern).
+--- @param buff SpellCastBuffs_BuffIcon_Control
+function SpellCastBuffs.FitAbilityIdLabelFont(buff)
+    local label = buff.abilityId
+    if not label or label:IsHidden() then
+        return
+    end
+    if label:GetText() == "" then
+        return
+    end
+
+    local fonts = SpellCastBuffs.abilityIdFonts
+    if not fonts or #fonts == 0 then
+        label:SetFont(SpellCastBuffs.buffsFont)
+        return
+    end
+
+    label:SetMaxLineCount(0)
+    for _, font in ipairs(fonts) do
+        label:SetFont(font)
+        if not label:WasTruncated() then
+            break
+        end
+    end
+    label:SetMaxLineCount(1)
+end
+
 function SpellCastBuffs.ApplyFont()
     if not SpellCastBuffs.Enabled then
         return
@@ -1798,6 +1894,11 @@ function SpellCastBuffs.ApplyFont()
     local fontStyle = SpellCastBuffs.SV.BuffFontStyle
     local fontSize = (SpellCastBuffs.SV.BuffFontSize and SpellCastBuffs.SV.BuffFontSize > 0) and SpellCastBuffs.SV.BuffFontSize or 17
     SpellCastBuffs.buffsFont = LUIE.CreateFontString(fontName, fontSize, fontStyle)
+
+    SpellCastBuffs.abilityIdFonts = {}
+    for size = fontSize, 8, -1 do
+        SpellCastBuffs.abilityIdFonts[#SpellCastBuffs.abilityIdFonts + 1] = LUIE.CreateFontString(fontName, size, fontStyle)
+    end
 
     -- Font Setup for Prominent Buffs & Debuffs
     local prominentName = LUIE.Fonts[SpellCastBuffs.SV.ProminentLabelFontFace]
@@ -1817,16 +1918,23 @@ function SpellCastBuffs.ApplyFont()
     for _, container in pairs(SpellCastBuffs.containerRouting) do
         if needs_reset[container] then
             for i = 1, #SpellCastBuffs.BuffContainers[container].icons do
-                -- Set label font
-                SpellCastBuffs.BuffContainers[container].icons[i].label:SetFont(SpellCastBuffs.buffsFont)
-                -- Set prominent buff label font
-                if SpellCastBuffs.BuffContainers[container].icons[i].name then
-                    SpellCastBuffs.BuffContainers[container].icons[i].name:SetFont(SpellCastBuffs.prominentFont)
+                local icon = SpellCastBuffs.BuffContainers[container].icons[i]
+                icon.label:SetFont(SpellCastBuffs.buffsFont)
+                if icon.stack then
+                    icon.stack:SetFont(SpellCastBuffs.buffsFont)
+                end
+                if icon.abilityId then
+                    SpellCastBuffs.FitAbilityIdLabelFont(icon)
+                end
+                if icon.name then
+                    icon.name:SetFont(SpellCastBuffs.prominentFont)
                 end
             end
         end
         needs_reset[container] = false
     end
+
+    SpellCastBuffs.MarkDisplayLayoutDirty()
 end
 
 -- Runs on the EVENT_ARTIFICIAL_EFFECT_ADDED / EVENT_ARTIFICIAL_EFFECT_REMOVED listener.
@@ -1912,6 +2020,7 @@ function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
             }
         end
     end
+    SpellCastBuffs.MarkDisplayDirty()
 end
 
 -- EVENT_BOSSES_CHANGED handler
@@ -2269,6 +2378,7 @@ function SpellCastBuffs.OnPlayerActivated(eventCode)
     end
 
     SpellCastBuffs.ApplyDisplayAlpha()
+    SpellCastBuffs.MarkDisplayDirty()
 end
 
 -- Runs on the EVENT_PLAYER_DEACTIVATED listener

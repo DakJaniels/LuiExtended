@@ -376,4 +376,5 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
             SpellCastBuffs.RemoveDuplicateEffectsInSharedContainer(context, abilityId, nativeUid)
         end
     end
+    SpellCastBuffs.MarkDisplayDirty()
 end
