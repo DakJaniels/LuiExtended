@@ -193,5 +193,14 @@
         </Control>
       </Controls>
     </TopLevelControl>
+    <TopLevelControl name="LUIE_SCB_DebugOverflowTooltipTopLevel"
+                     inherits="TooltipTopLevel"
+                     tier="HIGH">
+      <Controls>
+        <Tooltip name="LUIE_SCB_DebugOverflowTooltip"
+                 inherits="ZO_BaseTooltip"
+                 tier="HIGH" />
+      </Controls>
+    </TopLevelControl>
   </Controls>
 </GuiXml>
