@@ -57,6 +57,7 @@ S.g_itemWasDestroyed = false           -- Tracker for item being destroyed
 S.g_packSiege = false                  -- Tracker for siege packed
 S.g_lockpickBroken = false             -- Tracker for lockpick being broken
 S.g_groupLootIndex = {}                -- Table to hold group member names for group loot display.
+S.g_factionRepAnnounceDedupe = { delta = 0, time = 0 }
 S.g_stackSplit = false                 -- Determines if we just split an inventory item stack
 S.g_combinedRecipe = false             -- Determines if we just used an item that combines a recipe to stop the "learned" message from showing.
 S.g_InventoryOn = false                -- Determines if Inventory Updates for Item Changes are on
@@ -374,6 +375,7 @@ function ChatAnnouncements.Initialize(enabled)
     -- Register events
     ChatAnnouncements.RegisterGoldEvents()
     ChatAnnouncements.RegisterLootEvents()
+    ChatAnnouncements.RegisterLootHistoryHooks()
     ChatAnnouncements.RegisterMailEvents()
     ChatAnnouncements.RegisterXPEvents()
     ChatAnnouncements.RegisterAchievementsEvent()
@@ -549,6 +551,7 @@ end
 
 function ChatAnnouncements.RegisterGoldEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_CURRENCY_UPDATE)
+    eventManager:UnregisterForEvent(moduleName, EVENT_PENDING_CURRENCY_REWARD_CACHED)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_ADDED)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_REMOVED)
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_CLOSE_MAILBOX)
@@ -558,6 +561,7 @@ function ChatAnnouncements.RegisterGoldEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_MAIL_REMOVED)
 
     eventManager:RegisterForEvent(moduleName, EVENT_CURRENCY_UPDATE, ChatAnnouncements.OnCurrencyUpdate)
+    eventManager:RegisterForEvent(moduleName, EVENT_PENDING_CURRENCY_REWARD_CACHED, ChatAnnouncements.OnPendingCurrencyRewardCached)
     eventManager:RegisterForEvent(moduleName, EVENT_LOOT_UPDATED, ChatAnnouncements.OnLootUpdated)
     eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_ADDED, ChatAnnouncements.OnMailAttach)
     eventManager:RegisterForEvent(moduleName, EVENT_MAIL_ATTACHMENT_REMOVED, ChatAnnouncements.OnMailAttachRemove)
@@ -649,6 +653,7 @@ function ChatAnnouncements.RegisterLootEvents()
     eventManager:UnregisterForEvent(moduleName, EVENT_QUEST_COMPLETE_ATTEMPT_FAILED_INVENTORY_FULL)
     eventManager:UnregisterForEvent(moduleName, EVENT_INVENTORY_IS_FULL)
     eventManager:UnregisterForEvent(moduleName, EVENT_LOOT_ITEM_FAILED)
+    eventManager:UnregisterForEvent(moduleName, EVENT_ADVENTURE_ZONE_FACTION_REPUTATION_CHANGED)
 
     -- LOOT RECEIVED
     if ChatAnnouncements.SV.Inventory.Loot or ChatAnnouncements.SV.Inventory.LootQuestAdd or ChatAnnouncements.SV.Inventory.LootQuestRemove then
@@ -666,6 +671,9 @@ function ChatAnnouncements.RegisterLootEvents()
         S.g_inventoryStacks = {}
         ChatAnnouncements.IndexEquipped()
         ChatAnnouncements.IndexInventory()
+    end
+    if ChatAnnouncements.SV.Inventory.Loot then
+        eventManager:RegisterForEvent(moduleName, EVENT_ADVENTURE_ZONE_FACTION_REPUTATION_CHANGED, ChatAnnouncements.OnAdventureZoneFactionReputationChanged)
     end
     -- VENDOR
     if ChatAnnouncements.SV.Inventory.LootVendor then
@@ -722,6 +730,14 @@ function ChatAnnouncements.RegisterLootEvents()
         eventManager:RegisterForEvent(moduleName, EVENT_INVENTORY_IS_FULL, ChatAnnouncements.InventoryFull)
         eventManager:RegisterForEvent(moduleName, EVENT_LOOT_ITEM_FAILED, ChatAnnouncements.LootItemFailed)
     end]]
+end
+
+function ChatAnnouncements.RegisterLootHistoryHooks()
+    if ZO_LootHistory_Shared and ZO_LootHistory_Shared.AddAdventureZoneFactionReputation then
+        ZO_PostHook(ZO_LootHistory_Shared, "AddAdventureZoneFactionReputation", function (_, reputationAdded)
+            ChatAnnouncements.QueueAdventureZoneFactionReputationGain(reputationAdded)
+        end)
+    end
 end
 
 function ChatAnnouncements.RegisterDisguiseEvents()
@@ -1587,6 +1603,15 @@ function I.IsContainerLootCurrencyReason(changeReason)
         or changeReason == CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER
 end
 
+function I.IsLootLikeCurrencyReason(changeReason)
+    return changeReason == CURRENCY_CHANGE_REASON_LOOT
+        or changeReason == CURRENCY_CHANGE_REASON_LOOT_CURRENCY_CONTAINER
+        or changeReason == CURRENCY_CHANGE_REASON_KILL
+        or changeReason == CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER
+        or changeReason == CURRENCY_CHANGE_REASON_REWARD
+        or changeReason == CURRENCY_CHANGE_REASON_QUESTREWARD
+end
+
 function ChatAnnouncements.FlushDeferredContainerLootCurrency()
     if S.g_deferredContainerGoldThrottleAmount > 0 then
         S.g_currencyGoldThrottleValue = S.g_deferredContainerGoldThrottleAmount
@@ -1640,6 +1665,14 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
     -- If the total gold change was 0 or (Reason 7 = Command) or (Reason 28 = Mount Feed) or (Reason 35 = Player Init) or (Reason 81 = Expiration) - End Now
     if UpOrDown == 0 or reason == CURRENCY_CHANGE_REASON_COMMAND or reason == CURRENCY_CHANGE_REASON_FEED_MOUNT or reason == CURRENCY_CHANGE_REASON_PLAYER_INIT or reason == CURRENCY_CHANGE_REASON_EXPIRATION then
         return
+    end
+
+    -- CURT_TRADE_BARS loot-like gains follow ZOS loot history via EVENT_CURRENCY_UPDATE (see LootHistory_Manager).
+    -- If PTR shows gaps without CURRENCY_UPDATE, register EVENT_TRADE_BAR_UPDATE and forward to OnCurrencyUpdate.
+    if currency == CURT_TRADE_BARS and UpOrDown > 0 and I.IsLootLikeCurrencyReason(reason) then
+        if not ChatAnnouncements.SV.Inventory.Loot or not ChatAnnouncements.SV.Currency.CurrencyTradeBarsChange then
+            return
+        end
     end
 
     local formattedValue = ZO_CommaDelimitDecimalNumber(newValue)
@@ -1829,6 +1862,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
         [CURRENCY_CHANGE_REASON_CROWNS_PURCHASED] = "CurrencyMessageReceive",
         [CURRENCY_CHANGE_REASON_PURCHASED_WITH_SEALS] = "CurrencyMessageSpend",
         [CURRENCY_CHANGE_REASON_PURCHASED_WITH_TRADE_BARS] = "CurrencyMessageSpend",
+        [CURRENCY_CHANGE_REASON_EVENT_TICKET_TO_TRADE_BARS_CONVERSION] = "CurrencyMessageReceive",
         [CURRENCY_CHANGE_REASON_CACHE_REDEEMED_FOR_TOME_POINTS] = "CurrencyMessageReceive",
         [CURRENCY_CHANGE_REASON_PURCHASED_TAMRIEL_TOMES_PREMIUM_PLUS] = "CurrencyMessageSpend",
         [CURRENCY_CHANGE_REASON_PURCHASED_TAMRIEL_TOMES_REWARD] = "CurrencyMessageSpend",
@@ -4110,6 +4144,88 @@ function ChatAnnouncements.OnLootReceived(eventId, receivedBy, itemLink, quantit
         end
         ChatAnnouncements.ItemPrinter(icon, quantity, itemType, itemId, formattedItemLink, recipient, logPrefix, gainOrLoss, false, true)
     end
+end
+
+--- @param deltaReputation integer
+--- @param playerReputationTotal integer|nil From EVENT_ADVENTURE_ZONE_FACTION_REPUTATION_CHANGED _newReputation_; else GetAdventureZonePlayerReputation()
+function ChatAnnouncements.QueueAdventureZoneFactionReputationGain(deltaReputation, playerReputationTotal)
+    if not ChatAnnouncements.SV.Inventory.Loot or deltaReputation == 0 then
+        return
+    end
+
+    local now = GetGameTimeMilliseconds()
+    if S.g_factionRepAnnounceDedupe.delta == deltaReputation and (now - S.g_factionRepAnnounceDedupe.time) < 250 then
+        return
+    end
+    S.g_factionRepAnnounceDedupe.delta = deltaReputation
+    S.g_factionRepAnnounceDedupe.time = now
+
+    local faction = GetUnitAdventureZoneFaction("player")
+    local label = GetString(SI_LOOT_HISTORY_ADVENTURE_ZONE_FACTION_REPUTATION)
+    local iconPath = ZO_GetAdventureZoneFactionIcon(faction) or ""
+    local formattedIcon = (ChatAnnouncements.SV.Inventory.LootIcons and iconPath ~= "") and zo_strformat("<<1>> ", zo_iconFormat(iconPath, 16, 16)) or ""
+
+    local color
+    local gainOrLoss
+    if deltaReputation > 0 then
+        gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 1 or 3
+    else
+        gainOrLoss = ChatAnnouncements.SV.Currency.CurrencyContextColor and 2 or 4
+    end
+    if gainOrLoss == 1 then
+        color = ColorizeColors.CurrencyUpColorize:ToHex()
+    elseif gainOrLoss == 2 then
+        color = ColorizeColors.CurrencyDownColorize:ToHex()
+    else
+        color = ColorizeColors.CurrencyColorize:ToHex()
+    end
+
+    local absDelta = math.abs(deltaReputation)
+    local quantity = string_format(" |cFFFFFFx%d|r", absDelta)
+    local itemString = string_format("%s%s%s", formattedIcon, label, quantity)
+
+    local logPrefix = ChatAnnouncements.GetContextMessagePrefix()
+
+    local totalString = ""
+    if ChatAnnouncements.SV.Inventory.LootTotal and faction ~= ADVENTURE_ZONE_FACTION_NONE then
+        local totalRep = playerReputationTotal or GetAdventureZonePlayerReputation()
+        if totalRep > 0 then
+            totalString = string_format(" |c%s%s|r %s|cFFFFFF%s|r", color, ChatAnnouncements.SV.Inventory.LootTotalString, formattedIcon, ZO_CommaDelimitDecimalNumber(totalRep))
+        end
+    end
+
+    ChatAnnouncements.QueuedMessages[ChatAnnouncements.QueuedMessagesCounter] =
+    {
+        message = itemString,
+        type = "LOOT",
+        formattedRecipient = "",
+        color = color,
+        logPrefix = logPrefix,
+        totalString = totalString,
+        groupLoot = false,
+    }
+    ChatAnnouncements.QueuedMessagesCounter = ChatAnnouncements.QueuedMessagesCounter + 1
+    eventManager:RegisterForUpdate(moduleName .. "Printer", 50, ChatAnnouncements.PrintQueuedMessages)
+end
+
+--- @param eventId integer
+--- @param newReputation integer
+--- @param deltaReputation integer
+function ChatAnnouncements.OnAdventureZoneFactionReputationChanged(eventId, newReputation, deltaReputation)
+    ChatAnnouncements.QueueAdventureZoneFactionReputationGain(deltaReputation, newReputation)
+end
+
+--- @param eventId integer
+--- @param currencyType CurrencyType
+--- @param currencyLocation CurrencyLocation
+--- @param amount integer
+--- @param reason CurrencyChangeReason
+--- @param reasonSupplementaryInfo integer
+function ChatAnnouncements.OnPendingCurrencyRewardCached(eventId, currencyType, currencyLocation, amount, reason, reasonSupplementaryInfo)
+    if amount == 0 then
+        return
+    end
+    ChatAnnouncements.OnCurrencyUpdate(eventId, currencyType, currencyLocation, amount, 0, reason, reasonSupplementaryInfo)
 end
 
 function ChatAnnouncements.OnInventoryItemUsed(eventId, itemSoundCategory)
