@@ -5,7 +5,6 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-local UI = LUIE.UI
 
 -- SpellCastBuffs namespace
 --- @class (partial) LUIE.SpellCastBuffs
@@ -26,6 +25,9 @@ local GetAbilityName = GetAbilityName
 local IsBlockActive = IsBlockActive
 local IsPlayerStunned = IsPlayerStunned
 
+-- Matches SpellCastBuffs.xml ZO_DefaultCooldown alpha="0.5"
+local BUFF_ICON_COOLDOWN_ALPHA = 0.5
+local BUFF_ICON_FADEOUT_MS = 2000
 
 -- Helper function to get CC color
 --- @param ccType integer
@@ -124,6 +126,10 @@ local function SetSingleIconBuffType(buff, buffType, unbreakable, id)
     -- Set cooldown color if it exists
     if buff.cd then
         buff.cd:SetFillColor(fillColor[1], fillColor[2], fillColor[3], fillColor[4])
+        buff.cdFillR = fillColor[1]
+        buff.cdFillG = fillColor[2]
+        buff.cdFillB = fillColor[3]
+        buff.cdFillA = fillColor[4]
     end
 
     -- Set progress bar colors if they exist
@@ -132,128 +138,22 @@ local function SetSingleIconBuffType(buff, buffType, unbreakable, id)
     end
 end
 
--- Initialize buff icon pools per container (called once on module init)
-local buffIconPools = {}
+local function CreateSingleIcon(container, effectType)
+    local metaPool = SpellCastBuffs.GetBuffIconMetaPool(container)
+    local buff, poolKey = metaPool:AcquireObject()
+    buff.poolKey = poolKey
 
-local function GetOrCreateBuffIconPool(container)
-    if not buffIconPools[container] then
-        local function BuffIconFactory(objectPool)
-            local effectType = nil -- Will be set when acquired
+    SpellCastBuffs.ApplySingleIconLayout(container, buff)
 
-            -- Create main buff container as a flex item inside iconHolder.
-            -- Explicitly disable grow/shrink so icons stay fixed size regardless of container pressure.
-            -- Start excluded from yoga layout — included only when actually shown via CreateSingleIcon.
-            local buff = UI:Backdrop(SpellCastBuffs.BuffContainers[container].iconHolder, nil, nil, { 0, 0, 0, 0.5 }, { 0, 0, 0, 1 }, false)
-            buff:SetFlexGrow(0)
-            buff:SetFlexShrink(0)
-            buff:SetExcludeFromFlexbox(true)
-            -- Setup mouse interaction
-            buff:SetMouseEnabled(true)
-            buff:SetHandler("OnMouseEnter", SpellCastBuffs.Buff_OnMouseEnter)
-            buff:SetHandler("OnMouseExit", SpellCastBuffs.Buff_OnMouseExit)
-            buff:SetHandler("OnMouseUp", SpellCastBuffs.Buff_OnMouseUp)
-
-            -- Border layer (UV-cropped like ZO_BuffDebuff; texture swapped per buff/debuff in SetSingleIconBuffType)
-            buff.back = UI:Texture(buff, "fill", nil, SpellCastBuffs.GetBuffBorderTexture(), DL_BACKGROUND, true)
-            SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, SpellCastBuffs.SV.IconSize)
-
-            -- Glow border layer (`buff_frame` / `debuff_frame`); pixel rounding reduces uneven edges when scaled.
-            buff.frame = UI:Texture(buff, { CENTER, CENTER }, nil, nil, DL_OVERLAY, false)
-            buff.frame:SetPixelRoundingEnabled(true)
-
-            -- Background layer (except for player_long container)
-            if container ~= "player_long" then
-                -- Create background texture
-                buff.iconbg = UI:Texture(buff, "fill", nil, "EsoUI/Art/ActionBar/abilityInset.dds", DL_CONTROLS, false)
-                -- Create dark backdrop behind the texture
-                local bgBackdrop = UI:Backdrop(buff.iconbg, "fill", nil, { 0, 0, 0, 0.9 }, { 0, 0, 0, 0.9 }, false)
-                bgBackdrop:SetDrawLevel(DL_CONTROLS)
-            end
-
-            -- Collectible/mount background
-            buff.drop = UI:Texture(buff, nil, nil, LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_BACKGROUND_DDS, DL_BACKGROUND, true)
-
-            -- Main ability icon
-            buff.icon = UI:Texture(buff, nil, nil, "/esoui/art/icons/icon_missing.dds", DL_CONTROLS, false)
-
-            -- Duration label
-            buff.label = UI:Label(buff, nil, nil, nil, SpellCastBuffs.buffsFont, nil, false)
-            buff.label:SetAnchor(TOPLEFT, buff, LEFT, -SpellCastBuffs.padding, -SpellCastBuffs.SV.LabelPosition)
-            buff.label:SetAnchor(BOTTOMRIGHT, buff, BOTTOMRIGHT, SpellCastBuffs.padding, -2)
-
-            -- Debug ability ID label
-            buff.abilityId = UI:Label(buff, { CENTER, CENTER }, nil, nil, SpellCastBuffs.buffsFont, nil, false)
-            buff.abilityId:SetDrawLayer(DL_OVERLAY)
-            buff.abilityId:SetDrawTier(DT_MEDIUM)
-
-            -- Stack count label
-            buff.stack = UI:Label(buff, nil, nil, nil, SpellCastBuffs.buffsFont, nil, false)
-            buff.stack:SetAnchor(CENTER, buff, BOTTOMLEFT, 0, 0)
-            buff.stack:SetAnchor(CENTER, buff, TOPRIGHT, -SpellCastBuffs.padding * 3, SpellCastBuffs.padding * 3)
-
-            if buff.iconbg then
-                -- Match ZO_DefaultCooldown / ZO_BuffDebuffIcon: fill entire slot (see WindowTemplates.xml AnchorFill).
-                buff.cd = UI:ControlWithType(buff, "fill", nil, false, nil, CT_COOLDOWN)
-                buff.cd:SetDrawLayer(DL_BACKGROUND)
-            end
-
-            if container == "prominentbuffs" or container == "prominentdebuffs" then
-                buff.effectType = effectType
-                buff.name = UI:Label(buff, nil, nil, nil, SpellCastBuffs.prominentFont, nil, false)
-
-                -- Create progress bar
-                buff.bar =
-                {
-                    backdrop = UI:Backdrop(buff, nil, { 154, 16 }, nil, nil, false),
-                    bar = UI:StatusBar(buff, nil, { 150, 12 }, nil, false),
-                }
-
-                -- Setup bar properties
-                buff.bar.backdrop:SetEdgeTexture("", 8, 2, 2, 2)
-                buff.bar.backdrop:SetDrawLayer(DL_BACKGROUND)
-                buff.bar.backdrop:SetDrawLevel(DL_CONTROLS)
-                buff.bar.bar:SetMinMax(0, 1)
-            end
-
-            return buff
-        end
-
-        local function BuffIconReset(buff)
-            buff:SetHidden(true)
-            buff:SetExcludeFromFlexbox(true)
-            buff:ClearAnchors()
-            buff:SetAlpha(1)
-            if buff.cd then
-                buff.cd:StartCooldown(0, 0, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, false)
-            end
-            buff.label:SetText("")
-            buff.stack:SetHidden(true)
-            if buff.name then
-                buff.name:SetText("")
-            end
-            if buff.bar then
-                buff.bar.bar:SetValue(0)
-            end
-        end
-
-        -- Create the pool
-        buffIconPools[container] = ZO_ObjectPool:New(BuffIconFactory, BuffIconReset)
+    if effectType then
+        local borderTexture = (effectType == BUFF_EFFECT_TYPE_BUFF) and SpellCastBuffs.GetBuffBorderTexture() or SpellCastBuffs.GetDebuffBorderTexture()
+        buff.back:SetTexture(borderTexture)
+        SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, SpellCastBuffs.SV.IconSize)
     end
 
-    return buffIconPools[container]
-end
-
-local function CreateSingleIcon(container, effectType)
-    local pool = GetOrCreateBuffIconPool(container)
-    local buff = pool:AcquireObject()
-
-    -- Reset icon properties for first use
-    SpellCastBuffs.ResetSingleIcon(container, buff)
-
-    -- Include in Yoga first, then (re)apply margins — Yoga may clear node properties
-    -- on the exclude→include transition so margins must be set after SetExcludeFromFlexbox(false).
     buff:SetExcludeFromFlexbox(false)
     SpellCastBuffs.ApplyIconFlexMargin(container, buff)
+    buff.lastFlexContainer = container
     buff:SetHidden(false)
 
     return buff
@@ -276,6 +176,26 @@ local function EaseOutQuad(t, b, c, d)
 
     t = t / d
     return -c * t * (t - 2) + b
+end
+
+--- Parent SetAlpha does not reliably fade CooldownControl; scale cd control + fill with the expire fade.
+--- @param buff SpellCastBuffs_BuffIcon_Control
+--- @param container string
+--- @param remain number|nil
+local function ApplyBuffIconExpireFade(buff, container, remain)
+    local fadeAlpha = 1
+    if SpellCastBuffs.SV.FadeOutIcons and remain ~= nil and remain < BUFF_ICON_FADEOUT_MS then
+        fadeAlpha = EaseOutQuad(remain, 0, 1, BUFF_ICON_FADEOUT_MS)
+    end
+
+    buff:SetAlpha(fadeAlpha)
+
+    if buff.cd and container ~= "player_long" and not buff.cd:IsHidden() then
+        buff.cd:SetAlpha(BUFF_ICON_COOLDOWN_ALPHA * fadeAlpha)
+        if buff.cdFillA then
+            buff.cd:SetFillColor(buff.cdFillR, buff.cdFillG, buff.cdFillB, buff.cdFillA * fadeAlpha)
+        end
+    end
 end
 
 --- @param currentTimeMs number
@@ -310,52 +230,85 @@ local function updateBar(currentTimeMs, sortedList, container)
     end
 end
 
+-- Reused each OnUpdate tick to avoid allocating fresh tables (GC pressure).
+local g_buffsSorted = {}
+local g_sortedCounts = {}
+local g_displayUidCounter = {}
+local g_seenAbilityIdPerContainer = {}
+local g_cachedDisplaySortedLists = {}
+local g_isProminentContainer = {}
+
+--- @param remain number
+--- @param container string
+--- @return string|nil
+local function FormatRemainLabelText(remain, container)
+    if remain > 86400000 then
+        return string_format("%d d", zo_floor(remain / 86400000))
+    elseif remain > 6000000 then
+        return string_format("%dh", zo_floor(remain / 3600000))
+    elseif remain > 600000 then
+        return string_format("%dm", zo_floor(remain / 60000))
+    elseif remain > 60000 or container == "player_long" then
+        local m = zo_floor(remain / 60000)
+        local s = remain / 1000 - 60 * m
+        return string_format("%d:%.2d", m, s)
+    end
+    return string_format(SpellCastBuffs.SV.RemainingTextMillis and "%.1f" or "%.1d", remain / 1000)
+end
+
+--- @param buff SpellCastBuffs_BuffIcon_Control
+--- @param container string
+--- @param force boolean
+local function ApplyIconLayoutIfNeeded(buff, container, force)
+    local iconSize = SpellCastBuffs.SV.IconSize
+    if force
+    or buff.lastAppliedIconSize ~= iconSize
+    or buff.lastLayoutVersion ~= SpellCastBuffs.displayLayoutVersion
+    or buff.lastFlexContainer ~= container then
+        buff:SetExcludeFromFlexbox(false)
+        SpellCastBuffs.ApplyBuffIconSlotDimensions(buff, iconSize)
+        SpellCastBuffs.ApplyIconFlexMargin(container, buff)
+        buff.lastFlexContainer = container
+        buff.lastAppliedIconSize = iconSize
+        buff.lastLayoutVersion = SpellCastBuffs.displayLayoutVersion
+    end
+end
+
 --- @param currentTimeMs number
 --- @param sortedList table
 --- @param container string
-local function updateIcons(currentTimeMs, sortedList, container)
-    -- Special workaround for container with player long buffs. We do not need to update it every 100ms, but rather 3 times less often
-    if SpellCastBuffs.BuffContainers[container].skipUpdate then
-        SpellCastBuffs.BuffContainers[container].skipUpdate = SpellCastBuffs.BuffContainers[container].skipUpdate + 1
-        if SpellCastBuffs.BuffContainers[container].skipUpdate > 1 then
-            SpellCastBuffs.BuffContainers[container].skipUpdate = 0
-        else
-            return
-        end
-    end
-
+local function updateIconsStructure(currentTimeMs, sortedList, container)
     local iconsNum = #sortedList
+    local index = 0
 
-    -- Flex layout handles visual ordering; always iterate 1→N in sorted order
-    local index = 0 -- Global icon counter
     for i = 1, iconsNum do
-        -- Get current buff definition
         local effect = sortedList[i]
         index = index + 1
-        -- Get or create icon from pool
+
         if SpellCastBuffs.BuffContainers[container].icons[index] == nil then
             SpellCastBuffs.BuffContainers[container].icons[index] = CreateSingleIcon(container, effect.type)
         end
 
-        -- Calculate remaining time
-        local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
-        local name = (effect.name ~= nil) and effect.name or nil
-
         local buff = SpellCastBuffs.BuffContainers[container].icons[index]
-        -- Include in Yoga FIRST, then set margins.
-        -- SetExcludeFromFlexbox may clear Yoga node properties on the transition,
-        -- so margins must be (re)applied after the node is included, not before.
-        buff:SetExcludeFromFlexbox(false)
-        SpellCastBuffs.ApplyIconFlexMargin(container, buff)
+        if container == "player_long" then
+            if buff.cd then
+                buff.cd:SetHidden(true)
+            end
+            if buff.iconbg then
+                buff.iconbg:SetHidden(true)
+            end
+        end
+
+        local slotRebound = effect.iconNum ~= index
+        ApplyIconLayoutIfNeeded(buff, container, slotRebound)
         buff:SetHidden(false)
 
-        -- If previously this icon was used for different effect, then setup it again
-        if effect.iconNum ~= index then
+        if slotRebound then
             effect.iconNum = index
             effect.restart = true
+            local name = (effect.name ~= nil) and effect.name or nil
             SetSingleIconBuffType(buff, effect.type, effect.unbreakable, effect.id)
 
-            -- Setup Info for Tooltip function to pull
             buff.effectId = effect.id
             buff.effectName = name
             buff.buffType = effect.type
@@ -373,53 +326,88 @@ local function updateIcons(currentTimeMs, sortedList, container)
             buff.icon:SetTexture(effect.icon)
             buff:SetAlpha(1)
             buff:SetHidden(false)
+
+            local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
             if not remain or effect.fakeDuration then
+                local staticLabel
                 if effect.toggle then
-                    buff.label:SetText("T")
+                    staticLabel = "T"
                 elseif effect.groundLabel then
-                    buff.label:SetText("G")
-                else
-                    buff.label:SetText(nil)
+                    staticLabel = "G"
                 end
+                if buff.lastLabelText ~= staticLabel then
+                    buff.label:SetText(staticLabel)
+                    buff.lastLabelText = staticLabel
+                end
+            else
+                buff.lastLabelText = nil
             end
 
             if buff.abilityId and effect.id then
-                buff.abilityId:SetText(effect.id)
+                local idText = tostring(effect.id)
+                if buff.lastAbilityIdText ~= idText then
+                    buff.abilityId:SetText(idText)
+                    buff.lastAbilityIdText = idText
+                    if SpellCastBuffs.SV.ShowDebugAbilityId then
+                        SpellCastBuffs.FitAbilityIdLabelFont(buff)
+                    end
+                end
             end
 
             if buff.name then
-                buff.name:SetText(zo_strformat("<<C:1>>", effect.name))
+                local nameText = zo_strformat("<<C:1>>", effect.name)
+                buff.name:SetText(nameText)
             end
         end
+    end
+
+    SpellCastBuffs.ReleaseSurplusBuffIcons(container, iconsNum)
+end
+
+--- @param currentTimeMs number
+--- @param sortedList table
+--- @param container string
+local function updateIconsLight(currentTimeMs, sortedList, container)
+    if SpellCastBuffs.BuffContainers[container].skipUpdate then
+        SpellCastBuffs.BuffContainers[container].skipUpdate = SpellCastBuffs.BuffContainers[container].skipUpdate + 1
+        if SpellCastBuffs.BuffContainers[container].skipUpdate > 1 then
+            SpellCastBuffs.BuffContainers[container].skipUpdate = 0
+        else
+            return
+        end
+    end
+
+    local iconsNum = #sortedList
+    for i = 1, iconsNum do
+        local effect = sortedList[i]
+        local buff = SpellCastBuffs.BuffContainers[container].icons[i]
+        if not buff then
+            break
+        end
+
+        local remain = (effect.ends ~= nil) and (effect.ends - currentTimeMs) or nil
 
         if effect.stack and effect.stack > 0 then
-            buff.stack:SetText(string_format("%s", effect.stack))
+            local stackText = string_format("%s", effect.stack)
+            if buff.lastStackText ~= stackText then
+                buff.stack:SetText(stackText)
+                buff.lastStackText = stackText
+            end
             buff.stack:SetHidden(false)
         else
             buff.stack:SetHidden(true)
+            buff.lastStackText = nil
         end
 
-        -- For update remaining text. For temporary effects this is not very efficient, but we have not much such effects
         if remain and not effect.fakeDuration then
-            if remain > 86400000 then
-                -- more then 1 day
-                buff.label:SetText(string_format("%d d", zo_floor(remain / 86400000)))
-            elseif remain > 6000000 then
-                -- over 100 minutes - display XXh
-                buff.label:SetText(string_format("%dh", zo_floor(remain / 3600000)))
-            elseif remain > 600000 then
-                -- over 10 minutes - display XXm
-                buff.label:SetText(string_format("%dm", zo_floor(remain / 60000)))
-            elseif remain > 60000 or container == "player_long" then
-                local m = zo_floor(remain / 60000)
-                local s = remain / 1000 - 60 * m
-                buff.label:SetText(string_format("%d:%.2d", m, s))
-            else
-                buff.label:SetText(string_format(SpellCastBuffs.SV.RemainingTextMillis and "%.1f" or "%.1d", remain / 1000))
+            local labelText = FormatRemainLabelText(remain, container)
+            if buff.lastLabelText ~= labelText then
+                buff.label:SetText(labelText)
+                buff.lastLabelText = labelText
             end
         end
-        if effect.restart and buff.cd ~= nil then
-            -- Modify recall penalty to show forced max duration
+
+        if effect.restart and buff.cd ~= nil and container ~= "player_long" then
             if effect.id == 999016 then
                 effect.dur = 600000
             end
@@ -431,21 +419,24 @@ local function updateIcons(currentTimeMs, sortedList, container)
             end
         end
 
-        -- Now possibly fade out expiring icon
-        if SpellCastBuffs.SV.FadeOutIcons and remain ~= nil and remain < 2000 then
-            -- buff:SetAlpha( 0.05 + remain/2106 )
-            buff:SetAlpha(EaseOutQuad(remain, 0, 1, 2000))
+        if buff.abilityId then
+            if SpellCastBuffs.SV.ShowDebugAbilityId and effect.id then
+                buff.abilityId:SetHidden(false)
+                local idText = tostring(effect.id)
+                if buff.lastAbilityIdText ~= idText then
+                    buff.abilityId:SetText(idText)
+                    buff.lastAbilityIdText = idText
+                    SpellCastBuffs.FitAbilityIdLabelFont(buff)
+                end
+            else
+                buff.abilityId:SetHidden(true)
+                buff.lastAbilityIdText = nil
+            end
         end
-    end
 
-    -- Hide rest of icons and remove them from yoga layout so they don't affect wrap calculations
-    for i = iconsNum + 1, #SpellCastBuffs.BuffContainers[container].icons do
-        local icon = SpellCastBuffs.BuffContainers[container].icons[i]
-        icon:SetHidden(true)
-        icon:SetExcludeFromFlexbox(true)
+        ApplyBuffIconExpireFade(buff, container, remain)
     end
 end
-
 
 -- Helper function to sort buffs
 --- @param x {
@@ -509,121 +500,15 @@ end
 function SpellCastBuffs.OnUpdate(currentTimeMs)
     SpellCastBuffs.EnforceDisplayAlpha()
 
-    local buffsSorted = {}
-    local sortedCounts = {}
-    local displayUidCounter = {}
-    local seenAbilityIdPerContainer = {}
-    local needs_update = {}
-    local isProminent = {}
-
-    --- @param container string
-    --- @param effect table
-    local function appendSortedEffect(container, effect)
-        if effect.id then
-            local seen = seenAbilityIdPerContainer[container]
-            if not seen then
-                seen = {}
-                seenAbilityIdPerContainer[container] = seen
-            end
-            local existingIndex = seen[effect.id]
-            if existingIndex then
-                local existing = buffsSorted[container][existingIndex]
-                if effect.buffSlot and existing and not existing.buffSlot then
-                    buffsSorted[container][existingIndex] = effect
-                end
-                return
-            end
-        end
-        sortedCounts[container] = (sortedCounts[container] or 0) + 1
-        displayUidCounter[container] = (displayUidCounter[container] or 0) + 1
-        effect.displayUid = displayUidCounter[container]
-        local index = sortedCounts[container]
-        buffsSorted[container][index] = effect
-        if effect.id then
-            local seen = seenAbilityIdPerContainer[container]
-            if seen then
-                seen[effect.id] = index
-            end
-        end
-    end
-
-    -- And reset sizes of already existing icons
-    for _, container in pairs(SpellCastBuffs.containerRouting) do
-        needs_update[container] = true
-        -- Prepare sort container
-        if buffsSorted[container] == nil then
-            buffsSorted[container] = {}
-        end
-        sortedCounts[container] = 0
-        displayUidCounter[container] = 0
-        -- Refresh prominent buff labels on each update tick
-        if container == "prominentbuffs" or container == "prominentdebuffs" then
-            isProminent[container] = true
-        end
-    end
-
-    -- Filter expired events and build array for sorting
-    for context, effectsList in pairs(SpellCastBuffs.EffectsList) do
-        local container = SpellCastBuffs.containerRouting[context]
-        for k, v in pairs(effectsList) do
-            -- Remove effect (that is not permanent and has duration)
-            if v.ends ~= nil and v.dur > 0 and v.ends < currentTimeMs then
-                effectsList[k] = nil
-            elseif container then
-                -- Add icons to to-be-sorted list only if effect already started
-                if v.starts < currentTimeMs then
-                    -- Filter Effects
-                    -- Always show prominent effects
-                    if v.target == "prominent" then
-                        appendSortedEffect(container, v)
-                        -- If the effect is not flagged as long or 0 duration and flagged to display in short container, then display normally.
-                    elseif v.type == BUFF_EFFECT_TYPE_DEBUFF or v.forced == "short" or not (v.forced == "long" or v.ends == nil or v.dur == 0) then
-                        if v.target == "reticleover" and SpellCastBuffs.SV.ShortTermEffects_Target then
-                            appendSortedEffect(container, v)
-                        elseif v.target == "player" and SpellCastBuffs.SV.ShortTermEffects_Player then
-                            appendSortedEffect(container, v)
-                        end
-                        -- If the effect is a long term effect on the target then use Long Term Target settings.
-                    elseif v.target == "reticleover" and SpellCastBuffs.SV.LongTermEffects_Target then
-                        appendSortedEffect(container, v)
-                        -- If the effect is a long term effect on the player then use Long Term Player settings.
-                    elseif v.target == "player" and SpellCastBuffs.SV.LongTermEffects_Player then
-                        -- Choose container for long-term player buffs
-                        if SpellCastBuffs.SV.LongTermEffectsSeparate and not (container == "prominentbuffs" or container == "prominentdebuffs") then
-                            if buffsSorted.player_long == nil then
-                                buffsSorted.player_long = {}
-                            end
-                            appendSortedEffect("player_long", v)
-                        else
-                            appendSortedEffect(container, v)
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    -- Sort effects in container and draw them on screen
-    for _, container in pairs(SpellCastBuffs.containerRouting) do
-        if needs_update[container] then
-            table_sort(buffsSorted[container], buffSort)
-            updateIcons(currentTimeMs, buffsSorted[container], container)
-        end
-        needs_update[container] = false
-    end
-
-    for _, container in pairs(SpellCastBuffs.containerRouting) do
-        if isProminent[container] then
-            updateBar(currentTimeMs, buffsSorted[container], container)
-        end
-    end
-
-    -- Display Block buff for player if enabled
+    -- Display Block buff for player if enabled (before display rebuild)
     if SpellCastBuffs.SV.ShowBlockPlayer and not SpellCastBuffs.SV.HidePlayerBuffs then
-        if IsBlockActive() and not IsPlayerStunned() then -- Is Block Active returns true when the player is stunned currently.
+        if IsBlockActive() and not IsPlayerStunned() then
             local abilityId = 974
             local abilityName = Abilities.Innate_Brace
             local context = SpellCastBuffs.DetermineContextSimple("player1", abilityId, abilityName)
+            if not SpellCastBuffs.EffectsList[context][abilityId] then
+                SpellCastBuffs.MarkDisplayDirty()
+            end
             SpellCastBuffs.EffectsList[context][abilityId] =
             {
                 uid = abilityId,
@@ -643,5 +528,146 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
         else
             SpellCastBuffs.ClearPlayerBuff(974)
         end
+    end
+
+    local expiredAny = false
+
+    for _, effectsList in pairs(SpellCastBuffs.EffectsList) do
+        for k, v in pairs(effectsList) do
+            if v.ends ~= nil and v.dur > 0 and v.ends < currentTimeMs then
+                effectsList[k] = nil
+                expiredAny = true
+            end
+        end
+    end
+    if expiredAny then
+        SpellCastBuffs.MarkDisplayDirty()
+    end
+
+    --- @param container string
+    --- @param effect table
+    local function appendSortedEffect(container, effect)
+        if effect.id then
+            local seen = g_seenAbilityIdPerContainer[container]
+            if not seen then
+                seen = {}
+                g_seenAbilityIdPerContainer[container] = seen
+            end
+            local existingIndex = seen[effect.id]
+            if existingIndex then
+                local existing = g_buffsSorted[container][existingIndex]
+                if effect.buffSlot and existing and not existing.buffSlot then
+                    g_buffsSorted[container][existingIndex] = effect
+                end
+                return
+            end
+        end
+        g_sortedCounts[container] = (g_sortedCounts[container] or 0) + 1
+        g_displayUidCounter[container] = (g_displayUidCounter[container] or 0) + 1
+        effect.displayUid = g_displayUidCounter[container]
+        local index = g_sortedCounts[container]
+        g_buffsSorted[container][index] = effect
+        if effect.id then
+            local seen = g_seenAbilityIdPerContainer[container]
+            if seen then
+                seen[effect.id] = index
+            end
+        end
+    end
+
+    local function rebuildDisplaySortedLists()
+        for _, container in pairs(SpellCastBuffs.containerRouting) do
+            if not g_buffsSorted[container] then
+                g_buffsSorted[container] = {}
+            else
+                ZO_ClearNumericallyIndexedTable(g_buffsSorted[container])
+            end
+            if not g_seenAbilityIdPerContainer[container] then
+                g_seenAbilityIdPerContainer[container] = {}
+            else
+                ZO_ClearTable(g_seenAbilityIdPerContainer[container])
+            end
+            g_sortedCounts[container] = 0
+            g_displayUidCounter[container] = 0
+            g_isProminentContainer[container] = (container == "prominentbuffs" or container == "prominentdebuffs")
+        end
+        if not g_buffsSorted.player_long then
+            g_buffsSorted.player_long = {}
+        else
+            ZO_ClearNumericallyIndexedTable(g_buffsSorted.player_long)
+        end
+        if not g_seenAbilityIdPerContainer.player_long then
+            g_seenAbilityIdPerContainer.player_long = {}
+        else
+            ZO_ClearTable(g_seenAbilityIdPerContainer.player_long)
+        end
+        g_sortedCounts.player_long = 0
+        g_displayUidCounter.player_long = 0
+
+        for context, effectsList in pairs(SpellCastBuffs.EffectsList) do
+            local container = SpellCastBuffs.containerRouting[context]
+            for k, v in pairs(effectsList) do
+                if container and v.starts < currentTimeMs then
+                    if v.target == "prominent" then
+                        appendSortedEffect(container, v)
+                    elseif v.type == BUFF_EFFECT_TYPE_DEBUFF or v.forced == "short" or not (v.forced == "long" or v.ends == nil or v.dur == 0) then
+                        if v.target == "reticleover" and SpellCastBuffs.SV.ShortTermEffects_Target then
+                            appendSortedEffect(container, v)
+                        elseif v.target == "player" and SpellCastBuffs.SV.ShortTermEffects_Player then
+                            appendSortedEffect(container, v)
+                        end
+                    elseif v.target == "reticleover" and SpellCastBuffs.SV.LongTermEffects_Target then
+                        appendSortedEffect(container, v)
+                    elseif v.target == "player" and SpellCastBuffs.SV.LongTermEffects_Player then
+                        if SpellCastBuffs.SV.LongTermEffectsSeparate and not (container == "prominentbuffs" or container == "prominentdebuffs") then
+                            appendSortedEffect("player_long", v)
+                        else
+                            appendSortedEffect(container, v)
+                        end
+                    end
+                end
+            end
+        end
+
+        for _, container in pairs(SpellCastBuffs.containerRouting) do
+            table_sort(g_buffsSorted[container], buffSort)
+            g_cachedDisplaySortedLists[container] = g_buffsSorted[container]
+            updateIconsStructure(currentTimeMs, g_buffsSorted[container], container)
+        end
+        if g_buffsSorted.player_long then
+            table_sort(g_buffsSorted.player_long, buffSort)
+            g_cachedDisplaySortedLists.player_long = g_buffsSorted.player_long
+            updateIconsStructure(currentTimeMs, g_buffsSorted.player_long, "player_long")
+        end
+    end
+
+    if SpellCastBuffs.displayDirty then
+        rebuildDisplaySortedLists()
+        SpellCastBuffs.displayDirty = false
+    end
+
+    for _, container in pairs(SpellCastBuffs.containerRouting) do
+        local sortedList = g_cachedDisplaySortedLists[container]
+        if sortedList then
+            updateIconsLight(currentTimeMs, sortedList, container)
+        end
+    end
+
+    local playerLongList = g_cachedDisplaySortedLists.player_long
+    if playerLongList then
+        updateIconsLight(currentTimeMs, playerLongList, "player_long")
+    end
+
+    for _, container in pairs(SpellCastBuffs.containerRouting) do
+        if g_isProminentContainer[container] then
+            local sortedList = g_cachedDisplaySortedLists[container]
+            if sortedList then
+                updateBar(currentTimeMs, sortedList, container)
+            end
+        end
+    end
+
+    if LUIE.IsDevDebugEnabled() then
+        SpellCastBuffs.RecordBuffIconPoolHighWater()
     end
 end

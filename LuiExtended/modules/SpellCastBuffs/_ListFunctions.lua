@@ -350,6 +350,7 @@ function SpellCastBuffs.RemoveSyntheticEffectsForAbilityId(context, abilityId, k
             end
         end
     end
+    SpellCastBuffs.MarkDisplayDirty()
 end
 
 --- @param context string
@@ -373,6 +374,7 @@ function SpellCastBuffs.ClearFakeEffectEntry(context, abilityId)
     end
     effectsList[GetEffectUidFake(abilityId)] = nil
     effectsList[abilityId] = nil
+    SpellCastBuffs.MarkDisplayDirty()
 end
 
 --- @param context string
@@ -384,6 +386,7 @@ function SpellCastBuffs.SetFakeCombatEffect(context, abilityId, entry)
     local effectsList = SpellCastBuffs.EffectsList[context]
     effectsList[uid] = entry
     effectsList[abilityId] = nil
+    SpellCastBuffs.MarkDisplayDirty()
 end
 
 --- Remove other EffectsList rows that share the same UI container and ability id (e.g. ground + reticleover2 -> target debuffs).
@@ -404,4 +407,5 @@ function SpellCastBuffs.RemoveDuplicateEffectsInSharedContainer(keepContext, abi
             end
         end
     end
+    SpellCastBuffs.MarkDisplayDirty()
 end

@@ -1,0 +1,197 @@
+<!--
+      LuiExtended — SpellCastBuffs icon virtual (ZO_ControlPool source template)
+      License: The MIT License (MIT)
+-->
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
+  <Controls>
+    <Control name="LUIE_SpellCastBuffIcon"
+             virtual="true"
+             mouseEnabled="true"
+             hidden="true">
+      <OnMouseEnter>
+        LUIE.SpellCastBuffs.Buff_OnMouseEnter(self)
+      </OnMouseEnter>
+      <OnMouseExit>
+        LUIE.SpellCastBuffs.Buff_OnMouseExit(self)
+      </OnMouseExit>
+      <OnMouseUp>
+        LUIE.SpellCastBuffs.Buff_OnMouseUp(self, button, upInside)
+      </OnMouseUp>
+      <Controls>
+        <Texture name="$(parent)_Back"
+                 layer="BACKGROUND"
+                 textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES"
+                 hidden="true" />
+        <Texture name="$(parent)_Frame"
+                 layer="OVERLAY"
+                 textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)"
+                  relativePoint="CENTER" />
+        </Texture>
+        <Texture name="$(parent)_IconBg"
+                 textureFile="EsoUI/Art/ActionBar/abilityInset.dds"
+                 level="1"
+                 layer="CONTROLS"
+                 hidden="true" />
+        <Texture name="$(parent)_Drop"
+                 textureFile="LuiMedia/media/icons/abilities/ability_innate_background.dds"
+                 layer="BACKGROUND"
+                 hidden="true">
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)"
+                  relativePoint="TOPLEFT"
+                  offsetX="1"
+                  offsetY="1" />
+          <Anchor point="BOTTOMRIGHT"
+                  relativeTo="$(parent)"
+                  relativePoint="BOTTOMRIGHT"
+                  offsetX="-1"
+                  offsetY="-1" />
+        </Texture>
+        <Cooldown name="$(parent)_Cooldown"
+                  inherits="ZO_DefaultCooldown"
+                  level="1"
+                  alpha="0.5"
+                  hidden="true" />
+        <Texture name="$(parent)_Icon"
+                 textureFile="EsoUI/Art/Icons/icon_missing.dds"
+                 textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES"
+                 level="2"
+                 layer="CONTROLS">
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)"
+                  relativePoint="TOPLEFT"
+                  offsetX="1"
+                  offsetY="1" />
+          <Anchor point="BOTTOMRIGHT"
+                  relativeTo="$(parent)"
+                  relativePoint="BOTTOMRIGHT"
+                  offsetX="-1"
+                  offsetY="-1" />
+        </Texture>
+        <Label name="$(parent)_Label"
+               wrapMode="ELLIPSIS"
+               horizontalAlignment="CENTER"
+               verticalAlignment="BOTTOM"
+               excludeFromResizeToFitExtents="true"
+               hidden="true" />
+        <Label name="$(parent)_AbilityId"
+               layer="OVERLAY"
+               tier="MEDIUM"
+               horizontalAlignment="CENTER"
+               verticalAlignment="TOP"
+               wrapMode="TRUNCATE"
+               maxLineCount="1"
+               excludeFromResizeToFitExtents="true"
+               hidden="true">
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)"
+                  relativePoint="TOPLEFT"
+                  offsetX="1"
+                  offsetY="1" />
+          <Anchor point="TOPRIGHT"
+                  relativeTo="$(parent)"
+                  relativePoint="TOPRIGHT"
+                  offsetX="-1"
+                  offsetY="1" />
+        </Label>
+        <Label name="$(parent)_Stack"
+               wrapMode="ELLIPSIS"
+               horizontalAlignment="CENTER"
+               verticalAlignment="CENTER"
+               excludeFromResizeToFitExtents="true"
+               hidden="true" />
+        <Label name="$(parent)_Name"
+               wrapMode="ELLIPSIS"
+               excludeFromResizeToFitExtents="true"
+               hidden="true" />
+        <Backdrop name="$(parent)_BarBackdrop"
+                  centerColor="00000066"
+                  edgeColor="00000099"
+                  hidden="true"
+                  excludeFromResizeToFitExtents="true"
+                  layer="BACKGROUND">
+          <Dimensions x="154"
+                      y="16" />
+          <Edge edgeFileWidth="8"
+                edgeFileHeight="2"
+                edgeFilePadding="2" />
+        </Backdrop>
+        <StatusBar name="$(parent)_Bar"
+                   hidden="true"
+                   excludeFromResizeToFitExtents="true"
+                   layer="CONTROLS">
+          <Dimensions x="150"
+                      y="12" />
+        </StatusBar>
+      </Controls>
+    </Control>
+    <!-- Buff/debuff host: mover preview inset + flex icon holder (mirrored under UF
+    _Buffs/_Debuffs) -->
+    <Control name="LUIE_SCB_EffectsRegion_Template"
+             virtual="true"
+             hidden="false">
+      <Controls>
+        <Texture name="$(parent)_Preview"
+                 textureFile="/esoui/art/miscellaneous/inset_bg.dds"
+                 layer="BACKGROUND"
+                 hidden="true">
+          <AnchorFill />
+          <Controls>
+            <Label name="$(parent)_Label"
+                   wrapMode="ELLIPSIS"
+                   horizontalAlignment="CENTER"
+                   verticalAlignment="CENTER"
+                   excludeFromResizeToFitExtents="true">
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)"
+                      relativePoint="CENTER" />
+            </Label>
+          </Controls>
+        </Texture>
+        <Control name="$(parent)_IconHolder"
+                 hidden="false">
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)"
+                  relativePoint="TOPLEFT" />
+        </Control>
+      </Controls>
+    </Control>
+    <TopLevelControl name="LUIE_SCB_Tlw_Template"
+                     virtual="true"
+                     mouseEnabled="false"
+                     movable="false"
+                     clampedToScreen="true"
+                     hidden="true"
+                     layer="BACKGROUND"
+                     tier="LOW">
+      <Controls>
+        <Texture name="$(parent)_Preview"
+                 textureFile="/esoui/art/miscellaneous/inset_bg.dds"
+                 layer="BACKGROUND"
+                 hidden="true">
+          <AnchorFill />
+          <Controls>
+            <Label name="$(parent)_Label"
+                   wrapMode="ELLIPSIS"
+                   horizontalAlignment="CENTER"
+                   verticalAlignment="CENTER"
+                   excludeFromResizeToFitExtents="true">
+              <Anchor point="CENTER"
+                      relativeTo="$(parent)"
+                      relativePoint="CENTER" />
+            </Label>
+          </Controls>
+        </Texture>
+        <Control name="$(parent)_IconHolder"
+                 hidden="false">
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)"
+                  relativePoint="TOPLEFT" />
+        </Control>
+      </Controls>
+    </TopLevelControl>
+  </Controls>
+</GuiXml>

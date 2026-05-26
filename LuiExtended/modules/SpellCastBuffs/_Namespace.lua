@@ -25,6 +25,7 @@ local LUIE = LUIE
 --- @field playerDead boolean
 --- @field playerResurrectStage number?
 --- @field buffsFont string
+--- @field abilityIdFonts string[]
 --- @field prominentFont string
 --- @field padding number
 --- @field protectAbilityRemoval table
@@ -492,8 +493,19 @@ SpellCastBuffs.windowTitles =
 }
 
 --- @generic K, V
---- Buff icon control (single aura icon); extends Control with effect data for tooltips/right-click.
---- @class SpellCastBuffs_BuffIcon_Control : Control
+--- Buff icon control (single aura icon); extends virtual template with runtime refs and effect data.
+--- @class SpellCastBuffs_BuffIcon_Control : LUIE_SpellCastBuffIcon
+--- @field back TextureControl
+--- @field frame TextureControl
+--- @field iconbg TextureControl
+--- @field drop TextureControl
+--- @field icon TextureControl
+--- @field label LabelControl
+--- @field abilityId LabelControl
+--- @field stack LabelControl
+--- @field cd CooldownControl
+--- @field name LabelControl
+--- @field bar { backdrop: BackdropControl, bar: StatusBarControl }
 --- @field effectId number?
 --- @field effectName string?
 --- @field buffSlot number?

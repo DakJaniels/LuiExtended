@@ -12,7 +12,6 @@ end
 
 -- LUIE utility functions
 local AddSystemMessage = LUIE.AddSystemMessage
-local printToChat = LUIE.PrintToChat
 
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
@@ -28,6 +27,8 @@ local DebugResults = Data.DebugResults
 -- -----------------------------------------------------------------------------
 
 local pairs = pairs
+local ipairs = ipairs
+local table_sort = table.sort
 local string_format = string.format
 local zo_round = zo_round
 local tostring = tostring
@@ -576,6 +577,39 @@ function SpellCastBuffs.TempSlashZoneCheckFull()
     AddSystemMessage("--------------------")
 end
 
+function SpellCastBuffs.LogBuffIconPoolStats()
+    local controlPool = SpellCastBuffs.buffIconControlPool
+    if not controlPool then
+        LUIE:Log("Debug", "[SCB Pool] Not initialized.")
+        return
+    end
+
+    SpellCastBuffs.RecordBuffIconPoolHighWater()
+
+    local total = controlPool:GetTotalObjectCount()
+    local active = controlPool:GetActiveObjectCount()
+    local free = controlPool:GetFreeObjectCount()
+    local highWater = SpellCastBuffs.buffIconPoolHighWater
+
+    LUIE:Log(
+        "Debug",
+        string_format("[SCB Pool] total=%d active=%d free=%d sessionHighWater=%d", total, active, free, highWater)
+    )
+
+    local metaLines = {}
+    for containerKey, metaPool in pairs(SpellCastBuffs.buffIconMetaPools) do
+        metaLines[#metaLines + 1] = string_format("  %s active=%d", containerKey, metaPool:GetActiveObjectCount())
+    end
+    table_sort(metaLines)
+    for _, line in ipairs(metaLines) do
+        LUIE:Log("Debug", line)
+    end
+end
+
+function SpellCastBuffs.TempSlashBuffPoolStats()
+    SpellCastBuffs.LogBuffIconPoolStats()
+end
+
 -- -----------------------------------------------------------------------------
 -- Slash Commands Registration
 -- -----------------------------------------------------------------------------
@@ -588,6 +622,7 @@ local DEBUG_COMMANDS =
     ["/zonecheck"] = SpellCastBuffs.TempSlashZoneCheck,
     ["/zonecheckfull"] = SpellCastBuffs.TempSlashZoneCheckFull,
     ["/abilitydump"] = SpellCastBuffs.TempSlashCheckRemovedAbilities,
+    ["/scbpool"] = SpellCastBuffs.TempSlashBuffPoolStats,
 }
 
 --- Initializes debug slash commands

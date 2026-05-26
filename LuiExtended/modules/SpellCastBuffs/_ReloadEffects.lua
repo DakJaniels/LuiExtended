@@ -105,4 +105,5 @@ function SpellCastBuffs.ReloadEffects(unitTag)
         -- Display Battle Spirit
         SpellCastBuffs.LoadBattleSpiritTarget()
     end
+    SpellCastBuffs.MarkDisplayDirty()
 end
