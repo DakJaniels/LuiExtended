@@ -60,6 +60,7 @@ local changelogMessages =
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom frame unit names now always use Font Size (Label) for that frame type (Player, Target, Group, Raid, Companion, Pet, Boss, AvA). Names on raid, pet, and similar layouts on the health bar no longer use Font Size (Bar) by mistake (for example name at 16 while the label slider shows 22).",
     "",
+
     -- Version Header 7.2.2.9
     "|cFFA500LuiExtended Version 7.2.2.9|r",
     "",
