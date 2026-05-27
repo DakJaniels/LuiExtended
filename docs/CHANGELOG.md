@@ -1,5 +1,11 @@
 # LuiExtended Changelog
 
+## Version 7.2.3.1
+
+### Fixed
+
+- Unit Frames: Per-category **Font/Texture** settings now show **Font Size (Label)** and **Font Size (Bar)** only for **Player**, **Target**, **Group** (small group), and **AvA** frames that use a separate top caption row. **Raid**, **Companion**, **Pet**, and **Boss** use a single **Font Size** slider for all text on the health bar (name and values). Compact frames with different saved label and bar sizes now render one consistent size until you change that slider (both saved values update together when you do).
+
 ## Version 7.2.3.0
 
 ### Changes
