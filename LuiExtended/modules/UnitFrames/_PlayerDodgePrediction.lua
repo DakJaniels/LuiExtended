@@ -645,6 +645,7 @@ function LUIE_PlayerDodgePrediction:StopStaminaBarSmoothAnimation(bar)
     bar.luiStaminaDodgeAnimation:Stop()
 end
 
+--- @param bar StatusBarControl
 --- @param cost integer
 --- @return boolean
 function LUIE_PlayerDodgePrediction:PrepareStaminaDodgeMarkersForSmoothBar(bar, cost)
@@ -684,6 +685,7 @@ function LUIE_PlayerDodgePrediction:PrepareStaminaDodgeMarkersForSmoothBar(bar, 
 end
 
 --- @param cost integer
+--- @param positionOnly boolean|nil
 function LUIE_PlayerDodgePrediction:PublishDodgeCostIfChanged(cost, positionOnly)
     if positionOnly then
         return
