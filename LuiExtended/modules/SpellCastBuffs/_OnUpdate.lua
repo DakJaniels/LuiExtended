@@ -271,6 +271,7 @@ local function ApplyIconLayoutIfNeeded(buff, container, force)
         buff.lastFlexContainer = container
         buff.lastAppliedIconSize = iconSize
         buff.lastLayoutVersion = SpellCastBuffs.displayLayoutVersion
+        SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
     end
 end
 
@@ -343,15 +344,8 @@ local function updateIconsStructure(currentTimeMs, sortedList, container)
                 buff.lastLabelText = nil
             end
 
-            if buff.abilityId and effect.id then
-                local idText = tostring(effect.id)
-                if buff.lastAbilityIdText ~= idText then
-                    buff.abilityId:SetText(idText)
-                    buff.lastAbilityIdText = idText
-                    if SpellCastBuffs.SV.ShowDebugAbilityId then
-                        SpellCastBuffs.FitAbilityIdLabelFont(buff)
-                    end
-                end
+            if buff.abilityId and effect.id and SpellCastBuffs.SV.ShowDebugAbilityId then
+                SpellCastBuffs.UpdateAbilityIdDebugLabel(buff, tostring(effect.id))
             end
 
             if buff.name then
@@ -421,16 +415,11 @@ local function updateIconsLight(currentTimeMs, sortedList, container)
 
         if buff.abilityId then
             if SpellCastBuffs.SV.ShowDebugAbilityId and effect.id then
-                buff.abilityId:SetHidden(false)
-                local idText = tostring(effect.id)
-                if buff.lastAbilityIdText ~= idText then
-                    buff.abilityId:SetText(idText)
-                    buff.lastAbilityIdText = idText
-                    SpellCastBuffs.FitAbilityIdLabelFont(buff)
-                end
+                SpellCastBuffs.UpdateAbilityIdDebugLabel(buff, tostring(effect.id))
             else
                 buff.abilityId:SetHidden(true)
                 buff.lastAbilityIdText = nil
+                buff.abilityIdLabelDirty = nil
             end
         end
 
@@ -506,27 +495,39 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
             local abilityId = 974
             local abilityName = Abilities.Innate_Brace
             local context = SpellCastBuffs.DetermineContextSimple("player1", abilityId, abilityName)
-            if not SpellCastBuffs.EffectsList[context][abilityId] then
+            local effectsList = SpellCastBuffs.EffectsList[context]
+            local existing = effectsList and effectsList[abilityId]
+            if not existing then
+                SpellCastBuffs.MarkDisplayDirty()
+                existing =
+                {
+                    uid = abilityId,
+                    target = SpellCastBuffs.DetermineTarget(context),
+                    type = 1,
+                    id = abilityId,
+                    name = abilityName,
+                    icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_BLOCK_DDS,
+                    dur = 0,
+                    starts = currentTimeMs - 1,
+                    ends = nil,
+                    restart = true,
+                    iconNum = 0,
+                    forced = "short",
+                    toggle = true,
+                }
+                effectsList[abilityId] = existing
+            else
+                existing.restart = true
+            end
+            if not SpellCastBuffs.blockPlayerEffectActive then
                 SpellCastBuffs.MarkDisplayDirty()
             end
-            SpellCastBuffs.EffectsList[context][abilityId] =
-            {
-                uid = abilityId,
-                target = SpellCastBuffs.DetermineTarget(context),
-                type = 1,
-                id = abilityId,
-                name = abilityName,
-                icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_BLOCK_DDS,
-                dur = 0,
-                starts = currentTimeMs,
-                ends = nil,
-                restart = true,
-                iconNum = 0,
-                forced = "short",
-                toggle = true,
-            }
+            SpellCastBuffs.blockPlayerEffectActive = true
         else
-            SpellCastBuffs.ClearPlayerBuff(974)
+            if SpellCastBuffs.blockPlayerEffectActive then
+                SpellCastBuffs.ClearPlayerBuff(974)
+            end
+            SpellCastBuffs.blockPlayerEffectActive = false
         end
     end
 
@@ -607,7 +608,7 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
         for context, effectsList in pairs(SpellCastBuffs.EffectsList) do
             local container = SpellCastBuffs.containerRouting[context]
             for k, v in pairs(effectsList) do
-                if container and v.starts < currentTimeMs then
+                if container and v.starts <= currentTimeMs then
                     if v.target == "prominent" then
                         appendSortedEffect(container, v)
                     elseif v.type == BUFF_EFFECT_TYPE_DEBUFF or v.forced == "short" or not (v.forced == "long" or v.ends == nil or v.dur == 0) then
