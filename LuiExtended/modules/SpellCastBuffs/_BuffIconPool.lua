@@ -87,6 +87,13 @@ local function ResetBuffIconControl(buff)
     if buff.bar then
         buff.bar.bar:SetValue(0)
     end
+    buff.lastAbilityIdText = nil
+    buff.lastLabelText = nil
+    buff.lastStackText = nil
+    buff.lastFlexContainer = nil
+    buff.lastAppliedIconSize = nil
+    buff.lastLayoutVersion = nil
+    buff.abilityIdLabelDirty = true
     ResetBuffIconDynamicTextures(buff)
 end
 
