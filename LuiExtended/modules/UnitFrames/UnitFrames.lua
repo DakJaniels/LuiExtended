@@ -361,9 +361,9 @@ function UnitFrames.Initialize(enabled)
 
         -- Register for screen resolution changes to recalculate positioning
         eventManager:RegisterForEvent(moduleName, EVENT_SCREEN_RESIZED, function (eventId, pixelWidth, pixelHeight)
-            if LUIE.IsDevDebugEnabled() then
-                LUIE:Log("Debug", "Unit Frames: Screen resolution changed to " .. pixelWidth .. LUIE_TINY_X_FORMATTER .. pixelHeight .. " pixels, recalculating positions")
-            end
+            -- if LUIE.IsDevDebugEnabled() then
+            --     LUIE:Log("Debug", "Unit Frames: Screen resolution changed to " .. pixelWidth .. LUIE_TINY_X_FORMATTER .. pixelHeight .. " pixels, recalculating positions")
+            -- end
             UnitFrames.CustomFramesSetPositions()
         end)
 

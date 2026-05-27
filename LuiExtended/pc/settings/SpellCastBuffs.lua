@@ -263,46 +263,6 @@ function SpellCastBuffs.CreateSettings()
                 name = "Display Options",
             },
             {
-                type = "slider",
-                name = zo_strformat("\t\t\t\t\t<<1>>", "Out-of-Combat Opacity"),
-                tooltip = "Buff and debuff display opacity while out of combat (0–100%).",
-                min = 0,
-                max = 100,
-                step = 5,
-                getFunc = function ()
-                    return Settings.oocAlpha
-                end,
-                setFunc = function (value)
-                    Settings.oocAlpha = value
-                    SpellCastBuffs.ApplyDisplayAlpha()
-                end,
-                width = "full",
-                default = Defaults.oocAlpha,
-                disabled = function ()
-                    return not LUIE.SV.SpellCastBuff_Enable
-                end,
-            },
-            {
-                type = "slider",
-                name = zo_strformat("\t\t\t\t\t<<1>>", "In-Combat Opacity"),
-                tooltip = "Buff and debuff display opacity while in combat (0–100%).",
-                min = 0,
-                max = 100,
-                step = 5,
-                getFunc = function ()
-                    return Settings.incAlpha
-                end,
-                setFunc = function (value)
-                    Settings.incAlpha = value
-                    SpellCastBuffs.ApplyDisplayAlpha()
-                end,
-                width = "full",
-                default = Defaults.incAlpha,
-                disabled = function ()
-                    return not LUIE.SV.SpellCastBuff_Enable
-                end,
-            },
-            {
                 -- Hide OakenSoul
                 type = "checkbox",
                 name = GetString(LUIE_STRING_LAM_BUFF_MISC_HIDE_OAKENSOUL),
@@ -1447,6 +1407,46 @@ function SpellCastBuffs.CreateSettings()
         name = GetString(LUIE_STRING_LAM_BUFF_ICON_HEADER),
         controls =
         {
+            {
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "Out-of-Combat Opacity"),
+                tooltip = "Buff and debuff display opacity while out of combat (0–100%).",
+                min = 0,
+                max = 100,
+                step = 5,
+                getFunc = function ()
+                    return Settings.oocAlpha
+                end,
+                setFunc = function (value)
+                    Settings.oocAlpha = value
+                    SpellCastBuffs.ApplyDisplayAlpha()
+                end,
+                width = "full",
+                default = Defaults.oocAlpha,
+                disabled = function ()
+                    return not LUIE.SV.SpellCastBuff_Enable
+                end,
+            },
+            {
+                type = "slider",
+                name = zo_strformat("\t\t\t\t\t<<1>>", "In-Combat Opacity"),
+                tooltip = "Buff and debuff display opacity while in combat (0–100%).",
+                min = 0,
+                max = 100,
+                step = 5,
+                getFunc = function ()
+                    return Settings.incAlpha
+                end,
+                setFunc = function (value)
+                    Settings.incAlpha = value
+                    SpellCastBuffs.ApplyDisplayAlpha()
+                end,
+                width = "full",
+                default = Defaults.incAlpha,
+                disabled = function ()
+                    return not LUIE.SV.SpellCastBuff_Enable
+                end,
+            },
             {
                 -- Buff Icon Size
                 type = "slider",
