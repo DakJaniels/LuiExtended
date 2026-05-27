@@ -116,6 +116,7 @@ function UnitFrames.CustomFramesApplyBarAlignment()
         if stamBar and stamBar.bar then
             local staminaAlignment = UnitFrames.SV.BarAlignPlayerStamina or 1
             stamBar.bar:SetBarAlignment(staminaAlignment - 1)
+            UnitFrames.PlayerDodgePrediction.StopStaminaBarSmoothAnimation(stamBar.bar)
         end
         UnitFrames.PlayerDodgePrediction.Refresh()
     end

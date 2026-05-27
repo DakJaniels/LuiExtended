@@ -250,7 +250,9 @@ function UnitFrames.OnPowerUpdate(unitTag, powerIndex, powerType, powerValue, po
     end
 
     if unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_STAMINA then
-        UnitFrames.PlayerDodgePrediction.Refresh(true)
+        if not UnitFrames.PlayerDodgePrediction.ShouldUseLUIEStaminaSmooth() then
+            UnitFrames.PlayerDodgePrediction.Refresh(true)
+        end
     end
 
     -- If players powerValue is zero, issue new blinking event on Custom Frames
@@ -347,11 +349,23 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
     -- Update status bar
     if attributeFrame.bar then
         if UnitFrames.SV.CustomSmoothBar and not isTraumaFlag then
-            ZO_StatusBar_SmoothTransition(attributeFrame.bar, adjustedBarValue, powerEffectiveMax, forceInit, nil, 250)
+            if unitTag == "player"
+            and powerType == COMBAT_MECHANIC_FLAGS_STAMINA
+            and UnitFrames.PlayerDodgePrediction.ShouldUseLUIEStaminaSmooth() then
+                UnitFrames.PlayerDodgePrediction.SmoothTransitionStaminaBar(attributeFrame.bar, adjustedBarValue, powerEffectiveMax, forceInit)
+            else
+                if unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_STAMINA then
+                    UnitFrames.PlayerDodgePrediction.StopStaminaBarSmoothAnimation(attributeFrame.bar)
+                end
+                ZO_StatusBar_SmoothTransition(attributeFrame.bar, adjustedBarValue, powerEffectiveMax, forceInit, nil, 250)
+            end
             if trauma then
                 ZO_StatusBar_SmoothTransition(attributeFrame.trauma, powerValue, powerEffectiveMax, forceInit, nil, 250)
             end
         else
+            if unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_STAMINA then
+                UnitFrames.PlayerDodgePrediction.StopStaminaBarSmoothAnimation(attributeFrame.bar)
+            end
             attributeFrame.bar:SetMinMax(0, powerEffectiveMax)
             attributeFrame.bar:SetValue(adjustedBarValue)
             if trauma then

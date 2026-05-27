@@ -10,8 +10,6 @@ local UnitFrames = LUIE.UnitFrames
 local eventManager = GetEventManager()
 local moduleName = UnitFrames.moduleName
 
-UnitFrames.PlayerDodgePrediction = {}
-
 local ROLL_DODGE_ABILITY_ID = 28549
 -- Expert Evasion: ICD debuff on the player after a free roll (LuiData Effects/Override.lua, 151113).
 local EXPERT_EVASION_COOLDOWN_ABILITY_ID = 151113
@@ -32,21 +30,45 @@ local MARKER_POOL_KEY_SINGLE = 1
 local MARKER_POOL_KEY_CENTER_LEFT = 2
 local MARKER_POOL_KEY_CENTER_RIGHT = 3
 local MARKER_WIDTH = 2
+local LUIE_STAMINA_SMOOTH_MS = 250
 
-local eventsRegistered = false
-local smoothUpdateRegistered = false
-local markerPool
-local expertEvasionOnCooldown = false
-local playerDodgeFatigueStacks = 0
-local DODGE_PREDICTION_SMOOTH_UPDATE = moduleName .. "DodgePredictionSmoothUpdate"
+LUIE_PLAYER_DODGE_PREDICTION_CALLBACK_DODGE_COST_CHANGED = "DodgeCostChanged"
 
-local function IsFeatureEnabled()
+--- Player dodge prediction marker on custom stamina bar (singleton feature on UnitFrames).
+--- @class LUIE_PlayerDodgePrediction : ZO_CallbackObject
+--- @field expertEvasionOnCooldown boolean
+--- @field playerDodgeFatigueStacks integer
+--- @field eventsRegistered boolean
+--- @field markerPool ZO_ControlPool|nil
+--- @field staminaBarAnimationPool ZO_ObjectPool|nil
+--- @field lastPublishedCost integer|nil
+LUIE_PlayerDodgePrediction = ZO_CallbackObject:Subclass()
+
+--- @return LUIE_PlayerDodgePrediction
+function LUIE_PlayerDodgePrediction:New()
+    local obj = ZO_CallbackObject.New(self)
+    obj.expertEvasionOnCooldown = false
+    obj.playerDodgeFatigueStacks = 0
+    obj.eventsRegistered = false
+    obj.markerPool = nil
+    obj.staminaBarAnimationPool = nil
+    obj.lastPublishedCost = nil
+    return obj
+end
+
+function LUIE_PlayerDodgePrediction:IsFeatureEnabled()
     local sv = UnitFrames.SV
     return UnitFrames.Enabled and sv and sv.CustomFramesPlayer and sv.ShowPlayerDodgePrediction
 end
 
+--- Player stamina bar uses LUIE smooth pool (dodge marker synced in bar animation tick).
+--- @return boolean
+function LUIE_PlayerDodgePrediction:ShouldUseLUIEStaminaSmooth()
+    return self:IsFeatureEnabled() and UnitFrames.SV.CustomSmoothBar
+end
+
 --- @return table|nil stamina attribute frame from custom player UI
-local function GetPlayerStaminaFrame()
+function LUIE_PlayerDodgePrediction:GetPlayerStaminaFrame()
     local player = UnitFrames.CustomFrames and UnitFrames.CustomFrames["player"]
     return player and player[COMBAT_MECHANIC_FLAGS_STAMINA]
 end
@@ -113,16 +135,16 @@ local function PlayerHasExpertEvasionChampionPassive()
     return true
 end
 
-local function SyncExpertEvasionCooldownFromBuffs()
-    expertEvasionOnCooldown = PlayerHasBuffAbility(EXPERT_EVASION_COOLDOWN_ABILITY_ID)
+function LUIE_PlayerDodgePrediction:SyncExpertEvasionCooldownFromBuffs()
+    self.expertEvasionOnCooldown = PlayerHasBuffAbility(EXPERT_EVASION_COOLDOWN_ABILITY_ID)
 end
 
-local function SyncPlayerDodgeFatigueStacksFromBuffs()
-    playerDodgeFatigueStacks = 0
+function LUIE_PlayerDodgePrediction:SyncPlayerDodgeFatigueStacksFromBuffs()
+    self.playerDodgeFatigueStacks = 0
     for i = 1, GetNumBuffs("player") do
         local _, _, _, _, stackCount, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", i)
         if abilityId == DODGE_FATIGUE_ABILITY_ID then
-            playerDodgeFatigueStacks = stackCount or 0
+            self.playerDodgeFatigueStacks = stackCount or 0
             return
         end
     end
@@ -132,16 +154,16 @@ end
 --- @param abilityId integer
 --- @param stackCount integer|nil
 --- @return boolean stateChanged
-local function OnDodgeFatigueEffectChanged(changeType, abilityId, stackCount)
+function LUIE_PlayerDodgePrediction:OnDodgeFatigueEffectChanged(changeType, abilityId, stackCount)
     if abilityId ~= DODGE_FATIGUE_ABILITY_ID then
         return false
     end
     if changeType == EFFECT_RESULT_FADED then
-        playerDodgeFatigueStacks = 0
+        self.playerDodgeFatigueStacks = 0
     elseif changeType == EFFECT_RESULT_GAINED
     or     changeType == EFFECT_RESULT_UPDATED
     or     changeType == EFFECT_RESULT_FULL_REFRESH then
-        playerDodgeFatigueStacks = stackCount or 0
+        self.playerDodgeFatigueStacks = stackCount or 0
     else
         return false
     end
@@ -151,16 +173,16 @@ end
 --- @param changeType integer
 --- @param abilityId integer
 --- @return boolean stateChanged
-local function OnExpertEvasionEffectChanged(changeType, abilityId)
+function LUIE_PlayerDodgePrediction:OnExpertEvasionEffectChanged(changeType, abilityId)
     if abilityId ~= EXPERT_EVASION_COOLDOWN_ABILITY_ID then
         return false
     end
     if changeType == EFFECT_RESULT_FADED then
-        expertEvasionOnCooldown = false
+        self.expertEvasionOnCooldown = false
     elseif changeType == EFFECT_RESULT_GAINED
     or     changeType == EFFECT_RESULT_UPDATED
     or     changeType == EFFECT_RESULT_FULL_REFRESH then
-        expertEvasionOnCooldown = true
+        self.expertEvasionOnCooldown = true
     else
         return false
     end
@@ -185,8 +207,8 @@ local function GetDodgeFatiguePercentPerStack()
 end
 
 --- @return integer
-local function GetPlayerDodgeFatigueStacks()
-    return playerDodgeFatigueStacks
+function LUIE_PlayerDodgePrediction:GetPlayerDodgeFatigueStacks()
+    return self.playerDodgeFatigueStacks
 end
 
 --- @return integer
@@ -268,28 +290,23 @@ local function ApplyAthleticsRollDodgeCostReduction(baseCost)
     return zo_max(0, zo_round(baseCost * (1 - reductionPercent / 100)))
 end
 
---- GetAbilityCost(28549) is base; Athletics reduces cost; Dodge Fatigue stacks multiply cost (LuiData 69143, combat log verified).
---- @param baseCost integer
---- @return integer
-local function ApplyDodgeFatigueToCost(baseCost)
-    local stacks = GetPlayerDodgeFatigueStacks()
-    if stacks <= 0 then
+local function ApplyDodgeFatigueToCost(baseCost, fatigueStacks, percentPerStack)
+    if fatigueStacks <= 0 then
         return baseCost
     end
-    local percentPerStack = GetDodgeFatiguePercentPerStack()
-    return zo_max(0, zo_round(baseCost * ((1 + percentPerStack / 100) ^ stacks)))
+    return zo_max(0, zo_round(baseCost * ((1 + percentPerStack / 100) ^ fatigueStacks)))
 end
 
 --- Next roll dodge stamina cost (GetAbilityCost + Athletics + Dodge Fatigue + Expert Evasion).
 --- @return integer
-local function GetPredictedRollDodgeStaminaCost()
+function LUIE_PlayerDodgePrediction:GetPredictedRollDodgeStaminaCost()
     local cost = zo_max(0, GetAbilityCost(ROLL_DODGE_ABILITY_ID, COMBAT_MECHANIC_FLAGS_STAMINA, nil, "player"))
     cost = ApplyAthleticsRollDodgeCostReduction(cost)
     if not PlayerHasExpertEvasionChampionPassive() then
-        return ApplyDodgeFatigueToCost(cost)
+        return ApplyDodgeFatigueToCost(cost, self.playerDodgeFatigueStacks, GetDodgeFatiguePercentPerStack())
     end
-    if expertEvasionOnCooldown then
-        return ApplyDodgeFatigueToCost(cost)
+    if self.expertEvasionOnCooldown then
+        return ApplyDodgeFatigueToCost(cost, self.playerDodgeFatigueStacks, GetDodgeFatiguePercentPerStack())
     end
     return 0
 end
@@ -313,13 +330,20 @@ end
 --- @param useBarAnimatedValue boolean|nil when true, use bar:GetValue() during smooth transitions
 --- @return integer displayed
 --- @return integer effectiveMax
-local function GetStaminaBarValues(staminaFrame, useBarAnimatedValue)
+function LUIE_PlayerDodgePrediction:GetStaminaBarValues(staminaFrame, useBarAnimatedValue)
     local bar = staminaFrame.bar
     if bar then
         local _, max = bar:GetMinMax()
         local displayed = bar:GetValue()
         if UnitFrames.SV.CustomSmoothBar and not useBarAnimatedValue then
-            displayed = ZO_StatusBar_GetTargetValue(bar) or displayed
+            if bar.luiStaminaDodgeAnimation then
+                local customAnimation = bar.luiStaminaDodgeAnimation:GetFirstAnimation()
+                if customAnimation and customAnimation.endValue then
+                    displayed = customAnimation.endValue
+                end
+            else
+                displayed = ZO_StatusBar_GetTargetValue(bar) or displayed
+            end
         end
         if max and max > 0 then
             return displayed, max
@@ -334,10 +358,24 @@ end
 --- @param bar StatusBarControl
 --- @param predicted number
 --- @param alignment integer
-local function PositionDodgeMarkerEdge(line, bar, predicted, alignment)
+--- @param staminaFrame table|nil
+local function PositionDodgeMarkerEdge(line, bar, predicted, alignment, staminaFrame)
     local barWidth, barHeight = bar:GetWidth(), bar:GetHeight()
     local lineX = bar:CalculateSizeWithoutLeadingEdgeForValue(predicted)
     lineX = zo_clamp(lineX, 0, zo_max(0, barWidth - MARKER_WIDTH))
+
+    if staminaFrame
+    and staminaFrame.dodgePredictionLastEdgeLineX == lineX
+    and staminaFrame.dodgePredictionLastEdgeAlignment == alignment then
+        return
+    end
+
+    if staminaFrame then
+        staminaFrame.dodgePredictionLastEdgeLineX = lineX
+        staminaFrame.dodgePredictionLastEdgeAlignment = alignment
+        staminaFrame.dodgePredictionLastCenterLeftX = nil
+        staminaFrame.dodgePredictionLastCenterRightX = nil
+    end
 
     line:ClearAnchors()
     line:SetDimensions(MARKER_WIDTH, barHeight)
@@ -357,14 +395,28 @@ end
 --- @param bar StatusBarControl
 --- @param predicted number
 --- @param effectiveMax number
-local function PositionDodgeMarkerCenter(lineLeft, lineRight, bar, predicted, effectiveMax)
+--- @param staminaFrame table|nil
+local function PositionDodgeMarkerCenter(lineLeft, lineRight, bar, predicted, effectiveMax, staminaFrame)
     local barWidth, barHeight = bar:GetWidth(), bar:GetHeight()
     local percent = zo_clamp(predicted / effectiveMax, 0, 1)
     local halfSpan = (barWidth * percent) / 2
     halfSpan = zo_min(halfSpan, zo_max(0, (barWidth / 2) - MARKER_WIDTH))
     local centerX = barWidth / 2
-    local leftX = centerX - halfSpan - MARKER_WIDTH
-    local rightX = centerX + halfSpan
+    local leftX = zo_floor(centerX - halfSpan - MARKER_WIDTH)
+    local rightX = zo_floor(centerX + halfSpan)
+
+    if staminaFrame
+    and staminaFrame.dodgePredictionLastCenterLeftX == leftX
+    and staminaFrame.dodgePredictionLastCenterRightX == rightX then
+        return
+    end
+
+    if staminaFrame then
+        staminaFrame.dodgePredictionLastCenterLeftX = leftX
+        staminaFrame.dodgePredictionLastCenterRightX = rightX
+        staminaFrame.dodgePredictionLastEdgeLineX = nil
+        staminaFrame.dodgePredictionLastEdgeAlignment = nil
+    end
 
     lineLeft:ClearAnchors()
     lineRight:ClearAnchors()
@@ -376,71 +428,88 @@ local function PositionDodgeMarkerCenter(lineLeft, lineRight, bar, predicted, ef
     lineRight:SetAnchor(BOTTOMLEFT, bar, BOTTOMLEFT, rightX, 0)
 end
 
-local function UnregisterSmoothPositionUpdate()
-    if smoothUpdateRegistered then
-        eventManager:UnregisterForUpdate(DODGE_PREDICTION_SMOOTH_UPDATE)
-        smoothUpdateRegistered = false
-    end
-end
-
-local function RegisterSmoothPositionUpdate()
-    if smoothUpdateRegistered or not UnitFrames.SV.CustomSmoothBar then
-        return
-    end
-    smoothUpdateRegistered = true
-    eventManager:RegisterForUpdate(DODGE_PREDICTION_SMOOTH_UPDATE, 0, function ()
-        local staminaFrame = GetPlayerStaminaFrame()
-        if not staminaFrame or not staminaFrame.dodgePredictionLastCost then
-            UnregisterSmoothPositionUpdate()
-            return
-        end
-        local bar = staminaFrame.bar
-        if not bar then
-            UnregisterSmoothPositionUpdate()
-            return
-        end
-        local displayed, effectiveMax = GetStaminaBarValues(staminaFrame, true)
-        if not effectiveMax or effectiveMax <= 0 then
-            return
-        end
-        local cost = staminaFrame.dodgePredictionLastCost
-        local predicted = zo_clamp(displayed - cost, 0, effectiveMax)
-        local alignment = GetStaminaBarAlignment()
-        if alignment == 3 then
-            local lineLeft = staminaFrame.dodgePredictionLineCenterLeft
-            local lineRight = staminaFrame.dodgePredictionLineCenterRight
-            if not lineLeft or not lineRight or lineLeft:IsHidden() or lineRight:IsHidden() then
-                UnregisterSmoothPositionUpdate()
-                return
-            end
-            PositionDodgeMarkerCenter(lineLeft, lineRight, bar, predicted, effectiveMax)
-        else
-            local line = staminaFrame.dodgePredictionLine
-            if not line or line:IsHidden() then
-                UnregisterSmoothPositionUpdate()
-                return
-            end
-            PositionDodgeMarkerEdge(line, bar, predicted, alignment)
-        end
-    end)
-end
-
---- @param staminaFrame table|nil
-local function ReleaseStaminaMarker(staminaFrame)
-    UnregisterSmoothPositionUpdate()
+local function ClearDodgeMarkerPositionCache(staminaFrame)
     if not staminaFrame then
         return
     end
+    staminaFrame.dodgePredictionLastEdgeLineX = nil
+    staminaFrame.dodgePredictionLastEdgeAlignment = nil
+    staminaFrame.dodgePredictionLastCenterLeftX = nil
+    staminaFrame.dodgePredictionLastCenterRightX = nil
+end
+
+--- @param line Control
+--- @param canAfford boolean
+local function ApplyLineColor(line, canAfford)
+    local color = UnitFrames.SV.PlayerDodgePredictionColor or UnitFrames.Defaults.PlayerDodgePredictionColor
+    local r, g, b, a = color[1], color[2], color[3], color[4]
+    if not canAfford then
+        r, g, b = 1, 0.35, 0.35
+    end
+    line:SetCenterColor(r, g, b, a)
+    line:SetEdgeColor(r, g, b, a)
+end
+
+--- Positions dodge marker lines from a known displayed stamina value (bar may already reflect this value).
+--- @param bar StatusBarControl
+--- @param displayed number
+--- @param effectiveMax number|nil
+function LUIE_PlayerDodgePrediction:PositionMarkerFromBar(bar, displayed, effectiveMax)
+    local staminaFrame = self:GetPlayerStaminaFrame()
+    if not staminaFrame or staminaFrame.bar ~= bar or not staminaFrame.dodgePredictionLastCost then
+        return
+    end
+    if not effectiveMax or effectiveMax <= 0 then
+        local _, max = bar:GetMinMax()
+        effectiveMax = max
+    end
+    if not effectiveMax or effectiveMax <= 0 then
+        return
+    end
+
+    local cost = staminaFrame.dodgePredictionLastCost
+    local predicted = zo_clamp(displayed - cost, 0, effectiveMax)
+    local alignment = GetStaminaBarAlignment()
+    local canAfford = displayed >= cost
+
+    if alignment == 3 then
+        local lineLeft = staminaFrame.dodgePredictionLineCenterLeft
+        local lineRight = staminaFrame.dodgePredictionLineCenterRight
+        if not lineLeft or not lineRight or lineLeft:IsHidden() or lineRight:IsHidden() then
+            return
+        end
+        ApplyLineColor(lineLeft, canAfford)
+        ApplyLineColor(lineRight, canAfford)
+        PositionDodgeMarkerCenter(lineLeft, lineRight, bar, predicted, effectiveMax, staminaFrame)
+    else
+        local line = staminaFrame.dodgePredictionLine
+        if not line or line:IsHidden() then
+            return
+        end
+        ApplyLineColor(line, canAfford)
+        PositionDodgeMarkerEdge(line, bar, predicted, alignment, staminaFrame)
+    end
+end
+
+--- @param staminaFrame table|nil
+function LUIE_PlayerDodgePrediction:ReleaseStaminaMarker(staminaFrame)
+    if staminaFrame and staminaFrame.bar then
+        self:StopStaminaBarSmoothAnimation(staminaFrame.bar)
+    end
+    if not staminaFrame then
+        return
+    end
+    ClearDodgeMarkerPositionCache(staminaFrame)
     staminaFrame.dodgePredictionLastCost = nil
-    if markerPool then
+    if self.markerPool then
         if staminaFrame.dodgePredictionPoolKey then
-            markerPool:ReleaseObject(staminaFrame.dodgePredictionPoolKey)
+            self.markerPool:ReleaseObject(staminaFrame.dodgePredictionPoolKey)
         end
         if staminaFrame.dodgePredictionPoolKeyCenterLeft then
-            markerPool:ReleaseObject(staminaFrame.dodgePredictionPoolKeyCenterLeft)
+            self.markerPool:ReleaseObject(staminaFrame.dodgePredictionPoolKeyCenterLeft)
         end
         if staminaFrame.dodgePredictionPoolKeyCenterRight then
-            markerPool:ReleaseObject(staminaFrame.dodgePredictionPoolKeyCenterRight)
+            self.markerPool:ReleaseObject(staminaFrame.dodgePredictionPoolKeyCenterRight)
         end
     end
     staminaFrame.dodgePredictionLine = nil
@@ -453,18 +522,18 @@ end
 
 --- @param bar StatusBarControl
 --- @return ZO_ControlPool
-local function GetMarkerPool(bar)
-    if markerPool and markerPool.parent == bar then
-        return markerPool
+function LUIE_PlayerDodgePrediction:GetMarkerPool(bar)
+    if self.markerPool and self.markerPool.parent == bar then
+        return self.markerPool
     end
-    if markerPool then
-        markerPool:ReleaseAllObjects()
+    if self.markerPool then
+        self.markerPool:ReleaseAllObjects()
     end
-    markerPool = ZO_ControlPool:New(MARKER_POOL_TEMPLATE, bar, "DodgePredictionMarker")
-    markerPool:SetCustomFactoryBehavior(function (line)
+    self.markerPool = ZO_ControlPool:New(MARKER_POOL_TEMPLATE, bar, "DodgePredictionMarker")
+    self.markerPool:SetCustomFactoryBehavior(function (line)
         line:SetEdgeTexture("", 1, 1, 0, 0)
     end)
-    return markerPool
+    return self.markerPool
 end
 
 --- @param bar StatusBarControl
@@ -472,8 +541,8 @@ end
 --- @return Control|nil line edge alignment
 --- @return Control|nil lineLeft center alignment
 --- @return Control|nil lineRight center alignment
-local function AcquireStaminaMarkers(bar, staminaFrame)
-    local pool = GetMarkerPool(bar)
+function LUIE_PlayerDodgePrediction:AcquireStaminaMarkers(bar, staminaFrame)
+    local pool = self:GetMarkerPool(bar)
     local alignment = GetStaminaBarAlignment()
 
     if alignment == 3 then
@@ -492,7 +561,7 @@ local function AcquireStaminaMarkers(bar, staminaFrame)
         end
     end
 
-    ReleaseStaminaMarker(staminaFrame)
+    self:ReleaseStaminaMarker(staminaFrame)
 
     if alignment == 3 then
         local lineLeft, keyLeft = pool:AcquireObject(MARKER_POOL_KEY_CENTER_LEFT)
@@ -510,31 +579,181 @@ local function AcquireStaminaMarkers(bar, staminaFrame)
     return line, nil, nil
 end
 
---- @param line Control
---- @param canAfford boolean
-local function ApplyLineColor(line, canAfford)
-    local color = UnitFrames.SV.PlayerDodgePredictionColor or UnitFrames.Defaults.PlayerDodgePredictionColor
-    local r, g, b, a = color[1], color[2], color[3], color[4]
-    if not canAfford then
-        r, g, b = 1, 0.35, 0.35
+function LUIE_PlayerDodgePrediction:OnStaminaBarAnimationUpdate(customAnimation, progress)
+    local bar = customAnimation.bar
+    if not bar then
+        return
     end
-    line:SetCenterColor(r, g, b, a)
-    line:SetEdgeColor(r, g, b, a)
+    local newBarValue = zo_lerp(customAnimation.initialValue, customAnimation.endValue, progress)
+    bar:SetValue(newBarValue)
+    if self:IsFeatureEnabled() then
+        local _, max = bar:GetMinMax()
+        self:PositionMarkerFromBar(bar, newBarValue, max)
+    end
+end
+
+function LUIE_PlayerDodgePrediction:OnStaminaBarAnimationStop(timeline, completedPlaying)
+    local animationKey = timeline.key
+    local customAnimation = timeline:GetFirstAnimation()
+    local bar = customAnimation and customAnimation.bar
+    if bar then
+        bar.luiStaminaDodgeAnimation = nil
+        if bar.onStopCallback then
+            bar.onStopCallback(bar, completedPlaying)
+        end
+    end
+    if self.staminaBarAnimationPool and animationKey then
+        self.staminaBarAnimationPool:ReleaseObject(animationKey)
+    end
+end
+
+function LUIE_PlayerDodgePrediction:AcquireStaminaBarAnimation()
+    if not self.staminaBarAnimationPool then
+        local owner = self
+        local function Factory(objectPool)
+            local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_StatusBarGrowTemplate")
+            timeline:GetFirstAnimation():SetUpdateFunction(function (customAnimation, progress)
+                owner:OnStaminaBarAnimationUpdate(customAnimation, progress)
+            end)
+            timeline:SetHandler("OnStop", function (timelineSelf, ...)
+                owner:OnStaminaBarAnimationStop(timelineSelf, ...)
+            end)
+            return timeline
+        end
+
+        local function Reset(timeline)
+            local customAnimation = timeline:GetFirstAnimation()
+            customAnimation.bar = nil
+            customAnimation.initialValue = nil
+            customAnimation.endValue = nil
+        end
+
+        self.staminaBarAnimationPool = ZO_ObjectPool:New(Factory, Reset)
+    end
+
+    local timeline, key = self.staminaBarAnimationPool:AcquireObject()
+    timeline.key = key
+    return timeline
+end
+
+--- Stops LUIE player stamina smooth animation (when dodge prediction or smooth bar is disabled).
+--- @param bar StatusBarControl|nil
+function LUIE_PlayerDodgePrediction:StopStaminaBarSmoothAnimation(bar)
+    if not bar or not bar.luiStaminaDodgeAnimation then
+        return
+    end
+    bar.luiStaminaDodgeAnimation:Stop()
+end
+
+--- @param cost integer
+--- @return boolean
+function LUIE_PlayerDodgePrediction:PrepareStaminaDodgeMarkersForSmoothBar(bar, cost)
+    local staminaFrame = self:GetPlayerStaminaFrame()
+    if not staminaFrame or staminaFrame.bar ~= bar or cost <= 0 then
+        return false
+    end
+
+    local backdrop = staminaFrame.backdrop
+    if not backdrop then
+        return false
+    end
+
+    local barWidth, barHeight = bar:GetWidth(), bar:GetHeight()
+    if barWidth <= 0 or barHeight <= 0 then
+        return false
+    end
+
+    staminaFrame.dodgePredictionLastCost = cost
+    local alignment = GetStaminaBarAlignment()
+    local line, lineLeft, lineRight = self:AcquireStaminaMarkers(bar, staminaFrame)
+    ClearDodgeMarkerPositionCache(staminaFrame)
+
+    if alignment == 3 then
+        if not lineLeft or not lineRight then
+            return false
+        end
+        lineLeft:SetHidden(false)
+        lineRight:SetHidden(false)
+    else
+        if not line then
+            return false
+        end
+        line:SetHidden(false)
+    end
+    return true
+end
+
+--- @param cost integer
+function LUIE_PlayerDodgePrediction:PublishDodgeCostIfChanged(cost, positionOnly)
+    if positionOnly then
+        return
+    end
+    if self.lastPublishedCost ~= cost then
+        self.lastPublishedCost = cost
+        self:FireCallbacks(LUIE_PLAYER_DODGE_PREDICTION_CALLBACK_DODGE_COST_CHANGED, cost)
+    end
+end
+
+--- Smooth transition for player stamina when dodge prediction uses combined bar+marker animation (see ZO_StatusBar_SmoothTransition).
+--- @param bar StatusBarControl
+--- @param value number
+--- @param max number
+--- @param forceInit boolean|nil
+function LUIE_PlayerDodgePrediction:SmoothTransitionStaminaBar(bar, value, max, forceInit)
+    local cost = self:GetPredictedRollDodgeStaminaCost()
+    if cost > 0 then
+        self:PrepareStaminaDodgeMarkersForSmoothBar(bar, cost)
+    end
+
+    local oldValue = bar:GetValue()
+    bar:SetMinMax(0, max)
+    local oldMax = bar.max or max
+    bar.max = max
+
+    if forceInit or max <= 0 then
+        bar:SetValue(value)
+        if bar.luiStaminaDodgeAnimation then
+            bar.luiStaminaDodgeAnimation:Stop()
+        end
+        self:PositionMarkerFromBar(bar, value, max)
+        return
+    end
+
+    if oldMax > 0 and oldMax ~= max then
+        local maxChange = max / oldMax
+        oldValue = oldValue * maxChange
+        bar:SetValue(oldValue)
+    end
+
+    if not bar.luiStaminaDodgeAnimation then
+        bar.luiStaminaDodgeAnimation = self:AcquireStaminaBarAnimation()
+    end
+
+    local customAnimation = bar.luiStaminaDodgeAnimation:GetFirstAnimation()
+    customAnimation:SetDuration(LUIE_STAMINA_SMOOTH_MS)
+    customAnimation.bar = bar
+    customAnimation.initialValue = oldValue
+    customAnimation.endValue = value
+
+    bar.luiStaminaDodgeAnimation:PlayFromStart()
 end
 
 --- @param positionOnly boolean|nil When true, reuse last predicted cost (stamina bar value updates only).
-function UnitFrames.PlayerDodgePrediction.Refresh(positionOnly)
-    local staminaFrame = GetPlayerStaminaFrame()
+function LUIE_PlayerDodgePrediction:Refresh(positionOnly)
+    local staminaFrame = self:GetPlayerStaminaFrame()
 
-    if not IsFeatureEnabled() then
-        ReleaseStaminaMarker(staminaFrame)
+    if not self:IsFeatureEnabled() then
+        if staminaFrame and staminaFrame.bar then
+            self:StopStaminaBarSmoothAnimation(staminaFrame.bar)
+        end
+        self:ReleaseStaminaMarker(staminaFrame)
         return
     end
 
     local backdrop = staminaFrame and staminaFrame.backdrop
     local bar = staminaFrame and staminaFrame.bar
     if not backdrop or not bar then
-        ReleaseStaminaMarker(staminaFrame)
+        self:ReleaseStaminaMarker(staminaFrame)
         return
     end
 
@@ -542,31 +761,33 @@ function UnitFrames.PlayerDodgePrediction.Refresh(positionOnly)
     if positionOnly and staminaFrame.dodgePredictionLastCost then
         cost = staminaFrame.dodgePredictionLastCost
     else
-        cost = GetPredictedRollDodgeStaminaCost()
+        cost = self:GetPredictedRollDodgeStaminaCost()
     end
     if cost <= 0 then
-        ReleaseStaminaMarker(staminaFrame)
+        self:ReleaseStaminaMarker(staminaFrame)
         return
     end
 
-    local displayed, effectiveMax = GetStaminaBarValues(staminaFrame)
+    local displayed, effectiveMax = self:GetStaminaBarValues(staminaFrame)
     if not effectiveMax or effectiveMax <= 0 then
-        ReleaseStaminaMarker(staminaFrame)
+        self:ReleaseStaminaMarker(staminaFrame)
         return
     end
 
     local barWidth, barHeight = bar:GetWidth(), bar:GetHeight()
     if barWidth <= 0 or barHeight <= 0 then
-        ReleaseStaminaMarker(staminaFrame)
+        self:ReleaseStaminaMarker(staminaFrame)
         return
     end
 
     local alignment = GetStaminaBarAlignment()
-    local line, lineLeft, lineRight = AcquireStaminaMarkers(bar, staminaFrame)
+    local line, lineLeft, lineRight = self:AcquireStaminaMarkers(bar, staminaFrame)
     local predicted = zo_clamp(displayed - cost, 0, effectiveMax)
     local canAfford = displayed >= cost
 
     staminaFrame.dodgePredictionLastCost = cost
+    ClearDodgeMarkerPositionCache(staminaFrame)
+    self:PublishDodgeCostIfChanged(cost, positionOnly)
 
     if alignment == 3 then
         if not lineLeft or not lineRight then
@@ -574,7 +795,7 @@ function UnitFrames.PlayerDodgePrediction.Refresh(positionOnly)
         end
         ApplyLineColor(lineLeft, canAfford)
         ApplyLineColor(lineRight, canAfford)
-        PositionDodgeMarkerCenter(lineLeft, lineRight, bar, predicted, effectiveMax)
+        PositionDodgeMarkerCenter(lineLeft, lineRight, bar, predicted, effectiveMax, staminaFrame)
         lineLeft:SetHidden(false)
         lineRight:SetHidden(false)
     else
@@ -582,26 +803,25 @@ function UnitFrames.PlayerDodgePrediction.Refresh(positionOnly)
             return
         end
         ApplyLineColor(line, canAfford)
-        PositionDodgeMarkerEdge(line, bar, predicted, alignment)
+        PositionDodgeMarkerEdge(line, bar, predicted, alignment, staminaFrame)
         line:SetHidden(false)
     end
-    RegisterSmoothPositionUpdate()
 end
 
-function UnitFrames.PlayerDodgePrediction.RegisterEvents()
-    if eventsRegistered then
+function LUIE_PlayerDodgePrediction:RegisterEvents()
+    if self.eventsRegistered then
         return
     end
-    eventsRegistered = true
+    self.eventsRegistered = true
 
     local onRefresh = function ()
-        UnitFrames.PlayerDodgePrediction.Refresh()
+        self:Refresh()
     end
 
     local effectHandler = moduleName .. "DodgePredictionEffect"
     eventManager:RegisterForEvent(effectHandler, EVENT_EFFECT_CHANGED, function (_, changeType, _, _, _, _, _, stackCount, _, _, _, _, _, _, _, abilityId)
-        if OnExpertEvasionEffectChanged(changeType, abilityId)
-        or OnDodgeFatigueEffectChanged(changeType, abilityId, stackCount) then
+        if self:OnExpertEvasionEffectChanged(changeType, abilityId)
+        or self:OnDodgeFatigueEffectChanged(changeType, abilityId, stackCount) then
             onRefresh()
         end
     end)
@@ -611,14 +831,14 @@ function UnitFrames.PlayerDodgePrediction.RegisterEvents()
 
     eventManager:RegisterForEvent(moduleName .. "DodgePredictionChampion", EVENT_CHAMPION_POINT_UPDATE, function (_, unitTag)
         if unitTag == "player" then
-            SyncExpertEvasionCooldownFromBuffs()
+            self:SyncExpertEvasionCooldownFromBuffs()
             onRefresh()
         end
     end)
 
     eventManager:RegisterForEvent(moduleName .. "DodgePredictionPlayerActivated", EVENT_PLAYER_ACTIVATED, function ()
-        SyncExpertEvasionCooldownFromBuffs()
-        SyncPlayerDodgeFatigueStacksFromBuffs()
+        self:SyncExpertEvasionCooldownFromBuffs()
+        self:SyncPlayerDodgeFatigueStacksFromBuffs()
         onRefresh()
     end)
 
@@ -640,12 +860,69 @@ function UnitFrames.PlayerDodgePrediction.RegisterEvents()
     end)
 end
 
-function UnitFrames.PlayerDodgePrediction.Initialize()
+function LUIE_PlayerDodgePrediction:Initialize()
     if not UnitFrames.Enabled then
         return
     end
-    SyncExpertEvasionCooldownFromBuffs()
-    SyncPlayerDodgeFatigueStacksFromBuffs()
-    UnitFrames.PlayerDodgePrediction.RegisterEvents()
-    UnitFrames.PlayerDodgePrediction.Refresh()
+    self:SyncExpertEvasionCooldownFromBuffs()
+    self:SyncPlayerDodgeFatigueStacksFromBuffs()
+    self:RegisterEvents()
+    self:Refresh()
+end
+
+-- -----------------------------------------------------------------------------
+-- Facade (preserves UnitFrames.PlayerDodgePrediction.* call sites)
+-- -----------------------------------------------------------------------------
+
+UnitFrames.PlayerDodgePrediction = {}
+
+local function GetDodgePredictionInstance()
+    return UnitFrames.dodgePrediction
+end
+
+function UnitFrames.PlayerDodgePrediction.Initialize()
+    if not UnitFrames.dodgePrediction then
+        UnitFrames.dodgePrediction = LUIE_PlayerDodgePrediction:New()
+    end
+    UnitFrames.dodgePrediction:Initialize()
+end
+
+function UnitFrames.PlayerDodgePrediction.RegisterEvents()
+    local instance = GetDodgePredictionInstance()
+    if instance then
+        instance:RegisterEvents()
+    end
+end
+
+function UnitFrames.PlayerDodgePrediction.Refresh(positionOnly)
+    local instance = GetDodgePredictionInstance()
+    if instance then
+        instance:Refresh(positionOnly)
+    end
+end
+
+function UnitFrames.PlayerDodgePrediction.ShouldUseLUIEStaminaSmooth()
+    local instance = GetDodgePredictionInstance()
+    return instance and instance:ShouldUseLUIEStaminaSmooth() or false
+end
+
+function UnitFrames.PlayerDodgePrediction.SmoothTransitionStaminaBar(bar, value, max, forceInit)
+    local instance = GetDodgePredictionInstance()
+    if instance then
+        instance:SmoothTransitionStaminaBar(bar, value, max, forceInit)
+    end
+end
+
+function UnitFrames.PlayerDodgePrediction.StopStaminaBarSmoothAnimation(bar)
+    local instance = GetDodgePredictionInstance()
+    if instance then
+        instance:StopStaminaBarSmoothAnimation(bar)
+    end
+end
+
+function UnitFrames.PlayerDodgePrediction.PositionMarkerFromBar(bar, displayed, effectiveMax)
+    local instance = GetDodgePredictionInstance()
+    if instance then
+        instance:PositionMarkerFromBar(bar, displayed, effectiveMax)
+    end
 end
