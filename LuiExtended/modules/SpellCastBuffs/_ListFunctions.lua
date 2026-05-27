@@ -367,14 +367,21 @@ end
 
 --- @param context string
 --- @param abilityId integer
+--- @return boolean removed True if an effects-list row was cleared
 function SpellCastBuffs.ClearFakeEffectEntry(context, abilityId)
     local effectsList = SpellCastBuffs.EffectsList[context]
     if not effectsList then
-        return
+        return false
     end
-    effectsList[GetEffectUidFake(abilityId)] = nil
+    local uid = GetEffectUidFake(abilityId)
+    local removed = effectsList[uid] ~= nil or effectsList[abilityId] ~= nil
+    if not removed then
+        return false
+    end
+    effectsList[uid] = nil
     effectsList[abilityId] = nil
     SpellCastBuffs.MarkDisplayDirty()
+    return true
 end
 
 --- @param context string
