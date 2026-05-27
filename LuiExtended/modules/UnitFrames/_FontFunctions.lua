@@ -10,6 +10,13 @@ local LUIE = LUIE
 --- @class (partial) UnitFrames
 local UnitFrames = LUIE.UnitFrames
 
+local separateCaptionFontCategories = UnitFrames.APPEARANCE_SEPARATE_CAPTION_FONT_CATEGORIES
+
+--- @param category string
+--- @return boolean
+local function categoryUsesSeparateCaptionFont(category)
+    return separateCaptionFontCategories[category] == true
+end
 
 local function __applyFont(unitTag)
     -- First try selecting font face
@@ -158,6 +165,9 @@ end
 local function MakeCustomFrameFontStrings(category)
     local appearance = UnitFrames.GetCustomFrameAppearance(category)
     local fontName, fontStyle, sizeCaption, sizeBars = ResolveCustomFrameFont(appearance)
+    if not categoryUsesSeparateCaptionFont(category) then
+        sizeCaption = sizeBars
+    end
     return CustomFramesMakeFont(fontName, fontStyle, sizeCaption), CustomFramesMakeFont(fontName, fontStyle, sizeBars), sizeCaption
 end
 

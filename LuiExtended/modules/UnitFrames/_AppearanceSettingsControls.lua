@@ -24,6 +24,35 @@ UnitFrames.APPEARANCE_CATEGORY_TITLE_STRINGS =
     ava = LUIE_STRING_LAM_UF_CFRAMES_APPEARANCE_AVA,
 }
 
+local FONT_SIZE_MIN = 10
+local FONT_SIZE_MAX = 30
+local FONT_SIZE_STEP = 1
+
+local separateCaptionFontCategories = UnitFrames.APPEARANCE_SEPARATE_CAPTION_FONT_CATEGORIES
+
+--- @param category string
+--- @return boolean
+local function categoryUsesSeparateCaptionFont(category)
+    return separateCaptionFontCategories[category] == true
+end
+
+--- @param category string
+--- @return number
+local function getAppearanceFontSizeForPreview(category)
+    local appearance = UnitFrames.GetCustomFrameAppearance(category)
+    if categoryUsesSeparateCaptionFont(category) then
+        return appearance.fontOther
+    end
+    return appearance.fontBars
+end
+
+--- @param entry table
+--- @param value number
+local function syncUnifiedAppearanceFontSize(entry, value)
+    entry.fontOther = value
+    entry.fontBars = value
+end
+
 local function GetAppearanceEntry(settings, category)
     if not settings.CustomFrameAppearance then
         settings.CustomFrameAppearance = {}
@@ -38,6 +67,148 @@ local function GetDefaultAppearanceEntry(defaults, category)
     return defaults.CustomFrameAppearance and defaults.CustomFrameAppearance[category]
 end
 
+--- @param controls table
+--- @param category string
+--- @param settings table
+--- @param defaults table
+--- @param defaultEntry table|nil
+--- @param disabledFunc function
+local function AppendLAMFontSizeControls(controls, category, settings, defaults, defaultEntry, disabledFunc)
+    local function applyFont()
+        UnitFrames.CustomFramesApplyFontForCategory(category)
+    end
+
+    if categoryUsesSeparateCaptionFont(category) then
+        controls[#controls + 1] =
+        {
+            type = "slider",
+            name = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_LABELS),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_LABELS_TP),
+            min = FONT_SIZE_MIN,
+            max = FONT_SIZE_MAX,
+            step = FONT_SIZE_STEP,
+            getFunc = function ()
+                return UnitFrames.GetCustomFrameAppearance(category).fontOther
+            end,
+            setFunc = function (value)
+                GetAppearanceEntry(settings, category).fontOther = value
+                applyFont()
+            end,
+            width = "half",
+            disabled = disabledFunc,
+            default = defaultEntry and defaultEntry.fontOther or defaults.CustomFontOther,
+        }
+        controls[#controls + 1] =
+        {
+            type = "slider",
+            name = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_BARS),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_BARS_TP),
+            min = FONT_SIZE_MIN,
+            max = FONT_SIZE_MAX,
+            step = FONT_SIZE_STEP,
+            getFunc = function ()
+                return UnitFrames.GetCustomFrameAppearance(category).fontBars
+            end,
+            setFunc = function (value)
+                GetAppearanceEntry(settings, category).fontBars = value
+                applyFont()
+            end,
+            width = "half",
+            disabled = disabledFunc,
+            default = defaultEntry and defaultEntry.fontBars or defaults.CustomFontBars,
+        }
+    else
+        controls[#controls + 1] =
+        {
+            type = "slider",
+            name = GetString(LUIE_STRING_LAM_FONT_SIZE),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_COMPACT_TP),
+            min = FONT_SIZE_MIN,
+            max = FONT_SIZE_MAX,
+            step = FONT_SIZE_STEP,
+            getFunc = function ()
+                return UnitFrames.GetCustomFrameAppearance(category).fontBars
+            end,
+            setFunc = function (value)
+                syncUnifiedAppearanceFontSize(GetAppearanceEntry(settings, category), value)
+                applyFont()
+            end,
+            width = "full",
+            disabled = disabledFunc,
+            default = defaultEntry and defaultEntry.fontBars or defaults.CustomFontBars,
+        }
+    end
+end
+
+--- @param rows table
+--- @param category string
+--- @param settings table
+--- @param defaults table
+--- @param defaultEntry table|nil
+--- @param disabledFunc function
+--- @param markFontDeferred function
+local function AppendLHASFontSizeRows(rows, category, settings, defaults, defaultEntry, disabledFunc, markFontDeferred)
+    local LHAS = LibHarvensAddonSettings
+
+    if categoryUsesSeparateCaptionFont(category) then
+        rows[#rows + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_LABELS),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_LABELS_TP),
+            min = FONT_SIZE_MIN,
+            max = FONT_SIZE_MAX,
+            step = FONT_SIZE_STEP,
+            getFunction = function ()
+                return UnitFrames.GetCustomFrameAppearance(category).fontOther
+            end,
+            setFunction = function (value)
+                GetAppearanceEntry(settings, category).fontOther = value
+                markFontDeferred()
+            end,
+            disable = disabledFunc,
+            default = defaultEntry and defaultEntry.fontOther or defaults.CustomFontOther,
+        }
+        rows[#rows + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_BARS),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_BARS_TP),
+            min = FONT_SIZE_MIN,
+            max = FONT_SIZE_MAX,
+            step = FONT_SIZE_STEP,
+            getFunction = function ()
+                return UnitFrames.GetCustomFrameAppearance(category).fontBars
+            end,
+            setFunction = function (value)
+                GetAppearanceEntry(settings, category).fontBars = value
+                markFontDeferred()
+            end,
+            disable = disabledFunc,
+            default = defaultEntry and defaultEntry.fontBars or defaults.CustomFontBars,
+        }
+    else
+        rows[#rows + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_FONT_SIZE),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_COMPACT_TP),
+            min = FONT_SIZE_MIN,
+            max = FONT_SIZE_MAX,
+            step = FONT_SIZE_STEP,
+            getFunction = function ()
+                return UnitFrames.GetCustomFrameAppearance(category).fontBars
+            end,
+            setFunction = function (value)
+                syncUnifiedAppearanceFontSize(GetAppearanceEntry(settings, category), value)
+                markFontDeferred()
+            end,
+            disable = disabledFunc,
+            default = defaultEntry and defaultEntry.fontBars or defaults.CustomFontBars,
+        }
+    end
+end
+
 --- @param category string
 --- @param settings table
 --- @param defaults table
@@ -50,7 +221,7 @@ function UnitFrames.BuildLAMAppearanceCategoryControls(category, settings, defau
         return not LUIE.SV.UnitFrames_Enabled
     end
 
-    return
+    local controls =
     {
         settingsAPI.CreateFontDropdown(
             GetString(LUIE_STRING_LAM_FONT),
@@ -67,7 +238,7 @@ function UnitFrames.BuildLAMAppearanceCategoryControls(category, settings, defau
             defaultEntry and defaultEntry.fontFace or defaults.CustomFontFace,
             nil,
             "name-up",
-            function () return UnitFrames.GetCustomFrameAppearance(category).fontOther end,
+            function () return getAppearanceFontSizeForPreview(category) end,
             function () return UnitFrames.GetCustomFrameAppearance(category).fontStyle end
         ),
         settingsAPI.CreateFontStyleDropdown(
@@ -81,62 +252,31 @@ function UnitFrames.BuildLAMAppearanceCategoryControls(category, settings, defau
                 UnitFrames.CustomFramesApplyFontForCategory(category)
             end,
             function () return UnitFrames.GetCustomFrameAppearance(category).fontFace end,
-            function () return UnitFrames.GetCustomFrameAppearance(category).fontOther end,
+            function () return getAppearanceFontSizeForPreview(category) end,
             "full",
             disabledFunc,
             defaultEntry and defaultEntry.fontStyle or defaults.CustomFontStyle
         ),
-        {
-            type = "slider",
-            name = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_LABELS),
-            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_LABELS_TP),
-            min = 10,
-            max = 30,
-            step = 1,
-            getFunc = function ()
-                return UnitFrames.GetCustomFrameAppearance(category).fontOther
-            end,
-            setFunc = function (value)
-                GetAppearanceEntry(settings, category).fontOther = value
-                UnitFrames.CustomFramesApplyFontForCategory(category)
-            end,
-            width = "half",
-            disabled = disabledFunc,
-            default = defaultEntry and defaultEntry.fontOther or defaults.CustomFontOther,
-        },
-        {
-            type = "slider",
-            name = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_BARS),
-            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_BARS_TP),
-            min = 10,
-            max = 30,
-            step = 1,
-            getFunc = function ()
-                return UnitFrames.GetCustomFrameAppearance(category).fontBars
-            end,
-            setFunc = function (value)
-                GetAppearanceEntry(settings, category).fontBars = value
-                UnitFrames.CustomFramesApplyFontForCategory(category)
-            end,
-            width = "half",
-            disabled = disabledFunc,
-            default = defaultEntry and defaultEntry.fontBars or defaults.CustomFontBars,
-        },
-        settingsAPI.CreateStatusbarTextureDropdown(
-            GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE),
-            GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE_TP),
-            function ()
-                return UnitFrames.GetCustomFrameAppearance(category).texture
-            end,
-            function (var)
-                GetAppearanceEntry(settings, category).texture = var
-                UnitFrames.CustomFramesApplyTextureForCategory(category)
-            end,
-            "full",
-            disabledFunc,
-            defaultEntry and defaultEntry.texture or defaults.CustomTexture
-        ),
     }
+
+    AppendLAMFontSizeControls(controls, category, settings, defaults, defaultEntry, disabledFunc)
+
+    controls[#controls + 1] = settingsAPI.CreateStatusbarTextureDropdown(
+        GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE),
+        GetString(LUIE_STRING_LAM_UF_CFRAMES_TEXTURE_TP),
+        function ()
+            return UnitFrames.GetCustomFrameAppearance(category).texture
+        end,
+        function (var)
+            GetAppearanceEntry(settings, category).texture = var
+            UnitFrames.CustomFramesApplyTextureForCategory(category)
+        end,
+        "full",
+        disabledFunc,
+        defaultEntry and defaultEntry.texture or defaults.CustomTexture
+    )
+
+    return controls
 end
 
 --- @param category string
@@ -197,43 +337,7 @@ function UnitFrames.BuildLHASAppearanceCategoryRows(category, settings, defaults
         disable = disabledFunc,
     }
 
-    rows[#rows + 1] =
-    {
-        type = LHAS.ST_SLIDER,
-        label = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_LABELS),
-        tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_LABELS_TP),
-        min = 10,
-        max = 30,
-        step = 1,
-        getFunction = function ()
-            return UnitFrames.GetCustomFrameAppearance(category).fontOther
-        end,
-        setFunction = function (value)
-            GetAppearanceEntry(settings, category).fontOther = value
-            markFontDeferred()
-        end,
-        disable = disabledFunc,
-        default = defaultEntry and defaultEntry.fontOther or defaults.CustomFontOther,
-    }
-
-    rows[#rows + 1] =
-    {
-        type = LHAS.ST_SLIDER,
-        label = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_BARS),
-        tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMES_FONT_SIZE_BARS_TP),
-        min = 10,
-        max = 30,
-        step = 1,
-        getFunction = function ()
-            return UnitFrames.GetCustomFrameAppearance(category).fontBars
-        end,
-        setFunction = function (value)
-            GetAppearanceEntry(settings, category).fontBars = value
-            markFontDeferred()
-        end,
-        disable = disabledFunc,
-        default = defaultEntry and defaultEntry.fontBars or defaults.CustomFontBars,
-    }
+    AppendLHASFontSizeRows(rows, category, settings, defaults, defaultEntry, disabledFunc, markFontDeferred)
 
     rows[#rows + 1] =
     {
