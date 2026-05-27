@@ -48,6 +48,21 @@ local changelogSectionBodyPool
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.3.2
+    "|cFFA500LuiExtended Version 7.2.3.2|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs (debug): Show Debug Ability ID on pooled buff/debuff icons no longer intermittently fails to draw the numeric ID (most noticeable on target buff routing) after icons are recycled from the shared pool. Pool reset clears per-icon text caches, slot rebind refreshes the ID label, and LabelControl:Clean() runs before truncation checks when font fitting runs.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Show Block Player brace icon displays again when full display rebuilds are not forced every tick. The synthetic block effect is updated in place while blocking, and the display sorter includes effects whose start time equals the current update (not only strictly earlier).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: ClearPlayerBuff and ClearFakeEffectEntry only mark the display dirty when an effects-list row was actually removed, instead of every 100 ms while not blocking with Show Block Player enabled.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Target buff and debuff icons no longer linger after clearing reticle; ReloadEffects now marks the display dirty when target lists are cleared (empty reticle or dead unit).",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs (debug): Ability ID font fitting runs only when the ID text or icon layout changed, reducing per-tick cost while Show Debug Ability ID is enabled.",
+    "",
+
     -- Version Header 7.2.3.1
     "|cFFA500LuiExtended Version 7.2.3.1|r",
     "",
