@@ -48,6 +48,14 @@ local changelogSectionBodyPool
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.3.1
+    "|cFFA500LuiExtended Version 7.2.3.1|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Per-category Font/Texture settings now show Font Size (Label) and Font Size (Bar) only for Player, Target, Group (small group), and AvA frames that use a separate top caption row. Raid, Companion, Pet, and Boss use a single Font Size slider for all text on the health bar (name and values). Compact frames with different saved label and bar sizes now render one consistent size until you change that slider (both values are updated together when you do).",
+    "",
+
     -- Version Header 7.2.3.0
     "|cFFA500LuiExtended Version 7.2.3.0|r",
     "",
