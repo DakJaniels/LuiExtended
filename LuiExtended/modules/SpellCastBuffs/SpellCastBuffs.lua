@@ -79,11 +79,20 @@ end
 -- Specifically for clearing a player buff, removes this buff from player1, promd_player, and promb_player containers
 function SpellCastBuffs.ClearPlayerBuff(abilityId)
     local context = { "player1", "promd_player", "promb_player" }
+    local removedAny = false
     for _, v in pairs(context) do
-        SpellCastBuffs.EffectsList[v][abilityId] = nil
-        SpellCastBuffs.ClearFakeEffectEntry(v, abilityId)
+        local effectsList = SpellCastBuffs.EffectsList[v]
+        if effectsList and effectsList[abilityId] then
+            effectsList[abilityId] = nil
+            removedAny = true
+        end
+        if SpellCastBuffs.ClearFakeEffectEntry(v, abilityId) then
+            removedAny = true
+        end
     end
-    SpellCastBuffs.MarkDisplayDirty()
+    if removedAny then
+        SpellCastBuffs.MarkDisplayDirty()
+    end
 end
 
 -- Initialize preview labels for all frames
@@ -1380,7 +1389,10 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
     if buff.abilityId ~= nil then
         buff.abilityId:SetHidden(not SpellCastBuffs.SV.ShowDebugAbilityId)
         if SpellCastBuffs.SV.ShowDebugAbilityId and buff.abilityId:GetText() ~= "" then
-            SpellCastBuffs.FitAbilityIdLabelFont(buff)
+            SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
+            if SpellCastBuffs.NeedsAbilityIdLabelFit(buff) then
+                SpellCastBuffs.FitAbilityIdLabelFont(buff)
+            end
         end
     end
 
@@ -1856,7 +1868,47 @@ function SpellCastBuffs.Buff_OnMouseExit(control)
 end
 
 -- Updates local variable with new font and resets all existing icons
+--- @param buff SpellCastBuffs_BuffIcon_Control
+function SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
+    buff.abilityIdLabelDirty = true
+end
+
+--- @param buff SpellCastBuffs_BuffIcon_Control
+--- @return boolean
+function SpellCastBuffs.NeedsAbilityIdLabelFit(buff)
+    if buff.abilityIdLabelDirty then
+        return true
+    end
+    local iconSize = SpellCastBuffs.SV.IconSize
+    if buff.lastAppliedAbilityIdIconSize ~= iconSize then
+        return true
+    end
+    if buff.lastAppliedAbilityIdLayoutVersion ~= SpellCastBuffs.displayLayoutVersion then
+        return true
+    end
+    return false
+end
+
+--- Show Debug Ability ID: set text when needed; FitAbilityIdLabelFont only when text or layout changed.
+--- @param buff SpellCastBuffs_BuffIcon_Control
+--- @param idText string
+function SpellCastBuffs.UpdateAbilityIdDebugLabel(buff, idText)
+    if not buff.abilityId then
+        return
+    end
+    buff.abilityId:SetHidden(false)
+    if buff.lastAbilityIdText ~= idText or buff.abilityId:GetText() ~= idText then
+        buff.abilityId:SetText(idText)
+        buff.lastAbilityIdText = idText
+        SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
+    end
+    if SpellCastBuffs.NeedsAbilityIdLabelFit(buff) then
+        SpellCastBuffs.FitAbilityIdLabelFont(buff)
+    end
+end
+
 --- Shrink ability-id debug text to fit the icon width (LabelControl:WasTruncated, ZO_FontAdjustingWrapLabel pattern).
+--- LabelControl:Clean() forces dirty text to layout/draw in-callstack (needed before WasTruncated on pooled icons).
 --- @param buff SpellCastBuffs_BuffIcon_Control
 function SpellCastBuffs.FitAbilityIdLabelFont(buff)
     local label = buff.abilityId
@@ -1867,20 +1919,30 @@ function SpellCastBuffs.FitAbilityIdLabelFont(buff)
         return
     end
 
+    label:Clean()
+
     local fonts = SpellCastBuffs.abilityIdFonts
     if not fonts or #fonts == 0 then
         label:SetFont(SpellCastBuffs.buffsFont)
+        label:Clean()
+        buff.abilityIdLabelDirty = nil
+        buff.lastAppliedAbilityIdIconSize = SpellCastBuffs.SV.IconSize
+        buff.lastAppliedAbilityIdLayoutVersion = SpellCastBuffs.displayLayoutVersion
         return
     end
 
     label:SetMaxLineCount(0)
     for _, font in ipairs(fonts) do
         label:SetFont(font)
+        label:Clean()
         if not label:WasTruncated() then
             break
         end
     end
     label:SetMaxLineCount(1)
+    buff.abilityIdLabelDirty = nil
+    buff.lastAppliedAbilityIdIconSize = SpellCastBuffs.SV.IconSize
+    buff.lastAppliedAbilityIdLayoutVersion = SpellCastBuffs.displayLayoutVersion
 end
 
 function SpellCastBuffs.ApplyFont()
