@@ -537,6 +537,7 @@ SpellCastBuffs.sortDirection = {}         --- @type table<string, string> Holds 
 SpellCastBuffs.playerActive = false       -- Player Active State
 SpellCastBuffs.playerDead = false         -- Player Dead State
 SpellCastBuffs.playerResurrectStage = nil -- Player resurrection sequence state
+SpellCastBuffs.blockPlayerEffectActive = false -- Show Block Player synthetic brace icon is in EffectsList / display cache
 
 SpellCastBuffs.buffsFont = ""             -- Buff font
 SpellCastBuffs.prominentFont = ""         -- Prominent buffs label font
