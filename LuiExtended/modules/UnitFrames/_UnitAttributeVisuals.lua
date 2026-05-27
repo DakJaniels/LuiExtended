@@ -131,6 +131,52 @@ end
 -- Power Update Handler
 -- -----------------------------------------------------------------------------
 
+UnitFrames.powerUpdateSnapshot = UnitFrames.powerUpdateSnapshot or {}
+
+--- Clears cached power values used to skip redundant UpdateAttribute work (see ZO_PlayerAttributeBar:OnPowerUpdate).
+--- @param unitTag string
+--- @param powerType CombatMechanicFlags|nil If nil, clears all power types for unitTag
+function UnitFrames.ClearPowerUpdateSnapshot(unitTag, powerType)
+    local unitSnap = UnitFrames.powerUpdateSnapshot[unitTag]
+    if not unitSnap then
+        return
+    end
+    if powerType then
+        unitSnap[powerType] = nil
+    else
+        UnitFrames.powerUpdateSnapshot[unitTag] = nil
+    end
+end
+
+--- @param unitTag string
+--- @param powerType CombatMechanicFlags
+--- @param powerValue integer
+--- @param powerMax integer
+--- @param powerEffectiveMax integer
+--- @return boolean
+function UnitFrames.HasPowerUpdateChanged(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
+    local unitSnap = UnitFrames.powerUpdateSnapshot[unitTag]
+    local snap = unitSnap and unitSnap[powerType]
+    if not snap then
+        return true
+    end
+    return snap[1] ~= powerValue or snap[2] ~= powerMax or snap[3] ~= powerEffectiveMax
+end
+
+--- @param unitTag string
+--- @param powerType CombatMechanicFlags
+--- @param powerValue integer
+--- @param powerMax integer
+--- @param powerEffectiveMax integer
+function UnitFrames.CommitPowerUpdateSnapshot(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
+    local unitSnap = UnitFrames.powerUpdateSnapshot[unitTag]
+    if not unitSnap then
+        unitSnap = {}
+        UnitFrames.powerUpdateSnapshot[unitTag] = unitSnap
+    end
+    unitSnap[powerType] = { powerValue, powerMax, powerEffectiveMax }
+end
+
 --- Runs on the EVENT_POWER_UPDATE listener.
 --- This handler fires every time unit attribute changes.
 ---
@@ -168,25 +214,33 @@ function UnitFrames.OnPowerUpdate(unitTag, powerIndex, powerType, powerValue, po
         end
     end
 
-    -- Update frames
-    if UnitFrames.DefaultFrames[unitTag] then
-        UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.DefaultFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
-    end
+    local powerChanged = UnitFrames.HasPowerUpdateChanged(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
+    if powerChanged then
+        UnitFrames.CommitPowerUpdateSnapshot(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
 
-    if UnitFrames.CustomFrames[unitTag] then
-        -- Special handling for reticleover health to skip critters and guards
-        if unitTag == "reticleover" and powerType == COMBAT_MECHANIC_FLAGS_HEALTH then
-            local isCritter = (UnitFrames.savedHealth.reticleover[3] <= 9)
-            local isGuard = IsUnitInvulnerableGuard("reticleover")
-            if (isCritter or isGuard) and powerValue >= 1 then
-                return
-            end
+        if UnitFrames.DefaultFrames[unitTag] then
+            UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.DefaultFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
         end
-        UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.CustomFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
+
+        if UnitFrames.CustomFrames[unitTag] then
+            -- Special handling for reticleover health to skip critters and guards
+            if unitTag == "reticleover" and powerType == COMBAT_MECHANIC_FLAGS_HEALTH then
+                local isCritter = (UnitFrames.savedHealth.reticleover[3] <= 9)
+                local isGuard = IsUnitInvulnerableGuard("reticleover")
+                if (isCritter or isGuard) and powerValue >= 1 then
+                    return
+                end
+            end
+            UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.CustomFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
+        end
+
+        if UnitFrames.AvaCustFrames[unitTag] then
+            UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.AvaCustFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
+        end
     end
 
-    if UnitFrames.AvaCustFrames[unitTag] then
-        UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.AvaCustFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
+    if not powerChanged then
+        return
     end
 
     -- Record state of power loss to change transparency of player frame

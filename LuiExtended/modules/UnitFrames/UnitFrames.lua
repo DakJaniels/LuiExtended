@@ -1184,6 +1184,7 @@ function UnitFrames.OnUnitCreated(eventId, unitTag)
         -- Make sure we do not try to update bars on this unitTag before full group update is complete
         if "group" == (zo_strsub(unitTag, 0, 5)) then
             UnitFrames.CustomFrames[unitTag] = nil
+            UnitFrames.ClearPowerUpdateSnapshot(unitTag)
         end
         -- We should avoid calling full update on CustomFrames too often
         if not g_PendingUpdate.Group.flag then
@@ -1198,6 +1199,7 @@ function UnitFrames.OnUnitCreated(eventId, unitTag)
     if UnitFrames.CustomFrames["PetGroup1"] ~= nil then
         if "playerpet" == (zo_strsub(unitTag, 0, 9)) then
             UnitFrames.CustomFrames[unitTag] = nil
+            UnitFrames.ClearPowerUpdateSnapshot(unitTag)
         end
         UnitFrames.CustomPetUpdate()
     end
@@ -1212,6 +1214,7 @@ function UnitFrames.OnUnitDestroyed(eventId, unitTag)
     -- if LUIE.IsDevDebugEnabled() then
     --     LUIE:Log("Debug",string_format("[%s] OnUnitDestroyed: %s (%s)", GetTimeString(), unitTag, GetUnitName(unitTag)))
     -- end
+    UnitFrames.ClearPowerUpdateSnapshot(unitTag)
     -- Make sure we do not try to update bars on this unitTag before full group update is complete
     if "group" == (zo_strsub(unitTag, 0, 5)) then
         UnitFrames.CustomFrames[unitTag] = nil
@@ -1437,6 +1440,7 @@ end
 
 -- Used to query initial values and display them in corresponding control
 function UnitFrames.ReloadValues(unitTag)
+    UnitFrames.ClearPowerUpdateSnapshot(unitTag)
     -- Build list of powerTypes this unitTag has in both DefaultFrames and CustomFrames
     local powerTypes = {}
     if UnitFrames.DefaultFrames[unitTag] then
