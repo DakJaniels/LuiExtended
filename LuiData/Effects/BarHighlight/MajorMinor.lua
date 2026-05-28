@@ -755,6 +755,10 @@ local majorMinor =
     [47726] = true,  -- Minor Wound
     [48346] = true,  -- Minor Wound
     [48946] = true,  -- Major Breach
+    [259089] = true, -- Minor Breach (Petrify combat; display 61742)
+    [259129] = true, -- Minor Breach (Fossilize combat; display 61742)
+    [259130] = true, -- Minor Vulnerability (Fossilize combat; display 79717)
+    [259137] = true, -- Minor Breach (Shattering Rocks combat; display 61742)
     [49264] = true,  -- Major Evasion
     [50997] = true,  -- Major Expedition
     [51434] = true,  -- Minor Vulnerability
@@ -918,9 +922,9 @@ local majorMinor =
     [76420] = true,  -- Major Prophecy
     [76426] = true,  -- Major Savagery
     [76433] = true,  -- Major Prophecy
-    [76498] = true,  -- Major Expedition
-    [76502] = true,  -- Major Expedition
-    [76506] = true,  -- Major Expedition
+    [76498] = true,  -- Major Cowardice (Chains of Flame combat bundle; display 147643)
+    [76502] = true,  -- Major Cowardice (Chains of Dominance combat; display 147643)
+    [76506] = true,  -- Major Evasion (Chains of Devastation combat; display 61716)
     [76518] = true,  -- Major Brutality
     [76564] = true,  -- Minor Force
     [76617] = true,  -- Minor Slayer
@@ -1136,6 +1140,17 @@ local majorMinor =
 
     -- Empower
     [61737] = true, -- Empower
+    [76537] = true, -- Empower (Molten Armaments combat)
+
+    -- Wing Buffet / Fleetstep Wings
+    [259744] = true, -- Major Expedition (Fleetstep Wings)
+    [259745] = true, -- Major Expedition (Fleetstep Wings)
+    [259746] = true, -- Major Expedition (Fleetstep Wings)
+    [259761] = true, -- Minor Brutality (Fleetstep Wings)
+
+    -- Protect the Brood
+    [32753] = true,  -- Minor Protection (combat)
+    [260258] = true, -- Major Expedition (combat)
 }
 
 --- @class (partial) MajorMinor

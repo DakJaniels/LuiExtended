@@ -53,7 +53,13 @@ local barHighlightOverride =
     [20944] = { newId = 31103 },                        -- Disintegrating Dragonfire → target DOT
     -- Engulfing Dragonfire: slotted 20930 (BEGIN/GAIN DUR ~4750, EFFECT_CHANGED buff); track 32821 (tick GAIN/GAIN DUR 5000, FADE).
     [20930] = { newId = 32821, combatTrack = true, duration = 5000, combatTrackRemainOnSlotted = true },
-    [20499] = { newId = 61737 },                        -- Empowering Chains --> Empower
+    [20492] = { newId = 38254 },                        -- Chains of Flame --> Taunt (target, 15s; log 38254)
+    [20496] = { newId = 38254 },                        -- Chains of Dominance --> Taunt (target, 15s; shared 38254 track id)
+    [76502] = { newId = 147643, showFakeAura = true, noRemove = true, duration = 15000, combatTrack = true }, -- Major Cowardice combat (Dominance; display 147643)
+    -- Chains of Devastation: player hit buffs (log; no 61737 Empower). Primary bar = longer Major Evasion 10s; Berserk 6s via combat row + extraId.
+    [20499] = { newId = 61716, showFakeAura = true, noRemove = true, duration = 10000, combatTrack = true }, -- --> Major Evasion (61716 display; 76506 combat)
+    [76506] = { newId = 61716, showFakeAura = true, noRemove = true, duration = 10000, combatTrack = true }, -- Major Evasion combat bundle
+    [147421] = { newId = 61745, showFakeAura = true, noRemove = true, duration = 6000, combatTrack = true }, -- Major Berserk combat --> 61745 display
     [32963] = { newId = 32958 },                        -- Shifting Standard
 
     -- Draconic Power
@@ -66,19 +72,76 @@ local barHighlightOverride =
     [32744] = { noRemove = true }, -- Blood of the Green Dragon
     [32722] = { newId = 61698, noRemove = true }, -- Blood of the Elder Dragon → Major Fortitude
 
-    [21014] = { newId = 108798 },                       -- Protective Plate
+    [21007] = { duration = 6000 },                      -- Wing Buffet (player buff)
+    -- Fleetstep: slotted 21014 = 6000 ms; 108798 = 4000 ms expedition carrier (61736 display). CheckOnFade 108798 --> 21014.
+    [21014] = { duration = 6000, noRemove = true },    -- Fleetstep Wings (slotted player buff on bar)
+    [108798] = { noRemove = true },                    -- Fleetstep expedition carrier (~4s); fade --> CheckOnFade --> 21014 remainder
+    -- 259744 combat Major Expedition (first Wing Buffet log); morph cast often omits -- use 108798/61736 above.
+    [259744] = { newId = 61736, showFakeAura = true, noRemove = true, duration = 4000, combatTrack = true },
+    [259761] = { newId = 61662, showFakeAura = true, noRemove = true, duration = 20000, combatTrack = true }, -- Minor Brutality when combat id fires
+    -- Protect the Brood: slotted 21017 = 6000 ms; 61736 Major Expedition ~4s on player; 32753 combat -> 61721 Minor Protection 20s (13:29 log).
+    [21017] = { duration = 6000, noRemove = true },    -- Protect the Brood (slotted player buff on bar)
+    [122407] = { noRemove = true },                    -- Named brood buff in export; not in morph log -- CheckOnFade fallback
+    [32753] = { newId = 61721, showFakeAura = true, noRemove = true, duration = 20000, combatTrack = true }, -- Minor Protection (combat)
+    [260258] = { newId = 61736, showFakeAura = true, noRemove = true, duration = 4000, combatTrack = true }, -- Major Expedition (combat when present; morph log often 61736 only)
 
-    [29012] = { newId = 114590 },                       -- Dragon Leap --> Stun
-    [32719] = { newId = 114600 },                       -- Take Flight --> Stun
-    [32715] = { newId = 61814 },                        -- Ferocious Leap
+    -- Dragon Leap line (table 198758357): Landslide ground 29465/29466 (offset 32837063); stun 114590 / U49 262678 (offset 27087866).
+    [29016] = { newId = 29465 },                        -- Dragon Leap (slotted) --> Landslide (player ground, ~30s refresh)
+    [29012] = { newId = 114590 },                       -- Dragon Leap (cast combat) --> Stun
+    -- Take Flight: do NOT use Landslide 29465 on bar (ActionBar maps slot to track id; Landslide Dur 0 / stack → garbage labels e.g. -1472).
+    [32719] = { newId = 262682 },                       -- Take Flight (slotted) --> Stun (U49; combat log ~3000 ms)
+    -- Ferocious Leap: bar tracks 10s shield (61814); Landslide 29465 via BarHighlightExtraId only (log).
+    [32715] = { newId = 61814 },                        -- Ferocious Leap (slotted) --> damage shield
 
-    -- Earthen Heart
-    [29032] = { newId = 134310 },                      -- Superheated Ward
-    [31816] = { newId = 134340 },                      -- Magma Fist
-    [31820] = { newId = 261754 },                      -- Volcanic Ward
-    [29043] = { newId = 258658, showFakeAura = true }, -- Molten Weapons --> Major Sorcery
-    [31874] = { newId = 258666, showFakeAura = true }, -- Igneous Weapons --> Major Sorcery
-    [31888] = { newId = 258661, showFakeAura = true }, -- Molten Armaments
+    -- Earthen Heart — Superheated Ward / Volcanic Ward / Magma Fist (table 198758357; combat log)
+    [29032] = { newId = 134310, duration = 6000 },     -- Superheated Ward → player buff 134310 (6s)
+    [31820] = { newId = 261754, duration = 6000, noRemove = true }, -- Volcanic Ward → primary player buff 261754 (6s; parallel 258203)
+    [258203] = { hide = true },                        -- Volcanic Ward secondary buff (same 6s; CheckOnFade ↔ 261754)
+    [31816] = { newId = 134340 },                      -- Magma Fist → target Heat Shock 134340 (7s); self 258293 via ExtraId
+    -- Molten Weapons line (table 198758357): slotted bar = player bundle; combat majors/empower via combatTrack + display ids.
+    [29043] = { newId = 258658, showFakeAura = true, noRemove = true, duration = 30000 }, -- Molten Weapons (player buff 258658, 30s)
+    [31874] = { newId = 258666, showFakeAura = true, noRemove = true, duration = 60000 }, -- Igneous Weapons (player buff 258666, 60s)
+    [31888] = { newId = 258661, showFakeAura = true, noRemove = true, duration = 30000 }, -- Molten Armaments (player buff 258661 + Empower, 30s)
+    [92507] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },  -- Major Sorcery combat --> display
+    [131340] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true }, -- Major Brutality combat --> display
+    [92503] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 60000, combatTrack = true },  -- Major Sorcery combat (Igneous, 60s)
+    [76518] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 60000, combatTrack = true },  -- Major Brutality combat (Igneous, 60s)
+    [92512] = { newId = 61687, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },  -- Major Sorcery combat (Molten Armaments)
+    [131341] = { newId = 61665, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true }, -- Major Brutality combat (Molten Armaments)
+    [76537] = { newId = 61737, showFakeAura = true, noRemove = true, duration = 30000, combatTrack = true },  -- Empower combat (Molten Armaments only)
+
+    -- Obsidian Shield line (table 198758357): slotted id = player buff 6s; combat Major Mending --> 61711 display.
+    [29071] = { duration = 6000, noRemove = true }, -- Obsidian Shield (player buff on bar, 6s)
+    [29224] = { duration = 6000, noRemove = true }, -- Igneous Shield (player buff on bar, 6s)
+    [32673] = { duration = 6000, noRemove = true }, -- Fragmented Shield (player buff on bar, 6s)
+    [108675] = { newId = 61711, showFakeAura = true, noRemove = true, duration = 4000, combatTrack = true }, -- Major Mending combat (Obsidian Shield)
+    [55033] = { newId = 61711, showFakeAura = true, noRemove = true, duration = 4000, combatTrack = true },  -- Major Mending combat (Igneous Shield)
+    [108676] = { newId = 61711, showFakeAura = true, noRemove = true, duration = 6000, combatTrack = true }, -- Major Mending combat (Fragmented Shield, 6s)
+
+    -- Earthspike Mantle line (table 198758357): slotted id = player buff 20s; Major Resolve combat --> 61694 (combatTrack, no showFakeAura on 61694).
+    [20319] = { duration = 20000, noRemove = true }, -- Earthspike Mantle
+    [20328] = { duration = 20000, noRemove = true }, -- Earthshield Mantle
+    [31808] = { noRemove = true },                   -- Earthshield damage shield (6s); CheckOnFade --> 20328 mantle remainder
+    [20323] = { duration = 20000, noRemove = true }, -- Shatterspike Mantle
+    [61815] = { newId = 61694, noRemove = true, duration = 20000, combatTrack = true }, -- Major Resolve combat (Earthspike Mantle)
+    [61827] = { newId = 61694, noRemove = true, duration = 20000, combatTrack = true }, -- Major Resolve combat (Earthshield Mantle)
+    [61836] = { newId = 61694, noRemove = true, duration = 20000, combatTrack = true }, -- Major Resolve combat (Shatterspike Mantle)
+
+    -- Petrify (table 198758357): slotted bar key 259090 (~8s stun). Breach: combat 259089 and/or display 61742 GAIN (10s); do not showFakeAura on 61742 (blocks real aura events).
+    [29037] = { newId = 259090 },                        -- Petrify (slotted) --> target stun
+    [259090] = { combatTrack = true, noRemove = true, duration = 8000 }, -- Stun (target; combat / EFFECT_CHANGED on track id)
+    [259089] = { newId = 259090, noRemove = true, duration = 10000, combatTrack = true }, -- Minor Breach combat (when present; same bar key as stun)
+
+    -- Fossilize (table 198758357; mudcrab log): bar key 54931 (~8s stun). Breach/vuln combat 20s; display 61742/79717 share global ids (61742 ExtraId stays Petrify 259090).
+    [32685] = { newId = 54931 },                        -- Fossilize (slotted) --> target stun
+    [54931] = { combatTrack = true, noRemove = true, duration = 8000 }, -- Stun (target)
+    [259129] = { newId = 54931, noRemove = true, duration = 20000, combatTrack = true }, -- Minor Breach combat --> display 61742
+    [259130] = { newId = 54931, noRemove = true, duration = 20000, combatTrack = true }, -- Minor Vulnerability combat --> display 79717
+
+    -- Shattering Rocks (table 198758357; mudcrab log): bar key 259138 (~8s stun). Breach combat 259137 10s (no vuln/root).
+    [32678] = { newId = 259138 },                        -- Shattering Rocks (slotted) --> target stun
+    [259138] = { combatTrack = true, noRemove = true, duration = 8000 }, -- Stun (target; log name Petrify)
+    [259137] = { newId = 259138, noRemove = true, duration = 10000, combatTrack = true }, -- Minor Breach combat --> display 61742
 
     ---------------------------
     -- Nightblade -------------
@@ -398,6 +461,9 @@ local barHighlightOverride =
     -- [38845] = { newId = 38852 },   -- Blood Craze
     [38845] = { newId = 38848 },   -- Blood Craze
 
+    -- Blade Cloak (28613): player self buff 247975 (~900 ms GAIN DUR pulse; 20s skill duration from slotted/effect).
+    [28613] = { newId = 247975, combatTrack = true, duration = 900, combatTrackRemainOnSlotted = true, noRemove = true },
+
     [28591] = { newId = 100474 },  -- Whirlwind --> Chaotic Whirlwind
     [38891] = { newId = 100474 },  -- Whirling Blades --> Chaotic Whirlwind
     [38861] = { newId = 100474 },  -- Steel Tornado --> Chaotic Whirlwind
@@ -629,6 +695,11 @@ local barHighlightOverride =
     [61489] = { newId = 61498 }, -- Revealing Flare
     [61519] = { newId = 61522 }, -- Lingering Flare
     [61524] = { newId = 61526 }, -- Blinding Flare
+
+    -- Grimoire Support banners (table 198758357): Shocking Banner slotted --> player inspire buff 5s (227087/227088)
+    [217706] = { newId = 227087, showFakeAura = true, noRemove = true, duration = 5000 }, -- Shocking Banner (Dragonknight's Banner on DK)
+    [227088] = { hide = true },                                                            -- paired parallel buff
+    [227089] = { hide = true },                                                            -- 100ms tick
 
     ---------------------------
     -- Volendrung -------------

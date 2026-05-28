@@ -3045,7 +3045,7 @@ local debugAuras =
     [199252] = true, -- The Languid Eye (channel refresh tick)
     [191889] = true, -- The Languid Eye (status tick bundle)
     [258665] = true, -- Igneous Weapons (target damage)
-    [258666] = true, -- Igneous Weapons (combat bundle)
+    [258666] = true, -- Igneous Weapons (player buff)
     [259761] = true, -- Minor Brutality (Igneous Weapons bundle)
     [259215] = true, -- The Storm Voice (bundle)
     [259216] = true, -- The Storm Voice (bundle)
@@ -3825,17 +3825,20 @@ local debugAuras =
     -- Earthen Heart
     [29468] = true, -- Eternal Mountain (Rank 1)
     [44996] = true, -- Eternal Mountain (Rank 2)
-    [29463] = true, -- Battle Roar (Rank 1)
-    [29465] = true, -- Battle Roar
-    [29466] = true, -- Battle Roar
-    [29467] = true, -- Battle Roar
-    [44984] = true, -- Battle Roar (Rank 2)
-    [44986] = true, -- Battle Roar
-    [44987] = true, -- Battle Roar
-    [44988] = true, -- Battle Roar
+    [259223] = true, -- Battle Roar (slotted name, offset 33273852)
+    [29463] = true, -- Landslide
+    [29465] = true, -- Landslide (ground aura)
+    [29466] = true, -- Landslide (ground tick)
+    [29467] = true, -- Landslide
+    [44984] = true, -- Landslide
+    [44987] = true, -- Landslide
+    [44988] = true, -- Landslide
+    [259228] = true, -- Landslide (U49)
+    [259241] = true, -- Landslide (U49, Take Flight)
+    [259684] = true, -- Landslide (U49, Ferocious Leap)
     [29473] = true, -- Mountain's Blessing (Rank 1)
     [61798] = true, -- Minor Brutality
-    [29474] = true, -- Mountain's Blessing
+    [29474] = true, -- Blessing at the Peak (passive POWER)
     [45001] = true, -- Mountain's Blessing (Rank 2)
     [61799] = true, -- Minor Brutality
     [45005] = true, -- Mountain's Blessing
@@ -3894,22 +3897,22 @@ local debugAuras =
     [34240] = true,  -- Dragonfire Breath Dummy (LMN dump)
     [131120] = true, -- Dragonfire Breath (skill-name table id; watch combat logs)
 
-    [31290] = true,  -- Fiery Reach taunt (Fiery Grip - All Morphs)
-    [20492] = true,  -- Fiery Grip (Fiery Grip)
-    [20493] = true,  -- Fiery Grip (Fiery Grip)
-    [20494] = true,  -- Fiery Grip (Fiery Grip)
-    [76498] = true,  -- Major Expedition (Fiery Grip)
+    [31290] = true,  -- Fiery Reach taunt (Chains of Flame line)
+    [20492] = true,  -- Chains of Flame
+    [20493] = true,  -- Chains of Flame (IMMUNE clutter)
+    [20494] = true,  -- Chains of Flame (combat bundle)
+    [76498] = true,  -- Major Cowardice combat (Chains of Flame; display 147643)
 
-    [20499] = true,  -- Empowering Chains (Empowering Chains)
-    [62023] = true,  -- Fiery Grip (Empowering Chains)
-    [147421] = true, -- Empower (Empowering Chains)
-    [76506] = true,  -- Major Expedition (Empowering Chains)
+    [20499] = true,  -- Chains of Devastation (slotted / target)
+    [62023] = true,  -- Chains of Devastation (pull bundle on target)
+    [147421] = true, -- Major Berserk combat (Chains of Devastation; display 61745)
+    [76506] = true,  -- Major Evasion combat (Chains of Devastation; display 61716)
 
-    [20496] = true,  -- Unrelenting Grip (Unrelenting Grip)
-    [62004] = true,  -- Unrelenting Grip (Unrelenting Grip)
-    [62001] = true,  -- Unrelenting Grip (Unrelenting Grip)
-    [76502] = true,  -- Major Expedition (Unrelenting Grip)
-    [77105] = true,  -- Unrelenting Grip (Unrelenting Grip)
+    [20496] = true,  -- Chains of Dominance (slotted / target)
+    [62004] = true,  -- Chains of Dominance (combat bundle)
+    [62001] = true,  -- Chains of Dominance (cast combat)
+    [76502] = true,  -- Major Cowardice combat (Chains of Dominance; display 147643)
+    [77105] = true,  -- Unrelenting Chain (Dominance player POWER tick; hidden on frames)
 
     [75088] = true,  -- Major Prophecy (Inferno)
     [28967] = true,  -- Inferno (Inferno)
@@ -3963,19 +3966,19 @@ local debugAuras =
     [32949] = true,  -- Major Defile (Standard of Might)
     [32950] = true,  -- Standard of Might (Standard of Might)
 
-    [20319] = true,  -- Spiked Armor (Spiked Armor)
-    [61815] = true,  -- Major Resolve (Spiked Armor)
-    [20320] = true,  -- Spiked Armor (Spiked Armor)
+    [20319] = true,  -- Earthspike Mantle (player buff)
+    [61815] = true,  -- Major Resolve (Earthspike Mantle combat)
+    [20320] = true,  -- Earthspike Mantle (combat clutter)
 
-    [20328] = true,  -- Hardened Armor (Hardened Armor)
-    [61827] = true,  -- Major Resolve (Hardened Armor)
-    [31808] = true,  -- Hardened Armor (Hardened Armor)
-    [20329] = true,  -- Hardened Armor Damage Return (Hardened Armor)
+    [20328] = true,  -- Earthshield Mantle (player buff)
+    [61827] = true,  -- Major Resolve (Earthshield Mantle combat)
+    [31808] = true,  -- Earthshield Mantle (damage shield, 6s)
+    [20329] = true,  -- Earthshield Mantle (damage return combat)
 
-    [20323] = true,  -- Volatile Armor (Volatile Armor)
-    [61836] = true,  -- Major Resolve (Volatile Armor)
-    [20324] = true,  -- Volatle Armor (Volatile Armor)
-    [20326] = true,  -- Volatile Armor (Volatile Armor)
+    [20323] = true,  -- Shatterspike Mantle (player buff)
+    [61836] = true,  -- Major Resolve (Shatterspike Mantle combat)
+    [20324] = true,  -- Shatterspike Mantle (ON CD combat)
+    [20326] = true,  -- Shatterspike Mantle (target DOT)
 
     [32974] = true,  -- Ignite (Dark Talons - Synergy)
     [48040] = true,  -- Synergy Dummy (Dark Talons - Ignite Synergy)
@@ -4014,13 +4017,18 @@ local debugAuras =
     [32723] = true,  -- Coagulating Blood (Coagulating Blood)
     [91674] = true,  -- Major Fortitude (Coagulating Blood)
 
-    [21007] = true,  -- Reflective Scale (Reflective Scale)
+    [21007] = true,  -- Wing Buffet (Wing Buffet)
+    [259720] = true, -- Wing Buffet (combat bundle)
 
-    [21014] = true,  -- Protective Plate (Protective Plate)
-    [108798] = true, -- Protective Plate (Protective Plate)
+    [21014] = true,  -- Fleetstep Wings (Fleetstep Wings)
+    [108798] = true, -- Fleetstep Wings (player buff)
+    [259744] = true, -- Major Expedition (Fleetstep Wings)
+    [259761] = true, -- Minor Brutality (Fleetstep Wings)
 
-    [21017] = true,  -- Dragon Fire Scale (Dragon Fire Scale)
-    [32753] = true,  -- Dragon Fire Scale (Dragon Fire Scale)
+    [21017] = true,  -- Protect the Brood (slotted)
+    [122407] = true, -- Protect the Brood (export player buff; not in 13:29 morph log)
+    [32753] = true,  -- Minor Protection combat (Protect the Brood)
+    [260258] = true, -- Major Expedition combat (Protect the Brood)
 
     [31837] = true,  -- Inhale (Inhale)
     [31859] = true,  -- Inhale Heal (Inhale)
@@ -4040,53 +4048,69 @@ local debugAuras =
     [256041] = true,  -- Draw Essence
 
     [48744] = true,  -- CC Immunity (Dragon Leap)
+    [48745] = true,  -- Dragon Leap (Dragon Leap)
     [29012] = true,  -- Dragon Leap (Dragon Leap)
     [29014] = true,  -- Dragon Leap (Dragon Leap)
-    [29016] = true,  -- Dragon Leap (Dragon Leap)
-    [114590] = true, -- Stun (Dragon Leap)
-    [118928] = true, -- Dragon Leap (Dragon Leap)
+    [29016] = true,  -- Dragon Leap (slotted)
+    [259323] = true, -- Dragon Leap (travel)
+    [262677] = true, -- Dragon Leap (combat bundle)
+    [114590] = true, -- Stun (Dragon Leap, legacy)
+    [262678] = true, -- Stun (Dragon Leap, U49)
+    [118928] = true, -- Dragon Leap (combat bundle)
 
     [48753] = true,  -- CC Immunity (Take Flight)
-    [32719] = true,  -- Take Flight (Take Flight)
+    [48752] = true,  -- Take Flight (Take Flight)
+    [32719] = true,  -- Take Flight (slotted)
     [32720] = true,  -- Take Flight (Take Flight)
     [32721] = true,  -- Take Flight (Take Flight)
-    [114600] = true, -- Stun (Take Flight)
-    [118936] = true, -- Take Flight (Take Flight)
+    [259372] = true, -- Take Flight (travel)
+    [262683] = true, -- Take Flight (combat bundle)
+    [114600] = true, -- Stun (Take Flight, legacy)
+    [262682] = true, -- Stun (Take Flight, U49)
+    [118936] = true, -- Take Flight (combat bundle)
 
     [48760] = true,  -- CC Immunity (Ferocious Leap)
-    [32715] = true,  -- Ferocious Leap (Ferocious Leap)
-    [32716] = true,  -- Ferocious Leap (Ferocious Leap)
-    [32717] = true,  -- Ferocious Leap (Ferocious Leap)
-    [61814] = true,  -- Ferocious Leap (Ferocious Leap)
-    [114601] = true, -- Stun (Ferocious Leap)
-    [118938] = true, -- Ferocious Leap (Ferocious Leap)
+    [48761] = true,  -- Ferocious Leap (combat bundle)
+    [32715] = true,  -- Ferocious Leap (slotted)
+    [32716] = true,  -- Ferocious Leap (damage on target)
+    [32717] = true,  -- Ferocious Leap (target knockback aura, ~3s)
+    [262681] = true, -- Ferocious Leap (combat bundle)
+    [61814] = true,  -- Ferocious Leap (player damage shield, 10s)
+    [114601] = true, -- Stun (Ferocious Leap; combat log)
+    [262680] = true, -- Stun (Ferocious Leap, U49 export — not in log)
+    [118938] = true, -- Ferocious Leap (combat bundle)
 
-    [29032] = true,  -- Stonefist (Stonefist)
-    [134310] = true, -- Stonefist (Stonefist)
-    [133037] = true, -- Stonefist (Stonefist)
-    [134009] = true, -- Stonefist (Stonefist)
+    [29032] = true,  -- Superheated Ward (Superheated Ward)
+    [134310] = true, -- Superheated Ward (Superheated Ward)
+    [133037] = true, -- Superheated Ward (legacy bundle)
+    [134009] = true, -- Superheated Ward (knockdown)
 
-    [31820] = true,  -- Obsidian Shard (Obsidian Shard)
-    [68763] = true,  -- Obsidian Shard (Obsidian Shard)
+    [31820] = true,  -- Volcanic Ward (Volcanic Ward)
+    [261754] = true, -- Volcanic Ward (Volcanic Ward)
+    [258203] = true, -- Volcanic Ward (Volcanic Ward)
+    [68763] = true,  -- Volcanic Ward (end heal)
 
-    [31816] = true,  -- Stone Giant (Stone Giant)
-    [134340] = true, -- Stone Giant (Stone Giant)
-    [133027] = true, -- Stone Giant (Stone Giant)
-    [134336] = true, -- Stone Giant (Stone Giant)
-    [134355] = true, -- Stone Giant (Stone Giant)
+    [31816] = true,  -- Magma Fist (Magma Fist)
+    [134340] = true, -- Magma Fist (Heat Shock)
+    [258293] = true, -- Magma Fist (player buff)
+    [133027] = true, -- Magma Fist (legacy bundle)
+    [134336] = true, -- Magma Fist (legacy stagger)
+    [134355] = true, -- Magma Fist (knockdown)
 
     [29043] = true,  -- Molten Weapons (Molten Weapons)
+    [258658] = true, -- Molten Weapons (player buff)
     [131340] = true, -- Major Brutality (Molten Weapons)
     [92507] = true,  -- Major Sorcery (Molten Weapons)
 
     [31874] = true,  -- Igneous Weapons (Igneous Weapons)
-    [258666] = true, -- Igneous Weapons (combat bundle)
+    [258666] = true, -- Igneous Weapons (player buff)
     [259761] = true, -- Minor Brutality (Igneous Weapons bundle)
     [76518] = true,  -- Major Brutality (Igneous Weapons)
     [92503] = true,  -- Major Sorcery (Igneous Weapons)
 
     [31888] = true,  -- Molten Armaments (Molten Armaments)
-    [76537] = true,  -- Molten Armaments (Molten Armaments)
+    [258661] = true, -- Molten Armaments (player buff)
+    [76537] = true,  -- Empower (Molten Armaments combat)
     [131341] = true, -- Major Brutality (Molten Armaments)
     [92512] = true,  -- Major Sorcery (Molten Armaments)
 
@@ -4102,14 +4126,22 @@ local debugAuras =
 
     [29037] = true,  -- Petrify (Petrify)
     [54918] = true,  -- Petrify (Petrify)
+    [259089] = true, -- Petrify Minor Breach combat
+    [259090] = true, -- Petrify stun (target)
 
     [32685] = true,  -- Fossilize (Fossilize)
     [54931] = true,  -- Fossilize (Fossilize)
-    [61785] = true,  -- Fossilize (Fossilize)
+    [259128] = true, -- Fossilize snare
+    [259129] = true, -- Fossilize Minor Breach combat
+    [259130] = true, -- Fossilize Minor Vulnerability combat
+    [61785] = true,  -- Fossilize root
 
     [32678] = true,  -- Shattering Rocks (Shattering Rocks)
-    [32684] = true,  -- Shattering Rocks (Shattering Rocks)
-    [108811] = true, -- Shattering Rocks (Shattering Rocks)
+    [259136] = true, -- Shattering Rocks snare
+    [259137] = true, -- Shattering Rocks Minor Breach combat
+    [259138] = true, -- Shattering Rocks stun (target)
+    [32684] = true,  -- Shattering Rocks (damage combat)
+    [108811] = true, -- Shattering Rocks (player heal combat)
 
     [31837] = true,  -- Core of Flame
     [31842] = true,  -- Core of Flame (damage)
