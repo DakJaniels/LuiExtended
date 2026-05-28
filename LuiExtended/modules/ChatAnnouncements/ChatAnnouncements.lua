@@ -701,10 +701,16 @@ function ChatAnnouncements.RegisterLootEvents()
 end
 
 function ChatAnnouncements.RegisterLootHistoryHooks()
+    -- See HookFunction for rationale: ZO_PostHook is multiplicative; sentinel
+    -- prevents double-fire if RegisterLootHistoryHooks is invoked more than once.
+    if ChatAnnouncements._lootHistoryHooksInstalled then
+        return
+    end
     if ZO_LootHistory_Shared and ZO_LootHistory_Shared.AddAdventureZoneFactionReputation then
         ZO_PostHook(ZO_LootHistory_Shared, "AddAdventureZoneFactionReputation", function (_, reputationAdded)
             ChatAnnouncements.QueueAdventureZoneFactionReputationGain(reputationAdded)
         end)
+        ChatAnnouncements._lootHistoryHooksInstalled = true
     end
 end
 
@@ -3866,8 +3872,13 @@ function ChatAnnouncements.ResolveQuestItemChange()
 
                 countChange = newValue + questItemIndex[itemId].counter
                 S.g_questItemRemoved[itemId] = true
+                -- nil (not false) so the key is removed from the table and the
+                -- map stays bounded to currently-debouncing items rather than
+                -- accumulating every unique quest itemId seen during the session.
+                -- Downstream check at PrintQueuedMessages uses `if not S.g_questItemRemoved[itemId]`
+                -- which evaluates the same for nil and false.
                 zo_callLater(function ()
-                                 S.g_questItemRemoved[itemId] = false
+                                 S.g_questItemRemoved[itemId] = nil
                              end, 100)
 
                 if not Quests.QuestItemHideRemove[itemId] and not S.g_loginHideQuestLoot then
@@ -3934,8 +3945,9 @@ function ChatAnnouncements.ResolveQuestItemChange()
                 --
                 countChange = newValue - questItemIndex[itemId].stack
                 S.g_questItemAdded[itemId] = true
+                -- See g_questItemRemoved above: nil keeps the map bounded.
                 zo_callLater(function ()
-                                 S.g_questItemAdded[itemId] = false
+                                 S.g_questItemAdded[itemId] = nil
                              end, 100)
 
                 if not Quests.QuestItemHideLoot[itemId] and not S.g_loginHideQuestLoot then
@@ -6831,6 +6843,10 @@ function ChatAnnouncements.OnGroupInviteReceived(eventId, inviterName, inviterDi
 end
 
 function ChatAnnouncements.IndexGroupLoot()
+    -- Rebuild rather than merge: previously this function only ever inserted,
+    -- so every group composition seen during the session left a permanent
+    -- characterName key in g_groupLootIndex (real growth across PUG/LFG nights).
+    ZO_ClearTable(S.g_groupLootIndex)
     local groupSize = GetGroupSize()
     for i = 1, groupSize do
         local characterName = GetUnitName("group" .. i)

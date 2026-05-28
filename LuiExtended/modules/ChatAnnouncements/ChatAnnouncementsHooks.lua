@@ -29,6 +29,15 @@ local moduleName = LUIE.name .. "ChatAnnouncements"
 
 -- ALERT & EVENT HANDLER PREHOOK FUNCTIONS
 function ChatAnnouncements.HookFunction()
+    -- ZO_PreHook stacks: every call to HookFunction wraps the prior handler again,
+    -- so re-entry (e.g. if Initialize ran twice in one Lua state via an external
+    -- /reloadui shim) would double-invoke every alert hook. The first-call sentinel
+    -- makes the function idempotent within a session.
+    if ChatAnnouncements._alertHooksInstalled then
+        return
+    end
+    ChatAnnouncements._alertHooksInstalled = true
+
     local alertHandlers = ZO_AlertText_GetHandlers()
 
     -- EVENT_STYLE_LEARNED (Alert Handler)
