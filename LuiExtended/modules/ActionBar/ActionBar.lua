@@ -3675,23 +3675,6 @@ end
 ]]
 --
 
---- @param result ActionResult
---- @param isError boolean
---- @param abilityName string
---- @param abilityGraphic integer
---- @param abilityActionSlotType ActionSlotType
---- @param sourceName string
---- @param sourceType CombatUnitType
---- @param targetName string
---- @param targetType CombatUnitType
---- @param hitValue integer
---- @param powerType CombatMechanicFlags
---- @param damageType DamageType
---- @param log boolean
---- @param sourceUnitId integer
---- @param targetUnitId integer
---- @param abilityId integer
---- @param overflow integer
 --- Resolve bar-highlight timer length from combatTrack override data and combat hitValue (ms).
 local function GetCombatTrackToggleDurationMs(combatAbilityId, result, hitValue)
     local trackId = g_barCombatEventRemap[combatAbilityId] or combatAbilityId
@@ -3719,6 +3702,23 @@ local function SetCombatTrackToggleRemain(barAbilityId, combatAbilityId, current
     g_toggledSlotsRemain[barAbilityId] = currentTimeMS + durationMs
 end
 
+--- @param result ActionResult
+--- @param isError boolean
+--- @param abilityName string
+--- @param abilityGraphic integer
+--- @param abilityActionSlotType ActionSlotType
+--- @param sourceName string
+--- @param sourceType CombatUnitType
+--- @param targetName string
+--- @param targetType CombatUnitType
+--- @param hitValue integer
+--- @param powerType CombatMechanicFlags
+--- @param damageType DamageType
+--- @param log boolean
+--- @param sourceUnitId integer
+--- @param targetUnitId integer
+--- @param abilityId integer
+--- @param overflow integer
 function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
     -- If the source/target isn't the player then bail out now.
     if sourceType ~= COMBAT_UNIT_TYPE_PLAYER and targetType ~= COMBAT_UNIT_TYPE_PLAYER then

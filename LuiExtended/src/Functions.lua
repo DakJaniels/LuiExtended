@@ -941,9 +941,6 @@ do
         return (desc and desc ~= "") and desc or nil
     end
 
-    local STAT_DISPLAY_FORMAT_PERCENT = STAT_DISPLAY_FORMAT_PERCENT or 2
-    local ADVANCED_STAT_CRITICAL_DAMAGE = 23
-
     --- @param abilityId integer
     --- @param preferredStatType integer|nil luaindex AdvancedStatDisplayType (e.g. CRITICAL_DAMAGE)
     --- @return number|nil
@@ -955,7 +952,7 @@ do
         local fallback
         for index = 1, numAdvanced do
             local statType, displayFormat, effectValue = GetAbilityAdvancedStatAndEffectByIndex(abilityId, index)
-            if effectValue and displayFormat == STAT_DISPLAY_FORMAT_PERCENT then
+            if effectValue and displayFormat == ADVANCED_STAT_DISPLAY_FORMAT_PERCENT then
                 if preferredStatType and statType == preferredStatType then
                     return effectValue
                 end
@@ -970,7 +967,7 @@ do
     --- @param abilityId integer
     --- @return string|nil
     local function FatedFortuneTooltip(abilityId)
-        local percent = GetAbilityAdvancedStatPercent(abilityId, ADVANCED_STAT_CRITICAL_DAMAGE)
+        local percent = GetAbilityAdvancedStatPercent(abilityId, ADVANCED_STAT_DISPLAY_TYPE_CRITICAL_DAMAGE)
         if not percent or percent == 0 then
             return nil
         end
