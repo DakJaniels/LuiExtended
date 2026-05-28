@@ -66,9 +66,10 @@ function LUIE.HookKeyboardStats()
                 end
             end
 
-            -- Handle dynamic tooltip
-            if override and override.dynamicTooltip then
-                tooltipText = LUIE.DynamicTooltip(abilityId) or tooltipText -- Fallback to original tooltipText if nil
+            -- TooltipHandlers and EffectOverride.dynamicTooltip (matches SpellCastBuffs)
+            local dynTip = LUIE.DynamicTooltip(abilityId)
+            if dynTip then
+                tooltipText = dynTip
             end
 
             -- Clean up tooltip text

@@ -203,7 +203,7 @@ function ChatAnnouncements.PlayerToPlayerHook()
     end
 
     local function AlertGroupKickDisabled()
-        printToChat(GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR))
+        printToChat(GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR), true)
         if ChatAnnouncements.SV.Group.GroupAlert then
             ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(LUIE_STRING_CA_GROUP_LEADERKICK_ERROR))
         end

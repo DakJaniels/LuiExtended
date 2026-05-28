@@ -25,6 +25,7 @@ local function LoadSavedVars()
     LUIE.MigrateSplitModuleSavedVarsFromLuiESV()
     LUIE.RepairSplitModuleSavedVarsFromLegacy()
     LUIE.PruneLegacyLuiESVDefaultProfileBranch()
+    LUIE.MigrateChatOutputToCore()
 
     if _G["Srendarr"] then
         LUIE.InstallExternalSavedVarsLegacyCompat()
@@ -104,6 +105,9 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.PlayerNameFormatted = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("player"))
     LUIE.PlayerDisplayName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitDisplayName("player"))
     LUIE.PlayerFaction = GetUnitAlliance("player")
+    -- -----------------------------------------------------------------------------
+    -- LUIE-wide chat output (LCM / tabs / timestamps); independent of CA module
+    LUIE.ChatAnnouncements.ChatOutput.InitializePrintRouting()
     -- -----------------------------------------------------------------------------
     -- Initialize this addon modules according to user preferences
     LUIE.ChatAnnouncements.Initialize(LUIE.SV.ChatAnnouncements_Enable)

@@ -211,12 +211,13 @@ end
 LUIE.TimeStampColorize = ZO_OFF_WHITE:ToHex()
 
 -- -----------------------------------------------------------------------------
---- Updates the timestamp color based on the value in LUIE.ChatAnnouncements.SV.TimeStampColor.
+--- Updates the timestamp color based on the value in `LUIE.SV.ChatOutput.TimeStampColor`.
 function LUIE.UpdateTimeStampColor()
     local color
-    color = LUIE.ChatAnnouncements.SV.TimeStampColor
+    local chatOutput = LUIE.SV and LUIE.SV.ChatOutput
+    color = chatOutput and chatOutput.TimeStampColor
     if color == nil then
-        color = { 0.5607843137, 0.5607843137, 0.5607843137 }
+        color = LUIE.Defaults.ChatOutput.TimeStampColor or { 0.5607843137, 0.5607843137, 0.5607843137 }
     end
     LUIE.TimeStampColorize = ZO_ColorDef:New(unpack(color)):ToHex()
 end
@@ -241,16 +242,17 @@ do
 
     --- Returns a formatted timestamp based on the provided time string and format string.
     --- @param timeStr string: The time string in the format "HH:MM:SS".
-    --- @param formatStr string|nil (optional): The format string for the timestamp. If not provided, the default format from LUIE.ChatAnnouncements.SV.TimeStampFormat will be used.
+    --- @param formatStr string|nil (optional): The format string for the timestamp. If not provided, the default format from `LUIE.SV.ChatOutput.TimeStampFormat` will be used.
     --- @param milliseconds string|nil
     --- @return string @ The formatted timestamp.
     local function CreateTimestamp(timeStr, formatStr, milliseconds)
-        local showTimestamp = LUIE.ChatAnnouncements.SV.TimeStamp
+        local chatOutput = LUIE.SV and LUIE.SV.ChatOutput or LUIE.Defaults.ChatOutput
+        local showTimestamp = chatOutput.TimeStamp
         if showTimestamp then
             milliseconds = milliseconds or getCurrentMillisecondsFormatted()
         end
         if milliseconds == nil then milliseconds = "" end
-        formatStr = formatStr or LUIE.ChatAnnouncements.SV.TimeStampFormat
+        formatStr = formatStr or chatOutput.TimeStampFormat
 
         -- split up default timestamp
         local hours, minutes, seconds = string_match(timeStr, "([^%:]+):([^%:]+):([^%:]+)")
@@ -348,72 +350,19 @@ do
 end
 -- -----------------------------------------------------------------------------
 do
-    local FormatMessage = LUIE.FormatMessage
-    local SystemMessage = LUIE.AddSystemMessage
-
-    --- Prints a message to specific chat windows based on user settings
-    --- @param formattedMsg string: The message to print
-    --- @param isSystem boolean: Whether this is a system message
-    local function PrintToChatWindows(formattedMsg, isSystem)
-        -- If system messages should go to all windows and this is a system message, use SystemMessage
-        if isSystem and LUIE.ChatAnnouncements.SV.ChatSystemAll then
-            SystemMessage(formattedMsg)
-            return
-        end
-
-        -- Otherwise, print to individual tabs based on settings
-        for _, cc in ipairs(ZO_GetChatSystem().containers) do
-            for i = 1, #cc.windows do
-                if LUIE.ChatAnnouncements.SV.ChatTab[i] == true then
-                    local chatContainer = cc
-                    local chatWindow = cc.windows[i]
-
-                    -- Skip Combat Metrics Log window if CMX is enabled
-                    local skipWindow = false
-                    if CMX and CMX.db and CMX.db.chatLog then
-                        if chatContainer:GetTabName(i) == CMX.db.chatLog.name then
-                            skipWindow = true
-                        end
-                    end
-
-                    if not skipWindow then
-                        chatContainer:AddEventMessageToWindow(chatWindow, formattedMsg, CHAT_CATEGORY_SYSTEM)
-                    end
-                end
-            end
-        end
-    end
-
-    --- Easy Print to Chat.
-    --- Prints a message to the chat.
+    --- Easy Print to Chat (delegates to ChatAnnouncements chat output).
     --- @param msg string: The message to be printed.
     --- @param isSystem? boolean: If true, the message is considered a system message.
     local function PrintToChat(msg, isSystem)
-        -- Guard clause: exit early if chat system not ready
-        if not ZO_GetChatSystem().primaryContainer then
+        local chatOutput = LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
+        if chatOutput then
+            chatOutput.Print(msg, isSystem)
             return
         end
-
-        -- Default message if none provided
         if msg == "" then
             msg = "[Empty String]"
         end
-
-        -- Determine if we should format the message with a timestamp
-        local shouldFormat = not LUIE.ChatAnnouncements.SV.ChatBypassFormat
-        local doTimestamp = LUIE.ChatAnnouncements.SV.TimeStamp
-        local formattedMsg = shouldFormat
-            and FormatMessage(msg, doTimestamp)
-            or msg
-
-        -- Method 1: Print to all tabs (uses SystemMessage)
-        if LUIE.ChatAnnouncements.SV.ChatMethod == "Print to All Tabs" then
-            SystemMessage(formattedMsg)
-            return
-        end
-
-        -- Method 2: Print to specific tabs
-        PrintToChatWindows(formattedMsg, isSystem)
+        LUIE.AddSystemMessage(msg)
     end
 
     LUIE.PrintToChat = PrintToChat
@@ -992,6 +941,117 @@ do
         return (desc and desc ~= "") and desc or nil
     end
 
+    local STAT_DISPLAY_FORMAT_PERCENT = STAT_DISPLAY_FORMAT_PERCENT or 2
+    local ADVANCED_STAT_CRITICAL_DAMAGE = 23
+
+    --- @param abilityId integer
+    --- @param preferredStatType integer|nil luaindex AdvancedStatDisplayType (e.g. CRITICAL_DAMAGE)
+    --- @return number|nil
+    local function GetAbilityAdvancedStatPercent(abilityId, preferredStatType)
+        local numAdvanced = GetAbilityNumAdvancedStats(abilityId)
+        if not numAdvanced or numAdvanced < 1 then
+            return nil
+        end
+        local fallback
+        for index = 1, numAdvanced do
+            local statType, displayFormat, effectValue = GetAbilityAdvancedStatAndEffectByIndex(abilityId, index)
+            if effectValue and displayFormat == STAT_DISPLAY_FORMAT_PERCENT then
+                if preferredStatType and statType == preferredStatType then
+                    return effectValue
+                end
+                if fallback == nil then
+                    fallback = effectValue
+                end
+            end
+        end
+        return fallback
+    end
+
+    --- @param abilityId integer
+    --- @return string|nil
+    local function FatedFortuneTooltip(abilityId)
+        local percent = GetAbilityAdvancedStatPercent(abilityId, ADVANCED_STAT_CRITICAL_DAMAGE)
+        if not percent or percent == 0 then
+            return nil
+        end
+        return zo_strformat(GetString(LUIE_STRING_SKILL_FATED_FORTUNE_TP), percent)
+    end
+
+    -- Matches LocalizeString / zo_strformat arity in eso_game.lua (<<1>>..<<7>>).
+    local TOOLTIP_FORMAT_PLACEHOLDER_MAX = 7
+
+    --- Colored numeric tokens from a ZOS ability description (|cFFFFFF12|r, etc.).
+    --- @param description string|nil
+    --- @return number[]
+    local function ExtractDescriptionNumbers(description)
+        local numbers = {}
+        if not description or description == "" then
+            return numbers
+        end
+        for num in description:gmatch("|c%x+(%d+)") do
+            numbers[#numbers + 1] = tonumber(num)
+        end
+        return numbers
+    end
+
+    --- Fill unset <<n>> slots from GetAbilityDescription(tooltipSetAbilityId).
+    --- @param values (number|string|nil)[]
+    --- @param setAbilityId integer
+    --- @param unitTag string
+    local function ApplySetAbilityDescriptionToTooltipValues(values, setAbilityId, unitTag)
+        local desc = GetAbilityDescription(setAbilityId, nil, unitTag or "player")
+        local numbers = ExtractDescriptionNumbers(desc)
+        for i = 1, TOOLTIP_FORMAT_PLACEHOLDER_MAX do
+            if values[i] == nil and numbers[i] then
+                values[i] = numbers[i]
+            end
+        end
+    end
+
+    --- @param ov EffectOverrideData
+    --- @param durationSec number
+    --- @param unitTag string
+    --- @return (number|string)[]
+    local function ResolveEffectTooltipValues(ov, durationSec, unitTag)
+        local values = {}
+        for index = 1, TOOLTIP_FORMAT_PLACEHOLDER_MAX do
+            local valueKey = index == 1 and "tooltipValue1" or ("tooltipValue" .. index)
+            local idKey = index == 1 and "tooltipValue1Id" or ("tooltipValue" .. index .. "Id")
+            if ov[valueKey] ~= nil then
+                values[index] = ov[valueKey]
+            elseif ov[idKey] then
+                values[index] = zo_floor((GetAbilityDuration(ov[idKey], nil, unitTag) or 0) + 0.5) / 1000
+            elseif index == 1 then
+                values[index] = durationSec
+            end
+        end
+        if values[2] == nil and ov.tooltipValue2Mod then
+            values[2] = zo_floor(durationSec + ov.tooltipValue2Mod + 0.5)
+        end
+        if ov.tooltipSetAbilityId then
+            ApplySetAbilityDescriptionToTooltipValues(values, ov.tooltipSetAbilityId, unitTag)
+        end
+        for index = 1, TOOLTIP_FORMAT_PLACEHOLDER_MAX do
+            if values[index] == nil then
+                values[index] = 0
+            end
+        end
+        return values
+    end
+
+    --- zo_strformat for Tooltips.* strings supporting <<1>>..<<7>> (API limit).
+    --- @param tooltipString string
+    --- @param ov EffectOverrideData
+    --- @param durationSec number
+    --- @param unitTag string
+    --- @return string
+    local function FormatTooltipString(tooltipString, ov, durationSec, unitTag)
+        local values = ResolveEffectTooltipValues(ov, durationSec, unitTag)
+        return zo_strformat(
+            tooltipString,
+            values[1], values[2], values[3], values[4], values[5], values[6], values[7])
+    end
+
     -- Tooltip handler definitions
     local TooltipHandlers =
     {
@@ -1094,6 +1154,14 @@ do
             return zo_strformat(GetString(LUIE_STRING_SKILL_WEB_ENSNARED_STACK_TP), perStack, total)
         end,
 
+        -- Fated Fortune (Herald) — passive rank and timed stack share <<1>> crit bonus; API sheet/effect text stays at 0%%.
+        [184844] = function ()
+            return FatedFortuneTooltip(184844)
+        end,
+        [194875] = function ()
+            return FatedFortuneTooltip(194875)
+        end,
+
     }
 
     -- Returns dynamic tooltips when called by Tooltip function
@@ -1117,7 +1185,33 @@ do
         return nil
     end
 
+    --- Builds EffectOverride custom tooltip text (<<1>>..<<5>>). TooltipHandlers win when not skipped.
+    --- @param abilityId integer
+    --- @param durationSec number
+    --- @param unitTag string|nil
+    --- @param options { tooltipString: string?, skipHandler: boolean? }|nil
+    --- @return string|nil
+    local function FormatOverrideTooltip(abilityId, durationSec, unitTag, options)
+        options = options or {}
+        local ov = EffectOverride[abilityId]
+        if not ov then
+            return nil
+        end
+        if not options.skipHandler then
+            local handler = TooltipHandlers[abilityId]
+            if handler then
+                return handler(unitTag)
+            end
+        end
+        local tooltipString = options.tooltipString or ov.tooltip
+        if not tooltipString then
+            return nil
+        end
+        return FormatTooltipString(tooltipString, ov, durationSec, unitTag or "player")
+    end
+
     LUIE.DynamicTooltip = DynamicTooltip
+    LUIE.FormatOverrideTooltip = FormatOverrideTooltip
 end
 -- -----------------------------------------------------------------------------
 

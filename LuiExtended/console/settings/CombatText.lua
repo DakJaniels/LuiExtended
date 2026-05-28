@@ -483,6 +483,45 @@ function CombatText.CreateConsoleSettings()
             end
         }
 
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_DRAGONKNIGHT),
+            tooltip = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_DRAGONKNIGHT_TP),
+            buttonText = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_DRAGONKNIGHT),
+            clickHandler = function ()
+                CombatText.AddBulkToCustomList(Settings.blacklist, BlacklistPresets.Dragonknight)
+                SettingsAPI:RefreshPanel(panel)
+                LUIE.RefreshBlacklistDialog("LUIE_MANAGE_CT_BLACKLIST")
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_NIGHTBLADE),
+            tooltip = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_NIGHTBLADE_TP),
+            buttonText = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_NIGHTBLADE),
+            clickHandler = function ()
+                CombatText.AddBulkToCustomList(Settings.blacklist, BlacklistPresets.Nightblade)
+                SettingsAPI:RefreshPanel(panel)
+                LUIE.RefreshBlacklistDialog("LUIE_MANAGE_CT_BLACKLIST")
+            end
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_BUTTON,
+            label = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_ARCANIST),
+            tooltip = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_ARCANIST_TP),
+            buttonText = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_ARCANIST),
+            clickHandler = function ()
+                CombatText.AddBulkToCustomList(Settings.blacklist, BlacklistPresets.Arcanist)
+                SettingsAPI:RefreshPanel(panel)
+                LUIE.RefreshBlacklistDialog("LUIE_MANAGE_CT_BLACKLIST")
+            end
+        }
+
         -- Store temp text for adding items
         if not Settings.tempBlacklistText then
             Settings.tempBlacklistText = ""

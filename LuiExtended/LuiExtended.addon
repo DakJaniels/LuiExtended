@@ -36,6 +36,7 @@ src/Hooks.lua
 
 shared/actionbutton.lua
 shared/settings_tweaks.lua
+shared/ChatOutputSettingsUI.lua
 shared/synergy.lua
 
 gamepad/HooksSkillsAdvisor.lua
@@ -66,6 +67,7 @@ console/Unlock.lua
 
 # Modules - Chat Announcements
 modules/ChatAnnouncements/ChatAnnouncementsConstants.lua
+modules/ChatAnnouncements/ChatOutput.lua
 modules/ChatAnnouncements/ChatAnnouncementsPlayerToPlayerHooks.lua
 modules/ChatAnnouncements/ChatAnnouncementsExperience.lua
 modules/ChatAnnouncements/ChatAnnouncementsCSA.lua

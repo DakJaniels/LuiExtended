@@ -906,7 +906,7 @@ function ChatAnnouncements.HookFunction()
     local function ClientInteractResult(result, interactTargetName)
         local formatString = GetString("SI_CLIENTINTERACTRESULT", result)
         if formatString ~= "" then
-            printToChat(zo_strformat(formatString, interactTargetName))
+            printToChat(zo_strformat(formatString, interactTargetName), true)
             if ChatAnnouncements.SV.Notify.NotificationLockpickAlert then
                 ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, zo_strformat(formatString, interactTargetName))
             end
@@ -3082,7 +3082,7 @@ function ChatAnnouncements.HookFunction()
         if countDelta < 0 then
             if ChatAnnouncements.SV.Group.GroupRaidReviveCA then
                 local iconCA = zo_iconFormat("EsoUI/Art/Trials/VitalityDepletion.dds", 16, 16)
-                printToChat(zo_strformat(LUIE_STRING_CA_GROUP_REVIVE_COUNTER_UPDATED, iconCA))
+                printToChat(zo_strformat(LUIE_STRING_CA_GROUP_REVIVE_COUNTER_UPDATED, iconCA), true)
             end
 
             if ChatAnnouncements.SV.Group.GroupRaidReviveCSA then
@@ -3169,7 +3169,7 @@ function ChatAnnouncements.HookFunction()
             -- Display CA
             if ChatAnnouncements.SV.Group.GroupRaidScoreCA then
                 local iconCA = zo_iconFormat(reasonAssets.icon, 16, 16)
-                printToChat(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_SCORE_UPDATED, iconCA, scoreAmount))
+                printToChat(zo_strformat(LUIE_STRING_CA_GROUP_TRIAL_SCORE_UPDATED, iconCA, scoreAmount), true)
             end
 
             -- Display CSA

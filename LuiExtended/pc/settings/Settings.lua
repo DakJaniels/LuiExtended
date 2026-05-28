@@ -373,12 +373,12 @@ function LUIE.CreateSettings()
     local function ProfileCopyExecute()
         local tgtP, tgtA, tgtB = ProfileCopyGetTargetTriple()
         if not (tgtP and tgtA and tgtB) then
-            CHAT_ROUTER:AddSystemMessage(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR))
+            LUIE.PrintToChat(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR), true)
             return
         end
         local srcBucket = ProfileCopyGetEffectiveSourceBucket()
         if not (copyPick_server and copyPick_account and srcBucket) then
-            CHAT_ROUTER:AddSystemMessage(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR))
+            LUIE.PrintToChat(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR), true)
             return
         end
         if ProfileCopyIsSameAsTarget() then
@@ -399,7 +399,7 @@ function LUIE.CreateSettings()
             end
         end
         if not anyCopied then
-            CHAT_ROUTER:AddSystemMessage(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR))
+            LUIE.PrintToChat(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR), true)
             return
         end
         ReloadUI("ingame")
@@ -780,6 +780,11 @@ function LUIE.CreateSettings()
     optionsData[#optionsData + 1] = SettingsAPI.CreateSubmenuOption(
         GetString(LUIE_STRING_LAM_SVPROFILE_HEADER),
         profileControls
+    )
+
+    optionsData[#optionsData + 1] = SettingsAPI.CreateSubmenuOption(
+        GetString(LUIE_STRING_LAM_CHATOUTPUT_HEADER),
+        LUIE.BuildChatOutputLAMControls(SettingsAPI)
     )
 
     -- Modules Header

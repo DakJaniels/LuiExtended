@@ -186,10 +186,20 @@ LUIE.OtherAddonCompatability =
 }
 -- -----------------------------------------------------------------------------
 -- Default Settings
+--- @class LUIE_ChatOutputDefaults
+--- @field ChatMethod string
+--- @field ChatBypassFormat boolean
+--- @field ChatTab table<number, boolean>
+--- @field ChatSystemAll boolean
+--- @field TimeStamp boolean
+--- @field TimeStampFormat string
+--- @field TimeStampColor number[]
+
 --- @class LUIE_Defaults_SV
 --- @field DebugEnvironmentActive boolean True while /luie debug on allowlist is applied
 --- @field DebugEnvironmentRestore table<string, boolean>|nil Snapshot of addon enabled flags before debug on
 --- @field DebugEnvironmentPendingChat string|nil One-shot chat line to show after the next UI reload
+--- @field ChatOutput LUIE_ChatOutputDefaults LUIE-wide chat print routing (tabs, timestamps, LCM/pChat)
 LUIE.Defaults =
 {
     CustomIcons                 = true,
@@ -228,6 +238,17 @@ LUIE.Defaults =
     DebugEnvironmentActive      = false,
     DebugEnvironmentRestore     = nil,
     DebugEnvironmentPendingChat = nil,
+
+    ChatOutput =
+    {
+        ChatMethod = "Print to All Tabs",
+        ChatBypassFormat = false,
+        ChatTab = { [1] = true, [2] = true, [3] = true, [4] = true, [5] = true },
+        ChatSystemAll = true,
+        TimeStamp = false,
+        TimeStampFormat = "HH:m:s",
+        TimeStampColor = { 143 / 255, 143 / 255, 143 / 255 },
+    },
 
     Migrations                  = {}
 }
