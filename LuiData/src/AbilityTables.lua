@@ -486,7 +486,7 @@ local abilityTables =
     -- Dragonknight
     Skill_Fiery_Breath = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20917)),
     Skill_Chains_of_Flame = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20492)),
-    Skill_Fiery_Grip = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20492)), -- legacy key (NPC clones)
+    Skill_Fiery_Grip = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20492)),        -- legacy key (NPC clones)
     Skill_Chains_of_Devastation = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20499)),
     Skill_Empowering_Chains = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20499)), -- legacy key
     Skill_Chains_of_Dominance = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(20496)),

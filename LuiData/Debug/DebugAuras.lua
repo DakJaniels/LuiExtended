@@ -3823,29 +3823,29 @@ local debugAuras =
     [44953] = true, -- Scaled Armor (Rank 2)
 
     -- Earthen Heart
-    [29468] = true, -- Eternal Mountain (Rank 1)
-    [44996] = true, -- Eternal Mountain (Rank 2)
+    [29468] = true,  -- Eternal Mountain (Rank 1)
+    [44996] = true,  -- Eternal Mountain (Rank 2)
     [259223] = true, -- Battle Roar (slotted name, offset 33273852)
-    [29463] = true, -- Landslide
-    [29465] = true, -- Landslide (ground aura)
-    [29466] = true, -- Landslide (ground tick)
-    [29467] = true, -- Landslide
-    [44984] = true, -- Landslide
-    [44987] = true, -- Landslide
-    [44988] = true, -- Landslide
+    [29463] = true,  -- Landslide
+    [29465] = true,  -- Landslide (ground aura)
+    [29466] = true,  -- Landslide (ground tick)
+    [29467] = true,  -- Landslide
+    [44984] = true,  -- Landslide
+    [44987] = true,  -- Landslide
+    [44988] = true,  -- Landslide
     [259228] = true, -- Landslide (U49)
     [259241] = true, -- Landslide (U49, Take Flight)
     [259684] = true, -- Landslide (U49, Ferocious Leap)
-    [29473] = true, -- Mountain's Blessing (Rank 1)
-    [61798] = true, -- Minor Brutality
-    [29474] = true, -- Blessing at the Peak (passive POWER)
-    [45001] = true, -- Mountain's Blessing (Rank 2)
-    [61799] = true, -- Minor Brutality
-    [45005] = true, -- Mountain's Blessing
-    [29475] = true, -- Helping Hands (Rank 1)
-    [29476] = true, -- Helping Hands
-    [45009] = true, -- Helping Hands (Rank 2)
-    [45010] = true, -- Helping Hands
+    [29473] = true,  -- Mountain's Blessing (Rank 1)
+    [61798] = true,  -- Minor Brutality
+    [29474] = true,  -- Blessing at the Peak (passive POWER)
+    [45001] = true,  -- Mountain's Blessing (Rank 2)
+    [61799] = true,  -- Minor Brutality
+    [45005] = true,  -- Mountain's Blessing
+    [29475] = true,  -- Helping Hands (Rank 1)
+    [29476] = true,  -- Helping Hands
+    [45009] = true,  -- Helping Hands (Rank 2)
+    [45010] = true,  -- Helping Hands
 
     -------------------------------------
     -- DRAGONKNIGHT ACTIVES -------------
@@ -4042,10 +4042,10 @@ local debugAuras =
     [32797] = true,  -- Deep Breath (Deep Breath)
     [32805] = true,  -- Deep Breath (Deep Breath)
 
-    [256038] = true,  -- Draw Essence
-    [256039] = true,  -- Draw Essence
-    [256040] = true,  -- Draw Essence
-    [256041] = true,  -- Draw Essence
+    [256038] = true, -- Draw Essence
+    [256039] = true, -- Draw Essence
+    [256040] = true, -- Draw Essence
+    [256041] = true, -- Draw Essence
 
     [48744] = true,  -- CC Immunity (Dragon Leap)
     [48745] = true,  -- Dragon Leap (Dragon Leap)
@@ -6542,8 +6542,8 @@ local debugAuras =
     [45500] = true,  -- Tri Focus -- Rank 2
     [69773] = true,  -- Tri Focus
     [45505] = true,  -- Tri Focus
-    [203988] = true,  -- Tri Focus (target DoT)
-    [204009] = true,  -- Tri Focus (target DoT)
+    [203988] = true, -- Tri Focus (target DoT)
+    [204009] = true, -- Tri Focus (target DoT)
 
     [30957] = true,  -- Penetrating Magic -- Rank 1
     [45509] = true,  -- Penetrating Magic -- Rank 2

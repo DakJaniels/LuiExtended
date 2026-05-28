@@ -105,11 +105,11 @@ local fakePlayerBuffs =
     -----------------
 
     -- Dragonknight
-    [32956] = { duration = 0 },                                        -- Standard of Might (Standard of Might)
+    [32956] = { duration = 0 },                          -- Standard of Might (Standard of Might)
 
-    [29004] = { duration = "GET", onlyExtended = true },               -- Dragon Blood
-    [32744] = { duration = "GET", onlyExtra = true },                  -- Green Dragon Blood
-    [32722] = { duration = "GET", onlyExtended = true },               -- Coagulating Blood
+    [29004] = { duration = "GET", onlyExtended = true }, -- Dragon Blood
+    [32744] = { duration = "GET", onlyExtra = true },    -- Green Dragon Blood
+    [32722] = { duration = "GET", onlyExtended = true }, -- Coagulating Blood
 
     -- shiftId = player bundle (not slotted id) so Extra Buffs does not duplicate 29043/31874/31888 on unit frame
     [92507] = { duration = "GET", shiftId = 258658, onlyExtra = true },  -- Molten Weapons (Major Sorcery combat)
@@ -120,9 +120,9 @@ local fakePlayerBuffs =
     [131341] = { duration = "GET", shiftId = 258661, onlyExtra = true }, -- Molten Armaments (Major Brutality combat)
     [76537] = { duration = "GET", shiftId = 258661, onlyExtra = true },  -- Molten Armaments (Empower combat)
 
-    [31841] = { duration = 2500 },                                     -- Inhale
-    [32796] = { duration = 2500 },                                     -- Deep Breath
-    [32788] = { duration = 2500 },                                     -- Draw Essence
+    [31841] = { duration = 2500 },                                       -- Inhale
+    [32796] = { duration = 2500 },                                       -- Deep Breath
+    [32788] = { duration = 2500 },                                       -- Draw Essence
 
     -- Nightblade
     [90587] = { duration = "GET", shiftId = 33375, onlyExtended = true }, -- Blur
