@@ -60,9 +60,11 @@ local barHighlightOverride =
     [20245] = { newId = 20527 },                        -- Dark Talons
     [20252] = { newId = 31898 },                        -- Burning Talons
     [20251] = { newId = 20528 },                        -- Choking Talons -- TODO: Possibly track Maim here as well
-    [29004] = { showFakeAura = true, noRemove = true }, -- Dragon Blood
-    [32744] = { showFakeAura = true, noRemove = true }, -- Green Dragon Blood
-    [32722] = { showFakeAura = true, noRemove = true }, -- Coagulating Blood
+    -- Dragon Blood: bar keys newId; timer from player buff (61698), not slotted combat (1500 ms GAIN DUR). showFakeAura would block buff refresh on recast.
+    [29004] = { newId = 61698, noRemove = true }, -- Dragon Blood → Major Fortitude
+    -- Green: 5s HoT buff (32744) on effect frame; HoT fade → CheckOnFade → remaining major time. noRemove keeps bar through HoT fade for swap.
+    [32744] = { noRemove = true }, -- Blood of the Green Dragon
+    [32722] = { newId = 61698, noRemove = true }, -- Blood of the Elder Dragon → Major Fortitude
 
     [21014] = { newId = 108798 },                       -- Protective Plate
 

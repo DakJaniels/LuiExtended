@@ -42,6 +42,7 @@ local barHighlightCheckOnFade =
     -- Dragonknight
     [108798] = { id1 = 21014, unitTag = PLAYER_UNIT_TAG },             -- Protective Plate
     [31898] = { id1 = 20253, id2 = 31898, unitTag = TARGET_UNIT_TAG }, -- Burning Talons
+    [32744] = { id1 = 61698, id2 = 61705, unitTag = PLAYER_UNIT_TAG }, -- Blood of the Green Dragon HoT fade → Major Fortitude / Major Endurance (remaining duration)
 
     -- Nightblade
     [125314] = { duration = 90620, durationMod = 125314, unitTag = PLAYER_UNIT_TAG }, -- Phantasmal Escape --> Major Evasion

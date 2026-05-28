@@ -1809,6 +1809,18 @@ local effectOverride =
     -- DRAGONKNIGHT ACTIVE ABILITIES -------------------------------
     ----------------------------------------------------------------
 
+    -- Dragon Blood / Blood of the Green Dragon / Blood of the Elder Dragon (bar → 61698 via BarHighlightOverride)
+    [29010] = { hide = true }, -- Dragon Blood (HEAL combat)
+    [29011] = { hide = true }, -- Major Fortitude bundle (player buff 61698)
+    [259761] = { hide = true }, -- Minor Brutality bundle (Dragon Blood cast / Igneous Weapons)
+    [32745] = { hide = true }, -- Blood of the Green Dragon (HEAL combat)
+    [32748] = { hide = true }, -- Major Endurance bundle (player buff 61705)
+    [61884] = { hide = true }, -- Major Fortitude bundle (green morph)
+    [91670] = { hide = true }, -- Minor Vitality bundle (green morph)
+    [32723] = { hide = true }, -- Blood of the Elder Dragon (HEAL combat)
+    [91674] = { hide = true }, -- Major Fortitude bundle (elder morph)
+    [259634] = { hide = true }, -- Minor Courage bundle (elder morph)
+
     -- Lava Whip / Molten Whip / Flame Lash (morph 2) / Power Lash
     -- U49 Lava Whip: OB hit → 5 stacks Volcanic Whip / Lava Slam (23808, 20s, 20s ICD); slot becomes 256798 Volcanic Whip (consumes stack)
     [23806] = { hide = true },                                                                                                        -- Lava Whip (legacy hit/cast combat; bar highlight → 23808)
@@ -1961,7 +1973,6 @@ local effectOverride =
     -- Molten Weapons / Igneous Weapons / Molten Armaments
     [258666] = { hide = true }, -- Igneous Weapons (combat bundle; player-facing morph buff is separate)
     [258665] = { hide = true }, -- Igneous Weapons (weapon damage on target)
-    [259761] = { hide = true }, -- Minor Brutality (Igneous Weapons bundle)
     [258661] = { dynamicTooltip = true, tooltipMorphId = 31888 }, -- Molten Armaments morph (bundle id != morph)
     [76537] = { tooltip = Tooltips.Skill_Molten_Armaments }, -- Molten Armaments (Molten Armaments)
 

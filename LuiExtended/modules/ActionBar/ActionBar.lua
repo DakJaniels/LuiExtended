@@ -1731,11 +1731,11 @@ local playerZ = 0.000000000000000
 --- @param abilityId integer
 --- @return string
 local function SetBarRemainLabel(remain, abilityId)
-    if Effects.IsGrimFocus[abilityId] or Effects.IsBloodFrenzy[abilityId] then
+    if Effects.IsGrimFocus[abilityId] or Effects.IsBloodFrenzy[abilityId] or (Effects.IsCrux and Effects.IsCrux[abilityId]) then
         return ""
-    else
-        return FormatDurationSeconds(remain)
     end
+
+    return FormatDurationSeconds(remain)
 end
 
 -- -----------------------------------------------------------------------------
@@ -2855,7 +2855,8 @@ function ActionBar.ShowSlot(slotNum, abilityId, currentTimeMS, desaturate)
         if not c then
             return
         end
-        local remain = g_toggledSlotsRemain[abilityId] - currentTimeMS
+        local endMs = g_toggledSlotsRemain[abilityId]
+        local remain = endMs and (endMs - currentTimeMS) or 0
         c.label:SetText(SetBarRemainLabel(remain, abilityId))
         if g_toggledSlotsStack[abilityId] and g_toggledSlotsStack[abilityId] > 0 then
             c.stack:SetText(g_toggledSlotsStack[abilityId])
