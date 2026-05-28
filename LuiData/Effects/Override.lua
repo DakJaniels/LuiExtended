@@ -1810,15 +1810,18 @@ local effectOverride =
     ----------------------------------------------------------------
 
     -- Lava Whip / Molten Whip / Flame Lash (morph 2) / Power Lash
-    [23806] = { hide = true },                                                                                                        -- Lava Whip (hit/cast combat; bar highlight → 23808)
-    [23808] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                           -- Lava Slam (Off Balance on target; en.lang ability name)
+    -- U49 Lava Whip: OB hit → 5 stacks Volcanic Whip / Lava Slam (23808, 20s, 20s ICD); slot becomes 256798 Volcanic Whip (consumes stack)
+    [23806] = { hide = true },                                                                                                        -- Lava Whip (legacy hit/cast combat; bar highlight → 23808)
+    [256798] = { hide = true },                                                                                                       -- Volcanic Whip (replacement cast hit / AOE combat)
+    [23808] = { dynamicTooltip = true, tooltipMorphId = 23806, unbreakable = 1 },                                                   -- Lava Slam (Volcanic Whip stacks on player; bar highlight)
     [20805] = { hide = true },                                                                                                        -- Molten Whip (hit combat; bar → 122658)
     [20816] = { hide = true },                                                                                                        -- Flame Lash (hit combat; bar → 34117)
     [20806] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                           -- Off Balance (Molten Whip)
     [122658] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_SEETHING_FURY_DDS, tooltip = Tooltips.Skill_Seething_Fury }, -- Seething Fury (~10s player buff; Molten Whip)
-    [34117] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                           -- Power Lash stacks (Flame Lash combatTrack; U49 lang name)
-    [20824] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_POWER_LASH_DDS },                                             -- Power Lash (Flame Lash)
-    [23105] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_POWER_LASH_DDS },                                             -- Power Lash (Flame Lash)
+    -- Flame Lash: OB hit → 5 stacks Power Lash (34117, 20s); slot becomes 20824 Power Lash (consumes stack); 23105 heal combat
+    [34117] = { dynamicTooltip = true, tooltipMorphId = 20816, unbreakable = 1 },                                                   -- Power Lash stacks (player buff; bar highlight)
+    [20824] = { hide = true },                                                                                                        -- Power Lash (replacement cast hit combat)
+    [23105] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20816 },                                                       -- Power Lash (self-heal combat)
     [257507] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20816 },                                                       -- Flame Lash (self-heal combat)
     -- Combustion (108815 / 108816) can apply 18084 Burning on whip hits (see log); 160949 not observed on base Lava Whip
 

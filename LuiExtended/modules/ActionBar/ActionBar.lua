@@ -283,6 +283,9 @@ local function GetCustomToggleControl(slotNum)
     local t = g_uiCustomToggle[slotNum]
     return (t and t ~= true) and t or nil
 end
+--- Forward declarations (OnAbilityUsed is defined above these helpers).
+local ForEachToggledSlot
+local SetToggledStackLabels
 local g_triggeredSlotsFront = {}                   -- Triggered bar highlight slots
 local g_triggeredSlotsBack = {}                    -- Triggered bar highlight slots
 --- @type table<number, number>
@@ -321,6 +324,10 @@ local g_boundArmamentsPlayed = {}                  -- Specific variable to locko
 --- @type {[integer]:boolean}
 local g_disableProcSound = {}                      -- When we play a proc sound from a bar ability changing (like power lash) we put a 3 sec ICD on it so it doesn't spam when mousing on/off a target, etc
 local g_hotbarCategory = GetActiveHotbarCategory() -- Set on initialization and when we swap weapons to determine the current hotbar category
+local POWER_LASH_STACK_TRACK = 34117
+local POWER_LASH_MAX_STACKS = 5
+local VOLCANIC_WHIP_STACK_TRACK = 23808
+local VOLCANIC_WHIP_MAX_STACKS = 5
 --- @type {[integer]:ActionButton}
 local g_backbarButtons = {}                        -- Table to hold backbar buttons
 local g_backbarContainer                           -- Parent control for backbar (used for SETHOTBAR auto-hide)
@@ -1325,6 +1332,17 @@ function ActionBar.UpdateBarHighlightTables()
             -- Register filter for specific abilityId's in table only, and filter for source = player, no errors
             eventManager:AddFilterForEvent(eventName, EVENT_COMBAT_EVENT, REGISTER_FILTER_ABILITY_ID, ability_Id, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER)
         end
+        -- Stack-track buff fades (34117 Power Lash, 23808 Volcanic Whip) often have no player source on FADE; target = player still clears bar highlight.
+        for _, trackId in ipairs({ POWER_LASH_STACK_TRACK, VOLCANIC_WHIP_STACK_TRACK }) do
+            if g_barOverrideCI[trackId] then
+                counter = counter + 1
+                local eventName = moduleName .. "CombatEventBarFade" .. trackId
+                eventManager:RegisterForEvent(eventName, EVENT_COMBAT_EVENT, function (_, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+                    ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+                end)
+                eventManager:AddFilterForEvent(eventName, EVENT_COMBAT_EVENT, REGISTER_FILTER_ABILITY_ID, trackId, REGISTER_FILTER_IS_ERROR, false, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_FADED)
+            end
+        end
     end
 end
 
@@ -1853,43 +1871,71 @@ function ActionBar.OnAbilityUsed(actionSlotIndex)
         ActionBar.StopCastBar()
     end
 
-    -- Power Lash consumes a stack per cast; combat often does not emit EFFECT_GAINED per stack, so sync from slot use (bound 20824 / 23105).
-    local POWER_LASH_STACK_TRACK = 34117
-    if not ActionBar.SV.ShowToggled then
-        return
-    end
-    if not (g_toggledSlotsFront[POWER_LASH_STACK_TRACK] or g_toggledSlotsBack[POWER_LASH_STACK_TRACK]) or not g_toggledSlotsRemain[POWER_LASH_STACK_TRACK] then
-        return
-    end
+    -- Power Lash consumes a stack per cast; combat often does not emit EFFECT_GAINED per stack, so sync from slot use (bound 20824 only).
+    if ActionBar.SV.ShowToggled then
+        if (g_toggledSlotsFront[POWER_LASH_STACK_TRACK] or g_toggledSlotsBack[POWER_LASH_STACK_TRACK]) and g_toggledSlotsRemain[POWER_LASH_STACK_TRACK] then
+            local bound = GetSlotTrueBoundId(actionSlotIndex, g_hotbarCategory)
+            if bound == 20824 then
+                local stacks = g_toggledSlotsStack[POWER_LASH_STACK_TRACK]
+                if stacks and stacks > 0 then
+                    stacks = stacks - 1
+                    g_toggledSlotsStack[POWER_LASH_STACK_TRACK] = stacks > 0 and stacks or nil
 
-    local bound = GetSlotTrueBoundId(actionSlotIndex, g_hotbarCategory)
-    if bound ~= 20824 and bound ~= 23105 then
-        return
-    end
-
-    local stacks = g_toggledSlotsStack[POWER_LASH_STACK_TRACK]
-    if not stacks or stacks <= 0 then
-        return
-    end
-
-    stacks = stacks - 1
-    g_toggledSlotsStack[POWER_LASH_STACK_TRACK] = stacks > 0 and stacks or nil
-
-    local now = GetGameTimeMilliseconds()
-    if not g_toggledSlotsStack[POWER_LASH_STACK_TRACK] then
-        g_toggledSlotsRemain[POWER_LASH_STACK_TRACK] = nil
-        if g_toggledSlotsFront[POWER_LASH_STACK_TRACK] then
-            ActionBar.HideSlot(g_toggledSlotsFront[POWER_LASH_STACK_TRACK], POWER_LASH_STACK_TRACK)
+                    local now = GetGameTimeMilliseconds()
+                    if not g_toggledSlotsStack[POWER_LASH_STACK_TRACK] then
+                        g_toggledSlotsRemain[POWER_LASH_STACK_TRACK] = nil
+                        if g_toggledSlotsFront[POWER_LASH_STACK_TRACK] then
+                            ActionBar.HideSlot(g_toggledSlotsFront[POWER_LASH_STACK_TRACK], POWER_LASH_STACK_TRACK)
+                        end
+                        if g_toggledSlotsBack[POWER_LASH_STACK_TRACK] then
+                            ActionBar.HideSlot(g_toggledSlotsBack[POWER_LASH_STACK_TRACK], POWER_LASH_STACK_TRACK)
+                        end
+                    else
+                        if g_toggledSlotsFront[POWER_LASH_STACK_TRACK] then
+                            ActionBar.ShowSlot(g_toggledSlotsFront[POWER_LASH_STACK_TRACK], POWER_LASH_STACK_TRACK, now, false)
+                        end
+                        if g_toggledSlotsBack[POWER_LASH_STACK_TRACK] then
+                            ActionBar.ShowSlot(g_toggledSlotsBack[POWER_LASH_STACK_TRACK], POWER_LASH_STACK_TRACK, now, false)
+                        end
+                    end
+                    if ActionBar.SV.BarShowLabel then
+                        SetToggledStackLabels(POWER_LASH_STACK_TRACK, g_toggledSlotsStack[POWER_LASH_STACK_TRACK])
+                    end
+                end
+            end
         end
-        if g_toggledSlotsBack[POWER_LASH_STACK_TRACK] then
-            ActionBar.HideSlot(g_toggledSlotsBack[POWER_LASH_STACK_TRACK], POWER_LASH_STACK_TRACK)
-        end
-    else
-        if g_toggledSlotsFront[POWER_LASH_STACK_TRACK] then
-            ActionBar.ShowSlot(g_toggledSlotsFront[POWER_LASH_STACK_TRACK], POWER_LASH_STACK_TRACK, now, false)
-        end
-        if g_toggledSlotsBack[POWER_LASH_STACK_TRACK] then
-            ActionBar.ShowSlot(g_toggledSlotsBack[POWER_LASH_STACK_TRACK], POWER_LASH_STACK_TRACK, now, false)
+
+        -- Volcanic Whip (256798) consumes a Lava Slam / Volcanic Whip stack per cast (U49 Lava Whip).
+        if (g_toggledSlotsFront[VOLCANIC_WHIP_STACK_TRACK] or g_toggledSlotsBack[VOLCANIC_WHIP_STACK_TRACK]) and g_toggledSlotsRemain[VOLCANIC_WHIP_STACK_TRACK] then
+            local bound = GetSlotTrueBoundId(actionSlotIndex, g_hotbarCategory)
+            if bound == 256798 then
+                local stacks = g_toggledSlotsStack[VOLCANIC_WHIP_STACK_TRACK]
+                if stacks and stacks > 0 then
+                    stacks = stacks - 1
+                    g_toggledSlotsStack[VOLCANIC_WHIP_STACK_TRACK] = stacks > 0 and stacks or nil
+
+                    local now = GetGameTimeMilliseconds()
+                    if not g_toggledSlotsStack[VOLCANIC_WHIP_STACK_TRACK] then
+                        g_toggledSlotsRemain[VOLCANIC_WHIP_STACK_TRACK] = nil
+                        if g_toggledSlotsFront[VOLCANIC_WHIP_STACK_TRACK] then
+                            ActionBar.HideSlot(g_toggledSlotsFront[VOLCANIC_WHIP_STACK_TRACK], VOLCANIC_WHIP_STACK_TRACK)
+                        end
+                        if g_toggledSlotsBack[VOLCANIC_WHIP_STACK_TRACK] then
+                            ActionBar.HideSlot(g_toggledSlotsBack[VOLCANIC_WHIP_STACK_TRACK], VOLCANIC_WHIP_STACK_TRACK)
+                        end
+                    else
+                        if g_toggledSlotsFront[VOLCANIC_WHIP_STACK_TRACK] then
+                            ActionBar.ShowSlot(g_toggledSlotsFront[VOLCANIC_WHIP_STACK_TRACK], VOLCANIC_WHIP_STACK_TRACK, now, false)
+                        end
+                        if g_toggledSlotsBack[VOLCANIC_WHIP_STACK_TRACK] then
+                            ActionBar.ShowSlot(g_toggledSlotsBack[VOLCANIC_WHIP_STACK_TRACK], VOLCANIC_WHIP_STACK_TRACK, now, false)
+                        end
+                    end
+                    if ActionBar.SV.BarShowLabel then
+                        SetToggledStackLabels(VOLCANIC_WHIP_STACK_TRACK, g_toggledSlotsStack[VOLCANIC_WHIP_STACK_TRACK])
+                    end
+                end
+            end
         end
     end
 end
@@ -2407,7 +2453,7 @@ local PROC_SOUND_THRESHOLDS =
 }
 
 --- Iterate over front and back toggled slots for abilityId; call fn(slotNum) for each valid slot.
-local function ForEachToggledSlot(abilityId, fn)
+ForEachToggledSlot = function (abilityId, fn)
     local front = g_toggledSlotsFront[abilityId]
     local back = g_toggledSlotsBack[abilityId]
     if front and GetCustomToggleControl(front) then fn(front) end
@@ -2415,7 +2461,7 @@ local function ForEachToggledSlot(abilityId, fn)
 end
 
 --- Set stack label on all toggled slots for abilityId. textOrNil: number to display, or nil/0 for empty.
-local function SetToggledStackLabels(abilityId, textOrNil)
+SetToggledStackLabels = function (abilityId, textOrNil)
     local text = (textOrNil and textOrNil > 0) and tostring(textOrNil) or ""
     ForEachToggledSlot(abilityId, function (slotNum)
         g_uiCustomToggle[slotNum].stack:SetText(text)
@@ -2589,14 +2635,28 @@ local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeTyp
     if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
         if ActionBar.SV.ShowToggled then
             if abilityId == 34117 and stackCount == 0 then
+                -- stackCount can be 0 on first EFFECT_CHANGED tick; timer/stacks come from combatTrack or OnAbilityUsed
+                if g_toggledSlotsRemain[abilityId] then
+                    ShowToggledSlots(abilityId, GetGameTimeMilliseconds())
+                end
+            elseif abilityId == 23808 and stackCount == 0 then
                 HideToggledSlots(abilityId)
                 g_toggledSlotsRemain[abilityId] = nil
                 g_toggledSlotsStack[abilityId] = nil
             else
                 local currentTime = GetGameTimeMilliseconds()
                 g_toggledSlotsRemain[abilityId] = 1000 * endTime
-                if not isStackBaseAbility[abilityId] then g_toggledSlotsStack[abilityId] = stackCount end
+                if not isStackBaseAbility[abilityId] then
+                    if stackCount and stackCount > 0 then
+                        g_toggledSlotsStack[abilityId] = stackCount
+                    elseif abilityId == 34117 and not g_toggledSlotsStack[abilityId] and g_toggledSlotsRemain[abilityId] then
+                        g_toggledSlotsStack[abilityId] = POWER_LASH_MAX_STACKS
+                    end
+                end
                 ShowToggledSlots(abilityId, currentTime)
+                if ActionBar.SV.BarShowLabel and abilityId == 34117 and g_toggledSlotsStack[abilityId] then
+                    SetToggledStackLabels(abilityId, g_toggledSlotsStack[abilityId])
+                end
             end
         end
     end
@@ -3640,29 +3700,32 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
         if g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId] then
             if ActionBar.SV.ShowToggled then
                 local skipToggleShow = false
-                -- Power Lash stacks (34117): combat hitValue = stack count (EFFECT_GAINED) or duration ms (EFFECT_GAINED_DURATION); see EVENT_COMBAT_EVENT logs.
-                if abilityId == 34117 then
-                    if result == ACTION_RESULT_EFFECT_GAINED and type(hitValue) == "number" and hitValue <= 0 then
-                        g_toggledSlotsRemain[abilityId] = nil
-                        g_toggledSlotsStack[abilityId] = nil
-                        if g_toggledSlotsFront[abilityId] then
-                            ActionBar.HideSlot(g_toggledSlotsFront[abilityId], abilityId)
-                        end
-                        if g_toggledSlotsBack[abilityId] then
-                            ActionBar.HideSlot(g_toggledSlotsBack[abilityId], abilityId)
-                        end
-                        skipToggleShow = true
-                    else
-                        if result == ACTION_RESULT_EFFECT_GAINED_DURATION and type(hitValue) == "number" and hitValue >= 500 then
-                            g_toggledSlotsRemain[abilityId] = currentTimeMS + hitValue
-                        else
-                            local duration = GetUpdatedAbilityDuration(abilityId)
-                            g_toggledSlotsRemain[abilityId] = currentTimeMS + duration
-                        end
-                        if result == ACTION_RESULT_EFFECT_GAINED and type(hitValue) == "number" and hitValue > 0 and hitValue <= 20 then
-                            g_toggledSlotsStack[abilityId] = hitValue
+                -- Power Lash (34117) / Lava Slam Volcanic Whip stacks (23808): combat hitValue = stack count (EFFECT_GAINED) or duration ms (EFFECT_GAINED_DURATION).
+                if abilityId == 34117 or abilityId == 23808 then
+                    local maxStack = abilityId == 34117 and POWER_LASH_MAX_STACKS or VOLCANIC_WHIP_MAX_STACKS
+                    -- Timer from GAIN DUR (hitValue ms); plain GAIN often has hitValue 0 with stacks on a later event — do not treat as fade (see combat log: GAIN then GAIN DUR D 20000).
+                    if result == ACTION_RESULT_EFFECT_GAINED_DURATION and type(hitValue) == "number" and hitValue >= 500 then
+                        g_toggledSlotsRemain[abilityId] = currentTimeMS + hitValue
+                        if abilityId == 34117 and not g_toggledSlotsStack[abilityId] then
+                            g_toggledSlotsStack[abilityId] = POWER_LASH_MAX_STACKS
                             if ActionBar.SV.BarShowLabel then
-                                SetToggledStackLabels(abilityId, hitValue)
+                                SetToggledStackLabels(abilityId, POWER_LASH_MAX_STACKS)
+                            end
+                        elseif abilityId == 23808 and not g_toggledSlotsStack[abilityId] then
+                            g_toggledSlotsStack[abilityId] = VOLCANIC_WHIP_MAX_STACKS
+                            if ActionBar.SV.BarShowLabel then
+                                SetToggledStackLabels(abilityId, VOLCANIC_WHIP_MAX_STACKS)
+                            end
+                        end
+                    elseif result == ACTION_RESULT_EFFECT_GAINED and type(hitValue) == "number" and hitValue > 0 and hitValue <= maxStack then
+                        g_toggledSlotsStack[abilityId] = hitValue
+                        if ActionBar.SV.BarShowLabel then
+                            SetToggledStackLabels(abilityId, hitValue)
+                        end
+                        if not g_toggledSlotsRemain[abilityId] then
+                            local duration = g_barDurationOverride[abilityId] or GetUpdatedAbilityDuration(abilityId)
+                            if duration > 0 then
+                                g_toggledSlotsRemain[abilityId] = currentTimeMS + duration
                             end
                         end
                     end

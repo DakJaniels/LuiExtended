@@ -25,8 +25,8 @@ local barHighlightExtraId =
 {
 
     -- Dragonknight
-    [20824] = 34117, -- Power Lash proc bar id --> stack buff id used in combat / buff events
-    [23105] = 34117, -- Power Lash (alt rank) --> same stack id
+    [256798] = 23808, -- Volcanic Whip (replaces Lava Whip on bar) --> Lava Slam stack buff
+    [20824] = 34117, -- Power Lash on bar (replaces Flame Lash) --> stack buff 34117
     [20253] = 31898, -- Burning Talons
     [61785] = 32685, -- Fossilize
 

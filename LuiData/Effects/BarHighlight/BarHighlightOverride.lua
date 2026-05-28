@@ -38,13 +38,12 @@ local barHighlightOverride =
     ---------------------------
 
     -- Ardent Flame
-    [23806] = { newId = 23808 },                        -- Lava Whip → Lava Slam (Off Balance)
+    [23806] = { newId = 23808, combatTrack = true, duration = 20000 }, -- Lava Whip → Lava Slam / Volcanic Whip stacks (5, 20s)
+    [256798] = { newId = 23808, combatTrack = true, duration = 20000 }, -- Volcanic Whip on bar → same stack buff id
     [20805] = { newId = 122658, combatTrack = true, duration = 10000 }, -- Molten Whip → Seething Fury (~10s; 122658 GAIN refreshes)
-    -- Flame Lash / Power Lash (U49+): stacks use abilityId 34117 in EVENT_COMBAT_EVENT (EFFECT_GAINED hitValue=stacks, EFFECT_GAINED_DURATION hitValue=ms).
-    -- combatTrack registers combat listener without g_barFakeAura so player buff fade still clears via EVENT_EFFECT_CHANGED.
+    -- Flame Lash / Power Lash (U49+): 34117 stack buff (5 stacks, 20s); 20824 replaces slotted Flame Lash when stacks are up.
     [20816] = { newId = 34117, combatTrack = true, duration = 20000 },
-    [20824] = { newId = 34117 },
-    [23105] = { newId = 34117, combatTrack = true, duration = 20000 },
+    [20824] = { newId = 34117, combatTrack = true, duration = 20000 },
     [20657] = { newId = 44363 },                        -- Searing Strike
     [20668] = { newId = 44369 },                        -- Searing Claw
     -- Core of Flame / Soul of Flame / Heart of Flame: ~4s player buff on slotted id (31837 / 32792 / 32785); no BarHighlightOverride entry.

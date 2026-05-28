@@ -3848,8 +3848,9 @@ local debugAuras =
     -- DRAGONKNIGHT ACTIVES -------------
     -------------------------------------
 
-    [23806] = true,  -- Lava Whip (hit/cast combat)
-    [23808] = true,  -- Lava Slam / Off Balance (target debuff)
+    [23806] = true,  -- Lava Whip (legacy hit/cast combat)
+    [256798] = true, -- Volcanic Whip (replacement cast / hit combat)
+    [23808] = true,  -- Lava Slam (Volcanic Whip stacks; bar highlight)
 
     [20805] = true,  -- Molten Whip (hit combat)
     [122658] = true, -- Seething Fury (Molten Whip)
@@ -3857,10 +3858,10 @@ local debugAuras =
     [20806] = true,  -- Off Balance (Molten Whip)
     [122729] = true, -- Seething Fury (legacy combat id)
 
-    [20816] = true,  -- Flame Lash (hit combat)
-    [34117] = true,  -- Power Lash stacks (Flame Lash bar track)
-    [20824] = true,  -- Power Lash (Flame Lash)
-    [23105] = true,  -- Power Lash (Flame Lash)
+    [20816] = true,  -- Flame Lash (slotted / legacy hit combat)
+    [34117] = true,  -- Power Lash stacks (20s player buff; bar highlight)
+    [20824] = true,  -- Power Lash (replacement cast hit combat)
+    [23105] = true,  -- Power Lash (self-heal combat)
     [257507] = true, -- Flame Lash (self-heal combat)
 
     [20657] = true,  -- Searing Strike (hit combat)
