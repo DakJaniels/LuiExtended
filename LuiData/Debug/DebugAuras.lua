@@ -3806,7 +3806,7 @@ local debugAuras =
     [108815] = true, -- Combustion
     [29430] = true,  -- Warmth (Rank 1)
     [45012] = true,  -- Warmth (Rank 2)
-    [160949] = true, -- Warmth
+    [160949] = true, -- Traumatic Burns (Core of Flame line)
     [29439] = true,  -- Searing Heat (Rank 1)
     [45023] = true,  -- Searing Heat (Rank 2)
     [29451] = true,  -- World in Ruin (Rank 1)
@@ -4104,6 +4104,11 @@ local debugAuras =
     [32684] = true,  -- Shattering Rocks (Shattering Rocks)
     [108811] = true, -- Shattering Rocks (Shattering Rocks)
 
+    [31837] = true,  -- Core of Flame
+    [31842] = true,  -- Core of Flame (damage)
+    [32792] = true,  -- Soul of Flame
+    [32785] = true,  -- Heart of Flame
+
     [29059] = true,  -- Hearthfire (ground entity / slotted)
     [33142] = true,  -- Hearthfire (slotted ground buff)
     [61772] = true,  -- Hearthfire (ally HOT inside ground)
@@ -4114,9 +4119,6 @@ local debugAuras =
     [34791] = true,  -- Fire Keeper (ally HOT inside ground)
     [20780] = true,  -- Fire Keeper (Minor Heroism inside-ground bundle)
 
-    [31837] = true,  -- Core of Flame (Hearth and Home)
-    [32785] = true,  -- Heart of Flame (Hearth and Home)
-    [32792] = true,  -- Soul of Flame (Hearth and Home)
     [32710] = true,  -- Hearth and Home (ground entity)
     [33099] = true,  -- Hearth and Home (slotted ground buff)
     [32714] = true,  -- Heart of Flame (Major Protection inside-ground bundle)

@@ -47,11 +47,7 @@ local barHighlightOverride =
     [23105] = { newId = 34117, combatTrack = true, duration = 20000 },
     [20657] = { newId = 44363 },                        -- Searing Strike
     [20668] = { newId = 44369 },                        -- Searing Claw
-    -- Hearthfire / Hearth and Home / Fire Keeper: bar timer tracks EffectGroundDisplay ground duration (not HOT / reticle buffs).
-    -- Do not use showFakeAura here — combat-only timers lose g_toggledSlotsPlayer and clear on target change.
-    [31837] = { newId = 32710 }, -- Core of Flame --> ground entity id
-    [32785] = { newId = 32710 }, -- Heart of Flame --> ground entity id
-    [32792] = { newId = 32710 }, -- Soul of Flame --> ground entity id
+    -- Core of Flame / Soul of Flame / Heart of Flame: ~4s player buff on slotted id (31837 / 32792 / 32785); no BarHighlightOverride entry.
     [20660] = { newId = 44373 },                        -- Burning Embers
     [20917] = { newId = 31102 },                        -- Fiery Breath
     [20944] = { newId = 31103 },                        -- Noxious Breath

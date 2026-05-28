@@ -1781,7 +1781,7 @@ local effectOverride =
     [45011] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_COMBUSTION_DDS },                                                    -- Combustion (Combustion - Rank 2)
     [108816] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_COMBUSTION_DDS },                                                   -- Combustion (Combustion - Rank 2)
     [108815] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_COMBUSTION_DDS },                                                   -- Combustion (Combustion - Rank 2)
-    [160949] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_WARMTH_DDS, tooltip = Tooltips.Generic_Snare, tooltipValue2 = 30 }, -- Warmth -- TODO: Maybe find a way to determine rank for the 15% or 30% snare tooltip
+    [160949] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 }, -- Traumatic Burns (Core of Flame line target debuff)
 
     [29455] = { icon = "/esoui/art/icons/passive_dragonknight_007.dds" },                                                                   -- Iron Skin (Iron Skin - Rank 1)
     [44922] = { icon = "/esoui/art/icons/passive_dragonknight_007.dds" },                                                                   -- Iron Skin (Iron Skin - Rank 2)
@@ -1833,6 +1833,12 @@ local effectOverride =
     [62004] = { hide = true },                                              -- Unrelenting Grip (Unrelenting Grip)
     [77105] = { icon = "/esoui/art/icons/ability_dragonknight_005_a.dds" }, -- Unrelenting Grip (Unrelenting Grip)
 
+    -- Core of Flame / Soul of Flame / Heart of Flame (channeled ~4s self-buff; unrelated to Hearthfire 15s ground)
+    [31837] = { dynamicTooltip = true, toggle = true }, -- Core of Flame
+    [32792] = { dynamicTooltip = true, toggle = true }, -- Soul of Flame
+    [32785] = { dynamicTooltip = true, toggle = true }, -- Heart of Flame
+    [31842] = { hide = true },                          -- Core of Flame (hit damage combat)
+
     -- Inferno / Incinerate / Cauterize — live sheet text (static strings were pre–Inferno rework / wrong morph names)
     [28967] = { dynamicTooltip = true, toggle = true },                              -- Inferno
     [257750] = { hide = true, dynamicTooltip = true, tooltipMorphId = 28967 },       -- Inferno (1s activation pulse)
@@ -1841,7 +1847,7 @@ local effectOverride =
     [257754] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32853 },   -- Incinerate (Inferno rework bundle)
     [258586] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32853 },       -- Fire Keeper (activation pulse)
     [258585] = { hide = true, tooltip = Tooltips.Skill_Minor_Fortitude },            -- Minor Fortitude (Incinerate bundle)
-    [243742] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },           -- Traumatic Burns (Incinerate)
+    [243742] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },           -- Traumatic Burns (Incinerate bundle; Core line target debuff is 160949)
     [32881] = { dynamicTooltip = true, toggle = true },                              -- Cauterize
     [76429] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32881 },          -- Cauterize (activation pulse)
     [257752] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32881 },       -- Inferno (Cauterize 1s wave pulse)
@@ -1946,14 +1952,11 @@ local effectOverride =
     [20779] = { dynamicTooltip = true, groundLabel = true },                                                                 -- Fire Keeper (15s ground; FakePlayerOfflineAura + showFakeAura)
     [21435] = { hide = true },                                                                                                                           -- Fire Keeper (slotted ground buff; action bar tracks via newId)
     [20780] = { hide = true, tooltip = Tooltips.Skill_Minor_Heroism },                                                                                   -- Minor Heroism bundle (inside Fire Keeper ground; player shows 61708/61697)
-    [31837] = { dynamicTooltip = true },                                                                                                                 -- Core of Flame (Hearth and Home)
-    [32785] = { dynamicTooltip = true },                                                                                                                 -- Heart of Flame (Hearth and Home)
-    [32792] = { dynamicTooltip = true },                                                                                                                 -- Soul of Flame (Hearth and Home)
-    [32710] = { dynamicTooltip = true, groundLabel = true },                                                                 -- Hearth and Home (15s ground; FakePlayerOfflineAura + action bar via slotted morph newId)
+    [32710] = { dynamicTooltip = true, groundLabel = true },                                                                 -- Hearth and Home (15s ground)
     [33099] = { hide = true },                                                                                                   -- Hearth and Home (slotted ground buff; action bar tracks via newId)
     [32711] = { groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                         -- Hearth and Home (ally HOT inside ground — combat HOT/HOT!)
     [32712] = { duration = 0, groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Snare_Fire, tooltipValue2 = 1, tooltipValue3 = 70 }, -- Hearth and Home (enemy flame/snare inside ground)
-    [32714] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32785 },                                                                            -- Eruption bundle id (Major Protection while inside Heart of Flame ground)
+    [32714] = { hide = true, dynamicTooltip = true },                                                                        -- Major Protection bundle (inside Hearth and Home ground only)
 
     [61772] = { groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                         -- Hearthfire (ally HOT inside ground)
     [34791] = { groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                         -- Fire Keeper (ally HOT inside ground)
