@@ -51,6 +51,11 @@ local fakePlayerOfflineAura =
     [40382] = { duration = "GET", ground = true }, -- Barbed Trap (Barbed Trap)
     [40372] = { duration = "GET", ground = true }, -- Lightweight Beast Trap (Lightweight Beast Trap)
 
+    -- Dragonknight — Hearth and Home / Fire Keeper / Hearthfire (ground entity; combat GAIN → Offline)
+    [29059] = { duration = "GET", ground = true }, -- Hearthfire (ground shares slotted id)
+    [32710] = { duration = "GET", ground = true }, -- Hearth and Home (Core / Heart / Soul morph ground)
+    [20779] = { duration = "GET", ground = true }, -- Fire Keeper (ground shares slotted id)
+
     -- Arcanist
     [183555] = { duration = "GET", ground = true }, -- Arcanist's Domain (ground)
     [186229] = { duration = "GET", ground = true }, -- Zenas' Empowering Disc (ground)

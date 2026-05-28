@@ -74,9 +74,10 @@ local addGroundDamageAura =
     [32964] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Shifting Standard
     [32948] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Standard of Might
 
-    [61772] = { duration = 1100, type = BUFF_EFFECT_TYPE_BUFF },   -- Ash Cloud (Ash Cloud)
-    [34791] = { duration = 1100, type = BUFF_EFFECT_TYPE_BUFF },   -- Cinder Storm (Cinder Storm)
-    [32711] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Eruption (Eruption)
+    [61772] = { duration = 1100, type = BUFF_EFFECT_TYPE_BUFF },   -- Hearthfire (ally heal inside ground)
+    [32711] = { duration = 1100, type = BUFF_EFFECT_TYPE_BUFF },   -- Hearth and Home (ally HOT inside ground)
+    [32712] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Hearth and Home (enemy inside ground)
+    [34791] = { duration = 1100, type = BUFF_EFFECT_TYPE_BUFF },   -- Fire Keeper (ally HOT inside ground)
 
     -- Nightblade
     [36052] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Twisting Path (Twisting Path)

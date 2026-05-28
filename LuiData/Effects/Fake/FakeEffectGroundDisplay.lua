@@ -93,9 +93,9 @@ Effects.EffectGroundDisplay =
     [28988] = { buff = false, debuff = false, ground = true },                  -- Dragonknight Standard (Dragonknight Standard)
     [32958] = { buff = false, debuff = false, ground = true, noRemove = true }, -- Shifting Standard (Shifting Standard)
     [32947] = { buff = false, debuff = false, ground = true },                  -- Standard of Might (Standard of Might)
-    [29059] = { buff = true, debuff = false, ground = false },                  -- Ash Cloud (Ash Cloud)
-    [20779] = { buff = true, debuff = false, ground = false },                  -- Cinder Storm (Cinder Storm)
-    [32710] = { buff = false, debuff = false, ground = true },                  -- Eruption (Eruption)
+    [29059] = { buff = false, debuff = false, ground = true },                  -- Hearthfire (ground entity shares slotted id)
+    [20779] = { buff = false, debuff = false, ground = true },                  -- Fire Keeper (ground entity shares slotted id)
+    [32710] = { buff = false, debuff = false, ground = true },                  -- Hearth and Home (Hearth and Home)
 
     -- Nightblade
     [33195] = { buff = true, debuff = false, ground = false },                                                -- Path of Darkness (Path of Darkness)

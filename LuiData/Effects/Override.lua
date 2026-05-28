@@ -850,6 +850,10 @@ local effectOverride =
     [120021] = { tooltip = Tooltips.Skill_War_Horn_Dummy },                                                                                                                                                 -- Aggressive Horn (Target Iron Atronach, Trial)
     [120024] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_WORM_CULT_DDS, tooltip = Tooltips.Generic_Increase_Magicka_Recovery_No_Dur, tooltipValue2 = 145 },                                           -- Worm's Raiment (Target Iron Atronach, Trial)
     [120026] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_HIRCINE_DDS, tooltip = Tooltips.Generic_Increase_Stamina_Recovery_No_Dur, tooltipValue2 = 145 },                                             -- Hircine's Veneer (Target Iron Atronach, Trial)
+    [265932] = { hide = true, tooltip = Tooltips.Skill_Major_Brutality },                                                                                                                                   -- Major Brutality (trial dummy refresh bundle)
+    [265933] = { hide = true, tooltip = Tooltips.Skill_Major_Sorcery },                                                                                                                                     -- Major Sorcery (trial dummy refresh bundle)
+    [265984] = { hide = true, tooltip = Tooltips.Skill_Major_Savagery },                                                                                                                                    -- Major Savagery (trial dummy refresh; same type as DK slotted 61667)
+    [265985] = { hide = true, tooltip = Tooltips.Skill_Major_Prophecy },                                                                                                                                   -- Major Prophecy (trial dummy refresh; same type as DK slotted 61689)
     ----------------------------------------------------------------
     -- Misc Items
     ----------------------------------------------------------------
@@ -1812,11 +1816,13 @@ local effectOverride =
     [34117] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                           -- Off Balance (Flame Lash)
     [20824] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_POWER_LASH_DDS },                                             -- Power Lash (Flame Lash)
     [23105] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_POWER_LASH_DDS },                                             -- Power Lash (Flame Lash)
+    [257507] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20816 },                                                       -- Flame Lash (self-heal combat)
 
     -- Searing Strike / Venomous Claw /Burning Embers
     [44363] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 }, -- Searing Strike (Searing Strike)
     [44369] = { tooltip = Tooltips.Skill_Venomous_Claw },             -- Venomous Claw (Venomous Claw)
     [44373] = { tooltip = Tooltips.Skill_Burning_Embers },            -- Burning Embers (Burning Embers)
+    [261752] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20660 },                                                      -- Burning Embers (self-heal combat)
 
     -- Fiery Breath / Noxious Breath / Engulfing Flames
     [31102] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },   -- Fiery Breath (Fiery Breath)
@@ -1828,11 +1834,24 @@ local effectOverride =
     [77105] = { icon = "/esoui/art/icons/ability_dragonknight_005_a.dds" }, -- Unrelenting Grip (Unrelenting Grip)
 
     -- Inferno / Incinerate / Cauterize — live sheet text (static strings were pre–Inferno rework / wrong morph names)
-    [28967] = { dynamicTooltip = true },                              -- Inferno
-    [32853] = { dynamicTooltip = true },                              -- Incinerate (was Flames of Oblivion)
+    [28967] = { dynamicTooltip = true, toggle = true },                              -- Inferno
+    [257750] = { hide = true, dynamicTooltip = true, tooltipMorphId = 28967 },       -- Inferno (1s activation pulse)
+    [258548] = { hide = true, tooltip = Tooltips.Skill_Minor_Fortitude },            -- Minor Fortitude (Inferno bundle)
+    [32853] = { dynamicTooltip = true, toggle = true },                              -- Incinerate (was Flames of Oblivion)
     [257754] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32853 },   -- Incinerate (Inferno rework bundle)
+    [258586] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32853 },       -- Fire Keeper (activation pulse)
+    [258585] = { hide = true, tooltip = Tooltips.Skill_Minor_Fortitude },            -- Minor Fortitude (Incinerate bundle)
     [243742] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },           -- Traumatic Burns (Incinerate)
-    [32881] = { dynamicTooltip = true },                              -- Cauterize
+    [32881] = { dynamicTooltip = true, toggle = true },                              -- Cauterize
+    [76429] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32881 },          -- Cauterize (activation pulse)
+    [257752] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32881 },       -- Inferno (Cauterize 1s wave pulse)
+    [258618] = { hide = true, tooltip = Tooltips.Skill_Minor_Heroism },              -- Minor Heroism (Cauterize bundle)
+    [258619] = { hide = true, tooltip = Tooltips.Skill_Minor_Fortitude },            -- Minor Fortitude (Cauterize bundle)
+    -- Slotted Inferno line: combat bundles for Major Prophecy / Savagery (player buff frames use 61689 / 61667)
+    [75088] = { hide = true, tooltip = Tooltips.Skill_Major_Prophecy, tooltipMorphId = 28967 },   -- Major Prophecy (Inferno slotted)
+    [76420] = { hide = true, tooltip = Tooltips.Skill_Major_Prophecy, tooltipMorphId = 32853 },  -- Major Prophecy (Incinerate slotted)
+    [76426] = { hide = true, tooltip = Tooltips.Skill_Major_Savagery },                           -- Major Savagery (Inferno line slotted combat)
+    [76433] = { hide = true, tooltip = Tooltips.Skill_Major_Prophecy, tooltipMorphId = 32881 },  -- Major Prophecy (Cauterize slotted)
 
     -- Dragonknight Standard / Shifting Standard / Standard of Might
     [98438] = { name = Abilities.Skill_Shackle },                                                                                                -- Shackle Damage (Dragonknight Standard - Shackle Synergy)
@@ -1920,17 +1939,24 @@ local effectOverride =
     [61785] = { tooltip = Tooltips.Generic_Immobilize },          -- Fossilize (Fossilize)
     [32678] = { tooltip = Tooltips.Skill_Shattering_Rocks_Stun }, -- Shattering Rocks (Shattering Rocks)
 
-    -- Ash Cloud / Cinder Storm / Eruption
-    [29059] = { tooltip = Tooltips.Skill_Ash_Cloud },                                                                                                    -- Ash Cloud (Ash Cloud)
-    [29126] = { duration = 0, groundLabel = true, tooltip = Tooltips.Generic_Snare_No_Dur, tooltipValue2 = 70 },                                         -- Ash Cloud (Ash Cloud)
-    [20779] = { tooltip = Tooltips.Skill_Ash_Cloud },                                                                                                    -- Cinder Storm (Cinder Storm)
-    [20780] = { duration = 0, groundLabel = true, tooltip = Tooltips.Generic_Snare_No_Dur, tooltipValue2 = 70 },                                         -- Cinder Storm (Cinder Storm)
-    [32710] = { tooltip = Tooltips.Skill_Eruption },                                                                                                     -- Eruption (Eruption)
-    [32712] = { duration = 0, groundLabel = true, tooltip = Tooltips.Generic_AOE_Snare_Fire, tooltipValue2 = 1, tooltipValue3 = 70, hideGround = true }, -- Eruption (Eruption)
+    -- Hearthfire / Fire Keeper / Hearth and Home (U49+ Ash Cloud line)
+    [29059] = { dynamicTooltip = true, groundLabel = true },                                                                 -- Hearthfire (15s ground; FakePlayerOfflineAura + showFakeAura)
+    [33142] = { hide = true },                                                                                               -- Hearthfire (slotted ground buff; duplicate of combat tracking)
+    [29126] = { hide = true, tooltip = Tooltips.Skill_Minor_Heroism },                                                       -- Minor Heroism bundle (inside Hearthfire ground; player shows 61708/61697)
+    [20779] = { dynamicTooltip = true, groundLabel = true },                                                                 -- Fire Keeper (15s ground; FakePlayerOfflineAura + showFakeAura)
+    [21435] = { hide = true },                                                                                                                           -- Fire Keeper (slotted ground buff; action bar tracks via newId)
+    [20780] = { hide = true, tooltip = Tooltips.Skill_Minor_Heroism },                                                                                   -- Minor Heroism bundle (inside Fire Keeper ground; player shows 61708/61697)
+    [31837] = { dynamicTooltip = true },                                                                                                                 -- Core of Flame (Hearth and Home)
+    [32785] = { dynamicTooltip = true },                                                                                                                 -- Heart of Flame (Hearth and Home)
+    [32792] = { dynamicTooltip = true },                                                                                                                 -- Soul of Flame (Hearth and Home)
+    [32710] = { dynamicTooltip = true, groundLabel = true },                                                                 -- Hearth and Home (15s ground; FakePlayerOfflineAura + action bar via slotted morph newId)
+    [33099] = { hide = true },                                                                                                   -- Hearth and Home (slotted ground buff; action bar tracks via newId)
+    [32711] = { groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                         -- Hearth and Home (ally HOT inside ground — combat HOT/HOT!)
+    [32712] = { duration = 0, groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Snare_Fire, tooltipValue2 = 1, tooltipValue3 = 70 }, -- Hearth and Home (enemy flame/snare inside ground)
+    [32714] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32785 },                                                                            -- Eruption bundle id (Major Protection while inside Heart of Flame ground)
 
-    [61772] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                                            -- Ash Cloud (Ash Cloud)
-    [34791] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                                            -- Cinder Storm (Cinder Storm)
-    [32711] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Snare_Fire, tooltipValue2 = 1, tooltipValue3 = 70 },                                  -- Eruption (Eruption)
+    [61772] = { groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                         -- Hearthfire (ally HOT inside ground)
+    [34791] = { groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                         -- Fire Keeper (ally HOT inside ground)
 
     -- Magma Armor / Magma Shell / Corrosive Armor
     [15957] = { tooltip = Tooltips.Skill_Magma_Armor },                                  -- Magma Armor (Magma Armor)
