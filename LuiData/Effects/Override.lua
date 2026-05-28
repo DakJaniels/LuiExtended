@@ -1809,20 +1809,34 @@ local effectOverride =
     -- DRAGONKNIGHT ACTIVE ABILITIES -------------------------------
     ----------------------------------------------------------------
 
-    -- Lava Whip / Molten Whip / Flame Lash
-    [23808] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                           -- Off Balance (Lava Whip)
+    -- Lava Whip / Molten Whip / Flame Lash (morph 2) / Power Lash
+    [23806] = { hide = true },                                                                                                        -- Lava Whip (hit/cast combat; bar highlight → 23808)
+    [23808] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                           -- Lava Slam (Off Balance on target; en.lang ability name)
+    [20805] = { hide = true },                                                                                                        -- Molten Whip (hit combat; bar → 122658)
+    [20816] = { hide = true },                                                                                                        -- Flame Lash (hit combat; bar → 34117)
     [20806] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                           -- Off Balance (Molten Whip)
-    [122658] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_SEETHING_FURY_DDS, tooltip = Tooltips.Skill_Seething_Fury }, -- Seething Fury (Molten Whip)
-    [34117] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                           -- Off Balance (Flame Lash)
+    [122658] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_SEETHING_FURY_DDS, tooltip = Tooltips.Skill_Seething_Fury }, -- Seething Fury (~10s player buff; Molten Whip)
+    [34117] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                           -- Power Lash stacks (Flame Lash combatTrack; U49 lang name)
     [20824] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_POWER_LASH_DDS },                                             -- Power Lash (Flame Lash)
     [23105] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_POWER_LASH_DDS },                                             -- Power Lash (Flame Lash)
     [257507] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20816 },                                                       -- Flame Lash (self-heal combat)
+    -- Combustion (108815 / 108816) can apply 18084 Burning on whip hits (see log); 160949 not observed on base Lava Whip
 
-    -- Searing Strike / Venomous Claw /Burning Embers
-    [44363] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 }, -- Searing Strike (Searing Strike)
-    [44369] = { tooltip = Tooltips.Skill_Venomous_Claw },             -- Venomous Claw (Venomous Claw)
-    [44373] = { tooltip = Tooltips.Skill_Burning_Embers },            -- Burning Embers (Burning Embers)
-    [261752] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20660 },                                                      -- Burning Embers (self-heal combat)
+    -- Searing Strike / Searing Claw / Burning Embers
+    [20657] = { hide = true },                                        -- Searing Strike (initial hit combat)
+    [123068] = { hide = true },                                       -- Searing Strike (alternate hit combat)
+    [20668] = { hide = true },                                        -- Searing Claw (initial hit combat; slotted id)
+    [31810] = { hide = true },                                        -- Searing Claw (alternate hit combat)
+    [123072] = { hide = true },                                       -- Searing Claw (alternate hit combat)
+    [31815] = { hide = true },                                        -- Burning Embers (alternate hit combat)
+    [123073] = { hide = true },                                       -- Burning Embers (alternate hit combat)
+    [20660] = { hide = true },                                        -- Burning Embers (initial hit combat; slotted id)
+    [44363] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 }, -- Searing Strike (target DOT ~8s)
+    [44369] = { tooltip = Tooltips.Skill_Venomous_Claw },             -- Searing Claw (target DOT; tooltip string pre-U49 name)
+    [44373] = { tooltip = Tooltips.Skill_Burning_Embers },            -- Burning Embers (target DOT)
+    [261752] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20660 }, -- Burning Embers (self-heal combat at DOT end)
+    [263208] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20660 }, -- Burning Embers (Wildfire Embers; heal/combat on kill or DOT end)
+    -- On cast hit: 160949 Traumatic Burns (visible), 18084 Burning (~4s); 243742 hidden snare/bundle
 
     -- Fiery Breath / Noxious Breath / Engulfing Flames
     [31102] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },   -- Fiery Breath (Fiery Breath)
@@ -1853,7 +1867,7 @@ local effectOverride =
     [257754] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32853 },   -- Incinerate (Inferno rework bundle)
     [258586] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32853 },       -- Fire Keeper (activation pulse)
     [258585] = { hide = true, tooltip = Tooltips.Skill_Minor_Fortitude },            -- Minor Fortitude (Incinerate bundle)
-    [243742] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },           -- Traumatic Burns (Incinerate bundle; Core line target debuff is 160949)
+    [243742] = { hide = true, tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 }, -- Traumatic Burns snare/bundle (160949 is visible debuff on DK hits)
     [32881] = { dynamicTooltip = true, toggle = true },                              -- Cauterize
     [76429] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32881 },          -- Cauterize (activation pulse)
     [257752] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32881 },       -- Inferno (Cauterize 1s wave pulse)

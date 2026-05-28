@@ -3848,32 +3848,36 @@ local debugAuras =
     -- DRAGONKNIGHT ACTIVES -------------
     -------------------------------------
 
-    [23806] = true,  -- Lava Whip (Lava Whip)
-    [23808] = true,  -- Off Balance (Lava Whip)
+    [23806] = true,  -- Lava Whip (hit/cast combat)
+    [23808] = true,  -- Lava Slam / Off Balance (target debuff)
 
-    [32842] = true,  -- Seething Fury (Molten Whip)
-    [20805] = true,  -- Molten Whip (Molten Whip)
+    [20805] = true,  -- Molten Whip (hit combat)
     [122658] = true, -- Seething Fury (Molten Whip)
-    [122729] = true, -- Seething Fury (Molten Whip)
+    [32842] = true,  -- Seething Fury (legacy combat id)
     [20806] = true,  -- Off Balance (Molten Whip)
+    [122729] = true, -- Seething Fury (legacy combat id)
 
-    [20816] = true,  -- Flame Lash (Flame Lash)
-    [34117] = true,  -- Off Balance (Flame Lash)
+    [20816] = true,  -- Flame Lash (hit combat)
+    [34117] = true,  -- Power Lash stacks (Flame Lash bar track)
     [20824] = true,  -- Power Lash (Flame Lash)
     [23105] = true,  -- Power Lash (Flame Lash)
     [257507] = true, -- Flame Lash (self-heal combat)
 
-    [20657] = true,  -- Searing Strike (Searing Strike)
-    [44363] = true,  -- Searing Strike (Searing Strike)
+    [20657] = true,  -- Searing Strike (hit combat)
+    [123068] = true, -- Searing Strike (alternate hit combat)
+    [44363] = true,  -- Searing Strike (target DOT)
 
-    [20668] = true,  -- Venomous Claw (Venomous Claw)
-    [44369] = true,  -- Venomous Claw (Venomous Claw)
-    [31810] = true,  -- Venomous Claw (Venomous Claw)
+    [20668] = true,  -- Searing Claw (hit combat)
+    [44369] = true,  -- Searing Claw (target DOT)
+    [31810] = true,  -- Searing Claw (hit combat)
+    [123072] = true, -- Searing Claw (alternate hit combat)
 
-    [20660] = true,  -- Burning Embers (Burning Embers)
-    [44373] = true,  -- Burning Embers (Burning Embers)
-    [31815] = true,  -- Burning Embers (Burning Embers)
-    [261752] = true, -- Burning Embers (self-heal combat)
+    [20660] = true,  -- Burning Embers (hit combat)
+    [44373] = true,  -- Burning Embers (target DOT)
+    [31815] = true,  -- Burning Embers (hit combat)
+    [123073] = true, -- Burning Embers (alternate hit combat)
+    [261752] = true, -- Burning Embers (self-heal at DOT end)
+    [263208] = true, -- Burning Embers (Wildfire Embers heal/combat)
 
     [20917] = true,  -- Fiery Breath (Fiery Breath)
     [31102] = true,  -- Fiery Breath (Fiery Breath)

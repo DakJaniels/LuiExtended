@@ -38,8 +38,8 @@ local barHighlightOverride =
     ---------------------------
 
     -- Ardent Flame
-    [23806] = { newId = 23808 },  -- Lava Whip --> Off Balance
-    [20805] = { newId = 122658 }, -- Molten Whip --> Seething Fury
+    [23806] = { newId = 23808 },                        -- Lava Whip → Lava Slam (Off Balance)
+    [20805] = { newId = 122658, combatTrack = true, duration = 10000 }, -- Molten Whip → Seething Fury (~10s; 122658 GAIN refreshes)
     -- Flame Lash / Power Lash (U49+): stacks use abilityId 34117 in EVENT_COMBAT_EVENT (EFFECT_GAINED hitValue=stacks, EFFECT_GAINED_DURATION hitValue=ms).
     -- combatTrack registers combat listener without g_barFakeAura so player buff fade still clears via EVENT_EFFECT_CHANGED.
     [20816] = { newId = 34117, combatTrack = true, duration = 20000 },
