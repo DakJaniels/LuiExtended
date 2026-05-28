@@ -2124,8 +2124,8 @@ local strings =
     LUIE_STRING_LAM_CT_BLACKLIST_ADD_DRAGONKNIGHT_TP = "Add Dragonknight abilities that have spammy resource restore/drain to the blacklist.",
     LUIE_STRING_LAM_CT_BLACKLIST_ADD_NIGHTBLADE = "Add Nightblade Regen",
     LUIE_STRING_LAM_CT_BLACKLIST_ADD_NIGHTBLADE_TP = "Add Nightblade abilities that have spammy resource restore/drain to the blacklist.",
-    LUIE_STRING_LAM_CT_BLACKLIST_ADD_ARCANIST = "Add Arcanist Eye",
-    LUIE_STRING_LAM_CT_BLACKLIST_ADD_ARCANIST_TP = "Add IMMUNE combat spam from The Unblinking Eye ultimates and morphs to the blacklist.",
+    LUIE_STRING_LAM_CT_BLACKLIST_ADD_ARCANIST = "Add Arcanist Regen.",
+    LUIE_STRING_LAM_CT_BLACKLIST_ADD_ARCANIST_TP = "Add Arcanist abilities that have spammy resource restore/drain to the blacklist.",
 
     LUIE_STRING_LAM_CI_HEADER_ACTIVE_COMBAT_ALERT = "Active Combat Alert Options",
     LUIE_STRING_LAM_CI_ALERT_DESCRIPTION = "Display alerts when an enemy ability is incoming. The options below allow you to customize which alerts to display, display mitigation suggestions, toggle a countdown/cast timer, choose a sound to play, and show a border color on the icon based off the type of crowd control the ability applies (if any).",
