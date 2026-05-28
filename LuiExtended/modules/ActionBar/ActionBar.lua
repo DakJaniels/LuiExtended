@@ -1337,6 +1337,9 @@ function ActionBar.UpdateBarHighlightTables()
                 if value.duration then
                     g_barDurationOverride[trackId] = value.duration
                 end
+                if value.noRemove then
+                    g_barNoRemove[trackId] = true
+                end
                 -- Slotted id also fires combat (e.g. Engulfing 20930 BEGIN/GAIN DUR 4750); bar slot keys track id (32821).
                 if value.newId and value.newId ~= abilityId then
                     g_barCombatEventRemap[abilityId] = trackId
@@ -2794,7 +2797,7 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
     end
 
     -- Hijack abilityId for extra bar highlights (skip if FancyActionBar active)
-    if not isFancyActionBarEnabled then
+    if not isFancyActionBarEnabled and not passThrough then
         local extraId = Effects.BarHighlightExtraId[abilityId]
         if extraId then
             abilityId = extraId
