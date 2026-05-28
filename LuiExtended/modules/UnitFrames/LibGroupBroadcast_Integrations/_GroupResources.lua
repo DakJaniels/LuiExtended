@@ -35,6 +35,12 @@ local Shared = UnitFrames.LibGroupBroadcastShared
 
 local isInitialized = false
 
+-- Stored callback refs so Uninitialize() can unregister them via
+-- GroupResources:UnregisterForMagickaChanges / UnregisterForStaminaChanges
+-- (LibGroupResources/PublicApi.lua:12,28)
+local magickaChangeCallback
+local staminaChangeCallback
+
 -- Add resource bars to a custom frame (only needed for SmallGroup frames - RaidGroup frames have them pre-created)
 local function AddResourceBarsToFrame(frameData, isRaid)
     if not frameData or not frameData.control then return end
@@ -272,19 +278,15 @@ function GroupResourcesManager.Initialize()
     if not Settings or not Settings.enabled then return end
 
     -- Register callbacks for resource updates directly with the GroupResources API
-    GroupResources:RegisterForMagickaChanges(function (unitTag, unitName, current, maximum, percentage)
-        -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE:Log("Debug","[LUIE GroupResources] Magicka callback: " .. tostring(unitTag) .. " " .. tostring(unitName) .. " " .. tostring(current) .. "/" .. tostring(maximum))
-        -- end
+    magickaChangeCallback = function (unitTag, unitName, current, maximum, percentage)
         UpdateResourceBar(unitTag, current, maximum, percentage, COMBAT_MECHANIC_FLAGS_MAGICKA)
-    end)
+    end
+    GroupResources:RegisterForMagickaChanges(magickaChangeCallback)
 
-    GroupResources:RegisterForStaminaChanges(function (unitTag, unitName, current, maximum, percentage)
-        -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE:Log("Debug","[LUIE GroupResources] Stamina callback: " .. tostring(unitTag) .. " " .. tostring(unitName) .. " " .. tostring(current) .. "/" .. tostring(maximum))
-        -- end
+    staminaChangeCallback = function (unitTag, unitName, current, maximum, percentage)
         UpdateResourceBar(unitTag, current, maximum, percentage, COMBAT_MECHANIC_FLAGS_STAMINA)
-    end)
+    end
+    GroupResources:RegisterForStaminaChanges(staminaChangeCallback)
 
     -- Handle timeout checking
     EVENT_MANAGER:RegisterForUpdate("LUIE_GroupResources_Timeout", 1000, function ()
@@ -308,6 +310,27 @@ function GroupResourcesManager.Initialize()
     end)
 
     isInitialized = true
+end
+
+-- Tear down everything Initialize() set up. Pairs symmetric unregisters with the
+-- registers above so disabling the integration at runtime (without /reloadui)
+-- releases the closures held by LibGroupBroadcast's GroupResources handler and
+-- the EVENT_MANAGER update slot.
+function GroupResourcesManager.Uninitialize()
+    if not isInitialized then return end
+
+    if magickaChangeCallback then
+        GroupResources:UnregisterForMagickaChanges(magickaChangeCallback)
+        magickaChangeCallback = nil
+    end
+    if staminaChangeCallback then
+        GroupResources:UnregisterForStaminaChanges(staminaChangeCallback)
+        staminaChangeCallback = nil
+    end
+
+    EVENT_MANAGER:UnregisterForUpdate("LUIE_GroupResources_Timeout")
+
+    isInitialized = false
 end
 
 -- Add resource bars to all group/raid frames
