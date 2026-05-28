@@ -2352,6 +2352,12 @@ function SpellCastBuffs.MenuPreview()
     end
 end
 
+-- Reused scratch table for ApplyDisplayAlpha / EnforceDisplayAlpha de-dupe.
+-- Both functions ran a `local seen = {}` allocation per call; EnforceDisplayAlpha
+-- runs every 100ms tick (see SpellCastBuffs.OnUpdate L490), so the empty-table
+-- churn was real. We cleared between uses with ZO_ClearTable.
+local g_displayAlphaSeen = {}
+
 --- Set buff container opacity from in-combat / out-of-combat saved values (0–100).
 function SpellCastBuffs.ApplyDisplayAlpha()
     if not SpellCastBuffs.Enabled then
@@ -2364,10 +2370,10 @@ function SpellCastBuffs.ApplyDisplayAlpha()
     local alpha = 0.01 * (IsUnitInCombat("player") and incAlpha or oocAlpha)
     g_scbDisplayAlpha = alpha
 
-    local seen = {}
+    ZO_ClearTable(g_displayAlphaSeen)
     for _, control in pairs(SpellCastBuffs.BuffContainers) do
-        if control and control.SetAlpha and not seen[control] then
-            seen[control] = true
+        if control and control.SetAlpha and not g_displayAlphaSeen[control] then
+            g_displayAlphaSeen[control] = true
             control:SetAlpha(alpha)
         end
     end
@@ -2380,10 +2386,10 @@ function SpellCastBuffs.EnforceDisplayAlpha()
     end
 
     local alpha = g_scbDisplayAlpha
-    local seen = {}
+    ZO_ClearTable(g_displayAlphaSeen)
     for _, control in pairs(SpellCastBuffs.BuffContainers) do
-        if control and control.SetAlpha and control.GetAlpha and not seen[control] then
-            seen[control] = true
+        if control and control.SetAlpha and control.GetAlpha and not g_displayAlphaSeen[control] then
+            g_displayAlphaSeen[control] = true
             if zo_abs(control:GetAlpha() - alpha) > 0.001 then
                 control:SetAlpha(alpha)
             end

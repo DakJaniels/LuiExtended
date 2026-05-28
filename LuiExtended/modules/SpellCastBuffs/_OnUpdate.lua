@@ -484,6 +484,112 @@ local function buffSort(x, y)
     return nil
 end
 
+--- Appends an effect into the sorted display list for a container.
+--- Hoisted to module scope (previously a local-in-OnUpdate, which allocated a
+--- fresh function object every 100ms tick). All referenced state lives in
+--- module-scope upvalues already (g_seenAbilityIdPerContainer / g_buffsSorted /
+--- g_sortedCounts / g_displayUidCounter), so no behavioral change.
+--- @param container string
+--- @param effect table
+local function appendSortedEffect(container, effect)
+    if effect.id then
+        local seen = g_seenAbilityIdPerContainer[container]
+        if not seen then
+            seen = {}
+            g_seenAbilityIdPerContainer[container] = seen
+        end
+        local existingIndex = seen[effect.id]
+        if existingIndex then
+            local existing = g_buffsSorted[container][existingIndex]
+            if effect.buffSlot and existing and not existing.buffSlot then
+                g_buffsSorted[container][existingIndex] = effect
+            end
+            return
+        end
+    end
+    g_sortedCounts[container] = (g_sortedCounts[container] or 0) + 1
+    g_displayUidCounter[container] = (g_displayUidCounter[container] or 0) + 1
+    effect.displayUid = g_displayUidCounter[container]
+    local index = g_sortedCounts[container]
+    g_buffsSorted[container][index] = effect
+    if effect.id then
+        local seen = g_seenAbilityIdPerContainer[container]
+        if seen then
+            seen[effect.id] = index
+        end
+    end
+end
+
+--- Rebuilds the sorted display lists from SpellCastBuffs.EffectsList.
+--- Hoisted out of OnUpdate (was a nested local closure recreated each tick).
+--- currentTimeMs is passed explicitly since it's the only per-tick value.
+--- @param currentTimeMs number
+local function rebuildDisplaySortedLists(currentTimeMs)
+    for _, container in pairs(SpellCastBuffs.containerRouting) do
+        if not g_buffsSorted[container] then
+            g_buffsSorted[container] = {}
+        else
+            ZO_ClearNumericallyIndexedTable(g_buffsSorted[container])
+        end
+        if not g_seenAbilityIdPerContainer[container] then
+            g_seenAbilityIdPerContainer[container] = {}
+        else
+            ZO_ClearTable(g_seenAbilityIdPerContainer[container])
+        end
+        g_sortedCounts[container] = 0
+        g_displayUidCounter[container] = 0
+        g_isProminentContainer[container] = (container == "prominentbuffs" or container == "prominentdebuffs")
+    end
+    if not g_buffsSorted.player_long then
+        g_buffsSorted.player_long = {}
+    else
+        ZO_ClearNumericallyIndexedTable(g_buffsSorted.player_long)
+    end
+    if not g_seenAbilityIdPerContainer.player_long then
+        g_seenAbilityIdPerContainer.player_long = {}
+    else
+        ZO_ClearTable(g_seenAbilityIdPerContainer.player_long)
+    end
+    g_sortedCounts.player_long = 0
+    g_displayUidCounter.player_long = 0
+
+    for context, effectsList in pairs(SpellCastBuffs.EffectsList) do
+        local container = SpellCastBuffs.containerRouting[context]
+        for k, v in pairs(effectsList) do
+            if container and v.starts <= currentTimeMs then
+                if v.target == "prominent" then
+                    appendSortedEffect(container, v)
+                elseif v.type == BUFF_EFFECT_TYPE_DEBUFF or v.forced == "short" or not (v.forced == "long" or v.ends == nil or v.dur == 0) then
+                    if v.target == "reticleover" and SpellCastBuffs.SV.ShortTermEffects_Target then
+                        appendSortedEffect(container, v)
+                    elseif v.target == "player" and SpellCastBuffs.SV.ShortTermEffects_Player then
+                        appendSortedEffect(container, v)
+                    end
+                elseif v.target == "reticleover" and SpellCastBuffs.SV.LongTermEffects_Target then
+                    appendSortedEffect(container, v)
+                elseif v.target == "player" and SpellCastBuffs.SV.LongTermEffects_Player then
+                    if SpellCastBuffs.SV.LongTermEffectsSeparate and not (container == "prominentbuffs" or container == "prominentdebuffs") then
+                        appendSortedEffect("player_long", v)
+                    else
+                        appendSortedEffect(container, v)
+                    end
+                end
+            end
+        end
+    end
+
+    for _, container in pairs(SpellCastBuffs.containerRouting) do
+        table_sort(g_buffsSorted[container], buffSort)
+        g_cachedDisplaySortedLists[container] = g_buffsSorted[container]
+        updateIconsStructure(currentTimeMs, g_buffsSorted[container], container)
+    end
+    if g_buffsSorted.player_long then
+        table_sort(g_buffsSorted.player_long, buffSort)
+        g_cachedDisplaySortedLists.player_long = g_buffsSorted.player_long
+        updateIconsStructure(currentTimeMs, g_buffsSorted.player_long, "player_long")
+    end
+end
+
 -- Runs OnUpdate - 100 ms buffer
 --- @param currentTimeMs number
 function SpellCastBuffs.OnUpdate(currentTimeMs)
@@ -545,105 +651,34 @@ function SpellCastBuffs.OnUpdate(currentTimeMs)
         SpellCastBuffs.MarkDisplayDirty()
     end
 
-    --- @param container string
-    --- @param effect table
-    local function appendSortedEffect(container, effect)
-        if effect.id then
-            local seen = g_seenAbilityIdPerContainer[container]
-            if not seen then
-                seen = {}
-                g_seenAbilityIdPerContainer[container] = seen
-            end
-            local existingIndex = seen[effect.id]
-            if existingIndex then
-                local existing = g_buffsSorted[container][existingIndex]
-                if effect.buffSlot and existing and not existing.buffSlot then
-                    g_buffsSorted[container][existingIndex] = effect
-                end
-                return
-            end
-        end
-        g_sortedCounts[container] = (g_sortedCounts[container] or 0) + 1
-        g_displayUidCounter[container] = (g_displayUidCounter[container] or 0) + 1
-        effect.displayUid = g_displayUidCounter[container]
-        local index = g_sortedCounts[container]
-        g_buffsSorted[container][index] = effect
-        if effect.id then
-            local seen = g_seenAbilityIdPerContainer[container]
-            if seen then
-                seen[effect.id] = index
+    -- Sweep expired ground-effect removal-protection timestamps. These are
+    -- written in _OnEffectChangedGround.lua:120 as `protectAbilityRemoval[id] = currentTimeMs + 150`
+    -- and only cleared on the next gain of the same ground ability. Without a
+    -- sweep the table retains one entry for every distinct ground abilityId
+    -- encountered during the session (bounded but real growth).
+    if SpellCastBuffs.protectAbilityRemoval then
+        for abilityId, expireAt in pairs(SpellCastBuffs.protectAbilityRemoval) do
+            if expireAt < currentTimeMs then
+                SpellCastBuffs.protectAbilityRemoval[abilityId] = nil
             end
         end
     end
 
-    local function rebuildDisplaySortedLists()
-        for _, container in pairs(SpellCastBuffs.containerRouting) do
-            if not g_buffsSorted[container] then
-                g_buffsSorted[container] = {}
-            else
-                ZO_ClearNumericallyIndexedTable(g_buffsSorted[container])
+    -- Sweep stale internal-stack-counter entries. _OnCombatEventHelpers.lua:457-469
+    -- clears the counter only when the associated fake-effect entry exists and the
+    -- counter reaches zero; on edge paths (fake entry cleared elsewhere first) the
+    -- counter can stick. Nil any non-positive value so the map stays bounded to
+    -- abilities with live fake stacks.
+    if SpellCastBuffs.InternalStackCounter then
+        for abilityId, stackCount in pairs(SpellCastBuffs.InternalStackCounter) do
+            if not stackCount or stackCount <= 0 then
+                SpellCastBuffs.InternalStackCounter[abilityId] = nil
             end
-            if not g_seenAbilityIdPerContainer[container] then
-                g_seenAbilityIdPerContainer[container] = {}
-            else
-                ZO_ClearTable(g_seenAbilityIdPerContainer[container])
-            end
-            g_sortedCounts[container] = 0
-            g_displayUidCounter[container] = 0
-            g_isProminentContainer[container] = (container == "prominentbuffs" or container == "prominentdebuffs")
-        end
-        if not g_buffsSorted.player_long then
-            g_buffsSorted.player_long = {}
-        else
-            ZO_ClearNumericallyIndexedTable(g_buffsSorted.player_long)
-        end
-        if not g_seenAbilityIdPerContainer.player_long then
-            g_seenAbilityIdPerContainer.player_long = {}
-        else
-            ZO_ClearTable(g_seenAbilityIdPerContainer.player_long)
-        end
-        g_sortedCounts.player_long = 0
-        g_displayUidCounter.player_long = 0
-
-        for context, effectsList in pairs(SpellCastBuffs.EffectsList) do
-            local container = SpellCastBuffs.containerRouting[context]
-            for k, v in pairs(effectsList) do
-                if container and v.starts <= currentTimeMs then
-                    if v.target == "prominent" then
-                        appendSortedEffect(container, v)
-                    elseif v.type == BUFF_EFFECT_TYPE_DEBUFF or v.forced == "short" or not (v.forced == "long" or v.ends == nil or v.dur == 0) then
-                        if v.target == "reticleover" and SpellCastBuffs.SV.ShortTermEffects_Target then
-                            appendSortedEffect(container, v)
-                        elseif v.target == "player" and SpellCastBuffs.SV.ShortTermEffects_Player then
-                            appendSortedEffect(container, v)
-                        end
-                    elseif v.target == "reticleover" and SpellCastBuffs.SV.LongTermEffects_Target then
-                        appendSortedEffect(container, v)
-                    elseif v.target == "player" and SpellCastBuffs.SV.LongTermEffects_Player then
-                        if SpellCastBuffs.SV.LongTermEffectsSeparate and not (container == "prominentbuffs" or container == "prominentdebuffs") then
-                            appendSortedEffect("player_long", v)
-                        else
-                            appendSortedEffect(container, v)
-                        end
-                    end
-                end
-            end
-        end
-
-        for _, container in pairs(SpellCastBuffs.containerRouting) do
-            table_sort(g_buffsSorted[container], buffSort)
-            g_cachedDisplaySortedLists[container] = g_buffsSorted[container]
-            updateIconsStructure(currentTimeMs, g_buffsSorted[container], container)
-        end
-        if g_buffsSorted.player_long then
-            table_sort(g_buffsSorted.player_long, buffSort)
-            g_cachedDisplaySortedLists.player_long = g_buffsSorted.player_long
-            updateIconsStructure(currentTimeMs, g_buffsSorted.player_long, "player_long")
         end
     end
 
     if SpellCastBuffs.displayDirty then
-        rebuildDisplaySortedLists()
+        rebuildDisplaySortedLists(currentTimeMs)
         SpellCastBuffs.displayDirty = false
     end
 
