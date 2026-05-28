@@ -1838,6 +1838,12 @@ local effectOverride =
     [32792] = { dynamicTooltip = true, toggle = true }, -- Soul of Flame
     [32785] = { dynamicTooltip = true, toggle = true }, -- Heart of Flame
     [31842] = { hide = true },                          -- Core of Flame (hit damage combat)
+    [32794] = { hide = true },                          -- Soul of Flame (hit damage combat)
+    [32786] = { hide = true },                          -- Heart of Flame (channel heal combat)
+    [32787] = { hide = true },                          -- Heart of Flame (hit damage combat)
+    [32788] = { hide = true },                          -- Heart of Flame (combat bundle)
+    [32789] = { hide = true },                          -- Heart of Flame (combat bundle)
+    -- Target debuffs: 160949 Traumatic Burns (Core/Heart); Soul adds 18084 Burning (~4s); 243742 combat bundle
 
     -- Inferno / Incinerate / Cauterize — live sheet text (static strings were pre–Inferno rework / wrong morph names)
     [28967] = { dynamicTooltip = true, toggle = true },                              -- Inferno
@@ -1898,9 +1904,10 @@ local effectOverride =
     [32796] = { icon = "/esoui/art/icons/ability_dragonknight_012_a.dds", tooltip = Tooltips.Skill_Inhale },       -- Deep Breath (Deep Breath)
     [32795] = { icon = "/esoui/art/icons/ability_dragonknight_012_a.dds" },                                        -- Deep Breath (Deep Breath)
     [32797] = { icon = "" },                                                                                       -- Deep Breath (Deep Breath) -- Hide for Interrupt notification on Combat Text
-    [32788] = { icon = "/esoui/art/icons/ability_dragonknight_012_b.dds", tooltip = Tooltips.Skill_Draw_Essence }, -- Draw Essence (Draw Essence)
-    [32786] = { icon = "/esoui/art/icons/ability_dragonknight_012_b.dds" },                                        -- Draw Essence (Draw Essence)
-    [32789] = { icon = "/esoui/art/icons/ability_dragonknight_012_b.dds" },                                        -- Draw Essence (Draw Essence)
+    [256038] = { icon = "/esoui/art/icons/ability_dragonknight_012_b.dds", tooltip = Tooltips.Skill_Draw_Essence }, -- Draw Essence (U49 slotted/combat)
+    [256039] = { icon = "/esoui/art/icons/ability_dragonknight_012_b.dds" },                                        -- Draw Essence (combat)
+    [256040] = { icon = "/esoui/art/icons/ability_dragonknight_012_b.dds" },                                        -- Draw Essence (combat)
+    [256041] = { icon = "/esoui/art/icons/ability_dragonknight_012_b.dds" },                                        -- Draw Essence (combat)
 
     -- Dragon Leap / Take Flight / Ferocious Leap
     [29016] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds" },                       -- Dragon Leap (Dragon Leap)

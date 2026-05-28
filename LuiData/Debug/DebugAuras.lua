@@ -116,7 +116,7 @@ local debugAuras =
     -------------------------------------
 
     -- Magic Status Effects
-    [18084] = true,  -- Burning (Fire Status Effect)
+    [18084] = true,  -- Burning (status; Soul of Flame target ~4s DOT)
     [130804] = true, -- Burning (Fire Status Effect - Siege)
     [21481] = true,  -- Chill (Frost Status Effect)
     [68368] = true,  -- Minor Maim (Frost Status Effect)
@@ -4026,11 +4026,10 @@ local debugAuras =
     [32797] = true,  -- Deep Breath (Deep Breath)
     [32805] = true,  -- Deep Breath (Deep Breath)
 
-    [32785] = true,  -- Draw Essence (Draw Essence)
-    [32786] = true,  -- Draw Essence (Draw Essence)
-    [32788] = true,  -- Draw Essence (Draw Essence)
-    [32787] = true,  -- Draw Essence (Draw Essence)
-    [32789] = true,  -- Draw Essence (Draw Essence)
+    [256038] = true,  -- Draw Essence
+    [256039] = true,  -- Draw Essence
+    [256040] = true,  -- Draw Essence
+    [256041] = true,  -- Draw Essence
 
     [48744] = true,  -- CC Immunity (Dragon Leap)
     [29012] = true,  -- Dragon Leap (Dragon Leap)
@@ -4107,7 +4106,12 @@ local debugAuras =
     [31837] = true,  -- Core of Flame
     [31842] = true,  -- Core of Flame (damage)
     [32792] = true,  -- Soul of Flame
+    [32794] = true,  -- Soul of Flame (damage)
     [32785] = true,  -- Heart of Flame
+    [32786] = true,  -- Heart of Flame (channel heal combat)
+    [32787] = true,  -- Heart of Flame (damage)
+    [32788] = true,  -- Heart of Flame (combat)
+    [32789] = true,  -- Heart of Flame (combat)
 
     [29059] = true,  -- Hearthfire (ground entity / slotted)
     [33142] = true,  -- Hearthfire (slotted ground buff)
