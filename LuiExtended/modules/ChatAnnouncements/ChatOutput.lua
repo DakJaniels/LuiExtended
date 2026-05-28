@@ -214,13 +214,13 @@ local function RegisterPChatRechainCallbacks()
     end
     pChatCallbacksRegistered = true
 
-    CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_FRIEND_PLAYER_STATUS_CHANGED", function()
+    CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_FRIEND_PLAYER_STATUS_CHANGED", function ()
         ChatOutput.WrapFormatter(EVENT_FRIEND_PLAYER_STATUS_CHANGED, ShouldSuppressFriendStatus)
     end)
-    CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_IGNORE_ADDED", function()
+    CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_IGNORE_ADDED", function ()
         ChatOutput.WrapFormatter(EVENT_IGNORE_ADDED, ShouldSuppressFriendIgnore)
     end)
-    CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_IGNORE_REMOVED", function()
+    CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_IGNORE_REMOVED", function ()
         ChatOutput.WrapFormatter(EVENT_IGNORE_REMOVED, ShouldSuppressFriendIgnore)
     end)
 end
@@ -230,7 +230,7 @@ local function RegisterActivationHandler()
         return
     end
     activationHandlerRegistered = true
-    eventManager:RegisterForEvent(ACTIVATION_HANDLER_NAME, EVENT_PLAYER_ACTIVATED, function()
+    eventManager:RegisterForEvent(ACTIVATION_HANDLER_NAME, EVENT_PLAYER_ACTIVATED, function ()
         zo_callLater(OnDeferredPlayerActivated, 0)
     end)
 end

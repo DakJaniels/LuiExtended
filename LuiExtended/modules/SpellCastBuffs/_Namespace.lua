@@ -531,19 +531,19 @@ local uiTlw = {} -- GUI
 --- @type table<string, string>
 SpellCastBuffs.containerRouting = {}
 
-SpellCastBuffs.alignmentDirection = {}    --- @type table<string, string> Holds alignment direction for all containers
-SpellCastBuffs.sortDirection = {}         --- @type table<string, string> Holds sorting direction for all containers
+SpellCastBuffs.alignmentDirection = {}         --- @type table<string, string> Holds alignment direction for all containers
+SpellCastBuffs.sortDirection = {}              --- @type table<string, string> Holds sorting direction for all containers
 
-SpellCastBuffs.playerActive = false       -- Player Active State
-SpellCastBuffs.playerDead = false         -- Player Dead State
-SpellCastBuffs.playerResurrectStage = nil -- Player resurrection sequence state
+SpellCastBuffs.playerActive = false            -- Player Active State
+SpellCastBuffs.playerDead = false              -- Player Dead State
+SpellCastBuffs.playerResurrectStage = nil      -- Player resurrection sequence state
 SpellCastBuffs.blockPlayerEffectActive = false -- Show Block Player synthetic brace icon is in EffectsList / display cache
 
-SpellCastBuffs.buffsFont = ""             -- Buff font
-SpellCastBuffs.prominentFont = ""         -- Prominent buffs label font
-SpellCastBuffs.padding = 0                -- Padding between icons
-SpellCastBuffs.protectAbilityRemoval = {} -- AbilityId's set to a timestamp here to prevent removal of ground effects when refreshing ground auras from causing the aura to fade.
-SpellCastBuffs.ignoreAbilityId = {}       -- Ignored abilityId's on EVENT_COMBAT_EVENT, some events fire twice and we need to ignore every other one.
+SpellCastBuffs.buffsFont = ""                  -- Buff font
+SpellCastBuffs.prominentFont = ""              -- Prominent buffs label font
+SpellCastBuffs.padding = 0                     -- Padding between icons
+SpellCastBuffs.protectAbilityRemoval = {}      -- AbilityId's set to a timestamp here to prevent removal of ground effects when refreshing ground auras from causing the aura to fade.
+SpellCastBuffs.ignoreAbilityId = {}            -- Ignored abilityId's on EVENT_COMBAT_EVENT, some events fire twice and we need to ignore every other one.
 
 -- Add buff containers into LUIE namespace
 SpellCastBuffs.BuffContainers = uiTlw

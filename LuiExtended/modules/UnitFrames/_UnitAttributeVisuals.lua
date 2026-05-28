@@ -367,7 +367,7 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
     -- Update status bar
     if attributeFrame.bar then
         if UnitFrames.SV.CustomSmoothBar and not isTraumaFlag then
-            if unitTag == "player"
+            if  unitTag == "player"
             and powerType == COMBAT_MECHANIC_FLAGS_STAMINA
             and UnitFrames.PlayerDodgePrediction.ShouldUseLUIEStaminaSmooth() then
                 UnitFrames.PlayerDodgePrediction.SmoothTransitionStaminaBar(attributeFrame.bar, adjustedBarValue, powerEffectiveMax, forceInit)

@@ -364,7 +364,7 @@ local function PositionDodgeMarkerEdge(line, bar, predicted, alignment, staminaF
     local lineX = bar:CalculateSizeWithoutLeadingEdgeForValue(predicted)
     lineX = zo_clamp(lineX, 0, zo_max(0, barWidth - MARKER_WIDTH))
 
-    if staminaFrame
+    if  staminaFrame
     and staminaFrame.dodgePredictionLastEdgeLineX == lineX
     and staminaFrame.dodgePredictionLastEdgeAlignment == alignment then
         return
@@ -405,7 +405,7 @@ local function PositionDodgeMarkerCenter(lineLeft, lineRight, bar, predicted, ef
     local leftX = zo_floor(centerX - halfSpan - MARKER_WIDTH)
     local rightX = zo_floor(centerX + halfSpan)
 
-    if staminaFrame
+    if  staminaFrame
     and staminaFrame.dodgePredictionLastCenterLeftX == leftX
     and staminaFrame.dodgePredictionLastCenterRightX == rightX then
         return

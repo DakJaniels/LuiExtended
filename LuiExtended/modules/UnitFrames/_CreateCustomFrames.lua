@@ -120,7 +120,7 @@ local function SetHealthBarAbovePowerHalo(backdrop, bar)
         return
     end
 
-    --bar:SetDrawLayer(DL_CONTROLS)
+    -- bar:SetDrawLayer(DL_CONTROLS)
     bar:SetDrawLevel(HEALTH_BAR_FILL_DRAW_LEVEL)
 
     local trauma = backdrop:GetNamedChild("_Trauma")

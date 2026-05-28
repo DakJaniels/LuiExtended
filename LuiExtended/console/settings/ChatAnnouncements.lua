@@ -8407,12 +8407,12 @@ function ChatAnnouncements.CreateConsoleSettings()
 
         local nightMarketDisplaySections =
         {
-            { svKey = "ZoneNightMarketBoulderDash", label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_BOULDER_DASH, tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_BOULDER_DASH_TP },
-            { svKey = "ZoneNightMarketRewards", label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_REWARDS, tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_REWARDS_TP },
+            { svKey = "ZoneNightMarketBoulderDash",   label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_BOULDER_DASH,   tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_BOULDER_DASH_TP   },
+            { svKey = "ZoneNightMarketRewards",       label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_REWARDS,        tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_REWARDS_TP        },
             { svKey = "ZoneNightMarketScavengingMaw", label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_SCAVENGING_MAW, tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_SCAVENGING_MAW_TP },
-            { svKey = "ZoneNightMarketZoneHunt", label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ZONE_HUNT, tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ZONE_HUNT_TP },
-            { svKey = "ZoneNightMarketEssence", label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ESSENCE, tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ESSENCE_TP },
-            { svKey = "ZoneNightMarketMisc", label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_MISC, tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_MISC_TP },
+            { svKey = "ZoneNightMarketZoneHunt",      label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ZONE_HUNT,      tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ZONE_HUNT_TP      },
+            { svKey = "ZoneNightMarketEssence",       label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ESSENCE,        tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_ESSENCE_TP        },
+            { svKey = "ZoneNightMarketMisc",          label = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_MISC,           tooltip = LUIE_STRING_LAM_CA_DISPLAY_NIGHT_MARKET_MISC_TP           },
         }
         for _, section in ipairs(nightMarketDisplaySections) do
             AddNightMarketDisplayCheckbox(section.svKey, section.label, section.tooltip, "CA")

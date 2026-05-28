@@ -82,8 +82,14 @@ local function ResolveFrameKey(frameArg)
     end
     local aliases =
     {
-        sg1 = "SmallGroup1", sg2 = "SmallGroup2", sg3 = "SmallGroup3", sg4 = "SmallGroup4",
-        rg1 = "RaidGroup1", rg2 = "RaidGroup2", tar = "reticleover", target = "reticleover",
+        sg1 = "SmallGroup1",
+        sg2 = "SmallGroup2",
+        sg3 = "SmallGroup3",
+        sg4 = "SmallGroup4",
+        rg1 = "RaidGroup1",
+        rg2 = "RaidGroup2",
+        tar = "reticleover",
+        target = "reticleover",
     }
     local key = aliases[string.lower(frameArg)] or frameArg
     if UnitFrames.CustomFrames[key] then

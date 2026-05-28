@@ -884,8 +884,8 @@ function SynergyTracker:EvictDetectedSynergiesIfNeeded()
         local timesSeen = data.timesSeen or 0
         local firstSeen = data.firstSeen or 0
         if not victimId
-            or timesSeen < victimTimesSeen
-            or (timesSeen == victimTimesSeen and firstSeen < victimFirstSeen)
+        or timesSeen < victimTimesSeen
+        or (timesSeen == victimTimesSeen and firstSeen < victimFirstSeen)
         then
             victimId = abilityId
             victimTimesSeen = timesSeen

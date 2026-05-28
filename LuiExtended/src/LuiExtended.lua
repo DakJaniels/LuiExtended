@@ -239,7 +239,7 @@ LUIE.Defaults =
     DebugEnvironmentRestore     = nil,
     DebugEnvironmentPendingChat = nil,
 
-    ChatOutput =
+    ChatOutput                  =
     {
         ChatMethod = "Print to All Tabs",
         ChatBypassFormat = false,

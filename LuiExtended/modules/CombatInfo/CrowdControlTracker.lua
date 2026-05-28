@@ -1404,14 +1404,14 @@ function CrowdControlTracker:BreakFreeAnimation()
         self:InsertAnimationType(timeline, ANIMATION_TRANSLATE, rightSide, animDuration, animDelay, ZO_EaseOutCubic, 0, 0, 550, 0)
 
         timeline:SetHandler("OnStop", function ()
-            leftSide:ClearAnchors()
-            leftSide:SetAnchor(LEFT, LUIE_CCTracker_BreakFreeFrame, LEFT, 0, 0)
-            leftSide:SetScale(1)
-            rightSide:ClearAnchors()
-            rightSide:SetAnchor(RIGHT, LUIE_CCTracker_BreakFreeFrame, RIGHT, 0, 0)
-            rightSide:SetScale(1)
-            self.breakFreePlaying = nil
-        end, "OnStop")
+                                leftSide:ClearAnchors()
+                                leftSide:SetAnchor(LEFT, LUIE_CCTracker_BreakFreeFrame, LEFT, 0, 0)
+                                leftSide:SetScale(1)
+                                rightSide:ClearAnchors()
+                                rightSide:SetAnchor(RIGHT, LUIE_CCTracker_BreakFreeFrame, RIGHT, 0, 0)
+                                rightSide:SetScale(1)
+                                self.breakFreePlaying = nil
+                            end, "OnStop")
 
         self.timelineCache[BREAK_FREE_CACHE_KEY] = { timeline = timeline }
     end
@@ -1474,15 +1474,15 @@ local function BuildCachedAnimation(self, control, animType)
     }
 
     timeline:SetHandler("OnStop", function ()
-        control:SetScale(CombatInfo.SV.cct.controlScale)
-        local a = cacheEntry.anchor
-        if a.point then
-            control:ClearAnchors()
-            control:SetAnchor(a.point, a.relativeTo, a.relativePoint, a.offsetX, a.offsetY)
-        end
-        self.currentlyPlaying = nil
-        self.immunePlaying = nil
-    end, "OnStop")
+                            control:SetScale(CombatInfo.SV.cct.controlScale)
+                            local a = cacheEntry.anchor
+                            if a.point then
+                                control:ClearAnchors()
+                                control:SetAnchor(a.point, a.relativeTo, a.relativePoint, a.offsetX, a.offsetY)
+                            end
+                            self.currentlyPlaying = nil
+                            self.immunePlaying = nil
+                        end, "OnStop")
 
     return cacheEntry
 end

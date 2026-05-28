@@ -1707,7 +1707,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
                 if containerContext == "target1" or containerContext == "target2" or containerContext == "targetb" or containerContext == "targetd" or containerContext == "promb_target" or containerContext == "promd_target" then
                     if ov and ov.tooltipOther then
                         local otherFormatted = LUIE.FormatOverrideTooltip(control.effectId, duration, ttUnit,
-                            { tooltipString = ov.tooltipOther, skipHandler = true })
+                                                                          { tooltipString = ov.tooltipOther, skipHandler = true })
                         if otherFormatted then
                             tooltipText = otherFormatted
                         end
@@ -1716,7 +1716,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
 
                 if LUIE.ResolveVeteranDifficulty() == true and ov and ov.tooltipVet then
                     local vetFormatted = LUIE.FormatOverrideTooltip(control.effectId, duration, ttUnit,
-                        { tooltipString = ov.tooltipVet, skipHandler = true })
+                                                                    { tooltipString = ov.tooltipVet, skipHandler = true })
                     if vetFormatted then
                         tooltipText = vetFormatted
                     end
@@ -1724,7 +1724,7 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
 
                 if Effects.EffectGroundDisplay[control.effectId] and Effects.EffectGroundDisplay[control.effectId].tooltip and control.buffType == BUFF_EFFECT_TYPE_BUFF then
                     local groundFormatted = LUIE.FormatOverrideTooltip(control.effectId, duration, ttUnit,
-                        { tooltipString = Effects.EffectGroundDisplay[control.effectId].tooltip, skipHandler = true })
+                                                                       { tooltipString = Effects.EffectGroundDisplay[control.effectId].tooltip, skipHandler = true })
                     if groundFormatted then
                         tooltipText = groundFormatted
                     end
@@ -1745,8 +1745,8 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
                 end
 
                 -- Dynamic tooltip when opted in, or when no custom override tooltip is configured
-                if not Effects.TooltipUseDefault[control.effectId]
-                    and not (ov and ov.tooltip and not ov.dynamicTooltip) then
+                if  not Effects.TooltipUseDefault[control.effectId]
+                and not (ov and ov.tooltip and not ov.dynamicTooltip) then
                     local dynTip = LUIE.DynamicTooltip(control.effectId, ttUnit)
                     if dynTip then
                         tooltipText = dynTip
