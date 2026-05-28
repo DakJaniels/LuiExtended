@@ -391,8 +391,14 @@ end
 
 --- Register scene callback for the game menu
 function Unlock.RegisterSceneCallback()
+    -- See pc/Unlock.lua: idempotency guard so a re-run Initialize does not
+    -- stack a second StateChange handler on the gameMenuInGame scene.
+    if Unlock._sceneCallbackInstalled then
+        return
+    end
     local scene = sceneManager:GetScene("gameMenuInGame")
     scene:RegisterCallback("StateChange", Unlock.OnSceneChange)
+    Unlock._sceneCallbackInstalled = true
 end
 
 -- -----------------------------------------------------------------------------
