@@ -292,7 +292,6 @@ local barHighlightOverride =
     ---------------------------
     -- Arcanist ---------------
     ---------------------------
-    [193398] = { newId = 184220 },                                       -- Beam --> Crux
     [185817] = { newId = 185818 },                                       -- Abyssal Impact (abyssal ink)
     [183006] = { newId = 183008 },                                       -- Cephaliarch's Flail (abyssal ink)
     [185823] = { newId = 185825 },                                       -- Tentacular Dread (abyssal ink)
@@ -349,7 +348,7 @@ local barHighlightOverride =
     [183122] = { newId = 189533, combatTrack = true, duration = 4500, combatTrackRemainOnSlotted = true }, -- Exhausting Fatecarver (magicka)
     [193397] = { combatTrack = true, duration = 4500 },                 -- Exhausting Fatecarver (stamina)
     [186366] = { newId = 189533, combatTrack = true, duration = 4500, combatTrackRemainOnSlotted = true }, -- Pragmatic Fatecarver (magicka)
-    [193398] = { combatTrack = true, duration = 4500 },                 -- Pragmatic Fatecarver (stamina)
+    [193398] = { newId = 184220, combatTrack = true, duration = 4500 },                 -- Pragmatic Fatecarver (stamina)
 
     ---------------------------
     -- Two Handed -------------
