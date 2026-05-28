@@ -23,8 +23,6 @@ local zo_strformat = zo_strformat
 
 local eventManager = GetEventManager()
 
-local bossThresholdControlSerial = 0
-
 local leaderIcons =
 {
     [0] = [[/esoui/art/icons/heraldrycrests_misc_blank_01.dds]],
@@ -688,9 +686,12 @@ local function ApplyThresholdStageToLabel(label, state)
     label:SetColor(c[1], c[2], c[3], c[4])
 end
 
-local function CreateThresholdLine(parent)
-    bossThresholdControlSerial = bossThresholdControlSerial + 1
-    local line = parent:CreateControl("$(parent)ThresholdLine" .. bossThresholdControlSerial, CT_BACKDROP)
+--- @param parent Control
+--- @param nameSuffix string|number Unique-per-parent suffix; used to build a stable
+--- control name so reused indices don't allocate new names each call (previously
+--- a global monotonic serial that climbed forever).
+local function CreateThresholdLine(parent, nameSuffix)
+    local line = parent:CreateControl("$(parent)ThresholdLine" .. tostring(nameSuffix), CT_BACKDROP)
     line:SetCenterColor(BOSS_THRESHOLD_MARKER_COLOR[1], BOSS_THRESHOLD_MARKER_COLOR[2], BOSS_THRESHOLD_MARKER_COLOR[3], BOSS_THRESHOLD_MARKER_COLOR[4])
     line:SetEdgeColor(BOSS_THRESHOLD_MARKER_COLOR[1], BOSS_THRESHOLD_MARKER_COLOR[2], BOSS_THRESHOLD_MARKER_COLOR[3], BOSS_THRESHOLD_MARKER_COLOR[4])
     line:SetEdgeTexture("", 1, 1, 0, 0)
@@ -702,10 +703,13 @@ local function CreateThresholdLine(parent)
     return line
 end
 
-local function CreateThresholdLabel(parent, dimensions, isBottom)
-    bossThresholdControlSerial = bossThresholdControlSerial + 1
+--- @param parent Control
+--- @param dimensions table {width, height}
+--- @param isBottom boolean
+--- @param nameSuffix string|number Stable per-parent suffix; see CreateThresholdLine.
+local function CreateThresholdLabel(parent, dimensions, isBottom, nameSuffix)
     local labelSuffix = isBottom and "ThresholdLabelBottom" or "ThresholdLabelTop"
-    local label = parent:CreateControl("$(parent)" .. labelSuffix .. bossThresholdControlSerial, CT_LABEL)
+    local label = parent:CreateControl("$(parent)" .. labelSuffix .. tostring(nameSuffix), CT_LABEL)
     if ZO_IsConsoleOrGameCoreUI() then
         label:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
     else
@@ -747,7 +751,10 @@ local function ApplyMultiLineToFrame(healthFrame, lineX, height, stage)
         end
     end
     if not marker then
-        marker = { line = CreateThresholdLine(container) }
+        -- Stable name keyed by parent-local slot (#markers + 1) — no monotonic
+        -- global serial, and the name string is reused if we never expand past
+        -- this slot again.
+        marker = { line = CreateThresholdLine(container, #markers + 1) }
         table_insert(markers, marker)
     end
 
@@ -851,13 +858,13 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
     for idx, column in ipairs(thresholdInfo.columns) do
         local topLabel = stack.topLabels[idx]
         if not topLabel then
-            topLabel = CreateThresholdLabel(container, BOSS_THRESHOLD_TOP_LABEL_DIMENSIONS, false)
+            topLabel = CreateThresholdLabel(container, BOSS_THRESHOLD_TOP_LABEL_DIMENSIONS, false, idx)
             stack.topLabels[idx] = topLabel
         end
 
         local bottomLabel = stack.bottomLabels[idx]
         if not bottomLabel then
-            bottomLabel = CreateThresholdLabel(container, bottomDim, true)
+            bottomLabel = CreateThresholdLabel(container, bottomDim, true, idx)
             bottomLabel:SetTransformNormalizedOriginPoint(0.5, 0.5)
             bottomLabel:SetTransformRotationZ(ZO_HALF_PI)
             stack.bottomLabels[idx] = bottomLabel
@@ -865,7 +872,7 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
 
         local commonLine = stack.commonLines[idx]
         if not commonLine then
-            commonLine = CreateThresholdLine(container)
+            commonLine = CreateThresholdLine(container, idx)
             stack.commonLines[idx] = commonLine
         end
 
@@ -1216,6 +1223,9 @@ function UnitFrames.OnUnitDestroyed(eventId, unitTag)
     --     LUIE:Log("Debug",string_format("[%s] OnUnitDestroyed: %s (%s)", GetTimeString(), unitTag, GetUnitName(unitTag)))
     -- end
     UnitFrames.ClearPowerUpdateSnapshot(unitTag)
+    -- Visualizer modules are singletons; nil their per-unitTag recency-info
+    -- subtree so it can be collected (otherwise it persists for the session).
+    UnitFrames.ClearVisualizerRecencyInfo(unitTag)
     -- Make sure we do not try to update bars on this unitTag before full group update is complete
     if "group" == (zo_strsub(unitTag, 0, 5)) then
         UnitFrames.CustomFrames[unitTag] = nil

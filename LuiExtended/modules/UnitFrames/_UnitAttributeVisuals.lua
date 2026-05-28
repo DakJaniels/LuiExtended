@@ -148,6 +148,24 @@ function UnitFrames.ClearPowerUpdateSnapshot(unitTag, powerType)
     end
 end
 
+--- Drops the per-unitTag updateRecencyInfo subtree on every registered visualizer
+--- module so its nested tables can be collected when a unit is destroyed.
+--- Visualizer modules are singletons (one set in UnitFrames.VisualizerModules,
+--- mixed into each LUIE_UnitAttributeVisualizer), so without this call every
+--- unitTag ever seen by a UAV event retains its full sequence-id subtree until
+--- /reloadui.
+--- @param unitTag string
+function UnitFrames.ClearVisualizerRecencyInfo(unitTag)
+    if not unitTag then return end
+    local modules = UnitFrames.VisualizerModules
+    if not modules then return end
+    for _, module in pairs(modules) do
+        if module and module.ClearUnitTag then
+            module:ClearUnitTag(unitTag)
+        end
+    end
+end
+
 --- @param unitTag string
 --- @param powerType CombatMechanicFlags
 --- @param powerValue integer
