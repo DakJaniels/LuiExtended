@@ -3880,16 +3880,19 @@ local debugAuras =
     [261752] = true, -- Burning Embers (self-heal at DOT end)
     [263208] = true, -- Burning Embers (Wildfire Embers heal/combat)
 
-    [20917] = true,  -- Fiery Breath (Fiery Breath)
-    [31102] = true,  -- Fiery Breath (Fiery Breath)
+    [20917] = true,  -- Dragonfire Breath (channel/hit combat)
+    [31102] = true,  -- Dragonfire Breath (target DOT ~10s)
 
-    [20944] = true,  -- Noxious Breath (Noxious Breath)
-    [31103] = true,  -- Noxious Breath (Noxious Breath)
-    [48946] = true,  -- Major Breach (Noxious Breath)
+    [20944] = true,  -- Disintegrating Dragonfire (hit combat; not in aura log when hidden)
+    [31103] = true,  -- Disintegrating Dragonfire (target DOT ~10s)
+    [48946] = true,  -- Major Breach (Disintegrating combat; hide on frames → 61743)
 
-    [20930] = true,  -- Engulfing Flames (Engulfing Flames)
-    [31104] = true,  -- Engulfing Flames (Engulfing Flames)
-    [32821] = true,  -- Engulfing Flames (Engulfing Flames)
+    [20930] = true,  -- Engulfing Dragonfire (slotted; cast bar 20930 in CastBarTable)
+    [32821] = true,  -- Engulfing Dragonfire (player channel buff; bar highlight + combat GAIN DUR 5000)
+    [31104] = true,  -- Engulfing Dragonfire (tick DMG combat on target; hidden on frames)
+    [270517] = true, -- Engulfing Dragonfire (tick ON CD combat; hidden on frames)
+    [34240] = true,  -- Dragonfire Breath Dummy (LMN dump)
+    [131120] = true, -- Dragonfire Breath (skill-name table id; watch combat logs)
 
     [31290] = true,  -- Fiery Reach taunt (Fiery Grip - All Morphs)
     [20492] = true,  -- Fiery Grip (Fiery Grip)

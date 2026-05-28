@@ -22,6 +22,7 @@ local contingency = { newId = 222285, showFakeAura = true, noRemove = true, dura
 --- @field duration integer | nil Override duration for the effect (in milliseconds)
 --- @field hide boolean | nil Whether to hide this bar highlight entirely
 --- @field combatTrack boolean|nil Register EVENT_COMBAT_EVENT for newId without g_barFakeAura (keeps EVENT_EFFECT_CHANGED for fade)
+--- @field combatTrackRemainOnSlotted boolean|nil When newId is a channel tick id: only slotted-id combat (and effect) sets bar timer; tick combat keeps highlight without resetting remain
 
 --- @type table<integer, BarHighlightOverrideOptions>
 local barHighlightOverride =
@@ -48,9 +49,10 @@ local barHighlightOverride =
     [20668] = { newId = 44369 },                        -- Searing Claw
     -- Core of Flame / Soul of Flame / Heart of Flame: ~4s player buff on slotted id (31837 / 32792 / 32785); no BarHighlightOverride entry.
     [20660] = { newId = 44373 },                        -- Burning Embers
-    [20917] = { newId = 31102 },                        -- Fiery Breath
-    [20944] = { newId = 31103 },                        -- Noxious Breath
-    [20930] = { newId = 31104 },                        -- Engulfing Flames
+    [20917] = { newId = 31102 },                        -- Dragonfire Breath → target DOT
+    [20944] = { newId = 31103 },                        -- Disintegrating Dragonfire → target DOT
+    -- Engulfing Dragonfire: slotted 20930 (BEGIN/GAIN DUR ~4750, EFFECT_CHANGED buff); track 32821 (tick GAIN/GAIN DUR 5000, FADE).
+    [20930] = { newId = 32821, combatTrack = true, duration = 5000, combatTrackRemainOnSlotted = true },
     [20499] = { newId = 61737 },                        -- Empowering Chains --> Empower
     [32963] = { newId = 32958 },                        -- Shifting Standard
 
@@ -329,7 +331,7 @@ local barHighlightOverride =
     -- Remedy Cascade (channeled): channel combat id reports [Chan] 4500 in combat log
     [183537] = { combatTrack = true, duration = 4500 },                 -- Remedy Cascade (cost mag)
     [198309] = { combatTrack = true, duration = 4500 },                 -- Remedy Cascade (cost stam)
-    [178454] = { newId = 183537, combatTrack = true, duration = 4500 }, -- Remedy Cascade (cost variant → channel id)
+    [178454] = { newId = 183537, combatTrack = true, duration = 4500, combatTrackRemainOnSlotted = true }, -- Remedy Cascade (cost variant → channel id)
 
     -- Curative Surge (channeled)
     [186200] = { combatTrack = true, duration = 4500 }, -- Curative Surge (cost mag)
@@ -340,11 +342,11 @@ local barHighlightOverride =
     [198330] = { combatTrack = true, duration = 4500 }, -- Cascading Fortune (cost stam)
 
     -- Fatecarver (channeled): slotted id maps to player channel combat id; combatTrack + duration for slot registration
-    [185805] = { newId = 189533, combatTrack = true, duration = 4500 }, -- Fatecarver (magicka)
+    [185805] = { newId = 189533, combatTrack = true, duration = 4500, combatTrackRemainOnSlotted = true }, -- Fatecarver (magicka)
     [193331] = { combatTrack = true, duration = 4500 },                 -- Fatecarver (stamina)
-    [183122] = { newId = 189533, combatTrack = true, duration = 4500 }, -- Exhausting Fatecarver (magicka)
+    [183122] = { newId = 189533, combatTrack = true, duration = 4500, combatTrackRemainOnSlotted = true }, -- Exhausting Fatecarver (magicka)
     [193397] = { combatTrack = true, duration = 4500 },                 -- Exhausting Fatecarver (stamina)
-    [186366] = { newId = 189533, combatTrack = true, duration = 4500 }, -- Pragmatic Fatecarver (magicka)
+    [186366] = { newId = 189533, combatTrack = true, duration = 4500, combatTrackRemainOnSlotted = true }, -- Pragmatic Fatecarver (magicka)
     [193398] = { combatTrack = true, duration = 4500 },                 -- Pragmatic Fatecarver (stamina)
 
     ---------------------------

@@ -27,7 +27,9 @@ local barHighlightExtraId =
     -- Dragonknight
     [256798] = 23808, -- Volcanic Whip (replaces Lava Whip on bar) --> Lava Slam stack buff
     [20824] = 34117, -- Power Lash on bar (replaces Flame Lash) --> stack buff 34117
+    [20930] = 32821, -- Engulfing slotted id --> channel tick track id (EFFECT_CHANGED uses 20930)
     [20253] = 31898, -- Burning Talons
+    [48946] = 31103, -- Disintegrating Major Breach combat id --> DOT track on bar (log)
     [61785] = 32685, -- Fossilize
 
     -- Sorcerer

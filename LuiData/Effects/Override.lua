@@ -1841,10 +1841,17 @@ local effectOverride =
     [263208] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20660 }, -- Burning Embers (Wildfire Embers; heal/combat on kill or DOT end)
     -- On cast hit: 160949 Traumatic Burns (visible), 18084 Burning (~4s); 243742 hidden snare/bundle
 
-    -- Fiery Breath / Noxious Breath / Engulfing Flames
-    [31102] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },   -- Fiery Breath (Fiery Breath)
-    [31103] = { tooltip = Tooltips.Generic_Poison, tooltipValue2 = 2 }, -- Noxious Breath (Noxious Breath)
-    [31104] = { tooltip = Tooltips.Skill_Engulfing_Flames },            -- Engulfing Flames (Engulfing Flames)
+    -- Dragonfire Breath / Disintegrating Dragonfire / Engulfing Dragonfire (U49+)
+    [20917] = { hide = true },                                            -- Dragonfire Breath (channel/hit combat; bar → 31102)
+    [20944] = { hide = true },                                            -- Disintegrating Dragonfire (hit combat; bar → 31103)
+    [20930] = { hide = true },                                            -- Engulfing Dragonfire (slotted hit; bar → 32821 channel buff)
+    [31102] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },   -- Dragonfire Breath (target DOT ~10s)
+    [31103] = { dynamicTooltip = true, tooltipMorphId = 20944 },         -- Disintegrating Dragonfire (target DOT ~10s; log: 31103 + 61743 breach)
+    [31104] = { hide = true },                                            -- Engulfing Dragonfire (tick hit combat on target)
+    [270517] = { hide = true },                                           -- Engulfing Dragonfire (tick ON CD combat; U49 log)
+    [32821] = { dynamicTooltip = true, tooltipMorphId = 20930, toggle = true, unbreakable = 1 }, -- Engulfing channel (player; ~5s refreshed per tick)
+    [34240] = { hide = true },                                            -- Dragonfire Breath Dummy (LMN dump)
+    [48946] = { hide = true },                                            -- Major Breach combat (Disintegrating); aura UI → 61743
 
     -- Fiery Grip / Empowering Chains / Unrelenting Grip
     [62004] = { hide = true },                                              -- Unrelenting Grip (Unrelenting Grip)
