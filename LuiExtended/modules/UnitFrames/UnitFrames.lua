@@ -690,6 +690,7 @@ end
 --- @param nameSuffix string|number Unique-per-parent suffix; used to build a stable
 --- control name so reused indices don't allocate new names each call (previously
 --- a global monotonic serial that climbed forever).
+--- @return BackdropControl line
 local function CreateThresholdLine(parent, nameSuffix)
     local line = parent:CreateControl("$(parent)ThresholdLine" .. tostring(nameSuffix), CT_BACKDROP)
     line:SetCenterColor(BOSS_THRESHOLD_MARKER_COLOR[1], BOSS_THRESHOLD_MARKER_COLOR[2], BOSS_THRESHOLD_MARKER_COLOR[3], BOSS_THRESHOLD_MARKER_COLOR[4])
@@ -707,6 +708,7 @@ end
 --- @param dimensions table {width, height}
 --- @param isBottom boolean
 --- @param nameSuffix string|number Stable per-parent suffix; see CreateThresholdLine.
+--- @return LabelControl label
 local function CreateThresholdLabel(parent, dimensions, isBottom, nameSuffix)
     local labelSuffix = isBottom and "ThresholdLabelBottom" or "ThresholdLabelTop"
     local label = parent:CreateControl("$(parent)" .. labelSuffix .. tostring(nameSuffix), CT_LABEL)
