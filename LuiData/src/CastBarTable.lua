@@ -409,6 +409,23 @@ local castBarTable =
         [84528] = true, -- Flame Juggling (Castle Charm Challenge)
         [84506] = true, -- Dagger Juggling (Castle Charm Challenge)
         [84533] = true, -- Sword Swallowing (Castle Charm Challenge)
+
+        -- Arcanist (Fatecarver channels)
+        [185805] = true, -- Fatecarver (magicka)
+        [189533] = true, -- Fatecarver (combat track)
+        [193331] = true, -- Fatecarver (stamina)
+        [183122] = true, -- Exhausting Fatecarver (magicka)
+        [193397] = true, -- Exhausting Fatecarver (stamina)
+        [186366] = true, -- Pragmatic Fatecarver (magicka)
+        [193398] = true, -- Pragmatic Fatecarver (stamina)
+
+        -- Arcanist (Runemend morph channels)
+        [183537] = true, -- Remedy Cascade (channel combat)
+        [186193] = true, -- Cascading Fortune (channel combat)
+        [198309] = true, -- Remedy Cascade (stamina slotted / channel)
+        [198330] = true, -- Cascading Fortune (stamina slotted / channel)
+        [186200] = true, -- Curative Surge (channel combat)
+        [198537] = true, -- Curative Surge (stamina slotted / channel)
     },
 
     --------------------------------------------------------------------------------------------------------------------------------
@@ -1273,6 +1290,18 @@ local castBarTable =
         [134583] = true, -- Vampiric Drain (Vampire)
         [135905] = true, -- Drain Vigor (Vampire)
         [137259] = true, -- Exhilarating Drain (Vampire)
+
+        -- Arcanist (Fatecarver channel combat id + stamina morph)
+        [189533] = true, -- Fatecarver (combat track)
+        [193331] = true, -- Fatecarver (stamina)
+
+        -- Arcanist (Runemend morph channel combat ids)
+        [183537] = true, -- Remedy Cascade (channel)
+        [186193] = true, -- Cascading Fortune (channel)
+        [198309] = true, -- Remedy Cascade (stamina channel)
+        [198330] = true, -- Cascading Fortune (stamina channel)
+        [186200] = true, -- Curative Surge (channel)
+        [198537] = true, -- Curative Surge (stamina channel)
     },
 
     -- Possibly use later if any cast removal events need to rely on EVENT_COMBAT_EVENT

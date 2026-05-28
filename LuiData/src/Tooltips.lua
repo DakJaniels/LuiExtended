@@ -653,6 +653,9 @@ local tooltips =
     Set_Hunters_Venom = GetString(LUIE_STRING_SET_HUNTERS_VENOM_TP),
     Set_Sheer_Venom = GetString(LUIE_STRING_SET_SHEER_VENOM_TP),
     Set_Elemental_Catalyst = GetString(LUIE_STRING_SET_ELEMENTAL_CATALYST_TP),
+    Set_Encratiss_Behemoth = GetString(LUIE_STRING_SKILL_SET_ENCRATISS_BEHEMOTH_TP),
+    Set_Slivers_Of_The_Null_Arca = GetString(LUIE_STRING_SKILL_SET_SLIVERS_OF_THE_NULL_ARCA_TP),
+    Set_Perfected_Slivers_Of_The_Null_Arca = GetString(LUIE_STRING_SKILL_SET_PERFECTED_SLIVERS_OF_THE_NULL_ARCA_TP),
     Set_Crimson_Twilight = GetString(LUIE_STRING_SET_CRIMSON_TWILIGHT_TP),
     Set_Ironblood = GetString(LUIE_STRING_SKILL_SET_IRONBLOOD_TP),
 

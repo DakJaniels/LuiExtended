@@ -1695,46 +1695,39 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
         else
             local duration
             if type(control.effectId) == "number" then
-                duration = control.duration / 1000
-                local value2
-                local value3
-                if Effects.EffectOverride[control.effectId] then
-                    if Effects.EffectOverride[control.effectId].tooltipValue2 then
-                        value2 = Effects.EffectOverride[control.effectId].tooltipValue2
-                    elseif Effects.EffectOverride[control.effectId].tooltipValue2Mod then
-                        value2 = zo_floor(duration + Effects.EffectOverride[control.effectId].tooltipValue2Mod + 0.5)
-                    elseif Effects.EffectOverride[control.effectId].tooltipValue2Id then
-                        value2 = zo_floor((GetAbilityDuration(Effects.EffectOverride[control.effectId].tooltipValue2Id, nil, ttUnit) or 0) + 0.5) / 1000
-                    else
-                        value2 = 0
-                    end
-                else
-                    value2 = 0
-                end
-                if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltipValue3 then
-                    value3 = Effects.EffectOverride[control.effectId].tooltipValue3
-                else
-                    value3 = 0
-                end
-                duration = zo_floor((duration * 10) + 0.5) / 10
+                local duration = zo_floor((control.duration / 1000 * 10) + 0.5) / 10
+                local ov = Effects.EffectOverride[control.effectId]
 
-                tooltipText = (Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltip) and zo_strformat(Effects.EffectOverride[control.effectId].tooltip, duration, value2, value3) or ""
+                local formatted = LUIE.FormatOverrideTooltip(control.effectId, duration, ttUnit)
+                if formatted then
+                    tooltipText = formatted
+                end
 
-                -- If there is a special tooltip to use for targets only, then set this now
                 local containerContext = control.container
                 if containerContext == "target1" or containerContext == "target2" or containerContext == "targetb" or containerContext == "targetd" or containerContext == "promb_target" or containerContext == "promd_target" then
-                    if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltipOther then
-                        tooltipText = zo_strformat(Effects.EffectOverride[control.effectId].tooltipOther, duration, value2, value3)
+                    if ov and ov.tooltipOther then
+                        local otherFormatted = LUIE.FormatOverrideTooltip(control.effectId, duration, ttUnit,
+                            { tooltipString = ov.tooltipOther, skipHandler = true })
+                        if otherFormatted then
+                            tooltipText = otherFormatted
+                        end
                     end
                 end
 
-                -- Use separate Veteran difficulty tooltip if applicable.
-                if LUIE.ResolveVeteranDifficulty() == true and Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltipVet then
-                    tooltipText = zo_strformat(Effects.EffectOverride[control.effectId].tooltipVet, duration, value2, value3)
+                if LUIE.ResolveVeteranDifficulty() == true and ov and ov.tooltipVet then
+                    local vetFormatted = LUIE.FormatOverrideTooltip(control.effectId, duration, ttUnit,
+                        { tooltipString = ov.tooltipVet, skipHandler = true })
+                    if vetFormatted then
+                        tooltipText = vetFormatted
+                    end
                 end
-                -- Use separate Ground tooltip if applicable (only applies to buffs not debuffs)
+
                 if Effects.EffectGroundDisplay[control.effectId] and Effects.EffectGroundDisplay[control.effectId].tooltip and control.buffType == BUFF_EFFECT_TYPE_BUFF then
-                    tooltipText = zo_strformat(Effects.EffectGroundDisplay[control.effectId].tooltip, duration, value2, value3)
+                    local groundFormatted = LUIE.FormatOverrideTooltip(control.effectId, duration, ttUnit,
+                        { tooltipString = Effects.EffectGroundDisplay[control.effectId].tooltip, skipHandler = true })
+                    if groundFormatted then
+                        tooltipText = groundFormatted
+                    end
                 end
 
                 -- Display Default Tooltip Description if no custom tooltip is present
@@ -1751,8 +1744,9 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
                     end
                 end
 
-                -- Dynamic tooltip (TooltipHandlers in Functions.lua, or EffectOverride.dynamicTooltip / GetAbilityDescription morph)
-                do
+                -- Dynamic tooltip when opted in, or when no custom override tooltip is configured
+                if not Effects.TooltipUseDefault[control.effectId]
+                    and not (ov and ov.tooltip and not ov.dynamicTooltip) then
                     local dynTip = LUIE.DynamicTooltip(control.effectId, ttUnit)
                     if dynTip then
                         tooltipText = dynTip
@@ -1782,10 +1776,13 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
         end
 
         -- Default-tooltip path: re-apply TooltipHandlers / dynamicTooltip after plain description (matches custom path)
-        if type(control.effectId) == "number" then
-            local dynTip = LUIE.DynamicTooltip(control.effectId, ttUnit)
-            if dynTip then
-                tooltipText = dynTip
+        if type(control.effectId) == "number" and not Effects.TooltipUseDefault[control.effectId] then
+            local ov = Effects.EffectOverride[control.effectId]
+            if not (ov and ov.tooltip and not ov.dynamicTooltip) then
+                local dynTip = LUIE.DynamicTooltip(control.effectId, ttUnit)
+                if dynTip then
+                    tooltipText = dynTip
+                end
             end
         end
 

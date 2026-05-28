@@ -430,6 +430,10 @@ local abilityTables =
     Set_Blood_Curse = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(139903)),
     Set_Sanguine_Burst = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(142305)),
     Set_Heed_the_Call = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(142780)),
+    Set_Elemental_Catalyst = GetString(LUIE_STRING_SKILL_SET_ELEMENTAL_CATALYST),
+    Set_Encratiss_Behemoth = GetString(LUIE_STRING_SKILL_SET_ENCRATISS_BEHEMOTH),
+    Set_Slivers_Of_The_Null_Arca = GetString(LUIE_STRING_SKILL_SET_SLIVERS_OF_THE_NULL_ARCA),
+    Set_Perfected_Slivers_Of_The_Null_Arca = GetString(LUIE_STRING_SKILL_SET_PERFECTED_SLIVERS_OF_THE_NULL_ARCA),
     Set_Legacy_of_Karth = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(147388)),
 
     Disguise_Monks_Disguise = GetString(LUIE_STRING_SKILL_DISGUISE_MONKS_DISGUISE),

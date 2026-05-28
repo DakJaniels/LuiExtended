@@ -245,6 +245,9 @@ local barHighlightOverride =
     [86139] = { showFakeAura = true },                -- Crystallized Slab --> Crystalized Slab
     [86143] = { showFakeAura = true },                -- Shimmering Shield --> Shimmering Shield
 
+    -- Ultimate
+    [219680] = { combatTrack = true, duration = 7000 }, -- Highland Sentinel (~7s active window)
+
     ---------------------------
     -- Necromancer ------------
     ---------------------------
@@ -310,10 +313,42 @@ local barHighlightOverride =
     [185918] = { newId = 79717 },                                        -- Rune of Eldritch Horror (minor vuln)
     [185921] = { newId = 79717 },                                        -- Rune of Uncanny Adoration (minor vuln)
     [183267] = { newId = 145975 },                                       -- Rune of the Colorless Pool (minor brittle)
-    [198567] = { newId = 888101 },                                       -- Tidal Chakram (cost stam)
-    [186209] = { newId = 888101 },                                       -- Tidal Chakram (cost mag)
+    [186209] = { newId = 186210, showFakeAura = true, duration = 6000 }, -- Tidal Chakram (cost mag)
+    [198567] = { newId = 186210, showFakeAura = true, duration = 6000 }, -- Tidal Chakram (cost stam)
     [186189] = { newId = 189565 },                                       -- Evolving Runemend
     [183447] = { showFakeAura = true, noRemove = true, newId = 183449 }, -- Chakram Shields
+    [198564] = { newId = 194237, showFakeAura = true, duration = 6000 }, -- Chakram of Destiny (player shield)
+
+    -- Gate morphs: bar timer tracks entry portal ground; noRemove = ignore FADE on teleport until countdown ends
+    [186211] = { newId = 195190, showFakeAura = true, noRemove = true, duration = 7000 }, -- Fleet-Footed Gate (cast → entry portal ground)
+    [197856] = { newId = 195190, showFakeAura = true, noRemove = true, duration = 7000 }, -- Fleet-Footed Gate (cost variant)
+
+    [186220] = { newId = 195204, showFakeAura = true, noRemove = true, duration = 7000 }, -- Passage Between Worlds (cast → entry portal ground)
+    [190394] = { newId = 195204, showFakeAura = true, noRemove = true, duration = 7000 }, -- Passage Between Worlds (cost variant)
+
+    [183542] = { newId = 195167, showFakeAura = true, noRemove = true, duration = 7000 }, -- Apocryphal Gate (cast → entry portal ground)
+    [178457] = { newId = 195167, showFakeAura = true, noRemove = true, duration = 7000 }, -- Apocryphal Gate (cost variant)
+
+    -- Remedy Cascade (channeled): channel combat id reports [Chan] 4500 in combat log
+    [183537] = { combatTrack = true, duration = 4500 },                 -- Remedy Cascade (cost mag)
+    [198309] = { combatTrack = true, duration = 4500 },                 -- Remedy Cascade (cost stam)
+    [178454] = { newId = 183537, combatTrack = true, duration = 4500 }, -- Remedy Cascade (cost variant → channel id)
+
+    -- Curative Surge (channeled)
+    [186200] = { combatTrack = true, duration = 4500 }, -- Curative Surge (cost mag)
+    [198537] = { combatTrack = true, duration = 4500 }, -- Curative Surge (cost stam)
+
+    -- Cascading Fortune (channeled)
+    [186193] = { combatTrack = true, duration = 4500 }, -- Cascading Fortune (cost mag)
+    [198330] = { combatTrack = true, duration = 4500 }, -- Cascading Fortune (cost stam)
+
+    -- Fatecarver (channeled): slotted id maps to player channel combat id; combatTrack + duration for slot registration
+    [185805] = { newId = 189533, combatTrack = true, duration = 4500 }, -- Fatecarver (magicka)
+    [193331] = { combatTrack = true, duration = 4500 },                 -- Fatecarver (stamina)
+    [183122] = { newId = 189533, combatTrack = true, duration = 4500 }, -- Exhausting Fatecarver (magicka)
+    [193397] = { combatTrack = true, duration = 4500 },                 -- Exhausting Fatecarver (stamina)
+    [186366] = { newId = 189533, combatTrack = true, duration = 4500 }, -- Pragmatic Fatecarver (magicka)
+    [193398] = { combatTrack = true, duration = 4500 },                 -- Pragmatic Fatecarver (stamina)
 
     ---------------------------
     -- Two Handed -------------

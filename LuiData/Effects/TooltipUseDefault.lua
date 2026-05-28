@@ -38,4 +38,7 @@ Effects.TooltipUseDefault =
     [13982] = true, -- Boon: The Atronach
     [13984] = true, -- Boon: The Shadow
     [13985] = true, -- Boon: The Tower
+
+    -- Herald passives (timed stack buffs; use TooltipHandlers when GetAbilityEffectDescription stays at 0%%)
+    [184860] = true, -- Harnessed Quintessence (timed stack)
 }

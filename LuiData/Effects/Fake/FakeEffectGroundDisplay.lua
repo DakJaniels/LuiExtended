@@ -177,6 +177,21 @@ Effects.EffectGroundDisplay =
     [118022] = { buff = true, debuff = false, ground = false, icon = "/esoui/art/icons/ability_necromancer_016_a.dds" }, -- Renewing Undeath (Renewing Undeath)
     [118814] = { buff = true, debuff = false, ground = false, icon = "/esoui/art/icons/ability_necromancer_016_b.dds" }, -- Enduring Undeath (Enduring Undeath)
 
+    -- Arcanist
+    [189791] = { buff = false, debuff = false, ground = true }, -- The Unblinking Eye (ground)
+    [189838] = { buff = false, debuff = false, ground = true }, -- The Tide King's Gaze (ground)
+    [189867] = { buff = false, debuff = false, ground = true }, -- The Languid Eye (ground)
+    [187514] = { buff = false, debuff = false, ground = true }, -- Rune of Displacement (ground)
+    [183555] = { buff = false, debuff = false, ground = true }, -- Arcanist's Domain (ground)
+    [186229] = { buff = false, debuff = false, ground = true }, -- Zenas' Empowering Disc (ground)
+    [183709] = { buff = false, debuff = false, ground = true }, -- Vitalizing Glyphic (ground)
+    [193794] = { buff = false, debuff = false, ground = true }, -- Glyphic of the Tides (ground)
+    [195167] = { buff = false, debuff = false, ground = true }, -- Apocryphal Gate (entry portal ground)
+    [195190] = { buff = false, debuff = false, ground = true }, -- Fleet-Footed Gate (entry portal ground)
+    [195204] = { buff = false, debuff = false, ground = true }, -- Passage Between Worlds (entry portal ground)
+    [186234] = { buff = false, debuff = false, ground = true }, -- Reconstructive Domain (ground)
+    [193558] = { buff = false, debuff = false, ground = true }, -- Resonating Glyphic (ground)
+
     ---------------------------
     -- Two-Handed -------------
     ---------------------------

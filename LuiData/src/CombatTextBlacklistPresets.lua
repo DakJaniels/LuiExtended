@@ -44,5 +44,28 @@ blacklistPresets.Necromancer =
     [123233] = true, -- Mortal Coil (Mortal Coil)
 }
 
+-- Dragonknight
+blacklistPresets.Dragonknight =
+{
+    [32786] = true, -- Draw Essence (Draw Essence)
+    [32789] = true, -- Draw Essence (Draw Essence)
+}
+
+-- Nightblade
+blacklistPresets.Nightblade =
+{
+    [114957] = true, -- Siphoning Strikes (Siphoning Strikes)
+    [114963] = true, -- Leeching Strikes (Leeching Strikes)
+    [114964] = true, -- Leeching Strikes (Leeching Strikes)
+    [114968] = true, -- Siphoning Attacks (Siphoning Attacks)
+    [114969] = true, -- Siphoning Attacks (Siphoning Attacks)
+}
+
+-- Arcanist (Eye ult IMMUNE combat spam only)
+blacklistPresets.Arcanist =
+{
+    [191889] = true, -- The Languid Eye (IMMUNE status tick bundle)
+}
+
 --- @class (partial) CombatTextBlacklistPresets
 Data.CombatTextBlacklistPresets = blacklistPresets

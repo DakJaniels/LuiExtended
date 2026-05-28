@@ -61,7 +61,10 @@ local CollectibleTables = {}
 
 local CombatTextBlacklistPresets =
 {
+    Arcanist = {},
+    Dragonknight = {},
     Necromancer = {},
+    Nightblade = {},
     Sets = {},
     Sorcerer = {},
     Templar = {},

@@ -1014,7 +1014,12 @@ local strings =
     LUIE_STRING_SET_WINTERS_RESPITE_TP = "You and group members in the |cFFFFFF8|r meter radius of healing frost restore Health every |cFFFFFF1|r second.",
     LUIE_STRING_SET_HUNTERS_VENOM_TP = "You and any player opposed to your attacker within a |cFFFFFF6|r meter radius take Poison Damage every |cFFFFFF1|r second for |cFFFFFF<<1>>|r seconds.",
     LUIE_STRING_SET_SHEER_VENOM_TP = "Afflicted with Poison Damage every |cFFFFFF1|r seconds for |cFFFFFF<<1>>|r seconds.\n\nDeals up to |cFFFFFF100|r% more damage in proportion to your missing health under |cFFFFFF100|r%.",
+    LUIE_STRING_SKILL_SET_ELEMENTAL_CATALYST = "Elemental Catalyst",
     LUIE_STRING_SET_ELEMENTAL_CATALYST_TP = "Increase Critical Damage taken by |cFFFFFF3|r% for |cFFFFFF<<1>>|r <<1[second/seconds]>>.",
+    LUIE_STRING_SKILL_SET_ENCRATISS_BEHEMOTH = "Encratis's Behemoth",
+    LUIE_STRING_SKILL_SET_ENCRATISS_BEHEMOTH_TP = "Dealing Flame Damage to an enemy grants you Behemoth's Aura for |cFFFFFF<<1>>|r <<1[second/seconds]>> that reaches up to |cFFFFFF12|r meters. You and up to |cFFFFFF11|r group members in the aura reduce Flame Damage taken by |cFFFFFF<<2>>|r. Enemies in the aura increase their Flame Damage taken by |cFFFFFF<<3>>|r. This effect can occur once every |cFFFFFF<<4>>|r <<4[second/seconds]>>.",
+    LUIE_STRING_SKILL_SET_SLIVERS_OF_THE_NULL_ARCA = "Slivers of the Null Arca",
+    LUIE_STRING_SKILL_SET_SLIVERS_OF_THE_NULL_ARCA_TP = "Dealing Critical Damage gives you a stack of |cFFFFFF<<1>>|r for |cFFFFFF<<2>>|r <<2[second/seconds]>>, up to once every |cFFFFFF<<3>>|r <<3[second/seconds]>>.\n\nUpon gaining your third stack, they merge into a crystal that launches at the last enemy you damaged, dealing |cFFFFFF<<4>>|r. This effect scales off the higher of your Weapon or Spell Damage, and you cannot gain |cFFFFFF<<1>>|r for |cFFFFFF<<5>>|r <<5[second/seconds]>> after the crystal is launched.",
     LUIE_STRING_SET_CRIMSON_TWILIGHT_TP = "After |cFFFFFF<<1>>|r <<1[second/seconds]>>, violently siphon the mist of blood into your body, dealing Bleed Damage to enemies within |cFFFFFF8|r meters and healing you for |cFFFFFF100|r% of the damage done.",
     LUIE_STRING_SET_STONE_HUSK_DOT_TP = "Tethered for |cFFFFFF<<1>>|r <<1[second/seconds]>>. You and your allies touching the tether take physical damage every |cFFFFFF1|r second.\n\nEach time this effect deals damage your attacker gains a stack of Husk Drain.",
     LUIE_STRING_SET_STONE_HUSK_HUSK_DRAIN_TP = "Gaining stacks each time the tether deals damage.\n\nWhen the tether ends, you consume the stacks and gain |cFFFFFF30|r Weapon Damage per stack consumed for |cFFFFFF5|r seconds.",
@@ -1038,6 +1043,8 @@ local strings =
     LUIE_STRING_SKILL_SET_GIANTS_ENDURANCE_TP = "Increase Weapon Damage by |cFFFFFF41|r, stacking up to |cFFFFFF10|r times when you deal Critical Damage.\n\nCompleting a fully-charged Heavy Attack removes Giant's Endurance and grants Giant's Might for |cFFFFFF15|r seconds, increasing your Weapon Damage by |cFFFFFF63|r per stack removed.\n\nYou can only gain a stack of Giant's Endurance once every half second.",
     LUIE_STRING_SKILL_SET_GIANTS_MIGHT_TP = "Increase Weapon Damage by |cFFFFFF63|r per stack of Giant's Endurance consumed for |cFFFFFF<<1>>|r seconds.",
     LUIE_STRING_SKILL_ROAR_OF_ALKOSH_TP = "Reduce Physical and Spell Resistance by the initial damage done by Roar of Alkosh for |cFFFFFF10|r seconds.",
+    LUIE_STRING_SKILL_SET_PERFECTED_SLIVERS_OF_THE_NULL_ARCA = "Perfected Slivers of the Null Arca",
+    LUIE_STRING_SKILL_SET_PERFECTED_SLIVERS_OF_THE_NULL_ARCA_TP = "Dealing Critical Damage gives you a stack of |cFFFFFF<<1>>|r for |cFFFFFF<<2>>|r <<2[second/seconds]>>, up to once every |cFFFFFF<<3>>|r <<3[second/seconds]>>.\n\nUpon gaining your third stack, they merge into a crystal that launches at the last enemy you damaged, dealing |cFFFFFF<<4>>|r. This effect scales off the higher of your Weapon or Spell Damage, and you cannot gain |cFFFFFF<<1>>|r for |cFFFFFF<<5>>|r <<5[second/seconds]>> after the crystal is launched.",
 
     -- Battleground Sets
     -- LUIE_STRING_SKILL_SET_COWARDS_GEAR_TP =                  "While Sprinting you gain Major Expedition and Major Protection.",
@@ -1278,6 +1285,8 @@ local strings =
     LUIE_STRING_SKILL_CONSTRICTING_WEBS_TP = "Wrapped in webs and unable to take any action for |cFFFFFF<<1>>|r seconds.",
     -- Web (stacking Ensnared): fallback when GetAbilityDescription still returns 0%% placeholders (see TooltipHandlers[256674]).
     LUIE_STRING_SKILL_WEB_ENSNARED_STACK_TP = "You are caught in webs!\nYour Movement Speed is decreased by |cFFFFFF<<1>>|r% per stack of Ensnared.\nCurrent Bonus: |cFFFFFF<<2>>|r%",
+    -- Fated Fortune (Herald): GetAbilityDescription / GetAbilityEffectDescription leave |cFFFFFF0|r%% until advanced stat context is applied (see TooltipHandlers[194875]).
+    LUIE_STRING_SKILL_FATED_FORTUNE_TP = "Increases your Critical Damage and Critical Healing by |cFFFFFF<<1>>|r% while you have one or more Crux.",
     LUIE_STRING_SKILL_PRIMAL_MAUL = "Primal Maul",
     LUIE_STRING_SKILL_ROOT_GUARD = "Root Guard",
     LUIE_STRING_SKILL_EARTH_MENDER = "Earth Mender",

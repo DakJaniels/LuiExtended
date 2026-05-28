@@ -147,6 +147,13 @@ local addGroundDamageAura =
     [118021] = { duration = 1100, type = BUFF_EFFECT_TYPE_BUFF },              -- Renewing Undeath (Renewing Undeath)
     [118813] = { duration = 1100, type = BUFF_EFFECT_TYPE_BUFF },              -- Enduring Undeath (Enduring Undeath)
 
+    -- Arcanist
+    [189793] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF }, -- The Unblinking Eye (ground damage)
+    [189839] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF }, -- The Tide King's Gaze (ground damage)
+    [189869] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF }, -- The Languid Eye (ground damage)
+    [185840] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Rune of Displacement (ground damage)
+    [191084] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Rune of Displacement (ground damage)
+
     -- Two-Handed
     [126474] = { duration = 1100, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Stampede (Stampede)
 

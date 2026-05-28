@@ -1299,10 +1299,11 @@ function ActionBar.UpdateBarHighlightTables()
                     end
                     g_barFakeAura[abilityId] = true
                 end
-            elseif value.combatTrack == true and value.newId then
-                g_barOverrideCI[value.newId] = true
+            elseif value.combatTrack == true then
+                local trackId = value.newId or abilityId
+                g_barOverrideCI[trackId] = true
                 if value.duration then
-                    g_barDurationOverride[value.newId] = value.duration
+                    g_barDurationOverride[trackId] = value.duration
                 end
             else
                 if value.noRemove then
@@ -3666,9 +3667,14 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
                         end
                     end
                 else
-                    local duration = GetUpdatedAbilityDuration(abilityId)
-                    local endTime = currentTimeMS + duration
-                    g_toggledSlotsRemain[abilityId] = endTime
+                    if result == ACTION_RESULT_EFFECT_GAINED_DURATION and type(hitValue) == "number" and hitValue >= 500 then
+                        g_toggledSlotsRemain[abilityId] = currentTimeMS + hitValue
+                    else
+                        local duration = GetUpdatedAbilityDuration(abilityId)
+                        if duration > 0 then
+                            g_toggledSlotsRemain[abilityId] = currentTimeMS + duration
+                        end
+                    end
                 end
                 -- Handling for Crystallized Shield + Morphs
                 if abilityId == 86135 or abilityId == 86139 or abilityId == 86143 then
