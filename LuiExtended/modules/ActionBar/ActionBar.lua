@@ -319,9 +319,9 @@ local g_barConsumeStackOnCast = {}                 -- Bound id -> track id (Effe
 --- @type {[integer]: "keep"|"clear"}
 local g_barCombatStackZeroEffect = {}              -- Effects.BarHighlightStackZeroEffect for track buff ids
 --- @type {[integer]: integer}
-local g_barCombatEventRemap = {}                     -- Slotted ability id -> combatTrack newId (from BarHighlightOverride)
+local g_barCombatEventRemap = {}                   -- Slotted ability id -> combatTrack newId (from BarHighlightOverride)
 --- @type {[integer]: boolean}
-local g_barCombatTrackRemainOnSlotted = {}           -- Track id: bar timer only from slotted-id combat / effect (not tick newId combat)
+local g_barCombatTrackRemainOnSlotted = {}         -- Track id: bar timer only from slotted-id combat / effect (not tick newId combat)
 --- @type string[]
 local g_barCombatEventNames = {}                   -- EVENT_COMBAT_EVENT handler names (unregistered before rebuild)
 --- @type {[integer]:number}
@@ -1731,7 +1731,8 @@ local playerZ = 0.000000000000000
 --- @param abilityId integer
 --- @return string
 local function SetBarRemainLabel(remain, abilityId)
-    if Effects.IsGrimFocus[abilityId] or Effects.IsBloodFrenzy[abilityId] or (Effects.IsCrux and Effects.IsCrux[abilityId]) then
+    if Effects.IsGrimFocus[abilityId] or Effects.IsBloodFrenzy[abilityId] --[[ or (Effects.IsCrux and Effects.IsCrux[abilityId]) ]]
+    then
         return ""
     end
 
@@ -3681,8 +3682,8 @@ local function GetCombatTrackToggleDurationMs(combatAbilityId, result, hitValue)
     if not g_barCombatTrack[trackId] then
         return nil
     end
-    if (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED or result == ACTION_RESULT_EFFECT_GAINED_DURATION)
-        and type(hitValue) == "number" and hitValue >= 500 then
+    if  (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED or result == ACTION_RESULT_EFFECT_GAINED_DURATION)
+    and type(hitValue) == "number" and hitValue >= 500 then
         return hitValue
     end
     return g_barDurationOverride[trackId]
