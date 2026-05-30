@@ -96,7 +96,7 @@ local function AppendLAMFontSizeControls(controls, category, settings, defaults,
             end,
             width = "half",
             disabled = disabledFunc,
-            default = defaultEntry and defaultEntry.fontOther or defaults.CustomFontOther,
+            default = defaultEntry.fontOther,
         }
         controls[#controls + 1] =
         {
@@ -115,7 +115,7 @@ local function AppendLAMFontSizeControls(controls, category, settings, defaults,
             end,
             width = "half",
             disabled = disabledFunc,
-            default = defaultEntry and defaultEntry.fontBars or defaults.CustomFontBars,
+            default = defaultEntry.fontBars,
         }
     else
         controls[#controls + 1] =
@@ -135,7 +135,7 @@ local function AppendLAMFontSizeControls(controls, category, settings, defaults,
             end,
             width = "full",
             disabled = disabledFunc,
-            default = defaultEntry and defaultEntry.fontBars or defaults.CustomFontBars,
+            default = defaultEntry.fontBars,
         }
     end
 end
@@ -167,7 +167,7 @@ local function AppendLHASFontSizeRows(rows, category, settings, defaults, defaul
                 markFontDeferred()
             end,
             disable = disabledFunc,
-            default = defaultEntry and defaultEntry.fontOther or defaults.CustomFontOther,
+            default = defaultEntry.fontOther,
         }
         rows[#rows + 1] =
         {
@@ -185,7 +185,7 @@ local function AppendLHASFontSizeRows(rows, category, settings, defaults, defaul
                 markFontDeferred()
             end,
             disable = disabledFunc,
-            default = defaultEntry and defaultEntry.fontBars or defaults.CustomFontBars,
+            default = defaultEntry.fontBars,
         }
     else
         rows[#rows + 1] =
@@ -204,7 +204,7 @@ local function AppendLHASFontSizeRows(rows, category, settings, defaults, defaul
                 markFontDeferred()
             end,
             disable = disabledFunc,
-            default = defaultEntry and defaultEntry.fontBars or defaults.CustomFontBars,
+            default = defaultEntry.fontBars,
         }
     end
 end
@@ -235,7 +235,7 @@ function UnitFrames.BuildLAMAppearanceCategoryControls(category, settings, defau
             end,
             "full",
             disabledFunc,
-            defaultEntry and defaultEntry.fontFace or defaults.CustomFontFace,
+            defaultEntry.fontFace,
             nil,
             "name-up",
             function () return getAppearanceFontSizeForPreview(category) end,
@@ -255,7 +255,7 @@ function UnitFrames.BuildLAMAppearanceCategoryControls(category, settings, defau
             function () return getAppearanceFontSizeForPreview(category) end,
             "full",
             disabledFunc,
-            defaultEntry and defaultEntry.fontStyle or defaults.CustomFontStyle
+            defaultEntry.fontStyle
         ),
     }
 
@@ -273,7 +273,7 @@ function UnitFrames.BuildLAMAppearanceCategoryControls(category, settings, defau
         end,
         "full",
         disabledFunc,
-        defaultEntry and defaultEntry.texture or defaults.CustomTexture
+        defaultEntry.texture
     )
 
     return controls
@@ -311,7 +311,7 @@ function UnitFrames.BuildLHASAppearanceCategoryRows(category, settings, defaults
             markFontDeferred()
         end,
         disable = disabledFunc,
-        default = defaultEntry and defaultEntry.fontFace or defaults.CustomFontFace,
+        default = defaultEntry.fontFace,
     }
 
     rows[#rows + 1] =
@@ -333,7 +333,7 @@ function UnitFrames.BuildLHASAppearanceCategoryRows(category, settings, defaults
             GetAppearanceEntry(settings, category).fontStyle = item.data or item.name or value
             markFontDeferred()
         end,
-        default = defaultEntry and defaultEntry.fontStyle or defaults.CustomFontStyle,
+        default = defaultEntry.fontStyle,
         disable = disabledFunc,
     }
 
@@ -352,7 +352,7 @@ function UnitFrames.BuildLHASAppearanceCategoryRows(category, settings, defaults
             GetAppearanceEntry(settings, category).texture = item.data or item.name or value
             UnitFrames.CustomFramesApplyTextureForCategory(category)
         end,
-        default = defaultEntry and defaultEntry.texture or defaults.CustomTexture,
+        default = defaultEntry.texture,
         disable = disabledFunc,
     }
 

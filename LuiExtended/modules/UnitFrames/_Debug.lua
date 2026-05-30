@@ -502,20 +502,170 @@ local function DebugAll()
 end
 
 -- -----------------------------------------------------------------------------
+-- Font diagnostics dump
+-- -----------------------------------------------------------------------------
+
+-- One representative custom-frame unitTag per appearance category. Used by the
+-- font dump to read the live `name` label height for that category.
+local DUMP_REPRESENTATIVE_FRAME =
+{
+    player = "player",
+    target = "reticleover",
+    group = "SmallGroup1",
+    raid = "RaidGroup1",
+    companion = "companion",
+    pet = "PetGroup1",
+    boss = "boss1",
+    ava = "AvaPlayerTarget",
+}
+
+local function formatNumber(value)
+    if value == nil then
+        return "nil"
+    end
+    if type(value) == "number" then
+        if value == math.floor(value) then
+            return tostring(value)
+        end
+        return string.format("%.1f", value)
+    end
+    return tostring(value)
+end
+
+-- Returns the SV bar width / name-clip values that drive the name label width
+-- for each category, plus the expected label width math (for cross-checking
+-- whether layout actually applied the clip on the live label). nil = no SV.
+local function geometrySVForCategory(category)
+    local sv = UnitFrames.SV
+    if not sv then return nil end
+    if category == "raid" then
+        local iconOption = sv.RaidIconOptions or 1
+        -- Mirrors applyIconSettings: iconOption == 1 means no icon (offset 10),
+        -- otherwise role/class icon is shown and the name is inset further (offset 27).
+        local offset = (iconOption == 1) and 10 or 27
+        return {
+            barWidth = sv.RaidBarWidth,
+            clip = sv.RaidNameClip,
+            iconOption = iconOption,
+            expectedNameWidth = zo_max(0, sv.RaidBarWidth - sv.RaidNameClip - offset),
+        }
+    elseif category == "pet" then
+        return {
+            barWidth = sv.PetWidth,
+            clip = sv.PetNameClip,
+            expectedNameWidth = zo_max(0, sv.PetWidth - sv.PetNameClip - 10),
+        }
+    elseif category == "companion" then
+        return {
+            barWidth = sv.CompanionWidth,
+            clip = sv.CompanionNameClip,
+            expectedNameWidth = zo_max(0, sv.CompanionWidth - sv.CompanionNameClip - 10),
+        }
+    elseif category == "boss" then
+        return {
+            barWidth = sv.BossBarWidth,
+            expectedNameWidth = zo_max(0, sv.BossBarWidth - 50),
+        }
+    end
+    return nil
+end
+
+-- Returns the rhb/control width for the given frame and category (so the dump can
+-- show whether the parent that the name label is anchored to is sized correctly).
+-- ESO's COMBAT_MECHANIC_FLAGS_HEALTH is the live key the unitframe table uses.
+local function parentBarWidthForFrame(frame)
+    if not frame then return nil end
+    local healthEntry = frame[COMBAT_MECHANIC_FLAGS_HEALTH]
+    if healthEntry and healthEntry.backdrop and healthEntry.backdrop.GetWidth then
+        return healthEntry.backdrop:GetWidth()
+    end
+    if frame.control and frame.control.GetWidth then
+        return frame.control:GetWidth()
+    end
+    return nil
+end
+
+local function tlwHiddenForFrame(frame)
+    if not frame or not frame.tlw or not frame.tlw.IsHidden then return nil end
+    return frame.tlw:IsHidden()
+end
+
+function UnitFrames.DumpFontDiagnostics()
+    LUIE.AddSystemMessage("[LUIE] UnitFrames font diagnostics:")
+    local sv = UnitFrames.SV
+    local svRoot = sv and sv.CustomFrameAppearance or {}
+    local groupSize = GetGroupSize()
+    LUIE.AddSystemMessage(string.format("  context: groupSize=%d", groupSize))
+    for _, category in ipairs(UnitFrames.APPEARANCE_CATEGORY_IDS) do
+        local rawEntry = svRoot[category] or {}
+        local resolved = UnitFrames.GetCustomFrameAppearance(category)
+        local captionSize = UnitFrames.GetCustomFrameCaptionSize(category)
+        local frameKey = DUMP_REPRESENTATIVE_FRAME[category]
+        local frame = frameKey and UnitFrames.CustomFrames[frameKey]
+        local nameWidth = "n/a"
+        local nameHeight = "n/a"
+        local textWidth = "n/a"
+        local textHeight = "n/a"
+        local nameHidden = "n/a"
+        if frame and frame.name then
+            nameWidth = formatNumber(frame.name:GetWidth())
+            nameHeight = formatNumber(frame.name:GetHeight())
+            textWidth = formatNumber(frame.name:GetTextWidth())
+            textHeight = formatNumber(frame.name:GetTextHeight())
+            if frame.name.IsHidden then
+                nameHidden = tostring(frame.name:IsHidden())
+            end
+        end
+        LUIE.AddSystemMessage(string.format(
+            "  %s: raw{face=%s style=%s bars=%s other=%s tex=%s} resolved{bars=%s other=%s caption=%s} label{w=%s h=%s text=%sx%s hidden=%s frame=%s}",
+            category,
+            tostring(rawEntry.fontFace),
+            formatNumber(rawEntry.fontStyle),
+            formatNumber(rawEntry.fontBars),
+            formatNumber(rawEntry.fontOther),
+            tostring(rawEntry.texture),
+            formatNumber(resolved.fontBars),
+            formatNumber(resolved.fontOther),
+            formatNumber(captionSize),
+            nameWidth,
+            nameHeight,
+            textWidth,
+            textHeight,
+            nameHidden,
+            tostring(frameKey)
+        ))
+        local geom = geometrySVForCategory(category)
+        if geom then
+            local parts = {}
+            if geom.barWidth then parts[#parts + 1] = "barW=" .. formatNumber(geom.barWidth) end
+            if geom.clip then parts[#parts + 1] = "clip=" .. formatNumber(geom.clip) end
+            if geom.iconOption then parts[#parts + 1] = "iconOpt=" .. formatNumber(geom.iconOption) end
+            if geom.expectedNameWidth then parts[#parts + 1] = "expectedW=" .. formatNumber(geom.expectedNameWidth) end
+            local parentW = parentBarWidthForFrame(frame)
+            if parentW then parts[#parts + 1] = "rhbW=" .. formatNumber(parentW) end
+            local hidden = tlwHiddenForFrame(frame)
+            if hidden ~= nil then parts[#parts + 1] = "tlwHidden=" .. tostring(hidden) end
+            LUIE.AddSystemMessage(string.format("    %s SV: %s", category, table.concat(parts, " ")))
+        end
+    end
+end
+
+-- -----------------------------------------------------------------------------
 -- Slash command registration
 -- -----------------------------------------------------------------------------
 
 local DEBUG_COMMANDS =
 {
-    ["/luiufsm"]     = DebugGroup,
-    ["/luiufraid"]   = DebugRaid,
-    ["/luiufplayer"] = DebugPlayer,
-    ["/luiuftar"]    = DebugTarget,
-    ["/luiufava"]    = DebugAva,
-    ["/luiufpet"]    = DebugPets,
-    ["/luiufboss"]   = DebugBosses,
-    ["/luiufcomp"]   = DebugCompanion,
-    ["/luiufall"]    = DebugAll,
+    ["/luiufsm"]        = DebugGroup,
+    ["/luiufraid"]      = DebugRaid,
+    ["/luiufplayer"]    = DebugPlayer,
+    ["/luiuftar"]       = DebugTarget,
+    ["/luiufava"]       = DebugAva,
+    ["/luiufpet"]       = DebugPets,
+    ["/luiufboss"]      = DebugBosses,
+    ["/luiufcomp"]      = DebugCompanion,
+    ["/luiufall"]       = DebugAll,
+    ["/luiufdumpfonts"] = UnitFrames.DumpFontDiagnostics,
 }
 
 SLASH_COMMANDS["/luieufdebug"] = function (arg)

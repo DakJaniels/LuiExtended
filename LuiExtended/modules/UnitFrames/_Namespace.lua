@@ -119,11 +119,6 @@ UnitFrames.Defaults =
     CustomFormatTwoGroup = GetString(LUIE_STRING_UF_FORMAT_GROUP_TWO),
     CustomFormatRaid = GetString(LUIE_STRING_UF_FORMAT_RAID),
     CustomFormatBoss = GetString(LUIE_STRING_UF_FORMAT_BOSS),
-    CustomFontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
-    CustomFontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
-    CustomFontBars = 16,
-    CustomFontOther = 20,
-    CustomTexture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
     CustomFrameAppearance =
     {
         player =
