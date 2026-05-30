@@ -1327,6 +1327,25 @@ function SpellCastBuffs.ApplyBuffIconSlotDimensions(buff, buffSize)
     buff:SetFlexShrink(0)
 end
 
+-- Prominent vertical column: name in the strip between icon top and progress bar top.
+--- @param buff SpellCastBuffs_BuffIcon_Control
+--- @param labelOnLeft boolean
+local function ApplyProminentNameLabelAnchors(buff, labelOnLeft)
+    local xOff = labelOnLeft and -4 or 4
+    buff.name:ClearAnchors()
+    if labelOnLeft then
+        buff.name:SetAnchor(TOPRIGHT, buff, TOPLEFT, xOff, 2)
+        buff.name:SetAnchor(BOTTOMLEFT, buff.bar.backdrop, TOPRIGHT, 0, -2)
+    else
+        buff.name:SetAnchor(TOPLEFT, buff, TOPRIGHT, xOff, 2)
+        buff.name:SetAnchor(BOTTOMRIGHT, buff.bar.backdrop, TOPLEFT, 0, -2)
+    end
+    buff.name:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+    buff.name:SetVerticalAlignment(TEXT_ALIGN_BOTTOM)
+    buff.name:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+    buff.name:SetMaxLineCount(1)
+end
+
 -- Layout, anchors, and visibility for one icon (pool acquire or settings refresh).
 function SpellCastBuffs.ApplySingleIconLayout(container, buff)
     local buffSize = SpellCastBuffs.SV.IconSize
@@ -1428,10 +1447,6 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
 
     if container == "prominentbuffs" then
         if SpellCastBuffs.SV.ProminentBuffLabelDirection == "Left" then
-            buff.name:ClearAnchors()
-            buff.name:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-            buff.name:SetAnchor(TOPRIGHT, buff, TOPLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-
             buff.bar.backdrop:ClearAnchors()
             buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
             buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
@@ -1441,11 +1456,9 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
             buff.bar.bar:ClearAnchors()
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
-        else
-            buff.name:ClearAnchors()
-            buff.name:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-            buff.name:SetAnchor(TOPLEFT, buff, TOPRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
 
+            ApplyProminentNameLabelAnchors(buff, true)
+        else
             buff.bar.backdrop:ClearAnchors()
             buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
             buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
@@ -1455,15 +1468,13 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
             buff.bar.bar:ClearAnchors()
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
+
+            ApplyProminentNameLabelAnchors(buff, false)
         end
     end
 
     if container == "prominentdebuffs" then
         if SpellCastBuffs.SV.ProminentDebuffLabelDirection == "Right" then
-            buff.name:ClearAnchors()
-            buff.name:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-            buff.name:SetAnchor(TOPLEFT, buff, TOPRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-
             buff.bar.backdrop:ClearAnchors()
             buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
             buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
@@ -1473,11 +1484,9 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
             buff.bar.bar:ClearAnchors()
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
-        else
-            buff.name:ClearAnchors()
-            buff.name:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-            buff.name:SetAnchor(TOPRIGHT, buff, TOPLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
 
+            ApplyProminentNameLabelAnchors(buff, false)
+        else
             buff.bar.backdrop:ClearAnchors()
             buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
             buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
@@ -1487,6 +1496,8 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
             buff.bar.bar:ClearAnchors()
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
+
+            ApplyProminentNameLabelAnchors(buff, true)
         end
     end
 
