@@ -378,6 +378,17 @@ function SpellCastBuffs.Initialize(enabled)
         LUIE.MarkMigrationDone("spellcastbuffs_fontstyles_v2")
     end
 
+    -- Seed the canonical Off Balance name into Prominent Debuffs once so the
+    -- new OB routing works out of the box. Users can still remove it from the
+    -- list and it will not be re-added.
+    if not LUIE.IsMigrationDone("spellcastbuffs_seed_offbalance_prom") then
+        local obName = Abilities.Skill_Off_Balance
+        if obName and SpellCastBuffs.SV.PromDebuffTable[obName] == nil then
+            SpellCastBuffs.SV.PromDebuffTable[obName] = true
+        end
+        LUIE.MarkMigrationDone("spellcastbuffs_seed_offbalance_prom")
+    end
+
     -- Correct read values
     if SpellCastBuffs.SV.IconSize < 30 or SpellCastBuffs.SV.IconSize > 60 then
         SpellCastBuffs.SV.IconSize = SpellCastBuffs.Defaults.IconSize
@@ -512,6 +523,7 @@ function SpellCastBuffs.Initialize(enabled)
     SpellCastBuffs.Reset()
     SpellCastBuffs.UpdateContextHideList()
     SpellCastBuffs.UpdateDisplayOverrideIdList()
+    SpellCastBuffs.BuildOffBalanceDebuffLookup()
 
     -- Register events
     eventManager:RegisterForUpdate(moduleName, 100, SpellCastBuffs.OnUpdate)
@@ -1335,10 +1347,10 @@ local function ApplyProminentNameLabelAnchors(buff, labelOnLeft)
     buff.name:ClearAnchors()
     if labelOnLeft then
         buff.name:SetAnchor(TOPRIGHT, buff, TOPLEFT, xOff, 2)
-        buff.name:SetAnchor(BOTTOMLEFT, buff.bar.backdrop, TOPRIGHT, 0, -2)
+        buff.name:SetAnchor(BOTTOMLEFT, buff.bar.backdrop, TOPLEFT, 0, -2)
     else
         buff.name:SetAnchor(TOPLEFT, buff, TOPRIGHT, xOff, 2)
-        buff.name:SetAnchor(BOTTOMRIGHT, buff.bar.backdrop, TOPLEFT, 0, -2)
+        buff.name:SetAnchor(BOTTOMRIGHT, buff.bar.backdrop, TOPRIGHT, 0, -2)
     end
     buff.name:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     buff.name:SetVerticalAlignment(TEXT_ALIGN_BOTTOM)
