@@ -10,6 +10,8 @@ local LuiData = LuiData
 local Data = LuiData.Data
 --- @type Effects
 local Effects = Data.Effects
+local Abilities = Data.Abilities
+local Tooltips = Data.Tooltips
 local printToChat = LUIE.PrintToChat
 local GetString = GetString
 local zo_strformat = zo_strformat
@@ -276,6 +278,27 @@ function SpellCastBuffs.UpdateDisplayOverrideIdList()
     if SpellCastBuffs.SV.ShowSharedMajorMinor then
         for k, v in pairs(Effects.DebuffDisplayOverrideMajorMinor) do
             SpellCastBuffs.debuffDisplayOverrideId[k] = v
+        end
+    end
+end
+
+-- Builds a lookup of every ability id that LuiData treats as the shared
+-- "Off Balance" debuff. Any entry in Effects.EffectOverride that either uses
+-- Tooltips.Generic_Off_Balance or normalizes to Abilities.Skill_Off_Balance
+-- counts. The Immunity buff (and any explicit BUFF_EFFECT_TYPE_BUFF entry)
+-- is excluded so ally-applied OB *debuffs* can promote to the prominent
+-- target container without requiring a hand-maintained id list.
+function SpellCastBuffs.BuildOffBalanceDebuffLookup()
+    SpellCastBuffs.offBalanceDebuffById = {}
+    local lookup = SpellCastBuffs.offBalanceDebuffById
+    local obTooltip = Tooltips.Generic_Off_Balance
+    local obName = Abilities.Skill_Off_Balance
+
+    for id, data in pairs(Effects.EffectOverride) do
+        if data.type ~= BUFF_EFFECT_TYPE_BUFF then
+            if (obTooltip and data.tooltip == obTooltip) or (obName and data.name == obName) then
+                lookup[id] = true
+            end
         end
     end
 end

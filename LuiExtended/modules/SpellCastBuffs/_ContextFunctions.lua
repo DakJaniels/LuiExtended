@@ -5,9 +5,75 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
+local LuiData = LuiData
+--- @type Data
+local Data = LuiData.Data
+local Abilities = Data.Abilities
 
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
+
+-- Ability id used by the Off Balance Immunity buff (buff-typed in Override.lua,
+-- so it lives in reticleover1, not the normal OB debuff lookup).
+local OFF_BALANCE_IMMUNITY_ID = 134599
+
+---
+--- True when the user has opted this ability into Prominent Debuffs, either by
+--- id, by ability name, or by the canonical Off Balance name (so a single
+--- "Off Balance" entry covers every renamed OB variant).
+--- @param abilityId number|nil
+--- @param abilityName string|nil
+--- @return boolean
+function SpellCastBuffs.WantsProminentDebuff(abilityId, abilityName)
+    local promTable = SpellCastBuffs.SV.PromDebuffTable
+    if abilityId and promTable[abilityId] then
+        return true
+    end
+    if abilityName and promTable[abilityName] then
+        return true
+    end
+    local obName = Abilities.Skill_Off_Balance
+    if obName and promTable[obName] then
+        if abilityId and SpellCastBuffs.offBalanceDebuffById[abilityId] then
+            return true
+        end
+        if abilityId == OFF_BALANCE_IMMUNITY_ID then
+            return true
+        end
+    end
+    return false
+end
+
+---
+--- Off Balance is special: unlike other prominent debuffs it must promote on
+--- the target even when an ally applied it, and the Immunity buff must promote
+--- from the target *buff* context. Returns the promoted context string, or nil
+--- when the ability is not OB-related / not opted in (caller falls back to the
+--- normal DetermineContext rules).
+--- @param context SpellCastBuffsContext
+--- @param abilityId number|nil
+--- @param abilityName string|nil
+--- @return string|nil context
+function SpellCastBuffs.ResolveProminentDebuffContext(context, abilityId, abilityName)
+    if not SpellCastBuffs.WantsProminentDebuff(abilityId, abilityName) then
+        return nil
+    end
+
+    if abilityId and SpellCastBuffs.offBalanceDebuffById[abilityId] then
+        if context == "reticleover2" then
+            return "promd_target"
+        elseif context == "player2" then
+            return "promd_player"
+        end
+    elseif abilityId == OFF_BALANCE_IMMUNITY_ID then
+        if context == "reticleover1" or context == "reticleover2" then
+            return "promd_target"
+        elseif context == "player1" or context == "player2" then
+            return "promd_player"
+        end
+    end
+    return nil
+end
 
 ---
 --- Determines the container context for prominent effects based on the current context, ability, and caster.
@@ -17,6 +83,11 @@ local SpellCastBuffs = LUIE.SpellCastBuffs
 --- @param castByPlayer number|nil The unit type of the caster (e.g., COMBAT_UNIT_TYPE_PLAYER, can be nil).
 --- @return string context The resolved context string (e.g., "promd_player", "promb_target", or original context).
 function SpellCastBuffs.DetermineContext(context, abilityId, abilityName, castByPlayer)
+    local obContext = SpellCastBuffs.ResolveProminentDebuffContext(context, abilityId, abilityName)
+    if obContext then
+        return obContext
+    end
+
     if SpellCastBuffs.SV.PromDebuffTable[abilityId] or SpellCastBuffs.SV.PromDebuffTable[abilityName] then
         if context == "player1" then
             context = "promd_player"

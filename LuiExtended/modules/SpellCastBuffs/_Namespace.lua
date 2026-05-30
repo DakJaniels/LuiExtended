@@ -17,6 +17,7 @@ local LUIE = LUIE
 --- @field hidePlayerEffects table
 --- @field hideTargetEffects table
 --- @field debuffDisplayOverrideId table
+--- @field offBalanceDebuffById table<integer, true>
 --- @field windowTitles table<string, string>
 --- @field containerRouting table<string, string>
 --- @field alignmentDirection table<string, string>
@@ -475,6 +476,7 @@ SpellCastBuffs.EffectsList =
 SpellCastBuffs.hidePlayerEffects = {}       --- @type table Table of Effects to hide on Player - generated on load or updated from Menu
 SpellCastBuffs.hideTargetEffects = {}       --- @type table Table of Effects to hide on Target - generated on load or updated from Menu
 SpellCastBuffs.debuffDisplayOverrideId = {} --- @type table Table of Effects (by id) that should show on the target regardless of who applied them.
+SpellCastBuffs.offBalanceDebuffById = {}    --- @type table<integer, true> Effect ids that LuiData identifies as the shared Off Balance debuff; populated on init.
 
 --- @type table<string, string>
 SpellCastBuffs.windowTitles =
