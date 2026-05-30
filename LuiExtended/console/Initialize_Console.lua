@@ -46,6 +46,7 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.MigrateSplitModuleSavedVarsFromLuiESV()
     LUIE.RepairSplitModuleSavedVarsFromLegacy()
     LUIE.PruneLegacyLuiESVDefaultProfileBranch()
+    LUIE.MigrateChatOutputToCore()
     LUIE.UpdateGuildData(nil, nil, nil, nil)
     -- -----------------------------------------------------------------------------
     -- Initialize Hooks
@@ -68,6 +69,8 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.PlayerNameFormatted = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("player"))
     LUIE.PlayerDisplayName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitDisplayName("player"))
     LUIE.PlayerFaction = GetUnitAlliance("player")
+    -- -----------------------------------------------------------------------------
+    LUIE.ChatAnnouncements.ChatOutput.InitializePrintRouting()
     -- -----------------------------------------------------------------------------
     -- Initialize this addon modules according to user preferences
     LUIE.ChatAnnouncements.Initialize(LUIE.SV.ChatAnnouncements_Enable)

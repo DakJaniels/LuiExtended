@@ -21,6 +21,13 @@ local HUD_SCENE = "hud"
 local HUDUI_SCENE = "hudui"
 local moduleName = LUIE.name .. "CombatInfo" .. "SynergyTracker"
 
+-- Cap on Settings.detectedSynergies. The map is an account-wide saved variable
+-- that grows monotonically (one entry per unique synergy abilityId ever seen).
+-- Without a cap it accumulates indefinitely across the lifetime of the install,
+-- bloating every /reloadui. 500 is well above the count of real distinct ESO
+-- synergy abilities so no live data is evicted in normal play.
+local MAX_DETECTED_SYNERGIES = 500
+
 -- UI Constants
 local MAX_SYNERGY_SLOTS = 10
 local PREVIEW_ROW_COUNT = 3
@@ -490,6 +497,7 @@ function SynergyTracker:RefreshActiveSynergies()
             }
 
             if not Settings.detectedSynergies[abilityId] then
+                self:EvictDetectedSynergiesIfNeeded()
                 Settings.detectedSynergies[abilityId] =
                 {
                     name = newSynergies[abilityId].name,
@@ -843,6 +851,51 @@ function SynergyTracker:ApplyCooldown(abilityId)
     end
 
     self:UpdateDisplay()
+end
+
+--- Evict least-used entries when detectedSynergies would exceed the hard cap.
+--- Called from RefreshActiveSynergies right before a new entry is inserted, so
+--- the table is bounded to MAX_DETECTED_SYNERGIES regardless of session length
+--- or weird zone visits (e.g. Imperial City scaling abilities). Eviction policy
+--- is LRU-by-timesSeen, falling back to oldest firstSeen as a tiebreaker.
+function SynergyTracker:EvictDetectedSynergiesIfNeeded()
+    local Settings = CombatInfo.SV.synergy
+    local detected = Settings.detectedSynergies
+    if not detected then
+        return
+    end
+
+    -- Cheap size check: count only when we may be at the cap.
+    local count = 0
+    for _ in pairs(detected) do
+        count = count + 1
+        if count >= MAX_DETECTED_SYNERGIES then
+            break
+        end
+    end
+    if count < MAX_DETECTED_SYNERGIES then
+        return
+    end
+
+    -- Now scan the full table to identify the actual victim. This branch runs
+    -- only when we're at the cap, so the O(N) scan is paid once per eviction.
+    local victimId, victimTimesSeen, victimFirstSeen
+    for abilityId, data in pairs(detected) do
+        local timesSeen = data.timesSeen or 0
+        local firstSeen = data.firstSeen or 0
+        if not victimId
+        or timesSeen < victimTimesSeen
+        or (timesSeen == victimTimesSeen and firstSeen < victimFirstSeen)
+        then
+            victimId = abilityId
+            victimTimesSeen = timesSeen
+            victimFirstSeen = firstSeen
+        end
+    end
+
+    if victimId then
+        detected[victimId] = nil
+    end
 end
 
 --- Synergy was removed (activated, timed out, or source destroyed)

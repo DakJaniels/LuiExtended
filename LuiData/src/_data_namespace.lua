@@ -61,7 +61,10 @@ local CollectibleTables = {}
 
 local CombatTextBlacklistPresets =
 {
+    Arcanist = {},
+    Dragonknight = {},
     Necromancer = {},
+    Nightblade = {},
     Sets = {},
     Sorcerer = {},
     Templar = {},
@@ -104,6 +107,8 @@ local DebugStatus = {}
 --- @field BarHighlightExtraId BarHighlightExtraId Table of additional effect IDs for highlighting
 --- @field BarHighlightOverride table<integer, BarHighlightOverrideOptions> Table of highlight override definitions
 --- @field BarHighlightStack BarHighlightStack Table of stack-based highlight effects
+--- @field BarHighlightStackConsume table<integer, integer> Bound ability id -> combatTrack stack buff id (consume one stack on cast)
+--- @field BarHighlightStackZeroEffect table<integer, "keep"|"clear"> Track buff id behavior when effect stack count is 0
 --- @field BarIdOverride BarIdOverride Table of bar ID overrides
 --- @field DisguiseIcons EffectsDisguiseIcons Table of disguise icon definitions
 --- @field EffectCreateSkillAura EffectCreateSkillAura Table of skill aura creation definitions
@@ -156,6 +161,8 @@ local Effects =
     BarHighlightExtraId = {},
     BarHighlightOverride = {},
     BarHighlightStack = {},
+    BarHighlightStackConsume = {},
+    BarHighlightStackZeroEffect = {},
     BarIdOverride = {},
     BlockAndBashCC = {},
     DebuffDisplayOverrideId = {},
@@ -251,8 +258,8 @@ local ZoneTable = {}
 --- @class (partial) LuiData
 LuiData = {}
 LuiData.name = "LuiData"
-LuiData.version = 7210
-LuiData.addonVersion = "7.2.1.0"
+LuiData.version = 7212
+LuiData.addonVersion = "7.2.1.2"
 
 --- @class (partial) Data
 LuiData.Data =

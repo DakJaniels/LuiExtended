@@ -177,7 +177,32 @@ function CrowdControlTracker.Initialize()
         CrowdControlTracker.currentlyPlaying = nil
         CrowdControlTracker.breakFreePlaying = nil
         CrowdControlTracker.immunePlaying = nil
+        -- Reusable AnimationTimeline cache keyed by (control, animType).
+        -- Building one fresh timeline per CC event creates GC churn in heavy combat
+        -- (Cyrodiil/BG); we cache one timeline per slot and update dynamic keyframe
+        -- values (alpha start/scale) via animation setters before PlayFromStart.
+        -- Stamped with the SV inputs used at build time so we can rebuild when
+        -- controlScale / immuneDisplayTime are changed at runtime via settings.
+        CrowdControlTracker.timelineCache = {}
         CrowdControlTracker:FullReset()
+    end
+end
+
+--- Discard all cached animation timelines. Call this when CC SV inputs that
+--- bake into keyframes (controlScale, immuneDisplayTime) change at runtime.
+function CrowdControlTracker:ClearTimelineCache()
+    if not self.timelineCache then
+        self.timelineCache = {}
+        return
+    end
+    for key, entry in pairs(self.timelineCache) do
+        if entry.timeline then
+            entry.timeline:Stop()
+            -- Remove the OnStop handler closure so the cleared timeline can be
+            -- collected; the closure captured `self`, so we replace it.
+            entry.timeline:SetHandler("OnStop", nil, "OnStop")
+        end
+        self.timelineCache[key] = nil
     end
 end
 
@@ -1336,6 +1361,10 @@ function CrowdControlTracker:CCPriority(ccType)
     return priorityMap[ccType]
 end
 
+--- Cache key for the break-free timeline. Stored on `self.timelineCache` so it
+--- can be invalidated alongside the StartAnimation cache by ClearTimelineCache.
+local BREAK_FREE_CACHE_KEY = "__breakfree__"
+
 function CrowdControlTracker:BreakFreeAnimation()
     if self.currentlyPlaying then
         self.currentlyPlaying:Stop()
@@ -1354,33 +1383,108 @@ function CrowdControlTracker:BreakFreeAnimation()
     leftSide:SetAlpha(1)
     rightSide:SetAlpha(1)
 
-    local timeline = animationManager:CreateTimeline()
-    local animDuration = 300
-    local animDelay = 150
-
-    self:InsertAnimationType(timeline, ANIMATION_SCALE, leftSide, animDelay, 0, ZO_EaseOutCubic, 1.0, 2)
-    self:InsertAnimationType(timeline, ANIMATION_SCALE, rightSide, animDelay, 0, ZO_EaseOutCubic, 1.0, 2)
-    self:InsertAnimationType(timeline, ANIMATION_SCALE, leftSide, animDuration, animDelay, ZO_EaseOutCubic, 1.8, 0.1)
-    self:InsertAnimationType(timeline, ANIMATION_SCALE, rightSide, animDuration, animDelay, ZO_EaseOutCubic, 1.8, 0.1)
-    self:InsertAnimationType(timeline, ANIMATION_ALPHA, leftSide, animDuration, animDelay, ZO_EaseInOutQuintic, 1, 0)
-    self:InsertAnimationType(timeline, ANIMATION_ALPHA, rightSide, animDuration, animDelay, ZO_EaseInOutQuintic, 1, 0)
-    self:InsertAnimationType(timeline, ANIMATION_TRANSLATE, leftSide, animDuration, animDelay, ZO_EaseOutCubic, 0, 0, -550, 0)
-    self:InsertAnimationType(timeline, ANIMATION_TRANSLATE, rightSide, animDuration, animDelay, ZO_EaseOutCubic, 0, 0, 550, 0)
-
-    local function OnStop()
-        leftSide:ClearAnchors()
-        leftSide:SetAnchor(LEFT, LUIE_CCTracker_BreakFreeFrame, LEFT, 0, 0)
-        leftSide:SetScale(1)
-        rightSide:ClearAnchors()
-        rightSide:SetAnchor(RIGHT, LUIE_CCTracker_BreakFreeFrame, RIGHT, 0, 0)
-        rightSide:SetScale(1)
-        self.breakFreePlaying = nil
+    if not self.timelineCache then
+        self.timelineCache = {}
     end
-    timeline:SetHandler("OnStop", OnStop, "OnStop")
+
+    local cached = self.timelineCache[BREAK_FREE_CACHE_KEY]
+    local timeline = cached and cached.timeline
+    if not timeline then
+        timeline = animationManager:CreateTimeline()
+        local animDuration = 300
+        local animDelay = 150
+
+        self:InsertAnimationType(timeline, ANIMATION_SCALE, leftSide, animDelay, 0, ZO_EaseOutCubic, 1.0, 2)
+        self:InsertAnimationType(timeline, ANIMATION_SCALE, rightSide, animDelay, 0, ZO_EaseOutCubic, 1.0, 2)
+        self:InsertAnimationType(timeline, ANIMATION_SCALE, leftSide, animDuration, animDelay, ZO_EaseOutCubic, 1.8, 0.1)
+        self:InsertAnimationType(timeline, ANIMATION_SCALE, rightSide, animDuration, animDelay, ZO_EaseOutCubic, 1.8, 0.1)
+        self:InsertAnimationType(timeline, ANIMATION_ALPHA, leftSide, animDuration, animDelay, ZO_EaseInOutQuintic, 1, 0)
+        self:InsertAnimationType(timeline, ANIMATION_ALPHA, rightSide, animDuration, animDelay, ZO_EaseInOutQuintic, 1, 0)
+        self:InsertAnimationType(timeline, ANIMATION_TRANSLATE, leftSide, animDuration, animDelay, ZO_EaseOutCubic, 0, 0, -550, 0)
+        self:InsertAnimationType(timeline, ANIMATION_TRANSLATE, rightSide, animDuration, animDelay, ZO_EaseOutCubic, 0, 0, 550, 0)
+
+        timeline:SetHandler("OnStop", function ()
+                                leftSide:ClearAnchors()
+                                leftSide:SetAnchor(LEFT, LUIE_CCTracker_BreakFreeFrame, LEFT, 0, 0)
+                                leftSide:SetScale(1)
+                                rightSide:ClearAnchors()
+                                rightSide:SetAnchor(RIGHT, LUIE_CCTracker_BreakFreeFrame, RIGHT, 0, 0)
+                                rightSide:SetScale(1)
+                                self.breakFreePlaying = nil
+                            end, "OnStop")
+
+        self.timelineCache[BREAK_FREE_CACHE_KEY] = { timeline = timeline }
+    end
 
     timeline:PlayFromStart()
-
     return timeline
+end
+
+--- Build the static keyframe layout for an animType on a given control.
+--- Called only on cache miss; subsequent plays mutate alpha/scale values
+--- via the cached animation references in `cacheEntry.dynamics`.
+--- @param self LuiExtended.CrowdControlTracker
+--- @param control Control
+--- @param animType "proc"|"end"|"endstagger"|"silence"|"stagger"|"immune"
+--- @return table { timeline, dynamics, controlScale, immuneDisplayTime, anchor }
+local function BuildCachedAnimation(self, control, animType)
+    local timeline = animationManager:CreateTimeline()
+    local dynamics = {}
+    local controlScaleAtBuild = CombatInfo.SV.cct.controlScale
+    local immuneDisplayTimeAtBuild = CombatInfo.SV.cct.immuneDisplayTime
+
+    if animType == "proc" then
+        -- Always insert the alpha; if alpha is already 1 at play time we
+        -- collapse it to a no-op via SetAlphaValues(1, 1) below.
+        self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 100, 0, ZO_EaseInQuadratic, 0, 1)
+        dynamics.alpha = timeline:GetAnimation(1)
+        self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 100, 0, ZO_EaseInQuadratic, 1, 2.2, SET_SCALE_FROM_SV)
+        self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 200, 200, ZO_EaseOutQuadratic, 2.2, 1, SET_SCALE_FROM_SV)
+    elseif animType == "end" or animType == "endstagger" then
+        -- Alpha start is dynamic (current control alpha when CC ends); we
+        -- rewrite SetAlphaValues(currentAlpha, 0) before each PlayFromStart.
+        self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 150, 0, ZO_EaseOutQuadratic, 1, 0)
+        dynamics.alpha = timeline:GetAnimation(1)
+    elseif animType == "silence_hidden" then
+        self:InsertAnimationType(timeline, ANIMATION_ALPHA, LUIE_CCTracker, 100, 0, ZO_EaseInQuadratic, 0, 1)
+        self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 100, 0, ZO_EaseInQuadratic, 1, 2.5, SET_SCALE_FROM_SV)
+        self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 200, 200, ZO_EaseOutQuadratic, 2.5, 1, SET_SCALE_FROM_SV)
+    elseif animType == "silence_visible" then
+        self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 250, 0, ZO_EaseInQuadratic, 1, 1.5, SET_SCALE_FROM_SV)
+        self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 250, 250, ZO_EaseOutQuadratic, 1.5, 1, SET_SCALE_FROM_SV)
+    elseif animType == "stagger" then
+        self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 50, 0, ZO_EaseInQuadratic, 0, 1)
+        self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 50, 0, ZO_EaseInQuadratic, 1, 1.5, SET_SCALE_FROM_SV)
+        self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 50, 100, ZO_EaseOutQuadratic, 1.5, 1, SET_SCALE_FROM_SV)
+    elseif animType == "immune" then
+        self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 10, 0, ZO_EaseInQuadratic, 0, 0.6)
+        self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, immuneDisplayTimeAtBuild, 100, ZO_EaseInOutQuadratic, 0.6, 0)
+    end
+
+    -- One stable OnStop per cached timeline; closure intentionally captures
+    -- `self` and the cache entry's `anchor` slot so we can update the anchor
+    -- snapshot per play without re-binding the handler.
+    local cacheEntry =
+    {
+        timeline = timeline,
+        dynamics = dynamics,
+        controlScale = controlScaleAtBuild,
+        immuneDisplayTime = immuneDisplayTimeAtBuild,
+        anchor = {},
+    }
+
+    timeline:SetHandler("OnStop", function ()
+                            control:SetScale(CombatInfo.SV.cct.controlScale)
+                            local a = cacheEntry.anchor
+                            if a.point then
+                                control:ClearAnchors()
+                                control:SetAnchor(a.point, a.relativeTo, a.relativePoint, a.offsetX, a.offsetY)
+                            end
+                            self.currentlyPlaying = nil
+                            self.immunePlaying = nil
+                        end, "OnStop")
+
+    return cacheEntry
 end
 
 --- @param control Control
@@ -1395,56 +1499,76 @@ function CrowdControlTracker:StartAnimation(control, animType, test)
         self.immunePlaying:Stop()
     end
 
+    if not self.timelineCache then
+        self.timelineCache = {}
+    end
+
+    -- Split "silence" into two cache slots — the original code branched on
+    -- LUIE_CCTracker:GetAlpha() < 1 with completely different keyframe shapes
+    -- (different scale magnitudes + a CCTracker alpha fade-in). Each shape
+    -- gets its own cached timeline.
+    local effectiveAnimType = animType
+    if animType == "silence" then
+        if LUIE_CCTracker:GetAlpha() < 1 then
+            effectiveAnimType = "silence_hidden"
+        else
+            LUIE_CCTracker:SetAlpha(1)
+            effectiveAnimType = "silence_visible"
+        end
+    end
+
     for i = 0, MAX_ANCHORS - 1 do
         local isValidAnchor, point, relativeTo, relativePoint, offsetX, offsetY, anchorConstrains = control:GetAnchor(i)
         if isValidAnchor then
             control:ClearAnchors()
             control:SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY, anchorConstrains)
 
-            local timeline = animationManager:CreateTimeline()
+            local cacheKey = tostring(control:GetName() or control) .. "::" .. effectiveAnimType
+            local cacheEntry = self.timelineCache[cacheKey]
 
-            if animType == "proc" then
+            -- Rebuild when SV inputs baked into keyframes have changed since cache build.
+            if cacheEntry then
+                if cacheEntry.controlScale ~= CombatInfo.SV.cct.controlScale or cacheEntry.immuneDisplayTime ~= CombatInfo.SV.cct.immuneDisplayTime then
+                    cacheEntry.timeline:Stop()
+                    cacheEntry.timeline:SetHandler("OnStop", nil, "OnStop")
+                    cacheEntry = nil
+                end
+            end
+
+            if not cacheEntry then
+                cacheEntry = BuildCachedAnimation(self, control, effectiveAnimType)
+                self.timelineCache[cacheKey] = cacheEntry
+            end
+
+            -- Update the anchor snapshot the OnStop closure will use to restore
+            -- this control's anchor when the animation completes.
+            local a = cacheEntry.anchor
+            a.point = point
+            a.relativeTo = relativeTo
+            a.relativePoint = relativePoint
+            a.offsetX = offsetX
+            a.offsetY = offsetY
+
+            -- Apply per-play dynamic keyframe values (the only state the original
+            -- code recomputed per CC event).
+            if effectiveAnimType == "proc" then
                 if control:GetAlpha() == 0 then
-                    self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 100, 0, ZO_EaseInQuadratic, 0, 1)
+                    cacheEntry.dynamics.alpha:SetAlphaValues(0, 1)
                 else
+                    -- alpha already at 1; collapse animation to a no-op without
+                    -- requiring SetAlpha(1) (matches original guard at L1410).
                     control:SetAlpha(1)
+                    cacheEntry.dynamics.alpha:SetAlphaValues(1, 1)
                 end
-                self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 100, 0, ZO_EaseInQuadratic, 1, 2.2, SET_SCALE_FROM_SV)
-                self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 200, 200, ZO_EaseOutQuadratic, 2.2, 1, SET_SCALE_FROM_SV)
-            elseif animType == "end" or animType == "endstagger" then
-                local currentAlpha = control:GetAlpha()
-                self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 150, 0, ZO_EaseOutQuadratic, currentAlpha, 0)
-            elseif animType == "silence" then
-                if LUIE_CCTracker:GetAlpha() < 1 then
-                    self:InsertAnimationType(timeline, ANIMATION_ALPHA, LUIE_CCTracker, 100, 0, ZO_EaseInQuadratic, 0, 1)
-                    self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 100, 0, ZO_EaseInQuadratic, 1, 2.5, SET_SCALE_FROM_SV)
-                    self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 200, 200, ZO_EaseOutQuadratic, 2.5, 1, SET_SCALE_FROM_SV)
-                else
-                    LUIE_CCTracker:SetAlpha(1)
-                    self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 250, 0, ZO_EaseInQuadratic, 1, 1.5, SET_SCALE_FROM_SV)
-                    self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 250, 250, ZO_EaseOutQuadratic, 1.5, 1, SET_SCALE_FROM_SV)
-                end
-            elseif animType == "stagger" then
-                self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 50, 0, ZO_EaseInQuadratic, 0, 1)
-                self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 50, 0, ZO_EaseInQuadratic, 1, 1.5, SET_SCALE_FROM_SV)
-                self:InsertAnimationType(timeline, ANIMATION_SCALE, control, 50, 100, ZO_EaseOutQuadratic, 1.5, 1, SET_SCALE_FROM_SV)
-            elseif animType == "immune" then
+            elseif effectiveAnimType == "end" or effectiveAnimType == "endstagger" then
+                cacheEntry.dynamics.alpha:SetAlphaValues(control:GetAlpha(), 0)
+            elseif effectiveAnimType == "immune" then
+                -- Pre-anim SetScale was inline in original (L1432); keep it.
                 control:SetScale(CombatInfo.SV.cct.controlScale * 1)
-                self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, 10, 0, ZO_EaseInQuadratic, 0, 0.6)
-                self:InsertAnimationType(timeline, ANIMATION_ALPHA, control, CombatInfo.SV.cct.immuneDisplayTime, 100, ZO_EaseInOutQuadratic, 0.6, 0)
             end
 
-            local function OnStop()
-                control:SetScale(CombatInfo.SV.cct.controlScale)
-                control:ClearAnchors()
-                control:SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY)
-                self.currentlyPlaying = nil
-                self.immunePlaying = nil
-            end
-            timeline:SetHandler("OnStop", OnStop, "OnStop")
-
-            timeline:PlayFromStart()
-            return timeline
+            cacheEntry.timeline:PlayFromStart()
+            return cacheEntry.timeline
         end
     end
 end
@@ -1554,12 +1678,12 @@ end
 
 local function QueueCrowdControlPreview()
     if not CombatInfo.SV.cct.enabled then
-        CHAT_ROUTER:AddSystemMessage("[LUIE] Crowd Control Tracker is disabled.")
+        LUIE.PrintToChat("[LUIE] Crowd Control Tracker is disabled.", true)
         return
     end
 
     if CombatInfo.SV.cct.enabledOnlyInCyro and not LUIE.ResolvePVPZone() then
-        CHAT_ROUTER:AddSystemMessage("[LUIE] Crowd Control Tracker preview is limited to Cyrodiil.")
+        LUIE.PrintToChat("[LUIE] Crowd Control Tracker preview is limited to Cyrodiil.", true)
         return
     end
 
@@ -1568,7 +1692,7 @@ local function QueueCrowdControlPreview()
     end
 
     if not CrowdControlTracker.addonEnabled then
-        CHAT_ROUTER:AddSystemMessage("[LUIE] Crowd Control Tracker is unavailable in this location.")
+        LUIE.PrintToChat("[LUIE] Crowd Control Tracker is unavailable in this location.", true)
         return
     end
 

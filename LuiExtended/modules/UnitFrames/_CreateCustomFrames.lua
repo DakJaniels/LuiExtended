@@ -120,7 +120,7 @@ local function SetHealthBarAbovePowerHalo(backdrop, bar)
         return
     end
 
-    --bar:SetDrawLayer(DL_CONTROLS)
+    -- bar:SetDrawLayer(DL_CONTROLS)
     bar:SetDrawLevel(HEALTH_BAR_FILL_DRAW_LEVEL)
 
     local trauma = backdrop:GetNamedChild("_Trauma")
@@ -951,7 +951,7 @@ local function SetupCommonFrameActions()
                             powerBar.noHealingOverlay:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
                             powerBar.noHealingOverlay:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
                             powerBar.noHealingOverlay:SetTexture(LUIE_MEDIA_UNITFRAMES_TEXTURES_DIAGONAL_DDS)
-                            powerBar.noHealingOverlay:SetDrawLevel(1) -- Draw below shield (which has no explicit level, defaults higher due to creation order)
+                            powerBar.noHealingOverlay:SetDrawLevel(HEALTH_BAR_FILL_DRAW_LEVEL + 1) -- Above health fill (10), below shield (12)
                             powerBar.noHealingOverlay:SetHidden(true)
                             powerBar.noHealingOverlay:SetAlpha(0)
                             -- Dark red tint with transparency so health color shows through
@@ -985,7 +985,7 @@ local function SetupCommonFrameActions()
                             powerBar.noHealingStripe:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
                             powerBar.noHealingStripe:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
                             powerBar.noHealingStripe:SetTexture(LUIE_MEDIA_UNITFRAMES_TEXTURES_DIAGONAL_DDS)
-                            powerBar.noHealingStripe:SetDrawLevel(1) -- Draw below shield (same level as overlay, relies on creation order)
+                            powerBar.noHealingStripe:SetDrawLevel(HEALTH_BAR_FILL_DRAW_LEVEL + 1) -- Above health fill (10), below shield (12)
                             powerBar.noHealingStripe:SetColor(1, 0.3, 0.3, 0.8)
                             powerBar.noHealingStripe:SetHidden(true)
                         end
@@ -1038,8 +1038,8 @@ local function SetupCommonFrameActions()
                                 powerBar.shield:SetAnchor(TOPLEFT, powerBar.shieldbackdrop, TOPLEFT, 1, 1)
                                 powerBar.shield:SetAnchor(BOTTOMRIGHT, powerBar.shieldbackdrop, BOTTOMRIGHT, -1, -1)
                             end
-                            -- Draw shield above no-healing overlay
-                            powerBar.shield:SetDrawLevel(2)
+                            -- Draw shield above no-healing overlay and health fill (HEALTH_BAR_FILL_DRAW_LEVEL = 10)
+                            powerBar.shield:SetDrawLevel(HEALTH_BAR_FILL_DRAW_LEVEL + 2)
                         end
                     end
                 end

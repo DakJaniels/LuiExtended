@@ -600,3 +600,53 @@ function LUIE.InstallExternalSavedVarsLegacyCompat()
 
     LUIE.isExternalSavedVarsLegacyCompatInstalled = true
 end
+
+-- -----------------------------------------------------------------------------
+--  Chat output settings: LUIE_ChatAnnouncements_SV -> LUIESV.ChatOutput (account-wide routing)
+-- -----------------------------------------------------------------------------
+
+local CHAT_OUTPUT_MIGRATION_KEYS =
+{
+    "ChatMethod",
+    "ChatBypassFormat",
+    "ChatSystemAll",
+    "TimeStamp",
+    "TimeStampFormat",
+}
+
+--- Copy legacy chat routing keys from Chat Announcements module SV into `LUIE.SV.ChatOutput`.
+--- Tab/timestamp preferences become account-wide (or per-character when `CharacterSpecificSV` is on).
+function LUIE.MigrateChatOutputToCore()
+    if not LUIE.SV or LUIE.IsMigrationDone("chat_output_to_core") then
+        return
+    end
+
+    LUIE.SV.ChatOutput = LUIE.SV.ChatOutput or {}
+    local dest = LUIE.SV.ChatOutput
+
+    local globalName = LUIE.ModuleSavedVarNames.ChatAnnouncements
+    local src = LUIE.GetRawModuleAccountWideLeaf(globalName)
+    if LUIE.SV.CharacterSpecificSV then
+        local charSrc = LUIE.GetRawModuleCharacterLeaf(globalName)
+        if charSrc then
+            src = charSrc
+        end
+    end
+
+    if type(src) == "table" then
+        for _, key in ipairs(CHAT_OUTPUT_MIGRATION_KEYS) do
+            if src[key] ~= nil then
+                dest[key] = src[key]
+            end
+        end
+        if type(src.ChatTab) == "table" then
+            dest.ChatTab = dest.ChatTab or {}
+            ZO_DeepTableCopy(src.ChatTab, dest.ChatTab)
+        end
+        if type(src.TimeStampColor) == "table" then
+            dest.TimeStampColor = { unpack(src.TimeStampColor) }
+        end
+    end
+
+    LUIE.MarkMigrationDone("chat_output_to_core")
+end

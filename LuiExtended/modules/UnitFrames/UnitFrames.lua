@@ -23,8 +23,6 @@ local zo_strformat = zo_strformat
 
 local eventManager = GetEventManager()
 
-local bossThresholdControlSerial = 0
-
 local leaderIcons =
 {
     [0] = [[/esoui/art/icons/heraldrycrests_misc_blank_01.dds]],
@@ -116,6 +114,7 @@ function UnitFrames.CustomFramesApplyBarAlignment()
         if stamBar and stamBar.bar then
             local staminaAlignment = UnitFrames.SV.BarAlignPlayerStamina or 1
             stamBar.bar:SetBarAlignment(staminaAlignment - 1)
+            UnitFrames.PlayerDodgePrediction.StopStaminaBarSmoothAnimation(stamBar.bar)
         end
         UnitFrames.PlayerDodgePrediction.Refresh()
     end
@@ -170,15 +169,15 @@ function UnitFrames.Initialize(enabled)
     end
 
     -- Migrate old string-based font styles to numeric constants (run once)
-    -- Migrate font styles (string/display/nil -> valid 0-7); run once per account
+    -- Migrate font styles (string/display/nil -> valid 0-7); run once per account.
+    -- Per-category CustomFrameAppearance.fontStyle values are normalized inside
+    -- MigrateCustomFrameAppearance, so only the default font style is handled here.
     if not LUIE.IsMigrationDone("unitframes_fontstyles_v2") then
         UnitFrames.SV.DefaultFontStyle = LUIE.MigrateFontStyle(UnitFrames.SV.DefaultFontStyle)
-        UnitFrames.SV.CustomFontStyle = LUIE.MigrateFontStyle(UnitFrames.SV.CustomFontStyle)
         LUIE.MarkMigrationDone("unitframes_fontstyles_v2")
     end
 
     UnitFrames.MigrateCustomFrameAppearance()
-    UnitFrames.MigrateCustomFrameAppearanceV2()
     UnitFrames.MigratePlayerTargetLabelFormats()
     UnitFrames.MigratePlayerTargetOverlayFlags()
     UnitFrames.MigratePowerOverlayDefaultOff()
@@ -687,9 +686,13 @@ local function ApplyThresholdStageToLabel(label, state)
     label:SetColor(c[1], c[2], c[3], c[4])
 end
 
-local function CreateThresholdLine(parent)
-    bossThresholdControlSerial = bossThresholdControlSerial + 1
-    local line = parent:CreateControl("$(parent)ThresholdLine" .. bossThresholdControlSerial, CT_BACKDROP)
+--- @param parent Control
+--- @param nameSuffix string|number Unique-per-parent suffix; used to build a stable
+--- control name so reused indices don't allocate new names each call (previously
+--- a global monotonic serial that climbed forever).
+--- @return BackdropControl line
+local function CreateThresholdLine(parent, nameSuffix)
+    local line = parent:CreateControl("$(parent)ThresholdLine" .. tostring(nameSuffix), CT_BACKDROP)
     line:SetCenterColor(BOSS_THRESHOLD_MARKER_COLOR[1], BOSS_THRESHOLD_MARKER_COLOR[2], BOSS_THRESHOLD_MARKER_COLOR[3], BOSS_THRESHOLD_MARKER_COLOR[4])
     line:SetEdgeColor(BOSS_THRESHOLD_MARKER_COLOR[1], BOSS_THRESHOLD_MARKER_COLOR[2], BOSS_THRESHOLD_MARKER_COLOR[3], BOSS_THRESHOLD_MARKER_COLOR[4])
     line:SetEdgeTexture("", 1, 1, 0, 0)
@@ -701,10 +704,14 @@ local function CreateThresholdLine(parent)
     return line
 end
 
-local function CreateThresholdLabel(parent, dimensions, isBottom)
-    bossThresholdControlSerial = bossThresholdControlSerial + 1
+--- @param parent Control
+--- @param dimensions table {width, height}
+--- @param isBottom boolean
+--- @param nameSuffix string|number Stable per-parent suffix; see CreateThresholdLine.
+--- @return LabelControl label
+local function CreateThresholdLabel(parent, dimensions, isBottom, nameSuffix)
     local labelSuffix = isBottom and "ThresholdLabelBottom" or "ThresholdLabelTop"
-    local label = parent:CreateControl("$(parent)" .. labelSuffix .. bossThresholdControlSerial, CT_LABEL)
+    local label = parent:CreateControl("$(parent)" .. labelSuffix .. tostring(nameSuffix), CT_LABEL)
     if ZO_IsConsoleOrGameCoreUI() then
         label:SetFont("$(GAMEPAD_MEDIUM_FONT)|16|soft-shadow-thick")
     else
@@ -746,7 +753,10 @@ local function ApplyMultiLineToFrame(healthFrame, lineX, height, stage)
         end
     end
     if not marker then
-        marker = { line = CreateThresholdLine(container) }
+        -- Stable name keyed by parent-local slot (#markers + 1) — no monotonic
+        -- global serial, and the name string is reused if we never expand past
+        -- this slot again.
+        marker = { line = CreateThresholdLine(container, #markers + 1) }
         table_insert(markers, marker)
     end
 
@@ -850,13 +860,13 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
     for idx, column in ipairs(thresholdInfo.columns) do
         local topLabel = stack.topLabels[idx]
         if not topLabel then
-            topLabel = CreateThresholdLabel(container, BOSS_THRESHOLD_TOP_LABEL_DIMENSIONS, false)
+            topLabel = CreateThresholdLabel(container, BOSS_THRESHOLD_TOP_LABEL_DIMENSIONS, false, idx)
             stack.topLabels[idx] = topLabel
         end
 
         local bottomLabel = stack.bottomLabels[idx]
         if not bottomLabel then
-            bottomLabel = CreateThresholdLabel(container, bottomDim, true)
+            bottomLabel = CreateThresholdLabel(container, bottomDim, true, idx)
             bottomLabel:SetTransformNormalizedOriginPoint(0.5, 0.5)
             bottomLabel:SetTransformRotationZ(ZO_HALF_PI)
             stack.bottomLabels[idx] = bottomLabel
@@ -864,7 +874,7 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
 
         local commonLine = stack.commonLines[idx]
         if not commonLine then
-            commonLine = CreateThresholdLine(container)
+            commonLine = CreateThresholdLine(container, idx)
             stack.commonLines[idx] = commonLine
         end
 
@@ -1184,6 +1194,7 @@ function UnitFrames.OnUnitCreated(eventId, unitTag)
         -- Make sure we do not try to update bars on this unitTag before full group update is complete
         if "group" == (zo_strsub(unitTag, 0, 5)) then
             UnitFrames.CustomFrames[unitTag] = nil
+            UnitFrames.ClearPowerUpdateSnapshot(unitTag)
         end
         -- We should avoid calling full update on CustomFrames too often
         if not g_PendingUpdate.Group.flag then
@@ -1198,6 +1209,7 @@ function UnitFrames.OnUnitCreated(eventId, unitTag)
     if UnitFrames.CustomFrames["PetGroup1"] ~= nil then
         if "playerpet" == (zo_strsub(unitTag, 0, 9)) then
             UnitFrames.CustomFrames[unitTag] = nil
+            UnitFrames.ClearPowerUpdateSnapshot(unitTag)
         end
         UnitFrames.CustomPetUpdate()
     end
@@ -1212,6 +1224,10 @@ function UnitFrames.OnUnitDestroyed(eventId, unitTag)
     -- if LUIE.IsDevDebugEnabled() then
     --     LUIE:Log("Debug",string_format("[%s] OnUnitDestroyed: %s (%s)", GetTimeString(), unitTag, GetUnitName(unitTag)))
     -- end
+    UnitFrames.ClearPowerUpdateSnapshot(unitTag)
+    -- Visualizer modules are singletons; nil their per-unitTag recency-info
+    -- subtree so it can be collected (otherwise it persists for the session).
+    UnitFrames.ClearVisualizerRecencyInfo(unitTag)
     -- Make sure we do not try to update bars on this unitTag before full group update is complete
     if "group" == (zo_strsub(unitTag, 0, 5)) then
         UnitFrames.CustomFrames[unitTag] = nil
@@ -1437,6 +1453,7 @@ end
 
 -- Used to query initial values and display them in corresponding control
 function UnitFrames.ReloadValues(unitTag)
+    UnitFrames.ClearPowerUpdateSnapshot(unitTag)
     -- Build list of powerTypes this unitTag has in both DefaultFrames and CustomFrames
     local powerTypes = {}
     if UnitFrames.DefaultFrames[unitTag] then
@@ -3592,10 +3609,43 @@ local function calculateFramePosition(index, itemsPerColumn, spacerHeight, resou
     return xOffset, yOffset
 end
 
+-- Compact-frame name labels are anchored inside the _Health backdrop, so the
+-- layout normally caps their height to BarHeight - 2. When the caption font is
+-- larger than the bar height, ESO auto-shrinks the rendered glyphs unless the
+-- label is grown to fit the font. This returns the height the label needs.
+local function resolveCompactNameHeight(category, barHeight)
+    local base = barHeight - 2
+    local sizeCaption = UnitFrames.GetCustomFrameCaptionSize and UnitFrames.GetCustomFrameCaptionSize(category)
+    if not sizeCaption or sizeCaption <= 0 then
+        return base
+    end
+    local needed = math.ceil(2 * sizeCaption)
+    return zo_max(base, needed)
+end
+
+-- Applies a (possibly clipped) width/height to a name label. ESO's
+-- Control:SetDimensions silently ignores values <= 0 on labels in
+-- TEXT_WRAP_MODE_TRUNCATE mode and falls back to auto-sizing-to-text, so the
+-- *_NameClip sliders need to explicitly hide the label when the user dials the
+-- clip past the available room. Returning the label to visible whenever a
+-- positive width is available keeps the slider symmetric across its full range.
+local function ApplyClippedNameWidth(nameLabel, computedWidth, height)
+    if not nameLabel then return end
+    if computedWidth <= 0 then
+        nameLabel:SetHidden(true)
+        return
+    end
+    nameLabel:SetHidden(false)
+    nameLabel:SetDimensions(computedWidth, height)
+end
+UnitFrames.ApplyClippedNameWidth = ApplyClippedNameWidth
+
 -- Determines which icon to show and configures name positioning accordingly
 local function applyIconSettings(unitFrame, unitTag, role, healthBackdrop)
-    local nameWidth = UnitFrames.SV.RaidBarWidth - UnitFrames.SV.RaidNameClip - 27
-    local nameHeight = UnitFrames.SV.RaidBarHeight - 2
+    -- Clamp to >= 0 so extreme RaidNameClip values produce a 0-wide (invisible)
+    -- name label instead of a negative SetDimensions arg that ESO silently ignores.
+    local nameWidth = zo_max(0, UnitFrames.SV.RaidBarWidth - UnitFrames.SV.RaidNameClip - 27)
+    local nameHeight = resolveCompactNameHeight("raid", UnitFrames.SV.RaidBarHeight)
     local iconOption = UnitFrames.SV.RaidIconOptions or 1
 
     -- Determine which icon to show (if any)
@@ -3626,13 +3676,13 @@ local function applyIconSettings(unitFrame, unitTag, role, healthBackdrop)
 
     -- Apply settings based on what we're showing
     if showRoleIcon or showClassIcon then
-        unitFrame.name:SetDimensions(nameWidth, nameHeight)
+        ApplyClippedNameWidth(unitFrame.name, nameWidth, nameHeight)
         unitFrame.name:SetAnchor(LEFT, healthBackdrop, LEFT, 22, 0)
         unitFrame.roleIcon:SetHidden(not showRoleIcon)
         unitFrame.classIcon:SetHidden(not showClassIcon)
     else
         -- No icon shown
-        unitFrame.name:SetDimensions(UnitFrames.SV.RaidBarWidth - UnitFrames.SV.RaidNameClip - 10, nameHeight)
+        ApplyClippedNameWidth(unitFrame.name, zo_max(0, UnitFrames.SV.RaidBarWidth - UnitFrames.SV.RaidNameClip - 10), nameHeight)
         unitFrame.name:SetAnchor(LEFT, healthBackdrop, LEFT, 5, 0)
         unitFrame.roleIcon:SetHidden(true)
         unitFrame.classIcon:SetHidden(true)
@@ -3711,9 +3761,14 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
         end
     end
 
-    local maxSlots = layoutAllRaidSlots and 12 or GetGroupSize()
+    -- Always iterate all 12 raid slots so dimensions/anchors stay in sync with current SV
+    -- (RaidBarWidth, RaidBarHeight, RaidNameClip, RaidIconOptions). This mirrors
+    -- CustomFramesApplyLayoutGroup which always iterates 1..4. Without this, moving the
+    -- RaidNameClip slider while solo (GetGroupSize() == 0) wouldn't update preview frames
+    -- and any slot beyond the real group size would keep stale geometry.
+    local realGroupSize = GetGroupSize()
 
-    for i = 1, maxSlots do
+    for i = 1, 12 do
         local index
         local unitTag
 
@@ -3721,43 +3776,57 @@ function UnitFrames.CustomFramesApplyLayoutRaid(unhide, layoutAllRaidSlots)
             index = i
             unitTag = "player"
         else
-            index = UnitFrames.SV.SortRoleRaid and playerList[i] or i
-            unitTag = GetGroupUnitTagByIndex(index)
+            if UnitFrames.SV.SortRoleRaid then
+                -- playerList only contains entries for actually grouped members; for empty
+                -- slots fall back to the natural slot index so we still update geometry.
+                index = playerList[i] or i
+            else
+                index = i
+            end
+            if i <= realGroupSize then
+                unitTag = GetGroupUnitTagByIndex(index)
+            else
+                unitTag = nil
+            end
         end
 
         local unitFrame = UnitFrames.CustomFrames["RaidGroup" .. index]
-        local rhb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
+        if unitFrame then
+            local rhb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
 
-        -- Calculate position and set frame dimensions
-        local xOffset, yOffset = calculateFramePosition(i, itemsPerColumn, spacerHeight, resourceBarsHeight, totalFrameWidth, frameSpacing)
-        unitFrame.control:ClearAnchors()
-        unitFrame.control:SetAnchor(TOPLEFT, raid, TOPLEFT, xOffset, yOffset)
-        unitFrame.control:SetDimensions(totalFrameWidth, totalFrameHeight)
+            -- Calculate position and set frame dimensions
+            local xOffset, yOffset = calculateFramePosition(i, itemsPerColumn, spacerHeight, resourceBarsHeight, totalFrameWidth, frameSpacing)
+            unitFrame.control:ClearAnchors()
+            unitFrame.control:SetAnchor(TOPLEFT, raid, TOPLEFT, xOffset, yOffset)
+            unitFrame.control:SetDimensions(totalFrameWidth, totalFrameHeight)
 
-        -- Apply icon settings
-        local role = GetGroupMemberSelectedRole(unitTag)
-        applyIconSettings(unitFrame, unitTag, role, rhb)
+            -- Apply icon settings (uses RaidIconOptions, not unitTag-specific for iconOpt=2/3)
+            local role = unitTag and GetGroupMemberSelectedRole(unitTag) or nil
+            applyIconSettings(unitFrame, unitTag, role, rhb)
 
-        -- Override for group leader
-        if IsUnitGroupLeader(unitTag) then
-            unitFrame.name:SetDimensions(UnitFrames.SV.RaidBarWidth - UnitFrames.SV.RaidNameClip - 27, UnitFrames.SV.RaidBarHeight - 2)
-            unitFrame.name:SetAnchor(LEFT, rhb, LEFT, 22, 0)
-            unitFrame.roleIcon:SetHidden(true)
-            unitFrame.classIcon:SetHidden(true)
-            unitFrame.leader:SetTexture(leaderIcons[1])
-        else
-            unitFrame.leader:SetTexture(leaderIcons[0])
-        end
+            local raidNameHeight = resolveCompactNameHeight("raid", UnitFrames.SV.RaidBarHeight)
 
-        -- Set label dimensions
-        unitFrame.dead:SetDimensions(UnitFrames.SV.RaidBarWidth - 50, UnitFrames.SV.RaidBarHeight - 2)
-        unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.RaidBarWidth - 50, UnitFrames.SV.RaidBarHeight - 2)
+            -- Override for group leader (only when slot has a real, leadered member)
+            if unitTag and IsUnitGroupLeader(unitTag) then
+                ApplyClippedNameWidth(unitFrame.name, zo_max(0, UnitFrames.SV.RaidBarWidth - UnitFrames.SV.RaidNameClip - 27), raidNameHeight)
+                unitFrame.name:SetAnchor(LEFT, rhb, LEFT, 22, 0)
+                unitFrame.roleIcon:SetHidden(true)
+                unitFrame.classIcon:SetHidden(true)
+                unitFrame.leader:SetTexture(leaderIcons[1])
+            else
+                unitFrame.leader:SetTexture(leaderIcons[0])
+            end
 
-        -- Override for offline players
-        if not IsUnitOnline(unitTag) then
-            unitFrame.name:SetDimensions(UnitFrames.SV.RaidBarWidth - UnitFrames.SV.RaidNameClip, UnitFrames.SV.RaidBarHeight - 2)
-            unitFrame.name:SetAnchor(LEFT, rhb, LEFT, 5, 0)
-            unitFrame.classIcon:SetHidden(true)
+            -- Set label dimensions (always — driven purely by SV geometry)
+            unitFrame.dead:SetDimensions(UnitFrames.SV.RaidBarWidth - 50, UnitFrames.SV.RaidBarHeight - 2)
+            unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.RaidBarWidth - 50, UnitFrames.SV.RaidBarHeight - 2)
+
+            -- Override for offline players (only meaningful when slot has a real member)
+            if unitTag and not IsUnitOnline(unitTag) then
+                ApplyClippedNameWidth(unitFrame.name, zo_max(0, UnitFrames.SV.RaidBarWidth - UnitFrames.SV.RaidNameClip), raidNameHeight)
+                unitFrame.name:SetAnchor(LEFT, rhb, LEFT, 5, 0)
+                unitFrame.classIcon:SetHidden(true)
+            end
         end
     end
 
@@ -3777,7 +3846,8 @@ function UnitFrames.CustomFramesApplyLayoutCompanion(unhide)
     unitFrame.control:ClearAnchors()
     unitFrame.control:SetAnchorFill(companion)
     unitFrame.control:SetDimensions(UnitFrames.SV.CompanionWidth, UnitFrames.SV.CompanionHeight)
-    unitFrame.name:SetDimensions(UnitFrames.SV.CompanionWidth - UnitFrames.SV.CompanionNameClip - 10, UnitFrames.SV.CompanionHeight - 2)
+    local companionNameHeight = resolveCompactNameHeight("companion", UnitFrames.SV.CompanionHeight)
+    ApplyClippedNameWidth(unitFrame.name, zo_max(0, UnitFrames.SV.CompanionWidth - UnitFrames.SV.CompanionNameClip - 10), companionNameHeight)
     unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.CompanionWidth - 50, UnitFrames.SV.CompanionHeight - 2)
 
     UnitFrames.CustomFramesTryUnhideTlw("companion", unhide)
@@ -3792,12 +3862,13 @@ function UnitFrames.CustomFramesApplyLayoutPet(unhide)
     local pet = UnitFrames.CustomFrames["PetGroup1"].tlw
     pet:SetDimensions(UnitFrames.SV.PetWidth, UnitFrames.SV.PetHeight * 7 + 21)
 
+    local petNameHeight = resolveCompactNameHeight("pet", UnitFrames.SV.PetHeight)
     for i = 1, 7 do
         local unitFrame = UnitFrames.CustomFrames["PetGroup" .. i]
         unitFrame.control:ClearAnchors()
         unitFrame.control:SetAnchor(TOPLEFT, pet, TOPLEFT, 0, (UnitFrames.SV.PetHeight + 3) * (i - 1))
         unitFrame.control:SetDimensions(UnitFrames.SV.PetWidth, UnitFrames.SV.PetHeight)
-        unitFrame.name:SetDimensions(UnitFrames.SV.PetWidth - UnitFrames.SV.PetNameClip - 10, UnitFrames.SV.PetHeight - 2)
+        ApplyClippedNameWidth(unitFrame.name, zo_max(0, UnitFrames.SV.PetWidth - UnitFrames.SV.PetNameClip - 10), petNameHeight)
         unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.PetWidth - 50, UnitFrames.SV.PetHeight - 2)
     end
 
@@ -3818,12 +3889,13 @@ function UnitFrames.CustomFramesApplyLayoutBosses(requestedUnhide)
     local bossesTotalHeight = barHeight * bossSlotCount + spacing * zo_max(0, bossSlotCount - 1)
     bosses:SetDimensions(UnitFrames.SV.BossBarWidth, bossesTotalHeight)
 
+    local bossNameHeight = resolveCompactNameHeight("boss", UnitFrames.SV.BossBarHeight)
     for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
         local unitFrame = UnitFrames.CustomFrames["boss" .. i]
         unitFrame.control:ClearAnchors()
         unitFrame.control:SetAnchor(TOPLEFT, bosses, TOPLEFT, 0, (barHeight + spacing) * (i - BOSS_RANK_ITERATION_BEGIN))
         unitFrame.control:SetDimensions(UnitFrames.SV.BossBarWidth, UnitFrames.SV.BossBarHeight)
-        unitFrame.name:SetDimensions(UnitFrames.SV.BossBarWidth - 50, UnitFrames.SV.BossBarHeight - 2)
+        unitFrame.name:SetDimensions(UnitFrames.SV.BossBarWidth - 50, bossNameHeight)
         unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.BossBarWidth - 50, UnitFrames.SV.BossBarHeight - 2)
     end
 

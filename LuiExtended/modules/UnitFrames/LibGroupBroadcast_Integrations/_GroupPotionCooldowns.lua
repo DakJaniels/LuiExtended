@@ -30,6 +30,40 @@ local POTION_ICON = LUIE_MEDIA_ICONS_POTIONS_POTION_001_DDS
 -- We maintain our own cache because the library's GetUnitPotionData() is buggy
 local potionDataCache = {}
 
+-- Stored callback refs so Uninitialize() can unregister them via
+-- lgpc:UnregisterForEvent(eventName, callback) (LibGroupPotionCooldowns.lua:230)
+local groupCooldownUpdateCallback
+local playerCooldownUpdateCallback
+
+-- Evict cache entries for unitTags that are no longer in the active group.
+-- Called from group-change events so a /reloadui isn't required to release
+-- stale potionData tables held by the closure registry.
+local function EvictStaleUnitTagsFromCache()
+    if not IsUnitGrouped("player") then
+        for unitTag in pairs(potionDataCache) do
+            if unitTag ~= "player" then
+                potionDataCache[unitTag] = nil
+            end
+        end
+        return
+    end
+
+    local activeTags = { player = true }
+    local groupSize = GetGroupSize()
+    for i = 1, groupSize do
+        local tag = GetGroupUnitTagByIndex(i)
+        if tag then
+            activeTags[tag] = true
+        end
+    end
+
+    for unitTag in pairs(potionDataCache) do
+        if not activeTags[unitTag] then
+            potionDataCache[unitTag] = nil
+        end
+    end
+end
+
 local function GetPotionCooldownControls(frameData)
     if not frameData or not frameData.potionCooldown then return nil end
 
@@ -216,23 +250,23 @@ function GroupPotionCooldownsManager.Initialize()
     -- Register for cooldown updates
     -- Note: We rely ONLY on the event callbacks because the library's GetUnitPotionData()
     -- query method is buggy and returns nil/empty data even when cooldowns are active
-    lgpc:RegisterForEvent(LibGroupPotionCooldowns.EVENT_GROUP_COOLDOWN_UPDATE, function (unitTag, potionData)
-        -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE:Log("Debug","[LUIE] GROUP_COOLDOWN_UPDATE: " .. unitTag .. " isOnCooldown=" .. tostring(potionData.isOnCooldown))
-        -- end
-        -- Cache the data for periodic updates
+    groupCooldownUpdateCallback = function (unitTag, potionData)
         potionDataCache[unitTag] = potionData
         UpdatePotionCooldownDisplay(unitTag, potionData)
-    end)
+    end
+    lgpc:RegisterForEvent(LibGroupPotionCooldowns.EVENT_GROUP_COOLDOWN_UPDATE, groupCooldownUpdateCallback)
 
-    lgpc:RegisterForEvent(LibGroupPotionCooldowns.EVENT_PLAYER_COOLDOWN_UPDATE, function (unitTag, potionData)
-        -- if LUIE.IsDevDebugEnabled() then
-        --     LUIE:Log("Debug","[LUIE] PLAYER_COOLDOWN_UPDATE: " .. unitTag .. " isOnCooldown=" .. tostring(potionData.isOnCooldown))
-        -- end
-        -- Cache the data for periodic updates
+    playerCooldownUpdateCallback = function (unitTag, potionData)
         potionDataCache[unitTag] = potionData
         UpdatePotionCooldownDisplay(unitTag, potionData)
-    end)
+    end
+    lgpc:RegisterForEvent(LibGroupPotionCooldowns.EVENT_PLAYER_COOLDOWN_UPDATE, playerCooldownUpdateCallback)
+
+    -- Prune cache when group composition changes so departed members'
+    -- potionData tables can be released; without this, every distinct
+    -- group/raid unitTag ever seen retains its last potionData for the session.
+    EVENT_MANAGER:RegisterForEvent("LUIE_GroupPotionCooldowns_GroupLeft", EVENT_GROUP_MEMBER_LEFT, EvictStaleUnitTagsFromCache)
+    EVENT_MANAGER:RegisterForEvent("LUIE_GroupPotionCooldowns_GroupUpdate", EVENT_GROUP_UPDATE, EvictStaleUnitTagsFromCache)
 
     -- Periodic update to refresh displays (for remaining time countdown)
     if Settings.showRemainingTime then
@@ -250,6 +284,32 @@ function GroupPotionCooldownsManager.Initialize()
     end
 
     isInitialized = true
+end
+
+-- Tear down everything Initialize() set up. Pairs symmetric unregisters with the
+-- registers above so disabling the integration at runtime (without /reloadui)
+-- releases the closures held by LibGroupPotionCooldowns' callbackRegistry and
+-- the EVENT_MANAGER update slot.
+function GroupPotionCooldownsManager.Uninitialize()
+    if not isInitialized then return end
+
+    if lgpc then
+        if groupCooldownUpdateCallback then
+            lgpc:UnregisterForEvent(LibGroupPotionCooldowns.EVENT_GROUP_COOLDOWN_UPDATE, groupCooldownUpdateCallback)
+        end
+        if playerCooldownUpdateCallback then
+            lgpc:UnregisterForEvent(LibGroupPotionCooldowns.EVENT_PLAYER_COOLDOWN_UPDATE, playerCooldownUpdateCallback)
+        end
+    end
+    groupCooldownUpdateCallback = nil
+    playerCooldownUpdateCallback = nil
+
+    EVENT_MANAGER:UnregisterForEvent("LUIE_GroupPotionCooldowns_GroupLeft", EVENT_GROUP_MEMBER_LEFT)
+    EVENT_MANAGER:UnregisterForEvent("LUIE_GroupPotionCooldowns_GroupUpdate", EVENT_GROUP_UPDATE)
+    EVENT_MANAGER:UnregisterForUpdate("LUIE_GroupPotionCooldowns_Update")
+
+    ZO_ClearTable(potionDataCache)
+    isInitialized = false
 end
 
 -- Setup potion cooldown displays on all frames

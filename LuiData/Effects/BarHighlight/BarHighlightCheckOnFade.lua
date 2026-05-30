@@ -40,8 +40,15 @@ local barHighlightCheckOnFade =
 {
 
     -- Dragonknight
-    [108798] = { id1 = 21014, unitTag = PLAYER_UNIT_TAG },             -- Protective Plate
-    [31898] = { id1 = 20253, id2 = 31898, unitTag = TARGET_UNIT_TAG }, -- Burning Talons
+    [108798] = { id1 = 21014, unitTag = PLAYER_UNIT_TAG },                             -- Fleetstep Wings
+    [122407] = { id1 = 21017, unitTag = PLAYER_UNIT_TAG },                             -- Protect the Brood
+    [31898] = { id1 = 20253, id2 = 31898, unitTag = TARGET_UNIT_TAG },                 -- Burning Talons
+    [32744] = { id1 = 61698, id2 = 61705, unitTag = PLAYER_UNIT_TAG },                 -- Blood of the Green Dragon HoT fade → Major Fortitude / Major Endurance (remaining duration)
+    [261754] = { id1 = 258203, id2 = 31820, unitTag = PLAYER_UNIT_TAG },               -- Volcanic Ward primary buff fade → secondary / slotted remainder
+    [258203] = { id1 = 261754, id2 = 31820, unitTag = PLAYER_UNIT_TAG },               -- Volcanic Ward secondary buff fade → primary / slotted remainder
+    [31808] = { id1 = 20328, unitTag = PLAYER_UNIT_TAG },                              -- Earthshield Mantle shield fade → mantle player buff remainder
+    [54931] = { id1 = 61742, id2 = 79717, id3 = 54931, unitTag = TARGET_UNIT_TAG },    -- Fossilize stun fade → Minor Breach / Minor Vuln / stun on target (reticle resync)
+    [259138] = { id1 = 61742, id2 = 259138, id3 = 259137, unitTag = TARGET_UNIT_TAG }, -- Shattering Rocks stun fade → breach display / stun / breach combat on target
 
     -- Nightblade
     [125314] = { duration = 90620, durationMod = 125314, unitTag = PLAYER_UNIT_TAG }, -- Phantasmal Escape --> Major Evasion

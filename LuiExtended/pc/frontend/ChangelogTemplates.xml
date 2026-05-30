@@ -3,70 +3,70 @@
 -->
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
-	<Controls>
-		<Control name="LUIE_Changelog_SectionHeader_Template"
-		         mouseEnabled="true"
-		         hidden="true"
-		         virtual="true">
-			<Dimensions x="830"
-			            y="40"/>
-			<Controls>
-				<Backdrop name="$(parent)Bg">
-					<AnchorFill/>
-				</Backdrop>
-				<Label name="$(parent)Title"
-				       font="ZoFontWinH4"
-				       wrapMode="ELLIPSIS"
-				       horizontalAlignment="LEFT"
-				       verticalAlignment="CENTER">
-					<Anchor point="LEFT"
-					        relativeTo="$(parent)"
-					        relativePoint="LEFT"
-					        offsetX="12"
-					        offsetY="0"/>
-					<Anchor point="RIGHT"
-					        relativeTo="$(parent)"
-					        relativePoint="RIGHT"
-					        offsetX="-48"
-					        offsetY="0"/>
-				</Label>
-				<Button name="$(parent)Toggle"
-				        font="ZoFontGame"
-				        text="+"
-				        mouseEnabled="true">
-					<Dimensions x="28"
-					            y="28"/>
-					<Anchor point="RIGHT"
-					        relativeTo="$(parent)"
-					        relativePoint="RIGHT"
-					        offsetX="-8"
-					        offsetY="0"/>
-				</Button>
-			</Controls>
-		</Control>
-		<Control name="LUIE_Changelog_SectionBody_Template"
-		         hidden="true"
-		         virtual="true">
-			<Controls>
-				<Backdrop name="$(parent)Bg">
-					<Anchor point="TOPLEFT"
-					        relativeTo="$(parent)"
-					        relativePoint="TOPLEFT"/>
-					<Anchor point="TOPRIGHT"
-					        relativeTo="$(parent)"
-					        relativePoint="TOPRIGHT"/>
-				</Backdrop>
-				<Label name="$(parent)Text"
-				       font="ZoFontGame"
-				       wrapMode="ELLIPSIS"
-				       horizontalAlignment="LEFT">
-					<Anchor point="TOPLEFT"
-					        relativeTo="$(parent)"
-					        relativePoint="TOPLEFT"
-					        offsetX="8"
-					        offsetY="8"/>
-				</Label>
-			</Controls>
-		</Control>
-	</Controls>
+  <Controls>
+    <Control name="LUIE_Changelog_SectionHeader_Template"
+             mouseEnabled="true"
+             hidden="true"
+             virtual="true">
+      <Dimensions x="830"
+                  y="40" />
+      <Controls>
+        <Backdrop name="$(parent)Bg">
+          <AnchorFill />
+        </Backdrop>
+        <Label name="$(parent)Title"
+               font="ZoFontWinH4"
+               wrapMode="ELLIPSIS"
+               horizontalAlignment="LEFT"
+               verticalAlignment="CENTER">
+          <Anchor point="LEFT"
+                  relativeTo="$(parent)"
+                  relativePoint="LEFT"
+                  offsetX="12"
+                  offsetY="0" />
+          <Anchor point="RIGHT"
+                  relativeTo="$(parent)"
+                  relativePoint="RIGHT"
+                  offsetX="-48"
+                  offsetY="0" />
+        </Label>
+        <Button name="$(parent)Toggle"
+                font="ZoFontGame"
+                text="+"
+                mouseEnabled="true">
+          <Dimensions x="28"
+                      y="28" />
+          <Anchor point="RIGHT"
+                  relativeTo="$(parent)"
+                  relativePoint="RIGHT"
+                  offsetX="-8"
+                  offsetY="0" />
+        </Button>
+      </Controls>
+    </Control>
+    <Control name="LUIE_Changelog_SectionBody_Template"
+             hidden="true"
+             virtual="true">
+      <Controls>
+        <Backdrop name="$(parent)Bg">
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)"
+                  relativePoint="TOPLEFT" />
+          <Anchor point="TOPRIGHT"
+                  relativeTo="$(parent)"
+                  relativePoint="TOPRIGHT" />
+        </Backdrop>
+        <Label name="$(parent)Text"
+               font="ZoFontGame"
+               wrapMode="ELLIPSIS"
+               horizontalAlignment="LEFT">
+          <Anchor point="TOPLEFT"
+                  relativeTo="$(parent)"
+                  relativePoint="TOPLEFT"
+                  offsetX="8"
+                  offsetY="8" />
+        </Label>
+      </Controls>
+    </Control>
+  </Controls>
 </GuiXml>

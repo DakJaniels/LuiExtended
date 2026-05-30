@@ -661,13 +661,6 @@ ChatAnnouncements.Brackets =
 --- @field BracketOptionCollectible integer
 --- @field BracketOptionCollectibleUse integer
 --- @field BracketOptionAchievement integer
---- @field ChatMethod string
---- @field ChatBypassFormat boolean
---- @field ChatTab CA_ChatTab
---- @field ChatSystemAll boolean
---- @field TimeStamp boolean
---- @field TimeStampFormat string
---- @field TimeStampColor CA_Color
 --- @field Achievement CAAchievementDefaults
 --- @field Group CAGroupDefaults
 --- @field Social CASocialDefaults
@@ -695,13 +688,6 @@ ChatAnnouncements.Defaults =
     BracketOptionCollectible = 2,
     BracketOptionCollectibleUse = 2,
     BracketOptionAchievement = 2,
-    ChatMethod = "Print to All Tabs",
-    ChatBypassFormat = false,
-    ChatTab = { [1] = true, [2] = true, [3] = true, [4] = true, [5] = true },
-    ChatSystemAll = true,
-    TimeStamp = false,
-    TimeStampFormat = "HH:m:s",
-    TimeStampColor = { 143 / 255, 143 / 255, 143 / 255 },
 
     -- Achievements
     Achievement =

@@ -427,8 +427,15 @@ end
 
 --- Register scene callback for the game menu
 function Unlock.RegisterSceneCallback()
+    -- ZO_Scene:RegisterCallback stacks; without this guard a second call (e.g.
+    -- from a re-run Initialize) would stack a second StateChange handler that
+    -- would fire OnSceneChange twice on every menu open/close.
+    if Unlock._sceneCallbackInstalled then
+        return
+    end
     local scene = sceneManager:GetScene("gameMenuInGame")
     scene:RegisterCallback("StateChange", Unlock.OnSceneChange)
+    Unlock._sceneCallbackInstalled = true
 end
 
 -- -----------------------------------------------------------------------------

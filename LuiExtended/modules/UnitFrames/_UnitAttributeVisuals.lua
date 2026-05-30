@@ -131,6 +131,70 @@ end
 -- Power Update Handler
 -- -----------------------------------------------------------------------------
 
+UnitFrames.powerUpdateSnapshot = UnitFrames.powerUpdateSnapshot or {}
+
+--- Clears cached power values used to skip redundant UpdateAttribute work (see ZO_PlayerAttributeBar:OnPowerUpdate).
+--- @param unitTag string
+--- @param powerType CombatMechanicFlags|nil If nil, clears all power types for unitTag
+function UnitFrames.ClearPowerUpdateSnapshot(unitTag, powerType)
+    local unitSnap = UnitFrames.powerUpdateSnapshot[unitTag]
+    if not unitSnap then
+        return
+    end
+    if powerType then
+        unitSnap[powerType] = nil
+    else
+        UnitFrames.powerUpdateSnapshot[unitTag] = nil
+    end
+end
+
+--- Drops the per-unitTag updateRecencyInfo subtree on every registered visualizer
+--- module so its nested tables can be collected when a unit is destroyed.
+--- Visualizer modules are singletons (one set in UnitFrames.VisualizerModules,
+--- mixed into each LUIE_UnitAttributeVisualizer), so without this call every
+--- unitTag ever seen by a UAV event retains its full sequence-id subtree until
+--- /reloadui.
+--- @param unitTag string
+function UnitFrames.ClearVisualizerRecencyInfo(unitTag)
+    if not unitTag then return end
+    local modules = UnitFrames.VisualizerModules
+    if not modules then return end
+    for _, module in pairs(modules) do
+        if module and module.ClearUnitTag then
+            module:ClearUnitTag(unitTag)
+        end
+    end
+end
+
+--- @param unitTag string
+--- @param powerType CombatMechanicFlags
+--- @param powerValue integer
+--- @param powerMax integer
+--- @param powerEffectiveMax integer
+--- @return boolean
+function UnitFrames.HasPowerUpdateChanged(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
+    local unitSnap = UnitFrames.powerUpdateSnapshot[unitTag]
+    local snap = unitSnap and unitSnap[powerType]
+    if not snap then
+        return true
+    end
+    return snap[1] ~= powerValue or snap[2] ~= powerMax or snap[3] ~= powerEffectiveMax
+end
+
+--- @param unitTag string
+--- @param powerType CombatMechanicFlags
+--- @param powerValue integer
+--- @param powerMax integer
+--- @param powerEffectiveMax integer
+function UnitFrames.CommitPowerUpdateSnapshot(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
+    local unitSnap = UnitFrames.powerUpdateSnapshot[unitTag]
+    if not unitSnap then
+        unitSnap = {}
+        UnitFrames.powerUpdateSnapshot[unitTag] = unitSnap
+    end
+    unitSnap[powerType] = { powerValue, powerMax, powerEffectiveMax }
+end
+
 --- Runs on the EVENT_POWER_UPDATE listener.
 --- This handler fires every time unit attribute changes.
 ---
@@ -168,25 +232,33 @@ function UnitFrames.OnPowerUpdate(unitTag, powerIndex, powerType, powerValue, po
         end
     end
 
-    -- Update frames
-    if UnitFrames.DefaultFrames[unitTag] then
-        UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.DefaultFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
-    end
+    local powerChanged = UnitFrames.HasPowerUpdateChanged(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
+    if powerChanged then
+        UnitFrames.CommitPowerUpdateSnapshot(unitTag, powerType, powerValue, powerMax, powerEffectiveMax)
 
-    if UnitFrames.CustomFrames[unitTag] then
-        -- Special handling for reticleover health to skip critters and guards
-        if unitTag == "reticleover" and powerType == COMBAT_MECHANIC_FLAGS_HEALTH then
-            local isCritter = (UnitFrames.savedHealth.reticleover[3] <= 9)
-            local isGuard = IsUnitInvulnerableGuard("reticleover")
-            if (isCritter or isGuard) and powerValue >= 1 then
-                return
-            end
+        if UnitFrames.DefaultFrames[unitTag] then
+            UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.DefaultFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
         end
-        UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.CustomFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
+
+        if UnitFrames.CustomFrames[unitTag] then
+            -- Special handling for reticleover health to skip critters and guards
+            if unitTag == "reticleover" and powerType == COMBAT_MECHANIC_FLAGS_HEALTH then
+                local isCritter = (UnitFrames.savedHealth.reticleover[3] <= 9)
+                local isGuard = IsUnitInvulnerableGuard("reticleover")
+                if (isCritter or isGuard) and powerValue >= 1 then
+                    return
+                end
+            end
+            UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.CustomFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
+        end
+
+        if UnitFrames.AvaCustFrames[unitTag] then
+            UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.AvaCustFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
+        end
     end
 
-    if UnitFrames.AvaCustFrames[unitTag] then
-        UnitFrames.UpdateAttribute(unitTag, powerType, UnitFrames.AvaCustFrames[unitTag][powerType], powerValue, powerEffectiveMax, false, nil)
+    if not powerChanged then
+        return
     end
 
     -- Record state of power loss to change transparency of player frame
@@ -196,7 +268,9 @@ function UnitFrames.OnPowerUpdate(unitTag, powerIndex, powerType, powerValue, po
     end
 
     if unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_STAMINA then
-        UnitFrames.PlayerDodgePrediction.Refresh(true)
+        if not UnitFrames.PlayerDodgePrediction.ShouldUseLUIEStaminaSmooth() then
+            UnitFrames.PlayerDodgePrediction.Refresh(true)
+        end
     end
 
     -- If players powerValue is zero, issue new blinking event on Custom Frames
@@ -293,11 +367,23 @@ function UnitFrames.UpdateAttribute(unitTag, powerType, attributeFrame, powerVal
     -- Update status bar
     if attributeFrame.bar then
         if UnitFrames.SV.CustomSmoothBar and not isTraumaFlag then
-            ZO_StatusBar_SmoothTransition(attributeFrame.bar, adjustedBarValue, powerEffectiveMax, forceInit, nil, 250)
+            if  unitTag == "player"
+            and powerType == COMBAT_MECHANIC_FLAGS_STAMINA
+            and UnitFrames.PlayerDodgePrediction.ShouldUseLUIEStaminaSmooth() then
+                UnitFrames.PlayerDodgePrediction.SmoothTransitionStaminaBar(attributeFrame.bar, adjustedBarValue, powerEffectiveMax, forceInit)
+            else
+                if unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_STAMINA then
+                    UnitFrames.PlayerDodgePrediction.StopStaminaBarSmoothAnimation(attributeFrame.bar)
+                end
+                ZO_StatusBar_SmoothTransition(attributeFrame.bar, adjustedBarValue, powerEffectiveMax, forceInit, nil, 250)
+            end
             if trauma then
                 ZO_StatusBar_SmoothTransition(attributeFrame.trauma, powerValue, powerEffectiveMax, forceInit, nil, 250)
             end
         else
+            if unitTag == "player" and powerType == COMBAT_MECHANIC_FLAGS_STAMINA then
+                UnitFrames.PlayerDodgePrediction.StopStaminaBarSmoothAnimation(attributeFrame.bar)
+            end
             attributeFrame.bar:SetMinMax(0, powerEffectiveMax)
             attributeFrame.bar:SetValue(adjustedBarValue)
             if trauma then

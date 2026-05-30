@@ -310,35 +310,6 @@ S.g_blacklistIDs =
 
 
 
-S.g_firstLoad = true
-
-local ChatEventFormattersDelete =
-{
-    [EVENT_BATTLEGROUND_INACTIVITY_WARNING] = true,
-    [EVENT_BROADCAST] = true,
-    [EVENT_FRIEND_PLAYER_STATUS_CHANGED] = true,
-    [EVENT_GROUP_INVITE_RESPONSE] = true,
-    [EVENT_GROUP_MEMBER_LEFT] = true,
-    [EVENT_GROUP_TYPE_CHANGED] = true,
-    [EVENT_IGNORE_ADDED] = true,
-    [EVENT_IGNORE_REMOVED] = true,
-    [EVENT_SOCIAL_ERROR] = true,
-    [EVENT_TRIAL_FEATURE_RESTRICTED] = true,
-}
-
-function ChatAnnouncements.SlayChatHandlers()
-    -- Unregister ZOS handlers for events we need to modify
-    for eventId, _ in pairs(ChatEventFormattersDelete) do
-        EVENT_MANAGER:UnregisterForEvent("ChatRouter", eventId)
-    end
-
-    -- Slay these events in case LibChatMessage is active and hooks them
-    local ChatEventFormatters = CHAT_ROUTER:GetRegisteredMessageFormatters()
-    for eventType, _ in pairs(ChatEventFormattersDelete) do
-        ChatEventFormatters[eventType] = nil
-    end
-end
-
 function ChatAnnouncements.Initialize(enabled)
     -- Load settings
     local isCharacterSpecific = LUIE.SV.CharacterSpecificSV
@@ -350,6 +321,8 @@ function ChatAnnouncements.Initialize(enabled)
 
     ChatAnnouncements.InvalidateQuestCounterFilterCache()
 
+    ChatAnnouncements.ChatOutput.InitializeRouterIntegration(enabled)
+
     -- Some modules might need to pull some of the color settings from CA so we want these to always be set regardless of CA module being enabled/disabled.
     ChatAnnouncements.RegisterColorEvents()
     -- Always register this function for other components to use
@@ -357,6 +330,7 @@ function ChatAnnouncements.Initialize(enabled)
 
     -- Disable module if setting not toggled on
     if not enabled then
+        ChatAnnouncements.Enabled = false
         return
     end
     ChatAnnouncements.Enabled = true
@@ -424,12 +398,6 @@ function ChatAnnouncements.Initialize(enabled)
 
     -- Index members for Group Loot
     ChatAnnouncements.IndexGroupLoot()
-
-    -- Stop other chat handlers from registering, then stop them again a few more times just in case.
-    ChatAnnouncements.SlayChatHandlers()
-    -- Call this again a few times shortly after load just in case.
-    zo_callLater(ChatAnnouncements.SlayChatHandlers, 100)
-    zo_callLater(ChatAnnouncements.SlayChatHandlers, 5000)
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -733,10 +701,16 @@ function ChatAnnouncements.RegisterLootEvents()
 end
 
 function ChatAnnouncements.RegisterLootHistoryHooks()
+    -- See HookFunction for rationale: ZO_PostHook is multiplicative; sentinel
+    -- prevents double-fire if RegisterLootHistoryHooks is invoked more than once.
+    if ChatAnnouncements._lootHistoryHooksInstalled then
+        return
+    end
     if ZO_LootHistory_Shared and ZO_LootHistory_Shared.AddAdventureZoneFactionReputation then
         ZO_PostHook(ZO_LootHistory_Shared, "AddAdventureZoneFactionReputation", function (_, reputationAdded)
             ChatAnnouncements.QueueAdventureZoneFactionReputationGain(reputationAdded)
         end)
+        ChatAnnouncements._lootHistoryHooksInstalled = true
     end
 end
 
@@ -3898,8 +3872,13 @@ function ChatAnnouncements.ResolveQuestItemChange()
 
                 countChange = newValue + questItemIndex[itemId].counter
                 S.g_questItemRemoved[itemId] = true
+                -- nil (not false) so the key is removed from the table and the
+                -- map stays bounded to currently-debouncing items rather than
+                -- accumulating every unique quest itemId seen during the session.
+                -- Downstream check at PrintQueuedMessages uses `if not S.g_questItemRemoved[itemId]`
+                -- which evaluates the same for nil and false.
                 zo_callLater(function ()
-                                 S.g_questItemRemoved[itemId] = false
+                                 S.g_questItemRemoved[itemId] = nil
                              end, 100)
 
                 if not Quests.QuestItemHideRemove[itemId] and not S.g_loginHideQuestLoot then
@@ -3966,8 +3945,9 @@ function ChatAnnouncements.ResolveQuestItemChange()
                 --
                 countChange = newValue - questItemIndex[itemId].stack
                 S.g_questItemAdded[itemId] = true
+                -- See g_questItemRemoved above: nil keeps the map bounded.
                 zo_callLater(function ()
-                                 S.g_questItemAdded[itemId] = false
+                                 S.g_questItemAdded[itemId] = nil
                              end, 100)
 
                 if not Quests.QuestItemHideLoot[itemId] and not S.g_loginHideQuestLoot then
@@ -6671,11 +6651,6 @@ function ChatAnnouncements.OnPlayerActivated(eventId)
         S.g_tradeTarget = ZO_SELECTED_TEXT:Colorize(zo_strformat("<<C:1>>", tradeName))
     end
 
-    if S.g_firstLoad then
-        ChatAnnouncements.SlayChatHandlers()
-        S.g_firstLoad = false
-    end
-
     zo_callLater(function ()
                      S.g_loginHideQuestLoot = false
                  end, 3000)
@@ -6745,13 +6720,13 @@ end
 
 --[[
 function ChatAnnouncements.InventoryFullQuest(eventId)
-    printToChat(GetString(SI_INVENTORY_ERROR_INVENTORY_FULL))
+    printToChat(GetString(SI_INVENTORY_ERROR_INVENTORY_FULL), true)
 end
 
 function ChatAnnouncements.InventoryFull(eventId, numSlotsRequested, numSlotsFree)
     local function DisplayItemFailed()
         if numSlotsRequested == 1 then
-            printToChat(GetString(SI_INVENTORY_ERROR_INVENTORY_FULL))
+            printToChat(GetString(SI_INVENTORY_ERROR_INVENTORY_FULL), true)
         else
             printToChat(zo_strformat(GetString(SI_INVENTORY_ERROR_INSUFFICIENT_SPACE), (numSlotsRequested - numSlotsFree) ))
         end
@@ -6868,6 +6843,10 @@ function ChatAnnouncements.OnGroupInviteReceived(eventId, inviterName, inviterDi
 end
 
 function ChatAnnouncements.IndexGroupLoot()
+    -- Rebuild rather than merge: previously this function only ever inserted,
+    -- so every group composition seen during the session left a permanent
+    -- characterName key in g_groupLootIndex (real growth across PUG/LFG nights).
+    ZO_ClearTable(S.g_groupLootIndex)
     local groupSize = GetGroupSize()
     for i = 1, groupSize do
         local characterName = GetUnitName("group" .. i)

@@ -57,8 +57,15 @@ local BUFF_EFFECT_TYPE_DEBUFF = BUFF_EFFECT_TYPE_DEBUFF
     - tooltip = Tooltips.AbilityName -- Set a custom tooltip to display for this ability
     - tooltipOther = Tooltips.AbilityName -- Set a custom tooltip for display for this ability when this effect is NOT on the player
     - tooltipVeteran = Tooltips.AbilityName -- Set a custom tooltip to use for this ability on Veteran Difficulty only (for abilities that are shared in dungeons and apply additional or different effects on Veteran Difficulty)
-    - tooltipValue2 = *number* or *string* -- Set a value to use for the 2nd input field of a tooltip that has a 2nd input field
-    - tooltipValue3 = *number* or *string* -- Set a value to use for the 2nd input field of a tooltip that has a 3rd input field
+    - tooltipValue2 = *number* or *string* -- Value for the 2nd input field of a tooltip that has a 2nd input field
+    - tooltipValue3 = *number* or *string* -- Set a value to use for the 3rd input field of a tooltip that has a 3rd input field
+    - tooltipValue1 = *number* or *string* -- Override <<1>> (defaults to buff duration in seconds)
+    - tooltipValue4 = *number* or *string* -- Value for <<4>>
+    - tooltipValue5 = *number* or *string* -- Value for <<5>>
+    - tooltipValue6 = *number* or *string* -- Value for <<6>>
+    - tooltipValue7 = *number* or *string* -- Value for <<7>> (zo_strformat / LocalizeString arity limit)
+    - tooltipValue1Id .. tooltipValue7Id = *abilityId* -- Pull <<n>> from GetAbilityDuration(id)/1000
+    - tooltipSetAbilityId = *number* -- Fill any unset <<n>> from colored numbers in GetAbilityDescription(set ability)
     - tooltipValue2Mod = *number* -- Needed in some cases to derive a value on an ability tooltip. This value is used for effects like the snare from Sun Fire, when the duration needs to be derived from either buff since one can potentially be hidden.
     - dynamicTooltip = true -- Prefer live skill-sheet text via GetAbilityDescription (see LUIE.DynamicTooltip fallback). Handlers in Functions.lua override when special logic is needed (Brace, Sneak, etc.).
     - tooltipMorphId = *number* -- Optional with dynamicTooltip: buff/bundle ability id differs from the morph shown on the skill sheet — pull description from this id instead of the effect row id.
@@ -77,6 +84,14 @@ local effectOverride =
     [157737] = { hide = true },
     [157736] = { hide = true },
     [157732] = { hide = true },
+    [153467] = { dynamicTooltip = true }, -- Mending Incantation (cast)
+    [153684] = { dynamicTooltip = true }, -- Mending Incantation (heal buff)
+    [153483] = { hide = true },           -- CPN MI Area Effect 1 (ground)
+    [153498] = { hide = true },           -- CPN MI Area Effect 1 (ground)
+    [153499] = { hide = true },           -- CPN MI Area Effect 1 (ground)
+
+    -- Gear procs (visible buffs)
+    [163033] = { dynamicTooltip = true }, -- Hexos' Ward
 
     -- TEMP MOVE LATER
     [54119] = { forcedContainer = "short" }, -- Remembrance (The Anger of a King)
@@ -95,42 +110,80 @@ local effectOverride =
     ----------------------------------------------------------------
 
     -- Major / Minor Buffs
-    [61693] = { tooltip = Tooltips.Skill_Minor_Resolve },    -- Minor Resolve
-    [61694] = { tooltip = Tooltips.Skill_Major_Resolve },    -- Major Resolve
-    [61697] = { tooltip = Tooltips.Skill_Minor_Fortitude },  -- Minor Fortitude
-    [61698] = { tooltip = Tooltips.Skill_Major_Fortitude },  -- Major Fortitude
-    [61704] = { tooltip = Tooltips.Skill_Minor_Endurance },  -- Minor Endurance
-    [61705] = { tooltip = Tooltips.Skill_Major_Endurance },  -- Major Endurance
-    [61706] = { tooltip = Tooltips.Skill_Minor_Intellect },  -- Minor Intellect
-    [61707] = { tooltip = Tooltips.Skill_Major_Intellect },  -- Major Intellect
-    [61685] = { tooltip = Tooltips.Skill_Minor_Sorcery },    -- Minor Sorcery
-    [61687] = { tooltip = Tooltips.Skill_Major_Sorcery },    -- Major Sorcery
-    [61691] = { tooltip = Tooltips.Skill_Minor_Prophecy },   -- Minor Prophecy
-    [61689] = { tooltip = Tooltips.Skill_Major_Prophecy },   -- Major Prophecy
-    [61662] = { tooltip = Tooltips.Skill_Minor_Brutality },  -- Minor Brutality
-    [61665] = { tooltip = Tooltips.Skill_Major_Brutality },  -- Major Brutality
-    [61666] = { tooltip = Tooltips.Skill_Minor_Savagery },   -- Minor Savagery
-    [61667] = { tooltip = Tooltips.Skill_Major_Savagery },   -- Major Savagery
-    [61744] = { tooltip = Tooltips.Skill_Minor_Berserk },    -- Minor Berserk
-    [61745] = { tooltip = Tooltips.Skill_Major_Berserk },    -- Major Berserk
-    [61746] = { tooltip = Tooltips.Skill_Minor_Force },      -- Minor Force
-    [61747] = { tooltip = Tooltips.Skill_Major_Force },      -- Major Force
-    [61549] = { tooltip = Tooltips.Skill_Minor_Vitality },   -- Minor Vitality
-    [61713] = { tooltip = Tooltips.Skill_Major_Vitality },   -- Major Vitality
-    [61710] = { tooltip = Tooltips.Skill_Minor_Mending },    -- Minor Mending
-    [61711] = { tooltip = Tooltips.Skill_Major_Mending },    -- Major Mending
-    [61721] = { tooltip = Tooltips.Skill_Minor_Protection }, -- Minor Protection
-    [61722] = { tooltip = Tooltips.Skill_Major_Protection }, -- Major Protection
-    [61715] = { tooltip = Tooltips.Skill_Minor_Evasion },    -- Minor Evasion
-    [61716] = { tooltip = Tooltips.Skill_Major_Evasion },    -- Major Evasion
-    [61735] = { tooltip = Tooltips.Skill_Minor_Expedition }, -- Minor Expedition
-    [61736] = { tooltip = Tooltips.Skill_Major_Expedition }, -- Major Expedition
-    [63569] = { tooltip = Tooltips.Skill_Gallop },           -- Major Gallop
-    [61708] = { tooltip = Tooltips.Skill_Minor_Heroism },    -- Minor Heroism
-    [61709] = { tooltip = Tooltips.Skill_Major_Heroism },    -- Major Heroism
-    [88490] = { tooltip = Tooltips.Skill_Minor_Toughness },  -- Minor Toughness
-    [147417] = { tooltip = Tooltips.Skill_Minor_Courage },   -- Minor Courage
-    [109966] = { tooltip = Tooltips.Skill_Major_Courage },   -- Major Courage
+    [61693] = { tooltip = Tooltips.Skill_Minor_Resolve },                     -- Minor Resolve
+    [61694] = { tooltip = Tooltips.Skill_Major_Resolve },                     -- Major Resolve
+    [61697] = { tooltip = Tooltips.Skill_Minor_Fortitude },                   -- Minor Fortitude
+    [61698] = { tooltip = Tooltips.Skill_Major_Fortitude },                   -- Major Fortitude
+    [61704] = { tooltip = Tooltips.Skill_Minor_Endurance },                   -- Minor Endurance
+    [61705] = { tooltip = Tooltips.Skill_Major_Endurance },                   -- Major Endurance
+    [61706] = { tooltip = Tooltips.Skill_Minor_Intellect },                   -- Minor Intellect
+    [61707] = { tooltip = Tooltips.Skill_Major_Intellect },                   -- Major Intellect
+    [61685] = { tooltip = Tooltips.Skill_Minor_Sorcery },                     -- Minor Sorcery
+    [61687] = { tooltip = Tooltips.Skill_Major_Sorcery },                     -- Major Sorcery
+    [61691] = { tooltip = Tooltips.Skill_Minor_Prophecy },                    -- Minor Prophecy
+    [61689] = { tooltip = Tooltips.Skill_Major_Prophecy },                    -- Major Prophecy
+    [61662] = { tooltip = Tooltips.Skill_Minor_Brutality },                   -- Minor Brutality
+    [61665] = { tooltip = Tooltips.Skill_Major_Brutality },                   -- Major Brutality
+    [183049] = { hide = true, tooltip = Tooltips.Skill_Major_Brutality },     -- Major Brutality (Herald of the Tome bundle)
+    [203342] = { hide = true, tooltip = Tooltips.Skill_Major_Prophecy },      -- Major Prophecy (Herald of the Tome bundle)
+    [183166] = { hide = true, tooltip = Tooltips.Skill_Minor_Maim },          -- Minor Maim (Apocrypha bundle)
+    [183431] = { hide = true, tooltip = Tooltips.Skill_Minor_Maim },          -- Minor Maim (Runic Sunder bundle)
+    [186532] = { hide = true, tooltip = Tooltips.Skill_Minor_Maim },          -- Minor Maim (Runic Embrace bundle)
+    [187757] = { hide = true, tooltip = Tooltips.Skill_Minor_Lifesteal },     -- Minor Lifesteal (Runic Embrace bundle)
+    [183650] = { hide = true, tooltip = Tooltips.Skill_Major_Resolve },       -- Major Resolve (Fatewoven Armor bundle)
+    [186478] = { hide = true, tooltip = Tooltips.Skill_Major_Resolve },       -- Major Resolve (Unbreakable Fate bundle)
+    [185909] = { hide = true, tooltip = Tooltips.Skill_Major_Resolve },       -- Major Resolve (Cruxweaver Armor bundle)
+    [185913] = { hide = true, tooltip = Tooltips.Skill_Minor_Resolve },       -- Minor Resolve (Runic Defense bundle)
+    [186490] = { hide = true, tooltip = Tooltips.Skill_Minor_Resolve },       -- Minor Resolve (Runeguard of Freedom bundle)
+    [183424] = { hide = true, tooltip = Tooltips.Skill_Minor_Resolve },       -- Minor Resolve (Runeguard of Still Waters bundle)
+    [194597] = { hide = true, tooltip = Tooltips.Skill_Minor_Protection },    -- Minor Protection (Runic Defense bundle)
+    [186493] = { hide = true, tooltip = Tooltips.Skill_Minor_Protection },    -- Minor Protection (Runeguard of Freedom bundle)
+    [194647] = { hide = true, tooltip = Tooltips.Skill_Minor_Protection },    -- Minor Protection (Runeguard of Still Waters bundle)
+    [185920] = { hide = true, tooltip = Tooltips.Skill_Minor_Vulnerability }, -- Minor Vulnerability (Eldritch Horror bundle)
+    [185923] = { hide = true, tooltip = Tooltips.Skill_Minor_Vulnerability }, -- Minor Vulnerability (Uncanny Adoration bundle)
+    [183271] = { hide = true, tooltip = Tooltips.Skill_Minor_Vulnerability }, -- Minor Vulnerability (Colorless Pool bundle)
+    [184986] = { hide = true, tooltip = Tooltips.Skill_Minor_Brittle },       -- Minor Brittle (Colorless Pool bundle)
+    [183579] = { hide = true, tooltip = Tooltips.Skill_Minor_Courage },       -- Minor Courage (Arcanist's Domain bundle)
+    [183580] = { hide = true, tooltip = Tooltips.Skill_Minor_Endurance },     -- Minor Endurance (Arcanist's Domain bundle)
+    [185750] = { hide = true, tooltip = Tooltips.Skill_Minor_Fortitude },     -- Minor Fortitude (Arcanist's Domain bundle)
+    [185751] = { hide = true, tooltip = Tooltips.Skill_Minor_Intellect },     -- Minor Intellect (Arcanist's Domain bundle)
+    [186230] = { hide = true, tooltip = Tooltips.Skill_Minor_Courage },       -- Minor Courage (Zenas' Empowering Disc bundle)
+    [186231] = { hide = true, tooltip = Tooltips.Skill_Minor_Endurance },     -- Minor Endurance (Zenas' Empowering Disc bundle)
+    [186232] = { hide = true, tooltip = Tooltips.Skill_Minor_Fortitude },     -- Minor Fortitude (Zenas' Empowering Disc bundle)
+    [186233] = { hide = true, tooltip = Tooltips.Skill_Minor_Intellect },     -- Minor Intellect (Zenas' Empowering Disc bundle)
+    [186235] = { hide = true, tooltip = Tooltips.Skill_Minor_Courage },       -- Minor Courage (Reconstructive Domain bundle)
+    [186236] = { hide = true, tooltip = Tooltips.Skill_Minor_Endurance },     -- Minor Endurance (Reconstructive Domain bundle)
+    [186239] = { hide = true, tooltip = Tooltips.Skill_Minor_Fortitude },     -- Minor Fortitude (Reconstructive Domain bundle)
+    [186240] = { hide = true, tooltip = Tooltips.Skill_Minor_Intellect },     -- Minor Intellect (Reconstructive Domain bundle)
+    [187940] = { hide = true, tooltip = Tooltips.Skill_Minor_Courage },       -- Minor Courage (Fleet-Footed Gate sprint bundle)
+    [187941] = { hide = true, tooltip = Tooltips.Skill_Minor_Endurance },     -- Minor Endurance (Fleet-Footed Gate sprint bundle)
+    [187942] = { hide = true, tooltip = Tooltips.Skill_Minor_Fortitude },     -- Minor Fortitude (Fleet-Footed Gate sprint bundle)
+    [187943] = { hide = true, tooltip = Tooltips.Skill_Minor_Intellect },     -- Minor Intellect (Fleet-Footed Gate sprint bundle)
+    [183649] = { hide = true, tooltip = Tooltips.Skill_Minor_Breach },        -- Minor Breach (Fatewoven Armor bundle)
+    [191763] = { hide = true, tooltip = Tooltips.Skill_Major_Breach },        -- Major Breach (Fate Omen eldritch morph bundle)
+    [61666] = { tooltip = Tooltips.Skill_Minor_Savagery },                    -- Minor Savagery
+    [61667] = { tooltip = Tooltips.Skill_Major_Savagery },                    -- Major Savagery
+    [61744] = { tooltip = Tooltips.Skill_Minor_Berserk },                     -- Minor Berserk
+    [61745] = { tooltip = Tooltips.Skill_Major_Berserk },                     -- Major Berserk
+    [61746] = { tooltip = Tooltips.Skill_Minor_Force },                       -- Minor Force
+    [61747] = { tooltip = Tooltips.Skill_Major_Force },                       -- Major Force
+    [61549] = { tooltip = Tooltips.Skill_Minor_Vitality },                    -- Minor Vitality
+    [61713] = { tooltip = Tooltips.Skill_Major_Vitality },                    -- Major Vitality
+    [61710] = { tooltip = Tooltips.Skill_Minor_Mending },                     -- Minor Mending
+    [61711] = { tooltip = Tooltips.Skill_Major_Mending },                     -- Major Mending
+    [61721] = { tooltip = Tooltips.Skill_Minor_Protection },                  -- Minor Protection
+    [61722] = { tooltip = Tooltips.Skill_Major_Protection },                  -- Major Protection
+    [61715] = { tooltip = Tooltips.Skill_Minor_Evasion },                     -- Minor Evasion
+    [184933] = { hide = true, tooltip = Tooltips.Skill_Minor_Evasion },       -- Minor Evasion (Apocrypha bundle)
+    [61716] = { tooltip = Tooltips.Skill_Major_Evasion },                     -- Major Evasion
+    [61735] = { tooltip = Tooltips.Skill_Minor_Expedition },                  -- Minor Expedition
+    [61736] = { tooltip = Tooltips.Skill_Major_Expedition },                  -- Major Expedition
+    [63569] = { tooltip = Tooltips.Skill_Gallop },                            -- Major Gallop
+    [61708] = { tooltip = Tooltips.Skill_Minor_Heroism },                     -- Minor Heroism
+    [61709] = { tooltip = Tooltips.Skill_Major_Heroism },                     -- Major Heroism
+    [88490] = { tooltip = Tooltips.Skill_Minor_Toughness },                   -- Minor Toughness
+    [147417] = { tooltip = Tooltips.Skill_Minor_Courage },                    -- Minor Courage
+    [109966] = { tooltip = Tooltips.Skill_Major_Courage },                    -- Major Courage
 
     -- Major / Minor Debuffs
     [61742] = { tooltip = Tooltips.Skill_Minor_Breach },                                                               -- Minor Breach
@@ -797,6 +850,10 @@ local effectOverride =
     [120021] = { tooltip = Tooltips.Skill_War_Horn_Dummy },                                                                                                                                                 -- Aggressive Horn (Target Iron Atronach, Trial)
     [120024] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_WORM_CULT_DDS, tooltip = Tooltips.Generic_Increase_Magicka_Recovery_No_Dur, tooltipValue2 = 145 },                                           -- Worm's Raiment (Target Iron Atronach, Trial)
     [120026] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_HIRCINE_DDS, tooltip = Tooltips.Generic_Increase_Stamina_Recovery_No_Dur, tooltipValue2 = 145 },                                             -- Hircine's Veneer (Target Iron Atronach, Trial)
+    [265932] = { hide = true, tooltip = Tooltips.Skill_Major_Brutality },                                                                                                                                   -- Major Brutality (trial dummy refresh bundle)
+    [265933] = { hide = true, tooltip = Tooltips.Skill_Major_Sorcery },                                                                                                                                     -- Major Sorcery (trial dummy refresh bundle)
+    [265984] = { hide = true, tooltip = Tooltips.Skill_Major_Savagery },                                                                                                                                    -- Major Savagery (trial dummy refresh; same type as DK slotted 61667)
+    [265985] = { hide = true, tooltip = Tooltips.Skill_Major_Prophecy },                                                                                                                                    -- Major Prophecy (trial dummy refresh; same type as DK slotted 61689)
     ----------------------------------------------------------------
     -- Misc Items
     ----------------------------------------------------------------
@@ -1118,7 +1175,7 @@ local effectOverride =
     [100306] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_ASYLUM_CONCENTRATED_FORCE_DDS, tooltip = Tooltips.Set_Asylum_Destruction_Staff },                                        -- Concentrated Force (Asylum Destruction Staff)-- Maelstrom Weapons
     [99806] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_MAELSTROM_CRUEL_FLURRY_DDS, tooltip = Tooltips.Set_Maelstrom_DW },                                                        -- Cruel Flurry (Maelstrom Dual Wield)
     [99851] = { hide = true },                                                                                                                                                          -- Thunderous Volley (Maelstrom Bow)
-    [99789] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_MAELSTROM_MERCILESS_CHARGE_DDS, dynamicTooltip = true, tooltipMorphId = 99787 },                                            -- Merciless Charge (Maelstrom 2H) active buff; set text on 99787
+    [99789] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_MAELSTROM_MERCILESS_CHARGE_DDS, dynamicTooltip = true, tooltipMorphId = 99787 },                                          -- Merciless Charge (Maelstrom 2H) active buff; set text on 99787
     [100588] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_MAELSTROM_RAMPAGING_SLASH_DDS, tooltip = Tooltips.Set_Maelstrom_1H },                                                    -- Rampaging Slash (Maelstrom 1H + Shield)
     [100587] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_MAELSTROM_RAMPAGING_SLASH_DDS },                                                                                         -- Rampaging Slash (Maelstrom 1H + Shield)
     [100589] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_MAELSTROM_RAMPAGING_SLASH_DDS },                                                                                         -- Rampaging Slash (Maelstrom 1H + Shield)
@@ -1474,6 +1531,8 @@ local effectOverride =
     [133211] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_HITI_DDS, name = Abilities.Set_Warming_Aura },                                                                                            -- Hiti's Hearth (Hiti's)
     [135130] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_HITI_DDS, name = Abilities.Set_Warming_Aura, forcedContainer = "short", groundLabel = true, tooltip = Tooltips.Set_Hitis_Hearth_Ground }, -- Hiti's Hearth (Hiti's)
     [133406] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_DRAUGRKINS_GRIP_DDS, tooltip = Tooltips.Set_Draugrkin },                                                                                  -- Draugrkin's Grip (Draugrkin)
+    [142596] = { name = Abilities.Set_Elemental_Catalyst, tooltip = Tooltips.Set_Elemental_Catalyst, tooltipSetAbilityId = 142596 },                                                                     -- Elemental Catalyst (Elemental Catalyst)
+    [181606] = { name = Abilities.Set_Elemental_Catalyst, tooltip = Tooltips.Set_Elemental_Catalyst, tooltipSetAbilityId = 142596 },                                                                     -- Elemental Catalyst (proc bundle)
     [142610] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SPELL_SWORD_FIRE_DDS, tooltip = Tooltips.Set_Elemental_Catalyst },                                                                            -- Flame Weakness (of the Catalyst)
     [142652] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SPELL_SWORD_FROST_DDS, tooltip = Tooltips.Set_Elemental_Catalyst },                                                                           -- Frost Weakness (of the Catalyst)
     [142653] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SPELL_SWORD_SHOCK_DDS, tooltip = Tooltips.Set_Elemental_Catalyst },                                                                           -- Shock Weakness (of the Catalyst)
@@ -1600,6 +1659,17 @@ local effectOverride =
     [135951] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_GIANTS_MIGHT_DDS, tooltip = Tooltips.Set_Giants_Might },                                                                                                                                                                                             -- Giant's Might (Yandir's)
     [138013] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_GIANTS_ENDURANCE_DDS, tooltip = Tooltips.Set_Giants_Endurance, forcedContainer = "short" },                                                                                                                                                          -- Giant's Endurance (Yandir's Perfect)
     [138019] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_GIANTS_MIGHT_DDS, tooltip = Tooltips.Set_Giants_Might },                                                                                                                                                                                             -- Giant's Might (Yandir's Perfect)
+    -- Trial Sets (Rockgrove / Dreadsail Reef)
+    [150975] = { hide = true },                                                                                                                                                                                                                                                                                     -- Encratis's Behemoth (proc trigger)
+    [151033] = { name = Abilities.Set_Encratiss_Behemoth, tooltip = Tooltips.Set_Encratiss_Behemoth, tooltipSetAbilityId = 150975, tooltipValue1Id = 151033 },                                                                                                                                                      -- Behemoth's Aura (Encratis's Behemoth)
+    [151032] = { duration = 0, tooltip = Tooltips.Set_Encratiss_Behemoth, tooltipSetAbilityId = 150975, tooltipValue1Id = 151033 },                                                                                                                                                                                 -- Behemoth's Resilience (Encratis's Behemoth)
+    [151034] = { duration = 0, type = BUFF_EFFECT_TYPE_DEBUFF, tooltip = Tooltips.Set_Encratiss_Behemoth, tooltipOther = Tooltips.Set_Encratiss_Behemoth, tooltipSetAbilityId = 150975, tooltipValue1Id = 151033 },                                                                                                 -- Behemoth's Vulnerability (Encratis's Behemoth)
+    [220787] = { hide = true },                                                                                                                                                                                                                                                                                     -- Slivers of the Null Arca (proc trigger)
+    [220790] = { name = Abilities.Set_Slivers_Of_The_Null_Arca, tooltip = Tooltips.Set_Slivers_Of_The_Null_Arca, tooltipSetAbilityId = 220787, tooltipValue1Id = 220790 },                                                                                                                                          -- Sliver (Slivers of the Null Arca)
+    [220864] = { name = Abilities.Set_Slivers_Of_The_Null_Arca, tooltip = Tooltips.Set_Slivers_Of_The_Null_Arca, tooltipSetAbilityId = 220787, tooltipValue1Id = 220864 },                                                                                                                                          -- Slivers of the Null Arca (crystal proc)
+    [220863] = { hide = true },                                                                                                                                                                                                                                                                                     -- Sliver Assault (Slivers of the Null Arca)
+    [215727] = { dynamicTooltip = true },                                                                                                                                                                                                                                                                           -- Sunderer (set proc)
+    [215726] = { hide = true },                                                                                                                                                                                                                                                                                     -- Overcharged (Sunderer set bundle)
     -- Set ICD's (Fake Id's)
     [999010] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_ETERNAL_WARRIOR_ICD_DDS, name = zo_strformat("<<1>> <<2>>", Abilities.Set_Eternal_Warrior, Abilities.Set_Cooldown), tooltip = Tooltips.Generic_Set_ICD_Minutes, tooltipValue2 = Abilities.Set_Eternal_Warrior, tooltipValue3 = 1, unbreakable = 1 }, -- Eternal Warrior (Fake Id)
     [999011] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SET_PHOENIX_ICD_DDS, name = zo_strformat("<<1>> <<2>>", Abilities.Set_Phoenix, Abilities.Set_Cooldown), tooltip = Tooltips.Generic_Set_ICD_Minutes, tooltipValue2 = Abilities.Set_Phoenix, tooltipValue3 = 1, unbreakable = 1 },                         -- Phoenix (Fake Id)
@@ -1705,66 +1775,141 @@ local effectOverride =
     ----------------------------------------------------------------
 
     -- Ardent Flame
-    [29424] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_COMBUSTION_DDS },                                                    -- Combustion (Combustion - Rank 1)
-    [108806] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_COMBUSTION_DDS },                                                   -- Combustion (Combustion - Rank 1)
-    [108809] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_COMBUSTION_DDS },                                                   -- Combustion (Combustion - Rank 1)
-    [45011] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_COMBUSTION_DDS },                                                    -- Combustion (Combustion - Rank 2)
-    [108816] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_COMBUSTION_DDS },                                                   -- Combustion (Combustion - Rank 2)
-    [108815] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_COMBUSTION_DDS },                                                   -- Combustion (Combustion - Rank 2)
-    [160949] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_WARMTH_DDS, tooltip = Tooltips.Generic_Snare, tooltipValue2 = 30 }, -- Warmth -- TODO: Maybe find a way to determine rank for the 15% or 30% snare tooltip
+    [29424] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_COMBUSTION_DDS },    -- Combustion (Combustion - Rank 1)
+    [108806] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_COMBUSTION_DDS },   -- Combustion (Combustion - Rank 1)
+    [108809] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_COMBUSTION_DDS },   -- Combustion (Combustion - Rank 1)
+    [45011] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_COMBUSTION_DDS },    -- Combustion (Combustion - Rank 2)
+    [108816] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_COMBUSTION_DDS },   -- Combustion (Combustion - Rank 2)
+    [108815] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_COMBUSTION_DDS },   -- Combustion (Combustion - Rank 2)
+    [160949] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },                      -- Traumatic Burns (Core of Flame line target debuff)
 
-    [29455] = { icon = "/esoui/art/icons/passive_dragonknight_007.dds" },                                                                   -- Iron Skin (Iron Skin - Rank 1)
-    [44922] = { icon = "/esoui/art/icons/passive_dragonknight_007.dds" },                                                                   -- Iron Skin (Iron Skin - Rank 2)
+    [29455] = { icon = "/esoui/art/icons/passive_dragonknight_007.dds" },                   -- Iron Skin (Iron Skin - Rank 1)
+    [44922] = { icon = "/esoui/art/icons/passive_dragonknight_007.dds" },                   -- Iron Skin (Iron Skin - Rank 2)
 
-    [29451] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_WORLD_IN_RUIN_DDS },                                                 -- World in Ruin (World in Ruin - Rank 1)
-    [45029] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_WORLD_IN_RUIN_DDS },                                                 -- World in Ruin (World in Ruin - Rank 2)
+    [29451] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_WORLD_IN_RUIN_DDS }, -- World in Ruin (World in Ruin - Rank 1)
+    [45029] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_WORLD_IN_RUIN_DDS }, -- World in Ruin (World in Ruin - Rank 2)
 
     -- Earthen Heart
-    [29465] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_BATTLE_ROAR_DDS },        -- Battle Roar (Battle Roar - Rank 1)
-    [29466] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_BATTLE_ROAR_DDS },        -- Battle Roar (Battle Roar - Rank 1)
-    [29467] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_BATTLE_ROAR_DDS },        -- Battle Roar (Battle Roar - Rank 1)
-    [44986] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_BATTLE_ROAR_DDS },        -- Battle Roar (Battle Roar - Rank 2)
-    [44987] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_BATTLE_ROAR_DDS },        -- Battle Roar (Battle Roar - Rank 2)
-    [44988] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_BATTLE_ROAR_DDS },        -- Battle Roar (Battle Roar - Rank 2)
-    [29468] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_ETERNAL_MOUNTAIN_DDS },   -- Eternal Mountain (Eternal Mountain - Rank 1)
-    [44996] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_ETERNAL_MOUNTAIN_DDS },   -- Eternal Mountain (Eternal Mountain - Rank 2)
-    [29474] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_MOUNTAINS_BLESSING_DDS }, -- Mountain's Blessing (Mountain's Blessing - Rank 1)
-    [45005] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_MOUNTAINS_BLESSING_DDS }, -- Mountain's Blessing (Mountain's Blessing - Rank 2)
-    [29475] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_HELPING_HANDS_DDS },      -- Helping Hands (Helping Hands - Rank 1)
-    [29476] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_HELPING_HANDS_DDS },      -- Helping Hands (Helping Hands - Rank 1)
-    [45009] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_HELPING_HANDS_DDS },      -- Helping Hands (Helping Hands - Rank 2)
-    [45010] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_HELPING_HANDS_DDS },      -- Helping Hands (Helping Hands - Rank 2)
+    -- Battle Roar slotted name id 259223 (offset 33273852); do not use Landslide combat ids 29463–29467 here.
+    [29468] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_ETERNAL_MOUNTAIN_DDS },                -- Eternal Mountain (Eternal Mountain - Rank 1)
+    [44996] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_ETERNAL_MOUNTAIN_DDS },                -- Eternal Mountain (Eternal Mountain - Rank 2)
+    [29474] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_MOUNTAINS_BLESSING_DDS, hide = true }, -- Blessing at the Peak (passive POWER clutter; table 198758357)
+    [45005] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_MOUNTAINS_BLESSING_DDS },              -- Mountain's Blessing (Mountain's Blessing - Rank 2)
+    [29475] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_HELPING_HANDS_DDS },                   -- Helping Hands (Helping Hands - Rank 1)
+    [29476] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_HELPING_HANDS_DDS },                   -- Helping Hands (Helping Hands - Rank 1)
+    [45009] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_DRAGONKNIGHT_HELPING_HANDS_DDS },                   -- Helping Hands (Helping Hands - Rank 2)
+    [45010] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_HELPING_HANDS_DDS },                   -- Helping Hands (Helping Hands - Rank 2)
 
     ----------------------------------------------------------------
     -- DRAGONKNIGHT ACTIVE ABILITIES -------------------------------
     ----------------------------------------------------------------
 
-    -- Lava Whip / Molten Whip / Flame Lash
-    [23808] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                           -- Off Balance (Lava Whip)
+    -- Dragon Blood / Blood of the Green Dragon / Blood of the Elder Dragon (bar → 61698 via BarHighlightOverride)
+    [29010] = { hide = true },  -- Dragon Blood (HEAL combat)
+    [29011] = { hide = true },  -- Major Fortitude bundle (player buff 61698)
+    -- 259761 Minor Brutality: see Fleetstep Wings (~1961); same combat id as Dragon Blood / Igneous Weapons bundle
+    [32745] = { hide = true },  -- Blood of the Green Dragon (HEAL combat)
+    [32748] = { hide = true },  -- Major Endurance bundle (player buff 61705)
+    [61884] = { hide = true },  -- Major Fortitude bundle (green morph)
+    [91670] = { hide = true },  -- Minor Vitality bundle (green morph)
+    [32723] = { hide = true },  -- Blood of the Elder Dragon (HEAL combat)
+    [91674] = { hide = true },  -- Major Fortitude bundle (elder morph)
+    [259634] = { hide = true }, -- Minor Courage bundle (elder morph)
+
+    -- Lava Whip / Molten Whip / Flame Lash (morph 2) / Power Lash
+    -- U49 Lava Whip: OB hit → 5 stacks Volcanic Whip / Lava Slam (23808, 20s, 20s ICD); slot becomes 256798 Volcanic Whip (consumes stack)
+    [23806] = { hide = true },                                                                                                       -- Lava Whip (legacy hit/cast combat; bar highlight → 23808)
+    [256798] = { hide = true },                                                                                                      -- Volcanic Whip (replacement cast hit / AOE combat)
+    [23808] = { dynamicTooltip = true, tooltipMorphId = 23806, unbreakable = 1 },                                                    -- Lava Slam (Volcanic Whip stacks on player; bar highlight)
+    [20805] = { hide = true },                                                                                                       -- Molten Whip (hit combat; bar → 122658)
+    [20816] = { hide = true },                                                                                                       -- Flame Lash (hit combat; bar → 34117)
     [20806] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                           -- Off Balance (Molten Whip)
-    [122658] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_SEETHING_FURY_DDS, tooltip = Tooltips.Skill_Seething_Fury }, -- Seething Fury (Molten Whip)
-    [34117] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                           -- Off Balance (Flame Lash)
-    [20824] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_POWER_LASH_DDS },                                             -- Power Lash (Flame Lash)
-    [23105] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_POWER_LASH_DDS },                                             -- Power Lash (Flame Lash)
+    [122658] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_SEETHING_FURY_DDS, tooltip = Tooltips.Skill_Seething_Fury }, -- Seething Fury (~10s player buff; Molten Whip)
+    -- Flame Lash: OB hit → 5 stacks Power Lash (34117, 20s); slot becomes 20824 Power Lash (consumes stack); 23105 heal combat
+    [34117] = { dynamicTooltip = true, tooltipMorphId = 20816, unbreakable = 1 },                                                    -- Power Lash stacks (player buff; bar highlight)
+    [20824] = { hide = true },                                                                                                       -- Power Lash (replacement cast hit combat)
+    [23105] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20816 },                                                        -- Power Lash (self-heal combat)
+    [257507] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20816 },                                                       -- Flame Lash (self-heal combat)
+    -- Combustion (108815 / 108816) can apply 18084 Burning on whip hits (see log); 160949 not observed on base Lava Whip
 
-    -- Searing Strike / Venomous Claw /Burning Embers
-    [44363] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 }, -- Searing Strike (Searing Strike)
-    [44369] = { tooltip = Tooltips.Skill_Venomous_Claw },             -- Venomous Claw (Venomous Claw)
-    [44373] = { tooltip = Tooltips.Skill_Burning_Embers },            -- Burning Embers (Burning Embers)
+    -- Searing Strike / Searing Claw / Burning Embers
+    [20657] = { hide = true },                                                 -- Searing Strike (initial hit combat)
+    [123068] = { hide = true },                                                -- Searing Strike (alternate hit combat)
+    [20668] = { hide = true },                                                 -- Searing Claw (initial hit combat; slotted id)
+    [31810] = { hide = true },                                                 -- Searing Claw (alternate hit combat)
+    [123072] = { hide = true },                                                -- Searing Claw (alternate hit combat)
+    [31815] = { hide = true },                                                 -- Burning Embers (alternate hit combat)
+    [123073] = { hide = true },                                                -- Burning Embers (alternate hit combat)
+    [20660] = { hide = true },                                                 -- Burning Embers (initial hit combat; slotted id)
+    [44363] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },          -- Searing Strike (target DOT ~8s)
+    [44369] = { tooltip = Tooltips.Skill_Venomous_Claw },                      -- Searing Claw (target DOT; tooltip string pre-U49 name)
+    [44373] = { tooltip = Tooltips.Skill_Burning_Embers },                     -- Burning Embers (target DOT)
+    [261752] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20660 }, -- Burning Embers (self-heal combat at DOT end)
+    [263208] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20660 }, -- Burning Embers (Wildfire Embers; heal/combat on kill or DOT end)
+    -- On cast hit: 160949 Traumatic Burns (visible), 18084 Burning (~4s); 243742 hidden snare/bundle
 
-    -- Fiery Breath / Noxious Breath / Engulfing Flames
-    [31102] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },   -- Fiery Breath (Fiery Breath)
-    [31103] = { tooltip = Tooltips.Generic_Poison, tooltipValue2 = 2 }, -- Noxious Breath (Noxious Breath)
-    [31104] = { tooltip = Tooltips.Skill_Engulfing_Flames },            -- Engulfing Flames (Engulfing Flames)
+    -- Dragonfire Breath / Disintegrating Dragonfire / Engulfing Dragonfire (U49+)
+    [20917] = { hide = true },                                                                   -- Dragonfire Breath (channel/hit combat; bar → 31102)
+    [20944] = { hide = true },                                                                   -- Disintegrating Dragonfire (hit combat; bar → 31103)
+    [20930] = { hide = true },                                                                   -- Engulfing Dragonfire (slotted hit; bar → 32821 channel buff)
+    [31102] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },                            -- Dragonfire Breath (target DOT ~10s)
+    [31103] = { dynamicTooltip = true, tooltipMorphId = 20944 },                                 -- Disintegrating Dragonfire (target DOT ~10s; log: 31103 + 61743 breach)
+    [31104] = { hide = true },                                                                   -- Engulfing Dragonfire (tick hit combat on target)
+    [270517] = { hide = true },                                                                  -- Engulfing Dragonfire (tick ON CD combat; U49 log)
+    [32821] = { dynamicTooltip = true, tooltipMorphId = 20930, toggle = true, unbreakable = 1 }, -- Engulfing channel (player; ~5s refreshed per tick)
+    [34240] = { hide = true },                                                                   -- Dragonfire Breath Dummy (LMN dump)
+    [48946] = { hide = true },                                                                   -- Major Breach combat (Disintegrating); aura UI → 61743
 
-    -- Fiery Grip / Empowering Chains / Unrelenting Grip
-    [62004] = { hide = true },                                              -- Unrelenting Grip (Unrelenting Grip)
-    [77105] = { icon = "/esoui/art/icons/ability_dragonknight_005_a.dds" }, -- Unrelenting Grip (Unrelenting Grip)
+    -- Chains of Flame / Chains of Devastation / Chains of Dominance (was Fiery Grip line; table 198758357)
+    [20492] = { dynamicTooltip = true, name = Abilities.Skill_Chains_of_Flame },                                                                    -- Chains of Flame (slotted / target GAIN)
+    [20493] = { hide = true },                                                                                                                      -- Chains of Flame (IMMUNE clutter, ~200 ms)
+    [20494] = { hide = true },                                                                                                                      -- Chains of Flame (combat bundle)
+    [31290] = { hide = true, name = Abilities.Skill_Chains_of_Flame, tooltip = Tooltips.Innate_Taunt, tooltipOther = Tooltips.Innate_Taunt_Other }, -- Fiery Reach taunt (legacy combat id)
+    [52790] = { hide = true },                                                                                                                      -- Taunt Counter
+    [38541] = { icon = "/esoui/art/icons/ability_warrior_010.dds", tooltip = Tooltips.Innate_Taunt },                                               -- Taunt (player, Chains cast)
+    [76498] = { hide = true, tooltip = Tooltips.Skill_Major_Cowardice, tooltipMorphId = 20492 },                                                    -- Major Cowardice (Chains combat bundle; display 147643)
+    [20499] = { dynamicTooltip = true, name = Abilities.Skill_Chains_of_Devastation },                                                              -- Chains of Devastation (slotted / target GAIN)
+    [62023] = { hide = true },                                                                                                                      -- Chains of Devastation (pull bundle ~100 ms on target)
+    [76506] = { hide = true, tooltip = Tooltips.Skill_Major_Evasion, tooltipMorphId = 20499 },                                                      -- Major Evasion combat (display 61716)
+    [147421] = { hide = true, tooltip = Tooltips.Skill_Major_Berserk, tooltipMorphId = 20499 },                                                     -- Major Berserk combat (display 61745)
+    -- Chains of Dominance (20496): log mirrors Flame taunt + cowardice; combat cowardice id 76502 (not 76498)
+    [20496] = { dynamicTooltip = true, name = Abilities.Skill_Chains_of_Dominance },                                                                -- Chains of Dominance (slotted / target GAIN)
+    [62004] = { hide = true },                                                                                                                      -- Chains of Dominance (combat bundle)
+    [62001] = { hide = true },                                                                                                                      -- Chains of Dominance (cast combat)
+    [77105] = { hide = true },                                                                                                                      -- Unrelenting Chain (~1.5s POWER on player)
+    [76502] = { hide = true, tooltip = Tooltips.Skill_Major_Cowardice, tooltipMorphId = 20496 },                                                    -- Major Cowardice combat (display 147643, 15s log)
+
+    -- Core of Flame / Soul of Flame / Heart of Flame (channeled ~4s self-buff; unrelated to Hearthfire 15s ground)
+    [31837] = { dynamicTooltip = true, toggle = true }, -- Core of Flame
+    [32792] = { dynamicTooltip = true, toggle = true }, -- Soul of Flame
+    [32785] = { dynamicTooltip = true, toggle = true }, -- Heart of Flame
+    [31842] = { hide = true },                          -- Core of Flame (hit damage combat)
+    [32794] = { hide = true },                          -- Soul of Flame (hit damage combat)
+    [32786] = { hide = true },                          -- Heart of Flame (channel heal combat)
+    [32787] = { hide = true },                          -- Heart of Flame (hit damage combat)
+    [32788] = { hide = true },                          -- Heart of Flame (combat bundle)
+    [32789] = { hide = true },                          -- Heart of Flame (combat bundle)
+    -- Target debuffs: 160949 Traumatic Burns (Core/Heart); Soul adds 18084 Burning (~4s); 243742 combat bundle
 
     -- Inferno / Incinerate / Cauterize — live sheet text (static strings were pre–Inferno rework / wrong morph names)
-    [28967] = { dynamicTooltip = true },                              -- Inferno
-    [32853] = { dynamicTooltip = true },                              -- Incinerate (was Flames of Oblivion)
-    [32881] = { dynamicTooltip = true },                              -- Cauterize
+    [28967] = { dynamicTooltip = true, toggle = true },                                         -- Inferno
+    [257750] = { hide = true, dynamicTooltip = true, tooltipMorphId = 28967 },                  -- Inferno (1s activation pulse)
+    [258548] = { hide = true, tooltip = Tooltips.Skill_Minor_Fortitude },                       -- Minor Fortitude (Inferno bundle)
+    [32853] = { dynamicTooltip = true, toggle = true },                                         -- Incinerate (was Flames of Oblivion)
+    [257754] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32853 },                  -- Incinerate (Inferno rework bundle)
+    [258586] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32853 },                  -- Fire Keeper (activation pulse)
+    [258585] = { hide = true, tooltip = Tooltips.Skill_Minor_Fortitude },                       -- Minor Fortitude (Incinerate bundle)
+    [243742] = { hide = true, tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },             -- Traumatic Burns snare/bundle (160949 is visible debuff on DK hits)
+    [32881] = { dynamicTooltip = true, toggle = true },                                         -- Cauterize
+    [76429] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32881 },                   -- Cauterize (activation pulse)
+    [257752] = { hide = true, dynamicTooltip = true, tooltipMorphId = 32881 },                  -- Inferno (Cauterize 1s wave pulse)
+    [258618] = { hide = true, tooltip = Tooltips.Skill_Minor_Heroism },                         -- Minor Heroism (Cauterize bundle)
+    [258619] = { hide = true, tooltip = Tooltips.Skill_Minor_Fortitude },                       -- Minor Fortitude (Cauterize bundle)
+    -- Slotted Inferno line: combat bundles for Major Prophecy / Savagery (player buff frames use 61689 / 61667)
+    [75088] = { hide = true, tooltip = Tooltips.Skill_Major_Prophecy, tooltipMorphId = 28967 }, -- Major Prophecy (Inferno slotted)
+    [76420] = { hide = true, tooltip = Tooltips.Skill_Major_Prophecy, tooltipMorphId = 32853 }, -- Major Prophecy (Incinerate slotted)
+    [76426] = { hide = true, tooltip = Tooltips.Skill_Major_Savagery },                         -- Major Savagery (Inferno line slotted combat)
+    [76433] = { hide = true, tooltip = Tooltips.Skill_Major_Prophecy, tooltipMorphId = 32881 }, -- Major Prophecy (Cauterize slotted)
 
     -- Dragonknight Standard / Shifting Standard / Standard of Might
     [98438] = { name = Abilities.Skill_Shackle },                                                                                                -- Shackle Damage (Dragonknight Standard - Shackle Synergy)
@@ -1780,12 +1925,18 @@ local effectOverride =
     [32964] = { groundLabel = true, tooltip = Tooltips.Skill_Dragonknight_Standard_Ground, tooltipValue2 = 1 },                                  -- Shifting Standard
     [32948] = { groundLabel = true, tooltip = Tooltips.Skill_Dragonknight_Standard_Ground, tooltipValue2 = 1 },                                  -- Standard of Might
 
-    -- Spiked Armor / Hardened Armor / Volatile Armor
-    [20319] = { tooltip = Tooltips.Skill_Spiked_Armor },                                -- Spiked Armor (Spiked Armor)
-    [20328] = { tooltip = Tooltips.Skill_Hardened_Armor },                              -- Hardened Armor (Hardened Armor)
-    [31808] = { tooltip = Tooltips.Generic_Damage_Shield_Duration, hideReduce = true }, -- Hardened Armor (Hardened Armor)
-    [20323] = { tooltip = Tooltips.Skill_Spiked_Armor },                                -- Volatile Armor (Volatile Armor)
-    [20326] = { tooltip = Tooltips.Generic_Magic, tooltipValue2 = 2 },                  -- Volatile Armor (Volatile Armor)
+    -- Earthspike Mantle / Earthshield Mantle / Shatterspike Mantle (table 198758357; combat log)
+    [20319] = { dynamicTooltip = true, name = Abilities.Skill_Earthspike_Mantle },                                                     -- Earthspike Mantle (player buff, 20s)
+    [61815] = { hide = true, tooltip = Tooltips.Skill_Major_Resolve, tooltipMorphId = 20319 },                                         -- Major Resolve combat (Earthspike Mantle)
+    [20328] = { dynamicTooltip = true, name = Abilities.Skill_Earthshield_Mantle },                                                    -- Earthshield Mantle (player buff, 20s)
+    [61827] = { hide = true, tooltip = Tooltips.Skill_Major_Resolve, tooltipMorphId = 20328 },                                         -- Major Resolve combat (Earthshield Mantle)
+    [31808] = { dynamicTooltip = true, tooltip = Tooltips.Generic_Damage_Shield_Duration, tooltipMorphId = 20328, hideReduce = true }, -- Earthshield Mantle damage shield (6s)
+    [20323] = { dynamicTooltip = true, name = Abilities.Skill_Shatterspike_Mantle },                                                   -- Shatterspike Mantle (player buff, 20s)
+    [61836] = { hide = true, tooltip = Tooltips.Skill_Major_Resolve, tooltipMorphId = 20323 },                                         -- Major Resolve combat (Shatterspike Mantle)
+    [20326] = { dynamicTooltip = true, tooltipMorphId = 20323 },                                                                       -- Shatterspike Mantle DOT (target, 20s; no generic Burning)
+    [20324] = { hide = true },                                                                                                         -- Shatterspike Mantle (ON CD combat; export)
+    [20320] = { hide = true },                                                                                                         -- Earthspike Mantle (combat clutter)
+    [20329] = { hide = true },                                                                                                         -- Earthshield Mantle damage return combat
 
     -- Dark Talons / Burning Talons / Choking Talons
     [20527] = { tooltip = Tooltips.Generic_Immobilize },                      -- Dark Talons (Dark Talons)
@@ -1793,69 +1944,172 @@ local effectOverride =
     [20253] = { hideReduce = true, tooltip = Tooltips.Skill_Burning_Talons }, -- Burning Talons (Burning Talons)
     [20528] = { tooltip = Tooltips.Generic_Immobilize },                      -- Choking Talons (Choking Talons)
 
-    -- Protective Scale / Protective Plate / Dragon Fire Scale
-    [21007] = { tooltip = Tooltips.Skill_Protective_Scale },                                         -- Protective Scale (Protective Scale)
-    [21014] = { tooltip = Tooltips.Skill_Protective_Plate },                                         -- Protective Plate (Protective Plate)
-    [108798] = { tooltip = Tooltips.Skill_Protective_Plate, hideReduce = true, noDuplicate = true }, -- Protective Plate (Protective Plate)
-    [21017] = { tooltip = Tooltips.Skill_Dragon_Fire_Scale },                                        -- Dragon Fire Scale (Dragon Fire Scale)
+    -- Wing Buffet / Fleetstep Wings / Protect the Brood
+    [21007] = { dynamicTooltip = true },                                                                                                            -- Wing Buffet (player buff)
+    [259720] = { hide = true },                                                                                                                     -- Wing Buffet (combat bundle)
+    [259718] = { name = Abilities.Skill_Wing_Buffet, tooltip = Tooltips.Generic_Stun },                                                             -- Wing Buffet (stun)
+    [259719] = { name = Abilities.Skill_Wing_Buffet, tooltip = Tooltips.Generic_Knockback },                                                        -- Wing Buffet (knockback)
+    [21014] = { dynamicTooltip = true },                                                                                                            -- Fleetstep Wings (slotted)
+    [108798] = { dynamicTooltip = true, hideReduce = true, noDuplicate = true, tooltip = Tooltips.Skill_Major_Expedition, tooltipMorphId = 21014 }, -- Fleetstep Wings (Major Expedition carrier, ~4s)
+    [259731] = { hide = true },                                                                                                                     -- Fleetstep Wings (combat bundle)
+    [259732] = { hide = true },
+    [259733] = { hide = true },
+    [259743] = { hide = true },                                                                    -- Stun Self (Fleetstep Wings)
+    [259744] = { hide = true, tooltip = Tooltips.Skill_Major_Expedition, tooltipMorphId = 21014 }, -- Major Expedition (Fleetstep Wings)
+    [259745] = { hide = true, tooltip = Tooltips.Skill_Major_Expedition, tooltipMorphId = 21014 },
+    [259746] = { hide = true, tooltip = Tooltips.Skill_Major_Expedition, tooltipMorphId = 21014 },
+    [259761] = { hide = true, tooltip = Tooltips.Skill_Minor_Brutality, tooltipMorphId = 21014 },                                                   -- Minor Brutality (Fleetstep Wings)
+    [21017] = { dynamicTooltip = true },                                                                                                            -- Protect the Brood (slotted)
+    [122407] = { dynamicTooltip = true, hideReduce = true, noDuplicate = true, tooltip = Tooltips.Skill_Minor_Protection, tooltipMorphId = 21017 }, -- Protect the Brood (export; morph log uses 32753/61721)
+    [32753] = { hide = true, tooltip = Tooltips.Skill_Minor_Protection, tooltipMorphId = 21017 },                                                   -- Minor Protection (Protect the Brood combat)
+    [260258] = { hide = true, tooltip = Tooltips.Skill_Major_Expedition, tooltipMorphId = 21017 },                                                  -- Major Expedition (Protect the Brood combat)
+    [260259] = { hide = true },                                                                                                                     -- Major Evasion bundle (adjacent id)
+    [259748] = { name = Abilities.Skill_Protect_the_Brood, dynamicTooltip = true },                                                                 -- Comrade's Vigor
+    [259749] = { name = Abilities.Skill_Protect_the_Brood, dynamicTooltip = true },
+    [259752] = { name = Abilities.Skill_Protect_the_Brood, dynamicTooltip = true },
+    [259741] = { hide = true }, -- Participant (Protect the Brood)
+
+    -- Reflective Scales / Reactive Scales / Protective Plate / Dragon Fire Scale (relocated from 21007/21014/21017)
+    [233320] = { tooltip = Tooltips.Skill_Protective_Scale, dynamicTooltip = true },  -- Reflective Scales
+    [233321] = { tooltip = Tooltips.Skill_Protective_Scale, dynamicTooltip = true },
+    [65786] = { tooltip = Tooltips.Skill_Protective_Scale, dynamicTooltip = true },   -- Reactive Scales
+    [65787] = { tooltip = Tooltips.Skill_Protective_Scale, dynamicTooltip = true },
+    [256000] = { tooltip = Tooltips.Skill_Protective_Plate, dynamicTooltip = true },  -- Protective Plate
+    [256044] = { tooltip = Tooltips.Skill_Protective_Plate, hideReduce = true, noDuplicate = true },
+    [255999] = { tooltip = Tooltips.Skill_Dragon_Fire_Scale, dynamicTooltip = true }, -- Dragon Fire Scale
+    [256042] = { tooltip = Tooltips.Skill_Dragon_Fire_Scale, dynamicTooltip = true },
+    [256043] = { tooltip = Tooltips.Skill_Dragon_Fire_Scale, dynamicTooltip = true },
+    [56946] = { tooltip = Tooltips.Skill_Dragon_Fire_Scale, dynamicTooltip = true },
+    [56947] = { tooltip = Tooltips.Skill_Dragon_Fire_Scale, dynamicTooltip = true },
 
     -- Inhale / Deep Breath / Draw Essence
-    [31841] = { icon = "/esoui/art/icons/ability_dragonknight_012.dds", tooltip = Tooltips.Skill_Inhale },         -- Inhale (Inhale)
-    [31859] = { icon = "/esoui/art/icons/ability_dragonknight_012.dds", name = Abilities.Skill_Inhale },           -- Inhale Heal (Inhale)
-    [32796] = { icon = "/esoui/art/icons/ability_dragonknight_012_a.dds", tooltip = Tooltips.Skill_Inhale },       -- Deep Breath (Deep Breath)
-    [32795] = { icon = "/esoui/art/icons/ability_dragonknight_012_a.dds" },                                        -- Deep Breath (Deep Breath)
-    [32797] = { icon = "" },                                                                                       -- Deep Breath (Deep Breath) -- Hide for Interrupt notification on Combat Text
-    [32788] = { icon = "/esoui/art/icons/ability_dragonknight_012_b.dds", tooltip = Tooltips.Skill_Draw_Essence }, -- Draw Essence (Draw Essence)
-    [32786] = { icon = "/esoui/art/icons/ability_dragonknight_012_b.dds" },                                        -- Draw Essence (Draw Essence)
-    [32789] = { icon = "/esoui/art/icons/ability_dragonknight_012_b.dds" },                                        -- Draw Essence (Draw Essence)
+    [31841] = { icon = "/esoui/art/icons/ability_dragonknight_012.dds", tooltip = Tooltips.Skill_Inhale },          -- Inhale (Inhale)
+    [31859] = { icon = "/esoui/art/icons/ability_dragonknight_012.dds", name = Abilities.Skill_Inhale },            -- Inhale Heal (Inhale)
+    [32796] = { icon = "/esoui/art/icons/ability_dragonknight_012_a.dds", tooltip = Tooltips.Skill_Inhale },        -- Deep Breath (Deep Breath)
+    [32795] = { icon = "/esoui/art/icons/ability_dragonknight_012_a.dds" },                                         -- Deep Breath (Deep Breath)
+    [32797] = { icon = "" },                                                                                        -- Deep Breath (Deep Breath) -- Hide for Interrupt notification on Combat Text
+    [256038] = { icon = "/esoui/art/icons/ability_dragonknight_012_b.dds", tooltip = Tooltips.Skill_Draw_Essence }, -- Draw Essence (U49 slotted/combat)
+    [256039] = { icon = "/esoui/art/icons/ability_dragonknight_012_b.dds" },                                        -- Draw Essence (combat)
+    [256040] = { icon = "/esoui/art/icons/ability_dragonknight_012_b.dds" },                                        -- Draw Essence (combat)
+    [256041] = { icon = "/esoui/art/icons/ability_dragonknight_012_b.dds" },                                        -- Draw Essence (combat)
 
-    -- Dragon Leap / Take Flight / Ferocious Leap
-    [29016] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds" },                       -- Dragon Leap (Dragon Leap)
-    [114590] = { name = Abilities.Skill_Dragon_Leap, tooltip = Tooltips.Generic_Knockback },    -- Stun (Dragon Leap)
-    [118928] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },         -- Dragon Leap (Dragon Leap)
-    [114600] = { name = Abilities.Skill_Take_Flight, tooltip = Tooltips.Generic_Knockback },    -- Stun (Take Flight)
-    [118936] = { icon = "/esoui/art/icons/ability_dragonknight_009_b.dds", hide = true },       -- Take Flight (Take Flight)
-    [61814] = { tooltip = Tooltips.Generic_Damage_Shield_Duration },                            -- Ferocious Leap (Ferocious Leap)
-    [114601] = { name = Abilities.Skill_Ferocious_Leap, tooltip = Tooltips.Generic_Knockback }, -- Stun (Ferocious Leap)
-    [118938] = { icon = "/esoui/art/icons/ability_dragonknight_009_a.dds", hide = true },       -- Ferocious Leap (Ferocious Leap)
+    -- Dragon Leap / Take Flight / Ferocious Leap (names from en.lang.csv table 198758357)
+    [29016] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds" },                                   -- Dragon Leap (slotted)
+    [259323] = { hide = true },                                                                             -- Dragon Leap (travel)
+    [262677] = { hide = true },                                                                             -- Dragon Leap (combat bundle)
+    [48744] = { hide = true },                                                                              -- CC Immunity (Dragon Leap)
+    [48745] = { hide = true },                                                                              -- Dragon Leap (combat bundle)
+    [114590] = { name = Abilities.Skill_Dragon_Leap, tooltip = Tooltips.Generic_Knockback },                -- Stun (Dragon Leap, legacy)
+    [262678] = { name = Abilities.Skill_Dragon_Leap, tooltip = Tooltips.Generic_Knockback },                -- Stun (Dragon Leap, U49)
+    [29465] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hideReduce = true },                -- Landslide (ground aura, offset 32837063)
+    [29466] = { hide = true },                                                                              -- Landslide (ground tick)
+    [29467] = { hide = true },                                                                              -- Landslide
+    [259228] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                     -- Landslide (U49)
+    [44984] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                      -- Landslide
+    [44987] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                      -- Landslide
+    [44988] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                      -- Landslide
+    [118928] = { icon = "/esoui/art/icons/ability_dragonknight_009.dds", hide = true },                     -- Dragon Leap (combat bundle)
+    [32719] = { icon = "/esoui/art/icons/ability_dragonknight_009_b.dds" },                                 -- Take Flight (slotted)
+    [259372] = { hide = true },                                                                             -- Take Flight (travel)
+    [262683] = { hide = true },                                                                             -- Take Flight (combat bundle)
+    [48753] = { hide = true },                                                                              -- CC Immunity (Take Flight)
+    [48752] = { hide = true },                                                                              -- Take Flight (combat bundle)
+    [114600] = { name = Abilities.Skill_Take_Flight, tooltip = Tooltips.Generic_Knockback },                -- Stun (Take Flight, legacy)
+    [262682] = { name = Abilities.Skill_Take_Flight, tooltip = Tooltips.Generic_Knockback },                -- Stun (Take Flight, U49; combat log)
+    [259241] = { icon = "/esoui/art/icons/ability_dragonknight_009_b.dds", hide = true },                   -- Landslide (U49, Take Flight)
+    [118936] = { icon = "/esoui/art/icons/ability_dragonknight_009_b.dds", hide = true },                   -- Take Flight (combat bundle)
+    [32715] = { icon = "/esoui/art/icons/ability_dragonknight_009_a.dds" },                                 -- Ferocious Leap (slotted)
+    [32716] = { hide = true },                                                                              -- Ferocious Leap (damage on target)
+    [32717] = { name = Abilities.Skill_Ferocious_Leap, tooltip = Tooltips.Generic_Knockback },              -- Ferocious Leap (target knockback aura, ~3s)
+    [262681] = { hide = true },                                                                             -- Ferocious Leap (combat bundle)
+    [48760] = { hide = true },                                                                              -- CC Immunity (Ferocious Leap)
+    [48761] = { hide = true },                                                                              -- Ferocious Leap (combat bundle)
+    [61814] = { name = Abilities.Skill_Ferocious_Leap, tooltip = Tooltips.Generic_Damage_Shield_Duration }, -- Ferocious Leap (player damage shield, 10s)
+    [114601] = { name = Abilities.Skill_Ferocious_Leap, tooltip = Tooltips.Generic_Knockback },             -- Stun (Ferocious Leap; combat log)
+    [262680] = { name = Abilities.Skill_Ferocious_Leap, tooltip = Tooltips.Generic_Knockback },             -- Stun (U49; export only — log used 114601)
+    [259684] = { icon = "/esoui/art/icons/ability_dragonknight_009_a.dds", hide = true },                   -- Landslide (U49, Ferocious Leap)
+    [118938] = { icon = "/esoui/art/icons/ability_dragonknight_009_a.dds", hide = true },                   -- Ferocious Leap (combat bundle)
 
-    -- Stonefist / Obsidian Shard / Stone Giant
-    [29032] = { tooltip = Tooltips.Skill_Stonefist },                       -- Stonefist (Stonefist)
-    [134009] = { tooltip = Tooltips.Generic_Knockdown },                    -- Stonefist (Stonefist)
+    -- Superheated Ward / Volcanic Ward / Magma Fist (U49 Earthen Heart line; table 198758357)
+    [29032] = { dynamicTooltip = true },                                                                 -- Superheated Ward (slotted)
+    [134310] = { dynamicTooltip = true, tooltipMorphId = 29032 },                                        -- Superheated Ward (player buff, 6s)
+    [134009] = { name = Abilities.Skill_Stonefist, tooltip = Tooltips.Generic_Knockdown },               -- Superheated Ward (knockdown; legacy id)
 
-    [68763] = { icon = "/esoui/art/icons/ability_dragonknight_013_b.dds" }, -- Obsidian Shard (Obsidian Shard)
+    [31820] = { dynamicTooltip = true },                                                                 -- Volcanic Ward (slotted)
+    [261754] = { dynamicTooltip = true, tooltipMorphId = 31820 },                                        -- Volcanic Ward (player buff, 6s)
+    [258203] = { dynamicTooltip = true, tooltipMorphId = 31820, hideReduce = true, noDuplicate = true }, -- Volcanic Ward (parallel player buff, 6s)
+    [68763] = { dynamicTooltip = true, tooltipMorphId = 31820 },                                         -- Volcanic Ward (end heal; table 198758357)
 
-    [31816] = { tooltip = Tooltips.Skill_Stone_Giant },                     -- Stone Giant (Stone Giant)
-    [134336] = { tooltip = Tooltips.Skill_Stagger },                        -- Stagger (Stone Giant)
-    [134355] = { tooltip = Tooltips.Generic_Knockdown },                    -- Stone Giant (Stone Giant)
+    [31816] = { dynamicTooltip = true },                                                                 -- Magma Fist (slotted)
+    [134340] = { dynamicTooltip = true, tooltipMorphId = 31816 },                                        -- Heat Shock (target, 7s)
+    [134336] = { tooltip = Tooltips.Skill_Stagger },                                                     -- Stagger (legacy Stone Giant)
+    [134355] = { tooltip = Tooltips.Generic_Knockdown },                                                 -- knockdown (legacy)
+    [133037] = { hide = true },                                                                          -- legacy Stonefist bundle
+    [133027] = { hide = true },                                                                          -- legacy Stone Giant bundle
 
-    -- Molten Weapons / Igneous Weapons / Molten Armaments
-    [258666] = { hide = true }, -- Major Sorcery bundle from Igneous Weapons (31874 shows full morph buff/tooltip)
-    [258661] = { dynamicTooltip = true, tooltipMorphId = 31888 }, -- Molten Armaments morph (bundle id != morph)
-    [76537] = { tooltip = Tooltips.Skill_Molten_Armaments }, -- Molten Armaments (Molten Armaments)
+    [258293] = { dynamicTooltip = true, tooltipMorphId = 31816 },                                        -- Magma Fist (player buff, 6s empower)
+    [259215] = { hide = true },                                                                          -- The Storm Voice (bundle)
+    [259216] = { hide = true },                                                                          -- The Storm Voice (bundle)
+    [259217] = { hide = true },                                                                          -- The Storm Voice (bundle)
 
-    -- Obsidian Shield / Igneous Shield / Fragmented Shield
-    [29071] = { tooltip = Tooltips.Generic_Damage_Shield_Duration }, -- Obsidian Shield (Obsidian Shield)
-    [29224] = { tooltip = Tooltips.Generic_Damage_Shield_Duration }, -- Igneous Shield (Igneous Shield)
-    [32673] = { tooltip = Tooltips.Generic_Damage_Shield_Duration }, -- Fragmented Shield (Fragmented Shield)
+    -- Molten Weapons / Igneous Weapons / Molten Armaments (table 198758357; combat log)
+    [29043] = { hide = true, dynamicTooltip = true },                                                      -- Molten Weapons (slotted cast aura; player buff = 258658)
+    [31874] = { hide = true, dynamicTooltip = true },                                                      -- Igneous Weapons (slotted cast aura; player buff = 258666)
+    [31888] = { hide = true, dynamicTooltip = true },                                                      -- Molten Armaments (slotted cast aura; player buff = 258661)
+    [258658] = { dynamicTooltip = true, tooltipMorphId = 29043, name = Abilities.Skill_Molten_Weapons },   -- Molten Weapons (player buff, 30s)
+    [258666] = { dynamicTooltip = true, tooltipMorphId = 31874, name = Abilities.Skill_Igneous_Weapons },  -- Igneous Weapons (player buff, 60s)
+    [258665] = { hide = true },                                                                            -- Igneous Weapons (weapon damage on target)
+    [258661] = { dynamicTooltip = true, tooltipMorphId = 31888, name = Abilities.Skill_Molten_Armaments }, -- Molten Armaments (player buff, 30s)
+    [92507] = { hide = true, tooltip = Tooltips.Skill_Major_Sorcery, tooltipMorphId = 29043 },             -- Major Sorcery (Molten Weapons combat)
+    [131340] = { hide = true, tooltip = Tooltips.Skill_Major_Brutality, tooltipMorphId = 29043 },          -- Major Brutality (Molten Weapons combat)
+    [92503] = { hide = true, tooltip = Tooltips.Skill_Major_Sorcery, tooltipMorphId = 31874 },             -- Major Sorcery (Igneous Weapons combat)
+    [76518] = { hide = true, tooltip = Tooltips.Skill_Major_Brutality, tooltipMorphId = 31874 },           -- Major Brutality (Igneous Weapons combat)
+    [92512] = { hide = true, tooltip = Tooltips.Skill_Major_Sorcery, tooltipMorphId = 31888 },             -- Major Sorcery (Molten Armaments combat)
+    [131341] = { hide = true, tooltip = Tooltips.Skill_Major_Brutality, tooltipMorphId = 31888 },          -- Major Brutality (Molten Armaments combat)
+    [76537] = { hide = true, tooltip = Tooltips.Skill_Empower, tooltipMorphId = 31888 },                   -- Empower (Molten Armaments combat only)
 
-    -- Petrify / Fossilize / Shattering Rocks
-    [29037] = { tooltip = Tooltips.Skill_Petrify_Stun },          -- Petrify (Petrify)
-    [32685] = { tooltip = Tooltips.Skill_Fossilize_Stun },        -- Fossilize (Fossilize)
-    [61785] = { tooltip = Tooltips.Generic_Immobilize },          -- Fossilize (Fossilize)
-    [32678] = { tooltip = Tooltips.Skill_Shattering_Rocks_Stun }, -- Shattering Rocks (Shattering Rocks)
+    -- Obsidian Shield / Igneous Shield / Fragmented Shield (table 198758357; slotted id = player buff 6s)
+    [29071] = { dynamicTooltip = true, tooltip = Tooltips.Generic_Damage_Shield_Duration, name = Abilities.Skill_Obsidian_Shield },   -- Obsidian Shield
+    [29224] = { dynamicTooltip = true, tooltip = Tooltips.Generic_Damage_Shield_Duration, name = Abilities.Skill_Igneous_Shield },    -- Igneous Shield
+    [32673] = { dynamicTooltip = true, tooltip = Tooltips.Generic_Damage_Shield_Duration, name = Abilities.Skill_Fragmented_Shield }, -- Fragmented Shield
+    [108675] = { hide = true, tooltip = Tooltips.Skill_Major_Mending, tooltipMorphId = 29071 },                                       -- Major Mending (Obsidian Shield combat)
+    [55033] = { hide = true, tooltip = Tooltips.Skill_Major_Mending, tooltipMorphId = 29224 },                                        -- Major Mending (Igneous Shield combat)
+    [108676] = { hide = true, tooltip = Tooltips.Skill_Major_Mending, tooltipMorphId = 32673 },                                       -- Major Mending (Fragmented Shield combat, 6s)
 
-    -- Ash Cloud / Cinder Storm / Eruption
-    [29059] = { tooltip = Tooltips.Skill_Ash_Cloud },                                                                                                    -- Ash Cloud (Ash Cloud)
-    [29126] = { duration = 0, groundLabel = true, tooltip = Tooltips.Generic_Snare_No_Dur, tooltipValue2 = 70 },                                         -- Ash Cloud (Ash Cloud)
-    [20779] = { tooltip = Tooltips.Skill_Ash_Cloud },                                                                                                    -- Cinder Storm (Cinder Storm)
-    [20780] = { duration = 0, groundLabel = true, tooltip = Tooltips.Generic_Snare_No_Dur, tooltipValue2 = 70 },                                         -- Cinder Storm (Cinder Storm)
-    [32710] = { tooltip = Tooltips.Skill_Eruption },                                                                                                     -- Eruption (Eruption)
-    [32712] = { duration = 0, groundLabel = true, tooltip = Tooltips.Generic_AOE_Snare_Fire, tooltipValue2 = 1, tooltipValue3 = 70, hideGround = true }, -- Eruption (Eruption)
+    -- Petrify / Fossilize / Shattering Rocks (table 198758357)
+    [29037] = { dynamicTooltip = true, name = Abilities.Skill_Petrify },                                    -- Petrify (slotted / target encase GAIN)
+    [54918] = { hide = true },                                                                              -- Petrify snare (1s clutter)
+    [259089] = { hide = true, tooltip = Tooltips.Skill_Minor_Breach, tooltipMorphId = 29037 },              -- Minor Breach combat bundle (display 61742; 10s)
+    -- 61742: global Minor Breach row above; Petrify applies via target aura + tooltipMorphId on 259089 when combat fires
+    [259090] = { name = Abilities.Skill_Petrify, tooltip = Tooltips.Skill_Petrify_Stun },                   -- Petrify stun (target, ~8s)
+    [32685] = { dynamicTooltip = true, name = Abilities.Skill_Fossilize },                                  -- Fossilize (slotted / target encase GAIN)
+    [259128] = { hide = true },                                                                             -- Fossilize snare (1s clutter)
+    [259129] = { hide = true, tooltip = Tooltips.Skill_Minor_Breach, tooltipMorphId = 32685 },              -- Minor Breach combat (display 61742, 20s)
+    [259130] = { hide = true, tooltip = Tooltips.Skill_Minor_Vulnerability, tooltipMorphId = 32685 },       -- Minor Vulnerability combat (display 79717, 20s)
+    [54931] = { name = Abilities.Skill_Fossilize, tooltip = Tooltips.Skill_Fossilize_Stun },                -- Fossilize stun (target, ~8s)
+    [61785] = { name = Abilities.Skill_Fossilize, tooltip = Tooltips.Generic_Immobilize },                  -- Fossilize root (post-stun, 4s)
+    [32678] = { dynamicTooltip = true, name = Abilities.Skill_Shattering_Rocks },                           -- Shattering Rocks (slotted / target encase GAIN)
+    [259136] = { hide = true },                                                                             -- Shattering Rocks snare (1s clutter)
+    [259137] = { hide = true, tooltip = Tooltips.Skill_Minor_Breach, tooltipMorphId = 32678 },              -- Minor Breach combat (display 61742, 10s)
+    [259138] = { name = Abilities.Skill_Shattering_Rocks, tooltip = Tooltips.Skill_Shattering_Rocks_Stun }, -- Stun on target (~8s; log Petrify)
+    [32684] = { hide = true },                                                                              -- Shattering Rocks (damage combat)
+    [108811] = { hide = true },                                                                             -- Shattering Rocks (player heal combat at cast end)
 
-    [61772] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                                            -- Ash Cloud (Ash Cloud)
-    [34791] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                                            -- Cinder Storm (Cinder Storm)
-    [32711] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Snare_Fire, tooltipValue2 = 1, tooltipValue3 = 70 },                                  -- Eruption (Eruption)
+    -- Hearthfire / Fire Keeper / Hearth and Home (U49+ Ash Cloud line)
+    [29059] = { dynamicTooltip = true, groundLabel = true },                                                                                             -- Hearthfire (15s ground; FakePlayerOfflineAura + showFakeAura)
+    [33142] = { hide = true },                                                                                                                           -- Hearthfire (slotted ground buff; duplicate of combat tracking)
+    [29126] = { hide = true, tooltip = Tooltips.Skill_Minor_Heroism },                                                                                   -- Minor Heroism bundle (inside Hearthfire ground; player shows 61708/61697)
+    [20779] = { dynamicTooltip = true, groundLabel = true },                                                                                             -- Fire Keeper (15s ground; FakePlayerOfflineAura + showFakeAura)
+    [21435] = { hide = true },                                                                                                                           -- Fire Keeper (slotted ground buff; action bar tracks via newId)
+    [20780] = { hide = true, tooltip = Tooltips.Skill_Minor_Heroism },                                                                                   -- Minor Heroism bundle (inside Fire Keeper ground; player shows 61708/61697)
+    [32710] = { dynamicTooltip = true, groundLabel = true },                                                                                             -- Hearth and Home (15s ground)
+    [33099] = { hide = true },                                                                                                                           -- Hearth and Home (slotted ground buff; action bar tracks via newId)
+    [32711] = { groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                         -- Hearth and Home (ally HOT inside ground — combat HOT/HOT!)
+    [32712] = { duration = 0, groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Snare_Fire, tooltipValue2 = 1, tooltipValue3 = 70 }, -- Hearth and Home (enemy flame/snare inside ground)
+    [32714] = { hide = true, dynamicTooltip = true },                                                                                                    -- Major Protection bundle (inside Hearth and Home ground only)
+
+    [61772] = { groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                         -- Hearthfire (ally HOT inside ground)
+    [34791] = { groundLabel = true, hideGround = true, tooltip = Tooltips.Generic_AOE_Heal, tooltipValue2 = 1 },                                         -- Fire Keeper (ally HOT inside ground)
 
     -- Magma Armor / Magma Shell / Corrosive Armor
     [15957] = { tooltip = Tooltips.Skill_Magma_Armor },                                  -- Magma Armor (Magma Armor)
@@ -2032,7 +2286,7 @@ local effectOverride =
     [33321] = { icon = "/esoui/art/icons/ability_nightblade_003.dds" },  -- Siphoning Strikes (Siphoning Strikes)
     [114957] = { icon = "/esoui/art/icons/ability_nightblade_003.dds" }, -- Siphoning Strikes (Siphoning Strikes)
     [36908] = { tooltip = Tooltips.Skill_Leeching_Strikes },             -- Leeching Strikes (Leeching Strikes)
-    [215493] = { dynamicTooltip = true, tooltipMorphId = 36935 },       -- Siphoning Attacks bundle buff → morph 36935
+    [215493] = { dynamicTooltip = true, tooltipMorphId = 36935 },        -- Siphoning Attacks bundle buff → morph 36935
     [36935] = { dynamicTooltip = true },                                 -- Siphoning Attacks morph — GetAbilityDescription (was stale static TP)
 
     -- Drain Power / Power Extraction / Sap Essence
@@ -2488,13 +2742,13 @@ local effectOverride =
 
     -- Feral Guardian / Eternal Guardian / Wild Guardian
     [101438] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_CC_IMMUNITY_DDS, name = Abilities.Innate_CC_Immunity, tooltip = Tooltips.Generic_CC_Immunity },                                                                                                                                -- Bear Immunity (Feral Guardian - All Morphs)
-    [85982] = { dynamicTooltip = true, toggle = true },                                                                                                                                                                                                                                        -- Feral Guardian — full sheet text via DynamicTooltip
+    [85982] = { dynamicTooltip = true, toggle = true },                                                                                                                                                                                                                                          -- Feral Guardian — full sheet text via DynamicTooltip
     [89135] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WARDEN_SWIPE_DDS, name = Abilities.Skill_Bite },                                                                                                                                                                                       -- Swipe (Feral Guardian)
     [89128] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WARDEN_CRUSHING_SWIPE_DDS },                                                                                                                                                                                                           -- Crushing Swipe (Feral Guardian)
     [89129] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WARDEN_CRUSHING_SWIPE_DDS, tooltip = Tooltips.Generic_Knockdown },                                                                                                                                                                     -- Crushing Swipe (Feral Guardian)
     [90284] = { type = BUFF_EFFECT_TYPE_DEBUFF, unbreakable = 1, tooltip = Tooltips.Skill_Guardians_Wrath },                                                                                                                                                                                     -- Guardian's Wrath (Feral Guardian)
     [93144] = { hide = true },                                                                                                                                                                                                                                                                   -- Guardian's Wrath Trigger (Feral Guardian)
-    [85986] = { dynamicTooltip = true, toggle = true },                                                                                                                                                                                                                                         -- Eternal Guardian
+    [85986] = { dynamicTooltip = true, toggle = true },                                                                                                                                                                                                                                          -- Eternal Guardian
     [109982] = { hide = true },                                                                                                                                                                                                                                                                  -- Eternal Guardian (Eternal Guardian)
     [105906] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WARDEN_SWIPE_DDS, name = Abilities.Skill_Bite },                                                                                                                                                                                      -- Swipe (Eternal Guardian)
     [105907] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WARDEN_CRUSHING_SWIPE_DDS },                                                                                                                                                                                                          -- Crushing Swipe (Eternal Guardian)
@@ -2503,12 +2757,16 @@ local effectOverride =
     [94626] = { hide = true },                                                                                                                                                                                                                                                                   -- Guardian's Wrath Trigger (Eternal Guardian)
     [109983] = { hide = true },                                                                                                                                                                                                                                                                  -- Eternal Guardian Revive (Eternal Guardian)
     [110384] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WARDEN_ETERNAL_GUARDIAN_ICD_DDS, name = zo_strformat("<<1>> <<2>>", Abilities.Skill_Eternal_Guardian, Abilities.Set_Cooldown), tooltip = Tooltips.Skill_Eternal_Guardian_Cooldown, type = BUFF_EFFECT_TYPE_DEBUFF, unbreakable = 1 }, -- Eternal Guardian (Eternal Guardian)
-    [85990] = { dynamicTooltip = true, toggle = true },                                                                                                                                                                                                                                         -- Wild Guardian
+    [85990] = { dynamicTooltip = true, toggle = true },                                                                                                                                                                                                                                          -- Wild Guardian
     [89219] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WARDEN_SWIPE_DDS, name = Abilities.Skill_Bite },                                                                                                                                                                                       -- Swipe (Wild Guardian)
     [89220] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WARDEN_CRUSHING_SWIPE_DDS },                                                                                                                                                                                                           -- Crushing Swipe (Wild Guardian)
     [92666] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WARDEN_CRUSHING_SWIPE_DDS, tooltip = Tooltips.Generic_Knockdown },                                                                                                                                                                     -- Crushing Swipe (Wild Guardian)
     [92163] = { type = BUFF_EFFECT_TYPE_DEBUFF, unbreakable = 1, tooltip = Tooltips.Skill_Guardians_Savagery },                                                                                                                                                                                  -- Guardian's Savagery (Wild Guardian)
     [93233] = { hide = true },                                                                                                                                                                                                                                                                   -- Guardian's Savagery Trigger (Wild Guardian)
+
+    -- Highland Sentinel (Warden ultimate morph)
+    [219680] = { dynamicTooltip = true, toggle = true }, -- Highland Sentinel
+    [219681] = { hide = true },                          -- Sentinel's Eye (combat refresh tick)
 
     -- GREEN BALANCE
 
@@ -2801,7 +3059,347 @@ local effectOverride =
     -- ARCANIST ACTIVE ABILITIES --------------------------------
     ----------------------------------------------------------------
 
-    -- Placeholder, need to add data for abilities
+    -- Crux
+    [184220] = { dynamicTooltip = true }, -- Crux (resource)
+
+    -- Runemend
+    [192742] = { hide = true }, -- Runemend SlotPassive
+    [196434] = { hide = true }, -- Evolving Runemend SlotPassive
+    [196435] = { hide = true }, -- Audacious Runemend SlotPassive
+    [183261] = { hide = true }, -- Runemend (combat heal)
+    [183489] = { hide = true }, -- Runemend (combat heal)
+    [186247] = { hide = true }, -- Runemend (combat heal)
+    [186250] = { hide = true }, -- Evolving Runemend (combat heal)
+    [186252] = { hide = true }, -- Evolving Runemend (combat heal)
+    [186191] = { hide = true }, -- Audacious Runemend (combat heal)
+    [186265] = { hide = true }, -- Audacious Runemend (combat heal)
+    [186267] = { hide = true }, -- Audacious Runemend (combat heal)
+
+    -- Evolving Runemend
+    [186189] = { dynamicTooltip = true, tooltipMorphId = 189565 }, -- Evolving Runemend (cast)
+    [189565] = { dynamicTooltip = true },                          -- Evolving Runemend (player buff)
+
+    -- Remedy Cascade
+    [183537] = { dynamicTooltip = true },                          -- Remedy Cascade (channel)
+    [178454] = { dynamicTooltip = true, tooltipMorphId = 183537 }, -- Remedy Cascade (cost variant)
+    [189713] = { hide = true },                                    -- Remedy Cascade (slotted combat bundle)
+    [183539] = { hide = true },                                    -- Remedy Cascade (HoT tick)
+
+    -- Cascading Fortune
+    [186193] = { dynamicTooltip = true },                          -- Cascading Fortune (channel)
+    [198330] = { dynamicTooltip = true, tooltipMorphId = 186193 }, -- Cascading Fortune (cost variant)
+    [189777] = { hide = true },                                    -- Cascading Fortune (slotted combat bundle)
+    [186254] = { hide = true },                                    -- Cascading Fortune (HoT tick)
+
+    -- Curative Surge
+    [186200] = { dynamicTooltip = true },                          -- Curative Surge (channel)
+    [198537] = { dynamicTooltip = true, tooltipMorphId = 186200 }, -- Curative Surge (cost stam)
+    [186201] = { hide = true },                                    -- Curative Surge (slotted combat bundle)
+    [186203] = { hide = true },                                    -- Curative Surge (HoT tick)
+
+    -- Arcanist's Domain
+    [183555] = { groundLabel = true, dynamicTooltip = true }, -- Arcanist's Domain (ground)
+    [187386] = { dynamicTooltip = true },                     -- Domain (player buff in ground)
+
+    -- Zenas' Empowering Disc
+    [186229] = { groundLabel = true, dynamicTooltip = true }, -- Zenas' Empowering Disc (ground)
+    [187387] = { dynamicTooltip = true },                     -- Zenas' Empowering Disc (player buff in ground)
+
+    -- Reconstructive Domain
+    [186234] = { groundLabel = true, dynamicTooltip = true }, -- Reconstructive Domain (ground)
+    [186242] = { dynamicTooltip = true },                     -- Reconstructive Domain (player buff in ground)
+    [186243] = { hide = true },                               -- Reconstructive Domain (HoT tick)
+
+    -- Chakram Shields
+    [183447] = { dynamicTooltip = true, tooltipMorphId = 183449 }, -- Chakram Shields (cast)
+    [178456] = { dynamicTooltip = true, tooltipMorphId = 183449 }, -- Chakram Shields (cost variant)
+    [183449] = { dynamicTooltip = true },                          -- Chakram Shields (player buff)
+
+    -- Chakram of Destiny
+    [198564] = { dynamicTooltip = true, tooltipMorphId = 194237 }, -- Chakram of Destiny (cast)
+    [186207] = { hide = true },                                    -- Chakram of Destiny (combat bundle)
+    [186208] = { dynamicTooltip = true },                          -- Chakram of Destiny (player shield, alternate morph track)
+    [194237] = { dynamicTooltip = true },                          -- Chakram of Destiny (player / shared shield buff)
+
+    -- Tidal Chakram
+    [186209] = { dynamicTooltip = true, tooltipMorphId = 186210 }, -- Tidal Chakram (cast / slotted mag)
+    [198567] = { dynamicTooltip = true, tooltipMorphId = 186210 }, -- Tidal Chakram (cost stam)
+    [186210] = { dynamicTooltip = true },                          -- Tidal Chakram (player shield buff)
+
+    -- Vitalizing Glyphic
+    [178455] = { dynamicTooltip = true, tooltipMorphId = 183712 }, -- Vitalizing Glyphic (cast)
+    [183709] = { groundLabel = true, dynamicTooltip = true },      -- Vitalizing Glyphic (ground)
+    [183711] = { hide = true },                                    -- Vitalizing Glyphic (ground spawn)
+    [183712] = { dynamicTooltip = true },                          -- Vitalizing Glyphic (glyph pet buff)
+    [184078] = { hide = true },                                    -- Vitalizing Glyphic Init Health (pet spawn)
+    [184079] = { hide = true },                                    -- Vitalizing Glyphic (pet combat)
+    [184330] = { hide = true },                                    -- Vitalizing Glyphic (player refresh tick)
+    [185757] = { hide = true },                                    -- Vitalizing Glyphic (HoT tick)
+    [201395] = { hide = true },                                    -- Player Glyphic Battle Spirit (pet)
+
+    -- Glyphic of the Tides
+    [201394] = { dynamicTooltip = true, tooltipMorphId = 193797 }, -- Glyphic of the Tides (cast)
+    [193794] = { groundLabel = true, dynamicTooltip = true },      -- Glyphic of the Tides (ground)
+    [193796] = { hide = true },                                    -- Glyphic of the Tides (ground spawn)
+    [193797] = { dynamicTooltip = true },                          -- Glyphic of the Tides (glyph pet buff)
+    [194191] = { hide = true },                                    -- Glyphic of the Tides Init Health (pet spawn)
+    [193798] = { hide = true },                                    -- Glyphic of the Tides (pet combat)
+    [193799] = { hide = true },                                    -- Glyphic of the Tides (player refresh tick)
+    [193800] = { hide = true },                                    -- Glyphic of the Tides (HoT tick)
+
+    -- Resonating Glyphic
+    [193769] = { dynamicTooltip = true, tooltipMorphId = 193559 }, -- Resonating Glyphic (cast)
+    [193558] = { groundLabel = true, dynamicTooltip = true },      -- Resonating Glyphic (ground)
+    [193560] = { hide = true },                                    -- Resonating Glyphic (ground spawn)
+    [193559] = { dynamicTooltip = true },                          -- Resonating Glyphic (glyph pet buff)
+    [193561] = { hide = true },                                    -- Resonating Glyphic Init Health (pet spawn)
+    [194205] = { hide = true },                                    -- Resonating Glyphic (pet combat)
+    [194207] = { hide = true },                                    -- Resonating Glyphic (player refresh tick)
+    [194208] = { hide = true },                                    -- Resonating Glyphic (HoT tick)
+
+    -- Apocryphal Gate
+    [183542] = { dynamicTooltip = true },                          -- Apocryphal Gate (cast)
+    [178457] = { dynamicTooltip = true, tooltipMorphId = 183542 }, -- Apocryphal Gate (cost variant)
+    [195167] = { groundLabel = true, dynamicTooltip = true },      -- Apocryphal Gate (entry portal ground; single ground icon)
+    [183543] = { dynamicTooltip = true },                          -- Apocryphal Gate (player portal anchor)
+    [183546] = { hide = true },                                    -- Apocryphal Gate (exit portal ground; hidden — use 195167)
+    [183544] = { hide = true },                                    -- Apocryphal Gate (travel combat tick)
+    [183547] = { hide = true },                                    -- Apocryphal Gate (travel combat tick)
+
+    -- Passage Between Worlds
+    [186220] = { dynamicTooltip = true },                          -- Passage Between Worlds (cast)
+    [190394] = { dynamicTooltip = true, tooltipMorphId = 186220 }, -- Passage Between Worlds (cost variant)
+    [195204] = { groundLabel = true, dynamicTooltip = true },      -- Passage Between Worlds (entry portal ground; single ground icon)
+    [186224] = { dynamicTooltip = true },                          -- Passage Between Worlds (player portal anchor)
+    [186226] = { hide = true },                                    -- Passage Between Worlds (exit portal ground; hidden — use 195204)
+    [186221] = { hide = true },                                    -- Passage Between Worlds (travel combat tick)
+    [186223] = { hide = true },                                    -- Passage Between Worlds (travel combat tick)
+
+    -- Fleet-Footed Gate
+    [186211] = { dynamicTooltip = true },                          -- Fleet-Footed Gate (cast)
+    [197856] = { dynamicTooltip = true, tooltipMorphId = 186211 }, -- Fleet-Footed Gate (cost variant)
+    [195190] = { groundLabel = true, dynamicTooltip = true },      -- Fleet-Footed Gate (entry portal ground; single ground icon)
+    [186215] = { dynamicTooltip = true },                          -- Fleet-Footed Gate (player portal anchor)
+    [186217] = { hide = true },                                    -- Fleet-Footed Gate (exit portal ground; hidden — use 195190)
+    [186212] = { hide = true },                                    -- Fleet-Footed Gate (travel combat tick)
+    [186214] = { hide = true },                                    -- Fleet-Footed Gate (travel combat tick)
+    [187939] = { dynamicTooltip = true },                          -- Major Expedition (Fleet-Footed Gate player buff)
+
+    -- Fatecarver / Exhausting Fatecarver / Pragmatic Fatecarver (bar slotted)
+    [185805] = { dynamicTooltip = true }, -- Fatecarver (magicka)
+    [193331] = { dynamicTooltip = true }, -- Fatecarver (stamina)
+    [183122] = { dynamicTooltip = true }, -- Exhausting Fatecarver (magicka)
+    [193397] = { dynamicTooltip = true }, -- Exhausting Fatecarver (stamina)
+    [186366] = { dynamicTooltip = true }, -- Pragmatic Fatecarver (magicka)
+    [193398] = { dynamicTooltip = true }, -- Pragmatic Fatecarver (stamina)
+
+    -- Fatecarver (combat / channel / tick — not bar icons)
+    [185808] = { hide = true }, -- Fatecarver (damage tick)
+    [189533] = { hide = true }, -- Fatecarver (channel bundle)
+    [183123] = { hide = true }, -- Exhausting Fatecarver (area)
+    [184291] = { hide = true }, -- Exhausting Fatecarver
+    [186369] = { hide = true }, -- Pragmatic Fatecarver
+    [186370] = { hide = true }, -- Pragmatic Fatecarver (area)
+    [186780] = { hide = true }, -- Exhausting Fatecarver
+    [194842] = { hide = true }, -- Fatecarver
+    [194843] = { hide = true }, -- Fatecarver (area)
+    [194844] = { hide = true }, -- Fatecarver Snare (Exhausting Fatecarver)
+    [178441] = { hide = true }, -- Fatecarver Dummy
+    [201265] = { hide = true }, -- Pragmatic Fatecarver
+    [201273] = { hide = true }, -- Pragmatic Fatecarver
+
+    -- Runeblades (projectile / hit tracking on target)
+    [188658] = { hide = true }, -- Runeblades
+    [190569] = { hide = true }, -- Runeblades
+    [190570] = { hide = true }, -- Runeblades
+
+    -- Writhing Runeblades
+    [186430] = { dynamicTooltip = true }, -- Writhing Runeblades (player)
+    [188787] = { hide = true },           -- Writhing Runeblades (blade hit)
+    [185804] = { hide = true },           -- Writhing Runeblades (blade hit)
+    [188186] = { hide = true },           -- Writhing Runeblades (blade hit)
+
+    -- Escalating Runeblades
+    [203350] = { dynamicTooltip = true }, -- Escalating Runeblades (player)
+    [188780] = { hide = true },           -- Escalating Runeblades (blade hit)
+    [182978] = { hide = true },           -- Escalating Runeblades (blade hit)
+    [193751] = { hide = true },           -- Escalating Runeblades (blade hit)
+    [182979] = { hide = true },           -- Escalating Runeblades (blade hit)
+
+    -- Inspired Scholarship
+    [185842] = { dynamicTooltip = true }, -- Inspired Scholarship (player buff)
+    [185843] = { hide = true },           -- Inspired Scholarship (damage tick)
+
+    -- Runic Jolt
+    [183165] = { dynamicTooltip = true }, -- Runic Jolt (cast)
+    [199696] = { hide = true },           -- Runic Jolt (slotted combat bundle; GAIN on skill line / slot)
+
+    -- Runic Embrace
+    [186531] = { dynamicTooltip = true }, -- Runic Embrace (cast)
+    [188112] = { hide = true },           -- Runic Embrace (heal tick)
+
+    -- Runic Sunder
+    [183430] = { dynamicTooltip = true, tooltipMorphId = 187742 },        -- Runic Sunder (cast)
+    [187742] = { dynamicTooltip = true, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Runic Sunder (target debuff)
+    [187741] = { dynamicTooltip = true },                                 -- Runic Sunder (player/group buff)
+
+    -- Runespite Ward
+    [185894] = { dynamicTooltip = true },                          -- Runespite Ward (player buff)
+    [185901] = { dynamicTooltip = true, tooltipMorphId = 185894 }, -- Spiteward of the Lucid Mind
+    [185903] = { dynamicTooltip = true, tooltipMorphId = 185894 }, -- Spiteward of the Lucid Mind (cast)
+    [187543] = { hide = true },                                    -- Spiteward of the Lucid Mind (Crux heal)
+    [188512] = { hide = true },                                    -- Spiteward of the Lucid Mind (power restore)
+    [190583] = { hide = true },                                    -- Hideous Clarity (power restore)
+    [190584] = { hide = true },                                    -- Hideous Clarity (power restore)
+    [183241] = { dynamicTooltip = true, tooltipMorphId = 184362 }, -- Impervious Runeward (cast)
+    [184362] = { dynamicTooltip = true },                          -- Impervious Runeward (player/group buff)
+    [183244] = { hide = true },                                    -- Impervious Runeward (combat bundle)
+    [196128] = { hide = true },                                    -- Impervious Runeward (Crux heal)
+    [197967] = { hide = true },                                    -- Impervious Runeward (short combat tick)
+    [185895] = { hide = true },                                    -- Runespite Ward (combat bundle)
+    [192297] = { hide = true },                                    -- Runespite Ward (Crux heal)
+    [185897] = { hide = true },                                    -- Runespite Ward (retaliate hit on attacker)
+
+    -- Fatewoven Armor
+    [183648] = { dynamicTooltip = true }, -- Fatewoven Armor
+
+    -- Unbreakable Fate
+    [186477] = { dynamicTooltip = true },                          -- Unbreakable Fate (player buff)
+    [186480] = { dynamicTooltip = true, tooltipMorphId = 186477 }, -- Unbreakable Fate (cost variant)
+
+    -- Cruxweaver Armor
+    [185908] = { dynamicTooltip = true }, -- Cruxweaver Armor (player/group buff)
+
+    -- Gibbering Shield / Gibbering Shelter
+    [183676] = { dynamicTooltip = true },                          -- Gibbering Shield (cast / player buff)
+    [192380] = { dynamicTooltip = true },                          -- Gibbering Shelter (player buff)
+    [192382] = { dynamicTooltip = true, tooltipMorphId = 192380 }, -- Gibbering Shelter (cost variant)
+    [192383] = { dynamicTooltip = true, tooltipMorphId = 192380 }, -- Gibbering Shelter (cost variant)
+
+    -- Runic Defense
+    [185912] = { dynamicTooltip = true, tooltipMorphId = 194637 }, -- Runic Defense (cast)
+    [194637] = { dynamicTooltip = true },                          -- Runic Defense (player buff)
+
+    -- Runeguard of Freedom
+    [186489] = { dynamicTooltip = true, tooltipMorphId = 186492 }, -- Runeguard of Freedom (cast)
+    [186492] = { dynamicTooltip = true },                          -- Runeguard of Freedom (player/group buff)
+
+    -- Runeguard of Still Waters
+    [183401] = { dynamicTooltip = true, tooltipMorphId = 194646 }, -- Runeguard of Still Waters (cast)
+    [194646] = { dynamicTooltip = true },                          -- Runeguard of Still Waters (player/group buff)
+    [186832] = { hide = true },                                    -- Runeguard of Still Waters (IMMUNE bundle)
+
+    -- Rune of Eldritch Horror
+    [185918] = { dynamicTooltip = true, type = BUFF_EFFECT_TYPE_DEBUFF },                          -- Rune of Eldritch Horror (target)
+    [185921] = { dynamicTooltip = true, tooltipMorphId = 185918, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Rune of Uncanny Adoration
+    [185922] = { hide = true },                                                                    -- Rune of Uncanny Adoration (IMMUNE bundle)
+    [185919] = { hide = true },                                                                    -- Rune of Eldritch Horror (IMMUNE bundle)
+
+    -- Rune of the Colorless Pool
+    [183267] = { dynamicTooltip = true, type = BUFF_EFFECT_TYPE_DEBUFF },                          -- Rune of the Colorless Pool (target)
+    [183270] = { dynamicTooltip = true, tooltipMorphId = 183267, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Rune of the Colorless Pool (cost variant)
+
+    -- Rune of Displacement
+    [185839] = { dynamicTooltip = true, tooltipMorphId = 185841 },        -- Rune of Displacement (cast mag)
+    [201293] = { dynamicTooltip = true, tooltipMorphId = 185841 },        -- Rune of Displacement (cast stam)
+    [187514] = { groundLabel = true, dynamicTooltip = true },             -- Rune of Displacement (ground)
+    [185841] = { dynamicTooltip = true, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Rune of Displacement (target debuff)
+    [185840] = { hide = true, groundLabel = true },                       -- Rune of Displacement (damage tick)
+    [191084] = { hide = true, groundLabel = true },                       -- Rune of Displacement (damage tick)
+
+    -- Cephaliarch's Flail / Tentacular Dread / Abyssal Impact
+    [183006] = { dynamicTooltip = true },                                 -- Cephaliarch's Flail
+    [183008] = { dynamicTooltip = true, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Abyssal Ink (target)
+    [183009] = { hide = true },                                           -- Cephaliarch's Flail (status bundle)
+    [201275] = { hide = true },                                           -- Cephaliarch's Flail (heal tick)
+    [185823] = { dynamicTooltip = true },                                 -- Tentacular Dread
+    [185826] = { hide = true },                                           -- Tentacular Dread (combat)
+    [186773] = { hide = true },                                           -- Tentacular Dread (combat)
+    [201384] = { hide = true },                                           -- Tentacular Dread (combat)
+    [185817] = { dynamicTooltip = true, tooltipMorphId = 185818 },        -- Abyssal Impact (magicka)
+    [185818] = { dynamicTooltip = true, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Abyssal Ink
+    [186772] = { hide = true },                                           -- Abyssal Impact (combat)
+    [192229] = { hide = true },                                           -- Abyssal Impact
+    [192230] = { hide = true },                                           -- Abyssal Impact
+    [192231] = { hide = true },                                           -- Abyssal Impact
+
+    -- The Imperfect Ring
+    [185836] = { dynamicTooltip = true, tooltipMorphId = 185838 },        -- The Imperfect Ring
+    [201286] = { dynamicTooltip = true, tooltipMorphId = 185838 },        -- The Imperfect Ring (cost mag)
+    [185838] = { dynamicTooltip = true, type = BUFF_EFFECT_TYPE_DEBUFF }, -- The Imperfect Ring (target DoT)
+    [191077] = { hide = true },                                           -- The Imperfect Ring (combat bundle)
+
+    -- The Unblinking Eye (ultimate)
+    [189791] = { groundLabel = true, dynamicTooltip = true }, -- The Unblinking Eye (ground)
+    [189792] = { dynamicTooltip = true },                     -- The Unblinking Eye (player aura)
+    [189793] = { hide = true, groundLabel = true },           -- The Unblinking Eye (damage tick)
+
+    -- The Tide King's Gaze (ultimate morph)
+    [189838] = { groundLabel = true, dynamicTooltip = true }, -- The Tide King's Gaze (ground)
+    [191367] = { dynamicTooltip = true },                     -- The Tide King's Gaze (player aura)
+    [189839] = { hide = true, groundLabel = true },           -- The Tide King's Gaze (damage tick)
+    [189837] = { hide = true },                               -- The Tide King's Gaze (combat bundle)
+
+    -- The Languid Eye (ultimate morph)
+    [189867] = { groundLabel = true, dynamicTooltip = true }, -- The Languid Eye (ground)
+    [189868] = { dynamicTooltip = true },                     -- The Languid Eye (player aura)
+    [189869] = { hide = true, groundLabel = true },           -- The Languid Eye (damage tick)
+    [199252] = { hide = true },                               -- The Languid Eye (channel refresh tick)
+    [191889] = { hide = true },                               -- The Languid Eye (status tick bundle)
+
+    ----------------------------------------------------------------
+    -- HERALD OF THE TOME -----------------------------------------
+    ----------------------------------------------------------------
+
+    -- Tome-Bearer's Inspiration
+    [186452] = { dynamicTooltip = true }, -- Tome-Bearer's Inspiration (player buff)
+    [186453] = { hide = true },           -- Tome-Bearer's Inspiration (damage tick)
+
+    -- Fate Omen's Inspiration (Tome-Bearer morph)
+    [191761] = { dynamicTooltip = true }, -- Fate Omen's Inspiration (eldritch morph)
+    [191765] = { dynamicTooltip = true }, -- Fate Omen's Inspiration (berserk morph)
+    [191762] = { hide = true },           -- Apocrypha Waves (combat bundle)
+
+    -- Shields of Erudition
+    [192937] = { dynamicTooltip = true }, -- Shields of Erudition (cast)
+    [192939] = { dynamicTooltip = true }, -- Shields of Erudition (player ally shield)
+    [192941] = { dynamicTooltip = true }, -- Shields of Erudition (companion ally shield)
+
+    -- Recuperative Treatise
+    [183047] = { dynamicTooltip = true },                                 -- Recuperative Treatise (player buff)
+    [185825] = { dynamicTooltip = true, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Abyssal Ink (target)
+    [183048] = { hide = true },                                           -- Recuperative Treatise (damage tick)
+    [184103] = { hide = true },                                           -- Recuperative Treatise (power restore)
+    [184104] = { hide = true },                                           -- Recuperative Treatise (power restore)
+    [185407] = { hide = true },                                           -- Recuperative Treatise (damage tick)
+
+    -- Fulminating Rune
+    [182988] = { dynamicTooltip = true, tooltipMorphId = 187850 },        -- Fulminating Rune (cast mag)
+    [201296] = { dynamicTooltip = true, tooltipMorphId = 187850 },        -- Fulminating Rune (cast stam)
+    [187850] = { dynamicTooltip = true, type = BUFF_EFFECT_TYPE_DEBUFF }, -- Fulminating Rune (target debuff)
+    [182989] = { hide = true },                                           -- Fulminating Rune (damage tick)
+    [184258] = { hide = true },                                           -- Fulminating Rune (combat bundle)
+
+    -- Herald passives (stack rank combat id swap)
+    [184847] = { hide = true },           -- Fated Fortune (rank swap)
+    [184857] = { dynamicTooltip = true }, -- Harnessed Quintessence
+    [184858] = { hide = true },           -- Harnessed Quintessence (rank swap)
+    [184870] = { dynamicTooltip = true }, -- Psychic Lesion
+    [184873] = { hide = true },           -- Psychic Lesion (rank swap)
+    [184885] = { dynamicTooltip = true }, -- Splintered Secrets
+    [184887] = { hide = true },           -- Splintered Secrets (rank swap)
+
+    -- Arcanist passives (rank combat id swap)
+    [184918] = { dynamicTooltip = true }, -- Aegis of the Unseen
+    [184923] = { hide = true },           -- Aegis of the Unseen (rank swap)
+    [184930] = { dynamicTooltip = true }, -- Circumvented Fate
+    [184932] = { hide = true },           -- Circumvented Fate (rank swap)
+    [185033] = { dynamicTooltip = true }, -- Wellspring of the Abyss
+    [185036] = { hide = true },           -- Wellspring of the Abyss (rank swap)
+    [185050] = { dynamicTooltip = true }, -- Implacable Outcome
+    [185051] = { hide = true },           -- Implacable Outcome (rank swap)
+    [185058] = { hide = true },           -- Implacable Outcome (rank swap)
+    [185070] = { hide = true },           -- Implacable Outcome (rank swap)
 
     ----------------------------------------------------------------
     -- PLAYER WEAPON ATTACKS ---------------------------------------
@@ -2924,6 +3522,8 @@ local effectOverride =
     [69773] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEAPON_TRI_FOCUS_SHIELD_DDS, tooltip = Tooltips.Generic_Damage_Shield_Duration }, -- Tri Focus (Tri Focus - Rank 2)
     [30951] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEAPON_TRI_FOCUS_DAMAGE_DDS },                                                    -- Shock (Tri Focus - Rank 1)
     [45505] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEAPON_TRI_FOCUS_DAMAGE_DDS },                                                    -- Shock (Tri Focus - Rank 2)
+    [203988] = { dynamicTooltip = true, type = BUFF_EFFECT_TYPE_DEBUFF },                                                                   -- Tri Focus (target DoT)
+    [204009] = { dynamicTooltip = true, type = BUFF_EFFECT_TYPE_DEBUFF },                                                                   -- Tri Focus (target DoT)
     [30959] = { icon = "/esoui/art/icons/ability_weapon_007.dds" },                                                                         -- Ancient Knowledge (Ancient Knowledge - Rank 1)
     [45513] = { icon = "/esoui/art/icons/ability_weapon_007.dds", hide = true },                                                            -- Ancient Knowledge (Ancient Knowledge - Rank 2)
     [30966] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEAPON_DESTRUCTION_EXPERT_DDS },                                                  -- Magicka Restore (Destruction Expert - Rank 1)
@@ -3010,10 +3610,14 @@ local effectOverride =
     [38848] = { icon = "/esoui/art/icons/ability_dualwield_001_a.dds", tooltip = Tooltips.Skill_Blood_Craze },              -- Blood Craze Bleed (Blood Craze)
     [38852] = { tooltip = Tooltips.Skill_Blood_Craze_Heal },                                                                -- Blood Craze (Blood Craze)
 
-    -- Blade Cloak / Quick Cloak / Deadly Cloak
-    [28613] = { tooltip = Tooltips.Skill_Blade_Cloak, tooltipValue2 = 2 }, -- Blade Cloak (Blade Cloak)
-    [38901] = { tooltip = Tooltips.Skill_Blade_Cloak, tooltipValue2 = 2 }, -- Quick Cloak (Quick Cloak)
-    [38906] = { tooltip = Tooltips.Skill_Blade_Cloak, tooltipValue2 = 2 }, -- Deadly Cloak (Deadly Cloak)
+    -- Blade Cloak / Quick Cloak / Deadly Cloak (table 198758357; U49 player buff pulse 247975 ~900 ms)
+    [28613] = { dynamicTooltip = true, toggle = true },                                           -- Blade Cloak (slotted)
+    [38901] = { dynamicTooltip = true, toggle = true },                                           -- Quick Cloak (slotted)
+    [38906] = { dynamicTooltip = true, toggle = true },                                           -- Deadly Cloak (slotted)
+    [247975] = { dynamicTooltip = true, tooltipMorphId = 28613, toggle = true, unbreakable = 1 }, -- Blade Cloak (player buff; log GAIN/GAIN DUR ~900 ms)
+    [247976] = { hide = true },                                                                   -- Blade Cloak AoE Fx (U49; was 64746)
+    [64746] = { hide = true },                                                                    -- Blade Cloak AoE Fx (legacy)
+    [62522] = { hide = true },                                                                    -- Blade Cloak (legacy player buff id; track 247975)
 
     -- Hidden Blade / Shrouded Daggers / Flying Blade
     [126641] = { icon = "" },                                                                                                                          -- Hidden Blade (Hidden Blade)
@@ -3368,8 +3972,8 @@ local effectOverride =
     [32494] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_ATTACKHEAVY_DDS },                                                                                                                                                           -- Heavy Attack (Werewolf)
     [60773] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_ATTACKRESTORE_DDS },                                                                                                                                                         -- Heavy Attack (Werewolf)
 
-    [33208] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS, hide = true },                                                                                                                                                   -- Devour (Devour)
-    [33209] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS },                                                                                                                                                                -- Devour (Devour)
+    [33208] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS, hide = true },                                                                                                                                                   -- Devour synergy state (U50: passive renamed to Insatiable Hunger; synergy still uses Devour name)
+    [33209] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS },                                                                                                                                                                -- Devour / Insatiable Hunger HEAL tick (U50)
     [40515] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS },                                                                                                                                                                -- Devour (Blood Moon)
     [40520] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS, name = Abilities.Skill_Devour, unbreakable = 1, tooltip = Tooltips.Generic_Knockdown },                                                                          -- Q3047 - Knockdown (Blood Moon - Rank 1)
     [40525] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_BLOODMOON_ICD_DDS, name = zo_strformat("<<1>> <<2>>", Abilities.Passive_Bloodmoon, Abilities.Set_Cooldown), tooltip = Tooltips.Skill_Blood_Moon, forcedContainer = "long" }, -- Bit an Ally (Blood Moon)
@@ -3391,29 +3995,163 @@ local effectOverride =
     [137164] = { tooltip = Tooltips.Skill_Feral_Carnage },                                                -- Feral Carnage (Feral Pounce)
 
     -- Hircine's Bounty / Hircine's Rage / Hircine's Fortitude
-    [137202] = { icon = "/esoui/art/icons/ability_werewolf_004_a.dds" },                                                                                                                             -- Hircine's Bounty (Hircine's Bounty)
+    [137202] = { icon = "/esoui/art/icons/ability_werewolf_004_a.dds" }, -- Hircine's Bounty (Hircine's Bounty)
 
-    [137204] = { icon = "/esoui/art/icons/ability_werewolf_004_b.dds" },                                                                                                                             -- Hircine's Rage (Hircine's Rage)
-    [137206] = { icon = "/esoui/art/icons/ability_werewolf_004_b.dds", name = Abilities.Skill_Hircines_Rage, unbreakable = 1, tooltip = Tooltips.Generic_Increase_Damage_Taken, tooltipValue2 = 5 }, -- Major Berserk (Hircine's Rage)
+    [137204] = { icon = "/esoui/art/icons/ability_werewolf_004_b.dds" }, -- Hircine's Rage (Hircine's Rage)
+    -- U50 audit Phase 4 (Pack Leader slotted log): 137206 is the live Hircine's Rage 20s active state
+    -- (API surfaces it as "Hircine's Rage" on the buff frame, [Dur] ~20000). The legacy "Major Berserk
+    -- + Increase Damage Taken 5%" tradeoff is gone in U50 -- Minor Berserk 267570 is the new berserk
+    -- component, granted as part of the while-slotted bundle wired in Phase 3.
+    [137206] = { icon = "/esoui/art/icons/ability_werewolf_004_b.dds", name = Abilities.Skill_Hircines_Rage, unbreakable = 1 }, -- Hircine's Rage active state (U50; 20s; was Major Berserk pre-U50)
+    -- U50 audit Phase 3 (Hircine's Rage activated log; Dur=0 GAIN/FADE for all five): slotted Hircine's
+    -- Rage now grants Major Protection 137347, Major Brutality 267554, Major Sorcery 267555, and Minor
+    -- Berserk 267570, anchored by 267553. Display ids 61722 / 61665 / 61687 / 61744 surface on the
+    -- buff frame via the API; internal anchors hidden to avoid duplicate icons.
+    [137347] = { hide = true },                                          -- Major Protection internal (Hircine's Rage; U50 while-slotted)
+    [267553] = { hide = true },                                          -- Hircine's Rage while-slotted anchor (U50)
+    [267554] = { hide = true },                                          -- Major Brutality internal (Hircine's Rage; U50 while-slotted)
+    [267555] = { hide = true },                                          -- Major Sorcery internal (Hircine's Rage; U50 while-slotted)
+    [267570] = { hide = true },                                          -- Minor Berserk internal (Hircine's Rage; U50 while-slotted)
 
-    [137209] = { icon = "/esoui/art/icons/ability_werewolf_004_c.dds" },                                                                                                                             -- Hircine's Fortitude (Hircine's Fortitude)
-    [137210] = { tooltip = Tooltips.Skill_Hircines_Fortitude },                                                                                                                                      -- Hircine's Fortitude (Hircine's Fortitude)
+    [137209] = { icon = "/esoui/art/icons/ability_werewolf_004_c.dds" }, -- Hircine's Fortitude (Hircine's Fortitude)
+    [137210] = { tooltip = Tooltips.Skill_Hircines_Fortitude },          -- Hircine's Fortitude (Hircine's Fortitude)
 
     -- Roar / Ferocious Roar / Deafening Roar
+    -- U50 audit Phase 1 (Hircine's Gift quest log): slotted Roar 32633 emits target fear 170991 (~3s
+    -- combat; 4s tooltip), target Off Balance 137257 (7s, bar track), and player Blood Hunger 267744
+    -- (30s, max 3 stacks per Refreshed: (3); SkillDumper morph 2 grants 2 stacks). Bar stays on 137257;
+    -- Blood Hunger shows on player frame with displayStacks.
+    -- U50 audit Phase 2 (Roar IV tooltip + form-swap log line `[168425] Major Prophecy [D]0 GAIN`):
+    -- while-slotted Roar grants Major Prophecy 168425 + Major Savagery 138072 (both internal; display
+    -- ids 61689 / 61667 are what the player buff frame shows via the API). Both re-apply on form swap.
+    -- Feeding Frenzy synergy (legacy on Howl of Despair) is now described on Roar IV: 6% damage done
+    -- + Minor Force 30s + 10% Crit Damage; synergy combat ids not yet observed in a log.
     [32633] = { tooltip = Tooltips.Generic_Fear },                          -- Roar (Roar)
     [137257] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance (Roar)
+    [170991] = { hide = true },                                             -- Roar target fear marker (U50; bar already tracks 137257)
 
     [39113] = { tooltip = Tooltips.Generic_Fear },                          -- Ferocious Roar (Ferocious Roar)
     [45834] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off Balance (Ferocious Roar)
-    [137287] = { tooltip = Tooltips.Skill_Ferocious_Roar },                 -- Ferocious Roar (Ferocious Roar)
+    -- 137287 was pre-U50 Ferocious Roar tooltip target -- ZOS repurposed it to Feeding Frenzy stage 1
+    -- in U50 (see Phase 4 entry further below in this file). Skill_Ferocious_Roar lang string is now
+    -- orphaned but kept registered in Tooltips.lua / lang/*.lua for potential future re-attachment.
+    [171001] = { hide = true },                                             -- Ferocious Roar target fear marker (U50; parallel to base Roar 170991; bar already tracks 45834)
 
     [39114] = { tooltip = Tooltips.Generic_Fear },                          -- Deafening Roar (Deafening Roar)
     [137312] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance (Deafening Roar)
+    -- U50 audit Phase 6 (Werewolf Berserker / Deafening Roar slotted log): Deafening Roar no longer
+    -- applies Major Breach (legacy pre-U50). The cast now grants Major Cowardice (111788 internal -->
+    -- 147643 display, 15s), Major Maim (137311 internal --> 61725 display, 15s), Off Balance 137312
+    -- (7s), Blood Hunger 267744 (player stack +1), and a fear marker 171003 (parallel to Roar's
+    -- 170991 / Ferocious Roar's 171001). Hide the internals so the buff frame keeps the standard
+    -- 147643 / 61725 Major Cowardice / Major Maim icons surfaced by the API.
+    [137311] = { hide = true }, -- Major Maim internal (Deafening Roar; U50; display 61725)
+    [111788] = { hide = true }, -- Major Cowardice internal (Deafening Roar; U50; display 147643)
+    [171003] = { hide = true }, -- Deafening Roar target fear marker (U50; parallel to 170991 / 171001)
 
-    -- Infectious Claws / Claws of Anguish / Claws of Life
-    [58856] = { tooltip = Tooltips.Generic_Disease, tooltipValue2 = 2 }, -- Infection (Infectious Claws)
-    [58865] = { tooltip = Tooltips.Generic_Disease, tooltipValue2 = 2 }, -- Infection (Claws of Anguish)
-    [58880] = { tooltip = Tooltips.Skill_Claws_of_Life },                -- Infection (Claws of Life)
+    -- Blood Hunger (U50): player stack buff granted by Roar / Ferocious / Deafening, consumed by
+    -- Gnash and Claw Fury (Rending Claws morph). Quest log shows 30000 ms duration with Refreshed: (3).
+    [267744] = { icon = "/esoui/art/icons/ability_werewolf_003.dds", tooltip = Tooltips.Skill_Blood_Hunger, displayStacks = true, maxStacks = 3, stack = 1 }, -- Blood Hunger (Roar - All Morphs)
+
+    -- Fury (U50): new Werewolf resource generated by ability casts. POWER event only; hide any
+    -- defensive Override hit in case the API later surfaces it as a buff.
+    -- 266744 is the per-target Fury-generation throttle (fires `[D] 0 [R] ON CD` on the target
+    -- after damaging hits like Feral Pounce 39107 / Brutal Pounce). Rate-limits how often a single
+    -- target can grant Fury so you can't farm one mob indefinitely. Defensive hide; the API
+    -- shouldn't surface ON CD events as auras, but keeps the buff frame clean if it ever does.
+    [266875] = { hide = true }, -- Fury (Werewolf resource counter; U50)
+    [266744] = { hide = true }, -- Fury per-target generation throttle (U50; ON CD marker; Phase 6 + 02:25 logs)
+
+    -- Gnash (U50: 58405 was legacy "Piercing Howl" id, now repurposed as Gnash base). Consumes a stack
+    -- of Blood Hunger to deal a Physical lunge, then the second hit (267745 Gnash Execute) deals up to
+    -- 125% more damage to enemies under 25% Health. 137317 is the brief "ripping out" state (~400 ms).
+    -- Icons confirmed canonical via SkillDumper: Gnash _002_rend.dds, Rip and Tear _002_rend_a.dds,
+    -- Bloody Gnash _002_rend_b.dds (all share the Gnash base icon family).
+    [58405] = { icon = "/esoui/art/icons/ability_werewolf_002_rend.dds", tooltip = Tooltips.Skill_Gnash }, -- Gnash (U50; renamed from Piercing Howl)
+    [137317] = { icon = "/esoui/art/icons/ability_werewolf_002_rend.dds", hide = true },                   -- Gnash ripping-out state (~400 ms; bar uses this for second-hit timer)
+
+    -- Bloody Gnash (U50: second Gnash morph; reuses legacy Howl of Agony line ids 58798/58801).
+    -- SkillDumper-confirmed canonical name "Bloody Gnash" (id 58798), icon _002_rend_b.dds. Phase 6
+    -- log (Bloody Gnash slotted) shows: 58798 initial DMG (slot), 58801 ~400ms second-hit indicator
+    -- (parallel to Gnash 137317 / Rip and Tear 58745), 267747 Bloody Gnash Execute second-hit DMG,
+    -- and a 148801 Hemorrhaging 4s bleed status DOT applied per Execute (unique to this morph; Gnash
+    -- has no extra status, Rip and Tear applies Major Breach instead). Blood Hunger 267744 consumed
+    -- on cast with 50% retention chance per tooltip.
+    [58798] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_b.dds", tooltip = Tooltips.Skill_Bloody_Gnash }, -- Bloody Gnash (U50; was Howl of Agony)
+    [58801] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_b.dds", hide = true },                           -- Bloody Gnash ~400 ms second-hit indicator (U50; was Howl of Agony Bonus)
+    [267747] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_b.dds", hide = true },                          -- Bloody Gnash Execute second-hit DMG (U50)
+
+    -- Insatiable Hunger (U50: renamed Devour passive; 268571 is the 12s active state granted while
+    -- you devour a corpse). 33209 HEAL tick and 37233/120612 POWER ticks are silent helpers.
+    [268571] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS, tooltip = Tooltips.Skill_Insatiable_Hunger }, -- Insatiable Hunger (U50 active devour state)
+
+    -- Hircine's Bounty (U50): while-slotted majors now include Brutality + Sorcery (261901 / 261902
+    -- internal -> 61665 / 61687 display). Hide the internal ids so the player buff frame keeps the
+    -- standard Major Brutality / Major Sorcery icons supplied by the API (61665 / 61687).
+    [261901] = { hide = true }, -- Major Brutality internal (Hircine's Bounty - All Morphs, U50)
+    [261902] = { hide = true }, -- Major Sorcery internal (Hircine's Bounty - All Morphs, U50)
+
+    -- Werewolf Transformation new passives (U50): all fire on transform with Dur=0 to register
+    -- passive bonuses. Defensive hide in case any surfaces as a buff frame entry.
+    [266845] = { hide = true }, -- Call of the Pack passive (U50; group ult-cost reduction)
+    [266849] = { hide = true }, -- Feral Cruelty passive (U50)
+    [266851] = { hide = true }, -- Feral Cruelty passive (U50)
+    [266874] = { hide = true }, -- Master of the Chase passive (U50; Fury generation bonus)
+    [267414] = { hide = true }, -- Werewolf Transformation internal passive (U50)
+    [268123] = { hide = true }, -- Slaughter passive (U50)
+    [269021] = { hide = true }, -- Prowl passive (U50)
+    [150998] = { hide = true }, -- Major Resolve internal (transform; display 61694 stays on buff frame)
+
+    -- Rending Claws / Claw Fury / Bloodclaws (U50 rename of Infectious Claws line)
+    -- U50 Phase 2 log (base 58855): Physical hit (10s) + 58856 Bleed DOT (4s rolling refresh on 10s total).
+    -- U50 Phase 4 log (Claw Fury 58864 morph): channel buff on PLAYER [D]10000 [Chan]4666; per-tick
+    -- 58865 DMG ticks; 58869 ON CD; each tick refreshes Blood Hunger 267744. Bar tracks 58864 channel.
+    -- U50 Phase 6 log (Bloodclaws 58879 morph) + SkillDumper confirmation (id 58879 "Bloodclaws",
+    -- icon _006_c.dds, 10s base duration): 58879 initial Physical DMG (slot; up to 6 enemies),
+    -- 58880 target Bleed DOT (10s total, 2s ticks; up to 5% per-tick Hemorrhaging chance), 58881
+    -- player HoT, 267961 instant heal POWER event. Initial hit grants +1 Blood Hunger per enemy hit
+    -- and has 15% Sundered chance per tooltip.
+    [58856] = { tooltip = Tooltips.Generic_Bleed, tooltipValue2 = 2 },                                                       -- Rending Claws Bleed DOT (U50; was Infection - Disease)
+    [58864] = { icon = "/esoui/art/icons/u50_ability_werewolf_claws_of_anguish.dds" },                                       -- Claw Fury channel buff (U50; 4.6s channel within 10s window; consumes Blood Hunger each tick)
+    [58865] = { icon = "/esoui/art/icons/u50_ability_werewolf_claws_of_anguish.dds", hide = true },                          -- Claw Fury per-tick DMG (U50; was Claws of Anguish Disease DOT)
+    [58869] = { icon = "/esoui/art/icons/u50_ability_werewolf_claws_of_anguish.dds", hide = true },                          -- Claw Fury per-tick ON CD (U50; was Major Defile)
+    [58879] = { icon = "/esoui/art/icons/ability_werewolf_006_c.dds", tooltip = Tooltips.Skill_Bloodclaws },                 -- Bloodclaws (U50; was Claws of Life slot id; SkillDumper-confirmed icon)
+    [58880] = { icon = "/esoui/art/icons/ability_werewolf_006_c.dds", tooltip = Tooltips.Generic_Bleed, tooltipValue2 = 2 }, -- Bloodclaws target Bleed DOT (U50; 10s total, 2s ticks)
+    [58881] = { icon = "/esoui/art/icons/ability_werewolf_006_c.dds", hide = true },                                         -- Bloodclaws player HoT (U50; was Claws of Life player heal)
+    [267961] = { icon = "/esoui/art/icons/ability_werewolf_006_c.dds", hide = true },                                        -- Bloodclaws instant heal POWER event (U50; per-tick player heal trigger)
+
+    -- Rip and Tear (U50: second Gnash morph; reuses legacy Howl of Despair line ids)
+    -- Phase 4 log (Rip and Tear slotted): 58742 hits target, 58745 (~400 ms) tags the second-hit
+    -- window like Gnash's 137317, then 58744 Rip and Tear Execute lands the follow-up DMG, and 267785
+    -- heals the player. Blood Hunger 267744 consumed on cast.
+    -- Phase 6 SkillDumper correction: canonical icon is _002_rend_a.dds (Gnash morph family),
+    -- not the legacy _005_a.dds I'd assumed from the reused Howl of Despair ids.
+    [58742] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true },  -- Rip and Tear initial DMG (U50; was Howl of Despair)
+    [58745] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true },  -- Rip and Tear ~400 ms second-hit indicator (U50; was Feeding Frenzy synergy id)
+    [58744] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true },  -- Rip and Tear Execute second-hit DMG (U50; was Howl of Despair Synergy)
+    [267785] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true }, -- Rip and Tear self-heal (U50)
+    -- 137321 Major Breach 15s: shared Sundered-status-effect Major Breach id, applied by multiple
+    -- sources. Phase 5 log (no Rip and Tear slotted) showed it firing from the Sunderer set proc
+    -- chain (148800 Sundered DMG -> 148803 Minor Breach 4s -> 137321 Major Breach 15s). Phase 6 in-
+    -- game tooltip ("Rip and Tear IV": "applying Major Breach for 15 seconds and the Sundered status
+    -- effect on the initial rip") confirms Rip and Tear is also a direct source. Keep generic Major
+    -- Breach tooltip since the id itself isn't source-specific.
+    [137321] = { tooltip = Tooltips.Skill_Major_Breach }, -- Major Breach (generic Sundered-status id; Rip and Tear + Sunderer set both apply in U50)
+
+    -- Feeding Frenzy synergy (U50: moved from Howl of Despair to Roar family; reuses legacy ids)
+    -- Phase 4 log shows three Feeding Frenzy stages fire after a Ferocious Roar cast: 137287 player
+    -- buff 10s -> 58813 player buff 20s -> 131353 player buff 30s, with 188427 Minor Force 30s as the
+    -- final ally-payoff layer. Major Courage 137295 (display 109966) also fires from the morph cast.
+    -- Defensive hide on the staging ids since the API surfaces 109966 / 61746 cleanly on the buff frame.
+    [137287] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true }, -- Feeding Frenzy stage 1 player buff 10s (U50; was Ferocious Roar tooltip target -- repurposed)
+    [58813] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true },  -- Feeding Frenzy stage 2 player buff 20s (U50; was Howl of Despair Feeding Frenzy)
+    [131353] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true }, -- Feeding Frenzy stage 3 player buff 30s (U50; was Howl of Despair Empower id)
+    [58775] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true },  -- Feeding Frenzy synergy registration (U50; legacy Howl of Despair synergy id)
+
+    -- Call of the Hunt (U50): Pack Leader transform passive, fires Dur=0 GAIN on form-in -- parallel
+    -- to base Werewolf Transformation's 150998 Major Resolve internal. Hide so the actual Major
+    -- Protection 61722 (already on buff frame) keeps its standard icon.
+    [150999] = { hide = true }, -- Call of the Hunt passive (Pack Leader; U50)
 
     -- Werewolf Transformation / Pack Leader / Werewolf Berserker
     [39477] = { hide = true },                                                                                                             -- De-Werewolf (Werewolf Transformation - All Morphs)
@@ -3432,6 +4170,30 @@ local effectOverride =
     [39076] = { tooltip = Tooltips.Skill_Werewolf_Berserker },                                                                             -- Werewolf Berserker (Werewolf Berserker)
     [111844] = { tooltip = Tooltips.Generic_Fear },                                                                                        -- Werewolf Berserker
     [89147] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_ATTACKBLEED_DDS, tooltip = Tooltips.Generic_Bleed, tooltipValue2 = 1 }, -- Werewolf Berserker Bleed (Werewolf Bleed)
+    -- U50 audit Phase 6 (Werewolf Berserker slotted log): form-in fires 267420 alongside 61745 Major
+    -- Berserk (Dur=0 GAIN, fades at form-out). Internal Major Berserk grant specific to the Berserker
+    -- morph -- Pack Leader does not surface 267420 (it grants 150999 Call of the Hunt instead). Hide
+    -- to avoid duplicate Major Berserk icon on the buff frame; 61745 is what the API surfaces.
+    [267420] = { hide = true }, -- Major Berserk internal (Werewolf Berserker form-in passive; U50; display 61745)
+
+    -- U50 Insatiable Hunger Passive (39050): persistent passive marker fires Dur=0 GAIN on form-in
+    -- and fades on form-out. Marker only; the actual Devour/Insatiable Hunger active uses 268571.
+    -- Hide so it doesn't clutter the buff frame.
+    [39050] = { hide = true }, -- Insatiable Hunger Passive marker (U50; rename of Devour Passive)
+
+    -- U50 Rampage Ultimate (in-form R-slot ult; consumes Fury 266875 at max stacks)
+    -- 267425 Enduring Rampage is one morph of the Rampage ult that appears in the R slot
+    -- while transformed. Tooltip confirmed in-game (see ENDURING RAMPAGE IV): instant, self,
+    -- 20s; +20% Movement Speed, +15% Damage Done, +4000 Health Recovery, -100% Werewolf
+    -- Transformation and ability cost. "This effect is lost if you leave Werewolf form."
+    -- API returns proper name "Enduring Rampage" and the correct icon, so we only attach the
+    -- tooltip and keep the buff visible on the player frame.
+    -- Phase 6 log (Werewolf Berserker form ult cast) surfaced 267416 Rampage [D]20000 GAIN as the
+    -- parallel Rampage variant. API surfaces the name "Rampage" cleanly. Tooltip text not yet
+    -- captured -- no Override entry until user provides the in-game RAMPAGE IV description for the
+    -- second morph (likely the offensive "Devastating Rampage" or unnamed base). DebugAuras carries
+    -- the attribution for now.
+    [267425] = { tooltip = Tooltips.Skill_Enduring_Rampage }, -- Enduring Rampage (Rampage morph; U50) -- <<1>> auto-fills from live 20s buff duration
 
     ----------------------------------------------------------------
     -- WEREWOLF QUEST ABILITIES ------------------------------------
@@ -3821,6 +4583,18 @@ local effectOverride =
     [40239] = { tooltip = Tooltips.Skill_Replenishing_Barrier },                                              -- Replenishing Barrier (Replenishing Barrier)
     [40240] = { icon = "/esoui/art/icons/ability_ava_006_a.dds" },                                            -- Replenishing Barrier (Replenishing Barrier)
     [40241] = { icon = "/esoui/art/icons/ability_ava_006_a.dds" },                                            -- Replenishing Barrier (Replenishing Barrier)
+
+    -- Grimoire Support banners (crafted; table 198758357; Shocking Banner combat log)
+    [217706] = { hide = true, dynamicTooltip = true },                                                     -- Shocking Banner (slotted cast clutter; player buff = 227087)
+    [227087] = { dynamicTooltip = true, tooltipMorphId = 217706, name = Abilities.Skill_Shocking_Banner }, -- Dragonknight's Banner (player inspire buff, 5s)
+    [227088] = { hide = true },                                                                            -- Dragonknight's Banner (paired parallel buff, 5s)
+    [227089] = { hide = true },                                                                            -- Dragonknight's Banner (100ms tick)
+    [217699] = { hide = true },                                                                            -- Banner Bearer (clutter)
+    [227085] = { hide = true },                                                                            -- Banner Bearer (clutter)
+    [227600] = { hide = true },                                                                            -- Banner Bearer (clutter)
+    [227030] = { hide = true },                                                                            -- Bannerman (clutter)
+    [227120] = { hide = true },                                                                            -- Bannerman (clutter)
+    [227123] = { hide = true, tooltip = Tooltips.Skill_Minor_Endurance, tooltipMorphId = 217706 },         -- Minor Endurance (banner combat bundle)
 
     ----------------------------------------------------------------
     -- EMPEROR PASSIVES --------------------------------------------
@@ -7310,7 +8084,8 @@ local effectOverride =
     [52826] = { icon = "/esoui/art/icons/ability_bow_001_a.dds", tooltip = Tooltips.Generic_Reduce_Healing_Received, tooltipValue2 = 50 },                                                                                     -- Lethal Arrow (Pishna Longshot)
 
     -- Stage 7 - Circle of Rituals
-    [56946] = { icon = "/esoui/art/icons/ability_dragonknight_008.dds", name = Abilities.Skill_Reflective_Scale, tooltip = Tooltips.Skill_Reflective_Shadows },                                                -- Dragon Fire Scale (Bloodwraith Kynval)
+    -- Bloodwraith Kynval (IC): combat aura 56946 / 56947 — same ability ids as player Dragon Fire Scale (en.lang table 198758357).
+    -- effectOverride allows one [56946] key; DK player overrides ~1982. Alerts: AlertTable ~4552. Do not add a second [56946] here (legacy Reflective Scale name was incorrect for this id).
     [56599] = { hide = true },                                                                                                                                                                                 -- CLDA - Captured Animation (Daedric Sacrifice)
     [55635] = { hide = true },                                                                                                                                                                                 -- CLDA - Daedric Sac Check (Daedric Sacrifice)
     [54634] = { hide = true, icon = "/esoui/art/icons/achievement_ic_018.dds", name = Abilities.Skill_Summon_Harvester },                                                                                      -- CLDA - Sacrifice (Daedric Sacrifice)
@@ -8951,8 +9726,20 @@ local effectOverride =
 --- @field tooltipOther string? # Custom tooltip when effect not on player
 --- @field tooltipVeteran string? # Custom tooltip for Veteran difficulty
 --- @field tooltipValue2Id integer?
+--- @field tooltipValue1 (number|string)? # Value for <<1>>; defaults to buff duration (seconds)
 --- @field tooltipValue2 (number|string)? # Value for 2nd tooltip input field
 --- @field tooltipValue3 (number|string)? # Value for 3rd tooltip input field
+--- @field tooltipValue4 (number|string)? # Value for <<4>>
+--- @field tooltipValue5 (number|string)? # Value for <<5>>
+--- @field tooltipValue6 (number|string)? # Value for <<6>>
+--- @field tooltipValue7 (number|string)? # Value for <<7>>
+--- @field tooltipValue1Id integer?
+--- @field tooltipValue3Id integer?
+--- @field tooltipValue4Id integer?
+--- @field tooltipValue5Id integer?
+--- @field tooltipValue6Id integer?
+--- @field tooltipValue7Id integer?
+--- @field tooltipSetAbilityId integer? # Fill unset <<1>>..<<7>> from GetAbilityDescription colored numbers
 --- @field tooltipValue2Mod number? # For deriving values like snare duration from either buff
 --- @field dynamicTooltip boolean? # Use live skill-sheet description via GetAbilityDescription unless a TooltipHandlers entry exists
 --- @field tooltipMorphId integer? # With dynamicTooltip: description source id when effect id differs from morph (e.g. combat bundle vs morph)

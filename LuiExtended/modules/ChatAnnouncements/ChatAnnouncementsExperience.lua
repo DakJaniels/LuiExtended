@@ -15,7 +15,6 @@ local Quests = Data.Quests
 
 local ColorizeColors = ChatAnnouncements.Colors
 
-local printToChat = LUIE.PrintToChat
 local string_format = string.format
 local table_insert = table.insert
 local table_concat = table.concat

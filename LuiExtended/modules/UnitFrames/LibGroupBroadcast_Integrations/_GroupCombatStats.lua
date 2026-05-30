@@ -24,6 +24,12 @@ local lgcs
 local isInitialized = false
 local isPlayerInCombat = false
 
+-- Stored callback refs so Uninitialize() can unregister them via
+-- lgcs:UnregisterForEvent(eventName, callback) (LibGroupCombatStats.lua:613)
+local ultUpdateCallback
+local dpsUpdateCallback
+local hpsUpdateCallback
+
 -- Add combat stat displays to a custom frame
 local function AddCombatStatsToFrame(frameData, isRaid)
     if not frameData or not frameData.control then return end
@@ -304,29 +310,32 @@ function GroupCombatStatsManager.Initialize()
 
     -- Register for ultimate updates
     if Settings.showUltimate then
-        lgcs:RegisterForEvent(LibGroupCombatStats.EVENT_GROUP_ULT_UPDATE, function (unitTag, ultData)
+        ultUpdateCallback = function (unitTag, ultData)
             UpdateUltimateDisplay(unitTag, ultData)
-        end)
+        end
+        lgcs:RegisterForEvent(LibGroupCombatStats.EVENT_GROUP_ULT_UPDATE, ultUpdateCallback)
     end
 
     -- Register for DPS updates
     if Settings.showDPS then
-        lgcs:RegisterForEvent(LibGroupCombatStats.EVENT_GROUP_DPS_UPDATE, function (unitTag, dpsData)
+        dpsUpdateCallback = function (unitTag, dpsData)
             local stats = lgcs:GetUnitStats(unitTag)
             if stats then
                 UpdateCombatStatsText(unitTag, dpsData, stats.hps)
             end
-        end)
+        end
+        lgcs:RegisterForEvent(LibGroupCombatStats.EVENT_GROUP_DPS_UPDATE, dpsUpdateCallback)
     end
 
     -- Register for HPS updates
     if Settings.showHPS then
-        lgcs:RegisterForEvent(LibGroupCombatStats.EVENT_GROUP_HPS_UPDATE, function (unitTag, hpsData)
+        hpsUpdateCallback = function (unitTag, hpsData)
             local stats = lgcs:GetUnitStats(unitTag)
             if stats then
                 UpdateCombatStatsText(unitTag, stats.dps, hpsData)
             end
-        end)
+        end
+        lgcs:RegisterForEvent(LibGroupCombatStats.EVENT_GROUP_HPS_UPDATE, hpsUpdateCallback)
     end
 
     -- Register for combat state changes
@@ -392,6 +401,35 @@ function GroupCombatStatsManager.RefreshAll()
             end
         end
     end)
+end
+
+-- Tear down everything Initialize() set up. Pairs symmetric unregisters with the
+-- registers above so disabling the integration at runtime (without /reloadui)
+-- releases the closures held by LibGroupCombatStats' callbackRegistry and the
+-- EVENT_MANAGER update slots.
+function GroupCombatStatsManager.Uninitialize()
+    if not isInitialized then return end
+
+    if lgcs then
+        if ultUpdateCallback then
+            lgcs:UnregisterForEvent(LibGroupCombatStats.EVENT_GROUP_ULT_UPDATE, ultUpdateCallback)
+        end
+        if dpsUpdateCallback then
+            lgcs:UnregisterForEvent(LibGroupCombatStats.EVENT_GROUP_DPS_UPDATE, dpsUpdateCallback)
+        end
+        if hpsUpdateCallback then
+            lgcs:UnregisterForEvent(LibGroupCombatStats.EVENT_GROUP_HPS_UPDATE, hpsUpdateCallback)
+        end
+    end
+    ultUpdateCallback = nil
+    dpsUpdateCallback = nil
+    hpsUpdateCallback = nil
+
+    EVENT_MANAGER:UnregisterForEvent("LUIE_GroupCombatStats_Combat", EVENT_PLAYER_COMBAT_STATE)
+    EVENT_MANAGER:UnregisterForUpdate("LUIE_GroupCombatStats_Update")
+    EVENT_MANAGER:UnregisterForUpdate("LUIE_GroupCombatStats_HideDelay")
+
+    isInitialized = false
 end
 
 -- Hide combat stats for a unit

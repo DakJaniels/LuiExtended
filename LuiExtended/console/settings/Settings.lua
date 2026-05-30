@@ -387,12 +387,12 @@ function LUIE.CreateConsoleSettings()
     local function ProfileCopyExecute()
         local tgtP, tgtA, tgtB = ProfileCopyGetTargetTriple()
         if not (tgtP and tgtA and tgtB) then
-            CHAT_ROUTER:AddSystemMessage(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR))
+            LUIE.PrintToChat(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR), true)
             return
         end
         local srcBucket = ProfileCopyGetEffectiveSourceBucket()
         if not (copyPick_server and copyPick_account and srcBucket) then
-            CHAT_ROUTER:AddSystemMessage(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR))
+            LUIE.PrintToChat(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR), true)
             return
         end
         if ProfileCopyIsSameAsTarget() then
@@ -413,7 +413,7 @@ function LUIE.CreateConsoleSettings()
             end
         end
         if not anyCopied then
-            CHAT_ROUTER:AddSystemMessage(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR))
+            LUIE.PrintToChat(GetString(LUIE_STRING_LAM_PROFILE_COPY_ERROR), true)
             return
         end
         ReloadUI("ingame")
@@ -782,6 +782,8 @@ function LUIE.CreateConsoleSettings()
             ReloadUI("ingame")
         end
     }
+
+    LUIE.AppendChatOutputConsoleControls(settingsData, LHAS)
 
     -- Modules Header
     settingsData[#settingsData + 1] =

@@ -66,6 +66,14 @@ end
 
 -- Account specific DEBUG for ArtOfShred (These are only registered to give me some additional debug options)
 function SpellCastBuffs.AuthorCombatDebug(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId)
+    local override = EffectOverride[abilityId]
+    if DebugAuras[abilityId] and override and override.hide then
+        return
+    end
+    if SpellCastBuffs.SV.ShowDebugFilter and (DebugAuras[abilityId] or override) then
+        return
+    end
+
     local iconFormatted = zo_iconFormat(GetAbilityIcon(abilityId), 16, 16)
     local nameFormatted = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
 
@@ -86,7 +94,7 @@ function SpellCastBuffs.AuthorCombatDebug(eventCode, result, isError, abilityNam
 
     local formattedResult = DebugResults[result]
 
-    if EffectOverride[abilityId] and EffectOverride[abilityId].hide then
+    if override and override.hide then
         local finalString = (iconFormatted .. "[" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [S] " .. source .. " --> [T] " .. target .. " [R] " .. formattedResult)
         for k, cc in ipairs(chatSystem.containers) do
             local chatContainer = cc
@@ -99,6 +107,14 @@ end
 
 -- Account specific DEBUG for ArtOfShred (These are only registered to give me some additional debug options)
 function SpellCastBuffs.AuthorEffectDebug(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, castByPlayer)
+    local override = EffectOverride[abilityId]
+    if DebugAuras[abilityId] and override and override.hide then
+        return
+    end
+    if SpellCastBuffs.SV.ShowDebugFilter and (DebugAuras[abilityId] or override) then
+        return
+    end
+
     local iconFormatted = zo_iconFormat(GetAbilityIcon(abilityId), 16, 16)
     local nameFormatted = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
 
@@ -109,11 +125,11 @@ function SpellCastBuffs.AuthorEffectDebug(eventCode, changeType, effectSlot, eff
     unitName = unitName .. " (" .. unitTag .. ")"
 
     local refreshOnly = ""
-    if EffectOverride[abilityId] and EffectOverride[abilityId].refreshOnly then
+    if override and override.refreshOnly then
         refreshOnly = " |c00E200(Refresh Only - Hidden)|r "
     end
 
-    if EffectOverride[abilityId] and EffectOverride[abilityId].hide then
+    if override and override.hide then
         local finalString = (iconFormatted .. refreshOnly .. "|c00E200 [" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [Tag] " .. unitName .. "|r")
         for k, cc in ipairs(chatSystem.containers) do
             local chatContainer = cc

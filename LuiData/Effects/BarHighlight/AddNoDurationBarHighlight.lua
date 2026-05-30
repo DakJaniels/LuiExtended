@@ -22,6 +22,7 @@ local addNoDurationBarHighlight =
 {
     -- Dragonknight
     [34117] = true, -- Power Lash stacks (Flame Lash); combat supplies duration; API may still read 0 for bar slot registration
+    [32821] = true, -- Engulfing Dragonfire channel (player); combat GAIN DUR 5000 per tick
 
     -- Necromancer
     [115240] = true, -- Bitter Harvest

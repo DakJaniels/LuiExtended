@@ -162,13 +162,40 @@ local function ApplyCustomFrameNameLabelHeights(unitFrame, sizeCaption)
     end
 end
 
+local function ResolveCompactCaptionSize(category, sizeCaption, sizeBars)
+    if categoryUsesSeparateCaptionFont(category) then
+        return sizeCaption
+    end
+    return zo_max(sizeCaption, sizeBars)
+end
+
 local function MakeCustomFrameFontStrings(category)
     local appearance = UnitFrames.GetCustomFrameAppearance(category)
     local fontName, fontStyle, sizeCaption, sizeBars = ResolveCustomFrameFont(appearance)
-    if not categoryUsesSeparateCaptionFont(category) then
-        sizeCaption = sizeBars
-    end
+    sizeCaption = ResolveCompactCaptionSize(category, sizeCaption, sizeBars)
     return CustomFramesMakeFont(fontName, fontStyle, sizeCaption), CustomFramesMakeFont(fontName, fontStyle, sizeBars), sizeCaption
+end
+
+-- Public: returns the resolved caption font size for a category, with the same
+-- compact-category zo_max rule as MakeCustomFrameFontStrings. Used by the layout
+-- functions in UnitFrames.lua so they can grow compact name labels to fit the
+-- caption font without coupling to font-string creation.
+function UnitFrames.GetCustomFrameCaptionSize(category)
+    local appearance = UnitFrames.GetCustomFrameAppearance(category)
+    local _, _, sizeCaption, sizeBars = ResolveCustomFrameFont(appearance)
+    return ResolveCompactCaptionSize(category, sizeCaption, sizeBars)
+end
+
+-- For compact categories (raid/pet/boss/companion) the name label is anchored
+-- on the _Health backdrop. Its height is set by the layout to BarHeight - 2,
+-- which can clip larger caption fonts. This helper grows the label height so
+-- the requested font renders without ESO auto-shrinking it.
+local function ApplyCompactNameLabelHeight(unitFrame, sizeCaption)
+    if not unitFrame or not unitFrame.name then return end
+    local needed = math.ceil(2 * sizeCaption)
+    if needed > (unitFrame.name:GetHeight() or 0) then
+        unitFrame.name:SetHeight(needed)
+    end
 end
 
 function UnitFrames.CustomFramesApplyFontPlayer()
@@ -206,8 +233,9 @@ function UnitFrames.CustomFramesApplyFontCompanion()
     if not unitFrame or not unitFrame.tlw then
         return
     end
-    local fontCaption, fontBars = MakeCustomFrameFontStrings("companion")
+    local fontCaption, fontBars, sizeCaption = MakeCustomFrameFontStrings("companion")
     ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
+    ApplyCompactNameLabelHeight(unitFrame, sizeCaption)
 end
 
 function UnitFrames.CustomFramesApplyFontGroup()
@@ -228,11 +256,12 @@ function UnitFrames.CustomFramesApplyFontRaid()
     if not (UnitFrames.CustomFrames["RaidGroup1"] and UnitFrames.CustomFrames["RaidGroup1"].tlw) then
         return
     end
-    local fontCaption, fontBars = MakeCustomFrameFontStrings("raid")
+    local fontCaption, fontBars, sizeCaption = MakeCustomFrameFontStrings("raid")
     for i = 1, 12 do
         local unitFrame = UnitFrames.CustomFrames["RaidGroup" .. i]
         if unitFrame then
             ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
+            ApplyCompactNameLabelHeight(unitFrame, sizeCaption)
         end
     end
 end
@@ -241,11 +270,12 @@ function UnitFrames.CustomFramesApplyFontPet()
     if not (UnitFrames.CustomFrames["PetGroup1"] and UnitFrames.CustomFrames["PetGroup1"].tlw) then
         return
     end
-    local fontCaption, fontBars = MakeCustomFrameFontStrings("pet")
+    local fontCaption, fontBars, sizeCaption = MakeCustomFrameFontStrings("pet")
     for i = 1, 7 do
         local unitFrame = UnitFrames.CustomFrames["PetGroup" .. i]
         if unitFrame then
             ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
+            ApplyCompactNameLabelHeight(unitFrame, sizeCaption)
         end
     end
 end
@@ -254,11 +284,12 @@ function UnitFrames.CustomFramesApplyFontBoss()
     if not (UnitFrames.CustomFrames["boss1"] and UnitFrames.CustomFrames["boss1"].tlw) then
         return
     end
-    local fontCaption, fontBars = MakeCustomFrameFontStrings("boss")
+    local fontCaption, fontBars, sizeCaption = MakeCustomFrameFontStrings("boss")
     for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
         local unitFrame = UnitFrames.CustomFrames["boss" .. i]
         if unitFrame then
             ApplyCustomFrameFontToUnitFrame(unitFrame, fontCaption, fontBars)
+            ApplyCompactNameLabelHeight(unitFrame, sizeCaption)
         end
     end
 end

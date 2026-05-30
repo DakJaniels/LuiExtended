@@ -25,10 +25,66 @@ local barHighlightExtraId =
 {
 
     -- Dragonknight
-    [20824] = 34117, -- Power Lash proc bar id --> stack buff id used in combat / buff events
-    [23105] = 34117, -- Power Lash (alt rank) --> same stack id
-    [20253] = 31898, -- Burning Talons
-    [61785] = 32685, -- Fossilize
+    [108798] = 21014, -- Fleetstep Wings expedition carrier buff --> slotted (morph log path)
+    [259744] = 21014, -- Fleetstep Wings Major Expedition combat --> slotted (bundle log path)
+    [259761] = 21014, -- Fleetstep Wings Minor Brutality combat --> slotted
+    -- Shared taunt/cowardice display ids: bar uses newId 38254 / combatTrack on slotted morph; extraId only for morph-specific combat bundles.
+    [76498] = 20492,  -- Major Cowardice combat (Chains of Flame only; not 76502)
+    [76502] = 20496,  -- Major Cowardice combat (Chains of Dominance) --> slotted
+    [76506] = 20499,  -- Major Evasion combat (Chains of Devastation) --> slotted
+    [147421] = 20499, -- Major Berserk combat (Chains of Devastation) --> slotted
+    [259718] = 21007, -- Wing Buffet stun --> slotted
+    [259719] = 21007, -- Wing Buffet knockback --> slotted
+    [259323] = 29016, -- Dragon Leap travel (600 ms) --> slotted
+    [262677] = 29016, -- Dragon Leap bundle --> slotted
+    [114590] = 29016, -- Dragon Leap stun (legacy) --> slotted
+    [262678] = 29016, -- Dragon Leap stun (U49) --> slotted
+    [259228] = 29016, -- Landslide (U49) --> Dragon Leap (Landslide on bar via BarHighlightOverride newId 29465)
+    [259372] = 32719, -- Take Flight travel --> slotted
+    [262683] = 32719, -- Take Flight bundle --> slotted
+    [114600] = 32719, -- Take Flight stun (legacy) --> slotted
+    [262682] = 32719, -- Take Flight stun (U49, combat log 3000 ms) --> slotted
+    [259241] = 32719, -- Landslide (U49) --> Take Flight
+    [262681] = 32715, -- Ferocious Leap bundle --> slotted
+    [114601] = 32715, -- Ferocious Leap stun (legacy; combat log 3000 ms) --> slotted
+    [262680] = 32715, -- Ferocious Leap stun (U49 export; not in Ferocious log)
+    [32717] = 32715,  -- Ferocious Leap knockback aura (target; log, parallel 114601) --> slotted
+    -- Landslide 29465 shared; bar newId 29465 only on 29016 (Take Flight bar uses 262682 stun — not 29465).
+    [259684] = 32715, -- Landslide (U49) --> Ferocious Leap
+    [258293] = 31816, -- Magma Fist player buff (6s empower) --> slotted
+    [92507] = 29043,  -- Major Sorcery combat (Molten Weapons) --> slotted
+    [131340] = 29043, -- Major Brutality combat (Molten Weapons) --> slotted
+    [92503] = 31874,  -- Major Sorcery combat (Igneous Weapons) --> slotted
+    [76518] = 31874,  -- Major Brutality combat (Igneous Weapons) --> slotted
+    [92512] = 31888,  -- Major Sorcery combat (Molten Armaments) --> slotted
+    [131341] = 31888, -- Major Brutality combat (Molten Armaments) --> slotted
+    [76537] = 31888,  -- Empower combat (Molten Armaments) --> slotted
+    [108675] = 29071, -- Major Mending combat (Obsidian Shield) --> slotted
+    [55033] = 29224,  -- Major Mending combat (Igneous Shield) --> slotted
+    [108676] = 32673, -- Major Mending combat (Fragmented Shield) --> slotted
+    [61815] = 20319,  -- Major Resolve combat (Earthspike Mantle) --> slotted
+    [61827] = 20328,  -- Major Resolve combat (Earthshield Mantle) --> slotted
+    [61836] = 20323,  -- Major Resolve combat (Shatterspike Mantle) --> slotted
+    [32753] = 21017,  -- Protect the Brood Minor Protection combat --> slotted
+    [260258] = 21017, -- Protect the Brood Major Expedition combat --> slotted
+    [122407] = 21017, -- Protect the Brood (export buff path) --> slotted
+    [259748] = 21017, -- Comrade's Vigor --> Protect the Brood
+    [259749] = 21017,
+    [259752] = 21017,
+    [256798] = 23808, -- Volcanic Whip (replaces Lava Whip on bar) --> Lava Slam stack buff
+    [20824] = 34117,  -- Power Lash on bar (replaces Flame Lash) --> stack buff 34117
+    [20930] = 32821,  -- Engulfing slotted id --> channel tick track id (EFFECT_CHANGED uses 20930)
+    [20253] = 31898,  -- Burning Talons
+    [48946] = 31103,  -- Disintegrating Major Breach combat id --> DOT track on bar (log)
+    [61785] = 32685,  -- Fossilize root (post-stun)
+    [54931] = 32685,  -- Fossilize stun (target) --> slotted
+    [259129] = 32685, -- Fossilize Minor Breach combat --> slotted
+    [259130] = 32685, -- Fossilize Minor Vulnerability combat --> slotted
+    [259090] = 29037, -- Petrify stun (target) --> slotted
+    [259089] = 29037, -- Petrify Minor Breach combat (when present) --> slotted
+    [61742] = 259090, -- Minor Breach display on target (Petrify bar key 259090; Fossilize uses 259129 combatTrack)
+    [259138] = 32678, -- Shattering Rocks stun (target) --> slotted
+    [259137] = 32678, -- Shattering Rocks Minor Breach combat --> slotted
 
     -- Sorcerer
     [89491] = 24330,  -- Haunting Curse
@@ -62,8 +118,14 @@ local barHighlightExtraId =
     [104085] = 104079, -- Time Freeze
 
     -- Werewolf
-    [32633] = 137257, -- Roar --> Off Balance
-    [39114] = 137312, -- > Deafening Roar --> Off Balance -- TODO: Could possibly track Major Breach/Minor Maim
+    [32633] = 137257,  -- Roar --> Off Balance
+    [170991] = 137257, -- Roar fear combat id (U50) --> Off Balance bar key (single key per Roar bundle)
+    [171001] = 45834,  -- Ferocious Roar fear combat id (U50) --> Off Balance bar key
+    [171003] = 137312, -- Deafening Roar fear combat id (U50) --> Off Balance bar key (parallel to 170991 / 171001)
+    [267745] = 58405,  -- Gnash Execute (U50 second-hit) --> Gnash slot
+    [58744] = 58742,   -- Rip and Tear Execute (U50; Gnash morph second-hit) --> Rip and Tear slot
+    [267747] = 58798,  -- Bloody Gnash Execute (U50; Gnash morph second-hit) --> Bloody Gnash slot (parallel to 267745 --> 58405, 58744 --> 58742)
+    [39114] = 137312,  -- Deafening Roar slot --> Off Balance (U50: was tagged "TODO Major Breach/Minor Maim"; Deafening Roar no longer applies Major Breach, now grants Major Cowardice + Major Maim + Off Balance)
 
     -- Vampire
     [138130] = 138098, -- Stupefy

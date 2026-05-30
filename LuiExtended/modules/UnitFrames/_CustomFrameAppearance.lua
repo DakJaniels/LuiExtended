@@ -10,7 +10,6 @@ local LUIE = LUIE
 local UnitFrames = LUIE.UnitFrames
 
 local ipairs = ipairs
-local pairs = pairs
 
 --- @type string[]
 UnitFrames.APPEARANCE_CATEGORY_IDS =
@@ -46,27 +45,16 @@ local BASE_NAME_TO_CATEGORY =
     ["AvaPlayerTarget"] = "ava",
 }
 
-local function LegacyAppearanceFromSV(sv)
-    return
-    {
-        fontFace = sv.CustomFontFace,
-        fontStyle = sv.CustomFontStyle,
-        fontBars = sv.CustomFontBars,
-        fontOther = sv.CustomFontOther,
-        texture = sv.CustomTexture,
-    }
-end
-
-local function NormalizeAppearanceEntry(entry, legacy)
+local function NormalizeAppearanceEntry(entry, fallback)
     entry = entry or {}
-    legacy = legacy or {}
+    fallback = fallback or {}
     return
     {
-        fontFace = entry.fontFace or legacy.fontFace,
-        fontStyle = entry.fontStyle or legacy.fontStyle,
-        fontBars = (entry.fontBars and entry.fontBars > 0) and entry.fontBars or legacy.fontBars,
-        fontOther = (entry.fontOther and entry.fontOther > 0) and entry.fontOther or legacy.fontOther,
-        texture = entry.texture or legacy.texture,
+        fontFace = entry.fontFace or fallback.fontFace,
+        fontStyle = entry.fontStyle or fallback.fontStyle,
+        fontBars = (entry.fontBars and entry.fontBars > 0) and entry.fontBars or fallback.fontBars,
+        fontOther = (entry.fontOther and entry.fontOther > 0) and entry.fontOther or fallback.fontOther,
+        texture = entry.texture or fallback.texture,
     }
 end
 
@@ -124,8 +112,13 @@ function UnitFrames.GetCustomFrameAppearance(category)
 end
 
 --- One-time migration from global custom font/texture keys.
+--- Seeds each per-category entry from the legacy `Custom*` SV keys, then deletes
+--- those legacy keys so subsequent reads have no cross-category fallback path.
+--- Treats both `nil` and `<= 0` per-category fields as needing fill. Marks both
+--- the v1 and v2 migration keys done in a single pass (v2 was previously a
+--- separate, redundant fill of `<= 0` values).
 function UnitFrames.MigrateCustomFrameAppearance()
-    if LUIE.IsMigrationDone("unitframes_custom_appearance_v1") then
+    if LUIE.IsMigrationDone("unitframes_custom_appearance_v1") and LUIE.IsMigrationDone("unitframes_custom_appearance_v2") then
         return
     end
     local sv = UnitFrames.SV
@@ -141,57 +134,30 @@ function UnitFrames.MigrateCustomFrameAppearance()
         sv.CustomFrameAppearance = {}
     end
     for _, category in ipairs(UnitFrames.APPEARANCE_CATEGORY_IDS) do
-        if not sv.CustomFrameAppearance[category] then
-            sv.CustomFrameAppearance[category] =
-            {
-                fontFace = legacy.fontFace,
-                fontStyle = legacy.fontStyle,
-                fontBars = legacy.fontBars,
-                fontOther = legacy.fontOther,
-                texture = legacy.texture,
-            }
-        else
-            local entry = sv.CustomFrameAppearance[category]
-            entry.fontFace = entry.fontFace or legacy.fontFace
-            entry.fontStyle = LUIE.MigrateFontStyle(entry.fontStyle or legacy.fontStyle)
-            entry.fontBars = entry.fontBars or legacy.fontBars
-            entry.fontOther = entry.fontOther or legacy.fontOther
-            entry.texture = entry.texture or legacy.texture
-        end
-    end
-    LUIE.MarkMigrationDone("unitframes_custom_appearance_v1")
-end
-
---- Fill missing per-category font/texture fields from legacy globals (one-time, after v1).
-function UnitFrames.MigrateCustomFrameAppearanceV2()
-    if LUIE.IsMigrationDone("unitframes_custom_appearance_v2") then
-        return
-    end
-    local sv = UnitFrames.SV
-    if not sv.CustomFrameAppearance then
-        LUIE.MarkMigrationDone("unitframes_custom_appearance_v2")
-        return
-    end
-    local legacy = LegacyAppearanceFromSV(sv)
-    for _, category in ipairs(UnitFrames.APPEARANCE_CATEGORY_IDS) do
         local entry = sv.CustomFrameAppearance[category]
-        if entry then
-            if (not entry.fontBars or entry.fontBars <= 0) and legacy.fontBars then
-                entry.fontBars = legacy.fontBars
-            end
-            if (not entry.fontOther or entry.fontOther <= 0) and legacy.fontOther then
-                entry.fontOther = legacy.fontOther
-            end
-            if not entry.fontFace or entry.fontFace == "" then
-                entry.fontFace = legacy.fontFace
-            end
-            if entry.fontStyle == nil then
-                entry.fontStyle = legacy.fontStyle
-            end
-            if not entry.texture or entry.texture == "" then
-                entry.texture = legacy.texture
-            end
+        if not entry then
+            entry = {}
+            sv.CustomFrameAppearance[category] = entry
+        end
+        if not entry.fontFace or entry.fontFace == "" then
+            entry.fontFace = legacy.fontFace
+        end
+        entry.fontStyle = LUIE.MigrateFontStyle(entry.fontStyle or legacy.fontStyle)
+        if not entry.fontBars or entry.fontBars <= 0 then
+            entry.fontBars = legacy.fontBars
+        end
+        if not entry.fontOther or entry.fontOther <= 0 then
+            entry.fontOther = legacy.fontOther
+        end
+        if not entry.texture or entry.texture == "" then
+            entry.texture = legacy.texture
         end
     end
+    sv.CustomFontFace = nil
+    sv.CustomFontStyle = nil
+    sv.CustomFontBars = nil
+    sv.CustomFontOther = nil
+    sv.CustomTexture = nil
+    LUIE.MarkMigrationDone("unitframes_custom_appearance_v1")
     LUIE.MarkMigrationDone("unitframes_custom_appearance_v2")
 end

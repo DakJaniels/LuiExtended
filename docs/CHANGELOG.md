@@ -1,5 +1,33 @@
 # LuiExtended Changelog
 
+## Version 7.2.3.2
+
+### New
+
+- SpellCastBuffs: **Off Balance** can now be tracked as a single **Prominent Debuff**. Adding "Off Balance" to Prominent Debuffs covers every renamed Off Balance variant, Off Balance applied by allies, and the **Off Balance Immunity** buff, all routed to the prominent target column. It is added to Prominent Debuffs once by default; remove it and it will not be re-added.
+- Chat Output: New shared **chat output** settings (timestamp on/off, format and color, tab routing, and system-message handling) are now stored **account-wide** (or per-character when **Character-Specific Settings** is enabled) and shared across LUIE modules. Existing Chat Announcements chat settings are migrated automatically, and **Combat Text** now exposes the same chat output options.
+- Chat Output: Added **LibChatMessage** integration on PC for better compatibility with external chat addons (such as pChat) when LUIE prints to chat.
+
+### Changes
+
+- LuiData: **Werewolf** abilities, buffs, and tooltips were overhauled for **Update 50**, including renamed and new skills (Gnash, Bloody Gnash, Rending Claws, Bloodclaws, Claw Fury, Rip and Tear), **Blood Hunger** stacks, the **Fury** resource, **Insatiable Hunger**, and the **Rampage** ultimate. Buff classifications were corrected (for example, Deafening Roar now grants **Major Cowardice** and **Major Maim** instead of Major Breach), and internal helper auras are hidden so the buff frame keeps the correct icons.
+- LuiData / Action Bar: **Dragonknight** abilities received updated buff tracking, tooltips, and bar highlights (Lava / Volcanic / Molten Whip, Flame Lash, Power Lash, Dragonfire Breath, Engulfing Dragonfire, Dragon Blood morphs, Battle Roar, Landslide and Mantle morphs, Searing Strike, Burning Embers, and Core / Heart / Soul of Flame), with more accurate bar-highlight stack consumption and dynamic tooltip values.
+- LuiData: Added tracking, tooltips, ground-effect auras, cast bar entries, and Combat Text blacklist presets for new **Arcanist** abilities, a dynamic **Fated Fortune** tooltip, and support for new **Update 50** trial abilities and effects.
+- SpellCastBuffs: Prominent buff and debuff name labels were repositioned to a single line in the strip above the progress bar for a cleaner layout.
+- Action Bar: Added **noRemove** handling so certain tracked bar highlights are not cleared early, and combat-event pass-through is now respected when remapping extra bar-highlight IDs.
+- SpellCastBuffs (debug): Ability ID font fitting runs only when the ID text or icon layout changed, reducing per-tick cost while **Show Debug Ability ID** is enabled.
+- Performance & Memory: Bounded several tables that could grow over long sessions and added cleanup on unit / viewer destruction and reloads (SpellCastBuffs buff sorting and ground / stack sweeps, ChatAnnouncements quest-item and group-loot tracking, Combat Text event viewers, Crowd Control animation cache and Synergy Tracker eviction, Group Resources callbacks, Unit Frames attribute visualizers, and dodge-prediction / power-update handling).
+
+### Fixed
+
+- SpellCastBuffs (debug): **Show Debug Ability ID** on pooled buff/debuff icons no longer intermittently fails to draw the numeric ID (most noticeable on target buff routing) after icons are recycled from the shared pool. Pool reset clears per-icon text caches, slot rebind refreshes the ID label, and **LabelControl:Clean()** runs before truncation checks when font fitting runs.
+- SpellCastBuffs: **Show Block Player** brace icon displays again when full display rebuilds are not forced every tick. The synthetic block effect is updated in place while blocking, and the display sorter includes effects whose start time equals the current update (not only strictly earlier).
+- SpellCastBuffs: **ClearPlayerBuff** and **ClearFakeEffectEntry** only mark the display dirty when an effects-list row was actually removed, instead of every 100 ms while not blocking with Show Block Player enabled.
+- SpellCastBuffs: Target buff and debuff icons no longer linger after clearing reticle; **ReloadEffects** now marks the display dirty when target lists are cleared (empty reticle or dead unit).
+- Unit Frames: Compact (**Raid**) name labels now grow to fit the caption font size instead of being shrunk by the game, the **Raid Name Clip** slider hides or clips names correctly across its full range, and the raid layout now refreshes all 12 slots so size / clip changes preview while solo and empty slots no longer keep stale geometry.
+- Unit Frames: The no-healing (healing-absorbed) overlay and the damage shield now layer correctly above the health fill on custom frames.
+- ChatAnnouncements: Alert and loot-history hooks are now installed only once, preventing duplicate announcements if module setup runs again in the same session.
+
 ## Version 7.2.3.1
 
 ### Fixed

@@ -490,7 +490,9 @@ function CombatTextEventViewer:ControlLayout(control, abilityId, combatType, sou
 end
 
 --- Register a callback for a combat text event<br>
---- Uses the event listener's instance-based callback system
+--- Uses the event listener's instance-based callback system.
+--- Tracks the (eventType, func) pair on the viewer so `Destroy` can unregister it
+--- when the viewer is swapped (e.g. user changes animation type in settings).
 --- @param eventType string The event type identifier
 --- @param func function The callback function to register
 function CombatTextEventViewer:RegisterCallback(eventType, func)
@@ -499,6 +501,27 @@ function CombatTextEventViewer:RegisterCallback(eventType, func)
         return
     end
     self.eventListener:RegisterCallback(eventType, func)
+
+    if not self._registeredCallbacks then
+        self._registeredCallbacks = {}
+    end
+    self._registeredCallbacks[#self._registeredCallbacks + 1] = { eventType = eventType, func = func }
+end
+
+--- Unregister all callbacks this viewer registered on its event listener and
+--- drop the listener reference. Must be called before discarding the viewer
+--- (e.g. in `CombatText.CreateCombatEventViewer` before assigning a new viewer)
+--- to prevent the old closure (which captures `self`) from being retained by
+--- the listener's `callbackRegistry`.
+function CombatTextEventViewer:Destroy()
+    if self._registeredCallbacks and self.eventListener then
+        for i = 1, #self._registeredCallbacks do
+            local entry = self._registeredCallbacks[i]
+            self.eventListener:UnregisterCallback(entry.eventType, entry.func)
+        end
+    end
+    self._registeredCallbacks = nil
+    self.eventListener = nil
 end
 
 ---

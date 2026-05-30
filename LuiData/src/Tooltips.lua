@@ -37,9 +37,9 @@ local str_Flame = GetString(SI_DAMAGETYPE3)
 local str_Shock = GetString(SI_DAMAGETYPE4)
 local str_Frost = GetString(SI_DAMAGETYPE6)
 local PhysicalDamage = GetString(SI_DAMAGETYPE2) .. " Damage" -- TODO: Localize
-local FlameDamage = str_Flame .. " Damage"                   -- TODO: Localize
-local ShockDamage = str_Shock .. " Damage"                   -- TODO: Localize
-local FrostDamage = str_Frost .. " Damage"                   -- TODO: Localize
+local FlameDamage = str_Flame .. " Damage"                    -- TODO: Localize
+local ShockDamage = str_Shock .. " Damage"                    -- TODO: Localize
+local FrostDamage = str_Frost .. " Damage"                    -- TODO: Localize
 local MagicDamage = GetString(SI_DAMAGETYPE8) .. " Damage"    -- TODO: Localize
 local DiseaseDamage = GetString(SI_DAMAGETYPE10) .. " Damage" -- TODO: Localize
 local PoisonDamage = GetString(SI_DAMAGETYPE11) .. " Damage"  -- TODO: Localize
@@ -653,6 +653,9 @@ local tooltips =
     Set_Hunters_Venom = GetString(LUIE_STRING_SET_HUNTERS_VENOM_TP),
     Set_Sheer_Venom = GetString(LUIE_STRING_SET_SHEER_VENOM_TP),
     Set_Elemental_Catalyst = GetString(LUIE_STRING_SET_ELEMENTAL_CATALYST_TP),
+    Set_Encratiss_Behemoth = GetString(LUIE_STRING_SKILL_SET_ENCRATISS_BEHEMOTH_TP),
+    Set_Slivers_Of_The_Null_Arca = GetString(LUIE_STRING_SKILL_SET_SLIVERS_OF_THE_NULL_ARCA_TP),
+    Set_Perfected_Slivers_Of_The_Null_Arca = GetString(LUIE_STRING_SKILL_SET_PERFECTED_SLIVERS_OF_THE_NULL_ARCA_TP),
     Set_Crimson_Twilight = GetString(LUIE_STRING_SET_CRIMSON_TWILIGHT_TP),
     Set_Ironblood = GetString(LUIE_STRING_SKILL_SET_IRONBLOOD_TP),
 
@@ -731,6 +734,9 @@ local tooltips =
     Skill_Shifting_Standard = GetString(LUIE_STRING_SKILL_SHIFTING_STANDARD_TP),
     Skill_Spiked_Armor = GetString(LUIE_STRING_SKILL_SPIKED_ARMOR_TP),
     Skill_Hardened_Armor = GetString(LUIE_STRING_SKILL_HARDENED_ARMOR_TP),
+    Skill_Earthspike_Mantle = GetString(LUIE_STRING_SKILL_EARTHSPIKE_MANTLE_TP),
+    Skill_Earthshield_Mantle = GetString(LUIE_STRING_SKILL_EARTHSHIELD_MANTLE_TP),
+    Skill_Shatterspike_Mantle = GetString(LUIE_STRING_SKILL_SHATTERSPIKE_MANTLE_TP),
     Skill_Burning_Talons = GetString(LUIE_STRING_SKILL_BURNING_TALONS_TP),
     Skill_Protective_Scale = GetString(LUIE_STRING_SKILL_PROTECTIVE_SCALE_TP),
     Skill_Protective_Plate = GetString(LUIE_STRING_SKILL_PROTECTIVE_PLATE_TP),
@@ -1068,6 +1074,12 @@ local tooltips =
     Skill_Brutal_Carnage_Buff = GetString(LUIE_STRING_SKILL_BRUTAL_CARNAGE_BUFF_TP),
     Skill_Hircines_Fortitude = GetString(LUIE_STRING_SKILL_HIRCINES_FORTITUDE_TP),
     Skill_Ferocious_Roar = GetString(LUIE_STRING_SKILL_FEROCIOUS_ROAR_TP),
+    Skill_Blood_Hunger = GetString(LUIE_STRING_SKILL_BLOOD_HUNGER_TP),
+    Skill_Insatiable_Hunger = GetString(LUIE_STRING_SKILL_INSATIABLE_HUNGER_TP),
+    Skill_Gnash = GetString(LUIE_STRING_SKILL_GNASH_TP),
+    Skill_Bloody_Gnash = GetString(LUIE_STRING_SKILL_BLOODY_GNASH_TP),
+    Skill_Bloodclaws = GetString(LUIE_STRING_SKILL_BLOODCLAWS_TP),
+    Skill_Enduring_Rampage = GetString(LUIE_STRING_SKILL_ENDURING_RAMPAGE_TP),
 
     ----------------------------------------------------------------
     -- GUILDS SKILLS ------------------------------------------------

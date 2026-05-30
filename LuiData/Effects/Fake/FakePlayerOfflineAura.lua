@@ -50,6 +50,22 @@ local fakePlayerOfflineAura =
     [35750] = { duration = "GET", ground = true }, -- Trap Beast (Trap Beast)
     [40382] = { duration = "GET", ground = true }, -- Barbed Trap (Barbed Trap)
     [40372] = { duration = "GET", ground = true }, -- Lightweight Beast Trap (Lightweight Beast Trap)
+
+    -- Dragonknight — Hearth and Home / Fire Keeper / Hearthfire (ground entity; combat GAIN → Offline)
+    [29059] = { duration = "GET", ground = true }, -- Hearthfire (ground shares slotted id)
+    [32710] = { duration = "GET", ground = true }, -- Hearth and Home (Core / Heart / Soul morph ground)
+    [20779] = { duration = "GET", ground = true }, -- Fire Keeper (ground shares slotted id)
+
+    -- Arcanist
+    [183555] = { duration = "GET", ground = true }, -- Arcanist's Domain (ground)
+    [186229] = { duration = "GET", ground = true }, -- Zenas' Empowering Disc (ground)
+    [183709] = { duration = "GET", ground = true }, -- Vitalizing Glyphic (ground)
+    [193794] = { duration = "GET", ground = true }, -- Glyphic of the Tides (ground)
+    [195167] = { duration = "GET", ground = true }, -- Apocryphal Gate (entry portal ground)
+    [195190] = { duration = "GET", ground = true }, -- Fleet-Footed Gate (entry portal ground)
+    [195204] = { duration = "GET", ground = true }, -- Passage Between Worlds (entry portal ground)
+    [186234] = { duration = "GET", ground = true }, -- Reconstructive Domain (ground)
+    [193558] = { duration = "GET", ground = true }, -- Resonating Glyphic (ground)
 }
 
 

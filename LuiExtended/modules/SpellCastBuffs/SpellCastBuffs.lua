@@ -79,11 +79,20 @@ end
 -- Specifically for clearing a player buff, removes this buff from player1, promd_player, and promb_player containers
 function SpellCastBuffs.ClearPlayerBuff(abilityId)
     local context = { "player1", "promd_player", "promb_player" }
+    local removedAny = false
     for _, v in pairs(context) do
-        SpellCastBuffs.EffectsList[v][abilityId] = nil
-        SpellCastBuffs.ClearFakeEffectEntry(v, abilityId)
+        local effectsList = SpellCastBuffs.EffectsList[v]
+        if effectsList and effectsList[abilityId] then
+            effectsList[abilityId] = nil
+            removedAny = true
+        end
+        if SpellCastBuffs.ClearFakeEffectEntry(v, abilityId) then
+            removedAny = true
+        end
     end
-    SpellCastBuffs.MarkDisplayDirty()
+    if removedAny then
+        SpellCastBuffs.MarkDisplayDirty()
+    end
 end
 
 -- Initialize preview labels for all frames
@@ -369,6 +378,17 @@ function SpellCastBuffs.Initialize(enabled)
         LUIE.MarkMigrationDone("spellcastbuffs_fontstyles_v2")
     end
 
+    -- Seed the canonical Off Balance name into Prominent Debuffs once so the
+    -- new OB routing works out of the box. Users can still remove it from the
+    -- list and it will not be re-added.
+    if not LUIE.IsMigrationDone("spellcastbuffs_seed_offbalance_prom") then
+        local obName = Abilities.Skill_Off_Balance
+        if obName and SpellCastBuffs.SV.PromDebuffTable[obName] == nil then
+            SpellCastBuffs.SV.PromDebuffTable[obName] = true
+        end
+        LUIE.MarkMigrationDone("spellcastbuffs_seed_offbalance_prom")
+    end
+
     -- Correct read values
     if SpellCastBuffs.SV.IconSize < 30 or SpellCastBuffs.SV.IconSize > 60 then
         SpellCastBuffs.SV.IconSize = SpellCastBuffs.Defaults.IconSize
@@ -503,6 +523,7 @@ function SpellCastBuffs.Initialize(enabled)
     SpellCastBuffs.Reset()
     SpellCastBuffs.UpdateContextHideList()
     SpellCastBuffs.UpdateDisplayOverrideIdList()
+    SpellCastBuffs.BuildOffBalanceDebuffLookup()
 
     -- Register events
     eventManager:RegisterForUpdate(moduleName, 100, SpellCastBuffs.OnUpdate)
@@ -1318,6 +1339,25 @@ function SpellCastBuffs.ApplyBuffIconSlotDimensions(buff, buffSize)
     buff:SetFlexShrink(0)
 end
 
+-- Prominent vertical column: name in the strip between icon top and progress bar top.
+--- @param buff SpellCastBuffs_BuffIcon_Control
+--- @param labelOnLeft boolean
+local function ApplyProminentNameLabelAnchors(buff, labelOnLeft)
+    local xOff = labelOnLeft and -4 or 4
+    buff.name:ClearAnchors()
+    if labelOnLeft then
+        buff.name:SetAnchor(TOPRIGHT, buff, TOPLEFT, xOff, 2)
+        buff.name:SetAnchor(BOTTOMLEFT, buff.bar.backdrop, TOPLEFT, 0, -2)
+    else
+        buff.name:SetAnchor(TOPLEFT, buff, TOPRIGHT, xOff, 2)
+        buff.name:SetAnchor(BOTTOMRIGHT, buff.bar.backdrop, TOPRIGHT, 0, -2)
+    end
+    buff.name:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+    buff.name:SetVerticalAlignment(TEXT_ALIGN_BOTTOM)
+    buff.name:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+    buff.name:SetMaxLineCount(1)
+end
+
 -- Layout, anchors, and visibility for one icon (pool acquire or settings refresh).
 function SpellCastBuffs.ApplySingleIconLayout(container, buff)
     local buffSize = SpellCastBuffs.SV.IconSize
@@ -1380,7 +1420,10 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
     if buff.abilityId ~= nil then
         buff.abilityId:SetHidden(not SpellCastBuffs.SV.ShowDebugAbilityId)
         if SpellCastBuffs.SV.ShowDebugAbilityId and buff.abilityId:GetText() ~= "" then
-            SpellCastBuffs.FitAbilityIdLabelFont(buff)
+            SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
+            if SpellCastBuffs.NeedsAbilityIdLabelFit(buff) then
+                SpellCastBuffs.FitAbilityIdLabelFont(buff)
+            end
         end
     end
 
@@ -1416,10 +1459,6 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
 
     if container == "prominentbuffs" then
         if SpellCastBuffs.SV.ProminentBuffLabelDirection == "Left" then
-            buff.name:ClearAnchors()
-            buff.name:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-            buff.name:SetAnchor(TOPRIGHT, buff, TOPLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-
             buff.bar.backdrop:ClearAnchors()
             buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
             buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
@@ -1429,11 +1468,9 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
             buff.bar.bar:ClearAnchors()
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
-        else
-            buff.name:ClearAnchors()
-            buff.name:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-            buff.name:SetAnchor(TOPLEFT, buff, TOPRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
 
+            ApplyProminentNameLabelAnchors(buff, true)
+        else
             buff.bar.backdrop:ClearAnchors()
             buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
             buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
@@ -1443,15 +1480,13 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
             buff.bar.bar:ClearAnchors()
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
+
+            ApplyProminentNameLabelAnchors(buff, false)
         end
     end
 
     if container == "prominentdebuffs" then
         if SpellCastBuffs.SV.ProminentDebuffLabelDirection == "Right" then
-            buff.name:ClearAnchors()
-            buff.name:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-            buff.name:SetAnchor(TOPLEFT, buff, TOPRIGHT, 4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-
             buff.bar.backdrop:ClearAnchors()
             buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
             buff.bar.backdrop:SetAnchor(BOTTOMLEFT, buff, BOTTOMRIGHT, 4, 0)
@@ -1461,11 +1496,9 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
             buff.bar.bar:ClearAnchors()
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
-        else
-            buff.name:ClearAnchors()
-            buff.name:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
-            buff.name:SetAnchor(TOPRIGHT, buff, TOPLEFT, -4, -(SpellCastBuffs.SV.IconSize * 0.25) + 2)
 
+            ApplyProminentNameLabelAnchors(buff, false)
+        else
             buff.bar.backdrop:ClearAnchors()
             buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
             buff.bar.backdrop:SetAnchor(BOTTOMRIGHT, buff, BOTTOMLEFT, -4, 0)
@@ -1475,6 +1508,8 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
             buff.bar.bar:ClearAnchors()
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
             buff.bar.bar:SetAnchor(CENTER, buff.bar.backdrop, CENTER, 0, 0)
+
+            ApplyProminentNameLabelAnchors(buff, true)
         end
     end
 
@@ -1683,46 +1718,39 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
         else
             local duration
             if type(control.effectId) == "number" then
-                duration = control.duration / 1000
-                local value2
-                local value3
-                if Effects.EffectOverride[control.effectId] then
-                    if Effects.EffectOverride[control.effectId].tooltipValue2 then
-                        value2 = Effects.EffectOverride[control.effectId].tooltipValue2
-                    elseif Effects.EffectOverride[control.effectId].tooltipValue2Mod then
-                        value2 = zo_floor(duration + Effects.EffectOverride[control.effectId].tooltipValue2Mod + 0.5)
-                    elseif Effects.EffectOverride[control.effectId].tooltipValue2Id then
-                        value2 = zo_floor((GetAbilityDuration(Effects.EffectOverride[control.effectId].tooltipValue2Id, nil, ttUnit) or 0) + 0.5) / 1000
-                    else
-                        value2 = 0
-                    end
-                else
-                    value2 = 0
-                end
-                if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltipValue3 then
-                    value3 = Effects.EffectOverride[control.effectId].tooltipValue3
-                else
-                    value3 = 0
-                end
-                duration = zo_floor((duration * 10) + 0.5) / 10
+                local duration = zo_floor((control.duration / 1000 * 10) + 0.5) / 10
+                local ov = Effects.EffectOverride[control.effectId]
 
-                tooltipText = (Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltip) and zo_strformat(Effects.EffectOverride[control.effectId].tooltip, duration, value2, value3) or ""
+                local formatted = LUIE.FormatOverrideTooltip(control.effectId, duration, ttUnit)
+                if formatted then
+                    tooltipText = formatted
+                end
 
-                -- If there is a special tooltip to use for targets only, then set this now
                 local containerContext = control.container
                 if containerContext == "target1" or containerContext == "target2" or containerContext == "targetb" or containerContext == "targetd" or containerContext == "promb_target" or containerContext == "promd_target" then
-                    if Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltipOther then
-                        tooltipText = zo_strformat(Effects.EffectOverride[control.effectId].tooltipOther, duration, value2, value3)
+                    if ov and ov.tooltipOther then
+                        local otherFormatted = LUIE.FormatOverrideTooltip(control.effectId, duration, ttUnit,
+                                                                          { tooltipString = ov.tooltipOther, skipHandler = true })
+                        if otherFormatted then
+                            tooltipText = otherFormatted
+                        end
                     end
                 end
 
-                -- Use separate Veteran difficulty tooltip if applicable.
-                if LUIE.ResolveVeteranDifficulty() == true and Effects.EffectOverride[control.effectId] and Effects.EffectOverride[control.effectId].tooltipVet then
-                    tooltipText = zo_strformat(Effects.EffectOverride[control.effectId].tooltipVet, duration, value2, value3)
+                if LUIE.ResolveVeteranDifficulty() == true and ov and ov.tooltipVet then
+                    local vetFormatted = LUIE.FormatOverrideTooltip(control.effectId, duration, ttUnit,
+                                                                    { tooltipString = ov.tooltipVet, skipHandler = true })
+                    if vetFormatted then
+                        tooltipText = vetFormatted
+                    end
                 end
-                -- Use separate Ground tooltip if applicable (only applies to buffs not debuffs)
+
                 if Effects.EffectGroundDisplay[control.effectId] and Effects.EffectGroundDisplay[control.effectId].tooltip and control.buffType == BUFF_EFFECT_TYPE_BUFF then
-                    tooltipText = zo_strformat(Effects.EffectGroundDisplay[control.effectId].tooltip, duration, value2, value3)
+                    local groundFormatted = LUIE.FormatOverrideTooltip(control.effectId, duration, ttUnit,
+                                                                       { tooltipString = Effects.EffectGroundDisplay[control.effectId].tooltip, skipHandler = true })
+                    if groundFormatted then
+                        tooltipText = groundFormatted
+                    end
                 end
 
                 -- Display Default Tooltip Description if no custom tooltip is present
@@ -1739,8 +1767,9 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
                     end
                 end
 
-                -- Dynamic tooltip (TooltipHandlers in Functions.lua, or EffectOverride.dynamicTooltip / GetAbilityDescription morph)
-                do
+                -- Dynamic tooltip when opted in, or when no custom override tooltip is configured
+                if  not Effects.TooltipUseDefault[control.effectId]
+                and not (ov and ov.tooltip and not ov.dynamicTooltip) then
                     local dynTip = LUIE.DynamicTooltip(control.effectId, ttUnit)
                     if dynTip then
                         tooltipText = dynTip
@@ -1770,10 +1799,13 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
         end
 
         -- Default-tooltip path: re-apply TooltipHandlers / dynamicTooltip after plain description (matches custom path)
-        if type(control.effectId) == "number" then
-            local dynTip = LUIE.DynamicTooltip(control.effectId, ttUnit)
-            if dynTip then
-                tooltipText = dynTip
+        if type(control.effectId) == "number" and not Effects.TooltipUseDefault[control.effectId] then
+            local ov = Effects.EffectOverride[control.effectId]
+            if not (ov and ov.tooltip and not ov.dynamicTooltip) then
+                local dynTip = LUIE.DynamicTooltip(control.effectId, ttUnit)
+                if dynTip then
+                    tooltipText = dynTip
+                end
             end
         end
 
@@ -1856,7 +1888,47 @@ function SpellCastBuffs.Buff_OnMouseExit(control)
 end
 
 -- Updates local variable with new font and resets all existing icons
+--- @param buff SpellCastBuffs_BuffIcon_Control
+function SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
+    buff.abilityIdLabelDirty = true
+end
+
+--- @param buff SpellCastBuffs_BuffIcon_Control
+--- @return boolean
+function SpellCastBuffs.NeedsAbilityIdLabelFit(buff)
+    if buff.abilityIdLabelDirty then
+        return true
+    end
+    local iconSize = SpellCastBuffs.SV.IconSize
+    if buff.lastAppliedAbilityIdIconSize ~= iconSize then
+        return true
+    end
+    if buff.lastAppliedAbilityIdLayoutVersion ~= SpellCastBuffs.displayLayoutVersion then
+        return true
+    end
+    return false
+end
+
+--- Show Debug Ability ID: set text when needed; FitAbilityIdLabelFont only when text or layout changed.
+--- @param buff SpellCastBuffs_BuffIcon_Control
+--- @param idText string
+function SpellCastBuffs.UpdateAbilityIdDebugLabel(buff, idText)
+    if not buff.abilityId then
+        return
+    end
+    buff.abilityId:SetHidden(false)
+    if buff.lastAbilityIdText ~= idText or buff.abilityId:GetText() ~= idText then
+        buff.abilityId:SetText(idText)
+        buff.lastAbilityIdText = idText
+        SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
+    end
+    if SpellCastBuffs.NeedsAbilityIdLabelFit(buff) then
+        SpellCastBuffs.FitAbilityIdLabelFont(buff)
+    end
+end
+
 --- Shrink ability-id debug text to fit the icon width (LabelControl:WasTruncated, ZO_FontAdjustingWrapLabel pattern).
+--- LabelControl:Clean() forces dirty text to layout/draw in-callstack (needed before WasTruncated on pooled icons).
 --- @param buff SpellCastBuffs_BuffIcon_Control
 function SpellCastBuffs.FitAbilityIdLabelFont(buff)
     local label = buff.abilityId
@@ -1867,20 +1939,30 @@ function SpellCastBuffs.FitAbilityIdLabelFont(buff)
         return
     end
 
+    label:Clean()
+
     local fonts = SpellCastBuffs.abilityIdFonts
     if not fonts or #fonts == 0 then
         label:SetFont(SpellCastBuffs.buffsFont)
+        label:Clean()
+        buff.abilityIdLabelDirty = nil
+        buff.lastAppliedAbilityIdIconSize = SpellCastBuffs.SV.IconSize
+        buff.lastAppliedAbilityIdLayoutVersion = SpellCastBuffs.displayLayoutVersion
         return
     end
 
     label:SetMaxLineCount(0)
     for _, font in ipairs(fonts) do
         label:SetFont(font)
+        label:Clean()
         if not label:WasTruncated() then
             break
         end
     end
     label:SetMaxLineCount(1)
+    buff.abilityIdLabelDirty = nil
+    buff.lastAppliedAbilityIdIconSize = SpellCastBuffs.SV.IconSize
+    buff.lastAppliedAbilityIdLayoutVersion = SpellCastBuffs.displayLayoutVersion
 end
 
 function SpellCastBuffs.ApplyFont()
@@ -2293,6 +2375,12 @@ function SpellCastBuffs.MenuPreview()
     end
 end
 
+-- Reused scratch table for ApplyDisplayAlpha / EnforceDisplayAlpha de-dupe.
+-- Both functions ran a `local seen = {}` allocation per call; EnforceDisplayAlpha
+-- runs every 100ms tick (see SpellCastBuffs.OnUpdate L490), so the empty-table
+-- churn was real. We cleared between uses with ZO_ClearTable.
+local g_displayAlphaSeen = {}
+
 --- Set buff container opacity from in-combat / out-of-combat saved values (0–100).
 function SpellCastBuffs.ApplyDisplayAlpha()
     if not SpellCastBuffs.Enabled then
@@ -2305,10 +2393,10 @@ function SpellCastBuffs.ApplyDisplayAlpha()
     local alpha = 0.01 * (IsUnitInCombat("player") and incAlpha or oocAlpha)
     g_scbDisplayAlpha = alpha
 
-    local seen = {}
+    ZO_ClearTable(g_displayAlphaSeen)
     for _, control in pairs(SpellCastBuffs.BuffContainers) do
-        if control and control.SetAlpha and not seen[control] then
-            seen[control] = true
+        if control and control.SetAlpha and not g_displayAlphaSeen[control] then
+            g_displayAlphaSeen[control] = true
             control:SetAlpha(alpha)
         end
     end
@@ -2321,10 +2409,10 @@ function SpellCastBuffs.EnforceDisplayAlpha()
     end
 
     local alpha = g_scbDisplayAlpha
-    local seen = {}
+    ZO_ClearTable(g_displayAlphaSeen)
     for _, control in pairs(SpellCastBuffs.BuffContainers) do
-        if control and control.SetAlpha and control.GetAlpha and not seen[control] then
-            seen[control] = true
+        if control and control.SetAlpha and control.GetAlpha and not g_displayAlphaSeen[control] then
+            g_displayAlphaSeen[control] = true
             if zo_abs(control:GetAlpha() - alpha) > 0.001 then
                 control:SetAlpha(alpha)
             end

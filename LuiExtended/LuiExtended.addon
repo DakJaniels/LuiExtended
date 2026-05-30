@@ -2,10 +2,10 @@
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101049 101050
-## Version: 7.2.3.1
-## AddOnVersion: 7231
+## Version: 7.2.3.2
+## AddOnVersion: 7232
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
-## DependsOn: LuiMedia>=7133 LuiData>=7210
+## DependsOn: LuiMedia>=7133 LuiData>=7212
 ## PCDependsOn: LibAddonMenu-2.0>=43
 ## ConsoleDependsOn: LibHarvensAddonSettings>=20106 LibConsoleDialogs
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705 CrutchAlerts>=20502
@@ -36,6 +36,7 @@ src/Hooks.lua
 
 shared/actionbutton.lua
 shared/settings_tweaks.lua
+shared/ChatOutputSettingsUI.lua
 shared/synergy.lua
 
 gamepad/HooksSkillsAdvisor.lua
@@ -66,6 +67,7 @@ console/Unlock.lua
 
 # Modules - Chat Announcements
 modules/ChatAnnouncements/ChatAnnouncementsConstants.lua
+modules/ChatAnnouncements/ChatOutput.lua
 modules/ChatAnnouncements/ChatAnnouncementsPlayerToPlayerHooks.lua
 modules/ChatAnnouncements/ChatAnnouncementsExperience.lua
 modules/ChatAnnouncements/ChatAnnouncementsCSA.lua

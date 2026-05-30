@@ -341,6 +341,39 @@ function CombatText.CreateSettings()
                 end,
                 width = "half",
             },
+            -- Blacklist Button - Dragonknight
+            {
+                type = "button",
+                name = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_DRAGONKNIGHT),
+                tooltip = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_DRAGONKNIGHT_TP),
+                func = function ()
+                    CombatText.AddBulkToCustomList(Settings.blacklist, BlacklistPresets.Dragonknight)
+                    LUIE_BlacklistCT:UpdateChoices(GenerateCustomList(Settings.blacklist))
+                end,
+                width = "half",
+            },
+            -- Blacklist Button - Nightblade
+            {
+                type = "button",
+                name = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_NIGHTBLADE),
+                tooltip = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_NIGHTBLADE_TP),
+                func = function ()
+                    CombatText.AddBulkToCustomList(Settings.blacklist, BlacklistPresets.Nightblade)
+                    LUIE_BlacklistCT:UpdateChoices(GenerateCustomList(Settings.blacklist))
+                end,
+                width = "half",
+            },
+            -- Blacklist Button - Arcanist
+            {
+                type = "button",
+                name = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_ARCANIST),
+                tooltip = GetString(LUIE_STRING_LAM_CT_BLACKLIST_ADD_ARCANIST_TP),
+                func = function ()
+                    CombatText.AddBulkToCustomList(Settings.blacklist, BlacklistPresets.Arcanist)
+                    LUIE_BlacklistCT:UpdateChoices(GenerateCustomList(Settings.blacklist))
+                end,
+                width = "half",
+            },
 
             {
                 -- Clear Blacklist

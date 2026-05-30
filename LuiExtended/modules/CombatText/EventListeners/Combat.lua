@@ -226,7 +226,7 @@ end
 --- @return boolean true if this is a duplicate of a line we already showed (caller must skip)
 local function IsRecentDuplicateMitigation(combatType, result, abilityId, targetUnitId)
     local now = GetGameTimeMilliseconds()
-    if now - lastMitigationDedupe.timeMs < MITIGATION_DEDUPE_WINDOW_MS
+    if  now - lastMitigationDedupe.timeMs < MITIGATION_DEDUPE_WINDOW_MS
     and lastMitigationDedupe.combatType == combatType
     and lastMitigationDedupe.result == result
     and lastMitigationDedupe.abilityId == abilityId

@@ -29,7 +29,33 @@ local barHighlightStack =
     [146919] = 1, -- Subterranean Assault
     [86015] = 2,  -- Deep Fissure
     [178028] = 1, -- Deep Fissure
+
+    -- Dragonknight (combatTrack stack buff ids; max stacks for bar highlight + combat GAIN hitValue)
+    [34117] = 5, -- Power Lash stacks (Flame Lash line)
+    [23808] = 5, -- Lava Slam / Volcanic Whip stacks (Lava Whip line)
+}
+
+--- Slotted bound id consumes one stack on this track buff id when cast (combat may not emit per-stack GAIN).
+--- @type table<integer, integer>
+local barHighlightStackConsume =
+{
+    [20824] = 34117,  -- Power Lash
+    [256798] = 23808, -- Volcanic Whip
+}
+
+--- When EVENT_EFFECT_CHANGED reports stackCount 0 on the track buff id.
+--- @type table<integer, "keep"|"clear">
+local barHighlightStackZeroEffect =
+{
+    [34117] = "keep",  -- timer/stacks from combatTrack or slot use; ignore empty stack tick
+    [23808] = "clear", -- hide when API reports 0 stacks
 }
 
 --- @class (partial) BarHighlightStack
 Effects.BarHighlightStack = barHighlightStack
+
+--- @class (partial) BarHighlightStackConsume
+Effects.BarHighlightStackConsume = barHighlightStackConsume
+
+--- @class (partial) BarHighlightStackZeroEffect
+Effects.BarHighlightStackZeroEffect = barHighlightStackZeroEffect

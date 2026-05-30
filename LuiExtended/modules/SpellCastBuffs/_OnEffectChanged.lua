@@ -211,27 +211,18 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
     -- Where the new icon will go into
     local context = unitTag .. effectType
 
-    -- Override for Off-Balance Immunity to show it as a prominent debuff for tracking.
-    if abilityId == 134599 or abilityId == 120014 then
-        if context == "reticleover1" or context == "reticleover2" then
-            if SpellCastBuffs.SV.PromDebuffTable[abilityId] or SpellCastBuffs.SV.PromDebuffTable[effectName] then
-                context = "promd_target"
-            end
-        elseif context == "player1" then
-            if SpellCastBuffs.SV.PromBuffTable[abilityId] or SpellCastBuffs.SV.PromBuffTable[effectName] then
-                context = "promb_player"
-            end
+    -- Special handling for Bound Armaments - only show in prominent buffs if stack count >= 4
+    if abilityId == 203447 and stackCount < 4 then
+        -- Force context to be non-prominent if stacks are too low
+        if context == "promb_player" then
+            context = "player1"
         end
-    else
-        -- Special handling for Bound Armaments - only show in prominent buffs if stack count >= 4
-        if abilityId == 203447 and stackCount < 4 then
-            -- Force context to be non-prominent if stacks are too low
-            if context == "promb_player" then
-                context = "player1"
-            end
-        end
-        context = SpellCastBuffs.DetermineContext(context, abilityId, effectName, sourceType)
     end
+
+    -- DetermineContext routes prominent buffs/debuffs and uses the OB-aware
+    -- helper so Off Balance debuffs (and the Immunity buff) promote to the
+    -- target prominent container regardless of who applied them.
+    context = SpellCastBuffs.DetermineContext(context, abilityId, effectName, sourceType)
 
     -- Exit here if there is no container to hold this effect
     if not SpellCastBuffs.containerRouting[context] then

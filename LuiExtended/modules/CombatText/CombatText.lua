@@ -290,10 +290,14 @@ function CombatText.CreateCombatEventViewer()
         return
     end
 
-    -- Remove old combat event viewer if it exists
+    -- Remove old combat event viewer if it exists.
+    -- ZO_CallbackObject does NOT auto-clean callbacks when the owning object loses references;
+    -- closures registered in viewer:Initialize close over `self` and stay pinned in the
+    -- listener's callbackRegistry until explicitly unregistered. Failing to Destroy() leaks
+    -- the old viewer (including its eventBuffer / activeControls) and stacks an extra
+    -- early-returning closure on every combat event for each animation-type change.
     if CombatText.combatEventViewer then
-        -- With ZO_CallbackObject, callbacks are managed by the listener instance
-        -- No manual unregistration needed - just clear the viewer reference
+        CombatText.combatEventViewer:Destroy()
         CombatText.combatEventViewer = nil
     end
 

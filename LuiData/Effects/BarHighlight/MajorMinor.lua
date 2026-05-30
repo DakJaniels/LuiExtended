@@ -65,7 +65,7 @@ local majorMinor =
     [111354] = true, -- Major Cowardice
     [111377] = true, -- Major Heroism
     [111380] = true, -- Major Heroism
-    [111788] = true, -- Major Breach
+    [111788] = true, -- Major Cowardice (U50; was tagged "Major Breach" pre-U50 -- Phase 6 Werewolf Deafening Roar log confirmed Major Cowardice 15s; display 147643)
     [113284] = true, -- Minor Heroism
     [113306] = true, -- Minor Vitality
     [113307] = true, -- Minor Mending
@@ -186,7 +186,7 @@ local majorMinor =
     [137206] = true, -- Major Berserk
     [137210] = true, -- Minor Fortitude
     [137212] = true, -- Minor Endurance
-    [137311] = true, -- Minor Maim
+    [137311] = true, -- Major Maim (U50; was tagged "Minor Maim" pre-U50 -- Phase 6 Werewolf Deafening Roar log confirmed Major Maim 15s; display 61725)
     [137348] = true, -- Minor Courage
     [137539] = true, -- Minor Wound
     [137986] = true, -- Major Slayer
@@ -755,6 +755,10 @@ local majorMinor =
     [47726] = true,  -- Minor Wound
     [48346] = true,  -- Minor Wound
     [48946] = true,  -- Major Breach
+    [259089] = true, -- Minor Breach (Petrify combat; display 61742)
+    [259129] = true, -- Minor Breach (Fossilize combat; display 61742)
+    [259130] = true, -- Minor Vulnerability (Fossilize combat; display 79717)
+    [259137] = true, -- Minor Breach (Shattering Rocks combat; display 61742)
     [49264] = true,  -- Major Evasion
     [50997] = true,  -- Major Expedition
     [51434] = true,  -- Minor Vulnerability
@@ -764,7 +768,7 @@ local majorMinor =
     [54126] = true,  -- Minor Wound
     [55033] = true,  -- Major Mending
     [57962] = true,  -- Minor Wound
-    [58869] = true,  -- Major Defile
+    -- [58869] = true, -- Major Defile (U50: id repurposed as Claw Fury per-tick ON CD; removed from major/minor list to avoid misclassification)
     [61275] = true,  -- Major Vitality
     [61549] = true,  -- Minor Vitality
     [61662] = true,  -- Minor Brutality
@@ -918,9 +922,9 @@ local majorMinor =
     [76420] = true,  -- Major Prophecy
     [76426] = true,  -- Major Savagery
     [76433] = true,  -- Major Prophecy
-    [76498] = true,  -- Major Expedition
-    [76502] = true,  -- Major Expedition
-    [76506] = true,  -- Major Expedition
+    [76498] = true,  -- Major Cowardice (Chains of Flame combat bundle; display 147643)
+    [76502] = true,  -- Major Cowardice (Chains of Dominance combat; display 147643)
+    [76506] = true,  -- Major Evasion (Chains of Devastation combat; display 61716)
     [76518] = true,  -- Major Brutality
     [76564] = true,  -- Minor Force
     [76617] = true,  -- Minor Slayer
@@ -1136,6 +1140,17 @@ local majorMinor =
 
     -- Empower
     [61737] = true, -- Empower
+    [76537] = true, -- Empower (Molten Armaments combat)
+
+    -- Wing Buffet / Fleetstep Wings
+    [259744] = true, -- Major Expedition (Fleetstep Wings)
+    [259745] = true, -- Major Expedition (Fleetstep Wings)
+    [259746] = true, -- Major Expedition (Fleetstep Wings)
+    [259761] = true, -- Minor Brutality (Fleetstep Wings)
+
+    -- Protect the Brood
+    [32753] = true,  -- Minor Protection (combat)
+    [260258] = true, -- Major Expedition (combat)
 }
 
 --- @class (partial) MajorMinor

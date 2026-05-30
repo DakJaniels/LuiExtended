@@ -50,8 +50,13 @@ local GetAbilityCastInfo = GetAbilityCastInfo
 --- @param abilityId integer
 --- @param overflow integer
 function SpellCastBuffs.EventCombatDebug(eventId, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
-    -- Don't display if this aura is already added to the filter
-    if DebugAuras[abilityId] and SpellCastBuffs.SV.ShowDebugFilter then return end
+    local override = EffectOverride[abilityId]
+    if override and override.hide then
+        return
+    end
+    if SpellCastBuffs.SV.ShowDebugFilter and (DebugAuras[abilityId] or override) then
+        return
+    end
 
     local iconFormatted = zo_iconFormat(GetAbilityIcon(abilityId), 16, 16)
     local nameFormatted = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
@@ -107,7 +112,11 @@ end
 --- @param abilityId integer
 --- @param sourceType CombatUnitType
 function SpellCastBuffs.EventEffectDebug(eventId, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, deprecatedBuffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
-    if DebugAuras[abilityId] and SpellCastBuffs.SV.ShowDebugFilter then
+    local override = EffectOverride[abilityId]
+    if override and override.hide then
+        return
+    end
+    if SpellCastBuffs.SV.ShowDebugFilter and (DebugAuras[abilityId] or override) then
         return
     end
 
@@ -124,17 +133,10 @@ function SpellCastBuffs.EventEffectDebug(eventId, changeType, effectSlot, effect
     unitName = unitName .. " (" .. unitTag .. ")"
 
     local finalString
-    if EffectOverride[abilityId] and EffectOverride[abilityId].hide then
-        finalString = (iconFormatted .. "|c00E200 [" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [Tag] " .. unitName .. "|r")
-        -- Use CHAT_ROUTER to bypass some other addons modifying this string
-        CHAT_ROUTER:AddSystemMessage(finalString)
-        return
-    end
-
     local duration = (endTime - beginTime) * 1000
 
     local refreshOnly = ""
-    if EffectOverride[abilityId] and EffectOverride[abilityId].refreshOnly then
+    if override and override.refreshOnly then
         refreshOnly = " |c00E200(Hidden)|r "
     end
 
