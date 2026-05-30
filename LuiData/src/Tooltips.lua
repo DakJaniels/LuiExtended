@@ -1074,6 +1074,12 @@ local tooltips =
     Skill_Brutal_Carnage_Buff = GetString(LUIE_STRING_SKILL_BRUTAL_CARNAGE_BUFF_TP),
     Skill_Hircines_Fortitude = GetString(LUIE_STRING_SKILL_HIRCINES_FORTITUDE_TP),
     Skill_Ferocious_Roar = GetString(LUIE_STRING_SKILL_FEROCIOUS_ROAR_TP),
+    Skill_Blood_Hunger = GetString(LUIE_STRING_SKILL_BLOOD_HUNGER_TP),
+    Skill_Insatiable_Hunger = GetString(LUIE_STRING_SKILL_INSATIABLE_HUNGER_TP),
+    Skill_Gnash = GetString(LUIE_STRING_SKILL_GNASH_TP),
+    Skill_Bloody_Gnash = GetString(LUIE_STRING_SKILL_BLOODY_GNASH_TP),
+    Skill_Bloodclaws = GetString(LUIE_STRING_SKILL_BLOODCLAWS_TP),
+    Skill_Enduring_Rampage = GetString(LUIE_STRING_SKILL_ENDURING_RAMPAGE_TP),
 
     ----------------------------------------------------------------
     -- GUILDS SKILLS ------------------------------------------------

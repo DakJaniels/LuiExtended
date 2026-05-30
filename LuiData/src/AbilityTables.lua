@@ -651,6 +651,12 @@ local abilityTables =
     Skill_Brutal_Carnage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(137186)),
     Skill_Feral_Carnage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(137165)),
     Skill_Hircines_Rage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(58317)),
+    Skill_Blood_Hunger = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(267744)),
+    Skill_Gnash = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(58405)),
+    Skill_Bloody_Gnash = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(58798)),
+    Skill_Bloodclaws = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(58879)),
+    Skill_Insatiable_Hunger = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(268571)),
+    Skill_Enduring_Rampage = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(267425)),
     Skill_Remove = ZO_CachedStrFormat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(31262)),
 
     -- ---------------------------------------------------

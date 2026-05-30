@@ -596,18 +596,31 @@ local barHighlightOverride =
     -- Werewolf ---------------
     ---------------------------
 
+    -- U50 audit Phase 1: Roar bar stays on Off Balance 137257 (existing 7s target debuff with
+    -- BarHighlightCheckOnFade resync). Blood Hunger 267744 is displayed on the player buff frame
+    -- via Override (displayStacks/maxStacks=3), not on the bar, because a slotted id can only
+    -- carry a single newId remap.
+
     [32632] = { newId = 137156 },                      -- Pounce --> Carnage
-    [39105] = { newId = 137189 },                      -- Brutal Pounce --> Brutal Carnage
+    [39105] = { newId = 137184 },                      -- Brutal Pounce --> Brutal Carnage 12s DOT (U50 Phase 4 log; 137189 proc did not fire)
     [39104] = { newId = 137164 },                      -- Feral Pounce --> Feral Carnage
 
-    [58317] = { newId = 137206, showFakeAura = true }, -- Hircine's Rage --> Major Berserk
+    [58317] = { newId = 137206, showFakeAura = true }, -- Hircine's Rage --> 137206 Hircine's Rage active state (U50; was Major Berserk pre-U50)
     [58325] = { newId = 61704 },                       -- hircine's fortitude (minor fortitude)
     [32633] = { newId = 137257 },                      -- roar (off-balance)
-    [39113] = { newId = 45834 },                       -- ferocious roar (off-balance); 137287 is heavy attack speed buff
-    [39114] = { newId = 61743 },                       -- deafening roar major breach; 137312 is off-balance
-    [58855] = { newId = 58856 },                       -- Infectious Claws
-    [58864] = { newId = 58865 },                       -- Claws of Anguish
-    [58879] = { newId = 58880 },                       -- Claws of Life
+    [39113] = { newId = 45834 },                       -- ferocious roar (off-balance); 137287 repurposed to Feeding Frenzy in U50
+    -- Phase 6 update: Deafening Roar (39114) no longer applies Major Breach in U50 -- the cast now
+    -- grants Major Cowardice 147643 (15s) + Major Maim 61725 (15s) + Off Balance 137312 (7s) +
+    -- Blood Hunger 267744 stack. Re-pointing bar to 137312 Off Balance for consistency with the
+    -- other Roar morphs (32633 --> 137257, 39113 --> 45834); Major Cowardice / Major Maim land on
+    -- the target buff frame independently with their canonical icons.
+    [39114] = { newId = 137312 }, -- Deafening Roar --> Off Balance 7s (U50; was 61743 Major Breach pre-U50)
+    [58405] = { newId = 137317 }, -- Gnash (U50) --> 400ms second-hit indicator
+    [58742] = { newId = 58745 },  -- Rip and Tear (U50; Gnash morph) --> 400ms second-hit indicator (parallel to Gnash 58405 --> 137317)
+    [58798] = { newId = 58801 },  -- Bloody Gnash (U50; Gnash morph) --> 400ms second-hit indicator (parallel to Gnash 58405 --> 137317, Rip and Tear 58742 --> 58745)
+    [58855] = { newId = 58856 },  -- Rending Claws (U50; was Infectious Claws) --> DOT
+    [58864] = { newId = 58864 },  -- Claw Fury (U50; Rending Claws channel morph) --> tracks own 4.6s channel buff
+    [58879] = { newId = 58880 },  -- Bloodclaws (U50; Rending Claws morph) --> 10s target Bleed DOT (Phase 6 log confirmed)
 
     ---------------------------
     -- Fighters Guild ---------

@@ -684,7 +684,7 @@ local strings =
 
     -- Werewolf
     LUIE_STRING_SKILL_SANIES_LUPINUS_TP = "You have been bitten by a Werewolf and contracted Sanies Lupinus.",
-    LUIE_STRING_SKILL_LYCANTHROPHY_TP = "You can transform into a savage Werewolf.\n\nYou take |cFFFFFF25|r% more Poison Damage while transformed into a Werewolf.",
+    LUIE_STRING_SKILL_LYCANTHROPHY_TP = "You can transform into a savage Werewolf.\n\nYou take |cFFFFFF15|r% more Poison Damage while transformed into a Werewolf.",
     LUIE_STRING_SKILL_BLOOD_MOON_TP = "You have bitten another player. You may not do so again for |cFFFFFF7|r days.",
     LUIE_STRING_SKILL_CLAWS_OF_LIFE_TP = "Afflicted with Disease Damage every |cFFFFFF2|r seconds for |cFFFFFF<<1>>|r seconds.\n\nThe werewolf heals for |cFFFFFF100|r% of the damage done.",
     LUIE_STRING_SKILL_WEREWOLF_TRANSFORMATION_TP = "Transformed into a werewolf.\n\nWhile transformed your Max Stamina is increased by |cFFFFFF30|r%.\n\nYou cannot generate Ultimate while transformed.",
@@ -696,6 +696,12 @@ local strings =
     LUIE_STRING_SKILL_BRUTAL_CARNAGE_BUFF_TP = "Increase Weapon Damage by |cFFFFFF100|r for |cFFFFFF10|r seconds, stacking up to |cFFFFFF6|r times for each enemy hit by Brutal Carnage.",
     LUIE_STRING_SKILL_HIRCINES_FORTITUDE_TP = "Gain Health and Stamina Recovery equal to |cFFFFFF5|r% of the amount you healed with Hircine's Fortitude, up to a maximum of |cFFFFFF333|r, for |cFFFFFF<<1>>|r seconds.",
     LUIE_STRING_SKILL_FEROCIOUS_ROAR_TP = "Increase Heavy Attack casting speed by |cFFFFFF33|r% for |cFFFFFF<<1>>|r seconds.",
+    LUIE_STRING_SKILL_BLOOD_HUNGER_TP = "Empowers Gnash and Claw Fury for |cFFFFFF<<1>>|r seconds, stacking up to |cFFFFFF3|r times.",
+    LUIE_STRING_SKILL_INSATIABLE_HUNGER_TP = "Devouring a corpse. Each second you heal and restore |cFFFFFF15|r Ultimate.",
+    LUIE_STRING_SKILL_GNASH_TP = "Consume a stack of Blood Hunger to bare your fangs and gnash your teeth into an enemy. The second hit deals up to |cFFFFFF125|r% more damage to enemies with less than |cFFFFFF25|r% Health.",
+    LUIE_STRING_SKILL_BLOODY_GNASH_TP = "Consume a stack of Blood Hunger to bare your fangs and gnash your teeth into an enemy. The second hit deals up to |cFFFFFF200|r% more damage to enemies with less than |cFFFFFF25|r% Health and applies the Hemorrhaging status effect.\n\n|cFFFFFF50|r% chance to retain Blood Hunger on cast.",
+    LUIE_STRING_SKILL_BLOODCLAWS_TP = "Shred up to |cFFFFFF6|r enemies in front of you with blood-soaked claws, dealing Bleed Damage over |cFFFFFF<<1>>|r seconds.\n\nHeals you for |cFFFFFF41|r% of the initial hit's damage and for additional Health from the damage over time. Each enemy hit grants a stack of Blood Hunger. |cFFFFFF15|r% chance to apply Sundered on the initial hit, |cFFFFFF5|r% chance to apply Hemorrhaging per tick.",
+    LUIE_STRING_SKILL_ENDURING_RAMPAGE_TP = "Increase Movement Speed by |cFFFFFF20|r%, damage done by |cFFFFFF15|r%, and Health Recovery by |cFFFFFF4000|r, and reduce the cost of Werewolf Transformation and abilities by |cFFFFFF100|r% for |cFFFFFF<<1>>|r seconds.\n\nLost if you leave Werewolf form.",
 
     -- Vampire
     LUIE_STRING_SKILL_NOXIPHILIC_SANGUIVORIA_TP = "You have been bitten by a Vampire and contracted Noxiphilic Sanguivoria.",

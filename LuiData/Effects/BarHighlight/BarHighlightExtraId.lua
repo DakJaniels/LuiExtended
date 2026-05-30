@@ -118,8 +118,14 @@ local barHighlightExtraId =
     [104085] = 104079, -- Time Freeze
 
     -- Werewolf
-    [32633] = 137257, -- Roar --> Off Balance
-    [39114] = 137312, -- > Deafening Roar --> Off Balance -- TODO: Could possibly track Major Breach/Minor Maim
+    [32633] = 137257,  -- Roar --> Off Balance
+    [170991] = 137257, -- Roar fear combat id (U50) --> Off Balance bar key (single key per Roar bundle)
+    [171001] = 45834,  -- Ferocious Roar fear combat id (U50) --> Off Balance bar key
+    [171003] = 137312, -- Deafening Roar fear combat id (U50) --> Off Balance bar key (parallel to 170991 / 171001)
+    [267745] = 58405,  -- Gnash Execute (U50 second-hit) --> Gnash slot
+    [58744] = 58742,   -- Rip and Tear Execute (U50; Gnash morph second-hit) --> Rip and Tear slot
+    [267747] = 58798,  -- Bloody Gnash Execute (U50; Gnash morph second-hit) --> Bloody Gnash slot (parallel to 267745 --> 58405, 58744 --> 58742)
+    [39114] = 137312,  -- Deafening Roar slot --> Off Balance (U50: was tagged "TODO Major Breach/Minor Maim"; Deafening Roar no longer applies Major Breach, now grants Major Cowardice + Major Maim + Off Balance)
 
     -- Vampire
     [138130] = 138098, -- Stupefy

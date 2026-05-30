@@ -3972,8 +3972,8 @@ local effectOverride =
     [32494] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_ATTACKHEAVY_DDS },                                                                                                                                                           -- Heavy Attack (Werewolf)
     [60773] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_ATTACKRESTORE_DDS },                                                                                                                                                         -- Heavy Attack (Werewolf)
 
-    [33208] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS, hide = true },                                                                                                                                                   -- Devour (Devour)
-    [33209] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS },                                                                                                                                                                -- Devour (Devour)
+    [33208] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS, hide = true },                                                                                                                                                   -- Devour synergy state (U50: passive renamed to Insatiable Hunger; synergy still uses Devour name)
+    [33209] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS },                                                                                                                                                                -- Devour / Insatiable Hunger HEAL tick (U50)
     [40515] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS },                                                                                                                                                                -- Devour (Blood Moon)
     [40520] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS, name = Abilities.Skill_Devour, unbreakable = 1, tooltip = Tooltips.Generic_Knockdown },                                                                          -- Q3047 - Knockdown (Blood Moon - Rank 1)
     [40525] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_BLOODMOON_ICD_DDS, name = zo_strformat("<<1>> <<2>>", Abilities.Passive_Bloodmoon, Abilities.Set_Cooldown), tooltip = Tooltips.Skill_Blood_Moon, forcedContainer = "long" }, -- Bit an Ally (Blood Moon)
@@ -3995,29 +3995,163 @@ local effectOverride =
     [137164] = { tooltip = Tooltips.Skill_Feral_Carnage },                                                -- Feral Carnage (Feral Pounce)
 
     -- Hircine's Bounty / Hircine's Rage / Hircine's Fortitude
-    [137202] = { icon = "/esoui/art/icons/ability_werewolf_004_a.dds" },                                                                                                                             -- Hircine's Bounty (Hircine's Bounty)
+    [137202] = { icon = "/esoui/art/icons/ability_werewolf_004_a.dds" }, -- Hircine's Bounty (Hircine's Bounty)
 
-    [137204] = { icon = "/esoui/art/icons/ability_werewolf_004_b.dds" },                                                                                                                             -- Hircine's Rage (Hircine's Rage)
-    [137206] = { icon = "/esoui/art/icons/ability_werewolf_004_b.dds", name = Abilities.Skill_Hircines_Rage, unbreakable = 1, tooltip = Tooltips.Generic_Increase_Damage_Taken, tooltipValue2 = 5 }, -- Major Berserk (Hircine's Rage)
+    [137204] = { icon = "/esoui/art/icons/ability_werewolf_004_b.dds" }, -- Hircine's Rage (Hircine's Rage)
+    -- U50 audit Phase 4 (Pack Leader slotted log): 137206 is the live Hircine's Rage 20s active state
+    -- (API surfaces it as "Hircine's Rage" on the buff frame, [Dur] ~20000). The legacy "Major Berserk
+    -- + Increase Damage Taken 5%" tradeoff is gone in U50 -- Minor Berserk 267570 is the new berserk
+    -- component, granted as part of the while-slotted bundle wired in Phase 3.
+    [137206] = { icon = "/esoui/art/icons/ability_werewolf_004_b.dds", name = Abilities.Skill_Hircines_Rage, unbreakable = 1 }, -- Hircine's Rage active state (U50; 20s; was Major Berserk pre-U50)
+    -- U50 audit Phase 3 (Hircine's Rage activated log; Dur=0 GAIN/FADE for all five): slotted Hircine's
+    -- Rage now grants Major Protection 137347, Major Brutality 267554, Major Sorcery 267555, and Minor
+    -- Berserk 267570, anchored by 267553. Display ids 61722 / 61665 / 61687 / 61744 surface on the
+    -- buff frame via the API; internal anchors hidden to avoid duplicate icons.
+    [137347] = { hide = true },                                          -- Major Protection internal (Hircine's Rage; U50 while-slotted)
+    [267553] = { hide = true },                                          -- Hircine's Rage while-slotted anchor (U50)
+    [267554] = { hide = true },                                          -- Major Brutality internal (Hircine's Rage; U50 while-slotted)
+    [267555] = { hide = true },                                          -- Major Sorcery internal (Hircine's Rage; U50 while-slotted)
+    [267570] = { hide = true },                                          -- Minor Berserk internal (Hircine's Rage; U50 while-slotted)
 
-    [137209] = { icon = "/esoui/art/icons/ability_werewolf_004_c.dds" },                                                                                                                             -- Hircine's Fortitude (Hircine's Fortitude)
-    [137210] = { tooltip = Tooltips.Skill_Hircines_Fortitude },                                                                                                                                      -- Hircine's Fortitude (Hircine's Fortitude)
+    [137209] = { icon = "/esoui/art/icons/ability_werewolf_004_c.dds" }, -- Hircine's Fortitude (Hircine's Fortitude)
+    [137210] = { tooltip = Tooltips.Skill_Hircines_Fortitude },          -- Hircine's Fortitude (Hircine's Fortitude)
 
     -- Roar / Ferocious Roar / Deafening Roar
+    -- U50 audit Phase 1 (Hircine's Gift quest log): slotted Roar 32633 emits target fear 170991 (~3s
+    -- combat; 4s tooltip), target Off Balance 137257 (7s, bar track), and player Blood Hunger 267744
+    -- (30s, max 3 stacks per Refreshed: (3); SkillDumper morph 2 grants 2 stacks). Bar stays on 137257;
+    -- Blood Hunger shows on player frame with displayStacks.
+    -- U50 audit Phase 2 (Roar IV tooltip + form-swap log line `[168425] Major Prophecy [D]0 GAIN`):
+    -- while-slotted Roar grants Major Prophecy 168425 + Major Savagery 138072 (both internal; display
+    -- ids 61689 / 61667 are what the player buff frame shows via the API). Both re-apply on form swap.
+    -- Feeding Frenzy synergy (legacy on Howl of Despair) is now described on Roar IV: 6% damage done
+    -- + Minor Force 30s + 10% Crit Damage; synergy combat ids not yet observed in a log.
     [32633] = { tooltip = Tooltips.Generic_Fear },                          -- Roar (Roar)
     [137257] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance (Roar)
+    [170991] = { hide = true },                                             -- Roar target fear marker (U50; bar already tracks 137257)
 
     [39113] = { tooltip = Tooltips.Generic_Fear },                          -- Ferocious Roar (Ferocious Roar)
     [45834] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off Balance (Ferocious Roar)
-    [137287] = { tooltip = Tooltips.Skill_Ferocious_Roar },                 -- Ferocious Roar (Ferocious Roar)
+    -- 137287 was pre-U50 Ferocious Roar tooltip target -- ZOS repurposed it to Feeding Frenzy stage 1
+    -- in U50 (see Phase 4 entry further below in this file). Skill_Ferocious_Roar lang string is now
+    -- orphaned but kept registered in Tooltips.lua / lang/*.lua for potential future re-attachment.
+    [171001] = { hide = true },                                             -- Ferocious Roar target fear marker (U50; parallel to base Roar 170991; bar already tracks 45834)
 
     [39114] = { tooltip = Tooltips.Generic_Fear },                          -- Deafening Roar (Deafening Roar)
     [137312] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance (Deafening Roar)
+    -- U50 audit Phase 6 (Werewolf Berserker / Deafening Roar slotted log): Deafening Roar no longer
+    -- applies Major Breach (legacy pre-U50). The cast now grants Major Cowardice (111788 internal -->
+    -- 147643 display, 15s), Major Maim (137311 internal --> 61725 display, 15s), Off Balance 137312
+    -- (7s), Blood Hunger 267744 (player stack +1), and a fear marker 171003 (parallel to Roar's
+    -- 170991 / Ferocious Roar's 171001). Hide the internals so the buff frame keeps the standard
+    -- 147643 / 61725 Major Cowardice / Major Maim icons surfaced by the API.
+    [137311] = { hide = true }, -- Major Maim internal (Deafening Roar; U50; display 61725)
+    [111788] = { hide = true }, -- Major Cowardice internal (Deafening Roar; U50; display 147643)
+    [171003] = { hide = true }, -- Deafening Roar target fear marker (U50; parallel to 170991 / 171001)
 
-    -- Infectious Claws / Claws of Anguish / Claws of Life
-    [58856] = { tooltip = Tooltips.Generic_Disease, tooltipValue2 = 2 }, -- Infection (Infectious Claws)
-    [58865] = { tooltip = Tooltips.Generic_Disease, tooltipValue2 = 2 }, -- Infection (Claws of Anguish)
-    [58880] = { tooltip = Tooltips.Skill_Claws_of_Life },                -- Infection (Claws of Life)
+    -- Blood Hunger (U50): player stack buff granted by Roar / Ferocious / Deafening, consumed by
+    -- Gnash and Claw Fury (Rending Claws morph). Quest log shows 30000 ms duration with Refreshed: (3).
+    [267744] = { icon = "/esoui/art/icons/ability_werewolf_003.dds", tooltip = Tooltips.Skill_Blood_Hunger, displayStacks = true, maxStacks = 3, stack = 1 }, -- Blood Hunger (Roar - All Morphs)
+
+    -- Fury (U50): new Werewolf resource generated by ability casts. POWER event only; hide any
+    -- defensive Override hit in case the API later surfaces it as a buff.
+    -- 266744 is the per-target Fury-generation throttle (fires `[D] 0 [R] ON CD` on the target
+    -- after damaging hits like Feral Pounce 39107 / Brutal Pounce). Rate-limits how often a single
+    -- target can grant Fury so you can't farm one mob indefinitely. Defensive hide; the API
+    -- shouldn't surface ON CD events as auras, but keeps the buff frame clean if it ever does.
+    [266875] = { hide = true }, -- Fury (Werewolf resource counter; U50)
+    [266744] = { hide = true }, -- Fury per-target generation throttle (U50; ON CD marker; Phase 6 + 02:25 logs)
+
+    -- Gnash (U50: 58405 was legacy "Piercing Howl" id, now repurposed as Gnash base). Consumes a stack
+    -- of Blood Hunger to deal a Physical lunge, then the second hit (267745 Gnash Execute) deals up to
+    -- 125% more damage to enemies under 25% Health. 137317 is the brief "ripping out" state (~400 ms).
+    -- Icons confirmed canonical via SkillDumper: Gnash _002_rend.dds, Rip and Tear _002_rend_a.dds,
+    -- Bloody Gnash _002_rend_b.dds (all share the Gnash base icon family).
+    [58405] = { icon = "/esoui/art/icons/ability_werewolf_002_rend.dds", tooltip = Tooltips.Skill_Gnash }, -- Gnash (U50; renamed from Piercing Howl)
+    [137317] = { icon = "/esoui/art/icons/ability_werewolf_002_rend.dds", hide = true },                   -- Gnash ripping-out state (~400 ms; bar uses this for second-hit timer)
+
+    -- Bloody Gnash (U50: second Gnash morph; reuses legacy Howl of Agony line ids 58798/58801).
+    -- SkillDumper-confirmed canonical name "Bloody Gnash" (id 58798), icon _002_rend_b.dds. Phase 6
+    -- log (Bloody Gnash slotted) shows: 58798 initial DMG (slot), 58801 ~400ms second-hit indicator
+    -- (parallel to Gnash 137317 / Rip and Tear 58745), 267747 Bloody Gnash Execute second-hit DMG,
+    -- and a 148801 Hemorrhaging 4s bleed status DOT applied per Execute (unique to this morph; Gnash
+    -- has no extra status, Rip and Tear applies Major Breach instead). Blood Hunger 267744 consumed
+    -- on cast with 50% retention chance per tooltip.
+    [58798] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_b.dds", tooltip = Tooltips.Skill_Bloody_Gnash }, -- Bloody Gnash (U50; was Howl of Agony)
+    [58801] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_b.dds", hide = true },                           -- Bloody Gnash ~400 ms second-hit indicator (U50; was Howl of Agony Bonus)
+    [267747] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_b.dds", hide = true },                          -- Bloody Gnash Execute second-hit DMG (U50)
+
+    -- Insatiable Hunger (U50: renamed Devour passive; 268571 is the 12s active state granted while
+    -- you devour a corpse). 33209 HEAL tick and 37233/120612 POWER ticks are silent helpers.
+    [268571] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_DEVOUR_DDS, tooltip = Tooltips.Skill_Insatiable_Hunger }, -- Insatiable Hunger (U50 active devour state)
+
+    -- Hircine's Bounty (U50): while-slotted majors now include Brutality + Sorcery (261901 / 261902
+    -- internal -> 61665 / 61687 display). Hide the internal ids so the player buff frame keeps the
+    -- standard Major Brutality / Major Sorcery icons supplied by the API (61665 / 61687).
+    [261901] = { hide = true }, -- Major Brutality internal (Hircine's Bounty - All Morphs, U50)
+    [261902] = { hide = true }, -- Major Sorcery internal (Hircine's Bounty - All Morphs, U50)
+
+    -- Werewolf Transformation new passives (U50): all fire on transform with Dur=0 to register
+    -- passive bonuses. Defensive hide in case any surfaces as a buff frame entry.
+    [266845] = { hide = true }, -- Call of the Pack passive (U50; group ult-cost reduction)
+    [266849] = { hide = true }, -- Feral Cruelty passive (U50)
+    [266851] = { hide = true }, -- Feral Cruelty passive (U50)
+    [266874] = { hide = true }, -- Master of the Chase passive (U50; Fury generation bonus)
+    [267414] = { hide = true }, -- Werewolf Transformation internal passive (U50)
+    [268123] = { hide = true }, -- Slaughter passive (U50)
+    [269021] = { hide = true }, -- Prowl passive (U50)
+    [150998] = { hide = true }, -- Major Resolve internal (transform; display 61694 stays on buff frame)
+
+    -- Rending Claws / Claw Fury / Bloodclaws (U50 rename of Infectious Claws line)
+    -- U50 Phase 2 log (base 58855): Physical hit (10s) + 58856 Bleed DOT (4s rolling refresh on 10s total).
+    -- U50 Phase 4 log (Claw Fury 58864 morph): channel buff on PLAYER [D]10000 [Chan]4666; per-tick
+    -- 58865 DMG ticks; 58869 ON CD; each tick refreshes Blood Hunger 267744. Bar tracks 58864 channel.
+    -- U50 Phase 6 log (Bloodclaws 58879 morph) + SkillDumper confirmation (id 58879 "Bloodclaws",
+    -- icon _006_c.dds, 10s base duration): 58879 initial Physical DMG (slot; up to 6 enemies),
+    -- 58880 target Bleed DOT (10s total, 2s ticks; up to 5% per-tick Hemorrhaging chance), 58881
+    -- player HoT, 267961 instant heal POWER event. Initial hit grants +1 Blood Hunger per enemy hit
+    -- and has 15% Sundered chance per tooltip.
+    [58856] = { tooltip = Tooltips.Generic_Bleed, tooltipValue2 = 2 },                                                       -- Rending Claws Bleed DOT (U50; was Infection - Disease)
+    [58864] = { icon = "/esoui/art/icons/u50_ability_werewolf_claws_of_anguish.dds" },                                       -- Claw Fury channel buff (U50; 4.6s channel within 10s window; consumes Blood Hunger each tick)
+    [58865] = { icon = "/esoui/art/icons/u50_ability_werewolf_claws_of_anguish.dds", hide = true },                          -- Claw Fury per-tick DMG (U50; was Claws of Anguish Disease DOT)
+    [58869] = { icon = "/esoui/art/icons/u50_ability_werewolf_claws_of_anguish.dds", hide = true },                          -- Claw Fury per-tick ON CD (U50; was Major Defile)
+    [58879] = { icon = "/esoui/art/icons/ability_werewolf_006_c.dds", tooltip = Tooltips.Skill_Bloodclaws },                 -- Bloodclaws (U50; was Claws of Life slot id; SkillDumper-confirmed icon)
+    [58880] = { icon = "/esoui/art/icons/ability_werewolf_006_c.dds", tooltip = Tooltips.Generic_Bleed, tooltipValue2 = 2 }, -- Bloodclaws target Bleed DOT (U50; 10s total, 2s ticks)
+    [58881] = { icon = "/esoui/art/icons/ability_werewolf_006_c.dds", hide = true },                                         -- Bloodclaws player HoT (U50; was Claws of Life player heal)
+    [267961] = { icon = "/esoui/art/icons/ability_werewolf_006_c.dds", hide = true },                                        -- Bloodclaws instant heal POWER event (U50; per-tick player heal trigger)
+
+    -- Rip and Tear (U50: second Gnash morph; reuses legacy Howl of Despair line ids)
+    -- Phase 4 log (Rip and Tear slotted): 58742 hits target, 58745 (~400 ms) tags the second-hit
+    -- window like Gnash's 137317, then 58744 Rip and Tear Execute lands the follow-up DMG, and 267785
+    -- heals the player. Blood Hunger 267744 consumed on cast.
+    -- Phase 6 SkillDumper correction: canonical icon is _002_rend_a.dds (Gnash morph family),
+    -- not the legacy _005_a.dds I'd assumed from the reused Howl of Despair ids.
+    [58742] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true },  -- Rip and Tear initial DMG (U50; was Howl of Despair)
+    [58745] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true },  -- Rip and Tear ~400 ms second-hit indicator (U50; was Feeding Frenzy synergy id)
+    [58744] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true },  -- Rip and Tear Execute second-hit DMG (U50; was Howl of Despair Synergy)
+    [267785] = { icon = "/esoui/art/icons/ability_werewolf_002_rend_a.dds", hide = true }, -- Rip and Tear self-heal (U50)
+    -- 137321 Major Breach 15s: shared Sundered-status-effect Major Breach id, applied by multiple
+    -- sources. Phase 5 log (no Rip and Tear slotted) showed it firing from the Sunderer set proc
+    -- chain (148800 Sundered DMG -> 148803 Minor Breach 4s -> 137321 Major Breach 15s). Phase 6 in-
+    -- game tooltip ("Rip and Tear IV": "applying Major Breach for 15 seconds and the Sundered status
+    -- effect on the initial rip") confirms Rip and Tear is also a direct source. Keep generic Major
+    -- Breach tooltip since the id itself isn't source-specific.
+    [137321] = { tooltip = Tooltips.Skill_Major_Breach }, -- Major Breach (generic Sundered-status id; Rip and Tear + Sunderer set both apply in U50)
+
+    -- Feeding Frenzy synergy (U50: moved from Howl of Despair to Roar family; reuses legacy ids)
+    -- Phase 4 log shows three Feeding Frenzy stages fire after a Ferocious Roar cast: 137287 player
+    -- buff 10s -> 58813 player buff 20s -> 131353 player buff 30s, with 188427 Minor Force 30s as the
+    -- final ally-payoff layer. Major Courage 137295 (display 109966) also fires from the morph cast.
+    -- Defensive hide on the staging ids since the API surfaces 109966 / 61746 cleanly on the buff frame.
+    [137287] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true }, -- Feeding Frenzy stage 1 player buff 10s (U50; was Ferocious Roar tooltip target -- repurposed)
+    [58813] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true },  -- Feeding Frenzy stage 2 player buff 20s (U50; was Howl of Despair Feeding Frenzy)
+    [131353] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true }, -- Feeding Frenzy stage 3 player buff 30s (U50; was Howl of Despair Empower id)
+    [58775] = { icon = "/esoui/art/icons/ability_werewolf_007_a.dds", hide = true },  -- Feeding Frenzy synergy registration (U50; legacy Howl of Despair synergy id)
+
+    -- Call of the Hunt (U50): Pack Leader transform passive, fires Dur=0 GAIN on form-in -- parallel
+    -- to base Werewolf Transformation's 150998 Major Resolve internal. Hide so the actual Major
+    -- Protection 61722 (already on buff frame) keeps its standard icon.
+    [150999] = { hide = true }, -- Call of the Hunt passive (Pack Leader; U50)
 
     -- Werewolf Transformation / Pack Leader / Werewolf Berserker
     [39477] = { hide = true },                                                                                                             -- De-Werewolf (Werewolf Transformation - All Morphs)
@@ -4036,6 +4170,30 @@ local effectOverride =
     [39076] = { tooltip = Tooltips.Skill_Werewolf_Berserker },                                                                             -- Werewolf Berserker (Werewolf Berserker)
     [111844] = { tooltip = Tooltips.Generic_Fear },                                                                                        -- Werewolf Berserker
     [89147] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEREWOLF_ATTACKBLEED_DDS, tooltip = Tooltips.Generic_Bleed, tooltipValue2 = 1 }, -- Werewolf Berserker Bleed (Werewolf Bleed)
+    -- U50 audit Phase 6 (Werewolf Berserker slotted log): form-in fires 267420 alongside 61745 Major
+    -- Berserk (Dur=0 GAIN, fades at form-out). Internal Major Berserk grant specific to the Berserker
+    -- morph -- Pack Leader does not surface 267420 (it grants 150999 Call of the Hunt instead). Hide
+    -- to avoid duplicate Major Berserk icon on the buff frame; 61745 is what the API surfaces.
+    [267420] = { hide = true }, -- Major Berserk internal (Werewolf Berserker form-in passive; U50; display 61745)
+
+    -- U50 Insatiable Hunger Passive (39050): persistent passive marker fires Dur=0 GAIN on form-in
+    -- and fades on form-out. Marker only; the actual Devour/Insatiable Hunger active uses 268571.
+    -- Hide so it doesn't clutter the buff frame.
+    [39050] = { hide = true }, -- Insatiable Hunger Passive marker (U50; rename of Devour Passive)
+
+    -- U50 Rampage Ultimate (in-form R-slot ult; consumes Fury 266875 at max stacks)
+    -- 267425 Enduring Rampage is one morph of the Rampage ult that appears in the R slot
+    -- while transformed. Tooltip confirmed in-game (see ENDURING RAMPAGE IV): instant, self,
+    -- 20s; +20% Movement Speed, +15% Damage Done, +4000 Health Recovery, -100% Werewolf
+    -- Transformation and ability cost. "This effect is lost if you leave Werewolf form."
+    -- API returns proper name "Enduring Rampage" and the correct icon, so we only attach the
+    -- tooltip and keep the buff visible on the player frame.
+    -- Phase 6 log (Werewolf Berserker form ult cast) surfaced 267416 Rampage [D]20000 GAIN as the
+    -- parallel Rampage variant. API surfaces the name "Rampage" cleanly. Tooltip text not yet
+    -- captured -- no Override entry until user provides the in-game RAMPAGE IV description for the
+    -- second morph (likely the offensive "Devastating Rampage" or unnamed base). DebugAuras carries
+    -- the attribution for now.
+    [267425] = { tooltip = Tooltips.Skill_Enduring_Rampage }, -- Enduring Rampage (Rampage morph; U50) -- <<1>> auto-fills from live 20s buff duration
 
     ----------------------------------------------------------------
     -- WEREWOLF QUEST ABILITIES ------------------------------------
