@@ -56,6 +56,7 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Off Balance can now be tracked as a single Prominent Debuff. Adding \"Off Balance\" to Prominent Debuffs covers every renamed Off Balance variant, Off Balance applied by allies, and the Off Balance Immunity buff, all routed to the prominent target column. It is added to Prominent Debuffs once by default; remove it and it will not be re-added.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Output: New shared chat output settings (timestamp on/off, format and color, tab routing, and system-message handling) are now stored account-wide (or per-character when Character-Specific Settings is enabled) and shared across LUIE modules. Existing Chat Announcements chat settings are migrated automatically, and Combat Text now exposes the same chat output options.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Output: Added LibChatMessage integration on PC for better compatibility with external chat addons (such as pChat) when LUIE prints to chat.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Output: Added rChat integration on PC (external formatting and CHAT_ROUTER re-chaining) alongside existing pChat support when Allow Addons to Modify LUIE Messages is enabled.",
     "",
     -- Changes
     "|cFFFF00Changes:|r",
