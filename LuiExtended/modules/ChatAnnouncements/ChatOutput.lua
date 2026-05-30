@@ -24,10 +24,37 @@ ChatOutput.wrappers = {}
 ChatOutput.lcm = nil
 
 local activationHandlerRegistered = false
-local pChatCallbacksRegistered = false
+local externalChatCallbacksRegistered = false
 
 local function IsPChatAvailable()
     return pChat ~= nil and not ZO_IsConsoleOrGameCoreUI()
+end
+
+local function IsRChatAvailable()
+    return rChat ~= nil and not ZO_IsConsoleOrGameCoreUI()
+end
+
+--- @return function|nil
+local function GetExternalFormatSysMessage()
+    if IsPChatAvailable() then
+        local formatSysMessage = _G["pChat_FormatSysMessage"] or pChat.formatSysMessage
+        if formatSysMessage then
+            return formatSysMessage
+        end
+    end
+
+    if IsRChatAvailable() then
+        local formatSysMessage = _G["rChat_FormatSysMessage"] or rChat.formatSysMessage
+        if formatSysMessage then
+            return formatSysMessage
+        end
+    end
+
+    if rChat_ZOS and type(rChat_ZOS.FormatSysMessage) == "function" then
+        return rChat_ZOS.FormatSysMessage
+    end
+
+    return nil
 end
 
 local function GetSettings()
@@ -50,13 +77,11 @@ function ChatOutput.ShouldUseExternalFormatting()
 end
 
 local function ApplyExternalSystemFormat(rawMsg)
-    if IsPChatAvailable() then
-        local formatSysMessage = _G["pChat_FormatSysMessage"] or pChat.formatSysMessage
-        if formatSysMessage then
-            local formatted = formatSysMessage(rawMsg)
-            if formatted then
-                return formatted
-            end
+    local formatSysMessage = GetExternalFormatSysMessage()
+    if formatSysMessage then
+        local formatted = formatSysMessage(rawMsg)
+        if formatted then
+            return formatted
         end
     end
 
@@ -208,21 +233,38 @@ local function OnDeferredPlayerActivated()
     ChatOutput.ChainFormatterSuppressions()
 end
 
-local function RegisterPChatRechainCallbacks()
-    if not IsPChatAvailable() or pChatCallbacksRegistered then
+local function RegisterExternalChatRechainCallbacks()
+    if externalChatCallbacksRegistered then
         return
     end
-    pChatCallbacksRegistered = true
+    if not IsPChatAvailable() and not IsRChatAvailable() then
+        return
+    end
+    externalChatCallbacksRegistered = true
 
-    CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_FRIEND_PLAYER_STATUS_CHANGED", function ()
-        ChatOutput.WrapFormatter(EVENT_FRIEND_PLAYER_STATUS_CHANGED, ShouldSuppressFriendStatus)
-    end)
-    CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_IGNORE_ADDED", function ()
-        ChatOutput.WrapFormatter(EVENT_IGNORE_ADDED, ShouldSuppressFriendIgnore)
-    end)
-    CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_IGNORE_REMOVED", function ()
-        ChatOutput.WrapFormatter(EVENT_IGNORE_REMOVED, ShouldSuppressFriendIgnore)
-    end)
+    if IsPChatAvailable() then
+        CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_FRIEND_PLAYER_STATUS_CHANGED", function ()
+            ChatOutput.WrapFormatter(EVENT_FRIEND_PLAYER_STATUS_CHANGED, ShouldSuppressFriendStatus)
+        end)
+        CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_IGNORE_ADDED", function ()
+            ChatOutput.WrapFormatter(EVENT_IGNORE_ADDED, ShouldSuppressFriendIgnore)
+        end)
+        CALLBACK_MANAGER:RegisterCallback("pChat_Initialized_EVENT_IGNORE_REMOVED", function ()
+            ChatOutput.WrapFormatter(EVENT_IGNORE_REMOVED, ShouldSuppressFriendIgnore)
+        end)
+    end
+
+    if IsRChatAvailable() then
+        CALLBACK_MANAGER:RegisterCallback("rChat_Initialized_EVENT_FRIEND_PLAYER_STATUS_CHANGED", function ()
+            ChatOutput.WrapFormatter(EVENT_FRIEND_PLAYER_STATUS_CHANGED, ShouldSuppressFriendStatus)
+        end)
+        CALLBACK_MANAGER:RegisterCallback("rChat_Initialized_EVENT_IGNORE_ADDED", function ()
+            ChatOutput.WrapFormatter(EVENT_IGNORE_ADDED, ShouldSuppressFriendIgnore)
+        end)
+        CALLBACK_MANAGER:RegisterCallback("rChat_Initialized_EVENT_IGNORE_REMOVED", function ()
+            ChatOutput.WrapFormatter(EVENT_IGNORE_REMOVED, ShouldSuppressFriendIgnore)
+        end)
+    end
 end
 
 local function RegisterActivationHandler()
@@ -248,7 +290,7 @@ function ChatOutput.InitializeRouterIntegration(caModuleEnabled)
         return
     end
 
-    RegisterPChatRechainCallbacks()
+    RegisterExternalChatRechainCallbacks()
     RegisterActivationHandler()
 
     if ZO_GetChatSystem().primaryContainer then
