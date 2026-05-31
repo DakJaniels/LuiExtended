@@ -466,8 +466,11 @@ function LUIE.CreateSettings()
         GetString(LUIE_STRING_LAM_CHANGELOG),
         GetString(LUIE_STRING_LAM_CHANGELOG_TP),
         function ()
-            LUIE.ToggleChangelog(false)
+            if not Settings.ShowChangeLog then
+                return
+            end
             SCENE_MANAGER:ShowBaseScene()
+            LUIE.ToggleChangelog(false)
         end,
         "half",
         function () return not Settings.ShowChangeLog end
