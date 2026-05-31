@@ -166,7 +166,8 @@ local function ResolveCompactCaptionSize(category, sizeCaption, sizeBars)
     if categoryUsesSeparateCaptionFont(category) then
         return sizeCaption
     end
-    return zo_max(sizeCaption, sizeBars)
+    -- Compact categories (raid, companion, pet, boss) use one Font Size slider; bar size is authoritative.
+    return sizeBars
 end
 
 local function MakeCustomFrameFontStrings(category)
@@ -177,7 +178,7 @@ local function MakeCustomFrameFontStrings(category)
 end
 
 -- Public: returns the resolved caption font size for a category, with the same
--- compact-category zo_max rule as MakeCustomFrameFontStrings. Used by the layout
+-- compact-category sizeBars rule as MakeCustomFrameFontStrings. Used by the layout
 -- functions in UnitFrames.lua so they can grow compact name labels to fit the
 -- caption font without coupling to font-string creation.
 function UnitFrames.GetCustomFrameCaptionSize(category)

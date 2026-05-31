@@ -935,6 +935,38 @@ function LUIE.CreateConsoleSettings()
         label = GetString(LUIE_STRING_LAM_MISCHEADER)
     }
 
+    local alertAlignmentItems =
+    {
+        { name = "LEFT", data = 1 },
+        { name = "CENTER", data = 2 },
+        { name = "RIGHT", data = 3 },
+    }
+
+    settingsData[#settingsData + 1] =
+    {
+        type = LHAS.ST_DROPDOWN,
+        label = GetString(LUIE_STRING_LAM_ALERT_TEXT_ALIGNMENT),
+        tooltip = GetString(LUIE_STRING_LAM_ALERT_TEXT_ALIGNMENT_TP),
+        items = alertAlignmentItems,
+        getFunction = function ()
+            local index = Settings.AlertFrameAlignment or Defaults.AlertFrameAlignment
+            for _, item in ipairs(alertAlignmentItems) do
+                if item.data == index then
+                    return item.name
+                end
+            end
+            return "RIGHT"
+        end,
+        setFunction = function (combobox, value, item)
+            Settings.AlertFrameAlignment = item.data
+            LUIE.ApplyAlertFrameAlignment()
+        end,
+        default = alertAlignmentItems[Defaults.AlertFrameAlignment].name,
+        disable = function ()
+            return Settings.HideAlertFrame
+        end,
+    }
+
     -- Hide Alerts
     settingsData[#settingsData + 1] =
     {
