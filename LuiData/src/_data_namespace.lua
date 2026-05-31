@@ -140,6 +140,8 @@ local DebugStatus = {}
 --- @field KeepUpgradeOverride KeepUpgradeOverride Table of keep upgrade overrides
 --- @field KeepUpgrade_Tooltip KeepUpgrade_Tooltip Table of keep upgrade tooltip definitions
 --- @field MajorMinor MajorMinor Table of major/minor effect definitions
+--- @field OffBalanceAbilityRegistry OffBalanceRegistryEntry[] Registry of Off Balance-related ability ids (English raw names)
+--- @field OffBalanceImmunityAbilityId integer Ability id for Off Balance Immunity
 --- @field MapDataOverride MapDataOverride Table of map data overrides
 --- @field RemoveAbilityActiveHighlight RemoveAbilityActiveHighlight Table of effects to remove active highlight
 --- @field SynergyNameOverride table<string, SynergyNameOverrideEntry> Table of synergy name overrides

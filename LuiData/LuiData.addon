@@ -29,6 +29,7 @@ Effects/MergeId.lua
 Effects/MergeName.lua
 Effects/Misc.lua
 Effects/Override.lua
+Effects/OffBalance.lua
 Effects/OverrideByName.lua
 Effects/PullDuration.lua
 Effects/SourceOverride.lua

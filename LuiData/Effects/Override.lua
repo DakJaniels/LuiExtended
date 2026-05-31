@@ -305,7 +305,14 @@ local effectOverride =
     [45982] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_BLOCK_STUN_DDS, tooltip = Tooltips.Generic_Stun, cc = LUIE_CC_TYPE_STUN },                                          -- Bash Stun (Stun from bashing cast when NPC is pinned against an obstacle)
 
     -- Off-Balance Exploit
-    [16825] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN }, -- Off-Balance Exploit
+    [16825] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN },  -- Off-Balance Exploit
+    [18793] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN },  -- Off Balance Exploit
+    [44364] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN },  -- Off-Balance Exploit
+    [126567] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN }, -- Off-Balance Exploit
+    [126568] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN }, -- Off-Balance Exploit
+    [126570] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN }, -- Off-Balance Exploit
+    [126571] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN }, -- Off-Balance Exploit
+    [144658] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN }, -- Off-Balance Exploit
 
     -- Death/Resurrection
     [14644] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_RESURRECTION_IMMUNITY_DDS, name = Abilities.Innate_Revive },                                                                  -- Revive (Death Dialogue)
@@ -350,15 +357,78 @@ local effectOverride =
     [999019] = { icon = LUIE_MEDIA_ICONS_ASSISTANTS_ASSISTANT_NUZHIMEH_DDS, name = Abilities.Innate_Assistant },       -- Assistant FAKE BUFF
 
 
-    [15594] = { hide = true },                                                                                                                                                                                                                    -- Bonus vs off Balance
-    [10950] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_FALL_SNARE_DDS, name = Abilities.Innate_Fall_Damage },                                                                                                                           -- Fall Snare
-    [999016] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_RECALL_COOLDOWN_DDS, name = Abilities.Innate_Recall_Penalty, tooltip = Tooltips.Innate_Recall_Penalty },                                                                        -- Recall Penalty FAKE
-    [6811] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_RECALL_DDS },                                                                                                                                                                     -- Recall
-    [31221] = { hide = true },                                                                                                                                                                                                                    -- Skyshard Collect (Aura on Skyshard when player collects it)
-    [32346] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_ABSORBING_SKYSHARD_DDS, name = Abilities.Innate_Absorbing_Skyshard },                                                                                                            -- Skyshard Collect
+    [15594] = { hide = true },                                                                                                                                               -- Bonus vs off Balance
+    [10950] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_FALL_SNARE_DDS, name = Abilities.Innate_Fall_Damage },                                                      -- Fall Snare
+    [999016] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_RECALL_COOLDOWN_DDS, name = Abilities.Innate_Recall_Penalty, tooltip = Tooltips.Innate_Recall_Penalty },   -- Recall Penalty FAKE
+    [6811] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_RECALL_DDS },                                                                                                -- Recall
+    [31221] = { hide = true },                                                                                                                                               -- Skyshard Collect (Aura on Skyshard when player collects it)
+    [32346] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_ABSORBING_SKYSHARD_DDS, name = Abilities.Innate_Absorbing_Skyshard },                                       -- Skyshard Collect
 
-    [2727] = { icon = "/esoui/art/icons/ability_debuff_offbalance.dds", name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                                            -- Off-Balance
-    [134599] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_IMMUNITY_DDS, type = BUFF_EFFECT_TYPE_BUFF, tooltip = Tooltips.Generic_Off_Balance_Immunity },                                                                      -- Off Balance Immunity
+    [2727] = { icon = "/esoui/art/icons/ability_debuff_offbalance.dds", name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },       -- Off-Balance
+    [134599] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_IMMUNITY_DDS, type = BUFF_EFFECT_TYPE_BUFF, tooltip = Tooltips.Generic_Off_Balance_Immunity }, -- Off Balance Immunity
+
+    -- Off Balance -- registry debuffs (LuiData/OffBalance.lua)
+    [4508] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },   -- Off-Balance
+    [5805] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },   -- Off Balance
+    [7534] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },   -- Off-Balance
+    [8392] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },   -- Off-Balance
+    [11474] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off Balance
+    [14062] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off Balance
+    [14884] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off-Balance
+    [37152] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off Balance
+    [61980] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off-Balance
+    [63108] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off-Balance
+    [70054] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off Balance
+    [71877] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off Balance
+    [72279] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off Balance
+    [75214] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off Balance
+    [89681] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off-Balance
+    [92265] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off-Balance
+    [99535] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },  -- Off-Balance
+    [100582] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance
+    [100686] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [100689] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [100694] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [104012] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance
+    [116998] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [117008] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [117009] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [117010] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [117011] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [121026] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [121031] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [121042] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [121123] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [121124] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [128752] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [154579] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance
+    [156183] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance
+    [163593] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance
+    [164731] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance
+    [186482] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance
+    [192997] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [208859] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance
+    [211496] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance
+    [212853] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance
+    [214432] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance
+    [218822] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [230828] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [236061] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Player Off Balance
+    [240504] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance
+    [241340] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance
+    [253689] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off-Balance
+    [256815] = { name = Abilities.Skill_Off_Balance, tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 }, -- Off Balance
+
+    -- Off Balance -- internal / hide (LuiData/OffBalance.lua)
+    [3144] = { hide = true },                                                                                                                                                                                                                     -- Off Balance Enemy
+    [3464] = { hide = true },                                                                                                                                                                                                                     -- Remove Off-Balance
+    [4839] = { hide = true },                                                                                                                                                                                                                     -- Perma Set Off Balance Target
+    [18147] = { hide = true },                                                                                                                                                                                                                    -- Off-Balance Self
+    [39695] = { hide = true },                                                                                                                                                                                                                    -- Off-Balance Self
+    [61956] = { hide = true },                                                                                                                                                                                                                    -- Off-Balance Timer
+    [64676] = { hide = true },                                                                                                                                                                                                                    -- MQ1 Tutorial Perma Off-Balance
+    [92262] = { hide = true },                                                                                                                                                                                                                    -- Off-Balance Timer
+    [92264] = { hide = true },                                                                                                                                                                                                                    -- MQ1 Tutorial Perma Off-Balance
     [132831] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_MAJOR_VULNERABILITY_IMMUNITY_DDS, name = Abilities.Skill_Major_Vulnerability_Immunity, type = BUFF_EFFECT_TYPE_BUFF, tooltip = Tooltips.Generic_Major_Vulnerability_Immunity }, -- Major Vulnerability Invulnerability
     [85701] = { hide = true },                                                                                                                                                                                                                    -- Dueling Flag
     [21263] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_AYLEID_WELL_DDS, name = Abilities.Innate_Ayleid_Well, tooltip = Tooltips.Innate_Ayleid_Well },                                                                                   -- Ayleid Health Bonus
