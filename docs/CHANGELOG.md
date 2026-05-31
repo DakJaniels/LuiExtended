@@ -2,8 +2,13 @@
 
 ## Version 7.2.3.3
 
+### New
+
+- Unit Frames: **Companion Ability Track** adds an optional icon row on the custom **Companion** frame for companion hotbar abilities (including built-in interrupt), with optional cooldown radial, effect timer, and stack labels. Enable it under Custom Unit Frames → Companion; it is **off by default** for new installs.
+
 ### Fixed
 
+- Unit Frames: **Use Separate Shield Bar** again shows shield on custom **Player**, **Target**, **Small Group**, **Companion**, and **Pet** frames (including live updates from settings without **/reloadui**). Companion layout reserves space for the shield row and places the **Companion Ability Track** icon row below it.
 - SpellCastBuffs (debug): **Show Debug Ability ID** no longer cuts off digits on buff icons.
 - SpellCastBuffs (debug): Ability IDs show on existing buffs after **/reloadui** without waiting for them to refresh.
 

@@ -584,6 +584,11 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.CustomShieldBarSeparate = value
+                if value then
+                    Settings.CustomShieldBarFull = false
+                end
+                UnitFrames.OnCustomShieldBarSettingsChanged(true)
+                SettingsAPI:RefreshPanel(panel)
             end,
             warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()
@@ -605,14 +610,11 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.CustomShieldBarHeight = value
-                UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
-                UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
-                UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(false)
-                UnitFrames.CustomFramesApplyLayoutGroup(false)
+                UnitFrames.OnCustomShieldBarSettingsChanged(true)
             end,
             warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()
-                return not (LUIE.SV.UnitFrames_Enabled and not Settings.CustomShieldBarFull)
+                return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomShieldBarSeparate or not Settings.CustomShieldBarFull))
             end,
             default = Defaults.CustomShieldBarHeight,
             decimals = 0,
@@ -628,6 +630,8 @@ function UnitFrames.CreateConsoleSettings()
             end,
             setFunction = function (value)
                 Settings.CustomShieldBarFull = value
+                UnitFrames.OnCustomShieldBarSettingsChanged(false)
+                SettingsAPI:RefreshPanel(panel)
             end,
             warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
             disable = function ()

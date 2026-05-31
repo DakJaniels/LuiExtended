@@ -595,6 +595,10 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.CustomShieldBarSeparate = value
+                    if value then
+                        Settings.CustomShieldBarFull = false
+                    end
+                    UnitFrames.OnCustomShieldBarSettingsChanged(true)
                 end,
                 width = "full",
                 default = Defaults.CustomShieldBarSeparate,
@@ -616,16 +620,13 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.CustomShieldBarHeight = value
-                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
-                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
-                    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(false)
-                    UnitFrames.CustomFramesApplyLayoutGroup(false)
+                    UnitFrames.OnCustomShieldBarSettingsChanged(true)
                 end,
                 width = "full",
                 default = Defaults.CustomShieldBarHeight,
                 warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and not Settings.CustomShieldBarFull)
+                    return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomShieldBarSeparate or not Settings.CustomShieldBarFull))
                 end,
             },
             {
@@ -638,6 +639,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.CustomShieldBarFull = value
+                    UnitFrames.OnCustomShieldBarSettingsChanged(false)
                 end,
                 width = "full",
                 default = Defaults.CustomShieldBarFull,

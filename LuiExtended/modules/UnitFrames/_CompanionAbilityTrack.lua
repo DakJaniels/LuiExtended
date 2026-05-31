@@ -478,13 +478,18 @@ function LUIE_CompanionAbilityRow:ApplyLayout(settings)
     local rowWidth = (iconSize * iconCount) + (spacing * zo_max(0, iconCount - 1))
     self.container:SetDimensions(rowWidth, iconSize)
 
-    local _, healthBackdrop = self:GetCompanionFrame()
+    local frame, healthBackdrop = self:GetCompanionFrame()
     if not healthBackdrop then
         return
     end
 
+    local anchorBelow = healthBackdrop
+    if frame and frame[COMBAT_MECHANIC_FLAGS_HEALTH] and frame[COMBAT_MECHANIC_FLAGS_HEALTH].shieldbackdrop then
+        anchorBelow = frame[COMBAT_MECHANIC_FLAGS_HEALTH].shieldbackdrop
+    end
+
     self.container:ClearAnchors()
-    self.container:SetAnchor(TOPLEFT, healthBackdrop, BOTTOMLEFT, 0, ROW_BELOW_GAP)
+    self.container:SetAnchor(TOPLEFT, anchorBelow, BOTTOMLEFT, 0, ROW_BELOW_GAP)
 
     local prevBackdrop
     local interruptSlot = self.slots[self.interruptSlotKey]

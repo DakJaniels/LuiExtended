@@ -188,6 +188,9 @@ function UnitFrames.Initialize(enabled)
     if UnitFrames.SV.DefaultIncTransparency < 0 or UnitFrames.SV.DefaultIncTransparency > 100 then
         UnitFrames.SV.DefaultIncTransparency = UnitFrames.Defaults.DefaultIncTransparency
     end
+    if UnitFrames.SV.CustomColourShield and UnitFrames.SV.CustomColourShield[4] == nil then
+        UnitFrames.SV.CustomColourShield[4] = UnitFrames.Defaults.CustomColourShield[4]
+    end
 
     -- Disable module if setting not toggled on
     if not enabled then
@@ -3504,6 +3507,20 @@ function UnitFrames.CustomFramesApplyLayoutPlayer(unhide)
     UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(unhide)
 end
 
+-- Re-apply shield bar visibility after shield mode or layout changes.
+function UnitFrames.RefreshCustomFrameShields()
+    local powerShield = UnitFrames.VisualizerModules and UnitFrames.VisualizerModules.PowerShieldModule
+    if not powerShield or not UnitFrames.savedHealth then
+        return
+    end
+    for unitTag, saved in pairs(UnitFrames.savedHealth) do
+        local shieldValue = saved[4]
+        if shieldValue and shieldValue > 0 then
+            powerShield:UpdateShield(unitTag, shieldValue, saved[3])
+        end
+    end
+end
+
 local function insertRole(list, currentRole)
     for index = 1, GetGroupSize() do
         local playerRole = GetGroupMemberSelectedRole(GetGroupUnitTagByIndex(index))
@@ -3520,7 +3537,8 @@ function UnitFrames.CustomFramesApplyLayoutGroup(unhide)
     end
 
     local groupBarHeight = UnitFrames.SV.GroupBarHeight
-    if UnitFrames.SV.CustomShieldBarSeparate then
+    local sampleHealth = UnitFrames.CustomFrames["SmallGroup1"][COMBAT_MECHANIC_FLAGS_HEALTH]
+    if sampleHealth and sampleHealth.shieldbackdrop then
         groupBarHeight = groupBarHeight + UnitFrames.SV.CustomShieldBarHeight
     end
 
@@ -3855,24 +3873,27 @@ function UnitFrames.CustomFramesApplyLayoutCompanion(unhide)
 
     local companion = UnitFrames.CustomFrames["companion"].tlw
     local unitFrame = UnitFrames.CustomFrames["companion"]
+    local chb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH]
 
     local barHeight = UnitFrames.SV.CompanionHeight
     local barWidth = UnitFrames.SV.CompanionWidth
+    local shieldHeight = chb.shieldbackdrop and UnitFrames.SV.CustomShieldBarHeight or 0
     local abilityExtra = 0
     if UnitFrames.companionAbilityTrack then
         abilityExtra = UnitFrames.companionAbilityTrack:GetCompanionFrameExtraHeight()
     end
-    local totalHeight = barHeight + abilityExtra
+    local totalHeight = barHeight + shieldHeight + abilityExtra
 
     companion:SetDimensions(barWidth, totalHeight)
     unitFrame.control:ClearAnchors()
     unitFrame.control:SetAnchorFill(companion)
     unitFrame.control:SetDimensions(barWidth, totalHeight)
 
-    local healthBackdrop = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
+    local healthBackdrop = chb.backdrop
     healthBackdrop:ClearAnchors()
     healthBackdrop:SetAnchor(TOPLEFT, unitFrame.control, TOPLEFT)
     healthBackdrop:SetDimensions(barWidth, barHeight)
+    CustomFramesLayoutSetupShieldBackdrop(chb.shieldbackdrop, healthBackdrop, barWidth)
 
     local companionNameHeight = resolveCompactNameHeight("companion", barHeight)
     ApplyClippedNameWidth(unitFrame.name, zo_max(0, barWidth - UnitFrames.SV.CompanionNameClip - 10), companionNameHeight)

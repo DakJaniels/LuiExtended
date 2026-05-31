@@ -57,6 +57,7 @@ local changelogMessages =
     "",
     -- Fix
     "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Use Separate Shield Bar again shows shield on custom Player, Target, Small Group, Companion, and Pet frames (including live updates from settings without /reloadui). Companion layout reserves space for the shield row and places the ability track below it.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs (debug): Show Debug Ability ID no longer cuts off digits on buff icons.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs (debug): Ability IDs show on existing buffs after /reloadui without waiting for them to refresh.",
     "",
