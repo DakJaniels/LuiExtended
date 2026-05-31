@@ -109,6 +109,7 @@ local DebugStatus = {}
 --- @field BarHighlightStack BarHighlightStack Table of stack-based highlight effects
 --- @field BarHighlightStackConsume table<integer, integer> Bound ability id -> combatTrack stack buff id (consume one stack on cast)
 --- @field BarHighlightStackZeroEffect table<integer, "keep"|"clear"> Track buff id behavior when effect stack count is 0
+--- @field CompanionAbilityTrack CompanionAbilityTrack Slotted companion ability id -> UF icon track data
 --- @field BarIdOverride BarIdOverride Table of bar ID overrides
 --- @field DisguiseIcons EffectsDisguiseIcons Table of disguise icon definitions
 --- @field EffectCreateSkillAura EffectCreateSkillAura Table of skill aura creation definitions
@@ -139,6 +140,8 @@ local DebugStatus = {}
 --- @field KeepUpgradeOverride KeepUpgradeOverride Table of keep upgrade overrides
 --- @field KeepUpgrade_Tooltip KeepUpgrade_Tooltip Table of keep upgrade tooltip definitions
 --- @field MajorMinor MajorMinor Table of major/minor effect definitions
+--- @field OffBalanceAbilityRegistry OffBalanceRegistryEntry[] Registry of Off Balance-related ability ids (English raw names)
+--- @field OffBalanceImmunityAbilityId integer Ability id for Off Balance Immunity
 --- @field MapDataOverride MapDataOverride Table of map data overrides
 --- @field RemoveAbilityActiveHighlight RemoveAbilityActiveHighlight Table of effects to remove active highlight
 --- @field SynergyNameOverride table<string, SynergyNameOverrideEntry> Table of synergy name overrides
@@ -163,6 +166,7 @@ local Effects =
     BarHighlightStack = {},
     BarHighlightStackConsume = {},
     BarHighlightStackZeroEffect = {},
+    CompanionAbilityTrack = {},
     BarIdOverride = {},
     BlockAndBashCC = {},
     DebuffDisplayOverrideId = {},
@@ -258,8 +262,8 @@ local ZoneTable = {}
 --- @class (partial) LuiData
 LuiData = {}
 LuiData.name = "LuiData"
-LuiData.version = 7212
-LuiData.addonVersion = "7.2.1.2"
+LuiData.version = 7213
+LuiData.addonVersion = "7.2.1.3"
 
 --- @class (partial) Data
 LuiData.Data =

@@ -2,8 +2,8 @@
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101049 101050
-## Version: 7.2.3.2
-## AddOnVersion: 7232
+## Version: 7.2.3.3
+## AddOnVersion: 7233
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
 ## DependsOn: LuiMedia>=7133 LuiData>=7212
 ## PCDependsOn: LibAddonMenu-2.0>=43
@@ -182,6 +182,7 @@ modules/UnitFrames/_FontFunctions.lua
 modules/UnitFrames/_Debug.lua
 modules/UnitFrames/_DynamicPositioning.lua
 modules/UnitFrames/_PlayerDodgePrediction.lua
+modules/UnitFrames/_CompanionAbilityTrack.lua
 modules/UnitFrames/UnitFrames.lua
 
 # SavedVariables migration (requires module Defaults tables)

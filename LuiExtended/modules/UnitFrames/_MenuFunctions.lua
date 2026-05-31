@@ -11,6 +11,26 @@ local LUIE = LUIE
 local UnitFrames = LUIE.UnitFrames
 local GridOverlay = LUIE.GridOverlay
 
+local function ApplyCustomShieldBarLayoutRefresh()
+    UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
+    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
+    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(false)
+    UnitFrames.CustomFramesApplyLayoutGroup(false)
+    UnitFrames.CustomFramesApplyLayoutCompanion(false)
+    UnitFrames.CustomFramesApplyLayoutPet(false)
+end
+
+function UnitFrames.OnCustomShieldBarSettingsChanged(applyLayout)
+    UnitFrames.CustomFramesApplyShieldBarMode()
+    if applyLayout then
+        ApplyCustomShieldBarLayoutRefresh()
+    end
+    UnitFrames.CustomFramesApplyColorsMenuHealthShieldTraumaInvulnerableAndGroupRaid()
+    UnitFrames.CustomFramesApplyColorsMenuCompanionFrameOnly()
+    UnitFrames.CustomFramesApplyColorsMenuPetFramesOnly()
+    UnitFrames.RefreshCustomFrameShields()
+end
+
 function UnitFrames.MenuUpdatePlayerFrameOptions(option)
     if UnitFrames.CustomFrames["reticleover"] then
         local reticleover = UnitFrames.CustomFrames["reticleover"]
@@ -404,9 +424,19 @@ local function CustomFramesApplyColorsInternal(sections)
     local applyGroupRaidLoop = runAll or sections.groupRaid == true
     local applyPlayerMagickaStamina = runAll or sections.playerMagickaStamina == true
 
+    local function GetShieldBarFillAlpha(baseName)
+        local separateAlpha = UnitFrames.SV.CustomShieldBarSeparate
+            and baseName ~= "boss"
+            and baseName ~= "RaidGroup"
+        if separateAlpha then
+            return UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha / 100) or 1
+        end
+        return UnitFrames.SV.ShieldAlpha / 100
+    end
+
     if applyHealthFamily then
         for _, baseName in pairs({ "player", "reticleover", "boss", "AvaPlayerTarget" }) do
-            shield[4] = (UnitFrames.SV.CustomShieldBarSeparate and not (baseName == "boss")) and UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha / 100)
+            shield[4] = GetShieldBarFillAlpha(baseName)
             for i = 0, 7 do
                 local unitTag = (i == 0) and baseName or (baseName .. i)
                 if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
@@ -437,6 +467,7 @@ local function CustomFramesApplyColorsInternal(sections)
     if applyCompanionBlock and UnitFrames.CustomFrames["companion"] and UnitFrames.CustomFrames["companion"].tlw then
         local unitFrame = UnitFrames.CustomFrames["companion"]
         local shb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH] -- not a backdrop
+        shield[4] = GetShieldBarFillAlpha("companion")
         if UnitFrames.SV.CompanionUseClassColor then
             local class_color
             local class_bg
@@ -487,6 +518,7 @@ local function CustomFramesApplyColorsInternal(sections)
             if UnitFrames.CustomFrames[unitTag] and UnitFrames.CustomFrames[unitTag].tlw then
                 local unitFrame = UnitFrames.CustomFrames[unitTag]
                 local shb = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH] -- not a backdrop
+                shield[4] = GetShieldBarFillAlpha("PetGroup")
                 if UnitFrames.SV.PetUseClassColor then
                     local class_color
                     local class_bg
@@ -539,7 +571,7 @@ local function CustomFramesApplyColorsInternal(sections)
     local incrementMarker = 0 -- Marker -- Once we reach this value in iteration, we have to add +1 to default unitTag index for all other units.
     if applyGroupRaidLoop then
         for _, baseName in pairs({ "SmallGroup", "RaidGroup" }) do
-            shield[4] = (UnitFrames.SV.CustomShieldBarSeparate and not (baseName == "RaidGroup")) and UnitFrames.SV.CustomColourShield[4] or (UnitFrames.SV.ShieldAlpha / 100)
+            shield[4] = GetShieldBarFillAlpha(baseName)
 
             -- Extra loop if player is excluded in Small Group Frames
             if UnitFrames.SV.GroupExcludePlayer and not (baseName == "RaidGroup") then

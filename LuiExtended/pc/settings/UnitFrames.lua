@@ -595,6 +595,10 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.CustomShieldBarSeparate = value
+                    if value then
+                        Settings.CustomShieldBarFull = false
+                    end
+                    UnitFrames.OnCustomShieldBarSettingsChanged(true)
                 end,
                 width = "full",
                 default = Defaults.CustomShieldBarSeparate,
@@ -616,16 +620,13 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.CustomShieldBarHeight = value
-                    UnitFrames.CustomFramesApplyLayoutPlayerFrame(false)
-                    UnitFrames.CustomFramesApplyLayoutReticleoverFrame(false)
-                    UnitFrames.CustomFramesApplyLayoutAvaPlayerTargetFrame(false)
-                    UnitFrames.CustomFramesApplyLayoutGroup(false)
+                    UnitFrames.OnCustomShieldBarSettingsChanged(true)
                 end,
                 width = "full",
                 default = Defaults.CustomShieldBarHeight,
                 warning = GetString(LUIE_STRING_LAM_RELOADUI_WARNING),
                 disabled = function ()
-                    return not (LUIE.SV.UnitFrames_Enabled and not Settings.CustomShieldBarFull)
+                    return not (LUIE.SV.UnitFrames_Enabled and (Settings.CustomShieldBarSeparate or not Settings.CustomShieldBarFull))
                 end,
             },
             {
@@ -638,6 +639,7 @@ function UnitFrames.CreateSettings()
                 end,
                 setFunc = function (value)
                     Settings.CustomShieldBarFull = value
+                    UnitFrames.OnCustomShieldBarSettingsChanged(false)
                 end,
                 width = "full",
                 default = Defaults.CustomShieldBarFull,
@@ -4457,6 +4459,89 @@ function UnitFrames.CreateSettings()
                 default = Defaults.CompanionUseClassColor,
                 disabled = function ()
                     return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
+                end,
+            },
+            {
+                type = "header",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_HEADER),
+                width = "full",
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_ENABLE),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_ENABLE_TP),
+                getFunc = function ()
+                    return Settings.CompanionAbilityTrack.enabled
+                end,
+                setFunc = function (value)
+                    Settings.CompanionAbilityTrack.enabled = value
+                    UnitFrames.CustomFramesApplyLayoutCompanion(false)
+                    if UnitFrames.companionAbilityTrack then
+                        UnitFrames.companionAbilityTrack:RefreshAll()
+                    end
+                end,
+                width = "full",
+                default = Defaults.CompanionAbilityTrack.enabled,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
+                end,
+            },
+            {
+                type = "slider",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_ICON_SIZE),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_ICON_SIZE_TP),
+                min = 16,
+                max = 40,
+                step = 1,
+                getFunc = function ()
+                    return Settings.CompanionAbilityTrack.iconSize
+                end,
+                setFunc = function (value)
+                    Settings.CompanionAbilityTrack.iconSize = value
+                    UnitFrames.CustomFramesApplyLayoutCompanion(false)
+                end,
+                width = "full",
+                default = Defaults.CompanionAbilityTrack.iconSize,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion and Settings.CompanionAbilityTrack.enabled)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_SHOW_EFFECT),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_SHOW_EFFECT_TP),
+                getFunc = function ()
+                    return Settings.CompanionAbilityTrack.showEffectTimer
+                end,
+                setFunc = function (value)
+                    Settings.CompanionAbilityTrack.showEffectTimer = value
+                    if UnitFrames.companionAbilityTrack then
+                        UnitFrames.companionAbilityTrack:RefreshAll()
+                    end
+                end,
+                width = "full",
+                default = Defaults.CompanionAbilityTrack.showEffectTimer,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion and Settings.CompanionAbilityTrack.enabled)
+                end,
+            },
+            {
+                type = "checkbox",
+                name = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_SHOW_STACKS),
+                tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_SHOW_STACKS_TP),
+                getFunc = function ()
+                    return Settings.CompanionAbilityTrack.showStacks
+                end,
+                setFunc = function (value)
+                    Settings.CompanionAbilityTrack.showStacks = value
+                    if UnitFrames.companionAbilityTrack then
+                        UnitFrames.companionAbilityTrack:RefreshAll()
+                    end
+                end,
+                width = "full",
+                default = Defaults.CompanionAbilityTrack.showStacks,
+                disabled = function ()
+                    return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion and Settings.CompanionAbilityTrack.enabled)
                 end,
             },
         },

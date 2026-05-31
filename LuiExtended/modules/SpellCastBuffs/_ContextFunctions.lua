@@ -9,13 +9,10 @@ local LuiData = LuiData
 --- @type Data
 local Data = LuiData.Data
 local Abilities = Data.Abilities
+local Effects = Data.Effects
 
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
-
--- Ability id used by the Off Balance Immunity buff (buff-typed in Override.lua,
--- so it lives in reticleover1, not the normal OB debuff lookup).
-local OFF_BALANCE_IMMUNITY_ID = 134599
 
 ---
 --- True when the user has opted this ability into Prominent Debuffs, either by
@@ -37,7 +34,7 @@ function SpellCastBuffs.WantsProminentDebuff(abilityId, abilityName)
         if abilityId and SpellCastBuffs.offBalanceDebuffById[abilityId] then
             return true
         end
-        if abilityId == OFF_BALANCE_IMMUNITY_ID then
+        if abilityId == Effects.OffBalanceImmunityAbilityId then
             return true
         end
     end
@@ -65,7 +62,7 @@ function SpellCastBuffs.ResolveProminentDebuffContext(context, abilityId, abilit
         elseif context == "player2" then
             return "promd_player"
         end
-    elseif abilityId == OFF_BALANCE_IMMUNITY_ID then
+    elseif abilityId == Effects.OffBalanceImmunityAbilityId then
         if context == "reticleover1" or context == "reticleover2" then
             return "promd_target"
         elseif context == "player1" or context == "player2" then

@@ -786,6 +786,10 @@ local function CreateCompanionFrame()
         }
         UnitFrames.CustomFrames["companion"].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
         UnitFrames.CustomFrames["companion"][COMBAT_MECHANIC_FLAGS_HEALTH].label.format = "Current (Percentage%)"
+
+        if UnitFrames.companionAbilityTrack then
+            UnitFrames.companionAbilityTrack:CreateControls(UnitFrames.CustomFrames["companion"])
+        end
     end
 end
 
@@ -844,6 +848,59 @@ local function CreateBossFrames()
             }
             UnitFrames.CustomFrames[unitTag].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
             UnitFrames.CustomFrames[unitTag][COMBAT_MECHANIC_FLAGS_HEALTH].label.format = "Percentage%"
+        end
+    end
+end
+
+local SHIELD_BAR_FRAME_BASE_NAMES = { "player", "reticleover", "companion", "SmallGroup", "RaidGroup", "boss", "AvaPlayerTarget", "PetGroup" }
+
+local function ApplyCustomFrameHealthShieldBar(frame, shieldOverlay)
+    local powerBar = frame[COMBAT_MECHANIC_FLAGS_HEALTH]
+    if not powerBar or not powerBar.shield then
+        return
+    end
+
+    powerBar.shield:ClearAnchors()
+    if shieldOverlay then
+        powerBar.shield:SetParent(powerBar.backdrop)
+        if UnitFrames.SV.CustomShieldBarFull then
+            powerBar.shield:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
+            powerBar.shield:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
+        else
+            powerBar.shield:SetAnchor(BOTTOMLEFT, powerBar.backdrop, BOTTOMLEFT, 1, 1)
+            powerBar.shield:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
+            powerBar.shield:SetHeight(UnitFrames.SV.CustomShieldBarHeight)
+        end
+    else
+        if not powerBar.shieldbackdrop then
+            powerBar.shieldbackdrop = frame.control:CreateControl("$(parent)HealthShieldBackdrop", CT_BACKDROP)
+            powerBar.shieldbackdrop:SetCenterColor(0, 0, 0, 0.4)
+            powerBar.shieldbackdrop:SetEdgeColor(0, 0, 0, 0.6)
+            powerBar.shieldbackdrop:SetEdgeTexture("", 8, 1, 1, 1)
+            powerBar.shieldbackdrop:SetDrawLayer(DL_BACKGROUND)
+            powerBar.shieldbackdrop:SetHidden(true)
+        end
+        powerBar.shield:SetParent(powerBar.shieldbackdrop)
+        powerBar.shield:SetAnchor(TOPLEFT, powerBar.shieldbackdrop, TOPLEFT, 1, 1)
+        powerBar.shield:SetAnchor(BOTTOMRIGHT, powerBar.shieldbackdrop, BOTTOMRIGHT, -1, -1)
+    end
+    powerBar.shield:SetDrawLevel(HEALTH_BAR_FILL_DRAW_LEVEL + 2)
+end
+
+function UnitFrames.CustomFramesApplyShieldBarMode()
+    local baseNameKey = nil
+    local baseName
+    while true do
+        baseNameKey, baseName = next(SHIELD_BAR_FRAME_BASE_NAMES, baseNameKey)
+        if baseNameKey == nil then break end
+        local shieldOverlay = (baseName == "RaidGroup" or baseName == "boss") or not UnitFrames.SV.CustomShieldBarSeparate
+
+        for i = 0, 12 do
+            local unitTag = (i == 0) and baseName or (baseName .. i)
+            local frame = UnitFrames.CustomFrames[unitTag]
+            if frame then
+                ApplyCustomFrameHealthShieldBar(frame, shieldOverlay)
+            end
         end
     end
 end
@@ -907,9 +964,6 @@ local function SetupCommonFrameActions()
                 LUIE.ApplyPositionLabelFont(unitFrame.tlw.preview.anchorLabel)
             end
         end
-
-        -- Anchor bars to their backdrops
-        local shieldOverlay = (baseName == "RaidGroup" or baseName == "boss") or not UnitFrames.SV.CustomShieldBarSeparate
 
         for i = 0, 12 do
             local unitTag = (i == 0) and baseName or (baseName .. i)
@@ -1017,30 +1071,6 @@ local function SetupCommonFrameActions()
                             end
                         end
 
-                        if powerBar.shield then
-                            powerBar.shield:ClearAnchors()
-                            if shieldOverlay then
-                                if UnitFrames.SV.CustomShieldBarFull then
-                                    powerBar.shield:SetAnchor(TOPLEFT, powerBar.backdrop, TOPLEFT, 1, 1)
-                                    powerBar.shield:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
-                                else
-                                    powerBar.shield:SetAnchor(BOTTOMLEFT, powerBar.backdrop, BOTTOMLEFT, 1, 1)
-                                    powerBar.shield:SetAnchor(BOTTOMRIGHT, powerBar.backdrop, BOTTOMRIGHT, -1, -1)
-                                    powerBar.shield:SetHeight(UnitFrames.SV.CustomShieldBarHeight)
-                                end
-                            else
-                                powerBar.shieldbackdrop = frame.control:CreateControl("$(parent)ShieldBackdrop", CT_BACKDROP)
-                                powerBar.shieldbackdrop:SetCenterColor(0, 0, 0, 0.4)
-                                powerBar.shieldbackdrop:SetEdgeColor(0, 0, 0, 0.6)
-                                powerBar.shieldbackdrop:SetEdgeTexture("", 8, 1, 1, 1)
-                                powerBar.shieldbackdrop:SetDrawLayer(DL_BACKGROUND)
-                                powerBar.shieldbackdrop:SetHidden(true)
-                                powerBar.shield:SetAnchor(TOPLEFT, powerBar.shieldbackdrop, TOPLEFT, 1, 1)
-                                powerBar.shield:SetAnchor(BOTTOMRIGHT, powerBar.shieldbackdrop, BOTTOMRIGHT, -1, -1)
-                            end
-                            -- Draw shield above no-healing overlay and health fill (HEALTH_BAR_FILL_DRAW_LEVEL = 10)
-                            powerBar.shield:SetDrawLevel(HEALTH_BAR_FILL_DRAW_LEVEL + 2)
-                        end
                     end
                 end
 
@@ -1056,6 +1086,8 @@ local function SetupCommonFrameActions()
             end
         end
     end
+
+    UnitFrames.CustomFramesApplyShieldBarMode()
 end
 
 -- Generic function to setup regen/degen animations

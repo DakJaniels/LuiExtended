@@ -27,6 +27,20 @@ local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
 
 local moduleName = SpellCastBuffs.moduleName
+local ABILITY_ID_LABEL_FIT_MARGIN = 0.92
+
+--- Full string width in UI units (LabelControl:GetStringWidth is layout-native; compare to GetWidth).
+--- @param label LabelControl
+--- @param idText string
+--- @return number
+local function GetAbilityIdStringWidthUI(label, idText)
+    label:Clean()
+    local widthNative = label:GetStringWidth(idText)
+    if not widthNative or widthNative <= 0 then
+        return 0
+    end
+    return widthNative / GetUIGlobalScale()
+end
 local g_scbDisplayAlpha -- Last alpha for buff containers (HUD fade can reset to 1 on reload)
 
 
@@ -679,6 +693,9 @@ function SpellCastBuffs.Initialize(enabled)
                          SpellCastBuffs.ApplyDisplayAlpha()
                      end
                  end, 300)
+
+    SpellCastBuffs.MarkDisplayDirty()
+    SpellCastBuffs.ScheduleAbilityIdDebugLabelRefresh()
 end
 
 function SpellCastBuffs.RegisterWerewolfEvents()
@@ -1224,11 +1241,16 @@ function SpellCastBuffs.Reset()
         end
     end
 
-    if SpellCastBuffs.playerActive then
+    if IsPlayerActivated() then
+        SpellCastBuffs.playerActive = true
         SpellCastBuffs.ReloadEffects("player")
+        if GetUnitName("reticleover") ~= "" then
+            SpellCastBuffs.ReloadEffects("reticleover")
+        end
     end
 
     SpellCastBuffs.MarkDisplayLayoutDirty()
+    SpellCastBuffs.ScheduleAbilityIdDebugLabelRefresh()
 end
 
 -- Applies the correct flex margins to a single buff icon.
@@ -1358,6 +1380,32 @@ local function ApplyProminentNameLabelAnchors(buff, labelOnLeft)
     buff.name:SetMaxLineCount(1)
 end
 
+--- Ability-id overlay anchors and visibility (pool acquire, icon resize, settings).
+--- @param buff SpellCastBuffs_BuffIcon_Control
+function SpellCastBuffs.ApplyBuffIconAbilityIdLayout(buff)
+    if not buff.abilityId then
+        return
+    end
+    local buffSize = SpellCastBuffs.SV.IconSize
+    local showId = SpellCastBuffs.SV.ShowDebugAbilityId
+    local idOutset = zo_max(2, zo_floor(buffSize * 0.12))
+    if  buff.lastAbilityIdLayoutIconSize == buffSize
+    and buff.lastAbilityIdLayoutOutset == idOutset
+    and buff.lastAbilityIdLayoutShown == showId then
+        return
+    end
+    buff.lastAbilityIdLayoutIconSize = buffSize
+    buff.lastAbilityIdLayoutOutset = idOutset
+    buff.lastAbilityIdLayoutShown = showId
+    buff.abilityId:SetHidden(not showId)
+    buff.abilityId:ClearAnchors()
+    buff.abilityId:SetAnchor(TOPLEFT, buff, TOPLEFT, -idOutset, 1)
+    buff.abilityId:SetAnchor(TOPRIGHT, buff, TOPRIGHT, idOutset, 1)
+    buff.abilityId:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+    buff.abilityId:SetVerticalAlignment(TEXT_ALIGN_TOP)
+    SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
+end
+
 -- Layout, anchors, and visibility for one icon (pool acquire or settings refresh).
 function SpellCastBuffs.ApplySingleIconLayout(container, buff)
     local buffSize = SpellCastBuffs.SV.IconSize
@@ -1417,13 +1465,10 @@ function SpellCastBuffs.ApplySingleIconLayout(container, buff)
         buff.iconbg:SetHidden(not SpellCastBuffs.SV.RemainingCooldown)
     end
 
-    if buff.abilityId ~= nil then
-        buff.abilityId:SetHidden(not SpellCastBuffs.SV.ShowDebugAbilityId)
-        if SpellCastBuffs.SV.ShowDebugAbilityId and buff.abilityId:GetText() ~= "" then
-            SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
-            if SpellCastBuffs.NeedsAbilityIdLabelFit(buff) then
-                SpellCastBuffs.FitAbilityIdLabelFont(buff)
-            end
+    SpellCastBuffs.ApplyBuffIconAbilityIdLayout(buff)
+    if SpellCastBuffs.SV.ShowDebugAbilityId and buff.abilityId and buff.abilityId:GetText() ~= "" then
+        if SpellCastBuffs.NeedsAbilityIdLabelFit(buff) then
+            SpellCastBuffs.FitAbilityIdLabelFont(buff)
         end
     end
 
@@ -1916,50 +1961,126 @@ function SpellCastBuffs.UpdateAbilityIdDebugLabel(buff, idText)
     if not buff.abilityId then
         return
     end
+    if not SpellCastBuffs.SV.ShowDebugAbilityId or idText == "" then
+        buff.abilityId:SetHidden(true)
+        return
+    end
+    SpellCastBuffs.ApplyBuffIconAbilityIdLayout(buff)
     buff.abilityId:SetHidden(false)
-    if buff.lastAbilityIdText ~= idText or buff.abilityId:GetText() ~= idText then
+    local textChanged = buff.lastAbilityIdText ~= idText or buff.abilityId:GetText() ~= idText
+    if textChanged then
         buff.abilityId:SetText(idText)
         buff.lastAbilityIdText = idText
         SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
     end
-    if SpellCastBuffs.NeedsAbilityIdLabelFit(buff) then
-        SpellCastBuffs.FitAbilityIdLabelFont(buff)
+    SpellCastBuffs.FitAbilityIdLabelFont(buff)
+end
+
+--- Refit ability-id overlays after layout has dimensions (reloadui / first paint).
+function SpellCastBuffs.RefreshAllAbilityIdDebugLabels()
+    if not SpellCastBuffs.Enabled or not SpellCastBuffs.SV.ShowDebugAbilityId then
+        return
+    end
+    for _, containerKey in pairs(SpellCastBuffs.containerRouting) do
+        local container = SpellCastBuffs.BuffContainers[containerKey]
+        if container and container.icons then
+            for i = 1, #container.icons do
+                local buff = container.icons[i]
+                if buff and buff.abilityId and not buff:IsHidden() then
+                    local idText = buff.lastAbilityIdText or buff.abilityId:GetText()
+                    if idText and idText ~= "" then
+                        buff.lastAbilityIdLayoutIconSize = nil
+                        SpellCastBuffs.ApplyBuffIconAbilityIdLayout(buff)
+                        buff.abilityId:SetHidden(false)
+                        SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
+                        SpellCastBuffs.FitAbilityIdLabelFont(buff)
+                    end
+                end
+            end
+        end
+    end
+    local longContainer = SpellCastBuffs.BuffContainers.player_long
+    if longContainer and longContainer.icons then
+        for i = 1, #longContainer.icons do
+            local buff = longContainer.icons[i]
+            if buff and buff.abilityId and not buff:IsHidden() then
+                local idText = buff.lastAbilityIdText or buff.abilityId:GetText()
+                if idText and idText ~= "" then
+                    buff.lastAbilityIdLayoutIconSize = nil
+                    SpellCastBuffs.ApplyBuffIconAbilityIdLayout(buff)
+                    buff.abilityId:SetHidden(false)
+                    SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
+                    SpellCastBuffs.FitAbilityIdLabelFont(buff)
+                end
+            end
+        end
     end
 end
 
---- Shrink ability-id debug text to fit the icon width (LabelControl:WasTruncated, ZO_FontAdjustingWrapLabel pattern).
---- LabelControl:Clean() forces dirty text to layout/draw in-callstack (needed before WasTruncated on pooled icons).
+function SpellCastBuffs.ScheduleAbilityIdDebugLabelRefresh()
+    zo_callLater(function ()
+                     if SpellCastBuffs.Enabled then
+                         SpellCastBuffs.RefreshAllAbilityIdDebugLabels()
+                     end
+                 end, 0)
+end
+
+--- Shrink ability-id debug text to fit the label width (GetStringWidth vs GetWidth; WasTruncated/GetTextWidth can lie under TRUNCATE).
+--- LabelControl:Clean() forces layout before measuring pooled icons.
 --- @param buff SpellCastBuffs_BuffIcon_Control
 function SpellCastBuffs.FitAbilityIdLabelFont(buff)
     local label = buff.abilityId
     if not label or label:IsHidden() then
         return
     end
-    if label:GetText() == "" then
+    local idText = label:GetText()
+    if idText == "" then
         return
     end
 
+    label:SetScale(1)
     label:Clean()
+
+    local availableWidth = label:GetWidth()
+    if not availableWidth or availableWidth <= 0 then
+        SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
+        return
+    end
+
+    local function fitsInLabelWidth()
+        local textWidthUI = GetAbilityIdStringWidthUI(label, idText)
+        return textWidthUI > 0 and textWidthUI <= availableWidth * ABILITY_ID_LABEL_FIT_MARGIN
+    end
 
     local fonts = SpellCastBuffs.abilityIdFonts
     if not fonts or #fonts == 0 then
         label:SetFont(SpellCastBuffs.buffsFont)
-        label:Clean()
-        buff.abilityIdLabelDirty = nil
-        buff.lastAppliedAbilityIdIconSize = SpellCastBuffs.SV.IconSize
-        buff.lastAppliedAbilityIdLayoutVersion = SpellCastBuffs.displayLayoutVersion
-        return
+    else
+        label:SetMaxLineCount(0)
+        for _, font in ipairs(fonts) do
+            label:SetFont(font)
+            if fitsInLabelWidth() then
+                break
+            end
+        end
+        label:SetMaxLineCount(1)
     end
 
-    label:SetMaxLineCount(0)
-    for _, font in ipairs(fonts) do
-        label:SetFont(font)
+    local textWidthUI = GetAbilityIdStringWidthUI(label, idText)
+    if textWidthUI > 0 and textWidthUI > availableWidth * ABILITY_ID_LABEL_FIT_MARGIN then
+        label:SetScale(zo_min(1, (availableWidth * ABILITY_ID_LABEL_FIT_MARGIN) / textWidthUI))
         label:Clean()
-        if not label:WasTruncated() then
-            break
-        end
+    else
+        label:SetScale(1)
     end
-    label:SetMaxLineCount(1)
+
+    local guard = 0
+    while label:WasTruncated() and guard < 8 do
+        label:SetScale(label:GetScale() * 0.88)
+        label:Clean()
+        guard = guard + 1
+    end
+
     buff.abilityIdLabelDirty = nil
     buff.lastAppliedAbilityIdIconSize = SpellCastBuffs.SV.IconSize
     buff.lastAppliedAbilityIdLayoutVersion = SpellCastBuffs.displayLayoutVersion
@@ -1981,7 +2102,7 @@ function SpellCastBuffs.ApplyFont()
     SpellCastBuffs.buffsFont = LUIE.CreateFontString(fontName, fontSize, fontStyle)
 
     SpellCastBuffs.abilityIdFonts = {}
-    for size = fontSize, 8, -1 do
+    for size = fontSize, 3, -1 do
         SpellCastBuffs.abilityIdFonts[#SpellCastBuffs.abilityIdFonts + 1] = LUIE.CreateFontString(fontName, size, fontStyle)
     end
 
@@ -2009,6 +2130,9 @@ function SpellCastBuffs.ApplyFont()
                     icon.stack:SetFont(SpellCastBuffs.buffsFont)
                 end
                 if icon.abilityId then
+                    icon.lastAbilityIdLayoutIconSize = nil
+                    SpellCastBuffs.ApplyBuffIconAbilityIdLayout(icon)
+                    SpellCastBuffs.MarkAbilityIdLabelDirty(icon)
                     SpellCastBuffs.FitAbilityIdLabelFont(icon)
                 end
                 if icon.name then

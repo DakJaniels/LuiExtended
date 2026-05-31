@@ -48,6 +48,20 @@ local changelogSectionBodyPool
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.3.3
+    "|cFFA500LuiExtended Version 7.2.3.3|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Companion Ability Track adds an optional icon row on the custom Companion frame for companion hotbar abilities (including built-in interrupt), with optional cooldown radial, effect timer, and stack labels. Enable it under Custom Unit Frames → Companion; it is off by default for new installs.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Use Separate Shield Bar again shows shield on custom Player, Target, Small Group, Companion, and Pet frames (including live updates from settings without /reloadui). Companion layout reserves space for the shield row and places the ability track below it.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs (debug): Show Debug Ability ID no longer cuts off digits on buff icons.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs (debug): Ability IDs show on existing buffs after /reloadui without waiting for them to refresh.",
+    "",
+
     -- Version Header 7.2.3.2
     "|cFFA500LuiExtended Version 7.2.3.2|r",
     "",

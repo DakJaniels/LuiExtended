@@ -271,7 +271,7 @@ local function ApplyIconLayoutIfNeeded(buff, container, force)
         buff.lastFlexContainer = container
         buff.lastAppliedIconSize = iconSize
         buff.lastLayoutVersion = SpellCastBuffs.displayLayoutVersion
-        SpellCastBuffs.MarkAbilityIdLabelDirty(buff)
+        SpellCastBuffs.ApplyBuffIconAbilityIdLayout(buff)
     end
 end
 
@@ -303,6 +303,12 @@ local function updateIconsStructure(currentTimeMs, sortedList, container)
         local slotRebound = effect.iconNum ~= index
         ApplyIconLayoutIfNeeded(buff, container, slotRebound)
         buff:SetHidden(false)
+
+        if buff.abilityId and effect.id and SpellCastBuffs.SV.ShowDebugAbilityId then
+            SpellCastBuffs.UpdateAbilityIdDebugLabel(buff, tostring(effect.id))
+        elseif buff.abilityId and not SpellCastBuffs.SV.ShowDebugAbilityId then
+            buff.abilityId:SetHidden(true)
+        end
 
         if slotRebound then
             effect.iconNum = index
@@ -342,10 +348,6 @@ local function updateIconsStructure(currentTimeMs, sortedList, container)
                 end
             else
                 buff.lastLabelText = nil
-            end
-
-            if buff.abilityId and effect.id and SpellCastBuffs.SV.ShowDebugAbilityId then
-                SpellCastBuffs.UpdateAbilityIdDebugLabel(buff, tostring(effect.id))
             end
 
             if buff.name then
@@ -587,6 +589,10 @@ local function rebuildDisplaySortedLists(currentTimeMs)
         table_sort(g_buffsSorted.player_long, buffSort)
         g_cachedDisplaySortedLists.player_long = g_buffsSorted.player_long
         updateIconsStructure(currentTimeMs, g_buffsSorted.player_long, "player_long")
+    end
+
+    if SpellCastBuffs.SV.ShowDebugAbilityId then
+        SpellCastBuffs.ScheduleAbilityIdDebugLabelRefresh()
     end
 end
 
