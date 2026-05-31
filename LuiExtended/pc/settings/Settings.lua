@@ -954,6 +954,26 @@ function LUIE.CreateSettings()
         true
     )
 
+    local alertAlignmentOptions = { "LEFT", "CENTER", "RIGHT" }
+    local alertAlignmentOptionsKeys = { ["LEFT"] = 1, ["CENTER"] = 2, ["RIGHT"] = 3 }
+
+    optionsData[#optionsData + 1] = SettingsAPI.CreateDropdownOption(
+        GetString(LUIE_STRING_LAM_ALERT_TEXT_ALIGNMENT),
+        GetString(LUIE_STRING_LAM_ALERT_TEXT_ALIGNMENT_TP),
+        alertAlignmentOptions,
+        function ()
+            local index = Settings.AlertFrameAlignment or Defaults.AlertFrameAlignment
+            return alertAlignmentOptions[index] or alertAlignmentOptions[3]
+        end,
+        function (value)
+            Settings.AlertFrameAlignment = alertAlignmentOptionsKeys[value] or 3
+            LUIE.ApplyAlertFrameAlignment()
+        end,
+        "full",
+        function () return Settings.HideAlertFrame end,
+        alertAlignmentOptions[Defaults.AlertFrameAlignment]
+    )
+
     -- Hide Alerts
     optionsData[#optionsData + 1] = SettingsAPI.CreateCheckboxOption(
         GetString(LUIE_STRING_LAM_ALERT_HIDE_ALL),

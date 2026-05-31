@@ -229,6 +229,12 @@ function LUIE.SetupAlertFrameVisibility()
     if ZO_AlertTextNotification then
         ZO_AlertTextNotification:SetHidden(LUIE.SV.HideAlertFrame)
     end
+    if ZO_AlertTextNotificationGamepad then
+        ZO_AlertTextNotificationGamepad:SetHidden(LUIE.SV.HideAlertFrame)
+    end
+    if not LUIE.SV.HideAlertFrame then
+        LUIE.ApplyAlertFrameAlignment()
+    end
 end
 
 -- -----------------------------------------------------------------------------

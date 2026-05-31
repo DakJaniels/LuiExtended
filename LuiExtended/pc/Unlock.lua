@@ -8,7 +8,6 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 -- -----------------------------------------------------------------------------
-local UI = LUIE.UI
 local GridOverlay = LUIE.GridOverlay
 local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
@@ -27,6 +26,10 @@ local windowManager = GetWindowManager()
 --- @field preview LUIE_PositionableTLWPreview|nil
 --- @field previewLabel LabelControl|nil
 
+--- Runtime control with a stable SV key when `GetName()` is not used (e.g. ACT layout anchor).
+--- @class LUIE_UnlockPositionableControl : Control
+--- @field luiUnlockPositionAttr string|nil
+
 --- @class LUIE.Unlock : table
 --- @field frameMoverEnabled boolean Flag indicating if frame movers are currently enabled
 --- @field movers table Table of created mover frames
@@ -36,6 +39,8 @@ local Unlock =
     frameMoverEnabled = false,
     movers = {},
     dynamicEventsQuestHookInstalled = false,
+    unlockPositionHooksInstalled = false,
+    activeCombatTipsAnchor = nil,
     defaultPanels =
     {
         [ZO_HUDInfamyMeter] = { GetString(LUIE_STRING_DEFAULT_FRAME_INFAMY_METER) },
@@ -58,7 +63,6 @@ local Unlock =
         [ZO_LootHistoryControl_Keyboard] = { GetString(LUIE_STRING_DEFAULT_FRAME_LOOT_HISTORY), 280, 400 },
         [ZO_TutorialHudInfoTipKeyboard] = { GetString(LUIE_STRING_DEFAULT_FRAME_TUTORIALS) },
         [ZO_AlertTextNotification] = { GetString(LUIE_STRING_DEFAULT_FRAME_ALERTS), 600, 56 },
-        [ZO_ActiveCombatTipsTip] = { GetString(LUIE_STRING_DEFAULT_FRAME_ACTIVE_COMBAT_TIPS), 250, 20 },
         [ZO_AdvZoneHUD_TopLevel] = { "NightMarket Favor counter" },
     }
 }
@@ -102,31 +106,28 @@ function Unlock.ApplyGridSnap(left, top, gridType)
 end
 
 -- -----------------------------------------------------------------------------
--- Template Functions
--- -----------------------------------------------------------------------------
-
---- Replace the template function for certain elements to also use custom positions
---- @param object table<string, function> The object containing the template function to be replaced
---- @param functionName string The name of the template function to be replaced
---- @param frameName string The name of the frame associated with the template function
-function Unlock.ReplaceDefaultTemplate(object, functionName, frameName)
-    local zos_function = object[functionName]
-    object[functionName] = function (self)
-        local result = zos_function(self)
-        local frameData = LUIE.SV[frameName]
-        if frameData then
-            local frame = _G[frameName]
-            --- @cast frame userdata
-            frame:ClearAnchors()
-            frame:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, frameData[1], frameData[2], ANCHOR_CONSTRAINS_XY)
-        end
-        return result
-    end
-end
-
--- -----------------------------------------------------------------------------
 -- Element Handling Functions
 -- -----------------------------------------------------------------------------
+
+--- Re-anchors a moved default UI frame after ZOS applies templates or tracker layout.
+--- @param frameName string Saved-vars key (`element:GetName()` from `defaultPanels`).
+function Unlock.ApplySavedUnlockFramePosition(frameName)
+    local frameData = LUIE.SV[frameName]
+    if not frameData then
+        return
+    end
+    local frame = _G[frameName]
+    if not frame then
+        return
+    end
+    local x, y = frameData[1], frameData[2]
+    if x == nil or y == nil then
+        return
+    end
+    x, y = Unlock.ApplyGridSnap(x, y, "default")
+    frame:ClearAnchors()
+    frame:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y, ANCHOR_CONSTRAINS_XY)
+end
 
 --- Width/height for `ZO_AdvZoneHUD_TopLevel` that match the visible icon + score row (see ZO_AdventureZoneHUD:OnPlatformStyleChanged),
 --- not the Telvar meter and not the XML full-screen stretch anchors on the top-level control.
@@ -199,6 +200,239 @@ function Unlock.RegisterDynamicEventsQuestAnchorHook()
     Unlock.dynamicEventsQuestHookInstalled = true
 end
 
+function Unlock.ApplyActiveCombatTipsAnchors()
+    if not ZO_ActiveCombatTipsTip then
+        return
+    end
+    local frameName = "LUIE_ActiveCombatTipsAnchor"
+    if LUIE.SV["ZO_ActiveCombatTipsTip"] and not LUIE.SV[frameName] then
+        LUIE.SV[frameName] = LUIE.SV["ZO_ActiveCombatTipsTip"]
+        LUIE.SV["ZO_ActiveCombatTipsTip"] = nil
+    end
+    if not Unlock.activeCombatTipsAnchor then
+        --- @type LUIE_UnlockPositionableControl
+        local anchor = windowManager:CreateControl(nil, GuiRoot, CT_CONTROL)
+        anchor.luiUnlockPositionAttr = frameName
+        anchor:SetDimensions(250, 20)
+        anchor:SetDrawLayer(DL_CONTROLS)
+        anchor:SetAnchor(CENTER, GuiRoot, BOTTOM, 0, -250, ANCHOR_CONSTRAINS_XY)
+        Unlock.activeCombatTipsAnchor = anchor
+        if not Unlock.defaultPanels[anchor] then
+            Unlock.defaultPanels[anchor] = { GetString(LUIE_STRING_DEFAULT_FRAME_ACTIVE_COMBAT_TIPS), 250, 20 }
+        end
+    end
+    local anchor = Unlock.activeCombatTipsAnchor
+    if not anchor then
+        return
+    end
+
+    local frameData = LUIE.SV[frameName]
+    if frameData and frameData[1] ~= nil and frameData[2] ~= nil then
+        local x, y = Unlock.ApplyGridSnap(frameData[1], frameData[2], "default")
+        anchor:ClearAnchors()
+        anchor:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y, ANCHOR_CONSTRAINS_XY)
+    else
+        anchor:ClearAnchors()
+        anchor:SetAnchor(CENTER, GuiRoot, BOTTOM, 0, -250, ANCHOR_CONSTRAINS_XY)
+    end
+
+    ZO_ActiveCombatTipsTip:ClearAnchors()
+    ZO_ActiveCombatTipsTip:SetAnchor(CENTER, anchor, CENTER, 0, 0, ANCHOR_CONSTRAINS_XY)
+end
+
+function Unlock.RegisterUnlockPositionHooks()
+    if Unlock.unlockPositionHooksInstalled then
+        return
+    end
+    if COMPASS_FRAME then
+        ZO_PostHook(COMPASS_FRAME, "ApplyStyle", function ()
+            Unlock.ApplySavedUnlockFramePosition("ZO_CompassFrame")
+        end)
+    end
+    if PLAYER_PROGRESS_BAR then
+        ZO_PostHook(PLAYER_PROGRESS_BAR, "RefreshTemplate", function ()
+            Unlock.ApplySavedUnlockFramePosition("ZO_PlayerProgress")
+        end)
+    end
+    if ZO_HUDTracker_Base then
+        ZO_PostHook(ZO_HUDTracker_Base, "RefreshAnchors", function (tracker)
+            if tracker.control then
+                Unlock.ApplySavedUnlockFramePosition(tracker.control:GetName())
+            end
+        end)
+    end
+    if ACTIVE_COMBAT_TIP_SYSTEM then
+        ZO_PostHook(ACTIVE_COMBAT_TIP_SYSTEM, "ApplyStyle", function ()
+            Unlock.ApplyActiveCombatTipsAnchors()
+        end)
+    end
+    Unlock.unlockPositionHooksInstalled = true
+end
+
+local ALERT_FRAME_SV_KEY = "ZO_AlertTextNotification"
+
+--- @param alignment number 1 = left, 2 = center, 3 = right
+--- @return integer
+local function GetAlertAlignmentPoint(alignment)
+    if alignment == 1 then
+        return TOPLEFT
+    elseif alignment == 2 then
+        return TOP
+    end
+    return TOPRIGHT
+end
+
+--- @param alignment number 1 = left, 2 = center, 3 = right
+--- @return integer
+local function GetAlertTextHorizontalAlignment(alignment)
+    if alignment == 1 then
+        return TEXT_ALIGN_LEFT
+    elseif alignment == 2 then
+        return TEXT_ALIGN_CENTER
+    end
+    return TEXT_ALIGN_RIGHT
+end
+
+--- @return number
+local function GetResolvedAlertFrameAlignment()
+    local alignment = LUIE.SV.AlertFrameAlignment or LUIE.Defaults.AlertFrameAlignment or 3
+    if alignment < 1 or alignment > 3 then
+        alignment = 3
+    end
+    return alignment
+end
+
+--- Match `ZO_AlertLine` wrap to LUIE alignment (ZOS template defaults to RIGHT in XML).
+--- @param control LabelControl
+--- @param alignment number|nil
+function Unlock.ApplyAlertLineTextAlignment(control, alignment)
+    if not control then
+        return
+    end
+    alignment = alignment or GetResolvedAlertFrameAlignment()
+    control:SetHorizontalAlignment(GetAlertTextHorizontalAlignment(alignment))
+    local parent = control:GetParent()
+    if parent then
+        local point = GetAlertAlignmentPoint(alignment)
+        control:ClearAnchors()
+        control:SetAnchor(point, parent, point, 0, 0, ANCHOR_CONSTRAINS_XY)
+    end
+end
+
+--- Wrap `ZO_FadingControlBuffer` template setup so each new alert line gets alignment.
+--- @param alertMessages ZO_AlertText_Keyboard|ZO_AlertText_Gamepad|nil
+local function WrapAlertFadingControlBufferTemplates(alertMessages)
+    if not alertMessages or not alertMessages.alerts then
+        return
+    end
+    local templates = alertMessages.alerts.templates
+    if not templates then
+        return
+    end
+    for _, templateData in pairs(templates) do
+        if templateData.setup and not templateData._luiAlertSetupWrapped then
+            local originalSetup = templateData.setup
+            templateData.setup = function (control, data)
+                originalSetup(control, data)
+                Unlock.ApplyAlertLineTextAlignment(control)
+            end
+            templateData._luiAlertSetupWrapped = true
+        end
+    end
+end
+
+--- @param alertMessages ZO_AlertText_Keyboard|ZO_AlertText_Gamepad|nil
+local function RefreshActiveAlertLineAlignment(alertMessages)
+    if not alertMessages or not alertMessages.alerts then
+        return
+    end
+    local alignment = GetResolvedAlertFrameAlignment()
+    local activeEntries = alertMessages.alerts.activeEntries
+    if not activeEntries then
+        return
+    end
+    for _, entryControl in ipairs(activeEntries) do
+        if entryControl.activeLines then
+            for _, lineControl in ipairs(entryControl.activeLines) do
+                Unlock.ApplyAlertLineTextAlignment(lineControl, alignment)
+            end
+        end
+    end
+end
+
+function Unlock.EnsureAlertTextSetupHooks()
+    if Unlock.alertTextSetupHooksInstalled then
+        return
+    end
+    WrapAlertFadingControlBufferTemplates(ALERT_MESSAGES)
+    WrapAlertFadingControlBufferTemplates(ALERT_MESSAGES_GAMEPAD)
+    Unlock.alertTextSetupHooksInstalled = true
+end
+
+--- Default screen anchor for the alert TLW when no custom unlock position is saved.
+--- @param alignment number
+--- @return integer point
+--- @return integer relativePoint
+--- @return integer offsetX
+--- @return integer offsetY
+local function GetAlertDefaultScreenAnchor(alignment)
+    local point = GetAlertAlignmentPoint(alignment)
+    local offsetX = 0
+    if alignment == 1 then
+        offsetX = 15
+    elseif alignment == 3 then
+        offsetX = -15
+    end
+    return point, point, offsetX, 15
+end
+
+--- Reposition scrolling alert lines inside the notification frame (Phinix / Azurah method).
+--- @param alertFrame Control
+--- @param alignment number
+function Unlock.ApplyAlertTextFadingBufferAnchor(alertFrame, alignment)
+    if not alertFrame then
+        return
+    end
+    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, " ")
+    local alertText = alertFrame:GetChild(1)
+    if not alertText then
+        return
+    end
+    --- @diagnostic disable-next-line: undefined-field
+    if not alertText.fadingControlBuffer then
+        return
+    end
+    local point = GetAlertAlignmentPoint(alignment)
+    --- @diagnostic disable-next-line: undefined-field
+    alertText.fadingControlBuffer.anchor = ZO_Anchor:New(point, alertFrame, point)
+end
+
+--- Apply `LUIE.SV.AlertFrameAlignment` to keyboard/gamepad alert notification frames.
+function Unlock.ApplyAlertFrameAlignment()
+    if LUIE.SV.HideAlertFrame then
+        return
+    end
+    Unlock.EnsureAlertTextSetupHooks()
+    local alignment = GetResolvedAlertFrameAlignment()
+
+    local hasCustomPosition = LUIE.SV[ALERT_FRAME_SV_KEY] ~= nil
+    local alertFrames = { ZO_AlertTextNotification, ZO_AlertTextNotificationGamepad }
+
+    for _, alertFrame in ipairs(alertFrames) do
+        if alertFrame then
+            if not hasCustomPosition then
+                local point, relativePoint, offsetX, offsetY = GetAlertDefaultScreenAnchor(alignment)
+                alertFrame:ClearAnchors()
+                alertFrame:SetAnchor(point, GuiRoot, relativePoint, offsetX, offsetY, ANCHOR_CONSTRAINS_XY)
+            end
+            Unlock.ApplyAlertTextFadingBufferAnchor(alertFrame, alignment)
+        end
+    end
+
+    RefreshActiveAlertLineAlignment(ALERT_MESSAGES)
+    RefreshActiveAlertLineAlignment(ALERT_MESSAGES_GAMEPAD)
+end
+
 --- Helper function to set the anchor of an element
 --- @param element Control The element to set the anchor for
 --- @param frameName string The name of the frame associated with the element
@@ -220,22 +454,11 @@ function Unlock.SetAnchor(element, frameName)
         ZO_ObjectiveCaptureMeterFrame:SetAnchor(BOTTOM, ZO_ObjectiveCaptureMeter, BOTTOM, 0, 0, ANCHOR_CONSTRAINS_XY)
     end
 
-    -- Setup Alert Text to anchor properly.
-    -- Thanks to Phinix (Azurah) for this method of adjusting the fadingControlBuffer anchor to reposition the alert text.
-    if element == ZO_AlertTextNotification then
-        -- Throw a dummy alert just in case so alert text exists.
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NONE, " ")
-        local alertText
-        if not IsInGamepadPreferredMode() then
-            alertText = ZO_AlertTextNotification:GetChild(1)
-        else
-            alertText = ZO_AlertTextNotificationGamepad:GetChild(1)
-        end
-        -- Only adjust this if a custom position is set.
-        if x ~= nil and y ~= nil then
-            -- Anchor to the Top Right corner of the Alerts frame.
-            --- @diagnostic disable-next-line: undefined-field
-            alertText.fadingControlBuffer.anchor = ZO_Anchor:New(TOPRIGHT, ZO_AlertTextNotification, TOPRIGHT)
+    if element == ZO_AlertTextNotification and x ~= nil and y ~= nil then
+        local alignment = LUIE.SV.AlertFrameAlignment or LUIE.Defaults.AlertFrameAlignment or 3
+        Unlock.ApplyAlertTextFadingBufferAnchor(ZO_AlertTextNotification, alignment)
+        if ZO_AlertTextNotificationGamepad then
+            Unlock.ApplyAlertTextFadingBufferAnchor(ZO_AlertTextNotificationGamepad, alignment)
         end
     end
 
@@ -248,105 +471,145 @@ end
 -- Mover Creation and Management
 -- -----------------------------------------------------------------------------
 
+--- Saved-vars / mover key for unlock panels (ZOS frames use `GetName()`; addon panels may use `luiUnlockPositionAttr`).
+--- @param element Control|LUIE_UnlockPositionableControl
+--- @return string
+function Unlock.GetUnlockPositionAttr(element)
+    --- @type LUIE_UnlockPositionableControl
+    local positionable = element
+    return positionable.luiUnlockPositionAttr or element:GetName()
+end
+
+--- Top-level mover window name (addon-owned TLW; not the ZOS frame being repositioned).
+--- `$(parent)_*` children require a non-empty parent name — `CreateTopLevelWindow(nil)` yields duplicate `_Preview`.
+--- @param element Control
+--- @return string
+local function GetUnlockMoverTopLevelName(element)
+    return "LUIE_UnlockMover_" .. Unlock.GetUnlockPositionAttr(element)
+end
+
+--- Place unlock mover overlay at the element's on-screen position (not its anchor chain).
+--- ZOS HUD such as `ZO_HUDEquipmentStatus` anchors to the quickslot/action bar; copying `GetAnchor()`
+--- ties other movers to the bar when it is repositioned.
+--- @param mover TopLevelWindow
+--- @param element Control
+function Unlock.AnchorMoverToElementScreenPosition(mover, element)
+    mover:ClearAnchors()
+    mover:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, element:GetLeft(), element:GetTop(), ANCHOR_CONSTRAINS_XY)
+end
+
+--- One-time sync of all mover overlays to current HUD screen rects (e.g. when enabling frame movers). Not used after a single drag.
+function Unlock.RefreshMoverScreenPositions()
+    if not Unlock.frameMoverEnabled then
+        return
+    end
+    for element, _ in pairs(Unlock.defaultPanels) do
+        local mover = Unlock.movers[Unlock.GetUnlockPositionAttr(element)]
+        if mover then
+            Unlock.AnchorMoverToElementScreenPosition(mover, element)
+        end
+    end
+end
+
 --- Helper function to create a coordinate label for mover frames
 --- @param parent Control The parent control for the label
 --- @param positionText string The text to display in the label
 --- @return LabelControl label The created label
 function Unlock.CreateCoordinateLabel(parent, positionText)
-    local label = windowManager:CreateControl(nil, parent, CT_LABEL)
-    label:SetFont(LUIE.GetPositionLabelFont())
-    label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
-    label:SetVerticalAlignment(TEXT_ALIGN_TOP)
-    label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
-    label:SetAnchor(TOPLEFT, parent, TOPLEFT, 2, 2, ANCHOR_CONSTRAINS_XY)
+    local label = parent.coordLabel
+    if not label then
+        label = parent:CreateControl("$(parent)_AnchorLabel", CT_LABEL)
+        label:SetFont(LUIE.GetPositionLabelFont())
+        label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+        label:SetVerticalAlignment(TEXT_ALIGN_TOP)
+        label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+        label:SetAnchor(TOPLEFT, parent, TOPLEFT, 2, 2, ANCHOR_CONSTRAINS_XY)
+        label:SetColor(1, 1, 0, 1)
+        label:SetDrawLayer(DL_OVERLAY)
+        label:SetDrawLevel(5)
+        label:SetDrawTier(DT_MEDIUM)
+
+        local bg = label:CreateControl("$(parent)_Bg", CT_BACKDROP)
+        bg:SetCenterColor(0, 0, 0, 1)
+        bg:SetEdgeColor(0, 0, 0, 1)
+        bg:SetEdgeTexture("", 8, 1, 1, 1)
+        bg:SetDrawLayer(DL_BACKGROUND)
+        bg:SetAnchorFill(label)
+        bg:SetDrawLayer(DL_OVERLAY)
+        bg:SetDrawLevel(5)
+        bg:SetDrawTier(DT_MEDIUM)
+        parent.coordLabel = label
+    end
     label:SetText(positionText)
-    label:SetColor(1, 1, 0, 1)
-    label:SetDrawLayer(DL_OVERLAY)
-    label:SetDrawLevel(5)
-    label:SetDrawTier(DT_MEDIUM)
-
-    -- Create label background
-    local bg = windowManager:CreateControl(nil, label, CT_BACKDROP)
-    bg:SetCenterColor(0, 0, 0, 1)
-    bg:SetEdgeColor(0, 0, 0, 1)
-    bg:SetEdgeTexture("", 8, 1, 1, 1)
-    bg:SetDrawLayer(DL_BACKGROUND)
-    bg:SetAnchorFill(label)
-    bg:SetDrawLayer(DL_OVERLAY)
-    bg:SetDrawLevel(5)
-    bg:SetDrawTier(DT_LOW)
-
     return label
 end
 
 --- Helper function to create a top-level window (mover)
 --- @param element Control The element to create the top-level window for
 --- @param config {[1]:string, [2]:number?, [3]:number?} The table containing window configuration values
---- @param point number The anchor point for the top-level window
---- @param relativePoint number The relative anchor point for the top-level window
---- @param offsetX number The X offset for the top-level window
---- @param offsetY number The Y offset for the top-level window
---- @param relativeTo Control The element to which the top-level window is relative
 --- @return LUIE_PositionableTopLevelWindow tlw The created top-level window
-function Unlock.CreateTopLevelWindow(element, config, point, relativePoint, offsetX, offsetY, relativeTo)
-    --- Runtime value is Zo `TopLevelWindow`; Unlock attaches `customPositionAttr` and `preview` (see class doc).
+function Unlock.CreateTopLevelWindow(element, config)
+    local attr = Unlock.GetUnlockPositionAttr(element)
+    local moverName = GetUnlockMoverTopLevelName(element)
     --- @type LUIE_PositionableTopLevelWindow
-    local tlw = windowManager:CreateTopLevelWindow(nil)
-    tlw:SetClampedToScreen(true)
-    tlw:SetMouseEnabled(false)
-    tlw:SetMovable(false)
-    tlw:SetHidden(true)
-    tlw:SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY, ANCHOR_CONSTRAINS_XY)
+    local tlw = Unlock.movers[attr] or _G[moverName]
+    if not tlw then
+        tlw = windowManager:CreateTopLevelWindow(moverName)
+        tlw:SetDrawTier(DT_MEDIUM)
+        tlw:SetClampedToScreen(true)
+        tlw:SetMouseEnabled(false)
+        tlw:SetMovable(false)
+        tlw:SetHidden(true)
+        tlw.customPositionAttr = attr
+    end
+
+    Unlock.AnchorMoverToElementScreenPosition(tlw, element)
     tlw:SetDimensions(element:GetWidth(), element:GetHeight())
-    tlw.customPositionAttr = element:GetName()
 
-    -- Create preview backdrop
-    tlw.preview = windowManager:CreateControl(nil, tlw, CT_BACKDROP)
-    tlw.preview:SetCenterColor(0, 0, 0, 0.4)
-    tlw.preview:SetEdgeColor(0, 0, 0, 0.6)
-    tlw.preview:SetEdgeTexture("", 8, 1, 1, 1)
-    tlw.preview:SetDrawLayer(DL_BACKGROUND)
-    tlw.preview:SetAnchorFill(tlw)
-    tlw.preview:SetDrawLayer(DL_OVERLAY)
-    tlw.preview:SetDrawLevel(5)
-    tlw.preview:SetDrawTier(DT_MEDIUM)
+    if not tlw.preview then
+        tlw.preview = tlw:CreateControl("$(parent)_Preview", CT_BACKDROP)
+        tlw.preview:SetCenterColor(0, 0, 0, 0.4)
+        tlw.preview:SetEdgeColor(0, 0, 0, 0.6)
+        tlw.preview:SetEdgeTexture("", 8, 1, 1, 1)
+        tlw.preview:SetDrawLayer(DL_BACKGROUND)
+        tlw.preview:SetAnchorFill(tlw)
+        tlw.preview:SetDrawLayer(DL_OVERLAY)
+        tlw.preview:SetDrawLevel(5)
+        tlw.preview:SetDrawTier(DT_MEDIUM)
+    end
 
-    -- Get initial position from saved variables if it exists
     local positionText = "Default"
-    if LUIE.SV[tlw.customPositionAttr] then
-        local x = LUIE.SV[tlw.customPositionAttr][1] or 0
-        local y = LUIE.SV[tlw.customPositionAttr][2] or 0
+    if LUIE.SV[attr] then
+        local x = LUIE.SV[attr][1] or 0
+        local y = LUIE.SV[attr][2] or 0
         positionText = string.format("%d, %d | %s", x, y, config[1])
     else
         positionText = string.format("Default | %s", config[1])
     end
+    Unlock.CreateCoordinateLabel(tlw.preview, positionText)
 
-    -- Create coordinate label with initial position
-    tlw.preview.coordLabel = Unlock.CreateCoordinateLabel(tlw.preview, positionText)
-
-    --- @param self LUIE_PositionableTopLevelWindow
-    local function OnMoveStart(self)
-        eventManager:RegisterForUpdate("LUIE_UnlockMoveUpdate", 200, function ()
-            if self.preview and self.preview.coordLabel then
-                local frameName = config[1] -- Get the frame name from the config
-                self.preview.coordLabel:SetText(string.format("%d, %d | %s", self:GetLeft(), self:GetTop(), frameName))
-            end
-        end)
-    end
-
-    --- @param self LUIE_PositionableTopLevelWindow
-    local function OnMoveStop(self)
-        eventManager:UnregisterForUpdate("LUIE_UnlockMoveUpdate")
-        if self.preview and self.preview.coordLabel then
-            local frameName = config[1] -- Get the frame name from the config
-            self.preview.coordLabel:SetText(string.format("%d, %d | %s", self:GetLeft(), self:GetTop(), frameName))
+    if not tlw._luiUnlockMoveLabelHandlers then
+        --- @param self LUIE_PositionableTopLevelWindow
+        local function OnMoveStart(self)
+            eventManager:RegisterForUpdate("LUIE_UnlockMoveUpdate", 200, function ()
+                if self.preview and self.preview.coordLabel then
+                    self.preview.coordLabel:SetText(string.format("%d, %d | %s", self:GetLeft(), self:GetTop(), config[1]))
+                end
+            end)
         end
+
+        --- @param self LUIE_PositionableTopLevelWindow
+        local function OnMoveStopLabelOnly(self)
+            eventManager:UnregisterForUpdate("LUIE_UnlockMoveUpdate")
+            if self.preview and self.preview.coordLabel then
+                self.preview.coordLabel:SetText(string.format("%d, %d | %s", self:GetLeft(), self:GetTop(), config[1]))
+            end
+        end
+
+        tlw:SetHandler("OnMoveStart", OnMoveStart)
+        tlw:SetHandler("OnMoveStop", OnMoveStopLabelOnly)
+        tlw._luiUnlockMoveLabelHandlers = true
     end
-
-    -- Add movement handlers
-    tlw:SetHandler("OnMoveStart", OnMoveStart)
-
-    tlw:SetHandler("OnMoveStop", OnMoveStop)
 
     return tlw
 end
@@ -356,6 +619,12 @@ end
 --- @param config {[1]:string, [2]:number?, [3]:number?} The configuration for the element
 --- @return LUIE_PositionableTopLevelWindow|nil mover The created mover window or nil if initialization failed
 function Unlock.InitializeElementMover(element, config)
+    local attr = Unlock.GetUnlockPositionAttr(element)
+    local existingMover = Unlock.movers[attr] or _G[GetUnlockMoverTopLevelName(element)]
+    if existingMover then
+        return existingMover
+    end
+
     -- Adjust width and height constraints if provided
     local width, height = config[2], config[3]
     if element == ZO_AdvZoneHUD_TopLevel then
@@ -398,12 +667,17 @@ function Unlock.InitializeElementMover(element, config)
 
                 -- Save the new position and update the element positions
                 LUIE.SV[self.customPositionAttr] = { left, top }
-                Unlock.SetElementPosition()
+                if self.preview and self.preview.coordLabel then
+                    self.preview.coordLabel:SetText(string.format("%d, %d | %s", left, top, config[1]))
+                end
+                Unlock.ApplySavedPositionForElement(element, config)
             end
 
-            -- Create and configure the top-level window (mover) for the element
-            local mover = Unlock.CreateTopLevelWindow(element, config, point, relativePoint, offsetX, offsetY, relativeTo)
-            mover:SetHandler("OnMoveStop", OnMoveStop)
+            local mover = Unlock.CreateTopLevelWindow(element, config)
+            if not mover._luiUnlockSaveHandler then
+                mover:SetHandler("OnMoveStop", OnMoveStop)
+                mover._luiUnlockSaveHandler = true
+            end
 
             return mover
         end
@@ -442,24 +716,39 @@ end
 -- Public API Functions
 -- -----------------------------------------------------------------------------
 
+--- Apply saved position for one unlock panel (used when a single mover is dropped).
+--- @param element Control
+--- @param config {[1]:string, [2]:number?, [3]:number?}
+function Unlock.ApplySavedPositionForElement(element, config)
+    local frameName = Unlock.GetUnlockPositionAttr(element)
+    if not LUIE.SV[frameName] then
+        return
+    end
+    Unlock.AdjustElement(element, config)
+    Unlock.SetAnchor(element, frameName)
+    if element == ZO_FocusedQuestTrackerPanel then
+        Unlock.ApplyDynamicEventsTrackerToQuest()
+    end
+    if element == Unlock.activeCombatTipsAnchor then
+        Unlock.ApplyActiveCombatTipsAnchors()
+    end
+end
+
 --- Called when an element mover is adjusted and on initialization to update all positions
 function Unlock.SetElementPosition()
     for element, config in pairs(Unlock.defaultPanels) do
-        local frameName = element:GetName()
+        local frameName = Unlock.GetUnlockPositionAttr(element)
         if LUIE.SV[frameName] then
             Unlock.AdjustElement(element, config)
             Unlock.SetAnchor(element, frameName)
         end
     end
 
-    -- Apply custom templates
-    Unlock.ReplaceDefaultTemplate(ACTIVE_COMBAT_TIP_SYSTEM, "ApplyStyle", "ZO_ActiveCombatTips")
-    Unlock.ReplaceDefaultTemplate(COMPASS_FRAME, "ApplyStyle", "ZO_CompassFrame")
-    Unlock.ReplaceDefaultTemplate(PLAYER_PROGRESS_BAR, "RefreshTemplate", "ZO_PlayerProgress")
-    Unlock.ReplaceDefaultTemplate(ZO_HUDTracker_Base, "RefreshAnchors", "ZO_EndDunHUDTrackerContainer")
-    Unlock.ReplaceDefaultTemplate(ZO_HUDTracker_Base, "RefreshAnchors", "ZO_AdvZoneHUDTrackerContainer")
+    Unlock.ApplyActiveCombatTipsAnchors()
+    Unlock.RegisterUnlockPositionHooks()
     Unlock.RegisterDynamicEventsQuestAnchorHook()
     Unlock.ApplyDynamicEventsTrackerToQuest()
+    Unlock.ApplyAlertFrameAlignment()
 end
 
 --- Setup element movers based on the provided state
@@ -472,11 +761,11 @@ function Unlock.SetupElementMover(state)
         if isFirstRun then
             local mover = Unlock.InitializeElementMover(element, config)
             if mover then
-                Unlock.movers[element:GetName()] = mover
+                Unlock.movers[Unlock.GetUnlockPositionAttr(element)] = mover
             end
         end
 
-        local mover = Unlock.movers[element:GetName()]
+        local mover = Unlock.movers[Unlock.GetUnlockPositionAttr(element)]
         --- @cast mover userdata
         if mover then
             mover:SetMouseEnabled(state)
@@ -491,14 +780,17 @@ function Unlock.SetupElementMover(state)
 
     local gridSize = LUIE.SV.snapToGridSize_default or 15
     GridOverlay.Refresh("default", state and LUIE.SV.snapToGrid_default, gridSize)
+    if state then
+        Unlock.RefreshMoverScreenPositions()
+    end
 end
 
 --- Reset the position of windows. Called from the Settings Menu
 function Unlock.ResetElementPosition()
     for element, _ in pairs(Unlock.defaultPanels) do
-        local frameName = element:GetName()
-        LUIE.SV[frameName] = nil
+        LUIE.SV[Unlock.GetUnlockPositionAttr(element)] = nil
     end
+    LUIE.SV["ZO_ActiveCombatTipsTip"] = nil
     ReloadUI("ingame")
 end
 
@@ -514,6 +806,7 @@ LUIE.ApplyGridSnap = Unlock.ApplyGridSnap
 LUIE.SetElementPosition = Unlock.SetElementPosition
 LUIE.SetupElementMover = Unlock.SetupElementMover
 LUIE.ResetElementPosition = Unlock.ResetElementPosition
+LUIE.ApplyAlertFrameAlignment = Unlock.ApplyAlertFrameAlignment
 
 -- Store the Unlock module in LUIE
 LUIE.Unlock = Unlock
