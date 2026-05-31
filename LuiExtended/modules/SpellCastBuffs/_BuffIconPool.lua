@@ -79,6 +79,7 @@ local function ResetBuffIconControl(buff)
     buff.stack:SetHidden(true)
     if buff.abilityId then
         buff.abilityId:SetText("")
+        buff.abilityId:SetScale(1)
         buff.abilityId:SetHidden(true)
     end
     if buff.name then
@@ -88,6 +89,9 @@ local function ResetBuffIconControl(buff)
         buff.bar.bar:SetValue(0)
     end
     buff.lastAbilityIdText = nil
+    buff.lastAbilityIdLayoutIconSize = nil
+    buff.lastAbilityIdLayoutOutset = nil
+    buff.lastAbilityIdLayoutShown = nil
     buff.lastLabelText = nil
     buff.lastStackText = nil
     buff.lastFlexContainer = nil
@@ -193,6 +197,7 @@ function SpellCastBuffs.GetBuffIconMetaPool(containerKey)
         buff:SetFlexGrow(0)
         buff:SetFlexShrink(0)
         SpellCastBuffs.ApplyBuffIconSlotDimensions(buff, SpellCastBuffs.SV.IconSize)
+        SpellCastBuffs.ApplyBuffIconAbilityIdLayout(buff)
         local borderTexture = SpellCastBuffs.IsDebuffAuraContainer(containerKey) and SpellCastBuffs.GetDebuffBorderTexture() or SpellCastBuffs.GetBuffBorderTexture()
         buff.back:SetTexture(borderTexture)
         SpellCastBuffs.ApplyAbilityFrameTextureCoords(buff.back, SpellCastBuffs.SV.IconSize)

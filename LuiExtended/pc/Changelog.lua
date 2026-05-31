@@ -48,6 +48,15 @@ local changelogSectionBodyPool
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.3.3
+    "|cFFA500LuiExtended Version 7.2.3.3|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs (debug): Show Debug Ability ID no longer cuts off digits on buff icons.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs (debug): Ability IDs show on existing buffs after /reloadui without waiting for them to refresh.",
+    "",
+
     -- Version Header 7.2.3.2
     "|cFFA500LuiExtended Version 7.2.3.2|r",
     "",

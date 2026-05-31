@@ -1,5 +1,12 @@
 # LuiExtended Changelog
 
+## Version 7.2.3.3
+
+### Fixed
+
+- SpellCastBuffs (debug): **Show Debug Ability ID** no longer cuts off digits on buff icons.
+- SpellCastBuffs (debug): Ability IDs show on existing buffs after **/reloadui** without waiting for them to refresh.
+
 ## Version 7.2.3.2
 
 ### New
