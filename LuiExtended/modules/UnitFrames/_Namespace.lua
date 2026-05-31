@@ -150,7 +150,7 @@ UnitFrames.Defaults =
             fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
-            fontOther = 20,
+            fontOther = 16,
             texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
         },
         companion =
@@ -158,7 +158,7 @@ UnitFrames.Defaults =
             fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
-            fontOther = 20,
+            fontOther = 16,
             texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
         },
         pet =
@@ -166,7 +166,7 @@ UnitFrames.Defaults =
             fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
-            fontOther = 20,
+            fontOther = 16,
             texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
         },
         boss =
@@ -174,7 +174,7 @@ UnitFrames.Defaults =
             fontFace = GetString(LUIE_STRING_UF_FONT_DEFAULT),
             fontStyle = FONT_STYLE_SOFT_SHADOW_THIN,
             fontBars = 16,
-            fontOther = 20,
+            fontOther = 16,
             texture = GetString(LUIE_STRING_UF_TEXTURE_DEFAULT),
         },
         ava =

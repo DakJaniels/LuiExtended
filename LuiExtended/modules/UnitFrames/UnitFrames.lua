@@ -178,6 +178,7 @@ function UnitFrames.Initialize(enabled)
     end
 
     UnitFrames.MigrateCustomFrameAppearance()
+    UnitFrames.MigrateCustomFrameAppearanceCompactFontSync()
     UnitFrames.MigratePlayerTargetLabelFormats()
     UnitFrames.MigratePlayerTargetOverlayFlags()
     UnitFrames.MigratePowerOverlayDefaultOff()

@@ -108,6 +108,10 @@ function UnitFrames.GetCustomFrameAppearance(category)
     if not normalized.texture or normalized.texture == "" then
         normalized.texture = defaultAppearance.texture
     end
+    -- Single Font Size slider categories: keep fontOther aligned with fontBars at read time.
+    if not UnitFrames.APPEARANCE_SEPARATE_CAPTION_FONT_CATEGORIES[category] then
+        normalized.fontOther = normalized.fontBars
+    end
     return normalized
 end
 
@@ -160,4 +164,30 @@ function UnitFrames.MigrateCustomFrameAppearance()
     sv.CustomTexture = nil
     LUIE.MarkMigrationDone("unitframes_custom_appearance_v1")
     LUIE.MarkMigrationDone("unitframes_custom_appearance_v2")
+end
+
+--- One-time sync of fontOther to fontBars for compact appearance categories (raid, companion, pet, boss).
+function UnitFrames.MigrateCustomFrameAppearanceCompactFontSync()
+    if LUIE.IsMigrationDone("unitframes_custom_appearance_v3") then
+        return
+    end
+    local sv = UnitFrames.SV
+    if not sv.CustomFrameAppearance then
+        sv.CustomFrameAppearance = {}
+    end
+    for _, category in ipairs(UnitFrames.APPEARANCE_CATEGORY_IDS) do
+        if not UnitFrames.APPEARANCE_SEPARATE_CAPTION_FONT_CATEGORIES[category] then
+            local entry = sv.CustomFrameAppearance[category]
+            if not entry then
+                entry = {}
+                sv.CustomFrameAppearance[category] = entry
+            end
+            if entry.fontBars and entry.fontBars > 0 then
+                entry.fontOther = entry.fontBars
+            elseif entry.fontOther and entry.fontOther > 0 then
+                entry.fontBars = entry.fontOther
+            end
+        end
+    end
+    LUIE.MarkMigrationDone("unitframes_custom_appearance_v3")
 end
