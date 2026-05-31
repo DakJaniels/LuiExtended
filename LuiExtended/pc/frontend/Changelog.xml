@@ -1,7 +1,6 @@
 <!--
       LuiExtended
       License: The MIT License (MIT)
-      Changelog chrome styled like LibFlexUI DefaultTheme (self-contained, no LibFlexUI dependency).
 -->
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/DakJaniels/esoui_gui_xsd/main/esoui_gui_xml.xsd">
