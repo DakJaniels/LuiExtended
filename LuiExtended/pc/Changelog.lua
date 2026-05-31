@@ -48,6 +48,21 @@ local changelogSectionBodyPool
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.3.4
+    "|cFFA500LuiExtended Version 7.2.3.4|r",
+    "",
+    -- New
+    "|cFFFF00New:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Misc Settings (PC) / Settings (console): Alert Text Alignment dropdown (Left, Center, Right) for on-screen combat alerts. Sets the default notification anchor when the frame is not unlocked, re-anchors the scrolling alert buffer to match, and applies the same alignment to wrapped multi-line alert lines on keyboard and gamepad.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: Custom Raid, Companion, Pet, and Boss frames no longer render unit names larger than health/value text on stock settings. The single Font Size control now matches both saved fields and on-screen text without moving the slider first (including a one-time migration for existing profiles).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Active Combat Tips (dodge and synergy help) use a dedicated layout anchor so tips dismiss correctly again; saved positions migrate from the old ZO_ActiveCombatTipsTip unlock key.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Frame mover previews follow each HUD element's on-screen position. Moving one unlocked panel no longer drags other preview overlays with it (for example Equipment Status or Ram when the action bar is moved).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Saved positions for the compass, player XP bar, and HUD trackers are re-applied after ZOS UI refresh (compass style, XP template, tracker anchor refresh) without replacing ZOS template functions.",
+    "",
+
     -- Version Header 7.2.3.3
     "|cFFA500LuiExtended Version 7.2.3.3|r",
     "",
