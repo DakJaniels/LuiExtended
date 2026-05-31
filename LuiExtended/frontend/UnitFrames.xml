@@ -2335,6 +2335,64 @@
         <!-- Pet 7 -->
       </Controls>
     </TopLevelControl>
+    <Backdrop name="LUIE_UF_CompanionAbilitySlot_Template"
+              virtual="true"
+              mouseEnabled="true"
+              centerColor="BF000000"
+              edgeColor="FF000000"
+              hidden="false">
+      <Dimensions x="24"
+                  y="24" />
+      <Edge edgeSize="1" />
+      <Controls>
+        <Texture name="$(parent)_Icon"
+                 textureFile=""
+                 layer="CONTROLS"
+                 hidden="false">
+          <Dimensions x="22"
+                      y="22" />
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)"
+                  relativePoint="CENTER" />
+        </Texture>
+        <Cooldown name="$(parent)_Cooldown"
+                  inherits="ZO_DefaultCooldown"
+                  tier="LOW"
+                  hidden="true">
+          <AnchorFill />
+        </Cooldown>
+        <Cooldown name="$(parent)_EffectCooldown"
+                  inherits="ZO_DefaultCooldown"
+                  tier="LOW"
+                  fillColor="33D9D933"
+                  hidden="true">
+          <AnchorFill />
+        </Cooldown>
+        <Label name="$(parent)_Duration"
+               text=""
+               font="ZoFontGameSmall"
+               color="FFFFFF"
+               horizontalAlignment="CENTER"
+               verticalAlignment="CENTER"
+               hidden="true">
+          <Anchor point="CENTER"
+                  relativeTo="$(parent)"
+                  relativePoint="CENTER" />
+        </Label>
+        <Label name="$(parent)_Stack"
+               text=""
+               font="ZoFontGameSmall"
+               color="FFFFFF"
+               horizontalAlignment="RIGHT"
+               verticalAlignment="TOP"
+               hidden="true">
+          <Anchor point="TOPRIGHT"
+                  relativeTo="$(parent)"
+                  relativePoint="TOPRIGHT"
+                  offsetX="-1" />
+        </Label>
+      </Controls>
+    </Backdrop>
     <TopLevelControl name="LUIE_UF_CompanionFrame_Template"
                      virtual="true"
                      mouseEnabled="false"
@@ -2514,6 +2572,34 @@
                 </Label>
               </Controls>
             </Backdrop>
+            <!-- Hotbar slot suffixes 3–8: ACTION_BAR_FIRST_NORMAL_SLOT_INDEX+1 ..
+            ACTION_BAR_ULTIMATE_SLOT_INDEX+1 -->
+            <Control name="$(parent)_CompanionAbilities"
+                     hidden="false">
+              <Controls>
+                <Backdrop name="$(parent)_SlotBuiltinInterrupt"
+                          inherits="LUIE_UF_CompanionAbilitySlot_Template"
+                          hidden="true" />
+                <Backdrop name="$(parent)_Slot3"
+                          inherits="LUIE_UF_CompanionAbilitySlot_Template"
+                          hidden="true" />
+                <Backdrop name="$(parent)_Slot4"
+                          inherits="LUIE_UF_CompanionAbilitySlot_Template"
+                          hidden="true" />
+                <Backdrop name="$(parent)_Slot5"
+                          inherits="LUIE_UF_CompanionAbilitySlot_Template"
+                          hidden="true" />
+                <Backdrop name="$(parent)_Slot6"
+                          inherits="LUIE_UF_CompanionAbilitySlot_Template"
+                          hidden="true" />
+                <Backdrop name="$(parent)_Slot7"
+                          inherits="LUIE_UF_CompanionAbilitySlot_Template"
+                          hidden="true" />
+                <Backdrop name="$(parent)_Slot8"
+                          inherits="LUIE_UF_CompanionAbilitySlot_Template"
+                          hidden="true" />
+              </Controls>
+            </Control>
           </Controls>
         </Control>
       </Controls>

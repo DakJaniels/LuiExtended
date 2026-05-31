@@ -786,6 +786,10 @@ local function CreateCompanionFrame()
         }
         UnitFrames.CustomFrames["companion"].name:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
         UnitFrames.CustomFrames["companion"][COMBAT_MECHANIC_FLAGS_HEALTH].label.format = "Current (Percentage%)"
+
+        if UnitFrames.companionAbilityTrack then
+            UnitFrames.companionAbilityTrack:CreateControls(UnitFrames.CustomFrames["companion"])
+        end
     end
 end
 

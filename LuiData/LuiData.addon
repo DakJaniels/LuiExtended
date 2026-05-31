@@ -52,6 +52,7 @@ Effects/BarHighlight/BarHighlightDestroFix.lua
 Effects/BarHighlight/BarHighlightExtraId.lua
 Effects/BarHighlight/BarHighlightOverride.lua
 Effects/BarHighlight/BarHighlightStack.lua
+Effects/CompanionAbilityTrack.lua
 Effects/BarHighlight/BarIdOverride.lua
 Effects/BarHighlight/HasAbilityProc.lua
 Effects/BarHighlight/IsAbilityActiveGlow.lua

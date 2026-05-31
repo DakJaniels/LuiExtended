@@ -109,6 +109,7 @@ local DebugStatus = {}
 --- @field BarHighlightStack BarHighlightStack Table of stack-based highlight effects
 --- @field BarHighlightStackConsume table<integer, integer> Bound ability id -> combatTrack stack buff id (consume one stack on cast)
 --- @field BarHighlightStackZeroEffect table<integer, "keep"|"clear"> Track buff id behavior when effect stack count is 0
+--- @field CompanionAbilityTrack CompanionAbilityTrack Slotted companion ability id -> UF icon track data
 --- @field BarIdOverride BarIdOverride Table of bar ID overrides
 --- @field DisguiseIcons EffectsDisguiseIcons Table of disguise icon definitions
 --- @field EffectCreateSkillAura EffectCreateSkillAura Table of skill aura creation definitions
@@ -163,6 +164,7 @@ local Effects =
     BarHighlightStack = {},
     BarHighlightStackConsume = {},
     BarHighlightStackZeroEffect = {},
+    CompanionAbilityTrack = {},
     BarIdOverride = {},
     BlockAndBashCC = {},
     DebuffDisplayOverrideId = {},

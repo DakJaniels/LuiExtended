@@ -230,6 +230,10 @@ function UnitFrames.Initialize(enabled)
     -- Increment so this doesn't occur again.
     coreAw.AdjustVarsUF = 2
 
+    if not UnitFrames.companionAbilityTrack then
+        UnitFrames.companionAbilityTrack = LUIE_CompanionAbilityTrack:New()
+    end
+
     UnitFrames.CreateDefaultFrames()
     UnitFrames.CreateCustomFrames()
     UnitFrames.PlayerDodgePrediction.Initialize()
@@ -255,6 +259,10 @@ function UnitFrames.Initialize(enabled)
     -- Initialize GroupFoodDrinkBuff
     if UnitFrames.GroupFoodDrinkBuff then
         UnitFrames.GroupFoodDrinkBuff.Initialize()
+    end
+
+    if UnitFrames.companionAbilityTrack then
+        UnitFrames.companionAbilityTrack:Initialize()
     end
 
     local function RefreshBossHealthBar(self, smoothAnimate)
@@ -1095,8 +1103,14 @@ function UnitFrames.CompanionUpdate()
             UnitFrames.CustomFramesApplyCompanionInCombat(true)
             UnitFrames.UpdateCompanionCombatGlow()
         end
+        if UnitFrames.companionAbilityTrack then
+            UnitFrames.companionAbilityTrack:RefreshAll()
+        end
     else
         UnitFrames.CustomFrames[unitTag].control:SetHidden(true)
+        if UnitFrames.companionAbilityTrack then
+            UnitFrames.companionAbilityTrack:RefreshAll()
+        end
     end
 end
 
@@ -3842,13 +3856,31 @@ function UnitFrames.CustomFramesApplyLayoutCompanion(unhide)
     local companion = UnitFrames.CustomFrames["companion"].tlw
     local unitFrame = UnitFrames.CustomFrames["companion"]
 
-    companion:SetDimensions(UnitFrames.SV.CompanionWidth, UnitFrames.SV.CompanionHeight)
+    local barHeight = UnitFrames.SV.CompanionHeight
+    local barWidth = UnitFrames.SV.CompanionWidth
+    local abilityExtra = 0
+    if UnitFrames.companionAbilityTrack then
+        abilityExtra = UnitFrames.companionAbilityTrack:GetCompanionFrameExtraHeight()
+    end
+    local totalHeight = barHeight + abilityExtra
+
+    companion:SetDimensions(barWidth, totalHeight)
     unitFrame.control:ClearAnchors()
     unitFrame.control:SetAnchorFill(companion)
-    unitFrame.control:SetDimensions(UnitFrames.SV.CompanionWidth, UnitFrames.SV.CompanionHeight)
-    local companionNameHeight = resolveCompactNameHeight("companion", UnitFrames.SV.CompanionHeight)
-    ApplyClippedNameWidth(unitFrame.name, zo_max(0, UnitFrames.SV.CompanionWidth - UnitFrames.SV.CompanionNameClip - 10), companionNameHeight)
-    unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(UnitFrames.SV.CompanionWidth - 50, UnitFrames.SV.CompanionHeight - 2)
+    unitFrame.control:SetDimensions(barWidth, totalHeight)
+
+    local healthBackdrop = unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].backdrop
+    healthBackdrop:ClearAnchors()
+    healthBackdrop:SetAnchor(TOPLEFT, unitFrame.control, TOPLEFT)
+    healthBackdrop:SetDimensions(barWidth, barHeight)
+
+    local companionNameHeight = resolveCompactNameHeight("companion", barHeight)
+    ApplyClippedNameWidth(unitFrame.name, zo_max(0, barWidth - UnitFrames.SV.CompanionNameClip - 10), companionNameHeight)
+    unitFrame[COMBAT_MECHANIC_FLAGS_HEALTH].label:SetDimensions(barWidth - 50, barHeight - 2)
+
+    if UnitFrames.companionAbilityTrack then
+        UnitFrames.companionAbilityTrack:ApplyLayout()
+    end
 
     UnitFrames.CustomFramesTryUnhideTlw("companion", unhide)
 end

@@ -354,6 +354,15 @@ UnitFrames.Defaults =
     CompanionEnablePower = false,
     CompanionCombatGlow = false,
     CompanionCombatGlowColor = { 1, 0, 0, 1 },
+    CompanionAbilityTrack =
+    {
+        enabled = false,
+        iconSize = 24,
+        iconSpacing = 2,
+        showEffectTimer = true,
+        showStacks = true,
+        showBuiltinInterrupt = true,
+    },
     BarAlignPlayerHealth = 1,
     BarAlignPlayerMagicka = 1,
     BarAlignPlayerStamina = 1,

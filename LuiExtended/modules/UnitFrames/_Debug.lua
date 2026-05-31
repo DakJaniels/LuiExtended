@@ -543,26 +543,30 @@ local function geometrySVForCategory(category)
         -- Mirrors applyIconSettings: iconOption == 1 means no icon (offset 10),
         -- otherwise role/class icon is shown and the name is inset further (offset 27).
         local offset = (iconOption == 1) and 10 or 27
-        return {
+        return
+        {
             barWidth = sv.RaidBarWidth,
             clip = sv.RaidNameClip,
             iconOption = iconOption,
             expectedNameWidth = zo_max(0, sv.RaidBarWidth - sv.RaidNameClip - offset),
         }
     elseif category == "pet" then
-        return {
+        return
+        {
             barWidth = sv.PetWidth,
             clip = sv.PetNameClip,
             expectedNameWidth = zo_max(0, sv.PetWidth - sv.PetNameClip - 10),
         }
     elseif category == "companion" then
-        return {
+        return
+        {
             barWidth = sv.CompanionWidth,
             clip = sv.CompanionNameClip,
             expectedNameWidth = zo_max(0, sv.CompanionWidth - sv.CompanionNameClip - 10),
         }
     elseif category == "boss" then
-        return {
+        return
+        {
             barWidth = sv.BossBarWidth,
             expectedNameWidth = zo_max(0, sv.BossBarWidth - 50),
         }

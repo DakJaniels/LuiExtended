@@ -4466,6 +4466,94 @@ function UnitFrames.CreateConsoleSettings()
             end,
             default = Defaults.CompanionUseClassColor,
         }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_HEADER),
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_ENABLE),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_ENABLE_TP),
+            getFunction = function ()
+                return Settings.CompanionAbilityTrack.enabled
+            end,
+            setFunction = function (value)
+                Settings.CompanionAbilityTrack.enabled = value
+                UnitFrames.CustomFramesApplyLayoutCompanion(false)
+                if UnitFrames.companionAbilityTrack then
+                    UnitFrames.companionAbilityTrack:RefreshAll()
+                end
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion)
+            end,
+            default = Defaults.CompanionAbilityTrack.enabled,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_SLIDER,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_ICON_SIZE),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_ICON_SIZE_TP),
+            min = 16,
+            max = 40,
+            step = 1,
+            getFunction = function ()
+                return Settings.CompanionAbilityTrack.iconSize
+            end,
+            setFunction = function (value)
+                Settings.CompanionAbilityTrack.iconSize = value
+                UnitFrames.CustomFramesApplyLayoutCompanion(false)
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion and Settings.CompanionAbilityTrack.enabled)
+            end,
+            default = Defaults.CompanionAbilityTrack.iconSize,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_SHOW_EFFECT),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_SHOW_EFFECT_TP),
+            getFunction = function ()
+                return Settings.CompanionAbilityTrack.showEffectTimer
+            end,
+            setFunction = function (value)
+                Settings.CompanionAbilityTrack.showEffectTimer = value
+                if UnitFrames.companionAbilityTrack then
+                    UnitFrames.companionAbilityTrack:RefreshAll()
+                end
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion and Settings.CompanionAbilityTrack.enabled)
+            end,
+            default = Defaults.CompanionAbilityTrack.showEffectTimer,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_SHOW_STACKS),
+            tooltip = GetString(LUIE_STRING_LAM_UF_CFRAMESCOMPANION_ABILITIES_SHOW_STACKS_TP),
+            getFunction = function ()
+                return Settings.CompanionAbilityTrack.showStacks
+            end,
+            setFunction = function (value)
+                Settings.CompanionAbilityTrack.showStacks = value
+                if UnitFrames.companionAbilityTrack then
+                    UnitFrames.companionAbilityTrack:RefreshAll()
+                end
+            end,
+            disable = function ()
+                return not (LUIE.SV.UnitFrames_Enabled and Settings.CustomFramesCompanion and Settings.CompanionAbilityTrack.enabled)
+            end,
+            default = Defaults.CompanionAbilityTrack.showStacks,
+        }
     end)
 
     -- Build Custom Unit Frames (Pet) Options Section
