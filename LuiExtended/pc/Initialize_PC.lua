@@ -21,15 +21,13 @@ local function LoadSavedVars()
     if LUIE.SV.CharacterSpecificSV then
         LUIE.SV = ZO_SavedVars:New(LUIE.SVName, LUIE.SVVer, nil, LUIE.Defaults, profile)
     end
+    -- -----------------------------------------------------------------------------
 
     LUIE.MigrateSplitModuleSavedVarsFromLuiESV()
     LUIE.RepairSplitModuleSavedVarsFromLegacy()
     LUIE.PruneLegacyLuiESVDefaultProfileBranch()
     LUIE.MigrateChatOutputToCore()
-
-    if _G["Srendarr"] then
-        LUIE.InstallExternalSavedVarsLegacyCompat()
-    end
+    LUIE.ScheduleDebugEnvironmentReconcile()
 end
 
 --- - **EVENT_PLAYER_ACTIVATED **
@@ -39,8 +37,16 @@ end
 local function LoadScreen(eventId, initial)
     eventManager:UnregisterForEvent(LUIE.name, EVENT_PLAYER_ACTIVATED)
     --
+    LUIE.ReconcileDebugEnvironmentSavedVars()
     LUIE.ShowDebugEnvironmentPendingChat()
     --
+    -- -----------------------------------------------------------------------------
+
+    if _G["Srendarr"] then
+        LUIE.InstallExternalSavedVarsLegacyCompat()
+    end
+    -- -----------------------------------------------------------------------------
+
     -- Set Positions for moved Default UI elements
     LUIE.SetElementPosition()
     if not LUIE.SV.StartupInfo then
@@ -51,6 +57,7 @@ end
 -- Register events.
 local function RegisterEvents()
     eventManager:RegisterForEvent(LUIE.name, EVENT_PLAYER_ACTIVATED, LoadScreen)
+    -- -----------------------------------------------------------------------------
 
     -- Event registrations
     if LUIE.SV.SlashCommands_Enable or LUIE.SV.ChatAnnouncements_Enable then
@@ -73,6 +80,8 @@ function LUIE:InitializeHooks()
     self.HookKeyboardIcons()
     self.HookKeyboardStats()
     self.HookKeyboardMap()
+
+    self.RegisterDebugEnvironmentLogoutHooks()
 end
 
 --- - **EVENT_ADD_ON_LOADED **

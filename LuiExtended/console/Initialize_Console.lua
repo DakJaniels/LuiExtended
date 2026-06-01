@@ -20,6 +20,7 @@ local function LoadScreen(eventId, initial)
     if not LUIE.SV.StartupInfo and initial then
         LUIE.PrintToChat(zo_strformat("|cFFFFFF<<1>> by|r |c00C000<<2>>|r |cFFFFFFv<<3>>|r", LUIE.name, LUIE.author, LUIE.version), true)
     end
+    LUIE.ReconcileDebugEnvironmentSavedVars()
     LUIE.ShowDebugEnvironmentPendingChat()
     if LibDebugLogger then
         LibDebugLogger:ClearLog()
@@ -47,6 +48,7 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.RepairSplitModuleSavedVarsFromLegacy()
     LUIE.PruneLegacyLuiESVDefaultProfileBranch()
     LUIE.MigrateChatOutputToCore()
+    LUIE.ScheduleDebugEnvironmentReconcile()
     LUIE.UpdateGuildData(nil, nil, nil, nil)
     -- -----------------------------------------------------------------------------
     -- Initialize Hooks
@@ -56,6 +58,7 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.HookGamePadIcons()
     LUIE.HookGamePadStats()
     LUIE.HookGamePadMap()
+    LUIE.RegisterDebugEnvironmentLogoutHooks()
     --
     LUIE.OtherAddonCompatability.isActionDurationReminderEnabled = LUIE.IsItEnabled("ActionDurationReminder")
     LUIE.OtherAddonCompatability.isCrutchAlertsEnabled = LUIE.IsItEnabled("CrutchAlerts")
