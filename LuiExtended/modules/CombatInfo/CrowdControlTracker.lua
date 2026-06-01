@@ -1423,7 +1423,7 @@ end
 --- Build the static keyframe layout for an animType on a given control.
 --- Called only on cache miss; subsequent plays mutate alpha/scale values
 --- via the cached animation references in `cacheEntry.dynamics`.
---- @param self LuiExtended.CrowdControlTracker
+--- @param self CrowdControlTracker
 --- @param control Control
 --- @param animType "proc"|"end"|"endstagger"|"silence"|"stagger"|"immune"
 --- @return table { timeline, dynamics, controlScale, immuneDisplayTime, anchor }
