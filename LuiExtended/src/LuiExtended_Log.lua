@@ -10,7 +10,7 @@ local LUIE = LUIE
 LUIE.log_to_chat = false
 LUIE.log_stack_traces = true
 
--- Deferred log processing (coroutine-based, no LibAsync)
+local LOG_PROCESSOR_UPDATE = "LUIE_LogProcessor"
 local log_queue = {}
 local log_processor_scheduled = false
 
@@ -61,29 +61,25 @@ local function create_log(log_type, log_content)
     end
 end
 
--- Persistent coroutine: pop one job, create_log, yield (driven by schedule below)
-local log_co = coroutine.create(function ()
-    while true do
-        local job = table.remove(log_queue, 1)
-        if job then
-            create_log(job[1], job[2] or "[nil]")
-        end
-        coroutine.yield()
+local function process_next_log_job()
+    local job = table.remove(log_queue, 1)
+    if job then
+        create_log(job[1], job[2] or "[nil]")
     end
-end)
+end
+
+local function on_log_processor_update()
+    process_next_log_job()
+    if #log_queue == 0 then
+        GetEventManager():UnregisterForUpdate(LOG_PROCESSOR_UPDATE)
+        log_processor_scheduled = false
+    end
+end
 
 local function schedule_log_processor()
     if log_processor_scheduled then return end
     log_processor_scheduled = true
-    local eventManager = GetEventManager()
-    eventManager:RegisterForPostEffectsUpdate("LUIE_LogProcessor", 0, function ()
-        eventManager:UnregisterForPostEffectsUpdate("LUIE_LogProcessor")
-        coroutine.resume(log_co)
-        log_processor_scheduled = false
-        if #log_queue > 0 then
-            schedule_log_processor()
-        end
-    end)
+    GetEventManager():RegisterForUpdate(LOG_PROCESSOR_UPDATE, 0, on_log_processor_update)
 end
 
 local function emit_message(log_type, text)
