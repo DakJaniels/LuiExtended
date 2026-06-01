@@ -29,6 +29,9 @@ local addNoDurationBarHighlight =
     [124165] = true, -- Deaden Pain
     [124193] = true, -- Necrotic Potency
     [118814] = true, -- Enduring Undeath
+
+    -- Two Handed
+    [61737] = true, -- Empower (Wrecking Blow); API Dur 0 until combat refresh
 }
 
 Effects.AddNoDurationBarHighlight = addNoDurationBarHighlight

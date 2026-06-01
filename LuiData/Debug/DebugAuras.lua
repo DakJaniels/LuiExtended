@@ -6395,7 +6395,7 @@ local debugAuras =
     [29389] = true, -- Follow Up (Rank 1)
     [60860] = true, -- Bonus Damage
     [45446] = true, -- Follow Up (Rank 2)
-    [60888] = true, -- Bonus Damage
+    [60888] = true, -- Bonus Damage (Follow Up - Rank 2)
 
     [29391] = true, -- Battle Rush (Rank 1)
     [29392] = true, -- Battle Rush
@@ -6409,8 +6409,10 @@ local debugAuras =
     [28279] = true,  -- Uppercut (Uppercut)
 
     [38814] = true,  -- Dizzying Swing (Dizzying Swing)
-    [131562] = true, -- Off Balance (Dizzying Swing)
-    [137807] = true, -- Dizzying Swing (Dizzying Swing)
+    [131562] = true, -- Off Balance (Dizzying Swing, 7s)
+    [16825] = true,  -- Off Balance Exploit stun (Dizzying re-hit, 2s)
+    [137807] = true, -- Dizzying Swing snare (OB immune, 2s)
+    [134599] = true, -- Off Balance Immunity (clears OB; log 15s on dummy)
 
     [38807] = true,  -- Wrecking Blow (Wrecking Blow)
     [147423] = true, -- Empower (Wrecking Blow)
@@ -6432,8 +6434,10 @@ local debugAuras =
     [38782] = true,  -- Critical Rush (Critical Rush)
 
     [20919] = true,  -- Cleave (Cleave)
+    [159717] = true, -- Cleave (damage shield)
 
     [38745] = true,  -- Carve (Carve)
+    [159728] = true, -- Carve (damage shield)
     [38747] = true,  -- Carve Bleed (Carve)
 
     [38754] = true,  -- Brawler (Brawler)
@@ -6473,12 +6477,17 @@ local debugAuras =
     [126497] = true, -- Onslaught (Onslaught)
     [83230] = true,  -- Onslaught (Onslaught)
     [83231] = true,  -- Onslaught (Onslaught)
+    [261753] = true, -- Onslaught (U49 bundle)
 
     [83238] = true,  -- Berserker Rage (Berserker Rage)
     [126492] = true, -- Berserker Rage (Berserker Rage)
     [83239] = true,  -- Berserker Rage (Berserker Rage)
+    [28301] = true,  -- CC Immunity (Berserker Rage)
     [83240] = true,  -- Berserker Rage (Berserker Rage)
     [83241] = true,  -- Berserker Rage (Berserker Rage)
+    [61737] = true,  -- Empower (Wrecking Blow)
+    [61745] = true,  -- Major Berserk (Wrecking Blow)
+    [188408] = true, -- Major Berserk (Wrecking Blow combat)
 
     -------------------------------------
     -- ONE HAND AND SHIELD PASSIVES -----

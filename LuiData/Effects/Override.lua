@@ -306,7 +306,7 @@ local effectOverride =
 
     -- Off-Balance Exploit
     [16825] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN },  -- Off-Balance Exploit
-    [18793] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN },  -- Off Balance Exploit
+    [18793] = { hide = true }, -- Off Balance Exploit bundle (0 ms; parallel to 16825 — Dizzying log)
     [44364] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN },  -- Off-Balance Exploit
     [126567] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN }, -- Off-Balance Exploit
     [126568] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN }, -- Off-Balance Exploit
@@ -3542,8 +3542,10 @@ local effectOverride =
     ----------------------------------------------------------------
 
     -- Two Handed
-    [30821] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEAPON_FORCEFUL_DDS },                                                                    -- Forceful (Rank 1)
-    [45445] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEAPON_FORCEFUL_DDS },                                                                    -- Forceful (Rank 2)
+    [29387] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEAPON_FORCEFUL_DDS },                                                                    -- Forceful (Rank 1)
+    [45444] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_WEAPON_FORCEFUL_DDS },                                                                    -- Forceful (Rank 2)
+    [30821] = { hide = true },                                                                                                                      -- Forceful (stale equip id)
+    [45445] = { hide = true },                                                                                                                      -- Forceful (stale equip id)
     [29375] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_WEAPON_HEAVY_WEAPONS_DDS },                                                               -- Heavy Weapons (Rank 1)
     [45430] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_WEAPON_HEAVY_WEAPONS_DDS },                                                               -- Heavy Weapons (Rank 2)
     [29388] = { icon = LUIE_MEDIA_ICONS_ABILITIES_PASSIVE_WEAPON_BALANCED_BLADE_DDS },                                                              -- Balanced Blade (Rank 1)
@@ -3616,15 +3618,17 @@ local effectOverride =
     -- TWO HANDED ACTIVES -------------------
     -----------------------------------------
 
-    -- Uppercut / Dizzying Swing / Wrecking Blow
-    [131562] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                   -- Off Balance (Dizzying Swing)
-    [137807] = { icon = "/esoui/art/icons/ability_2handed_001_a.dds", tooltip = Tooltips.Generic_Snare, tooltipValue2 = 40 }, -- Dizzying Swing (Dizzying Swing)
+    -- Uppercut / Dizzying Swing / Wrecking Blow (16825/18793: innate Off-Balance Exploit block ~308; bar: BarHighlightOverride)
+    [131562] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                   -- Off Balance (Dizzying Swing, 7s)
+    [137807] = { icon = "/esoui/art/icons/ability_2handed_001_a.dds", tooltip = Tooltips.Generic_Snare, tooltipValue2 = 40 }, -- Dizzying Swing snare (OB immune, 2s)
 
     -- Critical Charge / Stampede / Critical Rush
     [38791] = { tooltip = Tooltips.Skill_Stampede },                                               -- Stampede (Stampede)
     [126474] = { tooltip = Tooltips.Generic_AOE_Physical, tooltipValue2 = 1, groundLabel = true }, -- Stampede (Stampede)
 
     -- Cleave / Carve / Brawler
+    [159717] = { tooltip = Tooltips.Generic_Damage_Shield_Duration }, -- Cleave (damage shield)
+    [159728] = { tooltip = Tooltips.Generic_Damage_Shield_Duration }, -- Carve (damage shield)
     [38747] = { tooltip = Tooltips.Generic_Bleed, tooltipValue2 = 2 }, -- Carve Bleed (Carve)
     [38763] = { tooltip = Tooltips.Generic_Damage_Shield_Duration },   -- Brawler (Brawler)
 
@@ -3640,7 +3644,19 @@ local effectOverride =
     [126497] = { icon = "/esoui/art/icons/ability_2handed_006_a.dds" }, -- Onslaught (Onslaught)
     [83230] = { tooltip = Tooltips.Skill_Onslaught },                   -- Onslaught (Onslaught)
     [126492] = { icon = "/esoui/art/icons/ability_2handed_006_b.dds" }, -- Berserker Rage (Berserker Rage)
-    [83239] = { tooltip = Tooltips.Skill_Berserker_Rage },              -- Berserker Rage (Berserker Rage)
+    [83239] = { tooltip = Tooltips.Skill_Berserker_Rage },              -- Berserker Rage (Berserker Rage); CC immunity 28301 --> innate block ~326
+
+    [83221] = { hide = true },   -- Berserker Strike (parallel combat)
+    [83231] = { hide = true },   -- Onslaught (parallel combat)
+    [261753] = { hide = true },  -- Onslaught (U49 bundle)
+    [83240] = { hide = true },   -- Berserker Rage (parallel combat)
+    [83241] = { hide = true },   -- Berserker Rage (parallel combat)
+    [38773] = { hide = true },   -- Brawler (short combat ticks)
+    [38774] = { hide = true },   -- Brawler (short combat ticks)
+    [147423] = { hide = true },  -- Empower (Wrecking Blow combat)
+    [188408] = { hide = true },  -- Major Berserk (Wrecking Blow combat)
+    [60895] = { hide = true },   -- Rally Heal Buff (combat ticks)
+    [157657] = { hide = true },  -- Rally (combat noise)
 
     -----------------------------------------
     -- ONE HAND AND SHIELD ACTIVES ----------

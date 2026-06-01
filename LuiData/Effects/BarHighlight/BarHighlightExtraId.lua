@@ -102,6 +102,13 @@ local barHighlightExtraId =
     [143948] = 118354, -- Empowering Grasp
     [143949] = 118354, -- Empowering Grasp
 
+    -- Two Handed
+    [16825] = 38814,  -- Off Balance Exploit stun --> Dizzying Swing (bar slot)
+    [137807] = 38814, -- OB immune snare --> Dizzying Swing (bar slot)
+    [126475] = 38788, -- Stampede player track --> slotted Stampede (Merciless 99789 is primary newId on 38788)
+    [147423] = 38807, -- Empower combat --> Wrecking Blow
+    [188408] = 38807, -- Major Berserk combat --> Wrecking Blow
+
     -- Bow
     [38707] = 100302,  -- Bombard --> Piercing Spray
     [38703] = 100302,  -- Acid Spray --> Piercing Spray

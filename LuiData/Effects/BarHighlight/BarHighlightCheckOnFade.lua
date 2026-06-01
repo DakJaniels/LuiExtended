@@ -71,6 +71,9 @@ local barHighlightCheckOnFade =
     [118354] = { id1 = 118354, id2 = 143948, id3 = 143949, unitTag = TARGET_UNIT_TAG }, -- Minor Maim --> Empowering Grasp / Minor Maim
 
     -- Two Handed
+    [131562] = { id1 = 131562, id2 = 16825, id3 = 137807, unitTag = TARGET_UNIT_TAG }, -- Dizzying Swing OB 7s / exploit stun 2s / immune snare 2s
+    [16825] = { id1 = 16825, id2 = 131562, id3 = 137807, unitTag = TARGET_UNIT_TAG },
+    [137807] = { id1 = 137807, id2 = 131562, id3 = 16825, unitTag = TARGET_UNIT_TAG },
     [38797] = { duration = 38794, durationMod = 38797, unitTag = PLAYER_UNIT_TAG }, -- Forward Momentum --> Major Brutality / Minor Endurance
 
     -- Dual Wield
