@@ -349,6 +349,8 @@ local strings =
     LUIE_STRING_CA_MAIL_ERROR_NO_COD_VALUE = "You must set the Cash on Delivery amount.",
     LUIE_STRING_CA_MAIL_SENDMAILRESULT2 = "Unknown player.",            -- Fixing missing periods on default strings
     LUIE_STRING_CA_MAIL_SENDMAILRESULT3 = "Recipient's Inbox is full.", -- Fixing missing periods on default strings
+    -- Must match in-game guild store sale mail subject (SI / client string) for detection.
+    LUIE_STRING_CA_MAIL_GUILD_STORE_ITEM_SOLD_SUBJECT = "Item Sold",
     LUIE_STRING_CA_MARA_PLEDGEOFMARARESULT0 = "|cFFFFFF<<1>>|r is too busy to pledge with.",
     LUIE_STRING_CA_MARA_PLEDGEOFMARARESULT1 = "You can't join in the Ritual of Mara with a player who is dead.",
     LUIE_STRING_CA_MARA_PLEDGEOFMARARESULT2 = "Beginning Ritual of Mara with |cFFFFFF<<1>>|r.",
