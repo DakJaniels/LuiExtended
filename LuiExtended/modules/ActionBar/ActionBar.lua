@@ -2057,6 +2057,70 @@ function ActionBar.ApplyProcSound(menu)
 end
 
 -- -----------------------------------------------------------------------------
+--- Applies player-style ultimate value/percent labels (tier colors on value, hide rules on percent).
+--- @param labelVal LabelControl|nil
+--- @param labelPct LabelControl|nil
+--- @param labelEnabled boolean
+--- @param pctEnabled boolean
+--- @param hideFull boolean Hide percent label when at 100% (value label stays visible).
+--- @param powerValue integer
+--- @param cost integer
+--- @param pct integer 0-100
+--- @param checkToggledUltimate boolean When true, hide percent if player slot 8 toggle is showing.
+local function ApplyUltimateSlotLabels(labelVal, labelPct, labelEnabled, pctEnabled, hideFull, powerValue, cost, pct, checkToggledUltimate)
+    if not labelEnabled and not pctEnabled then
+        return
+    end
+    if labelPct and pctEnabled then
+        labelPct:SetText(pct .. "%")
+    end
+    if labelVal and labelEnabled then
+        labelVal:SetText(powerValue .. "/" .. cost)
+    end
+    if pct < 100 then
+        local setHiddenPct = not pctEnabled
+        if checkToggledUltimate then
+            local c8 = GetCustomToggleControl(8)
+            if ActionBar.SV.ShowToggledUltimate and c8 and not c8:IsHidden() then
+                setHiddenPct = true
+            end
+        end
+        if labelPct then
+            labelPct:SetHidden(setHiddenPct)
+        end
+        if labelVal and labelEnabled then
+            for i = #uiUltimate.pctColours, 1, -1 do
+                if pct < uiUltimate.pctColours[i].pct then
+                    local color = uiUltimate.pctColours[i].colour
+                    labelVal:SetColor(color[1], color[2], color[3], color[4])
+                    break
+                end
+            end
+        end
+    else
+        local setHiddenPct = not pctEnabled
+        if checkToggledUltimate then
+            local c8 = GetCustomToggleControl(8)
+            if (ActionBar.SV.ShowToggledUltimate and c8 and not c8:IsHidden()) or hideFull then
+                setHiddenPct = true
+            end
+        elseif hideFull then
+            setHiddenPct = true
+        end
+        if labelPct then
+            labelPct:SetHidden(setHiddenPct)
+        end
+        if labelVal and labelEnabled then
+            local color = uiUltimate.colour
+            labelVal:SetColor(color[1], color[2], color[3], color[4])
+        end
+    end
+    if labelVal then
+        labelVal:SetHidden(not labelEnabled)
+    end
+end
+
+-- -----------------------------------------------------------------------------
 -- Resets the ultimate labels on menu option change
 --- Re-anchors ultimate percent label using SV UltimateLabelPosition.
 function ActionBar.ResetUltimateLabel()
@@ -2086,9 +2150,9 @@ function ActionBar.CreateCompanionUltimateLabels()
     ultimateValueLabel:SetAnchor(BOTTOM, companionButton, TOP, 0, -3)
     ultimateValueLabel:SetFont("$(BOLD_FONT)|16|soft-shadow-thick")
     ultimateValueLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
-    ultimateValueLabel:SetVerticalAlignment(TEXT_ALIGN_TOP)
+    ultimateValueLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
     ultimateValueLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
-    ultimateValueLabel:SetHidden(not ActionBar.SV.CompanionUltimateLabelEnabled)
+    ultimateValueLabel:SetHidden(true)
     uiCompanionUltimate.LabelVal = ultimateValueLabel
 
     local ultimatePctLabel = companionButton:CreateControl("$(parent)LUIECompanionLabelPct", CT_LABEL)
@@ -2098,10 +2162,8 @@ function ActionBar.CreateCompanionUltimateLabels()
     ultimatePctLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
     ultimatePctLabel:SetAnchor(TOPLEFT, companionButton)
     ultimatePctLabel:SetAnchor(BOTTOMRIGHT, companionButton, nil, 0, -ActionBar.SV.CompanionUltimateLabelPosition)
-    ultimatePctLabel:SetColor(unpack(ActionBar.SV.CompanionUltimateColorDefault))
-    ultimatePctLabel:SetDrawLayer(DL_OVERLAY)
-    ultimatePctLabel:SetDrawTier(DT_HIGH)
-    ultimatePctLabel:SetHidden(not ActionBar.SV.CompanionUltimatePctEnabled)
+    ultimatePctLabel:SetColor(unpack(uiUltimate.colour))
+    ultimatePctLabel:SetHidden(true)
     uiCompanionUltimate.LabelPct = ultimatePctLabel
 
     g_companionUltimateLabelsCreated = true
@@ -2173,23 +2235,18 @@ function ActionBar.UpdateCompanionUltimateLabel(optCurrent)
     end
 
     local sv = ActionBar.SV
-    if uiCompanionUltimate.LabelVal and sv.CompanionUltimateLabelEnabled then
-        uiCompanionUltimate.LabelVal:SetText(current .. "/" .. maxCost)
-        local hideVal = sv.CompanionUltimateHideFull and current >= maxCost
-        uiCompanionUltimate.LabelVal:SetHidden(hideVal)
-    end
-
-    if uiCompanionUltimate.LabelPct and sv.CompanionUltimatePctEnabled then
-        local colourRow = sv.CompanionUltimateColor50
-        if pct >= 100 then
-            colourRow = sv.CompanionUltimateColor100
-        elseif pct >= 80 then
-            colourRow = sv.CompanionUltimateColor80
-        end
-        uiCompanionUltimate.LabelPct:SetColor(unpack(colourRow))
-        uiCompanionUltimate.LabelPct:SetText(pct .. "%")
-        local hidePct = sv.CompanionUltimateHideFull and current >= maxCost
-        uiCompanionUltimate.LabelPct:SetHidden(hidePct)
+    if sv.CompanionUltimateLabelEnabled or sv.CompanionUltimatePctEnabled then
+        ApplyUltimateSlotLabels(
+            uiCompanionUltimate.LabelVal,
+            uiCompanionUltimate.LabelPct,
+            sv.CompanionUltimateLabelEnabled,
+            sv.CompanionUltimatePctEnabled,
+            sv.CompanionUltimateHideFull,
+            current,
+            maxCost,
+            pct,
+            true
+        )
     end
 end
 
@@ -2210,12 +2267,6 @@ function ActionBar.OnActiveCompanionStateChanged(newState)
     RefreshCompanionQuickslotAnchors()
     local active = newState == COMPANION_STATE_ACTIVE
     if active then
-        if uiCompanionUltimate.LabelVal and ActionBar.SV.CompanionUltimateLabelEnabled then
-            uiCompanionUltimate.LabelVal:SetHidden(false)
-        end
-        if uiCompanionUltimate.LabelPct and ActionBar.SV.CompanionUltimatePctEnabled then
-            uiCompanionUltimate.LabelPct:SetHidden(false)
-        end
         ActionBar.UpdateCompanionUltimateLabel()
     else
         if uiCompanionUltimate.LabelVal then
@@ -4309,53 +4360,19 @@ function ActionBar.OnPowerUpdatePlayer(unitTag, powerIndex, powerType, powerValu
     end
     -- Update the tooltip only when the slot is used and percentage is enabled
     if IsSlotUsed(g_ultimateSlot, g_hotbarCategory) then
-        if ActionBar.SV.UltimateLabelEnabled or ActionBar.SV.UltimatePctEnabled then
-            -- Set % value
-            if ActionBar.SV.UltimatePctEnabled then
-                uiUltimate.LabelPct:SetText(pct .. "%")
-            end
-            -- Set label value
-            if ActionBar.SV.UltimateLabelEnabled then
-                uiUltimate.LabelVal:SetText(powerValue .. "/" .. g_ultimateCost)
-            end
-            -- Pct label: show always when less then 100% and possibly if UltimateHideFull is false
-            if pct < 100 then
-                -- Check Ultimate Percent Setting & if slot is used then check if the slot is currently showing a toggle
-                local setHiddenPct = not ActionBar.SV.UltimatePctEnabled
-                local c8 = GetCustomToggleControl(8)
-                if ActionBar.SV.ShowToggledUltimate and c8 and not c8:IsHidden() then
-                    setHiddenPct = true
-                end
-                uiUltimate.LabelPct:SetHidden(setHiddenPct)
-                -- Update Label Color
-                if ActionBar.SV.UltimateLabelEnabled then
-                    for i = #uiUltimate.pctColours, 1, -1 do
-                        if pct < uiUltimate.pctColours[i].pct then
-                            local color = uiUltimate.pctColours[i].colour
-                            local r, g, b, a = color[1], color[2], color[3], color[4]
-                            uiUltimate.LabelVal:SetColor(r, g, b, a)
-                            break
-                        end
-                    end
-                end
-            else
-                -- Check Ultimate Percent Setting & if slot is used then check if the slot is currently showing a toggle
-                local setHiddenPct = not ActionBar.SV.UltimatePctEnabled
-                local c8 = GetCustomToggleControl(8)
-                if (ActionBar.SV.ShowToggledUltimate and c8 and not c8:IsHidden()) or ActionBar.SV.UltimateHideFull then
-                    setHiddenPct = true
-                end
-                uiUltimate.LabelPct:SetHidden(setHiddenPct)
-                -- Update Label Color
-                if ActionBar.SV.UltimateLabelEnabled then
-                    local color = uiUltimate.colour
-                    local r, g, b, a = color[1], color[2], color[3], color[4]
-                    uiUltimate.LabelVal:SetColor(r, g, b, a)
-                end
-            end
-            -- Set label hidden or showing
-            local setHiddenLabel = not ActionBar.SV.UltimateLabelEnabled
-            uiUltimate.LabelVal:SetHidden(setHiddenLabel)
+        local sv = ActionBar.SV
+        if sv.UltimateLabelEnabled or sv.UltimatePctEnabled then
+            ApplyUltimateSlotLabels(
+                uiUltimate.LabelVal,
+                uiUltimate.LabelPct,
+                sv.UltimateLabelEnabled,
+                sv.UltimatePctEnabled,
+                sv.UltimateHideFull,
+                powerValue,
+                g_ultimateCost,
+                pct,
+                true
+            )
         end
     else
         uiUltimate.LabelPct:SetHidden(true)
