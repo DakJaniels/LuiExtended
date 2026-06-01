@@ -7,7 +7,6 @@
 --- @class (partial) LUIE.CombatInfo.Block
 
 local LUIE = LUIE
-local UI = LUIE.UI
 --- @class (partial) LUIE.CombatInfo
 local CombatInfo = LUIE.CombatInfo
 --- @class (partial) Block
@@ -566,18 +565,23 @@ local function CreateBloodlordEmbraceWindow()
         CombatInfo.SV.block.bloodlordEmbracePosition = { left = x, top = y }
     end)
 
-    local rootFlex = UI:FlexControl(win, "fill", "inherit", false, { container = { direction = FLEX_DIRECTION_ROW } })
+    local rootFlex = windowManager:CreateControl(moduleName .. "BloodlordRootFlex", win, CT_CONTROL)
+    rootFlex:SetAnchorFill(win)
+    rootFlex:SetDimensions(win:GetWidth(), win:GetHeight())
+    rootFlex:SetChildLayout(CHILD_LAYOUT_TYPE_FLEX)
+    rootFlex:SetChildFlexDirection(FLEX_DIRECTION_ROW)
 
     local abilityGui = CreateBloodlordEmbraceAbilityControl(rootFlex, moduleName .. "BloodlordIcon", 0, true)
     abilityGui.ctrl:SetFlexBasis(BLOODLORD_EMBRACE_ABILITY_ICON_SIZE)
     abilityGui.ctrl:SetFlexShrink(0)
     abilityGui.ctrl:SetFlexMargins(0, 0, BLOODLORD_EMBRACE_GAP, 0)
 
-    local columnFlex = UI:FlexControl(rootFlex, nil, nil, false,
-                                      {
-                                          container = { direction = FLEX_DIRECTION_COLUMN, itemAlignment = FLEX_ALIGNMENT_FLEX_START },
-                                          item = { basis = PANEL_WIDTH, shrink = 0 },
-                                      })
+    local columnFlex = windowManager:CreateControl(moduleName .. "BloodlordColumnFlex", rootFlex, CT_CONTROL)
+    columnFlex:SetChildLayout(CHILD_LAYOUT_TYPE_FLEX)
+    columnFlex:SetChildFlexDirection(FLEX_DIRECTION_COLUMN)
+    columnFlex:SetChildFlexItemAlignment(FLEX_ALIGNMENT_FLEX_START)
+    columnFlex:SetFlexBasis(PANEL_WIDTH)
+    columnFlex:SetFlexShrink(0)
 
     local targetPanel = CreateBloodlordEmbracePanel(columnFlex, moduleName .. "BloodlordTarget", 0, 0, "Current Target", "None", 1, 0, 0)
     targetPanel.ctrl:SetFlexBasis(PANEL_HEIGHT)

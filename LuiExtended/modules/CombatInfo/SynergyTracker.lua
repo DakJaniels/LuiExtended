@@ -174,7 +174,7 @@ function SynergyTracker:ApplySlotAnchors(displayMode, visibleCount)
     end
 end
 
---- Unlock move UI: backdrop visibility and row mouse so the top-level control receives drags
+--- Unlock move backdrop visibility and row mouse so the top-level control receives drags
 function SynergyTracker:UpdateUnlockInteraction()
     local Settings = CombatInfo.SV.synergy
     local unlocked = Settings.unlocked
