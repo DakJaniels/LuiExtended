@@ -726,6 +726,7 @@ function Unlock.ResetElementPosition()
         LUIE.SV[Unlock.GetUnlockPositionAttr(element)] = nil
     end
     LUIE.SV["ZO_ActiveCombatTipsTip"] = nil
+    LUIE.SV.AlertFrameAlignment = nil
     ReloadUI("ingame")
 end
 
