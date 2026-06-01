@@ -1630,7 +1630,26 @@ end
 local function ClearStickyTooltip()
     ClearTooltip(InformationTooltip)
     SpellCastBuffs.ClearDebugMetaOverflowTooltip()
+    SpellCastBuffs.tooltipHoverState = nil
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
+end
+
+--- Flex relayout / icon pool rebound can fire OnMouseEnter again while the pointer never left the icon.
+--- Rebuilding InformationTooltip (and debug overflow) on every repeat causes visible layout flicker.
+--- @param control Control
+--- @return boolean
+local function ShouldSkipRepeatBuffTooltipBuild(control)
+    local state = SpellCastBuffs.tooltipHoverState
+    if not state or state.control ~= control or state.effectId ~= control.effectId then
+        return false
+    end
+    if InformationTooltip:IsHidden() then
+        return false
+    end
+    if InformationTooltip.GetOwner and InformationTooltip:GetOwner() ~= control then
+        return false
+    end
+    return true
 end
 
 local buffTypes =
@@ -1728,6 +1747,16 @@ end
 -- OnMouseEnter for Buff Tooltips
 function SpellCastBuffs.Buff_OnMouseEnter(control)
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
+
+    if ShouldSkipRepeatBuffTooltipBuild(control) then
+        return
+    end
+
+    SpellCastBuffs.tooltipHoverState =
+    {
+        control = control,
+        effectId = control.effectId,
+    }
 
     SpellCastBuffs.ClearDebugMetaOverflowTooltip()
     InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -5, TOP)
@@ -1924,6 +1953,7 @@ end
 
 -- OnMouseExit for Buff Tooltips
 function SpellCastBuffs.Buff_OnMouseExit(control)
+    SpellCastBuffs.tooltipHoverState = nil
     if SpellCastBuffs.SV.TooltipSticky > 0 then
         eventManager:RegisterForUpdate(moduleName .. "StickyTooltip", SpellCastBuffs.SV.TooltipSticky, ClearStickyTooltip)
     else
