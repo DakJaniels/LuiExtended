@@ -130,7 +130,17 @@ function SpellCastBuffs.EventEffectDebug(eventId, changeType, effectSlot, effect
     if unitName == LUIE.PlayerNameFormatted then
         unitName = "Player"
     end
-    unitName = unitName .. " (" .. unitTag .. ")"
+    local tagSuffix = unitTag
+    if tagSuffix == nil or tagSuffix == "" then
+        if unitId and unitId ~= 0 then
+            tagSuffix = "id:" .. unitId
+        else
+            tagSuffix = nil
+        end
+    end
+    if tagSuffix then
+        unitName = unitName .. " (" .. tagSuffix .. ")"
+    end
 
     local finalString
     local duration = (endTime - beginTime) * 1000

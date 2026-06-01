@@ -122,8 +122,17 @@ function SpellCastBuffs.AuthorEffectDebug(eventCode, changeType, effectSlot, eff
     if unitName == LUIE.PlayerNameFormatted then
         unitName = "Player"
     end
-    unitName = unitName .. " (" .. unitTag .. ")"
-
+    local tagSuffix = unitTag
+    if tagSuffix == nil or tagSuffix == "" then
+        if unitId and unitId ~= 0 then
+            tagSuffix = string_format("id:%d", unitId)
+        else
+            tagSuffix = nil
+        end
+    end
+    if tagSuffix then
+        unitName = unitName .. " (" .. tagSuffix .. ")"
+    end
     local refreshOnly = ""
     if override and override.refreshOnly then
         refreshOnly = " |c00E200(Refresh Only - Hidden)|r "
