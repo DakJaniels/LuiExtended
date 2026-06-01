@@ -76,7 +76,7 @@ function CombatInfo.AddToCustomList(list, input)
     local id = tonumber(input)
     local listRef = ""
     if id and id > 0 then
-        local cachedName = ZO_CachedStrFormat(SI_ABILITY_NAME, getAbilityName(id))
+        local cachedName = zo_strformat(SI_ABILITY_NAME, getAbilityName(id))
         local name = cachedName
         if name ~= nil and name ~= "" then
             local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
@@ -103,7 +103,7 @@ function CombatInfo.RemoveFromCustomList(list, input)
     local id = tonumber(input)
     local listRef = ""
     if id and id > 0 then
-        local cachedName = ZO_CachedStrFormat(SI_ABILITY_NAME, getAbilityName(id))
+        local cachedName = zo_strformat(SI_ABILITY_NAME, getAbilityName(id))
         local name = cachedName
         local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
         list[id] = nil

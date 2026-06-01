@@ -5,7 +5,6 @@
 
 -- Global Variables
 
-LUIE_UPPER_CASE_NAME_FORMATTER = "<<C:1>>"
 LUIE_TINY_X_FORMATTER = "\195\151"
 
 -- LUIE_CC_ICON

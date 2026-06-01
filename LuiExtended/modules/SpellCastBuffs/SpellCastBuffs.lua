@@ -2246,7 +2246,7 @@ function SpellCastBuffs.AddNameOnBossEngaged(eventCode)
     -- Check for bosses and add name auras when engaged.
     for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
         local unitTag = "boss" .. i
-        local bossName = DoesUnitExist(unitTag) and zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName(unitTag)) or ""
+        local bossName = DoesUnitExist(unitTag) and zo_strformat("<<C:1>>", GetUnitName(unitTag)) or ""
         if Effects.AddNameOnBossEngaged[bossName] then
             for k, v in pairs(Effects.AddNameOnBossEngaged[bossName]) do
                 Effects.AddNameAura[k] = {}
@@ -2378,7 +2378,7 @@ function SpellCastBuffs.RestoreSavedFakeEffects()
         -- local container = SpellCastBuffs.containerRouting[context]
         for k, v in pairs(effectsList) do
             if v.savedName ~= nil then
-                local unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("reticleover"))
+                local unitName = zo_strformat("<<C:1>>", GetUnitName("reticleover"))
                 if unitName == v.savedName then
                     if SpellCastBuffs.EffectsList.saved[k] then
                         SpellCastBuffs.EffectsList.ground[k] = SpellCastBuffs.EffectsList.saved[k]

@@ -227,7 +227,7 @@ function LUIE:Log(log_type, ...)
         local remaining_args = { select(2, ...) }
 
         -- Format the string with the remaining arguments
-        local formatted_value = ZO_CachedStrFormat(first_arg, unpack(remaining_args))
+        local formatted_value = zo_strformat(first_arg, unpack(remaining_args))
 
         -- Emit the formatted message
         emit_message(log_type, formatted_value)

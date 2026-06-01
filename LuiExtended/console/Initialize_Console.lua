@@ -66,8 +66,8 @@ local function OnAddOnLoaded(eventId, addonName)
     -- Toggle Alert Frame Visibility if needed
     LUIE.SetupAlertFrameVisibility()
     LUIE.PlayerNameRaw = GetRawUnitName("player")
-    LUIE.PlayerNameFormatted = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("player"))
-    LUIE.PlayerDisplayName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitDisplayName("player"))
+    LUIE.PlayerNameFormatted = zo_strformat("<<C:1>>", GetUnitName("player"))
+    LUIE.PlayerDisplayName = zo_strformat("<<C:1>>", GetUnitDisplayName("player"))
     LUIE.PlayerFaction = GetUnitAlliance("player")
     -- -----------------------------------------------------------------------------
     LUIE.ChatAnnouncements.ChatOutput.InitializePrintRouting()

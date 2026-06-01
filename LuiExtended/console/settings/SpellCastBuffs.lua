@@ -50,7 +50,7 @@ local function GenerateCustomListLHAS(input)
         local name
         -- If the input is a numeric value then we can pull this abilityId's info.
         if type(id) == "number" then
-            name = zo_iconFormat(GetAbilityIcon(id), 16, 16) .. " [" .. id .. "] " .. zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
+            name = zo_iconFormat(GetAbilityIcon(id), 16, 16) .. " [" .. id .. "] " .. zo_strformat("<<C:1>>", GetAbilityName(id))
             -- If the input is not numeric then add this as a name only.
         else
             name = id

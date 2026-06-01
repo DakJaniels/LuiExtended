@@ -362,7 +362,7 @@ function CombatTextEventViewer:GetResolvedIconPath(abilityId, sourceName)
 
     -- Override by source name
     if Effects_EffectOverrideByName[abilityId] then
-        sourceName = ZO_CachedStrFormat("<<C:1>>", sourceName)
+        sourceName = zo_strformat("<<C:1>>", sourceName)
         local nameOverride = Effects_EffectOverrideByName[abilityId][sourceName]
         if nameOverride and nameOverride.icon then
             iconPath = nameOverride.icon

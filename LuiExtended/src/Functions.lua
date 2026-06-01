@@ -543,7 +543,7 @@ function LUIE.UpdateGuildData(eventId, guildServerId, characterName, guildId)
     --     local traceback = "Update Guild Data:\n" ..
     --         "--> eventId: " .. tostring(eventId) .. "\n" ..
     --         "--> guildServerId: " .. tostring(guildServerId) .. "\n" ..
-    --         "--> characterName: " .. zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, characterName) .. "\n" ..
+    --         "--> characterName: " .. zo_strformat("<<C:1>>", characterName) .. "\n" ..
     --         "--> guildId: " .. tostring(guildId)
     --     Debug(traceback)
     -- end

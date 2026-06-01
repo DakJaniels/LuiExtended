@@ -151,7 +151,7 @@ function SpellCastBuffs.ApplyGroundDamageEffectOverrideByName(abilityId, sourceN
         return iconName, effectName, false
     end
 
-    local unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
+    local unitName = zo_strformat("<<C:1>>", sourceName)
     local byName = Effects.EffectOverrideByName[abilityId][unitName]
     if not byName then
         return iconName, effectName, false
@@ -187,7 +187,7 @@ function SpellCastBuffs.ApplyEffectOverrideByNameForUnit(abilityId, unitName, ic
         return iconName, effectName, false
     end
 
-    unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, unitName)
+    unitName = zo_strformat("<<C:1>>", unitName)
     local byName = Effects.EffectOverrideByName[abilityId][unitName]
     if not byName then
         return iconName, effectName, false
@@ -401,8 +401,8 @@ function SpellCastBuffs.HandleIncomingFakeExternalBuff(result, abilityId, source
         return
     end
     local duration = config.duration
-    local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
-    local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
+    local source = zo_strformat("<<C:1>>", sourceName)
+    local target = zo_strformat("<<C:1>>", targetName)
     if source ~= "" and target == LUIE.PlayerNameFormatted then
         SpellCastBuffs.SetFakeCombatEffect(
             context,
@@ -487,14 +487,14 @@ function SpellCastBuffs.HandleIncomingFakeExternalDebuff(result, abilityId, sour
     end
 
     if abilityId == 14523 then
-        local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
+        local source = zo_strformat("<<C:1>>", sourceName)
         if source == "Jackal" then
             iconName = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_JACKAL_HELLJOINT_DDS
         end
     end
 
-    local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
-    local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
+    local source = zo_strformat("<<C:1>>", sourceName)
+    local target = zo_strformat("<<C:1>>", targetName)
     if source ~= "" and target == LUIE.PlayerNameFormatted then
         if SpellCastBuffs.UnitHasBuffAbilityId("player", abilityId) then
             return
@@ -582,8 +582,8 @@ function SpellCastBuffs.HandleIncomingFakePlayerBuff(result, abilityId, sourceNa
         return
     end
     local forcedType = config.long and "long" or "short"
-    local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
-    local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
+    local source = zo_strformat("<<C:1>>", sourceName)
+    local target = zo_strformat("<<C:1>>", targetName)
     unbreakable = (Effects.EffectOverride[finalId] and Effects.EffectOverride[finalId].unbreakable) or unbreakable
     if source == LUIE.PlayerNameFormatted and target == LUIE.PlayerNameFormatted then
         SpellCastBuffs.SetFakeCombatEffect(
@@ -629,8 +629,8 @@ function SpellCastBuffs.HandleIncomingFakeStagger(result, abilityId, sourceName,
     local iconName = config.icon or GetAbilityIcon(abilityId)
     local effectName = config.name or GetAbilityName(abilityId)
     local duration = config.duration
-    local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
-    local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
+    local source = zo_strformat("<<C:1>>", sourceName)
+    local target = zo_strformat("<<C:1>>", targetName)
     local context = "player2"
     if source ~= "" and target == LUIE.PlayerNameFormatted then
         if not SpellCastBuffs.UnitHasBuffAbilityId("player", abilityId) then
@@ -787,7 +787,7 @@ function SpellCastBuffs.HandleOutgoingFakePlayerOfflineAura(result, abilityId, s
         effectName = Effects.FakePlayerOfflineAura and Effects.FakePlayerOfflineAura[finalId].name or GetAbilityName(finalId)
     end
     local forcedType = config.long and "long" or "short"
-    local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
+    local source = zo_strformat("<<C:1>>", sourceName)
     unbreakable = Effects.EffectOverride[finalId].unbreakable or unbreakable
     if source ~= LUIE.PlayerNameFormatted then
         return
@@ -830,8 +830,8 @@ end
 --- @param opts? SCBFakeCombatEffectOpts
 local function placeOutgoingReticleTargetFakeEffect(abilityId, targetName, sourceName, iconName, effectName, duration, unbreakable, groundLabel, opts)
     local context = "reticleover2"
-    local source = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
-    local target = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
+    local source = zo_strformat("<<C:1>>", sourceName)
+    local target = zo_strformat("<<C:1>>", targetName)
     if source ~= LUIE.PlayerNameFormatted or target == nil then
         return
     end
@@ -839,11 +839,11 @@ local function placeOutgoingReticleTargetFakeEffect(abilityId, targetName, sourc
         return
     end
 
-    local unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("reticleover"))
+    local unitName = zo_strformat("<<C:1>>", GetUnitName("reticleover"))
     local listKey = unitName == target and "ground" or "saved"
     opts = opts or {}
     opts.groundLabel = groundLabel
-    opts.savedName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, targetName)
+    opts.savedName = zo_strformat("<<C:1>>", targetName)
 
     SpellCastBuffs.EffectsList[listKey][abilityId] = SpellCastBuffs.BuildFakeCombatEffectEntry(
         context,

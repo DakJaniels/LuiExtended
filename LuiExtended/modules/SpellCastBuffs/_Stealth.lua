@@ -159,7 +159,7 @@ function SpellCastBuffs.StealthStateChanged(unitTag, stealthState)
     -- Crouch sneak (live buff abilityId 20309; icon remains hidden-eye art)
     if stealthState == STEALTH_STATE_HIDDEN or stealthState == STEALTH_STATE_HIDDEN_ALMOST_DETECTED then
         local abilityId = 20309
-        local abilityName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(abilityId))
+        local abilityName = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
         context = SpellCastBuffs.DetermineContextSimple(context, abilityId, abilityName)
         SpellCastBuffs.EffectsList[context][abilityId] =
         {
@@ -178,7 +178,7 @@ function SpellCastBuffs.StealthStateChanged(unitTag, stealthState)
         -- Shadow stealth / invisibility (same live abilityId 20309, different icon)
     elseif stealthState == STEALTH_STATE_STEALTH or stealthState == STEALTH_STATE_STEALTH_ALMOST_DETECTED then
         local abilityId = 20309
-        local abilityName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(abilityId))
+        local abilityName = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
         context = SpellCastBuffs.DetermineContextSimple(context, abilityId, abilityName)
         SpellCastBuffs.EffectsList[context][abilityId] =
         {
