@@ -39,7 +39,6 @@ end
 local function LoadScreen(eventId, initial)
     eventManager:UnregisterForEvent(LUIE.name, EVENT_PLAYER_ACTIVATED)
     --
-    SLASH_COMMANDS["/luie"] = LUIE.OnLuieSlashCommand
     LUIE.ShowDebugEnvironmentPendingChat()
     --
     -- Set Positions for moved Default UI elements
@@ -138,6 +137,7 @@ local function OnAddOnLoaded(eventId, addonName)
     if LUIE.SV.ShowChangeLog == true then
         LUIE.ChangelogScreen()
     end
+    SLASH_COMMANDS["/luie"] = LUIE.OnLuieSlashCommand
     -- -----------------------------------------------------------------------------
     -- Register global event listeners
     RegisterEvents()
