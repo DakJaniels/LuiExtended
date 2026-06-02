@@ -288,7 +288,7 @@ local function IsRecentDuplicateDrain(abilityId, combatMechanicFlags, amount)
     return false
 end
 
---- Clear pending slot → cost correlation (also used before a new slot attempt).
+--- Clear pending slot --> cost correlation (also used before a new slot attempt).
 local function ClearPendingAbilityCost()
     pendingSlotAbilityCost.abilityId = 0
     pendingSlotAbilityCost.expireGameTimeMs = 0

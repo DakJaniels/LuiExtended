@@ -39,9 +39,9 @@ local barHighlightOverride =
     ---------------------------
 
     -- Ardent Flame
-    [23806] = { newId = 23808, combatTrack = true, duration = 20000 },  -- Lava Whip → Lava Slam / Volcanic Whip stacks (5, 20s)
-    [256798] = { newId = 23808, combatTrack = true, duration = 20000 }, -- Volcanic Whip on bar → same stack buff id
-    [20805] = { newId = 122658, combatTrack = true, duration = 10000 }, -- Molten Whip → Seething Fury (~10s; 122658 GAIN refreshes)
+    [23806] = { newId = 23808, combatTrack = true, duration = 20000 },  -- Lava Whip --> Lava Slam / Volcanic Whip stacks (5, 20s)
+    [256798] = { newId = 23808, combatTrack = true, duration = 20000 }, -- Volcanic Whip on bar --> same stack buff id
+    [20805] = { newId = 122658, combatTrack = true, duration = 10000 }, -- Molten Whip --> Seething Fury (~10s; 122658 GAIN refreshes)
     -- Flame Lash / Power Lash (U49+): 34117 stack buff (5 stacks, 20s); 20824 replaces slotted Flame Lash when stacks are up.
     [20816] = { newId = 34117, combatTrack = true, duration = 20000 },
     [20824] = { newId = 34117, combatTrack = true, duration = 20000 },
@@ -49,8 +49,8 @@ local barHighlightOverride =
     [20668] = { newId = 44369 }, -- Searing Claw
     -- Core of Flame / Soul of Flame / Heart of Flame: ~4s player buff on slotted id (31837 / 32792 / 32785); no BarHighlightOverride entry.
     [20660] = { newId = 44373 }, -- Burning Embers
-    [20917] = { newId = 31102 }, -- Dragonfire Breath → target DOT
-    [20944] = { newId = 31103 }, -- Disintegrating Dragonfire → target DOT
+    [20917] = { newId = 31102 }, -- Dragonfire Breath --> target DOT
+    [20944] = { newId = 31103 }, -- Disintegrating Dragonfire --> target DOT
     -- Engulfing Dragonfire: slotted 20930 (BEGIN/GAIN DUR ~4750, EFFECT_CHANGED buff); track 32821 (tick GAIN/GAIN DUR 5000, FADE).
     [20930] = { newId = 32821, combatTrack = true, duration = 5000, combatTrackRemainOnSlotted = true },
     [20492] = { newId = 38254 },                                                                              -- Chains of Flame --> Taunt (target, 15s; log 38254)
@@ -67,10 +67,10 @@ local barHighlightOverride =
     [20252] = { newId = 31898 },                    -- Burning Talons
     [20251] = { newId = 20528 },                    -- Choking Talons -- TODO: Possibly track Maim here as well
     -- Dragon Blood: bar keys newId; timer from player buff (61698), not slotted combat (1500 ms GAIN DUR). showFakeAura would block buff refresh on recast.
-    [29004] = { newId = 61698, noRemove = true },   -- Dragon Blood → Major Fortitude
-    -- Green: 5s HoT buff (32744) on effect frame; HoT fade → CheckOnFade → remaining major time. noRemove keeps bar through HoT fade for swap.
+    [29004] = { newId = 61698, noRemove = true },   -- Dragon Blood --> Major Fortitude
+    -- Green: 5s HoT buff (32744) on effect frame; HoT fade --> CheckOnFade --> remaining major time. noRemove keeps bar through HoT fade for swap.
     [32744] = { noRemove = true },                  -- Blood of the Green Dragon
-    [32722] = { newId = 61698, noRemove = true },   -- Blood of the Elder Dragon → Major Fortitude
+    [32722] = { newId = 61698, noRemove = true },   -- Blood of the Elder Dragon --> Major Fortitude
 
     [21007] = { duration = 6000 },                  -- Wing Buffet (player buff)
     -- Fleetstep: slotted 21014 = 6000 ms; 108798 = 4000 ms expedition carrier (61736 display). CheckOnFade 108798 --> 21014.
@@ -88,16 +88,16 @@ local barHighlightOverride =
     -- Dragon Leap line (table 198758357): Landslide ground 29465/29466 (offset 32837063); stun 114590 / U49 262678 (offset 27087866).
     [29016] = { newId = 29465 },  -- Dragon Leap (slotted) --> Landslide (player ground, ~30s refresh)
     [29012] = { newId = 114590 }, -- Dragon Leap (cast combat) --> Stun
-    -- Take Flight: do NOT use Landslide 29465 on bar (ActionBar maps slot to track id; Landslide Dur 0 / stack → garbage labels e.g. -1472).
+    -- Take Flight: do NOT use Landslide 29465 on bar (ActionBar maps slot to track id; Landslide Dur 0 / stack --> garbage labels e.g. -1472).
     [32719] = { newId = 262682 }, -- Take Flight (slotted) --> Stun (U49; combat log ~3000 ms)
     -- Ferocious Leap: bar tracks 10s shield (61814); Landslide 29465 via BarHighlightExtraId only (log).
     [32715] = { newId = 61814 },  -- Ferocious Leap (slotted) --> damage shield
 
     -- Earthen Heart — Superheated Ward / Volcanic Ward / Magma Fist (table 198758357; combat log)
-    [29032] = { newId = 134310, duration = 6000 },                                                            -- Superheated Ward → player buff 134310 (6s)
-    [31820] = { newId = 261754, duration = 6000, noRemove = true },                                           -- Volcanic Ward → primary player buff 261754 (6s; parallel 258203)
+    [29032] = { newId = 134310, duration = 6000 },                                                            -- Superheated Ward --> player buff 134310 (6s)
+    [31820] = { newId = 261754, duration = 6000, noRemove = true },                                           -- Volcanic Ward --> primary player buff 261754 (6s; parallel 258203)
     [258203] = { hide = true },                                                                               -- Volcanic Ward secondary buff (same 6s; CheckOnFade ↔ 261754)
-    [31816] = { newId = 134340 },                                                                             -- Magma Fist → target Heat Shock 134340 (7s); self 258293 via ExtraId
+    [31816] = { newId = 134340 },                                                                             -- Magma Fist --> target Heat Shock 134340 (7s); self 258293 via ExtraId
     -- Molten Weapons line (table 198758357): slotted bar = player bundle; combat majors/empower via combatTrack + display ids.
     [29043] = { newId = 258658, showFakeAura = true, noRemove = true, duration = 30000 },                     -- Molten Weapons (player buff 258658, 30s)
     [31874] = { newId = 258666, showFakeAura = true, noRemove = true, duration = 60000 },                     -- Igneous Weapons (player buff 258666, 60s)
@@ -407,19 +407,19 @@ local barHighlightOverride =
     [198564] = { newId = 194237, showFakeAura = true, duration = 6000 }, -- Chakram of Destiny (player shield)
 
     -- Gate morphs: bar timer tracks entry portal ground; noRemove = ignore FADE on teleport until countdown ends
-    [186211] = { newId = 195190, showFakeAura = true, noRemove = true, duration = 7000 }, -- Fleet-Footed Gate (cast → entry portal ground)
+    [186211] = { newId = 195190, showFakeAura = true, noRemove = true, duration = 7000 }, -- Fleet-Footed Gate (cast --> entry portal ground)
     [197856] = { newId = 195190, showFakeAura = true, noRemove = true, duration = 7000 }, -- Fleet-Footed Gate (cost variant)
 
-    [186220] = { newId = 195204, showFakeAura = true, noRemove = true, duration = 7000 }, -- Passage Between Worlds (cast → entry portal ground)
+    [186220] = { newId = 195204, showFakeAura = true, noRemove = true, duration = 7000 }, -- Passage Between Worlds (cast --> entry portal ground)
     [190394] = { newId = 195204, showFakeAura = true, noRemove = true, duration = 7000 }, -- Passage Between Worlds (cost variant)
 
-    [183542] = { newId = 195167, showFakeAura = true, noRemove = true, duration = 7000 }, -- Apocryphal Gate (cast → entry portal ground)
+    [183542] = { newId = 195167, showFakeAura = true, noRemove = true, duration = 7000 }, -- Apocryphal Gate (cast --> entry portal ground)
     [178457] = { newId = 195167, showFakeAura = true, noRemove = true, duration = 7000 }, -- Apocryphal Gate (cost variant)
 
     -- Remedy Cascade (channeled): channel combat id reports [Chan] 4500 in combat log
     [183537] = { combatTrack = true, duration = 4500 },                                                    -- Remedy Cascade (cost mag)
     [198309] = { combatTrack = true, duration = 4500 },                                                    -- Remedy Cascade (cost stam)
-    [178454] = { newId = 183537, combatTrack = true, duration = 4500, combatTrackRemainOnSlotted = true }, -- Remedy Cascade (cost variant → channel id)
+    [178454] = { newId = 183537, combatTrack = true, duration = 4500, combatTrackRemainOnSlotted = true }, -- Remedy Cascade (cost variant --> channel id)
 
     -- Curative Surge (channeled)
     [186200] = { combatTrack = true, duration = 4500 }, -- Curative Surge (cost mag)

@@ -6,7 +6,6 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 -- LUIE utility functions
-local AddSystemMessage = LUIE.AddSystemMessage
 local PrintToChat = LUIE.PrintToChat
 
 --- @class (partial) LUIE.SpellCastBuffs
@@ -150,12 +149,14 @@ function SpellCastBuffs.EventEffectDebug(eventId, changeType, effectSlot, effect
         refreshOnly = " |c00E200(Hidden)|r "
     end
 
+    local ccDebug = SpellCastBuffs.FormatEffectCcDebugSuffix(abilityId, statusEffectType, effectType, abilityType)
+
     if changeType == 1 then
-        finalString = ("|c00E200Gained:|r " .. refreshOnly .. iconFormatted .. " [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. " [Dur] " .. duration)
+        finalString = ("|c00E200Gained:|r " .. refreshOnly .. iconFormatted .. " [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. " [Dur] " .. duration .. ccDebug)
     elseif changeType == 2 then
-        finalString = ("|c00E200Faded:|r " .. iconFormatted .. " [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName)
+        finalString = ("|c00E200Faded:|r " .. iconFormatted .. " [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. ccDebug)
     else
-        finalString = ("|c00E200Refreshed:|r " .. iconFormatted .. " (" .. changeType .. ") [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. " [Dur] " .. duration)
+        finalString = ("|c00E200Refreshed:|r " .. iconFormatted .. " (" .. changeType .. ") [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. " [Dur] " .. duration .. ccDebug)
     end
     PrintToChat(finalString, true)
 end

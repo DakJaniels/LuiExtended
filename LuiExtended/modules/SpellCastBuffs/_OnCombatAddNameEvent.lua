@@ -10,26 +10,11 @@ local LUIE = LUIE
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
 
-local UI = LUIE.UI
 local LuiData = LuiData
 --- @type Data
 local Data = LuiData.Data
 --- @type Effects
 local Effects = Data.Effects
-local Abilities = Data.Abilities
-local Tooltips = Data.Tooltips
-local string_format = string.format
-local printToChat = LUIE.PrintToChat
-local zo_strformat = zo_strformat
-local table_insert = table.insert
-local table_sort = table.sort
--- local displayName = GetDisplayName()
-local eventManager = GetEventManager()
-local sceneManager = SCENE_MANAGER
-local windowManager = GetWindowManager()
-
-local moduleName = SpellCastBuffs.moduleName
-
 
 --[[
  * Runs on the EVENT_COMBAT_EVENT listener.

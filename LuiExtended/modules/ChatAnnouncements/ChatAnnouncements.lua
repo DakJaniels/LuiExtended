@@ -3204,7 +3204,7 @@ function I.GetTimedActivityProgressAnnounceKey(index)
     return string_format("i:%i", index)
 end
 
---- Suppress duplicate chat/alert for the same challenge slot at the same progress (2 game events → 2 lines, not 4).
+--- Suppress duplicate chat/alert for the same challenge slot at the same progress (2 game events --> 2 lines, not 4).
 --- @param index luaindex
 --- @param currentProgress integer
 --- @return boolean suppress

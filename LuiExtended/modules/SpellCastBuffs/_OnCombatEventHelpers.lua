@@ -16,6 +16,21 @@ local Data = LuiData.Data
 local Effects = Data.Effects
 local zo_strformat = zo_strformat
 
+--- Maps EVENT_COMBAT_EVENT result -> LUIE_CC_TYPE (client DebugResults labels).
+local ACTION_RESULT_TO_LUIE_CC =
+{
+    [ACTION_RESULT_STUNNED] = LUIE_CC_TYPE_STUN,
+    [ACTION_RESULT_KNOCKBACK] = LUIE_CC_TYPE_KNOCKBACK,
+    [ACTION_RESULT_LEVITATED] = LUIE_CC_TYPE_PULL,
+    [ACTION_RESULT_DISORIENTED] = LUIE_CC_TYPE_DISORIENT,
+    [ACTION_RESULT_FEARED] = LUIE_CC_TYPE_FEAR,
+    [ACTION_RESULT_CHARMED] = LUIE_CC_TYPE_CHARM,
+    [ACTION_RESULT_SILENCED] = LUIE_CC_TYPE_SILENCE,
+    [ACTION_RESULT_STAGGERED] = LUIE_CC_TYPE_STAGGER,
+    [ACTION_RESULT_SNARED] = LUIE_CC_TYPE_SNARE,
+    [ACTION_RESULT_ROOTED] = LUIE_CC_TYPE_ROOT,
+}
+
 local groundDamageAuraCombatResults =
 {
     [ACTION_RESULT_DAMAGE] = true,
@@ -223,6 +238,7 @@ end
 --- @class SCBFakeCombatEffectOpts
 --- @field forced? string
 --- @field groundLabel? boolean
+--- @field combatCcType? integer LUIE_CC_TYPE_* derived from EVENT_COMBAT_EVENT result (for fake combat auras)
 --- @field stack? integer
 --- @field toggle? boolean
 --- @field fakeDuration? boolean
@@ -255,6 +271,7 @@ function SpellCastBuffs.BuildFakeCombatEffectEntry(context, effectType, id, name
         restart = true,
         iconNum = 0,
         unbreakable = unbreakable,
+        combatCcType = opts.combatCcType,
     }
     if opts.groundLabel ~= nil then
         entry.groundLabel = opts.groundLabel
@@ -632,25 +649,25 @@ function SpellCastBuffs.HandleIncomingFakeStagger(result, abilityId, sourceName,
     local source = zo_strformat("<<C:1>>", sourceName)
     local target = zo_strformat("<<C:1>>", targetName)
     local context = "player2"
-    if source ~= "" and target == LUIE.PlayerNameFormatted then
-        if not SpellCastBuffs.UnitHasBuffAbilityId("player", abilityId) then
-            SpellCastBuffs.SetFakeCombatEffect(
+    if source ~= "" and target == LUIE.PlayerNameFormatted and not SpellCastBuffs.UnitHasBuffAbilityId("player", abilityId) then
+        local ccType = ACTION_RESULT_TO_LUIE_CC[result]
+        SpellCastBuffs.SetFakeCombatEffect(
+            context,
+            abilityId,
+            SpellCastBuffs.BuildFakeCombatEffectEntry(
                 context,
+                BUFF_EFFECT_TYPE_DEBUFF,
                 abilityId,
-                SpellCastBuffs.BuildFakeCombatEffectEntry(
-                    context,
-                    BUFF_EFFECT_TYPE_DEBUFF,
-                    abilityId,
-                    effectName,
-                    iconName,
-                    duration,
-                    unbreakable,
-                    {
-                        groundLabel = groundLabel,
-                    }
-                )
+                effectName,
+                iconName,
+                duration,
+                unbreakable,
+                {
+                    groundLabel = groundLabel,
+                    combatCcType = ccType,
+                }
             )
-        end
+        )
     end
 end
 

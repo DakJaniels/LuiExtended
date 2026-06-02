@@ -332,6 +332,18 @@ local function formatEnumLabel(nameTable, value)
     return tostring(value)
 end
 
+--- @param statusEffectType StatusEffectType|integer|nil
+--- @return string
+function SpellCastBuffs.FormatStatusEffectTypeLabel(statusEffectType)
+    return formatEnumLabel(statusEffectTypeNames, statusEffectType)
+end
+
+--- @param abilityType AbilityType|integer|nil
+--- @return string
+function SpellCastBuffs.FormatAbilityTypeLabel(abilityType)
+    return formatEnumLabel(abilityTypeNames, abilityType)
+end
+
 local function formatStatWithId(nameTable, statId)
     if statId == nil then
         return "—"
@@ -393,7 +405,7 @@ local function addDerivedStatDebugLines(abilityId, addLine)
         if derivedStat ~= nil then
             addLine(
                 string.format("derived[%d]", index),
-                string.format("%s → %s", formatStatWithId(derivedStatNames, derivedStat), tostring(effect or 0))
+                string.format("%s --> %s", formatStatWithId(derivedStatNames, derivedStat), tostring(effect or 0))
             )
         end
     end
@@ -415,7 +427,7 @@ local function addAdvancedStatDebugLines(abilityId, addLine)
             addLine(
                 string.format("adv[%d]", index),
                 string.format(
-                    "%s | %s → %s",
+                    "%s | %s --> %s",
                     formatStatWithId(advancedStatDisplayTypeNames, statType),
                     formatEnumLabel(advancedStatDisplayFormatNames, displayFormat),
                     tostring(effectValue or 0)
@@ -456,22 +468,33 @@ local function addCcTooltipDebugLines(override, meta, abilityId, addLine)
         return
     end
 
+    local statusFx = meta and meta.statusEffectType or nil
+    local abiType = meta and meta.abilityType or nil
+    local resolvedCc = (type(abilityId) == "number") and SpellCastBuffs.ResolveEffectCcType(abilityId, statusFx, abiType) or nil
+
     if override then
         if override.cc then
-            addLine("LUIE cc", SpellCastBuffs.GetLuiCcTypeLabel(override.cc))
+            addLine("LUIE cc (override)", SpellCastBuffs.GetLuiCcTypeLabel(override.cc))
         end
         if override.ccMergedType then
             addLine("LUIE cc (merged)", SpellCastBuffs.GetLuiCcTypeLabel(override.ccMergedType))
         end
-        if not override.cc and not override.ccMergedType then
-            addLine("LUIE cc", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_NO_CC))
-        end
-    elseif type(abilityId) == "number" then
-        addLine("LUIE cc", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_NO_OVERRIDE))
     end
 
-    if SpellCastBuffs.SV.ColorCC and override and override.cc then
-        addLine("CC Color", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_CC_COLOR_ON))
+    if resolvedCc then
+        addLine("LUIE cc (resolved)", SpellCastBuffs.GetLuiCcTypeLabel(resolvedCc))
+    elseif override and not override.cc and not override.ccMergedType then
+        addLine("LUIE cc (resolved)", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_NO_CC))
+    elseif type(abilityId) == "number" and not override then
+        addLine("LUIE cc (resolved)", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_NO_OVERRIDE))
+    end
+
+    if SpellCastBuffs.SV.ColorCC then
+        if resolvedCc then
+            addLine("CC Color", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_CC_COLOR_ON))
+        else
+            addLine("CC Color", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_CC_COLOR_OFF))
+        end
     end
 end
 
@@ -866,7 +889,7 @@ local function anchorDebugOverflowBesidePrimary(overflow, primary, buffControl)
     local fitsRight = roomRight >= overflowWidth + gap
     local fitsLeft = roomLeft >= overflowWidth + gap
 
-    -- Tooltip.lua: left-half screen → comparative on primary's right; right-half → comparative on left.
+    -- Tooltip.lua: left-half screen --> comparative on primary's right; right-half --> comparative on left.
     local preferRightByQuadrant = false
     if buffControl then
         local quadrant = calculateBuffIconQuadrant(buffControl)

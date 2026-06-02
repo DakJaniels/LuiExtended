@@ -311,7 +311,7 @@ function LUIE_PlayerDodgePrediction:GetPredictedRollDodgeStaminaCost()
     return 0
 end
 
---- @return integer 1 = L→R, 2 = R→L, 3 = center
+--- @return integer 1 = L-->R, 2 = R-->L, 3 = center
 local function GetStaminaBarAlignment()
     local index = UnitFrames.SV.BarAlignPlayerStamina or 1
     if type(index) == "number" then
@@ -353,7 +353,7 @@ function LUIE_PlayerDodgePrediction:GetStaminaBarValues(staminaFrame, useBarAnim
     return powerValue, powerEffectiveMax
 end
 
---- L→R / R→L: single edge at predicted fill boundary.
+--- L-->R / R-->L: single edge at predicted fill boundary.
 --- @param line Control
 --- @param bar StatusBarControl
 --- @param predicted number

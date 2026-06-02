@@ -4173,7 +4173,7 @@ local debugAuras =
 
     [20944] = true,  -- Disintegrating Dragonfire (hit combat; not in aura log when hidden)
     [31103] = true,  -- Disintegrating Dragonfire (target DOT ~10s)
-    [48946] = true,  -- Major Breach (Disintegrating combat; hide on frames → 61743)
+    [48946] = true,  -- Major Breach (Disintegrating combat; hide on frames --> 61743)
 
     [20930] = true,  -- Engulfing Dragonfire (slotted; cast bar 20930 in CastBarTable)
     [32821] = true,  -- Engulfing Dragonfire (player channel buff; bar highlight + combat GAIN DUR 5000)

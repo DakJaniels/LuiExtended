@@ -29,7 +29,7 @@ local SpellCastBuffs = LUIE.SpellCastBuffs
 -- Bulk list add from menu buttons
 function SpellCastBuffs.AddBulkToCustomList(list, table)
     if table ~= nil then
-        for k, v in pairs(table) do
+        for k, _ in pairs(table) do
             SpellCastBuffs.AddToCustomList(list, k)
         end
     end
@@ -42,7 +42,7 @@ function SpellCastBuffs.ClearCustomList(list)
         list == SpellCastBuffs.SV.PriorityBuffTable and GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_BUFFS) or
         list == SpellCastBuffs.SV.PriorityDebuffTable and GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_DEBUFFS) or
         list == SpellCastBuffs.SV.BlacklistTable and GetString(LUIE_STRING_CUSTOM_LIST_AURA_BLACKLIST)
-    for k, v in pairs(list) do
+    for k, _ in pairs(list) do
         list[k] = nil
     end
     chatSystem:Maximize()

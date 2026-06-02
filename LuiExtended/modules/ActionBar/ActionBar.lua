@@ -2520,14 +2520,14 @@ SetToggledStackLabels = function (abilityId, textOrNil)
 end
 
 --- Hide all toggled slots for abilityId.
-local function HideToggledSlots(abilityId)
+function HideToggledSlots(abilityId)
     ForEachToggledSlot(abilityId, function (slotNum)
         ActionBar.HideSlot(slotNum, abilityId)
     end)
 end
 
 --- Show all toggled slots for abilityId.
-local function ShowToggledSlots(abilityId, currentTime)
+function ShowToggledSlots(abilityId, currentTime)
     if g_toggledSlotsFront[abilityId] then
         ActionBar.ShowSlot(g_toggledSlotsFront[abilityId], abilityId, currentTime, false)
     end

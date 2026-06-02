@@ -325,7 +325,7 @@ local function DebugAttributeVisuals(arg1, arg2)
         return
     end
 
-    LUIE.AddSystemMessage(string.format("[LUIE] UnitFrames visual debug: %s → %s", frameKey, presetName))
+    LUIE.AddSystemMessage(string.format("[LUIE] UnitFrames visual debug: %s --> %s", frameKey, presetName))
 end
 
 -- -----------------------------------------------------------------------------

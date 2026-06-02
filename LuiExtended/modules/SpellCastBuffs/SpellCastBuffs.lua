@@ -17,11 +17,8 @@ local Data = LuiData.Data
 local Effects = Data.Effects
 local Abilities = Data.Abilities
 local Tooltips = Data.Tooltips
-local string_format = string.format
-local printToChat = LUIE.PrintToChat
 local zo_strformat = zo_strformat
 local table_insert = table.insert
-local table_sort = table.sort
 -- local displayName = GetDisplayName()
 local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
@@ -1266,10 +1263,10 @@ end
 -- legacy "trailing margin only" setup is expressed as SetFlexMargins with half of `gap` on the
 -- flex-start physical edge and half on flex-end (integer split). That preserves neighbor spacing
 -- while keeping rows even under FLEX_JUSTIFICATION_CENTER + wrap. The physical edges used:
---   ROW            → LEFT + RIGHT   (formerly all on RIGHT)
---   ROW_REVERSE    → RIGHT + LEFT   (formerly all on LEFT)
---   COLUMN         → TOP + BOTTOM   (formerly all on BOTTOM)
---   COLUMN_REVERSE → BOTTOM + TOP   (formerly all on TOP)
+--   ROW            --> LEFT + RIGHT   (formerly all on RIGHT)
+--   ROW_REVERSE    --> RIGHT + LEFT   (formerly all on LEFT)
+--   COLUMN         --> TOP + BOTTOM   (formerly all on BOTTOM)
+--   COLUMN_REVERSE --> BOTTOM + TOP   (formerly all on TOP)
 --
 -- Cross-axis gutter uses one-sided margin so inter-row gap = exactly padding (not 2×padding).
 -- Vertical single-axis columns use IconSize/10 for gap so labels stay readable at any size.
@@ -1667,7 +1664,7 @@ local buffTypes =
     [LUIE_BUFF_TYPE_NONE] = GetString(LUIE_STRING_BUFF_TYPE_NONE),
 }
 
---- Routed buff container key → unit tag for stealth/tooltip APIs.
+--- Routed buff container key --> unit tag for stealth/tooltip APIs.
 --- @param container string|nil
 --- @return string
 local function TooltipUnitTagFromBuffContainer(container)
@@ -2186,7 +2183,7 @@ function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
 
     if artificialEffectId then
         local removeEffect = artificialEffectId
-        -- Battle Spirit: API id 1 (Cyrodiil / BG / duel) and id 3 (Imperial City) → fake id matches target frame (999014). Id 2 is LFG, not Battle Spirit.
+        -- Battle Spirit: API id 1 (Cyrodiil / BG / duel) and id 3 (Imperial City) --> fake id matches target frame (999014). Id 2 is LFG, not Battle Spirit.
         if artificialEffectId == 1 or artificialEffectId == 3 then
             removeEffect = 999014
         end

@@ -17,7 +17,6 @@ local Abilities = Data.Abilities
 local Effects = Data.Effects
 
 local zo_floor = zo_floor
-local zo_min = zo_min
 local string_format = string.format
 local zo_strformat = zo_strformat
 local table_sort = table.sort
@@ -28,6 +27,101 @@ local IsPlayerStunned = IsPlayerStunned
 -- Matches SpellCastBuffs.xml ZO_DefaultCooldown alpha="0.5"
 local BUFF_ICON_COOLDOWN_ALPHA = 0.5
 local BUFF_ICON_FADEOUT_MS = 2000
+
+--- Maps API status effect type to LUIE_CC_TYPE for ColorCC when EffectOverride.cc is absent.
+local statusEffectTypeToLuiCc =
+{
+    [STATUS_EFFECT_TYPE_STUN] = LUIE_CC_TYPE_STUN,
+    [STATUS_EFFECT_TYPE_SNARE] = LUIE_CC_TYPE_SNARE,
+    [STATUS_EFFECT_TYPE_ROOT] = LUIE_CC_TYPE_ROOT,
+    [STATUS_EFFECT_TYPE_FEAR] = LUIE_CC_TYPE_FEAR,
+    [STATUS_EFFECT_TYPE_SILENCE] = LUIE_CC_TYPE_SILENCE,
+    [STATUS_EFFECT_TYPE_CHARM] = LUIE_CC_TYPE_CHARM,
+    [STATUS_EFFECT_TYPE_MESMERIZE] = LUIE_CC_TYPE_CHARM,
+    [STATUS_EFFECT_TYPE_LEVITATE] = LUIE_CC_TYPE_PULL,
+    [STATUS_EFFECT_TYPE_DAZED] = LUIE_CC_TYPE_STAGGER,
+}
+
+--- Fallback when statusEffectType is NONE but ability row still tags CC via AbilityType (see DacksDevPlayground effect debug).
+local abilityTypeToLuiCc =
+{
+    [ABILITY_TYPE_STUN] = LUIE_CC_TYPE_STUN,
+    [ABILITY_TYPE_SNARE] = LUIE_CC_TYPE_SNARE,
+    [ABILITY_TYPE_SILENCE] = LUIE_CC_TYPE_SILENCE,
+    [ABILITY_TYPE_KNOCKBACK] = LUIE_CC_TYPE_KNOCKBACK,
+    [ABILITY_TYPE_FEAR] = LUIE_CC_TYPE_FEAR,
+    [ABILITY_TYPE_DISORIENT] = LUIE_CC_TYPE_DISORIENT,
+    [ABILITY_TYPE_STAGGER] = LUIE_CC_TYPE_STAGGER,
+    [ABILITY_TYPE_LEVITATE] = LUIE_CC_TYPE_PULL,
+    [ABILITY_TYPE_PACIFY] = LUIE_CC_TYPE_SILENCE,
+    [ABILITY_TYPE_OFFBALANCE] = LUIE_CC_TYPE_STAGGER,
+}
+
+--- @param abilityId integer|nil
+--- @param statusEffectType StatusEffectType|integer|nil
+--- @param abilityType AbilityType|integer|nil
+--- @param combatCcType integer|nil LUIE_CC_TYPE_* derived from EVENT_COMBAT_EVENT when effect row lacks API CC fields
+--- @return integer|nil LUIE_CC_TYPE_* when this debuff should use a CC color
+function SpellCastBuffs.ResolveEffectCcType(abilityId, statusEffectType, abilityType, combatCcType)
+    if not abilityId then
+        return nil
+    end
+    local override = Effects.EffectOverride[abilityId]
+    if override and override.cc then
+        return override.cc
+    end
+    if override and override.ccMergedType and SpellCastBuffs.SV.HideReduce then
+        return override.ccMergedType
+    end
+    if combatCcType then
+        return combatCcType
+    end
+    if statusEffectType and statusEffectType ~= STATUS_EFFECT_TYPE_NONE then
+        local fromStatus = statusEffectTypeToLuiCc[statusEffectType]
+        if fromStatus then
+            return fromStatus
+        end
+    end
+    if abilityType and abilityType ~= ABILITY_TYPE_NONE then
+        return abilityTypeToLuiCc[abilityType]
+    end
+    return nil
+end
+
+--- Chat/debug suffix for Effect debug (Show Debug Effect) — CC resolve + fill color hint.
+--- @param abilityId integer
+--- @param statusEffectType StatusEffectType|integer|nil
+--- @param effectType BuffEffectType|integer
+--- @param abilityType AbilityType|integer|nil
+--- @return string
+function SpellCastBuffs.FormatEffectCcDebugSuffix(abilityId, statusEffectType, effectType, abilityType)
+    if effectType ~= BUFF_EFFECT_TYPE_DEBUFF then
+        return ""
+    end
+    local chunks = {}
+    chunks[#chunks + 1] = "StaFX:" .. SpellCastBuffs.FormatStatusEffectTypeLabel(statusEffectType or STATUS_EFFECT_TYPE_NONE)
+    chunks[#chunks + 1] = "AbiT:" .. SpellCastBuffs.FormatAbilityTypeLabel(abilityType or ABILITY_TYPE_NONE)
+    local resolvedCc = SpellCastBuffs.ResolveEffectCcType(abilityId, statusEffectType, abilityType, nil)
+    if resolvedCc then
+        chunks[#chunks + 1] = "CC→" .. SpellCastBuffs.GetLuiCcTypeLabel(resolvedCc)
+    else
+        chunks[#chunks + 1] = "CC→(none)"
+    end
+    local override = Effects.EffectOverride[abilityId]
+    if override and override.cc then
+        chunks[#chunks + 1] = "Ov:" .. SpellCastBuffs.GetLuiCcTypeLabel(override.cc)
+    end
+    if override and override.unbreakable == 1 and SpellCastBuffs.SV.ColorUnbreakable then
+        chunks[#chunks + 1] = "|cBBBBFFFill:unbreakable|r"
+    elseif SpellCastBuffs.SV.ColorCC then
+        if resolvedCc then
+            chunks[#chunks + 1] = "|c00E200Fill:CC|r"
+        else
+            chunks[#chunks + 1] = "|cFF6666Fill:debuff|r"
+        end
+    end
+    return " [" .. table.concat(chunks, " ") .. "]"
+end
 
 -- Helper function to get CC color
 --- @param ccType integer
@@ -45,6 +139,7 @@ local function getCCColor(ccType)
         [LUIE_CC_TYPE_STAGGER] = SpellCastBuffs.SV.colors.stagger,
         [LUIE_CC_TYPE_SNARE] = SpellCastBuffs.SV.colors.snare,
         [LUIE_CC_TYPE_ROOT] = SpellCastBuffs.SV.colors.root,
+        [LUIE_CC_TYPE_CHARM] = SpellCastBuffs.SV.colors.charm,
     }
     return ccColors[ccType] or SpellCastBuffs.SV.colors.nocc
 end
@@ -53,7 +148,10 @@ end
 --- @param buffType integer
 --- @param unbreakable integer
 --- @param id integer
-local function SetSingleIconBuffType(buff, buffType, unbreakable, id)
+--- @param statusEffectType StatusEffectType|integer|nil
+--- @param abilityType AbilityType|integer|nil
+--- @param combatCcType integer|nil LUIE_CC_TYPE_* derived from EVENT_COMBAT_EVENT for fake combat entries
+local function SetSingleIconBuffType(buff, buffType, unbreakable, id, statusEffectType, abilityType, combatCcType)
     -- Determine context type and get ability name
     local contextType = (buffType == BUFF_EFFECT_TYPE_BUFF) and "buff" or "debuff"
     local abilityName = GetAbilityName(id)
@@ -82,8 +180,12 @@ local function SetSingleIconBuffType(buff, buffType, unbreakable, id)
                 return SpellCastBuffs.SV.colors.prioritydebuff
             elseif unbreakable == 1 and SpellCastBuffs.SV.ColorUnbreakable then
                 return SpellCastBuffs.SV.colors.unbreakable
-            elseif SpellCastBuffs.SV.ColorCC and Effects.EffectOverride[id] and Effects.EffectOverride[id].cc then
-                return getCCColor(Effects.EffectOverride[id].cc)
+            elseif SpellCastBuffs.SV.ColorCC then
+                local ccType = SpellCastBuffs.ResolveEffectCcType(id, statusEffectType, abilityType, combatCcType)
+                if ccType then
+                    return getCCColor(ccType)
+                end
+                return SpellCastBuffs.SV.colors.debuff
             else
                 return SpellCastBuffs.SV.colors.debuff
             end
@@ -314,7 +416,10 @@ local function updateIconsStructure(currentTimeMs, sortedList, container)
             effect.iconNum = index
             effect.restart = true
             local name = (effect.name ~= nil) and effect.name or nil
-            SetSingleIconBuffType(buff, effect.type, effect.unbreakable, effect.id)
+            local statusFx = effect.debugMeta and effect.debugMeta.statusEffectType or nil
+            local abiType = effect.debugMeta and effect.debugMeta.abilityType or nil
+            local combatCcType = effect.combatCcType or nil
+            SetSingleIconBuffType(buff, effect.type, effect.unbreakable, effect.id, statusFx, abiType, combatCcType)
 
             buff.effectId = effect.id
             buff.effectName = name
@@ -557,7 +662,7 @@ local function rebuildDisplaySortedLists(currentTimeMs)
 
     for context, effectsList in pairs(SpellCastBuffs.EffectsList) do
         local container = SpellCastBuffs.containerRouting[context]
-        for k, v in pairs(effectsList) do
+        for _, v in pairs(effectsList) do
             if container and v.starts <= currentTimeMs then
                 if v.target == "prominent" then
                     appendSortedEffect(container, v)

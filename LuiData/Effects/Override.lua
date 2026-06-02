@@ -1874,7 +1874,7 @@ local effectOverride =
     -- DRAGONKNIGHT ACTIVE ABILITIES -------------------------------
     ----------------------------------------------------------------
 
-    -- Dragon Blood / Blood of the Green Dragon / Blood of the Elder Dragon (bar → 61698 via BarHighlightOverride)
+    -- Dragon Blood / Blood of the Green Dragon / Blood of the Elder Dragon (bar --> 61698 via BarHighlightOverride)
     [29010] = { hide = true },  -- Dragon Blood (HEAL combat)
     [29011] = { hide = true },  -- Major Fortitude bundle (player buff 61698)
     -- 259761 Minor Brutality: see Fleetstep Wings (~1961); same combat id as Dragon Blood / Igneous Weapons bundle
@@ -1887,15 +1887,15 @@ local effectOverride =
     [259634] = { hide = true }, -- Minor Courage bundle (elder morph)
 
     -- Lava Whip / Molten Whip / Flame Lash (morph 2) / Power Lash
-    -- U49 Lava Whip: OB hit → 5 stacks Volcanic Whip / Lava Slam (23808, 20s, 20s ICD); slot becomes 256798 Volcanic Whip (consumes stack)
-    [23806] = { hide = true },                                                                                                       -- Lava Whip (hit/cast combat; bar highlight → 23808)
+    -- U49 Lava Whip: OB hit --> 5 stacks Volcanic Whip / Lava Slam (23808, 20s, 20s ICD); slot becomes 256798 Volcanic Whip (consumes stack)
+    [23806] = { hide = true },                                                                                                       -- Lava Whip (hit/cast combat; bar highlight --> 23808)
     [256798] = { hide = true },                                                                                                      -- Volcanic Whip (replacement cast hit / AOE combat)
     [23808] = { dynamicTooltip = true, tooltipMorphId = 23806, unbreakable = 1 },                                                    -- Lava Slam (Volcanic Whip stacks on player; bar highlight)
-    [20805] = { hide = true },                                                                                                       -- Molten Whip (hit combat; bar → 122658)
-    [20816] = { hide = true },                                                                                                       -- Flame Lash (hit combat; bar → 34117)
+    [20805] = { hide = true },                                                                                                       -- Molten Whip (hit combat; bar --> 122658)
+    [20816] = { hide = true },                                                                                                       -- Flame Lash (hit combat; bar --> 34117)
     [20806] = { tooltip = Tooltips.Generic_Off_Balance, unbreakable = 1 },                                                           -- Off Balance (Molten Whip)
     [122658] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_DRAGONKNIGHT_SEETHING_FURY_DDS, tooltip = Tooltips.Skill_Seething_Fury }, -- Seething Fury (~10s player buff; Molten Whip)
-    -- Flame Lash: OB hit → 5 stacks Power Lash (34117, 20s); slot becomes 20824 Power Lash (consumes stack); 23105 heal combat
+    -- Flame Lash: OB hit --> 5 stacks Power Lash (34117, 20s); slot becomes 20824 Power Lash (consumes stack); 23105 heal combat
     [34117] = { dynamicTooltip = true, tooltipMorphId = 20816, unbreakable = 1 },                                                    -- Power Lash stacks (player buff; bar highlight)
     [20824] = { hide = true },                                                                                                       -- Power Lash (replacement cast hit combat)
     [23105] = { hide = true, dynamicTooltip = true, tooltipMorphId = 20816 },                                                        -- Power Lash (self-heal combat)
@@ -1919,16 +1919,16 @@ local effectOverride =
     -- On cast hit: 160949 Traumatic Burns (visible), 18084 Burning (~4s); 243742 hidden snare/bundle
 
     -- Dragonfire Breath / Disintegrating Dragonfire / Engulfing Dragonfire (U49+)
-    [20917] = { hide = true },                                                                   -- Dragonfire Breath (channel/hit combat; bar → 31102)
-    [20944] = { hide = true },                                                                   -- Disintegrating Dragonfire (hit combat; bar → 31103)
-    [20930] = { hide = true },                                                                   -- Engulfing Dragonfire (slotted hit; bar → 32821 channel buff)
+    [20917] = { hide = true },                                                                   -- Dragonfire Breath (channel/hit combat; bar --> 31102)
+    [20944] = { hide = true },                                                                   -- Disintegrating Dragonfire (hit combat; bar --> 31103)
+    [20930] = { hide = true },                                                                   -- Engulfing Dragonfire (slotted hit; bar --> 32821 channel buff)
     [31102] = { tooltip = Tooltips.Generic_Burn, tooltipValue2 = 2 },                            -- Dragonfire Breath (target DOT ~10s)
     [31103] = { dynamicTooltip = true, tooltipMorphId = 20944 },                                 -- Disintegrating Dragonfire (target DOT ~10s; log: 31103 + 61743 breach)
     [31104] = { hide = true },                                                                   -- Engulfing Dragonfire (tick hit combat on target)
     [270517] = { hide = true },                                                                  -- Engulfing Dragonfire (tick ON CD combat; U49 log)
     [32821] = { dynamicTooltip = true, tooltipMorphId = 20930, toggle = true, unbreakable = 1 }, -- Engulfing channel (player; ~5s refreshed per tick)
     [34240] = { hide = true },                                                                   -- Dragonfire Breath Dummy (LMN dump)
-    [48946] = { hide = true },                                                                   -- Major Breach combat (Disintegrating); aura UI → 61743
+    [48946] = { hide = true },                                                                   -- Major Breach combat (Disintegrating); aura UI --> 61743
 
     -- Chains of Flame / Chains of Devastation / Chains of Dominance (was Fiery Grip line; table 198758357)
     [20492] = { dynamicTooltip = true, name = Abilities.Skill_Chains_of_Flame },                                                                    -- Chains of Flame (slotted / target GAIN)
@@ -2356,7 +2356,7 @@ local effectOverride =
     [33321] = { icon = "/esoui/art/icons/ability_nightblade_003.dds" },  -- Siphoning Strikes (Siphoning Strikes)
     [114957] = { icon = "/esoui/art/icons/ability_nightblade_003.dds" }, -- Siphoning Strikes (Siphoning Strikes)
     [36908] = { tooltip = Tooltips.Skill_Leeching_Strikes },             -- Leeching Strikes (Leeching Strikes)
-    [215493] = { dynamicTooltip = true, tooltipMorphId = 36935 },        -- Siphoning Attacks bundle buff → morph 36935
+    [215493] = { dynamicTooltip = true, tooltipMorphId = 36935 },        -- Siphoning Attacks bundle buff --> morph 36935
     [36935] = { dynamicTooltip = true },                                 -- Siphoning Attacks morph — GetAbilityDescription (was stale static TP)
 
     -- Drain Power / Power Extraction / Sap Essence
@@ -4913,7 +4913,7 @@ local effectOverride =
     [8239] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_HAMSTRUNG_DDS, name = Abilities.Skill_Hamstring, tooltip = Tooltips.Generic_Snare, tooltipValue2 = 30 }, -- Hamstrung
 
     -- Standard NPC Abilities
-    [2874] = { name = Abilities.Innate_Stagger, tooltip = Tooltips.Generic_Stagger }, -- Staggered (Generic Stagger applied to player by many different NPC abilities)
+    [2874] = { name = Abilities.Innate_Stagger, tooltip = Tooltips.Generic_Stagger, cc = LUIE_CC_TYPE_STAGGER }, -- Staggered (Generic Stagger applied to player by many different NPC abilities)
 
     -- Critter events
     [79544] = { hide = true },                                                                                                                                                        -- Mischievous Dodge (Nixad)

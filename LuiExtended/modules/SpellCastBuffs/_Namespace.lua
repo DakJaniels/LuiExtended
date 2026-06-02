@@ -39,6 +39,8 @@ local LUIE = LUIE
 --- @field werewolfCounter number
 --- @field werewolfQuest number
 --- @field InternalStackCounter table
+--- @field CombatCcByAbilityId table<integer, { ccType: integer, expires: number, targetUnitTag?: string }>
+--- @field CombatCcByTargetAbilityId table<string, integer>
 local SpellCastBuffs = ZO_Object:Subclass()
 
 ------------------------------------------------

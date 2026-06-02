@@ -10,7 +10,6 @@ local LUIE = LUIE
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
 
-local UI = LUIE.UI
 local LuiData = LuiData
 --- @type Data
 local Data = LuiData.Data
