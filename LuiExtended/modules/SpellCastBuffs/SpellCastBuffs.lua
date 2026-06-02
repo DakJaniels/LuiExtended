@@ -661,10 +661,21 @@ function SpellCastBuffs.Initialize(enabled)
         SpellCastBuffs.SV.colors.levitate = SpellCastBuffs.Defaults.colors.levitate
         SpellCastBuffs.SV.colors.disorient = SpellCastBuffs.Defaults.colors.disorient
         SpellCastBuffs.SV.colors.fear = SpellCastBuffs.Defaults.colors.fear
+        SpellCastBuffs.SV.colors.charm = SpellCastBuffs.Defaults.colors.charm
         SpellCastBuffs.SV.colors.silence = SpellCastBuffs.Defaults.colors.silence
         SpellCastBuffs.SV.colors.stagger = SpellCastBuffs.Defaults.colors.stagger
         SpellCastBuffs.SV.colors.snare = SpellCastBuffs.Defaults.colors.snare
         SpellCastBuffs.SV.colors.root = SpellCastBuffs.Defaults.colors.root
+    end
+    -- New feature defaults (do not bump AdjustVarsSCB): ensure new keys exist without migrating prior data.
+    if SpellCastBuffs.SV.DamageTypeFallback == nil then
+        SpellCastBuffs.SV.DamageTypeFallback = SpellCastBuffs.Defaults.DamageTypeFallback
+    end
+    if SpellCastBuffs.SV.colors.damage == nil then
+        SpellCastBuffs.SV.colors.damage = SpellCastBuffs.Defaults.colors.damage
+    end
+    if SpellCastBuffs.SV.colors.charm == nil then
+        SpellCastBuffs.SV.colors.charm = SpellCastBuffs.Defaults.colors.charm
     end
     -- Increment so this doesn't occur again.
     coreAw.AdjustVarsSCB = 2

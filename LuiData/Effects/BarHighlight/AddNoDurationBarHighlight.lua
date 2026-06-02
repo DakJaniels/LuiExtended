@@ -25,10 +25,14 @@ local addNoDurationBarHighlight =
     [32821] = true, -- Engulfing Dragonfire channel (player); combat GAIN DUR 5000 per tick
 
     -- Necromancer
+    [114131] = true, -- Flame Skull charges
+    [117625] = true, -- Venom Skull charges
+    [117638] = true, -- Ricochet Skull charges
     [115240] = true, -- Bitter Harvest
     [124165] = true, -- Deaden Pain
     [124193] = true, -- Necrotic Potency
-    [118814] = true, -- Enduring Undeath
+    [118814] = true, -- Enduring Undeath (ground/tooltip track)
+    [118810] = true, -- Enduring Undeath (corpse-extended player aura)
 
     -- Two Handed
     [61737] = true, -- Empower (Wrecking Blow); API Dur 0 until combat refresh

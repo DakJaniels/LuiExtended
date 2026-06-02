@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-field
 -- -----------------------------------------------------------------------------
 --  LuiExtended                                                               --
 --  Distributed under The MIT License (MIT) (see LICENSE file)                --
@@ -9,12 +10,6 @@ local LUIE = LUIE
 -- -----------------------------------------------------------------------------
 local zo_strformat = zo_strformat
 local table_concat = table.concat
-local MOUSE_BUTTON_INDEX_LEFT = MOUSE_BUTTON_INDEX_LEFT
-local TOPLEFT = TOPLEFT
-local BOTTOMLEFT = BOTTOMLEFT
-local LEFT = LEFT
-local RIGHT = RIGHT
--- TextWrapMode (eso meta): TEXT_WRAP_MODE_TRUNCATE, TEXT_WRAP_MODE_ELLIPSIS only — no TEXT_WRAP_MODE_WRAP.
 -- -----------------------------------------------------------------------------
 
 local CHANGELOG_THEME =

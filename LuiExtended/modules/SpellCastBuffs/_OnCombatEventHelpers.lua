@@ -83,6 +83,53 @@ function SpellCastBuffs.IsAuraLifecycleCombatResult(result)
     return auraLifecycleCombatResults[result] == true
 end
 
+local damageTypeCombatResults =
+{
+    [ACTION_RESULT_DAMAGE] = true,
+    [ACTION_RESULT_CRITICAL_DAMAGE] = true,
+    [ACTION_RESULT_PRECISE_DAMAGE] = true,
+    [ACTION_RESULT_WRECKING_DAMAGE] = true,
+    [ACTION_RESULT_DOT_TICK] = true,
+    [ACTION_RESULT_DOT_TICK_CRITICAL] = true,
+    [ACTION_RESULT_DAMAGE_SHIELDED] = true,
+}
+
+--- @param result ActionResult
+--- @return boolean
+function SpellCastBuffs.IsDamageTypeCombatResult(result)
+    return damageTypeCombatResults[result] == true
+end
+
+--- Cache combat damageType for an abilityId (short TTL).
+--- @param abilityId integer
+--- @param result ActionResult
+--- @param damageType DamageType|integer|nil
+function SpellCastBuffs.RecordCombatDamageType(abilityId, result, damageType)
+    if not SpellCastBuffs.SV.DamageTypeFallback or not SpellCastBuffs.SV.ColorCC then
+        return
+    end
+    if not abilityId or abilityId == 0 then
+        return
+    end
+    if not damageType or damageType == DAMAGE_TYPE_NONE or damageType == DAMAGE_TYPE_GENERIC then
+        return
+    end
+    if not SpellCastBuffs.IsDamageTypeCombatResult(result) then
+        return
+    end
+    local now = GetFrameTimeMilliseconds()
+    local expires = now + 5000
+    SpellCastBuffs.combatDamageTypeByAbilityId[abilityId] = { damageType = damageType, expires = expires }
+
+    -- Some effects show on frames under a remapped id (e.g. BarHighlightOverride.newId).
+    -- Mirror damageType onto the remapped id so the displayed aura can pick it up.
+    local override = Effects.BarHighlightOverride and Effects.BarHighlightOverride[abilityId] or nil
+    local remapId = override and override.newId or nil
+    if remapId and remapId ~= abilityId then
+        SpellCastBuffs.combatDamageTypeByAbilityId[remapId] = { damageType = damageType, expires = expires }
+    end
+end
+
 --- @param config table
 --- @param result ActionResult
 --- @return boolean

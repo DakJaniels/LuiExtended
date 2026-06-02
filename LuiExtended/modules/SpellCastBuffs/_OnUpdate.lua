@@ -185,6 +185,17 @@ local function SetSingleIconBuffType(buff, buffType, unbreakable, id, statusEffe
                 if ccType then
                     return getCCColor(ccType)
                 end
+                if SpellCastBuffs.SV.DamageTypeFallback and SpellCastBuffs.SV.colors.damage then
+                    local now = GetFrameTimeMilliseconds()
+                    local entry = SpellCastBuffs.combatDamageTypeByAbilityId and SpellCastBuffs.combatDamageTypeByAbilityId[id] or nil
+                    if entry and entry.expires and entry.expires > now then
+                        local dt = entry.damageType
+                        local dtColor = dt and SpellCastBuffs.SV.colors.damage[dt] or nil
+                        if dtColor then
+                            return dtColor
+                        end
+                    end
+                end
                 return SpellCastBuffs.SV.colors.debuff
             else
                 return SpellCastBuffs.SV.colors.debuff

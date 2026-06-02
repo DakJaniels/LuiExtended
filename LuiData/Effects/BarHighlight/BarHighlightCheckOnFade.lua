@@ -69,6 +69,9 @@ local barHighlightCheckOnFade =
     [121513] = { id1 = 121513, id2 = 143915, id3 = 143917, unitTag = TARGET_UNIT_TAG }, -- Minor Maim --> Grave Grasp / Minor Maim
     [118309] = { id1 = 118309, id2 = 118325, id3 = 143945, unitTag = TARGET_UNIT_TAG }, -- Minor Maim --> Ghostly Embrace / Minor Maim
     [118354] = { id1 = 118354, id2 = 143948, id3 = 143949, unitTag = TARGET_UNIT_TAG }, -- Minor Maim --> Empowering Grasp / Minor Maim
+    [114131] = { id1 = 114131, unitTag = PLAYER_UNIT_TAG },                             -- Flame Skull charges (resync stacks after per-cast combat FADE)
+    [117625] = { id1 = 117625, unitTag = PLAYER_UNIT_TAG },                             -- Venom Skull charges
+    [117638] = { id1 = 117638, unitTag = PLAYER_UNIT_TAG },                             -- Ricochet Skull charges
 
     -- Two Handed
     [131562] = { id1 = 131562, id2 = 16825, id3 = 137807, unitTag = TARGET_UNIT_TAG }, -- Dizzying Swing OB 7s / exploit stun 2s / immune snare 2s

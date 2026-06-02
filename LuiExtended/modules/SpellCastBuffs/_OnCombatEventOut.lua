@@ -36,6 +36,8 @@ local Effects = Data.Effects
 --- @param abilityId integer
 --- @param overflow integer
 function SpellCastBuffs.OnCombatEventOut(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+    SpellCastBuffs.RecordCombatDamageType(abilityId, result, damageType)
+
     if targetType == COMBAT_UNIT_TYPE_PLAYER or targetType == COMBAT_UNIT_TYPE_PLAYER_PET then
         return
     end

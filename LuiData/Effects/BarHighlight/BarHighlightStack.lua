@@ -34,6 +34,11 @@ local barHighlightStack =
     -- Dragonknight (combatTrack stack buff ids; max stacks for bar highlight + combat GAIN hitValue)
     [34117] = 5, -- Power Lash stacks (Flame Lash line)
     [23808] = 5, -- Lava Slam / Volcanic Whip stacks (Lava Whip line)
+
+    -- Necromancer (skull charge tracks; max 3)
+    [114131] = 3, -- Flame Skull charges
+    [117625] = 3, -- Venom Skull charges
+    [117638] = 3, -- Ricochet Skull charges
 }
 
 --- Slotted bound id consumes one stack on this track buff id when cast (combat may not emit per-stack GAIN).
@@ -43,6 +48,9 @@ local barHighlightStackConsume =
     [20824] = 34117,  -- Power Lash
     [256798] = 23808, -- Volcanic Whip
     [24165] = 203447, -- Bound Armaments
+    [114108] = 114131, -- Flame Skull
+    [117624] = 117625, -- Venom Skull
+    [117637] = 117638, -- Ricochet Skull
 }
 
 --- When EVENT_EFFECT_CHANGED reports stackCount 0 on the track buff id.
@@ -51,6 +59,9 @@ local barHighlightStackZeroEffect =
 {
     [34117] = "keep",  -- timer/stacks from combatTrack or slot use; ignore empty stack tick
     [23808] = "clear", -- hide when API reports 0 stacks
+    [114131] = "keep",
+    [117625] = "keep",
+    [117638] = "keep",
 }
 
 --- @class (partial) BarHighlightStack

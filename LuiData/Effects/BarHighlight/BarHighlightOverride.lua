@@ -340,15 +340,33 @@ local barHighlightOverride =
     -- Necromancer ------------
     ---------------------------
 
+    -- Grave Lord — skull charge stacks (combatTrack; max 3 in BarHighlightStack)
+    [114108] = { newId = 114131, combatTrack = true },                                     -- Flame Skull
+    [117624] = { newId = 117625, combatTrack = true },                                     -- Venom Skull
+    [117637] = { newId = 117638, combatTrack = true },                                     -- Ricochet Skull
+
     [114860] = { newId = 114863 },                                                         -- Blastbones
     [117330] = { newId = 114863 },                                                         -- Blastbones
     [117690] = { newId = 117691 },                                                         -- Blighted Blastbones
     [117693] = { newId = 117691 },                                                         -- Blighted Blastbones
-    [117749] = { newId = 117750, showFakeAura = true, noRemove = true, duration = 20500 }, -- Grave Lord's Sacrifice
+    [117749] = { newId = 117750, showFakeAura = true, noRemove = true, duration = 20500 }, -- Grave Lord's Sacrifice (Stalking)
     [117773] = { newId = 117750 },                                                         -- Relentless Blastbones --> Stalking Blastbones
+
+    [115252] = { newId = 115255, showFakeAura = true, noRemove = true, duration = 10400 }, -- Boneyard
+    [117805] = { newId = 117807, showFakeAura = true, noRemove = true, duration = 10400 }, -- Unnerving Boneyard
+    [117850] = { newId = 117852, showFakeAura = true, noRemove = true, duration = 10400 }, -- Avid Boneyard
+
+    [114317] = { newId = 114317, duration = 20000 },                                       -- Skeletal Mage
+    [118680] = { newId = 118680, duration = 20000 },                                       -- Skeletal Archer
+    [118726] = { newId = 118726, duration = 20000 },                                       -- Skeletal Arcanist
+
+    [122174] = { newId = 122380, showFakeAura = true, noRemove = true, duration = 3000 },  -- Frozen Colossus
+    [122395] = { newId = 122398, showFakeAura = true, noRemove = true, duration = 3000 },  -- Pestilent Colossus
+    [122388] = { newId = 122391, showFakeAura = true, noRemove = true, duration = 3000 },  -- Glacial Colossus
 
     [115924] = { newId = 116445 },                                                         -- Shocking Siphon
     [118763] = { newId = 118764 },                                                         -- Detonating Siphon
+    [118766] = { newId = 118764 },                                                         -- Detonating Siphon (ground tick id -> aura id)
     [118008] = { newId = 118009 },                                                         -- Mystic Siphon
 
     [118226] = { newId = 125750 },                                                         -- Ruinous Scythe --> Off Balance
@@ -362,19 +380,35 @@ local barHighlightOverride =
     [118308] = { newId = 118309 },                                                         -- Ghostly Embrace
     [118352] = { newId = 118354 },                                                         -- Empowering Grasp
 
+    [115206] = { newId = 115206, duration = 20000 },                                         -- Bone Armor
+    [118237] = { newId = 118237, duration = 20000 },                                         -- Beckoning Armor
+    [118244] = { newId = 118244, duration = 30000 },                                         -- Summoner's Armor
+
+    [115093] = { newId = 115095, showFakeAura = true, noRemove = true, duration = 11100 }, -- Bone Totem
+    [118380] = { newId = 118381, showFakeAura = true, noRemove = true, duration = 11100 }, -- Remote Totem
+    [118404] = { newId = 118405, showFakeAura = true, noRemove = true, duration = 13100 }, -- Agony Totem
+
+    [115001] = { newId = 115001, duration = 20000 },                                         -- Bone Goliath Transformation
+    [118664] = { newId = 118664, duration = 20000 },                                         -- Pummeling Goliath
+    [118279] = { newId = 118279, duration = 20000 },                                         -- Ravenous Goliath
+
     [114196] = { newId = 114206, showFakeAura = true },                                    -- Render Flesh --> Minor Defile
     [117883] = { newId = 117885, showFakeAura = true },                                    -- Resistant Flesh --> Minor Defile
     [117888] = { newId = 117890, showFakeAura = true },                                    -- Blood Sacrifice --> Minor Defile
 
-    [115315] = { newId = 115326 },                                                         -- Life amid Death
-    [118017] = { newId = 118022 },                                                         -- Renewing Undeath
-    [118809] = { newId = 118814 },                                                         -- Enduring Undeath
+    [115315] = { newId = 115532, showFakeAura = true, noRemove = true, duration = 5100 },   -- Life amid Death (player aura when extended)
+    [118017] = { newId = 118018, showFakeAura = true, noRemove = true, duration = 5100 }, -- Renewing Undeath
+    [118809] = { newId = 118810, showFakeAura = true, noRemove = true, duration = 30100 }, -- Enduring Undeath (corpse-extended HoT window)
+
+    [115710] = { newId = 115710, duration = 16000 },                                       -- Spirit Mender
+    [118912] = { newId = 118912, duration = 16000 },                                       -- Spirit Guardian
+    [118840] = { newId = 118840, duration = 8000 },                                         -- Intensive Mender
 
     [115926] = { newId = 116450 },                                                         -- Restoring Tether
     [118070] = { newId = 118071 },                                                         -- Braided Tether
     [118122] = { newId = 118123 },                                                         -- Mortal Coil
 
-    [118379] = { newId = 124999, showFakeAura = true },                                    -- Animate Blastbones
+    [118379] = { newId = 124999, showFakeAura = true, noRemove = true, duration = 8000 },  -- Animate Blastbones
 
     ---------------------------
     -- Arcanist ---------------

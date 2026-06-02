@@ -1934,7 +1934,7 @@ function ActionBar.OnAbilityUsed(actionSlotIndex)
     if ActionBar.SV.ShowToggled then
         local bound = GetSlotTrueBoundId(actionSlotIndex, g_hotbarCategory)
         local trackId = g_barConsumeStackOnCast[bound]
-        if trackId and (g_toggledSlotsFront[trackId] or g_toggledSlotsBack[trackId]) and g_toggledSlotsRemain[trackId] then
+        if trackId and (g_toggledSlotsFront[trackId] or g_toggledSlotsBack[trackId]) and (g_toggledSlotsRemain[trackId] or g_toggledSlotsStack[trackId]) then
             DecrementBarHighlightCombatStack(trackId)
         end
     end
@@ -2520,14 +2520,14 @@ SetToggledStackLabels = function (abilityId, textOrNil)
 end
 
 --- Hide all toggled slots for abilityId.
-function HideToggledSlots(abilityId)
+HideToggledSlots = function (abilityId)
     ForEachToggledSlot(abilityId, function (slotNum)
         ActionBar.HideSlot(slotNum, abilityId)
     end)
 end
 
 --- Show all toggled slots for abilityId.
-function ShowToggledSlots(abilityId, currentTime)
+ShowToggledSlots = function (abilityId, currentTime)
     if g_toggledSlotsFront[abilityId] then
         ActionBar.ShowSlot(g_toggledSlotsFront[abilityId], abilityId, currentTime, false)
     end
@@ -2637,7 +2637,21 @@ local function OnGroundEffectGained(abilityId, endTime, stackCount)
 end
 
 --- Handle non-ground effect FADED: Grim Focus stack clear, proc stop, toggle hide, BarHighlightSwap.
-local function OnEffectFaded(abilityId)
+--- @param stackCount integer|nil Stack count from EVENT_EFFECT_CHANGED (charge buffs may FADE with stacks still up).
+local function OnEffectFaded(abilityId, stackCount)
+    local maxStack = g_barCombatStackMax[abilityId]
+    if maxStack and stackCount and stackCount > 0 then
+        g_toggledSlotsStack[abilityId] = stackCount
+        if ActionBar.SV.ShowToggled and (g_toggledSlotsFront[abilityId] or g_toggledSlotsBack[abilityId]) then
+            ShowToggledSlots(abilityId, GetGameTimeMilliseconds())
+            if ActionBar.SV.BarShowLabel then
+                SetToggledStackLabels(abilityId, stackCount)
+            end
+        end
+        TryBarHighlightSwap(abilityId)
+        return
+    end
+
     if isStackCounter[abilityId] then
         for k in pairs(isStackBaseAbility) do
             g_toggledSlotsStack[k] = nil
@@ -2862,7 +2876,7 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
     if unitTag ~= "player" and unitTag ~= "reticleover" then return end
 
     if changeType == EFFECT_RESULT_FADED then
-        OnEffectFaded(abilityId)
+        OnEffectFaded(abilityId, stackCount)
     else
         OnEffectGained(abilityId, unitTag, endTime, stackCount, changeType)
     end
@@ -3889,6 +3903,11 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
             if Effects.BarHighlightCheckOnFade[barAbilityId] then
                 ActionBar.BarHighlightSwap(barAbilityId)
             end
+            return
+        end
+
+        -- Charge-stack buffs (e.g. Necromancer skulls): per-charge combat FADE fires before EFFECT_CHANGED; stacks stay on player.
+        if g_barCombatStackMax[barAbilityId] and g_barCombatStackZeroEffect[barAbilityId] == "keep" then
             return
         end
 

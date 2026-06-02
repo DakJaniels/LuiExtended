@@ -98,6 +98,9 @@ local barHighlightExtraId =
     [87194] = 88761,   -- Minor Protection --> Major Resolve (Ice Fortress)
 
     -- Necromancer
+    [114108] = 114131, -- Flame Skull (slotted / combat) --> charge buff
+    [117624] = 117625, -- Venom Skull
+    [117637] = 117638, -- Ricochet Skull
     [143915] = 121513, -- Grave Grasp
     [143917] = 121513, -- Grave Grasp
     [118325] = 118309, -- Ghostly Embrace

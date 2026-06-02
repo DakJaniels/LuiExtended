@@ -2989,6 +2989,21 @@ local effectOverride =
     [117625] = { tooltip = Tooltips.Skill_Flame_Skull, tooltipValue2 = GetAbilityName(117629), forcedContainer = "short" }, -- Venom Skull (Venom Skull)
     [117638] = { tooltip = Tooltips.Skill_Ricochet_Skull, forcedContainer = "short" },                                      -- Ricochet Skull (Ricochet Skull)
 
+    -- Sacrifice / pet tick noise (player frame)
+    [220098] = { hide = true },
+    [220099] = { hide = true },
+    [220100] = { hide = true },
+    [220101] = { hide = true },
+    [220102] = { hide = true },
+    [220103] = { hide = true },
+    [220104] = { hide = true },
+    [220105] = { hide = true },
+    [220106] = { hide = true },
+
+    -- Bitter Harvest helper pings
+    [124006] = { hide = true },
+    [119372] = { hide = true },
+
     -- Blastbones / Blighted Blastbones / Stalking Blastbones
     [116149] = { hide = true },                                                                                           -- Blastbones Model FX (Blastbones)
     [114861] = { icon = "/esoui/art/icons/ability_necromancer_002.dds", tooltip = Tooltips.Skill_Blastbones },            -- Blastbones (Blastbones)
@@ -3117,6 +3132,9 @@ local effectOverride =
 
     -- Render Flesh / Resistant Flesh / Blood Sacrifice
     [117886] = { tooltip = Tooltips.Skill_Resistant_Flesh }, -- Resistant Flesh (Resistant Flesh)
+    [117947] = { hide = true }, -- Expunge and Modify (Curative Curse on Resistant Flesh)
+    [117941] = { hide = true }, -- Expunge and Modify
+    [124005] = { hide = true }, -- Expunge slotted ping
 
     -- Life amid Death / Renewing Undeath / Enduring Undeath
     [115326] = { icon = "/esoui/art/icons/ability_necromancer_016.dds", tooltip = Tooltips.Skill_Life_amid_Death },   -- Life amid Death (Life amid Death)
