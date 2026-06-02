@@ -48,9 +48,7 @@ local barHighlightStackConsume =
     [20824] = 34117,  -- Power Lash
     [256798] = 23808, -- Volcanic Whip
     [24165] = 203447, -- Bound Armaments
-    [114108] = 114131, -- Flame Skull
-    [117624] = 117625, -- Venom Skull
-    [117637] = 117638, -- Ricochet Skull
+    -- Necromancer skulls: charge counter builds on cast; do not consume here (unlike Power Lash).
 }
 
 --- When EVENT_EFFECT_CHANGED reports stackCount 0 on the track buff id.

@@ -28,6 +28,17 @@ local GetAbilityName = GetAbilityName
 local GetAbilityDuration = GetAbilityDuration
 local GetAbilityCastInfo = GetAbilityCastInfo
 
+local function GetEffectResultString(result)
+    local results =
+    {
+        [1] = "GAINED",
+        [2] = "FADED",
+        [3] = "UPDATED",
+        [4] = "FULL_REFRESH",
+        [5] = "TRANSFER"
+    }
+    return results[result]
+end
 
 -- Debug Display for Combat Events
 --- @param eventId integer
@@ -156,7 +167,7 @@ function SpellCastBuffs.EventEffectDebug(eventId, changeType, effectSlot, effect
     elseif changeType == 2 then
         finalString = ("|c00E200Faded:|r " .. iconFormatted .. " [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. ccDebug)
     else
-        finalString = ("|c00E200Refreshed:|r " .. iconFormatted .. " (" .. changeType .. ") [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. " [Dur] " .. duration .. ccDebug)
+        finalString = ("|c00E200Refreshed:|r " .. iconFormatted .. " (" .. GetEffectResultString(changeType) .. ") [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. " [Dur] " .. duration .. ccDebug)
     end
     PrintToChat(finalString, true)
 end

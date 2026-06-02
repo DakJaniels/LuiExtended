@@ -45,3 +45,38 @@ Effects.IsSimmeringFrenzyOverride =
 {
     [134160] = true, -- Simmering Frenzy
 }
+
+--------------------------------------------------------------------------------------------------------------------------------
+-- ActionBar stack tracking: counter buff id fades update slotted/base bar stack labels (Grim Focus line, Bound Armaments)
+--------------------------------------------------------------------------------------------------------------------------------
+
+--- @class (partial) BarHighlightStackCounter
+--- @type table<integer, boolean>
+Effects.BarHighlightStackCounter =
+{
+    [61905] = true,  -- Grim Focus (counter)
+    [61928] = true,  -- Relentless Focus (counter)
+    [61920] = true,  -- Merciless Resolve (counter)
+    [130293] = true, -- Bound Armaments (counter)
+}
+
+--- @class (partial) BarHighlightStackBaseAbility
+--- @type table<integer, boolean>
+Effects.BarHighlightStackBaseAbility =
+{
+    [61902] = true, -- Grim Focus (slotted)
+    [61927] = true, -- Relentless Focus (slotted)
+    [61919] = true, -- Merciless Resolve (slotted)
+    [24165] = true, -- Bound Armaments (slotted)
+}
+
+--- Proc sound at stack thresholds on track buff ids (pairs with IsGrimFocus / IsBoundArmaments).
+--- @class (partial) BarHighlightProcSoundThresholds
+--- @type table<integer, integer[]>
+Effects.BarHighlightProcSoundThresholds =
+{
+    [122585] = { 5, 10 }, -- Grim Focus
+    [122587] = { 5, 10 }, -- Relentless Focus
+    [122586] = { 5, 10 }, -- Merciless Resolve
+    [203447] = { 4, 8 },  -- Bound Armaments
+}

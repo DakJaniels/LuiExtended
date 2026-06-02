@@ -109,6 +109,9 @@ local DebugStatus = {}
 --- @field BarHighlightStack BarHighlightStack Table of stack-based highlight effects
 --- @field BarHighlightStackConsume table<integer, integer> Bound ability id -> combatTrack stack buff id (consume one stack on cast)
 --- @field BarHighlightStackZeroEffect table<integer, "keep"|"clear"> Track buff id behavior when effect stack count is 0
+--- @field BarHighlightStackCounter table<integer, boolean> Counter buff id: fade updates slotted bar stack (Grim Focus, Bound Armaments)
+--- @field BarHighlightStackBaseAbility table<integer, boolean> Slotted ability ids that display stack count on the bar
+--- @field BarHighlightProcSoundThresholds table<integer, integer[]> Track buff id -> stack thresholds for proc sound
 --- @field CompanionAbilityTrack CompanionAbilityTrack Slotted companion ability id -> UF icon track data
 --- @field BarIdOverride BarIdOverride Table of bar ID overrides
 --- @field DisguiseIcons EffectsDisguiseIcons Table of disguise icon definitions
@@ -166,6 +169,9 @@ local Effects =
     BarHighlightStack = {},
     BarHighlightStackConsume = {},
     BarHighlightStackZeroEffect = {},
+    BarHighlightStackCounter = {},
+    BarHighlightStackBaseAbility = {},
+    BarHighlightProcSoundThresholds = {},
     CompanionAbilityTrack = {},
     BarIdOverride = {},
     BlockAndBashCC = {},

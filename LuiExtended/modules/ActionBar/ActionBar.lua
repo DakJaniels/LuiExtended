@@ -314,6 +314,8 @@ local g_barNoRemove = {}                           -- Table of abilities we don'
 local g_barCombatTrack = {}                        -- Track ids registered via BarHighlightOverride.combatTrack
 --- @type {[integer]:number}
 local g_barCombatStackMax = {}                     -- Max stacks (Effects.BarHighlightStack) for combatTrack highlights
+--- @type {[integer]:boolean}
+local g_barCombatStackNoExpire = {}                -- BarHighlightOverride.combatStackNoExpire (track id)
 --- @type {[integer]:integer}
 local g_barConsumeStackOnCast = {}                 -- Bound id -> track id (Effects.BarHighlightStackConsume)
 --- @type {[integer]: "keep"|"clear"}
@@ -1302,6 +1304,7 @@ function ActionBar.UpdateBarHighlightTables()
     g_barNoRemove = {}
     g_barCombatTrack = {}
     g_barCombatStackMax = {}
+    g_barCombatStackNoExpire = {}
     g_barConsumeStackOnCast = {}
     g_barCombatStackZeroEffect = {}
     g_barCombatEventRemap = {}
@@ -1347,6 +1350,9 @@ function ActionBar.UpdateBarHighlightTables()
                 end
                 if value.combatTrackRemainOnSlotted and trackId then
                     g_barCombatTrackRemainOnSlotted[trackId] = true
+                end
+                if value.combatStackNoExpire and trackId then
+                    g_barCombatStackNoExpire[trackId] = true
                 end
             else
                 if value.noRemove then
@@ -1742,6 +1748,119 @@ local function SetBarRemainLabel(remain, abilityId)
     return FormatDurationSeconds(remain)
 end
 
+--- Dur-0 combatTrack stack buffs (e.g. Necromancer skull charges): remain may be 0 while stacks are still active.
+--- @param abilityId integer
+--- @return boolean
+local function ShouldKeepCombatStackBarHighlight(abilityId)
+    if not g_barCombatStackNoExpire[abilityId] then
+        return false
+    end
+    local stacks = g_toggledSlotsStack[abilityId]
+    return stacks ~= nil and stacks > 0
+end
+
+local function UpdateQuickslotPotionTimer()
+    if not ActionBar.SV.PotionTimerShow then
+        return
+    end
+    local slotIndex = GetCurrentQuickslot()
+    local remain, duration, _ = GetSlotCooldownInfo(slotIndex, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
+    local label = uiQuickSlot.label
+    local timeColours = uiQuickSlot.timeColours
+    if duration <= 5000 then
+        label:SetHidden(true)
+        return
+    end
+    label:SetHidden(false)
+    if not ActionBar.SV.PotionTimerColor then
+        label:SetColor(1, 1, 1, 1)
+    else
+        local color = uiQuickSlot.colour
+        local r, g, b, a = color[1], color[2], color[3], color[4]
+        for i = #timeColours, 1, -1 do
+            if remain < timeColours[i].remain then
+                color = timeColours[i].colour
+                break
+            end
+        end
+        label:SetColor(r, g, b, a)
+    end
+    local text
+    if remain > 86400000 then
+        text = zo_floor(remain / 86400000) .. " d"
+    elseif remain > 6000000 then
+        text = zo_floor(remain / 3600000) .. "h"
+    elseif remain > 600000 then
+        text = zo_floor(remain / 60000) .. "m"
+    elseif remain > 60000 then
+        local m = zo_floor(remain / 60000)
+        local s = remain / 1000 - 60 * m
+        text = m .. ":" .. string_format("%.2d", s)
+    else
+        text = string_format(ActionBar.SV.PotionTimerMillis and "%.1f" or "%.1d", 0.001 * remain)
+    end
+    label:SetText(text)
+end
+
+--- @param currentTimeMS integer
+local function OnUpdateTriggeredSlotHighlights(currentTimeMS)
+    for abilityId, endTimeMS in pairs(g_triggeredSlotsRemain) do
+        local remain = endTimeMS - currentTimeMS
+        local front = g_triggeredSlotsFront[abilityId]
+        local back = g_triggeredSlotsBack[abilityId]
+        local frontAnim = front and g_uiProcAnimation[front]
+        local backAnim = back and g_uiProcAnimation[back]
+        if endTimeMS < currentTimeMS then
+            if frontAnim then
+                frontAnim:Stop()
+            end
+            if backAnim then
+                backAnim:Stop()
+            end
+            g_triggeredSlotsRemain[abilityId] = nil
+        elseif ActionBar.SV.BarShowLabel and remain > 0 then
+            local text = SetBarRemainLabel(remain, abilityId)
+            if frontAnim then
+                frontAnim.procLoopTexture.label:SetText(text)
+            end
+            if backAnim then
+                backAnim.procLoopTexture.label:SetText(text)
+            end
+        end
+    end
+end
+
+--- @param currentTimeMS integer
+local function OnUpdateToggledSlotHighlights(currentTimeMS)
+    for abilityId, endTimeMS in pairs(g_toggledSlotsRemain) do
+        local remain = endTimeMS - currentTimeMS
+        local front = g_toggledSlotsFront[abilityId]
+        local back = g_toggledSlotsBack[abilityId]
+        local frontToggle = front and g_uiCustomToggle[front]
+        local backToggle = back and g_uiCustomToggle[back]
+        if endTimeMS < currentTimeMS then
+            if not ShouldKeepCombatStackBarHighlight(abilityId) then
+                if frontToggle then
+                    ActionBar.HideSlot(front, abilityId)
+                end
+                if backToggle then
+                    ActionBar.HideSlot(back, abilityId)
+                end
+                g_toggledSlotsRemain[abilityId] = nil
+                g_toggledSlotsStack[abilityId] = nil
+            end
+        elseif ActionBar.SV.BarShowLabel and remain > 0 then
+            local text = SetBarRemainLabel(remain, abilityId)
+            if frontToggle then
+                frontToggle.label:SetText(text)
+            end
+            if backToggle then
+                backToggle.label:SetText(text)
+            end
+        end
+    end
+end
+
 -- -----------------------------------------------------------------------------
 -- Updates all floating labels. Called every 100ms
 ---
@@ -1756,102 +1875,9 @@ function ActionBar.OnUpdate(currentTimeMS)
         end
     end
 
-    -- Procs
-    for k, v in pairs(g_triggeredSlotsRemain) do
-        local remain = v - currentTimeMS
-        local front = g_triggeredSlotsFront[k]
-        local back = g_triggeredSlotsBack[k]
-        local frontAnim = front and g_uiProcAnimation[front]
-        local backAnim = back and g_uiProcAnimation[back]
-        -- If duration reaches 0 then remove effect
-        if v < currentTimeMS then
-            if frontAnim then
-                frontAnim:Stop()
-            end
-            if backAnim then
-                backAnim:Stop()
-            end
-            g_triggeredSlotsRemain[k] = nil
-        end
-        -- Update Label (FRONT)(BACK)
-        if ActionBar.SV.BarShowLabel and remain then
-            if frontAnim then
-                frontAnim.procLoopTexture.label:SetText(SetBarRemainLabel(remain, k))
-            end
-            if backAnim then
-                backAnim.procLoopTexture.label:SetText(SetBarRemainLabel(remain, k))
-            end
-        end
-    end
-    -- Ability Highlight
-    for k, v in pairs(g_toggledSlotsRemain) do
-        local remain = v - currentTimeMS
-        local front = g_toggledSlotsFront[k]
-        local back = g_toggledSlotsBack[k]
-        local frontToggle = front and g_uiCustomToggle[front]
-        local backToggle = back and g_uiCustomToggle[back]
-        -- Update Label (FRONT)
-        if v < currentTimeMS then
-            if frontToggle then
-                ActionBar.HideSlot(front, k)
-            end
-            if backToggle then
-                ActionBar.HideSlot(back, k)
-            end
-            g_toggledSlotsRemain[k] = nil
-            g_toggledSlotsStack[k] = nil
-        end
-        -- Update Label (BACK)
-        if ActionBar.SV.BarShowLabel and remain then
-            if frontToggle then
-                frontToggle.label:SetText(SetBarRemainLabel(remain, k))
-            end
-            if backToggle then
-                backToggle.label:SetText(SetBarRemainLabel(remain, k))
-            end
-        end
-    end
-
-    -- Quickslot cooldown
-    if ActionBar.SV.PotionTimerShow then
-        local slotIndex = GetCurrentQuickslot()
-        local remain, duration, _ = GetSlotCooldownInfo(slotIndex, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
-        local label = uiQuickSlot.label
-        local timeColours = uiQuickSlot.timeColours
-        if duration > 5000 then
-            label:SetHidden(false)
-            if not ActionBar.SV.PotionTimerColor then
-                label:SetColor(1, 1, 1, 1)
-            else
-                local color = uiQuickSlot.colour
-                local r, g, b, a = color[1], color[2], color[3], color[4]
-                for i = #timeColours, 1, -1 do
-                    if remain < timeColours[i].remain then
-                        color = timeColours[i].colour
-                        break
-                    end
-                end
-                label:SetColor(r, g, b, a)
-            end
-            local text
-            if remain > 86400000 then
-                text = zo_floor(remain / 86400000) .. " d"
-            elseif remain > 6000000 then
-                text = zo_floor(remain / 3600000) .. "h"
-            elseif remain > 600000 then
-                text = zo_floor(remain / 60000) .. "m"
-            elseif remain > 60000 then
-                local m = zo_floor(remain / 60000)
-                local s = remain / 1000 - 60 * m
-                text = m .. ":" .. string_format("%.2d", s)
-            else
-                text = string_format(ActionBar.SV.PotionTimerMillis and "%.1f" or "%.1d", 0.001 * remain)
-            end
-            label:SetText(text)
-        else
-            label:SetHidden(true)
-        end
-    end
+    OnUpdateTriggeredSlotHighlights(currentTimeMS)
+    OnUpdateToggledSlotHighlights(currentTimeMS)
+    UpdateQuickslotPotionTimer()
 
     -- Hide Ultimate generation texture if it is time to do so
     if ActionBar.SV.UltimateGeneration then
@@ -1874,9 +1900,7 @@ function ActionBar.OnUpdate(currentTimeMS)
     savedPlayerX = playerX
     savedPlayerZ = playerZ
     playerX, playerZ = GetMapPlayerPosition("player")
-    if savedPlayerX == playerX and savedPlayerZ == playerZ then
-        return
-    else
+    if savedPlayerX ~= playerX or savedPlayerZ ~= playerZ then
         -- Fix if the player clicks on a Wayshrine in the World Map
         if g_castbarWorldMapFix == false then
             if Castbar.BreakCastOnMove[castbar.id] then
@@ -2392,9 +2416,11 @@ function ActionBar.OnReticleTargetChanged()
             buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer = GetUnitBuffInfo(unitTag, i)
             -- Convert boolean to number value if cast by player
             if castByPlayer == true then
-                castByPlayer = 1
+                --- @diagnostic disable-next-line: cast-local-type
+                castByPlayer = COMBAT_UNIT_TYPE_PLAYER
             else
-                castByPlayer = 5
+                --- @diagnostic disable-next-line: cast-local-type
+                castByPlayer = COMBAT_UNIT_TYPE_OTHER
             end
             if not IsUnitDead(unitTag) then
                 ActionBar.OnEffectChanged(
@@ -2478,31 +2504,6 @@ function ActionBar.BarHighlightSwap(abilityId)
     end
 end
 
-local isStackCounter =
-{
-    [61905] = true,  -- Grim Focus
-    [61928] = true,  -- Relentless Focus
-    [61920] = true,  -- Merciless Resolve
-    [130293] = true, -- Bound Armaments
-}
-
-local isStackBaseAbility =
-{
-    [61902] = true, -- Grim Focus
-    [61927] = true, -- Relentless Focus
-    [61919] = true, -- Merciless Resolve
-    [24165] = true, -- Bound Armaments
-}
-
--- Proc sound thresholds: abilityId -> { threshold1, threshold2 }. Used by IsGrimFocus and IsBoundArmaments.
-local PROC_SOUND_THRESHOLDS =
-{
-    [122585] = { 5, 10 }, -- Grim Focus
-    [122587] = { 5, 10 }, -- Relentless Focus
-    [122586] = { 5, 10 }, -- Merciless Resolve
-    [203447] = { 4, 8 },  -- Bound Armaments
-}
-
 --- Iterate over front and back toggled slots for abilityId; call fn(slotNum) for each valid slot.
 ForEachToggledSlot = function (abilityId, fn)
     local front = g_toggledSlotsFront[abilityId]
@@ -2559,7 +2560,7 @@ end
 
 --- Play proc sound at stack thresholds. Used by Grim Focus and Bound Armaments.
 local function PlayProcSoundAtStacks(abilityId, stackCount)
-    local thresholds = PROC_SOUND_THRESHOLDS[abilityId]
+    local thresholds = Effects.BarHighlightProcSoundThresholds[abilityId]
     if not thresholds or not ActionBar.SV.ShowTriggered or not ActionBar.SV.ProcEnableSound then return end
     if not g_boundArmamentsPlayed[abilityId] then
         g_boundArmamentsPlayed[abilityId] = {}
@@ -2652,8 +2653,8 @@ local function OnEffectFaded(abilityId, stackCount)
         return
     end
 
-    if isStackCounter[abilityId] then
-        for k in pairs(isStackBaseAbility) do
+    if Effects.BarHighlightStackCounter[abilityId] then
+        for k in pairs(Effects.BarHighlightStackBaseAbility) do
             g_toggledSlotsStack[k] = nil
             if ActionBar.SV.ShowToggled and ActionBar.SV.BarShowLabel and (g_toggledSlotsFront[k] or g_toggledSlotsBack[k]) then
                 SetToggledStackLabels(k, nil)
@@ -2679,7 +2680,7 @@ local function OnEffectFaded(abilityId, stackCount)
     if g_toggledSlotsRemain[abilityId] then
         HideToggledSlots(abilityId)
         g_toggledSlotsRemain[abilityId] = nil
-        if not isStackBaseAbility[abilityId] then g_toggledSlotsStack[abilityId] = nil end
+        if not Effects.BarHighlightStackBaseAbility[abilityId] then g_toggledSlotsStack[abilityId] = nil end
     end
 
     TryBarHighlightSwap(abilityId)
@@ -2733,8 +2734,13 @@ local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeTyp
                     end
                 else
                     local currentTime = GetGameTimeMilliseconds()
-                    g_toggledSlotsRemain[abilityId] = 1000 * endTime
-                    if not isStackBaseAbility[abilityId] then
+                    local remainMs = 1000 * endTime
+                    if stackCount and stackCount > 0 and remainMs <= currentTime then
+                        local overrideDur = g_barDurationOverride[abilityId]
+                        remainMs = currentTime + ((overrideDur and overrideDur > 0) and overrideDur or 600000)
+                    end
+                    g_toggledSlotsRemain[abilityId] = remainMs
+                    if not Effects.BarHighlightStackBaseAbility[abilityId] then
                         if stackCount and stackCount > 0 then
                             g_toggledSlotsStack[abilityId] = stackCount
                         elseif not g_toggledSlotsStack[abilityId] and g_toggledSlotsRemain[abilityId] then
@@ -2756,7 +2762,7 @@ local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeTyp
                 else
                     g_toggledSlotsRemain[abilityId] = newRemain
                 end
-                if not isStackBaseAbility[abilityId] then
+                if not Effects.BarHighlightStackBaseAbility[abilityId] then
                     if stackCount and stackCount > 0 then
                         g_toggledSlotsStack[abilityId] = stackCount
                     end
@@ -2766,10 +2772,10 @@ local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeTyp
         end
     end
 
-    if isStackCounter[abilityId] then
+    if Effects.BarHighlightStackCounter[abilityId] then
         for i = 1, GetNumBuffs(unitTag) do
             local baseId = select(11, GetUnitBuffInfo(unitTag, i))
-            if isStackBaseAbility[baseId] then
+            if Effects.BarHighlightStackBaseAbility[baseId] then
                 g_toggledSlotsStack[baseId] = stackCount
                 if ActionBar.SV.ShowToggled and ActionBar.SV.BarShowLabel and (g_toggledSlotsFront[baseId] or g_toggledSlotsBack[baseId]) then
                     SetToggledStackLabels(baseId, g_toggledSlotsStack[baseId] and g_toggledSlotsStack[baseId] > 0 and g_toggledSlotsStack[baseId] or nil)
@@ -3860,6 +3866,8 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
                             local duration = g_barDurationOverride[barAbilityId] or GetUpdatedAbilityDuration(barAbilityId)
                             if duration > 0 then
                                 g_toggledSlotsRemain[barAbilityId] = currentTimeMS + duration
+                            else
+                                g_toggledSlotsRemain[barAbilityId] = currentTimeMS + 600000
                             end
                         end
                     end

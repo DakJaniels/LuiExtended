@@ -14,7 +14,7 @@ local Effects = LuiData.Data.Effects
 local CrowdControl = LuiData.Data.CrowdControl
 local eventManager = GetEventManager()
 local animationManager = GetAnimationManager()
-local sceneManager = SCENE_MANAGER
+
 local IsCharmAbility = IsCharmAbility
 local table_insert = table.insert
 local table_remove = table.remove

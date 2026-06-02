@@ -21,7 +21,6 @@ local Quests = Data.Quests
 local printToChat = LUIE.PrintToChat
 local string_format = string.format
 local table_insert = table.insert
-local table_concat = table.concat
 
 local eventManager = GetEventManager()
 local windowManager = GetWindowManager()

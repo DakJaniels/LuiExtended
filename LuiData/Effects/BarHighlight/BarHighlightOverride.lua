@@ -23,6 +23,7 @@ local contingency = { newId = 222285, showFakeAura = true, noRemove = true, dura
 --- @field hide boolean | nil Whether to hide this bar highlight entirely
 --- @field combatTrack boolean|nil Register EVENT_COMBAT_EVENT for newId without g_barFakeAura (keeps EVENT_EFFECT_CHANGED for fade)
 --- @field combatTrackRemainOnSlotted boolean|nil When newId is a channel tick id: only slotted-id combat (and effect) sets bar timer; tick combat keeps highlight without resetting remain
+--- @field combatStackNoExpire boolean|nil Dur-0 stack charge buff: keep bar highlight while stacks remain even if remain timestamp expired (ActionBar OnUpdate)
 
 --- @type table<integer, BarHighlightOverrideOptions>
 local barHighlightOverride =
@@ -341,9 +342,9 @@ local barHighlightOverride =
     ---------------------------
 
     -- Grave Lord — skull charge stacks (combatTrack; max 3 in BarHighlightStack)
-    [114108] = { newId = 114131, combatTrack = true },                                     -- Flame Skull
-    [117624] = { newId = 117625, combatTrack = true },                                     -- Venom Skull
-    [117637] = { newId = 117638, combatTrack = true },                                     -- Ricochet Skull
+    [114108] = { newId = 114131, combatTrack = true, combatStackNoExpire = true },         -- Flame Skull
+    [117624] = { newId = 117625, combatTrack = true, combatStackNoExpire = true },         -- Venom Skull
+    [117637] = { newId = 117638, combatTrack = true, combatStackNoExpire = true },         -- Ricochet Skull
 
     [114860] = { newId = 114863 },                                                         -- Blastbones
     [117330] = { newId = 114863 },                                                         -- Blastbones
