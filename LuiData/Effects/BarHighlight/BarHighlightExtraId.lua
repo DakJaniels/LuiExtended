@@ -37,17 +37,17 @@ local barHighlightExtraId =
     [259719] = 21007, -- Wing Buffet knockback --> slotted
     [259323] = 29016, -- Dragon Leap travel (600 ms) --> slotted
     [262677] = 29016, -- Dragon Leap bundle --> slotted
-    [114590] = 29016, -- Dragon Leap stun (legacy) --> slotted
-    [262678] = 29016, -- Dragon Leap stun (U49) --> slotted
+    [114590] = 29016, -- Dragon Leap stun --> slotted
+    [262678] = 29016, -- Dragon Leap stun --> slotted
     [259228] = 29016, -- Landslide (U49) --> Dragon Leap (Landslide on bar via BarHighlightOverride newId 29465)
     [259372] = 32719, -- Take Flight travel --> slotted
     [262683] = 32719, -- Take Flight bundle --> slotted
-    [114600] = 32719, -- Take Flight stun (legacy) --> slotted
-    [262682] = 32719, -- Take Flight stun (U49, combat log 3000 ms) --> slotted
+    [114600] = 32719, -- Take Flight stun --> slotted
+    [262682] = 32719, -- Take Flight stun --> slotted
     [259241] = 32719, -- Landslide (U49) --> Take Flight
     [262681] = 32715, -- Ferocious Leap bundle --> slotted
-    [114601] = 32715, -- Ferocious Leap stun (legacy; combat log 3000 ms) --> slotted
-    [262680] = 32715, -- Ferocious Leap stun (U49 export; not in Ferocious log)
+    [114601] = 32715, -- Ferocious Leap stun --> slotted
+    [262680] = 32715, -- Ferocious Leap stun --> slotted
     [32717] = 32715,  -- Ferocious Leap knockback aura (target; log, parallel 114601) --> slotted
     -- Landslide 29465 shared; bar newId 29465 only on 29016 (Take Flight bar uses 262682 stun — not 29465).
     [259684] = 32715, -- Landslide (U49) --> Ferocious Leap
@@ -129,13 +129,13 @@ local barHighlightExtraId =
 
     -- Werewolf
     [32633] = 137257,  -- Roar --> Off Balance
-    [170991] = 137257, -- Roar fear combat id (U50) --> Off Balance bar key (single key per Roar bundle)
-    [171001] = 45834,  -- Ferocious Roar fear combat id (U50) --> Off Balance bar key
-    [171003] = 137312, -- Deafening Roar fear combat id (U50) --> Off Balance bar key (parallel to 170991 / 171001)
-    [267745] = 58405,  -- Gnash Execute (U50 second-hit) --> Gnash slot
-    [58744] = 58742,   -- Rip and Tear Execute (U50; Gnash morph second-hit) --> Rip and Tear slot
-    [267747] = 58798,  -- Bloody Gnash Execute (U50; Gnash morph second-hit) --> Bloody Gnash slot (parallel to 267745 --> 58405, 58744 --> 58742)
-    [39114] = 137312,  -- Deafening Roar slot --> Off Balance (U50: was tagged "TODO Major Breach/Minor Maim"; Deafening Roar no longer applies Major Breach, now grants Major Cowardice + Major Maim + Off Balance)
+    [170991] = 137257, -- Roar fear combat id --> Off Balance bar key
+    [171001] = 45834,  -- Ferocious Roar fear combat id --> Off Balance bar key
+    [171003] = 137312, -- Deafening Roar fear combat id --> Off Balance bar key
+    [267745] = 58405,  -- Gnash Execute --> Gnash slot
+    [58744] = 58742,   -- Rip and Tear Execute --> Rip and Tear slot
+    [267747] = 58798,  -- Bloody Gnash Execute --> Bloody Gnash slot
+    [39114] = 137312,  -- Deafening Roar --> Off Balance
 
     -- Vampire
     [138130] = 138098, -- Stupefy
