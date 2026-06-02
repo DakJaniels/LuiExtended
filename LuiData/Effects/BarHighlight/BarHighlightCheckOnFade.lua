@@ -76,6 +76,11 @@ local barHighlightCheckOnFade =
     [137807] = { id1 = 137807, id2 = 131562, id3 = 16825, unitTag = TARGET_UNIT_TAG },
     [38797] = { duration = 38794, durationMod = 38797, unitTag = PLAYER_UNIT_TAG }, -- Forward Momentum --> Major Brutality / Minor Endurance
 
+    -- Sorcerer (target CC debuffs + bundled maim)
+    [143659] = { id1 = 61725, id2 = 143659, unitTag = TARGET_UNIT_TAG },               -- Encase immobilize fade --> Major Maim
+    [143663] = { id1 = 61725, id2 = 143663, id3 = 214457, unitTag = TARGET_UNIT_TAG }, -- Shattering Prison
+    [143668] = { id1 = 61725, id2 = 143668, unitTag = TARGET_UNIT_TAG },               -- Restraining Prison
+
     -- Dual Wield
     [126667] = { id1 = 61665, unitTag = PLAYER_UNIT_TAG }, -- Flying Blade --> Major Brutality
 

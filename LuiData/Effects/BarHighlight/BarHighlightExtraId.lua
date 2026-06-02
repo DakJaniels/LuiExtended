@@ -87,8 +87,11 @@ local barHighlightExtraId =
     [259137] = 32678, -- Shattering Rocks Minor Breach combat --> slotted
 
     -- Sorcerer
-    [89491] = 24330,  -- Haunting Curse
-    [132946] = 28482, -- Streak
+    [89491] = 24330,  -- Haunting Curse (1-stack target track --> slotted)
+    [132946] = 23236, -- Streak (combat --> slotted; target stun 28482 hidden)
+    [47147] = 27706,  -- Negate Magic in-field stun --> slotted ground
+    [47159] = 28341,  -- Suppression Field stun --> slotted ground
+    [47167] = 28348,  -- Absorption Field stun --> slotted ground
 
     -- Warden
     [130140] = 130139, -- Cutting Dive --> Off-Balance

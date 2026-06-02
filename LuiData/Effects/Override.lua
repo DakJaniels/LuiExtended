@@ -306,7 +306,7 @@ local effectOverride =
 
     -- Off-Balance Exploit
     [16825] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN },  -- Off-Balance Exploit
-    [18793] = { hide = true }, -- Off Balance Exploit bundle (0 ms; parallel to 16825 — Dizzying log)
+    [18793] = { hide = true },                                                                                                                                  -- Off Balance Exploit bundle (0 ms; parallel to 16825 — Dizzying log)
     [44364] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN },  -- Off-Balance Exploit
     [126567] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN }, -- Off-Balance Exploit
     [126568] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_INNATE_OFF_BALANCE_EXPLOIT_DDS, tooltip = Tooltips.Generic_Knockdown, cc = LUIE_CC_TYPE_KNOCKDOWN }, -- Off-Balance Exploit
@@ -2388,6 +2388,8 @@ local effectOverride =
 
     [31384] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SORCERER_BLOOD_MAGIC_DDS },                                                                                     -- Blood Magic (Blood Magic - Rank 1)
     [45173] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SORCERER_BLOOD_MAGIC_DDS },                                                                                     -- Blood Magic (Blood Magic - Rank 2)
+    [252508] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SORCERER_BLOOD_MAGIC_DDS },                                                                                    -- Blood Magic (cast proc)
+    [62320] = { hide = true },                                                                                                                                            -- Exploitation Minor Prophecy combat (display 61691)
 
     -- Daedric Summoning
 
@@ -2411,11 +2413,11 @@ local effectOverride =
     [31421] = { icon = "/esoui/art/icons/ability_sorcerer_068.dds" },               -- Energized (Energized - Rank 1)
     [45190] = { icon = "/esoui/art/icons/ability_sorcerer_068.dds" },               -- Energized (Energized - Rank 2)
 
-    -- [31422] = { icon = 'esoui/art/icons/ability_sorcerer_054.dds' }, -- Amplitude (Amplitude - Rank 1)
-    -- [45192] = { icon = 'esoui/art/icons/ability_sorcerer_054.dds' }, -- Amplitude (Amplitude - Rank 2)
+    [31422] = { icon = "/esoui/art/icons/ability_sorcerer_054.dds" },               -- Amplitude (Amplitude - Rank 1)
+    [45192] = { icon = "/esoui/art/icons/ability_sorcerer_054.dds" },               -- Amplitude (Amplitude - Rank 2)
 
-    [31425] = { icon = "/esoui/art/icons/ability_sorcerer_070.dds" }, -- Expert Mage (Expert Mage - Rank 1)
-    [45195] = { icon = "/esoui/art/icons/ability_sorcerer_070.dds" }, -- Expert Mage (Expert Mage - Rank 2)
+    [31425] = { icon = "/esoui/art/icons/ability_sorcerer_070.dds" },               -- Expert Mage (Expert Mage - Rank 1)
+    [45195] = { icon = "/esoui/art/icons/ability_sorcerer_070.dds" },               -- Expert Mage (Expert Mage - Rank 2)
 
     ----------------------------------------------------------------
     -- SORCERER ACTIVES --------------------------------------------
@@ -2428,6 +2430,7 @@ local effectOverride =
     [143808] = { tooltip = Tooltips.Generic_Reduce_Physical_Spell_Resist_Value, tooltipValue2 = 1000 }, -- Crystal Weapon (Crystal Weapon)
 
     [46327] = { name = Abilities.Skill_Crystal_Fragments, tooltip = Tooltips.Skill_Crystal_Fragments }, -- Crystal Fragments Proc (Crystal Fragments)
+    [114716] = { hide = true },                                                                         -- Crystal Fragments hit FX
 
     -- Encase / Shattering Prison / Restraining Prison
     [28025] = { tooltip = Tooltips.Generic_Immobilize },      -- Encase (Encase)
@@ -2452,6 +2455,8 @@ local effectOverride =
     [114903] = { tooltip = Tooltips.Generic_Magicka_Regen_Value, tooltipValue2 = 1, tooltipValue3 = 120 }, -- Dark Exchange (Dark Exchange)
     [114908] = { tooltip = Tooltips.Generic_Stamina_Regen_Value, tooltipValue2 = 1, tooltipValue3 = 120 }, -- Dark Deal (Dark Deal)
     [114909] = { tooltip = Tooltips.Generic_Magicka_Regen_Value, tooltipValue2 = 1, tooltipValue3 = 120 }, -- Dark Conversion (Dark Conversion)
+    [196184] = { hide = true },                                                                            -- Dark Exchange Minor Berserk combat
+    [123323] = { hide = true },                                                                            -- Dark Deal Minor Berserk combat
 
     -- Daedric Mines / Daedric Tomb / Daedric Minefield
     [24830] = { icon = "/esoui/art/icons/ability_sorcerer_daedric_mines.dds", tooltip = Tooltips.Skill_Daedric_Mines },                                               -- Daedric Mines (Daedric Mines)
@@ -2497,6 +2502,13 @@ local effectOverride =
     [24328] = { tooltip = Tooltips.Skill_Daedric_Prey },              -- Daedric Prey (Daedric Prey)
     [24330] = { tooltip = Tooltips.Skill_Haunting_Curse, stack = 2 }, -- Haunting Curse (Haunting Curse)
     [89491] = { tooltip = Tooltips.Skill_Haunting_Curse, stack = 1 }, -- Haunting Curse (Haunting Curse)
+    [28176] = { hide = true },                                        -- Haunting Curse (player echo)
+    [89492] = { hide = true },                                        -- Haunting Curse (player track)
+    [28169] = { hide = true },                                        -- Daedric Curse (player echo)
+    [28175] = { hide = true },                                        -- Daedric Prey (player echo)
+    [44507] = { hide = true },                                        -- Daedric Curse (tail)
+    [44511] = { hide = true },                                        -- Daedric Prey (tail)
+    [44515] = { hide = true },                                        -- Haunting Curse (tail)
 
     -- Summon Winged Twilight / Summon Twilight Tormentor / Summon Twilight Matriarch
     [24617] = { icon = LUIE_MEDIA_ICONS_ABILITIES_ABILITY_SORCERER_ZAP_DDS, name = Abilities.Skill_Zap },    -- Zap (Summon Winged Twilight - All Morphs)
@@ -2565,14 +2577,31 @@ local effectOverride =
     [23210] = { tooltip = Tooltips.Skill_Lightning_Form }, -- Lightning Form (Lightning Form)
     [23231] = { tooltip = Tooltips.Skill_Hurricane },      -- Hurricane (Hurricane)
     [23213] = { tooltip = Tooltips.Skill_Lightning_Form }, -- Boundless Storm (Boundless Storm)
+    [43769] = { hide = true },                             -- Conduit (Boundless Storm / LF bundle)
+    [23196] = { hide = true },                             -- Conduit (damage tick)
+    [80485] = { hide = true },                             -- Hurricane Bonus Damage Stacks
+    [80484] = { hide = true },                             -- Hurricane Bonus Radius Stacks
+    [77437] = { hide = true },                             -- Daedric Tomb (player placement ping; bar uses 24847)
+    [114764] = { hide = true },                            -- Endless Fury (player ready proc)
+    [23284] = { hide = true },                             -- Ball of Lightning Intercept
+    [189181] = { hide = true },                            -- Overload (channel buff)
+    [189182] = { hide = true },                            -- Power Overload (channel buff)
+    [189183] = { hide = true },                            -- Energy Overload (channel buff)
+    [24794] = { hide = true },                             -- Overload heavy channel
+    [24810] = { hide = true },                             -- Power Overload heavy channel
+    [114797] = { hide = true },                            -- Energy Overload heavy channel
+    [114769] = { hide = true },                            -- Power Overload light attack (out of resource)
 
     -- Lightning Splash / Liquid Lightning / Lightning Flood
-    [23182] = { tooltip = Tooltips.Skill_Lightning_Splash, tooltipValue2 = 4 },                -- Lightning Splash (Lightning Splash)
-    [23200] = { tooltip = Tooltips.Skill_Lightning_Splash, tooltipValue2 = 4 },                -- Liquid Lightning (Liquid Lightning)
-    [23205] = { tooltip = Tooltips.Skill_Lightning_Splash, tooltipValue2 = 6 },                -- Lightning Flood (Lightning Flood)
-    [23189] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Shock, tooltipValue2 = 1 }, -- Lightning Splash (Lightning Splash)
-    [23202] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Shock, tooltipValue2 = 1 }, -- Liquid Lightning (Liquid Lightning)
-    [23208] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Shock, tooltipValue2 = 1 }, -- Lightning Flood (Lightning Flood)
+    [23182] = { tooltip = Tooltips.Skill_Lightning_Splash, tooltipValue2 = 4 },                 -- Lightning Splash (Lightning Splash)
+    [23200] = { tooltip = Tooltips.Skill_Lightning_Splash, tooltipValue2 = 4 },                 -- Liquid Lightning (Liquid Lightning)
+    [23205] = { tooltip = Tooltips.Skill_Lightning_Splash, tooltipValue2 = 6 },                 -- Lightning Flood (Lightning Flood)
+    [157462] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Shock, tooltipValue2 = 1 }, -- Lightning Splash (ground track)
+    [157535] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Shock, tooltipValue2 = 1 }, -- Liquid Lightning (ground track)
+    [157537] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Shock, tooltipValue2 = 1 }, -- Lightning Flood (ground track)
+    [23189] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Shock, tooltipValue2 = 1 },  -- Lightning Splash (Lightning Splash)
+    [23202] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Shock, tooltipValue2 = 1 },  -- Liquid Lightning (Liquid Lightning)
+    [23208] = { groundLabel = true, tooltip = Tooltips.Generic_AOE_Shock, tooltipValue2 = 1 },  -- Lightning Flood (Lightning Flood)
 
     -- Surge / Power Surge / Critical Surge
     [23670] = { tooltip = Tooltips.Skill_Surge },       -- Surge (Surge)
@@ -2582,7 +2611,7 @@ local effectOverride =
     -- Bolt Escape
     [51392] = { type = BUFF_EFFECT_TYPE_DEBUFF, unbreakable = 1, tooltip = Tooltips.Skill_Bolt_Escape_Fatigue },                                                       -- Bolt Escape Fatigue (Bolt Escape - All Morphs)
     [23235] = { tooltip = Tooltips.Generic_Stun },                                                                                                                     -- Bolt Escape (Bolt Escape)
-    [28482] = { tooltip = Tooltips.Generic_Stun },                                                                                                                     -- Streak (Streak)
+    [28482] = { hide = true },                                                                                                                                         -- Streak (target stun; bar uses 51392 fatigue)
     [132946] = { tooltip = Tooltips.Generic_Stun },                                                                                                                    -- Streak (Streak)
     [131383] = { tooltip = Tooltips.Innate_Snare_Immobilize_Immunity },                                                                                                -- Ball of Lightning (Ball of Lightning)
     [23283] = { hide = true },                                                                                                                                         -- Summoned Ball of Lightning (Ball of Lightning)
@@ -2591,7 +2620,6 @@ local effectOverride =
     -- Overload / Power Overload / Energy Overload
     [24785] = { tooltip = Tooltips.Skill_Overload, toggle = true },                -- Overload (Overload)
     [24806] = { tooltip = Tooltips.Skill_Overload, toggle = true },                -- Power Overload (Power Overload)
-    [114769] = { icon = "/esoui/art/icons/ability_sorcerer_power_overload.dds" },  -- Power Overload Light Attack (Power Overload)
     [24804] = { tooltip = Tooltips.Skill_Energy_Overload, toggle = true },         -- Energy Overload (Energy Overload)
     [114773] = { icon = "/esoui/art/icons/ability_sorcerer_energy_overload.dds" }, -- Energy Overload Light Attack (Energy Overload)
     [29740] = { icon = "/esoui/art/icons/ability_sorcerer_energy_overload.dds" },  -- Energy Overload (Energy Overload)
@@ -3627,8 +3655,8 @@ local effectOverride =
     [126474] = { tooltip = Tooltips.Generic_AOE_Physical, tooltipValue2 = 1, groundLabel = true }, -- Stampede (Stampede)
 
     -- Cleave / Carve / Brawler
-    [159717] = { tooltip = Tooltips.Generic_Damage_Shield_Duration }, -- Cleave (damage shield)
-    [159728] = { tooltip = Tooltips.Generic_Damage_Shield_Duration }, -- Carve (damage shield)
+    [159717] = { tooltip = Tooltips.Generic_Damage_Shield_Duration },  -- Cleave (damage shield)
+    [159728] = { tooltip = Tooltips.Generic_Damage_Shield_Duration },  -- Carve (damage shield)
     [38747] = { tooltip = Tooltips.Generic_Bleed, tooltipValue2 = 2 }, -- Carve Bleed (Carve)
     [38763] = { tooltip = Tooltips.Generic_Damage_Shield_Duration },   -- Brawler (Brawler)
 
@@ -3646,17 +3674,17 @@ local effectOverride =
     [126492] = { icon = "/esoui/art/icons/ability_2handed_006_b.dds" }, -- Berserker Rage (Berserker Rage)
     [83239] = { tooltip = Tooltips.Skill_Berserker_Rage },              -- Berserker Rage (Berserker Rage); CC immunity 28301 --> innate block ~326
 
-    [83221] = { hide = true },   -- Berserker Strike (parallel combat)
-    [83231] = { hide = true },   -- Onslaught (parallel combat)
-    [261753] = { hide = true },  -- Onslaught (U49 bundle)
-    [83240] = { hide = true },   -- Berserker Rage (parallel combat)
-    [83241] = { hide = true },   -- Berserker Rage (parallel combat)
-    [38773] = { hide = true },   -- Brawler (short combat ticks)
-    [38774] = { hide = true },   -- Brawler (short combat ticks)
-    [147423] = { hide = true },  -- Empower (Wrecking Blow combat)
-    [188408] = { hide = true },  -- Major Berserk (Wrecking Blow combat)
-    [60895] = { hide = true },   -- Rally Heal Buff (combat ticks)
-    [157657] = { hide = true },  -- Rally (combat noise)
+    [83221] = { hide = true },                                          -- Berserker Strike (parallel combat)
+    [83231] = { hide = true },                                          -- Onslaught (parallel combat)
+    [261753] = { hide = true },                                         -- Onslaught (U49 bundle)
+    [83240] = { hide = true },                                          -- Berserker Rage (parallel combat)
+    [83241] = { hide = true },                                          -- Berserker Rage (parallel combat)
+    [38773] = { hide = true },                                          -- Brawler (short combat ticks)
+    [38774] = { hide = true },                                          -- Brawler (short combat ticks)
+    [147423] = { hide = true },                                         -- Empower (Wrecking Blow combat)
+    [188408] = { hide = true },                                         -- Major Berserk (Wrecking Blow combat)
+    [60895] = { hide = true },                                          -- Rally Heal Buff (combat ticks)
+    [157657] = { hide = true },                                         -- Rally (combat noise)
 
     -----------------------------------------
     -- ONE HAND AND SHIELD ACTIVES ----------

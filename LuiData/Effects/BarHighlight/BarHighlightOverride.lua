@@ -195,20 +195,38 @@ local barHighlightOverride =
     ---------------------------
 
     -- Dark Magic
-    [24371] = { newId = 24559 },  -- rune prison
-    [24578] = { newId = 24581 },  -- shattering prison
-    [24584] = { newId = 114903 }, -- Dark Exchange
-    [24589] = { newId = 114909 }, -- dark conversion
-    [24595] = { newId = 114908 }, -- dark deal
-    [24828] = { newId = 24830 },  -- Daedric Mines
-    [24842] = { newId = 24844 },  -- daedric tomb (first mine) 24846; 24847
-    [24834] = { newId = 25158 },  -- Daedric Minefield --> Daedric Mines
+    [24371] = { newId = 24559 },                                    -- rune prison
+    [24578] = { newId = 24581 },                                    -- rune cage
+    [24584] = { newId = 114903 },                                   -- Dark Exchange
+    [24589] = { newId = 114909 },                                   -- dark conversion
+    [24595] = { newId = 114908 },                                   -- dark deal
+    [24574] = { newId = 24574, duration = 120000 },                 -- defensive rune (player shield)
+    [24828] = { newId = 24830, duration = 15000 },                  -- Daedric Mines (player placement)
+    [24842] = { newId = 24847, duration = 16000 },                  -- daedric tomb (ground track 24847)
+    [24834] = { newId = 25158, duration = 15000 },                  -- Daedric Minefield
+    [27706] = { newId = 27706, duration = 12000 },                  -- negate magic (ground)
+    [28341] = { newId = 28341, duration = 12000 },                  -- suppression field (ground)
+    [28348] = { newId = 28348, duration = 12000 },                  -- absorption field (ground)
+    [43714] = { newId = 143744, duration = 3000 },                  -- crystal shard (crystal weaver)
+    [46324] = { newId = 46327, duration = 8000 },                   -- crystal fragments (proc)
+    [46331] = { newId = 46331, duration = 6000 },                   -- crystal weapon (self buff)
+    [28025] = { newId = 143659, noRemove = true, duration = 4000 }, -- encase (target immobilize)
+    [28308] = { newId = 143663, noRemove = true, duration = 4000 }, -- shattering prison
+    [28311] = { newId = 143668, noRemove = true, duration = 4000 }, -- restraining prison
 
     -- Daedric Summoning
-    [23492] = { newId = 80463 },                                         -- greater storm atronarch
-    [23495] = { newId = 23668 },                                         -- Summon Charged Atronach
-    [23634] = { newId = 80459 },                                         -- Summon Storm Atronach
-    [24165] = { newId = 203447 },                                        -- bound armaments
+    [23492] = { newId = 80463, duration = 15000 },                       -- greater storm atronach
+    [23495] = { newId = 80468, duration = 15000 },                       -- summon charged atronach (player track)
+    [23634] = { newId = 80459, duration = 15000 },                       -- summon storm atronach
+    [24158] = { newId = 24158, duration = 3000 },                        -- bound armor
+    [24163] = { newId = 24163, duration = 3000 },                        -- bound aegis
+    [24165] = { newId = 203447, duration = 10000 },                      -- bound armaments
+    [24326] = { newId = 24326, noRemove = true, duration = 6000 },       -- daedric curse (target)
+    [24328] = { newId = 24328, noRemove = true, duration = 6000 },       -- daedric prey (target)
+    [24330] = { newId = 24330, noRemove = true, combatTrack = true },    -- haunting curse (stacks via 89491 ExtraId)
+    [28418] = { newId = 28418, duration = 6000 },                        -- conjured ward
+    [29489] = { newId = 29489, duration = 6000 },                        -- hardened ward
+    [29482] = { newId = 29482, duration = 10000 },                       -- empowered ward
     [77140] = { newId = 77354, showFakeAura = true, noRemove = true },   -- twilight tormentor enrage
     [77182] = { newId = 77187, showFakeAura = true, noRemove = true },   -- volatile pulse
     [108840] = { newId = 108842, showFakeAura = true, noRemove = true }, -- summon unstable familiar
@@ -217,15 +235,21 @@ local barHighlightOverride =
     [23316] = { newId = 77187, showFakeAura = true, noRemove = true },   -- summon volatile familiar
 
     -- Storm Calling
-    [18718] = { newId = 18746 },  -- mages' fury
-    [19109] = { newId = 19118 },  -- endless fury
-    [19123] = { newId = 19125 },  -- mages' wrath
-    [23182] = { newId = 157462 }, -- lightning splash
-    [23205] = { newId = 157537 }, -- lightning flood
-    [23200] = { newId = 157535 }, -- liquid lightning
-    [23234] = { newId = 51392 },  -- bolt escape fatigue
-    [23236] = { newId = 51392 },  -- streak fatigue
-    [23277] = { newId = 51392 },  -- ball of lightning fatigue
+    [18718] = { newId = 18746, duration = 2000 },   -- mages' fury (target execute)
+    [19109] = { newId = 19118, duration = 2000 },   -- endless fury (target execute)
+    [19123] = { newId = 19125, duration = 2000 },   -- mages' wrath
+    [23182] = { newId = 157462, duration = 10000 }, -- lightning splash (ground)
+    [23205] = { newId = 157537, duration = 10000 }, -- lightning flood (ground)
+    [23200] = { newId = 157535, duration = 15000 }, -- liquid lightning (ground)
+    [23210] = { newId = 23210, duration = 20000 },  -- lightning form
+    [23213] = { newId = 23213, duration = 30000 },  -- boundless storm
+    [23231] = { newId = 23231, duration = 20000 },  -- hurricane
+    [23234] = { newId = 51392, duration = 4000 },   -- bolt escape fatigue
+    [23236] = { newId = 51392, duration = 4000 },   -- streak fatigue
+    [23277] = { newId = 51392, duration = 4000 },   -- ball of lightning fatigue
+    [23670] = { newId = 23670, duration = 33000 },  -- surge
+    [23674] = { newId = 23674, duration = 33000 },  -- power surge
+    [23678] = { newId = 23678, duration = 33000 },  -- critical surge
 
     ---------------------------
     -- Templar ----------------
@@ -417,24 +441,24 @@ local barHighlightOverride =
     -- Two Handed -------------
     ---------------------------
 
-    [20919] = { newId = 159717, showFakeAura = true, duration = 6000 },             -- Cleave --> damage shield
-    [38807] = { newId = 61737, showFakeAura = true, duration = 3000 },              -- Wrecking Blow --> Empower
-    [38814] = { newId = 131562, noRemove = true },                                  -- Dizzying Swing --> Off Balance 7s (target)
-    [16825] = { newId = 38814, duration = 2000, combatTrack = true, noRemove = true }, -- Off Balance Exploit stun (re-hit on OB; log 17:44)
-    [137807] = { newId = 38814, duration = 2000, combatTrack = true, noRemove = true }, -- OB immune snare fallback (log IMMUNE + 137807 2s)
+    [20919] = { newId = 159717, showFakeAura = true, duration = 6000 },                  -- Cleave --> damage shield
+    [38807] = { newId = 61737, showFakeAura = true, duration = 3000 },                   -- Wrecking Blow --> Empower
+    [38814] = { newId = 131562, noRemove = true },                                       -- Dizzying Swing --> Off Balance 7s (target)
+    [16825] = { newId = 38814, duration = 2000, combatTrack = true, noRemove = true },   -- Off Balance Exploit stun (re-hit on OB; log 17:44)
+    [137807] = { newId = 38814, duration = 2000, combatTrack = true, noRemove = true },  -- OB immune snare fallback (log IMMUNE + 137807 2s)
     [38788] = { newId = 99789, showFakeAura = true, duration = 18000, noRemove = true }, -- Stampede --> Merciless Charge (vMA); Stampede track via ExtraId 126475
-    [38745] = { newId = 159728, showFakeAura = true, duration = 6000 },            -- Carve --> damage shield (target bleed 38747)
-    [38754] = { newId = 38763, showFakeAura = true, duration = 6000 },            -- Brawler --> damage shield
+    [38745] = { newId = 159728, showFakeAura = true, duration = 6000 },                  -- Carve --> damage shield (target bleed 38747)
+    [38754] = { newId = 38763, showFakeAura = true, duration = 6000 },                   -- Brawler --> damage shield
 
     [28448] = { newId = 99789, showFakeAura = true, duration = 18000, noRemove = true }, -- Critical Charge --> Merciless Charge
     [38778] = { newId = 99789, showFakeAura = true, duration = 18000, noRemove = true }, -- Critical Rush --> Merciless Charge
 
-    [28297] = { showFakeAura = true, noRemove = true }, -- Momentum --> Major Brutality
-    [38794] = { newId = 38797 },                        -- Forward Momentum
-    [38802] = { showFakeAura = true, noRemove = true }, -- Rally
-    [83216] = { newId = 83217, showFakeAura = true, duration = 12000 },           -- Berserker Strike
-    [83229] = { newId = 83230, showFakeAura = true, duration = 8000 },            -- Onslaught
-    [83238] = { newId = 83239, showFakeAura = true, duration = 12000 },           -- Berserker Rage
+    [28297] = { showFakeAura = true, noRemove = true },                                  -- Momentum --> Major Brutality
+    [38794] = { newId = 38797 },                                                         -- Forward Momentum
+    [38802] = { showFakeAura = true, noRemove = true },                                  -- Rally
+    [83216] = { newId = 83217, showFakeAura = true, duration = 12000 },                  -- Berserker Strike
+    [83229] = { newId = 83230, showFakeAura = true, duration = 8000 },                   -- Onslaught
+    [83238] = { newId = 83239, showFakeAura = true, duration = 12000 },                  -- Berserker Rage
 
     ---------------------------
     -- One Hand and Shield ----

@@ -19,8 +19,9 @@ local barHighlightStack =
 {
 
     -- Sorcerer
-    [24330] = 2, -- Haunting Curse (Haunting Curse)
-    [89491] = 1, -- Haunting Curse (Haunting Curse)
+    [24330] = 2,  -- Haunting Curse (Haunting Curse)
+    [89491] = 1,  -- Haunting Curse (Haunting Curse)
+    [203447] = 4, -- Bound Armaments (Bound Armaments)
 
     -- Warden
     [86009] = 2,  -- Scorch (Scorch)
@@ -41,6 +42,7 @@ local barHighlightStackConsume =
 {
     [20824] = 34117,  -- Power Lash
     [256798] = 23808, -- Volcanic Whip
+    [24165] = 203447, -- Bound Armaments
 }
 
 --- When EVENT_EFFECT_CHANGED reports stackCount 0 on the track buff id.
