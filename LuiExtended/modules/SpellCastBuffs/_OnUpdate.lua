@@ -103,9 +103,9 @@ function SpellCastBuffs.FormatEffectCcDebugSuffix(abilityId, statusEffectType, e
     chunks[#chunks + 1] = "AbiT:" .. SpellCastBuffs.FormatAbilityTypeLabel(abilityType or ABILITY_TYPE_NONE)
     local resolvedCc = SpellCastBuffs.ResolveEffectCcType(abilityId, statusEffectType, abilityType, nil)
     if resolvedCc then
-        chunks[#chunks + 1] = "CC→" .. SpellCastBuffs.GetLuiCcTypeLabel(resolvedCc)
+        chunks[#chunks + 1] = "CC-->" .. SpellCastBuffs.GetLuiCcTypeLabel(resolvedCc)
     else
-        chunks[#chunks + 1] = "CC→(none)"
+        chunks[#chunks + 1] = "CC-->(none)"
     end
     local override = Effects.EffectOverride[abilityId]
     if override and override.cc then
@@ -304,8 +304,8 @@ end
 --- @param sortedList table
 --- @param container string
 local function updateBar(currentTimeMs, sortedList, container)
-    -- updateIcons always assigns icons[i] = sortedList[i] (1→N order).
-    -- Flex direction handles visual ordering, so bar values must use the same 1→N mapping.
+    -- updateIcons always assigns icons[i] = sortedList[i] (1-->N order).
+    -- Flex direction handles visual ordering, so bar values must use the same 1-->N mapping.
     -- Old sort-direction–based reverse iteration no longer applies.
     for i = 1, #sortedList do
         local effect = sortedList[i]
