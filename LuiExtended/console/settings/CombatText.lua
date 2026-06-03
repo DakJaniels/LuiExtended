@@ -29,7 +29,7 @@ local function GenerateCustomListLHAS(input)
         counter = counter + 1
         local displayName
         if type(id) == "number" then
-            displayName = zo_iconFormat(GetAbilityIcon(id), 16, 16) .. " [" .. id .. "] " .. zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
+            displayName = zo_iconFormat(GetAbilityIcon(id), 16, 16) .. " [" .. id .. "] " .. zo_strformat("<<C:1>>", GetAbilityName(id))
         else
             displayName = id
         end

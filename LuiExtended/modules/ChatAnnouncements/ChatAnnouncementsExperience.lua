@@ -9,18 +9,12 @@ local LUIE = LUIE
 --- @class (partial) ChatAnnouncements
 local ChatAnnouncements = LUIE.ChatAnnouncements
 
-local Data = LuiData.Data
-local Effects = Data.Effects
-local Quests = Data.Quests
 
 local ColorizeColors = ChatAnnouncements.Colors
 
 local string_format = string.format
-local table_insert = table.insert
-local table_concat = table.concat
 
 local eventManager = GetEventManager()
-local windowManager = GetWindowManager()
 
 local moduleName = LUIE.name .. "ChatAnnouncements"
 

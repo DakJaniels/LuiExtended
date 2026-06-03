@@ -11,7 +11,7 @@ local CrowdControl = Data.CrowdControl
 --- @class (partial) SpecialCC
 local specialCC =
 {
-    [55756] = true, -- Burning (Valkyn Skoria)
+    [55756] = true, -- Burning (Valkyn Skoria),
 }
 
 --- @class (partial) SpecialCC

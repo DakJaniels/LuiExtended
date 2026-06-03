@@ -36,6 +36,8 @@ local Effects = Data.Effects
 --- @param abilityId integer
 --- @param overflow integer
 function SpellCastBuffs.OnCombatEventIn(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId, overflow)
+    SpellCastBuffs.RecordCombatDamageType(abilityId, result, damageType)
+
     if not (Effects.FakeExternalBuffs[abilityId] or Effects.FakeExternalDebuffs[abilityId] or Effects.FakePlayerBuffs[abilityId] or Effects.FakeStagger[abilityId] or Effects.AddGroundDamageAura[abilityId]) then
         return
     end

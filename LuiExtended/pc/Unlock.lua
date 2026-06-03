@@ -256,8 +256,8 @@ function Unlock.RegisterUnlockPositionHooks()
     end
     if ZO_HUDTracker_Base then
         ZO_PostHook(ZO_HUDTracker_Base, "RefreshAnchors", function (tracker)
-            if tracker.control then
-                Unlock.ApplySavedUnlockFramePosition(tracker.control:GetName())
+            if tracker.container then
+                Unlock.ApplySavedUnlockFramePosition(tracker.container:GetName())
             end
         end)
     end
@@ -791,6 +791,7 @@ function Unlock.ResetElementPosition()
         LUIE.SV[Unlock.GetUnlockPositionAttr(element)] = nil
     end
     LUIE.SV["ZO_ActiveCombatTipsTip"] = nil
+    LUIE.SV.AlertFrameAlignment = nil
     ReloadUI("ingame")
 end
 

@@ -1070,7 +1070,6 @@ local function SetupCommonFrameActions()
                                 end
                             end
                         end
-
                     end
                 end
 

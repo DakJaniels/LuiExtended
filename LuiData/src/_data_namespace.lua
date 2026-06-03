@@ -98,6 +98,7 @@ local DebugStatus = {}
 --- @field AddNameOnBossEngaged AddNameOnBossEngaged Table of effects that add names when boss is engaged
 --- @field AddNameOnEvent AddNameOnEvent Table of effects that add names on specific events
 --- @field AddNoDurationBarHighlight table<integer, boolean> Table of effects that should highlight without duration
+--- @field BarHighlightHideDurationLabel table<integer, boolean> Track ids: bar stack highlight without countdown label
 --- @field AddStackOnEvent AddStackOnEvent Table of effects that add stacks on specific events
 --- @field ArtificialEffectOverride ArtificialEffectOverride Table of artificial effect overrides
 --- @field AssistantIcons AssistantIcons Table of assistant icon definitions
@@ -109,6 +110,9 @@ local DebugStatus = {}
 --- @field BarHighlightStack BarHighlightStack Table of stack-based highlight effects
 --- @field BarHighlightStackConsume table<integer, integer> Bound ability id -> combatTrack stack buff id (consume one stack on cast)
 --- @field BarHighlightStackZeroEffect table<integer, "keep"|"clear"> Track buff id behavior when effect stack count is 0
+--- @field BarHighlightStackCounter table<integer, boolean> Counter buff id: fade updates slotted bar stack (Grim Focus, Bound Armaments)
+--- @field BarHighlightStackBaseAbility table<integer, boolean> Slotted ability ids that display stack count on the bar
+--- @field BarHighlightProcSoundThresholds table<integer, integer[]> Track buff id -> stack thresholds for proc sound
 --- @field CompanionAbilityTrack CompanionAbilityTrack Slotted companion ability id -> UF icon track data
 --- @field BarIdOverride BarIdOverride Table of bar ID overrides
 --- @field DisguiseIcons EffectsDisguiseIcons Table of disguise icon definitions
@@ -155,6 +159,7 @@ local Effects =
     AddNameOnBossEngaged = {},
     AddNameOnEvent = {},
     AddNoDurationBarHighlight = {},
+    BarHighlightHideDurationLabel = {},
     AddStackOnEvent = {},
     ArtificialEffectOverride = {},
     AssistantIcons = {},
@@ -166,6 +171,9 @@ local Effects =
     BarHighlightStack = {},
     BarHighlightStackConsume = {},
     BarHighlightStackZeroEffect = {},
+    BarHighlightStackCounter = {},
+    BarHighlightStackBaseAbility = {},
+    BarHighlightProcSoundThresholds = {},
     CompanionAbilityTrack = {},
     BarIdOverride = {},
     BlockAndBashCC = {},
@@ -262,8 +270,8 @@ local ZoneTable = {}
 --- @class (partial) LuiData
 LuiData = {}
 LuiData.name = "LuiData"
-LuiData.version = 7213
-LuiData.addonVersion = "7.2.1.3"
+LuiData.version = 7214
+LuiData.addonVersion = "7.2.1.4"
 
 --- @class (partial) Data
 LuiData.Data =

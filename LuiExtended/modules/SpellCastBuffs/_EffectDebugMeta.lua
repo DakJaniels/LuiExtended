@@ -49,6 +49,8 @@ local BETWEEN_TOOLTIP_OFFSET_X = 20
 local PRIMARY_DEBUG_LINE_CAP = 14
 
 local debugMetaOverflowTooltip
+local debugMetaOverflowContentKey
+local debugMetaOverflowAnchorSide
 
 local advancedStatDisplayFormatNames =
 {
@@ -330,6 +332,18 @@ local function formatEnumLabel(nameTable, value)
     return tostring(value)
 end
 
+--- @param statusEffectType StatusEffectType|integer|nil
+--- @return string
+function SpellCastBuffs.FormatStatusEffectTypeLabel(statusEffectType)
+    return formatEnumLabel(statusEffectTypeNames, statusEffectType)
+end
+
+--- @param abilityType AbilityType|integer|nil
+--- @return string
+function SpellCastBuffs.FormatAbilityTypeLabel(abilityType)
+    return formatEnumLabel(abilityTypeNames, abilityType)
+end
+
 local function formatStatWithId(nameTable, statId)
     if statId == nil then
         return "—"
@@ -353,6 +367,14 @@ local function formatSeconds(value)
         return "—"
     end
     return string.format("%.2fs", value)
+end
+
+--- Coarser format for live countdown fields so tiny time deltas do not force tooltip rebuilds.
+local function formatRemainingSeconds(value)
+    if value == nil then
+        return "—"
+    end
+    return string.format("%.1fs", value)
 end
 
 local function isMundusStoneBuffIndex(unitTag, buffListIndex)
@@ -383,7 +405,7 @@ local function addDerivedStatDebugLines(abilityId, addLine)
         if derivedStat ~= nil then
             addLine(
                 string.format("derived[%d]", index),
-                string.format("%s → %s", formatStatWithId(derivedStatNames, derivedStat), tostring(effect or 0))
+                string.format("%s --> %s", formatStatWithId(derivedStatNames, derivedStat), tostring(effect or 0))
             )
         end
     end
@@ -405,7 +427,7 @@ local function addAdvancedStatDebugLines(abilityId, addLine)
             addLine(
                 string.format("adv[%d]", index),
                 string.format(
-                    "%s | %s → %s",
+                    "%s | %s --> %s",
                     formatStatWithId(advancedStatDisplayTypeNames, statType),
                     formatEnumLabel(advancedStatDisplayFormatNames, displayFormat),
                     tostring(effectValue or 0)
@@ -446,22 +468,33 @@ local function addCcTooltipDebugLines(override, meta, abilityId, addLine)
         return
     end
 
+    local statusFx = meta and meta.statusEffectType or nil
+    local abiType = meta and meta.abilityType or nil
+    local resolvedCc = (type(abilityId) == "number") and SpellCastBuffs.ResolveEffectCcType(abilityId, statusFx, abiType) or nil
+
     if override then
         if override.cc then
-            addLine("LUIE cc", SpellCastBuffs.GetLuiCcTypeLabel(override.cc))
+            addLine("LUIE cc (override)", SpellCastBuffs.GetLuiCcTypeLabel(override.cc))
         end
         if override.ccMergedType then
             addLine("LUIE cc (merged)", SpellCastBuffs.GetLuiCcTypeLabel(override.ccMergedType))
         end
-        if not override.cc and not override.ccMergedType then
-            addLine("LUIE cc", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_NO_CC))
-        end
-    elseif type(abilityId) == "number" then
-        addLine("LUIE cc", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_NO_OVERRIDE))
     end
 
-    if SpellCastBuffs.SV.ColorCC and override and override.cc then
-        addLine("CC Color", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_CC_COLOR_ON))
+    if resolvedCc then
+        addLine("LUIE cc (resolved)", SpellCastBuffs.GetLuiCcTypeLabel(resolvedCc))
+    elseif override and not override.cc and not override.ccMergedType then
+        addLine("LUIE cc (resolved)", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_NO_CC))
+    elseif type(abilityId) == "number" and not override then
+        addLine("LUIE cc (resolved)", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_NO_OVERRIDE))
+    end
+
+    if SpellCastBuffs.SV.ColorCC then
+        if resolvedCc then
+            addLine("CC Color", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_CC_COLOR_ON))
+        else
+            addLine("CC Color", GetString(LUIE_STRING_BUFF_TOOLTIP_DEBUG_META_CC_COLOR_OFF))
+        end
     end
 end
 
@@ -646,7 +679,7 @@ local function addUnitBuffTimingLines(meta, control, unitTag, addLine)
         addLine("API Duration", formatSeconds(apiDuration))
         local remain = meta.timeEnding - GetGameTimeSeconds()
         if remain >= 0 then
-            addLine("API Remaining", formatSeconds(remain))
+            addLine("API Remaining", formatRemainingSeconds(remain))
         end
     elseif meta and meta.timeEnding == 0 then
         addLine("API Duration", "infinite")
@@ -719,7 +752,36 @@ end
 --- @param value string
 local function appendDebugMetaLineToTooltip(tooltip, label, value)
     tooltip:AddLine(formatDebugMetaLineText(label, value), "ZoFontWinT1", ZO_NORMAL_TEXT:UnpackRGB())
-    tooltip:SetVerticalPadding(2)
+end
+
+--- @param tooltip TooltipControl
+--- @param debugLines { label: string, value: string }[]
+--- @param startIndex integer
+--- @param endIndex integer
+local function appendDebugMetaLineRangeToTooltip(tooltip, debugLines, startIndex, endIndex)
+    for i = startIndex, endIndex do
+        local row = debugLines[i]
+        appendDebugMetaLineToTooltip(tooltip, row.label, row.value)
+    end
+    if endIndex >= startIndex then
+        tooltip:SetVerticalPadding(2)
+    end
+end
+
+--- Stable key for overflow rebuild; API Remaining is omitted so sub-second drift does not clear the column.
+--- @param debugLines { label: string, value: string }[]
+--- @return string
+local function buildDebugMetaOverflowContentKey(debugLines)
+    local parts = {}
+    for i = 1, #debugLines do
+        local row = debugLines[i]
+        if row.label == "API Remaining" then
+            parts[i] = row.label
+        else
+            parts[i] = string.format("%s=%s", row.label, tostring(row.value))
+        end
+    end
+    return table.concat(parts, "\n")
 end
 
 --- @return TooltipControl
@@ -738,12 +800,11 @@ local function computePrimaryDebugLineCount(numLines)
     end
 
     local screenHeight = select(2, GuiRoot:GetDimensions())
-    local _, tooltipTop = InformationTooltip:GetScreenRect()
-    local roomAbove = zo_max(0, tooltipTop - SCREEN_MARGIN)
-    local maxByRoom = zo_floor(roomAbove / DEBUG_LINE_HEIGHT)
     local maxByScreen = zo_floor((screenHeight - (2 * SCREEN_MARGIN)) / DEBUG_LINE_HEIGHT)
 
-    local cap = zo_min(PRIMARY_DEBUG_LINE_CAP, maxByRoom, maxByScreen)
+    -- Do not use InformationTooltip:GetScreenRect() here: primary height changes as lines are added,
+    -- which makes the split cap unstable and forces overflow re-layout flicker.
+    local cap = zo_min(PRIMARY_DEBUG_LINE_CAP, maxByScreen)
     cap = zo_max(1, cap)
 
     if numLines <= cap then
@@ -805,9 +866,7 @@ end
 --- @param primary TooltipControl
 --- @param buffControl Control|nil
 local function anchorDebugOverflowBesidePrimary(overflow, primary, buffControl)
-    if overflow.animation then
-        overflow.animation:Stop()
-    end
+    ClearTooltipImmediately(overflow)
     overflow:SetHidden(false)
     overflow:SetAlpha(1)
 
@@ -828,18 +887,31 @@ local function anchorDebugOverflowBesidePrimary(overflow, primary, buffControl)
     local fitsRight = roomRight >= overflowWidth + gap
     local fitsLeft = roomLeft >= overflowWidth + gap
 
-    -- Tooltip.lua: left-half screen → comparative on primary's right; right-half → comparative on left.
+    -- Tooltip.lua: left-half screen --> comparative on primary's right; right-half --> comparative on left.
     local preferRightByQuadrant = false
     if buffControl then
         local quadrant = calculateBuffIconQuadrant(buffControl)
         preferRightByQuadrant = quadrant == QUAD_TOPLEFT or quadrant == QUAD_BOTTOMLEFT
     end
 
+    local anchorOnPrimaryRight
     if fitsRight and (not fitsLeft or preferRightByQuadrant) then
-        overflow:SetOwner(primary, TOPLEFT, gap, 0, TOPRIGHT)
+        anchorOnPrimaryRight = true
     elseif fitsLeft then
-        overflow:SetOwner(primary, TOPRIGHT, -gap, 0, TOPLEFT)
+        anchorOnPrimaryRight = false
     elseif roomRight >= roomLeft then
+        anchorOnPrimaryRight = true
+    else
+        anchorOnPrimaryRight = false
+    end
+
+    local sideKey = anchorOnPrimaryRight and "right" or "left"
+    if debugMetaOverflowAnchorSide == sideKey and not overflow:IsHidden() then
+        return
+    end
+    debugMetaOverflowAnchorSide = sideKey
+
+    if anchorOnPrimaryRight then
         overflow:SetOwner(primary, TOPLEFT, gap, 0, TOPRIGHT)
     else
         overflow:SetOwner(primary, TOPRIGHT, -gap, 0, TOPLEFT)
@@ -857,10 +929,7 @@ local function flushDebugMetaTooltips(debugLines, buffControl)
 
     local primaryCount = resolvePrimarySplitCount(debugLines, computePrimaryDebugLineCount(numLines))
 
-    for i = 1, primaryCount do
-        local row = debugLines[i]
-        appendDebugMetaLineToTooltip(InformationTooltip, row.label, row.value)
-    end
+    appendDebugMetaLineRangeToTooltip(InformationTooltip, debugLines, 1, primaryCount)
 
     if numLines <= primaryCount then
         SpellCastBuffs.ClearDebugMetaOverflowTooltip()
@@ -868,21 +937,31 @@ local function flushDebugMetaTooltips(debugLines, buffControl)
     end
 
     local overflow = GetDebugMetaOverflowTooltip()
+    local overflowKey = buildDebugMetaOverflowContentKey(debugLines)
+    local overflowLinesStart = primaryCount + 1
+
+    if overflowKey == debugMetaOverflowContentKey and not overflow:IsHidden() then
+        anchorDebugOverflowBesidePrimary(overflow, InformationTooltip, buffControl)
+        return
+    end
+
+    debugMetaOverflowContentKey = overflowKey
+    debugMetaOverflowAnchorSide = nil
+
     if overflow.ClearLines then
         overflow:ClearLines()
     end
     overflow:AddLine("Debug meta (continued)", "ZoFontWinT1", ZO_NORMAL_TEXT:UnpackRGB())
     overflow:SetVerticalPadding(2)
 
-    for i = primaryCount + 1, numLines do
-        local row = debugLines[i]
-        appendDebugMetaLineToTooltip(overflow, row.label, row.value)
-    end
+    appendDebugMetaLineRangeToTooltip(overflow, debugLines, overflowLinesStart, numLines)
 
     anchorDebugOverflowBesidePrimary(overflow, InformationTooltip, buffControl)
 end
 
 function SpellCastBuffs.ClearDebugMetaOverflowTooltip()
+    debugMetaOverflowContentKey = nil
+    debugMetaOverflowAnchorSide = nil
     if debugMetaOverflowTooltip then
         ClearTooltipImmediately(debugMetaOverflowTooltip)
     end

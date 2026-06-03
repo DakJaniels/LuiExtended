@@ -5,25 +5,10 @@
 
 --- @class (partial) LuiExtended
 local LUIE = LUIE
-local UI = LUIE.UI
-local LuiData = LuiData
-local Data = LuiData.Data
-local Effects = Data.Effects
-local Abilities = Data.Abilities
-local Castbar = Data.CastBarTable
-local OtherAddonCompatability = LUIE.OtherAddonCompatability
-
 local pairs = pairs
 local printToChat = LUIE.PrintToChat
-local GetSlotTrueBoundId = LUIE.GetSlotTrueBoundId
-local GetAbilityDuration = GetAbilityDuration
-local timeMs = GetFrameTimeMilliseconds
 local zo_strformat = zo_strformat
-local string_format = string.format
 local eventManager = GetEventManager()
-local sceneManager = SCENE_MANAGER
-local windowManager = GetWindowManager()
-local animationManager = GetAnimationManager()
 local ACTION_RESULT_AREA_EFFECT = 669966
 
 local moduleName = LUIE.name .. "CombatInfo"
@@ -64,7 +49,7 @@ end
 
 function CombatInfo.ClearCustomList(list)
     local listRef = ""
-    for k, v in pairs(list) do
+    for k, _ in pairs(list) do
         list[k] = nil
     end
     ZO_GetChatSystem():Maximize()
@@ -76,7 +61,7 @@ function CombatInfo.AddToCustomList(list, input)
     local id = tonumber(input)
     local listRef = ""
     if id and id > 0 then
-        local cachedName = ZO_CachedStrFormat(SI_ABILITY_NAME, getAbilityName(id))
+        local cachedName = zo_strformat(SI_ABILITY_NAME, getAbilityName(id))
         local name = cachedName
         if name ~= nil and name ~= "" then
             local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
@@ -103,7 +88,7 @@ function CombatInfo.RemoveFromCustomList(list, input)
     local id = tonumber(input)
     local listRef = ""
     if id and id > 0 then
-        local cachedName = ZO_CachedStrFormat(SI_ABILITY_NAME, getAbilityName(id))
+        local cachedName = zo_strformat(SI_ABILITY_NAME, getAbilityName(id))
         local name = cachedName
         local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
         list[id] = nil

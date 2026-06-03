@@ -156,7 +156,7 @@ end
 --- Modules are singletons shared across all visualizers, so `updateRecencyInfo`
 --- accumulates nested tables for every unitTag that has ever fired a UAV event
 --- against this module. Without explicit cleanup, the per-tag subtree (visualType
---- → stat → attribute → powerType → sequenceId) persists for the rest of the
+--- --> stat --> attribute --> powerType --> sequenceId) persists for the rest of the
 --- session even after the unit is destroyed; this method nils the unitTag entry
 --- so its subtree can be collected. Safe to call repeatedly.
 --- @param unitTag string

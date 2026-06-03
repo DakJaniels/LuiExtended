@@ -15,11 +15,7 @@ local Zonenames = Data.ZoneNames
 local alertMapOverride =
 {
     -- Slam (Great Bear)
-    [70366] =
-    {
-        -- QUESTS
-        [Zonenames.Zone_Deepwood_Barrow] = UnitNames.NPC_Great_Bear, -- Deepwood Vale (Greymoor Tutorial)
-    },
+    [70366] = { [Zonenames.Zone_Deepwood_Barrow] = UnitNames.NPC_Great_Bear }, -- Slam (Great Bear)
 }
 
 --- @class (partial) AlertMapOverride

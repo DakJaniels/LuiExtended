@@ -43,12 +43,12 @@ local barHighlightCheckOnFade =
     [108798] = { id1 = 21014, unitTag = PLAYER_UNIT_TAG },                             -- Fleetstep Wings
     [122407] = { id1 = 21017, unitTag = PLAYER_UNIT_TAG },                             -- Protect the Brood
     [31898] = { id1 = 20253, id2 = 31898, unitTag = TARGET_UNIT_TAG },                 -- Burning Talons
-    [32744] = { id1 = 61698, id2 = 61705, unitTag = PLAYER_UNIT_TAG },                 -- Blood of the Green Dragon HoT fade → Major Fortitude / Major Endurance (remaining duration)
-    [261754] = { id1 = 258203, id2 = 31820, unitTag = PLAYER_UNIT_TAG },               -- Volcanic Ward primary buff fade → secondary / slotted remainder
-    [258203] = { id1 = 261754, id2 = 31820, unitTag = PLAYER_UNIT_TAG },               -- Volcanic Ward secondary buff fade → primary / slotted remainder
-    [31808] = { id1 = 20328, unitTag = PLAYER_UNIT_TAG },                              -- Earthshield Mantle shield fade → mantle player buff remainder
-    [54931] = { id1 = 61742, id2 = 79717, id3 = 54931, unitTag = TARGET_UNIT_TAG },    -- Fossilize stun fade → Minor Breach / Minor Vuln / stun on target (reticle resync)
-    [259138] = { id1 = 61742, id2 = 259138, id3 = 259137, unitTag = TARGET_UNIT_TAG }, -- Shattering Rocks stun fade → breach display / stun / breach combat on target
+    [32744] = { id1 = 61698, id2 = 61705, unitTag = PLAYER_UNIT_TAG },                 -- Blood of the Green Dragon HoT fade --> Major Fortitude / Major Endurance (remaining duration)
+    [261754] = { id1 = 258203, id2 = 31820, unitTag = PLAYER_UNIT_TAG },               -- Volcanic Ward primary buff fade --> secondary / slotted remainder
+    [258203] = { id1 = 261754, id2 = 31820, unitTag = PLAYER_UNIT_TAG },               -- Volcanic Ward secondary buff fade --> primary / slotted remainder
+    [31808] = { id1 = 20328, unitTag = PLAYER_UNIT_TAG },                              -- Earthshield Mantle shield fade --> mantle player buff remainder
+    [54931] = { id1 = 61742, id2 = 79717, id3 = 54931, unitTag = TARGET_UNIT_TAG },    -- Fossilize stun fade --> Minor Breach / Minor Vuln / stun on target (reticle resync)
+    [259138] = { id1 = 61742, id2 = 259138, id3 = 259137, unitTag = TARGET_UNIT_TAG }, -- Shattering Rocks stun fade --> breach display / stun / breach combat on target
 
     -- Nightblade
     [125314] = { duration = 90620, durationMod = 125314, unitTag = PLAYER_UNIT_TAG }, -- Phantasmal Escape --> Major Evasion
@@ -69,9 +69,27 @@ local barHighlightCheckOnFade =
     [121513] = { id1 = 121513, id2 = 143915, id3 = 143917, unitTag = TARGET_UNIT_TAG }, -- Minor Maim --> Grave Grasp / Minor Maim
     [118309] = { id1 = 118309, id2 = 118325, id3 = 143945, unitTag = TARGET_UNIT_TAG }, -- Minor Maim --> Ghostly Embrace / Minor Maim
     [118354] = { id1 = 118354, id2 = 143948, id3 = 143949, unitTag = TARGET_UNIT_TAG }, -- Minor Maim --> Empowering Grasp / Minor Maim
+    [253163] = { id1 = 253163, id2 = 253164, id3 = 119068, unitTag = TARGET_UNIT_TAG }, -- Vengeance Grave Grasp / Minor Maim / immunity
+    [269944] = { id1 = 269944, id2 = 255165, unitTag = TARGET_UNIT_TAG },               -- Battle Trauma (6s + 4s components)
+    [255184] = { id1 = 61693, id2 = 255185, unitTag = PLAYER_UNIT_TAG },                -- Stand Firm --> Minor Resolve / heal combat
+    [255189] = { id1 = 61705, id2 = 61707, unitTag = PLAYER_UNIT_TAG },                 -- Regroup --> Major Endurance / Major Intellect
+    [255326] = { id1 = 61744, id2 = 61735, unitTag = PLAYER_UNIT_TAG },                 -- Marshaling Cry --> Minor Berserk / Minor Expedition
+    [255479] = { id1 = 255479, id2 = 255512, unitTag = PLAYER_UNIT_TAG },               -- Detonating Strike proc / player track remainder
+    [246026] = { id1 = 246026, id2 = 61694, unitTag = PLAYER_UNIT_TAG },                -- Bone Armor buff fade --> Major Resolve remainder
+    [114131] = { id1 = 114131, unitTag = PLAYER_UNIT_TAG },                             -- Flame Skull charges (resync stacks after per-cast combat FADE)
+    [117625] = { id1 = 117625, unitTag = PLAYER_UNIT_TAG },                             -- Venom Skull charges
+    [117638] = { id1 = 117638, unitTag = PLAYER_UNIT_TAG },                             -- Ricochet Skull charges
 
     -- Two Handed
+    [131562] = { id1 = 131562, id2 = 16825, id3 = 137807, unitTag = TARGET_UNIT_TAG }, -- Dizzying Swing OB 7s / exploit stun 2s / immune snare 2s
+    [16825] = { id1 = 16825, id2 = 131562, id3 = 137807, unitTag = TARGET_UNIT_TAG },
+    [137807] = { id1 = 137807, id2 = 131562, id3 = 16825, unitTag = TARGET_UNIT_TAG },
     [38797] = { duration = 38794, durationMod = 38797, unitTag = PLAYER_UNIT_TAG }, -- Forward Momentum --> Major Brutality / Minor Endurance
+
+    -- Sorcerer (target CC debuffs + bundled maim)
+    [143659] = { id1 = 61725, id2 = 143659, unitTag = TARGET_UNIT_TAG },               -- Encase immobilize fade --> Major Maim
+    [143663] = { id1 = 61725, id2 = 143663, id3 = 214457, unitTag = TARGET_UNIT_TAG }, -- Shattering Prison
+    [143668] = { id1 = 61725, id2 = 143668, unitTag = TARGET_UNIT_TAG },               -- Restraining Prison
 
     -- Dual Wield
     [126667] = { id1 = 61665, unitTag = PLAYER_UNIT_TAG }, -- Flying Blade --> Major Brutality

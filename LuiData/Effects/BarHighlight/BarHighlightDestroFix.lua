@@ -127,7 +127,7 @@ local function ExtendDestroMappingWithAllRanks()
                 local abilityIds = { GetProgressionSkillMorphSlotChainedAbilityIds(progressionId, morphSlot) }
 
                 -- Add each rank to the mapping if not already present
-                for rankIndex, rankAbilityId in ipairs(abilityIds) do
+                for _, rankAbilityId in ipairs(abilityIds) do
                     if not extendedMapping[rankAbilityId] then
                         -- Use the same staff mapping as the max rank version
                         extendedMapping[rankAbilityId] = staffMap

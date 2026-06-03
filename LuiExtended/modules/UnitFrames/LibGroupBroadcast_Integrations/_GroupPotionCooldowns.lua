@@ -35,6 +35,22 @@ local potionDataCache = {}
 local groupCooldownUpdateCallback
 local playerCooldownUpdateCallback
 
+-- Hide potion cooldown display
+local function HidePotionCooldown(unitTag)
+    local frameData = Shared.GetFrameData(unitTag)
+    if not frameData or not frameData.potionCooldown then return end
+
+    if frameData.potionCooldown.icon then
+        frameData.potionCooldown.icon:SetHidden(true)
+    end
+    if frameData.potionCooldown.backdrop then
+        frameData.potionCooldown.backdrop:SetHidden(true)
+    end
+    if frameData.potionCooldown.label then
+        frameData.potionCooldown.label:SetHidden(true)
+    end
+end
+
 -- Evict cache entries for unitTags that are no longer in the active group.
 -- Called from group-change events so a /reloadui isn't required to release
 -- stale potionData tables held by the closure registry.
@@ -42,6 +58,7 @@ local function EvictStaleUnitTagsFromCache()
     if not IsUnitGrouped("player") then
         for unitTag in pairs(potionDataCache) do
             if unitTag ~= "player" then
+                HidePotionCooldown(unitTag)
                 potionDataCache[unitTag] = nil
             end
         end
@@ -59,6 +76,7 @@ local function EvictStaleUnitTagsFromCache()
 
     for unitTag in pairs(potionDataCache) do
         if not activeTags[unitTag] then
+            HidePotionCooldown(unitTag)
             potionDataCache[unitTag] = nil
         end
     end
@@ -213,22 +231,6 @@ local function UpdatePotionCooldownDisplay(unitTag, potionData)
 
     backdrop:SetHidden(false)
     icon:SetHidden(false)
-end
-
--- Hide potion cooldown display
-local function HidePotionCooldown(unitTag)
-    local frameData = Shared.GetFrameData(unitTag)
-    if not frameData or not frameData.potionCooldown then return end
-
-    if frameData.potionCooldown.icon then
-        frameData.potionCooldown.icon:SetHidden(true)
-    end
-    if frameData.potionCooldown.backdrop then
-        frameData.potionCooldown.backdrop:SetHidden(true)
-    end
-    if frameData.potionCooldown.label then
-        frameData.potionCooldown.label:SetHidden(true)
-    end
 end
 
 -- Initialize LibGroupPotionCooldowns integration

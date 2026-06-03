@@ -37,17 +37,17 @@ local barHighlightExtraId =
     [259719] = 21007, -- Wing Buffet knockback --> slotted
     [259323] = 29016, -- Dragon Leap travel (600 ms) --> slotted
     [262677] = 29016, -- Dragon Leap bundle --> slotted
-    [114590] = 29016, -- Dragon Leap stun (legacy) --> slotted
-    [262678] = 29016, -- Dragon Leap stun (U49) --> slotted
+    [114590] = 29016, -- Dragon Leap stun --> slotted
+    [262678] = 29016, -- Dragon Leap stun --> slotted
     [259228] = 29016, -- Landslide (U49) --> Dragon Leap (Landslide on bar via BarHighlightOverride newId 29465)
     [259372] = 32719, -- Take Flight travel --> slotted
     [262683] = 32719, -- Take Flight bundle --> slotted
-    [114600] = 32719, -- Take Flight stun (legacy) --> slotted
-    [262682] = 32719, -- Take Flight stun (U49, combat log 3000 ms) --> slotted
+    [114600] = 32719, -- Take Flight stun --> slotted
+    [262682] = 32719, -- Take Flight stun --> slotted
     [259241] = 32719, -- Landslide (U49) --> Take Flight
     [262681] = 32715, -- Ferocious Leap bundle --> slotted
-    [114601] = 32715, -- Ferocious Leap stun (legacy; combat log 3000 ms) --> slotted
-    [262680] = 32715, -- Ferocious Leap stun (U49 export; not in Ferocious log)
+    [114601] = 32715, -- Ferocious Leap stun --> slotted
+    [262680] = 32715, -- Ferocious Leap stun --> slotted
     [32717] = 32715,  -- Ferocious Leap knockback aura (target; log, parallel 114601) --> slotted
     -- Landslide 29465 shared; bar newId 29465 only on 29016 (Take Flight bar uses 262682 stun — not 29465).
     [259684] = 32715, -- Landslide (U49) --> Ferocious Leap
@@ -87,20 +87,48 @@ local barHighlightExtraId =
     [259137] = 32678, -- Shattering Rocks Minor Breach combat --> slotted
 
     -- Sorcerer
-    [89491] = 24330,  -- Haunting Curse
-    [132946] = 28482, -- Streak
+    [89491] = 24330,  -- Haunting Curse (1-stack target track --> slotted)
+    [132946] = 23236, -- Streak (combat --> slotted; target stun 28482 hidden)
+    [47147] = 27706,  -- Negate Magic in-field stun --> slotted ground
+    [47159] = 28341,  -- Suppression Field stun --> slotted ground
+    [47167] = 28348,  -- Absorption Field stun --> slotted ground
 
     -- Warden
     [130140] = 130139, -- Cutting Dive --> Off-Balance
     [87194] = 88761,   -- Minor Protection --> Major Resolve (Ice Fortress)
 
     -- Necromancer
+    [114108] = 114131, -- Flame Skull (slotted / combat) --> charge buff
+    [123683] = 114131, -- Flame Skull charged cast projectile --> charge buff
+    [123685] = 114131, -- Flame Skull 3rd cast projectile --> charge buff
+    [117624] = 117625, -- Venom Skull
+    [117637] = 117638, -- Ricochet Skull
     [143915] = 121513, -- Grave Grasp
     [143917] = 121513, -- Grave Grasp
     [118325] = 118309, -- Ghostly Embrace
     [143945] = 118309, -- Ghostly Embrace
     [143948] = 118354, -- Empowering Grasp
     [143949] = 118354, -- Empowering Grasp
+    [253164] = 253163, -- Vengeance Grave Grasp --> Minor Maim combat
+    [119068] = 253163, -- Vengeance Grave Grasp --> Immobilize Immunity (target)
+    [61693] = 255184,  -- Stand Firm --> Minor Resolve (player buff drives slotted bar)
+    [61705] = 255189,  -- Regroup --> Major Endurance
+    [61707] = 255189,  -- Regroup --> Major Intellect
+    [61735] = 255326,  -- Marshaling Cry --> Minor Expedition
+    [61744] = 255326,  -- Marshaling Cry --> Minor Berserk
+    [255165] = 269944, -- Battle Trauma (4s dodge penalty on target --> 6s track id)
+    [61694] = 246026,  -- Vengeance Bone Armor --> Major Resolve (player buff)
+    [238130] = 238129, -- Vengeance Frozen Colossus (secondary ground --> slotted ground)
+    [238132] = 238129, -- Vengeance Frozen Colossus (damage tick --> ground bar key)
+    [255480] = 255479, -- Detonating Strike (damage combat --> proc bar)
+    [255550] = 255479, -- Detonating Strike (ground tick --> proc bar)
+
+    -- Two Handed
+    [16825] = 38814,  -- Off Balance Exploit stun --> Dizzying Swing (bar slot)
+    [137807] = 38814, -- OB immune snare --> Dizzying Swing (bar slot)
+    [126475] = 38788, -- Stampede player track --> slotted Stampede (Merciless 99789 is primary newId on 38788)
+    [147423] = 38807, -- Empower combat --> Wrecking Blow
+    [188408] = 38807, -- Major Berserk combat --> Wrecking Blow
 
     -- Bow
     [38707] = 100302,  -- Bombard --> Piercing Spray
@@ -119,13 +147,13 @@ local barHighlightExtraId =
 
     -- Werewolf
     [32633] = 137257,  -- Roar --> Off Balance
-    [170991] = 137257, -- Roar fear combat id (U50) --> Off Balance bar key (single key per Roar bundle)
-    [171001] = 45834,  -- Ferocious Roar fear combat id (U50) --> Off Balance bar key
-    [171003] = 137312, -- Deafening Roar fear combat id (U50) --> Off Balance bar key (parallel to 170991 / 171001)
-    [267745] = 58405,  -- Gnash Execute (U50 second-hit) --> Gnash slot
-    [58744] = 58742,   -- Rip and Tear Execute (U50; Gnash morph second-hit) --> Rip and Tear slot
-    [267747] = 58798,  -- Bloody Gnash Execute (U50; Gnash morph second-hit) --> Bloody Gnash slot (parallel to 267745 --> 58405, 58744 --> 58742)
-    [39114] = 137312,  -- Deafening Roar slot --> Off Balance (U50: was tagged "TODO Major Breach/Minor Maim"; Deafening Roar no longer applies Major Breach, now grants Major Cowardice + Major Maim + Off Balance)
+    [170991] = 137257, -- Roar fear combat id --> Off Balance bar key
+    [171001] = 45834,  -- Ferocious Roar fear combat id --> Off Balance bar key
+    [171003] = 137312, -- Deafening Roar fear combat id --> Off Balance bar key
+    [267745] = 58405,  -- Gnash Execute --> Gnash slot
+    [58744] = 58742,   -- Rip and Tear Execute --> Rip and Tear slot
+    [267747] = 58798,  -- Bloody Gnash Execute --> Bloody Gnash slot
+    [39114] = 137312,  -- Deafening Roar --> Off Balance
 
     -- Vampire
     [138130] = 138098, -- Stupefy

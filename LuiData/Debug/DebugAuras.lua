@@ -3177,7 +3177,7 @@ local debugAuras =
     [213164] = true, -- Crescent Scythe (slotted)
     [213165] = true, -- Perigean Armor (slotted / track)
     [213450] = true, -- Perigean Major Resolve on companion (combat log)
-    [61694] = true, -- Major Resolve (companion buff display id)
+    [61694] = true,  -- Major Resolve (companion buff display id)
     [155326] = true, -- Bashing Bulwark (slotted)
     [155327] = true, -- Bashing Bulwark stun on target (combat log)
     [152625] = true, -- Provoke (slotted)
@@ -3238,7 +3238,7 @@ local debugAuras =
     [157419] = true, -- Bash (built-in companion interrupt)
     [157420] = true, -- Bash stagger bundle (combat)
     [157424] = true, -- Bash stun on reticleover
-    [45902] = true, -- Off Balance from Bash on reticleover
+    [45902] = true,  -- Off Balance from Bash on reticleover
     [152512] = true, -- Sunder (slotted, base morph)
     [154667] = true, -- Sunder (slotted morph / DOT on reticleover)
     [152624] = true, -- Sever (slotted)
@@ -4136,17 +4136,17 @@ local debugAuras =
     -- DRAGONKNIGHT ACTIVES -------------
     -------------------------------------
 
-    [23806] = true,  -- Lava Whip (legacy hit/cast combat)
+    [23806] = true,  -- Lava Whip (hit/cast combat)
     [256798] = true, -- Volcanic Whip (replacement cast / hit combat)
     [23808] = true,  -- Lava Slam (Volcanic Whip stacks; bar highlight)
 
     [20805] = true,  -- Molten Whip (hit combat)
     [122658] = true, -- Seething Fury (Molten Whip)
-    [32842] = true,  -- Seething Fury (legacy combat id)
+    [32842] = true,  -- Seething Fury (combat id)
     [20806] = true,  -- Off Balance (Molten Whip)
-    [122729] = true, -- Seething Fury (legacy combat id)
+    [122729] = true, -- Seething Fury (combat id)
 
-    [20816] = true,  -- Flame Lash (slotted / legacy hit combat)
+    [20816] = true,  -- Flame Lash (slotted hit combat)
     [34117] = true,  -- Power Lash stacks (20s player buff; bar highlight)
     [20824] = true,  -- Power Lash (replacement cast hit combat)
     [23105] = true,  -- Power Lash (self-heal combat)
@@ -4173,10 +4173,10 @@ local debugAuras =
 
     [20944] = true,  -- Disintegrating Dragonfire (hit combat; not in aura log when hidden)
     [31103] = true,  -- Disintegrating Dragonfire (target DOT ~10s)
-    [48946] = true,  -- Major Breach (Disintegrating combat; hide on frames → 61743)
+    [48946] = true,  -- Major Breach (Disintegrating combat; hide on frames --> 61743)
 
     [20930] = true,  -- Engulfing Dragonfire (slotted; cast bar 20930 in CastBarTable)
-    [32821] = true,  -- Engulfing Dragonfire (player channel buff; bar highlight + combat GAIN DUR 5000)
+    [32821] = true,  -- Engulfing Dragonfire (player channel buff; bar highlight + CastChannelCombatTrack cast bar)
     [31104] = true,  -- Engulfing Dragonfire (tick DMG combat on target; hidden on frames)
     [270517] = true, -- Engulfing Dragonfire (tick ON CD combat; hidden on frames)
     [34240] = true,  -- Dragonfire Breath Dummy (LMN dump)
@@ -4339,7 +4339,7 @@ local debugAuras =
     [29016] = true,  -- Dragon Leap (slotted)
     [259323] = true, -- Dragon Leap (travel)
     [262677] = true, -- Dragon Leap (combat bundle)
-    [114590] = true, -- Stun (Dragon Leap, legacy)
+    [114590] = true, -- Stun (Dragon Leap)
     [262678] = true, -- Stun (Dragon Leap, U49)
     [118928] = true, -- Dragon Leap (combat bundle)
 
@@ -4350,7 +4350,7 @@ local debugAuras =
     [32721] = true,  -- Take Flight (Take Flight)
     [259372] = true, -- Take Flight (travel)
     [262683] = true, -- Take Flight (combat bundle)
-    [114600] = true, -- Stun (Take Flight, legacy)
+    [114600] = true, -- Stun (Take Flight)
     [262682] = true, -- Stun (Take Flight, U49)
     [118936] = true, -- Take Flight (combat bundle)
 
@@ -4367,7 +4367,7 @@ local debugAuras =
 
     [29032] = true,  -- Superheated Ward (Superheated Ward)
     [134310] = true, -- Superheated Ward (Superheated Ward)
-    [133037] = true, -- Superheated Ward (legacy bundle)
+    [133037] = true, -- Superheated Ward (bundle)
     [134009] = true, -- Superheated Ward (knockdown)
 
     [31820] = true,  -- Volcanic Ward (Volcanic Ward)
@@ -4378,8 +4378,8 @@ local debugAuras =
     [31816] = true,  -- Magma Fist (Magma Fist)
     [134340] = true, -- Magma Fist (Heat Shock)
     [258293] = true, -- Magma Fist (player buff)
-    [133027] = true, -- Magma Fist (legacy bundle)
-    [134336] = true, -- Magma Fist (legacy stagger)
+    [133027] = true, -- Magma Fist (bundle)
+    [134336] = true, -- Magma Fist (stagger)
     [134355] = true, -- Magma Fist (knockdown)
 
     [29043] = true,  -- Molten Weapons (Molten Weapons)
@@ -6395,7 +6395,7 @@ local debugAuras =
     [29389] = true, -- Follow Up (Rank 1)
     [60860] = true, -- Bonus Damage
     [45446] = true, -- Follow Up (Rank 2)
-    [60888] = true, -- Bonus Damage
+    [60888] = true, -- Bonus Damage (Follow Up - Rank 2)
 
     [29391] = true, -- Battle Rush (Rank 1)
     [29392] = true, -- Battle Rush
@@ -6409,8 +6409,10 @@ local debugAuras =
     [28279] = true,  -- Uppercut (Uppercut)
 
     [38814] = true,  -- Dizzying Swing (Dizzying Swing)
-    [131562] = true, -- Off Balance (Dizzying Swing)
-    [137807] = true, -- Dizzying Swing (Dizzying Swing)
+    [131562] = true, -- Off Balance (Dizzying Swing, 7s)
+    [16825] = true,  -- Off Balance Exploit stun (Dizzying re-hit, 2s)
+    [137807] = true, -- Dizzying Swing snare (OB immune, 2s)
+    [134599] = true, -- Off Balance Immunity (clears OB; log 15s on dummy)
 
     [38807] = true,  -- Wrecking Blow (Wrecking Blow)
     [147423] = true, -- Empower (Wrecking Blow)
@@ -6432,8 +6434,10 @@ local debugAuras =
     [38782] = true,  -- Critical Rush (Critical Rush)
 
     [20919] = true,  -- Cleave (Cleave)
+    [159717] = true, -- Cleave (damage shield)
 
     [38745] = true,  -- Carve (Carve)
+    [159728] = true, -- Carve (damage shield)
     [38747] = true,  -- Carve Bleed (Carve)
 
     [38754] = true,  -- Brawler (Brawler)
@@ -6473,12 +6477,17 @@ local debugAuras =
     [126497] = true, -- Onslaught (Onslaught)
     [83230] = true,  -- Onslaught (Onslaught)
     [83231] = true,  -- Onslaught (Onslaught)
+    [261753] = true, -- Onslaught (U49 bundle)
 
     [83238] = true,  -- Berserker Rage (Berserker Rage)
     [126492] = true, -- Berserker Rage (Berserker Rage)
     [83239] = true,  -- Berserker Rage (Berserker Rage)
+    [28301] = true,  -- CC Immunity (Berserker Rage)
     [83240] = true,  -- Berserker Rage (Berserker Rage)
     [83241] = true,  -- Berserker Rage (Berserker Rage)
+    [61737] = true,  -- Empower (Wrecking Blow)
+    [61745] = true,  -- Major Berserk (Wrecking Blow)
+    [188408] = true, -- Major Berserk (Wrecking Blow combat)
 
     -------------------------------------
     -- ONE HAND AND SHIELD PASSIVES -----
@@ -7535,29 +7544,28 @@ local debugAuras =
     [137184] = true, -- Brutal Carnage (Brutal Pounce)
     [137189] = true, -- Brutal Carnage (Brutal Pounce)
 
-    [39104] = true,  -- Feral Pounce cast (Feral Pounce; U50 BEGIN event)
-    [39107] = true,  -- Feral Pounce DMG (Feral Pounce; U50 close-range bleed hit)
+    [39104] = true,  -- Feral Pounce cast (Feral Pounce)
+    [39107] = true,  -- Feral Pounce DMG (Feral Pounce)
     [137165] = true, -- Feral Carnage proc (Feral Pounce)
-    [137166] = true, -- Feral Carnage player ON CD (U50; Phase 6 log confirmed; per-cast cooldown marker)
+    [137166] = true, -- Feral Carnage player ON CD (per-cast cooldown marker)
     [137167] = true, -- Feral Carnage (Feral Pounce)
-    [137168] = true, -- Feral Carnage Fury generator (Feral Pounce; U50; POWER+ on player per damage tick)
-    [137164] = true, -- Feral Carnage 12s target Bleed DOT (Feral Pounce; U50; up to 450% bonus damage at low Health per tooltip)
+    [137168] = true, -- Feral Carnage Fury generator (Feral Pounce)
+    [137164] = true, -- Feral Carnage 12s target Bleed DOT (Feral Pounce)
 
-    [137193] = true, -- Hircine's Bounty while-slotted base (U50; ally-grant component)
+    [137193] = true, -- Hircine's Bounty while-slotted base
     [58310] = true,  -- Hircine's Bounty cast (Hircine's Bounty - All Morphs)
     [137202] = true, -- Hircine's Bounty heal/power (Hircine's Bounty - All Morphs)
-    [261901] = true, -- Major Brutality internal (Hircine's Bounty - All Morphs, U50; display 61665)
-    [261902] = true, -- Major Sorcery internal (Hircine's Bounty - All Morphs, U50; display 61687)
+    [261901] = true, -- Major Brutality internal (Hircine's Bounty - All Morphs; display 61665)
+    [261902] = true, -- Major Sorcery internal (Hircine's Bounty - All Morphs; display 61687)
 
     [58317] = true,  -- Hircine's Rage cast (Hircine's Rage)
     [137204] = true, -- Hircine's Rage heal (Hircine's Rage)
-    [137206] = true, -- Major Berserk (Hircine's Rage) -- TODO Phase 3: replaced by Minor Berserk 267570 in U50; verify still fires
-    -- U50 Phase 3 Hircine's Rage while-slotted bundle (Dur=0 GAIN/FADE on slot/unslot)
-    [137347] = true, -- Major Protection internal (Hircine's Rage; U50 while-slotted; display 61722)
-    [267553] = true, -- Hircine's Rage while-slotted anchor (U50)
-    [267554] = true, -- Major Brutality internal (Hircine's Rage; U50 while-slotted; display 61665)
-    [267555] = true, -- Major Sorcery internal (Hircine's Rage; U50 while-slotted; display 61687)
-    [267570] = true, -- Minor Berserk internal (Hircine's Rage; U50 while-slotted; display 61744)
+    [137206] = true, -- Major Berserk (Hircine's Rage) -- TODO: replaced by Minor Berserk 267570 in U50; verify still fires
+    [137347] = true, -- Major Protection internal (Hircine's Rage while-slotted; display 61722)
+    [267553] = true, -- Hircine's Rage while-slotted anchor
+    [267554] = true, -- Major Brutality internal (Hircine's Rage while-slotted; display 61665)
+    [267555] = true, -- Major Sorcery internal (Hircine's Rage while-slotted; display 61687)
+    [267570] = true, -- Minor Berserk internal (Hircine's Rage while-slotted; display 61744)
 
     [58325] = true,  -- Hircine's Fortitude (Hircine's Fortitude)
     [137209] = true, -- Hircine's Fortitude (Hircine's Fortitude)
@@ -7569,64 +7577,57 @@ local debugAuras =
     [32633] = true,  -- Roar (Roar)
     [125004] = true, -- Roar (Roar)
     [137257] = true, -- Off Balance (Roar)
-    [170991] = true, -- Roar target fear marker (U50)
-    [267744] = true, -- Blood Hunger (Roar - All Morphs, U50 stack buff)
-    [266875] = true, -- Fury (Werewolf resource counter, U50)
-    [266744] = true, -- Fury per-target generation throttle (U50; fires `[D] 0 [R] ON CD` on target after damaging hits like Feral Pounce 39107; rate-limits Fury farming on a single mob; Phase 6 + 02:25 logs)
+    [170991] = true, -- Roar target fear marker
+    [267744] = true, -- Blood Hunger (Roar - All Morphs stack buff)
+    [266875] = true, -- Fury (Werewolf resource counter)
+    [266744] = true, -- Fury per-target generation throttle (ON CD marker)
 
     [39113] = true,  -- Ferocious Roar (Ferocious Roar)
     [125007] = true, -- Ferocious Roar (Ferocious Roar)
     [45834] = true,  -- Off Balance (Ferocious Roar)
-    [137287] = true, -- Feeding Frenzy stage 1 player buff 10s (U50; was "Ferocious Roar" pre-U50)
-    [171001] = true, -- Ferocious Roar target fear marker (U50; AoE 4s; parallel to base Roar 170991)
+    [137287] = true, -- Feeding Frenzy stage 1 player buff 10s
+    [171001] = true, -- Ferocious Roar target fear marker
 
-    [39114] = true,  -- Deafening Roar cast (Deafening Roar; U50)
+    [39114] = true,  -- Deafening Roar cast (Deafening Roar)
     [125023] = true, -- Deafening Roar internal (Deafening Roar)
-    [111788] = true, -- Major Cowardice internal 15s (Deafening Roar; U50; was tagged "Major Breach" pre-U50 -- Phase 6 log confirmed Major Cowardice; display 147643)
-    [137311] = true, -- Major Maim internal 15s (Deafening Roar; U50; was tagged "Minor Maim" pre-U50 -- Phase 6 log confirmed Major Maim; display 61725)
-    [171003] = true, -- Deafening Roar target fear marker (U50; parallel to 170991 Roar / 171001 Ferocious Roar)
+    [111788] = true, -- Major Cowardice internal 15s (Deafening Roar; display 147643)
+    [137311] = true, -- Major Maim internal 15s (Deafening Roar; display 61725)
+    [171003] = true, -- Deafening Roar target fear marker
     [137312] = true, -- Off Balance 7s (Deafening Roar)
 
-    [58405] = true,  -- Gnash (U50 rename of Piercing Howl id; base Werewolf morph)
-    [137317] = true, -- Gnash ripping-out state (U50; ~400 ms second-hit window)
-    [267745] = true, -- Gnash Execute (U50; second-hit damage, bonus under 25% Health)
+    [58405] = true,  -- Gnash
+    [137317] = true, -- Gnash ripping-out state (~400 ms second-hit window)
+    [267745] = true, -- Gnash Execute (second-hit damage)
 
-    -- Feeding Frenzy synergy line (U50: moved from Howl of Despair to Roar; legacy ids reused)
-    [58775] = true,  -- Feeding Frenzy synergy registration (U50; Roar; was Howl of Despair)
-    [131353] = true, -- Feeding Frenzy stage 3 player buff 30s (U50; Roar; was Empower/Howl of Despair)
-    [58813] = true,  -- Feeding Frenzy stage 2 player buff 20s (U50; Roar; was Howl of Despair)
-    -- Rip and Tear (U50: second Gnash morph; reuses legacy Howl of Despair line ids)
-    [58742] = true,  -- Rip and Tear initial DMG (U50; was Howl of Despair)
-    [58745] = true,  -- Rip and Tear 400ms second-hit indicator (U50; was Feeding Frenzy id)
-    [58744] = true,  -- Rip and Tear Execute second-hit DMG (U50; was Howl of Despair Synergy)
-    [137321] = true, -- Major Breach 15s generic Sundered-status id (U50; Rip and Tear confirmed source via tooltip + Sunderer set proc; was Piercing Howl id pre-U50)
-    [267785] = true, -- Rip and Tear self-heal (U50)
-    [267425] = true, -- Enduring Rampage (U50; Rampage in-form R-slot ult; Pack Leader-side morph; instant cast, 20s self; +20% Move Speed, +15% Damage Done, +4000 Health Recovery, -100% WW Transformation/ability cost; "lost if you leave Werewolf form" per tooltip)
-    [267416] = true, -- Rampage (U50; Rampage in-form R-slot ult; Werewolf Berserker-side variant; 20s self; Phase 6 log -- tooltip pending from user)
-    [267420] = true, -- Major Berserk internal (U50; Werewolf Berserker form-in passive grant; fires Dur=0 alongside 61745 display; fades at form-out; Phase 6 log)
+    [58775] = true,  -- Feeding Frenzy synergy registration
+    [131353] = true, -- Feeding Frenzy stage 3 player buff 30s
+    [58813] = true,  -- Feeding Frenzy stage 2 player buff 20s
+    [58742] = true,  -- Rip and Tear initial DMG
+    [58745] = true,  -- Rip and Tear 400ms second-hit indicator
+    [58744] = true,  -- Rip and Tear Execute second-hit DMG
+    [137321] = true, -- Major Breach 15s (generic Sundered-status id)
+    [267785] = true, -- Rip and Tear self-heal
+    [267425] = true, -- Enduring Rampage (Rampage morph)
+    [267416] = true, -- Rampage (Werewolf Berserker variant)
+    [267420] = true, -- Major Berserk internal (Werewolf Berserker form-in passive; display 61745)
 
-    -- Bloody Gnash (U50: second Gnash morph; reuses legacy Howl of Agony ids 58798/58801)
-    -- SkillDumper-confirmed canonical name "Bloody Gnash" (id 58798), icon _002_rend_b.dds.
-    [58798] = true,  -- Bloody Gnash initial DMG (U50; was Howl of Agony pre-U50)
-    [58801] = true,  -- Bloody Gnash ~400ms second-hit indicator (U50; was Howl of Agony Bonus pre-U50)
-    [267747] = true, -- Bloody Gnash Execute second-hit DMG (U50; applies 148801 Hemorrhaging 4s; up to 200% bonus damage under 25% Health per tooltip)
+    [58798] = true,  -- Bloody Gnash initial DMG
+    [58801] = true,  -- Bloody Gnash ~400ms second-hit indicator
+    [267747] = true, -- Bloody Gnash Execute second-hit DMG
 
-    [58855] = true,  -- Rending Claws (U50 rename of Infectious Claws; base)
-    [58856] = true,  -- Rending Claws Bleed DOT (U50)
+    [58855] = true,  -- Rending Claws
+    [58856] = true,  -- Rending Claws Bleed DOT
 
-    -- Claw Fury (U50: channel morph of Rending Claws; reuses legacy Claws of Anguish ids)
-    [58864] = true, -- Claw Fury channel buff on PLAYER (U50; [D]10000 [Chan]4666; was Claws of Anguish base)
-    [58865] = true, -- Claw Fury per-tick DMG, refreshes Blood Hunger each tick (U50; was Claws of Anguish DOT)
-    [58869] = true, -- Claw Fury per-tick ON CD (U50; was Major Defile id)
+    [58864] = true,  -- Claw Fury channel buff on PLAYER
+    [58865] = true,  -- Claw Fury per-tick DMG
+    [58869] = true,  -- Claw Fury per-tick ON CD
 
-    -- Bloodclaws (U50: second Rending Claws morph; reuses legacy Claws of Life ids 58879/58880/58881)
-    -- SkillDumper-confirmed canonical name "Bloodclaws" (id 58879), icon _006_c.dds, 10s base duration.
-    [58879] = true,  -- Bloodclaws initial Physical DMG (U50; was Claws of Life base; cleaves up to 6 enemies per tooltip)
-    [58880] = true,  -- Bloodclaws target Bleed DOT (U50; 10s total with 2s ticks; 5% Hemorrhaging chance per tick per tooltip)
-    [58881] = true,  -- Bloodclaws player HoT (U50; was Claws of Life player heal)
-    [267961] = true, -- Bloodclaws instant heal POWER event (U50; per-tick player heal trigger; Phase 6 log)
-    [61378] = true,  -- Claws of Life Caused Damage -- legacy id, may be unused in U50
-    [61379] = true,  -- Claws of Life Saved Damage -- legacy id, may be unused in U50
+    [58879] = true,  -- Bloodclaws initial Physical DMG
+    [58880] = true,  -- Bloodclaws target Bleed DOT
+    [58881] = true,  -- Bloodclaws player HoT
+    [267961] = true, -- Bloodclaws instant heal POWER event
+    [61378] = true,  -- Claws of Life Caused Damage
+    [61379] = true,  -- Claws of Life Saved Damage
 
     [33469] = true,  -- Werewolf Transformation (Werewolf Transformation - All Morphs)
     [39033] = true,  -- Werewolf Transform Setup (Werewolf Transformation - All Morphs)
@@ -7637,23 +7638,22 @@ local debugAuras =
     [39038] = true,  -- Werewolf Effects Setup (Werewolf Transformation - All Morphs)
     [39039] = true,  -- Bonus Stamina (Werewolf Transformation - All Morphs)
     [39051] = true,  -- Kill Trigger (Werewolf Transformation - All Morphs)
-    [39050] = true,  -- Insatiable Hunger Passive (U50 rename of Devour Passive)
+    [39050] = true,  -- Insatiable Hunger Passive
     [39477] = true,  -- De-Werewolf (Werewolf Transformation - All Morphs)
     [39478] = true,  -- Remove Sprint (Werewolf Transformation - All Morphs)
     [80194] = true,  -- Remove Pets (Werewolf Transformation - All Morphs)
     [42246] = true,  -- Charge Ultimate (Werewolf Transformation - All Morphs)
-    -- U50 transformation passives (Dur=0 GAIN on form-in; observed on base Werewolf morph)
-    [266845] = true, -- Call of the Pack passive (U50; ult-cost reduction with allied werewolves)
-    [266849] = true, -- Feral Cruelty passive (U50)
-    [266851] = true, -- Feral Cruelty passive (U50)
-    [266874] = true, -- Master of the Chase passive (U50; Fury generation bonus)
-    [267414] = true, -- Werewolf Transformation internal passive (U50)
-    [268123] = true, -- Slaughter passive (U50)
-    [269021] = true, -- Prowl passive (U50)
-    [150998] = true, -- Major Resolve internal (U50; base Werewolf Transformation; display 61694)
-    [150999] = true, -- Call of the Hunt passive (Pack Leader; U50; fires Dur=0 on form-in)
-    [268571] = true, -- Insatiable Hunger active state (U50; 12s GAIN while devouring corpse)
-    [37233] = true,  -- Insatiable Hunger ult restore tick (U50; POWER+)
+    [266845] = true, -- Call of the Pack passive
+    [266849] = true, -- Feral Cruelty passive
+    [266851] = true, -- Feral Cruelty passive
+    [266874] = true, -- Master of the Chase passive
+    [267414] = true, -- Werewolf Transformation internal passive
+    [268123] = true, -- Slaughter passive
+    [269021] = true, -- Prowl passive
+    [150998] = true, -- Major Resolve internal (base Werewolf Transformation; display 61694)
+    [150999] = true, -- Call of the Hunt passive (Pack Leader)
+    [268571] = true, -- Insatiable Hunger active state
+    [37233] = true,  -- Insatiable Hunger ult restore tick
     [32478] = true,  -- Heavy Attack Damage Bonus (Werewolf base morph; 1s GAIN)
 
     [32455] = true,  -- Werewolf Transformation (Werewolf Transformation)
@@ -17433,6 +17433,73 @@ local debugAuras =
     [116364] = true, -- Rourken's Rebuke (Rourken's Rebuke)
 
     [116094] = true, -- Malacath's Vengeance (Malacath's Vengeance)
+
+    -- Cyrodiil Vengeance — Dragonknight templates (VENGEANCE_SKILL_MAP.csv; track/combat TBD)
+    [237606] = true, -- Vengeance Lava Whip
+    [237607] = true, -- Vengeance Searing Strike
+    [237609] = true, -- Vengeance Searing Strike
+    [237611] = true, -- Vengeance Searing Strike
+    [237615] = true, -- Vengeance Dragonfire Breath
+    [237617] = true, -- Vengeance Dragonfire Breath
+    [237618] = true, -- Vengeance Dragonfire Breath
+    [237620] = true, -- Vengeance Chains of Flame
+    [237621] = true, -- Vengeance Chains of Flame
+    [237622] = true, -- Vengeance Chains of Flame
+    [237624] = true, -- Vengeance Inferno
+    [237627] = true, -- Vengeance Dragonknight Standard
+    [237629] = true, -- Vengeance Dragonknight Standard
+    [237630] = true, -- Vengeance Earthspike Mantle
+    [237636] = true, -- Vengeance Dark Talons
+    [237638] = true, -- Vengeance Dragon Blood
+    [237639] = true, -- Vengeance Wing Buffet
+    [237641] = true, -- Vengeance Core of Flame
+    [237644] = true, -- Vengeance Core of Flame
+    [237645] = true, -- Vengeance Core of Flame
+    [237648] = true, -- Vengeance Dragon Leap
+    [237649] = true, -- Vengeance Dragon Leap
+    [237650] = true, -- Vengeance Dragon Leap
+    [237651] = true, -- Vengeance Dragon Leap
+    [237652] = true, -- Vengeance Dragon Leap
+    [237781] = true, -- Vengeance Superheated Ward
+    [237782] = true, -- Vengeance Molten Weapons
+    [237785] = true, -- Vengeance Obsidian Shield
+    [237787] = true, -- Vengeance Petrify
+    [237788] = true, -- Vengeance Hearthfire
+    [237789] = true, -- Vengeance Hearthfire
+    [237790] = true, -- Vengeance Magma Armor
+    [261043] = true, -- Vengeance Petrify
+
+    -- Cyrodiil Vengeance — Necromancer (combat log: Guardian of Sedor)
+    [238137] = true, -- Vengeance Death Scythe
+    [238138] = true, -- Vengeance Death Scythe (heal)
+    [246025] = true, -- Vengeance Bone Armor
+    [246026] = true, -- Vengeance Bone Armor (player buff)
+    [253156] = true, -- Vengeance Grave Grasp (slotted)
+    [253163] = true, -- Vengeance Grave Grasp (target root)
+    [253164] = true, -- Vengeance Grave Grasp (Minor Maim combat)
+    [238258] = true, -- Vengeance Life amid Death
+    [238260] = true, -- Vengeance Life amid Death (heal)
+    [238255] = true, -- Vengeance Expunge
+    [238129] = true, -- Vengeance Frozen Colossus (ground)
+    [238130] = true, -- Vengeance Frozen Colossus (ground bundle)
+    [238132] = true, -- Vengeance Frozen Colossus (damage)
+
+    -- Cyrodiil Vengeance — Soldier kit (Vengeance Soldier line)
+    [255057] = true, -- Sweeping Assault
+    [255164] = true, -- Battle Trauma (slotted)
+    [255165] = true, -- Battle Trauma
+    [269944] = true, -- Battle Trauma
+    [255184] = true, -- Stand Firm
+    [255185] = true, -- Stand Firm (heal)
+    [255189] = true, -- Regroup
+    [255190] = true, -- Regroup (Major Intellect combat)
+    [255326] = true, -- Marshaling Cry
+    [255327] = true, -- Marshaling Cry (Minor Berserk combat)
+    [255479] = true, -- Detonating Strike (buff)
+    [255480] = true, -- Detonating Strike (damage)
+    [255498] = true, -- Detonating Strike (ground)
+    [255512] = true, -- Detonating Strike (player track)
+    [255550] = true, -- Detonating Strike (ground tick)
 
     [117979] = true, -- Accursed Charge (Accursed Charge)
     [117980] = true, -- Accursed Charge (Accursed Charge)

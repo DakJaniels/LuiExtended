@@ -81,6 +81,11 @@ function SlashCommands.Initialize(enabled)
 end
 
 function SlashCommands.RegisterSlashCommands()
+    if LUIE.SlashCommandRegistry and LUIE.SlashCommandRegistry.IsAvailable() then
+        LUIE.SlashCommandRegistry.RegisterSlashCommandsModule()
+        return
+    end
+
     local autoComplete = ZO_GetChatSystem().textEntry.slashCommandAutoComplete
     if autoComplete then
         autoComplete:ClearPossibleCommandMatches()

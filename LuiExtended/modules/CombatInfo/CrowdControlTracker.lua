@@ -14,7 +14,7 @@ local Effects = LuiData.Data.Effects
 local CrowdControl = LuiData.Data.CrowdControl
 local eventManager = GetEventManager()
 local animationManager = GetAnimationManager()
-local sceneManager = SCENE_MANAGER
+
 local IsCharmAbility = IsCharmAbility
 local table_insert = table.insert
 local table_remove = table.remove
@@ -337,7 +337,7 @@ local function ResolveAbilityName(abilityId, sourceName)
     local abilityName = GetAbilityName(abilityId)
 
     if Effects.EffectOverrideByName[abilityId] then
-        sourceName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
+        sourceName = zo_strformat("<<C:1>>", sourceName)
         if Effects.EffectOverrideByName[abilityId][sourceName] then
             abilityName = Effects.EffectOverrideByName[abilityId][sourceName].name or abilityName
         end
@@ -371,7 +371,7 @@ local function ResolveAbilityIcon(abilityId, sourceName)
     local abilityIcon = GetAbilityIcon(abilityId)
 
     if Effects.EffectOverrideByName[abilityId] then
-        sourceName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, sourceName)
+        sourceName = zo_strformat("<<C:1>>", sourceName)
         if Effects.EffectOverrideByName[abilityId][sourceName] then
             abilityIcon = Effects.EffectOverrideByName[abilityId][sourceName].icon or abilityIcon
         end
@@ -1423,7 +1423,7 @@ end
 --- Build the static keyframe layout for an animType on a given control.
 --- Called only on cache miss; subsequent plays mutate alpha/scale values
 --- via the cached animation references in `cacheEntry.dynamics`.
---- @param self LuiExtended.CrowdControlTracker
+--- @param self CrowdControlTracker
 --- @param control Control
 --- @param animType "proc"|"end"|"endstagger"|"silence"|"stagger"|"immune"
 --- @return table { timeline, dynamics, controlScale, immuneDisplayTime, anchor }

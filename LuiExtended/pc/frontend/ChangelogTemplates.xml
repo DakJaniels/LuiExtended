@@ -47,19 +47,17 @@
     <Control name="LUIE_Changelog_SectionBody_Template"
              hidden="true"
              virtual="true">
+      <Dimensions x="830"
+                  y="24" />
       <Controls>
         <Backdrop name="$(parent)Bg">
-          <Anchor point="TOPLEFT"
-                  relativeTo="$(parent)"
-                  relativePoint="TOPLEFT" />
-          <Anchor point="TOPRIGHT"
-                  relativeTo="$(parent)"
-                  relativePoint="TOPRIGHT" />
+          <AnchorFill />
         </Backdrop>
         <Label name="$(parent)Text"
                font="ZoFontGame"
                wrapMode="ELLIPSIS"
-               horizontalAlignment="LEFT">
+               horizontalAlignment="LEFT"
+               verticalAlignment="TOP">
           <Anchor point="TOPLEFT"
                   relativeTo="$(parent)"
                   relativePoint="TOPLEFT"

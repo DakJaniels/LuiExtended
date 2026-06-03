@@ -25,7 +25,6 @@ local table_insert = table.insert
 local table_concat = table.concat
 
 local eventManager = GetEventManager()
-local windowManager = GetWindowManager()
 
 local moduleName = LUIE.name .. "ChatAnnouncements"
 
@@ -1900,7 +1899,8 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             if currencyType == CURT_MONEY then
                 local senderKey = currencySender ~= "" and currencySender or ""
                 local nowMs = GetGameTimeMilliseconds()
-                if  S.g_lastMailCurrencyAnnounce.amount == amountDelta
+                if not S.g_mailBatchTakeAll
+                and S.g_lastMailCurrencyAnnounce.amount == amountDelta
                 and S.g_lastMailCurrencyAnnounce.senderKey == senderKey
                 and (nowMs - S.g_lastMailCurrencyAnnounce.timeMs) < MAIL_CURRENCY_ANNOUNCE_DEDUPE_MS then
                     return nil, nil, "return"
@@ -2578,14 +2578,30 @@ function ChatAnnouncements.MailRemoved(eventId)
     end
 end
 
+-- Guild trader sale proceeds use system mail with subject "Item Sold" (localized; must match client).
+function I.IsGuildStoreItemSoldMail(fromSystem, subject)
+    if not fromSystem or subject == nil or subject == "" then
+        return false
+    end
+    return subject == GetString(LUIE_STRING_CA_MAIL_GUILD_STORE_ITEM_SOLD_SUBJECT)
+end
+
+function I.ResolveGuildStoreSaleMailSender(authoritativeSender)
+    local displayName = (authoritativeSender and authoritativeSender ~= "") and authoritativeSender
+        or GetString(SI_GAMEPAD_GUILD_HEADER_GUILD_SERVICES_STORE)
+    return ZO_GAME_REPRESENTATIVE_TEXT:Colorize(displayName)
+end
+
 -- Resolve sender display string and COD/attachment info for a mail (used by Take All queue).
 function I.ResolveMailSender(mailId)
-    local senderDisplayName, senderCharacterName, _, _, _, fromSystem, fromCustomerService, _, numAttachments, attachedMoney, codAmount = GetMailItemInfo(mailId)
+    local senderDisplayName, senderCharacterName, subject, _, _, fromSystem, fromCustomerService, _, numAttachments, attachedMoney, codAmount = GetMailItemInfo(mailId)
     numAttachments = numAttachments or 0
     attachedMoney = attachedMoney or 0
     local mailTarget = ""
     local authoritativeSender = GetMailSender(mailId)
-    if fromSystem or fromCustomerService then
+    if I.IsGuildStoreItemSoldMail(fromSystem, subject) then
+        mailTarget = I.ResolveGuildStoreSaleMailSender(authoritativeSender)
+    elseif fromSystem or fromCustomerService then
         if authoritativeSender and authoritativeSender ~= "" then
             mailTarget = ZO_GAME_REPRESENTATIVE_TEXT:Colorize(authoritativeSender)
         else
@@ -2620,7 +2636,8 @@ function I.StoreMailSenderForMailId(mailId, mailTarget)
     end
 end
 
--- Build sender queue in Take All order (by category/index; money then items per mail).
+-- Build sender queue in Take All order (by category/index; one entry per attached gold).
+-- Batch item loot uses g_mailItemSenderFifo, not this queue.
 -- categoryFilter: when set, only that MailCategory is queued (category Take All).
 function I.EnqueueMailLootEntry(mailId, mailTarget)
     table.insert(S.g_mailLootQueue, { mailId = mailId, sender = mailTarget })
@@ -2727,9 +2744,6 @@ function I.PopulateMailSenderQueue(categoryFilter)
                 local mailTarget, hasCOD, numAttachments, attachedMoney = I.ResolveMailSender(mailId)
                 if (numAttachments and numAttachments > 0) or (attachedMoney and attachedMoney > 0) then
                     if attachedMoney > 0 then
-                        I.EnqueueMailLootEntry(mailId, mailTarget)
-                    end
-                    for i = 1, (numAttachments or 0) do
                         I.EnqueueMailLootEntry(mailId, mailTarget)
                     end
                     I.StoreMailSenderForMailId(mailId, mailTarget)
@@ -3189,7 +3203,7 @@ function I.GetTimedActivityProgressAnnounceKey(index)
     return string_format("i:%i", index)
 end
 
---- Suppress duplicate chat/alert for the same challenge slot at the same progress (2 game events → 2 lines, not 4).
+--- Suppress duplicate chat/alert for the same challenge slot at the same progress (2 game events --> 2 lines, not 4).
 --- @param index luaindex
 --- @param currentProgress integer
 --- @return boolean suppress

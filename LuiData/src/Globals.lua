@@ -5,7 +5,6 @@
 
 -- Global Variables
 
-LUIE_UPPER_CASE_NAME_FORMATTER = "<<C:1>>"
 LUIE_TINY_X_FORMATTER = "\195\151"
 
 -- LUIE_CC_ICON
@@ -113,7 +112,9 @@ do
         --- @param itemLink string
         --- @return string abilityDescription
         function GetItemLinkOnUseAbilityDescription(itemLink)
-            local hasAbility, abilityHeader, abilityDescription, cooldown, hasScaling, minLevel, maxLevel, isChampionPoints, remainingCooldown = GetItemLinkOnUseAbilityInfo(itemLink)
+            --- * GetItemLinkOnUseAbilityInfo(*string* _itemLink_)
+            --- ** _Returns:_ *bool* _hasAbility_, *string* _abilityHeader_, *string* _abilityDescription_, *integer* _cooldown_, *bool* _hasScaling_, *integer* _minLevel_, *integer* _maxLevel_, *bool* _isChampionPoints_, *integer* _remainingCooldown_
+            local _, _, abilityDescription, _, _, _, _, _, _ = GetItemLinkOnUseAbilityInfo(itemLink)
             return abilityDescription
         end
     end
@@ -125,7 +126,7 @@ do
     --- @param repl    string|number|table|function
     --- @param n?      integer
     --- @return string
-    function StringOnlyGSUB(s, pattern, repl, n)
+    StringOnlyGSUB = function (s, pattern, repl, n)
         -- Only use n if explicitly provided, otherwise replace all matches
         if n then
             return (zo_strgsub(s, pattern, repl, n))

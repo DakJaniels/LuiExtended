@@ -152,6 +152,7 @@ local fakePlayerBuffs =
     -- Two Handed
     [28297] = { duration = "GET", onlyExtra = true }, -- Momentum
     [38794] = { duration = "GET", onlyExtra = true }, -- Forward Momentum
+    [38802] = { duration = "GET", onlyExtra = true }, -- Rally
 
     -- Restoration Staff
     [37243] = { duration = "GET", onlyExtended = true, ignoreFade = true }, -- Blessing of Protection (Blessing of Protection)

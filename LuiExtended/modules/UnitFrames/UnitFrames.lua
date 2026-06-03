@@ -82,6 +82,21 @@ local BOSS_THRESHOLD_TOP_LABEL_DIMENSIONS = { 48, 16 }
 local BOSS_THRESHOLD_BOTTOM_LABEL_DIMENSIONS = { 120, 16 }
 local DEFAULT_BOSS_THRESHOLD_PERCENTS = { 25, 50, 75 }
 
+-- -----------------------------------------------------------------------------
+-- CrutchAlerts BossHealthBar integration (optional dependency)
+-- -----------------------------------------------------------------------------
+-- IMPORTANT: Do not reference the global `CrutchAlerts` in hot paths (e.g. power-update repaints).
+-- Some dev/debug environments treat reads of missing globals as errors. We therefore cache any
+-- needed Crutch handles/options once during `UnitFrames.Initialize()` when the addon is confirmed enabled.
+local crutchBossHealthBar = nil
+local crutchBossHealthOptions = nil -- CrutchAlerts.savedOptions.bossHealthBar (table) or nil
+local crutchGetBossThresholds = nil -- function or nil
+local crutchRegisterThresholdsChangeListener = nil -- function or nil
+
+-- Extra bottom padding applied to the bosses TLW when threshold mechanics are shown,
+-- so the mechanic labels have reserved space and don't overlap nearby UI.
+UnitFrames.bossThresholdMechanicPadding = 0
+
 -- Labels for Offline/Dead/Resurrection Status
 local strDead = GetString(SI_UNIT_FRAME_STATUS_DEAD)
 local strOffline = GetString(SI_UNIT_FRAME_STATUS_OFFLINE)
@@ -198,6 +213,23 @@ function UnitFrames.Initialize(enabled)
         return
     end
     UnitFrames.Enabled = true
+
+    -- Cache CrutchAlerts BossHealthBar handles/options once (optional dependency).
+    -- Guarded by the compatibility flag set during addon load.
+    if LUIE.OtherAddonCompatability and LUIE.OtherAddonCompatability.isCrutchAlertsEnabled then
+        -- NOTE: CrutchAlerts is an optional dependency; when installed it loads before LUIE.
+        -- This branch only runs when the addon manager confirms it is enabled.
+        local crutch = CrutchAlerts
+        crutchBossHealthBar = crutch and crutch.BossHealthBar or nil
+        crutchGetBossThresholds = crutchBossHealthBar and crutchBossHealthBar.GetBossThresholds or nil
+        crutchRegisterThresholdsChangeListener = crutchBossHealthBar and crutchBossHealthBar.RegisterThresholdsChangeListener or nil
+        crutchBossHealthOptions = crutch and crutch.savedOptions and crutch.savedOptions.bossHealthBar or nil
+    else
+        crutchBossHealthBar = nil
+        crutchGetBossThresholds = nil
+        crutchRegisterThresholdsChangeListener = nil
+        crutchBossHealthOptions = nil
+    end
 
     -- Even if used do not want to use neither DefaultFrames nor CustomFrames, let us still create tables to hold health and shield values
     -- { powerValue, powerMax, powerEffectiveMax, shield, trauma }
@@ -348,10 +380,8 @@ function UnitFrames.Initialize(enabled)
         -- overrides (e.g. Z'Maja stage detection) repaint the markers.
         -- See CrutchAlerts/bosshealthbar/BossHealthBarAPI.lua:117-135.
         if LUIE.OtherAddonCompatability.isCrutchAlertsEnabled then
-            local bhb = CrutchAlerts and CrutchAlerts.BossHealthBar
-            local bhb_rtcl = bhb and bhb.RegisterThresholdsChangeListener
-            if bhb_rtcl then
-                bhb_rtcl("LUIE_UnitFrames", UnitFrames.OnCrutchThresholdsChanged)
+            if crutchRegisterThresholdsChangeListener then
+                crutchRegisterThresholdsChangeListener("LUIE_UnitFrames", UnitFrames.OnCrutchThresholdsChanged)
             else
                 pendingCrutchAlertsVersionWarning = true
                 zo_callLater(TryShowPendingCrutchAlertsVersionWarning, 0)
@@ -473,9 +503,11 @@ local function FetchCrutchBossThresholds()
         return nil
     end
 
-    local crutch = CrutchAlerts
+    if not crutchGetBossThresholds then
+        return nil
+    end
 
-    local data = crutch.BossHealthBar.GetBossThresholds()
+    local data = crutchGetBossThresholds()
     if type(data) ~= "table" then
         return nil
     end
@@ -608,7 +640,7 @@ local function GetVisibleBossSpan()
 end
 
 local function GetThresholdStageColorsFromCrutch()
-    local c = CrutchAlerts and CrutchAlerts.savedOptions and CrutchAlerts.savedOptions.bossHealthBar
+    local c = crutchBossHealthOptions
     if c and c.activeColor and c.imminentColor and c.passedColor then
         return c.activeColor, c.imminentColor, c.passedColor
     end
@@ -616,7 +648,7 @@ local function GetThresholdStageColorsFromCrutch()
 end
 
 local function RoundBossThresholdHealthPercent(percentRaw)
-    local cr = CrutchAlerts and CrutchAlerts.savedOptions and CrutchAlerts.savedOptions.bossHealthBar
+    local cr = crutchBossHealthOptions
     if cr and cr.useFloorRounding == false then
         return zo_round(percentRaw)
     end
@@ -879,8 +911,6 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
         local bottomLabel = stack.bottomLabels[idx]
         if not bottomLabel then
             bottomLabel = CreateThresholdLabel(container, bottomDim, true, idx)
-            bottomLabel:SetTransformNormalizedOriginPoint(0.5, 0.5)
-            bottomLabel:SetTransformRotationZ(ZO_HALF_PI)
             stack.bottomLabels[idx] = bottomLabel
         end
 
@@ -914,7 +944,7 @@ local function ApplyBossThresholdMarkers(thresholdInfo)
         bottomLabel:ClearAnchors()
         bottomLabel:SetDimensions(bottomDim[1], bottomDim[2])
         if column.mechanic and column.mechanic ~= "" then
-            bottomLabel:SetAnchor(CENTER, container, BOTTOMLEFT, cx, labelOffsetY + bottomDim[1] / 2)
+            bottomLabel:SetAnchor(TOP, container, BOTTOMLEFT, cx, labelOffsetY)
             bottomLabel:SetText(column.mechanic)
             ApplyThresholdStageToLabel(bottomLabel, stage)
             bottomLabel:SetHidden(false)
@@ -977,13 +1007,16 @@ function UnitFrames.UpdateBossThresholds()
     if not UnitFrames.CustomFrames or not UnitFrames.CustomFrames["boss1"] then
         UnitFrames.activeBossThresholds = nil
         UnitFrames.lastBossThresholdColumnSig = nil
+        UnitFrames.bossThresholdMechanicPadding = 0
         return
     end
 
     if not UnitFrames.SV.BossShowThresholdMarkers then
         UnitFrames.activeBossThresholds = nil
         UnitFrames.lastBossThresholdColumnSig = nil
+        UnitFrames.bossThresholdMechanicPadding = 0
         ApplyBossThresholdMarkers(nil)
+        UnitFrames.CustomFramesApplyLayoutBosses()
         return
     end
 
@@ -998,7 +1031,27 @@ function UnitFrames.UpdateBossThresholds()
     end
 
     UnitFrames.activeBossThresholds = thresholdInfo
+
+    -- If any threshold has a non-empty mechanic label, reserve space below the boss stack.
+    local hasMechanic = false
+    if thresholdInfo and thresholdInfo.columns then
+        for _, col in ipairs(thresholdInfo.columns) do
+            if col.mechanic and col.mechanic ~= "" then
+                hasMechanic = true
+                break
+            end
+        end
+    end
+    if hasMechanic then
+        local rawOffsetY = (UnitFrames.SV and UnitFrames.SV.BossThresholdLabelOffsetY) or -2
+        local labelOffsetY = zo_abs(rawOffsetY)
+        UnitFrames.bossThresholdMechanicPadding = labelOffsetY + BOSS_THRESHOLD_BOTTOM_LABEL_DIMENSIONS[2] + 2
+    else
+        UnitFrames.bossThresholdMechanicPadding = 0
+    end
+
     ApplyBossThresholdMarkers(thresholdInfo)
+    UnitFrames.CustomFramesApplyLayoutBosses()
 end
 
 --- Used by UnitFrames slash debug only. Paints threshold markers from built-in percentages;
@@ -3940,7 +3993,7 @@ function UnitFrames.CustomFramesApplyLayoutBosses(requestedUnhide)
     local spacing = UnitFrames.SV.BossBarSpacing or 2
     local barHeight = UnitFrames.SV.BossBarHeight
     local bossSlotCount = BOSS_RANK_ITERATION_END - BOSS_RANK_ITERATION_BEGIN + 1
-    local bossesTotalHeight = barHeight * bossSlotCount + spacing * zo_max(0, bossSlotCount - 1)
+    local bossesTotalHeight = barHeight * bossSlotCount + spacing * zo_max(0, bossSlotCount - 1) + (UnitFrames.bossThresholdMechanicPadding or 0)
     bosses:SetDimensions(UnitFrames.SV.BossBarWidth, bossesTotalHeight)
 
     local bossNameHeight = resolveCompactNameHeight("boss", UnitFrames.SV.BossBarHeight)

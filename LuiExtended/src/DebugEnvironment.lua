@@ -6,9 +6,13 @@
 local LUIE = LUIE
 
 local addOnManager = GetAddOnManager()
+local eventManager = GetEventManager()
 local zo_strlower = zo_strlower
 local string_format = string.format
 local pairs = pairs
+
+local DEBUG_ENVIRONMENT_EVENT_NAMESPACE = "LuiExtended_DebugEnvironment"
+local debugEnvironmentLogoutPrehooked = false
 
 local CORE_ALLOWLIST =
 {
@@ -79,7 +83,65 @@ end
 
 --- @return boolean
 function LUIE.IsDebugEnvironmentActive()
-    return LUIE.SV.DebugEnvironmentActive == true
+    return LUIE.SV and LUIE.SV.DebugEnvironmentActive == true
+end
+
+local function ClearDebugEnvironmentSavedVars()
+    if not LUIE.SV then
+        return
+    end
+    LUIE.SV.DebugEnvironmentActive = false
+    LUIE.SV.DebugEnvironmentRestore = nil
+    LUIE.SV.DebugEnvironmentPendingChat = nil
+end
+
+--- True when every enabled addon is on the debug allowlist (or no non-allowlist addon is enabled).
+--- @return boolean
+local function IsDebugEnvironmentAppliedToAddOnManager()
+    local allowlist = GetDebugEnvironmentAllowlist()
+    local states = ScanAddOnManager()
+    for name, enabled in pairs(states) do
+        if enabled and not allowlist[name] then
+            return false
+        end
+    end
+    return true
+end
+
+--- Clears stale debug SV when the client addon list no longer matches allowlist-only mode.
+function LUIE.ReconcileDebugEnvironmentSavedVars()
+    if not LUIE.SV or not LUIE.IsDebugEnvironmentActive() then
+        return
+    end
+    if not IsDebugEnvironmentAppliedToAddOnManager() then
+        ClearDebugEnvironmentSavedVars()
+    end
+end
+
+--- Restore pre-debug addon selection and clear debug SV before logout unloads the UI.
+local function EndDebugEnvironmentForLogout()
+    if not LUIE.SV or not LUIE.IsDebugEnvironmentActive() then
+        return
+    end
+    local restore = LUIE.SV.DebugEnvironmentRestore
+    if restore then
+        ApplyEnabledByName(restore)
+    end
+    ClearDebugEnvironmentSavedVars()
+end
+
+--- Deferred reconcile after the addon load pass (AddOnManager enabled flags are reliable).
+function LUIE.ScheduleDebugEnvironmentReconcile()
+    zo_callLater(LUIE.ReconcileDebugEnvironmentSavedVars, 0)
+end
+
+function LUIE.RegisterDebugEnvironmentLogoutHooks()
+    if debugEnvironmentLogoutPrehooked then
+        return
+    end
+    ZO_PreHook("Logout", EndDebugEnvironmentForLogout)
+    ZO_PreHook("Quit", EndDebugEnvironmentForLogout)
+    debugEnvironmentLogoutPrehooked = true
 end
 
 --- @param enable boolean
@@ -149,23 +211,16 @@ local function PrintUsage()
     DebugEnvironmentChat("       /luie svstatus - SavedVariables migration diagnostics")
 end
 
-function LUIE.OnLuieSlashCommand(args)
-    args = zo_strtrim(args or "")
-    if args == "" then
-        PrintUsage()
-        return
-    end
-    local sub, action = zo_strlower(args):match("^(%S+)%s*(%S*)")
-    sub = sub or ""
-    action = action or ""
-    if sub == "svstatus" then
-        LUIE.PrintSavedVariablesMigrationStatus()
-        return
-    end
-    if sub ~= "debug" then
-        PrintUsage()
-        return
-    end
+function LUIE.LuieSlashCommandPrintUsage()
+    PrintUsage()
+end
+
+function LUIE.LuieSlashCommandSvStatus()
+    LUIE.PrintSavedVariablesMigrationStatus()
+end
+
+function LUIE.LuieSlashCommandDebug(action)
+    action = zo_strlower(zo_strtrim(action or ""))
     if action == "" or action == "status" then
         PrintDebugEnvironmentStatus()
         return
@@ -191,4 +246,24 @@ function LUIE.OnLuieSlashCommand(args)
         return
     end
     PrintUsage()
+end
+
+function LUIE.OnLuieSlashCommand(args)
+    args = zo_strtrim(args or "")
+    if args == "" then
+        PrintUsage()
+        return
+    end
+    local sub, action = zo_strlower(args):match("^(%S+)%s*(%S*)")
+    sub = sub or ""
+    action = action or ""
+    if sub == "svstatus" then
+        LUIE.LuieSlashCommandSvStatus()
+        return
+    end
+    if sub ~= "debug" then
+        PrintUsage()
+        return
+    end
+    LUIE.LuieSlashCommandDebug(action)
 end

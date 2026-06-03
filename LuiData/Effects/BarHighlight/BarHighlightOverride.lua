@@ -23,6 +23,7 @@ local contingency = { newId = 222285, showFakeAura = true, noRemove = true, dura
 --- @field hide boolean | nil Whether to hide this bar highlight entirely
 --- @field combatTrack boolean|nil Register EVENT_COMBAT_EVENT for newId without g_barFakeAura (keeps EVENT_EFFECT_CHANGED for fade)
 --- @field combatTrackRemainOnSlotted boolean|nil When newId is a channel tick id: only slotted-id combat (and effect) sets bar timer; tick combat keeps highlight without resetting remain
+--- @field combatStackNoExpire boolean|nil Dur-0 stack charge buff: keep bar highlight while stacks remain even if remain timestamp expired (ActionBar OnUpdate)
 
 --- @type table<integer, BarHighlightOverrideOptions>
 local barHighlightOverride =
@@ -39,9 +40,9 @@ local barHighlightOverride =
     ---------------------------
 
     -- Ardent Flame
-    [23806] = { newId = 23808, combatTrack = true, duration = 20000 },  -- Lava Whip → Lava Slam / Volcanic Whip stacks (5, 20s)
-    [256798] = { newId = 23808, combatTrack = true, duration = 20000 }, -- Volcanic Whip on bar → same stack buff id
-    [20805] = { newId = 122658, combatTrack = true, duration = 10000 }, -- Molten Whip → Seething Fury (~10s; 122658 GAIN refreshes)
+    [23806] = { newId = 23808, combatTrack = true, duration = 20000 },  -- Lava Whip --> Lava Slam / Volcanic Whip stacks (5, 20s)
+    [256798] = { newId = 23808, combatTrack = true, duration = 20000 }, -- Volcanic Whip on bar --> same stack buff id
+    [20805] = { newId = 122658, combatTrack = true, duration = 10000 }, -- Molten Whip --> Seething Fury (~10s; 122658 GAIN refreshes)
     -- Flame Lash / Power Lash (U49+): 34117 stack buff (5 stacks, 20s); 20824 replaces slotted Flame Lash when stacks are up.
     [20816] = { newId = 34117, combatTrack = true, duration = 20000 },
     [20824] = { newId = 34117, combatTrack = true, duration = 20000 },
@@ -49,8 +50,8 @@ local barHighlightOverride =
     [20668] = { newId = 44369 }, -- Searing Claw
     -- Core of Flame / Soul of Flame / Heart of Flame: ~4s player buff on slotted id (31837 / 32792 / 32785); no BarHighlightOverride entry.
     [20660] = { newId = 44373 }, -- Burning Embers
-    [20917] = { newId = 31102 }, -- Dragonfire Breath → target DOT
-    [20944] = { newId = 31103 }, -- Disintegrating Dragonfire → target DOT
+    [20917] = { newId = 31102 }, -- Dragonfire Breath --> target DOT
+    [20944] = { newId = 31103 }, -- Disintegrating Dragonfire --> target DOT
     -- Engulfing Dragonfire: slotted 20930 (BEGIN/GAIN DUR ~4750, EFFECT_CHANGED buff); track 32821 (tick GAIN/GAIN DUR 5000, FADE).
     [20930] = { newId = 32821, combatTrack = true, duration = 5000, combatTrackRemainOnSlotted = true },
     [20492] = { newId = 38254 },                                                                              -- Chains of Flame --> Taunt (target, 15s; log 38254)
@@ -67,10 +68,10 @@ local barHighlightOverride =
     [20252] = { newId = 31898 },                    -- Burning Talons
     [20251] = { newId = 20528 },                    -- Choking Talons -- TODO: Possibly track Maim here as well
     -- Dragon Blood: bar keys newId; timer from player buff (61698), not slotted combat (1500 ms GAIN DUR). showFakeAura would block buff refresh on recast.
-    [29004] = { newId = 61698, noRemove = true },   -- Dragon Blood → Major Fortitude
-    -- Green: 5s HoT buff (32744) on effect frame; HoT fade → CheckOnFade → remaining major time. noRemove keeps bar through HoT fade for swap.
+    [29004] = { newId = 61698, noRemove = true },   -- Dragon Blood --> Major Fortitude
+    -- Green: 5s HoT buff (32744) on effect frame; HoT fade --> CheckOnFade --> remaining major time. noRemove keeps bar through HoT fade for swap.
     [32744] = { noRemove = true },                  -- Blood of the Green Dragon
-    [32722] = { newId = 61698, noRemove = true },   -- Blood of the Elder Dragon → Major Fortitude
+    [32722] = { newId = 61698, noRemove = true },   -- Blood of the Elder Dragon --> Major Fortitude
 
     [21007] = { duration = 6000 },                  -- Wing Buffet (player buff)
     -- Fleetstep: slotted 21014 = 6000 ms; 108798 = 4000 ms expedition carrier (61736 display). CheckOnFade 108798 --> 21014.
@@ -88,16 +89,16 @@ local barHighlightOverride =
     -- Dragon Leap line (table 198758357): Landslide ground 29465/29466 (offset 32837063); stun 114590 / U49 262678 (offset 27087866).
     [29016] = { newId = 29465 },  -- Dragon Leap (slotted) --> Landslide (player ground, ~30s refresh)
     [29012] = { newId = 114590 }, -- Dragon Leap (cast combat) --> Stun
-    -- Take Flight: do NOT use Landslide 29465 on bar (ActionBar maps slot to track id; Landslide Dur 0 / stack → garbage labels e.g. -1472).
+    -- Take Flight: do NOT use Landslide 29465 on bar (ActionBar maps slot to track id; Landslide Dur 0 / stack --> garbage labels e.g. -1472).
     [32719] = { newId = 262682 }, -- Take Flight (slotted) --> Stun (U49; combat log ~3000 ms)
     -- Ferocious Leap: bar tracks 10s shield (61814); Landslide 29465 via BarHighlightExtraId only (log).
     [32715] = { newId = 61814 },  -- Ferocious Leap (slotted) --> damage shield
 
     -- Earthen Heart — Superheated Ward / Volcanic Ward / Magma Fist (table 198758357; combat log)
-    [29032] = { newId = 134310, duration = 6000 },                                                            -- Superheated Ward → player buff 134310 (6s)
-    [31820] = { newId = 261754, duration = 6000, noRemove = true },                                           -- Volcanic Ward → primary player buff 261754 (6s; parallel 258203)
+    [29032] = { newId = 134310, duration = 6000 },                                                            -- Superheated Ward --> player buff 134310 (6s)
+    [31820] = { newId = 261754, duration = 6000, noRemove = true },                                           -- Volcanic Ward --> primary player buff 261754 (6s; parallel 258203)
     [258203] = { hide = true },                                                                               -- Volcanic Ward secondary buff (same 6s; CheckOnFade ↔ 261754)
-    [31816] = { newId = 134340 },                                                                             -- Magma Fist → target Heat Shock 134340 (7s); self 258293 via ExtraId
+    [31816] = { newId = 134340 },                                                                             -- Magma Fist --> target Heat Shock 134340 (7s); self 258293 via ExtraId
     -- Molten Weapons line (table 198758357): slotted bar = player bundle; combat majors/empower via combatTrack + display ids.
     [29043] = { newId = 258658, showFakeAura = true, noRemove = true, duration = 30000 },                     -- Molten Weapons (player buff 258658, 30s)
     [31874] = { newId = 258666, showFakeAura = true, noRemove = true, duration = 60000 },                     -- Igneous Weapons (player buff 258666, 60s)
@@ -195,20 +196,38 @@ local barHighlightOverride =
     ---------------------------
 
     -- Dark Magic
-    [24371] = { newId = 24559 },  -- rune prison
-    [24578] = { newId = 24581 },  -- shattering prison
-    [24584] = { newId = 114903 }, -- Dark Exchange
-    [24589] = { newId = 114909 }, -- dark conversion
-    [24595] = { newId = 114908 }, -- dark deal
-    [24828] = { newId = 24830 },  -- Daedric Mines
-    [24842] = { newId = 24844 },  -- daedric tomb (first mine) 24846; 24847
-    [24834] = { newId = 25158 },  -- Daedric Minefield --> Daedric Mines
+    [24371] = { newId = 24559 },                                    -- rune prison
+    [24578] = { newId = 24581 },                                    -- rune cage
+    [24584] = { newId = 114903 },                                   -- Dark Exchange
+    [24589] = { newId = 114909 },                                   -- dark conversion
+    [24595] = { newId = 114908 },                                   -- dark deal
+    [24574] = { newId = 24574, duration = 120000 },                 -- defensive rune (player shield)
+    [24828] = { newId = 24830, duration = 15000 },                  -- Daedric Mines (player placement)
+    [24842] = { newId = 24847, duration = 16000 },                  -- daedric tomb (ground track 24847)
+    [24834] = { newId = 25158, duration = 15000 },                  -- Daedric Minefield
+    [27706] = { newId = 27706, duration = 12000 },                  -- negate magic (ground)
+    [28341] = { newId = 28341, duration = 12000 },                  -- suppression field (ground)
+    [28348] = { newId = 28348, duration = 12000 },                  -- absorption field (ground)
+    [43714] = { newId = 143744, duration = 3000 },                  -- crystal shard (crystal weaver)
+    [46324] = { newId = 46327, duration = 8000 },                   -- crystal fragments (proc)
+    [46331] = { newId = 46331, duration = 6000 },                   -- crystal weapon (self buff)
+    [28025] = { newId = 143659, noRemove = true, duration = 4000 }, -- encase (target immobilize)
+    [28308] = { newId = 143663, noRemove = true, duration = 4000 }, -- shattering prison
+    [28311] = { newId = 143668, noRemove = true, duration = 4000 }, -- restraining prison
 
     -- Daedric Summoning
-    [23492] = { newId = 80463 },                                         -- greater storm atronarch
-    [23495] = { newId = 23668 },                                         -- Summon Charged Atronach
-    [23634] = { newId = 80459 },                                         -- Summon Storm Atronach
-    [24165] = { newId = 203447 },                                        -- bound armaments
+    [23492] = { newId = 80463, duration = 15000 },                       -- greater storm atronach
+    [23495] = { newId = 80468, duration = 15000 },                       -- summon charged atronach (player track)
+    [23634] = { newId = 80459, duration = 15000 },                       -- summon storm atronach
+    [24158] = { newId = 24158, duration = 3000 },                        -- bound armor
+    [24163] = { newId = 24163, duration = 3000 },                        -- bound aegis
+    [24165] = { newId = 203447, duration = 10000 },                      -- bound armaments
+    [24326] = { newId = 24326, noRemove = true, duration = 6000 },       -- daedric curse (target)
+    [24328] = { newId = 24328, noRemove = true, duration = 6000 },       -- daedric prey (target)
+    [24330] = { newId = 24330, noRemove = true, combatTrack = true },    -- haunting curse (stacks via 89491 ExtraId)
+    [28418] = { newId = 28418, duration = 6000 },                        -- conjured ward
+    [29489] = { newId = 29489, duration = 6000 },                        -- hardened ward
+    [29482] = { newId = 29482, duration = 10000 },                       -- empowered ward
     [77140] = { newId = 77354, showFakeAura = true, noRemove = true },   -- twilight tormentor enrage
     [77182] = { newId = 77187, showFakeAura = true, noRemove = true },   -- volatile pulse
     [108840] = { newId = 108842, showFakeAura = true, noRemove = true }, -- summon unstable familiar
@@ -217,15 +236,21 @@ local barHighlightOverride =
     [23316] = { newId = 77187, showFakeAura = true, noRemove = true },   -- summon volatile familiar
 
     -- Storm Calling
-    [18718] = { newId = 18746 },  -- mages' fury
-    [19109] = { newId = 19118 },  -- endless fury
-    [19123] = { newId = 19125 },  -- mages' wrath
-    [23182] = { newId = 157462 }, -- lightning splash
-    [23205] = { newId = 157537 }, -- lightning flood
-    [23200] = { newId = 157535 }, -- liquid lightning
-    [23234] = { newId = 51392 },  -- bolt escape fatigue
-    [23236] = { newId = 51392 },  -- streak fatigue
-    [23277] = { newId = 51392 },  -- ball of lightning fatigue
+    [18718] = { newId = 18746, duration = 2000 },   -- mages' fury (target execute)
+    [19109] = { newId = 19118, duration = 2000 },   -- endless fury (target execute)
+    [19123] = { newId = 19125, duration = 2000 },   -- mages' wrath
+    [23182] = { newId = 157462, duration = 10000 }, -- lightning splash (ground)
+    [23205] = { newId = 157537, duration = 10000 }, -- lightning flood (ground)
+    [23200] = { newId = 157535, duration = 15000 }, -- liquid lightning (ground)
+    [23210] = { newId = 23210, duration = 20000 },  -- lightning form
+    [23213] = { newId = 23213, duration = 30000 },  -- boundless storm
+    [23231] = { newId = 23231, duration = 20000 },  -- hurricane
+    [23234] = { newId = 51392, duration = 4000 },   -- bolt escape fatigue
+    [23236] = { newId = 51392, duration = 4000 },   -- streak fatigue
+    [23277] = { newId = 51392, duration = 4000 },   -- ball of lightning fatigue
+    [23670] = { newId = 23670, duration = 33000 },  -- surge
+    [23674] = { newId = 23674, duration = 33000 },  -- power surge
+    [23678] = { newId = 23678, duration = 33000 },  -- critical surge
 
     ---------------------------
     -- Templar ----------------
@@ -316,15 +341,35 @@ local barHighlightOverride =
     -- Necromancer ------------
     ---------------------------
 
+    -- Grave Lord — skull charge stacks (combatTrack; max 3 in BarHighlightStack)
+    [114108] = { newId = 114131, combatTrack = true, combatStackNoExpire = true },         -- Flame Skull (slotted / cast 1 projectile)
+    [123683] = { newId = 114131, combatTrack = true, combatStackNoExpire = true },         -- Flame Skull charged cast (no corpse; combat log cast 2+)
+    [123685] = { newId = 114131, combatTrack = true, combatStackNoExpire = true },         -- Flame Skull every-3rd cast (+ corpse)
+    [117624] = { newId = 117625, combatTrack = true, combatStackNoExpire = true },         -- Venom Skull
+    [117637] = { newId = 117638, combatTrack = true, combatStackNoExpire = true },         -- Ricochet Skull
+
     [114860] = { newId = 114863 },                                                         -- Blastbones
     [117330] = { newId = 114863 },                                                         -- Blastbones
     [117690] = { newId = 117691 },                                                         -- Blighted Blastbones
     [117693] = { newId = 117691 },                                                         -- Blighted Blastbones
-    [117749] = { newId = 117750, showFakeAura = true, noRemove = true, duration = 20500 }, -- Grave Lord's Sacrifice
+    [117749] = { newId = 117750, showFakeAura = true, noRemove = true, duration = 20500 }, -- Grave Lord's Sacrifice (Stalking)
     [117773] = { newId = 117750 },                                                         -- Relentless Blastbones --> Stalking Blastbones
+
+    [115252] = { newId = 115255, showFakeAura = true, noRemove = true, duration = 10400 }, -- Boneyard
+    [117805] = { newId = 117807, showFakeAura = true, noRemove = true, duration = 10400 }, -- Unnerving Boneyard
+    [117850] = { newId = 117852, showFakeAura = true, noRemove = true, duration = 10400 }, -- Avid Boneyard
+
+    [114317] = { newId = 114317, duration = 20000 },                                       -- Skeletal Mage
+    [118680] = { newId = 118680, duration = 20000 },                                       -- Skeletal Archer
+    [118726] = { newId = 118726, duration = 20000 },                                       -- Skeletal Arcanist
+
+    [122174] = { newId = 122380, showFakeAura = true, noRemove = true, duration = 3000 },  -- Frozen Colossus
+    [122395] = { newId = 122398, showFakeAura = true, noRemove = true, duration = 3000 },  -- Pestilent Colossus
+    [122388] = { newId = 122391, showFakeAura = true, noRemove = true, duration = 3000 },  -- Glacial Colossus
 
     [115924] = { newId = 116445 },                                                         -- Shocking Siphon
     [118763] = { newId = 118764 },                                                         -- Detonating Siphon
+    [118766] = { newId = 118764 },                                                         -- Detonating Siphon (ground tick id -> aura id)
     [118008] = { newId = 118009 },                                                         -- Mystic Siphon
 
     [118226] = { newId = 125750 },                                                         -- Ruinous Scythe --> Off Balance
@@ -338,19 +383,35 @@ local barHighlightOverride =
     [118308] = { newId = 118309 },                                                         -- Ghostly Embrace
     [118352] = { newId = 118354 },                                                         -- Empowering Grasp
 
+    [115206] = { newId = 115206, duration = 20000 },                                       -- Bone Armor
+    [118237] = { newId = 118237, duration = 20000 },                                       -- Beckoning Armor
+    [118244] = { newId = 118244, duration = 30000 },                                       -- Summoner's Armor
+
+    [115093] = { newId = 115095, showFakeAura = true, noRemove = true, duration = 11100 }, -- Bone Totem
+    [118380] = { newId = 118381, showFakeAura = true, noRemove = true, duration = 11100 }, -- Remote Totem
+    [118404] = { newId = 118405, showFakeAura = true, noRemove = true, duration = 13100 }, -- Agony Totem
+
+    [115001] = { newId = 115001, duration = 20000 },                                       -- Bone Goliath Transformation
+    [118664] = { newId = 118664, duration = 20000 },                                       -- Pummeling Goliath
+    [118279] = { newId = 118279, duration = 20000 },                                       -- Ravenous Goliath
+
     [114196] = { newId = 114206, showFakeAura = true },                                    -- Render Flesh --> Minor Defile
     [117883] = { newId = 117885, showFakeAura = true },                                    -- Resistant Flesh --> Minor Defile
     [117888] = { newId = 117890, showFakeAura = true },                                    -- Blood Sacrifice --> Minor Defile
 
-    [115315] = { newId = 115326 },                                                         -- Life amid Death
-    [118017] = { newId = 118022 },                                                         -- Renewing Undeath
-    [118809] = { newId = 118814 },                                                         -- Enduring Undeath
+    [115315] = { newId = 115532, showFakeAura = true, noRemove = true, duration = 5100 },  -- Life amid Death (player aura when extended)
+    [118017] = { newId = 118018, showFakeAura = true, noRemove = true, duration = 5100 },  -- Renewing Undeath
+    [118809] = { newId = 118810, showFakeAura = true, noRemove = true, duration = 30100 }, -- Enduring Undeath (corpse-extended HoT window)
+
+    [115710] = { newId = 115710, duration = 16000 },                                       -- Spirit Mender
+    [118912] = { newId = 118912, duration = 16000 },                                       -- Spirit Guardian
+    [118840] = { newId = 118840, duration = 8000 },                                        -- Intensive Mender
 
     [115926] = { newId = 116450 },                                                         -- Restoring Tether
     [118070] = { newId = 118071 },                                                         -- Braided Tether
     [118122] = { newId = 118123 },                                                         -- Mortal Coil
 
-    [118379] = { newId = 124999, showFakeAura = true },                                    -- Animate Blastbones
+    [118379] = { newId = 124999, showFakeAura = true, noRemove = true, duration = 8000 },  -- Animate Blastbones
 
     ---------------------------
     -- Arcanist ---------------
@@ -383,19 +444,19 @@ local barHighlightOverride =
     [198564] = { newId = 194237, showFakeAura = true, duration = 6000 }, -- Chakram of Destiny (player shield)
 
     -- Gate morphs: bar timer tracks entry portal ground; noRemove = ignore FADE on teleport until countdown ends
-    [186211] = { newId = 195190, showFakeAura = true, noRemove = true, duration = 7000 }, -- Fleet-Footed Gate (cast → entry portal ground)
+    [186211] = { newId = 195190, showFakeAura = true, noRemove = true, duration = 7000 }, -- Fleet-Footed Gate (cast --> entry portal ground)
     [197856] = { newId = 195190, showFakeAura = true, noRemove = true, duration = 7000 }, -- Fleet-Footed Gate (cost variant)
 
-    [186220] = { newId = 195204, showFakeAura = true, noRemove = true, duration = 7000 }, -- Passage Between Worlds (cast → entry portal ground)
+    [186220] = { newId = 195204, showFakeAura = true, noRemove = true, duration = 7000 }, -- Passage Between Worlds (cast --> entry portal ground)
     [190394] = { newId = 195204, showFakeAura = true, noRemove = true, duration = 7000 }, -- Passage Between Worlds (cost variant)
 
-    [183542] = { newId = 195167, showFakeAura = true, noRemove = true, duration = 7000 }, -- Apocryphal Gate (cast → entry portal ground)
+    [183542] = { newId = 195167, showFakeAura = true, noRemove = true, duration = 7000 }, -- Apocryphal Gate (cast --> entry portal ground)
     [178457] = { newId = 195167, showFakeAura = true, noRemove = true, duration = 7000 }, -- Apocryphal Gate (cost variant)
 
     -- Remedy Cascade (channeled): channel combat id reports [Chan] 4500 in combat log
     [183537] = { combatTrack = true, duration = 4500 },                                                    -- Remedy Cascade (cost mag)
     [198309] = { combatTrack = true, duration = 4500 },                                                    -- Remedy Cascade (cost stam)
-    [178454] = { newId = 183537, combatTrack = true, duration = 4500, combatTrackRemainOnSlotted = true }, -- Remedy Cascade (cost variant → channel id)
+    [178454] = { newId = 183537, combatTrack = true, duration = 4500, combatTrackRemainOnSlotted = true }, -- Remedy Cascade (cost variant --> channel id)
 
     -- Curative Surge (channeled)
     [186200] = { combatTrack = true, duration = 4500 }, -- Curative Surge (cost mag)
@@ -417,20 +478,24 @@ local barHighlightOverride =
     -- Two Handed -------------
     ---------------------------
 
-    [38807] = { newId = 61737 },                        -- Wrecking Blow --> Empower
-    [38814] = { newId = 131562 },                       -- Dizzying Swing --> Off Balance
-    [38788] = { newId = 38791 },                        -- Stampede
-    [38745] = { newId = 38747 },                        -- Carve
-    [38754] = { newId = 38763 },                        -- Brawler
+    [20919] = { newId = 159717, showFakeAura = true, duration = 6000 },                  -- Cleave --> damage shield
+    [38807] = { newId = 61737, showFakeAura = true, duration = 3000 },                   -- Wrecking Blow --> Empower
+    [38814] = { newId = 131562, noRemove = true },                                       -- Dizzying Swing --> Off Balance 7s (target)
+    [16825] = { newId = 38814, duration = 2000, combatTrack = true, noRemove = true },   -- Off Balance Exploit stun (re-hit on OB; log 17:44)
+    [137807] = { newId = 38814, duration = 2000, combatTrack = true, noRemove = true },  -- OB immune snare fallback (log IMMUNE + 137807 2s)
+    [38788] = { newId = 99789, showFakeAura = true, duration = 18000, noRemove = true }, -- Stampede --> Merciless Charge (vMA); Stampede track via ExtraId 126475
+    [38745] = { newId = 159728, showFakeAura = true, duration = 6000 },                  -- Carve --> damage shield (target bleed 38747)
+    [38754] = { newId = 38763, showFakeAura = true, duration = 6000 },                   -- Brawler --> damage shield
 
-    [28448] = { newId = 99789 },                        -- Critical Charge --> Merciless Charge
-    [38778] = { newId = 99789 },                        -- Critical Rush --> Merciless Charge
+    [28448] = { newId = 99789, showFakeAura = true, duration = 18000, noRemove = true }, -- Critical Charge --> Merciless Charge
+    [38778] = { newId = 99789, showFakeAura = true, duration = 18000, noRemove = true }, -- Critical Rush --> Merciless Charge
 
-    [28297] = { showFakeAura = true, noRemove = true }, -- Momentum --> Major Brutality
-    [38794] = { newId = 38797 },                        -- Forward Momentum
-    [83216] = { newId = 83217 },                        -- Berserker Strike
-    [83229] = { newId = 83230 },                        -- Onslaught
-    [83238] = { newId = 83239 },                        -- Berserker Rage
+    [28297] = { showFakeAura = true, noRemove = true },                                  -- Momentum --> Major Brutality
+    [38794] = { newId = 38797 },                                                         -- Forward Momentum
+    [38802] = { showFakeAura = true, noRemove = true },                                  -- Rally
+    [83216] = { newId = 83217, showFakeAura = true, duration = 12000 },                  -- Berserker Strike
+    [83229] = { newId = 83230, showFakeAura = true, duration = 8000 },                   -- Onslaught
+    [83238] = { newId = 83239, showFakeAura = true, duration = 12000 },                  -- Berserker Rage
 
     ---------------------------
     -- One Hand and Shield ----
@@ -596,31 +661,21 @@ local barHighlightOverride =
     -- Werewolf ---------------
     ---------------------------
 
-    -- U50 audit Phase 1: Roar bar stays on Off Balance 137257 (existing 7s target debuff with
-    -- BarHighlightCheckOnFade resync). Blood Hunger 267744 is displayed on the player buff frame
-    -- via Override (displayStacks/maxStacks=3), not on the bar, because a slotted id can only
-    -- carry a single newId remap.
-
     [32632] = { newId = 137156 },                      -- Pounce --> Carnage
-    [39105] = { newId = 137184 },                      -- Brutal Pounce --> Brutal Carnage 12s DOT (U50 Phase 4 log; 137189 proc did not fire)
+    [39105] = { newId = 137184 },                      -- Brutal Pounce --> Brutal Carnage 12s DOT
     [39104] = { newId = 137164 },                      -- Feral Pounce --> Feral Carnage
 
-    [58317] = { newId = 137206, showFakeAura = true }, -- Hircine's Rage --> 137206 Hircine's Rage active state (U50; was Major Berserk pre-U50)
+    [58317] = { newId = 137206, showFakeAura = true }, -- Hircine's Rage --> Hircine's Rage active state
     [58325] = { newId = 61704 },                       -- hircine's fortitude (minor fortitude)
     [32633] = { newId = 137257 },                      -- roar (off-balance)
-    [39113] = { newId = 45834 },                       -- ferocious roar (off-balance); 137287 repurposed to Feeding Frenzy in U50
-    -- Phase 6 update: Deafening Roar (39114) no longer applies Major Breach in U50 -- the cast now
-    -- grants Major Cowardice 147643 (15s) + Major Maim 61725 (15s) + Off Balance 137312 (7s) +
-    -- Blood Hunger 267744 stack. Re-pointing bar to 137312 Off Balance for consistency with the
-    -- other Roar morphs (32633 --> 137257, 39113 --> 45834); Major Cowardice / Major Maim land on
-    -- the target buff frame independently with their canonical icons.
-    [39114] = { newId = 137312 }, -- Deafening Roar --> Off Balance 7s (U50; was 61743 Major Breach pre-U50)
-    [58405] = { newId = 137317 }, -- Gnash (U50) --> 400ms second-hit indicator
-    [58742] = { newId = 58745 },  -- Rip and Tear (U50; Gnash morph) --> 400ms second-hit indicator (parallel to Gnash 58405 --> 137317)
-    [58798] = { newId = 58801 },  -- Bloody Gnash (U50; Gnash morph) --> 400ms second-hit indicator (parallel to Gnash 58405 --> 137317, Rip and Tear 58742 --> 58745)
-    [58855] = { newId = 58856 },  -- Rending Claws (U50; was Infectious Claws) --> DOT
-    [58864] = { newId = 58864 },  -- Claw Fury (U50; Rending Claws channel morph) --> tracks own 4.6s channel buff
-    [58879] = { newId = 58880 },  -- Bloodclaws (U50; Rending Claws morph) --> 10s target Bleed DOT (Phase 6 log confirmed)
+    [39113] = { newId = 45834 },                       -- ferocious roar (off-balance)
+    [39114] = { newId = 137312 },                      -- Deafening Roar --> Off Balance 7s
+    [58405] = { newId = 137317 },                      -- Gnash --> 400ms second-hit indicator
+    [58742] = { newId = 58745 },                       -- Rip and Tear --> 400ms second-hit indicator
+    [58798] = { newId = 58801 },                       -- Bloody Gnash --> 400ms second-hit indicator
+    [58855] = { newId = 58856 },                       -- Rending Claws --> DOT
+    [58864] = { newId = 58864 },                       -- Claw Fury --> channel buff
+    [58879] = { newId = 58880 },                       -- Bloodclaws --> 10s target Bleed DOT
 
     ---------------------------
     -- Fighters Guild ---------
@@ -789,6 +844,31 @@ local barHighlightOverride =
     [240148] = contingency, -- "Ulfsild's Contingency"
     [240149] = contingency, -- "Healing Contingency"
     [240150] = contingency, -- "Ulfsild's Contingency"
+
+    ---------------------------
+    -- Cyrodiil Vengeance (combat log 2025-06; VENGEANCE_SKILL_MAP.csv)
+    ---------------------------
+
+    -- Necromancer — Bone Tyrant / Living Death / Grave Lord
+    [253156] = { newId = 253163, combatTrack = true },                                    -- Vengeance Grave Grasp (QUEUED / ON CD / target 253163)
+    [246025] = { newId = 246026, combatTrack = true, duration = 20000 },                  -- Vengeance Bone Armor (246025 GAIN DUR; 61694 on player)
+    [246026] = { newId = 246026, combatTrack = true, duration = 20000 },                  -- Vengeance Bone Armor (246026 parallel GAIN DUR / FADE)
+    [238258] = { newId = 238258, showFakeAura = true, noRemove = true, duration = 1000 }, -- Vengeance Life amid Death (ground)
+    [238137] = { newId = 238137, combatTrack = true },                                    -- Vengeance Death Scythe (ON CD / OOR / STUN / STAGGER)
+    [238129] = { newId = 238129, showFakeAura = true, noRemove = true, duration = 3000 }, -- Vengeance Frozen Colossus (ground; log 238129/238130 GAIN)
+    [238255] = { newId = 238255, combatTrack = true },                                    -- Vengeance Expunge (QUEUED; cleanse + restore bundle)
+
+    -- Alliance War — Soldier loadout kit
+    [255057] = { newId = 255057, combatTrack = true },                   -- Sweeping Assault (CD / combat from log ON CD)
+    [255164] = { newId = 269944, noRemove = true },                      -- Battle Trauma (reticle target; 269944 + 255165 via ExtraId / CheckOnFade)
+    [255184] = { newId = 255184, combatTrack = true, duration = 20000 }, -- Stand Firm (log 255184 GAIN DUR / FADE; Minor Resolve 61693 on player)
+    [255189] = { newId = 255189, combatTrack = true, duration = 10000 }, -- Regroup (255189 GAIN DUR; 61705 + 61707 on player)
+    [255190] = { newId = 255189, combatTrack = true, duration = 10000 }, -- Regroup --> Major Intellect combat (remap to slotted)
+    [255326] = { newId = 255326, combatTrack = true, duration = 15000 }, -- Marshaling Cry (255326 GAIN DUR; 61744 + 61735 on player)
+    [255327] = { newId = 255326, combatTrack = true, duration = 15000 }, -- Marshaling Cry --> Minor Berserk combat (remap to slotted)
+    [255479] = { newId = 255479, combatTrack = true, duration = 10000 }, -- Detonating Strike (255479 GAIN DUR; FADE on detonate cast)
+    [255498] = { newId = 255479, combatTrack = true, duration = 10000 }, -- Detonating Strike (ground BEGIN; remap to proc bar)
+    [255512] = { newId = 255479, combatTrack = true, duration = 10000 }, -- Detonating Strike (player track GAIN DUR; FADE with proc)
 
     ---------------------------
     -- Temp -------------------

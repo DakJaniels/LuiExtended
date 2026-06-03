@@ -283,8 +283,8 @@ function LUIE.API_Hooks()
 
             -- Check if there is an effect override by name for the abilityId
             if Effects.EffectOverrideByName[abilityId] then
-                local unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, attackerRawName)
-                local petName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, minionName)
+                local unitName = zo_strformat("<<C:1>>", attackerRawName)
+                local petName = zo_strformat("<<C:1>>", minionName)
 
                 -- Check if there is an effect override by name for the attacker unit name
                 if Effects.EffectOverrideByName[abilityId][unitName] then

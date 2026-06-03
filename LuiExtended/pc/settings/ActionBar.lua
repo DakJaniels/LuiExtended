@@ -52,7 +52,7 @@ local function GenerateCustomList(input)
         counter = counter + 1
         -- If the input is a numeric value then we can pull this abilityId's info.
         if type(id) == "number" then
-            options[counter] = zo_iconTextFormat(GetAbilityIcon(id), 16, 16, " [" .. id .. "] " .. zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id)), true, true)
+            options[counter] = zo_iconTextFormat(GetAbilityIcon(id), 16, 16, " [" .. id .. "] " .. zo_strformat("<<C:1>>", GetAbilityName(id)), true, true)
             -- If the input is not numeric then add this as a name only.
         else
             options[counter] = id
@@ -963,6 +963,23 @@ function ActionBar.CreateSettings()
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
                 default = Defaults.CastBarTimer,
             },
+            {
+                type = "dropdown",
+                name = AddIndent(GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT), 1),
+                tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_TP),
+                choices =
+                {
+                    GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_MS),
+                    GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_SEC_01),
+                    GetString(LUIE_STRING_LAM_AB_CASTBAR_TIMER_FORMAT_SEC_001),
+                },
+                choicesValues = { 1, 2, 3 },
+                getFunc = function () return Settings.CastBarTimerFormat end,
+                setFunc = function (value) Settings.CastBarTimerFormat = value end,
+                width = "full",
+                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and Settings.CastBarTimer) end,
+                default = Defaults.CastBarTimerFormat,
+            },
             SettingsAPI.CreateFontDropdown(
                 AddIndent(GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTFACE), 2),
                 GetString(LUIE_STRING_LAM_AB_CASTBAR_FONTFACE_TP),
@@ -1064,6 +1081,34 @@ function ActionBar.CreateSettings()
                 width = "full",
                 disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable) end,
                 default = Defaults.CastBarHeavy,
+            },
+            {
+                type = "checkbox",
+                name = AddIndent(GetString(LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER), 1),
+                tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_WEAVE_HELPER_TP),
+                getFunc = function () return Settings.CastBarWeaveHelper end,
+                setFunc = function (value)
+                    Settings.CastBarWeaveHelper = value
+                    if ActionBar.CastBar and ActionBar.CastBar.OnWeaveHelperSettingChanged then
+                        ActionBar.CastBar.OnWeaveHelperSettingChanged()
+                    end
+                end,
+                width = "full",
+                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and LUIE.OtherAddonCompatability.isLibCombatEnabled) end,
+                default = Defaults.CastBarWeaveHelper,
+            },
+            {
+                type = "slider",
+                name = AddIndent(GetString(LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD), 1),
+                tooltip = GetString(LUIE_STRING_LAM_AB_CASTBAR_WEAVE_THRESHOLD_TP),
+                min = 0,
+                max = 200,
+                step = 10,
+                getFunc = function () return Settings.CastBarWeaveThresholdMs end,
+                setFunc = function (value) Settings.CastBarWeaveThresholdMs = value end,
+                width = "full",
+                disabled = function () return not (LUIE.SV.ActionBar_Enabled and Settings.CastBarEnable and Settings.CastBarWeaveHelper and LUIE.OtherAddonCompatability.isLibCombatEnabled) end,
+                default = Defaults.CastBarWeaveThresholdMs,
             },
             {
                 type = "header",

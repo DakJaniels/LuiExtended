@@ -50,7 +50,7 @@ local function GenerateCustomListLHAS(input)
         local name
         -- If the input is a numeric value then we can pull this abilityId's info.
         if type(id) == "number" then
-            name = zo_iconFormat(GetAbilityIcon(id), 16, 16) .. " [" .. id .. "] " .. zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
+            name = zo_iconFormat(GetAbilityIcon(id), 16, 16) .. " [" .. id .. "] " .. zo_strformat("<<C:1>>", GetAbilityName(id))
             -- If the input is not numeric then add this as a name only.
         else
             name = id
@@ -2431,6 +2431,68 @@ function SpellCastBuffs.CreateConsoleSettings()
                 return not Settings.ColorCC
             end,
         }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Damage Type Fallback",
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_CHECKBOX,
+            label = "Color non-CC debuffs by damage type (cooldown fill)",
+            tooltip = "When Color Debuffs by Crowd Control Type is on and a debuff has no CC classification, use the debuff's damage type (from combat) to color the cooldown fill.",
+            getFunction = function ()
+                return Settings.DamageTypeFallback
+            end,
+            setFunction = function (v)
+                Settings.DamageTypeFallback = v
+                SpellCastBuffs.ReloadEffects("player")
+            end,
+            default = Defaults.DamageTypeFallback,
+            disable = function ()
+                return (not LUIE.SV.SpellCastBuff_Enable) or (not Settings.ColorCC)
+            end,
+        }
+
+        settings[#settings + 1] =
+        {
+            type = LHAS.ST_LABEL,
+            label = "Damage Type Colors",
+        }
+
+        local function disabledDamageType()
+            return (not Settings.DamageTypeFallback) or (not Settings.ColorCC)
+        end
+
+        local function addDamageTypeColor(dt)
+            settings[#settings + 1] =
+            {
+                type = LHAS.ST_COLOR,
+                label = GetString(_G["SI_DAMAGETYPE" .. tostring(dt)]),
+                getFunction = function ()
+                    return Settings.colors.damage[dt][1], Settings.colors.damage[dt][2], Settings.colors.damage[dt][3], Settings.colors.damage[dt][4]
+                end,
+                setFunction = function (r, g, b, a)
+                    Settings.colors.damage[dt] = { r, g, b, a }
+                end,
+                default = Defaults.colors.damage[dt],
+                disable = disabledDamageType,
+            }
+        end
+
+        addDamageTypeColor(DAMAGE_TYPE_PHYSICAL)
+        addDamageTypeColor(DAMAGE_TYPE_FIRE)
+        addDamageTypeColor(DAMAGE_TYPE_SHOCK)
+        addDamageTypeColor(DAMAGE_TYPE_OBLIVION)
+        addDamageTypeColor(DAMAGE_TYPE_COLD)
+        addDamageTypeColor(DAMAGE_TYPE_EARTH)
+        addDamageTypeColor(DAMAGE_TYPE_MAGIC)
+        addDamageTypeColor(DAMAGE_TYPE_DROWN)
+        addDamageTypeColor(DAMAGE_TYPE_DISEASE)
+        addDamageTypeColor(DAMAGE_TYPE_POISON)
+        addDamageTypeColor(DAMAGE_TYPE_BLEED)
     end)
 
     -- Build Alignment & Sorting Options Section

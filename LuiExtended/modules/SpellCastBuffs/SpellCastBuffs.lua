@@ -17,11 +17,8 @@ local Data = LuiData.Data
 local Effects = Data.Effects
 local Abilities = Data.Abilities
 local Tooltips = Data.Tooltips
-local string_format = string.format
-local printToChat = LUIE.PrintToChat
 local zo_strformat = zo_strformat
 local table_insert = table.insert
-local table_sort = table.sort
 -- local displayName = GetDisplayName()
 local eventManager = GetEventManager()
 local sceneManager = SCENE_MANAGER
@@ -664,10 +661,21 @@ function SpellCastBuffs.Initialize(enabled)
         SpellCastBuffs.SV.colors.levitate = SpellCastBuffs.Defaults.colors.levitate
         SpellCastBuffs.SV.colors.disorient = SpellCastBuffs.Defaults.colors.disorient
         SpellCastBuffs.SV.colors.fear = SpellCastBuffs.Defaults.colors.fear
+        SpellCastBuffs.SV.colors.charm = SpellCastBuffs.Defaults.colors.charm
         SpellCastBuffs.SV.colors.silence = SpellCastBuffs.Defaults.colors.silence
         SpellCastBuffs.SV.colors.stagger = SpellCastBuffs.Defaults.colors.stagger
         SpellCastBuffs.SV.colors.snare = SpellCastBuffs.Defaults.colors.snare
         SpellCastBuffs.SV.colors.root = SpellCastBuffs.Defaults.colors.root
+    end
+    -- New feature defaults (do not bump AdjustVarsSCB): ensure new keys exist without migrating prior data.
+    if SpellCastBuffs.SV.DamageTypeFallback == nil then
+        SpellCastBuffs.SV.DamageTypeFallback = SpellCastBuffs.Defaults.DamageTypeFallback
+    end
+    if SpellCastBuffs.SV.colors.damage == nil then
+        SpellCastBuffs.SV.colors.damage = SpellCastBuffs.Defaults.colors.damage
+    end
+    if SpellCastBuffs.SV.colors.charm == nil then
+        SpellCastBuffs.SV.colors.charm = SpellCastBuffs.Defaults.colors.charm
     end
     -- Increment so this doesn't occur again.
     coreAw.AdjustVarsSCB = 2
@@ -1266,10 +1274,10 @@ end
 -- legacy "trailing margin only" setup is expressed as SetFlexMargins with half of `gap` on the
 -- flex-start physical edge and half on flex-end (integer split). That preserves neighbor spacing
 -- while keeping rows even under FLEX_JUSTIFICATION_CENTER + wrap. The physical edges used:
---   ROW            → LEFT + RIGHT   (formerly all on RIGHT)
---   ROW_REVERSE    → RIGHT + LEFT   (formerly all on LEFT)
---   COLUMN         → TOP + BOTTOM   (formerly all on BOTTOM)
---   COLUMN_REVERSE → BOTTOM + TOP   (formerly all on TOP)
+--   ROW            --> LEFT + RIGHT   (formerly all on RIGHT)
+--   ROW_REVERSE    --> RIGHT + LEFT   (formerly all on LEFT)
+--   COLUMN         --> TOP + BOTTOM   (formerly all on BOTTOM)
+--   COLUMN_REVERSE --> BOTTOM + TOP   (formerly all on TOP)
 --
 -- Cross-axis gutter uses one-sided margin so inter-row gap = exactly padding (not 2×padding).
 -- Vertical single-axis columns use IconSize/10 for gap so labels stay readable at any size.
@@ -1630,7 +1638,26 @@ end
 local function ClearStickyTooltip()
     ClearTooltip(InformationTooltip)
     SpellCastBuffs.ClearDebugMetaOverflowTooltip()
+    SpellCastBuffs.tooltipHoverState = nil
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
+end
+
+--- Flex relayout / icon pool rebound can fire OnMouseEnter again while the pointer never left the icon.
+--- Rebuilding InformationTooltip (and debug overflow) on every repeat causes visible layout flicker.
+--- @param control Control
+--- @return boolean
+local function ShouldSkipRepeatBuffTooltipBuild(control)
+    local state = SpellCastBuffs.tooltipHoverState
+    if not state or state.control ~= control or state.effectId ~= control.effectId then
+        return false
+    end
+    if InformationTooltip:IsHidden() then
+        return false
+    end
+    if InformationTooltip.GetOwner and InformationTooltip:GetOwner() ~= control then
+        return false
+    end
+    return true
 end
 
 local buffTypes =
@@ -1648,7 +1675,7 @@ local buffTypes =
     [LUIE_BUFF_TYPE_NONE] = GetString(LUIE_STRING_BUFF_TYPE_NONE),
 }
 
---- Routed buff container key → unit tag for stealth/tooltip APIs.
+--- Routed buff container key --> unit tag for stealth/tooltip APIs.
 --- @param container string|nil
 --- @return string
 local function TooltipUnitTagFromBuffContainer(container)
@@ -1729,6 +1756,16 @@ end
 function SpellCastBuffs.Buff_OnMouseEnter(control)
     eventManager:UnregisterForUpdate(moduleName .. "StickyTooltip")
 
+    if ShouldSkipRepeatBuffTooltipBuild(control) then
+        return
+    end
+
+    SpellCastBuffs.tooltipHoverState =
+    {
+        control = control,
+        effectId = control.effectId,
+    }
+
     SpellCastBuffs.ClearDebugMetaOverflowTooltip()
     InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -5, TOP)
     -- Setup Text
@@ -1761,9 +1798,9 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
         if control.tooltip then
             tooltipText = control.tooltip
         else
-            local duration
+            local duration = 0
             if type(control.effectId) == "number" then
-                local duration = zo_floor((control.duration / 1000 * 10) + 0.5) / 10
+                duration = zo_floor((control.duration / 1000 * 10) + 0.5) / 10
                 local ov = Effects.EffectOverride[control.effectId]
 
                 local formatted = LUIE.FormatOverrideTooltip(control.effectId, duration, ttUnit)
@@ -1820,8 +1857,6 @@ function SpellCastBuffs.Buff_OnMouseEnter(control)
                         tooltipText = dynTip
                     end
                 end
-            else
-                duration = 0
             end
         end
 
@@ -1924,6 +1959,7 @@ end
 
 -- OnMouseExit for Buff Tooltips
 function SpellCastBuffs.Buff_OnMouseExit(control)
+    SpellCastBuffs.tooltipHoverState = nil
     if SpellCastBuffs.SV.TooltipSticky > 0 then
         eventManager:RegisterForUpdate(moduleName .. "StickyTooltip", SpellCastBuffs.SV.TooltipSticky, ClearStickyTooltip)
     else
@@ -2156,7 +2192,7 @@ function SpellCastBuffs.ArtificialEffectUpdate(artificialEffectId)
 
     if artificialEffectId then
         local removeEffect = artificialEffectId
-        -- Battle Spirit: API id 1 (Cyrodiil / BG / duel) and id 3 (Imperial City) → fake id matches target frame (999014). Id 2 is LFG, not Battle Spirit.
+        -- Battle Spirit: API id 1 (Cyrodiil / BG / duel) and id 3 (Imperial City) --> fake id matches target frame (999014). Id 2 is LFG, not Battle Spirit.
         if artificialEffectId == 1 or artificialEffectId == 3 then
             removeEffect = 999014
         end
@@ -2246,7 +2282,7 @@ function SpellCastBuffs.AddNameOnBossEngaged(eventCode)
     -- Check for bosses and add name auras when engaged.
     for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
         local unitTag = "boss" .. i
-        local bossName = DoesUnitExist(unitTag) and zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName(unitTag)) or ""
+        local bossName = DoesUnitExist(unitTag) and zo_strformat("<<C:1>>", GetUnitName(unitTag)) or ""
         if Effects.AddNameOnBossEngaged[bossName] then
             for k, v in pairs(Effects.AddNameOnBossEngaged[bossName]) do
                 Effects.AddNameAura[k] = {}
@@ -2378,7 +2414,7 @@ function SpellCastBuffs.RestoreSavedFakeEffects()
         -- local container = SpellCastBuffs.containerRouting[context]
         for k, v in pairs(effectsList) do
             if v.savedName ~= nil then
-                local unitName = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetUnitName("reticleover"))
+                local unitName = zo_strformat("<<C:1>>", GetUnitName("reticleover"))
                 if unitName == v.savedName then
                     if SpellCastBuffs.EffectsList.saved[k] then
                         SpellCastBuffs.EffectsList.ground[k] = SpellCastBuffs.EffectsList.saved[k]

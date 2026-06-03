@@ -10,25 +10,12 @@ local LUIE = LUIE
 --- @class (partial) LUIE.SpellCastBuffs
 local SpellCastBuffs = LUIE.SpellCastBuffs
 
-local UI = LUIE.UI
 local LuiData = LuiData
 --- @type Data
 local Data = LuiData.Data
 --- @type Effects
 local Effects = Data.Effects
-local Abilities = Data.Abilities
-local Tooltips = Data.Tooltips
-local string_format = string.format
-local printToChat = LUIE.PrintToChat
 local zo_strformat = zo_strformat
-local table_insert = table.insert
-local table_sort = table.sort
--- local displayName = GetDisplayName()
-local eventManager = GetEventManager()
-local sceneManager = SCENE_MANAGER
-local windowManager = GetWindowManager()
-
-local moduleName = SpellCastBuffs.moduleName
 
 --- @type table<number, string>
 local oakensoul = Effects.IsOakenSoul
@@ -236,7 +223,7 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
         if Effects.EffectCreateSkillAura[abilityId] and Effects.EffectCreateSkillAura[abilityId].removeOnEnd then
             local id = Effects.EffectCreateSkillAura[abilityId].abilityId
 
-            local name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
+            local name = zo_strformat("<<C:1>>", GetAbilityName(id))
             local fakeEffectType = Effects.EffectOverride[id] and Effects.EffectOverride[id].type or effectType
             if not (SpellCastBuffs.SV.BlacklistTable[name] or SpellCastBuffs.SV.BlacklistTable[id]) then
                 local simulatedContext = unitTag .. fakeEffectType
@@ -279,7 +266,7 @@ function SpellCastBuffs.OnEffectChanged(changeType, effectSlot, effectName, unit
         if Effects.EffectCreateSkillAura[abilityId] then
             if not Effects.EffectCreateSkillAura[abilityId].requiredStack or (Effects.EffectCreateSkillAura[abilityId].requiredStack and stackCount == Effects.EffectCreateSkillAura[abilityId].requiredStack) then
                 local id = Effects.EffectCreateSkillAura[abilityId].abilityId
-                local name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
+                local name = zo_strformat("<<C:1>>", GetAbilityName(id))
                 local fakeEffectType = Effects.EffectOverride[id] and Effects.EffectOverride[id].type or effectType
                 local fakeUnbreakable = Effects.EffectOverride[id] and Effects.EffectOverride[id].unbreakable or 0
                 if not (SpellCastBuffs.SV.BlacklistTable[name] or SpellCastBuffs.SV.BlacklistTable[id]) then

@@ -352,7 +352,7 @@ function CombatTextEventViewer:GetTextAttributes(powerType, damageType, flags)
 end
 
 --- Apply contextual icon overrides based on zone/map/source<br>
---- Resolves icon path in priority order: base ability → source name → zone → map → default CC icon
+--- Resolves icon path in priority order: base ability --> source name --> zone --> map --> default CC icon
 --- @param abilityId integer The ability ID
 --- @param sourceName string The source/caster name
 --- @return string? iconPath The resolved icon texture path, or nil if not found
@@ -362,7 +362,7 @@ function CombatTextEventViewer:GetResolvedIconPath(abilityId, sourceName)
 
     -- Override by source name
     if Effects_EffectOverrideByName[abilityId] then
-        sourceName = ZO_CachedStrFormat("<<C:1>>", sourceName)
+        sourceName = zo_strformat("<<C:1>>", sourceName)
         local nameOverride = Effects_EffectOverrideByName[abilityId][sourceName]
         if nameOverride and nameOverride.icon then
             iconPath = nameOverride.icon

@@ -56,7 +56,7 @@ local abilityNameCache = setmetatable({},
                                       {
                                           __mode = "v", -- Weak values: entries can be GC'd when no longer referenced
                                           __index = function (t, abilityId)
-                                              local name = ZO_CachedStrFormat("<<C:1>>", GetAbilityName(abilityId))
+                                              local name = zo_strformat("<<C:1>>", GetAbilityName(abilityId))
                                               t[abilityId] = name
                                               return name
                                           end
@@ -68,7 +68,7 @@ local sourceNameCache = setmetatable({},
                                      {
                                          __mode = "v", -- Weak values: entries can be GC'd when no longer referenced
                                          __index = function (t, sourceName)
-                                             local formatted = ZO_CachedStrFormat("<<C:1>>", sourceName)
+                                             local formatted = zo_strformat("<<C:1>>", sourceName)
                                              t[sourceName] = formatted
                                              return formatted
                                          end
@@ -288,7 +288,7 @@ local function IsRecentDuplicateDrain(abilityId, combatMechanicFlags, amount)
     return false
 end
 
---- Clear pending slot → cost correlation (also used before a new slot attempt).
+--- Clear pending slot --> cost correlation (also used before a new slot attempt).
 local function ClearPendingAbilityCost()
     pendingSlotAbilityCost.abilityId = 0
     pendingSlotAbilityCost.expireGameTimeMs = 0

@@ -17,5 +17,6 @@ $RECYCLE.BIN/
 .vscode/*
 .emmyrc.json
 .luarc.json
+.luacheckrc
 
 LuiDevTool

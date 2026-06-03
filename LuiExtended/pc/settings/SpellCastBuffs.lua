@@ -38,7 +38,7 @@ local function GenerateCustomList(input)
         counter = counter + 1
         -- If the input is a numeric value then we can pull this abilityId's info.
         if type(id) == "number" then
-            options[counter] = zo_iconFormat(GetAbilityIcon(id), 16, 16) .. " [" .. id .. "] " .. zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
+            options[counter] = zo_iconFormat(GetAbilityIcon(id), 16, 16) .. " [" .. id .. "] " .. zo_strformat("<<C:1>>", GetAbilityName(id))
             -- If the input is not numeric then add this as a name only.
         else
             options[counter] = id
@@ -2160,6 +2160,146 @@ function SpellCastBuffs.CreateSettings()
                 disabled = function ()
                     return not Settings.ColorCC
                 end,
+            },
+            {
+                -- Damage Type Fallback Header
+                type = "header",
+                name = "Damage Type Fallback",
+                width = "full",
+            },
+            {
+                -- Damage Type Fallback Toggle
+                type = "checkbox",
+                name = "Color non-CC debuffs by damage type (cooldown fill)",
+                tooltip = "When Color Debuffs by Crowd Control Type is on and a debuff has no CC classification, use the debuff's damage type (from combat) to color the cooldown fill.",
+                getFunc = function ()
+                    return Settings.DamageTypeFallback
+                end,
+                setFunc = function (value)
+                    Settings.DamageTypeFallback = value
+                    SpellCastBuffs.ReloadEffects("player")
+                end,
+                width = "full",
+                default = Defaults.DamageTypeFallback,
+                disabled = function ()
+                    return (not LUIE.SV.SpellCastBuff_Enable) or (not Settings.ColorCC)
+                end,
+            },
+            {
+                -- Damage Type Colors Header
+                type = "header",
+                name = "Damage Type Colors",
+                width = "full",
+            },
+            {
+                type = "colorpicker",
+                name = GetString(SI_DAMAGETYPE2),
+                tooltip = "Cooldown fill color for Physical damage debuffs.",
+                getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_PHYSICAL]) end,
+                setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_PHYSICAL] = { r, g, b, a } end,
+                default = { r = Defaults.colors.damage[DAMAGE_TYPE_PHYSICAL][1], g = Defaults.colors.damage[DAMAGE_TYPE_PHYSICAL][2], b = Defaults.colors.damage[DAMAGE_TYPE_PHYSICAL][3], a = Defaults.colors.damage[DAMAGE_TYPE_PHYSICAL][4] },
+                width = "half",
+                disabled = function () return (not Settings.DamageTypeFallback) or (not Settings.ColorCC) end,
+            },
+            {
+                type = "colorpicker",
+                name = GetString(SI_DAMAGETYPE3),
+                tooltip = "Cooldown fill color for Flame damage debuffs.",
+                getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_FIRE]) end,
+                setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_FIRE] = { r, g, b, a } end,
+                default = { r = Defaults.colors.damage[DAMAGE_TYPE_FIRE][1], g = Defaults.colors.damage[DAMAGE_TYPE_FIRE][2], b = Defaults.colors.damage[DAMAGE_TYPE_FIRE][3], a = Defaults.colors.damage[DAMAGE_TYPE_FIRE][4] },
+                width = "half",
+                disabled = function () return (not Settings.DamageTypeFallback) or (not Settings.ColorCC) end,
+            },
+            {
+                type = "colorpicker",
+                name = GetString(SI_DAMAGETYPE4),
+                tooltip = "Cooldown fill color for Shock damage debuffs.",
+                getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_SHOCK]) end,
+                setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_SHOCK] = { r, g, b, a } end,
+                default = { r = Defaults.colors.damage[DAMAGE_TYPE_SHOCK][1], g = Defaults.colors.damage[DAMAGE_TYPE_SHOCK][2], b = Defaults.colors.damage[DAMAGE_TYPE_SHOCK][3], a = Defaults.colors.damage[DAMAGE_TYPE_SHOCK][4] },
+                width = "half",
+                disabled = function () return (not Settings.DamageTypeFallback) or (not Settings.ColorCC) end,
+            },
+            {
+                type = "colorpicker",
+                name = GetString(SI_DAMAGETYPE5),
+                tooltip = "Cooldown fill color for Daedric/Oblivion damage debuffs.",
+                getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_OBLIVION]) end,
+                setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_OBLIVION] = { r, g, b, a } end,
+                default = { r = Defaults.colors.damage[DAMAGE_TYPE_OBLIVION][1], g = Defaults.colors.damage[DAMAGE_TYPE_OBLIVION][2], b = Defaults.colors.damage[DAMAGE_TYPE_OBLIVION][3], a = Defaults.colors.damage[DAMAGE_TYPE_OBLIVION][4] },
+                width = "half",
+                disabled = function () return (not Settings.DamageTypeFallback) or (not Settings.ColorCC) end,
+            },
+            {
+                type = "colorpicker",
+                name = GetString(SI_DAMAGETYPE6),
+                tooltip = "Cooldown fill color for Frost damage debuffs.",
+                getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_COLD]) end,
+                setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_COLD] = { r, g, b, a } end,
+                default = { r = Defaults.colors.damage[DAMAGE_TYPE_COLD][1], g = Defaults.colors.damage[DAMAGE_TYPE_COLD][2], b = Defaults.colors.damage[DAMAGE_TYPE_COLD][3], a = Defaults.colors.damage[DAMAGE_TYPE_COLD][4] },
+                width = "half",
+                disabled = function () return (not Settings.DamageTypeFallback) or (not Settings.ColorCC) end,
+            },
+            {
+                type = "colorpicker",
+                name = GetString(SI_DAMAGETYPE7),
+                tooltip = "Cooldown fill color for Earth damage debuffs.",
+                getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_EARTH]) end,
+                setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_EARTH] = { r, g, b, a } end,
+                default = { r = Defaults.colors.damage[DAMAGE_TYPE_EARTH][1], g = Defaults.colors.damage[DAMAGE_TYPE_EARTH][2], b = Defaults.colors.damage[DAMAGE_TYPE_EARTH][3], a = Defaults.colors.damage[DAMAGE_TYPE_EARTH][4] },
+                width = "half",
+                disabled = function () return (not Settings.DamageTypeFallback) or (not Settings.ColorCC) end,
+            },
+            {
+                type = "colorpicker",
+                name = GetString(SI_DAMAGETYPE8),
+                tooltip = "Cooldown fill color for Magic damage debuffs.",
+                getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_MAGIC]) end,
+                setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_MAGIC] = { r, g, b, a } end,
+                default = { r = Defaults.colors.damage[DAMAGE_TYPE_MAGIC][1], g = Defaults.colors.damage[DAMAGE_TYPE_MAGIC][2], b = Defaults.colors.damage[DAMAGE_TYPE_MAGIC][3], a = Defaults.colors.damage[DAMAGE_TYPE_MAGIC][4] },
+                width = "half",
+                disabled = function () return (not Settings.DamageTypeFallback) or (not Settings.ColorCC) end,
+            },
+            {
+                type = "colorpicker",
+                name = GetString(SI_DAMAGETYPE9),
+                tooltip = "Cooldown fill color for Drowning damage debuffs.",
+                getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_DROWN]) end,
+                setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_DROWN] = { r, g, b, a } end,
+                default = { r = Defaults.colors.damage[DAMAGE_TYPE_DROWN][1], g = Defaults.colors.damage[DAMAGE_TYPE_DROWN][2], b = Defaults.colors.damage[DAMAGE_TYPE_DROWN][3], a = Defaults.colors.damage[DAMAGE_TYPE_DROWN][4] },
+                width = "half",
+                disabled = function () return (not Settings.DamageTypeFallback) or (not Settings.ColorCC) end,
+            },
+            {
+                type = "colorpicker",
+                name = GetString(SI_DAMAGETYPE10),
+                tooltip = "Cooldown fill color for Disease damage debuffs.",
+                getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_DISEASE]) end,
+                setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_DISEASE] = { r, g, b, a } end,
+                default = { r = Defaults.colors.damage[DAMAGE_TYPE_DISEASE][1], g = Defaults.colors.damage[DAMAGE_TYPE_DISEASE][2], b = Defaults.colors.damage[DAMAGE_TYPE_DISEASE][3], a = Defaults.colors.damage[DAMAGE_TYPE_DISEASE][4] },
+                width = "half",
+                disabled = function () return (not Settings.DamageTypeFallback) or (not Settings.ColorCC) end,
+            },
+            {
+                type = "colorpicker",
+                name = GetString(SI_DAMAGETYPE11),
+                tooltip = "Cooldown fill color for Poison damage debuffs.",
+                getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_POISON]) end,
+                setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_POISON] = { r, g, b, a } end,
+                default = { r = Defaults.colors.damage[DAMAGE_TYPE_POISON][1], g = Defaults.colors.damage[DAMAGE_TYPE_POISON][2], b = Defaults.colors.damage[DAMAGE_TYPE_POISON][3], a = Defaults.colors.damage[DAMAGE_TYPE_POISON][4] },
+                width = "half",
+                disabled = function () return (not Settings.DamageTypeFallback) or (not Settings.ColorCC) end,
+            },
+            {
+                type = "colorpicker",
+                name = GetString(SI_DAMAGETYPE12),
+                tooltip = "Cooldown fill color for Bleed damage debuffs.",
+                getFunc = function () return unpack(Settings.colors.damage[DAMAGE_TYPE_BLEED]) end,
+                setFunc = function (r, g, b, a) Settings.colors.damage[DAMAGE_TYPE_BLEED] = { r, g, b, a } end,
+                default = { r = Defaults.colors.damage[DAMAGE_TYPE_BLEED][1], g = Defaults.colors.damage[DAMAGE_TYPE_BLEED][2], b = Defaults.colors.damage[DAMAGE_TYPE_BLEED][3], a = Defaults.colors.damage[DAMAGE_TYPE_BLEED][4] },
+                width = "half",
+                disabled = function () return (not Settings.DamageTypeFallback) or (not Settings.ColorCC) end,
             },
         },
     }

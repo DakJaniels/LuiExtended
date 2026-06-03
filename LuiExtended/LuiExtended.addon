@@ -2,16 +2,18 @@
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101049 101050
-## Version: 7.2.3.4
-## AddOnVersion: 7234
+## Version: 7.2.3.5
+## AddOnVersion: 7235
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
-## DependsOn: LuiMedia>=7133 LuiData>=7212
+## DependsOn: LuiMedia>=7133 LuiData>=7214
 ## PCDependsOn: LibAddonMenu-2.0>=43
 ## ConsoleDependsOn: LibHarvensAddonSettings>=20106 LibConsoleDialogs
 ## OptionalDependsOn: LibChatMessage>=118 pChat>=10006050 CombatMetrics>=10705 CrutchAlerts>=20502
 ## OptionalDependsOn: LibGroupResources>=91 LibGroupCombatStats>=20251011 LibGroupPotionCooldowns>=20250727
-## OptionalDependsOn: LibDebugLogger>=268 DebugLogViewer>=697 DolgubonsLazyWritCreator>=4038 LibLazyCrafting>=4028 LootLog>=408040 Taneth
-## SavedVariables: LUIESV LUIE_UnitFrames_SV LUIE_CombatText_SV LUIE_ChatAnnouncements_SV LUIE_SpellCastBuffs_SV LUIE_ActionBar_SV LUIE_InfoPanel_SV LUIE_SlashCommands_SV LUIE_CombatInfo_SV
+## OptionalDependsOn: LibDebugLogger>=268 DebugLogViewer>=697 DolgubonsLazyWritCreator>=4038 LibLazyCrafting>=4028
+## OptionalDependsOn:  LootLog>=408040 Taneth LibCombat LibCombat2 LibSlashCommander
+## SavedVariables: LUIESV LUIE_UnitFrames_SV LUIE_CombatText_SV LUIE_ChatAnnouncements_SV LUIE_SpellCastBuffs_SV
+## SavedVariables: LUIE_ActionBar_SV LUIE_InfoPanel_SV LUIE_SlashCommands_SV LUIE_CombatInfo_SV
 
 # Addon Profiler
 ;src/AddonProfiler.lua
@@ -106,7 +108,12 @@ modules/CombatText/EventViewers/Points.lua
 modules/CombatText/EventViewers/Resources.lua
 
 # Modules - Action Bar
+modules/ActionBar/Namespace.lua
+modules/ActionBar/ActionBar_CastBar.lua
+modules/ActionBar/ActionBar_CastBar_LibCombat.lua
+modules/ActionBar/ActionBar_Backbar.lua
 modules/ActionBar/ActionBar.lua
+modules/ActionBar/ActionBar_EventReg.lua
 
 # Modules - Combat Info
 modules/CombatInfo/Namespace.lua
@@ -210,6 +217,9 @@ pc/frontend/Changelog.xml
 pc/Changelog.lua
 
 # Settings - PC
+pc/SlashCommandRegistry.lua
+pc/SlashCommands_LSC.lua
+pc/SettingsSlashCommandLSC.lua
 pc/Settings_API.lua
 pc/lam_extension/LUIE_ComboBoxStatusbarEntry.xml
 pc/lam_extension/fontable_dropdown.lua

@@ -39,6 +39,9 @@ local LUIE = LUIE
 --- @field werewolfCounter number
 --- @field werewolfQuest number
 --- @field InternalStackCounter table
+--- @field CombatCcByAbilityId table<integer, { ccType: integer, expires: number, targetUnitTag?: string }>
+--- @field CombatCcByTargetAbilityId table<string, integer>
+--- @field combatDamageTypeByAbilityId table<integer, { damageType: integer, expires: number }>
 local SpellCastBuffs = ZO_Object:Subclass()
 
 ------------------------------------------------
@@ -67,12 +70,14 @@ local SpellCastBuffs = ZO_Object:Subclass()
 --- @field stagger SCB_Color
 --- @field snare SCB_Color
 --- @field root SCB_Color
+--- @field damage table<integer, SCB_Color> Damage-type colors keyed by DAMAGE_TYPE_* (SpellCastBuffs-owned palette)
 
 --- Root default settings for SpellCastBuffs (SV and Defaults share this shape).
 --- @class SCBDefaults
 --- @field ColorCosmetic boolean
 --- @field ColorUnbreakable boolean
 --- @field ColorCC boolean
+--- @field DamageTypeFallback boolean
 --- @field colors SCBColors
 --- @field IconSize number
 --- @field LabelPosition number
@@ -248,6 +253,7 @@ SpellCastBuffs.Defaults =
     ColorCosmetic = true,
     ColorUnbreakable = true,
     ColorCC = false,
+    DamageTypeFallback = false,
     colors =
     {
         buff = { 0, 1, 0, 1 },
@@ -267,6 +273,21 @@ SpellCastBuffs.Defaults =
         stagger = { 1, 127 / 255, 0, 1 },
         snare = { 1, 242 / 255, 32 / 255, 1 },
         root = { 1, 165 / 255, 0, 1 },
+        -- DamageType fallback palette (cooldown fill only; NONE/GENERIC are treated as no override)
+        damage =
+        {
+            [DAMAGE_TYPE_PHYSICAL] = { 200 / 255, 200 / 255, 160 / 255, 1 },
+            [DAMAGE_TYPE_FIRE] = { 1, 100 / 255, 20 / 255, 1 },
+            [DAMAGE_TYPE_SHOCK] = { 0, 1, 1, 1 },
+            [DAMAGE_TYPE_OBLIVION] = { 75 / 255, 0, 150 / 255, 1 },
+            [DAMAGE_TYPE_COLD] = { 35 / 255, 70 / 255, 1, 1 },
+            [DAMAGE_TYPE_EARTH] = { 100 / 255, 75 / 255, 50 / 255, 1 },
+            [DAMAGE_TYPE_MAGIC] = { 1, 1, 0, 1 },
+            [DAMAGE_TYPE_DROWN] = { 35 / 255, 70 / 255, 255 / 255, 1 },
+            [DAMAGE_TYPE_DISEASE] = { 25 / 255, 85 / 255, 0, 1 },
+            [DAMAGE_TYPE_POISON] = { 0, 1, 127 / 255, 1 },
+            [DAMAGE_TYPE_BLEED] = { 1, 45 / 255, 45 / 255, 1 },
+        },
     },
     IconSize = 40,
     LabelPosition = 0,
@@ -471,6 +492,11 @@ SpellCastBuffs.EffectsList =
     promd_target = {},
     promd_player = {}
 }
+
+--- Short-lived cache for damageType derived from EVENT_COMBAT_EVENT, keyed by abilityId.
+--- Used as a fallback to color debuff cooldown fill when debuff has no CC classification.
+--- @type table<integer, { damageType: integer, expires: number }>
+SpellCastBuffs.combatDamageTypeByAbilityId = {}
 
 
 SpellCastBuffs.hidePlayerEffects = {}       --- @type table Table of Effects to hide on Player - generated on load or updated from Menu

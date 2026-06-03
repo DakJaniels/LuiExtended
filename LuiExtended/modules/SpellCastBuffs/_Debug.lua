@@ -6,7 +6,6 @@
 --- @class (partial) LuiExtended
 local LUIE = LUIE
 -- LUIE utility functions
-local AddSystemMessage = LUIE.AddSystemMessage
 local PrintToChat = LUIE.PrintToChat
 
 --- @class (partial) LUIE.SpellCastBuffs
@@ -29,6 +28,17 @@ local GetAbilityName = GetAbilityName
 local GetAbilityDuration = GetAbilityDuration
 local GetAbilityCastInfo = GetAbilityCastInfo
 
+local function GetEffectResultString(result)
+    local results =
+    {
+        [1] = "GAINED",
+        [2] = "FADED",
+        [3] = "UPDATED",
+        [4] = "FULL_REFRESH",
+        [5] = "TRANSFER"
+    }
+    return results[result]
+end
 
 -- Debug Display for Combat Events
 --- @param eventId integer
@@ -130,7 +140,17 @@ function SpellCastBuffs.EventEffectDebug(eventId, changeType, effectSlot, effect
     if unitName == LUIE.PlayerNameFormatted then
         unitName = "Player"
     end
-    unitName = unitName .. " (" .. unitTag .. ")"
+    local tagSuffix = unitTag
+    if tagSuffix == nil or tagSuffix == "" then
+        if unitId and unitId ~= 0 then
+            tagSuffix = "id:" .. unitId
+        else
+            tagSuffix = nil
+        end
+    end
+    if tagSuffix then
+        unitName = unitName .. " (" .. tagSuffix .. ")"
+    end
 
     local finalString
     local duration = (endTime - beginTime) * 1000
@@ -140,12 +160,14 @@ function SpellCastBuffs.EventEffectDebug(eventId, changeType, effectSlot, effect
         refreshOnly = " |c00E200(Hidden)|r "
     end
 
+    local ccDebug = SpellCastBuffs.FormatEffectCcDebugSuffix(abilityId, statusEffectType, effectType, abilityType)
+
     if changeType == 1 then
-        finalString = ("|c00E200Gained:|r " .. refreshOnly .. iconFormatted .. " [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. " [Dur] " .. duration)
+        finalString = ("|c00E200Gained:|r " .. refreshOnly .. iconFormatted .. " [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. " [Dur] " .. duration .. ccDebug)
     elseif changeType == 2 then
-        finalString = ("|c00E200Faded:|r " .. iconFormatted .. " [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName)
+        finalString = ("|c00E200Faded:|r " .. iconFormatted .. " [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. ccDebug)
     else
-        finalString = ("|c00E200Refreshed:|r " .. iconFormatted .. " (" .. changeType .. ") [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. " [Dur] " .. duration)
+        finalString = ("|c00E200Refreshed:|r " .. iconFormatted .. " (" .. GetEffectResultString(changeType) .. ") [" .. abilityId .. "] " .. nameFormatted .. ": [Tag] " .. unitName .. " [Dur] " .. duration .. ccDebug)
     end
     PrintToChat(finalString, true)
 end

@@ -122,15 +122,25 @@ function SpellCastBuffs.AuthorEffectDebug(eventCode, changeType, effectSlot, eff
     if unitName == LUIE.PlayerNameFormatted then
         unitName = "Player"
     end
-    unitName = unitName .. " (" .. unitTag .. ")"
-
+    local tagSuffix = unitTag
+    if tagSuffix == nil or tagSuffix == "" then
+        if unitId and unitId ~= 0 then
+            tagSuffix = string_format("id:%d", unitId)
+        else
+            tagSuffix = nil
+        end
+    end
+    if tagSuffix then
+        unitName = unitName .. " (" .. tagSuffix .. ")"
+    end
     local refreshOnly = ""
     if override and override.refreshOnly then
         refreshOnly = " |c00E200(Refresh Only - Hidden)|r "
     end
 
     if override and override.hide then
-        local finalString = (iconFormatted .. refreshOnly .. "|c00E200 [" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [Tag] " .. unitName .. "|r")
+        local ccDebug = SpellCastBuffs.FormatEffectCcDebugSuffix(abilityId, statusEffectType, effectType, abilityType)
+        local finalString = (iconFormatted .. refreshOnly .. "|c00E200 [" .. abilityId .. "] " .. nameFormatted .. ": HIDDEN LUI" .. ": [Tag] " .. unitName .. ccDebug .. "|r")
         for k, cc in ipairs(chatSystem.containers) do
             local chatContainer = cc
             local chatWindow = cc.windows[2]

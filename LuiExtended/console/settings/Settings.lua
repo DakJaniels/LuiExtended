@@ -937,9 +937,9 @@ function LUIE.CreateConsoleSettings()
 
     local alertAlignmentItems =
     {
-        { name = "LEFT", data = 1 },
+        { name = "LEFT",   data = 1 },
         { name = "CENTER", data = 2 },
-        { name = "RIGHT", data = 3 },
+        { name = "RIGHT",  data = 3 },
     }
 
     settingsData[#settingsData + 1] =

@@ -29,7 +29,7 @@ local SpellCastBuffs = LUIE.SpellCastBuffs
 -- Bulk list add from menu buttons
 function SpellCastBuffs.AddBulkToCustomList(list, table)
     if table ~= nil then
-        for k, v in pairs(table) do
+        for k, _ in pairs(table) do
             SpellCastBuffs.AddToCustomList(list, k)
         end
     end
@@ -42,7 +42,7 @@ function SpellCastBuffs.ClearCustomList(list)
         list == SpellCastBuffs.SV.PriorityBuffTable and GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_BUFFS) or
         list == SpellCastBuffs.SV.PriorityDebuffTable and GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_DEBUFFS) or
         list == SpellCastBuffs.SV.BlacklistTable and GetString(LUIE_STRING_CUSTOM_LIST_AURA_BLACKLIST)
-    for k, v in pairs(list) do
+    for k, _ in pairs(list) do
         list[k] = nil
     end
     chatSystem:Maximize()
@@ -61,7 +61,7 @@ function SpellCastBuffs.AddToCustomList(list, input)
         list == SpellCastBuffs.SV.PriorityDebuffTable and GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_DEBUFFS) or
         list == SpellCastBuffs.SV.BlacklistTable and GetString(LUIE_STRING_CUSTOM_LIST_AURA_BLACKLIST)
     if id and id > 0 then
-        local name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
+        local name = zo_strformat("<<C:1>>", GetAbilityName(id))
         if name ~= nil and name ~= "" then
             local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
             list[id] = true
@@ -94,7 +94,7 @@ function SpellCastBuffs.RemoveFromCustomList(list, input)
         list == SpellCastBuffs.SV.PriorityDebuffTable and GetString(LUIE_STRING_CUSTOM_LIST_PRIORITY_DEBUFFS) or
         list == SpellCastBuffs.SV.BlacklistTable and GetString(LUIE_STRING_CUSTOM_LIST_AURA_BLACKLIST)
     if id and id > 0 then
-        local name = zo_strformat(LUIE_UPPER_CASE_NAME_FORMATTER, GetAbilityName(id))
+        local name = zo_strformat("<<C:1>>", GetAbilityName(id))
         local icon = zo_iconFormat(GetAbilityIcon(id), 16, 16)
         list[id] = nil
         chatSystem:Maximize()

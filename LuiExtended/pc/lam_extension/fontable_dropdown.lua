@@ -205,14 +205,14 @@ end
 local function UpdateValue(control, forceDefault, value)
     local isMultiSelectionEnabled = control.isMultiSelectionEnabled
     if forceDefault then -- if we are forcing defaults
-        local value = GetDefaultValue(control.data.default)
+        local defaultValue = GetDefaultValue(control.data.default)
         if isMultiSelectionEnabled then
-            value = value or {}
-            control.data.setFunc(value)
-            UpdateMultiSelectSelected(control, value)
+            defaultValue = defaultValue or {}
+            control.data.setFunc(defaultValue)
+            UpdateMultiSelectSelected(control, defaultValue)
         else
-            control.data.setFunc(value)
-            control.dropdown:SetSelectedItem(control.choices[value])
+            control.data.setFunc(defaultValue)
+            control.dropdown:SetSelectedItem(control.choices[defaultValue])
         end
     elseif value ~= nil then
         if isMultiSelectionEnabled then
@@ -278,27 +278,27 @@ local function UpdateChoices(control, choices, choicesValues, choicesTooltips)
     ZO_ClearTable(control.choices)
 
     -- build new list of choices
-    local choices = choices or control.data.choices
-    local choicesValues = choicesValues or control.data.choicesValues
-    local choicesTooltips = choicesTooltips or control.data.choicesTooltips
+    local resolvedChoices = choices or control.data.choices
+    local resolvedChoicesValues = choicesValues or control.data.choicesValues
+    local resolvedChoicesTooltips = choicesTooltips or control.data.choicesTooltips
 
-    if choicesValues then
-        assert(#choices == #choicesValues, "choices and choicesValues need to have the same size")
+    if resolvedChoicesValues then
+        assert(#resolvedChoices == #resolvedChoicesValues, "choices and choicesValues need to have the same size")
     end
 
-    if choicesTooltips then
-        assert(#choices == #choicesTooltips, "choices and choicesTooltips need to have the same size")
+    if resolvedChoicesTooltips then
+        assert(#resolvedChoices == #resolvedChoicesTooltips, "choices and choicesTooltips need to have the same size")
         SetupTooltips(control.dropdown)
     end
 
-    for i = 1, #choices do
-        local entry = control.dropdown:CreateItemEntry(choices[i], DropdownCallback)
+    for i = 1, #resolvedChoices do
+        local entry = control.dropdown:CreateItemEntry(resolvedChoices[i], DropdownCallback)
         entry.control = control
-        if choicesValues then
-            entry.value = choicesValues[i]
+        if resolvedChoicesValues then
+            entry.value = resolvedChoicesValues[i]
         end
-        if choicesTooltips then
-            entry.tooltip = choicesTooltips[i]
+        if resolvedChoicesTooltips then
+            entry.tooltip = resolvedChoicesTooltips[i]
         end
         local entryValue = entry.value
         if entryValue == nil then entryValue = entry.name end

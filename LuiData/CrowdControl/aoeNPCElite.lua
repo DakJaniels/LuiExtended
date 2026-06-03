@@ -21,47 +21,47 @@ local aoeNPCElite =
 {
 
     -- Overland / Standard NPC's
-    [44228] = 0, -- Dragonknight Standard (Dragonknight - Elite)
-    [81197] = 1, -- Agonizing Fury (Thundermaul - Boss)
-    [21952] = 1, -- Repulsion Shock (Wamasu)
-    [55867] = 0, -- Repulsion Shock (Wamasu - Boss)
-    [72794] = 1, -- Toxic Pool (Haj Mota)
-    [53233] = 1, -- Miasma Pool (Flesh Colossus)
-    [52866] = 1, -- Volley (Cyrodiil Archer)
-    [54258] = 1, -- Upgraded Volley (Cyrodiil Archer)
-    [10271] = 1, -- Quake (Gargoyle)
-    [9011] = 1,  -- Tremor (Troll)
-    [48297] = 1, -- Consuming Omen (Troll - Ranged)
-    [19061] = 1, -- Rain of Wisps (Wispmother)
-    [75928] = 1, -- Elemental Pool (Minotaur)
-    [75953] = 1, -- Brimstone Hailfire (Minotaur Shaman)
-    [75976] = 1, -- Pillar of Nirn (Minotaur Shaman)
-    [75980] = 1, -- Pillar Eruption (Minotaur Shaman)
-    [11282] = 1, -- Steam Breath (Dwemer Centurion)
+    [9011] = 1, -- Tremor (Troll),
+    [10271] = 1, -- Quake (Gargoyle),
+    [11282] = 1, -- Steam Breath (Dwemer Centurion),
+    [19061] = 1, -- Rain of Wisps (Wispmother),
+    [21952] = 1, -- Repulsion Shock (Wamasu),
+    [44228] = 0, -- Dragonknight Standard (Dragonknight - Elite),
+    [48297] = 1, -- Consuming Omen (Troll - Ranged),
+    [52866] = 1, -- Volley (Cyrodiil Archer),
+    [53233] = 1, -- Miasma Pool (Flesh Colossus),
+    [54258] = 1, -- Upgraded Volley (Cyrodiil Archer),
+    [55867] = 0, -- Repulsion Shock (Wamasu - Boss),
+    [72794] = 1, -- Toxic Pool (Haj Mota),
+    [75928] = 1, -- Elemental Pool (Minotaur),
+    [75953] = 1, -- Brimstone Hailfire (Minotaur Shaman),
+    [75976] = 1, -- Pillar of Nirn (Minotaur Shaman),
+    [75980] = 1, -- Pillar Eruption (Minotaur Shaman),
+    [81197] = 1, -- Agonizing Fury (Thundermaul - Boss),
 
     -- World
-    [95841] = 1, -- Static Charge (Dark Anchor)
+    [95841] = 1, -- Static Charge (Dark Anchor),
 
     -- Quests
-    [50765] = 1, -- CON_AOE_Template1 (Pelidil's End)
+    [50765] = 1, -- CON_AOE_Template1 (Pelidil's End),
 
     -- Summerset
-    [105889] = 1, -- Pustulant Eruption (Yaghra Nightmare)
+    [105889] = 1, -- Pustulant Eruption (Yaghra Nightmare),
 
     -- Dragonstar Arena
-    [53314] = 1, -- Flame Volley (Sovngarde Ranger)
-    [53280] = 1, -- Unstable Wall of Frost (Sovngarde Icemage)
-    [53614] = 1, -- Thundering Presence (Nak'tah)
-    [53625] = 1, -- Lightning Flood (Nak'tah)
-    [56824] = 1, -- Puncturing Sweep (House Dres Templar)
-    [54161] = 1, -- Berserker Frenzy (House Dres Slaver)
-    [54080] = 1, -- Cinder Storm (Earthen Heart Knight)
-    [52892] = 1, -- Flames of Oblivion (Anal'a Tu'wha)
-    [55981] = 1, -- Ice Charge (Dwarven Ice Centurion)
+    [52892] = 1, -- Flames of Oblivion (Anal'a Tu'wha),
+    [53280] = 1, -- Unstable Wall of Frost (Sovngarde Icemage),
+    [53314] = 1, -- Flame Volley (Sovngarde Ranger),
+    [53614] = 1, -- Thundering Presence (Nak'tah),
+    [53625] = 1, -- Lightning Flood (Nak'tah),
+    [54080] = 1, -- Cinder Storm (Earthen Heart Knight),
+    [54161] = 1, -- Berserker Frenzy (House Dres Slaver),
+    [55981] = 1, -- Ice Charge (Dwarven Ice Centurion),
+    [56824] = 1, -- Puncturing Sweep (House Dres Templar),
 
     -- Maelstrom Arena
-    [72159] = 1, -- Static Field (Dwarven Spider)
-    [72203] = 1, -- Overcharge (Scavenger Thunder-Smith)
+    [72159] = 1, -- Static Field (Dwarven Spider),
+    [72203] = 1, -- Overcharge (Scavenger Thunder-Smith),
 }
 
 --- @class (partial) aoeNPCElite
