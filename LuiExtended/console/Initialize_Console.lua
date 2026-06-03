@@ -20,8 +20,6 @@ local function LoadScreen(eventId, initial)
     if not LUIE.SV.StartupInfo and initial then
         LUIE.PrintToChat(zo_strformat("|cFFFFFF<<1>> by|r |c00C000<<2>>|r |cFFFFFFv<<3>>|r", LUIE.name, LUIE.author, LUIE.version), true)
     end
-    LUIE.ReconcileDebugEnvironmentSavedVars()
-    LUIE.ShowDebugEnvironmentPendingChat()
     if LibDebugLogger then
         LibDebugLogger:ClearLog()
     end
@@ -48,7 +46,6 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.RepairSplitModuleSavedVarsFromLegacy()
     LUIE.PruneLegacyLuiESVDefaultProfileBranch()
     LUIE.MigrateChatOutputToCore()
-    LUIE.ScheduleDebugEnvironmentReconcile()
     LUIE.UpdateGuildData(nil, nil, nil, nil)
     -- -----------------------------------------------------------------------------
     -- Initialize Hooks
@@ -74,7 +71,7 @@ local function OnAddOnLoaded(eventId, addonName)
     LUIE.PlayerDisplayName = zo_strformat("<<C:1>>", GetUnitDisplayName("player"))
     LUIE.PlayerFaction = GetUnitAlliance("player")
     -- -----------------------------------------------------------------------------
-    LUIE.ChatAnnouncements.ChatOutput.InitializePrintRouting()
+    LUIE.ChatAnnouncements.ChatOutput:InitializePrintRouting()
     -- -----------------------------------------------------------------------------
     -- Initialize this addon modules according to user preferences
     LUIE.ChatAnnouncements.Initialize(LUIE.SV.ChatAnnouncements_Enable)
@@ -111,6 +108,7 @@ local function OnAddOnLoaded(eventId, addonName)
         eventManager:RegisterForEvent(LUIE.name .. "ChatAnnouncements", EVENT_GUILD_SELF_LEFT_GUILD, LUIE.UpdateGuildData)
     end
     -- -----------------------------------------------------------------------------
+    LUIE.ScheduleDebugEnvironmentReloadChat()
     eventManager:UnregisterForEvent(addonName, eventId)
 end
 

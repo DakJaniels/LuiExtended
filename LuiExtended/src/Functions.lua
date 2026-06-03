@@ -362,7 +362,7 @@ do
     local function PrintToChat(msg, isSystem)
         local chatOutput = LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
         if chatOutput then
-            chatOutput.Print(msg, isSystem)
+            chatOutput:Print(msg, isSystem)
             return
         end
         if msg == "" then

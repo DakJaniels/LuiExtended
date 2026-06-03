@@ -49,6 +49,23 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.3.6
+    "|cFFA500LuiExtended Version 7.2.3.6|r",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Output (PC): Per-tab routing grid with LUIE and System columns (up to 20 tabs). Shorter setting tooltips.",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Output: Print to Specific Tabs works again with LibChatMessage loaded.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Output: Tab rows follow the number of open chat tabs; inactive slots stay disabled.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Output: Display System Messages in ALL Tabs honors Print to All Tabs for system-style messages.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Output: Per-tab toggles keep saved values when greyed out after LAM refresh.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Debug environment (/luie debug): Persists across /reloadui; reload while debugging no longer resets extra addons you enabled for testing.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Debug environment (/luie debug): One chat reminder per UI load while debug is active (including ingame /reloadui). Logout and quit still restore your prior addon selection.",
+    "",
+
     -- Version Header 7.2.3.5
     "|cFFA500LuiExtended Version 7.2.3.5|r",
     "",

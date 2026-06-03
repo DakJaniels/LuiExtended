@@ -11,8 +11,13 @@ local zo_strlower = zo_strlower
 local string_format = string.format
 local pairs = pairs
 
-local DEBUG_ENVIRONMENT_EVENT_NAMESPACE = "LuiExtended_DebugEnvironment"
 local debugEnvironmentLogoutPrehooked = false
+local debugEnvironmentReloadChatShown = false
+
+local DEBUG_ENVIRONMENT_RELOAD_CHAT_NAMESPACE = "LuiExtended_DebugEnvironmentReloadChat"
+
+local DEBUG_ENVIRONMENT_ACTIVE_RELOAD_MESSAGE =
+    "Debug environment is active. LUIE core addons were enabled; you may enable more addons to test interactions. Use '/luie debug off' to restore your addon list."
 
 local CORE_ALLOWLIST =
 {
@@ -55,7 +60,7 @@ local function ApplyEnabledByName(enabledByName, entries)
     end
     local numAddOns = addOnManager:GetNumAddOns()
     for i = 1, numAddOns do
-        local name = addOnManager:GetAddOnInfo(i)
+        local name, _, _, _, _ = addOnManager:GetAddOnInfo(i)
         if name then
             addOnManager:SetAddOnEnabled(i, enabledByName[name] == true)
         end
@@ -95,29 +100,6 @@ local function ClearDebugEnvironmentSavedVars()
     LUIE.SV.DebugEnvironmentPendingChat = nil
 end
 
---- True when every enabled addon is on the debug allowlist (or no non-allowlist addon is enabled).
---- @return boolean
-local function IsDebugEnvironmentAppliedToAddOnManager()
-    local allowlist = GetDebugEnvironmentAllowlist()
-    local states = ScanAddOnManager()
-    for name, enabled in pairs(states) do
-        if enabled and not allowlist[name] then
-            return false
-        end
-    end
-    return true
-end
-
---- Clears stale debug SV when the client addon list no longer matches allowlist-only mode.
-function LUIE.ReconcileDebugEnvironmentSavedVars()
-    if not LUIE.SV or not LUIE.IsDebugEnvironmentActive() then
-        return
-    end
-    if not IsDebugEnvironmentAppliedToAddOnManager() then
-        ClearDebugEnvironmentSavedVars()
-    end
-end
-
 --- Restore pre-debug addon selection and clear debug SV before logout unloads the UI.
 local function EndDebugEnvironmentForLogout()
     if not LUIE.SV or not LUIE.IsDebugEnvironmentActive() then
@@ -128,11 +110,6 @@ local function EndDebugEnvironmentForLogout()
         ApplyEnabledByName(restore)
     end
     ClearDebugEnvironmentSavedVars()
-end
-
---- Deferred reconcile after the addon load pass (AddOnManager enabled flags are reliable).
-function LUIE.ScheduleDebugEnvironmentReconcile()
-    zo_callLater(LUIE.ReconcileDebugEnvironmentSavedVars, 0)
 end
 
 function LUIE.RegisterDebugEnvironmentLogoutHooks()
@@ -156,7 +133,7 @@ function LUIE.ApplyDebugEnvironment(enable)
         LUIE.SV.DebugEnvironmentRestore = currentStates
         ApplyEnabledByName(GetDebugEnvironmentAllowlist(), entries)
         LUIE.SV.DebugEnvironmentActive = true
-        LUIE.SV.DebugEnvironmentPendingChat = "Debug environment is active. Only LUIE core addons are enabled. Use '/luie debug off' to restore your addon list."
+        LUIE.SV.DebugEnvironmentPendingChat = DEBUG_ENVIRONMENT_ACTIVE_RELOAD_MESSAGE
         return true, "Debug environment enabled. Reloading UI..."
     end
 
@@ -175,19 +152,47 @@ function LUIE.ApplyDebugEnvironment(enable)
     return true, "Debug environment disabled. Reloading UI..."
 end
 
---- Shows a chat line queued before ReloadUI (post-reload confirmation). Call after saved vars load.
-function LUIE.ShowDebugEnvironmentPendingChat()
+--- One-shot message after debug on/off, or the active reminder on any reload while debug is on.
+--- @return string|nil
+local function TakeDebugEnvironmentReloadChatMessage()
     if not LUIE.SV then
+        return nil
+    end
+    local pending = LUIE.SV.DebugEnvironmentPendingChat
+    if pending and pending ~= "" then
+        LUIE.SV.DebugEnvironmentPendingChat = nil
+        return pending
+    end
+    if LUIE.IsDebugEnvironmentActive() then
+        return DEBUG_ENVIRONMENT_ACTIVE_RELOAD_MESSAGE
+    end
+    return nil
+end
+
+--- Prints at most once per UI load (pending on/off transition, or active reminder while debug is on).
+local function ShowDebugEnvironmentReloadChatOnce()
+    if debugEnvironmentReloadChatShown then
         return
     end
-    local message = LUIE.SV.DebugEnvironmentPendingChat
-    if not message or message == "" then
+    debugEnvironmentReloadChatShown = true
+    eventManager:UnregisterForEvent(DEBUG_ENVIRONMENT_RELOAD_CHAT_NAMESPACE, EVENT_PLAYER_ACTIVATED)
+
+    local message = TakeDebugEnvironmentReloadChatMessage()
+    if not message then
         return
     end
-    LUIE.SV.DebugEnvironmentPendingChat = nil
     zo_callLater(function ()
                      DebugEnvironmentChat(message)
                  end, 0)
+end
+
+--- After init: show on ReloadUI when already in world, or on first EVENT_PLAYER_ACTIVATED when not.
+function LUIE.ScheduleDebugEnvironmentReloadChat()
+    if IsPlayerActivated() then
+        zo_callLater(ShowDebugEnvironmentReloadChatOnce, 0)
+        return
+    end
+    eventManager:RegisterForEvent(DEBUG_ENVIRONMENT_RELOAD_CHAT_NAMESPACE, EVENT_PLAYER_ACTIVATED, ShowDebugEnvironmentReloadChatOnce)
 end
 
 local function PrintDebugEnvironmentStatus()

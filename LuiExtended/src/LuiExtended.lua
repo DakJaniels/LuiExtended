@@ -20,16 +20,14 @@
 --- @field SV LUIE_Defaults_SV Current saved variables
 --- @field UI LUIE.UI
 --- @field GridOverlay LUIE.GridOverlay
+--- @field chatOutputSettingsUI LUIE_ChatOutputSettingsUI|nil
 LUIE = {}
 LUIE.__index = LUIE
 -- -----------------------------------------------------------------------------
---- @class (partial) LuiExtended
-local LUIE = LUIE
--- -----------------------------------------------------------------------------
 LUIE.tag = "LUIE"
 LUIE.name = "LuiExtended"
-LUIE.version = "7.2.3.5"
-LUIE.addonVersion = 7235
+LUIE.version = "7.2.3.6"
+LUIE.addonVersion = 7236
 LUIE.author = "@dack_janiels[PC]"
 LUIE.legacyAuthors = "ArtOfShred, psypanda, Saenic & SpellBuilder"
 LUIE.website = "https://www.esoui.com/downloads/info818-LuiExtended.html"
@@ -246,6 +244,7 @@ LUIE.Defaults =
     {
         ChatMethod = "Print to All Tabs",
         ChatBypassFormat = false,
+        -- Tab indices 1..N are dynamic (see ChatAnnouncements.ChatOutput:GetMaxChatTabIndex); defaults keep first five enabled for legacy installs.
         ChatTab = { [1] = true, [2] = true, [3] = true, [4] = true, [5] = true },
         ChatSystemAll = true,
         TimeStamp = false,
