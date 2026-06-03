@@ -54,11 +54,25 @@ local changelogMessages =
     "",
     -- New
     "|cFFFF00New:|r",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t TBD.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: When Color Debuffs by Crowd Control Type is enabled, optional Color non-CC debuffs by damage type (cooldown fill) plus per-damage-type color pickers tint the cooldown fill from combat-reported damage type when no crowd-control class applies.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Misc Settings: In-game Changelog uses collapsible version sections with stable scroll and wrap width, and layout refresh when sections expand.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Chat Output (PC): When LibChatMessage is installed, Chat Output settings integrate LibChatMessage time prefix, format presets, history restore, and timestamp sync for proxy output.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Slash Commands (PC): When LibSlashCommander is installed, LUIE slash commands register through a shared registry for chat autocomplete and command descriptions.",
+    "",
+    -- Changes
+    "|cFFFF00Changes:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t LuiData: Werewolf abilities, buffs, tooltips, and bar highlights are finalized for Update 50 (including in-form Rampage morphs, Fury, and helper-aura cleanup on the buff frame).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t LuiData: Added Infinite Archive and trial supplement combat alert tables merged at load for Endless Archive and additional trial and dungeon abilities.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t LuiData / Action Bar: Sorcerer and Two-Handed skill-line bar highlights and effect audits; Necromancer skull stack highlights keep bar highlights while stacks remain (combatStackNoExpire); proc stack thresholds and combat-stack tracking improvements.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t ChatAnnouncements: Guild trader sale mail with subject Item Sold is recognized for sender resolution and chat announcements.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs (debug): Debug tooltips format remaining time, use an overflow column, and skip redundant rebuilds on hover.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Debug environment (/luie debug): Saved-vars reconciliation after load and on logout restores addon enablement cleanly.",
     "",
     -- Fix
     "|cFFFF00Fix:|r",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Endless Archive and Night Market adventure-zone HUD tracker positions persist again after reloadui, zone change, and turning off Unlock Default UI Elements (tracker container saved-vars key on RefreshAnchors post-hook).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Reset to Defaults for unlock positions also clears AlertFrameAlignment so alert text alignment resets with other unlock data.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unit Frames: CrutchAlerts BossHealthBar integration caches handles at init instead of reading CrutchAlerts in hot paths, avoiding errors in strict debug environments when Crutch is disabled.",
     "",
 
     -- Version Header 7.2.3.4
@@ -74,7 +88,6 @@ local changelogMessages =
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Active Combat Tips (dodge and synergy help) use a dedicated layout anchor so tips dismiss correctly again; saved positions migrate from the old ZO_ActiveCombatTipsTip unlock key.",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Frame mover previews follow each HUD element's on-screen position. Moving one unlocked panel no longer drags other preview overlays with it (for example Equipment Status or Ram when the action bar is moved).",
     "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Saved positions for the compass, player XP bar, and HUD trackers are re-applied after ZOS UI refresh (compass style, XP template, tracker anchor refresh) without replacing ZOS template functions.",
-    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Unlock: Endless Archive and Night Market adventure-zone HUD tracker positions persist again after reloadui, zone change, and turning off Unlock Default UI Elements (tracker container saved-vars key on RefreshAnchors post-hook).",
     "",
 
     -- Version Header 7.2.3.3
