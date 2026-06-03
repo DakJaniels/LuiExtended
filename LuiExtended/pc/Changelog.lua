@@ -49,6 +49,18 @@ local LUIE_CHANGELOG_SCENE_NAME = "LUIE_Changelog"
 -- -----------------------------------------------------------------------------
 local changelogMessages =
 {
+    -- Version Header 7.2.3.7
+    "|cFFA500LuiExtended Version 7.2.3.7|r",
+    "",
+    -- Fix
+    "|cFFFF00Fix:|r",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Show Backbar mirrors the base-game activation proc glow on inactive weapon bar slots (same highlight as the active bar when an ability is ready).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Show Triggered proc feedback on the back bar (timed procs, instant procs, and stack-based highlights such as Necromancer skull charges) matches the front bar again.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar: Necromancer Flame, Venom, and Ricochet skull charge highlights use separate tracking (Venom advances from the charge buff and any in-combat Necromancer ability while slotted, not only skull casts). Stack labels, proc at full charge, and clear after the empowered cast match the base game.",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t Action Bar / LuiData: Venom Skull bar stacks show 1 through 3 when the charge buff reports three stacks (Flame and Ricochet remain 1 and 2 with proc at two charges).",
+    "|t12:12:EsoUI/Art/Miscellaneous/bullet.dds|t SpellCastBuffs: Necromancer skull charge buff tooltips pull live morph text from the skill sheet (localized) instead of shortened static strings.",
+    "",
+
     -- Version Header 7.2.3.6
     "|cFFA500LuiExtended Version 7.2.3.6|r",
     "",

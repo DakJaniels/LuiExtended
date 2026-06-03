@@ -178,6 +178,9 @@ ActionBar.CastBar =
 --- @field ShowAppropriateAbilityActionButtonDropCallouts fun(actionType: integer, actionValue: integer)
 --- @field OnPlayerActivatedScan fun()
 --- @field OnSetHotbarEffect fun(changeType: number): boolean
+--- @field GetInactiveHotbarCategory fun(): HotBarCategory
+--- @field UpdateActivationHighlight fun(luiSlotNum: number)
+--- @field RefreshAllActivationHighlights fun()
 ActionBar.Backbar =
 {
     name = LUIE.name .. "ActionBar" .. "Backbar",

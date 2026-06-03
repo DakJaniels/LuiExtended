@@ -144,6 +144,10 @@ local g_barCombatStackZeroEffect = {}      -- Effects.BarHighlightStackZeroEffec
 local g_barCombatEventRemap = {}           -- Slotted ability id -> combatTrack newId (from BarHighlightOverride)
 --- @type {[integer]: boolean}
 local g_barCombatTrackRemainOnSlotted = {} -- Track id: bar timer only from slotted-id combat / effect (not tick newId combat)
+--- @type {[integer]: boolean}
+local g_barCombatStackNoExpire = {}        -- Track ids: keep bar highlight while stacks remain (BarHighlightOverride.combatStackNoExpire)
+--- Dur-0 stack highlights: internal remain so OnUpdate / BarSlotUpdate do not expire immediately
+local BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS = 3600000
 --- @type string[]
 local g_barCombatEventNames = {}           -- EVENT_COMBAT_EVENT handler names (unregistered before rebuild)
 --- @type {[integer]:number}
@@ -782,6 +786,7 @@ function ActionBar.UpdateBarHighlightTables()
     g_barCombatStackZeroEffect = {}
     g_barCombatEventRemap = {}
     g_barCombatTrackRemainOnSlotted = {}
+    g_barCombatStackNoExpire = {}
 
     if ActionBar.SV.ShowTriggered or ActionBar.SV.ShowToggled then
         -- Grab any aura's from the list that have on EVENT_COMBAT_EVENT AURA support
@@ -813,8 +818,11 @@ function ActionBar.UpdateBarHighlightTables()
                 if value.duration then
                     g_barDurationOverride[combatTrackAbilityId] = value.duration
                 end
-                if value.noRemove then
+                if value.noRemove or value.combatStackNoExpire then
                     g_barNoRemove[combatTrackAbilityId] = true
+                end
+                if value.combatStackNoExpire then
+                    g_barCombatStackNoExpire[combatTrackAbilityId] = true
                 end
                 -- Slotted id also fires combat (e.g. Engulfing 20930 BEGIN/GAIN DUR 4750); bar slot keys track id (32821).
                 if value.newId and value.newId ~= abilityId then
@@ -1138,6 +1146,7 @@ end
 --- @return string
 local function SetBarRemainLabel(remain, abilityId)
     if Effects.IsGrimFocus[abilityId] or Effects.IsBloodFrenzy[abilityId]
+    or Effects.BarHighlightHideDurationLabel[abilityId]
     then
         return ""
     end
@@ -1195,14 +1204,18 @@ function ActionBar.OnUpdate(currentTimeMS)
         local backToggle = backSlotNum and g_uiCustomToggle[backSlotNum]
         -- Update Label (FRONT)
         if effectEndTimeMs < currentTimeMS then
-            if frontToggle then
-                ActionBar.HideSlot(frontSlotNum, highlightAbilityId)
+            if g_barCombatStackNoExpire[highlightAbilityId] and g_toggledSlotsStack[highlightAbilityId] and g_toggledSlotsStack[highlightAbilityId] > 0 then
+                g_toggledSlotsRemain[highlightAbilityId] = currentTimeMS + BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS
+            else
+                if frontToggle then
+                    ActionBar.HideSlot(frontSlotNum, highlightAbilityId)
+                end
+                if backToggle then
+                    ActionBar.HideSlot(backSlotNum, highlightAbilityId)
+                end
+                g_toggledSlotsRemain[highlightAbilityId] = nil
+                g_toggledSlotsStack[highlightAbilityId] = nil
             end
-            if backToggle then
-                ActionBar.HideSlot(backSlotNum, highlightAbilityId)
-            end
-            g_toggledSlotsRemain[highlightAbilityId] = nil
-            g_toggledSlotsStack[highlightAbilityId] = nil
         end
         -- Update Label (BACK)
         if ActionBar.SV.BarShowLabel and remain then
@@ -1728,13 +1741,116 @@ end
 forEachToggledBarSlot = function (abilityId, slotCallback)
     local frontSlotNum = g_toggledSlotsFront[abilityId]
     local backSlotNum = g_toggledSlotsBack[abilityId]
-    if frontSlotNum and GetCustomToggleControl(frontSlotNum) then slotCallback(frontSlotNum) end
-    if backSlotNum and GetCustomToggleControl(backSlotNum) then slotCallback(backSlotNum) end
+    if frontSlotNum then
+        slotCallback(frontSlotNum)
+    end
+    if backSlotNum then
+        slotCallback(backSlotNum)
+    end
+end
+
+local function GetSkullChargeSource(trackId)
+    return Effects.BarHighlightSkullChargeSource and Effects.BarHighlightSkullChargeSource[trackId]
+end
+
+--- Necromancer skull: bar label capped by BarHighlightSkullChargeTrack (Flame/Ricochet 1–2, Venom 1–3). Proc at label max.
+local function GetSkullDisplayStack(trackId, rawStack)
+    if not rawStack or rawStack <= 0 then
+        return nil
+    end
+    local labelMax = Effects.BarHighlightSkullChargeTrack and Effects.BarHighlightSkullChargeTrack[trackId]
+    if not labelMax then
+        return rawStack
+    end
+    if rawStack >= labelMax then
+        return labelMax
+    end
+    return rawStack
+end
+
+local function StopSkullProcOnSlots(trackId)
+    forEachToggledBarSlot(trackId, function (slotNum)
+        local anim = g_uiProcAnimation[slotNum]
+        if anim then
+            anim:Stop()
+        end
+    end)
+end
+
+local function UpdateSkullProcState(trackId)
+    local labelMax = Effects.BarHighlightSkullChargeTrack and Effects.BarHighlightSkullChargeTrack[trackId]
+    if not labelMax or not ActionBar.SV.ShowTriggered then
+        return
+    end
+    local stacks = g_toggledSlotsStack[trackId]
+    forEachToggledBarSlot(trackId, function (slotNum)
+        if stacks == labelMax then
+            ActionBar.PlayProcAnimations(slotNum)
+        else
+            local anim = g_uiProcAnimation[slotNum]
+            if anim then
+                anim:Stop()
+            end
+        end
+    end)
+end
+
+local function ClearSkullChargeStacks(trackId)
+    g_toggledSlotsStack[trackId] = nil
+    g_toggledSlotsRemain[trackId] = nil
+    StopSkullProcOnSlots(trackId)
+    HideToggledSlots(trackId)
+    SetToggledStackLabels(trackId, nil)
+end
+
+local function ReadSkullChargeStackFromPlayerBuff(trackId)
+    if not DoesUnitExist("player") then
+        return nil
+    end
+    for i = 1, GetNumBuffs("player") do
+        local _, _, _, _, stackCount, _, _, _, _, _, abilityIdNew, _, castByPlayer = GetUnitBuffInfo("player", i)
+        if abilityIdNew == trackId and castByPlayer and stackCount and stackCount > 0 then
+            return stackCount
+        end
+    end
+    return nil
+end
+
+local function ApplySkullChargeStacks(trackId, rawStack)
+    local displayStack = GetSkullDisplayStack(trackId, rawStack)
+    if not displayStack then
+        ClearSkullChargeStacks(trackId)
+        return
+    end
+    g_toggledSlotsStack[trackId] = displayStack
+    local currentTimeMs = GetGameTimeMilliseconds()
+    if g_barCombatStackNoExpire[trackId] then
+        g_toggledSlotsRemain[trackId] = currentTimeMs + BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS
+    end
+    if ActionBar.SV.ShowToggled then
+        ShowToggledSlots(trackId, currentTimeMs)
+        SetToggledStackLabels(trackId, displayStack)
+        UpdateSkullProcState(trackId)
+    end
+end
+
+--- Slotted bound id -> charge label when the game swaps the bar icon (charged morph ids).
+local function TrySyncSkullChargeFromSlottedBound(boundAbilityId)
+    local slottedDisplay = Effects.BarHighlightSkullSlottedDisplay and Effects.BarHighlightSkullSlottedDisplay[boundAbilityId]
+    if not slottedDisplay or slottedDisplay <= 0 then
+        return
+    end
+    local trackId = Effects.BarHighlightExtraId and Effects.BarHighlightExtraId[boundAbilityId]
+    if not trackId or not (g_toggledSlotsFront[trackId] or g_toggledSlotsBack[trackId]) then
+        return
+    end
+    ApplySkullChargeStacks(trackId, slottedDisplay)
 end
 
 --- Set stack label on all toggled slots for abilityId. textOrNil: number to display, or nil/0 for empty.
 SetToggledStackLabels = function (abilityId, textOrNil)
-    local stackLabelText = (textOrNil and textOrNil > 0) and tostring(textOrNil) or ""
+    local display = GetSkullDisplayStack(abilityId, textOrNil) or textOrNil
+    local stackLabelText = (display and display > 0) and tostring(display) or ""
     forEachToggledBarSlot(abilityId, function (slotNum)
         g_uiCustomToggle[slotNum].stack:SetText(stackLabelText)
     end)
@@ -1893,7 +2009,7 @@ local function OnEffectFaded(abilityId)
 end
 
 --- Handle non-ground effect GAINED: proc sound, proc animation, ShowSlot, Grim Focus stack labels.
-local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeType)
+local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeType, passThrough)
     PlayProcSoundAtStacks(abilityId, stackCount)
 
     if g_triggeredSlotsFront[abilityId] or g_triggeredSlotsBack[abilityId] then
@@ -1929,9 +2045,37 @@ local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeTyp
         if ActionBar.SV.ShowToggled then
             local maxStack = g_barCombatStackMax[abilityId]
             if maxStack then
-                if stackCount == 0 then
+                if Effects.BarHighlightSkullChargeTrack and Effects.BarHighlightSkullChargeTrack[abilityId] then
+                    local skullSource = GetSkullChargeSource(abilityId)
+                    if stackCount and stackCount > 0 then
+                        ApplySkullChargeStacks(abilityId, stackCount)
+                    elseif skullSource == "trackBuff" and (passThrough or (changeType == EFFECT_RESULT_GAINED and unitTag == "player")) then
+                        local buffStacks = ReadSkullChargeStackFromPlayerBuff(abilityId)
+                        if buffStacks and buffStacks > 0 then
+                            ApplySkullChargeStacks(abilityId, buffStacks)
+                        else
+                            local keepStacks = g_toggledSlotsStack[abilityId] and g_toggledSlotsStack[abilityId] > 0
+                            if keepStacks then
+                                ShowToggledSlots(abilityId, GetGameTimeMilliseconds())
+                                UpdateSkullProcState(abilityId)
+                            end
+                        end
+                    elseif stackCount == 0 then
+                        local zeroMode = g_barCombatStackZeroEffect[abilityId]
+                        if zeroMode == "clear" then
+                            ClearSkullChargeStacks(abilityId)
+                        else
+                            local keepStacks = g_toggledSlotsStack[abilityId] and g_toggledSlotsStack[abilityId] > 0
+                            if keepStacks then
+                                ShowToggledSlots(abilityId, GetGameTimeMilliseconds())
+                                UpdateSkullProcState(abilityId)
+                            end
+                        end
+                    end
+                elseif stackCount == 0 then
                     local zeroMode = g_barCombatStackZeroEffect[abilityId]
-                    if zeroMode == "keep" and g_toggledSlotsRemain[abilityId] then
+                    local keepStacks = g_toggledSlotsStack[abilityId] and g_toggledSlotsStack[abilityId] > 0
+                    if zeroMode == "keep" and (g_toggledSlotsRemain[abilityId] or (g_barCombatStackNoExpire[abilityId] and keepStacks)) then
                         ShowToggledSlots(abilityId, GetGameTimeMilliseconds())
                     elseif zeroMode == "clear" then
                         HideToggledSlots(abilityId)
@@ -1940,7 +2084,11 @@ local function OnEffectGained(abilityId, unitTag, endTime, stackCount, changeTyp
                     end
                 else
                     local currentTime = GetGameTimeMilliseconds()
-                    g_toggledSlotsRemain[abilityId] = 1000 * endTime
+                    if g_barCombatStackNoExpire[abilityId] then
+                        g_toggledSlotsRemain[abilityId] = currentTime + BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS
+                    else
+                        g_toggledSlotsRemain[abilityId] = 1000 * endTime
+                    end
                     if not isStackBaseAbility[abilityId] then
                         if stackCount and stackCount > 0 then
                             g_toggledSlotsStack[abilityId] = stackCount
@@ -2070,7 +2218,7 @@ function ActionBar.OnEffectChanged(changeType, effectSlot, effectName, unitTag, 
     if changeType == EFFECT_RESULT_FADED then
         OnEffectFaded(abilityId)
     else
-        OnEffectGained(abilityId, unitTag, endTime, stackCount, changeType)
+        OnEffectGained(abilityId, unitTag, endTime, stackCount, changeType, passThrough)
     end
 end
 
@@ -2241,6 +2389,7 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
         return
     end
 
+    local combatAbilityId = abilityId
     local barAbilityId = g_barCombatEventRemap[abilityId] or abilityId
 
     if sourceType == COMBAT_UNIT_TYPE_PLAYER and targetType == COMBAT_UNIT_TYPE_PLAYER then
@@ -2284,10 +2433,18 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
 
     if result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED or result == ACTION_RESULT_EFFECT_GAINED_DURATION then
         local currentTimeMS = GetFrameTimeMilliseconds()
+        local empoweredSkullTrack = Effects.BarHighlightSkullEmpoweredCast and Effects.BarHighlightSkullEmpoweredCast[combatAbilityId]
+        if empoweredSkullTrack and (result == ACTION_RESULT_BEGIN or result == ACTION_RESULT_EFFECT_GAINED) then
+            ClearSkullChargeStacks(empoweredSkullTrack)
+            return
+        end
         if g_toggledSlotsFront[barAbilityId] or g_toggledSlotsBack[barAbilityId] then
             if ActionBar.SV.ShowToggled then
                 local skipToggleShow = false
                 local maxStack = g_barCombatStackMax[barAbilityId]
+                local isSkullChargeTrack = Effects.BarHighlightSkullChargeTrack and Effects.BarHighlightSkullChargeTrack[barAbilityId] ~= nil
+                local skullChargeSource = isSkullChargeTrack and GetSkullChargeSource(barAbilityId) or nil
+                local skullStacksFromCombat = not (skullChargeSource == "trackBuff" and combatAbilityId ~= barAbilityId)
                 if maxStack then
                     -- combatTrack stack buff: hitValue = stack count (EFFECT_GAINED) or duration ms (EFFECT_GAINED_DURATION).
                     if result == ACTION_RESULT_EFFECT_GAINED_DURATION and type(hitValue) == "number" and hitValue >= 500 then
@@ -2299,14 +2456,39 @@ function ActionBar.OnCombatEventBar(result, isError, abilityName, abilityGraphic
                             end
                         end
                     elseif result == ACTION_RESULT_EFFECT_GAINED and type(hitValue) == "number" and hitValue > 0 and hitValue <= maxStack then
-                        g_toggledSlotsStack[barAbilityId] = hitValue
-                        if ActionBar.SV.BarShowLabel then
-                            SetToggledStackLabels(barAbilityId, hitValue)
+                        if isSkullChargeTrack and skullStacksFromCombat then
+                            ApplySkullChargeStacks(barAbilityId, hitValue)
+                            skipToggleShow = true
+                        elseif isSkullChargeTrack then
+                            skipToggleShow = true
+                        else
+                            g_toggledSlotsStack[barAbilityId] = hitValue
+                            if ActionBar.SV.BarShowLabel then
+                                SetToggledStackLabels(barAbilityId, hitValue)
+                            end
+                            if not g_toggledSlotsRemain[barAbilityId] then
+                                local duration = g_barDurationOverride[barAbilityId] or GetUpdatedAbilityDuration(barAbilityId)
+                                if duration > 0 then
+                                    g_toggledSlotsRemain[barAbilityId] = currentTimeMS + duration
+                                elseif g_barCombatStackNoExpire[barAbilityId] then
+                                    g_toggledSlotsRemain[barAbilityId] = currentTimeMS + BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS
+                                end
+                            end
                         end
-                        if not g_toggledSlotsRemain[barAbilityId] then
-                            local duration = g_barDurationOverride[barAbilityId] or GetUpdatedAbilityDuration(barAbilityId)
-                            if duration > 0 then
-                                g_toggledSlotsRemain[barAbilityId] = currentTimeMS + duration
+                    elseif result == ACTION_RESULT_EFFECT_GAINED then
+                        local castStacks = Effects.BarHighlightStackFromCast and Effects.BarHighlightStackFromCast[combatAbilityId]
+                        if castStacks and castStacks > 0 and castStacks <= maxStack and skullStacksFromCombat then
+                            if isSkullChargeTrack then
+                                ApplySkullChargeStacks(barAbilityId, castStacks)
+                                skipToggleShow = true
+                            else
+                                g_toggledSlotsStack[barAbilityId] = castStacks
+                                if ActionBar.SV.BarShowLabel then
+                                    SetToggledStackLabels(barAbilityId, castStacks)
+                                end
+                                if not g_toggledSlotsRemain[barAbilityId] and g_barCombatStackNoExpire[barAbilityId] then
+                                    g_toggledSlotsRemain[barAbilityId] = currentTimeMS + BAR_COMBAT_STACK_PLACEHOLDER_REMAIN_MS
+                                end
                             end
                         end
                     end
@@ -2472,6 +2654,10 @@ function ActionBar.BarSlotUpdate(slotNum, wasFullUpdate, onlyProc)
         end
     end
 
+    if onlyProc == false then
+        TrySyncSkullChargeFromSlottedBound(abilityId)
+    end
+
     local showFakeAura = (Effects.BarHighlightOverride[abilityId] and Effects.BarHighlightOverride[abilityId].showFakeAura)
 
     if Effects.BarHighlightOverride[abilityId] then
@@ -2509,7 +2695,7 @@ function ActionBar.BarSlotUpdate(slotNum, wasFullUpdate, onlyProc)
 
     -- Check if currently this ability is in proc state
     local procAbilityKey = Effects.HasAbilityProc[abilityName]
-    if Effects.IsAbilityProc[GetSlotTrueBoundId(slotNum, g_hotbarCategory)] then
+    if Effects.IsAbilityProc[abilityId] then
         if ActionBar.SV.ShowTriggered then
             ActionBar.PlayProcAnimations(slotNum)
             if ActionBar.SV.ProcEnableSound then
@@ -2609,6 +2795,7 @@ function ActionBar.OnActiveHotbarUpdate(didActiveHotbarChange, shouldUpdateAbili
         end
     else
         g_activeWeaponSwapInProgress = false
+        Backbar.RefreshAllActivationHighlights()
     end
 end
 
@@ -2667,7 +2854,8 @@ function ActionBar.PlayProcAnimations(slotNum)
     local procLoopTexture = windowManager:CreateControlFromVirtual("$(parent)Loop_LUIE", actionButton.slot, "ZO_PendingLoop_Glow")
     procLoopTexture:SetAnchor(TOPLEFT, actionButton.slot:GetNamedChild("FlipCard"))
     procLoopTexture:SetAnchor(BOTTOMRIGHT, actionButton.slot:GetNamedChild("FlipCard"))
-    procLoopTexture:SetDrawLayer(DL_TEXT)
+    procLoopTexture:SetDrawLayer(DL_OVERLAY)
+    procLoopTexture:SetDrawTier(DT_HIGH)
     procLoopTexture:SetHidden(true)
 
     -- Create label control
