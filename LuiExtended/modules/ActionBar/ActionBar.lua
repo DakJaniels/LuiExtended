@@ -428,16 +428,6 @@ function ActionBar.Initialize(enabled)
         LUIE.MarkMigrationDone("actionbar_companion_ultimate_v1")
     end
 
-    if not LUIE.IsMigrationDone("actionbar_castbar_weave_v1") then
-        if ActionBar.SV.CastBarWeaveHelper == nil then
-            ActionBar.SV.CastBarWeaveHelper = OtherAddonCompatability.isLibCombatEnabled
-        end
-        if ActionBar.SV.CastBarWeaveThresholdMs == nil then
-            ActionBar.SV.CastBarWeaveThresholdMs = ActionBar.Defaults.CastBarWeaveThresholdMs
-        end
-        LUIE.MarkMigrationDone("actionbar_castbar_weave_v1")
-    end
-
     -- -----------------------------------------------------------------------------
     -- Migrate font styles if needed
     -- Migrate font styles (string/display/nil -> valid 0-7); run once per account
