@@ -320,7 +320,7 @@ function ChatAnnouncements.Initialize(enabled)
 
     ChatAnnouncements.InvalidateQuestCounterFilterCache()
 
-    ChatAnnouncements.ChatOutput.InitializeRouterIntegration(enabled)
+    ChatAnnouncements.ChatOutput:InitializeRouterIntegration(enabled)
 
     -- Some modules might need to pull some of the color settings from CA so we want these to always be set regardless of CA module being enabled/disabled.
     ChatAnnouncements.RegisterColorEvents()
@@ -1899,7 +1899,7 @@ function ChatAnnouncements.OnCurrencyUpdate(eventId, currency, currencyLocation,
             if currencyType == CURT_MONEY then
                 local senderKey = currencySender ~= "" and currencySender or ""
                 local nowMs = GetGameTimeMilliseconds()
-                if not S.g_mailBatchTakeAll
+                if  not S.g_mailBatchTakeAll
                 and S.g_lastMailCurrencyAnnounce.amount == amountDelta
                 and S.g_lastMailCurrencyAnnounce.senderKey == senderKey
                 and (nowMs - S.g_lastMailCurrencyAnnounce.timeMs) < MAIL_CURRENCY_ANNOUNCE_DEDUPE_MS then

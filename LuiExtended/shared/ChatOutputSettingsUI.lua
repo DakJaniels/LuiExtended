@@ -6,58 +6,259 @@
 local LUIE = LUIE
 
 local zo_strformat = zo_strformat
+local wm = WINDOW_MANAGER
 
-local function GetChatOutputSettings()
+local LAM_TAB_ROW_HEIGHT = 26
+local LAM_TAB_HEADER_HEIGHT = LAM_TAB_ROW_HEIGHT
+local LAM_TOGGLE_ON_TEXT = GetString(SI_CHECK_BUTTON_ON):upper()
+local LAM_TOGGLE_OFF_TEXT = GetString(SI_CHECK_BUTTON_OFF):upper()
+
+local CHAT_TAB_TOGGLE_COL_WIDTH = 48
+local CHAT_TAB_COL_SYSTEM_WIDTH = 56
+local CHAT_TAB_COL_GAP = 8
+local CHAT_TAB_COL_SYSTEM_RIGHT = 0
+local CHAT_TAB_COL_LUIE_RIGHT = CHAT_TAB_COL_SYSTEM_WIDTH + CHAT_TAB_COL_GAP
+local CHAT_TAB_COL_LABEL_GAP = 8
+
+--- @param toggleControl table
+--- @param parent table
+--- @param rowHeight number
+--- @param rightOffset number
+--- @param colWidth number|nil
+local function AnchorChatTabRoutingToggleSlot(toggleControl, parent, rowHeight, rightOffset, colWidth)
+    colWidth = colWidth or CHAT_TAB_TOGGLE_COL_WIDTH
+    toggleControl:SetDimensions(colWidth, rowHeight)
+    toggleControl:ClearAnchors()
+    toggleControl:SetAnchor(TOPRIGHT, parent, TOPRIGHT, -rightOffset, 0)
+    toggleControl.checkbox:ClearAnchors()
+    toggleControl.checkbox:SetAnchor(CENTER, toggleControl, CENTER, 0, 0)
+end
+
+--- @param parent table
+--- @param rowLabel table
+--- @param luiToggle table
+--- @param systemToggle table
+--- @param rowHeight number
+local function ApplyChatTabRoutingColumnLayout(parent, rowLabel, luiToggle, systemToggle, rowHeight)
+    AnchorChatTabRoutingToggleSlot(systemToggle, parent, rowHeight, CHAT_TAB_COL_SYSTEM_RIGHT, CHAT_TAB_COL_SYSTEM_WIDTH)
+    AnchorChatTabRoutingToggleSlot(luiToggle, parent, rowHeight, CHAT_TAB_COL_LUIE_RIGHT, CHAT_TAB_TOGGLE_COL_WIDTH)
+
+    rowLabel:ClearAnchors()
+    rowLabel:SetAnchor(TOPLEFT, parent, TOPLEFT, 0, 0)
+    rowLabel:SetAnchor(TOPRIGHT, luiToggle, TOPLEFT, -CHAT_TAB_COL_LABEL_GAP, 0)
+end
+
+--- @param parent table
+--- @param text string
+--- @param rightOffset number
+--- @param rowHeight number
+--- @param colWidth number|nil
+--- @return table
+local function CreateChatTabRoutingColumnHeaderLabel(parent, text, rightOffset, rowHeight, colWidth)
+    colWidth = colWidth or CHAT_TAB_TOGGLE_COL_WIDTH
+    local label = wm:CreateControl(nil, parent, CT_LABEL)
+    label:SetFont("ZoFontWinT1")
+    label:SetDimensions(colWidth, rowHeight)
+    label:SetText(text)
+    label:SetAnchor(TOPRIGHT, parent, TOPRIGHT, -rightOffset, 0)
+    label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+    label:SetVerticalAlignment(TEXT_ALIGN_CENTER)
+    return label
+end
+
+local function WireChatTabRoutingHeaderLabelTooltip(label, tooltipText)
+    label.data = { tooltipText = tooltipText or "" }
+    label:SetMouseEnabled(true)
+    label:SetHandler("OnMouseEnter", function (self)
+        ZO_Options_OnMouseEnter(self)
+    end)
+    label:SetHandler("OnMouseExit", function (self)
+        ZO_Options_OnMouseExit(self)
+    end)
+end
+
+local function ApplyChatTabRoutingToggleVisual(toggleControl, value, disabled)
+    local checkbox = toggleControl.checkbox
+    checkbox:SetText(value and LAM_TOGGLE_ON_TEXT or LAM_TOGGLE_OFF_TEXT)
+    if disabled then
+        checkbox:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+    elseif value then
+        checkbox:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+    else
+        checkbox:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+    end
+    toggleControl.isDisabled = disabled
+end
+
+local function WireChatTabRoutingInlineToggle(toggleControl, getFunc, setFunc, tooltipText)
+    toggleControl.data = { tooltipText = tooltipText or "" }
+    toggleControl:SetMouseEnabled(true)
+    toggleControl:SetHandler("OnMouseEnter", function (self)
+        ZO_Options_OnMouseEnter(self)
+        if not self.isDisabled then
+            self.checkbox:SetColor(ZO_HIGHLIGHT_TEXT:UnpackRGBA())
+        end
+    end)
+    toggleControl:SetHandler("OnMouseExit", function (self)
+        ZO_Options_OnMouseExit(self)
+        ApplyChatTabRoutingToggleVisual(self, getFunc(), self.isDisabled)
+    end)
+    toggleControl:SetHandler("OnMouseUp", function (self, button, upInside)
+        if not upInside or self.isDisabled or button ~= MOUSE_BUTTON_INDEX_LEFT then
+            return
+        end
+        PlaySound(SOUNDS.DEFAULT_CLICK)
+        setFunc(not getFunc())
+        ApplyChatTabRoutingToggleVisual(self, getFunc(), self.isDisabled)
+        local LAM = LibAddonMenu2
+        if LAM and LAM.util then
+            LAM.util.RequestRefreshIfNeeded(self:GetParent())
+        end
+    end)
+end
+
+--- @return table LAM custom control data
+local function CreateChatTabRoutingColumnHeaderLAMOption()
+    return
+    {
+        type = "custom",
+        reference = "LUIE_ChatOutputTabRowHeader",
+        width = "full",
+        minHeight = LAM_TAB_HEADER_HEIGHT,
+        createFunc = function (control)
+            control.headerTabLabel = wm:CreateControl(nil, control, CT_LABEL)
+            control.headerTabLabel:SetFont("ZoFontWinH4")
+            control.headerTabLabel:SetHeight(LAM_TAB_HEADER_HEIGHT)
+            control.headerTabLabel:SetAnchor(TOPLEFT, control, TOPLEFT, 0, 0)
+            control.headerTabLabel:SetVerticalAlignment(TEXT_ALIGN_CENTER)
+            control.headerTabLabel:SetText(GetString(LUIE_STRING_LAM_CA_CHATTAB_ROUTING_HEADER_TAB))
+
+            local headerLuiLabel = CreateChatTabRoutingColumnHeaderLabel(
+                control,
+                GetString(LUIE_STRING_LAM_CA_CHATTAB_ROUTING_HEADER_LUIE),
+                CHAT_TAB_COL_LUIE_RIGHT,
+                LAM_TAB_HEADER_HEIGHT,
+                CHAT_TAB_TOGGLE_COL_WIDTH
+            )
+            WireChatTabRoutingHeaderLabelTooltip(headerLuiLabel, GetString(LUIE_STRING_LAM_CA_CHATTAB_ROUTING_HEADER_LUIE_TP))
+
+            local headerSystemLabel = CreateChatTabRoutingColumnHeaderLabel(
+                control,
+                GetString(LUIE_STRING_LAM_CA_CHATTAB_ROUTING_HEADER_SYSTEM),
+                CHAT_TAB_COL_SYSTEM_RIGHT,
+                LAM_TAB_HEADER_HEIGHT,
+                CHAT_TAB_COL_SYSTEM_WIDTH
+            )
+            WireChatTabRoutingHeaderLabelTooltip(headerSystemLabel, GetString(LUIE_STRING_LAM_CA_CHATTAB_ROUTING_HEADER_SYSTEM_TP))
+        end,
+    }
+end
+
+--- @class LUIE_ChatOutputSettingsUI : ZO_InitializingObject
+--- @field chatOutput LUIE_ChatOutput|nil
+--- @field chatTabLAMRefreshRegistered boolean
+local LUIE_ChatOutputSettingsUI = ZO_InitializingObject:Subclass()
+
+--- @param chatOutput LUIE_ChatOutput|nil
+function LUIE_ChatOutputSettingsUI:Initialize(chatOutput)
+    self.chatOutput = chatOutput
+    self.chatTabLAMRefreshRegistered = false
+end
+
+--- @return LUIE_ChatOutputSettingsUI
+local function GetChatOutputSettingsUI()
+    if not LUIE.chatOutputSettingsUI then
+        local chatOutput = LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
+        LUIE.chatOutputSettingsUI = LUIE_ChatOutputSettingsUI:New(chatOutput)
+    end
+    return LUIE.chatOutputSettingsUI
+end
+
+function LUIE_ChatOutputSettingsUI:GetChatOutputSettings()
     return LUIE.SV and LUIE.SV.ChatOutput
 end
 
-local function GetChatOutputDefaults()
+function LUIE_ChatOutputSettingsUI:GetChatOutputDefaults()
     return LUIE.Defaults.ChatOutput
 end
 
-local CHAT_METHOD_ALL_TABS = "Print to All Tabs"
-local CHAT_METHOD_SPECIFIC_TABS = "Print to Specific Tabs"
+local function GetChatOutputSettings()
+    return GetChatOutputSettingsUI():GetChatOutputSettings()
+end
 
-local function UsesPrintToSpecificChatTabs(settings)
-    settings = settings or GetChatOutputSettings()
-    return settings and settings.ChatMethod == CHAT_METHOD_SPECIFIC_TABS
+local function GetChatOutputDefaults()
+    return GetChatOutputSettingsUI():GetChatOutputDefaults()
 end
 
 local function GetChatTabCheckboxValue(tabIndex, settings)
     settings = settings or GetChatOutputSettings()
-    if not UsesPrintToSpecificChatTabs(settings) then
+    if not settings or not settings.ChatTab then
         return false
     end
-    return settings.ChatTab[tabIndex]
+    return settings.ChatTab[tabIndex] == true
 end
 
 local function SetChatTabCheckboxValue(tabIndex, value, settings)
     settings = settings or GetChatOutputSettings()
-    if not UsesPrintToSpecificChatTabs(settings) then
+    if not settings then
         return
+    end
+    if not settings.ChatTab then
+        settings.ChatTab = {}
     end
     settings.ChatTab[tabIndex] = value
 end
 
 local function GetChatSystemAllCheckboxValue(settings)
     settings = settings or GetChatOutputSettings()
-    if not UsesPrintToSpecificChatTabs(settings) then
+    if not settings then
         return false
     end
-    return settings.ChatSystemAll
+    return settings.ChatSystemAll == true
 end
 
 local function SetChatSystemAllCheckboxValue(value, settings)
     settings = settings or GetChatOutputSettings()
-    if not UsesPrintToSpecificChatTabs(settings) then
+    if not settings then
         return
     end
     settings.ChatSystemAll = value
 end
 
-local function IsChatTabRoutingOptionDisabled(settings)
-    settings = settings or GetChatOutputSettings()
-    return not UsesPrintToSpecificChatTabs(settings)
+local chatTabLAMRefreshRegistered = false
+
+--- LAM anchors controls at creation; never SetHidden (leaves empty gaps). Refresh labels and live System filter state (PC).
+local function RefreshChatTabLAMControlLabels()
+    if ZO_IsConsoleOrGameCoreUI() then
+        return
+    end
+    local LAM = LibAddonMenu2
+    if not LAM or not LAM.currentPanelOpened then
+        return
+    end
+    local chatOutput = LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
+    if not chatOutput then
+        return
+    end
+    for tabIndex = 1, chatOutput:GetChatTabSettingsSlotCount() do
+        local rowControl = _G["LUIE_ChatOutputTabRow_" .. tabIndex]
+        if rowControl then
+            rowControl:SetHidden(false)
+            if rowControl.RefreshChatTabRoutingRow then
+                rowControl:RefreshChatTabRoutingRow()
+            elseif rowControl.UpdateValue then
+                rowControl:UpdateValue()
+            end
+        end
+    end
+end
+
+local function RegisterChatTabLAMRefreshCallback()
+    if chatTabLAMRefreshRegistered or ZO_IsConsoleOrGameCoreUI() then
+        return
+    end
+    chatTabLAMRefreshRegistered = true
+    CALLBACK_MANAGER:RegisterCallback("LAM-RefreshPanel", RefreshChatTabLAMControlLabels)
 end
 
 local function IsLibChatMessageLoaded()
@@ -79,17 +280,17 @@ end
 
 local function UsesExternalChatFormatting()
     local chatOutput = LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
-    return chatOutput and chatOutput.ShouldUseExternalFormatting()
+    return chatOutput and chatOutput:ShouldUseExternalFormatting()
 end
 
 local function IsLuiExtendedTimestampSettingsDisabled()
     return UsesExternalChatFormatting()
 end
 
-local function SyncLuiExtendedTimestampToLibChatMessage()
+local function ApplyChatOutputTimePrefixSettingsFromSavedVars()
     local chatOutput = LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
-    if chatOutput and chatOutput.ApplyLibChatMessageTimePrefixSettings then
-        chatOutput.ApplyLibChatMessageTimePrefixSettings()
+    if chatOutput then
+        chatOutput:ApplyLibChatMessageTimePrefixSettings()
     end
 end
 
@@ -124,7 +325,7 @@ local LCM_TIME_FORMAT_VALUES =
     "[%T]",
 }
 local LCM_TIME_FORMAT_PRESET_COUNT = #LCM_TIME_FORMAT_VALUES
---- LAM/LHAS dropdown value when LibChatMessage format is not one of the three presets (e.g. synced from Timestamp Format below).
+local LCM_TIME_FORMAT_FALLBACK = LCM_TIME_FORMAT_VALUES[1]
 local LCM_TIME_FORMAT_LUIE_SYNC = "__LUIE_TIMESTAMP_FORMAT__"
 
 local function GetLcmTimeFormatDropdownLabels()
@@ -161,9 +362,70 @@ end
 
 local function GetLibChatMessageTimePrefixFormat()
     if not LibChatMessage then
-        return LCM_TIME_FORMAT_VALUES[1]
+        return LCM_TIME_FORMAT_FALLBACK
     end
     return LibChatMessage:GetTimePrefixFormat()
+end
+
+--- LibChatMessage os.date format for LAM/edit display (single %, e.g. [%H:%M:%S] — not Lua-escaped %%).
+--- @param format string
+--- @return string
+local function FormatLibChatMessageOsDateForSettingsDisplay(format)
+    if type(format) ~= "string" then
+        return format
+    end
+    return (string.gsub(format, "%%%%", "%%"))
+end
+
+local function GetChatOutputForSettings()
+    return LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
+end
+
+--- Convert LUIE Timestamp Format tokens to LibChatMessage os.date for display/storage.
+--- @param luiFormat string|nil
+--- @return string
+local function ConvertLuiExtendedTimestampFormatForLibChatMessageDisplay(luiFormat)
+    local chatOutput = GetChatOutputForSettings()
+    if not chatOutput then
+        return "[%X]"
+    end
+    return FormatLibChatMessageOsDateForSettingsDisplay(chatOutput:LuiExtendedFormatToLibChatMessageOsDate(luiFormat))
+end
+
+--- Value shown in LibChatMessage os.date editbox (read-only): converted when Custom is selected, else current LCM format.
+local function GetLibChatMessageTimePrefixFormatForSettingsDisplay()
+    if not LibChatMessage then
+        return LCM_TIME_FORMAT_FALLBACK
+    end
+    if UsesLuiExtendedTimestampFormatForLibChatMessage() then
+        local settings = GetChatOutputSettings()
+        if settings and settings.TimeStamp then
+            local chatOutput = GetChatOutputForSettings()
+            local formatString
+            if chatOutput then
+                formatString = chatOutput:GetTimestampFormatStringForLibChatMessageSync()
+            else
+                formatString = settings.TimeStampFormat
+            end
+            if formatString then
+                return ConvertLuiExtendedTimestampFormatForLibChatMessageDisplay(formatString)
+            end
+        end
+    end
+    local display = FormatLibChatMessageOsDateForSettingsDisplay(GetLibChatMessageTimePrefixFormat())
+    if type(display) == "string" and display ~= "" then
+        return display
+    end
+    return LCM_TIME_FORMAT_FALLBACK
+end
+
+--- LAM editbox calls getFunc at control creation; must always return a string (never nil).
+local function GetLibChatMessageTimePrefixFormatForSettingsDisplayLAM()
+    local ok, result = pcall(GetLibChatMessageTimePrefixFormatForSettingsDisplay)
+    if ok and type(result) == "string" and result ~= "" then
+        return result
+    end
+    return LCM_TIME_FORMAT_FALLBACK
 end
 
 local function SetLibChatMessageTimePrefixFormat(format)
@@ -173,10 +435,8 @@ local function SetLibChatMessageTimePrefixFormat(format)
     LibChatMessage:SetTimePrefixFormat(format)
 end
 
-local function SetLibChatMessageTimePrefixFormatFromOsDateField(format)
-    SetLibChatMessageUseLuiExtendedTimestampFormat(false)
-    SetLibChatMessageTimePrefixFormat(format)
-    SyncLuiExtendedTimestampToLibChatMessage()
+local function SetLibChatMessageTimePrefixFormatFromOsDateField(_format)
+    -- Read-only preview; use the preset dropdown or Timestamp Format (Custom), not this field.
 end
 
 local function IsLibChatMessageTimeFormatOptionDisabled()
@@ -184,8 +444,35 @@ local function IsLibChatMessageTimeFormatOptionDisabled()
     return not (settings and settings.TimeStamp)
 end
 
+local function IsLibChatMessageTimeFormatLockedByPChat()
+    if ZO_IsConsoleOrGameCoreUI() then
+        return false
+    end
+    local chatOutput = GetChatOutputForSettings()
+    return chatOutput ~= nil and chatOutput:IsLibChatMessageTimeFormatLockedByPChat()
+end
+
+local function IsLibChatMessageOsDateFormatFieldDisabled()
+    return true
+end
+
+local function SetLibChatMessageTimeFormatPresetDropdownValue(value)
+    local chatOutput = GetChatOutputForSettings()
+    if chatOutput and chatOutput:IsLibChatMessageTimeFormatLockedByPChat() then
+        return
+    end
+    if value == LCM_TIME_FORMAT_LUIE_SYNC then
+        SetLibChatMessageUseLuiExtendedTimestampFormat(true)
+        ApplyChatOutputTimePrefixSettingsFromSavedVars()
+        return
+    end
+    SetLibChatMessageUseLuiExtendedTimestampFormat(false)
+    SetLibChatMessageTimePrefixFormat(value)
+    ApplyChatOutputTimePrefixSettingsFromSavedVars()
+end
+
 local function GetLibChatMessageTimeFormatPresetDropdownValue()
-    if UsesLuiExtendedTimestampFormatForLibChatMessage() then
+    if IsLibChatMessageTimeFormatLockedByPChat() or UsesLuiExtendedTimestampFormatForLibChatMessage() then
         return LCM_TIME_FORMAT_LUIE_SYNC
     end
     local format = GetLibChatMessageTimePrefixFormat()
@@ -195,26 +482,34 @@ local function GetLibChatMessageTimeFormatPresetDropdownValue()
     return LCM_TIME_FORMAT_LUIE_SYNC
 end
 
-local function SetLibChatMessageTimeFormatPresetDropdownValue(value)
-    if value == LCM_TIME_FORMAT_LUIE_SYNC then
-        SetLibChatMessageUseLuiExtendedTimestampFormat(true)
-        SyncLuiExtendedTimestampToLibChatMessage()
-        return
-    end
-    SetLibChatMessageUseLuiExtendedTimestampFormat(false)
-    SetLibChatMessageTimePrefixFormat(value)
-    SyncLuiExtendedTimestampToLibChatMessage()
-end
-
-local function IsLibChatMessageOsDateFormatFieldDisabled()
+local function IsLibChatMessageTimeFormatPresetDropdownDisabled()
     if IsLibChatMessageTimeFormatOptionDisabled() then
         return true
     end
-    return UsesLuiExtendedTimestampFormatForLibChatMessage()
+    return IsLibChatMessageTimeFormatLockedByPChat()
 end
 
-local function IsLibChatMessageTimeFormatPresetDropdownDisabled()
-    return IsLibChatMessageTimeFormatOptionDisabled()
+local function IsPChatTimestampFormattingLibChatMessageProxy()
+    return IsLibChatMessageTimeFormatLockedByPChat()
+end
+
+local function AppendLibChatMessageTimeFormatTooltip(baseTooltip)
+    if IsPChatTimestampFormattingLibChatMessageProxy() then
+        return zo_strformat("<<1>>\n\n<<2>>", baseTooltip, GetString(LUIE_STRING_LAM_CA_LCM_TIMEFORMAT_PCHAT_NOTE_TP))
+    end
+    return baseTooltip
+end
+
+local function GetLibChatMessageTimeFormatPresetTooltip()
+    return AppendLibChatMessageTimeFormatTooltip(GetString(LUIE_STRING_LAM_CA_LCM_TIMEFORMAT_TP))
+end
+
+local function GetLibChatMessageTimeFormatCustomTooltip()
+    local tooltip = GetString(LUIE_STRING_LAM_CA_LCM_TIMEFORMAT_CUSTOM_TP)
+    if IsPChatTimestampFormattingLibChatMessageProxy() then
+        tooltip = zo_strformat("<<1>>\n\n<<2>>", tooltip, GetString(LUIE_STRING_LAM_CA_LCM_TIMEFORMAT_PCHAT_NOTE_TP))
+    end
+    return tooltip
 end
 
 local function GetLibChatMessageTimePrefixOnPlayerChat()
@@ -284,13 +579,15 @@ local function AppendLibChatMessageTimeLAMControls(controls, SettingsAPI)
 
     controls[#controls + 1] = SettingsAPI.CreateDropdownOption(
         GetString(LUIE_STRING_LAM_CA_LCM_TIMEFORMAT),
-        GetString(LUIE_STRING_LAM_CA_LCM_TIMEFORMAT_TP),
+        function ()
+            return GetLibChatMessageTimeFormatPresetTooltip()
+        end,
         GetLcmTimeFormatDropdownLabels(),
         GetLibChatMessageTimeFormatPresetDropdownValue,
         SetLibChatMessageTimeFormatPresetDropdownValue,
         "full",
         IsLibChatMessageTimeFormatPresetDropdownDisabled,
-        LCM_TIME_FORMAT_VALUES[1],
+        LCM_TIME_FORMAT_FALLBACK,
         nil,
         "name-up",
         nil,
@@ -299,12 +596,14 @@ local function AppendLibChatMessageTimeLAMControls(controls, SettingsAPI)
 
     controls[#controls + 1] = SettingsAPI.CreateEditboxOption(
         GetString(LUIE_STRING_LAM_CA_LCM_TIMEFORMAT_CUSTOM),
-        GetString(LUIE_STRING_LAM_CA_LCM_TIMEFORMAT_CUSTOM_TP),
-        GetLibChatMessageTimePrefixFormat,
+        function ()
+            return GetLibChatMessageTimeFormatCustomTooltip()
+        end,
+        GetLibChatMessageTimePrefixFormatForSettingsDisplayLAM,
         SetLibChatMessageTimePrefixFormatFromOsDateField,
         "full",
         IsLibChatMessageOsDateFormatFieldDisabled,
-        LCM_TIME_FORMAT_VALUES[1]
+        LCM_TIME_FORMAT_FALLBACK
     )
 
     controls[#controls + 1] = SettingsAPI.CreateCheckboxOption(
@@ -349,7 +648,7 @@ local function AppendLibChatMessageTimeConsoleControls(settings, LHAS)
     {
         type = LHAS.ST_DROPDOWN,
         label = GetString(LUIE_STRING_LAM_CA_LCM_TIMEFORMAT),
-        tooltip = GetString(LUIE_STRING_LAM_CA_LCM_TIMEFORMAT_TP),
+        tooltip = GetLibChatMessageTimeFormatPresetTooltip(),
         items = function ()
             local labels = GetLcmTimeFormatDropdownLabels()
             local values = GetLcmTimeFormatDropdownValues()
@@ -363,7 +662,7 @@ local function AppendLibChatMessageTimeConsoleControls(settings, LHAS)
         setFunction = function (_combobox, _value, item)
             SetLibChatMessageTimeFormatPresetDropdownValue(item.data or _value)
         end,
-        default = LCM_TIME_FORMAT_VALUES[1],
+        default = LCM_TIME_FORMAT_FALLBACK,
         disable = IsLibChatMessageTimeFormatPresetDropdownDisabled,
     }
 
@@ -371,12 +670,12 @@ local function AppendLibChatMessageTimeConsoleControls(settings, LHAS)
     {
         type = LHAS.ST_EDIT,
         label = GetString(LUIE_STRING_LAM_CA_LCM_TIMEFORMAT_CUSTOM),
-        tooltip = GetString(LUIE_STRING_LAM_CA_LCM_TIMEFORMAT_CUSTOM_TP),
-        getFunction = GetLibChatMessageTimePrefixFormat,
+        tooltip = GetLibChatMessageTimeFormatCustomTooltip(),
+        getFunction = GetLibChatMessageTimePrefixFormatForSettingsDisplayLAM,
         setFunction = function (value)
             SetLibChatMessageTimePrefixFormatFromOsDateField(value)
         end,
-        default = LCM_TIME_FORMAT_VALUES[1],
+        default = LCM_TIME_FORMAT_FALLBACK,
         disable = IsLibChatMessageOsDateFormatFieldDisabled,
     }
 
@@ -417,7 +716,7 @@ local function AppendLuiExtendedTimestampLAMControls(controls, SettingsAPI, Sett
         end,
         function (value)
             Settings.TimeStamp = value
-            SyncLuiExtendedTimestampToLibChatMessage()
+            ApplyChatOutputTimePrefixSettingsFromSavedVars()
         end,
         "full",
         function ()
@@ -435,7 +734,7 @@ local function AppendLuiExtendedTimestampLAMControls(controls, SettingsAPI, Sett
         function (value)
             Settings.TimeStampFormat = value
             SetLibChatMessageUseLuiExtendedTimestampFormat(true)
-            SyncLuiExtendedTimestampToLibChatMessage()
+            ApplyChatOutputTimePrefixSettingsFromSavedVars()
         end,
         "full",
         function ()
@@ -473,7 +772,7 @@ local function AppendLuiExtendedTimestampConsoleControls(settings, LHAS, Setting
         end,
         setFunction = function (value)
             Settings.TimeStamp = value
-            SyncLuiExtendedTimestampToLibChatMessage()
+            ApplyChatOutputTimePrefixSettingsFromSavedVars()
         end,
         default = Defaults.TimeStamp,
         disable = function ()
@@ -492,7 +791,7 @@ local function AppendLuiExtendedTimestampConsoleControls(settings, LHAS, Setting
         setFunction = function (value)
             Settings.TimeStampFormat = value
             SetLibChatMessageUseLuiExtendedTimestampFormat(true)
-            SyncLuiExtendedTimestampToLibChatMessage()
+            ApplyChatOutputTimePrefixSettingsFromSavedVars()
         end,
         default = Defaults.TimeStampFormat,
         disable = function ()
@@ -528,16 +827,32 @@ end
 
 local LCM_HISTORY_DEFAULT_MAX_AGE = 3600
 
+local function IsPChatChatRestoreEnabled()
+    local chatOutput = LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
+    return chatOutput and chatOutput:IsPChatChatRestoreEnabled()
+end
+
+local function IsLibChatMessageHistoryOptionDisabled()
+    return IsPChatChatRestoreEnabled()
+end
+
 local function GetLibChatMessageHistoryEnabled()
-    if not LibChatMessage then
+    if not LibChatMessage or IsPChatChatRestoreEnabled() then
         return false
     end
     return LibChatMessage:IsChatHistoryEnabled()
 end
 
 local function SetLibChatMessageHistoryEnabled(enabled)
-    if LibChatMessage then
-        LibChatMessage:SetChatHistoryEnabled(enabled)
+    if not LibChatMessage then
+        return
+    end
+    if enabled and IsPChatChatRestoreEnabled() then
+        return
+    end
+    LibChatMessage:SetChatHistoryEnabled(enabled)
+    if IsPChatChatRestoreEnabled() then
+        LibChatMessage:SetChatHistoryEnabled(false)
     end
 end
 
@@ -560,7 +875,9 @@ end
 
 local function GetLibChatMessageHistoryTooltip()
     local tooltip = GetString(LUIE_STRING_LAM_CA_LCM_HISTORY_TP)
-    if LibChatMessage then
+    if IsPChatChatRestoreEnabled() then
+        tooltip = zo_strformat("<<1>>\n\n<<2>>", tooltip, GetString(LUIE_STRING_LAM_CA_LCM_HISTORY_PCHAT_ACTIVE_TP))
+    elseif LibChatMessage then
         local activeText = LibChatMessage:IsChatHistoryActive() and "active" or "inactive"
         local enabledText = LibChatMessage:IsChatHistoryEnabled() and "enabled" or "disabled"
         tooltip = zo_strformat(
@@ -583,7 +900,7 @@ local function AppendLibChatMessageHistoryLAMControls(controls, SettingsAPI)
         GetLibChatMessageHistoryEnabled,
         SetLibChatMessageHistoryEnabled,
         "full",
-        nil,
+        IsLibChatMessageHistoryOptionDisabled,
         false,
         nil,
         true
@@ -598,7 +915,7 @@ local function AppendLibChatMessageHistoryLAMControls(controls, SettingsAPI)
         SetLibChatMessageHistoryMaxAgeFromString,
         "full",
         function ()
-            return not GetLibChatMessageHistoryEnabled()
+            return IsLibChatMessageHistoryOptionDisabled() or not GetLibChatMessageHistoryEnabled()
         end,
         tostring(LCM_HISTORY_DEFAULT_MAX_AGE),
         nil,
@@ -621,6 +938,7 @@ local function AppendLibChatMessageHistoryConsoleControls(settings, LHAS)
         getFunction = GetLibChatMessageHistoryEnabled,
         setFunction = SetLibChatMessageHistoryEnabled,
         default = false,
+        disable = IsLibChatMessageHistoryOptionDisabled,
     }
 
     settings[#settings + 1] =
@@ -636,17 +954,21 @@ local function AppendLibChatMessageHistoryConsoleControls(settings, LHAS)
         end,
         default = tostring(LCM_HISTORY_DEFAULT_MAX_AGE),
         disable = function ()
-            return not GetLibChatMessageHistoryEnabled()
+            return IsLibChatMessageHistoryOptionDisabled() or not GetLibChatMessageHistoryEnabled()
         end,
     }
 end
 
 --- @param SettingsAPI table
 --- @return table LAM controls for nested LibChatMessage submenu (PC only)
-function LUIE.BuildLibChatMessageLAMControls(SettingsAPI)
+function LUIE_ChatOutputSettingsUI:BuildLibChatMessageLAMControls(SettingsAPI)
     local controls = {}
 
-    controls[#controls + 1] = SettingsAPI.CreateDescriptionOption(GetString(LUIE_STRING_LAM_CA_LCM_SUBMENU_NOTE))
+    controls[#controls + 1] = SettingsAPI.CreateDescriptionOption(
+        GetString(LUIE_STRING_LAM_CA_LCM_SUBMENU_NOTE),
+        "full",
+        GetString(LUIE_STRING_LAM_CA_LCM_SUBMENU_NOTE_TITLE)
+    )
 
     AppendLibChatMessageHistoryLAMControls(controls, SettingsAPI)
     AppendLibChatMessageTimeLAMControls(controls, SettingsAPI)
@@ -654,9 +976,138 @@ function LUIE.BuildLibChatMessageLAMControls(SettingsAPI)
     return controls
 end
 
+--- @param tabIndex integer
+--- @param chatOutput LUIE_ChatOutput|nil
+--- @return table LAM custom control data
+local function CreateChatTabRoutingRowLAMOption(tabIndex, chatOutput)
+    local tabIndexCapture = tabIndex
+
+    local function IsTabSlotDisabled()
+        if chatOutput then
+            return not chatOutput:IsChatTabIndexActiveForSettings(tabIndexCapture)
+        end
+        return tabIndexCapture > 5
+    end
+
+    local function GetTabRowLabel()
+        if chatOutput then
+            return chatOutput:GetChatTabSettingsShortLabel(tabIndexCapture)
+        end
+        return zo_strformat(GetString(LUIE_STRING_LAM_CA_CHATTAB_ROW_NONAME), tostring(tabIndexCapture))
+    end
+
+    return
+    {
+        type = "custom",
+        reference = "LUIE_ChatOutputTabRow_" .. tabIndexCapture,
+        width = "full",
+        minHeight = LAM_TAB_ROW_HEIGHT,
+        refreshFunc = function (control)
+            if control.RefreshChatTabRoutingRow then
+                control:RefreshChatTabRoutingRow()
+            end
+        end,
+        createFunc = function (control)
+            control.tabIndex = tabIndexCapture
+
+            control.systemToggle = wm:CreateControl(nil, control, CT_CONTROL)
+            control.systemToggle.checkbox = wm:CreateControl(nil, control.systemToggle, CT_LABEL)
+            control.systemToggle.checkbox:SetFont("ZoFontGameBold")
+
+            control.luiToggle = wm:CreateControl(nil, control, CT_CONTROL)
+            control.luiToggle.checkbox = wm:CreateControl(nil, control.luiToggle, CT_LABEL)
+            control.luiToggle.checkbox:SetFont("ZoFontGameBold")
+
+            control.rowLabel = wm:CreateControl(nil, control, CT_LABEL)
+            control.rowLabel:SetFont("ZoFontWinH4")
+            control.rowLabel:SetHeight(LAM_TAB_ROW_HEIGHT)
+            control.rowLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+
+            ApplyChatTabRoutingColumnLayout(control, control.rowLabel, control.luiToggle, control.systemToggle, LAM_TAB_ROW_HEIGHT)
+
+            WireChatTabRoutingInlineToggle(
+                control.luiToggle,
+                function ()
+                    return GetChatTabCheckboxValue(tabIndexCapture)
+                end,
+                function (value)
+                    SetChatTabCheckboxValue(tabIndexCapture, value)
+                end,
+                zo_strformat(GetString(LUIE_STRING_LAM_CA_CHATTAB_TP), tostring(tabIndexCapture))
+            )
+            WireChatTabRoutingInlineToggle(
+                control.systemToggle,
+                function ()
+                    if chatOutput then
+                        return chatOutput:IsSystemCategoryEnabledOnTabForSettings(tabIndexCapture)
+                    end
+                    return false
+                end,
+                function (value)
+                    if chatOutput then
+                        chatOutput:SetSystemCategoryEnabledOnTabForSettings(tabIndexCapture, value)
+                    end
+                end,
+                GetString(LUIE_STRING_LAM_CA_CHATTAB_SYSTEMFILTER_TP)
+            )
+
+            local rowTooltip = zo_strformat(GetString(LUIE_STRING_LAM_CA_CHATTAB_TP), tostring(tabIndexCapture))
+            if control.data then
+                control.data.tooltipText = rowTooltip
+            end
+
+            control.rowLabel:SetHandler("OnMouseEnter", function (self)
+                ZO_Options_OnMouseEnter(self:GetParent())
+            end)
+            control.rowLabel:SetHandler("OnMouseExit", function (self)
+                ZO_Options_OnMouseExit(self:GetParent())
+            end)
+
+            function control:RefreshChatTabRoutingRow()
+                local disabled = IsTabSlotDisabled()
+                self.rowLabel:SetText(GetTabRowLabel())
+                if disabled then
+                    self.rowLabel:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+                else
+                    self.rowLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+                end
+                ApplyChatTabRoutingToggleVisual(
+                    self.luiToggle,
+                    GetChatTabCheckboxValue(tabIndexCapture),
+                    disabled
+                )
+                local systemEnabled = chatOutput and chatOutput:IsSystemCategoryEnabledOnTabForSettings(tabIndexCapture) or false
+                ApplyChatTabRoutingToggleVisual(self.systemToggle, systemEnabled, disabled)
+            end
+
+            control:RefreshChatTabRoutingRow()
+        end,
+    }
+end
+
+--- @param controls table
 --- @param SettingsAPI table
---- @return table LAM submenu controls
-function LUIE.BuildChatOutputLAMControls(SettingsAPI)
+--- @param Defaults LUIE_ChatOutputDefaults
+local function AppendChatTabRoutingLAMControls(controls, SettingsAPI, Defaults)
+    local chatOutput = LUIE.ChatAnnouncements and LUIE.ChatAnnouncements.ChatOutput
+    local tabSlotCount = chatOutput and chatOutput:GetChatTabSettingsSlotCount() or 20
+
+    controls[#controls + 1] = SettingsAPI.CreateDescriptionOption(
+        GetString(LUIE_STRING_LAM_CA_CHATTAB_ROUTING_SECTION),
+        "full",
+        GetString(LUIE_STRING_LAM_CA_CHATTAB_ROUTING_TITLE)
+    )
+    controls[#controls + 1] = CreateChatTabRoutingColumnHeaderLAMOption()
+
+    for tabIndex = 1, tabSlotCount do
+        controls[#controls + 1] = CreateChatTabRoutingRowLAMOption(tabIndex, chatOutput)
+    end
+    RegisterChatTabLAMRefreshCallback()
+end
+
+--- @param SettingsAPI table
+--- @return table LAM controls for Chat Output settings (PC)
+function LUIE_ChatOutputSettingsUI:BuildChatOutputLAMControls(SettingsAPI)
     local Settings = GetChatOutputSettings()
     local Defaults = GetChatOutputDefaults()
     local controls = {}
@@ -671,7 +1122,7 @@ function LUIE.BuildChatOutputLAMControls(SettingsAPI)
         end,
         function (value)
             Settings.ChatBypassFormat = value
-            SyncLuiExtendedTimestampToLibChatMessage()
+            ApplyChatOutputTimePrefixSettingsFromSavedVars()
         end,
         "full",
         nil,
@@ -681,10 +1132,24 @@ function LUIE.BuildChatOutputLAMControls(SettingsAPI)
     if IsLibChatMessageLoaded() then
         controls[#controls + 1] = SettingsAPI.CreateSubmenuOption(
             GetString(LUIE_STRING_LAM_CA_LCM_SUBMENU),
-            LUIE.BuildLibChatMessageLAMControls(SettingsAPI),
+            self:BuildLibChatMessageLAMControls(SettingsAPI),
             "LUIE_ChatOutput_LibChatMessage"
         )
     end
+
+    controls[#controls + 1] = SettingsAPI.CreateCheckboxOption(
+        GetString(LUIE_STRING_LAM_CA_CHATTABSYSTEMALL),
+        GetString(LUIE_STRING_LAM_CA_CHATTABSYSTEMALL_TP),
+        function ()
+            return GetChatSystemAllCheckboxValue()
+        end,
+        function (value)
+            SetChatSystemAllCheckboxValue(value)
+        end,
+        "full",
+        nil,
+        Defaults.ChatSystemAll
+    )
 
     controls[#controls + 1] = SettingsAPI.CreateDropdownOption(
         GetString(LUIE_STRING_LAM_CA_CHATMETHOD),
@@ -703,39 +1168,9 @@ function LUIE.BuildChatOutputLAMControls(SettingsAPI)
         "name-up"
     )
 
-    for tabIndex = 1, 5 do
-        controls[#controls + 1] = SettingsAPI.CreateCheckboxOption(
-            zo_strformat(GetString(LUIE_STRING_LAM_CA_CHATTAB), tostring(tabIndex)),
-            zo_strformat(GetString(LUIE_STRING_LAM_CA_CHATTAB_TP), tostring(tabIndex)),
-            function ()
-                return GetChatTabCheckboxValue(tabIndex)
-            end,
-            function (value)
-                SetChatTabCheckboxValue(tabIndex, value)
-            end,
-            "full",
-            function ()
-                return IsChatTabRoutingOptionDisabled()
-            end,
-            Defaults.ChatTab[tabIndex]
-        )
-    end
+    controls[#controls + 1] = SettingsAPI.CreateDividerOption()
 
-    controls[#controls + 1] = SettingsAPI.CreateCheckboxOption(
-        zo_strformat("\t\t\t\t\t<<1>>", GetString(LUIE_STRING_LAM_CA_CHATTABSYSTEMALL)),
-        GetString(LUIE_STRING_LAM_CA_CHATTABSYSTEMALL_TP),
-        function ()
-            return GetChatSystemAllCheckboxValue()
-        end,
-        function (value)
-            SetChatSystemAllCheckboxValue(value)
-        end,
-        "full",
-        function ()
-            return IsChatTabRoutingOptionDisabled()
-        end,
-        Defaults.ChatSystemAll
-    )
+    AppendChatTabRoutingLAMControls(controls, SettingsAPI, Defaults)
 
     AppendLuiExtendedTimestampLAMControls(controls, SettingsAPI, Settings, Defaults)
 
@@ -744,7 +1179,7 @@ end
 
 --- @param settings table LHAS settings array to append to
 --- @param LHAS table LibHarvensAddonSettings
-function LUIE.AppendChatOutputConsoleControls(settings, LHAS)
+function LUIE_ChatOutputSettingsUI:AppendChatOutputConsoleControls(settings, LHAS)
     local Settings = GetChatOutputSettings()
     local Defaults = GetChatOutputDefaults()
 
@@ -770,7 +1205,7 @@ function LUIE.AppendChatOutputConsoleControls(settings, LHAS)
         end,
         setFunction = function (value)
             Settings.ChatBypassFormat = value
-            SyncLuiExtendedTimestampToLibChatMessage()
+            ApplyChatOutputTimePrefixSettingsFromSavedVars()
         end,
         default = Defaults.ChatBypassFormat,
     }
@@ -782,4 +1217,22 @@ function LUIE.AppendChatOutputConsoleControls(settings, LHAS)
     end
 
     AppendLuiExtendedTimestampConsoleControls(settings, LHAS, Settings, Defaults)
+end
+
+--- @param SettingsAPI table
+--- @return table
+function LUIE.BuildLibChatMessageLAMControls(SettingsAPI)
+    return GetChatOutputSettingsUI():BuildLibChatMessageLAMControls(SettingsAPI)
+end
+
+--- @param SettingsAPI table
+--- @return table
+function LUIE.BuildChatOutputLAMControls(SettingsAPI)
+    return GetChatOutputSettingsUI():BuildChatOutputLAMControls(SettingsAPI)
+end
+
+--- @param settings table
+--- @param LHAS table
+function LUIE.AppendChatOutputConsoleControls(settings, LHAS)
+    GetChatOutputSettingsUI():AppendChatOutputConsoleControls(settings, LHAS)
 end

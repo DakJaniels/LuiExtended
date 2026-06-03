@@ -27,7 +27,6 @@ local function LoadSavedVars()
     LUIE.RepairSplitModuleSavedVarsFromLegacy()
     LUIE.PruneLegacyLuiESVDefaultProfileBranch()
     LUIE.MigrateChatOutputToCore()
-    LUIE.ScheduleDebugEnvironmentReconcile()
 end
 
 --- - **EVENT_PLAYER_ACTIVATED **
@@ -36,9 +35,6 @@ end
 --- @param initial boolean
 local function LoadScreen(eventId, initial)
     eventManager:UnregisterForEvent(LUIE.name, eventId)
-    --
-    LUIE.ReconcileDebugEnvironmentSavedVars()
-    LUIE.ShowDebugEnvironmentPendingChat()
     --
     -- -----------------------------------------------------------------------------
 
@@ -116,7 +112,7 @@ local function OnAddOnLoaded(eventId, addonName)
         LUIE.PlayerFaction = GetUnitAlliance("player")
         -- -----------------------------------------------------------------------------
         -- LUIE-wide chat output (LCM / tabs / timestamps); independent of CA module
-        LUIE.ChatAnnouncements.ChatOutput.InitializePrintRouting()
+        LUIE.ChatAnnouncements.ChatOutput:InitializePrintRouting()
         -- -----------------------------------------------------------------------------
         -- Initialize this addon modules according to user preferences
         LUIE.ChatAnnouncements.Initialize(LUIE.SV.ChatAnnouncements_Enable)
@@ -155,6 +151,7 @@ local function OnAddOnLoaded(eventId, addonName)
         -- -----------------------------------------------------------------------------
         -- Register global event listeners
         RegisterEvents()
+        LUIE.ScheduleDebugEnvironmentReloadChat()
     end
 end
 

@@ -2,8 +2,8 @@
 ## Author: @dack_janiels[PC]
 ## LegacyAuthors: ArtOfShred, psypanda, Saenic & SpellBuilder
 ## APIVersion: 101049 101050
-## Version: 7.2.3.5
-## AddOnVersion: 7235
+## Version: 7.2.3.6
+## AddOnVersion: 7236
 ## Description: Provides UnitFrames, InfoPanel, Combat Text & Info, Buff & Debuff Tracking, Chat Announcements and Slash Commands.
 ## DependsOn: LuiMedia>=7133 LuiData>=7214
 ## PCDependsOn: LibAddonMenu-2.0>=43
@@ -69,7 +69,8 @@ console/Unlock.lua
 
 # Modules - Chat Announcements
 modules/ChatAnnouncements/ChatAnnouncementsConstants.lua
-modules/ChatAnnouncements/ChatOutput.lua
+modules/ChatAnnouncements/ChatOutput/_Namespace.lua
+modules/ChatAnnouncements/ChatOutput/ChatOutput.lua
 modules/ChatAnnouncements/ChatAnnouncementsPlayerToPlayerHooks.lua
 modules/ChatAnnouncements/ChatAnnouncementsExperience.lua
 modules/ChatAnnouncements/ChatAnnouncementsCSA.lua

@@ -1,5 +1,20 @@
 # LuiExtended Changelog
 
+## Version 7.2.3.6
+
+### Changes
+
+- Chat Output (PC): Per-tab routing grid with **LUIE** and **System** columns (up to 20 tabs). Shorter setting tooltips.
+
+### Fixed
+
+- Chat Output: **Print to Specific Tabs** works again with **LibChatMessage** loaded.
+- Chat Output: Tab rows follow the number of open chat tabs; inactive slots stay disabled.
+- Chat Output: **Display System Messages in ALL Tabs** honors **Print to All Tabs** for system-style messages.
+- Chat Output: Per-tab toggles keep saved values when greyed out after LAM refresh.
+- Debug environment (**/luie debug**): Persists across **/reloadui**; reload while debugging no longer resets extra addons you enabled for testing.
+- Debug environment (**/luie debug**): One chat reminder per UI load while debug is active (including ingame **/reloadui**). Logout and quit still restore your prior addon selection.
+
 ## Version 7.2.3.5
 
 ### New
